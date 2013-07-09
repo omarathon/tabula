@@ -30,7 +30,12 @@
 	<#list students as student>
 	<li class="student">
 		<div class="profile clearfix">
-			<@fmt.member_photo student "tinythumbnail" false />
+			<#if student.isMember()>
+				<@fmt.member_photo student "tinythumbnail" false />
+			<#else>
+				<#-- `student` is actually only backed by a User here, so no Member photo, so let's explicitly serve the default photo -->
+				<@fmt.member_photo {} "tinythumbnail" false />
+			</#if>
 
 			<div class="name">
 				<h6>${student.fullName}</h6>

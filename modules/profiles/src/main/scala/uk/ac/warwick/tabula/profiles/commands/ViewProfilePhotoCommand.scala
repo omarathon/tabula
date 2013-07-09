@@ -27,7 +27,7 @@ import uk.ac.warwick.util.files.FileData
 import uk.ac.warwick.util.files.FileStore.UsingOutput
 
 trait ResizesPhoto {
-	val imageResizer = Wire[FileExposingImageResizer]
+	var imageResizer = Wire[FileExposingImageResizer]
 
 	val DefaultPhoto = new DefaultPhoto
 	val DefaultModified = new DateTime(0)
@@ -89,7 +89,7 @@ class RenderableFileReference(ref: RenderableFile, prefix: String) extends Abstr
 
 class ViewProfilePhotoCommand(val member: Member) extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited with ResizesPhoto {
 
-	PermissionCheck(Permissions.Profiles.Read.Core, member)
+	PermissionCheck(Permissions.Profiles.Read.Core, mandatory(member))
 
 	private var fileFound: Boolean = _
 

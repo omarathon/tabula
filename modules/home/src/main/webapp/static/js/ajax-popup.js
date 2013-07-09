@@ -6,7 +6,7 @@
  * "data-popup-target" attribute can be a CSS selector for a parent
  * element for the popup to point at.
  */
-jQuery(function($){ "use strict";
+jQuery(function ($) { "use strict";
 
 /**
  * Variant of ajax-popup that uses a modal instead.
@@ -26,7 +26,7 @@ jQuery.fn.ajaxModalLink = function(options) {
 		    link = this,
 		    $link = $(link),
 		    $modalElement = $($link.data('target')) || options.target,
-		    href = options.href || $link.attr('href')
+		    href = options.href || $link.attr('href'),
 		    $modalBody = $modalElement.find('.modal-body'),
 		    wholeContent = $modalBody.length === 0;
 
@@ -51,11 +51,11 @@ jQuery.fn.ajaxModalLink = function(options) {
 				$modalElement.html("");
 			}
 			$modalElement.removeData('modal');
-		})
+		});
 
 		return false;
 	});
-}
+};
 $('a.ajax-modal').ajaxModalLink();
 // end AJAX modal
 
@@ -70,7 +70,7 @@ $('a.ajax-popup').click(function(e){
         height = 300,
         pointAt = link;
 
-    if ($link.data('popup-target') != null) {
+    if ($link.data('popup-target') !== null) {
         pointAt = $link.closest($link.data('popup-target'));
     }
 
@@ -87,10 +87,10 @@ $('a.ajax-popup').click(function(e){
         $root.find('input[type=submit]').click(function(e){
             e.preventDefault();
             var $form = $(this).closest('form');
-            
+
             // added ZLJ Aug 10th to make a unique URL which IE8 will load
             var $randomNumber = Math.floor(Math.random() * 10000000);
-            
+
             // this line doesn't work in IE8 (IE8 bug) - need to make the URL
             // unique using generated random number
             //jQuery.post($form.attr('action'), $form.serialize(), function(data){

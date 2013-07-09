@@ -186,7 +186,7 @@
 
 <#macro member_photo member resize="thumbnail" lightbox=true >
 	<div class="photo size-${resize}">
-		<#if member.universityId??>
+		<#if (member.universityId)??>
 			<#local fullsize_img><@routes.photo member /></#local>
 			<@lightbox_link lightbox fullsize_img>
 			<img src="<@routes.photo member />?size=${resize}"/>
@@ -199,7 +199,7 @@
 
 <#macro relation_photo member relationship resize="thumbnail" lightbox=true >
 	<div class="photo size-${resize}">
-		<#if member.universityId??>
+		<#if (member.universityId)??>
 			<#local fullsize_img><@routes.relationshipPhoto profile relationship /></#local>
 			<@lightbox_link lightbox fullsize_img>
 			<img src="<@routes.relationshipPhoto profile relationship />?size=${resize}" />
