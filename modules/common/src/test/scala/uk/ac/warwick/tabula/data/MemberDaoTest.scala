@@ -48,7 +48,7 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala map { session.delete(_) }
 	}
 
-	@Test @DirtiesContext
+	@Test
 	def crud = transactional { tx =>
 		val m1 = Fixtures.student(universityId = "0000001", userId="student")
 		val m2 = Fixtures.student(universityId = "0000002", userId="student")
@@ -91,7 +91,7 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 		dao.getByUserId("staff1", false) should be (Some(m3))
 	}
 
-	@Test @DirtiesContext
+	@Test
   def listUpdatedSince = transactional { tx =>
 		val dept1 = Fixtures.department("hi", "History")
 		val dept2 = Fixtures.department("fr", "French")
@@ -132,7 +132,7 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 		dao.listUpdatedSince(new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0), dept2, 5) should be (Seq(m4))
 	}
 
-	@Test @DirtiesContext
+	@Test
 	def getRegisteredModules: Unit = transactional { tx =>
 		val mod1 = Fixtures.module("in101")
 		val mod2 = Fixtures.module("in102")
@@ -175,7 +175,7 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 		dao.getRegisteredModules("0000004") should be (Seq())
 	}
 
-	@Test @DirtiesContext
+	@Test
 	def studentRelationshipsCurrentAndByTarget = transactional { tx =>
 		val dept1 = Fixtures.department("sp", "Spanish")
 		val dept2 = Fixtures.department("en", "English")
@@ -225,7 +225,7 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 		session.flush()
 	}
 
-	@Test @DirtiesContext
+	@Test
 	def studentRelationshipsByDepartmentAndAgent = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
@@ -278,7 +278,7 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 
 	}
 
-	@Test @DirtiesContext
+	@Test
 	def studentsWithoutRelationships = transactional { tx =>
 		val dept1 = Fixtures.department("af", "Art of Foraging")
 		val dept2 = Fixtures.department("tm", "Traditional Music")

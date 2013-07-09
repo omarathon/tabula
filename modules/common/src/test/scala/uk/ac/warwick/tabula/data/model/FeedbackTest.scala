@@ -31,16 +31,16 @@ class FeedbackTest extends PersistenceTestBase {
 	  assignment.feedbacks.size should be (10)
 	}
 	
-	@Test def deleteFileAttachmentOnDelete {
+	@Test def deleteFileAttachmentOnDelete = transactional {ts=>
 		// TAB-667
-		val orphanAttachment = transactional { tx =>
+		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment
 			
 			session.save(attachment)
 			attachment
 		}
 		
-		val (feedback, feedbackAttachment) = transactional { tx => 
+		val (feedback, feedbackAttachment) = flushing(session) {
 			val feedback = new Feedback(universityId = idFormat(1))
 			
 			val assignment = new Assignment
@@ -61,16 +61,16 @@ class FeedbackTest extends PersistenceTestBase {
 		feedbackAttachment.id should not be (null)
 		
 		// Can fetch everything from db
-		transactional { tx => 
+		flushing(session) {
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			session.get(classOf[Feedback], feedback.id) should be (feedback)
 			session.get(classOf[FileAttachment], feedbackAttachment.id) should be (feedbackAttachment)
 		}
-		
-		transactional { tx => session.delete(feedback) }
+
+		flushing(session) { session.delete(feedback) }
 		
 		// Ensure we can't fetch the feedback or attachment, but all the other objects are returned
-		transactional { tx => 
+		flushing(session) {
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			session.get(classOf[Feedback], feedback.id) should be (null)
 			session.get(classOf[FileAttachment], feedbackAttachment.id) should be (null)
