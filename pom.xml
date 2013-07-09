@@ -471,7 +471,7 @@
 					<jvmArgs>
 						<jvmArg>-Xms256m</jvmArg>
 						<jvmArg>-Xmx2048m</jvmArg>
-						<jvmArg>-XX:MaxPermSize=256m</jvmArg>
+						<jvmArg>-XX:MaxPermSize=512m</jvmArg>
 					</jvmArgs>
 					<args>
 						<arg>-deprecation</arg>
@@ -644,7 +644,8 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>${surefire.version}</version>
-					<configuration>
+          <configuration>
+            <argLine>-Xmx2048m -Xms256m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
 						<forkCount>0.75C</forkCount>
 						<systemPropertyVariables>
 							<!-- Referenced in test tabula.properties data directory,

@@ -152,16 +152,16 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		staff.isAPersonalTutor should be (true)
 	}
 
-	@Test def deleteFileAttachmentOnDelete {
+	@Test def deleteFileAttachmentOnDelete = transactional { tx =>
 		// TAB-667
-		val orphanAttachment = transactional { tx =>
+		val orphanAttachment =flushing(session){
 			val attachment = new FileAttachment
 
 			session.save(attachment)
 			attachment
 		}
 
-		val (member, memberAttachment) = transactional { tx =>
+		val (member, memberAttachment) = flushing(session){
 			val member = new StudentMember
 			member.universityId = "01234567"
 			member.userId = "steve"
@@ -179,17 +179,17 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		memberAttachment.id should not be (null)
 
 		// Can fetch everything from db
-		transactional { tx =>
+		flushing(session){
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			// Can't do an exact equality check because of Hibernate polymorphism
 			session.get(classOf[Member], member.id).asInstanceOf[Member].universityId should be (member.universityId)
 			session.get(classOf[FileAttachment], memberAttachment.id).asInstanceOf[FileAttachment].id should be (memberAttachment.id)
 		}
 
-		transactional { tx => session.delete(member) }
+		flushing(session){session.delete(member) }
 
 		// Ensure we can't fetch the FeedbackTemplate or attachment, but all the other objects are returned
-		transactional { tx =>
+		flushing(session){
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			session.get(classOf[Member], member.id) should be (null)
 			session.get(classOf[FileAttachment], memberAttachment.id) should be (null)

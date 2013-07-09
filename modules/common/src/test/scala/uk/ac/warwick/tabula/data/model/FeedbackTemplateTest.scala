@@ -5,16 +5,16 @@ import uk.ac.warwick.tabula.PersistenceTestBase
 
 class FeedbackTemplateTest extends PersistenceTestBase {
 	
-	@Test def deleteFileAttachmentOnDelete {
+	@Test def deleteFileAttachmentOnDelete {transactional{tx=>
 		// TAB-667
-		val orphanAttachment = transactional { tx =>
+		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment
 			
 			session.save(attachment)
 			attachment
 		}
-		
-		val (feedbackTemplate, feedbackAttachment) = transactional { tx => 
+
+		val (feedbackTemplate, feedbackAttachment) = flushing(session) {
 			val feedbackTemplate = new FeedbackTemplate
 			
 			val attachment = new FileAttachment
@@ -30,20 +30,20 @@ class FeedbackTemplateTest extends PersistenceTestBase {
 		feedbackAttachment.id should not be (null)
 		
 		// Can fetch everything from db
-		transactional { tx => 
+		flushing(session) {
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			session.get(classOf[FeedbackTemplate], feedbackTemplate.id) should be (feedbackTemplate)
 			session.get(classOf[FileAttachment], feedbackAttachment.id) should be (feedbackAttachment)
 		}
-		
-		transactional { tx => session.delete(feedbackTemplate) }
+
+		flushing(session) { session.delete(feedbackTemplate) }
 		
 		// Ensure we can't fetch the FeedbackTemplate or attachment, but all the other objects are returned
-		transactional { tx => 
+		flushing(session) {
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			session.get(classOf[FeedbackTemplate], feedbackTemplate.id) should be (null)
 			session.get(classOf[FileAttachment], feedbackAttachment.id) should be (null)
 		}
-	}
+	}}
 	
 }

@@ -53,16 +53,22 @@ class TutorChangeNotificationTest extends TestBase with Mockito {
 
 	@Test
 	def shouldCallTextRendererWithCorrectModel():Unit = new TutorFixture {
-		val model = ArgumentCaptor.forClass(classOf[Map[String,Any]])
+		val modelCaptor = ArgumentCaptor.forClass(classOf[Map[String,Any]])
+
 		val n = createNewTutorNotification(relationship, actor, recipient, Some(oldTutor))
+
 		n.content should be (TEST_CONTENT)
+
 		verify(n.mockRenderer, times(1)).renderTemplate(
 			any[String],
-			model.capture())
-		model.getValue.get("tutee").get should be(student)
-		model.getValue.get("oldTutor").get should be(Some(oldTutor))
-		model.getValue.get("newTutor").get should be(Some(newTutor))
-		model.getValue.get("path").get should be("/view/student")
+			modelCaptor.capture())
+
+		val model = modelCaptor.getValue
+
+		model("tutee")should be(Some(student))
+		model("oldTutor") should be(Some(oldTutor))
+		model("newTutor") should be(Some(newTutor))
+		model("path") should be("/view/student")
 	}
 
 	trait MockRenderer extends TextRenderer {
