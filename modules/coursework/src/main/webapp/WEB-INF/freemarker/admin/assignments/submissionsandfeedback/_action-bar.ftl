@@ -53,9 +53,9 @@
 						</li>
 						<li class="must-have-selected">
 							<#assign deletesubmissionurl><@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
-							<@fmt.permission_button permission='Submission.Delete' scope=module contents='<i class="icon-remove"></i> Delete submission'	
-												type='a' action_descr='delete submission' classes="form-post" href=deletesubmissionurl	
-												tooltip='Delete submission' data_attr='data-container=body' />
+							<@fmt.permission_button permission='Submission.Delete' scope=module action_descr='delete submission' classes="form-post" href=deletesubmissionurl tooltip='Delete submission' >
+								<i class="icon-remove"></i> Delete submission
+							</@fmt.permission_button>
 						</li>
 					</ul>
 				</div>
@@ -158,10 +158,10 @@
 						</a>
 					</li>
 					<li>
-						<#assign publishfeedbackurl><@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/> </#assign>
-						<@fmt.permission_button permission='Feedback.Publish' scope=module contents='<i class="icon-share"></i> Publish feedback'	
-												type='a' action_descr='release feedback to students' classes="" href=publishfeedbackurl	
-												tooltip='Release feedback to students' data_attr='data-container=body' />
+						<#assign publishfeedbackurl><@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/></#assign>
+						<@fmt.permission_button permission='Feedback.Publish' scope=module type='a' action_descr='release feedback to students' tooltip="Release feedback to students" href=publishfeedbackurl>
+							<i class="icon-share"></i> Publish feedback
+						</@fmt.permission_button>
 					</li>
 					<li class="must-have-selected">
 						<a class="form-post" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />"><i class="icon-remove"></i> Delete feedback</a>

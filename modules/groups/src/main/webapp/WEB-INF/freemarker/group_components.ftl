@@ -177,9 +177,10 @@
                                         
                                         <#assign archive_url><@routes.archiveset groupSet /></#assign>
                                         
-                                        <@fmt.permission_button permission='SmallGroups.Archive' scope=module contents='<i class="icon-folder-close icon-fixed-width"></i> ${archive_caption}' 
-                                        					type='a' action_descr='${archive_caption}'?lower_case classes='archive-group-link ajax-popup' href=archive_url 
-                                        					tooltip='Archive small group' data_attr='data-popup-target=.btn-group data-container=body' /> 
+                                        <@fmt.permission_button permission='SmallGroups.Archive' scope=module action_descr='${archive_caption}'?lower_case classes='archive-group-link ajax-popup' href=archive_url 
+                                        						tooltip='Archive small group' data_attr='data-popup-target=.btn-group data-container=body'> 
+                                        <i class="icon-folder-close icon-fixed-width"></i> ${archive_caption} 
+                                        </@fmt.permission_button>
                                     </a></li> 
                                     </#if>
                                 </@dropdown_menu>
