@@ -75,7 +75,7 @@
 			</@form.labelled_row>
 
 			<@form.labelled_row "reason" "Please give a full statement of your reasons for applying for an extension">
-				<@f.textarea path="reason" cssClass="text big-textarea" maxlength="${4000}"/>
+				<@f.textarea path="reason" cssClass="text big-textarea" maxlength=4000/>
 			</@form.labelled_row>
 
 			<@form.labelled_row "requestedExpiryDate" "Requested extension date">
