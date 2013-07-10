@@ -39,18 +39,18 @@
 		<@form.labelled_row "allocationMethod" "Allocation method">
 			<@form.label checkbox=true>
 				<@f.radiobutton path="allocationMethod" value="Manual" />
-				Manually allocate students to groups
+				Manual allocation
 				<a class="use-popover" data-html="true"
-			     data-content="No automatic allocation will occur; students must all be manually allocated to groups by administrators">
+			     data-content="Allocate students by drag and drop or spreadsheet upload">
 			   	<i class="icon-question-sign"></i>
 			  </a>
 			</@form.label>
 			<#if features.smallGroupTeachingStudentSignUp>
 				<@form.label checkbox=true>
 					<@f.radiobutton path="allocationMethod" value="StudentSignUp" />
-					Allow students to sign up for groups
+					Self sign-up
 					<a class="use-popover" data-html="true"
-				     data-content="Students are allowed to sign up for groups while registration is open. Administrators can still assign students to groups">
+				     data-content="Allow students to sign up for groups (you can edit group allocation later)">
 				   	<i class="icon-question-sign"></i>
 				  </a>
 				</@form.label>
