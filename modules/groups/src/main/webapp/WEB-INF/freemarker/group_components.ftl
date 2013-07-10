@@ -198,7 +198,7 @@
 </#list>
 
 <#-- List of students modal -->
-<div id="students-list-modal" class="modal ">
+<div id="students-list-modal" class="modal fade">
 </div>
 
 </#macro>

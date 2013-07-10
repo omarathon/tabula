@@ -5,9 +5,10 @@
 
 <div class="modal-body">
 
+	<ul>
 	<#list command.group.events as event>
 	<#assign tutorUsers=event.tutors.users />
-	<p>
+	<li>
 		<div>
 		<@fmt.weekRanges event />,
 		${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
@@ -23,12 +24,14 @@
 			${tutorUser.fullName}<#if tutorUser_has_next>,</#if>
 		</#list>
 		</div>
-	</p>
+	</li>
 	</#list>
+	</ul>
 
-	<ul>
+	<#if students?has_content>
+	<ul class="profile-user-list">
 	<#list students as student>
-	<li class="student">
+	<li>
 		<div class="profile clearfix">
 			<#if student.isMember()>
 				<@fmt.member_photo student "tinythumbnail" false />
@@ -45,5 +48,10 @@
 	</li>
 	</#list>
 	</ul>
+	<#else>
+
+	<p>No students have been allocated to this group.</p>
+
+	</#if>
 
 </div>
