@@ -33,8 +33,8 @@ import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 // scalastyle:off magic.number
 class RelationshipServiceTest extends AppContextTestBase with Mockito {
 
-	@Autowired var relationshipService:RelationshipServiceImpl = _
-	@Autowired var profileService:ProfileServiceImpl = _
+	@Autowired var relationshipService: RelationshipServiceImpl = _
+	@Autowired var profileService: ProfileServiceImpl = _
 
 	@Transactional
 	@Test def findingRelationships = withFakeTime(dateTime(2000, 6)) {

@@ -126,39 +126,29 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					.seq
 	}
 
-	/* Had to change to SQL query till Hibernate can cope with bind variables which are joined on something other than the id */
 	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] = {
 		// order by agent to separate any named (external) from numeric (member) agents
 		// then by student properties
-
-		if (relationshipType == null) {
-			Seq()
-		}
-		else {
-			val getRelsByDeptSql = """
-				select sr.*
-				from
-					StudentRelationship sr,
-					StudentCourseDetails scd
-				where
-					sr.target_sprCode = scd.sprCode
-				and
-					sr.relationship_type = :relationshipType
-				and
-					scd.deptCode = :departmentCode
-				and
-					(sr.end_date is null or sr.end_date >= SYSDATE)
-				order by
-					sr.agent, sr.target_sprCode
-				"""
-
-			val query = session.createSQLQuery(getRelsByDeptSql).addEntity(classOf[StudentRelationship])
-			query.setString("relationshipType", relationshipType.dbValue)
-			query.setString("departmentCode", department.code)
-			query.list() map {
-				case rel: StudentRelationship => rel
-			}
-		}
+		session.newQuery[StudentRelationship]("""
+			select
+				distinct sr
+			from
+				StudentRelationship sr,
+				StudentCourseDetails scd
+			where
+				sr.targetSprCode = scd.sprCode
+			and
+				sr.relationshipType = :relationshipType
+			and
+				scd.department = :department
+			and
+				(sr.endDate is null or sr.endDate >= SYSDATE)
+			order by
+				sr.agent, sr.targetSprCode
+		""")
+			.setEntity("department", department)
+			.setParameter("relationshipType", relationshipType)
+			.seq
 	}
 
 	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship] =
@@ -171,59 +161,50 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			))
 			.seq
 
-	/* Had to change this to a SQL query till Hibernate can cope with bind variables which are joined on something other than the id */
-	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member] = {
-		if (relationshipType == null) {
-			Seq()
-		}
-		else {
-			val sql = """
-				select distinct mem.*
-				from
-					Member mem,
-					StudentCourseDetails scd
-				where
-					mem.universityid = scd.universityid
-				and
-					scd.deptCode = :departmentCode
-				and
-					scd.sprcode not in (select sr.target_sprcode from studentrelationship sr where sr.relationship_type = :relationshipType)
-			"""
+	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member] =
+		if (relationshipType == null) Seq()
+		else session.newQuery[Member]("""
+			select
+				distinct sm
+			from
+				StudentMember sm
+				inner join sm.studentCourseDetails as scd
+			where
+				sm.homeDepartment = :department
+			and
+				scd.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
+		""")
+			.setEntity("department", department)
+			.setParameter("relationshipType", relationshipType)
+			.seq
 
-			val query = session.createSQLQuery(sql).addEntity(classOf[Member])
-			query.setString("relationshipType", relationshipType.dbValue)
-			query.setString("departmentCode", department.code)
-			query.list() map {
-				case rel: Member => rel
-			}
-		}
-	}
-
-	/* Had to change this to a SQL query till Hibernate can cope with bind variables which are joined on something other than the id */
 	def countStudentsByDepartment(department: Department): Number =
 		if (department == null) 0
-		else {
-			val sql = "select count(distinct universityid) from studentcoursedetails where deptcode = :departmentCode"
-			val query = session.createSQLQuery(sql)
-			query.setString("departmentCode", department.code)
-			.uniqueResult
-			.asInstanceOf[Number].intValue
-		}
+		else session.newQuery[Number]("""
+			select
+				count(distinct student)
+			from
+				StudentCourseDetails scd
+			where
+				scd.department = :department
+			""")
+			.setEntity("department", department)
+			.uniqueResult.getOrElse(0)
 
-	/* Had to change this to a SQL query till Hibernate can cope with bind variables which are joined on something other than the id */
-	//				val sql = """select count(distinct universityid) from studentcoursedetails scd where deptcode = :departmentCode
-	//					and scd.sprCode not in (select sr.target_sprcode from studentrelationship sr where sr.relationship_type = :relationshipType)"""
+	def countStudentsByRelationshipAndDepartment(relationshipType: RelationshipType, department: Department): Number =
+		if (relationshipType == null) 0
+		else session.newQuery[Number]("""
+			select
+				count(distinct student)
+			from
+				StudentCourseDetails scd
+			where
+				scd.department = :department
+			and
+				scd.sprCode in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
+			""")
+			.setEntity("department", department)
+			.setParameter("relationshipType", relationshipType)
+			.uniqueResult.getOrElse(0)
 
-	def countStudentsByRelationshipAndDepartment(relationshipType: RelationshipType, department: Department): Number = {
-				if (relationshipType == null) 0
-				else {
-					val sql = """select count(distinct universityid) from studentcoursedetails scd where deptcode = :departmentCode
-						and scd.sprCode in (select sr.target_sprcode from studentrelationship sr where sr.relationship_type = :relationshipType)"""
-					val query = session.createSQLQuery(sql)
-					query.setString("departmentCode", department.code)
-					query.setString("relationshipType", relationshipType.dbValue)
-					.uniqueResult
-					.asInstanceOf[Number].intValue
-				}
-		}
 }
