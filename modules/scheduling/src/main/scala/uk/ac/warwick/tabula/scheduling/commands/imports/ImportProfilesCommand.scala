@@ -51,7 +51,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 		logger.info("Importing SITS statuses")
 
 		transactional() {
-			sitsStatusesImporter.getSitsStatuses() map { _.apply }
+			sitsStatusesImporter.getSitsStatuses map { _.apply }
 
 			session.flush
 			session.clear
@@ -62,7 +62,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 		logger.info("Importing Modes of Attendance")
 
 		transactional() {
-			modeOfAttendanceImporter.getModeOfAttendances() map { _.apply }
+			modeOfAttendanceImporter.getModeOfAttendances map { _.apply }
 
 			session.flush
 			session.clear

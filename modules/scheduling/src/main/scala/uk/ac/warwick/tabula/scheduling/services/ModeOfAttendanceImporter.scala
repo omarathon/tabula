@@ -15,24 +15,14 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.ModeOfAttendance
 import uk.ac.warwick.tabula.data.ModeOfAttendanceDao
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleModeOfAttendanceCommand
+import org.springframework.context.annotation.Profile
 
-@Service
-class ModeOfAttendanceImporter extends Logging {
-	import ModeOfAttendanceImporter._
-
+trait ModeOfAttendanceImporter extends Logging {
 	var modeOfAttendanceDao = Wire.auto[ModeOfAttendanceDao]
 	
-	var sits = Wire[DataSource]("sitsDataSource")
-	
-	lazy val modeOfAttendanceQuery = new ModeOfAttendanceQuery(sits)
-	
 	var modeOfAttendanceMap = slurpModeOfAttendances()
-
-	def getModeOfAttendances(): Seq[ImportSingleModeOfAttendanceCommand] = {
-		val modeOfAttendances = modeOfAttendanceQuery.execute.toSeq
-		modeOfAttendanceMap = slurpModeOfAttendances()
-		modeOfAttendances
-	}
+	
+	def getModeOfAttendances: Seq[ImportSingleModeOfAttendanceCommand]
 	
 	def slurpModeOfAttendances(): Map[String, ModeOfAttendance] = {
 		transactional(readOnly = true) {
@@ -42,8 +32,34 @@ class ModeOfAttendanceImporter extends Logging {
 				(modeOfAttendanceCode, status)
 			}).toMap
 		}
-	}		
+	}
 }
+
+@Profile(Array("dev", "production")) @Service
+class ModeOfAttendanceImporterImpl extends ModeOfAttendanceImporter {
+	import ModeOfAttendanceImporter._
+	
+	var sits = Wire[DataSource]("sitsDataSource")
+	
+	lazy val modeOfAttendanceQuery = new ModeOfAttendanceQuery(sits)
+
+	def getModeOfAttendances: Seq[ImportSingleModeOfAttendanceCommand] = {
+		val modeOfAttendances = modeOfAttendanceQuery.execute.toSeq
+		modeOfAttendanceMap = slurpModeOfAttendances()
+		modeOfAttendances
+	}
+}
+
+@Profile(Array("sandbox")) @Service
+class SandboxModeOfAttendanceImporter extends ModeOfAttendanceImporter {
+	def getModeOfAttendances: Seq[ImportSingleModeOfAttendanceCommand] =
+		Seq(
+			new ImportSingleModeOfAttendanceCommand(ModeOfAttendanceInfo("F", "FULL-TIME", "Full-time according to Funding Council definitions")),
+			new ImportSingleModeOfAttendanceCommand(ModeOfAttendanceInfo("P", "PART-TIME", "Part-time"))
+		)
+}
+
+case class ModeOfAttendanceInfo(code: String, shortName: String, fullName: String)
 
 object ModeOfAttendanceImporter {
 		
@@ -53,7 +69,10 @@ object ModeOfAttendanceImporter {
 	
 	class ModeOfAttendanceQuery(ds: DataSource) extends MappingSqlQuery[ImportSingleModeOfAttendanceCommand](ds, GetModeOfAttendance) {
 		compile()
-		override def mapRow(resultSet: ResultSet, rowNumber: Int) = new ImportSingleModeOfAttendanceCommand(resultSet)
+		override def mapRow(resultSet: ResultSet, rowNumber: Int) = 
+			new ImportSingleModeOfAttendanceCommand(
+				ModeOfAttendanceInfo(resultSet.getString("moa_code"), resultSet.getString("moa_snam"), resultSet.getString("moa_name"))
+			)
 	}
 	
 }

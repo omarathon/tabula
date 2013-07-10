@@ -57,8 +57,8 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 	@Test def forenameFormatting {
 		new Environment {
 			val names = Seq("Mathew James", "Anna-Lee", "Nick", "Krist\u00EDn")
-			val importer = new ProfileImporter
-
+			val importer = new ProfileImporterImpl
+			
 			for (name <- names) {
 				val mac = MembershipInformation(MembershipMember(
 					universityId = "0672089",
@@ -77,9 +77,8 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		new Environment {
 			val names = Seq("d'Haenens Johansson", "O'Toole", "Calvo-Bado", "Biggins", "MacCallum", "McCartney",
 							"Mannion", "von Der Glockenspeil", "d'Howes", "di Stefano", "Mc Cauley", "J\u00F3hannesd\u00F3ttir")
-
-			val importer = new ProfileImporter
-
+			val importer = new ProfileImporterImpl
+			
 			for (name <- names) {
 				val mac = MembershipInformation(MembershipMember(
 					universityId = "0672089",
@@ -96,8 +95,8 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 	// Test that if we have name formatting from SSO, we use that as long as the names match
 	@Test def takesSuggestions {
 		new Environment {
-			val importer = new ProfileImporter
-
+			val importer = new ProfileImporterImpl
+			
 			val user1 = new User()
 			user1.setFirstName("MatHEW")
 			user1.setLastName("Macintosh")
@@ -140,8 +139,9 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			usercode				= "cuscav",
 			userType				= Staff
 		), () => Some(blobBytes))
+		
+		val importer = new ProfileImporterImpl
 
-		val importer = new ProfileImporter()
 		val fileDao = mock[FileDao]
 
 		val memberDao = mock[MemberDao]

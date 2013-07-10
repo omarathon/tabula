@@ -1,11 +1,8 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.ResultSet
-
-
 import org.joda.time.DateTime
 import org.springframework.beans.BeanWrapperImpl
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
@@ -17,8 +14,9 @@ import uk.ac.warwick.tabula.data.model.ModeOfAttendance
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
+import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceInfo
 
-class ImportSingleModeOfAttendanceCommand(resultSet: ResultSet) extends Command[ModeOfAttendance] with Logging with Daoisms 
+class ImportSingleModeOfAttendanceCommand(info: ModeOfAttendanceInfo) extends Command[ModeOfAttendance] with Logging with Daoisms 
 	with Unaudited with PropertyCopying {
 	
 	PermissionCheck(Permissions.ImportSystemData)
@@ -26,13 +24,9 @@ class ImportSingleModeOfAttendanceCommand(resultSet: ResultSet) extends Command[
 	var modeOfAttendanceDao = Wire.auto[ModeOfAttendanceDao]
 
 	// A couple of intermediate properties that will be transformed later
-	var code: String = _
-	var shortName: String = _
-	var fullName: String = _
-	
-	this.code = resultSet.getString("moa_code")
-	this.shortName = resultSet.getString("moa_snam")
-	this.fullName = resultSet.getString("moa_name")
+	var code = info.code
+	var shortName = info.shortName
+	var fullName = info.fullName
 	
 	override def applyInternal(): ModeOfAttendance = transactional() {
 		val modeOfAttendanceExisting = modeOfAttendanceDao.getByCode(code)

@@ -33,7 +33,7 @@
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
 
-		<warwickutils.version>20130628</warwickutils.version>
+		<warwickutils.version>20130704-1109</warwickutils.version>
 	        <surefire.version>2.14.1</surefire.version>
 		<recompileMode><!-- incremental --></recompileMode>
 
