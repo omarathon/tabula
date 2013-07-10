@@ -38,7 +38,7 @@ trait ProfileImporter {
 	def userIdAndCategory(member: Member): Option[MembershipInformation]
 }
 
-@Profile(Array("dev", "production")) @Service
+@Profile(Array("dev", "test", "production")) @Service
 class ProfileImporterImpl extends ProfileImporter with Logging {
 	import ProfileImporter._
 

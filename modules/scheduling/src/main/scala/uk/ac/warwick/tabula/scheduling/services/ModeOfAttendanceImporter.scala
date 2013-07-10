@@ -35,7 +35,7 @@ trait ModeOfAttendanceImporter extends Logging {
 	}
 }
 
-@Profile(Array("dev", "production")) @Service
+@Profile(Array("dev", "test", "production")) @Service
 class ModeOfAttendanceImporterImpl extends ModeOfAttendanceImporter {
 	import ModeOfAttendanceImporter._
 	

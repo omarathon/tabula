@@ -34,7 +34,7 @@ trait SitsStatusesImporter extends Logging {
 	}	
 }
 
-@Profile(Array("dev", "production")) @Service
+@Profile(Array("dev", "test", "production")) @Service
 class SitsStatusesImporterImpl extends SitsStatusesImporter {
 	import SitsStatusesImporter._
 	

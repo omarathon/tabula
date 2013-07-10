@@ -33,7 +33,7 @@ trait AssignmentImporter {
 	def getAllAssignments: Seq[UpstreamAssignment]
 }
 
-@Profile(Array("dev", "production")) @Service
+@Profile(Array("dev", "test", "production")) @Service
 class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 	import AssignmentImporter._
 

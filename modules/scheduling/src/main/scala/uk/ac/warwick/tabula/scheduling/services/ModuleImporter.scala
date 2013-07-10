@@ -34,7 +34,7 @@ trait ModuleImporter {
 /**
  * Retrieves department and module information from Webgroups.
  */
-@Profile(Array("dev", "production")) @Service
+@Profile(Array("dev", "test", "production")) @Service
 class ModuleImporterImpl extends ModuleImporter with Logging {
 	import ModuleImporter._
 

@@ -16,7 +16,7 @@ trait SupervisorImporter {
 	def getSupervisorPrsCodes(scjCode: String): Seq[String]
 }
 
-@Profile(Array("dev", "production")) @Service
+@Profile(Array("dev", "test", "production")) @Service
 class SupervisorImporterImpl extends SupervisorImporter {
 	import SupervisorImporter._
 
