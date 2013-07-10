@@ -55,16 +55,16 @@ class ExtensionTest extends PersistenceTestBase {
 
   }
 	
-	@Test def deleteFileAttachmentOnDelete {
+	@Test def deleteFileAttachmentOnDelete = transactional{tx=>
 		// TAB-667
-		val orphanAttachment = transactional { tx =>
+		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment
 			
 			session.save(attachment)
 			attachment
 		}
 		
-		val (extension, extensionAttachment) = transactional { tx =>
+		val (extension, extensionAttachment) = flushing(session) {
 			val extension = new Extension(universityId = idFormat(1))
 			extension.userId = "steve"
 				
@@ -86,16 +86,16 @@ class ExtensionTest extends PersistenceTestBase {
 		extensionAttachment.id should not be (null)
 		
 		// Can fetch everything from db
-		transactional { tx => 
+		flushing(session) {
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			session.get(classOf[Extension], extension.id) should be (extension)
 			session.get(classOf[FileAttachment], extensionAttachment.id) should be (extensionAttachment)
 		}
-		
-		transactional { tx => session.delete(extension) }
+
+		flushing(session) { session.delete(extension) }
 		
 		// Ensure we can't fetch the extension or attachment, but all the other objects are returned
-		transactional { tx => 
+		flushing(session) {
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			session.get(classOf[Extension], extension.id) should be (null)
 			session.get(classOf[FileAttachment], extensionAttachment.id) should be (null)

@@ -22,7 +22,7 @@ class TutorHomeCommandTest extends TestBase with Mockito {
 			command.smallGroupService.findSmallGroupsByTutor(currentUser.apparentUser) returns (groups)
 
 			val result = command.applyInternal()
-			result should be (Map(module -> List(set)))
+			result should be (Map(module -> Map(set->groups)))
 		}
 	}
 }

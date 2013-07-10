@@ -75,7 +75,7 @@
 			</@form.labelled_row>
 
 			<@form.labelled_row "reason" "Please give a full statement of your reasons for applying for an extension">
-				<@f.textarea path="reason" cssClass="text big-textarea" />
+				<@f.textarea path="reason" cssClass="text big-textarea" maxlength=4000/>
 			</@form.labelled_row>
 
 			<@form.labelled_row "requestedExpiryDate" "Requested extension date">
@@ -83,7 +83,7 @@
 			</@form.labelled_row>
 
 			<@form.labelled_row "file.upload" "Upload supporting documentation relevant to your request">
-				<input type="file" name="file.upload" />
+				<input type="file" name="file.upload" multiple />
 				<div id="multifile-column-description" class="help-block">
 					<#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
 				</div>

@@ -12,10 +12,12 @@ import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
 import org.hibernate.annotations.ForeignKey
 import uk.ac.warwick.tabula.system.permissions.Restricted
+import uk.ac.warwick.tabula.services.RelationshipService
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.helpers.Logging
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -46,10 +48,13 @@ object Member {
 		name="userType",
 		discriminatorType=DiscriminatorType.STRING
 )
-abstract class Member extends MemberProperties with ToString with HibernateVersioned with PermissionsTarget {
+abstract class Member extends MemberProperties with ToString with HibernateVersioned with PermissionsTarget with Logging {
 
 	@transient
 	var profileService = Wire.auto[ProfileService]
+
+	@transient
+	var relationshipService = Wire.auto[RelationshipService]
 
 	def this(user: CurrentUser) = {
 		this()
@@ -80,6 +85,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 		}
 	}
 
+	def routeName: String = ""
 	def officialName = title + " " + Option(fullFirstName).getOrElse(firstName) + " " + lastName
 
 	def description = {
@@ -89,14 +95,17 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 		val deptName = Option(homeDepartment).map(", " + _.name).getOrElse("")
 
-		userTypeString + deptName
+		userTypeString + routeName + deptName
 	}
 
 	/**
-	 * Get all departments that this student is affiliated with at a departmental level.
-	 * This includes their home department, and the department running their course.
+	 * Get all departments that this member is affiliated to.
+	 * (Overriden by StudentMember).
 	 */
-	def affiliatedDepartments = Option(homeDepartment).toStream
+	def affiliatedDepartments = homeDepartment match {
+		case null => Stream()
+		case _ => Stream(homeDepartment)
+	}
 
 	/**
 	 * Get all departments that this student touches. This includes their home department,
@@ -147,98 +156,72 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 		"name" -> (firstName + " " + lastName),
 		"email" -> email)
 
-
-	@Restricted(Array("Profiles.PersonalTutor.Read"))
-	def personalTutors: Seq[StudentRelationship] = Nil
-
-	@Restricted(Array("Profiles.Supervisor.Read"))
-	def supervisors: Seq[StudentRelationship] = Nil
-
 	def isStaff = (userType == MemberUserType.Staff)
 	def isStudent = (userType == MemberUserType.Student)
-	def isAPersonalTutor = (userType == MemberUserType.Staff && !profileService.listStudentRelationshipsWithMember(RelationshipType.PersonalTutor, this).isEmpty)
+	def isAPersonalTutor = {
+		(userType == MemberUserType.Staff &&
+				!relationshipService.listStudentRelationshipsWithMember(
+						RelationshipType.PersonalTutor, this
+			).isEmpty)
+	}
+	def isASupervisor = (userType == MemberUserType.Staff && !relationshipService.listStudentRelationshipsWithMember(RelationshipType.Supervisor, this).isEmpty)
 	def hasAPersonalTutor = false
 
-	def isSupervisor = (userType == MemberUserType.Staff && !profileService.listStudentRelationshipsWithMember(RelationshipType.Supervisor, this).isEmpty)
 	def hasSupervisor = false
+
+
+	def mostSignificantCourseDetails: Option[StudentCourseDetails] = None
+
+	def hasCurrentEnrolment = false
 }
 
 @Entity
 @DiscriminatorValue("S")
-class StudentMember extends Member with StudentProperties with PostLoadBehaviour {
+class StudentMember extends Member with StudentProperties {
 	this.userType = MemberUserType.Student
 
-	@OneToOne(fetch = FetchType.LAZY, mappedBy = "student", cascade = Array(ALL))
-	@Restricted(Array("Profiles.Read.StudyDetails"))
-	var studyDetails: StudyDetails = new StudyDetails
-
-	studyDetails.student = this
+	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@Restricted(Array("Profiles.Read.StudentCourseDetails"))
+	var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
 
 	def this(id: String) = {
 		this()
 		this.universityId = id
 	}
 
-	// FIXME this belongs as a Freemarker macro or helper
-	def statusString: String = {
-		var statusString = ""
-		if (studyDetails != null && studyDetails.sprStatus!= null)
-			statusString = studyDetails.sprStatus.fullName.toLowerCase()
-		if (studyDetails != null && studyDetails.enrolmentStatus != null)
-			statusString += " (" + studyDetails.enrolmentStatus.fullName.toLowerCase() + ")"
-		statusString.capitalize
-	}
-
-	// Find out if the student has an SCE record for the current year (which will mean
-	// their study details will be filled in).
-	// Could just check that enrolment status is not null, but it's not impossible that
-	// on SITS an enrolment status which doesn't exist in the status table has been
-	// entered, in which case we wouldn't be able to populate that field - so checking
-	// that route is also not null for good measure.
-
-	def hasCurrentEnrolment: Boolean = {
-		studyDetails != null && studyDetails.enrolmentStatus != null && studyDetails.route != null
-	}
-
-	override def description = {
-		val userTypeString = Option(groupName).getOrElse("")
-
-		val courseName = Option(studyDetails.route).map(", " + _.name).getOrElse("")
-		val deptName = Option(homeDepartment).map(", " + _.name).getOrElse("")
-
-		userTypeString + courseName + deptName
-	}
-
 	/**
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
-	override def affiliatedDepartments =
-		(
-			Option(homeDepartment) #::
-			Option(studyDetails.studyDepartment) #::
-			Option(studyDetails.route).map(_.department) #::
-			Stream.empty
-		).flatten.distinct
+	override def affiliatedDepartments: Stream[Department] = {
+		val sprDepartments = studentCourseDetails.asScala.map( _.department ).toStream
+		val routeDepartments = studentCourseDetails.asScala.map(_.route).filter(_ != null).map(_.department).toStream
 
-	@Restricted(Array("Profiles.PersonalTutor.Read"))
-	override def personalTutors =
-		profileService.findCurrentRelationships(RelationshipType.PersonalTutor, studyDetails.sprCode)
+		(Option(homeDepartment).toStream #:::
+				sprDepartments #:::
+				routeDepartments
+		).distinct
+	}
 
-	override def hasAPersonalTutor = !personalTutors.isEmpty
-
-	@Restricted(Array("Profiles.Supervisor.Read"))
-	override def supervisors =
-		profileService.findCurrentRelationships(RelationshipType.Supervisor, studyDetails.sprCode)
-
-	override def hasSupervisor = !supervisors.isEmpty
-
-	// If hibernate sets studyDetails to null, make a new empty studyDetails
-	override def postLoad {
-		if (studyDetails == null) {
-			studyDetails = new StudyDetails
-			studyDetails.student = this
+	override def mostSignificantCourseDetails = {
+		if (studentCourseDetails == null || studentCourseDetails.isEmpty) None
+		else {
+			val mostSignifCourse = studentCourseDetails.asScala.filter {
+				details => details.mostSignificant != null && details.mostSignificant
+			}
+			mostSignifCourse.headOption
 		}
+	}
+
+	override def hasCurrentEnrolment: Boolean = {
+		!studentCourseDetails.asScala.map(_.hasCurrentEnrolment).isEmpty
+	}
+
+	override def routeName: String = mostSignificantCourseDetails match {
+		case Some(details) =>
+			if (details != null && details.route != null) ", " + details.route.name
+			else ""
+		case _ => ""
 	}
 }
 

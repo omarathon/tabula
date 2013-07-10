@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.profiles.commands.AbstractDeleteMeetingRecordCommand
 import uk.ac.warwick.tabula.web.Mav
 
 @Controller
-@RequestMapping(value = Array("/tutor/meeting/{meetingRecord}"))
+@RequestMapping(value = Array("/*/meeting/{meetingRecord}"))
 class DeleteMeetingRecordController  extends BaseController {
 	validatesSelf[DeleteMeetingRecordCommand]
 

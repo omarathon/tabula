@@ -9,9 +9,7 @@ import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.InitBinder
 import org.springframework.web.bind.annotation.RequestMethod
 import javax.annotation.Resource
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.{PermissionDeniedException, CurrentUser, ItemNotFoundException, RequestInfo}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model._
@@ -36,7 +34,7 @@ abstract trait ControllerMethods extends PermissionsCheckingMethods with Logging
 			permittedByChecks(securityService, user, something)
 			Some(something)
 		} catch {
-			case e:Exception => None
+			case e @ (_ : ItemNotFoundException | _ : PermissionDeniedException)=> None
 		}
 
 	def restrictedBy[A <: PermissionsChecking](fn: => Boolean)(something: => A): Option[A] =

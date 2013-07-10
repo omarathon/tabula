@@ -5,22 +5,21 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.MarkingCompletedComm
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import org.hibernate.Session
-import uk.ac.warwick.tabula.data.HasSession
+import uk.ac.warwick.tabula.data.SessionComponent
 
 
-class MarkingCompletedTest extends AppContextTestBase with MarkingWorkflowWorld with Mockito{
+class MarkingCompletedTest extends AppContextTestBase with MarkingWorkflowWorld with Mockito {
 
-  val mockSession = mock[Session]
-	var stateService:StateService =new ComposableStateServiceImpl with HasSession{
-    def session = mockSession
-  }
+	val mockSession = mock[Session]
+	var stateService: StateService = new ComposableStateServiceImpl with SessionComponent {
+		def session = mockSession
+	}
 
 	@Transactional @Test
-	def firstMarkerFinished(){
-		withUser("cuslaj"){
+	def firstMarkerFinished() {
+		withUser("cuslaj") {
 			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
 			val command = new MarkingCompletedCommand(assignment.module, assignment, currentUser, isFirstMarker)
 			command.stateService = stateService

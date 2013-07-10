@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.StudentRelationship
 import org.hibernate.criterion.{Restrictions,Order}
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.spring.Wire
 
 trait MeetingRecordDao {
 	def saveOrUpdate(meeting: MeetingRecord)
@@ -41,4 +42,11 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 
 
 	def get(id: String) = getById[MeetingRecord](id);
+}
+
+trait MeetingRecordDaoComponent{
+	var meetingRecordDao:MeetingRecordDao
+}
+trait AutowiringMeetingRecordDaoComponent extends MeetingRecordDaoComponent{
+	var meetingRecordDao = Wire.auto[MeetingRecordDao]
 }

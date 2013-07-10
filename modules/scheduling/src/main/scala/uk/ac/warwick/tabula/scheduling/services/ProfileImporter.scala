@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleMemberCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStaffCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentRowCommand
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.membership.MembershipInterfaceException
 import org.joda.time.DateTime
@@ -51,7 +51,10 @@ class ProfileImporterImpl extends ProfileImporter with Logging {
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
 	lazy val membershipByUsercodeQuery = new MembershipByUsercodeQuery(membership)
 
-	def studentInformationQuery(member: MembershipInformation, ssoUser: User) = new StudentInformationQuery(sits, member, ssoUser)
+	def studentInformationQuery(member: MembershipInformation, ssoUser: User) = {
+		val ret = new StudentInformationQuery(sits, member, ssoUser)
+		ret
+	}
 	def staffInformationQuery(member: MembershipInformation, ssoUser: User) = new StaffInformationQuery(sits, member, ssoUser)
 
 	def getMemberDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportSingleMemberCommand] = {
@@ -62,9 +65,12 @@ class ProfileImporterImpl extends ProfileImporter with Logging {
 			val ssoUser = users(usercode)
 
 			mac.member.userType match {
-				case Student 		   => studentInformationQuery(mac, ssoUser).executeByNamedParam(
+				case Student 		   => {
+					val cmds = studentInformationQuery(mac, ssoUser).executeByNamedParam(
 											Map("year" -> currentAcademicYear, "usercodes" -> usercode)
 										  ).toSeq
+					cmds
+					}
 				case Staff | Emeritus  => staffInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
 				case _ => Seq()
 			}
@@ -225,7 +231,6 @@ class SandboxProfileImporter extends ProfileImporter {
 }
 
 object ProfileImporter {
-
 	val GetStudentInformation = """
 		select
 			stu.stu_code as university_id,
@@ -244,15 +249,15 @@ object ProfileImporter {
 
 			nat.nat_name as nationality,
 
-			crs.crs_code as sits_course_code,
+			crs.crs_code as course_code,
 			crs.crs_ylen as course_year_length,
 
 			spr.spr_code as spr_code,
 			spr.rou_code as route_code,
-			spr.spr_dptc as study_department,
+			spr.spr_dptc as department_code,
 			spr.awd_code as award_code,
 			spr.sts_code as spr_status_code,
-			--spr.spr_levc as level_code,
+			spr.spr_levc as level_code,
 			spr.prs_code as spr_tutor1,
 			--spr.spr_prs2 as spr_tutor2,
 
@@ -260,13 +265,16 @@ object ProfileImporter {
 			scj.scj_begd as begin_date,
 			scj.scj_endd as end_date,
 			scj.scj_eend as expected_end_date,
+			scj.scj_udfa as most_signif_indicator,
 			--scj.scj_prsc as scj_tutor1,
 			--scj.scj_prs2 as scj_tutor2,
 
 			sce.sce_sfcc as funding_source,
 			sce.sce_stac as enrolment_status_code,
 			sce.sce_blok as year_of_study,
-			sce.sce_moac as mode_of_attendance_code
+			sce.sce_moac as mode_of_attendance_code,
+			sce.sce_ayrc as sce_academic_year,
+			sce.sce_seq2 as sce_sequence_number
 
 		from intuit.ins_stu stu
 
@@ -275,7 +283,6 @@ object ProfileImporter {
 
 			join intuit.srs_scj scj
 				on spr.spr_code = scj.scj_sprc
-				and scj.scj_udfa = 'Y'
 
 			join intuit.srs_sce sce
 				on scj.scj_code = sce.sce_scjc
@@ -297,8 +304,16 @@ object ProfileImporter {
 			left outer join intuit.srs_sta sts
 				on spr.sts_code = sts.sta_code
 
-			where stu.stu_udf3 in (:usercodes)
+		where stu.stu_udf3 in (:usercodes)
 		"""
+
+	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User)
+		extends MappingSqlQuery[ImportSingleStudentRowCommand](ds, GetStudentInformation) {
+		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
+		declareParameter(new SqlParameter("year", Types.VARCHAR))
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStudentRowCommand(member, ssoUser, rs)
+	}
 
 	val GetStaffInformation = """
 		select
@@ -318,14 +333,6 @@ object ProfileImporter {
 		from intuit.ins_prs prs
 			where prs.prs_exid in (:usercodes)
 		"""
-
-	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User)
-		extends MappingSqlQuery[ImportSingleStudentCommand](ds, GetStudentInformation) {
-		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
-		declareParameter(new SqlParameter("year", Types.VARCHAR))
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStudentCommand(member, ssoUser, rs)
-	}
 
 	class StaffInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User)
 		extends MappingSqlQuery[ImportSingleStaffCommand](ds, GetStaffInformation) {

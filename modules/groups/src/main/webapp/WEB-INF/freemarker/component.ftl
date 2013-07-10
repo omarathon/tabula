@@ -1,4 +1,4 @@
-<#compress>
+<#ftl strip_text=true />
 
 <#assign bodyClass="groups-page" />
 <#assign siteHeader="Small Group Teaching" />
@@ -6,5 +6,3 @@
 <#assign title="Small Group Teaching" />
 <#assign name="groups" />
 <#assign nonav=false />
-
-</#compress>

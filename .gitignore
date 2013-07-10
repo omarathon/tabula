@@ -44,6 +44,7 @@ ajcore*
 /.idea/libraries
 /.idea/dictionaries
 .iws
+*.iml
 
 # Sublime Text IDE
 *.sublime-project

@@ -23,7 +23,6 @@ class ImportSingleSitsStatusCommand(info: SitsStatusInfo) extends Command[SitsSt
 	
 	var sitsStatusDao = Wire.auto[SitsStatusDao]
 
-	// A couple of intermediate properties that will be transformed later
 	var code = info.code
 	var shortName = info.shortName
 	var fullName = info.fullName

@@ -1,46 +1,44 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
+import uk.ac.warwick.spring.Wire
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.DegreeType.Postgraduate
+import uk.ac.warwick.tabula.data.model.RelationshipType.Supervisor
+import uk.ac.warwick.tabula.data.model.StaffMember
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.RelationshipType.Supervisor
-import uk.ac.warwick.tabula.data.model.DegreeType.Postgraduate
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.StaffMember
+import uk.ac.warwick.tabula.services.RelationshipService
 
-class ImportSupervisorsForSingleStudentCommand(member: StudentMember) extends Command[Unit] with Logging{
+class ImportSupervisorsForSingleStudentCommand(studentCourseDetails: StudentCourseDetails)
+	extends Command[Unit] with Unaudited with Logging {
 	PermissionCheck(Permissions.ImportSystemData)
 
 	var supervisorImporter = Wire.auto[SupervisorImporter]
 	var profileService = Wire.auto[ProfileService]
+	var relationshipService = Wire.auto[RelationshipService]
 
 	def applyInternal() {
-		logger.info("member is: " + member)
-		if (member.studyDetails.route != null && member.studyDetails.route.degreeType == Postgraduate) {
+		if (studentCourseDetails.route != null && studentCourseDetails.route.degreeType == Postgraduate) {
 			transactional() {
 				importSupervisors
 			}
 		}
 	}
 
-	override def describe(d: Description) = d.property("universityId" -> member.universityId)
+	override def describe(d: Description) = d.property("sprCode" -> studentCourseDetails.sprCode)
 
 	def importSupervisors {
-		val prsCodes = supervisorImporter.getSupervisorPrsCodes(member.studyDetails.scjCode)
+		val prsCodes = supervisorImporter.getSupervisorPrsCodes(studentCourseDetails.scjCode)
 
-		supervisorImporter.getSupervisorPrsCodes(member.studyDetails.scjCode).foreach {
+		supervisorImporter.getSupervisorPrsCodes(studentCourseDetails.scjCode).foreach {
 			supervisorPrsCode => {
 				profileService.getMemberByPrsCode(supervisorPrsCode) match {
-					case Some(sup: StaffMember) => profileService.saveStudentRelationship(Supervisor, member.studyDetails.sprCode, sup.id)
-					case _ => logger.warn("Can't save supervisor " + supervisorPrsCode + " for " + member.studyDetails.sprCode + " - not a member in Tabula db")
+					case Some(sup: StaffMember) => relationshipService.saveStudentRelationship(Supervisor, studentCourseDetails.sprCode, sup.id)
+					case _ => logger.warn("Can't save supervisor " + supervisorPrsCode + " for " + studentCourseDetails.sprCode + " - not a member in Tabula db")
 				}
 			}
 		}

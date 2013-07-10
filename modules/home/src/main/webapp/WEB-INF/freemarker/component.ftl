@@ -1,4 +1,4 @@
-<#compress>
+<#ftl strip_text=true />
 
 <#assign bodyClass="tabula-page" />
 <#assign siteHeader="Tabula" />
@@ -6,5 +6,3 @@
 <#assign title="Tabula" />
 <#assign name="home" />
 <#assign nonav=true />
-
-</#compress>

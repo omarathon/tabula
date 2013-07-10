@@ -33,7 +33,7 @@ class AdminDepartmentHomeController extends GroupsController {
 		val moduleItems =
 			for (module <- modules) yield {
 				ViewModule(module,
-					module.groupSets.asScala map { ViewSet(_) },
+					module.groupSets.asScala map { set => ViewSet(set, set.groups.asScala) },
 					canManageGroups=securityService.can(user, Permissions.Module.ManageSmallGroups, module)
 				)
 			}

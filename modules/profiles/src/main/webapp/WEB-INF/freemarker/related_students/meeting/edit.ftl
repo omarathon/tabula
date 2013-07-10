@@ -1,8 +1,17 @@
+<#assign student = studentCourseDetails.student/>
+<#if relationshipType.dbValue=="supervisor">
+	<#assign agent_role= "supervisor" />
+	<#assign member_role= "supervisee" />
+<#elseif relationshipType.dbValue="personalTutor">
+	<#assign agent_role= "tutor" />
+	<#assign member_role= "tutee" />
+</#if>
+
 <#assign heading>
 	<h2>Record a meeting</h2>
 	<h6>
-		<span class="muted">between tutor</span> ${tutorName}
-		<span class="muted">and tutee</span> ${student.fullName}
+		<span class="muted">between ${agent_role}</span> ${agentName}
+		<span class="muted">and ${member_role}</span> ${student.fullName}
 	</h6>
 </#assign>
 
@@ -21,7 +30,7 @@
 	<div class="modal-footer">
 		<form class="double-submit-protection">
 			<span class="submit-buttons">
-				<#assign title>Submit record for approval by personal <#if isStudent>tutor<#else>tutee</#if></#assign>
+				<#assign title>Submit record for approval by <#if isStudent>${agent_role}<#else>${member_role}</#if></#assign>
 				<button title="${title}" class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
 					Submit for approval
 				</button>

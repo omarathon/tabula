@@ -160,7 +160,8 @@ object Permissions {
 			case object HomeEmail extends Permission("View a member's alternative email address")
 			case object Usercode extends Permission("View a member's usercode")
 			case object PersonalTutees extends Permission("View a member's personal tutees")
-			case object StudyDetails extends Permission("View a member's study details")
+			case object StudentCourseDetails extends Permission("View a student's course details")
+			case object Supervisees extends Permission("View a member's supervisees")
 		}
 
 		// Person's own tutor ('upward' relationship)
@@ -194,15 +195,15 @@ object Permissions {
       }
 		}
 	}
-	
+
 	object SmallGroups {
 		case object Archive extends Permission("Archive small groups")
-		
+
 		case object Create extends Permission("Create small groups")
 		case object Read extends Permission("View small groups")
 		case object Update extends Permission("Edit small groups")
 		case object Delete extends Permission("Delete small groups")
-		
+
 		case object Allocate extends Permission("Allocate students to small groups")
 	}
 

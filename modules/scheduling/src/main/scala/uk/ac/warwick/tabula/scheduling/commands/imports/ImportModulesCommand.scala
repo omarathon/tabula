@@ -14,14 +14,19 @@ import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.scheduling.services.ModuleImporter
 import uk.ac.warwick.tabula.scheduling.services.RouteInfo
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.services.CourseAndRouteService
 
 class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 	import ImportModulesCommand._
-	
+
 	PermissionCheck(Permissions.ImportSystemData)
 
 	var moduleImporter = Wire.auto[ModuleImporter]
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
+	var courseAndRouteService = Wire.auto[CourseAndRouteService]
 
 	def applyInternal() {
 		transactional() {
@@ -70,7 +75,7 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 
 	def importRoutes(routes: Seq[RouteInfo], dept: Department) {
 		for (rot <- routes) {
-			moduleService.getRouteByCode(rot.code) match {
+			courseAndRouteService.getRouteByCode(rot.code) match {
 				case None => {
 					debug("Route code %s not found in database, so inserting", rot.code)
 					session.saveOrUpdate(newRouteFrom(rot, dept))
@@ -116,7 +121,7 @@ object ImportModulesCommand {
 		department.name = d.name
 		department
 	}
-	
+
 	def newRouteFrom(r: RouteInfo, dept: Department): Route = {
 		val route = new Route
 		route.code = r.code
@@ -125,5 +130,4 @@ object ImportModulesCommand {
 		route.department = dept
 		route
 	}
-	
 }

@@ -22,7 +22,7 @@
 
 	<import resource="properties-context.xml" />
 	<import resource="persistence-context.xml" />
-	
+
 	<!-- Needed to enable use of the uk.ac.warwick.spring.Wire object -->
 	<bean class="uk.ac.warwick.spring.SpringConfigurer" lazy-init="false" />
 
@@ -132,6 +132,8 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.DayOfWeekConverter"/>
                 <bean class="uk.ac.warwick.tabula.data.convert.NumberConverterFactory"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.StudentCourseDetailsConverter"/>
+
 	        </list>
 	    </property>
 	    <property name="formatters">
@@ -277,7 +279,7 @@
 		<constructor-arg ref="realUserLookup" />
 	</bean>
 	<bean id="groupService" factory-bean="userLookup" factory-method="getGroupService" />
-	
+
 	<bean id="realUserLookup" class="uk.ac.warwick.tabula.services.UserLookupServiceImpl" autowire-candidate="false">
 		<constructor-arg ref="userLookupDelegate" />
 	</bean>
@@ -335,7 +337,7 @@
 	<bean id="parser" class="org.springframework.expression.spel.standard.SpelExpressionParser"/>
 
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
-	
+
 	<bean class="uk.ac.warwick.util.files.hash.impl.SHAFileHasher" />
 	<bean class="uk.ac.warwick.util.termdates.TermFactoryImpl" />
 
@@ -380,7 +382,7 @@
 	<bean class="uk.ac.warwick.tabula.FeatureFlagListener" />
 	<bean class="uk.ac.warwick.tabula.services.MaintenanceModeListener" />
 	<bean class="uk.ac.warwick.tabula.services.SSOMaintenanceModeListener" />
-	
+
 	<!-- Expose EhCache properties as system properties -->
 	<bean
     class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -407,7 +409,7 @@
 
 	<beans profile="test">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.tabula.MockUserLookup" autowire-candidate="false" />
-		
+
 		<!-- This is the default embedded broker -->
 		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider" factory-method="createEmbeddedBroker" />
 	</beans>

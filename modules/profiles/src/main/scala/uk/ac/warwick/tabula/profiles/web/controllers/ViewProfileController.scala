@@ -3,21 +3,22 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, Member, StudentMember}
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
-import uk.ac.warwick.tabula.commands.ViewViewableCommand
-import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
-import org.springframework.web.bind.annotation.RequestParam
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.data.model.{RelationshipType, MeetingRecord, Member, StudentMember}
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
+import uk.ac.warwick.tabula.commands.{Appliable, ViewViewableCommand}
+import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 
 
 class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
+
 	if (user.isStudent && user.universityId != profile.universityId) {
 		logger.info("Denying access for user " + user + " to view profile " + profile)
 		throw new PermissionDeniedException(user, Permissions.Profiles.Read.Core, profile)
@@ -34,10 +35,26 @@ class ViewProfileController extends ProfilesController {
 	def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 
-	@ModelAttribute("viewMeetingRecordCommand")
-	def viewMeetingRecordCommand(@PathVariable("member") member: Member) = member match {
-		case student: StudentMember => restricted(new ViewMeetingRecordCommand(student, user))
-		case _ => None
+	@ModelAttribute("viewTutorMeetingRecordCommand")
+	def viewTutorMeetingRecordCommand(@PathVariable("member") member: Member) = {
+		member.mostSignificantCourseDetails match {
+			case Some(scd) => restricted(ViewMeetingRecordCommand(scd, user, RelationshipType.PersonalTutor))
+			case _ => {
+				logger.warn("Member " + member.universityId + " has no most significant course details")
+				None
+			}
+		}
+	}
+
+	@ModelAttribute("viewSupervisorMeetingRecordCommand")
+	def viewSupervisorMeetingRecordCommand(@PathVariable("member") member: Member) = {
+		member.mostSignificantCourseDetails match {
+			case Some(scd) => restricted(ViewMeetingRecordCommand(scd, user, RelationshipType.Supervisor))
+			case _ => {
+				logger.warn("Member " + member.universityId + " has no most significant course details")
+				None
+			}
+		}
 	}
 
 	@ModelAttribute("viewProfileCommand")
@@ -48,20 +65,25 @@ class ViewProfileController extends ProfilesController {
 
 	@RequestMapping
 	def viewProfile(
-			@ModelAttribute("viewProfileCommand") profileCmd: ViewProfileCommand,
-			@ModelAttribute("viewMeetingRecordCommand") meetingsCmd: Option[ViewMeetingRecordCommand],
+			@ModelAttribute("viewProfileCommand") profileCmd: Appliable[StudentMember],
+			@ModelAttribute("viewTutorMeetingRecordCommand") tutorMeetingsCmd: Option[Appliable[Seq[MeetingRecord]]],
+			@ModelAttribute("viewSupervisorMeetingRecordCommand") supervisorMeetingsCmd: Option[Appliable[Seq[MeetingRecord]]],
 			@RequestParam(value="meeting", required=false) openMeetingId: String,
 			@RequestParam(defaultValue="", required=false) tutorId: String) = {
 
 		val profiledStudentMember = profileCmd.apply
 		val isSelf = (profiledStudentMember.universityId == user.universityId)
 
-		val meetings = meetingsCmd match {
+		val tutorMeetings = tutorMeetingsCmd match {
 			case None => Seq()
-			case Some(cmd) => cmd.apply
+			case Some(cmd) => cmd.apply()
+		}
+		val supervisorMeetings = supervisorMeetingsCmd match {
+			case None => Seq()
+			case Some(cmd) => cmd.apply()
 		}
 
-		val openMeeting = meetings.find(m => m.id == openMeetingId).getOrElse(null)
+		val openMeeting = tutorMeetings.find(m => m.id == openMeetingId).getOrElse(null)
 
 		val tutor = userLookup.getUserByWarwickUniId(tutorId)
 
@@ -69,7 +91,8 @@ class ViewProfileController extends ProfilesController {
 			"profile" -> profiledStudentMember,
 			"viewer" -> currentMember,
 			"isSelf" -> isSelf,
-			"meetings" -> meetings,
+			"tutorMeetings" -> tutorMeetings,
+		  "supervisorMeetings"->supervisorMeetings,
 			"openMeeting" -> openMeeting,
 			"tutor" -> tutor)
 		.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))

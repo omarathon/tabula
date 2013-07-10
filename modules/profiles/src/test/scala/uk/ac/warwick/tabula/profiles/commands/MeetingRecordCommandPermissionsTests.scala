@@ -12,6 +12,7 @@ trait MeetingRecordCommandPermissionsTests extends Mockito{
   val ps = mock[ProfileService]
 
   var student:StudentMember = _
+  var studentCourseDetails: StudentCourseDetails = _
   var creator: StaffMember = _
   var relationship: StudentRelationship = _
   var supervisorRelationship: StudentRelationship = _
@@ -34,6 +35,13 @@ trait MeetingRecordCommandPermissionsTests extends Mockito{
       val m = new StudentMember("1170836")
       m.userId = "studentmember"
       m
+    }
+
+    studentCourseDetails = {
+    	val scd = new StudentCourseDetails()
+    	scd.scjCode = "1170836/1"
+    	scd.student = student
+    	scd
     }
 
     relationship = {

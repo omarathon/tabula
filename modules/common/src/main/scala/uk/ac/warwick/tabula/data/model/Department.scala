@@ -1,31 +1,31 @@
 package uk.ac.warwick.tabula.data.model
 
+import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import scala.xml.NodeSeq
+
 import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.ForeignKey
+
 import javax.persistence._
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
-import org.hibernate.annotations.JoinColumnsOrFormulas
-import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
-import org.hibernate.annotations.JoinColumnOrFormula
-import org.hibernate.annotations.JoinFormula
-import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
-import org.hibernate.annotations.ForeignKey
-import scala.annotation.tailrec
-import uk.ac.warwick.tabula.data.model.groups.WeekRange
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
 
 @Entity @AccessType("field")
-class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Department] with PermissionsTarget {
+class Department extends GeneratedId
+	with PostLoadBehaviour with SettingsMap[Department] with PermissionsTarget with Serializable{
 	import Department._
 
+	@Column(unique=true)
 	var code:String = null
 
 	var name:String = null
@@ -73,7 +73,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 
 	def personalTutorSource = getStringSetting(Settings.PersonalTutorSource) getOrElse(Department.Settings.PersonalTutorSourceValues.Local)
 	def personalTutorSource_= (ptSource: String) = settings += (Settings.PersonalTutorSource -> ptSource)
-	
+
 	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem) getOrElse(WeekRange.NumberingSystem.Default)
 	def weekNumberingSystem_= (wnSystem: String) = settings += (Settings.WeekNumberingSystem -> wnSystem)
 
@@ -118,7 +118,7 @@ class Department extends GeneratedId with PostLoadBehaviour with SettingsMap[Dep
 	var grantedRoles:JList[DepartmentGrantedRole] = JArrayList()
 
 	def permissionsParents = Option(parent).toStream
-	
+
 	/** The 'top' ancestor of this department, or itself if
 	  * it has no parent.
 	  */
@@ -149,7 +149,7 @@ object Department {
 		val PlagiarismDetection = "plagiarismDetection"
 
 		val PersonalTutorSource = "personalTutorSource"
-			
+
 		val WeekNumberingSystem = "weekNumberSystem"
 
 		object PersonalTutorSourceValues {

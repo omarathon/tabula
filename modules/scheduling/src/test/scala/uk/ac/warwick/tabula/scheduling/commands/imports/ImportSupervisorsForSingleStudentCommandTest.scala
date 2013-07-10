@@ -13,10 +13,10 @@ import uk.ac.warwick.tabula.data.model.RelationshipType._
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.StudyDetails
 import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
 import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 
 
 class ImportSupervisorForSingleStudentCommandTest extends AppContextTestBase with Mockito with Logging{
@@ -31,12 +31,16 @@ class ImportSupervisorForSingleStudentCommandTest extends AppContextTestBase wit
 		// set up and persist student
 		val supervisee = new StudentMember(uniId)
 		supervisee.userId = "xxxxx"
-		supervisee.studyDetails.scjCode = scjCode
-		supervisee.studyDetails.sprCode = sprCode
+		//supervisee.studyDetails.scjCode = scjCode
+		//supervisee.studyDetails.sprCode = sprCode
+
+		val studentCourseDetails = new StudentCourseDetails(supervisee, scjCode)
+		studentCourseDetails.sprCode = sprCode
+		supervisee.studentCourseDetails.add(studentCourseDetails)
 
 		val route = new Route
 		route.degreeType = Postgraduate
-		supervisee.studyDetails.route = route
+		studentCourseDetails.route = route
 		session.saveOrUpdate(route)
 
 		session.saveOrUpdate(supervisee)
@@ -61,12 +65,12 @@ class ImportSupervisorForSingleStudentCommandTest extends AppContextTestBase wit
 			importer.getSupervisorPrsCodes(scjCode) returns codes
 
 			// test command
-			val command = new ImportSupervisorsForSingleStudentCommand(supervisee)
+			val command = new ImportSupervisorsForSingleStudentCommand(studentCourseDetails)
 			command.supervisorImporter = importer
 			command.applyInternal
 
 			// check results
-			val supRels = supervisee.supervisors
+			val supRels = supervisee.studentCourseDetails.get(0).supervisors
 			supRels.size should be (1)
 			val rel = supRels.head
 
@@ -84,12 +88,12 @@ class ImportSupervisorForSingleStudentCommandTest extends AppContextTestBase wit
 			importer.getSupervisorPrsCodes(scjCode) returns Seq()
 
 			// test command
-			val command = new ImportSupervisorsForSingleStudentCommand(supervisee)
+			val command = new ImportSupervisorsForSingleStudentCommand(studentCourseDetails)
 			command.supervisorImporter = importer
 			command.applyInternal
 
 			// check results
-			val supRels = supervisee.supervisors
+			val supRels = supervisee.studentCourseDetails.get(0).supervisors
 			supRels.size should be (0)
 		}
 	}

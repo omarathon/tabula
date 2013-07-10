@@ -22,24 +22,27 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import scala._
 import scala.Some
+import uk.ac.warwick.tabula.services.RelationshipService
 
 class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Member], val currentUser:User, val remove: Boolean)
 	extends Command[Option[StudentRelationship]] with Notifies[StudentRelationship] with Promises {
-	
-	var profileService = Wire[ProfileService]
+
+	val studentCourseDetails: StudentCourseDetails = student.mostSignificantCourseDetails.get
+
+	var relationshipService = Wire[RelationshipService]
 
 	var tutor: Member = _
 
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, student)
 
 	// throw this request out if personal tutors can't be edited in Tabula for this department
-	if (!student.studyDetails.studyDepartment.canEditPersonalTutors) {
+	if (!studentCourseDetails.department.canEditPersonalTutors) {
 		logger.info("Denying access to EditTutorCommand since student "
-				+ student.studyDetails.sprCode
+				+ studentCourseDetails.sprCode
 				+ " has a study department "
-				+ "( " + student.studyDetails.studyDepartment.name
+				+ "( " + studentCourseDetails.department.name
 				+ ") with a personal tutor source setting of "
-				+ student.studyDetails.studyDepartment.personalTutorSource + ".")
+				+ studentCourseDetails.department.personalTutorSource + ".")
 		throw new ItemNotFoundException()
 	}
 
@@ -48,21 +51,21 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 	var notifyTutee: Boolean = false
 	var notifyOldTutor: Boolean = false
 	var notifyNewTutor: Boolean = false
-
 	var modifiedRelationships: Seq[StudentRelationship] = Nil
+
 
 	def applyInternal = {
 		if (!currentTutor.isDefined) {
 			// Brand new tutor
-			val newRelationship = profileService.saveStudentRelationship(PersonalTutor, student.studyDetails.sprCode, tutor.universityId)
+			val newRelationship = relationshipService.saveStudentRelationship(PersonalTutor, studentCourseDetails.sprCode, tutor.universityId)
 
 			modifiedRelationships = Seq(newRelationship)
 			Some(newRelationship)
 		} else if (currentTutor.get != tutor) {
 			// Replacing the current tutor with a new one
-			val currentRelationships = profileService.findCurrentRelationships(PersonalTutor, student.studyDetails.sprCode)
-			
-			// Is there an existing relationship for this tutor? 
+			val currentRelationships = relationshipService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode)
+
+			// Is there an existing relationship for this tutor?
 			// Could happen if a student has two tutors, and we're trying to replace the second with the first
 			currentRelationships.find(_.agent == tutor.universityId) match {
 				case Some(existingRelationship) => {
@@ -72,16 +75,16 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 				case _ => {
 					// Find the relationship for the current tutor, and end it
 					endTutorRelationship(currentRelationships)
-					
+
 					// Save the new relationship
-					val newRelationship = profileService.saveStudentRelationship(PersonalTutor, student.studyDetails.sprCode, tutor.universityId)
+					val newRelationship = relationshipService.saveStudentRelationship(PersonalTutor, studentCourseDetails.sprCode, tutor.universityId)
 
 					modifiedRelationships = Seq(newRelationship)
 					Some(newRelationship)
 				}
 			}
 		} else if (currentTutor.get == tutor && remove) {
-				val currentRelationships = profileService.findCurrentRelationships(PersonalTutor, student.studyDetails.sprCode)
+				val currentRelationships = relationshipService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode)
 				endTutorRelationship(currentRelationships)
 				modifiedRelationships = currentRelationships
 				None
@@ -93,14 +96,11 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 	def endTutorRelationship(currentRelationships: Seq[StudentRelationship]) {
 		currentRelationships.find(_.agent == currentTutor.get.universityId) foreach { rel =>
 			rel.endDate = DateTime.now
-			profileService.saveOrUpdate(rel)
+			relationshipService.saveOrUpdate(rel)
 		}
 	}
 
-	override def describe(d: Description) = {
-		d.studentIds(Seq(student.universityId))
-		.property("new tutor ID" -> tutor.universityId)
-	}
+	override def describe(d: Description) = d.property("student SPR code" -> studentCourseDetails.sprCode).property("new tutor ID" -> tutor.universityId)
 
 	def emit: Seq[Notification[StudentRelationship]] = {
 
@@ -108,7 +108,7 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 
 			val tuteeNotification:List[Notification[StudentRelationship]] = if(notifyTutee){
 				val template = TutorChangeNotification.TuteeTemplate
-				val recepient = relationship.studentMember.asSsoUser
+				val recepient = relationship.studentMember.get.asSsoUser
 				List(new TutorChangeNotification(relationship, currentUser, recepient, currentTutor, template) with FreemarkerTextRenderer)
 			} else Nil
 
@@ -138,36 +138,35 @@ class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Memb
 }
 
 @Controller
-@RequestMapping(Array("/tutor/{student}"))
+@RequestMapping(Array("/tutor/{studentCourseDetails}"))
 class EditTutorController extends BaseController {
 	var profileService = Wire.auto[ProfileService]
 
 	@ModelAttribute("editTutorCommand")
-	def editTutorCommand(@PathVariable("student") student: Member,
-	                     @RequestParam(value="currentTutor", required=false)
-	                     currentTutor: Member,
-	                     @RequestParam(value="remove", required=false) remove: Boolean,
-		                   user: CurrentUser) = student match {
-		case student: StudentMember => new EditTutorCommand(student, Option(currentTutor), user.apparentUser, Option(remove).getOrElse(false))
-		case _ => throw new ItemNotFoundException
-	}
+	def editTutorCommand(
+			@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
+			@RequestParam(value="currentTutor", required=false) currentTutor: Member,
+			@RequestParam(value="remove", required=false) remove: Boolean,
+			user: CurrentUser
+			) =
+		new EditTutorCommand(studentCourseDetails.student, Option(currentTutor), user.apparentUser, Option(remove).getOrElse(false))
 
 	// initial form display
 	@RequestMapping(value = Array("/edit","/add"),method=Array(GET))
 	def editTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest) = {
 		Mav("tutor/edit/view",
-			"student" -> cmd.student,
+			"studentCourseDetails" -> cmd.studentCourseDetails,
 			"tutorToDisplay" -> cmd.currentTutor
 		).noLayout()
 	}
-	
+
 
 	@RequestMapping(value = Array("/edit", "/add"), method=Array(POST))
 	def saveTutor(@ModelAttribute("editTutorCommand") cmd: EditTutorCommand, request: HttpServletRequest ) = {
 		val rel = cmd.apply()
 
 		Mav("tutor/edit/view",
-			"student" -> cmd.student,
+			"student" -> cmd.studentCourseDetails.student,
 			"tutorToDisplay" -> cmd.currentTutor
 		)
 	}

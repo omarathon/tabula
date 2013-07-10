@@ -26,9 +26,9 @@
 
 <article class="profile">
 	<section id="personal-details" class="clearfix">
-		
+
 		<@fmt.member_photo profile />
-		
+
 
 		<header>
 			<h1><@fmt.profile_name profile /></h1>
@@ -157,7 +157,16 @@
 		</#if>
 	</section>
 
-	<#if profile.student>
+	<#if (profile.studentCourseDetails)?? && (profile.mostSignificantCourseDetails)??>
+
+		<!-- most significant course first -->
+		<#assign studentCourseDetails=profile.mostSignificantCourseDetails>
+
+		<#if profile.studentCourseDetails?size gt 1>
+			<hr>
+			<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
+		</#if>
+
 		<div class="tabbable">
 			<ol class="panes">
 				<li id="course-pane">
@@ -173,6 +182,20 @@
 				</li>
 			</ol>
 		</div>
+
+
+		<!-- and then the others -->
+		<#list profile.studentCourseDetails as studentCourseDetails>
+			<#if studentCourseDetails.scjCode != profile.mostSignificantCourseDetails.scjCode>
+				<#if profile.studentCourseDetails?size gt 1>
+					<hr>
+					<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
+				</#if>
+
+				<#include "_course_details.ftl" />
+
+			</#if>
+		</#list>
 	</#if>
 </article>
 

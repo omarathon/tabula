@@ -48,13 +48,11 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 
 	var memberDao = Wire.auto[MemberDao]
 	var fileDao = Wire.auto[FileDao]
-	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
 
 	// A couple of intermediate properties that will be transformed later
 	var photoOption: () => Option[Array[Byte]] = _
 	var homeDepartmentCode: String = _
-	//var studyDepartmentCode: String = _
-	
+
 	var membershipLastUpdated: DateTime = _
 
 	def this(mac: MembershipInformation, ssoUser: User, rs: ResultSet) {
@@ -153,10 +151,10 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		"userId", "firstName", "lastName", "email", "homeEmail", "title", "fullFirstName", "userType", "gender",
 		"inUseFlag", "inactivationDate", "groupName", "dateOfBirth", "jobTitle", "phoneNumber"
 	)
-	
+
 	private def copyPhotoIfModified(property: String, photoOption: () => Option[Array[Byte]], memberBean: BeanWrapper): Boolean = {
 		val memberLastUpdated = memberBean.getPropertyValue("lastUpdatedDate").asInstanceOf[DateTime]
-		
+
 		/*
 		 * We copy the photo if:
 		 * - There is no last updated date for the Member; or
@@ -173,7 +171,7 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 			logger.info(s"Fetching photo for $universityId as our member last updated $memberLastUpdated is before membership last updated $membershipLastUpdated")
 			true
 		} else false
-		
+
 		if (fetchPhoto) {
 			copyPhoto("photo", photoOption(), memberBean)
 			true // always ping the last updated date
@@ -194,16 +192,6 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 		fileDao.savePermanent(photo)
 		photo
 	}
-
-	private def toDepartment(departmentCode: String) = {
-		if (departmentCode == null || departmentCode == "") {
-			null
-		} else {
-			moduleAndDepartmentService.getDepartmentByCode(departmentCode.toLowerCase).getOrElse(null)
-		}
-	}
-
-	override def describe(d: Description) = d.property("universityId" -> universityId)
 
 }
 

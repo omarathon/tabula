@@ -9,10 +9,10 @@
 	<li class="student well well-small">
 		<div class="profile clearfix">
 			<@fmt.member_photo profile "tinythumbnail" false />
-			
+
 			<div class="name">
 				<h6>${profile.fullName!student.fullName}</h6>
-				${(profile.studyDetails.route.name)!student.shortDepartment}
+				${(profile.mostSignificantCourseDetails.route.name)!student.shortDepartment}
 			</div>
 		</div>
 		<input type="hidden" name="${bindpath}" value="${student.userId}" />
@@ -21,11 +21,11 @@
 
 <#escape x as x?html>
 	<h1>Allocate students to ${set.name}</h1>
-	
+
 	<noscript>
 		<div class="alert">This page requires Javascript.</div>
 	</noscript>
-	
+
 	<div class="tabbable fix-on-scroll-container">
 		<ul class="nav nav-tabs">
 			<li class="active">
@@ -35,7 +35,7 @@
 				<a href="#allocategroups-tab2" data-toggle="tab">Upload spreadsheet</a>
 			</li>
 		</ul>
-	
+
 		<div class="tab-content">
 			<div class="tab-pane active" id="allocategroups-tab1">
 
@@ -172,7 +172,7 @@
 			</div><!-- end 2nd tab-->
 
 		</div><!-- end tab-content -->
-	
+
 	</div> <!-- end tabbable -->
-	
+
 </#escape>
