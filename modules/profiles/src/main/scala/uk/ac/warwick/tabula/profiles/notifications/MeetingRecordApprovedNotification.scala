@@ -11,6 +11,7 @@ class MeetingRecordApprovedNotification(approval: MeetingRecordApproval)
 	def title = "Meeting record approved"
 	def content = renderToString(FreemarkerTemplate, Map(
 		"actor" -> agent,
+		"role"->actorRole,
 		"dateFormatter" -> dateFormatter,
 		"meetingRecord" -> approval.meetingRecord,
 		"verbed" -> "approved",
