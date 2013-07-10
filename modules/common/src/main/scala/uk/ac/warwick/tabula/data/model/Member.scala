@@ -194,8 +194,8 @@ class StudentMember extends Member with StudentProperties {
 	 * This includes their home department, and the department running their course.
 	 */
 	override def affiliatedDepartments: Stream[Department] = {
-		val sprDepartments = studentCourseDetails.asScala.map( _.department ).toStream
-		val routeDepartments = studentCourseDetails.asScala.map(_.route).filter(_ != null).map(_.department).toStream
+		val sprDepartments = studentCourseDetails.asScala.flatMap(scd => Option(scd.department)).toStream
+		val routeDepartments = studentCourseDetails.asScala.flatMap(scd => Option(scd.route)).flatMap(route => Option(route.department)).toStream
 
 		(Option(homeDepartment).toStream #:::
 				sprDepartments #:::
