@@ -167,7 +167,6 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def isASupervisor = (userType == MemberUserType.Staff && !relationshipService.listStudentRelationshipsWithMember(RelationshipType.Supervisor, this).isEmpty)
 	def hasAPersonalTutor = false
 
-	def isSupervisor = (userType == MemberUserType.Staff && !relationshipService.listStudentRelationshipsWithMember(RelationshipType.Supervisor, this).isEmpty)
 	def hasSupervisor = false
 
 

@@ -43,7 +43,6 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Profiles.Read.PersonalTutees,
 		Profiles.Read.StudentCourseDetails,
 	  Profiles.Read.Supervisees,
-		Profiles.Read.StudyDetails,
 		Profiles.Search,
 
 		Profiles.PersonalTutor.Upload,
