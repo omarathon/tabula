@@ -12,16 +12,6 @@ html.iframe {
 @import "bootstrap/variables.less";
 @import "bootstrap/mixins.less";
 
-@grid-size: 16px;
-@subtle-text-color: @gray;
-@very-subtle-text-color: @grayLight;
-@very-subtle-font-size: 0.8em;
-
-@box-style-border-radius: 8px;
-
-@zebra-pale: #f5f5f5;
-@zebra-dark: #ebebeb;
-
 label.disabled {
   color: @grayLight;
   cursor: not-allowed;
@@ -49,17 +39,6 @@ ul.unstyled, ol.unstyled {
 	border: 1px solid #bbb;
 	border-bottom: 1px solid #aaa;
 	.border-radius(8px);
-}
-
-.fade-transition() {
-  @properties: opacity, -webkit-transform;
-  .transition-property(@properties);
-  .transition-duration(0.3s);
-}
-
-.cursor-pointer() {
-  cursor: pointer;
-  cursor: hand;
 }
 
 // details polyfill support
@@ -1133,432 +1112,84 @@ h1.with-settings {
 }
 
 // grey out disabled icons
-.tabula-page .dropdown-menu > li.disabled > a > [class^="icon-"], #container .dropdown-menu > li.disabled > a > [class^="icon-"] {
-    opacity:.3;
-    filter: alpha(opacity=30);
+.tabula-page, #container {
+	.dropdown-menu {
+	 	li.disabled > a > [class^="icon-"], li > a.disabled > [class^="icon-"] {
+	    	opacity:.3;
+    		filter: alpha(opacity=30);
+    	}
+    }
 }
+
+
+//Grey out links to actions that are not permitted and remove state changes
+.tabula-page, #container {
+	 .dropdown-menu > li > a.disabled {
+		
+		color: @grayLight;
+	
+		&:hover, &:focus {
+			text-decoration: none;
+  			background-color: transparent;
+  			background-image: none; // Remove CSS gradient
+  			.reset-filter();
+  			cursor: default;
+  		}
+	}
+}
+
+
 
 } // .tabula-page
 
-.profiles-page {
-	// Definition list reset //
-	#main-content {
-	 	dl, dt, dd { margin: 0; padding: 0; }
-	 	dt, dd { font-weight: normal; display: inline; }
- 	}
-
-	// mixin
-	.tabula-photo (@width, @padding) {
-		float: left;
-		width: @width;
-		margin-right: 16px;
-
-		img {
-			padding: @padding;
-					background-color: #fff;
-					border: 1px solid #ccc;
-					border: 1px solid rgba(0,0,0,.2);
-			.box-shadow(3px, 3px, 2px, rgba(0,0,0,.2));
-
-			max-width: @width - (@padding * 2);
-		}
+// Mixin. Not for use directly - use the .size-* classes below,
+// which are used by the FTL macro so just use that!
+.tabula-photo (@width, @padding) {
+	float: left;
+	margin-right: 16px;
+	img {
+		padding: @padding;
+		background-color: #fff;
+		border: 1px solid #ccc;
+		border: 1px solid rgba(0,0,0,.2);
+		.box-shadow(3px, 3px, 2px, rgba(0,0,0,.2));
+		max-width: @width;
 	}
-	
-	.photo.size-tinythumbnail {
-		.tabula-photo(50px, 5px);
-	}
-	
-	.photo.size-thumbnail {
-		.tabula-photo(186px, 8px);
-	}
-	
-	
-
-	hr.full-width {
- 		width: auto;
- 		background: #bfb8d4;
- 	}
-
-	.profile {
-		margin-top: 20px;
-	}
-
-	#container .profile  {
-		.col1 {
-			float: left;
-			width: 354px;
-			margin-right: 16px;
-		}
-		.col2 {
-			float: left;
-			width: 354px;
-			margin-right: 0;
-		}
-
-		#personal-details {
-			header {
-				h1, h5 {
-					display: inline;
-					line-height: 26px;
-				}
-
-				h1 {
-					margin-right: 10px;
-				}
-
-				margin-bottom: 16px;
-			}
-
-			table.profile-info {
-				// Reset
-				th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
-
-				width: 100%;
-
-				th {
-					text-align: right;
-					color: @grayLight;
-					white-space: nowrap;
-
-					&:after { content: ':'; margin-right: 3px; }
-				}
-
-				td {
-					color: #0c0c0c;
-					width: 99%;
-				}
-			}
-		}
-
-		#course-details {
-			table.course-info {
-				// Reset
-				th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
-
-				width: 100%;
-
-				th {
-					text-align: right;
-					color: @grayLight;
-					white-space: nowrap;
-
-					&:after { content: ':'; margin-right: 3px; }
-				}
-
-				td {
-					color: #0c0c0c;
-					width: 99%;
-				}
-
-				tbody {
-					border-bottom: 15px solid transparent;
-				}
-			}
-		}
-
-		#personal-development, #supervision {
-			div.photo {
-				.tabula-photo(50px, 5px);
-			}
-
-			.add-tutor-link {
-				text-decoration: none;
-				margin-bottom:6px;
-				width: 140px;
-				display:block;
-			}
-
-			section.meetings {
-				margin: 12px 0;
-
-				details.meeting {
-
-					padding-right: 15px;
-
-					&.well {
-						padding: 1px;
-						margin: 5px 0;
-					}
-
-					summary {
-						margin-left: 5px;
-						padding-top: 9px;
-						font-weight: bold;
-						border-bottom: dotted 1px lighten(@grayLight, 35%);
-					}
-
-					.meeting-body {
-						margin: 10px 0 0 20px;
-
-						small {
-							display: inline-block;
-						}
-
-						.description, .attachment, .muted, .alert {
-							margin-bottom: 5px;
-						}
-
-						div.rejection blockquote.reason{
-							margin: 7px 21px 21px 21px;
-							padding: 5px 5px 5px 14px;
-							border-left: 5px solid @errorBorder;
-							background-color: darken(@errorBackground, 5%);
-						}
-
-						.submit-buttons {
-							margin-top: 0;
-							padding: 0;
-						}
-					}
-				}
-
-
-				.new, .toggle-all-details {
-					margin: -20px 0 0 10px;
-					float: right;
-					text-decoration: none;
-					.cursor-pointer();
-				}
-
-				span.date {
-					margin-right: 1em;
-					display: inline-block;
-					width: 13em;
-				}
-
-				.meeting-record-toolbar {
-					float: right;
-					margin-right: 1em;
-					a {
-						text-decoration: none;
-					}
-				}
-
-				summary:hover {
-					background-color: @zebra-dark;
-					.transition-duration(0.3s);
-				}
-
-				details {
-					i.icon-remove, i.icon-repeat {
-						opacity:0.5;
-					}
-					i.icon-spinner {
-						display:none;
-					}
-				}
-
-				details.deleted {
-					summary {
-						text-decoration: line-through;
-						span {
-							text-decoration: inherit;
-						}
-						i.icon-trash {
-							opacity:0.5;
-						}
-						i.icon-remove, i.icon-repeat {
-							opacity:1;
-						}
-					}
-				}
-
-				details.processing {
-					i {
-						display:none;
-					}
-					i.icon-spinner {
-						display:inline-block;
-					}
-				}
-			}
-		}
-	} // .profile
-
-	#container #tutors {
-		.tutor-detail {
-			font-family: @baseFontFamily;
-			font-size: @baseFontSize * 1.1;
-			letter-spacing: 0;
-			color: @grayLight;
-			margin-left: 12px;
-		}
-
-		div.photo {
-			.tabula-photo(50px, 5px);
-		}
-
-		.tutees {
-			width: 100%;
-
-			th.photo-col { width: 11%; }
-			th.tutee-col { width: 12%; }
-			th.id-col { width: 11%; }
-			th.type-col { width: 25%; }
-			th.year-col { width: 5%; }
-			th.course-col { width: 35%; }
-			th.course-but-photo-col { width: 24%; }
-
-			h6 { display: inline; }
-		}
-
-		.profile-link {
-			font-weight: bold;
-			color: @grayLight;
-			text-decoration: none;
-
-			&:hover,&:active {
-				text-decoration: none;
-			}
-		}
-
-		.hover {
-			.cursor-pointer;
-			background-color: #ddd;
-			background-color: fadeout(lighten(#ff0,30%), 40%);
-		}
-
-	} // #tutors
-
-	#container ul.profile-user-list {
-		margin: 0;
-		padding-left: 0;
-		list-style: none;
-
-		li {
-			.clearfix();
-			padding: 0.5em 0;
-			border: 0 solid lighten(@grayLight, 25%);
-			border-bottom-width: 1px;
-
-			h3 { margin-bottom: 0; }
-
-			.photo {
-				.tabula-photo(50px, 5px);
-				float: right;
-			}
-
-			&:first-child { border-top-width: 1px; }
-		}
-	} // ul.profile-user-list
-
-	#container .profile-search {
-		margin: 4px 0 20px;
-
-		form { margin: 0; }
-
-		// TODO Why
-		.input-append .btn { height: 40px; }
-
-		@searchFontSize: @baseFontSize * 1.5;
-		@searchLineHeight: @baseLineHeight * 1.5;
-
-		.input-append {
-			margin-bottom: 0;
-			position: relative;
-
-			div.spinner-container {
-				position: absolute;
-				line-height: 40px;
-				height: 40px;
-				width: 40px;
-				top: 1px;
-				#grid .fluid .offset(8.5); // dirrty
-				z-index: 10;
-			}
-		}
-
-		input[type="text"] {
-			height: @searchLineHeight;
-			margin-bottom: 0;
-			font-size: @searchFontSize;
-			line-height: @searchLineHeight;
-			#grid .fluid .span(10);
-		}
-
-		.btn {
-			font-size: @searchFontSize;
-			line-height: @searchLineHeight;
-			#grid .fluid .span(2);
-
-			i { vertical-align: baseline; }
-		}
-
-		.dropdown-menu {
-			#grid .fluid .span(12);
-
-			li > a { padding: 3px 8px; }
-
-			h3 { margin-bottom: 0; }
-
-			h3, .description {
-				#grid .fluid .span(10);
-			}
-
-			.photo { max-height: 50px; }
-
-			.description { white-space: normal; }
-
-			.active > a, .active > a:hover {
-				#gradient > .vertical(#d0d0d0, darken(#d0d0d0, 5%));
-			}
-
-			.pull-right a {
-				text-align: left;
-			}
-
-
-		}
-	} // .profile-search
-
-	#container .tutor-search {
-		.control-group { margin-top: 54px; }
-		.input-append .btn { margin-top: 1px; }
-
-		@searchFontSize: @baseFontSize * 1.2;
-		@searchLineHeight: @baseLineHeight * 1.2;
-
-		.input-box {
-			margin-bottom: 0;
-			position: relative;
-		}
-
-		input[type="text"] {
-			height: @searchLineHeight;
-			font-size: @searchFontSize;
-			width: 400px;
-		}
-
-		form { margin: 0; }
-
-		b {
-			line-height: 28px;
-			font-size: @searchFontSize;
-		}
-	} // .tutor-search
-
-	#container .tutor-edit {
-		button {
-			text-align: right;
-			margin-right:220px
-			}
-
-	} // .tutor-edit
-
-	#container .tutor-edit-return {
-		a {
-			margin-top: 54px;
-			}
-
-	} // .tutor-edit
-
-} // .profiles-page
+}
+
+.photo.size-tinythumbnail {
+	.tabula-photo(40px, 5px);
+}
+
+.photo.size-thumbnail {
+	.tabula-photo(170px, 8px);
+}
 
 .datetimepicker {
 	line-height: 20px;
 }
 
 
+ul.profile-user-list {
+	margin: 0;
+	padding-left: 0;
+	list-style: none;
+
+	li {
+		.clearfix();
+		padding: 0.5em 0;
+		border: 0 solid lighten(@grayLight, 25%);
+		border-bottom-width: 1px;
+
+		h3 { margin-bottom: 0; }
+
+		.photo {
+			float: right;
+		}
+
+		&:first-child { border-top-width: 1px; }
+	}
+} // ul.profile-user-list
 
 //---- Flexi Picker -----//
 

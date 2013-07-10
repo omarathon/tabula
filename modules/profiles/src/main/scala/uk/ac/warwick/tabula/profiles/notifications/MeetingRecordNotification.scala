@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.notifications
 
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, Notification}
+import uk.ac.warwick.tabula.data.model.{RelationshipType, MeetingRecord, Notification}
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.spring.Wire
 import freemarker.template.Configuration
@@ -17,4 +17,10 @@ abstract class MeetingRecordNotification(meeting: MeetingRecord)
 	def url = Routes.profile.view(
 			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(message)), 
 			meeting)
+
+	def actorRole = meeting.relationship.relationshipType match {
+		case RelationshipType.PersonalTutor=>"personal tutor"
+		case RelationshipType.Supervisor=>"supervisor"
+
+	}
 }

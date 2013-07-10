@@ -37,7 +37,7 @@ class AssignmentImporterTest extends PersistenceTestBase with Mockito {
 	@Test def importMembers {
     withFakeTime(dateTime(2012, 5)) {
 
-      val assignmentImporter = new AssignmentImporter
+      val assignmentImporter = new AssignmentImporterImpl
       assignmentImporter.ads = ads
       assignmentImporter.afterPropertiesSet
 

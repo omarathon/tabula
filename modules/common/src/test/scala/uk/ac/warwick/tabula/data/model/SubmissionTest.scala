@@ -14,16 +14,16 @@ class SubmissionTest extends PersistenceTestBase {
 		submission.allAttachments.size should be (0)
 	}
 	
-	@Test def deleteFileAttachmentOnDelete {
+	@Test def deleteFileAttachmentOnDelete = transactional{tx=>
 		// TAB-667
-		val orphanAttachment = transactional { tx =>
+		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment
 			
 			session.save(attachment)
 			attachment
 		}
 		
-		val (submission, submissionAttachment) = transactional { tx => 
+		val (submission, submissionAttachment) = flushing(session) {
 			val submission = new Submission(universityId = "0000001")
 			submission.userId = "steve"
 			
@@ -48,16 +48,16 @@ class SubmissionTest extends PersistenceTestBase {
 		submissionAttachment.id should not be (null)
 		
 		// Can fetch everything from db
-		transactional { tx => 
+		flushing(session) {
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			session.get(classOf[Submission], submission.id) should be (submission)
 			session.get(classOf[FileAttachment], submissionAttachment.id) should be (submissionAttachment)
 		}
-		
-		transactional { tx => session.delete(submission) }
+
+		flushing(session) { session.delete(submission) }
 		
 		// Ensure we can't fetch the submission or attachment, but all the other objects are returned
-		transactional { tx => 
+		flushing(session) {
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			session.get(classOf[Submission], submission.id) should be (null)
 			session.get(classOf[FileAttachment], submissionAttachment.id) should be (null)

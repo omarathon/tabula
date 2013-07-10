@@ -32,7 +32,7 @@ class DownloadMarkerFeedbackTest extends AppContextTestBase with MarkingWorkflow
 	}
 
 	@Test
-	def downloadSingle(){
+	def downloadSingle()= transactional{ts=>
 		withUser("cuslaj"){
 			val markerFeedback = assignment.getMarkerFeedback("9876004", currentUser.apparentUser)
 			val command = new AdminGetSingleMarkerFeedbackCommand(assignment.module, assignment, markerFeedback.get)
@@ -44,7 +44,7 @@ class DownloadMarkerFeedbackTest extends AppContextTestBase with MarkingWorkflow
 	}
 
 	@Test
-	def downloadAll(){
+	def downloadAll()= transactional{ts=>
 		withUser("cuslat"){
 			val command = new DownloadFirstMarkersFeedbackCommand(assignment.module, assignment, currentUser)
 			val renderable = command.apply()

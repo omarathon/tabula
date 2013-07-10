@@ -25,11 +25,21 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentRowCo
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.membership.MembershipInterfaceException
 import org.joda.time.DateTime
+import org.springframework.context.annotation.Profile
+import uk.ac.warwick.tabula.scheduling.sandbox.SandboxData
+import uk.ac.warwick.tabula.data.model.DegreeType
+import uk.ac.warwick.tabula.scheduling.sandbox.MapResultSet
 
 case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
 
-@Service
-class ProfileImporter extends Logging {
+trait ProfileImporter {
+	def getMemberDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportSingleMemberCommand]
+	def userIdsAndCategories(department: Department): Seq[MembershipInformation]
+	def userIdAndCategory(member: Member): Option[MembershipInformation]
+}
+
+@Profile(Array("dev", "production")) @Service
+class ProfileImporterImpl extends ProfileImporter with Logging {
 	import ProfileImporter._
 
 	var sits = Wire[DataSource]("sitsDataSource")
@@ -94,6 +104,130 @@ class ProfileImporter extends Logging {
 				)
 		}
 	}
+}
+
+@Profile(Array("sandbox")) @Service
+class SandboxProfileImporter extends ProfileImporter {
+	def getMemberDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportSingleMemberCommand] =
+		membersAndCategories map { mac =>
+			val member = mac.member
+			val ssoUser = new User(member.usercode)
+			ssoUser.setFoundUser(true)
+			ssoUser.setVerified(true)
+			ssoUser.setDepartment(SandboxData.Departments(member.departmentCode).name)
+			ssoUser.setDepartmentCode(member.departmentCode)
+			ssoUser.setEmail(member.email)
+			ssoUser.setFirstName(member.preferredForenames)
+			ssoUser.setLastName(member.preferredSurname)
+			ssoUser.setStudent(true)
+			ssoUser.setWarwickId(member.universityId)
+			
+			val route = SandboxData.route(member.universityId.toLong)
+			
+			val rs = new MapResultSet(Map(
+				"university_id" -> member.universityId,
+				"title" -> member.title,
+				"preferred_forename" -> member.preferredForenames,
+				"forenames" -> member.preferredForenames,
+				"family_name" -> member.preferredSurname,
+				"gender" -> member.gender.dbValue,
+				"email_address" -> member.email,
+				"user_code" -> member.usercode,
+				"date_of_birth" -> member.dateOfBirth.toDateTimeAtStartOfDay(),
+				"in_use_flag" -> "Active",
+				"date_of_inactivation" -> member.endDate.toDateTimeAtStartOfDay(),
+				"alternative_email_address" -> null,
+				"mobile_number" -> null,
+				"nationality" -> "British (ex. Channel Islands & Isle of Man)",
+				"sits_course_code" -> "%s-%s".format(member.departmentCode.toUpperCase, route.code.toUpperCase),
+				"course_year_length" -> "3",
+				"spr_code" -> "%s/1".format(member.universityId),
+				"route_code" -> route.code.toUpperCase,
+				"study_department" -> member.departmentCode.toUpperCase,
+				"award_code" -> (if (route.degreeType == DegreeType.Undergraduate) "BA" else "MA"),
+				"spr_status_code" -> "C",
+				"spr_tutor1" -> null,
+				"scj_code" -> "%s/1".format(member.universityId),
+				"begin_date" -> member.startDate.toDateTimeAtStartOfDay(),
+				"end_date" -> member.endDate.toDateTimeAtStartOfDay(),
+				"expected_end_date" -> member.endDate.toDateTimeAtStartOfDay(),
+				"funding_source" -> null,
+				"enrolment_status_code" -> "F",
+				"year_of_study" -> ((member.universityId.toLong % 3) + 1).toInt,
+				"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F")
+			))
+			new ImportSingleStudentRowCommand(mac, ssoUser, rs)
+		}
+		
+	def userIdsAndCategories(department: Department): Seq[MembershipInformation] = 
+		SandboxData.Departments(department.code).routes.values.flatMap { route =>
+			(route.studentsStartId to route.studentsEndId).map { uniId =>
+				val gender = if (uniId % 2 == 0) Gender.Male else Gender.Female
+				val name = SandboxData.randomName(uniId, gender)
+				val title = gender match {
+					case Gender.Male => "Mr"
+					case _ => "Miss"
+				}
+				// Every fifth student is part time
+				val isPartTime = uniId % 5 == 0
+				
+				val userType = MemberUserType.Student
+				val groupName = route.degreeType match {
+					case DegreeType.Undergraduate => if (isPartTime) "Undergraduate - part-time" else "Undergraduate - full-time"
+					case _ => 
+						if (route.isResearch)
+							if (isPartTime) "Postgraduate (research) PT" else "Postgraduate (research) FT"
+						else
+							if (isPartTime) "Postgraduate (taught) PT" else "Postgraduate (taught) FT"
+				}
+				
+				MembershipInformation(
+					MembershipMember(
+						uniId.toString,
+						department.code,
+						"%s.%s@tabula-sandbox.warwick.ac.uk".format(name.givenName.substring(0, 1), name.familyName),
+						groupName,
+						title,
+						name.givenName,
+						name.familyName,
+						groupName,
+						DateTime.now.minusYears(19).toLocalDate().withDayOfYear((uniId % 364) + 1),
+						department.code + uniId.toString.takeRight(4),
+						DateTime.now.minusYears(1).toLocalDate,
+						DateTime.now.plusYears(2).toLocalDate,
+						DateTime.now,
+						null,
+						gender,
+						null,
+						userType
+					), () => None
+				)
+			}
+		}.toSeq
+		
+	def userIdAndCategory(member: Member): Option[MembershipInformation] = 
+		Some(MembershipInformation(
+			MembershipMember(
+				member.universityId,
+				member.homeDepartment.code,
+				member.email,
+				member.groupName,
+				member.title,
+				member.firstName,
+				member.lastName,
+				member.jobTitle,
+				member.dateOfBirth,
+				member.userId,
+				DateTime.now.minusYears(1).toLocalDate,
+				DateTime.now.plusYears(2).toLocalDate,
+				member.lastUpdatedDate,
+				member.phoneNumber,
+				member.gender,
+				member.homeEmail,
+				member.userType
+			), () => None
+		))
+		
 }
 
 object ProfileImporter {

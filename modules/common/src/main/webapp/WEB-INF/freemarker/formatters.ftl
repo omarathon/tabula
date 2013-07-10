@@ -186,7 +186,7 @@
 
 <#macro member_photo member resize="thumbnail" lightbox=true >
 	<div class="photo size-${resize}">
-		<#if member.universityId??>
+		<#if (member.universityId)??>
 			<#local fullsize_img><@routes.photo member /></#local>
 			<@lightbox_link lightbox fullsize_img>
 			<img src="<@routes.photo member />?size=${resize}"/>
@@ -199,7 +199,7 @@
 
 <#macro relation_photo member relationship resize="thumbnail" lightbox=true >
 	<div class="photo size-${resize}">
-		<#if member.universityId??>
+		<#if (member.universityId)??>
 			<#local fullsize_img><@routes.relationshipPhoto profile relationship /></#local>
 			<@lightbox_link lightbox fullsize_img>
 			<img src="<@routes.relationshipPhoto profile relationship />?size=${resize}" />
@@ -209,5 +209,28 @@
 		</#if>
 	</div>
 </#macro>
+
+<#macro permission_button permission scope action_descr href="" tooltip="" classes="" type="a" data_attr="data-container=body" >
+	<#local class></#local>
+	<#local title></#local>
+	
+	<#if tooltip??>
+		<#local title>title='${tooltip}.'</#local>
+		<#local classes='${classes} use-tooltip'?trim >
+	</#if>
+	
+    <#if href??><#local href>href=${href}</#local></#if>
+    
+	<#if !can.do(permission,scope)>
+		<#local classes='${classes} disabled use-tooltip'?trim > 
+		<#local title>title='You do not have permission to ${action_descr}.'</#local>
+	</#if>
+	
+	<#local attr='${data_attr}'?replace("data-toggle=modal","") >
+	
+	<#if classes??><#local class>class='${classes}'</#local></#if>
+	<${type} ${href} ${class} ${title} ${attr}><#noescape><#nested></#noescape></${type}>
+</#macro>
+
 </#escape>
 

@@ -99,3 +99,10 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		(memberDao.countStudentsByDepartment(department).intValue, memberDao.countStudentsByRelationshipAndDepartment(relationshipType, department).intValue)
 	}
 }
+
+trait RelationshipServiceComponent {
+	var relationshipService:RelationshipService
+}
+trait AutowiringRelationshipServiceComponent extends RelationshipServiceComponent{
+	var relationshipService = Wire[RelationshipService]
+}
