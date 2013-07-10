@@ -156,7 +156,7 @@ class SandboxProfileImporter extends ProfileImporter {
 				"year_of_study" -> ((member.universityId.toLong % 3) + 1).toInt,
 				"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F")
 			))
-			new ImportSingleStudentCommand(mac, ssoUser, rs)
+			new ImportSingleStudentRowCommand(mac, ssoUser, rs)
 		}
 		
 	def userIdsAndCategories(department: Department): Seq[MembershipInformation] = 
