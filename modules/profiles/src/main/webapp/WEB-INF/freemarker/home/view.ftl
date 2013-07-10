@@ -16,9 +16,11 @@
 				<h2>My students</h2>
 			
 				<ul>
-					<#if showMyStudents>
-					<li><a href="<@routes.tutees />">Personal tutees</a></li>
-				    <li><a href="<@routes.supervisees />">Supervisees</a></li>
+					<#if isAPersonalTutor>
+					   <li><a href="<@routes.tutees />">Personal tutees</a></li>
+					</#if>
+					<#if isASupervisor>
+					<li><a href="<@routes.supervisees />">Supervisees</a></li>
 					</#if>
 
 					<#list smallGroups as smallGroup>

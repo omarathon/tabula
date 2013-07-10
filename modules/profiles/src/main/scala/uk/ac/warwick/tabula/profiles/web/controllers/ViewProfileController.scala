@@ -76,11 +76,11 @@ class ViewProfileController extends ProfilesController {
 
 		val tutorMeetings = tutorMeetingsCmd match {
 			case None => Seq()
-			case Some(cmd) => cmd.apply
+			case Some(cmd) => cmd.apply()
 		}
 		val supervisorMeetings = supervisorMeetingsCmd match {
 			case None => Seq()
-			case Some(cmd) => cmd.apply
+			case Some(cmd) => cmd.apply()
 		}
 
 		val openMeeting = tutorMeetings.find(m => m.id == openMeetingId).getOrElse(null)
