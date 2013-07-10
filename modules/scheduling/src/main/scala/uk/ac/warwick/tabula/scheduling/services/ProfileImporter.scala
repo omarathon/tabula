@@ -29,6 +29,7 @@ import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.scheduling.sandbox.SandboxData
 import uk.ac.warwick.tabula.data.model.DegreeType
 import uk.ac.warwick.tabula.scheduling.sandbox.MapResultSet
+import uk.ac.warwick.tabula.AcademicYear
 
 case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
 
@@ -124,7 +125,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			
 			val route = SandboxData.route(member.universityId.toLong)
 			
-			val rs = new MapResultSet(Map(
+			val rs = new MapResultSet(Map(					
 				"university_id" -> member.universityId,
 				"title" -> member.title,
 				"preferred_forename" -> member.preferredForenames,
@@ -139,22 +140,26 @@ class SandboxProfileImporter extends ProfileImporter {
 				"alternative_email_address" -> null,
 				"mobile_number" -> null,
 				"nationality" -> "British (ex. Channel Islands & Isle of Man)",
-				"sits_course_code" -> "%s-%s".format(member.departmentCode.toUpperCase, route.code.toUpperCase),
+				"course_code" -> "%s-%s".format(member.departmentCode.toUpperCase, route.code.toUpperCase),
 				"course_year_length" -> "3",
 				"spr_code" -> "%s/1".format(member.universityId),
 				"route_code" -> route.code.toUpperCase,
-				"study_department" -> member.departmentCode.toUpperCase,
+				"department_code" -> member.departmentCode.toUpperCase,
 				"award_code" -> (if (route.degreeType == DegreeType.Undergraduate) "BA" else "MA"),
 				"spr_status_code" -> "C",
+				"level_code" -> ((member.universityId.toLong % 3) + 1).toString,
 				"spr_tutor1" -> null,
 				"scj_code" -> "%s/1".format(member.universityId),
 				"begin_date" -> member.startDate.toDateTimeAtStartOfDay(),
 				"end_date" -> member.endDate.toDateTimeAtStartOfDay(),
 				"expected_end_date" -> member.endDate.toDateTimeAtStartOfDay(),
+				"most_signif_indicator" -> "Y",
 				"funding_source" -> null,
 				"enrolment_status_code" -> "F",
 				"year_of_study" -> ((member.universityId.toLong % 3) + 1).toInt,
-				"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F")
+				"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
+				"sce_academic_year" -> AcademicYear.guessByDate(DateTime.now).toString,
+				"sce_sequence_number" -> 1
 			))
 			new ImportSingleStudentRowCommand(mac, ssoUser, rs)
 		}
