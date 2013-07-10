@@ -18,11 +18,19 @@ trait TutorFixture extends Mockito {
 
 	val student = new StudentMember
 	student.universityId = "student"
-	val courseDetails = new StudentCourseDetails()
-	courseDetails.sprCode = "spr-123"
-	courseDetails.mostSignificant = true
-	courseDetails.department = department
-	student.studentCourseDetails.add(courseDetails)
+		
+	val studentCourseDetails = new StudentCourseDetails
+	studentCourseDetails.student = student
+	studentCourseDetails.department = department
+	studentCourseDetails.sprCode = "0000001/1"
+	studentCourseDetails.mostSignificant = true
+	student.studentCourseDetails.add(studentCourseDetails)
+
+//	val courseDetails = new StudentCourseDetails()
+//	courseDetails.sprCode = "spr-123"
+//	courseDetails.mostSignificant = true
+//	courseDetails.department = department
+//	student.studentCourseDetails.add(courseDetails)
 
 	val newTutor = new StaffMember
 	newTutor.universityId = "0000001"

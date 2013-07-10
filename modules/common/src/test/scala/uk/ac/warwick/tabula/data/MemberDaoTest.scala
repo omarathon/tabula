@@ -305,4 +305,52 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 		dao.getStudentsWithoutRelationshipByDepartment(RelationshipType.PersonalTutor, dept2) should be (Seq(m6))
 		dao.getStudentsWithoutRelationshipByDepartment(null, dept1) should be (Seq())
 	}
+
+	@Test def studentsCounting = transactional { tx =>
+		val dept1 = Fixtures.department("ms", "Motorsport")
+		val dept2 = Fixtures.department("vr", "Vehicle Repair")
+
+		session.save(dept1)
+		session.save(dept2)
+
+		session.flush
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		stu1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
+
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		stu2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
+
+		val staff1 = Fixtures.staff(universityId = "1000003", userId="staff1", department=dept1)
+		staff1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 3, 1, 0, 0, 0)
+
+		val staff2 = Fixtures.staff(universityId = "1000004", userId="staff2", department=dept2)
+		staff2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 1, 0, 0, 0)
+
+		dao.saveOrUpdate(stu1)
+		dao.saveOrUpdate(stu2)
+		dao.saveOrUpdate(staff1)
+		dao.saveOrUpdate(staff2)
+
+		val relBetweenStaff1AndStu1 = StudentRelationship("1000003", RelationshipType.PersonalTutor, "1000001/1")
+		val relBetweenStaff1AndStu2 = StudentRelationship("1000003", RelationshipType.PersonalTutor, "1000002/1")
+
+		dao.saveOrUpdate(relBetweenStaff1AndStu1)
+		dao.saveOrUpdate(relBetweenStaff1AndStu2)
+		session.flush()
+
+		dao.countStudentsByDepartment(dept1) should be (1)
+		dao.countStudentsByRelationshipAndDepartment(RelationshipType.PersonalTutor, dept1) should be (1)
+
+		session.delete(relBetweenStaff1AndStu1)
+		session.delete(relBetweenStaff1AndStu2)
+		session.delete(dept1)
+		session.delete(dept2)
+		session.delete(stu1)
+		session.delete(stu2)
+		session.delete(staff1)
+		session.delete(staff2)
+		session.flush()
+	}
+
 }

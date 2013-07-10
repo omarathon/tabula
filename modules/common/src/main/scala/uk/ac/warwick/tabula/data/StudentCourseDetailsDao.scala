@@ -16,7 +16,6 @@ trait StudentCourseDetailsDao {
 	def delete(studentCourseDetails: StudentCourseDetails)
 	def getByScjCode(scjCode: String): Option[StudentCourseDetails]
 	def getStudentBySprCode(sprCode: String): Option[StudentMember]
-	def getScjCodeBySprCode(sprCode: String): Option[String]
 }
 
 @Repository
@@ -45,12 +44,5 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 
 		if (scdList.size > 0) Some(scdList.head.student)
 		else None
-	}
-
-	def getScjCodeBySprCode(sprCode: String) = {
-		val stuCourseDetails = session.newCriteria[StudentCourseDetails]
-				.add(is("sprCode", sprCode.trim))
-				.uniqueResult
-		stuCourseDetails.map(_.scjCode)
 	}
 }

@@ -24,16 +24,14 @@ import scala._
 import scala.Some
 import uk.ac.warwick.tabula.services.RelationshipService
 
-class EditTutorCommand(val student: StudentMember, val currentTutor: Option[Member], val currentUser:User, val remove: Boolean)
+class EditTutorCommand(val studentCourseDetails: StudentCourseDetails, val currentTutor: Option[Member], val currentUser:User, val remove: Boolean)
 	extends Command[Option[StudentRelationship]] with Notifies[StudentRelationship] with Promises {
-
-	val studentCourseDetails: StudentCourseDetails = student.mostSignificantCourseDetails.get
 
 	var relationshipService = Wire[RelationshipService]
 
 	var tutor: Member = _
 
-	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, student)
+	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, studentCourseDetails.student)
 
 	// throw this request out if personal tutors can't be edited in Tabula for this department
 	if (!studentCourseDetails.department.canEditPersonalTutors) {
@@ -149,7 +147,7 @@ class EditTutorController extends BaseController {
 			@RequestParam(value="remove", required=false) remove: Boolean,
 			user: CurrentUser
 			) =
-		new EditTutorCommand(studentCourseDetails.student, Option(currentTutor), user.apparentUser, Option(remove).getOrElse(false))
+		new EditTutorCommand(studentCourseDetails, Option(currentTutor), user.apparentUser, Option(remove).getOrElse(false))
 
 	// initial form display
 	@RequestMapping(value = Array("/edit","/add"),method=Array(GET))

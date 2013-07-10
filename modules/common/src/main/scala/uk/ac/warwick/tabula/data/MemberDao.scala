@@ -199,32 +199,31 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		}
 	}
 
+	/* Had to change this to a SQL query till Hibernate can cope with bind variables which are joined on something other than the id */
 	def countStudentsByDepartment(department: Department): Number =
 		if (department == null) 0
-		else session.newQuery[Number]("""
-			select
-				count(distinct student)
-			from
-				StudentCourseDetails scd
-			where
-				scd.department = :department
-			""")
-			.setEntity("department", department)
-			.uniqueResult.getOrElse(0)
+		else {
+			val sql = "select count(distinct universityid) from studentcoursedetails where deptcode = :departmentCode"
+			val query = session.createSQLQuery(sql)
+			query.setString("departmentCode", department.code)
+			.uniqueResult
+			.asInstanceOf[Number].intValue
+		}
 
-	def countStudentsByRelationshipAndDepartment(relationshipType: RelationshipType, department: Department): Number =
-		if (relationshipType == null) 0
-		else session.newQuery[Number]("""
-			select
-				count(distinct student)
-			from
-				StudentCourseDetails scd
-			where
-				scd.department = :department
-			and
-				scd.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
-			""")
-			.setEntity("department", department)
-			.setParameter("relationshipType", relationshipType)
-			.uniqueResult.getOrElse(0)
+	/* Had to change this to a SQL query till Hibernate can cope with bind variables which are joined on something other than the id */
+	//				val sql = """select count(distinct universityid) from studentcoursedetails scd where deptcode = :departmentCode
+	//					and scd.sprCode not in (select sr.target_sprcode from studentrelationship sr where sr.relationship_type = :relationshipType)"""
+
+	def countStudentsByRelationshipAndDepartment(relationshipType: RelationshipType, department: Department): Number = {
+				if (relationshipType == null) 0
+				else {
+					val sql = """select count(distinct universityid) from studentcoursedetails scd where deptcode = :departmentCode
+						and scd.sprCode in (select sr.target_sprcode from studentrelationship sr where sr.relationship_type = :relationshipType)"""
+					val query = session.createSQLQuery(sql)
+					query.setString("departmentCode", department.code)
+					query.setString("relationshipType", relationshipType.dbValue)
+					.uniqueResult
+					.asInstanceOf[Number].intValue
+				}
+		}
 }
