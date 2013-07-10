@@ -45,6 +45,8 @@ class StudentRelationshipTest extends TestBase with Mockito {
 	@Test def convertToObject() {
 		val t = new RelationshipUserType
 		t.convertToObject("personalTutor") should be (RelationshipType.PersonalTutor)
+		t.convertToObject("tutor") should be (RelationshipType.PersonalTutor)
+		t.convertToObject("supervisor") should be (RelationshipType.Supervisor)
 		evaluating { t.convertToObject("Q") } should produce [IllegalArgumentException]
 	}
 

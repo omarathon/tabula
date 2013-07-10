@@ -29,12 +29,12 @@ class DownloadMeetingRecordFilesController extends BaseController {
 
 	// the difference between the RequestMapping paths for these two methods is a bit subtle - the first has
 	// attachments plural, the second has attachments singular.
-	@RequestMapping(value = Array("/tutor/meeting/{meetingRecord}/attachments/*"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	@RequestMapping(value = Array("/*/meeting/{meetingRecord}/attachments/*"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getAll(command: DownloadMeetingRecordFilesCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		getOne(command, null)
 	}
 
-	@RequestMapping(value = Array("/tutor/meeting/{meetingRecord}/attachment/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	@RequestMapping(value = Array("/*/meeting/{meetingRecord}/attachment/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
 	def getOne(command: DownloadMeetingRecordFilesCommand, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		// specify callback so that audit logging happens around file serving
 		command.callback = { (renderable) => fileServer.serve(renderable) }
