@@ -105,7 +105,7 @@ trait StudentCourseProperties {
 	// same as the department on the Route table, but in some cases, e.g. where routes change ownership in
 	// different years, the SPR code might contain a different department.
 	@ManyToOne
-	@JoinColumn(name = "deptCode", referencedColumnName="code")
+	@JoinColumn(name = "department_id")
 	var department: Department = _
 
 	var awardCode: String = _
