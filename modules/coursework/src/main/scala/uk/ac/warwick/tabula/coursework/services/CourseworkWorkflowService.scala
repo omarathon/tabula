@@ -179,7 +179,7 @@ object WorkflowStages {
 			case Some(item) if item.submission.suspectPlagiarised =>
 				StageProgress(CheckForPlagiarism, true, "workflow.CheckForPlagiarism.suspectPlagiarised", Danger, true)
 			case Some(item) if item.submission.allAttachments.find(_.originalityReport != null).isDefined => 
-				StageProgress(CheckForPlagiarism, true, "workflow.CheckForPlagiarism.notPlagiarised", Good, true)
+				StageProgress(CheckForPlagiarism, true, "workflow.CheckForPlagiarism.checked", Good, true)
 			case Some(_) => StageProgress(CheckForPlagiarism, false, "workflow.CheckForPlagiarism.notChecked")
 			case _ => StageProgress(CheckForPlagiarism, false, "workflow.CheckForPlagiarism.notChecked")
 		}
