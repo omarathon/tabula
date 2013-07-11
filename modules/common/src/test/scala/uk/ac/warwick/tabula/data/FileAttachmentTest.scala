@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.data
-import uk.ac.warwick.tabula.AppContextTestBase
+import uk.ac.warwick.tabula.{TestBase, AppContextTestBase}
 import org.junit.Test
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.model.FileAttachment
@@ -18,46 +18,26 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.transaction.annotation.Transactional
 
-class FileAttachmentTest extends AppContextTestBase {
-	@Autowired var dao:FileDao =_
-	
+class FileAttachmentTest extends TestBase {
+
 	/** 
 	 * HFC-136 
 	 * Filenames can be prefixed with whitespace, preventing download
 	 */
-	@Test def untrimmedFilenames {
+	@Test
+	def untrimmedFilenames {
 		new FileAttachment(" 0123456.docx").name should be ("0123456.docx")
 		new FileAttachment(null).name should be (null)
 	}
-	
-	@Test def badWindowsFilenames {
+
+	@Test
+	def badWindowsFilenames {
 		new FileAttachment(""" \Fun: good or bad? <You|decide>/.docx""").name should be ("Fun good or bad Youdecide.docx")
 	}
-	
-	@Transactional
-	@Test def save {
-		val attachment = new FileAttachment("file.txt")
-		val string = "Doe, a deer, a female deer"
-		val bytes = string.getBytes("UTF-8")
-		attachment.uploadedDataLength = bytes.length
-		attachment.uploadedData = new ByteArrayInputStream(bytes)
-		dao.saveTemporary(attachment)
-		
-		attachment.id should not be (null)
-		
-		session.flush
-		session.clear
-		
-		dao.getFileById(attachment.id) match {
-			case Some(loadedAttachment:FileAttachment) => {
-				//val blob = loadedAttachment.data
-				val data = readStream(loadedAttachment.dataStream, "UTF-8")
-				data should be (string)
-			}
-			case None => fail("nope")
-		}
-		
+
+	@Test
+	def removeSemicolons() {
+		new FileAttachment("We've had our fun; now let's go home.xlsx").name should be ("We've had our fun now let's go home.xlsx")
 	}
-	
-	def readStream(is:InputStream, encoding:String) = new String(FileCopyUtils.copyToByteArray(is), encoding)
+
 }
