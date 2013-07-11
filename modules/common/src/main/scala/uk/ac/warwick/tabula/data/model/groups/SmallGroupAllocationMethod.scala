@@ -11,15 +11,19 @@ object SmallGroupAllocationMethod {
 	case object StudentSignUp extends SmallGroupAllocationMethod("StudentSignUp")
 	case object Random extends SmallGroupAllocationMethod("Random")
 
+  val Default = Manual
 	// lame manual collection. Keep in sync with the case objects above
 	val members = Seq(Manual, StudentSignUp, Random)
 
-	def fromDatabase(dbValue: String) =
+	def fromDatabase(dbValue: String) ={
 		if (dbValue == null) null
 		else members.find{_.dbValue == dbValue} match {
 			case Some(caseObject) => caseObject
 			case None => throw new IllegalArgumentException()
 		}
+  }
+
+  def apply(value:String) = fromDatabase(value)
 }
 
 class SmallGroupAllocationMethodUserType extends AbstractBasicUserType[SmallGroupAllocationMethod, String] {

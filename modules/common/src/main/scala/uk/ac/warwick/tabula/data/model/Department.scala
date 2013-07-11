@@ -12,7 +12,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
-import uk.ac.warwick.tabula.data.model.groups.WeekRange
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, WeekRange}
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -77,6 +77,9 @@ class Department extends GeneratedId
 	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem) getOrElse(WeekRange.NumberingSystem.Default)
 	def weekNumberingSystem_= (wnSystem: String) = settings += (Settings.WeekNumberingSystem -> wnSystem)
 
+  def defaultGroupAllocationMethod = getStringSetting(Settings.DefaultGroupAllocationMethod).map(SmallGroupAllocationMethod(_)).getOrElse(SmallGroupAllocationMethod.Default)
+  def defaultGroupAllocationMethod_= (method:SmallGroupAllocationMethod) =  settings += (Settings.DefaultGroupAllocationMethod->method.dbValue)
+
 	// FIXME belongs in Freemarker
 	def formattedGuidelineSummary:String = Option(extensionGuidelineSummary) map { raw =>
 		val Splitter = """\s*\n(\s*\n)+\s*""".r // two+ newlines, with whitespace
@@ -107,6 +110,7 @@ class Department extends GeneratedId
 	def canEditPersonalTutors: Boolean = {
 		personalTutorSource == null || personalTutorSource == Settings.PersonalTutorSourceValues.Local
 	}
+
 
 	// If hibernate sets owners to null, make a new empty usergroup
 	override def postLoad {
@@ -156,5 +160,7 @@ object Department {
 			val Local = "local"
 			val Sits = "SITS"
 		}
+
+    val DefaultGroupAllocationMethod = "defaultGroupAllocationMethod"
 	}
 }

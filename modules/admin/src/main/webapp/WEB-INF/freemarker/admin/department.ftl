@@ -45,7 +45,7 @@
 					<i class="icon-user"></i> Edit departmental permissions
 				</a></li>
 				<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}">
-					<i class="icon-list-alt"></i> Display settings</a>
+					<i class="icon-list-alt"></i> Settings</a>
 				</li>
 			</ul>
 		</div>

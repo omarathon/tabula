@@ -21,6 +21,7 @@ import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.spring.Wire
 
 /**
  * Handles data about modules and departments
@@ -113,5 +114,14 @@ class ModuleAndDepartmentService extends Logging {
 	def save(dept: Department) = transactional() {
 		departmentDao.save(dept)
 	}
+
+}
+
+trait ModuleAndDepartmentServiceComponent{
+	var moduleAndDepartmentService:ModuleAndDepartmentService
+}
+
+trait AutowiringModuleAndDepartmentServiceComponent extends ModuleAndDepartmentServiceComponent {
+	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
 }
