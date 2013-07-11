@@ -13,4 +13,6 @@ trait RenderableFile {
 	 * inputStream to serve the content. (i.e. for SendFile support)
 	 */
 	def file: Option[File]
+
+	def cachePolicy = CachePolicy()
 }

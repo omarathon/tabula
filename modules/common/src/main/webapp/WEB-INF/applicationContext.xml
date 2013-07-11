@@ -225,13 +225,23 @@
 		<constructor-arg ref="mailSender" />
 	</bean>
 
-	<bean id="mailSender"
-		class="uk.ac.warwick.util.mail.AsynchronousWarwickMailSender">
+	<bean id="mailSender" class="uk.ac.warwick.util.mail.AsynchronousWarwickMailSender">
 		<constructor-arg index="0" ref="priorityTaskExecutionService" />
 		<constructor-arg index="1">
-			<bean
-				class="org.springframework.mail.javamail.JavaMailSenderImpl">
-				<property name="host" value="${mail.smtp.host}" />
+			<bean class="org.springframework.mail.javamail.JavaMailSenderImpl">
+				<property name="username" value="${mail.smtp.user}" />
+				<property name="password" value="${mail.smtp.password}" />
+				<property name="javaMailProperties">
+					<props>
+						<prop key="mail.smtp.from">${mail.smtp.from}</prop>
+						<prop key="mail.smtp.user">${mail.smtp.user}</prop>
+						<prop key="mail.smtp.password">${mail.smtp.password}</prop>
+						<prop key="mail.smtp.host">${mail.smtp.host}</prop>
+						<prop key="mail.smtp.port">${mail.smtp.port}</prop>
+						<prop key="mail.smtp.auth">${mail.smtp.auth}</prop>
+						<prop key="mail.smtp.starttls.enable">${mail.smtp.starttls.enable}</prop>
+					</props>
+				</property>
 			</bean>
 		</constructor-arg>
 	</bean>
@@ -297,6 +307,7 @@
 				<entry key="url" value-ref="urlMethodModel" />
 				<entry key="rootUrl" value="${toplevel.url}${module.context}" />
 				<entry key="componentName" value="${module.name}" />
+				<entry key="activeSpringProfiles" value="${spring.profiles.active}" />
 				<entry key="userlookup"><bean class="uk.ac.warwick.tabula.web.views.UserLookupTag" /></entry>
 				<entry key="permissions"><bean class="uk.ac.warwick.tabula.web.views.PermissionFunction" /></entry>
 				<entry key="showIntro"><bean class="uk.ac.warwick.tabula.web.views.ShowIntroFunction" /></entry>
@@ -413,7 +424,7 @@
 		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider" factory-method="createEmbeddedBroker" />
 	</beans>
 
-	<beans profile="dev,production">
+	<beans profile="dev,sandbox,production">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false"
 				p:ssosUrl="${ssoclient.ssos.url}"
 				p:groupServiceLocation="${ssoclient.webgroups.url}" />
@@ -440,14 +451,14 @@
 	<beans profile="dev">
 	</beans>
 
-	<beans profile="production">
+	<beans profile="sandbox,production">
 	</beans>
 
-	<beans profile="dev,production,console">
+	<beans profile="dev,sandbox,production,console">
 
 	</beans>
 
-	<beans profile="dev,production">
+	<beans profile="dev,sandbox,production">
 
 			<!-- JMX -->
 

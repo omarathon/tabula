@@ -31,6 +31,7 @@ import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import org.springframework.test.annotation.DirtiesContext
 
 // scalastyle:off magic.number
 class MemberDaoTest extends AppContextTestBase with Logging {
@@ -47,7 +48,8 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala map { session.delete(_) }
 	}
 
-	@Test def crud = transactional { tx =>
+	@Test
+	def crud = transactional { tx =>
 		val m1 = Fixtures.student(universityId = "0000001", userId="student")
 		val m2 = Fixtures.student(universityId = "0000002", userId="student")
 
@@ -89,7 +91,8 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 		dao.getByUserId("staff1", false) should be (Some(m3))
 	}
 
-	@Test def listUpdatedSince = transactional { tx =>
+	@Test
+  def listUpdatedSince = transactional { tx =>
 		val dept1 = Fixtures.department("hi", "History")
 		val dept2 = Fixtures.department("fr", "French")
 
@@ -129,7 +132,8 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 		dao.listUpdatedSince(new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0), dept2, 5) should be (Seq(m4))
 	}
 
-	@Test def getRegisteredModules: Unit = transactional { tx =>
+	@Test
+	def getRegisteredModules: Unit = transactional { tx =>
 		val mod1 = Fixtures.module("in101")
 		val mod2 = Fixtures.module("in102")
 		val mod3 = Fixtures.module("in103")
@@ -171,7 +175,8 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 		dao.getRegisteredModules("0000004") should be (Seq())
 	}
 
-	@Test def studentRelationshipsCurrentAndByTarget = transactional { tx =>
+	@Test
+	def studentRelationshipsCurrentAndByTarget = transactional { tx =>
 		val dept1 = Fixtures.department("sp", "Spanish")
 		val dept2 = Fixtures.department("en", "English")
 
@@ -179,6 +184,7 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 		session.save(dept2)
 
 		session.flush
+	  session.clear
 
 		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
 		stu1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
@@ -219,7 +225,8 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 		session.flush()
 	}
 
-	@Test def studentRelationshipsByDepartmentAndAgent = transactional { tx =>
+	@Test
+	def studentRelationshipsByDepartmentAndAgent = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 
@@ -271,7 +278,8 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 
 	}
 
-	@Test def studentsWithoutRelationships = transactional { tx =>
+	@Test
+	def studentsWithoutRelationships = transactional { tx =>
 		val dept1 = Fixtures.department("af", "Art of Foraging")
 		val dept2 = Fixtures.department("tm", "Traditional Music")
 

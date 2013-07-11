@@ -3,9 +3,7 @@
 <#macro row student>
 <tr class="tutee">
 	<td>
-		<div class="photo">
-			<img src="<@routes.photo student />" />
-		</div>
+		<@fmt.member_photo student "tinythumbnail" />
 	</td>
 	<td><h6>${student.firstName}</h6></td>
 	<td><h6>${student.lastName}</h6></td>
@@ -60,7 +58,7 @@
             }).on("mouseout", function(e) {
                         $(this).find("td").removeClass("hover");
                     }).on("click", function(e) {
-                        if (! $(e.target).is("a") && ! $(e.target).is("img")) $(this).find("a.profile-link")[0].click();
+                        if (! $(e.target).is("a") && ! $(e.target).is("img")) window.location = $(this).find("a.profile-link")[0].href;
                     });
         });
     })(jQuery);

@@ -18,18 +18,21 @@ object MemberOrUser {
 }
 
 sealed trait MemberOrUser{
+	def isMember: Boolean
 	def fullName: Option[String]
 	def universityId: String
 	def shortDepartment: String
 }
 
 private case class WrappedUser(user: User) extends MemberOrUser {
+	def isMember = false
 	def fullName = Some(user.getFullName)
 	def universityId = user.getWarwickId
 	def shortDepartment = user.getShortDepartment
 }
 
 private case class WrappedMember(member: Member) extends MemberOrUser {
+	def isMember = true
 	def fullName = member.fullName
 	def universityId = member.universityId
 	def shortDepartment = member.homeDepartment.name

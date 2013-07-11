@@ -161,6 +161,7 @@ object Permissions {
 			case object Usercode extends Permission("View a member's usercode")
 			case object PersonalTutees extends Permission("View a member's personal tutees")
 			case object StudentCourseDetails extends Permission("View a student's course details")
+			case object Supervisees extends Permission("View a member's supervisees")
 		}
 
 		// Person's own tutor ('upward' relationship)

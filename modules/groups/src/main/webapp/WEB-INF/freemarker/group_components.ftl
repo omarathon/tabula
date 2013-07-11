@@ -168,14 +168,20 @@
                                             <i class="icon-envelope-alt icon-fixed-width"></i>
                                             Notify
                                         </a></li>
-                                    <li><a class="archive-group-link ajax-popup" data-popup-target=".btn-group" href="<@routes.archiveset groupSet />">
-                                        <i class="icon-folder-close icon-fixed-width"></i>
+                                    <li>
                                         <#if groupSet.archived>
-                                            Unarchive groups
+                                           <#assign archive_caption>Unarchive groups</#assign>
                                         <#else>
-                                            Archive groups
+                                            <#assign archive_caption>Archive groups</#assign>
                                         </#if>
-                                    </a></li>
+                                        
+                                        <#assign archive_url><@routes.archiveset groupSet /></#assign>
+                                        
+                                        <@fmt.permission_button permission='SmallGroups.Archive' scope=module action_descr='${archive_caption}'?lower_case classes='archive-group-link ajax-popup' href=archive_url 
+                                        						tooltip='Archive small group' data_attr='data-popup-target=.btn-group data-container=body'> 
+                                        <i class="icon-folder-close icon-fixed-width"></i> ${archive_caption} 
+                                        </@fmt.permission_button>
+                                    </a></li> 
                                     </#if>
                                 </@dropdown_menu>
                             </div>
@@ -192,7 +198,7 @@
 </#list>
 
 <#-- List of students modal -->
-<div id="students-list-modal" class="modal ">
+<div id="students-list-modal" class="modal fade">
 </div>
 
 </#macro>

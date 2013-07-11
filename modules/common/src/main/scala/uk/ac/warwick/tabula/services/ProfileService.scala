@@ -97,3 +97,11 @@ class ProfileServiceImpl extends ProfileService with Logging {
 		memberDao.countStudentsByDepartment(department).intValue
 	}
 }
+
+trait ProfileServiceComponent{
+	var profileService:ProfileService
+}
+
+trait AutowiringProfileServiceComponent extends ProfileServiceComponent{
+	var profileService = Wire.auto[ProfileService]
+}

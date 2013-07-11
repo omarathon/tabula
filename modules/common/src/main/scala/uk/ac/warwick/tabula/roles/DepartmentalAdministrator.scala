@@ -42,6 +42,7 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Profiles.Read.NextOfKin,
 		Profiles.Read.PersonalTutees,
 		Profiles.Read.StudentCourseDetails,
+	  Profiles.Read.Supervisees,
 		Profiles.Search,
 
 		Profiles.PersonalTutor.Upload,
@@ -49,6 +50,9 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Profiles.PersonalTutor.Read,
 		Profiles.PersonalTutor.Update,
 		Profiles.PersonalTutor.Delete,
+
+	  Profiles.Supervisor.Read,
+		
 		Profiles.PersonalTutor.MeetingRecord.Read,
     Profiles.Supervisor.MeetingRecord.Read
 	)

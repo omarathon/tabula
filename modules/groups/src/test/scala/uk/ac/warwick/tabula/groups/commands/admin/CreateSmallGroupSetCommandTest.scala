@@ -2,9 +2,7 @@ package uk.ac.warwick.tabula.groups.commands.admin
 import uk.ac.warwick.tabula.AppContextTestBase
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat
-import uk.ac.warwick.tabula.data.model.groups.WeekRange
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, WeekRange, DayOfWeek}
 
 import org.joda.time.LocalTime
 import scala.collection.JavaConverters._
@@ -18,6 +16,7 @@ class CreateSmallGroupSetCommandTest extends AppContextTestBase {
 		val cmd = new CreateSmallGroupSetCommand(f.module1)
 		cmd.name = "Terry"
 		cmd.format = SmallGroupFormat.Seminar
+		cmd.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
 		
 		// Create two groups with two events
 		val group1Cmd = cmd.groups.get(0) 
@@ -30,7 +29,7 @@ class CreateSmallGroupSetCommandTest extends AppContextTestBase {
 		g1Event1Cmd.endTime = new LocalTime(14, 0)
 		g1Event1Cmd.location = "John's house"
 		g1Event1Cmd.title = "John"
-		
+
 		val g1Event2Cmd = group1Cmd.events.get(1)
 		g1Event2Cmd.weekRanges = Seq(WeekRange(2, 10))
 		g1Event2Cmd.day = DayOfWeek.Wednesday
@@ -62,6 +61,7 @@ class CreateSmallGroupSetCommandTest extends AppContextTestBase {
 		set.name should be ("Terry")
 		set.format should be (SmallGroupFormat.Seminar)
 		set.groups.size should be (2)
+		set.allocationMethod should be (SmallGroupAllocationMethod.StudentSignUp)
 		
 		val group1 = set.groups.asScala.find(_.name == "Steve").head
 		group1.events.size should be (2)

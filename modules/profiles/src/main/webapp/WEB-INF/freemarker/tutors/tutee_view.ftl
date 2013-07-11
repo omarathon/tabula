@@ -1,4 +1,4 @@
-<#import "tutee_macros.ftl" as tutee_macros />
+<#import "../related_students/related_students_macros.ftl" as tutee_macros />
 
 <#escape x as x?html>
 <div id="tutors">

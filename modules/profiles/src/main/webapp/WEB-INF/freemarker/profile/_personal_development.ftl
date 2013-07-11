@@ -1,3 +1,4 @@
+<#import "../related_students/meeting/meeting_list_macros.ftl" as meeting_macros />
 <#escape x as x?html>
 <section id="personal-development" class="clearfix">
 
@@ -91,7 +92,7 @@
 		</div>
 
 		<#if studentCourseDetails.hasAPersonalTutor>
-			<#include "../tutor/meeting/list.ftl" />
+			<@meeting_macros.list studentCourseDetails tutorMeetings "personal tutor"/>
 		</#if>
 
 		<div id="modal" class="modal hide fade" style="display:none;"></div>
