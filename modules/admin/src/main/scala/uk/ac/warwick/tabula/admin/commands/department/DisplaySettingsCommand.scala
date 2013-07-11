@@ -31,14 +31,12 @@ class DisplaySettingsCommandInternal (val department:Department) extends Command
 	var defaultGroupAllocationMethod = department.defaultGroupAllocationMethod.dbValue
 
 	override def applyInternal() = transactional() {
-		department ++= (
-			Settings.ShowStudentName -> showStudentName,
-			Settings.PlagiarismDetection -> plagiarismDetection,
-			Settings.AssignmentInfoView -> assignmentInfoView,
-			Settings.DefaultGroupAllocationMethod -> SmallGroupAllocationMethod(defaultGroupAllocationMethod).dbValue,
-			Settings.WeekNumberingSystem -> weekNumberingSystem
-		)
-		
+		department.showStudentName = showStudentName
+		department.plagiarismDetectionEnabled =  plagiarismDetection
+		department.assignmentInfoView = assignmentInfoView
+		department.defaultGroupAllocationMethod = SmallGroupAllocationMethod(defaultGroupAllocationMethod)
+		department.weekNumberingSystem = weekNumberingSystem
+
 		moduleAndDepartmentService.save(department)
 	}
 }

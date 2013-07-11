@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 
 @Entity @AccessType("field")
 class Department extends GeneratedId
-	with PostLoadBehaviour with SettingsMap[Department] with PermissionsTarget with Serializable{
+	with PostLoadBehaviour with HasSettings[Department] with PermissionsTarget with Serializable{
 	import Department._
 
 	@Column(unique=true)

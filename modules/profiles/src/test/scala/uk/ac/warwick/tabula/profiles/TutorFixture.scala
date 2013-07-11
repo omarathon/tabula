@@ -10,8 +10,7 @@ import scala.Some
 trait TutorFixture extends Mockito {
 
 	val department = new Department
-	department.settings = Map(Department.Settings.PersonalTutorSource -> Department.Settings.PersonalTutorSourceValues.Local)
-
+  department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Local
 	val actor = new User
 	val recipient = new User
 	recipient.setWarwickId("recipient")
