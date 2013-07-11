@@ -214,7 +214,7 @@
 	<#local class></#local>
 	<#local title></#local>
 	
-	<#if tooltip??>
+	<#if tooltip?has_content>
 		<#local title>title='${tooltip}.'</#local>
 		<#local classes='${classes} use-tooltip'?trim >
 	</#if>
