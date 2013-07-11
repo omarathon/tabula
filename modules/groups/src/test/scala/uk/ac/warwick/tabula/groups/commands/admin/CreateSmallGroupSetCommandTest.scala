@@ -17,6 +17,7 @@ class CreateSmallGroupSetCommandTest extends AppContextTestBase {
 		cmd.name = "Terry"
 		cmd.format = SmallGroupFormat.Seminar
 		cmd.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
+		cmd.allowSelfGroupSwitching = true
 		
 		// Create two groups with two events
 		val group1Cmd = cmd.groups.get(0) 
@@ -62,6 +63,7 @@ class CreateSmallGroupSetCommandTest extends AppContextTestBase {
 		set.format should be (SmallGroupFormat.Seminar)
 		set.groups.size should be (2)
 		set.allocationMethod should be (SmallGroupAllocationMethod.StudentSignUp)
+		set.allowSelfGroupSwitching.booleanValue should be (true)
 		
 		val group1 = set.groups.asScala.find(_.name == "Steve").head
 		group1.events.size should be (2)

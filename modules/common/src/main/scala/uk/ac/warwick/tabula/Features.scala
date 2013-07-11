@@ -54,6 +54,8 @@ abstract class Features {
 	@Value("${features.smallGroupTeaching:false}") var smallGroupTeaching = defaults.smallGroupTeaching
 	@Value("${features.smallGroupTeaching.studentSignUp:false}") var smallGroupTeachingStudentSignUp = defaults.smallGroupTeachingStudentSignUp
 	@Value("${features.smallGroupTeaching.randomAllocation:false}") var smallGroupTeachingRandomAllocation = defaults.smallGroupTeachingRandomAllocation
+	@Value("${features.smallGroupTeaching.selfGroupSwitching:false}") var smallGroupTeachingSelfGroupSwitching = defaults.smallGroupTeachingSelfGroupSwitching
+
 	@Value("${features.smallGroupTeaching.tutorView:false}") var smallGroupTeachingTutorView = defaults.smallGroupTeachingTutorView
 
 	private val bean = new BeanWrapperImpl(this)
@@ -104,6 +106,7 @@ class FeaturesMessage {
 	@BeanProperty var smallGroupTeaching = false
 	@BeanProperty var smallGroupTeachingStudentSignUp = false
 	@BeanProperty var smallGroupTeachingRandomAllocation = false
+	@BeanProperty var smallGroupTeachingSelfGroupSwitching = false
 	@BeanProperty var smallGroupTeachingTutorView = false
 }
 
