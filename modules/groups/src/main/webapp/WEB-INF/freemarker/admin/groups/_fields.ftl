@@ -68,6 +68,29 @@
 		</@form.labelled_row>
 	</#if>
 
+	<#if features.smallGroupTeachingSelfGroupSwitching>
+		<@form.labelled_row "allowSelfGroupSwitching" "Allow students to change their group">
+			<@form.label checkbox=true>
+				<@f.radiobutton path="allowSelfGroupSwitching" value="true" />
+				Allow students to switch groups
+				<a class="use-popover" data-html="true"
+			     data-content="Students are allowed to change the group they are in">
+			   	<i class="icon-question-sign"></i>
+			  </a>
+			</@form.label>
+
+			<@form.label checkbox=true>
+				<@f.radiobutton path="allowSelfGroupSwitching" value="false" />
+				Don't allow students to switch groups
+				<a class="use-popover" data-html="true"
+				 data-content="Students are not allowed to change the group they are in">
+				<i class="icon-question-sign"></i>
+			  </a>
+			</@form.label>
+
+		</@form.labelled_row>
+	</#if>
+
 </fieldset>
 
 <fieldset id="students">

@@ -21,6 +21,7 @@ class SmallGroupSetTest extends TestBase with Mockito{
     source.id = "testId"
     source.academicYear = AcademicYear(2001)
     source.allocationMethod = SmallGroupAllocationMethod.Manual
+    source.allowSelfGroupSwitching = true
     source.archived = true
     source.assessmentGroups =  JArrayList()
     source.format = SmallGroupFormat.Lab
@@ -41,6 +42,8 @@ class SmallGroupSetTest extends TestBase with Mockito{
     clone.id should be(source.id)
     clone.academicYear should be (source.academicYear)
     clone.allocationMethod should be (source.allocationMethod)
+    clone.allowSelfGroupSwitching.booleanValue should be (true)
+    clone.allowSelfGroupSwitching.booleanValue should be (source.allowSelfGroupSwitching.booleanValue)
     clone.archived should be(source.archived)
     clone.assessmentGroups should be(assessmentGroups)
     clone.format should be (source.format)
