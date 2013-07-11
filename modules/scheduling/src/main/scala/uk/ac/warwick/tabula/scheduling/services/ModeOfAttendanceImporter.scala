@@ -17,14 +17,29 @@ import uk.ac.warwick.tabula.data.ModeOfAttendanceDao
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleModeOfAttendanceCommand
 import org.springframework.context.annotation.Profile
 
+/**
+ * Provides access to modeofattendance data in SITS.
+ *
+ * (also provides access to the internal imported verison of data as well,
+ *  so it's sort of a service too - bit of a mish mash of responsibility :|)
+ */
 trait ModeOfAttendanceImporter extends Logging {
+
 	var modeOfAttendanceDao = Wire.auto[ModeOfAttendanceDao]
+
+	protected var modeOfAttendanceMap: Map[String, ModeOfAttendance] = null
+
+	def getModeOfAttendanceForCode(code: String): Option[ModeOfAttendance] = {
+		if (modeOfAttendanceMap == null) {
+			modeOfAttendanceMap = slurpModeOfAttendances()
+		}
+		modeOfAttendanceMap.get(code)
+	}
+
+	/** Get a list of commands that can be applied to save items to the modeofattendance table. */
+	def getImportCommands: Seq[ImportSingleModeOfAttendanceCommand]
 	
-	var modeOfAttendanceMap = slurpModeOfAttendances()
-	
-	def getModeOfAttendances: Seq[ImportSingleModeOfAttendanceCommand]
-	
-	def slurpModeOfAttendances(): Map[String, ModeOfAttendance] = {
+	protected def slurpModeOfAttendances(): Map[String, ModeOfAttendance] = {
 		transactional(readOnly = true) {
 			logger.debug("refreshing SITS mode of attendance map")
 
@@ -35,7 +50,8 @@ trait ModeOfAttendanceImporter extends Logging {
 	}
 }
 
-@Profile(Array("dev", "test", "production")) @Service
+@Profile(Array("dev", "test", "production"))
+@Service
 class ModeOfAttendanceImporterImpl extends ModeOfAttendanceImporter {
 	import ModeOfAttendanceImporter._
 	
@@ -43,16 +59,20 @@ class ModeOfAttendanceImporterImpl extends ModeOfAttendanceImporter {
 	
 	lazy val modeOfAttendanceQuery = new ModeOfAttendanceQuery(sits)
 
-	def getModeOfAttendances: Seq[ImportSingleModeOfAttendanceCommand] = {
+	def getImportCommands: Seq[ImportSingleModeOfAttendanceCommand] = {
 		val modeOfAttendances = modeOfAttendanceQuery.execute.toSeq
+		// this slurp is always one behind, because the above query only selects and it doesn't
+		// get inserted into our table until we return the result for the importer to apply.
+		// but it isn't that important to be dead up to date with this data.
 		modeOfAttendanceMap = slurpModeOfAttendances()
 		modeOfAttendances
 	}
 }
 
-@Profile(Array("sandbox")) @Service
+@Profile(Array("sandbox"))
+@Service
 class SandboxModeOfAttendanceImporter extends ModeOfAttendanceImporter {
-	def getModeOfAttendances: Seq[ImportSingleModeOfAttendanceCommand] =
+	def getImportCommands: Seq[ImportSingleModeOfAttendanceCommand] =
 		Seq(
 			new ImportSingleModeOfAttendanceCommand(ModeOfAttendanceInfo("F", "FULL-TIME", "Full-time according to Funding Council definitions")),
 			new ImportSingleModeOfAttendanceCommand(ModeOfAttendanceInfo("P", "PART-TIME", "Part-time"))
