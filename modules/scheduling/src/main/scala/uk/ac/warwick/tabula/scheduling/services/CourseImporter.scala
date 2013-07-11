@@ -1,16 +1,16 @@
 package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
+
 import scala.collection.JavaConversions._
+
+import javax.sql.DataSource
+
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.stereotype.Service
-import javax.sql.DataSource
+
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.SitsStatusDao
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleSitsStatusCommand
-import org.apache.log4j.Logger
-import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.CourseDao
 import uk.ac.warwick.tabula.data.model.Course
@@ -29,39 +29,40 @@ class CourseImporter extends Logging with Daoisms {
 
 	private var courseMap: Map[String, Course] = _
 
-	private def updateCourseMap {
-		courseMap = slurpCourses
+	private def updateCourseMap() {
+		courseMap = slurpCourses()
 	}
 
 	def getCourseForCode(code: String) = {
-		if (courseMap == null) updateCourseMap
+		if (courseMap == null) updateCourseMap()
 		courseMap(code)
 	}
 
-	def importCourses {
+	def importCourses() {
 		logger.info("Importing Courses")
 
 		transactional() {
-			getCourses map { _.apply }
-			session.flush
-			session.clear
+			getImportCommands foreach { _.apply() }
+			session.flush()
+			session.clear()
 		}
 
-		courseMap = slurpCourses
+		updateCourseMap()
 	}
 
-	def getCourses: Seq[ImportSingleCourseCommand] = {
-		val courses = coursesQuery.execute.toSeq
-		courses
+	def getImportCommands: Seq[ImportSingleCourseCommand] = {
+		coursesQuery.execute.toSeq
 	}
 
-	def slurpCourses: Map[String, Course] = {
+	private def slurpCourses(): Map[String, Course] = {
 		transactional(readOnly = true) {
 			logger.debug("refreshing SITS course map")
 
-			(for (courseCode <- courseDao.getAllCourseCodes; course <- courseDao.getByCode(courseCode)) yield {
-				(courseCode, course)
-			}).toMap
+			(for {
+				courseCode <- courseDao.getAllCourseCodes
+				course <- courseDao.getByCode(courseCode)
+			} yield (courseCode -> course)).toMap
+
 		}
 	}
 
