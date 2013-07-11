@@ -46,6 +46,8 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 	var format: SmallGroupFormat = _
 	
 	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
+
+	var allowSelfGroupSwitching: Boolean = false
 	
 	// start complicated membership stuff
 	
@@ -104,6 +106,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		academicYear = set.academicYear
 		format = set.format
 		allocationMethod = set.allocationMethod
+		allowSelfGroupSwitching = set.allowSelfGroupSwitching
 		
 		// TODO AssessmentGroupItems
 		
@@ -118,6 +121,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		set.academicYear = academicYear
 		set.format = format
 		set.allocationMethod = allocationMethod
+		set.allowSelfGroupSwitching = allowSelfGroupSwitching
 		
 		// TODO AssessmentGroupItems
 		

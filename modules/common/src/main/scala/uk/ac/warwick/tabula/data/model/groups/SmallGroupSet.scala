@@ -65,6 +65,9 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethodUserType")
 	var allocationMethod: SmallGroupAllocationMethod = _
 
+	@Column(name="SELF_GROUP_SWITCHING")
+	var allowSelfGroupSwitching:JBoolean = _
+
 	@ManyToOne
 	@JoinColumn(name = "module_id")
 	var module: Module = _
@@ -104,6 +107,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
     newSet.id = id
     newSet.academicYear = academicYear
     newSet.allocationMethod = allocationMethod
+    newSet.allowSelfGroupSwitching = allowSelfGroupSwitching
     newSet.archived = archived
     newSet.assessmentGroups = assessmentGroups
     newSet.format = format
