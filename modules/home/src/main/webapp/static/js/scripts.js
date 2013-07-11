@@ -571,7 +571,7 @@
 
 			$t.on('click', '.layout-tools .icon-th-large', function() { // gadgetify
 				reset();
-				var $cols = $('<div class="cols row-fluid"><ol class="span6" /><ol class="span6" /></div>');
+				var $cols = $('<div class="cols row-fluid"><ol class="ex-panes span6" /><ol class="ex-panes span6" /></div>');
 				var paneCount = $panes.children().length;
 				$t.append($cols);
 				$panes.children().each(function(idx) {
@@ -590,7 +590,7 @@
 				});
 
 				// make sortable & finish up rendering
-				$t.find('.span6').sortable({
+				$t.find('.ex-panes').sortable({
 					handle: '.tab-container a',
 					placeholder: 'sort-target',
 					forcePlaceholderSize: true,

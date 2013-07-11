@@ -3,9 +3,9 @@
 <#escape x as x?html>
 <section id="supervision" class="clearfix">
 	<#if studentCourseDetails.supervisors?? && studentCourseDetails.supervisors?size gt 0>
-		<h4>Supervisor<#if studentCourseDetails.supervisors?size gt 1>s</#if></h4>
+		<h4>Supervision</h4>
 
-		<div class="tutors clearfix row fluid">
+		<div class="tutors clearfix row-fluid">
 		<#list studentCourseDetails.supervisors as relationship>
 			<#assign supervisor = relationship.agentMember />
 			<div class="tutor clearfix span4">
