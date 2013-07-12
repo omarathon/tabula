@@ -216,5 +216,29 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 
   }
 
+	@Test
+	def cachesResultsOfGettersByDefault(){
+		val wrapper = new ScalaBeansWrapper
+		val target = new MyObject
+		val wrapped = wrapper.wrap(target).asInstanceOf[wrapper.ScalaHashModel]
+		wrapped.get("name").toString should be("text")
+		target.name="something different"
+		// method is not re-invoked
+		wrapped.get("name").toString should be("text")
+	}
+
+	@Test
+	def doesntCacheIfToldNotTo(){
+		val wrapper = new ScalaBeansWrapper
+		wrapper.useWrapperCache = false
+		val target = new MyObject
+		val wrapped = wrapper.wrap(target).asInstanceOf[wrapper.ScalaHashModel]
+		wrapped.get("name").toString should be("text")
+		target.name="something different"
+		// method is not re-invoked
+		wrapped.get("name").toString should be("something different")
+
+	}
+
 
 }
