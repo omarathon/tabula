@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
 import collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.{StudentSignUp, Manual}
 
 class DepartmentTest extends TestBase with Mockito {
 	
@@ -21,13 +22,15 @@ class DepartmentTest extends TestBase with Mockito {
 		department.extensionGuidelineLink should be (null)
 		department.showStudentName should be (false)
 		department.plagiarismDetectionEnabled should be (true)
-		
+    department.defaultGroupAllocationMethod should be (Manual)
+
 		department.collectFeedbackRatings = true
 		department.allowExtensionRequests = true
 		department.extensionGuidelineSummary = "Here is my magic summary.\n\n    Do everything good!"
 		department.extensionGuidelineLink = "http://warwick.ac.uk"
 		department.showStudentName = true
 		department.plagiarismDetectionEnabled = false
+    department.defaultGroupAllocationMethod = StudentSignUp
 		
 		department.collectFeedbackRatings should be (true)
 		department.allowExtensionRequests should be (true)
@@ -37,6 +40,7 @@ class DepartmentTest extends TestBase with Mockito {
 		department.extensionGuidelineLink should be ("http://warwick.ac.uk")
 		department.showStudentName should be (true)
 		department.plagiarismDetectionEnabled should be (false)
+    department.defaultGroupAllocationMethod should be (StudentSignUp)
 	}
 	
 	@Test def groups {

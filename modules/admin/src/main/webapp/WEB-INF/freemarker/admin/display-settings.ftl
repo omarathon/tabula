@@ -1,6 +1,6 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#escape x as x?html>
-<h1>Display settings for ${department.name}</h1>
+<h1>Settings for ${department.name}</h1>
 <@f.form method="post" class="form-horizontal" action="" commandName="displaySettingsCommand">
 	<@form.row>
 		<@form.label></@form.label>
@@ -71,7 +71,22 @@
 			<@f.errors path="weekNumberingSystem" cssClass="error" />
 		</@form.field>
 	</@form.row>
-	
+    <#if features.smallGroupTeachingStudentSignUp>
+		<@form.row>
+			<@form.label>Default allocation method for small groups</@form.label>
+			<@form.field>
+				<@form.label checkbox=true>
+					<@f.radiobutton path="defaultGroupAllocationMethod" value="Manual" />
+					Manual Allocation
+				</@form.label>
+				<@form.label checkbox=true>
+					<@f.radiobutton path="defaultGroupAllocationMethod" value="StudentSignUp" />
+					Self Sign-up
+				</@form.label>
+				<@f.errors path="defaultGroupAllocationMethod" cssClass="error" />
+			</@form.field>
+		</@form.row>
+    </#if >
 <div class="submit-buttons">
 	<input type="submit" value="Save" class="btn btn-primary">
 	<#if (returnTo!"")?length gt 0>

@@ -1,34 +1,14 @@
 package uk.ac.warwick.tabula.coursework
 
-import org.hibernate.SessionFactory
-import org.junit.runner.RunWith
-import org.junit.Test
-import org.scalatest.junit.JUnitSuite
-import org.scalatest.junit.ShouldMatchersForJUnit
-import org.springframework.context.ApplicationContext
-import org.springframework.mock.web.MockServletContext
-import org.springframework.orm.hibernate3.HibernateTemplate
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.web.context.support.AnnotationConfigWebApplicationContext
-import uk.ac.warwick.tabula.data.model.Assignment
-import org.springframework.test.context.support.AnnotationConfigContextLoader
-import org.springframework.context.annotation.Configuration
+import uk.ac.warwick.tabula.data.model._
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Import
-import org.springframework.context.annotation.ComponentScan
-import uk.ac.warwick.tabula.data.model.Assignment
-import org.springframework.test.context.transaction.TransactionConfiguration
 import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.data.model.Module
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model.Department
-import javax.validation.Validation
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
 import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.tabula._
 import org.junit.Ignore
+import scala.language.reflectiveCalls
 
 // scalastyle:off magic.number
 class ApplicationTest extends AppContextTestBase {
@@ -77,9 +57,19 @@ class ApplicationTest extends AppContextTestBase {
      * property is replaced with a new empty group on load.
      */
     @Transactional @Test def departmentLoadEvent {
+
+			// see http://stackoverflow.com/questions/1589603/scala-set-a-field-value-reflectively-from-field-name
+			implicit def reflector(ref: AnyRef) = new {
+				def getV(name: String): Any = ref.getClass.getMethods.find(_.getName == name).get.invoke(ref)
+				def setV(name: String, value: Any): Unit = ref.getClass.getMethods.find(_.getName == name + "_$eq").get.invoke(ref, value.asInstanceOf[AnyRef])
+			}
+
       val dept = new Department
       dept.code = "gr"
-      dept.settings = null
+
+			dept.setV("settings",null)
+
+      dept.getV("settings") == null should be(true)
       session.save(dept)
 
       val id = dept.id
@@ -88,10 +78,9 @@ class ApplicationTest extends AppContextTestBase {
       session.clear
 
       session.load(classOf[Department], id) match {
-        case loadedDepartment:Department => loadedDepartment.settings should not be(null)
-        case _ => fail("Department not found")
+        case loadedDepartment:Department => (loadedDepartment.getV("settings") == null) should be(false)
+				case _ => fail("Department not found")
       }
-
     }
 
     @Transactional @Test def getModules = {

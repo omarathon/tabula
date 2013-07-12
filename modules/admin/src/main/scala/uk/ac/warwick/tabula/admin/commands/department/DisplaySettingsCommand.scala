@@ -1,41 +1,57 @@
 package uk.ac.warwick.tabula.admin.commands.department
-import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.commands.{Description, Command}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Department.Settings
-import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 
+object DisplaySettingsCommand{
+	def apply(department:Department) =
+		new DisplaySettingsCommandInternal(department)
+			with ComposableCommand[Unit]
+			with AutowiringModuleAndDepartmentServiceComponent
+	    with DisplaySettingsCommandDescription
+	    with DisplaySettingsCommandPermissions
+}
 
-class DisplaySettingsCommand (val department:Department) extends Command[Unit] with SelfValidating {
+trait DisplaySettingsCommandState{
+	val department:Department
+}
+
+class DisplaySettingsCommandInternal (val department:Department) extends CommandInternal[Unit]  with DisplaySettingsCommandState  {
+	this:ModuleAndDepartmentServiceComponent =>
 	
-	PermissionCheck(Permissions.Department.ManageDisplaySettings, department)
-	
-	var departmentService = Wire[ModuleAndDepartmentService]
-
-	var showStudentName = department.showStudentName
+  var showStudentName = department.showStudentName
 	var plagiarismDetection = department.plagiarismDetectionEnabled
 	var assignmentInfoView = department.assignmentInfoView
 	var weekNumberingSystem = department.weekNumberingSystem
+	var defaultGroupAllocationMethod = department.defaultGroupAllocationMethod.dbValue
 
 	override def applyInternal() = transactional() {
-		department ++= (
-			Settings.ShowStudentName -> showStudentName,
-			Settings.PlagiarismDetection -> plagiarismDetection,
-			Settings.AssignmentInfoView -> assignmentInfoView,
-			Settings.WeekNumberingSystem -> weekNumberingSystem
-		)
-		
-		departmentService.save(department)
-	}
+		department.showStudentName = showStudentName
+		department.plagiarismDetectionEnabled =  plagiarismDetection
+		department.assignmentInfoView = assignmentInfoView
+		department.defaultGroupAllocationMethod = SmallGroupAllocationMethod(defaultGroupAllocationMethod)
+		department.weekNumberingSystem = weekNumberingSystem
 
+		moduleAndDepartmentService.save(department)
+	}
+}
+
+trait DisplaySettingsCommandPermissions extends RequiresPermissionsChecking{
+	this:DisplaySettingsCommandState=>
+	def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.Department.ManageDisplaySettings, department)
+
+	}
+}
+trait DisplaySettingsCommandDescription extends Describable[Unit]{
+	this:DisplaySettingsCommandState=>
 	// describe the thing that's happening.
 	override def describe(d:Description) =
 		d.department(department)
-
-	override def validate(errors:Errors) {}
 }
+
