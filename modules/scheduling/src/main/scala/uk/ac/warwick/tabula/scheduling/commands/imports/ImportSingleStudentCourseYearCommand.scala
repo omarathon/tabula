@@ -167,7 +167,7 @@ class ImportSingleStudentCourseYearCommand(resultSet: ResultSet)
 		if (code == null || code == "") {
 			null
 		} else {
-			modeOfAttendanceImporter.modeOfAttendanceMap.get(code).getOrElse(null)
+			modeOfAttendanceImporter.getModeOfAttendanceForCode(code).orNull
 		}
 	}
 

@@ -907,13 +907,6 @@ table {
 	margin: 10px;
 }
 
-.nav.nav-tabs{
-	padding-left: 0;
-	a {
-		text-decoration:none;
-	}
-}
-
 .rating-question { margin: 1em; }
 
 input.copyable-url {
@@ -1282,15 +1275,28 @@ h1.with-settings {
 	}
 
 	.tabbable {
-		ol {
-			margin: 0;
+		.panes,
+		.ex-panes {
+			margin-top: 0;
 			padding-left: 0;
-
-			&.col1, &.col2 { min-height: 80px; }
 
 			&.tab-content { padding-left: 10px; }
 
 			li { list-style: none; }
+		}
+
+		.panes {
+			margin: 0;
+			padding-bottom: 16px;
+			min-height: 8px;
+
+			> li {
+				margin: 12px 0;
+
+				&.tab-pane {
+					margin: 0;
+				}
+			}
 		}
 
 		.layout-tools {
@@ -1307,8 +1313,18 @@ h1.with-settings {
 		}
 
 		.nav-tabs {
-			// room for layout-tools
+			// make room for layout-tools
 			padding-right: 70px;
+
+			li {
+				margin-right: 4px;
+
+				> a {
+					border: 1px solid #ddd;
+					border-bottom-color: transparent;
+					text-decoration: none;
+				}
+			}
 
 			.disabled { cursor: not-allowed; }
 			.icon-move { cursor: move; }
@@ -1337,19 +1353,6 @@ h1.with-settings {
 
 			.tab-content {
 				background: white;
-			}
-		}
-
-		.panes {
-			padding-bottom: 16px;
-			min-height: 8px;
-
-			> li {
-				margin: 12px 0;
-
-				&.tab-pane {
-					margin: 0;
-				}
 			}
 		}
 

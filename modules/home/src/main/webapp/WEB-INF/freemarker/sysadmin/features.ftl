@@ -20,7 +20,7 @@ When you set a property here, <strong>all</strong> properties will be kept in sy
 <th>${feature.name}</th>
 <td>${feature.value?string}</td>
 <td>
-<form action="<@url page="/sysadmin/features"/>" method="POST">
+<form id="${feature.name}_form" action="<@url page="/sysadmin/features"/>" method="POST">
 <input type="hidden" name="name" value="${feature.name}">
 Set to 
 <input type="submit" name="value" value="false"> or 

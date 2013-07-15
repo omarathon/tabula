@@ -105,7 +105,7 @@
 				-->
 				
 				<#if can_manage_dept>
-					<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt"></i> Display settings</a></li>
+					<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt"></i> Settings</a></li>
 				</#if>
 				
 				

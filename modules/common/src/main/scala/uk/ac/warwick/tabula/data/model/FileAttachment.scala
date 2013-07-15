@@ -1,4 +1,6 @@
 package uk.ac.warwick.tabula.data.model
+
+import scala.language.postfixOps
 import java.io._
 import com.google.common.io.Files
 import org.hibernate.annotations.AccessType

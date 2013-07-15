@@ -62,7 +62,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 		logger.info("Importing Modes of Attendance")
 
 		transactional() {
-			modeOfAttendanceImporter.getModeOfAttendances map { _.apply }
+			modeOfAttendanceImporter.getImportCommands foreach { _.apply() }
 
 			session.flush
 			session.clear

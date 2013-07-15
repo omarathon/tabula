@@ -541,6 +541,7 @@
 				var $cols = $t.find('.cols');
 				$cols.find('.gadget').appendTo($panes);
 				$cols.remove();
+				$t.find('.tutor').removeClass('span4');
 				$t.find('.gadget-only').children().unwrap();
 				$t.find('.tab-container').remove();
 				$t.find('.gadget, .tab-content, .tab-pane, .active').removeClass('gadget tab-content tab-pane active');
@@ -570,7 +571,7 @@
 
 			$t.on('click', '.layout-tools .icon-th-large', function() { // gadgetify
 				reset();
-				var $cols = $('<div class="cols row-fluid"><ol class="span6" /><ol class="span6" /></div>');
+				var $cols = $('<div class="cols row-fluid"><ol class="ex-panes span6" /><ol class="ex-panes span6" /></div>');
 				var paneCount = $panes.children().length;
 				$t.append($cols);
 				$panes.children().each(function(idx) {
@@ -579,6 +580,7 @@
 					var link = '#' + $(this).attr('id');
 					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '" title="Click and drag to move">' + title + ' <i class="icon-minus-sign-alt" title="Hide ' + title + '"></i></a></li>');
 					var $gadgetHeaderTab = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
+					$(this).find('.tutor').removeClass('span4');
 					$gadgetHeaderTab.children().append($tab);
 					$gadget.wrapInner('<div class="tab-content gadget-only" />').children().wrapInner('<div class="gadget-only tab-pane active" />');
 					$gadget.prepend($gadgetHeaderTab).find('.tab-container li a').tab('show');
@@ -588,7 +590,7 @@
 				});
 
 				// make sortable & finish up rendering
-				$t.find('.span6').sortable({
+				$t.find('.ex-panes').sortable({
 					handle: '.tab-container a',
 					placeholder: 'sort-target',
 					forcePlaceholderSize: true,

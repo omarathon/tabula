@@ -73,6 +73,8 @@ class StudentCourseDetails
 		studentCourseYearDetails.asScala.max
 	}
 
+	def courseType = CourseType.fromCourseCode(course.code);
+
 	@Restricted(Array("Profiles.PersonalTutor.Read"))
 	def personalTutors =
 		relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, this.sprCode)
@@ -130,4 +132,26 @@ trait StudentCourseProperties {
 	var lastUpdatedDate = DateTime.now
 
 	var mostSignificant: JBoolean = _
+}
+
+sealed abstract class CourseType(val code: String, val level: String, val description: String)
+
+object CourseType {
+	case object PGR extends CourseType("PG(R)", "Postgraduate", "Postgraduate (Research)")
+	case object PGT extends CourseType("PG(T)", "Postgraduate", "Postgraduate (Taught)")
+	case object UG extends CourseType("UG", "Undergraduate", "Undergraduate")
+	case object Foundation extends CourseType("F", "Foundation", "Foundation course")
+	case object PreSessional extends CourseType("PS", "Pre-sessional", "Pre-sessional course")
+
+	def fromCourseCode(cc: String) = {
+		if (cc.isEmpty) null
+		cc.charAt(0) match {
+			case 'U' => UG
+			case 'T' => PGT
+			case 'R' => PGR
+			case 'F' => Foundation
+			case 'N' => PreSessional
+			case _ => throw new IllegalArgumentException()
+		}
+	}
 }

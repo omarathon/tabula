@@ -173,13 +173,17 @@
 					<#include "_course_details.ftl" />
 				</li>
 
-				<li id="supervision-pane">
-					<#include "_supervision.ftl" />
-				</li>
+				<#if profile.hasAPersonalTutor || studentCourseDetails.courseType.code != "PG(R)">
+					<li id="pd-pane">
+						<#include "_personal_development.ftl" />
+					</li>
+				</#if>
 
-				<li id="pd-pane">
-					<#include "_personal_development.ftl" />
-				</li>
+				<#if profile.hasSupervisor || studentCourseDetails.courseType.code == "PG(R)">
+					<li id="supervision-pane">
+						<#include "_supervision.ftl" />
+					</li>
+				</#if>
 			</ol>
 		</div>
 

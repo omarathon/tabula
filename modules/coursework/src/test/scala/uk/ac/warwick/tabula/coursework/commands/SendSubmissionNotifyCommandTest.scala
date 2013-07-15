@@ -41,7 +41,7 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 	
 	
 	@Test def allSubmissions {
-		userSettings.settings = Map("alertsSubmission" -> "allSubmissions")
+		userSettings.alertsSubmission = "allSubmissions"
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
 
 		sc.applyInternal()
@@ -55,7 +55,7 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 	
 	
 	@Test def noAlerts {
-		userSettings.settings = Map("alertsSubmission" -> "none")
+		userSettings.alertsSubmission = "none"
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
 
 		sc.applyInternal()
@@ -64,7 +64,7 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 	
 	
 	@Test def lateSubmissions {
-		userSettings.settings = Map("alertsSubmission" -> "lateSubmissions")
+		userSettings.alertsSubmission = "lateSubmissions"
 		submission.submittedDate = new DateTime(2013, 1, 12, 12, 0)
 		submission.assignment.extensions add newExtension
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
@@ -76,7 +76,7 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 	
 	
 	@Test def lateSubmissionsIgnoreOnTime {
-		userSettings.settings = Map("alertsSubmission" -> "lateSubmissions")
+		userSettings.alertsSubmission= "lateSubmissions"
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
 		
 		sc.applyInternal()
