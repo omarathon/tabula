@@ -26,6 +26,7 @@
 						<@form.labelled_row "file.upload" "Files">
 							<input type="file" name="file.upload" multiple />
 						</@form.labelled_row>
+						<@f.errors path="file" cssClass="error" />
 					</td>
 				</tr>
 			</table>

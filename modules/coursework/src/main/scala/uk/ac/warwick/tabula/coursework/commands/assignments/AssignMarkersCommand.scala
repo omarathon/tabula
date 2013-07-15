@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.{Description, Command}
 import uk.ac.warwick.tabula.data.model.{UserGroup, Module, Assignment}
 import uk.ac.warwick.tabula.data.{SessionComponent, Daoisms}
@@ -32,7 +33,14 @@ abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:A
 	var secondMarkerUnassignedStudents: JList[Student] = _
 	var firstMarkers: JList[Marker] = _
 	var secondMarkers: JList[Marker] = _
-	var markerMapping: JMap[String, JList[String]] = _
+
+	val allMarkers = assignment.markingWorkflow.firstMarkers.members ++ assignment.markingWorkflow.secondMarkers.members
+
+	var markerMapping : JMap[String, JList[String]] = allMarkers.map({
+		val myList : JList[String] = JArrayList()
+		x => (x, myList)
+	}).toMap.asJava
+
 
 	def onBind() {
 

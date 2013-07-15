@@ -23,11 +23,13 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.BindingResult
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException
 
 
 abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment, val submitter: CurrentUser) extends Command[A]
 	with Daoisms with Logging with BindListener {
 
+	val validAttachmentStrings = Seq(".xlsx")
 	var userLookup = Wire.auto[UserLookupService]
 	var marksExtractor = Wire.auto[MarksExtractor]
   
@@ -39,7 +41,7 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 	def postExtractValidation(errors: Errors) {
 		val uniIdsSoFar: mutable.Set[String] = mutable.Set()
 
-		if (marks != null && !marks.isEmpty()) {
+		if (marks != null && !marks.isEmpty) {
 			for (i <- 0 until marks.length) {
 				val mark = marks.get(i)
 				val newPerson = if (mark.universityId != null){
@@ -103,15 +105,30 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 	}
 
 	override def onBind(result:BindingResult) {
-		transactional() {
-			file.onBind(result)
-			if (!file.attached.isEmpty()) {
-				processFiles(file.attached)
-			}
+		val fileNames = file.fileNames map (_.toLowerCase)
+		val invalidFiles = fileNames.filter(s => !validAttachmentStrings.exists(s.endsWith))
 
-			def processFiles(files: Seq[FileAttachment]) {
-				for (file <- files.filter(_.hasData)) {
-					marks addAll marksExtractor.readXSSFExcelFile(file.dataStream)
+		if (invalidFiles.size > 0) {
+			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
+			else result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+		}
+
+		if (!result.hasErrors) {
+			transactional() {
+				file.onBind(result)
+				if (!file.attached.isEmpty()) {
+					processFiles(file.attached)
+				}
+	
+				def processFiles(files: Seq[FileAttachment]) {
+					for (file <- files.filter(_.hasData)) {
+						try {
+							marks.addAll(marksExtractor.readXSSFExcelFile(file.dataStream))
+						} catch {
+							case e: InvalidFormatException =>
+								result.rejectValue("file", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+						}
+					}
 				}
 			}
 		}
