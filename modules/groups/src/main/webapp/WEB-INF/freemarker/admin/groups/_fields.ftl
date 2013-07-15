@@ -68,6 +68,38 @@
 		</@form.labelled_row>
 	</#if>
 
+	<#if features.smallGroupTeachingStudentSignUp>
+			<@form.row defaultClass="">
+    			<@form.field>
+    				<@form.label checkbox=true>
+    					<@f.checkbox path="studentsCanSeeTutorName" id="studentsCanSeeTutorName" />
+    						Students can see tutor name
+    						<a class="use-popover" data-html="true"
+    										 data-content="Students can see tutor names when deciding which group to sign up for">
+    										<i class="icon-question-sign"></i>
+    						</a>
+    				</@form.label>
+    				<@f.errors path="studentsCanSeeTutorName" cssClass="error" />
+    			</@form.field>
+    	    </@form.row>
+	</#if>
+	<#if features.smallGroupTeachingStudentSignUp>
+			<@form.row defaultClass="">
+    			<@form.field>
+    				<@form.label checkbox=true>
+    					<@f.checkbox path="studentsCanSeeOtherMembers" id="studentsCanSeeOtherMembers" />
+    						Students can see student names
+    						<a class="use-popover" data-html="true"
+    										 data-content="Students can see the names of any other students in the group when deciding which group to sign up for">
+    										<i class="icon-question-sign"></i>
+    						</a>
+    				</@form.label>
+    				<@f.errors path="studentsCanSeeOtherMembers" cssClass="error" />
+    			</@form.field>
+    	    </@form.row>
+	</#if>
+
+
 	<#if features.smallGroupTeachingSelfGroupSwitching>
 		<@form.labelled_row "allowSelfGroupSwitching" "Allow students to change their group">
 			<@form.label checkbox=true>

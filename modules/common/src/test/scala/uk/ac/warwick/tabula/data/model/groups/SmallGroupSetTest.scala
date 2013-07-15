@@ -56,4 +56,33 @@ class SmallGroupSetTest extends TestBase with Mockito{
     clone.releasedToStudents should be(source.releasedToStudents)
     clone.releasedToTutors should be (source.releasedToTutors)
   }
+
+	@Test
+	def duplicateCreatesNewSettingsMap(){
+		val source = new SmallGroupSet
+		source.studentsCanSeeOtherMembers = true
+		val clone = source.duplicateTo(source.module)
+		clone.studentsCanSeeOtherMembers should be (true)
+		source.studentsCanSeeOtherMembers = false
+		clone.studentsCanSeeOtherMembers should be (true)
+	}
+
+	@Test
+	def canGetAndSetTutorVisibility(){
+		val set = new SmallGroupSet()
+		set.studentsCanSeeTutorName should be(false)
+		set.studentsCanSeeTutorName = true
+		set.studentsCanSeeTutorName should be(true)
+	}
+
+	@Test
+	def canGetAndSetOtherStudentVisibility(){
+		val set = new SmallGroupSet()
+		set.studentsCanSeeOtherMembers should be (false)
+		set.studentsCanSeeOtherMembers  = true
+		set.studentsCanSeeOtherMembers should be (true)
+	}
+
+
+
 }
