@@ -20,6 +20,8 @@ The conf directory should contain:
 
 You can get versions of these from the servers directory
 
+Unpack activemq-ra.rar into the deploy directory from http://pkg.elab.warwick.ac.uk/activemq.apache.org/activemq-ra.zip
+
 Obtain the datasource files for the app and ADS, and place in the deploy directory - you'll need a TabulaDS and an AcademicDS
 
 You will need to get this configuration added to Web Sign-on for SSO to work.
