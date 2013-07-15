@@ -26,7 +26,7 @@
 		<div class="alert">This page requires Javascript.</div>
 	</noscript>
 
-	<div class="tabbable fix-on-scroll-container">
+	<div class="tabbable">
 		<ul class="nav nav-tabs">
 			<li class="active">
 				<a href="#allocategroups-tab1" data-toggle="tab">Drag and drop</a>
@@ -69,7 +69,7 @@
 						<i class="icon-arrow-left"></i> Remove all
 					</a>
 				</div>
-				<div class="row-fluid"> <!-- fix-on-scroll-container -->
+				<div class="row-fluid fix-on-scroll-container">
 					<div class="span5">
 						<div class="students">
 							<h3>Students</h3>
@@ -122,7 +122,7 @@
 											<#assign count = existingStudents?size />
 											<span class="drag-count">${count}</span> <span class="drag-counted" data-singular="student" data-plural="students">student<#if count != 1>s</#if></span>
 
-											<a id="show-list-${group.id}" class="show-list" title="View students" data-title="${popoverHeader}" data-prelude="${groupDetails}" data-placement="left"><i class="icon-question-sign"></i></a>
+											<a id="show-list-${group.id}" class="show-list" title="View students" data-container=".fix-on-scroll-container" data-title="${popoverHeader}" data-prelude="${groupDetails}" data-placement="left"><i class="icon-question-sign"></i></a>
 										</div>
 									</div>
 
