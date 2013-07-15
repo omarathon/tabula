@@ -84,5 +84,11 @@ class SmallGroupSetTest extends TestBase with Mockito{
 	}
 
 
+	@Test
+	def allowSelfGroupSwitchingDefaultsToTrue(){
+		val set = new SmallGroupSet()
+		set.allowSelfGroupSwitching should be (true)
+	}
+
 
 }
