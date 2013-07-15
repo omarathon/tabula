@@ -115,7 +115,7 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 					logger.warn("Couldn't update course details for SCJ "
 							+ studentCourseDetails.scjCode + ", SPR " + studentCourseDetails.sprCode
 							+ ".  Might be invalid data in SITS - working on the assumption "
-							+ "there shouldn't be be multiple SPR codes for one current SCJ code")
+							+ "there shouldn't be multiple SPR codes for one current SCJ code")
 					exception.printStackTrace
 				}
 			}

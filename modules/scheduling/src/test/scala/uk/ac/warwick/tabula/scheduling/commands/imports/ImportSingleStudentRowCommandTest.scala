@@ -33,9 +33,26 @@ import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.services.CourseAndRouteService
+import uk.ac.warwick.tabula.scheduling.services.MembershipMember
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD
+import java.sql.Date
+import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
+import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
+import uk.ac.warwick.tabula.services.ProfileServiceImpl
+import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporterImpl
+import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDaoImpl
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
+import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.tabula.data.model.ModeOfAttendance
+import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
+import uk.ac.warwick.tabula.data.model.SitsStatus
+import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
 
 // scalastyle:off magic.number
-class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito with Logging {
+@DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
+class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito with Logging {
 
 	trait Environment {
 		val blobBytes = Array[Byte](1,2,3,4,5)
@@ -43,8 +60,8 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 		val fileDao = smartMock[FileDao]
 
 		val route = new Route
-		val mds = mock[ModuleAndDepartmentService]
-		val crService = mock[CourseAndRouteService]
+		val mds = smartMock[ModuleAndDepartmentService]
+		val crService = smartMock[CourseAndRouteService]
 		crService.getRouteByCode("c100") returns (Some(route))
 
 		val department = new Department
@@ -53,8 +70,8 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 		department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits
 		mds.getDepartmentByCode("ph") returns (Some(department))
 		mds.getDepartmentByCode("PH") returns (Some(department))
-		val rs = mock[ResultSet]
-		val md = mock[ResultSetMetaData]
+		val rs = smartMock[ResultSet]
+		val md = smartMock[ResultSetMetaData]
 		rs.getMetaData() returns(md)
 		md.getColumnCount() returns(4)
 		md.getColumnName(1) returns("gender")
@@ -68,6 +85,14 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 		rs.getString("route_code") returns("C100")
 		rs.getString("spr_tutor1") returns ("IN0070790")
 		rs.getString("homeDepartmentCode") returns ("PH")
+		rs.getString("scj_code") returns ("0672089/2")
+		rs.getDate("begin_date") returns new Date(new java.util.Date("12 May 2011").getTime())
+		rs.getDate("end_date") returns new Date(new java.util.Date("12 May 2014").getTime())
+		rs.getDate("expected_end_date") returns new Date(new java.util.Date("12 May 2014").getTime())
+		rs.getInt("sce_sequence_number") returns (1)
+		rs.getString("enrolment_status_code") returns ("F")
+		rs.getString("mode_of_attendance_code") returns ("P")
+		rs.getString("sce_academic_year") returns ("10/11")
 
 		val mm = MembershipMember(
 			universityId 			= "0672089",
@@ -92,10 +117,64 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 
 	}
 
-	// Just a simple test to make sure all the properties that we use BeanWrappers for actually exist, really
-	@Ignore("broken") @Test def worksWithNew {
+	@Test def testImportSingleStudentCourseYearCommand {
 		new Environment {
-			val memberDao = mock[MemberDao]
+			val modeOfAttendanceImporter = smartMock[ModeOfAttendanceImporter]
+			val profileService = smartMock[ProfileService]
+			val studentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
+			val sitsStatusesImporter = smartMock[SitsStatusesImporter]
+
+			modeOfAttendanceImporter.modeOfAttendanceMap returns Map("F" -> new ModeOfAttendance("F", "FT", "Full Time"), "P" -> new ModeOfAttendance("P", "PT", "Part Time"))
+			sitsStatusesImporter.sitsStatusMap returns Map("F" -> new SitsStatus("F", "F", "Fully Enrolled"), "P" -> new SitsStatus("P", "P", "Permanently Withdrawn"))
+
+			val command = new ImportSingleStudentCourseYearCommand(rs)
+			command.modeOfAttendanceImporter = modeOfAttendanceImporter
+			command.profileService = profileService
+			command.studentCourseYearDetailsDao = studentCourseYearDetailsDao
+			command.sitsStatusesImporter = sitsStatusesImporter
+
+			val studentCourseDetails = new StudentCourseDetails
+			studentCourseDetails.scjCode = "0672089/2"
+			studentCourseDetails.sprCode = "0672089/2"
+
+			command.studentCourseDetails = studentCourseDetails
+
+			val studentCourseYearDetails = command.applyInternal
+			studentCourseYearDetails.academicYear.toString should be ("10/11")
+			studentCourseYearDetails.sceSequenceNumber should be (1)
+			studentCourseYearDetails.enrolmentStatus.code should be ("F")
+			studentCourseYearDetails.lastUpdatedDate should not be null
+			studentCourseYearDetails.modeOfAttendance.code should be ("P")
+			studentCourseYearDetails.yearOfStudy should be (3)
+
+			there was one(studentCourseYearDetailsDao).saveOrUpdate(any[StudentCourseYearDetails]);
+		}
+	}
+
+	@Ignore("broken")
+	@Test def testImportSingleStudentCourseCommand {
+		new Environment {
+			val sitsStatusesImporter = smartMock[SitsStatusesImporter]
+			val studentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
+
+			sitsStatusesImporter.sitsStatusMap returns Map("F" -> new SitsStatus("F", "F", "Fully Enrolled"), "P" -> new SitsStatus("P", "P", "Permanently Withdrawn"))
+
+			val command = new ImportSingleStudentCourseCommand(rs)
+			command.studentCourseDetailsDao = studentCourseDetailsDao
+			command.sitsStatusesImporter = sitsStatusesImporter
+
+			val studentCourseDetails = command.applyInternal
+			there was one(studentCourseDetailsDao).saveOrUpdate(any[StudentCourseDetails]);
+
+		}
+
+	}
+
+	// Just a simple test to make sure all the properties that we use BeanWrappers for actually exist, really
+	@Ignore("broken")
+	@Test def worksWithNew {
+		new Environment {
+			val memberDao = smartMock[MemberDao]
 			memberDao.getByUniversityId("0672089") returns(None)
 
 			val command = new ImportSingleStudentRowCommand(mac, new AnonymousUser(), rs)
@@ -125,7 +204,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 		new Environment {
 			val existing = new StudentMember("0672089")
 
-			val memberDao = mock[MemberDao]
+			val memberDao = smartMock[MemberDao]
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
 
 
@@ -158,7 +237,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 		new Environment {
 			val existing = new StudentMember("0672089")
 			val existingStaffMember = new StaffMember("0070790")
-			val memberDao = mock[MemberDao]
+			val memberDao = smartMock[MemberDao]
 			val relationshipService = smartMock[RelationshipService]
 			val profileService = smartMock[ProfileService]
 
@@ -193,7 +272,7 @@ class ImportSingleStudentCommandTest extends AppContextTestBase with Mockito wit
 		new Environment {
 			val existing = new StudentMember("0672089")
 			val existingStaffMember = new StaffMember("0070790")
-			val memberDao = mock[MemberDao]
+			val memberDao = smartMock[MemberDao]
 			val profileService = smartMock[ProfileService]
 			val relationshipService = smartMock[RelationshipService]
 
