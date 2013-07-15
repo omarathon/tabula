@@ -47,7 +47,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 	
 	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
 
-	var allowSelfGroupSwitching: Boolean = false
+	var allowSelfGroupSwitching: Boolean = true
 	
 	// start complicated membership stuff
 	

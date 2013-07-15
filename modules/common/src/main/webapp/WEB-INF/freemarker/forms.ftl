@@ -55,13 +55,13 @@ Include by default as "form", e.g.
 	<div class="${baseClass}"><#nested/></div>
 </#macro>
 
-<#macro label path="" for="" checkbox=false>
-<#local clazz="control-label">
+<#macro label path="" for="" checkbox=false clazz="">
+<#local clazz="${clazz} control-label"?trim />
 <#if checkbox>
-	<#local clazz="checkbox" />
+	<#local clazz="${clazz} checkbox"?trim />
 </#if>
 <#if path!="">
-  <@f.label path="${path}" for="${path}" cssClass="${clazz}"><#nested/></@f.label>
+  <@f.label path="${path}" for="${path}" cssClass="${clazz}" ><#nested/></@f.label>
 <#elseif for!="">
   <label for="${for}" class="${clazz}"><#nested /></label>
 <#else>
@@ -85,9 +85,9 @@ Include by default as "form", e.g.
 
 <#macro errors path><@f.errors path=path cssClass="error help-inline" /></#macro>
 
-<#macro labelled_row path label cssClass="" help="" fieldCssClass="">
+<#macro labelled_row path label cssClass="" help="" fieldCssClass="" labelCss="">
 <@row path=path cssClass=cssClass>
-	<@_label path=path>
+	<@_label path=path clazz=labelCss >
 		${label}
 	</@_label>
 	<@field cssClass=fieldCssClass>

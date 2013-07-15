@@ -37,57 +37,55 @@
 
 	<#if features.smallGroupTeachingStudentSignUp || features.smallGroupTeachingRandomAllocation>
 		<@form.labelled_row "allocationMethod" "Allocation method">
-			<@form.label checkbox=true>
+			<label class="radio">
 				<@f.radiobutton path="allocationMethod" value="Manual" />
 				Manual allocation
 				<a class="use-popover" data-html="true"
 			     data-content="Allocate students by drag and drop or spreadsheet upload">
 			   	<i class="icon-question-sign"></i>
 			  </a>
-			</@form.label>
+			</label>
 			<#if features.smallGroupTeachingStudentSignUp>
-				<@form.label checkbox=true>
-					<@f.radiobutton path="allocationMethod" value="StudentSignUp" />
+				<label class="radio">
+					<@f.radiobutton path="allocationMethod" value="StudentSignUp" radioactive=".canBeDisabled" />
 					Self sign-up
 					<a class="use-popover" data-html="true"
 				     data-content="Allow students to sign up for groups (you can edit group allocation later)">
 				   	<i class="icon-question-sign"></i>
 				  </a>
-				</@form.label>
+				</label>
 			</#if>
 			<#if features.smallGroupTeachingRandomAllocation>
-				<@form.label checkbox=true>
+				<label class="radio">
 					<@f.radiobutton path="allocationMethod" value="Random" />
 					Randomly allocate students to groups
 					<a class="use-popover" data-html="true"
 				     data-content="Students in the allocation list are randomly assigned to groups. Administrators can still assign students to groups. There may be a delay between students being added to the allocation list and being allocated to a group.">
 				   	<i class="icon-question-sign"></i>
 				  </a>
-				</@form.label>
+				</label>
 			</#if>
 		</@form.labelled_row>
 	</#if>
 
 	<#if features.smallGroupTeachingSelfGroupSwitching>
-		<@form.labelled_row "allowSelfGroupSwitching" "Allow students to change their group">
-			<@form.label checkbox=true>
-				<@f.radiobutton path="allowSelfGroupSwitching" value="true" />
-				Allow students to switch groups
+	
+		<#assign isStudentSignup=form.getvalue('allocationMethod') />
+		<#if isStudentSignup != 'StudentSignUp'>
+			<#assign disable_label="disabled" />
+			<#assign disable_prop="true" />
+		<#else>
+			<#assign disable_prop="false" />
+		</#if>
+		
+		<@form.labelled_row "allowSelfGroupSwitching" "Allow students to switch groups" "canBeDisabled" "" "" "${disable_label}" >
+			<@form.label checkbox=true >
+				<@f.checkbox path="allowSelfGroupSwitching" value="true" disabled=disable_prop />
 				<a class="use-popover" data-html="true"
-			     data-content="Students are allowed to change the group they are in">
-			   	<i class="icon-question-sign"></i>
-			  </a>
+					data-content="When self sign up is enabled students will be able to switch groups.">
+						<i class="icon-question-sign"></i>
+			  	</a>
 			</@form.label>
-
-			<@form.label checkbox=true>
-				<@f.radiobutton path="allowSelfGroupSwitching" value="false" />
-				Don't allow students to switch groups
-				<a class="use-popover" data-html="true"
-				 data-content="Students are not allowed to change the group they are in">
-				<i class="icon-question-sign"></i>
-			  </a>
-			</@form.label>
-
 		</@form.labelled_row>
 	</#if>
 
@@ -162,7 +160,13 @@
 </fieldset>
 
 <script type="text/javascript">
+
+
 	jQuery(function($) {
+		
+	$("input:radio[name='allocationMethod']").tabulaRadioActive();
+	
+	
 		<#-- controller detects action=refresh and does a bind without submit -->
 		$('.modal.refresh-form').on('hide', function(e) {
 			// Ignore events that are something ELSE hiding and being propagated up!
