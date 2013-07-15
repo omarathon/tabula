@@ -1,54 +1,54 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
+import java.sql.Date
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
 import org.joda.time.DateTimeConstants
 import org.joda.time.LocalDate
-import org.junit.{Ignore, Test}
+import org.junit.Ignore
+import org.junit.Test
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD
 import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.MemberDao
+import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
+import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
+import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDaoImpl
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.Gender._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
+import uk.ac.warwick.tabula.data.model.ModeOfAttendance
+import uk.ac.warwick.tabula.data.model.RelationshipType._
+import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.data.model.StaffMember
+import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
+import uk.ac.warwick.tabula.scheduling.services.MembershipMember
+import uk.ac.warwick.tabula.scheduling.services.MembershipMember
+import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
+import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporterImpl
+import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
+import uk.ac.warwick.tabula.services.CourseAndRouteService
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.tabula.data.model.RelationshipType._
-import uk.ac.warwick.tabula.data.model.RelationshipType
-import uk.ac.warwick.tabula.scheduling.services.MembershipMember
-import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.services.CourseAndRouteService
-import uk.ac.warwick.tabula.scheduling.services.MembershipMember
-import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD
-import java.sql.Date
-import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
-import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
 import uk.ac.warwick.tabula.services.ProfileServiceImpl
-import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporterImpl
-import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDaoImpl
-import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
-import uk.ac.warwick.tabula.data.model.SitsStatus
-import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
+import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.userlookup.AnonymousUser
 
 // scalastyle:off magic.number
 @DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
@@ -189,17 +189,42 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 
 			there was one(studentCourseDetailsDao).saveOrUpdate(any[StudentCourseDetails]);
 		}
-
 	}
 
-	// Just a simple test to make sure all the properties that we use BeanWrappers for actually exist, really
-	@Ignore("broken")
-	@Test def worksWithNew {
+	@Test def testImportSingleStudentRowCommandWorksWithNew {
 		new Environment {
+			// first set up studentCourseYearDetails, because the apply for that command is included in the apply for this command:
+			val modeOfAttendanceImporter = smartMock[ModeOfAttendanceImporter]
+
+			val profileService = smartMock[ProfileService]
+			val studentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
+			val sitsStatusesImporter = smartMock[SitsStatusesImporter]
+
+			modeOfAttendanceImporter.modeOfAttendanceMap returns Map("F" -> new ModeOfAttendance("F", "FT", "Full Time"), "P" -> new ModeOfAttendance("P", "PT", "Part Time"))
+			modeOfAttendanceImporter.getModeOfAttendanceForCode("P") returns Some(new ModeOfAttendance("P", "PT", "Part Time"))
+			sitsStatusesImporter.sitsStatusMap returns Map("F" -> new SitsStatus("F", "F", "Fully Enrolled"), "P" -> new SitsStatus("P", "P", "Permanently Withdrawn"))
+
+			val yearCommand = new ImportSingleStudentCourseYearCommand(rs)
+			yearCommand.modeOfAttendanceImporter = modeOfAttendanceImporter
+			yearCommand.profileService = profileService
+			yearCommand.studentCourseYearDetailsDao = studentCourseYearDetailsDao
+			yearCommand.sitsStatusesImporter = sitsStatusesImporter
+
+			// end of stuff to set up studentCourseYearDetails
+
+			// now set up studentCourseDetail:
+			val studentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
+
+			val courseCommand = new ImportSingleStudentCourseCommand(rs, yearCommand)
+			courseCommand.studentCourseDetailsDao = studentCourseDetailsDao
+			courseCommand.sitsStatusesImporter = sitsStatusesImporter
+
+			// end of setting up studentCourseDetail
+
 			val memberDao = smartMock[MemberDao]
 			memberDao.getByUniversityId("0672089") returns(None)
 
-			val command = new ImportSingleStudentRowCommand(mac, new AnonymousUser(), rs)
+			val command = new ImportSingleStudentRowCommand(mac, new AnonymousUser(), rs, courseCommand)
 			command.memberDao = memberDao
 			command.fileDao = fileDao
 			command.moduleAndDepartmentService = mds
@@ -222,7 +247,7 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 		}
 	}
 
-	@Ignore("broken") @Test def worksWithExisting {
+/*	@Ignore("broken") @Test def worksWithExisting {
 		new Environment {
 			val existing = new StudentMember("0672089")
 
@@ -251,9 +276,9 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 
 			there was one(memberDao).saveOrUpdate(existing)
 		}
-	}
+	}*/
 
-	@Ignore("broken") @Transactional
+/*	@Ignore("broken") @Transactional
 	@Test def testCaptureTutorIfSourceIsLocal {
 
 		new Environment {
@@ -324,6 +349,6 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 
 			there was one(relationshipService).saveStudentRelationship(PersonalTutor, "0672089/2","0070790");
 		}
-	}
+	}*/
 }
 

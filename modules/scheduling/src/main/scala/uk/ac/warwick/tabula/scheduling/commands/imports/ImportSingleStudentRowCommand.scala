@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
 
-class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet)
+class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet, importSingleStudentCourseCommand: ImportSingleStudentCourseCommand)
 	extends ImportSingleMemberCommand(member, ssoUser, resultSet)
 	with Logging with Daoisms
 	with StudentProperties with Unaudited with PropertyCopying {
@@ -37,7 +37,7 @@ class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User
 	this.nationality = rs.getString("nationality")
 	this.mobileNumber = rs.getString("mobile_number")
 
-	val importSingleStudentCourseCommand = new ImportSingleStudentCourseCommand(rs, new ImportSingleStudentCourseYearCommand(rs))
+	//val importSingleStudentCourseCommand = new ImportSingleStudentCourseCommand(rs, new ImportSingleStudentCourseYearCommand(rs))
 
 	override def applyInternal(): Member = transactional() {
 		val memberExisting = memberDao.getByUniversityId(universityId)

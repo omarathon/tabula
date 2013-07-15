@@ -30,6 +30,8 @@ import uk.ac.warwick.tabula.scheduling.sandbox.SandboxData
 import uk.ac.warwick.tabula.data.model.DegreeType
 import uk.ac.warwick.tabula.scheduling.sandbox.MapResultSet
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCourseCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCourseYearCommand
 
 case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
 
@@ -122,10 +124,10 @@ class SandboxProfileImporter extends ProfileImporter {
 			ssoUser.setLastName(member.preferredSurname)
 			ssoUser.setStudent(true)
 			ssoUser.setWarwickId(member.universityId)
-			
+
 			val route = SandboxData.route(member.universityId.toLong)
-			
-			val rs = new MapResultSet(Map(					
+
+			val rs = new MapResultSet(Map(
 				"university_id" -> member.universityId,
 				"title" -> member.title,
 				"preferred_forename" -> member.preferredForenames,
@@ -161,10 +163,10 @@ class SandboxProfileImporter extends ProfileImporter {
 				"sce_academic_year" -> AcademicYear.guessByDate(DateTime.now).toString,
 				"sce_sequence_number" -> 1
 			))
-			new ImportSingleStudentRowCommand(mac, ssoUser, rs)
+			new ImportSingleStudentRowCommand(mac, ssoUser, rs, new ImportSingleStudentCourseCommand(rs, new ImportSingleStudentCourseYearCommand(rs)))
 		}
-		
-	def userIdsAndCategories(department: Department): Seq[MembershipInformation] = 
+
+	def userIdsAndCategories(department: Department): Seq[MembershipInformation] =
 		SandboxData.Departments(department.code).routes.values.flatMap { route =>
 			(route.studentsStartId to route.studentsEndId).map { uniId =>
 				val gender = if (uniId % 2 == 0) Gender.Male else Gender.Female
@@ -175,17 +177,17 @@ class SandboxProfileImporter extends ProfileImporter {
 				}
 				// Every fifth student is part time
 				val isPartTime = uniId % 5 == 0
-				
+
 				val userType = MemberUserType.Student
 				val groupName = route.degreeType match {
 					case DegreeType.Undergraduate => if (isPartTime) "Undergraduate - part-time" else "Undergraduate - full-time"
-					case _ => 
+					case _ =>
 						if (route.isResearch)
 							if (isPartTime) "Postgraduate (research) PT" else "Postgraduate (research) FT"
 						else
 							if (isPartTime) "Postgraduate (taught) PT" else "Postgraduate (taught) FT"
 				}
-				
+
 				MembershipInformation(
 					MembershipMember(
 						uniId.toString,
@@ -209,8 +211,8 @@ class SandboxProfileImporter extends ProfileImporter {
 				)
 			}
 		}.toSeq
-		
-	def userIdAndCategory(member: Member): Option[MembershipInformation] = 
+
+	def userIdAndCategory(member: Member): Option[MembershipInformation] =
 		Some(MembershipInformation(
 			MembershipMember(
 				member.universityId,
@@ -232,7 +234,7 @@ class SandboxProfileImporter extends ProfileImporter {
 				member.userType
 			), () => None
 		))
-		
+
 }
 
 object ProfileImporter {
@@ -317,7 +319,8 @@ object ProfileImporter {
 		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
 		declareParameter(new SqlParameter("year", Types.VARCHAR))
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStudentRowCommand(member, ssoUser, rs)
+		override def mapRow(rs: ResultSet, rowNumber: Int)
+					= new ImportSingleStudentRowCommand(member, ssoUser, rs, new ImportSingleStudentCourseCommand(rs, new ImportSingleStudentCourseYearCommand(rs)))
 	}
 
 	val GetStaffInformation = """
