@@ -40,7 +40,7 @@ import java.sql.BatchUpdateException
 import org.hibernate.exception.ConstraintViolationException
 import uk.ac.warwick.tabula.scheduling.services.CourseImporter
 
-class ImportSingleStudentCourseCommand(resultSet: ResultSet)
+class ImportSingleStudentCourseCommand(resultSet: ResultSet, importSingleStudentCourseYearCommand: ImportSingleStudentCourseYearCommand)
 	extends Command[StudentCourseDetails] with Logging with Daoisms
 	with StudentCourseProperties with Unaudited with PropertyCopying {
 
@@ -86,7 +86,7 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 	this.courseYearLength = rs.getString("course_year_length")
 	this.levelCode = rs.getString("level_code")
 
-	val importSingleStudentCourseYearCommand = new ImportSingleStudentCourseYearCommand(resultSet)
+	//val importSingleStudentCourseYearCommand = new ImportSingleStudentCourseYearCommand(resultSet)
 
 	override def applyInternal(): StudentCourseDetails = transactional() {
 		val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCode(scjCode)

@@ -88,7 +88,7 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 		rs.getString("scj_code") returns ("0672089/2")
 		rs.getDate("begin_date") returns new Date(new java.util.Date("12 May 2011").getTime())
 		rs.getDate("end_date") returns new Date(new java.util.Date("12 May 2014").getTime())
-		rs.getDate("expected_end_date") returns new Date(new java.util.Date("12 May 2014").getTime())
+		rs.getDate("expected_end_date") returns new Date(new java.util.Date("12 May 2015").getTime())
 		rs.getInt("sce_sequence_number") returns (1)
 		rs.getString("enrolment_status_code") returns ("F")
 		rs.getString("mode_of_attendance_code") returns ("P")
@@ -125,7 +125,9 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 			val sitsStatusesImporter = smartMock[SitsStatusesImporter]
 
 			modeOfAttendanceImporter.modeOfAttendanceMap returns Map("F" -> new ModeOfAttendance("F", "FT", "Full Time"), "P" -> new ModeOfAttendance("P", "PT", "Part Time"))
+			modeOfAttendanceImporter.getModeOfAttendanceForCode("P") returns Some(new ModeOfAttendance("P", "PT", "Part Time"))
 			sitsStatusesImporter.sitsStatusMap returns Map("F" -> new SitsStatus("F", "F", "Fully Enrolled"), "P" -> new SitsStatus("P", "P", "Permanently Withdrawn"))
+
 
 			val command = new ImportSingleStudentCourseYearCommand(rs)
 			command.modeOfAttendanceImporter = modeOfAttendanceImporter
@@ -151,21 +153,41 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 		}
 	}
 
-	@Ignore("broken")
 	@Test def testImportSingleStudentCourseCommand {
 		new Environment {
-			val sitsStatusesImporter = smartMock[SitsStatusesImporter]
-			val studentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
+			// first set up studentCouresYearDetails, because the apply for that command is included in the apply for this command
+			val modeOfAttendanceImporter = smartMock[ModeOfAttendanceImporter]
 
+			val profileService = smartMock[ProfileService]
+			val studentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
+			val sitsStatusesImporter = smartMock[SitsStatusesImporter]
+
+			modeOfAttendanceImporter.modeOfAttendanceMap returns Map("F" -> new ModeOfAttendance("F", "FT", "Full Time"), "P" -> new ModeOfAttendance("P", "PT", "Part Time"))
+			modeOfAttendanceImporter.getModeOfAttendanceForCode("P") returns Some(new ModeOfAttendance("P", "PT", "Part Time"))
 			sitsStatusesImporter.sitsStatusMap returns Map("F" -> new SitsStatus("F", "F", "Fully Enrolled"), "P" -> new SitsStatus("P", "P", "Permanently Withdrawn"))
 
-			val command = new ImportSingleStudentCourseCommand(rs)
+			val yearCommand = new ImportSingleStudentCourseYearCommand(rs)
+			yearCommand.modeOfAttendanceImporter = modeOfAttendanceImporter
+			yearCommand.profileService = profileService
+			yearCommand.studentCourseYearDetailsDao = studentCourseYearDetailsDao
+			yearCommand.sitsStatusesImporter = sitsStatusesImporter
+
+			// end of stuff to set up studentCourseYearDetails
+
+			val studentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
+
+			val command = new ImportSingleStudentCourseCommand(rs, yearCommand)
 			command.studentCourseDetailsDao = studentCourseDetailsDao
 			command.sitsStatusesImporter = sitsStatusesImporter
 
 			val studentCourseDetails = command.applyInternal
-			there was one(studentCourseDetailsDao).saveOrUpdate(any[StudentCourseDetails]);
 
+			studentCourseDetails.scjCode should be ("0672089/2")
+			studentCourseDetails.beginDate.toString should be ("2011-05-12")
+			studentCourseDetails.endDate.toString should be ("2014-05-12")
+			studentCourseDetails.expectedEndDate.toString should be ("2015-05-12")
+
+			there was one(studentCourseDetailsDao).saveOrUpdate(any[StudentCourseDetails]);
 		}
 
 	}

@@ -27,7 +27,7 @@ trait ModeOfAttendanceImporter extends Logging {
 
 	var modeOfAttendanceDao = Wire.auto[ModeOfAttendanceDao]
 
-	protected var modeOfAttendanceMap: Map[String, ModeOfAttendance] = null
+	var modeOfAttendanceMap: Map[String, ModeOfAttendance] = null
 
 	def getModeOfAttendanceForCode(code: String): Option[ModeOfAttendance] = {
 		if (modeOfAttendanceMap == null) {
@@ -38,7 +38,7 @@ trait ModeOfAttendanceImporter extends Logging {
 
 	/** Get a list of commands that can be applied to save items to the modeofattendance table. */
 	def getImportCommands: Seq[ImportSingleModeOfAttendanceCommand]
-	
+
 	protected def slurpModeOfAttendances(): Map[String, ModeOfAttendance] = {
 		transactional(readOnly = true) {
 			logger.debug("refreshing SITS mode of attendance map")
@@ -54,9 +54,9 @@ trait ModeOfAttendanceImporter extends Logging {
 @Service
 class ModeOfAttendanceImporterImpl extends ModeOfAttendanceImporter {
 	import ModeOfAttendanceImporter._
-	
+
 	var sits = Wire[DataSource]("sitsDataSource")
-	
+
 	lazy val modeOfAttendanceQuery = new ModeOfAttendanceQuery(sits)
 
 	def getImportCommands: Seq[ImportSingleModeOfAttendanceCommand] = {
@@ -82,17 +82,17 @@ class SandboxModeOfAttendanceImporter extends ModeOfAttendanceImporter {
 case class ModeOfAttendanceInfo(code: String, shortName: String, fullName: String)
 
 object ModeOfAttendanceImporter {
-		
+
 	val GetModeOfAttendance = """
 		select moa_code, moa_snam, moa_name from intuit.ins_moa
 		"""
-	
+
 	class ModeOfAttendanceQuery(ds: DataSource) extends MappingSqlQuery[ImportSingleModeOfAttendanceCommand](ds, GetModeOfAttendance) {
 		compile()
-		override def mapRow(resultSet: ResultSet, rowNumber: Int) = 
+		override def mapRow(resultSet: ResultSet, rowNumber: Int) =
 			new ImportSingleModeOfAttendanceCommand(
 				ModeOfAttendanceInfo(resultSet.getString("moa_code"), resultSet.getString("moa_snam"), resultSet.getString("moa_name"))
 			)
 	}
-	
+
 }
