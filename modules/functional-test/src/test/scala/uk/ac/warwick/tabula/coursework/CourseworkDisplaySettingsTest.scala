@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.coursework
 
-import scala.collection.JavaConverters._
 import org.scalatest.{GivenWhenThen, BeforeAndAfter, BeforeAndAfterAll}
 import uk.ac.warwick.tabula.BrowserTest
 import org.openqa.selenium.By
+import uk.ac.warwick.tabula.home.FeaturesDriver._
 
 class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 
@@ -23,6 +23,39 @@ class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures 
 		
 		checkbox("showStudentName").isSelected should be (true)
 	}
+
+	"Department admin" should "be able to set default group signup method for a department" in {
+
+		Given("The smallGroupTeachingStudentSignUp feature is enabled")
+		enableFeature("smallGroupTeachingStudentSignUp")
+
+		as(P.Admin1) {
+		When("an administrator goes to the department settings page")
+			click on linkText("Go to the Test Services admin page")
+ 			openDisplaySettings()
+
+	  Then("the administrator can see the option to set a default signup method")
+			radioButtonGroup("defaultGroupAllocationMethod") should not be(null)
+			
+
+		When("the administrator selects 'Manual Allocation' and submits")
+			radioButtonGroup("defaultGroupAllocationMethod").value= "Manual"
+			submit()
+
+		Then("The settings page should show 'Manual Allocation' as the selected method")
+			openDisplaySettings()
+			radioButtonGroup("defaultGroupAllocationMethod").selection should be(Some("Manual"))
+
+		When("the administrator selects 'Student Sign-up' and submits")
+			radioButtonGroup("defaultGroupAllocationMethod").value= "StudentSignUp"
+			submit()
+
+		Then("The settings page should show 'Student Sign-up' as the selected method")
+			openDisplaySettings()
+			radioButtonGroup("defaultGroupAllocationMethod").selection should be(Some("StudentSignUp"))
+
+
+		}}
 
 	def openDisplaySettings() = {
 		click on (cssSelector(".dept-settings a.dropdown-toggle"))
