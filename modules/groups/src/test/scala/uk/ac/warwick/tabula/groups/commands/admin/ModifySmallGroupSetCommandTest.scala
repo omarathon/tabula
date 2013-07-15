@@ -56,7 +56,7 @@ class ModifySmallGroupSetCommandTest extends TestBase{
 
 		sourceSet.studentsCanSeeOtherMembers should be (true)
 		sourceSet.studentsCanSeeTutorName should be(true)
-		sourceSet.allowSelfGroupSwitching should be(JBoolean(Some(true)))
+		sourceSet.allowSelfGroupSwitching should be(true)
 		sourceSet.name should be("test")
 		sourceSet.academicYear should be(AcademicYear(2012))
 		sourceSet.format should be (SmallGroupFormat.Lab)

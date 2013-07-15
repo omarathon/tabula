@@ -72,7 +72,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	var allocationMethod: SmallGroupAllocationMethod = _
 
 	@Column(name="self_group_switching")
-	var allowSelfGroupSwitching:JBoolean = _
+	var allowSelfGroupSwitching:Boolean = false
 
 	@ManyToOne
 	@JoinColumn(name = "module_id")
