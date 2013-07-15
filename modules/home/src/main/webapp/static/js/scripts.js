@@ -218,6 +218,24 @@
 			});
 		}
 	};
+	
+	$.fn.tabulaRadioActive = function(options) {
+		var $radios = this;
+		
+		this.on('change', function() {		
+			// fallback to plain "radioactive" attribute since FTL syntax doesn't allow dashes in macro parameter names.
+			
+			$.each($radios, function(i, radio) {
+				var radioActiveAttr = $(radio).data('radioactive') || $(radio).attr('radioactive');
+				if (radioActiveAttr) {
+					var $container = jQuery(radioActiveAttr);
+					$container.find('label,input,select').toggleClass('disabled', !radio.checked);
+					$container.find('input,select').attr({disabled: !radio.checked});
+				}
+			})
+		})
+	}
+	
 
 	/*
 	 * .double-submit-protection class on a form will detect submission
