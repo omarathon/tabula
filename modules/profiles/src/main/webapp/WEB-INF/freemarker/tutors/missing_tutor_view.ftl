@@ -27,7 +27,7 @@
 								${(student.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}
 							</td>
 							<td>
-								$(student.mostSignificantCourseDetails.get.route.name)!
+								${(student.mostSignificantCourseDetails.route.name)!}
 							</td>
 						</tr>
 					</#list>
