@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value
 import uk.ac.warwick.tabula._
 import org.junit.Ignore
 import scala.language.reflectiveCalls
+import scala.language.implicitConversions
 
 // scalastyle:off magic.number
 class ApplicationTest extends AppContextTestBase {
