@@ -23,7 +23,7 @@ object SmallGroupSet {
 	final val NotDeletedFilter = "notDeleted"
 	object Settings {
 		val StudentsCanSeeTutorNames = "StudentsCanSeeTutorNames"
-		val StudentsCanSeeOtherMemebers = "StudentsCanSeeOtherMemebers"
+		val StudentsCanSeeOtherMembers = "StudentsCanSeeOtherMembers"
 	}
 }
 
@@ -106,8 +106,8 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	def studentsCanSeeTutorName = getBooleanSetting(Settings.StudentsCanSeeTutorNames).getOrElse(false)
 	def studentsCanSeeTutorName_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeTutorNames -> canSee)
 
-	def studentsCanSeeOtherMembers = getBooleanSetting(Settings.StudentsCanSeeOtherMemebers).getOrElse(false)
-	def studentsCanSeeOtherMembers_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeOtherMemebers -> canSee)
+	def studentsCanSeeOtherMembers = getBooleanSetting(Settings.StudentsCanSeeOtherMembers).getOrElse(false)
+	def studentsCanSeeOtherMembers_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeOtherMembers -> canSee)
 
 
 
