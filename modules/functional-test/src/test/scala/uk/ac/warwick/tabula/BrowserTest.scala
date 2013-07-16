@@ -26,7 +26,7 @@ import com.gargoylesoftware.htmlunit.BrowserVersion
   * the WebDriver we provide.
   */
 @RunWith(classOf[JUnitRunner])
-abstract class BrowserTest
+trait BrowserTest
 	extends ShouldMatchers
 	with FlatSpec
 	with BeforeAndAfter
@@ -53,6 +53,9 @@ abstract class BrowserTest
 		case "firefox" => new FirefoxDriver
 		case "ie" => new InternetExplorerDriver
 	}
+
+	implicit val browserTest = this
+
 	
 	/**
 	 * eventually{} is a generic ScalaTest method to repeatedly
@@ -62,7 +65,6 @@ abstract class BrowserTest
 	def eventuallyAjax(fun: =>Unit) {
 		eventually(timeout(10.seconds), interval(200.millis)) (fun)
 	}
-
 }
 
 case class LoginDetails(val usercode: String, val password: String, description: String)
