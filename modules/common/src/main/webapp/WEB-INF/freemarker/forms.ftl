@@ -57,9 +57,10 @@ Include by default as "form", e.g.
 </#macro>
 
 <#macro label path="" for="" checkbox=false clazz="">
-<#local clazz="${clazz} control-label"?trim />
 <#if checkbox>
 	<#local clazz="${clazz} checkbox"?trim />
+<#else>
+	<#local clazz="${clazz} control-label"?trim />
 </#if>
 <#if path!="">
   <@f.label path="${path}" for="${path}" cssClass="${clazz}" ><#nested/></@f.label>
