@@ -294,6 +294,7 @@
 				e.stopImmediatePropagation();
 				e.preventDefault();
 			}
+			return false;
 		});
 
 		// Click away to dismiss
