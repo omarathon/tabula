@@ -14,11 +14,21 @@
 <#else>
 	<ul id="home-list">
 		<#-- TODO can we guard this, or would it be too expensive to be worth the bother? -->
-		<li><h2><a href="<@url page="/" context="/coursework" />">Coursework Management</a></h2></li>
+		<li><h2><a href="<@url page="/" context="/coursework" />">Coursework Management</a></h2>
+			<#if user.staff>
+				<span class="hint">Create assignments, give feedback and add marks</span>
+			<#else>
+				<span class="hint">Submit coursework, view feedback and see your marks</span>
+			</#if>
+		</li>
 		
 		<#if features.smallGroupTeaching>
 			<li><h2><a href="<@url page="/" context="/groups" />" />Small Group Teaching</a></h2>
-				<span class="hint">Create seminars, tutorials and lab groups</span>
+				<#if user.staff>
+					<span class="hint">Create seminars, tutorials and lab groups</span>
+				<#else>
+					<span class="hint">View your seminars, tutorials and lab groups</span>
+				</#if>
 			</li>
 		</#if>
 	
@@ -27,7 +37,9 @@
 				<span class="hint">View student information and edit personal tutors</span>
 			</li>
 		<#elseif user.student>
-			<li><h2><a href="<@url page="/" context="/profiles" />">My Student Profile</a></h2></li>
+			<li><h2><a href="<@url page="/" context="/profiles" />">My Student Profile</a></h2>
+				<span class="hint">View your student information</span>
+			</li>
 		</#if>
 	</ul>
 </#if>
