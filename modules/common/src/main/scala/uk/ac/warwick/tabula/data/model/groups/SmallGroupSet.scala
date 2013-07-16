@@ -17,9 +17,14 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
 
 object SmallGroupSet {
 	final val NotDeletedFilter = "notDeleted"
+	object Settings {
+		val StudentsCanSeeTutorNames = "StudentsCanSeeTutorNames"
+		val StudentsCanSeeOtherMembers = "StudentsCanSeeOtherMembers"
+	}
 }
 
 /**
@@ -29,8 +34,9 @@ object SmallGroupSet {
 @Filter(name = SmallGroupSet.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget {
-	
+class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings[SmallGroupSet] with PostLoadBehaviour  {
+	import SmallGroupSet.Settings
+
 	@transient var permissionsService = Wire[PermissionsService]
 	@transient var membershipService = Wire[AssignmentMembershipService]
 
@@ -66,7 +72,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	var allocationMethod: SmallGroupAllocationMethod = _
 
 	@Column(name="self_group_switching")
-	var allowSelfGroupSwitching:JBoolean = _
+	var allowSelfGroupSwitching:Boolean = true
 
 	@ManyToOne
 	@JoinColumn(name = "module_id")
@@ -97,6 +103,15 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	
 	def permissionsParents = Option(module).toStream
 
+	def studentsCanSeeTutorName = getBooleanSetting(Settings.StudentsCanSeeTutorNames).getOrElse(false)
+	def studentsCanSeeTutorName_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeTutorNames -> canSee)
+
+	def studentsCanSeeOtherMembers = getBooleanSetting(Settings.StudentsCanSeeOtherMembers).getOrElse(false)
+	def studentsCanSeeOtherMembers_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeOtherMembers -> canSee)
+
+
+
+
 	def toStringProps = Seq(
 		"id" -> id,
 		"name" -> name,
@@ -119,6 +134,12 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
     newSet.permissionsService = permissionsService
     newSet.releasedToStudents = releasedToStudents
     newSet.releasedToTutors = releasedToTutors
+		newSet.settings = Map() ++ settings
     newSet
   }
+
+	def postLoad {
+		ensureSettings
+	}
 }
+

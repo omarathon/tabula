@@ -28,11 +28,12 @@ Include by default as "form", e.g.
 	</@spring.bind>
 </#function>
 
-<#macro row path="" cssClass="">
+<#macro row path="" cssClass="" defaultClass="control-group">
+
 	<#if cssClass="">
-		<#assign baseClass="control-group"/>
+		<#assign baseClass=defaultClass/>
 	<#else>
-		<#assign baseClass="control-group " + cssClass />
+		<#assign baseClass=defaultClass + " " + cssClass />
 	</#if>
 	<#if path="">
 		<div class="${baseClass}"><#nested/></div>

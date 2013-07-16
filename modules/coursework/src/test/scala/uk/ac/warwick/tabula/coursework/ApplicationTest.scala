@@ -58,12 +58,6 @@ class ApplicationTest extends AppContextTestBase {
      */
     @Transactional @Test def departmentLoadEvent {
 
-			// see http://stackoverflow.com/questions/1589603/scala-set-a-field-value-reflectively-from-field-name
-			implicit def reflector(ref: AnyRef) = new {
-				def getV(name: String): Any = ref.getClass.getMethods.find(_.getName == name).get.invoke(ref)
-				def setV(name: String, value: Any): Unit = ref.getClass.getMethods.find(_.getName == name + "_$eq").get.invoke(ref, value.asInstanceOf[AnyRef])
-			}
-
       val dept = new Department
       dept.code = "gr"
 
