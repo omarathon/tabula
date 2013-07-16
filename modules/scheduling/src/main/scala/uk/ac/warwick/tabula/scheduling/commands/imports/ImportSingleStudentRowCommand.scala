@@ -68,7 +68,7 @@ class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User
 		}
 
 		importSingleStudentCourseCommand.stuMem = member
-		importSingleStudentCourseCommand.apply
+		importSingleStudentCourseCommand.apply()
 
 		member
 	}

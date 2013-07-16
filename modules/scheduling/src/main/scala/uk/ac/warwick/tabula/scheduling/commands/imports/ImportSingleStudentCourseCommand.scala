@@ -122,7 +122,9 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet, importSingleStudent
 		}
 
 		importSingleStudentCourseYearCommand.studentCourseDetails = studentCourseDetails
-		importSingleStudentCourseYearCommand.apply
+
+
+		importSingleStudentCourseYearCommand.apply()
 
 		captureTutor(studentCourseDetails.department)
 
