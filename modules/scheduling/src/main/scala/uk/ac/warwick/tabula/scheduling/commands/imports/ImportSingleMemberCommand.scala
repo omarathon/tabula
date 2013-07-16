@@ -154,14 +154,19 @@ abstract class ImportSingleMemberCommand extends Command[Member] with Logging wi
 
 	private def copyPhotoIfModified(property: String, photoOption: () => Option[Array[Byte]], memberBean: BeanWrapper): Boolean = {
 		val memberLastUpdated = memberBean.getPropertyValue("lastUpdatedDate").asInstanceOf[DateTime]
+		val existingPhoto = memberBean.getPropertyValue("photo").asInstanceOf[FileAttachment]
 
 		/*
 		 * We copy the photo if:
+		 * - The student currently has no photo; or
 		 * - There is no last updated date for the Member; or
 		 * - There is no last updated date from Membership; or
 		 * - The last updated date for the Member is before or on the same day as the last updated date from Membership
 		 */
-		val fetchPhoto = if (memberLastUpdated == null) {
+		val fetchPhoto = if (existingPhoto == null || !existingPhoto.hasData) {
+			logger.info(s"Fetching photo for $universityId as we have no existing photo stored")
+			true
+		} else if (memberLastUpdated == null) {
 			logger.info(s"Fetching photo for $universityId as we have no last updated date stored")
 			true
 		} else if (membershipLastUpdated == null) {

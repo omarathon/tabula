@@ -299,7 +299,7 @@
 		// Click away to dismiss
 		$('html').on('click', function(e) {
 			// if clicking anywhere other than the popover itself
-			if ($(e.target).closest('.popover').length === 0) {
+			if ($(e.target).closest('.popover').length === 0 && $(e.target).closest('.use-popover').length === 0) {
 				$items.popover('hide');
 			}
 		});
