@@ -40,7 +40,7 @@ class ImportModeOfAttendanceCommand(info: ModeOfAttendanceInfo) extends Command[
 			case _ => new ModeOfAttendance()
 		}
 
-		val commandBean = new BeanWrapperImpl(ImportModeOfAttendanceCommand.this)
+		val commandBean = new BeanWrapperImpl(this)
 		val modeOfAttendanceBean = new BeanWrapperImpl(modeOfAttendance)
 
 		val hasChanged = copyBasicProperties(properties, commandBean, modeOfAttendanceBean)

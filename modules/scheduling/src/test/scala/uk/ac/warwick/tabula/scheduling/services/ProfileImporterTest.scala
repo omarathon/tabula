@@ -117,9 +117,6 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			user2.setFirstName("different")
 			user2.setLastName("strokes")
 
-			//val member1 = new ImportStudentRowCommand(mac, user1, rs)
-			//val member2 = new ImportStudentRowCommand(mac, user2, rs)
-
 			val member1 = new ImportStudentRowCommand(mac, user1, rs,
 				new ImportStudentCourseCommand(rs,
 						new ImportStudentCourseYearCommand(rs),

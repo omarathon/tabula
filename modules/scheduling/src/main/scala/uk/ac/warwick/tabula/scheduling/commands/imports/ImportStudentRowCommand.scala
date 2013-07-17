@@ -54,7 +54,7 @@ class ImportStudentRowCommand(member: MembershipInformation, ssoUser: User, resu
 			case _ => (true, new StudentMember(universityId))
 		}
 
-		val commandBean = new BeanWrapperImpl(ImportStudentRowCommand.this)
+		val commandBean = new BeanWrapperImpl(this)
 		val memberBean = new BeanWrapperImpl(member)
 
 		val hasChanged = copyMemberProperties(commandBean, memberBean)

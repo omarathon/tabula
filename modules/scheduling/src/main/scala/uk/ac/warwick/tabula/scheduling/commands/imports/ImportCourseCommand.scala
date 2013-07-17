@@ -32,7 +32,7 @@ class ImportCourseCommand(resultSet: ResultSet)
 	var name = resultSet.getString("crs_name")
 	var title = resultSet.getString("crs_titl")
 
-	override def applyInternal(): Course = transactional() ({
+	override def applyInternal(): Course = transactional() {
 		val courseExisting = courseDao.getByCode(code)
 
 		logger.debug("Importing course " + code + " into " + courseExisting)
@@ -44,7 +44,7 @@ class ImportCourseCommand(resultSet: ResultSet)
 			case _ => new Course()
 		}
 
-		val commandBean = new BeanWrapperImpl(ImportCourseCommand.this)
+		val commandBean = new BeanWrapperImpl(this)
 		val courseBean = new BeanWrapperImpl(course)
 
 		val hasChanged = copyBasicProperties(properties, commandBean, courseBean)
@@ -57,7 +57,7 @@ class ImportCourseCommand(resultSet: ResultSet)
 		}
 
 		course
-	})
+	}
 
 	private val properties = Set(
 		"code", "shortName", "name", "title"
