@@ -66,7 +66,6 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					userType = Staff
 				), () => None)
 
-				//val member = new ImportStudentRowCommand(mac, new AnonymousUser, rs)
 				val member = new ImportStudentRowCommand(mac, new AnonymousUser, rs,
 					new ImportStudentCourseCommand(rs,
 							new ImportStudentCourseYearCommand(rs),
@@ -92,7 +91,6 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					userType = Staff
 				), () => None)
 
-				// val member = new ImportStudentRowCommand(mac, new AnonymousUser, rs)
 				val member = new ImportStudentRowCommand(mac, new AnonymousUser, rs,
 					new ImportStudentCourseCommand(rs,
 							new ImportStudentCourseYearCommand(rs),
@@ -169,7 +167,6 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		val memberDao = mock[MemberDao]
 		memberDao.getByUniversityId("0672089") returns(None)
 
-		//val command = new ImportStudentRowCommand(mac, new AnonymousUser, rs)
 		val command = new ImportStudentRowCommand(mac, new AnonymousUser, rs,
 			new ImportStudentCourseCommand(rs,
 				new ImportStudentCourseYearCommand(rs),
