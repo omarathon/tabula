@@ -202,7 +202,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseDetails.endDate.toString should be ("2014-05-12")
 			studentCourseDetails.expectedEndDate.toString should be ("2015-05-12")
 
-			//studentCourseDetails.studentCourseYearDetails.size should be (1)
+			studentCourseDetails.studentCourseYearDetails.size should be (1)
 
 			there was one(studentCourseDetailsDao).saveOrUpdate(any[StudentCourseDetails]);
 		}
@@ -224,16 +224,6 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			command.fileDao = fileDao
 			command.moduleAndDepartmentService = modAndDeptService
 
-			// need to save the transient department as we're saving a reference to it in member
-			//val deptDao = new DepartmentDaoImpl
-			//deptDao.save(department)
-
-			//moaDao.saveOrUpdate(new ModeOfAttendance("F", "FT", "Full Time"))
-			//moaDao.saveOrUpdate(new ModeOfAttendance("P", "PT", "Part Time"))
-
-			//sitsStatusDao.saveOrUpdate(new SitsStatus("F", "Fully enrolled", "Fully enrolled for this session"))
-			//sitsStatusDao.saveOrUpdate(new SitsStatus("P", "PWD", "Permanently Withdrawn"))
-
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
 			val member = command.applyInternal()
 
@@ -248,17 +238,11 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			member.photo should not be (null)
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 
-/*				val uniId = member.universityId
+			member match {
+				case stu: StudentMember => stu.studentCourseDetails.size should be (1)
+				case _ => false should be (true)
+			}
 
-				val memFromDb = memberDao.getByUserId(uniId)
-
-				val studentMember = (memFromDb match {
-					case Some(stu: StudentMember) => Some(stu)
-					case _ => None
-				}).get
-
-				studentMember.studentCourseDetails.size should be (1)
-*/
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])
 

@@ -124,7 +124,9 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 
 		importStudentCourseYearCommand.studentCourseDetails = studentCourseDetails
 		val studentCourseYearDetails = importStudentCourseYearCommand.apply()
-		//studentCourseDetails.attachStudentCourseYearDetails(studentCourseYearDetails)
+
+		// Apply above will take care of the db.  This brings the in-memory data up to speed:
+		studentCourseDetails.attachStudentCourseYearDetails(studentCourseYearDetails)
 
 		captureTutor(studentCourseDetails.department)
 

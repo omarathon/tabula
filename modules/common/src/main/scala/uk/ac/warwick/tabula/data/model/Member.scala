@@ -223,6 +223,20 @@ class StudentMember extends Member with StudentProperties {
 			else ""
 		case _ => ""
 	}
+
+	def attachStudentCourseDetails(detailsToAdd: StudentCourseDetails) {
+		studentCourseDetails.asScala.filter(_.equals(detailsToAdd)) match {
+			case scd: StudentCourseDetails => {
+				// out with the old and in with the new
+				studentCourseDetails.remove(scd)
+				studentCourseDetails.add(detailsToAdd)
+			}
+			case nil => {
+				studentCourseDetails.add(detailsToAdd)
+			}
+		}
+	}
+
 }
 
 @Entity

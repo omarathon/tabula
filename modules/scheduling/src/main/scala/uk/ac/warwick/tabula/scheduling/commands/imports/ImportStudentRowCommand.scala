@@ -67,7 +67,10 @@ class ImportStudentRowCommand(member: MembershipInformation, ssoUser: User, resu
 		}
 
 		importStudentCourseCommand.stuMem = member
-		importStudentCourseCommand.apply()
+		val studentCourseDetails = importStudentCourseCommand.apply()
+
+		// apply above will take care of the db.  This brings the in-memory data up to speed:
+		member.attachStudentCourseDetails(studentCourseDetails)
 
 		member
 	}
