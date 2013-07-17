@@ -11,6 +11,9 @@ import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import scala.beans.BeanProperty
+import org.apache.commons.collections.FactoryUtils
+import org.apache.commons.collections.list.LazyList
 
 class AssignMarkersCommand(module: Module, assignment:Assignment)
 	extends AbstractAssignMarkersCommand(module, assignment)
@@ -36,14 +39,14 @@ abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:A
 
 	val allMarkers = assignment.markingWorkflow.firstMarkers.members ++ assignment.markingWorkflow.secondMarkers.members
 
+	def listFactory : JList[String] = JArrayList()
+
 	var markerMapping : JMap[String, JList[String]] = allMarkers.map({
-		val myList : JList[String] = JArrayList()
-		x => (x, myList)
+		x => (x, listFactory)
 	}).toMap.asJava
 
 
 	def onBind() {
-
 		def retrieveMarkers(markerDef:Seq[String]): JList[Marker] = markerDef.map{marker =>
 			val students:JList[Student] = assignment.markerMap.toMap.get(marker) match {
 				case Some(userGroup:UserGroup) => userGroup.includeUsers.map{student =>
