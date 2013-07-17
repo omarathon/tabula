@@ -95,16 +95,10 @@ class StudentCourseDetails
 	def equals(that:StudentCourseDetails) = this.scjCode == that.scjCode
 
 	def attachStudentCourseYearDetails(yearDetailsToAdd: StudentCourseYearDetails) {
-		studentCourseYearDetails.asScala.filter(_.equals(yearDetailsToAdd)) match {
-			case scyd: StudentCourseYearDetails => {
-				// out with the old and in with the new
-				studentCourseYearDetails.remove(scyd)
-				studentCourseYearDetails.add(yearDetailsToAdd)
-			}
-			case nil => {
-				studentCourseYearDetails.add(yearDetailsToAdd)
-			}
+		if (studentCourseYearDetails.asScala.contains(yearDetailsToAdd)) {
+				studentCourseYearDetails.remove(yearDetailsToAdd)
 		}
+		studentCourseYearDetails.add(yearDetailsToAdd)
 	}
 }
 
