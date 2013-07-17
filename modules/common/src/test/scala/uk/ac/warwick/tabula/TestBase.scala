@@ -37,6 +37,7 @@ import freemarker.core.Environment
 import scala.Some
 import org.apache.log4j.NDC
 import uk.ac.warwick.tabula.helpers.Logging
+import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
 
 /** Base class for tests which boringly uses the JUnit support of
   * Scalatest, so you do @Test annotated methods as you normally would.
@@ -227,6 +228,19 @@ trait TestHelpers extends TestFixtures {
 	def resourceAsString(path: String, encoding: String = "UTF-8"): String = new String(resourceAsBytes(path), encoding)
 	def resourceAsBytes(path: String): Array[Byte] = FileCopyUtils.copyToByteArray(new ClassPathResource(path).getInputStream)
 
+	/**
+	 * custom matcher to let you write
+	 *
+	 * myObject should be ( anInstanceOf[MyType] )
+	 *
+	 * See https://groups.google.com/forum/#!topic/scalatest-users/UrdRM6XHB4Y
+	 */
+	def anInstanceOf[T](implicit manifest: Manifest[T]) = {
+		val clazz = manifest.runtimeClass.asInstanceOf[Class[T]]
+		new BePropertyMatcher[AnyRef] { def apply(left: AnyRef) =
+			BePropertyMatchResult(clazz.isAssignableFrom(left.getClass), "an instance of " + clazz.getName)
+		}
+	}
 
 	def containMatching[A](f: (A)=>Boolean) = org.scalatest.matchers.Matcher[Seq[A]] { (v:Seq[A]) =>
 		org.scalatest.matchers.MatchResult(

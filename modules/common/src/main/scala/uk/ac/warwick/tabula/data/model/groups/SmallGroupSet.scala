@@ -74,6 +74,9 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	@Column(name="self_group_switching")
 	var allowSelfGroupSwitching:Boolean = true
 
+	@Column(name="open_for_signups")
+	var openForSignups:Boolean = false
+
 	@ManyToOne
 	@JoinColumn(name = "module_id")
 	var module: Module = _
