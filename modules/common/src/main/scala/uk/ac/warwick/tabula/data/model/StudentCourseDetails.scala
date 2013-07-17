@@ -95,9 +95,7 @@ class StudentCourseDetails
 	def equals(that:StudentCourseDetails) = this.scjCode == that.scjCode
 
 	def attachStudentCourseYearDetails(yearDetailsToAdd: StudentCourseYearDetails) {
-		if (studentCourseYearDetails.asScala.contains(yearDetailsToAdd)) {
-				studentCourseYearDetails.remove(yearDetailsToAdd)
-		}
+		studentCourseYearDetails.remove(yearDetailsToAdd)
 		studentCourseYearDetails.add(yearDetailsToAdd)
 	}
 }

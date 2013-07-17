@@ -225,9 +225,7 @@ class StudentMember extends Member with StudentProperties {
 	}
 
 	def attachStudentCourseDetails(detailsToAdd: StudentCourseDetails) {
-		if (studentCourseDetails.asScala.contains(detailsToAdd)) {
-				studentCourseDetails.remove(detailsToAdd)
-		}
+		studentCourseDetails.remove(detailsToAdd)
 		studentCourseDetails.add(detailsToAdd)
 	}
 }
