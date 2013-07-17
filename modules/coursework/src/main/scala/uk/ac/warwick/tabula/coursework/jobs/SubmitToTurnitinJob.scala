@@ -74,7 +74,7 @@ class SubmitToTurnitinJob extends Job
 		lazy val session = api.login(job.user).getOrElse(throw loginFailure)
 
 		// Get existing submissions. 
-		val existingSubmissions = session.listSubmissions(classId, assignmentId) match {
+		val existingSubmissions = session.listSubmissions(classId, className, assignmentId, assignmentName) match {
 			case ClassNotFound() | AssignmentNotFound() => { // class or assignment don't exist
 				// ensure assignment and course are created, as submitPaper doesn't always do that for you
 				debug("Missing class or assignment, creating...")
@@ -238,7 +238,7 @@ class SubmitToTurnitinJob extends Job
 			// getSubmissions isn't recursive, it just makes the code after it clearer.
 			def getSubmissions() = {
 				Thread.sleep(WaitingSleep)
-				session.listSubmissions(classId, assignmentId) match {
+				session.listSubmissions(classId, className, assignmentId, assignmentName) match {
 					case GotSubmissions(list) => {
 						val checked = list filter { _.hasBeenChecked }
 						if (checked.size == list.size) {
