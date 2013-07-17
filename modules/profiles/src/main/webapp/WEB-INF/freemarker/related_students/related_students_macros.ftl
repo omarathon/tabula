@@ -3,9 +3,7 @@
 <#macro row student>
 <tr class="related_student">
 	<td>
-		<div class="photo">
-			<img src="<@routes.photo student />" />
-		</div>
+		<@fmt.member_photo student "tinythumbnail" />
 	</td>
 	<td><h6>${student.firstName}</h6></td>
 	<td><h6>${student.lastName}</h6></td>
