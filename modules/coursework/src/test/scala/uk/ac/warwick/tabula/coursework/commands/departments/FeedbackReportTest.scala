@@ -5,12 +5,12 @@ import scala.collection.JavaConverters._
 import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.joda.time.base.AbstractInstant
-import uk.ac.warwick.tabula.AppContextTestBase
+import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.coursework.services.feedbackreport.FeedbackReport
 import uk.ac.warwick.userlookup.User
 
 // scalastyle:off
-class FeedbackReportTest extends AppContextTestBase with ReportWorld {
+class FeedbackReportTest extends TestBase with ReportWorld {
 	import FeedbackReport._
 	
 	@Test
