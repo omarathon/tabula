@@ -292,9 +292,10 @@
 		$items.on('click', function(e) {
 			if ($(this).hasClass('disabled')) {
 				e.stopImmediatePropagation();
-				e.preventDefault();
 			}
-			return false;
+			//Prevent propagation of click event to parent DOM elements
+			e.preventDefault();
+			e.stopPropagation();
 		});
 
 		// Click away to dismiss
