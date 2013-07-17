@@ -117,7 +117,7 @@
 							</div>
 						</#list>
 
-						<#assign unallocatedSize = groupSet.unallocatedStudents?size />
+						<#assign unallocatedSize = groupSet.unallocatedStudentsCount />
 						<#if unallocatedSize gt 0>
 							<div class="alert">
 								<i class="icon-info-sign"></i> <@fmt.p unallocatedSize "student has" "students have" /> not been allocated to a group

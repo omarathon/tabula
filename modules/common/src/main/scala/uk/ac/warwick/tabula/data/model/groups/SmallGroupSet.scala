@@ -99,6 +99,13 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 		allStudents diff allocatedStudents
 	}
 	
+	def unallocatedStudentsCount = {
+		val allStudentsCount = membershipService.countMembershipUsers(assessmentGroups.asScala, Some(members))
+		val allocatedStudentsCount = groups.asScala.foldLeft(0) { (acc, grp) => acc + grp.students.members.size }
+		
+		allStudentsCount - allocatedStudentsCount
+	}
+	
 	def hasAllocated = groups.asScala exists { !_.students.isEmpty }
 	
 	def permissionsParents = Option(module).toStream

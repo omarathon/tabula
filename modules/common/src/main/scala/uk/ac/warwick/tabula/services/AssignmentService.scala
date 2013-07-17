@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Filter
 import org.hibernate.annotations.FilterDef
@@ -73,6 +74,10 @@ trait AssignmentMembershipService {
 	def replaceMembers(group: UpstreamAssessmentGroup, universityIds: Seq[String])
 
 	def getEnrolledAssignments(user: User): Seq[Assignment]
+
+	def countMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Int
+	def countMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Int
+	def countMembershipUsers(assignment: Assignment): Int
 
 	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): AssignmentMembershipInfo
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[User]
@@ -350,6 +355,30 @@ trait AssignmentMembershipMethods { self: AssignmentMembershipServiceImpl =>
 	def determineMembershipUsers(assignment: Assignment): Seq[User] = {
 		determineMembershipUsers(assignment.upstreamAssessmentGroups, Option(assignment.members))
 	}
+	
+	/**
+	 * May overestimate
+	 */
+	def countMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]) = {
+		val sitsUsers = upstream.flatMap { _.members.members }.distinct
+
+		val includes = others map { _.includeUsers.asScala } getOrElse Nil
+		val excludes = others map { _.excludeUsers.asScala } getOrElse Nil
+
+		((sitsUsers ++ includes) diff excludes).size
+	}
+
+	/**
+	 * Returns just a list of User objects who are on this assessment group.
+	 */
+	def countMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]) =
+		countMembership(upstream, others)
+
+	/**
+	 * Returns a simple count of students who are enrolled on this assignment
+	 */
+	def countMembershipUsers(assignment: Assignment): Int =
+		countMembershipUsers(assignment.upstreamAssessmentGroups, Option(assignment.members))
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Boolean = {
 		if (others map {_.excludeUsers contains user.getUserId } getOrElse false) false
