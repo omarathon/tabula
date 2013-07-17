@@ -39,10 +39,9 @@ abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:A
 
 	val allMarkers = assignment.markingWorkflow.firstMarkers.members ++ assignment.markingWorkflow.secondMarkers.members
 
-	def listFactory : JList[String] = JArrayList()
-
-	var markerMapping : JMap[String, JList[String]] = allMarkers.map({
-		x => (x, listFactory)
+	var markerMapping : JMap[String, JList[String]] = allMarkers.map({ x =>
+			val myList : JList[String] = JArrayList()
+			(x, myList)
 	}).toMap.asJava
 
 
