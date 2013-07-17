@@ -305,11 +305,26 @@
 				$items.popover('hide');
 			}
 		});
+		
+		// TAB-945 support popovers within fix-on-scroll
+		$items.closest('.fix-on-scroll').on('fixed', function(e, isFixed, fixLocation) {
+			// Re-position any currently shown popover whenever we trigger a change in fix behaviour
+			$items.each(function() {
+				var $item = $(this);
+				var popover = $item.popover().data('popover');
+				var $tip = popover.tip();
+				if ($tip.is(':visible')) {
+					// Re-position. BUT HOW?
+					$item.popover('show');
+				}
+			});
+		});
 
 		/* SPECIAL: popovers don't inherently know their progenitor, yet popover methods
 		 * (eg. hide) are *only* callable on *that original element*. So to close
 		 * a specific popover (or introductory) programmatically you need to jump hoops.
 		 * Lame.
+		 *
 		 * Workaround is to handle the shown event on the calling element,
 		 * call its popover() method again to get an object reference and then go diving
 		 * for a reference to the new popover itself in the DOM.
@@ -524,16 +539,19 @@
 						});
 
 						$this.data('is-fixed', true);
+						$this.trigger('fixed', [true, 'top']);
 					} else if (!tooHigh && isFixed && pinToFloor) {
 						// Pin to the floor
 						var diff = (scrollTop + height) - floor;
 
 						$this.css('top', gutter - diff);
 						$this.data('is-pinned-to-floor', true);
+						$this.trigger('fixed', [true, 'bottom']);
 					} else if (!tooHigh && isFixed && !pinToFloor && pinnedToFloor) {
 						// Un-pin from the floor
 						$this.css('top', gutter);
 						$this.data('is-pinned-to-floor', false);
+						$this.trigger('fixed', [true, 'top']);
 					} else if ((tooHigh || scrollTop <= offsetTop) && isFixed) {
 						// Un-fix it
 						$this.css('width', $this.data('original-width'));
@@ -541,6 +559,7 @@
 						$this.css('top', $this.data('original-top'));
 
 						$this.data('is-fixed', false);
+						$this.trigger('fixed', [false]);
 					}
 				});
 			});
