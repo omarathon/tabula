@@ -213,9 +213,9 @@ class StudentMember extends Member with StudentProperties {
 		}
 	}
 
-	override def hasCurrentEnrolment: Boolean = {
-		!studentCourseDetails.asScala.map(_.hasCurrentEnrolment).isEmpty
-	}
+	override def hasCurrentEnrolment: Boolean = studentCourseDetails.asScala.exists(_.hasCurrentEnrolment)
+	override def hasAPersonalTutor: Boolean = studentCourseDetails.asScala.exists(_.hasAPersonalTutor)
+	override def hasSupervisor: Boolean = studentCourseDetails.asScala.exists(_.hasSupervisor)
 
 	override def routeName: String = mostSignificantCourseDetails match {
 		case Some(details) =>
