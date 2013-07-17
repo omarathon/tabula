@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 
 
-class ImportSupervisorForSingleStudentCommandTest extends AppContextTestBase with Mockito with Logging{
+class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Mockito with Logging {
 
 	trait Environment {
 		val scjCode = "1111111/1"
@@ -65,7 +65,8 @@ class ImportSupervisorForSingleStudentCommandTest extends AppContextTestBase wit
 			importer.getSupervisorPrsCodes(scjCode) returns codes
 
 			// test command
-			val command = new ImportSupervisorsForSingleStudentCommand(studentCourseDetails)
+			val command = new ImportSupervisorsForStudentCommand()
+			command.studentCourseDetails = studentCourseDetails
 			command.supervisorImporter = importer
 			command.applyInternal
 
@@ -88,7 +89,8 @@ class ImportSupervisorForSingleStudentCommandTest extends AppContextTestBase wit
 			importer.getSupervisorPrsCodes(scjCode) returns Seq()
 
 			// test command
-			val command = new ImportSupervisorsForSingleStudentCommand(studentCourseDetails)
+			val command = new ImportSupervisorsForStudentCommand()
+			command.studentCourseDetails = studentCourseDetails
 			command.supervisorImporter = importer
 			command.applyInternal
 

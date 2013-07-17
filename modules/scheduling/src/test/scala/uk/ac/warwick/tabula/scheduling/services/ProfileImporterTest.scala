@@ -11,12 +11,13 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.Gender._
 import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
 import uk.ac.warwick.tabula.events.EventHandling
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentRowCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentRowCommand
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.User
 import org.junit.Ignore
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCourseCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCourseYearCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseYearCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSupervisorsForStudentCommand
 
 // scalastyle:off magic.number
 class ProfileImporterTest extends PersistenceTestBase with Mockito {
@@ -64,9 +65,14 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					preferredForenames = name.toUpperCase,
 					userType = Staff
 				), () => None)
-				
-				//val member = new ImportSingleStudentRowCommand(mac, new AnonymousUser, rs)
-				val member = new ImportSingleStudentRowCommand(mac, new AnonymousUser, rs, new ImportSingleStudentCourseCommand(rs, new ImportSingleStudentCourseYearCommand(rs)))
+
+				//val member = new ImportStudentRowCommand(mac, new AnonymousUser, rs)
+				val member = new ImportStudentRowCommand(mac, new AnonymousUser, rs,
+					new ImportStudentCourseCommand(rs,
+							new ImportStudentCourseYearCommand(rs),
+							new ImportSupervisorsForStudentCommand()
+					)
+				)
 				member.firstName should be (name)
 			}
 		}
@@ -86,8 +92,13 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					userType = Staff
 				), () => None)
 
-				// val member = new ImportSingleStudentRowCommand(mac, new AnonymousUser, rs)
-				val member = new ImportSingleStudentRowCommand(mac, new AnonymousUser, rs, new ImportSingleStudentCourseCommand(rs, new ImportSingleStudentCourseYearCommand(rs)))
+				// val member = new ImportStudentRowCommand(mac, new AnonymousUser, rs)
+				val member = new ImportStudentRowCommand(mac, new AnonymousUser, rs,
+					new ImportStudentCourseCommand(rs,
+							new ImportStudentCourseYearCommand(rs),
+							new ImportSupervisorsForStudentCommand()
+					)
+				)
 				member.lastName should be (name)
 			}
 		}
@@ -106,11 +117,21 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			user2.setFirstName("different")
 			user2.setLastName("strokes")
 
-			//val member1 = new ImportSingleStudentRowCommand(mac, user1, rs)
-			//val member2 = new ImportSingleStudentRowCommand(mac, user2, rs)
+			//val member1 = new ImportStudentRowCommand(mac, user1, rs)
+			//val member2 = new ImportStudentRowCommand(mac, user2, rs)
 
-			val member1 = new ImportSingleStudentRowCommand(mac, user1, rs, new ImportSingleStudentCourseCommand(rs, new ImportSingleStudentCourseYearCommand(rs)))
-			val member2 = new ImportSingleStudentRowCommand(mac, user2, rs, new ImportSingleStudentCourseCommand(rs, new ImportSingleStudentCourseYearCommand(rs)))
+			val member1 = new ImportStudentRowCommand(mac, user1, rs,
+				new ImportStudentCourseCommand(rs,
+						new ImportStudentCourseYearCommand(rs),
+						new ImportSupervisorsForStudentCommand()
+				)
+			)
+			val member2 = new ImportStudentRowCommand(mac, user2, rs,
+				new ImportStudentCourseCommand(rs,
+						new ImportStudentCourseYearCommand(rs),
+						new ImportSupervisorsForStudentCommand()
+				)
+			)
 
 			member1.firstName should be ("MatHEW")
 			member1.lastName should be ("Macintosh")
@@ -151,8 +172,13 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		val memberDao = mock[MemberDao]
 		memberDao.getByUniversityId("0672089") returns(None)
 
-		//val command = new ImportSingleStudentRowCommand(mac, new AnonymousUser, rs)
-		val command = new ImportSingleStudentRowCommand(mac, new AnonymousUser, rs, new ImportSingleStudentCourseCommand(rs, new ImportSingleStudentCourseYearCommand(rs)))
+		//val command = new ImportStudentRowCommand(mac, new AnonymousUser, rs)
+		val command = new ImportStudentRowCommand(mac, new AnonymousUser, rs,
+			new ImportStudentCourseCommand(rs,
+				new ImportStudentCourseYearCommand(rs),
+				new ImportSupervisorsForStudentCommand()
+			)
+		)
 
 		command.memberDao = memberDao
 		command.fileDao = fileDao

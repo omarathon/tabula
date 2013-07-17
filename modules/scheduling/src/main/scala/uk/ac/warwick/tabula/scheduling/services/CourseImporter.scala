@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.CourseDao
 import uk.ac.warwick.tabula.data.model.Course
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleCourseCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportCourseCommand
 import uk.ac.warwick.tabula.data.Daoisms
 
 @Service
@@ -50,7 +50,7 @@ class CourseImporter extends Logging with Daoisms {
 		updateCourseMap()
 	}
 
-	def getImportCommands: Seq[ImportSingleCourseCommand] = {
+	def getImportCommands: Seq[ImportCourseCommand] = {
 		coursesQuery.execute.toSeq
 	}
 
@@ -74,9 +74,9 @@ object CourseImporter {
 		select crs_code, crs_snam, crs_name, crs_titl from intuit.srs_crs
 		"""
 
-	class CoursesQuery(ds: DataSource) extends MappingSqlQuery[ImportSingleCourseCommand](ds, GetCourse) {
+	class CoursesQuery(ds: DataSource) extends MappingSqlQuery[ImportCourseCommand](ds, GetCourse) {
 		compile()
-		override def mapRow(resultSet: ResultSet, rowNumber: Int) = new ImportSingleCourseCommand(resultSet)
+		override def mapRow(resultSet: ResultSet, rowNumber: Int) = new ImportCourseCommand(resultSet)
 	}
 
 }

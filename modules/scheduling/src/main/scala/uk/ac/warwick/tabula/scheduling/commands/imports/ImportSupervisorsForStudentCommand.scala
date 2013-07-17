@@ -13,13 +13,15 @@ import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
 
-class ImportSupervisorsForSingleStudentCommand(studentCourseDetails: StudentCourseDetails)
+class ImportSupervisorsForStudentCommand()
 	extends Command[Unit] with Unaudited with Logging {
 	PermissionCheck(Permissions.ImportSystemData)
 
 	var supervisorImporter = Wire.auto[SupervisorImporter]
 	var profileService = Wire.auto[ProfileService]
 	var relationshipService = Wire.auto[RelationshipService]
+
+	var studentCourseDetails: StudentCourseDetails = _
 
 	def applyInternal() {
 		if (studentCourseDetails.route != null && studentCourseDetails.route.degreeType == Postgraduate) {

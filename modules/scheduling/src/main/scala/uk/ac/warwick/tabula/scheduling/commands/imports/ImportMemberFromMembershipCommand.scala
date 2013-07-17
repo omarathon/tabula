@@ -27,8 +27,10 @@ import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.userlookup.User
 
-abstract class ImportSingleMemberFromMembershipCommand extends ImportSingleMemberCommand with Logging with Daoisms
+abstract class ImportMemberFromMembershipCommand
+	extends ImportMemberCommand with Logging with Daoisms
 	with MemberProperties with Unaudited with PropertyCopying {
+
 	import ImportMemberHelpers._
 
 	def this(mac: MembershipInformation, ssoUser: User, rs: ResultSet) {

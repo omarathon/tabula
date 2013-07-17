@@ -56,39 +56,55 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.DepartmentDaoImpl
 import uk.ac.warwick.tabula.data.ModeOfAttendanceDao
 import uk.ac.warwick.tabula.data.SitsStatusDao
+import uk.ac.warwick.tabula.services.MaintenanceModeService
 
 // scalastyle:off magic.number
 @DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
-class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito with Logging {
-
-	@Autowired var memberDao:MemberDao =_
-	@Autowired var moaDao:ModeOfAttendanceDao =_
-	@Autowired var sitsStatusDao:SitsStatusDao =_
-
+class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	trait Environment {
-		val blobBytes = Array[Byte](1,2,3,4,5)
 
+		val memberDao = smartMock[MemberDao]
+		val moaDao = smartMock[ModeOfAttendanceDao]
+		val sitsStatusDao = smartMock[SitsStatusDao]
 		val fileDao = smartMock[FileDao]
+		val studentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
+		val studentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
 
-		val route = new Route
-		val modAndDeptService = smartMock[ModuleAndDepartmentService]
+		var maintenanceModeService = smartMock[MaintenanceModeService]
+		maintenanceModeService.enabled returns false
+
+		val profileService = smartMock[ProfileService]
+
 		val courseAndRouteService = smartMock[CourseAndRouteService]
+		val route = smartMock[Route]
 		courseAndRouteService.getRouteByCode("c100") returns (Some(route))
+
+		val modAndDeptService = smartMock[ModuleAndDepartmentService]
+		modAndDeptService.getDepartmentByCode("ph") returns (Some(department))
+		modAndDeptService.getDepartmentByCode("PH") returns (Some(department))
+
+
+		val modeOfAttendanceImporter = smartMock[ModeOfAttendanceImporter]
+		modeOfAttendanceImporter.modeOfAttendanceMap returns Map("F" -> new ModeOfAttendance("F", "FT", "Full Time"), "P" -> new ModeOfAttendance("P", "PT", "Part Time"))
+		modeOfAttendanceImporter.getModeOfAttendanceForCode("P") returns Some(new ModeOfAttendance("P", "PT", "Part Time"))
+
+		val sitsStatusesImporter = smartMock[SitsStatusesImporter]
+		sitsStatusesImporter.sitsStatusMap returns Map("F" -> new SitsStatus("F", "F", "Fully Enrolled"), "P" -> new SitsStatus("P", "P", "Permanently Withdrawn"))
 
 		val department = new Department
 		department.code = "ph"
 		department.name = "Philosophy"
 		department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits
-		modAndDeptService.getDepartmentByCode("ph") returns (Some(department))
-		modAndDeptService.getDepartmentByCode("PH") returns (Some(department))
+
 		val rs = smartMock[ResultSet]
-		val md = smartMock[ResultSetMetaData]
-		rs.getMetaData() returns(md)
-		md.getColumnCount() returns(4)
-		md.getColumnName(1) returns("gender")
-		md.getColumnName(2) returns("year_of_study")
-		md.getColumnName(3) returns("spr_code")
-		md.getColumnName(4) returns("route_code")
+		val rsMetaData = smartMock[ResultSetMetaData]
+		rs.getMetaData() returns(rsMetaData)
+
+		rsMetaData.getColumnCount() returns(4)
+		rsMetaData.getColumnName(1) returns("gender")
+		rsMetaData.getColumnName(2) returns("year_of_study")
+		rsMetaData.getColumnName(3) returns("spr_code")
+		rsMetaData.getColumnName(4) returns("route_code")
 
 		rs.getString("gender") returns("M")
 		rs.getInt("year_of_study") returns(3)
@@ -124,41 +140,31 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 			alternativeEmailAddress	= null,
 			userType				= Student		)
 
+		val blobBytes = Array[Byte](1,2,3,4,5)
 		val mac = MembershipInformation(mm, () => Some(blobBytes))
 
-		val modeOfAttendanceImporter = smartMock[ModeOfAttendanceImporter]
-		val profileService = smartMock[ProfileService]
-		//val studentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
+		val yearCommand = new ImportStudentCourseYearCommand(rs)
+		yearCommand.modeOfAttendanceImporter = modeOfAttendanceImporter
+		yearCommand.profileService = profileService
+		yearCommand.sitsStatusesImporter = sitsStatusesImporter
+		yearCommand.maintenanceMode = maintenanceModeService
+		yearCommand.studentCourseYearDetailsDao = studentCourseYearDetailsDao
 
-		var studentCourseDetailsDao = new StudentCourseDetailsDaoImpl
-		var studentCourseYearDetailsDao = new StudentCourseYearDetailsDaoImpl
-
-		val sitsStatusesImporter = smartMock[SitsStatusesImporter]
-
-		modeOfAttendanceImporter.modeOfAttendanceMap returns Map("F" -> new ModeOfAttendance("F", "FT", "Full Time"), "P" -> new ModeOfAttendance("P", "PT", "Part Time"))
-		modeOfAttendanceImporter.getModeOfAttendanceForCode("P") returns Some(new ModeOfAttendance("P", "PT", "Part Time"))
-		sitsStatusesImporter.sitsStatusMap returns Map("F" -> new SitsStatus("F", "F", "Fully Enrolled"), "P" -> new SitsStatus("P", "P", "Permanently Withdrawn"))
+		val supervisorCommand = new ImportSupervisorsForStudentCommand()
+		supervisorCommand.maintenanceMode = maintenanceModeService
 	}
 
-	@Test def testImportSingleStudentCourseYearCommand {
+	@Test def testImportStudentCourseYearCommand {
 		new Environment {
-			val yearCommand = new ImportSingleStudentCourseYearCommand(rs)
-			yearCommand.modeOfAttendanceImporter = modeOfAttendanceImporter
-			yearCommand.profileService = profileService
-			yearCommand.sitsStatusesImporter = sitsStatusesImporter
-
-			studentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDaoImpl]
-			studentCourseDetailsDao = smartMock[StudentCourseDetailsDaoImpl]
-
 			val studentCourseDetails = new StudentCourseDetails
 			studentCourseDetails.scjCode = "0672089/2"
 			studentCourseDetails.sprCode = "0672089/2"
-
-			yearCommand.studentCourseYearDetailsDao = studentCourseYearDetailsDao
 			yearCommand.studentCourseDetails = studentCourseDetails
 
 			// now the set up is done, run the apply command and test it:
 			val studentCourseYearDetails = yearCommand.applyInternal()
+
+			// and check stuff:
 			studentCourseYearDetails.academicYear.toString should be ("10/11")
 			studentCourseYearDetails.sceSequenceNumber should be (1)
 			studentCourseYearDetails.enrolmentStatus.code should be ("F")
@@ -170,28 +176,22 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 		}
 	}
 
-	@Test def testImportSingleStudentCourseCommand {
+	@Test def testImportStudentCourseCommand {
 		new Environment {
-			val yearCommand = new ImportSingleStudentCourseYearCommand(rs)
-			yearCommand.modeOfAttendanceImporter = modeOfAttendanceImporter
-			yearCommand.profileService = profileService
-			yearCommand.sitsStatusesImporter = sitsStatusesImporter
-
-			studentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDaoImpl]
-			studentCourseDetailsDao = smartMock[StudentCourseDetailsDaoImpl]
-
 			// first set up the studentCourseYearDetails as above
 			var studentCourseDetails = new StudentCourseDetails
 			studentCourseDetails.scjCode = "0672089/2"
 			studentCourseDetails.sprCode = "0672089/2"
-			yearCommand.studentCourseYearDetailsDao = studentCourseYearDetailsDao
 			yearCommand.studentCourseDetails = studentCourseDetails
+
 			val studentCourseYearDetails = yearCommand.applyInternal()
 
-			// then set up and run importSingleStudentCourseDetailsCommand apply
-			val command = new ImportSingleStudentCourseCommand(rs, yearCommand)
+			// then set up and run importStudentCourseDetailsCommand apply
+			val command = new ImportStudentCourseCommand(rs, yearCommand, supervisorCommand)
 			command.studentCourseDetailsDao = studentCourseDetailsDao
 			command.sitsStatusesImporter = sitsStatusesImporter
+			command.courseAndRouteService = courseAndRouteService
+			command.maintenanceMode = maintenanceModeService
 
 			// now the set up is done, run the apply command and test it:
 			studentCourseDetails = command.applyInternal()
@@ -209,50 +209,44 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 	}
 
 	@Test
-	def testImportSingleStudentRowCommandWorksWithNew {
+	def testImportStudentRowCommandWorksWithNew {
 		new Environment {
-			transactional { tx =>
-				// first set up the commands, starting at the year-specific end:
-				val yearCommand = new ImportSingleStudentCourseYearCommand(rs)
-				yearCommand.modeOfAttendanceImporter = modeOfAttendanceImporter
-				yearCommand.profileService = profileService
-				yearCommand.sitsStatusesImporter = sitsStatusesImporter
+			// now the course-specific command:
+			val courseCommand = new ImportStudentCourseCommand(rs, yearCommand, supervisorCommand)
+			courseCommand.studentCourseDetailsDao = studentCourseDetailsDao
+			courseCommand.sitsStatusesImporter = sitsStatusesImporter
+			courseCommand.courseAndRouteService = courseAndRouteService
+			courseCommand.maintenanceMode = maintenanceModeService
 
-				// now the course-specific command:
-				val courseCommand = new ImportSingleStudentCourseCommand(rs, yearCommand)
-				courseCommand.studentCourseDetailsDao = studentCourseDetailsDao
-				courseCommand.sitsStatusesImporter = sitsStatusesImporter
+			val command = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, courseCommand)
 
-				val command = new ImportSingleStudentRowCommand(mac, new AnonymousUser(), rs, courseCommand)
+			command.memberDao = memberDao
+			command.fileDao = fileDao
+			command.moduleAndDepartmentService = modAndDeptService
 
-				command.memberDao = memberDao
-				command.fileDao = fileDao
-				command.moduleAndDepartmentService = modAndDeptService
+			// need to save the transient department as we're saving a reference to it in member
+			//val deptDao = new DepartmentDaoImpl
+			//deptDao.save(department)
 
-				// need to save the transient department as we're saving a reference to it in member
-				val deptDao = new DepartmentDaoImpl
-				deptDao.save(department)
+			//moaDao.saveOrUpdate(new ModeOfAttendance("F", "FT", "Full Time"))
+			//moaDao.saveOrUpdate(new ModeOfAttendance("P", "PT", "Part Time"))
 
-				moaDao.saveOrUpdate(new ModeOfAttendance("F", "FT", "Full Time"))
-				moaDao.saveOrUpdate(new ModeOfAttendance("P", "PT", "Part Time"))
+			//sitsStatusDao.saveOrUpdate(new SitsStatus("F", "Fully enrolled", "Fully enrolled for this session"))
+			//sitsStatusDao.saveOrUpdate(new SitsStatus("P", "PWD", "Permanently Withdrawn"))
 
-				sitsStatusDao.saveOrUpdate(new SitsStatus("F", "Fully enrolled", "Fully enrolled for this session"))
-				sitsStatusDao.saveOrUpdate(new SitsStatus("P", "PWD", "Permanently Withdrawn"))
+			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
+			val member = command.applyInternal()
 
-				// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
-				val member = command.applyInternal()
-				session.flush()
-
-				// test that member contains the expected data:
-				member.title should be ("Mr")
-				member.universityId should be ("0672089")
-				member.userId should be ("cuscav")
-				member.email should be ("M.Mannion@warwick.ac.uk")
-				member.gender should be (Male)
-				member.firstName should be ("Mathew")
-				member.lastName should be ("Mannion")
-				member.photo should not be (null)
-				member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
+			// test that member contains the expected data:
+			member.title should be ("Mr")
+			member.universityId should be ("0672089")
+			member.userId should be ("cuscav")
+			member.email should be ("M.Mannion@warwick.ac.uk")
+			member.gender should be (Male)
+			member.firstName should be ("Mathew")
+			member.lastName should be ("Mannion")
+			member.photo should not be (null)
+			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
 
 /*				val uniId = member.universityId
 
@@ -264,12 +258,11 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 				}).get
 
 				studentMember.studentCourseDetails.size should be (1)
+*/
+			there was one(fileDao).savePermanent(any[FileAttachment])
+			there was no(fileDao).saveTemporary(any[FileAttachment])
 
-				there was one(fileDao).savePermanent(any[FileAttachment])
-				there was no(fileDao).saveTemporary(any[FileAttachment])
-
-				there was one(memberDao).saveOrUpdate(any[Member])*/
-			}
+			there was one(memberDao).saveOrUpdate(any[Member])
 		}
 	}
 
@@ -279,7 +272,7 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 			// now set up studentCourseDetail:
 			val studentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
 
-			val courseCommand = new ImportSingleStudentCourseCommand(rs, yearCommand)
+			val courseCommand = new ImportStudentCourseCommand(rs, yearCommand)
 			courseCommand.studentCourseDetailsDao = studentCourseDetailsDao
 			courseCommand.sitsStatusesImporter = sitsStatusesImporter
 
@@ -290,7 +283,7 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 			val memberDao = smartMock[MemberDao]
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
 
-			val command = new ImportSingleStudentRowCommand(mac, new AnonymousUser(), rs, courseCommand)
+			val command = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, courseCommand)
 			command.memberDao = memberDao
 			command.fileDao = fileDao
 			command.moduleAndDepartmentService = mds
@@ -321,7 +314,7 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 			// now set up studentCourseDetail:
 			val studentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
 
-			val courseCommand = new ImportSingleStudentCourseCommand(rs, yearCommand)
+			val courseCommand = new ImportStudentCourseCommand(rs, yearCommand)
 			courseCommand.studentCourseDetailsDao = studentCourseDetailsDao
 			courseCommand.sitsStatusesImporter = sitsStatusesImporter
 
@@ -339,7 +332,7 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 			// if personalTutorSource is "local", there should be no update
 			department.personalTutorSource = "local"
 
-			val command = new ImportSingleStudentRowCommand(mac, new AnonymousUser(), rs, courseCommand)
+			val command = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, courseCommand)
 			command.memberDao = memberDao
 			command.fileDao = fileDao
 			command.moduleAndDepartmentService = mds
@@ -376,7 +369,7 @@ class ImportSingleStudentRowCommandTest extends AppContextTestBase with Mockito 
 			// if personalTutorSource is "SITS", there *should* an update
 			department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits
 
-			val command = new ImportSingleStudentRowCommand(mac, new AnonymousUser(), rs)
+			val command = new ImportStudentRowCommand(mac, new AnonymousUser(), rs)
 			command.memberDao = memberDao
 			command.fileDao = fileDao
 			command.moduleAndDepartmentService = mds

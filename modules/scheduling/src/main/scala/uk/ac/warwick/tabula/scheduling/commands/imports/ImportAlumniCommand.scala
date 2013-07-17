@@ -34,13 +34,15 @@ import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.OtherMember
 
-class ImportSingleAlumniCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet) extends ImportSingleMemberCommand(member, ssoUser, rs)
+class ImportAlumniCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet)
+	extends ImportMemberCommand(member, ssoUser, rs)
 	with Logging with Daoisms with AlumniProperties with Unaudited {
+
 	import ImportMemberHelpers._
 
 	// any initialisation code specific to alumni (e.g. setting alumni properties) can go here
 
-	def applyInternal(): Member = transactional() {
+	def applyInternal(): Member = transactional() ({
 		val memberExisting = memberDao.getByUniversityId(universityId)
 
 		logger.debug("Importing member " + universityId + " into " + memberExisting)
@@ -48,7 +50,7 @@ class ImportSingleAlumniCommand(member: MembershipInformation, ssoUser: User, rs
 		val isTransient = !memberExisting.isDefined
 		val member = memberExisting getOrElse(new OtherMember(universityId))
 
-		val commandBean = new BeanWrapperImpl(this)
+		val commandBean = new BeanWrapperImpl(ImportAlumniCommand.this)
 		val memberBean = new BeanWrapperImpl(member)
 
 		// We intentionally use a single pipe rather than a double pipe here - we want both statements to be evaluated
@@ -62,7 +64,7 @@ class ImportSingleAlumniCommand(member: MembershipInformation, ssoUser: User, rs
 		}
 
 		member
-	}
+	})
 
 	private val basicAlumniProperties: Set[String] = Set()
 

@@ -44,7 +44,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.exception.ConstraintViolationException
 
 
-class ImportSingleStudentCourseYearCommand(resultSet: ResultSet)
+class ImportStudentCourseYearCommand(resultSet: ResultSet)
 	extends Command[StudentCourseYearDetails] with Logging with Daoisms
 	with StudentCourseYearProperties with Unaudited with PropertyCopying {
 	import ImportMemberHelpers._
@@ -64,17 +64,18 @@ class ImportSingleStudentCourseYearCommand(resultSet: ResultSet)
 	// This needs to be assigned before apply is called.
 	// (can't be in the constructor because it's not yet created then)
 	// TODO - use promises to make sure it gets assigned
-	var studentCourseDetails: StudentCourseDetails = _
+	var studentCourseDetails: StudentCourseDetails =
+  _
 
-	this.yearOfStudy = rs.getInt("year_of_study")
+	ImportStudentCourseYearCommand.this.yearOfStudy = rs.getInt("year_of_study")
 	//this.fundingSource = rs.getString("funding_source")
-	this.sceSequenceNumber = rs.getInt("sce_sequence_number")
+	ImportStudentCourseYearCommand.this.sceSequenceNumber = rs.getInt("sce_sequence_number")
 
-	this.enrolmentStatusCode = rs.getString("enrolment_status_code")
-	this.modeOfAttendanceCode = rs.getString("mode_of_attendance_code")
-	this.academicYearString = rs.getString("sce_academic_year")
+	ImportStudentCourseYearCommand.this.enrolmentStatusCode = rs.getString("enrolment_status_code")
+	ImportStudentCourseYearCommand.this.modeOfAttendanceCode = rs.getString("mode_of_attendance_code")
+	ImportStudentCourseYearCommand.this.academicYearString = rs.getString("sce_academic_year")
 
-	override def applyInternal(): StudentCourseYearDetails = transactional() {
+	override def applyInternal(): StudentCourseYearDetails = transactional() ({
 		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKey(
 			studentCourseDetails,
 			sceSequenceNumber)
@@ -86,7 +87,7 @@ class ImportSingleStudentCourseYearCommand(resultSet: ResultSet)
 			case _ => (true, new StudentCourseYearDetails(studentCourseDetails, sceSequenceNumber))
 		}
 
-		val commandBean = new BeanWrapperImpl(this)
+		val commandBean = new BeanWrapperImpl(ImportStudentCourseYearCommand.this)
 		val studentCourseYearDetailsBean = new BeanWrapperImpl(studentCourseYearDetails)
 
 		val hasChanged = copyStudentCourseYearProperties(commandBean, studentCourseYearDetailsBean)
@@ -99,7 +100,7 @@ class ImportSingleStudentCourseYearCommand(resultSet: ResultSet)
 		}
 
 		studentCourseYearDetails
-	}
+	})
 
 	private val basicStudentCourseYearProperties = Set(
 		"yearOfStudy"

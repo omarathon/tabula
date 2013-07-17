@@ -22,10 +22,11 @@ import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
 
-class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet, importSingleStudentCourseCommand: ImportSingleStudentCourseCommand)
-	extends ImportSingleMemberCommand(member, ssoUser, resultSet)
+class ImportStudentRowCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet, importStudentCourseCommand: ImportStudentCourseCommand)
+	extends ImportMemberCommand(member, ssoUser, resultSet)
 	with Logging with Daoisms
 	with StudentProperties with Unaudited with PropertyCopying {
+
 	import ImportMemberHelpers._
 
 	implicit val rs = resultSet
@@ -36,8 +37,6 @@ class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User
 
 	this.nationality = rs.getString("nationality")
 	this.mobileNumber = rs.getString("mobile_number")
-
-	//val importSingleStudentCourseCommand = new ImportSingleStudentCourseCommand(rs, new ImportSingleStudentCourseYearCommand(rs))
 
 	override def applyInternal(): Member = transactional() {
 		val memberExisting = memberDao.getByUniversityId(universityId)
@@ -55,7 +54,7 @@ class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User
 			case _ => (true, new StudentMember(universityId))
 		}
 
-		val commandBean = new BeanWrapperImpl(this)
+		val commandBean = new BeanWrapperImpl(ImportStudentRowCommand.this)
 		val memberBean = new BeanWrapperImpl(member)
 
 		val hasChanged = copyMemberProperties(commandBean, memberBean)
@@ -67,8 +66,8 @@ class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User
 			memberDao.saveOrUpdate(member)
 		}
 
-		importSingleStudentCourseCommand.stuMem = member
-		importSingleStudentCourseCommand.apply()
+		importStudentCourseCommand.stuMem = member
+		importStudentCourseCommand.apply()
 
 		member
 	}

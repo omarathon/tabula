@@ -39,8 +39,11 @@ import uk.ac.warwick.tabula.services.CourseAndRouteService
 import java.sql.BatchUpdateException
 import org.hibernate.exception.ConstraintViolationException
 import uk.ac.warwick.tabula.scheduling.services.CourseImporter
+import scala.collection.JavaConverters._
 
-class ImportSingleStudentCourseCommand(resultSet: ResultSet, importSingleStudentCourseYearCommand: ImportSingleStudentCourseYearCommand)
+class ImportStudentCourseCommand(resultSet: ResultSet,
+		importStudentCourseYearCommand: ImportStudentCourseYearCommand,
+		importSupervisorsForStudentCommand: ImportSupervisorsForStudentCommand)
 	extends Command[StudentCourseDetails] with Logging with Daoisms
 	with StudentCourseProperties with Unaudited with PropertyCopying {
 
@@ -86,8 +89,6 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet, importSingleStudent
 	this.courseYearLength = rs.getString("course_year_length")
 	this.levelCode = rs.getString("level_code")
 
-	//val importSingleStudentCourseYearCommand = new ImportSingleStudentCourseYearCommand(resultSet)
-
 	override def applyInternal(): StudentCourseDetails = transactional() {
 		val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCode(scjCode)
 
@@ -121,14 +122,14 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet, importSingleStudent
 			}
 		}
 
-		importSingleStudentCourseYearCommand.studentCourseDetails = studentCourseDetails
-
-
-		importSingleStudentCourseYearCommand.apply()
+		importStudentCourseYearCommand.studentCourseDetails = studentCourseDetails
+		val studentCourseYearDetails = importStudentCourseYearCommand.apply()
+		//studentCourseDetails.attachStudentCourseYearDetails(studentCourseYearDetails)
 
 		captureTutor(studentCourseDetails.department)
 
-		new ImportSupervisorsForSingleStudentCommand(studentCourseDetails).apply
+		importSupervisorsForStudentCommand.studentCourseDetails = studentCourseDetails
+		importSupervisorsForStudentCommand.apply
 
 		studentCourseDetails
 	}
