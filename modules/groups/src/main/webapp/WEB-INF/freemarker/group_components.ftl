@@ -39,7 +39,7 @@
 
 
 <a id="${module_anchor(module)}"></a>
-<div class="striped-section<#if has_groups> collapsible expanded</#if><#if data.canManageDepartment && !has_groups> empty</#if>"
+<div class="module-info striped-section<#if has_groups> collapsible expanded</#if><#if data.canManageDepartment && !has_groups> empty</#if>"
 	 data-name="${module_anchor(module)}">
 	<div class="clearfix">
 

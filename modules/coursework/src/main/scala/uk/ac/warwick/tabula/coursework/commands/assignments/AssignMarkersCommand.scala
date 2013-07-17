@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.{Description, Command}
 import uk.ac.warwick.tabula.data.model.{UserGroup, Module, Assignment}
 import uk.ac.warwick.tabula.data.{SessionComponent, Daoisms}
@@ -10,6 +11,9 @@ import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import scala.beans.BeanProperty
+import org.apache.commons.collections.FactoryUtils
+import org.apache.commons.collections.list.LazyList
 
 class AssignMarkersCommand(module: Module, assignment:Assignment)
 	extends AbstractAssignMarkersCommand(module, assignment)
@@ -32,10 +36,17 @@ abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:A
 	var secondMarkerUnassignedStudents: JList[Student] = _
 	var firstMarkers: JList[Marker] = _
 	var secondMarkers: JList[Marker] = _
-	var markerMapping: JMap[String, JList[String]] = _
+
+	val allMarkers = assignment.markingWorkflow.firstMarkers.members ++ assignment.markingWorkflow.secondMarkers.members
+
+	def listFactory : JList[String] = JArrayList()
+
+	var markerMapping : JMap[String, JList[String]] = allMarkers.map({
+		x => (x, listFactory)
+	}).toMap.asJava
+
 
 	def onBind() {
-
 		def retrieveMarkers(markerDef:Seq[String]): JList[Marker] = markerDef.map{marker =>
 			val students:JList[Student] = assignment.markerMap.toMap.get(marker) match {
 				case Some(userGroup:UserGroup) => userGroup.includeUsers.map{student =>

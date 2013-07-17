@@ -69,7 +69,7 @@
 							<#if meeting.attachments?? && meeting.attachments?size gt 0>
 								<@fmt.download_attachments meeting.attachments "/${action_url_prefix}/meeting/${meeting.id}/" "for this meeting record" "${meeting.title?url}" />
 							</#if>
-							<@state meeting/>
+							<@state meeting studentCourseDetails/>
 						</div>
 					</details>
 				</#list>
@@ -78,7 +78,7 @@
 	</section>
 </#macro>
 
-<#macro state meeting>
+<#macro state meeting studentCourseDetails>
 	<#if meeting.pendingApproval && !meeting.pendingApprovalBy(viewer)>
 	<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
 	<div class="alert alert-info">

@@ -214,6 +214,13 @@
 			 * click selector must be specific otherwise the click event will propagate up past the section element
 			 * these HTML5 elements have default browser driven behaviour that is hard to override.
 			 */
+			
+			// named handler that can be unbound 
+			var iframeHandler = function() {
+				frameLoad(this);
+				$(this).off('load', iframeHandler);
+			};
+			
 			var meetingsSection = $("section.meetings");
 			$(".new, .edit-meeting-record", meetingsSection).on("click", function(e) {
 				var target = $(this).attr("href");
@@ -222,9 +229,7 @@
 					var $mb = $m.find(".modal-body").empty();
 					var iframeMarkup = "<iframe frameBorder='0' scrolling='no' style='height:100%;width:100%;' id='modal-content'></iframe>";
 					$(iframeMarkup)
-						.load(function() {
-							frameLoad(this);
-						})
+						.on('load', iframeHandler)
 						.attr("src", target + "?iframe")
 						.appendTo($mb);
 				});
@@ -233,8 +238,10 @@
 
 			$m.on('submit', 'form', function(e){
 				e.preventDefault();
-				// submit the inner form in the iframe
-				$m.find('iframe').contents().find('form').submit();
+				// reattach the load handler and submit the inner form in the iframe
+				$m.find('iframe')
+					.on('load', iframeHandler)
+					.contents().find('form').submit();
 
 				// hide the iframe, so we don't get a FOUC
 				$m.find('.modal-body').slideUp();

@@ -47,7 +47,9 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 	
 	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
 
-	var allowSelfGroupSwitching: Boolean = false
+	var allowSelfGroupSwitching: Boolean = true
+	var studentsCanSeeTutorName:Boolean = false
+	var studentsCanSeeOtherMembers:Boolean = false
 	
 	// start complicated membership stuff
 	
@@ -107,6 +109,8 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		format = set.format
 		allocationMethod = set.allocationMethod
 		allowSelfGroupSwitching = set.allowSelfGroupSwitching
+		studentsCanSeeTutorName = set.studentsCanSeeTutorName
+	  studentsCanSeeOtherMembers = set.studentsCanSeeOtherMembers
 		
 		// TODO AssessmentGroupItems
 		
@@ -122,6 +126,8 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		set.format = format
 		set.allocationMethod = allocationMethod
 		set.allowSelfGroupSwitching = allowSelfGroupSwitching
+		set.studentsCanSeeOtherMembers = studentsCanSeeOtherMembers
+		set.studentsCanSeeTutorName = studentsCanSeeTutorName
 		
 		// TODO AssessmentGroupItems
 		

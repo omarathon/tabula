@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import org.hibernate.annotations.Type
 import javax.persistence._
 
-trait HasSettings[A <: HasSettings[A]] { self: A =>
+trait HasSettings {
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.JsonMapUserType")
 	protected var settings: Map[String, Any] = Map()
@@ -49,7 +49,7 @@ trait HasSettings[A <: HasSettings[A]] { self: A =>
  * expose type-safe getters and setters instead of mixing in SettingsMap directly
  */
 
-trait SettingsMap[A <: SettingsMap[A]] extends HasSettings[A] { self: A =>
+trait SettingsMap[A <: SettingsMap[A]] extends HasSettings { self: A =>
 	
 
 	protected def -=(key: String) = {
