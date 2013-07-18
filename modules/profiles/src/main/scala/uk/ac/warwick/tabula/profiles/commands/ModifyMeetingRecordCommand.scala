@@ -9,14 +9,12 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.MeetingRecordDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
-import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.system.BindListener
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.FileDao
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.Features
-import scala.Some
 
 abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship)
 	extends Command[MeetingRecord] with Notifies[MeetingRecord] with SelfValidating with FormattedHtml
