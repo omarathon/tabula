@@ -158,7 +158,7 @@
 						</a>
 					</li>
 					<li>
-						<#assign publishfeedbackurl><@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/></#assign>
+						<#assign publishfeedbackurl><@url page='/admin/module/${module.code}/assignments/${assignment.id}/publish'/></#assign>
 						<@fmt.permission_button permission='Feedback.Publish' scope=module type='a' action_descr='release feedback to students' tooltip="Release feedback to students" href=publishfeedbackurl>
 							<i class="icon-share"></i> Publish feedback
 						</@fmt.permission_button>
