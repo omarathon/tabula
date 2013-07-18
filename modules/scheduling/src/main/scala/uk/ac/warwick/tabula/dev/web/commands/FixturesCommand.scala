@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupFormat, SmallGroup, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
 
 /** This command is intentionally Public. It only exists on dev and is designed,
   * in essence, to blitz a department and set up some sample data in it.
@@ -75,6 +75,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	      groupSet.name="Test Lab"
 	      groupSet.format = SmallGroupFormat.Lab
 	      groupSet.module = firstModule
+				groupSet.allocationMethod= SmallGroupAllocationMethod.Manual
 	      val group  = new SmallGroup
 	      group.name ="Test Lab Group 1"
 	      groupSet.groups = JArrayList(group)

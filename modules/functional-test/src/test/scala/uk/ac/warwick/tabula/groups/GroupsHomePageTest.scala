@@ -1,9 +1,10 @@
 package uk.ac.warwick.tabula.groups
 
 import org.scalatest.GivenWhenThen
+import uk.ac.warwick.tabula.BreadcrumbsMatcher
 
 
-class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen{
+class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with BreadcrumbsMatcher{
 
   "Department Admin" should "be offered a link to the department's group pages" in {
 
@@ -15,7 +16,10 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen{
 	  When("the administrator clicks to view the admin page")
 				click on linkText("Go to the Test Services admin page")
 
-		Then("The page should display at least one module")
+		Then("The page should be the small group teaching page")
+				breadCrumbsMatch(Seq("Small Group Teaching"))
+
+		And("The page should display at least one module")
 			findAll(className("module-info")).toList should not be (Nil)
 
 		And("Some modules should be hidden")
