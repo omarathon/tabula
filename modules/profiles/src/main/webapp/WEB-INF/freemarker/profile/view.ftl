@@ -184,8 +184,10 @@
 						<#include "_supervision.ftl" />
 					</li>
 				</#if>
-				
-				<div id="modal" class="modal hide fade" style="display:none;"></div>
+
+			</ol>
+			
+			<div id="modal" class="modal hide fade" style="display:none;"></div>
 
 				<div id="modal-change-tutor" class="modal hide fade"></div>
 		
@@ -201,7 +203,6 @@
 					});
 				});
 				</script>
-			</ol>
 		</div>
 
 
