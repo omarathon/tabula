@@ -30,13 +30,13 @@ class CourseworkMarkingWorkflowTest extends BrowserTest with CourseworkFixtures 
 		textField("name").value = "Marking workflow 1"
 		singleSel("markingMethod").value = "StudentsChooseMarker"
 		textField("firstMarkers").value = P.Marker1.usercode
-		
+
 		// Ensure that another marker field has magically appeared
 		eventually {
-			findAll(cssSelector(".user-code-picker")).toList.filter(_.isDisplayed).size should be (2)
+			findAll(cssSelector(".flexi-picker")).toList.filter(_.isDisplayed).size should be (2)
 		}
 		
-		new TextField(findAll(cssSelector(".user-code-picker")).toList(1).underlying).value = P.Marker2.usercode
+		new TextField(findAll(cssSelector(".flexi-picker")).toList.apply(1).underlying).value = P.Marker2.usercode
 		
 		submit()
 		

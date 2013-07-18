@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.coursework.jobs
 
 import uk.ac.warwick.tabula.jobs.Job
 import uk.ac.warwick.tabula.jobs.JobTestHelp
-import uk.ac.warwick.tabula.{AppContextTestBase, Mockito}
+import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.coursework.commands.departments.ReportWorld
 
 // scalastyle:off magic.number
-class FeedbackReportJobTest extends AppContextTestBase with Mockito with JobTestHelp with ReportWorld {
+class FeedbackReportJobTest extends TestBase with Mockito with JobTestHelp with ReportWorld {
 	val job = new FeedbackReportJob
 	override def createJobs = Array[Job](job)
 

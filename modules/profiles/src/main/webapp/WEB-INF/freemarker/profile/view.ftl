@@ -184,6 +184,23 @@
 						<#include "_supervision.ftl" />
 					</li>
 				</#if>
+				
+				<div id="modal" class="modal hide fade" style="display:none;"></div>
+
+				<div id="modal-change-tutor" class="modal hide fade"></div>
+		
+				<script type="text/javascript">
+				jQuery(function($){
+					// load edit personal tutor
+					$("#personal-development, #supervision").on("click", ".edit-tutor-link, .add-tutor-link", function(e) {
+						e.preventDefault();
+						var url = $(this).attr('href');
+						$("#modal-change-tutor").load(url,function(){
+							$("#modal-change-tutor").modal('show');
+						});
+					});
+				});
+				</script>
 			</ol>
 		</div>
 

@@ -10,14 +10,13 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import uk.ac.warwick.tabula.services.{SubmissionService, AssignmentMembershipService, AuditEventQueryMethods}
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.AppContextTestBase
+import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
 // reusable environment for marking workflow tests
-trait ReportWorld extends AppContextTestBase with Mockito {
+trait ReportWorld extends TestBase with Mockito {
 	
 	val department = new Department
 	department.code = "IN"
