@@ -13,7 +13,31 @@ import org.joda.time.DateTime
 class SmallGroupPersistenceTest extends AppContextTestBase {
 	
 	@Autowired var service: ModuleAndDepartmentService = _
-	
+
+	@Test def nullSettingsAreReplacedWithEmptyMap(){
+		transactional{ts =>
+			val cs108 = service.getModuleByCode("cs108").get
+			val set = new SmallGroupSet(cs108)
+			set.format = SmallGroupFormat.Lab
+		  set.name = "test"
+			set.setV("settings",null)
+
+			set.getV("settings") == null should be(true)
+			session.save(set)
+
+			val id = set.id
+
+			session.flush
+			session.clear
+
+			session.load(classOf[SmallGroupSet], id) match {
+				case loadedSet:SmallGroupSet => (loadedSet.getV("settings") == null) should be(false)
+				case _ => fail("Set not found")
+			}
+
+		}
+	}
+
 	@Transactional
 	@Test def itWorks {
 		// Use data from data.sql

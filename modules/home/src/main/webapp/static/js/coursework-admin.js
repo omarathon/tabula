@@ -504,7 +504,7 @@ $(function(){
             if ($(this).html() === "Approved")
                 $(this).html('<span>Granted</span>');
             else if ($(this).html() === "Rejected")
-                $(this).html('<span">Rejected</span>');
+                $(this).html('<span>Rejected</span>');
         });
     };
 

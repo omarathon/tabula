@@ -160,7 +160,8 @@ object Permissions {
 			case object HomeEmail extends Permission("View a member's alternative email address")
 			case object Usercode extends Permission("View a member's usercode")
 			case object PersonalTutees extends Permission("View a member's personal tutees")
-			case object StudyDetails extends Permission("View a member's study details")
+			case object StudentCourseDetails extends Permission("View a student's course details")
+			case object Supervisees extends Permission("View a member's supervisees")
 		}
 
 		// Person's own tutor ('upward' relationship)
@@ -171,30 +172,38 @@ object Permissions {
 			case object Read extends Permission("View a personal tutor")
 			case object Update extends Permission("Edit a personal tutor")
 			case object Delete extends Permission("Remove a personal tutor")
+
+      object MeetingRecord {
+        case object Create extends Permission("Add a tutor meeting record")
+        case object Read extends Permission("View a tutor meeting record")
+        case object ReadDetails extends Permission("View the contents of a tutor meeting record")
+        case object Update extends Permission("Edit a tutor meeting record")
+        case object Delete extends Permission("Remove a tutor meeting record")
+      }
+
 		}
 
 		// Person's own supervisor ('upward' relationship)
 		object Supervisor {
 			case object Read extends Permission("View a supervisor")
-		}
-
-		object MeetingRecord {
-			case object Create extends Permission("Add a meeting record")
-			case object Read extends Permission("View a meeting record")
-			case object ReadDetails extends Permission("View the contents of a meeting record")
-			case object Update extends Permission("Edit a meeting record")
-			case object Delete extends Permission("Remove a meeting record")
+      object MeetingRecord {
+        case object Create extends Permission("Add a supervisor meeting record")
+        case object Read extends Permission("View a supervisor meeting record")
+        case object ReadDetails extends Permission("View the contents of a supervisor meeting record")
+        case object Update extends Permission("Edit a supervisor meeting record")
+        case object Delete extends Permission("Remove a supervisor meeting record")
+      }
 		}
 	}
-	
+
 	object SmallGroups {
 		case object Archive extends Permission("Archive small groups")
-		
+
 		case object Create extends Permission("Create small groups")
 		case object Read extends Permission("View small groups")
 		case object Update extends Permission("Edit small groups")
 		case object Delete extends Permission("Delete small groups")
-		
+
 		case object Allocate extends Permission("Allocate students to small groups")
 	}
 

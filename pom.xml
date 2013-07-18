@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>38</version>
+	<version>39</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -27,13 +27,15 @@
 	<properties>
 		<scala.version>2.10.1</scala.version>
 		<scala.major.version>2.10</scala.major.version>
-		<org.springframework.version>3.2.0.RELEASE</org.springframework.version>
+		<org.springframework.version>3.2.3.RELEASE</org.springframework.version>
 		<org.apache.lucene.version>4.0.0</org.apache.lucene.version>
 		<net.databinder.dispatch.version>0.8.9</net.databinder.dispatch.version>
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
-		<warwickutils.version>20130514</warwickutils.version>
-        <surefire.version>2.14.1</surefire.version>
+
+		<warwickutils.version>20130704-1109</warwickutils.version>
+	        <surefire.version>2.14.1</surefire.version>
+		<recompileMode><!-- incremental --></recompileMode>
 
 		<tabula.basedir>${project.basedir}</tabula.basedir>
 		<tabula.module.context>/${project.artifactId}</tabula.module.context>
@@ -93,26 +95,6 @@
 
 			<build>
 				<defaultGoal>install</defaultGoal>
-
-				<plugins>
-					<plugin>
-						<groupId>org.codehaus.mojo</groupId>
-						<artifactId>properties-maven-plugin</artifactId>
-						<executions>
-							<execution>
-								<phase>initialize</phase>
-								<goals>
-									<goal>read-project-properties</goal>
-								</goals>
-								<configuration>
-									<files>
-										<file>${tabula.basedir}/local.properties</file>
-									</files>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
 			</build>
 		</profile>
 
@@ -219,7 +201,37 @@
 								</configuration>
 							</execution>
 						</executions>
-					</plugin>
+          </plugin>
+          <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.1.4</version>
+                <executions>
+                    <execution>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>revision</goal>
+                         </goals>
+                    </execution>
+                </executions>
+
+                <configuration>
+                    <prefix>git</prefix>
+                    <dateFormat>dd.MM.yyyy '@' HH:mm:ss z</dateFormat>
+                    <verbose>true</verbose>
+                    <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+                    <generateGitPropertiesFile>false</generateGitPropertiesFile>
+                    <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+                    <failOnNoGitDirectory>true</failOnNoGitDirectory>
+                    <gitDescribe>
+                        <skip>false</skip>
+                        <always>false</always>
+                        <abbrev>7</abbrev>
+                        <dirty>-devel</dirty>
+                        <forceLongFormat>false</forceLongFormat>
+                    </gitDescribe>
+                </configuration>
+            </plugin>
 
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -239,7 +251,9 @@
 											<entry key="build.time" value="${build.time}" />
 											<entry key="module.name" value="${project.artifactId}" />
 											<entry key="module.context" value="${tabula.module.context}" />
-										</propertyfile>
+											<entry key="git.commit" value ="${git.commit.id}"/>
+											<entry key="git.describe" value = "${git.commit.id.describe}"/>
+  										</propertyfile>
 									</target>
 								</configuration>
 								<goals>
@@ -452,12 +466,12 @@
 				</executions>
 				<configuration>
 					<checkMultipleScalaVersions>false</checkMultipleScalaVersions>
-					<!-- <recompileMode>incremental</recompileMode>
-					<useZincServer>true</useZincServer> -->
+					<recompileMode>${recompileMode}</recompileMode>
+					<useZincServer>true</useZincServer>
 					<jvmArgs>
 						<jvmArg>-Xms256m</jvmArg>
 						<jvmArg>-Xmx2048m</jvmArg>
-						<jvmArg>-XX:MaxPermSize=256m</jvmArg>
+						<jvmArg>-XX:MaxPermSize=512m</jvmArg>
 					</jvmArgs>
 					<args>
 						<arg>-deprecation</arg>
@@ -511,6 +525,25 @@
 						</manifest>
 					</archive>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>initialize</phase>
+						<goals>
+							<goal>read-project-properties</goal>
+						</goals>
+						<configuration>
+							<files>
+								<file>${tabula.basedir}/local.properties</file>
+							</files>
+							<quiet>true</quiet><!-- keep quiet if file not found -->
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 
@@ -566,7 +599,7 @@
 				<plugin>
 					<groupId>net.alchim31.maven</groupId>
 					<artifactId>scala-maven-plugin</artifactId>
-					<version>3.1.3</version>
+					<version>3.1.5</version>
 				</plugin>
 
 				<plugin>
@@ -611,8 +644,9 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>${surefire.version}</version>
-					<configuration>
-						<forkCount>1C</forkCount>
+          <configuration>
+            <argLine>-Xmx2048m -Xms256m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
+						<forkCount>0.75C</forkCount>
 						<systemPropertyVariables>
 							<!-- Referenced in test tabula.properties data directory,
 								ensuring forks use separate data -->
@@ -796,6 +830,25 @@
 											<goal>
 												generate-application-xml
 											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											pl.project13.maven
+										</groupId>
+										<artifactId>
+											git-commit-id-plugin
+										</artifactId>
+										<versionRange>
+											[2.1.4,)
+										</versionRange>
+										<goals>
+											<goal>revision</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>

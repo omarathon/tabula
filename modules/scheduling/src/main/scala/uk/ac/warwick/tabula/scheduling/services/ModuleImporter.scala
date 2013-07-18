@@ -15,6 +15,8 @@ import javax.annotation.Resource
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
+import org.springframework.context.annotation.Profile
+import uk.ac.warwick.tabula.scheduling.sandbox.SandboxData
 
 case class DepartmentInfo(val name: String, val code: String, val faculty: String)
 case class ModuleInfo(val name: String, val code: String, val group: String)
@@ -32,7 +34,7 @@ trait ModuleImporter {
 /**
  * Retrieves department and module information from Webgroups.
  */
-@Service
+@Profile(Array("dev", "test", "production")) @Service
 class ModuleImporterImpl extends ModuleImporter with Logging {
 	import ModuleImporter._
 
@@ -47,6 +49,20 @@ class ModuleImporterImpl extends ModuleImporter with Logging {
 	def getDepartments: Seq[DepartmentInfo] = departmentInfoMappingQuery.execute
 	def getModules(deptCode: String): Seq[ModuleInfo] = moduleInfoMappingQuery.execute(deptCode.toUpperCase)
 	def getRoutes(deptCode: String): Seq[RouteInfo] = routeInfoMappingQuery.execute(deptCode.toUpperCase)
+}
+
+@Profile(Array("sandbox")) @Service
+class SandboxModuleImporter extends ModuleImporter {
+	
+	def getDepartments: Seq[DepartmentInfo] = 
+		SandboxData.Departments.toSeq map { case (code, d) => DepartmentInfo(d.name, d.code, d.facultyCode) }
+	
+	def getModules(deptCode: String): Seq[ModuleInfo] = 
+		SandboxData.Departments(deptCode).modules.toSeq map { case (code, m) => ModuleInfo(m.name, m.code, deptCode + "-" + m.code) }
+	
+	def getRoutes(deptCode: String): Seq[RouteInfo] = 
+		SandboxData.Departments(deptCode).routes.toSeq map { case (code, r) => RouteInfo(r.name, r.code, r.degreeType) }
+	
 }
 
 object ModuleImporter {

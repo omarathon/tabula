@@ -20,7 +20,7 @@
 	<@f.errors path="roleDefinition" cssClass="error help-inline" />
 
 	<div class="form-inline">
-		<@form.userpicker path="usercodes" />
+		<@form.flexipicker path="usercodes" />
 		<input class="btn" type="submit" value="Add">
 	</div>
 	<@f.errors path="usercodes" cssClass="error help-inline" />
@@ -52,7 +52,7 @@
 </#if>
 
 	<h3 class="permissionTitle">Senior tutors</h3> <a class="use-popover" id="popover-seniortutors" data-html="true"
-	   data-original-title="Senior tutors <button type='button' onclick=&quot;jQuery('#popover-seniortutors').popover('hide')&quot; class='close'>&times;</button></span>"
+	   data-original-title="Senior tutors"
 	   data-content="A senior tutor can see everything that a personal tutor can, for every student in the department."><i class="icon-question-sign"></i></a>
 
 	<#macro useractions user_id role>
@@ -63,10 +63,10 @@
 			<a class="btn btn-danger btn-mini removeUser"><i class="icon-white icon-remove"></i></a>
 		</form>
 	</#macro>
-	
+
 	<#assign seniorTutors=usersWithRole('PersonalTutorRoleDefinition', department) />
 	<#if seniorTutors?size gt 0>
-	
+
 		<table class="permission-list">
 		<#list seniorTutors as u>
 			<tr>
@@ -78,13 +78,13 @@
 			</tr>
 		</#list>
 		</table>
-		
+
 	<#else>
-	
+
 		<p class="empty-list">
 			There are no senior tutors yet.
 		</p>
-	
+
 	</#if>
 
 </div>

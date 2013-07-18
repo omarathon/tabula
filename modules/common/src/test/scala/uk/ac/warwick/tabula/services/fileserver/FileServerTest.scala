@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.FileDao
 import org.mockito.Matchers._
 import java.io.File
 import org.springframework.util.FileCopyUtils
+import org.joda.time.{Hours, DateTime}
 
 class FileServerTest extends TestBase with Mockito {
 	
@@ -142,6 +143,24 @@ class FileServerTest extends TestBase with Mockito {
 		res.getContentType() should be ("application/zip")
 		res.getHeader("Content-Disposition") should be ("attachment")
 		res.getContentAsByteArray().length should be (0)
+	}
+
+	@Test def expiresHeader {
+		implicit val req = new MockHttpServletRequest
+		implicit val res = mock[MockHttpServletResponse]
+
+		val time = new DateTime(2012, 6, 7, 8, 9, 10, 0)
+		val period = Hours.THREE
+
+		val file = mock[RenderableFile]
+		file.cachePolicy returns (CachePolicy(expires = Some(period)))
+		file.contentLength returns None
+
+		withFakeTime(time) {
+			server.serve(file)(req, res)
+		}
+
+		there was one(res).setDateHeader("Expires", time.plus(period).getMillis)
 	}
 
 }

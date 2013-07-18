@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.services.StateService
 import uk.ac.warwick.tabula.permissions.Permissions
 
 class MarkingCompletedCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser, val firstMarker:Boolean)
-	extends Command[Unit] with SelfValidating with Daoisms {
+	extends Command[Unit] with SelfValidating {
 
 	var stateService = Wire.auto[StateService]
 
@@ -50,7 +50,6 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 				val parentFeedback = mf.feedback
 				val secondMarkerFeedback = parentFeedback.retrieveSecondMarkerFeedback
 				stateService.updateState(secondMarkerFeedback, MarkingState.ReleasedForMarking)
-				session.saveOrUpdate(parentFeedback)
 			}
 		}
 

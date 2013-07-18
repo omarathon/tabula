@@ -1,29 +1,12 @@
 package uk.ac.warwick.tabula.coursework.commands
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.util.mail.AsynchronousWarwickMailSender
-import org.springframework.mail.SimpleMailMessage
-import org.junit.Test
+
 import uk.ac.warwick.tabula.Mockito
 import org.mockito.Mockito._
-import uk.ac.warwick.util.mail.WarwickMailSender
-import javax.mail.internet.MimeMessage
-import javax.mail.internet.InternetAddress
-import javax.mail.Message.RecipientType
-import javax.mail.Session
-import java.util.Properties
-
-
 import uk.ac.warwick.tabula.data.model.Submission
-
 import uk.ac.warwick.tabula.data.model.Assignment
-
-
 import uk.ac.warwick.tabula.data.model.Module
-
-
 import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConversions._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.coursework.commands.assignments.SendSubmissionNotifyCommand
@@ -32,8 +15,6 @@ import uk.ac.warwick.tabula.services.UserSettingsService
 import uk.ac.warwick.tabula.data.model.UserSettings
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.AppContextTestBase
-import javax.servlet.ServletContext
-import javax.mail.internet.MimeMultipart
 import org.junit.Before
 
 // scalastyle:off magic.number
@@ -44,16 +25,15 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 	var ug = new UserGroup()
 	var userSettings = new UserSettings()
 	var sc: SendSubmissionNotifyCommand = _
+	val userLookup = mock[UserLookupService]
+	when(userLookup.getUserByUserId("test")).thenReturn(u)
 	
 	@Before def before {
 		ug.includeUsers = List ("test")
 		submission = newBaseSubmission
 		sc = { 
-			var sendCmd = new SendSubmissionNotifyCommand(submission, ug)
-			sendCmd.fromAddress = "noreply@warwick.ac.uk"
-			sendCmd.replyAddress = "reply@warwick.ac.uk"
-			sendCmd.mailSender = mock[WarwickMailSender]
-			sendCmd.userLookup = mock[UserLookupService]
+			val sendCmd = new SendSubmissionNotifyCommand(submission, ug)
+			sendCmd.userLookup = userLookup
 			sendCmd.userSettings = mock[UserSettingsService]
 			sendCmd
 		}
@@ -61,79 +41,47 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 	
 	
 	@Test def allSubmissions {
-		userSettings.settings = Map("alertsSubmission" -> "allSubmissions")
-		
-		val session = Session.getDefaultInstance(new Properties)
-		val mimeMessage = new MimeMessage(session)	   
-		sc.mailSender.createMimeMessage() returns mimeMessage
-		
+		userSettings.alertsSubmission = "allSubmissions"
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
-		when(sc.userLookup.getUserByUserId("test")).thenReturn(u)
+
+		sc.applyInternal()
+		val notification = sc.emit.get(0) // should only be one so get it!
+		notification.recipients.size should be(1)
 		
-		sc.applyInternal()	
-		
-		there was one (sc.mailSender).send(mimeMessage)
-		
-		val messContent = mimeMessage.getContent()
-		val text = mimeMessage.getContent match {
-				case string: String => string
-				case multipart: MimeMultipart => multipart.getBodyPart(0).getContent.toString
-			}
-			
+		val text = notification.content
 		text should include (submission.assignment.module.name)
 		text should include (submission.id)
-
 	}
 	
 	
 	@Test def noAlerts {
-		userSettings.settings = Map("alertsSubmission" -> "none")
-		
-		val session = Session.getDefaultInstance(new Properties)
-		val mimeMessage = new MimeMessage(session)	   
-		sc.mailSender.createMimeMessage() returns mimeMessage
-				
+		userSettings.alertsSubmission = "none"
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
-		when(sc.userLookup.getUserByUserId("test")).thenReturn(u)
-		
-		sc.applyInternal()	
-		
-		there was no(sc.mailSender).send(mimeMessage)
+
+		sc.applyInternal()
+		sc.emit should be(Nil) // should not be any notifications
 	}
 	
 	
 	@Test def lateSubmissions {
-		userSettings.settings = Map("alertsSubmission" -> "lateSubmissions")
-		
+		userSettings.alertsSubmission = "lateSubmissions"
 		submission.submittedDate = new DateTime(2013, 1, 12, 12, 0)
 		submission.assignment.extensions add newExtension
-				
-		val session = Session.getDefaultInstance(new Properties)
-		val mimeMessage = new MimeMessage(session)	   
-		sc.mailSender.createMimeMessage() returns mimeMessage
-				
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
-		when(sc.userLookup.getUserByUserId("test")).thenReturn(u)
 		
-		sc.applyInternal()	
-		
-		there was one(sc.mailSender).send(mimeMessage)
+		sc.applyInternal()
+		val notification = sc.emit.get(0) // should only be one so get it!
+		notification.recipients.size should be(1)
 	}
 	
 	
 	@Test def lateSubmissionsIgnoreOnTime {
-		userSettings.settings = Map("alertsSubmission" -> "lateSubmissions")
-						
-		val session = Session.getDefaultInstance(new Properties)
-		val mimeMessage = new MimeMessage(session)	   
-		sc.mailSender.createMimeMessage() returns mimeMessage
-				
+		userSettings.alertsSubmission= "lateSubmissions"
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
-		when(sc.userLookup.getUserByUserId("test")).thenReturn(u)
 		
-		sc.applyInternal()	
-		
-		there was no (sc.mailSender).send(mimeMessage)
+		sc.applyInternal()
+		sc.applyInternal()
+		sc.emit should be(Nil) // should not be any notifications
 	}
 	
 
@@ -182,5 +130,5 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 	    assignment.closeDate = 	new DateTime(2012, 7, 12, 12, 0)
 	    assignment
 	}
-		
+
 }

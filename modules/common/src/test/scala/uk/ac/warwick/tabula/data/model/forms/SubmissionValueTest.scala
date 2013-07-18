@@ -21,16 +21,16 @@ class SubmissionValueTest extends PersistenceTestBase {
 		saved.attachments.iterator.next.temporary.booleanValue should be (false)
 	}
 	
-	@Test def deleteFileAttachmentOnDelete {
+	@Test def deleteFileAttachmentOnDelete =transactional{tx=>
 		// TAB-667
-		val orphanAttachment = transactional { tx =>
+		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment
 			
 			session.save(attachment)
 			attachment
 		}
 		
-		val (ssv, ssvAttachment1, ssvAttachment2) = transactional { tx =>
+		val (ssv, ssvAttachment1, ssvAttachment2) = flushing(session) {
 			val submission = new Submission(universityId = "0000001")
 			submission.userId = "steve"
 				
@@ -57,17 +57,17 @@ class SubmissionValueTest extends PersistenceTestBase {
 		ssvAttachment2.id should not be (null)
 		
 		// Can fetch everything from db
-		transactional { tx => 
+		flushing(session) {
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			session.get(classOf[SavedSubmissionValue], ssv.id) should be (ssv)
 			session.get(classOf[FileAttachment], ssvAttachment1.id) should be (ssvAttachment1)
 			session.get(classOf[FileAttachment], ssvAttachment2.id) should be (ssvAttachment2)
 		}
-		
-		transactional { tx => session.delete(ssv) }
+
+		flushing(session) { session.delete(ssv) }
 		
 		// Ensure we can't fetch the extension or attachment, but all the other objects are returned
-		transactional { tx => 
+		flushing(session) {
 			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
 			session.get(classOf[SavedSubmissionValue], ssv.id) should be (null)
 			session.get(classOf[FileAttachment], ssvAttachment1.id) should be (null)

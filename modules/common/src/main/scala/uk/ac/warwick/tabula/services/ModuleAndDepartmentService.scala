@@ -1,30 +1,27 @@
 package uk.ac.warwick.tabula.services
+import scala.collection.JavaConverters._
+import scala.reflect.ClassTag
+
+
 
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.InitializingBean
-import org.springframework.scheduling.annotation.Scheduled
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model._
+
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.DepartmentDao
 import uk.ac.warwick.tabula.data.ModuleDao
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.userlookup.GroupService
-import org.springframework.scheduling.annotation.Async
-import collection.JavaConverters._
-import uk.ac.warwick.userlookup.Group
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.RouteDao
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.permissions.{Permission, Permissions}
-import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
-import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
 import uk.ac.warwick.tabula.roles.RoleDefinition
-import scala.reflect.ClassTag
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.spring.Wire
 
 /**
  * Handles data about modules and departments
@@ -34,7 +31,6 @@ class ModuleAndDepartmentService extends Logging {
 
 	@Autowired var moduleDao: ModuleDao = _
 	@Autowired var departmentDao: DepartmentDao = _
-	@Autowired var routeDao: RouteDao = _
 	@Autowired var userLookup: UserLookupService = _
 	@Autowired var securityService: SecurityService = _
 	@Autowired var permissionsService: PermissionsService = _
@@ -63,10 +59,6 @@ class ModuleAndDepartmentService extends Logging {
 	def getModuleById(code: String) = transactional(readOnly = true) {
 		moduleDao.getById(code)
 	}
-	
-	def getRouteByCode(code: String) = transactional(readOnly = true) {
-		routeDao.getByCode(code)
-	} 
 
 	// We may have a granted role that's overridden later, so we also need to do a security service check as well
 	// as getting the role itself
@@ -122,5 +114,14 @@ class ModuleAndDepartmentService extends Logging {
 	def save(dept: Department) = transactional() {
 		departmentDao.save(dept)
 	}
+
+}
+
+trait ModuleAndDepartmentServiceComponent{
+	var moduleAndDepartmentService:ModuleAndDepartmentService
+}
+
+trait AutowiringModuleAndDepartmentServiceComponent extends ModuleAndDepartmentServiceComponent {
+	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
 }

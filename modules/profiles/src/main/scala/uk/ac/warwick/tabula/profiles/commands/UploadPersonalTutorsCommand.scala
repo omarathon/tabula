@@ -33,6 +33,20 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.model.StudentMember
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.UniversityId
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.helpers.FoundUser
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.helpers.NoUser
+import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 
 class UploadPersonalTutorsCommand(val department: Department) extends Command[Seq[StudentRelationship]] with Daoisms with Logging with BindListener with SelfValidating {
 
@@ -41,7 +55,9 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 	val acceptedExtensions = Seq(".xlsx")
 
 	val userLookup = Wire.auto[UserLookupService]
+	var relationshipService = Wire.auto[RelationshipService]
 	var profileService = Wire.auto[ProfileService]
+
 	var personalTutorExtractor = Wire.auto[RawStudentRelationshipExtractor]
 
 	var extractWarning = Wire.property("${profiles.relationship.upload.warning}")
@@ -94,10 +110,11 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 						}
 						case Some(targetMember: StudentMember) => {
 							rawStudentRelationship.targetMember = targetMember
-							if (targetMember.studyDetails.sprCode == null) {
-								errors.rejectValue("targetUniversityId", "member.sprCode.notFound")
+							if (targetMember.mostSignificantCourseDetails.isEmpty) {
+								errors.rejectValue("targetUniversityId", "member.course.noSignif")
 								valid = false
 							}
+
 							if (!targetMember.affiliatedDepartments.contains(department)) {
 								errors.rejectValue("targetUniversityId", "uniNumber.wrong.department", Array(department.name), "")
 								valid = false
@@ -171,11 +188,13 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 			val targetSprCode = profileService.getMemberByUniversityId(targetUniId) match {
 				// should never be None as validation has already checked for this
 				case None => throw new IllegalStateException("Couldn't find member for " + targetUniId)
-				case Some(mem: StudentMember) => mem.studyDetails.sprCode
+				case Some(mem: StudentMember) => {
+					mem.mostSignificantCourseDetails.getOrElse(throw new IllegalStateException("Couldn't determine course for " + mem.universityId)).sprCode
+				}
 				case Some(otherMember) => throw new IllegalStateException("Couldn't find student for " + targetUniId + " (non-student found)")
 			}
 
-			val currentRelationships = profileService.findCurrentRelationships(PersonalTutor, targetSprCode)
+			val currentRelationships = relationshipService.findCurrentRelationships(PersonalTutor, targetSprCode)
 
 			// Does this relationship already exist?
 			currentRelationships.find(_.agent == agent) match {
@@ -184,11 +203,11 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 					// End all existing relationships
 					currentRelationships.foreach { rel =>
 						rel.endDate = DateTime.now
-						profileService.saveOrUpdate(rel)
+						relationshipService.saveOrUpdate(rel)
 					}
 
 					// Save the new one
-					val rel = profileService.saveStudentRelationship(PersonalTutor, targetSprCode, agent)
+					val rel = relationshipService.saveStudentRelationship(PersonalTutor, targetSprCode, agent)
 
 					logger.debug("Saved personal tutor for " + targetUniId)
 

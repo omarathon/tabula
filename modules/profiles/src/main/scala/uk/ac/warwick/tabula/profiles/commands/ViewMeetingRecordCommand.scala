@@ -1,32 +1,55 @@
 package uk.ac.warwick.tabula.profiles.commands
-import scala.reflect.BeanProperty
-import org.joda.time.DateTime
-import org.springframework.validation.Errors
-import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{Command,Unaudited}
-import uk.ac.warwick.tabula.data.MeetingRecordDao
-import uk.ac.warwick.tabula.data.model.{Member,StudentMember,StudentRelationship,MeetingRecord}
-import uk.ac.warwick.tabula.data.model.RelationshipType._
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent, MeetingRecordDao}
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.CurrentUser
+import scala.Some
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import scala.Some
+import scala.Some
 
+object ViewMeetingRecordCommand{
+	def apply(studentCourseDetails: StudentCourseDetails, currentUser: CurrentUser, relationshipType:RelationshipType)  =
+		new ViewMeetingRecordCommandInternal(studentCourseDetails, currentUser, relationshipType) with
+			AutowiringProfileServiceComponent with
+			AutowiringMeetingRecordDaoComponent with
+		  AutowiringRelationshipServiceComponent with
+	  	ComposableCommand[Seq[MeetingRecord]] with
+		  ViewMeetingRecordCommandPermissions with
+	   	Unaudited
 
-class ViewMeetingRecordCommand(val student: StudentMember, val currentUser: CurrentUser) extends Command[Seq[MeetingRecord]] with Unaudited {
+}
 
-	PermissionCheck(Permissions.Profiles.MeetingRecord.Read, student)
+trait ViewMeetingRecordCommandState{
+	val studentCourseDetails: StudentCourseDetails
+	val requestingUser: CurrentUser
+	val relationshipType:RelationshipType
+}
 
-	var dao = Wire.auto[MeetingRecordDao]
-	var profileService = Wire.auto[ProfileService]
+class ViewMeetingRecordCommandInternal(val  studentCourseDetails: StudentCourseDetails, val requestingUser: CurrentUser, val relationshipType:RelationshipType)
+	extends CommandInternal[Seq[MeetingRecord]] with ViewMeetingRecordCommandState {
+
+	this:ProfileServiceComponent with RelationshipServiceComponent with  MeetingRecordDaoComponent=>
+
 
 	def applyInternal() = {
-		val rels = profileService.getRelationships(PersonalTutor, student)
-		val currentMember = profileService.getMemberByUniversityId(currentUser.universityId)
+    val rels = relationshipService.getRelationships(relationshipType, studentCourseDetails.sprCode)
+		val currentMember = profileService.getMemberByUniversityId(requestingUser.universityId)
 
 		currentMember match {
 			case None => Seq()
-			case Some(mem)=> dao.list(rels.toSet, mem)
+			case Some(mem)=> meetingRecordDao.list(rels.toSet, mem)
 		}
+	}
+}
+
+trait ViewMeetingRecordCommandPermissions extends RequiresPermissionsChecking{
+	this:ViewMeetingRecordCommandState =>
+
+	def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(MeetingPermissions.Read.permissionFor(relationshipType), studentCourseDetails)
+
 	}
 }

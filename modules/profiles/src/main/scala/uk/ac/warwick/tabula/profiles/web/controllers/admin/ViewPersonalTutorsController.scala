@@ -5,12 +5,11 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.profiles.commands.MissingPersonalTutorsCommand
-import uk.ac.warwick.tabula.profiles.commands.ViewPersonalTuteesCommand
-import uk.ac.warwick.tabula.profiles.commands.ViewPersonalTutorsCommand
+import uk.ac.warwick.tabula.data.model.{StudentRelationship, RelationshipType, Department}
+import uk.ac.warwick.tabula.profiles.commands.{ViewRelatedStudentsCommand, MissingPersonalTutorsCommand, ViewPersonalTutorsCommand}
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.commands.Appliable
 
 @Controller
 @RequestMapping(value = Array("/department/{department}/tutors"))
@@ -50,10 +49,10 @@ class MissingPersonalTutorsController extends ProfilesController {
 @Controller
 @RequestMapping(value = Array("/tutees"))
 class ViewPersonalTuteesController extends ProfilesController {
-	@ModelAttribute("cmd") def command = new ViewPersonalTuteesCommand(currentMember)
+	@ModelAttribute("cmd") def command = ViewRelatedStudentsCommand(currentMember, RelationshipType.PersonalTutor)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def view(@ModelAttribute("cmd") cmd: ViewPersonalTuteesCommand): Mav = {
+	def view(@ModelAttribute("cmd") cmd: Appliable[Seq[StudentRelationship]]): Mav = {
 		Mav("tutors/tutee_view", "tutees" -> cmd.apply)
 	}
 }

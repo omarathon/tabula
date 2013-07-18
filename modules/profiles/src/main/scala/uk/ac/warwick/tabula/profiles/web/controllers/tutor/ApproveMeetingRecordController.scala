@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 
 @Controller
-@RequestMapping(value = Array("/tutor/meeting/{meetingRecord}/approval"))
+@RequestMapping(value = Array("/*/meeting/{meetingRecord}/approval"))
 class ApproveMeetingRecordController  extends ProfilesController {
 	validatesSelf[ApproveMeetingRecordCommand]
 

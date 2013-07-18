@@ -1,27 +1,30 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
+import scala.collection.JavaConverters._
+
 import javax.persistence._
-import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
+import javax.validation.constraints.NotNull
+
+import org.hibernate.annotations.{AccessType, Filter, FilterDef, Type}
 import org.joda.time.DateTime
+
+import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import javax.persistence._
-import javax.persistence.FetchType._
-import javax.persistence.CascadeType._
-import uk.ac.warwick.tabula.data.model.permissions.SmallGroupGrantedRole
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import javax.validation.constraints.NotNull
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
 
 object SmallGroupSet {
 	final val NotDeletedFilter = "notDeleted"
+	object Settings {
+		val StudentsCanSeeTutorNames = "StudentsCanSeeTutorNames"
+		val StudentsCanSeeOtherMembers = "StudentsCanSeeOtherMembers"
+	}
 }
 
 /**
@@ -31,9 +34,9 @@ object SmallGroupSet {
 @Filter(name = SmallGroupSet.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget {
-	import SmallGroupSet._
-	
+class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings with PostLoadBehaviour  {
+	import SmallGroupSet.Settings
+
 	@transient var permissionsService = Wire[PermissionsService]
 	@transient var membershipService = Wire[AssignmentMembershipService]
 
@@ -52,8 +55,13 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 
 	var archived: JBoolean = false
 
-	var released: JBoolean = false
-	
+  @Column(name="released_to_students")
+	var releasedToStudents: JBoolean = false
+  @Column(name="released_to_tutors")
+  var releasedToTutors:JBoolean = false
+
+  def fullyReleased= releasedToStudents && releasedToTutors
+
 	@Column(name="group_format")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupFormatUserType")
 	@NotNull
@@ -62,6 +70,9 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	@Column(name="allocation_method")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethodUserType")
 	var allocationMethod: SmallGroupAllocationMethod = _
+
+	@Column(name="self_group_switching")
+	var allowSelfGroupSwitching:Boolean = true
 
 	@ManyToOne
 	@JoinColumn(name = "module_id")
@@ -88,13 +99,54 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 		allStudents diff allocatedStudents
 	}
 	
+	def unallocatedStudentsCount = {
+		val allStudentsCount = membershipService.countMembershipUsers(assessmentGroups.asScala, Some(members))
+		val allocatedStudentsCount = groups.asScala.foldLeft(0) { (acc, grp) => acc + grp.students.members.size }
+		
+		allStudentsCount - allocatedStudentsCount
+	}
+	
 	def hasAllocated = groups.asScala exists { !_.students.isEmpty }
 	
 	def permissionsParents = Option(module).toStream
+
+	def studentsCanSeeTutorName = getBooleanSetting(Settings.StudentsCanSeeTutorNames).getOrElse(false)
+	def studentsCanSeeTutorName_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeTutorNames -> canSee)
+
+	def studentsCanSeeOtherMembers = getBooleanSetting(Settings.StudentsCanSeeOtherMembers).getOrElse(false)
+	def studentsCanSeeOtherMembers_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeOtherMembers -> canSee)
+
+
+
 
 	def toStringProps = Seq(
 		"id" -> id,
 		"name" -> name,
 		"module" -> module)
 
+  def duplicateTo( module:Module, assessmentGroups:JList[UpstreamAssessmentGroup] = JArrayList()):SmallGroupSet = {
+    val newSet = new SmallGroupSet()
+    newSet.id = id
+    newSet.academicYear = academicYear
+    newSet.allocationMethod = allocationMethod
+    newSet.allowSelfGroupSwitching = allowSelfGroupSwitching
+    newSet.archived = archived
+    newSet.assessmentGroups = assessmentGroups
+    newSet.format = format
+    newSet.groups = groups.asScala.map(_.duplicateTo(newSet)).asJava
+    newSet.members = members.duplicate()
+    newSet.membershipService= membershipService
+    newSet.module = module
+    newSet.name = name
+    newSet.permissionsService = permissionsService
+    newSet.releasedToStudents = releasedToStudents
+    newSet.releasedToTutors = releasedToTutors
+		newSet.settings = Map() ++ settings
+    newSet
+  }
+
+	def postLoad {
+		ensureSettings
+	}
 }
+

@@ -2,23 +2,20 @@ package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.tabula.AppContextTestBase
 import org.springframework.beans.factory.annotation.Autowired
-import org.junit.Test
+import org.junit.{Test, After}
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import java.io.ByteArrayInputStream
+import java.io.{InputStream, ByteArrayInputStream, File}
 import org.joda.time.DateTime
 import javax.persistence.Entity
 import org.hibernate.annotations.AccessType
-import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import java.io.File
 import org.springframework.util.FileCopyUtils
 import org.joda.time.DateTimeConstants
-import org.junit.After
 import org.springframework.transaction.annotation.Transactional
 
 // scalastyle:off magic.number
@@ -82,7 +79,7 @@ class FileDaoTest extends AppContextTestBase {
 	 * data but can still find existing data stored under the old location.
 	 */
 	@Test
-	def compatDirectorySplit {
+	def compatDirectorySplit() {
 		transactional { tx =>
 			dao.attachmentDir = createTemporaryDirectory
 
@@ -108,5 +105,33 @@ class FileDaoTest extends AppContextTestBase {
 
 		}
 	}
+
+	@Test
+	def save() {
+		transactional { tx =>
+			val attachment = new FileAttachment("file.txt")
+			val string = "Doe, a deer, a female deer"
+			val bytes = string.getBytes("UTF-8")
+			attachment.uploadedDataLength = bytes.length
+			attachment.uploadedData = new ByteArrayInputStream(bytes)
+			dao.saveTemporary(attachment)
+
+			attachment.id should not be (null)
+
+			session.flush
+			session.clear
+
+			dao.getFileById(attachment.id) match {
+				case Some(loadedAttachment:FileAttachment) => {
+					//val blob = loadedAttachment.data
+					val data = readStream(loadedAttachment.dataStream, "UTF-8")
+					data should be (string)
+				}
+				case None => fail("nope")
+			}
+		}
+	}
+
+	private def readStream(is:InputStream, encoding:String) = new String(FileCopyUtils.copyToByteArray(is), encoding)
 	
 }

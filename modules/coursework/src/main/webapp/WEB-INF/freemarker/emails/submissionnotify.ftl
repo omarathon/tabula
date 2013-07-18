@@ -1,5 +1,3 @@
-Hello
-	          
 This email confirms that a submission for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name} has been received.
 
 This email is sent to you as a manager of the module.
@@ -28,6 +26,3 @@ All submissions for this assignment can be found here:
 To unsubscribe from these emails, go here and select "No alerts".
 
 <@url page='/admin/usersettings#submission-alerts'/>
-
-
-This email was sent from an automated system, and replies to it will not reach a real person.

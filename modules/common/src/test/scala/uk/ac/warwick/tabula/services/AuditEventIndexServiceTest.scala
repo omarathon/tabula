@@ -32,10 +32,11 @@ import uk.ac.warwick.tabula.data.model.Department
 import org.apache.commons.io.FileUtils
 import uk.ac.warwick.tabula.Fixtures
 import org.springframework.test.annotation.DirtiesContext
+import uk.ac.warwick.tabula.helpers.Logging
 
 // scalastyle:off magic.number
 //@DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
-class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
+class AuditEventIndexServiceTest extends AppContextTestBase with Mockito with Logging {
 	
 	var indexer:AuditEventIndexService = _
 	@Autowired var service:AuditEventService = _
@@ -52,7 +53,12 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito {
 	@After def tearDown {
 		indexer.destroy()
 		session.createSQLQuery("delete from auditevent").executeUpdate()
-		FileUtils.deleteDirectory(TEMP_DIR)
+		try {
+			FileUtils.deleteDirectory(TEMP_DIR)
+		} catch {
+			// windows holds onto a lock on some index files longer than it should. Don't fail over this
+			case e:java.io.IOException => logger.warn(e.getMessage)
+		}
 	}
 
 	/**

@@ -89,10 +89,18 @@ class UserGroup extends GeneratedId {
 
 	def members: Seq[String] =
 		(includeUsers.toList ++ staticIncludeUsers ++ webgroupMembers) filterNot excludeUsers.contains
-		
+
 	def users: Seq[User] =
-		if (universityIds) members map { userLookup.getUserByWarwickUniId(_) }
-		else userLookup.getUsersByUserIds(members.asJava).values.asScala.toSeq
+		if (universityIds) members map {
+			userLookup.getUserByWarwickUniId(_)
+		}
+		else {
+			if (members.isEmpty) {
+				Nil
+			} else {
+				userLookup.getUsersByUserIds(members.asJava).values.asScala.toSeq
+			}
+		}
 
 	def webgroupMembers: List[String] = baseWebgroup match {
 		case webgroup: String => groupService.getUserCodesInGroup(webgroup).asScala.toList
@@ -108,6 +116,13 @@ class UserGroup extends GeneratedId {
 		includeUsers.addAll(other.includeUsers)
 		excludeUsers.addAll(other.excludeUsers)
 		staticIncludeUsers.addAll(other.staticIncludeUsers)
+	}
+
+	def duplicate(): UserGroup = {
+		val newGroup = new UserGroup
+		newGroup.copyFrom(this)
+		newGroup.userLookup = this.userLookup
+		newGroup
 	}
 
 }

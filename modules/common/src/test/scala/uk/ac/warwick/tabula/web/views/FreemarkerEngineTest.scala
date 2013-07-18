@@ -9,6 +9,7 @@ import freemarker.template.Configuration
 import uk.ac.warwick.tabula.data.model.Department
 import org.junit.Ignore
 import org.joda.time.Duration
+import scala.util.Properties
 
 class FreemarkerEngineTest extends TestBase {
 	var configuration:Configuration = _
@@ -49,5 +50,10 @@ class FreemarkerEngineTest extends TestBase {
 		))
 		output should be ("Robot=CERBERUS;")
 	}
+
+  @Test def usesMacros{
+    val output=render("uses_macros.ftl",Map("count"->3))
+    output should be ("First line"+Properties.lineSeparator+"3 wombats")
+  }
 	
 }

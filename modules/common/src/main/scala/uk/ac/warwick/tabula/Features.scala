@@ -48,12 +48,14 @@ abstract class Features {
 	@Value("${features.markerFeedback:true}") var markerFeedback = defaults.markerFeedback
 	@Value("${features.profiles:true}") var profiles = defaults.profiles
 	@Value("${features.assignmentProgressTable:true}") var assignmentProgressTable = defaults.assignmentProgressTable
-	@Value("${features.assignmentProgressTableByDefault:false}") var assignmentProgressTableByDefault = defaults.assignmentProgressTableByDefault
+	@Value("${features.assignmentProgressTableByDefault:true}") var assignmentProgressTableByDefault = defaults.assignmentProgressTableByDefault
 	@Value("${features.summativeFilter:true}") var summativeFilter = defaults.summativeFilter
 	@Value("${features.meetingRecordApproval:true}") var meetingRecordApproval = defaults.meetingRecordApproval
 	@Value("${features.smallGroupTeaching:false}") var smallGroupTeaching = defaults.smallGroupTeaching
 	@Value("${features.smallGroupTeaching.studentSignUp:false}") var smallGroupTeachingStudentSignUp = defaults.smallGroupTeachingStudentSignUp
 	@Value("${features.smallGroupTeaching.randomAllocation:false}") var smallGroupTeachingRandomAllocation = defaults.smallGroupTeachingRandomAllocation
+	@Value("${features.smallGroupTeaching.selfGroupSwitching:false}") var smallGroupTeachingSelfGroupSwitching = defaults.smallGroupTeachingSelfGroupSwitching
+
 	@Value("${features.smallGroupTeaching.tutorView:false}") var smallGroupTeachingTutorView = defaults.smallGroupTeachingTutorView
 
 	private val bean = new BeanWrapperImpl(this)
@@ -104,7 +106,8 @@ class FeaturesMessage {
 	@BeanProperty var smallGroupTeaching = false
 	@BeanProperty var smallGroupTeachingStudentSignUp = false
 	@BeanProperty var smallGroupTeachingRandomAllocation = false
-	@BeanProperty var smallGroupTeachingTutorView = true
+	@BeanProperty var smallGroupTeachingSelfGroupSwitching = false
+	@BeanProperty var smallGroupTeachingTutorView = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

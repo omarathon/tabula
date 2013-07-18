@@ -12,7 +12,7 @@ import javax.validation.constraints._
 @NamedQueries(Array(
 	new NamedQuery(name = "route.code", query = "select r from Route r where code = :code"),
 	new NamedQuery(name = "route.department", query = "select r from Route r where department = :department")))
-class Route extends GeneratedId {
+class Route extends GeneratedId with Serializable {
 
 	def this(code: String = null, department: Department = null) {
 		this()
@@ -20,13 +20,15 @@ class Route extends GeneratedId {
 		this.department = department
 	}
 
+	@Column(unique=true)
 	var code: String = _
+
 	var name: String = _
 
 	@ManyToOne
 	@JoinColumn(name = "department_id")
 	var department: Department = _
-	
+
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.DegreeTypeUserType")
 	var degreeType: DegreeType = _
 

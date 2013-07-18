@@ -85,10 +85,19 @@
 						<div id="custom-header">
 							<div>
 							<#if (info.maintenance)!false>
-								<span id="maintenance-mode-label" class="label label-warning" rel="popover" title="System read-only" data-placement="left" data-content="This system has been placed in a read-only mode. You will be able to downoad files, but other operations are not currently possible. Normal access will be restored very soon.">Read-only</span>
+								<span id="maintenance-mode-label" class="label label-warning" rel="popover" title="System read-only" data-placement="left" data-content="This system has been placed in a read-only mode. You will be able to download files, but other operations are not currently possible. Normal access will be restored very soon.">Read-only</span>
 								<script>
 									jQuery(function($){
 										$('#maintenance-mode-label').popover();
+									});
+								</script>
+							</#if>
+							
+							<#if (activeSpringProfiles!"") == "sandbox">
+								<span id="sandbox-label" class="label label-warning" rel="popover" title="Tabula Sandbox" data-placement="left" data-content="This instance of Tabula is a sandbox instance, and doesn't use any real data."><i class="icon-sun"></i> Sandbox</span>
+								<script>
+									jQuery(function($){
+										$('#sandbox-label').popover();
 									});
 								</script>
 							</#if>

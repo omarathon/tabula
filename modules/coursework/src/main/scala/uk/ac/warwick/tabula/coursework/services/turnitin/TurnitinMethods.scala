@@ -310,16 +310,15 @@ trait TurnitinMethods { self: Session =>
 	/**
 	 * List the submissions made to this assignment in this class.
 	 * 
-	 * Unlike some others, this command will not create the class or the assignment implicitly -
-	 * they must already exist. You will get ClassNotFound or AssignmentNotFound if either are
-	 * missing. The API documentation claims otherwise.
+	 * This command <em>may</em> throw ClassNotFound or AssignmentNotFound in some circumstances,
+	 * but the intended behaviour is that it will create the class or assignment implicitly.
 	 */
-	def listSubmissions(classId: ClassId, assignmentId: AssignmentId): Response = {
+	def listSubmissions(classId: ClassId, className: ClassName, assignmentId: AssignmentId, assignmentName: AssignmentName): Response = {
 		val response = doRequest(ListSubmissionsFunction, None,
 			"cid" -> classId.value,
-			"ctl" -> "Class name", // required but ignored.
+			"ctl" -> className.value,
 			"assignid" -> assignmentId.value,
-			"assign" -> "Assignment name", //required but ignored.
+			"assign" -> assignmentName.value,
 			"tem" -> userEmail,
 			"fcmd" -> "2")
 		if (response.success) GotSubmissions(response.submissionsList)

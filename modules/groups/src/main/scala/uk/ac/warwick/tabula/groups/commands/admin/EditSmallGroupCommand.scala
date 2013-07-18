@@ -20,7 +20,6 @@ class EditSmallGroupCommand(group: SmallGroup) extends ModifySmallGroupCommand(g
 
 	def applyInternal() = transactional() {
 		copyTo(group)
-		service.saveOrUpdate(group)
 		group
 	}
 

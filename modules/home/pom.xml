@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>38</version>
+		<version>39</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -134,7 +134,7 @@
 				<executions>
 					<execution>
 						<id>lesscss</id>
-						<phase>compile</phase>
+						<phase>prepare-package</phase>
 						<configuration>
 							<target>
 								<taskdef name="lesscss" classname="uk.ac.warwick.util.ant.LessCSSTask"
@@ -197,7 +197,7 @@
 				<artifactId>yuicompressor-maven-plugin</artifactId>
 				<executions>
 					<execution>
-						<phase>process-classes</phase>
+						<phase>prepare-package</phase>
 						<goals>
 							<goal>compress</goal>
 						</goals>
@@ -257,8 +257,9 @@
 								<include>jquery-biglist.js</include>
 								<include>jquery-details.js</include>
 								<include>jquery-tableform.js</include>
-                <include>jquery-draganddrop.js</include>
+								<include>jquery-draganddrop.js</include>
 								<include>userpicker.js</include>
+								<include>flexipicker.js</include>
 								<include>ajax-popup.js</include>
 								<include>app-comments.js</include>
 							</includes>

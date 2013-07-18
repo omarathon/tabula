@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
-import uk.ac.warwick.tabula.commands.{Description, Command}
+import uk.ac.warwick.tabula.commands.{Notifies, Description, Command, SelfValidating}
 import scala.collection.JavaConversions._
-import org.springframework.beans.factory.annotation.{Autowired, Configurable}
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.helpers.{LazyLists, Logging}
 import uk.ac.warwick.tabula.data.Transactions._
-import reflect.BeanProperty
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.DateFormats
@@ -17,26 +16,47 @@ import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notifications._
+import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 
 /*
  * Built the command as a bulk operation. Single additions can be achieved by adding only one extension to the list.
  */
 
 class AddExtensionCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
-	extends ModifyExtensionCommand(module, assignment, submitter) {
+	extends ModifyExtensionCommand(module, assignment, submitter) with Notifies[Option[Extension]] {
 	
 	PermissionCheck(Permissions.Extension.Create, assignment)
-	
+
+	def emit = extensions.asScala.map({extension =>
+			val student = userLookup.getUserByWarwickUniId(extension.universityId)
+			new ExtensionGrantedNotification(extension, student, submitter.apparentUser) with FreemarkerTextRenderer
+	})
 }
 
 class EditExtensionCommand(module: Module, assignment: Assignment, val extension: Extension, submitter: CurrentUser)
-	extends ModifyExtensionCommand(module, assignment, submitter) {
+	extends ModifyExtensionCommand(module, assignment, submitter) with Notifies[Option[Extension]] {
 	
 	PermissionCheck(Permissions.Extension.Update, extension)
 	
-	copyExtensions(List(extension))	
+	copyExtensions(List(extension))
+
+	def emit = extensions.asScala.flatMap({extension =>
+			val student = userLookup.getUserByWarwickUniId(extension.universityId)
+			val admin = submitter.apparentUser
+
+			val studentNotification = if(extension.isManual){
+				new ExtensionChangedNotification(extension, student, admin) with FreemarkerTextRenderer
+			} else if (extension.approved) {
+				new ExtensionRequestApprovedNotification(extension, student, admin) with FreemarkerTextRenderer
+			} else {
+				new ExtensionRequestRejectedNotification(extension, student, admin) with FreemarkerTextRenderer
+			}
+
+			val adminNotifications = new ExtensionRequestRespondedNotification(extension, student, admin) with FreemarkerTextRenderer
+
+		Seq(studentNotification, adminNotifications)
+	})
 }
 
 class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, extension: Extension, submitter: CurrentUser)

@@ -19,9 +19,9 @@
 	<#if has_assignments>
 		<div class="striped-section collapsible expanded" data-name="pending">
 			<div class="clearfix">
-				<h3 class="section-title">Pending</h2>
+				<h3 class="section-title">Pending</h3>
 			</div>
-			
+
 			<div class="striped-section-contents">
 				<#macro enrolled_assignment info>
 					<#local assignment = info.assignment />
@@ -29,7 +29,7 @@
 					<#local hasExtension = info.hasExtension />
 					<#local isExtended = info.isExtended!false />
 					<#local extensionRequested = info.extensionRequested!false />
-					
+
 					<div class="item-info clearfix<#if !info.isExtended && info.closed> late<#elseif info.isExtended!false> extended</#if>">
 						<div class="row-fluid">
 							<div class="span4">
@@ -102,7 +102,7 @@
 	<#if has_historical_items>
 		<div class="striped-section collapsible" data-name="past">
 			<div class="clearfix">
-				<h3 class="section-title">Past</h2>
+				<h3 class="section-title">Past</h3>
 			</div>
 			
 			<div class="striped-section-contents">

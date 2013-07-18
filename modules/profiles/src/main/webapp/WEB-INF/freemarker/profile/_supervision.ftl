@@ -1,16 +1,18 @@
+<#import "../related_students/meeting/meeting_list_macros.ftl" as meeting_macros />
+
 <#escape x as x?html>
 <section id="supervision" class="clearfix">
-	<#if profile.supervisors?? && profile.supervisors?size gt 0>
-		<h4>Supervisor<#if profile.supervisors?size gt 1>s</#if></h4>
+	<#if studentCourseDetails.supervisors?? && studentCourseDetails.supervisors?size gt 0>
+		<h4>Supervision</h4>
 
-		<div class="tutors clearfix row">
-		<#list profile.supervisors as relationship>
+		<div class="tutors clearfix row-fluid">
+		<#list studentCourseDetails.supervisors as relationship>
 			<#assign supervisor = relationship.agentMember />
 			<div class="tutor clearfix span4">
 				<#if supervisor??>
-					<div class="photo">
-						<img src="<@routes.relationshipPhoto profile relationship />" />
-					</div>
+
+					<@fmt.relation_photo member relationship "tinythumbnail" />
+
 					<h5>
 						${supervisor.fullName!"Supervisor"}
 					</h5>
@@ -25,6 +27,10 @@
 			</div>
 		</#list>
 		</div>
+		<@meeting_macros.list studentCourseDetails supervisorMeetings "supervisor"/>
+	<#else>
+		<h4>Supervisors</h4>
+		<p class="text-warning"><i class="icon-warning-sign"></i> No supervision details are recorded in Tabula for the current year.</p>
 	</#if>
 </section>
 </#escape>

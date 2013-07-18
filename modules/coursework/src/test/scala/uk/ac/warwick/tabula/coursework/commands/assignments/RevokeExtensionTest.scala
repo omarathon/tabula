@@ -14,6 +14,7 @@ class RevokeExtensionTest extends AppContextTestBase with Mockito {
 	def revokeExtension(){
 		withUser("cuslaj") {
 			val assignment = newDeepAssignment()
+			assignment.id = "assignment"
 			val extension = new Extension()
 			extension.universityId = "0000001"
 			extension.assignment = assignment

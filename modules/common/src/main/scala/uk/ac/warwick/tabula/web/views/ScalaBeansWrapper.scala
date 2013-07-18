@@ -19,12 +19,13 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.system.permissions.Restricted
+import uk.ac.warwick.tabula.system.permissions.{RestrictionProvider, Restricted}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.ScopelessPermission
-import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.{RequestInfo}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import java.lang.reflect.Method
+import scala.util.{Try,Success, Failure}
 
 /**
  * A implementation of BeansWrapper that support native Scala basic and collection types
@@ -33,6 +34,10 @@ import java.lang.reflect.Method
 class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 	
 	var securityService = Wire[SecurityService]
+
+	// On startup, ensure this is empty. This is mainly for hot reloads (JRebel), which
+	// won't know to clear this singleton variable.
+	ScalaHashModel.gettersCache.clear()
 
 	def superWrap(obj: Object): TemplateModel = {
 		super.wrap(obj)
@@ -44,7 +49,6 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 			case Some(x: Object) => wrap(x)
 			case Some(null) => null
 			case None => null
-			//      case long:Long => superWrap(long:JLong)
 			case jcol: java.util.Collection[_] => superWrap(jcol)
 			case jmap: JMap[_, _] => superWrap(jmap)
 			case smap: scala.collection.Map[_, _] => superWrap(mapAsJavaMapConverter(smap).asJava)
@@ -58,7 +62,10 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 		}
 	}
 	// scalastyle:on
-	
+
+	// whether or not to cache results of get() methods for the life of this wrapper.
+	var useWrapperCache = true
+
 	private def isScalaCompiled(obj: Any) = Option(obj) match {
 		case Some(obj) if (!obj.getClass.isArray) => obj.getClass.getPackage.getName.startsWith("uk.ac.warwick.tabula")
 		case _ => false
@@ -92,9 +99,19 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 			
 			def parse(m: Method, name: String) = {
 				val restrictedAnnotation = m.getAnnotation(classOf[Restricted])
-				val perms: Seq[Permission] =
-					if (restrictedAnnotation != null) restrictedAnnotation.value map { name => Permissions.of(name) }
-					else Nil			
+        val restrictionProviderAnnotation = m.getAnnotation(classOf[RestrictionProvider])
+				val perms: PermissionsFetcher =
+					if (restrictedAnnotation != null) {
+              (_)=>restrictedAnnotation.value map { name => Permissions.of(name) }
+          }
+          else if (restrictionProviderAnnotation != null){
+            Try(cls.getMethod(restrictionProviderAnnotation.value())) match{
+              case Success(method)=>(x)=>method.invoke(x).asInstanceOf[Seq[Permission]]
+              case Failure(e)=>throw new IllegalStateException(
+                "Couldn't find restriction provider method %s():Seq[Permission]".format(restrictionProviderAnnotation.value()),e)
+            }
+          }
+					else (_)=>Nil
 				
 				(name -> (m, perms))
 			}
@@ -117,7 +134,20 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 		// Cache child properties for the life of this model, so that their caches are useful when a property is accessed twice.
 		// Not the same as TAB-469, which would cache for longer than the life of a request, causing memory leaks. This cache
 		// will use a bit more memory but it won't leak outside of a request.
-		var cachedResults = mutable.HashMap[String, TemplateModel]()
+		val cachedResults = new ResultsCache
+
+		class ResultsCache {
+
+			def getOrElseUpdate(key: String, updater: => TemplateModel): TemplateModel = {
+				if (useWrapperCache) {
+					cache.getOrElseUpdate(key, updater)
+				} else {
+					updater
+				}
+			}
+			var cache = mutable.HashMap[String, TemplateModel]()
+			def clear() = cache.clear()
+		}
 
 		def user = RequestInfo.fromThread.get.user
 
@@ -132,17 +162,20 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 		}
 		
 		override def get(key: String): TemplateModel = {
-			val x = key
-			cachedResults.getOrElseUpdate(key, 
-				getters.get(key) match {
+			cachedResults.getOrElseUpdate(key,{
+				val gtr= getters.get(key)
+				gtr match {
 					case Some((getter, permissions)) => 
-						if (canDo(permissions)) wrapper.wrap(getter.invoke(sobj))
+						if (canDo(permissions(sobj))) {
+							val res = getter.invoke(sobj)
+							wrapper.wrap(res)
+						}
 						else null
 					case None => checkInnerClasses(key) match {
 						case Some(method) => method
 						case None => super.get(key)
 					}
-				}
+				}}
 			)
 		}
 	
@@ -164,8 +197,8 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 	
 	object ScalaHashModel {
 		type Getter = java.lang.reflect.Method
-		
-		val gettersCache = new mutable.HashMap[Class[_], Map[String, (Getter, Seq[Permission])]]
+		type PermissionsFetcher = Any=>Seq[Permission]
+		val gettersCache = new mutable.HashMap[Class[_], Map[String, (Getter, PermissionsFetcher)]]
 	}
 
 }

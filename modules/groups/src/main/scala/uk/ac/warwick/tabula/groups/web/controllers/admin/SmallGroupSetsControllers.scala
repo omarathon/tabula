@@ -5,26 +5,23 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
-import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.Module
+import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
+import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat
-import uk.ac.warwick.tabula.groups.commands.admin.CreateSmallGroupSetCommand
+import uk.ac.warwick.tabula.groups.commands.admin._
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
-import uk.ac.warwick.tabula.groups.commands.admin.EditSmallGroupSetCommand
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
-import uk.ac.warwick.tabula.groups.commands.admin.ModifySmallGroupSetCommand
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
-import uk.ac.warwick.tabula.groups.commands.admin.DeleteSmallGroupSetCommand
 import org.springframework.validation.BeanPropertyBindingResult
-import uk.ac.warwick.tabula.groups.commands.admin.ArchiveSmallGroupSetCommand
+import uk.ac.warwick.tabula.commands.Appliable
+import scala.collection.JavaConverters._
+import uk.ac.warwick.userlookup.User
 
 trait SmallGroupSetsController extends GroupsController {
 	
@@ -94,8 +91,8 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 		
 	@ModelAttribute("smallGroupSet") def set(@PathVariable("set") set: SmallGroupSet) = set 
 	
-	@ModelAttribute("editSmallGroupSetCommand") def cmd(@PathVariable("set") set: SmallGroupSet) = 
-		new EditSmallGroupSetCommand(set)
+	@ModelAttribute("editSmallGroupSetCommand") def cmd(@PathVariable("set") set: SmallGroupSet, user:CurrentUser) =
+		new EditSmallGroupSetCommand(set, user.apparentUser)
 
 	@ModelAttribute("canDelete") def canDelete(@PathVariable("set") set: SmallGroupSet) = {
 		val cmd = new DeleteSmallGroupSetCommand(set.module, set)
@@ -165,3 +162,60 @@ class ArchiveSmallGroupSetController extends GroupsController {
 	}
 	
 }
+
+@RequestMapping(Array("/admin/module/{module}/groups/{set}/release"))
+@Controller
+class ReleaseSmallGroupSetController extends GroupsController {
+
+  @ModelAttribute("releaseGroupSetCommand") def getReleaseGroupSetCommand(@PathVariable("set") set:SmallGroupSet):Appliable[Seq[SmallGroupSet]]={
+    new ReleaseGroupSetCommandImpl( Seq(set),user.apparentUser )
+  }
+
+  @RequestMapping
+  def form(@ModelAttribute("releaseGroupSetCommand") cmd: Appliable[SmallGroupSet]) =
+    Mav("admin/groups/release").noLayoutIf(ajax)
+
+  @RequestMapping(method = Array(POST))
+  def submit(@ModelAttribute("releaseGroupSetCommand") cmd: Appliable[SmallGroupSet]) = {
+    cmd.apply()
+    Mav("ajax_success").noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
+  }
+}
+
+@RequestMapping(Array("/admin/department/{department}/groups/release"))
+@Controller
+class ReleaseAllSmallGroupSetsController extends GroupsController {
+
+  @ModelAttribute("moduleList") def newViewModel():ModuleListViewModel={
+    new ModuleListViewModel()
+  }
+
+  @RequestMapping
+  def form(@ModelAttribute("moduleList") model: ModuleListViewModel, @PathVariable department:Department, showFlash:Boolean=false) ={
+    Mav("admin/groups/bulk-release", "department"->department, "modules"->department.modules, "showFlash"->showFlash)
+  }
+
+  @RequestMapping(method = Array(POST))
+  def submit(@ModelAttribute("moduleList") model: ModuleListViewModel,@PathVariable department:Department) = {
+    model.createCommand(user.apparentUser).apply()
+    Redirect("/admin/department/%s/groups/release".format(department.code), "batchReleaseSuccess"->true)
+  }
+
+  class ModuleListViewModel(){
+    var checkedModules:JList[Module] = JArrayList()
+    var notifyStudents:JBoolean = true
+    var notifyTutors:JBoolean = true
+
+    def smallGroupSets() = {
+      checkedModules.asScala.flatMap(mod=>
+        mod.groupSets.asScala
+      )
+    }
+
+    def createCommand(user:User):Appliable[Seq[SmallGroupSet]] = {
+      new ReleaseGroupSetCommandImpl(smallGroupSets(), user)
+    }
+  }
+
+}
+

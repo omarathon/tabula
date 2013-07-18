@@ -1,8 +1,5 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import java.sql.ResultSet
-
-
 import org.joda.time.DateTime
 import org.springframework.beans.BeanWrapperImpl
 
@@ -17,22 +14,18 @@ import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
+import uk.ac.warwick.tabula.scheduling.services.SitsStatusInfo
 
-class ImportSingleSitsStatusCommand(resultSet: ResultSet) extends Command[SitsStatus] with Logging with Daoisms 
+class ImportSingleSitsStatusCommand(info: SitsStatusInfo) extends Command[SitsStatus] with Logging with Daoisms 
 	with Unaudited with PropertyCopying {
 	
 	PermissionCheck(Permissions.ImportSystemData)
 	
 	var sitsStatusDao = Wire.auto[SitsStatusDao]
 
-	// A couple of intermediate properties that will be transformed later
-	var code: String = _
-	var shortName: String = _
-	var fullName: String = _
-	
-	this.code = resultSet.getString("sta_code")
-	this.shortName = resultSet.getString("sta_snam")
-	this.fullName = resultSet.getString("sta_name")
+	var code = info.code
+	var shortName = info.shortName
+	var fullName = info.fullName
 	
 	override def applyInternal(): SitsStatus = transactional() {
 		val sitsStatusExisting = sitsStatusDao.getByCode(code)

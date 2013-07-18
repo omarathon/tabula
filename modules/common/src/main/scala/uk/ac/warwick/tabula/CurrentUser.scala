@@ -13,6 +13,10 @@ import uk.ac.warwick.tabula.data.model.Member
  */
 class CurrentUser(
 	val realUser: User,
+	/**
+	 * This is the User that should be referenced almost all of the time. It is either
+	 * the actual user, or the person you are masquerading as.
+	 */
 	val apparentUser: User,
 	val profile: Option[Member] = None,
 	val sysadmin: Boolean = false,

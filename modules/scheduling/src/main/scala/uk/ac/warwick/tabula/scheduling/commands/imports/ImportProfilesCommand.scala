@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import uk.ac.warwick.tabula.scheduling.services.CourseImporter
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 
@@ -29,6 +30,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	var userLookup = Wire.auto[UserLookupService]
 	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
 	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
+	var courseImporter = Wire.auto[CourseImporter]
 
 	var features = Wire.auto[Features]
 
@@ -39,6 +41,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 			benchmark("ImportMembers") {
 				importSitsStatuses
 				importModeOfAttendances
+				courseImporter.importCourses
 				doMemberDetails
 			}
 		}
@@ -48,7 +51,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 		logger.info("Importing SITS statuses")
 
 		transactional() {
-			sitsStatusesImporter.getSitsStatuses() map { _.apply }
+			sitsStatusesImporter.getSitsStatuses map { _.apply }
 
 			session.flush
 			session.clear
@@ -59,7 +62,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 		logger.info("Importing Modes of Attendance")
 
 		transactional() {
-			modeOfAttendanceImporter.getModeOfAttendances() map { _.apply }
+			modeOfAttendanceImporter.getImportCommands foreach { _.apply() }
 
 			session.flush
 			session.clear
@@ -67,6 +70,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	}
 
 	/** Import basic info about all members in Membership, batched 250 at a time (small batch size is mostly for web sign-on's benefit) */
+
 	def doMemberDetails {
 		benchmark("Import all member details") {
 			for {
@@ -80,7 +84,6 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 
 				transactional() {
 					profileImporter.getMemberDetails(userIdsAndCategories, users) map { _.apply }
-
 					session.flush
 					session.clear
 				}
@@ -95,7 +98,10 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 
 			profileImporter.userIdAndCategory(member) match {
 				case Some(membInfo: MembershipInformation) => {
-					val members = profileImporter.getMemberDetails(List(membInfo), Map(usercode -> user)) map { _.apply }
+					val commands = profileImporter.getMemberDetails(List(membInfo), Map(usercode -> user))
+					val members = commands map { _.apply }
+
+					//val members = profileImporter.getMemberDetails(List(membInfo), Map(usercode -> user)) map { _.apply }
 					session.flush
 					for (member <- members) session.evict(member)
 				}

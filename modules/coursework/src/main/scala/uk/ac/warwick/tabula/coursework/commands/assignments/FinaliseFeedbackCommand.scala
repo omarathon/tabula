@@ -9,10 +9,10 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.Permissions
 
 /**
- * Copies the appropriate MarkerFeedback item to it's parent Feedback ready for processing by administrators
+ * Copies the appropriate MarkerFeedback item to its parent Feedback ready for processing by administrators
  */
 class FinaliseFeedbackCommand(val assignment: Assignment, val markerFeedbacks:JList[MarkerFeedback])
-	extends Command[Unit] with Daoisms {
+	extends Command[Unit] {
 
 	var fileDao = Wire.auto[FileDao]
 
@@ -20,8 +20,7 @@ class FinaliseFeedbackCommand(val assignment: Assignment, val markerFeedbacks:JL
 
 	def applyInternal() {
 		markerFeedbacks.foreach { markerFeedback =>
-			val feedback = copyToFeedback(markerFeedback)
-			session.saveOrUpdate(feedback)
+			this.copyToFeedback(markerFeedback)
 		}
 	}
 

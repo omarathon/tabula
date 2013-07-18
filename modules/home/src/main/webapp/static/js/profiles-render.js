@@ -51,7 +51,7 @@
 					sorter: function(items) { return items; }, // use 'as-returned' sort
 					highlighter: function(item) {
 						var member = item.split("|");
-						return '<img src="/profiles/view/photo/' + member[1] + '.jpg" class="photo pull-right"><h3 class="name">' + member[0] + '</h3><div class="description">' + member[3] + '</div>';
+						return '<img src="/profiles/view/photo/' + member[1] + '.jpg?size=tinythumbnail" class="photo pull-right"><h3 class="name">' + member[0] + '</h3><div class="description">' + member[3] + '</div>';
 					},
 
 					updater: function(item) {
@@ -72,11 +72,6 @@
 
 	// MEETING RECORD STUFF
 	$(function() {
-
-
-
-
-
 		function scrollToOpenDetails() {
 			// prevent js errors when getNavigationHeight is undefined
 			if(window.getNavigationHeight != undefined){
@@ -98,14 +93,14 @@
 			if ($f.find("#meeting-record-form").length == 1) {
 				// unhide the iframe
 				$m.find('.modal-body').slideDown();
-				
+
 				// reset datepicker & submit protection
 				var $form = $m.find('form.double-submit-protection');
 				$form.tabulaSubmitOnce();
 				$form.find(".btn").removeClass('disabled');
 				// wipe any existing state information for the submit protection
 				$form.removeData('submitOnceSubmitted');
-				
+
 				// firefox fix
 				var wait = setInterval(function() {
 					var h = $f.find("body").height();
@@ -114,15 +109,18 @@
 						$m.find(".modal-body").animate({ height: h });
 					}
 				}, 50);
-				
+
 				// show-time
 				$m.modal("show");
 				$m.on("shown", function() {
 					$f.find("[name='title']").focus();
 				});
 			} else if ($f.find("section.meetings").length == 1) {
+                var source =$f.find("section.meetings");
+                var targetClass = source.attr('data-target-container');
+                var target = $("section."+targetClass);
 				// bust the returned content out to the original page, and kill the modal
-				$("section.meetings").replaceWith($f.find("section.meetings"));
+				target.replaceWith(source);
 				$('details').details();
 				// rebind all of this stuff to the new UI
 				decorateMeetingRecords();
@@ -216,6 +214,13 @@
 			 * click selector must be specific otherwise the click event will propagate up past the section element
 			 * these HTML5 elements have default browser driven behaviour that is hard to override.
 			 */
+			
+			// named handler that can be unbound 
+			var iframeHandler = function() {
+				frameLoad(this);
+				$(this).off('load', iframeHandler);
+			};
+			
 			var meetingsSection = $("section.meetings");
 			$(".new, .edit-meeting-record", meetingsSection).on("click", function(e) {
 				var target = $(this).attr("href");
@@ -224,9 +229,7 @@
 					var $mb = $m.find(".modal-body").empty();
 					var iframeMarkup = "<iframe frameBorder='0' scrolling='no' style='height:100%;width:100%;' id='modal-content'></iframe>";
 					$(iframeMarkup)
-						.load(function() {
-							frameLoad(this);
-						})
+						.on('load', iframeHandler)
 						.attr("src", target + "?iframe")
 						.appendTo($mb);
 				});
@@ -235,8 +238,10 @@
 
 			$m.on('submit', 'form', function(e){
 				e.preventDefault();
-				// submit the inner form in the iframe
-				$m.find('iframe').contents().find('form').submit();
+				// reattach the load handler and submit the inner form in the iframe
+				$m.find('iframe')
+					.on('load', iframeHandler)
+					.contents().find('form').submit();
 
 				// hide the iframe, so we don't get a FOUC
 				$m.find('.modal-body').slideUp();

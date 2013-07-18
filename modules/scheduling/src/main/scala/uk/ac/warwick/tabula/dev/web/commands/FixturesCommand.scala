@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupFormat, SmallGroup, SmallGroupSet}
 
 /** This command is intentionally Public. It only exists on dev and is designed,
   * in essence, to blitz a department and set up some sample data in it.
@@ -27,7 +28,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 		// Two department admins
 		val department = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code).get
-		
+
 		val cmd = new GrantRoleCommand(department)
 		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
 		cmd.usercodes.addAll(Seq(Fixtures.TestAdmin1, Fixtures.TestAdmin2))
@@ -59,13 +60,26 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		transactional() {
 			for (modInfo <- moduleInfos; module <- moduleAndDepartmentService.getModuleByCode(modInfo.code)) {
 				 session.delete(module)
-      }
+			}
 		}
 
 		transactional() {
 			for (modInfo <- moduleInfos)
 				session.save(newModuleFrom(modInfo, department))
 		}
+
+	    // create a small group on the first module in the list
+	    transactional(){
+	      val firstModule = moduleAndDepartmentService.getModuleByCode(moduleInfos.head.code).get
+	      val groupSet = new SmallGroupSet()
+	      groupSet.name="Test Lab"
+	      groupSet.format = SmallGroupFormat.Lab
+	      groupSet.module = firstModule
+	      val group  = new SmallGroup
+	      group.name ="Test Lab Group 1"
+	      groupSet.groups = JArrayList(group)
+	      session.save(groupSet)
+	    }
 
 		session.flush()
 		session.clear()
@@ -81,6 +95,7 @@ object Fixtures {
 	val TestModule1 = ModuleInfo("Test Module 1", "xxx101", "xxx-xxx101")
 	val TestModule2 = ModuleInfo("Test Module 2", "xxx102", "xxx-xxx102")
 	val TestModule3 = ModuleInfo("Test Module 3", "xxx103", "xxx-xxx103")
+
 
 	val TestAdmin1 = "tabula-functest-admin1"
 	val TestAdmin2 = "tabula-functest-admin2"

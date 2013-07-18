@@ -1,4 +1,4 @@
-This record of your personal tutor meeting has been ${verbed} by ${actor.fullName}:
+This record of your ${role} meeting has been ${verbed} by ${actor.fullName}:
 
 ${meetingRecord.title} on ${dateFormatter.print(meetingRecord.meetingDate)}
 <#if reason??>

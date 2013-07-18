@@ -218,6 +218,24 @@
 			});
 		}
 	};
+	
+	$.fn.tabulaRadioActive = function(options) {
+		var $radios = this;
+		
+		this.on('change', function() {		
+			// fallback to plain "radioactive" attribute since FTL syntax doesn't allow dashes in macro parameter names.
+			
+			$.each($radios, function(i, radio) {
+				var radioActiveAttr = $(radio).data('radioactive') || $(radio).attr('radioactive');
+				if (radioActiveAttr) {
+					var $container = jQuery(radioActiveAttr);
+					$container.find('label,input,select').toggleClass('disabled', !radio.checked);
+					$container.find('input,select').attr({disabled: !radio.checked});
+				}
+			})
+		})
+	}
+	
 
 	/*
 	 * .double-submit-protection class on a form will detect submission
@@ -264,27 +282,78 @@
 	$.fn.tabulaPopover = function(options) {
 		var $items = this;
 
+		// set options, with defaults
+		var defaults = {
+			template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+		};
+		var options = $.extend({}, defaults, options);
+
+		// don't popover disabled
 		$items.on('click', function(e) {
 			if ($(this).hasClass('disabled')) {
 				e.stopImmediatePropagation();
-				e.preventDefault();
 			}
+			//Prevent propagation of click event to parent DOM elements
+			e.preventDefault();
+			e.stopPropagation();
 		});
-
-		$items.popover(options);
 
 		// Click away to dismiss
 		$('html').on('click', function(e) {
 			// if clicking anywhere other than the popover itself
-			if ($(e.target).closest('.popover').length === 0) {
+			if ($(e.target).closest('.popover').length === 0 && $(e.target).closest('.use-popover').length === 0) {
 				$items.popover('hide');
+			}
+		});
+		
+		// TAB-945 support popovers within fix-on-scroll
+		$items.closest('.fix-on-scroll').on('fixed', function(e, isFixed, fixLocation) {
+			// Re-position any currently shown popover whenever we trigger a change in fix behaviour
+			$items.each(function() {
+				var $item = $(this);
+				var popover = $item.popover().data('popover');
+				var $tip = popover.tip();
+				if ($tip.is(':visible')) {
+					// Re-position. BUT HOW?
+					$item.popover('show');
+				}
+			});
+		});
+
+		/* SPECIAL: popovers don't inherently know their progenitor, yet popover methods
+		 * (eg. hide) are *only* callable on *that original element*. So to close
+		 * a specific popover (or introductory) programmatically you need to jump hoops.
+		 * Lame.
+		 *
+		 * Workaround is to handle the shown event on the calling element,
+		 * call its popover() method again to get an object reference and then go diving
+		 * for a reference to the new popover itself in the DOM.
+		 */
+		$items.on('shown', function(e) {
+			var $po = $(e.target).popover().data('popover').tip();
+			$po.data('creator', $(e.target));
+		});
+		$('#container').on('click', '.popover .close', function(e) {
+			var $creator = $(e.target).parents('.popover').data('creator');
+			if ($creator) {
+				$creator.popover('hide');
+			}
+		});
+
+		// now that's all done, bind the popover
+		$items.popover(options);
+
+		// ensure popovers/introductorys override title with data-title attribute where available
+		$items.each(function() {
+			if ($(this).attr('data-title')) {
+				$(this).attr('data-original-title', $(this).attr('data-title'));
 			}
 		});
 
 		return $items;
 	};
 
-	$(function(){
+	$(function() {
 		$('a.disabled').on('click', function(e) {
 			e.preventDefault();
 		});
@@ -336,47 +405,20 @@
 		// http://twitter.github.com/bootstrap/javascript.html#tooltips
 		$('.use-tooltip').tooltip();
 
-		/* SPECIAL: popovers don't inherently know their progenitor, yet popover methods
-		 * (eg. hide) are *only* callable on *that original element*. So to close
-		 * a specific popover (or introductory) programmatically you need to jump hoops.
-		 * Lame.
-		 * Workaround is to handle the shown event on the calling element,
-		 * call its popover() method again to get an object reference and then go diving
-		 * for a reference to the new popover itself in the DOM.
-		 */
-		$('#container').on('shown', '.use-popover, .use-introductory', function(e) {
-			var $po = $(e.target).popover().data('popover').tip();
-			$po.data('creator', $(e.target));
-		});
-		$('#container').on('click', '.popover .close', function(e) {
-			var $creator = $(e.target).parents('.popover').data('creator');
-			if ($creator) {
-				$creator.popover('hide');
-			}
-		});
-
-		// ensure popovers/introductorys override title with data-title attribute where available
-		$('.use-popover, .use-introductory').each(function() {
-			if ($(this).attr('data-title')) {
-				$(this).attr('data-original-title', $(this).attr('data-title'));
-			}
-		});
-
 		// add .use-popover and optional data- attributes to enable a cool popover.
 		// http://twitter.github.com/bootstrap/javascript.html#popovers
-		$('.use-popover').popover({
+		$('.use-popover').tabulaPopover({
 			trigger: 'click',
-			container: '#container',
-			template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
-		}).click(function(){ return false; });
+			container: '#container'
+		});
 
 		// add .use-introductory for custom popover.
 		// https://github.com/twitter/bootstrap/issues/2234
-		$('.use-introductory').popover({
+		$('.use-introductory').tabulaPopover({
 			trigger: 'click',
 			container: '#container',
             template: '<div class="popover introductory"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div><div class="footer"><form class="form-inline"><label class="checkbox"><input type="checkbox"> Don\'t show me this again</label></form></div></div></div>'
-		}).click(function(){ return false; });
+		});
 
 		$('.use-introductory:not(.auto)').each(function() {
 			var template = $(this).data('popover').options.template;
@@ -455,7 +497,7 @@
 
 		// If we're on OS X, replace all kbd.keyboard-control-key with Cmd instead of Ctrl
 		if (navigator.platform.indexOf('Mac') != -1) {
-			$('kbd.keyboard-control-key').html('&#8984; Cmd');
+			$('kbd.keyboard-control-key').html('<span class="mac-cmd">&#8984;</span> cmd');
 		}
 
 		// Fixed to top on scroll
@@ -465,7 +507,7 @@
 			$(window).scroll(function() {
 				var scrollTop = $(this).scrollTop() + gutter;
 
-				$('.fix-on-scroll').each(function() {
+				$('.fix-on-scroll:visible').each(function() {
 					var $this = $(this);
 
 					var $scrollContainer = $this.closest('.fix-on-scroll-container');
@@ -497,16 +539,19 @@
 						});
 
 						$this.data('is-fixed', true);
+						$this.trigger('fixed', [true, 'top']);
 					} else if (!tooHigh && isFixed && pinToFloor) {
 						// Pin to the floor
 						var diff = (scrollTop + height) - floor;
 
 						$this.css('top', gutter - diff);
 						$this.data('is-pinned-to-floor', true);
+						$this.trigger('fixed', [true, 'bottom']);
 					} else if (!tooHigh && isFixed && !pinToFloor && pinnedToFloor) {
 						// Un-pin from the floor
 						$this.css('top', gutter);
 						$this.data('is-pinned-to-floor', false);
+						$this.trigger('fixed', [true, 'top']);
 					} else if ((tooHigh || scrollTop <= offsetTop) && isFixed) {
 						// Un-fix it
 						$this.css('width', $this.data('original-width'));
@@ -514,9 +559,146 @@
 						$this.css('top', $this.data('original-top'));
 
 						$this.data('is-fixed', false);
+						$this.trigger('fixed', [false]);
 					}
 				});
 			});
 		}
+
+		// tabbable-gadgety-listy things
+		var $t = $('.tabbable');
+		var $panes = $t.find('.panes');
+
+		if ($t.length && $panes.length) {
+			// set up layout control
+			var $lt = $('<span class="layout-tools pull-right muted"><i class="icon-folder-close hidden-phone" title="Switch to tabbed layout"></i> <i class="icon-th-large" title="Switch to gadget layout"></i> <i class="icon-reorder" title="Switch to list layout"></i><!-- <i class="icon-ok" title="Save layout settings"></i>--></span>');
+			$t.prepend($lt);
+			$t.trigger('tabbablechanged');
+
+			var reset = function() { // to list
+				$t.hide();
+				var $cols = $t.find('.cols');
+				$cols.find('.gadget').appendTo($panes);
+				$cols.remove();
+				$t.find('.tutor').removeClass('span4');
+				$t.find('.gadget-only').children().unwrap();
+				$t.find('.tab-container').remove();
+				$t.find('.gadget, .tab-content, .tab-pane, .active').removeClass('gadget tab-content tab-pane active');
+			}
+
+			$(document).on('tabbablechanged', function(e) {
+				$('.tooltip').remove();
+				$t.show().find('.tab-container i, .layout-tools i').tooltip({ delay: { show: 750, hide: 100 } });
+			});
+
+			// layout options
+			$t.on('click', '.layout-tools .icon-folder-close', function() { // tabify
+				reset();
+				var $tabContainer = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
+				var $tabs = $tabContainer.find('ul');
+				$panes.children().each(function() {
+					var title = $(this).find('h4').html();
+					var link = '#' + $(this).attr('id');
+					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '">' + title + ' <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>');
+					$tabs.append($tab);
+				});
+				$lt.after($tabContainer);
+				$panes.addClass('tab-content').children().addClass('tab-pane');
+				$t.find('.nav-tabs').sortable({ handle: '.icon-move' }).show().find('li:first a').tab('show');
+				$t.trigger('tabbablechanged');
+			});
+
+			$t.on('click', '.layout-tools .icon-th-large', function() { // gadgetify
+				reset();
+				var $cols = $('<div class="cols row-fluid"><ol class="ex-panes span6" /><ol class="ex-panes span6" /></div>');
+				var paneCount = $panes.children().length;
+				$t.append($cols);
+				$panes.children().each(function(idx) {
+					var $gadget = $(this).addClass('gadget');
+					var title = $(this).find('h4').html();
+					var link = '#' + $(this).attr('id');
+					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '" title="Click and drag to move">' + title + ' <i class="icon-minus-sign-alt" title="Hide ' + title + '"></i></a></li>');
+					var $gadgetHeaderTab = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
+					$(this).find('.tutor').removeClass('span4');
+					$gadgetHeaderTab.children().append($tab);
+					$gadget.wrapInner('<div class="tab-content gadget-only" />').children().wrapInner('<div class="gadget-only tab-pane active" />');
+					$gadget.prepend($gadgetHeaderTab).find('.tab-container li a').tab('show');
+
+					// populate columns (dumbly)
+					$(this).appendTo(idx < paneCount/2 ? $cols.children().first() : $cols.children().last());
+				});
+
+				// make sortable & finish up rendering
+				$t.find('.ex-panes').sortable({
+					handle: '.tab-container a',
+					placeholder: 'sort-target',
+					forcePlaceholderSize: true,
+					connectWith: '.span6'
+				});
+
+				$t.trigger('tabbablechanged');
+			});
+
+			$t.on('click', '.layout-tools .icon-reorder', function() { // listify
+				reset();
+				$t.trigger('tabbablechanged');
+			});
+
+			// tab controls
+			$t.on("click", ".tab-container .icon-resize-small", function(e) {
+				e.stopPropagation();
+				var $a = $(this).parent();
+				var title = $a.data("title");
+				$(this).prop("title", "Expand " + title);
+				$a.data("href", $a.attr("href")).removeAttr("href").removeAttr("data-toggle").html($a.html().replace(title, "").replace("resize-small", "resize-full")).addClass("disabled");
+				$t.trigger('tabbablechanged');
+			});
+
+			$t.on("click", ".tab-container .icon-resize-full", function(e) {
+				e.stopPropagation();
+				var $a = $(this).parent();
+				var title = $a.data("title");
+				$(this).prop("title", "Collapse");
+				$a.attr("href", $a.data("href")).removeData("href").attr("data-toggle", "tab").html(title + $a.html().replace("resize-full", "resize-small")).removeClass("disabled");
+				$t.trigger('tabbablechanged');
+			});
+
+			$t.on("click", ".tab-container .icon-minus-sign-alt", function(e) {
+				e.stopPropagation();
+				var $a = $(this).parent();
+				$a.closest('.gadget').find('.tab-content').slideUp('fast');
+				var title = $a.data("title");
+				$(this).prop("title", "Show " + title);
+				$a.data("href", $a.attr("href")).removeAttr("href").removeAttr("data-toggle").html($a.html().replace("minus-sign", "plus-sign"));
+				$t.trigger('tabbablechanged');
+			});
+
+			$t.on("click", ".tab-container .icon-plus-sign-alt", function(e) {
+				e.stopPropagation();
+				var $a = $(this).parent();
+				$a.closest('.gadget').find('.tab-content').slideDown('fast');
+				var title = $a.data("title");
+				$(this).prop("title", "Hide " + title);
+				$a.attr("href", $a.data("href")).removeData("href").attr("data-toggle", "tab").html($a.html().replace("plus-sign", "minus-sign"));
+				$t.trigger('tabbablechanged');
+			});
+
+			// default to gadgets
+			$t.find('.layout-tools .icon-th-large').click();
+		}
 	}); // on ready
+
+
+
 })(jQuery);
+
+jQuery(function($){
+// If there's an element with an id of 'scroll-container', max-size it to fit to the bottom of
+// the page, with scrollbars if needed
+    $('#scroll-container').each(function(){
+        var scrollable = $(this);
+        // window.height includes horizontal scrollbar on mozilla so add 20px of padding.
+        var elementHeight = ($(window).height() - scrollable.offset().top) - 20;
+        scrollable.css({'max-height':elementHeight,'overflow-y': 'auto'});
+    });
+});

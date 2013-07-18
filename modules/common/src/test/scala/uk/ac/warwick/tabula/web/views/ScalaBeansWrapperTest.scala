@@ -2,16 +2,13 @@ package uk.ac.warwick.tabula.web.views
 
 import scala.collection.mutable
 import scala.collection.mutable.Buffer
-import org.junit.Test
-import org.scalatest.junit.JUnitSuite
-import org.scalatest.junit.ShouldMatchersForJUnit
 import freemarker.template.SimpleSequence
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.system.permissions.Restricted
+import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.services.SecurityService
-import freemarker.template.TemplateModel
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.Permission
@@ -37,9 +34,16 @@ class MyObject extends PermissionsTarget {
 	  
   @Restricted(Array("Module.ManageAssignments")) def getPermsGreeting(name:String) = "Hello %s!" format (name)
   @Restricted(Array("Module.ManageAssignments", "Module.Delete", "GodMode")) def getPermsGreeting():String = getPermsGreeting("you")
-  
+
+
   override def id = ""
 	override def permissionsParents = Stream.empty
+
+
+  var restrictAccess:Boolean = false
+  def providePermission():Seq[Permission] = if (restrictAccess) Seq(Permissions.Module.ManageAssignments) else Nil
+  @RestrictionProvider("providePermission") def getRuntimeRestricted() ="Ho Ho Ho"
+
 }
 
 object World {
@@ -52,7 +56,8 @@ object World {
 }
 
 class ScalaBeansWrapperTest extends TestBase with Mockito {
-	
+
+
 	@Test def nestedObjects {
 		World.Scotland.plant should be ("Thistle")
 
@@ -180,4 +185,60 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 	    case _ => fail()
 	  }
 	}
+
+  @Test
+  def runtimePermisionsRestriction = withUser("cuscav") {
+
+    val wrapper = new ScalaBeansWrapper()
+    val securityService = mock[SecurityService]
+
+    val m = mutable.HashMap[Permission, Boolean]()
+    m.put(Permissions.Assignment.Read, true)
+    m.contains(Permissions.Assignment.Read) should be (true)
+
+    wrapper.securityService = securityService
+    val target = new MyObject
+    var wrapped = wrapper.wrap(target).asInstanceOf[wrapper.ScalaHashModel]
+    // initially, there are no permissions set, so we can read the value
+    wrapped.get("runtimeRestricted").toString() should be("Ho Ho Ho")
+    wrapped.get("runtimeRestricted").toString() should be("Ho Ho Ho")
+
+    // now change the object's state so that it applies permissions
+    // wrappers assume that objects are immutable, so we'll have to create a new one.
+    target.restrictAccess = true
+    wrapped = wrapper.wrap(target).asInstanceOf[wrapper.ScalaHashModel]
+    wrapped.get("runtimeRestricted") should be(null)
+
+    // finally, give the current user permissions, and make sure he can see the value again.
+    securityService.can(currentUser, target.providePermission().head, target) returns (true)
+    wrapped = wrapper.wrap(target).asInstanceOf[wrapper.ScalaHashModel]
+    wrapped.get("runtimeRestricted").toString() should be("Ho Ho Ho")
+
+  }
+
+	@Test
+	def cachesResultsOfGettersByDefault(){
+		val wrapper = new ScalaBeansWrapper
+		val target = new MyObject
+		val wrapped = wrapper.wrap(target).asInstanceOf[wrapper.ScalaHashModel]
+		wrapped.get("name").toString should be("text")
+		target.name="something different"
+		// method is not re-invoked
+		wrapped.get("name").toString should be("text")
+	}
+
+	@Test
+	def doesntCacheIfToldNotTo(){
+		val wrapper = new ScalaBeansWrapper
+		wrapper.useWrapperCache = false
+		val target = new MyObject
+		val wrapped = wrapper.wrap(target).asInstanceOf[wrapper.ScalaHashModel]
+		wrapped.get("name").toString should be("text")
+		target.name="something different"
+		// method is not re-invoked
+		wrapped.get("name").toString should be("something different")
+
+	}
+
+
 }

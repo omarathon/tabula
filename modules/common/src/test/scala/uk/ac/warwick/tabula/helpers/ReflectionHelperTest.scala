@@ -12,12 +12,12 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.Permissions
 import java.io.InputStreamReader
 
-class ReflectionHelperTest extends TestBase {
-	
-	new Reflections("uk.ac.warwick.tabula").save(getClass.getResource("/").getFile() + "META-INF/reflections/all-reflections.xml")
-	
+class ReflectionHelperTest extends TestBase with ReflectionsSetup {
+
+
+
 	@Test def allPermissionsTargets = {
-		ReflectionHelper.allPermissionTargets.contains(classOf[Department]) should be (true) 
+		ReflectionHelper.allPermissionTargets.contains(classOf[Department]) should be (true)
 	}
 	
 	@Test def allPermissions = {
@@ -60,4 +60,12 @@ class CatchAllUrlHandler extends URLStreamHandler {
 	override def openConnection(url: URL): URLConnection = {
 		throw new UnsupportedOperationException()
 	}
+}
+
+trait ReflectionsSetup{
+	val maybeRootResource = Option(getClass.getResource("/"))
+	val resourceLocation  = maybeRootResource.map(_.getFile() +  "META-INF/reflections/all-reflections.xml")
+		.getOrElse(getClass.getResource("/META-INF/reflections/all-reflections.xml").getFile())
+
+	new Reflections("uk.ac.warwick.tabula").save(resourceLocation)
 }

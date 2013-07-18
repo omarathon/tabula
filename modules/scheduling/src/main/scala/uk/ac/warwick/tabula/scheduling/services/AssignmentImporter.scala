@@ -4,9 +4,7 @@ import java.sql.ResultSet
 import java.sql.Types
 import javax.sql.DataSource
 import javax.annotation.Resource
-
 import scala.collection.JavaConversions._
-
 import org.joda.time.DateTime
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Service
@@ -15,15 +13,28 @@ import org.springframework.jdbc.core.SqlParameter
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
-
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.model.UpstreamAssignment
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.SprCode
+import org.springframework.context.annotation.Profile
+import uk.ac.warwick.tabula.scheduling.sandbox.SandboxData
 
-@Service
-class AssignmentImporter extends InitializingBean {
+trait AssignmentImporter {
+	/**
+	 * Iterates through ALL module registration elements,
+	 * passing each ModuleRegistration item to the given callback for it to process.
+	 */
+	def allMembers(callback: ModuleRegistration => Unit): Unit
+	
+	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup]
+	
+	def getAllAssignments: Seq[UpstreamAssignment]
+}
+
+@Profile(Array("dev", "test", "production")) @Service
+class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 	import AssignmentImporter._
 
 	@Resource(name = "academicDataStore") var ads: DataSource = _
@@ -75,6 +86,60 @@ class AssignmentImporter extends InitializingBean {
 	}
 
 	private def yearsToImport = AcademicYear.guessByDate(DateTime.now).yearsSurrounding(0, 1)
+}
+
+@Profile(Array("sandbox")) @Service
+class SandboxAssignmentImporter extends AssignmentImporter {
+	
+	def allMembers(callback: ModuleRegistration => Unit) =
+		SandboxData.Departments
+			.flatMap { case (code, d) => d.routes.values.toSeq }
+			.flatMap { route =>
+				(route.studentsStartId to route.studentsEndId).flatMap { uniId =>
+					route.moduleCodes.map { moduleCode =>
+						ModuleRegistration(
+							year = AcademicYear.guessByDate(DateTime.now).toString, 
+							sprCode = "%d/1".format(uniId), 
+							occurrence = "A", 
+							moduleCode = "%s-15".format(moduleCode.toUpperCase), 
+							assessmentGroup = "A")
+					}
+				}
+			}
+			.foreach { reg => callback(reg) }
+	
+	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] =
+		SandboxData.Departments
+			.flatMap { case (code, d) => d.routes.values.toSeq }
+			.flatMap { route =>
+				route.moduleCodes.map { moduleCode =>
+					val ag = new UpstreamAssessmentGroup()
+					ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+					ag.academicYear = AcademicYear.guessByDate(DateTime.now)
+					ag.assessmentGroup = "A"
+					ag.occurrence = "A"
+					ag
+				}
+			}
+			.toSeq
+	
+	def getAllAssignments: Seq[UpstreamAssignment] =
+		SandboxData.Departments
+			.flatMap { case (code, d) => 
+				d.routes.values.flatMap { route =>
+					route.moduleCodes.map { moduleCode =>
+						val a = new UpstreamAssignment
+						a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+						a.sequence = "A01"
+						a.name = "Coursework"
+						a.assessmentGroup = "A"
+						a.departmentCode = d.code.toUpperCase
+						a
+					}
+				}
+			}
+			.toSeq
+	
 }
 
 /**

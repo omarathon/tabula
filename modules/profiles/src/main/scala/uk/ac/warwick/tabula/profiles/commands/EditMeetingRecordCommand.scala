@@ -34,5 +34,5 @@ class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
 		}
 	}
 
-	def emit = new MeetingRecordApprovalNotification(meeting, "edit")
+	def emit = Seq(new MeetingRecordApprovalNotification(meeting, "edit"))
 }

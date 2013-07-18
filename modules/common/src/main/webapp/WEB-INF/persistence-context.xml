@@ -81,7 +81,7 @@
 	    </bean>
 	</beans>
 	
-	<beans profile="dev,production,console">
+	<beans profile="dev,sandbox,production,console">
 	
 		<bean class="uk.ac.warwick.tabula.system.DatabaseEncodingChecker"
 			c:sessionFactory-ref="sessionFactory"
@@ -117,7 +117,7 @@
 		
 	</beans>
 	
-	<beans profile="dev,production">	
+	<beans profile="dev,sandbox,production">	
 	
 		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler">
 	    	<property name="nativeJdbcExtractor">
@@ -130,6 +130,9 @@
 		   <property name="jndiName" value="java:/TabulaDS"/>
 	    </bean>
 	    
+	</beans>
+	
+	<beans profile="dev,production">
 	    <bean id="academicDataStore" class="org.springframework.jndi.JndiObjectFactoryBean">
 		   <property name="jndiName" value="java:/AcademicDS"/>
 	    </bean>
@@ -141,17 +144,18 @@
 	    <bean id="membershipDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		   <property name="jndiName" value="java:/MembershipDS"/>
 	    </bean>
-	    
 	</beans>
 	
-	<beans profile="test">
-		<jdbc:embedded-database id="dataSource" />
-		
+	<beans profile="sandbox,test">
 		<jdbc:embedded-database id="academicDataStore" />
 		
 		<jdbc:embedded-database id="sitsDataSource" />
 		
 		<jdbc:embedded-database id="membershipDataSource" />
+	</beans>
+	
+	<beans profile="test">
+		<jdbc:embedded-database id="dataSource" />
 			
 		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" />
 		

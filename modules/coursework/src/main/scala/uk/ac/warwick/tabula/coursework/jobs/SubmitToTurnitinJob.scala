@@ -3,28 +3,21 @@ package uk.ac.warwick.tabula.coursework.jobs
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
-import org.springframework.mail.javamail.MimeMailMessage
 import org.springframework.stereotype.Component
-import freemarker.template.Configuration
-import javax.annotation.Resource
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.Describable
 import uk.ac.warwick.tabula.coursework.commands.turnitin.TurnitinTrait
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.OriginalityReport
+import uk.ac.warwick.tabula.data.model.{Assignment, OriginalityReport}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.coursework.services.turnitin.Turnitin._
 import uk.ac.warwick.tabula.coursework.services.turnitin._
-import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.web.views.FreemarkerRendering
-import uk.ac.warwick.util.mail.WarwickMailSender
+import uk.ac.warwick.tabula.web.views.{FreemarkerTextRenderer, FreemarkerRendering}
 import uk.ac.warwick.tabula.jobs._
 import java.util.HashMap
 import uk.ac.warwick.tabula.services.OriginalityReportService
 import language.implicitConversions
+import uk.ac.warwick.tabula.coursework.jobs.notifications.{TurnitinJobSuccessNotification, TurnitinJobErrorNotification}
 
 object SubmitToTurnitinJob {
 	val identifier = "turnitin-submit"
@@ -47,21 +40,18 @@ abstract class DescribableJob(instance: JobInstance) extends Describable[Nothing
  * it will send an email every time.
  */
 @Component
-class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with FreemarkerRendering {
+class SubmitToTurnitinJob extends Job
+	with TurnitinTrait with NotifyingJob[Seq[TurnitinSubmissionInfo]] with Logging with FreemarkerRendering {
+
 	val identifier = SubmitToTurnitinJob.identifier
 
-	@Autowired implicit var freemarker: Configuration = _
 	@Autowired var assignmentService: AssignmentService = _
 	@Autowired var originalityReportService: OriginalityReportService = _
-	@Resource(name = "mailSender") var mailer: WarwickMailSender = _
-
-	@Value("${mail.noreply.to}") var replyAddress: String = _
-	@Value("${mail.exceptions.to}") var fromAddress: String = _
 
 	val WaitingRetries = 50
 	val WaitingSleep = 20000
 
-	var sendEmails = true
+	var sendNotifications = true
 
 	def run(implicit job: JobInstance) {
 		new Runner(job).run()
@@ -84,7 +74,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 		lazy val session = api.login(job.user).getOrElse(throw loginFailure)
 
 		// Get existing submissions. 
-		val existingSubmissions = session.listSubmissions(classId, assignmentId) match {
+		val existingSubmissions = session.listSubmissions(classId, className, assignmentId, assignmentName) match {
 			case ClassNotFound() | AssignmentNotFound() => { // class or assignment don't exist
 				// ensure assignment and course are created, as submitPaper doesn't always do that for you
 				debug("Missing class or assignment, creating...")
@@ -96,15 +86,9 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 				list
 			}
 			case failure => {
-				if (sendEmails) {
+				if (sendNotifications) {
 					debug("Sending an email to " + job.user.email)
-					val mime = mailer.createMimeMessage()
-					val email = new MimeMailMessage(mime)
-					email.setFrom(replyAddress)
-					email.setTo(job.user.email)
-					email.setSubject("Turnitin check has not completed successfully for %s - %s" format (assignment.module.code.toUpperCase, assignment.name))
-					email.setText(renderJobFailedEmailText(job.user, assignment))
-					mailer.send(mime)
+					addNotification(new TurnitinJobErrorNotification(assignment, job.user.apparentUser) with FreemarkerTextRenderer)
 				}
 				throw new FailedJobException("Failed to get list of existing submissions: " + failure)
 			}
@@ -197,15 +181,9 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 			if (reports.isEmpty && failedUploads.size() != uploadsTotal) {
 				logger.error("Waited for complete Turnitin report but didn't get one.")
 				updateStatus("Failed to generate a report. The service may be busy - try again later.")
-				if (sendEmails) {
+				if (sendNotifications) {
 					debug("Sending an email to " + job.user.email)
-					val mime = mailer.createMimeMessage()
-					val email = new MimeMailMessage(mime)
-					email.setFrom(replyAddress)
-					email.setTo(job.user.email)
-					email.setSubject("Turnitin check has not completed successfully for %s - %s" format (assignment.module.code.toUpperCase, assignment.name))
-					email.setText(renderJobFailedEmailText(job.user, assignment))
-					mailer.send(mime)
+					addNotification(new TurnitinJobErrorNotification(assignment, job.user.apparentUser) with FreemarkerTextRenderer)
 				}
 			} else {
 
@@ -238,15 +216,9 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 		
 				}
 
-				if (sendEmails) {
+				if (sendNotifications) {
 					debug("Sending an email to " + job.user.email)
-					val mime = mailer.createMimeMessage()
-					val email = new MimeMailMessage(mime)
-					email.setFrom(replyAddress)
-					email.setTo(job.user.email)
-					email.setSubject("Turnitin check finished for %s - %s" format (assignment.module.code.toUpperCase, assignment.name))
-					email.setText(renderJobDoneEmailText(job.user, assignment, failedUploads))
-					mailer.send(mime)
+					addNotification(new TurnitinJobSuccessNotification(failedUploads, reports, assignment, job.user.apparentUser) with FreemarkerTextRenderer)
 				}
 
 				updateStatus("Generated a report.")
@@ -266,7 +238,7 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 			// getSubmissions isn't recursive, it just makes the code after it clearer.
 			def getSubmissions() = {
 				Thread.sleep(WaitingSleep)
-				session.listSubmissions(classId, assignmentId) match {
+				session.listSubmissions(classId, className, assignmentId, assignmentName) match {
 					case GotSubmissions(list) => {
 						val checked = list filter { _.hasBeenChecked }
 						if (checked.size == list.size) {
@@ -295,26 +267,5 @@ class SubmitToTurnitinJob extends Job with TurnitinTrait with Logging with Freem
 
 	}
 
-	def renderJobDoneEmailText(user: CurrentUser, assignment: Assignment, failedUploads: HashMap[String, String]) = {
-		renderToString("/WEB-INF/freemarker/emails/turnitinjobdone.ftl", Map(
-			"assignment" -> assignment,
-			"assignmentTitle" -> ("%s - %s" format (assignment.module.code.toUpperCase, assignment.name)),
-			"user" -> user,
-			"failureCount" -> failedUploads.size(),
-			"failedUploads" -> failedUploads,
-			"path" -> Routes.admin.assignment.submissionsandfeedback(assignment)
-		))
-	}
-	
-	def renderJobFailedEmailText(user: CurrentUser, assignment: Assignment) = {
-		renderToString("/WEB-INF/freemarker/emails/turnitinjobfailed.ftl", Map(
-			"assignment" -> assignment,
-			"assignmentTitle" -> ("%s - %s" format (assignment.module.code.toUpperCase, assignment.name)),
-			"user" -> user,
-			"path" -> Routes.admin.assignment.submissionsandfeedback(assignment)
-		))
-	}
-
 	def loginFailure = new IllegalStateException("Failed to login user to Turnitin")
-
 }

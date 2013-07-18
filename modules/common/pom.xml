@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>38</version>
+		<version>39</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -227,7 +227,7 @@
 		<dependency>
 			<groupId>uk.ac.warwick</groupId>
 			<artifactId>spring-scala-glue_${scala.major.version}</artifactId>
-			<version>1.4</version>
+			<version>1.5</version>
 		</dependency>
 		
 		<dependency>

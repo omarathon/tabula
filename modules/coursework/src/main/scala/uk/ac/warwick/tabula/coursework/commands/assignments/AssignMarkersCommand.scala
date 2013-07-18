@@ -1,20 +1,27 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.{Description, Command}
 import uk.ac.warwick.tabula.data.model.{UserGroup, Module, Assignment}
-import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.{SessionComponent, Daoisms}
 import uk.ac.warwick.tabula.data.Transactions._
-import reflect.BeanProperty
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import scala.beans.BeanProperty
+import org.apache.commons.collections.FactoryUtils
+import org.apache.commons.collections.list.LazyList
 
+class AssignMarkersCommand(module: Module, assignment:Assignment)
+	extends AbstractAssignMarkersCommand(module, assignment)
+	with Daoisms
 
-class AssignMarkersCommand(val module: Module, val assignment:Assignment) extends Command[Assignment] with Daoisms{
+abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:Assignment) extends Command[Assignment] {
+	// declare dependencies through self-type
+	self: SessionComponent =>
 
 	case class Marker(fullName:String, userCode:String, var students:JList[Student])
 	case class Student(displayValue: String, userCode: String)
@@ -29,10 +36,16 @@ class AssignMarkersCommand(val module: Module, val assignment:Assignment) extend
 	var secondMarkerUnassignedStudents: JList[Student] = _
 	var firstMarkers: JList[Marker] = _
 	var secondMarkers: JList[Marker] = _
-	var markerMapping: JMap[String, JList[String]] = _
+
+	val allMarkers = assignment.markingWorkflow.firstMarkers.members ++ assignment.markingWorkflow.secondMarkers.members
+
+	var markerMapping : JMap[String, JList[String]] = allMarkers.map({ x =>
+			val myList : JList[String] = JArrayList()
+			(x, myList)
+	}).toMap.asJava
+
 
 	def onBind() {
-
 		def retrieveMarkers(markerDef:Seq[String]): JList[Marker] = markerDef.map{marker =>
 			val students:JList[Student] = assignment.markerMap.toMap.get(marker) match {
 				case Some(userGroup:UserGroup) => userGroup.includeUsers.map{student =>

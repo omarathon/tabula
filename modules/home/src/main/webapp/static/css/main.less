@@ -14,24 +14,6 @@
 	float: none;
 }
 
-// Badass CSS transitions for the popup library
-.WPopupBox {
-  top: 0;
-  -webkit-transform-origin: 0% 50%;
-  .csstransitions & {
-    display: block;
-    pointer-events: none;
-    .fade-transition();
-    .opacity-one(0.0);
-    -webkit-transform: scale(0.5);
-  }
-  .csstransitions &.visible {
-  	.opacity-one(1.0);
-	pointer-events: auto;
-	-webkit-transform: scale(1);
-  }
-}
-
 // Change look of some things when they're in a popup box
 .WPopupBox {
 	.submit-buttons {
@@ -42,7 +24,7 @@
 	p {
 		margin-bottom: 1em;
 	}
-	
+
 	.narrowed-form {
 		.form-row {
 			.label, label { width: 12em; }
@@ -58,10 +40,6 @@
 
 h1 {
 	margin: 16px 0;
-}
-
-.muted {
-	color: @grayLight;
 }
 
 .flush-content #content-wrapper {
@@ -100,7 +78,7 @@ body .full-width {
   		margin-bottom: 2px !important;
   		padding: 0px;
   		cursor: default;
-  		
+
   		&.item{
 			border: 1px solid #CCCCCC;
 			border-color: #0055CC #0055CC #003580;
@@ -109,14 +87,14 @@ body .full-width {
 			margin: 2px;
 			box-shadow: none;
 			padding: 2px 0px 2px 4px;
-			line-height: 14px;	
-			  
+			line-height: 14px;
+
 			span{
 				margin-right: 2px;
 				color: #FFFFFF;
 				text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
 			}
-				
+
 			a.close{
 				opacity: 1.0;
 				width: 12px;
@@ -124,7 +102,7 @@ body .full-width {
 				background:url(/static/images/text-list-close.png) -48px -96px;
 			}
 		}
-  		
+
  		&.inputContainer {
 			line-height: 14px;
 			margin-bottom: 0px !important;
@@ -142,16 +120,16 @@ body .full-width {
 
 .marksUploadTable {
 	tbody {
-	
+
     	tr:nth-child(odd) td, tr:nth-child(odd) th {
       		background-color: @tableBackgroundAccent;
     	}
-    	
+
     	tr.errorRow td{
 			background-color: @errorBackground;
 			color: @errorText;
 		}
-		
+
     	td , th{
     		border: 1px solid @tableBorder;
     		&:hover{
@@ -201,10 +179,10 @@ body .full-width {
 ul.drag-list {
 	.cloned { opacity: 0.5; }
 
-	li { 
-		display:inline-block; 
-		float: left; 
-		margin: 1px 3px; 
+	li {
+		display:inline-block;
+		float: left;
+		margin: 1px 3px;
 		min-width: 62px;
 
 		background-color: @btnInfoBackground;
