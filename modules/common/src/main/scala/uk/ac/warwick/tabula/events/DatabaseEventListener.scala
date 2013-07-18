@@ -19,7 +19,7 @@ import java.io.ObjectOutputStream
 import java.io.FileOutputStream
 import scala.react.Observing
 
-class DatabaseEventListener extends EventListener with Daoisms with InitializingBean with Observing with Logging {
+class DatabaseEventListener extends EventListener with InitializingBean with Observing with Logging {
 
 	@Autowired var auditEventService: AuditEventService = _
 	@Autowired var maintenanceModeService: MaintenanceModeService = _
