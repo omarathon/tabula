@@ -8,13 +8,13 @@ import javax.sql.DataSource
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.SitsStatusDao
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleSitsStatusCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSitsStatusCommand
 import org.apache.log4j.Logger
 import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.ModeOfAttendance
 import uk.ac.warwick.tabula.data.ModeOfAttendanceDao
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleModeOfAttendanceCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModeOfAttendanceCommand
 import org.springframework.context.annotation.Profile
 
 /**
@@ -27,7 +27,7 @@ trait ModeOfAttendanceImporter extends Logging {
 
 	var modeOfAttendanceDao = Wire.auto[ModeOfAttendanceDao]
 
-	protected var modeOfAttendanceMap: Map[String, ModeOfAttendance] = null
+	var modeOfAttendanceMap: Map[String, ModeOfAttendance] = null
 
 	def getModeOfAttendanceForCode(code: String): Option[ModeOfAttendance] = {
 		if (modeOfAttendanceMap == null) {
@@ -37,8 +37,8 @@ trait ModeOfAttendanceImporter extends Logging {
 	}
 
 	/** Get a list of commands that can be applied to save items to the modeofattendance table. */
-	def getImportCommands: Seq[ImportSingleModeOfAttendanceCommand]
-	
+	def getImportCommands: Seq[ImportModeOfAttendanceCommand]
+
 	protected def slurpModeOfAttendances(): Map[String, ModeOfAttendance] = {
 		transactional(readOnly = true) {
 			logger.debug("refreshing SITS mode of attendance map")
@@ -54,12 +54,12 @@ trait ModeOfAttendanceImporter extends Logging {
 @Service
 class ModeOfAttendanceImporterImpl extends ModeOfAttendanceImporter {
 	import ModeOfAttendanceImporter._
-	
+
 	var sits = Wire[DataSource]("sitsDataSource")
-	
+
 	lazy val modeOfAttendanceQuery = new ModeOfAttendanceQuery(sits)
 
-	def getImportCommands: Seq[ImportSingleModeOfAttendanceCommand] = {
+	def getImportCommands: Seq[ImportModeOfAttendanceCommand] = {
 		val modeOfAttendances = modeOfAttendanceQuery.execute.toSeq
 		// this slurp is always one behind, because the above query only selects and it doesn't
 		// get inserted into our table until we return the result for the importer to apply.
@@ -72,27 +72,27 @@ class ModeOfAttendanceImporterImpl extends ModeOfAttendanceImporter {
 @Profile(Array("sandbox"))
 @Service
 class SandboxModeOfAttendanceImporter extends ModeOfAttendanceImporter {
-	def getImportCommands: Seq[ImportSingleModeOfAttendanceCommand] =
+	def getImportCommands: Seq[ImportModeOfAttendanceCommand] =
 		Seq(
-			new ImportSingleModeOfAttendanceCommand(ModeOfAttendanceInfo("F", "FULL-TIME", "Full-time according to Funding Council definitions")),
-			new ImportSingleModeOfAttendanceCommand(ModeOfAttendanceInfo("P", "PART-TIME", "Part-time"))
+			new ImportModeOfAttendanceCommand(ModeOfAttendanceInfo("F", "FULL-TIME", "Full-time according to Funding Council definitions")),
+			new ImportModeOfAttendanceCommand(ModeOfAttendanceInfo("P", "PART-TIME", "Part-time"))
 		)
 }
 
 case class ModeOfAttendanceInfo(code: String, shortName: String, fullName: String)
 
 object ModeOfAttendanceImporter {
-		
+
 	val GetModeOfAttendance = """
 		select moa_code, moa_snam, moa_name from intuit.ins_moa
 		"""
-	
-	class ModeOfAttendanceQuery(ds: DataSource) extends MappingSqlQuery[ImportSingleModeOfAttendanceCommand](ds, GetModeOfAttendance) {
+
+	class ModeOfAttendanceQuery(ds: DataSource) extends MappingSqlQuery[ImportModeOfAttendanceCommand](ds, GetModeOfAttendance) {
 		compile()
-		override def mapRow(resultSet: ResultSet, rowNumber: Int) = 
-			new ImportSingleModeOfAttendanceCommand(
+		override def mapRow(resultSet: ResultSet, rowNumber: Int) =
+			new ImportModeOfAttendanceCommand(
 				ModeOfAttendanceInfo(resultSet.getString("moa_code"), resultSet.getString("moa_snam"), resultSet.getString("moa_name"))
 			)
 	}
-	
+
 }

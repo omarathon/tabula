@@ -22,10 +22,11 @@ import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
 
-class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet)
-	extends ImportSingleMemberCommand(member, ssoUser, resultSet)
+class ImportStudentRowCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet, importStudentCourseCommand: ImportStudentCourseCommand)
+	extends ImportMemberCommand(member, ssoUser, resultSet)
 	with Logging with Daoisms
 	with StudentProperties with Unaudited with PropertyCopying {
+
 	import ImportMemberHelpers._
 
 	implicit val rs = resultSet
@@ -36,8 +37,6 @@ class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User
 
 	this.nationality = rs.getString("nationality")
 	this.mobileNumber = rs.getString("mobile_number")
-
-	val importSingleStudentCourseCommand = new ImportSingleStudentCourseCommand(rs)
 
 	override def applyInternal(): Member = transactional() {
 		val memberExisting = memberDao.getByUniversityId(universityId)
@@ -67,8 +66,11 @@ class ImportSingleStudentRowCommand(member: MembershipInformation, ssoUser: User
 			memberDao.saveOrUpdate(member)
 		}
 
-		importSingleStudentCourseCommand.stuMem = member
-		importSingleStudentCourseCommand.apply
+		importStudentCourseCommand.stuMem = member
+		val studentCourseDetails = importStudentCourseCommand.apply()
+
+		// apply above will take care of the db.  This brings the in-memory data up to speed:
+		member.attachStudentCourseDetails(studentCourseDetails)
 
 		member
 	}

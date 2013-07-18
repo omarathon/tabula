@@ -223,6 +223,11 @@ class StudentMember extends Member with StudentProperties {
 			else ""
 		case _ => ""
 	}
+
+	def attachStudentCourseDetails(detailsToAdd: StudentCourseDetails) {
+		studentCourseDetails.remove(detailsToAdd)
+		studentCourseDetails.add(detailsToAdd)
+	}
 }
 
 @Entity

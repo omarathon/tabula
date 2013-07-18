@@ -39,8 +39,11 @@ import uk.ac.warwick.tabula.services.CourseAndRouteService
 import java.sql.BatchUpdateException
 import org.hibernate.exception.ConstraintViolationException
 import uk.ac.warwick.tabula.scheduling.services.CourseImporter
+import scala.collection.JavaConverters._
 
-class ImportSingleStudentCourseCommand(resultSet: ResultSet)
+class ImportStudentCourseCommand(resultSet: ResultSet,
+		importStudentCourseYearCommand: ImportStudentCourseYearCommand,
+		importSupervisorsForStudentCommand: ImportSupervisorsForStudentCommand)
 	extends Command[StudentCourseDetails] with Logging with Daoisms
 	with StudentCourseProperties with Unaudited with PropertyCopying {
 
@@ -86,8 +89,6 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 	this.courseYearLength = rs.getString("course_year_length")
 	this.levelCode = rs.getString("level_code")
 
-	val importSingleStudentCourseYearCommand = new ImportSingleStudentCourseYearCommand(resultSet)
-
 	override def applyInternal(): StudentCourseDetails = transactional() {
 		val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCode(scjCode)
 
@@ -115,18 +116,22 @@ class ImportSingleStudentCourseCommand(resultSet: ResultSet)
 					logger.warn("Couldn't update course details for SCJ "
 							+ studentCourseDetails.scjCode + ", SPR " + studentCourseDetails.sprCode
 							+ ".  Might be invalid data in SITS - working on the assumption "
-							+ "there shouldn't be be multiple SPR codes for one current SCJ code")
+							+ "there shouldn't be multiple SPR codes for one current SCJ code")
 					exception.printStackTrace
 				}
 			}
 		}
 
-		importSingleStudentCourseYearCommand.studentCourseDetails = studentCourseDetails
-		importSingleStudentCourseYearCommand.apply
+		importStudentCourseYearCommand.studentCourseDetails = studentCourseDetails
+		val studentCourseYearDetails = importStudentCourseYearCommand.apply()
+
+		// Apply above will take care of the db.  This brings the in-memory data up to speed:
+		studentCourseDetails.attachStudentCourseYearDetails(studentCourseYearDetails)
 
 		captureTutor(studentCourseDetails.department)
 
-		new ImportSupervisorsForSingleStudentCommand(studentCourseDetails).apply
+		importSupervisorsForStudentCommand.studentCourseDetails = studentCourseDetails
+		importSupervisorsForStudentCommand.apply
 
 		studentCourseDetails
 	}

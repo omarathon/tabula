@@ -19,7 +19,8 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.CourseDao
 import uk.ac.warwick.tabula.data.model.Course
 
-class ImportSingleCourseCommand(resultSet: ResultSet) extends Command[Course] with Logging with Daoisms
+class ImportCourseCommand(resultSet: ResultSet)
+	extends Command[Course] with Logging with Daoisms
 	with Unaudited with PropertyCopying {
 
 	PermissionCheck(Permissions.ImportSystemData)

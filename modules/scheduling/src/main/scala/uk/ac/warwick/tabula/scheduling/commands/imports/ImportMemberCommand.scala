@@ -40,7 +40,7 @@ import scala.util.matching.Regex
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import language.implicitConversions
 
-abstract class ImportSingleMemberCommand extends Command[Member] with Logging with Daoisms
+abstract class ImportMemberCommand extends Command[Member] with Logging with Daoisms
 	with MemberProperties with Unaudited with PropertyCopying {
 	import ImportMemberHelpers._
 
