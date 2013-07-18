@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.AppContextTestBase
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.Fixtures
 
-class CourseDaoTest extends AppContextTestBase {
-
-	@Autowired var dao:CourseDao =_
+class CourseDaoTest extends PersistenceTestBase {
 
 	@Test def crud = transactional { tx =>
+		val dao = new CourseDaoImpl
+		dao.sessionFactory = sessionFactory
 		val course = Fixtures.course("TPOS-M9P0")
 		dao.saveOrUpdate(course)
 
