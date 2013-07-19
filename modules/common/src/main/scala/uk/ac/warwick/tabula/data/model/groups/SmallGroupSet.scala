@@ -122,7 +122,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	def defaultMaxGroupSizeEnabled = getBooleanSetting(Settings.DefaultMaxGroupSizeEnabled).getOrElse(false)
 	def defaultMaxGroupSizeEnabled_=(isEnabled:Boolean) = settings += (Settings.DefaultMaxGroupSizeEnabled -> isEnabled)
 
-	def defaultMaxGroupSize = getIntSetting(Settings.DefaultMaxGroupSize).getOrElse(15)
+	def defaultMaxGroupSize = getIntSetting(Settings.DefaultMaxGroupSize).getOrElse(DefaultGroupSize)
 	def defaultMaxGroupSize_=(defaultSize:Int) = settings += (Settings.DefaultMaxGroupSize -> defaultSize)
 
 

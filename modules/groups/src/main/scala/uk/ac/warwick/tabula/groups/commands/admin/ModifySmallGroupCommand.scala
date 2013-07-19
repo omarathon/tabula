@@ -33,9 +33,9 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 	
 	var name: String = _
 
-	var maxGroupSize:Int = if (properties.defaultMaxGroupSizeEnabled) properties.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
+	var maxGroupSize: Int = if (properties.defaultMaxGroupSizeEnabled) properties.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
 
-	var maxGroupSizeEnabled:Boolean = false
+	var maxGroupSizeEnabled: Boolean = false
 
 	// Used by parent command
 	var delete: Boolean = false

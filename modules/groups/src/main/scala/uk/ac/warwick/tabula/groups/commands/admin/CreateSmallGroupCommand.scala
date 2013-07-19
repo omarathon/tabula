@@ -22,11 +22,10 @@ class CreateSmallGroupCommand(groupSet: Promise[SmallGroupSet], module: Module, 
 		val group = { promisedValue = new SmallGroup }
 		copyTo(group)
 
-
 		// FIXME This is to avoid the un-saved transient Hibernate bug
 		if (groupSet.get.id.hasText) service.saveOrUpdate(group)
 
-		if (group.maxGroupSize == null && properties.defaultMaxGroupSizeEnabled){
+		if (group.maxGroupSize == null && properties.defaultMaxGroupSizeEnabled) {
 			group.maxGroupSize = properties.defaultMaxGroupSize
 		}
 		group.maxGroupSizeEnabled = properties.defaultMaxGroupSizeEnabled

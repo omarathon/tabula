@@ -217,7 +217,7 @@
 		$("input:radio[name='allocationMethod']").tabulaRadioActive();
 
 		$('#defaultMaxGroupSizeEnabled').click(function() {
-			if ($('#defaultMaxGroupSize').attr('disabled')) $('#defaultMaxGroupSize').removeAttr('disabled');
+			if ($('#defaultMaxGroupSize').prop('disabled')) $('#defaultMaxGroupSize').removeAttr('disabled');
 			else $('#defaultMaxGroupSize').attr('disabled', 'disabled');
 		});
 
