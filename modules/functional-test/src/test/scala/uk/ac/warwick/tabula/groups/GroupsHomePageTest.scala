@@ -10,7 +10,6 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 
 
 		"Department Admin" should "be offered a link to the department's group pages" in {
-		val x = 1
 		Given("the administrator is logged in and viewing the groups home page")
 			signIn as(P.Admin1)  to (Path("/groups"))
 			pageTitle should be ("Tabula - Small Group Teaching")
