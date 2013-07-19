@@ -25,11 +25,19 @@
 				<@form.labelled_row "name" "Group name">
 					<@f.input path="name" cssClass="text" />
 
+
+
+
 					<button type="button" class="btn" data-toggle="add" title="Add another group" disabled="disabled">
 						<i class="icon-plus"></i>
 					</button>
 				</@form.labelled_row>
 			</@spring.nestedPath>
+
+
+
+
+
 		</div>
 		<div class="modal-footer">
 			<button class="btn" data-dismiss="modal" aria-hidden="true">Done</button>
