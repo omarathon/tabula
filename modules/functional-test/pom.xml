@@ -222,6 +222,49 @@
 			<artifactId>joda-convert</artifactId>
 			<version>1.1</version>
 			<scope>test</scope>
-		</dependency>
+    </dependency>
+    <dependency>
+      <groupId>net.databinder</groupId>
+      <artifactId>dispatch_${scala.major.version}</artifactId>
+      <version>${net.databinder.dispatch.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.databinder</groupId>
+      <artifactId>dispatch-core_${scala.major.version}</artifactId>
+      <version>${net.databinder.dispatch.version}</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-codec</artifactId>
+          <groupId>commons-codec</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>net.databinder</groupId>
+      <artifactId>dispatch-futures_${scala.major.version}</artifactId>
+      <version>${net.databinder.dispatch.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.databinder</groupId>
+      <artifactId>dispatch-http_${scala.major.version}</artifactId>
+      <version>${net.databinder.dispatch.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.databinder</groupId>
+      <artifactId>dispatch-jsoup_${scala.major.version}</artifactId>
+      <version>${net.databinder.dispatch.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.databinder</groupId>
+      <artifactId>dispatch-mime_${scala.major.version}</artifactId>
+      <version>${net.databinder.dispatch.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>net.databinder</groupId>
+      <artifactId>dispatch-tagsoup_${scala.major.version}</artifactId>
+      <version>${net.databinder.dispatch.version}</version>
+    </dependency>
+
+
 	</dependencies>
 </project>
