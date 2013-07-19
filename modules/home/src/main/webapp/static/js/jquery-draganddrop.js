@@ -314,7 +314,7 @@ TODO: More options; Random allocation function.
         	$sortables.find('li')
             .draggable(draggableOptions);
 
-        if (useHandle) draggables.prepend('<i class="icon-reorder icon-white ' + handleClass + '"></i> ');
+        if (useHandle) draggables.prepend('<i class="icon-reorder icon-white ' + handleClass.substr(1) + '"></i> ');
 
         // Drag-select
         var dragSelectOptions = {
