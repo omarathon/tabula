@@ -1,45 +1,30 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.AppContextTestBase
-import org.springframework.beans.factory.annotation.Autowired
-import org.junit.Test
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import java.io.ByteArrayInputStream
-import org.joda.time.DateTime
-import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Repository
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import java.io.File
-import org.springframework.util.FileCopyUtils
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.data.model.Member
-import org.junit.Before
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.StaffMember
-import org.joda.time.DateTimeConstants
-import org.junit.After
 import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
+
+import org.joda.time.DateTime
+import org.joda.time.DateTimeConstants
+import org.junit.Before
+import org.junit.After
+
+import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase, Fixtures}
+import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import org.springframework.test.annotation.DirtiesContext
+import uk.ac.warwick.tabula.services.ProfileService
 
 // scalastyle:off magic.number
-class MemberDaoTest extends AppContextTestBase with Logging {
+class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
-	@Autowired var dao:MemberDao =_
+	val dao = new MemberDaoImpl
 
-	@Before def setup: Unit = transactional { tx =>
-		session.enableFilter(Member.ActiveOnlyFilter)
+	@Before def setup() {
+		dao.sessionFactory = sessionFactory
+		transactional { tx =>
+			session.enableFilter(Member.ActiveOnlyFilter)
+		}
 	}
 
 	@After def tidyUp: Unit = transactional { tx =>
@@ -259,8 +244,13 @@ class MemberDaoTest extends AppContextTestBase with Logging {
 		dao.saveOrUpdate(relBetweenStaff1AndStu2)
 		session.flush()
 
+		// relationship Wires in a ProfileService, awkward.
+		// Fortunately we have a chance to inject a mock in here.
+		val profileService = smartMock[ProfileService]
+		profileService.getStudentBySprCode("1000001/1") returns (Some(stu1))
 
 		val ret = dao.getRelationshipsByDepartment(RelationshipType.PersonalTutor, dept1)
+		ret(0).profileService = profileService
 		ret(0).studentMember.get.universityId should be ("1000001")
 		ret(0).studentMember.get.mostSignificantCourseDetails.get.department.code should be ("hm")
 

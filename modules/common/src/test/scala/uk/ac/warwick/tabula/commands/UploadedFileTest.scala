@@ -2,13 +2,12 @@ package uk.ac.warwick.tabula.commands
 
 import org.springframework.mock.web.MockMultipartFile
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.{TestBase, Mockito, AppContextTestBase}
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.AppContextTestBase
 import org.springframework.validation.BindException
 
 
-class UploadedFileTest extends AppContextTestBase with Mockito{
+class UploadedFileTest extends TestBase with Mockito{
 
 	val multi1 = new MockMultipartFile("file", "feedback.doc", "text/plain", "aaaaaaaaaaaaaaaa".getBytes)
 	val multiEmpty = new MockMultipartFile("file", null, "text/plain", null: Array[Byte])
@@ -47,6 +46,7 @@ class UploadedFileTest extends AppContextTestBase with Mockito{
 	@Test // TAB-48
 	def ignoreSystemFiles {
 		val uploadedFile = new UploadedFile
+		uploadedFile.disallowedFilenames = List("thumbs.db")
 		uploadedFile.fileDao = smartMock[FileDao]
 		uploadedFile.upload = JArrayList(multi1, multiSystemFile)
 		uploadedFile.onBind(new BindException(uploadedFile, "file"))
@@ -59,12 +59,26 @@ class UploadedFileTest extends AppContextTestBase with Mockito{
 	@Test // TAB-48
 	def ignoreAppleDouble {
 		val uploadedFile = new UploadedFile
+		uploadedFile.disallowedPrefixes = List("._")
 		uploadedFile.fileDao = smartMock[FileDao]
 		uploadedFile.upload = JArrayList(multi1, multiAppleDouble)
 		uploadedFile.onBind(new BindException(uploadedFile, "file"))
 		
 		uploadedFile.attached.size should be (1)
 		uploadedFile.attached.get(0).name should be ("feedback.doc")
+	}
+
+	@Test
+	def customDisallowed {
+		val uploadedFile = new UploadedFile
+		uploadedFile.fileDao = smartMock[FileDao]
+		uploadedFile.disallowedFilenames = List("feedback.doc")
+		uploadedFile.upload = JArrayList(multiSystemFile, multiAppleDouble, multi1)
+		uploadedFile.onBind(new BindException(uploadedFile, "file"))
+
+		uploadedFile.attached.size should be (2)
+		uploadedFile.attached.get(0).name should be (multiSystemFile.getOriginalFilename)
+		uploadedFile.attached.get(1).name should be (multiAppleDouble.getOriginalFilename)
 	}
 		
 	

@@ -71,7 +71,7 @@ trait PropertyCopying extends Logging {
 		if (code == null || code == "") {
 			null
 		} else {
-			sitsStatusesImporter.sitsStatusMap.get(code).getOrElse(null)
+			sitsStatusesImporter.getSitsStatusForCode(code).getOrElse(null)
 		}
 	}
 
