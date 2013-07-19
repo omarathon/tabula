@@ -19,8 +19,16 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSitsStatusCommand
 trait SitsStatusesImporter extends Logging {
 	var sitsStatusDao = Wire.auto[SitsStatusDao]
 	
-	var sitsStatusMap = slurpSitsStatuses()
-	
+	var sitsStatusMap:Map[String,SitsStatus] = null
+
+	def getSitsStatusForCode(code:String) = {
+			if (sitsStatusMap == null){
+				sitsStatusMap=slurpSitsStatuses()
+			}
+		sitsStatusMap.get(code)
+	}
+
+
 	def getSitsStatuses: Seq[ImportSitsStatusCommand]
 	
 	def slurpSitsStatuses(): Map[String, SitsStatus] = {
