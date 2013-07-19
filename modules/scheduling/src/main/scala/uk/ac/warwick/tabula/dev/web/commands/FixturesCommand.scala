@@ -70,7 +70,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 	    // create a small group on the first module in the list
 	    transactional(){
-	      val firstModule = moduleAndDepartmentService.getModuleByCode(moduleInfos.head.code).get
+	      val firstModule = moduleAndDepartmentService.getModuleByCode(Fixtures.TestModule1.code).get
 	      val groupSet = new SmallGroupSet()
 	      groupSet.name="Test Lab"
 	      groupSet.format = SmallGroupFormat.Lab
@@ -81,6 +81,20 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	      groupSet.groups = JArrayList(group)
 	      session.save(groupSet)
 	    }
+
+		  // and another, with AllocationMethod = "StudentSignUp", on the second
+		transactional(){
+			val secondModule = moduleAndDepartmentService.getModuleByCode(Fixtures.TestModule2.code).get
+			val groupSet = new SmallGroupSet()
+			groupSet.name="Module 2 Tutorial"
+			groupSet.format = SmallGroupFormat.Tutorial
+			groupSet.module = secondModule
+			groupSet.allocationMethod= SmallGroupAllocationMethod.StudentSignUp
+			val group  = new SmallGroup
+			group.name ="Group 1"
+			groupSet.groups = JArrayList(group)
+			session.save(groupSet)
+		}
 
 		session.flush()
 		session.clear()

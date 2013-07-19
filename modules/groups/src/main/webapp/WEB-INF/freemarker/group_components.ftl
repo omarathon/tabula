@@ -67,7 +67,7 @@
 		<#list moduleItem.setItems as setItem>
 			<#assign groupSet=setItem.set />
 			<#if !groupSet.deleted>
-				<div class="item-info row-fluid<#if groupSet.archived> archived</#if>">
+				<div class="item-info row-fluid<#if groupSet.archived> archived</#if> groupset-${groupSet.id}">
 					<div class="span3">
 						<h3 class="name">
 							<small>
