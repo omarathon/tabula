@@ -75,7 +75,6 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 		val modAndDeptService = smartMock[ModuleAndDepartmentService]
 		modAndDeptService.getDepartmentByCode("ph") returns (Some(department))
-		modAndDeptService.getDepartmentByCode("PH") returns (Some(department))
 
 		var maintenanceModeService = smartMock[MaintenanceModeService]
 		maintenanceModeService.enabled returns false
