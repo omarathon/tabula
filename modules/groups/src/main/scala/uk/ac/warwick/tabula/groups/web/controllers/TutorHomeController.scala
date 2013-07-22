@@ -24,7 +24,9 @@ class TutorHomeController extends GroupsController {
 		val moduleItems =
 			for ((module, sets) <- mapping) yield {
 				ViewModule(module,
-					sets map { ViewSet(_) },
+					sets.toSeq map { case (set, groups) =>
+						ViewSet(set, groups)
+					},
 					canManageGroups=false
 				)
 			}

@@ -34,7 +34,7 @@ class TutorChangeNotification (
 			"path" -> url
 		))
 	}
-	def url: String = Routes.profile.view(relationship.studentMember)
+	def url: String = Routes.profile.view(relationship.studentMember.get)
 }
 
 object TutorChangeNotification {

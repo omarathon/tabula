@@ -8,8 +8,10 @@ import uk.ac.warwick.tabula.dev.web.commands.FixturesCommand
 @Controller
 @RequestMapping(Array("/fixtures/setup"))
 class FixturesController {
-	
+
 	@RequestMapping
-	def apply(cmd: FixturesCommand) { cmd.apply() }
+	def apply(cmd: FixturesCommand) {
+		cmd.apply()
+	}
 
 }

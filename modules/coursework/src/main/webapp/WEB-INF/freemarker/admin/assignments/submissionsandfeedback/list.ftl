@@ -77,21 +77,18 @@
 </#if>
 
 <div class="submission-feedback-list">
-	<div class="clearfix">
-		<@form.selector_check_all />
-	</div>
 	<table id="submission-table" class="table table-bordered table-striped">
 		<colgroup class="student">
 			<col class="checkbox" />
 			<col class="student-info" />
 		</colgroup>
-		
+
 		<colgroup class="submission">
 			<col class="files" />
 			<col class="submitted" />
 			<col class="status" />
 			<#assign submissionColspan=3 />
-			
+
 			<#if assignment.wordCountField??>
 				<#assign submissionColspan=submissionColspan+1 />
 				<col class="word-count" />
@@ -102,16 +99,16 @@
 				<col class="second-marker" />
 			</#if>
 		</colgroup>
-		
+
 		<#if hasOriginalityReport>
 			<colgroup class="plagiarism">
 				<col class="report" />
 			</colgroup>
 		</#if>
-		
+
 		<colgroup class="feedback">
 			<#assign feedbackColspan=3 />
-		
+
 			<col class="files" />
 			<col class="uploaded" />
 			<#if assignment.collectMarks>
@@ -120,16 +117,16 @@
 				<col class="grade" />
 			</#if>
 			<col class="status" />
-		</colgroup>	
+		</colgroup>
 		<thead>
 			<tr>
-				<th></th>
+				<th class="check-col"><div class="check-all checkbox"><input type="checkbox" class="collection-check-all"></div></th>
 				<th class="sortable">Student</th>
-				
+
 				<th colspan="${submissionColspan?c}">
 					Submission
 				</th>
-				
+
 				<#if hasOriginalityReport>
 					<th>Plagiarism</th>
 				</#if>

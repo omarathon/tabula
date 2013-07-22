@@ -100,7 +100,7 @@ object FunctionalTestProperties {
 	lazy val Student3 = userDetails("student3", "Student")
 	lazy val Student4 = userDetails("student4", "Student")
 	lazy val Student5 = userDetails("student5", "Student")
-
+  lazy val Sysadmin = userDetails("sysadmin", "System Administrator")
 	/**
 	 * Get a property by name, or null if not found anywhere. Checks in this order
 	 * - System properties

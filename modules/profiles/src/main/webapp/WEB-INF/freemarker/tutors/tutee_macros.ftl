@@ -3,16 +3,14 @@
 <#macro row student>
 <tr class="tutee">
 	<td>
-		<div class="photo">
-			<img src="<@routes.photo student />" />
-		</div>
+		<@fmt.member_photo student "tinythumbnail" />
 	</td>
 	<td><h6>${student.firstName}</h6></td>
 	<td><h6>${student.lastName}</h6></td>
 	<td><a class="profile-link" href="<@routes.profile student />">${student.universityId}</a></td>
 	<td>${student.groupName}</td>
-	<td>${(student.studyDetails.yearOfStudy)!""}</td>
-	<td>${(student.studyDetails.route.name)!""}</td>
+	<td>${(student.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!""}</td>
+	<td>${(student.mostSignificantCourseDetails.route.name)!""}</td>
 </tr>
 </#macro>
 
@@ -60,7 +58,7 @@
             }).on("mouseout", function(e) {
                         $(this).find("td").removeClass("hover");
                     }).on("click", function(e) {
-                        if (! $(e.target).is("a") && ! $(e.target).is("img")) $(this).find("a.profile-link")[0].click();
+                        if (! $(e.target).is("a") && ! $(e.target).is("img")) window.location = $(this).find("a.profile-link")[0].href;
                     });
         });
     })(jQuery);

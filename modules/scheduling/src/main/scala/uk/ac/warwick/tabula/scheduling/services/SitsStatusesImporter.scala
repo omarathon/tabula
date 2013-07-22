@@ -1,35 +1,35 @@
 package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
+
 import scala.collection.JavaConversions._
+
+import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.stereotype.Service
+
 import javax.sql.DataSource
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.SitsStatusDao
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleSitsStatusCommand
-import org.apache.log4j.Logger
-import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.SitsStatus
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSitsStatusCommand
 
-@Service
-class SitsStatusesImporter extends Logging {
-	import SitsStatusesImporter._
-
+trait SitsStatusesImporter extends Logging {
 	var sitsStatusDao = Wire.auto[SitsStatusDao]
 	
-	var sits = Wire[DataSource]("sitsDataSource")
-	
-	lazy val sitsStatusesQuery = new SitsStatusesQuery(sits)
-	
-	var sitsStatusMap = slurpSitsStatuses()
+	var sitsStatusMap:Map[String,SitsStatus] = null
 
-	def getSitsStatuses(): Seq[ImportSingleSitsStatusCommand] = {
-		val statuses = sitsStatusesQuery.execute.toSeq
-		sitsStatusMap = slurpSitsStatuses()
-		statuses
+	def getSitsStatusForCode(code:String) = {
+			if (sitsStatusMap == null){
+				sitsStatusMap=slurpSitsStatuses()
+			}
+		sitsStatusMap.get(code)
 	}
+
+
+	def getSitsStatuses: Seq[ImportSitsStatusCommand]
 	
 	def slurpSitsStatuses(): Map[String, SitsStatus] = {
 		transactional(readOnly = true) {
@@ -39,8 +39,34 @@ class SitsStatusesImporter extends Logging {
 				(statusCode, status)
 			}).toMap
 		}
-	}		
+	}	
 }
+
+@Profile(Array("dev", "test", "production")) @Service
+class SitsStatusesImporterImpl extends SitsStatusesImporter {
+	import SitsStatusesImporter._
+	
+	var sits = Wire[DataSource]("sitsDataSource")
+	
+	lazy val sitsStatusesQuery = new SitsStatusesQuery(sits)
+
+	def getSitsStatuses: Seq[ImportSitsStatusCommand] = {
+		val statuses = sitsStatusesQuery.execute.toSeq
+		sitsStatusMap = slurpSitsStatuses()
+		statuses
+	}	
+}
+
+@Profile(Array("sandbox")) @Service
+class SandboxSitsStatusesImporter extends SitsStatusesImporter {
+	def getSitsStatuses: Seq[ImportSitsStatusCommand] = 
+		Seq(
+			new ImportSitsStatusCommand(SitsStatusInfo("C", "CURRENT STUDENT", "Current Student")),
+			new ImportSitsStatusCommand(SitsStatusInfo("P", "PERMANENTLY W/D", "Permanently Withdrawn"))
+		)
+}
+
+case class SitsStatusInfo(code: String, shortName: String, fullName: String)
 
 object SitsStatusesImporter {
 		
@@ -48,9 +74,12 @@ object SitsStatusesImporter {
 		select sta_code, sta_snam, sta_name from intuit.srs_sta
 		"""
 	
-	class SitsStatusesQuery(ds: DataSource) extends MappingSqlQuery[ImportSingleSitsStatusCommand](ds, GetSitsStatus) {
+	class SitsStatusesQuery(ds: DataSource) extends MappingSqlQuery[ImportSitsStatusCommand](ds, GetSitsStatus) {
 		compile()
-		override def mapRow(resultSet: ResultSet, rowNumber: Int) = new ImportSingleSitsStatusCommand(resultSet)
+		override def mapRow(resultSet: ResultSet, rowNumber: Int) = 
+			new ImportSitsStatusCommand(
+				SitsStatusInfo(resultSet.getString("sta_code"), resultSet.getString("sta_snam"), resultSet.getString("sta_name"))
+			)
 	}
 	
 }

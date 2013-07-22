@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>39-SNAPSHOT</version>
+	<version>40-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -33,7 +33,7 @@
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
 
-		<warwickutils.version>20130628</warwickutils.version>
+		<warwickutils.version>20130704-1109</warwickutils.version>
 	        <surefire.version>2.14.1</surefire.version>
 		<recompileMode><!-- incremental --></recompileMode>
 
@@ -208,6 +208,7 @@
                 <version>2.1.4</version>
                 <executions>
                     <execution>
+                        <phase>prepare-package</phase>
                         <goals>
                             <goal>revision</goal>
                          </goals>
@@ -470,7 +471,7 @@
 					<jvmArgs>
 						<jvmArg>-Xms256m</jvmArg>
 						<jvmArg>-Xmx2048m</jvmArg>
-						<jvmArg>-XX:MaxPermSize=256m</jvmArg>
+						<jvmArg>-XX:MaxPermSize=512m</jvmArg>
 					</jvmArgs>
 					<args>
 						<arg>-deprecation</arg>
@@ -598,7 +599,7 @@
 				<plugin>
 					<groupId>net.alchim31.maven</groupId>
 					<artifactId>scala-maven-plugin</artifactId>
-					<version>3.1.3</version>
+					<version>3.1.5</version>
 				</plugin>
 
 				<plugin>
@@ -643,7 +644,8 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>${surefire.version}</version>
-					<configuration>
+          <configuration>
+            <argLine>-Xmx2048m -Xms256m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
 						<forkCount>0.75C</forkCount>
 						<systemPropertyVariables>
 							<!-- Referenced in test tabula.properties data directory,
@@ -828,6 +830,25 @@
 											<goal>
 												generate-application-xml
 											</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<ignore></ignore>
+									</action>
+								</pluginExecution>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>
+											pl.project13.maven
+										</groupId>
+										<artifactId>
+											git-commit-id-plugin
+										</artifactId>
+										<versionRange>
+											[2.1.4,)
+										</versionRange>
+										<goals>
+											<goal>revision</goal>
 										</goals>
 									</pluginExecutionFilter>
 									<action>

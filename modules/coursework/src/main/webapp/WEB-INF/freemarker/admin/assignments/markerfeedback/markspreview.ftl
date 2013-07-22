@@ -36,9 +36,13 @@
 	
 	<@spring.bind path="marks">
 	<#assign itemsList=status.actualValue /> 
+	<#assign modifiedCount = 0 />
+	<#list itemsList as item>
+		<#if item.valid><#assign modifiedCount = modifiedCount + 1 /></#if>
+	</#list>
 	<p>
 		<#if itemsList?size gt 0>
-			${text_acknowledge} ${itemsList?size} students.  
+			${text_acknowledge} ${modifiedCount} students.  
 			<#if hasErrors>
 				${text_problems}
 			</#if>

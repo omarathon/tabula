@@ -3,11 +3,11 @@ import org.reflections.Reflections
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.helpers.ReflectionsSetup
 
-class GrantedPermissionPersistenceTest extends PersistenceTestBase {
+class GrantedPermissionPersistenceTest extends PersistenceTestBase with ReflectionsSetup {
 	
-	new Reflections("uk.ac.warwick.tabula").save(getClass.getResource("/").getFile() + "META-INF/reflections/all-reflections.xml")
-	
+
 	@Test def saveAndLoad {
 		transactional { t =>
 			val department = new Department

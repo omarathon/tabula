@@ -1,4 +1,6 @@
 package uk.ac.warwick.tabula.data.model
+
+import scala.language.postfixOps
 import java.io._
 import com.google.common.io.Files
 import org.hibernate.annotations.AccessType
@@ -90,10 +92,7 @@ class FileAttachment extends GeneratedId {
 	def length: Option[Long] = Option(file) map { _.length }
 
 	// checks the length field first. If that is not populated use uploadedData instead
-	def actualDataLength = length match {
-		case Some(size) => size
-		case None => uploadedDataLength
-	}
+	def actualDataLength = length getOrElse uploadedDataLength
 
 	def fileExt: String = {
 		if (name.lastIndexOf('.') > -1) {
@@ -107,7 +106,7 @@ class FileAttachment extends GeneratedId {
 	 * A stream to read the entirety of the data Blob, or null
 	 * if there is no Blob.
 	 */
-	def dataStream: InputStream = (Option(file) map { new FileInputStream(_) }).orNull
+	def dataStream: InputStream = Option(file) map { new FileInputStream(_) } orNull
 
 	def hasData = file != null
 
@@ -132,8 +131,11 @@ class FileAttachment extends GeneratedId {
 
 object FileAttachment {
 
-	private val BadWindowsCharacters = new Regex("""[<\\"|:*/>?]""")
+	private val BadCharacters = new Regex("""[<\\"|;:*/>?]""")
 
-	def sanitisedFilename(filename: String) = BadWindowsCharacters.replaceAllIn(filename.trim, "")
+	def sanitisedFilename(filename: String) = {
+		val trimmed = filename.trim
+		BadCharacters.replaceAllIn(trimmed, "")
+	}
 
 }

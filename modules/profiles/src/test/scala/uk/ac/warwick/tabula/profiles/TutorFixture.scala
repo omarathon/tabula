@@ -10,18 +10,27 @@ import scala.Some
 trait TutorFixture extends Mockito {
 
 	val department = new Department
-	department.settings = Map(Department.Settings.PersonalTutorSource -> Department.Settings.PersonalTutorSourceValues.Local)
-
-	val studyDetails = mock[StudyDetails]
-	when(studyDetails.studyDepartment).thenReturn(department)
-
+  department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Local
 	val actor = new User
 	val recipient = new User
 	recipient.setWarwickId("recipient")
 
 	val student = new StudentMember
 	student.universityId = "student"
-	student.studyDetails = studyDetails
+		
+	val studentCourseDetails = new StudentCourseDetails
+	studentCourseDetails.student = student
+	studentCourseDetails.department = department
+	studentCourseDetails.sprCode = "0000001/1"
+	studentCourseDetails.mostSignificant = true
+	student.studentCourseDetails.add(studentCourseDetails)
+
+//	val courseDetails = new StudentCourseDetails()
+//	courseDetails.sprCode = "spr-123"
+//	courseDetails.mostSignificant = true
+//	courseDetails.department = department
+//	student.studentCourseDetails.add(courseDetails)
+
 	val newTutor = new StaffMember
 	newTutor.universityId = "0000001"
 	val oldTutor = new StaffMember

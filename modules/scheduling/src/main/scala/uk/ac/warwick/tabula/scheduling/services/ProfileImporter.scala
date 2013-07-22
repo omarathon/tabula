@@ -19,17 +19,31 @@ import uk.ac.warwick.tabula.data.model.MemberUserType.Emeritus
 import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleMemberCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStaffCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportMemberCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStaffMemberCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentRowCommand
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.membership.MembershipInterfaceException
 import org.joda.time.DateTime
+import org.springframework.context.annotation.Profile
+import uk.ac.warwick.tabula.scheduling.sandbox.SandboxData
+import uk.ac.warwick.tabula.data.model.DegreeType
+import uk.ac.warwick.tabula.scheduling.sandbox.MapResultSet
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseYearCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSupervisorsForStudentCommand
 
 case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
 
-@Service
-class ProfileImporter extends Logging {
+trait ProfileImporter {
+	def getMemberDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportMemberCommand]
+	def userIdsAndCategories(department: Department): Seq[MembershipInformation]
+	def userIdAndCategory(member: Member): Option[MembershipInformation]
+}
+
+@Profile(Array("dev", "test", "production")) @Service
+class ProfileImporterImpl extends ProfileImporter with Logging {
 	import ProfileImporter._
 
 	var sits = Wire[DataSource]("sitsDataSource")
@@ -41,10 +55,13 @@ class ProfileImporter extends Logging {
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
 	lazy val membershipByUsercodeQuery = new MembershipByUsercodeQuery(membership)
 
-	def studentInformationQuery(member: MembershipInformation, ssoUser: User) = new StudentInformationQuery(sits, member, ssoUser)
+	def studentInformationQuery(member: MembershipInformation, ssoUser: User) = {
+		val ret = new StudentInformationQuery(sits, member, ssoUser)
+		ret
+	}
 	def staffInformationQuery(member: MembershipInformation, ssoUser: User) = new StaffInformationQuery(sits, member, ssoUser)
 
-	def getMemberDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportSingleMemberCommand] = {
+	def getMemberDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportMemberCommand] = {
 		// TODO we could probably chunk this into 20 or 30 users at a time for the query, or even split by category and query all at once
 
 		membersAndCategories flatMap { mac =>
@@ -52,9 +69,12 @@ class ProfileImporter extends Logging {
 			val ssoUser = users(usercode)
 
 			mac.member.userType match {
-				case Student 		   => studentInformationQuery(mac, ssoUser).executeByNamedParam(
+				case Student 		   => {
+					val cmds = studentInformationQuery(mac, ssoUser).executeByNamedParam(
 											Map("year" -> currentAcademicYear, "usercodes" -> usercode)
 										  ).toSeq
+					cmds
+					}
 				case Staff | Emeritus  => staffInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
 				case _ => Seq()
 			}
@@ -90,8 +110,135 @@ class ProfileImporter extends Logging {
 	}
 }
 
-object ProfileImporter {
+@Profile(Array("sandbox")) @Service
+class SandboxProfileImporter extends ProfileImporter {
+	def getMemberDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportMemberCommand] =
+		membersAndCategories map { mac =>
+			val member = mac.member
+			val ssoUser = new User(member.usercode)
+			ssoUser.setFoundUser(true)
+			ssoUser.setVerified(true)
+			ssoUser.setDepartment(SandboxData.Departments(member.departmentCode).name)
+			ssoUser.setDepartmentCode(member.departmentCode)
+			ssoUser.setEmail(member.email)
+			ssoUser.setFirstName(member.preferredForenames)
+			ssoUser.setLastName(member.preferredSurname)
+			ssoUser.setStudent(true)
+			ssoUser.setWarwickId(member.universityId)
 
+			val route = SandboxData.route(member.universityId.toLong)
+
+			val rs = new MapResultSet(Map(
+				"university_id" -> member.universityId,
+				"title" -> member.title,
+				"preferred_forename" -> member.preferredForenames,
+				"forenames" -> member.preferredForenames,
+				"family_name" -> member.preferredSurname,
+				"gender" -> member.gender.dbValue,
+				"email_address" -> member.email,
+				"user_code" -> member.usercode,
+				"date_of_birth" -> member.dateOfBirth.toDateTimeAtStartOfDay(),
+				"in_use_flag" -> "Active",
+				"date_of_inactivation" -> member.endDate.toDateTimeAtStartOfDay(),
+				"alternative_email_address" -> null,
+				"mobile_number" -> null,
+				"nationality" -> "British (ex. Channel Islands & Isle of Man)",
+				"course_code" -> "%s-%s".format(member.departmentCode.toUpperCase, route.code.toUpperCase),
+				"course_year_length" -> "3",
+				"spr_code" -> "%s/1".format(member.universityId),
+				"route_code" -> route.code.toUpperCase,
+				"department_code" -> member.departmentCode.toUpperCase,
+				"award_code" -> (if (route.degreeType == DegreeType.Undergraduate) "BA" else "MA"),
+				"spr_status_code" -> "C",
+				"level_code" -> ((member.universityId.toLong % 3) + 1).toString,
+				"spr_tutor1" -> null,
+				"scj_code" -> "%s/1".format(member.universityId),
+				"begin_date" -> member.startDate.toDateTimeAtStartOfDay(),
+				"end_date" -> member.endDate.toDateTimeAtStartOfDay(),
+				"expected_end_date" -> member.endDate.toDateTimeAtStartOfDay(),
+				"most_signif_indicator" -> "Y",
+				"funding_source" -> null,
+				"enrolment_status_code" -> "F",
+				"year_of_study" -> ((member.universityId.toLong % 3) + 1).toInt,
+				"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
+				"sce_academic_year" -> AcademicYear.guessByDate(DateTime.now).toString,
+				"sce_sequence_number" -> 1
+			))
+			new ImportStudentRowCommand(mac, ssoUser, rs, new ImportStudentCourseCommand(rs, new ImportStudentCourseYearCommand(rs), new ImportSupervisorsForStudentCommand()))
+		}
+
+	def userIdsAndCategories(department: Department): Seq[MembershipInformation] =
+		SandboxData.Departments(department.code).routes.values.flatMap { route =>
+			(route.studentsStartId to route.studentsEndId).map { uniId =>
+				val gender = if (uniId % 2 == 0) Gender.Male else Gender.Female
+				val name = SandboxData.randomName(uniId, gender)
+				val title = gender match {
+					case Gender.Male => "Mr"
+					case _ => "Miss"
+				}
+				// Every fifth student is part time
+				val isPartTime = uniId % 5 == 0
+
+				val userType = MemberUserType.Student
+				val groupName = route.degreeType match {
+					case DegreeType.Undergraduate => if (isPartTime) "Undergraduate - part-time" else "Undergraduate - full-time"
+					case _ =>
+						if (route.isResearch)
+							if (isPartTime) "Postgraduate (research) PT" else "Postgraduate (research) FT"
+						else
+							if (isPartTime) "Postgraduate (taught) PT" else "Postgraduate (taught) FT"
+				}
+
+				MembershipInformation(
+					MembershipMember(
+						uniId.toString,
+						department.code,
+						"%s.%s@tabula-sandbox.warwick.ac.uk".format(name.givenName.substring(0, 1), name.familyName),
+						groupName,
+						title,
+						name.givenName,
+						name.familyName,
+						groupName,
+						DateTime.now.minusYears(19).toLocalDate().withDayOfYear((uniId % 364) + 1),
+						department.code + uniId.toString.takeRight(4),
+						DateTime.now.minusYears(1).toLocalDate,
+						DateTime.now.plusYears(2).toLocalDate,
+						DateTime.now,
+						null,
+						gender,
+						null,
+						userType
+					), () => None
+				)
+			}
+		}.toSeq
+
+	def userIdAndCategory(member: Member): Option[MembershipInformation] =
+		Some(MembershipInformation(
+			MembershipMember(
+				member.universityId,
+				member.homeDepartment.code,
+				member.email,
+				member.groupName,
+				member.title,
+				member.firstName,
+				member.lastName,
+				member.jobTitle,
+				member.dateOfBirth,
+				member.userId,
+				DateTime.now.minusYears(1).toLocalDate,
+				DateTime.now.plusYears(2).toLocalDate,
+				member.lastUpdatedDate,
+				member.phoneNumber,
+				member.gender,
+				member.homeEmail,
+				member.userType
+			), () => None
+		))
+
+}
+
+object ProfileImporter {
 	val GetStudentInformation = """
 		select
 			stu.stu_code as university_id,
@@ -110,15 +257,15 @@ object ProfileImporter {
 
 			nat.nat_name as nationality,
 
-			crs.crs_code as sits_course_code,
+			crs.crs_code as course_code,
 			crs.crs_ylen as course_year_length,
 
 			spr.spr_code as spr_code,
 			spr.rou_code as route_code,
-			spr.spr_dptc as study_department,
+			spr.spr_dptc as department_code,
 			spr.awd_code as award_code,
 			spr.sts_code as spr_status_code,
-			--spr.spr_levc as level_code,
+			spr.spr_levc as level_code,
 			spr.prs_code as spr_tutor1,
 			--spr.spr_prs2 as spr_tutor2,
 
@@ -126,13 +273,16 @@ object ProfileImporter {
 			scj.scj_begd as begin_date,
 			scj.scj_endd as end_date,
 			scj.scj_eend as expected_end_date,
+			scj.scj_udfa as most_signif_indicator,
 			--scj.scj_prsc as scj_tutor1,
 			--scj.scj_prs2 as scj_tutor2,
 
 			sce.sce_sfcc as funding_source,
 			sce.sce_stac as enrolment_status_code,
 			sce.sce_blok as year_of_study,
-			sce.sce_moac as mode_of_attendance_code
+			sce.sce_moac as mode_of_attendance_code,
+			sce.sce_ayrc as sce_academic_year,
+			sce.sce_seq2 as sce_sequence_number
 
 		from intuit.ins_stu stu
 
@@ -141,7 +291,6 @@ object ProfileImporter {
 
 			join intuit.srs_scj scj
 				on spr.spr_code = scj.scj_sprc
-				and scj.scj_udfa = 'Y'
 
 			join intuit.srs_sce sce
 				on scj.scj_code = sce.sce_scjc
@@ -163,8 +312,17 @@ object ProfileImporter {
 			left outer join intuit.srs_sta sts
 				on spr.sts_code = sts.sta_code
 
-			where stu.stu_udf3 in (:usercodes)
+		where stu.stu_udf3 in (:usercodes)
 		"""
+
+	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User)
+		extends MappingSqlQuery[ImportStudentRowCommand](ds, GetStudentInformation) {
+		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
+		declareParameter(new SqlParameter("year", Types.VARCHAR))
+		compile()
+		override def mapRow(rs: ResultSet, rowNumber: Int)
+					= new ImportStudentRowCommand(member, ssoUser, rs, new ImportStudentCourseCommand(rs, new ImportStudentCourseYearCommand(rs), new ImportSupervisorsForStudentCommand()))
+	}
 
 	val GetStaffInformation = """
 		select
@@ -185,19 +343,11 @@ object ProfileImporter {
 			where prs.prs_exid in (:usercodes)
 		"""
 
-	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User)
-		extends MappingSqlQuery[ImportSingleStudentCommand](ds, GetStudentInformation) {
-		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
-		declareParameter(new SqlParameter("year", Types.VARCHAR))
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStudentCommand(member, ssoUser, rs)
-	}
-
 	class StaffInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User)
-		extends MappingSqlQuery[ImportSingleStaffCommand](ds, GetStaffInformation) {
+		extends MappingSqlQuery[ImportStaffMemberCommand](ds, GetStaffInformation) {
 		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
 		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportSingleStaffCommand(member, ssoUser, rs)
+		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportStaffMemberCommand(member, ssoUser, rs)
 	}
 
 	val GetCurrentAcademicYear = """

@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula
 
 import org.springframework.scala.context.function.{FunctionalConfigApplicationContext, FunctionalConfiguration}
-import org.springframework.context.support.ApplicationContextAwareProcessor
 import uk.ac.warwick.spring.SpringConfigurer
 
 abstract class FunctionalContext extends FunctionalConfiguration {

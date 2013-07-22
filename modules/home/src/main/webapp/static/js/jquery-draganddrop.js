@@ -68,18 +68,18 @@ TODO: More options; Random allocation function.
 
 				var itemName = this.options.itemName || 'item';
 				var textSelector = this.options.textSelector;
-				
+
 				var useHandle = this.options.useHandle;
 				if (typeof(useHandle) === 'undefined') useHandle = true;
-				
+
 				var handleClass = this.options.handle || '.handle';
-    
+
         var sortables = '.drag-list';
         var selectables = this.options.selectables || sortables;
         var $el = $(element);
         var self = this;
         var first_rows = {};
-        
+
         var $returnList = $el.find('.return-list');
         var hasReturnList = $returnList.length > 0;
 
@@ -120,7 +120,7 @@ TODO: More options; Random allocation function.
         // Move a bunch of items. Mappings is a list of objects. Each object contains:
         //   'target', the $ul to move items to;
         //   'items', an array of list items to move;
-        //   'sources', array of lists where the items came from 
+        //   'sources', array of lists where the items came from
         //             (just used to trigger an event on the list);
         // This function powers most of the other item moving functions.
         this.batchMove = function(mappings) {
@@ -169,15 +169,15 @@ TODO: More options; Random allocation function.
         // Wire button to trigger returnItems
         $el.find('.return-items').click(function(e) {
             self.returnItems();
-				
+
 						e.preventDefault();
 						e.stopPropagation();
 						return false;
         });
 
 				var deleteLinkHtml;
-				if (this.options.removeTooltip) deleteLinkHtml = ' <a href="#" class="delete btn btn-mini" data-toggle="tooltip" title="' + this.options.removeTooltip + '"><i class="icon-remove"></i></a>'; 
-        else deleteLinkHtml = ' <a href="#" class="delete btn btn-mini"><i class="icon-remove"></i> Remove</a>';
+				if (this.options.removeTooltip) deleteLinkHtml = ' <a href="#" class="delete" data-toggle="tooltip" title="' + this.options.removeTooltip + '"><i class="icon-remove icon-large"></i></a>';
+        else deleteLinkHtml = ' <a href="#" class="delete"><i class="icon-remove icon-large"></i> Remove</a>';
 
 				var popoverGenerator = function() {
             var customHeader = $(this).data('pre') || ''; // data-pre attribute
@@ -189,11 +189,11 @@ TODO: More options; Random allocation function.
                 .map(function(i, li){
                     var $li = $(li);
                     var id = $li.find('input').val();
-                    
+
                     var text;
                     if (textSelector) text = $li.find(textSelector).text();
                 		else text = $li.text();
-                    
+
                     if (hasReturnList) text += deleteLinkHtml;
 
                     return '<li data-item-id="'+id+'">'+text+'</li>';
@@ -207,7 +207,7 @@ TODO: More options; Random allocation function.
 	        $(this).tabulaPopover({
 	            html: true,
 	            content: popoverGenerator,
-	            placement: $(this).data('placement') || 'right' 
+	            placement: $(this).data('placement') || 'right'
 	        }).click(function(e){
 	            return false;
 	        }).each(function(i, link) {
@@ -217,10 +217,13 @@ TODO: More options; Random allocation function.
 	            $sourceList.on('changed.tabula', function() {
 	                // Update the popover contents, if it's visible.
 	                if ($sourceList.find('li').length === 0) {
-	                    $link.addClass('disabled');
-	                    $link.popover('hide');
+	                    $link.addClass('disabled').popover('hide').tooltip('disable');
 	                } else {
-	                    $link.removeClass('disabled');
+	                    $link.removeClass('disabled')
+	                    var tooltip = $link.data('tooltip');
+	                    if (tooltip.$tip) {
+	                    	$link.tooltip('enable');
+	                    }
 	                    var popover = $link.data('popover');
 	                    if (popover.$tip) {
 	                        var $content = popover.$tip.find('.popover-content');
@@ -230,8 +233,11 @@ TODO: More options; Random allocation function.
 	                    }
 	                }
 	            });
+	        }).tooltip({
+	        	placement: 'top',
+	        	delay: { show: 750, hide: 100 }
 	        });
-				});
+		});
 
         // Handle buttons inside the .show-list popover by attaching it to .drag-target,
         // so we don't have to remember to bind events to popovers as they come and go.
@@ -252,7 +258,7 @@ TODO: More options; Random allocation function.
 
         var $sortables = $el.find(sortables);
         var $selectables = $el.find(selectables);
-								
+
         var draggableOptions = {
             scroll: this.options.scroll || false,
             revert: 'invalid',
@@ -282,11 +288,11 @@ TODO: More options; Random allocation function.
             helper: function(event) {
                 var $element = $(event.currentTarget);
                 var multidrag = $element.hasClass('ui-selected');
-                
+
                 var msg;
                 if (textSelector) msg = $element.find(textSelector).text();
                 else msg = $element.text();
-                
+
                 if (multidrag) msg = $element.closest('ul').find('.ui-selected').length + " " + itemName + "s";
                 return $('<div>')
                     .addClass('label')
@@ -300,15 +306,15 @@ TODO: More options; Random allocation function.
             }
 
         };
-        
+
         if (useHandle) draggableOptions.handle = handleClass;
 
         // Drag any list item by its handle
-        var draggables = 
+        var draggables =
         	$sortables.find('li')
             .draggable(draggableOptions);
-            
-        if (useHandle) draggables.prepend('<i class="icon-reorder icon-white ' + handleClass + '"></i> ');
+
+        if (useHandle) draggables.prepend('<i class="icon-reorder icon-white ' + handleClass.substr(1) + '"></i> ');
 
         // Drag-select
         var dragSelectOptions = {
@@ -316,7 +322,7 @@ TODO: More options; Random allocation function.
         };
         if (useHandle) dragSelectOptions.cancel = handleClass;
         else dragSelectOptions.cancel = 'li';
-        
+
         $selectables.selectable(dragSelectOptions);
 
         var updateAllCounts = function() {
@@ -394,7 +400,10 @@ TODO: More options; Random allocation function.
         // This is neater than the mathemagical alternative.
         setTimeout(function() {
             var $dragList = $dragTarget.find('.drag-list');
-            $dragTarget.find('.drag-count').html($dragList.find('li').length);
+            var count = $dragList.find('li').length;
+            $dragTarget.find('.drag-count').html(count);
+            var $counted = $dragTarget.find('.drag-counted');
+            $counted.html(count == 1 ? $counted.data("singular") : $counted.data("plural"));
         }, 10);
     };
 

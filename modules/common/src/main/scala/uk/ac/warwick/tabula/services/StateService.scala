@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.data.model.{MarkerFeedback, MarkingState, Submission}
+import uk.ac.warwick.tabula.data.model.{MarkerFeedback, MarkingState}
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.{HasSession, Daoisms}
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.data.{SessionComponent, Daoisms}
 
 trait StateService {
 	def updateState(markerFeedback: MarkerFeedback, state: MarkingState)
@@ -12,14 +11,13 @@ trait StateService {
 @Service(value = "stateService")
 class StateServiceImpl extends ComposableStateServiceImpl with Daoisms
 
-
 class ComposableStateServiceImpl extends StateService {
-  this:HasSession =>
+	this:SessionComponent =>
 
-  def updateState(markerFeedback: MarkerFeedback, state: MarkingState){
-    if (markerFeedback.state != null && !markerFeedback.state.canTransitionTo(state))
-      throw new IllegalStateException("Cannot transition from " + markerFeedback.state + " to " + state)
-    markerFeedback.state = state
-    session.saveOrUpdate(markerFeedback)
-  }
+	def updateState(markerFeedback: MarkerFeedback, state: MarkingState) {
+		if (markerFeedback.state != null && !markerFeedback.state.canTransitionTo(state))
+			throw new IllegalStateException("Cannot transition from " + markerFeedback.state + " to " + state)
+		markerFeedback.state = state
+		session.saveOrUpdate(markerFeedback)
+	}
 }

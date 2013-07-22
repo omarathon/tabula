@@ -43,7 +43,6 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 
 	override def applyInternal(): Assignment = transactional() {
 		copyTo(assignment)
-		service.save(assignment)
 		assignment
 	}
 

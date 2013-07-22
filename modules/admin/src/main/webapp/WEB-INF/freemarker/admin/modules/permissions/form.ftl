@@ -58,7 +58,7 @@
 <!--<div class="permission-group">-->
 
 	<h3 class="permissionTitle">Module managers</h3> <a class="use-popover" id="popover-modulemanager" data-html="true"
-	   data-original-title="Module managers <button type='button' onclick=&quot;jQuery('#popover-modulemanager').popover('hide')&quot; class='close'>&times;</button></span>"
+	   data-original-title="Module managers</span>"
 	   data-content="A module manager can create and delete assignments, download submissions and publish feedback for this module."><i class="icon-question-sign"></i></a>
 
 	<#macro useractions user_id role>
@@ -69,9 +69,9 @@
 			<a class="btn btn-danger btn-mini removeUser"><i class="icon-white icon-remove"></i></a>
 		</form>
 	</#macro>
-	
+
 	<#if module.managers.includeUsers?size gt 0>
-	
+
 		<table class="permission-list">
 		<@userlookup ids=module.managers.includeUsers>
 		<#list missing_ids as missing_id>
@@ -97,20 +97,20 @@
 		</#list>
 		</@userlookup>
 		</table>
-		
+
 	<#else>
-	
+
 		<p class="empty-list">
 			There are no module managers yet.
 		</p>
-	
+
 	</#if>
 
 <!--</div> --> <!-- perm group -->
 
 
 <h3 class="permissionTitle">Module assistants</h3> <a class="use-popover" id="popover-moduleassistant" data-html="true"
-   data-original-title="Module assistants <button type='button' onclick=&quot;jQuery('#popover-moduleassistant').popover('hide')&quot; class='close'>&times;</button></span>"
+   data-original-title="Module assistants"
    data-content="A module assistant can create assignments and download submissions, but cannot delete assignments or submissions, or publish feedback for this module."><i class="icon-question-sign"></i></a>
 
 <#if module.assistants.includeUsers?size gt 0>

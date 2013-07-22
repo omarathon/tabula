@@ -21,28 +21,35 @@ import uk.ac.warwick.tabula.JavaImports._
  */
 class ScalaFreemarkerConfiguration extends Configuration with ServletContextAware {
 	//Default constructor initialzation
+	this.setStrictSyntaxMode(true)
 	this.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX)
 	this.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER)
 	this.setAutoIncludes(List("/WEB-INF/freemarker/prelude.ftl"))
 
-	val wrapper = new ScalaBeansWrapper
-	wrapper.setMethodsShadowItems(false) // do not lookup method first.
-	wrapper.setDefaultDateType(TemplateDateModel.DATETIME) //this allow java.util.Date to work from model.
-	
-	// TAB-351 TAB-469 Don't enable caching	
-	wrapper.setUseCache(false)
-	wrapper.setExposureLevel(BeansWrapper.EXPOSE_SAFE);
+	this.setObjectWrapper(createWrapper(true))
 
-	this.setObjectWrapper(wrapper)
 
+	private def createWrapper(useCache:Boolean) = {
+		val wrapper = new ScalaBeansWrapper
+		wrapper.setMethodsShadowItems(false) // do not lookup method first.
+		wrapper.setDefaultDateType(TemplateDateModel.DATETIME) //this allow java.util.Date to work from model.
+
+		// TAB-351 TAB-469 Don't enable caching
+		wrapper.setUseCache(false)
+		wrapper.useWrapperCache = false
+		wrapper.setExposureLevel(BeansWrapper.EXPOSE_SAFE);
+
+		wrapper
+	}
 	// Mainly for tests to run - if servlet context is never set, it will
 	// use the classloader to find templates.
 	setClassForTemplateLoading(getClass(), "/")
 
 	@Required
 	def setSharedVariables(vars: JMap[String, Any]) {
+		val nonCachingWrapper = createWrapper(false)
 		this.setSharedVariable("commandVarName", FormTag.MODEL_ATTRIBUTE_VARIABLE_NAME)
-		for ((key, value) <- vars) this.setSharedVariable(key, value)
+		for ((key, value) <- vars) this.setSharedVariable(key, nonCachingWrapper.wrap(value.asInstanceOf[Object]))
 	}
 
 	override def setServletContext(ctx: javax.servlet.ServletContext) = {

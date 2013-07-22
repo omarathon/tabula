@@ -8,19 +8,19 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
 import javax.validation.Valid
 import uk.ac.warwick.tabula.web.Breadcrumbs
-import uk.ac.warwick.tabula.admin.commands.department.DisplaySettingsCommand
+import uk.ac.warwick.tabula.admin.commands.department.{DisplaySettingsCommandState, DisplaySettingsCommand}
 import org.springframework.web.bind.annotation.RequestMethod
 import uk.ac.warwick.tabula.admin.web.controllers.AdminController
 import uk.ac.warwick.tabula.admin.web.Routes
 import org.springframework.web.bind.annotation.RequestParam
+import uk.ac.warwick.tabula.commands.Appliable
 
 @Controller
 @RequestMapping(Array("/department/{dept}/settings/display"))
 class DisplaySettingsController extends AdminController {
 
-	@ModelAttribute def displaySettingsCommand(@PathVariable("dept") dept:Department) = new DisplaySettingsCommand(dept)
+	@ModelAttribute("displaySettingsCommand") def displaySettingsCommand(@PathVariable("dept") dept:Department) = DisplaySettingsCommand(dept)
 	
-	validatesSelf[DisplaySettingsCommand]
 
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, dept:Department):Mav = mav.crumbs(Breadcrumbs.Department(dept))
@@ -28,15 +28,15 @@ class DisplaySettingsController extends AdminController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def viewSettings(
 		@PathVariable("dept") dept: Department, 
-		user: CurrentUser,  
-		cmd:DisplaySettingsCommand, errors:Errors) =
+		user: CurrentUser,
+		@ModelAttribute("displaySettingsCommand") cmd:Appliable[Unit], errors:Errors) =
 			crumbed(Mav("admin/display-settings",
 				"department" -> dept,
 				"returnTo" -> getReturnTo("")
 			), dept)
 
 	@RequestMapping(method=Array(POST))
-	def saveSettings(@Valid cmd:DisplaySettingsCommand, errors:Errors) = {
+	def saveSettings(@Valid @ModelAttribute("displaySettingsCommand") cmd:DisplaySettingsCommandState with Appliable[Unit], errors:Errors) = {
 		if (errors.hasErrors){
 			viewSettings(cmd.department, user, cmd, errors)
 		} else {

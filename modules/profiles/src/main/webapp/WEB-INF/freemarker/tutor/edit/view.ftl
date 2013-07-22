@@ -12,9 +12,10 @@
 
 
 	<#if user.staff>
+		<#assign student = studentCourseDetails.student/>
 		<div id="edit-personal-tutor-modal" class="modal-body">
 		<@f.form method="post" commandName="editTutorCommand" action="" cssClass="form-horizontal">
-			
+
 
 				<h5 id="tuteeName">Personal Tutee: ${student.fullName}</h5>
 				<input id="student" name="student" type="hidden" value="${student.universityId}" />
@@ -78,16 +79,16 @@
 					</div>
 				</div>
 
-			
 
-			
+
+
 		</@f.form>
 		</div>
 		<div class="modal-footer">
 				<div type="button" class="btn disabled" id="save-tutor">Save</div>
 			</div>
 	</#if>
-	
+
 	<script>
 		jQuery(document).ready(function($) {
 
@@ -110,17 +111,17 @@
 
 			function setStudent(memberString) {
 				var member = memberString.split("|");
-				
+
 				if($('#editTutorCommand input[name=currentTutor]').val() != member[1]) {
 					$('#remove-tutor').addClass("disabled");
 					$('#notify-tutor-change').show();
 				} else {
 					$('#remove-tutor').removeClass("disabled");
 				}
-				
+
 				$('#editTutorCommand input[name=tutor]').val(member[1]);
 				$("#tutorSearchResults").html("");
-				
+
 				$("#save-tutor").removeClass("disabled").addClass("btn-primary");
 				return member[0];
 			}
@@ -236,9 +237,9 @@
 
 
 			profileSearch($('#edit-personal-tutor-modal .profile-search'), "../tutor/search.json", tutorHighlight, setStudent);
-			
+
 
 		}(jQuery));
 	</script>
-	
+
 </#escape>

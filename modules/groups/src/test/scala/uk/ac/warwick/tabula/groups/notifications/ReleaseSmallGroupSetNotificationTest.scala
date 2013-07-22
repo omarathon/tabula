@@ -23,7 +23,7 @@ class ReleaseSmallGroupSetNotificationTest extends TestBase with Mockito{
   @Test
   def titleIncludesGroupFormat(){new SmallGroupFixture {
     val n =  createNotification(group1, actor, recipient)
-    n.title should be("Seminar allocation")
+    n.title should be("Lab allocation")
   }}
 
   @Test

@@ -17,9 +17,16 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
 
 object SmallGroupSet {
 	final val NotDeletedFilter = "notDeleted"
+	object Settings {
+		val StudentsCanSeeTutorNames = "StudentsCanSeeTutorNames"
+		val StudentsCanSeeOtherMembers = "StudentsCanSeeOtherMembers"
+		val DefaultMaxGroupSizeEnabled = "DefaultMaxGroupSizeEnabled"
+		val DefaultMaxGroupSize = "DefaultMaxGroupSize"
+	}
 }
 
 /**
@@ -29,8 +36,10 @@ object SmallGroupSet {
 @Filter(name = SmallGroupSet.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget {
-	
+class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings with PostLoadBehaviour  {
+	import SmallGroupSet.Settings
+	import SmallGroup._
+
 	@transient var permissionsService = Wire[PermissionsService]
 	@transient var membershipService = Wire[AssignmentMembershipService]
 
@@ -64,6 +73,9 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	@Column(name="allocation_method")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethodUserType")
 	var allocationMethod: SmallGroupAllocationMethod = _
+
+	@Column(name="self_group_switching")
+	var allowSelfGroupSwitching:Boolean = true
 
 	@ManyToOne
 	@JoinColumn(name = "module_id")
@@ -109,9 +121,29 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 		allStudents diff allocatedStudents
 	}
 	
+	def unallocatedStudentsCount = {
+		val allStudentsCount = membershipService.countMembershipUsers(assessmentGroups.asScala, Some(members))
+		val allocatedStudentsCount = groups.asScala.foldLeft(0) { (acc, grp) => acc + grp.students.members.size }
+		
+		allStudentsCount - allocatedStudentsCount
+	}
+	
 	def hasAllocated = groups.asScala exists { !_.students.isEmpty }
 	
 	def permissionsParents = Option(module).toStream
+
+	def studentsCanSeeTutorName = getBooleanSetting(Settings.StudentsCanSeeTutorNames).getOrElse(false)
+	def studentsCanSeeTutorName_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeTutorNames -> canSee)
+
+	def studentsCanSeeOtherMembers = getBooleanSetting(Settings.StudentsCanSeeOtherMembers).getOrElse(false)
+	def studentsCanSeeOtherMembers_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeOtherMembers -> canSee)
+
+	def defaultMaxGroupSizeEnabled = getBooleanSetting(Settings.DefaultMaxGroupSizeEnabled).getOrElse(false)
+	def defaultMaxGroupSizeEnabled_=(isEnabled:Boolean) = settings += (Settings.DefaultMaxGroupSizeEnabled -> isEnabled)
+
+	def defaultMaxGroupSize = getIntSetting(Settings.DefaultMaxGroupSize).getOrElse(DefaultGroupSize)
+	def defaultMaxGroupSize_=(defaultSize:Int) = settings += (Settings.DefaultMaxGroupSize -> defaultSize)
+
 
 	def toStringProps = Seq(
 		"id" -> id,
@@ -123,6 +155,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
     newSet.id = id
     newSet.academicYear = academicYear
     newSet.allocationMethod = allocationMethod
+    newSet.allowSelfGroupSwitching = allowSelfGroupSwitching
     newSet.archived = archived
     newSet.assessmentGroups = assessmentGroups
     newSet.format = format
@@ -134,6 +167,12 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
     newSet.permissionsService = permissionsService
     newSet.releasedToStudents = releasedToStudents
     newSet.releasedToTutors = releasedToTutors
+		newSet.settings = Map() ++ settings
     newSet
   }
+
+	def postLoad {
+		ensureSettings
+	}
 }
+

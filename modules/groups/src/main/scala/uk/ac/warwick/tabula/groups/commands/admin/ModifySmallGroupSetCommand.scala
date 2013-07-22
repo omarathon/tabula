@@ -1,15 +1,34 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
+import org.hibernate.validator.constraints._
+import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Module, UserGroup, UpstreamAssessmentGroup}
 import uk.ac.warwick.tabula.commands.{UpdatesStudentMembership, SelfValidating, PromisingCommand}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat
+import uk.ac.warwick.tabula.AcademicYear
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.helpers.LazyLists
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.helpers.Promise
+import uk.ac.warwick.tabula.helpers.Promises._
+import uk.ac.warwick.tabula.commands.PromisingCommand
 import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
+import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.BindingResult
+import uk.ac.warwick.tabula.UniversityId
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import org.hibernate.validator.Valid
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 
 /**
@@ -18,6 +37,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
  */
 abstract class ModifySmallGroupSetCommand(val module: Module)
 	extends PromisingCommand[SmallGroupSet]
+		with SmallGroupSetProperties
 		with UpdatesStudentMembership
 		with SelfValidating 
 		with BindListener {
@@ -30,10 +50,6 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 	val setOption : Option[SmallGroupSet]
 
 	var name: String = _
-	
-	var format: SmallGroupFormat = _
-	
-	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
 	
 	// start complicated membership stuff
 
@@ -57,7 +73,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		
 	// A collection of sub-commands for modifying the child groups
 	var groups: JList[ModifySmallGroupCommand] = LazyLists.withFactory { () => 
-		new CreateSmallGroupCommand(this, module)
+		new CreateSmallGroupCommand(this, module, this)
 	}
 	
 	def validate(errors: Errors) {
@@ -84,9 +100,15 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 			group.smallGroupSet = set // only required for a new assignment
 		}
 		assessmentGroups = set.assessmentGroups
+		allowSelfGroupSwitching = set.allowSelfGroupSwitching
+		studentsCanSeeTutorName = set.studentsCanSeeTutorName
+	  studentsCanSeeOtherMembers = set.studentsCanSeeOtherMembers
+		defaultMaxGroupSizeEnabled = set.defaultMaxGroupSizeEnabled
+		defaultMaxGroupSize = set.defaultMaxGroupSize
+
 		
 		groups.clear()
-		groups.addAll(set.groups.asScala.map(new EditSmallGroupCommand(_)).asJava)
+		groups.addAll(set.groups.asScala.map(x => {new EditSmallGroupCommand(x, this)}).asJava)
 		
 		if (set.members != null) members.copyFrom(set.members)
 	}
@@ -98,6 +120,14 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		set.allocationMethod = allocationMethod
 
 		set.assessmentGroups = assessmentGroups
+		
+		set.allowSelfGroupSwitching = allowSelfGroupSwitching
+		set.studentsCanSeeOtherMembers = studentsCanSeeOtherMembers
+		set.studentsCanSeeTutorName = studentsCanSeeTutorName
+		set.defaultMaxGroupSizeEnabled = defaultMaxGroupSizeEnabled
+		set.defaultMaxGroupSize = defaultMaxGroupSize
+
+		// TODO AssessmentGroupItems
 		
 		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
 		set.groups.clear()
@@ -124,4 +154,21 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 
 	}
 
+}
+
+
+trait SmallGroupSetProperties {
+	var name: String = _
+
+	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
+
+	var format: SmallGroupFormat = _
+
+	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
+
+	var allowSelfGroupSwitching: Boolean = true
+	var studentsCanSeeTutorName:Boolean = false
+	var studentsCanSeeOtherMembers:Boolean = false
+	var defaultMaxGroupSizeEnabled:Boolean = false
+	var defaultMaxGroupSize:Int = SmallGroup.DefaultGroupSize
 }

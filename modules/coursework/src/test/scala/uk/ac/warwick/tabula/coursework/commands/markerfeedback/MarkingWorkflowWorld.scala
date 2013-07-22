@@ -1,12 +1,14 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model._
 import java.util.HashMap
-import uk.ac.warwick.tabula.AppContextTestBase
+
+import collection.JavaConversions._
+
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.TestFixtures
 
 // reusable environment for marking workflow tests
-trait MarkingWorkflowWorld extends AppContextTestBase{
+trait MarkingWorkflowWorld extends TestFixtures {
 
 	val assignment = newDeepAssignment(moduleCode = "IN101")
 	generateSubmission(assignment, "9876004", "cusxad")

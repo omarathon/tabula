@@ -10,7 +10,7 @@ import javax.persistence.Entity
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.SprCode
+import uk.ac.warwick.tabula.{ToString, SprCode}
 import org.springframework.dao.DataRetrievalFailureException
 import uk.ac.warwick.tabula.roles.Supervisor
 
@@ -70,12 +70,11 @@ class StudentRelationship extends GeneratedId {
 
 	def agentLastName = agentMember.map( _.lastName ).getOrElse(agent) // can't reliably extract a last name from agent string
 
-	def studentMember = profileService.getStudentBySprCode(targetSprCode) match {
-		case None => throw new DataRetrievalFailureException("No matching Member for SprCode, " + targetSprCode)
-		case Some(student) => student
-	}
+	def studentMember = profileService.getStudentBySprCode(targetSprCode) 
 
 	def studentId = SprCode.getUniversityId(targetSprCode)
+
+	override def toString = super.toString + ToString.forProps("agent" -> agent, "relationshipType" -> relationshipType, "student" -> targetSprCode)
 }
 
 object StudentRelationship {
@@ -112,6 +111,7 @@ object RelationshipType {
 
 	def fromCode(code: String) = code match {
 	  	case PersonalTutor.dbValue => PersonalTutor
+			case "tutor"=>PersonalTutor // match the term used in URLs
 	  	case Supervisor.dbValue => Supervisor
 	  	case null => null
 	  	case _ => throw new IllegalArgumentException()

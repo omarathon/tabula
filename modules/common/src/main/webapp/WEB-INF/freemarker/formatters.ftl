@@ -1,4 +1,4 @@
-<#compress>
+<#ftl strip_text=true />
 <#escape x as x?html>
 
 <#macro module_name module>
@@ -101,12 +101,12 @@
 --></#if></#macro>
 
 <#--	Macro for handling singleton & multiple attachments using a common filepath root
-		
+
 		attachments: either a FileAttachment, or Seq[FileAttachment] please
 		page: the URL 'folder' path, for passing to a <@url> macro
 		context: string to append to the 'download files' message
 		zipFilename: filename (excluding extension) to use for zip downloads
-		
+
 		In the controller, ensure that there are @RequestMappings for the specified 'page', with suffixes of
 		/attachment/{filename} for individual files, and
 		/attachments/{zipfile}.zip (note trailing 's') for collated files
@@ -124,7 +124,7 @@
 		<#-- take the first and continue as above -->
 		<#assign attachment = attachments?first />
 	</#if>
-	
+
 	<#if attachment??>
 		<#assign title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#assign>
 		<div class="attachment">
@@ -136,7 +136,7 @@
 				<#assign title>Download a zip file of attachments<#if context?has_content> ${context}</#if></#assign>
 				<@download_link filePath="${page}attachments/${zipFilename}.zip" mimeType="application/zip" title="${title}" text="Download files as zip" />
 			</summary>
-			
+
 			<#list attachments as attachment>
 				<#assign title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#assign>
 				<div class="attachment">
@@ -164,6 +164,18 @@
 	${role_definition.description?lower_case}
 </#compress></#macro>
 
+<#macro course_description_for_heading studentCourseDetails>
+		${(studentCourseDetails.course.name)!} (${(studentCourseDetails.course.code?upper_case)!})
+</#macro>
+
+<#macro course_description studentCourseDetails>
+	<#if (studentCourseDetails.route.name) != (studentCourseDetails.course.name)>
+		${(studentCourseDetails.course.name)!} (${(studentCourseDetails.course.code?upper_case)!})
+	<#else>
+		${(studentCourseDetails.course.code?upper_case)!}
+	</#if>
+</#macro>
+
 <#macro lightbox_link enabled url>
 	<#if enabled>
 		<a href="${url}" rel="lightbox"><#nested /></a>
@@ -172,10 +184,9 @@
 	</#if>
 </#macro>
 
-
 <#macro member_photo member resize="thumbnail" lightbox=true >
 	<div class="photo size-${resize}">
-		<#if member.universityId??>
+		<#if (member.universityId)??>
 			<#local fullsize_img><@routes.photo member /></#local>
 			<@lightbox_link lightbox fullsize_img>
 			<img src="<@routes.photo member />?size=${resize}"/>
@@ -186,11 +197,9 @@
 	</div>
 </#macro>
 
-
-
 <#macro relation_photo member relationship resize="thumbnail" lightbox=true >
 	<div class="photo size-${resize}">
-		<#if member.universityId??>
+		<#if (member.universityId)??>
 			<#local fullsize_img><@routes.relationshipPhoto profile relationship /></#local>
 			<@lightbox_link lightbox fullsize_img>
 			<img src="<@routes.relationshipPhoto profile relationship />?size=${resize}" />
@@ -201,7 +210,27 @@
 	</div>
 </#macro>
 
-
+<#macro permission_button permission scope action_descr href="" tooltip="" classes="" type="a" data_attr="data-container=body" >
+	<#local class></#local>
+	<#local title></#local>
+	
+	<#if tooltip?has_content>
+		<#local title>title='${tooltip}.'</#local>
+		<#local classes='${classes} use-tooltip'?trim >
+	</#if>
+	
+    <#if href??><#local href>href=${href}</#local></#if>
+    
+	<#if !can.do(permission,scope)>
+		<#local classes='${classes} disabled use-tooltip'?trim > 
+		<#local title>title='You do not have permission to ${action_descr}.'</#local>
+	</#if>
+	
+	<#local attr='${data_attr}'?replace("data-toggle=modal","") >
+	
+	<#if classes??><#local class>class='${classes}'</#local></#if>
+	<${type} ${href} ${class} ${title} ${attr}><#noescape><#nested></#noescape></${type}>
+</#macro>
 
 </#escape>
-</#compress>
+

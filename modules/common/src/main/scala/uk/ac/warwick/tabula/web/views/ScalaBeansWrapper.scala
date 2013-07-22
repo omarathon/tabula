@@ -62,7 +62,10 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 		}
 	}
 	// scalastyle:on
-	
+
+	// whether or not to cache results of get() methods for the life of this wrapper.
+	var useWrapperCache = true
+
 	private def isScalaCompiled(obj: Any) = Option(obj) match {
 		case Some(obj) if (!obj.getClass.isArray) => obj.getClass.getPackage.getName.startsWith("uk.ac.warwick.tabula")
 		case _ => false
@@ -131,7 +134,20 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 		// Cache child properties for the life of this model, so that their caches are useful when a property is accessed twice.
 		// Not the same as TAB-469, which would cache for longer than the life of a request, causing memory leaks. This cache
 		// will use a bit more memory but it won't leak outside of a request.
-		var cachedResults = mutable.HashMap[String, TemplateModel]()
+		val cachedResults = new ResultsCache
+
+		class ResultsCache {
+
+			def getOrElseUpdate(key: String, updater: => TemplateModel): TemplateModel = {
+				if (useWrapperCache) {
+					cache.getOrElseUpdate(key, updater)
+				} else {
+					updater
+				}
+			}
+			var cache = mutable.HashMap[String, TemplateModel]()
+			def clear() = cache.clear()
+		}
 
 		def user = RequestInfo.fromThread.get.user
 
@@ -146,17 +162,20 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 		}
 		
 		override def get(key: String): TemplateModel = {
-			val x = key
-			cachedResults.getOrElseUpdate(key, 
-				getters.get(key) match {
+			cachedResults.getOrElseUpdate(key,{
+				val gtr= getters.get(key)
+				gtr match {
 					case Some((getter, permissions)) => 
-						if (canDo(permissions(sobj))) wrapper.wrap(getter.invoke(sobj))
+						if (canDo(permissions(sobj))) {
+							val res = getter.invoke(sobj)
+							wrapper.wrap(res)
+						}
 						else null
 					case None => checkInnerClasses(key) match {
 						case Some(method) => method
 						case None => super.get(key)
 					}
-				}
+				}}
 			)
 		}
 	

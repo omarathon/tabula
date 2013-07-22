@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 		Mav("home/view",
 			"ownedDepartments" -> ownedDepartments,
 			"ownedModuleDepartments" -> ownedModules.map { _.department },
-			"taughtGroups" -> Nil //taughtGroups
+			"taughtGroups" -> taughtGroups
 		)
 	}
 	

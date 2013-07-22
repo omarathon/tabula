@@ -9,14 +9,12 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.MeetingRecordDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
-import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.system.BindListener
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.FileDao
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.Features
-import scala.Some
 
 abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship)
 	extends Command[MeetingRecord] with Notifies[MeetingRecord] with SelfValidating with FormattedHtml
@@ -38,7 +36,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 	var posted: Boolean = false
 
-  PermissionCheck(MeetingPermissions.Create.permissionFor(relationship.relationshipType), relationship.studentMember)
+	PermissionCheck(MeetingPermissions.Create.permissionFor(relationship.relationshipType), mandatory(relationship.studentMember))
 
 	val meeting: MeetingRecord
 
@@ -95,7 +93,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 			meetingRecordApproval
 		}
 
-		val approver = Seq(relationship.agentMember, Some(relationship.studentMember)).flatten.find(_ != creator)
+		val approver = Seq(relationship.agentMember, relationship.studentMember).flatten.find(_ != creator)
 		approver.map(getMeetingRecord(_))
 
 	}

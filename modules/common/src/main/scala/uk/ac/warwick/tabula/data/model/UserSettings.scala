@@ -10,7 +10,8 @@ import org.apache.commons.codec.digest.DigestUtils
 @Entity
 class UserSettings extends GeneratedId with SettingsMap[UserSettings] with PermissionsTarget {
 	import UserSettings._
-	
+
+	@Column(unique = true)
 	var userId: String = _
 	
 	def alertsSubmission = getStringSetting(Settings.AlertsSubmission).orNull

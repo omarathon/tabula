@@ -37,34 +37,87 @@
 
 	<#if features.smallGroupTeachingStudentSignUp || features.smallGroupTeachingRandomAllocation>
 		<@form.labelled_row "allocationMethod" "Allocation method">
-			<@form.label checkbox=true>
+			<label class="radio">
 				<@f.radiobutton path="allocationMethod" value="Manual" />
-				Manually allocate students to groups
+				Manual allocation
 				<a class="use-popover" data-html="true"
-			     data-content="No automatic allocation will occur; students must all be manually allocated to groups by administrators">
+			     data-content="Allocate students by drag and drop or spreadsheet upload">
 			   	<i class="icon-question-sign"></i>
 			  </a>
-			</@form.label>
+			</label>
 			<#if features.smallGroupTeachingStudentSignUp>
-				<@form.label checkbox=true>
-					<@f.radiobutton path="allocationMethod" value="StudentSignUp" />
-					Allow students to sign up for groups
+				<label class="radio">
+					<@f.radiobutton path="allocationMethod" value="StudentSignUp" radioactive=".canBeDisabled" />
+					Self sign-up
 					<a class="use-popover" data-html="true"
-				     data-content="Students are allowed to sign up for groups while registration is open. Administrators can still assign students to groups">
+				     data-content="Allow students to sign up for groups (you can edit group allocation later)">
 				   	<i class="icon-question-sign"></i>
 				  </a>
-				</@form.label>
+				</label>
 			</#if>
 			<#if features.smallGroupTeachingRandomAllocation>
-				<@form.label checkbox=true>
+				<label class="radio">
 					<@f.radiobutton path="allocationMethod" value="Random" />
 					Randomly allocate students to groups
 					<a class="use-popover" data-html="true"
 				     data-content="Students in the allocation list are randomly assigned to groups. Administrators can still assign students to groups. There may be a delay between students being added to the allocation list and being allocated to a group.">
 				   	<i class="icon-question-sign"></i>
 				  </a>
-				</@form.label>
+				</label>
 			</#if>
+		</@form.labelled_row>
+	</#if>
+
+	<#if features.smallGroupTeachingStudentSignUp>
+			<@form.row defaultClass="">
+    			<@form.field>
+    				<@form.label checkbox=true>
+    					<@f.checkbox path="studentsCanSeeTutorName" id="studentsCanSeeTutorName" />
+    						Students can see tutor name
+    						<a class="use-popover" data-html="true"
+    										 data-content="Students can see tutor names when deciding which group to sign up for">
+    										<i class="icon-question-sign"></i>
+    						</a>
+    				</@form.label>
+    				<@f.errors path="studentsCanSeeTutorName" cssClass="error" />
+    			</@form.field>
+    	    </@form.row>
+	</#if>
+	<#if features.smallGroupTeachingStudentSignUp>
+			<@form.row defaultClass="">
+    			<@form.field>
+    				<@form.label checkbox=true>
+    					<@f.checkbox path="studentsCanSeeOtherMembers" id="studentsCanSeeOtherMembers" />
+    						Students can see student names
+    						<a class="use-popover" data-html="true"
+    										 data-content="Students can see the names of any other students in the group when deciding which group to sign up for">
+    										<i class="icon-question-sign"></i>
+    						</a>
+    				</@form.label>
+    				<@f.errors path="studentsCanSeeOtherMembers" cssClass="error" />
+    			</@form.field>
+    	    </@form.row>
+	</#if>
+
+
+	<#if features.smallGroupTeachingSelfGroupSwitching>
+	
+		<#assign isStudentSignup=form.getvalue('allocationMethod') />
+		<#if isStudentSignup != 'StudentSignUp'>
+			<#assign disable_label="disabled" />
+			<#assign disable_prop="true" />
+		<#else>
+			<#assign disable_prop="false" />
+		</#if>
+		
+		<@form.labelled_row "allowSelfGroupSwitching" "Allow students to switch groups" "canBeDisabled" "" "" "${disable_label}" >
+			<@form.label checkbox=true >
+				<@f.checkbox path="allowSelfGroupSwitching" value="true" disabled=disable_prop />
+				<a class="use-popover" data-html="true"
+					data-content="When self sign up is enabled students will be able to switch groups.">
+						<i class="icon-question-sign"></i>
+			  	</a>
+			</@form.label>
 		</@form.labelled_row>
 	</#if>
 
@@ -118,7 +171,26 @@
 			(and <@fmt.p deletedGroupCount "group" "groups" /> marked for deletion)
 		</#if>
 	</p>
-	
+
+	<@form.row defaultClass="maxGroupSize groupDetail">
+		<@form.field>
+			<@form.label checkbox=true>
+				<@f.checkbox path="defaultMaxGroupSizeEnabled" id="defaultMaxGroupSizeEnabled" />
+				Set maximum group size:
+			</@form.label>
+
+			<#assign disabled = !(set.defaultMaxGroupSizeEnabled!true)>
+
+			<@f.input path="defaultMaxGroupSize" type="number" min="0" max="100" cssClass="input-small" disabled="${disabled?string}" />
+
+			<a class="use-popover" data-html="true"
+			   data-content="This is the default maximum size for any new groups you create.  You can adjust the maximum size of individual groups">
+				<i class="icon-question-sign"></i>
+			</a>
+			<@f.errors path="defaultMaxGroupSize" cssClass="error" />
+		</@form.field>
+	</@form.row>
+
 	<#include "_groups_modal.ftl" />
 	
 	<div class="striped-section<#if groups?size gt 0> collapsible expanded</#if>">
@@ -139,7 +211,16 @@
 </fieldset>
 
 <script type="text/javascript">
+
 	jQuery(function($) {
+
+		$("input:radio[name='allocationMethod']").tabulaRadioActive();
+
+		$('#defaultMaxGroupSizeEnabled').click(function() {
+			if ($('#defaultMaxGroupSize').prop('disabled')) $('#defaultMaxGroupSize').removeAttr('disabled');
+			else $('#defaultMaxGroupSize').attr('disabled', 'disabled');
+		});
+
 		<#-- controller detects action=refresh and does a bind without submit -->
 		$('.modal.refresh-form').on('hide', function(e) {
 			// Ignore events that are something ELSE hiding and being propagated up!

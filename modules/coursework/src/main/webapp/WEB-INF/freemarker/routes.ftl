@@ -1,3 +1,4 @@
+<#ftl strip_text=true />
 <#--
 Just a handy place to create macros for generating URLs to various places, to save time
 if we end up changing any of them. 
@@ -5,7 +6,7 @@ if we end up changing any of them.
 TODO grab values from the Routes object in code, as that's pretty equivalent and 
 	we're repeating ourselves here. OR expose Routes directly.
 
---><#compress>
+-->
 <#macro home><@url page="/" /></#macro>
 <#macro departmenthome department><@url page="/admin/department/${department.code}/" /></#macro>
 <#macro depthome module><@url page="/admin/department/${module.department.code}/#module-${module.code}" /></#macro>
@@ -62,4 +63,3 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro extensionRequest assignment><@url page="/module/${assignment.module.code}/${assignment.id}/extension"/></#macro>
 <#macro assignmentreceipt assignment><@url page="/module/${assignment.module.code}/${assignment.id}/resend-receipt"/></#macro>
 <#macro assignmentrequestaccess assignment><@url page="/module/${assignment.module.code}/${assignment.id}/request-access"/></#macro>
-</#compress>

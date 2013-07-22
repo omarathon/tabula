@@ -1,3 +1,4 @@
+<#ftl strip_text=true />
 <#compress><#-- Included into every Freemarker template. -->
 <#if JspTaglibs??>
 	<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>

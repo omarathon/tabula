@@ -1,15 +1,15 @@
 <#escape x as x?html>
 
 	<#assign commandName="command" />
-	<#assign formDestination><@routes.tutor_upload department /></#assign> 
-		
+	<#assign formDestination><@routes.tutor_upload department /></#assign>
+
 	<@spring.bind path=commandName>
 		<#assign hasErrors=status.errors.allErrors?size gt 0 />
 	</@spring.bind>
-	
-	<@f.form method="post" action=formDestination commandName=commandName>	
+
+	<@f.form method="post" action=formDestination commandName=commandName>
 		<h1>Preview personal tutor changes for ${department.name}</h1>
-		
+
 		<@spring.bind path="rawStudentRelationships">
 			<#assign itemList = status.actualValue />
 			<#if itemList?size gt 0>
@@ -24,7 +24,7 @@
 					<p>You are setting tutors for the <@fmt.p itemList?size "a tutor" "tutors" 1 0 false /> for the <b><@fmt.p itemList?size "student" /></b>
 					listed below.
 				</#if>
-				
+
 				<div class="submit-buttons">
 					<input type="hidden" name="confirm" value="true">
 					<input class="btn btn-primary" type="submit" value="Confirm">
@@ -47,30 +47,30 @@
 							<@f.hidden path="agentUniversityId" />
 							<@f.hidden path="agentName" />
 							<@f.hidden path="valid" />
-							
+
 							<#if !item.valid>
 								<tr class="error">
 							<#else>
 								<tr class="success">
 							</#if>
 								<td>
-									${item.targetUniversityId}
+									${(item.targetUniversityId)!}
 								</td>
 								<td>
 									<#if item.targetMember?has_content>
-										${item.targetMember.fullName}
+										${(item.targetMember.fullName)!}
 									</#if>
 								</td>
 								<td>
 									<#if item.agentUniversityId?has_content>
-										${item.agentUniversityId}
+										${(item.agentUniversityId)!}
 									</#if>
 								</td>
 								<td>
 									<#if item.agentMember?has_content>
-										${item.agentMember.fullName}
+										${(item.agentMember.fullName)!}
 									<#elseif item.agentName?has_content>
-										${item.agentName} (no ID - assumed external)
+										${(item.agentName)!} (no ID - assumed external)
 									</#if>
 								</td>
 							</tr>
@@ -89,7 +89,7 @@
 						<li>Check that there are data rows with valid student IDs, and either tutor IDs or names for each.</li>
 					</ul>
 				</div>
-				
+
 				<div class="submit-buttons">
 					<a class="btn" href="<@routes.home />">Cancel</a>
 				</div>

@@ -26,9 +26,9 @@
 
 <article class="profile">
 	<section id="personal-details" class="clearfix">
-		
+
 		<@fmt.member_photo profile />
-		
+
 
 		<header>
 			<h1><@fmt.profile_name profile /></h1>
@@ -157,22 +157,67 @@
 		</#if>
 	</section>
 
-	<#if profile.student>
+	<#if (profile.studentCourseDetails)?? && (profile.mostSignificantCourseDetails)??>
+
+		<!-- most significant course first -->
+		<#assign studentCourseDetails=profile.mostSignificantCourseDetails>
+
+		<#if profile.studentCourseDetails?size gt 1>
+			<hr>
+			<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
+		</#if>
+
 		<div class="tabbable">
 			<ol class="panes">
 				<li id="course-pane">
 					<#include "_course_details.ftl" />
 				</li>
 
-				<li id="supervision-pane">
-					<#include "_supervision.ftl" />
-				</li>
+				<#if profile.hasAPersonalTutor || studentCourseDetails.courseType.code != "PG(R)">
+					<li id="pd-pane">
+						<#include "_personal_development.ftl" />
+					</li>
+				</#if>
 
-				<li id="pd-pane">
-					<#include "_personal_development.ftl" />
-				</li>
+				<#if profile.hasSupervisor || studentCourseDetails.courseType.code == "PG(R)">
+					<li id="supervision-pane">
+						<#include "_supervision.ftl" />
+					</li>
+				</#if>
+
 			</ol>
+			
+			<div id="modal" class="modal hide fade" style="display:none;"></div>
+
+				<div id="modal-change-tutor" class="modal hide fade"></div>
+		
+				<script type="text/javascript">
+				jQuery(function($){
+					// load edit personal tutor
+					$("#personal-development, #supervision").on("click", ".edit-tutor-link, .add-tutor-link", function(e) {
+						e.preventDefault();
+						var url = $(this).attr('href');
+						$("#modal-change-tutor").load(url,function(){
+							$("#modal-change-tutor").modal('show');
+						});
+					});
+				});
+				</script>
 		</div>
+
+
+		<!-- and then the others -->
+		<#list profile.studentCourseDetails as studentCourseDetails>
+			<#if studentCourseDetails.scjCode != profile.mostSignificantCourseDetails.scjCode>
+				<#if profile.studentCourseDetails?size gt 1>
+					<hr>
+					<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
+				</#if>
+
+				<#include "_course_details.ftl" />
+
+			</#if>
+		</#list>
 	</#if>
 </article>
 

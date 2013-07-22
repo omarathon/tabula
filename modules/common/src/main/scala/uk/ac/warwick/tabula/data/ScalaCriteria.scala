@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data
 import org.hibernate.criterion._
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
+import org.hibernate.transform.DistinctRootEntityResultTransformer
 
 /**
  * Nice wrapper for a Criteria object. You usually won't create
@@ -17,6 +18,7 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 	def setFirstResult(i: Int) = chainable { c.setFirstResult(i) }
 	def createAlias(property: String, alias: String) = chainable { c.createAlias(property, alias) }
 	def setProjection(projection: Projection) = chainable { c.setProjection(projection) }
+	def distinct = chainable { c.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE) }
 
 	// Helper to neaten up the above chainable methods - returns this instead of plain Criteria
 	@inline private def chainable(fn: => Unit) = { fn; this }

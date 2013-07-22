@@ -6,7 +6,59 @@
  * "data-popup-target" attribute can be a CSS selector for a parent
  * element for the popup to point at.
  */
-jQuery(function($){ "use strict";
+jQuery(function ($) { "use strict";
+
+/**
+ * Variant of ajax-popup that uses a modal instead.
+ *
+ * If the modal HTML is missing a modal-body, it's assumed that the AJAX
+ * response will contain the header, body and footer, and will load all that
+ * in. Otherwise it will insert it into the modal-body as normal.
+ *
+ * HEY: Currently only handles static responses, doesn't catch forms
+ * and redecorate their responses. But it should be made to do that
+ * eventually.
+ */
+jQuery.fn.ajaxModalLink = function(options) {
+	this.click(function(e){
+		e.preventDefault();
+		var options = options || {},
+		    link = this,
+		    $link = $(link),
+		    $modalElement = $($link.data('target')) || options.target,
+		    href = options.href || $link.attr('href'),
+		    $modalBody = $modalElement.find('.modal-body'),
+		    wholeContent = $modalBody.length === 0;
+
+		if (wholeContent) {
+			// HTML has no modal-body. bootstrap.js doesn't directly support this,
+			// so let's manually shove it in.
+			$modalElement.html('<div class="modal-header"><h3>Loading&hellip;</h3></div>');
+			$modalElement.modal({ remote: null });
+			$modalElement.load(href);
+		} else {
+			$modalElement.find('.modal-body').html("<p>Loading&hellip;</p>");
+			$modalElement.modal({
+				remote: href
+			});
+		}
+
+		// Forget about modal on hide, otherwise it'll only load once.
+		$modalElement.on('hidden', function() {
+			if (wholeContent) {
+				// There was no modal-body when we first started, so revert back to
+				// this situation to allow the init code to work next time.
+				$modalElement.html("");
+			}
+			$modalElement.removeData('modal');
+		});
+
+		return false;
+	});
+};
+$('a.ajax-modal').ajaxModalLink();
+// end AJAX modal
+
 
 var ajaxPopup = new WPopupBox();
 
@@ -18,7 +70,7 @@ $('a.ajax-popup').click(function(e){
         height = 300,
         pointAt = link;
 
-    if ($link.data('popup-target') != null) {
+    if ($link.data('popup-target') !== null) {
         pointAt = $link.closest($link.data('popup-target'));
     }
 
@@ -35,10 +87,10 @@ $('a.ajax-popup').click(function(e){
         $root.find('input[type=submit]').click(function(e){
             e.preventDefault();
             var $form = $(this).closest('form');
-            
+
             // added ZLJ Aug 10th to make a unique URL which IE8 will load
             var $randomNumber = Math.floor(Math.random() * 10000000);
-            
+
             // this line doesn't work in IE8 (IE8 bug) - need to make the URL
             // unique using generated random number
             //jQuery.post($form.attr('action'), $form.serialize(), function(data){

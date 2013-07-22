@@ -1,21 +1,15 @@
 package uk.ac.warwick.tabula.data
 
 import org.hibernate.SessionFactory
-import scala.reflect.Manifest
-import org.springframework.beans.factory.annotation.Autowired
-import scala.annotation.target.field
 import javax.sql.DataSource
 import org.hibernate.Session
 import uk.ac.warwick.tabula.data.model.CanBeDeleted
-import javax.annotation.Resource
-import org.springframework.transaction.support.TransactionTemplate
-import org.springframework.transaction.TransactionStatus
-import org.springframework.transaction.support.TransactionCallback
-import org.springframework.transaction.PlatformTransactionManager
 import uk.ac.warwick.spring.Wire
 import language.implicitConversions
 import scala.reflect._
-trait HasSession{
+
+/** Trait for self-type annotation, declaring availability of a Session. */
+trait SessionComponent{
   protected def session:Session
 }
 /**
@@ -26,10 +20,7 @@ trait HasSession{
  * session factory. If you want to do JDBC stuff or use a
  * different data source you'll need to look elsewhere.
  */
-trait Daoisms extends HasSession {
-	import uk.ac.warwick.tabula.data.Transactions._
-
-	import org.hibernate.criterion.Restrictions._
+trait Daoisms extends SessionComponent {
 	def is = org.hibernate.criterion.Restrictions.eq _
 
 	var dataSource = Wire[DataSource]("dataSource")
