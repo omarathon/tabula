@@ -21,7 +21,7 @@ class SmallGroupSetTest extends TestBase with Mockito{
     source.id = "testId"
     source.academicYear = AcademicYear(2001)
     source.allocationMethod = SmallGroupAllocationMethod.Manual
-    source.allowSelfGroupSwitching = true
+    source.allowSelfGroupSwitching = false
     source.archived = true
     source.assessmentGroups =  JArrayList()
     source.format = SmallGroupFormat.Lab
@@ -33,6 +33,7 @@ class SmallGroupSetTest extends TestBase with Mockito{
     source.permissionsService = mock[PermissionsService]
     source.releasedToStudents = true
     source.releasedToTutors = true
+    source.defaultMaxGroupSize = 22
     val cloneModule = new Module
     val assessmentGroups:JList[UpstreamAssessmentGroup] = JArrayList()
 
@@ -42,7 +43,7 @@ class SmallGroupSetTest extends TestBase with Mockito{
     clone.id should be(source.id)
     clone.academicYear should be (source.academicYear)
     clone.allocationMethod should be (source.allocationMethod)
-    clone.allowSelfGroupSwitching.booleanValue should be (true)
+    clone.allowSelfGroupSwitching.booleanValue should be (false)
     clone.allowSelfGroupSwitching.booleanValue should be (source.allowSelfGroupSwitching.booleanValue)
     clone.archived should be(source.archived)
     clone.assessmentGroups should be(assessmentGroups)
@@ -55,16 +56,22 @@ class SmallGroupSetTest extends TestBase with Mockito{
     clone.permissionsService should be(source.permissionsService)
     clone.releasedToStudents should be(source.releasedToStudents)
     clone.releasedToTutors should be (source.releasedToTutors)
+    clone.defaultMaxGroupSize should be (source.defaultMaxGroupSize)
+    clone.defaultMaxGroupSizeEnabled should be (source.defaultMaxGroupSizeEnabled)
   }
 
 	@Test
 	def duplicateCreatesNewSettingsMap(){
 		val source = new SmallGroupSet
 		source.studentsCanSeeOtherMembers = true
+		source.defaultMaxGroupSize = 3
 		val clone = source.duplicateTo(source.module)
 		clone.studentsCanSeeOtherMembers should be (true)
+		clone.defaultMaxGroupSize should be (3)
 		source.studentsCanSeeOtherMembers = false
+		source.defaultMaxGroupSize = 5
 		clone.studentsCanSeeOtherMembers should be (true)
+		clone.defaultMaxGroupSize should be (3)
 	}
 
 	@Test
@@ -83,6 +90,21 @@ class SmallGroupSetTest extends TestBase with Mockito{
 		set.studentsCanSeeOtherMembers should be (true)
 	}
 
+	@Test
+	def canGetAndSetDefaultMaxSize(){
+		val set = new SmallGroupSet()
+		set.defaultMaxGroupSize should be (SmallGroup.DefaultGroupSize)
+		set.defaultMaxGroupSize  = 7
+		set.defaultMaxGroupSize should be (7)
+	}
+
+	@Test
+	def canGetAndSetDefaultMaxSizeEnabled(){
+		val set = new SmallGroupSet()
+		set.defaultMaxGroupSizeEnabled should be (false)
+		set.defaultMaxGroupSizeEnabled  = true
+		set.defaultMaxGroupSizeEnabled should be (true)
+	}
 
 	@Test
 	def allowSelfGroupSwitchingDefaultsToTrue(){

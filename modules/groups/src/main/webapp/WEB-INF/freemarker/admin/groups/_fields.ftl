@@ -171,7 +171,26 @@
 			(and <@fmt.p deletedGroupCount "group" "groups" /> marked for deletion)
 		</#if>
 	</p>
-	
+
+	<@form.row defaultClass="maxGroupSize groupDetail">
+		<@form.field>
+			<@form.label checkbox=true>
+				<@f.checkbox path="defaultMaxGroupSizeEnabled" id="defaultMaxGroupSizeEnabled" />
+				Set maximum group size:
+			</@form.label>
+
+			<#assign disabled = !(set.defaultMaxGroupSizeEnabled!true)>
+
+			<@f.input path="defaultMaxGroupSize" type="number" min="0" max="100" cssClass="input-small" disabled="${disabled?string}" />
+
+			<a class="use-popover" data-html="true"
+			   data-content="This is the default maximum size for any new groups you create.  You can adjust the maximum size of individual groups">
+				<i class="icon-question-sign"></i>
+			</a>
+			<@f.errors path="defaultMaxGroupSize" cssClass="error" />
+		</@form.field>
+	</@form.row>
+
 	<#include "_groups_modal.ftl" />
 	
 	<div class="striped-section<#if groups?size gt 0> collapsible expanded</#if>">
@@ -193,12 +212,15 @@
 
 <script type="text/javascript">
 
-
 	jQuery(function($) {
-		
-	$("input:radio[name='allocationMethod']").tabulaRadioActive();
-	
-	
+
+		$("input:radio[name='allocationMethod']").tabulaRadioActive();
+
+		$('#defaultMaxGroupSizeEnabled').click(function() {
+			if ($('#defaultMaxGroupSize').prop('disabled')) $('#defaultMaxGroupSize').removeAttr('disabled');
+			else $('#defaultMaxGroupSize').attr('disabled', 'disabled');
+		});
+
 		<#-- controller detects action=refresh and does a bind without submit -->
 		$('.modal.refresh-form').on('hide', function(e) {
 			// Ignore events that are something ELSE hiding and being propagated up!

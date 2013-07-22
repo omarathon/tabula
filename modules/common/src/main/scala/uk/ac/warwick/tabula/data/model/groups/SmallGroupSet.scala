@@ -24,6 +24,8 @@ object SmallGroupSet {
 	object Settings {
 		val StudentsCanSeeTutorNames = "StudentsCanSeeTutorNames"
 		val StudentsCanSeeOtherMembers = "StudentsCanSeeOtherMembers"
+		val DefaultMaxGroupSizeEnabled = "DefaultMaxGroupSizeEnabled"
+		val DefaultMaxGroupSize = "DefaultMaxGroupSize"
 	}
 }
 
@@ -36,6 +38,7 @@ object SmallGroupSet {
 @AccessType("field")
 class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings with PostLoadBehaviour  {
 	import SmallGroupSet.Settings
+	import SmallGroup._
 
 	@transient var permissionsService = Wire[PermissionsService]
 	@transient var membershipService = Wire[AssignmentMembershipService]
@@ -116,7 +119,11 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	def studentsCanSeeOtherMembers = getBooleanSetting(Settings.StudentsCanSeeOtherMembers).getOrElse(false)
 	def studentsCanSeeOtherMembers_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeOtherMembers -> canSee)
 
+	def defaultMaxGroupSizeEnabled = getBooleanSetting(Settings.DefaultMaxGroupSizeEnabled).getOrElse(false)
+	def defaultMaxGroupSizeEnabled_=(isEnabled:Boolean) = settings += (Settings.DefaultMaxGroupSizeEnabled -> isEnabled)
 
+	def defaultMaxGroupSize = getIntSetting(Settings.DefaultMaxGroupSize).getOrElse(DefaultGroupSize)
+	def defaultMaxGroupSize_=(defaultSize:Int) = settings += (Settings.DefaultMaxGroupSize -> defaultSize)
 
 
 	def toStringProps = Seq(
