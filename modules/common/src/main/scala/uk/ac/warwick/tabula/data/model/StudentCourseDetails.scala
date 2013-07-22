@@ -41,7 +41,7 @@ class StudentCourseDetails
 	var student: StudentMember = _
 
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@Restricted(Array("Profiles.Read.StudentCourseDetails"))
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	val studentCourseYearDetails: JList[StudentCourseYearDetails] = JArrayList()
 
 	def toStringProps = Seq(
@@ -70,6 +70,7 @@ class StudentCourseDetails
 		statusString
 	}
 
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def latestStudentCourseYearDetails: StudentCourseYearDetails = {
 		studentCourseYearDetails.asScala.max
 	}
@@ -105,10 +106,12 @@ trait StudentCourseProperties {
 
 	@ManyToOne
 	@JoinColumn(name = "courseCode", referencedColumnName="code")
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var course: Course = _
 
 	@ManyToOne
 	@JoinColumn(name = "routeCode", referencedColumnName="code")
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var route: Route = _
 
 	// this is the department from the SPR table in SITS (Student Programme Route).  It is likely to be the
@@ -118,27 +121,36 @@ trait StudentCourseProperties {
 	@JoinColumn(name = "department_id")
 	var department: Department = _
 
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var awardCode: String = _
+	
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var levelCode: String = _
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var beginDate: LocalDate = _
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var endDate: LocalDate = _
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var expectedEndDate: LocalDate = _
 
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var courseYearLength: String = _
 
 	@ManyToOne
 	@JoinColumn(name="sprStatusCode")
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var sprStatus: SitsStatus = _
 
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var lastUpdatedDate = DateTime.now
 
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var mostSignificant: JBoolean = _
 }
 

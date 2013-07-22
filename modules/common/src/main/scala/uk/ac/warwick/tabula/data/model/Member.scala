@@ -181,7 +181,7 @@ class StudentMember extends Member with StudentProperties {
 	this.userType = MemberUserType.Student
 
 	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@Restricted(Array("Profiles.Read.StudentCourseDetails"))
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
 
 	def this(id: String) = {
