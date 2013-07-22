@@ -17,12 +17,12 @@ class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:W
 		findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == moduleCode.toUpperCase).next().underlying
 	}
 
-	def isCurrentPage():Boolean =  {
+	def isCurrentPage(): Boolean =  {
 		currentUrl should include ("/groups/admin/department/" + departmentCode)
 		find(cssSelector("h1")).get.text == ("Tabula » Small Group Teaching")
 	}
 
-	def getGroupsetInfo(moduleCode: String, groupsetName: String) ={
+	def getGroupsetInfo(moduleCode: String, groupsetName: String) = {
 		new GroupSetInfoSummarySection(
 			getModuleInfo(moduleCode).  findElements(By.className("item-info")).asScala.filter(_.findElement(By.className("name")).getText.trim == groupsetName).head,
 		  moduleCode
@@ -41,7 +41,7 @@ class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:W
 	}
 }
 
-class GroupSetInfoSummarySection(val underlying:WebElement, val moduleCode:String)(implicit webDriver:WebDriver) extends Eventually with ShouldMatchers {
+class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: String)(implicit webDriver: WebDriver) extends Eventually with ShouldMatchers {
 
 	val groupsetId = {
 		val classes = underlying.findElement(By.cssSelector("div.item-info")).getAttribute("class").split(" ")
@@ -67,21 +67,21 @@ class GroupSetInfoSummarySection(val underlying:WebElement, val moduleCode:Strin
 		!underlying.findElements(By.partialLinkText("Open")).isEmpty
 	}
 
-	def getOpenButton()={
+	def getOpenButton() = {
 		underlying.findElement(By.partialLinkText("Actions")).click()
 		underlying.findElement(By.partialLinkText("Open"))
 	}
 }
 
-class BatchOpenPage(val departmentCode:String)(implicit webDriver:WebDriver) extends Page with WebBrowser with Eventually with ShouldMatchers{
+class BatchOpenPage(val departmentCode: String)(implicit webDriver: WebDriver) extends Page with WebBrowser with Eventually with ShouldMatchers {
 	val url= FunctionalTestProperties.SiteRoot + s"/groups/admin/department/${departmentCode}/groups/open"
 
-	def isCurrentPage():Boolean =  {
+	def isCurrentPage(): Boolean =  {
 		currentUrl should include (s"/groups/admin/department/${departmentCode}/groups/open")
 		find(cssSelector("#main-content h1")).get.text.startsWith("Open groups in ")
 	}
 
-	def checkboxForGroupSet(groupset:GroupSetInfoSummarySection)={
+	def checkboxForGroupSet(groupset: GroupSetInfoSummarySection) = {
 		findAll(tagName("input")).filter(_.underlying.getAttribute("value") == groupset.groupsetId).next.underlying
 	}
 

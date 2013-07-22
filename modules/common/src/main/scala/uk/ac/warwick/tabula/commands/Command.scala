@@ -29,7 +29,7 @@ import uk.ac.warwick.userlookup.User
  * make things more maintainable. assignment() will automatically
  * record its module and department info.
  */
-trait Describable[A] extends KnowsEventName{
+trait Describable[A] extends KnowsEventName {
 	// describe the thing that's happening.
 	def describe(d: Description)
 	// optional extra description after the thing's happened.
@@ -37,7 +37,7 @@ trait Describable[A] extends KnowsEventName{
 	def describeResult(d: Description) {}
 }
 // Broken out from describable so that we can write classes which just implement describe
-trait KnowsEventName{
+trait KnowsEventName {
 	val eventName: String
 }
 

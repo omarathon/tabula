@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.JavaImports.JHashMap
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 
-class OpenGroupSetNotificationTemplateTest extends TestBase with FreemarkerTestHelpers with FreemarkerRendering{
+class OpenGroupSetNotificationTemplateTest extends TestBase with FreemarkerTestHelpers with FreemarkerRendering {
 
 	private trait NotificationFixture extends SmallGroupFixture {
 
@@ -18,7 +18,7 @@ class OpenGroupSetNotificationTemplateTest extends TestBase with FreemarkerTestH
 	}
 
 	@Test
-	def includesTheNameOfEachGroupSet{
+	def includesTheNameOfEachGroupSet {
 		new NotificationFixture {
 			val output =
 				renderToString(OpenSmallGroupSetsNotification.templateLocation,

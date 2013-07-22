@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.web.views.{FreemarkerTextRenderer, TextRenderer}
 import uk.ac.warwick.tabula.groups.commands.admin.OpenSmallGroupSetState
 import uk.ac.warwick.tabula.services.UserLookupService
 
-object OpenSmallGroupSetsNotification{
+object OpenSmallGroupSetsNotification {
 	val templateLocation = "/WEB-INF/freemarker/notifications/open_small_group_student_notification.ftl"
 
 }
