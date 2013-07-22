@@ -98,7 +98,7 @@ class SandboxCourseImporter extends CourseImporter {
 					new ImportCourseCommand(
 						CourseInfo(
 							code="%s-%s".format(departmentCode.toUpperCase, routeCode.toUpperCase),
-							shortName=route.name,
+							shortName=route.name.substring(0, 20).toUpperCase,
 							fullName=route.name,
 							title="%s %s".format(route.degreeType.description, route.name)
 						)
