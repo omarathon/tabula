@@ -97,7 +97,7 @@
 							<h3>Groups</h3>
 							<#list set.groups as group>
 								<#assign existingStudents = mappingById[group.id]![] />
-								<div class="drag-target well clearfix">
+								<div class="drag-target well clearfix group-${group.id}">
 									<div class="group-header">
 										<#assign popoverHeader>Students in ${group.name}</#assign>
 										<#assign groupDetails>
@@ -122,7 +122,7 @@
 											<#assign count = existingStudents?size />
 											<span class="drag-count">${count}</span> <span class="drag-counted" data-singular="student" data-plural="students">student<#if count != 1>s</#if></span>
 
-											<a id="show-list-${group.id}" class="show-list" title="View students" data-container=".groups .drag-target" data-title="${popoverHeader}" data-prelude="${groupDetails}" data-placement="left"><i class="icon-question-sign"></i></a>
+											<a id="show-list-${group.id}" class="show-list" title="View students" data-container=".group-${group.id}" data-title="${popoverHeader}" data-prelude="${groupDetails}" data-placement="left"><i class="icon-question-sign"></i></a>
 										</div>
 									</div>
 
