@@ -15,7 +15,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 			go to groupsPage.url
 
 		When("I click on the 'Actions' dropdown for module xxx01/Test Lab")
-			val editPage = groupsPage.goToEditPropertiesOf("xxx101", "Test Lab")
+			val editPage = groupsPage.getGroupsetInfo("xxx101", "Test Lab").goToEditProperties
 
 		Then("The page is the edit properties page")
 			editPage.isCurrentPage("xxx101")
@@ -33,7 +33,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 
 		And(" I view the edit properties page for xxx101/Test Lab")
 		  go to groupsetSummaryPage.url
-		  val editProperties = groupsetSummaryPage.goToEditPropertiesOf("xxx101", "Test Lab")
+		  val editProperties = groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").goToEditProperties
 
 		Then("I should see the options to show/hide tutor name")
 			checkbox("studentsCanSeeTutorName") should not be (null)
@@ -45,10 +45,10 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 			editProperties.submit()
 
 		Then("The page is the groupset summary page")
-		  groupsetSummaryPage.isCurrentPage()
+		  groupsetSummaryPage should be('currentPage)
 
 		When("I navigate to the edit properties page again")
-		  groupsetSummaryPage.goToEditPropertiesOf("xxx101","Test Lab")
+		  groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").goToEditProperties
 
 		Then("The checkboxes should still be checked")
 		  checkbox("studentsCanSeeTutorName").value should be("true")

@@ -61,7 +61,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
   @Column(name="released_to_students")
 	var releasedToStudents: JBoolean = false
   @Column(name="released_to_tutors")
-  var releasedToTutors:JBoolean = false
+  var releasedToTutors: JBoolean = false
 
   def fullyReleased= releasedToStudents && releasedToTutors
 
@@ -75,7 +75,10 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	var allocationMethod: SmallGroupAllocationMethod = _
 
 	@Column(name="self_group_switching")
-	var allowSelfGroupSwitching:Boolean = true
+	var allowSelfGroupSwitching: Boolean = true
+
+	@Column(name="open_for_signups")
+	var openForSignups: Boolean = false
 
 	@ManyToOne
 	@JoinColumn(name = "module_id")

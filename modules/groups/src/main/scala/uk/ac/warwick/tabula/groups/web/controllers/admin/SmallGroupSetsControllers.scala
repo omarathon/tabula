@@ -182,6 +182,27 @@ class ReleaseSmallGroupSetController extends GroupsController {
   }
 }
 
+@RequestMapping(Array("/admin/module/{module}/groups/{set}/open"))
+@Controller
+class OpenSmallGroupSetController extends GroupsController {
+
+	@ModelAttribute("openGroupSetCommand")
+	def getOpenGroupSetCommand(@PathVariable("set") set: SmallGroupSet): Appliable[Seq[SmallGroupSet]] with OpenSmallGroupSetState = {
+		OpenSmallGroupSetCommand(Seq(set), user.apparentUser)
+	}
+
+	@RequestMapping
+	def form(@ModelAttribute("openGroupSetCommand") cmd: Appliable[Seq[SmallGroupSet]]) =
+		Mav("admin/groups/open").noLayoutIf(ajax)
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("openGroupSetCommand") cmd: Appliable[Seq[SmallGroupSet]]) = {
+		cmd.apply()
+		Mav("ajax_success").noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
+	}
+}
+
+
 @RequestMapping(Array("/admin/department/{department}/groups/release"))
 @Controller
 class ReleaseAllSmallGroupSetsController extends GroupsController {
@@ -216,6 +237,37 @@ class ReleaseAllSmallGroupSetsController extends GroupsController {
       new ReleaseGroupSetCommandImpl(smallGroupSets(), user)
     }
   }
+
+}
+
+@RequestMapping(Array("/admin/department/{department}/groups/open"))
+@Controller
+class OpenAllSmallGroupSetsController extends GroupsController {
+
+	@ModelAttribute("setList") def newViewModel():GroupsetListViewModel={
+		new GroupsetListViewModel((user, sets)=>OpenSmallGroupSetCommand(sets, user))
+	}
+
+	@RequestMapping
+	def form(@ModelAttribute("setList") model: GroupsetListViewModel, @PathVariable department:Department, showFlash:Boolean=false) ={
+		val groupSets = department.modules.asScala.flatMap(_.groupSets.asScala).filter(_.allocationMethod == SmallGroupAllocationMethod.StudentSignUp)
+		Mav("admin/groups/bulk-open", "department"->department, "groupSets"->groupSets, "showFlash"->showFlash)
+	}
+
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("setList") model: GroupsetListViewModel,@PathVariable department:Department) = {
+		model.applyCommand(user.apparentUser)
+		Redirect("/admin/department/%s/groups/open".format(department.code), "batchOpenSuccess"->true)
+	}
+
+	class GroupsetListViewModel(val createCommand: (User, Seq[SmallGroupSet])=>Appliable[Seq[SmallGroupSet]]){
+		var checkedGroupsets:JList[SmallGroupSet] = JArrayList()
+
+		def applyCommand(user:User)= {
+			createCommand(user, checkedGroupsets.asScala).apply()
+		}
+	}
 
 }
 

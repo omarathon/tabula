@@ -65,8 +65,13 @@ If you are doing any work on this, it would be good to do the above first.
 			</a>
 			<ul class="dropdown-menu pull-right">
 				<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt icon-fixed-width"></i> Display settings</a></li>
+				<#if features.smallGroupTeachingStudentSignUp>
+                <li ${data.hasOpenableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to open' ")} >
+                    <a href="<@routes.batchopen department />"><i class="icon-unlock-alt icon-fixed-width"></i> Open</a></li>
+                 </#if>
                 <li ${data.hasUnreleasedGroupsets?string(''," class='disabled use-tooltip' title='All modules already notified' ")} >
                     <a href="<@routes.batchnotify department />"><i class="icon-envelope-alt icon-fixed-width"></i> Notify</a></li>
+
 			</ul>
 		</div>
 
