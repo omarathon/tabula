@@ -6,7 +6,7 @@
 </div>
 </#if>
     <@f.form method="post" action="" commandName="setList" cssClass="form-horizonatal form-tiny">
-    <p> Open these groups for self sign-up. Students will be notified via email tha tthey can now sign up for these groups in Tabula
+    <p> Open these groups for self sign-up. Students will be notified via email that they can now sign up for these groups in Tabula
     </p>
         <div class="control-group">
             <input class="btn btn-info" type="submit" value="Open">
