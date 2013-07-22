@@ -8,9 +8,8 @@ import uk.ac.warwick.tabula.services.jobs._
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.helpers.Logging
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.commands.Notifies
 import uk.ac.warwick.tabula.data.model.Notification
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable
 
 /**
  * A Job is a task that is added to a queue and processed in the
@@ -69,15 +68,14 @@ abstract class Job extends Logging {
 
 // Maintains an internal list of Notifications that are sent after the job has finished
 
-trait NotifyingJob[A] extends Notifies[A] {
-
+trait NotifyingJob[A] { // Doesn't extend Notifies[A] because we don't know which instance to emit for
 	this: Job =>
 
-	var notifications = new ListBuffer[Notification[A]]()
+	var notifications = mutable.Map[JobInstance, mutable.ListBuffer[Notification[A]]]()
 
-	def addNotification(n:Notification[A]){
-		notifications.append(n)
+	def pushNotification(instance: JobInstance, n: Notification[A]) {
+		notifications.getOrElseUpdate(instance, new mutable.ListBuffer[Notification[A]]).append(n)
 	}
 
-	def emit = notifications
+	def popNotifications(instance: JobInstance) = notifications.remove(instance).getOrElse(Nil)
 }

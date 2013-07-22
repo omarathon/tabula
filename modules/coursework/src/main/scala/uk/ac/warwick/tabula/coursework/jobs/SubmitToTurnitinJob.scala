@@ -88,7 +88,7 @@ class SubmitToTurnitinJob extends Job
 			case failure => {
 				if (sendNotifications) {
 					debug("Sending an email to " + job.user.email)
-					addNotification(new TurnitinJobErrorNotification(assignment, job.user.apparentUser) with FreemarkerTextRenderer)
+					pushNotification(job, new TurnitinJobErrorNotification(assignment, job.user.apparentUser) with FreemarkerTextRenderer)
 				}
 				throw new FailedJobException("Failed to get list of existing submissions: " + failure)
 			}
@@ -183,7 +183,7 @@ class SubmitToTurnitinJob extends Job
 				updateStatus("Failed to generate a report. The service may be busy - try again later.")
 				if (sendNotifications) {
 					debug("Sending an email to " + job.user.email)
-					addNotification(new TurnitinJobErrorNotification(assignment, job.user.apparentUser) with FreemarkerTextRenderer)
+					pushNotification(job, new TurnitinJobErrorNotification(assignment, job.user.apparentUser) with FreemarkerTextRenderer)
 				}
 			} else {
 
@@ -218,7 +218,7 @@ class SubmitToTurnitinJob extends Job
 
 				if (sendNotifications) {
 					debug("Sending an email to " + job.user.email)
-					addNotification(new TurnitinJobSuccessNotification(failedUploads, reports, assignment, job.user.apparentUser) with FreemarkerTextRenderer)
+					pushNotification(job, new TurnitinJobSuccessNotification(failedUploads, reports, assignment, job.user.apparentUser) with FreemarkerTextRenderer)
 				}
 
 				updateStatus("Generated a report.")

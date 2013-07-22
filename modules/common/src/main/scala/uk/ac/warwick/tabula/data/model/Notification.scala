@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.DateFormats
  * recipients = who is interested in this notification - activity streams won't
  * need this information
  */
-trait Notification[A]{
+trait Notification[A] {
 
 	final val dateFormatter = DateFormats.NotificationDate
 
