@@ -1,12 +1,9 @@
 package uk.ac.warwick.tabula.scheduling.services
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
-
 import scala.collection.JavaConversions._
-
 import org.joda.time.DateTimeConstants
 import org.joda.time.LocalDate
-
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.MemberDao
@@ -14,10 +11,20 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.Gender._
 import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
 import uk.ac.warwick.tabula.events.EventHandling
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleStudentRowCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentRowCommand
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.userlookup.User
 import org.junit.Ignore
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseYearCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSupervisorsForStudentCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStaffMemberCommand
+import uk.ac.warwick.tabula.data.MemberDao
+import uk.ac.warwick.tabula.PersistenceTestBase
+import uk.ac.warwick.tabula.data.FileDao
+import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.events.EventHandling
+
 
 // scalastyle:off magic.number
 class ProfileImporterTest extends PersistenceTestBase with Mockito {
@@ -58,7 +65,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		new Environment {
 			val names = Seq("Mathew James", "Anna-Lee", "Nick", "Krist\u00EDn")
 			val importer = new ProfileImporterImpl
-			
+
 			for (name <- names) {
 				val mac = MembershipInformation(MembershipMember(
 					universityId = "0672089",
@@ -66,7 +73,12 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					userType = Staff
 				), () => None)
 
-				val member = new ImportSingleStudentRowCommand(mac, new AnonymousUser, rs)
+				val member = new ImportStudentRowCommand(mac, new AnonymousUser, rs,
+					new ImportStudentCourseCommand(rs,
+							new ImportStudentCourseYearCommand(rs),
+							new ImportSupervisorsForStudentCommand()
+					)
+				)
 				member.firstName should be (name)
 			}
 		}
@@ -78,7 +90,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			val names = Seq("d'Haenens Johansson", "O'Toole", "Calvo-Bado", "Biggins", "MacCallum", "McCartney",
 							"Mannion", "von Der Glockenspeil", "d'Howes", "di Stefano", "Mc Cauley", "J\u00F3hannesd\u00F3ttir")
 			val importer = new ProfileImporterImpl
-			
+
 			for (name <- names) {
 				val mac = MembershipInformation(MembershipMember(
 					universityId = "0672089",
@@ -86,7 +98,12 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					userType = Staff
 				), () => None)
 
-				val member = new ImportSingleStudentRowCommand(mac, new AnonymousUser, rs)
+				val member = new ImportStudentRowCommand(mac, new AnonymousUser, rs,
+					new ImportStudentCourseCommand(rs,
+							new ImportStudentCourseYearCommand(rs),
+							new ImportSupervisorsForStudentCommand()
+					)
+				)
 				member.lastName should be (name)
 			}
 		}
@@ -96,7 +113,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 	@Test def takesSuggestions {
 		new Environment {
 			val importer = new ProfileImporterImpl
-			
+
 			val user1 = new User()
 			user1.setFirstName("MatHEW")
 			user1.setLastName("Macintosh")
@@ -105,8 +122,8 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			user2.setFirstName("different")
 			user2.setLastName("strokes")
 
-			val member1 = new ImportSingleStudentRowCommand(mac, user1, rs)
-			val member2 = new ImportSingleStudentRowCommand(mac, user2, rs)
+			val member1 = new ImportStaffMemberCommand(mac, user1, rs)
+			val member2 = new ImportStaffMemberCommand(mac, user2, rs)
 
 			member1.firstName should be ("MatHEW")
 			member1.lastName should be ("Macintosh")
@@ -116,7 +133,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		}
 	}
 
-	@Ignore("broken") @Test def importStaff {
+	@Test def importStaff {
 		val blobBytes = Array[Byte](1,2,3,4,5)
 
 		val rs = mock[ResultSet]
@@ -139,7 +156,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			usercode				= "cuscav",
 			userType				= Staff
 		), () => Some(blobBytes))
-		
+
 		val importer = new ProfileImporterImpl
 
 		val fileDao = mock[FileDao]
@@ -147,7 +164,8 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		val memberDao = mock[MemberDao]
 		memberDao.getByUniversityId("0672089") returns(None)
 
-		val command = new ImportSingleStudentRowCommand(mac, new AnonymousUser, rs)
+		val command = new ImportStaffMemberCommand(mac, new AnonymousUser, rs)
+
 		command.memberDao = memberDao
 		command.fileDao = fileDao
 

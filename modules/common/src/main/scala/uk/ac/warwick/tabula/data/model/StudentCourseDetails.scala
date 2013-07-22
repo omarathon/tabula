@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
+import scala.collection.JavaConverters._
 
 @Entity
 class StudentCourseDetails
@@ -89,6 +90,13 @@ class StudentCourseDetails
 
 	def compare(that:StudentCourseDetails): Int = {
 		this.scjCode.compare(that.scjCode)
+	}
+
+	def equals(that:StudentCourseDetails) = this.scjCode == that.scjCode
+
+	def attachStudentCourseYearDetails(yearDetailsToAdd: StudentCourseYearDetails) {
+		studentCourseYearDetails.remove(yearDetailsToAdd)
+		studentCourseYearDetails.add(yearDetailsToAdd)
 	}
 }
 

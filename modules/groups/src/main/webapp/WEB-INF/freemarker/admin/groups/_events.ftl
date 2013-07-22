@@ -88,13 +88,20 @@
 			
 				<div class="item-info<#if deleteGroup> deleted</#if>">
 					<div class="row-fluid">
-						<div class="span10">
-							<h3 class="name">
+						<div class="span10 groupDetail">
+							<h3 class="name inline-block">
 								${group.name!""}
 								<#if !newRecord>
 									<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
-								</#if>	
+								</#if>
 							</h3>
+							<@form.label checkbox=true>
+							<@f.checkbox path="maxGroupSizeEnabled" />
+							Set maximum group size:
+							</@form.label>
+
+							<@f.input path="maxGroupSize" type="number" min="0" max="100" cssClass="input-small" />
+
 						</div>
 						<div class="span2">
 							<#if !deleteGroup>
@@ -169,6 +176,7 @@
 	
 	<script type="text/javascript">
 		jQuery(function($) {
+
 			$('span[data-toggle="tooltip"]').tooltip();
 		
 			$('button[data-toggle="elements"][data-target]').on('click', function() {

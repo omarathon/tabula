@@ -27,7 +27,7 @@ trait PropertyCopying extends Logging {
 
 			// null == null in Scala so this is safe for unset values
 			if (oldValue != newValue) {
-				logger.debug("Detected property change; setting value")
+				logger.debug("Detected property change for " + property + " (" + oldValue + " -> " + newValue + "); setting value")
 
 				destinationBean.setPropertyValue(property, newValue)
 				true
@@ -71,7 +71,7 @@ trait PropertyCopying extends Logging {
 		if (code == null || code == "") {
 			null
 		} else {
-			sitsStatusesImporter.sitsStatusMap.get(code).getOrElse(null)
+			sitsStatusesImporter.getSitsStatusForCode(code).getOrElse(null)
 		}
 	}
 

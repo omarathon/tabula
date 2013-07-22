@@ -12,6 +12,10 @@ import scala.Predef.String
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.userlookup.User
 
+trait UserLookupComponent {
+	def userLookup: UserLookupService
+}
+
 trait UserLookupService extends UserLookupInterface
 
 class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService with UserByWarwickIdCache {

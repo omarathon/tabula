@@ -14,14 +14,22 @@ import uk.ac.warwick.tabula.data.SitsStatusDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSingleSitsStatusCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSitsStatusCommand
 
 trait SitsStatusesImporter extends Logging {
 	var sitsStatusDao = Wire.auto[SitsStatusDao]
 	
-	var sitsStatusMap = slurpSitsStatuses()
-	
-	def getSitsStatuses: Seq[ImportSingleSitsStatusCommand]
+	var sitsStatusMap:Map[String,SitsStatus] = null
+
+	def getSitsStatusForCode(code:String) = {
+			if (sitsStatusMap == null){
+				sitsStatusMap=slurpSitsStatuses()
+			}
+		sitsStatusMap.get(code)
+	}
+
+
+	def getSitsStatuses: Seq[ImportSitsStatusCommand]
 	
 	def slurpSitsStatuses(): Map[String, SitsStatus] = {
 		transactional(readOnly = true) {
@@ -42,7 +50,7 @@ class SitsStatusesImporterImpl extends SitsStatusesImporter {
 	
 	lazy val sitsStatusesQuery = new SitsStatusesQuery(sits)
 
-	def getSitsStatuses: Seq[ImportSingleSitsStatusCommand] = {
+	def getSitsStatuses: Seq[ImportSitsStatusCommand] = {
 		val statuses = sitsStatusesQuery.execute.toSeq
 		sitsStatusMap = slurpSitsStatuses()
 		statuses
@@ -51,10 +59,10 @@ class SitsStatusesImporterImpl extends SitsStatusesImporter {
 
 @Profile(Array("sandbox")) @Service
 class SandboxSitsStatusesImporter extends SitsStatusesImporter {
-	def getSitsStatuses: Seq[ImportSingleSitsStatusCommand] = 
+	def getSitsStatuses: Seq[ImportSitsStatusCommand] = 
 		Seq(
-			new ImportSingleSitsStatusCommand(SitsStatusInfo("C", "CURRENT STUDENT", "Current Student")),
-			new ImportSingleSitsStatusCommand(SitsStatusInfo("P", "PERMANENTLY W/D", "Permanently Withdrawn"))
+			new ImportSitsStatusCommand(SitsStatusInfo("C", "CURRENT STUDENT", "Current Student")),
+			new ImportSitsStatusCommand(SitsStatusInfo("P", "PERMANENTLY W/D", "Permanently Withdrawn"))
 		)
 }
 
@@ -66,10 +74,10 @@ object SitsStatusesImporter {
 		select sta_code, sta_snam, sta_name from intuit.srs_sta
 		"""
 	
-	class SitsStatusesQuery(ds: DataSource) extends MappingSqlQuery[ImportSingleSitsStatusCommand](ds, GetSitsStatus) {
+	class SitsStatusesQuery(ds: DataSource) extends MappingSqlQuery[ImportSitsStatusCommand](ds, GetSitsStatus) {
 		compile()
 		override def mapRow(resultSet: ResultSet, rowNumber: Int) = 
-			new ImportSingleSitsStatusCommand(
+			new ImportSitsStatusCommand(
 				SitsStatusInfo(resultSet.getString("sta_code"), resultSet.getString("sta_snam"), resultSet.getString("sta_name"))
 			)
 	}

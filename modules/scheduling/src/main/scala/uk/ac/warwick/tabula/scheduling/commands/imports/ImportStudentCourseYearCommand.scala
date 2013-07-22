@@ -44,7 +44,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.exception.ConstraintViolationException
 
 
-class ImportSingleStudentCourseYearCommand(resultSet: ResultSet)
+class ImportStudentCourseYearCommand(resultSet: ResultSet)
 	extends Command[StudentCourseYearDetails] with Logging with Daoisms
 	with StudentCourseYearProperties with Unaudited with PropertyCopying {
 	import ImportMemberHelpers._
@@ -102,9 +102,10 @@ class ImportSingleStudentCourseYearCommand(resultSet: ResultSet)
 	}
 
 	private val basicStudentCourseYearProperties = Set(
-		"yearOfStudy",
+		"yearOfStudy"
+		//,
 		//"fundingSource",
-		"modeOfAttendance"
+		//"modeOfAttendance"
 	)
 
 	private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studentCourseYearBean: BeanWrapper) = {

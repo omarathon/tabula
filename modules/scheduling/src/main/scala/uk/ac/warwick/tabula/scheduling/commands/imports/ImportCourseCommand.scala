@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import java.sql.ResultSet
 import org.joda.time.DateTime
 import org.springframework.beans.BeanWrapperImpl
 import uk.ac.warwick.spring.Wire
@@ -18,18 +17,20 @@ import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.CourseDao
 import uk.ac.warwick.tabula.data.model.Course
+import uk.ac.warwick.tabula.scheduling.services.CourseInfo
 
-class ImportSingleCourseCommand(resultSet: ResultSet) extends Command[Course] with Logging with Daoisms
+class ImportCourseCommand(info: CourseInfo)
+	extends Command[Course] with Logging with Daoisms
 	with Unaudited with PropertyCopying {
 
 	PermissionCheck(Permissions.ImportSystemData)
 
 	var courseDao = Wire.auto[CourseDao]
 
-	var code = resultSet.getString("crs_code")
-	var shortName = resultSet.getString("crs_snam")
-	var name = resultSet.getString("crs_name")
-	var title = resultSet.getString("crs_titl")
+	var code = info.code
+	var shortName = info.shortName
+	var name = info.fullName
+	var title = info.title
 
 	override def applyInternal(): Course = transactional() {
 		val courseExisting = courseDao.getByCode(code)

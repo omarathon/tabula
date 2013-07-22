@@ -16,8 +16,10 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.{StaffMember, EmeritusMember}
 import uk.ac.warwick.tabula.data.model.MemberUserType
 
-class ImportSingleStaffCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet) extends ImportSingleMemberCommand(member, ssoUser, rs)
+class ImportStaffMemberCommand(member: MembershipInformation, ssoUser: User, rs: ResultSet)
+	extends ImportMemberCommand(member, ssoUser, rs)
 	with Logging with Daoisms with StaffProperties with Unaudited {
+
 	import ImportMemberHelpers._
 
 	this.teachingStaff = rs.getString("teaching_staff") == "Y"

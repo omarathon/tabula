@@ -36,6 +36,10 @@ class StudentCourseYearDetails extends  StudentCourseYearProperties
 			this.sceSequenceNumber - that.sceSequenceNumber
 		}
 	}
+
+	def equals(that: StudentCourseYearDetails) = {
+		(this.studentCourseDetails == that.studentCourseDetails) && (this.sceSequenceNumber == that.sceSequenceNumber)
+	}
 }
 
 trait StudentCourseYearProperties {

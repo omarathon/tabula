@@ -4,6 +4,7 @@ import org.hibernate.validator.constraints._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat
 import uk.ac.warwick.tabula.AcademicYear
@@ -32,24 +33,15 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
  * for creation; the Edit command should call .copyFrom(SmallGroupSet) to copy any existing properties.
  */
 abstract class ModifySmallGroupSetCommand(val module: Module) 
-	extends PromisingCommand[SmallGroupSet]  
+	extends PromisingCommand[SmallGroupSet]
+	with SmallGroupSetProperties
 		with SelfValidating 
 		with BindListener {
 	
 	var userLookup = Wire[UserLookupService]
 	var membershipService = Wire[AssignmentMembershipService]
 	
-	var name: String = _
 
-	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
-	
-	var format: SmallGroupFormat = _
-	
-	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
-
-	var allowSelfGroupSwitching: Boolean = true
-	var studentsCanSeeTutorName:Boolean = false
-	var studentsCanSeeOtherMembers:Boolean = false
 	
 	// start complicated membership stuff
 	
@@ -86,7 +78,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		
 	// A collection of sub-commands for modifying the child groups
 	var groups: JList[ModifySmallGroupCommand] = LazyLists.withFactory { () => 
-		new CreateSmallGroupCommand(this, module)
+		new CreateSmallGroupCommand(this, module, this)
 	}
 	
 	def validate(errors: Errors) {
@@ -111,11 +103,14 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		allowSelfGroupSwitching = set.allowSelfGroupSwitching
 		studentsCanSeeTutorName = set.studentsCanSeeTutorName
 	  studentsCanSeeOtherMembers = set.studentsCanSeeOtherMembers
+		defaultMaxGroupSizeEnabled = set.defaultMaxGroupSizeEnabled
+		defaultMaxGroupSize = set.defaultMaxGroupSize
+
 		
 		// TODO AssessmentGroupItems
 		
 		groups.clear()
-		groups.addAll(set.groups.asScala.map(new EditSmallGroupCommand(_)).asJava)
+		groups.addAll(set.groups.asScala.map(x => {new EditSmallGroupCommand(x, this)}).asJava)
 		
 		if (set.members != null) members.copyFrom(set.members)
 	}
@@ -128,7 +123,9 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		set.allowSelfGroupSwitching = allowSelfGroupSwitching
 		set.studentsCanSeeOtherMembers = studentsCanSeeOtherMembers
 		set.studentsCanSeeTutorName = studentsCanSeeTutorName
-		
+		set.defaultMaxGroupSizeEnabled = defaultMaxGroupSizeEnabled
+		set.defaultMaxGroupSize = defaultMaxGroupSize
+
 		// TODO AssessmentGroupItems
 		
 		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
@@ -196,4 +193,21 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		groups.asScala.foreach(_.onBind(result))
 	}
 
+}
+
+
+trait SmallGroupSetProperties {
+	var name: String = _
+
+	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
+
+	var format: SmallGroupFormat = _
+
+	var allocationMethod: SmallGroupAllocationMethod = SmallGroupAllocationMethod.Manual
+
+	var allowSelfGroupSwitching: Boolean = true
+	var studentsCanSeeTutorName:Boolean = false
+	var studentsCanSeeOtherMembers:Boolean = false
+	var defaultMaxGroupSizeEnabled:Boolean = false
+	var defaultMaxGroupSize:Int = SmallGroup.DefaultGroupSize
 }

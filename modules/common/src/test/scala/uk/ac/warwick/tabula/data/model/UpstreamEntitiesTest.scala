@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.{Mockito, AcademicYear, PersistenceTestBase}
 import uk.ac.warwick.tabula.services.{AssignmentService, AssignmentServiceImpl}
 import org.junit.Before
 import uk.ac.warwick.tabula.services.AssignmentMembershipServiceImpl
+import uk.ac.warwick.tabula.data.AssignmentMembershipDaoImpl
 
 // scalastyle:off magic.number
 class UpstreamEntitiesTest extends PersistenceTestBase {
@@ -15,8 +16,11 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			val assignmentService = new AssignmentServiceImpl
 			assignmentService.sessionFactory = sessionFactory
 
+			val dao = new AssignmentMembershipDaoImpl
+			dao.sessionFactory = sessionFactory
+
 			val assignmentMembershipService = new AssignmentMembershipServiceImpl
-			assignmentMembershipService.sessionFactory = sessionFactory
+			assignmentMembershipService.dao = dao
 
 			val law = new UpstreamAssignment
 			law.moduleCode = "la155-10"

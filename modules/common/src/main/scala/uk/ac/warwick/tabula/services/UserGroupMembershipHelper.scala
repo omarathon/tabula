@@ -68,7 +68,7 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] 
 			else ""
 
 		s"""
-			select distinct r
+			select r
 			from $simpleEntityName r
 			$leftJoin
 			where
@@ -95,6 +95,7 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] 
 		val groupsByUser = session.newQuery[A](groupsByUserSql)
 			.setString("universityId", user.getWarwickId)
 			.setString("userId", user.getUserId)
+			.distinct
 			.seq
 
 		val webgroupNames: Seq[String] = getWebgroups(user.getUserId)
