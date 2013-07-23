@@ -6,6 +6,15 @@ import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.spring.Wire
+
+trait SmallGroupServiceComponent {
+	def smallGroupService: SmallGroupService
+}
+
+trait AutowiringSmallGroupServiceComponent extends SmallGroupServiceComponent {
+	var smallGroupService = Wire[SmallGroupService]
+}
 
 trait SmallGroupService {
 	def getSmallGroupSetById(id: String): Option[SmallGroupSet]
@@ -16,6 +25,8 @@ trait SmallGroupService {
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent)
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent]
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup]
+
+	def updateAttendance(smallGroupEvent: SmallGroupEvent, weekNumber: Int, users: Seq[User])
 }
 
 @Service("smallGroupService")
@@ -37,4 +48,8 @@ class SmallGroupServiceImpl
 
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = groupTutorsHelper.findBy(user)
+
+	def updateAttendance(smallGroupEvent: SmallGroupEvent, weekNumber: Int, users: Seq[User]) {
+		???
+	}
 }

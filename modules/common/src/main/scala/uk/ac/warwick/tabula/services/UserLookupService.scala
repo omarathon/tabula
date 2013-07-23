@@ -5,15 +5,16 @@ import uk.ac.warwick.userlookup._
 import uk.ac.warwick.util.cache._
 import org.joda.time.DateTime
 import javax.annotation.PreDestroy
-import uk.ac.warwick.userlookup.webgroups.GroupServiceAdapter
-import scala.collection.JavaConverters._
-import java.lang.String
 import scala.Predef.String
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.spring.Wire
 
 trait UserLookupComponent {
 	def userLookup: UserLookupService
+}
+
+trait AutowiringUserLookupComponent extends UserLookupComponent {
+	var userLookup = Wire[UserLookupService]
 }
 
 trait UserLookupService extends UserLookupInterface

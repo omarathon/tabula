@@ -98,10 +98,10 @@ class ProfileServiceImpl extends ProfileService with Logging {
 	}
 }
 
-trait ProfileServiceComponent{
-	var profileService:ProfileService
+trait ProfileServiceComponent {
+	var profileService: ProfileService
 }
 
 trait AutowiringProfileServiceComponent extends ProfileServiceComponent{
-	var profileService = Wire.auto[ProfileService]
+	var profileService = Wire[ProfileService]
 }

@@ -130,6 +130,7 @@
 							<bean class="uk.ac.warwick.tabula.data.convert.RelationshipTypeConverter" />
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupEventIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.DayOfWeekConverter"/>
                 <bean class="uk.ac.warwick.tabula.data.convert.NumberConverterFactory"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.StudentCourseDetailsConverter"/>

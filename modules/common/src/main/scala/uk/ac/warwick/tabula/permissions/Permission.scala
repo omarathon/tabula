@@ -212,6 +212,10 @@ object Permissions {
 		case object Allocate extends Permission("Allocate students to small groups")
 	}
 
+	object SmallGroupEvents {
+		case object Register extends Permission("Record attendance on small group events")
+	}
+
 	object UserSettings {
 		case object Update extends Permission("Edit user settings")
 	}
