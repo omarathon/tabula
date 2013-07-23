@@ -67,7 +67,7 @@
 		<#list moduleItem.setItems as setItem>
 			<#assign groupSet=setItem.set />
 			<#if !groupSet.deleted>
-				<div class="item-info row-fluid<#if groupSet.archived> archived</#if>">
+				<div class="item-info row-fluid<#if groupSet.archived> archived</#if> groupset-${groupSet.id}">
 					<div class="span3">
 						<h3 class="name">
 							<small>
@@ -159,9 +159,25 @@
                                         </#list>
                                     </ul>
                                 </#if>-->
+
                                 <@dropdown_menu "Actions" "cog">
                                     <#if moduleItem.canManageGroups>
                                     <li><a href="<@routes.editset groupSet />"><i class="icon-wrench icon-fixed-width"></i> Edit properties</a></li>
+                                     <#if features.smallGroupTeachingStudentSignUp>
+										 <#if groupSet.openForSignups>
+										 <li  ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
+                                         		   (''," class='disabled use-tooltip' title='Not a self-signup group' ")
+                                         }>
+                                         <a  class="close-group-link" href="/TODO-TAB-934"><i class="icon-lock icon-fixed-width"></i> Close</a></li>
+
+										 <#else>
+										<li  ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
+												   (''," class='disabled use-tooltip' title='Not a self-signup group' ")
+										}>
+										<a  class="open-group-link" data-toggle="modal" data-target="#modal-container"
+										href="<@routes.openset groupSet />"><i class="icon-unlock-alt icon-fixed-width"></i> Open</a></li>
+										</#if>
+									</#if>
                                     <li><a href="<@routes.allocateset groupSet />"><i class="icon-random icon-fixed-width"></i> Allocate students</a></li>
                                     <li ${groupSet.fullyReleased?string(" class='disabled use-tooltip' title='Already notified' ",'')} >
                                             <a class="notify-group-link" data-toggle="modal" data-target="#modal-container" href="<@routes.releaseset groupSet />">

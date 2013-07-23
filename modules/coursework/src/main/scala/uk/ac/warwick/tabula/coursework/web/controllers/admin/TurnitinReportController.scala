@@ -34,8 +34,10 @@ class ViewPlagiarismReportCommand(val module: Module, val assignment: Assignment
 			case Some(session) => {
 
 				val classId = Turnitin.classIdFor(assignment, turnitinService.classPrefix)
+				val className = Turnitin.classNameFor(assignment)
 				val assignmentId = Turnitin.assignmentIdFor(assignment)
-				session.listSubmissions(classId, ClassName(""), assignmentId, AssignmentName("")) match {
+				val assignmentName = Turnitin.assignmentNameFor(assignment)
+				session.listSubmissions(classId, className, assignmentId, assignmentName) match {
 					case GotSubmissions(list) => {
 						val matchingObject = list.find { _.title == fileId }
 						val objectId = matchingObject.map { _.objectId }

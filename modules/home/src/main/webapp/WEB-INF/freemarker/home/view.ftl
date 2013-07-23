@@ -41,6 +41,12 @@
 				<span class="hint">View your student information</span>
 			</li>
 		</#if>
+		
+		<#if features.attendanceMonitoring>
+			<li>
+				<h2><a href="<@url page="/" context="/attendance" />" />Attendance Monitoring</a></h2>
+			</li>
+		</#if>
 	</ul>
 </#if>
 

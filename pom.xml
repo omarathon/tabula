@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>40-SNAPSHOT</version>
+	<version>41-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -33,7 +33,7 @@
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
 
-		<warwickutils.version>20130704-1109</warwickutils.version>
+		<warwickutils.version>20130722-1137</warwickutils.version>
 	        <surefire.version>2.14.1</surefire.version>
 		<recompileMode><!-- incremental --></recompileMode>
 
@@ -68,7 +68,8 @@
 	<modules>
 		<module>modules/common</module>
 		<module>modules/home</module>
-    <module>modules/admin</module>
+		<module>modules/admin</module>
+		<module>modules/attendance</module>
 		<module>modules/coursework</module>
 		<module>modules/profiles</module>
 		<module>modules/groups</module>
@@ -218,7 +219,7 @@
                 <configuration>
                     <prefix>git</prefix>
                     <dateFormat>dd.MM.yyyy '@' HH:mm:ss z</dateFormat>
-                    <verbose>true</verbose>
+                    <verbose>false</verbose>
                     <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
                     <generateGitPropertiesFile>false</generateGitPropertiesFile>
                     <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
@@ -1022,6 +1023,13 @@
 			<dependency>
 				<groupId>uk.ac.warwick.tabula</groupId>
 				<artifactId>home</artifactId>
+				<version>${project.version}</version>
+				<type>jar</type>
+				<classifier>jar</classifier>
+			</dependency>
+			<dependency>
+				<groupId>uk.ac.warwick.tabula</groupId>
+				<artifactId>attendance</artifactId>
 				<version>${project.version}</version>
 				<type>jar</type>
 				<classifier>jar</classifier>

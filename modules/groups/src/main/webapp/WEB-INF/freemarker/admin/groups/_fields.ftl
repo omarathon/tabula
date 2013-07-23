@@ -177,7 +177,7 @@
 				Set maximum group size:
 			</@form.label>
 
-			<#assign disabled = !(set.defaultMaxGroupSizeEnabled!true)>
+			<#assign disabled = !(smallGroupSet.defaultMaxGroupSizeEnabled!true)>
 
 			<@f.input path="defaultMaxGroupSize" type="number" min="0" max="100" cssClass="input-small" disabled="${disabled?string}" />
 

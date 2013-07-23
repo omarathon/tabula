@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/modules/admin/admin.iml" filepath="$PROJECT_DIR$/modules/admin/admin.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/all/all.iml" filepath="$PROJECT_DIR$/modules/all/all.iml" />
+      <module fileurl="file://$PROJECT_DIR$/modules/attendance/attendance.iml" filepath="$PROJECT_DIR$/modules/attendance/attendance.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/common/common.iml" filepath="$PROJECT_DIR$/modules/common/common.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/coursework/courses.iml" filepath="$PROJECT_DIR$/modules/coursework/courses.iml" />
       <module fileurl="file://$PROJECT_DIR$/modules/functional-test/functional-test.iml" filepath="$PROJECT_DIR$/modules/functional-test/functional-test.iml" />

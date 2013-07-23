@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.helpers.Promises
+import uk.ac.warwick.userlookup.User
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -28,12 +29,15 @@ import uk.ac.warwick.tabula.helpers.Promises
  * make things more maintainable. assignment() will automatically
  * record its module and department info.
  */
-trait Describable[A] {
+trait Describable[A] extends KnowsEventName {
 	// describe the thing that's happening.
 	def describe(d: Description)
 	// optional extra description after the thing's happened.
 	def describeResult(d: Description, result: A) { describeResult(d) }
 	def describeResult(d: Description) {}
+}
+// Broken out from describable so that we can write classes which just implement describe
+trait KnowsEventName {
 	val eventName: String
 }
 
@@ -330,6 +334,12 @@ trait CommandInternal[A] {
 
 trait ComposableCommand[A] extends Command[A] with PerformsPermissionsChecking{
 	this:CommandInternal[A] with Describable[A] with RequiresPermissionsChecking=>
-
 }
 
+/**
+ * ComposableCommands often need to include a user in their state, for notifications etc. Depending on this trait allows
+ * that to be mocked easily for testing
+ */
+trait UserAware {
+	val user:User
+}
