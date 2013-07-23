@@ -50,7 +50,9 @@ Some other useful Maven commands:
 
 - `mvn -DskipTests` - skip tests during deploy (Maven will run tests by default)
 - `mvn -DskipTests -Dmaven.test.skip=true` - also skip test compilation
-- `mvn --project modules/coursework --also-make` - work on a single module, but make module dependencies like common
+- `mvn --projects modules/coursework --also-make` - work on a single module, but make module dependencies like common
+- `mvn -Pdeploy --projects modules/attendance --also-make -DskipTests` - Deploy a single module 
+    (Remember JBoss will still deploy old wars unless you delete them!)
 - `mvn test -Dsurefire.useFile=false` - run tests, showing stack trace of failures in the console
 - `mvn test -Dtest=uk.ac.warwick.tabula.coursework.ApplicationTest` - run a specific test
 - `mvn -Pdev-deploy-views` - syncs the latest Freemarker templates into the deployed app - no need to redeploy
@@ -63,23 +65,29 @@ Directory structure
 ----------
 
 - `config`
-	- `servers`
-    	- `common` - stuff most servers use for Apache config etc.
-    - `scripts`
-    	- `schema` - SQL migration scripts for any database schema changes.
-    	- `varsrc` - Deploy scripts, usually found in /var/src/courses on servers
+  - `servers`
+    - `common` - stuff most servers use for Apache config etc.
+  - `scripts`
+    - `schema` - SQL migration scripts for any database schema changes.
+    - `varsrc` - Deploy scripts, usually found in /var/src/courses on servers
 - `modules` - Tabula modules
-	- `(modulename)`
-		- `src`
-    		- `main` 
-        		- `scala` - Scala source files
-        		- `java` - Java source files
-        		- `resources` - non-code files that will be available in the app classpath
-        		- `webapp` - other non-code files that make up the WAR.
-        		- `artwork` - source graphics not included in the app, but used to generate static images. Usually SVG/Inkscape.
-    		- `test`
-    		- `console`
-    		
+  - `(modulename)`
+    - `src`
+      - `main` 
+        - `scala` - Scala source files
+        - `java` - Java source files
+        - `resources` - non-code files that will be available in the app classpath
+        - `webapp` - other non-code files that make up the WAR.
+        - `artwork` - source graphics not included in the app, but used to generate static images. Usually SVG/Inkscape.
+      - `test`
+      - `console`
+
+Creating a new module
+---------
+
+When creating a new module, if it is a web app then you need to have an empty `.war-project` file in the WEB-INF directory.
+This tells the build to do certain stuff.
+
 Maven overlays
 ---------
 
