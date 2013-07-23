@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.groups
 
 import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 
 import javax.persistence._
 import javax.persistence.CascadeType._
@@ -85,11 +86,10 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	@JoinColumn(name = "set_id")
 	var groups: JList[SmallGroup] = JArrayList()
 
+	// only students manually added or excluded. use allStudents to get all students in the group set
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
 	var members: UserGroup = new UserGroup
-
-
 
 	// Cannot link directly to upstream assessment groups data model in sits is silly ...
 	@OneToMany(mappedBy = "smallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
@@ -113,16 +113,16 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 		}
 	}
 
+	def allStudents = membershipService.determineMembershipUsers(upstreamAssessmentGroups, Some(members))
+	def allStudentsCount = membershipService.countMembershipUsers(upstreamAssessmentGroups, Some(members))
 	
 	def unallocatedStudents = {
-		val allStudents = membershipService.determineMembershipUsers(upstreamAssessmentGroups, Some(members))
 		val allocatedStudents = groups.asScala flatMap { _.students.users }
-		
+
 		allStudents diff allocatedStudents
 	}
 	
 	def unallocatedStudentsCount = {
-		val allStudentsCount = membershipService.countMembershipUsers(assessmentGroups.asScala, Some(members))
 		val allocatedStudentsCount = groups.asScala.foldLeft(0) { (acc, grp) => acc + grp.students.members.size }
 		
 		allStudentsCount - allocatedStudentsCount

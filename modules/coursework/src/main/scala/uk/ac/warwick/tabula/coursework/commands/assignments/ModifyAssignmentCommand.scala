@@ -9,7 +9,7 @@ import org.springframework.validation.Errors
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.{UpdatesStudentMembership, Command, SelfValidating}
+import uk.ac.warwick.tabula.commands.{CurrentAcademicYear, UpdatesStudentMembership, Command, SelfValidating}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AssignmentService}
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
@@ -20,7 +20,7 @@ import scala.Some
  * Common behaviour
  */
  abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assignment]
-	with SharedAssignmentProperties with SelfValidating with UpdatesStudentMembership {
+	with SharedAssignmentProperties with SelfValidating with UpdatesStudentMembership with CurrentAcademicYear {
 
 	var service = Wire.auto[AssignmentService]
 
@@ -81,7 +81,7 @@ import scala.Some
 		assignment.assessmentGroups.clear
 		assignment.assessmentGroups.addAll(assessmentGroups)
 		for (group <- assignment.assessmentGroups if group.assignment == null) {
-			group.assignment = assignment // only required for a new assignment
+			group.assignment = assignment
 		}
 
 		copySharedTo(assignment: Assignment)

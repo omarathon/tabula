@@ -11,8 +11,8 @@
 
 <script>
 	jQuery(function ($) {
-		$('#action-submit').closest('form').on('click', '.update-only', function() {
-			$('#action-submit').val('update');
+		$('#action-input').closest('form').on('click', '.update-only', function() {
+			$('#action-input').val('update');
 		});
 	});
 </script>

@@ -7,11 +7,11 @@ import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{MembershipInfo, UserLookupService, AssignmentMembershipService}
-import scala.Some
-import scala.Some
+import uk.ac.warwick.tabula.services.{AssignmentMembershipInfo, UserLookupService, AssignmentMembershipService}
 
-trait UpdatesStudentMembership extends CurrentAcademicYear {
+trait UpdatesStudentMembership {
+
+	this : CurrentAcademicYear =>
 
 	var userLookup = Wire.auto[UserLookupService]
 	var membershipService = Wire.auto[AssignmentMembershipService]
@@ -155,7 +155,7 @@ trait UpdatesStudentMembership extends CurrentAcademicYear {
 	/**
 	 * Returns a sequence of MembershipItems
 	 */
-	def membershipInfo : MembershipInfo = membershipService.determineMembership(linkedUpstreamAssessmentGroups, Option(members))
+	def membershipInfo : AssignmentMembershipInfo = membershipService.determineMembership(linkedUpstreamAssessmentGroups, Option(members))
 
 }
 

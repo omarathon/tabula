@@ -134,9 +134,7 @@
 		<#assign membersGroup=status.actualValue />
 	</@spring.bind>
 	<#assign hasMembers=(membersGroup?? && (membersGroup.includeUsers?size gt 0 || membersGroup.excludeUsers?size gt 0)) />
-	
-	<p>There <#if ((membersGroup.includeUsers?size)!0) == 1>is<#else>are</#if> <@fmt.p (membersGroup.includeUsers?size)!0 "student" "students" /></p>
-	
+
 	<#include "_students.ftl" />
 </fieldset>
 

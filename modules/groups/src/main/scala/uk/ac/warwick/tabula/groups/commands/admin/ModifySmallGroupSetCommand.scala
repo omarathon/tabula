@@ -1,22 +1,17 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
 import org.hibernate.validator.constraints._
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.{AssessmentGroup, Module, UserGroup, UpstreamAssessmentGroup}
-import uk.ac.warwick.tabula.commands.{UpdatesStudentMembership, SelfValidating, PromisingCommand}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.helpers.LazyLists
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.helpers.Promises._
-import uk.ac.warwick.tabula.commands.PromisingCommand
 import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
 import javax.validation.constraints.NotNull
@@ -26,10 +21,11 @@ import uk.ac.warwick.tabula.UniversityId
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.hibernate.validator.Valid
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
+import scala.Some
+import scala.Some
 
 /**
  * Common superclass for creation and modification. Note that any defaults on the vars here are defaults
@@ -48,13 +44,17 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 	//var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
 
 	val setOption : Option[SmallGroupSet]
-
-	var name: String = _
 	
 	// start complicated membership stuff
 
 	lazy val exisitingGroups: Option[Seq[UpstreamAssessmentGroup]] =  setOption.map(_.upstreamAssessmentGroups)
 	lazy val existingMembers: Option[UserGroup] = setOption.map(_.members)
+
+	def copyGroupsFrom(smallGroupSet: SmallGroupSet) {
+		upstreamGroups.addAll(availableUpstreamGroups filter { ug =>
+			assessmentGroups.exists( ag => ug.upstreamAssignment == ag.upstreamAssignment && ag.occurrence == ug.occurrence )
+		})
+	}
 
 	/**
 	 * Convert Spring-bound upstream group references to an AssessmentGroup buffer
@@ -95,17 +95,17 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		academicYear = set.academicYear
 		format = set.format
 		allocationMethod = set.allocationMethod
-
-		for (group <- set.assessmentGroups.asScala if group.smallGroupSet == null) {
-			group.smallGroupSet = set // only required for a new assignment
-		}
-		assessmentGroups = set.assessmentGroups
 		allowSelfGroupSwitching = set.allowSelfGroupSwitching
 		studentsCanSeeTutorName = set.studentsCanSeeTutorName
 	  studentsCanSeeOtherMembers = set.studentsCanSeeOtherMembers
 		defaultMaxGroupSizeEnabled = set.defaultMaxGroupSizeEnabled
 		defaultMaxGroupSize = set.defaultMaxGroupSize
 
+		// linked assessmentGroups
+		assessmentGroups = set.assessmentGroups
+		upstreamGroups.addAll(availableUpstreamGroups filter { ug =>
+			assessmentGroups.exists( ag => ug.upstreamAssignment == ag.upstreamAssignment && ag.occurrence == ug.occurrence )
+		})
 		
 		groups.clear()
 		groups.addAll(set.groups.asScala.map(x => {new EditSmallGroupCommand(x, this)}).asJava)
@@ -119,15 +119,18 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		set.format = format
 		set.allocationMethod = allocationMethod
 
-		set.assessmentGroups = assessmentGroups
+		set.assessmentGroups.clear
+		set.assessmentGroups.addAll(assessmentGroups)
+		for (group <- set.assessmentGroups if group.smallGroupSet == null) {
+			group.smallGroupSet = set
+		}
+
 		
 		set.allowSelfGroupSwitching = allowSelfGroupSwitching
 		set.studentsCanSeeOtherMembers = studentsCanSeeOtherMembers
 		set.studentsCanSeeTutorName = studentsCanSeeTutorName
 		set.defaultMaxGroupSizeEnabled = defaultMaxGroupSizeEnabled
 		set.defaultMaxGroupSize = defaultMaxGroupSize
-
-		// TODO AssessmentGroupItems
 		
 		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
 		set.groups.clear()
@@ -139,8 +142,6 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 	
 	override def onBind(result: BindingResult) {
 
-		afterBind()
-			
 		// If the last element of groups is both a Creation and is empty, disregard it
 		def isEmpty(cmd: ModifySmallGroupCommand) = cmd match {
 			case cmd: CreateSmallGroupCommand if !cmd.name.hasText && cmd.events.isEmpty => true
@@ -157,10 +158,8 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 }
 
 
-trait SmallGroupSetProperties {
+trait SmallGroupSetProperties extends CurrentAcademicYear {
 	var name: String = _
-
-	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
 
 	var format: SmallGroupFormat = _
 

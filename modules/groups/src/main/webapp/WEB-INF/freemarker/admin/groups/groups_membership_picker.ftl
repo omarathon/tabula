@@ -2,6 +2,8 @@
 	<@form.labelled_row "members" "Students" "assignmentEnrolment">
 		<fieldset id="assignmentEnrolmentFields">
 
+
+
 		<#list command.upstreamGroups as item>
 			<@f.hidden path="upstreamGroups[${item_index}]" cssClass="upstreamGroups" />
 		</#list>
