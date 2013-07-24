@@ -44,8 +44,9 @@ ajcore*
 /.idea/libraries
 /.idea/dictionaries
 /.idea/scala_compiler.xml
-.iws
+.idea/
 *.iml
+*.iws
 
 # Sublime Text IDE
 *.sublime-project
