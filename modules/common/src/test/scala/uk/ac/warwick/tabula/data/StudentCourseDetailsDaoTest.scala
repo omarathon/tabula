@@ -2,43 +2,33 @@ package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConverters.asScalaBufferConverter
 
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.FilterDefs
-import org.hibernate.annotations.Filters
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import org.junit.After
 import org.junit.Before
-import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 
-import javax.persistence.DiscriminatorColumn
-import javax.persistence.DiscriminatorValue
-import javax.persistence.Entity
-import javax.persistence.Inheritance
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase, Fixtures}
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.Logging
 
-class StudentCourseDetailsDaoTest extends AppContextTestBase with Logging {
-	@Autowired var memberDao:MemberDao =_
-	@Autowired var dao:StudentCourseDetailsDao =_
+class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with Mockito {
 
-	@Before def setup: Unit = transactional { tx =>
-		session.enableFilter(Member.ActiveOnlyFilter)
+	val memberDao = new MemberDaoImpl
+	val dao = new StudentCourseDetailsDaoImpl
+
+	@Before def setup() {
+		memberDao.sessionFactory = sessionFactory
+		dao.sessionFactory = sessionFactory
+		transactional { tx =>
+			session.enableFilter(Member.ActiveOnlyFilter)
+		}
 	}
 
 	@After def tidyUp: Unit = transactional { tx =>
 		session.disableFilter(Member.ActiveOnlyFilter)
-
 		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala map { session.delete(_) }
 	}
-
 
 	@Test def getByScjCode = transactional { tx =>
 		val dept1 = Fixtures.department("ms", "Motorsport")

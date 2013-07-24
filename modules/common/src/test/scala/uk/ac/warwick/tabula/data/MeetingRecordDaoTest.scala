@@ -1,27 +1,25 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.JavaConverters._
-import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
-import org.junit.Test
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.Fixtures
+import org.junit.Before
+import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures}
 import uk.ac.warwick.tabula.data.model.MeetingRecord
-import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.data.model.Member
 
 // scalastyle:off magic.number
-class MeetingRecordDaoTest extends AppContextTestBase {
+class MeetingRecordDaoTest extends PersistenceTestBase {
 
-	@Autowired var memberDao: MemberDao =_
-	@Autowired var meetingDao :MeetingRecordDao =_
+	// This test for memberdao maybe shouldn't be involving meetingrecorddao.
+	val memberDao = new MemberDaoImpl
+	val meetingDao = new MeetingRecordDaoImpl
+
+	@Before
+	def setup() {
+		memberDao.sessionFactory = sessionFactory
+		meetingDao.sessionFactory = sessionFactory
+	}
 
 	@Test def createAndList = transactional { tx =>
 
