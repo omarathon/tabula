@@ -44,6 +44,7 @@ ajcore*
 /.idea/libraries
 /.idea/dictionaries
 /.idea/scala_compiler.xml
+/.idea/*
 .idea/
 *.iml
 *.iws
