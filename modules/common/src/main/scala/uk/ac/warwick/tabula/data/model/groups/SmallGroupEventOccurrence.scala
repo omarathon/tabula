@@ -6,14 +6,18 @@ import uk.ac.warwick.tabula.data.model.{UserGroup, GeneratedId}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import scala.Array
 import javax.persistence.CascadeType._
+import java.lang.annotation.Annotation
 
 @AccessType("field")
 @Entity
-@UniqueConstraint(columnNames = Array("smallGroupEvent", "week"))
+@Table(uniqueConstraints = Array(
+	new UniqueConstraint(columnNames = Array("event_id", "week"))
+))
 class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with Serializable {
 	type WeekNumber = Int
 
 	@ManyToOne
+	@JoinColumn(name="event_id")
 	var smallGroupEvent: SmallGroupEvent = _
 
 	var week: WeekNumber = _
