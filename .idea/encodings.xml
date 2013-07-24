@@ -4,9 +4,9 @@
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/modules/admin" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/modules/all" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/modules/attendance" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/modules/common" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/modules/coursework" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/modules/functional-test" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/modules/groups" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/modules/home" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/modules/profiles" charset="UTF-8" />
