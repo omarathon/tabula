@@ -13,22 +13,22 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 	trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent {
 		val smallGroupService = mock[SmallGroupService]
 		val userLookup = mock[UserLookupService]
+		def apply() {}
 	}
 
 	@Test
 	def commandApply() {
 		val event = mock[SmallGroupEvent]
 		val week = 1
-		val command = new RecordAttendanceCommand(event, week) with CommandTestSupport
 		val user = new User("abcde")
 
-		command.userLookup.getUsersByUserIds(Seq("abcde").asJava) returns (Map("abcde" -> user).asJava)
-
-		command.attending.add("abcde")
+		val command = new RecordAttendanceCommand(event, week) with CommandTestSupport
+		//command.userLookup.getUsersByUserIds(Seq("abcde").asJava) returns (Map("abcde" -> user).asJava)
+		command.attendees.add("abcde")
 		command.applyInternal()
 
-		there was one(command.userLookup).getUsersByUserIds(Seq("abcde").asJava)
-		there was one(command.smallGroupService).updateAttendance(event, week, Seq(user))
+		there was no(command.userLookup).getUsersByUserIds(Seq("abcde").asJava)
+		there was one(command.smallGroupService).updateAttendance(event, week, Seq("abcde"))
 	}
 
 }
