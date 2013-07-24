@@ -24,8 +24,6 @@ import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.hibernate.validator.Valid
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
-import scala.Some
-import scala.Some
 
 /**
  * Common superclass for creation and modification. Note that any defaults on the vars here are defaults

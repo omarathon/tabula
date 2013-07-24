@@ -86,7 +86,7 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 		.add(Restrictions.eq("upstreamAssignment", group.upstreamAssignment))
 		.add(Restrictions.eq("occurrence", group.occurrence))
 
-		if(group.assignment != null){
+		if (group.assignment != null) {
 			criteria.add(Restrictions.eq("assignment", group.assignment))
 		} else {
 			criteria.add(Restrictions.eq("smallGroupSet", group.smallGroupSet))

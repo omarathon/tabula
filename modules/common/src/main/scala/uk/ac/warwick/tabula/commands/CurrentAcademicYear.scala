@@ -7,10 +7,6 @@ trait CurrentAcademicYear {
 
 	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime)
 
-	def getAcademicYearString =
-		if (academicYear != null)
-			academicYear.toString()
-		else
-			""
+	def getAcademicYearString = Option(academicYear).map(_.toString).getOrElse("")
 
 }
