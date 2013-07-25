@@ -9,6 +9,7 @@ import org.springframework.validation.Errors
 import org.hibernate.validator.Valid
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.CurrentUser
+import org.springframework.web.bind.annotation.RequestParam
 
 @RequestMapping(value = Array("/event/{event}/register/{week}"))
 @Controller
@@ -26,12 +27,12 @@ class RecordAttendanceController extends GroupsController {
 		command.populate()
 		form(command)
 	}
-	
+
 	def form(@ModelAttribute command: RecordAttendanceCommand): Mav = {
-		Mav("groups/attendance/form", 
-			"command" -> command, 
-			"cancel" -> Routes.tutor.mygroups(user.apparentUser)
-		)
+		val returnTo = getReturnTo(Routes.tutor.mygroups(user.apparentUser))
+		Mav("groups/attendance/form",
+			"command" -> command,
+			"returnTo" -> getReturnTo(Routes.tutor.mygroups(user.apparentUser)))
 	}
 
 	@RequestMapping(method = Array(POST))

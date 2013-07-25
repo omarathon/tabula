@@ -12,6 +12,7 @@
 
 <div class="striped-section-contents attendees">
 	<form action="" method="post">
+		<input type="hidden" value="<@url page="${returnTo}" />" />
 		<#list command.event.group.students.users as student>
 			<#assign checked = false />
 			<#list command.attendees as attendedStudent>
@@ -34,7 +35,7 @@
 		
 		<div class="pull-right">
 			<input type="submit" value="Save" class="btn btn-primary">
-			<a class="btn" href="<@url page="${cancel}" />">Cancel</a>
+			<a class="btn" href="<@url page="${returnTo}" />">Cancel</a>
 		</div>
 	</form>
 </div>
