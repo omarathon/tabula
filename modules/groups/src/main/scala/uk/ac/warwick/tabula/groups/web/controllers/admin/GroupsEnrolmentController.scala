@@ -1,35 +1,33 @@
-package uk.ac.warwick.tabula.coursework.web.controllers.admin.assignments
+package uk.ac.warwick.tabula.groups.web.controllers.admin
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation._
+import org.springframework.web.bind.annotation.{InitBinder, PathVariable, ModelAttribute, RequestMapping}
+import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
+import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.web.bind.WebDataBinder
-
-import uk.ac.warwick.tabula.coursework.commands.assignments._
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.{UpstreamGroupPropertyEditor, UpstreamGroup}
-
+import uk.ac.warwick.tabula.groups.commands.admin.EditGroupSetEnrolmentCommand
 
 /**
  * Controller to populate the user listing for editing, without persistence
  */
 @Controller
-@RequestMapping(value = Array("/admin/module/{module}/assignments/enrolment"))
-class AssignmentEnrolmentController extends CourseworkController {
+@RequestMapping(value = Array("/admin/module/{module}/groups/enrolment"))
+class GroupsEnrolmentController extends GroupsController {
 
-	validatesSelf[EditAssignmentEnrolmentCommand]
+	validatesSelf[EditGroupSetEnrolmentCommand]
 
 	@ModelAttribute def formObject(@PathVariable("module") module: Module) = {
-		val cmd = new EditAssignmentEnrolmentCommand(mandatory(module))
+		val cmd = new EditGroupSetEnrolmentCommand(mandatory(module))
 		cmd.upstreamGroups.clear()
 		cmd
 	}
 
 	@RequestMapping
-	def showForm(form: EditAssignmentEnrolmentCommand, openDetails: Boolean = false) = {
+	def showForm(form: EditGroupSetEnrolmentCommand, openDetails: Boolean = false) = {
 		form.afterBind()
 
-		Mav("admin/assignments/enrolment",
+		Mav("admin/groups/enrolment",
 			"department" -> form.module.department,
 			"module" -> form.module,
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,
@@ -43,5 +41,5 @@ class AssignmentEnrolmentController extends CourseworkController {
 	def upstreamGroupBinder(binder: WebDataBinder) {
 		binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
 	}
-}
 
+}

@@ -16,6 +16,8 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 class CreateSmallGroupSetCommand(module: Module) extends ModifySmallGroupSetCommand(module) with BindListener {
 	
 	PermissionCheck(Permissions.SmallGroups.Create, module)
+
+	val setOption = None
 	
 	var service = Wire[SmallGroupService]
 

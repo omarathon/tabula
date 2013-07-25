@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.WebDataBinder
-import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{InitBinder, ModelAttribute, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import uk.ac.warwick.tabula.data.model.{Department, Module}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat
@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 import org.springframework.validation.BeanPropertyBindingResult
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{UpstreamGroupPropertyEditor, UpstreamGroup, Appliable}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
 
@@ -67,13 +67,21 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 		new CreateSmallGroupSetCommand(module)
 		
 	@RequestMapping
-	def form(cmd: CreateSmallGroupSetCommand) =
+	def form(cmd: CreateSmallGroupSetCommand) = {
+		cmd.afterBind()
+
 		Mav("admin/groups/new",
-			"allTermWeekRanges" -> allTermWeekRanges(cmd)
+			"allTermWeekRanges" -> allTermWeekRanges(cmd),
+			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
+			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
+			"assessmentGroups" -> cmd.assessmentGroups
 		).crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
+	}
 	
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))
-	def submit(@Valid cmd: CreateSmallGroupSetCommand, errors: Errors) =
+	def submit(@Valid cmd: CreateSmallGroupSetCommand, errors: Errors) = {
+		cmd.afterBind()
+
 		if (errors.hasErrors) form(cmd)
 		else {
 			val set = cmd.apply()
@@ -81,6 +89,12 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 			// Redirect straight to allocation
 			Redirect(Routes.admin.allocate(set))
 		}
+	}
+
+	@InitBinder
+	def upstreamGroupBinder(binder: WebDataBinder) {
+		binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
+	}
 }
 
 @RequestMapping(Array("/admin/module/{module}/groups/{set}/edit"))
@@ -102,18 +116,43 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	}
 	
 	@RequestMapping
-	def form(cmd: EditSmallGroupSetCommand) =
+	def form(cmd: EditSmallGroupSetCommand) = {
+		cmd.afterBind()
+
 		Mav("admin/groups/edit",
-			"allTermWeekRanges" -> allTermWeekRanges(cmd)
+			"allTermWeekRanges" -> allTermWeekRanges(cmd),
+			"availableUpstreamGroups" -> cmd.availableUpstreamGroups,
+			"linkedUpstreamAssessmentGroups" -> cmd.linkedUpstreamAssessmentGroups,
+			"assessmentGroups" -> cmd.assessmentGroups
 		).crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
-	
-	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))
-	def submit(@Valid cmd: EditSmallGroupSetCommand, errors: Errors) =
+	}
+
+	@RequestMapping(method = Array(POST), params = Array("action=update"))
+	def update(@Valid cmd: EditSmallGroupSetCommand, errors: Errors) = {
+		cmd.afterBind()
+
+		if (!errors.hasErrors) {
+			cmd.apply()
+		}
+
+		form(cmd)
+	}
+
+	@RequestMapping(method=Array(POST), params=Array("action!=refresh", "action!=update"))
+	def submit(@Valid cmd: EditSmallGroupSetCommand, errors: Errors) = {
+		cmd.afterBind()
+
 		if (errors.hasErrors) form(cmd)
 		else {
 			cmd.apply()
 			Redirect(Routes.admin.module(cmd.module))
 		}
+	}
+
+	@InitBinder
+	def upstreamGroupBinder(binder: WebDataBinder) {
+		binder.registerCustomEditor(classOf[UpstreamGroup], new UpstreamGroupPropertyEditor)
+	}
 }
 
 @RequestMapping(Array("/admin/module/{module}/groups/{set}/delete"))

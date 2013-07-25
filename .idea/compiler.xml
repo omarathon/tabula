@@ -38,7 +38,6 @@
         <processorPath useClasspath="true" />
         <module name="admin" />
         <module name="all" />
-        <module name="attendance" />
         <module name="common" />
         <module name="courses" />
         <module name="functional-test" />
@@ -51,7 +50,6 @@
     <bytecodeTargetLevel>
       <module name="admin" target="1.6" />
       <module name="all" target="1.6" />
-      <module name="attendance" target="1.6" />
       <module name="common" target="1.6" />
       <module name="courses" target="1.6" />
       <module name="functional-test" target="1.6" />

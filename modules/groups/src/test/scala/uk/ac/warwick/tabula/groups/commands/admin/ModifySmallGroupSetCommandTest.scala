@@ -11,6 +11,8 @@ class ModifySmallGroupSetCommandTest extends TestBase{
 
 	def getCommand(m:Module) = new ModifySmallGroupSetCommand(m) {
 		def describe(d: Description) {}
+		val setOption = None
+		override lazy val availableUpstreamGroups = Nil
 		protected def applyInternal(): SmallGroupSet = new SmallGroupSet
 	}
 

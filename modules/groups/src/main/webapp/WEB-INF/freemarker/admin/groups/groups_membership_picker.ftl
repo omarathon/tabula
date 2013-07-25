@@ -1,11 +1,8 @@
-<#--
-
-	assignment membership editor split out from _fields.ftl for readability.
-
--->
 <#escape x as x?html>
 	<@form.labelled_row "members" "Students" "assignmentEnrolment">
 		<fieldset id="assignmentEnrolmentFields">
+
+
 
 		<#list command.upstreamGroups as item>
 			<@f.hidden path="upstreamGroups[${item_index}]" cssClass="upstreamGroups" />
@@ -64,27 +61,27 @@
 			</summary>
 
 			<#-- FIXME: alerts fired post SITS change go here, if controller returns something to say -->
-			<#-- <p class="alert alert-success"><i class="icon-ok"></i> This assignment is (now linked|no longer linked) to ${r"${name}"} and ${r"${name}"}</p> -->
+			<#-- <p class="alert alert-success"><i class="icon-ok"></i> This group set is (now linked|no longer linked) to ${r"${name}"} and ${r"${name}"}</p> -->
 
 			<p>
 				<#if linkedUpstreamAssessmentGroups?has_content>
-					<a class="btn use-tooltip disabled show-sits-picker" title="Change the linked SITS assignment used for enrolment data">Change link to SITS</a>
+					<a class="btn use-tooltip disabled show-sits-picker" title="Change the linked SITS groups used for enrolment data">Change link to SITS</a>
 				<#elseif availableUpstreamGroups?has_content>
-					<a class="btn use-tooltip disabled show-sits-picker" title="Use enrolment data from one or more assignments recorded in SITS">Add link to SITS</a>
+					<a class="btn use-tooltip disabled show-sits-picker" title="Use enrolment data from one or more groups recorded in SITS">Add link to SITS</a>
 				<#else>
-					<a class="btn use-tooltip disabled" title="No assignments are recorded for this module in SITS. Add them there if you want to create a parallel link in Tabula.">No SITS link available</a>
+					<a class="btn use-tooltip disabled" title="No membership groups are recorded for this module in SITS. Add them there if you want to create a parallel link in Tabula.">No SITS link available</a>
 				</#if>
 				</a>
 
 				<a class="btn use-tooltip disabled show-adder"
-						<#if availableUpstreamGroups??>title="This will only enrol a student for this assignment in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
+						<#if availableUpstreamGroups??>title="This will only enrol a student for this group set in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
 						>
 					Add students manually
 				</a>
 
 				<#if hasMembers>
 					<a class="btn btn-warning disabled remove-users member-action use-tooltip"
-							<#if availableUpstreamGroups??>title="This will only remove enrolment for this assignment in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
+							<#if availableUpstreamGroups??>title="This will only remove enrolment for this group set in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
 							>
 						Remove
 					</a>
@@ -219,7 +216,7 @@
 
 			<#if command.availableUpstreamGroups?has_content>
 				<div class="modal-body">
-					<p>Add students by linking this assignment to one or more of the following SITS assignments for
+					<p>Add students by linking this group set to one or more of the following SITS membership groups for
 					${command.module.code?upper_case} which have assessment groups for ${command.academicYear.label}.</p>
 
 					<table id="sits-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-orangeLight">
@@ -253,7 +250,7 @@
 				</div>
 			<#else>
 				<div class="modal-body">
-					<p class="alert alert-warning">No SITS assignments for ${command.module.code?upper_case} are available</p>
+					<p class="alert alert-warning">No SITS membership groups for ${command.module.code?upper_case} are available</p>
 				</div>
 			</#if>
 		</div>
@@ -275,13 +272,13 @@
 			$enrolment.tabulaPrepareSpinners();
 			$enrolment.find('summary:not([role="button"])').closest('details').details();
 
-			// TODO this is cribbed out of scripts.js - re-use would be better
+			// TODO this is cribbed out of scripts.js - re-use would be better			
 			$enrolment.find('.use-popover').each(function() {
 				if ($(this).attr('data-title')) {
 					$(this).attr('data-original-title', $(this).attr('data-title'));
 				}
 			});
-
+	
 			$enrolment.find('.use-popover').popover({
 				trigger: 'click',
 				container: '#container',
@@ -318,7 +315,7 @@
 		</#if>
 		initEnrolment();
 
-		var $pendingAlert = $('<p class="alert alert-warning hide"><i class="icon-warning-sign"></i> Your changes will not be recorded until you save this assignment.	<input type="submit" value="Save" class="btn btn-primary btn-mini update-only"></p>');
+		var $pendingAlert = $('<p class="alert alert-warning hide"><i class="icon-warning-sign"></i> Your changes will not be recorded until you save this group set.	<input type="submit" value="Save" class="btn btn-primary btn-mini update-only"></p>');
 
 		<#-- manage check-all state -->
 		var updateCheckboxes = function($table) {
@@ -340,7 +337,7 @@
 		}
 
 		var alertPending = function() {
-			if (window.location.pathname.indexOf('/assignments/new') == -1) {
+			if (window.location.pathname.indexOf('/groups/new') == -1) {
 				$('#enrolment').before($pendingAlert);
 				$pendingAlert.delay(750).slideDown();
 			}
@@ -365,7 +362,7 @@
 		$enrolment.on('click', '.sits-picker .btn', function(e) {
 			e.preventDefault();
 			var $m = $(this).closest('.modal');
-			if ($(this).is(':not(.disabled)')) {
+			if ($(this).is(':not(.disabled)')) {			
 				$('.sits-picker .btn').addClass('disabled').prop('disabled', 'disabled');
 
 				<#-- get current list of values and remove and/or add changes -->
@@ -402,10 +399,10 @@
 		});
 
 		<#-- adder click handler -->
-		$enrolment.on('click', '.adder .btn', function(e) {
+		$enrolment.on('click', '.adder .btn', function(e) {		
 			e.preventDefault();
-			var $m = $(this).closest('.modal');
-			if ($(this).is(':not(.disabled)')) {
+			var $m = $(this).closest('.modal');		
+			if ($(this).is(':not(.disabled)')) {	
 				$(this).addClass('disabled').prop('disabled', 'disabled');
 				$.ajax({
 					type: 'POST',

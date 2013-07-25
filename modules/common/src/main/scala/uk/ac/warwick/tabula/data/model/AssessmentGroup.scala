@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import javax.persistence._
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 
 @Entity
 class AssessmentGroup extends GeneratedId {
@@ -8,6 +9,10 @@ class AssessmentGroup extends GeneratedId {
 	@ManyToOne
 	@JoinColumn(name = "assignment_id")
 	var assignment: Assignment = _
+
+	@ManyToOne
+	@JoinColumn(name = "group_set_id")
+	var smallGroupSet: SmallGroupSet = _
 
 	@ManyToOne
 	@JoinColumn(name = "upstream_id")
