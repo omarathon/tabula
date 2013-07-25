@@ -26,6 +26,7 @@ trait SmallGroupService {
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent)
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent]
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup]
+	def findSmallGroupsByStudent(student: User): Seq[SmallGroup]
 
 	def updateAttendance(smallGroupEvent: SmallGroupEvent, weekNumber: Int, usercodes: Seq[String])
 }
@@ -35,6 +36,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	val eventTutorsHelper = new UserGroupMembershipHelper[SmallGroupEvent]("tutors")
 	val groupTutorsHelper = new UserGroupMembershipHelper[SmallGroup]("events.tutors")
+	val studentGroupHelper = new UserGroupMembershipHelper[SmallGroup]("students")
 
 	def getSmallGroupSetById(id: String) = smallGroupDao.getSmallGroupSetById(id)
 	def getSmallGroupById(id: String) = smallGroupDao.getSmallGroupById(id)
@@ -46,6 +48,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = groupTutorsHelper.findBy(user)
+	def findSmallGroupsByStudent(user: User): Seq[SmallGroup] = studentGroupHelper.findBy(user)
 
 	def updateAttendance(event: SmallGroupEvent, weekNumber: Int, usercodes: Seq[String]) {
 		val occurrence = smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber) getOrElse {

@@ -20,17 +20,7 @@ class TutorHomeController extends GroupsController {
 	def listModules(@ModelAttribute("command") command: TutorHomeCommand): Mav = {
 		val mapping = command.apply()
 
-		// Build the view model
-		val moduleItems =
-			for ((module, sets) <- mapping) yield {
-				ViewModule(module,
-					sets.toSeq map { case (set, groups) =>
-						ViewSet(set, groups)
-					},
-					canManageGroups=false
-				)
-			}
-		val data = ViewModules( moduleItems.toSeq, canManageDepartment=false )
+		val data = generateGroupsViewModel(mapping)
 
 		Mav("groups/tutor_home",
 			"data" -> data
