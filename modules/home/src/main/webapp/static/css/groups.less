@@ -1,4 +1,5 @@
 @import "bootstrap/variables.less";
+@import "css3.less";
 
 @header-colour: @tabulaGreenLight;
 
@@ -83,3 +84,16 @@ input.deleted {
 }
 
 // end arrange students into groups
+
+.tabula-page .attendees .item-info {
+	.span1 {
+		text-align: center;
+	}
+	&, & label {
+		.cursor-pointer();
+	}
+	&.clickable:hover {
+		background-color: @zebra-dark;
+		.transition-duration(0.3s);
+	}
+}

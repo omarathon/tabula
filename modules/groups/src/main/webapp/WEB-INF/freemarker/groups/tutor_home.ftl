@@ -3,6 +3,17 @@
 
 <h1>My small groups</h1>
 
+<#if updatedOccurrence??>
+<div class="alert alert-success">
+	<button type="button" class="close" data-dismiss="alert">&times;</button>
+    Attendance at 
+    	${updatedOccurrence.smallGroupEvent.group.groupSet.name}, 
+		${updatedOccurrence.smallGroupEvent.group.name}: 
+		${updatedOccurrence.smallGroupEvent.day.name} <@fmt.time updatedOccurrence.smallGroupEvent.startTime /> - <@fmt.time updatedOccurrence.smallGroupEvent.endTime /> 
+		in <strong>Week ${updatedOccurrence.week}</strong> has been recorded.
+</div>
+</#if>
+
 <#-- Hide while it doesn't actually do anything.
 	When we do make it work, make it work for the other similar pages e.g. /groups/admin/department/{dept}/
 <div class="input-prepend">
