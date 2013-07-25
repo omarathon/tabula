@@ -45,7 +45,6 @@ abstract class AppContextTestBase extends TestBase with ContextSetup with Transa
 @RunWith(classOf[SpringJUnit4ClassRunner])
 @ContextConfiguration(locations=Array("/WEB-INF/properties-context.xml","/WEB-INF/persistence-context.xml"))
 @ActiveProfiles(Array("test"))
-@DirtiesContext
 abstract class PersistenceTestBase extends TestBase with ContextSetup with TransactionalTesting {
 	
 	
