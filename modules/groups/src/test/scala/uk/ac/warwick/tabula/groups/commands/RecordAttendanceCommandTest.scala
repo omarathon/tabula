@@ -43,8 +43,7 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		there was one(command.smallGroupService).updateAttendance(event, week, Seq("abcde"))
 	}
 	
-	@Test
-	def validate() {
+	trait Fixture {
 		val invalidUser = new User("invalid")
 		invalidUser.setFoundUser(false);
 		val missingUser = new User("missing")
@@ -69,31 +68,46 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		students.userLookup.getUsersByUserIds(JArrayList(validUser.getUserId())) returns JMap(validUser.getUserId() -> validUser)
 		
 		students.addUser(validUser.getUserId())
-		
-		command.attendees = JArrayList()
-		command.attendees.add(invalidUser.getUserId())
-		command.attendees.add(validUser.getUserId())
-		
-		var errors = new BindException(command, "command")
-		command.validate(errors)
-		errors.hasFieldErrors() should be (true)
-		errors.getFieldError("attendees").getArguments() should have size (1) 
-		
-		command.attendees = JArrayList()
-		command.attendees.add(missingUser.getUserId())
-		command.attendees.add(validUser.getUserId())
-		
-		errors = new BindException(command, "command")
-		command.validate(errors)
-		errors.hasFieldErrors() should be (true)
-		errors.getFieldError("attendees").getArguments() should have size (1) 
-		
-		command.attendees = JArrayList()
-		command.attendees.add(validUser.getUserId())
-		
-		errors = new BindException(command, "command")
-		command.validate(errors)
-		errors.hasFieldErrors() should be (false)
+	}
+	
+	@Test
+	def validateInvalid() {
+		new Fixture {
+			command.attendees = JArrayList()
+			command.attendees.add(invalidUser.getUserId())
+			command.attendees.add(validUser.getUserId())
+			
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors() should be (true)
+			errors.getFieldError("attendees").getArguments() should have size (1) 
+		}
+	}
+	
+	@Test
+	def validateMissing() {
+		new Fixture {
+			command.attendees = JArrayList()
+			command.attendees.add(missingUser.getUserId())
+			command.attendees.add(validUser.getUserId())
+			
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors() should be (true)
+			errors.getFieldError("attendees").getArguments() should have size (1) 
+		}
+	}
+	
+	@Test
+	def validateValid() {
+		new Fixture {
+			command.attendees = JArrayList()
+			command.attendees.add(validUser.getUserId())
+			
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors() should be (false)
+		}
 	}
 
 }

@@ -4,8 +4,7 @@ import scala.collection.JavaConverters.asScalaBufferConverter
 
 import org.springframework.validation.Errors
 
-import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.JavaImports.JList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.CommandInternal
 import uk.ac.warwick.tabula.commands.ComposableCommand
