@@ -22,7 +22,7 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 	trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent with ProfileServiceComponent {
 		val smallGroupService = mock[SmallGroupService]
 		val userLookup = mock[UserLookupService]
-		var profileService = mock[ProfileService]
+		val profileService = mock[ProfileService]
 		
 		def apply(): SmallGroupEventOccurrence = {
 			smallGroupEventOccurrence
@@ -49,8 +49,10 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		invalidUser.setFoundUser(false);
 		val missingUser = new User("missing")
 		missingUser.setFoundUser(true);
+		missingUser.setWarwickId("missing")
 		val validUser = new User("valid")
 		validUser.setFoundUser(true);
+		validUser.setWarwickId("valid")
 		val event = new SmallGroupEvent()
 		val group = new SmallGroup()
 		val students = new UserGroup()
@@ -63,6 +65,10 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		command.userLookup.getUserByWarwickUniId(invalidUser.getUserId()) returns (invalidUser)
 		command.userLookup.getUserByWarwickUniId(missingUser.getUserId()) returns (missingUser)
 		command.userLookup.getUserByWarwickUniId(validUser.getUserId()) returns (validUser)
+		students.userLookup = command.userLookup
+		students.userLookup.getUsersByUserIds(JArrayList(validUser.getUserId())) returns JMap(validUser.getUserId() -> validUser)
+		
+		students.addUser(validUser.getUserId())
 		
 		command.attendees = JArrayList()
 		command.attendees.add(invalidUser.getUserId())
@@ -81,6 +87,13 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		command.validate(errors)
 		errors.hasFieldErrors() should be (true)
 		errors.getFieldError("attendees").getArguments() should have size (1) 
+		
+		command.attendees = JArrayList()
+		command.attendees.add(validUser.getUserId())
+		
+		errors = new BindException(command, "command")
+		command.validate(errors)
+		errors.hasFieldErrors() should be (false)
 	}
 
 }
