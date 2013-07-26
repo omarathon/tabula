@@ -43,9 +43,9 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 	extends CommandInternal[SmallGroupEventOccurrence] 
 			with Appliable[SmallGroupEventOccurrence] with RecordAttendanceState with SelfValidating {
 	self: SmallGroupServiceComponent with UserLookupComponent with ProfileServiceComponent =>
-	type UserId = String
+	type UniversityId = String
 
-	var attendees: JList[UserId] = JArrayList()
+	var attendees: JList[UniversityId] = JArrayList()
 	
 	def populate() {
 		attendees = smallGroupService.getAttendees(event, week)
@@ -60,11 +60,11 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 	}
 
 	def validate(errors: Errors) {
-		val invalidUsers: Seq[String] = attendees.asScala.filter(s => !userLookup.getUserByWarwickUniId(s).isFoundUser())
+		val invalidUsers: Seq[UniversityId] = attendees.asScala.filter(s => !userLookup.getUserByWarwickUniId(s).isFoundUser())
 		if (invalidUsers.length > 0) {
 			errors.rejectValue("attendees", "smallGroup.attendees.invalid", Array(invalidUsers), "")
 		} else {
-			val missingUsers: Seq[String] = attendees.asScala.filter(s => event.group.students.users.filter(u => u.getWarwickId() == s).length == 0)
+			val missingUsers: Seq[UniversityId] = attendees.asScala.filter(s => event.group.students.users.filter(u => u.getWarwickId() == s).length == 0)
 			if (missingUsers.length > 0) {
 				errors.rejectValue("attendees", "smallGroup.attendees.missing", Array(missingUsers), "")
 			}
