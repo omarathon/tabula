@@ -2,11 +2,8 @@ package uk.ac.warwick.tabula.groups.commands
 
 import scala.collection.JavaConverters.asScalaBufferConverter
 
-import org.hibernate.annotations.AccessType
 import org.springframework.validation.Errors
 
-import javax.persistence.Entity
-import javax.persistence.Table
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.commands.Appliable
