@@ -28,7 +28,7 @@ trait SmallGroupService {
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent]
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup]
 
-	def updateAttendance(smallGroupEvent: SmallGroupEvent, weekNumber: Int, usercodes: Seq[String]): SmallGroupEventOccurrence
+	def updateAttendance(smallGroupEvent: SmallGroupEvent, weekNumber: Int, universityIds: Seq[String]): SmallGroupEventOccurrence
 	def getAttendees(event: SmallGroupEvent, weekNumber: Int): JList[String]
 }
 
@@ -56,7 +56,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			case _ => JArrayList()
 		}
 
-	def updateAttendance(event: SmallGroupEvent, weekNumber: Int, usercodes: Seq[String]): SmallGroupEventOccurrence = {
+	def updateAttendance(event: SmallGroupEvent, weekNumber: Int, universityIds: Seq[String]): SmallGroupEventOccurrence = {
 		val occurrence = smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber) getOrElse {
 			val newOccurrence = new SmallGroupEventOccurrence()
 			newOccurrence.smallGroupEvent = event
@@ -66,7 +66,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		}
 
 		occurrence.attendees.includeUsers.clear()
-		occurrence.attendees.includeUsers.addAll(usercodes.asJava)
+		occurrence.attendees.includeUsers.addAll(universityIds.asJava)
 		occurrence
 	}
 }

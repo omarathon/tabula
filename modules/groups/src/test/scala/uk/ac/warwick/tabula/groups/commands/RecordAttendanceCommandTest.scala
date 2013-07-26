@@ -11,15 +11,18 @@ import org.springframework.validation.Errors
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.ProfileServiceComponent
 
 class RecordAttendanceCommandTest extends TestBase with Mockito {
 	
 	val smallGroupEventOccurrence = mock[SmallGroupEventOccurrence]
 
 	// Implements the dependencies declared by the command
-	trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent {
+	trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent with ProfileServiceComponent {
 		val smallGroupService = mock[SmallGroupService]
 		val userLookup = mock[UserLookupService]
+		var profileService = mock[ProfileService]
 		
 		def apply(): SmallGroupEventOccurrence = {
 			smallGroupEventOccurrence
@@ -57,9 +60,9 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 
 		val command = new RecordAttendanceCommand(event, week) with CommandTestSupport
 		
-		command.userLookup.getUserByUserId(invalidUser.getUserId()) returns (invalidUser)
-		command.userLookup.getUserByUserId(missingUser.getUserId()) returns (missingUser)
-		command.userLookup.getUserByUserId(validUser.getUserId()) returns (validUser)
+		command.userLookup.getUserByWarwickUniId(invalidUser.getUserId()) returns (invalidUser)
+		command.userLookup.getUserByWarwickUniId(missingUser.getUserId()) returns (missingUser)
+		command.userLookup.getUserByWarwickUniId(validUser.getUserId()) returns (validUser)
 		
 		command.attendees = JArrayList()
 		command.attendees.add(invalidUser.getUserId())

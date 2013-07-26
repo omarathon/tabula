@@ -13,10 +13,10 @@
 <div class="striped-section-contents attendees">
 	<form action="" method="post">
 		<input type="hidden" value="<@url page="${returnTo}" />" />
-		<#list command.event.group.students.users as student>
+		<#list command.members as student>
 			<#assign checked = false />
 			<#list command.attendees as attendedStudent>
-				<#if attendedStudent == student.userId>
+				<#if attendedStudent == student.universityId>
 					<#assign checked = true />
 				</#if>
 			</#list>
@@ -24,10 +24,12 @@
 				<label>
 				<div class="span10">
 					<@fmt.member_photo student "tinythumbnail" false />
-					${student.fullName}
+					<div class="full-height">${student.fullName}</div>
 				</div>
 				<div class="span1">
-					<input type="checkbox" name="attendees" value="${student.userId}" <#if checked>checked="checked"</#if>/>
+					<div class="full-height">
+						<input type="checkbox" name="attendees" value="${student.universityId}" <#if checked>checked="checked"</#if>/>
+					</div>
 				</div>
 				</label>
 			</div>

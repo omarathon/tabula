@@ -29,7 +29,6 @@ class RecordAttendanceController extends GroupsController {
 	}
 
 	def form(@ModelAttribute command: RecordAttendanceCommand): Mav = {
-		val returnTo = getReturnTo(Routes.tutor.mygroups(user.apparentUser))
 		Mav("groups/attendance/form",
 			"command" -> command,
 			"returnTo" -> getReturnTo(Routes.tutor.mygroups(user.apparentUser)))
