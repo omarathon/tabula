@@ -35,8 +35,6 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 
 	var maxGroupSize: Int = if (properties.defaultMaxGroupSizeEnabled) properties.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
 
-	var maxGroupSizeEnabled: Boolean = false
-
 	// Used by parent command
 	var delete: Boolean = false
 	
@@ -92,7 +90,6 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 
 		group.maxGroupSize.foreach(size => maxGroupSize = size)
 
-		maxGroupSizeEnabled = group.maxGroupSizeEnabled
 		events.clear()
 		events.addAll(group.events.asScala.map(new EditSmallGroupEventCommand(_)).asJava)
 
@@ -103,7 +100,6 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 		group.name = name
 
 		group.maxGroupSize = maxGroupSize
-		group.maxGroupSizeEnabled = maxGroupSizeEnabled
 		
 		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
 		group.events.clear()
