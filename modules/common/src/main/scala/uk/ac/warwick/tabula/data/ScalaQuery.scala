@@ -3,6 +3,8 @@ package uk.ac.warwick.tabula.data
 import org.hibernate.criterion._
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
+import org.hibernate.transform.{DistinctRootEntityResultTransformer, ResultTransformer}
+import org.hibernate.Criteria
 
 /**
  * Nice wrapper for a Query object. You usually won't create
@@ -10,7 +12,9 @@ import uk.ac.warwick.tabula.JavaImports._
  * to Session which will return one of these.
  */
 class ScalaQuery[A](c: org.hibernate.Query) {
-	
+
+	def distinct = chainable { c.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE) }
+
 	def setString(name: String, value: String) = chainable { c.setString(name, value) }
 	def setEntity(name: String, entity: Any) = chainable { c.setEntity(name, entity) }
 	def setParameter(name: String, value: Any) = chainable { c.setParameter(name, value) }

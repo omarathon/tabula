@@ -13,12 +13,14 @@ import uk.ac.warwick.tabula.groups.notifications.SmallGroupSetChangedNotificatio
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 
-class EditSmallGroupSetCommand(val set: SmallGroupSet, val apparentUser:User) extends  ModifySmallGroupSetCommand(set.module) with SmallGroupSetCommand  with NotifiesAffectedGroupMembers{
-	
+class EditSmallGroupSetCommand(val set: SmallGroupSet, val apparentUser:User)
+	extends  ModifySmallGroupSetCommand(set.module) with SmallGroupSetCommand  with NotifiesAffectedGroupMembers {
+
 	PermissionCheck(Permissions.SmallGroups.Update, set)
 	
 	this.copyFrom(set)
 	promisedValue = set
+	val setOption = Some(set)
 
   var service = Wire[SmallGroupService]
 

@@ -18,7 +18,7 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.UniversityId
 import org.springframework.validation.BindingResult
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{SmallGroupService, UserLookupService}
 import uk.ac.warwick.spring.Wire
 import org.hibernate.validator.Valid
 import uk.ac.warwick.tabula.helpers.StringUtils._
@@ -27,12 +27,14 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
  * Common superclass for creation and modification. Note that any defaults on the vars here are defaults
  * for creation; the Edit command should call .copyFrom(SmallGroup) to copy any existing properties.
  */
-abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[SmallGroup] with SelfValidating with BindListener {
-	
+abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSetProperties) extends PromisingCommand[SmallGroup] with SelfValidating with BindListener {
+
 	var userLookup = Wire[UserLookupService]
 	
 	var name: String = _
-	
+
+	var maxGroupSize: Int = if (properties.defaultMaxGroupSizeEnabled) properties.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
+
 	// Used by parent command
 	var delete: Boolean = false
 	
@@ -85,15 +87,19 @@ abstract class ModifySmallGroupCommand(module: Module) extends PromisingCommand[
 	
 	def copyFrom(group: SmallGroup) {
 		name = group.name
-		
+
+		group.maxGroupSize.foreach(size => maxGroupSize = size)
+
 		events.clear()
 		events.addAll(group.events.asScala.map(new EditSmallGroupEventCommand(_)).asJava)
-		
+
 		if (group.students != null) students.copyFrom(group.students)
 	}
 	
 	def copyTo(group: SmallGroup) {
 		group.name = name
+
+		group.maxGroupSize = maxGroupSize
 		
 		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
 		group.events.clear()

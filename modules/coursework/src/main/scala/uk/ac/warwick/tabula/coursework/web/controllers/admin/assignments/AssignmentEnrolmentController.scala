@@ -6,9 +6,8 @@ import org.springframework.web.bind.WebDataBinder
 
 import uk.ac.warwick.tabula.coursework.commands.assignments._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
-import uk.ac.warwick.tabula.coursework.commands.assignments.UpstreamGroup
-import uk.ac.warwick.tabula.coursework.commands.assignments.UpstreamGroupPropertyEditor
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.commands.{UpstreamGroupPropertyEditor, UpstreamGroup}
 
 
 /**

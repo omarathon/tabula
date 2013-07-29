@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.data
 
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures}
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedPermission
 import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
@@ -11,13 +9,17 @@ import uk.ac.warwick.tabula.data.model.permissions.RoleOverride
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.userlookup.User
+import org.junit.Before
 
-class PermissionsDaoTest extends AppContextTestBase {
+class PermissionsDaoTest extends PersistenceTestBase {
 	
-	@Autowired var dao: PermissionsDao = _
+	val dao = new PermissionsDaoImpl
+
+	@Before
+	def setup() {
+		dao.sessionFactory = sessionFactory
+	}
 	
 	@Test def crud = transactional { t =>
 		val dept1 = Fixtures.department("dp1")

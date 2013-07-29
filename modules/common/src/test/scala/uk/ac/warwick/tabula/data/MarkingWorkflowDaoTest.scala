@@ -1,27 +1,16 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.AppContextTestBase
-import org.springframework.beans.factory.annotation.Autowired
-import org.junit.Test
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import java.io.ByteArrayInputStream
-import org.joda.time.DateTime
-import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Repository
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import java.io.File
-import org.springframework.util.FileCopyUtils
-import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures}
+import org.junit.Before
 
-class MarkingWorkflowDaoTest extends AppContextTestBase {
+class MarkingWorkflowDaoTest extends PersistenceTestBase {
 
-	@Autowired var dao:MarkingWorkflowDao =_
+	val dao = new MarkingWorkflowDaoImpl
+
+	@Before
+	def setup() {
+		dao.sessionFactory = sessionFactory
+	}
 
 	@Test def crud = transactional { tx =>
 		val dept = Fixtures.department("in")

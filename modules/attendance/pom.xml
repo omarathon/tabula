@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>uk.ac.warwick.tabula</groupId>
+		<artifactId>tabula-project</artifactId>
+		<version>41-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>attendance</artifactId>
+	<packaging>war</packaging>
+
+	<name>Tabula Attendance Monitoring</name>
+	<description>Monitoring attendance</description>
+
+	<properties>
+		<tabula.basedir>${project.basedir}/../..</tabula.basedir>
+	</properties>
+
+	<scm>
+		<url>https://repo.elab.warwick.ac.uk/projects/TAB/repos/tabula/browse/modules/attendance</url>
+	</scm>
+
+	<profiles>
+		<!-- deploy to jboss -->
+		<profile>
+			<id>deploy</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>dev-deploy-unpacked</id>
+								<phase>install</phase>
+								<configuration>
+									<target>
+										<sync todir="${deploy.dir}/${project.artifactId}.war">
+											<fileset dir="${project.build.directory}/${project.build.finalName}" />
+										</sync>
+										<touch file="${deploy.dir}/${project.artifactId}.war/WEB-INF/web.xml" />
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- sync views -->
+		<profile>
+			<id>dev-deploy-views</id>
+
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-antrun-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>dev-deploy-views</id>
+								<phase>process-resources</phase>
+								<configuration>
+									<target>
+										<sync todir="${deploy.dir}/${project.artifactId}.war/WEB-INF/freemarker">
+											<fileset dir="${basedir}/src/main/webapp/WEB-INF/freemarker" />
+										</sync>
+									</target>
+								</configuration>
+								<goals>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<dependencies>
+		<!-- Project dependencies -->
+		<dependency>
+			<groupId>uk.ac.warwick.tabula</groupId>
+			<artifactId>home</artifactId>
+			<classifier>static-hashes</classifier>
+			<type>zip</type>
+			<scope>provided</scope>
+		</dependency>
+	</dependencies>
+</project>

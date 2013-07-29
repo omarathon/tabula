@@ -11,6 +11,8 @@ class ModifySmallGroupSetCommandTest extends TestBase{
 
 	def getCommand(m:Module) = new ModifySmallGroupSetCommand(m) {
 		def describe(d: Description) {}
+		val setOption = None
+		override lazy val availableUpstreamGroups = Nil
 		protected def applyInternal(): SmallGroupSet = new SmallGroupSet
 	}
 
@@ -20,6 +22,8 @@ class ModifySmallGroupSetCommandTest extends TestBase{
 		val sourceSet = new SmallGroupSet()
 		sourceSet.studentsCanSeeOtherMembers = true
 		sourceSet.studentsCanSeeTutorName = true
+		sourceSet.defaultMaxGroupSizeEnabled = true
+		sourceSet.defaultMaxGroupSize = 22
 		sourceSet.allowSelfGroupSwitching = true
 		sourceSet.name = "test"
 		sourceSet.academicYear = AcademicYear(2012)
@@ -30,6 +34,8 @@ class ModifySmallGroupSetCommandTest extends TestBase{
 		command.copyFrom(sourceSet)
 		command.studentsCanSeeOtherMembers should be (true)
 		command.studentsCanSeeTutorName should be(true)
+		command.defaultMaxGroupSizeEnabled should be (true)
+		command.defaultMaxGroupSize should be (22)
 		command.allowSelfGroupSwitching should be(true)
 		command.name should be("test")
 		command.academicYear should be(AcademicYear(2012))
@@ -44,6 +50,8 @@ class ModifySmallGroupSetCommandTest extends TestBase{
 
 		command.studentsCanSeeOtherMembers = true
 		command.studentsCanSeeTutorName = true
+		command.defaultMaxGroupSizeEnabled = true
+		command.defaultMaxGroupSize = 23
 		command.allowSelfGroupSwitching = true
 		command.name = "test"
 		command.academicYear  = AcademicYear(2012)
@@ -56,6 +64,8 @@ class ModifySmallGroupSetCommandTest extends TestBase{
 
 		sourceSet.studentsCanSeeOtherMembers should be (true)
 		sourceSet.studentsCanSeeTutorName should be(true)
+		sourceSet.defaultMaxGroupSizeEnabled should be (true)
+		sourceSet.defaultMaxGroupSize should be (23)
 		sourceSet.allowSelfGroupSwitching should be(true)
 		sourceSet.name should be("test")
 		sourceSet.academicYear should be(AcademicYear(2012))

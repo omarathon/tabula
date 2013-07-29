@@ -19,7 +19,7 @@ object OpenSmallGroupSetCommand {
 	}
 }
 
-trait OpenSmallGroupSetState{
+trait OpenSmallGroupSetState {
 	val openableSets:Seq[SmallGroupSet]
 	// convenience value for freemarker to use when we're opening a single
 	// set rather than a batch.
@@ -31,43 +31,43 @@ trait OpenSmallGroupSetState{
 		}
 	}
 }
-class OpenSmallGroupSet(val requestedSets:Seq[SmallGroupSet], val user: User) extends CommandInternal[Seq[SmallGroupSet]] with OpenSmallGroupSetState with UserAware{
+class OpenSmallGroupSet(val requestedSets: Seq[SmallGroupSet], val user: User) extends CommandInternal[Seq[SmallGroupSet]] with OpenSmallGroupSetState with UserAware {
 
-	 val openableSets = requestedSets.filter(s=>s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && !s.openForSignups)
+	 val openableSets = requestedSets.filter(s => s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && !s.openForSignups)
 
 	 def applyInternal(): Seq[SmallGroupSet] = {
-		 openableSets.foreach(s=>s.openForSignups = true)
+		 openableSets.foreach(s => s.openForSignups = true)
 		 openableSets
 	 }
 }
 
-trait OpenSmallGroupSetPermissions extends RequiresPermissionsChecking{
-  this:OpenSmallGroupSetState =>
+trait OpenSmallGroupSetPermissions extends RequiresPermissionsChecking {
+  this: OpenSmallGroupSetState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
 		openableSets.foreach(g=>p.PermissionCheck(Permissions.SmallGroups.Update, g))
 	}
 }
 
-trait OpenSmallGroupSetAudit extends Describable[Seq[SmallGroupSet]]{
-	this:KnowsEventName with OpenSmallGroupSetState=>
+trait OpenSmallGroupSetAudit extends Describable[Seq[SmallGroupSet]] {
+	this: KnowsEventName with OpenSmallGroupSetState =>
 	def describe(d: Description) {
 		d.smallGroupSetCollection(openableSets)
 	}
 }
 
-trait OpenSmallGroupSetNotifier extends Notifies[Seq[SmallGroupSet]]{
-	this:OpenSmallGroupSetState with UserAware =>
+trait OpenSmallGroupSetNotifier extends Notifies[Seq[SmallGroupSet]] {
+	this: OpenSmallGroupSetState with UserAware =>
 
-	def emit():Seq[Notification[Seq[SmallGroupSet]]] ={
-			val allMemberships:Seq[(User,SmallGroupSet)] = for (set<-openableSets;
-			     member<-set.members.users) yield (member,set)
+	def emit(): Seq[Notification[Seq[SmallGroupSet]]] = {
+			val allMemberships: Seq[(User,SmallGroupSet)] = for (set <- openableSets;
+			     member <- set.members.users) yield (member, set)
 
 		  // convert the list of (student, set) pairs into a map of student->sets
-			val setsPerUser:Map[User,Seq[SmallGroupSet]] = allMemberships.groupBy(_._1).map { case (k,v) => (k,v.map(_._2))}
+			val setsPerUser: Map[User,Seq[SmallGroupSet]] = allMemberships.groupBy(_._1).map { case (k,v) => (k,v.map(_._2))}
 
       // convert the map into a notification per user
-		  setsPerUser.map {case (student, sets) =>new OpenSmallGroupSetsNotification(user,student,sets) with FreemarkerTextRenderer}.toSeq
+		  setsPerUser.map {case (student, sets) => new OpenSmallGroupSetsNotification(user,student,sets) with FreemarkerTextRenderer}.toSeq
 
 	}
 }

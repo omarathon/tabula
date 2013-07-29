@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.data
 
-import model.{MarkerFeedback, Feedback, Assignment}
+import uk.ac.warwick.tabula.data.Daoisms._
+import org.hibernate.criterion.Restrictions.{eq => is}
+import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Feedback, Assignment}
 import org.springframework.stereotype.Repository
 
 trait FeedbackDao {
@@ -10,8 +12,8 @@ trait FeedbackDao {
 	def delete(feedback: Feedback)
 }
 
-@Repository
-class FeedbackDaoImpl extends FeedbackDao with Daoisms {
+abstract class AbstractFeedbackDao extends FeedbackDao {
+	self: ExtendedSessionComponent =>
 
 	override def getFeedback(id: String) = getById[Feedback](id)
 	override def getMarkerFeedback(id: String) = getById[MarkerFeedback](id)
@@ -31,3 +33,6 @@ class FeedbackDaoImpl extends FeedbackDao with Daoisms {
 	}
 
 }
+
+@Repository
+class FeedbackDaoImpl extends AbstractFeedbackDao with Daoisms

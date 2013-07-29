@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.groups
 
 import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 
 import javax.persistence._
 import javax.persistence.CascadeType._
@@ -24,6 +25,8 @@ object SmallGroupSet {
 	object Settings {
 		val StudentsCanSeeTutorNames = "StudentsCanSeeTutorNames"
 		val StudentsCanSeeOtherMembers = "StudentsCanSeeOtherMembers"
+		val DefaultMaxGroupSizeEnabled = "DefaultMaxGroupSizeEnabled"
+		val DefaultMaxGroupSize = "DefaultMaxGroupSize"
 	}
 }
 
@@ -36,6 +39,7 @@ object SmallGroupSet {
 @AccessType("field")
 class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings with PostLoadBehaviour  {
 	import SmallGroupSet.Settings
+	import SmallGroup._
 
 	@transient var permissionsService = Wire[PermissionsService]
 	@transient var membershipService = Wire[AssignmentMembershipService]
@@ -58,7 +62,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
   @Column(name="released_to_students")
 	var releasedToStudents: JBoolean = false
   @Column(name="released_to_tutors")
-  var releasedToTutors:JBoolean = false
+  var releasedToTutors: JBoolean = false
 
   def fullyReleased= releasedToStudents && releasedToTutors
 
@@ -72,10 +76,10 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	var allocationMethod: SmallGroupAllocationMethod = _
 
 	@Column(name="self_group_switching")
-	var allowSelfGroupSwitching:Boolean = true
+	var allowSelfGroupSwitching: Boolean = true
 
 	@Column(name="open_for_signups")
-	var openForSignups:Boolean = false
+	var openForSignups: Boolean = false
 
 	@ManyToOne
 	@JoinColumn(name = "module_id")
@@ -85,25 +89,43 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	@JoinColumn(name = "set_id")
 	var groups: JList[SmallGroup] = JArrayList()
 
+	// only students manually added or excluded. use allStudents to get all students in the group set
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
 	var members: UserGroup = new UserGroup
-	
-	@ManyToMany(fetch = FetchType.LAZY, cascade = Array(ALL))
-	@JoinTable(name="smallgroupset_assessmentgroup",
-		joinColumns=Array(new JoinColumn(name="smallgroupset_id")),
-		inverseJoinColumns=Array(new JoinColumn(name="assessmentgroup_id")))
-	var assessmentGroups: JList[UpstreamAssessmentGroup] = JArrayList()
+
+	// Cannot link directly to upstream assessment groups data model in sits is silly ...
+	@OneToMany(mappedBy = "smallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
+
+	// converts the assessmentGroups to upstream assessment groups
+	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = {
+		if(academicYear == null){
+			Seq()
+		}
+		else {
+			val validGroups = assessmentGroups.asScala.filterNot(group=> group.upstreamAssignment == null || group.occurrence == null)
+			validGroups.flatMap { group =>
+				val template = new UpstreamAssessmentGroup
+				template.academicYear = academicYear
+				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
+				template.moduleCode = group.upstreamAssignment.moduleCode
+				template.occurrence = group.occurrence
+				membershipService.getUpstreamAssessmentGroup(template)
+			}
+		}
+	}
+
+	def allStudents = membershipService.determineMembershipUsers(upstreamAssessmentGroups, Some(members))
+	def allStudentsCount = membershipService.countMembershipUsers(upstreamAssessmentGroups, Some(members))
 	
 	def unallocatedStudents = {
-		val allStudents = membershipService.determineMembershipUsers(assessmentGroups.asScala, Some(members))
 		val allocatedStudents = groups.asScala flatMap { _.students.users }
-		
+
 		allStudents diff allocatedStudents
 	}
 	
 	def unallocatedStudentsCount = {
-		val allStudentsCount = membershipService.countMembershipUsers(assessmentGroups.asScala, Some(members))
 		val allocatedStudentsCount = groups.asScala.foldLeft(0) { (acc, grp) => acc + grp.students.members.size }
 		
 		allStudentsCount - allocatedStudentsCount
@@ -119,7 +141,11 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	def studentsCanSeeOtherMembers = getBooleanSetting(Settings.StudentsCanSeeOtherMembers).getOrElse(false)
 	def studentsCanSeeOtherMembers_=(canSee:Boolean) = settings += (Settings.StudentsCanSeeOtherMembers -> canSee)
 
+	def defaultMaxGroupSizeEnabled = getBooleanSetting(Settings.DefaultMaxGroupSizeEnabled).getOrElse(false)
+	def defaultMaxGroupSizeEnabled_=(isEnabled:Boolean) = settings += (Settings.DefaultMaxGroupSizeEnabled -> isEnabled)
 
+	def defaultMaxGroupSize = getIntSetting(Settings.DefaultMaxGroupSize).getOrElse(DefaultGroupSize)
+	def defaultMaxGroupSize_=(defaultSize:Int) = settings += (Settings.DefaultMaxGroupSize -> defaultSize)
 
 
 	def toStringProps = Seq(
@@ -127,7 +153,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 		"name" -> name,
 		"module" -> module)
 
-  def duplicateTo( module:Module, assessmentGroups:JList[UpstreamAssessmentGroup] = JArrayList()):SmallGroupSet = {
+  def duplicateTo( module:Module, assessmentGroups:JList[AssessmentGroup] = JArrayList()):SmallGroupSet = {
     val newSet = new SmallGroupSet()
     newSet.id = id
     newSet.academicYear = academicYear

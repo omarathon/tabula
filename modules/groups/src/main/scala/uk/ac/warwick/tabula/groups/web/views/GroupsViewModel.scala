@@ -32,7 +32,7 @@ object GroupsViewModel {
 		canManageGroups: Boolean
 	) {
 		def hasUnreleasedGroupsets = module.hasUnreleasedGroupSets
-		def hasOpenableGroupsets = module.groupSets.asScala.exists(s=>(!s.openForSignups) && s.allocationMethod == StudentSignUp )
+		def hasOpenableGroupsets = module.groupSets.asScala.exists(s => (!s.openForSignups) && s.allocationMethod == StudentSignUp )
 	}
 
 	case class ViewSet(

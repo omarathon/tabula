@@ -16,7 +16,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	val operator = mock[User]
 
 	@Test
-	def marksSelfSignupGroupAsOpen(){
+	def marksSelfSignupGroupAsOpen() {
 		val set = new SmallGroupSet()
 		set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
 		val cmd = new OpenSmallGroupSet(Seq(set), operator)
@@ -25,7 +25,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def ignoresSetsThatAreNotSelfSignUp(){
+	def ignoresSetsThatAreNotSelfSignUp() {
 		val set = new SmallGroupSet()
 		set.allocationMethod = SmallGroupAllocationMethod.Manual
 		val cmd = new OpenSmallGroupSet(Seq(set), operator)
@@ -35,7 +35,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
 
 	@Test
-	def processesMultipleSets(){
+	def processesMultipleSets() {
 
 		val set1 = new SmallGroupSet()
 		set1.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
@@ -49,7 +49,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def returnsUpdatedSets(){
+	def returnsUpdatedSets() {
 		val set = new SmallGroupSet()
 		set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
 
@@ -58,7 +58,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def ignoresSetsAlreadyOpened(){
+	def ignoresSetsAlreadyOpened() {
 		val set = new SmallGroupSet()
 		set.openForSignups = true
 		set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
@@ -69,7 +69,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def requiresUpdatePermissionsOnAllSetsToBeOpened(){
+	def requiresUpdatePermissionsOnAllSetsToBeOpened() {
 		val set1 = new SmallGroupSet()
 		val set2 = new SmallGroupSet()
 
@@ -84,9 +84,9 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def auditsLogsTheGroupsetsToBeOpened(){
+	def auditsLogsTheGroupsetsToBeOpened() {
 		val sets = Seq(new SmallGroupSet())
-		val audit = new OpenSmallGroupSetAudit with OpenSmallGroupSetState{
+		val audit = new OpenSmallGroupSetAudit with OpenSmallGroupSetState {
 			val eventName: String = ""
 			val openableSets: Seq[SmallGroupSet] = sets
 		}
@@ -110,7 +110,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def notifiesEachAffectedUser(){new NotificationFixture{
+	def notifiesEachAffectedUser() { new NotificationFixture {
 
 		val set1 = new SmallGroupSet()
 		set1.members = new UserGroup
@@ -141,7 +141,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	}	}
 
 	@Test
-	def CommandStateReportsFirstGroupset{
+	def CommandStateReportsFirstGroupset {
 		val set = new SmallGroupSet
 		val oneItem = new OpenSmallGroupSetState {
 			val openableSets: Seq[SmallGroupSet] = Seq(set)
@@ -158,7 +158,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	}
 
 	@Test(expected= classOf[RuntimeException])
-	def CommandStateThrowsExceptionIfAskedForSingleSetFromNone{
+	def CommandStateThrowsExceptionIfAskedForSingleSetFromNone {
 		val emptyList = new OpenSmallGroupSetState {
 			val openableSets: Seq[SmallGroupSet] = Seq()
 		}
@@ -167,7 +167,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def openSmallGroupCommandGluesEverythingTogether(){
+	def openSmallGroupCommandGluesEverythingTogether() {
 		val command = OpenSmallGroupSetCommand(Seq(new SmallGroupSet), operator)
 
 		command should be (anInstanceOf[Appliable[SmallGroupSet]])

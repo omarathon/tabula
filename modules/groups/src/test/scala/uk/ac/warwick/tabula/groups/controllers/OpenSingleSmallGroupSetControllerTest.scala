@@ -26,14 +26,14 @@ class OpenSingleSmallGroupSetControllerTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def submitCallsApply(){
+	def submitCallsApply() {
 		val mockCommand = mock[Appliable[Seq[SmallGroupSet]]]
 		controller.submit(mockCommand)
 		there was one(mockCommand).apply()
 	}
 
 	@Test
-	def submitShowsSuccessView(){
+	def submitShowsSuccessView() {
 		val mockCommand = mock[Appliable[Seq[SmallGroupSet]]]
 		controller.submit(mockCommand).viewName should be ("ajax_success")
 	}

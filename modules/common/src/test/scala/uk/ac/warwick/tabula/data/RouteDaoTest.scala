@@ -1,12 +1,16 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.AppContextTestBase
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures}
+import org.junit.Before
 
-class RouteDaoTest extends AppContextTestBase {
+class RouteDaoTest extends PersistenceTestBase {
 
-	@Autowired var dao:RouteDao =_
+	val dao = new RouteDaoImpl
+
+	@Before
+	def setup() {
+		dao.sessionFactory = sessionFactory
+	}
 
 	@Test def crud = transactional { tx =>
 		val route = Fixtures.route("g503")

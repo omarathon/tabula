@@ -95,7 +95,7 @@ class OpenSmallGroupSetsControllerTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def submitSendsRedirectBackToOpenGroupsPage(){
+	def submitSendsRedirectBackToOpenGroupsPage() {
 		new SmallGroupFixture {
 			department.code = "XYZ"
 			val user = new CurrentUser(new User, new User)

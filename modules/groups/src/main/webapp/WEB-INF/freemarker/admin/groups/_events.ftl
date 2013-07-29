@@ -88,13 +88,21 @@
 			
 				<div class="item-info<#if deleteGroup> deleted</#if>">
 					<div class="row-fluid">
-						<div class="span10">
-							<h3 class="name">
+						<div class="span10 groupDetail">
+							<h3 class="name inline-block">
 								${group.name!""}
 								<#if !newRecord>
 									<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
-								</#if>	
+								</#if>
 							</h3>
+							<#assign unlimited = !((smallGroupSet.defaultMaxGroupSizeEnabled)!false)>
+
+							<span class="groupSizeDetails groupSizeUnlimited" <#if !unlimited>style="display:none;"</#if>>
+								Unlimited group size
+							</span>
+							<span class="groupSizeDetails groupSizeLimited" <#if unlimited>style="display:none;"></#if>>
+								Maximum group size: <@f.input path="maxGroupSize" type="number" min="0" max="100" cssClass="input-small" />
+							</span>
 						</div>
 						<div class="span2">
 							<#if !deleteGroup>
@@ -169,6 +177,11 @@
 	
 	<script type="text/javascript">
 		jQuery(function($) {
+
+			$('#defaultMaxGroupSizeEnabled').click(function() {
+				$(".groupSizeDetails").toggle();
+			});
+
 			$('span[data-toggle="tooltip"]').tooltip();
 		
 			$('button[data-toggle="elements"][data-target]').on('click', function() {

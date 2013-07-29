@@ -148,7 +148,7 @@ object Permissions {
 		case object Search extends ScopelessPermission("Search student profiles")
 
 		object Read {
-			case object Core extends Permission("View a member's photo, name, course, Warwick email, job title and University number")
+			case object Core extends Permission("View a member's photo, name, Warwick email, job title and University number")
 			case object DateOfBirth extends Permission("View a member's date of birth")
 			case object Nationality extends Permission("View a member's nationality")
 			case object Gender extends Permission("View a member's gender")
@@ -159,8 +159,13 @@ object Permissions {
 			case object MobileNumber extends Permission("View a member's mobile number")
 			case object HomeEmail extends Permission("View a member's alternative email address")
 			case object Usercode extends Permission("View a member's usercode")
+			
+			object StudentCourseDetails {
+				case object Core extends Permission("View a student's basic course, route and department details")
+				case object Status extends Permission("View a student's enrolment and study status")
+			}
+			
 			case object PersonalTutees extends Permission("View a member's personal tutees")
-			case object StudentCourseDetails extends Permission("View a student's course details")
 			case object Supervisees extends Permission("View a member's supervisees")
 		}
 
@@ -205,6 +210,10 @@ object Permissions {
 		case object Delete extends Permission("Delete small groups")
 
 		case object Allocate extends Permission("Allocate students to small groups")
+	}
+
+	object SmallGroupEvents {
+		case object Register extends Permission("Record attendance on small group events")
 	}
 
 	object UserSettings {

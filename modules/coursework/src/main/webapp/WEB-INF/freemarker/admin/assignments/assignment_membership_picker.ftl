@@ -20,8 +20,8 @@
 		<#assign excludeIcon><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-ban-circle"></i></span><span class="hide">Removed</span></#assign>
 		<#assign sitsIcon><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span><span class="hide">SITS</span></#assign>
 
-		<#assign assignmentMembership = command.assignmentMembership />
-		<#assign hasMembers = assignmentMembership.totalCount gt 0 />
+		<#assign membershipInfo = command.membershipInfo />
+		<#assign hasMembers = membershipInfo.totalCount gt 0 />
 
 		<#macro what_is_this>
 			<#assign popoverText>
@@ -47,15 +47,15 @@
 				<#-- enumerate current state -->
 				<#if linkedUpstreamAssessmentGroups?has_content>
 					<span class="uneditable-value">
-						${assignmentMembership.totalCount} enrolled
-						<#if assignmentMembership.excludeCount gt 0 || assignmentMembership.includeCount gt 0>
-							<span class="muted">(${assignmentMembership.sitsCount} from SITS<#if assignmentMembership.usedExcludeCount gt 0> after ${assignmentMembership.usedExcludeCount} removed manually</#if><#if assignmentMembership.usedIncludeCount gt 0>, plus ${assignmentMembership.usedIncludeCount} added manually</#if>)</span>
+						${membershipInfo.totalCount} enrolled
+						<#if membershipInfo.excludeCount gt 0 || membershipInfo.includeCount gt 0>
+							<span class="muted">(${membershipInfo.sitsCount} from SITS<#if membershipInfo.usedExcludeCount gt 0> after ${membershipInfo.usedExcludeCount} removed manually</#if><#if membershipInfo.usedIncludeCount gt 0>, plus ${membershipInfo.usedIncludeCount} added manually</#if>)</span>
 						<#else>
 							<span class="muted">from SITS</span>
 						</#if>
 					<@what_is_this /></span>
 				<#elseif hasMembers>
-					<span class="uneditable-value">${assignmentMembership.includeCount} manually enrolled
+					<span class="uneditable-value">${membershipInfo.includeCount} manually enrolled
 					<@what_is_this /></span>
 				<#else>
 					<span class="uneditable-value">No students enrolled
@@ -110,7 +110,7 @@
 						</thead>
 
 						<tbody>
-							<#list assignmentMembership.items as item>
+							<#list membershipInfo.items as item>
 								<#assign _u = item.user>
 
 								<tr class="membership-item item-type-${item.itemTypeString}"> <#-- item-type-(sits|include|exclude) -->
@@ -275,13 +275,13 @@
 			$enrolment.tabulaPrepareSpinners();
 			$enrolment.find('summary:not([role="button"])').closest('details').details();
 
-			// TODO this is cribbed out of scripts.js - re-use would be better			
+			// TODO this is cribbed out of scripts.js - re-use would be better
 			$enrolment.find('.use-popover').each(function() {
 				if ($(this).attr('data-title')) {
 					$(this).attr('data-original-title', $(this).attr('data-title'));
 				}
 			});
-	
+
 			$enrolment.find('.use-popover').popover({
 				trigger: 'click',
 				container: '#container',
@@ -365,7 +365,7 @@
 		$enrolment.on('click', '.sits-picker .btn', function(e) {
 			e.preventDefault();
 			var $m = $(this).closest('.modal');
-			if ($(this).is(':not(.disabled)')) {			
+			if ($(this).is(':not(.disabled)')) {
 				$('.sits-picker .btn').addClass('disabled').prop('disabled', 'disabled');
 
 				<#-- get current list of values and remove and/or add changes -->
@@ -385,7 +385,7 @@
 
 				$.ajax({
 					type: 'POST',
-					url: '<@routes.assignmentenrolment module />',
+					url: '<@routes.enrolment module />',
 					data: $('#assignmentEnrolmentFields').find('input, textarea, select').serialize(),
 					error: function() {
 						$m.modal('hide');
@@ -402,14 +402,14 @@
 		});
 
 		<#-- adder click handler -->
-		$enrolment.on('click', '.adder .btn', function(e) {		
+		$enrolment.on('click', '.adder .btn', function(e) {
 			e.preventDefault();
-			var $m = $(this).closest('.modal');		
-			if ($(this).is(':not(.disabled)')) {	
+			var $m = $(this).closest('.modal');
+			if ($(this).is(':not(.disabled)')) {
 				$(this).addClass('disabled').prop('disabled', 'disabled');
 				$.ajax({
 					type: 'POST',
-					url: '<@routes.assignmentenrolment module />',
+					url: '<@routes.enrolment module />',
 					data: $('#assignmentEnrolmentFields').find('input, textarea, select').serialize(),
 					error: function() {
 						$m.modal('hide');

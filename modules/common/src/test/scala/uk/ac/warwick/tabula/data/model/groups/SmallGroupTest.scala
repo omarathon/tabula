@@ -68,6 +68,8 @@ class SmallGroupTest extends TestBase with Mockito {
     }
 
     val sourceSet = new SmallGroupSet
+    sourceSet.defaultMaxGroupSize = 11
+    sourceSet.defaultMaxGroupSizeEnabled = true
 
     source.name = "name"
     source.groupSet = sourceSet
@@ -76,8 +78,11 @@ class SmallGroupTest extends TestBase with Mockito {
     source.deleted = false
     source.id = "123"
     source.events = JArrayList(event)
+    source.maxGroupSize = 12
 
     val targetSet = new SmallGroupSet
+    targetSet.defaultMaxGroupSize = 10
+    targetSet.defaultMaxGroupSizeEnabled = true
 
     val target = source.duplicateTo(targetSet )
 
@@ -86,6 +91,7 @@ class SmallGroupTest extends TestBase with Mockito {
     target.name should be(source.name)
     target.groupSet should not be(source.groupSet)
     target.groupSet should be(targetSet)
+    target.maxGroupSize should be(source.maxGroupSize)
 
     target.permissionsService should be(source.permissionsService)
     target.students should not be(source.students)

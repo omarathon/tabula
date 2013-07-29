@@ -12,8 +12,8 @@ import uk.ac.warwick.tabula.coursework.commands.assignments._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.coursework.commands.assignments.UpstreamGroup
-import uk.ac.warwick.tabula.coursework.commands.assignments.UpstreamGroupPropertyEditor
+import uk.ac.warwick.tabula.commands.UpstreamGroup
+import uk.ac.warwick.tabula.commands.UpstreamGroupPropertyEditor
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/edit"))

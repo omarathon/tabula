@@ -7,48 +7,20 @@ import uk.ac.warwick.tabula.data.model.CanBeDeleted
 import uk.ac.warwick.spring.Wire
 import language.implicitConversions
 import scala.reflect._
+import uk.ac.warwick.tabula.data.Daoisms.NiceQueryCreator
 
 /** Trait for self-type annotation, declaring availability of a Session. */
 trait SessionComponent{
   protected def session:Session
 }
+
 /**
- * A trait for DAO classes to mix in to get useful things
- * like the current session.
- *
- * It's only really for Hibernate access to the default
- * session factory. If you want to do JDBC stuff or use a
- * different data source you'll need to look elsewhere.
+ * This self-type trait is a bit of a cheat as it has behaviour in it - but only
+ * some stuff that calls through to the provided session. Arguably better than
+ * forcing a test to provide these methods.
  */
-trait Daoisms extends SessionComponent {
-	def is = org.hibernate.criterion.Restrictions.eq _
-
-	var dataSource = Wire[DataSource]("dataSource")
-	var sessionFactory = Wire.auto[SessionFactory]
-
-	protected def session = sessionFactory.getCurrentSession
-
+trait ExtendedSessionComponent extends SessionComponent {
 	def isFilterEnabled(name: String) = session.getEnabledFilter(name) != null
-
-	/**
-	 * Do some work in a new session. Only needed outside of a request,
-	 * since we already have sessions there. When you know there's already
-	 * a session, you can access it through the `session` getter (within
-	 * the callback of this method, it should work too).
-	 */
-	protected def inSession(fn: (Session) => Unit) {
-		val sess = sessionFactory.openSession()
-		try fn(sess) finally sess.close()
-	}
-
-	/**
-	 * Adds a method to Session which returns a wrapped Criteria or Query that works
-	 * better with Scala's generics support.
-	 */
-	implicit class NiceQueryCreator(session: Session) {
-		def newCriteria[A: ClassTag] = new ScalaCriteria[A](session.createCriteria(classTag[A].runtimeClass))
-		def newQuery[A](hql: String) = new ScalaQuery[A](session.createQuery(hql))
-	}
 
 	/**
 	 * type-safe session.get. returns an Option object, which will match None if
@@ -65,5 +37,46 @@ trait Daoisms extends SessionComponent {
 			case _ => None
 		}
 	}
+}
+
+object Daoisms {
+	/**
+	 * Adds a method to Session which returns a wrapped Criteria or Query that works
+	 * better with Scala's generics support.
+	 */
+	implicit class NiceQueryCreator(session: Session) {
+		def newCriteria[A: ClassTag] = new ScalaCriteria[A](session.createCriteria(classTag[A].runtimeClass))
+		def newQuery[A](hql: String) = new ScalaQuery[A](session.createQuery(hql))
+	}
+}
+
+/**
+ * A trait for DAO classes to mix in to get useful things
+ * like the current session.
+ *
+ * It's only really for Hibernate access to the default
+ * session factory. If you want to do JDBC stuff or use a
+ * different data source you'll need to look elsewhere.
+ */
+trait Daoisms extends ExtendedSessionComponent {
+	def is = org.hibernate.criterion.Restrictions.eq _
+
+	var dataSource = Wire[DataSource]("dataSource")
+	var sessionFactory = Wire.auto[SessionFactory]
+
+	protected def session = sessionFactory.getCurrentSession
+
+	/**
+	 * Do some work in a new session. Only needed outside of a request,
+	 * since we already have sessions there. When you know there's already
+	 * a session, you can access it through the `session` getter (within
+	 * the callback of this method, it should work too).
+	 */
+	protected def inSession(fn: (Session) => Unit) {
+		val sess = sessionFactory.openSession()
+		try fn(sess) finally sess.close()
+	}
+
+	implicit def implicitNiceSession(session: Session) = new NiceQueryCreator(session)
 
 }

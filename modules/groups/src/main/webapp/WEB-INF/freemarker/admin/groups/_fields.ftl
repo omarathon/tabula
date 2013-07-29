@@ -110,7 +110,7 @@
 			<#assign disable_prop="false" />
 		</#if>
 		
-		<@form.labelled_row "allowSelfGroupSwitching" "Allow students to switch groups" "canBeDisabled" "" "" "${disable_label}" >
+		<@form.labelled_row "allowSelfGroupSwitching" "Allow students to switch groups" "canBeDisabled" "" "" disable_label >
 			<@form.label checkbox=true >
 				<@f.checkbox path="allowSelfGroupSwitching" value="true" disabled=disable_prop />
 				<a class="use-popover" data-html="true"
@@ -134,9 +134,7 @@
 		<#assign membersGroup=status.actualValue />
 	</@spring.bind>
 	<#assign hasMembers=(membersGroup?? && (membersGroup.includeUsers?size gt 0 || membersGroup.excludeUsers?size gt 0)) />
-	
-	<p>There <#if ((membersGroup.includeUsers?size)!0) == 1>is<#else>are</#if> <@fmt.p (membersGroup.includeUsers?size)!0 "student" "students" /></p>
-	
+
 	<#include "_students.ftl" />
 </fieldset>
 
@@ -171,7 +169,30 @@
 			(and <@fmt.p deletedGroupCount "group" "groups" /> marked for deletion)
 		</#if>
 	</p>
-	
+
+	<@form.row defaultClass="maxGroupSize groupDetail">
+		<@form.field>
+			<@form.label checkbox=true>
+				<@f.checkbox path="defaultMaxGroupSizeEnabled" id="defaultMaxGroupSizeEnabled" />
+				Set maximum group size:
+			</@form.label>
+
+			<#if set??>
+				<#assign disabled = !(set.defaultMaxGroupSizeEnabled!true)>
+			<#else>
+				<#assign disabled = "false" >
+			</#if>
+
+			<@f.input path="defaultMaxGroupSize" type="number" min="0" max="100" cssClass="input-small" disabled="${disabled?string}" />
+
+			<a class="use-popover" data-html="true"
+			   data-content="This is the default maximum size for any new groups you create.  You can adjust the maximum size of individual groups">
+				<i class="icon-question-sign"></i>
+			</a>
+			<@f.errors path="defaultMaxGroupSize" cssClass="error" />
+		</@form.field>
+	</@form.row>
+
 	<#include "_groups_modal.ftl" />
 	
 	<div class="striped-section<#if groups?size gt 0> collapsible expanded</#if>">
@@ -193,12 +214,15 @@
 
 <script type="text/javascript">
 
-
 	jQuery(function($) {
-		
-	$("input:radio[name='allocationMethod']").tabulaRadioActive();
-	
-	
+
+		$("input:radio[name='allocationMethod']").tabulaRadioActive();
+
+		$('#defaultMaxGroupSizeEnabled').click(function() {
+			if ($('#defaultMaxGroupSize').prop('disabled')) $('#defaultMaxGroupSize').removeAttr('disabled');
+			else $('#defaultMaxGroupSize').attr('disabled', 'disabled');
+		});
+
 		<#-- controller detects action=refresh and does a bind without submit -->
 		$('.modal.refresh-form').on('hide', function(e) {
 			// Ignore events that are something ELSE hiding and being propagated up!
@@ -213,7 +237,7 @@
 			}
 		
 			$('#action-input').val('refresh');
-      $('#action-input').closest('form').submit();
+			$('#action-input').closest('form').submit();
 		});
 		
 		// Open the first modal with an error in it

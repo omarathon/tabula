@@ -81,11 +81,19 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 		.add(Restrictions.eq("occurrence", group.occurrence))
 		.uniqueResult
 
-	def find(group: AssessmentGroup): Option[AssessmentGroup] = session.newCriteria[AssessmentGroup]
-		.add(Restrictions.eq("assignment", group.assignment))
+	def find(group: AssessmentGroup): Option[AssessmentGroup] = {
+		val criteria = session.newCriteria[AssessmentGroup]
 		.add(Restrictions.eq("upstreamAssignment", group.upstreamAssignment))
 		.add(Restrictions.eq("occurrence", group.occurrence))
-		.uniqueResult
+
+		if (group.assignment != null) {
+			criteria.add(Restrictions.eq("assignment", group.assignment))
+		} else {
+			criteria.add(Restrictions.eq("smallGroupSet", group.smallGroupSet))
+		}
+
+		criteria.uniqueResult
+	}
 
 	def save(group:AssessmentGroup) = session.saveOrUpdate(group)
 

@@ -17,6 +17,7 @@ import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.data.model.permissions.SmallGroupGrantedRole
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 import javax.validation.constraints.NotNull
@@ -24,6 +25,10 @@ import scala.collection.JavaConverters._
 
 object SmallGroup {
 	final val NotDeletedFilter = "notDeleted"
+	final val DefaultGroupSize = 15
+	object Settings {
+		val MaxGroupSize = "MaxGroupSize"
+	}
 }
 
 /**
@@ -33,7 +38,7 @@ object SmallGroup {
 @Filter(name = SmallGroup.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class SmallGroup extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with Serializable {
+class SmallGroup extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings with Serializable with PostLoadBehaviour {
 	import SmallGroup._
 	
 	@transient var permissionsService = Wire[PermissionsService]
@@ -60,6 +65,9 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	@JoinColumn(name = "studentsgroup_id")
 	var students: UserGroup = new UserGroup
 
+	def maxGroupSize = getIntSetting(Settings.MaxGroupSize)
+	def maxGroupSize_=(defaultSize:Int) = settings += (Settings.MaxGroupSize -> defaultSize)
+
 	def toStringProps = Seq(
 		"id" -> id,
 		"name" -> name,
@@ -85,8 +93,12 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
     newGroup.name = name
     newGroup.permissionsService = permissionsService
     newGroup.students = students.duplicate()
+    newGroup.settings = Map() ++ settings
     newGroup
   }
 
+	def postLoad {
+		ensureSettings
+	}
 
 }
