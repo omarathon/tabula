@@ -14,12 +14,14 @@ import uk.ac.warwick.tabula.JavaImports._
 class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	val operator = mock[User]
+	val open: Boolean = true
+	val close: Boolean = false
 
 	@Test
 	def marksSelfSignupGroupAsOpen() {
 		val set = new SmallGroupSet()
 		set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
-		val cmd = new OpenSmallGroupSet(Seq(set), operator)
+		val cmd = new OpenSmallGroupSet(Seq(set), operator, open)
 		cmd.applyInternal()
 		set.openForSignups should be (true)
 	}
@@ -28,7 +30,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	def ignoresSetsThatAreNotSelfSignUp() {
 		val set = new SmallGroupSet()
 		set.allocationMethod = SmallGroupAllocationMethod.Manual
-		val cmd = new OpenSmallGroupSet(Seq(set), operator)
+		val cmd = new OpenSmallGroupSet(Seq(set), operator, open)
 		cmd.applyInternal()
 		set.openForSignups should be (false)
 	}
@@ -42,7 +44,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val set2 = new SmallGroupSet()
 		set2.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
 
-		val cmd = new OpenSmallGroupSet(Seq(set1,set2), operator)
+		val cmd = new OpenSmallGroupSet(Seq(set1,set2), operator, open)
 		cmd.applyInternal()
 		set1.openForSignups should be (true)
 		set2.openForSignups should be (true)
@@ -53,7 +55,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val set = new SmallGroupSet()
 		set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
 
-		val cmd = new OpenSmallGroupSet(Seq(set), operator)
+		val cmd = new OpenSmallGroupSet(Seq(set), operator, open)
 		cmd.applyInternal() should be(Seq(set))
 	}
 
@@ -63,7 +65,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		set.openForSignups = true
 		set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
 
-		val cmd = new OpenSmallGroupSet(Seq(set), operator)
+		val cmd = new OpenSmallGroupSet(Seq(set), operator, open)
 		cmd.applyInternal() should be(Nil)
 
 	}
@@ -74,7 +76,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val set2 = new SmallGroupSet()
 
 		val perms = new OpenSmallGroupSetPermissions with OpenSmallGroupSetState {
-			val openableSets = Seq(set1,set2)
+			val applicableSets = Seq(set1,set2)
 		}
 
 		val checker = mock[PermissionsChecking]
@@ -88,7 +90,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val sets = Seq(new SmallGroupSet())
 		val audit = new OpenSmallGroupSetAudit with OpenSmallGroupSetState {
 			val eventName: String = ""
-			val openableSets: Seq[SmallGroupSet] = sets
+			val applicableSets: Seq[SmallGroupSet] = sets
 		}
 		val description = mock[Description]
 		audit.describe(description)
@@ -127,7 +129,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val s2 = set2.members.users
 
 		val notifier = new OpenSmallGroupSetNotifier with OpenSmallGroupSetState with UserAware {
-			val openableSets: Seq[SmallGroupSet] = Seq(set1,set2)
+			val applicableSets: Seq[SmallGroupSet] = Seq(set1,set2)
 			val user: User = operator
 		}
 
@@ -144,7 +146,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	def CommandStateReportsFirstGroupset {
 		val set = new SmallGroupSet
 		val oneItem = new OpenSmallGroupSetState {
-			val openableSets: Seq[SmallGroupSet] = Seq(set)
+			val applicableSets: Seq[SmallGroupSet] = Seq(set)
 		}
 		oneItem.singleSetToOpen should be(set)
 
@@ -152,7 +154,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		// that you're using a command with multiple sets in a context that only
 		// expects there to be one.
 		val twoItems= new OpenSmallGroupSetState {
-			val openableSets: Seq[SmallGroupSet] = Seq(set)
+			val applicableSets: Seq[SmallGroupSet] = Seq(set)
 		}
 		twoItems.singleSetToOpen should be(set)
 	}
@@ -160,7 +162,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	@Test(expected= classOf[RuntimeException])
 	def CommandStateThrowsExceptionIfAskedForSingleSetFromNone {
 		val emptyList = new OpenSmallGroupSetState {
-			val openableSets: Seq[SmallGroupSet] = Seq()
+			val applicableSets: Seq[SmallGroupSet] = Seq()
 		}
 		emptyList.singleSetToOpen
 

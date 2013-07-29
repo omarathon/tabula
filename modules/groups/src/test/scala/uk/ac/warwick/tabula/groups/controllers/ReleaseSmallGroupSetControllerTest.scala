@@ -72,6 +72,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
     val controller = new ReleaseAllSmallGroupSetsController()
     val model = controller.newViewModel()
     val department = new Department
+    department.code = "xyz"
     val mav = controller.form(model, department)
     mav.toModel.get("department") should be(Some(department))
     mav.viewName should be("admin/groups/bulk-release")

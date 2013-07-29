@@ -10,34 +10,41 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 
 object OpenSmallGroupSetCommand {
-	def apply(setsToOpen:Seq[SmallGroupSet], user:User) = {
-		new OpenSmallGroupSet(setsToOpen,user)
+	def apply(setsToOpen: Seq[SmallGroupSet], user: User) = {
+		new OpenSmallGroupSet(setsToOpen, user, true)
 			with ComposableCommand[Seq[SmallGroupSet]]
 			with OpenSmallGroupSetPermissions
 			with OpenSmallGroupSetAudit
 			with OpenSmallGroupSetNotifier
 	}
+	
+	def close(setsToClose: Seq[SmallGroupSet], user: User) = {
+		new OpenSmallGroupSet(setsToClose, user, false)
+			with ComposableCommand[Seq[SmallGroupSet]]
+			with OpenSmallGroupSetPermissions
+			with OpenSmallGroupSetAudit
+	}
 }
 
 trait OpenSmallGroupSetState {
-	val openableSets:Seq[SmallGroupSet]
+	val applicableSets: Seq[SmallGroupSet]
 	// convenience value for freemarker to use when we're opening a single
 	// set rather than a batch.
-	def singleSetToOpen:SmallGroupSet={
-		openableSets match {
+	def singleSetToOpen: SmallGroupSet = {
+		applicableSets match {
 			case h :: Nil => h
-			case Nil=>throw new RuntimeException("Attempted to get first group to open from an empty list")
+			case Nil => throw new RuntimeException("Attempted to get first group to open from an empty list")
 			case _ => throw new RuntimeException("Attempted to get single group to open from a list of many")
 		}
 	}
 }
-class OpenSmallGroupSet(val requestedSets: Seq[SmallGroupSet], val user: User) extends CommandInternal[Seq[SmallGroupSet]] with OpenSmallGroupSetState with UserAware {
+class OpenSmallGroupSet(val requestedSets: Seq[SmallGroupSet], val user: User, val setState: Boolean) extends CommandInternal[Seq[SmallGroupSet]] with OpenSmallGroupSetState with UserAware {
 
-	 val openableSets = requestedSets.filter(s => s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && !s.openForSignups)
+	 val applicableSets = requestedSets.filter(s => s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && s.openForSignups != setState)
 
 	 def applyInternal(): Seq[SmallGroupSet] = {
-		 openableSets.foreach(s => s.openForSignups = true)
-		 openableSets
+		 applicableSets.foreach(s => s.openForSignups = setState)
+		 applicableSets
 	 }
 }
 
@@ -45,14 +52,14 @@ trait OpenSmallGroupSetPermissions extends RequiresPermissionsChecking {
   this: OpenSmallGroupSetState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		openableSets.foreach(g=>p.PermissionCheck(Permissions.SmallGroups.Update, g))
+		applicableSets.foreach(g => p.PermissionCheck(Permissions.SmallGroups.Update, g))
 	}
 }
 
 trait OpenSmallGroupSetAudit extends Describable[Seq[SmallGroupSet]] {
 	this: KnowsEventName with OpenSmallGroupSetState =>
 	def describe(d: Description) {
-		d.smallGroupSetCollection(openableSets)
+		d.smallGroupSetCollection(applicableSets)
 	}
 }
 
@@ -60,7 +67,7 @@ trait OpenSmallGroupSetNotifier extends Notifies[Seq[SmallGroupSet]] {
 	this: OpenSmallGroupSetState with UserAware =>
 
 	def emit(): Seq[Notification[Seq[SmallGroupSet]]] = {
-			val allMemberships: Seq[(User,SmallGroupSet)] = for (set <- openableSets;
+			val allMemberships: Seq[(User,SmallGroupSet)] = for (set <- applicableSets;
 			     member <- set.members.users) yield (member, set)
 
 		  // convert the list of (student, set) pairs into a map of student->sets

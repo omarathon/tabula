@@ -5,16 +5,18 @@ import uk.ac.warwick.tabula.groups.web.controllers.admin.OpenSmallGroupSetContro
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet}
 import uk.ac.warwick.tabula.commands.Appliable
 
-class OpenSingleSmallGroupSetControllerTest extends TestBase with Mockito {
+class CloseSingleSmallGroupSetControllerTest extends TestBase with Mockito {
+	
 	val controller = new OpenSmallGroupSetController
 	val set = new SmallGroupSet
+	set.openForSignups = true //set is already open.
 	set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
 
 
 	@Test
 	def createsCommand() {
 		withUser("test") {
-			val command = controller.getOpenGroupSetCommand(set,"open")
+			val command = controller.getOpenGroupSetCommand(set,"close")
 			command.singleSetToOpen should be(set)
 		}
 	}
@@ -25,17 +27,6 @@ class OpenSingleSmallGroupSetControllerTest extends TestBase with Mockito {
 		controller.form(mockCommand).viewName should be("admin/groups/open")
 	}
 
-	@Test
-	def submitCallsApply() {
-		val mockCommand = mock[Appliable[Seq[SmallGroupSet]]]
-		controller.submit(mockCommand)
-		there was one(mockCommand).apply()
-	}
 
-	@Test
-	def submitShowsSuccessView() {
-		val mockCommand = mock[Appliable[Seq[SmallGroupSet]]]
-		controller.submit(mockCommand).viewName should be ("ajax_success")
-	}
 
 }
