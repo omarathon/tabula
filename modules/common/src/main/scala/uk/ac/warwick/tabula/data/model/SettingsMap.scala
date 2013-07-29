@@ -50,22 +50,22 @@ trait HasSettings {
 
 trait SettingsMap extends HasSettings {
 
-	protected def -=(key: String) = {
+	protected def -=(key: String): this.type = {
 		settings -= key
 		this
 	}
 	
-	protected def +=(kv: (String, Any)) = {
+	protected def +=(kv: (String, Any)): this.type = {
 		settings += kv
 		this
 	}
 
-	protected def ++=(sets: Pair[String, Any]*) = {
+	protected def ++=(sets: Pair[String, Any]*): this.type = {
 		settings ++= sets
 		this
 	}
 
-	def ++=(other: SettingsMap) = {
+	def ++=(other: SettingsMap): this.type = {
 		this.settings ++= other.settings
 		this
 	}
