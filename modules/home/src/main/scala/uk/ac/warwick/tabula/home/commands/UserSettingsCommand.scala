@@ -22,10 +22,8 @@ class UserSettingsCommand(user: CurrentUser, settings: UserSettings) extends Com
 	var weekNumberingSystem = settings.weekNumberingSystem
 		
 	override def applyInternal() = transactional() {
-		settings ++= (
-			Settings.AlertsSubmission -> alertsSubmission,
-			Settings.WeekNumberingSystem -> (if (weekNumberingSystem.hasText) weekNumberingSystem else null)
-		)
+		settings.alertsSubmission = alertsSubmission
+		settings.weekNumberingSystem = if (weekNumberingSystem.hasText) weekNumberingSystem else null
 		
 		service.save(user, settings)
 	}
