@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{SmallGroupService, UserLookupService}
 import uk.ac.warwick.tabula.data.model.{RelationshipType, MeetingRecord, Member, StudentMember}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
@@ -30,6 +30,7 @@ class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends View
 class ViewProfileController extends ProfilesController {
 
 	var userLookup = Wire.auto[UserLookupService]
+	var smallGroupService = Wire[SmallGroupService]
 
 	@ModelAttribute("searchProfilesCommand")
 	def searchProfilesCommand =
@@ -87,6 +88,9 @@ class ViewProfileController extends ProfilesController {
 
 		val tutor = userLookup.getUserByWarwickUniId(tutorId)
 
+		// the number of small groups that the student is a member of
+		val numSmallGroups = smallGroupService.findSmallGroupsByStudent(profiledStudentMember.asSsoUser).size
+
 		Mav("profile/view",
 			"profile" -> profiledStudentMember,
 			"viewer" -> currentMember,
@@ -94,6 +98,7 @@ class ViewProfileController extends ProfilesController {
 			"tutorMeetings" -> tutorMeetings,
 		  "supervisorMeetings"->supervisorMeetings,
 			"openMeeting" -> openMeeting,
+			"numSmallGroups" -> numSmallGroups,
 			"tutor" -> tutor)
 		.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}
