@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, MeetingRecord, RelationshipType, StudentMember}
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommandState
-import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService, SecurityService}
+import uk.ac.warwick.tabula.services.{SmallGroupService, ProfileService, UserLookupService, SecurityService}
 import uk.ac.warwick.tabula.permissions.{PermissionsTarget, Permission}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.userlookup.UserLookup
@@ -13,6 +13,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 	val controller = new ViewProfileController
 	// need to have a security service defined or we'll get a NPE in PermissionsCheckingMethods.restricted()
 	controller.securityService = mock[SecurityService]
+	controller.smallGroupService = mock[SmallGroupService]
 
 	val member = new StudentMember()
 	val courseDetails = new StudentCourseDetails()
@@ -21,6 +22,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 
 	@Test def createsTutorMeetingListCommand(){
 	withUser("test"){
+		controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
 		val cmd = controller.viewTutorMeetingRecordCommand(member).get.asInstanceOf[ViewMeetingRecordCommandState]
 	  cmd.relationshipType should be(RelationshipType.PersonalTutor)
 		}
@@ -29,13 +31,14 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 
 	@Test def createsSupervisorMeetingListCommand(){
 	withUser("test"){
+		controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
 		val cmd = controller.viewSupervisorMeetingRecordCommand(member).get.asInstanceOf[ViewMeetingRecordCommandState]
 		cmd.relationshipType should be(RelationshipType.Supervisor)
 	}}
 
 	@Test def exposesMeetingListsInModel(){
   withUser("test"){
-
+		controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
 	  val member = new StudentMember
 		member.universityId = "1234"
 		val viewProfileCommand = mock[Appliable[StudentMember]]
