@@ -59,7 +59,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def updateAttendance(event: SmallGroupEvent, weekNumber: Int, universityIds: Seq[String]): SmallGroupEventOccurrence = {
 		val occurrence = smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber) getOrElse {
 			val newOccurrence = new SmallGroupEventOccurrence()
-			newOccurrence.smallGroupEvent = event
+			newOccurrence.event = event
 			newOccurrence.week = weekNumber
 			smallGroupDao.saveOrUpdate(newOccurrence)
 			newOccurrence

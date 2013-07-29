@@ -7,9 +7,9 @@
 <div class="alert alert-success">
 	<button type="button" class="close" data-dismiss="alert">&times;</button>
     Attendance at 
-    	${updatedOccurrence.smallGroupEvent.group.groupSet.name}, 
-		${updatedOccurrence.smallGroupEvent.group.name}: 
-		${updatedOccurrence.smallGroupEvent.day.name} <@fmt.time updatedOccurrence.smallGroupEvent.startTime /> - <@fmt.time updatedOccurrence.smallGroupEvent.endTime /> 
+    	${updatedOccurrence.event.group.groupSet.name}, 
+		${updatedOccurrence.event.group.name}: 
+		${updatedOccurrence.event.day.name} <@fmt.time updatedOccurrence.event.startTime /> - <@fmt.time updatedOccurrence.event.endTime /> 
 		in <strong>Week ${updatedOccurrence.week}</strong> has been recorded.
 </div>
 </#if>

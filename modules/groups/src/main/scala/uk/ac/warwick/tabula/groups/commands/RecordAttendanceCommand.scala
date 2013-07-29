@@ -32,7 +32,9 @@ object RecordAttendanceCommand {
 			with RecordAttendanceDescription
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringUserLookupComponent
-			with AutowiringProfileServiceComponent
+			with AutowiringProfileServiceComponent {
+		override lazy val eventName = "RecordAttendance"
+	}
 }
 
 abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int) 
