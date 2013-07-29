@@ -1,11 +1,8 @@
 package uk.ac.warwick.tabula.helpers
 
 import uk.ac.warwick.tabula.TestBase
-import org.apache.log4j.Logger
-import org.apache.log4j.Appender
-import org.apache.log4j.WriterAppender
+import org.apache.log4j._
 import java.io.StringWriter
-import org.apache.log4j.SimpleLayout
 import org.junit.After
 import org.junit.Before
 
@@ -20,6 +17,7 @@ class LoggingTest extends TestBase with Logging {
 		
 		appender = new WriterAppender(new SimpleLayout, writer)
 		logger.addAppender(appender)
+		logger.setLevel(Level.DEBUG)
 	}
 	
 	@After def tearDown {

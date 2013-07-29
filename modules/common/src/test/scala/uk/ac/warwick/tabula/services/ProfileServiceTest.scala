@@ -2,28 +2,15 @@ package uk.ac.warwick.tabula.services
 
 import scala.collection.JavaConverters.asScalaBufferConverter
 
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.FilterDefs
-import org.hibernate.annotations.Filters
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import org.junit.After
 import org.junit.Before
-import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 
-import javax.persistence.DiscriminatorColumn
-import javax.persistence.DiscriminatorValue
-import javax.persistence.Entity
-import javax.persistence.Inheritance
-import javax.persistence.NamedQueries
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.JavaImports.JList
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.data.model.Member
 
