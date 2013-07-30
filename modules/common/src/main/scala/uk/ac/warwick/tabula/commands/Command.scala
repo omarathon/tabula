@@ -101,7 +101,15 @@ with JavaImports with EventHandling with NotificationHandling with PermissionsCh
 	*/
 	protected def applyInternal(): A
 
-	lazy val eventName = getClass.getSimpleName.replaceAll("Command$", "")
+	lazy val eventName = {
+		val name = getClass.getSimpleName.replaceAll("Command$", "")
+		if (name.contains("anon$")) {
+			// This can currently happen quite easily with caked-up commands. This code should
+			// try to work around that if possible, I'm just making it explode now so it's more obvious
+			throw new IllegalStateException(s"Command name calculated incorrectly as $name")
+		}
+		name
+	}
 
 	private def maintenanceCheck(callee: Describable[_]) = {
 		callee.isInstanceOf[ReadOnly] || !maintenanceMode.enabled
