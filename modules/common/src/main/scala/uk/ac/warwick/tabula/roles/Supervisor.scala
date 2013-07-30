@@ -17,6 +17,7 @@ object SupervisorRoleDefinition extends BuiltInRoleDefinition {
 		Profiles.Read.TelephoneNumber,
 		Profiles.Read.MobileNumber,
 		Profiles.Read.Usercode,
+		Profiles.Read.SmallGroups,
     Profiles.Supervisor.MeetingRecord.Create,
     Profiles.Supervisor.MeetingRecord.Read,
     Profiles.Supervisor.MeetingRecord.ReadDetails,

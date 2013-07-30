@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.data.model.Member
 class StudentGroupsController extends GroupsController {
 
 	@ModelAttribute("command") def command(@PathVariable member:Member) =
-		new ListStudentsGroupsCommandImpl(member.asSsoUser)
+		new ListStudentsGroupsCommandImpl(member)
 
 	@RequestMapping(method = Array(POST, GET))
 	def listGroups(@ModelAttribute("command") command: ListStudentsGroupsCommandImpl): Mav = {
