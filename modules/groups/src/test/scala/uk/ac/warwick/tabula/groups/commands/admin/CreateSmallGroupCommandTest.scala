@@ -27,7 +27,6 @@ class CreateSmallGroupCommandTest extends TestBase with Mockito {
 
 		val newGroup = command.applyInternal()
 		newGroup.maxGroupSize should be(Some(8))
-		newGroup.maxGroupSizeEnabled should be(true)
 
 	}
 
@@ -47,7 +46,6 @@ class CreateSmallGroupCommandTest extends TestBase with Mockito {
 
 		val newGroup = command.applyInternal()
 		newGroup.maxGroupSize should be(Some(SmallGroup.DefaultGroupSize))
-		newGroup.maxGroupSizeEnabled should be (false)
 
 	}
 

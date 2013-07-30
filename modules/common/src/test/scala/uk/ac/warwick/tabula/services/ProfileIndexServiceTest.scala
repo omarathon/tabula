@@ -1,46 +1,34 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.TestBase
-import org.apache.lucene.util.LuceneTestCase
-import org.junit.{Test, After, Before}
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.JavaImports._
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.commands._
-import org.apache.lucene.index.IndexReader
-import org.apache.lucene.store.FSDirectory
-import org.apache.lucene.search.IndexSearcher
-import org.apache.lucene.analysis.standard.StandardAnalyzer
-import org.apache.lucene.util.Version
-import uk.ac.warwick.userlookup.User
-import collection.JavaConversions._
-import uk.ac.warwick.util.core.StopWatch
-import uk.ac.warwick.tabula.JsonObjectMapperFactory
 import java.io.File
-import uk.ac.warwick.tabula.events.EventHandling
-import uk.ac.warwick.tabula.events.EventListener
-import uk.ac.warwick.tabula.events.Event
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.AppContextTestBase
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
-import org.apache.lucene.queryparser.classic.QueryParser
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute
-import uk.ac.warwick.tabula.data.MemberDao
-import uk.ac.warwick.tabula.data.model.MemberUserType._
-import uk.ac.warwick.tabula.Fixtures
 import java.util.concurrent.Executors
-import java.util.concurrent.ExecutorCompletionService
-import java.util.concurrent.Callable
+
+import scala.concurrent._
+import scala.concurrent.duration._
+import scala.concurrent.ExecutionContext
+
+import org.apache.commons.io.FileUtils
+import org.joda.time.DateTime
+import org.junit.{After, Before}
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.annotation.DirtiesContext
 import org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD
-import org.apache.commons.io.FileUtils
+import org.springframework.transaction.annotation.Transactional
+import org.scalatest.concurrent.AsyncAssertions
+
+import uk.ac.warwick.tabula.AppContextTestBase
+import uk.ac.warwick.tabula.data.MemberDao
+import uk.ac.warwick.tabula.data.model.MemberUserType._
+import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
+import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.util.core.StopWatch
+import scala.concurrent.duration.Duration
 
 // scalastyle:off magic.number
 @DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
-class ProfileIndexServiceTest extends AppContextTestBase with Mockito with Logging{
+class ProfileIndexServiceTest extends AppContextTestBase with Mockito with Logging with AsyncAssertions {
 	
 	@Autowired var indexer:ProfileIndexService = _
 	@Autowired var dao:MemberDao = _
@@ -172,20 +160,20 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito with Loggi
 		
 	}
 
+	// TAB-296
 	@Test def threading {
+		val ThreadCount = 100
+		val timeout = Duration(1, SECONDS)
 		val dept = Fixtures.department("CS", "Computer Science")
-		val callable = new Callable[Seq[Member]] {
-			override def call() = indexer.find("mathew james mannion", Seq(dept), Set(), false)
+
+		implicit val executionService = ExecutionContext.fromExecutor( Executors.newFixedThreadPool(5) )
+		
+		val futures = for (i <- 1 to ThreadCount) yield future {
+			indexer.find("mathew james mannion", Seq(dept), Set(), false)
 		}
-		
-		// TAB-296
-		val executionService = Executors.newFixedThreadPool(5)
-		val cs = new ExecutorCompletionService[Seq[Member]](executionService)
-		
-		for (i <- 1 to 100)
-			cs.submit(callable)
-			
-		for (i <- 1 to 100)
-			cs.take().get() should be ('empty)
+
+		for (future <- futures) {
+			Await.result(future, timeout) should be ('empty)
+		}
 	}
 }

@@ -1,19 +1,12 @@
 package uk.ac.warwick.tabula.services
 
-import java.io.StringWriter
 import uk.ac.warwick.tabula.data.model.UserSettings
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.helpers.Logging
 import org.hibernate.criterion.Restrictions
-import com.fasterxml.jackson.databind.JsonMappingException
-import org.codehaus.jackson.JsonParseException
-import org.springframework.beans.factory.annotation.Autowired
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.CurrentUser
-import scala.util.parsing.json.JSONObject
-import scala.util.parsing.json.JSONArray
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 
 
@@ -39,7 +32,8 @@ class UserSettingsServiceImpl extends UserSettingsService with Daoisms with Logg
 			case Some(settings) => settings
 			case None => new UserSettings(user.apparentId)
 		}
-		session.saveOrUpdate(settingsToSave ++= newSettings)
+		settingsToSave ++= newSettings
+		session.saveOrUpdate(settingsToSave)
 	}
 	
 }

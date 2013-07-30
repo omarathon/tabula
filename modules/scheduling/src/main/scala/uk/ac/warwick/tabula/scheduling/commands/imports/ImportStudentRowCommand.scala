@@ -57,7 +57,7 @@ class ImportStudentRowCommand(member: MembershipInformation, ssoUser: User, resu
 		val commandBean = new BeanWrapperImpl(this)
 		val memberBean = new BeanWrapperImpl(member)
 
-		val hasChanged = copyMemberProperties(commandBean, memberBean)
+		val hasChanged = copyMemberProperties(commandBean, memberBean) | copyStudentProperties(commandBean, memberBean)
 
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + member)

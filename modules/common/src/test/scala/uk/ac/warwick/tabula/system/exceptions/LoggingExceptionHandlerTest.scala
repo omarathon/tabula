@@ -1,12 +1,9 @@
 package uk.ac.warwick.tabula.system.exceptions
 
-import org.apache.log4j.WriterAppender
+import org.apache.log4j._
 import java.io.StringWriter
-import org.apache.log4j.Appender
 import org.junit.After
 import org.junit.Before
-import org.apache.log4j.SimpleLayout
-import org.apache.log4j.Logger
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.services.MaintenanceModeEnabledException
@@ -24,10 +21,12 @@ class LoggingExceptionHandlerTest extends TestBase {
 
 		appender = new WriterAppender(new SimpleLayout, writer)
 		handler.logger.addAppender(appender)
+		handler.logger.setLevel(Level.DEBUG)
 	}
 
 	@After def tearDown {
 		if (appender != null) handler.logger.removeAppender(appender)
+		handler.logger.setLevel(null)
 	}
 
 	@Test def userError {

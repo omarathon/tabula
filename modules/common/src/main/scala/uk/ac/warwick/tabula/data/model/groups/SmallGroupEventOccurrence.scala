@@ -18,7 +18,7 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 
 	@ManyToOne
 	@JoinColumn(name="event_id")
-	var smallGroupEvent: SmallGroupEvent = _
+	var event: SmallGroupEvent = _
 
 	var week: WeekNumber = _
 
@@ -26,6 +26,6 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 	@JoinColumn(name = "membersgroup_id")
 	var attendees: UserGroup = new UserGroup
 
-	def permissionsParents = Stream(smallGroupEvent)
+	def permissionsParents = Stream(event)
 
 }

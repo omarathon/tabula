@@ -56,7 +56,6 @@ import uk.ac.warwick.tabula.services.MaintenanceModeService
 import scala.collection.JavaConverters._
 
 // scalastyle:off magic.number
-@DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
 class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	trait Environment {
 

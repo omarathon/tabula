@@ -28,7 +28,6 @@ object SmallGroup {
 	final val DefaultGroupSize = 15
 	object Settings {
 		val MaxGroupSize = "MaxGroupSize"
-		val MaxGroupSizeEnabled = "MaxGroupSizeEnabled"
 	}
 }
 
@@ -68,9 +67,6 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	def maxGroupSize = getIntSetting(Settings.MaxGroupSize)
 	def maxGroupSize_=(defaultSize:Int) = settings += (Settings.MaxGroupSize -> defaultSize)
-
-	def maxGroupSizeEnabled = getBooleanSetting(Settings.MaxGroupSizeEnabled).getOrElse(false)
-	def maxGroupSizeEnabled_=(isEnabled:Boolean) = settings += (Settings.MaxGroupSizeEnabled -> isEnabled)
 
 	def toStringProps = Seq(
 		"id" -> id,

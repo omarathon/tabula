@@ -99,7 +99,7 @@ class ProfileServiceImpl extends ProfileService with Logging {
 }
 
 trait ProfileServiceComponent {
-	var profileService: ProfileService
+	def profileService: ProfileService
 }
 
 trait AutowiringProfileServiceComponent extends ProfileServiceComponent{

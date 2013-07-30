@@ -110,7 +110,7 @@
 			<#assign disable_prop="false" />
 		</#if>
 		
-		<@form.labelled_row "allowSelfGroupSwitching" "Allow students to switch groups" "canBeDisabled" "" "" "${disable_label}" >
+		<@form.labelled_row "allowSelfGroupSwitching" "Allow students to switch groups" "canBeDisabled" "" "" disable_label >
 			<@form.label checkbox=true >
 				<@f.checkbox path="allowSelfGroupSwitching" value="true" disabled=disable_prop />
 				<a class="use-popover" data-html="true"
@@ -177,7 +177,11 @@
 				Set maximum group size:
 			</@form.label>
 
-			<#assign disabled = !(smallGroupSet.defaultMaxGroupSizeEnabled!true)>
+			<#if set??>
+				<#assign disabled = !(set.defaultMaxGroupSizeEnabled!true)>
+			<#else>
+				<#assign disabled = "false" >
+			</#if>
 
 			<@f.input path="defaultMaxGroupSize" type="number" min="0" max="100" cssClass="input-small" disabled="${disabled?string}" />
 

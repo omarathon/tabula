@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import org.hibernate.annotations.Type
-import javax.persistence._
 
 trait HasSettings {
 
@@ -49,26 +48,25 @@ trait HasSettings {
  * expose type-safe getters and setters instead of mixing in SettingsMap directly
  */
 
-trait SettingsMap[A <: SettingsMap[A]] extends HasSettings { self: A =>
-	
+trait SettingsMap extends HasSettings {
 
-	protected def -=(key: String) = {
+	protected def -=(key: String): this.type = {
 		settings -= key
-		self
+		this
 	}
 	
-	protected def +=(kv: (String, Any)) = {
+	protected def +=(kv: (String, Any)): this.type = {
 		settings += kv
-		self
-	}
-	
-	def ++=(sets: Pair[String, Any]*) = {
-		settings ++= sets
-		self
+		this
 	}
 
-	def ++=(other: A) = {
-		settings ++= other.settings
-		self
+	protected def ++=(sets: Pair[String, Any]*): this.type = {
+		settings ++= sets
+		this
+	}
+
+	def ++=(other: SettingsMap): this.type = {
+		this.settings ++= other.settings
+		this
 	}
 }

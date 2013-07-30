@@ -28,7 +28,6 @@ class CreateSmallGroupCommand(groupSet: Promise[SmallGroupSet], module: Module, 
 		if (group.maxGroupSize == null && properties.defaultMaxGroupSizeEnabled) {
 			group.maxGroupSize = properties.defaultMaxGroupSize
 		}
-		group.maxGroupSizeEnabled = properties.defaultMaxGroupSizeEnabled
 
 		group
 	}

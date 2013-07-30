@@ -95,13 +95,14 @@
 									<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
 								</#if>
 							</h3>
-							<@form.label checkbox=true>
-							<@f.checkbox path="maxGroupSizeEnabled" />
-							Set maximum group size:
-							</@form.label>
+							<#assign unlimited = !((smallGroupSet.defaultMaxGroupSizeEnabled)!false)>
 
-							<@f.input path="maxGroupSize" type="number" min="0" max="100" cssClass="input-small" />
-
+							<span class="groupSizeDetails groupSizeUnlimited" <#if !unlimited>style="display:none;"</#if>>
+								Unlimited group size
+							</span>
+							<span class="groupSizeDetails groupSizeLimited" <#if unlimited>style="display:none;"></#if>>
+								Maximum group size: <@f.input path="maxGroupSize" type="number" min="0" max="100" cssClass="input-small" />
+							</span>
 						</div>
 						<div class="span2">
 							<#if !deleteGroup>
@@ -176,6 +177,10 @@
 	
 	<script type="text/javascript">
 		jQuery(function($) {
+
+			$('#defaultMaxGroupSizeEnabled').click(function() {
+				$(".groupSizeDetails").toggle();
+			});
 
 			$('span[data-toggle="tooltip"]').tooltip();
 		
