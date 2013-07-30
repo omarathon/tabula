@@ -58,12 +58,21 @@ class UserGroup extends GeneratedId {
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
 	var excludeUsers: JList[String] = JArrayList()
 
+	def add(user:User) = {
+		if (universityIds) addUser(user.getWarwickId)
+		else addUser(user.getUserId)
+	}
 	def addUser(user: String) = {
 		if (!includeUsers.contains(user)) {
 			includeUsers.add(user)
 		} else false
 	}
 	def removeUser(user: String) = includeUsers.remove(user)
+
+	def remove(user:User) = {
+		if (universityIds) removeUser(user.getWarwickId)
+		else removeUser(user.getUserId)
+	}
 
 	def excludeUser(user: String) = {
 		if (!excludeUsers.contains(user)) {
@@ -85,6 +94,10 @@ class UserGroup extends GeneratedId {
 				(staticIncludeUsers contains user) ||
 				(baseWebgroup != null && groupService.isUserInGroup(user, baseWebgroup)))
 
+	def includesUser(user:User) = {
+		if (universityIds) includes(user.getWarwickId)
+		else includes(user.getUserId)
+	}
 	def isEmpty = members.isEmpty
 
 	def members: Seq[String] =
