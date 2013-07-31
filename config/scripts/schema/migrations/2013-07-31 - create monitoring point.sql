@@ -8,7 +8,6 @@ create table monitoringpointsetyear (
 	constraint monitoringpointsetyear_pk primary key(id)
 );
 
-create index idx_monitoringpointsetyear_route_id on monitoringpointsetyear(route_id);
 create unique index idx_mpsy_route_year on monitoringpointsetyear(route_id, year);
 
 create table monitoringpointset (
