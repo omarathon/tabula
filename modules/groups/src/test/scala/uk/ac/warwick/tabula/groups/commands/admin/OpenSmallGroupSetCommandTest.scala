@@ -10,18 +10,17 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserLookupService
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
 
 class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	val operator = mock[User]
-	val open: Boolean = true
-	val close: Boolean = false
 
 	@Test
 	def marksSelfSignupGroupAsOpen() {
 		val set = new SmallGroupSet()
 		set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
-		val cmd = new OpenSmallGroupSet(Seq(set), operator, open)
+		val cmd = new OpenSmallGroupSet(Seq(set), operator, SmallGroupSetSelfSignUpState.Open)
 		cmd.applyInternal()
 		set.openForSignups should be (true)
 	}
@@ -30,7 +29,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	def ignoresSetsThatAreNotSelfSignUp() {
 		val set = new SmallGroupSet()
 		set.allocationMethod = SmallGroupAllocationMethod.Manual
-		val cmd = new OpenSmallGroupSet(Seq(set), operator, open)
+		val cmd = new OpenSmallGroupSet(Seq(set), operator, SmallGroupSetSelfSignUpState.Open)
 		cmd.applyInternal()
 		set.openForSignups should be (false)
 	}
@@ -44,7 +43,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val set2 = new SmallGroupSet()
 		set2.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
 
-		val cmd = new OpenSmallGroupSet(Seq(set1,set2), operator, open)
+		val cmd = new OpenSmallGroupSet(Seq(set1,set2), operator, SmallGroupSetSelfSignUpState.Open)
 		cmd.applyInternal()
 		set1.openForSignups should be (true)
 		set2.openForSignups should be (true)
@@ -55,7 +54,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val set = new SmallGroupSet()
 		set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
 
-		val cmd = new OpenSmallGroupSet(Seq(set), operator, open)
+		val cmd = new OpenSmallGroupSet(Seq(set), operator, SmallGroupSetSelfSignUpState.Open)
 		cmd.applyInternal() should be(Seq(set))
 	}
 
@@ -65,7 +64,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		set.openForSignups = true
 		set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
 
-		val cmd = new OpenSmallGroupSet(Seq(set), operator, open)
+		val cmd = new OpenSmallGroupSet(Seq(set), operator, SmallGroupSetSelfSignUpState.Open)
 		cmd.applyInternal() should be(Nil)
 
 	}
@@ -170,7 +169,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test
 	def openSmallGroupCommandGluesEverythingTogether() {
-		val command = OpenSmallGroupSetCommand(Seq(new SmallGroupSet), operator)
+		val command = OpenSmallGroupSetCommand(Seq(new SmallGroupSet), operator, SmallGroupSetSelfSignUpState.Open)
 
 		command should be (anInstanceOf[Appliable[SmallGroupSet]])
 		command should be (anInstanceOf[Notifies[Seq[SmallGroupSet]]])

@@ -23,6 +23,7 @@ import uk.ac.warwick.tabula.commands.{UpstreamGroupPropertyEditor, UpstreamGroup
 import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
 
 trait SmallGroupSetsController extends GroupsController {
 	
@@ -227,10 +228,9 @@ class ReleaseSmallGroupSetController extends GroupsController {
 class OpenSmallGroupSetController extends GroupsController {
 	
 	@ModelAttribute("openGroupSetCommand")
-	def getOpenGroupSetCommand(@PathVariable("set") set: SmallGroupSet, @PathVariable action: String): Appliable[Seq[SmallGroupSet]] with OpenSmallGroupSetState = action match {
-		case "open" => OpenSmallGroupSetCommand(Seq(set), user.apparentUser)
-		case "close" => OpenSmallGroupSetCommand.close(Seq(set), user.apparentUser)
-		case _ => throw new ItemNotFoundException()
+	def getOpenGroupSetCommand(@PathVariable("set") set: SmallGroupSet, @PathVariable action: SmallGroupSetSelfSignUpState): Appliable[Seq[SmallGroupSet]] with OpenSmallGroupSetState = {
+		OpenSmallGroupSetCommand(Seq(set), user.apparentUser, action)
+		
 	}
 
 	@RequestMapping
@@ -287,27 +287,27 @@ class ReleaseAllSmallGroupSetsController extends GroupsController {
 @Controller
 class OpenAllSmallGroupSetsController extends GroupsController {
 	
-	@ModelAttribute("setList") def newViewModelOpen(@PathVariable action: String): GroupsetListViewModel = action match {
-		case "open" => new GroupsetListViewModel((user, sets) => OpenSmallGroupSetCommand(sets, user), "open")
-		case "close" => new GroupsetListViewModel((user, sets) => OpenSmallGroupSetCommand.close(sets, user), "close")
-		case _ => throw new ItemNotFoundException()
+	@ModelAttribute("setList") def newViewModelOpen(@PathVariable action: SmallGroupSetSelfSignUpState): GroupsetListViewModel = {
+		new GroupsetListViewModel((user, sets) => OpenSmallGroupSetCommand(sets, user, action), action)
 	}
 	
 	@RequestMapping
 	def form(@ModelAttribute("setList") model: GroupsetListViewModel, @PathVariable department: Department, showFlash: Boolean = false) = {
 		val groupSets = department.modules.asScala.flatMap(_.groupSets.asScala).filter(_.allocationMethod == SmallGroupAllocationMethod.StudentSignUp)
-		Mav("admin/groups/bulk-open", "department" -> department, "groupSets" -> groupSets, "showFlash" -> showFlash, "setState" -> model.action)
+		Mav("admin/groups/bulk-open", "department" -> department, "groupSets" -> groupSets, "showFlash" -> showFlash, "setState" -> model.getName)
 		.crumbs(Breadcrumbs.Department(department))
 	}
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("setList") model: GroupsetListViewModel, @PathVariable department:Department) = {
 		model.applyCommand(user.apparentUser)
-		Redirect("/admin/department/%s/groups/selfsignup/%s".format(department.code, model.action), "batchOpenSuccess" -> true)
+		Redirect("/admin/department/%s/groups/selfsignup/%s".format(department.code, model.getName), "batchOpenSuccess" -> true)
 	}
 
-	class GroupsetListViewModel(val createCommand: (User, Seq[SmallGroupSet]) => Appliable[Seq[SmallGroupSet]], val action: String) {
+	class GroupsetListViewModel(val createCommand: (User, Seq[SmallGroupSet]) => Appliable[Seq[SmallGroupSet]], var action: SmallGroupSetSelfSignUpState) {
 		var checkedGroupsets: JList[SmallGroupSet] = JArrayList()
+		
+		def getName = action.name
 
 		def applyCommand(user: User)= {
 			createCommand(user, checkedGroupsets.asScala).apply()

@@ -9,14 +9,15 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.groups.commands.admin.OpenSmallGroupSet
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
 
 class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 
 	@Test
 	def createsViewModelAbleToBuildCommand() {
 		val controller = new OpenAllSmallGroupSetsController()
-		controller.newViewModelOpen("close") should be(anInstanceOf[controller.GroupsetListViewModel])
-		controller.newViewModelOpen("close").createCommand(new User, Nil) should be(anInstanceOf[OpenSmallGroupSet])
+		controller.newViewModelOpen(SmallGroupSetSelfSignUpState.Closed) should be(anInstanceOf[controller.GroupsetListViewModel])
+		controller.newViewModelOpen(SmallGroupSetSelfSignUpState.Closed).createCommand(new User, Nil) should be(anInstanceOf[OpenSmallGroupSet])
 	}
 
 
@@ -30,7 +31,7 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 			department.code = "XYZ"
 
 			val controller = new OpenAllSmallGroupSetsController()
-			val mav = controller.form(controller.newViewModelOpen("close"), department)
+			val mav = controller.form(controller.newViewModelOpen(SmallGroupSetSelfSignUpState.Closed), department)
 
 			mav.map("groupSets") should be(Seq(groupSet1))
 		}
@@ -42,7 +43,7 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 			val controller = new OpenAllSmallGroupSetsController()
 			department.code = "XYZ"
 			
-			val mav = controller.form(controller.newViewModelOpen("close"), department)
+			val mav = controller.form(controller.newViewModelOpen(SmallGroupSetSelfSignUpState.Closed), department)
 
 			mav.map("department") should be(department)
 
@@ -56,8 +57,8 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 			val controller = new OpenAllSmallGroupSetsController()
 			department.code = "XYZ"
 
-			controller.form(controller.newViewModelOpen("close"), department).map("showFlash") should be(JBoolean(Some(false)))
-			controller.form(controller.newViewModelOpen("close"), department, true).map("showFlash") should be(JBoolean(Some(true)))
+			controller.form(controller.newViewModelOpen(SmallGroupSetSelfSignUpState.Closed), department).map("showFlash") should be(JBoolean(Some(false)))
+			controller.form(controller.newViewModelOpen(SmallGroupSetSelfSignUpState.Closed), department, true).map("showFlash") should be(JBoolean(Some(true)))
 		}
 	}
 
@@ -68,7 +69,7 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 			val controller = new OpenAllSmallGroupSetsController()
 			department.code = "XYZ"
 			
-			controller.form(controller.newViewModelOpen("close"), department).viewName should be("admin/groups/bulk-open")
+			controller.form(controller.newViewModelOpen(SmallGroupSetSelfSignUpState.Closed), department).viewName should be("admin/groups/bulk-open")
 		}
 	}
 
@@ -76,8 +77,8 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 	def viewModelPassesApplyOntoCommand() {
 		val controller = new OpenAllSmallGroupSetsController()
 		val mockCommand = mock[Appliable[Seq[SmallGroupSet]]]
-
-		val model = new controller.GroupsetListViewModel((u, s) => mockCommand, "close")
+				
+		val model = new controller.GroupsetListViewModel((u, s) => mockCommand, SmallGroupSetSelfSignUpState.Closed)
 
 		model.applyCommand(new User)
 
@@ -93,8 +94,8 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 			withCurrentUser(user) {
 				val controller = new OpenAllSmallGroupSetsController()
 				val mockCommand = mock[Appliable[Seq[SmallGroupSet]]]
-				val viewModel = new controller.GroupsetListViewModel((u, s) => mockCommand, "close")
-
+				val viewModel = new controller.GroupsetListViewModel((u, s) => mockCommand, SmallGroupSetSelfSignUpState.Closed)
+				
 				val mav = controller.submit(viewModel, department)
 
 				mav.viewName should be("redirect:/admin/department/XYZ/groups/selfsignup/close")

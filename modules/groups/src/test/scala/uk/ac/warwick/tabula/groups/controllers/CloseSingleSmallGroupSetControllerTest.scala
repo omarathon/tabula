@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.groups.web.controllers.admin.OpenSmallGroupSetController
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet}
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
 
 class CloseSingleSmallGroupSetControllerTest extends TestBase with Mockito {
 	
@@ -16,7 +17,7 @@ class CloseSingleSmallGroupSetControllerTest extends TestBase with Mockito {
 	@Test
 	def createsCommand() {
 		withUser("test") {
-			val command = controller.getOpenGroupSetCommand(set,"close")
+			val command = controller.getOpenGroupSetCommand(set, SmallGroupSetSelfSignUpState.Closed)
 			command.singleSetToOpen should be(set)
 		}
 	}

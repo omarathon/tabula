@@ -8,22 +8,26 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.groups.notifications.OpenSmallGroupSetsNotification
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState._
+
 
 object OpenSmallGroupSetCommand {
-	def apply(setsToOpen: Seq[SmallGroupSet], user: User) = {
-		new OpenSmallGroupSet(setsToOpen, user, true)
-			with ComposableCommand[Seq[SmallGroupSet]]
-			with OpenSmallGroupSetPermissions
-			with OpenSmallGroupSetAudit
-			with OpenSmallGroupSetNotifier
-	}
+	def apply(setsToUpdate: Seq[SmallGroupSet], user: User, desiredState: SmallGroupSetSelfSignUpState) = desiredState match {
+		
 	
-	def close(setsToClose: Seq[SmallGroupSet], user: User) = {
-		new OpenSmallGroupSet(setsToClose, user, false)
-			with ComposableCommand[Seq[SmallGroupSet]]
-			with OpenSmallGroupSetPermissions
-			with OpenSmallGroupSetAudit
+		case Open => new OpenSmallGroupSet(setsToUpdate, user, desiredState)
+											with ComposableCommand[Seq[SmallGroupSet]]
+											with OpenSmallGroupSetPermissions
+											with OpenSmallGroupSetAudit
+											with OpenSmallGroupSetNotifier 
+		
+		case Closed => new OpenSmallGroupSet(setsToUpdate, user, desiredState)
+									with ComposableCommand[Seq[SmallGroupSet]]
+									with OpenSmallGroupSetPermissions
+									with OpenSmallGroupSetAudit
 	}
+		
 }
 
 trait OpenSmallGroupSetState {
@@ -38,12 +42,12 @@ trait OpenSmallGroupSetState {
 		}
 	}
 }
-class OpenSmallGroupSet(val requestedSets: Seq[SmallGroupSet], val user: User, val setState: Boolean) extends CommandInternal[Seq[SmallGroupSet]] with OpenSmallGroupSetState with UserAware {
+class OpenSmallGroupSet(val requestedSets: Seq[SmallGroupSet], val user: User, val setState: SmallGroupSetSelfSignUpState) extends CommandInternal[Seq[SmallGroupSet]] with OpenSmallGroupSetState with UserAware {
 
-	 val applicableSets = requestedSets.filter(s => s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && s.openForSignups != setState)
+	 val applicableSets = requestedSets.filter(s => s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && s.openState != setState)
 
 	 def applyInternal(): Seq[SmallGroupSet] = {
-		 applicableSets.foreach(s => s.openForSignups = setState)
+		 applicableSets.foreach(s => s.openState = setState)
 		 applicableSets
 	 }
 }
@@ -78,3 +82,6 @@ trait OpenSmallGroupSetNotifier extends Notifies[Seq[SmallGroupSet]] {
 
 	}
 }
+
+
+
