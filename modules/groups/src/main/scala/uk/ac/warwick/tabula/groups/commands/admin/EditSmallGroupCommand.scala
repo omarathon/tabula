@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.commands.{BaseDescribable, Describable, Description}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.helpers.{Promises, Promise}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.SmallGroupService
 
-class EditSmallGroupCommand(group: SmallGroup, properties: SmallGroupSetProperties) extends ModifySmallGroupCommand(group.groupSet.module, properties) {
+class EditSmallGroupCommand(val group: SmallGroup, properties: SmallGroupSetProperties)
+	extends ModifySmallGroupCommand(group.groupSet.module, properties)
+	with EditSmallGroupCommandDescription
+	with EditSmallGroupCommandState {
 
 	PermissionCheck(Permissions.SmallGroups.Update, group)
 	
@@ -22,8 +23,17 @@ class EditSmallGroupCommand(group: SmallGroup, properties: SmallGroupSetProperti
 		copyTo(group)
 		group
 	}
+}
 
-	override def describe(d: Description) = d.smallGroup(group).properties(
-		"name" -> name,
-		"groupSet" -> group.groupSet)
+trait EditSmallGroupCommandState {
+	def name: String
+	val group: SmallGroup
+}
+
+trait EditSmallGroupCommandDescription extends BaseDescribable[SmallGroup] {
+	self: EditSmallGroupCommandState =>
+	override def describe(d: Description) {
+		d.smallGroup(group)
+		d.property("name" -> name)
+	}
 }
