@@ -14,9 +14,9 @@ abstract class GroupsController extends BaseController with GroupsBreadcrumbs {
 
 	}
 
-	type moduleGroupsMap = Map[Module, Map[SmallGroupSet, Seq[SmallGroup]]]
+	type ModuleGroupsMap = Map[Module, Map[SmallGroupSet, Seq[SmallGroup]]]
 
-	def generateGroupsViewModel(mapping: moduleGroupsMap): ViewModules = {
+	def generateViewModules(mapping: ModuleGroupsMap): ViewModules = {
 		val moduleItems = for ((module, sets) <- mapping) yield {
 			ViewModule(module,
 				sets.toSeq map { case (set, groups) =>
@@ -26,6 +26,7 @@ abstract class GroupsController extends BaseController with GroupsBreadcrumbs {
 			)
 		}
 
-		ViewModules( moduleItems.toSeq, canManageDepartment = false )	}
+		ViewModules( moduleItems.toSeq, canManageDepartment = false )
+	}
 	
 }

@@ -23,7 +23,7 @@ class StudentGroupsController extends GroupsController {
 	def listGroups(@ModelAttribute("command") command: ListStudentsGroupsCommandImpl): Mav = {
 		val mapping = command.apply()
 
-		val data = generateGroupsViewModel(mapping)
+		val data = generateViewModules(mapping)
 
 		val title = {
 			val smallGroups: Seq[SmallGroupSet] = for (
