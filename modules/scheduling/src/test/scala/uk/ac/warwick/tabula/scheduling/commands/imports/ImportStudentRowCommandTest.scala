@@ -7,7 +7,6 @@ import java.sql.ResultSet
 import java.sql.ResultSetMetaData
 import org.joda.time.DateTimeConstants
 import org.joda.time.LocalDate
-import org.joda.time.DateTime
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
@@ -106,9 +105,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rs.getString("homeDepartmentCode") returns ("PH")
 		rs.getString("department_code") returns ("PH")
 		rs.getString("scj_code") returns ("0672089/2")
-		rs.getDate("begin_date") returns new Date(new DateTime(2011,5,12, 0,0).getMillis())
-		rs.getDate("end_date") returns new Date(new DateTime(2014,5,12, 0,0).getMillis())
-		rs.getDate("expected_end_date") returns new Date(new DateTime(2015,5,12, 0,0).getMillis())
+		rs.getDate("begin_date") returns Date.valueOf("2011-05-12")
+		rs.getDate("end_date") returns Date.valueOf("2014-05-12")
+		rs.getDate("expected_end_date") returns Date.valueOf("2015-05-12")
 		rs.getInt("sce_sequence_number") returns (1)
 		rs.getString("enrolment_status_code") returns ("F")
 		rs.getString("mode_of_attendance_code") returns ("P")
