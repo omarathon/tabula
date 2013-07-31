@@ -14,26 +14,26 @@ create table monitoringpointset (
 	id nvarchar2(250) not null,
 	point_set_year_id nvarchar2(250) not null,
 	name nvarchar2(4000) not null,
-	position number(2,0) not null default 0,
+	position number(2,0) default 0,
 	createddate timestamp(6),
 	updateddate timestamp(6),
 	constraint monitoringpointset_pk primary key(id)
 );
 
-create index idx_monitoringpointset_point_set_year_id on monitoringpointset(point_set_year_id);
+create index idx_mps_point_set_year_id on monitoringpointset(point_set_year_id);
 
 create table monitoringpoint (
 	id nvarchar2(250) not null,
 	point_set_id nvarchar2(250) not null,
 	name nvarchar2(4000) not null,
-	position number(2,0) not null default 0,
+	position number(2,0) default 0,
 	defaultvalue number(1) default 0,
 	createddate timestamp(6),
 	updateddate timestamp(6),
 	constraint monitoringpoint_pk primary key(id)
 );
 
-create index idx_monitoringpoint_point_set_id on monitoringpoint(point_set_id);
+create index idx_mpoint_point_set_id on monitoringpoint(point_set_id);
 
 create table monitoringcheckpoint (
 	id nvarchar2(250) not null,
@@ -45,5 +45,5 @@ create table monitoringcheckpoint (
 	constraint checkpoint_pk primary key(id)
 );
 
-create index idx_monitoringcheckpoint_point_id on monitoringcheckpoint(point_id);
-create index idx_monitoringcheckpoint_scd_id on monitoringcheckpoint(student_course_detail_id);
+create index idx_mcheckpoint_point_id on monitoringcheckpoint(point_id);
+create index idx_mcheckpoint_scd_id on monitoringcheckpoint(student_course_detail_id);
