@@ -128,7 +128,7 @@
 	<#if attachment??>
 		<#assign title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#assign>
 		<div class="attachment">
-			<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType!"application/octet-stream" title="${title}" text="Download ${attachment.name}" />
+			<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
 		</div>
 	<#elseif attachments?size gt 1>
 		<details class="attachment">
