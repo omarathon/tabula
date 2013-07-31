@@ -214,24 +214,32 @@
 			 * click selector must be specific otherwise the click event will propagate up past the section element
 			 * these HTML5 elements have default browser driven behaviour that is hard to override.
 			 */
-			
-			// named handler that can be unbound 
+
+			// named handler that can be unbound
 			var iframeHandler = function() {
 				frameLoad(this);
 				$(this).off('load', iframeHandler);
 			};
-			
+
 			var meetingsSection = $("section.meetings");
 			$(".new, .edit-meeting-record", meetingsSection).on("click", function(e) {
-				var target = $(this).attr("href");
+				var $this = $(this);
+				var targetUrl = $this.attr("href");
 
-				$m.load(target + "?modal", function() {
+				$.get(targetUrl + "?modal", function(data) {
+					$m.html(data);
 					var $mb = $m.find(".modal-body").empty();
 					var iframeMarkup = "<iframe frameBorder='0' scrolling='no' style='height:100%;width:100%;' id='modal-content'></iframe>";
 					$(iframeMarkup)
 						.on('load', iframeHandler)
-						.attr("src", target + "?iframe")
+						.attr("src", targetUrl + "?iframe")
 						.appendTo($mb);
+				}).fail(function() {
+					if (!$('#meeting-modal-failure').length) {
+						var $error = $('<p id="meeting-modal-failure" class="alert alert-error hide"><i class="icon-warning-sign"></i> Sorry, I\'m unable to edit meeting records for this student at the moment.</p>');
+						$this.before($error);
+						$error.slideDown();
+					}
 				});
 				return false;
 			});

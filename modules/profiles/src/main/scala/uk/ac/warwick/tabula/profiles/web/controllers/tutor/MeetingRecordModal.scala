@@ -58,11 +58,10 @@ trait MeetingRecordModal  {
 
 		Mav("related_students/meeting/edit",
 			"modal" -> true,
-			"command" -> command,
+			"agentName" -> (if (command.considerAlternatives) "" else command.relationship.agentName),
 			"studentCourseDetails" -> studentCourseDetails,
 			"isStudent" -> (studentCourseDetails.student == currentMember),
-			"relationshipType"->relationshipType,
-			"agentName" -> command.relationship.agentName).noLayout()
+			"relationshipType" -> relationshipType).noLayout()
 	}
 
 	// modal iframe form
@@ -79,14 +78,13 @@ trait MeetingRecordModal  {
 			"studentCourseDetails" -> studentCourseDetails,
 			"isStudent" -> (studentCourseDetails.student == currentMember),
 			"relationshipType"->relationshipType,
-			"agentName" -> command.relationship.agentName,
 			"creator" -> command.creator,
 			"formats" -> formats).noNavigation()
 	}
 
 	// submit async
 	@RequestMapping(method = Array(POST), params = Array("modal"))
-	def saveModalMeetingRecord(@Valid @ModelAttribute("command")command: ModifyMeetingRecordCommand,
+	def saveModalMeetingRecord(@Valid @ModelAttribute("command") command: ModifyMeetingRecordCommand,
 	                           errors: Errors,
 	                           @ModelAttribute("viewMeetingRecordCommand") viewCommand: Option[Appliable[Seq[MeetingRecord]]],
 	                           @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
@@ -99,14 +97,10 @@ trait MeetingRecordModal  {
 				case None => Seq()
 				case Some(cmd) => cmd.apply
 			}
-			val roleName = relationshipType match {
-				case PersonalTutor=>"personal tutor"
-				case Supervisor=>"supervisor"
-			}
 
 			Mav("related_students/meeting/list",
         	"studentCourseDetails" -> studentCourseDetails,
- 			    "role"->roleName,
+ 			    "role" -> relationshipType,
 				  "meetings" -> meetingList,
 				  "viewer" -> currentMember,
 				  "openMeeting" -> modifiedMeeting).noLayout()

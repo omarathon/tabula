@@ -18,7 +18,7 @@ class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
 		copyToCommand(meetingRecord)
 	}
 
-	def copyToCommand(meetingRecord: MeetingRecord){
+	def copyToCommand(meetingRecord: MeetingRecord) {
 		implicit def toOption[T](x:T) : Option[T] = Option(x)
 
 		title = title.getOrElse(meetingRecord.title)

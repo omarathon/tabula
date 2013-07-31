@@ -203,7 +203,7 @@ class StudentMember extends Member with StudentProperties {
 		).distinct
 	}
 
-	override def mostSignificantCourseDetails = {
+	override def mostSignificantCourseDetails: Option[StudentCourseDetails] = {
 		if (studentCourseDetails == null || studentCourseDetails.isEmpty) None
 		else {
 			val mostSignifCourse = studentCourseDetails.asScala.filter {

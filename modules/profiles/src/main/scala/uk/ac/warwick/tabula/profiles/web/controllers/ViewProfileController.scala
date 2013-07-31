@@ -82,8 +82,9 @@ class ViewProfileController extends ProfilesController {
 			case None => Seq()
 			case Some(cmd) => cmd.apply()
 		}
+		val meetings = tutorMeetings ++ supervisorMeetings
 
-		val openMeeting = tutorMeetings.find(m => m.id == openMeetingId).getOrElse(null)
+		val openMeeting = meetings.find(m => m.id == openMeetingId).getOrElse(null)
 
 		val tutor = userLookup.getUserByWarwickUniId(tutorId)
 

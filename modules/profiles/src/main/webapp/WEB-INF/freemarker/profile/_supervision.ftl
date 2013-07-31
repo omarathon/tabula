@@ -27,7 +27,7 @@
 			</div>
 		</#list>
 		</div>
-		<@meeting_macros.list studentCourseDetails supervisorMeetings "supervisor"/>
+		<@meeting_macros.list studentCourseDetails supervisorMeetings studentCourseDetails.supervisors?first.relationshipType />
 	<#else>
 		<h4>Supervisors</h4>
 		<p class="text-warning"><i class="icon-warning-sign"></i> No supervision details are recorded in Tabula for the current year.</p>
