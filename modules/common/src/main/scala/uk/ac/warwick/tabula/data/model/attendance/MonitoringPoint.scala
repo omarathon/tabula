@@ -19,8 +19,7 @@ class MonitoringPoint extends GeneratedId {
 	@NotNull
 	var name: String = _
 	
-	@NotNull
-	var position: Int = _
+	var defaultValue: Boolean = true
 	
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	var createdDate: DateTime = _

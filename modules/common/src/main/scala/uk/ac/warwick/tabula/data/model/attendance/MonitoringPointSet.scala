@@ -1,13 +1,16 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import uk.ac.warwick.tabula.data.model.GeneratedId
 import org.hibernate.annotations.Entity
-import javax.validation.constraints.NotNull
-import uk.ac.warwick.tabula.data.model.Route
+import org.hibernate.annotations.Type
+import org.joda.time.DateTime
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
-import org.joda.time.DateTime
-import org.hibernate.annotations.Type
+import javax.persistence.OneToMany
+import javax.validation.constraints.NotNull
+import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.JavaImports.JList
+import uk.ac.warwick.tabula.data.model.GeneratedId
+import javax.persistence.OrderColumn
 
 @Entity
 class MonitoringPointSet extends GeneratedId {
@@ -16,13 +19,12 @@ class MonitoringPointSet extends GeneratedId {
 	@JoinColumn(name = "point_set_year_id")
 	var pointSetYear: MonitoringPointSetYear = _
 	
+	@OneToMany(mappedBy = "pointSet")
+	@OrderColumn(name = "position")
+	var points: JList[MonitoringPoint] = JArrayList()
+	
 	@NotNull
 	var name: String = _
-	
-	@NotNull
-	var position: Int = _
-	
-	var defaultValue: Boolean = false
 	
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	var createdDate: DateTime = _
