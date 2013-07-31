@@ -185,8 +185,7 @@
 					</li>
 				</#if>
 
-				<#-- TODO - wrap in an if statement if not in groups -->
-				<#if numSmallGroups &gt; 0>
+				<#if numSmallGroups gt 0>
 					<li id="sg-pane" style="display:none;">
 						<#include "_small_groups.ftl" />
 					</li>
