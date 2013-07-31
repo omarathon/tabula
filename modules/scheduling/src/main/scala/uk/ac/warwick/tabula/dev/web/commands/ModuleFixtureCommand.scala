@@ -21,13 +21,9 @@ class ModuleFixtureCommand extends CommandInternal[Unit] with Logging{
 	def applyInternal(){
 		transactional() {
 			val department  = moduleAndDepartmentService.getDepartmentByCode(departmentCode).get
-
-			moduleAndDepartmentService.getModuleByCode(code) match {
-				case Some(module)=>{
-					session.delete(module)
-					logger.info(s"Deleted module ${code}")
-				}
-				case _ =>
+			moduleAndDepartmentService.getModuleByCode(code).foreach { module =>
+				session.delete(module)
+				logger.info(s"Deleted module ${code}")
 			}
 			session.save(newModuleFrom(moduleInfo, department))
 			logger.info(s"Created module ${code}")
