@@ -120,9 +120,8 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 	def describe(d: Description){
 		d.properties(
-			"creator" -> meeting.creator,
-			"relationship" -> meeting.relationship,
-			"pendingApprovers" -> meeting.pendingApprovers
+			"creator" -> meeting.creator.universityId,
+			"relationship" -> meeting.relationship.relationshipType.toString()
 		)
 	}
 }
