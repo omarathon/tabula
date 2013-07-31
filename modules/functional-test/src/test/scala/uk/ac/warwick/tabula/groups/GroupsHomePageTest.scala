@@ -38,16 +38,20 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 
 	it should "be able to open batches of groups" in {
 		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx")
+		val TEST_MODULE_CODE = "xxx999"
+		val TEST_GROUPSET_NAME="Test Tutorial"
 
 		Given("The smallGroupTeachingStudentSignUp feature is enabled")
    		enableFeature("smallGroupTeachingStudentSignUp")
 
+		And("There is a a groupset with an allocation method of StudentSignUp")
+			createModule("xxx",TEST_MODULE_CODE,"Batch Opening Groupsets test")
+		  createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp")
+
 		And("The administrator is logged in and viewing the groups home page")
 		  signIn as(P.Admin1)  to groupsetSummaryPage.url
 
-		And("There is a a groupset with an allocation method of SelfSignUp")
-      // created by SmallGroupFixtures, for now. Check that it's visible
-		  val setInfo = groupsetSummaryPage.getGroupsetInfo("xxx102", "Module 2 Tutorial")
+		  val setInfo = groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME)
 		  setInfo should not be (null)
 
 		Then("The Bulk Open Groups menu button is enabled")
@@ -81,7 +85,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		  go to updatedSummary.url
 
 		Then("The option to open the groupset is absent")
-			updatedSummary.getGroupsetInfo("xxx102", "Module 2 Tutorial") should not be ('showingOpenButton)
+			updatedSummary.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should not be ('showingOpenButton)
 	}
 
 }
