@@ -2,27 +2,27 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import org.joda.time.DateTimeConstants
 import org.springframework.web.multipart.MultipartFile
-import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.validation.BindException
-import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model.MeetingFormat._
-
-
+import uk.ac.warwick.tabula.PersistenceTestBase
+import uk.ac.warwick.tabula.data.FileDao
 
 // scalastyle:off magic.number
-class CreateMeetingRecordCommandTest extends AppContextTestBase with MeetingRecordTests {
+class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecordTests {
 
-
-	@Transactional
 	@Test
 	def validMeeting = withUser("cuscav") { withFakeTime(aprilFool) {
 
-		val cmd = new CreateMeetingRecordCommand(creator, relationship, false)
+		val cmd = new CreateMeetingRecordCommand(creator, relationship, false) {
+			override val session = mockSession
+		}
 		cmd.title = "A title"
 		cmd.format = FaceToFace
 		cmd.meetingDate  = dateTime(3903, DateTimeConstants.MARCH).toLocalDate // it's the future
+		cmd.maintenanceMode = maintenanceModeService
+		cmd.notificationService = notificationService
 
 		// check invalid future date
 		var errors = new BindException(cmd, "command")
@@ -44,6 +44,8 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with MeetingReco
 
 		cmd.meetingDate = marchHare
 		cmd.title = ""
+		cmd.features = emptyFeatures
+		cmd.features.meetingRecordApproval = true
 
 		// check invalid empty title
 		errors = new BindException(cmd, "command")
@@ -81,9 +83,13 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with MeetingReco
 
 		val fileAttach = new FileAttachment
 		fileAttach.name = "Beltane"
+
 		uploadedFile.attached.add(fileAttach)
 
+		val dao: FileDao = mock[FileDao]
+		cmd.fileDao = dao
 		cmd.file = uploadedFile
+		cmd.meetingRecordDao = meetingRecordDao
 
 		val meeting = transactional { tx => cmd.apply() }
 
