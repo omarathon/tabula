@@ -168,7 +168,8 @@
 										 <li  ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
                                          		   (''," class='disabled use-tooltip' title='Not a self-signup group' ")
                                          }>
-                                         <a  class="close-group-link" href="/TODO-TAB-934"><i class="icon-lock icon-fixed-width"></i> Close</a></li>
+                                         <a  class="close-group-link" data-toggle="modal" data-target="#modal-container" 
+                                         href="<@routes.closeset groupSet />"><i class="icon-lock icon-fixed-width"></i> Close</a></li>
 
 										 <#else>
 										<li  ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string

@@ -1,15 +1,26 @@
 <#escape x as x?html>
-<h1>Open groups in ${department.name}</h1>
-<#if info.requestParameters.batchOpenSuccess??>
+
+ <#if setState == 'close'>
+ 	<#assign pastTense = "d" />
+ 	<#assign stateChange = false />
+ <#else>
+ 	<#assign pastTense = "" />
+ 	<#assign stateChange = true />
+ </#if>
+
+
+<h1>${setState?cap_first} groups in ${department.name}</h1>
+<#if info.requestParameters.batchOpenSuccess?? && setState == "open">
 <div class="alert alert-success">
-    Students have been notified that these groups are now open for self-sign-up
+    Students have been notified that these groups are now ${setState} for self-sign-up
 </div>
 </#if>
     <@f.form method="post" action="" commandName="setList" cssClass="form-horizonatal form-tiny">
-    <p> Open these groups for self sign-up. Students will be notified via email that they can now sign up for these groups in Tabula
+    <p> ${setState?cap_first} these groups for self sign-up.
+    <#if setState == "open"> Students will be notified via email that they can now sign up for these groups in Tabula. </#if>
     </p>
         <div class="control-group">
-            <input class="btn btn-info" type="submit" value="Open">
+            <input class="btn btn-info" type="submit" value="${setState?cap_first}">
         </div>
 
     <div id="scroll-container">
@@ -23,16 +34,16 @@
         </thead>
         <tbody >
             <#list groupSets as set>
-            <tr ${set.openForSignups?string("class='use-tooltip' title='This group is already open for sign-ups'","")} >
+            <tr ${(set.openForSignups == stateChange)?string("class='use-tooltip' title='This group is already ${setState}${pastTense} for sign-ups'","")} >
                 <td>
                    <@f.checkbox
-                   class=set.openForSignups?string('','collection-checkbox')
+                   class=(set.openForSignups == stateChange)?string('','collection-checkbox')
                    path="checkedGroupsets"
-                   disabled=(set.openForSignups)?string
+                   disabled=(set.openForSignups == stateChange)?string
                    value=set.id/>
                 </td>
                 <td>
-                    <span class="${set.openForSignups?string('muted','')}">
+                    <span class=${(set.openForSignups == stateChange)?string("muted","")}>
                         ${set.module.code} - ${set.module.name} - ${set.name}
                     </span>
                 </td>
