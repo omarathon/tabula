@@ -90,7 +90,7 @@ class BatchOpenPage(val departmentCode: String)(implicit webDriver: WebDriver) e
 	val url= FunctionalTestProperties.SiteRoot + s"/groups/admin/department/${departmentCode}/groups/open"
 
 	def isCurrentPage(): Boolean =  {
-		currentUrl should include (s"/groups/admin/department/${departmentCode}/groups/open")
+		currentUrl should include (s"/groups/admin/department/${departmentCode}/groups/selfsignup/open")
 		find(cssSelector("#main-content h1")).get.text.startsWith("Open groups in ")
 	}
 
