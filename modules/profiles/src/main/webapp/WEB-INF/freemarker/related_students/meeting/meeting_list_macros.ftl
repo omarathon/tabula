@@ -1,16 +1,18 @@
 <#escape x as x?html>
 
-<#macro list studentCourseDetails meetings role>
-<#if role=="supervisor">
-	<#assign can_read_meetings = can.do("Profiles.Supervisor.MeetingRecord.Read", studentCourseDetails) />
-	<#assign can_create_meetings = can.do("Profiles.Supervisor.MeetingRecord.Create", studentCourseDetails) />
-	<#assign action_url_prefix = "supervisor" />
+<#macro checkPermissions studentCourseDetails relationshipType>
+	<#assign action_url_prefix = relationshipType.dbValue />
+	<#if action_url_prefix == "supervisor">
+		<#assign can_read_meetings = can.do("Profiles.Supervisor.MeetingRecord.Read", studentCourseDetails) />
+		<#assign can_create_meetings = can.do("Profiles.Supervisor.MeetingRecord.Create", studentCourseDetails) />
+	<#elseif action_url_prefix == "personalTutor">
+		<#assign can_read_meetings = can.do("Profiles.PersonalTutor.MeetingRecord.Read", studentCourseDetails) />
+		<#assign can_create_meetings = can.do("Profiles.PersonalTutor.MeetingRecord.Create", studentCourseDetails) />
+	</#if>
+</#macro>
 
-<#elseif role="personal tutor">
-	<#assign can_read_meetings = can.do("Profiles.PersonalTutor.MeetingRecord.Read", studentCourseDetails) />
-	<#assign can_create_meetings = can.do("Profiles.PersonalTutor.MeetingRecord.Create", studentCourseDetails) />
-	<#assign action_url_prefix = "tutor" />
-</#if>
+<#macro list studentCourseDetails meetings relationshipType>
+	<@checkPermissions studentCourseDetails relationshipType />
 
 	<section class="meetings ${action_url_prefix}-meetings" data-target-container="${action_url_prefix}-meetings">
 
@@ -19,11 +21,11 @@
 		</#if>
 
 		<#if can_create_meetings>
-			<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.scjCode?replace("/","_") action_url_prefix/>" title="Create a new record"><i class="icon-edit"></i> New record</a>
+			<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.urlSafeId action_url_prefix />" title="Create a new record"><i class="icon-edit"></i> New record</a>
 			<#if isSelf!false>
-				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to you and your ${role}(s).">Who can see this information?</small>
+				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to you and your ${relationshipType.description}(s).">Who can see this information?</small>
 			<#else>
-				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to the student and their ${role}(s).">Who can see this information?</small>
+				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to the student and their ${relationshipType.description}(s).">Who can see this information?</small>
 			</#if>
 		</#if>
 		<#if can_read_meetings>
@@ -51,10 +53,10 @@
 
 							<#if !meeting.approved && viewer.universityId == meeting.creator.universityId>
 								<div class="meeting-record-toolbar">
-									<a href="<@routes.edit_meeting_record studentCourseDetails.scjCode?replace("/","_") meeting action_url_prefix/>" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
-									<a href="<@routes.delete_meeting_record meeting action_url_prefix/>" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
-									<a href="<@routes.restore_meeting_record meeting action_url_prefix/>" class="btn-like restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
-									<a href="<@routes.purge_meeting_record meeting action_url_prefix/>" class="btn-like purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
+									<a href="<@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting action_url_prefix />" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
+									<a href="<@routes.delete_meeting_record meeting action_url_prefix />" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
+									<a href="<@routes.restore_meeting_record meeting action_url_prefix />" class="btn-like restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
+									<a href="<@routes.purge_meeting_record meeting action_url_prefix />" class="btn-like purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
 									<i class="icon-spinner icon-spin"></i>
 								</div>
 							</#if>
@@ -132,7 +134,7 @@
 		</#list>
 	</div>
 	<div class="submit-buttons">
-		<a class="edit-meeting-record btn btn-primary" href="<@routes.edit_meeting_record studentCourseDetails.scjCode?replace("/","_") meeting action_url_prefix/>">Edit</a>
+		<a class="edit-meeting-record btn btn-primary" href="<@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting action_url_prefix/>">Edit</a>
 	</div>
 	<#else>
 	<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.description} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>

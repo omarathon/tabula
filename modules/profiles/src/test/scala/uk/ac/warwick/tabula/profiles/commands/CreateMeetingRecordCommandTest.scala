@@ -19,7 +19,7 @@ class CreateMeetingRecordCommandTest extends AppContextTestBase with MeetingReco
 	@Test
 	def validMeeting = withUser("cuscav") { withFakeTime(aprilFool) {
 
-		val cmd = new CreateMeetingRecordCommand(creator, relationship)
+		val cmd = new CreateMeetingRecordCommand(creator, relationship, false)
 		cmd.title = "A title"
 		cmd.format = FaceToFace
 		cmd.meetingDate  = dateTime(3903, DateTimeConstants.MARCH).toLocalDate // it's the future

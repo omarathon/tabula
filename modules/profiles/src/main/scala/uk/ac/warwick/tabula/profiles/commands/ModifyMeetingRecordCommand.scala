@@ -16,7 +16,7 @@ import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.Features
 
-abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship)
+abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship, val considerAlternatives: Boolean = false)
 	extends Command[MeetingRecord] with Notifies[MeetingRecord] with SelfValidating with FormattedHtml
 	with BindListener with Daoisms {
 
@@ -45,7 +45,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 		def persistAttachments(meeting: MeetingRecord) {
 			// delete attachments that have been removed
 
-			if (meeting.attachments != null){
+			if (meeting.attachments != null) {
 				val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
 				val filesToRemove = meeting.attachments.asScala -- filesToKeep
 				meeting.attachments = JArrayList[FileAttachment](filesToKeep)
@@ -69,7 +69,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 		// persist the meeting record
 		meetingRecordDao.saveOrUpdate(meeting)
 
-		if (features.meetingRecordApproval){
+		if (features.meetingRecordApproval) {
 			updateMeetingApproval(meeting)
 		}
 
@@ -104,6 +104,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 			errors.rejectValue("title", "meetingRecord.title.long", new Array(MeetingRecord.MaxTitleLength), "")
 		}
 
+		rejectIfEmptyOrWhitespace(errors, "relationship", "NotEmpty")
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
 
 		meetingDate match {
@@ -118,7 +119,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 		}
 	}
 
-	def describe(d: Description){
+	def describe(d: Description) {
 		d.properties(
 			"creator" -> meeting.creator,
 			"relationship" -> meeting.relationship,

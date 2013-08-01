@@ -60,7 +60,7 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 			relationship
 		}
 
-		val createMeetingRecordCommand = new CreateMeetingRecordCommand(creator, relationship)
+		val createMeetingRecordCommand = new CreateMeetingRecordCommand(creator, relationship, false)
 		createMeetingRecordCommand.title = "Title"
 		createMeetingRecordCommand.format = FaceToFace
 		createMeetingRecordCommand.meetingDate  = dateTime(3903, DateTimeConstants.MARCH).toLocalDate // it's the future

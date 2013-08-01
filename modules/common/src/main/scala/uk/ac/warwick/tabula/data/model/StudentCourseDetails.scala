@@ -35,6 +35,7 @@ class StudentCourseDetails
 
 	@Id var scjCode: String = _
 	def id = scjCode
+	def urlSafeId = scjCode.replace("/", "_")
 
 	@ManyToOne
 	@JoinColumn(name="universityId", referencedColumnName="universityId")
@@ -123,7 +124,7 @@ trait StudentCourseProperties {
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var awardCode: String = _
-	
+
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var levelCode: String = _
 
