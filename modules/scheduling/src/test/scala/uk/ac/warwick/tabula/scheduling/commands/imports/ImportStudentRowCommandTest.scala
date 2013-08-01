@@ -1,24 +1,19 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
+import scala.collection.JavaConverters._
+
 import java.sql.Date
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
 import org.joda.time.DateTimeConstants
 import org.joda.time.LocalDate
-import org.junit.Ignore
-import org.junit.Test
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD
 import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
 import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
-import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDaoImpl
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.Gender._
@@ -37,23 +32,16 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
-import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporterImpl
 import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
 import uk.ac.warwick.tabula.services.CourseAndRouteService
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.services.ProfileServiceImpl
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.tabula.data.StudentCourseDetailsDaoImpl
-import uk.ac.warwick.tabula.data.MemberDaoImpl
-import uk.ac.warwick.tabula.Fixtures
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.data.DepartmentDaoImpl
 import uk.ac.warwick.tabula.data.ModeOfAttendanceDao
 import uk.ac.warwick.tabula.data.SitsStatusDao
 import uk.ac.warwick.tabula.services.MaintenanceModeService
-import scala.collection.JavaConverters._
+
 
 // scalastyle:off magic.number
 class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
@@ -117,9 +105,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rs.getString("homeDepartmentCode") returns ("PH")
 		rs.getString("department_code") returns ("PH")
 		rs.getString("scj_code") returns ("0672089/2")
-		rs.getDate("begin_date") returns new Date(new java.util.Date("12 May 2011").getTime())
-		rs.getDate("end_date") returns new Date(new java.util.Date("12 May 2014").getTime())
-		rs.getDate("expected_end_date") returns new Date(new java.util.Date("12 May 2015").getTime())
+		rs.getDate("begin_date") returns Date.valueOf("2011-05-12")
+		rs.getDate("end_date") returns Date.valueOf("2014-05-12")
+		rs.getDate("expected_end_date") returns Date.valueOf("2015-05-12")
 		rs.getInt("sce_sequence_number") returns (1)
 		rs.getString("enrolment_status_code") returns ("F")
 		rs.getString("mode_of_attendance_code") returns ("P")

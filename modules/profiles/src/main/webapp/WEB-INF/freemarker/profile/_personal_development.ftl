@@ -24,7 +24,7 @@
 
 		<#assign acceptsPersonalTutorChanges = (studentCourseDetails.department)?? && studentCourseDetails.department.canEditPersonalTutors />
 		<#if studentCourseDetails.hasAPersonalTutor && can.do("Profiles.PersonalTutor.Create", profile) && acceptsPersonalTutorChanges>
-			<a class="add-tutor-link" href="<@routes.tutor_edit_no_tutor scjCode=studentCourseDetails.scjCode?replace("/","_") />"
+			<a class="add-tutor-link" href="<@routes.tutor_edit_no_tutor scjCode=studentCourseDetails.urlSafeId />"
 				data-target="#modal-change-tutor"
 				data-scj="${studentCourseDetails.scjCode}"
 			>
@@ -36,7 +36,7 @@
 			<p>
 				Not recorded
 				<#if can.do("Profiles.PersonalTutor.Update", profile) && acceptsPersonalTutorChanges>
-					<a class="edit-tutor-link" href="<@routes.tutor_edit_no_tutor scjCode=studentCourseDetails.scjCode?replace("/","_") />"
+					<a class="edit-tutor-link" href="<@routes.tutor_edit_no_tutor scjCode=studentCourseDetails.urlSafeId />"
 						data-target="#modal-change-tutor"
 						data-scj="${studentCourseDetails.scjCode}"
 
@@ -57,7 +57,7 @@
 				<#if !personalTutor??>
 					${relationship.agentName} <span class="muted">External to Warwick</span>
 					<#if can.do("Profiles.PersonalTutor.Update", profile) && acceptsPersonalTutorChanges>
-						<a class="edit-tutor-link" href="<@routes.tutor_edit_no_tutor scjCode=studentCourseDetails.scjCode?replace("/","_") />"
+						<a class="edit-tutor-link" href="<@routes.tutor_edit_no_tutor scjCode=studentCourseDetails.urlSafeId />"
 						data-target="#modal-change-tutor"
 						data-scj="${studentCourseDetails.scjCode}"
 						>
@@ -71,7 +71,7 @@
 					<h5>
 						${personalTutor.fullName!"Personal tutor"}
 						<#if can.do("Profiles.PersonalTutor.Update", profile) && acceptsPersonalTutorChanges>
-							<a class="edit-tutor-link" href="<@routes.tutor_edit scjCode=studentCourseDetails.scjCode?replace("/","_") currentTutor=personalTutor/>"
+							<a class="edit-tutor-link" href="<@routes.tutor_edit scjCode=studentCourseDetails.urlSafeId currentTutor=personalTutor/>"
 							data-target="#modal-change-tutor"
 							data-scj="${studentCourseDetails.scjCode}"
 							>
@@ -92,7 +92,8 @@
 		</div>
 
 		<#if studentCourseDetails.hasAPersonalTutor>
-			<@meeting_macros.list studentCourseDetails tutorMeetings "personal tutor"/>
+			<#assign relType = (studentCourseDetails.personalTutors?first).relationshipType />
+			<@meeting_macros.list studentCourseDetails tutorMeetings relType />
 		</#if>
 	<#else>
 		<h4>Personal development</h4>

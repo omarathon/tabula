@@ -78,9 +78,18 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	@Column(name="self_group_switching")
 	var allowSelfGroupSwitching: Boolean = true
 
+	// TODO consider changing this to be a string, and setting it to the name of the SmallGroupSetSelfSignUpState
+	// to allow for more states than just "open" and "closed"
 	@Column(name="open_for_signups")
 	var openForSignups: Boolean = false
 
+  def openState:SmallGroupSetSelfSignUpState = if (openForSignups) SmallGroupSetSelfSignUpState.Open else SmallGroupSetSelfSignUpState.Closed 
+  
+ def openState_= (value:SmallGroupSetSelfSignUpState):Unit =  value match {
+	  case SmallGroupSetSelfSignUpState.Open => openForSignups = true
+	  case SmallGroupSetSelfSignUpState.Closed => openForSignups = false
+  }
+	
 	@ManyToOne
 	@JoinColumn(name = "module_id")
 	var module: Module = _

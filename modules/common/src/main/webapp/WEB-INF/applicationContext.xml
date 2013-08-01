@@ -135,6 +135,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.DayOfWeekConverter"/>
                 <bean class="uk.ac.warwick.tabula.data.convert.NumberConverterFactory"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.StudentCourseDetailsConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSelfSignUpStateConverter"/>
 
 	        </list>
 	    </property>

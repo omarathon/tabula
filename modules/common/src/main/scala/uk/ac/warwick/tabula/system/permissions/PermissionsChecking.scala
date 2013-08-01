@@ -146,6 +146,9 @@ trait PermissionsCheckingMethods extends Logging {
 trait RequiresPermissionsChecking{
 	def permissionsCheck(p:PermissionsChecking):Unit
 }
+trait PubliclyVisiblePermissions extends RequiresPermissionsChecking with Public{
+	def permissionsCheck(p:PermissionsChecking){}
+}
 trait PerformsPermissionsChecking extends PermissionsChecking{
 	this: RequiresPermissionsChecking=>
 	permissionsCheck(this)

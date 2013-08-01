@@ -1,12 +1,15 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
-import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
-import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, MeetingRecord, RelationshipType, StudentMember}
+import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser, Mockito, TestBase}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommandState
 import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService, SecurityService}
 import uk.ac.warwick.tabula.permissions.{PermissionsTarget, Permission}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.userlookup.UserLookup
+import org.mockito.Mockito._
+import scala.Some
+import scala.Some
 
 class ViewProfileControllerTest extends TestBase with Mockito{
 
@@ -19,44 +22,70 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 	courseDetails.mostSignificant = true
 	member.studentCourseDetails.add(courseDetails)
 
-	@Test def createsTutorMeetingListCommand(){
-	withUser("test"){
+	@Test(expected=classOf[ItemNotFoundException])
+	def throwsNonStudent() {
+		val staffMember = new StaffMember()
+		val cmd = controller.viewProfileCommand(staffMember)
+	}
+
+	@Test
+	def getsProfileCommand() {
+		withUser("test") {
+			val cmd = controller.viewProfileCommand(member)
+			cmd.value should be(member)
+		}
+	}
+
+	@Test def createsTutorMeetingListCommand() {
+	withUser("test") {
 		val cmd = controller.viewTutorMeetingRecordCommand(member).get.asInstanceOf[ViewMeetingRecordCommandState]
 	  cmd.relationshipType should be(RelationshipType.PersonalTutor)
 		}
 	}
 
 
-	@Test def createsSupervisorMeetingListCommand(){
-	withUser("test"){
+	@Test def createsSupervisorMeetingListCommand() {
+	withUser("test") {
 		val cmd = controller.viewSupervisorMeetingRecordCommand(member).get.asInstanceOf[ViewMeetingRecordCommandState]
 		cmd.relationshipType should be(RelationshipType.Supervisor)
 	}}
 
-	@Test def exposesMeetingListsInModel(){
-  withUser("test"){
+	@Test def exposesMeetingListsInModel() {
+		withUser("test") {
 
-	  val member = new StudentMember
-		member.universityId = "1234"
-		val viewProfileCommand = mock[Appliable[StudentMember]]
-		viewProfileCommand.apply returns member
+			val member = new StudentMember
+			member.universityId = "1234"
+			val viewProfileCommand = mock[Appliable[StudentMember]]
+			viewProfileCommand.apply returns member
 
-    val tutorMeetings = Seq(new MeetingRecord)
-		val supervisorMeetings = Seq(new MeetingRecord)
+			val tutorMeetings = Seq(new MeetingRecord)
+			val supervisorMeetings = Seq(new MeetingRecord)
 
-		val tutorCommand = mock[Appliable[Seq[MeetingRecord]]]
-		val supervisorCommand = mock[Appliable[Seq[MeetingRecord]]]
-		tutorCommand.apply returns tutorMeetings
-		supervisorCommand.apply returns supervisorMeetings
+			val tutorCommand = mock[Appliable[Seq[MeetingRecord]]]
+			val supervisorCommand = mock[Appliable[Seq[MeetingRecord]]]
+			tutorCommand.apply returns tutorMeetings
+			supervisorCommand.apply returns supervisorMeetings
 
-		// mocks necessary for base class functionality that should really be factored out
-		controller.userLookup = mock[UserLookupService]
-		controller.profileService = mock[ProfileService]
-		controller.profileService.getMemberByUserId("test", true) returns Some(member)
+			// mocks necessary for base class functionality that should really be factored out
+			controller.userLookup = mock[UserLookupService]
+			controller.profileService = mock[ProfileService]
+			controller.profileService.getMemberByUserId("test", true) returns Some(member)
 
-		val mav = controller.viewProfile(viewProfileCommand, Some(tutorCommand), Some(supervisorCommand),"test","test")
+			val mav = controller.viewProfile(viewProfileCommand, Some(tutorCommand), Some(supervisorCommand),"test","test")
 
-		mav.map("tutorMeetings") should be(tutorMeetings)
-		mav.map("supervisorMeetings") should be(supervisorMeetings)
-	}}
+			mav.map("tutorMeetings") should be(tutorMeetings)
+			mav.map("supervisorMeetings") should be(supervisorMeetings)
+		}
+	}
+
+	@Test def getMeetingRecordCommand() {
+		withUser("test") {
+			val cmd = controller.getViewMeetingRecordCommand(member, RelationshipType.PersonalTutor)
+			cmd should not be(None)
+
+			val staffMember = new StaffMember
+			val notACmd = controller.getViewMeetingRecordCommand(staffMember, RelationshipType.PersonalTutor)
+			notACmd should be(None)
+		}
+	}
 }
