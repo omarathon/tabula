@@ -18,6 +18,7 @@ import org.hibernate.criterion.{Projections, Restrictions, Order}
 import uk.ac.warwick.tabula.helpers.{ FoundUser, Logging }
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.AssessmentGroup
+import uk.ac.warwick.spring.Wire
 
 /**
  * Service providing access to Assignments and related objects.
@@ -113,5 +114,13 @@ class AssignmentServiceImpl
 			.setMaxResults(MaxAssignmentsByName)
 			.list
 	}
+}
+
+trait AssignmentServiceComponent {
+	def assignmentService: AssignmentService
+}
+
+trait AutowiringAssignmentServiceComponent extends AssignmentServiceComponent{
+	var assignmentService = Wire[AssignmentService]
 }
 
