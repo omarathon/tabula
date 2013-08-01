@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.data.model.MemberUserType.Emeritus
 import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
+import uk.ac.warwick.tabula.data.model.MemberUserType.Other
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportMemberCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStaffMemberCommand
@@ -50,7 +51,8 @@ class ProfileImporterImpl extends ProfileImporter with Logging {
 	var membership = Wire[DataSource]("membershipDataSource")
 	var membershipInterface = Wire.auto[MembershipInterfaceWrapper]
 
-	lazy val currentAcademicYear = new GetCurrentAcademicYearQuery(sits).execute().head
+	//val currentAcademicYear = new GetCurrentAcademicYearQuery(sits).execute().head
+	val currentAcademicYear = "12/13"
 
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
 	lazy val membershipByUsercodeQuery = new MembershipByUsercodeQuery(membership)
@@ -68,16 +70,18 @@ class ProfileImporterImpl extends ProfileImporter with Logging {
 			val usercode = mac.member.usercode
 			val ssoUser = users(usercode)
 
-			mac.member.userType match {
-				case Student 		   => {
-					val cmds = studentInformationQuery(mac, ssoUser).executeByNamedParam(
+			val usertype = mac.member.userType
+
+			val ret = mac.member.userType match {
+				case Staff | Emeritus => staffInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
+				case Student | Other => {
+					studentInformationQuery(mac, ssoUser).executeByNamedParam(
 											Map("year" -> currentAcademicYear, "usercodes" -> usercode)
 										  ).toSeq
-					cmds
 					}
-				case Staff | Emeritus  => staffInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
 				case _ => Seq()
 			}
+			ret
 		}
 	}
 
