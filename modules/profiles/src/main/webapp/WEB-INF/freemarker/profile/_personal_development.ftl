@@ -92,7 +92,8 @@
 		</div>
 
 		<#if studentCourseDetails.hasAPersonalTutor>
-			<@meeting_macros.list studentCourseDetails tutorMeetings studentCourseDetails.personalTutors?first.relationshipType />
+			<#assign relType = (studentCourseDetails.personalTutors?first).relationshipType />
+			<@meeting_macros.list studentCourseDetails tutorMeetings relType />
 		</#if>
 	<#else>
 		<h4>Personal development</h4>
