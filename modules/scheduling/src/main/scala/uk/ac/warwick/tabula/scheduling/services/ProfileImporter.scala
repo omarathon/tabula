@@ -51,8 +51,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging {
 	var membership = Wire[DataSource]("membershipDataSource")
 	var membershipInterface = Wire.auto[MembershipInterfaceWrapper]
 
-	//val currentAcademicYear = new GetCurrentAcademicYearQuery(sits).execute().head
-	val currentAcademicYear = "12/13"
+	val currentAcademicYear = new GetCurrentAcademicYearQuery(sits).execute().head
 
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
 	lazy val membershipByUsercodeQuery = new MembershipByUsercodeQuery(membership)
