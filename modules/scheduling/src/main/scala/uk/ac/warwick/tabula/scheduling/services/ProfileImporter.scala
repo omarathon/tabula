@@ -51,7 +51,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging {
 	var membership = Wire[DataSource]("membershipDataSource")
 	var membershipInterface = Wire.auto[MembershipInterfaceWrapper]
 
-	val currentAcademicYear = new GetCurrentAcademicYearQuery(sits).execute().head
+	lazy val currentAcademicYear = new GetCurrentAcademicYearQuery(sits).execute().head
 
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
 	lazy val membershipByUsercodeQuery = new MembershipByUsercodeQuery(membership)
@@ -68,8 +68,6 @@ class ProfileImporterImpl extends ProfileImporter with Logging {
 		membersAndCategories flatMap { mac =>
 			val usercode = mac.member.usercode
 			val ssoUser = users(usercode)
-
-			val usertype = mac.member.userType
 
 			val ret = mac.member.userType match {
 				case Staff | Emeritus => staffInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
