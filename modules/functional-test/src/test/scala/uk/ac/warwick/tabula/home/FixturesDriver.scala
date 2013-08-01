@@ -4,11 +4,14 @@ import dispatch.classic._
 import org.apache.http.client.params.{CookiePolicy, ClientPNames}
 import dispatch.classic.thread.ThreadSafeHttpClient
 import uk.ac.warwick.tabula.FunctionalTestProperties
+import scala.util.parsing.json.JSON
+import scala.language.postfixOps
 
 
 trait FixturesDriver {
 
-	lazy val http: Http = new Http with thread.Safety {
+	lazy val http: Http = new Http with thread.Safety with NoLogging {
+
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
 			getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 		}
@@ -20,19 +23,47 @@ trait FixturesDriver {
 		http.when(_==200)(req >| )
 	}
 
-	def createSmallGroupSet(moduleCode:String, groupSetName:String, groupCount:Int= 1, formatName:String="tutorial", allocationMethodName:String="M" +
-		"anual"){
+	def createSmallGroupSet(moduleCode:String,
+													groupSetName:String,
+													groupCount:Int= 1,
+													formatName:String="tutorial",
+													allocationMethodName:String="Manual",
+													openForSignups:Boolean = true,
+													maxGroupSize:Int = 0,
+													allowSelfGroupSwitching:Boolean  = true):String  = {
 		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/groupset"
 		val req = url(uri).POST << Map(
 			"moduleCode" -> moduleCode,
 			"groupSetName" -> groupSetName,
 		  "formatName"->formatName,
 		  "allocationMethodName"->allocationMethodName,
-		  "groupCount"->groupCount.toString
+		  "groupCount"->groupCount.toString,
+		  "openForSignups"->openForSignups.toString,
+		  "maxGroupSize"->maxGroupSize.toString,
+		  "allowSelfGroupSwitching"->allowSelfGroupSwitching.toString
 		)
-		http.when(_==200)(req >| )
+		val resp = http.when(_==200)(req as_str)
+
+		val id = JSON.parseFull(resp).get.asInstanceOf[Map[String,Any]]("id").toString
+		id
 	}
 
+  def addStudentToGroupSet(studentUserId: String, setId:String){
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/groupsetMembership"
+		val req = url(uri).POST << Map(
+			"groupSetId" -> setId,
+			"userId" -> studentUserId)
+		http.when(_==200)(req >|)
+	}
+
+	def addStudentToGroup(studentUserId: String, setId:String, groupName:String){
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/groupMembership"
+		val req = url(uri).POST << Map(
+			"groupSetId" -> setId,
+			"userId" -> studentUserId,
+		  "groupName"->groupName)
+		http.when(_==200)(req >|)
+	}
 
 
 
