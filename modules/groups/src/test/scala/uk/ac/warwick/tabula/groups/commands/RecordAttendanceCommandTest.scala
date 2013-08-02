@@ -54,9 +54,8 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		validUser.setWarwickId("valid")
 		val event = new SmallGroupEvent()
 		val group = new SmallGroup()
-		val students = new UserGroup()
-		group.students = students
 		event.group = group
+		val students = group.students
 		val week = 1
 
 		val command = new RecordAttendanceCommand(event, week) with CommandTestSupport

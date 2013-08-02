@@ -23,10 +23,8 @@ class DaoTests extends PersistenceTestBase with Logging {
 
 	@Transactional
 	@Test def findRegisteredModules {
-		val group = new UserGroup()
-
+		val group = UserGroup.ofUniversityIds
 		group.staticIncludeUsers.add("1112939")
-		group.universityIds = true
 		val module = new Module()
 		module.code="en107"
 		

@@ -55,7 +55,7 @@ trait UpdatesStudentMembership {
 	 * it is difficult to bind additions and removals directly to a collection
 	 * with Spring binding.
 	 */
-	var members: UserGroup = new UserGroup
+	var members: UserGroup = UserGroup.ofUsercodes
 
 
 	// parse massAddUsers into a collection of individual tokens

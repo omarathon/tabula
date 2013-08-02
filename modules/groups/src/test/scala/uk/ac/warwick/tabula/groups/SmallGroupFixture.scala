@@ -89,9 +89,8 @@ trait SmallGroupFixture extends Mockito {
   }
 
   def createUserGroup(userIds:Seq[String], identifierIsUniNumber:Boolean = true) = {
-    val ug = new UserGroup
+    val ug = if (identifierIsUniNumber) UserGroup.ofUniversityIds else UserGroup.ofUsercodes
     ug.userLookup = userLookup
-    ug.universityIds = identifierIsUniNumber
     ug.includeUsers = userIds.asJava
     ug
   }

@@ -152,7 +152,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
-	var members: UserGroup = new UserGroup
+	var members: UserGroup = UserGroup.ofUsercodes
 	
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name="markscheme_id")

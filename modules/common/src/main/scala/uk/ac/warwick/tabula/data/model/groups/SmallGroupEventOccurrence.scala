@@ -24,7 +24,7 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
-	var attendees: UserGroup = new UserGroup
+	var attendees: UserGroup = UserGroup.ofUniversityIds
 
 	def permissionsParents = Stream(event)
 

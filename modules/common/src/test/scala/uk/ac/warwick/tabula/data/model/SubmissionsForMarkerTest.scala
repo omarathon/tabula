@@ -78,7 +78,7 @@ class SubmissionsForMarkerTest  extends AppContextTestBase {
 	}
 
 	def newMarkingWorkflow(): MarkingWorkflow = {
-		val ug = new UserGroup()
+		val ug = UserGroup.ofUsercodes
 		ug.includeUsers = List ("cuslaj", "cusebr")
 
 		val ms = new MarkingWorkflow()

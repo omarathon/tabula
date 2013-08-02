@@ -134,7 +134,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		set.groups.clear()
 		set.groups.addAll(groups.asScala.filter(!_.delete).map(_.apply()).asJava)
 		
-		if (set.members == null) set.members = new UserGroup
+		if (set.members == null) set.members = UserGroup.ofUsercodes
 		set.members.copyFrom(members)
 	}
 	

@@ -63,7 +63,7 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 		
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "studentsgroup_id")
-	var students: UserGroup = new UserGroup
+	var students: UserGroup = UserGroup.ofUniversityIds
 
 	def maxGroupSize = getIntSetting(Settings.MaxGroupSize)
 	def maxGroupSize_=(defaultSize:Int) = settings += (Settings.MaxGroupSize -> defaultSize)
