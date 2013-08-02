@@ -69,7 +69,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging {
 			val usercode = mac.member.usercode
 			val ssoUser = users(usercode)
 
-			val ret = mac.member.userType match {
+			mac.member.userType match {
 				case Staff | Emeritus => staffInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
 				case Student | Other => {
 					studentInformationQuery(mac, ssoUser).executeByNamedParam(
@@ -78,7 +78,6 @@ class ProfileImporterImpl extends ProfileImporter with Logging {
 					}
 				case _ => Seq()
 			}
-			ret
 		}
 	}
 
