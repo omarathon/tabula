@@ -26,5 +26,7 @@ class MonitoringPoint extends GeneratedId {
 	
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	var updatedDate: DateTime = _
+	
+	var week: Int = _
 
 }
