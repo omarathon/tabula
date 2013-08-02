@@ -114,7 +114,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssignmentIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.AssessmentGroupIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.FeedbackIdConverter"/>
-							<bean class="uk.ac.warwick.tabula.data.convert.FeedbackTemplateIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.FeedbackTemplateIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.SubmissionIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.MarkingWorkflowIdConverter"/>
@@ -136,8 +136,8 @@
                 <bean class="uk.ac.warwick.tabula.data.convert.NumberConverterFactory"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.StudentCourseDetailsConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSelfSignUpStateConverter"/>
-
-	        </list>
+				<bean class="uk.ac.warwick.tabula.data.convert.RouteCodeConverter"/>
+			</list>
 	    </property>
 	    <property name="formatters">
 	    	<list>
