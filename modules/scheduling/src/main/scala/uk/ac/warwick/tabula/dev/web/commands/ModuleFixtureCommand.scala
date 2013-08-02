@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
-import uk.ac.warwick.tabula.commands.CommandInternal
+import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, CommandInternal}
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentServiceComponent
-import uk.ac.warwick.tabula.data.SessionComponent
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.data.{Daoisms, SessionComponent}
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
 class ModuleFixtureCommand extends CommandInternal[Unit] with Logging{
 
@@ -28,5 +29,16 @@ class ModuleFixtureCommand extends CommandInternal[Unit] with Logging{
 			session.save(newModuleFrom(moduleInfo, department))
 			logger.info(s"Created module ${code}")
 		}
+	}
+}
+object ModuleFixtureCommand{
+	def apply()={
+		new ModuleFixtureCommand()
+			with ComposableCommand[Unit]
+			with AutowiringModuleAndDepartmentServiceComponent
+			with Daoisms
+			with Unaudited
+			with PubliclyVisiblePermissions
+
 	}
 }

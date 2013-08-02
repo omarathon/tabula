@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.groups.commands.{TutorHomeCommandImpl, TutorHomeComm
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel._
 import org.springframework.web.bind.annotation.RequestParam
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 
 /**
  * Displays the group sets that the current user is a tutor of.
@@ -27,7 +28,7 @@ class TutorHomeController extends GroupsController {
 			for ((module, sets) <- mapping) yield {
 				ViewModule(module,
 					sets.toSeq map { case (set, groups) =>
-						ViewSet(set, groups)
+						ViewSet(set, groups, GroupsViewModel.Tutor)
 					},
 					canManageGroups=false
 				)

@@ -1,7 +1,7 @@
 <#escape x as x?html>
 	<#assign setState = openGroupSetCommand.setState/>
     <#assign smallGroupSet = openGroupSetCommand.singleSetToOpen/>
-    <#if openGroupSetCommand.setState == true>
+    <#if openGroupSetCommand.setState.name == 'open'>
     	<#assign submitAction><@routes.openset smallGroupSet /></#assign>
     	<#assign setState = "Open"/>
     <#else>

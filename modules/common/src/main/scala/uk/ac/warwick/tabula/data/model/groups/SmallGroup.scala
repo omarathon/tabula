@@ -68,6 +68,8 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	def maxGroupSize = getIntSetting(Settings.MaxGroupSize)
 	def maxGroupSize_=(defaultSize:Int) = settings += (Settings.MaxGroupSize -> defaultSize)
 
+	def isFull = groupSet.defaultMaxGroupSizeEnabled && maxGroupSize.getOrElse(0) <= students.members.size
+
 	def toStringProps = Seq(
 		"id" -> id,
 		"name" -> name,
