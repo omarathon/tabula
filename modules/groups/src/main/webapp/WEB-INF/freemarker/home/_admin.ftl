@@ -1,4 +1,4 @@
-<div class="row-fluid">
+<div class="row">
 
 <#if nonempty(ownedDepartments) || nonempty(ownedModuleDepartments)>
 	<div class="span6">

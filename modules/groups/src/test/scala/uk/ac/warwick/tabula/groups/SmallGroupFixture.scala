@@ -105,6 +105,7 @@ class SmallGroupSetBuilder(){
     if (template.module != null){
       template.module.groupSets.add(set)
     }
+		template.groups.asScala.foreach(g=>g.groupSet = set)
     set
   }
   def withGroups(groups:Seq[SmallGroup]):SmallGroupSetBuilder = {
@@ -112,6 +113,10 @@ class SmallGroupSetBuilder(){
     groups.foreach(g=>g.groupSet = template)
     this
   }
+	def withMembers(members:UserGroup):SmallGroupSetBuilder = {
+		template.members = members
+		this
+	}
   def withReleasedToStudents(b: Boolean): SmallGroupSetBuilder = {
     template.releasedToStudents = b
     this
@@ -132,6 +137,10 @@ class SmallGroupSetBuilder(){
     template.module = mod
     this
   }
+	def withAllocationMethod(method:SmallGroupAllocationMethod) = {
+		template.allocationMethod = method
+		this
+	}
 }
 class SmallGroupBuilder(val template:SmallGroup = new SmallGroup){
 

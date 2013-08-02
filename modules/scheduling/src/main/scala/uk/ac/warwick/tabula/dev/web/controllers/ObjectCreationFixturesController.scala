@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.dev.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import org.springframework.web.bind.annotation.RequestMethod.POST
-import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, Appliable}
-import uk.ac.warwick.tabula.dev.web.commands.{SmallGroupSetFixtureCommand, ModuleFixtureCommand}
-import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
+import uk.ac.warwick.tabula.dev.web.commands.{GroupMembershipFixtureCommand, GroupsetMembershipFixtureCommand, SmallGroupSetFixtureCommand, ModuleFixtureCommand}
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import org.springframework.web.servlet.View
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.web.views.JSONView
 
 @Controller
 @RequestMapping(Array("/fixtures/create/module"))
@@ -15,13 +15,7 @@ class ModuleCreationFixturesController {
 
 	@ModelAttribute("createModuleCommand")
 	def getCreateModuleCommand(): Appliable[Unit] = {
-		new ModuleFixtureCommand()
-			with ComposableCommand[Unit]
-			with AutowiringModuleAndDepartmentServiceComponent
-			with Daoisms
-			with Unaudited
-			with PubliclyVisiblePermissions
-
+		ModuleFixtureCommand()
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -35,20 +29,46 @@ class ModuleCreationFixturesController {
 class SmallGroupSetCreationFixturesController {
 
 	@ModelAttribute("createGroupSetCommand")
-	def getCreateModuleCommand(): Appliable[Unit] = {
-		new SmallGroupSetFixtureCommand()
-			with ComposableCommand[Unit]
-			with AutowiringModuleAndDepartmentServiceComponent
-			with Daoisms
-			with Unaudited
-			with PubliclyVisiblePermissions
+	def getCreateModuleCommand(): Appliable[SmallGroupSet] = {
+		SmallGroupSetFixtureCommand()
 
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("createGroupSetCommand") cmd: Appliable[Unit]) = {
+	def submit(@ModelAttribute("createGroupSetCommand") cmd: Appliable[SmallGroupSet]):View = {
+		val newSet = cmd.apply()
+		new JSONView(Map("id"->newSet.id))
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/create/groupsetMembership"))
+class SmallGroupSetMembershipCreationFixturesController {
+
+	@ModelAttribute("createMembershipCommand")
+	def getCreateModuleCommand(): Appliable[Unit] = {
+		GroupsetMembershipFixtureCommand()
+
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createMembershipCommand") cmd: Appliable[Unit]) {
 		cmd.apply()
 	}
 }
 
+@Controller
+@RequestMapping(Array("/fixtures/create/groupMembership"))
+class SmallGroupMembershipCreationFixturesController {
 
+	@ModelAttribute("createMembershipCommand")
+	def getCreateModuleCommand(): Appliable[Unit] = {
+		GroupMembershipFixtureCommand()
+
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createMembershipCommand") cmd: Appliable[Unit]) {
+		cmd.apply()
+	}
+}

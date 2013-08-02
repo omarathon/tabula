@@ -39,6 +39,12 @@ $(function(){
         e.preventDefault();
         $(e.target).hide().closest('.striped-section').find('.item-info.archived').show();
     });
+
+    // enable/disable the "sign up" buttons on the student groups homepage
+    $('#student-groups-view .sign-up-button').addClass('disabled use-tooltip').prop('disabled',true).prop('title','Please select a group');
+    $('#student-groups-view input.group-selection-radio').change(function(){
+		$('.sign-up-button').removeClass('disabled use-tooltip').prop('disabled',false).prop('title','');
+	});
 });
 
 

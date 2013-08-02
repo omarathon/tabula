@@ -210,6 +210,7 @@ object Permissions {
 		case object Delete extends Permission("Delete small groups")
 
 		case object Allocate extends Permission("Allocate students to small groups")
+		case object AllocateSelf extends Permission("Allocate the current user to a small group")
 	}
 
 	object SmallGroupEvents {

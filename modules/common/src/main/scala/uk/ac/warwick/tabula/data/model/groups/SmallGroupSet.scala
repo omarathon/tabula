@@ -37,7 +37,7 @@ object SmallGroupSet {
 @Filter(name = SmallGroupSet.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings with PostLoadBehaviour  {
+class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings with Serializable with PostLoadBehaviour  {
 	import SmallGroupSet.Settings
 	import SmallGroup._
 
