@@ -14,7 +14,7 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
  	private trait Fixture{
 		val testGroup = new SmallGroupBuilder().build
 		val user = new User()
-		user.setUserId("test")
+		user.setWarwickId("01234")
 		val testGroupSet = new SmallGroupSetBuilder().withId("set1").withGroups(Seq(testGroup)).build
 		val allocateCommand = new AllocateSelfToGroupCommand(user, testGroupSet)
 		allocateCommand.group = testGroup
@@ -26,16 +26,16 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 	@Test
 	def allocateAddsStudentToGroupMembers(){new Fixture{
 		  allocateCommand.applyInternal()
-		  testGroup.students.members should contain("test")
+		  testGroup.students.members should contain("01234")
 	}}
 
 	@Test
 	def allocateDoesNothingIfStudentAlreadyAssigned(){new Fixture {
 		testGroup.students.add(user)
-		testGroup.students.members should contain("test")
+		testGroup.students.members should contain("01234")
 
 		allocateCommand.applyInternal()
-		testGroup.students.members should contain("test")
+		testGroup.students.members should contain("01234")
 	}}
 
 	@Test
