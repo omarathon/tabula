@@ -47,7 +47,7 @@ import uk.ac.warwick.tabula.JsonObjectMapperFactory
 @DiscriminatorColumn(name = "fieldtype")
 abstract class FormField extends GeneratedId with Logging {
 
-	@transient var json = new JsonObjectMapperFactory().createInstance
+	@transient var json = JsonObjectMapperFactory.instance
 	@transient var userLookup = Wire.auto[UserLookupService]
 
 	@BeanProperty
