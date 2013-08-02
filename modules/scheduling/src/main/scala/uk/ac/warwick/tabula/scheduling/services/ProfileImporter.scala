@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.data.model.MemberUserType.Emeritus
 import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
+import uk.ac.warwick.tabula.data.model.MemberUserType.Other
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportMemberCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStaffMemberCommand
@@ -69,13 +70,12 @@ class ProfileImporterImpl extends ProfileImporter with Logging {
 			val ssoUser = users(usercode)
 
 			mac.member.userType match {
-				case Student 		   => {
-					val cmds = studentInformationQuery(mac, ssoUser).executeByNamedParam(
+				case Staff | Emeritus => staffInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
+				case Student | Other => {
+					studentInformationQuery(mac, ssoUser).executeByNamedParam(
 											Map("year" -> currentAcademicYear, "usercodes" -> usercode)
 										  ).toSeq
-					cmds
 					}
-				case Staff | Emeritus  => staffInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
 				case _ => Seq()
 			}
 		}
