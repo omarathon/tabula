@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.MarkingCompletedComm
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
-import org.hibernate.Session
+import org.hibernate.classic.Session
 import uk.ac.warwick.tabula.data.SessionComponent
 import uk.ac.warwick.spring.Wire
 import org.junit.{Before, After}

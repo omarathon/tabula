@@ -1,17 +1,15 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.AppContextTestBase
+import uk.ac.warwick.tabula._
 import org.junit.Test
 import uk.ac.warwick.tabula.data.model.Assignment
 import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.data.model.UpstreamAssignment
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Submission
-import uk.ac.warwick.tabula.MockUserLookup
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import collection.JavaConverters._
@@ -19,25 +17,35 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.AssessmentGroup
 import uk.ac.warwick.tabula.data.model.MarkingWorkflow
-import uk.ac.warwick.tabula.Fixtures
+import scala.Some
+import uk.ac.warwick.tabula.data.{AssignmentMembershipDaoImpl, AssignmentMembershipDao, DepartmentDaoImpl}
 
 // scalastyle:off magic.number
-class AssignmentServiceTest extends AppContextTestBase {
+class AssignmentServiceTest extends PersistenceTestBase {
 	
-	@Autowired var assignmentService:AssignmentServiceImpl =_
-	@Autowired var assignmentMembershipService:AssignmentMembershipServiceImpl =_
-	@Autowired var feedbackService:FeedbackServiceImpl =_
-	@Autowired var submissionService:SubmissionServiceImpl =_
-	@Autowired var originalityReportService:OriginalityReportServiceImpl =_
-	@Autowired var extensionService:ExtensionServiceImpl =_
+	val assignmentService:AssignmentServiceImpl = new AssignmentServiceImpl
+	val assignmentMembershipService:AssignmentMembershipServiceImpl =new AssignmentMembershipServiceImpl
+	val feedbackService:FeedbackServiceImpl =new FeedbackServiceImpl
+	val submissionService:SubmissionServiceImpl =new SubmissionServiceImpl
+	val originalityReportService:OriginalityReportServiceImpl =new OriginalityReportServiceImpl
+	val extensionService:ExtensionServiceImpl =new ExtensionServiceImpl
 	
-  @Autowired var modAndDeptService:ModuleAndDepartmentService =_
+  val modAndDeptService:ModuleAndDepartmentService =new ModuleAndDepartmentService
   var userLookup:MockUserLookup = _
     
-  @Before def getUserLookup {
-		// We can't just Autowire this because it has autowire-candidate="false"
-		userLookup = beans.getBean("userLookupDelegate").asInstanceOf[MockUserLookup]
+  @Before def setup {
+		userLookup = new MockUserLookup()
 		userLookup.defaultFoundUser = true
+		assignmentService.sessionFactory = sessionFactory
+		submissionService.sessionFactory = sessionFactory
+		extensionService.sessionFactory = sessionFactory
+		val deptDao = new DepartmentDaoImpl
+		deptDao.sessionFactory = sessionFactory
+		modAndDeptService.departmentDao = deptDao
+		feedbackService.userLookup = userLookup
+		val amDao = new AssignmentMembershipDaoImpl
+		amDao.sessionFactory = sessionFactory
+		assignmentMembershipService.dao = amDao
 	}
 	
 	@Transactional @Test def recentAssignment {

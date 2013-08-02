@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
 import forms.MarkerSelectField
-import uk.ac.warwick.tabula.{AppContextTestBase, RequestInfo}
+import uk.ac.warwick.tabula.{TestBase, AppContextTestBase, RequestInfo}
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConversions._
 
-class SubmissionsForMarkerTest  extends AppContextTestBase {
+class SubmissionsForMarkerTest  extends TestBase {
 
 	@Test def markersSubmissionsTest() {
 
