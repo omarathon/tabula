@@ -15,9 +15,10 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 
 	trait Fixture {
 		val module = new Module("BS101")
-		val fakeDate = new DateTime(2012, 8, 23, 0, 0)
+		val fakeDate = new DateTime(2013, 8, 23, 0, 0)
 
 		val assignment = new Assignment
+		assignment.addDefaultFields()
 		assignment.academicYear = AcademicYear.parse("12/13")
 		assignment.module = module
 		assignment.name = "Test"
@@ -38,21 +39,31 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 	@Test
 	def commandApply() {
 		new Fixture {
+			val command = new CopyAssignmentsCommand(Seq(module)) with CommandTestSupport
+			command.assignments = Seq(assignment)
+			command.archive = true
+			val newAssignment = command.applyInternal().get(0)
+
+			there was one(command.assignmentService).save(assignment)
+			there was one(command.assignmentService).save(newAssignment)
+		}
+	}
+
+	@Test
+	def copy() {
+		new Fixture with FindAssignmentFields {
 			withFakeTime(fakeDate) {
-				val command = new CopyAssignmentsCommand with CommandTestSupport
+				val command = new CopyAssignmentsCommand(Seq(module)) with CommandTestSupport
 				command.assignments = Seq(assignment)
 				command.archive = true
 				val newAssignment = command.applyInternal().get(0)
 
-				there was one(command.assignmentService).save(assignment)
-				there was one(command.assignmentService).save(newAssignment)
-
 				assignment.archived.booleanValue should be(true)
-				newAssignment.academicYear.toString should be("12/13")
+				newAssignment.academicYear.toString should be("13/14")
 				newAssignment.module should be(module)
 				newAssignment.name should be("Test")
-				newAssignment.openDate should be(fakeDate)
-				newAssignment.closeDate should be(fakeDate.plusDays(30))
+				newAssignment.openDate should be(fakeDate.plusYears(1))
+				newAssignment.closeDate should be(fakeDate.plusDays(30).plusYears(1))
 				newAssignment.openEnded.booleanValue should be(false)
 				newAssignment.collectMarks.booleanValue should be(true)
 				newAssignment.collectSubmissions.booleanValue should be(true)
@@ -63,7 +74,48 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 				newAssignment.allowExtensions.booleanValue should be(true)
 				newAssignment.allowExtensionRequests.booleanValue should be(false)
 				newAssignment.summative.booleanValue should be(false)
+			}
 		}
+	}
+
+	@Test
+	def copyDefaultFields() {
+		new Fixture with FindAssignmentFields {
+			val command = new CopyAssignmentsCommand(Seq(module)) with CommandTestSupport
+			command.assignments = Seq(assignment)
+			val newAssignment = command.applyInternal().get(0)
+
+			findCommentField(newAssignment).get.value should be ("")
+			findFileField(newAssignment).get.attachmentLimit should be (1)
+			findFileField(newAssignment).get.attachmentTypes should be (Nil)
+			findWordCountField(newAssignment).max should be(null)
+			findWordCountField(newAssignment).min should be(null)
+			findWordCountField(newAssignment).conventions should be(null)
+		}
+	}
+
+	@Test
+	def copyFieldValues() {
+		new Fixture with FindAssignmentFields {
+
+			val heronRant = "Words describing the evil nature of Herons will not count towards the final word count. Herons are scum. Hate them!"
+			findWordCountField(assignment).max = 5000
+			findWordCountField(assignment).min = 4500
+			findWordCountField(assignment).conventions = heronRant
+			val extremeHeronRant = heronRant.replace("Hate them", "Spit at them!")
+			findCommentField(assignment).get.value = extremeHeronRant
+			findFileField(assignment).get.attachmentLimit = 9999
+			findFileField(assignment).get.attachmentTypes = Seq(".hateherons")
+			val command = new CopyAssignmentsCommand(Seq(module)) with CommandTestSupport
+			command.assignments = Seq(assignment)
+			val newAssignment = command.applyInternal().get(0)
+
+			findCommentField(newAssignment).get.value should be (extremeHeronRant)
+			findFileField(newAssignment).get.attachmentLimit should be (9999)
+			findFileField(newAssignment).get.attachmentTypes should be (Seq(".hateherons"))
+			findWordCountField(newAssignment).max should be(5000)
+			findWordCountField(newAssignment).min should be(4500)
+			findWordCountField(newAssignment).conventions should be(heronRant)
 		}
 	}
 
