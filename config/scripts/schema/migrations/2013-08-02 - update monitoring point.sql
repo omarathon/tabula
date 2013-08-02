@@ -1,7 +1,5 @@
 drop table monitoringpointset;
 
-drop index idx_mps_point_set_year_id;
-
 alter table monitoringpointsetyear
 	rename to monitoringpointset;
 
