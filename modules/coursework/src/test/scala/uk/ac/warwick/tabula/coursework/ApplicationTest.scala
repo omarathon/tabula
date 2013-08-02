@@ -12,7 +12,7 @@ import scala.language.reflectiveCalls
 import scala.language.implicitConversions
 
 // scalastyle:off magic.number
-class ApplicationTest extends AppContextTestBase {
+class ApplicationTest extends AppContextTestBase with FieldAccessByReflection{
 
     @Autowired var annotationMapper:RequestMappingHandlerMapping =_
 
