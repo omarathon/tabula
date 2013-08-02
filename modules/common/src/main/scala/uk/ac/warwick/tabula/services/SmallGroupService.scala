@@ -33,7 +33,7 @@ trait SmallGroupService {
 	def getAttendees(event: SmallGroupEvent, weekNumber: Int): JList[String]
 }
 
-abstract class AbstractSmallGroupService() extends SmallGroupService {
+abstract class AbstractSmallGroupService extends SmallGroupService {
 	self: SmallGroupDaoComponent with SmallGroupMembershipHelpers=>
 
 	def getSmallGroupSetById(id: String) = smallGroupDao.getSmallGroupSetById(id)
@@ -71,9 +71,9 @@ abstract class AbstractSmallGroupService() extends SmallGroupService {
 	}
 }
 
-//TODO write some tests for SmallGroupService, substiting mocks for the helpers.
 trait SmallGroupMembershipHelpers{
 	val eventTutorsHelper:UserGroupMembershipHelper[SmallGroupEvent]
+  //TODO can this be removed? findSmallGroupsByTutor could just call findSmallGroupEventsByTutor and then group by group
 	val groupTutorsHelper:UserGroupMembershipHelper[SmallGroup]
 	val groupSetMembersHelper:UserGroupMembershipHelper[SmallGroupSet]
 }
