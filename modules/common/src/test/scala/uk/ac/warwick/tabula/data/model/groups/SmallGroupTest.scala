@@ -109,7 +109,6 @@ class SmallGroupTest extends TestBase with Mockito {
 		val group = new SmallGroup()
 		group.groupSet = new SmallGroupSet()
 		group.groupSet.defaultMaxGroupSizeEnabled = true
-		group.students = new UserGroup
 		group.students.addUser("test")
 
 
@@ -131,7 +130,6 @@ class SmallGroupTest extends TestBase with Mockito {
 		val group = new SmallGroup()
 		group.groupSet = new SmallGroupSet()
 		group.groupSet.defaultMaxGroupSizeEnabled = false
-		group.students = new UserGroup
 		group.students.addUser("test")
 
 
