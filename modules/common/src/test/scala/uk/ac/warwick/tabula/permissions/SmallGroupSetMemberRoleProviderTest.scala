@@ -12,7 +12,6 @@ class SmallGroupSetMemberRoleProviderTest extends TestBase {
 	private trait Fixture{
 		val groupSet = new SmallGroupSet
 		groupSet.id= "test"
-		groupSet.members = new UserGroup
 		groupSet.members.addUser("test")
 
 		val memberUser = new User

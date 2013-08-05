@@ -48,8 +48,7 @@ class HomeControllerTest extends TestBase with Mockito{
 			.build
 
 		def createUserGroup(users:Seq[User])= {
-			val ug = new UserGroup
-			ug.universityIds = true // makes stubbing the userlookup calls easier as there's no bulk fetch by warwick ID
+			val ug = UserGroup.ofUniversityIds
 			ug.userLookup = userLookup
 			users.foreach (ug.add)
 			ug

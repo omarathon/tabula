@@ -4,15 +4,12 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Configurable
-import javax.persistence.Column
-import javax.persistence.ElementCollection
-import javax.persistence.Entity
-import javax.persistence.JoinTable
-import javax.persistence.JoinColumn
+import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
+import org.hibernate.annotations.AccessType
 
 /**
  * Wherever a group of users is referenced in the app, it will be
@@ -34,7 +31,11 @@ import uk.ac.warwick.userlookup.User
  * Depending on context, the usercodes may be university IDs.
  */
 @Entity
-class UserGroup extends GeneratedId {
+@AccessType("field")
+class UserGroup private(val universityIds: Boolean) extends GeneratedId {
+
+	/* For Hibernate xx */
+	private def this() { this(false) }
 
 	@transient var userLookup = Wire.auto[UserLookupService]
 	def groupService = userLookup.getGroupService
@@ -81,7 +82,6 @@ class UserGroup extends GeneratedId {
 	}
 	def unexcludeUser(user: String) = excludeUsers.remove(user)
 
-	var universityIds: Boolean = false
 
 	/*
 	 * Could implement as `members.contains(user)`
@@ -121,8 +121,8 @@ class UserGroup extends GeneratedId {
 	}
 
 	def copyFrom(other: UserGroup) {
+		assert(this.universityIds == other.universityIds, "Can only copy from a group with same type of users")
 		baseWebgroup = other.baseWebgroup
-		universityIds = other.universityIds
 		includeUsers.clear()
 		excludeUsers.clear()
 		staticIncludeUsers.clear()
@@ -132,7 +132,7 @@ class UserGroup extends GeneratedId {
 	}
 
 	def duplicate(): UserGroup = {
-		val newGroup = new UserGroup
+		val newGroup = new UserGroup(this.universityIds)
 		newGroup.copyFrom(this)
 		newGroup.userLookup = this.userLookup
 		newGroup
@@ -141,10 +141,6 @@ class UserGroup extends GeneratedId {
 }
 
 object UserGroup {
-	def emptyUsercodes = new UserGroup
-	def emptyUniversityIds = {
-		val g = new UserGroup
-		g.universityIds = true
-		g
-	}
+	def ofUsercodes = new UserGroup(false)
+	def ofUniversityIds = new UserGroup(true)
 }

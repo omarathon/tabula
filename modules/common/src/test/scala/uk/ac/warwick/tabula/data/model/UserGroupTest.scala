@@ -11,7 +11,7 @@ class UserGroupTest extends PersistenceTestBase {
 
 	@Test def membership {
 		transactional { t =>
-			var group = new UserGroup
+			var group = UserGroup.ofUsercodes
 			
 			// users that can't be changed (i.e. as imported from upstream)
 			group.staticIncludeUsers.addAll(Seq( "exoman", "eggdog" ))
@@ -50,7 +50,7 @@ class UserGroupTest extends PersistenceTestBase {
 	@Test def withWebgroup {
 		val userLookup = new MockUserLookup
 		
-		val group = new UserGroup
+		val group = UserGroup.ofUsercodes
 		group.userLookup = userLookup
 		
 		group.addUser("cuscav")
@@ -68,15 +68,14 @@ class UserGroupTest extends PersistenceTestBase {
 	}
 	
 	@Test def copy {
-		val group = new UserGroup
+		val group = UserGroup.ofUsercodes
 		group.addUser("cuscav")
 		group.addUser("curef")
 		group.excludeUser("cusmab") // we don't like Steve
 		group.staticIncludeUsers.add("sb_systemtest")
 		group.baseWebgroup = "in-elab"
-		group.universityIds = true
 			
-		val group2 = new UserGroup
+		val group2 = UserGroup.ofUsercodes
 		group2.copyFrom(group)
 		
 		group.eq(group2) should be (false)
@@ -86,6 +85,13 @@ class UserGroupTest extends PersistenceTestBase {
 		group2.staticIncludeUsers.asScala.toSeq should be (group.staticIncludeUsers.asScala.toSeq)
 		group2.baseWebgroup should be (group.baseWebgroup)
 		group2.universityIds should be (group.universityIds)
+	}
+
+	@Test(expected=classOf[AssertionError])
+	def cannotCopyBetweenDifferentGroupTypes() {
+		val group = UserGroup.ofUniversityIds
+		val group2 = UserGroup.ofUsercodes
+		group2.copyFrom(group)
 	}
 	
 }
