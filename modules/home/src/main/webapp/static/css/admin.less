@@ -17,24 +17,32 @@
     margin-top: 6px;
 }
 
-.permission-list {
+#container .permission-list {
 	margin:4px 0 20px 0;
 
-	.user-fullname {
-		width: 170px;
+	.user, .user-fullname, .user-id, .actions {
+		vertical-align: middle;
 	}
 
-	.user-fullname, .user-id, .actions {
-		padding:8px 8px 8px 4px;
-		vertical-align: middle;
+	.user {
+		min-width: 240px;
+	}
+
+	.user-fullname {
+		min-width: 170px;
 	}
 
 	.user-id {
 		width: 70px;
 	}
 
+	.actions {
+		max-width: 30px;
+		text-align: center;
+	}
+
 	.highlight {
-		background-color: @grayLighter
+		background-color: @grayLighter;
 	}
 }
 

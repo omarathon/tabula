@@ -23,7 +23,7 @@ var RichResultField = function (input) {
 
 /** Clear field, focus for typing */
 RichResultField.prototype.edit = function () {
-  this.$input.val('').show().focus();
+  this.$input.val('').show().trigger('change').focus();
   this.$uneditable.hide().find('.val').text('');
 };
 
