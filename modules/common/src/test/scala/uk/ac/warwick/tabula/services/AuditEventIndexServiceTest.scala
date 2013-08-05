@@ -32,13 +32,16 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import scala.Some
 import org.hibernate.dialect.HSQLDialect
+import uk.ac.warwick.tabula.data.SessionComponent
 
 // scalastyle:off magic.number
 //@DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
 class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with Logging {
-	
+
 	var indexer:AuditEventIndexService = _
-	val service:AuditEventServiceImpl = new AuditEventServiceImpl
+	val service:AuditEventServiceImpl = new AuditEventServiceImpl with SessionComponent{
+		def session = sessionFactory.getCurrentSession
+	}
 
 	var TEMP_DIR:File = _
 	
@@ -48,7 +51,6 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		indexer.service = service
 		indexer.indexPath = TEMP_DIR
 		indexer.afterPropertiesSet
-		service.sessionFactory = sessionFactory
 		service.dialect = new HSQLDialect()
 	}
 	

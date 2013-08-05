@@ -1,33 +1,28 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConverters.asScalaBufferConverter
 
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
-import org.junit.After
 import org.junit.Before
-import org.springframework.beans.factory.annotation.Autowired
 
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.{PersistenceTestBase,Fixtures, Mockito}
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.{StudentCourseDetailsDaoImpl, MemberDaoImpl}
 
 // scalastyle:off magic.number
-class ProfileServiceTest extends AppContextTestBase with Mockito {
+class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
-	@Autowired var relationshipService:RelationshipServiceImpl = _
-	@Autowired var profileService:ProfileServiceImpl = _
+	val relationshipService:RelationshipServiceImpl = new RelationshipServiceImpl
+	val profileService:ProfileServiceImpl =  new ProfileServiceImpl
 
 	@Before def setup: Unit = transactional { tx =>
-		session.enableFilter(Member.ActiveOnlyFilter)
-	}
-
-	@After def tidyUp: Unit = transactional { tx =>
-		session.disableFilter(Member.ActiveOnlyFilter)
-
-		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala map { session.delete(_) }
+		val memberDao = new MemberDaoImpl
+	  memberDao.sessionFactory = sessionFactory
+	  val scd = new StudentCourseDetailsDaoImpl
+		scd.sessionFactory = sessionFactory
+		relationshipService.memberDao = memberDao
+		profileService.memberDao = memberDao
+		profileService.studentCourseDetailsDao =scd
 	}
 
 	@Test def crud = transactional { tx =>
@@ -111,6 +106,7 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 	}
 
 	@Test def getRegisteredModules: Unit = transactional { tx =>
+
 		val mod1 = Fixtures.module("in101")
 		val mod2 = Fixtures.module("in102")
 		val mod3 = Fixtures.module("in103")

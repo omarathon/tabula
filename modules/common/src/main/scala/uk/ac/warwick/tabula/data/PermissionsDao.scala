@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.permissions.Permission
 import scala.reflect.ClassTag
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
+import uk.ac.warwick.spring.Wire
 
 trait PermissionsDao {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
@@ -181,5 +182,12 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 			
 			c.seq
 	}
-					
+}
+
+trait PermissionsDaoComponent {
+	var permissionsDao:PermissionsDao
+}
+
+trait AutowiringPermissionsDaoComponent extends PermissionsDaoComponent{
+	var permissionsDao  =Wire[PermissionsDao]
 }

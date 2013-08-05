@@ -15,7 +15,7 @@ import org.springframework.util.FileCopyUtils
 import javax.annotation.Resource
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.AuditEvent
-import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.{SessionComponent, ExtendedSessionComponent, Daoisms}
 import uk.ac.warwick.tabula.events.Event
 import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.tabula.JsonObjectMapperFactory
@@ -35,7 +35,10 @@ trait AuditEventService {
 }
 
 @Component
-class AuditEventServiceImpl extends Daoisms with AuditEventService {
+class AutowiringEventServiceImpl extends AuditEventServiceImpl with Daoisms
+
+class AuditEventServiceImpl  extends AuditEventService {
+  this:SessionComponent=>
 
 	var json: ObjectMapper = JsonObjectMapperFactory.instance
 
