@@ -97,10 +97,10 @@
 							</h3>
 							<#assign unlimited = !((smallGroupSet.defaultMaxGroupSizeEnabled)!false)>
 
-							<span class="groupSizeDetails groupSizeUnlimited" <#if !unlimited>style="display:none;"</#if>>
+							<span class="groupSizeUnlimited groupSizeDetails" <#if !unlimited>style="display:none;"</#if>>
 								Unlimited group size
 							</span>
-							<span class="groupSizeDetails groupSizeLimited" <#if unlimited>style="display:none;"</#if>>
+							<span class="groupSizeLimited groupSizeDetails" <#if unlimited>style="display:none;"</#if>>
 								Maximum group size: <@f.input path="maxGroupSize" type="number" min="0" max="100" cssClass="input-small" />
 							</span>
 						</div>
@@ -177,10 +177,6 @@
 	
 	<script type="text/javascript">
 		jQuery(function($) {
-
-			$('#defaultMaxGroupSizeEnabled').click(function() {
-				$(".groupSizeDetails").toggle();
-			});
 
 			$('span[data-toggle="tooltip"]').tooltip();
 		
