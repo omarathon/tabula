@@ -110,9 +110,10 @@
 			<#assign disable_prop="false" />
 		</#if>
 		
-		<@form.labelled_row "allowSelfGroupSwitching" "Allow students to switch groups" "canBeDisabled" "" "" disable_label >
+		<@form.labelled_row "allowSelfGroupSwitching" "" "canBeDisabled" "" "" disable_label >
 			<@form.label checkbox=true >
 				<@f.checkbox path="allowSelfGroupSwitching" value="true" disabled=disable_prop />
+				Allow students to switch groups
 				<a class="use-popover" data-html="true"
 					data-content="When self sign up is enabled students will be able to switch groups.">
 						<i class="icon-question-sign"></i>
