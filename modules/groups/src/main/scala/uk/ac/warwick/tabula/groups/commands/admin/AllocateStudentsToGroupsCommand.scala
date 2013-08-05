@@ -52,7 +52,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	var allocateStudent: JList[AllocateStudentItem] = LazyLists.simpleFactory()
 
 	private def filenameOf(path: String) = new java.io.File(path).getName
-	
+
 	/** Mapping from small groups to an ArrayList containing users. */
 	var mapping = JMap[SmallGroup, JList[User]]()
 	var unallocated: JList[User] = JArrayList()
@@ -97,7 +97,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	
 	final def applyInternal() = transactional() {
 		for ((group, users) <- mapping.asScala) {
-			val userGroup = UserGroup.emptyUniversityIds
+			val userGroup = UserGroup.ofUniversityIds
 			users.asScala.foreach { user => userGroup.addUser(user.getWarwickId) }
 			group.students.copyFrom(userGroup)
 			service.saveOrUpdate(group)

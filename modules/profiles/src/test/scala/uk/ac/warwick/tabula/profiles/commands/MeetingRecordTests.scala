@@ -1,20 +1,32 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import org.joda.time.DateTimeConstants
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{NotificationService, MaintenanceModeService, ProfileService}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.{Mockito, AppContextTestBase, CurrentUser}
+import uk.ac.warwick.tabula.{PersistenceTestBase, Mockito, CurrentUser}
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.data.model.MeetingFormat.FaceToFace
 import scala.Some
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
+import org.hibernate.classic.Session
+import uk.ac.warwick.tabula.events.EventHandling
+import uk.ac.warwick.tabula.data.MeetingRecordDao
 
-trait MeetingRecordTests extends AppContextTestBase with Mockito {
+trait MeetingRecordTests extends PersistenceTestBase with Mockito {
+
 	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
 	val marchHare = dateTime(2013, DateTimeConstants.MARCH).toLocalDate
 
 	val ps = mock[ProfileService]
+
+	EventHandling.enabled = false
+
+	val meetingRecordDao = mock[MeetingRecordDao]
+	val maintenanceModeService = mock[MaintenanceModeService]
+	maintenanceModeService.enabled returns false
+	val notificationService = mock[NotificationService]
+	val mockSession = mock[Session]
 
 	var student:StudentMember = _
 	var creator: StaffMember = _

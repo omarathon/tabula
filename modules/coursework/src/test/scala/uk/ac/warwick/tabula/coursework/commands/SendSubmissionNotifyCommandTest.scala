@@ -22,7 +22,7 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 
 	var submission: Submission = _
 	val u: User = newTestUser
-	var ug = new UserGroup()
+	var ug = UserGroup.ofUsercodes
 	var userSettings = new UserSettings()
 	var sc: SendSubmissionNotifyCommand = _
 	val userLookup = mock[UserLookupService]

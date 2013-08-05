@@ -11,7 +11,12 @@ abstract class ScalaFactoryBean[A : ClassTag] extends AbstractFactoryBean[A] {
 }
 
 class JsonObjectMapperFactory extends ScalaFactoryBean[ObjectMapper] {
-	override def createInstance: ObjectMapper = {
+	override def createInstance: ObjectMapper = JsonObjectMapperFactory.instance
+}
+
+object JsonObjectMapperFactory  {
+	val instance: ObjectMapper = createInstance
+	def createInstance = {
 		val mapper = new ObjectMapper
 		mapper.registerModule(DefaultScalaModule)
 		mapper.registerModule(new JodaModule)

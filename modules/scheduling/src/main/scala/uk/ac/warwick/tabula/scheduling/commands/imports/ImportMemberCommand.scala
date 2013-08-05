@@ -148,6 +148,7 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 	}
 
 	private val basicMemberProperties = Set(
+		// userType is included for new records, but hibernate does not in fact update it for existing records
 		"userId", "firstName", "lastName", "email", "homeEmail", "title", "fullFirstName", "userType", "gender",
 		"inUseFlag", "inactivationDate", "groupName", "dateOfBirth", "jobTitle", "phoneNumber"
 	)

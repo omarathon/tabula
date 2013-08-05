@@ -7,4 +7,6 @@ trait Mockito extends org.specs.mock.Mockito with DefaultExampleExpectationsList
 	def isA[A](implicit tag: ClassTag[A]) = org.mockito.Matchers.isA(tag.runtimeClass.asInstanceOf[Class[A]])
 	def isNull[A](implicit tag: ClassTag[A]) = org.mockito.Matchers.isNull(tag.runtimeClass.asInstanceOf[Class[A]])
 	def reset[A](arg:A) = org.mockito.Mockito.reset(arg)
+
+	def verifyNoMoreInteractions(mocks: AnyRef*) = org.mockito.Mockito.verifyNoMoreInteractions(mocks : _*)
 }

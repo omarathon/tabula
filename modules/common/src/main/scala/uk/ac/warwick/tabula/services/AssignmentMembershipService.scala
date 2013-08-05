@@ -147,6 +147,9 @@ trait AssignmentMembershipMethods {
 	self: AssignmentMembershipService with UserLookupComponent =>
 
 	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): AssignmentMembershipInfo = {
+		for (group <- upstream) assert(group.members.universityIds)
+		for (group <- others) assert(!group.universityIds)
+
 		val sitsUsers =
 			upstream.flatMap { _.members.members }
 				.distinct

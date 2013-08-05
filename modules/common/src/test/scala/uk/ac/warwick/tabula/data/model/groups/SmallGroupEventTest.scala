@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import org.junit.Test
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
@@ -19,10 +18,7 @@ class SmallGroupEventTest extends TestBase with Mockito{
     source.permissionsService = mock[PermissionsService]
     source.startTime = new LocalTime(12,0,0,0)
     source.title= "test title"
-    val clonedTutors = new UserGroup
-    source.tutors = new UserGroup{
-      override def duplicate() = clonedTutors
-    }
+    source.tutors = UserGroup.ofUsercodes
     source.weekRanges = Seq(WeekRange(1))
 
     val targetGroup = new SmallGroup()
@@ -36,7 +32,7 @@ class SmallGroupEventTest extends TestBase with Mockito{
     clone.permissionsService should be(source.permissionsService)
     clone.startTime should be(source.startTime)
     clone.title should be(source.title)
-    clone.tutors should be(clonedTutors)
+    clone.tutors should not be(source.tutors) // just check they're different instances
     clone.weekRanges should be(source.weekRanges)
 
 

@@ -102,4 +102,44 @@ class SmallGroupTest extends TestBase with Mockito {
 
   }
 
+	@Test
+	def isFullReportsFullnessWhenGroupSizeLimitsEnabled(){
+
+		// set up a group with 1 member, with group size limits enabled
+		val group = new SmallGroup()
+		group.groupSet = new SmallGroupSet()
+		group.groupSet.defaultMaxGroupSizeEnabled = true
+		group.students.addUser("test")
+
+
+		group.maxGroupSize = 2
+		group should not be('full)
+
+		group.maxGroupSize = 1
+		group should be('full)
+
+		group.maxGroupSize = 0
+		group should be('full)
+
+	}
+
+	@Test
+	def isFullIsFalseWhenGroupSizeLimitsNotEnabled(){
+
+		// set up a group with 1 member, with group size limits enabled
+		val group = new SmallGroup()
+		group.groupSet = new SmallGroupSet()
+		group.groupSet.defaultMaxGroupSizeEnabled = false
+		group.students.addUser("test")
+
+
+		group.maxGroupSize = 2
+		group should not be('full)
+
+		group.maxGroupSize = 1
+		group should not be('full)
+
+		group.maxGroupSize = 0
+		group should not be('full)
+	}
 }

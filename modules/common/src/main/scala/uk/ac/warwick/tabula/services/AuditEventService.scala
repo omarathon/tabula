@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.data.model.AuditEvent
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.events.Event
 import org.springframework.transaction.annotation.Propagation._
+import uk.ac.warwick.tabula.JsonObjectMapperFactory
 
 trait AuditEventService {
 	def getById(id: Long): Option[AuditEvent]
@@ -36,7 +37,7 @@ trait AuditEventService {
 @Component
 class AuditEventServiceImpl extends Daoisms with AuditEventService {
 
-	@Autowired var json: ObjectMapper = _
+	var json: ObjectMapper = JsonObjectMapperFactory.instance
 
 	@Resource(name = "mainDatabaseDialect") var dialect: Dialect = _
 

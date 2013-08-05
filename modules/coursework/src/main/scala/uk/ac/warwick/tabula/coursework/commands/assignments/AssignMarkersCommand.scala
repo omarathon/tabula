@@ -91,7 +91,7 @@ abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:A
 			assignment.markerMap = new java.util.HashMap[String, UserGroup]()
 			if(Option(markerMapping).isDefined){
 				markerMapping.foreach{case(marker, studentList) =>
-					val group = new UserGroup()
+					val group = UserGroup.ofUsercodes
 					group.includeUsers = studentList
 					session.saveOrUpdate(group)
 					assignment.markerMap.put(marker, group)

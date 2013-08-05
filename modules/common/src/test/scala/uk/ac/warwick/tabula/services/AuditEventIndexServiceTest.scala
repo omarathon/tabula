@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula._
 import org.apache.lucene.util.LuceneTestCase
 import org.junit.Test
-import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.JavaImports._
 import org.junit.After
 import org.junit.Before
@@ -18,28 +17,29 @@ import org.apache.lucene.util.Version
 import uk.ac.warwick.userlookup.User
 import collection.JavaConversions._
 import uk.ac.warwick.util.core.StopWatch
-import uk.ac.warwick.tabula.JsonObjectMapperFactory
 import java.io.File
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.events.EventListener
 import uk.ac.warwick.tabula.events.Event
 import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.AppContextTestBase
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Department
 import org.apache.commons.io.FileUtils
-import uk.ac.warwick.tabula.Fixtures
 import org.springframework.test.annotation.DirtiesContext
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.data.model.AuditEvent
+import scala.Some
+import org.hibernate.dialect.HSQLDialect
 
 // scalastyle:off magic.number
 //@DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
-class AuditEventIndexServiceTest extends AppContextTestBase with Mockito with Logging {
+class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with Logging {
 	
 	var indexer:AuditEventIndexService = _
-	@Autowired var service:AuditEventService = _
+	val service:AuditEventServiceImpl = new AuditEventServiceImpl
+
 	var TEMP_DIR:File = _
 	
 	@Before def setup {		
@@ -48,6 +48,8 @@ class AuditEventIndexServiceTest extends AppContextTestBase with Mockito with Lo
 		indexer.service = service
 		indexer.indexPath = TEMP_DIR
 		indexer.afterPropertiesSet
+		service.sessionFactory = sessionFactory
+		service.dialect = new HSQLDialect()
 	}
 	
 	@After def tearDown {

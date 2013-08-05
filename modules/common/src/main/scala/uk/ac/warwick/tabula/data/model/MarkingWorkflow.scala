@@ -46,14 +46,14 @@ class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	/** The group of first markers. */
 	@OneToOne(cascade = Array(CascadeType.ALL))
 	@JoinColumn(name = "firstmarkers_id")
-	var firstMarkers = new UserGroup()
+	var firstMarkers = UserGroup.ofUsercodes
 
 	/** The second group of markers. May be unused if the marking workflow
 	  * only has one marking stage.
 	  */
 	@OneToOne(cascade = Array(CascadeType.ALL))
 	@JoinColumn(name = "secondmarkers_id")
-	var secondMarkers = new UserGroup()
+	var secondMarkers = UserGroup.ofUsercodes
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingMethodUserType")
 	var markingMethod: MarkingMethod = _

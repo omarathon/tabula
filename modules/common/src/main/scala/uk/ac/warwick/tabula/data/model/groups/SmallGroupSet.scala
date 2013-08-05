@@ -37,7 +37,7 @@ object SmallGroupSet {
 @Filter(name = SmallGroupSet.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings with PostLoadBehaviour  {
+class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings with Serializable with PostLoadBehaviour  {
 	import SmallGroupSet.Settings
 	import SmallGroup._
 
@@ -78,9 +78,18 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	@Column(name="self_group_switching")
 	var allowSelfGroupSwitching: Boolean = true
 
+	// TODO consider changing this to be a string, and setting it to the name of the SmallGroupSetSelfSignUpState
+	// to allow for more states than just "open" and "closed"
 	@Column(name="open_for_signups")
 	var openForSignups: Boolean = false
 
+  def openState:SmallGroupSetSelfSignUpState = if (openForSignups) SmallGroupSetSelfSignUpState.Open else SmallGroupSetSelfSignUpState.Closed 
+  
+ def openState_= (value:SmallGroupSetSelfSignUpState):Unit =  value match {
+	  case SmallGroupSetSelfSignUpState.Open => openForSignups = true
+	  case SmallGroupSetSelfSignUpState.Closed => openForSignups = false
+  }
+	
 	@ManyToOne
 	@JoinColumn(name = "module_id")
 	var module: Module = _
@@ -92,7 +101,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	// only students manually added or excluded. use allStudents to get all students in the group set
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
-	var members: UserGroup = new UserGroup
+	var members: UserGroup = UserGroup.ofUsercodes
 
 	// Cannot link directly to upstream assessment groups data model in sits is silly ...
 	@OneToMany(mappedBy = "smallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)

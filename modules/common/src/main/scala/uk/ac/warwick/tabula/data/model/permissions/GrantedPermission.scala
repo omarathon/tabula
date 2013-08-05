@@ -30,7 +30,7 @@ abstract class GrantedPermission[A <: PermissionsTarget] extends GeneratedId wit
 	
 	@OneToOne(cascade=Array(CascadeType.ALL))
 	@JoinColumn(name="usergroup_id")
-	var users: UserGroup = new UserGroup
+	var users: UserGroup = UserGroup.ofUsercodes
 	
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.permissions.PermissionUserType")
 	var permission: Permission = _
@@ -48,7 +48,7 @@ abstract class GrantedPermission[A <: PermissionsTarget] extends GeneratedId wit
 	}
 
 	def ensureUsers = {
-		if (users == null) users = new UserGroup
+		if (users == null) users = UserGroup.ofUsercodes
 		users
 	}
 

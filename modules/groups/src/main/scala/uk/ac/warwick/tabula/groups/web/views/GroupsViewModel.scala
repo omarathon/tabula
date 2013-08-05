@@ -24,6 +24,7 @@ object GroupsViewModel {
 	) {
 		def hasUnreleasedGroupsets = moduleItems.exists(_.hasUnreleasedGroupsets)
 		def hasOpenableGroupsets = moduleItems.exists(_.hasOpenableGroupsets)
+		def hasCloseableGroupsets = moduleItems.exists(_.hasCloseableGroupsets)
 	}
 
 	case class ViewModule(
@@ -33,11 +34,23 @@ object GroupsViewModel {
 	) {
 		def hasUnreleasedGroupsets = module.hasUnreleasedGroupSets
 		def hasOpenableGroupsets = module.groupSets.asScala.exists(s => (!s.openForSignups) && s.allocationMethod == StudentSignUp )
+		def hasCloseableGroupsets = module.groupSets.asScala.exists(s => (s.openForSignups) && s.allocationMethod == StudentSignUp )
 	}
 
 	case class ViewSet(
 		set: SmallGroupSet,
-		groups: Seq[SmallGroup]
-	)
+		groups: Seq[SmallGroup],
+	  viewerRole:ViewerRole
+	){
+		def viewerIsStudent = (viewerRole == StudentAssignedToGroup )|| (viewerRole == StudentNotAssignedToGroup)
+		def viewerMustSignUp = (viewerRole == StudentNotAssignedToGroup) && isStudentSignUp && set.openForSignups
+		def canViewMembers = set.studentsCanSeeOtherMembers
+		def isStudentSignUp = set.allocationMethod == StudentSignUp
+	}
+	sealed trait ViewerRole
+	case object StudentAssignedToGroup extends ViewerRole
+	case object StudentNotAssignedToGroup extends ViewerRole
+	case object Tutor extends ViewerRole
+
 
 }

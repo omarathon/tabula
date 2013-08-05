@@ -68,7 +68,10 @@
 			<#assign groupSet=setItem.set />
 			<#if !groupSet.deleted>
 				<div class="item-info row-fluid<#if groupSet.archived> archived</#if> groupset-${groupSet.id}">
-					<div class="span3">
+				<#if setItem.viewerMustSignUp>
+				  <form id="select-signup-${setItem.set.id}" method="post" action="<@routes.signup_to_group setItem.set />">
+				</#if>
+					<div class="span2">
 						<h3 class="name">
 							<small>
 							${groupSet.name}
@@ -83,7 +86,7 @@
 						</span>
 					</div>
 
-					<div class="span7">
+						<div class="${moduleItem.canManageGroups?string('span8','span10')}">
 						<#if allocated?? && allocated.id == groupSet.id>
 							<div class="alert alert-success">
 								<a class="close" data-dismiss="alert">&times;</a>
@@ -92,17 +95,46 @@
 						</#if>
 
 						<#list setItem.groups as group>
-							<div class="group">
+							<div class="row-fluid group">
+							<div class="span1">
+							 <#if setItem.viewerMustSignUp>
+							   <input type="radio"
+							          name="group"
+							          value="${group.id}"
+							          ${group.full?string(' disabled ','')}
+							          class="radio inline group-selection-radio"/>
+							</#if>
+							</div>
+							<div class="${moduleItem.canManageGroups?string('span7','span11')}">
 								<h4 class="name">
 								${group.name!""}
-								<#-- modal not currently working
-								<a data-url="<@routes.studentslist group />" data-toggle="modal"  href="#students-list-modal">
-								-->
-
+								<#if setItem.canViewMembers >
 								<a href="<@routes.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
 								<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
 								</a>
+								<#else>
+								<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
+								</#if>
 								</h4>
+
+								<#if setItem.viewerIsStudent >
+                                    <#if !setItem.isStudentSignUp()
+                                         || (setItem.isStudentSignUp() && !setItem.set.allowSelfGroupSwitching)
+                                         || (setItem.isStudentSignUp() && !setItem.set.openForSignups)
+                                         >
+                                      <form> <!-- targetless form here to make the DOM match the student-sign-up version, for ease of testing -->
+									     <input type="submit" disabled class="btn btn-primary btn-medium pull-right" value="Leave" use-tooltip" title='You cannot change this group allocation via tabula. Please speak to your department if you need to change groups'/>
+                                      </form>
+                                    <#else >
+	                                    <#if !setItem.viewerMustSignUp >
+	                                     <form id="leave-${setItem.set.id}" method="post" action="<@routes.leave_group setItem.set />" >
+                                            <input type="hidden" name="group" value="${group.id}" />
+                                            <input type="submit" class="btn btn-primary  pull-right" value="Leave"/>
+										 </form>
+										</#if>
+                                    </#if>
+                                </#if>
+
 
 								<ul class="unstyled">
 									<#list group.events as event>
@@ -114,9 +146,15 @@
 										</li>
 									</#list>
 								</ul>
+								</div>
 							</div>
 						</#list>
+						<#if setItem.viewerMustSignUp>
+							<input type="submit" class="btn btn-primary pull-right sign-up-button" value="Sign Up"/>
+							</form>
+                        </#if>
 
+                        <#if moduleItem.canManageGroups><#-- don't display allocation messages to users who can't do anything about them-->
 						<#assign unallocatedSize = groupSet.unallocatedStudentsCount />
 						<#if unallocatedSize gt 0>
 							<div class="alert">
@@ -142,8 +180,10 @@
                                   </p>
                              </#if>
                         </#if>
+                        </#if>
                     </div>
 
+                    <#if moduleItem.canManageGroups>
                     <div class="span2">
                         <div class="btn-toolbar pull-right">
                             <div class="btn-group">
@@ -161,14 +201,14 @@
                                 </#if>-->
 
                                 <@dropdown_menu "Actions" "cog">
-                                    <#if moduleItem.canManageGroups>
                                     <li><a href="<@routes.editset groupSet />"><i class="icon-wrench icon-fixed-width"></i> Edit properties</a></li>
                                      <#if features.smallGroupTeachingStudentSignUp>
 										 <#if groupSet.openForSignups>
 										 <li  ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
                                          		   (''," class='disabled use-tooltip' title='Not a self-signup group' ")
                                          }>
-                                         <a  class="close-group-link" href="/TODO-TAB-934"><i class="icon-lock icon-fixed-width"></i> Close</a></li>
+                                         <a  class="close-group-link" data-toggle="modal" data-target="#modal-container" 
+                                         href="<@routes.closeset groupSet />"><i class="icon-lock icon-fixed-width"></i> Close</a></li>
 
 										 <#else>
 										<li  ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
@@ -198,21 +238,25 @@
                                         <i class="icon-folder-close icon-fixed-width"></i> ${archive_caption} 
                                         </@fmt.permission_button>
                                     </a></li> 
-                                    </#if>
                                 </@dropdown_menu>
                             </div>
                         </div>
                     </div>
+                    </#if>
+
+					<#if setItem.viewerMustSignUp>
+					</form>
+                    </#if>
                 </div>
             </#if>
         </#list>
         </div>
         </#if>
     </div>
-</div>
+</div> <!-- module-info striped-section-->
 
 </#list>
-
+</div> <!-- small-group-modules-list-->
 <#-- List of students modal -->
 <div id="students-list-modal" class="modal fade">
 </div>

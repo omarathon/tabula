@@ -11,9 +11,9 @@
 				<article class="result" data-id="${result.universityId}">
 					<h3><a href="<#compress>
 						<#if tutorToDisplay??>
-							<@routes.tutor_edit_replace scjCode=studentCourseDetails.scjCode?replace("/","_") currentTutor=tutorToDisplay newTutor=result />
+							<@routes.tutor_edit_replace scjCode=studentCourseDetails.urlSafeId currentTutor=tutorToDisplay newTutor=result />
 						<#else>
-							<@routes.tutor_edit_set scjCode=studentCourseDetails.scjCode?replace("/","_") newTutor=result />
+							<@routes.tutor_edit_set scjCode=studentCourseDetails.urlSafeId newTutor=result />
 						</#if>
 					</#compress>"><@fmt.profile_name result /></a></h3>
 					<@fmt.profile_description result />

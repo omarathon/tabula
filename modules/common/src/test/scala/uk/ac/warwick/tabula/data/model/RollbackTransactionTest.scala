@@ -1,17 +1,25 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.{Fixtures, AppContextTestBase}
+import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures, AppContextTestBase}
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.data.MemberDao
+import uk.ac.warwick.tabula.data.{MemberDaoImpl, MemberDao}
+import org.junit.Before
 
 /**
  * This test exists to prove that our TransactionalTesting.transactional(){} function rolls back transactions
  * (or otherwise cleans up the database state) in between each test method
  *
  */
-class RollbackTransactionTest  extends AppContextTestBase{
+class RollbackTransactionTest  extends PersistenceTestBase{
 
-	@Autowired var dao:MemberDao =_
+
+
+	val dao = new MemberDaoImpl
+
+	@Before
+	def setup() {
+		dao.sessionFactory = sessionFactory
+	}
 
 	@Test
 	def insertOneThing()= transactional{tx=>

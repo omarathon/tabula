@@ -4,8 +4,9 @@ import uk.ac.warwick.tabula.{BreadcrumbsMatcher, LoginDetails, BrowserTest}
 import org.openqa.selenium.By
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.groups.pages.SmallGroupTeachingPage
+import uk.ac.warwick.tabula.home.FixturesDriver
 
-trait SmallGroupsFixture extends BrowserTest {
+trait SmallGroupsFixture extends BrowserTest with FixturesDriver{
 
   before{
     go to (Path("/scheduling/fixtures/setup"))
