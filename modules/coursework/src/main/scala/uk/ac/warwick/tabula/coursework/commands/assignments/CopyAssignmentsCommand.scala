@@ -4,13 +4,11 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.forms.WordCountField
-import org.springframework.validation.Errors
 
 object CopyAssignmentsCommand {
 	def apply(modules: Seq[Module]) =
@@ -89,27 +87,24 @@ abstract class CopyAssignmentsCommand(val modules: Seq[Module]) extends CommandI
 
 		newAssignment
 	}
-
 }
 
-trait CopyAssignmentsPermissions extends RequiresPermissionsChecking {
+trait CopyAssignmentsPermissions extends ArchiveAssignmentsPermissions {
 	self: CopyAssignmentsState =>
-	def permissionsCheck(p: PermissionsChecking) {
+	override def permissionsCheck(p: PermissionsChecking) {
+		if(archive) {
+			super.permissionsCheck(p)
+		}
+
 		for(module <- modules) {
-			if(archive) {
-				p.PermissionCheck(Permissions.Assignment.Update, module)
-			}
 			p.PermissionCheck(Permissions.Assignment.Create, module)
 		}
 	}
 }
 
-trait CopyAssignmentsState {
-	val modules: Seq[Module]
-
-	var assignments: JList[Assignment] = JArrayList()
-	var archive: JBoolean = false
+trait CopyAssignmentsState extends ArchiveAssignmentsState {
 	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime)
+	var archive: JBoolean = false
 }
 
 trait CopyAssignmentsDescription extends Describable[Seq[Assignment]] {
@@ -117,4 +112,5 @@ trait CopyAssignmentsDescription extends Describable[Seq[Assignment]] {
 	def describe(d: Description) = d
 		.properties("modules" -> modules.map(_.id))
 		.properties("assignments" -> assignments.asScala.map(_.id))
+		.properties("isArchiving" -> archive)
 }

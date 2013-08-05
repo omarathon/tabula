@@ -29,51 +29,9 @@
 			</div>
 		</@form.labelled_row>
 
-		<@form.row "copyAssignmentsCommand.assignments" "">
-			<@form.label "copyAssignmentsCommand.assignments">
-				Assignments to copy
-
-					<label>
-						<input type="checkbox" class="collection-check-all">
-						<span class="very-subtle">Select / unselect all</span>
-					</label>
-
-			</@form.label>
-			<@form.field cssClass="">
-				<#assign showTitles = copyAssignmentsCommand.modules?size gt 1 />
-				<#list copyAssignmentsCommand.modules as module>
-					<#if showTitles>
-						<h6 class="module-split">
-							<small><@fmt.module_name module /></small>
-						</h6>
-					</#if>
-					<#list module.assignments as assignment>
-						<div class="checkbox"><#compress>
-							<label class="checkbox">
-								<input type="checkbox" class="collection-checkbox" name="assignments" value="${assignment.id}">
-								${assignment.name}
-								<small><span class="muted">${assignment.academicYear.toString}</span></small>
-							</label>
-						</#compress></div>
-					</#list>
-				</#list>
-			</@form.field>
-		</@form.row>
+		<#assign modules = copyAssignmentsCommand.modules />
+		<#assign path = "copyAssignmentsCommand.assignments" />
+		<#include "_assignment_list.ftl" />
 
 	</form>
-	<script type="text/javascript">
-		jQuery(function($) {
-			$('.copy-assignments').bigList({
-				setup: function(){
-					checkboxChangedFunction();
-				},
-				onSomeChecked: function() {
-					$('.btn-primary').removeProp('disabled');
-				},
-				onNoneChecked: function() {
-					$('.btn-primary').prop('disabled', 'disabled');
-				}
-			});
-		});
-	</script>
 </#escape>
