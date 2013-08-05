@@ -19,12 +19,11 @@ class ListGroupStudentsController extends GroupsController {
 	@RequestMapping
 	def ajaxList(@ModelAttribute("command") command: ListGroupStudentsCommand, user: CurrentUser): Mav = {
 		val students = command.apply()
-		val currentWarwickId = user.apparentUser.getWarwickId
-		val userIsMember = students.exists(_.universityId == user.apparentUser.getWarwickId)
+		val userIsMember = students.exists(_.universityId == user.universityId)
 
 		Mav("groups/students",
 			"students" -> students,
-			"userUniId" -> currentWarwickId,
+			"userUniId" -> user.universityId,
 			"userIsMember" -> userIsMember
 		).noLayout()
 	}
