@@ -380,6 +380,7 @@ $(function(){
 
 // code for bulk archive/copy assignments
 $(function(){
+
 	$('.copy-assignments, .archive-assignments').bigList({
 
 		setup: function(e){
@@ -396,6 +397,15 @@ $(function(){
 			$('.btn-primary').prop('disabled', 'disabled');
 		}
 	});
+
+	$('form.copy-assignments').confirmModal({
+		message: "Are you sure that you want to create these assignments?"
+	});
+
+	$('form.archive-assignments').confirmModal({
+		message: "Are you sure that you want to archive these assignments?"
+	});
+
 });
 
 
