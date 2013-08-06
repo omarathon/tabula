@@ -1,20 +1,17 @@
 package uk.ac.warwick.tabula.attendance.web.controllers
 
-import scala.collection.JavaConverters.asScalaBufferConverter
-import org.hibernate.annotations.AccessType
+import scala.collection.JavaConverters._
+
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import javax.persistence.Entity
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.attendance.commands.GetMonitoringPointsCommand
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.JSONView
-import org.json.JSONObject
-import org.json.JSONArray
 
 @Controller
 @RequestMapping(Array("/manage/{dept}"))
@@ -30,22 +27,27 @@ class ManageMonitoringPointsController extends BaseController {
 
   @RequestMapping(value = Array("/points"), method = Array(GET, HEAD))
   def getPoints(@RequestParam route: Route, @RequestParam(value = "year", required = false) year: String) = {
-    val mps = GetMonitoringPointsCommand(mandatory(route), toInt(year)).apply
-    mps map { pointSet =>
-      val points = pointSet.points.asScala map { point =>
-        Map(
+    // for-comprehension on a bunch of Options is a neat way to say "do this if all options are present,
+    // otherwise return None" without having to handle each one individually
+    val pointSetOption = for {
+      r <- Option(route)
+      result <- GetMonitoringPointsCommand(route, toInt(year)).apply
+    } yield result
+
+    val model = pointSetOption map { pointSet =>
+      Map(
+        "points" -> (for (point <- pointSet.points.asScala) yield Map(
           "id" -> point.id,
           "name" -> point.name,
           "defaultValue" -> point.defaultValue,
-          "week" -> point.week)
-      }
-
-      Map(
-        "points" -> points)
-    } match {
-      case Some(model) => new JSONView(model)
-      case _ => new JSONView(Map())
+          "week" -> point.week
+        ))
+      )
+    } getOrElse {
+      Map()
     }
+
+    new JSONView(model)
   }
 
 }

@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import uk.ac.warwick.tabula.data.model.GeneratedId
-import org.hibernate.annotations.Entity
-import javax.validation.constraints.NotNull
-import uk.ac.warwick.tabula.data.model.Route
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
 import org.joda.time.DateTime
 import org.hibernate.annotations.Type
+
+import javax.persistence.Entity
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.validation.constraints.NotNull
+
+import uk.ac.warwick.tabula.data.model.GeneratedId
 
 @Entity
 class MonitoringPoint extends GeneratedId {
@@ -26,7 +27,8 @@ class MonitoringPoint extends GeneratedId {
 	
 	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	var updatedDate: DateTime = _
-	
+
+	@NotNull
 	var week: Int = _
 
 }

@@ -10,7 +10,7 @@
 				</#list>
 			</select>
 			<select name="year"  class="input-small">
-				<option value="" disabled selected style="display:none;">Year</option>
+				<option value="" selected style="display:none;">Year</option>
 				<#list 1..8 as year>
 					<option value="${year}">${year}</option>
 				</#list>

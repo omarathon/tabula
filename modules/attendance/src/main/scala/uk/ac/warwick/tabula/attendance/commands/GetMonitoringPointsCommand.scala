@@ -7,16 +7,15 @@ import uk.ac.warwick.tabula.services.AutowiringRouteServiceComponent
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.commands.ReadOnly
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.ComposableCommand
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.Route
 
-object GetMonitoringPointsCommand {	
+object GetMonitoringPointsCommand {
 	def apply(route: Route, year: Option[Int]) =
-		new GetMonitoringPointsCommand(route, year) 
+		new GetMonitoringPointsCommand(route, year)
 			with ComposableCommand[Option[MonitoringPointSet]]	
 			with GetMonitoringPointsCommandPermissions
 			with AutowiringRouteServiceComponent
@@ -24,7 +23,7 @@ object GetMonitoringPointsCommand {
 			with Unaudited 
 }
 
-abstract class GetMonitoringPointsCommand(val route: Route, val year: Option[Int]) 
+abstract class GetMonitoringPointsCommand(val route: Route, val year: Option[Int])
 	extends CommandInternal[Option[MonitoringPointSet]] with Appliable[Option[MonitoringPointSet]] 
 			with GetMonitoringPointsCommandState {
 	self: RouteServiceComponent =>

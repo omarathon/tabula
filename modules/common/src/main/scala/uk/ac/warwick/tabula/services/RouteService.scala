@@ -2,12 +2,8 @@ package uk.ac.warwick.tabula.services
 
 import scala.collection.JavaConverters._
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.{AutowiringRouteDaoComponent, RouteDaoComponent, Daoisms}
-import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.data.{AutowiringRouteDaoComponent, RouteDaoComponent}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
 
