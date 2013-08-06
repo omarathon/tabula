@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.groups.commands.{TutorHomeCommandImpl, TutorHomeCommand}
-import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel._
 import org.springframework.web.bind.annotation.RequestParam
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
@@ -23,7 +22,7 @@ class TutorHomeController extends GroupsController {
 	def listModules(@ModelAttribute("command") command: TutorHomeCommand, @RequestParam(value="updatedOccurrence", required=false) occurrence: SmallGroupEventOccurrence): Mav = {
 		val mapping = command.apply()
 
-		val data = generateViewModules(mapping)
+		val data = generateViewModules(mapping, GroupsViewModel.Tutor)
 
 		Mav("groups/tutor_home",
 			"data" -> data,
