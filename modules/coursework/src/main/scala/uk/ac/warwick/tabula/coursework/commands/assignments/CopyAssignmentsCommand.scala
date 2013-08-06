@@ -17,7 +17,7 @@ object CopyAssignmentsCommand {
 			with CopyAssignmentsPermissions
 			with CopyAssignmentsDescription
 			with AutowiringAssignmentServiceComponent {
-				override lazy val eventName = "CopyAssignments"
+				override lazy val eventName = "CopyAssignmentsFromPrevious"
 			}
 }
 
