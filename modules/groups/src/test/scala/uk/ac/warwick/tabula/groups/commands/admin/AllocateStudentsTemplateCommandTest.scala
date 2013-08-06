@@ -84,10 +84,10 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		group2.groupSet = set
 		group3.groupSet = set
 		group4.groupSet = set
-		group1.students.userLookup = userLookup
-		group2.students.userLookup = userLookup
-		group3.students.userLookup = userLookup
-		group4.students.userLookup = userLookup
+		group1._studentsGroup.userLookup = userLookup
+		group2._studentsGroup.userLookup = userLookup
+		group3._studentsGroup.userLookup = userLookup
+		group4._studentsGroup.userLookup = userLookup
 
 		set.members.addUser(user1.getUserId)
 		set.members.addUser(user2.getUserId)

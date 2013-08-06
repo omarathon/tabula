@@ -154,7 +154,9 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
   def detectsAllocationChangesForTutors(){new Fixture {
 
     val group = command.set.groups.asScala.find(_.name == "groupA").get
-    group.students.addUser("test")
+		val test:User = new User("test")
+		test.setWarwickId("123")
+    group.students.add(test)
     val tutor =  group.events.asScala.head.tutors.users.head
     command.hasAffectedTutorsEvents(tutor) should be(true)
 

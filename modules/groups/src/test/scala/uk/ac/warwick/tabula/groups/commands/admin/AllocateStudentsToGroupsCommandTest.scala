@@ -68,8 +68,8 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		set.groups.add(group2)
 		group1.groupSet = set
 		group2.groupSet = set
-		group1.students.userLookup = userLookup
-		group2.students.userLookup = userLookup
+		group1._studentsGroup.userLookup = userLookup
+		group2._studentsGroup.userLookup = userLookup
 		
 		set.members.addUser(user1.getUserId)
 		set.members.addUser(user2.getUserId)
@@ -103,8 +103,8 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		there was one(service).saveOrUpdate(group1)
 		there was one(service).saveOrUpdate(group2)
 		
-		group1.students.includeUsers should be (JArrayList("0200202", "0672088"))
-		group2.students.includeUsers should be (JArrayList("8888888", "0672089"))
+		group1._studentsGroup.includeUsers should be (JArrayList("0200202", "0672088"))
+		group2._studentsGroup.includeUsers should be (JArrayList("8888888", "0672089"))
 	}
 
 }

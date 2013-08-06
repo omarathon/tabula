@@ -111,8 +111,8 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
     }
 
 		
-		if (group.students == null) group.students = UserGroup.ofUniversityIds
-		group.students.copyFrom(students)
+		if (group._studentsGroup== null) group._studentsGroup = UserGroup.ofUniversityIds
+		group._studentsGroup.copyFrom(students)
 	}
 	
 	override def onBind(result: BindingResult) {

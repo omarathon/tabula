@@ -63,12 +63,13 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 		
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "studentsgroup_id")
-	var students: UserGroup = UserGroup.ofUniversityIds
+	var _studentsGroup: UserGroup = UserGroup.ofUniversityIds
+  def students: UnspecifiedTypeUserGroup = _studentsGroup
 
 	def maxGroupSize = getIntSetting(Settings.MaxGroupSize)
 	def maxGroupSize_=(defaultSize:Int) = settings += (Settings.MaxGroupSize -> defaultSize)
 
-	def isFull = groupSet.defaultMaxGroupSizeEnabled && maxGroupSize.getOrElse(0) <= students.members.size
+	def isFull = groupSet.defaultMaxGroupSizeEnabled && maxGroupSize.getOrElse(0) <= students.size
 
 	def toStringProps = Seq(
 		"id" -> id,
@@ -94,7 +95,7 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
     newGroup.groupSet = groupSet
     newGroup.name = name
     newGroup.permissionsService = permissionsService
-    newGroup.students = students.duplicate()
+    newGroup._studentsGroup = _studentsGroup.duplicate()
     newGroup.settings = Map() ++ settings
     newGroup
   }

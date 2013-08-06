@@ -135,7 +135,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	}
 	
 	def unallocatedStudentsCount = {
-		val allocatedStudentsCount = groups.asScala.foldLeft(0) { (acc, grp) => acc + grp.students.members.size }
+		val allocatedStudentsCount = groups.asScala.foldLeft(0) { (acc, grp) => acc + grp.students.size }
 		
 		allStudentsCount - allocatedStudentsCount
 	}

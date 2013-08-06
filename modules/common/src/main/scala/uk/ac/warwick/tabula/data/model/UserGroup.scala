@@ -32,7 +32,7 @@ import org.hibernate.annotations.AccessType
  */
 @Entity
 @AccessType("field")
-class UserGroup private(val universityIds: Boolean) extends GeneratedId {
+class UserGroup private(val universityIds: Boolean) extends GeneratedId with UnspecifiedTypeUserGroup{
 
 	/* For Hibernate xx */
 	private def this() { this(false) }
@@ -99,6 +99,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId {
 		else includes(user.getUserId)
 	}
 	def isEmpty = members.isEmpty
+	def size = members.size
 
 	def members: Seq[String] =
 		(includeUsers.toList ++ staticIncludeUsers ++ webgroupMembers) filterNot excludeUsers.contains
@@ -120,15 +121,24 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId {
 		case _ => Nil
 	}
 
-	def copyFrom(other: UserGroup) {
-		assert(this.universityIds == other.universityIds, "Can only copy from a group with same type of users")
-		baseWebgroup = other.baseWebgroup
-		includeUsers.clear()
-		excludeUsers.clear()
-		staticIncludeUsers.clear()
-		includeUsers.addAll(other.includeUsers)
-		excludeUsers.addAll(other.excludeUsers)
-		staticIncludeUsers.addAll(other.staticIncludeUsers)
+
+	def copyFrom(otherGroup: UnspecifiedTypeUserGroup) {
+		otherGroup match {
+			case other:UserGroup=>{
+				assert(this.universityIds == other.universityIds, "Can only copy from a group with same type of users")
+				baseWebgroup = other.baseWebgroup
+				includeUsers.clear()
+				excludeUsers.clear()
+				staticIncludeUsers.clear()
+				includeUsers.addAll(other.includeUsers)
+				excludeUsers.addAll(other.excludeUsers)
+				staticIncludeUsers.addAll(other.staticIncludeUsers)
+			}
+			case _ => {
+				assert(false, "Can only copy from one UserGroup to another")
+			}
+		}
+
 	}
 
 	def duplicate(): UserGroup = {
@@ -138,9 +148,32 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId {
 		newGroup
 	}
 
+	def hasSameMembersAs(other:UnspecifiedTypeUserGroup):Boolean ={
+		other match {
+			case otherUg:UserGroup if otherUg.universityIds == this.universityIds=> (this.members == otherUg.members)
+			case _ => this.users == other.users
+		}
+	}
+
+
 }
 
 object UserGroup {
 	def ofUsercodes = new UserGroup(false)
 	def ofUniversityIds = new UserGroup(true)
+}
+
+/**
+ * A usergroup where the value of universityId is hidden from the caller.
+ *
+ * This means that callers can only add/remove Users, not UserIds.
+ */
+
+trait UnspecifiedTypeUserGroup{
+	def users: Seq[User]
+	def add(User:User)
+	def remove(User:User)
+	def size:Int
+	def isEmpty:Boolean
+	def hasSameMembersAs(other:UnspecifiedTypeUserGroup):Boolean
 }

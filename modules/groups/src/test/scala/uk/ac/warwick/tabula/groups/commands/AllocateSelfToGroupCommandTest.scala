@@ -8,13 +8,17 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.{StudentSignUp, Manual}
+import uk.ac.warwick.tabula.services.UserLookupService
 
 class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 
  	private trait Fixture{
-		val testGroup = new SmallGroupBuilder().build
-		val user = new User()
+		val userLookup  =mock[UserLookupService]
+		val testGroup = new SmallGroupBuilder().withUserLookup(userLookup).build
+		val user = new User("abcde")
 		user.setWarwickId("01234")
+	  userLookup.getUserByWarwickUniId("01234") returns user
+
 		val testGroupSet = new SmallGroupSetBuilder().withId("set1").withGroups(Seq(testGroup)).build
 		val allocateCommand = new AllocateSelfToGroupCommand(user, testGroupSet)
 		allocateCommand.group = testGroup
@@ -26,16 +30,16 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 	@Test
 	def allocateAddsStudentToGroupMembers(){new Fixture{
 		  allocateCommand.applyInternal()
-		  testGroup.students.members should contain("01234")
+		  testGroup.students.users should contain(user)
 	}}
 
 	@Test
 	def allocateDoesNothingIfStudentAlreadyAssigned(){new Fixture {
 		testGroup.students.add(user)
-		testGroup.students.members should contain("01234")
+		testGroup.students.users should contain(user)
 
 		allocateCommand.applyInternal()
-		testGroup.students.members should contain("01234")
+		testGroup.students.users should contain(user)
 	}}
 
 	@Test
@@ -47,13 +51,13 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 	def deallocateRemovesStudentFromGroupMembers(){new Fixture{
 		testGroup.students.add(user)
 		deallocateCommand.applyInternal()
-		testGroup.students.members should be(Nil)
+		testGroup.students.users should be(Nil)
 	}}
 
 	@Test
 	def deallocateDoesNothingIfStudentNotAlreadyAssigned(){new Fixture {
 		deallocateCommand.applyInternal()
-		testGroup.students.members should be(Nil)
+		testGroup.students.users should be(Nil)
 	}}
 
 

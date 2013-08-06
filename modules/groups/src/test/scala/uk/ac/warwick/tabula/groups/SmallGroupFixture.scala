@@ -156,9 +156,13 @@ class SmallGroupBuilder(val template:SmallGroup = new SmallGroup){
     this
   }
   def withStudents(members:UserGroup):SmallGroupBuilder = {
-    template.students = members
+    template._studentsGroup = members
     this
   }
+	def withUserLookup(userLookup:UserLookupService)={
+		template._studentsGroup.userLookup = userLookup
+		this
+	}
   def withGroupName(s: String) = {
     template.name = s
     this

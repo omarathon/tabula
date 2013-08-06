@@ -99,7 +99,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 		for ((group, users) <- mapping.asScala) {
 			val userGroup = UserGroup.ofUniversityIds
 			users.asScala.foreach { user => userGroup.addUser(user.getWarwickId) }
-			group.students.copyFrom(userGroup)
+			group._studentsGroup.copyFrom(userGroup)
 			service.saveOrUpdate(group)
 		}
 		set
