@@ -153,52 +153,40 @@
 							<input type="submit" class="btn btn-primary pull-right sign-up-button" value="Sign Up"/>
 							</form>
                         </#if>
-
-                        <#if moduleItem.canManageGroups><#-- don't display allocation messages to users who can't do anything about them-->
-						<#assign unallocatedSize = groupSet.unallocatedStudentsCount />
-						<#if unallocatedSize gt 0>
-							<div class="alert">
-								<i class="icon-info-sign"></i> <@fmt.p unallocatedSize "student has" "students have" /> not been allocated to a group
-							</div>
+						<#-- Only show warnings to users that can do somthing about them -->
+						<#if moduleItem.canManageGroups>
+							<#assign unallocatedSize = groupSet.unallocatedStudentsCount />
+							<#if unallocatedSize gt 0>
+								<div class="alert">
+									<i class="icon-info-sign"></i> <@fmt.p unallocatedSize "student has" "students have" /> not been allocated to a group
+								</div>
+							</#if>
+	
+							<#if groupSet.hasAllocated >
+								 <#-- not released at all -->
+								  <#if (!groupSet.releasedToStudents && !groupSet.releasedToTutors)>
+								<p class="alert">
+									<i class="icon-info-sign"></i> Notifications have not been sent for these groups
+								</p>
+								 <#-- only released to tutors-->
+								 <#elseif (!groupSet.releasedToStudents && groupSet.releasedToTutors)>
+								  <p class="alert">
+									   <i class="icon-info-sign"></i> Notifications have not been sent to students for these groups
+								   </p>
+								  <#-- only released to students-->
+								  <#elseif (groupSet.releasedToStudents && !groupSet.releasedToTutors)>
+									  <p class="alert">
+										  <i class="icon-info-sign"></i> Notifications have not been sent to tutors for these groups
+									  </p>
+								 </#if>
+							</#if>
 						</#if>
-
-                        <#if groupSet.hasAllocated >
-                             <#-- not released at all -->
-                              <#if (!groupSet.releasedToStudents && !groupSet.releasedToTutors)>
-                            <p class="alert">
-                                <i class="icon-info-sign"></i> Notifications have not been sent for these groups
-                            </p>
-                             <#-- only released to tutors-->
-                             <#elseif (!groupSet.releasedToStudents && groupSet.releasedToTutors)>
-                              <p class="alert">
-                                   <i class="icon-info-sign"></i> Notifications have not been sent to students for these groups
-                               </p>
-                              <#-- only released to students-->
-                              <#elseif (groupSet.releasedToStudents && !groupSet.releasedToTutors)>
-                                  <p class="alert">
-                                      <i class="icon-info-sign"></i> Notifications have not been sent to tutors for these groups
-                                  </p>
-                             </#if>
-                        </#if>
-                        </#if>
                     </div>
 
                     <#if moduleItem.canManageGroups>
                     <div class="span2">
                         <div class="btn-toolbar pull-right">
                             <div class="btn-group">
-                                <#--<#if setItem.menu?? && setItem.menu.items?has_content>
-                                    <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-cog"></i> Actions <span class="caret"></span></a>
-                                    <ul class="dropdown-menu pull-right">
-                                        <#list setItem.menu.items as menuItem>
-                                            <li>
-                                                <a href="${menuItem.url}">
-                                                    <i class="icon-${menuItem.icon} icon-fixed-width"></i> ${menuItem.name}
-                                                </a>
-                                            </li>
-                                        </#list>
-                                    </ul>
-                                </#if>-->
 
                                 <@dropdown_menu "Actions" "cog">
                                     <li><a href="<@routes.editset groupSet />"><i class="icon-wrench icon-fixed-width"></i> Edit properties</a></li>

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.{PathVariable, RequestMapping, ModelAttribute}
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.groups.commands.ListGroupStudentsCommand
-
+import uk.ac.warwick.tabula.CurrentUser
 
 
 @Controller
@@ -17,8 +17,15 @@ class ListGroupStudentsController extends GroupsController {
 		new ListGroupStudentsCommand(group)
 
 	@RequestMapping
-	def ajaxList(@ModelAttribute("command") command: ListGroupStudentsCommand): Mav = {
-		Mav("groups/students", "students" -> command.apply()).noLayout()
+	def ajaxList(@ModelAttribute("command") command: ListGroupStudentsCommand, user: CurrentUser): Mav = {
+		val students = command.apply()
+		val userIsMember = students.exists(_.universityId == user.universityId)
+
+		Mav("groups/students",
+			"students" -> students,
+			"userUniId" -> user.universityId,
+			"userIsMember" -> userIsMember
+		).noLayout()
 	}
 
 }
