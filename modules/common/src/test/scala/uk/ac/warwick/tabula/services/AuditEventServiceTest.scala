@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.SessionComponent
 // scalastyle:off magic.number
 class AuditEventServiceTest extends PersistenceTestBase {
 	
-	val service =new AuditEventServiceImpl with SessionComponent{
+	val service =new AuditEventServiceImpl with SessionComponent {
 		def session = sessionFactory.getCurrentSession
 	}
 	service.dialect = new HSQLDialect

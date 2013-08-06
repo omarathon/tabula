@@ -39,7 +39,7 @@ import uk.ac.warwick.tabula.data.SessionComponent
 class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with Logging {
 
 	var indexer:AuditEventIndexService = _
-	val service:AuditEventServiceImpl = new AuditEventServiceImpl with SessionComponent{
+	val service:AuditEventServiceImpl = new AuditEventServiceImpl with SessionComponent {
 		def session = sessionFactory.getCurrentSession
 	}
 
@@ -82,7 +82,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		
 		val command = new NullCommand {
 			override lazy val eventName = "DownloadAllSubmissions"
-		  
+		 
 			override def describe(d: Description) = d
 				.assignment(assignment)
 				.submissions(assignment.submissions)

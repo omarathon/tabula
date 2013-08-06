@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase,  Fixtures}
+import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase, Fixtures}
 import uk.ac.warwick.tabula.services.permissions._
 import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
@@ -19,7 +19,7 @@ class PermissionsServiceTest extends PersistenceTestBase with Mockito {
 
 	val permsDao = new PermissionsDaoImpl
 
-	val service = new PermissionsServiceImpl with PermissionsDaoComponent with PermissionsServiceCaches{
+	val service = new PermissionsServiceImpl with PermissionsDaoComponent with PermissionsServiceCaches {
 		var permissionsDao:PermissionsDao = permsDao
 		val rolesByIdCache:GrantedRoleByIdCache = new GrantedRoleByIdCache(permsDao)
 		val permissionsByIdCache = new GrantedPermissionsByIdCache(permsDao)

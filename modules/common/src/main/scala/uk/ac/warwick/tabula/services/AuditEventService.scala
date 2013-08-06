@@ -37,8 +37,8 @@ trait AuditEventService {
 @Component
 class AutowiringEventServiceImpl extends AuditEventServiceImpl with Daoisms
 
-class AuditEventServiceImpl  extends AuditEventService {
-  this:SessionComponent=>
+class AuditEventServiceImpl extends AuditEventService {
+ this:SessionComponent=>
 
 	var json: ObjectMapper = JsonObjectMapperFactory.instance
 

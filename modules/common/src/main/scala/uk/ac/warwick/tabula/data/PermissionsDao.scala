@@ -188,6 +188,6 @@ trait PermissionsDaoComponent {
 	var permissionsDao:PermissionsDao
 }
 
-trait AutowiringPermissionsDaoComponent extends PermissionsDaoComponent{
+trait AutowiringPermissionsDaoComponent extends PermissionsDaoComponent {
 	var permissionsDao = Wire[PermissionsDao]
 }

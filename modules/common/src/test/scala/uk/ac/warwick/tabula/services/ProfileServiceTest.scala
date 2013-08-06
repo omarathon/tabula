@@ -13,12 +13,12 @@ import uk.ac.warwick.tabula.data.{StudentCourseDetailsDaoImpl, MemberDaoImpl}
 class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 	val relationshipService:RelationshipServiceImpl = new RelationshipServiceImpl
-	val profileService:ProfileServiceImpl =  new ProfileServiceImpl
+	val profileService:ProfileServiceImpl = new ProfileServiceImpl
 
 	@Before def setup: Unit = transactional { tx =>
 		val memberDao = new MemberDaoImpl
-	  memberDao.sessionFactory = sessionFactory
-	  val scd = new StudentCourseDetailsDaoImpl
+	 memberDao.sessionFactory = sessionFactory
+	 val scd = new StudentCourseDetailsDaoImpl
 		scd.sessionFactory = sessionFactory
 		relationshipService.memberDao = memberDao
 		profileService.memberDao = memberDao

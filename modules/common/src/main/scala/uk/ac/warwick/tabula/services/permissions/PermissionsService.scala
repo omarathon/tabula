@@ -219,7 +219,7 @@ class GrantedRoleByIdCache(dao: PermissionsDao) extends RequestLevelCaching[Stri
  * and map to a list of IDs of the granted roles / permissions.
  */ 
 
-trait GrantedRolesForUserCache { self:  PermissionsDaoComponent =>
+trait GrantedRolesForUserCache { self: PermissionsDaoComponent =>
 	final val GrantedRolesForUserCacheName = "GrantedRolesForUser"
 	final val GrantedRolesForUserCacheMaxAgeSecs = 60 * 60 // 1 hour
 	final val GrantedRolesForUserCacheMaxSize = 1000
@@ -310,7 +310,7 @@ trait PermissionsServiceCaches {
 	val rolesByIdCache:GrantedRoleByIdCache
 	val permissionsByIdCache:GrantedPermissionsByIdCache
 }
-trait PermissionsServiceCachesImpl extends PermissionsServiceCaches{
+trait PermissionsServiceCachesImpl extends PermissionsServiceCaches {
 	this:PermissionsDaoComponent=>
 	val rolesByIdCache:GrantedRoleByIdCache = new GrantedRoleByIdCache(permissionsDao)
 	val permissionsByIdCache = new GrantedPermissionsByIdCache(permissionsDao)
