@@ -74,7 +74,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	}
 }
 
-trait SmallGroupMembershipHelpers{
+trait SmallGroupMembershipHelpers {
 	val eventTutorsHelper:UserGroupMembershipHelper[SmallGroupEvent]
   //TODO can this be removed? findSmallGroupsByTutor could just call findSmallGroupEventsByTutor and then group by group
 	val groupTutorsHelper:UserGroupMembershipHelper[SmallGroup]
