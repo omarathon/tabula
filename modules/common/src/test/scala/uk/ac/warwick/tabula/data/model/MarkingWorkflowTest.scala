@@ -76,10 +76,10 @@ class MarkingWorkflowTest extends TestBase {
 		workflow.secondMarkers.addUser("cusfal")
 		
 		assignment.markerMap.putAll(Map(
-			"cuscav" -> UserGroup.emptyUsercodes,
-			"cusebr" -> UserGroup.emptyUsercodes,
-			"curef" -> UserGroup.emptyUsercodes,
-			"cusfal" -> UserGroup.emptyUsercodes
+			"cuscav" -> UserGroup.ofUsercodes,
+			"cusebr" -> UserGroup.ofUsercodes,
+			"curef" -> UserGroup.ofUsercodes,
+			"cusfal" -> UserGroup.ofUsercodes
 		).asJava)
 		
 		assignment.markerMap.get("cuscav").addUser("student1")

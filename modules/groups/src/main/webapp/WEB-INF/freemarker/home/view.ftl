@@ -12,6 +12,8 @@
 	<h1 class="with-settings">Hello</h1>
 </#if>	
 
+<#include "_student.ftl" />
+
 <#include "_admin.ftl" />
 
 </#escape>

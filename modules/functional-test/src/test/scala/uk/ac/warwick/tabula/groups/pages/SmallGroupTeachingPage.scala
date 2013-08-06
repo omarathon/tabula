@@ -9,24 +9,13 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.matchers.ShouldMatchers
 
 
-class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:WebDriver) extends Page with WebBrowser with	BreadcrumbsMatcher with Eventually with ShouldMatchers   {
+class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:WebDriver) extends Page with WebBrowser with	BreadcrumbsMatcher with Eventually with ShouldMatchers  with ModuleAndGroupSetList {
 
 	val url = FunctionalTestProperties.SiteRoot + "/groups/admin/department/" + departmentCode
-
-	private def getModuleInfo(moduleCode: String):WebElement ={
-		findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == moduleCode.toUpperCase).next().underlying
-	}
 
 	def isCurrentPage(): Boolean =  {
 		currentUrl should include ("/groups/admin/department/" + departmentCode)
 		find(cssSelector("h1")).get.text == ("Tabula » Small Group Teaching")
-	}
-
-	def getGroupsetInfo(moduleCode: String, groupsetName: String) = {
-		new GroupSetInfoSummarySection(
-			getModuleInfo(moduleCode).  findElements(By.className("item-info")).asScala.filter(_.findElement(By.className("name")).getText.trim == groupsetName).head,
-		  moduleCode
-		)
 	}
 
 	def getBatchOpenButton() = {
@@ -71,13 +60,37 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 		underlying.findElement(By.partialLinkText("Actions")).click()
 		underlying.findElement(By.partialLinkText("Open"))
 	}
+
+	def getSignupButton() = {
+		underlying.findElement(By.className("sign-up-button"))
+	}
+
+
+	def findLeaveButtonFor(groupName:String) = {
+		underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).headOption.map(
+			groupNameHeading=>groupNameHeading.findElement(By.xpath("../form/input[@type='submit']"))
+		)
+	}
+
+	def showsGroup(groupName:String) = {
+		underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).headOption.isDefined
+	}
+
+	def findSelectGroupCheckboxFor(groupName:String ) = {
+		val groupNameHeading = underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).head
+    // ugh. Might be worth investigating ways of using JQuery selector/traversals in selenium instead of this horror:
+		groupNameHeading.findElement(By.xpath("../../div[@class='span1']/input"))
+	}
+
+
+
 }
 
 class BatchOpenPage(val departmentCode: String)(implicit webDriver: WebDriver) extends Page with WebBrowser with Eventually with ShouldMatchers {
 	val url= FunctionalTestProperties.SiteRoot + s"/groups/admin/department/${departmentCode}/groups/open"
 
 	def isCurrentPage(): Boolean =  {
-		currentUrl should include (s"/groups/admin/department/${departmentCode}/groups/open")
+		currentUrl should include (s"/groups/admin/department/${departmentCode}/groups/selfsignup/open")
 		find(cssSelector("#main-content h1")).get.text.startsWith("Open groups in ")
 	}
 
@@ -88,5 +101,27 @@ class BatchOpenPage(val departmentCode: String)(implicit webDriver: WebDriver) e
 	def submit(){
 		findAll(tagName("input")).filter(_.underlying.getAttribute("type") == "submit").next.underlying.click()
 	}
+}
+
+trait ModuleAndGroupSetList {
+	this:WebBrowser =>
+	private def getModuleInfo(moduleCode: String)(implicit webdriver:WebDriver ):Option[WebElement] ={
+		val moduleInfoElements = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == moduleCode.toUpperCase)
+		if (moduleInfoElements.isEmpty){
+			None
+		}	else{
+			Some(moduleInfoElements.next().underlying)
+		}
+
+	}
+
+	def getGroupsetInfo(moduleCode: String, groupsetName: String)(implicit webdriver:WebDriver ):Option[GroupSetInfoSummarySection] = {
+		for( module  <-  getModuleInfo(moduleCode);
+		     groupSet <- module.findElements(By.className("item-info")).asScala.find(_.findElement(By.className("name")).getText.trim == groupsetName))
+			yield new GroupSetInfoSummarySection(groupSet,moduleCode)
+	}
+
+
+
 }
 

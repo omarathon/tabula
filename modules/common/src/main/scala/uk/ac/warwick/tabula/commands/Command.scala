@@ -29,13 +29,16 @@ import uk.ac.warwick.userlookup.User
  * make things more maintainable. assignment() will automatically
  * record its module and department info.
  */
-trait Describable[A] extends KnowsEventName {
+trait BaseDescribable[A] {
 	// describe the thing that's happening.
 	def describe(d: Description)
 	// optional extra description after the thing's happened.
 	def describeResult(d: Description, result: A) { describeResult(d) }
 	def describeResult(d: Description) {}
 }
+
+trait Describable[A] extends BaseDescribable[A] with KnowsEventName
+
 // Broken out from describable so that we can write classes which just implement describe
 trait KnowsEventName {
 	val eventName: String
@@ -101,7 +104,15 @@ with JavaImports with EventHandling with NotificationHandling with PermissionsCh
 	*/
 	protected def applyInternal(): A
 
-	lazy val eventName = getClass.getSimpleName.replaceAll("Command$", "")
+	lazy val eventName = {
+	  val name = getClass.getName.replaceFirst(".*\\.","").replaceFirst("Command.*","")
+		if (name.contains("anon$")) {
+			// This can currently happen quite easily with caked-up commands. This code should
+			// try to work around that if possible, I'm just making it explode now so it's more obvious
+			throw new IllegalStateException(s"Command name calculated incorrectly as $name")
+		}
+		name
+	}
 
 	private def maintenanceCheck(callee: Describable[_]) = {
 		callee.isInstanceOf[ReadOnly] || !maintenanceMode.enabled

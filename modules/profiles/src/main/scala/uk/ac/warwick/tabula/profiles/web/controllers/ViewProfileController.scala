@@ -36,10 +36,9 @@ class ViewProfileController extends ProfilesController {
 	def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 
-	@ModelAttribute("viewTutorMeetingRecordCommand")
-	def viewTutorMeetingRecordCommand(@PathVariable("member") member: Member) = {
+	def getViewMeetingRecordCommand(member: Member, relationshipType: RelationshipType) = {
 		member.mostSignificantCourseDetails match {
-			case Some(scd) => restricted(ViewMeetingRecordCommand(scd, user, RelationshipType.PersonalTutor))
+			case Some(scd) => restricted(ViewMeetingRecordCommand(scd, user, relationshipType))
 			case _ => {
 				logger.warn("Member " + member.universityId + " has no most significant course details")
 				None
@@ -47,16 +46,11 @@ class ViewProfileController extends ProfilesController {
 		}
 	}
 
+	@ModelAttribute("viewTutorMeetingRecordCommand")
+	def viewTutorMeetingRecordCommand(@PathVariable("member") member: Member) = getViewMeetingRecordCommand(member, RelationshipType.PersonalTutor)
+
 	@ModelAttribute("viewSupervisorMeetingRecordCommand")
-	def viewSupervisorMeetingRecordCommand(@PathVariable("member") member: Member) = {
-		member.mostSignificantCourseDetails match {
-			case Some(scd) => restricted(ViewMeetingRecordCommand(scd, user, RelationshipType.Supervisor))
-			case _ => {
-				logger.warn("Member " + member.universityId + " has no most significant course details")
-				None
-			}
-		}
-	}
+	def viewSupervisorMeetingRecordCommand(@PathVariable("member") member: Member) = getViewMeetingRecordCommand(member, RelationshipType.Supervisor)
 
 	@ModelAttribute("viewProfileCommand")
 	def viewProfileCommand(@PathVariable("member") member: Member) = member match {
@@ -83,8 +77,9 @@ class ViewProfileController extends ProfilesController {
 			case None => Seq()
 			case Some(cmd) => cmd.apply()
 		}
+		val meetings = tutorMeetings ++ supervisorMeetings
 
-		val openMeeting = tutorMeetings.find(m => m.id == openMeetingId).getOrElse(null)
+		val openMeeting = meetings.find(m => m.id == openMeetingId).getOrElse(null)
 
 		val tutor = userLookup.getUserByWarwickUniId(tutorId)
 

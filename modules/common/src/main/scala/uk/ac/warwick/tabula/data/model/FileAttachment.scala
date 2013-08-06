@@ -20,7 +20,7 @@ class FileAttachment extends GeneratedId {
 	import FileAttachment._
 
 	@transient var fileDao = Wire.auto[FileDao]
-	
+
 	@Column(name="file_hash")
 	var hash: String = _
 
@@ -122,9 +122,9 @@ class FileAttachment extends GeneratedId {
 		}
 		case _ => false
 	}
-	
+
 	@transient lazy val mimeType: String = file match {
-		case null => null
+		case null => "application/octet-stream"
 		case f => detectMimeType(f)
 	}
 }

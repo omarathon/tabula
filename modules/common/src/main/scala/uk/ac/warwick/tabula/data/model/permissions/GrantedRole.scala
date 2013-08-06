@@ -31,7 +31,7 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 
 	@OneToOne(cascade=Array(CascadeType.ALL))
 	@JoinColumn(name="usergroup_id")
-	var users: UserGroup = new UserGroup
+	var users: UserGroup = UserGroup.ofUsercodes
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "custom_role_id")
@@ -67,7 +67,7 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	}
 
 	def ensureUsers = {
-		if (users == null) users = new UserGroup
+		if (users == null) users = UserGroup.ofUsercodes
 		users
 	}
 

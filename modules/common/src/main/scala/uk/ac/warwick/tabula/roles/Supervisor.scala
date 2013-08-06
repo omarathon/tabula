@@ -18,10 +18,16 @@ object SupervisorRoleDefinition extends BuiltInRoleDefinition {
 		Profiles.Read.MobileNumber,
 		Profiles.Read.Usercode,
 		Profiles.Read.SmallGroups,
-    Profiles.Supervisor.MeetingRecord.Create,
-    Profiles.Supervisor.MeetingRecord.Read,
-    Profiles.Supervisor.MeetingRecord.ReadDetails,
-    Profiles.Supervisor.MeetingRecord.Update,
-    Profiles.Supervisor.MeetingRecord.Delete
+	
+		Profiles.Read.StudentCourseDetails.Core,
+		Profiles.Read.StudentCourseDetails.Status,
+		Profiles.Supervisor.Read,
+		Profiles.PersonalTutor.Read,
+
+		Profiles.Supervisor.MeetingRecord.Create,
+		Profiles.Supervisor.MeetingRecord.Read,
+		Profiles.Supervisor.MeetingRecord.ReadDetails,
+		Profiles.Supervisor.MeetingRecord.Update,
+		Profiles.Supervisor.MeetingRecord.Delete
 	)
 }

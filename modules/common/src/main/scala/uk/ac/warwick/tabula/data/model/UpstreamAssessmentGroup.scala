@@ -31,7 +31,7 @@ class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
 
 	@OneToOne(cascade = Array(CascadeType.ALL))
 	@JoinColumn(name = "membersgroup_id")
-	var members: UserGroup = UserGroup.emptyUniversityIds
+	var members: UserGroup = UserGroup.ofUniversityIds
 
 	override def preSave(newRecord: Boolean) {
 		if (!members.universityIds) throw new IllegalStateException

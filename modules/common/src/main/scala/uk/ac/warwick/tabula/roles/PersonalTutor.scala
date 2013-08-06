@@ -6,9 +6,9 @@ import uk.ac.warwick.tabula.data._
 case class PersonalTutor(student: model.Member) extends BuiltInRole(PersonalTutorRoleDefinition, student)
 
 object PersonalTutorRoleDefinition extends BuiltInRoleDefinition {
-	
+
 	override def description = "Personal Tutor"
-		
+
 	GrantsScopedPermission(
 		Profiles.Read.Core,
 		Profiles.Read.NextOfKin,
@@ -17,6 +17,12 @@ object PersonalTutorRoleDefinition extends BuiltInRoleDefinition {
 		Profiles.Read.TelephoneNumber,
 		Profiles.Read.MobileNumber,
 		Profiles.Read.Usercode,
+
+		Profiles.Read.StudentCourseDetails.Core,
+		Profiles.Read.StudentCourseDetails.Status,
+		Profiles.Supervisor.Read,
+		Profiles.PersonalTutor.Read,
+
 		Profiles.PersonalTutor.MeetingRecord.Create,
 		Profiles.PersonalTutor.MeetingRecord.Read,
 		Profiles.PersonalTutor.MeetingRecord.ReadDetails,

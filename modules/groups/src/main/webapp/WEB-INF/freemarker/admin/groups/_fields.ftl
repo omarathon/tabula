@@ -110,9 +110,10 @@
 			<#assign disable_prop="false" />
 		</#if>
 		
-		<@form.labelled_row "allowSelfGroupSwitching" "Allow students to switch groups" "canBeDisabled" "" "" disable_label >
+		<@form.labelled_row "allowSelfGroupSwitching" "" "canBeDisabled" "" "" disable_label >
 			<@form.label checkbox=true >
 				<@f.checkbox path="allowSelfGroupSwitching" value="true" disabled=disable_prop />
+				Allow students to switch groups
 				<a class="use-popover" data-html="true"
 					data-content="When self sign up is enabled students will be able to switch groups.">
 						<i class="icon-question-sign"></i>
@@ -180,7 +181,7 @@
 			<#if set??>
 				<#assign disabled = !(set.defaultMaxGroupSizeEnabled!true)>
 			<#else>
-				<#assign disabled = "false" >
+				<#assign disabled = "true" >
 			</#if>
 
 			<@f.input path="defaultMaxGroupSize" type="number" min="0" max="100" cssClass="input-small" disabled="${disabled?string}" />
@@ -216,21 +217,32 @@
 
 	jQuery(function($) {
 
-		$("input:radio[name='allocationMethod']").tabulaRadioActive();
+		var setMaxSizeOptions = function() {
+			if ($("#defaultMaxGroupSizeEnabled:checked").val()){
+				$('#defaultMaxGroupSize').removeAttr('disabled');
+				$(".groupSizeUnlimited").hide();
+				$(".groupSizeLimited").show();
+			} else {
+				$('#defaultMaxGroupSize').attr('disabled', 'disabled');
+				$(".groupSizeUnlimited").show();
+				$(".groupSizeLimited").hide();
+			}
+		}
 
-		$('#defaultMaxGroupSizeEnabled').click(function() {
-			if ($('#defaultMaxGroupSize').prop('disabled')) $('#defaultMaxGroupSize').removeAttr('disabled');
-			else $('#defaultMaxGroupSize').attr('disabled', 'disabled');
-		});
+		setMaxSizeOptions();
+
+		$('#defaultMaxGroupSizeEnabled').change(setMaxSizeOptions);
+
+		$("input:radio[name='allocationMethod']").tabulaRadioActive();
 
 		<#-- controller detects action=refresh and does a bind without submit -->
 		$('.modal.refresh-form').on('hide', function(e) {
 			// Ignore events that are something ELSE hiding and being propagated up!
 			if (!$(e.target).hasClass('modal')) return;
-		
+
 			// Which section are we targeting?
 			var section = $(this).closest('fieldset').attr('id') || '';
-			
+
 			if (section) {
 				var currentAction = $('#action-input').closest('form').attr('action');
 				$('#action-input').closest('form').attr('action', currentAction + '#' + section);

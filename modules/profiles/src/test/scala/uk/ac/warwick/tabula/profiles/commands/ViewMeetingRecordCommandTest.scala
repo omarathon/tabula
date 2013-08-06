@@ -90,4 +90,12 @@ class ViewMeetingRecordCommandTest extends TestBase with Mockito{
 		there was one(permsChecker).PermissionCheck(Permissions.Profiles.Supervisor.MeetingRecord.Read,perms.studentCourseDetails)
 	}}
 
+	@Test
+	def composedClassHasMeaningfulEventName(){
+		withUser("test"){
+			val command = ViewMeetingRecordCommand(null,currentUser, RelationshipType.PersonalTutor)
+			command.eventName should be ("ViewMeetingRecord")
+		}
+	}
+
 }

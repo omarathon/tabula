@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.profiles.web.controllers.tutor
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.RelationshipType._
 import uk.ac.warwick.tabula.profiles.commands.CreateMeetingRecordCommand
 import scala.Some
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
@@ -23,18 +22,12 @@ class CreateMeetingRecordController extends ProfilesController with MeetingRecor
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
 				// Go through the PersonalTutor relationships for this SPR code and find one where the current user is the agent.
-				// If there isn't one but there's only one relationship, pick it.  Otherwise don't try and guess.
+				// If there isn't one but there's only one relationship, pick it. Otherwise default to the first.
 				val defaultRelationship =
-					relationships.find(rel => (rel.agentMember map {
-						_.universityId
-					}) == Some(user.universityId))
-						.getOrElse(
-						if (relationships.size == 1) relationships.head
-						else throw new IllegalStateException(
-							"Tabula doesn't yet know how to distinguish between multiple tutors to enable third parties to create a meeting record")
-					)
+					relationships.find(rel => (rel.agentMember.map(_.universityId)) == Some(user.universityId))
+						.getOrElse(relationships.head)
 
-				new CreateMeetingRecordCommand(currentMember, defaultRelationship)
+				new CreateMeetingRecordCommand(currentMember, defaultRelationship, relationships.size > 1)
 		}
 	}
 }

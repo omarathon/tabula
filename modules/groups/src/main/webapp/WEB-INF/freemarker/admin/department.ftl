@@ -68,6 +68,8 @@ If you are doing any work on this, it would be good to do the above first.
 				<#if features.smallGroupTeachingStudentSignUp>
                 <li ${data.hasOpenableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to open' ")} >
                     <a href="<@routes.batchopen department />"><i class="icon-unlock-alt icon-fixed-width"></i> Open</a></li>
+                <li ${data.hasCloseableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to close' ")} >
+                    <a href="<@routes.batchclose department />"><i class="icon-lock icon-fixed-width"></i> Close</a></li>
                  </#if>
                 <li ${data.hasUnreleasedGroupsets?string(''," class='disabled use-tooltip' title='All modules already notified' ")} >
                     <a href="<@routes.batchnotify department />"><i class="icon-envelope-alt icon-fixed-width"></i> Notify</a></li>

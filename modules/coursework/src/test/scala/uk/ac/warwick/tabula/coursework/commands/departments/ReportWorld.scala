@@ -178,7 +178,7 @@ trait ReportWorld extends TestBase with Mockito {
 	}
 
 	def makeUserGroup(users: Seq[String]): UserGroup = {
-		val ug = new UserGroup
+		val ug = UserGroup.ofUsercodes
 		ug.includeUsers = users
 		ug
 	}

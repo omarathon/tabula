@@ -86,8 +86,8 @@ import scala.Some
 
 		copySharedTo(assignment: Assignment)
 
-		if (assignment.members == null) assignment.members = new UserGroup
-		assignment.members copyFrom members
+		if (assignment.members == null) assignment.members = UserGroup.ofUsercodes
+		assignment.members.copyFrom(members)
 	}
 
 	def prefillFromRecentAssignment() {
