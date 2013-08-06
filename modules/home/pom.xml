@@ -255,6 +255,7 @@
 								<include>scripts.js</include>
 								<include>jquery-copyable.js</include>
 								<include>jquery-biglist.js</include>
+								<include>jquery-confirmmodal.js</include>
 								<include>jquery-details.js</include>
 								<include>jquery-tableform.js</include>
 								<include>jquery-draganddrop.js</include>
