@@ -21,9 +21,11 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 
 	@Test(expected=classOf[ItemNotFoundException])
 	def throwsNonStudent() {
-		controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
-		val staffMember = new StaffMember()
-		val cmd = controller.viewProfileCommand(staffMember)
+		withUser("test") {
+			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
+			val staffMember = new StaffMember()
+			val cmd = controller.viewProfileCommand(staffMember)
+		}
 	}
 
 	@Test
@@ -53,7 +55,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 
 	@Test def exposesMeetingListsInModel() {
 		withUser("test") {
-			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
+
 			val member = new StudentMember
 			member.universityId = "1234"
 			val viewProfileCommand = mock[Appliable[StudentMember]]
@@ -71,6 +73,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 			controller.userLookup = mock[UserLookupService]
 			controller.profileService = mock[ProfileService]
 			controller.profileService.getMemberByUserId("test", true) returns Some(member)
+			controller.smallGroupService.findSmallGroupsByStudent(member.asSsoUser) returns (Nil)
 
 			val mav = controller.viewProfile(viewProfileCommand, Some(tutorCommand), Some(supervisorCommand),"test","test")
 
