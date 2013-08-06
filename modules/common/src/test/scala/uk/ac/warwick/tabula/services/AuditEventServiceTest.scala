@@ -19,16 +19,18 @@ class AuditEventServiceTest extends PersistenceTestBase {
 
 
 	@Test def listEvents {
-		transactional{ts=>
-		val now = new DateTime()
-		for (i <- Range(1,30)) {
-			val event = new Event("1138-9962-1813-4938", "Bite"+i, "cusebr", "cusebr", Map(), now.plusSeconds(i))
-			service.save(event, "pre")
+		transactional {
+			ts =>
+				val now = new DateTime()
+				for (i <- Range(1, 30)) {
+					val event = new Event("1138-9962-1813-4938", "Bite" + i, "cusebr", "cusebr", Map(), now.plusSeconds(i))
+					service.save(event, "pre")
+				}
+
+				val recent = service.listRecent(5, 10).toList
+				recent.size should be(10)
+				recent(0).eventType should be("Bite24")
+				recent(2).eventType should be("Bite22")
 		}
-		
-		val recent = service.listRecent(5,10).toList
-		recent.size should be (10)
-		recent(0).eventType should be ("Bite24")
-		recent(2).eventType should be ("Bite22")
-	}}
+	}
 }

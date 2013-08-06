@@ -52,7 +52,7 @@ trait PermissionsService {
 }
 
 @Service(value = "permissionsService")
-class AutowiringPermisionsServiceImpl extends PermissionsServiceImpl with AutowiringPermissionsDaoComponent with PermissionsServiceCachesImpl
+class AutowiringPermissionsServiceImpl extends PermissionsServiceImpl with AutowiringPermissionsDaoComponent with PermissionsServiceCachesImpl
 
 
 class PermissionsServiceImpl extends PermissionsService with Logging
