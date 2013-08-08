@@ -33,7 +33,7 @@
         </thead>
         <tbody >
             <#list modules as module>
-            <tr ${module.hasUnreleasedGroupSets?string("","class='use-tooltip' title='All Small Group Sets for this module have already been released'")} >
+            <tr ${module.hasUnreleasedGroupSets?string("","class='use-tooltip' title='Notifications about groups for this module have already been sent'")} >
                 <td>
                    <@f.checkbox
                    class=module.hasUnreleasedGroupSets?string('collection-checkbox','')
