@@ -136,6 +136,13 @@
                                 </#if>
 
 
+								<style>
+									#container .weekSelector {
+									width: 7em;
+									}
+								</style>
+
+
 								<ul class="unstyled">
 									<#list group.events as event>
 										<li>
@@ -143,6 +150,15 @@
 										<@fmt.weekRanges event />,
 										${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
 										${event.location!"[no location]"}
+
+										<form method="get">
+											<span class="pull-right">
+												<@fmt.weekRangeSelect event />
+												<input type="hidden" class="eventId" value="${event.id}" />
+												<input type="hidden" name="returnTo" />
+												<button class="btn btn-small btn-primary register-button">Record</button>
+											</span>
+										</form>
 										</li>
 									</#list>
 								</ul>
@@ -161,6 +177,8 @@
 								<i class="icon-info-sign"></i> <@fmt.p unallocatedSize "student has" "students have" /> not been allocated to a group
 							</div>
 						</#if>
+
+
 
                         <#if groupSet.hasAllocated >
                              <#-- not released at all -->
@@ -182,6 +200,8 @@
                         </#if>
                         </#if>
                     </div>
+
+
 
                     <#if moduleItem.canManageGroups>
                     <div class="span2">
@@ -261,4 +281,18 @@
 <div id="students-list-modal" class="modal fade">
 </div>
 
+
+	<script>
+		jQuery(".register-button").on("click", function(event){
+			event.preventDefault();
+			var form = jQuery(this).closest("form");
+			var eventId =  jQuery(form).find(".eventId").val();
+			var weekSelector = jQuery(form).find(".weekSelector").val();
+			jQuery(form).find('input[name="returnTo"]').attr("value", window.location.pathname);
+			form.attr("action", "/groups/event/" + eventId + "/register/" + weekSelector);
+			form.submit();
+		});
+	</script>
+
 </#macro>
+

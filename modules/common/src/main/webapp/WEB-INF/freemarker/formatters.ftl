@@ -43,6 +43,16 @@
 	--></#noescape><#--
 --></#macro>
 
+<#macro weekRangeSelect event><#--
+	--><#noescape><#--
+		--><select class="weekSelector"><#--
+			--><#list weekRangeSelectFormatter(event) as week><#--
+				--><option value="${week.weekToDisplay}">week ${week.weekToStore}</option><#--
+			--></#list><#--
+		--></select><#--
+	--></#noescape><#--
+--></#macro>
+
 <#macro p number singular plural="${singular}s" one="1" zero="0" shownumber=true><#--
 --><#if shownumber><#if number=1>${one}<#elseif number=0>${zero}<#else>${number}</#if><#--
 --> </#if><#if number=1>${singular}<#else>${plural}</#if></#macro>
