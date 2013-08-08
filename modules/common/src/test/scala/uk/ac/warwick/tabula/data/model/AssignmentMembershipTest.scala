@@ -32,7 +32,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 
   var assignmentMembershipService: AssignmentMembershipService = _
 	var userLookup: UserLookupService = _
-	val nobody = new UserGroup
+	val nobody = UserGroup.ofUsercodes
 
 	@Before def before {
 		userLookup = mock[UserLookupService]
@@ -77,7 +77,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 	
 	@Test def includeAndExclude {
 		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
-		val others = new UserGroup
+		val others = UserGroup.ofUsercodes
 		others.includeUsers.add("aaaaa")
 		others.excludeUsers.add("aaaaf")
 		val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(others)).items
@@ -113,7 +113,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 	 */
 	@Test def redundancy {
 		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
-        val others = new UserGroup
+        val others = UserGroup.ofUsercodes
         others.includeUsers.add("aaaaf")
         others.excludeUsers.add("aaaah")
         val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(others)).items

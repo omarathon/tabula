@@ -34,7 +34,7 @@ trait ExtensionFixture extends Mockito{
 
 	val userLookup = new MockUserLookup
 	userLookup.users = Map("admin" -> admin, "admin2" -> admin2, "admin3" -> admin3)
-	val extensionManagers = new UserGroup
+	val extensionManagers = UserGroup.ofUsercodes
 	extensionManagers.userLookup = userLookup
 	extensionManagers.includeUsers.add("admin")
 	extensionManagers.includeUsers.add("admin2")

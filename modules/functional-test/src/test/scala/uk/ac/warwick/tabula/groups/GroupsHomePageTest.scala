@@ -46,13 +46,13 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 
 		And("There is a a groupset with an allocation method of StudentSignUp")
 			createModule("xxx",TEST_MODULE_CODE,"Batch Opening Groupsets test")
-		  createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp")
+		  createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", openForSignups = false)
 
 		And("The administrator is logged in and viewing the groups home page")
 		  signIn as(P.Admin1)  to groupsetSummaryPage.url
 
-		  val setInfo = groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME)
-		  setInfo should not be (null)
+		  groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should be ('defined)
+		  val setInfo = groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
 		Then("The Bulk Open Groups menu button is enabled")
 		  groupsetSummaryPage.getBatchOpenButton() should be ('enabled)
@@ -85,7 +85,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 		  go to updatedSummary.url
 
 		Then("The option to open the groupset is absent")
-			updatedSummary.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should not be ('showingOpenButton)
+			updatedSummary.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get should not be ('showingOpenButton)
 	}
 
 }

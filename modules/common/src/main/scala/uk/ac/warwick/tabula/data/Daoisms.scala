@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data
 
 import org.hibernate.SessionFactory
 import javax.sql.DataSource
-import org.hibernate.Session
+import org.hibernate.classic.Session
 import uk.ac.warwick.tabula.data.model.CanBeDeleted
 import uk.ac.warwick.spring.Wire
 import language.implicitConversions

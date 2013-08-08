@@ -50,7 +50,7 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 	 * it is difficult to bind additions and removals directly to a collection
 	 * with Spring binding.
 	 */
-	var students: UserGroup = new UserGroup
+	var students: UserGroup = UserGroup.ofUniversityIds
 
 	// items added here are added to members.includeUsers.
 	var includeUsers: JList[String] = JArrayList()
@@ -111,7 +111,7 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
     }
 
 		
-		if (group.students == null) group.students = new UserGroup
+		if (group.students == null) group.students = UserGroup.ofUniversityIds
 		group.students.copyFrom(students)
 	}
 	

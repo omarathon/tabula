@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase, Fixtures}
+import uk.ac.warwick.tabula.services.permissions._
 import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedRole
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
@@ -12,11 +10,28 @@ import uk.ac.warwick.tabula.data.model.permissions.RoleOverride
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedPermission
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
+import uk.ac.warwick.tabula.data.{PermissionsDao, PermissionsDaoComponent, PermissionsDaoImpl}
+import scala.Some
+import uk.ac.warwick.util.queue.Queue
+import org.junit.Before
 
-class PermissionsServiceTest extends AppContextTestBase {
-	
-	@Autowired var service: PermissionsService = _
-	
+class PermissionsServiceTest extends PersistenceTestBase with Mockito {
+
+	val permsDao = new PermissionsDaoImpl
+
+	val service = new PermissionsServiceImpl with PermissionsDaoComponent with PermissionsServiceCaches {
+		var permissionsDao:PermissionsDao = permsDao
+		val rolesByIdCache:GrantedRoleByIdCache = new GrantedRoleByIdCache(permsDao)
+		val permissionsByIdCache = new GrantedPermissionsByIdCache(permsDao)
+	}
+	service.queue = mock[Queue]
+
+	@Before
+	def setup(){
+		permsDao.sessionFactory = sessionFactory
+	}
+
+
 	@Test def crud = transactional { t =>
 		val dept1 = Fixtures.department("dp1")
 		val dept2 = Fixtures.department("dp2")
@@ -40,7 +55,7 @@ class PermissionsServiceTest extends AppContextTestBase {
 		ro.overrideType = RoleOverride.Deny
 		
 		crd.overrides.add(ro)
-		
+
 		service.saveOrUpdate(crd)
 		
 		val gr2 = new DepartmentGrantedRole(dept1, crd)
@@ -54,13 +69,13 @@ class PermissionsServiceTest extends AppContextTestBase {
 		service.saveOrUpdate(gp)
 		
 		session.flush()
-		
+
 		service.getGrantedRole(dept1, DepartmentalAdministratorRoleDefinition) should be (Some(gr1))
 		service.getGrantedRole(dept1, crd) should be (Some(gr2))
 		service.getGrantedRole(dept1, ModuleManagerRoleDefinition) should be (None)
 		service.getGrantedRole(dept2, DepartmentalAdministratorRoleDefinition) should be (None)
 		service.getGrantedRole(dept2, crd) should be (None)
-		
+
 		service.getGrantedPermission(dept1, Permissions.Module.Create, GrantedPermission.Allow) should be (Some(gp))
 		service.getGrantedPermission(dept1, Permissions.Module.Create, GrantedPermission.Deny) should be (None)
 		service.getGrantedPermission(dept1, Permissions.Module.ManageAssignments, GrantedPermission.Allow) should be (None)

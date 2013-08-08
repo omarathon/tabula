@@ -29,7 +29,7 @@ class SharedAssignmentPropertiesForm extends SharedAssignmentProperties {
  * Contains all the fields that could be collectively assigned to a group of assignments, so that
  * we can set options for a group of assignments all in one go.
  */
-trait SharedAssignmentProperties {
+trait SharedAssignmentProperties extends FindAssignmentFields {
 
 
 	var openEnded: JBoolean = false
@@ -169,6 +169,9 @@ trait SharedAssignmentProperties {
 			}
 		}
 	}
+}
+
+trait FindAssignmentFields {
 
 	protected def findFileField(assignment: Assignment) =
 		assignment.findFieldOfType[FileField](Assignment.defaultUploadName)
@@ -188,4 +191,5 @@ trait SharedAssignmentProperties {
 			newField
 		})
 	}
+
 }

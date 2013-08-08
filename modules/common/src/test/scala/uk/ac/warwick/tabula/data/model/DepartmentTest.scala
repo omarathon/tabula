@@ -47,8 +47,8 @@ class DepartmentTest extends TestBase with Mockito {
 		val department = new Department
 		department.permissionsService = permissionsService
 		
-		val ownersGroup = UserGroup.emptyUsercodes
-		val extmanGroup = UserGroup.emptyUsercodes
+		val ownersGroup = UserGroup.ofUsercodes
+		val extmanGroup = UserGroup.ofUsercodes
 		
 		permissionsService.ensureUserGroupFor(department, DepartmentalAdministratorRoleDefinition) returns (ownersGroup)
 		permissionsService.ensureUserGroupFor(department, ExtensionManagerRoleDefinition) returns (extmanGroup)

@@ -39,7 +39,18 @@ object GroupsViewModel {
 
 	case class ViewSet(
 		set: SmallGroupSet,
-		groups: Seq[SmallGroup]
-	)
+		groups: Seq[SmallGroup],
+	  viewerRole:ViewerRole
+	){
+		def viewerIsStudent = (viewerRole == StudentAssignedToGroup )|| (viewerRole == StudentNotAssignedToGroup)
+		def viewerMustSignUp = (viewerRole == StudentNotAssignedToGroup) && isStudentSignUp && set.openForSignups
+		def canViewMembers = set.studentsCanSeeOtherMembers
+		def isStudentSignUp = set.allocationMethod == StudentSignUp
+	}
+	sealed trait ViewerRole
+	case object StudentAssignedToGroup extends ViewerRole
+	case object StudentNotAssignedToGroup extends ViewerRole
+	case object Tutor extends ViewerRole
+
 
 }

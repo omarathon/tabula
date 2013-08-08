@@ -27,6 +27,9 @@ object PersonalTutorRoleDefinition extends BuiltInRoleDefinition {
 		Profiles.PersonalTutor.MeetingRecord.Read,
 		Profiles.PersonalTutor.MeetingRecord.ReadDetails,
 		Profiles.PersonalTutor.MeetingRecord.Update,
-		Profiles.PersonalTutor.MeetingRecord.Delete
+		Profiles.PersonalTutor.MeetingRecord.Delete,
+
+		SmallGroups.Read,
+		Profiles.Read.SmallGroups
 	)
 }

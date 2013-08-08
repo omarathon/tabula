@@ -14,8 +14,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
 @Component
 class SmallGroupTutorRoleProvider extends RoleProvider {
 
-	var smallGroupService = Wire[SmallGroupService]
-	
+
 	override def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = scope match {
 		case event: SmallGroupEvent => getRoles(user, Seq(event))
 		case group: SmallGroup => getRoles(user, group.events.asScala)
@@ -29,6 +28,6 @@ class SmallGroupTutorRoleProvider extends RoleProvider {
 		  .distinct
 		  .map { SmallGroupTutor(_) }
 	
-	def rolesProvided = Set(classOf[Marker])
+	def rolesProvided = Set(classOf[SmallGroupTutor])
 	
 }

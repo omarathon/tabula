@@ -26,6 +26,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserLookupService
 import scala.reflect._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.JsonObjectMapperFactory
 
 /**
  * A FormField defines a field to be displayed on an Assignment
@@ -46,7 +47,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 @DiscriminatorColumn(name = "fieldtype")
 abstract class FormField extends GeneratedId with Logging {
 
-	@transient var json = Wire.auto[ObjectMapper]
+	@transient var json = JsonObjectMapperFactory.instance
 	@transient var userLookup = Wire.auto[UserLookupService]
 
 	@BeanProperty

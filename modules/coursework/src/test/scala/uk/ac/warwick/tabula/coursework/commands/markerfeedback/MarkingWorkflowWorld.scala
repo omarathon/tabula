@@ -55,7 +55,7 @@ trait MarkingWorkflowWorld extends TestFixtures {
 	}
 
 	def makeUserGroup(users: String*): UserGroup = {
-		val ug = new UserGroup
+		val ug = UserGroup.ofUsercodes
 		ug.includeUsers = users
 		ug
 	}
