@@ -96,7 +96,9 @@
 
 						<#list setItem.groups as group>
 							<div class="row-fluid group">
-							<div class="span1">
+							<div class="span1
+							${(setItem.viewerMustSignUp && group.full)?string('use-tooltip" title="There are no spaces left on this group"','"')}
+							>
 							 <#if setItem.viewerMustSignUp>
 							   <input type="radio"
 							          name="group"
@@ -123,13 +125,21 @@
                                          || (setItem.isStudentSignUp() && !setItem.set.openForSignups)
                                          >
                                       <form> <!-- targetless form here to make the DOM match the student-sign-up version, for ease of testing -->
-									     <input type="submit" disabled class="btn btn-primary btn-medium pull-right" value="Leave" use-tooltip" title='You cannot change this group allocation via tabula. Please speak to your department if you need to change groups'/>
+									     <input type="submit"
+									            disabled
+									            class="disabled btn btn-primary btn-medium pull-right use-tooltip"
+									            title='You cannot change this group allocation via tabula.
+									                   Please speak to your department if you need to change groups'
+									            value="Leave" />
                                       </form>
                                     <#else >
 	                                    <#if !setItem.viewerMustSignUp >
 	                                     <form id="leave-${setItem.set.id}" method="post" action="<@routes.leave_group setItem.set />" >
                                             <input type="hidden" name="group" value="${group.id}" />
-                                            <input type="submit" class="btn btn-primary  pull-right" value="Leave"/>
+                                            <input type="submit"
+                                                   class="btn btn-primary  pull-right use-tooltip"
+                                                   title='Leave this group. You will need to sign up for a different group.'
+                                                   value="Leave"/>
 										 </form>
 										</#if>
                                     </#if>
