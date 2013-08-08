@@ -15,11 +15,11 @@ class SmallGroupSetMemberRoleProviderTest extends TestBase {
 		groupSet.members.addUser("test")
 
 		val memberUser = new User
-		memberUser.setUserId("test")
+		memberUser.setWarwickId("test")
 		val member = new CurrentUser(memberUser,memberUser)
 
 		val nonMemberUser = new User
-		nonMemberUser.setUserId("test2")
+		nonMemberUser.setWarwickId("test2")
 		val nonMember = new CurrentUser(nonMemberUser,nonMemberUser)
 
 		val roleProvider = new SmallGroupSetMemberRoleProvider

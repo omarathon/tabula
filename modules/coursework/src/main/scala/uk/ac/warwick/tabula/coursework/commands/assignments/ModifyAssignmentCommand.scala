@@ -8,19 +8,17 @@ import org.joda.time.DateTime
 import org.springframework.validation.Errors
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.{CurrentAcademicYear, UpdatesStudentMembership, Command, SelfValidating}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{AssignmentMembershipService, AssignmentService}
-import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
+import uk.ac.warwick.tabula.services.AssignmentService
 import scala.Some
 
 
 /**
  * Common behaviour
  */
- abstract class ModifyAssignmentCommand(val module: Module) extends Command[Assignment]
-	with SharedAssignmentProperties with SelfValidating with UpdatesStudentMembership with CurrentAcademicYear {
+ abstract class ModifyAssignmentCommand(val module: Module,val updateStudentMembershipGroupIsUniversityIds:Boolean=false) extends Command[Assignment]
+	with SharedAssignmentProperties with SelfValidating with UpdatesStudentMembership with SpecifiesGroupType with CurrentAcademicYear {
 
 	var service = Wire.auto[AssignmentService]
 
@@ -127,7 +125,7 @@ import scala.Some
 		academicYear = assignment.academicYear
 		feedbackTemplate = assignment.feedbackTemplate
 		if (assignment.members != null) {
-			members copyFrom assignment.members
+			members = assignment.members.duplicate
 		}
 		copyNonspecificFrom(assignment)
 	}

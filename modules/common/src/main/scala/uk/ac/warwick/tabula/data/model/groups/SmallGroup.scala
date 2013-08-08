@@ -60,7 +60,12 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	var events: JList[SmallGroupEvent] = JArrayList()
 	
 	def permissionsParents = Option(groupSet).toStream
-		
+
+	/**
+	 * Direct access to the underlying UserGroup. Most of the time you don't want to us this; unless you're setting
+	 * it to a new UserGroup, you should probably access "students" instead and work with Users rather than guessing what
+	 * the right sort of UserId to use is.
+	 */
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "studentsgroup_id")
 	var _studentsGroup: UserGroup = UserGroup.ofUniversityIds

@@ -29,12 +29,13 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
  * Common superclass for creation and modification. Note that any defaults on the vars here are defaults
  * for creation; the Edit command should call .copyFrom(SmallGroupSet) to copy any existing properties.
  */
-abstract class ModifySmallGroupSetCommand(val module: Module)
+abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentMembershipGroupIsUniversityIds: Boolean = true)
 	extends PromisingCommand[SmallGroupSet]
-		with SmallGroupSetProperties
-		with UpdatesStudentMembership
-		with SelfValidating 
-		with BindListener {
+	with SmallGroupSetProperties
+	with UpdatesStudentMembership
+	with SpecifiesGroupType
+	with SelfValidating
+	with BindListener {
 
 	// get these from UpdatesStudentMembership
 	//var userLookup = Wire[UserLookupService]
@@ -108,7 +109,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		groups.clear()
 		groups.addAll(set.groups.asScala.map(x => {new EditSmallGroupCommand(x, this)}).asJava)
 		
-		if (set.members != null) members.copyFrom(set.members)
+		if (set.members != null) members = set.members.duplicate()
 	}
 	
 	def copyTo(set: SmallGroupSet) {
@@ -134,7 +135,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module)
 		set.groups.clear()
 		set.groups.addAll(groups.asScala.filter(!_.delete).map(_.apply()).asJava)
 		
-		if (set.members == null) set.members = UserGroup.ofUsercodes
+		if (set.members == null) set.members = UserGroup.ofUniversityIds
 		set.members.copyFrom(members)
 	}
 	

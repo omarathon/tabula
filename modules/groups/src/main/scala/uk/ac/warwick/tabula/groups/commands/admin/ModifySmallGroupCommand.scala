@@ -93,7 +93,7 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 		events.clear()
 		events.addAll(group.events.asScala.map(new EditSmallGroupEventCommand(_)).asJava)
 
-		if (group.students != null) students.copyFrom(group.students)
+		if (group.students != null) students = group._studentsGroup.duplicate()
 	}
 	
 	def copyTo(group: SmallGroup) {
@@ -111,8 +111,7 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
     }
 
 		
-		if (group._studentsGroup== null) group._studentsGroup = UserGroup.ofUniversityIds
-		group._studentsGroup.copyFrom(students)
+		if (students != null) group._studentsGroup = students.duplicate()
 	}
 	
 	override def onBind(result: BindingResult) {

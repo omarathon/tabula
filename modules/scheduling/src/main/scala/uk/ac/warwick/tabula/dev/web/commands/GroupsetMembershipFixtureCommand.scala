@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.{Daoisms, AutowiringSmallGroupDaoComponent, Ses
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.data.model.UserGroup
 
 class GroupsetMembershipFixtureCommand extends CommandInternal[Unit] with Logging{
 	this: UserLookupComponent with SmallGroupDaoComponent with SessionComponent =>
@@ -17,6 +18,9 @@ class GroupsetMembershipFixtureCommand extends CommandInternal[Unit] with Loggin
 		transactional() {
 			val user = userLookup.getUserByUserId(userId)
 			val groupset = smallGroupDao.getSmallGroupSetById(groupSetId).get
+			if (groupset.members.isEmpty){
+				groupset.members = UserGroup.ofUsercodes // have to use usercodes in fixtures because test users cant be looked
+			}		                                         // up by university ID
 			groupset.members.add(user)
 			logger.info(s"Added user $userId to groupset $groupSetId")
 		}

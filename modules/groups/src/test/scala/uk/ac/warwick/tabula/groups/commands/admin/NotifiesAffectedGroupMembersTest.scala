@@ -150,17 +150,16 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
 
   }}
 
-  @Test
-  def detectsAllocationChangesForTutors(){new Fixture {
+	@Test
+	def detectsAllocationChangesForTutors() {new Fixture {
 
-    val group = command.set.groups.asScala.find(_.name == "groupA").get
-		val test:User = new User("test")
-		test.setWarwickId("123")
-    group.students.add(test)
-    val tutor =  group.events.asScala.head.tutors.users.head
-    command.hasAffectedTutorsEvents(tutor) should be(true)
-
-  }}
+			val group = command.set.groups.asScala.find(_.name == "groupA").get
+			val test: User = new User("test")
+			test.setWarwickId("123")
+			group.students.add(test)
+			val tutor = group.events.asScala.head.tutors.users.head
+			command.hasAffectedTutorsEvents(tutor) should be(true)
+	}}
 
 
   class StubCommand(val set: SmallGroupSet, val apparentUser: User, var userLookup: UserLookupService)

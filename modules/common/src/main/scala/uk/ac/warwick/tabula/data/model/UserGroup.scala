@@ -60,8 +60,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 	var excludeUsers: JList[String] = JArrayList()
 
 	def add(user:User) = {
-		if (universityIds) addUser(user.getWarwickId)
-		else addUser(user.getUserId)
+		addUser(getIdFromUser(user))
 	}
 	def addUser(user: String) = {
 		if (!includeUsers.contains(user)) {
@@ -71,8 +70,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 	def removeUser(user: String) = includeUsers.remove(user)
 
 	def remove(user:User) = {
-		if (universityIds) removeUser(user.getWarwickId)
-		else removeUser(user.getUserId)
+		removeUser(getIdFromUser(user))
 	}
 
 	def excludeUser(user: String) = {
@@ -80,8 +78,13 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 			excludeUsers.add(user)
 		} else false
 	}
+	def exclude(user:User)={
+		excludeUser(getIdFromUser(user))
+	}
 	def unexcludeUser(user: String) = excludeUsers.remove(user)
-
+  def unexclude(user:User)={
+		unexcludeUser(getIdFromUser(user))
+	}
 
 	/*
 	 * Could implement as `members.contains(user)`
@@ -104,17 +107,28 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 	def members: Seq[String] =
 		(includeUsers.toList ++ staticIncludeUsers ++ webgroupMembers) filterNot excludeUsers.contains
 
-	def users: Seq[User] =
-		if (universityIds) members map {
-			userLookup.getUserByWarwickUniId(_)
+	private def getIdFromUser(user:User):String = {
+		if (universityIds)
+			user.getWarwickId
+		else
+			user.getUserId
+	}
+	private def getUsersFromIds(ids:Seq[String]):Seq[User] = {
+		if (universityIds){
+			ids.map(userLookup.getUserByWarwickUniId)
 		}
 		else {
-			if (members.isEmpty) {
+			if (ids.isEmpty) {
 				Nil
 			} else {
-				userLookup.getUsersByUserIds(members.asJava).values.asScala.toSeq
+				userLookup.getUsersByUserIds(ids.asJava).values.asScala.toSeq
 			}
 		}
+	}
+
+	def users: Seq[User] = getUsersFromIds(members)
+
+	def excludes: Seq[User] = getUsersFromIds(excludeUsers)
 
 	def webgroupMembers: List[String] = baseWebgroup match {
 		case webgroup: String => groupService.getUserCodesInGroup(webgroup).asScala.toList
@@ -154,8 +168,6 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 			case _ => this.users == other.users
 		}
 	}
-
-
 }
 
 object UserGroup {
@@ -166,14 +178,30 @@ object UserGroup {
 /**
  * A usergroup where the value of universityId is hidden from the caller.
  *
- * This means that callers can only add/remove Users, not UserIds.
+ * This means that callers can only add/remove Users, not UserIds/UniversityIds - and therefore they can't add the
+ * wrong type of identifier.
+ *
  */
 
 trait UnspecifiedTypeUserGroup{
+	/**
+	 * @return All of the included users (includedUsers, staticUsers, and webgroup members), minus the excluded users
+	 */
 	def users: Seq[User]
+
+	/**
+	 * @return The explicitly excluded users
+	 */
+	def excludes: Seq[User]
 	def add(User:User)
-	def remove(User:User)
+	def remove(user:User)
+	def exclude(user:User)
+	def unexclude(user:User)
 	def size:Int
 	def isEmpty:Boolean
+  def includesUser(user:User):Boolean
+	/**
+	 * @return true if the other.users() would return the same values as this.users(), else false
+	 */
 	def hasSameMembersAs(other:UnspecifiedTypeUserGroup):Boolean
 }
