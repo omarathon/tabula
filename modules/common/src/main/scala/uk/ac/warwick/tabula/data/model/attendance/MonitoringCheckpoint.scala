@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import org.hibernate.annotations.Entity
-import org.hibernate.annotations.Type
-import org.joda.time.DateTime
-
+import javax.persistence.Entity
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.validation.constraints.NotNull
+
+import org.hibernate.annotations.Type
+import org.joda.time.DateTime
+
 import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 
