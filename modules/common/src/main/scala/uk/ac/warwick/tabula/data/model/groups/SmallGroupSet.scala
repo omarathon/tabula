@@ -101,7 +101,8 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	// only students manually added or excluded. use allStudents to get all students in the group set
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
-	var members: UserGroup = UserGroup.ofUniversityIds
+	var _membersGroup = UserGroup.ofUniversityIds
+	def members: UnspecifiedTypeUserGroup= _membersGroup
 
 	// Cannot link directly to upstream assessment groups data model in sits is silly ...
 	@OneToMany(mappedBy = "smallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
@@ -172,7 +173,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
     newSet.assessmentGroups = assessmentGroups
     newSet.format = format
     newSet.groups = groups.asScala.map(_.duplicateTo(newSet)).asJava
-    newSet.members = members.duplicate()
+    newSet._membersGroup = _membersGroup.duplicate()
     newSet.membershipService= membershipService
     newSet.module = module
     newSet.name = name

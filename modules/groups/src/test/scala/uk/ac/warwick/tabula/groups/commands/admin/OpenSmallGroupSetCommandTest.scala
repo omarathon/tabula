@@ -117,14 +117,14 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	def notifiesEachAffectedUser() { new NotificationFixture {
 
 		val set1 = new SmallGroupSet()
-		set1.members.includeUsers = Seq(student1.getWarwickId,student2.getWarwickId).asJava
-		set1.members.userLookup = userLookup
+		set1._membersGroup.includeUsers = Seq(student1.getWarwickId,student2.getWarwickId).asJava
+		set1._membersGroup.userLookup = userLookup
 
 		val s1 = set1.members.users
 
 		val set2 = new SmallGroupSet()
-		set2.members.includeUsers = Seq(student2.getWarwickId,student3.getWarwickId).asJava
-		set2.members.userLookup = userLookup
+		set2._membersGroup.includeUsers = Seq(student2.getWarwickId,student3.getWarwickId).asJava
+		set2._membersGroup.userLookup = userLookup
 
 		val s2 = set2.members.users
 

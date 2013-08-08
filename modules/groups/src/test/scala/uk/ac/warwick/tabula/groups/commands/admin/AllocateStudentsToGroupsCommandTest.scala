@@ -21,7 +21,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		val set = Fixtures.smallGroupSet("My small groups")
 		set.module = module
 		set.membershipService = membershipService
-		set.members.userLookup = userLookup
+		set._membersGroup.userLookup = userLookup
 		
 		val user1 = new User("cuscav")
 		user1.setFoundUser(true)
@@ -71,11 +71,11 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		group1._studentsGroup.userLookup = userLookup
 		group2._studentsGroup.userLookup = userLookup
 		
-		set.members.addUser(user1.getUserId)
-		set.members.addUser(user2.getUserId)
-		set.members.addUser(user3.getUserId)
-		set.members.addUser(user4.getUserId)
-		set.members.addUser(user5.getUserId)
+		set.members.add(user1)
+		set.members.add(user2)
+		set.members.add(user3)
+		set.members.add(user4)
+		set.members.add(user5)
 		
 		membershipService.determineMembershipUsers(Seq.empty, Some(set.members)) returns (Seq(user1, user2, user3, user4, user5))
 		

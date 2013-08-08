@@ -23,7 +23,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 
 		set.module = module
 		set.membershipService = membershipService
-		set.members.userLookup = userLookup
+		set._membersGroup.userLookup = userLookup
 
 		val user1 = new User("cuscav")
 		user1.setFoundUser(true)
@@ -90,11 +90,11 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		group3._studentsGroup.userLookup = userLookup
 		group4._studentsGroup.userLookup = userLookup
 
-		set.members.addUser(user1.getWarwickId)
-		set.members.addUser(user2.getWarwickId)
-		set.members.addUser(user3.getWarwickId)
-		set.members.addUser(user4.getWarwickId)
-		set.members.addUser(user5.getWarwickId)
+		set.members.add(user1)
+		set.members.add(user2)
+		set.members.add(user3)
+		set.members.add(user4)
+		set.members.add(user5)
 
 	}
 

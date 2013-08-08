@@ -19,7 +19,7 @@ class GroupsetMembershipFixtureCommand extends CommandInternal[Unit] with Loggin
 			val user = userLookup.getUserByUserId(userId)
 			val groupset = smallGroupDao.getSmallGroupSetById(groupSetId).get
 			if (groupset.members.isEmpty){
-				groupset.members = UserGroup.ofUsercodes // have to use usercodes in fixtures because test users cant be looked
+				groupset._membersGroup = UserGroup.ofUsercodes // have to use usercodes in fixtures because test users cant be looked
 			}		                                         // up by university ID
 			groupset.members.add(user)
 			logger.info(s"Added user $userId to groupset $groupSetId")

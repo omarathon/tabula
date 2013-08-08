@@ -113,7 +113,7 @@ class SmallGroupSetBuilder(){
     this
   }
 	def withMembers(members:UserGroup):SmallGroupSetBuilder = {
-		template.members = members
+		template._membersGroup = members
 		this
 	}
   def withReleasedToStudents(b: Boolean): SmallGroupSetBuilder = {

@@ -86,8 +86,8 @@ trait SmallGroupMembershipHelpers {
 trait SmallGroupMembershipHelpersImpl extends SmallGroupMembershipHelpers {
 	val eventTutorsHelper = new UserGroupMembershipHelper[SmallGroupEvent]("tutors")
 	val groupTutorsHelper = new UserGroupMembershipHelper[SmallGroup]("events.tutors")
-	val groupSetMembersHelper = new UserGroupMembershipHelper[SmallGroupSet]("members")
-	val studentGroupHelper = new UserGroupMembershipHelper[SmallGroup]("students")
+	val groupSetMembersHelper = new UserGroupMembershipHelper[SmallGroupSet]("_membersGroup")
+	val studentGroupHelper = new UserGroupMembershipHelper[SmallGroup]("_studentsGroup")
 }
 
 @Service("smallGroupService")

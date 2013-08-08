@@ -109,7 +109,7 @@ trait UpdatesStudentMembership {
 		}
 		// now add the users from includeUsers. Note that this is always a list of userIds, not warwickIds,
 		// regardless of the value of updateStudentMembershipGroupIsUniversityIds
-		usersToAdd ++= userLookup.getUsersByUserIds(JArrayList(includeUsers.asScala map(_.trim) filterNot( _.isEmpty ) distinct)).asScala map(_._2)
+		usersToAdd ++= userLookup.getUsersByUserIds(JArrayList((includeUsers.asScala map(_.trim) filterNot( _.isEmpty )).distinct)).asScala map(_._2)
 
 		// now get implicit membership list from upstream
 		val upstreamMembers = exisitingGroups.map(membershipService.determineMembershipUsers(_, existingMembers)).getOrElse(Seq())
@@ -125,7 +125,7 @@ trait UpdatesStudentMembership {
 		}
 
 		// uninclude from previously-added users, or explicitly exclude
-		val usersToExclude = userLookup.getUsersByUserIds(JArrayList(excludeUsers.asScala map { _.trim } filterNot { _.isEmpty } distinct)).asScala map(_._2)
+		val usersToExclude = userLookup.getUsersByUserIds(JArrayList((excludeUsers.asScala map { _.trim } filterNot { _.isEmpty }).distinct)).asScala map(_._2)
 		for (exclude<-usersToExclude){
 			val tmp = members.users
 			if (members.users contains exclude){
