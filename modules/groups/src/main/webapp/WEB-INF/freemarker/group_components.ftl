@@ -140,25 +140,35 @@
 									#container .weekSelector {
 									width: 7em;
 									}
+
+
+									span.eventRegister {
+										margin-right:20px
+									}
 								</style>
+
 
 
 								<ul class="unstyled">
 									<#list group.events as event>
 										<li>
 										<#-- Tutor, weeks, day/time, location -->
+										<span class="pull-left eventWeeks span6">
 										<@fmt.weekRanges event />,
 										${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
 										${event.location!"[no location]"}
+										</span>
 
-										<form method="get">
-											<span class="pull-right">
-												<@fmt.weekRangeSelect event />
+										<span class="pull-right eventRegister">
+											<form method="get">
 												<input type="hidden" class="eventId" value="${event.id}" />
 												<input type="hidden" name="returnTo" />
-												<button class="btn btn-small btn-primary register-button">Record</button>
-											</span>
-										</form>
+												<span class="form-horizontal">
+													<@fmt.weekRangeSelect event />
+													<button class="btn btn-small btn-primary register-button">Record</button>
+												 </span>
+											</form>
+										</span>
 										</li>
 									</#list>
 								</ul>
@@ -288,7 +298,7 @@
 			var form = jQuery(this).closest("form");
 			var eventId =  jQuery(form).find(".eventId").val();
 			var weekSelector = jQuery(form).find(".weekSelector").val();
-			jQuery(form).find('input[name="returnTo"]').attr("value", window.location.pathname);
+			jQuery(form).find('input[name="returnTo"]').attr("value", window.location.pathname.substr(7));
 			form.attr("action", "/groups/event/" + eventId + "/register/" + weekSelector);
 			form.submit();
 		});
