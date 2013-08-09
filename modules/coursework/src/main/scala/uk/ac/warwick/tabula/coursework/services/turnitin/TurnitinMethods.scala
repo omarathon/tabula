@@ -11,6 +11,7 @@ import dispatch.classic.Request
 
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.util.web._
+import uk.ac.warwick.tabula.data.model.Department
 
 abstract class Response(val message: String) {
 	def successful: Boolean
@@ -218,8 +219,8 @@ trait TurnitinMethods { self: Session =>
 	 */
 	def updateAssignment(classId: ClassId, className: ClassName, assignmentId: AssignmentId, assignmentName: AssignmentName): Response = {
 		val params = commonAssignmentParams(classId, className, assignmentId, assignmentName) ++ Seq("fcmd" -> "3")
-        val response = doRequest(CreateAssignmentFunction, None, params: _*)
-        resolveAssignmentResponse(response)
+		val response = doRequest(CreateAssignmentFunction, None, params: _*)
+		resolveAssignmentResponse(response)
 	}
 
 	private def commonAssignmentParams(classId: ClassId, className: ClassName, assignmentId: AssignmentId, assignmentName: AssignmentName) = List(
@@ -229,6 +230,10 @@ trait TurnitinMethods { self: Session =>
 		"assign" -> assignmentName.value, // used if the assignment doesn't exist, to name the assignment.
 		"dtstart" -> monthsFromNow(0), //The start date for this assignment must occur on or after today.
 		"dtdue" -> monthsFromNow(6))
+
+	private def departmentSpecificAssignmentParams(department: Department): List[Pair[String, String]] = {
+		???
+	}
 
 	private def resolveAssignmentResponse(response: TurnitinResponse) = {
 		if (response.code == 419) AlreadyExists()
