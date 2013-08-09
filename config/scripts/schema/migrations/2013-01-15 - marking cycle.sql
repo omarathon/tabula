@@ -9,3 +9,4 @@ ALTER TABLE markerfeedback ADD grade NVARCHAR2(255);
 ALTER TABLE markscheme ADD markingMethod NVARCHAR2(255);
 UPDATE markscheme SET markingMethod = 'StudentsChooseMarker';
 commit;
+
