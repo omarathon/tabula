@@ -202,4 +202,23 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
   }
   }
 
+	@Test
+	def describeOutcomeWorks(){new SmallGroupFixture {
+		val command = new ReleaseGroupSetCommandImpl(Seq(groupSet1),requestingUser)
+		command.notifyStudents = true
+		command.notifyTutors = true
+		command.describeOutcome() should be(Some("Tutors and students in <strong>A Groupset 1 for LA101</strong> have been notified"))
+		command.notifyStudents = true
+		command.notifyTutors = false
+		command.describeOutcome() should be(Some("Students in <strong>A Groupset 1 for LA101</strong> have been notified"))
+		command.notifyTutors = true
+		command.notifyStudents = false
+		command.describeOutcome() should be(Some("Tutors in <strong>A Groupset 1 for LA101</strong> have been notified"))
+		command.notifyTutors = false
+		command.notifyStudents = false
+		command.describeOutcome() should be(None)
+
+	}
+	}
+
 }
