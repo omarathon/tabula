@@ -265,22 +265,29 @@ class ReleaseAllSmallGroupSetsController extends GroupsController {
     Redirect("/admin/department/%s/groups/release".format(department.code), "batchReleaseSuccess"->true)
   }
 
-  class ModuleListViewModel(){
-    var checkedModules:JList[Module] = JArrayList()
-    var notifyStudents:JBoolean = true
-    var notifyTutors:JBoolean = true
+	class ModuleListViewModel() {
+		var checkedModules: JList[Module] = JArrayList()
+		var notifyStudents: JBoolean = true
+		var notifyTutors: JBoolean = true
 
-    def smallGroupSets() = {
-      checkedModules.asScala.flatMap(mod=>
-        mod.groupSets.asScala
-      )
-    }
+		def smallGroupSets() = {
+			if (checkedModules == null) {
+				// if  no modules are selected, spring binds null, not an empty list :-(
+				Nil
+			} else {
+				checkedModules.asScala.flatMap(mod =>
+					mod.groupSets.asScala
+				)
+			}
+		}
 
-    def createCommand(user:User):Appliable[Seq[SmallGroupSet]] = {
-      new ReleaseGroupSetCommandImpl(smallGroupSets(), user)
-    }
-  }
-
+		def createCommand(user: User): Appliable[Seq[SmallGroupSet]] = {
+			val command = new ReleaseGroupSetCommandImpl(smallGroupSets(), user)
+			command.notifyStudents = notifyStudents
+			command.notifyTutors = notifyTutors
+			command
+		}
+	}
 }
 
 @RequestMapping(Array("/admin/department/{department}/groups/selfsignup/{action}"))
