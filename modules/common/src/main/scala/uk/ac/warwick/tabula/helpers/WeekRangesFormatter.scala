@@ -3,15 +3,16 @@ package uk.ac.warwick.tabula.helpers
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.language.implicitConversions
-import org.joda.time.base.BaseDateTime
-import org.joda.time.{DateMidnight, DateTimeConstants, DateTime}
-import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.util.termdates.TermFactory
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.AcademicYear
+import org.joda.time.DateMidnight
+import org.joda.time.DateTimeConstants
 import uk.ac.warwick.util.termdates.Term
+import org.joda.time.DateTime
+import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.RequestInfo
@@ -19,7 +20,9 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.JavaImports._
 import freemarker.template.{ TemplateModel, TemplateMethodModelEx }
 import freemarker.template.utility.DeepUnwrap
+import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.UserSettingsService
+
 
 /** Format week ranges, using a formatting preference for term week numbers, cumulative week numbers or academic week numbers.
   *

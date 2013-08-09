@@ -136,12 +136,6 @@
                                 </#if>
 
 
-								<style>
-
-								</style>
-
-
-
 								<ul class="unstyled">
 									<#list group.events as event>
 										<li class="clearfix">
