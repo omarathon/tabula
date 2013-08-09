@@ -248,10 +248,8 @@ class WeekRanges(year:AcademicYear) extends VacationAware {
 
 class WeekRangeSelectFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYear) {
 
-	val weekRange = WeekRange
-
 	def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, numberingSystem: String) = {
-		val allTermWeekRanges = weekRange.termWeekRanges(year)
+		val allTermWeekRanges = WeekRange.termWeekRanges(year)
 		val currentTerm = getTermNumber(DateTime.now)
 		val eventRanges = ranges flatMap (_.toWeeks)
 
@@ -259,11 +257,12 @@ class WeekRangeSelectFormatter(year: AcademicYear) extends WeekRanges(year: Acad
 		val weeks = currentTermRanges.intersect(eventRanges)
 
 	  numberingSystem match {
-			case "term" => weeks.map( x => EventWeek( x - (currentTermRanges(0) - 1 ), x ) )
-			case "cumulative" => weeks.map({x =>
+			case WeekRange.NumberingSystem.Term => weeks.map( x => EventWeek( x - (currentTermRanges(0) - 1 ), x ) )
+			case WeekRange.NumberingSystem.Cumulative => weeks.map({x =>
 				val date = weekNumberToDate(x, dayOfWeek)
 				EventWeek(termFactory.getTermFromDate(date).getCumulativeWeekNumber(date), x)
 			})
+			case WeekRange.NumberingSystem.Academic => eventRanges.map(x => EventWeek(x, x))
 			case _ => weeks.map( x => EventWeek(x, x) )
 		}
 	}
