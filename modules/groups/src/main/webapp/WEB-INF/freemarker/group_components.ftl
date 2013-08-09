@@ -105,7 +105,7 @@
 							          class="radio inline group-selection-radio"/>
 							</#if>
 							</div>
-							<div class="${moduleItem.canManageGroups?string('span7','span11')}">
+							<div class="span11">
 								<h4 class="name">
 								${group.name!""}
 								<#if setItem.canViewMembers >
@@ -137,21 +137,14 @@
 
 
 								<style>
-									#container .weekSelector {
-									width: 7em;
-									}
 
-
-									span.eventRegister {
-										margin-right:20px
-									}
 								</style>
 
 
 
 								<ul class="unstyled">
 									<#list group.events as event>
-										<li>
+										<li class="clearfix">
 										<#-- Tutor, weeks, day/time, location -->
 										<span class="pull-left eventWeeks span6">
 										<@fmt.weekRanges event />,
@@ -159,16 +152,18 @@
 										${event.location!"[no location]"}
 										</span>
 
+										<#if moduleItem.canManageGroups>
 										<span class="pull-right eventRegister">
-											<form method="get">
-												<input type="hidden" class="eventId" value="${event.id}" />
-												<input type="hidden" name="returnTo" />
+											<form method="get" action="/groups/event/${event.id}/register">
+
+												<input type="hidden" name="returnTo" value="/admin/department/${department.code}" />
 												<span class="form-horizontal">
 													<@fmt.weekRangeSelect event />
 													<button class="btn btn-small btn-primary register-button">Record</button>
 												 </span>
 											</form>
 										</span>
+										</#if>
 										</li>
 									</#list>
 								</ul>
@@ -290,19 +285,6 @@
 <#-- List of students modal -->
 <div id="students-list-modal" class="modal fade">
 </div>
-
-
-	<script>
-		jQuery(".register-button").on("click", function(event){
-			event.preventDefault();
-			var form = jQuery(this).closest("form");
-			var eventId =  jQuery(form).find(".eventId").val();
-			var weekSelector = jQuery(form).find(".weekSelector").val();
-			jQuery(form).find('input[name="returnTo"]').attr("value", window.location.pathname.substr(7));
-			form.attr("action", "/groups/event/" + eventId + "/register/" + weekSelector);
-			form.submit();
-		});
-	</script>
 
 </#macro>
 

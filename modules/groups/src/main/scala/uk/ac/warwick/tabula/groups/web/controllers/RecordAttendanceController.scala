@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.web.bind.annotation.RequestParam
 
-@RequestMapping(value = Array("/event/{event}/register/{week}"))
+@RequestMapping(value = Array("/event/{event}/register"))
 @Controller
 class RecordAttendanceController extends GroupsController {
 
@@ -20,7 +20,7 @@ class RecordAttendanceController extends GroupsController {
 	@ModelAttribute
 	def command(
 		@PathVariable event: SmallGroupEvent,
-		@PathVariable week: Int) = RecordAttendanceCommand(event, week)
+		@RequestParam week: Int) = RecordAttendanceCommand(event, week)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute command: RecordAttendanceCommand): Mav = {
