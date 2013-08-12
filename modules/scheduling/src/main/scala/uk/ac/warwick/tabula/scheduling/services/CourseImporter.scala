@@ -5,15 +5,10 @@ import scala.collection.JavaConversions._
 import javax.sql.DataSource
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.stereotype.Service
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.CourseDao
-import uk.ac.warwick.tabula.data.model.Course
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportCourseCommand
-import uk.ac.warwick.tabula.data.Daoisms
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.scheduling.sandbox.SandboxData
+import uk.ac.warwick.util.core.StringUtils
 
 trait CourseImporter extends Logging {
 	var courseDao = Wire[CourseDao]
@@ -98,7 +93,7 @@ class SandboxCourseImporter extends CourseImporter {
 					new ImportCourseCommand(
 						CourseInfo(
 							code="%s-%s".format(departmentCode.toUpperCase, routeCode.toUpperCase),
-							shortName=route.name.substring(0, 20).toUpperCase,
+							shortName=StringUtils.safeSubstring(route.name, 0, 20).toUpperCase,
 							fullName=route.name,
 							title="%s %s".format(route.degreeType.description, route.name)
 						)
