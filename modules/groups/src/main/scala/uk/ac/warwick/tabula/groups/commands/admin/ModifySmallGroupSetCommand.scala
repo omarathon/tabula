@@ -46,7 +46,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 	
 	// start complicated membership stuff
 
-	lazy val exisitingGroups: Option[Seq[UpstreamAssessmentGroup]] =  setOption.map(_.upstreamAssessmentGroups)
+	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroup]] =  setOption.map(_.upstreamAssessmentGroups)
 	lazy val existingMembers: Option[UserGroup] = setOption.map(_._membersGroup)
 
 	def copyGroupsFrom(smallGroupSet: SmallGroupSet) {

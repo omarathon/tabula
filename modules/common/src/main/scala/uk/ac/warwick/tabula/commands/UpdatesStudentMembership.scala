@@ -20,7 +20,7 @@ trait UpdatesStudentMembership {
 
 	// needs a module to determine the possible options from SITS
 	val module : Module
-	val exisitingGroups: Option[Seq[UpstreamAssessmentGroup]]
+	val existingGroups: Option[Seq[UpstreamAssessmentGroup]]
 	val existingMembers: Option[UserGroup]
 
 	/**
@@ -112,7 +112,7 @@ trait UpdatesStudentMembership {
 		usersToAdd ++= userLookup.getUsersByUserIds(JArrayList((includeUsers.asScala map(_.trim) filterNot( _.isEmpty )).distinct)).asScala map(_._2)
 
 		// now get implicit membership list from upstream
-		val upstreamMembers = exisitingGroups.map(membershipService.determineMembershipUsers(_, existingMembers)).getOrElse(Seq())
+		val upstreamMembers = existingGroups.map(membershipService.determineMembershipUsers(_, existingMembers)).getOrElse(Seq())
 
 		for (user<-usersToAdd.distinct){
 			if (members.excludes.contains(user)){
@@ -127,9 +127,7 @@ trait UpdatesStudentMembership {
 		// uninclude from previously-added users, or explicitly exclude
 		val usersToExclude = userLookup.getUsersByUserIds(JArrayList((excludeUsers.asScala map { _.trim } filterNot { _.isEmpty }).distinct)).asScala map(_._2)
 		for (exclude<-usersToExclude){
-			val tmp = members.users
 			if (members.users contains exclude){
-				println (tmp map (_.getUserId))
 				members.remove(exclude)
 			}else{
 				members.exclude(exclude)
