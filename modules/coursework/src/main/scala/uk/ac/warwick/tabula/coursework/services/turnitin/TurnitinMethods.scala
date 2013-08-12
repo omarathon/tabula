@@ -208,8 +208,10 @@ trait TurnitinMethods { self: Session =>
 	 * 
 	 * If the requested AssignmentId already exists, AlreadyExists() is returned.
 	 */
-	def createAssignment(classId: ClassId, className: ClassName, assignmentId: AssignmentId, assignmentName: AssignmentName): Response = {
-		val params = commonAssignmentParams(classId, className, assignmentId, assignmentName)
+	def createAssignment(classId: ClassId, className: ClassName, assignmentId: AssignmentId, assignmentName: AssignmentName, department: Department): Response = {
+		val commonParams = commonAssignmentParams(classId, className, assignmentId, assignmentName)
+		val departmentParams = departmentSpecificAssignmentParams(department)
+		val params = commonParams ++ departmentParams
 		val response = doRequest(CreateAssignmentFunction, None, params: _*)
 		resolveAssignmentResponse(response)
 	}
@@ -217,8 +219,10 @@ trait TurnitinMethods { self: Session =>
 	/**
 	 * Update an existing assignment in this class.
 	 */
-	def updateAssignment(classId: ClassId, className: ClassName, assignmentId: AssignmentId, assignmentName: AssignmentName): Response = {
-		val params = commonAssignmentParams(classId, className, assignmentId, assignmentName) ++ Seq("fcmd" -> "3")
+	def updateAssignment(classId: ClassId, className: ClassName, assignmentId: AssignmentId, assignmentName: AssignmentName, department: Department): Response = {
+		val commonParams = commonAssignmentParams(classId, className, assignmentId, assignmentName) ++ Seq("fcmd" -> "3")
+		val departmentParams = departmentSpecificAssignmentParams(department)
+		val params = commonParams ++ departmentParams
 		val response = doRequest(CreateAssignmentFunction, None, params: _*)
 		resolveAssignmentResponse(response)
 	}
@@ -232,7 +236,30 @@ trait TurnitinMethods { self: Session =>
 		"dtdue" -> monthsFromNow(6))
 
 	private def departmentSpecificAssignmentParams(department: Department): List[Pair[String, String]] = {
-		???
+
+		def booleanToString(boolean: Boolean) = boolean match {
+			case true => "1"
+			case _ => "0"
+		}
+
+		val excludeBibliography = booleanToString(department.turnitinExcludeBibliography)
+		val excludeQuotations = booleanToString(department.turnitinExcludeQuotations)
+
+		val excludeTypeAndValue =
+			if(department.turnitinSmallMatchWordLimit == 0 && department.turnitinSmallMatchPercentageLimit == 0) {
+				("0", "0")
+			} else if (department.turnitinSmallMatchWordLimit > 0) {
+				("1", department.turnitinSmallMatchWordLimit.toString)
+			} else {
+				("2", department.turnitinSmallMatchPercentageLimit.toString)
+			}
+
+		List(
+			"exclude_biblio" -> excludeBibliography,
+			"exclude_quoted" -> excludeQuotations,
+			"exclude_type" -> excludeTypeAndValue._1,
+			"exclude_value" -> excludeTypeAndValue._2
+		)
 	}
 
 	private def resolveAssignmentResponse(response: TurnitinResponse) = {
