@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.admin
 
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.BrowserTest
 import org.openqa.selenium.By
-import uk.ac.warwick.tabula.coursework.CourseworkFixtures
 import org.scalatest.GivenWhenThen
 
 class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with GivenWhenThen {
@@ -119,5 +117,17 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 		withRoleInElement(P.Marker1.usercode, ".supervisor-table") {
 			// Nothing to do, the with...() tests enough
 		}
+	}
+
+	"Random module manager" should "not be able to add senior supervisors" in {
+		as(P.ModuleManager1) {
+			// no link
+			findAll(linkText("Go to the Test Services admin page")).size should be (0)
+
+			// no direct access
+			go to (Path("/admin/department/xxx/permissions"))
+			pageSource.contains(s"Sorry ${P.ModuleManager1.usercode}, you don't have permission to see that.") should be (true)
+		}
+
 	}
 }
