@@ -30,7 +30,7 @@
         <p>They will automatically be notified of any further changes made to these groups</p>
     </div>
     <div class="modal-footer">
-    <input class="btn btn-info" type="submit" value="Notify"> <a class="btn cancel-link" data-dismiss="modal" href="#">Cancel</a>
+    <input class="btn btn-info" type="submit" value="Notify" data-update-target="#groupset-container-${smallGroupSet.id}"> <a class="btn cancel-link" data-dismiss="modal" href="#">Cancel</a>
     </div>
     </@f.form>
 </#escape>

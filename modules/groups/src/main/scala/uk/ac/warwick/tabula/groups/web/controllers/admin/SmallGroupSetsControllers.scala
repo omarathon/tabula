@@ -24,6 +24,8 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewModule, ViewSet}
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 
 trait SmallGroupSetsController extends GroupsController {
 	
@@ -208,19 +210,28 @@ class ArchiveSmallGroupSetController extends GroupsController {
 @Controller
 class ReleaseSmallGroupSetController extends GroupsController {
 
-  @ModelAttribute("releaseGroupSetCommand") def getReleaseGroupSetCommand(@PathVariable("set") set:SmallGroupSet):Appliable[Seq[SmallGroupSet]]={
-    new ReleaseGroupSetCommandImpl( Seq(set),user.apparentUser )
-  }
+	@ModelAttribute("releaseGroupSetCommand") def getReleaseGroupSetCommand(@PathVariable("set") set: SmallGroupSet): ReleaseSmallGroupSetCommand = {
+		new ReleaseGroupSetCommandImpl(Seq(set), user.apparentUser)
+	}
 
-  @RequestMapping
-  def form(@ModelAttribute("releaseGroupSetCommand") cmd: Appliable[SmallGroupSet]) =
-    Mav("admin/groups/release").noLayoutIf(ajax)
+	@RequestMapping
+	def form(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand) =
+		Mav("admin/groups/release").noLayoutIf(ajax)
 
-  @RequestMapping(method = Array(POST))
-  def submit(@ModelAttribute("releaseGroupSetCommand") cmd: Appliable[SmallGroupSet]) = {
-    cmd.apply()
-    Mav("ajax_success").noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
-  }
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand) = {
+		val updatedSet = cmd.apply() match {
+			case set :: Nil => set
+			case _ => throw new IllegalStateException("Received multiple updated sets from a single update operation!")
+		}
+		val groupSetItem = new ViewSet(updatedSet, updatedSet.groups.asScala, GroupsViewModel.Tutor)
+		val moduleItem = new ViewModule(updatedSet.module, Seq(groupSetItem), true)
+		Mav("admin/groups/single_groupset",
+			"groupsetItem" -> groupSetItem,
+			"moduleItem" -> moduleItem,
+			"notificationSentMessage" -> cmd.describeOutcome).noLayoutIf(ajax) // should be AJAX, otherwise you'll just get a terse success response.
+	}
 }
 
 @RequestMapping(Array("/admin/module/{module}/groups/{set}/selfsignup/{action}"))
