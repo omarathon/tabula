@@ -5,6 +5,11 @@ import scala.collection.JavaConversions._
 import javax.sql.DataSource
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.CourseDao
+import uk.ac.warwick.tabula.data.model.Course
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportCourseCommand
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.scheduling.sandbox.SandboxData
