@@ -53,6 +53,13 @@ abstract class BrowserTest
 		case "firefox" => new FirefoxDriver
 		case "ie" => new InternetExplorerDriver
 	}
+
+	def ifHtmlUnitDriver(operation:HtmlUnitDriver=>Unit) = {
+		webDriver match {
+			case h:HtmlUnitDriver=>operation(h)
+			case _=> // do nothing
+		}
+	}
 	
 	/**
 	 * eventually{} is a generic ScalaTest method to repeatedly
