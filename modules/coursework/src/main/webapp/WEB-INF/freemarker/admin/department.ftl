@@ -87,7 +87,27 @@
                 	<i class="icon-book"></i> Feedback report
                 </@fmt.permission_button>
             </li>
-			
+
+			<li>
+				<#assign copy_url><@routes.copyDepartmentsAssignments department /></#assign>
+				<@fmt.permission_button
+					permission='Assignment.Create'
+					scope=department
+					action_descr='copy existing assignments'
+					href=copy_url>
+					<i class="icon-share-alt"></i> Create assignments from previous
+				</@fmt.permission_button>
+			</li>
+			<li>
+				<#assign archive_url><@routes.archiveDepartmentsAssignments department /></#assign>
+				<@fmt.permission_button
+					permission='Assignment.Archive'
+					scope=department
+					action_descr='archive existing assignments'
+					href=archive_url>
+					<i class="icon-folder-close"></i> Archive assignments
+				</@fmt.permission_button>
+			</li>
 			
 			<#--
 				<#if features.extensions>
@@ -152,15 +172,36 @@
 					</a></li>
 				</#if>
 
-				<li><a href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-folder-close"></i> Add assignment</a></li>
+				<li><a href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-plus"></i> Create new assignment</a></li>
+
+
+				<li>
+					<#assign copy_url><@routes.copyModuleAssignments module /></#assign>
+					<@fmt.permission_button
+						permission='Assignment.Create'
+						scope=module
+						action_descr='copy existing assignments'
+						href=copy_url>
+						<i class="icon-share-alt"></i> Create assignments from previous
+					</@fmt.permission_button>
+				</li>
+				<li>
+					<#assign archive_url><@routes.archiveModuleAssignments module /></#assign>
+					<@fmt.permission_button
+						permission='Assignment.Archive'
+						scope=module
+						action_descr='archive existing assignments'
+						href=archive_url>
+						<i class="icon-folder-close"></i> Archive assignments
+					</@fmt.permission_button>
+				</li>
 
 				<#if has_archived_assignments>
 					<li><a class="show-archived-assignments" href="#">
-							<i class="icon-eye-open"></i> Show archived assignments
+						<i class="icon-eye-open"></i> Show archived assignments
 						</a>
 					</li>
 				</#if>
-
 		  </ul>
 		</div>
 

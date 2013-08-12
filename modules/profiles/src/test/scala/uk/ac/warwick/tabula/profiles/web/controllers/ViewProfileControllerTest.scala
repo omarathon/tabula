@@ -3,12 +3,8 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommandState
-import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService, SecurityService}
-import uk.ac.warwick.tabula.permissions.{PermissionsTarget, Permission}
+import uk.ac.warwick.tabula.services.{SmallGroupService, ProfileService, UserLookupService, SecurityService}
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.userlookup.UserLookup
-import org.mockito.Mockito._
-import scala.Some
 import scala.Some
 
 class ViewProfileControllerTest extends TestBase with Mockito{
@@ -16,6 +12,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 	val controller = new ViewProfileController
 	// need to have a security service defined or we'll get a NPE in PermissionsCheckingMethods.restricted()
 	controller.securityService = mock[SecurityService]
+	controller.smallGroupService = mock[SmallGroupService]
 
 	val member = new StudentMember()
 	val courseDetails = new StudentCourseDetails()
@@ -24,13 +21,17 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 
 	@Test(expected=classOf[ItemNotFoundException])
 	def throwsNonStudent() {
-		val staffMember = new StaffMember()
-		val cmd = controller.viewProfileCommand(staffMember)
+		withUser("test") {
+			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
+			val staffMember = new StaffMember()
+			val cmd = controller.viewProfileCommand(staffMember)
+		}
 	}
 
 	@Test
 	def getsProfileCommand() {
 		withUser("test") {
+			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
 			val cmd = controller.viewProfileCommand(member)
 			cmd.value should be(member)
 		}
@@ -38,6 +39,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 
 	@Test def createsTutorMeetingListCommand() {
 	withUser("test") {
+		controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
 		val cmd = controller.viewTutorMeetingRecordCommand(member).get.asInstanceOf[ViewMeetingRecordCommandState]
 	  cmd.relationshipType should be(RelationshipType.PersonalTutor)
 		}
@@ -46,6 +48,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 
 	@Test def createsSupervisorMeetingListCommand() {
 	withUser("test") {
+		controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
 		val cmd = controller.viewSupervisorMeetingRecordCommand(member).get.asInstanceOf[ViewMeetingRecordCommandState]
 		cmd.relationshipType should be(RelationshipType.Supervisor)
 	}}
@@ -70,6 +73,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 			controller.userLookup = mock[UserLookupService]
 			controller.profileService = mock[ProfileService]
 			controller.profileService.getMemberByUserId("test", true) returns Some(member)
+			controller.smallGroupService.findSmallGroupsByStudent(member.asSsoUser) returns (Nil)
 
 			val mav = controller.viewProfile(viewProfileCommand, Some(tutorCommand), Some(supervisorCommand),"test","test")
 
@@ -80,6 +84,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 
 	@Test def getMeetingRecordCommand() {
 		withUser("test") {
+			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
 			val cmd = controller.getViewMeetingRecordCommand(member, RelationshipType.PersonalTutor)
 			cmd should not be(None)
 

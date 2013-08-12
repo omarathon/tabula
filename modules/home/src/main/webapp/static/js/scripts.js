@@ -599,7 +599,7 @@
 				$panes.children().each(function() {
 					var title = $(this).find('h4').html();
 					var link = '#' + $(this).attr('id');
-					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '">' + title + ' <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>');
+					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '"><span class="title">' + title + '</span> <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>');
 					$tabs.append($tab);
 				});
 				$lt.after($tabContainer);
@@ -617,7 +617,7 @@
 					var $gadget = $(this).addClass('gadget');
 					var title = $(this).find('h4').html();
 					var link = '#' + $(this).attr('id');
-					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '" title="Click and drag to move">' + title + ' <i class="icon-minus-sign-alt" title="Hide ' + title + '"></i></a></li>');
+					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '" title="Click and drag to move"><span class="title">' + title + '</span> <i class="icon-minus-sign-alt" title="Hide ' + title + '"></i></a></li>');
 					var $gadgetHeaderTab = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
 					$(this).find('.tutor').removeClass('span4');
 					$gadgetHeaderTab.children().append($tab);

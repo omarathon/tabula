@@ -1,21 +1,47 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.AppContextTestBase
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.MockUserLookup
+import uk.ac.warwick.tabula._
 import org.junit.Before
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget, Permissions}
+import uk.ac.warwick.tabula.data._
+import uk.ac.warwick.tabula.services.permissions._
+import scala.Some
+import uk.ac.warwick.util.queue.Queue
 
-class ModuleAndDepartmentServiceTest extends AppContextTestBase {
+class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 	
-	@Autowired var service: ModuleAndDepartmentService = _
-	
+	val service: ModuleAndDepartmentService = new ModuleAndDepartmentService
+
 	val userLookup = new MockUserLookup
 	
 	@Before def wire {
+		val departmentDao = new DepartmentDaoImpl
+		departmentDao.sessionFactory = sessionFactory
+		service.departmentDao = departmentDao
+
 		service.userLookup = userLookup
+
+		val moduleDao = new ModuleDaoImpl
+		moduleDao.sessionFactory = sessionFactory
+		service.moduleDao = moduleDao
+
+		val permsDao = new PermissionsDaoImpl
+		permsDao.sessionFactory = sessionFactory
+
+		val permissionsService = new PermissionsServiceImpl with PermissionsDaoComponent with PermissionsServiceCaches {
+			var permissionsDao:PermissionsDao = permsDao
+			val rolesByIdCache:GrantedRoleByIdCache = new GrantedRoleByIdCache(permsDao)
+			val permissionsByIdCache = new GrantedPermissionsByIdCache(permsDao)
+		}
+		permissionsService.queue = mock[Queue]
+		permissionsService.groupService = userLookup.getGroupService()
+		service.permissionsService = permissionsService
+
+		val securityService = mock[SecurityService]
+		securityService.can(isA[CurrentUser],isA[Permission],isA[PermissionsTarget] ) returns true
+		service.securityService = securityService
+
+
 	}
 	
 	@Test def crud = transactional { tx =>

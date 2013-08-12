@@ -12,8 +12,10 @@ import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.permissions.Permissions
 
-
-class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private val currentUser: User) extends Command[Seq[SmallGroupSet]] with Appliable[Seq[SmallGroupSet]] with Notifies[Seq[SmallGroup]]{
+trait ReleaseSmallGroupSetCommand extends Appliable[Seq[SmallGroupSet]]{
+	def describeOutcome:Option[String]
+}
+class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private val currentUser: User) extends Command[Seq[SmallGroupSet]] with Appliable[Seq[SmallGroupSet]] with Notifies[Seq[SmallGroup]] with ReleaseSmallGroupSetCommand{
 
   var userLookup:UserLookupService = Wire.auto[UserLookupService]
   var groupSetsReleasedToStudents:List[SmallGroupSet] = Nil
@@ -63,6 +65,23 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
    studentNotifications ++ tutorNotifications
 
   }
+	def describeOutcome():Option[String]={
+		groupsToPublish match {
+			case singleGroup::Nil=>{
+				val tutors = Some("tutors").filter(_ => notifyTutors.booleanValue())
+				val students = Some("students").filter(_=>notifyStudents.booleanValue())
+				Seq(tutors,students).flatten match {
+					case Nil=>None // we've selected to notify neither staff nor students.
+					case list=>{
+						val updatedUsers = list.mkString(" and ").capitalize
+						val moduleName = singleGroup.module.code.toUpperCase
+						Some(s"$updatedUsers in <strong>${singleGroup.name} for ${moduleName}</strong> have been notified")
+					}
+				}
+			}
+			case _ => None // this function is only used when releasing a single group
+		}
+	}
 
 	def describe(desc:Description ){
     desc.smallGroupSetCollection(groupsToPublish)

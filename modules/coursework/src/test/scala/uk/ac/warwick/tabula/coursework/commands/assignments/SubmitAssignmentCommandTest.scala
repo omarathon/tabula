@@ -1,9 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import java.io.ByteArrayInputStream
-import java.io.File
 import org.joda.time.DateTime
-import org.junit.Test
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.BindException
@@ -11,20 +8,13 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Submission
-import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.forms.SubmissionValue
-import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
-import uk.ac.warwick.tabula.JavaImports._
-import java.util.HashSet
 import uk.ac.warwick.tabula.data.model.forms.FileField
 import uk.ac.warwick.tabula.data.model.forms.FileSubmissionValue
-import uk.ac.warwick.tabula.commands.UploadedFile
-import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.data.model.Module
 
 
-class SubmitAssignmentCommandTest extends AppContextTestBase {
+class SubmitAssignmentCommandTest extends TestBase {
 
 	@Autowired var dao: FileDao = _
 

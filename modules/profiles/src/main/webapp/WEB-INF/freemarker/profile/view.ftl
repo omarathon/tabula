@@ -185,6 +185,11 @@
 					</li>
 				</#if>
 
+				<#if numSmallGroups gt 0>
+					<li id="sg-pane" style="display:none;">
+						<#include "_small_groups.ftl" />
+					</li>
+				</#if>
 			</ol>
 			
 			<div id="modal" class="modal hide fade" style="display:none;"></div>
