@@ -137,7 +137,7 @@
 							          class="radio inline group-selection-radio"/>
 							</#if>
 							</div>
-							<div class="${moduleItem.canManageGroups?string('span7','span11')}">
+							<div class="span11">
 								<h4 class="name">
 								${group.name!""}
 								<#if setItem.canViewMembers >
@@ -178,11 +178,26 @@
 
 								<ul class="unstyled">
 									<#list group.events as event>
-										<li>
-										<#-- Tutor, weeks, day/time, location -->
-										<@fmt.weekRanges event />,
-										${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
-										${event.location!"[no location]"}
+										<li class="clearfix">
+											<#-- Tutor, weeks, day/time, location -->
+											<span class="pull-left eventWeeks span6">
+											<@fmt.weekRanges event />,
+											${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
+											${event.location!"[no location]"}
+											</span>
+
+											<#if moduleItem.canManageGroups>
+											<span class="pull-right eventRegister">
+												<form method="get" action="/groups/event/${event.id}/register">
+
+													<input type="hidden" name="returnTo" value="/admin/department/${department.code}" />
+													<span class="form-horizontal">
+														<@fmt.weekRangeSelect event />
+														<button class="btn btn-small btn-primary register-button">Record</button>
+													 </span>
+												</form>
+											</span>
+											</#if>
 										</li>
 									</#list>
 								</ul>
