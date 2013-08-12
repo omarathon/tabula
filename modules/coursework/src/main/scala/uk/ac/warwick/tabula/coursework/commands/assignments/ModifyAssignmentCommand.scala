@@ -130,7 +130,7 @@ import scala.Some
 		copyNonspecificFrom(assignment)
 	}
 
-	val exisitingGroups = Option(assignment).map(_.upstreamAssessmentGroups)
+	val existingGroups = Option(assignment).map(_.upstreamAssessmentGroups)
 	val existingMembers = Option(assignment).map(_.members)
 
 	/**
