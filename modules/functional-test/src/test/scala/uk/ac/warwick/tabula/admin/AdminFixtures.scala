@@ -13,6 +13,7 @@ trait AdminFixtures extends BrowserTest {
 	}
 
 	def as[T](user: LoginDetails)(fn: => T) = {
+		currentUser = user
 		signIn as(user) to (Path("/admin"))
 
 		fn

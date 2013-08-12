@@ -6,13 +6,14 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.groups.pages.SmallGroupTeachingPage
 import uk.ac.warwick.tabula.home.FixturesDriver
 
-trait SmallGroupsFixture extends BrowserTest with FixturesDriver{
+trait SmallGroupsFixture extends BrowserTest with FixturesDriver {
 
   before{
     go to (Path("/scheduling/fixtures/setup"))
   }
 
   def as[T](user: LoginDetails)(fn: =>T) = {
+		currentUser = user
     signIn as(user) to (Path("/groups"))
     fn
   }

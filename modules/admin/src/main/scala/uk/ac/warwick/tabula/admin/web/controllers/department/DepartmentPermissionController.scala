@@ -63,12 +63,6 @@ class DepartmentAddPermissionController extends AdminController with DepartmentP
 			val role = Some(command.apply().roleDefinition)
 			val userCodes = command.usercodes.asScala
 			form(department, userCodes, role, "add")
-//			val roleName = command.apply().roleDefinition.getName
-//			Mav("redirect:" + Routes.department.permissions(department),
-//					"role" -> roleName,
-//					"usercodes" -> command.usercodes,
-//					"action" -> "add"
-//			)
 		}
 
 	}
@@ -89,13 +83,6 @@ class DepartmentRemovePermissionController extends AdminController with Departme
 			val role = Some(command.apply().roleDefinition)
 			val userCodes = command.usercodes.asScala
 			form(department, userCodes, role, "remove")
-//			command.apply()
-//			val roleName = command.apply().roleDefinition.getName
-//			Mav("redirect:" + Routes.department.permissions(department),
-//					"role" -> roleName,
-//					"usercodes" -> command.usercodes,
-//					"action" -> "remove"
-//			)
 		}
 
 	}
