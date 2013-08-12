@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.commands.{Notifies, Appliable, UserAware, Description}
 import uk.ac.warwick.tabula.data.model.{Notification, UserGroup}
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import uk.ac.warwick.tabula.services.UserLookupService
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
@@ -97,31 +97,34 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 	}
 
 	trait NotificationFixture {
-		val student1 = new User
-		student1.setUserId("student1")
-		val student2 = new User
-		student2.setUserId("student2")
-		val student3 = new User
-		student3.setUserId("student3")
+		// n.b. both the userID and the warwickID need to be set. The userID is used as the key for equals() operations, and
+		// the warwickID is used as the key in UserGroup.members
+		val student1 = new User("student1")
+		student1.setWarwickId("student1")
+		val student2 = new User("student2")
+		student2.setWarwickId("student2")
+		val student3 = new User("student3")
+		student3.setWarwickId("student3")
+    val students = Seq(student1,student2,student3)
 
 		val userLookup = mock[UserLookupService]
-
-		userLookup.getUsersByUserIds(JArrayList("student1","student2")) returns JMap("student1"-> student1, "student2"->student2)
-		userLookup.getUsersByUserIds(JArrayList("student2","student3")) returns JMap("student2"-> student2, "student3"->student3)
+		userLookup.getUserByWarwickUniId(any[String]) answers{id=>
+			students.find(_.getWarwickId == id).getOrElse(new AnonymousUser)
+		}
 	}
 
 	@Test
 	def notifiesEachAffectedUser() { new NotificationFixture {
 
 		val set1 = new SmallGroupSet()
-		set1.members.includeUsers = Seq(student1.getUserId,student2.getUserId).asJava
-		set1.members.userLookup = userLookup
+		set1._membersGroup.includeUsers = Seq(student1.getWarwickId,student2.getWarwickId).asJava
+		set1._membersGroup.userLookup = userLookup
 
 		val s1 = set1.members.users
 
 		val set2 = new SmallGroupSet()
-		set2.members.includeUsers = Seq(student2.getUserId,student3.getUserId).asJava
-		set2.members.userLookup = userLookup
+		set2._membersGroup.includeUsers = Seq(student2.getWarwickId,student3.getWarwickId).asJava
+		set2._membersGroup.userLookup = userLookup
 
 		val s2 = set2.members.users
 
