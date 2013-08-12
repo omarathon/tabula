@@ -24,6 +24,10 @@
 			${tutorUser.fullName}<#if tutorUser_has_next>,</#if>
 		</#list>
 		</div>
+
+		<div>
+			<@fmt.p number=students?size singular="student" plural="students" /> <#if userIsMember> including you</#if>.
+		</div>
 	</li>
 	</#list>
 	</ul>
@@ -31,21 +35,24 @@
 	<#if students?has_content>
 	<ul class="profile-user-list">
 	<#list students as student>
-	<li>
-		<div class="profile clearfix">
-			<#if student.isMember()>
-				<@fmt.member_photo student "tinythumbnail" false />
-			<#else>
-				<#-- `student` is actually only backed by a User here, so no Member photo, so let's explicitly serve the default photo -->
-				<@fmt.member_photo {} "tinythumbnail" false />
-			</#if>
+	<#-- If the current user is a member no need to show them their own photo -->
+	<#if student.universityId != userUniId>
+		<li>
+			<div class="profile clearfix">
+				<#if student.isMember()>
+					<@fmt.member_photo student "tinythumbnail" false />
+				<#else>
+					<#-- `student` is actually only backed by a User here, so no Member photo, so let's explicitly serve the default photo -->
+					<@fmt.member_photo {} "tinythumbnail" false />
+				</#if>
 
-			<div class="name">
-				<h6>${student.fullName}</h6>
-				${student.shortDepartment}
+				<div class="name">
+					<h6>${student.fullName}</h6>
+					${student.shortDepartment}
+				</div>
 			</div>
-		</div>
-	</li>
+		</li>
+	</#if>
 	</#list>
 	</ul>
 	<#else>

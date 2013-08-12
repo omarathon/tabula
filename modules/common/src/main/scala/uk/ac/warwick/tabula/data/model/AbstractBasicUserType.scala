@@ -1,15 +1,14 @@
 package uk.ac.warwick.tabula.data.model
+
+import scala.reflect._
+
+import org.hibernate.usertype.UserType
+import org.hibernate.`type`.AbstractSingleColumnStandardBasicType
+
 import java.sql.PreparedStatement
 import java.sql.ResultSet
-import java.sql.Types
-import org.hibernate.`type`.StandardBasicTypes
-import org.hibernate.usertype.UserType
 import java.{ io => jio }
-import java.{ lang => jl }
-import org.hibernate.`type`.Type
-import org.hibernate.`type`.AbstractStandardBasicType
-import org.hibernate.`type`.AbstractSingleColumnStandardBasicType
-import scala.reflect._
+
 
 /**
  * Handles a lot of the junk that isn't necessary if all you want to do is
@@ -27,8 +26,11 @@ abstract class AbstractBasicUserType[A <: Object : ClassTag, B : ClassTag] exten
 	def convertToObject(input: B): A
 	def convertToValue(obj: A): B
 
+
 	final override def nullSafeGet(resultSet: ResultSet, names: Array[String], owner: Object) = {
-		basicType.nullSafeGet(resultSet, names(0)) match {
+		@deprecated("","") def _get = basicType.nullSafeGet _
+
+		_get(resultSet, names(0)) match {
 			case s: Any if s == nullValue => nullObject
 			case b: B => convertToObject(b)
 			case null => nullObject
@@ -36,7 +38,11 @@ abstract class AbstractBasicUserType[A <: Object : ClassTag, B : ClassTag] exten
 	}
 
 	final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int) {
-		basicType.nullSafeSet(stmt, toValue(value), index)
+		@deprecated("","") def _set(stmt: PreparedStatement, value: B, index:Int) {
+			basicType.nullSafeSet(stmt, value, index)
+		}
+
+		_set(stmt, toValue(value), index)
   }
 
 	private final def toValue(value: Any): B = value match {

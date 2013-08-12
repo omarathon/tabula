@@ -12,7 +12,7 @@ create table Assignment (
     openDate timestamp,
     resultspublished number(1,0) not null,
     module_id nvarchar2(255),
-    collectMarks number(1,0) not null,
+    collectMarks number(1,0) default 0 not null,
     CONSTRAINT "ASSIGNMENT_PK" PRIMARY KEY ("ID")
 );
 CREATE INDEX "IDX_ASSIGNMENT_MODULE" ON ASSIGNMENT("MODULE_ID");
@@ -98,7 +98,7 @@ create table AuditEvent (
 	eventStage nvarchar2(64) not null,
 	real_user_id nvarchar2(255) not null,
 	masquerade_user_id nvarchar2(255) not null,
-	data nvarchar2(4000) not null
+	data nclob not null
 );
 create index idx_auditeventdate on auditevent(eventdate);
 

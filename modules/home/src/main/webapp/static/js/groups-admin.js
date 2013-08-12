@@ -61,13 +61,18 @@ $(function() {
     $("#modal-container ").on("click","input[type='submit']", function(e){
         e.preventDefault();
         var $this = $(this);
-        var $form = $this.closest("form")
+        var $form = $this.closest("form");
+        var updateTargetId = $this.data("update-target");
 
         var randomNumber = Math.floor(Math.random() * 10000000);
 
         jQuery.post($form.attr('action') + "?rand=" + randomNumber, $form.serialize(), function(data){
             $("#modal-container ").modal('hide');
-            window.location.reload();
+            if (updateTargetId){
+               $(updateTargetId).html(data);
+            }else{
+	            window.location.reload();
+	        }
         });
     });
 });

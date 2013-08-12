@@ -204,7 +204,7 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 	}
 
 	"A student" should "not be able to leave a self-signup group which doesn't allow switching" in{
-		Given("A small groupset exists with 2 small groups and an allocation method of Manual")
+		Given("A small groupset exists with 2 small groups and an allocation method of Manual and allowSwitching is false")
 		createModule("xxx",TEST_MODULE_CODE,"No Switching Module")
 		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", groupCount=2, allowSelfGroupSwitching = false)
 

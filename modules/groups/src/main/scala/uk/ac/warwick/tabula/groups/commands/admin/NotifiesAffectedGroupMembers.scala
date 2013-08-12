@@ -39,7 +39,7 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet] {
 			// no events have changed (therefore no groups relevant to this tutor can have changed), but the allocations might have
 			val previousGroups = setBeforeUpdates.groups.asScala
 			val currentGroups = set.groups.asScala
-			val allocationsUnchanged = previousGroups.forall(pg => currentGroups.exists(cg => cg == pg && cg.students.members == pg.students.members))
+			val allocationsUnchanged = previousGroups.forall(pg => currentGroups.exists(cg => cg == pg && cg.students.hasSameMembersAs(pg.students)))
 			!allocationsUnchanged
 		} else {
 			true

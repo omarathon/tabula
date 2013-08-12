@@ -71,7 +71,7 @@
 				</div>
 				<div class="row-fluid fix-on-scroll-container">
 					<div class="span5">
-						<div class="students">
+						<div id="studentslist" class="students">
 							<h3>Students</h3>
 							<div class="well student-list drag-target">
 								<h4>Not allocated to a group</h4>
@@ -93,7 +93,7 @@
 						</div>
 					</div>
 					<div class="span5">
-						<div class="groups fix-on-scroll">
+						<div id="groupslist" class="groups fix-on-scroll">
 							<h3>Groups</h3>
 							<#list set.groups as group>
 								<#assign existingStudents = mappingById[group.id]![] />
@@ -172,5 +172,14 @@
 		</div><!-- end tab-content -->
 
 	</div> <!-- end tabbable -->
+
+	<script type="text/javascript">
+		(function($) {
+			<!--TAB-1008 - fix scrolling bug when student list is shorter than the group list-->
+			$('#studentslist').css('min-height', function() {
+				return $('#groupslist').outerHeight();
+			});
+		})(jQuery);
+	</script>
 
 </#escape>

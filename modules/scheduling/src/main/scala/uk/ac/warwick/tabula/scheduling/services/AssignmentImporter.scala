@@ -92,53 +92,49 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 class SandboxAssignmentImporter extends AssignmentImporter {
 	
 	def allMembers(callback: ModuleRegistration => Unit) =
-		SandboxData.Departments
-			.flatMap { case (code, d) => d.routes.values.toSeq }
-			.flatMap { route =>
-				(route.studentsStartId to route.studentsEndId).flatMap { uniId =>
-					route.moduleCodes.map { moduleCode =>
-						ModuleRegistration(
-							year = AcademicYear.guessByDate(DateTime.now).toString, 
-							sprCode = "%d/1".format(uniId), 
-							occurrence = "A", 
-							moduleCode = "%s-15".format(moduleCode.toUpperCase), 
-							assessmentGroup = "A")
-					}
-				}
-			}
-			.foreach { reg => callback(reg) }
+		for {
+			(code, d) <- SandboxData.Departments
+			route <- d.routes.values.toSeq
+			uniId <- route.studentsStartId to route.studentsEndId
+			moduleCode <- route.moduleCodes
+		} callback (
+			ModuleRegistration(
+				year = AcademicYear.guessByDate(DateTime.now).toString,
+				sprCode = "%d/1".format(uniId),
+				occurrence = "A",
+				moduleCode = "%s-15".format(moduleCode.toUpperCase),
+				assessmentGroup = "A"
+			)
+		)
 	
 	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] =
-		SandboxData.Departments
-			.flatMap { case (code, d) => d.routes.values.toSeq }
-			.flatMap { route =>
-				route.moduleCodes.map { moduleCode =>
-					val ag = new UpstreamAssessmentGroup()
-					ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
-					ag.academicYear = AcademicYear.guessByDate(DateTime.now)
-					ag.assessmentGroup = "A"
-					ag.occurrence = "A"
-					ag
-				}
-			}
-			.toSeq
+		for {
+			(code, d) <- SandboxData.Departments.toSeq
+			route <- d.routes.values.toSeq
+			moduleCode <- route.moduleCodes
+		} yield {
+			val ag = new UpstreamAssessmentGroup()
+			ag.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+			ag.academicYear = AcademicYear.guessByDate(DateTime.now)
+			ag.assessmentGroup = "A"
+			ag.occurrence = "A"
+			ag
+		}
 	
 	def getAllAssignments: Seq[UpstreamAssignment] =
-		SandboxData.Departments
-			.flatMap { case (code, d) => 
-				d.routes.values.flatMap { route =>
-					route.moduleCodes.map { moduleCode =>
-						val a = new UpstreamAssignment
-						a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
-						a.sequence = "A01"
-						a.name = "Coursework"
-						a.assessmentGroup = "A"
-						a.departmentCode = d.code.toUpperCase
-						a
-					}
-				}
-			}
-			.toSeq
+		for {
+			(code, d) <- SandboxData.Departments.toSeq
+			route <- d.routes.values.toSeq
+			moduleCode <- route.moduleCodes
+		} yield {
+			val a = new UpstreamAssignment
+			a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
+			a.sequence = "A01"
+			a.name = "Coursework"
+			a.assessmentGroup = "A"
+			a.departmentCode = d.code.toUpperCase
+			a
+		}
 	
 }
 

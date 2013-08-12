@@ -27,6 +27,7 @@ trait SmallGroupService {
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent)
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent]
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup]
+	def findSmallGroupsByStudent(student: User): Seq[SmallGroup]
 	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet]
 
 	def updateAttendance(smallGroupEvent: SmallGroupEvent, weekNumber: Int, universityIds: Seq[String]): SmallGroupEventOccurrence
@@ -50,6 +51,8 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet] = groupSetMembersHelper.findBy(user)
 
+	def findSmallGroupsByStudent(user: User): Seq[SmallGroup] = studentGroupHelper.findBy(user)
+	
 	def getAttendees(event: SmallGroupEvent, weekNumber: Int): JList[String] = 
 		smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber) match {
 			case Some(occurrence) => occurrence.attendees.includeUsers
@@ -71,18 +74,20 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	}
 }
 
-trait SmallGroupMembershipHelpers{
+trait SmallGroupMembershipHelpers {
 	val eventTutorsHelper:UserGroupMembershipHelper[SmallGroupEvent]
   //TODO can this be removed? findSmallGroupsByTutor could just call findSmallGroupEventsByTutor and then group by group
 	val groupTutorsHelper:UserGroupMembershipHelper[SmallGroup]
 	val groupSetMembersHelper:UserGroupMembershipHelper[SmallGroupSet]
+	val studentGroupHelper: UserGroupMembershipHelper[SmallGroup]
 }
 
 // new up UGMHs which will Wire.auto() their dependencies
 trait SmallGroupMembershipHelpersImpl extends SmallGroupMembershipHelpers {
 	val eventTutorsHelper = new UserGroupMembershipHelper[SmallGroupEvent]("tutors")
 	val groupTutorsHelper = new UserGroupMembershipHelper[SmallGroup]("events.tutors")
-	val groupSetMembersHelper = new UserGroupMembershipHelper[SmallGroupSet]("members")
+	val groupSetMembersHelper = new UserGroupMembershipHelper[SmallGroupSet]("_membersGroup")
+	val studentGroupHelper = new UserGroupMembershipHelper[SmallGroup]("_studentsGroup")
 }
 
 @Service("smallGroupService")

@@ -9,6 +9,7 @@ import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.ModuleDaoImpl
 import org.junit.Before
+import uk.ac.warwick.userlookup.User
 
 class SmallGroupPersistenceTest extends PersistenceTestBase with FieldAccessByReflection {
 
@@ -63,8 +64,7 @@ class SmallGroupPersistenceTest extends PersistenceTestBase with FieldAccessByRe
 			
 			set1.groups.add(group1)
 			session.saveOrUpdate(set1)
-			
-			group1.students.addUser("cuscav")
+			group1.students.add(new User("cuscav"))
 			session.saveOrUpdate(group1)
 			
 			val event1 = new SmallGroupEvent(group1)

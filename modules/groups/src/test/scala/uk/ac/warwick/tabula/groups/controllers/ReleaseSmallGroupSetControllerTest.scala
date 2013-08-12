@@ -13,6 +13,10 @@ import uk.ac.warwick.tabula.data.model.{Department, Module}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.groups.commands.admin.ReleaseSmallGroupSetCommand
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewModule, ViewSet}
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
+import scala.collection.mutable
 
 class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
 
@@ -29,7 +33,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
   def showsForm() {
     withUser("test") {
       val controller = new ReleaseSmallGroupSetController
-      val cmd = mock[Appliable[SmallGroupSet]]
+      val cmd = mock[ReleaseSmallGroupSetCommand]
       controller.form(cmd).viewName should be("admin/groups/release")
       controller.form(cmd).map should be(Map())
     }
@@ -39,17 +43,35 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
   def invokesCommand() {
     withUser("test") {
       val controller = new ReleaseSmallGroupSetController
-      val cmd = mock[Appliable[SmallGroupSet]]
-      when(cmd.apply()).thenReturn(new SmallGroupSet())
+			val cmd = mock[ReleaseSmallGroupSetCommand]
+      when(cmd.apply()).thenReturn(Seq(new SmallGroupSet()))
 
-      controller.submit(cmd).viewName should be("ajax_success")
+      controller.submit(cmd).viewName should be("admin/groups/single_groupset")
 
       verify(cmd, times(1)).apply()
-      controller.submit(cmd).map should be(Map())
     }
   }
 
-  @Test
+	@Test
+	def returnsContextAsExpected() {
+		withUser("test") {
+			val controller = new ReleaseSmallGroupSetController
+			val cmd = mock[ReleaseSmallGroupSetCommand]
+			val set = new SmallGroupSet()
+			set.module = new Module()
+			cmd.apply() returns (Seq(set))
+			cmd.describeOutcome returns Some("hello")
+			val context = controller.submit(cmd).map
+
+			val expectedViewSet = new ViewSet(set,set.groups.asScala,GroupsViewModel.Tutor)
+			context("notificationSentMessage") should be(Some("hello"))
+			context("groupsetItem") should be(expectedViewSet)
+			context("moduleItem") should be(new ViewModule(set.module,Seq(expectedViewSet),true))
+		}
+	}
+
+
+	@Test
   def moduleListViewModelConvertsModulesToGroupSets() {
     val mod1 = new Module()
     mod1.groupSets = Seq(new SmallGroupSet, new SmallGroupSet).asJava

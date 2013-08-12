@@ -378,7 +378,35 @@ $(function(){
 	});
 });
 
+// code for bulk archive/copy assignments
+$(function(){
 
+	$('.copy-assignments, .archive-assignments').bigList({
+
+		setup: function(e){
+			if(!$(".collection-checkbox").is(":checked")){
+				$('.btn-primary').prop('disabled', 'disabled');
+			}
+		},
+
+		onSomeChecked: function() {
+			$('.btn-primary').removeProp('disabled');
+		},
+
+		onNoneChecked: function() {
+			$('.btn-primary').prop('disabled', 'disabled');
+		}
+	});
+
+	$('form.copy-assignments').confirmModal({
+		message: "Are you sure that you want to create these assignments?"
+	});
+
+	$('form.archive-assignments').confirmModal({
+		message: "Are you sure that you want to archive these assignments?"
+	});
+
+});
 
 
 
