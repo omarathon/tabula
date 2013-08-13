@@ -235,7 +235,7 @@ trait TurnitinMethods { self: Session =>
 		"dtstart" -> monthsFromNow(0), //The start date for this assignment must occur on or after today.
 		"dtdue" -> monthsFromNow(6))
 
-	private def departmentSpecificAssignmentParams(department: Department): List[Pair[String, String]] = {
+	private def departmentSpecificAssignmentParams(department: Department): List[(String, String)] = {
 
 		def booleanToString(boolean: Boolean) = boolean match {
 			case true => "1"
