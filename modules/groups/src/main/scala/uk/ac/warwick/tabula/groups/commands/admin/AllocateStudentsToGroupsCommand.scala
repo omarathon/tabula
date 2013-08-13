@@ -79,9 +79,10 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	def membersById = {
 		val allUsers = (unallocated.asScala ++ (for ((group, users) <- mapping.asScala) yield users.asScala).flatten)
 		val allUniversityIds = allUsers.filter(validUser).map { _.getWarwickId }
-		profileService.getAllMembersWithUniversityIds(allUniversityIds)
+		val members = profileService.getAllMembersWithUniversityIds(allUniversityIds)
 			.filter(member => securityService.can(viewer, Permissions.Profiles.Read.Core, member))
 			.map(member => (member.universityId, member)).toMap
+		members
 	}
 	
 	// Sort all the lists of users by surname, firstname.

@@ -18,3 +18,11 @@ class EditSmallGroupSetPropertiesPage (implicit val webDriver:WebDriver) extends
 		find(cssSelector("input.btn-primary")).get.underlying.click()
 	}
 }
+
+class AllocateStudentsToGroupsPage(implicit val webDriver:WebDriver)extends WebBrowser with BreadcrumbsMatcher {
+	def isCurrentPage(moduleName:String){
+		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
+		var heading =find(cssSelector("#main-content h1")).get
+		heading.text should startWith ("Allocate students to")
+	}
+}

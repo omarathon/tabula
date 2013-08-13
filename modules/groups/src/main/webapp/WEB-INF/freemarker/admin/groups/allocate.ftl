@@ -6,10 +6,12 @@
 
 <#macro student_item student bindpath="">
 	<#assign profile = membersById[student.warwickId]!{} />
-	<li class="student well well-small">
+	<li class="student well well-small"
+	data-gender="${profile.gender.dbValue}"
+	data-route="${profile.mostSignificantCourseDetails.route.code}"
+	data-year="${profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy}">
 		<div class="profile clearfix">
 			<@fmt.member_photo profile "tinythumbnail" false />
-
 			<div class="name">
 				<h6>${profile.fullName!student.fullName}</h6>
 				${(profile.mostSignificantCourseDetails.route.name)!student.shortDepartment}
