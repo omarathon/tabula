@@ -41,8 +41,10 @@ class CopyModuleAssignmentsController extends CourseworkController with Unarchiv
 class CopyDepartmentAssignmentsController extends CourseworkController with UnarchivedAssignmentsMap {
 
 	@ModelAttribute
-	def copyAssignmentsCommand(@PathVariable("department") department: Department) =
-		CopyAssignmentsCommand(department.modules.asScala.filter(_.assignments.size > 0))
+	def copyAssignmentsCommand(@PathVariable("department") department: Department) = {
+		val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive))
+		CopyAssignmentsCommand(modules)
+	}
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable("department") department: Department, cmd: CopyAssignmentsCommand) = {
