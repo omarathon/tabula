@@ -38,3 +38,7 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 	def permissionsParents = Stream(department)
 
 }
+
+trait HasRoute {
+	def route: Route
+}

@@ -17,7 +17,7 @@ class MonitoringPointSet extends GeneratedId {
 	@JoinColumn(name = "route_id")
 	var route: Route = _
 	
-	@OneToMany(mappedBy = "pointSet")
+	@OneToMany(mappedBy = "pointSet", cascade=Array(CascadeType.PERSIST), orphanRemoval = true)
 	@OrderBy("week")
 	var points: JList[MonitoringPoint] = JArrayList()
 
@@ -35,4 +35,13 @@ class MonitoringPointSet extends GeneratedId {
 	@NotNull
 	var templateName: String = _
 
+	def add(point: MonitoringPoint) {
+		points.add(point)
+		point.pointSet = this
+	}
+
+	def remove(point: MonitoringPoint) {
+		points.remove(point)
+		point.pointSet = null
+	}
 }

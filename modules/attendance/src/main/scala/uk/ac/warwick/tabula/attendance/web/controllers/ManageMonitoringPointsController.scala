@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.web.views.JSONView
 
 @Controller
 @RequestMapping(Array("/manage/{dept}"))
-class ManageMonitoringPointsController extends BaseController {
+class ManageMonitoringPointsController extends AttendanceController {
 
   private def toInt(text: String) =
     if (text.hasText) try { Some(text.toInt) } catch { case e: NumberFormatException => None }
@@ -23,9 +23,9 @@ class ManageMonitoringPointsController extends BaseController {
 
   @RequestMapping(method = Array(GET, HEAD))
   def render(@PathVariable("dept") dept: Department, user: CurrentUser) =
-    Mav("home/manage", "department" -> dept)
+    Mav("manage/list", "department" -> dept)
 
-  @RequestMapping(value = Array("/points"), method = Array(GET, HEAD))
+  @RequestMapping(value = Array("/points.json"), method = Array(GET, HEAD))
   def getPoints(@RequestParam route: Route, @RequestParam(value = "year", required = false) year: String) = {
     // for-comprehension on a bunch of Options is a neat way to say "do this if all options are present,
     // otherwise return None" without having to handle each one individually

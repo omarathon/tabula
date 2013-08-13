@@ -3,7 +3,7 @@
 <form action="" class="form-inline">
 	<div class="row-fluid">
 		<div class="span12">
-			<select name="routes" class="input-xxlarge">
+			<select name="route" class="input-xxlarge">
 				<option value="" disabled selected style="display:none;">Route</option>
 				<#list department.routes?sort_by("code") as route>
 					<option value="${route.code}">${route.code?upper_case} ${route.name}</option>

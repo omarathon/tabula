@@ -16,7 +16,8 @@ trait AutowiringRouteServiceComponent extends RouteServiceComponent {
 }
 
 trait RouteService {
-	def saveOrUpdate(route: Route)
+	def save(route: Route)
+	def save(set: MonitoringPointSet)
 	def getByCode(code: String): Option[Route]
 	def findMonitoringPointSet(route: Route, year: Option[Int]): Option[MonitoringPointSet]
 }
@@ -24,7 +25,8 @@ trait RouteService {
 abstract class AbstractRouteService extends RouteService {
 	self: RouteDaoComponent =>
 
-	def saveOrUpdate(route: Route) = routeDao.saveOrUpdate(route)
+	def save(route: Route) = routeDao.saveOrUpdate(route)
+	def save(set: MonitoringPointSet) = routeDao.save(set)
 	def getByCode(code: String): Option[Route] = routeDao.getByCode(code)
 	def findMonitoringPointSet(route: Route, year: Option[Int]) = routeDao.findMonitoringPointSet(route, year)
 }

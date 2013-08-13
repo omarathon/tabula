@@ -17,6 +17,7 @@ trait AutowiringRouteDaoComponent extends RouteDaoComponent {
 
 trait RouteDao {
 	def saveOrUpdate(route: Route)
+	def save(set: MonitoringPointSet)
 	def getByCode(code: String): Option[Route]
 	def findMonitoringPointSet(route: Route, year: Option[Int]): Option[MonitoringPointSet]
 }
@@ -25,6 +26,8 @@ trait RouteDao {
 class RouteDaoImpl extends RouteDao with Daoisms {
 
 	def saveOrUpdate(route: Route) = session.saveOrUpdate(route)
+
+	def save(set: MonitoringPointSet) = session.saveOrUpdate(set)
 
 	def getByCode(code: String) =
 		session.newQuery[Route]("from Route r where code = :code").setString("code", code).uniqueResult
