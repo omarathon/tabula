@@ -20,11 +20,13 @@ class DeptDetailsController extends BaseSysadminController {
 	@RequestMapping
 	def departments = Mav("sysadmin/departments/list",
 		"departments" -> moduleService.allDepartments.sortBy{ _.name })
+		.crumbs(Breadcrumbs.Current("Sysadmin department list"))
 
 	@RequestMapping(Array("/{dept}/"))
 	def department(@PathVariable("dept") dept: Department) = {
 		Mav("sysadmin/departments/single",
 			"department" -> dept)
+			.crumbs(Breadcrumbs.Current(s"Sysadmin ${dept.name} overview"))
 	}
 	
 }
@@ -38,7 +40,18 @@ trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 		new RevokeRoleCommand(department, DepartmentalAdministratorRoleDefinition)
 	
 	def form(@PathVariable("department") department: Department): Mav = {
-		Mav("sysadmin/departments/permissions/form", "department" -> department)
+		Mav("sysadmin/departments/permissions", "department" -> department)
+			.crumbs(Breadcrumbs.Current(s"Sysadmin ${department.name} permissions"))
+	}
+
+	def form(department: Department, usercodes: Seq[String], role: Option[RoleDefinition], action: String): Mav = {
+		val users = userLookup.getUsersByUserIds(usercodes.asJava)
+		Mav("sysadmin/departments/permissions",
+			"department" -> department,
+			"users" -> users,
+			"role" -> role,
+			"action" -> action)
+			.crumbs(Breadcrumbs.Current(s"Sysadmin ${department.name} permissions"))
 	}
 	
 	def redirectToDeptPermissions(deptcode: String) = Mav("redirect:/sysadmin/departments/" + deptcode + "/permissions")

@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.web.Cookies._
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.userlookup.UserLookupInterface
+import uk.ac.warwick.tabula.home.SysadminBreadcrumbs
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -25,7 +26,7 @@ import uk.ac.warwick.userlookup.UserLookupInterface
  * @deprecated Use version in home module instead
  */
 
-abstract class BaseSysadminController extends BaseController {
+abstract class BaseSysadminController extends BaseController with SysadminBreadcrumbs {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	var userLookup = Wire.auto[UserLookupInterface]
 
@@ -48,16 +49,13 @@ class SysadminController extends BaseSysadminController {
 	@ModelAttribute("reindexForm") def reindexForm = new ReindexForm
 
 	@RequestMapping
-	def home = Mav("sysadmin/home").addObjects("maintenanceModeService" -> maintenanceService)
+	def home = Mav("sysadmin/home").crumbs(Breadcrumbs.Current("Sysadmin")).addObjects("maintenanceModeService" -> maintenanceService)
 
 }
 
 @Controller
 @RequestMapping(Array("/sysadmin/god"))
 class GodModeController extends BaseSysadminController {
-
-	@RequestMapping(method = Array(HEAD, GET))
-	def form(cmd: GodModeCommand) = Mav("sysadmin/masquerade/form")
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid cmd: GodModeCommand, response: HttpServletResponse) = {

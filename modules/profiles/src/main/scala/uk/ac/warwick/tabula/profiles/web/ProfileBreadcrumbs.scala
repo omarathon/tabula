@@ -9,7 +9,7 @@ trait ProfileBreadcrumbs {
 
 object ProfileBreadcrumbs {
 	abstract class Abstract extends BreadCrumb
-	case class Standard(val title: String, val url: String, override val tooltip: String) extends Abstract
+	case class Standard(val title: String, val url: Option[String], override val tooltip: String) extends Abstract
 
 	/**
 	 * Special case breadcrumb for a profile.
@@ -19,16 +19,15 @@ object ProfileBreadcrumbs {
 			case None => "Profile for unknown user"
 			case Some(name) => name
 		}
-		val url = Routes.profile.view(profile)
+		val url = Some(Routes.profile.view(profile))
 		override val tooltip = profile.fullName.getOrElse("") + " (" + profile.universityId + ")"
 	}
 
 	/**
-	 * Not current used: a breadcrumb without a link, to represent
-	 * the current page. We don't currently include the current page in crumbs.
+	 * A breadcrumb without a link, to represent the current page.
+	 * We don't currently include the current page in crumbs, but can use this for page titles
 	 */
 	case class Current(val title: String) extends Abstract {
-		val url = null
-		override def linked = false
+		val url = None
 	}
 }
