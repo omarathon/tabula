@@ -7,6 +7,8 @@ import uk.ac.warwick.tabula.data.model.Department.Settings
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent, ModuleAndDepartmentService}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import org.springframework.validation.{BindingResult, Errors}
+import uk.ac.warwick.tabula.system.BindListener
 
 object DisplaySettingsCommand{
 	def apply(department:Department) =
@@ -17,15 +19,22 @@ object DisplaySettingsCommand{
 	    with DisplaySettingsCommandPermissions
 }
 
-trait DisplaySettingsCommandState{
+trait DisplaySettingsCommandState {
 	val department:Department
 }
 
-class DisplaySettingsCommandInternal (val department:Department) extends CommandInternal[Unit]  with DisplaySettingsCommandState  {
+class DisplaySettingsCommandInternal (val department:Department) extends CommandInternal[Unit]
+	with SelfValidating with BindListener with DisplaySettingsCommandState {
+
 	this:ModuleAndDepartmentServiceComponent =>
 	
   var showStudentName = department.showStudentName
 	var plagiarismDetection = department.plagiarismDetectionEnabled
+	var turnitinExcludeBibliography = department.turnitinExcludeBibliography
+	var turnitinExcludeQuotations = department.turnitinExcludeQuotations
+	var turnitinExcludeSmallMatches: Boolean = _ // not saved as part of the settings - just used in the UI
+	var turnitinSmallMatchWordLimit = department.turnitinSmallMatchWordLimit
+	var turnitinSmallMatchPercentageLimit = department.turnitinSmallMatchPercentageLimit
 	var assignmentInfoView = department.assignmentInfoView
 	var weekNumberingSystem = department.weekNumberingSystem
 	var defaultGroupAllocationMethod = department.defaultGroupAllocationMethod.dbValue
@@ -33,11 +42,31 @@ class DisplaySettingsCommandInternal (val department:Department) extends Command
 	override def applyInternal() = transactional() {
 		department.showStudentName = showStudentName
 		department.plagiarismDetectionEnabled =  plagiarismDetection
+		department.turnitinExcludeBibliography = turnitinExcludeBibliography
+		department.turnitinExcludeQuotations = turnitinExcludeQuotations
+		department.turnitinSmallMatchWordLimit = turnitinSmallMatchWordLimit
+		department.turnitinSmallMatchPercentageLimit = turnitinSmallMatchPercentageLimit
 		department.assignmentInfoView = assignmentInfoView
 		department.defaultGroupAllocationMethod = SmallGroupAllocationMethod(defaultGroupAllocationMethod)
 		department.weekNumberingSystem = weekNumberingSystem
 
 		moduleAndDepartmentService.save(department)
+	}
+
+	override def onBind(result: BindingResult) {
+		turnitinExcludeSmallMatches = (turnitinSmallMatchWordLimit != 0 || turnitinSmallMatchPercentageLimit != 0)
+	}
+
+	override def validate(errors: Errors) {
+		if (turnitinSmallMatchWordLimit < 0) {
+			errors.rejectValue("turnitinSmallMatchWordLimit", "department.settings.turnitinSmallMatchWordLimit")
+		}
+		if (turnitinSmallMatchPercentageLimit < 0 || turnitinSmallMatchPercentageLimit > 100) {
+			errors.rejectValue("turnitinSmallMatchPercentageLimit", "department.settings.turnitinSmallMatchPercentageLimit")
+		}
+		if (turnitinSmallMatchWordLimit != 0 && turnitinSmallMatchPercentageLimit != 0) {
+			errors.rejectValue("turnitinExcludeSmallMatches", "department.settings.turnitinSmallMatchSingle")
+		}
 	}
 }
 

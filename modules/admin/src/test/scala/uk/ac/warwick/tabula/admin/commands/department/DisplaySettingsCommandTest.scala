@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import WeekRange.NumberingSystem._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
+import org.springframework.validation.BindException
 
 class DisplaySettingsCommandTest extends TestBase with Mockito {
 
@@ -57,6 +58,10 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 			commandInternal.defaultGroupAllocationMethod = Manual.dbValue
 			commandInternal.showStudentName = false
 			commandInternal.plagiarismDetection = false
+			commandInternal.turnitinExcludeBibliography = false
+			commandInternal.turnitinExcludeQuotations = false
+			commandInternal.turnitinSmallMatchPercentageLimit = 5
+			commandInternal.turnitinSmallMatchWordLimit = 0
 			commandInternal.assignmentInfoView = Table
 			commandInternal.weekNumberingSystem = Term
 
@@ -65,6 +70,10 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 			testDepartment.defaultGroupAllocationMethod should be(Manual)
 			testDepartment.showStudentName should be(false)
 			testDepartment.plagiarismDetectionEnabled should be(false)
+			testDepartment.turnitinExcludeBibliography should be (false)
+			testDepartment.turnitinExcludeQuotations should be (false)
+			testDepartment.turnitinSmallMatchPercentageLimit should be (5)
+			testDepartment.turnitinSmallMatchWordLimit should be (0)
 			testDepartment.assignmentInfoView should be(Table)
 			testDepartment.weekNumberingSystem should be(Term)
 
@@ -104,9 +113,60 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 			perms.permissionsCheck(checking)
 			there was one(checking).PermissionCheck(Permissions.Department.ManageDisplaySettings, testDepartment)
 		}
+	}
 
+	@Test
+	def percentageValidation {
+		new Fixture {
+			commandInternal.turnitinSmallMatchPercentageLimit = 101
 
+			var errors = new BindException(commandInternal, "command")
+			commandInternal.validate(errors)
+			errors.hasErrors should be (true)
 
+			commandInternal.turnitinSmallMatchPercentageLimit = -5
+			errors = new BindException(commandInternal, "command")
+			commandInternal.validate(errors)
+			errors.hasErrors should be (true)
+
+			commandInternal.turnitinSmallMatchPercentageLimit = 5
+			errors = new BindException(commandInternal, "command")
+			commandInternal.validate(errors)
+			errors.hasErrors should be (false)
+		}
+	}
+
+	@Test
+	def wordLimitValidation {
+		new Fixture {
+			commandInternal.turnitinSmallMatchPercentageLimit = -1
+
+			var errors = new BindException(commandInternal, "command")
+			commandInternal.validate(errors)
+			errors.hasErrors should be (true)
+
+			commandInternal.turnitinSmallMatchPercentageLimit = 25
+			errors = new BindException(commandInternal, "command")
+			commandInternal.validate(errors)
+			errors.hasErrors should be (false)
+		}
+	}
+
+	@Test
+	def smallMatchSingleValidation {
+		new Fixture {
+			commandInternal.turnitinSmallMatchPercentageLimit = 5
+			commandInternal.turnitinSmallMatchWordLimit = 5
+			var errors = new BindException(commandInternal, "command")
+			commandInternal.validate(errors)
+			errors.hasErrors should be (true)
+
+			commandInternal.turnitinSmallMatchPercentageLimit = 5
+			commandInternal.turnitinSmallMatchWordLimit = 0
+			errors = new BindException(commandInternal, "command")
+			commandInternal.validate(errors)
+			errors.hasErrors should be (false)
+		}
 	}
 
 }
