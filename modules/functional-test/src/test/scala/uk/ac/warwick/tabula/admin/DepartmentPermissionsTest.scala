@@ -9,19 +9,20 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 	def withRoleInElement[T](permittedUser: String, parentElement: String)(fn: => T) =
 		as(P.Admin1) {
 
+			def usercodes = findAll(cssSelector(s"${parentElement} .user .muted")).toList.map(_.underlying.getText.trim)
+
 			def onlyMe() = {
-				val users = findAll(cssSelector(s"${parentElement} .user .muted")).toList
-				users.size should be (1)
-				users.apply(0).underlying.getText should be (P.Admin1.usercode)
+				usercodes.size should be (1)
+				usercodes.apply(0) should be (P.Admin1.usercode)
 			}
 
 			def nowhereElse() = {
 				// doesn't like CSS :not() selector, so have to get all permission-lists and filter out the current one by scala text-mungery
 				val allLists = findAll(cssSelector(".permission-list")).toList.filterNot(_.underlying.getAttribute("class").contains(parentElement))
 				// then delve further to get the usercodes included
-				val userCodes = allLists map (list => list.underlying.findElement(By.cssSelector(".user .muted")).getText.trim)
-				userCodes should contain (P.Admin1.usercode)
-				userCodes should not contain (permittedUser)
+				val filteredUsercodes = allLists map (list => list.underlying.findElement(By.cssSelector(".user .muted")).getText.trim)
+				filteredUsercodes should contain (P.Admin1.usercode)
+				filteredUsercodes should not contain (permittedUser)
 			}
 
 			When("I go the admin page")
@@ -69,34 +70,27 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 				textField(cssSelector(s"${parentElement} .pickedUser")).value should be (permittedUser)
 
 			And("The usercode should be injected into the form correctly")
-				({
-					val user = cssSelector(s"${parentElement} .add-permissions [name=usercodes]")
-					find(user) should not be (None)
-					find(user).get.underlying.getAttribute("value").trim should be (permittedUser)
-				})
+				val injected = find(cssSelector(s"${parentElement} .add-permissions [name=usercodes]"))
+				injected should not be (None)
+				injected.get.underlying.getAttribute("value").trim should be (permittedUser)
 
 			When("I submit the form")
 				find(cssSelector(s"${parentElement} form.add-permissions")).get.underlying.submit()
 
 			Then("I should see myself and the new entry")
 				({
-					val users = findAll(cssSelector(s"${parentElement} .user .muted")).toList
-					users.size should be (2)
-					val userCodes = users.map(u => u.underlying.getText.trim)
-					userCodes should contain (P.Admin1.usercode)
-					userCodes should contain (permittedUser)
+					usercodes.size should be (2)
+					usercodes should contain (P.Admin1.usercode)
+					usercodes should contain (permittedUser)
 				})
 
 			And("I should not see anyone else with any other roles")
 				nowhereElse()
 
 			When("I remove the new entry")
-				({
-					val removable = find(cssSelector(s"${parentElement} .remove-permissions [name=usercodes][value=${permittedUser}]"))
-				//	System.out.println(pageSource)
-					removable should not be (None)
-					removable.get.underlying.submit()
-				})
+				val removable = find(cssSelector(s"${parentElement} .remove-permissions [name=usercodes][value=${permittedUser}]"))
+				removable should not be (None)
+				removable.get.underlying.submit()
 
 			Then("There should only be me left")
 				onlyMe()
@@ -107,19 +101,19 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 			fn
 		}
 
-	"Department admin" should "be able to add senior tutors" in {
+	"Department admin" should "be able to add and remove senior tutors" in {
 		withRoleInElement(P.Marker1.usercode, ".tutor-table") {
-			// Nothing to do, the with...() tests enough
+			// Nothing more to do, the with...() tests enough
 		}
 	}
 
-	"Department admin" should "be able to add senior supervisors" in {
+	"Department admin" should "be able to add and remove senior supervisors" in {
 		withRoleInElement(P.Marker1.usercode, ".supervisor-table") {
-			// Nothing to do, the with...() tests enough
+			// Nothing more to do, the with...() tests enough
 		}
 	}
 
-	"Random module manager" should "not be able to add senior supervisors" in {
+	"Random module manager" should "not be able to add senior supervisors or tutors" in {
 		as(P.ModuleManager1) {
 			// no link
 			findAll(linkText("Go to the Test Services admin page")).size should be (0)
