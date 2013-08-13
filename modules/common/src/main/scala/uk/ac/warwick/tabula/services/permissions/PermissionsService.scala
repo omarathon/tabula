@@ -200,7 +200,7 @@ class GrantedPermissionsByIdCache(dao: PermissionsDao) extends RequestLevelCachi
 		ids flatMap { id => getGrantedPermissionsById[A](id) }
 	
 	def getGrantedPermissionsById[A <: PermissionsTarget : ClassTag](id: String) = 
-		cachedBy(id, dao.getGrantedPermission[A](id)).asInstanceOf[Option[GrantedPermission[A]]]
+		cachedBy(id) { dao.getGrantedPermission[A](id) }.asInstanceOf[Option[GrantedPermission[A]]]
 	
 }
 
@@ -209,8 +209,8 @@ class GrantedRoleByIdCache(dao: PermissionsDao) extends RequestLevelCaching[Stri
 	def getGrantedRolesByIds[A <: PermissionsTarget : ClassTag](ids: Seq[String]) =
 		ids flatMap { id => getGrantedRoleById[A](id) }
 	
-	def getGrantedRoleById[A <: PermissionsTarget : ClassTag](id: String) = 
-		cachedBy(id, dao.getGrantedRole[A](id)).asInstanceOf[Option[GrantedRole[A]]]
+	def getGrantedRoleById[A <: PermissionsTarget : ClassTag](id: String) =
+		cachedBy(id) { dao.getGrantedRole[A](id) }.asInstanceOf[Option[GrantedRole[A]]]
 	
 }
 

@@ -7,7 +7,7 @@ trait RequestLevelCaching[A, B] extends Logging {
 	
 	def cache = RequestInfo.fromThread map { _.requestLevelCache.getCacheByName[A, B](getClass.getName) }
 	
-	def cachedBy(key: A, default: => B) = cache match {
+	def cachedBy(key: A)(default: => B) = cache match {
 		case Some(cache) => cache.getOrElseUpdate(key, default)
 		case _ => {
 			logger.warn("Tried to call a request level cache outside of a request!")
@@ -37,8 +37,10 @@ class RequestLevelCache {
 	}
 	
 	def shutdown = {
-		cacheMap.seq.foreach(_._2.clear)
-		cacheMap.clear
+		for ((name, cache) <- cacheMap) {
+			cache.clear()
+		}
+		cacheMap.clear()
 	}
 	
 }
