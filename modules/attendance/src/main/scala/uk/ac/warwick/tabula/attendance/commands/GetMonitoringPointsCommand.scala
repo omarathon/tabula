@@ -24,7 +24,7 @@ object GetMonitoringPointsCommand {
 }
 
 abstract class GetMonitoringPointsCommand(val route: Route, val year: Option[Int])
-	extends CommandInternal[Option[MonitoringPointSet]] with Appliable[Option[MonitoringPointSet]] 
+	extends CommandInternal[Option[MonitoringPointSet]] with Appliable[Option[MonitoringPointSet]]
 			with GetMonitoringPointsCommandState {
 	self: RouteServiceComponent =>
 

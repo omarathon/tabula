@@ -9,13 +9,13 @@
 					<option value="${route.code}">${route.code?upper_case} ${route.name}</option>
 				</#list>
 			</select>
-			<select name="year"  class="input-small">
+			<!--<select name="year"  class="input-small">
 				<option value="" selected style="display:none;">Year</option>
 				<#list 1..8 as year>
 					<option value="${year}">${year}</option>
 				</#list>
 			</select>
-			<input type="submit" class="btn btn-primary" value="Show">
+			<input type="submit" class="btn btn-primary" value="Show">-->
 		</div>
 	</div>
 </form>

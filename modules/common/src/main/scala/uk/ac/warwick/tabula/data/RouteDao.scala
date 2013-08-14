@@ -19,6 +19,7 @@ trait RouteDao {
 	def saveOrUpdate(route: Route)
 	def save(set: MonitoringPointSet)
 	def getByCode(code: String): Option[Route]
+	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
 	def findMonitoringPointSet(route: Route, year: Option[Int]): Option[MonitoringPointSet]
 }
 
@@ -31,6 +32,11 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 
 	def getByCode(code: String) =
 		session.newQuery[Route]("from Route r where code = :code").setString("code", code).uniqueResult
+
+	def findMonitoringPointSets(route: Route) =
+		session.newCriteria[MonitoringPointSet]
+			.add(is("route", route))
+			.seq
 
 	def findMonitoringPointSet(route: Route, year: Option[Int]) =
 		session.newCriteria[MonitoringPointSet]

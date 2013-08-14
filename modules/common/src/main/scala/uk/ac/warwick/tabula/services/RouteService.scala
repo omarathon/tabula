@@ -19,6 +19,7 @@ trait RouteService {
 	def save(route: Route)
 	def save(set: MonitoringPointSet)
 	def getByCode(code: String): Option[Route]
+	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
 	def findMonitoringPointSet(route: Route, year: Option[Int]): Option[MonitoringPointSet]
 }
 
@@ -28,6 +29,7 @@ abstract class AbstractRouteService extends RouteService {
 	def save(route: Route) = routeDao.saveOrUpdate(route)
 	def save(set: MonitoringPointSet) = routeDao.save(set)
 	def getByCode(code: String): Option[Route] = routeDao.getByCode(code)
+	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet] = routeDao.findMonitoringPointSets(route)
 	def findMonitoringPointSet(route: Route, year: Option[Int]) = routeDao.findMonitoringPointSet(route, year)
 }
 

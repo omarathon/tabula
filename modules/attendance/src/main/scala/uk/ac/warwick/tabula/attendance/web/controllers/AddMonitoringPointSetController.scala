@@ -2,20 +2,22 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
 import uk.ac.warwick.tabula.attendance.commands.AddMonitoringPointSetCommand
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{Route, Department}
 
 @Controller
 @RequestMapping(Array("/manage/{dept}/newset"))
 class AddMonitoringPointSetController extends AttendanceController {
 
+	validatesSelf[SelfValidating]
+
 	@ModelAttribute("command")
-	def createCommand() = AddMonitoringPointSetCommand()
+	def createCommand(@RequestParam route: Route) = AddMonitoringPointSetCommand(route)
 
 	@RequestMapping(method=Array(GET,HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPointSet]) = {
