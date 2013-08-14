@@ -1,11 +1,13 @@
 package uk.ac.warwick.tabula.data.model
 
+import scala.collection.JavaConversions._
 import org.hibernate.annotations.{Fetch, FetchMode, Type, AccessType}
 import org.joda.time.DateTime
-
 import javax.persistence._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
+import java.util.HashSet
 
 @Entity @AccessType("field")
 class MarkerFeedback extends GeneratedId {
@@ -36,13 +38,20 @@ class MarkerFeedback extends GeneratedId {
 	@Fetch(FetchMode.JOIN)
 	var attachments: JList[FileAttachment] = JArrayList()
 
+	@OneToMany(mappedBy = "markerFeedback", cascade = Array(ALL))
+	var customFormValues: JSet[SavedFormValue] = new HashSet
+
+	def getValue(field: FormField): Option[SavedFormValue] = {
+		customFormValues.find( _.name == field.name )
+	}
+
 	def addAttachment(attachment: FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
 		attachment.temporary = false
 		attachment.markerFeedback = this
 		attachments.add(attachment)
 	}
-		
+
 	def removeAttachment(attachment: FileAttachment) = {
 		attachment.markerFeedback = null
 		attachments.remove(attachment)

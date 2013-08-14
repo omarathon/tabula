@@ -81,6 +81,10 @@ class SavedFormValue extends GeneratedId {
 	@JoinColumn(name = "feedback_id")
 	var feedback: Feedback = _
 
+	@ManyToOne(fetch = LAZY)
+	@JoinColumn(name = "marker_feedback_id")
+	var markerFeedback: MarkerFeedback = _
+
 	// matches with assignment field name
 	var name: String = _
 

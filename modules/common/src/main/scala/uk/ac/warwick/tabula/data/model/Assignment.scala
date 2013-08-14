@@ -192,7 +192,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	/**
 	 * Before we allow customising of assignment feedback forms, we just want the basic
-	 * fields to allow you to attach a file and enter a comment.
+	 * fields to allow you to enter a comment.
 	 */
 	def addDefaultFeedbackFields() {
 		val feedback = new TextField
