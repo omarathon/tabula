@@ -13,7 +13,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.admin.web.Routes
-import uk.ac.warwick.tabula.web.Breadcrumbs
 import uk.ac.warwick.tabula.admin.web.controllers.AdminController
 
 
@@ -55,7 +54,7 @@ class ModulePermissionController extends AdminController with ModulePermissionCo
 class ModuleAddPermissionController extends AdminController with ModulePermissionControllerMethods {
 
 	validatesSelf[GrantRoleCommand[_]]
-	
+
 	@RequestMapping(method = Array(POST), params = Array("_command=add"))
 	def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand[Module], errors: Errors) : Mav =  {
 		val module = command.scope
@@ -77,7 +76,7 @@ class ModuleAddPermissionController extends AdminController with ModulePermissio
 class ModuleRemovePermissionController extends AdminController with ModulePermissionControllerMethods {
 
 	validatesSelf[RevokeRoleCommand[_]]
-	
+
 	@RequestMapping(method = Array(POST), params = Array("_command=remove"))
 	def removePermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand[Module],
 	                     errors: Errors): Mav = {
