@@ -13,18 +13,19 @@ class AllocateStudentsToGroupsPageTest extends SmallGroupsFixture with GivenWhen
 		Given("A small group set exists with 1 small group")
 		createModule("xxx", TEST_MODULE_CODE, "Allocation Module")
 		createRoute("xx123", "xxx", "Allocation Test Route")
+		createRoute("xx456", "xxx", "Allocation Test Route 2")
 
 		val setId = createSmallGroupSet(TEST_MODULE_CODE, TEST_GROUPSET_NAME)
 
 		And("Five students are a member of the groupset")
 
-		for ((studentId, gender, year) <- Seq(
-			(P.Student1.usercode, "F", 1),
-			(P.Student2.usercode, "M", 1),
-			(P.Student3.usercode, "F", 2),
-			(P.Student4.usercode, "M", 2),
-			(P.Student5.usercode, "F", 3))) {
-			createStudentMember(studentId, gender, "xx123", year)
+		for ((studentId, gender, year, route) <- Seq(
+			(P.Student1.usercode, "F", 1,"xx123"),
+			(P.Student2.usercode, "M", 1,"xx123"),
+			(P.Student3.usercode, "F", 1,"xx456"),
+			(P.Student4.usercode, "M", 2,"xx123"),
+			(P.Student5.usercode, "F", 3,"xx123"))) {
+			createStudentMember(studentId, gender, route, year)
 			addStudentToGroupSet(studentId, setId)
 		}
 

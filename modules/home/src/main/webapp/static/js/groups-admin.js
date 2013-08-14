@@ -76,8 +76,63 @@ $(function() {
         });
     });
 });
+
+function updateFilters(){
+    var studentList=$("#studentslist li");
+    var controls = $("#filter-controls input[type=checkbox]");
+    // get a list of (json-stringed) name/value pairs for attributes to hide
+    var hidden = $(controls).map(function(e,control){
+        var $control = $(control);
+        if ( ! $control.is(":checked")){ // unchecked means we will hide any students with this attribute
+           var hideThis = {};
+           hideThis[$control.data("filter-attr")]=$control.data("filter-value");
+           return JSON.stringify(hideThis);
+        }
+    });
+
+    // now go through all the students and hide/show each as appropriate
+    $(studentList).each(function(i, ele){
+        setVisibility(ele, hidden);
+     });
+}
+
+function setVisibility(element, hiddenAttrs){
+    var $element = $(element);
+    var data = $element.data();
+
+    // convert any data-f-* attributes into JSON
+    // n.b. jQuery data() camel-cases attributes;
+    // it converts data-f-Bar="foo" into data()[fBar]=foo
+    var stringData = [];
+    for (var prop in data){
+        if (prop.match("^f[A-Z]")){
+            var o = {};
+            o[prop] = data[prop];
+            stringData.push(JSON.stringify(o));
+        }
+    }
+
+    // if this element has any attributes on the hidden list, it
+    // should not be visible. Otherwise, show it.
+    var visible = true;
+    $(hiddenAttrs).each(function(i,attr){
+        if ($.inArray(attr, stringData) > -1){
+            visible = false;
+            return false; // break out of the loop early
+        }
+    });
+    $element.toggle(visible);
+}
+
+
 // Drag and drop allocation
 $(function() {
+
+    $("#filter-controls").on('click','input[type=checkbox]', function(){
+         updateFilters();
+    });
+
+
 	$('#allocateStudentsToGroupsCommand')
 		.dragAndDrop({
 			itemName: 'student',
