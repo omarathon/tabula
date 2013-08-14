@@ -40,8 +40,8 @@ trait CourseworkFixtures extends BrowserTest {
 		val info = getModuleInfo(moduleCode)
 
 		click on (info.findElement(By.className("module-manage-button")).findElement(By.partialLinkText("Manage")))
-
-		val addAssignment = info.findElement(By.partialLinkText("Add assignment"))
+		
+		val addAssignment = info.findElement(By.partialLinkText("Create new assignment"))
 		eventually {
 			addAssignment.isDisplayed should be (true)
 		}

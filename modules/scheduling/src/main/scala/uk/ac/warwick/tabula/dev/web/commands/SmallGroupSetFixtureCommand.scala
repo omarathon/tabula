@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupAllocationM
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.StudentSignUp
+import uk.ac.warwick.tabula.data.model.UserGroup
 
 class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Logging {
 
@@ -36,7 +37,7 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 			}
 			groupSet.openForSignups = openForSignups
 			groupSet.groups = JArrayList()
-
+			groupSet._membersGroup = UserGroup.ofUsercodes
 			if (maxGroupSize > 0){
 				groupSet.defaultMaxGroupSize = maxGroupSize
 				groupSet.defaultMaxGroupSizeEnabled = true
@@ -47,6 +48,8 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 				if (maxGroupSize > 0){
 					group.maxGroupSize = maxGroupSize
 				}
+				group._studentsGroup = UserGroup.ofUsercodes // have to user userCodes, because you can't look up an ext-user
+				                                             // (e.g. tabula-functest-student1) by uni ID.
 				groupSet.groups.add(group)
 
 			}

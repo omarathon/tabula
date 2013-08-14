@@ -67,7 +67,12 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 
 	def findLeaveButtonFor(groupName:String) = {
 		underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).headOption.map(
-			groupNameHeading=>groupNameHeading.findElement(By.xpath("../form/input[@type='submit']"))
+
+			groupNameHeading=>{
+				val parent = groupNameHeading.findElement(By.xpath(".."))
+				//groupNameHeading.findElement(By.xpath("../form/input[@type='submit']"))}
+				parent.findElement(By.cssSelector("form input.btn"))
+			}
 		)
 	}
 
@@ -78,7 +83,7 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 	def findSelectGroupCheckboxFor(groupName:String ) = {
 		val groupNameHeading = underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).head
     // ugh. Might be worth investigating ways of using JQuery selector/traversals in selenium instead of this horror:
-		groupNameHeading.findElement(By.xpath("../../div[@class='span1']/input"))
+		groupNameHeading.findElement(By.xpath("../../div[contains(@class,'span1')]/input"))
 	}
 }
 

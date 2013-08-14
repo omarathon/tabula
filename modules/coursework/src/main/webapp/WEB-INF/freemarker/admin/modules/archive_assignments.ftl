@@ -4,7 +4,7 @@
 	<form action="" method="post" class="form-horizontal archive-assignments">
 		<div class="submit-buttons">
 			<input class="btn btn-primary" type="submit" value="Confirm">
-			<a class="btn" href="${cancel}">Cancel</a>
+			<a class='btn' href='<@url page=cancel context="/coursework" />'>Cancel</a>
 		</div>
 
 		<#assign modules = archiveAssignmentsCommand.modules />
@@ -13,7 +13,7 @@
 
 		<div class="submit-buttons">
 			<input class="btn btn-primary" type="submit" value="Confirm">
-			<a class="btn" href="${cancel}">Cancel</a>
+			<a class='btn' href='<@url page=cancel context="/coursework" />'>Cancel</a>
 		</div>
 	</form>
 </#escape>

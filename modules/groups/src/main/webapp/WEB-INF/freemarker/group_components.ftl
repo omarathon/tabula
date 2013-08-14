@@ -26,7 +26,7 @@
 <#macro module_info data>
 <div class="small-group-modules-list">
 <#list data.moduleItems as moduleItem>
-<@single_module moduleItem />
+<@single_module moduleItem data.canManageDepartment/>
 </#list>
 </div> <!-- small-group-modules-list-->
 <#-- List of students modal -->
@@ -36,7 +36,7 @@
 </#macro>
 
 
-<#macro single_module moduleItem>
+<#macro single_module moduleItem canManageDepartment>
 
 <#assign module=moduleItem.module />
 <span id="${module_anchor(module)}-container">
@@ -50,7 +50,7 @@
 </#list>
 
 <a id="${module_anchor(module)}"></a>
-<div class="module-info striped-section<#if has_groups> collapsible expanded</#if><#if data.canManageDepartment && !has_groups> empty</#if>"
+<div class="module-info striped-section<#if has_groups> collapsible expanded</#if><#if canManageDepartment && !has_groups> empty</#if>"
 	 data-name="${module_anchor(module)}">
 	<div class="clearfix">
 
@@ -126,9 +126,7 @@
 
 						<#list setItem.groups as group>
 							<div class="row-fluid group">
-							<div class="span1
-							${(setItem.viewerMustSignUp && group.full)?string('use-tooltip" title="There are no spaces left on this group"','"')}
-							>
+							<div class="span1 ${(setItem.viewerMustSignUp && group.full)?string('use-tooltip" title="There are no spaces left on this group"','"')}>
 							 <#if setItem.viewerMustSignUp>
 							   <input type="radio"
 							          name="group"
@@ -137,7 +135,7 @@
 							          class="radio inline group-selection-radio"/>
 							</#if>
 							</div>
-							<div class="${moduleItem.canManageGroups?string('span7','span11')}">
+							<div class="span11">
 								<h4 class="name">
 								${group.name!""}
 								<#if setItem.canViewMembers >
@@ -178,11 +176,26 @@
 
 								<ul class="unstyled">
 									<#list group.events as event>
-										<li>
-										<#-- Tutor, weeks, day/time, location -->
-										<@fmt.weekRanges event />,
-										${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
-										${event.location!"[no location]"}
+										<li class="clearfix">
+											<#-- Tutor, weeks, day/time, location -->
+											<span class="pull-left eventWeeks span6">
+											<@fmt.weekRanges event />,
+											${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
+											${event.location!"[no location]"}
+											</span>
+
+											<#if moduleItem.canManageGroups>
+											<span class="pull-right eventRegister">
+												<form method="get" action="/groups/event/${event.id}/register">
+
+													<input type="hidden" name="returnTo" value="/admin/department/${department.code}" />
+													<span class="form-horizontal">
+														<@fmt.weekRangeSelect event />
+														<button class="btn btn-small btn-primary register-button">Record</button>
+													 </span>
+												</form>
+											</span>
+											</#if>
 										</li>
 									</#list>
 								</ul>

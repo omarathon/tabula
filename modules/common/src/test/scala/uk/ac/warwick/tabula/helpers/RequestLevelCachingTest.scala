@@ -14,10 +14,10 @@ class RequestLevelCachingTest extends TestBase {
 			"solution"
 		}
 		
-		cache.cachedBy("key", expensiveOp) should be ("solution")
+		cache.cachedBy("key") { expensiveOp } should be ("solution")
 		timesRun should be (1)
 		
-		cache.cachedBy("key", expensiveOp) should be ("solution")
+		cache.cachedBy("key") { expensiveOp } should be ("solution")
 		timesRun should be (2)
 		
 		cache.cache should be ('empty)
@@ -31,19 +31,19 @@ class RequestLevelCachingTest extends TestBase {
 		}
 			
 		withUser("cuscav") {
-			cache.cachedBy("key", expensiveOp) should be ("solution")
+			cache.cachedBy("key") { expensiveOp } should be ("solution")
 			timesRun should be (1)
 			
-			cache.cachedBy("key", expensiveOp) should be ("solution")
+			cache.cachedBy("key") { expensiveOp } should be ("solution")
 			timesRun should be (1)
 			
-			cache.cachedBy("other-key", expensiveOp) should be ("solution")
+			cache.cachedBy("other-key") { expensiveOp } should be ("solution")
 			timesRun should be (2)
 			
-			cache.cachedBy("other-key", expensiveOp) should be ("solution")
+			cache.cachedBy("other-key") { expensiveOp } should be ("solution")
 			timesRun should be (2)
 			
-			cache.cachedBy("key", expensiveOp) should be ("solution")
+			cache.cachedBy("key") { expensiveOp } should be ("solution")
 			timesRun should be (2)
 			
 			cache.cache should be (Some(Map("key" -> "solution", "other-key" -> "solution")))
@@ -52,14 +52,14 @@ class RequestLevelCachingTest extends TestBase {
 		// Out of request, cache should be empty again
 		cache.cache should be ('empty)
 		
-		cache.cachedBy("key", expensiveOp) should be ("solution")
+		cache.cachedBy("key") { expensiveOp } should be ("solution")
 		timesRun should be (3)
 		
 		withUser("cuscav") {
-			cache.cachedBy("key", expensiveOp) should be ("solution")
+			cache.cachedBy("key") { expensiveOp } should be ("solution")
 			timesRun should be (4)
 			
-			cache.cachedBy("key", expensiveOp) should be ("solution")
+			cache.cachedBy("key") { expensiveOp } should be ("solution")
 			timesRun should be (4)
 			
 			cache.cache should be (Some(Map("key" -> "solution")))

@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.MockUserLookup
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.userlookup.User
 import org.junit.Before
+import org.apache.poi.xssf.usermodel.XSSFSheet
 
 class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 
@@ -22,7 +23,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 
 		set.module = module
 		set.membershipService = membershipService
-		set.members.userLookup = userLookup
+		set._membersGroup.userLookup = userLookup
 
 		val user1 = new User("cuscav")
 		user1.setFoundUser(true)
@@ -84,21 +85,29 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		group2.groupSet = set
 		group3.groupSet = set
 		group4.groupSet = set
-		group1.students.userLookup = userLookup
-		group2.students.userLookup = userLookup
-		group3.students.userLookup = userLookup
-		group4.students.userLookup = userLookup
+		group1._studentsGroup.userLookup = userLookup
+		group2._studentsGroup.userLookup = userLookup
+		group3._studentsGroup.userLookup = userLookup
+		group4._studentsGroup.userLookup = userLookup
 
-		set.members.addUser(user1.getUserId)
-		set.members.addUser(user2.getUserId)
-		set.members.addUser(user3.getUserId)
-		set.members.addUser(user4.getUserId)
-		set.members.addUser(user5.getUserId)
+		set.members.add(user1)
+		set.members.add(user2)
+		set.members.add(user3)
+		set.members.add(user4)
+		set.members.add(user5)
 
 	}
 
 
 	@Test def allocateUsersSheet = withUser("slengteng") {
+
+		implicit class SearchableSheet(self:XSSFSheet) {
+			def containsDataRow(id:String, name:String, maxRows:Int = self.getLastRowNum):Boolean = {
+				val rows = for (i<- 1 to maxRows) yield self.getRow(i)
+				val matchingRow = rows.find(r=>r.getCell(0).toString == id && r.getCell(1).toString == name)
+				matchingRow.isDefined
+			}
+		}
 
 		val cmd = new AllocateStudentsTemplateCommand(module, set, currentUser)
 		val workbook = cmd.generateWorkbook()
@@ -111,29 +120,16 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		headerRow.getCell(2).toString should be ("Group name")
 		headerRow.getCell(3).toString should be ("group_id")
 
-		var studentRow = allocateSheet.getRow(4)
-		studentRow.getCell(0).toString should be ("0672089")
-		studentRow.getCell(1).toString should be ("Mathew Mannion")
+		allocateSheet.containsDataRow("0672089","Mathew Mannion", maxRows = 6) should be(true)
+		allocateSheet.containsDataRow("0672088","Nick Howes", maxRows = 6) should be(true)
+		allocateSheet.containsDataRow("8888888","Steven Carpenter", maxRows = 6) should be(true)
+		allocateSheet.containsDataRow("9293883","Matthew Jones", maxRows = 6) should be(true)
+		allocateSheet.containsDataRow("0200202","John Dale", maxRows = 6) should be(true)
+		allocateSheet.containsDataRow("","", maxRows = 6) should be(true)
 
-		studentRow = allocateSheet.getRow(5)
-		studentRow.getCell(0).toString should be ("0672088")
-		studentRow.getCell(1).toString should be ("Nick Howes")
-
-		studentRow = allocateSheet.getRow(1)
-		studentRow.getCell(0).toString should be ("8888888")
-		studentRow.getCell(1).toString should be ("Steven Carpenter")
-
-		studentRow = allocateSheet.getRow(3)
-		studentRow.getCell(0).toString should be ("9293883")
-		studentRow.getCell(1).toString should be ("Matthew Jones")
-
-		studentRow = allocateSheet.getRow(2)
-		studentRow.getCell(0).toString should be ("0200202")
-		studentRow.getCell(1).toString should be ("John Dale")
-
-		studentRow = allocateSheet.getRow(6)
-		studentRow.getCell(0).toString should be ("")
-		studentRow.getCell(1).toString should be ("")
+		val blankRow = allocateSheet.getRow(6)
+		blankRow.getCell(0).toString should be ("")
+		blankRow.getCell(1).toString should be ("")
 
 	}
 

@@ -120,7 +120,7 @@
 							</#if>
 						</div>
 					</div>
-					
+
 					<div class="row-fluid">
 						<div class="span12">
 							<ul class="events unstyled">

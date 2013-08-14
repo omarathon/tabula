@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.helpers
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
+import scala.language.implicitConversions
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.util.termdates.TermFactory
 import uk.ac.warwick.spring.Wire
@@ -13,8 +14,8 @@ import uk.ac.warwick.util.termdates.Term
 import org.joda.time.DateTime
 import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.tabula.helpers.Promises._
-import uk.ac.warwick.tabula.data.model.{ Department, UserSettings }
-import uk.ac.warwick.tabula.{ CurrentUser, RequestInfo }
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.JavaImports._
 import freemarker.template.{ TemplateModel, TemplateMethodModelEx }
@@ -22,11 +23,12 @@ import freemarker.template.utility.DeepUnwrap
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.UserSettingsService
 
+
 /** Format week ranges, using a formatting preference for term week numbers, cumulative week numbers or academic week numbers.
   *
   * WeekRange objects are always _stored_ with academic week numbers. These may span multiple terms, holidays etc.
   */
-object WeekRangesFormatter {
+object WeekRangesFormatter extends VacationAware {
 
 	val separator = "; "
 
@@ -43,32 +45,45 @@ object WeekRangesFormatter {
 		private val map = mutable.HashMap[AcademicYear, WeekRangesFormatter]()
 		def retrieve(year: AcademicYear) = map.getOrElseUpdate(year, new WeekRangesFormatter(year))
 	}
-	
-	/* Pimp the TermFactory to include Vacation "Terms"
-	 * We extend AnyVal here to make this a Value class (c.f. http://docs.scala-lang.org/overviews/core/value-classes.html)
-	 * This means we never instantiate the wrapper, the compiler just performs voodoo to call the methods. 
-	 */
-	implicit class VacationAwareTermFactory(val delegate: TermFactory) extends AnyVal {
-		def getTermFromDateIncludingVacations(date: BaseDateTime) = {
-			val term = delegate.getTermFromDate(date)
-			if (date.isBefore(term.getStartDate())) Vacation(delegate.getPreviousTerm(term), term)
-			else term
-		}
+}
 
-		def getTermsBetween(start: BaseDateTime, end: BaseDateTime): Seq[Term] = {
-			val startTerm = getTermFromDateIncludingVacations(start)
-			val endTerm = getTermFromDateIncludingVacations(end)
 
-			if (startTerm == endTerm) Seq(startTerm)
-			else startTerm +: getTermsBetween(startTerm.getEndDate().plusDays(1), end)
-		}
+
+
+/* Pimp the TermFactory to include Vacation "Terms"
+ * We extend AnyVal here to make this a Value class (c.f. http://docs.scala-lang.org/overviews/core/value-classes.html)
+ * This means we never instantiate the wrapper, the compiler just performs voodoo to call the methods.
+ */
+
+trait VacationAware {
+	implicit def vacationAwareTermFactory(delegate: TermFactory) = new VacationAwareTermFactory(delegate)
+}
+
+class VacationAwareTermFactory(val delegate: TermFactory) extends AnyVal  {
+	def getTermFromDateIncludingVacations(date: BaseDateTime) = {
+		val term = delegate.getTermFromDate(date)
+		if (date.isBefore(term.getStartDate())) Vacation(delegate.getPreviousTerm(term), term)
+		else term
 	}
 
+	def getTermsBetween(start: BaseDateTime, end: BaseDateTime): Seq[Term] = {
+		val startTerm = getTermFromDateIncludingVacations(start)
+		val endTerm = getTermFromDateIncludingVacations(end)
+
+		if (startTerm == endTerm) Seq(startTerm)
+		else startTerm +: getTermsBetween(startTerm.getEndDate().plusDays(1), end)
+	}
 }
+
+
+
+
+
 
 /** Companion class for Freemarker.
   */
 class WeekRangesFormatterTag extends TemplateMethodModelEx {
+
 	import WeekRangesFormatter.format
 
 	@Autowired var userSettings: UserSettingsService = _
@@ -99,10 +114,8 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 	}
 }
 
-class WeekRangesFormatter(year: AcademicYear) {
+class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYear) {
 	import WeekRangesFormatter._
-
-	var termFactory = Wire[TermFactory]
 
 	// Pimp Term to have a clever toString output
 	implicit class PimpedTerm(term: Term) {
@@ -172,13 +185,40 @@ class WeekRangesFormatter(year: AcademicYear) {
 			}.mkString(separator)
 	}
 
+}
+
+
+object WeekRangeSelectFormatter extends VacationAware {
+
+	val separator = "; "
+
+	private val formatterMap = new WeekRangeSelectFormatterCache
+
+	/** The reason we need the academic year and day of the week here is that it might affect
+		* which term a date falls under. Often, the Spring term starts on a Wednesday after New
+		* Year's Day, so Monday of that week is in the vacation, but Thursday is week 1 of term 2.
+		*/
+	def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, year: AcademicYear, numberingSystem: String) =
+		formatterMap.retrieve(year) format (ranges, dayOfWeek, numberingSystem)
+
+	class WeekRangeSelectFormatterCache {
+		private val map = mutable.HashMap[AcademicYear, WeekRangeSelectFormatter]()
+		def retrieve(year: AcademicYear) = map.getOrElseUpdate(year, new WeekRangeSelectFormatter(year))
+	}
+}
+
+
+class WeekRanges(year:AcademicYear) extends VacationAware {
+
+	var termFactory = Wire[TermFactory]
+
 	// We are confident that November 1st is always in term 1 of the year
 	lazy val weeksForYear =
 		termFactory.getAcademicWeeksForYear(new DateMidnight(year.startYear, DateTimeConstants.NOVEMBER, 1))
 			.asScala.map { pair => (pair.getLeft -> pair.getRight) } // Utils pairs to Scala pairs
 			.toMap
 
-	private def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =
+	def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =
 		weeksForYear(weekNumber).getStart().withDayOfWeek(dayOfWeek.jodaDayOfWeek)
 
 	def groupWeekRangesByTerm(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek) = {
@@ -202,8 +242,67 @@ class WeekRangesFormatter(year: AcademicYear) {
 			}
 		}
 	}
-
 }
+
+
+
+class WeekRangeSelectFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYear) {
+
+	def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, numberingSystem: String) = {
+		val allTermWeekRanges = WeekRange.termWeekRanges(year)
+		val currentTerm = getTermNumber(DateTime.now)
+		val eventRanges = ranges flatMap (_.toWeeks)
+
+		val currentTermRanges = allTermWeekRanges.toList(currentTerm).toWeeks
+		val weeks = currentTermRanges.intersect(eventRanges)
+
+	  numberingSystem match {
+			case WeekRange.NumberingSystem.Term => weeks.map( x => EventWeek( x - (currentTermRanges(0) - 1 ), x ) )
+			case WeekRange.NumberingSystem.Cumulative => weeks.map({x =>
+				val date = weekNumberToDate(x, dayOfWeek)
+				EventWeek(termFactory.getTermFromDate(date).getCumulativeWeekNumber(date), x)
+			})
+			case WeekRange.NumberingSystem.Academic => eventRanges.map(x => EventWeek(x, x))
+			case _ => weeks.map( x => EventWeek(x, x) )
+		}
+	}
+
+	def getTermNumber(now: DateTime): Int = {
+		termFactory.getTermFromDate(DateTime.now).getTermType match {
+			case Term.TermType.autumn => 0
+			case Term.TermType.spring => 1
+			case Term.TermType.summer => 2
+		}
+	}
+}
+
+case class EventWeek(weekToDisplay: Int, weekToStore: Int)
+
+class WeekRangeSelectFormatterTag extends TemplateMethodModelEx {
+	import WeekRangeSelectFormatter.format
+
+	@Autowired var userSettings: UserSettingsService = _
+
+		/** Pass through all the arguments, or just a SmallGroupEvent if you're lazy */
+		override def exec(list: JList[_]) = {
+			val user = RequestInfo.fromThread.get.user
+
+			def numberingSystem(department: Department) = {
+				userSettings.getByUserId(user.apparentId)
+					.flatMap { settings => Option(settings.weekNumberingSystem) }
+					.getOrElse(department.weekNumberingSystem)
+			}
+
+			val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
+			args match {
+				case Seq(event: SmallGroupEvent) =>
+					format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(event.group.groupSet.module.department))
+
+				case _ => throw new IllegalArgumentException("Bad args: " + args)
+			}
+		}
+}
+
 
 /** Special implementation of Term to encapsulate the idea of a Vacation.
   * Our default TermFactory doesn't care about Vacations, it returns the

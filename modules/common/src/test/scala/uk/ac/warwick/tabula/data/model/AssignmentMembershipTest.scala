@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
-import org.junit.Test
+import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.{AssignmentMembershipServiceImpl, AssignmentMembershipService}
 import uk.ac.warwick.userlookup.User
@@ -11,6 +9,8 @@ import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.services.IncludeType
 import uk.ac.warwick.tabula.services.SitsType
 import uk.ac.warwick.tabula.services.ExcludeType
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.JavaImports.{JHashMap,JList}
 
 class AssignmentMembershipTest extends TestBase with Mockito {
 
@@ -41,6 +41,10 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		}
 		userLookup.getUserByWarwickUniId(any[String]) answers { id =>
 			userDatabase find {_.getWarwickId == id} getOrElse (new AnonymousUser())
+		}
+		userLookup.getUsersByUserIds(any[JList[String]]) answers {case ids:JList[String]=>
+			val users = ids.asScala.map(id=>(id,userDatabase find {_.getUserId == id} getOrElse (new AnonymousUser())))
+			JHashMap(users:_*)
 		}
     assignmentMembershipService = {
       val s = new AssignmentMembershipServiceImpl
@@ -78,9 +82,11 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 	@Test def includeAndExclude {
 		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
 		val others = UserGroup.ofUsercodes
+		others.userLookup = userLookup
 		others.includeUsers.add("aaaaa")
 		others.excludeUsers.add("aaaaf")
 		val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(others)).items
+
 		membership.size should be (3)
 		
 		membership(0).user.getFullName should be ("Roger Aaaaa")
@@ -112,31 +118,32 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 	 * group anyway so the exclusion does nothing. 
 	 */
 	@Test def redundancy {
-		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
-        val others = UserGroup.ofUsercodes
-        others.includeUsers.add("aaaaf")
-        others.excludeUsers.add("aaaah")
-        val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(others)).items
-        membership.size should be (3)
-        
-        membership(0).user.getFullName should be ("Roger Aaaaf")
-        membership(0).itemType should be (IncludeType)
-        membership(0).itemTypeString should be ("include")
-        membership(0).extraneous should be (true)
-        
-        membership(1).user.getFullName should be ("Roger Aaaah")
-        membership(1).itemType should be (ExcludeType)
-        membership(1).itemTypeString should be ("exclude")
-        membership(1).extraneous should be (true)
-        
-        membership(2).user.getFullName should be ("Roger Aaaag")
-        membership(2).itemType should be (SitsType)
-        membership(2).itemTypeString should be ("sits")
-        membership(2).extraneous should be (false)
+		val upstream = newAssessmentGroup(Seq("0000005", "0000006"))
+		val others = UserGroup.ofUsercodes
+		others.includeUsers.add("aaaaf")
+		others.excludeUsers.add("aaaah")
+		others.userLookup = userLookup
+		val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(others)).items
+		membership.size should be(3)
+
+		membership(0).user.getFullName should be("Roger Aaaaf")
+		membership(0).itemType should be(IncludeType)
+		membership(0).itemTypeString should be("include")
+		membership(0).extraneous should be(true)
+
+		membership(1).user.getFullName should be("Roger Aaaah")
+		membership(1).itemType should be(ExcludeType)
+		membership(1).itemTypeString should be("exclude")
+		membership(1).extraneous should be(true)
+
+		membership(2).user.getFullName should be("Roger Aaaag")
+		membership(2).itemType should be(SitsType)
+		membership(2).itemTypeString should be("sits")
+		membership(2).extraneous should be(false)
 	}
-	
-	
-    def newAssessmentGroup(uniIds:Seq[String]) = {
+
+
+	def newAssessmentGroup(uniIds:Seq[String]) = {
         val upstream = new UpstreamAssessmentGroup
         uniIds foreach upstream.members.addUser
         upstream

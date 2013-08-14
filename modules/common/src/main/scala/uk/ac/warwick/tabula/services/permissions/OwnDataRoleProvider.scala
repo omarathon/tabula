@@ -40,7 +40,7 @@ class OwnDataRoleProvider extends RoleProvider {
 			//You can view small groups that you are a member of
 			case smallGroup: SmallGroup => {
 				val studentId = user.apparentUser.getWarwickId
-				if (studentId.hasText && smallGroup.students.includes(studentId)) Stream(SmallGroupMember(smallGroup))
+				if (studentId.hasText && smallGroup.students.includesUser(user.apparentUser)) Stream(SmallGroupMember(smallGroup))
 				else Stream.empty
 			}
 

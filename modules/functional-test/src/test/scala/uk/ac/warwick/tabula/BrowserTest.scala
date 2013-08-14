@@ -55,6 +55,13 @@ abstract class BrowserTest
 		case "ie" => new InternetExplorerDriver
 	}
 
+	def ifHtmlUnitDriver(operation:HtmlUnitDriver=>Unit) = {
+		webDriver match {
+			case h:HtmlUnitDriver=>operation(h)
+			case _=> // do nothing
+		}
+	}
+	
 	/**
 	 * eventually{} is a generic ScalaTest method to repeatedly
 	 * try a block of code until it works or we give up. eventuallyAjax {}

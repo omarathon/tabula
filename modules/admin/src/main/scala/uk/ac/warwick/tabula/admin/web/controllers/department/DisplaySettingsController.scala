@@ -7,17 +7,17 @@ import uk.ac.warwick.tabula.data.model.Department
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
 import javax.validation.Valid
-import uk.ac.warwick.tabula.web.Breadcrumbs
-import uk.ac.warwick.tabula.admin.commands.department.{DisplaySettingsCommandState, DisplaySettingsCommand}
-import org.springframework.web.bind.annotation.RequestMethod
+import uk.ac.warwick.tabula.admin.commands.department.{DisplaySettingsCommand, DisplaySettingsCommandState}
 import uk.ac.warwick.tabula.admin.web.controllers.AdminController
 import uk.ac.warwick.tabula.admin.web.Routes
-import org.springframework.web.bind.annotation.RequestParam
-import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
+
 
 @Controller
 @RequestMapping(Array("/department/{dept}/settings/display"))
 class DisplaySettingsController extends AdminController {
+
+	validatesSelf[SelfValidating]
 
 	@ModelAttribute("displaySettingsCommand") def displaySettingsCommand(@PathVariable("dept") dept:Department) = DisplaySettingsCommand(dept)
 	
@@ -36,7 +36,7 @@ class DisplaySettingsController extends AdminController {
 			), dept)
 
 	@RequestMapping(method=Array(POST))
-	def saveSettings(@Valid @ModelAttribute("displaySettingsCommand") cmd:DisplaySettingsCommandState with Appliable[Unit], errors:Errors) = {
+	def saveSettings(@Valid @ModelAttribute("displaySettingsCommand") cmd:DisplaySettingsCommandState  with Appliable[Unit], errors:Errors) = {
 		if (errors.hasErrors){
 			viewSettings(cmd.department, user, cmd, errors)
 		} else {

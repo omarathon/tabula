@@ -96,29 +96,43 @@
 		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
 	};
 
-	// apply to a checkbox or radio button
+	/* apply to a checkbox or radio button. When the target is selected a div containing further related form elements
+	   is revealed.
+
+	   Triggers a 'tabula.slideMoreOptions.shown' event on the div when it is revealed and a
+	   'tabula.slideMoreOptions.hidden' event when it is hidden.
+	*/
 	jQuery.fn.slideMoreOptions = function($slidingDiv, showWhenChecked) {
 		var $this = $(this);
 		var name = $this.attr("name");
 		var $form = $this.closest('form');
+		var doNothing = function(){};
 
 		// for checkboxes, there will just be one target - the current element (which will have the same name as itself).
 		// for radio buttons, each radio button will be a target.  They are identified as a group because they all have the same name.
 		var $changeTargets = $("input[name='" + name + "']", $form);
 		if (showWhenChecked) {
-			$changeTargets.change(function(){
-				if ($this.is(':checked'))
+			$changeTargets.change(function() {
+				if ($this.is(':checked')) {
 					$slidingDiv.stop().slideDown('fast');
-				else
+					$slidingDiv.trigger('tabula.slideMoreOptions.shown');
+				}
+				else {
 					$slidingDiv.stop().slideUp('fast');
+					$slidingDiv.trigger('tabula.slideMoreOptions.hidden');
+				}
 			});
 			$this.trigger('change');
 		} else {
-			$changeTargets.change(function(){
-				if ($this.is(':checked'))
+			$changeTargets.change(function() {
+				if ($this.is(':checked')) {
 					$slidingDiv.stop().slideUp('fast');
-				else
+					$slidingDiv.trigger('tabula.slideMoreOptions.hidden');
+				}
+				else {
 					$slidingDiv.stop().slideDown('fast');
+					$slidingDiv.trigger('tabula.slideMoreOptions.shown');
+				}
 			});
 			$this.trigger('change');
 		}
@@ -701,4 +715,23 @@ jQuery(function($){
         var elementHeight = ($(window).height() - scrollable.offset().top) - 20;
         scrollable.css({'max-height':elementHeight,'overflow-y': 'auto'});
     });
+});
+
+// code for department settings - lives here as department settings is included in most modules
+jQuery(function($){
+	$('input#plagiarismDetection').slideMoreOptions($('#turnitin-options'), true);
+
+	$('input#turnitinExcludeSmallMatches').slideMoreOptions($('#small-match-options'), true);
+
+	$('#small-match-options').on('tabula.slideMoreOptions.hidden',  function() {
+		if(!$(this).is(':checked')){
+			$('#small-match-options input[type=text]').val('0');
+		}
+	});
+
+	$('.settings-form').radioDisable({
+		onDisable: function($input){
+			$input.val("0");
+		}
+	});
 });

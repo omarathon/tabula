@@ -67,7 +67,13 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 
 		When("I Log in as the student and view the groups page")
 		signIn as(P.Student1)  to (Path("/groups"))
+
+
 		val groupsPage = new GroupsHomePage
+
+		// HTMLUnit javascript messes up the DOM when you have use-tooltip on a form element you want to query for
+		ifHtmlUnitDriver(h=>h.setJavascriptEnabled(false))
+		go to groupsPage.url
 		val groupInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
 		Then("The 'leave' button for group 1 should be enabled")
@@ -89,6 +95,8 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 
 		val group2Checkbox = groupsetInfo.findSelectGroupCheckboxFor("Group 2")
 		group2Checkbox should be('enabled)
+
+		ifHtmlUnitDriver(h=>h.setJavascriptEnabled(true))
 
 	}
 
@@ -204,7 +212,7 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 	}
 
 	"A student" should "not be able to leave a self-signup group which doesn't allow switching" in{
-		Given("A small groupset exists with 2 small groups and an allocation method of Manual")
+		Given("A small groupset exists with 2 small groups and an allocation method of Manual and allowSwitching is false")
 		createModule("xxx",TEST_MODULE_CODE,"No Switching Module")
 		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "StudentSignUp", groupCount=2, allowSelfGroupSwitching = false)
 
