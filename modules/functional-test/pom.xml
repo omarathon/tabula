@@ -43,7 +43,7 @@
 
 	<profiles>
 		<profile>
-			<!-- This isn't necessary - tests should run fine run by the JUnit runner. 
+			<!-- This isn't necessary - tests should run fine run by the JUnit runner.
 				just messing with getting native scalatest output. -->
 			<id>scalatest</id>
 			<build>
@@ -200,15 +200,27 @@
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
-			<version>2.9.0</version>
+			<version>2.34.0</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-server</artifactId>
-			<version>2.9.0</version>
+			<version>2.34.0</version>
 			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>xml-apis</groupId>
+			<artifactId>xml-apis</artifactId>
+			<version>1.4.01</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.2.5</version>
 		</dependency>
 
 		<dependency>

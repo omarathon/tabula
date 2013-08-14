@@ -16,7 +16,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 			go to groupsPage.url
 
 		When("I click on the 'Actions' dropdown for module xxx01/Test Lab")
-			val editPage = groupsPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
+		  val editPage = groupsPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
 
 		Then("The page is the edit properties page")
 			editPage.isCurrentPage("xxx101")

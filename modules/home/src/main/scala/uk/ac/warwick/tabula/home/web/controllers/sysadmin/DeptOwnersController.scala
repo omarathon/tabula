@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.home.web.controllers.sysadmin
 
+import scala.collection.JavaConverters._
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -9,7 +10,7 @@ import javax.validation.Valid
 import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.commands.permissions.RevokeRoleCommand
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import uk.ac.warwick.tabula.roles.{RoleDefinition, DepartmentalAdministratorRoleDefinition}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.Breadcrumbs
 
@@ -26,22 +27,28 @@ class DeptDetailsController extends BaseSysadminController {
 		Mav("sysadmin/departments/single",
 			"department" -> dept)
 	}
-	
 }
 
 trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 
-	@ModelAttribute("addCommand") def addCommandModel(@PathVariable("department") department: Department) = 
+	@ModelAttribute("addCommand") def addCommandModel(@PathVariable("department") department: Department) =
 		new GrantRoleCommand(department, DepartmentalAdministratorRoleDefinition)
-	
-	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable("department") department: Department) = 
+
+	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable("department") department: Department) =
 		new RevokeRoleCommand(department, DepartmentalAdministratorRoleDefinition)
-	
+
 	def form(@PathVariable("department") department: Department): Mav = {
-		Mav("sysadmin/departments/permissions/form", "department" -> department)
+		Mav("sysadmin/departments/permissions", "department" -> department)
 	}
-	
-	def redirectToDeptPermissions(deptcode: String) = Mav("redirect:/sysadmin/departments/" + deptcode + "/permissions")
+
+	def form(department: Department, usercodes: Seq[String], role: Option[RoleDefinition], action: String): Mav = {
+		val users = userLookup.getUsersByUserIds(usercodes.asJava)
+		Mav("sysadmin/departments/permissions",
+			"department" -> department,
+			"users" -> users,
+			"role" -> role,
+			"action" -> action)
+	}
 }
 
 @Controller @RequestMapping(Array("/sysadmin/departments/{department}/permissions"))
@@ -55,33 +62,34 @@ class DepartmentPermissionController extends BaseSysadminController with Departm
 class DepartmentAddPermissionController extends BaseSysadminController with DepartmentPermissionControllerMethods {
 
 	validatesSelf[GrantRoleCommand[_]]
-	
+
 	@RequestMapping(method = Array(POST), params = Array("_command=add"))
 	def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand[Department], errors: Errors): Mav = {
 		val department = command.scope
 		if (errors.hasErrors()) {
 			form(department)
 		} else {
-			command.apply()
-			redirectToDeptPermissions(department.code)
+			val role = Some(command.apply().roleDefinition)
+			val userCodes = command.usercodes.asScala
+			form(department, userCodes, role, "add")
 		}
-
 	}
 }
 
 @Controller @RequestMapping(Array("/sysadmin/departments/{department}/permissions"))
 class DepartmentRemovePermissionController extends BaseSysadminController with DepartmentPermissionControllerMethods {
-	
+
 	validatesSelf[RevokeRoleCommand[_]]
-	
+
 	@RequestMapping(method = Array(POST), params = Array("_command=remove"))
 	def addPermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand[Department], errors: Errors): Mav = {
 		val department = command.scope
 		if (errors.hasErrors()) {
 			form(department)
 		} else {
-			command.apply()
-			redirectToDeptPermissions(department.code)
+			val role = Some(command.apply().roleDefinition)
+			val userCodes = command.usercodes.asScala
+			form(department, userCodes, role, "remove")
 		}
 
 	}
