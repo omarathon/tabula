@@ -18,14 +18,14 @@ import uk.ac.warwick.tabula.permissions._
 
 
 class AddAssignmentCommand(module: Module = null) extends ModifyAssignmentCommand(module) {
-	
+
 	PermissionCheck(Permissions.Assignment.Create, module)
 
 	def assignment: Assignment = null
 
 	override def applyInternal(): Assignment = transactional() {
 		val assignment = new Assignment(module)
-		assignment.addDefaultFields()
+		assignment.addDefaultSubmissionFields()
 		copyTo(assignment)
 		service.save(assignment)
 		assignment

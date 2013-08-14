@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
-import forms.MarkerSelectField
-import uk.ac.warwick.tabula.{TestBase, AppContextTestBase, RequestInfo}
+import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, MarkerSelectField}
+import uk.ac.warwick.tabula.{TestBase, RequestInfo}
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConversions._
 
@@ -10,7 +10,7 @@ class SubmissionsForMarkerTest  extends TestBase {
 	@Test def markersSubmissionsTest() {
 
 		val assignment = new Assignment
-		assignment.addDefaultFields()
+		assignment.addDefaultSubmissionFields()
 		assignment.markingWorkflow = newMarkingWorkflow()
 
 		val markerSelect = new MarkerSelectField()
@@ -58,7 +58,7 @@ class SubmissionsForMarkerTest  extends TestBase {
 
 
 	def submissionValue(name: String, value: String) = {
-		val sv = new SavedSubmissionValue()
+		val sv = new SavedFormValue()
 		sv.name = name
 		sv.value = value
 		sv
@@ -88,7 +88,7 @@ class SubmissionsForMarkerTest  extends TestBase {
 		ms
 	}
 
-	def newSubmission(a:Assignment, values:JSet[SavedSubmissionValue]=null) = {
+	def newSubmission(a:Assignment, values:JSet[SavedFormValue]=null) = {
 		val s = new Submission
 		s.assignment = a
 		if (values != null) s.values = values

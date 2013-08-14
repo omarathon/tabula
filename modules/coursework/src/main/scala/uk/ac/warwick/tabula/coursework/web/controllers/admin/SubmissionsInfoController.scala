@@ -3,16 +3,14 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import java.io.StringWriter
 import scala.collection.JavaConversions.asScalaSet
 import scala.collection.JavaConversions.seqAsJavaList
-import org.joda.time.ReadableInstant
+import org.joda.time.{DateTime, ReadableInstant}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.coursework.commands.assignments.ListSubmissionsCommand
 import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
 import uk.ac.warwick.tabula.web.views.CSVView
 import uk.ac.warwick.util.csv.CSVLineWriter
 import uk.ac.warwick.util.csv.GoodCsvDocument
@@ -20,6 +18,7 @@ import scala.collection.immutable.ListMap
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
 /**
  * Download submissions metadata.
@@ -34,8 +33,8 @@ class SubmissionsInfoController extends CourseworkController {
 	def csvFormat(i: ReadableInstant) = csvFormatter print i
 
 	var checkIndex = true
-	
-	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
+
+	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new ListSubmissionsCommand(module, assignment)
 
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.xml"), method = Array(GET, HEAD))
@@ -55,15 +54,15 @@ class SubmissionsInfoController extends CourseworkController {
 		<assignment id={ assignment.id } open-date={ isoFormat(assignment.openDate) } close-date={ isoFormat(assignment.closeDate) }/>
 
 	def submissionElement(item: SubmissionListItem) =
-		<submission 
-				id={ item.submission.id } 
-				submission-time={ isoFormat(item.submission.submittedDate) } 
-				university-id={ item.submission.universityId } 
+		<submission
+				id={ item.submission.id }
+				submission-time={ isoFormat(item.submission.submittedDate) }
+				university-id={ item.submission.universityId }
 				downloaded={ item.downloaded.toString }>
 			{ item.submission.values map fieldElement(item) }
 		</submission>
 
-	def fieldElement(item: SubmissionListItem)(value: SavedSubmissionValue) =
+	def fieldElement(item: SubmissionListItem)(value: SavedFormValue) =
 		if (value.hasAttachments)
 			<field name={ value.name }>
 				{
@@ -77,7 +76,7 @@ class SubmissionsInfoController extends CourseworkController {
 		else
 			Nil //empty Node seq, no element
 
-			
+
 	@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissions.csv"), method = Array(GET, HEAD))
 	def csv(command: ListSubmissionsCommand) = {
 		command.checkIndex = checkIndex
@@ -99,26 +98,26 @@ class SubmissionsInfoController extends CourseworkController {
 	class SubmissionsCSVBuilder(items:Seq[SubmissionListItem]) extends CSVLineWriter[SubmissionListItem] {
 		val headers = {
 			var extraFields = Set[String]()
-			
+
 			// have to iterate all items to ensure complete field coverage. bleh :(
 			items foreach ( item => extraFields = extraFields ++ extraFieldData(item).keySet )
-			
+
 			// return core headers in insertion order (make it easier for parsers), followed by alpha-sorted field headers
 			(coreFields ++ extraFields.toList.sorted)
 		}
-		
+
 		def getNoOfColumns(item:SubmissionListItem) = headers.size
-		
+
 		def getColumn(item:SubmissionListItem, i:Int) = {
 			itemData(item).get(headers.get(i)) getOrElse ""
 		}
 	}
-	
+
 	private def itemData(item: SubmissionListItem) = coreData(item) ++ extraFieldData(item)
-	
+
 	// This Seq specifies the core field order
 	private def coreFields = Seq("submission-id", "submission-time", "university-id", "assignment-id", "downloaded")
-	
+
 	private def coreData(item: SubmissionListItem) = Map(
 		"submission-id" -> item.submission.id,
 		"submission-time" -> csvFormat(item.submission.submittedDate),
@@ -129,7 +128,7 @@ class SubmissionsInfoController extends CourseworkController {
 
 	private def extraFieldData(item: SubmissionListItem) = {
 		var fieldDataMap = ListMap[String, String]()
-		
+
 		item.submission.values foreach ( value =>
 			if (value.hasAttachments)
 				value.attachments foreach {file => {
@@ -139,7 +138,7 @@ class SubmissionsInfoController extends CourseworkController {
 			else if (value.value != null)
 				fieldDataMap += value.name -> value.value
 		)
-		
+
 		fieldDataMap
 	}
 }

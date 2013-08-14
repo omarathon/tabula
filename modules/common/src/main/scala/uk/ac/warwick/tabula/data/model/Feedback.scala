@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import javax.persistence.CascadeType._
+import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
+import java.util.HashSet
 
 
 @Entity @AccessType("field")
@@ -21,7 +23,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 
 	@ManyToOne(fetch = FetchType.LAZY, cascade=Array(PERSIST, MERGE), optional = false)
 	var assignment: Assignment = _
-	
+
 	def permissionsParents = Option(assignment).toStream
 
 	var uploaderId: String = _
@@ -60,7 +62,12 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var releasedDate: DateTime = _
 
+	@OneToMany(mappedBy = "feedback", cascade = Array(ALL))
+	var customFormValues: JSet[SavedFormValue] = new HashSet
 
+	def getValue(field: FormField): Option[SavedFormValue] = {
+		customFormValues.find( _.name == field.name )
+	}
 
 	// Getters for marker feedback either return the marker feedback or create a new empty one if none exist
 	def retrieveFirstMarkerFeedback:MarkerFeedback = {
@@ -105,7 +112,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 
 	@OneToMany(mappedBy = "feedback", fetch = FetchType.LAZY, cascade=Array(ALL))
 	var attachments: JList[FileAttachment] = JArrayList()
-	
+
 	def mostRecentAttachmentUpload =
 		if (attachments.isEmpty) null
 		else attachments.maxBy { _.dateUploaded }.dateUploaded
@@ -116,7 +123,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 		attachment.feedback = this
 		attachments.add(attachment)
 	}
-		
+
 	def removeAttachment(attachment: FileAttachment) = {
 		attachment.feedback = null
 		attachments.remove(attachment)

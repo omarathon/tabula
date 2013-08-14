@@ -38,9 +38,9 @@ class AssignmentItem(
 	var include: Boolean,
 	var occurrence: String,
 	var upstreamAssignment: UpstreamAssignment) {
-	
+
     def this() = this(true, null, null)
-    
+
 	var assignmentService = Wire.auto[AssignmentService]
 
 	// set after bind
@@ -57,7 +57,7 @@ class AssignmentItem(
 	var openDate: DateTime = _
 
 	var closeDate: DateTime = _
-	
+
 	var openEnded: JBoolean = false
 
 	def sameAssignment(other: AssignmentItem) =
@@ -69,9 +69,9 @@ class AssignmentItem(
  * Command for adding many assignments at once, usually from SITS.
  */
 class AddAssignmentsCommand(val department: Department, user: CurrentUser) extends Command[Unit] with SelfValidating {
-	
+
 	PermissionCheck(Permissions.Assignment.ImportFromExternalSystem, department)
-	
+
 	val DEFAULT_OPEN_HOUR = 12
 	val DEFAULT_WEEKS_LENGTH = 4
 
@@ -102,7 +102,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty
 	val defaultCloseDate = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH)
-	
+
 	@BeanProperty
 	val defaultOpenEnded = false
 
@@ -110,10 +110,10 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 		transactional() {
 			for (item <- assignmentItems if item.include) {
 				val assignment = new Assignment()
-				assignment.addDefaultFields()
+				assignment.addDefaultSubmissionFields()
 				assignment.academicYear = academicYear
 				assignment.name = item.name
-				
+
 				assignment.module = findModule(item.upstreamAssignment).get
 
 				assignment.openDate = item.openDate
@@ -122,18 +122,18 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 				// validation should have verified that there is an options set for us to use
 				val options = optionsMap.get(item.optionsId)
 				options.copySharedTo(assignment)
-				
+
 				// Do open-ended afterwards; it's a date item that we're copying, not from shared options
 				assignment.openEnded = item.openEnded
 
 				assignmentService.save(assignment)
-				
+
 				val assessmentGroup = new AssessmentGroup
 				assessmentGroup.occurrence = item.occurrence
 				assessmentGroup.upstreamAssignment = item.upstreamAssignment
 				assessmentGroup.assignment = assignment
 				assignmentMembershipService.save(assessmentGroup)
-				
+
 				assignment.assessmentGroups.add(assessmentGroup)
 				assignmentService.save(assignment)
 			}
@@ -171,7 +171,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 		}
 
 		validateNames(errors)
-		
+
 		if (!errors.hasErrors()) checkPermissions()
 	}
 
@@ -208,14 +208,14 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 			for ((modCode, moduleItems) <- groupedByModule;
 				  item <- moduleItems
 				  if moduleItems.exists(sameNameAs(item))) {
-				
+
 				val path = "assignmentItems[%d]" format (assignmentItems.indexOf(item))
 				// Can't work out why it will end up trying to add the same error multiple times,
 				// so wrapping in hasFieldErrors to limit it to showing just the first
 				if (!errors.hasFieldErrors(path)) {
 				    errors.rejectValue(path, "name.duplicate.assignment.upstream", item.name)
 				}
-				
+
 			}
 		}
 	}

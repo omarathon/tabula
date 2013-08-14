@@ -18,7 +18,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 		val fakeDate = new DateTime(2013, 8, 23, 0, 0)
 
 		val assignment = new Assignment
-		assignment.addDefaultFields()
+		assignment.addDefaultSubmissionFields()
 		assignment.academicYear = AcademicYear.parse("12/13")
 		assignment.module = module
 		assignment.name = "Test"

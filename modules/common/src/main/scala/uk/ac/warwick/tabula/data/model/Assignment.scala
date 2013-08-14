@@ -25,16 +25,20 @@ import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import scala.reflect._
+import scala.collection.mutable
 
 object Assignment {
+	// don't use the same name in different contexts, as that will kill find methods
 	val defaultCommentFieldName = "pretext"
 	val defaultUploadName = "upload"
+	val defaultFeedbackTextFieldName = "feedbackText"
+	val defaultFeedbackUploadName = "feedbackFile"
 	val defaultMarkerSelectorName = "marker"
 	val defaultWordCountName = "wordcount"
 	final val NotDeletedFilter = "notDeleted"
 	final val MaximumFileAttachments = 50
 	final val MaximumWordCount = 1000000
-	
+
 	object Settings {
 		object InfoViewType {
 			val Default = "default"
@@ -62,10 +66,10 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	@transient
 	var assignmentService = Wire[AssignmentService]("assignmentService")
-	
+
 	@transient
 	var assignmentMembershipService = Wire[AssignmentMembershipService]("assignmentMembershipService")
-	
+
 	@transient
 	var feedbackService = Wire[FeedbackService]("feedbackService")
 
@@ -121,7 +125,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	@ManyToOne
 	@JoinColumn(name = "module_id")
 	var module: Module = _
-	
+
 	def permissionsParents = Option(module).toStream
 
 	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
@@ -150,10 +154,13 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	@IndexColumn(name = "position")
 	var fields: JList[FormField] = JArrayList()
 
+	def submissionFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Submission)
+	def feedbackFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Feedback)
+
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
 	var members: UserGroup = UserGroup.ofUsercodes
-	
+
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name="markscheme_id")
 	var markingWorkflow: MarkingWorkflow = _
@@ -168,18 +175,37 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	}
 
 	/**
-	 * Before we allow customising of assignments, we just want the basic
+	 * Before we allow customising of assignment submission forms, we just want the basic
 	 * fields to allow you to attach a file and display some instructions.
 	 */
-	def addDefaultFields() {
+	def addDefaultSubmissionFields() {
 		val pretext = new CommentField
 		pretext.name = defaultCommentFieldName
 		pretext.value = ""
+		pretext.context = FormFieldContext.Submission
 
 		val file = new FileField
 		file.name = defaultUploadName
+		file.context = FormFieldContext.Submission
 
 		addFields(pretext, file)
+	}
+
+	/**
+	 * Before we allow customising of assignment feedback forms, we just want the basic
+	 * fields to allow you to attach a file and enter a comment.
+	 */
+	def addDefaultFeedbackFields() {
+		val feedback = new TextField
+		feedback.name = defaultFeedbackTextFieldName
+		feedback.value = ""
+		feedback.context = FormFieldContext.Feedback
+
+		val file = new FileField
+		file.name = defaultFeedbackUploadName
+		file.context = FormFieldContext.Feedback
+
+		addFields(feedback, file)
 	}
 
 	/**
@@ -216,7 +242,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 */
 	def isLate(submission: Submission) =
 		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.userId, submission.submittedDate)
-		
+
 	/**
 	 * retrospectively checks if a submission was an 'authorised late'
 	 * called by submission.isAuthorisedLate to check against extensions
@@ -226,7 +252,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	// returns extension for a specified student
 	def findExtension(uniId: String) = extensions.find(_.universityId == uniId)
-	
+
 	def membershipInfo = assignmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
 
 	// converts the assessmentGroups to upstream assessment groups
@@ -246,7 +272,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 			}
 		}
 	}
-	
+
 	/**
 	 * Whether the assignment is not archived or deleted.
 	 */
@@ -268,17 +294,18 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	}.uploadedDate
 
 	def addField(field: FormField) {
+		if (field.context == null) throw new IllegalArgumentException("Field with name " + field.name + " has no context specified")
 		if (fields.exists(_.name == field.name)) throw new IllegalArgumentException("Field with name " + field.name + " already exists")
 		field.assignment = this
-		field.position = fields.length
+		field.position = fields.filter(_.context == field.context).length
 		fields.add(field)
 	}
 
 	def removeField(field: FormField) {
 		fields.remove(field)
 		assignmentService.deleteFormField(field)
-		// manually update all fields to reflect their new positions
-		fields.zipWithIndex foreach {case (field, index) => field.position = index}
+		// manually update all fields in the context to reflect their new positions
+		fields.filter(_.context == field.context).zipWithIndex foreach {case (field, index) => field.position = index}
 	}
 
 	def attachmentField: Option[FileField] = findFieldOfType[FileField](Assignment.defaultUploadName)
@@ -462,7 +489,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * where the lists of students don't match up.
 	 */
 	def submissionsReport = SubmissionsReport(this)
-	
+
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
 	var grantedRoles:JList[AssignmentGrantedRole] = JArrayList()
@@ -476,13 +503,13 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
     def getUniIdsWithSubmissionOrFeedback = {
         var idsWithSubmissionOrFeedback: Set[String] = Set()
-        
+
         for (submission <- submissions) idsWithSubmissionOrFeedback += submission.universityId
         for (feedback <- fullFeedback) idsWithSubmissionOrFeedback += feedback.universityId
-        
+
         idsWithSubmissionOrFeedback
-    }   
-			
+    }
+
 }
 
 case class SubmissionsReport(val assignment: Assignment) {
@@ -520,10 +547,10 @@ case class SubmissionsReport(val assignment: Assignment) {
 		    problems
 		}
 	}
-    
+
 	// To make map() calls neater
     private def toUniId(f: Feedback) = f.universityId
     private def toUniId(s: Submission) = s.universityId
-    
-    
+
+
 }

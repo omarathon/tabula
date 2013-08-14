@@ -5,13 +5,13 @@ import uk.ac.warwick.tabula.{Mockito, AppContextTestBase}
 import java.util.zip.ZipInputStream
 import java.io.{ByteArrayInputStream, FileInputStream}
 import uk.ac.warwick.tabula.services.{StateService, Zips}
-import uk.ac.warwick.tabula.data.model.{SavedSubmissionValue, FileAttachment}
+import uk.ac.warwick.tabula.data.model.FileAttachment
 import org.junit.Before
 import uk.ac.warwick.tabula.coursework.commands.assignments.DownloadMarkersSubmissionsCommand
-import org.apache.velocity.tools.config.SkipSetters
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.util.FileCopyUtils
 import java.io.FileOutputStream
+import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
 
 class DownloadMarkerSubmissionTest extends AppContextTestBase with MarkingWorkflowWorld with Mockito {
@@ -28,7 +28,7 @@ class DownloadMarkerSubmissionTest extends AppContextTestBase with MarkingWorkfl
     assignment.submissions.foreach {
       submission =>
         submission.values.add({
-          val sv = new SavedSubmissionValue()
+          val sv = new SavedFormValue()
           sv.attachments = Set(attachment)
           sv
         })

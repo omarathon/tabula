@@ -12,7 +12,7 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.forms.FormField
+import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, FormField}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
@@ -64,9 +64,9 @@ class Submission extends GeneratedId with PermissionsTarget {
 	var state : MarkingState = _
 
 	@OneToMany(mappedBy = "submission", cascade = Array(ALL))
-	var values: JSet[SavedSubmissionValue] = new HashSet
+	var values: JSet[SavedFormValue] = new HashSet
 
-	def getValue(field: FormField): Option[SavedSubmissionValue] = {
+	def getValue(field: FormField): Option[SavedFormValue] = {
 		values.find( _.name == field.name )
 	}
 
@@ -95,39 +95,4 @@ class Submission extends GeneratedId with PermissionsTarget {
 
 	def isReleasedForMarking: Boolean = assignment.isReleasedForMarking(this)
 	def isReleasedToSecondMarker: Boolean = assignment.isReleasedToSecondMarker(this)
-}
-
-/**
- * Stores a value submitted for a single assignment field. It has
- * a few different fields to handle holding various types of item.
- */
-@Entity(name = "SubmissionValue") @AccessType("field")
-class SavedSubmissionValue extends GeneratedId {
-
-	@ManyToOne(fetch = LAZY)
-	@JoinColumn(name = "submission_id")
-	var submission: Submission = _
-
-	// matches with assignment field name
-	var name: String = _
-
-	/**
-	 * Optional, only for file fields
-	 */
-	@OneToMany(mappedBy = "submissionValue", fetch = LAZY, cascade=Array(ALL))
-	var attachments: JSet[FileAttachment] = JSet()
-
-	def hasAttachments = attachments != null && !attachments.isEmpty
-
-	var value: String = _
-}
-
-object SavedSubmissionValue {
-	def withAttachments(submission: Submission, name: String, attachments: JSet[FileAttachment]) = {
-		val value = new SavedSubmissionValue()
-		value.submission = submission
-		value.name = name
-		value.attachments = attachments
-		value
-	}
 }
