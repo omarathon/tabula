@@ -323,9 +323,6 @@ class FormFieldTest extends TestBase with Mockito {
 		val feedbackComment = assignment.findField(Assignment.defaultFeedbackTextFieldName)
 		feedbackComment should not be (None)
 		feedbackComment.get.position should be (0)
-		val feedbackFile = assignment.findField(Assignment.defaultFeedbackUploadName)
-		feedbackFile should not be (None)
-		feedbackFile.get.position should be (1)
 	}
 
 }

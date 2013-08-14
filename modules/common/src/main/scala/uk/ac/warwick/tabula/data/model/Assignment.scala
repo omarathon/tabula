@@ -32,7 +32,6 @@ object Assignment {
 	val defaultCommentFieldName = "pretext"
 	val defaultUploadName = "upload"
 	val defaultFeedbackTextFieldName = "feedbackText"
-	val defaultFeedbackUploadName = "feedbackFile"
 	val defaultMarkerSelectorName = "marker"
 	val defaultWordCountName = "wordcount"
 	final val NotDeletedFilter = "notDeleted"
@@ -201,11 +200,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 		feedback.value = ""
 		feedback.context = FormFieldContext.Feedback
 
-		val file = new FileField
-		file.name = defaultFeedbackUploadName
-		file.context = FormFieldContext.Feedback
-
-		addFields(feedback, file)
+		addField(feedback)
 	}
 
 	/**
