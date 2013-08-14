@@ -21,6 +21,11 @@ class ModuleTest extends TestBase {
 		Module.extractCats("md101") should be (None)
 	}
 
+	@Test def webgroupNameToModuleCode {
+		Module.nameFromWebgroupName("ch-ch101") should be ("ch101")
+		Module.nameFromWebgroupName("be-bo-101") should be ("bo-101")
+		Module.nameFromWebgroupName("nodashes") should be ("nodashes")
+	}
 
   @Test
   def hasUnreleasedGroupSetsReturnsTrueIfAtLeastOneSetIsUnreleased(){

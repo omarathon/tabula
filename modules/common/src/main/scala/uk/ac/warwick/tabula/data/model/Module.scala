@@ -80,9 +80,11 @@ object Module {
 	// where cats can be a decimal number.
 	private val ModuleCatsPattern = new Regex("""(.+?)-(\d+(?:\.\d+)?)""")
 
-	def nameFromWebgroupName(groupName: String): String = groupName.indexOf("-") match {
-		case -1 => groupName
-		case i: Int => groupName.substring(i + 1)
+	private val WebgroupPattern = new Regex("""(.+?)-(.+)""")
+
+	def nameFromWebgroupName(groupName: String): String = groupName match {
+		case WebgroupPattern(dept, name) => name
+		case _ => groupName
 	}
 
 	def stripCats(fullModuleName: String): String = fullModuleName match {
