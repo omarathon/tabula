@@ -28,7 +28,6 @@ class DeptDetailsController extends BaseSysadminController {
 			"department" -> dept)
 			.crumbs(Breadcrumbs.Current(s"Sysadmin ${dept.name} overview"))
 	}
-
 }
 
 trait DepartmentPermissionControllerMethods extends BaseSysadminController {
@@ -53,8 +52,6 @@ trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 			"action" -> action)
 			.crumbs(Breadcrumbs.Current(s"Sysadmin ${department.name} permissions"))
 	}
-
-	def redirectToDeptPermissions(deptcode: String) = Mav("redirect:/sysadmin/departments/" + deptcode + "/permissions")
 }
 
 @Controller @RequestMapping(Array("/sysadmin/departments/{department}/permissions"))
@@ -75,10 +72,10 @@ class DepartmentAddPermissionController extends BaseSysadminController with Depa
 		if (errors.hasErrors()) {
 			form(department)
 		} else {
-			command.apply()
-			redirectToDeptPermissions(department.code)
+			val role = Some(command.apply().roleDefinition)
+			val userCodes = command.usercodes.asScala
+			form(department, userCodes, role, "add")
 		}
-
 	}
 }
 
@@ -93,9 +90,9 @@ class DepartmentRemovePermissionController extends BaseSysadminController with D
 		if (errors.hasErrors()) {
 			form(department)
 		} else {
-			command.apply()
-			redirectToDeptPermissions(department.code)
+			val role = Some(command.apply().roleDefinition)
+			val userCodes = command.usercodes.asScala
+			form(department, userCodes, role, "remove")
 		}
-
 	}
 }

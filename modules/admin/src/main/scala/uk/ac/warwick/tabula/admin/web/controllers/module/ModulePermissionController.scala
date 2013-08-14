@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.admin.web.controllers.module
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.commands.permissions.RevokeRoleCommand
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.roles.RoleDefinition
-import uk.ac.warwick.tabula.admin.web.Routes
 import uk.ac.warwick.tabula.admin.web.controllers.AdminController
 
 
@@ -24,13 +23,13 @@ trait ModulePermissionControllerMethods extends AdminController {
 	var userLookup = Wire.auto[UserLookupService]
 
 	def form(module: Module): Mav = {
-		Mav("admin/modules/permissions/form", "module" -> module)
+		Mav("admin/module/permissions", "module" -> module)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 
-	def form(module: Module, usercodes: Array[String], role: Option[RoleDefinition], action: String): Mav = {
-		val users = userLookup.getUsersByUserIds(usercodes.toList)
-		Mav("admin/modules/permissions/form",
+	def form(module: Module, usercodes: Seq[String], role: Option[RoleDefinition], action: String): Mav = {
+		val users = userLookup.getUsersByUserIds(usercodes.asJava)
+		Mav("admin/module/permissions",
 				"module" -> module,
 				"users" -> users,
 				"role" -> role,
@@ -46,8 +45,6 @@ class ModulePermissionController extends AdminController with ModulePermissionCo
 	def permissionsForm(@PathVariable("module") module: Module, @RequestParam(defaultValue="") usercodes: Array[String],
 		@RequestParam(value="role", required=false) role: RoleDefinition, @RequestParam(value="action", required=false) action: String): Mav =
 		form(module, usercodes, Some(role), action)
-
-
 }
 
 @Controller @RequestMapping(value = Array("/module/{module}/permissions"))
@@ -56,19 +53,15 @@ class ModuleAddPermissionController extends AdminController with ModulePermissio
 	validatesSelf[GrantRoleCommand[_]]
 
 	@RequestMapping(method = Array(POST), params = Array("_command=add"))
-	def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand[Module], errors: Errors) : Mav =  {
+	def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand[Module], errors: Errors) : Mav = {
 		val module = command.scope
 		if (errors.hasErrors()) {
 			form(module)
 		} else {
-			val roleName = command.apply().roleDefinition.getName
-			Mav("redirect:" + Routes.module.permissions(module),
-					"role" -> roleName,
-					"usercodes" -> command.usercodes,
-					"action" -> "add"
-			)
+			val role = Some(command.apply().roleDefinition)
+			val userCodes = command.usercodes.asScala
+			form(module, userCodes, role, "add")
 		}
-
 	}
 }
 
@@ -84,14 +77,9 @@ class ModuleRemovePermissionController extends AdminController with ModulePermis
 		if (errors.hasErrors()) {
 			form(module)
 		} else {
-			command.apply()
-			val roleName = command.apply().roleDefinition.getName
-			Mav("redirect:" + Routes.module.permissions(module),
-					"role" -> roleName,
-					"usercodes" -> command.usercodes,
-					"action" -> "remove"
-			)
+			val role = Some(command.apply().roleDefinition)
+			val userCodes = command.usercodes.asScala
+			form(module, userCodes, role, "remove")
 		}
-
 	}
 }

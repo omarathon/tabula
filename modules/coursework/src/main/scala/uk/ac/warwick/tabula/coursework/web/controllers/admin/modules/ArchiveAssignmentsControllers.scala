@@ -40,8 +40,12 @@ class ArchiveModuleAssignmentsController extends CourseworkController with Unarc
 class ArchiveDepartmentAssignmentsController extends CourseworkController with UnarchivedAssignmentsMap {
 
 	@ModelAttribute
-	def archiveAssignmentsCommand(@PathVariable("department") department: Department) =
-		ArchiveAssignmentsCommand(department.modules.asScala.filter(_.assignments.size > 0))
+	def archiveAssignmentsCommand(@PathVariable("department") department: Department) = {
+		val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive))
+		ArchiveAssignmentsCommand(modules)
+	}
+
+
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable("department") department: Department, cmd: ArchiveAssignmentsCommand) = {
