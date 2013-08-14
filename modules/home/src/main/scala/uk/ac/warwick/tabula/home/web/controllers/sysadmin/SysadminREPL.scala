@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.home.web.controllers.sysadmin
 
-import uk.ac.warwick.tabula.web.controllers.BaseController
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.RequestParam
@@ -10,21 +9,16 @@ import org.springframework.beans.factory.BeanFactoryAware
 import org.springframework.beans.factory.BeanFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.expression.spel.standard.SpelExpressionParser
-import org.springframework.expression.Expression
-import org.springframework.expression.ParserContext
 import org.springframework.expression.spel.support.StandardEvaluationContext
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
-import collection.JavaConversions._
-import java.util.HashMap
-import org.springframework.expression.spel.SpelEvaluationException
 import org.hibernate.Session
 import scala.beans.BeanProperty
 
 @Controller
 @RequestMapping(value = Array("/sysadmin/repl"))
-class SysadminREPL extends BaseController with BeanFactoryAware {
+class SysadminREPL extends BaseSysadminController with BeanFactoryAware {
 
 	@BeanProperty var beanFactory: BeanFactory = _
 	@Autowired var assignmentService: AssignmentService = _
@@ -43,6 +37,7 @@ class SysadminREPL extends BaseController with BeanFactoryAware {
 			Return(null)
 		}
 		Mav("sysadmin/repl", "query" -> query, "response" -> response)
+			.crumbs(Breadcrumbs.Current(s"Sysadmin REPL"))
 	}
 
 	/**

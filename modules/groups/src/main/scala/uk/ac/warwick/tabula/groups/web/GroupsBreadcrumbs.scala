@@ -9,14 +9,14 @@ trait GroupsBreadcrumbs {
 
 object GroupsBreadcrumbs {
 	abstract class Abstract extends BreadCrumb
-	case class Standard(val title: String, val url: String, override val tooltip: String) extends Abstract
+	case class Standard(val title: String, val url: Option[String], override val tooltip: String) extends Abstract
 
 	/**
 	 * Special case breadcrumb for the department admin page.
 	 */
 	case class Department(val department: model.Department) extends Abstract {
 		val title = department.name
-		val url = Routes.admin(department)
+		val url = Some(Routes.admin(department))
 	}
 
 	/**
@@ -25,16 +25,15 @@ object GroupsBreadcrumbs {
 	 */
 	case class Module(val module: model.Module) extends Abstract {
 		val title = module.code.toUpperCase
-		val url = Routes.admin.module(module)
+		val url = Some(Routes.admin.module(module))
 		override val tooltip = module.name
 	}
 
 	/**
-	 * Not current used: a breadcrumb without a link, to represent
-	 * the current page. We don't currently include the current page in crumbs.
+	 * A breadcrumb without a link, to represent the current page.
+	 * We don't currently include the current page in crumbs, but can use this for page titles
 	 */
 	case class Current(val title: String) extends Abstract {
-		val url = null
-		override def linked = false
+		val url = None
 	}
 }

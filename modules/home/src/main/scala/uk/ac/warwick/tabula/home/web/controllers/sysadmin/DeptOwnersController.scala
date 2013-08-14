@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.commands.permissions.RevokeRoleCommand
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.roles.{RoleDefinition, DepartmentalAdministratorRoleDefinition}
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.web.Breadcrumbs
 
 @Controller
 @RequestMapping(Array("/sysadmin/departments/"))
@@ -21,11 +20,13 @@ class DeptDetailsController extends BaseSysadminController {
 	@RequestMapping
 	def departments = Mav("sysadmin/departments/list",
 		"departments" -> moduleService.allDepartments.sortBy{ _.name })
+		.crumbs(Breadcrumbs.Current("Sysadmin department list"))
 
 	@RequestMapping(Array("/{dept}/"))
 	def department(@PathVariable("dept") dept: Department) = {
 		Mav("sysadmin/departments/single",
 			"department" -> dept)
+			.crumbs(Breadcrumbs.Current(s"Sysadmin ${dept.name} overview"))
 	}
 }
 
@@ -39,6 +40,7 @@ trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 
 	def form(@PathVariable("department") department: Department): Mav = {
 		Mav("sysadmin/departments/permissions", "department" -> department)
+			.crumbs(Breadcrumbs.Current(s"Sysadmin ${department.name} permissions"))
 	}
 
 	def form(department: Department, usercodes: Seq[String], role: Option[RoleDefinition], action: String): Mav = {
@@ -48,6 +50,7 @@ trait DepartmentPermissionControllerMethods extends BaseSysadminController {
 			"users" -> users,
 			"role" -> role,
 			"action" -> action)
+			.crumbs(Breadcrumbs.Current(s"Sysadmin ${department.name} permissions"))
 	}
 }
 
@@ -91,6 +94,5 @@ class DepartmentRemovePermissionController extends BaseSysadminController with D
 			val userCodes = command.usercodes.asScala
 			form(department, userCodes, role, "remove")
 		}
-
 	}
 }

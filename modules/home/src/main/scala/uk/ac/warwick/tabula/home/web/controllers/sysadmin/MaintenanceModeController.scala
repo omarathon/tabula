@@ -8,7 +8,7 @@ import org.springframework.beans.BeanWrapperImpl
 import collection.JavaConversions._
 import java.beans.PropertyDescriptor
 import org.springframework.web.bind.annotation.RequestMethod
-import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.web.{Breadcrumbs, Mav}
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import scala.annotation.target.field
@@ -33,20 +33,20 @@ import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.permissions._
 
 class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Unit] with ReadOnly with Unaudited with SelfValidating {
-	
+
 	PermissionCheck(Permissions.ManageMaintenanceMode)
-	
+
 	val DefaultMaintenanceMinutes = 30
-	
+
 	var queue = Wire.named[Queue]("settingsSyncTopic")
-	
+
 	var enable: Boolean = service.enabled
 
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var until: DateTime = service.until getOrElse DateTime.now.plusMinutes(DefaultMaintenanceMinutes)
 
 	var message: String = service.message.orNull
-	
+
 	def applyInternal() {
 		if (!enable) {
 			message = null
@@ -56,7 +56,7 @@ class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Un
 		service.until = Option(until)
 		if (enable) service.enable
 		else service.disable
-		
+
 		queue.send(new MaintenanceModeMessage(service))
 	}
 
@@ -76,7 +76,8 @@ class MaintenanceModeController extends BaseSysadminController {
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(form: MaintenanceModeCommand, errors: Errors) =
-		Mav("sysadmin/maintenance").noLayoutIf(ajax)
+		Mav("sysadmin/maintenance").crumbs(Breadcrumbs.Current("Sysadmin maintenance mode"))
+			.noLayoutIf(ajax)
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid form: MaintenanceModeCommand, errors: Errors) = {
