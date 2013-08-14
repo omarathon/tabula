@@ -41,4 +41,20 @@ class ModuleTest extends TestBase {
 
     modPartReleased.hasUnreleasedGroupSets should be (true)
   }
+
+	@Test
+	def hasLiveAssignments(){
+		val module = new Module()
+		val assignment1 = new Assignment()
+		assignment1.deleted = true
+
+		val assignment2 = new Assignment()
+		assignment2.archived = true
+
+		module.assignments = Seq(assignment1, assignment2).asJava
+		module.hasLiveAssignments should be(false)
+
+		assignment2.archived = false
+		module.hasLiveAssignments should be(true)
+	}
 }

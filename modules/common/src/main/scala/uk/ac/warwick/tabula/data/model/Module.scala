@@ -48,6 +48,12 @@ class Module extends GeneratedId with PermissionsTarget {
 	
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var assignments: JList[Assignment] = JArrayList()
+
+	def hasLiveAssignments = Option(assignments) match {
+		case Some(a) => a.asScala.exists(_.isAlive)
+		case None => false
+	}
+
 	
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var groupSets: JList[SmallGroupSet] = JArrayList()

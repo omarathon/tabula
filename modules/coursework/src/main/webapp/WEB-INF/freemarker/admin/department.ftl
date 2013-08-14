@@ -151,7 +151,7 @@
 
 <#list modules as module>
 	<#assign can_manage=can.do("Module.ManageAssignments", module) />
-	<#assign has_assignments=(module.assignments!?size gt 0) />
+	<#assign has_assignments= module.hasLiveAssignments />
 	<#assign has_archived_assignments=false />
 	<#list module.assignments as assignment>
 	<#if assignment.archived>
