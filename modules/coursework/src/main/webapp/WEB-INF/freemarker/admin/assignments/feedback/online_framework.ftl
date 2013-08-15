@@ -1,17 +1,53 @@
+<#compress>
+
+<#assign module = assignment.module />
+<#assign department = module.department />
+<#assign feedbackGraphs = studentFeedbackGraphs />
+
+<#macro row graph>
+	<#assign u = graph.student />
+	<tr class="itemContainer">
+		<#if department.showStudentName>
+              			<td class="student-col"><h6 data-profile="${u.warwickId}">${u.firstName}</h6></td>
+              			<td class="student-col"><h6 data-profile="${u.warwickId}">${u.lastName}</h6></td>
+              		<#else>
+              			<td class="student-col"><h6 data-profile="${u.warwickId}">${u.warwickId}</h6></td>
+              		</#if>
+		<td class="status-col">
+			<dl style="margin: 0; border-bottom: 0;">
+				<dt>
+					<#if !graph.hasSubmission>
+						<div class="label">No submission</div>
+					</#if>
+					<#if graph.hasPublishedFeedback>
+						<#-- TODO semantic label classes? -->
+						<div class="label label-success">Published</div>
+					<#elseif graph.hasFeedback>
+						<div class="label label-warning">Marked</div>
+					</#if>
+				</dt>
+				<dd style="display: none;" class="feedback-container-container" data-profile="${u.warwickId}">
+					<div id="feedback-${u.warwickId}" class="feedback-container">
+						<p>No data is currently available.</p>
+					</div>
+				</dd>
+			</dl>
+		</td>
+	</tr>
+</#macro>
+
 <#escape x as x?html>
 <div>
 	<h1>Online marking</h1>
 	<h5>for ${assignment.name} (${assignment.module.code?upper_case})</h5>
 
-	<#assign module=assignment.module />
-	<#assign department=module.department />
-
-	<@import "../turnitin/_report_macro.ftl" as tin />
+	<#import "../turnitin/_report_macro.ftl" as tin />
+	<#import "../submissionsandfeedback/_submission_details.ftl" as sd />
 
 	<#-- TODO 20 day turnaround deadline status alert thing rendering -->
 
 	<table id="online-marking-table" class="students table table-bordered table-striped tabula-greenLight sticky-table-headers">
-		<thead<#if students?size == 0> style="display: none;"</#if>>
+		<thead<#if feedbackGraphs?size == 0> style="display: none;"</#if>>
 			<tr>
 				<#if department.showStudentName>
 					<th class="student-col">First name</th>
@@ -24,40 +60,56 @@
 			</tr>
 		</thead>
 
-		<#if students?size gt 0>
+		<#if feedbackGraphs?size gt 0>
 			<tbody>
-				<#macro row student>
-					<tr class="itemContainer">
-						<#if department.showStudentName>
-							<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.firstName}</h6></td>
-							<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.lastName}</h6></td>
-						<#else>
-							<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.warwickId}</h6></td>
-						</#if>
-						<td class="status-col">
-							<dl style="margin: 0; border-bottom: 0;">
-								<dt>
-									<div class="label">Pointless</div>
-								</dt>
-								<dd style="display: none;" id="feedback-${student.user.warwickId}" class="feedback-container" data-profile="${student.user.warwickId}">
-									<p>Nothing to see here</p>
-								</dd>
-							</dl>
-						</td>
-					</tr>
-				</#macro>
-
-				<#list students as student>
-					<@row student />
+				<#list feedbackGraphs as graph>
+					<@row graph />
 				</#list>
 			</tbody>
 		</#if>
 	</table>
 
-	<#if students?size gt 0>
+	<#if feedbackGraphs?size gt 0>
 		<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
 		<script type="text/javascript">
 		(function($) {
+			var repositionAjaxDivs = function() {
+				// These have to be positioned in the right order, so we loop through feedback-container-container
+				// rather than directly on feedback-container
+				$('.feedback-container-container').hide().each(function() {
+					var universityId = $(this).attr('data-profile');
+					var $feedback = $('#feedback-' + universityId);
+
+					if ($feedback.length) {
+						var isOpen = $feedback.data('open');
+
+						if (isOpen) {
+							$(this).show();
+							var $statusField = $(this).closest('.status-col');
+
+							// Add bottom padding equivalent to the height of the feedback div to the status field
+							var fieldPosition = $statusField.position();
+
+							$statusField.css('padding-bottom', '');
+							var fieldHeight = $statusField.outerHeight();
+							var feedbackHeight = $feedback.outerHeight();
+							$statusField.css('padding-bottom', feedbackHeight + 10);
+
+							// Position the workflow div in the correct location
+							$feedback.css({
+								top: (fieldPosition.top + fieldHeight - 2) + 'px',
+								left: ($('.students').position().left + 1) + 'px'
+							});
+						}
+					}
+				});
+			};
+
+			$.tablesorter.addWidget({
+				id: 'repositionAjaxDivs',
+				format: repositionAjaxDivs
+			});
+
 			// Expanding and contracting
 			$('.students tbody tr').each(function() {
 				var $nameField = $(this).find('.student-col h6').first();
@@ -92,26 +144,38 @@
 
 								// Set the data
 								$feedback.data('open', false);
+
+								repositionAjaxDivs();
+
+								// TODO add badge to $statusField.find('dt') if unsaved and no badge already there
+								// ...
+								// ...
 							} else {
-								// Move the workflow div to be at the end of the offset parent and display it
-								$('#main-content').append($feedback);
-								$feedback.show();
+								// get the data via AJAX and fill the feedback div
+								var sUrl = '<@routes.onlinemarking assignment />' + '/' + universityId;
+								$feedback.load(sUrl, function() {
+									// Move the feedback div to be at the end of the offset parent and display it
+									$('#main-content').append($feedback);
+									$feedback.show();
 
-								if ($statusField.closest('tr').is(':nth-child(odd)')) {
-									$feedback.css('background-color', '#ebebeb');
-								} else {
-									$feedback.css('background-color', '#f5f5f5');
-								}
+									if ($statusField.closest('tr').is(':nth-child(odd)')) {
+										$feedback.css('background-color', '#ebebeb');
+									} else {
+										$feedback.css('background-color', '#f5f5f5');
+									}
 
-								$feedback.css({
-									width: ($('.students').width() - 21) + 'px'
+									$feedback.css({
+										width: ($('.students').width() - 21) + 'px'
+									});
+
+									// Change the icon to open
+									$icon.removeClass('icon-chevron-right').addClass('icon-chevron-down');
+
+									// Set the data
+									$feedback.data('open', true);
+
+									repositionAjaxDivs();
 								});
-
-								// Change the icon to open
-								$icon.removeClass('icon-chevron-right').addClass('icon-chevron-down');
-
-								// Set the data
-								$feedback.data('open', true);
 							}
 
 							evt.preventDefault();
@@ -127,6 +191,6 @@
 		})(jQuery);
 		</script>
 	<#else>
-		<p>There are no unmarked submissions for this assignment yet.</p>
+		<p>There are no students recorded in Tabula for this assignment.</p>
 	</#if>
-</#escape>
+</#escape></#compress>

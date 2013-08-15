@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.spring.Wire
 
 trait FeedbackService {
 	def getStudentFeedback(assignment: Assignment, warwickId: String): Option[Feedback]
@@ -71,4 +72,12 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 	def delete(feedback: Feedback) = transactional() {
 		dao.delete(feedback)
 	}
+}
+
+trait FeedbackServiceComponent {
+	def feedbackService: FeedbackService
+}
+
+trait AutowiringFeedbackServiceComponent extends FeedbackServiceComponent {
+	var feedbackService = Wire[FeedbackService]
 }

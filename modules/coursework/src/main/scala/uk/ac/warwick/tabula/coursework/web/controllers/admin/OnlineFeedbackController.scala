@@ -3,51 +3,46 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.coursework.web.Routes.admin.module
-import javax.validation.Valid
-import uk.ac.warwick.tabula.coursework.commands.assignments.{Student, SubmissionAndFeedbackResults, SubmissionAndFeedbackCommand}
+import uk.ac.warwick.tabula.data.model.{Member, Assignment, Module}
+import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineFeedbackFormCommand, OnlineFeedbackCommand}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.{Submission, StudentMember, Assignment, Module}
-import uk.ac.warwick.tabula.commands.{SelfValidating, ReadOnly, Unaudited, Command}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.userlookup.User
-import org.joda.time.DateTime
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback"))
-class OnlineFeedbackController extends CourseworkController{
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/online"))
+class OnlineFeedbackController extends CourseworkController {
 
-	@ModelAttribute("onlineFeedbackCommand")
-	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
-		new OnlineFeedbackCommand(module, assignment)
+	@ModelAttribute
+	def command(@PathVariable module: Module, @PathVariable assignment: Assignment) =
+		OnlineFeedbackCommand(module, assignment)
 
-	@RequestMapping(Array("/online"))
-	def showTable(@Valid command: OnlineFeedbackCommand, errors: Errors) {
-		val (assignment, module) = (command.assignment, command.module)
+	@RequestMapping
+	def showTable(@ModelAttribute command: OnlineFeedbackCommand, errors: Errors): Mav = {
 
-		Mav("/admin/assignments/feedback/online_framework.ftl")
-			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+		val feedbackGraphs = command.apply()
+		val (assignment, module) = (command.assignment, command.assignment.module)
+
+		Mav("admin/assignments/feedback/online_framework",
+			"assignment" -> assignment,
+			"command" -> command,
+			"studentFeedbackGraphs" -> feedbackGraphs)
+			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Online marking for ${assignment.name}"))
 	}
 }
 
-class OnlineFeedbackCommand(val module: Module, val assignment: Assignment)
-	extends Command[Seq[RandomData]] with Unaudited with ReadOnly with SelfValidating {
 
-	mustBeLinked(mandatory(assignment), mandatory(module))
-	PermissionCheck(Permissions.Submission.Read, assignment)
+@Controller
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/online/{student}"))
+class OnlineFeedbackFormController extends CourseworkController {
 
-	def applyInternal() = {
-		???
-	}
+	@ModelAttribute
+	def command(@PathVariable student: Member, @PathVariable module: Module, @PathVariable assignment: Assignment) =
+		OnlineFeedbackFormCommand(module, assignment, student)
 
-	def validate(errors: Errors) {
-		true
+	@RequestMapping
+	def showForm(@ModelAttribute command: OnlineFeedbackFormCommand, errors: Errors): Mav = {
+
+		Mav("admin/assignments/feedback/online_feedback",
+			"command" -> command).noLayout
 	}
 }
-
-case class RandomData(
-	val student: StudentMember,
-	val submission: Option[Submission],
-	val hasFeedback: Boolean,
-	val hasPublishedFeedback: Boolean
-)

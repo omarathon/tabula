@@ -1,20 +1,18 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConversions._
 
-import org.hibernate.criterion.{Projections, Restrictions, Order}
 import org.springframework.stereotype.Service
 
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.spring.Wire
 
 trait SubmissionService {
 	def saveSubmission(submission: Submission)
 	def getSubmissionByUniId(assignment: Assignment, uniId: String): Option[Submission]
 	def getSubmission(id: String): Option[Submission]
-	
+
 	def delete(submission: Submission): Unit
 }
 
@@ -25,8 +23,7 @@ trait OriginalityReportService {
 
 @Service(value = "submissionService")
 class SubmissionServiceImpl extends SubmissionService with Daoisms with Logging {
-	import Restrictions._	
-	
+
 	def saveSubmission(submission: Submission) = {
 		session.saveOrUpdate(submission)
 		session.flush()
@@ -50,9 +47,18 @@ class SubmissionServiceImpl extends SubmissionService with Daoisms with Logging 
 	}
 }
 
+trait SubmissionServiceComponent {
+	def submissionService: SubmissionService
+}
+
+trait AutowiringSubmissionServiceComponent extends SubmissionServiceComponent {
+	var submissionService = Wire[SubmissionService]
+}
+
+
+
 @Service(value = "originalityReportService")
 class OriginalityReportServiceImpl extends OriginalityReportService with Daoisms with Logging {
-	import Restrictions._
 
 	/**
 	 * Deletes the OriginalityReport attached to this Submission if one

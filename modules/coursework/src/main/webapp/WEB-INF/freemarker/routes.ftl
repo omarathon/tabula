@@ -1,9 +1,9 @@
 <#ftl strip_text=true />
 <#--
 Just a handy place to create macros for generating URLs to various places, to save time
-if we end up changing any of them. 
+if we end up changing any of them.
 
-TODO grab values from the Routes object in code, as that's pretty equivalent and 
+TODO grab values from the Routes object in code, as that's pretty equivalent and
 	we're repeating ourselves here. OR expose Routes directly.
 
 -->
@@ -33,6 +33,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentsubmissionsandfeedback assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/list"/></#macro>
 <#macro assignmentsubmissionsandfeedbacktable assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/table"/></#macro>
 <#macro assignmentsubmissionsandfeedbacksummary assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/summary"/></#macro>
+
+<#macro onlinemarking assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/online" /></#macro>
+<#macro onlinemarkingform assignment student><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/online/${student.universityId}" /></#macro>
 
 <#macro feedbackadd assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/add" /></#macro>
 <#macro feedbackdelete assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/delete" /></#macro>
