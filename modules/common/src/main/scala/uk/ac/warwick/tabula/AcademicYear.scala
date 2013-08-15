@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula
-import org.joda.time.DateTime
+import org.joda.time.{DateTimeConstants, DateMidnight, DateTime}
 import org.joda.time.DateTimeConstants._
 import java.beans.PropertyEditorSupport
 
@@ -39,6 +39,15 @@ case class AcademicYear(val startYear: Int) extends Ordered[AcademicYear] {
 		val first = (this - yearsBefore)
 		Iterable.iterate(first, length) { y => y.next }.toSeq
 	}
+
+	/**
+	 * Returns a date guaranteed* to be some time in the first term of the specified year,
+	 * suitable for passing to TermFactory.getAcademicWeeksForYear
+	 *
+	 *  *Restrictions apply. Always read the small print. We are confident
+	 *   that November 1st is always in term 1 of the year
+	 */
+	def dateInTermOne =	new DateMidnight(startYear, DateTimeConstants.NOVEMBER, 1)
 
 	def compare(that:AcademicYear): Int = {
 			this.startYear - that.startYear

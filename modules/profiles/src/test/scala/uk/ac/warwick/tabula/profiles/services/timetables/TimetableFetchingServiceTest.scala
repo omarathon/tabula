@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.profiles.services
+package uk.ac.warwick.tabula.profiles.services.timetables
 
 import uk.ac.warwick.tabula.TestBase
 import scala.xml.XML
