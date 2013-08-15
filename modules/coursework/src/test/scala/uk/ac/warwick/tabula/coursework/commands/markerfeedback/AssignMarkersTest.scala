@@ -4,7 +4,7 @@ import java.util.HashMap
 
 import collection.JavaConversions._
 
-import org.hibernate.classic.Session
+import org.hibernate.Session
 import org.springframework.transaction.annotation.Transactional
 
 import uk.ac.warwick.tabula.JavaImports._

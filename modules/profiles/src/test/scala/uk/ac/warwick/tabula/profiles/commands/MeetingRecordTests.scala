@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.data.model.MeetingFormat.FaceToFace
 import scala.Some
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
-import org.hibernate.classic.Session
+import org.hibernate.Session
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.data.MeetingRecordDao
 

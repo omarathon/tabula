@@ -14,7 +14,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.web.views.{JSONErrorView, JSONView}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.services.jobs.JobService
-import org.hibernate.validator.Valid
+import javax.validation.Valid
 import uk.ac.warwick.spring.Wire
 
 

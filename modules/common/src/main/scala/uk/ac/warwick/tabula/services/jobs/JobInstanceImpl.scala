@@ -57,10 +57,10 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 
 	@transient var user: CurrentUser = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var createdDate: DateTime = new DateTime
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var updatedDate: DateTime = new DateTime
 
 	@Column(name = "progress") var _progress: Int = 0

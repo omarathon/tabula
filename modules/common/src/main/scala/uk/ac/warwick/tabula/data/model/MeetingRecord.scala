@@ -27,11 +27,11 @@ object MeetingRecord {
 class MeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted with FormattedHtml {
 
 	@Column(name="creation_date")
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var creationDate: DateTime = DateTime.now
 
 	@Column(name="last_updated_date")
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var lastUpdatedDate: DateTime = creationDate
 
 	@ManyToOne
@@ -39,7 +39,7 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	var relationship: StudentRelationship = _
 
 	@Column(name="meeting_date")
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var meetingDate: DateTime = _
 

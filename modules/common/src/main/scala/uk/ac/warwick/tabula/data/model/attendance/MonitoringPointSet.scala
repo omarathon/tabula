@@ -28,10 +28,10 @@ class MonitoringPointSet extends GeneratedId {
 	
 	var sentToAcademicOffice: Boolean = false
 	
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var createdDate: DateTime = _
 	
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var updatedDate: DateTime = _
 	
 	@NotNull

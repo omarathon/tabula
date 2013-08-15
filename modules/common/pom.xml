@@ -211,6 +211,17 @@
 			<artifactId>warwickutils-files</artifactId>
 			<version>${warwickutils.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>uk.ac.warwick.util</groupId>
+			<artifactId>warwickutils-hibernate</artifactId>
+			<version>${warwickutils.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>joda-time</groupId>
+					<artifactId>joda-time-hibernate</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 		
 		<dependency>
 			<groupId>uk.ac.warwick.sso</groupId>
@@ -291,12 +302,12 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
-			<version>3.6.10.Final</version>
+			<version>4.2.4.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-entitymanager</artifactId>
-			<version>3.6.10.Final</version>
+			<version>4.2.4.Final</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate.javax.persistence</groupId>
@@ -321,11 +332,11 @@
 		</dependency>
 
 		<!-- Needed to stop version clashing with Jboss5 common/lib http://stackoverflow.com/questions/4097567/jboss-and-different-versions-of-hibernate -->
-		<dependency>
+		<!--<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator-legacy</artifactId>
 			<version>4.0.2.GA</version>
-		</dependency>
+		</dependency>-->
 
 		<dependency>
 			<groupId>joda-time</groupId>
@@ -333,9 +344,9 @@
 			<version>2.0</version>
 		</dependency>
 		<dependency>
-			<groupId>joda-time</groupId>
-			<artifactId>joda-time-hibernate</artifactId>
-			<version>1.3</version>
+			<groupId>org.jadira.usertype</groupId>
+			<artifactId>usertype.core</artifactId>
+			<version>3.0.0.GA</version>
 		</dependency>
 		<dependency>
 			<groupId>org.joda</groupId>

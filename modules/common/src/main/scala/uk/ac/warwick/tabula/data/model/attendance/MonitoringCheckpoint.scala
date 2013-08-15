@@ -23,7 +23,7 @@ class MonitoringCheckpoint extends GeneratedId {
 	
 	var checked: Boolean = false
 	
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var createdDate: DateTime = _
 	
 	@NotNull

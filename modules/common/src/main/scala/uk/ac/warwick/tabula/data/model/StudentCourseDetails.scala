@@ -128,15 +128,15 @@ trait StudentCourseProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var levelCode: String = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentLocalDate")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var beginDate: LocalDate = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentLocalDate")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var endDate: LocalDate = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentLocalDate")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var expectedEndDate: LocalDate = _
 
@@ -148,7 +148,7 @@ trait StudentCourseProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var sprStatus: SitsStatus = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var lastUpdatedDate = DateTime.now
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))

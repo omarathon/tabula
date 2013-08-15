@@ -23,7 +23,7 @@ class Course {
 	var name: String = _
 	var title: String = _
 	
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var lastUpdatedDate = DateTime.now	
 	
 	override def toString = name

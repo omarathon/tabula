@@ -64,7 +64,7 @@ trait StudentCourseYearProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var yearOfStudy: JInteger = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var lastUpdatedDate = DateTime.now
 
 }

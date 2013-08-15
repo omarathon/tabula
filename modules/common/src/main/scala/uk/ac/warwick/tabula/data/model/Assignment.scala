@@ -95,13 +95,13 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	var archived: JBoolean = false
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var openDate: DateTime = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var closeDate: DateTime = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var createdDate = DateTime.now()
 
 	var openEnded: JBoolean = false

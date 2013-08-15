@@ -41,7 +41,7 @@ class Submission extends GeneratedId with PermissionsTarget {
 	var submitted: Boolean = false
 
 	@Column(name = "submitted_date")
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var submittedDate: DateTime = _
 
 	@NotNull
