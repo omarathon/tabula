@@ -77,24 +77,25 @@
 							<h3>Students</h3>
 							<div class="well ">
 									<h4>Not allocated to a group</h4>
-									<div id="filter-controls">
-									Show...
-									<div id="filter-by-gender-controls">
-									<label>Male <input type="checkbox" data-filter-attr="fGender" data-filter-value="M" checked="checked"></label>
-									<label>Female <input type="checkbox" data-filter-attr="fGender" data-filter-value="F" checked="checked"></label>
-									</div>
-									<div id="filter-by-year-controls">
-									<#list allocateStudentsToGroupsCommand.allMembersYears as year>
-										<label>Year ${year} <input type="checkbox" data-filter-attr="fYear" data-filter-value="${year}" checked="checked"></label>
-									</#list>
-									</div>
-									<div id="filter-by-route-controls">
-									<#list allocateStudentsToGroupsCommand.allMembersRoutes as route>
-										<label>${route.name} <input type="checkbox" data-filter-attr="fRoute" data-filter-value="${route.code}" checked="checked"></label>
-									</#list>
-									</div>
-									</div>
-
+									<#if features.smallGroupAllocationFiltering>
+										<div id="filter-controls">
+										Show...
+										<div id="filter-by-gender-controls">
+										<label>Male <input type="checkbox" data-filter-attr="fGender" data-filter-value="M" checked="checked"></label>
+										<label>Female <input type="checkbox" data-filter-attr="fGender" data-filter-value="F" checked="checked"></label>
+										</div>
+										<div id="filter-by-year-controls">
+										<#list allocateStudentsToGroupsCommand.allMembersYears as year>
+											<label>Year ${year} <input type="checkbox" data-filter-attr="fYear" data-filter-value="${year}" checked="checked"></label>
+										</#list>
+										</div>
+										<div id="filter-by-route-controls">
+										<#list allocateStudentsToGroupsCommand.allMembersRoutes as route>
+											<label>${route.name} <input type="checkbox" data-filter-attr="fRoute" data-filter-value="${route.code}" checked="checked"></label>
+										</#list>
+										</div>
+										</div>
+									</#if>
 								<div class="student-list drag-target">
 									<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
 										<@spring.bind path="unallocated">

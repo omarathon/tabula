@@ -57,6 +57,7 @@ abstract class Features {
 	@Value("${features.smallGroupTeaching.selfGroupSwitching:false}") var smallGroupTeachingSelfGroupSwitching = defaults.smallGroupTeachingSelfGroupSwitching
 	@Value("${features.smallGroupTeaching.tutorView:true}") var smallGroupTeachingTutorView = defaults.smallGroupTeachingTutorView
 	@Value("${features.attendanceMonitoring:true}") var attendanceMonitoring = defaults.attendanceMonitoring
+	@Value("${features.smallGroupAllocationFiltering:false}") var smallGroupAllocationFiltering = defaults.smallGroupAllocationFiltering
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -109,6 +110,7 @@ class FeaturesMessage {
 	@BeanProperty var smallGroupTeachingSelfGroupSwitching = false
 	@BeanProperty var smallGroupTeachingTutorView = false
 	@BeanProperty var attendanceMonitoring = true
+	@BeanProperty var smallGroupAllocationFiltering = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
