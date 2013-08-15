@@ -97,7 +97,7 @@ class SandboxCourseImporter extends CourseImporter {
 				department.routes.map { case (routeCode, route) =>
 					new ImportCourseCommand(
 						CourseInfo(
-							code="%s-%s".format(departmentCode.toUpperCase, routeCode.toUpperCase),
+							code="%c%s-%s".format(route.courseType.courseCodeChar, departmentCode.toUpperCase, routeCode.toUpperCase),
 							shortName=StringUtils.safeSubstring(route.name, 0, 20).toUpperCase,
 							fullName=route.name,
 							title="%s %s".format(route.degreeType.description, route.name)
