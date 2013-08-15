@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.context.annotation.Profile
-import uk.ac.warwick.tabula.scheduling.sandbox.SandboxData
+import uk.ac.warwick.tabula.sandbox.SandboxData
 
 case class DepartmentInfo(val name: String, val code: String, val faculty: String)
 case class ModuleInfo(val name: String, val code: String, val group: String)

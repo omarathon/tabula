@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.scheduling.sandbox
+package uk.ac.warwick.tabula.sandbox
 
 import java.sql.ResultSet
 import uk.ac.warwick.util.core.sql.AbstractResultSet

@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.data.model.UpstreamAssignment
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.SprCode
 import org.springframework.context.annotation.Profile
-import uk.ac.warwick.tabula.scheduling.sandbox.SandboxData
+import uk.ac.warwick.tabula.sandbox.SandboxData
 
 trait AssignmentImporter {
 	/**

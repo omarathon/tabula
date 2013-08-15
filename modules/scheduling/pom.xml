@@ -181,11 +181,5 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-		
-		<dependency>
-			<groupId>uk.co.halfninja</groupId>
-			<artifactId>random-name-generator_${scala.major.version}</artifactId>
-			<version>0.1-warwick</version>
-		</dependency>
 	</dependencies>
 </project>

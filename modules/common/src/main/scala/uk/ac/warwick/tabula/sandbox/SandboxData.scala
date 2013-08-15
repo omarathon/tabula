@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.scheduling.sandbox
+package uk.ac.warwick.tabula.sandbox
 
 import uk.ac.warwick.tabula.data.model.DegreeType
 import uk.co.halfninja.randomnames.NameGenerators
@@ -44,7 +44,7 @@ object SandboxData {
 				Route("Architecture (Taught)", "ac8p1", DegreeType.Postgraduate, CourseType.PGT, false, 
 					Seq("arc222", "arc3a1", "arc330"), 
 				4200301, 4200350)
-		)),
+		), 5200001, 5200030),
 		"hom" -> Department("History of Music", "hom", "A", Map(
 			"hom101" -> Module("History of Musical Techniques", "hom101"),
 			"hom102" -> Module("Introduction to Ethnomusicology", "hom102"),
@@ -78,7 +78,7 @@ object SandboxData {
 				Route("History of Music (Taught)", "hm8p1", DegreeType.Postgraduate, CourseType.PGT, false,
 					Seq("hom222", "hom3a1", "hom330"), 
 				4300301, 4300350)
-		))
+		), 5300001, 5300030)
 	)
 	
 	def randomName(id: Long, gender: Gender) = {
@@ -103,7 +103,9 @@ object SandboxData {
 		val code: String, 
 		val facultyCode: String, 
 		val modules: Map[String, Module], 
-		val routes: Map[String, Route]
+		val routes: Map[String, Route],
+		val staffStartId: Int,
+		val staffEndId: Int
 	)
 	case class Module(val name: String, val code: String)
 	case class Route(

@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.CourseDao
 import uk.ac.warwick.tabula.data.model.Course
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportCourseCommand
 import org.springframework.context.annotation.Profile
-import uk.ac.warwick.tabula.scheduling.sandbox.SandboxData
+import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.util.core.StringUtils
 
 trait CourseImporter extends Logging {
