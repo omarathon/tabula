@@ -34,7 +34,7 @@
 				</tbody>
 			</table>
 		<#else>
-			<p class="alert alert-success"><i class="icon-ok"></i> All students in Tabula have personal tutors recorded.</p>
+			<p class="alert alert-success"><i class="icon-ok"></i> All students in ${department.name} have personal tutors recorded.</p>
 		</#if>
 	<#else>
 		<p class="alert alert-warning"><i class="icon-warning-sign"></i> No students are currently visible for ${department.name} in Tabula.</p>

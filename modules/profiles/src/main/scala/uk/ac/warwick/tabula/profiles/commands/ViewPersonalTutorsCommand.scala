@@ -38,9 +38,9 @@ class ViewPersonalTutorsCommand(val department: Department) extends Command[Pers
 		}).toSeq:_*)
 
 		// count students
-		val (studentCount, missingCount) = relationshipService.countStudentsByRelationshipAndDepartment(PersonalTutor, department)
+		val (studentCount, withTutorsCount) = relationshipService.countStudentsByRelationshipAndDepartment(PersonalTutor, department)
 
-		new PersonalTutorGraph(sortedTutorRelationships, studentCount, missingCount)
+		new PersonalTutorGraph(sortedTutorRelationships, studentCount, studentCount - withTutorsCount)
 	}
 }
 
