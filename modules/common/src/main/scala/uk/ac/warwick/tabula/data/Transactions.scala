@@ -16,7 +16,7 @@ object Transactions extends TransactionAspectSupport {
 	var transactionManager = Wire.auto[PlatformTransactionManager]
 	override def getTransactionManager() = transactionManager
 	
-	private var enabled = true
+	var enabled = true
 
 	/** Disable transaction processing inside this method block.
 	  * Should be for testing only.
