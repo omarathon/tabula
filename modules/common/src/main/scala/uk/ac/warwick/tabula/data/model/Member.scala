@@ -75,7 +75,6 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 		this.universityId = id
 	}
 
-	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var lastUpdatedDate = DateTime.now
 
 	def fullName: Option[String] = {
@@ -294,7 +293,6 @@ trait MemberProperties {
 
 	var inUseFlag: String = _
 
-	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentLocalDate")
 	var inactivationDate: LocalDate = _
 
 	var groupName: String = _
@@ -303,7 +301,6 @@ trait MemberProperties {
 	@JoinColumn(name = "home_department_id")
 	var homeDepartment: Department = _
 
-	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentLocalDate")
 	@Restricted(Array("Profiles.Read.DateOfBirth"))
 	var dateOfBirth: LocalDate = _
 

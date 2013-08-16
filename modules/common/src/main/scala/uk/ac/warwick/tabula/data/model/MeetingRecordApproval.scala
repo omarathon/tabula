@@ -24,10 +24,8 @@ class MeetingRecordApproval extends GeneratedId  {
 	var state: MeetingApprovalState = _
 
 	@Column(name="creation_date")
-	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var creationDate: DateTime = DateTime.now
 
-	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var lastUpdatedDate: DateTime = creationDate
 
 	var comments: String = _

@@ -27,7 +27,6 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	var uploaderId: String = _
 
 	@Column(name = "uploaded_date")
-	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var uploadedDate: DateTime = new DateTime
 
 	var universityId: String = _
@@ -57,7 +56,6 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	var secondMarkerFeedback: MarkerFeedback = _
 
 	@Column(name = "released_date")
-	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var releasedDate: DateTime = _
 
 

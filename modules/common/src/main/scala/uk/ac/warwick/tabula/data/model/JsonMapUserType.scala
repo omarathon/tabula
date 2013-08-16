@@ -5,6 +5,7 @@ import uk.ac.warwick.spring.Wire
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.JsonObjectMapperFactory
 
 /** 
  * Stores a Map[String, Any] as JSON and inflates it back out. 
@@ -13,7 +14,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 class JsonMapUserType extends AbstractBasicUserType[Map[String, Any], String] with Logging {
 	
 	/** Sad face, Hibernate user types are instantiated in a weird way that make dependency injection hard */
-	lazy val jsonMapper = Wire.auto[ObjectMapper]
+	lazy val jsonMapper = JsonObjectMapperFactory.instance
 	
 	val basicType = StandardBasicTypes.STRING
 	override def sqlTypes = Array(Types.VARCHAR)

@@ -11,7 +11,7 @@ abstract class ScalaFactoryBean[A : ClassTag] extends AbstractFactoryBean[A] {
 }
 
 class JsonObjectMapperFactory extends ScalaFactoryBean[ObjectMapper] {
-	override def createInstance: ObjectMapper = JsonObjectMapperFactory.instance
+	override def createInstance: ObjectMapper = JsonObjectMapperFactory.createInstance
 }
 
 object JsonObjectMapperFactory  {

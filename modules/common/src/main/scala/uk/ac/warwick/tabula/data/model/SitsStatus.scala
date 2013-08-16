@@ -23,8 +23,7 @@ class SitsStatus {
 	var shortName: String = _
 	var fullName: String = _
 
-	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	var lastUpdatedDate = DateTime.now	
+	var lastUpdatedDate = DateTime.now
 	
 	override def toString = fullName.toLowerCase()
 

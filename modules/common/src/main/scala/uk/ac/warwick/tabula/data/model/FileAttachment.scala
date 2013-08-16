@@ -65,7 +65,6 @@ class FileAttachment extends GeneratedId {
 
 	var temporary: JBoolean = true
 
-	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var dateUploaded: DateTime = new DateTime
 
 	@transient private var _file: File = null
