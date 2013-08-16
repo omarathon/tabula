@@ -21,6 +21,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro supervisees><@url page="/supervisees" /></#macro>
 <#macro tutors department><@url page="/department/${department.code}/tutors" /></#macro>
 <#macro tutors_missing department><@url page="/department/${department.code}/tutors/missing" /></#macro>
+<#macro tutors_allocate department><@url page="/department/${department.code}/tutors/allocate" /></#macro>
 
 <#macro tutor_upload department><@url page="/department/${department.code}/tutors/upload" /></#macro>
 <#macro tutor_template department><@url page="/department/${department.code}/tutors/template" /></#macro>
