@@ -42,7 +42,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		userLookup.getUserByWarwickUniId(any[String]) answers { id =>
 			userDatabase find {_.getWarwickId == id} getOrElse (new AnonymousUser())
 		}
-		userLookup.getUsersByUserIds(any[JList[String]]) answers {case ids:JList[String]=>
+		userLookup.getUsersByUserIds(any[JList[String]]) answers { case ids:JList[String @unchecked] =>
 			val users = ids.asScala.map(id=>(id,userDatabase find {_.getUserId == id} getOrElse (new AnonymousUser())))
 			JHashMap(users:_*)
 		}
