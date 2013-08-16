@@ -36,7 +36,7 @@ class StudentMemberFixtureCommand extends CommandInternal[Unit] with Logging {
 			newMember.gender = Gender.fromCode(genderCode)
 			newMember.firstName = userLookupUser.getFirstName
 			newMember.lastName = userLookupUser.getLastName
-
+			newMember.inUseFlag = "Active"
 			val scd = new StudentCourseDetails(newMember, userLookupUser.getWarwickId + "/" + yearOfStudy)
 			scd.mostSignificant = true
 			scd.sprCode = scd.scjCode

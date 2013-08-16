@@ -6,16 +6,18 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupFormat, SmallGroupEvent}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat._
 
-
-trait SmallGroupEventTimetableEventSourceComponent {
+trait SmallGroupEventTimetableEventSourceComponent{
+	val studentGroupEventSource:StudentTimetableEventSource
+}
+trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTimetableEventSourceComponent {
 	this: SmallGroupServiceComponent with UserLookupComponent =>
 
-	def studentGroupEventSource:StudentTimetableEventSource = new SmallGroupEventTimetableEventSource
+	val studentGroupEventSource:StudentTimetableEventSource = new SmallGroupEventTimetableEventSourceImpl
 
-	class SmallGroupEventTimetableEventSource extends StudentTimetableEventSource{
+	class SmallGroupEventTimetableEventSourceImpl extends StudentTimetableEventSource{
 
 		def eventsFor(student: StudentMember): Seq[TimetableEvent] = {
-			val user = userLookup.getUserByWarwickUniId(student.universityId)
+			val user = userLookup.getUserByUserId(student.userId)
 			val studentsGroups = smallGroupService.findSmallGroupsByStudent(user)
 			val allEvents = studentsGroups.flatMap(group => group.events.asScala)
 			allEvents map smallGroupEventToTimetableEvent
@@ -23,16 +25,6 @@ trait SmallGroupEventTimetableEventSourceComponent {
 
 		def smallGroupEventToTimetableEvent(sge: SmallGroupEvent): TimetableEvent = {
 			TimetableEvent(sge)
-		}
-
-		def smallGroupFormatToTimetableEventType(sgf: SmallGroupFormat): TimetableEventType = {
-			sgf match {
-				case Seminar => TimetableEventType.Seminar
-				case Lab => TimetableEventType.Practical
-				case Tutorial => TimetableEventType.Other("Tutorial")
-				case Project => TimetableEventType.Other("Project")
-				case Example => TimetableEventType.Other("Example")
-			}
 		}
 	}
 

@@ -2,45 +2,57 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, Appliable, CommandInternal}
 import uk.ac.warwick.tabula.profiles.services.timetables._
-import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking, PubliclyVisiblePermissions}
 import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.services.{AutowiringTermFactoryComponent, TermAwareWeekToDateConverterComponent, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services._
 import org.joda.time.{Interval, LocalDate}
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.tabula.permissions.Permissions
 
-class ViewStudentPersonalTimetableCommandImpl extends CommandInternal[Seq[EventOccurrence]]{
-	this:StudentTimetableEventSourceComponent with EventOccurrenceComponent=>
+trait ViewStudentPersonalTimetableCommandState {
+	var student: StudentMember = _
+	var start: LocalDate = LocalDate.now.minusMonths(12)
+	var end: LocalDate = start.plusMonths(13)
+}
 
-	var student:StudentMember = _
-	var start:LocalDate = LocalDate.now
-	var end:LocalDate = start.plusMonths(1)
+class ViewStudentPersonalTimetableCommandImpl extends CommandInternal[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState {
+	this: StudentTimetableEventSourceComponent with EventOccurrenceServiceComponent =>
 
-	def eventsToOccurrences:TimetableEvent=>Seq[EventOccurrence] = eventOccurenceService.fromTimetableEvent(_,new Interval(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay))
+	def eventsToOccurrences: TimetableEvent => Seq[EventOccurrence] =
+		eventOccurrenceService.fromTimetableEvent(_, new Interval(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay))
 
-	protected def applyInternal(): Seq[EventOccurrence] = {
+	def applyInternal(): Seq[EventOccurrence] = {
 		val timetableEvents = studentTimetableEventSource.eventsFor(student)
-		val occurences = timetableEvents flatMap eventsToOccurrences
-		occurences.sortBy(_.start)
+		val occurrences = timetableEvents flatMap eventsToOccurrences
+		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+		occurrences.sortBy(_.start)
 	}
 }
 
-object ViewStudentPersonalTimetableCommand{
+trait ViewStudentTimetablePermissions extends RequiresPermissionsChecking{
+	this:ViewStudentPersonalTimetableCommandState =>
+	def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.Profiles.Read.Timetable, student)
+	}
+}
+
+object ViewStudentPersonalTimetableCommand {
 
 	// mmm, cake.
-	def apply:Appliable[Seq[EventOccurrence]] = {
+	def apply(): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState = {
 
 		new ViewStudentPersonalTimetableCommandImpl
 			with ComposableCommand[Seq[EventOccurrence]]
-		  with PubliclyVisiblePermissions
-		  with Unaudited
-		  with CombinedStudentTimetableEventSourceComponent
-		  with SmallGroupEventTimetableEventSourceComponent
-		  with ScientiaHttpTimetableFetchingServiceComponent
-		  with EventOccurrenceComponent
-		  with TermAwareWeekToDateConverterComponent
+			with ViewStudentTimetablePermissions
+			with Unaudited
+			with CombinedStudentTimetableEventSourceComponent
+			with SmallGroupEventTimetableEventSourceComponentImpl
+			with ScientiaHttpTimetableFetchingServiceComponent
+			with TermBasedEventOccurrenceComponent
+			with TermAwareWeekToDateConverterComponent
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringUserLookupComponent
-		  with AutowiringTermFactoryComponent
+			with AutowiringTermFactoryComponent
+			with AutowiringScientiaConfigurationComponent
 	}
 }
 

@@ -28,9 +28,9 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
   val year = AcademicYear.guessByDate(intervalIncludingOccurrence.getStart)
 	val mockConverter = mock[WeekToDateConverter]
 
-	val occurrenceService = new EventOccurrenceComponent with WeekToDateConverterComponent{
+	val occurrenceService = new TermBasedEventOccurrenceComponent with WeekToDateConverterComponent{
 		val weekToDateConverter = mockConverter
-	}.eventOccurenceService
+	}.eventOccurrenceService
 
 	@Test
 	def singleOccurenceDuringInterval(){

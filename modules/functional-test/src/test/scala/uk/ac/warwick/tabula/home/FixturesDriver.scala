@@ -48,6 +48,13 @@ trait FixturesDriver {
 		id
 	}
 
+	def createSmallGroupEvent(setId: String,title: String, weekRange:String="1") {
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/groupEvent"
+		val req = url(uri).POST << Map("setId" -> setId, "title" -> title, "weekRange"->weekRange)
+		http.when(_==200)(req >| )
+	}
+
+
   def addStudentToGroupSet(studentUserId: String, setId:String){
 		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/groupsetMembership"
 		val req = url(uri).POST << Map(

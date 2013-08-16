@@ -13,15 +13,15 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 	val mockSmallGroupService = mock[SmallGroupService]
 	val mockUserLookup = mock[UserLookupService]
 
-	val eventSource = new SmallGroupEventTimetableEventSourceComponent with UserLookupComponent with SmallGroupServiceComponent {
+	val eventSource = new SmallGroupEventTimetableEventSourceComponentImpl with UserLookupComponent with SmallGroupServiceComponent {
 		def smallGroupService: SmallGroupService = mockSmallGroupService
 		def userLookup: UserLookupService = mockUserLookup
 	}.studentGroupEventSource
 
 	val student = mock[StudentMember]
-	student.universityId returns "studentUniId"
+	student.userId returns "studentUserId"
 	val studentUser = new User
-	mockUserLookup.getUserByWarwickUniId(any[String]) returns studentUser
+	mockUserLookup.getUserByUserId(any[String]) returns studentUser
 
 	val group = new SmallGroup
 	val event = new SmallGroupEvent

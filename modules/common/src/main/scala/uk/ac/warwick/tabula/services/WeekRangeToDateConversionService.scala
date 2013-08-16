@@ -38,6 +38,13 @@ trait TermAwareWeekToDateConverterComponent extends WeekToDateConverterComponent
 
 		def intersectsWeek(interval: Interval, week: WeekRange.Week, year: AcademicYear): Boolean = {
 			val weekInterval = weeksForYear(year).get(week)
+			weekInterval match {
+				case Some(i)=>{
+					val o = interval.overlap(i)
+					val b = o != null
+				}
+				case None=>false
+			}
 			weekInterval.map((interval.overlap(_) != null)).getOrElse(false)
 		}
 

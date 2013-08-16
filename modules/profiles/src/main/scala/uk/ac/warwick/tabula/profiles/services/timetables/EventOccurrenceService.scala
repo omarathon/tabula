@@ -29,12 +29,17 @@ object EventOccurrence {
 		)
 	}
 }
-
-trait EventOccurrenceComponent {
+trait EventOccurrenceServiceComponent{
+	val eventOccurrenceService:EventOccurrenceService
+	trait EventOccurrenceService{
+		def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence]
+	}
+}
+trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
 	this: WeekToDateConverterComponent =>
-	def eventOccurenceService: EventOccurrenceService = new EventOccurrenceService
+	val eventOccurrenceService: EventOccurrenceService = new TermBasedEventOccurrenceService
 
-	class EventOccurrenceService {
+	class TermBasedEventOccurrenceService extends EventOccurrenceService{
 
 		def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence] = {
 

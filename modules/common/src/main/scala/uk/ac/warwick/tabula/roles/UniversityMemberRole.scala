@@ -29,6 +29,7 @@ case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefini
 		Profiles.Read.StudentCourseDetails.Status,
 		Profiles.Read.Supervisees,
 		Profiles.Read.SmallGroups,
+	  Profiles.Read.Timetable,
 
 		Profiles.PersonalTutor.MeetingRecord.Read,
     Profiles.PersonalTutor.MeetingRecord.ReadDetails,

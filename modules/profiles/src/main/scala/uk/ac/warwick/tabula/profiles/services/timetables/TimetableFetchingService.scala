@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.data.model.groups._
 import scala.Some
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat._
 import scala.Some
+import uk.ac.warwick.spring.Wire
 
 trait TimetableFetchingServiceComponent {
 	def timetableFetchingService:TimetableFetchingService
@@ -26,14 +27,29 @@ trait TimetableFetchingServiceComponent {
 		def getTimetableForStaff(universityId: String): Seq[TimetableEvent]
 	}
 }
+trait ScientiaConfigurationComponent{
+	val scientiaConfiguration:ScientiaConfiguration
+	trait ScientiaConfiguration{
+		val baseUri:String
+	}
+}
+trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComponent{
+	val scientiaConfiguration = new AutowiringScientiaConfiguration
+	class AutowiringScientiaConfiguration extends ScientiaConfiguration{
+		val baseUri:String =	Wire.optionProperty("${scientia.base.url}").getOrElse("https://test-timetablingmanagement.warwick.ac.uk/xml/")
+	}
+}
+
 trait ScientiaHttpTimetableFetchingServiceComponent extends TimetableFetchingServiceComponent{
 
+	this:ScientiaConfigurationComponent =>
 	def timetableFetchingService = new ScientiaHttpTimetableFetchingService
 
 	class ScientiaHttpTimetableFetchingService extends TimetableFetchingService with Logging with DisposableBean {
 		import ScientiaHttpTimetableFetchingService._
 
-		val baseUri = "https://test-timetablingmanagement.warwick.ac.uk/xml/"
+		lazy val baseUri = scientiaConfiguration.baseUri
+
 		lazy val studentUri = baseUri + "?StudentXML"
 		lazy val staffUri = baseUri + "?StaffXML"
 		lazy val courseUri = baseUri + "?CourseXML"
