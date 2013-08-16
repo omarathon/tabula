@@ -86,9 +86,9 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	}
 
 	def allMembersRoutes() = {
-		val routes = for (
-			member<-membersById.values;
-		  course<-member.mostSignificantCourseDetails)
+		val routes = for {
+			member <- membersById.values
+			course <- member.mostSignificantCourseDetails}
 		yield course.route
 		routes.toSeq.distinct
 	}
