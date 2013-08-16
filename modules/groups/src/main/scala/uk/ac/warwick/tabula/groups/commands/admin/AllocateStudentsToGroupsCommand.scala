@@ -27,8 +27,6 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 
-
-
 class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet, val viewer: CurrentUser)
 	extends Command[SmallGroupSet] with SelfValidating with BindListener with SmallGroupSetCommand with NotifiesAffectedGroupMembers{
 	
