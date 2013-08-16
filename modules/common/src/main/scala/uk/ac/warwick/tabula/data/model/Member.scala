@@ -285,7 +285,6 @@ trait MemberProperties {
 	var userType: MemberUserType = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
-	@Restricted(Array("Profiles.Read.Gender"))
 	var gender: Gender = _
 
 	@OneToOne(fetch = FetchType.LAZY, cascade=Array(ALL))

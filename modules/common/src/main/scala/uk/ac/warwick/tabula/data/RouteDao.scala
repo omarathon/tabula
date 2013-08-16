@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.data.model.Route
 trait RouteDao {
 	def saveOrUpdate(route: Route)
 	def getByCode(code: String): Option[Route]
+	def findByDepartment(department:Department):Seq[Route]
 }
 
 @Repository
@@ -22,4 +23,6 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 	def getByCode(code: String) = 
 		session.newQuery[Route]("from Route r where code = :code").setString("code", code).uniqueResult
 
+  def findByDepartment(department:Department) =
+		session.newQuery[Route]("from Route r where department = :dept").setEntity("dept",department).seq
 }

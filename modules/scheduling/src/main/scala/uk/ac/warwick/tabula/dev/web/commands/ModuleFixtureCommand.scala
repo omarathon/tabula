@@ -23,6 +23,7 @@ class ModuleFixtureCommand extends CommandInternal[Unit] with Logging{
 		transactional() {
 			val department  = moduleAndDepartmentService.getDepartmentByCode(departmentCode).get
 			moduleAndDepartmentService.getModuleByCode(code).foreach { module =>
+				department.modules.remove(module)
 				session.delete(module)
 				logger.info(s"Deleted module ${code}")
 			}

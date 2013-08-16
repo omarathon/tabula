@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.dev.web.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import org.springframework.web.bind.annotation.RequestMethod.POST
-import uk.ac.warwick.tabula.dev.web.commands.{GroupMembershipFixtureCommand, GroupsetMembershipFixtureCommand, SmallGroupSetFixtureCommand, ModuleFixtureCommand}
+import uk.ac.warwick.tabula.dev.web.commands._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import org.springframework.web.servlet.View
 import uk.ac.warwick.tabula.commands.Appliable
@@ -69,6 +69,36 @@ class SmallGroupMembershipCreationFixturesController {
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("createMembershipCommand") cmd: Appliable[Unit]) {
+		cmd.apply()
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/create/studentMember"))
+class StudentMemberCreationFixturesController {
+
+	@ModelAttribute("createMemberCommand")
+	def getCreateModuleCommand(): Appliable[Unit] = {
+		StudentMemberFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createMemberCommand") cmd: Appliable[Unit]) {
+		cmd.apply()
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/create/route"))
+class RouteCreationFixturesController {
+
+	@ModelAttribute("createRouteCommand")
+	def getCreateRouteCommand(): Appliable[Unit] = {
+		RouteCreationFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createRouteCommand") cmd: Appliable[Unit]) {
 		cmd.apply()
 	}
 }
