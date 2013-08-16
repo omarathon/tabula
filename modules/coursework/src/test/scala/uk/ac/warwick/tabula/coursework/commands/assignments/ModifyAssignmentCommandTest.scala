@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.UserGroup
 class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 
 	val userLookup = mock[UserLookupService]
-	userLookup.getUsersByUserIds(any[JList[String]]) answers {case ids:JList[String]=>
+	userLookup.getUsersByUserIds(any[JList[String]]) answers { case ids: JList[String @unchecked] =>
 		val users = ids.asScala.map(id=>(id,new User(id)))
 		JHashMap(users:_*)
 	}

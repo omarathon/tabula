@@ -15,7 +15,7 @@ class SandboxProfileImporterTest extends TestBase {
 	@Test def itWorks() = withFakeTime(new DateTime(2013, DateTimeConstants.JULY, 4, 11, 27, 54, 0)) {
 		val department = Fixtures.department("hom", "History of Music")
 		val macs = importer.userIdsAndCategories(department)
-		macs.size should be (280)
+		macs.size should be (310)
 		
 		val mac = macs(0)
 		mac.photo() should be ('empty)
