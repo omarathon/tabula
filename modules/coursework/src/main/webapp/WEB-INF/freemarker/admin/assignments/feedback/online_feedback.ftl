@@ -1,3 +1,5 @@
+<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
+<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#import "../submissionsandfeedback/_submission_details.ftl" as sd />
 
 <div class="feedback">
@@ -24,29 +26,25 @@
 			</div>
 		</div>
 	</#if>
-
 	<div class="form">
-		<form class="form-horizontal">
-			<div class="control-group">
-				<label class="control-label" for="inputEmail">Email</label>
-				<div class="controls">
-				  <input type="text" id="inputEmail" placeholder="Email">
-				</div>
-			  </div>
-			  <div class="control-group">
-				<label class="control-label" for="inputPassword">Password</label>
-				<div class="controls">
-				  <input type="password" id="inputPassword" placeholder="Password">
-				</div>
-			  </div>
-			  <div class="control-group">
-				<div class="controls">
-				  <label class="checkbox">
-					<input type="checkbox"> Remember me
-				  </label>
-				  <button type="submit" class="btn">Sign in</button>
-				</div>
-			  </div>
-  		</form>
+		<@f.form class="form-horizontal" method="post" enctype="multipart/form-data" commandName="command">
+
+			<@form.row>
+				<@form.label path="mark">Mark</@form.label>
+				<@form.field>
+					<@f.input path="mark" cssClass="input-small" />
+					<@f.errors path="mark" cssClass="error" />
+				</@form.field>
+			</@form.row>
+
+			<@form.row>
+				<@form.label path="grade">Grade</@form.label>
+				<@form.field>
+					<@f.input path="grade" cssClass="input-small" />
+					<@f.errors path="grade" cssClass="error" />
+				</@form.field>
+			</@form.row>
+
+		</@f.form>
 	</div>
 </div>

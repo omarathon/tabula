@@ -135,7 +135,7 @@
 					<#local extension=enhancedExtension.extension>
 				</#if>
 
-				<div class="workflow">
+				<div class="workflow content">
 					<#if student.stages?keys?seq_contains('Submission')>
 						<div class="stage-group clearfix">
 							<h3>Submission</h3>
@@ -339,15 +339,15 @@
 			</#macro>
 
 			<#macro row student>
-				<tr class="itemContainer<#if !student.coursework.enhancedSubmission??> awaiting-submission</#if>"<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission.suspectPlagiarised> data-plagiarised="true"</#if>>
+				<tr data-contentid="${student.user.warwickId}" class="itemContainer<#if !student.coursework.enhancedSubmission??> awaiting-submission</#if>"<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission.suspectPlagiarised> data-plagiarised="true"</#if>>
 					<td class="check-col"><#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??><input type="checkbox" class="collection-checkbox" name="students" value="${student.user.warwickId}"></#if></td>
 					<#if department.showStudentName>
-						<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.firstName}</h6></td>
-						<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.lastName}</h6></td>
+						<td class="student-col toggle-cell"><h6 class="toggle-icon" data-profile="${student.user.warwickId}">${student.user.firstName}</h6></td>
+						<td class="student-col toggle-cell"><h6 data-profile="${student.user.warwickId}">${student.user.lastName}</h6></td>
 					<#else>
-						<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.warwickId}</h6></td>
+						<td class="student-col toggle-icon toggle-cell"><h6 class="toggle-icon" data-profile="${student.user.warwickId}">${student.user.warwickId}</h6></td>
 					</#if>
-					<td class="progress-col">
+					<td class="progress-col content-cell toggle-cell">
 						<#if student.stages?keys?seq_contains('Submission') && student.nextStage?? && student.nextStage.toString != 'Submission' && student.stages['Submission'].messageCode != student.progress.messageCode>
 							<#local progressTooltip><@spring.message code=student.stages['Submission'].messageCode />. <@spring.message code=student.progress.messageCode /></#local>
 						<#else>
@@ -356,8 +356,8 @@
 
 						<dl class="progress progress-${student.progress.t} use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
 							<dt class="bar" style="width: ${student.progress.percentage}%;"></dt>
-							<dd style="display: none;" class="workflow-progress-container" data-profile="${student.user.warwickId}">
-								<div id="workflow-${student.user.warwickId}" class="workflow-container">
+							<dd style="display: none;" class="table-content-container" data-contentid="${student.user.warwickId}">
+								<div id="content-${student.user.warwickId}" class="workflow-container content-container">
 									<@workflow student />
 								</div>
 							</dd>
@@ -386,111 +386,11 @@
 
 <#if students?size gt 0>
 <script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
+
 <script type="text/javascript">
 (function($) {
 
-
-	var repositionWorkflowBoxes = function() {
-		// These have to be positioned in the right order, so we loop through workflow-progress-container rather than directly on workflow
-		$('.workflow-progress-container').hide().each(function() {
-			var universityId = $(this).attr('data-profile');
-			var $workflow = $('#workflow-' + universityId);
-
-			if ($workflow.length) {
-				var isOpen = $workflow.data('open');
-
-				if (isOpen) {
-					$(this).show();
-					var $progressField = $(this).closest('.progress-col');
-
-					// Add bottom padding equivalent to the height of the workflow div to the progress field
-					var fieldPosition = $progressField.position();
-
-					$progressField.css('padding-bottom', '');
-					var fieldHeight = $progressField.outerHeight();
-					var workflowHeight = $workflow.outerHeight();
-					$progressField.css('padding-bottom', workflowHeight + 10);
-
-					// Position the workflow div in the correct location
-					$workflow.css({
-						top: (fieldPosition.top + fieldHeight - 2) + 'px',
-						left: ($('.students').position().left + 1) + 'px'
-					});
-				}
-			}
-		});
-	};
-
-	$.tablesorter.addWidget({
-		id: 'repositionWorkflowBoxes',
-		format: repositionWorkflowBoxes
-	});
-
-	// Expanding and contracting
-	$('.students tbody tr').each(function() {
-		var $nameField = $(this).find('.student-col h6').first();
-		var $progressField = $(this).find('.progress-col').first();
-		var $icon = $('<i class="icon-chevron-right icon-fixed-width"></i>').css('margin-top', '2px');
-
-		$nameField
-			.prepend(' ')
-			.prepend($icon)
-			.closest('tr')
-			.find('.student-col,.progress-col')
-			.css('cursor', 'pointer')
-			.on('click', function(evt) {
-				var universityId = $nameField.attr('data-profile');
-				var $workflow = $('#workflow-' + universityId);
-				if ($workflow.length) {
-					var isOpen = $workflow.data('open');
-
-					if (isOpen) {
-						// Hide the workflow div and move it back to where it was before
-						$workflow.hide();
-						$progressField.find('dd').append($workflow);
-
-						// Remove the bottom padding on the progress field
-						$progressField.css('padding-bottom', '');
-
-						// Remove any position data from the workflow div
-						$workflow.attr('style', '');
-
-						// Change the icon to closed
-						$icon.removeClass('icon-chevron-down').addClass('icon-chevron-right');
-
-						// Set the data
-						$workflow.data('open', false);
-					} else {
-						// Move the workflow div to be at the end of the offset parent and display it
-						$('#main-content').append($workflow);
-						$workflow.show();
-
-						if ($progressField.closest('tr').is(':nth-child(odd)')) {
-							$workflow.css('background-color', '#ebebeb');
-						} else {
-							$workflow.css('background-color', '#f5f5f5');
-						}
-
-						$workflow.css({
-							width: ($('.students').width() - 21) + 'px'
-						});
-
-						// Change the icon to open
-						$icon.removeClass('icon-chevron-right').addClass('icon-chevron-down');
-
-						// Set the data
-						$workflow.data('open', true);
-					}
-
-					repositionWorkflowBoxes();
-
-					evt.preventDefault();
-					evt.stopPropagation();
-				}
-			});
-	});
-
-	$('.students').tablesorter({
+	var options = {
 		sortList: [[<#if department.showStudentName>3<#else>2</#if>,0]],
 		headers: { 0: { sorter: false } },
 		textExtraction: function(node) {
@@ -512,9 +412,11 @@
 			} else {
 				return $el.text().trim();
 			}
-		},
-		widgets: ['repositionWorkflowBoxes']
-	});
+		}
+	};
+
+	$('#coursework-progress-table').expandingTable({ tableSorterOptions: options });
+
 })(jQuery);
 </script>
 <#else>
