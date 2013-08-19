@@ -153,6 +153,10 @@ object Fixtures {
 		studentCourseDetails.sprCode = m.universityId + "/1"
 		studentCourseDetails.department = courseDepartment
 		studentCourseDetails.mostSignificant = true
+
+		val sprStatus = new SitsStatus();
+		sprStatus.code = "F"
+		studentCourseDetails.sprStatus = sprStatus
 		m.studentCourseDetails.add(studentCourseDetails)
 		m
 	}
