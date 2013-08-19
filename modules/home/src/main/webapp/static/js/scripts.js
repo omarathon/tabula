@@ -440,19 +440,21 @@
 		 */
 		$('html').addClass($.fn.details.support ? 'details' : 'no-details');
 		$('details').details();
+		// different selector for open details depending on if it's native or polyfill.
+		var openSlctr = $.fn.details.support ? '[open]' : '.open';
 
-		// togglers
+		// togglers - relies on everything being in a section element
 		$(".tabula-page").on("click", ".open-all-details", function() {
-			$("html.no-details details:not(.open) summary").click();
-			$("html.details details:not([open]) summary").click();
-			$(".open-all-details").hide();
-			$(".close-all-details").show();
+			var $container = $(this).closest('section');
+			$container.find('details:not(' + openSlctr + ') summary').click();
+			$container.find(".open-all-details").hide();
+			$container.find(".close-all-details").show();
 		});
 		$(".tabula-page").on("click", ".close-all-details", function() {
-			$("html.no-details details.open summary").click();
-			$("html.details details[open] summary").click();
-			$(".close-all-details").hide();
-			$(".open-all-details").show();
+			var $container = $(this).closest('section');
+			$container.find('details' + openSlctr + ' summary').click();
+			$container.find(".close-all-details").hide();
+			$container.find(".open-all-details").show();
 		});
 
 		// collapsible striped section
