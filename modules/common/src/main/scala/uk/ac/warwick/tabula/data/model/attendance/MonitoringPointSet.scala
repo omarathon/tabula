@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
 import uk.ac.warwick.tabula.data.model.GeneratedId
-import org.hibernate.annotations.Entity
+import javax.persistence.Entity
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.data.model.Route
 import javax.persistence.JoinColumn
@@ -28,10 +28,8 @@ class MonitoringPointSet extends GeneratedId {
 	
 	var sentToAcademicOffice: Boolean = false
 	
-	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var createdDate: DateTime = _
 	
-	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var updatedDate: DateTime = _
 	
 	@NotNull

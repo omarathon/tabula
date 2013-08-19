@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import org.hibernate.annotations.Entity
+import javax.persistence.Entity
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 
@@ -23,7 +23,6 @@ class MonitoringCheckpoint extends GeneratedId {
 	
 	var checked: Boolean = false
 	
-	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var createdDate: DateTime = _
 	
 	@NotNull
