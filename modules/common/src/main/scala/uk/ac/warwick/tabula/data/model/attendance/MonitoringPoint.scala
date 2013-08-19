@@ -21,10 +21,10 @@ class MonitoringPoint extends GeneratedId {
 	
 	var defaultValue: Boolean = true
 	
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var createdDate: DateTime = _
 	
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var updatedDate: DateTime = _
 	
 	var week: Int = _

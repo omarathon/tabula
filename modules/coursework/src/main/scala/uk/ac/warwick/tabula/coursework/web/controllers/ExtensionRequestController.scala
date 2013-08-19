@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.ExtensionRequestCommand
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import org.hibernate.validator.Valid
+import javax.validation.Valid
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.coursework.web.Routes
 

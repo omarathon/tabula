@@ -20,24 +20,17 @@
 		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd
 		http://go.warwick.ac.uk/elab-schemas/filterstack http://go.warwick.ac.uk/elab-schemas/filters.xsd">
 	
-	<bean id="hibernateLifecycle" class="uk.ac.warwick.tabula.data.HibernateLifecycle" />
+	<bean id="hibernateLifecycle" class="uk.ac.warwick.tabula.data.HibernateLifecycle"
+		p:sessionFactory-ref="sessionFactory" />
 	
 	<import resource="hibernate-packages-context.xml" />
 	
-	<bean id="sessionFactory" class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"
+	<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"
 		p:dataSource-ref="dataSource"
 		p:packagesToScan-ref="hibernatePackages"
-		p:lobHandler-ref="lobHandler"
-		p:hibernateProperties-ref="hibernateProperties">
-		<property name="eventListeners"><map>
-			<entry key="pre-load" value-ref="hibernateLifecycle" />
-			<entry key="post-load" value-ref="hibernateLifecycle"/>
-			<entry key="pre-update" value-ref="hibernateLifecycle"/>
-			<entry key="pre-insert" value-ref="hibernateLifecycle"/>
-		</map></property>
-	</bean>
+		p:hibernateProperties-ref="hibernateProperties" />
 	
-	<bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager"
+	<bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
 		p:sessionFactory-ref="sessionFactory" />
 
 	<beans profile="console">
@@ -73,12 +66,6 @@
 		    <property name="username" value="${membership.db.username}"/>
 		    <property name="password" value="${membership.db.password}"/>
 		</bean>
-		
-		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler">
-	    	<property name="nativeJdbcExtractor">
-	    		<bean class="org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor" />
-	    	</property>
-	    </bean>
 	</beans>
 	
 	<beans profile="dev,sandbox,production,console">
@@ -117,15 +104,8 @@
 		
 	</beans>
 	
-	<beans profile="dev,sandbox,production">	
-	
-		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.OracleLobHandler">
-	    	<property name="nativeJdbcExtractor">
-	    		<!-- <bean class="org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor" /> -->
-	    		<bean class="org.springframework.jdbc.support.nativejdbc.JBossNativeJdbcExtractor" />
-	    	</property>
-	    </bean>
-		
+	<beans profile="dev,sandbox,production">
+
 		<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		   <property name="jndiName" value="java:/TabulaDS"/>
 	    </bean>
@@ -156,9 +136,7 @@
 	
 	<beans profile="test">
 		<jdbc:embedded-database id="dataSource" />
-			
-		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" />
-		
+
 		<bean id="mainDatabaseDialect" class="org.hibernate.dialect.HSQLDialect" />
 
 		<import resource="hibernate-test-scripts-context.xml" />

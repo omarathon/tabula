@@ -20,7 +20,6 @@ class MarkerFeedback extends GeneratedId {
 	var feedback: Feedback = _
 
 	@Column(name = "uploaded_date")
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var uploadedDate: DateTime = new DateTime
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")

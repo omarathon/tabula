@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.profiles.commands.UploadPersonalTutorsCommand
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.system.BindListener
-import org.hibernate.validator.Valid
+import javax.validation.Valid
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.validation.ObjectError

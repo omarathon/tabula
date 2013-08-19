@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.services.{AssignmentMembershipService, UserLookupSer
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.Errors
-import org.hibernate.validator.NotNull
+import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.coursework.commands.feedback.ListFeedbackCommand
 import uk.ac.warwick.tabula.helpers.Stopwatches._
 

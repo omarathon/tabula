@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.events.EventHandling
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.springframework.transaction.annotation.Transactional
-import org.hibernate.classic.Session
+import org.hibernate.Session
 
 // scalastyle:off magic.number
 class AddMarksCommandTest extends TestBase with Mockito {

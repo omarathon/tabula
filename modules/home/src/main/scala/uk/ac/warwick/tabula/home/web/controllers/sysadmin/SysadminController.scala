@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.home.web.controllers.sysadmin
 
 import scala.collection.JavaConversions._
 
-import org.hibernate.validator.Valid
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
@@ -19,6 +18,7 @@ import uk.ac.warwick.tabula.web.Cookies._
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.home.SysadminBreadcrumbs
+import javax.validation.Valid
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.

@@ -36,15 +36,12 @@ class StudentRelationship extends GeneratedId {
 	var targetSprCode: String = new String("")
 
 	@Column(name = "uploaded_date")
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var uploadedDate: DateTime = new DateTime
 
 	@Column(name = "start_date")
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var startDate: DateTime = _
 
 	@Column(name = "end_date")
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var endDate: DateTime = _
 
 	// assume that all-numeric value is a member (not proven though)

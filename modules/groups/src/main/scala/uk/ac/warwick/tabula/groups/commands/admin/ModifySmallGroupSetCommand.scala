@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import org.hibernate.validator.Valid
+import javax.validation.Valid
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 
 /**

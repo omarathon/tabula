@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.groups.web.controllers.admin
 
-import org.hibernate.validator.Valid
+import javax.validation.Valid
 import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors

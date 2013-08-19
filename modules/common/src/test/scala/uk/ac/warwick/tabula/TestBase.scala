@@ -38,6 +38,7 @@ import scala.Some
 import org.apache.log4j.NDC
 import uk.ac.warwick.tabula.helpers.Logging
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
+import uk.ac.warwick.tabula.data.Transactions
 
 /** Base class for tests which boringly uses the JUnit support of
   * Scalatest, so you do @Test annotated methods as you normally would.
@@ -52,6 +53,8 @@ abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with Test
 	// No test should take longer than a minute
 	val minuteTimeout = new Timeout(60000)
 	@Rule def timeoutRule = minuteTimeout
+
+	Transactions.enabled = false
 
   NDC.pop
   NDC.push(System.getProperty("TestProcessId"))
