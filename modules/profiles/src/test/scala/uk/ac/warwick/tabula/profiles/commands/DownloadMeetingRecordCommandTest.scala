@@ -77,14 +77,14 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 		createMeetingRecordCommand.file = uploadedFile
 
-		val meeting = transactional { tx => createMeetingRecordCommand.apply() }
+		val meeting = transactional { tx => createMeetingRecordCommand.applyInternal() }
 
 		// test to see if DownloadMeetingRecordFilesCommand.apply() can be used to get the file
 		val downloadCommand = new DownloadMeetingRecordFilesCommand(meeting)
 
 		// normally for single files the filename is set in the command as it is a path variable (I think!)
 		downloadCommand.filename = "Beltane"
-		val retSingle = downloadCommand.apply()
+		val retSingle = downloadCommand.applyInternal()
 		val rendFile = retSingle.get
 		rendFile.filename should be ("Beltane")
 	}}
