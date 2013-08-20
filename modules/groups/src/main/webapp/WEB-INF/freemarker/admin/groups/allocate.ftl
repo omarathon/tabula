@@ -8,8 +8,8 @@
 	<#assign profile = membersById[student.warwickId]!{} />
 	<li class="student well well-small"
 	data-f-gender="${profile.gender.dbValue}"
-	data-f-route="${profile.mostSignificantCourseDetails.route.code}"
-	data-f-year="${profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy}">
+	data-f-route="${(profile.mostSignificantCourseDetails.route.code)!}"
+	data-f-year="${(profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
 		<div class="profile clearfix">
 			<@fmt.member_photo profile "tinythumbnail" false />
 			<div class="name">
