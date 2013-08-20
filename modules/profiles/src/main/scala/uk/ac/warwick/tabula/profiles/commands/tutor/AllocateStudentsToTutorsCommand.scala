@@ -27,6 +27,7 @@ import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.profiles.web.controllers.tutor.EditTutorCommand
 import uk.ac.warwick.tabula.commands.GroupsObjects
 import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.userlookup.User
 
 class AllocateStudentsToTutorsCommand(val department: Department, val viewer: CurrentUser)
 	extends Command[Seq[Option[StudentRelationship]]] 
@@ -55,6 +56,27 @@ class AllocateStudentsToTutorsCommand(val department: Department, val viewer: Cu
 	var service = Wire[RelationshipService]
 	var profileService = Wire[ProfileService]
 	var securityService = Wire[SecurityService]
+	
+	var additionalTutors: JList[String] = JArrayList()
+	
+	override def onBind(result: BindingResult) {
+		super.onBind(result)
+		
+		// Find all empty textboxes for tutors and remove them - otherwise we end up with a never ending list of empties
+		val indexesToRemove = additionalTutors.asScala.zipWithIndex.flatMap { case (tutor, index) =>
+			if (!tutor.hasText) Some(index)
+			else None
+		}
+		
+		// We reverse because removing from the back is better
+		indexesToRemove.reverse.foreach { additionalTutors.remove(_) }
+		
+		additionalTutors.asScala
+			.flatMap { profileService.getMemberByUserId(_) }
+			.foreach { member => 
+				if (!mapping.containsKey(member)) mapping.put(member, JArrayList())
+			}
+	}
 
 	// Only called on initial form view
 	override def populate() {

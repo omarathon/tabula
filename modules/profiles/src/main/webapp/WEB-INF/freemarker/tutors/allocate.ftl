@@ -59,7 +59,7 @@
 			</@spring.hasBindErrors>
 
 			<#assign submitUrl><@routes.tutors_allocate department /></#assign>
-			<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToTutorsCommand">
+			<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToTutorsCommand" cssClass="form-horizontal">
 				<div class="btn-toolbar">
 					<a class="random btn"
 					   href="#" >
@@ -115,7 +115,29 @@
 					</div>
 					<div class="span5">
 						<div id="tutorslist" class="tutors fix-on-scroll">
-							<button type="button" class="btn btn-primary pull-right">Add tutors</button>
+							<button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#add-tutors">Add tutors</button>
+							
+							<#-- Modal to add students manually -->
+							<div class="modal fade hide" id="add-tutors" tabindex="-1" role="dialog" aria-labelledby="add-tutors-label" aria-hidden="true">
+								<div class="modal-header">
+									<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+									<h3 id="add-tutors-label">Add tutors</h3>
+								</div>
+					
+								<div class="modal-body">
+									<p>
+										Lookup tutors by typing their names, usercodes or university IDs below, then click <code>Add</code>.
+									</p>
+									
+									<@form.labelled_row "additionalTutors" "Tutors">
+										<@form.flexipicker path="additionalTutors" placeholder="User name" list=true multiple=true />
+									</@form.labelled_row>
+								</div>
+					
+								<div class="modal-footer">
+									<button type="button" class="btn btn-primary refresh-form">Add</button>
+								</div>
+							</div>
 						
 							<h3>Tutors</h3>
 							
@@ -153,11 +175,6 @@
 								
 								<@tutor_item tutor.universityId tutor.fullName existingStudents />
 							</#list>
-							
-							<#-- For adding new tutors -->
-							<script id="tutor-template" type="text/template">
-								<@tutor_item "{{university_id}}" "{{full_name}}" />
-							</script>
 						</div>
 					</div>
 				</div>
@@ -202,7 +219,13 @@
 		(function($) {
 			<!--TAB-1008 - fix scrolling bug when student list is shorter than the group list-->
 			$('#studentslist').css('min-height', function() {
-				return $('#groupslist').outerHeight();
+				return $('#tutorslist').outerHeight();
+			});
+			
+			$('.btn.refresh-form').on('click', function(e) {
+				var $form = $(e.target).closest('form');
+				$form.prepend($('<input />').attr({type: 'hidden', name: 'action', value: 'refresh'}));
+				$form.submit();
 			});
 		})(jQuery);
 	</script>

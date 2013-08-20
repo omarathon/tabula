@@ -17,7 +17,7 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Marks.Create, assignment)
 	
-	var updatedReleasedFeedback: Seq[Feedback] = _
+	var updatedReleasedFeedback: Seq[Feedback] = Nil
 
 	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded

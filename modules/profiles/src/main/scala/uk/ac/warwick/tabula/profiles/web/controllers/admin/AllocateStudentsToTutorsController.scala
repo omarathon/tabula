@@ -31,9 +31,10 @@ class AllocateStudentsToTutorsController extends ProfilesController {
 		form(cmd)
 	}
 	
+	@RequestMapping(method=Array(POST), params=Array("action=refresh"))
 	def form(cmd: AllocateStudentsToTutorsCommand) = Mav("tutors/allocate")
 
-	@RequestMapping(method=Array(POST))
+	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))
 	def submit(@Valid cmd:AllocateStudentsToTutorsCommand, errors: Errors): Mav = {
 		cmd.sort()
 		if (errors.hasErrors()) {
