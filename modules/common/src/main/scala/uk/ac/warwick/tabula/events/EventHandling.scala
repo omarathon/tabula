@@ -42,7 +42,10 @@ trait EventHandling extends Logging {
 						try {
 							listener.onException(event, e)
 						} catch {
-							case e1: Throwable => logger.error("Exception in EventHandling.onException", e1)
+							case e1: Throwable => {
+								logger.error("Exception in EventHandling.onException", e1)
+								logger.error("Exception passed to EventHandling.onException", e)
+							}
 						} finally {
 							throw e
 						}

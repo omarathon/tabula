@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.admin.web.controllers
 
-import org.hibernate.validator.Valid
+import javax.validation.Valid
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 

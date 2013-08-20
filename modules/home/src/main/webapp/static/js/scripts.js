@@ -232,24 +232,7 @@
 			});
 		}
 	};
-	
-	$.fn.tabulaRadioActive = function(options) {
-		var $radios = this;
-		
-		this.on('change', function() {		
-			// fallback to plain "radioactive" attribute since FTL syntax doesn't allow dashes in macro parameter names.
-			
-			$.each($radios, function(i, radio) {
-				var radioActiveAttr = $(radio).data('radioactive') || $(radio).attr('radioactive');
-				if (radioActiveAttr) {
-					var $container = jQuery(radioActiveAttr);
-					$container.find('label,input,select').toggleClass('disabled', !radio.checked);
-					$container.find('input,select').attr({disabled: !radio.checked});
-				}
-			})
-		})
-	}
-	
+
 
 	/*
 	 * .double-submit-protection class on a form will detect submission
@@ -719,19 +702,26 @@ jQuery(function($){
 
 // code for department settings - lives here as department settings is included in most modules
 jQuery(function($){
-	$('input#plagiarismDetection').slideMoreOptions($('#turnitin-options'), true);
+	var $deptSettingsForm = $('.department-settings-form');
+	if (!$deptSettingsForm.length) return;
 
-	$('input#turnitinExcludeSmallMatches').slideMoreOptions($('#small-match-options'), true);
+	$deptSettingsForm.find('input#plagiarismDetection').slideMoreOptions($('#turnitin-options'), true);
 
-	$('#small-match-options').on('tabula.slideMoreOptions.hidden',  function() {
+	$deptSettingsForm.find('input#turnitinExcludeSmallMatches').slideMoreOptions($('#small-match-options'), true);
+
+	$deptSettingsForm.find('#small-match-options').on('tabula.slideMoreOptions.hidden',  function() {
+		// what is `this` here? can it ever be checked?
 		if(!$(this).is(':checked')){
 			$('#small-match-options input[type=text]').val('0');
 		}
+	}).find('input').on('disable.radiocontrolled', function() {
+		this.value = '0';
 	});
 
-	$('.settings-form').radioDisable({
-		onDisable: function($input){
-			$input.val("0");
-		}
+	$deptSettingsForm.find('input[name=disable-radio]').radioControlled({
+		parentSelector: '.control-group',
+		selector: '.controls',
+		mode: 'readonly'
 	});
+
 });

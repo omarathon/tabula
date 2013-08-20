@@ -8,6 +8,7 @@ import org.hibernate.`type`.AbstractSingleColumnStandardBasicType
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.{ io => jio }
+import org.hibernate.engine.spi.SessionImplementor
 
 
 /**
@@ -27,22 +28,16 @@ abstract class AbstractBasicUserType[A <: Object : ClassTag, B : ClassTag] exten
 	def convertToValue(obj: A): B
 
 
-	final override def nullSafeGet(resultSet: ResultSet, names: Array[String], owner: Object) = {
-		@deprecated("","") def _get = basicType.nullSafeGet _
-
-		_get(resultSet, names(0)) match {
+	final override def nullSafeGet(resultSet: ResultSet, names: Array[String], impl: SessionImplementor, owner: Object) = {
+		basicType.nullSafeGet(resultSet, names(0), impl) match {
 			case s: Any if s == nullValue => nullObject
 			case b: B => convertToObject(b)
 			case null => nullObject
 		}
 	}
 
-	final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int) {
-		@deprecated("","") def _set(stmt: PreparedStatement, value: B, index:Int) {
-			basicType.nullSafeSet(stmt, value, index)
-		}
-
-		_set(stmt, toValue(value), index)
+	final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int, impl: SessionImplementor) {
+		basicType.nullSafeSet(stmt, toValue(value), index, impl)
   }
 
 	private final def toValue(value: Any): B = value match {

@@ -606,7 +606,7 @@
 				<plugin>
 					<groupId>org.scalastyle</groupId>
 					<artifactId>scalastyle-maven-plugin</artifactId>
-					<version>0.2.0</version>
+					<version>0.3.2</version>
 					<configuration>
 						<!-- TAB-697 -->
 						<skip>true</skip>
@@ -614,7 +614,7 @@
 						<verbose>false</verbose>
 						<failOnViolation>true</failOnViolation>
 						<failOnWarning>false</failOnWarning>
-            <includeTestSourceDirectory>false</includeTestSourceDirectory>
+						<includeTestSourceDirectory>false</includeTestSourceDirectory>
 						<sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
 						<testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
 						<configLocation>${tabula.basedir}/config/scalastyle_config.xml</configLocation>

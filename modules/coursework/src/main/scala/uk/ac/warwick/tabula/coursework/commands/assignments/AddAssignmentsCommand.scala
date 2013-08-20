@@ -4,22 +4,20 @@ import collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.{ SelfValidating, Description, Command }
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.LazyLists
+import uk.ac.warwick.tabula.helpers.{LazyMaps, LazyLists}
 import uk.ac.warwick.tabula.data.model.{ Department, UpstreamAssignment }
 import uk.ac.warwick.tabula.{ DateFormats, AcademicYear }
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{ Autowired, Configurable }
 import uk.ac.warwick.tabula.services.AssignmentService
 import org.springframework.validation.Errors
-import com.google.common.collect.Maps
+import org.apache.commons.collections.map.LazyMap
+import org.apache.commons.collections.Factory
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.ValidationUtils
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.ModuleDao
 import uk.ac.warwick.tabula.data.model.Module
-import org.springframework.beans.factory.annotation.Configurable
-import scala.collection.mutable.HashMap
-import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
@@ -92,7 +90,8 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	/**
 	 * options which are referenced by key by AssignmentItem.optionsId
 	 */
-	var optionsMap: JMap[String, SharedAssignmentPropertiesForm] = Maps.newHashMap()
+	var optionsMap: JMap[String, SharedAssignmentPropertiesForm] =
+		LazyMaps.create { key: String => new SharedAssignmentPropertiesForm }
 
 	// just for prepopulating the date form fields.
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)

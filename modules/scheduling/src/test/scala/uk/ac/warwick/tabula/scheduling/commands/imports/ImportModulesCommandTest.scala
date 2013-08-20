@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import org.hibernate.classic.Session
+import org.hibernate.Session
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar

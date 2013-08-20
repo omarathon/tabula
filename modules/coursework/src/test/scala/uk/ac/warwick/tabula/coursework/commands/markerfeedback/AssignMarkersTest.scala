@@ -4,7 +4,7 @@ import java.util.HashMap
 
 import collection.JavaConversions._
 
-import org.hibernate.classic.Session
+import org.hibernate.Session
 import org.springframework.transaction.annotation.Transactional
 
 import uk.ac.warwick.tabula.JavaImports._
@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.SessionComponent
 // scalastyle:off magic.number
 class AssignMarkersTest extends TestBase with Mockito {
 
-	@Transactional @Test
+	@Test
 	def assignMarkers() { new MarkingWorkflowWorld {
 		val command = new AbstractAssignMarkersCommand(assignment.module, assignment) with SessionComponent {
 			val session = smartMock[Session]

@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.UniversityId
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.services.{SmallGroupService, UserLookupService}
 import uk.ac.warwick.spring.Wire
-import org.hibernate.validator.Valid
+import javax.validation.Valid
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**

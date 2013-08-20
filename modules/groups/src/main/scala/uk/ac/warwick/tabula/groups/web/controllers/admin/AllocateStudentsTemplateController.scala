@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.groups.commands.admin.AllocateStudentsTemplateCommand
-import org.hibernate.validator.Valid
+import javax.validation.Valid
 
 
 @Controller
