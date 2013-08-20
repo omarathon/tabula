@@ -136,11 +136,12 @@ jQuery.fn.expandingTable = function(options) {
 			if (isOpen) {
 				hideContent($content, $row, $icon);
 			} else {
-				if(options.contentUrl) {
+				if(options.contentUrl && !$content.data("loaded")) {
 					var contentId = $row.attr("data-contentid");
 					var dataUrl = options.contentUrl + '/' + contentId;
 					$content.load(dataUrl, function() {
 						showContent($content, $row, $icon);
+						$content.data("loaded", "true");
 					});
 				} else {
 					showContent($content, $row, $icon);
