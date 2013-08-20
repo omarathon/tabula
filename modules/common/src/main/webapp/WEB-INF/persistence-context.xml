@@ -28,7 +28,6 @@
 	<bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean"
 		p:dataSource-ref="dataSource"
 		p:packagesToScan-ref="hibernatePackages"
-		p:lobHandler-ref="lobHandler"
 		p:hibernateProperties-ref="hibernateProperties" />
 	
 	<bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager"
@@ -67,12 +66,6 @@
 		    <property name="username" value="${membership.db.username}"/>
 		    <property name="password" value="${membership.db.password}"/>
 		</bean>
-
-		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler">
-	    	<property name="nativeJdbcExtractor">
-	    		<bean class="org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor" />
-	    	</property>
-	    </bean>
 	</beans>
 	
 	<beans profile="dev,sandbox,production,console">
@@ -113,13 +106,6 @@
 	
 	<beans profile="dev,sandbox,production">
 
-		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler">
-	    	<property name="nativeJdbcExtractor">
-	    		<!-- <bean class="org.springframework.jdbc.support.nativejdbc.OracleJdbc4NativeJdbcExtractor" /> -->
-	    		<bean class="org.springframework.jdbc.support.nativejdbc.JBossNativeJdbcExtractor" />
-	    	</property>
-	    </bean>
-
 		<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		   <property name="jndiName" value="java:/TabulaDS"/>
 	    </bean>
@@ -150,8 +136,6 @@
 	
 	<beans profile="test">
 		<jdbc:embedded-database id="dataSource" />
-
-		<bean id="lobHandler" class="org.springframework.jdbc.support.lob.DefaultLobHandler" />
 
 		<bean id="mainDatabaseDialect" class="org.hibernate.dialect.HSQLDialect" />
 
