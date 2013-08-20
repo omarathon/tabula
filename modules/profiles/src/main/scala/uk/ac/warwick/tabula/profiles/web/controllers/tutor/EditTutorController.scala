@@ -24,8 +24,8 @@ import scala._
 import scala.Some
 import uk.ac.warwick.tabula.services.RelationshipService
 
-class EditTutorCommand(val studentCourseDetails: StudentCourseDetails, val currentTutor: Option[Member], val currentUser:User, val remove: Boolean)
-	extends Command[Option[StudentRelationship]] with Notifies[StudentRelationship] with Promises {
+class EditTutorCommand(val studentCourseDetails: StudentCourseDetails, val currentTutor: Option[Member], val currentUser: CurrentUser, val remove: Boolean)
+	extends Command[Option[StudentRelationship]] with Notifies[Option[StudentRelationship], StudentRelationship] with Promises {
 
 	var relationshipService = Wire[RelationshipService]
 
@@ -82,12 +82,12 @@ class EditTutorCommand(val studentCourseDetails: StudentCourseDetails, val curre
 				}
 			}
 		} else if (currentTutor.get == tutor && remove) {
-				val currentRelationships = relationshipService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode)
-				endTutorRelationship(currentRelationships)
-				modifiedRelationships = currentRelationships
-				None
+			val currentRelationships = relationshipService.findCurrentRelationships(PersonalTutor, studentCourseDetails.sprCode)
+			endTutorRelationship(currentRelationships)
+			modifiedRelationships = currentRelationships
+			None
 		} else {
-				None
+			None
 		}
 	}
 
@@ -100,21 +100,20 @@ class EditTutorCommand(val studentCourseDetails: StudentCourseDetails, val curre
 
 	override def describe(d: Description) = d.property("student SPR code" -> studentCourseDetails.sprCode).property("new tutor ID" -> tutor.universityId)
 
-	def emit: Seq[Notification[StudentRelationship]] = {
-
+	def emit(newRelationship: Option[StudentRelationship]): Seq[Notification[StudentRelationship]] = {
 		val notifications = modifiedRelationships.flatMap(relationship => {
 
 			val tuteeNotification:List[Notification[StudentRelationship]] = if(notifyTutee){
 				val template = TutorChangeNotification.TuteeTemplate
 				val recepient = relationship.studentMember.get.asSsoUser
-				List(new TutorChangeNotification(relationship, currentUser, recepient, currentTutor, template) with FreemarkerTextRenderer)
+				List(new TutorChangeNotification(relationship, currentUser.apparentUser, recepient, currentTutor, template) with FreemarkerTextRenderer)
 			} else Nil
 
 			val oldTutorNotification:List[Notification[StudentRelationship]] = if(notifyOldTutor){
 				val notifications = currentTutor.map(oldTutor => {
 					val template = TutorChangeNotification.OldTutorTemplate
 					val recepient =  oldTutor.asSsoUser
-					new TutorChangeNotification(relationship, currentUser, recepient, currentTutor, template) with FreemarkerTextRenderer
+					new TutorChangeNotification(relationship, currentUser.apparentUser, recepient, currentTutor, template) with FreemarkerTextRenderer
 				})
 				List(notifications).flatten
 			} else Nil
@@ -123,7 +122,7 @@ class EditTutorCommand(val studentCourseDetails: StudentCourseDetails, val curre
 				val notifications = relationship.agentMember.map(newTutor => {
 					val template = TutorChangeNotification.NewTutorTemplate
 					val recepient = newTutor.asSsoUser
-					new TutorChangeNotification(relationship, currentUser, recepient, currentTutor, template) with FreemarkerTextRenderer
+					new TutorChangeNotification(relationship, currentUser.apparentUser, recepient, currentTutor, template) with FreemarkerTextRenderer
 				})
 				List(notifications).flatten
 			} else Nil
@@ -147,7 +146,7 @@ class EditTutorController extends BaseController {
 			@RequestParam(value="remove", required=false) remove: Boolean,
 			user: CurrentUser
 			) =
-		new EditTutorCommand(studentCourseDetails, Option(currentTutor), user.apparentUser, Option(remove).getOrElse(false))
+		new EditTutorCommand(studentCourseDetails, Option(currentTutor), user, Option(remove).getOrElse(false))
 
 	// initial form display
 	@RequestMapping(value = Array("/edit","/add"),method=Array(GET))

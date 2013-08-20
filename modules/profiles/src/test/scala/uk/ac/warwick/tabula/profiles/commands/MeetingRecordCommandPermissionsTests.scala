@@ -74,7 +74,7 @@ trait MeetingRecordCommandPermissionsTests extends Mockito{
 
   }
   trait StubCommand{
-    def emit: Seq[Notification[MeetingRecord]] = null
+    def emit(meeting: MeetingRecord): Seq[Notification[MeetingRecord]] = null
 
     def onBind(result: BindingResult) {}
 

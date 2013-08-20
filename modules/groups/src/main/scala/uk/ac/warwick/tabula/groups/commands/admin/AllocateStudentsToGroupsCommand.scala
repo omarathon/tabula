@@ -26,11 +26,15 @@ import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
-
-
+import uk.ac.warwick.tabula.commands.GroupsObjects
 
 class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet, val viewer: CurrentUser)
-	extends Command[SmallGroupSet] with SelfValidating with BindListener with SmallGroupSetCommand with NotifiesAffectedGroupMembers{
+	extends Command[SmallGroupSet] 
+		with GroupsObjects[User, SmallGroup]
+		with SelfValidating 
+		with BindListener 
+		with SmallGroupSetCommand 
+		with NotifiesAffectedGroupMembers {
 	
 	mustBeLinked(set, module)
 	PermissionCheck(Permissions.SmallGroups.Allocate, set)
@@ -38,40 +42,30 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	// Sort users by last name, first name
 	implicit val defaultOrderingForUser = Ordering.by[User, String] ( user => user.getLastName + ", " + user.getFirstName )
 
-  var userLookup = Wire[UserLookupService]
-  val apparentUser = viewer.apparentUser
+	var userLookup = Wire[UserLookupService]
+	val apparentUser = viewer.apparentUser
 
-  var service = Wire[SmallGroupService]
+	var service = Wire[SmallGroupService]
 	var profileService = Wire[ProfileService]
 	var securityService = Wire[SecurityService]
 	var groupsExtractor = Wire.auto[GroupsExtractor]
-
-	var file: UploadedFile = new UploadedFile
-	var allocateStudent: JList[AllocateStudentItem] = LazyLists.simpleFactory()
-
-	private def filenameOf(path: String) = new java.io.File(path).getName
-
-	/** Mapping from small groups to an ArrayList containing users. */
-	var mapping = JMap[SmallGroup, JList[User]]()
-	var unallocated: JList[User] = JArrayList()
 	
 	for (group <- set.groups.asScala) mapping.put(group, JArrayList())
 	
 	// Only called on initial form view
-	def populate() {
+	override def populate() {
 		for (group <- set.groups.asScala)
 			mapping.put(group, JArrayList(group.students.users.toList))
 			
 		unallocated.clear()
 		unallocated.addAll(set.unallocatedStudents.asJavaCollection)
 	}
-	
 
 	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
 	// Do not modify the returned value!
-	def mappingById = mapping.asScala.map {
+	override def mappingById = (mapping.asScala.map {
 		case (group, users) => (group.id, users)
-	}
+	}).toMap
 	
 	// For use by Freemarker to get a simple map of university IDs to Member objects - permissions aware!
 	lazy val membersById = loadMembersById
@@ -93,7 +87,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 		routes.toSeq.distinct
 	}
 
-	def allMembersYears():Seq[JInteger] = {
+	def allMembersYears(): Seq[JInteger] = {
 		val years = for (
 			member<-membersById.values;
 			course<-member.mostSignificantCourseDetails) yield course.latestStudentCourseYearDetails.yearOfStudy
@@ -101,7 +95,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	}
 
 	// Sort all the lists of users by surname, firstname.
-	def sort() {
+	override def sort() {
 		// Because sortBy is not an in-place sort, we have to replace the lists entirely.
 		// Alternative is Collections.sort or math.Sorting but these would be more code.
 		for ((group, users) <- mapping.asScala) {
@@ -130,33 +124,20 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 
 	private def validUser(user: User) = user.isFoundUser && user.getWarwickId.hasText
 	
-	override def onBind(result:BindingResult) {
-		transactional() {
-			file.onBind(result)
-			if (!file.attached.isEmpty()) {
-				processFiles(file.attached.asScala)
+	def extractDataFromFile(file: FileAttachment) = {
+		val allocations = groupsExtractor.readXSSFExcelFile(file.dataStream)
+		
+		// work out users to add to set (all users mentioned in spreadsheet - users currently in set)
+		val allocateUsers = allocations.asScala.toList.map(x => userLookup.getUserByWarwickUniId(x.universityId)).toSet
+		val usersToAddToSet = allocateUsers.filterNot(set.members.users.toSet)
+		for(user <- usersToAddToSet) set.members.add(user)
+
+		allocations.asScala
+			.filter(_.groupId != null)
+			.groupBy{ x => service.getSmallGroupById(x.groupId).orNull }
+			.mapValues{ values => 
+				values.map(item => allocateUsers.find(item.universityId == _.getWarwickId).getOrElse(null)).asJava
 			}
-
-			def processFiles(files: Seq[FileAttachment]) {
-				for (file <- files.filter(_.hasData)) {
-					allocateStudent addAll groupsExtractor.readXSSFExcelFile(file.dataStream)
-				}
-
-				// work out users to add to set (all users mentioned in spreadsheet - users currently in set)
-				val allocateUsers = allocateStudent.asScala.toList.map(x => userLookup.getUserByWarwickUniId(x.universityId)).toSet
-				val usersToAddToSet = allocateUsers.filterNot(set.members.users.toSet)
-				for(user <- usersToAddToSet) set.members.add(user)
-
-				val grouped = allocateStudent.asScala.filter(_.groupId != null)
-						.groupBy{ x => service.getSmallGroupById(x.groupId).orNull }
-						.mapValues{ values => 
-							values.map(item => allocateUsers.find(item.universityId == _.getWarwickId).getOrElse(null)).asJava
-						}
-				
-				mapping.clear()
-				mapping.putAll( grouped.asJava )
-			}
-		}
 	}
 	
 	def describe(d: Description) = d.smallGroupSet(set)

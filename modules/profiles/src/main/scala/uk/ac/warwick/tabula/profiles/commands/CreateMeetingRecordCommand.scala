@@ -18,7 +18,7 @@ class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelations
 		file.onBind(result)
 	}
 
-	def emit = Seq(new MeetingRecordApprovalNotification(meeting, "create"))
+	def emit(meeting: MeetingRecord) = Seq(new MeetingRecordApprovalNotification(meeting, "create"))
 }
 
 

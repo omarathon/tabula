@@ -34,7 +34,7 @@ abstract class AddMarksCommand[A](val module: Module, val assignment: Assignment
 	var marksExtractor = Wire.auto[MarksExtractor]
   
 	var file: UploadedFile = new UploadedFile
-	var marks: JList[MarkItem] = LazyLists.simpleFactory()
+	var marks: JList[MarkItem] = LazyLists.create()
 
 	private def filenameOf(path: String) = new java.io.File(path).getName
 

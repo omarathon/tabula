@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 trait ReleaseSmallGroupSetCommand extends Appliable[Seq[SmallGroupSet]]{
 	def describeOutcome:Option[String]
 }
-class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private val currentUser: User) extends Command[Seq[SmallGroupSet]] with Appliable[Seq[SmallGroupSet]] with Notifies[Seq[SmallGroup]] with ReleaseSmallGroupSetCommand{
+class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private val currentUser: User) extends Command[Seq[SmallGroupSet]] with Appliable[Seq[SmallGroupSet]] with Notifies[Seq[SmallGroupSet], Seq[SmallGroup]] with ReleaseSmallGroupSetCommand{
 
   var userLookup:UserLookupService = Wire.auto[UserLookupService]
   var groupSetsReleasedToStudents:List[SmallGroupSet] = Nil
@@ -42,29 +42,31 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
     }
   }
 
-	def emit:Seq[Notification[Seq[SmallGroup]]] =  {
+	def emit(sets: Seq[SmallGroupSet]): Seq[Notification[Seq[SmallGroup]]] = {
+		val tutorNotifications = if (notifyTutors) {
+			for (
+				groupSet <- groupSetsReleasedToTutors;
+				group <- groupSet.groups.asScala;
+				event <- group.events.asScala;
+				tutor <- event.tutors.users
+			) yield new ReleaseSmallGroupSetsNotification(List(group), currentUser, tutor, isStudent = false) with FreemarkerTextRenderer
+		} else {
+			Nil
+		}
 
-   val tutorNotifications = if (notifyTutors){
-      for (groupSet<-groupSetsReleasedToTutors;
-           group<-groupSet.groups.asScala;
-           event<-group.events.asScala;
-           tutor<-event.tutors.users
-     )yield new ReleaseSmallGroupSetsNotification(List(group), currentUser,tutor, isStudent = false) with FreemarkerTextRenderer
-   } else {
-     Nil
-   }
-
-   val studentNotifications = if (notifyStudents){
-     for(groupSet<-groupSetsReleasedToStudents;
-         group<-groupSet.groups.asScala;
-         student<-group.students.users
-     ) yield new ReleaseSmallGroupSetsNotification(List(group),currentUser,student, isStudent = true) with FreemarkerTextRenderer
-    }else{
-     Nil
-   }
-   studentNotifications ++ tutorNotifications
-
-  }
+		val studentNotifications = if (notifyStudents) {
+			for (
+				groupSet <- groupSetsReleasedToStudents;
+				group <- groupSet.groups.asScala;
+				student <- group.students.users
+			) yield new ReleaseSmallGroupSetsNotification(List(group), currentUser, student, isStudent = true) with FreemarkerTextRenderer
+		} else {
+			Nil
+		}
+		
+		studentNotifications ++ tutorNotifications
+	}
+	
 	def describeOutcome():Option[String]={
 		groupsToPublish match {
 			case singleGroup::Nil=>{

@@ -96,7 +96,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     cmd.notifyStudents = true
     cmd.userLookup = userLookup
     cmd.applyInternal()
-		val notifications = cmd.emit
+		val notifications = cmd.emit(Seq(groupSet1))
 		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student1"))  should be (true)
     notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student2"))  should be (true)
 	}}
@@ -106,7 +106,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     val cmd = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
     cmd.notifyStudents = false
     cmd.userLookup = userLookup
-    val notifications = cmd.emit
+    val notifications = cmd.emit(Seq(groupSet1))
 
     notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student1"))  should be (false)
     notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student2"))  should be (false)
@@ -118,7 +118,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     cmd.notifyTutors = true
     cmd.userLookup = userLookup
     cmd.applyInternal()
-    val notifications = cmd.emit
+    val notifications = cmd.emit(Seq(groupSet1))
     notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor1"))  should be (true)
     notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor2"))  should be (true)
   }}
@@ -128,7 +128,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     val cmd = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
     cmd.notifyTutors = false
     cmd.userLookup = userLookup
-    val notifications = cmd.emit
+    val notifications = cmd.emit(Seq(groupSet1))
 
     notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor1"))  should be (false)
     notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor2"))  should be (false)
@@ -176,7 +176,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     command.userLookup = userLookup
     command.notifyTutors = true
     val updatedSets = command.applyInternal()
-    val notifications = command.emit
+    val notifications = command.emit(Seq(groupSet1, groupSet2))
     val allNotifiedGroupSets = notifications.flatMap(_._object.map(sg=>sg.groupSet))
     allNotifiedGroupSets.exists(_ == groupSet1) should be (false)
   }}

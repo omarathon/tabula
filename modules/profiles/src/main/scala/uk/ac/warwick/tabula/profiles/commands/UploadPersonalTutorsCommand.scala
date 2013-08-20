@@ -63,7 +63,7 @@ class UploadPersonalTutorsCommand(val department: Department) extends Command[Se
 	var extractWarning = Wire.property("${profiles.relationship.upload.warning}")
 
 	var file: UploadedFile = new UploadedFile
-	var rawStudentRelationships: JList[RawStudentRelationship] = LazyLists.simpleFactory()
+	var rawStudentRelationships: JList[RawStudentRelationship] = LazyLists.create()
 
 	private def filenameOf(path: String) = new java.io.File(path).getName
 

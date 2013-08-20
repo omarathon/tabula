@@ -24,24 +24,24 @@ import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
  */
 
 class AddExtensionCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
-	extends ModifyExtensionCommand(module, assignment, submitter) with Notifies[Option[Extension]] {
+	extends ModifyExtensionCommand(module, assignment, submitter) with Notifies[Seq[Extension], Option[Extension]] {
 	
 	PermissionCheck(Permissions.Extension.Create, assignment)
 
-	def emit = extensions.asScala.map({extension =>
-			val student = userLookup.getUserByWarwickUniId(extension.universityId)
-			new ExtensionGrantedNotification(extension, student, submitter.apparentUser) with FreemarkerTextRenderer
+	def emit(extensions: Seq[Extension]) = extensions.map({extension =>
+		val student = userLookup.getUserByWarwickUniId(extension.universityId)
+		new ExtensionGrantedNotification(extension, student, submitter.apparentUser) with FreemarkerTextRenderer
 	})
 }
 
 class EditExtensionCommand(module: Module, assignment: Assignment, val extension: Extension, submitter: CurrentUser)
-	extends ModifyExtensionCommand(module, assignment, submitter) with Notifies[Option[Extension]] {
+	extends ModifyExtensionCommand(module, assignment, submitter) with Notifies[Seq[Extension], Option[Extension]] {
 	
 	PermissionCheck(Permissions.Extension.Update, extension)
 	
 	copyExtensions(List(extension))
 
-	def emit = extensions.asScala.flatMap({extension =>
+	def emit(extensions: Seq[Extension]) = extensions.flatMap({extension =>
 			val student = userLookup.getUserByWarwickUniId(extension.universityId)
 			val admin = submitter.apparentUser
 
@@ -66,19 +66,19 @@ class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, exte
 }
 
 abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignment, val submitter: CurrentUser)
-		extends Command[List[Extension]] with Daoisms with Logging with SelfValidating {
+		extends Command[Seq[Extension]] with Daoisms with Logging with SelfValidating {
 	
 	mustBeLinked(assignment,module)
 		
 	var userLookup = Wire.auto[UserLookupService]
 	
-	var extensionItems:JList[ExtensionItem] = LazyLists.simpleFactory()
-	var extensions:JList[Extension] = LazyLists.simpleFactory()
+	var extensionItems:JList[ExtensionItem] = LazyLists.create()
+	var extensions:JList[Extension] = LazyLists.create()
 
 	/**
 	 * Transforms the commands extensionItems into Extension beans for persisting
 	 */
-	def copyExtensionItems(): List[Extension] = {
+	def copyExtensionItems(): Seq[Extension] = {
 		def retrieveExtension(item:ExtensionItem) = {
 			val extension = assignment.findExtension(item.universityId).getOrElse({
 				val newExtension = new Extension(item.universityId)
@@ -105,7 +105,7 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 	/**
 	 * Copies the specified extensions to the extensionItems array ready for editing
 	 */
-	def copyExtensions(extensions:List[Extension]){
+	def copyExtensions(extensions:Seq[Extension]){
 
 		val extensionItemsList = for (extension <- extensions) yield {
 			val item = new ExtensionItem
@@ -151,7 +151,7 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 		}
 	}
 
-	override def applyInternal():List[Extension] = transactional() {
+	override def applyInternal():Seq[Extension] = transactional() {
 		extensions = copyExtensionItems()
 		persistExtensions()
 		extensions.toList

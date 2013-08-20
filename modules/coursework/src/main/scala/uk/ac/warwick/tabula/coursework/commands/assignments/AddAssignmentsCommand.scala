@@ -85,7 +85,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now.plusMonths(3))
 
 	// All the possible assignments, prepopulated from SITS.
-	var assignmentItems: JList[AssignmentItem] = LazyLists.simpleFactory()
+	var assignmentItems: JList[AssignmentItem] = LazyLists.create()
 
 	private def includedItems = assignmentItems.filter { _.include }
 

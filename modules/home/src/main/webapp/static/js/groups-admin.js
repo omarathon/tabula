@@ -1,5 +1,5 @@
 /**
- * Scripts used only by the coursework admin section. 
+ * Scripts used only by the small group teaching admin section. 
  */
 (function ($) { "use strict";
 

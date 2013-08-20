@@ -53,6 +53,11 @@
 							<li><a href="<@routes.tutors_missing dept />">
 								<i class="icon-eye-close"></i> Students with no personal tutor
 							</a></li>
+							<#if features.personalTutorAssignment>
+								<li><a href="<@routes.tutors_allocate dept />">
+									<i class="icon-random icon-fixed-width"></i> Assign personal tutors</a>
+								</li>
+							</#if>
 					  </ul>
 					</div>
 					
