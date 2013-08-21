@@ -2,12 +2,14 @@
 
 <#assign showMyStudents = isAPersonalTutor || isASupervisor || smallGroups?has_content />
 
+
 <#if !user.loggedIn>
 	<p>
 		You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
 		to see a personalised view.
 	</p>
 <#else>
+	<#if isPGR><h2><a href="<@routes.profile_by_id universityId />">My Student Profile</a></h2></#if>
 	<div class="row-fluid">
 		<div class="span6">
 			<#include "../profile/search/form.ftl" />
