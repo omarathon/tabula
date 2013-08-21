@@ -1,5 +1,13 @@
 <#escape x as x?html>
 <div id="tutors">
+	<div class="pull-right">
+		<#if features.personalTutorAssignment>
+			<a href="<@routes.tutors_allocate department />" class="btn btn-medium pull-right">
+				<i class="icon-random icon-fixed-width"></i> Assign personal tutors</a>
+			</a>
+		</#if>
+	</div>
+	
 	<h1>Students in ${department.name} with no personal tutor</h1>
 
 	<#if studentCount gt 0>
