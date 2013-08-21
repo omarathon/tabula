@@ -2,8 +2,7 @@ package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands.CommandInternal
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.services.RouteServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringRouteServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, RouteServiceComponent, AutowiringRouteServiceComponent}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.commands.ReadOnly
@@ -13,8 +12,9 @@ import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.Route
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.helpers.WeekRangesFormatter
+import uk.ac.warwick.tabula.helpers.{WeekRanges, WeekRangesFormatter}
 import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek}
+import org.joda.time.{DateTimeConstants, DateMidnight}
 
 object GetMonitoringPointsCommand {
 	def apply(route: Route, year: Option[Int]) =
@@ -22,6 +22,7 @@ object GetMonitoringPointsCommand {
 			with ComposableCommand[Option[Pair[MonitoringPointSet, Map[String, Seq[MonitoringPoint]]]]]
 			with GetMonitoringPointsCommandPermissions
 			with AutowiringRouteServiceComponent
+			with AutowiringTermServiceComponent
 			with ReadOnly 
 			with Unaudited 
 }
@@ -30,7 +31,7 @@ abstract class GetMonitoringPointsCommand(val route: Route, val year: Option[Int
 	extends CommandInternal[Option[Pair[MonitoringPointSet, Map[String, Seq[MonitoringPoint]]]]]
 	with Appliable[Option[Pair[MonitoringPointSet, Map[String, Seq[MonitoringPoint]]]]]
 			with GetMonitoringPointsCommandState {
-	self: RouteServiceComponent =>
+	self: RouteServiceComponent with TermServiceComponent =>
 
 	def applyInternal(): Option[Pair[MonitoringPointSet, Map[String, Seq[MonitoringPoint]]]] = {
 		routeService.findMonitoringPointSet(route, year) match {
@@ -41,10 +42,15 @@ abstract class GetMonitoringPointsCommand(val route: Route, val year: Option[Int
 	}
 
 	private def groupByTerm(pointSet: MonitoringPointSet) = {
-		val wrf = new WeekRangesFormatter(pointSet.academicYear)
+		lazy val weeksForYear =
+			termService.getAcademicWeeksForYear(new DateMidnight(pointSet.academicYear.startYear, DateTimeConstants.NOVEMBER, 1))
+				.asScala.map { pair => (pair.getLeft -> pair.getRight) } // Utils pairs to Scala pairs
+				.toMap
 		val day = DayOfWeek(1)
 		pointSet.points.asScala.groupBy {
-			case point => wrf.groupWeekRangesByTerm(Seq(WeekRange(point.week)), day).head._2.getTermTypeAsString
+			case point => termService.getTermFromDateIncludingVacations(
+				weeksForYear(point.week).getStart().withDayOfWeek(day.jodaDayOfWeek)
+			).getTermTypeAsString
 		}
 	}
 

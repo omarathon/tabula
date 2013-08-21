@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.util.termdates.{Term, TermFactoryImpl}
 import org.joda.time.base.BaseDateTime
+import uk.ac.warwick.spring.Wire
 
 /**
  * Wraps TermFactory and adds more features.
@@ -57,4 +58,12 @@ case class Vacation(before: Term, after: Term) extends Term {
 	def getWeekNumber(date: BaseDateTime) = throw new IllegalStateException("Can't get week numbers from a vacation")
 	def getCumulativeWeekNumber(date: BaseDateTime) = throw new IllegalStateException("Can't get week numbers from a vacation")
 	def getAcademicWeekNumber(date: BaseDateTime) = after.getAcademicWeekNumber(date)
+}
+
+trait TermServiceComponent {
+	def termService: TermService
+}
+
+trait AutowiringTermServiceComponent extends TermServiceComponent {
+	var termService = Wire[TermService]
 }
