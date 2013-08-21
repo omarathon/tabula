@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.stereotype.Controller
 import javax.validation.Valid
 import uk.ac.warwick.tabula.profiles.commands.tutor.AllocateStudentsToTutorsCommand
+import uk.ac.warwick.tabula.profiles.web.Routes
 
 
 /**
@@ -27,21 +28,22 @@ class AllocateStudentsToTutorsController extends ProfilesController {
 	@RequestMapping
 	def showForm(cmd: AllocateStudentsToTutorsCommand) = {
 		cmd.populate()
-		cmd.sort()
 		form(cmd)
 	}
 	
 	@RequestMapping(method=Array(POST), params=Array("action=refresh"))
-	def form(cmd: AllocateStudentsToTutorsCommand) = Mav("tutors/allocate")
+	def form(cmd: AllocateStudentsToTutorsCommand) = {
+		cmd.sort()
+		Mav("tutors/allocate")
+	}
 
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))
 	def submit(@Valid cmd:AllocateStudentsToTutorsCommand, errors: Errors): Mav = {
-		cmd.sort()
 		if (errors.hasErrors()) {
 			form(cmd)
 		} else {
 			cmd.apply()
-			Redirect("/") // TODO
+			Redirect(Routes.admin(cmd.department))
 		}
 	}
 

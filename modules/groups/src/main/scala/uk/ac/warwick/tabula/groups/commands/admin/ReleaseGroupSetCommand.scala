@@ -12,22 +12,19 @@ import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.permissions.Permissions
 
-trait ReleaseSmallGroupSetCommand extends Appliable[Seq[SmallGroupSet]]{
+trait ReleaseSmallGroupSetCommand extends Appliable[Seq[ReleasedSmallGroupSet]] {
 	def describeOutcome:Option[String]
 }
-class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private val currentUser: User) extends Command[Seq[SmallGroupSet]] with Appliable[Seq[SmallGroupSet]] with Notifies[Seq[SmallGroupSet], Seq[SmallGroup]] with ReleaseSmallGroupSetCommand{
+class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private val currentUser: User) extends Command[Seq[ReleasedSmallGroupSet]] with Notifies[Seq[ReleasedSmallGroupSet], Seq[SmallGroup]] with ReleaseSmallGroupSetCommand {
 
   var userLookup:UserLookupService = Wire.auto[UserLookupService]
-  var groupSetsReleasedToStudents:List[SmallGroupSet] = Nil
-  var groupSetsReleasedToTutors:List[SmallGroupSet] = Nil
 
-
-  var notifyStudents:JBoolean = groupsToPublish match {
+  var notifyStudents: JBoolean = groupsToPublish match {
     case singleGroup::Nil => !singleGroup.releasedToStudents
     case _ => true
   }
 
-  var notifyTutors:JBoolean = groupsToPublish match {
+  var notifyTutors: JBoolean = groupsToPublish match {
     case singleGroup::Nil => !singleGroup.releasedToTutors
     case _=> true
   }
@@ -42,27 +39,23 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
     }
   }
 
-	def emit(sets: Seq[SmallGroupSet]): Seq[Notification[Seq[SmallGroup]]] = {
-		val tutorNotifications = if (notifyTutors) {
-			for (
-				groupSet <- groupSetsReleasedToTutors;
-				group <- groupSet.groups.asScala;
-				event <- group.events.asScala;
+	def emit(releasedSets: Seq[ReleasedSmallGroupSet]): Seq[Notification[Seq[SmallGroup]]] = {		
+		val tutorNotifications = 
+			for {
+				releasedSet <- releasedSets
+				if releasedSet.releasedToTutors
+				group <- releasedSet.set.groups.asScala
+				event <- group.events.asScala
 				tutor <- event.tutors.users
-			) yield new ReleaseSmallGroupSetsNotification(List(group), currentUser, tutor, isStudent = false) with FreemarkerTextRenderer
-		} else {
-			Nil
-		}
+			} yield new ReleaseSmallGroupSetsNotification(List(group), currentUser, tutor, isStudent = false) with FreemarkerTextRenderer
 
-		val studentNotifications = if (notifyStudents) {
-			for (
-				groupSet <- groupSetsReleasedToStudents;
-				group <- groupSet.groups.asScala;
+		val studentNotifications = 
+			for {
+				releasedSet <- releasedSets
+				if releasedSet.releasedToStudents
+				group <- releasedSet.set.groups.asScala
 				student <- group.students.users
-			) yield new ReleaseSmallGroupSetsNotification(List(group), currentUser, student, isStudent = true) with FreemarkerTextRenderer
-		} else {
-			Nil
-		}
+			} yield new ReleaseSmallGroupSetsNotification(List(group), currentUser, student, isStudent = true) with FreemarkerTextRenderer
 		
 		studentNotifications ++ tutorNotifications
 	}
@@ -88,19 +81,18 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
 	def describe(desc:Description ){
     desc.smallGroupSetCollection(groupsToPublish)
   }
-	
-	def applyInternal():Seq[SmallGroupSet] = {
-    groupsToPublish.foreach(groupToPublish=>{
-      if (notifyStudents && !groupToPublish.releasedToStudents){
-        groupToPublish.releasedToStudents = true
-        groupSetsReleasedToStudents = groupToPublish :: groupSetsReleasedToStudents
-      }
-      if (notifyTutors && !groupToPublish.releasedToTutors){
-        groupToPublish.releasedToTutors = true
-        groupSetsReleasedToTutors = groupToPublish :: groupSetsReleasedToTutors
-      }
-    })
-    groupsToPublish
-  }
+
+	def applyInternal(): Seq[ReleasedSmallGroupSet] = {
+		groupsToPublish.map(groupToPublish => {
+			val releaseToStudents = notifyStudents && !groupToPublish.releasedToStudents
+			val releaseToTutors = notifyTutors && !groupToPublish.releasedToTutors
+			
+			if (releaseToStudents) groupToPublish.releasedToStudents = true
+			if (releaseToTutors) groupToPublish.releasedToTutors = true
+			
+			ReleasedSmallGroupSet(groupToPublish, releaseToStudents, releaseToTutors)
+		})
+	}
 }
 
+case class ReleasedSmallGroupSet(set: SmallGroupSet, releasedToStudents: Boolean, releasedToTutors: Boolean)

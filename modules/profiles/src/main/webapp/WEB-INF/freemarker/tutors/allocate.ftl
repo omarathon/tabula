@@ -6,9 +6,9 @@
 
 <#macro student_item profile bindpath="">
 	<li class="student well well-small"
-	data-f-gender="${profile.gender.dbValue}"
-	data-f-route="${profile.mostSignificantCourseDetails.route.code}"
-	data-f-year="${profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy}">
+	data-f-gender="${(profile.gender.dbValue)!}"
+	data-f-route="${(profile.mostSignificantCourseDetails.route.code)!}"
+	data-f-year="${(profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
 		<div class="profile clearfix">
 			<@fmt.member_photo profile "tinythumbnail" false />
 			<div class="name">
@@ -38,7 +38,7 @@
 		</ul>
 
 		<div class="tab-content">
-			<div class="tab-pane active" id="allocatetutors-tab1">
+			<div id="allocatetutors-tab1" class="tab-pane active">
 
 			<p>Drag students onto a tutor to allocate them to the tutor. Select multiple students by dragging a box around them.
 				 You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key to add to a selection.</p>
@@ -60,35 +60,44 @@
 
 			<#assign submitUrl><@routes.tutors_allocate department /></#assign>
 			<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToTutorsCommand" cssClass="form-horizontal">
+			<div class="tabula-dnd" 
+					 data-item-name="student" 
+					 data-text-selector=".name h6"
+					 data-use-handle="false"
+					 data-selectables=".students .drag-target"
+					 data-scroll="true"
+					 data-remove-tooltip="Remove this student from this tutor">
 				<div class="btn-toolbar">
-					<a class="random btn"
+					<a class="random btn" data-toggle="randomise" data-disabled-on="empty-list"
 					   href="#" >
 						<i class="icon-random"></i> Randomly allocate
 					</a>
-					<a class="return-items btn"
+					<a class="return-items btn" data-toggle="return" data-disabled-on="no-allocation"
 					   href="#" >
 						<i class="icon-arrow-left"></i> Remove all
 					</a>
 				</div>
 				<div class="row-fluid fix-on-scroll-container">
 					<div class="span5">
-						<div id="studentslist" class="students">
+						<div id="studentslist" 
+								 class="students tabula-filtered-list"
+								 data-item-selector=".student-list li">
 							<h3>Students</h3>
 							<div class="well ">
 									<h4>Students with no personal tutor</h4>
 									<#if features.personalTutorAssignmentFiltering>
 										<div id="filter-controls">
 										Show...
-										<div id="filter-by-gender-controls">
+										<div class="filter" id="filter-by-gender-controls">
 										<label>Male <input type="checkbox" data-filter-attr="fGender" data-filter-value="M" checked="checked"></label>
 										<label>Female <input type="checkbox" data-filter-attr="fGender" data-filter-value="F" checked="checked"></label>
 										</div>
-										<div id="filter-by-year-controls">
+										<div class="filter" id="filter-by-year-controls">
 										<#list allocateStudentsToTutorsCommand.allMembersYears as year>
 											<label>Year ${year} <input type="checkbox" data-filter-attr="fYear" data-filter-value="${year}" checked="checked"></label>
 										</#list>
 										</div>
-										<div id="filter-by-route-controls">
+										<div class="filter" id="filter-by-route-controls">
 										<#list allocateStudentsToTutorsCommand.allMembersRoutes as route>
 											<label>${route.name} <input type="checkbox" data-filter-attr="fRoute" data-filter-value="${route.code}" checked="checked"></label>
 										</#list>
@@ -178,6 +187,7 @@
 						</div>
 					</div>
 				</div>
+			</div>
 
 				<div class="submit-buttons">
 					<input type="submit" class="btn btn-primary" value="Save">

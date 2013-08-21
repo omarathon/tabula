@@ -20,6 +20,7 @@ object Routes {
 	}
 	
 	object admin {
+		def apply(department: Department) = Routes.home // TODO https://repo.elab.warwick.ac.uk/projects/TAB/repos/tabula/pull-requests/145/overview?commentId=1012
 		def departmentPermissions(department: Department) = "/admin/department/%s/permissions" format (encoded(department.code))
 	}
 }
