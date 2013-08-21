@@ -49,7 +49,7 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
 				tutor <- event.tutors.users
 			} yield new ReleaseSmallGroupSetsNotification(List(group), currentUser, tutor, isStudent = false) with FreemarkerTextRenderer
 
-		val studentNotifications = 
+		val studentNotifications =
 			for {
 				releasedSet <- releasedSets
 				if releasedSet.releasedToStudents

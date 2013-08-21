@@ -16,7 +16,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
       command.notifyStudents = true
       val updatedSets = command.applyInternal()
       updatedSets.foreach(updatedSet=>
-        updatedSet.releasedToStudents.booleanValue should be(true)
+        updatedSet.set.releasedToStudents.booleanValue should be(true)
       )
    }}
 
@@ -28,7 +28,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     command.notifyStudents = false
     val updatedSets = command.applyInternal()
     updatedSets.foreach(updatedSet=>
-      updatedSet.releasedToStudents.booleanValue should be(true)
+      updatedSet.set.releasedToStudents.booleanValue should be(true)
     )
   }}
 
@@ -40,7 +40,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     command.notifyStudents = false
     val updatedSets = command.applyInternal()
     updatedSets.foreach(updatedSet=>
-      updatedSet.releasedToStudents.booleanValue should be(false)
+      updatedSet.set.releasedToStudents.booleanValue should be(false)
     )
   }}
 
@@ -51,7 +51,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     val updatedSet = command.applyInternal()
     val updatedSets = command.applyInternal()
     updatedSets.foreach(updatedSet=>
-      updatedSet.releasedToTutors.booleanValue should be(true)
+      updatedSet.set.releasedToTutors.booleanValue should be(true)
     )
   }}
 
@@ -63,7 +63,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     command.notifyTutors = false
     val updatedSets = command.applyInternal()
     updatedSets.foreach(updatedSet=>
-      updatedSet.releasedToTutors.booleanValue should be(true)
+      updatedSet.set.releasedToTutors.booleanValue should be(true)
     )
   }}
 
@@ -75,7 +75,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     command.notifyTutors = false
     val updatedSets = command.applyInternal()
     updatedSets.foreach(updatedSet=>
-      updatedSet.releasedToTutors.booleanValue should be(false)
+      updatedSet.set.releasedToTutors.booleanValue should be(false)
     )
   }}
 
