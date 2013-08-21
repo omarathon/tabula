@@ -67,7 +67,9 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 		_progress = p
 	}
 
-	@Lob var data: String = "{}"
+	// CLOB
+	var data: String = "{}"
+
 	@transient private var _json: JsonMap = Map()
 	def json = _json
 	def json_=(map: JsonMap) {

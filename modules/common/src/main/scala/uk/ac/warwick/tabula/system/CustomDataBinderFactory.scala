@@ -7,6 +7,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ServletRequestDataB
 import uk.ac.warwick.tabula.system.permissions.PermissionsBinding
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.SecurityService
+import org.springframework.validation.DataBinder
 
 /**
  * Factory that creates a DataBinder instance every time an object needs binding
@@ -20,10 +21,6 @@ class CustomDataBinderFactory(binderMethods: List[InvocableHandlerMethod], initi
 		val securityService = Wire.auto[SecurityService]
 	}
 	
-	trait NoAutoGrownNestedPaths extends CustomDataBinder {
-		setAutoGrowNestedPaths(false)
-	}
-	
 	override def createBinderInstance(target: Any, objectName: String, request: NativeWebRequest)	= { 
 		new CustomDataBinder(target, objectName) 
 				with CustomDataBinderDependencies
@@ -33,4 +30,8 @@ class CustomDataBinderFactory(binderMethods: List[InvocableHandlerMethod], initi
 				with NoAutoGrownNestedPaths
 	}
 	
+}
+
+trait NoAutoGrownNestedPaths extends DataBinder {
+	setAutoGrowNestedPaths(false)
 }
