@@ -14,7 +14,7 @@
 <@form.labelled_row "week" "Term week">
 	<@f.select path="week">
 		<#list 1..52 as week>
-			<@f.option value="${week}">${week}</@f.option>
+			<@f.option value="${week}"><@fmt.singleWeekFormat week command.set /></@f.option>
 		</#list>
 	</@f.select>
 </@form.labelled_row>

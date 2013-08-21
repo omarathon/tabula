@@ -43,6 +43,12 @@
 	--></#noescape><#--
 --></#macro>
 
+<#macro singleWeekFormat week monitoringPointSet><#--
+	--><#noescape><#--
+		-->${weekRangesFormatter(week, monitoringPointSet)}<#--
+	--></#noescape><#--
+--></#macro>
+
 <#macro p number singular plural="${singular}s" one="1" zero="0" shownumber=true><#--
 --><#if shownumber><#if number=1>${one}<#elseif number=0>${zero}<#else>${number}</#if><#--
 --> </#if><#if number=1>${singular}<#else>${plural}</#if></#macro>

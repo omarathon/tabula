@@ -69,7 +69,7 @@
 		</div>
 	</div>
 <#else>
-	<#list ["Term 1", "Christmas vacation", "Term 2", "Spring vacation", "Term 3", "Summer vacation"] as term>
+	<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
 		<#if pointsByTerm[term]??>
 			<@pointsInATerm term/>
 		</#if>

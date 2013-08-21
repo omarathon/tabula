@@ -18,7 +18,7 @@ import freemarker.template.{ TemplateModel, TemplateMethodModelEx }
 import freemarker.template.utility.DeepUnwrap
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.{Vacation, TermService, UserSettingsService}
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 
 /** Format week ranges, using a formatting preference for term week numbers, cumulative week numbers or academic week numbers.
   *
@@ -74,6 +74,10 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 
 			case Seq(monitoringPoint: MonitoringPoint) => {
 				format(Seq(WeekRange(monitoringPoint.week,monitoringPoint.week)), DayOfWeek(1), monitoringPoint.pointSet.academicYear, numberingSystem(monitoringPoint.pointSet.route.department))
+			}
+
+			case Seq(week: Integer, monitoringPointSet: MonitoringPointSet) => {
+				format(Seq(WeekRange(week)), DayOfWeek(1), monitoringPointSet.academicYear, numberingSystem(monitoringPointSet.route.department))
 			}
 
 			case _ => throw new IllegalArgumentException("Bad args: " + args)
