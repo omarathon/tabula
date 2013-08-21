@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
 import javax.persistence.Entity
-import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 
 import javax.persistence.JoinColumn

@@ -9,6 +9,7 @@ import uk.ac.warwick.spring.Wire
 import org.joda.time.DateMidnight
 import org.joda.time.DateTimeConstants
 import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.tabula.services.TermService
 
 case class WeekRange(val minWeek: WeekRange.Week, val maxWeek: WeekRange.Week) {
 	if (maxWeek < minWeek) throw new IllegalArgumentException("maxWeek must be >= minWeek")
@@ -24,7 +25,7 @@ case class WeekRange(val minWeek: WeekRange.Week, val maxWeek: WeekRange.Week) {
 object WeekRange {
 	type Week = Int
 	
-	var termFactory = Wire[TermFactory]
+	var termService = Wire[TermService]
 	
 	def apply(singleWeek: Week): WeekRange = WeekRange(singleWeek, singleWeek)
 	def fromString(rep: String) = rep.split('-') match {
@@ -52,9 +53,9 @@ object WeekRange {
 	
 	def termWeekRanges(year: AcademicYear): Seq[WeekRange] = {
 		// We are confident that November 1st is always in term 1 of the year
-		val autumnTerm = termFactory.getTermFromDate(new DateMidnight(year.startYear, DateTimeConstants.NOVEMBER, 1))
-		val springTerm = termFactory.getNextTerm(autumnTerm)
-		val summerTerm = termFactory.getNextTerm(springTerm)
+		val autumnTerm = termService.getTermFromDate(new DateMidnight(year.startYear, DateTimeConstants.NOVEMBER, 1))
+		val springTerm = termService.getNextTerm(autumnTerm)
+		val summerTerm = termService.getNextTerm(springTerm)
 		
 		def toWeekRange(term: Term) =
 			WeekRange(term.getAcademicWeekNumber(term.getStartDate()), term.getAcademicWeekNumber(term.getEndDate()))
