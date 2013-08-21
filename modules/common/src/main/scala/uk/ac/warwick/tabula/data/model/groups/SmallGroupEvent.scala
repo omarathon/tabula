@@ -46,11 +46,9 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	@NotNull
 	var day: DayOfWeek = _
 	
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalTimeAsString")
 	@NotNull
 	var startTime: LocalTime = _
 	
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalTimeAsString")
 	@NotNull
 	var endTime: LocalTime = _
 	

@@ -1,18 +1,13 @@
 package uk.ac.warwick.tabula.home.web.controllers.sysadmin
 
-import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.Features
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.beans.BeanWrapperImpl
-import collection.JavaConversions._
 import java.beans.PropertyDescriptor
 import org.springframework.web.bind.annotation.RequestMethod
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
-import scala.annotation.target.field
-import scala.annotation.target.param
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.beans.BeanWrapper
 import uk.ac.warwick.spring.Wire
@@ -27,7 +22,7 @@ case class FeatureItem(val name: String, val value: Boolean)
  */
 @Controller
 @RequestMapping(value = Array("/sysadmin/features"))
-final class FeaturesController extends BaseController with InitializingBean {
+final class FeaturesController extends BaseSysadminController with InitializingBean {
 
 	var features = Wire.auto[Features]
 	var queue = Wire.named[Queue]("settingsSyncTopic")
@@ -50,6 +45,7 @@ final class FeaturesController extends BaseController with InitializingBean {
 	def get(): Mav = {
 		Mav("sysadmin/features",
 			"currentValues" -> currentValues)
+			.crumbs(Breadcrumbs.Current(s"Sysadmin features"))
 	}
 
 	@RequestMapping(method = Array(RequestMethod.POST))
@@ -60,10 +56,10 @@ final class FeaturesController extends BaseController with InitializingBean {
 			}
 			case None => throw new IllegalArgumentException
 		}
-		
+
 		// Broadcast it to the world!
 		queue.send(new FeaturesMessage(features))
-		
+
 		Redirect("/sysadmin/features")
 	}
 }

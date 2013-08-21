@@ -172,7 +172,7 @@
 			<mvc:mapping path="/**"/>
 			<bean class="uk.ac.warwick.tabula.system.ConditionalInterceptor" p:excludePath="/static/*">
 				<constructor-arg>
-					<bean class="org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor" autowire="byName" />
+					<bean class="org.springframework.orm.hibernate4.support.OpenSessionInViewInterceptor" autowire="byName" />
 				</constructor-arg>
 			</bean>
 		</mvc:interceptor>
@@ -326,6 +326,7 @@
 				<entry key="intervalFormatter"><bean class="uk.ac.warwick.tabula.helpers.IntervalFormatter" /></entry>
 				<entry key="durationFormatter"><bean class="uk.ac.warwick.tabula.helpers.DurationFormatterTag" /></entry>
 				<entry key="weekRangesFormatter"><bean class="uk.ac.warwick.tabula.helpers.WeekRangesFormatterTag" /></entry>
+				<entry key="weekRangeSelectFormatter"><bean class="uk.ac.warwick.tabula.helpers.WeekRangeSelectFormatterTag" /></entry>
 			</map>
 		</property>
 	</bean>
@@ -423,12 +424,24 @@
 		<!-- This is the default embedded broker -->
 		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider" factory-method="createEmbeddedBroker" />
 	</beans>
-
-	<beans profile="dev,sandbox,production">
+	
+	<beans profile="sandbox">
+		<bean id="userLookupDelegate" class="uk.ac.warwick.tabula.services.SandboxUserLookup" autowire-candidate="false">
+			<constructor-arg>
+				<bean class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false"
+					p:ssosUrl="${ssoclient.ssos.url}"
+					p:groupServiceLocation="${ssoclient.webgroups.url}" />		
+			</constructor-arg>
+		</bean>
+	</beans>
+	
+	<beans profile="dev,production">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false"
 				p:ssosUrl="${ssoclient.ssos.url}"
-				p:groupServiceLocation="${ssoclient.webgroups.url}" />
+				p:groupServiceLocation="${ssoclient.webgroups.url}" />		
+	</beans>
 
+	<beans profile="dev,sandbox,production">
 		<!-- This may still be an embedded broker (i.e. for dev) but probably has JMX enabled -->
 		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider">
 			<constructor-arg value="${activemq.broker}" />

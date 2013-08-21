@@ -8,6 +8,21 @@ import org.springframework.beans.factory.annotation.{Autowired, Configurable}
 import scala.annotation.target.field
 import uk.ac.warwick.spring.Wire
 
+trait TransactionalComponent {
+	def transactional[A](
+												readOnly: Boolean = false,
+												propagation: Propagation = Propagation.REQUIRED
+												)(f: => A): A
+}
+
+trait AutowiringTransactionalComponent extends TransactionalComponent {
+	def transactional[A](
+												readOnly: Boolean = false,
+												propagation: Propagation = Propagation.REQUIRED
+												)(f: => A): A = Transactions.transactional(readOnly, propagation)(f)
+
+}
+
 object Transactions extends TransactionAspectSupport {
 
 	// unused as we skip the method that calls it, but it checks that an attribute source is set.
@@ -16,7 +31,7 @@ object Transactions extends TransactionAspectSupport {
 	var transactionManager = Wire.auto[PlatformTransactionManager]
 	override def getTransactionManager() = transactionManager
 	
-	private var enabled = true
+	var enabled = true
 
 	/** Disable transaction processing inside this method block.
 	  * Should be for testing only.

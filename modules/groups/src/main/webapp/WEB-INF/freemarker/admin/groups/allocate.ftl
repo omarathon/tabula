@@ -6,10 +6,12 @@
 
 <#macro student_item student bindpath="">
 	<#assign profile = membersById[student.warwickId]!{} />
-	<li class="student well well-small">
+	<li class="student well well-small"
+	data-f-gender="${profile.gender.dbValue}"
+	data-f-route="${(profile.mostSignificantCourseDetails.route.code)!}"
+	data-f-year="${(profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
 		<div class="profile clearfix">
 			<@fmt.member_photo profile "tinythumbnail" false />
-
 			<div class="name">
 				<h6>${profile.fullName!student.fullName}</h6>
 				${(profile.mostSignificantCourseDetails.route.name)!student.shortDepartment}
@@ -73,16 +75,36 @@
 					<div class="span5">
 						<div id="studentslist" class="students">
 							<h3>Students</h3>
-							<div class="well student-list drag-target">
-								<h4>Not allocated to a group</h4>
-
-								<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
-									<@spring.bind path="unallocated">
-										<#list status.actualValue as student>
-											<@student_item student "${status.expression}[${student_index}]" />
+							<div class="well ">
+									<h4>Not allocated to a group</h4>
+									<#if features.smallGroupAllocationFiltering>
+										<div id="filter-controls">
+										Show...
+										<div id="filter-by-gender-controls">
+										<label>Male <input type="checkbox" data-filter-attr="fGender" data-filter-value="M" checked="checked"></label>
+										<label>Female <input type="checkbox" data-filter-attr="fGender" data-filter-value="F" checked="checked"></label>
+										</div>
+										<div id="filter-by-year-controls">
+										<#list allocateStudentsToGroupsCommand.allMembersYears as year>
+											<label>Year ${year} <input type="checkbox" data-filter-attr="fYear" data-filter-value="${year}" checked="checked"></label>
 										</#list>
-									</@spring.bind>
-								</ul>
+										</div>
+										<div id="filter-by-route-controls">
+										<#list allocateStudentsToGroupsCommand.allMembersRoutes as route>
+											<label>${route.name} <input type="checkbox" data-filter-attr="fRoute" data-filter-value="${route.code}" checked="checked"></label>
+										</#list>
+										</div>
+										</div>
+									</#if>
+								<div class="student-list drag-target">
+									<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
+										<@spring.bind path="unallocated">
+											<#list status.actualValue as student>
+												<@student_item student "${status.expression}[${student_index}]" />
+											</#list>
+										</@spring.bind>
+									</ul>
+								</div>
 							</div>
 						</div>
 					</div>

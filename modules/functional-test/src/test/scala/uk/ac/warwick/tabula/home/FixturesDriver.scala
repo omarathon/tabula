@@ -65,6 +65,27 @@ trait FixturesDriver {
 		http.when(_==200)(req >|)
 	}
 
+	def createStudentMember(userId:String, genderCode:String = "M", routeCode:String="",yearOfStudy:Int=1 ){
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/studentMember"
+		val req = url(uri).POST << Map(
+			"userId" -> userId,
+			"genderCode"->genderCode,
+		  "yearOfStudy"->yearOfStudy.toString,
+		  "routeCode"->routeCode)
+		http.when(_==200)(req >|)
+
+	}
+
+	def createRoute(routeCode:String, departmentCode:String, routeName:String ){
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/route"
+		val req = url(uri).POST << Map(
+			"routeCode" -> routeCode,
+			"departmentCode"->departmentCode,
+		  "routeName"->routeName)
+		http.when(_==200)(req >|)
+
+	}
+
 
 
 }

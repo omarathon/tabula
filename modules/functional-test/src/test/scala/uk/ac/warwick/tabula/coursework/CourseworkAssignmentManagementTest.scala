@@ -13,7 +13,6 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 			
 			// Check that the assignment is there
 			id should not be ('empty)
-			println(id)
 			
 			// Check that an empty assignment looks right
 			click on getAssignmentInfo("xxx101", "Fully featured assignment").findElement(By.partialLinkText("0 submissions"))
@@ -70,7 +69,10 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 			reloadPage
 			
 			// Wait for the page reload...
-			eventually {
+			eventually {		
+				linkText("Show").findElement should be ('defined)
+				click on linkText("Show") // Modules with no non-archived assignments are hidden
+						
 				val minfo = getModuleInfo("xxx101")
 				click on (minfo.findElement(By.partialLinkText("Manage")))
 				

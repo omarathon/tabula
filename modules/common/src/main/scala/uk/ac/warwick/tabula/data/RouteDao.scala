@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data
 import org.springframework.stereotype.Repository
 import org.hibernate.criterion.Restrictions._
 
-import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.data.model.{Department, Route}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
 
@@ -21,6 +21,7 @@ trait RouteDao {
 	def save(point: MonitoringPoint)
 	def delete(point: MonitoringPoint)
 	def getByCode(code: String): Option[Route]
+	def findByDepartment(department:Department):Seq[Route]
 	def getMonitoringPointSetById(id: String): Option[MonitoringPointSet]
 	def getMonitoringPointById(id: String): Option[MonitoringPoint]
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
@@ -58,6 +59,9 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 			.add(yearRestriction(year))
 			.uniqueResult
 
+	def findByDepartment(department:Department) =
+		session.newQuery[Route]("from Route r where department = :dept").setEntity("dept",department).seq
+	
 	private def yearRestriction(opt: Option[Any]) = opt map { is("year", _) } getOrElse { isNull("year") }
 
 }

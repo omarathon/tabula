@@ -14,11 +14,11 @@
     <@f.form method="post" action="${submitAction}" commandName="releaseGroupSetCommand" cssClass="form-horizonatal form-tiny" style="margin-bottom:0">
 
     <div class="modal-body">
-        <p>Notify these people via email that ${smallGroupSet.name} ${smallGroupSet.format.description}
+        <p>Notify these people via email that ${smallGroupSet.name}
             allocations for ${smallGroupSet.module.code} are ready to view
             in Tabula</p>
         <@form.row "notifyStudents">
-            <label class="checkbox ${smallGroupSet.releasedToStudents?string('disabled','')}">
+            <label class='checkbox ${smallGroupSet.releasedToStudents?string("disabled use-tooltip' title='Already notified'","'") }>
                 <@f.checkbox path="notifyStudents" disabled="${smallGroupSet.releasedToStudents?string}"/>Students
             </label>
         </@form.row>
@@ -30,7 +30,7 @@
         <p>They will automatically be notified of any further changes made to these groups</p>
     </div>
     <div class="modal-footer">
-    <input class="btn btn-info" type="submit" value="Notify"> <a class="btn cancel-link" data-dismiss="modal" href="#">Cancel</a>
+    <input class="btn btn-info" type="submit" value="Notify" data-update-target="#groupset-container-${smallGroupSet.id}"> <a class="btn cancel-link" data-dismiss="modal" href="#">Cancel</a>
     </div>
     </@f.form>
 </#escape>

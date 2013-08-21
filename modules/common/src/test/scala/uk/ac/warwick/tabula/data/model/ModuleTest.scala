@@ -21,6 +21,11 @@ class ModuleTest extends TestBase {
 		Module.extractCats("md101") should be (None)
 	}
 
+	@Test def webgroupNameToModuleCode {
+		Module.nameFromWebgroupName("ch-ch101") should be ("ch101")
+		Module.nameFromWebgroupName("be-bo-101") should be ("bo-101")
+		Module.nameFromWebgroupName("nodashes") should be ("nodashes")
+	}
 
   @Test
   def hasUnreleasedGroupSetsReturnsTrueIfAtLeastOneSetIsUnreleased(){
@@ -41,4 +46,20 @@ class ModuleTest extends TestBase {
 
     modPartReleased.hasUnreleasedGroupSets should be (true)
   }
+
+	@Test
+	def hasLiveAssignments(){
+		val module = new Module()
+		val assignment1 = new Assignment()
+		assignment1.deleted = true
+
+		val assignment2 = new Assignment()
+		assignment2.archived = true
+
+		module.assignments = Seq(assignment1, assignment2).asJava
+		module.hasLiveAssignments should be(false)
+
+		assignment2.archived = false
+		module.hasLiveAssignments should be(true)
+	}
 }

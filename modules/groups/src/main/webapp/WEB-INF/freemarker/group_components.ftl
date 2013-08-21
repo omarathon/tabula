@@ -26,8 +26,20 @@
 <#macro module_info data>
 <div class="small-group-modules-list">
 <#list data.moduleItems as moduleItem>
+<@single_module moduleItem data.canManageDepartment/>
+</#list>
+</div> <!-- small-group-modules-list-->
+<#-- List of students modal -->
+<div id="students-list-modal" class="modal fade">
+</div>
+
+</#macro>
+
+
+<#macro single_module moduleItem canManageDepartment>
 
 <#assign module=moduleItem.module />
+<span id="${module_anchor(module)}-container">
 
 <#assign has_groups=(moduleItem.setItems!?size gt 0) />
 <#assign has_archived_groups=false />
@@ -37,9 +49,8 @@
 	</#if>
 </#list>
 
-
 <a id="${module_anchor(module)}"></a>
-<div class="module-info striped-section<#if has_groups> collapsible expanded</#if><#if data.canManageDepartment && !has_groups> empty</#if>"
+<div class="module-info striped-section<#if has_groups> collapsible expanded</#if><#if canManageDepartment && !has_groups> empty</#if>"
 	 data-name="${module_anchor(module)}">
 	<div class="clearfix">
 
@@ -65,9 +76,22 @@
 		<#if moduleItem.setItems?has_content>
 		<div class="striped-section-contents">
 		<#list moduleItem.setItems as setItem>
+		<span id="groupset-container-${setItem.set.id}">
+          <@single_groupset setItem moduleItem/>
+          </span>
+        </#list>
+        </div>
+        </#if>
+    </div>
+</div> <!-- module-info striped-section-->
+</span>
+</#macro>
+
+
+<#macro single_groupset setItem moduleItem>
 			<#assign groupSet=setItem.set />
 			<#if !groupSet.deleted>
-				<div class="item-info row-fluid<#if groupSet.archived> archived</#if> groupset-${groupSet.id}">
+				<div class="item-info row-fluid<#if groupSet.archived> archived</#if> groupset-${groupSet.id}" >
 				<#if setItem.viewerMustSignUp>
 				  <form id="select-signup-${setItem.set.id}" method="post" action="<@routes.signup_to_group setItem.set />">
 				</#if>
@@ -93,10 +117,16 @@
 								<p>Changes saved.</p>
 							</div>
 						</#if>
+						<#if notificationSentMessage??>
+							<div class="alert alert-success">
+								<a class="close" data-dismiss="alert">&times;</a>
+								<p>${notificationSentMessage}</p>
+							</div>
+						</#if>
 
 						<#list setItem.groups as group>
 							<div class="row-fluid group">
-							<div class="span1">
+							<div class="span1 ${(setItem.viewerMustSignUp && group.full)?string('use-tooltip" title="There are no spaces left on this group"','"')}>
 							 <#if setItem.viewerMustSignUp>
 							   <input type="radio"
 							          name="group"
@@ -105,7 +135,7 @@
 							          class="radio inline group-selection-radio"/>
 							</#if>
 							</div>
-							<div class="${moduleItem.canManageGroups?string('span7','span11')}">
+							<div class="span11">
 								<h4 class="name">
 								${group.name!""}
 								<#if setItem.canViewMembers >
@@ -123,13 +153,21 @@
                                          || (setItem.isStudentSignUp() && !setItem.set.openForSignups)
                                          >
                                       <form> <!-- targetless form here to make the DOM match the student-sign-up version, for ease of testing -->
-									     <input type="submit" disabled class="btn btn-primary btn-medium pull-right" value="Leave" use-tooltip" title='You cannot change this group allocation via tabula. Please speak to your department if you need to change groups'/>
+									     <input type="submit"
+									            disabled
+									            class="disabled btn btn-primary btn-medium pull-right use-tooltip"
+									            title='You cannot change this group allocation via tabula.
+									                   Please speak to your department if you need to change groups'
+									            value="Leave" />
                                       </form>
                                     <#else >
 	                                    <#if !setItem.viewerMustSignUp >
 	                                     <form id="leave-${setItem.set.id}" method="post" action="<@routes.leave_group setItem.set />" >
                                             <input type="hidden" name="group" value="${group.id}" />
-                                            <input type="submit" class="btn btn-primary  pull-right" value="Leave"/>
+                                            <input type="submit"
+                                                   class="btn btn-primary  pull-right use-tooltip"
+                                                   title='Leave this group. You will need to sign up for a different group.'
+                                                   value="Leave"/>
 										 </form>
 										</#if>
                                     </#if>
@@ -138,11 +176,26 @@
 
 								<ul class="unstyled">
 									<#list group.events as event>
-										<li>
-										<#-- Tutor, weeks, day/time, location -->
-										<@fmt.weekRanges event />,
-										${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
-										${event.location!"[no location]"}
+										<li class="clearfix">
+											<#-- Tutor, weeks, day/time, location -->
+											<span class="pull-left eventWeeks span6">
+											<@fmt.weekRanges event />,
+											${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
+											${event.location!"[no location]"}
+											</span>
+
+											<#if moduleItem.canManageGroups>
+											<span class="pull-right eventRegister">
+												<form method="get" action="/groups/event/${event.id}/register">
+
+													<input type="hidden" name="returnTo" value="/admin/department/${department.code}" />
+													<span class="form-horizontal">
+														<@fmt.weekRangeSelect event />
+														<button class="btn btn-small btn-primary register-button">Record</button>
+													 </span>
+												</form>
+											</span>
+											</#if>
 										</li>
 									</#list>
 								</ul>
@@ -161,7 +214,7 @@
 									<i class="icon-info-sign"></i> <@fmt.p unallocatedSize "student has" "students have" /> not been allocated to a group
 								</div>
 							</#if>
-	
+
 							<#if groupSet.hasAllocated >
 								 <#-- not released at all -->
 								  <#if (!groupSet.releasedToStudents && !groupSet.releasedToTutors)>
@@ -195,7 +248,7 @@
 										 <li  ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
                                          		   (''," class='disabled use-tooltip' title='Not a self-signup group' ")
                                          }>
-                                         <a  class="close-group-link" data-toggle="modal" data-target="#modal-container" 
+                                         <a  class="close-group-link" data-toggle="modal" data-target="#modal-container"
                                          href="<@routes.closeset groupSet />"><i class="icon-lock icon-fixed-width"></i> Close</a></li>
 
 										 <#else>
@@ -218,14 +271,14 @@
                                         <#else>
                                             <#assign archive_caption>Archive groups</#assign>
                                         </#if>
-                                        
+
                                         <#assign archive_url><@routes.archiveset groupSet /></#assign>
-                                        
-                                        <@fmt.permission_button permission='SmallGroups.Archive' scope=module action_descr='${archive_caption}'?lower_case classes='archive-group-link ajax-popup' href=archive_url 
-                                        						tooltip='Archive small group' data_attr='data-popup-target=.btn-group data-container=body'> 
-                                        <i class="icon-folder-close icon-fixed-width"></i> ${archive_caption} 
+
+                                        <@fmt.permission_button permission='SmallGroups.Archive' scope=groupSet.module action_descr='${archive_caption}'?lower_case classes='archive-group-link ajax-popup' href=archive_url
+                                        						tooltip='Archive small group' data_attr='data-popup-target=.btn-group data-container=body'>
+                                        <i class="icon-folder-close icon-fixed-width"></i> ${archive_caption}
                                         </@fmt.permission_button>
-                                    </a></li> 
+                                    </a></li>
                                 </@dropdown_menu>
                             </div>
                         </div>
@@ -237,16 +290,4 @@
                     </#if>
                 </div>
             </#if>
-        </#list>
-        </div>
-        </#if>
-    </div>
-</div> <!-- module-info striped-section-->
-
-</#list>
-</div> <!-- small-group-modules-list-->
-<#-- List of students modal -->
-<div id="students-list-modal" class="modal fade">
-</div>
-
 </#macro>

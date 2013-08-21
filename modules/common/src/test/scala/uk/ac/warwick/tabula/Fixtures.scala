@@ -145,7 +145,12 @@ object Fixtures {
 	def staff(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null) =
 		member(MemberUserType.Staff, universityId, userId, department).asInstanceOf[StaffMember]
 
-	def student(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null, courseDepartment: Department = null)	= {
+	def sitsStatus(code: String = "F", shortName: String = "Fully enrolled", fullName: String = "Fully enrolled for this session") = {
+		val status = new SitsStatus(code, shortName, fullName)
+		status
+	}
+
+	def student(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null, courseDepartment: Department = null, sprStatus: SitsStatus = null)	= {
 		val m = member(MemberUserType.Student, universityId, userId, department).asInstanceOf[StudentMember]
 
 		val studentCourseDetails = new StudentCourseDetails(m, m.universityId + "/1")
@@ -153,6 +158,9 @@ object Fixtures {
 		studentCourseDetails.sprCode = m.universityId + "/1"
 		studentCourseDetails.department = courseDepartment
 		studentCourseDetails.mostSignificant = true
+
+		studentCourseDetails.sprStatus = sprStatus
+
 		m.studentCourseDetails.add(studentCourseDetails)
 		m
 	}

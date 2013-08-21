@@ -32,7 +32,7 @@ import org.hibernate.annotations.AccessType
  */
 @Entity
 @AccessType("field")
-class UserGroup private(val universityIds: Boolean) extends GeneratedId {
+class UserGroup private(val universityIds: Boolean) extends GeneratedId with UnspecifiedTypeUserGroup{
 
 	/* For Hibernate xx */
 	private def this() { this(false) }
@@ -60,8 +60,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId {
 	var excludeUsers: JList[String] = JArrayList()
 
 	def add(user:User) = {
-		if (universityIds) addUser(user.getWarwickId)
-		else addUser(user.getUserId)
+		addUser(getIdFromUser(user))
 	}
 	def addUser(user: String) = {
 		if (!includeUsers.contains(user)) {
@@ -71,8 +70,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId {
 	def removeUser(user: String) = includeUsers.remove(user)
 
 	def remove(user:User) = {
-		if (universityIds) removeUser(user.getWarwickId)
-		else removeUser(user.getUserId)
+		removeUser(getIdFromUser(user))
 	}
 
 	def excludeUser(user: String) = {
@@ -80,8 +78,13 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId {
 			excludeUsers.add(user)
 		} else false
 	}
+	def exclude(user:User)={
+		excludeUser(getIdFromUser(user))
+	}
 	def unexcludeUser(user: String) = excludeUsers.remove(user)
-
+  def unexclude(user:User)={
+		unexcludeUser(getIdFromUser(user))
+	}
 
 	/*
 	 * Could implement as `members.contains(user)`
@@ -99,36 +102,57 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId {
 		else includes(user.getUserId)
 	}
 	def isEmpty = members.isEmpty
+	def size = members.size
 
 	def members: Seq[String] =
 		(includeUsers.toList ++ staticIncludeUsers ++ webgroupMembers) filterNot excludeUsers.contains
 
-	def users: Seq[User] =
-		if (universityIds) members map {
-			userLookup.getUserByWarwickUniId(_)
+	private def getIdFromUser(user:User):String = {
+		if (universityIds)
+			user.getWarwickId
+		else
+			user.getUserId
+	}
+	private def getUsersFromIds(ids:Seq[String]):Seq[User] = {
+		if (universityIds){
+			ids.map(userLookup.getUserByWarwickUniId)
 		}
 		else {
-			if (members.isEmpty) {
+			if (ids.isEmpty) {
 				Nil
 			} else {
-				userLookup.getUsersByUserIds(members.asJava).values.asScala.toSeq
+				userLookup.getUsersByUserIds(ids.asJava).values.asScala.toSeq
 			}
 		}
+	}
+
+	def users: Seq[User] = getUsersFromIds(members)
+
+	def excludes: Seq[User] = getUsersFromIds(excludeUsers)
 
 	def webgroupMembers: List[String] = baseWebgroup match {
 		case webgroup: String => groupService.getUserCodesInGroup(webgroup).asScala.toList
 		case _ => Nil
 	}
 
-	def copyFrom(other: UserGroup) {
-		assert(this.universityIds == other.universityIds, "Can only copy from a group with same type of users")
-		baseWebgroup = other.baseWebgroup
-		includeUsers.clear()
-		excludeUsers.clear()
-		staticIncludeUsers.clear()
-		includeUsers.addAll(other.includeUsers)
-		excludeUsers.addAll(other.excludeUsers)
-		staticIncludeUsers.addAll(other.staticIncludeUsers)
+
+	def copyFrom(otherGroup: UnspecifiedTypeUserGroup) {
+		otherGroup match {
+			case other:UserGroup=>{
+				assert(this.universityIds == other.universityIds, "Can only copy from a group with same type of users")
+				baseWebgroup = other.baseWebgroup
+				includeUsers.clear()
+				excludeUsers.clear()
+				staticIncludeUsers.clear()
+				includeUsers.addAll(other.includeUsers)
+				excludeUsers.addAll(other.excludeUsers)
+				staticIncludeUsers.addAll(other.staticIncludeUsers)
+			}
+			case _ => {
+				assert(false, "Can only copy from one UserGroup to another")
+			}
+		}
+
 	}
 
 	def duplicate(): UserGroup = {
@@ -138,9 +162,46 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId {
 		newGroup
 	}
 
+	def hasSameMembersAs(other:UnspecifiedTypeUserGroup):Boolean ={
+		other match {
+			case otherUg:UserGroup if otherUg.universityIds == this.universityIds=> (this.members == otherUg.members)
+			case _ => this.users == other.users
+		}
+	}
 }
 
 object UserGroup {
 	def ofUsercodes = new UserGroup(false)
 	def ofUniversityIds = new UserGroup(true)
+}
+
+/**
+ * A usergroup where the value of universityId is hidden from the caller.
+ *
+ * This means that callers can only add/remove Users, not UserIds/UniversityIds - and therefore they can't add the
+ * wrong type of identifier.
+ *
+ */
+
+trait UnspecifiedTypeUserGroup{
+	/**
+	 * @return All of the included users (includedUsers, staticUsers, and webgroup members), minus the excluded users
+	 */
+	def users: Seq[User]
+
+	/**
+	 * @return The explicitly excluded users
+	 */
+	def excludes: Seq[User]
+	def add(User:User)
+	def remove(user:User)
+	def exclude(user:User)
+	def unexclude(user:User)
+	def size:Int
+	def isEmpty:Boolean
+  def includesUser(user:User):Boolean
+	/**
+	 * @return true if the other.users() would return the same values as this.users(), else false
+	 */
+	def hasSameMembersAs(other:UnspecifiedTypeUserGroup):Boolean
 }

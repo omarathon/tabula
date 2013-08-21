@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.junit.Test
 import uk.ac.warwick.tabula._
 import collection.JavaConversions._
 import collection.JavaConverters._
-import uk.ac.warwick.userlookup.Group
-import uk.ac.warwick.userlookup.GroupImpl
+import JavaImports.{JArrayList,JList,JHashMap}
+import uk.ac.warwick.userlookup.{User, GroupImpl}
+import uk.ac.warwick.tabula.services.UserLookupService
 
-class UserGroupTest extends PersistenceTestBase {
+class UserGroupTest extends PersistenceTestBase  with Mockito{
 
 	@Test def membership {
 		transactional { t =>
@@ -93,5 +93,52 @@ class UserGroupTest extends PersistenceTestBase {
 		val group2 = UserGroup.ofUsercodes
 		group2.copyFrom(group)
 	}
-	
+
+	@Test
+	def canGetUsersWhenHoldingUserIds() {
+		val test = new User("test")
+		val group = UserGroup.ofUsercodes
+		group.addUser("test")
+		group.userLookup = mock[UserLookupService]
+		group.userLookup.getUsersByUserIds(JArrayList("test")) returns JHashMap("test" -> test)
+
+		group.users should be(Seq(test))
+		there was one(group.userLookup).getUsersByUserIds(any[JList[String]])
+	}
+
+	@Test
+	def canGetUsersWhenHoldingWarwickIds() {
+		val test = new User("test")
+		val group = UserGroup.ofUniversityIds
+		group.addUser("test")
+		group.userLookup = mock[UserLookupService]
+		group.userLookup.getUserByWarwickUniId("test") returns test
+
+		group.users should be(Seq(test))
+		there was one(group.userLookup).getUserByWarwickUniId(any[String])
+	}
+
+	@Test
+	def canGetExcludedUsersWhenHoldingUserIds() {
+		val test = new User("test")
+		val group = UserGroup.ofUsercodes
+		group.excludeUser("test")
+		group.userLookup = mock[UserLookupService]
+		group.userLookup.getUsersByUserIds(JArrayList("test")) returns JHashMap("test" -> test)
+
+		group.excludes should be(Seq(test))
+		there was one(group.userLookup).getUsersByUserIds(any[JList[String]])
+	}
+
+	@Test
+	def canGetExcludedUsersWhenHoldingWarwickIds() {
+		val test = new User("test")
+		val group = UserGroup.ofUniversityIds
+		group.excludeUser("test")
+		group.userLookup = mock[UserLookupService]
+		group.userLookup.getUserByWarwickUniId("test") returns test
+
+		group.excludes should be(Seq(test))
+		there was one(group.userLookup).getUserByWarwickUniId(any[String])
+	}
 }

@@ -47,7 +47,7 @@
 			</label>
 			<#if features.smallGroupTeachingStudentSignUp>
 				<label class="radio">
-					<@f.radiobutton path="allocationMethod" value="StudentSignUp" radioactive=".canBeDisabled" />
+					<@f.radiobutton path="allocationMethod" value="StudentSignUp" selector=".student-sign-up-options" />
 					Self sign-up
 					<a class="use-popover" data-html="true"
 				     data-content="Allow students to sign up for groups (you can edit group allocation later)">
@@ -101,25 +101,19 @@
 
 
 	<#if features.smallGroupTeachingSelfGroupSwitching>
-	
-		<#assign isStudentSignup=form.getvalue('allocationMethod') />
-		<#if isStudentSignup != 'StudentSignUp'>
-			<#assign disable_label="disabled" />
-			<#assign disable_prop="true" />
-		<#else>
-			<#assign disable_prop="false" />
-		</#if>
 		
-		<@form.labelled_row "allowSelfGroupSwitching" "" "canBeDisabled" "" "" disable_label >
-			<@form.label checkbox=true >
-				<@f.checkbox path="allowSelfGroupSwitching" value="true" disabled=disable_prop />
-				Allow students to switch groups
-				<a class="use-popover" data-html="true"
-					data-content="When self sign up is enabled students will be able to switch groups.">
-						<i class="icon-question-sign"></i>
-			  	</a>
-			</@form.label>
-		</@form.labelled_row>
+		<@form.row path="allowSelfGroupSwitching" cssClass="student-sign-up-options">
+			<@form.field>
+				<@form.label checkbox=true >
+					<@f.checkbox path="allowSelfGroupSwitching" />
+					Allow students to switch groups
+					<a class="use-popover" data-html="true"
+						data-content="When self sign up is enabled students will be able to switch groups.">
+							<i class="icon-question-sign"></i>
+					</a>
+				</@form.label>
+			</@form.field>
+		</@form.row>
 	</#if>
 
 </fieldset>
@@ -233,7 +227,8 @@
 
 		$('#defaultMaxGroupSizeEnabled').change(setMaxSizeOptions);
 
-		$("input:radio[name='allocationMethod']").tabulaRadioActive();
+		// Set up radios to enable/disable self-sign up options fields.
+		$("input:radio[name='allocationMethod']").radioControlled();
 
 		<#-- controller detects action=refresh and does a bind without submit -->
 		$('.modal.refresh-form').on('hide', function(e) {

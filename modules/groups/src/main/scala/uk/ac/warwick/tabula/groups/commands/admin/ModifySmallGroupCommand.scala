@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.UniversityId
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.services.{SmallGroupService, UserLookupService}
 import uk.ac.warwick.spring.Wire
-import org.hibernate.validator.Valid
+import javax.validation.Valid
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
@@ -93,7 +93,7 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 		events.clear()
 		events.addAll(group.events.asScala.map(new EditSmallGroupEventCommand(_)).asJava)
 
-		if (group.students != null) students.copyFrom(group.students)
+		if (group.students != null) students = group._studentsGroup.duplicate()
 	}
 	
 	def copyTo(group: SmallGroup) {
@@ -111,8 +111,7 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
     }
 
 		
-		if (group.students == null) group.students = UserGroup.ofUniversityIds
-		group.students.copyFrom(students)
+		if (students != null) group._studentsGroup = students.duplicate()
 	}
 	
 	override def onBind(result: BindingResult) {

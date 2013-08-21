@@ -55,7 +55,8 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		val event = new SmallGroupEvent()
 		val group = new SmallGroup()
 		event.group = group
-		val students = group.students
+		val students = UserGroup.ofUsercodes
+		group._studentsGroup = students
 		val week = 1
 
 		val command = new RecordAttendanceCommand(event, week) with CommandTestSupport

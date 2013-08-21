@@ -57,10 +57,8 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 
 	@transient var user: CurrentUser = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var createdDate: DateTime = new DateTime
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var updatedDate: DateTime = new DateTime
 
 	@Column(name = "progress") var _progress: Int = 0
@@ -69,7 +67,9 @@ class JobInstanceImpl() extends JobInstance with GeneratedId with PostLoadBehavi
 		_progress = p
 	}
 
-	@Lob var data: String = "{}"
+	// CLOB
+	var data: String = "{}"
+
 	@transient private var _json: JsonMap = Map()
 	def json = _json
 	def json_=(map: JsonMap) {

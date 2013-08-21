@@ -1,17 +1,11 @@
 package uk.ac.warwick.tabula.home.web.controllers.sysadmin
 
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Component
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import uk.ac.warwick.tabula.services.AuditEventService
-import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.services.AuditEventIndexService
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.data.model.AuditEvent
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.spring.Wire
 
@@ -31,7 +25,7 @@ case class UserLookupQuery() {
 }
 
 @Controller
-class AuditLogController extends BaseController {
+class AuditLogController extends BaseSysadminController {
 
 	var auditEventService = Wire.auto[AuditEventService]
 	var auditEventIndexService = Wire.auto[AuditEventIndexService]
@@ -52,6 +46,7 @@ class AuditLogController extends BaseController {
 			"page" -> page,
 			"startIndex" -> start,
 			"endIndex" -> end)
+			.crumbs(Breadcrumbs.Current("Sysadmin audit log"))
 	}
 
 	@RequestMapping(value = Array("/sysadmin/userlookup"))
@@ -76,6 +71,7 @@ class AuditLogController extends BaseController {
 			"page" -> page,
 			"startIndex" -> start,
 			"endIndex" -> end)
+			.crumbs(Breadcrumbs.Current("Sysadmin audit log"))
 	}
 
 	def toRichAuditItem(item: AuditEvent) = item.copy(parsedData = auditEventService.parseData(item.data))

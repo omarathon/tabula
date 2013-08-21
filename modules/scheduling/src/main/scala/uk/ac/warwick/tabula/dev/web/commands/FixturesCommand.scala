@@ -4,7 +4,7 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.{RouteDao, Daoisms}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
@@ -12,8 +12,9 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
-import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import uk.ac.warwick.tabula.roles.{SupervisorRoleDefinition, PersonalTutorRoleDefinition, DepartmentalAdministratorRoleDefinition}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.Route
 
 /** This command is intentionally Public. It only exists on dev and is designed,
   * in essence, to blitz a department and set up some sample data in it.
@@ -21,17 +22,28 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, Small
 class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	import ImportModulesCommand._
 
-	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
+	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+	var routeDao = Wire[RouteDao]
 
 	def applyInternal() {
 		setupDepartmentAndModules()
 
-		// Two department admins
+		// Two department admins, first is also a senior tutor and senior supervisor
 		val department = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code).get
 
 		val cmd = new GrantRoleCommand(department)
 		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
 		cmd.usercodes.addAll(Seq(Fixtures.TestAdmin1, Fixtures.TestAdmin2))
+		cmd.apply()
+
+		cmd.roleDefinition = PersonalTutorRoleDefinition
+		cmd.usercodes.clear()
+		cmd.usercodes.add(Fixtures.TestAdmin1)
+		cmd.apply()
+
+		cmd.roleDefinition = SupervisorRoleDefinition
+		cmd.usercodes.clear()
+		cmd.usercodes.add(Fixtures.TestAdmin1)
 		cmd.apply()
 	}
 
@@ -39,10 +51,11 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		// Blitz the test department
 		transactional() {
 			moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code) map { dept =>
+				val routes: Seq[Route] = routeDao.findByDepartment(dept)
 				for (module <- dept.modules) session.delete(module)
 				for (feedbackTemplate <- dept.feedbackTemplates) session.delete(feedbackTemplate)
 				for (markingWorkflow <- dept.markingWorkflows) session.delete(markingWorkflow)
-
+				for (route<-routes) session.delete(route)
 				session.delete(dept)
 			}
 		}

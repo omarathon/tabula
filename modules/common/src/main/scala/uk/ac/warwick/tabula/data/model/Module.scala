@@ -48,6 +48,12 @@ class Module extends GeneratedId with PermissionsTarget {
 	
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var assignments: JList[Assignment] = JArrayList()
+
+	def hasLiveAssignments = Option(assignments) match {
+		case Some(a) => a.asScala.exists(_.isAlive)
+		case None => false
+	}
+
 	
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var groupSets: JList[SmallGroupSet] = JArrayList()
@@ -74,9 +80,11 @@ object Module {
 	// where cats can be a decimal number.
 	private val ModuleCatsPattern = new Regex("""(.+?)-(\d+(?:\.\d+)?)""")
 
-	def nameFromWebgroupName(groupName: String): String = groupName.indexOf("-") match {
-		case -1 => groupName
-		case i: Int => groupName.substring(i + 1)
+	private val WebgroupPattern = new Regex("""(.+?)-(.+)""")
+
+	def nameFromWebgroupName(groupName: String): String = groupName match {
+		case WebgroupPattern(dept, name) => name
+		case _ => groupName
 	}
 
 	def stripCats(fullModuleName: String): String = fullModuleName match {

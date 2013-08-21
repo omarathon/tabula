@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.services.RelationshipService
 
 // wrapper class for personal tutor data - just for less crufty method signature
-class PersonalTutorGraph(val tuteeMap: TreeMap[String, Seq[StudentRelationship]], val studentCount: Int, val missingCount: Int)
+case class PersonalTutorGraph(val tuteeMap: TreeMap[String, Seq[StudentRelationship]], val studentCount: Int, val missingCount: Int)
 
 class ViewPersonalTutorsCommand(val department: Department) extends Command[PersonalTutorGraph] with Unaudited {
 
@@ -38,9 +38,9 @@ class ViewPersonalTutorsCommand(val department: Department) extends Command[Pers
 		}).toSeq:_*)
 
 		// count students
-		val (studentCount, missingCount) = relationshipService.countStudentsByRelationshipAndDepartment(PersonalTutor, department)
+		val (studentCount, withTutorsCount) = relationshipService.countStudentsByRelationshipAndDepartment(PersonalTutor, department)
 
-		new PersonalTutorGraph(sortedTutorRelationships, studentCount, missingCount)
+		PersonalTutorGraph(sortedTutorRelationships, studentCount, studentCount - withTutorsCount)
 	}
 }
 

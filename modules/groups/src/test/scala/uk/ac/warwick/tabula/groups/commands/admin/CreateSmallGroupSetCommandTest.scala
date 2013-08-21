@@ -1,24 +1,27 @@
 package uk.ac.warwick.tabula.groups.commands.admin
-import uk.ac.warwick.tabula.AppContextTestBase
 import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, WeekRange, DayOfWeek}
 
 import org.joda.time.LocalTime
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.services.{SmallGroupService, NotificationService, MaintenanceModeService}
+import uk.ac.warwick.tabula.{Mockito, TestBase, Fixtures}
+import uk.ac.warwick.tabula.events.EventHandling
 
-class CreateSmallGroupSetCommandTest extends AppContextTestBase {
+class CreateSmallGroupSetCommandTest extends TestBase with Mockito {
 	
-	@Transactional
 	@Test def itWorks {
 		val f = MyFixtures()
-		
+
 		val cmd = new CreateSmallGroupSetCommand(f.module1)
 		cmd.name = "Terry"
 		cmd.format = SmallGroupFormat.Seminar
 		cmd.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
 		cmd.allowSelfGroupSwitching = true
-		
+
+		cmd.service = mock[SmallGroupService]
+		EventHandling.enabled = false
+
 		// Create two groups with two events
 		val group1Cmd = cmd.groups.get(0) 
 		group1Cmd.name = "Steve"
@@ -104,10 +107,6 @@ class CreateSmallGroupSetCommandTest extends AppContextTestBase {
 		val department = Fixtures.department(code="ls", name="Life Sciences")
         val module1 = Fixtures.module(code="ls101")
         val module3 = Fixtures.module(code="ls103")
-        
-        session.save(department)
-        session.save(module1)
-        session.save(module3)
 	}
 
 }

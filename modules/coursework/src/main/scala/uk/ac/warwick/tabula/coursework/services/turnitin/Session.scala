@@ -23,7 +23,10 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	import TurnitinDates._
 
 	// Some parameters are not included in the MD5 signature calculation.
-	val excludeFromMd5 = Seq("dtend", "create_session", "session-id", "src", "apilang")
+	val excludeFromMd5 = Seq(
+		"dtend", "create_session", "session-id", "src", "apilang",
+		"exclude_biblio", "exclude_quoted", "exclude_type", "exclude_value"
+	)
 
 	// These are overriden within Turnitin.login().
 	var userEmail = ""
@@ -42,7 +45,8 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	 * If you start getting an "MD5 NOT AUTHENTICATED" on an API method you've
 	 * changed, it's usually because it doesn't recognise one of the parameters.
 	 * We MD5 on all parameters but the server will only MD5 on the parameters
-	 * it recognises, hence the discrepency.
+	 * it recognises, hence the discrepency. There is no way to know which parameters
+	 * that Turnitin cares about. There is no list in the docs. What fun!
 	 */
 	def doRequest(
 		functionId: String, // API function ID (defined in TurnitinMethods object)
@@ -152,11 +156,10 @@ class Session(turnitin: Turnitin, val sessionId: String) extends TurnitinMethods
 	 * the shared key and MD5hex that.
 	 */
 	def md5hex(params: Map[String, String]) = {
-		val sortedJoinedParams = params.filterKeys(!excludeFromMd5.contains(_)).toSeq
-			.sortBy(toKey) // sort by key (left part of Pair)
-			.map(toValue) // map to value (right part of Pair)
-			.mkString
-		DigestUtils.md5Hex(sortedJoinedParams + turnitin.sharedSecretKey)
+		val filteredParams = params.filterKeys(!excludeFromMd5.contains(_)).toSeq
+		val sortedParams = filteredParams.sortBy(toKey) // sort by key (left part of Pair)
+		val sortedValues = sortedParams.map(toValue).mkString // map to value (right part of Pair)
+		DigestUtils.md5Hex(sortedValues + turnitin.sharedSecretKey)
 	}
 
 }

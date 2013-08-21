@@ -1,13 +1,11 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
 import javax.persistence.Entity
+import org.joda.time.DateTime
+
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
 import javax.validation.constraints.NotNull
-
-import org.hibernate.annotations.Type
-import org.joda.time.DateTime
-
 import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 
@@ -24,7 +22,6 @@ class MonitoringCheckpoint extends GeneratedId {
 	
 	var checked: Boolean = false
 	
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
 	var createdDate: DateTime = _
 	
 	@NotNull

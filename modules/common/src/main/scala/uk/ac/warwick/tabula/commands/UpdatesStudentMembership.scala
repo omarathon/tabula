@@ -8,17 +8,19 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{AssignmentMembershipInfo, UserLookupService, AssignmentMembershipService}
+import scala.collection.mutable.ListBuffer
+import uk.ac.warwick.userlookup.User
 
 trait UpdatesStudentMembership {
 
-	this : CurrentAcademicYear =>
+	this : CurrentAcademicYear with SpecifiesGroupType =>
 
 	var userLookup = Wire.auto[UserLookupService]
 	var membershipService = Wire.auto[AssignmentMembershipService]
 
 	// needs a module to determine the possible options from SITS
 	val module : Module
-	val exisitingGroups: Option[Seq[UpstreamAssessmentGroup]]
+	val existingGroups: Option[Seq[UpstreamAssessmentGroup]]
 	val existingMembers: Option[UserGroup]
 
 	/**
@@ -55,7 +57,16 @@ trait UpdatesStudentMembership {
 	 * it is difficult to bind additions and removals directly to a collection
 	 * with Spring binding.
 	 */
-	var members: UserGroup = UserGroup.ofUsercodes
+	var members: UnspecifiedTypeUserGroup = {
+		val ug = if (updateStudentMembershipGroupIsUniversityIds){
+			UserGroup.ofUniversityIds
+
+		}else{
+			UserGroup.ofUsercodes
+		}
+		ug.userLookup = userLookup
+		ug
+	}
 
 
 	// parse massAddUsers into a collection of individual tokens
@@ -68,10 +79,10 @@ trait UpdatesStudentMembership {
 		updateAssessmentGroups()
 	}
 
-	private def addUserId(item: String) {
-		val user = userLookup.getUserByUserId(item)
+	private def addUserFromUserId(userId: String, addTo:ListBuffer[User]) {
+		val user = userLookup.getUserByUserId(userId)
 		if (user.isFoundUser && null != user.getWarwickId) {
-			includeUsers.add(user.getUserId)
+			addTo += user
 		}
 	}
 
@@ -79,39 +90,48 @@ trait UpdatesStudentMembership {
 	 * Convert Spring-bound user lists into an explicit UserGroup
 	 */
 	private def updateMembership() {
-		// parse items from textarea into includeUsers collection
+
+		// a list to hold the users we're adding
+		val usersToAdd = ListBuffer[User]()
+
+		// parse items from textarea into usersToAdd list
 		for (item <- massAddUsersEntries) {
 			if (UniversityId.isValid(item)) {
 				val user = userLookup.getUserByWarwickUniId(item)
 				if (user.isFoundUser) {
-					includeUsers.add(user.getUserId)
+					usersToAdd += user
 				} else {
-					addUserId(item)
+					addUserFromUserId(item, usersToAdd)
 				}
 			} else {
-				addUserId(item)
+				addUserFromUserId(item, usersToAdd)
 			}
 		}
+		// now add the users from includeUsers. Note that this is always a list of userIds, not warwickIds,
+		// regardless of the value of updateStudentMembershipGroupIsUniversityIds
+		usersToAdd ++= userLookup.getUsersByUserIds(JArrayList((includeUsers.asScala map(_.trim) filterNot( _.isEmpty )).distinct)).asScala map(_._2)
 
-		// get implicit membership list from upstream
-		val memberUsers = exisitingGroups.map(membershipService.determineMembershipUsers(_, existingMembers)).getOrElse(Seq())
-		val membersUserIds = memberUsers.map(_.getUserId)
+		// now get implicit membership list from upstream
+		val upstreamMembers = existingGroups.map(membershipService.determineMembershipUsers(_, existingMembers)).getOrElse(Seq())
 
-
-		// unexclude from previously excluded users, or explicitly include
-		((includeUsers.asScala map { _.trim } filterNot { _.isEmpty }).distinct) foreach { userId =>
-			if (members.excludeUsers contains userId) {
-				members.unexcludeUser(userId)
-			} else if (!(membersUserIds contains userId)) {
+		for (user<-usersToAdd.distinct){
+			if (members.excludes.contains(user)){
+				members.unexclude(user)
+			}
+			else if (!upstreamMembers.contains(user)){
 				// TAB-399 only add if not already a member of a linked UpstreamGroup
-				members.addUser(userId)
+				members.add(user)
 			}
 		}
 
 		// uninclude from previously-added users, or explicitly exclude
-		((excludeUsers.asScala map { _.trim } filterNot { _.isEmpty }).distinct) foreach { userId =>
-			if (members.includeUsers contains userId) members.removeUser(userId)
-			else members.excludeUser(userId)
+		val usersToExclude = userLookup.getUsersByUserIds(JArrayList((excludeUsers.asScala map { _.trim } filterNot { _.isEmpty }).distinct)).asScala map(_._2)
+		for (exclude<-usersToExclude){
+			if (members.users contains exclude){
+				members.remove(exclude)
+			}else{
+				members.exclude(exclude)
+			}
 		}
 
 		// empty these out to make it clear that we've "moved" the data into members
@@ -194,4 +214,7 @@ class UpstreamGroupPropertyEditor extends AbstractPropertyEditor[UpstreamGroup] 
 	}
 
 	override def toString(ug: UpstreamGroup) = ug.id
+}
+trait SpecifiesGroupType{
+	val updateStudentMembershipGroupIsUniversityIds:Boolean
 }

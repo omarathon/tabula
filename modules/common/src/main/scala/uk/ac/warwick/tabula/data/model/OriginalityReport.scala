@@ -15,7 +15,6 @@ class OriginalityReport() extends GeneratedId {
 
 	def completed = similarity map { _ > -1 } getOrElse false
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var createdDate: DateTime = DateTime.now
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")

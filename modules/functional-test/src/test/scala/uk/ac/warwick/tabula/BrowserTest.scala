@@ -33,12 +33,13 @@ abstract class BrowserTest
 	with Eventually
 	with SpanSugar
 	with WebBrowser
-	with WebsignonMethods {
+	with WebsignonMethods
+	with UserKnowledge {
 
 	// Shorthand to expose properties to test classes
 	val P = FunctionalTestProperties
 
-	/** Generates a full URL to browse to, 
+	/** Generates a full URL to browse to,
 	  * e.g. Path("/coursework") -> "https://tabula-test.warwick.ac.uk/coursework"
 	  */
 	def Path(path: String) = P.SiteRoot + path
@@ -52,6 +53,13 @@ abstract class BrowserTest
 		case "chrome" => new ChromeDriver
 		case "firefox" => new FirefoxDriver
 		case "ie" => new InternetExplorerDriver
+	}
+
+	def ifHtmlUnitDriver(operation:HtmlUnitDriver=>Unit) = {
+		webDriver match {
+			case h:HtmlUnitDriver=>operation(h)
+			case _=> // do nothing
+		}
 	}
 	
 	/**
@@ -71,7 +79,7 @@ case class LoginDetails(val usercode: String, val password: String, description:
   *
   * Can also be overridden by a System property, which can be useful e.g. for running a similar
   * set of tests multiple times with a different browser. (Note that some properties cannot be
-  * system properties, such as 
+  * system properties, such as
   *
   * Defaults are in functionaltest-default.properties.
   */
@@ -84,7 +92,7 @@ object FunctionalTestProperties {
 	/* Test user accounts who can sign in during tests. Populated from properties.
 	 * The tests currently REQUIRE that the user's first name is
 	 * equal to the usercode, since we look for "Signed in as X" to
-	 * determine whether we're signed in. Open to a better solution. 
+	 * determine whether we're signed in. Open to a better solution.
 	 */
 	lazy val Admin1 = userDetails("admin1", "Departmental admin")
 	lazy val Admin2 = userDetails("admin2", "Departmental admin")
@@ -105,11 +113,11 @@ object FunctionalTestProperties {
 	 * Get a property by name, or null if not found anywhere. Checks in this order
 	 * - System properties
 	 * - provided tabula-functionaltest.properties
-	 * - default properties 
+	 * - default properties
 	 */
-	private def prop(name: String) = 
+	private def prop(name: String) =
 		scala.util.Properties.propOrElse(name, fileProp(name))
-		
+
 	/** Like prop() but excludes system properties */
 	private def fileProp(name: String) = properties.getProperty(name)
 
@@ -136,4 +144,8 @@ object FunctionalTestProperties {
 			Assertions.fail("Properties missing for "+description+" (user."+identifier+".usercode)")
 		}
 	}
+}
+
+trait UserKnowledge {
+	var currentUser: LoginDetails = _
 }

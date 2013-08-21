@@ -22,6 +22,10 @@ class DepartmentTest extends TestBase with Mockito {
 		department.extensionGuidelineLink should be (null)
 		department.showStudentName should be (false)
 		department.plagiarismDetectionEnabled should be (true)
+		department.turnitinExcludeBibliography should be (true)
+		department.turnitinExcludeQuotations should be (true)
+		department.turnitinSmallMatchPercentageLimit should be (0)
+		department.turnitinSmallMatchWordLimit should be (0)
     department.defaultGroupAllocationMethod should be (Manual)
 
 		department.collectFeedbackRatings = true
@@ -30,6 +34,10 @@ class DepartmentTest extends TestBase with Mockito {
 		department.extensionGuidelineLink = "http://warwick.ac.uk"
 		department.showStudentName = true
 		department.plagiarismDetectionEnabled = false
+		department.turnitinExcludeBibliography = false
+		department.turnitinExcludeQuotations = false
+		department.turnitinSmallMatchPercentageLimit = 0
+		department.turnitinSmallMatchWordLimit = 50
     department.defaultGroupAllocationMethod = StudentSignUp
 		
 		department.collectFeedbackRatings should be (true)
@@ -40,6 +48,10 @@ class DepartmentTest extends TestBase with Mockito {
 		department.extensionGuidelineLink should be ("http://warwick.ac.uk")
 		department.showStudentName should be (true)
 		department.plagiarismDetectionEnabled should be (false)
+		department.turnitinExcludeBibliography should be (false)
+		department.turnitinExcludeQuotations should be (false)
+		department.turnitinSmallMatchPercentageLimit should be (0)
+		department.turnitinSmallMatchWordLimit should be (50)
     department.defaultGroupAllocationMethod should be (StudentSignUp)
 	}
 	

@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.data.model
+
+import scala.reflect._
+
+import org.hibernate.usertype.UserType
+import org.hibernate.`type`.AbstractSingleColumnStandardBasicType
+
 import java.sql.PreparedStatement
 import java.sql.ResultSet
-import java.sql.Types
-import org.hibernate.`type`.StandardBasicTypes
-import org.hibernate.usertype.UserType
 import java.{ io => jio }
-import java.{ lang => jl }
-import org.hibernate.`type`.Type
-import org.hibernate.`type`.AbstractStandardBasicType
-import org.hibernate.`type`.AbstractSingleColumnStandardBasicType
-import scala.reflect._
+import org.hibernate.engine.spi.SessionImplementor
+
 
 /**
  * Handles a lot of the junk that isn't necessary if all you want to do is
@@ -27,16 +27,17 @@ abstract class AbstractBasicUserType[A <: Object : ClassTag, B : ClassTag] exten
 	def convertToObject(input: B): A
 	def convertToValue(obj: A): B
 
-	final override def nullSafeGet(resultSet: ResultSet, names: Array[String], owner: Object) = {
-		basicType.nullSafeGet(resultSet, names(0)) match {
+
+	final override def nullSafeGet(resultSet: ResultSet, names: Array[String], impl: SessionImplementor, owner: Object) = {
+		basicType.nullSafeGet(resultSet, names(0), impl) match {
 			case s: Any if s == nullValue => nullObject
 			case b: B => convertToObject(b)
 			case null => nullObject
 		}
 	}
 
-	final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int) {
-		basicType.nullSafeSet(stmt, toValue(value), index)
+	final override def nullSafeSet(stmt: PreparedStatement, value: Any, index: Int, impl: SessionImplementor) {
+		basicType.nullSafeSet(stmt, toValue(value), index, impl)
   }
 
 	private final def toValue(value: Any): B = value match {

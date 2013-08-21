@@ -49,6 +49,16 @@
 	--></#noescape><#--
 --></#macro>
 
+<#macro weekRangeSelect event><#--
+	--><#noescape><#--
+		--><select name="week" class="weekSelector"><#--
+			--><#list weekRangeSelectFormatter(event) as week><#--
+				--><option value="${week.weekToDisplay}">week ${week.weekToStore}</option><#--
+			--></#list><#--
+		--></select><#--
+	--></#noescape><#--
+--></#macro>
+
 <#macro p number singular plural="${singular}s" one="1" zero="0" shownumber=true><#--
 --><#if shownumber><#if number=1>${one}<#elseif number=0>${zero}<#else>${number}</#if><#--
 --> </#if><#if number=1>${singular}<#else>${plural}</#if></#macro>
@@ -230,12 +240,13 @@
 	<#if !can.do(permission,scope)>
 		<#local classes='${classes} disabled use-tooltip'?trim >
 		<#local title>title='You do not have permission to ${action_descr}.'</#local>
+		<#local data_attr='${data_attr}'?replace("data-toggle=modal","") >
 	</#if>
 
-	<#local attr='${data_attr}'?replace("data-toggle=modal","") >
+
 
 	<#if classes??><#local class>class='${classes}'</#local></#if>
-	<${type} ${href} ${class} ${title} ${attr}><#noescape><#nested></#noescape></${type}>
+	<${type} ${href} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
 </#macro>
 
 </#escape>

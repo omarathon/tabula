@@ -1,3 +1,6 @@
--- TAB-579 department code needs to be unique so we can use it as an fk in studentCourseDetails
-alter table department add constraint dept_code UNIQUE (code) using index dept_code;
+-- This script used to convert an existing "dept_code" index to be unique.
+-- However this existing index is never created in a migration script, so
+-- it has been modified to create the index as unique in the first place.
+
+CREATE UNIQUE INDEX DEPT_CODE ON DEPARTMENT(CODE);
 

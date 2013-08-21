@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.groups.commands.admin
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{UserLookupService, SmallGroupService, ProfileService, SecurityService}
 import org.springframework.validation.Errors
@@ -14,7 +14,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.Transactions._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.ProfileService
@@ -23,13 +22,10 @@ import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.groups.services.docconversion.AllocateStudentItem
 import uk.ac.warwick.tabula.groups.services.docconversion.GroupsExtractor
-import uk.ac.warwick.tabula.data.model.FileAttachment
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
-
-
 
 class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet, val viewer: CurrentUser)
 	extends Command[SmallGroupSet] with SelfValidating with BindListener with SmallGroupSetCommand with NotifiesAffectedGroupMembers{
@@ -76,14 +72,32 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	}
 	
 	// For use by Freemarker to get a simple map of university IDs to Member objects - permissions aware!
-	def membersById = {
+	lazy val membersById = loadMembersById
+
+	def loadMembersById = {
 		val allUsers = (unallocated.asScala ++ (for ((group, users) <- mapping.asScala) yield users.asScala).flatten)
 		val allUniversityIds = allUsers.filter(validUser).map { _.getWarwickId }
-		profileService.getAllMembersWithUniversityIds(allUniversityIds)
+		val members = profileService.getAllMembersWithUniversityIds(allUniversityIds)
 			.filter(member => securityService.can(viewer, Permissions.Profiles.Read.Core, member))
 			.map(member => (member.universityId, member)).toMap
+		members
 	}
-	
+
+	def allMembersRoutes() = {
+		val routes = for {
+			member <- membersById.values
+			course <- member.mostSignificantCourseDetails}
+		yield course.route
+		routes.toSeq.distinct
+	}
+
+	def allMembersYears():Seq[JInteger] = {
+		val years = for (
+			member<-membersById.values;
+			course<-member.mostSignificantCourseDetails) yield course.latestStudentCourseYearDetails.yearOfStudy
+		years.toSeq.distinct.sorted
+	}
+
 	// Sort all the lists of users by surname, firstname.
 	def sort() {
 		// Because sortBy is not an in-place sort, we have to replace the lists entirely.
@@ -99,7 +113,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 		for ((group, users) <- mapping.asScala) {
 			val userGroup = UserGroup.ofUniversityIds
 			users.asScala.foreach { user => userGroup.addUser(user.getWarwickId) }
-			group.students.copyFrom(userGroup)
+			group._studentsGroup.copyFrom(userGroup)
 			service.saveOrUpdate(group)
 		}
 		set
@@ -129,7 +143,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 				// work out users to add to set (all users mentioned in spreadsheet - users currently in set)
 				val allocateUsers = allocateStudent.asScala.toList.map(x => userLookup.getUserByWarwickUniId(x.universityId)).toSet
 				val usersToAddToSet = allocateUsers.filterNot(set.members.users.toSet)
-				for(user <- usersToAddToSet) set.members.addUser(user.getUserId)
+				for(user <- usersToAddToSet) set.members.add(user)
 
 				val grouped = allocateStudent.asScala.filter(_.groupId != null)
 						.groupBy{ x => service.getSmallGroupById(x.groupId).orNull }

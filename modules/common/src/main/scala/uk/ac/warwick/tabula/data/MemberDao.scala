@@ -142,6 +142,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.department = :department
 			and
+				scd.sprStatus.code not like 'P%'
+			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
 			order by
 				sr.agent, sr.targetSprCode
@@ -172,6 +174,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			where
 				sm.homeDepartment = :department
 			and
+				scd.sprStatus.code not like 'P%'
+			and
 				scd.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
 		""")
 			.setEntity("department", department)
@@ -187,6 +191,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				StudentCourseDetails scd
 			where
 				scd.department = :department
+			and
+				scd.sprStatus.code not like 'P%'
 			""")
 			.setEntity("department", department)
 			.uniqueResult.getOrElse(0)
@@ -200,6 +206,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				StudentCourseDetails scd
 			where
 				scd.department = :department
+			and
+				scd.sprStatus.code not like 'P%'
 			and
 				scd.sprCode in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
 			""")

@@ -28,14 +28,14 @@
 						<a href="#main-content" accesskey="c" title="Skip to content [c]">Skip to content</a>
 						<a href="#navigation" accesskey="n" title="Skip to navigation [n]">Skip to navigation</a>
 					</div>
-				
+
 					<#-- The on-hover class here specifies that the links should only be displayed on hover -->
 					<div id="warwick-logo-container" class="on-hover">
 						<a id="warwick-logo-link" href="http://www.warwick.ac.uk" title="University of Warwick homepage">
 							<img id="warwick-logo" src="<@url resource="/static/images/logo.png" />" alt="University of Warwick">
 						</a>
 					</div>
-					
+
 					<div id="utility-container">
 						<div id="utility-bar">
 							<ul>
@@ -43,7 +43,7 @@
 								<#if user?? && user.loggedIn>
 									Signed in as ${user.fullName}
 									<#if user.staff>
-									| <a href="/settings">Settings</a> 
+									| <a href="/settings">Settings</a>
 									</#if>
 									| <a class="sso-link" href="<@sso.logoutlink target="${rootUrl}" />">Sign out</a>
 								<#else>
@@ -54,7 +54,7 @@
 						</div>
 					</div>
 				</div>
-				
+
 				<div id="page-header">
 					<div class="content">
 						<div id="site-header-container">
@@ -70,18 +70,18 @@
 									<#if (info.requestedUri != homeUrl)!false>
 										<a href="${homeUrl}">${component.siteHeader?default('Tabula')}</a>
 									<#else>
-										<span>${component.siteHeader?default('Tabula')}</span>	
+										<span>${component.siteHeader?default('Tabula')}</span>
 									</#if>
 								</#compress></span>
 							</h1>
-							
+
 							<h2 id="strapline">
 								<#if jumbotron?? && jumbotron>
 									Student management and administration system
 								</#if>
 							</h2>
 						</div>
-						
+
 						<div id="custom-header">
 							<div>
 							<#if (info.maintenance)!false>
@@ -92,7 +92,7 @@
 									});
 								</script>
 							</#if>
-							
+
 							<#if (activeSpringProfiles!"") == "sandbox">
 								<span id="sandbox-label" class="label label-warning" rel="popover" title="Tabula Sandbox" data-placement="left" data-content="This instance of Tabula is a sandbox instance, and doesn't use any real data."><i class="icon-sun"></i> Sandbox</span>
 								<script>
@@ -106,14 +106,14 @@
 					</div>
 				</div>
 			</div>
-			
+
 			<div id="navigation-and-content">
 				<#if !component.nonav>
 					<div id="navigation-wrapper">
 						<div id="navigation" class="horizontal">
 							<div id="primary-navigation-wrapper">
 								<div id="before-primary-navigation"></div>
-					
+
 								<div id="primary-navigation-container" >
 									<ul id="primary-navigation">
 										<li class="section rendered-link">
@@ -128,66 +128,70 @@
 												</div>
 											</div>
 										</li>
-										<#if breadcrumbs??><#list breadcrumbs as crumb><li class="section rendered-link">
-											<div class="link-content">
-												<div class="title rendered-link-content">
-													<a href="<@url page=crumb.url />" <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>>${crumb.title}</a>										
-												</div>
-											</div>
-										</li></#list></#if>
+										<#if breadcrumbs??><#list breadcrumbs as crumb>
+											<#if crumb.linked!false>
+												<li class="section rendered-link">
+													<div class="link-content">
+														<div class="title rendered-link-content">
+															<a href="<@url page=crumb.url />" <#if crumb.tooltip??>title="${crumb.tooltip}"</#if>>${crumb.title}</a>
+														</div>
+													</div>
+												</li>
+											</#if>
+										</#list></#if>
 									</ul>
 								</div>
-					
+
 								<div id="after-primary-navigation"></div>
 							</div>
 						</div>
 					</div>
 				</#if>
-		
+
 				<div id="content-wrapper">
 					<div id="main-content">
 						<#--
 						<div id="page-title">
-			
+
 							<h1>
 								<span id="after-page-title"></span>
 							</h1>
-			
+
 							<div id="page-title-bottom"></div>
 						</div>
 						-->
-			
+
 						<#-- column-1 and column-2 may not stick around as IDs - don't use them in a site design -->
 						<div id="column-1"><div id="column-1-content">
-						
+
 						<@tiles.insertAttribute name="body" />
-						
+
 						</div></div>
 
 						<div style="clear:both;"></div>
 					</div>
 				</div>
-			
+
 				<div style="clear:both;"></div>
 			</div>
-			
+
 			<div style="clear:both;"></div>
-			
+
 			<div id="footer">
 				<div class="content">
 					<div id="custom-footer">
 						<#-- Enter any custom footer content here (like contact details et al) -->
 					</div>
-					
+
 					<div style="clear:both;"></div>
-					
+
 					<div id="common-footer">
 						<div id="page-footer-elements" class="nofollow">
 							<span class="footer-left"></span> <span class="footer-right"></span>
-							
+
 							<div style="clear:both;"></div>
 						</div>
-						
+
 						<div id="footer-utility">
 							<ul>
 								<li id="sign-inout-link">
@@ -208,9 +212,9 @@
 			          				App last built <@warwick.formatDate value=appBuildDate pattern="d MMMM yyyy HH:mm" />
 			          			</li>
 		          			</ul>
-		          			
+
 		          			<div id="app-feedback-link"><a href="/app/tell-us<#if info??>?currentPage=${info.requestedUri}&componentName=${componentName}</#if>">Give feedback</a></div>
-		          				      					
+
 <#if user?? && (user.sysadmin || user.masquerader)>
 <div id="sysadmin-link">
 <div class="btn-group">
@@ -234,14 +238,14 @@ jQuery('#hide-sysadmin-only-content').on('click', function(){
 });
 </script>
 </#if>
-		          				      					
+
 	      					<div style="clear:both;"></div>
 		          		</div>
 					</div>
 				</div>
 			</div>
 		</div>
-		
-		
+
+
 	</body>
 </html>

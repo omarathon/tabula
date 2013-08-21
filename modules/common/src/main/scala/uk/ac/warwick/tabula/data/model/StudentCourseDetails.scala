@@ -128,15 +128,12 @@ trait StudentCourseProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var levelCode: String = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var beginDate: LocalDate = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var endDate: LocalDate = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var expectedEndDate: LocalDate = _
 
@@ -148,31 +145,30 @@ trait StudentCourseProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var sprStatus: SitsStatus = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var lastUpdatedDate = DateTime.now
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var mostSignificant: JBoolean = _
 }
 
-sealed abstract class CourseType(val code: String, val level: String, val description: String)
+sealed abstract class CourseType(val code: String, val level: String, val description: String, val courseCodeChar: Char)
 
 object CourseType {
-	case object PGR extends CourseType("PG(R)", "Postgraduate", "Postgraduate (Research)")
-	case object PGT extends CourseType("PG(T)", "Postgraduate", "Postgraduate (Taught)")
-	case object UG extends CourseType("UG", "Undergraduate", "Undergraduate")
-	case object Foundation extends CourseType("F", "Foundation", "Foundation course")
-	case object PreSessional extends CourseType("PS", "Pre-sessional", "Pre-sessional course")
+	case object PGR extends CourseType("PG(R)", "Postgraduate", "Postgraduate (Research)", 'R')
+	case object PGT extends CourseType("PG(T)", "Postgraduate", "Postgraduate (Taught)", 'T')
+	case object UG extends CourseType("UG", "Undergraduate", "Undergraduate", 'U')
+	case object Foundation extends CourseType("F", "Foundation", "Foundation course", 'F')
+	case object PreSessional extends CourseType("PS", "Pre-sessional", "Pre-sessional course", 'N')
 
 	def fromCourseCode(cc: String) = {
 		if (cc.isEmpty) null
 		cc.charAt(0) match {
-			case 'U' => UG
-			case 'T' => PGT
-			case 'R' => PGR
-			case 'F' => Foundation
-			case 'N' => PreSessional
-			case _ => throw new IllegalArgumentException()
+			case UG.courseCodeChar => UG
+			case PGT.courseCodeChar => PGT
+			case PGR.courseCodeChar => PGR
+			case Foundation.courseCodeChar => Foundation
+			case PreSessional.courseCodeChar => PreSessional
+			case other => throw new IllegalArgumentException("Unexpected first character of course code: %s".format(other))
 		}
 	}
 }

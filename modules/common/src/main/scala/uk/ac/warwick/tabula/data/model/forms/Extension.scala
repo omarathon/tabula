@@ -35,10 +35,10 @@ class Extension extends GeneratedId with PermissionsTarget {
 	var universityId:String =_
 
 	// TODO should there be a single def that returns the expiry date for approved/manual extensions, and requested expiry date otherwise?
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var requestedExpiryDate:DateTime =_
 
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var expiryDate:DateTime =_
 
 	var reason:String =_
@@ -58,10 +58,10 @@ class Extension extends GeneratedId with PermissionsTarget {
 	var approved:Boolean = false
 	var rejected:Boolean = false
 
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var requestedOn:DateTime =_
 
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var approvedOn:DateTime =_
 
 	var approvalComments:String =_
