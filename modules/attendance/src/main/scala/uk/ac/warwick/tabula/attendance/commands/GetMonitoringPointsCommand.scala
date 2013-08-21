@@ -13,6 +13,8 @@ import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.Route
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.helpers.WeekRangesFormatter
+import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek}
 
 object GetMonitoringPointsCommand {
 	def apply(route: Route, year: Option[Int]) =
@@ -38,15 +40,11 @@ abstract class GetMonitoringPointsCommand(val route: Route, val year: Option[Int
 
 	}
 
-	// TODO: Replace this naive way of grouping with real term weeks
 	private def groupByTerm(pointSet: MonitoringPointSet) = {
+		val wrf = new WeekRangesFormatter(pointSet.academicYear)
+		val day = DayOfWeek(1)
 		pointSet.points.asScala.groupBy {
-			case point if (point.week < 11) => "Autumn"
-			case point if (point.week < 16) => "Christmas vacation"
-			case point if (point.week < 26) => "Spring"
-			case point if (point.week < 31) => "Easter vacation"
-			case point if (point.week < 41) => "Summer"
-			case _ => "Summer vacation"
+			case point => wrf.groupWeekRangesByTerm(Seq(WeekRange(point.week)), day).head._2.getTermTypeAsString
 		}
 	}
 
