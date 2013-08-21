@@ -1,11 +1,9 @@
-package uk.ac.warwick.tabula.profiles.commands
+package uk.ac.warwick.tabula.profiles.commands.tutor
 
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.profiles.web.controllers.tutor.EditTutorCommand
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.profiles.TutorFixture
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.NoCurrentUser
 
 class EditTutorCommandTest extends TestBase with Mockito {
@@ -28,9 +26,8 @@ class EditTutorCommandTest extends TestBase with Mockito {
 		val command = new EditTutorCommand(studentCourseDetails, Some(oldTutor), NoCurrentUser(), false)
 		command.tutor = newTutor
 		command.notifyTutee = true
-		command.modifiedRelationships = Seq(relationship)
 
-		val notifications = command.emit(Some(relationship))
+		val notifications = command.emit(Seq(relationship))
 		notifications.size should be(1)
 		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student")) should be (true)
 	}}
@@ -40,9 +37,8 @@ class EditTutorCommandTest extends TestBase with Mockito {
 		val command = new EditTutorCommand(studentCourseDetails, Some(oldTutor), NoCurrentUser(), false)
 		command.tutor = newTutor
 		command.notifyOldTutor = true
-		command.modifiedRelationships = Seq(relationship)
 
-		val notifications = command.emit(Some(relationship))
+		val notifications = command.emit(Seq(relationship))
 		notifications.size should be(1)
 		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "0000002")) should be (true)
 	}}
@@ -52,9 +48,8 @@ class EditTutorCommandTest extends TestBase with Mockito {
 		val command = new EditTutorCommand(studentCourseDetails, Some(oldTutor), NoCurrentUser(), false)
 		command.tutor = newTutor
 		command.notifyNewTutor = true
-		command.modifiedRelationships = Seq(relationship)
 
-		val notifications = command.emit(Some(relationship))
+		val notifications = command.emit(Seq(relationship))
 		notifications.size should be(1)
 		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "0000001")) should be (true)
 	}}
@@ -66,9 +61,8 @@ class EditTutorCommandTest extends TestBase with Mockito {
 		command.notifyNewTutor = true
 		command.notifyOldTutor = true
 		command.notifyTutee = true
-		command.modifiedRelationships = Seq(relationship)
 
-		val notifications = command.emit(Some(relationship))
+		val notifications = command.emit(Seq(relationship))
 		notifications.size should be(2)
 		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "0000001")) should be (true)
 		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student")) should be (true)
@@ -80,9 +74,8 @@ class EditTutorCommandTest extends TestBase with Mockito {
 		command.tutor = newTutor
 		command.notifyOldTutor = true
 		command.notifyTutee = true
-		command.modifiedRelationships = Seq(relationship)
 
-		val notifications = command.emit(None)
+		val notifications = command.emit(Seq(relationship))
 		notifications.size should be(2)
 		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "0000002")) should be (true)
 		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student")) should be (true)

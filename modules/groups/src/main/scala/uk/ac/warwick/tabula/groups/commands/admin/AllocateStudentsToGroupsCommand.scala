@@ -84,7 +84,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 			member <- membersById.values
 			course <- member.mostSignificantCourseDetails}
 		yield course.route
-		routes.toSeq.distinct
+		routes.toSeq.sortBy(_.code).distinct
 	}
 
 	def allMembersYears(): Seq[JInteger] = {

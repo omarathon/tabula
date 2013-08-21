@@ -13,7 +13,7 @@ trait NotificationHandling {
 	def notify[A, B](cmd: Command[A])(f: => A): A = cmd match {
 		case ns: Notifies[A, B] => {
 			val result = f
-			for (notification <- ns.emit(f)) {
+			for (notification <- ns.emit(result)) {
 				notificationService.push(notification)
 			}
 			result

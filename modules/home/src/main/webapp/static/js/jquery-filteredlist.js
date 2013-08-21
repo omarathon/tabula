@@ -48,15 +48,13 @@ For example (using both checkboxes and a dropdown):
 Adding the class tabula-filtered-list to the container allows for automatic
 configuration without being invoked via Javascript. 
 
+A special-case (for <select> filters) is data-filter-value="*", which effectively
+disables that filter by allowing any value to be displayed.
+
 Options: (all of these options can be set as data- attributes)
- - 
-
-Optional extras:
- - 
-
-Method calls (after initialising):
-
- - 
+ - itemSelector (default: 'li')
+ - filterSelector (default: '.filter')
+ - filterControls (default: 'input[type="checkbox"],select')
 
 */
 (function($){ "use strict";
@@ -92,7 +90,7 @@ Method calls (after initialising):
         			case 'checkbox':
 								if ( ! $control.is(":checked")) { // unchecked means we will hide any items with this attribute
         					var hideThis = {};
-           				hideThis[$control.data("filter-attr")]=$control.data("filter-value");
+           				hideThis[$control.data("filter-attr")] = $control.data("filter-value");
            				return JSON.stringify(hideThis);
         				}
         				break;
@@ -101,8 +99,19 @@ Method calls (after initialising):
         		}
         		break;
         	case 'select':
-        		// TODO
-        		break;
+        		// Special case - if the selected value is * then we ignore this filter
+        		if ($control.find('option:selected').data('filter-value') === '*') {
+        			return;
+        		}
+        	
+        		return $control.find('option[data-filter-value]').map(function(i, opt) {
+        			var $option = $(opt);
+        			if (! $option.is(":selected")) { // unselected means we will hide any items with this attribute
+        				var hideThis = {};
+           			hideThis[$control.data("filter-attr")] = $option.data("filter-value");
+           			return JSON.stringify(hideThis);
+        			}
+        		}).get();
         	default:
         		console.error('Unsupported filter control: ' + $control.prop('tagName'));
         }

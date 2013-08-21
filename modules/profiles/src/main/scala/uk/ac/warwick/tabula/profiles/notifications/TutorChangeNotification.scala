@@ -19,7 +19,7 @@ class TutorChangeNotification (
 	val _object = relationship
 	val target: Option[AnyRef] = Some(relationship.studentMember)
 
-	val newTutor = if(relationship.endDate != null && relationship.endDate.isBeforeNow){
+	val newTutor = if (relationship.endDate != null && relationship.endDate.isBeforeNow) {
 		None
 	} else {
 		relationship.agentMember

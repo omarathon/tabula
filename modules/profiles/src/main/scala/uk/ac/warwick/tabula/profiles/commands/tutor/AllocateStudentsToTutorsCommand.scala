@@ -24,13 +24,12 @@ import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.LazyMaps
-import uk.ac.warwick.tabula.profiles.web.controllers.tutor.EditTutorCommand
 import uk.ac.warwick.tabula.commands.GroupsObjects
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.userlookup.User
 
 class AllocateStudentsToTutorsCommand(val department: Department, val viewer: CurrentUser)
-	extends Command[Seq[Option[StudentRelationship]]] 
+	extends Command[Seq[StudentRelationship]] 
 		with GroupsObjects[Member, Member] 
 		with SelfValidating 
 		with BindListener 
@@ -126,7 +125,7 @@ class AllocateStudentsToTutorsCommand(val department: Department, val viewer: Cu
 			member <- membersById.values
 			course <- member.mostSignificantCourseDetails}
 		yield course.route
-		routes.toSeq.distinct
+		routes.toSeq.sortBy(_.code).distinct
 	}
 
 	def allMembersYears: Seq[JInteger] = {
@@ -148,31 +147,38 @@ class AllocateStudentsToTutorsCommand(val department: Department, val viewer: Cu
 	}
 	
 	final def applyInternal() = transactional() {
-		val addedRelationships = (for ((tutor, students) <- mapping.asScala; student <- students.asScala) yield {
-			student.mostSignificantCourseDetails.flatMap { studentCourseDetails => 
+		val addCommands = (for ((tutor, students) <- mapping.asScala; student <- students.asScala) yield {
+			student.mostSignificantCourseDetails.map { studentCourseDetails => 
 				val cmd = new EditTutorCommand(studentCourseDetails, service.findCurrentRelationships(RelationshipType.PersonalTutor, studentCourseDetails.sprCode).headOption.flatMap { _.agentMember }, viewer, false)
 				cmd.tutor = tutor
-				
-				cmd.apply()
+				cmd
 			}
-		}).toSeq
+		}).toSeq.flatten
 		
-		val removedRelationships = (unallocated.asScala.flatMap { student =>
+		val removeCommands = (unallocated.asScala.flatMap { student =>
 			student.mostSignificantCourseDetails.map { studentCourseDetails =>
 				val rels = service.findCurrentRelationships(RelationshipType.PersonalTutor, studentCourseDetails.sprCode)
 				val tutors = rels.flatMap { _.agentMember }
 				
-				val changedRelationships = tutors.map { tutor =>
+				tutors.map { tutor =>
 					val cmd = new EditTutorCommand(studentCourseDetails, Some(tutor), viewer, true)
 					cmd.tutor = tutor
-					cmd.apply()
+					cmd
 				}
-				
-				changedRelationships
 			}
 		}).toSeq.flatten
 		
-		addedRelationships ++ removedRelationships
+		(addCommands ++ removeCommands).map { cmd =>
+			/*
+			 * Defensively code against these defaults changing in future. We do NOT want the 
+			 * sub-command to send notifications - we'll do that ourselves
+			 */ 
+			cmd.notifyTutee = false
+			cmd.notifyOldTutor = false
+			cmd.notifyNewTutor = false
+			
+			cmd.apply()
+		}.flatten
 	}
 	
 	def extractDataFromFile(file: FileAttachment) = ??? // TODO

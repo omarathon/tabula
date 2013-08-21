@@ -38,7 +38,7 @@ class AllocateStudentsToTutorsController extends ProfilesController {
 	}
 
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))
-	def submit(@Valid cmd:AllocateStudentsToTutorsCommand, errors: Errors): Mav = {
+	def submit(@Valid cmd: AllocateStudentsToTutorsCommand, errors: Errors): Mav = {
 		if (errors.hasErrors()) {
 			form(cmd)
 		} else {

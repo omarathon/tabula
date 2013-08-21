@@ -86,22 +86,28 @@
 							<div class="well ">
 									<h4>Students with no personal tutor</h4>
 									<#if features.personalTutorAssignmentFiltering>
-										<div id="filter-controls">
-										Show...
 										<div class="filter" id="filter-by-gender-controls">
-										<label>Male <input type="checkbox" data-filter-attr="fGender" data-filter-value="M" checked="checked"></label>
-										<label>Female <input type="checkbox" data-filter-attr="fGender" data-filter-value="F" checked="checked"></label>
+											<select data-filter-attr="fGender">
+												<option data-filter-value="*">Any Gender</option>
+												<option data-filter-value="M">Male</option>
+												<option data-filter-value="F">Female</option>
+											</select>
 										</div>
 										<div class="filter" id="filter-by-year-controls">
-										<#list allocateStudentsToTutorsCommand.allMembersYears as year>
-											<label>Year ${year} <input type="checkbox" data-filter-attr="fYear" data-filter-value="${year}" checked="checked"></label>
-										</#list>
+											<select data-filter-attr="fYear">
+												<option data-filter-value="*">Any Year of study</option>
+												<#list allocateStudentsToTutorsCommand.allMembersYears as year>
+													<option data-filter-value="${year}">Year ${year}</option>
+												</#list>
+											</select>
 										</div>
 										<div class="filter" id="filter-by-route-controls">
-										<#list allocateStudentsToTutorsCommand.allMembersRoutes as route>
-											<label>${route.name} <input type="checkbox" data-filter-attr="fRoute" data-filter-value="${route.code}" checked="checked"></label>
-										</#list>
-										</div>
+											<select data-filter-attr="fRoute">
+												<option data-filter-value="*">Any Route</option>
+												<#list allocateStudentsToTutorsCommand.allMembersRoutes as route>
+													<option data-filter-value="${route.code}">${route.code?upper_case} ${route.name}</option>
+												</#list>
+											</select>
 										</div>
 									</#if>
 								<div class="student-list drag-target">
@@ -188,9 +194,46 @@
 					</div>
 				</div>
 			</div>
+			
+			<#-- Pre-save modal for notifications -->
+			<div class="modal fade hide" id="notify-modal" tabindex="-1" role="dialog" aria-labelledby="notify-modal-label" aria-hidden="true">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h3 id="notify-modal-label">Send notifications</h3>
+				</div>
+	
+				<div class="modal-body">
+					<p>Notify these people via email of this change. Note that only students/tutors 
+					whose allocations have been changed will be notified.</p>
+					
+					<div class="control-group">
+						<div class="controls">
+							<label class="checkbox">
+								<input type="checkbox" name="notifyTutee" class="notifyTutee" checked />
+								Students
+							</label>
+
+							<label class="checkbox">
+								<input type="checkbox" name="notifyOldTutor" class="notifyOldTutor" checked />
+								Old tutors
+							</label>
+
+							<label class="checkbox">
+								<input type="checkbox" name="notifyNewTutor" class="notifyNewTutor" checked />
+								New tutors
+							</label>
+						</div>
+					</div>
+				</div>
+	
+				<div class="modal-footer">
+					<button type="submit" class="btn btn-primary">Save</button>
+					<button type="button" class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+				</div>
+			</div>
 
 				<div class="submit-buttons">
-					<input type="submit" class="btn btn-primary" value="Save">
+					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#notify-modal">Save</button>
 					<a href="<@routes.home />" class="btn">Cancel</a> <#-- TODO better url -->
 				</div>
 			</@f.form>
