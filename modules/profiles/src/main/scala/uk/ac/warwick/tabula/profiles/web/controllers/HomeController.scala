@@ -35,6 +35,8 @@ import uk.ac.warwick.tabula.permissions.Permissions
 			Mav("home/view",
 				"isAPersonalTutor" -> currentMember.isAPersonalTutor,
 				"isASupervisor" -> currentMember.isASupervisor,
+				"universityId" -> currentMember.universityId,
+				"isPGR" -> user.isPGR,
 				"smallGroups" -> smallGroups,
 				"adminDepartments" -> moduleService.departmentsWithPermission(user, Permissions.Department.ManageProfiles)
 			)

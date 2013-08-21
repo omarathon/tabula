@@ -27,7 +27,6 @@
 			<li><b>tutor_id</b> - contains the tutor's University ID number</li>
 			</ul>
 			<p>You may need to <a href='http://office.microsoft.com/en-gb/excel-help/format-numbers-as-text-HA102749016.aspx?CTT=1'>format these columns</a> as text to avoid Microsoft Excel removing 0s from the start of ID numbers.</p>
-			<p>If there are students in your department with external tutors who do not have a University ID number, you may also add a <b>tutor_name</b> column containing the names of the external tutors. Leave this column blank for tutors who have an ID number.</p>
 			<p>The spreadsheet may also contain other columns and information for your own reference (these will be ignored by Tabula).</p>
 		</#assign>
 

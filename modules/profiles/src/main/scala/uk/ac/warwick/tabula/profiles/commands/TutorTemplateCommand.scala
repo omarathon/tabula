@@ -10,9 +10,9 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.views.ExcelView
 
 class TutorTemplateCommand(val department: Department) extends Command[ExcelView] with Unaudited {
-	
+
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Upload, department)
-	
+
 	def applyInternal() = {
 		val workbook = new XSSFWorkbook()
 		val sheet = generateNewSheet(department, workbook)
@@ -21,13 +21,13 @@ class TutorTemplateCommand(val department: Department) extends Command[ExcelView
 	}
 
 	def generateNewSheet(department: Department, workbook: XSSFWorkbook) = {
-		val sheet = workbook.createSheet("Tutors for " + safeDepartmentName(department))		
+		val sheet = workbook.createSheet("Tutors for " + safeDepartmentName(department))
 		val style = workbook.createCellStyle
 		val format = workbook.createDataFormat
-		
+
 		// using an @ sets text format (from BuiltinFormats.class)
 		style.setDataFormat(format.getFormat("@"))
-		
+
 		// set style on all three columns
 		0 to 2 foreach {
 			col => sheet.setDefaultColumnStyle(col, style)
@@ -39,7 +39,6 @@ class TutorTemplateCommand(val department: Department) extends Command[ExcelView
 
 		header.createCell(0).setCellValue("student_id")
 		header.createCell(1).setCellValue("tutor_id")
-		header.createCell(2).setCellValue("tutor_name")
 
 		sheet
 	}
