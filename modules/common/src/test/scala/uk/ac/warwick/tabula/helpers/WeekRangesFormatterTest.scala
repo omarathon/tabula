@@ -9,11 +9,11 @@ import uk.ac.warwick.tabula.services.TermService
 
 class WeekRangesFormatterTest extends TestBase {
 
-	val termFactory = new TermService
+	val termService = new TermService
 
 	@Test def termNumbering = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
 		val formatter = new WeekRangesFormatter(AcademicYear.guessByDate(DateTime.now))
-		formatter.termService = termFactory
+		formatter.termService = termService
 
 		formatter.format(Seq(WeekRange(1, 10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term) should be("Term 1, weeks 1-10")
 		formatter.format(Seq(WeekRange(1, 5), WeekRange(7, 10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Term) should be("Term 1, weeks 1-5; Term 1, weeks 7-10")
@@ -25,7 +25,7 @@ class WeekRangesFormatterTest extends TestBase {
 
 	@Test def cumulativeTermNumbering = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
 		val formatter = new WeekRangesFormatter(AcademicYear.guessByDate(DateTime.now))
-		formatter.termService = termFactory
+		formatter.termService = termService
 
 		formatter.format(Seq(WeekRange(1, 10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative) should be("Term 1, weeks 1-10")
 		formatter.format(Seq(WeekRange(1, 5), WeekRange(7, 10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Cumulative) should be("Term 1, weeks 1-5; Term 1, weeks 7-10")
@@ -37,7 +37,7 @@ class WeekRangesFormatterTest extends TestBase {
 
 	@Test def academicWeekNumbering = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
 		val formatter = new WeekRangesFormatter(AcademicYear.guessByDate(DateTime.now))
-		formatter.termService = termFactory
+		formatter.termService = termService
 
 		formatter.format(Seq(WeekRange(1, 10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic) should be("Weeks 1-10")
 		formatter.format(Seq(WeekRange(1, 5), WeekRange(7, 10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.Academic) should be("Weeks 1-5; 7-10")
@@ -49,7 +49,7 @@ class WeekRangesFormatterTest extends TestBase {
 
 	@Test def noWeekNumbers = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
 		val formatter = new WeekRangesFormatter(AcademicYear.guessByDate(DateTime.now))
-		formatter.termService = termFactory
+		formatter.termService = termService
 
 		formatter.format(Seq(WeekRange(1, 10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None) should be("Tue 4<sup>th</sup> Oct - Tue 6<sup>th</sup> Dec 2011")
 		formatter.format(Seq(WeekRange(1, 5), WeekRange(7, 10)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None) should be("Tue 4<sup>th</sup> Oct - Tue 1<sup>st</sup> Nov 2011; Tue 15<sup>th</sup> Nov - Tue 6<sup>th</sup> Dec 2011")
