@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.services
 
 import scala.collection.JavaConverters.asScalaBufferConverter
-
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import org.joda.time.DateTimeUtils
@@ -9,7 +8,6 @@ import org.junit.After
 import org.junit.Before
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
-
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.JavaImports.JList
@@ -17,12 +15,15 @@ import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
+import uk.ac.warwick.tabula.data.SitsStatusDaoImpl
 
 // scalastyle:off magic.number
 class RelationshipServiceTest extends AppContextTestBase with Mockito {
 
 	@Autowired var relationshipService: RelationshipServiceImpl = _
 	@Autowired var profileService: ProfileServiceImpl = _
+	val sitsStatusDao = new SitsStatusDaoImpl
+	val sprFullyEnrolledStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
 
 	@Transactional
 	@Test def findingRelationships = withFakeTime(dateTime(2000, 6)) {
@@ -59,6 +60,9 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 	}
 
 	@Before def setup: Unit = transactional { tx =>
+		sitsStatusDao.sessionFactory = sessionFactory
+		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
+
 		session.enableFilter(Member.ActiveOnlyFilter)
 	}
 
@@ -76,10 +80,12 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		session.saveOrUpdate(dept2)
 		session.flush()
 
-		val m1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1)
+		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
+
+		val m1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, sprStatus=sprFullyEnrolledStatus)
 		m1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
 
-		val m2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2)
+		val m2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, sprStatus=sprFullyEnrolledStatus)
 		m2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
 
 		val m3 = Fixtures.staff(universityId = "1000003", userId="staff1", department=dept1)
@@ -116,12 +122,13 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		val dept2 = Fixtures.department("mi", "Micrology")
 		session.saveOrUpdate(dept1)
 		session.saveOrUpdate(dept2)
-		session.flush()
 
-		val m1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
+
+		val m1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1, sprStatus=sprFullyEnrolledStatus)
 		m1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
 
-		val m2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		val m2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2, sprStatus=sprFullyEnrolledStatus)
 		m2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
 
 		val m3 = Fixtures.staff(universityId = "1000003", userId="staff1", department=dept1)
@@ -148,15 +155,6 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		relationshipService.listStudentRelationshipsWithUniversityId(RelationshipType.PersonalTutor, "1000003").toSet should be (Seq(rel1, rel2).toSet)
 		relationshipService.listStudentRelationshipsWithUniversityId(RelationshipType.PersonalTutor, "1000004") should be (Seq())
 		relationshipService.listStudentRelationshipsWithUniversityId(null, "1000003") should be (Seq())
-
-		session.delete(m1)
-		session.delete(m2)
-		session.delete(m3)
-		session.delete(m4)
-		session.delete(rel1)
-		session.delete(rel2)
-
-		session.flush
 	}
 
 	@Test def listStudentsWithoutRelationship = transactional { tx =>
@@ -165,33 +163,11 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		val dept2 = Fixtures.department("dd", "Departmental Diagnostics")
 		session.saveOrUpdate(dept1)
 		session.saveOrUpdate(dept2)
-		session.flush()
 
-/*		val m1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
-		m1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
+		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
 
-		val m2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
-		m2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
-
-		val m3 = Fixtures.staff(universityId = "1000003", userId="staff1", department=dept1)
-		m3.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 3, 1, 0, 0, 0)
-
-		val m4 = Fixtures.staff(universityId = "1000004", userId="staff2", department=dept2)
-		m4.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 1, 0, 0, 0)
-
-		profileService.save(m1)
-		profileService.save(m2)
-		profileService.save(m3)
-		profileService.save(m4)
-
-		val rel1 = relationshipService.saveStudentRelationship(RelationshipType.PersonalTutor, "1000001/1", "1000003")
-		val rel2 = relationshipService.saveStudentRelationship(RelationshipType.PersonalTutor, "1000002/1", "1000003")
-
-		session.save(rel1)
-		session.save(rel2)*/
-
-		val m5 = Fixtures.student(universityId = "1000005", userId="student", department=dept1, courseDepartment=dept1)
-		val m6 = Fixtures.student(universityId = "1000006", userId="student", department=dept2, courseDepartment=dept2)
+		val m5 = Fixtures.student(universityId = "1000005", userId="student", department=dept1, courseDepartment=dept1, sprStatus=sprFullyEnrolledStatus)
+		val m6 = Fixtures.student(universityId = "1000006", userId="student", department=dept2, courseDepartment=dept2, sprStatus=sprFullyEnrolledStatus)
 
 		profileService.save(m5)
 		profileService.save(m6)
