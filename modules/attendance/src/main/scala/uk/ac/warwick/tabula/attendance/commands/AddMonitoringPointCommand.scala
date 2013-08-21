@@ -32,23 +32,11 @@ class AddMonitoringPointCommand(val set: MonitoringPointSet) extends CommandInte
 	}
 }
 
-
-
-trait AddMonitoringPointValidation extends SelfValidating {
+trait AddMonitoringPointValidation extends MonitoringPointValidation {
 	self: ModifyMonitoringPointState =>
 
 	override def validate(errors: Errors) {
-		week match {
-			case y if y < 1  => errors.rejectValue("week", "monitoringPointSet.week.min")
-			case y if y > 52 => errors.rejectValue("week", "monitoringPointSet.week.max")
-			case _ =>
-		}
-
-		if (!name.hasText) {
-			errors.rejectValue("name", "NotEmpty")
-		} else if (name.length > 4000) {
-			errors.rejectValue("name", "monitoringPoint.name.toolong")
-		}
+		super.validate(errors)
 
 		if (set.points.asScala.filter(p => p.name == name && p.week == week).size > 0) {
 			errors.rejectValue("name", "monitoringPoint.name.exists")
