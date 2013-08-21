@@ -29,7 +29,7 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.userlookup.User
 
 class AllocateStudentsToTutorsCommand(val department: Department, val viewer: CurrentUser)
-	extends Command[Seq[StudentRelationship]] 
+	extends Command[Seq[PersonalTutorChange]] 
 		with GroupsObjects[Member, Member] 
 		with SelfValidating 
 		with BindListener 
@@ -177,7 +177,7 @@ class AllocateStudentsToTutorsCommand(val department: Department, val viewer: Cu
 			cmd.notifyOldTutor = false
 			cmd.notifyNewTutor = false
 			
-			cmd.apply()
+			cmd.apply().map { modifiedRelationship => PersonalTutorChange(cmd.currentTutor, modifiedRelationship) }
 		}.flatten
 	}
 	
@@ -190,3 +190,8 @@ class AllocateStudentsToTutorsCommand(val department: Department, val viewer: Cu
 	def describe(d: Description) = d.department(department)
 
 }
+
+case class PersonalTutorChange(
+	oldTutor: Option[Member],
+	modifiedRelationship: StudentRelationship
+)

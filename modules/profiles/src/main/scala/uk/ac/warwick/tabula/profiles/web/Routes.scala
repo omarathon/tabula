@@ -12,11 +12,25 @@ import java.net.URLEncoder
 object Routes {
 	private def encoded(string: String) = URLEncoder.encode(string, "UTF-8")
 	def home = "/"
-
+	def search = "/search"
+		
 	object profile {
 		def view(member: Member) = "/view/%s" format (encoded(member.universityId))
 		def view(member: Member, meeting: MeetingRecord) = "/view/%s?meeting=%s" format (encoded(member.universityId), encoded(meeting.id))
 		def photo(member: Member) = "/view/photo/%s.jpg" format (encoded(member.universityId))
+	}
+	
+	def tutees = "/tutees"	
+	object tutors {
+		def apply(department: Department) = "/department/%s/tutors" format (encoded(department.code))
+		def missing(department: Department) = "/department/%s/tutors/missing" format (encoded(department.code))
+		def allocate(department: Department) = "/department/%s/tutors/allocate" format (encoded(department.code))
+		def upload(department: Department) = "/department/%s/tutors/upload" format (encoded(department.code))
+		def template(department: Department) = "/department/%s/tutors/template" format (encoded(department.code))
+	}
+	
+	object supervisor {
+		def supervisees = "/supervisees"
 	}
 	
 	object admin {

@@ -43,7 +43,7 @@ class AllocateStudentsToTutorsController extends ProfilesController {
 			form(cmd)
 		} else {
 			cmd.apply()
-			Redirect(Routes.admin(cmd.department))
+			Redirect(Routes.tutors(cmd.department))
 		}
 	}
 
