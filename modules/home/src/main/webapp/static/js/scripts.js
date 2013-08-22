@@ -685,6 +685,10 @@
 			// default to gadgets
 			$t.find('.layout-tools .icon-th-large').click();
 		}
+		
+		// drag and drop containers
+		$('.tabula-dnd').dragAndDrop();
+		$('.tabula-filtered-list').filteredList();
 	}); // on ready
 
 

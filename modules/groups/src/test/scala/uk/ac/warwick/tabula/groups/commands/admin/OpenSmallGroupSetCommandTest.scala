@@ -133,7 +133,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 			val user: User = operator
 		}
 
-		val notifications:Seq[Notification[Seq[SmallGroupSet]]]  = notifier.emit()
+		val notifications:Seq[Notification[Seq[SmallGroupSet]]]  = notifier.emit(Seq(set1,set2))
 
 		notifications.size should be(3)
 		notifications.find(_.recipients.head == student1) should be('defined)
@@ -173,7 +173,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val command = OpenSmallGroupSetCommand(Seq(new SmallGroupSet), operator, SmallGroupSetSelfSignUpState.Open)
 
 		command should be (anInstanceOf[Appliable[SmallGroupSet]])
-		command should be (anInstanceOf[Notifies[Seq[SmallGroupSet]]])
+		command should be (anInstanceOf[Notifies[Seq[SmallGroupSet], Seq[SmallGroupSet]]])
 		command should be (anInstanceOf[OpenSmallGroupSet])
 		command should be (anInstanceOf[OpenSmallGroupSetAudit])
 		command should be (anInstanceOf[OpenSmallGroupSetNotifier])

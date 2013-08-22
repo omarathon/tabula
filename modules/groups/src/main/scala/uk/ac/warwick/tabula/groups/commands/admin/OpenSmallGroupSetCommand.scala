@@ -67,19 +67,18 @@ trait OpenSmallGroupSetAudit extends Describable[Seq[SmallGroupSet]] {
 	}
 }
 
-trait OpenSmallGroupSetNotifier extends Notifies[Seq[SmallGroupSet]] {
+trait OpenSmallGroupSetNotifier extends Notifies[Seq[SmallGroupSet], Seq[SmallGroupSet]] {
 	this: OpenSmallGroupSetState with UserAware =>
 
-	def emit(): Seq[Notification[Seq[SmallGroupSet]]] = {
-			val allMemberships: Seq[(User,SmallGroupSet)] = for (set <- applicableSets;
-			     member <- set.members.users) yield (member, set)
+	def emit(sets: Seq[SmallGroupSet]): Seq[Notification[Seq[SmallGroupSet]]] = {
+		val allMemberships: Seq[(User,SmallGroupSet)] = 
+			for (set <- sets; member <- set.members.users) yield (member, set)
 
-		  // convert the list of (student, set) pairs into a map of student->sets
-			val setsPerUser: Map[User,Seq[SmallGroupSet]] = allMemberships.groupBy(_._1).map { case (k,v) => (k,v.map(_._2))}
+		// convert the list of (student, set) pairs into a map of student->sets
+		val setsPerUser: Map[User,Seq[SmallGroupSet]] = allMemberships.groupBy(_._1).map { case (k,v) => (k,v.map(_._2))}
 
-      // convert the map into a notification per user
-		  setsPerUser.map {case (student, sets) => new OpenSmallGroupSetsNotification(user,student,sets) with FreemarkerTextRenderer}.toSeq
-
+		// convert the map into a notification per user
+		setsPerUser.map {case (student, sets) => new OpenSmallGroupSetsNotification(user,student,sets) with FreemarkerTextRenderer}.toSeq
 	}
 }
 

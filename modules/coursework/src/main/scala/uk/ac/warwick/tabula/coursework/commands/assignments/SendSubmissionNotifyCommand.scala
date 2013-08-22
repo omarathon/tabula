@@ -15,7 +15,7 @@ import scala.Some
 import uk.ac.warwick.tabula.coursework.commands.assignments.notifications.SubmissionRecievedNotification
 
 class SendSubmissionNotifyCommand (val submission: Submission, val users: UserGroup)
-	extends Command[Boolean] with Notifies[Submission] with ReadOnly with Public {
+	extends Command[Seq[User]] with Notifies[Seq[User], Submission] with ReadOnly with Public {
 
 	mandatory(submission)
 	
@@ -26,13 +26,11 @@ class SendSubmissionNotifyCommand (val submission: Submission, val users: UserGr
 	var assignment: Assignment = submission.assignment
 	var module: Module = assignment.module
 	var student:User = userLookup.getUserByUserId(submission.userId)
-	var admins: Seq[User] = _
 
 	def applyInternal() = {
 		val userIds = users.includeUsers
 		val allAdmins = userIds.map(userLookup.getUserByUserId(_))
-		admins = allAdmins.filter(canEmailUser(_))
-		true
+		allAdmins.filter(canEmailUser(_))
 	}
 	
 	def canEmailUser(user: User) : Boolean = {
@@ -51,8 +49,8 @@ class SendSubmissionNotifyCommand (val submission: Submission, val users: UserGr
 		.submission(submission)
 	}
 
-	def emit: Seq[Notification[Submission]] = {
-		if(admins.size == 0){
+	def emit(admins: Seq[User]): Seq[Notification[Submission]] = {
+		if (admins.size == 0) {
 			Nil
 		} else {
 			Seq(new SubmissionRecievedNotification(submission, student, admins) with FreemarkerTextRenderer)

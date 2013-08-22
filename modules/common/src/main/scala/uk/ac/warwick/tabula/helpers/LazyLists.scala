@@ -23,14 +23,14 @@ object LazyLists {
 	 * Creates a lazy list (optionally based on an existing list) that will create
 	 * elements on demand using the default no-arg constructor for the class.
 	 */
-	def simpleFactory[A: ClassTag](list: JList[A] = JArrayList[A]()): JList[A] = {
+	def create[A: ClassTag](list: JList[A] = JArrayList[A]()): JList[A] = {
 		val constructor = classTag[A].runtimeClass.getDeclaredConstructor()
 		val factory = () => constructor.newInstance().asInstanceOf[A]
 		
-		withFactory[A](factory, list)
+		create[A](factory, list)
 	}
 	
-	def withFactory[A](fn: () => A, list: JList[A] = JArrayList[A]()): JList[A] =
+	def create[A](fn: () => A, list: JList[A] = JArrayList[A]()): JList[A] =
 		LazyList.decorate(list, new FuncFactory(fn)).asInstanceOf[JList[A]]
 
 }

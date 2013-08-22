@@ -7,7 +7,7 @@
 <#macro student_item student bindpath="">
 	<#assign profile = membersById[student.warwickId]!{} />
 	<li class="student well well-small"
-	data-f-gender="${profile.gender.dbValue}"
+	data-f-gender="${(profile.gender.dbValue)!}"
 	data-f-route="${(profile.mostSignificantCourseDetails.route.code)!}"
 	data-f-year="${(profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
 		<div class="profile clearfix">
@@ -61,35 +61,44 @@
 
 			<#assign submitUrl><@routes.allocateset set /></#assign>
 			<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToGroupsCommand">
+			<div class="tabula-dnd" 
+					 data-item-name="student" 
+					 data-text-selector=".name h6"
+					 data-use-handle="false"
+					 data-selectables=".students .drag-target"
+					 data-scroll="true"
+					 data-remove-tooltip="Remove this student from this group">
 				<div class="btn-toolbar">
-					<a class="random btn"
+					<a class="random btn" data-toggle="randomise" data-disabled-on="empty-list"
 					   href="#" >
 						<i class="icon-random"></i> Randomly allocate
 					</a>
-					<a class="return-items btn"
+					<a class="return-items btn" data-toggle="return" data-disabled-on="no-allocation"
 					   href="#" >
 						<i class="icon-arrow-left"></i> Remove all
 					</a>
 				</div>
 				<div class="row-fluid fix-on-scroll-container">
 					<div class="span5">
-						<div id="studentslist" class="students">
+						<div id="studentslist" 
+								 class="students tabula-filtered-list"
+								 data-item-selector=".student-list li">
 							<h3>Students</h3>
 							<div class="well ">
 									<h4>Not allocated to a group</h4>
 									<#if features.smallGroupAllocationFiltering>
 										<div id="filter-controls">
 										Show...
-										<div id="filter-by-gender-controls">
+										<div class="filter" id="filter-by-gender-controls">
 										<label>Male <input type="checkbox" data-filter-attr="fGender" data-filter-value="M" checked="checked"></label>
 										<label>Female <input type="checkbox" data-filter-attr="fGender" data-filter-value="F" checked="checked"></label>
 										</div>
-										<div id="filter-by-year-controls">
+										<div class="filter" id="filter-by-year-controls">
 										<#list allocateStudentsToGroupsCommand.allMembersYears as year>
 											<label>Year ${year} <input type="checkbox" data-filter-attr="fYear" data-filter-value="${year}" checked="checked"></label>
 										</#list>
 										</div>
-										<div id="filter-by-route-controls">
+										<div class="filter" id="filter-by-route-controls">
 										<#list allocateStudentsToGroupsCommand.allMembersRoutes as route>
 											<label>${route.name} <input type="checkbox" data-filter-attr="fRoute" data-filter-value="${route.code}" checked="checked"></label>
 										</#list>
@@ -158,7 +167,8 @@
 						</div>
 					</div>
 				</div>
-
+			</div>
+			
 				<div class="submit-buttons">
 					<input type="submit" class="btn btn-primary" value="Save">
 					<a href="<@routes.depthome module />" class="btn">Cancel</a>

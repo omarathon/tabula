@@ -449,3 +449,63 @@
 	} // .tutor-edit
 
 } // .profiles-page
+
+// drag students into tutors
+
+#allocateStudentsToTutorsCommand {
+
+	// FIXME I hate that I have to do this. The .profiles-page CSS is clearly too wide-ranging
+	.profile {
+		margin-top: 0;
+	}
+	
+	.filter {
+		select { width: 100%; }
+		
+		margin: 0 0 10px;
+	}
+
+	// Give the student list some affordance for dragging around students
+	.student-list {
+		margin: -16px;
+		padding: 16px;
+	}
+	
+	ul.drag-list li {
+		display: block;
+		float: none;
+	
+		background: white;
+		margin: 0 0 10px;
+
+		&:hover { background-color: darken(@wellBackground, 10%); }
+
+		&.ui-selecting { background: darken(@wellBackground, 10%) !important; }
+		&.ui-selected { background: darken(@wellBackground, 15%) !important; }
+		
+		.profile .photo {
+			float: left;
+			max-width: 50px;
+			padding-right: 10px;
+		}
+	}
+	
+	.well.drop-hover {
+		background-color: #dddddd;
+	}
+	
+	.tutor-header {
+		> h4, > div { display: inline-block; }
+		> h4 { margin-right: 10px; }
+	}
+	
+	.direction-icon {
+		font-size: 8em;
+		text-align: center;
+		padding-top: 33px;
+		color: #d6d6d6;
+	}
+
+}
+
+// end drag students into tutors

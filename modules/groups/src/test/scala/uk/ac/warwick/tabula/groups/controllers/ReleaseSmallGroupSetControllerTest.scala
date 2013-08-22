@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.groups.commands.admin.ReleaseSmallGroupSetCommand
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewModule, ViewSet}
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 import scala.collection.mutable
+import uk.ac.warwick.tabula.groups.commands.admin.ReleasedSmallGroupSet
 
 class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
 
@@ -44,7 +45,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
     withUser("test") {
       val controller = new ReleaseSmallGroupSetController
 			val cmd = mock[ReleaseSmallGroupSetCommand]
-      when(cmd.apply()).thenReturn(Seq(new SmallGroupSet()))
+      when(cmd.apply()).thenReturn(Seq(ReleasedSmallGroupSet(new SmallGroupSet(), true, true)))
 
       controller.submit(cmd).viewName should be("admin/groups/single_groupset")
 
@@ -59,7 +60,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
 			val cmd = mock[ReleaseSmallGroupSetCommand]
 			val set = new SmallGroupSet()
 			set.module = new Module()
-			cmd.apply() returns (Seq(set))
+			cmd.apply() returns (Seq(ReleasedSmallGroupSet(set, true, true)))
 			cmd.describeOutcome returns Some("hello")
 			val context = controller.submit(cmd).map
 
@@ -106,7 +107,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
     withUser("test") {
 
       val controller = new ReleaseAllSmallGroupSetsController()
-      val command = mock[Appliable[Seq[SmallGroupSet]]]
+      val command = mock[Appliable[Seq[ReleasedSmallGroupSet]]]
       val model = mock[controller.ModuleListViewModel]
       when(model.createCommand(any[User])).thenReturn(command)
       controller.submit(model, new Department)
@@ -119,7 +120,7 @@ class ReleaseSmallGroupSetControllerTest extends TestBase with Mockito {
     withUser("test") {
 
       val controller = new ReleaseAllSmallGroupSetsController()
-      val command = mock[Appliable[Seq[SmallGroupSet]]]
+      val command = mock[Appliable[Seq[ReleasedSmallGroupSet]]]
       val model = mock[controller.ModuleListViewModel]
       val department = new Department
       department.code = "xyz"

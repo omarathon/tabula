@@ -4,15 +4,17 @@
 
 <#escape x as x?html>
 <div id="tutor-view">
+	<div class="pull-right">
+		<#if features.personalTutorAssignment>
+			<a href="<@routes.tutors_allocate department />" class="btn btn-medium pull-right">
+				<i class="icon-random icon-fixed-width"></i> Assign personal tutors</a>
+			</a>
+		</#if>
+	</div>
+
 	<h1>Personal tutors for ${department.name}</h1>
 
 	<#if studentCount gt 0>
-		<#if can.do("Profiles.PersonalTutor.Upload", department)>
-			<p>
-<!--				<a class="btn" href="<@routes.tutor_upload department />" title="Upload Excel spreadsheet of new tutors"><i class="icon-upload"></i> Upload new tutor spreadsheet</a> -->
-			</p>
-		</#if>
-
 		<#if tutorRelationships?has_content>
 			<table id="tutors" class="table table-bordered">
 				<#list tutorRelationships?keys?sort as key>

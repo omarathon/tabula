@@ -15,7 +15,7 @@ trait SmallGroupSetCommand {
 	var userLookup: UserLookupService
 }
 
-trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet] {
+trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet] {
 	this: SmallGroupSetCommand =>
 
 	val setBeforeUpdates: SmallGroupSet = set.duplicateTo(set.module)
@@ -84,7 +84,7 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet] {
 		}
 	}
 
-	def emit: Seq[Notification[SmallGroupSet]] = {
+	def emit(set: SmallGroupSet): Seq[Notification[SmallGroupSet]] = {
 		val tutorNotifications: Seq[Notification[SmallGroupSet]] = if (set.releasedToTutors) {
 			val allEvents = (setBeforeUpdates.groups.asScala ++ set.groups.asScala).flatMap(g => g.events.asScala)
 			val allTutors = allEvents.flatMap(e => e.tutors.users).distinct

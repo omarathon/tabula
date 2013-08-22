@@ -67,7 +67,7 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 	///// end of complicated membership stuff
 		
 	// A collection of sub-commands for modifying the events
-	var events: JList[ModifySmallGroupEventCommand] = LazyLists.withFactory { () => 
+	var events: JList[ModifySmallGroupEventCommand] = LazyLists.create { () => 
 		new CreateSmallGroupEventCommand(this, module)
 	}
 	

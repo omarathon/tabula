@@ -14,7 +14,7 @@ import java.util.HashMap
 import uk.ac.warwick.tabula.helpers.LazyLists
 
 class MyCommand {
-	var attached:JList[FileAttachment] = LazyLists.simpleFactory()
+	var attached:JList[FileAttachment] = LazyLists.create()
 }
 
 class BindStatusTest extends TestBase {

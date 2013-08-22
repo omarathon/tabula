@@ -28,7 +28,7 @@ abstract class ExtensionController extends CourseworkController {
 	def crumbed(mav:Mav, module:Module)
 		= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))	
 
-	def toJson(extensions:List[Extension]) = {
+	def toJson(extensions: Seq[Extension]) = {
 		def toJson(extension:Extension) = {
 			val status = extension match {
 				case e if e.approved => "Approved"
