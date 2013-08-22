@@ -72,6 +72,12 @@
 									<bundleFileName>groups.war</bundleFileName>
 									<contextRoot>/groups</contextRoot>
 								</webModule>
+								<webModule>
+									<groupId>uk.ac.warwick.tabula</groupId>
+									<artifactId>attendance</artifactId>
+									<bundleFileName>attendance.war</bundleFileName>
+									<contextRoot>/attendance</contextRoot>
+								</webModule>
 							</modules>
 						</configuration>
 					</plugin>
