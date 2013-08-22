@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.dev.web.commands
 
 import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, CommandInternal}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.{RouteDao, MemberDao}
+import uk.ac.warwick.tabula.data.{DepartmentDao, CourseDao, RouteDao, MemberDao}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.spring.Wire
@@ -16,10 +16,14 @@ class StudentMemberFixtureCommand extends CommandInternal[Unit] with Logging {
 	var userId: String = _
 	var genderCode: String = _
 	var routeCode: String = ""
+	var courseCode:String=""
 	var yearOfStudy: Int = 1
+  var deptCode:String=""
 
 	var memberDao = Wire[MemberDao]
 	var routeDao = Wire[RouteDao]
+	var courseDao= Wire[CourseDao]
+  var deptDao = Wire[DepartmentDao]
 
 	def applyInternal() {
 		val userLookupUser = userLookup.getUserByUserId(userId)
@@ -27,9 +31,13 @@ class StudentMemberFixtureCommand extends CommandInternal[Unit] with Logging {
 		transactional() {
 			val existing = memberDao.getByUniversityId(userLookupUser.getWarwickId)
 			val route = if (routeCode != "") routeDao.getByCode(routeCode) else None
+			val course = if (courseCode!= "") courseDao.getByCode(courseCode) else None
+			val dept = if (deptCode!= "") deptDao.getByCode(deptCode) else None
+
 			existing foreach {
 				memberDao.delete
 			}
+
 			val newMember = new StudentMember
 			newMember.universityId = userLookupUser.getWarwickId
 			newMember.userId = userId
@@ -37,10 +45,14 @@ class StudentMemberFixtureCommand extends CommandInternal[Unit] with Logging {
 			newMember.firstName = userLookupUser.getFirstName
 			newMember.lastName = userLookupUser.getLastName
 			newMember.inUseFlag = "Active"
+
 			val scd = new StudentCourseDetails(newMember, userLookupUser.getWarwickId + "/" + yearOfStudy)
 			scd.mostSignificant = true
 			scd.sprCode = scd.scjCode
+
 			if (route.isDefined) scd.route = route.get
+			if (course.isDefined) scd.course = course.get
+			if (dept.isDefined) scd.department = dept.get
 			val yd = new StudentCourseYearDetails(scd, 1)
 			yd.yearOfStudy = yearOfStudy
 

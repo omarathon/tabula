@@ -72,13 +72,21 @@ trait FixturesDriver {
 		http.when(_==200)(req >|)
 	}
 
-	def createStudentMember(userId:String, genderCode:String = "M", routeCode:String="",yearOfStudy:Int=1 ){
+	def createStudentMember(userId:String,
+													genderCode:String = "M",
+													routeCode:String="",
+													yearOfStudy:Int=1,
+													courseCode:String="",
+													deptCode:String=""){
 		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/studentMember"
 		val req = url(uri).POST << Map(
 			"userId" -> userId,
 			"genderCode"->genderCode,
 		  "yearOfStudy"->yearOfStudy.toString,
-		  "routeCode"->routeCode)
+		  "routeCode"->routeCode,
+		  "courseCode"->courseCode,
+		  "deptCode"->deptCode
+		)
 		http.when(_==200)(req >|)
 
 	}
@@ -94,6 +102,14 @@ trait FixturesDriver {
 	}
 
 
+	def createCourse(courseCode:String, courseName:String ){
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/course"
+		val req = url(uri).POST << Map(
+			"courseCode" -> courseCode,
+			"courseName"->courseName)
+		http.when(_==200)(req >|)
+
+	}
 
 }
 

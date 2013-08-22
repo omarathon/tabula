@@ -23,7 +23,9 @@ class StudentTimetableTest extends BrowserTest with TimetableDriver with GivenWh
 
 	"A student" should "be able to view their timetable" in {
 		Given("Student1 has a membership record")
-		createStudentMember(P.Student1.usercode)
+		createRoute("xx123", "xxx", "timetable Test Route")
+		createCourse("Ux123","timetables")
+		createStudentMember(P.Student1.usercode,routeCode="xx123", courseCode="Ux123",deptCode = "xxx")
 
 		And("The timetabling service knows of a single event for student1")
 		setTimetableFor(P.Student1.usercode,singleEvent)

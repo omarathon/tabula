@@ -116,3 +116,18 @@ class RouteCreationFixturesController {
 		cmd.apply()
 	}
 }
+
+@Controller
+@RequestMapping(Array("/fixtures/create/course"))
+class CourseCreationFixturesController {
+
+	@ModelAttribute("createCourseCommand")
+	def getCreatecourseCommand(): Appliable[Unit] = {
+		CourseCreationFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createCourseCommand") cmd: Appliable[Unit]) {
+		cmd.apply()
+	}
+}
