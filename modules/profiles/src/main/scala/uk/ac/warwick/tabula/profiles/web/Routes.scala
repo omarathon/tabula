@@ -25,7 +25,6 @@ object Routes {
 		def apply(department: Department) = "/department/%s/tutors" format (encoded(department.code))
 		def missing(department: Department) = "/department/%s/tutors/missing" format (encoded(department.code))
 		def allocate(department: Department) = "/department/%s/tutors/allocate" format (encoded(department.code))
-		def upload(department: Department) = "/department/%s/tutors/upload" format (encoded(department.code))
 		def template(department: Department) = "/department/%s/tutors/template" format (encoded(department.code))
 	}
 	

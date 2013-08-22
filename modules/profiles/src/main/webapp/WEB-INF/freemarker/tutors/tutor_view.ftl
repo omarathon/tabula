@@ -15,12 +15,6 @@
 	<h1>Personal tutors for ${department.name}</h1>
 
 	<#if studentCount gt 0>
-		<#if can.do("Profiles.PersonalTutor.Upload", department)>
-			<p>
-<!--				<a class="btn" href="<@routes.tutor_upload department />" title="Upload Excel spreadsheet of new tutors"><i class="icon-upload"></i> Upload new tutor spreadsheet</a> -->
-			</p>
-		</#if>
-
 		<#if tutorRelationships?has_content>
 			<table id="tutors" class="table table-bordered">
 				<#list tutorRelationships?keys?sort as key>

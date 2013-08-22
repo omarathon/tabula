@@ -27,6 +27,7 @@ import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.commands.GroupsObjects
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.profiles.services.docconversion.RawStudentRelationshipExtractor
 
 class AllocateStudentsToTutorsCommand(val department: Department, val viewer: CurrentUser)
 	extends Command[Seq[PersonalTutorChange]] 
@@ -37,6 +38,7 @@ class AllocateStudentsToTutorsCommand(val department: Department, val viewer: Cu
 		with NotifiesAffectedStudents {
 	
 	PermissionCheck(Permissions.Profiles.PersonalTutor.Update, mandatory(department))
+	PermissionCheck(Permissions.Profiles.PersonalTutor.Upload, mandatory(department))
 
 	// throw this request out if personal tutors can't be edited in Tabula for this department
 	if (!department.canEditPersonalTutors) {
@@ -55,6 +57,8 @@ class AllocateStudentsToTutorsCommand(val department: Department, val viewer: Cu
 	var service = Wire[RelationshipService]
 	var profileService = Wire[ProfileService]
 	var securityService = Wire[SecurityService]
+	
+	var personalTutorExtractor = Wire[RawStudentRelationshipExtractor]
 	
 	var additionalTutors: JList[String] = JArrayList()
 	
@@ -181,7 +185,36 @@ class AllocateStudentsToTutorsCommand(val department: Department, val viewer: Cu
 		}.flatten
 	}
 	
-	def extractDataFromFile(file: FileAttachment) = ??? // TODO
+	def extractDataFromFile(file: FileAttachment) = {
+		val allocations = personalTutorExtractor.readXSSFExcelFile(file.dataStream)
+
+		// Convert to (student -> Option(staff))
+		val map = allocations.asScala
+			.filter { _.targetUniversityId.hasText }
+			.flatMap { rel =>
+				val student = profileService.getMemberByUniversityId(rel.targetUniversityId)
+				val staff =
+					if (rel.agentUniversityId.hasText) profileService.getMemberByUniversityId(rel.agentUniversityId)
+					else None
+				
+				student.map { (_ -> staff) }
+			}
+			
+		unallocated.clear()
+		unallocated.addAll(
+			map.filter { case (_, staff) => staff.isEmpty }
+			   .map { case (student, _) => student }
+			   .asJavaCollection
+		)
+		
+		map
+			.filter { case (_, staff) => staff.isDefined }
+		   	.map { case (student, staff) => (student, staff.get) }
+		   	.groupBy { case (_, staff) => staff }
+		   	.mapValues { values => 
+	   			values.map { case (student, _) => student }.asJava
+		   	}
+	}
 
 	def validate(errors: Errors) {
 		// Nothing to do

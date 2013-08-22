@@ -36,6 +36,15 @@ class AllocateStudentsToTutorsController extends ProfilesController {
 		cmd.sort()
 		Mav("tutors/allocate")
 	}
+	
+	@RequestMapping(method = Array(POST), params = Array("isfile=true", "action!=refresh"))
+	def previewFileUpload(@PathVariable("department") department: Department, @Valid cmd: AllocateStudentsToTutorsCommand, errors: Errors): Mav = {
+		if (errors.hasErrors && errors.getFieldError.getCode == "file.wrongtype.one") {
+			form(cmd)
+		} else {
+			Mav("tutors/upload_preview")
+		}
+	}
 
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh"))
 	def submit(@Valid cmd: AllocateStudentsToTutorsCommand, errors: Errors): Mav = {
