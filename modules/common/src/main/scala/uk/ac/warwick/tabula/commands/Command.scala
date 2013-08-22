@@ -21,6 +21,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -229,19 +230,19 @@ abstract class Description {
 	 * Record a Feedback item, plus its assignment, module, department
 	 */
 	def feedback(feedback: Feedback) = {
-		map += "feedback" -> feedback.id
+		property("feedback" -> feedback.id)
 		if (feedback.assignment != null) assignment(feedback.assignment)
 		this
 	}
 
-    /**
-     * Record a Submission item, plus its assignment, module, department
-     */
-    def submission(submission: Submission) = {
-        map += "submission" -> submission.id
-        if (submission.assignment != null) assignment(submission.assignment)
-        this
-    }	
+	/**
+	 * Record a Submission item, plus its assignment, module, department
+	 */
+	def submission(submission: Submission) = {
+		property("submission" -> submission.id)
+		if (submission.assignment != null) assignment(submission.assignment)
+		this
+	}
 	
 	/**
 	 * University IDs
@@ -305,19 +306,26 @@ abstract class Description {
 	 * Record module, plus department.
 	 */
 	def module(module: Module) = {
-		property("module" -> module.id)
 		if (module.department != null) department(module.department)
-		this
+		property("module" -> module.id)
 	}
 
 	def department(department: Department) = {
 		property("department", department.code)
-		this
 	}
 
 	def member(member: Member) = {
 		property("member", member.universityId)
-		this
+	}
+
+	def route(route: Route) = {
+		if (route.department != null) department(route.department)
+		property("route", route.code)
+	}
+
+	def monitoringPointSet(set: MonitoringPointSet) = {
+		if (set.route != null) route(set.route)
+		property("monitoringPointSet", set.id)
 	}
 
 	// delegate equality to the underlying map

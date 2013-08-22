@@ -21,7 +21,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import freemarker.template.{ TemplateModel, TemplateMethodModelEx }
 import freemarker.template.utility.DeepUnwrap
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.UserSettingsService
+import uk.ac.warwick.tabula.services.{Vacation, TermService, UserSettingsService}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 
 
 /** Format week ranges, using a formatting preference for term week numbers, cumulative week numbers or academic week numbers.
@@ -108,7 +109,15 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 				
 			case Seq(event: SmallGroupEvent) => 
 				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(event.group.groupSet.module.department))
-				
+
+			case Seq(monitoringPoint: MonitoringPoint) => {
+				format(Seq(WeekRange(monitoringPoint.week,monitoringPoint.week)), DayOfWeek(1), monitoringPoint.pointSet.academicYear, numberingSystem(monitoringPoint.pointSet.route.department))
+			}
+
+			case Seq(week: Integer, monitoringPointSet: MonitoringPointSet) => {
+				format(Seq(WeekRange(week)), DayOfWeek(1), monitoringPointSet.academicYear, numberingSystem(monitoringPointSet.route.department))
+			}
+
 			case _ => throw new IllegalArgumentException("Bad args: " + args)
 		}
 	}
@@ -127,7 +136,10 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 			term match {
 				case vac: Vacation => {
 					// Date range
-					"%s, %s" format (vac.getTermTypeAsString, IntervalFormatter.format(startDate, endDate, false))
+					if (startDate.equals(endDate))
+						"%s, %s" format (vac.getTermTypeAsString, IntervalFormatter.format(startDate, false))
+					else
+						"%s, %s" format (vac.getTermTypeAsString, IntervalFormatter.format(startDate, endDate, false))
 				}
 				case term => {
 					// Convert week numbers to the correct style
@@ -210,11 +222,11 @@ object WeekRangeSelectFormatter extends VacationAware {
 
 class WeekRanges(year:AcademicYear) extends VacationAware {
 
-	var termFactory = Wire[TermFactory]
+	var termService = Wire[TermService]
 
 	// We are confident that November 1st is always in term 1 of the year
 	lazy val weeksForYear =
-		termFactory.getAcademicWeeksForYear(new DateMidnight(year.startYear, DateTimeConstants.NOVEMBER, 1))
+		termService.getAcademicWeeksForYear(new DateMidnight(year.startYear, DateTimeConstants.NOVEMBER, 1))
 			.asScala.map { pair => (pair.getLeft -> pair.getRight) } // Utils pairs to Scala pairs
 			.toMap
 
@@ -223,12 +235,12 @@ class WeekRanges(year:AcademicYear) extends VacationAware {
 
 	def groupWeekRangesByTerm(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek) = {
 		ranges flatMap { range =>
-			if (range.isSingleWeek) Seq((range, termFactory.getTermFromDateIncludingVacations(weekNumberToDate(range.minWeek, dayOfWeek))))
+			if (range.isSingleWeek) Seq((range, termService.getTermFromDateIncludingVacations(weekNumberToDate(range.minWeek, dayOfWeek))))
 			else {
 				val startDate = weekNumberToDate(range.minWeek, dayOfWeek)
 				val endDate = weekNumberToDate(range.maxWeek, dayOfWeek)
 
-				termFactory.getTermsBetween(startDate, endDate) map { term =>
+				termService.getTermsBetween(startDate, endDate) map { term =>
 					val minWeek =
 						if (startDate.isBefore(term.getStartDate())) term.getAcademicWeekNumber(term.getStartDate)
 						else term.getAcademicWeekNumber(startDate)
@@ -260,7 +272,7 @@ class WeekRangeSelectFormatter(year: AcademicYear) extends WeekRanges(year: Acad
 			case WeekRange.NumberingSystem.Term => weeks.map( x => EventWeek( x - (currentTermRanges(0) - 1 ), x ) )
 			case WeekRange.NumberingSystem.Cumulative => weeks.map({x =>
 				val date = weekNumberToDate(x, dayOfWeek)
-				EventWeek(termFactory.getTermFromDate(date).getCumulativeWeekNumber(date), x)
+				EventWeek(termService.getTermFromDate(date).getCumulativeWeekNumber(date), x)
 			})
 			case WeekRange.NumberingSystem.Academic => eventRanges.map(x => EventWeek(x, x))
 			case _ => weeks.map( x => EventWeek(x, x) )
@@ -268,7 +280,7 @@ class WeekRangeSelectFormatter(year: AcademicYear) extends WeekRanges(year: Acad
 	}
 
 	def getTermNumber(now: DateTime): Int = {
-		termFactory.getTermFromDate(DateTime.now).getTermType match {
+		termService.getTermFromDate(DateTime.now).getTermType match {
 			case Term.TermType.autumn => 0
 			case Term.TermType.spring => 1
 			case Term.TermType.summer => 2
@@ -301,26 +313,4 @@ class WeekRangeSelectFormatterTag extends TemplateMethodModelEx {
 				case _ => throw new IllegalArgumentException("Bad args: " + args)
 			}
 		}
-}
-
-
-/** Special implementation of Term to encapsulate the idea of a Vacation.
-  * Our default TermFactory doesn't care about Vacations, it returns the
-  * next term if you give it a date before a vacation.
-  */
-case class Vacation(before: Term, after: Term) extends Term {
-	// Starts the day after the previous term and ends the day before the new term
-	def getStartDate = before.getEndDate().plusDays(1)
-	def getEndDate = after.getStartDate().minusDays(1)
-
-	def getTermType = null
-	def getTermTypeAsString = before.getTermType match {
-		case Term.TermType.autumn => "Christmas vacation"
-		case Term.TermType.spring => "Easter vacation"
-		case Term.TermType.summer => "Summer vacation"
-	}
-
-	def getWeekNumber(date: BaseDateTime) = throw new IllegalStateException("Can't get week numbers from a vacation")
-	def getCumulativeWeekNumber(date: BaseDateTime) = throw new IllegalStateException("Can't get week numbers from a vacation")
-	def getAcademicWeekNumber(date: BaseDateTime) = after.getAcademicWeekNumber(date)
 }
