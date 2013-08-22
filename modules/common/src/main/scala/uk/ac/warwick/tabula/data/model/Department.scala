@@ -48,6 +48,9 @@ class Department extends GeneratedId
 
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	var customRoleDefinitions:JList[CustomRoleDefinition] = JArrayList()
+	
+	@OneToMany(mappedBy="department", fetch = FetchType.LAZY)
+	var routes:JList[Route] = JArrayList()
 
 	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse(false)
 	def collectFeedbackRatings_= (collect: Boolean) = settings += (Settings.CollectFeedbackRatings -> collect)

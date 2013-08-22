@@ -6,9 +6,9 @@ import org.springframework.stereotype.Controller
 @Controller
 class HomeController extends BaseController {
 
-  @RequestMapping(Array("/")) 
-  def home = {
-    Mav("home/view")
-  }
-  
+	@RequestMapping(Array("/"))
+	def home = {
+		Mav("home/view")
+	}
+
 }

@@ -21,7 +21,7 @@
 						will be ignored.</p>
 					</div>
 				<#else>
-					<p>You are setting tutors for the <@fmt.p itemList?size "a tutor" "tutors" 1 0 false /> for the <b><@fmt.p itemList?size "student" /></b>
+					<p>You are setting <@fmt.p itemList?size "a tutor" "tutors" 1 0 false /> for the <b><@fmt.p itemList?size "student" /></b>
 					listed below.
 				</#if>
 

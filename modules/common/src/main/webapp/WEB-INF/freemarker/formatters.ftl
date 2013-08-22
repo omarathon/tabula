@@ -36,10 +36,16 @@
 	--></#noescape><#--
 --></#macro>
 
-<#-- Format week ranges for a SmallGroupEvent -->
-<#macro weekRanges event><#--
+<#-- Format week ranges for a SmallGroupEvent or MonitoringPoint -->
+<#macro weekRanges object><#--
 	--><#noescape><#--
-		-->${weekRangesFormatter(event)}<#--
+		-->${weekRangesFormatter(object)}<#--
+	--></#noescape><#--
+--></#macro>
+
+<#macro singleWeekFormat week monitoringPointSet><#--
+	--><#noescape><#--
+		-->${weekRangesFormatter(week, monitoringPointSet)}<#--
 	--></#noescape><#--
 --></#macro>
 

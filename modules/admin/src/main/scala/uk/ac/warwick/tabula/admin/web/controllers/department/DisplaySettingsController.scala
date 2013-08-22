@@ -20,10 +20,6 @@ class DisplaySettingsController extends AdminController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("displaySettingsCommand") def displaySettingsCommand(@PathVariable("dept") dept:Department) = DisplaySettingsCommand(dept)
-	
-
-	// Add the common breadcrumbs to the model.
-	def crumbed(mav:Mav, dept:Department):Mav = mav.crumbs(Breadcrumbs.Department(dept))
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def viewSettings(

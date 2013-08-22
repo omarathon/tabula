@@ -2,8 +2,6 @@ package uk.ac.warwick.tabula.helpers
 
 import org.joda.time._
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
-import collection.mutable
 import collection.JavaConversions._
 import freemarker.template.TemplateMethodModelEx
 import freemarker.template.utility.DeepUnwrap
@@ -42,6 +40,8 @@ object IntervalFormatter {
 
 	/** Useful sometimes if you have an "endless" interval like an open-ended Assignment. */
 	def format(start: DateTime): String = doFormat(start, true)
+
+	def format(start: DateTime, includeTime: Boolean): String = doFormat(start, true, includeTime)
 
 	/** @see #format(DateTime, DateTime, Boolean) */
 	def format(interval: Interval): String = format(interval.getStart, interval.getEnd)
