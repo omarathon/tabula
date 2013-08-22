@@ -220,5 +220,9 @@ object Permissions {
 	object UserSettings {
 		case object Update extends Permission("Edit user settings")
 	}
+	
+	object MonitoringPoints {
+		case object Manage extends Permission("Manage monitoring points")
+	}
 
 }
