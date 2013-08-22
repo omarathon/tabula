@@ -144,13 +144,13 @@ object TimetableEvent{
 	}
 }
 
-sealed abstract class TimetableEventType(val code: String)
+sealed abstract class TimetableEventType(val code: String, val displayName:String)
 object TimetableEventType {
-	case object Lecture extends TimetableEventType("LEC")
-	case object Practical extends TimetableEventType("PRA")
-	case object Seminar extends TimetableEventType("SEM")
-	case object Induction extends TimetableEventType("IND")
-	case class Other(c: String) extends TimetableEventType(c)
+	case object Lecture extends TimetableEventType("LEC", "Lecture")
+	case object Practical extends TimetableEventType("PRA", "Practical")
+	case object Seminar extends TimetableEventType("SEM","Seminar")
+	case object Induction extends TimetableEventType("IND","Induction")
+	case class Other(c: String) extends TimetableEventType(c,c)
 	
 	// lame manual collection. Keep in sync with the case objects above
 	val members = Seq(Lecture, Practical, Seminar, Induction)

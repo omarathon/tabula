@@ -32,7 +32,7 @@ class StudentTimetableTest extends BrowserTest with TimetableDriver with GivenWh
 		createModule("xxx", TEST_MODULE_CODE, "Timetabling Module")
 		val setId = createSmallGroupSet(TEST_MODULE_CODE, TEST_GROUPSET_NAME)
 		addStudentToGroup(P.Student1.usercode,setId, "Group 1")
-		createSmallGroupEvent(setId,"Test timetabling", weekRange = "6")
+		createSmallGroupEvent(setId,"Test timetabling", weekRange = "47")
 	}
 
 	val singleEvent = <Data>
@@ -40,10 +40,10 @@ class StudentTimetableTest extends BrowserTest with TimetableDriver with GivenWh
 			<Activity>
 				<name>CS132L</name>
 				<description/>
-				<start>12:00</start>
-				<end>13:00</end>
-				<weeks>6</weeks>
-				<day>4</day>
+				<start>09:30</start>
+				<end>11:30</end>
+				<weeks>47</weeks>
+				<day>0</day>
 				<type>LEC</type>
 				<rooms>
 					<room>L5</room>
@@ -57,6 +57,48 @@ class StudentTimetableTest extends BrowserTest with TimetableDriver with GivenWh
 			</Activity>
 			</Activities>
 		</Data>
+
+	// should you want to test weekend events...
+	val twoEvents = <Data>
+		<Activities>
+			<Activity>
+				<name>CS132L</name>
+				<description/>
+				<start>09:30</start>
+				<end>11:30</end>
+				<weeks>47</weeks>
+				<day>0</day>
+				<type>LEC</type>
+				<rooms>
+					<room>L5</room>
+				</rooms>
+				<modules>
+					<module>CS132</module>
+				</modules>
+				<staffmembers>
+					<staffmember>1170047</staffmember>
+				</staffmembers>
+			</Activity>
+			<Activity>
+				<name>Party!</name>
+				<description/>
+				<start>19:30</start>CS132L
+				<end>23:30</end>
+				<weeks>47</weeks>
+				<day>6</day>
+				<type>LEC</type>
+				<rooms>
+					<room>L5</room>
+				</rooms>
+				<modules>
+					<module>Party</module>
+				</modules>
+				<staffmembers>
+					<staffmember>1170047</staffmember>
+				</staffmembers>
+			</Activity>
+		</Activities>
+	</Data>
 
 
 }

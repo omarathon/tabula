@@ -1,1 +1,1 @@
-This is going to be the student timetable
+<div class='fullCalendar' data-viewname='agendaWeek'></div>

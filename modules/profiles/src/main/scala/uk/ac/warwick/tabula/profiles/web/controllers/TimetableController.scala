@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.profiles.commands.ViewStudentPersonalTimetableComman
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.{RequestParam, RequestMapping}
-import org.joda.time.LocalDate
+import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 
@@ -15,17 +15,20 @@ class TimetableController extends ProfilesController{
 
 
 	@RequestMapping(value=Array("/show"))
-	def show(){
+	def show() = {
 		Mav("timetables/student")
 	}
 	@RequestMapping(value=Array("/api"))
-	def getEvents(@RequestParam from:LocalDate, @RequestParam to:LocalDate):Mav={
+	def getEvents(@RequestParam from:Long, @RequestParam to:Long):Mav={
+		// from and to are seconds since the epoch, because that's what FullCalendar likes to send. Sigh.
+		val start = new DateTime(from*1000).toLocalDate
+		val end = new DateTime(to*1000).toLocalDate
 		currentMember match {
 			case student:StudentMember=>{
 				val command = ViewStudentPersonalTimetableCommand()
 				command.student = student
-				command.start = from
-				command.end = to
+				command.start = start
+				command.end = end
 				val timetableEvents = command.apply
 				val calendarEvents = timetableEvents map(FullCalendarEvent(_))
 				Mav(new JSONView(calendarEvents))

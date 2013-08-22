@@ -80,6 +80,15 @@ object AcademicYear {
 		case y => 2000 + y
 	}
 
+
+	/**
+	 * n.b. this does *not* tell you what academic year the date "now" lies within.
+	 *
+	 * e.g. Sept. 1st 2012 (Academic week 48, year 2011-12) will return year 2012-13.
+	 *
+	 * This function returns the year based on when SITS rolls over,
+	 * not when the academic year starts/stops
+	 */
 	def guessByDate(now: DateTime) = {
 		if (now.getMonthOfYear() >= AUGUST) {
 			new AcademicYear(now.getYear())

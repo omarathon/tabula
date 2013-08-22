@@ -261,6 +261,50 @@
 
 
 	});
-	//MEETING RECORD APPROVAL STUFF
+	//END MEETING RECORD APPROVAL STUFF
 
+	// TIMETABLE STUFF
+    $(function() {
+		function getEvents(start, end,callback){
+			$.ajax({url:'/profiles/timetable/api',
+				  // make the from/to params compatible with what FullCalendar sends if you just specify a URL
+				  // as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
+				  data:{'from':start.getTime()/1000,
+						'to':end.getTime()/1000
+						},
+				  success:function(data){
+					//
+					// TODO
+					//
+					// insert code here to look through the events and magically display weekends if a weekend event is found
+					// (cal.fullCalendar('option','weekends',true); doesn't work, although some other options do)
+					// https://code.google.com/p/fullcalendar/issues/detail?id=293 has some discussion and patches
+					//
+					callback(data);
+				  }
+				  });
+		}
+		function createCalendar(container,defaultViewName){
+			var showWeekends = (defaultViewName == "month");
+			$(container).fullCalendar({
+									events:function(start, end, callback){getEvents(start,end, callback);},
+									defaultView: defaultViewName,
+									allDaySlot: false,
+									slotMinutes: 30,
+									firstHour:8,
+									timeFormat: 'h:mm',
+									firstDay: 1, //monday
+									weekends:showWeekends,
+									header: {
+										left:   'title',
+										center: '',
+										right:  'today prev,next'
+									}
+			});
+		}
+
+        $(".fullCalendar").each(function(index){
+    			createCalendar($(this),$(this).data('viewname'));
+    		});
+    	});
 }(jQuery));
