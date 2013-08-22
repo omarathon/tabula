@@ -301,13 +301,17 @@ Method calls (after initialising):
             var $link = $(this);
             // the popover list item
             var $li = $link.closest('li');
-            var id = $li.data('item-id');
+            
+            // use .attr() rather than .data() to avoid implicit type conversion
+            var id = $li.attr('data-item-id'); 
+            
             // the underlying list item
             var $realLi = $li
                 .closest('.drag-target')
                 .find('input')
                 .filter(function(){ return this.value === id; })
                 .closest('li');
+            
             returnItem($realLi);
             return false;
         });

@@ -161,10 +161,14 @@ Options: (all of these options can be set as data- attributes)
   $.fn.filteredList = function(options) {
 		var filter = this.data(DataName);
 		
-    this.each(function(i, element) {
-      filter = new FilteredList(element, options);
-      $(element).data(DataName, filter);
-		});
+    if (options === 'filter') {
+      filter.filter();
+    } else {
+    	this.each(function(i, element) {
+      	filter = new FilteredList(element, options);
+      	$(element).data(DataName, filter);
+			});
+		}
 		
 		return this;
 	};

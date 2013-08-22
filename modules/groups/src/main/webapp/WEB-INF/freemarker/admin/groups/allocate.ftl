@@ -211,6 +211,15 @@
 			$('#studentslist').css('min-height', function() {
 				return $('#groupslist').outerHeight();
 			});
+
+			// When the return list has changed, make sure the filter is re-run			
+			$('.return-list').on('changed.tabula', function(e) {
+				// Make sure it exists before doing it
+				var filter = $('.tabula-filtered-list').data('tabula-filtered-list');
+				if (filter) {
+					filter.filter();
+				}
+			});
 		})(jQuery);
 	</script>
 

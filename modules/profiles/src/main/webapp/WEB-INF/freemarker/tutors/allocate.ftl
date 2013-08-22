@@ -224,6 +224,33 @@
 				$form.prepend($('<input />').attr({type: 'hidden', name: 'action', value: 'refresh'}));
 				$form.submit();
 			});
+			
+			$('#tutorslist .tutor-header > .delete').on('click', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				
+				// Get the drag and drop instance
+				var dnd = $('.tabula-dnd').data('tabula-dnd');
+				var $container = $(this).closest('.drag-target')
+				var $dragList = $container.find('.drag-list');
+				
+				dnd.batchMove([{
+					target: $('.return-list'),
+					items: $dragList.find('li'),
+					sources: $dragList
+				}]);
+				
+				$container.remove();
+			});
+
+			// When the return list has changed, make sure the filter is re-run			
+			$('.return-list').on('changed.tabula', function(e) {
+				// Make sure it exists before doing it
+				var filter = $('.tabula-filtered-list').data('tabula-filtered-list');
+				if (filter) {
+					filter.filter();
+				}
+			});
 		})(jQuery);
 	</script>
 
