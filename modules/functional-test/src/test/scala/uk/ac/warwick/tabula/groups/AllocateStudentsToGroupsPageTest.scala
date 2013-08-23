@@ -41,6 +41,9 @@ class AllocateStudentsToGroupsPageTest extends SmallGroupsFixture with GivenWhen
 		val allocatePage = groupsetSummaryPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get.goToAllocate
 
 		Then("I can see the list of students with all 5 students visible")
+
+		val x = allocatePage.findAllUnallocatedStudents
+		println(pageSource)
 		allocatePage.findAllUnallocatedStudents.filter(_.underlying.isDisplayed).size should be(5)
 
 		And("I can see the checkboxes to filter by gender, year, and course")
@@ -56,6 +59,7 @@ class AllocateStudentsToGroupsPageTest extends SmallGroupsFixture with GivenWhen
 		maleCheckbox.underlying.click()
 
 		Then("Only 3 students should be shown")
+		val unallocated = allocatePage.findAllUnallocatedStudents.map(e=>(e.underlying,e.underlying.isDisplayed)).toList
 		allocatePage.findAllUnallocatedStudents.filter(_.underlying.isDisplayed).size should be(3)
 
 		When("I uncheck the 'year 1' checkbox")
