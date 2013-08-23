@@ -222,7 +222,7 @@ class ReleaseSmallGroupSetController extends GroupsController {
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand) = {
 		val updatedSet = cmd.apply() match {
-			case set :: Nil => set
+			case releasedSet :: Nil => releasedSet.set
 			case _ => throw new IllegalStateException("Received multiple updated sets from a single update operation!")
 		}
 		val groupSetItem = new ViewSet(updatedSet, updatedSet.groups.asScala, GroupsViewModel.Tutor)
@@ -292,7 +292,7 @@ class ReleaseAllSmallGroupSetsController extends GroupsController {
 			}
 		}
 
-		def createCommand(user: User): Appliable[Seq[SmallGroupSet]] = {
+		def createCommand(user: User): Appliable[Seq[ReleasedSmallGroupSet]] = {
 			val command = new ReleaseGroupSetCommandImpl(smallGroupSets(), user)
 			command.notifyStudents = notifyStudents
 			command.notifyTutors = notifyTutors

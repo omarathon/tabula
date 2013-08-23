@@ -17,27 +17,27 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.notifications.Reques
  * Sends a message to one or more admins to let them know that the current
  * user thinks they should have access to an assignment.
  */
-class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Unit]
-	with Notifies[Assignment] with FreemarkerRendering with UnicodeEmails with Public {
+class RequestAssignmentAccessCommand(user: CurrentUser) extends Command[Seq[User]]
+	with Notifies[Seq[User], Assignment] with FreemarkerRendering with UnicodeEmails with Public {
 
 	var userLookup = Wire.auto[UserLookupService]
 
 	var module: Module = _
 	var assignment: Assignment = _
-	var admins:Seq[User] = _
 
-	override def applyInternal() {
+	// Returns the Seq or admin users
+	override def applyInternal() = {
 		// lookup the admin users - used to determine the recipients  for notifications
 		val departmentAdmins = module.department.owners
 		val adminMap = userLookup.getUsersByUserIds(seqAsJavaList(departmentAdmins.members))
-		admins = adminMap.values().asScala.filter(admin => admin.isFoundUser && admin.getEmail.hasText).toSeq
+		adminMap.values().asScala.filter(admin => admin.isFoundUser && admin.getEmail.hasText).toSeq
 	}
 
 	override def describe(d: Description) {
 		d.assignment(assignment)
 	}
 
-	def emit: Seq[Notification[Assignment]] = {
+	def emit(admins: Seq[User]): Seq[Notification[Assignment]] = {
 		Seq(new RequestAssignmentAccessNotification(assignment, user, admins) with FreemarkerTextRenderer)
 	}
 }

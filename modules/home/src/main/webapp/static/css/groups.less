@@ -55,12 +55,24 @@ input.deleted {
 
 #allocateStudentsToGroupsCommand {
 	
+	.filter {
+		select { width: 100%; }
+		
+		margin: 0 0 10px;
+	}
+
+	// Give the student list some affordance for dragging around students
+	.student-list {
+		margin: -16px;
+		padding: 16px;
+	}
+	
 	ul.drag-list li {
 		display: block;
 		float: none;
 	
 		background: white;
-		margin-bottom: 10px;
+		margin: 0 0 10px;
 
 		&:hover { background-color: darken(@wellBackground, 10%); }
 

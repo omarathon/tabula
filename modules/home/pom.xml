@@ -259,6 +259,7 @@
 								<include>jquery-details.js</include>
 								<include>jquery-tableform.js</include>
 								<include>jquery-draganddrop.js</include>
+								<include>jquery-filteredlist.js</include>
 								<include>jquery-radiocontrolled.js</include>
 								<include>userpicker.js</include>
 								<include>flexipicker.js</include>
@@ -299,6 +300,7 @@
 							<includes>
 								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
 								<include>profiles-render.js</include>
+								<include>profiles-admin.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>

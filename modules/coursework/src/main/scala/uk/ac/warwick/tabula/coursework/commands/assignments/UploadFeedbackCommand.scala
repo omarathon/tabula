@@ -97,10 +97,10 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 
 	/* for multiple upload */
 	// use lazy list with factory as spring doesn't know how to dynamically create items
-	var items: JList[FeedbackItem] = LazyLists.simpleFactory()
-	var unrecognisedFiles: JList[ProblemFile] = LazyLists.simpleFactory()
-	var moduleMismatchFiles: JList[ProblemFile] = LazyLists.simpleFactory()
-	var invalidFiles: JList[ProblemFile] = LazyLists.simpleFactory()
+	var items: JList[FeedbackItem] = LazyLists.create()
+	var unrecognisedFiles: JList[ProblemFile] = LazyLists.create()
+	var moduleMismatchFiles: JList[ProblemFile] = LazyLists.create()
+	var invalidFiles: JList[ProblemFile] = LazyLists.create()
 	var archive: MultipartFile = _
 	var batch: Boolean = false
 	var fromArchive: Boolean = false

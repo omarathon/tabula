@@ -176,7 +176,16 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.sprStatus.code not like 'P%'
 			and
-				scd.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
+				scd.sprCode not in (
+					select 
+						sr.targetSprCode 
+					from 
+						StudentRelationship sr 
+					where 
+						sr.relationshipType = :relationshipType
+					and
+						(sr.endDate is null or sr.endDate >= SYSDATE)
+				)
 		""")
 			.setEntity("department", department)
 			.setParameter("relationshipType", relationshipType)
