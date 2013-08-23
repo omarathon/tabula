@@ -13,11 +13,6 @@ import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 @RequestMapping(value = Array("/timetable"))
 class TimetableController extends ProfilesController{
 
-
-	@RequestMapping(value=Array("/show"))
-	def show() = {
-		Mav("timetables/student")
-	}
 	@RequestMapping(value=Array("/api"))
 	def getEvents(@RequestParam from:Long, @RequestParam to:Long):Mav={
 		// from and to are seconds since the epoch, because that's what FullCalendar likes to send. Sigh.

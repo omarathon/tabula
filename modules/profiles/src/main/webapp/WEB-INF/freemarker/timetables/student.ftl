@@ -1,1 +1,0 @@
-<div class='fullCalendar' data-viewname='agendaWeek'></div>
