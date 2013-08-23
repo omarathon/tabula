@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
@@ -21,8 +20,9 @@ object AddMonitoringPointCommand {
 /**
  * Creates a new monitoring point in a set.
  */
-class AddMonitoringPointCommand(val set: MonitoringPointSet) extends CommandInternal[MonitoringPoint] {
-	self: ModifyMonitoringPointState with RouteServiceComponent =>
+class AddMonitoringPointCommand(val set: MonitoringPointSet) extends CommandInternal[MonitoringPoint]
+		with ModifyMonitoringPointState {
+	self: RouteServiceComponent =>
 
 	override def applyInternal() = {
 		val point = new MonitoringPoint
