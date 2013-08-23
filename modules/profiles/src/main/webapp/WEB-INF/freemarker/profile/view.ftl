@@ -169,6 +169,12 @@
 
 		<div class="tabbable">
 			<ol class="panes">
+				<li id="timetable-pane">
+					<section id="timetable-details" class="clearfix">
+						<h4>Timetable</h4>
+						<div class='fullCalendar' data-viewname='agendaWeek'/>
+				</li>
+
 				<li id="course-pane">
 					<#include "_course_details.ftl" />
 				</li>

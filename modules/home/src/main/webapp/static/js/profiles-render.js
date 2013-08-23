@@ -290,10 +290,14 @@
 									events:function(start, end, callback){getEvents(start,end, callback);},
 									defaultView: defaultViewName,
 									allDaySlot: false,
-									slotMinutes: 30,
+									slotMinutes: 60,
 									firstHour:8,
-									timeFormat: 'h:mm',
 									firstDay: 1, //monday
+									timeFormat: {
+                                        agendaWeek: '', // don't display time on event
+                                        // for all other views
+                                        '': 'h:mm{ - h:mm}'   //  5:00 - 6:30
+                                    },
 									weekends:showWeekends,
 									header: {
 										left:   'title',
