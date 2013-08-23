@@ -2,6 +2,8 @@ package uk.ac.warwick.tabula.profiles
 
 import uk.ac.warwick.tabula.BrowserTest
 import org.scalatest.GivenWhenThen
+import uk.ac.warwick.tabula.home.FeaturesDriver
+import uk.ac.warwick.tabula.profiles.pages.ProfilePage
 
 /**
  * N.B. To run this test, you must set a system property (in tabula.properties)to tell tabula
@@ -13,28 +15,30 @@ import org.scalatest.GivenWhenThen
  * view timetable data for real production users.
  *
  */
-class StudentTimetableTest extends BrowserTest with TimetableDriver with GivenWhenThen{
-	before{
-		go to (Path("/scheduling/fixtures/setup"))
-	}
+class StudentTimetableTest extends BrowserTest with TimetablingFixture with  GivenWhenThen{
 
-	val TEST_MODULE_CODE = "xxx654"
-	val TEST_GROUPSET_NAME = "Timetable Test Groupset"
-
+	// TODO provide the functional tests with a TermFactory so we can work out what week we're in right now,
+	// and create the events in that week. Then we can verify that they actually show up on the calendar
+	
 	"A student" should "be able to view their timetable" in {
-		Given("Student1 has a membership record")
-		createRoute("xx123", "xxx", "timetable Test Route")
-		createCourse("Ux123","timetables")
-		createStudentMember(P.Student1.usercode,routeCode="xx123", courseCode="Ux123",deptCode = "xxx")
 
-		And("The timetabling service knows of a single event for student1")
+		Given("The timetabling service knows of a single event for student1")
 		setTimetableFor(P.Student1.usercode,singleEvent)
 
 		And("Student1 is a member of a small group with a single event")
-		createModule("xxx", TEST_MODULE_CODE, "Timetabling Module")
-		val setId = createSmallGroupSet(TEST_MODULE_CODE, TEST_GROUPSET_NAME)
-		addStudentToGroup(P.Student1.usercode,setId, "Group 1")
-		createSmallGroupEvent(setId,"Test timetabling", weekRange = "47")
+
+		addStudentToGroup(P.Student1.usercode,testGroupSetId, "Group 1")
+		createSmallGroupEvent(testGroupSetId,"Test timetabling", weekRange = "47")
+
+		When("Student1 views their profile")
+		signIn as(P.Student1) to (Path("/profiles"))
+		val profilePage = new ProfilePage()
+		profilePage should be('currentPage)
+
+		profilePage.timetablePane should be ('defined)
+		val timetable = profilePage.timetablePane.get
+		timetable should be('showingCalendar)
+
 	}
 
 	val singleEvent = <Data>
