@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.scheduling.services.CourseImporter
+import uk.ac.warwick.tabula.scheduling.services.ModuleRegistrationImporter
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 
@@ -31,6 +32,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
 	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	var courseImporter = Wire.auto[CourseImporter]
+	var moduleRegistrationImporter = Wire.auto[ModuleRegistrationImporter]
 
 	var features = Wire.auto[Features]
 
@@ -59,7 +61,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	}
 
 	def importModeOfAttendances {
-		logger.info("Importing Modes of Attendance")
+		logger.info("Importing modes of attendance")
 
 		transactional() {
 			modeOfAttendanceImporter.getImportCommands foreach { _.apply() }
@@ -84,6 +86,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 
 				transactional() {
 					profileImporter.getMemberDetails(userIdsAndCategories, users) map { _.apply }
+					moduleRegistrationImporter.getModuleRegistrationDetails(userIdsAndCategories, users) map {_.apply }
 					session.flush
 					session.clear
 				}
@@ -98,12 +101,21 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 
 			profileImporter.userIdAndCategory(member) match {
 				case Some(membInfo: MembershipInformation) => {
-					val commands = profileImporter.getMemberDetails(List(membInfo), Map(usercode -> user))
-					val members = commands map { _.apply }
 
-					//val members = profileImporter.getMemberDetails(List(membInfo), Map(usercode -> user)) map { _.apply }
+					// retrieve details for this student from SITS and store the information in Tabula
+					val importMemberCommands = profileImporter.getMemberDetails(List(membInfo), Map(usercode -> user))
+					if (importMemberCommands.isEmpty) logger.warn("Refreshing student " + membInfo.member.universityId + " but found no data to import.")
+					val members = importMemberCommands map { _.apply }
 					session.flush
 					for (member <- members) session.evict(member)
+
+					// get the user's module registrations
+					val importModRegCommands = moduleRegistrationImporter.getModuleRegistrationDetails(List(membInfo), Map(usercode -> user))
+					if (importModRegCommands.isEmpty) logger.warn("Looking for module registrations for student " + membInfo.member.universityId + " but found no data to import.")
+					val moduleRegistrations = importModRegCommands map { _.apply }
+					session.flush
+					for (modReg <- moduleRegistrations) session.evict(member)
+
 				}
 				case None => logger.warn("Student is no longer in uow_current_members in membership - not updating")
 			}
