@@ -14,7 +14,7 @@
 	<#if user.staff>
 		<#assign student = studentCourseDetails.student/>
 		<div id="edit-personal-tutor-modal" class="modal-body">
-		<@f.form method="post" commandName="editTutorCommand" action="" cssClass="form-horizontal">
+		<@f.form method="post" commandName="editStudentRelationshipCommand" action="" cssClass="form-horizontal">
 
 
 				<h5 id="tuteeName">Personal Tutee: ${student.fullName}</h5>
@@ -94,10 +94,10 @@
 
 			$('#save-tutor').click(function() {
 				if ($(this).hasClass("disabled")) return;
-				$.post($("#editTutorCommand").prop('action'), $("#editTutorCommand").serialize(), function(){
+				$.post($("#editStudentRelationshipCommand").prop('action'), $("#editStudentRelationshipCommand").serialize(), function(){
 					$('#modal-change-tutor').modal('hide');
-					var tutorId = $('#editTutorCommand input[name=tutor]').val();
-					var remove = $('#editTutorCommand input[name=remove]').val();
+					var tutorId = $('#editStudentRelationshipCommand input[name=tutor]').val();
+					var remove = $('#editStudentRelationshipCommand input[name=remove]').val();
 					if(remove == "true") {
 						var action = "removed";
 					} else {
@@ -112,14 +112,14 @@
 			function setStudent(memberString) {
 				var member = memberString.split("|");
 
-				if($('#editTutorCommand input[name=currentTutor]').val() != member[1]) {
+				if($('#editStudentRelationshipCommand input[name=currentTutor]').val() != member[1]) {
 					$('#remove-tutor').addClass("disabled");
 					$('#notify-tutor-change').show();
 				} else {
 					$('#remove-tutor').removeClass("disabled");
 				}
 
-				$('#editTutorCommand input[name=tutor]').val(member[1]);
+				$('#editStudentRelationshipCommand input[name=tutor]').val(member[1]);
 				$("#tutorSearchResults").html("");
 
 				$("#save-tutor").removeClass("disabled").addClass("btn-primary");
@@ -161,11 +161,11 @@
 				$('#removeTutorMessage').hide();
 				$('#notify-tutor-change').show();
 				$("#save-tutor").removeClass("disabled").addClass("btn-primary");
-				$('#editTutorCommand input[name="query"]').prop('disabled', true);;
+				$('#editStudentRelationshipCommand input[name="query"]').prop('disabled', true);;
 				$('#remove-tutor').addClass('disabled');
 				$('.inline-search-button').addClass('disabled');
 				$('#notify-remove-tutor').show();
-				$("#editTutorCommand input[name='remove']").val('true');
+				$("#editStudentRelationshipCommand input[name='remove']").val('true');
 			});
 
 			$('#cancel-remove-tutor').click(function() {

@@ -6,20 +6,18 @@ import java.io.FileOutputStream
 import java.net.URL
 import java.util.regex.Pattern
 import java.util.jar.JarFile
-
 import scala.collection.JavaConverters._
 import scala.reflect._
-
 import org.reflections.ReflectionsException
 import org.reflections.Reflections
 import org.reflections.vfs.Vfs
 import org.reflections.vfs.SystemDir
 import org.reflections.vfs.ZipDir
 import org.springframework.util.FileCopyUtils
-
 import com.google.common.base.Predicate
-
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
+import uk.ac.warwick.tabula.permissions.PermissionsSelector
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 object ReflectionHelper {
 	
@@ -49,7 +47,16 @@ object ReflectionHelper {
 		subtypesOf[Permission]
 			.filter {_.getName.substring(Permissions.getClass.getName.length).contains('$')}
 			.sortWith(sortFn)
-			.map { clz => clz.newInstance().asInstanceOf[Permission] }
+			.map { clz =>
+				val constructor = clz.getConstructors()(0)
+				val params = constructor.getParameterTypes().map {
+					case clz if clz == classOf[PermissionsSelector[StudentRelationshipType]] => PermissionsSelector.Any[StudentRelationshipType]
+					case clz => clz.newInstance().asInstanceOf[Object]
+				}
+				
+				if (params.length == 0) constructor.newInstance().asInstanceOf[Permission]
+				else constructor.newInstance(params: _*).asInstanceOf[Permission]
+			}
 	}
 	
 	lazy val groupedPermissions = {

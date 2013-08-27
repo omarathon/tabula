@@ -13,6 +13,8 @@ import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.roles._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import org.junit.Ignore
 
 class SecurityServiceTest extends TestBase with Mockito {
 	
@@ -27,7 +29,7 @@ class SecurityServiceTest extends TestBase with Mockito {
 		
 		securityService.can(currentUser, Permissions.GodMode) should be (true)
 		securityService.can(currentUser, Permissions.Department.ManageDisplaySettings, new Department) should be (true)
-		securityService.can(currentUser, Permissions.Profiles.PersonalTutor.Create, null) should be (true)
+		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Create(new StudentRelationshipType), null) should be (true)
 		securityService.can(currentUser, null) should be (true)
 		securityService.can(currentUser, null, null) should be (true)
 	}
@@ -77,7 +79,7 @@ class SecurityServiceTest extends TestBase with Mockito {
 		securityService.can(currentUser, Permissions.Department.ManageDisplaySettings, department) should be (true)
 		// Global perm
 		securityService.can(currentUser, Permissions.Module.Create, department) should be (true)
-		securityService.can(currentUser, Permissions.Profiles.PersonalTutor.Update, null) should be (false)
+		securityService.can(currentUser, Permissions.Profiles.StudentRelationship.Update(new StudentRelationshipType), null) should be (false)
 	}
 	
 	@Test def globalPermission {
@@ -207,6 +209,11 @@ class SecurityServiceTest extends TestBase with Mockito {
 		) should be (securityService.Deny)
 	}
 	
+	@Ignore @Test def selectors {
+		// TODO
+		fail("implement me")
+	}
+	
 	/*
 	 * Just testing a compiler warning that scared me, about it
 	 * mismatching case classes that use inheritence. But it's
@@ -227,7 +234,7 @@ class SecurityServiceTest extends TestBase with Mockito {
 	 * name equal to each other in future. Sigh 
 	 */
 	@Test def equality {
-		(Permissions.Module.Create == Permissions.Profiles.PersonalTutor.Create) should be (false)
+		(Permissions.Module.Create == Permissions.Feedback.Create) should be (false)
 		(Permissions.Module.Create == Permissions.Module.Create) should be (true)
 	}
 			

@@ -19,21 +19,21 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 		studentCourseDetails.relationshipService = relationshipService
 
 		student.studentCourseDetails.add(studentCourseDetails)
-
-
 		student.profileService = profileService
+		
+		val relationshipType = new StudentRelationshipType
 
 		profileService.getStudentBySprCode("0205225/1") returns (Some(student))
 
-		relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, "0205225/1") returns (Nil)
-		student.studentCourseDetails.get(0).personalTutors should be ('empty)
+		relationshipService.findCurrentRelationships(relationshipType, "0205225/1") returns (Nil)
+		student.studentCourseDetails.get(0).agents(relationshipType) should be ('empty)
 
-		val rel = StudentRelationship("0672089", RelationshipType.PersonalTutor, "0205225/1")
+		val rel = StudentRelationship("0672089", relationshipType, "0205225/1")
 		rel.profileService = profileService
 
-		relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, "0205225/1") returns (Seq(rel))
+		relationshipService.findCurrentRelationships(relationshipType, "0205225/1") returns (Seq(rel))
 		profileService.getMemberByUniversityId("0672089") returns (None)
-		student.studentCourseDetails.get(0).personalTutors map { _.agentParsed } should be (Seq("0672089"))
+		student.studentCourseDetails.get(0).agents(relationshipType) map { _.agentParsed } should be (Seq("0672089"))
 
 		val staff = Fixtures.staff(universityId="0672089")
 		staff.firstName = "Steve"
@@ -41,7 +41,7 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
 		profileService.getMemberByUniversityId("0672089") returns (Some(staff))
 
-		student.studentCourseDetails.get(0).personalTutors map { _.agentParsed } should be (Seq(staff))
+		student.studentCourseDetails.get(0).agents(relationshipType) map { _.agentParsed } should be (Seq(staff))
 	}
 
 }

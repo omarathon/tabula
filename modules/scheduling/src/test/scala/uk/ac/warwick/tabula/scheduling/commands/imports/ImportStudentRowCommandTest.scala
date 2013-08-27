@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import scala.collection.JavaConverters._
-
 import java.sql.Date
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
@@ -20,8 +19,6 @@ import uk.ac.warwick.tabula.data.model.Gender._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.data.model.RelationshipType._
-import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.data.model.StaffMember
@@ -41,6 +38,8 @@ import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.data.ModeOfAttendanceDao
 import uk.ac.warwick.tabula.data.SitsStatusDao
 import uk.ac.warwick.tabula.services.MaintenanceModeService
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
 
 
 // scalastyle:off magic.number
@@ -190,6 +189,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseDetails.scjCode = "0672089/2"
 			studentCourseDetails.sprCode = "0672089/2"
 			yearCommand.studentCourseDetails = studentCourseDetails
+				
+			relationshipService.getStudentRelationshipTypeById("tutor") returns (None)
 
 			val studentCourseYearDetails = yearCommand.applyInternal()
 
@@ -211,6 +212,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	@Test
 	def testImportStudentRowCommandWorksWithNew {
 		new Environment {
+			relationshipService.getStudentRelationshipTypeById("tutor") returns (None)
+			
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
 			val member = rowCommand.applyInternal()
 
@@ -242,9 +245,10 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	@Test
 	def worksWithExistingMember {
 		new Environment {
-
 			val existing = new StudentMember("0672089")
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
+				
+			relationshipService.getStudentRelationshipTypeById("tutor") returns (None)
 
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
 			val member = rowCommand.applyInternal()
@@ -265,15 +269,20 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	@Transactional
 	@Test def testCaptureTutorIfSourceIsLocal {
 
-		new Environment {
+		new Environment {			
 			val existing = new StudentMember("0672089")
 			val existingStaffMember = new StaffMember("0070790")
 
 			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
+			
+			val tutorRelationshipType = new StudentRelationshipType
+			tutorRelationshipType.id = "tutor"
+				
+			relationshipService.getStudentRelationshipTypeById("tutor") returns (Some(tutorRelationshipType))
 
 			// if personalTutorSource is "local", there should be no update
-			department.personalTutorSource = "local"
+			department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.Local)
 
 			val member = rowCommand.applyInternal() match {
 				case stu: StudentMember => Some(stu)
@@ -284,7 +293,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.studentCourseDetails.size should not be (0)
 
-			there was no(relationshipService).saveStudentRelationship(PersonalTutor, "0672089/2","0070790");
+			there was no(relationshipService).saveStudentRelationship(tutorRelationshipType, "0672089/2","0070790");
 		}
 	}
 
@@ -294,13 +303,18 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		new Environment {
 			val existing = new StudentMember("0672089")
 			val existingStaffMember = new StaffMember("0070790")
+			
+			val tutorRelationshipType = new StudentRelationshipType
+			tutorRelationshipType.id = "tutor"
+				
+			relationshipService.getStudentRelationshipTypeById("tutor") returns (Some(tutorRelationshipType))
+
+			// if personalTutorSource is "SITS", there *should* an update
+			department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.SITS)
 
 			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
-			relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, "0672089/2") returns (Nil)
-
-			// if personalTutorSource is "SITS", there *should* an update
-			department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits
+			relationshipService.findCurrentRelationships(tutorRelationshipType, "0672089/2") returns (Nil)
 
 			val member = rowCommand.applyInternal() match {
 				case stu: StudentMember => Some(stu)
@@ -311,7 +325,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.mostSignificantCourseDetails should not be (null)
 
-			there was one(relationshipService).saveStudentRelationship(PersonalTutor, "0672089/2","0070790");
+			there was one(relationshipService).saveStudentRelationship(tutorRelationshipType, "0672089/2","0070790");
 		}
 	}
 }

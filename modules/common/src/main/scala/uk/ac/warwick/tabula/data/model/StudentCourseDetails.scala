@@ -78,17 +78,11 @@ class StudentCourseDetails
 
 	def courseType = CourseType.fromCourseCode(course.code);
 
-	@Restricted(Array("Profiles.PersonalTutor.Read"))
-	def personalTutors =
-		relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, this.sprCode)
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core")) // TODO perms?
+	def agents(relationshipType: StudentRelationshipType) =
+		relationshipService.findCurrentRelationships(relationshipType, this.sprCode)
 
-	@Restricted(Array("Profiles.Supervisor.Read"))
-	def supervisors =
-		relationshipService.findCurrentRelationships(RelationshipType.Supervisor, this.sprCode)
-
-	def hasAPersonalTutor = !personalTutors.isEmpty
-
-	def hasSupervisor = !supervisors.isEmpty
+	def hasRelationship(relationshipType: StudentRelationshipType) = !agents(relationshipType).isEmpty
 
 	def compare(that:StudentCourseDetails): Int = {
 		this.scjCode.compare(that.scjCode)

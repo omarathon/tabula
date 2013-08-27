@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.data.model.StudentCourseProperties
@@ -40,6 +39,7 @@ import java.sql.BatchUpdateException
 import org.hibernate.exception.ConstraintViolationException
 import uk.ac.warwick.tabula.scheduling.services.CourseImporter
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
 
 class ImportStudentCourseCommand(resultSet: ResultSet,
 		importStudentCourseYearCommand: ImportStudentCourseYearCommand,
@@ -176,45 +176,48 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 
 		if (dept == null)
 			logger.warn("Trying to capture tutor for " + sprCode + " but department is null.")
+		else 
+			// is this student in a department that is set to import tutor data from SITS?
+			relationshipService
+				.getStudentRelationshipTypeById("tutor") // TODO this is awful
+				.filter { relType => dept.getStudentRelationshipSource(relType) == StudentRelationshipSource.SITS }
+				.foreach { relationshipType =>
+					val tutorUniIdOption = PrsCode.getUniversityId(sprTutor1)
 
-		// is this student in a department that is set to import tutor data from SITS?
-		else if (dept.personalTutorSource != null && dept.personalTutorSource == Department.Settings.PersonalTutorSourceValues.Sits) {
-			val tutorUniIdOption = PrsCode.getUniversityId(sprTutor1)
-
-			tutorUniIdOption match {
-				case Some(tutorUniId: String) => {
-					// only save the personal tutor if we can match the ID with a staff member in Tabula
-					val member = memberDao.getByUniversityId(tutorUniId) match {
-						case Some(mem: Member) => {
-							logger.info("Got a personal tutor from SITS! SprCode: " + sprCode + ", tutorUniId: " + tutorUniId)
-
-							val currentRelationships = relationshipService.findCurrentRelationships(PersonalTutor, sprCode)
-
-							// Does this relationship already exist?
-							currentRelationships.find(_.agent == tutorUniId) match {
-								case Some(existing) => existing
-								case _ => {
-									// End all existing relationships
-									currentRelationships.foreach { rel =>
-										rel.endDate = DateTime.now
-										relationshipService.saveOrUpdate(rel)
+					tutorUniIdOption match {
+						case Some(tutorUniId: String) => {
+							// only save the personal tutor if we can match the ID with a staff member in Tabula
+							val member = memberDao.getByUniversityId(tutorUniId) match {
+								case Some(mem: Member) => {
+									logger.info("Got a personal tutor from SITS! SprCode: " + sprCode + ", tutorUniId: " + tutorUniId)
+		
+									val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, sprCode)
+		
+									// Does this relationship already exist?
+									currentRelationships.find(_.agent == tutorUniId) match {
+										case Some(existing) => existing
+										case _ => {
+											// End all existing relationships
+											currentRelationships.foreach { rel =>
+												rel.endDate = DateTime.now
+												relationshipService.saveOrUpdate(rel)
+											}
+		
+											// Save the new one
+											val rel = relationshipService.saveStudentRelationship(relationshipType, sprCode, tutorUniId)
+		
+											rel
+										}
 									}
-
-									// Save the new one
-									val rel = relationshipService.saveStudentRelationship(PersonalTutor, sprCode, tutorUniId)
-
-									rel
+								}
+								case _ => {
+									logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + sprTutor1 + " - not importing this personal tutor from SITS")
 								}
 							}
 						}
-						case _ => {
-							logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + sprTutor1 + " - not importing this personal tutor from SITS")
-						}
+						case _ => logger.warn("Can't parse PRS code " + sprTutor1 + " for student " + sprCode)
 					}
 				}
-				case _ => logger.warn("Can't parse PRS code " + sprTutor1 + " for student " + sprCode)
-			}
-		}
 	}
 }
 

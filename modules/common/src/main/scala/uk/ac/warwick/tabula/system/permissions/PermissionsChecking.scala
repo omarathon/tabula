@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.data.model.FeedbackTemplate
 import scala.reflect.ClassTag
 import uk.ac.warwick.tabula.services.SecurityService
 import scala.annotation.target
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 /**
  * Trait that allows classes to call ActionCheck() in their inline definitions

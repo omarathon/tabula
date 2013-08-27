@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
+
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
@@ -11,11 +12,11 @@ import uk.ac.warwick.tabula.profiles.commands.ViewProfilePhotoCommand
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import org.springframework.web.bind.annotation.RequestMethod
 import uk.ac.warwick.tabula.profiles.commands.ViewStudentRelationshipPhotoCommand
-import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 @Controller
 @RequestMapping(value = Array("/view/photo/{member}.jpg"))
@@ -42,7 +43,7 @@ class StudentRelationshipPhotoController extends ProfilesController {
 	@ModelAttribute("viewStudentRelationshipPhotoCommand")
 	def command(
 		@PathVariable("sprCode") sprCode: String,
-		@PathVariable("relationshipType") relationshipType: RelationshipType,
+		@PathVariable("relationshipType") relationshipType: StudentRelationshipType,
 		@PathVariable("agent") agent: String) = {
 			val relationships = relationshipService.findCurrentRelationships(relationshipType, sprCode)
 			val relationship = relationships.find(_.agent == agent) getOrElse(throw new ItemNotFoundException)

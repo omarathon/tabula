@@ -85,10 +85,20 @@ class Department extends GeneratedId
 
 	def assignmentInfoView = getStringSetting(Settings.AssignmentInfoView) getOrElse(Assignment.Settings.InfoViewType.Default)
 	def assignmentInfoView_= (setting: String) = settings += (Settings.AssignmentInfoView -> setting)
-
-	def personalTutorSource = getStringSetting(Settings.PersonalTutorSource) getOrElse(Department.Settings.PersonalTutorSourceValues.Local)
-	def personalTutorSource_= (ptSource: String) = settings += (Settings.PersonalTutorSource -> ptSource)
-
+	
+	def getStudentRelationshipSource(relationshipType: StudentRelationshipType) =
+		getStringMapSetting(Settings.StudentRelationshipSource)
+			.flatMap { _.get(relationshipType.id) }
+			.map { StudentRelationshipSource.fromCode(_) }
+			.getOrElse(relationshipType.defaultSource)
+			
+	def setStudentRelationshipSource (relationshipType: StudentRelationshipType, source: StudentRelationshipSource) = {
+		val map = getStringMapSetting(Settings.StudentRelationshipSource, Map())
+		val newMap = (map + (relationshipType.id -> source.dbValue))
+		
+		settings += (Settings.StudentRelationshipSource -> newMap)
+	}
+			
 	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem) getOrElse(WeekRange.NumberingSystem.Default)
 	def weekNumberingSystem_= (wnSystem: String) = settings += (Settings.WeekNumberingSystem -> wnSystem)
 
@@ -121,11 +131,6 @@ class Department extends GeneratedId
 	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.includes(user)
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
-
-	def canEditPersonalTutors: Boolean = {
-		personalTutorSource == null || personalTutorSource == Settings.PersonalTutorSourceValues.Local
-	}
-
 
 	// If hibernate sets owners to null, make a new empty usergroup
 	override def postLoad {
@@ -171,14 +176,9 @@ object Department {
 		val TurnitinSmallMatchWordLimit = "turnitinSmallMatchWordLimit"
 		val TurnitinSmallMatchPercentageLimit = "turnitinSmallMatchPercentageLimit"
 
-		val PersonalTutorSource = "personalTutorSource"
+		val StudentRelationshipSource = "studentRelationshipSource"
 
 		val WeekNumberingSystem = "weekNumberSystem"
-
-		object PersonalTutorSourceValues {
-			val Local = "local"
-			val Sits = "SITS"
-		}
 
     val DefaultGroupAllocationMethod = "defaultGroupAllocationMethod"
 	}

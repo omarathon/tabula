@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommandState
 import uk.ac.warwick.tabula.services.{SmallGroupService, ProfileService, UserLookupService, SecurityService}
 import uk.ac.warwick.tabula.commands.Appliable
 import scala.Some
+import uk.ac.warwick.tabula.services.RelationshipService
 
 class ViewProfileControllerTest extends TestBase with Mockito{
 
@@ -37,59 +38,16 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 		}
 	}
 
-	@Test def createsTutorMeetingListCommand() {
-	withUser("test") {
-		controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
-		val cmd = controller.viewTutorMeetingRecordCommand(member).get.asInstanceOf[ViewMeetingRecordCommandState]
-	  cmd.relationshipType should be(RelationshipType.PersonalTutor)
-		}
-	}
-
-
-	@Test def createsSupervisorMeetingListCommand() {
-	withUser("test") {
-		controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
-		val cmd = controller.viewSupervisorMeetingRecordCommand(member).get.asInstanceOf[ViewMeetingRecordCommandState]
-		cmd.relationshipType should be(RelationshipType.Supervisor)
-	}}
-
-	@Test def exposesMeetingListsInModel() {
-		withUser("test") {
-
-			val member = new StudentMember
-			member.universityId = "1234"
-			val viewProfileCommand = mock[Appliable[StudentMember]]
-			viewProfileCommand.apply returns member
-
-			val tutorMeetings = Seq(new MeetingRecord)
-			val supervisorMeetings = Seq(new MeetingRecord)
-
-			val tutorCommand = mock[Appliable[Seq[MeetingRecord]]]
-			val supervisorCommand = mock[Appliable[Seq[MeetingRecord]]]
-			tutorCommand.apply returns tutorMeetings
-			supervisorCommand.apply returns supervisorMeetings
-
-			// mocks necessary for base class functionality that should really be factored out
-			controller.userLookup = mock[UserLookupService]
-			controller.profileService = mock[ProfileService]
-			controller.profileService.getMemberByUserId("test", true) returns Some(member)
-			controller.smallGroupService.findSmallGroupsByStudent(member.asSsoUser) returns (Nil)
-
-			val mav = controller.viewProfile(viewProfileCommand, Some(tutorCommand), Some(supervisorCommand),"test","test")
-
-			mav.map("tutorMeetings") should be(tutorMeetings)
-			mav.map("supervisorMeetings") should be(supervisorMeetings)
-		}
-	}
-
 	@Test def getMeetingRecordCommand() {
 		withUser("test") {
+			val relationshipType = new StudentRelationshipType
+			
 			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
-			val cmd = controller.getViewMeetingRecordCommand(member, RelationshipType.PersonalTutor)
+			val cmd = controller.getViewMeetingRecordCommand(member, relationshipType)
 			cmd should not be(None)
 
 			val staffMember = new StaffMember
-			val notACmd = controller.getViewMeetingRecordCommand(staffMember, RelationshipType.PersonalTutor)
+			val notACmd = controller.getViewMeetingRecordCommand(staffMember, relationshipType)
 			notACmd should be(None)
 		}
 	}

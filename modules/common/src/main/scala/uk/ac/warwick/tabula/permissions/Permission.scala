@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.permissions
 
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 sealed abstract class Permission(val description: String) extends CaseObjectEqualityFixes[Permission] {
 	val getName = Permissions.shortName(getClass.asInstanceOf[Class[_ <: Permission]])
@@ -9,6 +10,13 @@ sealed abstract class Permission(val description: String) extends CaseObjectEqua
 }
 sealed abstract class ScopelessPermission(description: String) extends Permission(description) {
 	override val isScoped = false
+}
+sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val selector: PermissionsSelector[A], description: String) extends Permission(description)
+
+trait PermissionsSelector[A <: PermissionsSelector[A]]
+
+object PermissionsSelector {
+	def Any[A <: PermissionsSelector[A]] = new PermissionsSelector[A] {}
 }
 
 case class CheckablePermission(val permission: Permission, val scope: Option[PermissionsTarget])
@@ -168,37 +176,30 @@ object Permissions {
 			case object PersonalTutees extends Permission("View a member's personal tutees")
 			case object Supervisees extends Permission("View a member's supervisees")
 		}
-
-		// Person's own tutor ('upward' relationship)
-		object PersonalTutor {
-			case object Upload extends Permission("Upload personal tutors from a spreadsheet")
-
-			case object Create extends Permission("Add a personal tutor")
-			case object Read extends Permission("View a personal tutor")
-			case object Update extends Permission("Edit a personal tutor")
-			case object Delete extends Permission("Remove a personal tutor")
-
-      object MeetingRecord {
-        case object Create extends Permission("Add a tutor meeting record")
-        case object Read extends Permission("View a tutor meeting record")
-        case object ReadDetails extends Permission("View the contents of a tutor meeting record")
-        case object Update extends Permission("Edit a tutor meeting record")
-        case object Delete extends Permission("Remove a tutor meeting record")
-      }
-
+		
+		object StudentRelationship {		
+			case class Create(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+				extends SelectorPermission(relationshipType, "Add a student relationship")
+			case class Read(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+				extends SelectorPermission(relationshipType, "View a student relationship")
+			case class Update(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+				extends SelectorPermission(relationshipType, "Edit a student relationship")
+			case class Delete(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+				extends SelectorPermission(relationshipType, "Remove a student relationship")
 		}
-
-		// Person's own supervisor ('upward' relationship)
-		object Supervisor {
-			case object Read extends Permission("View a supervisor")
-      object MeetingRecord {
-        case object Create extends Permission("Add a supervisor meeting record")
-        case object Read extends Permission("View a supervisor meeting record")
-        case object ReadDetails extends Permission("View the contents of a supervisor meeting record")
-        case object Update extends Permission("Edit a supervisor meeting record")
-        case object Delete extends Permission("Remove a supervisor meeting record")
-      }
-		}
+		
+		object MeetingRecord {
+      case class Create(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      	extends SelectorPermission(relationshipType, "Add a meeting record")
+      case class Read(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      	extends SelectorPermission(relationshipType, "View a meeting record")
+      case class ReadDetails(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      	extends SelectorPermission(relationshipType, "View the contents of a meeting record")
+      case class Update(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      	extends SelectorPermission(relationshipType, "Edit a meeting record")
+      case class Delete(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      	extends SelectorPermission(relationshipType, "Remove a meeting record")
+    }
 	}
 
 	object SmallGroups {

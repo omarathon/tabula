@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{RelationshipType, Member, StudentRelationship}
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.RelationshipType.{Supervisor, PersonalTutor}
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking, PerformsPermissionsChecking}
 import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.data.model.{Member, StudentRelationship}
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking, PerformsPermissionsChecking}
+import uk.ac.warwick.tabula.permissions.Permissions
 
 // Don't need this, unless there is specific state on the command which the controller needs access to.
 //
@@ -14,25 +14,17 @@ import uk.ac.warwick.tabula.commands._
 //	this:ViewRelatedStudentsCommandInternal=>
 //}
 object ViewRelatedStudentsCommand{
-	def apply(currentMember:Member,relationshipType:RelationshipType):Command[Seq[StudentRelationship]] = {
-		  new ViewRelatedStudentsCommandInternal(currentMember,relationshipType)
-				with ComposableCommand[Seq[StudentRelationship]]
+	def apply(currentMember: Member, relationshipType: StudentRelationshipType): Command[Seq[StudentRelationship]] = {
+		  new ViewRelatedStudentsCommandInternal(currentMember, relationshipType)
 				with AutowiringRelationshipServiceComponent
-        with Unaudited
 	}
 }
 
-class ViewRelatedStudentsCommandInternal(val currentMember: Member, val relationshipType:RelationshipType) extends CommandInternal[Seq[StudentRelationship]] with RequiresPermissionsChecking {
+class ViewRelatedStudentsCommandInternal(val currentMember: Member, val relationshipType: StudentRelationshipType) extends Command[Seq[StudentRelationship]] with Unaudited {
 
 	this: RelationshipServiceComponent =>
-
-	def permissionsCheck(p:PermissionsChecking){
-		relationshipType match {
-			case PersonalTutor=>p.PermissionCheck(Permissions.Profiles.Read.PersonalTutees, currentMember)
-			case Supervisor=>	p.PermissionCheck(Permissions.Profiles.Read.Supervisees, currentMember)
-		}
-
-	}
+		
+	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(relationshipType), currentMember)
 
 	def applyInternal(): Seq[StudentRelationship] = transactional(readOnly = true) {
 		relationshipService.listStudentRelationshipsWithMember(relationshipType, currentMember)

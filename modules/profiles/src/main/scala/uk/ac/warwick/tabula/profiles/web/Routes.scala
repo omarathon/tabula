@@ -20,16 +20,13 @@ object Routes {
 		def photo(member: Member) = "/view/photo/%s.jpg" format (encoded(member.universityId))
 	}
 	
-	def tutees = "/tutees"	
-	object tutors {
-		def apply(department: Department) = "/department/%s/tutors" format (encoded(department.code))
-		def missing(department: Department) = "/department/%s/tutors/missing" format (encoded(department.code))
-		def allocate(department: Department) = "/department/%s/tutors/allocate" format (encoded(department.code))
-		def template(department: Department) = "/department/%s/tutors/template" format (encoded(department.code))
-	}
-	
-	object supervisor {
-		def supervisees = "/supervisees"
+	def students(relationshipType: StudentRelationshipType) = "/%s/students" format (encoded(relationshipType.id))		
+		
+	object relationships {
+		def apply(department: Department, relationshipType: StudentRelationshipType) = "/department/%s/%s/all" format (encoded(department.code), encoded(relationshipType.id))
+		def missing(department: Department, relationshipType: StudentRelationshipType) = "/department/%s/%s/missing" format (encoded(department.code), encoded(relationshipType.id))
+		def allocate(department: Department, relationshipType: StudentRelationshipType) = "/department/%s/%s/allocate" format (encoded(department.code), encoded(relationshipType.id))
+		def template(department: Department, relationshipType: StudentRelationshipType) = "/department/%s/%s/template" format (encoded(department.code), encoded(relationshipType.id))
 	}
 	
 	object admin {

@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.RelationshipService
 
 @Controller class HomeController extends ProfilesController {
 	
@@ -31,10 +32,21 @@ import uk.ac.warwick.tabula.permissions.Permissions
 			val smallGroups =
 				if (features.smallGroupTeachingTutorView) smallGroupsService.findSmallGroupsByTutor(user.apparentUser)
 				else Nil
+				
+			// Get all the relationships that the current member is an agent of
+			val downwardRelationships = relationshipService.listAllStudentRelationshipsWithMember(currentMember)
+				
+			// Get all the enabled relationship types for a department
+			// TODO filter by department visibility
+			val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
+			
+			// A map from each type to a boolean for whether the current member has downward relationships of that type
+			val relationshipTypesMap = allRelationshipTypes.map { t =>
+				(t, downwardRelationships.exists(_.relationshipType == t))
+			}.toMap
 
 			Mav("home/view",
-				"isAPersonalTutor" -> currentMember.isAPersonalTutor,
-				"isASupervisor" -> currentMember.isASupervisor,
+				"relationshipTypesMap" -> relationshipTypesMap,
 				"universityId" -> currentMember.universityId,
 				"isPGR" -> user.isPGR,
 				"smallGroups" -> smallGroups,
