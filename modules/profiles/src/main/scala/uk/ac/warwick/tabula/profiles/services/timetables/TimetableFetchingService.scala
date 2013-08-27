@@ -77,7 +77,9 @@ trait ScientiaHttpTimetableFetchingServiceComponent extends TimetableFetchingSer
 		def getTimetableForStaff(universityId: String): Seq[TimetableEvent] = doRequest(staffUri, universityId)
 
 		def doRequest(uri: String, param: String) = {
+			// add ?p0={param} to the URL's get parameters
 			val req = url(uri) <<? Map("p0" -> param)
+			// execute the request and pass the response to the "handler" function for turning into TimetableEvents
 			http.x(req >:+ handler)
 		}
 

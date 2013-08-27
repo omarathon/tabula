@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.services._
 import org.joda.time.{Interval, LocalDate}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering
 
 trait ViewStudentPersonalTimetableCommandState {
 	var student: StudentMember = _
@@ -23,7 +24,8 @@ class ViewStudentPersonalTimetableCommandImpl extends CommandInternal[Seq[EventO
 	def applyInternal(): Seq[EventOccurrence] = {
 		val timetableEvents = studentTimetableEventSource.eventsFor(student)
 		val occurrences = timetableEvents flatMap eventsToOccurrences
-		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+		// Converter to make localDates sortable
+		import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedLocalDate
 		occurrences.sortBy(_.start)
 	}
 }

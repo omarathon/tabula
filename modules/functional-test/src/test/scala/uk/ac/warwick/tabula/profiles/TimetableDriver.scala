@@ -4,6 +4,7 @@ import scala.xml.Elem
 import uk.ac.warwick.tabula.home.{FeaturesDriver, FixturesDriver}
 import uk.ac.warwick.tabula.FunctionalTestProperties
 import dispatch.classic._
+import scala.language.postfixOps
 
 trait TimetableDriver extends FixturesDriver  {
 

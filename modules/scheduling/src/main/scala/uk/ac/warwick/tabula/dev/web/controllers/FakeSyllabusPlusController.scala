@@ -19,7 +19,7 @@ import uk.ac.warwick.spring.Wire
  */
 @Controller
 @RequestMapping(Array("/stubTimetable/*"))
-class FakeSyallabusPlusController {
+class FakeSyllabusPlusController {
 
 	val userLookup:UserLookupService = Wire[UserLookupService]
 	val studentTimetables: mutable.Map[String, String] = mutable.Map.empty
