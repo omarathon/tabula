@@ -45,7 +45,6 @@ class AllocateStudentsToGroupsPageTest extends SmallGroupsFixture with GivenWhen
 		val x = allocatePage.findAllUnallocatedStudents
 		println(pageSource)
 		allocatePage.findAllUnallocatedStudents.filter(_.underlying.isDisplayed).size should be(5)
-
 		And("I can see the checkboxes to filter by gender, year, and course")
 
 		find(cssSelector("#filter-controls")) should be('defined)

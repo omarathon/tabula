@@ -82,11 +82,16 @@ Method calls (after initialising):
 
     var DragAndDrop = function(element, options) {
     		var $el = $(element);
-    
+
     		if (options && typeof(options) === 'object') this.options = options;
     		else this.options = {};
-    		
+
     		// Allow data- attributes to be set as options, but override-able by any passed to the method
+    		//
+            // n.b. calling $el.data() may cause problems with HTMLUnit tests that try and select the element that $el
+            // refers to by its ID.
+            // If this causes test failures, then extract each required option manually with $data("option-name") - see
+            // jquery-filteredlist.js for an example
     		this.options = $.extend({}, $el.data(), this.options);
 
 				var itemName = this.options.itemName || 'item';
