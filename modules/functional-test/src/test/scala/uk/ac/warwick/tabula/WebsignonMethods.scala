@@ -47,6 +47,10 @@ trait WebsignonMethods extends ShouldMatchers {
           // yet released. fix it when it's released. https://groups.google.com/forum/?fromgroups=#!topic/scalatest-users/ojW9g4-2fmI
           id("password").webElement.sendKeys(details.password)
           submit()
+					// Sign-out operations redirect you to the context root, so we may now be on the wrong page...
+					if (currentUrl != url){
+						go to url
+					}
           if (pageSource contains ("Signed in as " + details.usercode)) {
             // NOW we're done
           } else if (pageSource contains ("Access refused")) {
