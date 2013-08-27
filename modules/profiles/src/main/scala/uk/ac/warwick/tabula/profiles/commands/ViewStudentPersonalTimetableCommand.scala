@@ -25,7 +25,7 @@ class ViewStudentPersonalTimetableCommandImpl extends CommandInternal[Seq[EventO
 		val timetableEvents = studentTimetableEventSource.eventsFor(student)
 		val occurrences = timetableEvents flatMap eventsToOccurrences
 		// Converter to make localDates sortable
-		import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedLocalDate
+		import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedLocalDateTime
 		occurrences.sortBy(_.start)
 	}
 }
