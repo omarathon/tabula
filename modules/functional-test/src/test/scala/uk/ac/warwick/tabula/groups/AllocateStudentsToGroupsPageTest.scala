@@ -43,7 +43,6 @@ class AllocateStudentsToGroupsPageTest extends SmallGroupsFixture with GivenWhen
 
 		Then("I can see the list of students with all 5 students visible")
 		allocatePage.findAllUnallocatedStudents.filter(_.underlying.isDisplayed).size should be(5)
-
 		And("I can see the checkboxes to filter by gender, year, and course")
 
 		find(cssSelector("#filter-controls")) should be('defined)

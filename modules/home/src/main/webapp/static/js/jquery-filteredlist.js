@@ -67,14 +67,11 @@ Options: (all of these options can be set as data- attributes)
     
     if (options && typeof(options) === 'object') this.options = options;
     else this.options = {};
-    		
-    // Allow data- attributes to be set as options, but override-able by any passed to the method
-    this.options = $.extend({}, $el.data(), this.options);
-    
+
     // Extract some options out to vars with defaults
-    var itemSelector = this.options.itemSelector || 'li';
-    var filterSelector = this.options.filterSelector || '.filter';
-    var filterControls = this.options.filterControls || 'input[type="checkbox"],select'; // TODO support more options here
+	var itemSelector = this.options.itemSelector || $el.data('item-selector')  || 'li';
+	var filterSelector = this.options.filterSelector || $el.data('filter-selector') || '.filter';
+	var filterControls = this.options.filterControls || $el.data('filter-controls') || 'input[type="checkbox"],select';
 
 		this.filter = function() {
 			var items = $el.find(itemSelector);
