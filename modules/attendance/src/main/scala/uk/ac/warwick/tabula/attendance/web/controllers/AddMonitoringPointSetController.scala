@@ -16,16 +16,17 @@ class AddMonitoringPointSetController extends AttendanceController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def createCommand(@RequestParam route: Route) = AddMonitoringPointSetCommand(route)
+	def createCommand(@PathVariable dept: Department) = AddMonitoringPointSetCommand(dept)
 
 	@RequestMapping(method=Array(GET,HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPointSet]) = {
-		Mav("manage/set/add_form").noLayoutIf(ajax)
+	def form(@PathVariable dept: Department) = {
+		// No type param so redirect back
+		Redirect("/manage/" + dept.code)
 	}
 
-	@RequestMapping(method=Array(GET,HEAD), params = Array("modal"))
-	def formModal(@ModelAttribute("command") cmd: Appliable[MonitoringPointSet]) = {
-		Mav("manage/set/add_form", "modal" -> true).noLayoutIf(ajax)
+	@RequestMapping(method=Array(GET,HEAD), params=Array("type=blank"))
+	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPointSet]) = {
+		Mav("manage/set/add_form", "createType" -> "blank")
 	}
 
 	@RequestMapping(method=Array(POST))
@@ -35,16 +36,6 @@ class AddMonitoringPointSetController extends AttendanceController {
 		} else {
 			cmd.apply()
 			Redirect("/manage/" + dept.code)
-		}
-	}
-
-	@RequestMapping(method=Array(POST), params = Array("modal"))
-	def submitModal(@PathVariable dept: Department, @Valid @ModelAttribute("command") cmd: Appliable[MonitoringPointSet], errors: Errors) = {
-		if (errors.hasErrors) {
-			formModal(cmd)
-		} else {
-			cmd.apply()
-			Mav("manage/set/add_form_success", "modal" -> true).noLayoutIf(ajax)
 		}
 	}
 

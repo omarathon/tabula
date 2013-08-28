@@ -4,15 +4,11 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
-import uk.ac.warwick.tabula.attendance.commands.GetMonitoringPointsCommand
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Route
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
-import org.springframework.scala.jdbc.core.JdbcCallbackConversions
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
 
 /**
  * Displays the screen for selecting a route+year and displaying the monitoring
@@ -31,7 +27,7 @@ class ManageMonitoringPointsController extends AttendanceController {
 		val routes = pointSetsForThisYearByRoute.keySet
 		Mav("manage/home",
 			"department" -> dept,
-			"setCount" -> dept.routes.asScala.map{r => r.monitoringPointSets.asScala.filter(s => s.academicYear.equals(academicYear)).size}.sum,
+			"setCount" -> dept.routes.asScala.map{r => r.monitoringPointSets.asScala.count(s => s.academicYear.equals(academicYear))}.sum,
 			"academicYear" -> academicYear,
 			"routesWithSets" -> routes,
 			"pointSetsForThisYearByRoute" -> pointSetsForThisYearByRoute.map{case (r, s) => r.code -> s}

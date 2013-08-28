@@ -11,7 +11,7 @@
 	</label>
 </form>
 
-<form action="<@url page="/manage/${department.code}/sets/create"/>">
+<form action="<@url page="/manage/${department.code}/sets/add"/>">
 	<h2>Create monitoring schemes</h2>
 	<label>
 		<input type="radio" name="type" value="blank"/>
