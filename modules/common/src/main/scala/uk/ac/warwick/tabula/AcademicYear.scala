@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula
-import org.joda.time.DateTime
+import org.joda.time.{DateTimeConstants, DateMidnight, DateTime}
 import org.joda.time.DateTimeConstants._
 import java.beans.PropertyEditorSupport
 
@@ -40,6 +40,15 @@ case class AcademicYear(val startYear: Int) extends Ordered[AcademicYear] {
 		Iterable.iterate(first, length) { y => y.next }.toSeq
 	}
 
+	/**
+	 * Returns a date guaranteed* to be some time in the first term of the specified year,
+	 * suitable for passing to TermFactory.getAcademicWeeksForYear
+	 *
+	 *  *Restrictions apply. Always read the small print. We are confident
+	 *   that November 1st is always in term 1 of the year
+	 */
+	def dateInTermOne =	new DateMidnight(startYear, DateTimeConstants.NOVEMBER, 1)
+
 	def compare(that:AcademicYear): Int = {
 			this.startYear - that.startYear
 	}
@@ -71,6 +80,15 @@ object AcademicYear {
 		case y => 2000 + y
 	}
 
+
+	/**
+	 * n.b. this does *not* tell you what academic year the date "now" lies within.
+	 *
+	 * e.g. Sept. 1st 2012 (Academic week 48, year 2011-12) will return year 2012-13.
+	 *
+	 * This function returns the year based on when SITS rolls over,
+	 * not when the academic year starts/stops
+	 */
 	def guessByDate(now: DateTime) = {
 		if (now.getMonthOfYear() >= AUGUST) {
 			new AcademicYear(now.getYear())

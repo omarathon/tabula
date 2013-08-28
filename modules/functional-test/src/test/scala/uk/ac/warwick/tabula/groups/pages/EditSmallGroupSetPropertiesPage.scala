@@ -27,7 +27,8 @@ class AllocateStudentsToGroupsPage(implicit val webDriver:WebDriver)extends WebB
 	}
 
 	def findAllUnallocatedStudents =  {
-		findAll(cssSelector("div#studentslist ul li"))
+		val s= findAll(cssSelector("div.student-list ul li"))
+		s
 	}
 
 	def findFilterCheckboxes(filterAttribute:Option[String], filterValue:Option[String]):Seq[Element]={

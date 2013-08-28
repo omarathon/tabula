@@ -302,6 +302,7 @@
 								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
 								<include>profiles-render.js</include>
 								<include>profiles-admin.js</include>
+								<include>fullcalendar.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>
