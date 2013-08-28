@@ -71,7 +71,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 	// end of complicated membership stuff
 		
 	// A collection of sub-commands for modifying the child groups
-	var groups: JList[ModifySmallGroupCommand] = LazyLists.withFactory { () => 
+	var groups: JList[ModifySmallGroupCommand] = LazyLists.create { () => 
 		new CreateSmallGroupCommand(this, module, this)
 	}
 	

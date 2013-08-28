@@ -45,8 +45,11 @@ trait KnowsEventName {
 	val eventName: String
 }
 
-trait Notifies[A] {
-	def emit: Seq[Notification[A]]
+/**
+ * Takes an A (usually the result of a Command) and generates notifications for Bs. Often, A == B.
+ */
+trait Notifies[A, B] {
+	def emit(result: A): Seq[Notification[B]]
 }
 trait Appliable[A]{
   def apply():A

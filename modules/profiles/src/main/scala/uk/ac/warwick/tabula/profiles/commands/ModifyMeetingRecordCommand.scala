@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.Features
 
 abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship, val considerAlternatives: Boolean = false)
-	extends Command[MeetingRecord] with Notifies[MeetingRecord] with SelfValidating with FormattedHtml
+	extends Command[MeetingRecord] with Notifies[MeetingRecord, MeetingRecord] with SelfValidating with FormattedHtml
 	with BindListener with Daoisms {
 
 	var features = Wire.auto[Features]

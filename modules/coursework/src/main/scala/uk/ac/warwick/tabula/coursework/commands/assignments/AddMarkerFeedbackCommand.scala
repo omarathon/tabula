@@ -19,9 +19,9 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 	PermissionCheck(Permissions.Feedback.Create, assignment)
 
 	// list to contain feedback files that are not for a student you should be marking
-	var invalidStudents: JList[FeedbackItem] = LazyLists.simpleFactory()
+	var invalidStudents: JList[FeedbackItem] = LazyLists.create()
 	// list to contain feedback files that are  for a student that has already been completed
-	var markedStudents: JList[FeedbackItem] = LazyLists.simpleFactory()
+	var markedStudents: JList[FeedbackItem] = LazyLists.create()
 
 	val submissions = assignment.getMarkersSubmissions(submitter.apparentUser)
 

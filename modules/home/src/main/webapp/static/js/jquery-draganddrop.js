@@ -39,6 +39,22 @@ Example (showing some optional extras as below)
       <ul class="drag-list hide" data-bindpath=command.tutor></ul>
     </div>
   </div>
+  
+Options: (all of these options can be set as data- attributes)
+ - itemName (default: item): 
+ 			 The name of the items being drag and dropped, for tooltips and help text
+ - textSelector: 
+ 			 If set, is used as a selector to find the text representation of an item
+ - useHandle (default: true): 
+ 			 If set to true, adds a handle to each item (see 'handle' option for class name/selector)
+ - handle (default: .handle): 
+ 			 See useHandle
+ - selectables (default: .drag-list): 
+ 			 Selector for selectable elements
+ - removeTooltip: 
+ 			 Tooltip to be used for removing items
+ - scroll (default: false): 
+ 			 Passed through to created draggables as the 'scroll' option
 
 Optional extras:
  - Counter: add a .drag-count element and it will be kept up to date
@@ -47,15 +63,17 @@ Optional extras:
        listing all the items. Use this in conjunction with hiding the
        list itself (by adding .hide to .drag-list)
  - Return items: Add .return-list to ONE .drag-list then add a
-       .return-items button; it will be wired to move all items into
+       .return-items button (or set data-toggle="return"); it will be wired to move all items into
        that list.
+ - Randomise items: Add a .random button (or set data-toggle="randomise");
+ 			 it will be wired to randomly allocate items.
 
 Method calls (after initialising):
 
  - $('#tutee-widget').dragAndDrop('return')
         Returns items, same as .return-items button.
-
-TODO: More options; Random allocation function.
+ - $('#tutee-widget').dragAndDrop('randomise')
+        Randomise items, same as .random button.
 
 */
 (function($){ "use strict";
@@ -63,8 +81,18 @@ TODO: More options; Random allocation function.
     var DataName = "tabula-dnd";
 
     var DragAndDrop = function(element, options) {
+    		var $el = $(element);
+
     		if (options && typeof(options) === 'object') this.options = options;
     		else this.options = {};
+
+    		// Allow data- attributes to be set as options, but override-able by any passed to the method
+    		//
+            // n.b. calling $el.data() may cause problems with HTMLUnit tests that try and select the element that $el
+            // refers to by its ID.
+            // If this causes test failures, then extract each required option manually with $data("option-name") - see
+            // jquery-filteredlist.js for an example
+    		this.options = $.extend({}, $el.data(), this.options);
 
 				var itemName = this.options.itemName || 'item';
 				var textSelector = this.options.textSelector;
@@ -76,7 +104,6 @@ TODO: More options; Random allocation function.
 
         var sortables = '.drag-list';
         var selectables = this.options.selectables || sortables;
-        var $el = $(element);
         var self = this;
         var first_rows = {};
 
@@ -167,12 +194,46 @@ TODO: More options; Random allocation function.
         };
 
         // Wire button to trigger returnItems
-        $el.find('.return-items').click(function(e) {
+        $el.find('.return-items, [data-toggle="return"]').click(function(e) {
             self.returnItems();
 
 						e.preventDefault();
 						e.stopPropagation();
 						return false;
+        });
+        
+        // Wire button to trigger randomise
+        $el.find('.random, [data-toggle="randomise"]').click(function(e) {
+            self.randomise();
+
+						e.preventDefault();
+						e.stopPropagation();
+						return false;
+        });
+        
+        // Automatically disabled/enabled buttons
+        $el.find('[data-disabled-on]').each(function(e) {
+        	var $button = $(this);
+        	var trigger = $button.data('disabledOn');
+        	
+        	$el.on('changed.tabula', function() {
+        		var $sourceList = $returnList;
+            var $targets = $el.find(sortables).not('.return-list');
+            
+            var unallocatedCount = $sourceList.find("li").length;
+            var allocatedCount = $targets.find("li").length;
+            
+            switch (trigger) {
+            	case 'empty-list':
+            		if (unallocatedCount > 0) $button.removeClass('disabled');
+            		else $button.addClass('disabled');
+            		break;
+            	case 'no-allocation':
+            		if (allocatedCount > 0) $button.removeClass('disabled');
+            		else $button.addClass('disabled');
+            		break;
+            }
+        	});
         });
 
 				var deleteLinkHtml;
@@ -245,13 +306,17 @@ TODO: More options; Random allocation function.
             var $link = $(this);
             // the popover list item
             var $li = $link.closest('li');
-            var id = $li.data('item-id');
+            
+            // use .attr() rather than .data() to avoid implicit type conversion
+            var id = $li.attr('data-item-id'); 
+            
             // the underlying list item
             var $realLi = $li
                 .closest('.drag-target')
                 .find('input')
                 .filter(function(){ return this.value === id; })
                 .closest('li');
+            
             returnItem($realLi);
             return false;
         });

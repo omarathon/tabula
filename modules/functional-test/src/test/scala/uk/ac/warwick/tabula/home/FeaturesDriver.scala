@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.home
 import uk.ac.warwick.tabula.BrowserTest
 import org.openqa.selenium.By
 
-class FeaturesDriver extends BrowserTest{
+trait FeaturesDriver extends BrowserTest{
 
 	def setFeatureState(name:String, state:Boolean){
 		signIn as(P.Sysadmin) to (Path("/sysadmin/features"))
@@ -14,16 +14,12 @@ class FeaturesDriver extends BrowserTest{
 		// possibly we should wait a while here to ensure that all apps have received the message.
 		// even better would be to register our own JMS consumer and wait until *we* see the message
 	}
-}
-object FeaturesDriver{
-	val driver = new FeaturesDriver
-
 	def enableFeature(name:String){
-		driver.setFeatureState(name, true)
+		setFeatureState(name, true)
 	}
 
 	def disableFeature(name:String){
-		driver.setFeatureState(name, false)
+		setFeatureState(name, false)
 	}
 
 }

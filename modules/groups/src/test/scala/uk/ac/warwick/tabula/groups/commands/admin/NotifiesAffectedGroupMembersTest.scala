@@ -111,7 +111,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
     val modifiedGroupA = groupA.withEvents(Seq(event)).build
     command.set.groups = JArrayList(modifiedGroupA, groupB)
 
-    val notifications = command.emit
+    val notifications = command.emit(command.set)
     notifications.size should be(2)
 
     notifications.exists(_.recipients == Seq(user1)) should be(true)
@@ -128,7 +128,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
     val modifiedGroupA = groupA.withEvents(Seq(event)).build
     cmd.set.groups = JArrayList(modifiedGroupA, groupB)
 
-    cmd.emit should be(Nil)
+    cmd.emit(cmd.set) should be(Nil)
   }}
 
   @Test

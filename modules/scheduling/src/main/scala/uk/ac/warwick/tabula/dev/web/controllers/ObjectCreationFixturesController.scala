@@ -58,6 +58,20 @@ class SmallGroupSetMembershipCreationFixturesController {
 }
 
 @Controller
+@RequestMapping(Array("/fixtures/create/groupEvent"))
+class SmallGroupEventCreationFixturesController {
+
+	@ModelAttribute("createEventCommand")
+	def getCreateEventCommand(): Appliable[Unit] = {
+		SmallGroupEventFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createEventCommand") cmd: Appliable[Unit]) {
+		cmd.apply()
+	}
+}
+@Controller
 @RequestMapping(Array("/fixtures/create/groupMembership"))
 class SmallGroupMembershipCreationFixturesController {
 
@@ -99,6 +113,21 @@ class RouteCreationFixturesController {
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("createRouteCommand") cmd: Appliable[Unit]) {
+		cmd.apply()
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/create/course"))
+class CourseCreationFixturesController {
+
+	@ModelAttribute("createCourseCommand")
+	def getCreatecourseCommand(): Appliable[Unit] = {
+		CourseCreationFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createCourseCommand") cmd: Appliable[Unit]) {
 		cmd.apply()
 	}
 }

@@ -108,7 +108,7 @@ object RelationshipType {
 
 	def fromCode(code: String) = code match {
 	  	case PersonalTutor.dbValue => PersonalTutor
-			case "tutor"=>PersonalTutor // match the term used in URLs
+			case "tutor" => PersonalTutor // match the term used in URLs
 	  	case Supervisor.dbValue => Supervisor
 	  	case null => null
 	  	case _ => throw new IllegalArgumentException()

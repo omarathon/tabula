@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.profiles.commands.TutorTemplateCommand
+import uk.ac.warwick.tabula.profiles.commands.tutor.TutorTemplateCommand
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 
 @Controller
