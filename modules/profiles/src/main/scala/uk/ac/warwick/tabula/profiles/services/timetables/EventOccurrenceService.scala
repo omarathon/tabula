@@ -32,11 +32,12 @@ object EventOccurrence {
 		)
 	}
 }
+trait EventOccurrenceService{
+	def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence]
+}
 trait EventOccurrenceServiceComponent{
 	val eventOccurrenceService:EventOccurrenceService
-	trait EventOccurrenceService{
-		def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence]
-	}
+
 }
 trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
 	this: WeekToDateConverterComponent with TermFactoryComponent =>

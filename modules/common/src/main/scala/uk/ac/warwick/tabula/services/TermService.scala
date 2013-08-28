@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
-import uk.ac.warwick.util.termdates.{Term, TermFactoryImpl}
+import uk.ac.warwick.util.termdates.{TermFactory, Term, TermFactoryImpl}
 import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.spring.Wire
 
@@ -9,7 +9,7 @@ import uk.ac.warwick.spring.Wire
  * Wraps TermFactory and adds more features.
  */
 @Service
-class TermService {
+class TermService extends TermFactory{
 	val termFactory = new TermFactoryImpl
 
 	def getTermFromDate(date: BaseDateTime) = termFactory.getTermFromDate(date)

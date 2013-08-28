@@ -8,10 +8,20 @@ import org.springframework.web.bind.annotation.{RequestParam, RequestMapping}
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
+import uk.ac.warwick.tabula.profiles.services.timetables.{AutowiringScientiaConfigurationComponent, ScientiaHttpTimetableFetchingServiceComponent, SmallGroupEventTimetableEventSourceComponentImpl, CombinedStudentTimetableEventSourceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
 
 @Controller
 @RequestMapping(value = Array("/timetable"))
 class TimetableController extends ProfilesController {
+
+	// re-use the event source, so it can cache lookups between requests
+	val eventSource = (new CombinedStudentTimetableEventSourceComponent
+		with SmallGroupEventTimetableEventSourceComponentImpl
+		with ScientiaHttpTimetableFetchingServiceComponent
+		with AutowiringSmallGroupServiceComponent
+		with AutowiringUserLookupComponent
+		with AutowiringScientiaConfigurationComponent).studentTimetableEventSource
 
 	@RequestMapping(value = Array("/api"))
 	def getEvents(@RequestParam from: Long, @RequestParam to: Long): Mav = {
@@ -20,7 +30,7 @@ class TimetableController extends ProfilesController {
 		val end = new DateTime(to * 1000).toLocalDate
 		currentMember match {
 			case student: StudentMember => {
-				val command = ViewStudentPersonalTimetableCommand()
+				val command = ViewStudentPersonalTimetableCommand(eventSource)
 				command.student = student
 				command.start = start
 				command.end = end
