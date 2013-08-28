@@ -7,5 +7,5 @@ trait TermFactoryComponent {
 	var termFactory:TermFactory
 }
 trait AutowiringTermFactoryComponent extends TermFactoryComponent{
-	var termFactory = Wire[TermFactory ]
+	var termFactory:TermFactory = Wire[TermService]
 }
