@@ -15,20 +15,34 @@ import uk.ac.warwick.tabula.permissions.Permissions
 //}
 object ViewRelatedStudentsCommand{
 	def apply(currentMember: Member, relationshipType: StudentRelationshipType): Command[Seq[StudentRelationship]] = {
-		  new ViewRelatedStudentsCommandInternal(currentMember, relationshipType)
-				with AutowiringRelationshipServiceComponent
+		new ViewRelatedStudentsCommandInternal(currentMember, relationshipType)
+			with ComposableCommand[Seq[StudentRelationship]]
+			with AutowiringRelationshipServiceComponent
+			with ViewRelatedStudentsCommandPermissions
+			with Unaudited
 	}
 }
 
+trait ViewRelatedStudentsCommandState {
+	val currentMember: Member
+	val relationshipType: StudentRelationshipType
+}
+
 class ViewRelatedStudentsCommandInternal(val currentMember: Member, val relationshipType: StudentRelationshipType)
-	extends CommandInternal[Seq[StudentRelationship]] with RequiresPermissionsChecking {
+	extends CommandInternal[Seq[StudentRelationship]] with ViewRelatedStudentsCommandState {
 
 	this: RelationshipServiceComponent =>
-		
-	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(relationshipType), currentMember)
 
 	def applyInternal(): Seq[StudentRelationship] = transactional(readOnly = true) {
 		relationshipService.listStudentRelationshipsWithMember(relationshipType, currentMember)
 	}
 
+}
+
+trait ViewRelatedStudentsCommandPermissions extends RequiresPermissionsChecking {
+	this: ViewRelatedStudentsCommandState =>
+
+	def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(relationshipType), currentMember)
+	}
 }
