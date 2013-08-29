@@ -10,7 +10,7 @@ create table moduleregistration (
   hib_version number
 );
 
-create unique index idx_moduleregistration_notional_key on moduleregistration(sprcode, modulecode, academicyear, cats);
+create unique index idx_modreg_notional_key on moduleregistration(sprcode, modulecode, academicyear, cats);
 
 alter table studentcourseyeardetails add modregstatus nvarchar2(10);
 

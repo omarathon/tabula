@@ -166,7 +166,8 @@ class SandboxProfileImporter extends ProfileImporter {
 			"year_of_study" -> ((member.universityId.toLong % 3) + 1).toInt,
 			"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
 			"sce_academic_year" -> AcademicYear.guessByDate(DateTime.now).toString,
-			"sce_sequence_number" -> 1
+			"sce_sequence_number" -> 1,
+			"mod_reg_status" -> "CON"
 		))
 		new ImportStudentRowCommand(mac, ssoUser, rs, new ImportStudentCourseCommand(rs, new ImportStudentCourseYearCommand(rs), new ImportSupervisorsForStudentCommand()))
 	}
