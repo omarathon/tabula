@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.scheduling.services.SitsStatusInfo
 import uk.ac.warwick.tabula.data.model.ModuleRegistration
 import uk.ac.warwick.tabula.data.ModuleRegistrationDao
 import uk.ac.warwick.tabula.scheduling.services.ModuleRegistrationRow
+import uk.ac.warwick.tabula.AcademicYear
 
 class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends Command[ModuleRegistration] with Logging
 	with Unaudited with PropertyCopying {
@@ -28,12 +29,12 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 	var sprCode = modRegRow.sprCode
 	var moduleCode = modRegRow.tabulaModuleCode
 	var academicYear = modRegRow.academicYear
-	var cats = modRegRow.cats
+	var cats: Double = modRegRow.cats
 	var assessmentGroup = modRegRow.assessmentGroup
 	var selectionStatusCode = modRegRow.selectionStatusCode
 
 	override def applyInternal(): ModuleRegistration = transactional() ({
-		val moduleRegistrationExisting = moduleRegistrationDao.getByNotionalKey(sprCode, moduleCode, academicYear)
+		val moduleRegistrationExisting: Option[ModuleRegistration] = moduleRegistrationDao.getByNotionalKey(sprCode, moduleCode, cats, academicYear)
 
 		logger.debug("Importing module registration for student " + sprCode + ", module " + moduleCode + " in " + academicYear)
 
@@ -41,7 +42,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 
 		val moduleRegistration = moduleRegistrationExisting match {
 			case Some(moduleRegistration: ModuleRegistration) => moduleRegistration
-			case _ => new ModuleRegistration(sprCode, moduleCode, academicYear)
+			case _ => new ModuleRegistration(sprCode, moduleCode, academicYear, cats)
 		}
 
 		val commandBean = new BeanWrapperImpl(ImportModuleRegistrationsCommand.this)
@@ -60,7 +61,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 	})
 
 	private val properties = Set(
-		"sprCode", "moduleCode", "academicYear", "cats", "assessmentGroup", "selectionStatusCode"
+		"assessmentGroup", "selectionStatusCode"
 	)
 
 	override def describe(d: Description) = d.properties(

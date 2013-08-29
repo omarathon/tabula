@@ -74,6 +74,8 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 	this.modeOfAttendanceCode = rs.getString("mode_of_attendance_code")
 	this.academicYearString = rs.getString("sce_academic_year")
 
+	this.modRegStatus = rs.getString("mod_reg_status")
+
 	override def applyInternal(): StudentCourseYearDetails = transactional() {
 		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKey(
 			studentCourseDetails,
@@ -102,7 +104,8 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 	}
 
 	private val basicStudentCourseYearProperties = Set(
-		"yearOfStudy"
+		"yearOfStudy",
+		"modRegStatus"
 		//,
 		//"fundingSource",
 		//"modeOfAttendance"

@@ -1,25 +1,30 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
-import scala.collection.JavaConversions._
+
+import scala.collection.JavaConversions.mapAsScalaMap
+import scala.collection.JavaConversions.seqAsJavaList
+
+import org.hibernate.annotations.AccessType
+
+import javax.persistence.Entity
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
-import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.Transactions.transactional
+import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.scheduling.services.CourseImporter
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
+import uk.ac.warwick.tabula.scheduling.services.ModuleRegistrationImporter
 import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
 import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
-import uk.ac.warwick.tabula.scheduling.services.CourseImporter
-import uk.ac.warwick.tabula.scheduling.services.ModuleRegistrationImporter
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.userlookup.User
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 
@@ -33,7 +38,6 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	var courseImporter = Wire.auto[CourseImporter]
 	var moduleRegistrationImporter = Wire.auto[ModuleRegistrationImporter]
-
 	var features = Wire.auto[Features]
 
 	val BatchSize = 250
@@ -114,7 +118,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 					if (importModRegCommands.isEmpty) logger.warn("Looking for module registrations for student " + membInfo.member.universityId + " but found no data to import.")
 					val moduleRegistrations = importModRegCommands map { _.apply }
 					session.flush
-					for (modReg <- moduleRegistrations) session.evict(member)
+					for (modReg <- moduleRegistrations) session.evict(modReg)
 
 				}
 				case None => logger.warn("Student is no longer in uow_current_members in membership - not updating")

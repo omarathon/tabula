@@ -354,7 +354,9 @@ object ProfileImporter {
 			sce.sce_blok as year_of_study,
 			sce.sce_moac as mode_of_attendance_code,
 			sce.sce_ayrc as sce_academic_year,
-			sce.sce_seq2 as sce_sequence_number
+			sce.sce_seq2 as sce_sequence_number,
+
+			ssn.ssn_mrgs as mod_reg_status
 
 		from intuit.ins_stu stu
 
@@ -383,6 +385,10 @@ object ProfileImporter {
 
 			left outer join intuit.srs_sta sts
 				on spr.sts_code = sts.sta_code
+
+			left outer join intuit.cam_ssn ssn
+				on spr.spr_code = ssn.ssn_sprc
+				and sce.sce_ayrc = ssn.ssn_ayrc
 
 		where stu.stu_udf3 in (:usercodes)
 		"""

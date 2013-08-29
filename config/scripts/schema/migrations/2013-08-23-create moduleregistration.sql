@@ -12,3 +12,5 @@ create table moduleregistration (
 
 create unique index idx_moduleregistration_notional_key on moduleregistration(sprcode, modulecode, academicyear, cats);
 
+alter table studentcourseyeardetails add modregstatus nvarchar2(10);
+
