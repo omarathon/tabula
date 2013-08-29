@@ -8,7 +8,7 @@ import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
 
 /*
- * sprCode, moduleCode and academicYear are a notional key for this table but giving it a generated ID to be
+ * sprCode, moduleCode, cat score and academicYear are a notional key for this table but giving it a generated ID to be
  * consistent with the other tables in Tabula which all have a key that's a single field.  In the db, there should be
  * a unique constraint on the combination of those three.
  */

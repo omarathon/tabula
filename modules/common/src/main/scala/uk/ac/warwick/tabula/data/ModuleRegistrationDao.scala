@@ -19,10 +19,10 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 
 /*	def getByNotionalKey(sprCode: String, moduleCode: String, academicYear: AcademicYear, cats: java.math.BigDecimal) = {
 		session.newCriteria[ModuleRegistration]
-			//.add(is("sprCode", sprCode))
-			//.add(is("moduleCode", moduleCode))
-			//.add(is("academicYear", academicYear))
-			//.add(is("cats", cats))
+			.add(is("sprCode", sprCode))
+			.add(is("moduleCode", moduleCode))
+			.add(is("academicYear", academicYear))
+			.add(is("cats", cats))
 			.uniqueResult
 	}*/
 

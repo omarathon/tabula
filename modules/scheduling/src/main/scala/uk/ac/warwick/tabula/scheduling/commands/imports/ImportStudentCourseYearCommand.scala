@@ -106,9 +106,6 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 	private val basicStudentCourseYearProperties = Set(
 		"yearOfStudy",
 		"modRegStatus"
-		//,
-		//"fundingSource",
-		//"modeOfAttendance"
 	)
 
 	private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studentCourseYearBean: BeanWrapper) = {
