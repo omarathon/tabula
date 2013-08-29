@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers.relationships
 import org.springframework.web.bind.annotation.{PathVariable, InitBinder, ModelAttribute}
 import uk.ac.warwick.tabula.profiles.commands.{ViewMeetingRecordCommand, ModifyMeetingRecordCommand, CreateMeetingRecordCommand}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.profiles.web.controllers.{CurrentMemberComponent, ProfilesController}
+import uk.ac.warwick.tabula.profiles.web.controllers.CurrentMemberComponent
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.Transactions._
@@ -20,7 +20,8 @@ import uk.ac.warwick.tabula.web.controllers.{ControllerViews, ControllerImports,
 
 trait MeetingRecordModal  {
 
-	this:ProfileServiceComponent with RelationshipServiceComponent with ControllerMethods with ControllerImports with CurrentMemberComponent with ControllerViews=>
+	this:ProfileServiceComponent with RelationshipServiceComponent with ControllerMethods with ControllerImports
+		with CurrentMemberComponent with ControllerViews=>
 	/**
 	 * Contains all of the request mappings needed to drive meeting record modals (including iframe stuff)
 	 *

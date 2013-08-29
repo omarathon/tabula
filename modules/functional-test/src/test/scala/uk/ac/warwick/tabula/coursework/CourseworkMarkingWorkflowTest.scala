@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework
 
 import scala.collection.JavaConverters._
-import org.scalatest.{GivenWhenThen, BeforeAndAfter, BeforeAndAfterAll}
+import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 import org.openqa.selenium.By
 

@@ -239,7 +239,10 @@ class ReleaseSmallGroupSetController extends GroupsController {
 class OpenSmallGroupSetController extends GroupsController {
 	
 	@ModelAttribute("openGroupSetCommand")
-	def getOpenGroupSetCommand(@PathVariable("set") set: SmallGroupSet, @PathVariable action: SmallGroupSetSelfSignUpState): Appliable[Seq[SmallGroupSet]] with OpenSmallGroupSetState = {
+	def getOpenGroupSetCommand(
+		@PathVariable("set") set: SmallGroupSet,
+		@PathVariable action: SmallGroupSetSelfSignUpState
+	): Appliable[Seq[SmallGroupSet]] with OpenSmallGroupSetState = {
 		OpenSmallGroupSetCommand(Seq(set), user.apparentUser, action)
 		
 	}

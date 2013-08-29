@@ -9,8 +9,6 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.services.SecurityService
@@ -22,10 +20,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.commands.GroupsObjects
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.profiles.services.docconversion.RawStudentRelationshipExtractor
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
@@ -152,13 +148,17 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	final def applyInternal() = transactional() {
 		val addCommands = (for ((agent, students) <- mapping.asScala; student <- students.asScala) yield {
 			student.mostSignificantCourseDetails.map { studentCourseDetails => 
-				val cmd = new EditStudentRelationshipCommand(studentCourseDetails, relationshipType, service.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode).headOption.flatMap { _.agentMember }, viewer, false)
+				val cmd = new EditStudentRelationshipCommand(
+					studentCourseDetails, 
+					relationshipType, 
+					service.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode
+				).headOption.flatMap { _.agentMember }, viewer, false)
 				cmd.agent = agent
 				cmd
 			}
 		}).toSeq.flatten
 		
-		val removeCommands = (unallocated.asScala.flatMap { student =>
+		val removeCommands = unallocated.asScala.flatMap { student =>
 			student.mostSignificantCourseDetails.map { studentCourseDetails =>
 				val rels = service.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode)
 				val agents = rels.flatMap { _.agentMember }
@@ -169,7 +169,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 					cmd
 				}
 			}
-		}).toSeq.flatten
+		}.toSeq.flatten
 		
 		(addCommands ++ removeCommands).map { cmd =>
 			/*

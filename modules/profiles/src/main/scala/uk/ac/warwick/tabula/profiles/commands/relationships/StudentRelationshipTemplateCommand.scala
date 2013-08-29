@@ -18,13 +18,6 @@ import org.apache.poi.ss.util.CellRangeAddressList
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper
 import org.apache.poi.xssf.usermodel.XSSFDataValidationConstraint
 import org.apache.poi.xssf.usermodel.XSSFDataValidation
-import javax.persistence.DiscriminatorColumn
-import javax.persistence.DiscriminatorValue
-import javax.persistence.Entity
-import javax.persistence.Inheritance
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.FilterDefs
-import org.hibernate.annotations.Filters
 import scala.Option.option2Iterable
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
@@ -93,7 +86,9 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 			val agentNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown agent name
 			agents.headOption.flatMap { _.fullName }.foreach(agentNameCell.setCellValue(_))
 			
-			row.createCell(3).setCellFormula("IF(ISTEXT($C"+(row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")")
+			row.createCell(3).setCellFormula(
+				"IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + agentLookupRange + ", 2, FALSE), \" \")"
+			)
 		}
 
 		formatWorkbook(workbook)

@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.coursework
 
-import scala.collection.JavaConverters._
-import org.scalatest.BeforeAndAfter
 import uk.ac.warwick.tabula.BrowserTest
 import org.openqa.selenium.By
 

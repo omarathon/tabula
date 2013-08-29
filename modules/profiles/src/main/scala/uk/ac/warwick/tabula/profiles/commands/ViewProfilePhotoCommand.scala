@@ -85,7 +85,8 @@ class RenderableFileReference(ref: RenderableFile, prefix: String) extends Abstr
 	override def unlink() { ??? }
 }
 
-class ViewProfilePhotoCommand(val member: Member) extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited with ResizesPhoto {
+class ViewProfilePhotoCommand(val member: Member)
+	extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited with ResizesPhoto {
 
 	PermissionCheck(Permissions.Profiles.Read.Core, mandatory(member))
 
@@ -100,8 +101,9 @@ class ViewProfilePhotoCommand(val member: Member) extends Command[RenderableFile
 
 }
 
-class ViewStudentRelationshipPhotoCommand(val member: Member, val relationship: StudentRelationship) extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited  with ResizesPhoto {
-	
+class ViewStudentRelationshipPhotoCommand(val member: Member, val relationship: StudentRelationship)
+	extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited  with ResizesPhoto {
+
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(relationship.relationshipType), member)
 
 	override def applyInternal() = {

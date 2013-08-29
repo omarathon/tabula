@@ -11,7 +11,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.SmallGroupService
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-class CreateSmallGroupCommand(groupSet: Promise[SmallGroupSet], module: Module, properties: SmallGroupSetProperties) extends ModifySmallGroupCommand(module, properties) {
+class CreateSmallGroupCommand(groupSet: Promise[SmallGroupSet], module: Module, properties: SmallGroupSetProperties)
+	extends ModifySmallGroupCommand(module, properties) {
 	
 	PermissionCheck(Permissions.SmallGroups.Create, module)
 

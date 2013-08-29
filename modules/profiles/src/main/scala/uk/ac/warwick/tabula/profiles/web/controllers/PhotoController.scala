@@ -27,7 +27,8 @@ class PhotoController extends ProfilesController {
 	@ModelAttribute("viewProfilePhotoCommand") def command(@PathVariable("member") member: Member) = new ViewProfilePhotoCommand(member)
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getPhoto(@ModelAttribute("viewProfilePhotoCommand") command: ViewProfilePhotoCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+	def getPhoto(@ModelAttribute("viewProfilePhotoCommand") command: ViewProfilePhotoCommand)
+							(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		// specify callback so that audit logging happens around file serving
 		command.apply { (renderable) => fileServer.stream(renderable) }
 	}
@@ -44,11 +45,12 @@ class StudentRelationshipPhotoController extends ProfilesController {
 	def command(
 		@PathVariable("sprCode") sprCode: String,
 		@PathVariable("relationshipType") relationshipType: StudentRelationshipType,
-		@PathVariable("agent") agent: String) = {
+		@PathVariable("agent") agent: String
+	) = {
 			val relationships = relationshipService.findCurrentRelationships(relationshipType, sprCode)
 			val relationship = relationships.find(_.agent == agent) getOrElse(throw new ItemNotFoundException)
 
-			var cmd = profileService.getStudentBySprCode(sprCode) match {
+			profileService.getStudentBySprCode(sprCode) match {
 				case Some(student: Member) => {
 					new ViewStudentRelationshipPhotoCommand(student, relationship)
 				}
@@ -60,7 +62,8 @@ class StudentRelationshipPhotoController extends ProfilesController {
 	}
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def getPhoto(@ModelAttribute("viewStudentRelationshipPhotoCommand") command: ViewStudentRelationshipPhotoCommand)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
+	def getPhoto(@ModelAttribute("viewStudentRelationshipPhotoCommand") command: ViewStudentRelationshipPhotoCommand)
+							(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		// specify callback so that audit logging happens around file serving
 		command.apply { (renderable) => fileServer.stream(renderable) }
 	}

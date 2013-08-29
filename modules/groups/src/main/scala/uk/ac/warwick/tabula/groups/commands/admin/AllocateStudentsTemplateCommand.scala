@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.web.views.ExcelView
 import org.apache.poi.ss.util.CellRangeAddressList
-import org.apache.poi.ss.usermodel.CellStyle
 
 class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSet, viewer: CurrentUser)
 		extends Command[ExcelView] with ReadOnly with Unaudited {
@@ -58,7 +57,9 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 				createUnprotectedCell(workbook, row, 2) // cell for the group name
 			}
 
-			row.createCell(3).setCellFormula("IF(ISTEXT($C"+(row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + groupLookupRange + ", 2, FALSE), \" \")")
+			row.createCell(3).setCellFormula(
+				"IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + groupLookupRange + ", 2, FALSE), \" \")"
+			)
 		}
 
 		formatWorkbook(workbook)
