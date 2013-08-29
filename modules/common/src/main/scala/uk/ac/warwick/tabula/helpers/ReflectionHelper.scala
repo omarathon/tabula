@@ -50,6 +50,7 @@ object ReflectionHelper {
 			.map { clz =>
 				val constructor = clz.getConstructors()(0)
 				val params = constructor.getParameterTypes().map {
+					// FIXME hardcoded to the only type of permissions selector we have atm
 					case clz if clz == classOf[PermissionsSelector[StudentRelationshipType]] => PermissionsSelector.Any[StudentRelationshipType]
 					case clz => clz.newInstance().asInstanceOf[Object]
 				}

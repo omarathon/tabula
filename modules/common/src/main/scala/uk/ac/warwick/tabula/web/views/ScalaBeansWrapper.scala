@@ -102,7 +102,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
         val restrictionProviderAnnotation = m.getAnnotation(classOf[RestrictionProvider])
 				val perms: PermissionsFetcher =
 					if (restrictedAnnotation != null) {
-              (_)=>restrictedAnnotation.value map { name => Permissions.of(name) }
+              (_) => restrictedAnnotation.value map { name => Permissions.of(name) }
           }
           else if (restrictionProviderAnnotation != null){
             Try(cls.getMethod(restrictionProviderAnnotation.value())) match{

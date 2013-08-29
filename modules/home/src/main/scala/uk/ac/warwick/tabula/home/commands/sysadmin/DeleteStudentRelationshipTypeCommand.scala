@@ -47,7 +47,7 @@ class DeleteStudentRelationshipTypeCommandInternal(val relationshipType: Student
 
 trait DeleteStudentRelationshipTypeCommandPermissions extends RequiresPermissionsChecking {
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.StudentRelationshipType.Read)
+		p.PermissionCheck(Permissions.StudentRelationshipType.Delete)
 	}
 }
 

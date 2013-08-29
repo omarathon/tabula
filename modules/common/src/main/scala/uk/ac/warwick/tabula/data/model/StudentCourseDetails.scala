@@ -78,7 +78,8 @@ class StudentCourseDetails
 
 	def courseType = CourseType.fromCourseCode(course.code)
 
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core")) // TODO perms?
+	// We can't restrict this because it's not a getter. Restrict in 
+	// view code if necessary (or implement for all methods in  ScalaBeansWrapper)
 	def relationships(relationshipType: StudentRelationshipType) =
 		relationshipService.findCurrentRelationships(relationshipType, this.sprCode)
 
