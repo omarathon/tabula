@@ -21,7 +21,7 @@
 					</div>
 					<div class="span1">
 						<div class="full-height">
-							<input type="checkbox" name="students" value="${student.universityId}" <#if checked>checked="checked"</#if>/>
+							<input type="checkbox" name="studentIds" value="${student.universityId}" <#if checked>checked="checked"</#if>/>
 						</div>
 					</div>
 				</label>
