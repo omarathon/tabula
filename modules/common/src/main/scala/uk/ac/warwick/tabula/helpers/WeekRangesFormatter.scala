@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import freemarker.template.{ TemplateModel, TemplateMethodModelEx }
 import freemarker.template.utility.DeepUnwrap
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.{TermService, UserSettingsService}
+import uk.ac.warwick.tabula.services.{Vacation, TermService, UserSettingsService}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 
 
@@ -111,7 +111,12 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(event.group.groupSet.module.department))
 
 			case Seq(monitoringPoint: MonitoringPoint) => {
-				format(Seq(WeekRange(monitoringPoint.week,monitoringPoint.week)), DayOfWeek(1), monitoringPoint.pointSet.academicYear, numberingSystem(monitoringPoint.pointSet.route.department))
+				format(
+					Seq(WeekRange(monitoringPoint.week,monitoringPoint.week)),
+					DayOfWeek(1),
+					monitoringPoint.pointSet.academicYear,
+					numberingSystem(monitoringPoint.pointSet.route.department)
+				)
 			}
 
 			case Seq(week: Integer, monitoringPointSet: MonitoringPointSet) => {
@@ -313,26 +318,4 @@ class WeekRangeSelectFormatterTag extends TemplateMethodModelEx {
 				case _ => throw new IllegalArgumentException("Bad args: " + args)
 			}
 		}
-}
-
-
-/** Special implementation of Term to encapsulate the idea of a Vacation.
-  * Our default TermFactory doesn't care about Vacations, it returns the
-  * next term if you give it a date before a vacation.
-  */
-case class Vacation(before: Term, after: Term) extends Term {
-	// Starts the day after the previous term and ends the day before the new term
-	def getStartDate = before.getEndDate().plusDays(1)
-	def getEndDate = after.getStartDate().minusDays(1)
-
-	def getTermType = null
-	def getTermTypeAsString = before.getTermType match {
-		case Term.TermType.autumn => "Christmas vacation"
-		case Term.TermType.spring => "Easter vacation"
-		case Term.TermType.summer => "Summer vacation"
-	}
-
-	def getWeekNumber(date: BaseDateTime) = throw new IllegalStateException("Can't get week numbers from a vacation")
-	def getCumulativeWeekNumber(date: BaseDateTime) = throw new IllegalStateException("Can't get week numbers from a vacation")
-	def getAcademicWeekNumber(date: BaseDateTime) = after.getAcademicWeekNumber(date)
 }
