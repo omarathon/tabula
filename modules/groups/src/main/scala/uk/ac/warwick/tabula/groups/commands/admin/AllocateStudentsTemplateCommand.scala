@@ -58,7 +58,7 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 			}
 
 			row.createCell(3).setCellFormula(
-				"IF(ISTEXT($C"+(row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + groupLookupRange + ", 2, FALSE), \" \")"
+				"IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + groupLookupRange + ", 2, FALSE), \" \")"
 			)
 		}
 

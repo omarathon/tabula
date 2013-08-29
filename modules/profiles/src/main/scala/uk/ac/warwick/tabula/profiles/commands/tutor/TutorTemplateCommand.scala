@@ -87,7 +87,7 @@ class TutorTemplateCommand(val department: Department) extends Command[ExcelView
 			tutors.headOption.flatMap { _.fullName }.foreach(tutorNameCell.setCellValue(_))
 			
 			row.createCell(3).setCellFormula(
-				"IF(ISTEXT($C"+(row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + tutorLookupRange + ", 2, FALSE), \" \")"
+				"IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + tutorLookupRange + ", 2, FALSE), \" \")"
 			)
 		}
 
