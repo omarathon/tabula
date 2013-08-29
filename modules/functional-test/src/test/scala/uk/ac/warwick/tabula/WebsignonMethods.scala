@@ -31,11 +31,15 @@ trait WebsignonMethods extends ShouldMatchers {
           if (pageSource contains ("Signed in as ")) {
             // signed in as someone else; sign out first
             click on linkText("Sign out")
-          }
+          }else if (pageTitle startsWith("Sign in - Access refused")){
+						//signed in as someone else who doesn't have permissions to view the page
+						//  - follow the "sign in as another user" link
+						click on linkText("Sign in with a different username.")
+					}
 
           // sign in if we've not already been taken to that page
           if (!pageTitle.contains("Sign in")) {
-            click on linkText("Sign in")
+						click on linkText("Sign in")
           }
           pageTitle should include ("Sign in")
           textField("userName").value = details.usercode
@@ -43,6 +47,10 @@ trait WebsignonMethods extends ShouldMatchers {
           // yet released. fix it when it's released. https://groups.google.com/forum/?fromgroups=#!topic/scalatest-users/ojW9g4-2fmI
           id("password").webElement.sendKeys(details.password)
           submit()
+					// Sign-out operations redirect you to the context root, so we may now be on the wrong page...
+					if (currentUrl != url){
+						go to url
+					}
           if (pageSource contains ("Signed in as " + details.usercode)) {
             // NOW we're done
           } else if (pageSource contains ("Access refused")) {

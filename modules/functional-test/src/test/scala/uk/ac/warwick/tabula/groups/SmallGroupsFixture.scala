@@ -1,9 +1,12 @@
 package uk.ac.warwick.tabula.groups
 
-import uk.ac.warwick.tabula.{LoginDetails, BrowserTest}
-import uk.ac.warwick.tabula.home.FixturesDriver
+import uk.ac.warwick.tabula.{BreadcrumbsMatcher, LoginDetails, BrowserTest}
+import org.openqa.selenium.By
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.groups.pages.SmallGroupTeachingPage
+import uk.ac.warwick.tabula.home.{FeaturesDriver, FixturesDriver}
 
-trait SmallGroupsFixture extends BrowserTest with FixturesDriver {
+trait SmallGroupsFixture extends BrowserTest with FixturesDriver with FeaturesDriver {
 
   before{
     go to (Path("/scheduling/fixtures/setup"))

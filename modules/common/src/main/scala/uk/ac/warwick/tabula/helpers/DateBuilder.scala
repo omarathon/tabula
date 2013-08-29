@@ -1,17 +1,12 @@
 package uk.ac.warwick.tabula.helpers
 
 import scala.collection.JavaConversions._
-import scala.collection.mutable
-import org.joda.time.LocalDate
-import org.joda.time.ReadableDateTime
+import org.joda.time._
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
 import freemarker.template.TemplateMethodModelEx
 import freemarker.template.TemplateModel
 import freemarker.template.utility.DeepUnwrap
 import uk.ac.warwick.tabula.JavaImports._
-import org.joda.time.DateTime
-import org.joda.time.DateMidnight
 
 object DateBuilder {
 
@@ -95,7 +90,8 @@ class DateBuilder extends TemplateMethodModelEx {
 		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }	
 		
 		val date = args.head match {
-			case partial: LocalDate => partial.toDateTimeAtStartOfDay()
+			case partial: LocalDate => partial.toDateTimeAtStartOfDay
+			case local:LocalDateTime => local.toDateTime
 			case instant: ReadableDateTime => instant
 			case _ => throw new IllegalArgumentException("Bad date argument")
 		}

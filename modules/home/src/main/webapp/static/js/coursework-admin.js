@@ -345,7 +345,9 @@ $(function(){
 
 	// Ajax specific modal end
 
-    var highlightId = "${highlightId}";
+	// CM removed this line; it would never have worked (looks like CnP from a freemarker tempate)
+    // var highlightId = "${highlightId}";
+    var highlightId = "";
     if (highlightId != "") {
         var container = $("#extension-list");
         var highlightRow = $("#row"+highlightId);

@@ -3,10 +3,19 @@ package uk.ac.warwick.tabula.coursework
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import org.openqa.selenium.By
+import org.openqa.selenium.WebDriver
+import org.openqa.selenium.WebElement
+import org.scalatest.selenium.WebBrowser.Element
 import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.LoginDetails
+import org.joda.time.format.DateTimeFormat
+import org.openqa.selenium.htmlunit.HtmlUnitWebElement
+import org.openqa.selenium.JavascriptExecutor
+import org.openqa.selenium.Keys
+import org.openqa.selenium.internal.seleniumemulation.FireEvent
+import uk.ac.warwick.tabula.home.FeaturesDriver
 
-trait CourseworkFixtures extends BrowserTest {
+trait CourseworkFixtures extends BrowserTest with FeaturesDriver{
 
 	before {
 		go to (Path("/scheduling/fixtures/setup"))

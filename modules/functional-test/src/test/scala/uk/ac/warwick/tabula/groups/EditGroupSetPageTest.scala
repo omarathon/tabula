@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.groups
 
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.home.FeaturesDriver._
 import uk.ac.warwick.tabula.groups.pages.SmallGroupTeachingPage
 
 class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
