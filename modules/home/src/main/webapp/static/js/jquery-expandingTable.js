@@ -35,6 +35,8 @@
 			Apply the tablesorter JQuery plugin to this table. Defaults to true
 		tableSorterOptions:
 			An option map that will be passed to the tableSorter plugin
+		contentUrl:
+			When this is specified we will use ajax to load the content from the specified URL
 */
 jQuery.fn.expandingTable = function(options) {
 
@@ -44,11 +46,10 @@ jQuery.fn.expandingTable = function(options) {
 	var tableContainerSelector = options.tableContainerSelector || '.table-content-container';
 	var iconSelector = options.iconSelector || '.toggle-icon';
 	var toggleCellSelector = options.toggleCellSelector || '.toggle-cell';
-
 	var allowTableSort = options.allowTableSort || true;
 	var tableSorterOptions = options.tableSorterOptions || {};
 
-	var iconMarkup = '<i class="icon-chevron-right icon-fixed-width"></i>';
+	var iconMarkup = '<i class="row-icon icon-chevron-right icon-fixed-width"></i>';
 
 	var $table = this.first();
 
@@ -104,6 +105,7 @@ jQuery.fn.expandingTable = function(options) {
 		$content.data('open', false);
 
 		repositionContentBoxes();
+		$content.trigger('tabula.expandingTable.parentRowCollapsed');
 	}
 
 	function showContent($content, $row, $icon) {
@@ -128,6 +130,7 @@ jQuery.fn.expandingTable = function(options) {
 		$content.data('open', true);
 
 		repositionContentBoxes();
+		$content.trigger('tabula.expandingTable.parentRowExpanded');
 	}
 
 	function toggleRow($content, $row, $icon) {
@@ -139,10 +142,13 @@ jQuery.fn.expandingTable = function(options) {
 				if(options.contentUrl && !$content.data("loaded")) {
 					var contentId = $row.attr("data-contentid");
 					var dataUrl = options.contentUrl + '/' + contentId;
+					
 					$content.load(dataUrl, function() {
 						showContent($content, $row, $icon);
 						$content.data("loaded", "true");
+						$content.trigger('tabula.expandingTable.contentChanged');
 					});
+					
 				} else {
 					showContent($content, $row, $icon);
 				}
@@ -165,11 +171,26 @@ jQuery.fn.expandingTable = function(options) {
 		var $toggleCells = $(toggleCellSelector, $row);
 		// add some styles to them and register the click event
 		$toggleCells.css('cursor', 'pointer');
-		$toggleCells.on('click', function(evt){
+
+		// add click handlers to the toggle cells
+		$toggleCells.on('click', function(evt) {
 			toggleRow($content, $row, $icon);
 			evt.preventDefault();
 			evt.stopPropagation();
 		});
+
+		// add handlers for a cutom event so external modules can collapse the row
+		$row.on('tabula.expandingTable.toggle', function(evt) {
+			toggleRow($content, $row, $icon);
+			evt.preventDefault();
+			evt.stopPropagation();
+		});
+
+		// global scope for this event. all instances of the plugin will need to run this
+		$(document).on('tabula.expandingTable.contentChanged', function(evt) {
+			repositionContentBoxes();
+		});
+
 	});
 
 	if(allowTableSort) {

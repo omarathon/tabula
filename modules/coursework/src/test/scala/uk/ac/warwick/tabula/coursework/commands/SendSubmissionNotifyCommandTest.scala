@@ -119,7 +119,7 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 
 	def newBaseAssignment = {
 		var assignment = new Assignment
-	    assignment.addDefaultSubmissionFields
+	    assignment.addDefaultFields()
 	    assignment.module = new Module
 	    assignment.module.code = "AA001"
 	    assignment.module.name = "Really difficult module"

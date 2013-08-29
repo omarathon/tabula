@@ -140,7 +140,7 @@
 
 
 	// submit bootstrap form using Ajax
-	jQuery.fn.ajaxSubmit = function(successCallback) {
+	jQuery.fn.tabulaAjaxSubmit = function(successCallback) {
 		$(this).on('submit', 'form', function(e){
 			e.preventDefault();
 			var $form = $(this);

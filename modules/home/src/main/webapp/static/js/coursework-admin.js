@@ -467,12 +467,12 @@ $(function(){
     });
 
     // feedback report
-	$("#feedback-report-modal").ajaxSubmit(function(data) {
+	$("#feedback-report-modal").tabulaAjaxSubmit(function(data) {
     	window.location = data.result;
     });
 
    // extensions admin
-	$("#extension-list").ajaxSubmit(function(data) {
+	$("#extension-list").tabulaAjaxSubmit(function(data) {
         var action = data.action;
         $.each(data.result, function() {
             modifyRow(this, action);

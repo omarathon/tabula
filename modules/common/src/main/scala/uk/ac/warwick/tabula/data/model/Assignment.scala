@@ -203,6 +203,11 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 		addField(feedback)
 	}
 
+	def addDefaultFields() {
+		addDefaultSubmissionFields()
+		addDefaultFeedbackFields()
+	}
+
 	/**
 	 * Returns whether we're between the opening and closing dates
 	 */
@@ -362,6 +367,9 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 		submissions.add(submission)
 		submission.assignment = this
 	}
+
+	// returns the submission for a specified student
+	def findSubmission(uniId: String) = submissions.find(_.universityId == uniId)
 
 	// returns feedback for a specified student
 	def findFeedback(uniId: String) = feedbacks.find(_.universityId == uniId)

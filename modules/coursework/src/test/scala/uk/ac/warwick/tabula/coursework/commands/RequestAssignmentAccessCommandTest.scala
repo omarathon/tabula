@@ -64,7 +64,7 @@ trait AssignmentFixture extends Mockito{
 	val module = new Module
 	module.department = department
 	val assignment = new Assignment
-	assignment.addDefaultSubmissionFields()
+	assignment.addDefaultFields()
 	assignment.module = module
 	assignment.module.code = "AA001"
 	assignment.module.name = "Really difficult module"

@@ -261,6 +261,7 @@
 								<include>jquery-draganddrop.js</include>
 								<include>jquery-radiodisable.js</include>
 								<include>jquery-expandingTable.js</include>
+								<include>jquery.form.js</include>
 								<include>userpicker.js</include>
 								<include>flexipicker.js</include>
 								<include>ajax-popup.js</include>

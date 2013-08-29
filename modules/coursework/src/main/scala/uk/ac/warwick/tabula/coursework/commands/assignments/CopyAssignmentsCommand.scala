@@ -70,7 +70,7 @@ abstract class CopyAssignmentsCommand(val modules: Seq[Module]) extends CommandI
 		newAssignment.feedbackTemplate = assignment.feedbackTemplate
 		newAssignment.markingWorkflow = assignment.markingWorkflow
 
-		newAssignment.addDefaultSubmissionFields()
+		newAssignment.addDefaultFields()
 
 		for (field <- findCommentField(assignment); newField <- findCommentField(newAssignment)) newField.value = field.value
 

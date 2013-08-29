@@ -141,6 +141,14 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 		criteria.listOf[String].toSet
 	}
 
+
+	def deleteFile(attachment: FileAttachment) = {
+		session.delete(attachment)
+		for (file <- getData(attachment.id)) {
+			file.delete()
+		}
+	}
+
 	/**
 	 * Delete any temporary blobs that are more than 2 days old.
 	 */

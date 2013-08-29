@@ -70,7 +70,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignment.module = module
 		assignment.academicYear = new AcademicYear(2009)
 		assignment.markDeleted()
-		assignment.addDefaultSubmissionFields
+		assignment.addDefaultFields()
 		assignmentService.save(assignment)
 
 		assignmentService.isFilterEnabled("notDeleted") should be (false)

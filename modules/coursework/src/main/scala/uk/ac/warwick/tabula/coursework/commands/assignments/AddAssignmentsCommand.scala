@@ -110,7 +110,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 		transactional() {
 			for (item <- assignmentItems if item.include) {
 				val assignment = new Assignment()
-				assignment.addDefaultSubmissionFields()
+				assignment.addDefaultFields()
 				assignment.academicYear = academicYear
 				assignment.name = item.name
 

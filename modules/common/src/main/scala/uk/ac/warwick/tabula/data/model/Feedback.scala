@@ -117,6 +117,21 @@ class Feedback extends GeneratedId with PermissionsTarget {
 		if (attachments.isEmpty) null
 		else attachments.maxBy { _.dateUploaded }.dateUploaded
 
+	/* Adds new attachments to the feedback. Ignores feedback that has already been uploaded and overwrites attachments
+	   with the same name as exiting attachments. Returns the attachments that wern't ignored. */
+	def addAttachments(fileAttachments: Seq[FileAttachment]) : Seq[FileAttachment] = fileAttachments.filter { a =>
+		val isIdentical = attachments.exists(f => f.name == a.name && f.isDataEqual(a))
+		if (!isIdentical) {
+			// if an attachment with the same name as this one exists then replace it
+			val duplicateAttachment = attachments.find(_.name == a.name)
+			duplicateAttachment.foreach(removeAttachment(_))
+			addAttachment(a)
+		}
+		!isIdentical
+	}
+
+
+
 	def addAttachment(attachment: FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
 		attachment.temporary = false

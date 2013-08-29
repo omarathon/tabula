@@ -33,6 +33,11 @@ import uk.ac.warwick.tabula.data.model.Gender.{Unspecified, Female, Male}
  * SavedFormValue class.
  *
  */
+
+object FormField {
+	final val FormFieldMaxSize = 4000
+}
+
 @Entity @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "fieldtype")
@@ -104,6 +109,11 @@ abstract class FormField extends GeneratedId with Logging {
 	 */
 	def blankFormValue: FormValue
 
+	/**
+	 * Return a form value of the appropriate type with its value set
+	 */
+	def populatedFormValue(value: SavedFormValue) : FormValue
+
 	def validate(value: FormValue, errors: Errors)
 
 }
@@ -115,7 +125,25 @@ trait SimpleValue[A] { self: FormField =>
 	def value: A = propertiesMap.getOrElse("value", null).asInstanceOf[A]
 	def getValue() = value
 
+	override def validate(value: FormValue, errors: Errors) {
+		value match {
+			case s:StringFormValue => {
+				val length = s.value.toString.length
+				if (length > FormField.FormFieldMaxSize)
+					errors.rejectValue("value", "textfield.tooLarge", Array[Object](length: JInteger, FormField.FormFieldMaxSize: JInteger), "")
+			}
+			case _ =>
+		}
+	}
+
 	def blankFormValue = new StringFormValue(this)
+
+	def populatedFormValue(savedFormValue: SavedFormValue) = {
+		val formValue = new StringFormValue(this)
+		formValue.value = savedFormValue.value
+		formValue
+	}
+
 }
 
 @Entity
@@ -124,14 +152,11 @@ class CommentField extends FormField with SimpleValue[String] with FormattedHtml
 	override def isReadOnly = true
 
 	def formattedHtml: String = formattedHtml(Option(value))
-
-	override def validate(value: FormValue, errors: Errors) {}
 }
 
 @Entity
 @DiscriminatorValue("text")
 class TextField extends FormField with SimpleValue[String] {
-	override def validate(value: FormValue, errors: Errors) {}
 }
 
 @Entity
@@ -147,6 +172,11 @@ class WordCountField extends FormField {
 	def conventions_=(conventions: String) = setProperty("conventions", conventions)
 
 	def blankFormValue = new IntegerFormValue(this)
+	def populatedFormValue(savedFormValue: SavedFormValue) = {
+		val formValue = new IntegerFormValue(this)
+		formValue.value = savedFormValue.value.asInstanceOf[Integer]
+		formValue
+	}
 
 	override def validate(value: FormValue, errors: Errors) {
 		value match {
@@ -161,14 +191,17 @@ class WordCountField extends FormField {
 
 @Entity
 @DiscriminatorValue("textarea")
-class TextareaField extends FormField with SimpleValue[String] {
-	override def validate(value: FormValue, errors: Errors) {}
-}
+class TextareaField extends FormField with SimpleValue[String] {}
 
 @Entity
 @DiscriminatorValue("checkbox")
 class CheckboxField extends FormField {
 	def blankFormValue = new BooleanFormValue(this)
+	def populatedFormValue(savedFormValue: SavedFormValue) = {
+		val formValue = new BooleanFormValue(this)
+		formValue.value = savedFormValue.value.asInstanceOf[Boolean]
+		formValue
+	}
 	override def validate(value: FormValue, errors: Errors) {}
 }
 
@@ -183,6 +216,7 @@ class MarkerSelectField extends FormField with SimpleValue[String] {
 	}
 
 	override def validate(value: FormValue, errors: Errors) {
+		super.validate(value, errors)
 		value match {
 			case v: StringFormValue => {
 				Option(v.value) match {
@@ -200,6 +234,7 @@ class MarkerSelectField extends FormField with SimpleValue[String] {
 @DiscriminatorValue("file")
 class FileField extends FormField {
 	def blankFormValue = new FileFormValue(this)
+	def populatedFormValue(savedFormValue: SavedFormValue) = blankFormValue
 
 	def attachmentLimit: Int = getProperty[JInteger]("attachmentLimit", 1)
 	def attachmentLimit_=(limit: Int) = setProperty("attachmentLimit", limit)

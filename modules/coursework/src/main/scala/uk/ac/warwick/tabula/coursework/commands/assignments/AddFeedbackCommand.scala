@@ -30,16 +30,7 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 				newFeedback
 			})
 
-			val newAttachments = file.attached.filter {attachment =>
-				val isIdentical = feedback.attachments.exists(f => f.name == attachment.name && f.isDataEqual(attachment))
-				if (!isIdentical){
-					// if an attachment with the same name as this one exists then delete it
-					val duplicateAttachment = feedback.attachments.find(_.name == attachment.name)
-					duplicateAttachment.foreach(feedback.removeAttachment(_))
-					feedback.addAttachment(attachment)
-				}
-				!isIdentical
-			}
+			val newAttachments = feedback.addAttachments(file.attached)
 
 			if (newAttachments.nonEmpty) {
 				session.saveOrUpdate(feedback)
@@ -49,6 +40,7 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 			}
 		}
 
+		// TODO should really do this in a more general place, like a save listener for Feedback objects
 		val updatedFeedback = if (items != null && !items.isEmpty()) {
 			val feedbacks = items.map { (item) =>
 				val feedback = saveFeedback(item.uniNumber, item.file)
@@ -60,7 +52,6 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 		} else {
 			val feedback = saveFeedback(uniNumber, file)
 			// delete feedback zip for this assignment, since it'll now be different.
-			// TODO should really do this in a more general place, like a save listener for Feedback objects
 			zipService.invalidateFeedbackZip(assignment)
 			feedback.toList
 		}

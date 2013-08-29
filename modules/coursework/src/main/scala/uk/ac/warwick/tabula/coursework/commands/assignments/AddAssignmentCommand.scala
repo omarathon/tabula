@@ -25,7 +25,7 @@ class AddAssignmentCommand(module: Module = null) extends ModifyAssignmentComman
 
 	override def applyInternal(): Assignment = transactional() {
 		val assignment = new Assignment(module)
-		assignment.addDefaultSubmissionFields()
+		assignment.addDefaultFields()
 		copyTo(assignment)
 		service.save(assignment)
 		assignment

@@ -202,7 +202,7 @@
 			});
 
 			// make modal links use ajax
-			$('section.meetings').ajaxSubmit(function() {
+			$('section.meetings').tabulaAjaxSubmit(function() {
 				document.location.reload(true);
 			});
 

@@ -10,7 +10,7 @@ class SubmissionsForMarkerTest  extends TestBase {
 	@Test def markersSubmissionsTest() {
 
 		val assignment = new Assignment
-		assignment.addDefaultSubmissionFields()
+		assignment.addDefaultFields()
 		assignment.markingWorkflow = newMarkingWorkflow()
 
 		val markerSelect = new MarkerSelectField()

@@ -172,6 +172,14 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 		}
 }
 
+trait ZipServiceComponent {
+	def zipService: ZipService
+}
+
+trait AutowiringZipServiceComponent extends ZipServiceComponent {
+	var zipService = Wire[ZipService]
+}
+
 /**
  * InputStream to read a single zip entry from a parent input stream.
  */
