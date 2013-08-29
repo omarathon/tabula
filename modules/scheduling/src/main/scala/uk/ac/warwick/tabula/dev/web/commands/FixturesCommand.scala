@@ -15,6 +15,8 @@ import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.roles.StudentRelationshipAgentRoleDefinition
 
 /** This command is intentionally Public. It only exists on dev and is designed,
   * in essence, to blitz a department and set up some sample data in it.
@@ -24,6 +26,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 	var routeDao = Wire[RouteDao]
+	var relationshipService = Wire[RelationshipService]
 
 	def applyInternal() {
 		setupDepartmentAndModules()
@@ -36,16 +39,15 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		cmd.usercodes.addAll(Seq(Fixtures.TestAdmin1, Fixtures.TestAdmin2))
 		cmd.apply()
 
-		// TODO
-//		cmd.roleDefinition = PersonalTutorRoleDefinition
-//		cmd.usercodes.clear()
-//		cmd.usercodes.add(Fixtures.TestAdmin1)
-//		cmd.apply()
-//
-//		cmd.roleDefinition = SupervisorRoleDefinition
-//		cmd.usercodes.clear()
-//		cmd.usercodes.add(Fixtures.TestAdmin1)
-//		cmd.apply()
+		cmd.roleDefinition = StudentRelationshipAgentRoleDefinition(relationshipService.getStudentRelationshipTypeByUrlPart("tutor").get)
+		cmd.usercodes.clear()
+		cmd.usercodes.add(Fixtures.TestAdmin1)
+		cmd.apply()
+
+		cmd.roleDefinition = StudentRelationshipAgentRoleDefinition(relationshipService.getStudentRelationshipTypeByUrlPart("supervisor").get)
+		cmd.usercodes.clear()
+		cmd.usercodes.add(Fixtures.TestAdmin1)
+		cmd.apply()
 	}
 
 	private def setupDepartmentAndModules() {
