@@ -79,10 +79,23 @@ trait UpdatesStudentMembership {
 		updateAssessmentGroups()
 	}
 
-	private def addUserFromUserId(userId: String, addTo:ListBuffer[User]) {
+	private def addUserFromUserId(userId: String, addTo: ListBuffer[User]) {
 		val user = userLookup.getUserByUserId(userId)
 		if (user.isFoundUser && null != user.getWarwickId) {
 			addTo += user
+		}
+	}
+
+	private def addIfValidUser(userString: String, addTo: ListBuffer[User]) {
+		if (UniversityId.isValid(userString)) {
+			val user = userLookup.getUserByWarwickUniId(userString)
+			if (user.isFoundUser) {
+				addTo += user
+			} else {
+				addUserFromUserId(userString, addTo)
+			}
+		} else {
+			addUserFromUserId(userString, addTo)
 		}
 	}
 
@@ -96,20 +109,13 @@ trait UpdatesStudentMembership {
 
 		// parse items from textarea into usersToAdd list
 		for (item <- massAddUsersEntries) {
-			if (UniversityId.isValid(item)) {
-				val user = userLookup.getUserByWarwickUniId(item)
-				if (user.isFoundUser) {
-					usersToAdd += user
-				} else {
-					addUserFromUserId(item, usersToAdd)
-				}
-			} else {
-				addUserFromUserId(item, usersToAdd)
-			}
+			addIfValidUser(item, usersToAdd)
 		}
-		// now add the users from includeUsers. Note that this is always a list of userIds, not warwickIds,
-		// regardless of the value of updateStudentMembershipGroupIsUniversityIds
-		usersToAdd ++= userLookup.getUsersByUserIds(JArrayList((includeUsers.asScala map(_.trim) filterNot( _.isEmpty )).distinct)).asScala map(_._2)
+
+		// now add the users from includeUsers
+		for (includedUser <- includeUsers.asScala){
+			addIfValidUser(includedUser, usersToAdd)
+		}
 
 		// now get implicit membership list from upstream
 		val upstreamMembers = existingGroups.map(membershipService.determineMembershipUsers(_, existingMembers)).getOrElse(Seq())
