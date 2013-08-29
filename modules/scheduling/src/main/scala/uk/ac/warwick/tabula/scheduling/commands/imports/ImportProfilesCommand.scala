@@ -90,6 +90,8 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 
 				transactional() {
 					profileImporter.getMemberDetails(userIdsAndCategories, users) map { _.apply }
+					session.flush
+					session.clear
 					moduleRegistrationImporter.getModuleRegistrationDetails(userIdsAndCategories, users) map {_.apply }
 					session.flush
 					session.clear
