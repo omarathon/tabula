@@ -26,7 +26,10 @@ class AllocateStudentsToGroupsPage(implicit val webDriver:WebDriver)extends WebB
 		heading.text should startWith ("Allocate students to")
 	}
 
-	def findAllUnallocatedStudents =  findAll(cssSelector("div#studentslist ul li"))
+	def findAllUnallocatedStudents =  {
+		val s= findAll(cssSelector("div.student-list ul li"))
+		s
+	}
 
 	def findFilterCheckboxes(filterAttribute:Option[String], filterValue:Option[String]):Seq[Element]={
 

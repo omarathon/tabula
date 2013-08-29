@@ -12,6 +12,8 @@ class CourseDaoTest extends PersistenceTestBase {
 		dao.saveOrUpdate(course)
 
 		dao.getByCode("TPOS-M9P0") should be (Some(course))
+		dao.getByCode("TPOS-M9P0").get.name should be ("Course TPOS-M9P0")
+
 		dao.getByCode("wibble") should be (None)
 	}
 

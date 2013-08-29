@@ -26,6 +26,8 @@ case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefini
 		Profiles.Read.StudentCourseDetails.Core,
 		Profiles.Read.StudentCourseDetails.Status,
 		Profiles.Read.SmallGroups,
+    Profiles.Read.Timetable,
+
 		Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
 		
 		Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]),
