@@ -43,5 +43,4 @@ abstract class AbstractRouteService extends RouteService {
 @Service("routeService")
 class RouteServiceImpl 
 	extends AbstractRouteService
-		with AutowiringRouteDaoComponent{
-}
+		with AutowiringRouteDaoComponent

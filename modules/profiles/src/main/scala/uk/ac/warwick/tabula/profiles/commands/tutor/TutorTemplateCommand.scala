@@ -19,13 +19,6 @@ import org.apache.poi.ss.util.CellRangeAddressList
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper
 import org.apache.poi.xssf.usermodel.XSSFDataValidationConstraint
 import org.apache.poi.xssf.usermodel.XSSFDataValidation
-import javax.persistence.DiscriminatorColumn
-import javax.persistence.DiscriminatorValue
-import javax.persistence.Entity
-import javax.persistence.Inheritance
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.FilterDefs
-import org.hibernate.annotations.Filters
 import scala.Option.option2Iterable
 
 class TutorTemplateCommand(val department: Department) extends Command[ExcelView] with ReadOnly with Unaudited {
@@ -93,7 +86,9 @@ class TutorTemplateCommand(val department: Department) extends Command[ExcelView
 			val tutorNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown tutor name
 			tutors.headOption.flatMap { _.fullName }.foreach(tutorNameCell.setCellValue(_))
 			
-			row.createCell(3).setCellFormula("IF(ISTEXT($C"+(row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + tutorLookupRange + ", 2, FALSE), \" \")")
+			row.createCell(3).setCellFormula(
+				"IF(ISTEXT($C"+(row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + tutorLookupRange + ", 2, FALSE), \" \")"
+			)
 		}
 
 		formatWorkbook(workbook)

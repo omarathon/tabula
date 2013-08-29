@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.coursework
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 import org.openqa.selenium.By
-import org.openqa.selenium.remote.RemoteWebDriver.When
 
 class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 

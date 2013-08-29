@@ -69,7 +69,10 @@ class SanityCheckFilesystemCommand extends Command[Unit] with ReadOnly {
 			
 			val (successful, unsuccessful) = checks.foldLeft((0, 0)) {(a, b) => (a._1 + b._1, a._2 + b._2)}
 			
-			val logString = "successfulFiles," + successful + ",failedFiles," + unsuccessful + ",timeTaken," + timer.getTotalTimeMillis + ",lastSuccessfulRun," + startTime.getMillis
+			val logString = "successfulFiles," + successful +
+				",failedFiles," + unsuccessful +
+				",timeTaken," + timer.getTotalTimeMillis +
+				",lastSuccessfulRun," + startTime.getMillis
 			logger.info(logString)
 
 			try {

@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.groups
 
 import org.scalatest.GivenWhenThen
-import org.openqa.selenium.{WebDriver, By}
 import uk.ac.warwick.tabula.home.FeaturesDriver._
 import uk.ac.warwick.tabula.groups.pages.SmallGroupTeachingPage
-import org.scalatest.selenium.WebBrowser
 
 class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 

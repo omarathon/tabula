@@ -111,7 +111,12 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(event.group.groupSet.module.department))
 
 			case Seq(monitoringPoint: MonitoringPoint) => {
-				format(Seq(WeekRange(monitoringPoint.week,monitoringPoint.week)), DayOfWeek(1), monitoringPoint.pointSet.academicYear, numberingSystem(monitoringPoint.pointSet.route.department))
+				format(
+					Seq(WeekRange(monitoringPoint.week,monitoringPoint.week)),
+					DayOfWeek(1),
+					monitoringPoint.pointSet.academicYear,
+					numberingSystem(monitoringPoint.pointSet.route.department)
+				)
 			}
 
 			case Seq(week: Integer, monitoringPointSet: MonitoringPointSet) => {

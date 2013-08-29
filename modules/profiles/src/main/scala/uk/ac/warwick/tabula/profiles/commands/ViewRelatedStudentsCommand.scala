@@ -22,7 +22,8 @@ object ViewRelatedStudentsCommand{
 	}
 }
 
-class ViewRelatedStudentsCommandInternal(val currentMember: Member, val relationshipType:RelationshipType) extends CommandInternal[Seq[StudentRelationship]] with RequiresPermissionsChecking {
+class ViewRelatedStudentsCommandInternal(val currentMember: Member, val relationshipType:RelationshipType)
+	extends CommandInternal[Seq[StudentRelationship]] with RequiresPermissionsChecking {
 
 	this: RelationshipServiceComponent =>
 

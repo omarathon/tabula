@@ -19,7 +19,10 @@ class TutorHomeController extends GroupsController {
 		new TutorHomeCommandImpl(user)
 
 	@RequestMapping(Array("/tutor"))
-	def listModules(@ModelAttribute("command") command: TutorHomeCommand, @RequestParam(value="updatedOccurrence", required=false) occurrence: SmallGroupEventOccurrence): Mav = {
+	def listModules(
+		@ModelAttribute("command") command: TutorHomeCommand,
+		@RequestParam(value="updatedOccurrence", required=false) occurrence: SmallGroupEventOccurrence
+	): Mav = {
 		val mapping = command.apply()
 
 		val data = generateViewModules(mapping, GroupsViewModel.Tutor)

@@ -42,7 +42,8 @@ trait OpenSmallGroupSetState {
 		}
 	}
 }
-class OpenSmallGroupSet(val requestedSets: Seq[SmallGroupSet], val user: User, val setState: SmallGroupSetSelfSignUpState) extends CommandInternal[Seq[SmallGroupSet]] with OpenSmallGroupSetState with UserAware {
+class OpenSmallGroupSet(val requestedSets: Seq[SmallGroupSet], val user: User, val setState: SmallGroupSetSelfSignUpState)
+	extends CommandInternal[Seq[SmallGroupSet]] with OpenSmallGroupSetState with UserAware {
 
 	 val applicableSets = requestedSets.filter(s => s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && s.openState != setState)
 

@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.groups.commands.admin
 
 import uk.ac.warwick.tabula.commands.{Appliable, Notifies, Command, Description}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup}
-import uk.ac.warwick.tabula.data.model.{Module, Notification}
+import uk.ac.warwick.tabula.data.model.Notification
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
@@ -15,7 +15,8 @@ import uk.ac.warwick.tabula.permissions.Permissions
 trait ReleaseSmallGroupSetCommand extends Appliable[Seq[ReleasedSmallGroupSet]] {
 	def describeOutcome:Option[String]
 }
-class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private val currentUser: User) extends Command[Seq[ReleasedSmallGroupSet]] with Notifies[Seq[ReleasedSmallGroupSet], Seq[SmallGroup]] with ReleaseSmallGroupSetCommand {
+class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private val currentUser: User)
+	extends Command[Seq[ReleasedSmallGroupSet]] with Notifies[Seq[ReleasedSmallGroupSet], Seq[SmallGroup]] with ReleaseSmallGroupSetCommand {
 
   var userLookup:UserLookupService = Wire.auto[UserLookupService]
 
