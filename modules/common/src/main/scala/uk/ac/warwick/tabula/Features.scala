@@ -60,6 +60,7 @@ abstract class Features {
 	@Value("${features.smallGroupAllocationFiltering:false}") var smallGroupAllocationFiltering = defaults.smallGroupAllocationFiltering
 	@Value("${features.personalTutorAssignment:false}") var personalTutorAssignment = defaults.personalTutorAssignment
 	@Value("${features.personalTutorAssignmentFiltering:false}") var personalTutorAssignmentFiltering = defaults.personalTutorAssignmentFiltering
+	@Value("${features.arbitraryRelationships:false}") var arbitraryRelationships = defaults.arbitraryRelationships
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -115,6 +116,7 @@ class FeaturesMessage {
 	@BeanProperty var smallGroupAllocationFiltering = false
 	@BeanProperty var personalTutorAssignment = false
 	@BeanProperty var personalTutorAssignmentFiltering = false
+	@BeanProperty var arbitraryRelationships = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

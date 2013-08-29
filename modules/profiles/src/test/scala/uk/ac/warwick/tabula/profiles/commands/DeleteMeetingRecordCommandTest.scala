@@ -35,8 +35,7 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		}
 
 		relationship = transactional { tx =>
-			val relationshipType = new StudentRelationshipType
-			relationshipType.id = "tutor"
+			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 			session.save(relationshipType)
 			
 			val relationship = StudentRelationship("Professor A Tutor", relationshipType, "0123456/1")

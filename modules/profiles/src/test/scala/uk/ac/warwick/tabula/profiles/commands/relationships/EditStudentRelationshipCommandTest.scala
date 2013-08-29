@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 	
-	val relationshipType = new StudentRelationshipType
+	val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
 	@Test
 	def describeShouldIncludeNewTutorAndStudent { new TutorFixture {

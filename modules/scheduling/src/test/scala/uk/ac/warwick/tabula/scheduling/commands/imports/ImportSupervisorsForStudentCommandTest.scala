@@ -30,8 +30,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		val prsCode = "IN0070790"
 		val supervisorUniId = "0070790"
 			
-		val relationshipType = new StudentRelationshipType
-		relationshipType.id = "supervisor"
+		val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
 		relationshipType.defaultSource = StudentRelationshipSource.SITS
 		session.saveOrUpdate(relationshipType)
 		
@@ -83,7 +82,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			command.applyInternal
 
 			// check results
-			val supRels = supervisee.studentCourseDetails.get(0).agents(relationshipType)
+			val supRels = supervisee.studentCourseDetails.get(0).relationships(relationshipType)
 			supRels.size should be (1)
 			val rel = supRels.head
 
@@ -107,7 +106,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			command.applyInternal
 
 			// check results
-			val supRels = supervisee.studentCourseDetails.get(0).agents(relationshipType)
+			val supRels = supervisee.studentCourseDetails.get(0).relationships(relationshipType)
 			supRels.size should be (0)
 		}
 	}

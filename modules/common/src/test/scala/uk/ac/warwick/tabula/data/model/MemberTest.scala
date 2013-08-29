@@ -145,7 +145,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		staff.profileService = profileService
 		staff.relationshipService = relationshipService
 		
-		val relationshipType = new StudentRelationshipType
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
 		relationshipService.listStudentRelationshipsWithMember(relationshipType, staff) returns (Seq())
 		staff.isRelationshipAgent(relationshipType) should be (false)

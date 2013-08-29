@@ -11,7 +11,7 @@ class MeetingRecordRejectedNotification(approval: MeetingRecordApproval)
 	def title = "Meeting record rejected"
 	def content = renderToString(FreemarkerTemplate, Map(
 		"actor" -> agent,
-		"role"->actorRole,
+		"role"->agentRole,
 		"dateFormatter" -> dateFormatter,
 		"meetingRecord" -> approval.meetingRecord,
 		"verbed" -> "rejected",

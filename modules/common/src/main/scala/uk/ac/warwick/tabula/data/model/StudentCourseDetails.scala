@@ -76,13 +76,13 @@ class StudentCourseDetails
 		studentCourseYearDetails.asScala.max
 	}
 
-	def courseType = CourseType.fromCourseCode(course.code);
+	def courseType = CourseType.fromCourseCode(course.code)
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core")) // TODO perms?
-	def agents(relationshipType: StudentRelationshipType) =
+	def relationships(relationshipType: StudentRelationshipType) =
 		relationshipService.findCurrentRelationships(relationshipType, this.sprCode)
 
-	def hasRelationship(relationshipType: StudentRelationshipType) = !agents(relationshipType).isEmpty
+	def hasRelationship(relationshipType: StudentRelationshipType) = !relationships(relationshipType).isEmpty
 
 	def compare(that:StudentCourseDetails): Int = {
 		this.scjCode.compare(that.scjCode)
@@ -154,7 +154,7 @@ object CourseType {
 	case object Foundation extends CourseType("F", "Foundation", "Foundation course", 'F')
 	case object PreSessional extends CourseType("PS", "Pre-sessional", "Pre-sessional course", 'N')
 
-	def fromCourseCode(cc: String) = {
+	def fromCourseCode(cc: String): CourseType = {
 		if (cc.isEmpty) null
 		cc.charAt(0) match {
 			case UG.courseCodeChar => UG

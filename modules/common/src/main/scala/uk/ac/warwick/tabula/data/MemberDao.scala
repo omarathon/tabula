@@ -16,7 +16,9 @@ import scala.collection.JavaConverters._
 trait MemberDao {
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType]
 	def getStudentRelationshipTypeById(id: String): Option[StudentRelationshipType]
+	def getStudentRelationshipTypeByUrlPart(urlPart: String): Option[StudentRelationshipType]
 	def saveOrUpdate(relationshipType: StudentRelationshipType)
+	def delete(relationshipType: StudentRelationshipType)
 	
 	def saveOrUpdate(member: Member)
 	def delete(member: Member)
@@ -36,6 +38,7 @@ trait MemberDao {
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[Member]
 	def countStudentsByDepartment(department: Department): Number
 	def countStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Number
+	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
 }
 
 @Repository
@@ -43,11 +46,20 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	import Restrictions._
 	import Order._
 
-	def allStudentRelationshipTypes: Seq[StudentRelationshipType] = session.newCriteria[StudentRelationshipType].seq
+	def allStudentRelationshipTypes: Seq[StudentRelationshipType] = 
+		session.newCriteria[StudentRelationshipType]
+			.addOrder(Order.asc("sortOrder"))
+			.addOrder(Order.asc("id"))
+			.seq
 	
 	def getStudentRelationshipTypeById(id: String) = getById[StudentRelationshipType](id)
+	def getStudentRelationshipTypeByUrlPart(urlPart: String) = 
+		session.newCriteria[StudentRelationshipType]
+			.add(is("urlPart", urlPart))
+			.uniqueResult
 	
 	def saveOrUpdate(relationshipType: StudentRelationshipType) = session.saveOrUpdate(relationshipType)
+	def delete(relationshipType: StudentRelationshipType) = session.delete(relationshipType)
 	
 	def saveOrUpdate(member: Member) = member match {
 		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
@@ -244,4 +256,18 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setEntity("relationshipType", relationshipType)
 			.uniqueResult.getOrElse(0)
 
+	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number =
+		if (relationshipType == null) 0
+		else session.newQuery[Number]("""
+			select
+				count(distinct student)
+			from
+				StudentCourseDetails scd
+			where
+				scd.sprCode in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
+			""")
+			.setEntity("relationshipType", relationshipType)
+			.uniqueResult.getOrElse(0)
+
 }
+

@@ -34,7 +34,7 @@ class EditStudentRelationshipController extends BaseController {
 	// initial form display
 	@RequestMapping(value = Array("/edit","/add"),method=Array(GET))
 	def editAgent(@ModelAttribute("editStudentRelationshipCommand") cmd: EditStudentRelationshipCommand, request: HttpServletRequest) = {
-		Mav("relationship/edit/view",
+		Mav("relationships/edit/view",
 			"studentCourseDetails" -> cmd.studentCourseDetails,
 			"agentToDisplay" -> cmd.currentAgent
 		).noLayout()
@@ -44,7 +44,7 @@ class EditStudentRelationshipController extends BaseController {
 	def saveAgent(@ModelAttribute("editStudentRelationshipCommand") cmd: EditStudentRelationshipCommand, request: HttpServletRequest ) = {
 		cmd.apply()
 
-		Mav("relationship/edit/view",
+		Mav("relationships/edit/view",
 			"student" -> cmd.studentCourseDetails.student,
 			"agentToDisplay" -> cmd.currentAgent
 		)

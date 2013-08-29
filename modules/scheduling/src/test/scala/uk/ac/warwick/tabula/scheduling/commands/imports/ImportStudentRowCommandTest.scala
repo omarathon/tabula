@@ -190,7 +190,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseDetails.sprCode = "0672089/2"
 			yearCommand.studentCourseDetails = studentCourseDetails
 				
-			relationshipService.getStudentRelationshipTypeById("tutor") returns (None)
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
 
 			val studentCourseYearDetails = yearCommand.applyInternal()
 
@@ -212,7 +212,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	@Test
 	def testImportStudentRowCommandWorksWithNew {
 		new Environment {
-			relationshipService.getStudentRelationshipTypeById("tutor") returns (None)
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
 			
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
 			val member = rowCommand.applyInternal()
@@ -248,7 +248,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			val existing = new StudentMember("0672089")
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
 				
-			relationshipService.getStudentRelationshipTypeById("tutor") returns (None)
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
 
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
 			val member = rowCommand.applyInternal()
@@ -276,10 +276,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
 			
-			val tutorRelationshipType = new StudentRelationshipType
-			tutorRelationshipType.id = "tutor"
+			val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 				
-			relationshipService.getStudentRelationshipTypeById("tutor") returns (Some(tutorRelationshipType))
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (Some(tutorRelationshipType))
 
 			// if personalTutorSource is "local", there should be no update
 			department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.Local)
@@ -304,10 +303,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			val existing = new StudentMember("0672089")
 			val existingStaffMember = new StaffMember("0070790")
 			
-			val tutorRelationshipType = new StudentRelationshipType
-			tutorRelationshipType.id = "tutor"
+			val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 				
-			relationshipService.getStudentRelationshipTypeById("tutor") returns (Some(tutorRelationshipType))
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (Some(tutorRelationshipType))
 
 			// if personalTutorSource is "SITS", there *should* an update
 			department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.SITS)

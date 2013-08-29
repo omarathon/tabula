@@ -40,7 +40,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 
 	@Test def getMeetingRecordCommand() {
 		withUser("test") {
-			val relationshipType = new StudentRelationshipType
+			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 			
 			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
 			val cmd = controller.getViewMeetingRecordCommand(member, relationshipType)

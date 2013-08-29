@@ -179,7 +179,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		else 
 			// is this student in a department that is set to import tutor data from SITS?
 			relationshipService
-				.getStudentRelationshipTypeById("tutor") // TODO this is awful
+				.getStudentRelationshipTypeByUrlPart("tutor") // TODO this is awful
 				.filter { relType => dept.getStudentRelationshipSource(relType) == StudentRelationshipSource.SITS }
 				.foreach { relationshipType =>
 					val tutorUniIdOption = PrsCode.getUniversityId(sprTutor1)

@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.web.views
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.web.servlet.View
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse

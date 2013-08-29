@@ -143,6 +143,26 @@
 			</@form.row>
 		</fieldset>
 	</fieldset>
+	
+	<#if features.arbitraryRelationships>
+		<fieldset id="relationship-options">
+			<legend>Student relationship options</legend>
+			
+			<@form.row>
+				<@form.label>Display</@form.label>
+				<@form.field>
+					<#list allRelationshipTypes as relationshipType>
+						<@form.label checkbox=true>
+							<@f.checkbox path="studentRelationshipDisplayed[${relationshipType.id}]" id="studentRelationshipDisplayed_${relationshipType.id}" />
+							${relationshipType.description}
+						</@form.label>
+					</#list>
+					
+					<@f.errors path="studentRelationshipDisplayed" cssClass="error" />
+				</@form.field>
+			</@form.row>
+		</fieldset>
+	</#if>
 
 <div class="submit-buttons">
 	<input type="submit" value="Save" class="btn btn-primary">

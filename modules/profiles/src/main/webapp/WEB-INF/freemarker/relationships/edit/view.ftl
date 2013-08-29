@@ -1,37 +1,37 @@
 <#escape x as x?html>
 
-	<#if tutorToDisplay??>
+	<#if agentToDisplay??>
 		<#assign pageAction="edit" >
 	<#else>
 		<#assign pageAction="add" >
 	</#if>
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-		<h3>${pageAction?capitalize} Personal Tutor</h3>
+		<h3>${pageAction?capitalize} ${relationshipType.agentRole?cap_first}</h3>
 	</div>
 
 
 	<#if user.staff>
 		<#assign student = studentCourseDetails.student/>
-		<div id="edit-personal-tutor-modal" class="modal-body">
+		<div id="edit-agent-modal" class="modal-body">
 		<@f.form method="post" commandName="editStudentRelationshipCommand" action="" cssClass="form-horizontal">
 
 
-				<h5 id="tuteeName">Personal Tutee: ${student.fullName}</h5>
+				<h5 id="studentName">${relationshipType.studentRole?capitalize}: ${student.fullName}</h5>
 				<input id="student" name="student" type="hidden" value="${student.universityId}" />
 
 				<div class="input-append">
 					<div class="control-group">
-						<label class="control-label" for="query"><b>Personal Tutor</b></label>
+						<label class="control-label" for="query"><b>${relationshipType.agentRole?cap_first}</b></label>
 						<div class="controls">
 							<span class="profile-search">
-								<#if tutorToDisplay??>
-									<input type="text" name="query" value="${tutorToDisplay.fullName}" id="query"/>
-									<input type="hidden" name="tutor" value="${tutorToDisplay.universityId}" />
-									<input type="hidden" name="currentTutor" value="${tutorToDisplay.universityId}" />
+								<#if agentToDisplay??>
+									<input type="text" name="query" value="${agentToDisplay.fullName}" id="query"/>
+									<input type="hidden" name="agent" value="${agentToDisplay.universityId}" />
+									<input type="hidden" name="currentAgent" value="${agentToDisplay.universityId}" />
 								<#else>
 									<input type="text" name="query" value="" id="query" />
-									<input type="hidden" name="tutor" />
+									<input type="hidden" name="agent" />
 								</#if>
 							</span>
 							<button class="inline-search-button btn" type="button"><i class="icon-search"></i></button>
@@ -41,39 +41,39 @@
 
 				<input type="hidden" name="remove" value="false" />
 				<#if pageAction!="add">
-					<button id="remove-tutor" class="btn btn-danger" type="button">Remove</button>
+					<button id="remove-agent" class="btn btn-danger" type="button">Remove</button>
 				</#if>
 
-				<div id="tutorSearchResults"></div>
+				<div id="agentSearchResults"></div>
 
 				<#if pageAction!="add">
-					<div id="removeTutorMessage" style="display: none" class="alert clearfix">
-						<p>Are you sure you want to remove <strong>${tutorToDisplay.fullName}</strong> as ${student.firstName}'s personal tutor?</p>
-						<button id="cancel-remove-tutor" class="btn pull-right" type="button">Cancel</button>
-						<button id="confirm-remove-tutor" class="btn btn-primary pull-right" type="button">Confirm</button>
+					<div id="removeAgentMessage" style="display: none" class="alert clearfix">
+						<p>Are you sure you want to remove <strong>${agentToDisplay.fullName}</strong> as ${student.firstName}'s ${relationshipType.agentRole}?</p>
+						<button id="cancel-remove-agent" class="btn pull-right" type="button">Cancel</button>
+						<button id="confirm-remove-agent" class="btn btn-primary pull-right" type="button">Confirm</button>
 					</div>
 				</#if>
 
-				<div id="notify-tutor-change">
+				<div id="notify-agent-change">
 				    <#if pageAction!="add">
-						<div id="notify-remove-tutor" class="alert hide"><strong>${tutorToDisplay.fullName}</strong> will no longer be ${student.firstName}'s personal tutor.</div>
+						<div id="notify-remove-agent" class="alert hide"><strong>${agentToDisplay.fullName}</strong> will no longer be ${student.firstName}'s ${relationshipType.agentRole}.</div>
 				  	</#if>
 					<p>Notify these people via email of this change</p>
 					<div class="control-group">
 						<div class="controls">
 							<label class="checkbox">
-								<input type="checkbox" name="notifyTutee" class="notifyTutee" checked />
-								Tutee
+								<input type="checkbox" name="notifyStudent" class="notifyStudent" checked />
+								${relationshipType.studentRole?cap_first}
 							</label>
 
 							<label class="checkbox <#if pageAction=="add">muted</#if>">
-								<input type="checkbox" name="notifyOldTutor" class="notifyOldTutor" <#if pageAction!="add">checked <#else> disabled </#if> />
-								Old tutor
+								<input type="checkbox" name="notifyOldAgent" class="notifyOldAgent" <#if pageAction!="add">checked <#else> disabled </#if> />
+								Old ${relationshipType.agentRole}
 							</label>
 
 							<label class="checkbox">
-								<input type="checkbox" name="notifyNewTutor" class="notifyNewTutor" checked />
-								New tutor
+								<input type="checkbox" name="notifyNewAgent" class="notifyNewAgent" checked />
+								New ${relationshipType.agentRole}
 							</label>
 						</div>
 					</div>
@@ -85,18 +85,18 @@
 		</@f.form>
 		</div>
 		<div class="modal-footer">
-				<div type="button" class="btn disabled" id="save-tutor">Save</div>
+				<div type="button" class="btn disabled" id="save-agent">Save</div>
 			</div>
 	</#if>
 
 	<script>
 		jQuery(document).ready(function($) {
 
-			$('#save-tutor').click(function() {
+			$('#save-agent').click(function() {
 				if ($(this).hasClass("disabled")) return;
 				$.post($("#editStudentRelationshipCommand").prop('action'), $("#editStudentRelationshipCommand").serialize(), function(){
-					$('#modal-change-tutor').modal('hide');
-					var tutorId = $('#editStudentRelationshipCommand input[name=tutor]').val();
+					$('#modal-change-agent').modal('hide');
+					var agentId = $('#editStudentRelationshipCommand input[name=agent]').val();
 					var remove = $('#editStudentRelationshipCommand input[name=remove]').val();
 					if(remove == "true") {
 						var action = "removed";
@@ -105,28 +105,28 @@
 					}
 
 					var currentUrl = [location.protocol, '//', location.host, location.pathname].join('');    // url without query string
-					window.location = currentUrl + "?action=tutor" + action + "&tutorId=" + tutorId;
+					window.location = currentUrl + "?action=agent" + action + "&agentId=" + agentId;
 				});
 			});
 
 			function setStudent(memberString) {
 				var member = memberString.split("|");
 
-				if($('#editStudentRelationshipCommand input[name=currentTutor]').val() != member[1]) {
-					$('#remove-tutor').addClass("disabled");
-					$('#notify-tutor-change').show();
+				if($('#editStudentRelationshipCommand input[name=currentAgent]').val() != member[1]) {
+					$('#remove-agent').addClass("disabled");
+					$('#notify-agent-change').show();
 				} else {
-					$('#remove-tutor').removeClass("disabled");
+					$('#remove-agent').removeClass("disabled");
 				}
 
-				$('#editStudentRelationshipCommand input[name=tutor]').val(member[1]);
-				$("#tutorSearchResults").html("");
+				$('#editStudentRelationshipCommand input[name=agent]').val(member[1]);
+				$("#agentSearchResults").html("");
 
-				$("#save-tutor").removeClass("disabled").addClass("btn-primary");
+				$("#save-agent").removeClass("disabled").addClass("btn-primary");
 				return member[0];
 			}
 
-			function tutorHighlight(item) {
+			function agentHighlight(item) {
 				var member = item.split("|");
 				return '<h3 class="name">' + member[0] + '</h3><span class="description">' + member[3] + '</span>';
 			}
@@ -134,49 +134,49 @@
 			$('.inline-search-button').click(function() {
 			    if ($(this).hasClass("disabled")) return;
 				var container = $(this).parents("form");
-				var target = "../tutor/search.json";
+				var target = "<@routes.relationship_search_json />";
 				var query = container.find('input[name="query"]').val();
 				if(query.length < 4) return;
 
-				$('#notify-tutor-change').hide();
-				$("#tutorSearchResults").html('<h5>Search results</h5><ul></ul>');
+				$('#notify-agent-change').hide();
+				$("#agentSearchResults").html('<h5>Search results</h5><ul></ul>');
 				$.get(target, { query : query }, function(data) {
 					var members = flattenMemberData(data);
 					$.each(data, function(i, member) {
-						$("#tutorSearchResults ul").append('<li data-value="'+members[i]+'"><a id="'+member.userId+'"><h6 class="name">' + member.name + '</h6>' + member.description + '</a></li>');
+						$("#agentSearchResults ul").append('<li data-value="'+members[i]+'"><a id="'+member.userId+'"><h6 class="name">' + member.name + '</h6>' + member.description + '</a></li>');
 					});
 				});
 			});
 
-			$('#remove-tutor').click(function() {
+			$('#remove-agent').click(function() {
 				if ($(this).hasClass("disabled")) return;
-				if ($('#notify-tutor-change').is(':visible')) $('#notify-tutor-change').hide();
-				$('#removeTutorMessage').show();
+				if ($('#notify-agent-change').is(':visible')) $('#notify-agent-change').hide();
+				$('#removeAgentMessage').show();
 			});
 
-			$('#confirm-remove-tutor').click(function() {
-				$('.notifyNewTutor').attr("disabled", "disabled");
-				$('.notifyNewTutor').prop("checked", false);
-				$('.notifyNewTutor').closest("label").addClass("muted");
-				$('#removeTutorMessage').hide();
-				$('#notify-tutor-change').show();
-				$("#save-tutor").removeClass("disabled").addClass("btn-primary");
+			$('#confirm-remove-agent').click(function() {
+				$('.notifyNewAgent').attr("disabled", "disabled");
+				$('.notifyNewAgent').prop("checked", false);
+				$('.notifyNewAgent').closest("label").addClass("muted");
+				$('#removeAgentMessage').hide();
+				$('#notify-agent-change').show();
+				$("#save-agent").removeClass("disabled").addClass("btn-primary");
 				$('#editStudentRelationshipCommand input[name="query"]').prop('disabled', true);;
-				$('#remove-tutor').addClass('disabled');
+				$('#remove-agent').addClass('disabled');
 				$('.inline-search-button').addClass('disabled');
-				$('#notify-remove-tutor').show();
+				$('#notify-remove-agent').show();
 				$("#editStudentRelationshipCommand input[name='remove']").val('true');
 			});
 
-			$('#cancel-remove-tutor').click(function() {
-				$('#removeTutorMessage').hide();
+			$('#cancel-remove-agent').click(function() {
+				$('#removeAgentMessage').hide();
 			});
 
-			$('#tutorSearchResults').on('click', 'li', function() {
-				var queryInput = $(this).parents('#edit-personal-tutor-modal').find('.profile-search input[name="query"]');
+			$('#agentSearchResults').on('click', 'li', function() {
+				var queryInput = $(this).parents('#edit-agent-modal').find('.profile-search input[name="query"]');
 				var memberName = setStudent($(this).attr('data-value'));
 				queryInput.val(memberName);
-				$("#save-tutor").removeClass("disabled").addClass("btn-primary");
+				$("#save-agent").removeClass("disabled").addClass("btn-primary");
 			});
 
 			function flattenMemberData(data) {
@@ -224,7 +224,7 @@
 						matcher: function(item) { return true; },
 						sorter: function(items) { return items; }, // use 'as-returned' sort
 						highlighter: function(item) {
-							return tutorHighlight(item);
+							return agentHighlight(item);
 						},
 
 						updater: function(item) {
@@ -236,7 +236,7 @@
 			}
 
 
-			profileSearch($('#edit-personal-tutor-modal .profile-search'), "../tutor/search.json", tutorHighlight, setStudent);
+			profileSearch($('#edit-agent-modal .profile-search'), "<@routes.relationship_search_json />", agentHighlight, setStudent);
 
 
 		}(jQuery));

@@ -31,6 +31,7 @@ class StudentRelationshipChangeNotification (
 			"student" -> relationship.studentMember,
 			"oldAgent" -> oldAgent,
 			"newAgent" -> newAgent,
+			"relationshipType" -> relationship.relationshipType,
 			"path" -> url
 		))
 	}

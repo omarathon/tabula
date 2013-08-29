@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsSelector
 
 case class StudentRelationshipAgent(student: model.Member, relationshipType: StudentRelationshipType) extends BuiltInRole(StudentRelationshipAgentRoleDefinition(relationshipType), student)
 
-case class StudentRelationshipAgentRoleDefinition(relationshipType: StudentRelationshipType) extends BuiltInRoleDefinition {
+case class StudentRelationshipAgentRoleDefinition(relationshipType: StudentRelationshipType) extends SelectorBuiltInRoleDefinition(relationshipType) {
 
 	override def description = relationshipType.description
 

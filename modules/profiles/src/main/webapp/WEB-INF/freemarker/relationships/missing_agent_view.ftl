@@ -1,22 +1,22 @@
 <#escape x as x?html>
-<div id="tutors">
+<div id="agents">
 	<div class="pull-right">
 		<#if features.personalTutorAssignment>
-			<a href="<@routes.tutors_allocate department />" class="btn btn-medium pull-right">
-				<i class="icon-random icon-fixed-width"></i> Assign personal tutors</a>
+			<a href="<@routes.relationship_allocate department relationshipType />" class="btn btn-medium pull-right">
+				<i class="icon-random icon-fixed-width"></i> Assign ${relationshipType.description}s</a>
 			</a>
 		</#if>
 	</div>
 	
-	<h1>Students in ${department.name} with no personal tutor</h1>
+	<h1>Students in ${department.name} with no ${relationshipType.agentRole}</h1>
 
 	<#if studentCount gt 0>
 		<#if missingStudents?has_content>
-			<table class="tutees table-bordered table-striped table-condensed tabula-purple">
+			<table class="students table-bordered table-striped table-condensed tabula-purple">
 				<thead>
 					<tr>
-						<th class="tutee-col">First name</th>
-						<th class="tutee-col">Last name</th>
+						<th class="student-col">First name</th>
+						<th class="student-col">Last name</th>
 						<th class="id-col">ID</th>
 						<th class="type-col">Type</th>
 						<th class="year-col">Year</th>
@@ -26,7 +26,7 @@
 
 				<tbody>
 					<#list missingStudents as student>
-						<tr class="tutee">
+						<tr class="student">
 							<td><h6>${student.firstName}</h6></td>
 							<td><h6>${student.lastName}</h6></td>
 							<td><a class="profile-link" href="<@routes.profile student />">${student.universityId}</a></td>
@@ -42,7 +42,7 @@
 				</tbody>
 			</table>
 		<#else>
-			<p class="alert alert-success"><i class="icon-ok"></i> All students in ${department.name} have personal tutors recorded.</p>
+			<p class="alert alert-success"><i class="icon-ok"></i> All students in ${department.name} have ${relationshipType.agentRole}s recorded.</p>
 		</#if>
 	<#else>
 		<p class="alert alert-warning"><i class="icon-warning-sign"></i> No students are currently visible for ${department.name} in Tabula.</p>
@@ -53,11 +53,11 @@
 <script type="text/javascript">
 (function($) {
 	$(function() {
-		$(".tutees").tablesorter({
+		$(".students").tablesorter({
 			sortList: [[1,0], [3,0], [4,0]]
 		});
 
-		$(".tutee").on("mouseover", function(e) {
+		$(".student").on("mouseover", function(e) {
 			$(this).find("td").addClass("hover");
 		}).on("mouseout", function(e) {
 			$(this).find("td").removeClass("hover");

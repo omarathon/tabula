@@ -18,5 +18,5 @@ abstract class MeetingRecordNotification(meeting: MeetingRecord)
 			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(message)), 
 			meeting)
 
-	def actorRole = meeting.relationship.relationshipType.actorRole
+	def agentRole = meeting.relationship.relationshipType.agentRole
 }

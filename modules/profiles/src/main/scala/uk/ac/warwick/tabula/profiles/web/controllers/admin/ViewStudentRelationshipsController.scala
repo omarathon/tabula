@@ -36,7 +36,7 @@ class MissingStudentRelationshipController extends ProfilesController {
 		new MissingStudentRelationshipCommand(department, relationshipType)
 
 	@RequestMapping(method = Array(HEAD, GET))
-	def view(@PathVariable("department") department: Department, @ModelAttribute("missingStudentRelationshipsCommand") missing: MissingStudentRelationshipCommand): Mav = {
+	def view(@PathVariable("department") department: Department, @ModelAttribute("missingStudentRelationshipCommand") missing: MissingStudentRelationshipCommand): Mav = {
 		val (studentCount, missingStudents) = missing.apply
 		Mav("relationships/missing_agent_view",
 			"studentCount" -> studentCount,

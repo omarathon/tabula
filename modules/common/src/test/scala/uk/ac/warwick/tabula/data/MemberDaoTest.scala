@@ -188,8 +188,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.saveOrUpdate(staff1)
 		memberDao.saveOrUpdate(staff2)
 		
-		val relationshipType = new StudentRelationshipType
-		relationshipType.id = "tutor"
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 
 		val relBetweenStaff1AndStu1 = StudentRelationship("1000003", relationshipType, "1000001/1")
@@ -236,8 +235,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.saveOrUpdate(staff1)
 		memberDao.saveOrUpdate(staff2)
 		
-		val relationshipType = new StudentRelationshipType
-		relationshipType.id = "tutor"
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 
 		val relBetweenStaff1AndStu1 = StudentRelationship("1000003", relationshipType, "1000001/1")
@@ -275,8 +273,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
 		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
 		
-		val relationshipType = new StudentRelationshipType
-		relationshipType.id = "tutor"
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 
 		val relBetweenStaff1AndStu1 = StudentRelationship("1000003", relationshipType, "1000001/1")
@@ -322,8 +319,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.saveOrUpdate(staff1)
 		memberDao.saveOrUpdate(staff2)
 		
-		val relationshipType = new StudentRelationshipType
-		relationshipType.id = "tutor"
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 
 		val relBetweenStaff1AndStu1 = StudentRelationship("1000003", relationshipType, "1000001/1")

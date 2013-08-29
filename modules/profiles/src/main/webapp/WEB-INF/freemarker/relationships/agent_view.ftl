@@ -3,50 +3,50 @@
 </#function>
 
 <#escape x as x?html>
-<div id="tutor-view">
+<div id="agent-view">
 	<div class="pull-right">
 		<#if features.personalTutorAssignment>
-			<a href="<@routes.tutors_allocate department />" class="btn btn-medium pull-right">
-				<i class="icon-random icon-fixed-width"></i> Assign personal tutors</a>
+			<a href="<@routes.relationship_allocate department relationshipType />" class="btn btn-medium pull-right">
+				<i class="icon-random icon-fixed-width"></i> Assign ${relationshipType.description}s</a>
 			</a>
 		</#if>
 	</div>
 
-	<h1>Personal tutors for ${department.name}</h1>
+	<h1>${relationshipType.description}s for ${department.name}</h1>
 
 	<#if studentCount gt 0>
-		<#if tutorRelationships?has_content>
-			<table id="tutors" class="table table-bordered">
-				<#list tutorRelationships?keys?sort as key>
-					<#assign tutor = tutorRelationships[key]?first.agentParsed />
-					<#assign tutees = tutorRelationships[key] />
-					<#assign tuteeKey = sanitise(key) + "-tutees" />
+		<#if agentRelationships?has_content>
+			<table id="agents" class="table table-bordered">
+				<#list agentRelationships?keys?sort as key>
+					<#assign agent = agentRelationships[key]?first.agentParsed />
+					<#assign students = agentRelationships[key] />
+					<#assign studentKey = sanitise(key) + "-students" />
 
 					<tbody>
 						<tr>
 							<td>
-								<h4 class="collapse-trigger" id="${tuteeKey}-trigger" data-toggle="collapse" data-target="#${tuteeKey}" title="Expand">
-									<span class="tutor-detail pull-right"><@fmt.p tutees?size "tutee" /></span>
+								<h4 class="collapse-trigger" id="${studentKey}-trigger" data-toggle="collapse" data-target="#${studentKey}" title="Expand">
+									<span class="agent-detail pull-right"><@fmt.p students?size "${relationshipType.studentRole}" /></span>
 									<i class="icon-chevron-right icon-fixed-width"></i>
-									<#if tutor?is_string>
-										${tutor}
-										<#if !tutor?string?starts_with("Not ")>
-											<span class="tutor-detail">External to Warwick</span>
+									<#if agent?is_string>
+										${agent}
+										<#if !agent?string?starts_with("Not ")>
+											<span class="agent-detail">External to Warwick</span>
 										</#if>
 									<#else>
-										${tutor.fullName}
-										<#if tutor.homeDepartment.code != department.code>
-											<span class="tutor-detail">${tutor.homeDepartment.name}</span>
+										${agent.fullName}
+										<#if agent.homeDepartment.code != department.code>
+											<span class="agent-detail">${agent.homeDepartment.name}</span>
 										</#if>
 									</#if>
 								</h4>
 
-								<div id="${tuteeKey}" class="collapse">
-									<table class="tutees table-bordered table-striped table-condensed tabula-purple">
+								<div id="${studentKey}" class="collapse">
+									<table class="students table-bordered table-striped table-condensed tabula-purple">
 										<thead>
 											<tr>
-												<th class="tutee-col">First name</th>
-												<th class="tutee-col">Last name</th>
+												<th class="student-col">First name</th>
+												<th class="student-col">Last name</th>
 												<th class="id-col">ID</th>
 												<th class="type-col">Type</th>
 												<th class="year-col">Year</th>
@@ -55,9 +55,9 @@
 										</thead>
 
 										<tbody>
-											<#list tutees as tuteeRelationship>
-												<#assign student = tuteeRelationship.studentMember />
-												<tr class="tutee">
+											<#list students as studentRelationship>
+												<#assign student = studentRelationship.studentMember />
+												<tr class="student">
 													<td><h6>${student.firstName}</h6></td>
 													<td><h6>${student.lastName}</h6></td>
 													<td><a class="profile-link" href="<@routes.profile student />">${student.universityId}</a></td>
@@ -79,13 +79,13 @@
 				</#list>
 			</table>
 		<#else>
-			<p class="alert alert-warning"><i class="icon-warning-sign"></i> No personal tutors are currently visible for ${department.name} in Tabula.</p>
+			<p class="alert alert-warning"><i class="icon-warning-sign"></i> No ${relationshipType.agentRole}s are currently visible for ${department.name} in Tabula.</p>
 		</#if>
 
 		<#if missingCount == 0>
-			<h4 class="muted"><i class="icon-ok"></i> All students in ${department.name} have personal tutors recorded</h4>
+			<h4 class="muted"><i class="icon-ok"></i> All students in ${department.name} have ${relationshipType.agentRole}s recorded</h4>
 		<#else>
-			<h4><a href="<@routes.tutors_missing department />">View <@fmt.p missingCount "student" /> with no personal tutor</a></h4>
+			<h4><a href="<@routes.relationship_missing department relationshipType />">View <@fmt.p missingCount "student" /> with no ${relationshipType.agentRole}</a></h4>
 		</#if>
 	<#else>
 		<p class="alert alert-warning"><i class="icon-warning-sign"></i> No students are currently visible for ${department.name} in Tabula.</p>
@@ -96,17 +96,17 @@
 <script type="text/javascript">
 (function($) {
 	$(function() {
-		$(".tutees").tablesorter({
+		$(".students").tablesorter({
 			sortList: [[1,0], [3,0], [4,0]]
 		});
 
-		$("#tutors").on("hidden", "div", function() {
+		$("#agents").on("hidden", "div", function() {
 			$("#" + this.id + "-trigger i").removeClass("icon-chevron-down").addClass("icon-chevron-right").parent().prop("title", "Expand");
 		}).on("shown", "div", function() {
 			$("#" + this.id + "-trigger i").removeClass("icon-chevron-right").addClass("icon-chevron-down").parent().prop("title", "Collapse");
 		});
 
-		$(".tutee").on("mouseover", function(e) {
+		$(".student").on("mouseover", function(e) {
 			$(this).find("td").addClass("hover");
 		}).on("mouseout", function(e) {
 			$(this).find("td").removeClass("hover");

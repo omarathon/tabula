@@ -1,7 +1,7 @@
 <#escape x as x?html>
 
 <#macro row student>
-<tr class="tutee">
+<tr class="student">
 	<td>
 		<@fmt.member_photo student "tinythumbnail" />
 	</td>
@@ -14,15 +14,15 @@
 </tr>
 </#macro>
 
-<#-- Print out a table of tutees.
+<#-- Print out a table of students.
  is_relationship=true means each item is a StudentRelationship rather than a member-->
-<#macro table tutees is_relationship>
-<table class="tutees table-bordered table-striped table-condensed tabula-purple">
+<#macro table students is_relationship>
+<table class="students table-bordered table-striped table-condensed tabula-purple">
 	<thead>
 	<tr>
 		<th class="photo-col">Photo</th>
-		<th class="tutee-col">First name</th>
-		<th class="tutee-col">Last name</th>
+		<th class="student-col">First name</th>
+		<th class="student-col">Last name</th>
 		<th class="id-col">ID</th>
 		<th class="type-col">Type</th>
 		<th class="year-col">Year</th>
@@ -31,7 +31,7 @@
 	</thead>
 
 	<tbody>
-		<#list tutees as item>
+		<#list students as item>
 			<#if is_relationship>
 				<#if item.studentMember?has_content>
 					<#assign student = item.studentMember />
@@ -44,16 +44,16 @@
 	</tbody>
 </table>
 
-<#if !tutee_table_script_included??>
+<#if !student_table_script_included??>
 <script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
 <script type="text/javascript">
     (function($) {
         $(function() {
-            $(".tutees").tablesorter({
+            $(".students").tablesorter({
                 sortList: [[2,0], [4,0], [5,0]]
             });
 
-            $(".tutee").on("mouseover", function(e) {
+            $(".student").on("mouseover", function(e) {
                 $(this).find("td").addClass("hover");
             }).on("mouseout", function(e) {
                         $(this).find("td").removeClass("hover");
@@ -63,7 +63,7 @@
         });
     })(jQuery);
 </script>
-<#assign tutee_table_script_included=true />
+<#assign student_table_script_included=true />
 </#if>
 
 </#macro>

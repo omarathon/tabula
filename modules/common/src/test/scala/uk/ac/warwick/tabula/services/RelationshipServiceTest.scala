@@ -26,8 +26,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 
 	@Transactional
 	@Test def findingRelationships = withFakeTime(dateTime(2000, 6)) {
-		val relationshipType = new StudentRelationshipType
-		relationshipType.id = "tutor"
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		relationshipService.saveOrUpdate(relationshipType)
 		
 		relationshipService.findCurrentRelationships(relationshipType, "1250148/1") should be ('empty)
@@ -102,8 +101,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		profileService.save(m3)
 		profileService.save(m4)
 		
-		val relationshipType = new StudentRelationshipType
-		relationshipType.id = "tutor"
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		relationshipService.saveOrUpdate(relationshipType)
 
 		val rel1 = relationshipService.saveStudentRelationship(relationshipType, "0000001/1", "0000003")
@@ -149,8 +147,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		profileService.save(m3)
 		profileService.save(m4)
 		
-		val relationshipType = new StudentRelationshipType
-		relationshipType.id = "tutor"
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		relationshipService.saveOrUpdate(relationshipType)
 
 		val rel1 = relationshipService.saveStudentRelationship(relationshipType, "1000001/1", "1000003")
@@ -181,8 +178,7 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		profileService.save(m5)
 		profileService.save(m6)
 		
-		val relationshipType = new StudentRelationshipType
-		relationshipType.id = "tutor"
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		relationshipService.saveOrUpdate(relationshipType)
 
 		relationshipService.listStudentsWithoutRelationship(relationshipType, dept1) should be (Seq(m5))

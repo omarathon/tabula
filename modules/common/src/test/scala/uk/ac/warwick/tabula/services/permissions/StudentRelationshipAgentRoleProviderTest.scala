@@ -19,7 +19,7 @@ class StudentRelationshipAgentRoleProviderTest extends TestBase with Mockito {
 	val member = Fixtures.student(universityId = "111111")
 
 	@Test def isAgent = withUser("cuscav", "0123456") {
-		val relationshipType = new StudentRelationshipType
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		
 		val rel1 = StudentRelationship("0123456", relationshipType, "111111/1")
 		val rel2 = StudentRelationship("0123456", relationshipType, "888888/1")

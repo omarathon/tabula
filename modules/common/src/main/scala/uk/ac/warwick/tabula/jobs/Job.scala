@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.jobs
 
-import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.stereotype.Service

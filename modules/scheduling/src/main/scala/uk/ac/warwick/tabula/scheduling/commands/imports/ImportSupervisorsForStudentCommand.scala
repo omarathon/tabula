@@ -35,7 +35,7 @@ class ImportSupervisorsForStudentCommand()
 
 	def importSupervisors {
 		relationshipService
-			.getStudentRelationshipTypeById("supervisor") // TODO this is awful
+			.getStudentRelationshipTypeByUrlPart("supervisor") // TODO this is awful
 			.filter { relType => studentCourseDetails.department.getStudentRelationshipSource(relType) == StudentRelationshipSource.SITS }
 			.foreach { relationshipType => 
 				val prsCodes = supervisorImporter.getSupervisorPrsCodes(studentCourseDetails.scjCode)

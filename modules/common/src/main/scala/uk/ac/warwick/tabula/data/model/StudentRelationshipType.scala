@@ -9,15 +9,24 @@ import org.hibernate.`type`.StandardBasicTypes
 import org.hibernate.annotations.Type
 import java.sql.Types
 import uk.ac.warwick.tabula.permissions.PermissionsSelector
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.StringUtils._
+import java.net.URLEncoder
+import javax.validation.constraints.NotNull
+import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.spring.Wire
 
 @Entity @AccessType("field")
 class StudentRelationshipType extends PermissionsTarget with PermissionsSelector[StudentRelationshipType] {
 	
-	/**
-	 * The ID is also often used in URL construction, so you may have /tutor/all for id=tutor
-	 */
 	@Id
 	var id: String = _
+	
+	/**
+	 * The URL identifier for this type. Valid URL path chars only please!!
+	 */
+	@NotNull
+	var urlPart: String = _
 	
 	/**
 	 * What you'd call a single actor in this relationship's context, e.g. "personal tutor".
@@ -25,7 +34,8 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 	 * This should be lowercase, as it will be used in a sentence. If it's used in other places,
 	 * the template is expected to capitalise accordingly.
 	 */
-	var actorRole: String = _
+	@NotNull
+	var agentRole: String = _
 	
 	/**
 	 * What you'd call a single student in this relationship's context, e.g. "personal tutee"
@@ -33,6 +43,7 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 	 * This should be lowercase, as it will be used in a sentence. If it's used in other places,
 	 * the template is expected to capitalise accordingly.
 	 */
+	@NotNull
 	var studentRole: String = _
 	
 	/**
@@ -46,16 +57,57 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.StudentRelationshipSourceUserType")
 	var defaultSource: StudentRelationshipSource = StudentRelationshipSource.Local
 	
+	var defaultDisplay: JBoolean = true
+	
+	@Column(name="expected_ug")
+	var expectedUG: JBoolean = false
+	
+	@Column(name="expected_pgt")
+	var expectedPGT: JBoolean = false
+	
+	@Column(name="expected_pgr")
+	var expectedPGR: JBoolean = false
+	
+	@Column(name="sort_order")
+	var sortOrder: Int = 2
+	
+	/**
+	 * Do we expect this member to have a relationship of this type? Controls 
+	 * whether it is hidden when empty, or displayed with a prompt to add.
+	 */
+	def displayIfEmpty(studentCourseDetails: StudentCourseDetails) = studentCourseDetails.courseType match {
+		case CourseType.UG => expectedUG
+		case CourseType.PGT => expectedPGT
+		case CourseType.PGR => expectedPGR
+		case _ => false
+	}
+	
 	/**
 	 * If the source is anything other than local, then this relationship type is read-only
 	 */
 	def readOnly(department: Department) = 
 		(department.getStudentRelationshipSource(this) != StudentRelationshipSource.Local)
+		
+	@transient
+	var relationshipService = Wire[RelationshipService]
+		
+	def empty = relationshipService.countStudentsByRelationship(this) == 0
 	
 	def permissionsParents = Stream.empty
 
 	override def toString = "StudentRelationshipType(%s)".format(id)
 
+}
+
+object StudentRelationshipType {
+	def apply(id: String, urlPart: String, agentRole: String, studentRole: String) = {
+		val relType = new StudentRelationshipType
+		relType.id = id
+		relType.urlPart = urlPart
+		relType.agentRole = agentRole
+		relType.studentRole = studentRole
+		relType
+	}
 }
 
 sealed abstract class StudentRelationshipSource(val dbValue: String)

@@ -14,10 +14,10 @@ import scala.reflect.ClassTag
 abstract class CaseObjectEqualityFixes[A <: CaseObjectEqualityFixes[A] : ClassTag] {
 	def getName: String
 	
-	override final def equals(other: Any) = other match {
+	override def equals(other: Any) = other match {
 		case that: A => getName == that.getName
 		case _ => false
 	}
-	override final def hashCode() = getName.hashCode()
-	override final def toString() = getName
+	override def hashCode() = getName.hashCode()
+	override def toString() = getName
 }

@@ -30,6 +30,7 @@ abstract class BulkRelationshipChangeNotification (
 	def content: String = {
 		renderTemplate(templateLocation, Map(
 			"changes" -> changes,
+			"relationshipType" -> relationshipType,
 			"path" -> url
 		) ++ extraModel)
 	}

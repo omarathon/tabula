@@ -8,7 +8,7 @@
 	background: @header-colour;
 }
 
-#modal-change-tutor #edit-personal-tutor-modal {
+#modal-change-agent #edit-agent-modal {
 	overflow:visible;
 
 	.control-label {
@@ -29,12 +29,12 @@
 		}
 	}
 
-	#save-tutor {
+	#save-agent {
 		float: right;
 		margin-right: 20px;
 	}
 
-	#remove-tutor {
+	#remove-agent {
 		vertical-align: top;
 		margin: 0px 0 0 20px;
 	}
@@ -49,19 +49,19 @@
 }
 
 
-#notify-tutor-change {
+#notify-agent-change {
 	display:none;
 }
 
-#tuteeName {
+#studentName {
 	margin-bottom: 20px;
 }
 
-#editTutorCommand {
+#editStudentRelationshipCommand {
 	margin-bottom: 0;
 }
 
-#tutorSearchResults {
+#agentSearchResults {
 	max-height:200px;
 	overflow-y:auto;
 
@@ -176,13 +176,12 @@
 			}
 		}
 
-		#personal-development, #supervision {
+		.relationship-section {
 
-			.add-tutor-link {
+			.add-agent-link {
 				text-decoration: none;
 				margin-bottom:6px;
-				width: 140px;
-				display:block;
+				display: block;
 			}
 
 			section.meetings {
@@ -311,8 +310,8 @@
 	} // .related_students
 
 
-	#container #tutors {
-		.tutor-detail {
+	#container #agents {
+		.agent-detail {
 			font-family: @baseFontFamily;
 			font-size: @baseFontSize * 1.1;
 			letter-spacing: 0;
@@ -320,11 +319,11 @@
 			margin-left: 12px;
 		}
 
-		.tutees {
+		.students {
 			width: 100%;
 
 			th.photo-col { width: 11%; }
-			th.tutee-col { width: 12%; }
+			th.student-col { width: 12%; }
 			th.id-col { width: 11%; }
 			th.type-col { width: 25%; }
 			th.year-col { width: 5%; }
@@ -336,7 +335,7 @@
 
 
 
-	} // #tutors
+	} // #agents
 
 	#container .profile-search {
 		margin: 4px 0 20px;
@@ -407,7 +406,7 @@
 		}
 	} // .profile-search
 
-	#container .tutor-search {
+	#container .agent-search {
 		.control-group { margin-top: 54px; }
 		.input-append .btn { margin-top: 1px; }
 
@@ -431,28 +430,28 @@
 			line-height: 28px;
 			font-size: @searchFontSize;
 		}
-	} // .tutor-search
+	} // .agent-search
 
-	#container .tutor-edit {
+	#container .agent-edit {
 		button {
 			text-align: right;
 			margin-right:220px
 			}
 
-	} // .tutor-edit
+	} // .agent-edit
 
-	#container .tutor-edit-return {
+	#container .agent-edit-return {
 		a {
 			margin-top: 54px;
 			}
 
-	} // .tutor-edit
+	} // .agent-edit
 
 } // .profiles-page
 
-// drag students into tutors
+// drag students into agents
 
-#allocateStudentsToTutorsCommand {
+#allocateStudentsToRelationshipCommand {
 
 	// FIXME I hate that I have to do this. The .profiles-page CSS is clearly too wide-ranging
 	.profile {
@@ -494,7 +493,7 @@
 		background-color: #dddddd;
 	}
 	
-	.tutor-header {
+	.agent-header {
 		> h4, > div { display: inline-block; }
 		> h4 { margin-right: 10px; }
 	}
@@ -508,4 +507,4 @@
 
 }
 
-// end drag students into tutors
+// end drag students into agents

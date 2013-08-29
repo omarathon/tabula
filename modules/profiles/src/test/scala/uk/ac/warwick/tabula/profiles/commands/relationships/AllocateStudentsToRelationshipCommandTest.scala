@@ -17,7 +17,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 	
 	@Test def itWorks = withUser("boombastic") {
 		val department = Fixtures.department("in", "IT Services")
-		val relationshipType = new StudentRelationshipType
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		
 		val student1 = Fixtures.student("0000001", "student1", department)
 		val student2 = Fixtures.student("0000002", "student2", department)

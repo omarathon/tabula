@@ -24,7 +24,9 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 trait RelationshipService {
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType]
 	def saveOrUpdate(relationshipType: StudentRelationshipType)
+	def delete(relationshipType: StudentRelationshipType)
 	def getStudentRelationshipTypeById(id: String): Option[StudentRelationshipType]
+	def getStudentRelationshipTypeByUrlPart(urlPart: String): Option[StudentRelationshipType]
 	
 	def saveOrUpdate(relationship: StudentRelationship)
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
@@ -37,6 +39,7 @@ trait RelationshipService {
 	def listStudentRelationshipsWithUniversityId(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
 	def listStudentsWithoutRelationship(relationshipType: StudentRelationshipType, department: Department): Seq[Member]
 	def countStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): (Int, Int)
+	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int
 }
 
 @Service(value = "relationshipService")
@@ -48,7 +51,9 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType] = memberDao.allStudentRelationshipTypes
 	def getStudentRelationshipTypeById(id: String) = memberDao.getStudentRelationshipTypeById(id)
+	def getStudentRelationshipTypeByUrlPart(urlPart: String) = memberDao.getStudentRelationshipTypeByUrlPart(urlPart)
 	def saveOrUpdate(relationshipType: StudentRelationshipType) = memberDao.saveOrUpdate(relationshipType)
+	def delete(relationshipType: StudentRelationshipType) = memberDao.delete(relationshipType)
 	
 	def saveOrUpdate(relationship: StudentRelationship) = memberDao.saveOrUpdate(relationship)
 
@@ -109,6 +114,10 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 
   def countStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): (Int, Int) = transactional(readOnly = true) {
 		(memberDao.countStudentsByDepartment(department).intValue, memberDao.countStudentsByRelationshipAndDepartment(relationshipType, department).intValue)
+	}
+
+  def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int = transactional(readOnly = true) {
+		memberDao.countStudentsByRelationship(relationshipType).intValue
 	}
 }
 

@@ -31,7 +31,7 @@ class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends View
 @RequestMapping(Array("/view/{member}"))
 class ViewProfileController extends ProfilesController {
 
-	var userLookup = Wire.auto[UserLookupService]
+	var userLookup = Wire[UserLookupService]
 	var smallGroupService = Wire[SmallGroupService]
 
 	@ModelAttribute("searchProfilesCommand")
@@ -60,13 +60,11 @@ class ViewProfileController extends ProfilesController {
 			@ModelAttribute("viewProfileCommand") profileCmd: Appliable[StudentMember],
 			@RequestParam(value="meeting", required=false) openMeetingId: String,
 			@RequestParam(defaultValue="", required=false) agentId: String) = {
-
 		val profiledStudentMember = profileCmd.apply
 		val isSelf = (profiledStudentMember.universityId == user.universityId)
 		
 		// Get all the enabled relationship types for a department
-		// TODO filter by department visibility
-		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
+		val allRelationshipTypes = member.homeDepartment.displayedStudentRelationshipTypes
 		
 		val relationshipMeetings =
 			allRelationshipTypes.flatMap { relationshipType =>
@@ -87,7 +85,7 @@ class ViewProfileController extends ProfilesController {
 			"profile" -> profiledStudentMember,
 			"viewer" -> currentMember,
 			"isSelf" -> isSelf,
-			"meetings" -> relationshipMeetings,
+			"meetingsById" -> relationshipMeetings.map { case (relType, meetings) => (relType.id, meetings) },
 			"openMeeting" -> openMeeting,
 			"numSmallGroups" -> numSmallGroups,
 			"agent" -> agent)

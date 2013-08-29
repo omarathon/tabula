@@ -9,8 +9,7 @@ import scala.Some
 
 trait TutorFixture extends Mockito {
 	
-	val tutorRelationshipType = new StudentRelationshipType
-	tutorRelationshipType.id = "tutor"
+	val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
 	val department = new Department
 	department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.Local)

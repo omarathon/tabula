@@ -52,7 +52,7 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		}
 
 		val relationship = transactional { tx =>
-			val relationship = StudentRelationship("Professor A Tutor", new StudentRelationshipType, "0123456/1")
+			val relationship = StudentRelationship("Professor A Tutor", StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"), "0123456/1")
 			relationship.profileService = ps
 			ps.getStudentBySprCode("0123456/1") returns (Some(student))
 

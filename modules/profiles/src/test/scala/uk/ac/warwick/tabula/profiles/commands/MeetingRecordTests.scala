@@ -52,7 +52,7 @@ trait MeetingRecordTests extends PersistenceTestBase with Mockito {
 		}
 
 		relationship = transactional { tx =>
-			val relationship = StudentRelationship("Professor A Tutor", new StudentRelationshipType, "1170836/1")
+			val relationship = StudentRelationship("Professor A Tutor", StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"), "1170836/1")
 			relationship.profileService = ps
 			ps.getStudentBySprCode("1170836/1") returns (Some(student))
 

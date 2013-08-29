@@ -15,7 +15,7 @@ class ViewMeetingRecordCommandTest extends TestBase with Mockito {
 			val studentCourseDetails = new StudentCourseDetails()
 			val requestor = new StaffMember()
 			val relationship = new StudentRelationship()
-			val relationshipType = new StudentRelationshipType
+			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
 			val meeting = new MeetingRecord
 			val command = new ViewMeetingRecordCommandInternal(studentCourseDetails, currentUser, relationshipType)

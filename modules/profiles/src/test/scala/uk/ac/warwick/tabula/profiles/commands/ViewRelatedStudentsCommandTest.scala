@@ -16,7 +16,7 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 
 		val mockRelationshipService = mock[RelationshipService]
 		val rels = Seq(new StudentRelationship)
-		val relationshipType = new StudentRelationshipType
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		
 		mockRelationshipService.listStudentRelationshipsWithMember(relationshipType, member) returns rels
 
@@ -32,7 +32,7 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 
 		val mockRelationshipService = mock[RelationshipService]
 		val rels = Seq(new StudentRelationship)
-		val relationshipType = new StudentRelationshipType
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		
 		mockRelationshipService.listStudentRelationshipsWithMember(relationshipType, member) returns rels
 

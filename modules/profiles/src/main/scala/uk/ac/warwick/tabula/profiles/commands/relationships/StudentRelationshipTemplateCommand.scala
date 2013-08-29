@@ -36,13 +36,13 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 	var profileService = Wire[ProfileService]
 	
 	val agentLookupSheetName = "AgentLookup"
-	val allocateSheetName = relationshipType.actorRole.capitalize + "s for " + safeDepartmentName(department)
+	val allocateSheetName = trimmedSheetName(relationshipType.agentRole.capitalize + "s for " + department.name)
 	val sheetPassword = "roygbiv"
 
 	def applyInternal() = {
 		val workbook = generateWorkbook()
 
-		new ExcelView("Allocation for " + safeDepartmentName(department) + " " + relationshipType.description + ".xlsx", workbook)
+		new ExcelView("Allocation for " + allocateSheetName + ".xlsx", workbook)
 	}
 	
 	def generateWorkbook() = {
@@ -114,11 +114,13 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 	
 	// attaches the data validation to the sheet
 	def generateAgentDropdowns(sheet: XSSFSheet, agents: Seq[Member]) {
-		val dropdownChoices = agents.flatMap(_.fullName).toArray
-		val dropdownRange = new CellRangeAddressList(1, agents.length, 2, 2)
-		val validation = getDataValidation(dropdownChoices, sheet, dropdownRange)
-
-		sheet.addValidationData(validation)
+		if (!agents.isEmpty) {
+			val dropdownChoices = agents.flatMap(_.fullName).toArray
+			val dropdownRange = new CellRangeAddressList(1, agents.length, 2, 2)
+			val validation = getDataValidation(dropdownChoices, sheet, dropdownRange)
+	
+			sheet.addValidationData(validation)
+		}
 	}
 	
 	// Excel data validation - will only accept the values fed to this method, also puts a dropdown on each cell
@@ -148,10 +150,10 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 		style.setDataFormat(format.getFormat("@"))
 
 		val sheet = workbook.getSheet(allocateSheetName)
-
-			// set style on all columns
-		0 to 3 foreach  {
-			col => sheet.setDefaultColumnStyle(col, style)
+		
+		// set style on all columns
+		0 to 3 foreach  { col => 
+			sheet.setDefaultColumnStyle(col, style)
 			sheet.autoSizeColumn(col)
 		}
 
@@ -167,7 +169,7 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 		val header = sheet.createRow(0)
 		header.createCell(0).setCellValue("student_id")
 		header.createCell(1).setCellValue(relationshipType.studentRole.capitalize + " name")
-		header.createCell(2).setCellValue(relationshipType.actorRole.capitalize + " name")
+		header.createCell(2).setCellValue(relationshipType.agentRole.capitalize + " name")
 		header.createCell(3).setCellValue("agent_id")
 
 		// using apache-poi, we can't protect certain cells - rather we have to protect
@@ -176,15 +178,11 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 		sheet
 	}
 	
-	// trim the name down to 21 characters. Excel sheet names must be 31 chars or less so
-	// "Marks for " = 10 chars + assignment name (max 21) = 31
-	def trimmedDepartmentName(department: Department) = {
-		if (department.name.length > 21)
-			department.name.substring(0, 21)
-		else
-			department.name
+	// Excel sheet names must be 31 chars or less so
+	def trimmedSheetName(rawSheetName: String) = {
+		val sheetName = WorkbookUtil.createSafeSheetName(rawSheetName)
+		
+		if (sheetName.length > 31) sheetName.substring(0, 31)
+		else sheetName
 	}
-
-	// util to replace unsafe characters with spaces
-	def safeDepartmentName(department: Department) = WorkbookUtil.createSafeSheetName(trimmedDepartmentName(department))
 }

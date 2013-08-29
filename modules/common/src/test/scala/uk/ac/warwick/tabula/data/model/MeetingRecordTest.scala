@@ -24,7 +24,7 @@ class MeetingRecordTest extends TestBase with Mockito {
 	}
 	
 	@Test def everydayConstructor = withFakeTime(aprilFool) {
-		val relationshipType = new StudentRelationshipType
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		
 		val creator = new StaffMember
 		val relationship = StudentRelationship("Professor A Tutor", relationshipType, "0123456/1")

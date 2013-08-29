@@ -6,24 +6,24 @@
 	</div>
 
 	<div class="modal-body">
-		<p>Notify these people via email of this change. Note that only students/tutors 
+		<p>Notify these people via email of this change. Note that only students/${relationshipType.agentRole}s 
 		whose allocations have been changed will be notified.</p>
 		
 		<div class="control-group">
 			<div class="controls">
 				<label class="checkbox">
-					<input type="checkbox" name="notifyTutee" class="notifyTutee" checked />
-					Students
+					<input type="checkbox" name="notifyStudent" class="notifyStudent" checked />
+					${relationshipType.studentRole?cap_first}s
 				</label>
 
 				<label class="checkbox">
-					<input type="checkbox" name="notifyOldTutor" class="notifyOldTutor" checked />
-					Old tutors
+					<input type="checkbox" name="notifyOldAgent" class="notifyOldAgent" checked />
+					Old ${relationshipType.agentRole}s
 				</label>
 
 				<label class="checkbox">
-					<input type="checkbox" name="notifyNewTutor" class="notifyNewTutor" checked />
-					New tutors
+					<input type="checkbox" name="notifyNewAgent" class="notifyNewAgent" checked />
+					New ${relationshipType.agentRole}s
 				</label>
 			</div>
 		</div>

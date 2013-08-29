@@ -1,6 +1,6 @@
-<#assign department=allocateStudentsToTutorsCommand.department />
-<#assign mappingById=allocateStudentsToTutorsCommand.mappingById />
-<#assign membersById=allocateStudentsToTutorsCommand.membersById />
+<#assign department=allocateStudentsToRelationshipCommand.department />
+<#assign mappingById=allocateStudentsToRelationshipCommand.mappingById />
+<#assign membersById=allocateStudentsToRelationshipCommand.membersById />
 
 
 
@@ -13,7 +13,7 @@
 			<@fmt.member_photo profile "tinythumbnail" false />
 			<div class="name">
 				<h6>${profile.fullName}</h6>
-				${profile.mostSignificantCourseDetails.route.name}
+				${(profile.mostSignificantCourseDetails.route.name)!profile.homeDepartment.name}
 			</div>
 		</div>
 		<input type="hidden" name="${bindpath}" value="${profile.universityId}" />
@@ -21,7 +21,7 @@
 </#macro>
 
 <#escape x as x?html>
-	<h1>Allocate students to personal tutors</h1>
+	<h1>Allocate students to ${relationshipType.description}s</h1>
 	
 	<noscript>
 		<div class="alert">This page requires Javascript.</div>
@@ -30,20 +30,20 @@
 	<div class="tabbable">
 		<ul class="nav nav-tabs">
 			<li class="active">
-				<a href="#allocatetutors-tab1" data-toggle="tab">Drag and drop</a>
+				<a href="#allocatestudents-tab1" data-toggle="tab">Drag and drop</a>
 			</li>
 			<li >
-				<a href="#allocatetutors-tab2" data-toggle="tab">Upload spreadsheet</a>
+				<a href="#allocatestudents-tab2" data-toggle="tab">Upload spreadsheet</a>
 			</li>
 		</ul>
 
 		<div class="tab-content">
-			<div id="allocatetutors-tab1" class="tab-pane active">
+			<div id="allocatestudents-tab1" class="tab-pane active">
 
-			<p>Drag students onto a tutor to allocate them to the tutor. Select multiple students by dragging a box around them.
+			<p>Drag students onto a ${relationshipType.agentRole} to allocate them to the ${relationshipType.agentRole}. Select multiple students by dragging a box around them.
 				 You can also hold the <kbd class="keyboard-control-key">Ctrl</kbd> key to add to a selection.</p>
 
-			<@spring.hasBindErrors name="allocateStudentsToTutorsCommand">
+			<@spring.hasBindErrors name="allocateStudentsToRelationshipCommand">
 				<#if errors.hasErrors()>
 					<div class="alert alert-error">
 						<h3>Some problems need fixing</h3>
@@ -58,15 +58,15 @@
 				</#if>
 			</@spring.hasBindErrors>
 
-			<#assign submitUrl><@routes.tutors_allocate department /></#assign>
-			<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToTutorsCommand" cssClass="form-horizontal">
+			<#assign submitUrl><@routes.relationship_allocate department relationshipType /></#assign>
+			<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToRelationshipCommand" cssClass="form-horizontal">
 			<div class="tabula-dnd" 
 					 data-item-name="student" 
 					 data-text-selector=".name h6"
 					 data-use-handle="false"
 					 data-selectables=".students .drag-target"
 					 data-scroll="true"
-					 data-remove-tooltip="Remove this student from this tutor">
+					 data-remove-tooltip="Remove this student from this ${relationshipType.agentRole}">
 				<div class="btn-toolbar">
 					<a class="random btn" data-toggle="randomise" data-disabled-on="empty-list"
 					   href="#" >
@@ -84,7 +84,7 @@
 								 data-item-selector=".student-list li">
 							<h3>Students</h3>
 							<div class="well ">
-									<h4>Students with no personal tutor</h4>
+									<h4>Students with no ${relationshipType.agentRole}</h4>
 									<#if features.personalTutorAssignmentFiltering>
 										<div class="filter" id="filter-by-gender-controls">
 											<select data-filter-attr="fGender">
@@ -96,7 +96,7 @@
 										<div class="filter" id="filter-by-year-controls">
 											<select data-filter-attr="fYear">
 												<option data-filter-value="*">Any Year of study</option>
-												<#list allocateStudentsToTutorsCommand.allMembersYears as year>
+												<#list allocateStudentsToRelationshipCommand.allMembersYears as year>
 													<option data-filter-value="${year}">Year ${year}</option>
 												</#list>
 											</select>
@@ -104,7 +104,7 @@
 										<div class="filter" id="filter-by-route-controls">
 											<select data-filter-attr="fRoute">
 												<option data-filter-value="*">Any Route</option>
-												<#list allocateStudentsToTutorsCommand.allMembersRoutes as route>
+												<#list allocateStudentsToRelationshipCommand.allMembersRoutes as route>
 													<option data-filter-value="${route.code}">${route.code?upper_case} ${route.name}</option>
 												</#list>
 											</select>
@@ -129,23 +129,23 @@
 						</div>
 					</div>
 					<div class="span5">
-						<div id="tutorslist" class="tutors fix-on-scroll">
-							<button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#add-tutors">Add tutors</button>
+						<div id="agentslist" class="agents fix-on-scroll">
+							<button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#add-agents">Add ${relationshipType.agentRole}s</button>
 							
 							<#-- Modal to add students manually -->
-							<div class="modal fade hide" id="add-tutors" tabindex="-1" role="dialog" aria-labelledby="add-tutors-label" aria-hidden="true">
+							<div class="modal fade hide" id="add-agents" tabindex="-1" role="dialog" aria-labelledby="add-agents-label" aria-hidden="true">
 								<div class="modal-header">
 									<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-									<h3 id="add-tutors-label">Add tutors</h3>
+									<h3 id="add-agents-label">Add ${relationshipType.agentRole}s</h3>
 								</div>
 					
 								<div class="modal-body">
 									<p>
-										Lookup tutors by typing their names, usercodes or university IDs below, then click <code>Add</code>.
+										Lookup ${relationshipType.agentRole}s by typing their names, usercodes or university IDs below, then click <code>Add</code>.
 									</p>
 									
-									<@form.labelled_row "additionalTutors" "Tutors">
-										<@form.flexipicker path="additionalTutors" placeholder="User name" list=true multiple=true />
+									<@form.labelled_row "additionalAgents" "${relationshipType.agentRole?cap_first}s">
+										<@form.flexipicker path="additionalAgents" placeholder="User name" list=true multiple=true />
 									</@form.labelled_row>
 								</div>
 					
@@ -154,16 +154,16 @@
 								</div>
 							</div>
 						
-							<h3>Tutors</h3>
+							<h3>${relationshipType.agentRole?cap_first}s</h3>
 							
-							<#macro tutor_item university_id full_name existing_students=[]>
-								<div class="drag-target well clearfix tutor-${university_id}">
-									<div class="tutor-header">
+							<#macro agent_item university_id full_name existing_students=[]>
+								<div class="drag-target well clearfix agent-${university_id}">
+									<div class="agent-header">
 										<a href="#" class="delete pull-right" data-toggle="tooltip" title="Remove ${full_name}">
 											<i class="icon-remove icon-large"></i>
 										</a>
 									
-										<#local popoverHeader>${full_name}'s personal tutees</#local>
+										<#local popoverHeader>${full_name}'s ${relationshipType.studentRole}s</#local>
 
 										<h4 class="name">
 											${full_name}
@@ -173,7 +173,7 @@
 											<#local count = existing_students?size />
 											<span class="drag-count">${count}</span> <span class="drag-counted" data-singular="student" data-plural="students">student<#if count != 1>s</#if></span>
 
-											<a id="show-list-${university_id}" class="show-list" title="View students" data-container=".tutor-${university_id}" data-title="${popoverHeader}" data-placement="left"><i class="icon-question-sign"></i></a>
+											<a id="show-list-${university_id}" class="show-list" title="View students" data-container=".agent-${university_id}" data-title="${popoverHeader}" data-placement="left"><i class="icon-question-sign"></i></a>
 										</div>
 									</div>
 
@@ -185,10 +185,10 @@
 								</div>
 							</#macro>
 							
-							<#list allocateStudentsToTutorsCommand.mapping?keys as tutor>
-								<#assign existingStudents = mappingById[tutor.universityId]![] />
+							<#list allocateStudentsToRelationshipCommand.mapping?keys as agent>
+								<#assign existingStudents = mappingById[agent.universityId]![] />
 								
-								<@tutor_item tutor.universityId tutor.fullName existingStudents />
+								<@agent_item agent.universityId agent.fullName existingStudents />
 							</#list>
 						</div>
 					</div>
@@ -204,7 +204,7 @@
 			</@f.form>
 			</div><!-- end 1st tab -->
 
-			<div class="tab-pane" id="allocatetutors-tab2">
+			<div class="tab-pane" id="allocatestudents-tab2">
 				<#include "upload_form.ftl" />
 			</div><!-- end 2nd tab-->
 
@@ -216,7 +216,7 @@
 		(function($) {
 			<!--TAB-1008 - fix scrolling bug when student list is shorter than the group list-->
 			$('#studentslist').css('min-height', function() {
-				return $('#tutorslist').outerHeight();
+				return $('#agentslist').outerHeight();
 			});
 			
 			$('.btn.refresh-form').on('click', function(e) {
@@ -225,7 +225,7 @@
 				$form.submit();
 			});
 			
-			$('#tutorslist .tutor-header > .delete').on('click', function(e) {
+			$('#agentslist .agent-header > .delete').on('click', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
 				

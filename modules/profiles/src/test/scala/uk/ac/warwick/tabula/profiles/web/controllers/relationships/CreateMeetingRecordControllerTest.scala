@@ -21,7 +21,7 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 	val relationshipService  = mock[RelationshipService]
 	controller.relationshipService = relationshipService
 	
-	val relationshipType = new StudentRelationshipType
+	val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
 	when(profileService.getMemberByUserId("tutor", true)).thenReturn(None)
 	when(profileService.getMemberByUserId("supervisor", true)).thenReturn(None)
@@ -39,7 +39,7 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 	@Test
 	def passesRelationshipTypeToCommand() {
 		withUser("tutor") {
-			val relationshipType = new StudentRelationshipType
+			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 			
 			val relationship = new StudentRelationship
 			relationship.targetSprCode = studentCourseDetails.sprCode
@@ -57,7 +57,7 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 	def passesFirstRelationshipTypeToCommand() {
 		val uniId = "1234765"
 		withUser("supervisor", uniId) {
-			val relationshipType = new StudentRelationshipType
+			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 			
 			val firstAgent = "first"
 			// use non-numeric agent in test to avoid unecessary member lookup

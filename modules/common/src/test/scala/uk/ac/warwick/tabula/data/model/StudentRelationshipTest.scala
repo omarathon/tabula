@@ -11,8 +11,7 @@ class StudentRelationshipTest extends TestBase with Mockito {
 	val profileService = mock[ProfileService]
 
 	@Test def agentMember {
-		val relType = new StudentRelationshipType
-		relType.id = "tutor"
+		val relType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		
 		val rel = StudentRelationship("0672089", relType, "0205225/1")
 		rel.profileService = profileService
@@ -46,8 +45,7 @@ class StudentRelationshipTest extends TestBase with Mockito {
 	}
 
 	@Test def toStringMethod() {
-		val relType = new StudentRelationshipType
-		relType.id = "tutor"
+		val relType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		
 		val rel = StudentRelationship("0672089", relType, "0205225/1")
 		rel.id = "hibernateid"

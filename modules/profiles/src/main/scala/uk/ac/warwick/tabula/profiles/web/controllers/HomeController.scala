@@ -37,7 +37,7 @@ import uk.ac.warwick.tabula.services.RelationshipService
 			val downwardRelationships = relationshipService.listAllStudentRelationshipsWithMember(currentMember)
 				
 			// Get all the enabled relationship types for a department
-			// TODO filter by department visibility
+			// Filtered by department visibility in view
 			val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 			
 			// A map from each type to a boolean for whether the current member has downward relationships of that type
@@ -47,6 +47,7 @@ import uk.ac.warwick.tabula.services.RelationshipService
 
 			Mav("home/view",
 				"relationshipTypesMap" -> relationshipTypesMap,
+				"relationshipTypesMapById" -> relationshipTypesMap.map { case (k, v) => (k.id, v) },
 				"universityId" -> currentMember.universityId,
 				"isPGR" -> user.isPGR,
 				"smallGroups" -> smallGroups,

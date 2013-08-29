@@ -23,11 +23,10 @@ case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefini
 		Profiles.Read.TelephoneNumber,
 		Profiles.Read.MobileNumber,
 		Profiles.Read.Usercode,
-		Profiles.Read.PersonalTutees,
 		Profiles.Read.StudentCourseDetails.Core,
 		Profiles.Read.StudentCourseDetails.Status,
-		Profiles.Read.Supervisees,
 		Profiles.Read.SmallGroups,
+		Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
 		
 		Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]),
 
