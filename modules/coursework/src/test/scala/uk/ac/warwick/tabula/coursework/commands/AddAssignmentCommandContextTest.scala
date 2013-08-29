@@ -45,6 +45,7 @@ class AddAssignmentCommandContextTest extends AppContextTestBase {
 
 			val assignment = session.get(classOf[Assignment], assignmentNew.id).asInstanceOf[Assignment]
 
+			assignment.fields.size should be >= (2)
 			assignment.submissionFields.size should be (2)
 			assignment.submissionFields.apply(0) should have('class(classOf[CommentField]))
 			assignment.submissionFields.apply(0).template should be ("comment")

@@ -127,7 +127,7 @@ trait SimpleValue[A] { self: FormField =>
 
 	override def validate(value: FormValue, errors: Errors) {
 		value match {
-			case s:StringFormValue => {
+			case s: StringFormValue if s.value != null => {
 				val length = s.value.toString.length
 				if (length > FormField.FormFieldMaxSize)
 					errors.rejectValue("value", "textfield.tooLarge", Array[Object](length: JInteger, FormField.FormFieldMaxSize: JInteger), "")

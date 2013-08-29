@@ -2,11 +2,7 @@ package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import scala.reflect.Manifest
 import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
-import javax.persistence._
-import javax.persistence.FetchType._
-import javax.persistence.CascadeType._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
@@ -25,7 +21,6 @@ import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import scala.reflect._
-import scala.collection.mutable
 
 object Assignment {
 	// don't use the same name in different contexts, as that will kill find methods
@@ -146,15 +141,14 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
 
-	/**
-	 * FIXME IndexColumn doesn't work, currently setting position manually. Investigate!
-	 */
+	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
-	@IndexColumn(name = "position")
 	var fields: JList[FormField] = JArrayList()
 
-	def submissionFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Submission)
-	def feedbackFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Feedback)
+	// IndexColumn is a busted flush for fields because of reuse of non-uniqueness.
+	// Use manual position management on add/removeFields, and in these getters
+	def submissionFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Submission).sortBy(_.position)
+	def feedbackFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
 
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
