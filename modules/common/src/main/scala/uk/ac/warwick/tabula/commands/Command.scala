@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -323,6 +323,10 @@ abstract class Description {
 	def monitoringPointSet(set: MonitoringPointSet) = {
 		if (set.route != null) route(set.route)
 		property("monitoringPointSet", set.id)
+	}
+
+	def monitoringCheckpoint(monitoringPoint: MonitoringPoint) = {
+		property("monitoringCheckpoint", monitoringPoint.id)
 	}
 
 	// delegate equality to the underlying map
