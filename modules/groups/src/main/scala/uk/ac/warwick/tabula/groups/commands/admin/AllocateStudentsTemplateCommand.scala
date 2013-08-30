@@ -37,7 +37,7 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 		generateGroupDropdowns(sheet, groups)
 
 		val groupLookupRange = groupLookupSheetName + "!$A2:$B" + (groups.length + 1)
-		val userIterator = set.members.users.iterator
+		val userIterator = set.allStudents.iterator
 
 		while (sheet.getLastRowNum < spreadsheetRows) {
 

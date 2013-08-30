@@ -91,21 +91,37 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 @Profile(Array("sandbox")) @Service
 class SandboxAssignmentImporter extends AssignmentImporter {
 	
-	def allMembers(callback: ModuleRegistration => Unit) =
+	def allMembers(callback: ModuleRegistration => Unit) = {
+		var moduleCodesToIds = Map[String, Seq[Range]]()
+		 
 		for {
 			(code, d) <- SandboxData.Departments
 			route <- d.routes.values.toSeq
-			uniId <- route.studentsStartId to route.studentsEndId
 			moduleCode <- route.moduleCodes
-		} callback (
-			ModuleRegistration(
-				year = AcademicYear.guessByDate(DateTime.now).toString,
-				sprCode = "%d/1".format(uniId),
-				occurrence = "A",
-				moduleCode = "%s-15".format(moduleCode.toUpperCase),
-				assessmentGroup = "A"
+		} {
+			val range = route.studentsStartId to route.studentsEndId
+			
+			moduleCodesToIds = moduleCodesToIds + (
+				moduleCode -> (moduleCodesToIds.getOrElse(moduleCode, Seq()) :+ range)
 			)
-		)
+		}
+		
+		moduleCodesToIds.foreach { case (moduleCode, ranges) => 
+			ranges.foreach { range => 
+				range.foreach { uniId =>
+					callback(
+						ModuleRegistration(
+							year = AcademicYear.guessByDate(DateTime.now).toString,
+							sprCode = "%d/1".format(uniId),
+							occurrence = "A",
+							moduleCode = "%s-15".format(moduleCode.toUpperCase),
+							assessmentGroup = "A"
+						)
+					)
+				}
+			}
+		}
+	}
 	
 	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] =
 		for {
