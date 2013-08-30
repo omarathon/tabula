@@ -1,38 +1,33 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.{AutowiringRouteServiceComponent, RouteServiceComponent}
+import uk.ac.warwick.tabula.AcademicYear
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.data.model.Department
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.system.permissions.Public
+import org.springframework.util.AutoPopulatingList
 
 object DeleteMonitoringPointCommand {
-	def apply(set: MonitoringPointSet, point: MonitoringPoint) =
-		new DeleteMonitoringPointCommand(set, point)
-			with ComposableCommand[Unit]
-			with DeleteMonitoringPointValidation
-			with DeleteMonitoringPointPermissions
-			with DeleteMonitoringPointState
-			with DeleteMonitoringPointDescription
-			with AutowiringRouteServiceComponent
+	def apply(dept: Department, pointIndex: Int) =
+		new DeleteMonitoringPointCommand(dept, pointIndex)
+		with AutowiringTermServiceComponent
+		with DeleteMonitoringPointValidation
+		with Public
 }
 
 /**
- * Creates a new monitoring point in a set.
+ * Deletes an existing monitoring point from the set of points in the command's state.
+ * Does not persist the change (no monitoring point set yet exists)
  */
-class DeleteMonitoringPointCommand(val set: MonitoringPointSet, val point: MonitoringPoint) extends CommandInternal[Unit] {
-	self: DeleteMonitoringPointState with RouteServiceComponent =>
+abstract class DeleteMonitoringPointCommand(val dept: Department, val pointIndex: Int)
+	extends Command[Unit] with ReadOnly with Unaudited with DeleteMonitoringPointState {
 
 	override def applyInternal() = {
-		routeService.delete(point)
-	}
-}
-
-trait DeleteMonitoringPointPermissions extends RequiresPermissionsChecking {
-	self: DeleteMonitoringPointState =>
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Manage, set.route)
+		monitoringPoints.remove(pointIndex)
 	}
 }
 
@@ -44,19 +39,12 @@ trait DeleteMonitoringPointValidation extends SelfValidating {
 	}
 }
 
-trait DeleteMonitoringPointDescription extends Describable[Unit] {
-	self: DeleteMonitoringPointState =>
-
-	override lazy val eventName = "DeleteMonitoringPoint"
-
-	override def describe(d: Description) {
-		d.monitoringPointSet(set)
-		d.property("name", point.name)
-	}
-}
-
-trait DeleteMonitoringPointState {
-	val set: MonitoringPointSet
-	val point: MonitoringPoint
+trait DeleteMonitoringPointState extends GroupMonitoringPointsByTerm {
+	val dept: Department
+	val pointIndex: Int
 	var confirm: Boolean = _
+	var monitoringPoints = new AutoPopulatingList(classOf[MonitoringPoint])
+	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
+	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
 }
+

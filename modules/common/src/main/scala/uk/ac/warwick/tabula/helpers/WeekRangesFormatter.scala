@@ -114,8 +114,8 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 				format(Seq(WeekRange(monitoringPoint.week,monitoringPoint.week)), DayOfWeek(1), monitoringPoint.pointSet.academicYear, numberingSystem(monitoringPoint.pointSet.route.department))
 			}
 
-			case Seq(week: Integer, monitoringPointSet: MonitoringPointSet) => {
-				format(Seq(WeekRange(week)), DayOfWeek(1), monitoringPointSet.academicYear, numberingSystem(monitoringPointSet.route.department))
+			case Seq(week: Integer, academicYear: AcademicYear, dept: Department) => {
+				format(Seq(WeekRange(week)), DayOfWeek(1), academicYear, numberingSystem(dept))
 			}
 
 			case _ => throw new IllegalArgumentException("Bad args: " + args)

@@ -16,7 +16,7 @@
 
 <hr />
 
-<form action="<@url page="/manage/${command.dept.code}/sets/add"/>" method="POST">
+<form id="addMonitoringPointSet" action="<@url page="/manage/${command.dept.code}/sets/add"/>" method="POST">
 	<div class="routeAndYearPicker">
 		<div class="row-fluid">
 			<div class="span2">
@@ -96,46 +96,16 @@
 			<h2>Monitoring points</h2>
 		</div>
 		<div class="span9">
-			<a href="" class="btn btn-primary"><i class="icon-plus"></i> Create new point</a>
+			<a href="<@url page="/manage/${command.dept.code}/sets/add/points/add?form=true" />" class="btn btn-primary new-point"><i class="icon-plus"></i> Create new point</a>
 		</div>
 	</div>
 
-	<#macro pointsInATerm term>
-		<div class="striped-section">
-			<h2 class="section-title">${term}</h2>
-			<div class="striped-section-contents">
-				<#list command.pointsByTerm[term]?sort_by("week") as point>
-					<div class="item-info row-fluid point">
-						<div class="span12">
-							<div class="pull-right">
-								<a class="btn btn-primary edit" href="<@url page="/manage/${departmentCode}/points/edit?set=${point.pointSet.id}&point=${point.id}"/>">Edit</a>
-								<a class="btn btn-danger delete" href="<@url page="/manage/${departmentCode}/points/delete?set=${point.pointSet.id}&point=${point.id}"/>"><i class="icon-delete"></i></a>
-							</div>
-							${point.name} (<@fmt.weekRanges point />)
-						</div>
-					</div>
-				</#list>
-			</div>
-		</div>
-	</#macro>
-
-	<#if command.monitoringPoints?size == 0>
-		<div class="row-fluid">
-			<div class="span12">
-				<em>No points exist for this scheme</em>
-			</div>
-		</div>
-	<#else>
-		<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
-			<#if command.pointsByTerm[term]??>
-				<@pointsInATerm term/>
-			</#if>
-		</#list>
-	</#if>
+	<#include "_monitoringPoints.ftl" />
 
 	<input type="submit" value="Create" class="btn btn-primary"/> <a class="btn" href="<@url page="/manage/${command.dept.code}"/>">Cancel</a>
 
 </form>
 
+<div id="modal" class="modal hide fade" style="display:none;"></div>
 
 </#escape>

@@ -12,31 +12,28 @@ import uk.ac.warwick.tabula.system.permissions.Public
 import org.springframework.util.AutoPopulatingList
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
-object AddMonitoringPointCommand {
-	def apply(dept: Department) =
-		new AddMonitoringPointCommand(dept)
+object EditMonitoringPointCommand {
+	def apply(dept: Department, pointIndex: Int) =
+		new EditMonitoringPointCommand(dept, pointIndex)
 		with AutowiringTermServiceComponent
-		with AddMonitoringPointValidation
+		with EditMonitoringPointValidation
 		with Public
 }
 
 /**
- * Adds a new monitoring point to the set of points in the command's state.
+ * Edits an existing monitoring point from the set of points in the command's state.
  * Does not persist the change (no monitoring point set yet exists)
  */
-abstract class AddMonitoringPointCommand(val dept: Department) extends Command[Unit] with ReadOnly with Unaudited with AddMonitoringPointState {
+abstract class EditMonitoringPointCommand(val dept: Department, val pointIndex: Int)
+	extends Command[Unit] with ReadOnly with Unaudited with EditMonitoringPointState {
 
 	override def applyInternal() = {
-		val point = new MonitoringPoint
-		point.name = name
-		point.defaultValue = defaultValue
-		point.week = week
-		monitoringPoints.add(point)
+		copyTo(monitoringPoints.get(pointIndex))
 	}
 }
 
-trait AddMonitoringPointValidation extends SelfValidating {
-	self: AddMonitoringPointState =>
+trait EditMonitoringPointValidation extends SelfValidating {
+	self: EditMonitoringPointState =>
 
 	override def validate(errors: Errors) {
 		week match {
@@ -51,20 +48,35 @@ trait AddMonitoringPointValidation extends SelfValidating {
 			errors.rejectValue("name", "monitoringPoint.name.toolong")
 		}
 
-		if (monitoringPoints.asScala.count(p => p.name == name && p.week == week) > 0) {
+		val pointsWithCurrentRemoved = monitoringPoints.asScala.zipWithIndex.filter(_._2 != pointIndex).unzip._1
+		if (pointsWithCurrentRemoved.count(p => p.name == name && p.week == week) > 0) {
 			errors.rejectValue("name", "monitoringPoint.name.exists")
 			errors.rejectValue("week", "monitoringPoint.name.exists")
 		}
 	}
 }
 
-trait AddMonitoringPointState extends GroupMonitoringPointsByTerm {
+trait EditMonitoringPointState extends GroupMonitoringPointsByTerm {
 	val dept: Department
+	val pointIndex: Int
 	var monitoringPoints = new AutoPopulatingList(classOf[MonitoringPoint])
 	var name: String = _
 	var defaultValue: Boolean = true
 	var week: Int = 0
 	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
+
+	def copyTo(point: MonitoringPoint) {
+		point.name = this.name
+		point.defaultValue = this.defaultValue
+		point.week = this.week
+	}
+
+	def copyFrom() {
+		val point = monitoringPoints.get(pointIndex)
+		this.name = point.name
+		this.defaultValue = point.defaultValue
+		this.week = point.week
+	}
 }
 

@@ -80,7 +80,22 @@ trait AddMonitoringPointSetDescription extends Describable[MonitoringPointSet] {
 	}
 }
 
-trait AddMonitoringPointSetState extends TermServiceComponent with RouteServiceComponent {
+trait GroupMonitoringPointsByTerm extends TermServiceComponent {
+	def groupByTerm(monitoringPoints: Seq[MonitoringPoint], academicYear: AcademicYear) = {
+		lazy val weeksForYear =
+			termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1))
+				.asScala.map { pair => pair.getLeft -> pair.getRight } // Utils pairs to Scala pairs
+				.toMap
+		val day = DayOfWeek(1)
+		monitoringPoints.groupBy {
+			case point => termService.getTermFromDateIncludingVacations(
+				weeksForYear(point.week).getStart.withDayOfWeek(day.jodaDayOfWeek)
+			).getTermTypeAsString
+		}
+	}
+}
+
+trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteServiceComponent {
 
 	private def getAvailableYears = {
 		val routeMap = dept.routes.asScala.map {
@@ -108,25 +123,12 @@ trait AddMonitoringPointSetState extends TermServiceComponent with RouteServiceC
 		routeMap
 	}
 
-	private def groupByTerm() = {
-		lazy val weeksForYear =
-			termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1))
-				.asScala.map { pair => pair.getLeft -> pair.getRight } // Utils pairs to Scala pairs
-				.toMap
-		val day = DayOfWeek(1)
-		monitoringPoints.asScala.groupBy {
-			case point => termService.getTermFromDateIncludingVacations(
-				weeksForYear(point.week).getStart.withDayOfWeek(day.jodaDayOfWeek)
-			).getTermTypeAsString
-		}
-	}
-
 	def dept: Department
 	val academicYear = AcademicYear.guessByDate(new DateTime())
 	val availableRoutes = dept.routes.asScala.sortBy(r => r.code)
 	lazy val availableYears = getAvailableYears
 	val monitoringPoints = new java.util.ArrayList[MonitoringPoint]
-	lazy val monitoringPointsByTerm = groupByTerm()
+	lazy val monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
 	val selectedRoutesAndYears: java.util.Map[Route, java.util.HashMap[String, java.lang.Boolean]] = dept.routes.asScala.map {
 		r => r -> JHashMap(
 			"1" -> java.lang.Boolean.FALSE,
