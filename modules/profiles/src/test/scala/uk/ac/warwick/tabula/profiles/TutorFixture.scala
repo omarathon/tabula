@@ -8,9 +8,11 @@ import uk.ac.warwick.tabula.services.ProfileService
 import scala.Some
 
 trait TutorFixture extends Mockito {
+	
+	val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
 	val department = new Department
-  department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Local
+	department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.Local)
 	val actor = new User
 	val recipient = new User
 	recipient.setWarwickId("recipient")

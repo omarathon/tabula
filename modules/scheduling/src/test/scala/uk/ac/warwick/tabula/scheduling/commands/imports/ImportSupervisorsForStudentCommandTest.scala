@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.model.DegreeType.Postgraduate
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.RelationshipType._
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentMember
@@ -17,6 +16,9 @@ import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
 import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
+import uk.ac.warwick.tabula.data.model.Department
 
 
 class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Mockito with Logging {
@@ -27,6 +29,13 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		val uniId = "1111111"
 		val prsCode = "IN0070790"
 		val supervisorUniId = "0070790"
+			
+		val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
+		relationshipType.defaultSource = StudentRelationshipSource.SITS
+		session.saveOrUpdate(relationshipType)
+		
+		val department = new Department
+		session.saveOrUpdate(department)
 
 		// set up and persist student
 		val supervisee = new StudentMember(uniId)
@@ -36,6 +45,8 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 
 		val studentCourseDetails = new StudentCourseDetails(supervisee, scjCode)
 		studentCourseDetails.sprCode = sprCode
+		studentCourseDetails.department = department
+		
 		supervisee.studentCourseDetails.add(studentCourseDetails)
 
 		val route = new Route
@@ -71,13 +82,13 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			command.applyInternal
 
 			// check results
-			val supRels = supervisee.studentCourseDetails.get(0).supervisors
+			val supRels = supervisee.studentCourseDetails.get(0).relationships(relationshipType)
 			supRels.size should be (1)
 			val rel = supRels.head
 
 			rel.agent should be (supervisorUniId)
 			rel.targetSprCode should be (sprCode)
-			rel.relationshipType should be (Supervisor)
+			rel.relationshipType should be (relationshipType)
 		}
 	}
 
@@ -95,7 +106,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			command.applyInternal
 
 			// check results
-			val supRels = supervisee.studentCourseDetails.get(0).supervisors
+			val supRels = supervisee.studentCourseDetails.get(0).relationships(relationshipType)
 			supRels.size should be (0)
 		}
 	}

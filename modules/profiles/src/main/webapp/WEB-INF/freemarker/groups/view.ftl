@@ -1,6 +1,6 @@
-<#import "../tutors/tutee_macros.ftl" as tutee_macros />
+<#import "../relationships/student_macros.ftl" as student_macros />
 
-<div id="tutors">
+<div id="relationships">
 <#escape x as x?html>
 
 	<#assign _groupSet=smallGroup.groupSet />
@@ -8,7 +8,7 @@
 
     <h1>${_module.code?upper_case} ${_groupSet.name}, ${smallGroup.name}</h1>
 
-	<@tutee_macros.table tutees=tutees is_relationship=false />
+	<@student_macros.table students=tutees is_relationship=false />
 
 </#escape>
 </div>

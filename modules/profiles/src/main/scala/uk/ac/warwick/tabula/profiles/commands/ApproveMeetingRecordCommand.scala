@@ -14,8 +14,7 @@ import uk.ac.warwick.tabula.profiles.notifications.{MeetingRecordApprovedNotific
 class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends Command[MeetingRecordApproval]
 	with Notifies[MeetingRecordApproval, MeetingRecord] with SelfValidating with Daoisms {
 
-
-  PermissionCheck(MeetingPermissions.Update.permissionFor(approval.meetingRecord.relationship.relationshipType), approval.meetingRecord)
+	PermissionCheck(Permissions.Profiles.MeetingRecord.Update(approval.meetingRecord.relationship.relationshipType), approval.meetingRecord)
 
 	var approved: JBoolean = _
 	var rejectionComments: String =_

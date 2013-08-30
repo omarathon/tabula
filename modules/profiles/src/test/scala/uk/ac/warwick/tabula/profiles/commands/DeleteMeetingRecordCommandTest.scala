@@ -5,13 +5,13 @@ import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.services.ProfileService
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model.MeetingRecord
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
@@ -35,7 +35,10 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		}
 
 		relationship = transactional { tx =>
-			val relationship = StudentRelationship("Professor A Tutor", PersonalTutor, "0123456/1")
+			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+			session.save(relationshipType)
+			
+			val relationship = StudentRelationship("Professor A Tutor", relationshipType, "0123456/1")
 			relationship.profileService = ps
 			ps.getStudentBySprCode("0123456/1") returns (Some(student))
 
@@ -46,7 +49,7 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		meeting = transactional { tx =>
 			val mr = new MeetingRecord
 			mr.creator = creator
-      mr.relationship = relationship
+			mr.relationship = relationship
 			session.save(mr)
 			mr
 		}

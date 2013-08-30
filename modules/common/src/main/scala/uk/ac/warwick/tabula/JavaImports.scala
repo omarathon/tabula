@@ -118,6 +118,18 @@ trait JavaImports {
 			elements foreach { case (key, value) => map.put(key, value) }
 			map
 		}
+		
+		def apply[A, B](orig: Map[A, B]): java.util.HashMap[A, B] = {
+			val map = new java.util.HashMap[A, B]()
+			if (!orig.isEmpty) map.putAll(orig.toMap.asJava)
+			map
+		}
+		
+		def apply[A, B](orig: JMap[A, B]): java.util.HashMap[A, B] = {
+			val map = new java.util.HashMap[A, B]()
+			if (!orig.isEmpty) map.putAll(orig)
+			map
+		}
 	}
 }
 
