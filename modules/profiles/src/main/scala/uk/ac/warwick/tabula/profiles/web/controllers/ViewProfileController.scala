@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, ViewViewableCommand}
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.commands.Command
+import uk.ac.warwick.tabula.services.RelationshipService
 
 class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
 
@@ -64,7 +65,10 @@ class ViewProfileController extends ProfilesController {
 		val isSelf = (profiledStudentMember.universityId == user.universityId)
 		
 		// Get all the enabled relationship types for a department
-		val allRelationshipTypes = member.homeDepartment.displayedStudentRelationshipTypes
+		val allRelationshipTypes = 
+			Option(member.homeDepartment)
+				.map { _.displayedStudentRelationshipTypes }
+				.getOrElse { relationshipService.allStudentRelationshipTypes }
 		
 		val relationshipMeetings =
 			allRelationshipTypes.flatMap { relationshipType =>
