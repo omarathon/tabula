@@ -151,7 +151,6 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 			groups.remove(groups.asScala.last)
 		
 		groups.asScala.foreach(_.onBind(result))
-
 	}
 
 }

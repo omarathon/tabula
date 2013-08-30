@@ -37,5 +37,5 @@ class CreateSmallGroupCommand(groupSet: Promise[SmallGroupSet], module: Module, 
 
 	override def describe(d: Description) = d.smallGroupSet(groupSet.get).properties(
 		"name" -> name)
-	
+			
 }
