@@ -123,7 +123,6 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 		for (group <- set.assessmentGroups if group.smallGroupSet == null) {
 			group.smallGroupSet = set
 		}
-
 		
 		set.allowSelfGroupSwitching = allowSelfGroupSwitching
 		set.studentsCanSeeOtherMembers = studentsCanSeeOtherMembers
@@ -140,7 +139,6 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 	}
 	
 	override def onBind(result: BindingResult) {
-
 		// If the last element of groups is both a Creation and is empty, disregard it
 		def isEmpty(cmd: ModifySmallGroupCommand) = cmd match {
 			case cmd: CreateSmallGroupCommand if !cmd.name.hasText && cmd.events.isEmpty => true
@@ -149,6 +147,9 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 		
 		while (!groups.isEmpty() && isEmpty(groups.asScala.last))
 			groups.remove(groups.asScala.last)
+			
+		// For each empty group, take our bound max group size value
+		groups.asScala.filter { _.events.isEmpty }.foreach { _.maxGroupSize = defaultMaxGroupSize }
 		
 		groups.asScala.foreach(_.onBind(result))
 	}
