@@ -1,31 +1,21 @@
 <#escape x as x?html>
 
-<#macro checkPermissions studentCourseDetails relationshipType>
-	<#assign action_url_prefix = relationshipType.dbValue />
-	<#if action_url_prefix == "supervisor">
-		<#assign can_read_meetings = can.do("Profiles.Supervisor.MeetingRecord.Read", studentCourseDetails) />
-		<#assign can_create_meetings = can.do("Profiles.Supervisor.MeetingRecord.Create", studentCourseDetails) />
-	<#elseif action_url_prefix == "personalTutor">
-		<#assign can_read_meetings = can.do("Profiles.PersonalTutor.MeetingRecord.Read", studentCourseDetails) />
-		<#assign can_create_meetings = can.do("Profiles.PersonalTutor.MeetingRecord.Create", studentCourseDetails) />
-	</#if>
-</#macro>
-
 <#macro list studentCourseDetails meetings relationshipType>
-	<@checkPermissions studentCourseDetails relationshipType />
+	<#assign can_read_meetings = can.do_with_selector("Profiles.MeetingRecord.Read", studentCourseDetails, relationshipType) />
+	<#assign can_create_meetings = can.do_with_selector("Profiles.MeetingRecord.Create", studentCourseDetails, relationshipType) />
 
-	<section class="meetings ${action_url_prefix}-meetings" data-target-container="${action_url_prefix}-meetings">
+	<section class="meetings ${relationshipType.id}-meetings" data-target-container="${relationshipType.id}-meetings">
 
 		<#if can_read_meetings>
 			<h5>Record of meetings</h5>
 		</#if>
 
 		<#if can_create_meetings>
-			<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.urlSafeId action_url_prefix />" title="Create a new record"><i class="icon-edit"></i> New record</a>
+			<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Create a new record"><i class="icon-edit"></i> New record</a>
 			<#if isSelf!false>
-				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to you and your ${relationshipType.description}(s).">Who can see this information?</small>
+				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to you and your ${relationshipType.agentRole}(s).">Who can see this information?</small>
 			<#else>
-				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to the student and their ${relationshipType.description}(s).">Who can see this information?</small>
+				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to the student and their ${relationshipType.agentRole}(s).">Who can see this information?</small>
 			</#if>
 		</#if>
 		<#if can_read_meetings>
@@ -53,10 +43,10 @@
 
 							<#if !meeting.approved && viewer.universityId == meeting.creator.universityId>
 								<div class="meeting-record-toolbar">
-									<a href="<@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting action_url_prefix />" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
-									<a href="<@routes.delete_meeting_record meeting action_url_prefix />" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
-									<a href="<@routes.restore_meeting_record meeting action_url_prefix />" class="btn-like restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
-									<a href="<@routes.purge_meeting_record meeting action_url_prefix />" class="btn-like purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
+									<a href="<@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting />" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
+									<a href="<@routes.delete_meeting_record meeting />" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
+									<a href="<@routes.restore_meeting_record meeting />" class="btn-like restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
+									<a href="<@routes.purge_meeting_record meeting />" class="btn-like purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
 									<i class="icon-spinner icon-spin"></i>
 								</div>
 							</#if>
@@ -69,7 +59,7 @@
 							</#if>
 
 							<#if meeting.attachments?? && meeting.attachments?size gt 0>
-								<@fmt.download_attachments meeting.attachments "/${action_url_prefix}/meeting/${meeting.id}/" "for this meeting record" "${meeting.title?url}" />
+								<@fmt.download_attachments meeting.attachments "/${relationshipType.urlPart}/meeting/${meeting.id}/" "for this meeting record" "${meeting.title?url}" />
 							</#if>
 							<@state meeting studentCourseDetails/>
 						</div>
@@ -93,7 +83,7 @@
 		If you reject it, please explain why.
 	</div>
 	<!-- not a spring form as we don't want the issue of binding multiple sets of data to the same command -->
-	<form method="post" id="meeting-${meeting.id}" action="<@routes.save_meeting_approval meeting action_url_prefix />" >
+	<form method="post" id="meeting-${meeting.id}" action="<@routes.save_meeting_approval meeting />" >
 		<@form.row>
 			<@form.field>
 				<label class="radio inline">
@@ -134,10 +124,10 @@
 		</#list>
 	</div>
 	<div class="submit-buttons">
-		<a class="edit-meeting-record btn btn-primary" href="<@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting action_url_prefix/>">Edit</a>
+		<a class="edit-meeting-record btn btn-primary" href="<@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting/>">Edit</a>
 	</div>
 	<#else>
-	<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.description} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
+	<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
 	</#if>
 </#macro>
 

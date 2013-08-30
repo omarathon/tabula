@@ -1,0 +1,4 @@
+/*
+http://stackoverflow.com/questions/7258655/can-the-default-timeslot-height-be-set-in-fullcalendar
+*/
+.fc-agenda-slots td div { height: 40px; }

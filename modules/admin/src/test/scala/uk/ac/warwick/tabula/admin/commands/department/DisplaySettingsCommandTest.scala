@@ -11,6 +11,8 @@ import WeekRange.NumberingSystem._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.services.RelationshipServiceComponent
+import uk.ac.warwick.tabula.services.RelationshipService
 
 class DisplaySettingsCommandTest extends TestBase with Mockito {
 
@@ -22,8 +24,9 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 		testDepartment.assignmentInfoView = Summary
 		testDepartment.weekNumberingSystem = Academic
 		
-		val commandInternal = new DisplaySettingsCommandInternal(testDepartment) with ModuleAndDepartmentServiceComponent {
+		val commandInternal = new DisplaySettingsCommandInternal(testDepartment) with ModuleAndDepartmentServiceComponent with RelationshipServiceComponent {
 			var moduleAndDepartmentService = mock[ModuleAndDepartmentService]
+			var relationshipService = mock[RelationshipService]
 		}
 
 	}

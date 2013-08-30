@@ -2,7 +2,8 @@ package uk.ac.warwick.tabula.groups.web.controllers
 
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.groups.commands.{DeallocateSelfFromGroupValidator, AllocateSelfToGroupValidator, DeallocateSelfFromGroupCommand, AllocateSelfToGroupCommand}
+import uk.ac.warwick.tabula.groups.commands.{DeallocateSelfFromGroupValidator, AllocateSelfToGroupValidator}
+import uk.ac.warwick.tabula.groups.commands.{DeallocateSelfFromGroupCommand, AllocateSelfToGroupCommand}
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.commands.Appliable

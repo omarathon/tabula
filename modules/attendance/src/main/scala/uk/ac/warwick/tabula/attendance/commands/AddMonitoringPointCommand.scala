@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
@@ -21,8 +20,9 @@ object AddMonitoringPointCommand {
 /**
  * Creates a new monitoring point in a set.
  */
-class AddMonitoringPointCommand(val set: MonitoringPointSet) extends CommandInternal[MonitoringPoint] {
-	self: ModifyMonitoringPointState with RouteServiceComponent =>
+class AddMonitoringPointCommand(val set: MonitoringPointSet) extends CommandInternal[MonitoringPoint]
+		with ModifyMonitoringPointState {
+	self: RouteServiceComponent =>
 
 	override def applyInternal() = {
 		val point = new MonitoringPoint
@@ -32,23 +32,11 @@ class AddMonitoringPointCommand(val set: MonitoringPointSet) extends CommandInte
 	}
 }
 
-
-
-trait AddMonitoringPointValidation extends SelfValidating {
+trait AddMonitoringPointValidation extends MonitoringPointValidation {
 	self: ModifyMonitoringPointState =>
 
 	override def validate(errors: Errors) {
-		week match {
-			case y if y < 1  => errors.rejectValue("week", "monitoringPointSet.week.min")
-			case y if y > 52 => errors.rejectValue("week", "monitoringPointSet.week.max")
-			case _ =>
-		}
-
-		if (!name.hasText) {
-			errors.rejectValue("name", "NotEmpty")
-		} else if (name.length > 4000) {
-			errors.rejectValue("name", "monitoringPoint.name.toolong")
-		}
+		super.validate(errors)
 
 		if (set.points.asScala.filter(p => p.name == name && p.week == week).size > 0) {
 			errors.rejectValue("name", "monitoringPoint.name.exists")

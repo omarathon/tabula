@@ -6,7 +6,6 @@ import collection.JavaConversions._
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.hibernate.annotations.Type
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
 import org.springframework.validation.Errors
 import org.springframework.web.util.HtmlUtils._
 import javax.persistence._
@@ -15,7 +14,6 @@ import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
 import uk.ac.warwick.tabula.data.FileDao
-import org.springframework.beans.factory.annotation.Configurable
 import scala.xml.NodeSeq
 import org.springframework.web.multipart.commons.CommonsMultipartFile
 import org.springframework.web.multipart.MultipartFile

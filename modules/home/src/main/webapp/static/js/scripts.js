@@ -579,7 +579,7 @@
 				var $cols = $t.find('.cols');
 				$cols.find('.gadget').appendTo($panes);
 				$cols.remove();
-				$t.find('.tutor').removeClass('span4');
+				$t.find('.agent').removeClass('span4');
 				$t.find('.gadget-only').children().unwrap();
 				$t.find('.tab-container').remove();
 				$t.find('.gadget, .tab-content, .tab-pane, .active').removeClass('gadget tab-content tab-pane active');
@@ -618,7 +618,7 @@
 					var link = '#' + $(this).attr('id');
 					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '" title="Click and drag to move"><span class="title">' + title + '</span> <i class="icon-minus-sign-alt" title="Hide ' + title + '"></i></a></li>');
 					var $gadgetHeaderTab = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
-					$(this).find('.tutor').removeClass('span4');
+					$(this).find('.agent').removeClass('span4');
 					$gadgetHeaderTab.children().append($tab);
 					$gadget.wrapInner('<div class="tab-content gadget-only" />').children().wrapInner('<div class="gadget-only tab-pane active" />');
 					$gadget.prepend($gadgetHeaderTab).find('.tab-container li a').tab('show');
@@ -685,6 +685,10 @@
 			// default to gadgets
 			$t.find('.layout-tools .icon-th-large').click();
 		}
+		
+		// drag and drop containers
+		$('.tabula-dnd').dragAndDrop();
+		$('.tabula-filtered-list').filteredList();
 	}); // on ready
 
 

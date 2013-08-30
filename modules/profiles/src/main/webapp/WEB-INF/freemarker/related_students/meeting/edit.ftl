@@ -1,11 +1,6 @@
 <#assign student = studentCourseDetails.student/>
-<#if relationshipType.dbValue == "supervisor">
-	<#assign agent_role= "supervisor" />
-	<#assign member_role= "supervisee" />
-<#elseif relationshipType.dbValue == "personalTutor">
-	<#assign agent_role= "tutor" />
-	<#assign member_role= "tutee" />
-</#if>
+<#assign agent_role = relationshipType.agentRole />
+<#assign member_role = relationshipType.studentRole />
 
 <#assign heading>
 	<h2>Record a meeting</h2>
@@ -135,7 +130,7 @@
 		<#else>
 			<#-- separate page, not modal -->
 			<div class="form-actions">
-				<#assign title>Submit record for approval by personal <#if isStudent>tutor<#else>tutee</#if></#assign>
+				<#assign title>Submit record for approval by <#if isStudent>${relationshipType.agentRole}<#else>${relationshipType.studentRole}</#if></#assign>
 				<button title="${title}" class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
 					Submit for approval
 				</button>

@@ -18,8 +18,20 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.notifications.Feedba
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.CurrentUser
 
+object PublishFeedbackCommand {
+	case class MissingUser(universityId: String)
+	case class BadEmail(user: User, exception: Exception = null)
+	
+	case class PublishFeedbackResults(
+		notifications: Seq[Notification[Feedback]] = Nil,
+		missingUsers: Seq[MissingUser] = Nil,
+		badEmails: Seq[BadEmail] = Nil
+	)
+}
+
 class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val submitter: CurrentUser)
-	extends Command[Unit] with Notifies[Feedback] with SelfValidating {
+	extends Command[PublishFeedbackCommand.PublishFeedbackResults] with Notifies[PublishFeedbackCommand.PublishFeedbackResults, Feedback] with SelfValidating {
+	import PublishFeedbackCommand._
 
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Feedback.Publish, assignment)
@@ -28,13 +40,6 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 	var userLookup = Wire.auto[UserLookupService]
 
 	var confirm: Boolean = false
-
-	case class MissingUser(universityId: String)
-	case class BadEmail(user: User, exception: Exception = null)
-
-	var missingUsers: JList[MissingUser] = JArrayList()
-	var badEmails: JList[BadEmail] = JArrayList()
-	var notifications: JList[Notification[Feedback]] = JArrayList()
 
 	// validation done even when showing initial form.
 	def prevalidate(errors: Errors) {
@@ -52,30 +57,44 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 		}
 	}
 
-	def applyInternal() {
+	def applyInternal() = {
 		transactional() {
 			val users = getUsersForFeedback
-			for ((studentId, user) <- users) {
-				val feedbacks = assignment.fullFeedback.find { _.universityId == studentId }
-				for (feedback <- feedbacks) {
-					feedback.released = true
-					feedback.releasedDate = new DateTime
-					generateNotification(studentId, user, feedback)
-				}
+			val allResults = for {
+				(studentId, user) <- users
+				feedback <- assignment.fullFeedback.find { _.universityId == studentId }
+			} yield {
+				feedback.released = true
+				feedback.releasedDate = new DateTime
+				generateNotification(studentId, user, feedback)
+			}
+			
+			allResults.foldLeft(PublishFeedbackResults()) { (acc, result) => 
+				PublishFeedbackResults(
+					notifications = acc.notifications ++ result.notifications,
+					missingUsers = acc.missingUsers ++ result.missingUsers,
+					badEmails = acc.badEmails ++ result.badEmails
+				)
 			}
 		}
 	}
 
-	private def generateNotification(id:String, user:User, feedback:Feedback) {
+	private def generateNotification(id:String, user:User, feedback:Feedback) = {
 		if (user.isFoundUser) {
 			val email = user.getEmail
 			if (email.hasText) {
-				notifications.add(new FeedbackPublishedNotification(feedback, submitter.apparentUser, user) with FreemarkerTextRenderer)
+				PublishFeedbackResults(
+					notifications = Seq(new FeedbackPublishedNotification(feedback, submitter.apparentUser, user) with FreemarkerTextRenderer)
+				)
 			} else {
-				badEmails.add(BadEmail(user))
+				PublishFeedbackResults(
+					badEmails = Seq(BadEmail(user))
+				)
 			}
 		} else {
-			missingUsers.add(MissingUser(id))
+			PublishFeedbackResults(
+				missingUsers = Seq(MissingUser(id))
+			)
 		}
 	}
 
@@ -85,6 +104,6 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 		.assignment(assignment)
 		.studentIds(getUsersForFeedback map { case(userId, user) => user.getWarwickId })
 
-	def emit: Seq[Notification[Feedback]] = notifications.asScala
+	def emit(results: PublishFeedbackResults) = results.notifications
 
 }

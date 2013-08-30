@@ -1,6 +1,9 @@
 <#escape x as x?html>
 
-<#assign showMyStudents = isAPersonalTutor || isASupervisor || smallGroups?has_content />
+<#assign showMyStudents = smallGroups?has_content />
+<#list relationshipTypesMap?values as has_relationship>
+	<#assign showMyStudents = showMyStudents || has_relationship />
+</#list>
 
 <#if !user.loggedIn>
 	<p>
@@ -8,6 +11,7 @@
 		to see a personalised view.
 	</p>
 <#else>
+	<#if isPGR><h2><a href="<@routes.profile_by_id universityId />">My Student Profile</a></h2></#if>
 	<div class="row-fluid">
 		<div class="span6">
 			<#include "../profile/search/form.ftl" />
@@ -16,12 +20,11 @@
 				<h2>My students</h2>
 			
 				<ul>
-					<#if isAPersonalTutor>
-					   <li><a href="<@routes.tutees />">Personal tutees</a></li>
-					</#if>
-					<#if isASupervisor>
-					<li><a href="<@routes.supervisees />">Supervisees</a></li>
-					</#if>
+					<#list relationshipTypesMap?keys as relationshipType>
+						<#if relationshipTypesMapById[relationshipType.id]>
+							<li><a href="<@routes.relationship_students relationshipType />">${relationshipType.studentRole?cap_first}s</a></li>
+						</#if>
+					</#list>
 
 					<#list smallGroups as smallGroup>
 					<#assign _groupSet=smallGroup.groupSet />
@@ -47,18 +50,20 @@
 								<i class="icon-user"></i> Edit departmental permissions
 							</a></li>
 							
-							<li><a href="<@routes.tutors dept />">
-								<i class="icon-eye-open"></i> Personal tutors
-							</a></li>
-							<li><a href="<@routes.tutors_missing dept />">
-								<i class="icon-eye-close"></i> Students with no personal tutor
-							</a></li>
-							
-							<#if features.personalTutorAssignment>
-								<li><a href="<@routes.tutors_allocate dept />">
-									<i class="icon-random icon-fixed-width"></i> Assign personal tutors</a>
-								</li>
-							</#if>
+							<#list dept.displayedStudentRelationshipTypes as relationshipType>
+								<li><a href="<@routes.relationship_agents dept relationshipType />">
+									<i class="icon-eye-open"></i> ${relationshipType.description}s
+								</a></li>
+								<li><a href="<@routes.relationship_missing dept relationshipType />">
+									<i class="icon-eye-close"></i> Students with no ${relationshipType.description}
+								</a></li>
+															
+								<#if features.personalTutorAssignment && !relationshipType.readOnly(dept)>
+									<li><a href="<@routes.relationship_allocate dept relationshipType />">
+										<i class="icon-random icon-fixed-width"></i> Assign ${relationshipType.description}s</a>
+									</li>
+								</#if>
+							</#list>
 					  </ul>
 					</div>
 					

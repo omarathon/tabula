@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.{NotificationHandling, EventHandling, Event, EventDescription}
 import uk.ac.warwick.tabula.JavaImports
 import uk.ac.warwick.tabula.services.MaintenanceModeService
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, RequiresPermissionsChecking, PermissionsChecking}
@@ -45,8 +44,11 @@ trait KnowsEventName {
 	val eventName: String
 }
 
-trait Notifies[A] {
-	def emit: Seq[Notification[A]]
+/**
+ * Takes an A (usually the result of a Command) and generates notifications for Bs. Often, A == B.
+ */
+trait Notifies[A, B] {
+	def emit(result: A): Seq[Notification[B]]
 }
 trait Appliable[A]{
   def apply():A

@@ -231,7 +231,7 @@ class WeekRanges(year:AcademicYear) extends VacationAware {
 
 	// We are confident that November 1st is always in term 1 of the year
 	lazy val weeksForYear =
-		termService.getAcademicWeeksForYear(new DateMidnight(year.startYear, DateTimeConstants.NOVEMBER, 1))
+		termService.getAcademicWeeksForYear(year.dateInTermOne)
 			.asScala.map { pair => (pair.getLeft -> pair.getRight) } // Utils pairs to Scala pairs
 			.toMap
 

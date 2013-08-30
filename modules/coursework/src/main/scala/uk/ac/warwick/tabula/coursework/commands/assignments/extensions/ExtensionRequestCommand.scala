@@ -21,7 +21,7 @@ import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 
 
 class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val submitter: CurrentUser)
-	extends Command[Extension]  with Notifies[Option[Extension]] with Daoisms with BindListener with SelfValidating {
+	extends Command[Extension]  with Notifies[Extension, Option[Extension]] with Daoisms with BindListener with SelfValidating {
 	
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Extension.MakeRequest, assignment)
@@ -34,8 +34,6 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 	var readGuidelines:JBoolean =_
 	// true if this command is modifying an existing extension. False otherwise
 	var modified:JBoolean = false
-
-	var extension:Extension =_
 
 	def validate(errors:Errors){
 		if(!submitter.apparentUser.getUserId.hasText){
@@ -69,7 +67,7 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 	override def applyInternal() = transactional() {
 
 		val universityId = submitter.apparentUser.getWarwickId
-		extension = assignment.findExtension(universityId).getOrElse({
+		val extension = assignment.findExtension(universityId).getOrElse({
 			val newExtension = new Extension(universityId)
 			newExtension.userId = submitter.apparentUser.getUserId
 			newExtension
@@ -100,7 +98,7 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 		d.module(assignment.module)
 	}
 
-	def emit = {
+	def emit(extension: Extension) = {
 		if (modified){
 			Seq(new ExtensionRequestModifiedNotification(extension, submitter.apparentUser) with FreemarkerTextRenderer)
 		} else {

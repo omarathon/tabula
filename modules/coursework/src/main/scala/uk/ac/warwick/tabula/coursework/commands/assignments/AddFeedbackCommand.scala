@@ -12,13 +12,11 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.notifications.Feedba
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 
 class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
-	extends UploadFeedbackCommand[List[Feedback]](module, assignment, submitter) with Notifies[Feedback] {
+	extends UploadFeedbackCommand[Seq[Feedback]](module, assignment, submitter) with Notifies[Seq[Feedback], Feedback] {
 
 	PermissionCheck(Permissions.Feedback.Create, assignment)
 
-	var updatedReleasedFeedback : List[Feedback] = _
-
-	override def applyInternal(): List[Feedback] = transactional() {
+	override def applyInternal(): Seq[Feedback] = transactional() {
 
 		def saveFeedback(uniNumber: String, file: UploadedFile):Option[Feedback] = {
 			val feedback = assignment.findFeedback(uniNumber).getOrElse({
@@ -65,8 +63,6 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 			feedback.toList
 		}
 
-		// we need to keep a list of released feedback that was changed in order to notify students of the change
-		updatedReleasedFeedback = updatedFeedback.filter(_.released)
 		updatedFeedback
 	}
 	
@@ -102,7 +98,7 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 		.assignment(assignment)
 		.studentIds(items.map { _.uniNumber })
 
-	def emit: Seq[Notification[Feedback]] = updatedReleasedFeedback.map( feedback => {
+	def emit(updatedFeedback: Seq[Feedback]): Seq[Notification[Feedback]] = updatedFeedback.filter(_.released).map( feedback => {
 		val student = userLookup.getUserByWarwickUniId(feedback.universityId)
 		new FeedbackChangeNotification(feedback, submitter.apparentUser, student) with FreemarkerTextRenderer
 	})

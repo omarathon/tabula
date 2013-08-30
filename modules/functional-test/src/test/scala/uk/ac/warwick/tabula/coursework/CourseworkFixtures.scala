@@ -13,8 +13,9 @@ import org.openqa.selenium.htmlunit.HtmlUnitWebElement
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.Keys
 import org.openqa.selenium.internal.seleniumemulation.FireEvent
+import uk.ac.warwick.tabula.home.FeaturesDriver
 
-trait CourseworkFixtures extends BrowserTest {
+trait CourseworkFixtures extends BrowserTest with FeaturesDriver{
 
 	before {
 		go to (Path("/scheduling/fixtures/setup"))

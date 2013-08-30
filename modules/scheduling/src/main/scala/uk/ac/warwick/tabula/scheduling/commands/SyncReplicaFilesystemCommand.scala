@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.scheduling.commands
 import java.io.File
 import java.io.FileReader
 import org.joda.time.DateTime
-import org.joda.time.DateTimeConstants
 import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
@@ -14,7 +13,6 @@ import uk.ac.warwick.util.httpclient.httpclient4.SimpleHttpMethodExecutor
 import uk.ac.warwick.util.httpclient.httpclient4.HttpMethodExecutor.Method
 import uk.ac.warwick.util.web.Uri
 import java.io.IOException
-import org.apache.http.client.ResponseHandler
 import org.json.JSONObject
 import uk.ac.warwick.tabula.scheduling.helpers.HttpResponseHandlers
 import org.apache.http.HttpStatus
@@ -249,7 +247,10 @@ class SyncReplicaFilesystemCommand extends Command[SyncReplicaResult] with ReadO
 					
 					// Break when there's no more to fetch
 					if (lastFiles.length < maxResponses) {
-						logger.debug("There should be no more hashes with this date: " + startDate + " as the number returned: " + lastFiles.length + " is lower than the maxResponses: " + maxResponses)
+						logger.debug("There should be no more hashes with this date: " + startDate
+							+ " as the number returned: " + lastFiles.length
+							+ " is lower than the maxResponses: " + maxResponses
+						)
 					}
 					
 				}

@@ -11,7 +11,9 @@ class StudentRelationshipTest extends TestBase with Mockito {
 	val profileService = mock[ProfileService]
 
 	@Test def agentMember {
-		val rel = StudentRelationship("0672089", RelationshipType.PersonalTutor, "0205225/1")
+		val relType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		
+		val rel = StudentRelationship("0672089", relType, "0205225/1")
 		rel.profileService = profileService
 
 		rel.isAgentMember should be (true)
@@ -42,23 +44,12 @@ class StudentRelationshipTest extends TestBase with Mockito {
 		rel.studentMember.get should be (student)
 	}
 
-	@Test def convertToObject() {
-		val t = new RelationshipUserType
-		t.convertToObject("personalTutor") should be (RelationshipType.PersonalTutor)
-		t.convertToObject("tutor") should be (RelationshipType.PersonalTutor)
-		t.convertToObject("supervisor") should be (RelationshipType.Supervisor)
-		evaluating { t.convertToObject("Q") } should produce [IllegalArgumentException]
-	}
-
-	@Test def convertToValue() {
-		val t = new RelationshipUserType
-		t.convertToValue(RelationshipType.PersonalTutor) should be ("personalTutor")
-	}
-
 	@Test def toStringMethod() {
-		val rel = StudentRelationship("0672089", RelationshipType.PersonalTutor, "0205225/1")
+		val relType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		
+		val rel = StudentRelationship("0672089", relType, "0205225/1")
 		rel.id = "hibernateid"
-		rel.toString should be ("StudentRelationship[hibernateid][agent=0672089,relationshipType=PersonalTutor,student=0205225/1]")
+		rel.toString should be ("StudentRelationship[hibernateid][agent=0672089,relationshipType=StudentRelationshipType(tutor),student=0205225/1]")
 	}
 
 }

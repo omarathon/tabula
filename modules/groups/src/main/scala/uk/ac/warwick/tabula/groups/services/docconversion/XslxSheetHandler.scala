@@ -15,11 +15,10 @@ import uk.ac.warwick.tabula.UniversityId
 class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, var allocateStudentItems: JList[AllocateStudentItem])
 	extends SheetContentsHandler with Logging {
 
-	var lastContents: String = null
-	var cellIsString = false
 	var isFirstRow = true // flag to skip the first row as it will contain column headers
+	var foundStudentInRow = false
+	
 	var columnMap = scala.collection.mutable.Map[Short, String]()
-	var columnIndex: Int = _
 	var currentAllocateStudentItem: AllocateStudentItem = _
 
 	val xssfHandler = new XSSFSheetXMLHandler(styles, sst, this, false)
@@ -35,24 +34,25 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
 
 	override def startRow(row: Int){
 		logger.debug("startRow: " + row.toString)
-		if (row > 0) {
-			isFirstRow = false
-			currentAllocateStudentItem = new AllocateStudentItem()
-		}
+		
+		isFirstRow = (row == 0)
+		currentAllocateStudentItem = new AllocateStudentItem()
+		foundStudentInRow = false
 	}
 
 	override def cell(cellReference: String, formattedValue: String){
 		val col = new CellReference(cellReference).getCol
-		if (isFirstRow){
-			columnMap(col) = formattedValue
-		} else if (columnMap.containsKey(col)) {
+		if (isFirstRow) columnMap(col) = formattedValue
+		else if (columnMap.containsKey(col)) {
 			columnMap(col) match {
 				case "student_id" => {
-					if(formattedValue.hasText)
+					if (formattedValue.hasText) {
 						currentAllocateStudentItem.universityId = UniversityId.zeroPad(formattedValue)
+						foundStudentInRow = true
+					}
 				}
 				case "group_id" => {
-					if(formattedValue.hasText)
+					if (formattedValue.hasText)
 						currentAllocateStudentItem.groupId = formattedValue
 				}
 				case _ => // ignore anything else
@@ -61,8 +61,7 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
 	}
 
 	override def endRow() {
-		if (!isFirstRow)
-			allocateStudentItems.add(currentAllocateStudentItem)
+		if (!isFirstRow && foundStudentInRow) allocateStudentItems.add(currentAllocateStudentItem)
 	}
 }
 

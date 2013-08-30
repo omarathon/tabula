@@ -22,8 +22,8 @@ class RequestAssignmentAccessCommandTest extends TestBase with FunctionalContext
 			cmd.userLookup = userLookup
 			cmd.assignment = assignment
 			cmd.module = assignment.module
-			cmd.apply()
-			val notifications = cmd.emit
+			val admins = cmd.apply()
+			val notifications = cmd.emit(admins)
 			notifications.size should be (1)
 		}
 	}

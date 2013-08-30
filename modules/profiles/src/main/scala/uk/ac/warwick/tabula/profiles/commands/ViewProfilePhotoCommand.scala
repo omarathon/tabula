@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.profiles.commands
+
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import org.springframework.util.FileCopyUtils
@@ -12,7 +13,6 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.services.fileserver.{CachePolicy, RenderableAttachment, RenderableFile}
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.spring.Wire
 import org.joda.time.{Days, Hours, DateTime}
 import uk.ac.warwick.util.files.imageresize.ImageResizer.FileType
@@ -85,7 +85,8 @@ class RenderableFileReference(ref: RenderableFile, prefix: String) extends Abstr
 	override def unlink() { ??? }
 }
 
-class ViewProfilePhotoCommand(val member: Member) extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited with ResizesPhoto {
+class ViewProfilePhotoCommand(val member: Member)
+	extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited with ResizesPhoto {
 
 	PermissionCheck(Permissions.Profiles.Read.Core, mandatory(member))
 
@@ -100,13 +101,10 @@ class ViewProfilePhotoCommand(val member: Member) extends Command[RenderableFile
 
 }
 
-class ViewStudentRelationshipPhotoCommand(val member: Member, val relationship: StudentRelationship) extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited  with ResizesPhoto {
+class ViewStudentRelationshipPhotoCommand(val member: Member, val relationship: StudentRelationship)
+	extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited  with ResizesPhoto {
 
-	relationship.relationshipType match {
-		case RelationshipType.PersonalTutor => PermissionCheck(Permissions.Profiles.PersonalTutor.Read, member)
-		case RelationshipType.Supervisor => PermissionCheck(Permissions.Profiles.Supervisor.Read, member)
-		case _ => throw new IllegalStateException("Unsupported relationship type: " + relationship.relationshipType)
-	}
+	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(relationship.relationshipType), member)
 
 	override def applyInternal() = {
 		val attachment = render(relationship.agentMember)

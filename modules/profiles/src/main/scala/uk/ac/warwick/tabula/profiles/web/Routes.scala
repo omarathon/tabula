@@ -12,14 +12,25 @@ import java.net.URLEncoder
 object Routes {
 	private def encoded(string: String) = URLEncoder.encode(string, "UTF-8")
 	def home = "/"
-
+	def search = "/search"
+		
 	object profile {
 		def view(member: Member) = "/view/%s" format (encoded(member.universityId))
 		def view(member: Member, meeting: MeetingRecord) = "/view/%s?meeting=%s" format (encoded(member.universityId), encoded(meeting.id))
 		def photo(member: Member) = "/view/photo/%s.jpg" format (encoded(member.universityId))
 	}
 	
+	def students(relationshipType: StudentRelationshipType) = "/%s/students" format (encoded(relationshipType.urlPart))		
+		
+	object relationships {
+		def apply(department: Department, relationshipType: StudentRelationshipType) = "/department/%s/%s/all" format (encoded(department.code), encoded(relationshipType.urlPart))
+		def missing(department: Department, relationshipType: StudentRelationshipType) = "/department/%s/%s/missing" format (encoded(department.code), encoded(relationshipType.urlPart))
+		def allocate(department: Department, relationshipType: StudentRelationshipType) = "/department/%s/%s/allocate" format (encoded(department.code), encoded(relationshipType.urlPart))
+		def template(department: Department, relationshipType: StudentRelationshipType) = "/department/%s/%s/template" format (encoded(department.code), encoded(relationshipType.urlPart))
+	}
+	
 	object admin {
+		def apply(department: Department) = Routes.home // TODO https://repo.elab.warwick.ac.uk/projects/TAB/repos/tabula/pull-requests/145/overview?commentId=1012
 		def departmentPermissions(department: Department) = "/admin/department/%s/permissions" format (encoded(department.code))
 	}
 }

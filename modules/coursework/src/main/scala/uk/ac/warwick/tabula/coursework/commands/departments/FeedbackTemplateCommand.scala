@@ -95,7 +95,7 @@ class DeleteFeedbackTemplateCommand(department:Department, val template: Feedbac
 		transactional() {
 			val feedbackTemplate= department.feedbackTemplates.find(_.id == id).get
 			if (feedbackTemplate.hasAssignments)
-				logger.error("Cannot delete feedbackt template "+feedbackTemplate.id+" - it is still linked to assignments")
+				logger.error("Cannot delete feedbackt template " + feedbackTemplate.id + " - it is still linked to assignments")
 			else
 				department.feedbackTemplates.remove(feedbackTemplate)
 		}

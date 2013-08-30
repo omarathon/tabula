@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.home
 
 import uk.ac.warwick.tabula.BrowserTest
-import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.admin.AdminFixtures
 
 class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixtures with GivenWhenThen {
 
