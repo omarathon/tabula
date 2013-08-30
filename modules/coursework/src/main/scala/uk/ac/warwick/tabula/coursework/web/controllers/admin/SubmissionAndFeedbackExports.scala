@@ -1,17 +1,7 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation._
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.coursework.commands.assignments._
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.AuditEventIndexService
-import java.io.StringWriter
-import uk.ac.warwick.util.csv.GoodCsvDocument
-import uk.ac.warwick.tabula.web.views.CSVView
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.util.csv.CSVLineWriter
 import scala.collection.immutable.ListMap
 import scala.collection.JavaConverters._
@@ -23,7 +13,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.commons.lang3.text.WordUtils
-import uk.ac.warwick.tabula.web.views.ExcelView
 import org.apache.poi.hssf.usermodel.HSSFDataFormat
 
 class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module: Module) extends SubmissionAndFeedbackExport {
@@ -81,7 +70,9 @@ class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module
 			Nil //empty Node seq, no element
 }
 	
-class CSVBuilder(val items: Seq[Student], val assignment: Assignment, val module: Module) extends CSVLineWriter[Student] with SubmissionAndFeedbackSpreadsheetExport {
+class CSVBuilder(val items: Seq[Student], val assignment: Assignment, val module: Module)
+	extends CSVLineWriter[Student] with SubmissionAndFeedbackSpreadsheetExport {
+
 	def getNoOfColumns(item:Student) = headers.size
 	
 	def getColumn(item:Student, i:Int) = formatData(itemData(item).get(headers(i)))

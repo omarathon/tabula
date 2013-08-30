@@ -4,25 +4,16 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.AlumniProperties
-import uk.ac.warwick.tabula.data.model.StudentProperties
 import uk.ac.warwick.tabula.data.model.MemberProperties
-import uk.ac.warwick.tabula.data.model.StaffProperties
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import java.sql.ResultSet
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.model.Gender
-import uk.ac.warwick.tabula.data.model.MemberUserType
-import java.sql.Blob
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.data.Transactions._
 import java.sql.Date
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
-import org.springframework.beans.BeanWrapperImpl
 import org.springframework.beans.BeanWrapper
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.helpers.Closeables._
@@ -70,7 +61,11 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		this.userType = member.userType
 
 		this.title = oneOf(member.title, optString("title")) map { WordUtils.capitalizeFully(_).trim() } getOrElse("")
-		this.firstName = oneOf(member.preferredForenames, optString("preferred_forename"), ssoUser.getFirstName) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
+		this.firstName = oneOf(
+			member.preferredForenames,
+			optString("preferred_forename"),
+			ssoUser.getFirstName
+		) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
 		this.fullFirstName = oneOf(optString("forenames"), ssoUser.getFirstName) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
 		this.lastName = oneOf(member.preferredSurname, optString("family_name"), ssoUser.getLastName) map { formatSurname(_, ssoUser.getLastName) } getOrElse("")
 

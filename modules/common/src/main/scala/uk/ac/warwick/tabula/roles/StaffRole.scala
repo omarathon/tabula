@@ -2,6 +2,8 @@ package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
+import uk.ac.warwick.tabula.permissions.PermissionsSelector
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 case class StaffRole(department: model.Department) extends BuiltInRole(StaffRoleDefinition, department)
 
@@ -21,7 +23,6 @@ case object StaffRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	GrantsScopedPermission(
 		Profiles.Read.StudentCourseDetails.Core,
 		Profiles.Read.StudentCourseDetails.Status,
-		Profiles.PersonalTutor.Read,
-		Profiles.Supervisor.Read
+		Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType])
 	)
 }

@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.profiles
 
 import uk.ac.warwick.tabula.BrowserTest
-import org.openqa.selenium.internal.seleniumemulation.WaitForPageToLoad
 
 class ProfilesSearchTest extends BrowserTest {
 	

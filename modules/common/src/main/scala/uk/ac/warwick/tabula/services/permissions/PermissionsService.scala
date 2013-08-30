@@ -130,41 +130,47 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 		permissionsDao.getGrantedRolesFor(scope) filter { _.users.includes(user.apparentId) }
 	})
 	
-	def getGrantedPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedPermission[_]] = ensureFoundUserSeq(user)(transactional(readOnly = true) {
-		permissionsDao.getGrantedPermissionsFor(scope).toStream filter { _.users.includes(user.apparentId) }
-	})
+	def getGrantedPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedPermission[_]] =
+		ensureFoundUserSeq(user)(transactional(readOnly = true) {
+			permissionsDao.getGrantedPermissionsFor(scope).toStream filter { _.users.includes(user.apparentId) }
+		}
+	)
 	
 	def getAllGrantedRolesFor(user: CurrentUser): Seq[GrantedRole[_]] = ensureFoundUserSeq(user)(getGrantedRolesFor[PermissionsTarget](user))
 	
 	def getAllGrantedPermissionsFor(user: CurrentUser): Seq[GrantedPermission[_]] = ensureFoundUserSeq(user)(getGrantedPermissionsFor[PermissionsTarget](user))
 	
-	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedRole[A]] = ensureFoundUserStream(user)(transactional(readOnly = true) {
-		val groupNames = groupService.getGroupsNamesForUser(user.apparentId).asScala
-		
-		rolesByIdCache.getGrantedRolesByIds[A](
-			// Get all roles where usercode is included,
-			GrantedRolesForUserCache.get((user.apparentUser, classTag[A])).asScala
-			
-			// Get all roles backed by one of the webgroups, 		
-			++ (groupNames flatMap { groupName => GrantedRolesForGroupCache.get((groupName, classTag[A])).asScala })
-		).toStream
-			// For sanity's sake, filter by the users including the user
-			.filter { _.users.includes(user.apparentId) }
-	})
+	def getGrantedRolesFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedRole[A]] =
+		ensureFoundUserStream(user)(transactional(readOnly = true) {
+			val groupNames = groupService.getGroupsNamesForUser(user.apparentId).asScala
+
+			rolesByIdCache.getGrantedRolesByIds[A](
+				// Get all roles where usercode is included,
+				GrantedRolesForUserCache.get((user.apparentUser, classTag[A])).asScala
+
+				// Get all roles backed by one of the webgroups,
+				++ (groupNames flatMap { groupName => GrantedRolesForGroupCache.get((groupName, classTag[A])).asScala })
+			).toStream
+				// For sanity's sake, filter by the users including the user
+				.filter { _.users.includes(user.apparentId) }
+		}
+	)
 	
-	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedPermission[A]] = ensureFoundUserStream(user)(transactional(readOnly = true) {
-		val groupNames = groupService.getGroupsNamesForUser(user.apparentId).asScala
-		
-		permissionsByIdCache.getGrantedPermissionsByIds[A](
-			// Get all permissions where usercode is included,
-			GrantedPermissionsForUserCache.get((user.apparentUser, classTag[A])).asScala
-			
-			// Get all permissions backed by one of the webgroups, 		
-			++ (groupNames flatMap { groupName => GrantedPermissionsForGroupCache.get((groupName, classTag[A])).asScala })
-		).toStream
-			// For sanity's sake, filter by the users including the user
-			.filter { _.users.includes(user.apparentId) }
-	})
+	def getGrantedPermissionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser): Stream[GrantedPermission[A]] =
+		ensureFoundUserStream(user)(transactional(readOnly = true) {
+			val groupNames = groupService.getGroupsNamesForUser(user.apparentId).asScala
+
+			permissionsByIdCache.getGrantedPermissionsByIds[A](
+				// Get all permissions where usercode is included,
+				GrantedPermissionsForUserCache.get((user.apparentUser, classTag[A])).asScala
+
+				// Get all permissions backed by one of the webgroups,
+				++ (groupNames flatMap { groupName => GrantedPermissionsForGroupCache.get((groupName, classTag[A])).asScala })
+			).toStream
+				// For sanity's sake, filter by the users including the user
+				.filter { _.users.includes(user.apparentId) }
+		}
+	)
 	
 	def getAllPermissionDefinitionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser, targetPermission: Permission): Set[A] = ensureFoundUserSet(user) {
 		val scopesWithGrantedRole = 

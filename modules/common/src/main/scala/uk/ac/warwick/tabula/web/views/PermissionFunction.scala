@@ -15,6 +15,10 @@ import freemarker.template.TemplateMethodModelEx
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.JavaImports._
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.permissions.PermissionsSelector
+import uk.ac.warwick.tabula.permissions.SelectorPermission
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 /**
  * Freemarker directive to show the contents of the tag
@@ -24,17 +28,20 @@ class PermissionFunction extends TemplateMethodModelEx with Logging {
 	@Autowired var securityService: SecurityService = _
 
 	override def exec(args: JList[_]): Object = {
-		val arguments = args.asInstanceOf[JList[TemplateModel]]
+		val arguments = args.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }	
+		
+		val (permission, item) = arguments match {
+			case Seq(actionName: String, item: PermissionsTarget) => 
+				(Permissions.of(actionName), item)
+			case Seq(actionName: String, item: PermissionsTarget, selector: StudentRelationshipType) => // FIXME hard-coded
+				(SelectorPermission.of(actionName, selector), item)
+			case _ => throw new IllegalArgumentException("Bad args")
+		}
 
 		val request = RequestInfo.fromThread.get
 		val currentUser = request.user
 
-		val actionName = DeepUnwrap.unwrap(arguments.get(0)).asInstanceOf[String]
-		val item = DeepUnwrap.unwrap(arguments.get(1)).asInstanceOf[PermissionsTarget]
-		val permission = Permissions.of(actionName)
-
 		securityService.can(currentUser, permission, item): JBoolean
-
 	}
 
 }

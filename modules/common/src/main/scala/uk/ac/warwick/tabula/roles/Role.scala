@@ -7,6 +7,8 @@ import scala.annotation.tailrec
 import scala.collection.immutable.ListMap
 import javax.persistence.Transient
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
+import org.apache.commons.lang3.builder.HashCodeBuilder
+import org.apache.commons.lang3.builder.EqualsBuilder
 
 trait RoleDefinition {
 	/**
@@ -36,7 +38,7 @@ trait RoleDefinition {
 }
 
 trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinition] with RoleDefinition {
-	final val getName = RoleDefinition.shortName(getClass.asInstanceOf[Class[_ <: BuiltInRoleDefinition]])
+	val getName = RoleDefinition.shortName(getClass.asInstanceOf[Class[_ <: BuiltInRoleDefinition]])
 
 	private var scopedPermissions: List[Permission] = List()
 	private var scopelessPermissions: List[ScopelessPermission] = List()
@@ -77,6 +79,45 @@ trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinitio
 		permissions(scope) ++ (subRoleDefinitions flatMap { _.allPermissions(scope) })
 		
 	def isAssignable = true
+}
+
+abstract class SelectorBuiltInRoleDefinition[A <: PermissionsSelector[A]](val selector: PermissionsSelector[A]) extends BuiltInRoleDefinition {
+	override val getName = SelectorBuiltInRoleDefinition.shortName(getClass.asInstanceOf[Class[_ <: SelectorBuiltInRoleDefinition[_]]])
+	
+	override def equals(other: Any) = other match {
+		case that: SelectorBuiltInRoleDefinition[A] => {
+			new EqualsBuilder()
+			.append(getName, that.getName)
+			.append(selector, that.getName)
+			.build()
+		}
+		case _ => false
+	}
+	
+	override def hashCode() = 
+		new HashCodeBuilder()
+		.append(getName)
+		.append(selector)
+		.build()
+		
+	override def toString() = "%s(%s)".format(super.toString, selector) 
+}
+
+object SelectorBuiltInRoleDefinition {
+	private val ObjectClassPrefix = RoleDefinition.getClass.getPackage.getName + "."
+	
+	def of[A <: PermissionsSelector[A]](name: String, selector: A): SelectorBuiltInRoleDefinition[A] = {
+		try {
+			// Go through the magical hierarchy
+			val clz = Class.forName(ObjectClassPrefix + name)
+			clz.getConstructors()(0).newInstance(selector).asInstanceOf[SelectorBuiltInRoleDefinition[A]]
+		} catch {
+			case e: ClassNotFoundException => throw new IllegalArgumentException("Role definition " + name + " not recognised")
+		}
+	}
+
+	def shortName(clazz: Class[_ <: BuiltInRoleDefinition])
+		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length).replace('$', '.')
 }
 
 trait UnassignableBuiltInRoleDefinition extends BuiltInRoleDefinition {

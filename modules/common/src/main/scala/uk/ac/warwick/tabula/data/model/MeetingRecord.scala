@@ -48,12 +48,7 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	@JoinColumn(name="creator_id")
 	var creator: Member = _
 
-  def readPermissions():Seq[Permission]={
-    Seq(relationship.relationshipType match {
-      case RelationshipType.PersonalTutor =>Permissions.Profiles.PersonalTutor.MeetingRecord.ReadDetails
-      case RelationshipType.Supervisor => Permissions.Profiles.Supervisor.MeetingRecord.ReadDetails
-    })
-  }
+  def readPermissions(): Seq[Permission] = Seq(Permissions.Profiles.MeetingRecord.ReadDetails(relationship.relationshipType))
 
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
   @RestrictionProvider("readPermissions")

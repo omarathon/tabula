@@ -4,7 +4,6 @@ import scala.collection.mutable
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.Configurable
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.Lob

@@ -32,7 +32,7 @@ class RawStudentRelationship {
 		this.agentUniversityId = agentUniversityId
 	}
 	
-	override def toString() = "Student=%s, Tutor=%s".format(targetUniversityId, agentUniversityId)
+	override def toString() = "Student=%s, Agent=%s".format(targetUniversityId, agentUniversityId)
 }
 
 @Service
@@ -63,7 +63,7 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
 
 	var isParsingHeader = true // flag to parse the first row for column headers
 	var foundStudentInRow = false
-	var foundTutorInRow = false
+	var foundAgentInRow = false
 
 	var columnMap = scala.collection.mutable.Map[Short, String]()
 	var currentRawStudentRelationship: RawStudentRelationship = _
@@ -85,7 +85,7 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
 		isParsingHeader = (row == 0)
 		currentRawStudentRelationship = new RawStudentRelationship
 		foundStudentInRow = false
-		foundTutorInRow = false
+		foundAgentInRow = false
 	}
 
 	def cell(cellReference: String, formattedValue: String) = {
@@ -98,9 +98,9 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
 					currentRawStudentRelationship.targetUniversityId = UniversityId.zeroPad(formattedValue)
 					foundStudentInRow = true
 				}
-				case "tutor_id" => {
+				case "agent_id" => {
 					currentRawStudentRelationship.agentUniversityId = UniversityId.zeroPad(formattedValue)
-					foundTutorInRow = true
+					foundAgentInRow = true
 				}
 				case _ => // ignore anything else
 			}

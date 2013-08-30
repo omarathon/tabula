@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.Daoisms
 
 abstract class AbstractDeleteMeetingRecordCommand[A] (val meetingRecord: MeetingRecord, val user: CurrentUser) extends Command[A] with SelfValidating{
 
-  PermissionCheck(MeetingPermissions.Delete.permissionFor(meetingRecord.relationship.relationshipType), meetingRecord)
+	PermissionCheck(Permissions.Profiles.MeetingRecord.Delete(meetingRecord.relationship.relationshipType), meetingRecord)
 
 	var meetingRecordDao = Wire.auto[MeetingRecordDao]
 

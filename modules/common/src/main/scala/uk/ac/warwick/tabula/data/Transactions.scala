@@ -4,7 +4,6 @@ import org.springframework.transaction._
 import org.springframework.transaction.support._
 import org.springframework.transaction.annotation._
 import org.springframework.transaction.interceptor._
-import org.springframework.beans.factory.annotation.{Autowired, Configurable}
 import scala.annotation.target.field
 import uk.ac.warwick.spring.Wire
 
