@@ -35,7 +35,10 @@ class SetMonitoringCheckpointController extends AttendanceController {
 
 
 	def form(@ModelAttribute command: SetMonitoringCheckpointCommand): Mav = {
-		Mav("home/set", "command" -> command, "monitoringPoint" -> command.monitoringPoint)
+		Mav("home/set",
+				"command" -> command,
+				"monitoringPoint" -> command.monitoringPoint,
+				"returnTo" -> getReturnTo(Routes.monitoringPoints))
 	}
 
 

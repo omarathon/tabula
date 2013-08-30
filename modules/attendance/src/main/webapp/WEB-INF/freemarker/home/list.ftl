@@ -17,7 +17,7 @@
 	<tbody class="striped-section-contents">
 		<#list monitoringPoints as monitoringPoint>
 			<tr>
-				<td><a href="monitoringpoints/${monitoringPoint.id}/week/${monitoringPoint.week}/set">${monitoringPoint.name}</a></td>
+				<td><a href="monitoringpoints/${monitoringPoint.id}/week/${monitoringPoint.week}/set?returnTo=/monitoringpoints<#if (RequestParameters.page??)>?page=${RequestParameters.page}</#if>">${monitoringPoint.name}</a></td>
 				<td>${monitoringPoint.week}</td>
 			</tr>
 		</#list>

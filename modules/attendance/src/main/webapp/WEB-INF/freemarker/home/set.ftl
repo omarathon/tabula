@@ -4,6 +4,7 @@
 <div class="striped-section-contents attendees">
 	<form action="" method="post">
 		<input type="hidden" name="monitoringPoint" value="${monitoringPoint.id}" />
+		<input type="hidden" value="<@url page="${returnTo}" />" />
 		<#list command.members as student>
 			<#assign checked = false />
 			<#list command.membersChecked as studentChecked>
@@ -30,7 +31,7 @@
 
 		<div class="pull-right">
 			<input type="submit" value="Save" class="btn btn-primary">
-			<a class="btn" href="#">Cancel</a>
+			<a class="btn" href="<@url page="${returnTo}" context="/attendance" />">Cancel</a>
 		</div>
 	</form>
 </div>
