@@ -12,7 +12,7 @@
 	<@f.form id="editMonitoringPoint" action="${action}" method="POST" commandName="command" class="form-horizontal">
 		<#list command.monitoringPoints as point>
 			<input type="hidden" name="monitoringPoints[${point_index}].name" value="${point.name}" />
-			<input type="hidden" name="monitoringPoints[${point_index}].defaultValue" value="<#if point.defaultValue>true<#else>false></#if>" />
+			<input type="hidden" name="monitoringPoints[${point_index}].defaultValue" value="<#if point.defaultValue>true<#else>false</#if>" />
 			<input type="hidden" name="monitoringPoints[${point_index}].week" value="${point.week}" />
 		</#list>
 		<#include "_fields.ftl" />

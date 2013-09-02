@@ -1,5 +1,12 @@
 <h1>Manage monitoring points for ${department.name}</h1>
 
+<#if createdCount?? >
+	<div class="alert alert-success">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		Monitoring schemes for ${createdCount} route<#if (createdCount > 1)>s</#if> have been created
+	</div>
+</#if>
+
 <form class="form-inline">
 	<label>Academic year
 		<select id="academicYear">

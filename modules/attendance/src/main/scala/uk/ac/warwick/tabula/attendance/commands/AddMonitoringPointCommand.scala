@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.system.permissions.Public
 import org.springframework.util.AutoPopulatingList
-import uk.ac.warwick.tabula.helpers.StringUtils._
+
 
 object AddMonitoringPointCommand {
 	def apply(dept: Department) =
@@ -35,21 +35,12 @@ abstract class AddMonitoringPointCommand(val dept: Department) extends Command[U
 	}
 }
 
-trait AddMonitoringPointValidation extends SelfValidating {
+trait AddMonitoringPointValidation extends SelfValidating with MonitoringPointValidation {
 	self: AddMonitoringPointState =>
 
 	override def validate(errors: Errors) {
-		week match {
-			case y if y < 1  => errors.rejectValue("week", "monitoringPoint.week.min")
-			case y if y > 52 => errors.rejectValue("week", "monitoringPoint.week.max")
-			case _ =>
-		}
-
-		if (!name.hasText) {
-			errors.rejectValue("name", "NotEmpty")
-		} else if (name.length > 4000) {
-			errors.rejectValue("name", "monitoringPoint.name.toolong")
-		}
+		validateWeek(errors, week, "week")
+		validateName(errors, name, "name")
 
 		if (monitoringPoints.asScala.count(p => p.name == name && p.week == week) > 0) {
 			errors.rejectValue("name", "monitoringPoint.name.exists")

@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
 import uk.ac.warwick.tabula.attendance.commands.AddMonitoringPointSetCommand
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.{Route, Department}
+import uk.ac.warwick.tabula.data.model.Department
+import scala.collection.mutable
 
 @Controller
 @RequestMapping(Array("/manage/{dept}/sets/add"))
@@ -25,17 +26,17 @@ class AddMonitoringPointSetController extends AttendanceController {
 	}
 
 	@RequestMapping(method=Array(GET,HEAD), params=Array("type=blank"))
-	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPointSet]) = {
+	def form(@ModelAttribute("command") cmd: Appliable[mutable.Buffer[MonitoringPointSet]]) = {
 		Mav("manage/set/add_form", "createType" -> "blank")
 	}
 
 	@RequestMapping(method=Array(POST))
-	def submit(@PathVariable dept: Department, @Valid @ModelAttribute("command") cmd: Appliable[MonitoringPointSet], errors: Errors) = {
+	def submit(@PathVariable dept: Department, @Valid @ModelAttribute("command") cmd: Appliable[mutable.Buffer[MonitoringPointSet]], errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
-			cmd.apply()
-			Redirect("/manage/" + dept.code)
+			val sets = cmd.apply()
+			Redirect("/manage/" + dept.code, "created" -> sets.map{s => s.route.code}.distinct.size)
 		}
 	}
 
