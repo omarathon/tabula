@@ -4,6 +4,10 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.util.termdates.{TermFactory, Term, TermFactoryImpl}
 import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.util.termdates.Term.TermType
+import scala.collection.JavaConverters._
+import org.joda.time.{Interval, DateTime}
+import uk.ac.warwick.tabula.AcademicYear
 
 /**
  * Wraps TermFactory and adds more features.
@@ -22,6 +26,22 @@ class TermService extends TermFactory{
 
 	def getAcademicWeeksForYear(date: BaseDateTime) = termFactory.getAcademicWeeksForYear(date)
 
+	/**
+	 * Return all the academic weeks for the specifed range, as a tuple of year, weeknumber, date interval
+	 */
+	def getAcademicWeeksBetween(start:DateTime, end:DateTime):Seq[(AcademicYear,Int,Interval)] = {
+		val autumnTerms:Seq[Term]= termFactory.getTermDates.asScala
+			.filter(t => t.getTermType == TermType.autumn)
+			.filter(t=>t.getStartDate.isAfter(start))
+			.filter(t=>t.getStartDate.isBefore(end))
+
+		// since we only picked the autumn terms from the termfactory,
+		// the endDate's year will be correct for the academicyear
+		autumnTerms.flatMap(term=>{
+			val weeks = termFactory.getAcademicWeeksForYear(term.getEndDate).asScala
+			weeks.map(week=>(AcademicYear(term.getEndDate.getYear), week.getLeft.toInt, week.getRight))
+		})
+	}
 	def getTermFromDateIncludingVacations(date: BaseDateTime) = {
 		val term = termFactory.getTermFromDate(date)
 		if (date.isBefore(term.getStartDate())) Vacation(termFactory.getPreviousTerm(term), term)

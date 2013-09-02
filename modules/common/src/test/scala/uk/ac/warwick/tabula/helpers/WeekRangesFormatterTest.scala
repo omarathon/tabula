@@ -6,6 +6,9 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.util.termdates.TermFactoryImpl
+import scala.collection.JavaConverters._
+import uk.ac.warwick.util.termdates.Term.TermType
 
 class WeekRangesFormatterTest extends TestBase {
 
@@ -57,6 +60,41 @@ class WeekRangesFormatterTest extends TestBase {
 		formatter.format(Seq(WeekRange(1, 52)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None) should be("Tue 4<sup>th</sup> Oct 2011 - Tue 25<sup>th</sup> Sep 2012")
 		formatter.format(Seq(WeekRange(11, 15)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None) should be("Tue 13<sup>th</sup> Dec 2011 - Tue 10<sup>th</sup> Jan 2012")
 		formatter.format(Seq(WeekRange(16, 25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None) should be("Tue 17<sup>th</sup> Jan - Tue 20<sup>th</sup> Mar 2012")
+	}
+
+
+	@Test
+	def getWeeks() {
+		val tf = new TermFactoryImpl
+
+
+		val weekDescriptions =
+
+			for (autumnTerm <- tf.getTermDates.asScala.filter(t => t.getTermType == TermType.autumn);
+					 week <- tf.getAcademicWeeksForYear(autumnTerm.getEndDate).asScala)
+			yield {
+				// since we only picked the autumn terms from the termfactory,
+				// the endDate's year will be correct for the academicyear
+				// have to make a new formatter per year. Rather than trying to re-use
+				// one if the year hasn't changed, just make a new one for each week; the constructor is cheap.
+				val formatter = new WeekRangesFormatter(AcademicYear(autumnTerm.getEndDate.getYear))
+				formatter.termService = termService
+				val weekNumber = week.getLeft
+				val weekInterval = week.getRight
+
+				val descriptionIncludingVacations = formatter.format(Seq(WeekRange(weekNumber)), DayOfWeek.Monday, WeekRange.NumberingSystem.Term)
+				// weekRangeFormatter always includes vacations, but we don't want them here
+				val description = if (descriptionIncludingVacations.startsWith("Term")) {
+					descriptionIncludingVacations
+				} else {
+					IntervalFormatter.format(weekInterval.getStart, weekInterval.getEnd, false)
+				}
+				(weekInterval.getStart.getMillis, weekInterval.getEnd.getMillis, description)
+			}
+
+		println(weekDescriptions.mkString("\n"))
+
+
 	}
 
 }
