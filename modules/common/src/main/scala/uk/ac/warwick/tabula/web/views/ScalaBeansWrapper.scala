@@ -44,7 +44,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 	}
 
 	// scalastyle:off
-	override def wrap(obj: Object): TemplateModel = {	
+	override def wrap(obj: Object): TemplateModel = {
 		obj match {
 			case Some(x: Object) => wrap(x)
 			case Some(null) => null

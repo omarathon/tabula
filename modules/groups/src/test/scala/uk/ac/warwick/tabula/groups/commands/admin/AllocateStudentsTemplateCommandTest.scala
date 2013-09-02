@@ -19,12 +19,7 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 	val module = Fixtures.module("in101", "Introduction to Scala")
 	val set = Fixtures.smallGroupSet("My small groups")
 
-	@Before def itWorks = withUser("boombastic") {
-
-		set.module = module
-		set.membershipService = membershipService
-		set._membersGroup.userLookup = userLookup
-
+	@Before def setup = withUser("boombastic") {
 		val user1 = new User("cuscav")
 		user1.setFoundUser(true)
 		user1.setFirstName("Mathew")
@@ -95,12 +90,16 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		set.members.add(user3)
 		set.members.add(user4)
 		set.members.add(user5)
-
+		
+		set.membershipService = membershipService
+		set.module = module
+		set._membersGroup.userLookup = userLookup
+		
+		membershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Some(set._membersGroup)) returns (set._membersGroup.users)
 	}
 
 
 	@Test def allocateUsersSheet = withUser("slengteng") {
-
 		implicit class SearchableSheet(self:XSSFSheet) {
 			def containsDataRow(id:String, name:String, maxRows:Int = self.getLastRowNum):Boolean = {
 				val rows = for (i<- 1 to maxRows) yield self.getRow(i)
@@ -134,7 +133,6 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 	}
 
 	@Test def groupLookupSheet() = withUser("satta") {
-
 		val cmd = new AllocateStudentsTemplateCommand(module, set, currentUser)
 		val workbook = cmd.generateWorkbook()
 
