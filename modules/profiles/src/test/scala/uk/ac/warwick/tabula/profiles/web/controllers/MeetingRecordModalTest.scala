@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.profiles.web.controllers.tutor.MeetingRecordModal
+import uk.ac.warwick.tabula.profiles.web.controllers.relationships.MeetingRecordModal
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.web.controllers.{ControllerViews, ControllerImports, ControllerMethods}
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.RelationshipType._
 
 class MeetingRecordModalTest extends TestBase with Mockito {
 
@@ -19,9 +18,9 @@ class MeetingRecordModalTest extends TestBase with Mockito {
 		var requestInfo: Option[RequestInfo] = _
 		var user: CurrentUser = _
 		var securityService: SecurityService = mock[SecurityService]
-		var currentMember:Member = _
+		var currentMember: Member = _
 		var profileService: ProfileService = mock[ProfileService]
-		var relationshipService:RelationshipService = mock[RelationshipService]
+		var relationshipService: RelationshipService = mock[RelationshipService]
 	}
 
 	val student = new StudentCourseDetails()
@@ -30,10 +29,13 @@ class MeetingRecordModalTest extends TestBase with Mockito {
 	@Test
 	def viewMeetingRecordCommandUsesRelationshipTypeFromParameter(){
 		val modals = new MeetingRecordModal() with ModalTestSupport
+		
+		val relationshipType1 = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		val relationshipType2 = StudentRelationshipType("supervisor", "supervisor", "research supervisor", "research supervisee")
 
-		modals.viewMeetingRecordCommand(student, Supervisor) should be('defined)
-		modals.viewMeetingRecordCommand(student,Supervisor).get.relationshipType  should be(Supervisor)
-		modals.viewMeetingRecordCommand(student,PersonalTutor).get.relationshipType  should be(PersonalTutor)
+		modals.viewMeetingRecordCommand(student, relationshipType1) should be('defined)
+		modals.viewMeetingRecordCommand(student, relationshipType1).get.relationshipType  should be(relationshipType1)
+		modals.viewMeetingRecordCommand(student, relationshipType2).get.relationshipType  should be(relationshipType2)
 	}
 
 	@Test
@@ -41,19 +43,11 @@ class MeetingRecordModalTest extends TestBase with Mockito {
 		val modals = new MeetingRecordModal() with ModalTestSupport
 
 		val rels = Seq(new StudentRelationship)
-		modals.relationshipService.findCurrentRelationships(Supervisor,student.sprCode) returns rels
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		
+		modals.relationshipService.findCurrentRelationships(relationshipType, student.sprCode) returns rels
 
-		modals.allRelationships(student, Supervisor) should be(rels)
-	}
-
-	@Test
-	def allRelationshipsUsesTutorRelationshipTypeFromParameter(){
-		val modals = new MeetingRecordModal() with ModalTestSupport
-
-		val rels = Seq(new StudentRelationship)
-		modals.relationshipService.findCurrentRelationships(PersonalTutor,student.sprCode) returns rels
-
-		modals.allRelationships(student, PersonalTutor) should be(rels)
+		modals.allRelationships(student, relationshipType) should be(rels)
 	}
 
 }

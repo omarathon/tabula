@@ -13,8 +13,7 @@ import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.RelationshipType
-import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.data.SitsStatusDaoImpl
 
 // scalastyle:off magic.number
@@ -27,36 +26,39 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 
 	@Transactional
 	@Test def findingRelationships = withFakeTime(dateTime(2000, 6)) {
-		relationshipService.findCurrentRelationships(PersonalTutor, "1250148/1") should be ('empty)
-		relationshipService.saveStudentRelationship(PersonalTutor, "1250148/1", "1234567")
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		relationshipService.saveOrUpdate(relationshipType)
+		
+		relationshipService.findCurrentRelationships(relationshipType, "1250148/1") should be ('empty)
+		relationshipService.saveStudentRelationship(relationshipType, "1250148/1", "1234567")
 
-		val opt = relationshipService.findCurrentRelationships(PersonalTutor, "1250148/1").headOption
+		val opt = relationshipService.findCurrentRelationships(relationshipType, "1250148/1").headOption
 		val currentRelationship = opt.getOrElse(fail("Failed to get current relationship"))
 		currentRelationship.agent should be ("1234567")
 
 		// now we've stored a relationship.  Try storing the identical one again:
-		relationshipService.saveStudentRelationship(PersonalTutor, "1250148/1", "1234567")
+		relationshipService.saveStudentRelationship(relationshipType, "1250148/1", "1234567")
 
-		relationshipService.findCurrentRelationships(PersonalTutor, "1250148/1").headOption.getOrElse(fail("Failed to get current relationship after re-storing")).agent should be ("1234567")
-		relationshipService.getRelationships(PersonalTutor, "1250148/1").size should be (1)
+		relationshipService.findCurrentRelationships(relationshipType, "1250148/1").headOption.getOrElse(fail("Failed to get current relationship after re-storing")).agent should be ("1234567")
+		relationshipService.getRelationships(relationshipType, "1250148/1").size should be (1)
 
 		// now store a new personal tutor for the same student. We should now have TWO personal tutors (as of TAB-416)
 		DateTimeUtils.setCurrentMillisFixed(new DateTime().plusMillis(30).getMillis())
-		relationshipService.saveStudentRelationship(PersonalTutor, "1250148/1", "7654321")
+		relationshipService.saveStudentRelationship(relationshipType, "1250148/1", "7654321")
 
-		val rels = relationshipService.getRelationships(PersonalTutor, "1250148/1")
+		val rels = relationshipService.getRelationships(relationshipType, "1250148/1")
 
 		DateTimeUtils.setCurrentMillisFixed(new DateTime().plusMillis(30).getMillis())
-		val currentRelationshipsUpdated = relationshipService.findCurrentRelationships(PersonalTutor, "1250148/1")
+		val currentRelationshipsUpdated = relationshipService.findCurrentRelationships(relationshipType, "1250148/1")
 		currentRelationshipsUpdated.size should be (2)
 
 		currentRelationshipsUpdated.find(_.agent == "7654321") should be ('defined)
 
-		relationshipService.getRelationships(PersonalTutor, "1250148/1").size should be (2)
+		relationshipService.getRelationships(relationshipType, "1250148/1").size should be (2)
 
-		relationshipService.listStudentRelationshipsWithUniversityId(PersonalTutor, "1234567").size should be (1)
-		relationshipService.listStudentRelationshipsWithUniversityId(PersonalTutor, "7654321").size should be (1)
-		relationshipService.listStudentRelationshipsWithUniversityId(PersonalTutor, "7654321").head.targetSprCode should be ("1250148/1")
+		relationshipService.listStudentRelationshipsWithUniversityId(relationshipType, "1234567").size should be (1)
+		relationshipService.listStudentRelationshipsWithUniversityId(relationshipType, "7654321").size should be (1)
+		relationshipService.listStudentRelationshipsWithUniversityId(relationshipType, "7654321").head.targetSprCode should be ("1250148/1")
 	}
 
 	@Before def setup: Unit = transactional { tx =>
@@ -98,21 +100,24 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		profileService.save(m2)
 		profileService.save(m3)
 		profileService.save(m4)
+		
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		relationshipService.saveOrUpdate(relationshipType)
 
-		val rel1 = relationshipService.saveStudentRelationship(RelationshipType.PersonalTutor, "0000001/1", "0000003")
-		val rel2 = relationshipService.saveStudentRelationship(RelationshipType.PersonalTutor, "0000002/1", "0000003")
+		val rel1 = relationshipService.saveStudentRelationship(relationshipType, "0000001/1", "0000003")
+		val rel2 = relationshipService.saveStudentRelationship(relationshipType, "0000002/1", "0000003")
 
 		session.save(rel1)
 		session.save(rel2)
 
-		relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, "0000001/1") should be (Seq(rel1))
-		relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, "0000002/1") should be (Seq(rel2))
-		relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, "0000003/1") should be (Nil)
+		relationshipService.findCurrentRelationships(relationshipType, "0000001/1") should be (Seq(rel1))
+		relationshipService.findCurrentRelationships(relationshipType, "0000002/1") should be (Seq(rel2))
+		relationshipService.findCurrentRelationships(relationshipType, "0000003/1") should be (Nil)
 		relationshipService.findCurrentRelationships(null, "0000001/1") should be (Nil)
 
-		relationshipService.getRelationships(RelationshipType.PersonalTutor, "0000001/1") should be (Seq(rel1))
-		relationshipService.getRelationships(RelationshipType.PersonalTutor, "0000002/1") should be (Seq(rel2))
-		relationshipService.getRelationships(RelationshipType.PersonalTutor, "0000003/1") should be (Seq())
+		relationshipService.getRelationships(relationshipType, "0000001/1") should be (Seq(rel1))
+		relationshipService.getRelationships(relationshipType, "0000002/1") should be (Seq(rel2))
+		relationshipService.getRelationships(relationshipType, "0000003/1") should be (Seq())
 		relationshipService.getRelationships(null, "0000001/1") should be (Seq())
 	}
 
@@ -141,20 +146,21 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		profileService.save(m2)
 		profileService.save(m3)
 		profileService.save(m4)
+		
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		relationshipService.saveOrUpdate(relationshipType)
 
-		val rel1 = relationshipService.saveStudentRelationship(RelationshipType.PersonalTutor, "1000001/1", "1000003")
-		val rel2 = relationshipService.saveStudentRelationship(RelationshipType.PersonalTutor, "1000002/1", "1000003")
+		val rel1 = relationshipService.saveStudentRelationship(relationshipType, "1000001/1", "1000003")
+		val rel2 = relationshipService.saveStudentRelationship(relationshipType, "1000002/1", "1000003")
 
 		session.save(rel1)
 		session.save(rel2)
 
-		relationshipService.listStudentRelationshipsByDepartment(RelationshipType.PersonalTutor, dept1) should be (Seq(rel1))
-		relationshipService.listStudentRelationshipsByDepartment(RelationshipType.PersonalTutor, dept2) should be (Seq(rel2))
-		relationshipService.listStudentRelationshipsByDepartment(null, dept1) should be (Seq())
+		relationshipService.listStudentRelationshipsByDepartment(relationshipType, dept1) should be (Seq(rel1))
+		relationshipService.listStudentRelationshipsByDepartment(relationshipType, dept2) should be (Seq(rel2))
 
-		relationshipService.listStudentRelationshipsWithUniversityId(RelationshipType.PersonalTutor, "1000003").toSet should be (Seq(rel1, rel2).toSet)
-		relationshipService.listStudentRelationshipsWithUniversityId(RelationshipType.PersonalTutor, "1000004") should be (Seq())
-		relationshipService.listStudentRelationshipsWithUniversityId(null, "1000003") should be (Seq())
+		relationshipService.listStudentRelationshipsWithUniversityId(relationshipType, "1000003").toSet should be (Seq(rel1, rel2).toSet)
+		relationshipService.listStudentRelationshipsWithUniversityId(relationshipType, "1000004") should be (Seq())
 	}
 
 	@Test def listStudentsWithoutRelationship = transactional { tx =>
@@ -171,9 +177,12 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 
 		profileService.save(m5)
 		profileService.save(m6)
+		
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		relationshipService.saveOrUpdate(relationshipType)
 
-		relationshipService.listStudentsWithoutRelationship(RelationshipType.PersonalTutor, dept1) should be (Seq(m5))
-		relationshipService.listStudentsWithoutRelationship(RelationshipType.PersonalTutor, dept2) should be (Seq(m6))
+		relationshipService.listStudentsWithoutRelationship(relationshipType, dept1) should be (Seq(m5))
+		relationshipService.listStudentsWithoutRelationship(relationshipType, dept2) should be (Seq(m6))
 		relationshipService.listStudentsWithoutRelationship(null, dept1) should be (Seq())
 	}
 }

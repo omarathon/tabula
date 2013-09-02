@@ -9,7 +9,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers._
 import uk.ac.warwick.tabula.data.model.{Assignment, Department}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{SubmissionService, AssignmentMembershipService, AuditEventQueryMethods}
+import uk.ac.warwick.tabula.services.{SubmissionService, FeedbackService, AssignmentMembershipService, AuditEventQueryMethods}
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 class FeedbackReport(department: Department, startDate: DateTime, endDate: DateTime) {
@@ -18,6 +18,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 	var auditEventQueryMethods = Wire[AuditEventQueryMethods]
 	var assignmentMembershipService = Wire[AssignmentMembershipService]
 	var submissionService = Wire[SubmissionService]
+	var feedbackService = Wire[FeedbackService]
 	val workbook = new XSSFWorkbook()
 	var workingDaysHelper = new WorkingDaysHelperImpl
 
@@ -173,16 +174,15 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 	 * - fourth is latest publish date
 	 */
 	def getFeedbackCount(assignment: Assignment): FeedbackCount =  {
-		val times: Seq[FeedbackCount] = for (
-			student <- assignmentMembershipService.determineMembershipUsers(assignment);
-			//submissionEvent <- auditEventQueryMethods.submissionForStudent(assignment, student).headOption ;
-			submission <- submissionService.getSubmissionByUniId(assignment, student.getWarwickId);
-			publishEvent <- auditEventQueryMethods.publishFeedbackForStudent(assignment, student).headOption;
-			submissionEventDate <- Option(submission.submittedDate);
-			publishEventDate <- Option(publishEvent.eventDate);
+		val times: Seq[FeedbackCount] = for {
+			student <- assignmentMembershipService.determineMembershipUsers(assignment)
+			submission <- submissionService.getSubmissionByUniId(assignment, student.getWarwickId)
+			feedback <- feedbackService.getFeedbackByUniId(assignment, student.getWarwickId)
+			if feedback.released
+			submissionEventDate <- Option(submission.submittedDate)
+			publishEventDate <- Option(feedback.releasedDate).orElse { auditEventQueryMethods.publishFeedbackForStudent(assignment, student).headOption.map { _.eventDate } }
 			assignmentCloseDate <- Option(assignment.closeDate)
-			if (!(publishEventDate.isBefore(submissionEventDate) || publishEventDate.isBefore(assignmentCloseDate)))
-		) yield {
+		} yield {
 			val submissionCandidateDate = 
 				if(submissionEventDate.isAfter(assignmentCloseDate)) submissionEventDate
 				else assignmentCloseDate

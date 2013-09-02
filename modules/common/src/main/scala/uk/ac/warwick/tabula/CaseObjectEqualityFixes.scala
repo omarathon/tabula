@@ -9,15 +9,15 @@ import scala.reflect.ClassTag
  * 
  * We also have to override hashCodes because their default is computed at compile time,
  * based only on the (unqualified) name of the current case object, so,
- * before override, Module.Create.hashCode() == PersonalTutor.Create.hashCode()
+ * before override, Module.Create.hashCode() == Feedback.Create.hashCode()
  */
 abstract class CaseObjectEqualityFixes[A <: CaseObjectEqualityFixes[A] : ClassTag] {
 	def getName: String
 	
-	override final def equals(other: Any) = other match {
+	override def equals(other: Any) = other match {
 		case that: A => getName == that.getName
 		case _ => false
 	}
-	override final def hashCode() = getName.hashCode()
-	override final def toString() = getName
+	override def hashCode() = getName.hashCode()
+	override def toString() = getName
 }

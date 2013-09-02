@@ -76,19 +76,14 @@ class StudentCourseDetails
 		studentCourseYearDetails.asScala.max
 	}
 
-	def courseType = CourseType.fromCourseCode(course.code);
+	def courseType = CourseType.fromCourseCode(course.code)
 
-	@Restricted(Array("Profiles.PersonalTutor.Read"))
-	def personalTutors =
-		relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, this.sprCode)
+	// We can't restrict this because it's not a getter. Restrict in 
+	// view code if necessary (or implement for all methods in  ScalaBeansWrapper)
+	def relationships(relationshipType: StudentRelationshipType) =
+		relationshipService.findCurrentRelationships(relationshipType, this.sprCode)
 
-	@Restricted(Array("Profiles.Supervisor.Read"))
-	def supervisors =
-		relationshipService.findCurrentRelationships(RelationshipType.Supervisor, this.sprCode)
-
-	def hasAPersonalTutor = !personalTutors.isEmpty
-
-	def hasSupervisor = !supervisors.isEmpty
+	def hasRelationship(relationshipType: StudentRelationshipType) = !relationships(relationshipType).isEmpty
 
 	def compare(that:StudentCourseDetails): Int = {
 		this.scjCode.compare(that.scjCode)
@@ -160,7 +155,7 @@ object CourseType {
 	case object Foundation extends CourseType("F", "Foundation", "Foundation course", 'F')
 	case object PreSessional extends CourseType("PS", "Pre-sessional", "Pre-sessional course", 'N')
 
-	def fromCourseCode(cc: String) = {
+	def fromCourseCode(cc: String): CourseType = {
 		if (cc.isEmpty) null
 		cc.charAt(0) match {
 			case UG.courseCodeChar => UG

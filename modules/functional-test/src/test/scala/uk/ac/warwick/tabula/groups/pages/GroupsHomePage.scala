@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.groups.pages
 
-import org.openqa.selenium.{By, WebElement, WebDriver}
+import org.openqa.selenium.WebDriver
 import org.scalatest.selenium.WebBrowser
 import uk.ac.warwick.tabula.FunctionalTestProperties
 import org.scalatest.concurrent.Eventually

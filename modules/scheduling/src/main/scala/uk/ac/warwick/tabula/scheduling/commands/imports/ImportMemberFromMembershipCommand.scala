@@ -48,7 +48,11 @@ abstract class ImportMemberFromMembershipCommand
 		this.userType = member.userType
 
 		this.title = oneOf(member.title, optString("title")) map { WordUtils.capitalizeFully(_).trim() } getOrElse("")
-		this.firstName = oneOf(member.preferredForenames, optString("preferred_forename"), ssoUser.getFirstName) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
+		this.firstName = oneOf(
+			member.preferredForenames,
+			optString("preferred_forename"),
+			ssoUser.getFirstName
+		) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
 		this.fullFirstName = oneOf(optString("forenames"), ssoUser.getFirstName) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
 		this.lastName = oneOf(member.preferredSurname, optString("family_name"), ssoUser.getLastName) map { formatSurname(_, ssoUser.getLastName) } getOrElse("")
 

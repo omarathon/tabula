@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.data.FileDao
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.tabula.permissions.Permissions
 
 abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship, val considerAlternatives: Boolean = false)
 	extends Command[MeetingRecord] with Notifies[MeetingRecord, MeetingRecord] with SelfValidating with FormattedHtml
@@ -36,7 +37,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 	var posted: Boolean = false
 
-	PermissionCheck(MeetingPermissions.Create.permissionFor(relationship.relationshipType), mandatory(relationship.studentMember))
+	PermissionCheck(Permissions.Profiles.MeetingRecord.Create(relationship.relationshipType), mandatory(relationship.studentMember))
 
 	val meeting: MeetingRecord
 

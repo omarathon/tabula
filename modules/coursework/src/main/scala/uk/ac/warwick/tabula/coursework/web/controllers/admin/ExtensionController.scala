@@ -59,7 +59,10 @@ abstract class ExtensionController extends CourseworkController {
 class ListExtensionRequestsController extends ExtensionController {
 
 	@ModelAttribute
-	def listCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment) = new ListExtensionsCommand(module, assignment, user)
+	def listCommand(
+	 @PathVariable("module") module:Module,
+	 @PathVariable("assignment") assignment:Assignment
+	) = new ListExtensionsCommand(module, assignment, user)
 
 	@RequestMapping(method=Array(HEAD,GET))
 	def listExtensions(cmd: ListExtensionsCommand):Mav = {
@@ -92,7 +95,11 @@ class AddExtensionController extends ExtensionController {
 	
 	// manually add an extension - requests will not be handled here
 	@RequestMapping(method=Array(GET))
-	def addExtension(@RequestParam("universityId") universityId:String, @ModelAttribute("modifyExtensionCommand") cmd:AddExtensionCommand, errors:Errors):Mav = {
+	def addExtension(
+		@RequestParam("universityId") universityId:String,
+		@ModelAttribute("modifyExtensionCommand") cmd:AddExtensionCommand,
+		errors:Errors
+	):Mav = {
 		val model = Mav("admin/assignments/extensions/add",
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,
@@ -219,8 +226,12 @@ class ReviewExtensionRequestController extends ExtensionController {
 class DeleteExtensionController extends ExtensionController {
 	
 	@ModelAttribute
-	def deleteCommand(@PathVariable("module") module:Module, @PathVariable("assignment") assignment:Assignment, @PathVariable("universityId") universityId:String, user:CurrentUser) 
-		= new DeleteExtensionCommand(module, assignment, universityId, user)
+	def deleteCommand(
+		@PathVariable("module") module:Module,
+		@PathVariable("assignment") assignment:Assignment,
+		@PathVariable("universityId") universityId:String,
+		user:CurrentUser
+	) = new DeleteExtensionCommand(module, assignment, universityId, user)
 
 	// delete a manually created extension item - this revokes the extension
 	@RequestMapping(method=Array(GET))

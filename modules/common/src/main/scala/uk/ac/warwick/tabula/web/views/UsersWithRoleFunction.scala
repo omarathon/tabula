@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import scala.collection.JavaConversions.seqAsJavaList
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.permissions.BuiltInRoleDefinitionUserType
 
 /**
  * Returns a list of users with the current role, ordered by surname, firstname.
@@ -28,7 +29,7 @@ class UsersWithRoleFunction extends TemplateMethodModelEx {
 		
 		if (arguments == null || args.size() != 2) throw new TemplateModelException("Invalid number of arguments")
 		
-		val roleDefinition = RoleDefinition.of(DeepUnwrap.unwrap(arguments.get(0)).asInstanceOf[String])
+		val roleDefinition = new BuiltInRoleDefinitionUserType().convertToObject(DeepUnwrap.unwrap(arguments.get(0)).asInstanceOf[String])
 		val scope = DeepUnwrap.unwrap(arguments.get(1)).asInstanceOf[PermissionsTarget]
 			
 		permissionsService.getGrantedRole(scope, roleDefinition) map { role =>

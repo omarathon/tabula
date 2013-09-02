@@ -42,7 +42,8 @@ trait OpenSmallGroupSetState {
 		}
 	}
 }
-class OpenSmallGroupSet(val requestedSets: Seq[SmallGroupSet], val user: User, val setState: SmallGroupSetSelfSignUpState) extends CommandInternal[Seq[SmallGroupSet]] with OpenSmallGroupSetState with UserAware {
+class OpenSmallGroupSet(val requestedSets: Seq[SmallGroupSet], val user: User, val setState: SmallGroupSetSelfSignUpState)
+	extends CommandInternal[Seq[SmallGroupSet]] with OpenSmallGroupSetState with UserAware {
 
 	 val applicableSets = requestedSets.filter(s => s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && s.openState != setState)
 
@@ -72,7 +73,7 @@ trait OpenSmallGroupSetNotifier extends Notifies[Seq[SmallGroupSet], Seq[SmallGr
 
 	def emit(sets: Seq[SmallGroupSet]): Seq[Notification[Seq[SmallGroupSet]]] = {
 		val allMemberships: Seq[(User,SmallGroupSet)] = 
-			for (set <- sets; member <- set.members.users) yield (member, set)
+			for (set <- sets; member <- set.allStudents) yield (member, set)
 
 		// convert the list of (student, set) pairs into a map of student->sets
 		val setsPerUser: Map[User,Seq[SmallGroupSet]] = allMemberships.groupBy(_._1).map { case (k,v) => (k,v.map(_._2))}

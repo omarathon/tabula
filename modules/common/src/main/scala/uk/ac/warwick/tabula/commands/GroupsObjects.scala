@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 
 trait GroupsObjects[A >: Null, B >: Null] extends BindListener {
 	
-	/** Mapping from tutors (as Members) to an ArrayList containing students (as Members). */	
+	/** Mapping from B to an ArrayList of As. */	
 	var mapping: JMap[B, JList[A]] =
 		LazyMaps.create { key: B => JArrayList(): JList[A] }.asJava
 	

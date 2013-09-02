@@ -1,6 +1,8 @@
 package uk.ac.warwick.tabula.data.model
 
 import org.hibernate.annotations.Type
+import uk.ac.warwick.tabula.JavaImports._
+import scala.collection.JavaConverters._
 
 trait HasSettings {
 
@@ -27,11 +29,19 @@ trait HasSettings {
 		case Some(value: Seq[_]) => Some(value.asInstanceOf[Seq[String]])
 		case _ => None
 	}
+	protected def getStringMapSetting(key: String) = {		
+		settings.get(key) match {
+			case Some(value: Map[_, _]) => Some(value.asInstanceOf[Map[String, String]])
+			case Some(value: collection.mutable.Map[_, _]) => Some(value.toMap.asInstanceOf[Map[String, String]])
+			case _ => None
+		}
+	}
 
 	protected def getStringSetting(key: String, default: => String): String = getStringSetting(key) getOrElse(default)
 	protected def getIntSetting(key: String, default: => Int): Int = getIntSetting(key) getOrElse(default)
 	protected def getBooleanSetting(key: String, default: => Boolean): Boolean = getBooleanSetting(key) getOrElse(default)
 	protected def getStringSeqSetting(key: String, default: => Seq[String]): Seq[String] = getStringSeqSetting(key) getOrElse(default)
+	protected def getStringMapSetting(key: String, default: => Map[String, String]): Map[String, String] = getStringMapSetting(key) getOrElse(default)
 
 	protected def settingsSeq = settings.toSeq
 

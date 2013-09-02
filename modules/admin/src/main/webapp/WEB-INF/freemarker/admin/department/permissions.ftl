@@ -15,7 +15,7 @@
 			   data-original-title="Senior tutors"
 			   data-content="A senior tutor can see everything that a personal tutor can, for every student in the department."><i class="icon-question-sign"></i></a>
 
-			<@pm.roleTable deptperms_url "tutor-table" department "PersonalTutorRoleDefinition" "senior tutors" />
+			<@pm.roleTable deptperms_url "tutor-table" department "StudentRelationshipAgentRoleDefinition(tutor)" "senior tutors" />
 		</div>
 
 		<div class="span6">
@@ -23,7 +23,7 @@
 			   data-original-title="Senior supervisors"
 			   data-content="A senior supervisor can see everything that a supervisor can, for every student in the department."><i class="icon-question-sign"></i></a>
 
-			<@pm.roleTable deptperms_url "supervisor-table" department "SupervisorRoleDefinition" "senior supervisors" />
+			<@pm.roleTable deptperms_url "supervisor-table" department "StudentRelationshipAgentRoleDefinition(supervisor)" "senior supervisors" />
 		</div>
 	</div>
 </div>

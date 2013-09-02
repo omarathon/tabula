@@ -7,7 +7,6 @@ import org.scalatest.selenium.WebBrowser
 import scala.collection.JavaConverters._
 import org.scalatest.concurrent.Eventually
 import org.scalatest.matchers.ShouldMatchers
-import org.openqa.selenium.htmlunit.HtmlUnitDriver
 
 
 class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:WebDriver) extends Page with WebBrowser with	BreadcrumbsMatcher with Eventually with ShouldMatchers  with ModuleAndGroupSetList {

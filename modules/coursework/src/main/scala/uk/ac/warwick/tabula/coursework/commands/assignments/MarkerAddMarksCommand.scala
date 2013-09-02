@@ -18,9 +18,15 @@ class MarkerAddMarksCommand(module: Module, assignment: Assignment, submitter: C
 		// Warn if marks for this student are already uploaded
 		assignment.feedbacks.find { (feedback) => feedback.universityId == mark.universityId} match {
 			case Some(feedback) => {
-				if (assignment.isFirstMarker(submitter.apparentUser) && feedback.firstMarkerFeedback != null && (feedback.firstMarkerFeedback.hasMark || feedback.firstMarkerFeedback.hasGrade))
+				if (assignment.isFirstMarker(submitter.apparentUser)
+					&& feedback.firstMarkerFeedback != null
+					&& (feedback.firstMarkerFeedback.hasMark || feedback.firstMarkerFeedback.hasGrade)
+				)
 					mark.isModified = true
-				else if (assignment.isSecondMarker(submitter.apparentUser) && feedback.secondMarkerFeedback != null && (feedback.secondMarkerFeedback.hasMark || feedback.secondMarkerFeedback.hasGrade))
+				else if (assignment.isSecondMarker(submitter.apparentUser)
+					&& feedback.secondMarkerFeedback != null
+					&& (feedback.secondMarkerFeedback.hasMark || feedback.secondMarkerFeedback.hasGrade)
+				)
 					mark.isModified = true
 			}
 			case None =>

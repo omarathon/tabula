@@ -1,20 +1,14 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import scala.collection.JavaConversions.asScalaBuffer
-import scala.collection.JavaConversions.seqAsJavaList
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException}
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.coursework.commands.feedback._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.services.AuditEventIndexService
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import javax.servlet.http.HttpServletRequest
 
@@ -24,11 +18,18 @@ class DownloadSelectedFeedbackController extends CourseworkController {
 	var feedbackDao = Wire.auto[FeedbackDao]
 	var fileServer = Wire.auto[FileServer]
 	
-	@ModelAttribute def singleFeedbackCommand(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, @PathVariable("feedbackId") feedbackId: String) = 
-		new AdminGetSingleFeedbackCommand(module, assignment, mandatory(feedbackDao.getFeedback(feedbackId)))
+	@ModelAttribute
+	def singleFeedbackCommand(
+		@PathVariable("module") module: Module,
+		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable("feedbackId") feedbackId: String
+	) = new AdminGetSingleFeedbackCommand(module, assignment, mandatory(feedbackDao.getFeedback(feedbackId)))
 
 	@RequestMapping(method = Array(RequestMethod.GET, RequestMethod.HEAD))
-	def get(cmd: AdminGetSingleFeedbackCommand, @PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
+	def get(
+		cmd: AdminGetSingleFeedbackCommand,
+		@PathVariable("filename") filename: String
+	)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		fileServer.serve(cmd.apply())
 	}
 }

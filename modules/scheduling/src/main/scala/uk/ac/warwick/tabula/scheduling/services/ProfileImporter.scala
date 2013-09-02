@@ -169,7 +169,12 @@ class SandboxProfileImporter extends ProfileImporter {
 			"sce_academic_year" -> AcademicYear.guessByDate(DateTime.now).toString,
 			"sce_sequence_number" -> 1
 		))
-		new ImportStudentRowCommand(mac, ssoUser, rs, new ImportStudentCourseCommand(rs, new ImportStudentCourseYearCommand(rs), new ImportSupervisorsForStudentCommand()))
+		new ImportStudentRowCommand(
+			mac,
+			ssoUser,
+			rs,
+			new ImportStudentCourseCommand(rs, new ImportStudentCourseYearCommand(rs), new ImportSupervisorsForStudentCommand())
+		)
 	}
 	
 	def staffMemberDetails(mac: MembershipInformation) = {
@@ -394,7 +399,12 @@ object ProfileImporter {
 		declareParameter(new SqlParameter("year", Types.VARCHAR))
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int)
-					= new ImportStudentRowCommand(member, ssoUser, rs, new ImportStudentCourseCommand(rs, new ImportStudentCourseYearCommand(rs), new ImportSupervisorsForStudentCommand()))
+			= new ImportStudentRowCommand(
+				member,
+				ssoUser,
+				rs,
+				new ImportStudentCourseCommand(rs, new ImportStudentCourseYearCommand(rs), new ImportSupervisorsForStudentCommand())
+			)
 	}
 
 	val GetStaffInformation = """

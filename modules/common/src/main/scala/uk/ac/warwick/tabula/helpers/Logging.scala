@@ -46,7 +46,13 @@ trait Logging {
 	 * Wrap some code in a stopwatch, logging some timing info
 	 * if it takes longer than minMillis.
 	 */
-	def benchmark[A](description: String, level: Priority = Info, minMillis: Int = 0, stopWatch: uk.ac.warwick.util.core.StopWatch = StopWatch(), logger: Logger = this.logger)(fn: => A): A = 
+	def benchmark[A](
+		description: String,
+		level: Priority = Info,
+		minMillis: Int = 0,
+		stopWatch: uk.ac.warwick.util.core.StopWatch = StopWatch(),
+		logger: Logger = this.logger
+	)(fn: => A): A =
 		timed(description, level, minMillis, stopWatch, logger) { timer =>
 			fn
 		}
@@ -54,7 +60,13 @@ trait Logging {
 	/**
 	 * The same as benchmark, but passes the StopWatch as a callback to the function
 	 */
-	def timed[A](description: String, level: Priority = Info, minMillis: Int = 0, stopWatch: uk.ac.warwick.util.core.StopWatch = StopWatch(), logger: Logger = this.logger)(fn: => (uk.ac.warwick.util.core.StopWatch => A)): A = {
+	def timed[A](
+		description: String,
+		level: Priority = Info,
+		minMillis: Int = 0,
+		stopWatch: uk.ac.warwick.util.core.StopWatch = StopWatch(),
+		logger: Logger = this.logger
+	)(fn: => (uk.ac.warwick.util.core.StopWatch => A)): A = {
 		if (Logging.benchmarking) {
 			try stopWatch.record(description) {
 				fn(stopWatch)

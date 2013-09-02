@@ -87,22 +87,28 @@
 							<div class="well ">
 									<h4>Not allocated to a group</h4>
 									<#if features.smallGroupAllocationFiltering>
-										<div id="filter-controls">
-										Show...
 										<div class="filter" id="filter-by-gender-controls">
-										<label>Male <input type="checkbox" data-filter-attr="fGender" data-filter-value="M" checked="checked"></label>
-										<label>Female <input type="checkbox" data-filter-attr="fGender" data-filter-value="F" checked="checked"></label>
+											<select data-filter-attr="fGender">
+												<option data-filter-value="*">Any Gender</option>
+												<option data-filter-value="M">Male</option>
+												<option data-filter-value="F">Female</option>
+											</select>
 										</div>
 										<div class="filter" id="filter-by-year-controls">
-										<#list allocateStudentsToGroupsCommand.allMembersYears as year>
-											<label>Year ${year} <input type="checkbox" data-filter-attr="fYear" data-filter-value="${year}" checked="checked"></label>
-										</#list>
+											<select data-filter-attr="fYear">
+												<option data-filter-value="*">Any Year of study</option>
+												<#list allocateStudentsToGroupsCommand.allMembersYears as year>
+													<option data-filter-value="${year}">Year ${year}</option>
+												</#list>
+											</select>
 										</div>
 										<div class="filter" id="filter-by-route-controls">
-										<#list allocateStudentsToGroupsCommand.allMembersRoutes as route>
-											<label>${route.name} <input type="checkbox" data-filter-attr="fRoute" data-filter-value="${route.code}" checked="checked"></label>
-										</#list>
-										</div>
+											<select data-filter-attr="fRoute">
+												<option data-filter-value="*">Any Route</option>
+												<#list allocateStudentsToGroupsCommand.allMembersRoutes as route>
+													<option data-filter-value="${route.code}">${route.code?upper_case} ${route.name}</option>
+												</#list>
+											</select>
 										</div>
 									</#if>
 								<div class="student-list drag-target">
