@@ -15,8 +15,8 @@ import org.springframework.util.AutoPopulatingList
 import scala.collection.mutable
 
 object AddMonitoringPointSetCommand {
-	def apply(dept: Department) =
-		new AddMonitoringPointSetCommand(dept)
+	def apply(dept: Department, createType: String) =
+		new AddMonitoringPointSetCommand(dept, createType)
 		with ComposableCommand[mutable.Buffer[MonitoringPointSet]]
 		with AutowiringRouteServiceComponent
 		with AutowiringTermServiceComponent
@@ -26,7 +26,7 @@ object AddMonitoringPointSetCommand {
 }
 
 
-abstract class AddMonitoringPointSetCommand(val dept: Department) extends CommandInternal[mutable.Buffer[MonitoringPointSet]]
+abstract class AddMonitoringPointSetCommand(val dept: Department, val createType: String) extends CommandInternal[mutable.Buffer[MonitoringPointSet]]
 	with AddMonitoringPointSetState {
 	self: RouteServiceComponent =>
 
@@ -99,6 +99,11 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 				errors.rejectValue(s"monitoringPoints[${pair._2}].name", "monitoringPoint.name.exists")
 			}
 		})
+
+		// when changing year fail validation so nothing is committed
+		if (changeYear) {
+			errors.reject("")
+		}
 	}
 }
 
@@ -154,7 +159,9 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 	}
 
 	def dept: Department
+	def createType: String
 	var academicYear = AcademicYear.guessByDate(new DateTime())
+	var changeYear = false
 	val availableRoutes = dept.routes.asScala.sortBy(r => r.code)
 	lazy val availableYears = getAvailableYears
 	val monitoringPoints = new AutoPopulatingList(classOf[MonitoringPoint])

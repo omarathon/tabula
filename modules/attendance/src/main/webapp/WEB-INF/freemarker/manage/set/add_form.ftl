@@ -1,29 +1,28 @@
 <#escape x as x?html>
 
-<#if createType == "blank">
+<#if command.createType == "blank">
 	<h1>Create monitoring schemes</h1>
 </#if>
 
-<form action="" class="form-inline">
-	<label>Academic year <select name="academicYear">
-		<#-- <#assign academicYears = [command.academicYear.previous.toString, command.academicYear.toString, command.academicYear.next.toString] /> -->
-		<#assign academicYears = [command.academicYear.toString] />
+<form id="addMonitoringPointSet" action="<@url page="/manage/${command.dept.code}/sets/add"/>" method="POST">
+	<input type="hidden" name="createType" value="${command.createType}" />
+
+	<label>Academic year for new schemes <select name="academicYear" style="margin-bottom: 0px;">
+		<#assign academicYears = [thisAcademicYear.previous.toString, thisAcademicYear.toString, thisAcademicYear.next.toString] />
         <#list academicYears as year>
         	<option <#if command.academicYear.toString == year>selected</#if> value="${year}">${year}</option>
         </#list>
 	</select></label>
-</form>
 
-<hr />
+	<hr />
 
-<form id="addMonitoringPointSet" action="<@url page="/manage/${command.dept.code}/sets/add"/>" method="POST">
 	<div class="routeAndYearPicker">
 		<div class="row-fluid">
 			<div class="span2">
 				<h2>Students</h2>
 			</div>
 			<div class="span10">
-				<span class="hint"><#if createType == "blank">
+				<span class="hint"><#if command.createType == "blank">
 					Create monitoring schemes for the following students
 				</#if></span>
 			</div>
@@ -62,7 +61,7 @@
 										</td>
 										<#list yearList as year>
 											<#assign checked = ""/>
-											<#if command.selectedRoutesAndYearsByRouteCode(route.code)[year]>
+											<#if command.selectedRoutesAndYearsByRouteCode(route.code)[year] && availableYearsForRoute[year]>
 												<#assign checked = "checked"/>
 											</#if>
 											<td class="year_${year}">

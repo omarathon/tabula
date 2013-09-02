@@ -48,7 +48,7 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 		emptyRoute.code = emptyRouteCode
 
 		dept.routes = JArrayList(routeWithAllYears, routeWithOneYear, emptyRoute)
-		val command = new AddMonitoringPointSetCommand(dept) with CommandTestSupport
+		val command = new AddMonitoringPointSetCommand(dept, null) with CommandTestSupport
 	}
 
 	@Test

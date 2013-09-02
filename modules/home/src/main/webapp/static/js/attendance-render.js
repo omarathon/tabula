@@ -46,6 +46,15 @@ $(function(){
 		setupCollapsible($this, $target);
 	});
 
+	$('#addMonitoringPointSet select[name="academicYear"]').on('change', function(){
+		$(this).closest('form').append(
+			$('<input/>').attr({
+				'name':'changeYear',
+				'type':'hidden'
+			}).val(true)
+		).submit();
+	});
+
 	$('.routeAndYearPicker').find('.collapsible').each(function(){
 		var $this = $(this), $target = $this.parent().find('.collapsible-target');
 		if ($target.find('input:checked').length > 0) {

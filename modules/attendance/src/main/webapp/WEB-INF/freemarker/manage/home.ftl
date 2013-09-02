@@ -21,7 +21,7 @@
 <form action="<@url page="/manage/${department.code}/sets/add"/>">
 	<h2>Create monitoring schemes</h2>
 	<label>
-		<input type="radio" name="type" value="blank"/>
+		<input type="radio" name="createType" value="blank"/>
 		Create blank scheme
 		<a class="use-popover" id="popover-create-blank" data-content="Create a new scheme from scratch"><i class="icon-question-sign"></i></a>
 	</label>
