@@ -17,28 +17,30 @@ import org.hibernate.annotations.Type
 @AccessType("field")
 class ModuleRegistration() extends GeneratedId {
 
-	def this(sprCode: String, moduleCode: String, academicYear: AcademicYear, cats: Double) {
+	def this(studentCourseDetails: StudentCourseDetails, moduleCode: String, cats: Double, academicYear: AcademicYear) {
 		this()
-		this.sprCode = sprCode
+		this.studentCourseDetails = studentCourseDetails
 		this.moduleCode = moduleCode
 		this.academicYear = academicYear
 		this.cats = cats
 	}
 
-	var sprCode: String = null
 	var moduleCode: String = null
 	var cats: Double = 0
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	var academicYear: AcademicYear = null
 
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.StudentCourseDetails")
+	var studentCourseDetails: StudentCourseDetails = null
+
 	var assessmentGroup: String = null
 
-	// NB - an "optional core" is a core which does not need to be taken in a certain year, e.g. for part-time students
-	// This is "SES_CODE" in SITS
-	var selectionStatusCode: String = null // C for core, O for option, CO for optional core
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleSelectionStatusUserType")
+	@Column(name="selectionstatuscode")
+	var selectionStatus: ModuleSelectionStatus = null // core, option or optional core
 
-	override def toString = sprCode + "-" + moduleCode + "-" + cats + "-" + AcademicYear
+	override def toString = studentCourseDetails.scjCode + "-" + moduleCode + "-" + cats + "-" + AcademicYear
 
 	var lastUpdatedDate = DateTime.now
 }

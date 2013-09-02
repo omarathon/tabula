@@ -118,9 +118,10 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 					// get the user's module registrations
 					val importModRegCommands = moduleRegistrationImporter.getModuleRegistrationDetails(List(membInfo), Map(usercode -> user))
 					if (importModRegCommands.isEmpty) logger.warn("Looking for module registrations for student " + membInfo.member.universityId + " but found no data to import.")
-					val moduleRegistrations = importModRegCommands map { _.apply }
+					val newModuleRegistrations = (importModRegCommands map { _.apply }).flatten
+					//deleteOldModuleRegistrations(usercode, newModuleRegistrations)
 					session.flush
-					for (modReg <- moduleRegistrations) session.evict(modReg)
+					for (modReg <- newModuleRegistrations) session.evict(modReg)
 
 				}
 				case None => logger.warn("Student is no longer in uow_current_members in membership - not updating")
@@ -128,6 +129,10 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 		}
 	}
 
+/*	deleteOldModuleRegistrations(usercode: String, newModuleRegistrations: Seq[ModuleRegistration]) {
+		moduleRegistrationDao.
+	}
+*/
 	def equal(s1: Seq[String], s2: Seq[String]) =
 		s1.length == s2.length && s1.sorted == s2.sorted
 

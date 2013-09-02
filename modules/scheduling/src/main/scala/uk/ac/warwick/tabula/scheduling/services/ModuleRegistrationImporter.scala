@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.data.SitsStatusDao
 import uk.ac.warwick.tabula.helpers.Logging
 import org.apache.log4j.Logger
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.ModuleRegistrationDao
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModuleRegistrationsCommand
 import uk.ac.warwick.tabula.helpers.Logging
@@ -22,6 +21,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import java.sql.Types
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import scala.collection.immutable.HashMap
+
 /**
  * Import module registration data from SITS.
  *
@@ -53,19 +53,34 @@ class ModuleRegistrationImporter extends SitsAcademicYearAware {
 			}
 		}
 	}
+}
 
+@Profile(Array("sandbox")) @Service
+class SandboxModuleRegistrationImporter {
 }
 
 object ModuleRegistrationImporter {
 
 	val GetModuleRegistration = """
+		select scj_code, sms.mod_code, sms.sms_mcrd, sms.sms_agrp, sms.ses_code, sms.ayr_code
+			from intuit.cam_sms sms, intuit.ins_stu stu, intuit.ins_spr spr, intuit.srs_scj scj, intuit.srs_vco
+			where sms.spr_code = spr.spr_code
+			and spr.spr_stuc = stu.stu_code
+			and sms.ayr_code = :year
+			and stu.stu_udf3 in (:usercodes)
+			and scj.scj_sprc = spr.spr_code
+			and vco_crsc = scj.scj_crsc
+			and vco_rouc = spr.rou_code
+		"""
+
+/*	val GetModuleRegistration = """
 		select sms.spr_code, sms.mod_code, sms.sms_mcrd, sms.sms_agrp, sms.ses_code, sms.ayr_code
 		from intuit.cam_sms sms, intuit.ins_stu stu, intuit.ins_spr spr
 		where sms.spr_code = spr.spr_code
 		and spr.spr_stuc = stu.stu_code
 		and sms.ayr_code = :year and stu.stu_udf3 in (:usercodes)
 		"""
-
+*/
 	class ModuleRegistrationQuery(ds: DataSource)
 		extends MappingSqlQuery[ImportModuleRegistrationsCommand](ds, GetModuleRegistration) {
 			declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
@@ -73,7 +88,7 @@ object ModuleRegistrationImporter {
 			compile()
 			override def mapRow(resultSet: ResultSet, rowNumber: Int) = {
 				val modRegRow = new ModuleRegistrationRow(
-						resultSet.getString("spr_code"),
+						resultSet.getString("scj_code"),
 						resultSet.getString("mod_code"),
 						resultSet.getDouble("sms_mcrd"),
 						resultSet.getString("sms_agrp"),
@@ -86,7 +101,7 @@ object ModuleRegistrationImporter {
 }
 
 class ModuleRegistrationRow(
-	val sprCode: String,
+	val scjCode: String,
 	val sitsModuleCode: String,
 	val cats: Double,
 	val assessmentGroup: String,
@@ -95,6 +110,5 @@ class ModuleRegistrationRow(
 
 	var madService = Wire.auto[ModuleAndDepartmentService]
 
-	def tabulaModuleCode = madService.getModuleBySitsCode(sitsModuleCode).getOrElse(
-			throw new IllegalStateException("No stem module for " + sitsModuleCode + " found in Tabula - maybe it hasn't been imported yet?")).code
+	def tabulaModule = madService.getModuleBySitsCode(sitsModuleCode)
 }

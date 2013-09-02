@@ -64,7 +64,7 @@ trait StudentCourseYearProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var yearOfStudy: JInteger = _
 
-	var modRegStatus: String = _ // intuit.cam_ssn.ssn_mrgs
+	var moduleRegistrationStatus: String = _ // intuit.cam_ssn.ssn_mrgs
 
 	var lastUpdatedDate = DateTime.now
 
