@@ -52,15 +52,15 @@ abstract class Features {
 	@Value("${features.summativeFilter:true}") var summativeFilter = defaults.summativeFilter
 	@Value("${features.meetingRecordApproval:true}") var meetingRecordApproval = defaults.meetingRecordApproval
 	@Value("${features.smallGroupTeaching:true}") var smallGroupTeaching = defaults.smallGroupTeaching
-	@Value("${features.smallGroupTeaching.studentSignUp:false}") var smallGroupTeachingStudentSignUp = defaults.smallGroupTeachingStudentSignUp
+	@Value("${features.smallGroupTeaching.studentSignUp:true}") var smallGroupTeachingStudentSignUp = defaults.smallGroupTeachingStudentSignUp
 	@Value("${features.smallGroupTeaching.randomAllocation:false}") var smallGroupTeachingRandomAllocation = defaults.smallGroupTeachingRandomAllocation
-	@Value("${features.smallGroupTeaching.selfGroupSwitching:false}") var smallGroupTeachingSelfGroupSwitching = defaults.smallGroupTeachingSelfGroupSwitching
+	@Value("${features.smallGroupTeaching.selfGroupSwitching:true}") var smallGroupTeachingSelfGroupSwitching = defaults.smallGroupTeachingSelfGroupSwitching
 	@Value("${features.smallGroupTeaching.tutorView:true}") var smallGroupTeachingTutorView = defaults.smallGroupTeachingTutorView
 	@Value("${features.attendanceMonitoring:true}") var attendanceMonitoring = defaults.attendanceMonitoring
-	@Value("${features.smallGroupAllocationFiltering:false}") var smallGroupAllocationFiltering = defaults.smallGroupAllocationFiltering
-	@Value("${features.personalTutorAssignment:false}") var personalTutorAssignment = defaults.personalTutorAssignment
-	@Value("${features.personalTutorAssignmentFiltering:false}") var personalTutorAssignmentFiltering = defaults.personalTutorAssignmentFiltering
-	@Value("${features.arbitraryRelationships:false}") var arbitraryRelationships = defaults.arbitraryRelationships
+	@Value("${features.smallGroupAllocationFiltering:true}") var smallGroupAllocationFiltering = defaults.smallGroupAllocationFiltering
+	@Value("${features.personalTutorAssignment:true}") var personalTutorAssignment = defaults.personalTutorAssignment
+	@Value("${features.personalTutorAssignmentFiltering:true}") var personalTutorAssignmentFiltering = defaults.personalTutorAssignmentFiltering
+	@Value("${features.arbitraryRelationships:true}") var arbitraryRelationships = defaults.arbitraryRelationships
 	@Value("${features.personalTimetables:false}") var personalTimetables = defaults.personalTimetables
 
 	private val bean = new BeanWrapperImpl(this)
@@ -109,15 +109,15 @@ class FeaturesMessage {
 	@BeanProperty var summativeFilter = true
 	@BeanProperty var meetingRecordApproval = true
 	@BeanProperty var smallGroupTeaching = true
-	@BeanProperty var smallGroupTeachingStudentSignUp = false
+	@BeanProperty var smallGroupTeachingStudentSignUp = true
 	@BeanProperty var smallGroupTeachingRandomAllocation = false
-	@BeanProperty var smallGroupTeachingSelfGroupSwitching = false
-	@BeanProperty var smallGroupTeachingTutorView = false
+	@BeanProperty var smallGroupTeachingSelfGroupSwitching = true
+	@BeanProperty var smallGroupTeachingTutorView = true
 	@BeanProperty var attendanceMonitoring = true
-	@BeanProperty var smallGroupAllocationFiltering = false
-	@BeanProperty var personalTutorAssignment = false
-	@BeanProperty var personalTutorAssignmentFiltering = false
-	@BeanProperty var arbitraryRelationships = false
+	@BeanProperty var smallGroupAllocationFiltering = true
+	@BeanProperty var personalTutorAssignment = true
+	@BeanProperty var personalTutorAssignmentFiltering = true
+	@BeanProperty var arbitraryRelationships = true
 	@BeanProperty var personalTimetables = false
 }
 
