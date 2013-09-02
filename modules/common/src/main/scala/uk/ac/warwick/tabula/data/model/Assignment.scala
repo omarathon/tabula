@@ -311,6 +311,8 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	def wordCountField: Option[WordCountField] = findFieldOfType[WordCountField](Assignment.defaultWordCountName)
 
+	def feedbackCommentsField: Option[TextField] = findFieldOfType[TextField](Assignment.defaultFeedbackTextFieldName)
+
 	/**
 	 * Find a FormField on the Assignment with the given name.
 	 */

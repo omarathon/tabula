@@ -299,7 +299,7 @@
 
 							<#if student.stages?keys?seq_contains('AddFeedback')>
 								<@stage student.stages['AddFeedback']><#compress>
-									<#if feedback?? && feedback.hasAttachments>: <#compress>
+									<#if feedback?? && (feedback.hasAttachments || feedback.hasOnlineFeedback)>: <#compress>
 										<#local attachments=feedback.attachments />
 										<#if attachments?size gt 0>
 											<#if attachments?size == 1>
@@ -312,9 +312,12 @@
 												<#if attachments?size == 1> file
 												<#else> files
 												</#if>
-											</#compress></a><#--
-										--></#if><#--
-										--><#if feedback.uploadedDate??> <#compress>
+											</#compress></a>
+										<#-- If the feedback was entered online there may not be attachments  -->
+										<#elseif feedback?? && feedback.hasOnlineFeedback>
+											Comments entered online
+										</#if>
+										<#if feedback.uploadedDate??><#compress>
 												<@fmt.date date=feedback.uploadedDate seconds=true capitalise=true shortMonth=true />
 										</#compress></#if>
 									</#compress></#if>
