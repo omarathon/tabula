@@ -82,6 +82,8 @@ $(function(){
 		updateRouteCounter();
 	});
 
+	var pointsChanged = false;
+
 	var bindPointButtons = function(){
     	$('#addMonitoringPointSet a.new-point, #addMonitoringPointSet a.edit-point, #addMonitoringPointSet a.delete-point').off().on('click', function(e){
     		e.preventDefault();
@@ -92,6 +94,7 @@ $(function(){
     				$('#addMonitoringPointSet .monitoring-points').replaceWith($m.find('.monitoring-points'))
     				$m.modal("hide");
     				bindPointButtons();
+    				pointsChanged = true;
     				return;
     			}
     			var $f = $m.find('form');
@@ -113,6 +116,18 @@ $(function(){
     	});
     };
     bindPointButtons();
+
+    $('#addMonitoringPointSet').on('submit', function(){
+    	pointsChanged = false;
+    })
+
+    if ($('#addMonitoringPointSet').length > 0) {
+    	$(window).bind('beforeunload', function(){
+    		if (pointsChanged) {
+    			return 'You have made changes to the monitoring points. If you continue they will be lost.'
+    		}
+		});
+	}
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);
