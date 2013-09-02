@@ -42,28 +42,29 @@ class AllocateStudentsToGroupsPageTest extends SmallGroupsFixture with GivenWhen
 
 		Then("I can see the list of students with all 5 students visible")
 
-		val x = allocatePage.findAllUnallocatedStudents
-		println(pageSource)
 		allocatePage.findAllUnallocatedStudents.filter(_.underlying.isDisplayed).size should be(5)
-		And("I can see the checkboxes to filter by gender, year, and course")
+		And("I can see the dropdowns to filter by gender, year, and course")
 
-		find(cssSelector("#filter-controls")) should be('defined)
-		// the checkboxes are determined by the test data we created when we set up the users
-		allocatePage.findFilterCheckboxes(Some("gender"), None).size should be(2) //M,F
-		allocatePage.findFilterCheckboxes(Some("year"), None).size should be(3) //1,2,3
-		allocatePage.findFilterCheckboxes(Some("route"), None).size should be(2) //xx123,xx456
+		// the select options are determined by the test data we created when we set up the users
+		allocatePage.findFilterDropdown("fGender") should be('defined)
+		allocatePage.findFilterDropdown("fGender").get.getOptions.size() should be(3) //M,F, All
 
-		When("I uncheck the 'male' checkbox")
-		val maleCheckbox = allocatePage.findFilterCheckboxes(Some("gender"), Some("M")).head
-		maleCheckbox.underlying.click()
+		allocatePage.findFilterDropdown("fYear") should be('defined)
+		allocatePage.findFilterDropdown("fYear").get.getOptions.size() should be(4) //1,2,3, All
+
+		allocatePage.findFilterDropdown("fRoute") should be('defined)
+		allocatePage.findFilterDropdown("fRoute").get.getOptions.size() should be(3) //xx123,xx456 All
+
+		When("I select the 'Female' option")
+		val genderSelect = allocatePage.findFilterDropdown("fGender").get
+		genderSelect.selectByVisibleText("Female")
 
 		Then("Only 3 students should be shown")
-		val unallocated = allocatePage.findAllUnallocatedStudents.map(e=>(e.underlying,e.underlying.isDisplayed)).toList
 		allocatePage.findAllUnallocatedStudents.filter(_.underlying.isDisplayed).size should be(3)
 
-		When("I uncheck the 'year 1' checkbox")
-		val year1Checkbox = allocatePage.findFilterCheckboxes(Some("year"), Some("1")).head
-		year1Checkbox.underlying.click()
+		When("I select the 'year 3' option")
+		val yearSelect = allocatePage.findFilterDropdown("fYear").get
+		yearSelect.selectByVisibleText("Year 3")
 
 		Then("Only 1 student1 should be shown")
 		allocatePage.findAllUnallocatedStudents.filter(_.underlying.isDisplayed).size should be(1)

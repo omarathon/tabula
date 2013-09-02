@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.groups.pages
 import org.scalatest.selenium.WebBrowser
 import org.openqa.selenium.WebDriver
 import uk.ac.warwick.tabula.BreadcrumbsMatcher
+import org.openqa.selenium.support.ui.Select
 
 
 class EditSmallGroupSetPropertiesPage (implicit val webDriver:WebDriver) extends WebBrowser with BreadcrumbsMatcher{
@@ -31,18 +32,10 @@ class AllocateStudentsToGroupsPage(implicit val webDriver:WebDriver)extends WebB
 		s
 	}
 
-	def findFilterCheckboxes(filterAttribute:Option[String], filterValue:Option[String]):Seq[Element]={
-
-		val allCheckboxes = findAll(cssSelector("#filter-controls input")).filter(_.underlying.getAttribute("type")=="checkbox")
-		val attrFilter:Element=>Boolean = filterAttribute match {
-			case Some(attr)=>element=>element.underlying.getAttribute("data-filter-attr") == "f" + attr.capitalize
-			case None=>element=>true
-		}
-		val valueFilter:Element=>Boolean = filterValue match {
-			case Some(value)=>element=>element.underlying.getAttribute("data-filter-value") == value
-			case None=>element=>true
-		}
-		allCheckboxes.filter(attrFilter).filter(valueFilter).toSeq
+	// use native selenium select, because the scalatest SingleSel doesn't allow enumerating its values
+	def findFilterDropdown(filterAttribute:String):Option[Select]={
+		val filterDropdowns = findAll(cssSelector("div.filter select"))
+		filterDropdowns.find(_.underlying.getAttribute("data-filter-attr") == filterAttribute).map(e=>new Select(e.underlying))
 	}
 
 }
