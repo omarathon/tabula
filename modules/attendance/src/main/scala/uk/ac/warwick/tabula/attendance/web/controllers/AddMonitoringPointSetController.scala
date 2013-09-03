@@ -22,7 +22,7 @@ class AddMonitoringPointSetController extends AttendanceController {
 		AddMonitoringPointSetCommand(dept, Option(existingSet))
 
 	@RequestMapping(method=Array(GET,HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[mutable.Buffer[MonitoringPointSet]]) = {
+	def form(@ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointSet]]) = {
 		Mav("manage/set/add_form", "thisAcademicYear" -> AcademicYear.guessByDate(new DateTime()))
 	}
 
