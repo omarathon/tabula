@@ -8,7 +8,6 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.data.model.Department
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.system.permissions.Public
 import org.springframework.util.AutoPopulatingList
 
 object DeleteMonitoringPointCommand {
@@ -16,7 +15,7 @@ object DeleteMonitoringPointCommand {
 		new DeleteMonitoringPointCommand(dept, pointIndex)
 		with AutowiringTermServiceComponent
 		with DeleteMonitoringPointValidation
-		with Public
+		with ReadOnly with Unaudited
 }
 
 /**
@@ -24,7 +23,7 @@ object DeleteMonitoringPointCommand {
  * Does not persist the change (no monitoring point set yet exists)
  */
 abstract class DeleteMonitoringPointCommand(val dept: Department, val pointIndex: Int)
-	extends Command[Unit] with ReadOnly with Unaudited with DeleteMonitoringPointState {
+	extends Command[Unit] with DeleteMonitoringPointState {
 
 	override def applyInternal() = {
 		monitoringPoints.remove(pointIndex)

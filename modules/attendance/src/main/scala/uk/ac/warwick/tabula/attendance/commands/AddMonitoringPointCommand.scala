@@ -8,7 +8,6 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.data.model.Department
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.system.permissions.Public
 import org.springframework.util.AutoPopulatingList
 
 
@@ -17,14 +16,14 @@ object AddMonitoringPointCommand {
 		new AddMonitoringPointCommand(dept)
 		with AutowiringTermServiceComponent
 		with AddMonitoringPointValidation
-		with Public
+		with ReadOnly with Unaudited
 }
 
 /**
  * Adds a new monitoring point to the set of points in the command's state.
  * Does not persist the change (no monitoring point set yet exists)
  */
-abstract class AddMonitoringPointCommand(val dept: Department) extends Command[Unit] with ReadOnly with Unaudited with AddMonitoringPointState {
+abstract class AddMonitoringPointCommand(val dept: Department) extends Command[Unit] with AddMonitoringPointState {
 
 	override def applyInternal() = {
 		val point = new MonitoringPoint

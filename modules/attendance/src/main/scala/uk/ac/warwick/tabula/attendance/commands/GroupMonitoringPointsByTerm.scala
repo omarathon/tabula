@@ -14,7 +14,7 @@ trait GroupMonitoringPointsByTerm extends TermServiceComponent {
 			termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1))
 				.asScala.map { pair => pair.getLeft -> pair.getRight } // Utils pairs to Scala pairs
 				.toMap
-		val day = DayOfWeek(1)
+		val day = DayOfWeek.Monday
 		monitoringPoints.groupBy {
 			case point => termService.getTermFromDateIncludingVacations(
 				weeksForYear(point.week).getStart.withDayOfWeek(day.jodaDayOfWeek)

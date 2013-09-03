@@ -141,8 +141,10 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 				"All" -> true
 			)
 		}.toMap
-		for (r <- dept.routes.asScala; existingSet <- r.monitoringPointSets.asScala.filter(s => s.academicYear == academicYear))
-			yield {
+		for {
+			r <- dept.routes.asScala
+			existingSet <- r.monitoringPointSets.asScala.filter(s => s.academicYear == academicYear)
+		}	yield {
 			if (existingSet.year ==  null) {
 				routeMap(r.code).foreach(p => routeMap(r.code)(p._1) = false)
 			} else {

@@ -8,7 +8,6 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.data.model.Department
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.system.permissions.Public
 import org.springframework.util.AutoPopulatingList
 
 object EditMonitoringPointCommand {
@@ -16,7 +15,7 @@ object EditMonitoringPointCommand {
 		new EditMonitoringPointCommand(dept, pointIndex)
 		with AutowiringTermServiceComponent
 		with EditMonitoringPointValidation
-		with Public
+		with ReadOnly with Unaudited
 }
 
 /**
