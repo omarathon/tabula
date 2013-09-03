@@ -91,7 +91,12 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 		def formatter(year: AcademicYear, weekNumber: Int, numberingSystem: String) = {
 			"Term 7 Week 95" // Use a value which won't be filtered out by the vacation-filter.
 		}
-		val jsonString = dumper.getWeekRangesAsJSON(formatter)
+		// there's some JSON weirdness here I don't understand; JSON.parseFull insists that
+		// identifiers be single-quoted, but freemarker escapes single quotes to &quot; when
+		// it renders the JSON, thus making it invalid. So the WeekRangesDumperTag will continue
+		// to use single quotes, and the test can swap them for doubles to keep s.u.p.j.JSON happy.
+		val jsonString = dumper.getWeekRangesAsJSON(formatter).replaceAll("'","\"")
+		println(jsonString)
 		val results = JSON.parseFull(jsonString)
 		results match {
 			// Carps about "non variable type argument is unchecked", but using just case a:Seq

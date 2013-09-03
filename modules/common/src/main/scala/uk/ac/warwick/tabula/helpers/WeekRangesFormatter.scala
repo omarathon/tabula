@@ -364,7 +364,7 @@ trait WeekRangesDumper extends KnowsUserNumberingSystem {
 
 		// could use Jackson to map these objects but it doesn't seem worth it
 		"[" + weekDescriptions.map {
-			case (start, end, desc) => s"""{"start":$start,"end":$end,"desc":"$desc"}"""
+			case (start, end, desc) => s"{'start':$start,'end':$end,'desc':'$desc'}"
 		}.mkString(",") + "]"
 
 	}
