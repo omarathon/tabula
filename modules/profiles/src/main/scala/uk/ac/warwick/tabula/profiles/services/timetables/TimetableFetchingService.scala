@@ -11,22 +11,23 @@ import dispatch.classic.thread.ThreadSafeHttpClient
 import scala.xml.Elem
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.data.model.groups._
-import scala.Some
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat._
 import scala.Some
 import uk.ac.warwick.spring.Wire
 
+trait TimetableFetchingService {
+	def getTimetableForStudent(universityId: String): Seq[TimetableEvent]
+	def getTimetableForModule(moduleCode: String): Seq[TimetableEvent]
+	def getTimetableForCourse(courseCode: String): Seq[TimetableEvent]
+	def getTimetableForRoom(roomName: String): Seq[TimetableEvent]
+	def getTimetableForStaff(universityId: String): Seq[TimetableEvent]
+}
+
 trait TimetableFetchingServiceComponent {
 	def timetableFetchingService:TimetableFetchingService
 
-	trait TimetableFetchingService {
-		def getTimetableForStudent(universityId: String): Seq[TimetableEvent]
-		def getTimetableForModule(moduleCode: String): Seq[TimetableEvent]
-		def getTimetableForCourse(courseCode: String): Seq[TimetableEvent]
-		def getTimetableForRoom(roomName: String): Seq[TimetableEvent]
-		def getTimetableForStaff(universityId: String): Seq[TimetableEvent]
-	}
 }
+
 trait ScientiaConfigurationComponent{
 	val scientiaConfiguration:ScientiaConfiguration
 	trait ScientiaConfiguration{
@@ -43,7 +44,18 @@ trait AutowiringScientiaConfigurationComponent extends ScientiaConfigurationComp
 trait ScientiaHttpTimetableFetchingServiceComponent extends TimetableFetchingServiceComponent{
 
 	this:ScientiaConfigurationComponent =>
-	def timetableFetchingService = new ScientiaHttpTimetableFetchingService
+
+	lazy val timetableFetchingService = {
+		if (scientiaConfiguration.baseUri.contains("stubTimetable"))
+		{
+			// don't cache if we're using the test stub - otherwise we won't see updates that the test setup makes
+			new ScientiaHttpTimetableFetchingService
+		}else{
+			new CachedTimetableFetchingService(new ScientiaHttpTimetableFetchingService)
+		}
+	}
+
+
 
 	class ScientiaHttpTimetableFetchingService extends TimetableFetchingService with Logging with DisposableBean {
 		import ScientiaHttpTimetableFetchingService._
@@ -80,6 +92,7 @@ trait ScientiaHttpTimetableFetchingServiceComponent extends TimetableFetchingSer
 			// add ?p0={param} to the URL's get parameters
 			val req = url(uri) <<? Map("p0" -> param)
 			// execute the request and pass the response to the "handler" function for turning into TimetableEvents
+			logger.info(s"Requesting timetable data from $uri")
 			http.x(req >:+ handler)
 		}
 

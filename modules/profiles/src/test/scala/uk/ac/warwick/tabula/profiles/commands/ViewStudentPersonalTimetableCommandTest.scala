@@ -17,20 +17,21 @@ class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 	val laterEvent = EventOccurrence("","",TimetableEventType.Induction,LocalDateTime.now.plusHours(1), LocalDateTime.now.plusHours(1),None, "", Nil )
 	val eventOccurences = Seq(laterEvent,earlierEvent) // deliberately put them the wrong way round so we can check sorting
 
-	val command = new ViewStudentPersonalTimetableCommandImpl with StudentTimetableEventSourceComponent with EventOccurrenceServiceComponent{
-		val studentTimetableEventSource = mock[StudentTimetableEventSource]
+	val studentTimetableEventSource = mock[StudentTimetableEventSource]
+	val command = new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource)  with EventOccurrenceServiceComponent{
+
 		val eventOccurrenceService = mock[EventOccurrenceService]
 	}
 	command.student = student
 	command.start=  new LocalDate
 	command.end = command.start.plusDays(2)
-	command.studentTimetableEventSource.eventsFor(student) returns timetableEvents
+	studentTimetableEventSource.eventsFor(student) returns timetableEvents
 	command.eventOccurrenceService.fromTimetableEvent(any[TimetableEvent], any[Interval]) returns eventOccurences
 
 	@Test
 	def fetchesEventsFromEventSource(){
 		command.applyInternal()
-		there was one(command.studentTimetableEventSource).eventsFor(student)
+		there was one(studentTimetableEventSource).eventsFor(student)
 	}
 
 	@Test
@@ -59,7 +60,7 @@ class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 
 	@Test
 	def mixesCorrectPermissionsIntoCommand(){
-		val composedCommand = ViewStudentPersonalTimetableCommand()
+		val composedCommand = ViewStudentPersonalTimetableCommand(studentTimetableEventSource)
 		composedCommand should be(anInstanceOf[ViewStudentTimetablePermissions])
 	}
 }

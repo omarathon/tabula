@@ -15,8 +15,8 @@ trait ViewStudentPersonalTimetableCommandState {
 	var end: LocalDate = start.plusMonths(13)
 }
 
-class ViewStudentPersonalTimetableCommandImpl extends CommandInternal[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState {
-	this: StudentTimetableEventSourceComponent with EventOccurrenceServiceComponent =>
+class ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource:StudentTimetableEventSource) extends CommandInternal[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState {
+	this: EventOccurrenceServiceComponent =>
 
 	def eventsToOccurrences: TimetableEvent => Seq[EventOccurrence] =
 		eventOccurrenceService.fromTimetableEvent(_, new Interval(start.toDateTimeAtStartOfDay, end.toDateTimeAtStartOfDay))
@@ -39,22 +39,17 @@ trait ViewStudentTimetablePermissions extends RequiresPermissionsChecking{
 
 object ViewStudentPersonalTimetableCommand {
 
-	// mmm, cake.
-	def apply(): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState = {
 
-		new ViewStudentPersonalTimetableCommandImpl
+	// mmm, cake.
+	def apply(eventSource:StudentTimetableEventSource): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState = {
+
+		new ViewStudentPersonalTimetableCommandImpl(eventSource)
 			with ComposableCommand[Seq[EventOccurrence]]
 			with ViewStudentTimetablePermissions
 			with Unaudited
-			with CombinedStudentTimetableEventSourceComponent
-			with SmallGroupEventTimetableEventSourceComponentImpl
-			with ScientiaHttpTimetableFetchingServiceComponent
 			with TermBasedEventOccurrenceComponent
 			with TermAwareWeekToDateConverterComponent
-			with AutowiringSmallGroupServiceComponent
-			with AutowiringUserLookupComponent
 			with AutowiringTermFactoryComponent
-			with AutowiringScientiaConfigurationComponent
 	}
 }
 
