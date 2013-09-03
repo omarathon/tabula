@@ -17,7 +17,7 @@ import scala.collection.mutable
 object AddMonitoringPointSetCommand {
 	def apply(dept: Department, createType: String) =
 		new AddMonitoringPointSetCommand(dept, createType)
-		with ComposableCommand[mutable.Buffer[MonitoringPointSet]]
+		with ComposableCommand[Seq[MonitoringPointSet]]
 		with AutowiringRouteServiceComponent
 		with AutowiringTermServiceComponent
 		with AddMonitoringPointSetPermissions
@@ -26,16 +26,13 @@ object AddMonitoringPointSetCommand {
 }
 
 
-abstract class AddMonitoringPointSetCommand(val dept: Department, val createType: String) extends CommandInternal[mutable.Buffer[MonitoringPointSet]]
+abstract class AddMonitoringPointSetCommand(val dept: Department, val createType: String) extends CommandInternal[Seq[MonitoringPointSet]]
 	with AddMonitoringPointSetState {
 	self: RouteServiceComponent =>
 
 	override def applyInternal() = {
-		val sets: mutable.Buffer[MonitoringPointSet] = mutable.Buffer()
-		selectedRoutesAndYears.asScala.foreach(pair => {
-			val route = pair._1
-			val selectedYears = pair._2.asScala.filter(p => p._2).keySet
-			selectedYears.foreach(year => {
+		selectedRoutesAndYears.asScala.map{case (route, allYears) => {
+				allYears.asScala.filter(_._2).keySet.map(year => {
 				val set = new MonitoringPointSet
 				set.academicYear = academicYear
 				set.createdDate = new DateTime()
@@ -53,10 +50,9 @@ abstract class AddMonitoringPointSetCommand(val dept: Department, val createType
 				set.updatedDate = new DateTime()
 				set.year = if (year.equals("All")) null else year.toInt
 				routeService.save(set)
-				sets.append(set)
+				set
 			})
-		})
-		sets
+		}}.flatten.toSeq
 	}
 }
 
@@ -64,9 +60,8 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 	self: AddMonitoringPointSetState with RouteServiceComponent =>
 
 	override def validate(errors: Errors) {
-		selectedRoutesAndYears.asScala.foreach(pair => {
-			val route = pair._1
-			val selectedYears = pair._2.asScala.filter(p => p._2).keySet
+		selectedRoutesAndYears.asScala.map{case (route, allYears) => {
+			val selectedYears = allYears.asScala.filter(_._2).keySet
 			if (selectedYears.size > 0) {
 				val existingYears = route.monitoringPointSets.asScala.filter(s => s.academicYear == academicYear)
 				if (existingYears.size == 1 && existingYears.head.year == null) {
@@ -83,22 +78,22 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 					errors.rejectValue("selectedRoutesAndYears", "monitoringPointSet.mixed", Array(route.code.toUpperCase), null)
 				}
 			}
-		})
-		if (selectedRoutesAndYears.asScala.count(p => p._2.asScala.count(y => y._2) > 0) == 0) {
+		}}
+		if (selectedRoutesAndYears.asScala.count(_._2.asScala.count(_._2) > 0) == 0) {
 			errors.rejectValue("selectedRoutesAndYears", "monitoringPointSet.noYears")
 		}
 		if (monitoringPoints.size() == 0) {
 			errors.rejectValue("monitoringPoints", "monitoringPointSet.noPoints")
 		}
 
-		monitoringPoints.asScala.zipWithIndex.foreach(pair => {
-			validateName(errors, pair._1.name, s"monitoringPoints[${pair._2}].name")
-			validateWeek(errors, pair._1.week, s"monitoringPoints[${pair._2}].week")
+		monitoringPoints.asScala.zipWithIndex.foreach{case (point, index) => {
+			validateName(errors, point.name, s"monitoringPoints[$index].name")
+			validateWeek(errors, point.week, s"monitoringPoints[$index].week")
 
-			if (monitoringPoints.asScala.count(p => p.name == pair._1.name && p.week == pair._1.week) > 1) {
-				errors.rejectValue(s"monitoringPoints[${pair._2}].name", "monitoringPoint.name.exists")
+			if (monitoringPoints.asScala.count(p => p.name == point.name && p.week == point.week) > 1) {
+				errors.rejectValue(s"monitoringPoints[$index].name", "monitoringPoint.name.exists")
 			}
-		})
+		}}
 
 		// when changing year fail validation so nothing is committed
 		if (changeYear) {
@@ -122,9 +117,9 @@ trait AddMonitoringPointSetDescription extends Describable[mutable.Buffer[Monito
 
 	override def describe(d: Description) {
 		d.department(dept)
-		d.property("routesAndYears", selectedRoutesAndYears.asScala.map{
-			pair => pair._1.code -> pair._2.asScala.filter(p => p._2).keys
-		}.filter{pair => pair._2.size > 0})
+		d.property("routesAndYears", selectedRoutesAndYears.asScala.map{ case	(route, allYears) =>
+			route.code -> allYears.asScala.filter(_._2).keys
+		}.filter{case	(route, selectedYears) =>  selectedYears.size > 0})
 	}
 }
 

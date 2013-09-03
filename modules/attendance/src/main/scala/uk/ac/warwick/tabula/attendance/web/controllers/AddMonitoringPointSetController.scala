@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Department
-import scala.collection.mutable
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 
@@ -29,12 +28,12 @@ class AddMonitoringPointSetController extends AttendanceController {
 	}
 
 	@RequestMapping(method=Array(GET,HEAD), params=Array("createType"))
-	def form(@ModelAttribute("command") cmd: Appliable[mutable.Buffer[MonitoringPointSet]]) = {
+	def form(@ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointSet]]) = {
 		Mav("manage/set/add_form", "thisAcademicYear" -> AcademicYear.guessByDate(new DateTime()))
 	}
 
 	@RequestMapping(method=Array(POST))
-	def submit(@PathVariable dept: Department, @Valid @ModelAttribute("command") cmd: Appliable[mutable.Buffer[MonitoringPointSet]], errors: Errors) = {
+	def submit(@PathVariable dept: Department, @Valid @ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointSet]], errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
