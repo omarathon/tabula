@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.JavaImports.JMap
  */
 class CachedTimetableFetchingService(delegate:TimetableFetchingService) extends TimetableFetchingService{
 
-	val SIX_HOURS = 1000*60*60*6
+	val CacheExpiryTime = 1000*60*60*6 // 6 hours in ms
 
 	sealed trait TimetableCacheKey extends Serializable{
 		val id:String
@@ -60,7 +60,7 @@ class CachedTimetableFetchingService(delegate:TimetableFetchingService) extends 
 		def shouldBeCached(response: EventList): Boolean = true
 	}
 	// rather than using 5 little caches, use one big one with a composite key
-	val timetableCache = Caches.newCache("SyllabusPlusTimetables", cacheEntryFactory, SIX_HOURS, CacheStrategy.EhCacheIfAvailable)
+	val timetableCache = Caches.newCache("SyllabusPlusTimetables", cacheEntryFactory, CacheExpiryTime, CacheStrategy.EhCacheIfAvailable)
 
 	def getTimetableForStudent(universityId: String): Seq[TimetableEvent] = timetableCache.get(StudentKey(universityId))
 	def getTimetableForModule(moduleCode: String): Seq[TimetableEvent] = timetableCache.get(ModuleKey(moduleCode))
