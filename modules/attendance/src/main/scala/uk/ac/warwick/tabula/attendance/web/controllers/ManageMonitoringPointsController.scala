@@ -2,36 +2,30 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, RequestParam, PathVariable, RequestMapping}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Route
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.attendance.commands.ManageMonitoringPointSetCommand
+import uk.ac.warwick.tabula.commands.Appliable
 
 /**
- * Displays the screen for selecting a route+year and displaying the monitoring
- * points for that combination (the monitoring point set).
+ * Displays the screen for creating and editing monitoring point sets
  */
 @Controller
 @RequestMapping(Array("/manage/{dept}"))
 class ManageMonitoringPointsController extends AttendanceController {
 
+	@ModelAttribute("command")
+	def createCommand(@PathVariable dept: Department, @RequestParam(value="academicYear", required = false) academicYear: AcademicYear) =
+			ManageMonitoringPointSetCommand(dept, Option(academicYear))
+
 	@RequestMapping
-	def home(@PathVariable("dept") dept: Department, @RequestParam(value="created", required = false) createdCount: Integer) = {
-		val academicYear = AcademicYear.guessByDate(new DateTime())
-		val pointSetsForThisYearByRoute = dept.routes.asScala.collect{
-			case r: Route => r.monitoringPointSets.asScala.filter(s => s.academicYear.equals(academicYear))
-		}.flatten.groupBy(_.route)
-		val routes = pointSetsForThisYearByRoute.keySet
-		Mav("manage/home",
-			"department" -> dept,
-			"setCount" -> dept.routes.asScala.map{r => r.monitoringPointSets.asScala.count(s => s.academicYear.equals(academicYear))}.sum,
-			"academicYear" -> academicYear,
-			"routesWithSets" -> routes,
-			"pointSetsForThisYearByRoute" -> pointSetsForThisYearByRoute.map{case (r, s) => r.code -> s},
-			"createdCount" -> createdCount
-		)
+	def home(@ModelAttribute("command") cmd: Appliable[Unit], @RequestParam(value="created", required = false) createdCount: Integer) = {
+		cmd.apply()
+		Mav("manage/home", "createdCount" -> createdCount)
 	}
 
 }

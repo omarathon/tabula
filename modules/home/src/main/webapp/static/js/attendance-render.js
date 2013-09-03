@@ -8,6 +8,59 @@ var exports = {};
 exports.Manage = {}
 
 $(function(){
+
+	// SCRIPTS FOR MANAGING MONITORING POINTS
+
+	if ($('#chooseCreateType').length > 0 && setsByRouteByAcademicYear) {
+		var $form = $('#chooseCreateType').find('input.create').on('change', function(){
+			if ($(this).hasClass('copy')) {
+				$form.find('button').html('Copy').prop('disabled', true);
+				academicYearSelect.add(routeSelect).add(yearSelect).prop('disabled', false).css('visibility','hidden');
+				academicYearSelect.find('option:first').prop('selected', true)
+					.end().css('visibility','visible');
+			} else {
+				$form.find('button').html('Create').prop('disabled', false);
+				academicYearSelect.add(routeSelect).add(yearSelect).prop('disabled', true).css('visibility','hidden');
+			}
+		}).end(),
+		academicYearSelect = $form.find('select.academicYear').on('change', function(){
+			routeSelect.find('option:gt(0)').remove()
+				.end().css('visibility','visible');
+			yearSelect.find('option:gt(0)').remove()
+				.end().css('visibility','hidden');
+			$.each(academicYearSelect.find('option:selected').data('routes'), function(i, route){
+				routeSelect.append(
+					$('<option/>').data('sets', route.sets).html(route.code.toUpperCase() + ' ' + route.name)
+				);
+			});
+		}).prop('disabled', true).css('visibility','hidden'),
+		routeSelect = $form.find('select.route').on('change', function(){
+			yearSelect.find('option:gt(0)').remove()
+				.end().find('option:first').prop('selected', true)
+				.end().css('visibility','visible').change();
+			$.each(routeSelect.find('option:selected').data('sets'), function(i, set){
+				yearSelect.append(
+					$('<option/>').val(set.id).html(set.year)
+				);
+			});
+		}).prop('disabled', true).css('visibility','hidden'),
+		yearSelect = $form.find('select[name="existingSet"]').on('change', function(){
+			if (yearSelect.val().length > 0) {
+				$form.find('button').prop('disabled', false);
+			} else {
+				$form.find('button').prop('disabled', true);
+			}
+		}).prop('disabled', true).css('visibility','hidden');
+
+		if (academicYearSelect.length > 0) {
+			for (var academicYear in setsByRouteByAcademicYear) {
+				academicYearSelect.append(
+					$('<option/>').data('routes', setsByRouteByAcademicYear[academicYear]).html(academicYear)
+				);
+			}
+		}
+	}
+
 	var setupCollapsible = function($this, $target){
 		$this.css('cursor', 'pointer').on('click', function(){
 			var $chevron = $this.find('i.icon-fixed-width');
@@ -128,6 +181,8 @@ $(function(){
     		}
 		});
 	}
+
+	// END SCRIPTS FOR MANAGING MONITORING POINTS
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);
