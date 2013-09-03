@@ -6,6 +6,7 @@ import org.joda.time.{Interval, DateTime}
 import uk.ac.warwick.tabula.data.model.{Department, UserSettings}
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.userlookup.User
+import scala.util.parsing.json.JSON
 
 class WeekRangesDumperTest extends TestBase with Mockito {
 
@@ -80,6 +81,30 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 		}
 		dumper.getWeekRangesAsJSON(formatter)
 
+	}}}
+
+	@Test
+	def outputsJSONArray(){new Fixture{ withUser("test") {
+		dumper.termService.getAcademicWeeksBetween(any[DateTime],any[DateTime]) returns singleWeek
+		dumper.userSettings.getByUserId("test") returns Some(settingsWithNumberingSystem)
+
+		def formatter(year: AcademicYear, weekNumber: Int, numberingSystem: String) = {
+			"Term 7 Week 95" // Use a value which won't be filtered out by the vacation-filter.
+		}
+		val jsonString = dumper.getWeekRangesAsJSON(formatter)
+		val results = JSON.parseFull(jsonString)
+		results match {
+			// Carps about "non variable type argument is unchecked", but using just case a:Seq
+			// causes the anInstanceOf assertion to fail. Meh.
+			case Some(a:Seq[Map[String,Any]]) =>{
+				a.length should be(1)
+				a.head should be (anInstanceOf[Map[String,Any]])
+				a.head("desc") should be("Term 7 Week 95")
+				a.head("start") should be(TEST_TIME.minusWeeks(1).getMillis)
+				a.head("end") should be(TEST_TIME.getMillis)
+			}
+			case _=> fail("Didn't get an array of json objects back from the dumper!")
+		}
 	}}}
 
 }

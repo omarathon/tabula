@@ -344,10 +344,7 @@ trait WeekRangesDumper extends KnowsUserNumberingSystem {
 		val endDate = clock.now.plusYears(2)
 		val user = RequestInfo.fromThread.get.user
 		// don't fetch the department if we don't have to, and if we _do_ have to, don't fetch it more than once.
-		lazy val department = {
-			val d = departmentService.getDepartmentByCode(user.departmentCode)
-			d
-		}
+		lazy val department = departmentService.getDepartmentByCode(user.departmentCode)
 
 		val termsAndWeeks = termService.getAcademicWeeksBetween(startDate, endDate)
 		val weekDescriptions = termsAndWeeks map {
@@ -367,7 +364,7 @@ trait WeekRangesDumper extends KnowsUserNumberingSystem {
 
 		// could use Jackson to map these objects but it doesn't seem worth it
 		"[" + weekDescriptions.map {
-			case (start, end, desc) => s"{'start':$start,'end':$end,'desc':'$desc'}"
+			case (start, end, desc) => s"""{"start":$start,"end":$end,"desc":"$desc"}"""
 		}.mkString(",") + "]"
 
 	}
