@@ -9,10 +9,14 @@ import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.data.model.Department
 import scala.collection.JavaConverters._
 import org.springframework.util.AutoPopulatingList
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.permissions.Permissions
 
 object EditMonitoringPointCommand {
 	def apply(dept: Department, pointIndex: Int) =
 		new EditMonitoringPointCommand(dept, pointIndex)
+		with ComposableCommand[Unit]
+		with EditMonitoringPointPermissions
 		with AutowiringTermServiceComponent
 		with EditMonitoringPointValidation
 		with ReadOnly with Unaudited
@@ -23,7 +27,7 @@ object EditMonitoringPointCommand {
  * Does not persist the change (no monitoring point set yet exists)
  */
 abstract class EditMonitoringPointCommand(val dept: Department, val pointIndex: Int)
-	extends Command[Unit] with ReadOnly with Unaudited with EditMonitoringPointState {
+	extends CommandInternal[Unit] with EditMonitoringPointState {
 
 	override def applyInternal() = {
 		copyTo(monitoringPoints.get(pointIndex))
@@ -42,6 +46,14 @@ trait EditMonitoringPointValidation extends SelfValidating with MonitoringPointV
 			errors.rejectValue("name", "monitoringPoint.name.exists")
 			errors.rejectValue("week", "monitoringPoint.name.exists")
 		}
+	}
+}
+
+trait EditMonitoringPointPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: EditMonitoringPointState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(dept))
 	}
 }
 

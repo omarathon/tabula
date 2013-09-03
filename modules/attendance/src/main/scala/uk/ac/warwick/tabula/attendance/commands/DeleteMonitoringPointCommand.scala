@@ -9,12 +9,16 @@ import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.data.model.Department
 import scala.collection.JavaConverters._
 import org.springframework.util.AutoPopulatingList
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.permissions.Permissions
 
 object DeleteMonitoringPointCommand {
 	def apply(dept: Department, pointIndex: Int) =
 		new DeleteMonitoringPointCommand(dept, pointIndex)
+		with ComposableCommand[Unit]
 		with AutowiringTermServiceComponent
 		with DeleteMonitoringPointValidation
+		with DeleteMonitoringPointPermissions
 		with ReadOnly with Unaudited
 }
 
@@ -23,7 +27,7 @@ object DeleteMonitoringPointCommand {
  * Does not persist the change (no monitoring point set yet exists)
  */
 abstract class DeleteMonitoringPointCommand(val dept: Department, val pointIndex: Int)
-	extends Command[Unit] with DeleteMonitoringPointState {
+	extends CommandInternal[Unit] with DeleteMonitoringPointState {
 
 	override def applyInternal() = {
 		monitoringPoints.remove(pointIndex)
@@ -35,6 +39,14 @@ trait DeleteMonitoringPointValidation extends SelfValidating {
 
 	override def validate(errors: Errors) {
 		if (!confirm) errors.rejectValue("confirm", "monitoringPoint.delete.confirm")
+	}
+}
+
+trait DeleteMonitoringPointPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: DeleteMonitoringPointState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(dept))
 	}
 }
 

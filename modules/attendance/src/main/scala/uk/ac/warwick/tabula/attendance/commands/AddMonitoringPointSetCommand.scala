@@ -110,7 +110,7 @@ trait AddMonitoringPointSetPermissions extends RequiresPermissionsChecking with 
 	}
 }
 
-trait AddMonitoringPointSetDescription extends Describable[mutable.Buffer[MonitoringPointSet]] {
+trait AddMonitoringPointSetDescription extends Describable[Seq[MonitoringPointSet]] {
 	self: AddMonitoringPointSetState =>
 
 	override lazy val eventName = "AddMonitoringPointSet"
