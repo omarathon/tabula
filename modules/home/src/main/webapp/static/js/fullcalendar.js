@@ -212,6 +212,7 @@ function Calendar(element, options, eventSources) {
 	t.getView = getView;
 	t.option = option;
 	t.trigger = trigger;
+	t.updateTitle = updateTitle;
 	
 	
 	// imports
