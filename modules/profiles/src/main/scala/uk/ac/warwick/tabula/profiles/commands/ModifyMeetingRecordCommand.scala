@@ -65,6 +65,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 		meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
 		meeting.format = format
 		meeting.lastUpdatedDate = DateTime.now
+		meeting.relationship = relationship
 		persistAttachments(meeting)
 
 		// persist the meeting record

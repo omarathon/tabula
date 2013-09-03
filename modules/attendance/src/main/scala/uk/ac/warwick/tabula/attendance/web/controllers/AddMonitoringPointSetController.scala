@@ -7,44 +7,32 @@ import uk.ac.warwick.tabula.attendance.commands.AddMonitoringPointSetCommand
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.model.{Route, Department}
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.AcademicYear
+import org.joda.time.DateTime
 
 @Controller
-@RequestMapping(Array("/manage/{dept}/sets/add"))
+@RequestMapping(value=Array("/manage/{dept}/sets/add"))
 class AddMonitoringPointSetController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def createCommand(@RequestParam route: Route) = AddMonitoringPointSetCommand(route)
+	def createCommand(@PathVariable dept: Department, @RequestParam(value="existingSet",required=false) existingSet: MonitoringPointSet) =
+		AddMonitoringPointSetCommand(dept, Option(existingSet))
 
 	@RequestMapping(method=Array(GET,HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPointSet]) = {
-		Mav("manage/set/add_form").noLayoutIf(ajax)
-	}
-
-	@RequestMapping(method=Array(GET,HEAD), params = Array("modal"))
-	def formModal(@ModelAttribute("command") cmd: Appliable[MonitoringPointSet]) = {
-		Mav("manage/set/add_form", "modal" -> true).noLayoutIf(ajax)
+	def form(@ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointSet]]) = {
+		Mav("manage/set/add_form", "thisAcademicYear" -> AcademicYear.guessByDate(new DateTime()))
 	}
 
 	@RequestMapping(method=Array(POST))
-	def submit(@PathVariable dept: Department, @Valid @ModelAttribute("command") cmd: Appliable[MonitoringPointSet], errors: Errors) = {
+	def submit(@PathVariable dept: Department, @Valid @ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointSet]], errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
-			cmd.apply()
-			Redirect("/manage/" + dept.code)
-		}
-	}
-
-	@RequestMapping(method=Array(POST), params = Array("modal"))
-	def submitModal(@PathVariable dept: Department, @Valid @ModelAttribute("command") cmd: Appliable[MonitoringPointSet], errors: Errors) = {
-		if (errors.hasErrors) {
-			formModal(cmd)
-		} else {
-			cmd.apply()
-			Mav("manage/set/add_form_success", "modal" -> true).noLayoutIf(ajax)
+			val sets = cmd.apply()
+			Redirect("/manage/" + dept.code, "created" -> sets.map{s => s.route.code}.distinct.size)
 		}
 	}
 

@@ -43,9 +43,9 @@
 	--></#noescape><#--
 --></#macro>
 
-<#macro singleWeekFormat week monitoringPointSet><#--
+<#macro singleWeekFormat week academicYear dept><#--
 	--><#noescape><#--
-		-->${weekRangesFormatter(week, monitoringPointSet)}<#--
+		-->${weekRangesFormatter(week, academicYear, dept)}<#--
 	--></#noescape><#--
 --></#macro>
 
