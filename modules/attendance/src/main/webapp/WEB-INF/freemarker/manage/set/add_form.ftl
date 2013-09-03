@@ -1,11 +1,8 @@
 <#escape x as x?html>
 
-<#if command.createType == "blank">
-	<h1>Create monitoring schemes</h1>
-</#if>
+<h1>Create monitoring schemes</h1>
 
 <form id="addMonitoringPointSet" action="<@url page="/manage/${command.dept.code}/sets/add"/>" method="POST">
-	<input type="hidden" name="createType" value="${command.createType}" />
 
 	<label>Academic year for new schemes <select name="academicYear" style="margin-bottom: 0px;">
 		<#assign academicYears = [thisAcademicYear.previous.toString, thisAcademicYear.toString, thisAcademicYear.next.toString] />
@@ -22,9 +19,9 @@
 				<h2>Students</h2>
 			</div>
 			<div class="span10">
-				<span class="hint"><#if command.createType == "blank">
+				<span class="hint">
 					Create monitoring schemes for the following students
-				</#if></span>
+				</span>
 			</div>
 		</div>
 

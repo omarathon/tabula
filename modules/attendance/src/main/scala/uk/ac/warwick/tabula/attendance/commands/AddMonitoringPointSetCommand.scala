@@ -15,8 +15,8 @@ import org.springframework.util.AutoPopulatingList
 import scala.collection.mutable
 
 object AddMonitoringPointSetCommand {
-	def apply(dept: Department, createType: String) =
-		new AddMonitoringPointSetCommand(dept, createType)
+	def apply(dept: Department, existingSetOption: Option[MonitoringPointSet]) =
+		new AddMonitoringPointSetCommand(dept, existingSetOption)
 		with ComposableCommand[mutable.Buffer[MonitoringPointSet]]
 		with AutowiringRouteServiceComponent
 		with AutowiringTermServiceComponent
@@ -26,7 +26,7 @@ object AddMonitoringPointSetCommand {
 }
 
 
-abstract class AddMonitoringPointSetCommand(val dept: Department, val createType: String) extends CommandInternal[mutable.Buffer[MonitoringPointSet]]
+abstract class AddMonitoringPointSetCommand(val dept: Department, val existingSetOption: Option[MonitoringPointSet]) extends CommandInternal[mutable.Buffer[MonitoringPointSet]]
 	with AddMonitoringPointSetState {
 	self: RouteServiceComponent =>
 
@@ -159,13 +159,30 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 	}
 
 	def dept: Department
-	def createType: String
+
+	def existingSetOption: Option[MonitoringPointSet]
+
 	var academicYear = AcademicYear.guessByDate(new DateTime())
+
 	var changeYear = false
+
 	val availableRoutes = dept.routes.asScala.sortBy(r => r.code)
+
 	lazy val availableYears = getAvailableYears
-	val monitoringPoints = new AutoPopulatingList(classOf[MonitoringPoint])
+
+	val pointSetToCopy = null
+
+	val monitoringPoints = existingSetOption match {
+		case Some(set: MonitoringPointSet) => {
+			val points = new AutoPopulatingList(classOf[MonitoringPoint])
+			set.points.asScala.foreach(p => points.add(p))
+			points
+		}
+		case None => new AutoPopulatingList(classOf[MonitoringPoint])
+	}
+
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
+
 	val selectedRoutesAndYears: java.util.Map[Route, java.util.HashMap[String, java.lang.Boolean]] = dept.routes.asScala.map {
 		r => r -> JHashMap(
 			"1" -> java.lang.Boolean.FALSE,
@@ -179,10 +196,9 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 			"All" -> java.lang.Boolean.FALSE
 		)
 	}.toMap.asJava
+
 	def selectedRoutesAndYearsByRouteCode(code: String) = routeService.getByCode(code) match {
 		case Some(r: Route) => selectedRoutesAndYears.get(r)
 		case _ => new ItemNotFoundException()
-
 	}
-
 }
