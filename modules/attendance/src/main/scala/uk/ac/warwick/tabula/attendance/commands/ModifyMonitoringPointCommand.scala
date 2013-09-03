@@ -44,29 +44,11 @@ trait ModifyMonitoringPointPermissions extends RequiresPermissionsChecking {
 	}
 }
 
-trait MonitoringPointValidation extends SelfValidating {
+trait ModifyMonitoringPointValidation extends SelfValidating {
 	self: ModifyMonitoringPointState =>
 
 	override def validate(errors: Errors) {
-		week match {
-			case y if y < 1  => errors.rejectValue("week", "monitoringPointSet.week.min")
-			case y if y > 52 => errors.rejectValue("week", "monitoringPointSet.week.max")
-			case _ =>
-		}
-
-		if (!name.hasText) {
-			errors.rejectValue("name", "NotEmpty")
-		} else if (name.length > 4000) {
-			errors.rejectValue("name", "monitoringPoint.name.toolong")
-		}
-	}
-}
-
-trait ModifyMonitoringPointValidation extends MonitoringPointValidation {
-	self: ModifyMonitoringPointState =>
-
-	override def validate(errors: Errors) {
-		super.validate(errors)
+		//super.validate(errors)
 
 		if (set.points.asScala.filter(p => p.name == name && p.week == week && p.id != point.id).size > 0) {
 			errors.rejectValue("name", "monitoringPoint.name.exists")

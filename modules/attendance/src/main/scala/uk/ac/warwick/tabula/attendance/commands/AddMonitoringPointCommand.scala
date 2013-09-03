@@ -1,58 +1,72 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.{AutowiringRouteServiceComponent, RouteServiceComponent}
+import uk.ac.warwick.tabula.AcademicYear
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.data.model.Department
+import scala.collection.JavaConverters._
+import org.springframework.util.AutoPopulatingList
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.permissions.Permissions
+
 
 object AddMonitoringPointCommand {
-	def apply(set: MonitoringPointSet) =
-		new AddMonitoringPointCommand(set)
-		with ComposableCommand[MonitoringPoint]
+	def apply(dept: Department) =
+		new AddMonitoringPointCommand(dept)
+		with ComposableCommand[Unit]
+		with AutowiringTermServiceComponent
 		with AddMonitoringPointValidation
-		with ModifyMonitoringPointPermissions
-		with ModifyMonitoringPointState
-		with AddMonitoringPointDescription
-		with AutowiringRouteServiceComponent
+		with AddMonitoringPointPermissions
+		with ReadOnly with Unaudited
 }
 
 /**
- * Creates a new monitoring point in a set.
+ * Adds a new monitoring point to the set of points in the command's state.
+ * Does not persist the change (no monitoring point set yet exists)
  */
-class AddMonitoringPointCommand(val set: MonitoringPointSet) extends CommandInternal[MonitoringPoint]
-		with ModifyMonitoringPointState {
-	self: RouteServiceComponent =>
+abstract class AddMonitoringPointCommand(val dept: Department) extends CommandInternal[Unit] with AddMonitoringPointState {
 
 	override def applyInternal() = {
 		val point = new MonitoringPoint
-		this.copyTo(point)
-		set.add(point)
-		point
+		point.name = name
+		point.defaultValue = defaultValue
+		point.week = week
+		monitoringPoints.add(point)
 	}
 }
 
-trait AddMonitoringPointValidation extends MonitoringPointValidation {
-	self: ModifyMonitoringPointState =>
+trait AddMonitoringPointPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: AddMonitoringPointState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(dept))
+	}
+}
+
+trait AddMonitoringPointValidation extends SelfValidating with MonitoringPointValidation {
+	self: AddMonitoringPointState =>
 
 	override def validate(errors: Errors) {
-		super.validate(errors)
+		validateWeek(errors, week, "week")
+		validateName(errors, name, "name")
 
-		if (set.points.asScala.filter(p => p.name == name && p.week == week).size > 0) {
+		if (monitoringPoints.asScala.count(p => p.name == name && p.week == week) > 0) {
 			errors.rejectValue("name", "monitoringPoint.name.exists")
 			errors.rejectValue("week", "monitoringPoint.name.exists")
 		}
 	}
 }
 
-trait AddMonitoringPointDescription extends Describable[MonitoringPoint] {
-	self: ModifyMonitoringPointState =>
-
-	override lazy val eventName = "AddMonitoringPoint"
-
-	override def describe(d: Description) {
-		d.monitoringPointSet(set)
-		d.property("name", name)
-	}
+trait AddMonitoringPointState extends GroupMonitoringPointsByTerm {
+	val dept: Department
+	var monitoringPoints = new AutoPopulatingList(classOf[MonitoringPoint])
+	var name: String = _
+	var defaultValue: Boolean = true
+	var week: Int = 0
+	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
+	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
 }
 

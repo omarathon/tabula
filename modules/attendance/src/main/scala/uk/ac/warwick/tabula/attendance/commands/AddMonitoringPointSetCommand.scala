@@ -1,72 +1,185 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
-import uk.ac.warwick.tabula.services.{AutowiringRouteServiceComponent, RouteServiceComponent}
-import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringRouteServiceComponent, RouteServiceComponent}
+import uk.ac.warwick.tabula.data.model.{Route, Department}
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
+import org.joda.time.DateTime
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.JavaImports.JHashMap
+import org.springframework.util.AutoPopulatingList
+import scala.collection.mutable
 
 object AddMonitoringPointSetCommand {
-	def apply(route: Route) =
-		new AddMonitoringPointSetCommand(route)
-		with ComposableCommand[MonitoringPointSet]
+	def apply(dept: Department, createType: String) =
+		new AddMonitoringPointSetCommand(dept, createType)
+		with ComposableCommand[Seq[MonitoringPointSet]]
 		with AutowiringRouteServiceComponent
-		with ModifyMonitoringPointSetPermissions
+		with AutowiringTermServiceComponent
+		with AddMonitoringPointSetPermissions
 		with AddMonitoringPointSetDescription
 		with AddMonitoringPointSetValidation
 }
 
 
-class AddMonitoringPointSetCommand(val route: Route) extends CommandInternal[MonitoringPointSet] with ModifyMonitoringPointSetState {
+abstract class AddMonitoringPointSetCommand(val dept: Department, val createType: String) extends CommandInternal[Seq[MonitoringPointSet]]
+	with AddMonitoringPointSetState {
 	self: RouteServiceComponent =>
 
 	override def applyInternal() = {
-		val set = new MonitoringPointSet
-		this.copyTo(set)
-		routeService.save(set)
-		set
+		selectedRoutesAndYears.asScala.map{case (route, allYears) => {
+				allYears.asScala.filter(_._2).keySet.map(year => {
+				val set = new MonitoringPointSet
+				set.academicYear = academicYear
+				set.createdDate = new DateTime()
+				set.points = monitoringPoints.asScala.map{m =>
+					val point = new MonitoringPoint
+					point.createdDate = new DateTime()
+					point.defaultValue = m.defaultValue
+					point.name = m.name
+					point.pointSet = set
+					point.updatedDate = new DateTime()
+					point.week = m.week
+					point
+				}.asJava
+				set.route = route
+				set.updatedDate = new DateTime()
+				set.year = if (year.equals("All")) null else year.toInt
+				routeService.save(set)
+				set
+			})
+		}}.flatten.toSeq
 	}
 }
 
-trait AddMonitoringPointSetValidation extends SelfValidating {
-	self: ModifyMonitoringPointSetState with RouteServiceComponent =>
+trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPointValidation {
+	self: AddMonitoringPointSetState with RouteServiceComponent =>
 
 	override def validate(errors: Errors) {
-		year match {
-			case null =>
-			case y if y < 1  => errors.rejectValue("year", "monitoringPointSet.year.min")
-			case y if y > 99 => errors.rejectValue("year", "monitoringPointSet.year.calendar")
-			case _ => // within range
+		selectedRoutesAndYears.asScala.map{case (route, allYears) => {
+			val selectedYears = allYears.asScala.filter(_._2).keySet
+			if (selectedYears.size > 0) {
+				val existingYears = route.monitoringPointSets.asScala.filter(s => s.academicYear == academicYear)
+				if (existingYears.size == 1 && existingYears.head.year == null) {
+					errors.rejectValue("selectedRoutesAndYears", "monitoringPointSet.allYears", Array(route.code.toUpperCase), null)
+				} else if (existingYears.size > 0) {
+					if (selectedYears.contains("All")) {
+						errors.rejectValue("selectedRoutesAndYears", "monitoringPointSet.alreadyYear", Array(route.code.toUpperCase), null)
+					} else {
+						selectedYears.filter(y => existingYears.count(ey => ey.year.toString.equals(y)) > 0).foreach(y => {
+							errors.rejectValue("selectedRoutesAndYears",  "monitoringPointSet.duplicate", Array(y, route.code.toUpperCase), null)
+						})
+					}
+				} else if (selectedYears.size > 1 && selectedYears.contains("All")) {
+					errors.rejectValue("selectedRoutesAndYears", "monitoringPointSet.mixed", Array(route.code.toUpperCase), null)
+				}
+			}
+		}}
+		if (selectedRoutesAndYears.asScala.count(_._2.asScala.count(_._2) > 0) == 0) {
+			errors.rejectValue("selectedRoutesAndYears", "monitoringPointSet.noYears")
+		}
+		if (monitoringPoints.size() == 0) {
+			errors.rejectValue("monitoringPoints", "monitoringPointSet.noPoints")
 		}
 
-		if (!templateNameToUse.hasText) {
-			errors.rejectValue("templateName", "NotEmpty")
+		monitoringPoints.asScala.zipWithIndex.foreach{case (point, index) => {
+			validateName(errors, point.name, s"monitoringPoints[$index].name")
+			validateWeek(errors, point.week, s"monitoringPoints[$index].week")
+
+			if (monitoringPoints.asScala.count(p => p.name == point.name && p.week == point.week) > 1) {
+				errors.rejectValue(s"monitoringPoints[$index].name", "monitoringPoint.name.exists")
+			}
+		}}
+
+		// when changing year fail validation so nothing is committed
+		if (changeYear) {
+			errors.reject("")
 		}
-
-		val existingPointSets = routeService.findMonitoringPointSets(this.route)
-		if (year == null && !existingPointSets.isEmpty) {
-			// existing sets with years - can't add one without year
-			errors.rejectValue("year", "monitoringPointSet.alreadyYearBased")
-		} else if (existingPointSets exists { _.year == this.year }) {
-			// existing set with this year
-			errors.rejectValue("year", "monitoringPointSet.duplicate")
-		} else if (existingPointSets exists { _.year == null }) {
-			// existing set matching all years - can't add a year-specific one
-			errors.rejectValue("year", "monitoringPointSet.notYearBased")
-		}
-
-
 	}
 }
 
-trait AddMonitoringPointSetDescription extends Describable[MonitoringPointSet] {
-	self: ModifyMonitoringPointSetState =>
+trait AddMonitoringPointSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: AddMonitoringPointSetState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(dept))
+	}
+}
+
+trait AddMonitoringPointSetDescription extends Describable[Seq[MonitoringPointSet]] {
+	self: AddMonitoringPointSetState =>
 
 	override lazy val eventName = "AddMonitoringPointSet"
 
 	override def describe(d: Description) {
-		d.route(route)
-		d.property("year", year)
+		d.department(dept)
+		d.property("routesAndYears", selectedRoutesAndYears.asScala.map{ case	(route, allYears) =>
+			route.code -> allYears.asScala.filter(_._2).keys
+		}.filter{case	(route, selectedYears) =>  selectedYears.size > 0})
 	}
+}
+
+
+
+trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteServiceComponent {
+
+	private def getAvailableYears = {
+		val routeMap = dept.routes.asScala.map {
+			r => r.code -> collection.mutable.Map(
+				"1" -> true,
+				"2" -> true,
+				"3" -> true,
+				"4" -> true,
+				"5" -> true,
+				"6" -> true,
+				"7" -> true,
+				"8" -> true,
+				"All" -> true
+			)
+		}.toMap
+		for {
+			r <- dept.routes.asScala
+			existingSet <- r.monitoringPointSets.asScala.filter(s => s.academicYear == academicYear)
+		}	yield {
+			if (existingSet.year ==  null) {
+				routeMap(r.code).foreach(p => routeMap(r.code)(p._1) = false)
+			} else {
+				routeMap(r.code)(existingSet.year.toString) = false
+				routeMap(r.code)("All") = false
+			}
+		}
+		routeMap
+	}
+
+	def dept: Department
+	def createType: String
+	var academicYear = AcademicYear.guessByDate(new DateTime())
+	var changeYear = false
+	val availableRoutes = dept.routes.asScala.sortBy(r => r.code)
+	lazy val availableYears = getAvailableYears
+	val monitoringPoints = new AutoPopulatingList(classOf[MonitoringPoint])
+	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
+	val selectedRoutesAndYears: java.util.Map[Route, java.util.HashMap[String, java.lang.Boolean]] = dept.routes.asScala.map {
+		r => r -> JHashMap(
+			"1" -> java.lang.Boolean.FALSE,
+			"2" -> java.lang.Boolean.FALSE,
+			"3" -> java.lang.Boolean.FALSE,
+			"4" -> java.lang.Boolean.FALSE,
+			"5" -> java.lang.Boolean.FALSE,
+			"6" -> java.lang.Boolean.FALSE,
+			"7" -> java.lang.Boolean.FALSE,
+			"8" -> java.lang.Boolean.FALSE,
+			"All" -> java.lang.Boolean.FALSE
+		)
+	}.toMap.asJava
+	def selectedRoutesAndYearsByRouteCode(code: String) = routeService.getByCode(code) match {
+		case Some(r: Route) => selectedRoutesAndYears.get(r)
+		case _ => new ItemNotFoundException()
+
+	}
+
 }
