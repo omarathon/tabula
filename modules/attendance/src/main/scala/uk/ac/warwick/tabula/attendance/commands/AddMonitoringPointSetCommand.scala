@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.{AbstractMonitoringPointSet, MonitoringPoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringRouteServiceComponent, RouteServiceComponent}
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import org.springframework.validation.Errors
@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.JavaImports.JHashMap
 import org.springframework.util.AutoPopulatingList
 
 object AddMonitoringPointSetCommand {
-	def apply(dept: Department, existingSetOption: Option[MonitoringPointSet]) =
+	def apply(dept: Department, existingSetOption: Option[AbstractMonitoringPointSet]) =
 		new AddMonitoringPointSetCommand(dept, existingSetOption)
 		with ComposableCommand[Seq[MonitoringPointSet]]
 		with AutowiringRouteServiceComponent
@@ -25,7 +25,7 @@ object AddMonitoringPointSetCommand {
 }
 
 
-abstract class AddMonitoringPointSetCommand(val dept: Department, val existingSetOption: Option[MonitoringPointSet]) extends CommandInternal[Seq[MonitoringPointSet]]
+abstract class AddMonitoringPointSetCommand(val dept: Department, val existingSetOption: Option[AbstractMonitoringPointSet]) extends CommandInternal[Seq[MonitoringPointSet]]
 	with AddMonitoringPointSetState {
 	self: RouteServiceComponent =>
 
@@ -156,7 +156,7 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 
 	def dept: Department
 
-	def existingSetOption: Option[MonitoringPointSet]
+	def existingSetOption: Option[AbstractMonitoringPointSet]
 
 	var academicYear = AcademicYear.guessByDate(new DateTime())
 
@@ -169,7 +169,7 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 	val pointSetToCopy = null
 
 	val monitoringPoints = existingSetOption match {
-		case Some(set: MonitoringPointSet) => {
+		case Some(set: AbstractMonitoringPointSet) => {
 			val points = new AutoPopulatingList(classOf[MonitoringPoint])
 			set.points.asScala.foreach(p => points.add(p))
 			points

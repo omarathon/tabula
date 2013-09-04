@@ -12,7 +12,7 @@ class MonitoringPoint extends GeneratedId {
 	
 	@ManyToOne
 	@JoinColumn(name = "point_set_id")
-	var pointSet: MonitoringPointSet = _
+	var pointSet: AbstractMonitoringPointSet = _
 	
 	@NotNull
 	var name: String = _

@@ -293,6 +293,10 @@ object Permissions {
 		case object Manage extends Permission("Manage monitoring points")
 		case object View extends ScopelessPermission("View monitoring points")
 	}
+
+	object MonitoringPointSetTemplates {
+		case object Manage extends ScopelessPermission("Manage monitoring point set templates")
+	}
 	
 	object StudentRelationshipType {
 		case object Create extends ScopelessPermission("Create student relationship types")

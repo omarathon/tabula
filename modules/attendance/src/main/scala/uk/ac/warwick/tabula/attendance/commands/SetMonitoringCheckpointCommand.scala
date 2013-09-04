@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
 import scala.collection.JavaConverters.asScalaBufferConverter
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{MonitoringPointServiceComponent, AutowiringMonitoringPointServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent}
@@ -34,10 +34,13 @@ abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoi
 	var membersChecked: Seq[StudentMember] = _
 
 	def populate() {
-		members = if(monitoringPoint.pointSet.year == null) {
-			profileService.getStudentsByRoute(monitoringPoint.pointSet.route)
+		members = if(monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].year == null) {
+			profileService.getStudentsByRoute(monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route)
 		} else {
-			profileService.getStudentsByRoute(monitoringPoint.pointSet.route, monitoringPoint.pointSet.academicYear)
+			profileService.getStudentsByRoute(
+				monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route,
+				monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear
+			)
 		}
 
 		membersChecked = monitoringPointService.getCheckedStudents(monitoringPoint)
@@ -62,7 +65,7 @@ trait SetMonitoringCheckpointCommandPermissions extends RequiresPermissionsCheck
 	self: SetMonitoringCheckpointState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Manage, monitoringPoint.pointSet.route)
+		p.PermissionCheck(Permissions.MonitoringPoints.Manage, monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route)
 	}
 }
 

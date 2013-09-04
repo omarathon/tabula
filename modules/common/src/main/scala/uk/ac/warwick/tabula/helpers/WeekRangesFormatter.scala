@@ -8,12 +8,9 @@ import uk.ac.warwick.util.termdates.TermFactory
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.DateMidnight
-import org.joda.time.DateTimeConstants
 import uk.ac.warwick.util.termdates.Term
 import org.joda.time.DateTime
 import org.joda.time.base.BaseDateTime
-import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
@@ -63,7 +60,7 @@ trait VacationAware {
 class VacationAwareTermFactory(val delegate: TermFactory) extends AnyVal  {
 	def getTermFromDateIncludingVacations(date: BaseDateTime) = {
 		val term = delegate.getTermFromDate(date)
-		if (date.isBefore(term.getStartDate())) Vacation(delegate.getPreviousTerm(term), term)
+		if (date.isBefore(term.getStartDate)) Vacation(delegate.getPreviousTerm(term), term)
 		else term
 	}
 
@@ -72,7 +69,7 @@ class VacationAwareTermFactory(val delegate: TermFactory) extends AnyVal  {
 		val endTerm = getTermFromDateIncludingVacations(end)
 
 		if (startTerm == endTerm) Seq(startTerm)
-		else startTerm +: getTermsBetween(startTerm.getEndDate().plusDays(1), end)
+		else startTerm +: getTermsBetween(startTerm.getEndDate.plusDays(1), end)
 	}
 }
 
@@ -114,8 +111,8 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 				format(
 					Seq(WeekRange(monitoringPoint.week,monitoringPoint.week)),
 					DayOfWeek(1),
-					monitoringPoint.pointSet.academicYear,
-					numberingSystem(monitoringPoint.pointSet.route.department)
+					monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear,
+					numberingSystem(monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route.department)
 				)
 			}
 
@@ -142,9 +139,9 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 				case vac: Vacation => {
 					// Date range
 					if (startDate.equals(endDate))
-						"%s, %s" format (vac.getTermTypeAsString, IntervalFormatter.format(startDate, false))
+						"%s, %s" format (vac.getTermTypeAsString, IntervalFormatter.format(startDate, includeTime = false))
 					else
-						"%s, %s" format (vac.getTermTypeAsString, IntervalFormatter.format(startDate, endDate, false))
+						"%s, %s" format (vac.getTermTypeAsString, IntervalFormatter.format(startDate, endDate, includeTime = false))
 				}
 				case term => {
 					// Convert week numbers to the correct style
@@ -182,7 +179,7 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 				val startDate = weekNumberToDate(weekRange.minWeek, dayOfWeek)
 				val endDate = weekNumberToDate(weekRange.maxWeek, dayOfWeek)
 
-				IntervalFormatter.format(startDate, endDate, false)
+				IntervalFormatter.format(startDate, endDate, includeTime = false)
 			}.mkString(separator)
 		}
 		case _ =>
@@ -232,11 +229,11 @@ class WeekRanges(year:AcademicYear) extends VacationAware {
 	// We are confident that November 1st is always in term 1 of the year
 	lazy val weeksForYear =
 		termService.getAcademicWeeksForYear(year.dateInTermOne)
-			.asScala.map { pair => (pair.getLeft -> pair.getRight) } // Utils pairs to Scala pairs
+			.asScala.map { pair => pair.getLeft -> pair.getRight } // Utils pairs to Scala pairs
 			.toMap
 
 	def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =
-		weeksForYear(weekNumber).getStart().withDayOfWeek(dayOfWeek.jodaDayOfWeek)
+		weeksForYear(weekNumber).getStart.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
 
 	def groupWeekRangesByTerm(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek) = {
 		ranges flatMap { range =>
@@ -247,11 +244,11 @@ class WeekRanges(year:AcademicYear) extends VacationAware {
 
 				termService.getTermsBetween(startDate, endDate) map { term =>
 					val minWeek =
-						if (startDate.isBefore(term.getStartDate())) term.getAcademicWeekNumber(term.getStartDate)
+						if (startDate.isBefore(term.getStartDate)) term.getAcademicWeekNumber(term.getStartDate)
 						else term.getAcademicWeekNumber(startDate)
 
 					val maxWeek =
-						if (endDate.isAfter(term.getEndDate())) term.getAcademicWeekNumber(term.getEndDate)
+						if (endDate.isAfter(term.getEndDate)) term.getAcademicWeekNumber(term.getEndDate)
 						else term.getAcademicWeekNumber(endDate)
 
 					(WeekRange(minWeek, maxWeek), term)
