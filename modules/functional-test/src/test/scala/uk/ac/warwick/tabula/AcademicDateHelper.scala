@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula
 
-import uk.ac.warwick.util.termdates.{Term, TermFactory}
+import uk.ac.warwick.util.termdates.{TermFactoryImpl, Term, TermFactory}
 import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.util.termdates.Term.TermType
+import org.joda.time.DateTime
 
 /**
  * Various bits of logic cherry-picked from TermFactory, VacationAwareTermFactory, WeekToDateConverter et al
@@ -61,4 +62,8 @@ case class FunctionalTestAcademicYear(val startYear: Int) extends Ordered[Functi
 	def compare(that:FunctionalTestAcademicYear): Int = {
 		this.startYear - that.startYear
 	}
+	def toSyallabusPlusFormat:String = (startYear%100).toString + ((startYear+1)%100).toString
+}
+object FunctionalTestAcademicYear{
+	def current = new AcademicDateHelper(new TermFactoryImpl).getAcademicYearContainingDate(DateTime.now)
 }

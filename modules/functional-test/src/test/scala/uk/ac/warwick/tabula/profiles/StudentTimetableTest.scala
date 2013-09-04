@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles
 
-import uk.ac.warwick.tabula.BrowserTest
+import uk.ac.warwick.tabula.{FunctionalTestAcademicYear, BrowserTest}
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.home.FeaturesDriver
 import uk.ac.warwick.tabula.profiles.pages.ProfilePage
@@ -45,7 +45,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 	"A student" should "be able to view their timetable" in {
 
 		Given("The timetabling service knows of a single event for student1")
-		setTimetableFor(P.Student1.usercode,singleEvent)
+		setTimetableFor(P.Student1.usercode, FunctionalTestAcademicYear.current,singleEvent)
 
 		And("Student1 is a member of a small group with a single event")
 
@@ -65,7 +65,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 	"A student" should "be able to request a JSON feed of timetable events" in {
 
 		Given("The timetabling service knows of a single event for student1")
-		setTimetableFor(P.Student1.usercode,singleEvent)
+		setTimetableFor(P.Student1.usercode,FunctionalTestAcademicYear.current,singleEvent)
 
 		And("Student1 is a member of a small group with a single event")
 

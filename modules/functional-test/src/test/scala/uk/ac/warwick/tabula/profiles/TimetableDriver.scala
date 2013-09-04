@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles
 
 import scala.xml.Elem
 import uk.ac.warwick.tabula.home.{FeaturesDriver, FixturesDriver}
-import uk.ac.warwick.tabula.{AcademicDateHelper, LoginDetails, FunctionalTestProperties}
+import uk.ac.warwick.tabula.{FunctionalTestAcademicYear, AcademicDateHelper, LoginDetails, FunctionalTestProperties}
 import dispatch.classic._
 import scala.language.postfixOps
 import dispatch.classic.thread.ThreadSafeHttpClient
@@ -13,9 +13,9 @@ import uk.ac.warwick.util.termdates.TermFactoryImpl
 
 trait TimetableDriver extends FixturesDriver  {
 
-	def setTimetableFor(userId:String, content:Elem) {
+	def setTimetableFor(userId:String, year:FunctionalTestAcademicYear, content:Elem) {
 		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/stubTimetable/student"
-		val req = url(uri).POST << Map("studentId" -> userId, "content"->content.toString)
+		val req = url(uri).POST << Map("studentId" -> userId, "year"->year.toSyallabusPlusFormat, "content"->content.toString)
 		http.when(_==200)(req >| )
 	}
 
