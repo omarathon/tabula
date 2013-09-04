@@ -4,8 +4,9 @@
 
 -->
 <#escape x as x?html>
-	<@form.labelled_row "members" "Students" "assignmentEnrolment">
-		<fieldset id="assignmentEnrolmentFields">
+
+<fieldset id="assignmentEnrolmentFields">
+	<@form.row "members" "assignmentEnrolment">
 
 		<#list command.upstreamGroups as item>
 			<@f.hidden path="upstreamGroups[${item_index}]" cssClass="upstreamGroups" />
@@ -43,7 +44,8 @@
 		</#macro>
 
 		<details>
-			<summary>
+			<summary class="collapsible">
+				<span class="legend" >Students <small>Select which students should be enrolled on this assignment</small> </span>
 				<#-- enumerate current state -->
 				<#if linkedUpstreamAssessmentGroups?has_content>
 					<span class="uneditable-value">
@@ -74,7 +76,6 @@
 				<#else>
 					<a class="btn use-tooltip disabled" title="No assignments are recorded for this module in SITS. Add them there if you want to create a parallel link in Tabula.">No SITS link available</a>
 				</#if>
-				</a>
 
 				<a class="btn use-tooltip disabled show-adder"
 						<#if availableUpstreamGroups??>title="This will only enrol a student for this assignment in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
@@ -257,8 +258,8 @@
 				</div>
 			</#if>
 		</div>
-		</fieldset>
-	</@form.labelled_row>
+	</@form.row>
+</fieldset>
 
 	<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript">
@@ -319,6 +320,31 @@
 		initEnrolment();
 
 		var $pendingAlert = $('<p class="alert alert-warning hide"><i class="icon-warning-sign"></i> Your changes will not be recorded until you save this assignment.	<input type="submit" value="Save" class="btn btn-primary btn-mini update-only"></p>');
+
+		<#-- TAB-830 expand submission details when collectSubmissions checkbox checked -->
+		$('input[name=collectSubmissions]').on('change click keypress',function(e) {
+
+			e.stopPropagation();
+
+			var collectSubmissions = $('input[name=collectSubmissions]').is(':checked');
+
+			if (collectSubmissions) {
+				$("html.no-details details.submissions:not(.open) summary").click();
+				$("html.details details.submissions:not([open]) summary").click();
+
+			}  else {
+				$("html.no-details details.submissions.open summary").click();
+				$("html.details details.submissions[open] summary").click();
+			}
+		});
+
+		<#-- if <summary> supported, disable defaults for this summary when a contained label element is clicked -->
+		$("summary").on("click", "label", function(e){
+			e.stopPropagation();
+			e.preventDefault();
+			$('#collectSubmissions').attr('checked', !$('#collectSubmissions').attr('checked') );
+			$('input[name=collectSubmissions]').triggerHandler("change");
+		});
 
 		<#-- manage check-all state -->
 		var updateCheckboxes = function($table) {
@@ -431,6 +457,8 @@
 			var empty = ($.trim($(this).val()) == "");
 			$('.add-students').toggleClass('disabled', empty);
 		});
+
+
 
 		<#-- show modals -->
 		$enrolment.on('click', '.show-sits-picker', function() {

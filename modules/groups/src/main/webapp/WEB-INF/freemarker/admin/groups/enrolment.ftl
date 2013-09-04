@@ -9,6 +9,7 @@
 
 <@f.errors cssClass="error form-errors" />
 
+<#include "groups_membership_picker_heading.ftl" />
 <#include "groups_membership_picker.ftl" />
 
 </@f.form>

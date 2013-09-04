@@ -1,65 +1,6 @@
 <#escape x as x?html>
-	<@form.labelled_row "members" "Students" "assignmentEnrolment">
-		<fieldset id="assignmentEnrolmentFields">
 
-
-
-		<#list command.upstreamGroups as item>
-			<@f.hidden path="upstreamGroups[${item_index}]" cssClass="upstreamGroups" />
-		</#list>
-
-		<@spring.bind path="members">
-			<#assign membersGroup=status.actualValue />
-		</@spring.bind>
-
-		<#assign includeIcon><span class="use-tooltip" title="Added manually" data-placement="right"><i class="icon-hand-up"></i></span><span class="hide">Added</span></#assign>
-		<#assign pendingDeletionIcon><span class="use-tooltip" title="Deleted manual addition" data-placement="right"><i class="icon-remove"></i></span><span class="hide">Pending deletion</span></#assign>
-		<#assign excludeIcon><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-ban-circle"></i></span><span class="hide">Removed</span></#assign>
-		<#assign sitsIcon><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span><span class="hide">SITS</span></#assign>
-
-		<#assign membershipInfo = command.membershipInfo />
-		<#assign hasMembers = membershipInfo.totalCount gt 0 />
-
-		<#macro what_is_this>
-			<#assign popoverText>
-				<p>You can link to an assignment in SITS and the list of students will be updated automatically from there.
-				If you are not using SITS you can manually add students by ITS usercode or university number.</p>
-
-				<p>It is also possible to tweak the list even when using SITS data, but this is only to be used
-				when necessary and you still need to ensure that the upstream SITS data gets fixed.</p>
-			</#assign>
-
-			<a href="#"
-			   title="What's this?"
-			   class="use-popover"
-			   data-title="Students"
-			   data-trigger="hover"
-	   		   data-html="true"
-			   data-content="${popoverText}"
-			   ><i class="icon-question-sign"></i></a>
-		</#macro>
-
-		<details>
-			<summary>
-				<#-- enumerate current state -->
-				<#if linkedUpstreamAssessmentGroups?has_content>
-					<span class="uneditable-value">
-						${membershipInfo.totalCount} enrolled
-						<#if membershipInfo.excludeCount gt 0 || membershipInfo.includeCount gt 0>
-							<span class="muted">(${membershipInfo.sitsCount} from SITS<#if membershipInfo.usedExcludeCount gt 0> after ${membershipInfo.usedExcludeCount} removed manually</#if><#if membershipInfo.usedIncludeCount gt 0>, plus ${membershipInfo.usedIncludeCount} added manually</#if>)</span>
-						<#else>
-							<span class="muted">from SITS</span>
-						</#if>
-					<@what_is_this /></span>
-				<#elseif hasMembers>
-					<span class="uneditable-value">${membershipInfo.includeCount} manually enrolled
-					<@what_is_this /></span>
-				<#else>
-					<span class="uneditable-value">No students enrolled
-					<@what_is_this /></span>
-				</#if>
-			</summary>
-
+			<div class="assignmentEnrolmentInner">
 			<#-- FIXME: alerts fired post SITS change go here, if controller returns something to say -->
 			<#-- <p class="alert alert-success"><i class="icon-ok"></i> This group set is (now linked|no longer linked) to ${r"${name}"} and ${r"${name}"}</p> -->
 
@@ -71,7 +12,6 @@
 				<#else>
 					<a class="btn use-tooltip disabled" title="No membership groups are recorded for this module in SITS. Add them there if you want to create a parallel link in Tabula.">No SITS link available</a>
 				</#if>
-				</a>
 
 				<a class="btn use-tooltip disabled show-adder"
 						<#if availableUpstreamGroups??>title="This will only enrol a student for this group set in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
@@ -176,9 +116,10 @@
 				<#-- placeholder to allow new links to be appended via script -->
 				<span id="enrolment-table"></span>
 			</#if>
-		</details>
+			</div>
 
 		<#-- Modal to add students manually -->
+		<div class="modals">
 		<div class="modal fade hide adder">
 			<div class="modal-header">
 				<a class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
@@ -193,7 +134,7 @@
 					<i class="icon-lightbulb icon-large"></i> <strong>Is your module in SITS?</strong> It may be better to fix the data there,
 					as other University systems won't know about any changes you make here.
 				</p>
-				<#-- SOMETIME
+				<#-- SOMETIME -->
 				<div>
 					<a href="#" class="btn"><i class="icon-user"></i> Lookup user</a>
 				</div>
@@ -253,9 +194,10 @@
 					<p class="alert alert-warning">No SITS membership groups for ${command.module.code?upper_case} are available</p>
 				</div>
 			</#if>
+
 		</div>
-		</fieldset>
-	</@form.labelled_row>
+		</div>
+
 
 	<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript">
@@ -389,7 +331,7 @@
 					},
 					success: function(data, status) {
 						$m.modal('hide');
-						$enrolment.html($(data).find('.assignmentEnrolment').contents());
+						$enrolment.html($(data).find('.assignmentEnrolmentInner').contents());
 						$enrolment.data('open', true);
 						initEnrolment();
 						alertPending();
@@ -413,7 +355,9 @@
 					},
 					success: function(data, status) {
 						$m.modal('hide');
-						$enrolment.html($(data).find('.assignmentEnrolment').contents());
+						$enrolment.find('.assignmentEnrolmentInner').html($(data).find('.assignmentEnrolmentInner').contents());
+						$enrolment.find('.enrolledCount').html($(data).find('.enrolledCount').contents());
+						$enrolment.find('.modals').html($(data).find('.modals').contents());
 						$enrolment.data('open', true);
 						initEnrolment();
 						alertPending();
