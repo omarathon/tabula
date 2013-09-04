@@ -2,32 +2,32 @@ package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.data.model.Department
+import org.springframework.util.AutoPopulatingList
 
-class ModifyMonitoringPointCommandTest extends TestBase with Mockito {
+class EditMonitoringPointCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends RouteServiceComponent
-			with ModifyMonitoringPointValidation with ModifyMonitoringPointState {
-		val routeService = mock[RouteService]
+	trait CommandTestSupport extends TermServiceComponent 
+		with EditMonitoringPointValidation with EditMonitoringPointState {
 
-		def apply(): MonitoringPoint = {
-			null
-		}
+		val termService = mock[TermService]
+		
 	}
 
 	trait Fixture {
-		val set = new MonitoringPointSet
+		val dept = mock[Department]
 		val monitoringPoint = new MonitoringPoint
 		val existingName = "Point 1"
 		val existingWeek = 1
-		monitoringPoint.id = "1"
 		monitoringPoint.name = existingName
 		monitoringPoint.week = existingWeek
-		val points = JArrayList(monitoringPoint)
-		set.points = points
-		val command = new ModifyMonitoringPointCommand(set, monitoringPoint) with CommandTestSupport
+		val points = new AutoPopulatingList(classOf[MonitoringPoint])
+		points.add(monitoringPoint)
+		val pointIndex = 0
+		val command = new EditMonitoringPointCommand(dept, pointIndex) with CommandTestSupport
+		command.monitoringPoints = points
 	}
 
 	@Test
@@ -37,7 +37,7 @@ class ModifyMonitoringPointCommandTest extends TestBase with Mockito {
 			command.week = existingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors() should be (false)
+			errors.hasFieldErrors should be (false)
 		}
 	}
 
@@ -48,7 +48,7 @@ class ModifyMonitoringPointCommandTest extends TestBase with Mockito {
 			command.week = 2
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors() should be (false)
+			errors.hasFieldErrors should be (false)
 		}
 	}
 
@@ -59,7 +59,7 @@ class ModifyMonitoringPointCommandTest extends TestBase with Mockito {
 			command.week = existingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors() should be (false)
+			errors.hasFieldErrors should be (false)
 		}
 	}
 
@@ -67,15 +67,16 @@ class ModifyMonitoringPointCommandTest extends TestBase with Mockito {
 	def validateDuplicatePoint() {
 		new Fixture {
 			val newPoint = new MonitoringPoint
-			newPoint.id = "2"
+			newPoint.name = existingName
+			newPoint.week = existingWeek
 			command.name = existingName
 			command.week = existingWeek
-			command.point = newPoint
+			command.monitoringPoints.add(newPoint)
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors() should be (true)
-			errors.getFieldError("name") should not be (null)
-			errors.getFieldError("week") should not be (null)
+			errors.hasFieldErrors should be (true)
+			errors.getFieldError("name") should not be null
+			errors.getFieldError("week") should not be null
 		}
 	}
 
@@ -86,8 +87,8 @@ class ModifyMonitoringPointCommandTest extends TestBase with Mockito {
 			command.week = 53
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors() should be (true)
-			errors.getFieldError("week") should not be (null)
+			errors.hasFieldErrors should be (true)
+			errors.getFieldError("week") should not be null
 		}
 	}
 
@@ -98,8 +99,8 @@ class ModifyMonitoringPointCommandTest extends TestBase with Mockito {
 			command.week = 1
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors() should be (true)
-			errors.getFieldError("name") should not be (null)
+			errors.hasFieldErrors should be (true)
+			errors.getFieldError("name") should not be null
 		}
 	}
 

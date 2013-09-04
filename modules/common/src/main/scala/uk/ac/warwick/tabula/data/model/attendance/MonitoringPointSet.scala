@@ -35,9 +35,6 @@ class MonitoringPointSet extends GeneratedId {
 	var createdDate: DateTime = _
 	
 	var updatedDate: DateTime = _
-	
-	@NotNull
-	var templateName: String = _
 
 	def add(point: MonitoringPoint) {
 		points.add(point)
