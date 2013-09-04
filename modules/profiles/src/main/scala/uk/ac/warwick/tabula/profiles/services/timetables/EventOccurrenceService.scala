@@ -69,10 +69,8 @@ trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
 
 		def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence] = {
 
-			// lord preserve us from trying to generate a timetable that spans two academic years.
-			val year = getAcademicYearContainingDate(dateRange.getStart)
 			def eventDateToLocalDate(week: WeekRange.Week, localTime: LocalTime): LocalDateTime = {
-				weekToDateConverter.toLocalDatetime(week, event.day, localTime, year).
+				weekToDateConverter.toLocalDatetime(week, event.day, localTime, event.year).
 					// Considered just returning None here, but if we ever encounter an event who's week/day/time
 					// specifications can't be converted into calendar dates, we have big problems with
 					// data quality and we need to fix them.
@@ -85,7 +83,7 @@ trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
 			} yield week
 
 			val eventsInIntersectingWeeks = weeks.
-				filter(week => weekToDateConverter.intersectsWeek(dateRange, week, year)).
+				filter(week => weekToDateConverter.intersectsWeek(dateRange, week, event.year)).
 				map {
 				week =>
 					EventOccurrence(event,

@@ -62,7 +62,7 @@ case class FunctionalTestAcademicYear(val startYear: Int) extends Ordered[Functi
 	def compare(that:FunctionalTestAcademicYear): Int = {
 		this.startYear - that.startYear
 	}
-	def toSyallabusPlusFormat:String = (startYear%100).toString + ((startYear+1)%100).toString
+	def toSyllabusPlusFormat:String = (startYear%100).toString + ((startYear+1)%100).toString
 }
 object FunctionalTestAcademicYear{
 	def current = new AcademicDateHelper(new TermFactoryImpl).getAcademicYearContainingDate(DateTime.now)
