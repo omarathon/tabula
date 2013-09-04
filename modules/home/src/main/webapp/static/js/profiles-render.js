@@ -108,7 +108,7 @@
 						clearInterval(wait);
 						$m.find(".modal-body").animate({ height: h });
 					}
-				}, 50);
+				}, 300); // this didn't work for me (ZLJ) at 150 but did at 200; upping to 300 to include safety margin
 
 				// show-time
 				$m.modal("show");
