@@ -21,8 +21,10 @@ trait MonitoringPointDao {
 	def list(page: Int) : Seq[MonitoringPoint]
 	def getStudentsChecked(monitoringPoint: MonitoringPoint): Seq[StudentMember]
 	def saveOrUpdate(monitoringPoint: MonitoringPoint)
+	def delete(monitoringPoint: MonitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
-	def saveOrUpdate(set: MonitoringPointSetTemplate)
+	def saveOrUpdate(template: MonitoringPointSetTemplate)
+	def saveOrUpdate(set: MonitoringPointSet)
 	def getCheckpoint(monitoringPoint: MonitoringPoint, member: StudentMember) : Option[MonitoringCheckpoint]
 	def getCheckpoints(montitoringPoint: MonitoringPoint) : Seq[MonitoringCheckpoint]
 	def listTemplates : Seq[MonitoringPointSetTemplate]
@@ -58,8 +60,10 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	}
 
 	def saveOrUpdate(monitoringPoint: MonitoringPoint) = session.saveOrUpdate(monitoringPoint)
+	def delete(monitoringPoint: MonitoringPoint) = session.delete(monitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint) = session.saveOrUpdate(monitoringCheckpoint)
-	def saveOrUpdate(set: MonitoringPointSetTemplate) = session.saveOrUpdate(set)
+	def saveOrUpdate(set: MonitoringPointSet) = session.saveOrUpdate(set)
+	def saveOrUpdate(template: MonitoringPointSetTemplate) = session.saveOrUpdate(template)
 
 	def getCheckpoint(monitoringPoint: MonitoringPoint, member: StudentMember): Option[MonitoringCheckpoint] = {
 	  val studentCourseDetail = member.studentCourseDetails.asScala.filter(

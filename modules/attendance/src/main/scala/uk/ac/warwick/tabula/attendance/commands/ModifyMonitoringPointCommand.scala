@@ -4,11 +4,10 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.{AutowiringRouteServiceComponent, RouteServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
 
 object ModifyMonitoringPointCommand {
 	def apply(set: MonitoringPointSet, point: MonitoringPoint) =
@@ -18,21 +17,21 @@ object ModifyMonitoringPointCommand {
 			with ModifyMonitoringPointPermissions
 			with ModifyMonitoringPointState
 			with ModifyMonitoringPointDescription
-			with AutowiringRouteServiceComponent
+			with AutowiringMonitoringPointServiceComponent
 }
 
 /**
  * Creates a new monitoring point in a set.
  */
 class ModifyMonitoringPointCommand(val set: MonitoringPointSet, val thePoint: MonitoringPoint) extends CommandInternal[MonitoringPoint] {
-	self: ModifyMonitoringPointState with RouteServiceComponent =>
+	self: ModifyMonitoringPointState with MonitoringPointServiceComponent =>
 
 	point = thePoint
 	copyFrom(point)
 
 	override def applyInternal() = {
 		this.copyTo(point)
-		routeService.save(point)
+		monitoringPointService.saveOrUpdate(point)
 		point
 	}
 }
@@ -50,7 +49,7 @@ trait ModifyMonitoringPointValidation extends SelfValidating {
 	override def validate(errors: Errors) {
 		//super.validate(errors)
 
-		if (set.points.asScala.filter(p => p.name == name && p.week == week && p.id != point.id).size > 0) {
+		if (set.points.asScala.count(p => p.name == name && p.week == week && p.id != point.id) > 0) {
 			errors.rejectValue("name", "monitoringPoint.name.exists")
 			errors.rejectValue("week", "monitoringPoint.name.exists")
 		}

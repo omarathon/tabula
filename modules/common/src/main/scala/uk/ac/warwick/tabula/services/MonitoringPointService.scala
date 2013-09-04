@@ -22,8 +22,10 @@ trait AutowiringMonitoringPointServiceComponent extends MonitoringPointServiceCo
 
 trait MonitoringPointService {
 	def saveOrUpdate(monitoringPoint : MonitoringPoint)
+	def delete(monitoringPoint : MonitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
-	def saveOrUpdate(set: MonitoringPointSetTemplate)
+	def saveOrUpdate(set: MonitoringPointSet)
+	def saveOrUpdate(template: MonitoringPointSetTemplate)
 	def getPointById(id : String) : Option[MonitoringPoint]
 	def getSetById(id : String) : Option[MonitoringPointSet]
 	def list(page: Int) : Seq[MonitoringPoint]
@@ -39,8 +41,10 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	self: MonitoringPointDaoComponent =>
 
 	def saveOrUpdate(monitoringPoint: MonitoringPoint) = monitoringPointDao.saveOrUpdate(monitoringPoint)
+	def delete(monitoringPoint: MonitoringPoint) = monitoringPointDao.delete(monitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint) = monitoringPointDao.saveOrUpdate(monitoringCheckpoint)
-	def saveOrUpdate(set: MonitoringPointSetTemplate) = monitoringPointDao.saveOrUpdate(set)
+	def saveOrUpdate(set: MonitoringPointSet) = monitoringPointDao.saveOrUpdate(set)
+	def saveOrUpdate(template: MonitoringPointSetTemplate) = monitoringPointDao.saveOrUpdate(template)
 	def getPointById(id: String): Option[MonitoringPoint] = monitoringPointDao.getPointById(id)
 	def getSetById(id: String): Option[MonitoringPointSet] = monitoringPointDao.getSetById(id)
 	def list(page: Int) : Seq[MonitoringPoint] = monitoringPointDao.list(page)

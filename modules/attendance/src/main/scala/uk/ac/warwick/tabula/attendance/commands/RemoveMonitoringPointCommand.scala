@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.{AutowiringRouteServiceComponent, RouteServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
 
 object RemoveMonitoringPointCommand {
 	def apply(set: MonitoringPointSet, point: MonitoringPoint) =
@@ -15,17 +15,17 @@ object RemoveMonitoringPointCommand {
 			with RemoveMonitoringPointPermissions
 			with RemoveMonitoringPointState
 			with RemoveMonitoringPointDescription
-			with AutowiringRouteServiceComponent
+			with AutowiringMonitoringPointServiceComponent
 }
 
 /**
  * Creates a new monitoring point in a set.
  */
 class RemoveMonitoringPointCommand(val set: MonitoringPointSet, val point: MonitoringPoint) extends CommandInternal[Unit] {
-	self: RemoveMonitoringPointState with RouteServiceComponent =>
+	self: RemoveMonitoringPointState with MonitoringPointServiceComponent =>
 
 	override def applyInternal() = {
-		routeService.delete(point)
+		monitoringPointService.delete(point)
 	}
 }
 
