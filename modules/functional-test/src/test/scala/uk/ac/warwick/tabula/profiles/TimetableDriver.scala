@@ -15,7 +15,7 @@ trait TimetableDriver extends FixturesDriver  {
 
 	def setTimetableFor(userId:String, year:FunctionalTestAcademicYear, content:Elem) {
 		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/stubTimetable/student"
-		val req = url(uri).POST << Map("studentId" -> userId, "year"->year.toSyallabusPlusFormat, "content"->content.toString)
+		val req = url(uri).POST << Map("studentId" -> userId, "year"->year.toSyllabusPlusFormat, "content"->content.toString)
 		http.when(_==200)(req >| )
 	}
 
