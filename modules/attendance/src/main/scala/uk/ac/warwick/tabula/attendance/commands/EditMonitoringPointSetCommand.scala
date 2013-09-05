@@ -1,0 +1,53 @@
+package uk.ac.warwick.tabula.attendance.commands
+
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.permissions.Permissions
+import scala.collection.JavaConverters._
+
+object EditMonitoringPointSetCommand {
+	def apply(set: MonitoringPointSet) =
+		new EditMonitoringPointSetCommand(set)
+		with ComposableCommand[Unit]
+		with AutowiringTermServiceComponent
+		with AutowiringMonitoringPointServiceComponent
+		with EditMonitoringPointSetPermissions
+		with ReadOnly with Unaudited
+}
+
+
+abstract class EditMonitoringPointSetCommand(val set: MonitoringPointSet) extends CommandInternal[Unit]
+	with EditMonitoringPointSetState {
+
+	override def applyInternal() = {
+
+	}
+}
+
+trait EditMonitoringPointSetPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: EditMonitoringPointSetState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(set.route))
+	}
+}
+
+trait EditMonitoringPointSetState extends GroupMonitoringPointsByTerm with MonitoringPointServiceComponent {
+
+	def set: MonitoringPointSet
+
+	def monitoringPointsByTerm = groupByTerm(set.points.asScala, set.academicYear)
+
+	// TAB-1079
+	def canPointBeUpdated(point: MonitoringPoint) = {
+		monitoringPointService.countCheckpointsForPoint(point) == 0
+	}
+
+	// TAB-1079
+	def canPointBeRemoved(point: MonitoringPoint) = {
+		monitoringPointService.countCheckpointsForPoint(point) == 0
+	}
+
+}

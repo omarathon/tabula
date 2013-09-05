@@ -34,6 +34,7 @@ trait MonitoringPointService {
 	def listTemplates : Seq[MonitoringPointSetTemplate]
 	def getTemplateById(id: String) : Option[MonitoringPointSetTemplate]
 	def deleteTemplate(template: MonitoringPointSetTemplate)
+	def countCheckpointsForPoint(point: MonitoringPoint): Int
 }
 
 
@@ -85,6 +86,8 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def getTemplateById(id: String): Option[MonitoringPointSetTemplate] = monitoringPointDao.getTemplateById(id)
 
 	def deleteTemplate(template: MonitoringPointSetTemplate) = monitoringPointDao.deleteTemplate(template)
+
+	def countCheckpointsForPoint(point: MonitoringPoint) = monitoringPointDao.countCheckpointsForPoint(point)
 }
 
 @Service("monitoringPointService")

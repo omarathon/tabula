@@ -6,24 +6,21 @@ import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPo
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.attendance.commands.RemoveMonitoringPointCommand
+import uk.ac.warwick.tabula.attendance.commands.CreateMonitoringPointCommand
 
 @Controller
-@RequestMapping(Array("/manage/{dept}/sets/{set}/points/{point}/delete"))
-class RemoveMonitoringPointController extends AttendanceController {
+@RequestMapping(Array("/manage/{dept}/sets/{set}/points/add"))
+class CreateMonitoringPointController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def createCommand(
-	 @PathVariable set: MonitoringPointSet,
-	 @PathVariable point: MonitoringPoint
-	) =
-	 RemoveMonitoringPointCommand(set, point)
+	def createCommand(@PathVariable set: MonitoringPointSet) =
+	 CreateMonitoringPointCommand(set)
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPoint]) = {
-	 Mav("manage/point/remove_form").noLayoutIf(ajax)
+	 Mav("manage/point/create_form").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method=Array(POST))

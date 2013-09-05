@@ -2,7 +2,7 @@
 
 <h1>Create monitoring schemes</h1>
 
-<form id="addMonitoringPointSet" action="<@url page="/manage/${command.dept.code}/sets/add"/>" method="POST">
+<form id="addMonitoringPointSet" action="<@url page="/manage/${command.dept.code}/sets/add"/>" method="POST" class="modify-monitoring-points">
 
 	<label>Academic year for new schemes <select name="academicYear" style="margin-bottom: 0px;">
 		<#assign academicYears = [thisAcademicYear.previous.toString, thisAcademicYear.toString, thisAcademicYear.next.toString] />
