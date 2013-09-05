@@ -153,6 +153,9 @@
 		<div class="tabbable">
 			<ol class="panes">
 				<#if features.personalTimetables>
+				<script type="text/javascript">
+				 var weeks = ${weekRangesDumper()}
+				 </script>
 					<li id="timetable-pane">
 						<section id="timetable-details" class="clearfix">
 							<h4>Timetable</h4>
