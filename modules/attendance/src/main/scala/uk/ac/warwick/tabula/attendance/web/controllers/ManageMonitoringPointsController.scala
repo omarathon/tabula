@@ -25,7 +25,7 @@ class ManageMonitoringPointsController extends AttendanceController {
 	@RequestMapping
 	def home(@ModelAttribute("command") cmd: Appliable[Unit], @RequestParam(value="created", required = false) createdCount: Integer) = {
 		cmd.apply()
-		Mav("manage/home", "createdCount" -> createdCount)
+		Mav("manage/manage", "createdCount" -> createdCount)
 	}
 
 }

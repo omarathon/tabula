@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.StudentMember
-import org.hibernate.criterion.Order
+import org.hibernate.criterion.{Projections, Order}
 
 trait MonitoringPointDaoComponent {
 	val monitoringPointDao: MonitoringPointDao
@@ -30,6 +30,7 @@ trait MonitoringPointDao {
 	def listTemplates : Seq[MonitoringPointSetTemplate]
 	def getTemplateById(id: String): Option[MonitoringPointSetTemplate]
 	def deleteTemplate(template: MonitoringPointSetTemplate)
+	def countCheckpointsForPoint(point: MonitoringPoint): Int
 }
 
 
@@ -91,4 +92,10 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		getById[MonitoringPointSetTemplate](id)
 
 	def deleteTemplate(template: MonitoringPointSetTemplate) = session.delete(template)
+
+	def countCheckpointsForPoint(point: MonitoringPoint) =
+		session.newCriteria[MonitoringCheckpoint]
+			.add(is("point", point))
+			.setProjection(Projections.rowCount())
+			.uniqueResult.get.asInstanceOf[Number].intValue()
 }

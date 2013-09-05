@@ -155,13 +155,15 @@ $(function(){
 	var pointsChanged = false;
 
 	var bindPointButtons = function(){
-    	$('#addMonitoringPointSet a.new-point, #addMonitoringPointSet a.edit-point, #addMonitoringPointSet a.delete-point').off().on('click', function(e){
+    	$('.modify-monitoring-points a.new-point, .modify-monitoring-points a.edit-point, .modify-monitoring-points a.delete-point')
+    		.off().not('.disabled').on('click', function(e){
+
     		e.preventDefault();
     		var formLoad = function(data){
     			var $m = $('#modal');
     			$m.html(data);
     			if ($m.find('.monitoring-points').length > 0) {
-    				$('#addMonitoringPointSet .monitoring-points').replaceWith($m.find('.monitoring-points'))
+    				$('.modify-monitoring-points .monitoring-points').replaceWith($m.find('.monitoring-points'))
     				$m.modal("hide");
     				bindPointButtons();
     				pointsChanged = true;
@@ -182,7 +184,11 @@ $(function(){
     				$f.find('input[name="name"]').focus();
     			}).modal("show");
     		};
-    		$.post($(this).attr('href'), $('form#addMonitoringPointSet').serialize(), formLoad)
+    		if ($('form#addMonitoringPointSet').length > 0) {
+    			$.post($(this).attr('href'), $('form#addMonitoringPointSet').serialize(), formLoad);
+    		} else {
+    			$.get($(this).attr('href'), formLoad);
+    		}
     	});
     };
     bindPointButtons();

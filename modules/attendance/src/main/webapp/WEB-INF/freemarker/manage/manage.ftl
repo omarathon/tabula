@@ -143,7 +143,7 @@
 										${route.code?upper_case} Year ${set.year}
 									</div>
 									<div class="span2">
-										<a href="<@url page="/manage/${command.dept.code}/sets/edit?set=${set.id}"/>" class="btn btn-primary btn-mini">Edit</a>
+										<a href="<@url page="/manage/${command.dept.code}/sets/${set.id}/edit"/>" class="btn btn-primary btn-mini">Edit</a>
 									</div>
 								</div>
 							</#list>

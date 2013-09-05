@@ -134,6 +134,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSelfSignUpStateConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.RouteCodeConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.AbstractMonitoringPointSetIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetTemplateIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalDateConverter"/>
