@@ -37,7 +37,6 @@ class FakeSyllabusPlusController extends Logging {
 
 	@RequestMapping(Array("/stubTimetable/student{year}/"))
 	def getStudent(@RequestParam("p0") studentId: String, @PathVariable("year") year:String, output: Writer) {
-		println(s"Requesting stub timetable data for $studentId $year")
 		val xml = studentTimetables.getOrElseUpdate(StudentYearKey(studentId, year) , {
 			val req = url(studentUri(year)) <<? Map("p0" -> studentId)
 			import scala.language.postfixOps
