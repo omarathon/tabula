@@ -1,0 +1,52 @@
+.striped-section.routes {
+	.collapsible-target {
+		margin-left: 2.5em;
+	}
+}
+
+.ellipsis {
+	overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+	.hint {
+		color: #818285;
+	}
+
+#container .routeAndYearPicker {
+	.span2 {
+		text-align: right;
+	}
+	.hint {
+		position: relative;
+		bottom: -10px;
+	}
+	table {
+		table-layout: fixed;
+		width: 700px;
+		th,td {
+			text-align: center;
+		}
+		th.ellipsis, td.ellipsis {
+			width: 300px;
+			max-width: 300px;
+			text-align: left;
+		}
+		&.header, &.header.table-striped.table-bordered.table-condensed.table-hover th {
+			margin-bottom: 0px;
+			border-bottom-left-radius: 0px;
+			border-bottom-right-radius: 0px;
+		}
+	}
+	.scroller {
+		width: 720px;
+		height: 260px;
+		overflow: auto;
+		margin-top: -1px;
+		table, table.table-striped.table-bordered.table-condensed.table-hover tbody:first-child td {
+			border-top-left-radius: 0px;
+           	border-top-right-radius: 0px;
+		}
+	}
+}

@@ -108,7 +108,7 @@
 						clearInterval(wait);
 						$m.find(".modal-body").animate({ height: h });
 					}
-				}, 50);
+				}, 300); // this didn't work for me (ZLJ) at 150 but did at 200; upping to 300 to include safety margin
 
 				// show-time
 				$m.modal("show");
@@ -284,6 +284,21 @@
 				  }
 				  });
 		}
+		function updateCalendarTitle(view,element){
+            var start = view.start.getTime();
+            var end = view.end.getTime();
+            var week = $.grep(weeks, function(week){
+                return (week.start >=start) && (week.end <= end);
+            });
+            if (week.length >0){
+                var decodedTitle = $("<div/>").html(week[0].desc).text();
+                view.title=decodedTitle;
+                view.calendar.updateTitle();
+            } // We should have an entry for every week; in the event that one's missing
+              // we'll just leave it blank. The day columns still have the date on them.
+            return true;
+		}
+
 		function createCalendar(container,defaultViewName){
 			var showWeekends = (defaultViewName == "month");
 			$(container).fullCalendar({
@@ -299,6 +314,7 @@
                                         '': 'h:mm{ - h:mm}'   //  5:00 - 6:30
                                     },
 									weekends:showWeekends,
+									viewRender:updateCalendarTitle,
 									header: {
 										left:   'title',
 										center: '',

@@ -291,6 +291,7 @@ object Permissions {
 	
 	object MonitoringPoints {
 		case object Manage extends Permission("Manage monitoring points")
+		case object View extends ScopelessPermission("View monitoring points")
 	}
 	
 	object StudentRelationshipType {

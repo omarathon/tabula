@@ -6,6 +6,9 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.util.termdates.TermFactoryImpl
+import scala.collection.JavaConverters._
+import uk.ac.warwick.util.termdates.Term.TermType
 
 class WeekRangesFormatterTest extends TestBase {
 
@@ -58,5 +61,4 @@ class WeekRangesFormatterTest extends TestBase {
 		formatter.format(Seq(WeekRange(11, 15)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None) should be("Tue 13<sup>th</sup> Dec 2011 - Tue 10<sup>th</sup> Jan 2012")
 		formatter.format(Seq(WeekRange(16, 25)), DayOfWeek.Tuesday, WeekRange.NumberingSystem.None) should be("Tue 17<sup>th</sup> Jan - Tue 20<sup>th</sup> Mar 2012")
 	}
-
 }

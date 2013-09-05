@@ -191,7 +191,7 @@
 
 				details.meeting {
 
-					padding-right: 15px;
+					padding-right: 0;
 
 					&.well {
 						padding: 1px;
@@ -203,6 +203,7 @@
 						padding-top: 9px;
 						font-weight: bold;
 						border-bottom: dotted 1px lighten(@grayLight, 35%);
+						overflow: auto;
 					}
 
 					.meeting-body {
@@ -241,12 +242,12 @@
 				span.date {
 					margin-right: 1em;
 					display: inline-block;
-					width: 13em;
+					width: 10em;
 				}
 
 				.meeting-record-toolbar {
 					float: right;
-					margin-right: 1em;
+					margin-right: 0.5em;
 					a {
 						text-decoration: none;
 					}
@@ -291,7 +292,7 @@
 				}
 			}
 		}
-	} // .profile
+	} // .profile container
 
 	#container .related_students {
 		.profile-link {
@@ -459,10 +460,10 @@
 	.profile {
 		margin-top: 0;
 	}
-	
+
 	.filter {
 		select { width: 100%; }
-		
+
 		margin: 0 0 10px;
 	}
 
@@ -471,11 +472,11 @@
 		margin: -16px;
 		padding: 16px;
 	}
-	
+
 	ul.drag-list li {
 		display: block;
 		float: none;
-	
+
 		background: white;
 		margin: 0 0 10px;
 
@@ -483,23 +484,23 @@
 
 		&.ui-selecting { background: darken(@wellBackground, 10%) !important; }
 		&.ui-selected { background: darken(@wellBackground, 15%) !important; }
-		
+
 		.profile .photo {
 			float: left;
 			max-width: 50px;
 			padding-right: 10px;
 		}
 	}
-	
+
 	.well.drop-hover {
 		background-color: #dddddd;
 	}
-	
+
 	.agent-header {
 		> h4, > div { display: inline-block; }
 		> h4 { margin-right: 10px; }
 	}
-	
+
 	.direction-icon {
 		font-size: 8em;
 		text-align: center;
@@ -510,3 +511,8 @@
 }
 
 // end drag students into agents
+
+// meeting record modal
+.modal-body#meeting-record-modal-body {
+	max-height: 550px; //override boostrap default of 400px
+}

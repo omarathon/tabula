@@ -1,6 +1,6 @@
 /**
- * Scripts used only by the attendance monitoring section.
- */
+* Scripts used only by the attendance monitoring section.
+*/
 (function ($) { "use strict";
 
 var exports = {};
@@ -8,168 +8,184 @@ var exports = {};
 exports.Manage = {}
 
 $(function(){
-	var target = $('form.manage-points').attr('action'), $select = $('form.manage-points select[name=route]');
-	$select.on('change', function(){
-		$('.academicyears-target').html('<img src="/static/images/icon-spinner.gif"');
-		$('.sets-target').empty();
-		$('.points-target').empty();
-		$.get(target, { route: $(this).val() }, function(data){
-			$('.academicyears-target').html(data);
-		});
-	});
-	if ($select.val().length > 0) {
-		$select.change();
-	}
-});
 
-exports.Manage.bindChooseAcademicYear = function(){
-	$('div.create-buttons a.create-point').hide();
-	$('form.manage-points-academicyear select[name="academicyear"]').on('change', function(){
-		$('.sets-target').empty();
-        $('.points-target').empty();
-		var target = $('form.manage-points-academicyear').attr('action'), sendData = {
-			route: $('form.manage-points select[name=route]').val(),
-			academicYear: $('form.manage-points-academicyear select[name="academicyear"]').val()
+	// SCRIPTS FOR MANAGING MONITORING POINTS
+
+	if ($('#chooseCreateType').length > 0 && setsByRouteByAcademicYear) {
+		var $form = $('#chooseCreateType').find('input.create').on('change', function(){
+			if ($(this).hasClass('copy')) {
+				$form.find('button').html('Copy').prop('disabled', true);
+				academicYearSelect.add(routeSelect).add(yearSelect).prop('disabled', false).css('visibility','hidden');
+				academicYearSelect.find('option:first').prop('selected', true)
+					.end().css('visibility','visible');
+			} else {
+				$form.find('button').html('Create').prop('disabled', false);
+				academicYearSelect.add(routeSelect).add(yearSelect).prop('disabled', true).css('visibility','hidden');
+			}
+		}).end(),
+		academicYearSelect = $form.find('select.academicYear').on('change', function(){
+			routeSelect.find('option:gt(0)').remove()
+				.end().css('visibility','visible');
+			yearSelect.find('option:gt(0)').remove()
+				.end().css('visibility','hidden');
+			$.each(academicYearSelect.find('option:selected').data('routes'), function(i, route){
+				routeSelect.append(
+					$('<option/>').data('sets', route.sets).html(route.code.toUpperCase() + ' ' + route.name)
+				);
+			});
+		}).prop('disabled', true).css('visibility','hidden'),
+		routeSelect = $form.find('select.route').on('change', function(){
+			yearSelect.find('option:gt(0)').remove()
+				.end().find('option:first').prop('selected', true)
+				.end().css('visibility','visible').change();
+			$.each(routeSelect.find('option:selected').data('sets'), function(i, set){
+				yearSelect.append(
+					$('<option/>').val(set.id).html(set.year)
+				);
+			});
+		}).prop('disabled', true).css('visibility','hidden'),
+		yearSelect = $form.find('select[name="existingSet"]').on('change', function(){
+			if (yearSelect.val().length > 0) {
+				$form.find('button').prop('disabled', false);
+			} else {
+				$form.find('button').prop('disabled', true);
+			}
+		}).prop('disabled', true).css('visibility','hidden');
+
+		if (academicYearSelect.length > 0) {
+			for (var academicYear in setsByRouteByAcademicYear) {
+				academicYearSelect.append(
+					$('<option/>').data('routes', setsByRouteByAcademicYear[academicYear]).html(academicYear)
+				);
+			}
 		}
-		$('.sets-target').html('<img src="/static/images/icon-spinner.gif"');
-		$.get(target, sendData, function(data){
-			$('.sets-target').html(data);
-		});
-	});
-};
-
-exports.Manage.onChooseYear = function(){
-	var target = $('form.manage-points-year').attr('action'), sendData = {
-		route: $('form.manage-points select[name=route]').val()
 	}
-	if ($('form.manage-points-year select[name="set-year"]').length > 0) {
-		sendData.year = $('form.manage-points-year select[name="set-year"]').val()
-	}
-	$('.points-target').html('<img src="/static/images/icon-spinner.gif"');
-	$.get(target, sendData, function(data){
-		$('.points-target').html(data);
-	});
-};
 
-exports.Manage.bindChooseYear = function(){
-	$('div.create-buttons a.create-point').hide();
-	$('form.manage-points-year select[name="set-year"]').on('change', exports.Manage.onChooseYear);
-};
-
-exports.Manage.bindNewSetButton = function(){
-	$('div.create-buttons a.create-set').on('click', function(e){
-		e.preventDefault();
-		var formLoad = function(data){
-			var $m = $('#modal');
-			$m.html(data);
-			if ($m.find('.monitoring-point-set').length > 0) {
-				var newYear = $m.find('.monitoring-point-set').data('year');
-				if ($('form.manage-points-year select[name="set-year"]').length === 0) {
-					$('form.manage-points select[name="route"]').change();
-				} else {
-					$('form.manage-points-year select[name="set-year"]').append(
-						$('<option/>').attr('value', newYear).html(newYear)
-					).val(newYear).change();
-				}
-				$m.modal("hide");
-				return;
-			}
-			var $f = $m.find('form');
-			$f.on('submit', function(event){
-				event.preventDefault();
-			});
-			$m.find('.modal-footer button[type=submit]').on('click', function(){
-				$(this).button('loading');
-				$.post($f.attr('action'), $f.serialize(), function(data){
-					$(this).button('reset');
-					formLoad(data);
-				})
-			});
-			$m.modal("show");
-		};
-		$.get($(this).attr('href'), { modal: true, route: $('form.manage-points select[name=route]').val() }, formLoad)
-	});
-};
-
-
-exports.Manage.showAndBindNewPointButton = function(){
-	$('div.create-buttons a.create-point').show().off().on('click', function(e){
-		e.preventDefault();
-		var formLoad = function(data){
-			var $m = $('#modal');
-			$m.html(data);
-			if ($m.find('.monitoring-point').length > 0) {
-				$('form.manage-points-year select[name="set-year"]').change();
-				$m.modal("hide");
-				return;
-			}
-			var $f = $m.find('form');
-			$f.on('submit', function(event){
-				event.preventDefault();
-			});
-			$m.find('.modal-footer button[type=submit]').on('click', function(){
-				$(this).button('loading');
-				$.post($f.attr('action'), $f.serialize(), function(data){
-					$(this).button('reset');
-					formLoad(data);
-				})
-			});
-			$m.modal("show");
-		};
-		$.get($(this).attr('href'), { modal: true, set: $('form.template input[name=set]').val() }, formLoad)
-	});
-};
-
-exports.Manage.bindUpdateSetForm = function(){
-	$('form.template').off().on('submit', function(e){
-		e.preventDefault();
-		var $f = $(this);
-		$f.find('input[type="submit"]').button('loading');
-		$f.find('span.error').empty();
-		$.post($f.attr('action'), $f.serialize(), function(data){
-			var button = $f.find('input[type="submit"]').button('reset');
-			if (button.data('spinContainer')) {
-				button.data('spinContainer').spin(false);
-			}
-			if ($.map(data.errors, function(e){ return e; }).length > 0) {
-				if (data.errors.templateName && data.errors.templateName.length > 0) {
-					$f.find('span.error').html(data.errors.templateName.join(', '));
-				} else {
-					$f.find('span.error').html('An unexpected error occurred');
-				}
+	var setupCollapsible = function($this, $target){
+		$this.css('cursor', 'pointer').on('click', function(){
+			var $chevron = $this.find('i.icon-fixed-width');
+			if ($this.hasClass('expanded')) {
+				$chevron.removeClass('icon-chevron-down').addClass('icon-chevron-right');
+				$this.removeClass('expanded');
+				$target.hide();
+			} else {
+				$chevron.removeClass('icon-chevron-right').addClass('icon-chevron-down');
+				$this.addClass('expanded');
+				$target.show();
 			}
 		});
-	});
-};
+		if ($this.hasClass('expanded')) {
+			$target.show();
+		} else {
+			$target.hide();
+		}
+	};
 
-exports.Manage.bindEditAndDeletePointButtons = function(){
-	$('div.point a.edit, div.point a.delete').on('click', function(e){
-		e.preventDefault();
-		var formLoad = function(data){
-			var $m = $('#modal');
-			$m.html(data);
-			if ($m.find('.monitoring-point').length > 0) {
-				$('form.manage-points-year select[name="set-year"]').change();
-				$m.modal("hide");
-				return;
-			}
-			var $f = $m.find('form');
-			$f.on('submit', function(event){
-				event.preventDefault();
-			});
-			$m.find('.modal-footer button[type=submit]').on('click', function(){
-				$(this).button('loading');
-				$.post($f.attr('action'), $f.serialize(), function(data){
-					$(this).button('reset');
-					formLoad(data);
-				})
-			});
-			$m.modal("show");
-		};
-		$.get($(this).attr('href'), { modal: true }, formLoad);
+	var updateRouteCounter = function(){
+		var total = $('.routeAndYearPicker').find('div.scroller tr').filter(function(){
+			return $(this).find('input:checked').length > 0;
+		}).length;
+		if (total === 0) {
+			$('.routeAndYearPicker').find('span.routes-count').html('are no routes');
+		} else if (total === 1) {
+			$('.routeAndYearPicker').find('span.routes-count').html('is 1 route');
+		} else {
+         	$('.routeAndYearPicker').find('span.routes-count').html('are ' + total + ' routes');
+         }
+	};
+
+	$('.striped-section.routes .collapsible').each(function(){
+		var $this = $(this), $target = $this.closest('.item-info').find('.collapsible-target');
+		setupCollapsible($this, $target);
 	});
-};
+
+	$('#addMonitoringPointSet select[name="academicYear"]').on('change', function(){
+		$(this).closest('form').append(
+			$('<input/>').attr({
+				'name':'changeYear',
+				'type':'hidden'
+			}).val(true)
+		).submit();
+	});
+
+	$('.routeAndYearPicker').find('.collapsible').each(function(){
+		var $this = $(this), $target = $this.parent().find('.collapsible-target');
+		if ($target.find('input:checked').length > 0) {
+			$this.addClass('expanded');
+			updateRouteCounter();
+		}
+		setupCollapsible($this, $target);
+	}).end().find('tr.years th:gt(0)').each(function(){
+		var $this = $(this), oldHtml = $this.html();
+		$this.empty().append(
+			$('<input/>').attr({
+				'type':'checkbox',
+				'title':'Select all/none'
+			}).on('click', function(){
+				var checked = $(this).prop('checked');
+				$this.closest('div').find('div.scroller tr').each(function(){
+					$(this).find('td.year_' + $this.data('year') + ' input').not(':disabled').prop('checked', checked);
+				});
+				updateRouteCounter();
+			})
+		).append(oldHtml);
+	}).end().find('td input:not(:disabled)').on('click', function(){
+		var $this = $(this);
+		$this.closest('div.collapsible-target').find('th.year_' + $this.data('year') + ' input').prop('checked', false);
+		updateRouteCounter();
+	});
+
+	var pointsChanged = false;
+
+	var bindPointButtons = function(){
+    	$('#addMonitoringPointSet a.new-point, #addMonitoringPointSet a.edit-point, #addMonitoringPointSet a.delete-point').off().on('click', function(e){
+    		e.preventDefault();
+    		var formLoad = function(data){
+    			var $m = $('#modal');
+    			$m.html(data);
+    			if ($m.find('.monitoring-points').length > 0) {
+    				$('#addMonitoringPointSet .monitoring-points').replaceWith($m.find('.monitoring-points'))
+    				$m.modal("hide");
+    				bindPointButtons();
+    				pointsChanged = true;
+    				return;
+    			}
+    			var $f = $m.find('form');
+    			$f.on('submit', function(event){
+    				event.preventDefault();
+    			});
+    			$m.find('.modal-footer button[type=submit]').on('click', function(){
+    				$(this).button('loading');
+    				$.post($f.attr('action'), $f.serialize(), function(data){
+    					$(this).button('reset');
+    					formLoad(data);
+    				})
+    			});
+    			$m.off('shown').on('shown', function(){
+    				$f.find('input[name="name"]').focus();
+    			}).modal("show");
+    		};
+    		$.post($(this).attr('href'), $('form#addMonitoringPointSet').serialize(), formLoad)
+    	});
+    };
+    bindPointButtons();
+
+    $('#addMonitoringPointSet').on('submit', function(){
+    	pointsChanged = false;
+    })
+
+    if ($('#addMonitoringPointSet').length > 0) {
+    	$(window).bind('beforeunload', function(){
+    		if (pointsChanged) {
+    			return 'You have made changes to the monitoring points. If you continue they will be lost.'
+    		}
+		});
+	}
+
+	// END SCRIPTS FOR MANAGING MONITORING POINTS
+});
 
 window.Attendance = jQuery.extend(window.Attendance, exports);
 
 }(jQuery));
+

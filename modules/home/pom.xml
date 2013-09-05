@@ -224,6 +224,7 @@
 								<include>libs/bootstrap-datetimepicker/css/datetimepicker.css</include>
 								<include>libs/popup/popup.css</include>
 								<include>libs/jquery-rating/jquery.rating.css</include>
+								<include>libs/jquery-fixedheadertable/jquery.fixedheadertable.css</include>
 							</includes>
 						</aggregation>
 						<aggregation>

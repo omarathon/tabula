@@ -14,7 +14,6 @@ class RouteDaoTest extends PersistenceTestBase {
 	val set = new MonitoringPointSet
 	set.route = route
 	set.createdDate = DateTime.now()
-	set.templateName = "Year 1"
 
 	@Before
 	def setup() {

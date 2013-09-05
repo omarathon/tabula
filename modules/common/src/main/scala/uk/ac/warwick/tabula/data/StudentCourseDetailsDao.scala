@@ -10,12 +10,14 @@ import org.springframework.stereotype.Repository
 import javax.persistence.Entity
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.AcademicYear
 
 trait StudentCourseDetailsDao {
 	def saveOrUpdate(studentCourseDetails: StudentCourseDetails)
 	def delete(studentCourseDetails: StudentCourseDetails)
 	def getByScjCode(scjCode: String): Option[StudentCourseDetails]
 	def getStudentBySprCode(sprCode: String): Option[StudentMember]
+	def getByRoute(route: Route) : Seq[StudentCourseDetails]
 	def findByDepartment(department:Department):Seq[StudentCourseDetails]
 }
 
@@ -52,4 +54,11 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 		if (scdList.size > 0) Some(scdList.head.student)
 		else None
 	}
+
+	def getByRoute(route: Route) = {
+		session.newCriteria[StudentCourseDetails]
+			.add(is("route.code", route.code))
+			.seq
+	}
+
 }
