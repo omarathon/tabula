@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.dev.web.commands
 
 import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, CommandInternal}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.data.{Daoisms, SessionComponent}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
@@ -10,10 +10,12 @@ import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.StudentSignUp
 import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.AcademicYear
+import org.joda.time.DateTime
 
 class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Logging {
 
-	this: ModuleAndDepartmentServiceComponent with SessionComponent =>
+	this: ModuleAndDepartmentServiceComponent with SessionComponent with TermServiceComponent =>
 
 	var moduleCode:String = _
 	var groupSetName:String = _
@@ -31,6 +33,7 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 			groupSet.name = groupSetName
 			groupSet.format = SmallGroupFormat.fromCode(formatName)
 			groupSet.module = module
+			groupSet.academicYear =AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
 			groupSet.allocationMethod = SmallGroupAllocationMethod.fromDatabase(allocationMethodName)
 			if (groupSet.allocationMethod == StudentSignUp ){
 				groupSet.allowSelfGroupSwitching = allowSelfGroupSwitching
@@ -66,5 +69,6 @@ object SmallGroupSetFixtureCommand{
 			with Daoisms
 			with Unaudited
 			with PubliclyVisiblePermissions
+			with AutowiringTermServiceComponent
 	}
 }

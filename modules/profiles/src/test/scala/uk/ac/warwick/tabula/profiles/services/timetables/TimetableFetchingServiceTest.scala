@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.services.timetables
 
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{AcademicYear, TestBase}
 import scala.xml.XML
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
@@ -9,7 +9,7 @@ import org.joda.time.LocalTime
 class TimetableFetchingServiceTest extends TestBase {
 	
 	@Test def parseXML() {
-		val events = ScientiaHttpTimetableFetchingService.parseXml(XML.loadString(TimetableEvents))
+		val events = ScientiaHttpTimetableFetchingService.parseXml(XML.loadString(TimetableEvents), AcademicYear(2012))
 		events.size should be (10)
 		events(0) should be (TimetableEvent(
 			name="CS132L",
@@ -21,7 +21,8 @@ class TimetableFetchingServiceTest extends TestBase {
 			eventType=TimetableEventType.Lecture,
 			location=Some("L5"),
 			moduleCode="CS132",
-			staffUniversityIds=Seq("1170047")
+			staffUniversityIds=Seq("1170047"),
+		  year = AcademicYear(2012)
 		))
 	}
 	
