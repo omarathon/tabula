@@ -78,7 +78,9 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 		}
 
 	def studentModuleRegistrationDetails(usercode: String, ssoUser: User) = {
-		val member = memberDao.getByUserId(usercode).get
+		Seq()
+
+/*		val member = memberDao.getByUserId(usercode).get
 
 		Seq(new ImportModuleRegistrationsCommand(
 				new ModuleRegistrationRow(
@@ -90,7 +92,7 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 					AcademicYear(2013)
 				)
 			)
-		)
+		)*/
 	}
 }
 
