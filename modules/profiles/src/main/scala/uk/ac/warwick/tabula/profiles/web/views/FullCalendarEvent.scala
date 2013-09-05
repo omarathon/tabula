@@ -4,7 +4,8 @@ import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.profiles.services.timetables.EventOccurrence
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.helpers.IntervalFormatter
+import uk.ac.warwick.tabula.helpers.{ConfigurableIntervalFormatter, IntervalFormatter}
+import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter.{IncludeDays, Hour12OptionalMins}
 
 /**
  * serialises to the JSON which FullCalendar likes.
@@ -27,6 +28,7 @@ case class FullCalendarEvent(title:String,
 
 object FullCalendarEvent{
 	def apply(source:EventOccurrence, userLookup:UserLookupService):FullCalendarEvent = {
+		val intervalFormatter = new ConfigurableIntervalFormatter(Hour12OptionalMins,IncludeDays)
 		val shortTimeFormat = DateTimeFormat.shortTime()
 		FullCalendarEvent(
 			title = source.moduleCode.toUpperCase + " " +  source.eventType.displayName + source.location.map(l=>s" ($l)").getOrElse(""),
@@ -35,7 +37,7 @@ object FullCalendarEvent{
 			end = source.end.toDateTime.getMillis/1000,
 		  formattedStartTime = shortTimeFormat.print(source.start.toDateTime),
 			formattedEndTime = shortTimeFormat.print(source.end.toDateTime),
-			formattedInterval = IntervalFormatter.format(source.start.toDateTime, source.end.toDateTime),
+			formattedInterval = intervalFormatter.format(source.start.toDateTime, source.end.toDateTime),
 		  location = source.location.getOrElse(""),
 		  description = source.description,
 			shorterTitle = source.moduleCode.toUpperCase + " " +  source.eventType.displayName,
