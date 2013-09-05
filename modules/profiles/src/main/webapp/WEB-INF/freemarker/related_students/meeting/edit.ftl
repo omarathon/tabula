@@ -21,7 +21,7 @@
 	${heading}
 </#if>
 <#if modal??>
-	<div class="modal-body"></div>
+	<div class="modal-body" id="meeting-record-modal-body"></div>
 	<div class="modal-footer">
 		<form class="double-submit-protection">
 			<span class="submit-buttons">

@@ -10,9 +10,13 @@ import uk.ac.warwick.util.termdates.Term.TermType
 
 class EventOccurrenceServiceTest extends TestBase with Mockito {
 
+
 	val week1:WeekRange.Week = 1
 	val week2:WeekRange.Week = 2
-	val week1Start = DateTime.now().withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay()
+	// deliberately pick a date that _isn't_ now, so that we can highlight places where we're accidentally
+	// guessing the current year instead of reading it from the event
+	val week1Start = DateTime.now().minusYears(2).withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay()
+	val year = AcademicYear.guessByDate(week1Start)
 	val week1end = week1Start.plusDays(7)
 	val week2Start = week1end
 	val week2End = week2Start.plusDays(7)
@@ -22,14 +26,16 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 	val singleWeek = Seq(WeekRange(week1,week1))
 	val twoWeeks = Seq(WeekRange(week1,week2))
 
-	val singleOccurrence = new TimetableEvent("test","test",TimetableEventType.Lecture,singleWeek, DayOfWeek.Monday,tenAm,tenThirty,None,"XX-123",Nil)
-	val doubleOccurrenence	= new TimetableEvent("test","test",TimetableEventType.Lecture,twoWeeks, DayOfWeek.Monday,tenAm,tenThirty,None,"XX-123",Nil)
-
-  val intervalIncludingOccurrence = new Interval(week1Start,week1end)
+	val intervalIncludingOccurrence = new Interval(week1Start,week1end)
 	val intervalIncludingTwoOccurrences = new Interval(week1Start,week2End)
 
+
+	val singleOccurrence = new TimetableEvent("test","test",TimetableEventType.Lecture,singleWeek, DayOfWeek.Monday,tenAm,tenThirty,None,"XX-123",Nil,year)
+	val doubleOccurrenence	= new TimetableEvent("test","test",TimetableEventType.Lecture,twoWeeks, DayOfWeek.Monday,tenAm,tenThirty,None,"XX-123",Nil,year)
+
+
+
 	val intervalOutsideOccurrence = new Interval(1,2)
-  val year = AcademicYear.guessByDate(intervalIncludingOccurrence.getStart)
 
 	val osc = new TermBasedEventOccurrenceComponent with WeekToDateConverterComponent with TermFactoryComponent{
 		val weekToDateConverter = mock[WeekToDateConverter]
@@ -48,7 +54,15 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 
 		val eo = occurrenceService.fromTimetableEvent(singleOccurrence,intervalIncludingOccurrence)
 
+
 		eo.size should be (1)
+
+		// verify that the academicYear used to calculate the intersection and the occurrence dates
+		// is the year from the event, not the current year
+		there was one(osc.weekToDateConverter).intersectsWeek(intervalIncludingOccurrence,week1,year)
+		there was one(osc.weekToDateConverter).toLocalDatetime(week1,DayOfWeek.Monday,tenAm,year)
+		there was one(osc.weekToDateConverter).toLocalDatetime(week1,DayOfWeek.Monday,tenThirty,year)
+
 	}
 
 	@Test

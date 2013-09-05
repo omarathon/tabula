@@ -18,6 +18,7 @@ local.properties
 console.properties
 tabula-private.properties
 !/modules/*/src/test/resources/tabula-private.properties
+atlassian-ide-plugin.xml
 
 # Error dumps, logs
 /hs_err*

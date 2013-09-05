@@ -4,8 +4,8 @@ import uk.ac.warwick.util.termdates.TermFactory
 import uk.ac.warwick.spring.Wire
 
 trait TermFactoryComponent {
-	var termFactory:TermFactory
+	var termFactory: TermFactory
 }
 trait AutowiringTermFactoryComponent extends TermFactoryComponent{
-	var termFactory:TermFactory = Wire[TermService]
+	var termFactory: TermFactory = Wire[TermService]
 }

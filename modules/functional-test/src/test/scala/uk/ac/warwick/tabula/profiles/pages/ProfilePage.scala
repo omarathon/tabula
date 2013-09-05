@@ -10,7 +10,6 @@ class ProfilePage (implicit val webDriver:WebDriver)  extends WebBrowser with	Br
 		// ideally, we'd check the URL looked like /profiles/view/{warwickID}, but unfortunately the
 		// logindetails object doesn't include warwickId, so, we'll try and use the breadcrumbs and page title instead
 		breadCrumbsMatch(Seq("Student Profiles","Your profile"))
-		println(pageTitle)
 		pageTitle == ("Tabula - Student Profiles - Your profile")
 	}
 
