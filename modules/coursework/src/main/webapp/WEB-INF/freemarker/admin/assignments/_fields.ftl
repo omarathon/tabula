@@ -122,13 +122,14 @@ the comments textarea needs to maintain newlines.
 
 </div> <#-- end row-fluid div -->
 
+<#-- These fields are also used by the batch assignment importer so they are in a separate file. -->
+<#include "_common_fields.ftl" />
+
 <#-- Members picker is pretty hefty so it is in a separate file -->
 <#if features.assignmentMembership>
 	<#include "assignment_membership_picker.ftl" />
 </#if>
-
-<#-- These fields are also used by the batch assignment importer so they are in a separate file. -->
-<#include "_common_fields.ftl" />
+<#include "_submissions_common_fields.ftl" />
 
 <script>
 jQuery(function ($) {

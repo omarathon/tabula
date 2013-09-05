@@ -21,7 +21,7 @@
 	
 		<@form.labelled_row "academicYear" "Academic year">
 			<@spring.bind path="academicYear">
-				<span class="uneditable-value">${status.actualValue.label} <span class="hint">(can't be changed)<span></span>
+				<span class="uneditable-value">${status.actualValue.label} <span class="hint">(can't be changed)</span></span>
 			</@spring.bind>
 		</@form.labelled_row>
 	
@@ -118,98 +118,118 @@
 
 </fieldset>
 
-<fieldset id="students">
-	<legend>Students <small>Select which students should be in this set of groups</small></legend>
-	
-	<div class="alert alert-success" style="display: none;" data-display="fragment">
-	  The membership list for these groups has been updated
-	</div>
-	
-	<@spring.bind path="members">
-		<#assign membersGroup=status.actualValue />
-	</@spring.bind>
-	<#assign hasMembers=(membersGroup?? && (membersGroup.includeUsers?size gt 0 || membersGroup.excludeUsers?size gt 0)) />
+<@form.row "members" "assignmentEnrolment">
+	<details>
+		<summary class="collapsible large-chevron">
+			<span class="legend" >Students <small>Select which students should be in this set of groups</small> </span>
 
-	<#include "_students.ftl" />
-</fieldset>
+			<div class="alert alert-success" style="display: none;" data-display="fragment">
+				The membership list for these groups has been updated
+			</div>
+
+			<@spring.bind path="members">
+				<#assign membersGroup=status.actualValue />
+			</@spring.bind>
+			<#assign hasMembers=(membersGroup?? && (membersGroup.includeUsers?size gt 0 || membersGroup.excludeUsers?size gt 0)) />
+
+			<#-- Members picker is pretty hefty so it is in a separate file -->
+			<#if editSmallGroupSetCommand??>
+				<#assign command=editSmallGroupSetCommand />
+			<#else>
+				<#assign command=createSmallGroupSetCommand />
+			</#if>
+			<#include "groups_membership_picker_heading.ftl" />
+		</summary>
+		<#include "groups_membership_picker.ftl" />
+	</details>
+</@form.row>
 
 <fieldset id="groups">
-	<legend>Groups <small>Create and name empty groups and add weekly events for these groups</small></legend>
-	
-	<div class="alert alert-success" style="display: none;" data-display="fragment">
-	  Your groups have been updated
-	</div>
+	<details>
+		<summary class="collapsible large-chevron">
+			<span class="legend" >Groups <small>Create and name empty groups and add weekly events for these groups</small> </span>
 
-	<@spring.bind path="groups">
-		<#assign groups=status.actualValue />
-	</@spring.bind>
-	
-	<#assign groupCount = 0 />
-	<#assign deletedGroupCount = 0 />
-	<#list groups as group>
-		<@spring.bind path="groups[${group_index}].delete">
-			<#assign deleteGroup=status.actualValue />
-		</@spring.bind>
-		
-		<#if deleteGroup>
-			<#assign deletedGroupCount = deletedGroupCount + 1 />
-		<#else>
-			<#assign groupCount = groupCount + 1 />
-		</#if>
-	</#list>
-	
-	<p>
-		There <#if groupCount == 1>is<#else>are</#if> <@fmt.p groupCount "group" "groups" />
-		<#if deletedGroupCount gt 0>
-			(and <@fmt.p deletedGroupCount "group" "groups" /> marked for deletion)
-		</#if>
-	</p>
+			<div class="alert alert-success" style="display: none;" data-display="fragment">
+			  Your groups have been updated
+			</div>
 
-	<@form.row defaultClass="maxGroupSize groupDetail">
-		<@form.field>
-			<@form.label checkbox=true>
-				<@f.checkbox path="defaultMaxGroupSizeEnabled" id="defaultMaxGroupSizeEnabled" />
-				Set maximum group size:
-			</@form.label>
+			<@spring.bind path="groups">
+				<#assign groups=status.actualValue />
+			</@spring.bind>
 
-			<#if set??>
-				<#assign disabled = !(set.defaultMaxGroupSizeEnabled!true)>
-			<#else>
-				<#assign disabled = "true" >
+			<#assign groupCount = 0 />
+			<#assign deletedGroupCount = 0 />
+			<#list groups as group>
+				<@spring.bind path="groups[${group_index}].delete">
+					<#assign deleteGroup=status.actualValue />
+				</@spring.bind>
+
+				<#if deleteGroup>
+					<#assign deletedGroupCount = deletedGroupCount + 1 />
+				<#else>
+					<#assign groupCount = groupCount + 1 />
+				</#if>
+			</#list>
+
+			<p>
+				<@fmt.p groupCount "group" "groups" />
+				<#if deletedGroupCount gt 0>
+					(and <@fmt.p deletedGroupCount "group" "groups" /> marked for deletion)
+				</#if>
+			</p>
+
+		</summary>
+
+		<@form.row defaultClass="maxGroupSize groupDetail">
+			<@form.field>
+				<@form.label checkbox=true>
+					<@f.checkbox path="defaultMaxGroupSizeEnabled" id="defaultMaxGroupSizeEnabled" />
+					Set maximum group size:
+				</@form.label>
+
+				<#if set??>
+					<#assign disabled = !(set.defaultMaxGroupSizeEnabled!true)>
+				<#else>
+					<#assign disabled = "true" >
+				</#if>
+
+				<@f.input path="defaultMaxGroupSize" type="number" min="0" max="100" cssClass="input-small" disabled="${disabled?string}" />
+
+				<a class="use-popover" data-html="true"
+				   data-content="This is the default maximum size for any new groups you create.  You can adjust the maximum size of individual groups">
+					<i class="icon-question-sign"></i>
+				</a>
+				<@f.errors path="defaultMaxGroupSize" cssClass="error" />
+			</@form.field>
+		</@form.row>
+
+		<#include "_groups_modal.ftl" />
+	
+		<div class="striped-section">
+			<div class="clearfix">
+				<div class="btn-group section-manage-button">
+				  <button type="button" data-target="#groups-modal" class="btn" data-toggle="modal">
+						<#if groups?size gt 0>Edit<#else>Add</#if> groups
+					</button>
+				</div>
+				<h2 class="section-title with-button">Groups</h2>
+			</div>
+
+			<#if groups?size gt 0>
+				<#include "_events.ftl" />
 			</#if>
 
-			<@f.input path="defaultMaxGroupSize" type="number" min="0" max="100" cssClass="input-small" disabled="${disabled?string}" />
-
-			<a class="use-popover" data-html="true"
-			   data-content="This is the default maximum size for any new groups you create.  You can adjust the maximum size of individual groups">
-				<i class="icon-question-sign"></i>
-			</a>
-			<@f.errors path="defaultMaxGroupSize" cssClass="error" />
-		</@form.field>
-	</@form.row>
-
-	<#include "_groups_modal.ftl" />
-	
-	<div class="striped-section<#if groups?size gt 0> collapsible expanded</#if>">
-		<div class="clearfix">
-			<div class="btn-group section-manage-button">
-			  <button type="button" data-target="#groups-modal" class="btn" data-toggle="modal">
-					<#if groups?size gt 0>Edit<#else>Add</#if> groups
-				</button>
-			</div>
-			<h2 class="section-title with-button">Groups</h2>
 		</div>
-		
-		<#if groups?size gt 0>
-			<#include "_events.ftl" />
-		</#if>
-		
-	</div>
+	</details>
 </fieldset>
 
 <script type="text/javascript">
 
 	jQuery(function($) {
+
+		$('#action-input').closest('form').on('click', '.update-only', function() {
+			$('#action-input').val('update');
+		});
 
 		var setMaxSizeOptions = function() {
 			if ($("#defaultMaxGroupSizeEnabled:checked").val()){
