@@ -9,12 +9,15 @@ import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 import uk.ac.warwick.tabula.profiles.services.timetables.{AutowiringScientiaConfigurationComponent, ScientiaHttpTimetableFetchingServiceComponent, SmallGroupEventTimetableEventSourceComponentImpl, CombinedStudentTimetableEventSourceComponent}
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.{UserLookupService, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
+import uk.ac.warwick.spring.Wire
 
 @Controller
 @RequestMapping(value = Array("/timetable"))
 class TimetableController extends ProfilesController {
+
+	var userLookup = Wire[UserLookupService]
 
 	// re-use the event source, so it can cache lookups between requests
 	val eventSource = (new CombinedStudentTimetableEventSourceComponent
@@ -39,7 +42,7 @@ class TimetableController extends ProfilesController {
 				command.start = start
 				command.end = end
 				val timetableEvents = command.apply
-				val calendarEvents = timetableEvents map (FullCalendarEvent(_))
+				val calendarEvents = timetableEvents map (FullCalendarEvent(_, userLookup))
 				Mav(new JSONView(calendarEvents))
 			}
 			case _ => throw new RuntimeException("Don't know how to render timetables for non-student users")

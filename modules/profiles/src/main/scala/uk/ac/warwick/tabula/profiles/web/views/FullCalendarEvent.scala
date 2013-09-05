@@ -3,6 +3,8 @@ package uk.ac.warwick.tabula.profiles.web.views
 import org.joda.time.{DateTime, LocalDate}
 import uk.ac.warwick.tabula.profiles.services.timetables.EventOccurrence
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.helpers.IntervalFormatter
 
 /**
  * serialises to the JSON which FullCalendar likes.
@@ -17,21 +19,27 @@ case class FullCalendarEvent(title:String,
                              // for use in the renderEvent callback
 														 formattedStartTime:String,
 														 formattedEndTime:String,
+														 formattedInterval:String,
 														 location:String="",
-														 description:String="" )
+														 description:String="",
+														 shorterTitle:String="", // used in the pop-up to display event details
+														 tutorNames:String="")
 
 object FullCalendarEvent{
-	def apply(source:EventOccurrence):FullCalendarEvent = {
+	def apply(source:EventOccurrence, userLookup:UserLookupService):FullCalendarEvent = {
 		val shortTimeFormat = DateTimeFormat.shortTime()
 		FullCalendarEvent(
-			source.moduleCode.toUpperCase + " " +  source.eventType.displayName + source.location.map(l=>s" ($l)").getOrElse(""),
-			false,
-			source.start.toDateTime.getMillis/1000,
-			source.end.toDateTime.getMillis/1000,
-		  shortTimeFormat.print(source.start.toDateTime),
-			shortTimeFormat.print(source.end.toDateTime),
-		  source.location.getOrElse(""),
-		  source.description
+			title = source.moduleCode.toUpperCase + " " +  source.eventType.displayName + source.location.map(l=>s" ($l)").getOrElse(""),
+			allDay = false,
+			start = source.start.toDateTime.getMillis/1000,
+			end = source.end.toDateTime.getMillis/1000,
+		  formattedStartTime = shortTimeFormat.print(source.start.toDateTime),
+			formattedEndTime = shortTimeFormat.print(source.end.toDateTime),
+			formattedInterval = IntervalFormatter.format(source.start.toDateTime, source.end.toDateTime),
+		  location = source.location.getOrElse(""),
+		  description = source.description,
+			shorterTitle = source.moduleCode.toUpperCase + " " +  source.eventType.displayName,
+			tutorNames = source.staffUniversityIds.map(id=>userLookup.getUserByWarwickUniId(id).getFullName).mkString(", ")
 		)
 	}
 }
