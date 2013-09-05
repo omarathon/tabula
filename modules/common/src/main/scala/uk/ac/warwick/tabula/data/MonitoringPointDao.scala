@@ -2,9 +2,10 @@ package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConverters._
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{StudentMember, Member}
+import uk.ac.warwick.tabula.data.model.StudentMember
+import org.hibernate.criterion.Order
 
 trait MonitoringPointDaoComponent {
 	val monitoringPointDao: MonitoringPointDao
@@ -15,13 +16,20 @@ trait AutowiringMonitoringPointDaoComponent extends MonitoringPointDaoComponent 
 }
 
 trait MonitoringPointDao {
-	def getById(id: String): Option[MonitoringPoint]
+	def getPointById(id: String): Option[MonitoringPoint]
+	def getSetById(id: String): Option[MonitoringPointSet]
 	def list(page: Int) : Seq[MonitoringPoint]
 	def getStudentsChecked(monitoringPoint: MonitoringPoint): Seq[StudentMember]
 	def saveOrUpdate(monitoringPoint: MonitoringPoint)
+	def delete(monitoringPoint: MonitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
+	def saveOrUpdate(template: MonitoringPointSetTemplate)
+	def saveOrUpdate(set: MonitoringPointSet)
 	def getCheckpoint(monitoringPoint: MonitoringPoint, member: StudentMember) : Option[MonitoringCheckpoint]
 	def getCheckpoints(montitoringPoint: MonitoringPoint) : Seq[MonitoringCheckpoint]
+	def listTemplates : Seq[MonitoringPointSetTemplate]
+	def getTemplateById(id: String): Option[MonitoringPointSetTemplate]
+	def deleteTemplate(template: MonitoringPointSetTemplate)
 }
 
 
@@ -29,10 +37,11 @@ trait MonitoringPointDao {
 class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 
-	def getById(id: String) = {
-		val ret = session.newQuery[MonitoringPoint]("from MonitoringPoint monitoringPoint where id = :id").setString("id", id).uniqueResult
-		ret
-	}
+	def getPointById(id: String) =
+		getById[MonitoringPoint](id)
+
+	def getSetById(id: String) =
+		getById[MonitoringPointSet](id)
 
 	def list(page: Int) = {
 		val perPage = 20
@@ -51,10 +60,15 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	}
 
 	def saveOrUpdate(monitoringPoint: MonitoringPoint) = session.saveOrUpdate(monitoringPoint)
+	def delete(monitoringPoint: MonitoringPoint) = session.delete(monitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint) = session.saveOrUpdate(monitoringCheckpoint)
+	def saveOrUpdate(set: MonitoringPointSet) = session.saveOrUpdate(set)
+	def saveOrUpdate(template: MonitoringPointSetTemplate) = session.saveOrUpdate(template)
 
 	def getCheckpoint(monitoringPoint: MonitoringPoint, member: StudentMember): Option[MonitoringCheckpoint] = {
-	  val studentCourseDetail = member.studentCourseDetails.asScala.filter(_.route == monitoringPoint.pointSet.route).head
+	  val studentCourseDetail = member.studentCourseDetails.asScala.filter(
+			_.route == monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route
+		).head
 
 		session.newCriteria[MonitoringCheckpoint]
 			.add(is("studentCourseDetail", studentCourseDetail))
@@ -67,5 +81,14 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			.seq
 	}
 
+	def listTemplates: Seq[MonitoringPointSetTemplate] = {
+		session.newCriteria[MonitoringPointSetTemplate]
+			.addOrder(Order.asc("position"))
+			.list.asScala.toSeq
+	}
 
+	def getTemplateById(id: String): Option[MonitoringPointSetTemplate] =
+		getById[MonitoringPointSetTemplate](id)
+
+	def deleteTemplate(template: MonitoringPointSetTemplate) = session.delete(template)
 }

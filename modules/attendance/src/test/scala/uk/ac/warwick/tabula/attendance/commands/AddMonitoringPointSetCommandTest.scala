@@ -10,10 +10,11 @@ import uk.ac.warwick.tabula.JavaImports._
 
 class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends RouteServiceComponent with TermServiceComponent
+	trait CommandTestSupport extends RouteServiceComponent with TermServiceComponent with MonitoringPointServiceComponent
 			with AddMonitoringPointSetValidation with AddMonitoringPointSetState {
 		val routeService = mock[RouteService]
 		val termService = mock[TermService]
+		val monitoringPointService = mock[MonitoringPointService]
 	}
 
 	trait Fixture {

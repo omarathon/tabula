@@ -24,7 +24,9 @@ case object SysadminRoleDefinition extends UnassignableBuiltInRoleDefinition {
 		StudentRelationshipType.Create,
 		StudentRelationshipType.Read,
 		StudentRelationshipType.Update,
-		StudentRelationshipType.Delete
+		StudentRelationshipType.Delete,
+
+		MonitoringPointSetTemplates.Manage
 	)
 	
 	GrantsGlobalPermission(

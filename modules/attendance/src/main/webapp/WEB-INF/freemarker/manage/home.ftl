@@ -48,14 +48,28 @@
 <form id="chooseCreateType" class="form-inline" action="<@url page="/manage/${command.dept.code}/sets/add"/>">
 	<h2>Create monitoring schemes</h2>
 	<label>
-		<input class="create blank" type="radio" checked name="createType"/>
+		<input class="create blank" type="radio" checked name="createType" value="blank"/>
 		Create blank scheme
 		<a class="use-popover" id="popover-create-blank" data-content="Create a new scheme from scratch"><i class="icon-question-sign"></i></a>
+		<select style="visibility:hidden"></select>
 	</label>
 	<br/>
+	<#if (command.templates?size > 0)>
+		<label>
+			<input class="create template" type="radio" name="createType" value="template"/>
+			Create from template
+			<a class="use-popover" id="popover-create-template" data-content="Choose a template monitoring scheme developed for each year of study"><i class="icon-question-sign"></i></a>
+			<select name="existingSet" class="template">
+				<#list command.templates as template>
+					<option value="${template.id}">${template.templateName}</option>
+				</#list>
+			</select>
+		</label>
+		<br />
+	</#if>
 	<#if (command.setsByRouteByAcademicYear?keys?size > 0)>
 		<label>
-			<input class="create copy" type="radio" name="createType"/>
+			<input class="create copy" type="radio" name="createType" value="copy"/>
 			Copy an existing scheme
 			<a class="use-popover" id="popover-create-copy" data-content="Choose an existing scheme to copy by academic year, route, and year of study"><i class="icon-question-sign"></i></a>
 			<select class="academicYear input-medium">
@@ -64,7 +78,7 @@
 			<select class="route input-xlarge">
 				<option style="display:none;" disabled selected value="">Route</option>
 			</select>
-			<select name="existingSet" class="input-medium">
+			<select name="existingSet" class="input-medium copy">
 				<option style="display:none;" disabled selected value="">Year of study</option>
 			</select>
 		</label>

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.{RouteServiceComponent, AutowiringRouteServiceComponent}
+import uk.ac.warwick.tabula.services.{MonitoringPointServiceComponent, AutowiringMonitoringPointServiceComponent, RouteServiceComponent, AutowiringRouteServiceComponent}
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -9,7 +9,7 @@ import scala.collection.mutable
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSetTemplate, MonitoringPointSet}
 
 object ManageMonitoringPointSetCommand {
 	def apply(dept: Department, academicYearOption: Option[AcademicYear]) =
@@ -17,6 +17,7 @@ object ManageMonitoringPointSetCommand {
 		with ComposableCommand[Unit]
 		with ManageMonitoringPointSetPermissions
 		with AutowiringRouteServiceComponent
+		with AutowiringMonitoringPointServiceComponent
 		with ReadOnly with Unaudited
 }
 
@@ -25,7 +26,7 @@ abstract class ManageMonitoringPointSetCommand(val dept: Department, val academi
 	with ManageMonitoringPointSetState {
 
 	override def applyInternal() = {
-		
+		templates = monitoringPointService.listTemplates
 	}
 }
 
@@ -37,9 +38,7 @@ trait ManageMonitoringPointSetPermissions extends RequiresPermissionsChecking wi
 	}
 }
 
-
-
-trait ManageMonitoringPointSetState extends RouteServiceComponent {
+trait ManageMonitoringPointSetState extends RouteServiceComponent with MonitoringPointServiceComponent {
 
 	def dept: Department
 	def academicYearOption: Option[AcademicYear]
@@ -66,5 +65,7 @@ trait ManageMonitoringPointSetState extends RouteServiceComponent {
 			case Some(r: Route) => setsByRouteByAcademicYear(academicYear)(r)
 			case _ => new ItemNotFoundException()
 	}
+
+	var templates: Seq[MonitoringPointSetTemplate] = _
 
 }

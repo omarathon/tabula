@@ -12,10 +12,13 @@ import java.net.URLEncoder
 object Routes {
 	private def encoded(string: String) = URLEncoder.encode(string, "UTF-8")
 	def home = "/"
+	object managingDepartment {
+		def apply(department: Department) = "/manage/%s" format encoded(department.code)
+	}
 
 	def monitoringPoints = "/monitoringpoints"
 
 	object admin {
-		def departmentPermissions(department: Department) = "/admin/department/%s/permissions" format (encoded(department.code))
+		def departmentPermissions(department: Department) = "/admin/department/%s/permissions" format encoded(department.code)
 	}
 }
