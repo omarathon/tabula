@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import org.joda.time.DateTime
-
 import javax.persistence._
 import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.annotations.AccessType
@@ -31,8 +30,9 @@ class ModuleRegistration() extends GeneratedId {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	var academicYear: AcademicYear = null
 
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.StudentCourseDetails")
-	var studentCourseDetails: StudentCourseDetails = null
+	@ManyToOne
+	@JoinColumn(name="scjCode", referencedColumnName="scjCode")
+	var studentCourseDetails: StudentCourseDetails = _
 
 	var assessmentGroup: String = null
 

@@ -3,9 +3,9 @@ package uk.ac.warwick.tabula.data
 import org.hibernate.annotations.AccessType
 import org.springframework.stereotype.Repository
 import javax.persistence.Entity
-import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.ModuleRegistration
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.tabula.AcademicYear
 
 trait ModuleRegistrationDao {
 	def saveOrUpdate(moduleRegistration: ModuleRegistration)
@@ -30,13 +30,11 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 		session.newQuery[ModuleRegistration]("""
 				select distinct mr
 					from ModuleRegistration mr
-					join studentMember
-						with userid = :usercode
-					where mr.academicYear = :academicYear
-					and mr.sprCode.universityId = studentMember.universityId
+					where studentCourseDetails.student.userId = :usercode
+					and academicYear = :academicYear
 				""")
 					.setString("usercode", usercode)
-					.setEntity("academicYear", academicYear)
+					.setString("academicYear", academicYear.getStoreValue.toString)
 					.seq
 	}
 }

@@ -43,7 +43,8 @@ trait ProfileImporter {
 	def userIdAndCategory(member: Member): Option[MembershipInformation]
 }
 
-@Profile(Array("dev", "test", "production")) @Service
+@Profile(Array("dev", "test", "production"))
+@Service
 class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademicYearAware {
 	import ProfileImporter._
 
