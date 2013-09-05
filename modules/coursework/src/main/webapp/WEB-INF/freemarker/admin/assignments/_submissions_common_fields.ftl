@@ -11,7 +11,7 @@ so that they can be passed around between requests.
 <#if features.submissions>
 	<fieldset id="submission-options">
 		<details <#if ((assignment.collectSubmissions)?? && assignment.collectSubmissions) || collectSubmissions?? && collectSubmissions > open </#if> class="submissions">
-			<summary class="collapsible">
+			<summary class="collapsible large-chevron">
 				<span class="legend collapsible" >Submissions <small>Set submission options for this assignment</small>
 				<@form.row>
 					<@form.field>
@@ -187,15 +187,4 @@ so that they can be passed around between requests.
 			</div>
 		</details>
 	</fieldset>
-
-<#--
-	<@form.row>
-	<@form.field>
-
-
-
-	</@form.field>
-	</@form.row>
--->
-
 </#if>

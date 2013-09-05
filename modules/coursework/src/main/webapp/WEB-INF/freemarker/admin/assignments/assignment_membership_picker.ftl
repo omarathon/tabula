@@ -44,7 +44,7 @@
 		</#macro>
 
 		<details>
-			<summary class="collapsible">
+			<summary class="collapsible large-chevron">
 				<span class="legend" >Students <small>Select which students should be enrolled on this assignment</small> </span>
 				<#-- enumerate current state -->
 				<#if linkedUpstreamAssessmentGroups?has_content>
