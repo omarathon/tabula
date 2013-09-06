@@ -119,7 +119,7 @@
 </fieldset>
 
 <@form.row "members" "assignmentEnrolment">
-	<details>
+	<details id="groups-details">
 		<summary class="collapsible large-chevron">
 			<span class="legend" >Students <small>Select which students should be in this set of groups</small> </span>
 
