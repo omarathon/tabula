@@ -69,7 +69,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 		  find("defaultMaxGroupSizeeee") should not be (null)
 
 		When("I expand groups details, check the checkbox, select a default value, and click Save")
-		  click on (cssSelector("#groups-details"))
+		  click on (cssSelector("details[id='groups-details'] summary"))
 		  checkbox("defaultMaxGroupSizeEnabled").select()
 		  id("defaultMaxGroupSize").webElement.clear()
 		  id("defaultMaxGroupSize").webElement.sendKeys("12")
@@ -80,7 +80,7 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 
 		When("I navigate to the edit properties page again and expand groups details")
 		  groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
-		  click on (cssSelector("#groups-details"))
+		  click on (cssSelector("details[id='groups-details'] summary"))
 
 		Then("The checkbox should still be checked")
 		  checkbox("defaultMaxGroupSizeEnabled").isSelected should be(true)

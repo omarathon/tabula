@@ -119,7 +119,7 @@
 </fieldset>
 
 <@form.row "members" "assignmentEnrolment">
-	<details id="groups-details">
+	<details>
 		<summary class="collapsible large-chevron">
 			<span class="legend" >Students <small>Select which students should be in this set of groups</small> </span>
 
@@ -145,7 +145,7 @@
 </@form.row>
 
 <fieldset id="groups">
-	<details>
+	<details id="groups-details">
 		<summary class="collapsible large-chevron">
 			<span class="legend" >Groups <small>Create and name empty groups and add weekly events for these groups</small> </span>
 
