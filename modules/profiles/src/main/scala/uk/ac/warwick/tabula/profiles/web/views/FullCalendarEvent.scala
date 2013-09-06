@@ -12,36 +12,36 @@ import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter.{IncludeDays, 
  *
  * Note: start and end are *Seconds* since the epoch, not milliseconds!
  */
-case class FullCalendarEvent(title:String,
-														 allDay:Boolean,
-														 start:Long,
-														 end:Long,
+case class FullCalendarEvent(title: String,
+														 allDay: Boolean,
+														 start: Long,
+														 end: Long,
 														 // fields below here are not used by FullCalendar itself, they're custom fields
-                             // for use in the renderEvent callback
-														 formattedStartTime:String,
-														 formattedEndTime:String,
-														 formattedInterval:String,
-														 location:String="",
-														 description:String="",
-														 shorterTitle:String="", // used in the pop-up to display event details
-														 tutorNames:String="")
+														 // for use in the renderEvent callback
+														 formattedStartTime: String,
+														 formattedEndTime: String,
+														 formattedInterval: String,
+														 location: String = "",
+														 description: String = "",
+														 shorterTitle: String = "", // used in the pop-up to display event details
+														 tutorNames: String = "")
 
-object FullCalendarEvent{
-	def apply(source:EventOccurrence, userLookup:UserLookupService):FullCalendarEvent = {
-		val intervalFormatter = new ConfigurableIntervalFormatter(Hour12OptionalMins,IncludeDays)
+object FullCalendarEvent {
+	def apply(source: EventOccurrence, userLookup: UserLookupService): FullCalendarEvent = {
+		val intervalFormatter = new ConfigurableIntervalFormatter(Hour12OptionalMins, IncludeDays)
 		val shortTimeFormat = DateTimeFormat.shortTime()
 		FullCalendarEvent(
-			title = source.moduleCode.toUpperCase + " " +  source.eventType.displayName + source.location.map(l=>s" ($l)").getOrElse(""),
+			title = source.moduleCode.toUpperCase + " " + source.eventType.displayName + source.location.map(l => s" ($l)").getOrElse(""),
 			allDay = false,
-			start = source.start.toDateTime.getMillis/1000,
-			end = source.end.toDateTime.getMillis/1000,
-		  formattedStartTime = shortTimeFormat.print(source.start.toDateTime),
+			start = source.start.toDateTime.getMillis / 1000,
+			end = source.end.toDateTime.getMillis / 1000,
+			formattedStartTime = shortTimeFormat.print(source.start.toDateTime),
 			formattedEndTime = shortTimeFormat.print(source.end.toDateTime),
 			formattedInterval = intervalFormatter.format(source.start.toDateTime, source.end.toDateTime),
-		  location = source.location.getOrElse(""),
-		  description = source.description,
-			shorterTitle = source.moduleCode.toUpperCase + " " +  source.eventType.displayName,
-			tutorNames = source.staffUniversityIds.map(id=>userLookup.getUserByWarwickUniId(id).getFullName).mkString(", ")
+			location = source.location.getOrElse(""),
+			description = source.description,
+			shorterTitle = source.moduleCode.toUpperCase + " " + source.eventType.displayName,
+			tutorNames = source.staffUniversityIds.map(id => userLookup.getUserByWarwickUniId(id).getFullName).mkString(", ")
 		)
 	}
 }
