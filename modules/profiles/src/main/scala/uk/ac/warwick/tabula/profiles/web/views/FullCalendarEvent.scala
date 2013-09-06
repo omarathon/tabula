@@ -16,6 +16,7 @@ case class FullCalendarEvent(title: String,
 														 allDay: Boolean,
 														 start: Long,
 														 end: Long,
+														 backgroundColor:String="#4daacc", // tabulaBlueLight.
 														 // fields below here are not used by FullCalendar itself, they're custom fields
 														 // for use in the renderEvent callback
 														 formattedStartTime: String,
@@ -24,9 +25,11 @@ case class FullCalendarEvent(title: String,
 														 location: String = "",
 														 description: String = "",
 														 shorterTitle: String = "", // used in the pop-up to display event details
-														 tutorNames: String = "")
+														 tutorNames: String = "",
+                             moduleCode: String="")
 
 object FullCalendarEvent {
+
 	def apply(source: EventOccurrence, userLookup: UserLookupService): FullCalendarEvent = {
 		val intervalFormatter = new ConfigurableIntervalFormatter(Hour12OptionalMins, IncludeDays)
 		val shortTimeFormat = DateTimeFormat.shortTime()
@@ -41,7 +44,9 @@ object FullCalendarEvent {
 			location = source.location.getOrElse(""),
 			description = source.description,
 			shorterTitle = source.moduleCode.toUpperCase + " " + source.eventType.displayName,
-			tutorNames = source.staffUniversityIds.map(id => userLookup.getUserByWarwickUniId(id).getFullName).mkString(", ")
+			tutorNames = source.staffUniversityIds.map(id => userLookup.getUserByWarwickUniId(id).getFullName).mkString(", "),
+		  moduleCode = source.moduleCode
 		)
 	}
 }
+
