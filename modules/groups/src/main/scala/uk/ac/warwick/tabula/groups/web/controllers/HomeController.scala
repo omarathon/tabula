@@ -27,16 +27,17 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewModules
 		val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageSmallGroups)
 		val taughtGroups = smallGroupService.findSmallGroupsByTutor(user.apparentUser)
 		val memberGroupSets = smallGroupService.findSmallGroupSetsByMember(user.apparentUser)
-		val nonEmptyMemberViewModules = getViewModulesForStudent(memberGroupSets,getGroupsToDisplay(_,user.apparentUser))
+		val releasedMemberGroupSets = getGroupSetsReleasedToStudents(memberGroupSets)
+		val nonEmptyMemberViewModules = getViewModulesForStudent(releasedMemberGroupSets,getGroupsToDisplay(_,user.apparentUser))
 
 		Mav("home/view",
 			"ownedDepartments" -> ownedDepartments,
 			"ownedModuleDepartments" -> ownedModules.map { _.department },
 			"taughtGroups" -> taughtGroups,
-		  "memberGroupsetModules"->ViewModules(nonEmptyMemberViewModules, false)
+			"memberGroupsetModules"->ViewModules(nonEmptyMemberViewModules, false)
 		)
 	}
-	
+
 }
 //
 // Stateless functions to munge groupsets and groups
@@ -64,8 +65,10 @@ object HomeController {
 	// return all the modules with at least one groupset with at least one group that needs
 	// to be displayed to the student (@see getGroupsToDisplay); map the modules and groupsets to
 	// ViewModules and ViewSets for rendering.
+
 	def getViewModulesForStudent(memberGroupSets:Seq[SmallGroupSet], getDisplayGroups:(SmallGroupSet)=>(Seq[SmallGroup],ViewerRole) ):Seq[ViewModule]={
 		val memberGroupSetsWithApplicableGroups = memberGroupSets.map(set=>(set,getDisplayGroups(set))).filterNot{case(s,(groups,role))=>groups.isEmpty}
+
 		val memberViewModules =	memberGroupSetsWithApplicableGroups.groupBy(_._1.module).map{
 			case(module,setData)=>{
 				val viewSets = setData.map{case(set,(groups,role))=>{
@@ -76,4 +79,6 @@ object HomeController {
 		}
 		memberViewModules.filterNot(m=>m.setItems.isEmpty).toSeq
 	}
+
+	def getGroupSetsReleasedToStudents(memberGroupSets:Seq[SmallGroupSet]) = memberGroupSets.filter(s => s.releasedToStudents)
 }
