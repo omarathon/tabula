@@ -10,12 +10,12 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering
 
 trait ViewStudentPersonalTimetableCommandState {
-	var student: StudentMember = _
+	val student: StudentMember
 	var start: LocalDate = LocalDate.now.minusMonths(12)
 	var end: LocalDate = start.plusMonths(13)
 }
 
-class ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource:StudentTimetableEventSource) extends CommandInternal[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState {
+class ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource:StudentTimetableEventSource, val student:StudentMember) extends CommandInternal[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState {
 	this: EventOccurrenceServiceComponent =>
 
 	def eventsToOccurrences: TimetableEvent => Seq[EventOccurrence] =
@@ -41,9 +41,11 @@ object ViewStudentPersonalTimetableCommand {
 
 
 	// mmm, cake.
-	def apply(eventSource:StudentTimetableEventSource): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState = {
+	// have to pass in the student in the constructor so that we have enough data for the permissions check to work
 
-		new ViewStudentPersonalTimetableCommandImpl(eventSource)
+	def apply(eventSource:StudentTimetableEventSource, student:StudentMember): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState = {
+
+		new ViewStudentPersonalTimetableCommandImpl(eventSource, student)
 			with ComposableCommand[Seq[EventOccurrence]]
 			with ViewStudentTimetablePermissions
 			with Unaudited

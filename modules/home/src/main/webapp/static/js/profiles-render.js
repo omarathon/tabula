@@ -265,29 +265,33 @@
 
 	// TIMETABLE STUFF
     $(function() {
-		function getEvents(start, end,callback){
-			$.ajax({url:'/profiles/timetable/api',
-				  // make the from/to params compatible with what FullCalendar sends if you just specify a URL
-				  // as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
-				  data:{'from':start.getTime()/1000,
-						'to':end.getTime()/1000
-						},
-				  success:function(data){
-					//
-					// TODO
-					//
-					// insert code here to look through the events and magically display weekends if a weekend event is found
-					// (cal.fullCalendar('option','weekends',true); doesn't work, although some other options do)
-					// https://code.google.com/p/fullcalendar/issues/detail?id=293 has some discussion and patches
-					//
-					callback(data);
-				  }
-				  });
+		function getEvents(studentId){
+			return function (start, end,callback){
+				$.ajax({url:'/profiles/timetable/api',
+					  // make the from/to params compatible with what FullCalendar sends if you just specify a URL
+					  // as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
+					  data:{'from':start.getTime()/1000,
+							'to':end.getTime()/1000,
+							'whoFor':studentId
+							},
+					  success:function(data){
+						//
+						// TODO
+						//
+						// insert code here to look through the events and magically display weekends if a weekend event is found
+						// (cal.fullCalendar('option','weekends',true); doesn't work, although some other options do)
+						// https://code.google.com/p/fullcalendar/issues/detail?id=293 has some discussion and patches
+						//
+						callback(data);
+					  }
+					  });
+			};
 		}
 		function onViewUpdate(view,element){
 		   updateCalendarTitle(view, element);
 		   $('.popover').hide();
 		}
+		// relies on the variable "weeks" having been defined elsewhere, by using the WeekRangesDumperTag
 		function updateCalendarTitle(view,element){
             var start = view.start.getTime();
             var end = view.end.getTime();
@@ -303,10 +307,10 @@
             return true;
 		}
 
-		function createCalendar(container,defaultViewName){
+		function createCalendar(container,defaultViewName, studentId){
 			var showWeekends = (defaultViewName == "month");
 			var cal = $(container).fullCalendar({
-									events:function(start, end, callback){getEvents(start,end, callback);},
+									events:getEvents(studentId),
 									defaultView: defaultViewName,
 									allDaySlot: false,
 									slotMinutes: 60,
@@ -350,7 +354,7 @@
 		}
 
         $(".fullCalendar").each(function(index){
-    			createCalendar($(this),$(this).data('viewname'));
+    			createCalendar($(this),$(this).data('viewname'),$(this).data('studentid'));
     		});
     	});
 }(jQuery));
