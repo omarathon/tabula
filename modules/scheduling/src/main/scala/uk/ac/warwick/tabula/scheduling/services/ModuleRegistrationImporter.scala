@@ -80,7 +80,13 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 	def studentModuleRegistrationDetails(usercode: String, ssoUser: User) = {
 		Seq()
 
-/*		val member = memberDao.getByUserId(usercode).get
+/*
+ *  Leaving this commented code in as it's how we might go about adding sandbox modreg data -
+ *  but this implementation would register every single student onto AM101-30 which
+ *  could be unwieldy if we implemented a page to list students by module, so it
+ *  would need to be improved on to spread students over a suitable range of modules.
+ *
+    	val member = memberDao.getByUserId(usercode).get
 
 		Seq(new ImportModuleRegistrationsCommand(
 				new ModuleRegistrationRow(

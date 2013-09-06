@@ -2,9 +2,7 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import scala.collection.JavaConversions.mapAsScalaMap
 import scala.collection.JavaConversions.seqAsJavaList
-
 import org.hibernate.annotations.AccessType
-
 import javax.persistence.Entity
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
@@ -25,8 +23,12 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.scheduling.services.SitsAcademicYearAware
+import uk.ac.warwick.tabula.data.model.ModuleRegistration
+import uk.ac.warwick.tabula.data.ModuleRegistrationDao
+import uk.ac.warwick.tabula.data.ModuleRegistrationDaoImpl
 
-class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
+class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware {
 
 	PermissionCheck(Permissions.ImportSystemData)
 
@@ -39,6 +41,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 	var courseImporter = Wire.auto[CourseImporter]
 	var moduleRegistrationImporter = Wire.auto[ModuleRegistrationImporter]
 	var features = Wire.auto[Features]
+	var moduleRegistrationDao = Wire.auto[ModuleRegistrationDaoImpl]
 
 	val BatchSize = 250
 
@@ -119,7 +122,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 					val importModRegCommands = moduleRegistrationImporter.getModuleRegistrationDetails(List(membInfo), Map(usercode -> user))
 					if (importModRegCommands.isEmpty) logger.warn("Looking for module registrations for student " + membInfo.member.universityId + " but found no data to import.")
 					val newModuleRegistrations = (importModRegCommands map { _.apply }).flatten
-					//deleteOldModuleRegistrations(usercode, newModuleRegistrations)
+					deleteOldModuleRegistrations(usercode, newModuleRegistrations)
 					session.flush
 					for (modReg <- newModuleRegistrations) session.evict(modReg)
 
@@ -129,10 +132,15 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms {
 		}
 	}
 
-/*	deleteOldModuleRegistrations(usercode: String, newModuleRegistrations: Seq[ModuleRegistration]) {
-		moduleRegistrationDao.
+	def deleteOldModuleRegistrations(usercode: String, newModuleRegistrations: Seq[ModuleRegistration]) {
+		val existingModuleRegistrations = moduleRegistrationDao.getByUsercodeAndYear(usercode, getCurrentSitsAcademicYear)
+		for (existingMR <- existingModuleRegistrations) {
+			if (!newModuleRegistrations.contains(existingMR)) {
+				session.delete(existingMR)
+			}
+		}
 	}
-*/
+
 	def equal(s1: Seq[String], s2: Seq[String]) =
 		s1.length == s2.length && s1.sorted == s2.sorted
 

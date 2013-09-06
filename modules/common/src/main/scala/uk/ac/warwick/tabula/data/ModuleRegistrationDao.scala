@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.AcademicYear
 trait ModuleRegistrationDao {
 	def saveOrUpdate(moduleRegistration: ModuleRegistration)
 	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, moduleCode: String, cats: Double, academicYear: AcademicYear): Option[ModuleRegistration]
+	def getByUsercodeAndYear(usercode: String, academicYear: AcademicYear) : Seq[ModuleRegistration]
 }
 
 @Repository
