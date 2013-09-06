@@ -188,7 +188,7 @@
 											<span class="pull-right eventRegister">
 												<form method="get" action="/groups/event/${event.id}/register">
 
-													<input type="hidden" name="returnTo" value="/admin/department/${department.code}" />
+													<input type="hidden" name="returnTo" value="/admin/department/${groupSet.module.department.code}" />
 													<span class="form-horizontal">
 														<@fmt.weekRangeSelect event />
 														<button class="btn btn-small btn-primary register-button">Record</button>
