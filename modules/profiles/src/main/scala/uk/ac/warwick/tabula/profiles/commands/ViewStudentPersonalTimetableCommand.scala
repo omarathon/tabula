@@ -15,6 +15,26 @@ trait ViewStudentPersonalTimetableCommandState {
 	var end: LocalDate = start.plusMonths(13)
 }
 
+/*
+ * If you want to add new sources of events to the calendar, here's where to do it:
+ *
+ *  - if your events recur throughout the academic year, and can be described in terms of "on this day, at this time,
+ *  in these academic weeks", then implement TimetableEventSource, and register your source with
+ *  CombinedStudentTimetableEventSource.
+ *
+ *  - if your events are one-off, but still described in terms of day, time, and academic week, implement a
+ *  TimetableEventSource as above (producing a Seq of size 1) and plumb it in as above; it will save you having to
+ *  write code to infer a proper calendar date.
+ *
+ *  - If your events already have a calendar date associated with them, then you should implement a method which
+ *  produces a Seq[EventOccurrence]. Invoke that within this class's applyInternal, and add the result to the
+ *  "occurrences" list, before the list is sorted.
+ *
+ *  - If there are several sources that fit the last category, then it would make sense to wrap them all into a
+ *  per-student "NonRecurringEventSource", add a cache, and pass that into this class's constructor alongside
+ *  the StudentTimetableEventSource
+ *
+ */
 class ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource:StudentTimetableEventSource, val student:StudentMember) extends CommandInternal[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState {
 	this: EventOccurrenceServiceComponent =>
 
