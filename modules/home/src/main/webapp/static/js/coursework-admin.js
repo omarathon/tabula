@@ -5,15 +5,7 @@
 
 var exports = {};
 
-// export the stuff we do to the submissions form so we can re-run it on demand.
-var decorateSubmissionsForm = function() {
-	$('input#collectSubmissions').slideMoreOptions($('#submission-options'), true);
-};
-exports.decorateSubmissionsForm = decorateSubmissionsForm;
-
 $(function(){
-
-    decorateSubmissionsForm();
 
     // hide stuff that makes no sense when open-ended
     $('input#openEnded').slideMoreOptions($('.has-close-date'), false);

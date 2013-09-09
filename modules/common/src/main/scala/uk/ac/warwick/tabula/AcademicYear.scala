@@ -1,7 +1,10 @@
 package uk.ac.warwick.tabula
 import org.joda.time.{DateTimeConstants, DateMidnight, DateTime}
 import org.joda.time.DateTimeConstants._
-import java.beans.PropertyEditorSupport
+import org.joda.time.base.BaseDateTime
+import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.util.termdates.Term.TermType
+import uk.ac.warwick.tabula.services.TermService
 
 /**
  * Represents a particular academic year. Traditionally they are displayed as
@@ -96,4 +99,21 @@ object AcademicYear {
 			new AcademicYear(now.getYear() - 1)
 		}
 	}
+
+	/**
+	 * This will tell you which academic year you're currently in, assuming that the year starts on day 1 of week 1 in term 1
+	 *
+	 */
+	def findAcademicYearContainingDate(date: BaseDateTime, termService:TermService): AcademicYear = {
+		val termContainingIntervalStart = termService.getTermFromDateIncludingVacations(date)
+		def findAutumnTermForTerm(term: Term): Term = {
+			term.getTermType match {
+				case TermType.autumn => term
+				case _ => findAutumnTermForTerm(termService.getPreviousTerm(term))
+			}
+		}
+		val firstWeekOfYear =  findAutumnTermForTerm(termContainingIntervalStart).getStartDate
+		AcademicYear(firstWeekOfYear.getYear)
+	}
+
 }

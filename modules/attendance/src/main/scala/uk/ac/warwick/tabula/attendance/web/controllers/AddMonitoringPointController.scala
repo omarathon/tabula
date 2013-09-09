@@ -1,14 +1,12 @@
 package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestParam, RequestMapping}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
+import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.attendance.commands.AddMonitoringPointCommand
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.ItemNotFoundException
 
 @Controller
 @RequestMapping(Array("/manage/{dept}/sets/add/points/add"))

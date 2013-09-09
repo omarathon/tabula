@@ -294,23 +294,25 @@
 		}
 	} // .profile container
 
-	#container .related_students {
-		.profile-link {
-			font-weight: bold;
-			color: @grayLight;
-			text-decoration: none;
-
-			&:hover,&:active {
+	#container {
+		.related_students, .students {
+			.profile-link {
+				font-weight: bold;
+				color: @grayLight;
 				text-decoration: none;
+
+				&:hover,&:active {
+					text-decoration: none;
+				}
+			}
+
+			.hover {
+				.cursor-pointer;
+				background-color: #ddd;
+				background-color: fadeout(lighten(#ff0,30%), 40%);
 			}
 		}
-
-		.hover {
-			.cursor-pointer;
-			background-color: #ddd;
-			background-color: fadeout(lighten(#ff0,30%), 40%);
-		}
-	} // .related_students
+	} // .related_students and students table hover behaviour
 
 
 	#container #agents {

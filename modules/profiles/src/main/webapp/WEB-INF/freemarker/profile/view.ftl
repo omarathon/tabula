@@ -151,17 +151,21 @@
 		</#if>
 
 		<div class="tabbable">
-			<ol class="panes">
-				<#if features.personalTimetables>
+			<#if features.personalTimetables>
 				<script type="text/javascript">
-				 var weeks = ${weekRangesDumper()}
-				 </script>
+					var weeks = ${weekRangesDumper()}
+				</script>
+			</#if>
+			<ol class="panes">
+
+				<#if features.personalTimetables>
 					<li id="timetable-pane">
-						<section id="timetable-details" class="clearfix">
-							<h4>Timetable</h4>
-							<div class='fullCalendar' data-viewname='agendaWeek'/>
+						<section id="timetable-details" class="clearfix" />
+						<h4>Timetable</h4>
+						<div class='fullCalendar' data-viewname='agendaWeek'/>
 					</li>
 				</#if>
+
 				<li id="course-pane">
 					<#include "_course_details.ftl" />
 				</li>

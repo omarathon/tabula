@@ -13,16 +13,31 @@ $(function(){
 
 	if ($('#chooseCreateType').length > 0 && setsByRouteByAcademicYear) {
 		var $form = $('#chooseCreateType').find('input.create').on('change', function(){
-			if ($(this).hasClass('copy')) {
+			if ($(this).val() === 'copy') {
 				$form.find('button').html('Copy').prop('disabled', true);
+				$form.find('select.template[name="existingSet"]').prop('disabled', true).css('visibility','hidden');
 				academicYearSelect.add(routeSelect).add(yearSelect).prop('disabled', false).css('visibility','hidden');
 				academicYearSelect.find('option:first').prop('selected', true)
 					.end().css('visibility','visible');
+			} else if ($(this).val() === 'template') {
+				$form.find('button').html('Create').prop('disabled', false);
+                $form.find('select.template[name="existingSet"]').prop('disabled', false).css('visibility','visible');
+                academicYearSelect.add(routeSelect).add(yearSelect).prop('disabled', true).css('visibility','hidden');
 			} else {
 				$form.find('button').html('Create').prop('disabled', false);
+				$form.find('select.template[name="existingSet"]').prop('disabled', true).css('visibility','hidden');
 				academicYearSelect.add(routeSelect).add(yearSelect).prop('disabled', true).css('visibility','hidden');
 			}
-		}).end(),
+		}).end().on('submit', function(){
+			var createType = $form.find('input.create:checked').val();
+			if (createType === 'copy') {
+				$form.find('select[name="existingSet"]').not('.copy').prop('disabled', true);
+			} else if (createType === 'template') {
+				$form.find('select[name="existingSet"]').not('.template').prop('disabled', true);
+			} else {
+				$form.find('select[name="existingSet"]').prop('disabled', true);
+			}
+		}),
 		academicYearSelect = $form.find('select.academicYear').on('change', function(){
 			routeSelect.find('option:gt(0)').remove()
 				.end().css('visibility','visible');
@@ -44,13 +59,15 @@ $(function(){
 				);
 			});
 		}).prop('disabled', true).css('visibility','hidden'),
-		yearSelect = $form.find('select[name="existingSet"]').on('change', function(){
-			if (yearSelect.val().length > 0) {
+		yearSelect = $form.find('select.copy[name="existingSet"]').on('change', function(){
+			if (yearSelect.val() && yearSelect.val().length > 0) {
 				$form.find('button').prop('disabled', false);
 			} else {
 				$form.find('button').prop('disabled', true);
 			}
 		}).prop('disabled', true).css('visibility','hidden');
+
+		$form.find('select.template[name="existingSet"]').prop('disabled', true).css('visibility','hidden');
 
 		if (academicYearSelect.length > 0) {
 			for (var academicYear in setsByRouteByAcademicYear) {
@@ -138,13 +155,15 @@ $(function(){
 	var pointsChanged = false;
 
 	var bindPointButtons = function(){
-    	$('#addMonitoringPointSet a.new-point, #addMonitoringPointSet a.edit-point, #addMonitoringPointSet a.delete-point').off().on('click', function(e){
+    	$('.modify-monitoring-points a.new-point, .modify-monitoring-points a.edit-point, .modify-monitoring-points a.delete-point')
+    		.off().not('.disabled').on('click', function(e){
+
     		e.preventDefault();
     		var formLoad = function(data){
     			var $m = $('#modal');
     			$m.html(data);
     			if ($m.find('.monitoring-points').length > 0) {
-    				$('#addMonitoringPointSet .monitoring-points').replaceWith($m.find('.monitoring-points'))
+    				$('.modify-monitoring-points .monitoring-points').replaceWith($m.find('.monitoring-points'))
     				$m.modal("hide");
     				bindPointButtons();
     				pointsChanged = true;
@@ -165,7 +184,11 @@ $(function(){
     				$f.find('input[name="name"]').focus();
     			}).modal("show");
     		};
-    		$.post($(this).attr('href'), $('form#addMonitoringPointSet').serialize(), formLoad)
+    		if ($('form#addMonitoringPointSet').length > 0) {
+    			$.post($(this).attr('href'), $('form#addMonitoringPointSet').serialize(), formLoad);
+    		} else {
+    			$.get($(this).attr('href'), formLoad);
+    		}
     	});
     };
     bindPointButtons();

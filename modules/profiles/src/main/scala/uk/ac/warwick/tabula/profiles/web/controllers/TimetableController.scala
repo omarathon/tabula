@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 import uk.ac.warwick.tabula.profiles.services.timetables.{AutowiringScientiaConfigurationComponent, ScientiaHttpTimetableFetchingServiceComponent, SmallGroupEventTimetableEventSourceComponentImpl, CombinedStudentTimetableEventSourceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
+import uk.ac.warwick.tabula.helpers.SystemClockComponent
 
 @Controller
 @RequestMapping(value = Array("/timetable"))
@@ -21,7 +22,10 @@ class TimetableController extends ProfilesController {
 		with ScientiaHttpTimetableFetchingServiceComponent
 		with AutowiringSmallGroupServiceComponent
 		with AutowiringUserLookupComponent
-		with AutowiringScientiaConfigurationComponent).studentTimetableEventSource
+		with AutowiringScientiaConfigurationComponent
+		with SystemClockComponent
+		).studentTimetableEventSource
+
 
 	@RequestMapping(value = Array("/api"))
 	def getEvents(@RequestParam from: Long, @RequestParam to: Long): Mav = {

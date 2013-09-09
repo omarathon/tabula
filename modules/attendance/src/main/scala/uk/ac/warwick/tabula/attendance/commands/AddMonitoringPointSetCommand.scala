@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringRouteServiceComponent, RouteServiceComponent}
+import uk.ac.warwick.tabula.data.model.attendance.{AbstractMonitoringPointSet, MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -12,22 +12,24 @@ import org.joda.time.DateTime
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports.JHashMap
 import org.springframework.util.AutoPopulatingList
+import scala.Some
 
 object AddMonitoringPointSetCommand {
-	def apply(dept: Department, existingSetOption: Option[MonitoringPointSet]) =
+	def apply(dept: Department, existingSetOption: Option[AbstractMonitoringPointSet]) =
 		new AddMonitoringPointSetCommand(dept, existingSetOption)
 		with ComposableCommand[Seq[MonitoringPointSet]]
 		with AutowiringRouteServiceComponent
 		with AutowiringTermServiceComponent
+		with AutowiringMonitoringPointServiceComponent
 		with AddMonitoringPointSetPermissions
 		with AddMonitoringPointSetDescription
 		with AddMonitoringPointSetValidation
 }
 
 
-abstract class AddMonitoringPointSetCommand(val dept: Department, val existingSetOption: Option[MonitoringPointSet]) extends CommandInternal[Seq[MonitoringPointSet]]
+abstract class AddMonitoringPointSetCommand(val dept: Department, val existingSetOption: Option[AbstractMonitoringPointSet]) extends CommandInternal[Seq[MonitoringPointSet]]
 	with AddMonitoringPointSetState {
-	self: RouteServiceComponent =>
+	self: MonitoringPointServiceComponent =>
 
 	override def applyInternal() = {
 		selectedRoutesAndYears.asScala.map{case (route, allYears) => {
@@ -48,7 +50,7 @@ abstract class AddMonitoringPointSetCommand(val dept: Department, val existingSe
 				set.route = route
 				set.updatedDate = new DateTime()
 				set.year = if (year.equals("All")) null else year.toInt
-				routeService.save(set)
+				monitoringPointService.saveOrUpdate(set)
 				set
 			})
 		}}.flatten.toSeq
@@ -156,7 +158,7 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 
 	def dept: Department
 
-	def existingSetOption: Option[MonitoringPointSet]
+	def existingSetOption: Option[AbstractMonitoringPointSet]
 
 	var academicYear = AcademicYear.guessByDate(new DateTime())
 
@@ -169,7 +171,7 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 	val pointSetToCopy = null
 
 	val monitoringPoints = existingSetOption match {
-		case Some(set: MonitoringPointSet) => {
+		case Some(set: AbstractMonitoringPointSet) => {
 			val points = new AutoPopulatingList(classOf[MonitoringPoint])
 			set.points.asScala.foreach(p => points.add(p))
 			points

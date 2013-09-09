@@ -75,6 +75,7 @@ class AddAssignmentController extends CourseworkController {
 			"availableUpstreamGroups" -> form.availableUpstreamGroups,
 			"linkedUpstreamAssessmentGroups" -> form.linkedUpstreamAssessmentGroups,
 			"assessmentGroups" -> form.assessmentGroups,
+			"collectSubmissions" -> form.collectSubmissions,
 			"maxWordCount" -> Assignment.MaximumWordCount)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}

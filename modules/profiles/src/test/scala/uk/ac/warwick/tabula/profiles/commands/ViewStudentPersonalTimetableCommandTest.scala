@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.profiles.services.timetables._
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek}
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import org.joda.time.{Interval, LocalDate, LocalDateTime, LocalTime}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 
 	val student = new StudentMember
-	val event = TimetableEvent("","",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,"",Nil)
+	val event = TimetableEvent("","",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,"",Nil, AcademicYear(2012))
 	val timetableEvents = Seq(event)
 	val earlierEvent = EventOccurrence("","",TimetableEventType.Induction,LocalDateTime.now, LocalDateTime.now,None, "", Nil )
 	val laterEvent = EventOccurrence("","",TimetableEventType.Induction,LocalDateTime.now.plusHours(1), LocalDateTime.now.plusHours(1),None, "", Nil )
