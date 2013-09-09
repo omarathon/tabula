@@ -220,8 +220,8 @@
 
 			<#if command.availableUpstreamGroups?has_content>
 				<div class="modal-body">
-					<p>Add students by linking this assignment to one or more of the following SITS assignments for
-					${command.module.code?upper_case} which have assessment groups for ${command.academicYear.label}.</p>
+					<p>Add students by linking this assignment to one or more of the following SITS assessment components for
+					${command.module.code?upper_case} in ${command.academicYear.label}.</p>
 
 					<table id="sits-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-orangeLight">
 						<thead>
@@ -230,7 +230,7 @@
 								<th class="sortable">Name</th>
 								<th class="sortable">Members</th>
 								<th class="sortable">CATS</th>
-								<th class="sortable">Cohort</th>
+								<th class="sortable">Occurrence</th>
 								<th class="sortable">Sequence</th>
 							</tr>
 						</thead>
