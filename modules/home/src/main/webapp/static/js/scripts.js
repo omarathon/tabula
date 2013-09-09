@@ -595,7 +595,7 @@
 				reset();
 				var $tabContainer = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
 				var $tabs = $tabContainer.find('ul');
-				$panes.children().each(function() {
+				$panes.children('li').each(function() {
 					var title = $(this).find('h4').html();
 					var link = '#' + $(this).attr('id');
 					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '"><span class="title">' + title + '</span> <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>');
@@ -610,9 +610,9 @@
 			$t.on('click', '.layout-tools .icon-th-large', function() { // gadgetify
 				reset();
 				var $cols = $('<div class="cols row-fluid"><ol class="ex-panes span6" /><ol class="ex-panes span6" /></div>');
-				var paneCount = $panes.children().length;
+				var paneCount = $panes.children('li').length;
 				$t.append($cols);
-				$panes.children().each(function(idx) {
+				$panes.children('li').each(function(idx) {
 					var $gadget = $(this).addClass('gadget');
 					var title = $(this).find('h4').html();
 					var link = '#' + $(this).attr('id');
