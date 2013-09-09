@@ -36,7 +36,7 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		MarkingWorkflow.Read,
 		MarkingWorkflow.Update,
 		MarkingWorkflow.Delete,
-		
+
 		MonitoringPoints.Manage,
 
 		Department.ManageProfiles,
@@ -46,15 +46,18 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Profiles.Read.StudentCourseDetails.Core,
 		Profiles.Read.StudentCourseDetails.Status,
 		Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
-		
+
 		Profiles.Search,
-		
+
 		Profiles.StudentRelationship.Create(PermissionsSelector.Any[StudentRelationshipType]),
 		Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]),
 		Profiles.StudentRelationship.Update(PermissionsSelector.Any[StudentRelationshipType]),
 		Profiles.StudentRelationship.Delete(PermissionsSelector.Any[StudentRelationshipType]),
-		
-		Profiles.MeetingRecord.Read(PermissionsSelector.Any[StudentRelationshipType])
+
+		Profiles.MeetingRecord.Read(PermissionsSelector.Any[StudentRelationshipType]),
+
+		SmallGroups.Read,
+		Profiles.Read.SmallGroups
 	)
 
 }
