@@ -80,5 +80,6 @@ object HomeController {
 		memberViewModules.filterNot(m=>m.setItems.isEmpty).toSeq
 	}
 
-	def getGroupSetsReleasedToStudents(memberGroupSets:Seq[SmallGroupSet]) = memberGroupSets.filter(s => s.releasedToStudents)
+	def getGroupSetsReleasedToStudents(memberGroupSets:Seq[SmallGroupSet]) = memberGroupSets.filter(s => (s.releasedToStudents || s.allocationMethod == StudentSignUp))
+
 }

@@ -25,6 +25,7 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 	var groupCount:Int = _
 	var maxGroupSize:Int = 0
 	var allowSelfGroupSwitching:Boolean = true
+	var releasedToStudents:Boolean = true
 
 	protected def applyInternal() = {
 		transactional() {
@@ -39,6 +40,7 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 				groupSet.allowSelfGroupSwitching = allowSelfGroupSwitching
 			}
 			groupSet.openForSignups = openForSignups
+			groupSet.releasedToStudents = releasedToStudents
 			groupSet.groups = JArrayList()
 			groupSet._membersGroup = UserGroup.ofUsercodes
 			if (maxGroupSize > 0){
