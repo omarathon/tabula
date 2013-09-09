@@ -7,6 +7,8 @@ import uk.ac.warwick.tabula.BreadcrumbsMatcher
 class ProfilePage (implicit val webDriver:WebDriver)  extends WebBrowser with	BreadcrumbsMatcher{
 
 	def isCurrentPage():Boolean = {
+		//TODO this can be fixed now; LoginDetails _does_ include warwickID
+		//
 		// ideally, we'd check the URL looked like /profiles/view/{warwickID}, but unfortunately the
 		// logindetails object doesn't include warwickId, so, we'll try and use the breadcrumbs and page title instead
 		breadCrumbsMatch(Seq("Student Profiles","Your profile"))
