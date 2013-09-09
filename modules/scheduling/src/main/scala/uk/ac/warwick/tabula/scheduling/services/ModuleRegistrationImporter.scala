@@ -117,7 +117,8 @@ object ModuleRegistrationImporter {
 					and sms.spr_code = ssn.ssn_sprc
 					and ssn_ayrc = sms.ayr_code
 					and ssn_mrgs != 'CON'
-			union
+					and scj_udfa in ('Y','y')
+		union
 			select scj_code, smo.mod_code, smo.smo_mcrd, smo.smo_agrp, smo.ses_code, smo.ayr_code
 				from intuit.cam_smo smo, intuit.ins_stu stu, intuit.ins_spr spr, intuit.srs_scj scj, intuit.srs_vco, intuit.cam_ssn ssn
 				where smo.spr_code = spr.spr_code
@@ -128,7 +129,8 @@ object ModuleRegistrationImporter {
 					and vco_crsc = scj.scj_crsc
 					and vco_rouc = spr.rou_code
 					and ssn_mrgs = 'CON'
-			union
+					and scj_udfa in ('Y','y')
+		union
 			select scj_code, smo.mod_code, smo.smo_mcrd, smo.smo_agrp, smo.ses_code, smo.ayr_code
 				from intuit.cam_smo smo, intuit.ins_stu stu, intuit.ins_spr spr, intuit.srs_scj scj, intuit.srs_vco
 				where smo.spr_code = spr.spr_code
@@ -136,6 +138,7 @@ object ModuleRegistrationImporter {
 				and smo.ayr_code = :year
 				and stu.stu_udf3 in (:usercodes)
 				and scj.scj_sprc = spr.spr_code
+				and scj_udfa in ('Y','y')
 				and vco_crsc = scj.scj_crsc
 				and vco_rouc = spr.rou_code
 				and not exists (select * from intuit.cam_ssn

@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.AcademicYear
 trait ModuleRegistrationDao {
 	def saveOrUpdate(moduleRegistration: ModuleRegistration)
 	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, moduleCode: String, cats: Double, academicYear: AcademicYear): Option[ModuleRegistration]
-	def getByUsercodeAndYear(usercode: String, academicYear: AcademicYear) : Seq[ModuleRegistration]
+	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration]
 }
 
 @Repository
@@ -27,14 +27,15 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 			.uniqueResult
 	}
 
-	def getByUsercodeAndYear(usercode: String, academicYear: AcademicYear) : Seq[ModuleRegistration] = {
+	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration] = {
+		val usercodeString: String = usercodes.mkString(", ")
 		session.newQuery[ModuleRegistration]("""
 				select distinct mr
 					from ModuleRegistration mr
-					where studentCourseDetails.student.userId = :usercode
+					where studentCourseDetails.student.userId in (:usercodes)
 					and academicYear = :academicYear
 				""")
-					.setString("usercode", usercode)
+					.setString("usercodes", usercodeString)
 					.setString("academicYear", academicYear.getStoreValue.toString)
 					.seq
 	}

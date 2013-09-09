@@ -40,7 +40,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 			scdDao.saveOrUpdate(scd)
 
 			val year = AcademicYear(2012)
-			val nonexistantModReg = modRegDao.getByUsercodeAndYear("abcde", year)
+			val nonexistantModReg = modRegDao.getByUsercodesAndYear(Seq("abcde"), year)
 			nonexistantModReg should be (Seq())
 
 			val module = new Module
@@ -52,7 +52,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 			modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
 			modRegDao.saveOrUpdate(modReg)
 
-			val retrievedModReg = modRegDao.getByUsercodeAndYear("abcde", AcademicYear(2012)).head
+			val retrievedModReg = modRegDao.getByUsercodesAndYear(Seq("abcde"), AcademicYear(2012)).head
 
 			retrievedModReg.isInstanceOf[ModuleRegistration] should be (true)
 			retrievedModReg.studentCourseDetails.scjCode should be ("0123456/1")
@@ -72,7 +72,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 			modReg2.selectionStatus = ModuleSelectionStatus.Core
 			modRegDao.saveOrUpdate(modReg2)
 
-			val retrievedModRegSet = modRegDao.getByUsercodeAndYear("abcde", AcademicYear(2012))
+			val retrievedModRegSet = modRegDao.getByUsercodesAndYear(Seq("abcde"), AcademicYear(2012))
 			retrievedModRegSet.size should be (2)
 
 			val abModule = retrievedModRegSet.find( _.moduleCode == "ab123")

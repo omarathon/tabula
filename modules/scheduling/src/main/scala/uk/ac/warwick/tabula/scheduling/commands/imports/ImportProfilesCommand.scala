@@ -95,7 +95,12 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					profileImporter.getMemberDetails(userIdsAndCategories, users) map { _.apply }
 					session.flush
 					session.clear
-					moduleRegistrationImporter.getModuleRegistrationDetails(userIdsAndCategories, users) map {_.apply }
+					val importModRegCommands = moduleRegistrationImporter.getModuleRegistrationDetails(userIdsAndCategories, users)
+					val newModuleRegistrations = importModRegCommands map {_.apply } flatten
+
+					val usercodesProcessed: Seq[String] = userIdsAndCategories map { _.member.usercode }
+
+					deleteOldModuleRegistrations(usercodesProcessed, newModuleRegistrations)
 					session.flush
 					session.clear
 				}
@@ -122,7 +127,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					val importModRegCommands = moduleRegistrationImporter.getModuleRegistrationDetails(List(membInfo), Map(usercode -> user))
 					if (importModRegCommands.isEmpty) logger.warn("Looking for module registrations for student " + membInfo.member.universityId + " but found no data to import.")
 					val newModuleRegistrations = (importModRegCommands map { _.apply }).flatten
-					deleteOldModuleRegistrations(usercode, newModuleRegistrations)
+					deleteOldModuleRegistrations(Seq(usercode), newModuleRegistrations)
 					session.flush
 					for (modReg <- newModuleRegistrations) session.evict(modReg)
 
@@ -132,8 +137,8 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		}
 	}
 
-	def deleteOldModuleRegistrations(usercode: String, newModuleRegistrations: Seq[ModuleRegistration]) {
-		val existingModuleRegistrations = moduleRegistrationDao.getByUsercodeAndYear(usercode, getCurrentSitsAcademicYear)
+	def deleteOldModuleRegistrations(usercodes: Seq[String], newModuleRegistrations: Seq[ModuleRegistration]) {
+		val existingModuleRegistrations = moduleRegistrationDao.getByUsercodesAndYear(usercodes, getCurrentSitsAcademicYear)
 		for (existingMR <- existingModuleRegistrations) {
 			if (!newModuleRegistrations.contains(existingMR)) {
 				session.delete(existingMR)
