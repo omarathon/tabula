@@ -7,50 +7,50 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 
 	"Department Admin" should "be able to view the Edit page for an existing group" in {
 		Given("I am logged in as admin")
-   		signIn as(P.Admin1)  to (Path("/groups"))
+		signIn as(P.Admin1)  to (Path("/groups"))
 		And("I view the small group page for test services")
-			val groupsPage = new SmallGroupTeachingPage("xxx")
-			go to groupsPage.url
+		val groupsPage = new SmallGroupTeachingPage("xxx")
+		go to groupsPage.url
 
 		When("I click on the 'Actions' dropdown for module xxx01/Test Lab")
-		  val editPage = groupsPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
+		val editPage = groupsPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
 
 		Then("The page is the edit properties page")
-			editPage.isCurrentPage("xxx101")
+		editPage.isCurrentPage("xxx101")
 
-		}
+	}
 
 	"Department Admin" should "be able to view and set information visibility options" in {
 		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx")
 
 		Given("The smallGroupTeachingStudentSignUp feature is enabled")
-			enableFeature("smallGroupTeachingStudentSignUp")
+		enableFeature("smallGroupTeachingStudentSignUp")
 
 		When("I log in as admin")
-   		signIn as(P.Admin1)  to (Path("/groups"))
+		signIn as(P.Admin1)  to (Path("/groups"))
 
 		And(" I view the edit properties page for xxx101/Test Lab")
-		  go to groupsetSummaryPage.url
-		  val editProperties = groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
+		go to groupsetSummaryPage.url
+		val editProperties = groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
 
 		Then("I should see the options to show/hide tutor name")
-			checkbox("studentsCanSeeTutorName") should not be (null)
-		  checkbox("studentsCanSeeOtherMembers") should not be (null)
+		checkbox("studentsCanSeeTutorName") should not be (null)
+		checkbox("studentsCanSeeOtherMembers") should not be (null)
 
 		When("I check the checkboxes and click Save")
-			checkbox("studentsCanSeeTutorName").select()
-		  checkbox("studentsCanSeeOtherMembers").select()
-			editProperties.submit()
+		checkbox("studentsCanSeeTutorName").select()
+		checkbox("studentsCanSeeOtherMembers").select()
+		editProperties.submit()
 
 		Then("The page is the groupset summary page")
-		  groupsetSummaryPage should be('currentPage)
+		groupsetSummaryPage should be('currentPage)
 
 		When("I navigate to the edit properties page again")
-		  groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
+		groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
 
 		Then("The checkboxes should still be checked")
-		  checkbox("studentsCanSeeTutorName").value should be("true")
-		  checkbox("studentsCanSeeOtherMembers").value should be("true")
+		checkbox("studentsCanSeeTutorName").value should be("true")
+		checkbox("studentsCanSeeOtherMembers").value should be("true")
 
 	}
 
@@ -58,15 +58,15 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx")
 
 		When("I log in as admin")
-		  signIn as(P.Admin1)  to (Path("/groups"))
+		signIn as(P.Admin1)  to (Path("/groups"))
 
 		And("I view the edit properties page for xxx101/Test Lab")
-		  go to groupsetSummaryPage.url
-		  val editProperties = groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
+		go to groupsetSummaryPage.url
+		val editProperties = groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
 
 		Then("I should see the options to set a default maximum group size")
-		  checkbox("defaultMaxGroupSizeEnabled") should not be (null)
-		  find("defaultMaxGroupSizeeee") should not be (null)
+		checkbox("defaultMaxGroupSizeEnabled") should not be (null)
+		find("defaultMaxGroupSizeeee") should not be (null)
 
 		When("I expand groups details, check the checkbox, select a default value, and click Save")
 		  click on (cssSelector("details[id='groups-details'] summary"))
@@ -76,35 +76,89 @@ class EditGroupSetPageTest  extends SmallGroupsFixture  with GivenWhenThen{
 		  editProperties.submit()
 
 		Then("The page is the groupset summary page")
-		  groupsetSummaryPage should be('currentPage)
+		groupsetSummaryPage should be('currentPage)
 
 		When("I navigate to the edit properties page again and expand groups details")
 		  groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
 		  click on (cssSelector("details[id='groups-details'] summary"))
 
 		Then("The checkbox should still be checked")
-		  checkbox("defaultMaxGroupSizeEnabled").isSelected should be(true)
+		checkbox("defaultMaxGroupSizeEnabled").isSelected should be(true)
 
 		And("The default value should be enabled and should have been saved")
-		  id("defaultMaxGroupSize").webElement.isEnabled should be(true)
-		  id("defaultMaxGroupSize").webElement.getAttribute("value") should be ("12")
+		id("defaultMaxGroupSize").webElement.isEnabled should be(true)
+		id("defaultMaxGroupSize").webElement.getAttribute("value") should be ("12")
 
 		When("I uncheck the checkbox and click Save")
-		  checkbox("defaultMaxGroupSizeEnabled").clear()
-		  editProperties.submit()
+		checkbox("defaultMaxGroupSizeEnabled").clear()
+		editProperties.submit()
 
 		Then("The page is the groupset summary page")
-		  groupsetSummaryPage should be('currentPage)
+		groupsetSummaryPage should be('currentPage)
 
 		When("I navigate to the edit properties page again")
-		  groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
+		groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
 
 		Then("The checkbox should be unchecked")
-		  checkbox("defaultMaxGroupSizeEnabled").isSelected should be(false)
+		checkbox("defaultMaxGroupSizeEnabled").isSelected should be(false)
 
 		And("The default value should remain the same but the field disabled")
-		  id("defaultMaxGroupSize").webElement.isEnabled should be(false)
-		  id("defaultMaxGroupSize").webElement.getAttribute("value") should be ("12")
+		id("defaultMaxGroupSize").webElement.isEnabled should be(false)
+		id("defaultMaxGroupSize").webElement.getAttribute("value") should be ("12")
+
+	}
+
+	"Department Admin" should "be able to set a expand/contract students details" in {
+		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx")
+
+		When("I log in as admin")
+		signIn as(P.Admin1)  to (Path("/groups"))
+
+		And("I view the edit properties page for xxx101/Test Lab")
+		go to groupsetSummaryPage.url
+		val editProperties = groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
+
+		And("Students details should be hidden")
+		val addStudentsLink = cssSelector("a.show-adder")
+		eventually {
+			addStudentsLink.webElement.isDisplayed should be (false)
+		}
+
+		When("I toggle the students details to open")
+		click on (id("students-summary"))
+		Then("The students details should be displayed")
+		addStudentsLink.webElement.isDisplayed should be (true)
+
+		When("I toggle the students details back again")
+		click on (id("students-summary"))
+		Then("The students details should be hidden")
+		addStudentsLink.webElement.isDisplayed should be (false)
+
+	}
+
+	"Department Admin" should "be able to set a expand/contract groups details" in {
+		val groupsetSummaryPage = new SmallGroupTeachingPage("xxx")
+
+		When("I log in as admin")
+		signIn as(P.Admin1)  to (Path("/groups"))
+
+		And("I view the edit properties page for xxx101/Test Lab")
+		go to groupsetSummaryPage.url
+		val editProperties = groupsetSummaryPage.getGroupsetInfo("xxx101", "Test Lab").get.goToEditProperties
+
+		And("Groups details should be hidden")
+		val maxGroupSizeCheckbox = id("defaultMaxGroupSizeEnabled")
+		maxGroupSizeCheckbox.webElement.isDisplayed should be (false)
+
+		When("I toggle the groups details to open")
+		click on (id("groups-summary"))
+		Then("The groups details should be displayed")
+		maxGroupSizeCheckbox.webElement.isDisplayed should be (true)
+
+		When("I toggle the grups details back again")
+		click on (id("groups-summary"))
+		Then("The students details should be hidden")
+		maxGroupSizeCheckbox.webElement.isDisplayed should be (false)
 
 	}
 
