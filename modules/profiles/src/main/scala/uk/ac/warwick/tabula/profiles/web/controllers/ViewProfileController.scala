@@ -63,20 +63,20 @@ class ViewProfileController extends ProfilesController {
 			@RequestParam(defaultValue="", required=false) agentId: String) = {
 		val profiledStudentMember = profileCmd.apply
 		val isSelf = (profiledStudentMember.universityId == user.universityId)
-		
+
 		// Get all the enabled relationship types for a department
-		val allRelationshipTypes = 
+		val allRelationshipTypes =
 			Option(member.homeDepartment)
 				.map { _.displayedStudentRelationshipTypes }
 				.getOrElse { relationshipService.allStudentRelationshipTypes }
-		
+
 		val relationshipMeetings =
 			allRelationshipTypes.flatMap { relationshipType =>
-				getViewMeetingRecordCommand(member, relationshipType).map { cmd => 
+				getViewMeetingRecordCommand(member, relationshipType).map { cmd =>
 					(relationshipType, cmd.apply())
-				}				
+				}
 			}.toMap
-		
+
 		val meetings = relationshipMeetings.values.flatten
 		val openMeeting = meetings.find(m => m.id == openMeetingId).getOrElse(null)
 
