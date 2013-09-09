@@ -12,7 +12,7 @@ create table moduleregistration (
 
 create unique index idx_modreg_notional_key on moduleregistration(scjcode, modulecode, academicyear, cats);
 
-alter table studentcourseyeardetails add modregstatus nvarchar2(10);
+alter table studentcourseyeardetails add moduleregistrationstatus nvarchar2(10);
 
-alter table studentcourseyeardetails rename column modregstatus to moduleregistrationstatus;
+
 
