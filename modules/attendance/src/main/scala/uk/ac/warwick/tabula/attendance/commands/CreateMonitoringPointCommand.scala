@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPointSetTemplate, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, AutowiringTermServiceComponent}
 
 
 object CreateMonitoringPointCommand {
@@ -16,6 +17,8 @@ object CreateMonitoringPointCommand {
 		with CreateMonitoringPointValidation
 		with CreateMonitoringPointDescription
 		with CreateMonitoringPointPermission
+		with AutowiringTermServiceComponent
+		with AutowiringMonitoringPointServiceComponent
 }
 
 /**
@@ -74,12 +77,14 @@ trait CreateMonitoringPointDescription extends Describable[MonitoringPoint] {
 	}
 }
 
-trait CreateMonitoringPointState {
+trait CreateMonitoringPointState extends GroupMonitoringPointsByTerm with CanPointBeChanged {
 	def set: MonitoringPointSet
 	val academicYear = set.academicYear
 	val dept = set.route.department
 	var name: String = _
 	var defaultValue: Boolean = true
 	var week: Int = 0
+
+	def monitoringPointsByTerm = groupByTerm(set.points.asScala, set.academicYear)
 }
 
