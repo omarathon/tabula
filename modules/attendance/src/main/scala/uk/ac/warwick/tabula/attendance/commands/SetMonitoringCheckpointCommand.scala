@@ -32,14 +32,15 @@ abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoi
 	var studentIds: JList[UniversityId] = JArrayList()
 	var members: Seq[StudentMember] = _
 	var membersChecked: Seq[StudentMember] = _
+	var set = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
 
 	def populate() {
-		members = if(monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].year == null) {
-			profileService.getStudentsByRoute(monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route)
+		members = if(set.year == null) {
+			profileService.getStudentsByRoute(set.route)
 		} else {
 			profileService.getStudentsByRoute(
-				monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route,
-				monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear
+				set.route,
+				set.academicYear
 			)
 		}
 
@@ -54,6 +55,10 @@ abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoi
 	}
 
 	def validate(errors: Errors) {
+		if(set.sentToAcademicOffice) {
+			errors.reject("monitoringCheckpoint.sentToAcademicOffice.set")
+		}
+
 		if(monitoringPoint == null) {
 			errors.rejectValue("monitoringPoint", "monitoringPoint")
 		}
