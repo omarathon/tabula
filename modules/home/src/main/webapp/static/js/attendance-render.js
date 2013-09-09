@@ -9,6 +9,30 @@ exports.Manage = {}
 
 $(function(){
 
+	// SCRIPTS FOR VIEWING MONITORING POINTS
+
+	$('#viewChooseSet').find('select[name="route"]').on('change', function(){
+		var $this = $(this),
+			selectedRouteCode = $this.find(':selected').val(),
+			yearSelect = $this.parent()
+				.find('select[name="set"]').find('option:gt(0)').remove()
+				.end().find('option:first').prop('selected', true)
+				.end();
+
+		$.each(
+			$.grep(setsByRouteByAcademicYear[$('select[name="academicYear"] :selected').val()], function(r){
+				return selectedRouteCode === r.code;
+			})[0].sets,
+			function(i, set){
+				yearSelect.append(
+					$('<option/>').val(set.id).html(set.year)
+				);
+			}
+		)
+	});
+
+	// END SCRIPTS FOR VIEWING MONITORING POINTS
+
 	// SCRIPTS FOR MANAGING MONITORING POINTS
 
 	if ($('#chooseCreateType').length > 0 && setsByRouteByAcademicYear) {
