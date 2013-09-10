@@ -184,7 +184,7 @@
 											${event.location!"[no location]"}
 											</span>
 
-											<#if moduleItem.canManageGroups>
+											<#if ( moduleItem.canManageGroups  && features.smallGroupTeachingRecordAttendance )>
 											<span class="pull-right eventRegister">
 												<form method="get" action="/groups/event/${event.id}/register">
 
