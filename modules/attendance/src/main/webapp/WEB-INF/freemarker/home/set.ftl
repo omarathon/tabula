@@ -1,3 +1,13 @@
+<script>
+
+(function ($) {
+	$(function() {
+		$('.persist-area').fixHeaderFooter();
+	});
+} (jQuery));
+
+</script>
+
 <div class="recordCheckpointForm">
 
 	<div class="persist-area">
