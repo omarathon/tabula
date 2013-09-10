@@ -2,14 +2,13 @@ package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.data.model.Route
-import scala.collection.JavaConverters._
 import org.joda.time.{Interval, DateTimeConstants, DateMidnight}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.util.termdates.Term
-import scala.Predef._
 import uk.ac.warwick.tabula.services.Vacation
+import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 
 class GroupMonitoringPointsByTermTest extends TestBase with Mockito {
 
@@ -44,8 +43,8 @@ class GroupMonitoringPointsByTermTest extends TestBase with Mockito {
 		autumnTerm.getTermTypeAsString returns "Autumn"
 		val christmasVacation = mock[Vacation]
 		christmasVacation.getTermTypeAsString returns "Christmas vacation"
-		termService.getTermFromDateIncludingVacations(week5StartDate.withDayOfWeek(1)) returns autumnTerm
-		termService.getTermFromDateIncludingVacations(week15StartDate.withDayOfWeek(1)) returns christmasVacation
+		termService.getTermFromDateIncludingVacations(week5StartDate.withDayOfWeek(DayOfWeek.Thursday.getAsInt)) returns autumnTerm
+		termService.getTermFromDateIncludingVacations(week15StartDate.withDayOfWeek(DayOfWeek.Thursday.getAsInt)) returns christmasVacation
 	}
 
 	@Test

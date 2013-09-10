@@ -30,6 +30,7 @@ trait FixturesDriver {
 													allocationMethodName:String="Manual",
 													openForSignups:Boolean = true,
 													maxGroupSize:Int = 0,
+													releasedToStudents:Boolean = true,
 													allowSelfGroupSwitching:Boolean  = true):String  = {
 		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/groupset"
 		val req = url(uri).POST << Map(
@@ -39,6 +40,7 @@ trait FixturesDriver {
 		  "allocationMethodName"->allocationMethodName,
 		  "groupCount"->groupCount.toString,
 		  "openForSignups"->openForSignups.toString,
+		  "releasedToStudents"->releasedToStudents.toString,
 		  "maxGroupSize"->maxGroupSize.toString,
 		  "allowSelfGroupSwitching"->allowSelfGroupSwitching.toString
 		)
