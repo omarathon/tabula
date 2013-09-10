@@ -5,20 +5,18 @@ import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.{DateTimeConstants, DateMidnight}
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import scala.collection.JavaConverters._
 
 
 trait GroupMonitoringPointsByTerm extends TermServiceComponent {
 	def groupByTerm(monitoringPoints: Seq[MonitoringPoint], academicYear: AcademicYear) = {
-		lazy val weeksForYear =
-			termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1))
-				.asScala.map { pair => pair.getLeft -> pair.getRight } // Utils pairs to Scala pairs
-				.toMap
+		val approxStartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
 		val day = DayOfWeek.Thursday
-		monitoringPoints.groupBy {
-			case point => termService.getTermFromDateIncludingVacations(
-				weeksForYear(point.week).getStart.withDayOfWeek(day.jodaDayOfWeek)
-			).getTermTypeAsString
+		lazy val weeksForYear = termService.getAcademicWeeksForYear(approxStartDate).toMap
+
+		monitoringPoints groupBy { point =>
+			val date = weeksForYear(point.week).getStart.withDayOfWeek(day.jodaDayOfWeek)
+			termService.getTermFromDateIncludingVacations(date).getTermTypeAsString
 		}
 	}
+
 }

@@ -9,11 +9,22 @@ import scala.collection.JavaConverters._
 import org.joda.time.{Interval, DateTime}
 import uk.ac.warwick.tabula.AcademicYear
 
+trait TermService {
+	def getTermFromDate(date: BaseDateTime): Term
+	def getPreviousTerm(term: Term): Term
+	def getNextTerm(term: Term): Term
+	def getAcademicWeek(date: BaseDateTime, weekNumber: Int): Interval
+	def getAcademicWeeksForYear(date: BaseDateTime): Seq[(Integer, Interval)]
+	def getAcademicWeeksBetween(start:DateTime, end:DateTime): Seq[(AcademicYear,Int,Interval)]
+	def getTermFromDateIncludingVacations(date: BaseDateTime): Term
+	def getTermsBetween(start: BaseDateTime, end: BaseDateTime): Seq[Term]
+}
+
 /**
  * Wraps TermFactory and adds more features.
  */
 @Service
-class TermService extends TermFactory{
+class TermServiceImpl extends TermService {
 	val termFactory = new TermFactoryImpl
 
 	def getTermFromDate(date: BaseDateTime) = termFactory.getTermFromDate(date)
@@ -24,7 +35,7 @@ class TermService extends TermFactory{
 
 	def getAcademicWeek(date: BaseDateTime, weekNumber: Int) = termFactory.getAcademicWeek(date, weekNumber)
 
-	def getAcademicWeeksForYear(date: BaseDateTime) = termFactory.getAcademicWeeksForYear(date)
+	def getAcademicWeeksForYear(date: BaseDateTime) = termFactory.getAcademicWeeksForYear(date).asScala map { pair => pair.getLeft -> pair.getRight }
 
 	/**
 	 * Return all the academic weeks for the specifed range, as a tuple of year, weeknumber, date interval

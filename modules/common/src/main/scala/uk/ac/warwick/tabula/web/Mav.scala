@@ -117,7 +117,7 @@ class Mav() {
 	}
 
 	def toModelAndView = {
-		val mav = new ModelAndView(viewName)
+		val mav = if (view != null) new ModelAndView(view) else new ModelAndView(viewName)
 		mav.addAllObjects(toModel)
 		mav
 	}
@@ -125,6 +125,14 @@ class Mav() {
 	override def toString = {
 		val v = if (view != null) view else viewName
 		"Mav(" + v + ", " + map + ")"
+	}
+
+	override def equals(other: Any) = other match {
+		case m: Mav =>
+			view == m.view &&
+			viewName == m.viewName &&
+			map == m.map
+		case _ => false
 	}
 }
 

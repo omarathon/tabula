@@ -99,9 +99,7 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 		println(jsonString)
 		val results = JSON.parseFull(jsonString)
 		results match {
-			// Carps about "non variable type argument is unchecked", but using just case a:Seq
-			// causes the anInstanceOf assertion to fail. Meh.
-			case Some(a:Seq[Map[String,Any]]) =>{
+			case Some(a:Seq[Map[String,Any]] @unchecked) => {
 				a.length should be(1)
 				a.head should be (anInstanceOf[Map[String,Any]])
 				a.head("desc") should be("Term 7 Week 95")

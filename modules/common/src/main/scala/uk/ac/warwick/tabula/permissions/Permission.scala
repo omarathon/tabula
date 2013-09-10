@@ -296,6 +296,7 @@ object Permissions {
 	}
 
 	object MonitoringPointSetTemplates {
+		case object View extends ScopelessPermission("View monitoring point set templates")
 		case object Manage extends ScopelessPermission("Manage monitoring point set templates")
 	}
 	

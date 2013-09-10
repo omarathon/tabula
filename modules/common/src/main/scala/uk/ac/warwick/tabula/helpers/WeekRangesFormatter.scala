@@ -27,7 +27,7 @@ import java.util
   *
   * WeekRange objects are always _stored_ with academic week numbers. These may span multiple terms, holidays etc.
   */
-object WeekRangesFormatter extends VacationAware {
+object WeekRangesFormatter {
 
 	val separator = "; "
 
@@ -45,38 +45,6 @@ object WeekRangesFormatter extends VacationAware {
 		def retrieve(year: AcademicYear) = map.getOrElseUpdate(year, new WeekRangesFormatter(year))
 	}
 }
-
-
-
-
-/* Pimp the TermFactory to include Vacation "Terms"
- * We extend AnyVal here to make this a Value class (c.f. http://docs.scala-lang.org/overviews/core/value-classes.html)
- * This means we never instantiate the wrapper, the compiler just performs voodoo to call the methods.
- */
-
-trait VacationAware {
-	implicit def vacationAwareTermFactory(delegate: TermFactory) = new VacationAwareTermFactory(delegate)
-}
-
-class VacationAwareTermFactory(val delegate: TermFactory) extends AnyVal  {
-	def getTermFromDateIncludingVacations(date: BaseDateTime) = {
-		val term = delegate.getTermFromDate(date)
-		if (date.isBefore(term.getStartDate)) Vacation(delegate.getPreviousTerm(term), term)
-		else term
-	}
-
-	def getTermsBetween(start: BaseDateTime, end: BaseDateTime): Seq[Term] = {
-		val startTerm = getTermFromDateIncludingVacations(start)
-		val endTerm = getTermFromDateIncludingVacations(end)
-
-		if (startTerm == endTerm) Seq(startTerm)
-		else startTerm +: getTermsBetween(startTerm.getEndDate.plusDays(1), end)
-	}
-}
-
-
-
-
 
 
 /** Companion class for Freemarker.
@@ -203,7 +171,7 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 }
 
 
-object WeekRangeSelectFormatter extends VacationAware {
+object WeekRangeSelectFormatter {
 
 	val separator = "; "
 
@@ -223,15 +191,13 @@ object WeekRangeSelectFormatter extends VacationAware {
 }
 
 
-class WeekRanges(year:AcademicYear) extends VacationAware {
+class WeekRanges(year:AcademicYear) {
 
 	var termService = Wire[TermService]
 
 	// We are confident that November 1st is always in term 1 of the year
 	lazy val weeksForYear =
-		termService.getAcademicWeeksForYear(year.dateInTermOne)
-			.asScala.map { pair => pair.getLeft -> pair.getRight } // Utils pairs to Scala pairs
-			.toMap
+		termService.getAcademicWeeksForYear(year.dateInTermOne).toMap
 
 	def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =
 		weeksForYear(weekNumber).getStart.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
@@ -331,7 +297,6 @@ trait WeekRangesDumper extends KnowsUserNumberingSystem {
 	var userSettings: UserSettingsService = Wire[UserSettingsService]
 	var departmentService: ModuleAndDepartmentService = Wire[ModuleAndDepartmentService]
 	var termService = Wire[TermService]
-	lazy val tf = termService.termFactory
 
 	def getWeekRangesAsJSON(formatWeekName: (AcademicYear, Int, String) => String) = {
 

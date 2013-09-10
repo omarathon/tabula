@@ -43,7 +43,7 @@ trait TimetableDriver extends FixturesDriver  {
 		import scala.language.postfixOps
 		val rawJSON = http.x(req as_str)
 		JSON.parseFull(rawJSON) match {
-			case Some(events:Seq[Map[String,Any]])=>events
+			case Some(events:Seq[Map[String,Any]] @unchecked)=>events
 			case _ => throw new RuntimeException(s"Couldn't parse JSON into sequence\n $rawJSON")
 		}
 	}

@@ -71,7 +71,7 @@ object ViewStudentPersonalTimetableCommand {
 			with Unaudited
 			with TermBasedEventOccurrenceComponent
 			with TermAwareWeekToDateConverterComponent
-			with AutowiringTermFactoryComponent
+			with AutowiringTermServiceComponent
 	}
 }
 
