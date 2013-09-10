@@ -47,7 +47,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def list(page: Int) = {
 		val perPage = 20
 		session.newCriteria[MonitoringPoint]
-			.setFirstResult(page)
+			.setFirstResult(page*perPage)
 			.setMaxResults(perPage)
 			.list.asScala.toSeq
 	}

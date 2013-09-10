@@ -206,6 +206,62 @@ $(function(){
 	}
 
 	// END SCRIPTS FOR MANAGING MONITORING POINTS
+
+
+	// Scripts for record attendance form
+
+	jQuery.fn.visible = function() {
+		return this.css('visibility', 'visible');
+	};
+
+	jQuery.fn.invisible = function() {
+		return this.css('visibility', 'hidden');
+	};
+
+   var updateTableHeaders = function () {
+	   $(".persist-area").each(function() {
+
+			var el           = $(this),
+			offset           = el.offset(),
+			scrollTop        = $(window).scrollTop(),
+			floatingHeader   = $(".floatingHeader", this),
+			floatingFooter   = $(".floatingFooter", this),
+			persistHeader    = $(".persist-header", this),
+			primaryNavHeight = $("#primary-navigation").height();
+
+		   if ((scrollTop > offset.top) && (scrollTop < offset.top + el.height())) {
+				floatingHeader.visible();
+		   } else {
+				floatingHeader.invisible();
+		   }
+
+			if(scrollTop + jQuery(window).height() - $(persistHeader).height() - primaryNavHeight > $(el).height()) {
+				floatingFooter.invisible();
+			} else {
+				floatingFooter.visible();
+			}
+
+	   });
+	}
+
+	function cloneRow(row, className) {
+		row.before(row.clone())
+			.css("width", row.width())
+			.addClass(className);
+	}
+
+	if($(".persist-area").length) {
+		$(".persist-area").each(function() {
+			cloneRow($(".persist-header", this), "floatingHeader");
+			cloneRow($(".persist-footer", this), "floatingFooter");
+		});
+
+		$(window)
+			.scroll(updateTableHeaders)
+			.trigger("scroll");
+	};
+
+	// End scripts for record attendance form
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);

@@ -12,8 +12,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.CurrentUser
 
 object SetMonitoringCheckpointCommand {
-	def apply(monitoringPoint: MonitoringPoint, week: Int, user: CurrentUser) =
-		new SetMonitoringCheckpointCommand(monitoringPoint, week, user)
+	def apply(monitoringPoint: MonitoringPoint, user: CurrentUser) =
+		new SetMonitoringCheckpointCommand(monitoringPoint, user)
 			with ComposableCommand[Seq[MonitoringCheckpoint]]
 			with SetMonitoringCheckpointCommandPermissions
 			with SetMonitoringPointDescription
@@ -24,7 +24,7 @@ object SetMonitoringCheckpointCommand {
 	}
 }
 
-abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoint, val week: Int, user: CurrentUser)
+abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoint, user: CurrentUser)
 	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with SelfValidating {
 	self: SetMonitoringCheckpointState with ProfileServiceComponent with MonitoringPointServiceComponent =>
 	type UniversityId = String
@@ -85,5 +85,4 @@ trait SetMonitoringPointDescription extends Describable[Seq[MonitoringCheckpoint
 
 trait SetMonitoringCheckpointState {
 	val monitoringPoint : MonitoringPoint
-	val week: Int
 }

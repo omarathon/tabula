@@ -5,7 +5,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
 import scala.Array
 import uk.ac.warwick.tabula.attendance.commands.SetMonitoringCheckpointCommand
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 import uk.ac.warwick.tabula.services.RouteService
 import uk.ac.warwick.tabula.web.Mav
 import javax.validation.Valid
@@ -13,7 +13,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.attendance.web.Routes
 
-@RequestMapping(Array("/monitoringpoints/{monitoringPoint}/week/{week}/set"))
+@RequestMapping(Array("/monitoringpoints/{monitoringPoint}/set"))
 @Controller
 class SetMonitoringCheckpointController extends AttendanceController {
 
@@ -22,8 +22,8 @@ class SetMonitoringCheckpointController extends AttendanceController {
 	@Autowired var service: RouteService = _
 
 	@ModelAttribute("command")
-	def command(@PathVariable monitoringPoint: MonitoringPoint, @PathVariable week: Int, user: CurrentUser) = {
-		SetMonitoringCheckpointCommand(monitoringPoint, week, user)
+	def command(@PathVariable monitoringPoint: MonitoringPoint, user: CurrentUser) = {
+		SetMonitoringCheckpointCommand(monitoringPoint, user)
 	}
 
 
@@ -47,8 +47,10 @@ class SetMonitoringCheckpointController extends AttendanceController {
 		if(errors.hasErrors) {
 			form(command)
 		} else {
-			command.apply
-			Redirect(Routes.monitoringPoints, "updatedMonitoringPoint" -> command.monitoringPoint.id)
+			command.apply()
+			val deptcode = command.set.route.department.code
+
+			Redirect("/manage/" + deptcode, "updatedMonitoringPoint" -> command.monitoringPoint.id)
 		}
 	}
 
