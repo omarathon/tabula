@@ -342,6 +342,35 @@
 
 	} // #agents
 
+	table.event-info {
+		// Reset
+		th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
+
+		width: 100%;
+
+		th {
+			text-align: right;
+			color: @grayLight;
+			white-space: nowrap;
+			font-size: @fontSizeSmall;
+
+			&:after { content: ':'; margin-right: 3px; }
+		}
+
+		td {
+			color: #0c0c0c;
+			width: 99%;
+			font-size: @fontSizeSmall;
+			sup { font-size:0.8em }
+            padding-bottom: 0.5em;
+		}
+		tbody {
+			border-bottom: 15px solid transparent;
+		}
+
+	}
+
+
 	#container .profile-search {
 		margin: 4px 0 20px;
 

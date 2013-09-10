@@ -284,6 +284,10 @@
 				  }
 				  });
 		}
+		function onViewUpdate(view,element){
+		   updateCalendarTitle(view, element);
+		   $('.popover').hide();
+		}
 		function updateCalendarTitle(view,element){
             var start = view.start.getTime();
             var end = view.end.getTime();
@@ -301,7 +305,7 @@
 
 		function createCalendar(container,defaultViewName){
 			var showWeekends = (defaultViewName == "month");
-			$(container).fullCalendar({
+			var cal = $(container).fullCalendar({
 									events:function(start, end, callback){getEvents(start,end, callback);},
 									defaultView: defaultViewName,
 									allDaySlot: false,
@@ -314,12 +318,34 @@
                                         '': 'h:mm{ - h:mm}'   //  5:00 - 6:30
                                     },
 									weekends:showWeekends,
-									viewRender:updateCalendarTitle,
+									viewRender:onViewUpdate,
 									header: {
 										left:   'title',
 										center: '',
 										right:  'today prev,next'
-									}
+									},
+									eventClick: function(event, jsEvent, view) {
+										var $this = $(this);
+										$this.popover('show');
+										return false;
+                                    },
+                                    eventAfterRender: function(event, element, view){
+										var content = "<table class='event-info'>";
+                                        if (event.description.length > 0){
+                                        	content = content + "<tr><th>What</th><td>" + event.description +"</td></tr>";
+                                        }
+                                        content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
+                                        content = content + "<tr><th>Where</th><td>" + event.location + "</td></tr>";
+                                        if (event.tutorNames.length > 0){
+                                        	content = content + "<tr><th>Who</th><td> " + event.tutorNames + "</td></tr>";
+                                        }
+                                    	content = content + "</table>";
+                                    	$(element).tabulaPopover({html:true, container:"#container",title:event.shorterTitle, content:content})
+                                    }
+			});
+			$(document).on('tabbablechanged', function(e) {
+				// redraw the calendar if the layout updates
+				cal.fullCalendar('render');
 			});
 		}
 

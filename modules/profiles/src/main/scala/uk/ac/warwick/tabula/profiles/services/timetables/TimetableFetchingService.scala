@@ -142,7 +142,12 @@ object ScientiaHttpTimetableFetchingService {
 				startTime = new LocalTime((activity \\ "start").text),
 				endTime = new LocalTime((activity \\ "end").text),
 				location = (activity \\ "room").text match {
-					case text if !text.isEmpty => Some(text)
+					case text if !text.isEmpty => {
+						// S+ has some (not all) rooms as "AB_AB1.2", where AB is a building code
+						// we're generally better off without this.
+						val removeBuildingNames = "^[^_]*_".r
+						Some(removeBuildingNames.replaceFirstIn(text,""))
+					}
 					case _ => None
 				},
 				moduleCode = (activity \\ "module").text,
