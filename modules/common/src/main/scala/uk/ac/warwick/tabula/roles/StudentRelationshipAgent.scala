@@ -19,6 +19,7 @@ case class StudentRelationshipAgentRoleDefinition(relationshipType: StudentRelat
 		Profiles.Read.TelephoneNumber,
 		Profiles.Read.MobileNumber,
 		Profiles.Read.Usercode,
+		Profiles.Read.Timetable,
 
 		Profiles.Read.StudentCourseDetails.Core,
 		Profiles.Read.StudentCourseDetails.Status,

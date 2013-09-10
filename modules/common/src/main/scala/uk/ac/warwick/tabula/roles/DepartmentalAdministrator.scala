@@ -43,6 +43,7 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 
 		Profiles.Read.Core,
 		Profiles.Read.NextOfKin,
+	  Profiles.Read.Timetable,
 		Profiles.Read.StudentCourseDetails.Core,
 		Profiles.Read.StudentCourseDetails.Status,
 		Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
