@@ -160,16 +160,17 @@
 
 				<#if features.personalTimetables>
 					<li id="timetable-pane">
-						<section id="timetable-details" class="clearfix" />
+						<section id="timetable-details" class="clearfix" >
 						<h4>Timetable</h4>
 						<div class='fullCalendar' data-viewname='agendaWeek'/>
+						</section>
 					</li>
 				</#if>
 
 				<li id="course-pane">
 					<#include "_course_details.ftl" />
 				</li>
-				
+
 				<#list (studentCourseDetails.department.displayedStudentRelationshipTypes)![] as relationshipType>
 					<#if studentCourseDetails.hasRelationship(relationshipType) || relationshipType.displayIfEmpty(studentCourseDetails)>
 						<li id="${relationshipType.id}-pane">
@@ -183,12 +184,18 @@
 						<#include "_small_groups.ftl" />
 					</li>
 				</#if>
+
+				<#if studentCourseDetails.hasModuleRegistrations>
+					<li id="module-registration-pane">
+						<#include "_module_registrations.ftl" />
+					</li>
+				</#if>
 			</ol>
-			
+
 			<div id="modal" class="modal hide fade" style="display:none;"></div>
 
 				<div id="modal-change-agent" class="modal hide fade"></div>
-		
+
 				<script type="text/javascript">
 				jQuery(function($){
 					// load edit personal agent

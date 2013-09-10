@@ -50,7 +50,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 				val moduleRegistration = moduleRegistrationExisting match {
 					case Some(moduleRegistration: ModuleRegistration) => moduleRegistration
 					case _ => {
-						new ModuleRegistration(scd, module.code, cats, academicYear)
+						new ModuleRegistration(scd, module, cats, academicYear)
 					}
 				}
 

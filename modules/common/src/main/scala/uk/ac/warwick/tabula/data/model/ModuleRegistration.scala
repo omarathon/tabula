@@ -16,15 +16,17 @@ import org.hibernate.annotations.Type
 @AccessType("field")
 class ModuleRegistration() extends GeneratedId {
 
-	def this(studentCourseDetails: StudentCourseDetails, moduleCode: String, cats: Double, academicYear: AcademicYear) {
+	def this(studentCourseDetails: StudentCourseDetails, module: Module, cats: Double, academicYear: AcademicYear) {
 		this()
 		this.studentCourseDetails = studentCourseDetails
-		this.moduleCode = moduleCode
+		this.module = module
 		this.academicYear = academicYear
 		this.cats = cats
 	}
 
-	var moduleCode: String = null
+	@ManyToOne
+	@JoinColumn(name="moduleCode", referencedColumnName="code")
+	var module: Module = null
 	var cats: Double = 0
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
@@ -40,7 +42,7 @@ class ModuleRegistration() extends GeneratedId {
 	@Column(name="selectionstatuscode")
 	var selectionStatus: ModuleSelectionStatus = null // core, option or optional core
 
-	override def toString = studentCourseDetails.scjCode + "-" + moduleCode + "-" + cats + "-" + AcademicYear
+	override def toString = studentCourseDetails.scjCode + "-" + module.code + "-" + cats + "-" + AcademicYear
 
 	var lastUpdatedDate = DateTime.now
 }

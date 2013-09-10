@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
+import uk.ac.warwick.tabula.data.model.Department
 
 
 object ListMonitoringPointsCommand {
@@ -28,12 +29,12 @@ abstract class ListMonitoringPointsCommand(val page: Int)
 }
 
 
-trait ListMonitoringPointsCommandPermissions extends RequiresPermissionsChecking {
+trait ListMonitoringPointsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: ListMonitoringPointsCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		val q = p.PermissionCheck(Permissions.MonitoringPoints.View)
-		q
+		// TODO This should be scoped to a real department
+		p.PermissionCheck(Permissions.MonitoringPoints.View, new Department)
 	}
 }
 

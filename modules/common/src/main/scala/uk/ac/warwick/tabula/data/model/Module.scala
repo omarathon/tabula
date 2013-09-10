@@ -14,6 +14,7 @@ import org.hibernate.annotations.ForeignKey
 import uk.ac.warwick.tabula.roles.ModuleAssistantRoleDefinition
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.system.permissions.Restricted
 
 @Entity
 @NamedQueries(Array(
@@ -30,36 +31,40 @@ class Module extends GeneratedId with PermissionsTarget {
 	var code: String = _
 	var name: String = _
 
-	// The managers are markers/moderators who upload feedback. 
+	// The managers are markers/moderators who upload feedback.
 	// They can also publish feedback.
 	// Module assistants can't publish feedback
-	@transient 
+	@transient
 	var permissionsService = Wire.auto[PermissionsService]
-	@transient 
+	@transient
 	lazy val managers = permissionsService.ensureUserGroupFor(this, ModuleManagerRoleDefinition)
-	@transient 
+	@transient
 	lazy val assistants = permissionsService.ensureUserGroupFor(this, ModuleAssistantRoleDefinition)
 
 	@ManyToOne
 	@JoinColumn(name = "department_id")
 	var department: Department = _
-	
+
 	def permissionsParents = Option(department).toStream
-	
+
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var assignments: JList[Assignment] = JArrayList()
+
+	// not including cascade as modules and moduleRegistrations are saved independently; also don't want to remove orphans
+	@OneToMany(mappedBy = "moduleRegistrations", fetch = FetchType.LAZY)
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var moduleRegistrations: JList[ModuleRegistration] = JArrayList()
 
 	def hasLiveAssignments = Option(assignments) match {
 		case Some(a) => a.asScala.exists(_.isAlive)
 		case None => false
 	}
 
-	
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	var groupSets: JList[SmallGroupSet] = JArrayList()
 
 	var active: Boolean = _
-	
+
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
 	var grantedRoles:JList[ModuleGrantedRole] = JArrayList()
@@ -96,12 +101,12 @@ object Module {
 		case ModuleCatsPattern(module, cats) => Some(cats)
 		case _ => None
 	}
-	
+
 	// For sorting a collection by module code. Either pass to the sort function,
 	// or expose as an implicit val.
 	val CodeOrdering = Ordering.by[Module, String] ( _.code )
 	val NameOrdering = Ordering.by[Module, String] ( _.name )
-	
+
 	// Companion object is one of the places searched for an implicit Ordering, so
 	// this will be the default when ordering a list of modules.
 	implicit val defaultOrdering = CodeOrdering

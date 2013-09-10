@@ -47,7 +47,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 			module.code = "ab123"
 			moduleDao.saveOrUpdate(module)
 
-			val modReg = new ModuleRegistration(scd, "ab123", 10.0, AcademicYear(2012))
+			val modReg = new ModuleRegistration(scd, module, 10.0, AcademicYear(2012))
 			modReg.assessmentGroup = "D"
 			modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
 			modRegDao.saveOrUpdate(modReg)
@@ -56,7 +56,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 
 			retrievedModReg.isInstanceOf[ModuleRegistration] should be (true)
 			retrievedModReg.studentCourseDetails.scjCode should be ("0123456/1")
-			retrievedModReg.moduleCode should be ("ab123")
+			retrievedModReg.module.code should be ("ab123")
 			retrievedModReg.cats should be (10.0)
 			retrievedModReg.academicYear should be (AcademicYear(2012))
 			retrievedModReg.assessmentGroup should be ("D")
@@ -67,7 +67,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 			module2.code = "cd456"
 			moduleDao.saveOrUpdate(module2)
 
-			val modReg2 = new ModuleRegistration(scd, "cd456", 30.0, AcademicYear(2012))
+			val modReg2 = new ModuleRegistration(scd, module2, 30.0, AcademicYear(2012))
 			modReg2.assessmentGroup = "E"
 			modReg2.selectionStatus = ModuleSelectionStatus.Core
 			modRegDao.saveOrUpdate(modReg2)
@@ -75,13 +75,13 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 			val retrievedModRegSet = modRegDao.getByUsercodesAndYear(Seq("abcde"), AcademicYear(2012))
 			retrievedModRegSet.size should be (2)
 
-			val abModule = retrievedModRegSet.find( _.moduleCode == "ab123")
+			val abModule = retrievedModRegSet.find( _.module.code == "ab123")
 			abModule.size should be (1)
 			abModule.get.cats should be (10.0)
 			abModule.get.assessmentGroup should be ("D")
 			abModule.get.selectionStatus should be (ModuleSelectionStatus.OptionalCore)
 
-			val cdModule = retrievedModRegSet.find( _.moduleCode == "cd456")
+			val cdModule = retrievedModRegSet.find( _.module.code == "cd456")
 			cdModule.size should be (1)
 			cdModule.get.cats should be (30.0)
 			cdModule.get.assessmentGroup should be ("E")
@@ -105,7 +105,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 			module.code = "ab123"
 			moduleDao.saveOrUpdate(module)
 
-			val modReg = new ModuleRegistration(scd, "ab123", 10.0, AcademicYear(2012))
+			val modReg = new ModuleRegistration(scd, module, 10.0, AcademicYear(2012))
 			modReg.assessmentGroup = "D"
 			modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
 			modRegDao.saveOrUpdate(modReg)
@@ -119,7 +119,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 			retrievedModReg.isInstanceOf[ModuleRegistration] should be (true)
 			retrievedModReg.studentCourseDetails.scjCode should be ("0123456/1")
 			retrievedModReg.studentCourseDetails.sprCode should be ("0123456/2")
-			retrievedModReg.moduleCode should be ("ab123")
+			retrievedModReg.module.code should be ("ab123")
 			retrievedModReg.cats should be (10.0)
 			retrievedModReg.academicYear should be (AcademicYear(2012))
 			retrievedModReg.assessmentGroup should be ("D")

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 
@@ -15,6 +15,7 @@ object UpdateMonitoringPointCommand {
 		new UpdateMonitoringPointCommand(set, point)
 		with ComposableCommand[MonitoringPoint]
 		with AutowiringMonitoringPointServiceComponent
+		with AutowiringTermServiceComponent
 		with UpdateMonitoringPointValidation
 		with UpdateMonitoringPointDescription
 		with UpdateMonitoringPointPermission
@@ -77,7 +78,7 @@ trait UpdateMonitoringPointDescription extends Describable[MonitoringPoint] {
 	}
 }
 
-trait UpdateMonitoringPointState {
+trait UpdateMonitoringPointState extends GroupMonitoringPointsByTerm with CanPointBeChanged {
 	def set: MonitoringPointSet
 	def point: MonitoringPoint
 	val academicYear = set.academicYear
@@ -85,6 +86,7 @@ trait UpdateMonitoringPointState {
 	var name: String = _
 	var defaultValue: Boolean = true
 	var week: Int = 0
+	def monitoringPointsByTerm = groupByTerm(set.points.asScala, academicYear)
 
 	def copyTo(point: MonitoringPoint) {
 		point.name = this.name

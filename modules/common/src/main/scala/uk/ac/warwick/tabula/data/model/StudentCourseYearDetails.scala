@@ -69,3 +69,19 @@ trait StudentCourseYearProperties {
 	var lastUpdatedDate = DateTime.now
 
 }
+
+object YearAndSequenceOrdering extends Ordering[StudentCourseYearDetails] {
+
+	def compare(firstScyd: StudentCourseYearDetails, secondScyd: StudentCourseYearDetails) = {
+		// return the one with the latest year
+		if (firstScyd.academicYear.startYear > secondScyd.academicYear.startYear) 1
+		else if (firstScyd.academicYear.startYear < secondScyd.academicYear.startYear) -1
+
+		// the years are the same - compare on SCE sequence number
+		else if (firstScyd.sceSequenceNumber > secondScyd.sceSequenceNumber) 1
+		else if (firstScyd.sceSequenceNumber < secondScyd.sceSequenceNumber) -1
+
+		// they are the same (this should never happen)
+		else 0
+	}
+}

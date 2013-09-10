@@ -11,7 +11,8 @@ class CreateMonitoringPointCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends TermServiceComponent
 			with CreateMonitoringPointValidation with CreateMonitoringPointState {
-		val termService = mock[TermService]
+				val termService = mock[TermService]
+				val monitoringPointService = mock[MonitoringPointService]
 	}
 
 	trait Fixture {
