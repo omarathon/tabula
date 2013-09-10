@@ -274,6 +274,7 @@ object Permissions {
 
 		case object Create extends Permission("Create small groups")
 		case object Read extends Permission("View small groups")
+		case object ReadMembership extends Permission("View small group membership")
 		case object Update extends Permission("Edit small groups")
 		case object Delete extends Permission("Delete small groups")
 

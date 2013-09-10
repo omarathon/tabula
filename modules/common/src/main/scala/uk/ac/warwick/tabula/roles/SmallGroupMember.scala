@@ -10,7 +10,8 @@ case object SmallGroupMemberRoleDefinition extends UnassignableBuiltInRoleDefini
 	override def description = "Small group member"
 
 	GrantsScopedPermission(
-		SmallGroups.Read
+		SmallGroups.Read,
+		SmallGroups.ReadMembership
 	)
 
 }
