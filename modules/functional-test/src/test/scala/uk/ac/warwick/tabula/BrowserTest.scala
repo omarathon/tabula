@@ -19,6 +19,8 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.time.SpanSugar
 import org.openqa.selenium.internal.seleniumemulation.WaitForPageToLoad
 import com.gargoylesoftware.htmlunit.BrowserVersion
+import uk.ac.warwick.userlookup.UserLookup
+import scala.util.{Success, Try}
 
 /** Abstract base class for Selenium tests.
   *
@@ -73,7 +75,7 @@ abstract class BrowserTest
 
 }
 
-case class LoginDetails(val usercode: String, val password: String, description: String)
+case class LoginDetails(val usercode: String, val password: String, description: String, warwickId:String)
 
 /** Properties that can be overridden by a functionaltest.properties file in the classpath.
   *
@@ -85,6 +87,12 @@ case class LoginDetails(val usercode: String, val password: String, description:
   */
 object FunctionalTestProperties {
 	private val properties = loadOptionalProps()
+
+	private val userLookup = new UserLookup
+	// hardcode the service URLs; if they ever change, it's as
+	// easy to change them here as it is in a properties file.
+	userLookup.setSsosUrl("https://websignon.warwick.ac.uk")
+	userLookup.setGroupServiceLocation("https://websignon.warwick.ac.uk")
 
 	val SiteRoot = prop("toplevel.url")
 	val Browser = prop("browser")
@@ -134,12 +142,19 @@ object FunctionalTestProperties {
 
 	private def userDetails(identifier: String, description: String) = {
 		val usercodeKey = "user." + identifier + ".usercode"
-		val passwordKey = "user." + identifier + ".password"
+
 		if (properties.containsKey(usercodeKey)) {
+			val warwickId = Try(userLookup.getUserByUserId(fileProp(usercodeKey))) match {
+				case Success(user)=>user.getWarwickId
+				case _=>"UNKNOWN"
+			}
+
 			LoginDetails(
-				fileProp("user." + identifier + ".usercode"),
+				fileProp(usercodeKey),
 				fileProp("user." + identifier + ".password"),
-				description)
+				description,
+				warwickId
+			)
 		} else {
 			Assertions.fail("Properties missing for "+description+" (user."+identifier+".usercode)")
 		}

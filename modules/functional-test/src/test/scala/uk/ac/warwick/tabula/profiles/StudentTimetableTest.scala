@@ -10,6 +10,7 @@ import com.gargoylesoftware.htmlunit.BrowserVersion
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.ie.InternetExplorerDriver
+import scala.util.{Failure, Success, Try}
 
 /**
  * N.B. To run this test, you must set a system property (in tabula.properties)to tell tabula
@@ -85,6 +86,30 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 		And("the second should be the small group event")
 		val smallGroup = events.last
 		smallGroup("title") should be("XXX654 Tutorial (Test Place)")
+	}
+	"A tutor" should "be able to request their tutees timetable" in {
+		Given("Marker 1 is tutor to Student 1")
+		createStudentRelationship(P.Student1,P.Marker1)
+
+		And("The timetabling service knows of a single event for student1")
+		setTimetableFor(P.Student1.usercode,FunctionalTestAcademicYear.current,singleEvent)
+
+		Then("Marker 1 should be able to view Student 1's timetable")
+		val events = requestWholeYearsTimetableFeedFor(P.Student1, asUser = Some(P.Marker1))
+		// we should be able to find the event we just created
+		events.find(e=>e("title") == "CS132 Lecture (L5)") should be ('defined)
+	}
+
+	"A user" should "not be able to view another users timetable without permission" in {
+		Given("The timetabling service knows of a single event for student1")
+		setTimetableFor(P.Student1.usercode,FunctionalTestAcademicYear.current,singleEvent)
+
+		Then("Marker 2 should not be able to view Student 1's timetable")
+		val events = Try(requestWholeYearsTimetableFeedFor(P.Student1, asUser = Some(P.Marker2)))
+		events match {
+			case _:Success[Seq[Map[String,Any]]]=>fail("Didn't expect to be able to get timetable feed without permission")
+			case _:Failure[Seq[Map[String,Any]]]=> {} //OK
+		}
 	}
 
 	val singleEvent = <Data>
