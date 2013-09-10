@@ -160,9 +160,10 @@
 
 				<#if features.personalTimetables>
 					<li id="timetable-pane">
-						<section id="timetable-details" class="clearfix" />
+						<section id="timetable-details" class="clearfix" >
 						<h4>Timetable</h4>
 						<div class='fullCalendar' data-viewname='agendaWeek'/>
+						</section>
 					</li>
 				</#if>
 
