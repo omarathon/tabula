@@ -7,7 +7,6 @@ import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.groups.commands.ListGroupStudentsCommand
 import uk.ac.warwick.tabula.CurrentUser
 
-
 @Controller
 @RequestMapping(value=Array("/group/{group}/studentspopup"))
 class ListGroupStudentsController extends GroupsController {
@@ -18,13 +17,16 @@ class ListGroupStudentsController extends GroupsController {
 
 	@RequestMapping
 	def ajaxList(@ModelAttribute("command") command: ListGroupStudentsCommand, user: CurrentUser): Mav = {
+
 		val students = command.apply()
 		val userIsMember = students.exists(_.universityId == user.universityId)
+		val showTutors = command.group.groupSet.studentsCanSeeTutorName
 
 		Mav("groups/students",
 			"students" -> students,
 			"userUniId" -> user.universityId,
-			"userIsMember" -> userIsMember
+			"userIsMember" -> userIsMember,
+			"studentsCanSeeTutorName" -> showTutors
 		).noLayout()
 	}
 
