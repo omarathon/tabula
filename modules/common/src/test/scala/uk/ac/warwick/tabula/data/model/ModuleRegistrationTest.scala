@@ -17,7 +17,7 @@ class ModuleRegistrationTest extends TestBase {
 			val module = new Module
 			module.code = "ab123"
 
-			val modReg = new ModuleRegistration(scd, module, 10.0, AcademicYear(2012))
+			val modReg = new ModuleRegistration(scd, module, new java.math.BigDecimal("10"), AcademicYear(2012))
 			modReg.assessmentGroup = "D"
 			modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
 

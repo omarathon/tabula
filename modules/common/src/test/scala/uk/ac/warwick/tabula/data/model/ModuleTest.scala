@@ -82,10 +82,10 @@ class ModuleTest extends PersistenceTestBase {
 			module2.code = "xx999"
 			session.saveOrUpdate(module2)
 
-			val mr1 = new ModuleRegistration(scd, module1, 10, AcademicYear(2013))
+			val mr1 = new ModuleRegistration(scd, module1, new java.math.BigDecimal("10"), AcademicYear(2013))
 			session.saveOrUpdate(mr1)
 
-			val mr2 = new ModuleRegistration(scd, module2, 30, AcademicYear(2013))
+			val mr2 = new ModuleRegistration(scd, module2, new java.math.BigDecimal("30"), AcademicYear(2013))
 			session.saveOrUpdate(mr2)
 
 			module1.moduleRegistrations.add(mr1)

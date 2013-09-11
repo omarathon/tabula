@@ -1,10 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.joda.time.DateTime
-import javax.persistence._
-import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.Type
+import org.joda.time.DateTime
+
+import javax.persistence._
+import uk.ac.warwick.tabula.AcademicYear
 
 /*
  * sprCode, moduleCode, cat score and academicYear are a notional key for this table but giving it a generated ID to be
@@ -16,7 +17,7 @@ import org.hibernate.annotations.Type
 @AccessType("field")
 class ModuleRegistration() extends GeneratedId {
 
-	def this(studentCourseDetails: StudentCourseDetails, module: Module, cats: Double, academicYear: AcademicYear) {
+	def this(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear) {
 		this()
 		this.studentCourseDetails = studentCourseDetails
 		this.module = module
@@ -27,7 +28,7 @@ class ModuleRegistration() extends GeneratedId {
 	@ManyToOne
 	@JoinColumn(name="moduleCode", referencedColumnName="code")
 	var module: Module = null
-	var cats: Double = 0
+	var cats: java.math.BigDecimal = null
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	var academicYear: AcademicYear = null

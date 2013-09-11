@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.Module
 
 trait ModuleRegistrationDao {
 	def saveOrUpdate(moduleRegistration: ModuleRegistration)
-	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, module: Module, cats: Double, academicYear: AcademicYear): Option[ModuleRegistration]
+	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear): Option[ModuleRegistration]
 	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration]
 }
 
@@ -19,7 +19,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 
 	def saveOrUpdate(moduleRegistration: ModuleRegistration) = session.saveOrUpdate(moduleRegistration)
 
-	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, module: Module, cats: Double, academicYear: AcademicYear) = {
+	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear) = {
 		session.newCriteria[ModuleRegistration]
 			.add(is("studentCourseDetails", studentCourseDetails))
 			.add(is("module", module))

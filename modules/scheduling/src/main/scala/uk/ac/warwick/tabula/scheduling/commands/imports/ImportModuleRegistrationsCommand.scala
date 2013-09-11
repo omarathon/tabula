@@ -30,7 +30,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 	var scjCode = modRegRow.scjCode
 	var tabulaModule = modRegRow.tabulaModule
 	var academicYear = modRegRow.academicYear
-	var cats: Double = modRegRow.cats
+	var cats: java.math.BigDecimal = modRegRow.cats
 	var assessmentGroup = modRegRow.assessmentGroup
 	var selectionStatusCode = modRegRow.selectionStatusCode
 	var selectionStatus: ModuleSelectionStatus = null

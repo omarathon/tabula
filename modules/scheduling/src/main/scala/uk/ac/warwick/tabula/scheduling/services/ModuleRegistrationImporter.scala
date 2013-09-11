@@ -138,7 +138,7 @@ object ModuleRegistrationImporter {
 				val modRegRow = new ModuleRegistrationRow(
 						resultSet.getString("scj_code"),
 						resultSet.getString("mod_code"),
-						resultSet.getDouble("sms_mcrd"),
+						resultSet.getBigDecimal("sms_mcrd"),
 						resultSet.getString("sms_agrp"),
 						resultSet.getString("ses_code"),
 						AcademicYear.parse(resultSet.getString("ayr_code")) )// shouldn't need to parse this out of the result set, must be a better way ...
@@ -151,7 +151,7 @@ object ModuleRegistrationImporter {
 class ModuleRegistrationRow(
 	val scjCode: String,
 	val sitsModuleCode: String,
-	val cats: Double,
+	val cats: java.math.BigDecimal,
 	val assessmentGroup: String,
 	val selectionStatusCode: String,
 	val academicYear: AcademicYear) {
