@@ -61,7 +61,9 @@ class TimetableController extends ProfilesController {
  		val colourStream = Stream.continually(colours.toStream).flatten
 		val modules = uncoloured.map(_.moduleCode).distinct
 		val modulesWithColours = modules.zip(colourStream)
-		uncoloured map (event=>event.copy(backgroundColor = modulesWithColours.find(_._1 == event.moduleCode).get._2))
+		uncoloured map (event=>{
+			val colour = modulesWithColours.find(_._1 == event.moduleCode).get._2
+			event.copy(backgroundColor = colour, borderColor = colour)})
 	}
 }
 

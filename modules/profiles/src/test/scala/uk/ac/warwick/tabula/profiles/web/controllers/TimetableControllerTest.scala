@@ -12,7 +12,7 @@ class TimetableControllerTest extends TestBase{
 			i<- 1 until 21;
 		  j = i%3}
 		yield {
-			FullCalendarEvent(s"Test event $i", false, 0L,0L,"","","","","","","","","",s"module$j")
+			FullCalendarEvent(s"Test event $i", false, 0L,0L,"","","","","","","","","","",s"module$j")
 		}
 
 		val coloured = new TimetableController().colourEvents(events)
