@@ -62,33 +62,4 @@ class ModuleTest extends PersistenceTestBase {
 		assignment2.archived = false
 		module.hasLiveAssignments should be(true)
 	}
-
-	@Test
-	def moduleRegistrations = transactional {
-		tx =>
-			val student = new StudentMember("0205225")
-			student.userId = "xxxxx"
-			session.saveOrUpdate(student)
-
-			val scd = new StudentCourseDetails(student, "0205225/1")
-			scd.moduleRegistrations.asScala should be (Seq())
-			session.saveOrUpdate(scd)
-
-			val module1 = new Module()
-			module1.code = "bb100"
-			session.saveOrUpdate(module1)
-
-			val module2 = new Module()
-			module2.code = "xx999"
-			session.saveOrUpdate(module2)
-
-			val mr1 = new ModuleRegistration(scd, module1, new java.math.BigDecimal("10"), AcademicYear(2013))
-			session.saveOrUpdate(mr1)
-
-			val mr2 = new ModuleRegistration(scd, module2, new java.math.BigDecimal("30"), AcademicYear(2013))
-			session.saveOrUpdate(mr2)
-
-			module1.moduleRegistrations.add(mr1)
-			module1.moduleRegistrations.asScala should be (Seq(mr1))
-	}
 }

@@ -6,8 +6,6 @@ import java.sql.Types
 sealed abstract class ModuleRegistrationStatus(val dbValue: String, val description: String)
 
 object ModuleRegistrationStatus {
-	// These are the possible values in SITS for SSN_MRG; the first is one I've added to cover the case where there is no SSN row
-	case object NYG extends ModuleRegistrationStatus(null, "None")
 	case object GEN extends ModuleRegistrationStatus("GEN", "Ready for student to make choices")
 	case object ENT extends ModuleRegistrationStatus("ENT", "Student has made choices; awaiting confirmation")
 	case object CON extends ModuleRegistrationStatus("CON", "Confirmed")
@@ -23,7 +21,6 @@ object ModuleRegistrationStatus {
 	case object PCA extends ModuleRegistrationStatus("PCA", "Post-confirmation answer")
 
 	def fromCode(code: String) = code match {
-	  	case NYG.dbValue => NYG
 	  	case GEN.dbValue => GEN
 	  	case ENT.dbValue => ENT
 	  	case CON.dbValue => CON
@@ -37,7 +34,7 @@ object ModuleRegistrationStatus {
 	  	case CRJ.dbValue => CRJ
 	  	case PCQ.dbValue => PCQ
 	  	case PCA.dbValue => PCA
-	  	case null => NYG
+	  	case null => null
 	  	case _ => throw new IllegalArgumentException()
 	}
 }

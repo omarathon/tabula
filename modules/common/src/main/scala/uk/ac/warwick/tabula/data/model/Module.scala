@@ -51,9 +51,9 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	var assignments: JList[Assignment] = JArrayList()
 
 	// not including cascade as modules and moduleRegistrations are saved independently; also don't want to remove orphans
-	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY)
+/*	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var moduleRegistrations: JList[ModuleRegistration] = JArrayList()
+	var moduleRegistrations: JList[ModuleRegistration] = JArrayList()*/
 
 	def hasLiveAssignments = Option(assignments) match {
 		case Some(a) => a.asScala.exists(_.isAlive)
