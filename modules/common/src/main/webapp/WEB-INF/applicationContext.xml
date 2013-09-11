@@ -389,8 +389,10 @@
 						<value>uk.ac.warwick.tabula.FeaturesMessage</value>
 						<value>uk.ac.warwick.tabula.services.MaintenanceModeMessage</value>
 						<value>uk.ac.warwick.tabula.services.permissions.PermissionsCacheBusterMessage</value>
+						<value>uk.ac.warwick.tabula.services.HibernateStatisticsMessage</value>
 					</list>
 				</property>
+				<property name="objectMapper" ref="json" />
 			</bean>
 		</property>
 	</bean>
