@@ -41,9 +41,7 @@ abstract class ViewMonitoringPointSetsCommand(
 				pointSet.academicYear
 			)
 		}
-		println(members)
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
-		val f = monitoringPointService.getCheckedForWeek(members, pointSet, currentAcademicWeek)
 		membersWithMissedCheckpoints = monitoringPointService.getCheckedForWeek(members, pointSet, currentAcademicWeek).filter{
 			case (member, checkMap) =>
 				checkMap.exists{
