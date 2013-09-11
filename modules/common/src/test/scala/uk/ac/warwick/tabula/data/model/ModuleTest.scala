@@ -62,4 +62,6 @@ class ModuleTest extends PersistenceTestBase {
 		assignment2.archived = false
 		module.hasLiveAssignments should be(true)
 	}
+
+
 }

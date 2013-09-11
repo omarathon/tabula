@@ -52,9 +52,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 				val moduleRegistration = moduleRegistrationExisting match {
 					case Some(moduleRegistration: ModuleRegistration) => moduleRegistration
 					case _ => {
-						val newModuleRegistration = new ModuleRegistration(scd, module, cats, academicYear)
-						module.moduleRegistrations.add(newModuleRegistration)
-						newModuleRegistration
+						new ModuleRegistration(scd, module, cats, academicYear)
 					}
 				}
 
