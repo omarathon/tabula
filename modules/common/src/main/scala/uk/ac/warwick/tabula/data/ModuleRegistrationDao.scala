@@ -6,10 +6,11 @@ import javax.persistence.Entity
 import uk.ac.warwick.tabula.data.model.ModuleRegistration
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.Module
 
 trait ModuleRegistrationDao {
 	def saveOrUpdate(moduleRegistration: ModuleRegistration)
-	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, moduleCode: String, cats: Double, academicYear: AcademicYear): Option[ModuleRegistration]
+	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, module: Module, cats: Double, academicYear: AcademicYear): Option[ModuleRegistration]
 	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration]
 }
 
@@ -18,10 +19,10 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 
 	def saveOrUpdate(moduleRegistration: ModuleRegistration) = session.saveOrUpdate(moduleRegistration)
 
-	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, moduleCode: String, cats: Double, academicYear: AcademicYear) = {
+	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, module: Module, cats: Double, academicYear: AcademicYear) = {
 		session.newCriteria[ModuleRegistration]
 			.add(is("studentCourseDetails", studentCourseDetails))
-			.add(is("moduleCode", moduleCode))
+			.add(is("module", module))
 			.add(is("academicYear", academicYear))
 			.add(is("cats", cats))
 			.uniqueResult

@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.system.permissions.Restricted
 @NamedQueries(Array(
 	new NamedQuery(name = "module.code", query = "select m from Module m where code = :code"),
 	new NamedQuery(name = "module.department", query = "select m from Module m where department = :department")))
-class Module extends GeneratedId with PermissionsTarget {
+class Module extends GeneratedId with PermissionsTarget with Serializable {
 
 	def this(code: String = null, department: Department = null) {
 		this()
@@ -51,7 +51,7 @@ class Module extends GeneratedId with PermissionsTarget {
 	var assignments: JList[Assignment] = JArrayList()
 
 	// not including cascade as modules and moduleRegistrations are saved independently; also don't want to remove orphans
-	@OneToMany(mappedBy = "moduleRegistrations", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var moduleRegistrations: JList[ModuleRegistration] = JArrayList()
 

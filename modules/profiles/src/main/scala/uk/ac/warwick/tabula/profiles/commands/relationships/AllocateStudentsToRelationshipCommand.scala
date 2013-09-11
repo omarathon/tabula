@@ -131,9 +131,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		val years = for (
 			member <- membersById.values;
 			course <- member.mostSignificantCourseDetails)
-				yield course.latestStudentCourseYearDetails
-						.getOrElse(throw new IllegalStateException("Couldn't determine latest student course year details for " + member.universityId))
-						.yearOfStudy
+				yield course.latestStudentCourseYearDetails.yearOfStudy
 		years.toSeq.distinct.sorted
 	}
 

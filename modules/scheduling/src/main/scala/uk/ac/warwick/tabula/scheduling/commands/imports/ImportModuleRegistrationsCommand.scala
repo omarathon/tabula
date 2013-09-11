@@ -16,9 +16,11 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import uk.ac.warwick.tabula.scheduling.services.ModuleRegistrationRow
 import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
+import org.springframework.beans.BeanWrapper
 
-class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends Command[Option[ModuleRegistration]] with Logging
-	with Unaudited with PropertyCopying {
+
+class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends Command[Option[ModuleRegistration]]
+	with Logging with Unaudited with PropertyCopying {
 
 	PermissionCheck(Permissions.ImportSystemData)
 
@@ -43,23 +45,25 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 				logger.debug("Importing module registration for student " + scjCode + ", module " + modRegRow.sitsModuleCode + " in " + academicYear)
 
 				val scd = studentCourseDetailsDao.getByScjCode(scjCode).getOrElse(throw new IllegalStateException("Can't record module registration - could not find a StudentCourseDetails for " + scjCode))
-				val moduleRegistrationExisting: Option[ModuleRegistration] = moduleRegistrationDao.getByNotionalKey(scd, module.code, cats, academicYear)
+				val moduleRegistrationExisting: Option[ModuleRegistration] = moduleRegistrationDao.getByNotionalKey(scd, module, cats, academicYear)
 
 				val isTransient = !moduleRegistrationExisting.isDefined
 
 				val moduleRegistration = moduleRegistrationExisting match {
 					case Some(moduleRegistration: ModuleRegistration) => moduleRegistration
 					case _ => {
-						new ModuleRegistration(scd, module, cats, academicYear)
+						val newModuleRegistration = new ModuleRegistration(scd, module, cats, academicYear)
+						module.moduleRegistrations.add(newModuleRegistration)
+						newModuleRegistration
 					}
 				}
 
 				val commandBean = new BeanWrapperImpl(ImportModuleRegistrationsCommand.this)
 				val moduleRegistrationBean = new BeanWrapperImpl(moduleRegistration)
 
-				selectionStatus = ModuleSelectionStatus.fromCode(selectionStatusCode)
+				val hasChanged = copyBasicProperties(properties, commandBean, moduleRegistrationBean) |
+					copySelectionStatus(moduleRegistrationBean, selectionStatusCode)
 
-				val hasChanged = copyBasicProperties(properties, commandBean, moduleRegistrationBean)
 
 				if (isTransient || hasChanged) {
 					logger.debug("Saving changes for " + moduleRegistration)
@@ -72,6 +76,23 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 			}
 		}
 	})
+
+	def copySelectionStatus(destinationBean: BeanWrapper, selectionStatusCode: String) = {
+		val property = "selectionStatus"
+		val oldValue = destinationBean.getPropertyValue(property)
+		val newValue = ModuleSelectionStatus.fromCode(selectionStatusCode)
+
+		logger.debug("Property " + property + ": " + oldValue + " -> " + newValue)
+
+		// null == null in Scala so this is safe for unset values
+		if (oldValue != newValue) {
+			logger.debug("Detected property change for " + property + " (" + oldValue + " -> " + newValue + "); setting value")
+
+			destinationBean.setPropertyValue(property, newValue)
+			true
+		}
+		else false
+	}
 
 	private val properties = Set(
 		"assessmentGroup", "selectionStatus"

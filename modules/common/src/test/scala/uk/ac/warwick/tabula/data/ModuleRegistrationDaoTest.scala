@@ -98,10 +98,11 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 			val scd = new StudentCourseDetails(stuMem, "0123456/1")
 			scd.sprCode = "0123456/2"
 
-			val nonexistantModReg = modRegDao.getByNotionalKey(scd, "ab123", 10.0, AcademicYear(2012))
+			val module = new Module
+
+			val nonexistantModReg = modRegDao.getByNotionalKey(scd, module, 10.0, AcademicYear(2012))
 			nonexistantModReg should be (None)
 
-			val module = new Module
 			module.code = "ab123"
 			moduleDao.saveOrUpdate(module)
 
@@ -114,7 +115,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 
 			scdDao.saveOrUpdate(scd)
 
-			val retrievedModReg = modRegDao.getByNotionalKey(scd, "ab123", 10.0, AcademicYear(2012)).get
+			val retrievedModReg = modRegDao.getByNotionalKey(scd, module, 10.0, AcademicYear(2012)).get
 
 			retrievedModReg.isInstanceOf[ModuleRegistration] should be (true)
 			retrievedModReg.studentCourseDetails.scjCode should be ("0123456/1")

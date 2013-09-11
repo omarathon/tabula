@@ -96,7 +96,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					session.flush
 					session.clear
 					val importModRegCommands = moduleRegistrationImporter.getModuleRegistrationDetails(userIdsAndCategories, users)
-					val newModuleRegistrations = importModRegCommands map {_.apply } flatten
+					val newModuleRegistrations = (importModRegCommands map {_.apply }).flatten
 
 					val usercodesProcessed: Seq[String] = userIdsAndCategories map { _.member.usercode }
 
