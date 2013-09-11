@@ -56,10 +56,7 @@ class TimetableController extends ProfilesController {
 	}
 
 	def colourEvents(uncoloured:Seq[FullCalendarEvent]):Seq[FullCalendarEvent] = {
-		// primary tabula colours
-		val colours = Seq("#239b92","#93225f","#a3b139","#3c5f80","#ec8d22","#ef3e36","#b0302e","#524761")++
-			// the second line are the colours listed in "variables.less" as "related colour"
-			Seq("#185c54","#df4094","#4daacc","#167ec2","#f1592a","#818285","#3a3a3c")
+		val colours = Seq("#239b92","#a3b139","#ec8d22","#ef3e36","#df4094","#4daacc","#167ec2","#f1592a","#818285")
 		// an infinitely repeating stream of colours
  		val colourStream = Stream.continually(colours.toStream).flatten
 		val modules = uncoloured.map(_.moduleCode).distinct
