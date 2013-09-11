@@ -7,10 +7,22 @@ case class SmallGroupSetMember(smallGroupSet:SmallGroupSet) extends BuiltInRole(
 
 case object SmallGroupSetMemberRoleDefinition extends BuiltInRoleDefinition {
 
-	override def description = "SmallGroupSetMember"
+	override def description = "Member of a set of small groups"
 
 	GrantsScopedPermission(
 		Permissions.SmallGroups.AllocateSelf
+	)
+
+}
+
+case class SmallGroupSetViewer(smallGroupSet: SmallGroupSet) extends BuiltInRole(SmallGroupSetViewerRoleDefinition, smallGroupSet)
+
+case object SmallGroupSetViewerRoleDefinition extends BuiltInRoleDefinition {
+
+	override def description = "Viewer of the membership of small groups"
+
+	GrantsScopedPermission(
+		Permissions.SmallGroups.ReadMembership
 	)
 
 }

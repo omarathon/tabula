@@ -17,6 +17,7 @@ case class FullCalendarEvent(title: String,
 														 start: Long,
 														 end: Long,
 														 backgroundColor:String="#4daacc", // tabulaBlueLight.
+														 textColor:String="#000",
 														 // fields below here are not used by FullCalendar itself, they're custom fields
 														 // for use in the renderEvent callback
 														 formattedStartTime: String,

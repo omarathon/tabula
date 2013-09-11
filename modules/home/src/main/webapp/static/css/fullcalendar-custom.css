@@ -20,3 +20,11 @@ but it should look more like h4
 .fc-header-title h2 sup{
    font-size: 70%
 }
+
+/*
+ * Override this; its default setting causes events to be slightly too pale for no good reason.
+*/
+.fc-event-vert .fc-event-bg { /* makes the event lighter w/ a semi-transparent overlay  */
+	opacity: 0;
+	filter: alpha(opacity=0);
+}
