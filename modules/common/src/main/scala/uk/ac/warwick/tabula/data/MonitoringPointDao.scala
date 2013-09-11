@@ -67,14 +67,17 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def saveOrUpdate(template: MonitoringPointSetTemplate) = session.saveOrUpdate(template)
 
 	def getCheckpoint(monitoringPoint: MonitoringPoint, member: StudentMember): Option[MonitoringCheckpoint] = {
-	  val studentCourseDetail = member.studentCourseDetails.asScala.filter(
+	  val studentCourseDetailOption = member.studentCourseDetails.asScala.find(
 			_.route == monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route
-		).head
+		)
 
-		session.newCriteria[MonitoringCheckpoint]
-			.add(is("studentCourseDetail", studentCourseDetail))
-			.add(is("point", monitoringPoint))
-			.uniqueResult
+		studentCourseDetailOption match {
+			case Some(studentCourseDetail) => session.newCriteria[MonitoringCheckpoint]
+				.add(is("studentCourseDetail", studentCourseDetail))
+				.add(is("point", monitoringPoint))
+				.uniqueResult
+			case _ => None
+		}
 	}
 
 	def getCheckpoints(monitoringPoint: MonitoringPoint) : Seq[MonitoringCheckpoint] = {
