@@ -65,8 +65,8 @@
 					<option value="${template.id}">${template.templateName}</option>
 				</#list>
 			</select>
-			<a class="btn monitoring-point-preview-button ajax-modal" data-target="#monitoring-point-preview-modal" href="#" data-hreftemplate="/attendance/monitoringpoints/preview/_TEMPLATE_ID_?academicYear=${command.thisAcademicYear.storeValue?c}">
-				Preview&hellip;
+			<a class="btn monitoring-point-preview-button ajax-modal" data-target="#monitoring-point-preview-modal" href="#" data-hreftemplate="/attendance/monitoringpoints/preview/_TEMPLATE_ID_?department=${command.dept.code}&academicYear=${command.thisAcademicYear.storeValue?c}">
+				Preview&hellip; <#-- wired by class in js -->
 			</a>
 			</span>
 		</label>

@@ -1,4 +1,6 @@
-<#compress><#escape x as x?html>
+<#ftl strip_text=true />
+
+<#escape x as x?html>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
 <#macro alerts commandName scope users="" role="">
@@ -103,4 +105,4 @@
 </script>
 </#macro>
 
-</#escape></#compress>
+</#escape>

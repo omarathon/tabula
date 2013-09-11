@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.data.model.Department
 
 object ViewMonitoringPointSetCommand {
 	def apply(set: AbstractMonitoringPointSet) = new ViewMonitoringPointSetCommand(set)
@@ -32,6 +33,12 @@ trait ViewMonitoringPointSetState extends GroupMonitoringPointsByTerm {
 	def set: AbstractMonitoringPointSet
 
 	var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
+
+	// Just used to access week render setting
+	var department: Department = set match {
+		case s:MonitoringPointSet => s.route.department
+		case _ => null
+	}
 
 	def academicYearToUse = set match {
 		case s:MonitoringPointSet => s.academicYear

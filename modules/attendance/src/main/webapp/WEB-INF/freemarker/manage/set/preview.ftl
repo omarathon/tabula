@@ -14,7 +14,7 @@
 		<#list command.monitoringPointsByTerm[term]?sort_by("week") as point>
 			<div class="item-info row-fluid point">
 				<div class="span12">
-					${point.name} (Week ${point.week}) <#-- <@fmt.singleWeekFormat point.week command.academicYearToUse command.dept />) -->
+					${point.name} (<@fmt.singleWeekFormat point.week command.academicYearToUse command.department />)
 				</div>
 			</div>
 		</#list>
