@@ -2,14 +2,14 @@ package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{Route, Department}
+import uk.ac.warwick.tabula.data.model.{StudentMember, Route, Department}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import scala.collection.mutable
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
 import scala.Some
 
 object ViewMonitoringPointSetsCommand {
@@ -20,6 +20,7 @@ object ViewMonitoringPointSetsCommand {
 		with AutowiringRouteServiceComponent
 		with AutowiringMonitoringPointServiceComponent
 		with AutowiringTermServiceComponent
+		with AutowiringProfileServiceComponent
 		with ReadOnly with Unaudited
 }
 
@@ -29,8 +30,25 @@ abstract class ViewMonitoringPointSetsCommand(
 		val routeOption: Option[Route], val pointSetOption: Option[MonitoringPointSet]
 	)	extends CommandInternal[Unit]	with ViewMonitoringPointSetsState {
 
-	override def applyInternal() = {
+	self: MonitoringPointServiceComponent with ProfileServiceComponent with TermServiceComponent =>
 
+	override def applyInternal() = {
+		val members = if(pointSet.year == null) {
+			profileService.getStudentsByRoute(pointSet.route)
+		} else {
+			profileService.getStudentsByRoute(
+				pointSet.route,
+				pointSet.academicYear
+			)
+		}
+		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
+		membersWithMissedCheckpoints = monitoringPointService.getCheckedForWeek(members, pointSet, currentAcademicWeek).filter{
+			case (member, checkMap) =>
+				checkMap.exists{
+					case (_, Some(b)) => !b
+					case _ => false
+				}
+		}
 	}
 }
 
@@ -77,5 +95,13 @@ trait ViewMonitoringPointSetsState extends RouteServiceComponent with Monitoring
 	}
 
 	def monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, academicYear)
+
+	var membersWithMissedCheckpoints: Map[StudentMember, Map[MonitoringPoint, Option[Boolean]]] = _
+
+	def missedCheckpointsByMember(member: StudentMember) =
+		membersWithMissedCheckpoints(member)
+
+	def missedCheckpointsByMemberByPoint(member: StudentMember, point: MonitoringPoint) =
+		membersWithMissedCheckpoints(member)(point)
 
 }
