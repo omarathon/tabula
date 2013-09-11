@@ -77,7 +77,7 @@ class StudentCourseDetails
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def latestStudentCourseYearDetails: StudentCourseYearDetails =
-		studentCourseYearDetails.asScala.max(YearAndSequenceOrdering)
+		studentCourseYearDetails.asScala.max
 
 	def courseType = CourseType.fromCourseCode(course.code)
 

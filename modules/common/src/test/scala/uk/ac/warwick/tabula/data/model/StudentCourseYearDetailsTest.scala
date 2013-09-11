@@ -35,20 +35,20 @@ class StudentCourseYearDetailsTest extends TestBase with Mockito {
 		scd.studentCourseYearDetails.add(scyd_2013_1)
 		scd.studentCourseYearDetails.add(scyd_2012_2)
 
-		scd.studentCourseYearDetails.asScala.max(YearAndSequenceOrdering) should be (scyd_2013_1)
+		scd.studentCourseYearDetails.asScala.max should be (scyd_2013_1)
 
 		// latest sequence number should come back first
 		scd.studentCourseYearDetails.clear
 		scd.studentCourseYearDetails.add(scyd_2012_2)
 		scd.studentCourseYearDetails.add(scyd_2012_1)
 
-		scd.studentCourseYearDetails.asScala.max(YearAndSequenceOrdering) should be (scyd_2012_2)
+		scd.studentCourseYearDetails.asScala.max should be (scyd_2012_2)
 
 		// year should win over sequence number
 		scd.studentCourseYearDetails.clear
 		scd.studentCourseYearDetails.add(scyd_2013_1)
 		scd.studentCourseYearDetails.add(scyd_2012_2)
 
-		scd.studentCourseYearDetails.asScala.max(YearAndSequenceOrdering) should be (scyd_2013_1)
+		scd.studentCourseYearDetails.asScala.max should be (scyd_2013_1)
 	}
 }
