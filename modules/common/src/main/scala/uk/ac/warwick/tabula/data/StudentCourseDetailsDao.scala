@@ -1,16 +1,17 @@
 package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConversions._
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.FilterDefs
-import org.hibernate.annotations.Filters
-import org.hibernate.criterion._
-import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
-import javax.persistence.Entity
-import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.spring.Wire
+
+trait StudentCourseDetailsDaoComponent {
+	val studentCourseDetailsDao: StudentCourseDetailsDao
+}
+
+trait AutowiringStudentCourseDetailsDaoComponent extends StudentCourseDetailsDaoComponent {
+	val studentCourseDetailsDao = Wire[StudentCourseDetailsDao]
+}
 
 trait StudentCourseDetailsDao {
 	def saveOrUpdate(studentCourseDetails: StudentCourseDetails)
@@ -23,8 +24,6 @@ trait StudentCourseDetailsDao {
 
 @Repository
 class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
-	import Restrictions._
-	import Order._
 
 	def saveOrUpdate(studentCourseDetails: StudentCourseDetails) = {
 		session.saveOrUpdate(studentCourseDetails)

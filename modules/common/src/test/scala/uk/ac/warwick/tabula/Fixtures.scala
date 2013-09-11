@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
+import org.joda.time.DateTime
 
 // scalastyle:off magic.number
 object Fixtures {
@@ -164,6 +165,12 @@ object Fixtures {
 
 		m.studentCourseDetails.add(studentCourseDetails)
 		m
+	}
+
+	def studentCourseYearDetails(academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)) = {
+		val scyd = new StudentCourseYearDetails
+		scyd.academicYear = academicYear
+		scyd
 	}
 
 	def monitoringPoint(name: String = "name", defaultValue: Boolean = false, week: Int = 0) = {

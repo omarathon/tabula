@@ -12,6 +12,15 @@ import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
+import uk.ac.warwick.spring.Wire
+
+trait MemberDaoComponent {
+	val memberDao: MemberDao
+}
+
+trait AutowiringMemberDaoComponent extends MemberDaoComponent {
+	val memberDao = Wire[MemberDao]
+}
 
 trait MemberDao {
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType]
