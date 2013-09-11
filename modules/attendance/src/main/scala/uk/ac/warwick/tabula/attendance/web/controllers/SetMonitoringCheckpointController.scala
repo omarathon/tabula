@@ -2,10 +2,10 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import scala.Array
 import uk.ac.warwick.tabula.attendance.commands.SetMonitoringCheckpointCommand
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.services.RouteService
 import uk.ac.warwick.tabula.web.Mav
 import javax.validation.Valid
@@ -13,7 +13,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.attendance.web.Routes
 
-@RequestMapping(Array("/monitoringpoints/{monitoringPoint}/set"))
+@RequestMapping(Array("/{department}/{monitoringPoint}/record"))
 @Controller
 class SetMonitoringCheckpointController extends AttendanceController {
 
