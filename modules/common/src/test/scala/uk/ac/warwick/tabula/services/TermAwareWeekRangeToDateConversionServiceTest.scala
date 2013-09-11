@@ -18,16 +18,16 @@ class TermAwareWeekRangeToDateConversionServiceTest extends TestBase with Mockit
 	val week1:WeekRange.Week = 1
   val week1Interval = new Interval(dtNow.withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay(),
 		                               dtNow.withDayOfWeek(DateTimeConstants.MONDAY).withTimeAtStartOfDay().plusDays(7))
-	val mockTf = mock[TermFactory]
-	val converter = new TermAwareWeekToDateConverterComponent with TermFactoryComponent{
-		var termFactory = mockTf
+	val mockTf = mock[TermService]
+	val converter = new TermAwareWeekToDateConverterComponent with TermServiceComponent{
+		var termService = mockTf
 	}.weekToDateConverter
 
-	mockTf.getAcademicWeeksForYear(localCurrentYear.dateInTermOne) returns JArrayList(
+	mockTf.getAcademicWeeksForYear(localCurrentYear.dateInTermOne) returns Seq(
 	  // week 1 includes localNow
-		WPair.of(JInteger(Some(week1)), week1Interval),
+		(JInteger(Some(week1)), week1Interval),
 		// week 2 is after localNow
-		WPair.of(JInteger(Some(2)), new Interval(week1Interval.getEnd, week1Interval.getEnd.plusDays(7)))
+		(JInteger(Some(2)), new Interval(week1Interval.getEnd, week1Interval.getEnd.plusDays(7)))
 	)
 
 	@Test

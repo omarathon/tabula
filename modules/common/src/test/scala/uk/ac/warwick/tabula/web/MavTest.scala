@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.web
 
 import uk.ac.warwick.tabula.TestBase
+import org.springframework.web.servlet.view.RedirectView
 
 class MavTest extends TestBase {
 	
@@ -21,6 +22,12 @@ class MavTest extends TestBase {
 		mav.getModel.get("breadcrumbs") should not be (null)
 		mav.getModel.get("pageTitle") should be ("my title")
 		mav.getModel.get("bodyClasses") should be ("body rocking")
+	}
+
+	@Test def viewObject() {
+		val view = new RedirectView("google.com")
+		val mav = Mav(view)
+		mav.toModelAndView.getView should be (view)
 	}
 
 }

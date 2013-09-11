@@ -12,7 +12,8 @@ case object StaffRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	override def description = "Staff Member"
 
 	GrantsScopelessPermission(
-		UserPicker
+		UserPicker,
+		MonitoringPointSetTemplates.View
 	)
 
 	GrantsGlobalPermission(

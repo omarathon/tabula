@@ -34,9 +34,9 @@ class GroupMonitoringPointsByTermTest extends TestBase with Mockito {
 		val route = mock[Route]
 		val yearOption = Option(1)
 
-		val week5pair = uk.ac.warwick.util.collections.Pair.of(new Integer(5), new Interval(week5StartDate, week5EndDate))
-		val week15pair = uk.ac.warwick.util.collections.Pair.of(new Integer(15), new Interval(week15StartDate, week15EndDate))
-		val weeksForYear = JArrayList(week5pair, week15pair)
+		val week5pair = (new Integer(5), new Interval(week5StartDate, week5EndDate))
+		val week15pair = (new Integer(15), new Interval(week15StartDate, week15EndDate))
+		val weeksForYear = Seq(week5pair, week15pair)
 		termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1))	returns weeksForYear
 
 		val autumnTerm = mock[Term]

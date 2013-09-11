@@ -5,14 +5,14 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
-import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.tabula.services.{TermServiceImpl, TermService}
 import uk.ac.warwick.util.termdates.TermFactoryImpl
 import scala.collection.JavaConverters._
 import uk.ac.warwick.util.termdates.Term.TermType
 
 class WeekRangesFormatterTest extends TestBase {
 
-	val termService = new TermService
+	val termService = new TermServiceImpl
 
 	@Test def termNumbering = withFakeTime(new DateTime(2011, 10, 12, 13, 36, 44)) {
 		val formatter = new WeekRangesFormatter(AcademicYear.guessByDate(DateTime.now))

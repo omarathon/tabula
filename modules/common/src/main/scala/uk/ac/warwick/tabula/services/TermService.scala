@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import org.springframework.stereotype.Service
-import uk.ac.warwick.util.termdates.{TermFactory, Term, TermFactoryImpl}
+import uk.ac.warwick.util.termdates.{Term, TermFactoryImpl}
 import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.util.termdates.Term.TermType
@@ -9,11 +9,23 @@ import scala.collection.JavaConverters._
 import org.joda.time.{Interval, DateTime}
 import uk.ac.warwick.tabula.AcademicYear
 
+trait TermService {
+	def getTermFromDate(date: BaseDateTime): Term
+	def getPreviousTerm(term: Term): Term
+	def getNextTerm(term: Term): Term
+	def getAcademicWeek(date: BaseDateTime, weekNumber: Int): Interval
+	def getAcademicWeeksForYear(date: BaseDateTime): Seq[(Integer, Interval)]
+	def getAcademicWeeksBetween(start:DateTime, end:DateTime): Seq[(AcademicYear,Int,Interval)]
+	def getTermFromDateIncludingVacations(date: BaseDateTime): Term
+	def getTermsBetween(start: BaseDateTime, end: BaseDateTime): Seq[Term]
+	def getAcademicWeekForAcademicYear(date: BaseDateTime, academicYear: AcademicYear): Int
+}
+
 /**
  * Wraps TermFactory and adds more features.
  */
 @Service
-class TermService extends TermFactory{
+class TermServiceImpl extends TermService {
 	val termFactory = new TermFactoryImpl
 
 	def getTermFromDate(date: BaseDateTime) = termFactory.getTermFromDate(date)
@@ -24,7 +36,7 @@ class TermService extends TermFactory{
 
 	def getAcademicWeek(date: BaseDateTime, weekNumber: Int) = termFactory.getAcademicWeek(date, weekNumber)
 
-	def getAcademicWeeksForYear(date: BaseDateTime) = termFactory.getAcademicWeeksForYear(date)
+	def getAcademicWeeksForYear(date: BaseDateTime) = termFactory.getAcademicWeeksForYear(date).asScala map { pair => pair.getLeft -> pair.getRight }
 
 	/**
 	 * Return all the academic weeks for the specifed range, as a tuple of year, weeknumber, date interval
@@ -44,7 +56,7 @@ class TermService extends TermFactory{
 	}
 	def getTermFromDateIncludingVacations(date: BaseDateTime) = {
 		val term = termFactory.getTermFromDate(date)
-		if (date.isBefore(term.getStartDate())) Vacation(termFactory.getPreviousTerm(term), term)
+		if (date.isBefore(term.getStartDate)) Vacation(termFactory.getPreviousTerm(term), term)
 		else term
 	}
 
@@ -53,7 +65,23 @@ class TermService extends TermFactory{
 		val endTerm = getTermFromDateIncludingVacations(end)
 
 		if (startTerm == endTerm) Seq(startTerm)
-		else startTerm +: getTermsBetween(startTerm.getEndDate().plusDays(1), end)
+		else startTerm +: getTermsBetween(startTerm.getEndDate.plusDays(1), end)
+	}
+
+	def getAcademicWeekForAcademicYear(date: BaseDateTime, academicYear: AcademicYear): Int = {
+		val termContainingYearStart = getTermFromDateIncludingVacations(academicYear.dateInTermOne)
+		def findNextAutumnTermForTerm(term: Term): Term = {
+			term.getTermType match {
+				case TermType.autumn => term
+				case _ => findNextAutumnTermForTerm(getNextTerm(term))
+			}
+		}
+		if (date.isBefore(termContainingYearStart.getStartDate))
+			Term.WEEK_NUMBER_BEFORE_START
+		else if (date.isAfter(findNextAutumnTermForTerm(getNextTerm(termContainingYearStart)).getStartDate))
+			Term.WEEK_NUMBER_AFTER_END
+		else
+			termContainingYearStart.getAcademicWeekNumber(date)
 	}
 
 }
@@ -65,8 +93,8 @@ class TermService extends TermFactory{
 	*/
 case class Vacation(before: Term, after: Term) extends Term {
 	// Starts the day after the previous term and ends the day before the new term
-	def getStartDate = before.getEndDate().plusDays(1)
-	def getEndDate = after.getStartDate().minusDays(1)
+	def getStartDate = before.getEndDate.plusDays(1)
+	def getEndDate = after.getStartDate.minusDays(1)
 
 	def getTermType = null
 	def getTermTypeAsString = before.getTermType match {

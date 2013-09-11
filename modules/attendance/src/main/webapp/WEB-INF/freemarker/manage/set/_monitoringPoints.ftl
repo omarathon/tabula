@@ -1,3 +1,4 @@
+<#include "*/attendance_variables.ftl" />
 <div class="monitoring-points">
 	<@spring.bind path="command.monitoringPoints">
 		<#if status.error>
@@ -46,7 +47,7 @@
 			</div>
 		</div>
 	<#else>
-		<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
+		<#list monitoringPointTermNames as term>
 			<#if command.monitoringPointsByTerm[term]??>
 				<@pointsInATerm term/>
 			</#if>
