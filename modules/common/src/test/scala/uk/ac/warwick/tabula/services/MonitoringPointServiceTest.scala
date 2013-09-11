@@ -11,26 +11,26 @@ class MonitoringPointServiceTest extends TestBase with Mockito {
 		val monitoringPointDao = mock[MonitoringPointDao]
 	}
 
-	@Test
-	def checkedForWeekTest() {
-		trait Fixture {
-			val service = new AbstractMonitoringPointService with ServiceTestSupport
-			val uniId1 = "1234"
-			val member1 = Fixtures.member(MemberUserType.Student, uniId1).asInstanceOf[StudentMember]
-			val uniId2 = "2345"
-			val member2 = Fixtures.member(MemberUserType.Student, uniId2).asInstanceOf[StudentMember]
-			val point1 = Fixtures.monitoringPoint("point1", defaultValue = false, 2)
-			val point2 = Fixtures.monitoringPoint("point2", defaultValue = true, 4)
-			val pointSet = new MonitoringPointSet
-			pointSet.points = JArrayList(point1, point2)
-			val trueCheckpoint = new MonitoringCheckpoint
-			trueCheckpoint.checked = true
-			val falseCheckpoint = new MonitoringCheckpoint
-			falseCheckpoint.checked = false
-		}
+	trait CheckpointFixture {
+		val service = new AbstractMonitoringPointService with ServiceTestSupport
+		val uniId1 = "1234"
+		val member1 = Fixtures.member(MemberUserType.Student, uniId1).asInstanceOf[StudentMember]
+		val uniId2 = "2345"
+		val member2 = Fixtures.member(MemberUserType.Student, uniId2).asInstanceOf[StudentMember]
+		val point1 = Fixtures.monitoringPoint("point1", defaultValue = false, 2)
+		val point2 = Fixtures.monitoringPoint("point2", defaultValue = true, 4)
+		val pointSet = new MonitoringPointSet
+		pointSet.points = JArrayList(point1, point2)
+		val trueCheckpoint = new MonitoringCheckpoint
+		trueCheckpoint.checked = true
+		val falseCheckpoint = new MonitoringCheckpoint
+		falseCheckpoint.checked = false
+	}
 
-		// With no checkpoint, before a point is valid there should be None (neither true or false)
-		new Fixture {
+	@Test
+	def checkedForWeekTestNoCheckpointsBeforePoints() {
+		new CheckpointFixture {
+			// With no checkpoint, before a point is valid there should be None (neither true or false)
 			service.monitoringPointDao.getCheckpoint(point1, member1) returns None
 			service.monitoringPointDao.getCheckpoint(point1, member2) returns None
 			service.monitoringPointDao.getCheckpoint(point2, member1) returns None
@@ -45,9 +45,12 @@ class MonitoringPointServiceTest extends TestBase with Mockito {
 				case _ => false
 			} should be (right = false)
 		}
+	}
 
-		// With no checkpoint, after a point is valid, should return the point's default value
-		new Fixture {
+	@Test
+	def checkedForWeekTestNoCheckpointsAfterPoints() {
+		new CheckpointFixture {
+			// With no checkpoint, after a point is valid, should return the point's default value
 			service.monitoringPointDao.getCheckpoint(point1, member1) returns None
 			service.monitoringPointDao.getCheckpoint(point1, member2) returns None
 			service.monitoringPointDao.getCheckpoint(point2, member1) returns None
@@ -58,9 +61,12 @@ class MonitoringPointServiceTest extends TestBase with Mockito {
 			noCheckpointsAfterPoints(member1)(point2) should be (Option(point2.defaultValue))
 			noCheckpointsAfterPoints(member2)(point2) should be (Option(point2.defaultValue))
 		}
+	}
 
-		// With checkpoints, should return the checkpoint's value regardless of the week
-		new Fixture {
+	@Test
+	def checkedForWeekTestWithCheckpoints() {
+		new CheckpointFixture {
+			// With checkpoints, should return the checkpoint's value regardless of the week
 			service.monitoringPointDao.getCheckpoint(point1, member1) returns Option(trueCheckpoint)
 			service.monitoringPointDao.getCheckpoint(point1, member2) returns Option(falseCheckpoint)
 			service.monitoringPointDao.getCheckpoint(point2, member1) returns Option(trueCheckpoint)
