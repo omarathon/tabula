@@ -59,17 +59,12 @@
 	}
 }
 
-
-
 .recordCheckpointForm {
-
 	.floatingHeader {
 		border-bottom: 1px solid #aaa;
 	}
-
 	.save-row {
 		width:100%;
-
 		.pull-right {
 			padding-right:2.5em;
 		}
@@ -77,4 +72,15 @@
 }
 
 
-
+#missed-monitoring-points {
+	.icon-ok { color: @successText; }
+	.icon-remove { color: @errorText; }
+	.missed-count {
+		padding: 2px 5px;
+		background: @tabulaOrangeLight;
+		&.red {
+			background: @errorText;
+			color: white;
+		}
+	}
+}

@@ -35,6 +35,7 @@ trait MonitoringPointService {
 	def getTemplateById(id: String) : Option[MonitoringPointSetTemplate]
 	def deleteTemplate(template: MonitoringPointSetTemplate)
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
+	def getCheckedForWeek(members: Seq[StudentMember], set: MonitoringPointSet, week: Int): Map[StudentMember, Map[MonitoringPoint, Option[Boolean]]]
 }
 
 
@@ -88,6 +89,21 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def deleteTemplate(template: MonitoringPointSetTemplate) = monitoringPointDao.deleteTemplate(template)
 
 	def countCheckpointsForPoint(point: MonitoringPoint) = monitoringPointDao.countCheckpointsForPoint(point)
+
+	def getCheckedForWeek(members: Seq[StudentMember], set: MonitoringPointSet, week: Int): Map[StudentMember, Map[MonitoringPoint, Option[Boolean]]] =
+		members.map(member =>
+			member ->
+			set.points.asScala.map(point =>
+				(point, monitoringPointDao.getCheckpoint(point, member) match {
+					case Some(c: MonitoringCheckpoint) => Option(c.checked)
+					case None =>
+						if (week <= point.week)
+							None
+						else
+							Option(point.defaultValue)
+				})
+			).toMap
+		).toMap
 }
 
 @Service("monitoringPointService")
