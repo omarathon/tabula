@@ -486,7 +486,6 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val department2 = assignment2.module.department
 
 		session.save(department2)
-		//session.save(assignment2.module)
 		assignmentService.save(assignment2)
 
 		val up1 = new UpstreamAssignment
