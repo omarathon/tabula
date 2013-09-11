@@ -10,12 +10,15 @@ import uk.ac.warwick.tabula.data.Daoisms
 import org.codehaus.jackson.annotate.JsonAutoDetect
 import scala.beans.BeanProperty
 import org.hibernate.stat.Statistics
+import org.joda.time.format.DateTimeFormat
 
 /**
  * Listens for messages
  */
 @Component
 class HibernateStatisticsService extends QueueListener with InitializingBean with Logging with Daoisms {
+
+	private val DateFormat = DateTimeFormat.shortDateTime()
 
 	var queue = Wire.named[Queue]("settingsSyncTopic")
 	var context = Wire.property("${module.context}")
@@ -33,14 +36,18 @@ class HibernateStatisticsService extends QueueListener with InitializingBean wit
 
 	def getStatisticsSummary(stats: Statistics) = {
 		s"""
-		Flushes: ${stats.getFlushCount}
-		Entity loads: ${stats.getEntityLoadCount}
-		Entity fetches: ${stats.getEntityFetchCount}
-		Collection loads: ${stats.getCollectionLoadCount}
-
-		Query count: ${stats.getQueryExecutionCount}
-		Slowest query (${stats.getQueryExecutionMaxTime}ms): ${stats.getQueryExecutionMaxTimeQueryString}
-
+		|Stats enabled: ${stats.isStatisticsEnabled} (since ${DateFormat.print(stats.getStartTime)})
+		|
+		|Flushes: ${stats.getFlushCount}
+		|Entity loads: ${stats.getEntityLoadCount}
+		|Entity fetches: ${stats.getEntityFetchCount}
+		|Collection loads: ${stats.getCollectionLoadCount}
+		|
+		|Sessions opened: ${stats.getSessionOpenCount}
+		|Sessions closed: ${stats.getSessionCloseCount}
+		|
+		|Query count: ${stats.getQueryExecutionCount}
+		|Slowest query (${stats.getQueryExecutionMaxTime}ms): ${stats.getQueryExecutionMaxTimeQueryString}
 		""".stripMargin
 	}
 
