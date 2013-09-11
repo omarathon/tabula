@@ -36,12 +36,12 @@ abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoi
 
 	def populate() {
 		members = if(set.year == null) {
-			profileService.getStudentsByRoute(set.route)
+			profileService.getStudentsByRoute(set.route).toStream.distinct
 		} else {
 			profileService.getStudentsByRoute(
 				set.route,
 				set.academicYear
-			)
+			).toStream.distinct
 		}
 
 		membersChecked = monitoringPointService.getCheckedStudents(monitoringPoint)

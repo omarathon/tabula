@@ -59,7 +59,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 			 val newCheckpoint = new MonitoringCheckpoint()
 			 newCheckpoint.studentCourseDetail = member.studentCourseDetails.asScala.filter(
 				 scd => scd.route == monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route
-			 ).head  //todo
+			 ).head
 			 newCheckpoint.point = monitoringPoint
 			 newCheckpoint.createdBy = user.apparentId
 			 newCheckpoint.createdDate = DateTime.now
