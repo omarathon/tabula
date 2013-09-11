@@ -44,7 +44,7 @@ class TermService extends TermFactory{
 	}
 	def getTermFromDateIncludingVacations(date: BaseDateTime) = {
 		val term = termFactory.getTermFromDate(date)
-		if (date.isBefore(term.getStartDate())) Vacation(termFactory.getPreviousTerm(term), term)
+		if (date.isBefore(term.getStartDate)) Vacation(termFactory.getPreviousTerm(term), term)
 		else term
 	}
 
@@ -53,7 +53,23 @@ class TermService extends TermFactory{
 		val endTerm = getTermFromDateIncludingVacations(end)
 
 		if (startTerm == endTerm) Seq(startTerm)
-		else startTerm +: getTermsBetween(startTerm.getEndDate().plusDays(1), end)
+		else startTerm +: getTermsBetween(startTerm.getEndDate.plusDays(1), end)
+	}
+
+	def getAcademicWeekForAcademicYear(date: BaseDateTime, academicYear: AcademicYear): Int = {
+		val termContainingYearStart = getTermFromDateIncludingVacations(academicYear.dateInTermOne)
+		def findNextAutumnTermForTerm(term: Term): Term = {
+			term.getTermType match {
+				case TermType.autumn => term
+				case _ => findNextAutumnTermForTerm(getNextTerm(term))
+			}
+		}
+		if (date.isBefore(termContainingYearStart.getStartDate))
+			Term.WEEK_NUMBER_BEFORE_START
+		else if (date.isAfter(findNextAutumnTermForTerm(getNextTerm(termContainingYearStart)).getStartDate))
+			Term.WEEK_NUMBER_AFTER_END
+		else
+			termContainingYearStart.getAcademicWeekNumber(date)
 	}
 
 }
@@ -65,8 +81,8 @@ class TermService extends TermFactory{
 	*/
 case class Vacation(before: Term, after: Term) extends Term {
 	// Starts the day after the previous term and ends the day before the new term
-	def getStartDate = before.getEndDate().plusDays(1)
-	def getEndDate = after.getStartDate().minusDays(1)
+	def getStartDate = before.getEndDate.plusDays(1)
+	def getEndDate = after.getStartDate.minusDays(1)
 
 	def getTermType = null
 	def getTermTypeAsString = before.getTermType match {

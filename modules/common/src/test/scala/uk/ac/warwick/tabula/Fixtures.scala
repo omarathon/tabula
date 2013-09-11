@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 
 // scalastyle:off magic.number
 object Fixtures {
@@ -87,11 +88,11 @@ object Fixtures {
 
 	def upstreamAssignment(departmentCode:String, number:Int) = {
         val a = new UpstreamAssignment
-        a.name = "Assignment %d" format (number)
+        a.name = "Assignment %d" format number
         a.departmentCode = departmentCode.toUpperCase
         a.moduleCode = "%s1%02d-30" format (departmentCode.toUpperCase, number)
         a.assessmentGroup = "A"
-        a.sequence = "A%02d" format (number)
+        a.sequence = "A%02d" format number
         a
     }
 
@@ -163,5 +164,13 @@ object Fixtures {
 
 		m.studentCourseDetails.add(studentCourseDetails)
 		m
+	}
+
+	def monitoringPoint(name: String = "name", defaultValue: Boolean = false, week: Int = 0) = {
+		val point = new MonitoringPoint
+		point.name = name
+		point.week = week
+		point.defaultValue = defaultValue
+		point
 	}
 }

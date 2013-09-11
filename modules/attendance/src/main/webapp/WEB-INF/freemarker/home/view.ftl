@@ -1,32 +1,6 @@
 <#escape x as x?html>
 <h1>View monitoring points for ${command.dept.name}</h1>
 
-<script>
-	var setsByRouteByAcademicYear = {
-		<#list command.setsByRouteByAcademicYear?keys as academicYear>
-			"${academicYear}" : [
-				<#list command.setsByRouteByAcademicYear[academicYear]?keys?sort_by("code") as route>
-					{
-						"code" : "${route.code}",
-						"name" : "${route.name}",
-						"sets" : [
-							<#list command.setsByRouteCodeByAcademicYear(academicYear, route.code) as set>
-								{
-									"id" : "${set.id}",
-									"year" : "<#if set.year??>${set.year}<#else>All</#if>"
-								}
-								<#if set_has_next>,</#if>
-							</#list>
-						]
-					}
-					<#if route_has_next>,</#if>
-				</#list>
-			]
-			<#if academicYear_has_next>,</#if>
-		</#list>
-	}
-</script>
-
 <form class="form-inline" action="<@url page="/${command.dept.code}"/>">
 	<label>Academic year
 		<select name="academicYear">
@@ -91,6 +65,58 @@
 </#if>
 
 <#if command.pointSet??>
+	<h2>Students who have missed monitoring points</h2>
+
+	<#if command.membersWithMissedCheckpoints?keys?size == 0>
+		<p>There are no students in ${command.route.code?upper_case} ${command.route.name} who have missed monitoring points</p>
+	<#else>
+
+		<table id="missed-monitoring-points" class="table table-striped table-bordered table-condensed">
+			<thead>
+				<tr>
+					<th class="sortable">First name</th>
+					<th class="sortable">Last name</th>
+					<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
+						<#if command.monitoringPointsByTerm[term]??>
+							<th>${term}</th>
+						</#if>
+					</#list>
+					<th class="sortable">Total</th>
+				</tr>
+			</thead>
+			<tbody>
+				<#list command.membersWithMissedCheckpoints?keys as member>
+					<#assign missedCount = 0 />
+					<tr>
+						<td>${member.firstName}</td>
+						<td>${member.lastName}</td>
+						<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
+							<#if command.monitoringPointsByTerm[term]??>
+								<td>
+									<#list command.monitoringPointsByTerm[term]?sort_by("week") as point>
+										<#assign checkpointState = (command.missedCheckpointsByMemberByPoint(member, point)?string("true", "false"))!"null" />
+										<#if checkpointState == "null">
+											<i class="icon-minus icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
+										<#elseif checkpointState == "true">
+											<i class="icon-ok icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
+										<#else>
+											<#assign missedCount = missedCount + 1 />
+											<i class="icon-remove icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
+										</#if>
+									</#list>
+								</td>
+							</#if>
+						</#list>
+						<td>
+							<span class="missed-count <#if (missedCount > 2)>red</#if>">${missedCount}</span>
+						</td>
+					</tr>
+				</#list>
+			<tbody>
+		</table>
+
+	</#if>
+
 	<h2>Monitoring points for ${command.route.code?upper_case} ${command.route.name},
 		<#if command.pointSet.year??>year ${command.pointSet.year}<#else>all years</#if>
 	</h2>
@@ -126,5 +152,38 @@
         </div>
 	</#if>
 </#if>
+
+<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
+<script>
+	var setsByRouteByAcademicYear = {
+		<#list command.setsByRouteByAcademicYear?keys as academicYear>
+			"${academicYear}" : [
+				<#list command.setsByRouteByAcademicYear[academicYear]?keys?sort_by("code") as route>
+					{
+						"code" : "${route.code}",
+						"name" : "${route.name}",
+						"sets" : [
+							<#list command.setsByRouteCodeByAcademicYear(academicYear, route.code) as set>
+								{
+									"id" : "${set.id}",
+									"year" : "<#if set.year??>${set.year}<#else>All</#if>"
+								}
+								<#if set_has_next>,</#if>
+							</#list>
+						]
+					}
+					<#if route_has_next>,</#if>
+				</#list>
+			]
+			<#if academicYear_has_next>,</#if>
+		</#list>
+	};
+
+	jQuery(function($){
+		$('#missed-monitoring-points')
+			.sortableTable()
+			.trigger('sorton', [[[$('#missed-monitoring-points th').length - 1,1]]]);
+	});
+</script>
 
 </#escape>

@@ -73,6 +73,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 		session.newCriteria[MonitoringCheckpoint]
 			.add(is("studentCourseDetail", studentCourseDetail))
+			.add(is("point", monitoringPoint))
 			.uniqueResult
 	}
 
