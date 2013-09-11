@@ -3,7 +3,7 @@
 <div class="alert alert-warning">
 	<h3>Slow operations</h3>
 	<p>
-	Some of these operations (such as Hibernate statistics collection) is bad for performance and shouldn't
+	Some of these operations (such as Hibernate statistics collection) are bad for performance and shouldn't
 	be enabled in production, or at least not for any length of time.
 	</p>
 </div>
