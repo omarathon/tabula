@@ -2,10 +2,58 @@ package uk.ac.warwick.tabula.groups
 
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BreadcrumbsMatcher
-import uk.ac.warwick.tabula.groups.pages.{BatchOpenPage, SmallGroupTeachingPage}
+import uk.ac.warwick.tabula.groups.pages.{GroupsHomePage, BatchOpenPage, SmallGroupTeachingPage}
 
 
 class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with BreadcrumbsMatcher{
+
+
+	val TEST_MODULE_CODE = "xxx999"
+	val TEST_GROUPSET_NAME="Test Tutorial"
+
+	"A student" should "not be able to see unreleased groups" in {
+		Given("A small groupset exists with 2 small groups, an allocation method of Manual, but is not released to students")
+		createModule("xxx",TEST_MODULE_CODE,"Manually-allocated Module")
+		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "Manual", groupCount=2, releasedToStudents = false)
+
+		And("The student is a member of the groupset")
+		addStudentToGroupSet(P.Student1.usercode,setId)
+
+		And("The student is allocated to group 1")
+		addStudentToGroup(P.Student1.usercode,setId,"Group 1")
+
+		When("I Log in as the student and view the groups page")
+		signIn as(P.Student1)  to (Path("/groups"))
+
+		Then("I should not see the unreleased groupset")
+		val groupsPage = new GroupsHomePage
+		groupsPage.isCurrentPage()
+
+		groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should not be ('defined)
+
+	}
+
+	"A student" should "be able to see released groups" in {
+		Given("A small groupset exists with 2 small groups, an allocation method of Manual, and is released to students")
+		createModule("xxx",TEST_MODULE_CODE,"Manually-allocated Module")
+		val setId = createSmallGroupSet(TEST_MODULE_CODE,TEST_GROUPSET_NAME,allocationMethodName = "Manual", groupCount=2, releasedToStudents = true)
+
+		And("The student is a member of the groupset")
+		addStudentToGroupSet(P.Student1.usercode,setId)
+
+		And("The student is allocated to group 1")
+		addStudentToGroup(P.Student1.usercode,setId,"Group 1")
+
+		When("I Log in as the student and view the groups page")
+		signIn as(P.Student1)  to (Path("/groups"))
+
+		Then("I should see the released groupset")
+		val groupsPage = new GroupsHomePage
+		groupsPage.isCurrentPage()
+
+		groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should be ('defined)
+
+	}
 
 
 		"Department Admin" should "be offered a link to the department's group pages" in {

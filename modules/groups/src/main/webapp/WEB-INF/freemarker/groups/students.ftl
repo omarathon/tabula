@@ -5,6 +5,7 @@
 
 <div class="modal-body">
 
+
 	<ul>
 	<#list command.group.events as event>
 	<#assign tutorUsers=event.tutors.users />
@@ -14,19 +15,21 @@
 		${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
 		${event.location!"[no location]"}
 		</div>
-		<div>
 
-		<@fmt.p number=tutorUsers?size singular="Tutor" shownumber=false />:
-		<#if !tutorUsers?has_content>
-			<em>None</em>
-		</#if>
-		<#list tutorUsers as tutorUser>
-			${tutorUser.fullName}<#if tutorUser_has_next>,</#if>
-		</#list>
+		<#if studentsCanSeeTutorName>
+		<div>
+			<@fmt.p number=tutorUsers?size singular="Tutor" shownumber=false />:
+			<#if !tutorUsers?has_content>
+				<em>None</em>
+			</#if>
+			<#list tutorUsers as tutorUser>
+				${tutorUser.fullName}<#if tutorUser_has_next>,</#if>
+			</#list>
 		</div>
+		</#if>
 
 		<div>
-			<@fmt.p number=students?size singular="student" plural="students" /> <#if userIsMember> including you</#if>.
+			<@fmt.p number=students?size singular="student" plural="students" /><#if userIsMember> including you</#if>.
 		</div>
 	</li>
 	</#list>

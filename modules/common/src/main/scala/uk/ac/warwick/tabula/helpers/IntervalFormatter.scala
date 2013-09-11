@@ -1,43 +1,28 @@
 package uk.ac.warwick.tabula.helpers
 
 import org.joda.time._
-import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.{DateTimeFormatter, DateTimeFormat}
 import collection.JavaConversions._
 import freemarker.template.TemplateMethodModelEx
 import freemarker.template.utility.DeepUnwrap
 import freemarker.template.TemplateModel
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter._
 
 /**
-	Formats an Interval (which is a start and an end date together)
+Formats an Interval (which is a start and an end date together)
 	in a compact format that avoids repetition. If start and end are
 	in the same year, for example, the year is only printed at the end.
-*/
+	*/
 object IntervalFormatter {
 
-	private val hourMinuteFormat = DateTimeFormat.forPattern("HH:mm")
-	private val dayAndDateFormat = DateTimeFormat.forPattern("EE d")
-	private val dateFormatWithoutDay = DateTimeFormat.forPattern("d")
-	private val monthFormat = DateTimeFormat.forPattern(" MMM")
-	private val monthAndYearFormat = DateTimeFormat.forPattern(" MMM yyyy")
+	def format(start: DateTime, end: DateTime, includeTime: Boolean = true, includeDays: Boolean = true) = {
+		val timeFormatter = if (includeTime) Hour24IncludeMins else OmitTimes
+		val dateFormatter = if (includeDays) IncludeDays else OmitDays
+		val formatter = new ConfigurableIntervalFormatter(timeFormatter, dateFormatter)
+		formatter.format(new Interval(start, end))
 
-	/** Print date range in this format:
-	  *
-	  *     09:00 Wed 10th Oct - 12:00 Mon 5th Nov 2012
-	  *
-	  * or this format if the years differ:
-	  *
-	  *     09:00 Wed 10th Oct 2012 - 12:00 Mon 5th Nov 2013
-	  *
-	  * Seconds are never printed.
-		*
-		* Includes time by default, but set includeTime=false to not include time.
-	  */
-	def format(start: DateTime, end: DateTime, includeTime: Boolean = true, includeDays:Boolean = true) = {
-		val yearAtStart = (start.getYear != end.getYear)
-		doFormat(start, yearAtStart, includeTime, includeDays) + " - " + doFormat(end, true, includeTime, includeDays)
 	}
-
 
 	/** Useful sometimes if you have an "endless" interval like an open-ended Assignment. */
 	def format(start: DateTime): String = doFormat(start, true)
@@ -47,47 +32,174 @@ object IntervalFormatter {
 	/** @see #format(DateTime, DateTime, Boolean) */
 	def format(interval: Interval): String = format(interval.getStart, interval.getEnd)
 
-	private def doFormat(date: DateTime, includeYear: Boolean, includeTime: Boolean = true, includeDays:Boolean = true) = {
-		
-		// TAB-546 : This was previously in a 12-hour format, e.g. 9am, 9:15am, 12 noon, 12 midnight
-		// now 24 hour format
-		def timePart(date: DateTime) = {
-			hourMinuteFormat.print(date).toLowerCase
-		}
-
-		// e.g. Mon 5th Nov
-		def dayPart(date: DateTime, includeDays:Boolean) = {
-			(if (includeDays) dayAndDateFormat else dateFormatWithoutDay)
-			    .print(date) + "<sup>" + DateBuilder.ordinal(date.getDayOfMonth) + "</sup>"
-		}
-
-		// e.g. Jan 2012, Nov 2012, Mar, Apr
-		def monthYearPart(date: DateTime, includeYear: Boolean) = {
-			if (includeYear) monthAndYearFormat.print(date)
-			else monthFormat.print(date)
-		}
-
-		val datePart = dayPart(date, includeDays) + monthYearPart(date, includeYear)
-
-		if (includeTime) timePart(date) + " " + datePart
-		else datePart
+	private def doFormat(date: DateTime, includeYear: Boolean, includeTime: Boolean = true, includeDays: Boolean = true): String = {
+		val timeFormatter = if (includeTime) Hour24IncludeMins else OmitTimes
+		val dateFormatter = if (includeDays) IncludeDays else OmitDays
+		val formatter = new ConfigurableIntervalFormatter(timeFormatter, dateFormatter)
+		formatter.format(date)
 	}
+
 }
 
-
 /**
-  * Companion class for Freemarker.
-  */
+ * Companion class for Freemarker.
+ */
 class IntervalFormatter extends TemplateMethodModelEx {
+
 	import IntervalFormatter.format
 
 	/** Two-argument method taking a start and end date. */
 	override def exec(list: JList[_]) = {
-		val args = list.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
+		val args = list.toSeq.map {
+			model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel])
+		}
 		args match {
 			case Seq(start: DateTime) => format(start)
 			case Seq(start: DateTime, end: DateTime) => format(start, end)
 			case _ => throw new IllegalArgumentException("Bad args")
 		}
 	}
+}
+
+/**
+ * Does the actual work of formatting; can be called directly or through the convenience methods on IntervalFormatter.
+ */
+class ConfigurableIntervalFormatter(val timeFormat: TimeFormats, val dateFormat: DateFormats) {
+
+
+	def format(start: DateTime, end: DateTime) = {
+		if (start.toDateMidnight == end.toDateMidnight) {
+			// don't print the date twice if they're the same
+			val timeBit = timeFormat.formatTimes(new Interval(start, end)) match {
+				case None => ""
+				case Some((startTime, endTime)) => s"$startTime - $endTime, "
+			}
+			val date = dateFormat.formatDate(start)
+			s"$timeBit$date"
+
+		} else {
+			val (startDate, endDate) = dateFormat.formatDates(new Interval(start, end))
+			val (startString, endString) = timeFormat.formatTimes(new Interval(start, end)) match {
+				case None => (startDate, endDate)
+				case Some((startTime, endTime)) => (s"$startTime, $startDate", s"$endTime, $endDate")
+			}
+			s"$startString - $endString"
+		}
+	}
+
+	def format(interval: Interval): String = format(interval.getStart, interval.getEnd)
+
+	/** Useful sometimes if you have an "endless" interval like an open-ended Assignment. */
+	def format(start: DateTime): String = {
+		val time = timeFormat.formatTime(start)
+		val date = dateFormat.formatDate(start)
+		time match {
+			case None => date
+			case Some(t) => s"$t, $date"
+
+		}
+	}
+}
+
+/**
+ * holds the various different rule-sets for formatting times and dates
+ */
+object ConfigurableIntervalFormatter {
+
+	/**
+	 * Format a time, or a pair of times. One possible configuration is that times are not displayed, in which
+	 * case, return None.
+	 */
+	sealed trait TimeFormats {
+		def formatTime(time: DateTime): Option[String]
+
+		def formatTimes(interval: Interval): Option[(String, String)]
+	}
+
+	case object Hour24IncludeMins extends TimeFormats {
+		private val hourMinuteFormat = DateTimeFormat.forPattern("HH:mm")
+
+		def formatTime(time: DateTime): Option[String] = Some(hourMinuteFormat.print(time))
+
+		def formatTimes(interval: Interval): Option[(String, String)] = Some((hourMinuteFormat.print(interval.getStart), hourMinuteFormat.print(interval.getEnd)))
+	}
+
+	case object OmitTimes extends TimeFormats {
+		def formatTime(time: DateTime): Option[String] = None
+
+		def formatTimes(interval: Interval): Option[(String, String)] = None
+	}
+
+	case object Hour12OptionalMins extends TimeFormats {
+		private val hourMinuteFormat = DateTimeFormat.forPattern("h:mma")
+		private val hourOnlyFormat = DateTimeFormat.forPattern("ha")
+
+		def formatTime(time: DateTime): Option[String] = {
+			if (time.getMinuteOfHour == 0) {
+				Some(hourOnlyFormat.print(time).toLowerCase)
+			} else {
+				Some(hourMinuteFormat.print(time).toLowerCase)
+			}
+		}
+
+		def formatTimes(interval: Interval): Option[(String, String)] = {
+			def format(date:DateTime) = (if(date.getMinuteOfHour == 0)hourOnlyFormat else hourMinuteFormat).print(date).toLowerCase()
+			Some(format(interval.getStart), format(interval.getEnd))
+		}
+	}
+
+	/**
+	 * Format a date, or a pair of dates. In general, when formatting a pair of dates, if the month and/or year
+	 * are the same on both dates then they are only printed once.
+	 */
+	sealed trait DateFormats {
+		def formatDate(date: DateTime): String
+
+		def formatDates(interval: Interval): (String, String)
+
+		def ordinal(date: DateTime) = "<sup>" + DateBuilder.ordinal(date.getDayOfMonth) + "</sup>"
+
+		protected val yearFormat = DateTimeFormat.forPattern(" yyyy")
+		protected val monthFormat = DateTimeFormat.forPattern(" MMM")
+
+		protected def formatInterval(interval: Interval, dayFormat: DateTimeFormatter) = {
+			val sameMonth = interval.getStart.getMonthOfYear == interval.getEnd.getMonthOfYear
+			val sameYear = interval.getStart.getYear == interval.getEnd.getYear
+			val startString = dayFormat.print(interval.getStart) + ordinal(interval.getStart) +
+				(if (!sameMonth) monthFormat.print(interval.getStart) else "") +
+				(if (!sameYear) yearFormat.print(interval.getStart) else "")
+			(startString,
+				dayFormat.print(interval.getEnd) + ordinal(interval.getEnd) +
+					monthFormat.print(interval.getEnd) +
+					yearFormat.print(interval.getEnd))
+
+		}
+	}
+
+	/**
+	 * Include the day of the week in the output
+	 */
+	case object IncludeDays extends DateFormats {
+		private val dayAndDateFormat = DateTimeFormat.forPattern("EE d")
+
+		def formatDate(date: DateTime): String = {
+			dayAndDateFormat.print(date) + ordinal(date) + monthFormat.print(date) + yearFormat.print(date)
+		}
+
+		def formatDates(interval: Interval): (String, String) = formatInterval(interval, dayAndDateFormat)
+	}
+
+	/**
+	 * Omit the day of the week from the output, only print the day of the month
+	 */
+	case object OmitDays extends DateFormats {
+		private val dateFormatWithoutDay = DateTimeFormat.forPattern("d")
+
+		def formatDate(date: DateTime): String = {
+			dateFormatWithoutDay.print(date) + ordinal(date) + yearFormat.print(date)
+		}
+
+		def formatDates(interval: Interval): (String, String) = formatInterval(interval, dateFormatWithoutDay)
+	}
+
 }

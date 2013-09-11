@@ -265,25 +265,33 @@
 
 	// TIMETABLE STUFF
     $(function() {
-		function getEvents(start, end,callback){
-			$.ajax({url:'/profiles/timetable/api',
-				  // make the from/to params compatible with what FullCalendar sends if you just specify a URL
-				  // as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
-				  data:{'from':start.getTime()/1000,
-						'to':end.getTime()/1000
-						},
-				  success:function(data){
-					//
-					// TODO
-					//
-					// insert code here to look through the events and magically display weekends if a weekend event is found
-					// (cal.fullCalendar('option','weekends',true); doesn't work, although some other options do)
-					// https://code.google.com/p/fullcalendar/issues/detail?id=293 has some discussion and patches
-					//
-					callback(data);
-				  }
-				  });
+		function getEvents(studentId){
+			return function (start, end,callback){
+				$.ajax({url:'/profiles/timetable/api',
+					  // make the from/to params compatible with what FullCalendar sends if you just specify a URL
+					  // as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
+					  data:{'from':start.getTime()/1000,
+							'to':end.getTime()/1000,
+							'whoFor':studentId
+							},
+					  success:function(data){
+						//
+						// TODO
+						//
+						// insert code here to look through the events and magically display weekends if a weekend event is found
+						// (cal.fullCalendar('option','weekends',true); doesn't work, although some other options do)
+						// https://code.google.com/p/fullcalendar/issues/detail?id=293 has some discussion and patches
+						//
+						callback(data);
+					  }
+					  });
+			};
 		}
+		function onViewUpdate(view,element){
+		   updateCalendarTitle(view, element);
+		   $('.popover').hide();
+		}
+		// relies on the variable "weeks" having been defined elsewhere, by using the WeekRangesDumperTag
 		function updateCalendarTitle(view,element){
             var start = view.start.getTime();
             var end = view.end.getTime();
@@ -299,10 +307,10 @@
             return true;
 		}
 
-		function createCalendar(container,defaultViewName){
+		function createCalendar(container,defaultViewName, studentId){
 			var showWeekends = (defaultViewName == "month");
-			$(container).fullCalendar({
-									events:function(start, end, callback){getEvents(start,end, callback);},
+			var cal = $(container).fullCalendar({
+									events:getEvents(studentId),
 									defaultView: defaultViewName,
 									allDaySlot: false,
 									slotMinutes: 60,
@@ -314,17 +322,39 @@
                                         '': 'h:mm{ - h:mm}'   //  5:00 - 6:30
                                     },
 									weekends:showWeekends,
-									viewRender:updateCalendarTitle,
+									viewRender:onViewUpdate,
 									header: {
 										left:   'title',
 										center: '',
 										right:  'today prev,next'
-									}
+									},
+									eventClick: function(event, jsEvent, view) {
+										var $this = $(this);
+										$this.popover('show');
+										return false;
+                                    },
+                                    eventAfterRender: function(event, element, view){
+										var content = "<table class='event-info'>";
+                                        if (event.description.length > 0){
+                                        	content = content + "<tr><th>What</th><td>" + event.description +"</td></tr>";
+                                        }
+                                        content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
+                                        content = content + "<tr><th>Where</th><td>" + event.location + "</td></tr>";
+                                        if (event.tutorNames.length > 0){
+                                        	content = content + "<tr><th>Who</th><td> " + event.tutorNames + "</td></tr>";
+                                        }
+                                    	content = content + "</table>";
+                                    	$(element).tabulaPopover({html:true, container:"#container",title:event.shorterTitle, content:content})
+                                    }
+			});
+			$(document).on('tabbablechanged', function(e) {
+				// redraw the calendar if the layout updates
+				cal.fullCalendar('render');
 			});
 		}
 
         $(".fullCalendar").each(function(index){
-    			createCalendar($(this),$(this).data('viewname'));
+    			createCalendar($(this),$(this).data('viewname'),$(this).data('studentid'));
     		});
     	});
 }(jQuery));

@@ -2,10 +2,8 @@ package uk.ac.warwick.tabula.profiles.services.timetables
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.groups.{WeekRange, DayOfWeek}
 import org.joda.time._
-import uk.ac.warwick.tabula.services.{TermFactoryComponent, WeekToDateConverterComponent, WeekToDateConverter, TermAwareWeekToDateConverterComponent}
-import uk.ac.warwick.util.termdates.{TermImpl, Term, TermFactory}
-import uk.ac.warwick.tabula.JavaImports.{JArrayList,JList, JInteger}
-import uk.ac.warwick.util.collections.{Pair=>wcPair}
+import uk.ac.warwick.tabula.services.{TermServiceComponent, TermService, WeekToDateConverterComponent, WeekToDateConverter}
+import uk.ac.warwick.util.termdates.{TermImpl,  TermFactory}
 import uk.ac.warwick.util.termdates.Term.TermType
 
 class EventOccurrenceServiceTest extends TestBase with Mockito {
@@ -37,12 +35,14 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 
 	val intervalOutsideOccurrence = new Interval(1,2)
 
-	val osc = new TermBasedEventOccurrenceComponent with WeekToDateConverterComponent with TermFactoryComponent{
+	val osc = new TermBasedEventOccurrenceComponent with WeekToDateConverterComponent with TermServiceComponent{
 		val weekToDateConverter = mock[WeekToDateConverter]
-		var termFactory: TermFactory = mock[TermFactory]
+		var termService = mock[TermService]
 	}
 
-	osc.termFactory.getTermFromDate(any[DateTime]) returns new TermImpl(osc.termFactory, DateTime.now().minusDays(14), DateTime.now().plusDays(7),TermType.autumn)
+	val termFactory = mock[TermFactory]
+
+	osc.termService.getTermFromDate(any[DateTime]) returns new TermImpl(termFactory, DateTime.now().minusDays(14), DateTime.now().plusDays(7),TermType.autumn)
 
 	val occurrenceService = osc.eventOccurrenceService
 

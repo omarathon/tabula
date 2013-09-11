@@ -7,7 +7,7 @@ class TermServiceTest extends TestBase{
 
 	@Test
 	def canGetAcademicWeeksBetweenDates(){
-		val service = new TermService
+		val service = new TermServiceImpl
 		val now = DateTime.now
 		val weeks = service.getAcademicWeeksBetween(now.minusYears(1), now.plusYears(1))
 		weeks.size should be(53 * 2) // 2 year span

@@ -274,6 +274,7 @@ object Permissions {
 
 		case object Create extends Permission("Create small groups")
 		case object Read extends Permission("View small groups")
+		case object ReadMembership extends Permission("View small group membership")
 		case object Update extends Permission("Edit small groups")
 		case object Delete extends Permission("Delete small groups")
 
@@ -291,10 +292,11 @@ object Permissions {
 	
 	object MonitoringPoints {
 		case object Manage extends Permission("Manage monitoring points")
-		case object View extends ScopelessPermission("View monitoring points")
+		case object View extends Permission("View monitoring points")
 	}
 
 	object MonitoringPointSetTemplates {
+		case object View extends ScopelessPermission("View monitoring point set templates")
 		case object Manage extends ScopelessPermission("Manage monitoring point set templates")
 	}
 	

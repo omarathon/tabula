@@ -16,15 +16,15 @@ trait LenientUserLookup {
 	}
 	
 	def lenientUserLookup = {
-	    val backend = mock[UserLookupService]
+		val backend = mock[UserLookupService]
 		expecting {
 			val id = capturingParam[String]
-		    allowing(backend).getUserByWarwickUniId(id.capture) willReturn id.map{
+			allowing(backend).getUserByWarwickUniId(id.capture) willReturn id.map {
 				new User(_) {
 					setFoundUser(true)
 				}
 			}
 		}
-	    backend
-    }
+		backend
+	}
 }

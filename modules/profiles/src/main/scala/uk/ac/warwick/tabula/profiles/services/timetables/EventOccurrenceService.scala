@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.profiles.services.timetables
 import uk.ac.warwick.tabula.data.model.groups.{WeekRange}
 import org.joda.time._
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.services.{TermFactoryComponent, WeekToDateConverterComponent}
-import uk.ac.warwick.tabula.helpers.VacationAwareTermFactory
+import uk.ac.warwick.tabula.services.{TermServiceComponent, WeekToDateConverterComponent}
 import uk.ac.warwick.util.termdates.Term
 import uk.ac.warwick.util.termdates.Term.TermType
 
@@ -40,7 +39,7 @@ trait EventOccurrenceServiceComponent{
 
 }
 trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
-	this: WeekToDateConverterComponent with TermFactoryComponent =>
+	this: WeekToDateConverterComponent with TermServiceComponent =>
 
 	val eventOccurrenceService: EventOccurrenceService = new TermBasedEventOccurrenceService
 
@@ -54,12 +53,11 @@ trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
 		 * one.
 		 */
 		def getAcademicYearContainingDate(date:DateTime):AcademicYear={
-			val vacationAwareTermFactory = new VacationAwareTermFactory(termFactory)
-			val termContainingIntervalStart = vacationAwareTermFactory.getTermFromDateIncludingVacations(date)
+			val termContainingIntervalStart = termService.getTermFromDateIncludingVacations(date)
 			def findAutumnTermForTerm(term:Term):Term = {
 				term.getTermType match {
 					case TermType.autumn=>term
-					case _ =>findAutumnTermForTerm(termFactory.getPreviousTerm(term))
+					case _ =>findAutumnTermForTerm(termService.getPreviousTerm(term))
 				}
 			}
 			val firstWeekOfYear = findAutumnTermForTerm(termContainingIntervalStart).getStartDate

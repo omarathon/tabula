@@ -4,8 +4,7 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.{Route, Department}
-import org.springframework.util.AutoPopulatingList
+import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 
 class UpdateMonitoringPointCommandTest extends TestBase with Mockito {

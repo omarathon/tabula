@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 
 class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 
-	val student = new StudentMember
+	val testStudent = new StudentMember
 	val event = TimetableEvent("","",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,"",Nil, AcademicYear(2012))
 	val timetableEvents = Seq(event)
 	val earlierEvent = EventOccurrence("","",TimetableEventType.Induction,LocalDateTime.now, LocalDateTime.now,None, "", Nil )
@@ -18,20 +18,19 @@ class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 	val eventOccurences = Seq(laterEvent,earlierEvent) // deliberately put them the wrong way round so we can check sorting
 
 	val studentTimetableEventSource = mock[StudentTimetableEventSource]
-	val command = new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource)  with EventOccurrenceServiceComponent{
+	val command = new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource, testStudent)  with EventOccurrenceServiceComponent{
 
 		val eventOccurrenceService = mock[EventOccurrenceService]
 	}
-	command.student = student
 	command.start=  new LocalDate
 	command.end = command.start.plusDays(2)
-	studentTimetableEventSource.eventsFor(student) returns timetableEvents
+	studentTimetableEventSource.eventsFor(testStudent) returns timetableEvents
 	command.eventOccurrenceService.fromTimetableEvent(any[TimetableEvent], any[Interval]) returns eventOccurences
 
 	@Test
 	def fetchesEventsFromEventSource(){
 		command.applyInternal()
-		there was one(studentTimetableEventSource).eventsFor(student)
+		there was one(studentTimetableEventSource).eventsFor(testStudent)
 	}
 
 	@Test
@@ -51,16 +50,18 @@ class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 
 	@Test
 	def requiresReadTimetablePermissions(){
-		val perms = new ViewStudentTimetablePermissions with ViewStudentPersonalTimetableCommandState
-		perms.student = student
+		val perms = new ViewStudentTimetablePermissions with ViewStudentPersonalTimetableCommandState{
+			val student = testStudent
+		}
+
 		val checking = mock[PermissionsChecking]
 		perms.permissionsCheck(checking)
-		there was one(checking).PermissionCheck(Permissions.Profiles.Read.Timetable, student)
+		there was one(checking).PermissionCheck(Permissions.Profiles.Read.Timetable, testStudent)
 	}
 
 	@Test
 	def mixesCorrectPermissionsIntoCommand(){
-		val composedCommand = ViewStudentPersonalTimetableCommand(studentTimetableEventSource)
+		val composedCommand = ViewStudentPersonalTimetableCommand(studentTimetableEventSource, null)
 		composedCommand should be(anInstanceOf[ViewStudentTimetablePermissions])
 	}
 }

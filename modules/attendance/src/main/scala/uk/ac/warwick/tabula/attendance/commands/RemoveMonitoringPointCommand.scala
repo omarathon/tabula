@@ -5,7 +5,8 @@ import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
+import scala.collection.JavaConverters._
 
 object RemoveMonitoringPointCommand {
 	def apply(set: MonitoringPointSet, point: MonitoringPoint) =
@@ -14,6 +15,7 @@ object RemoveMonitoringPointCommand {
 		with RemoveMonitoringPointValidation
 		with RemoveMonitoringPointDescription
 		with RemoveMonitoringPointPermission
+		with AutowiringTermServiceComponent
 		with AutowiringMonitoringPointServiceComponent
 }
 
@@ -62,9 +64,11 @@ trait RemoveMonitoringPointDescription extends Describable[MonitoringPoint] {
 	}
 }
 
-trait RemoveMonitoringPointState {
+trait RemoveMonitoringPointState extends GroupMonitoringPointsByTerm with CanPointBeChanged {
 	def set: MonitoringPointSet
 	def point: MonitoringPoint
 	var confirm: Boolean = _
+
+	def monitoringPointsByTerm = groupByTerm(set.points.asScala, set.academicYear)
 }
 

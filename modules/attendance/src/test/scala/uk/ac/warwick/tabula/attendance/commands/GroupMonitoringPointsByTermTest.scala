@@ -2,14 +2,13 @@ package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.data.model.Route
-import scala.collection.JavaConverters._
 import org.joda.time.{Interval, DateTimeConstants, DateMidnight}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.util.termdates.Term
-import scala.Predef._
 import uk.ac.warwick.tabula.services.Vacation
+import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 
 class GroupMonitoringPointsByTermTest extends TestBase with Mockito {
 
@@ -35,17 +34,17 @@ class GroupMonitoringPointsByTermTest extends TestBase with Mockito {
 		val route = mock[Route]
 		val yearOption = Option(1)
 
-		val week5pair = uk.ac.warwick.util.collections.Pair.of(new Integer(5), new Interval(week5StartDate, week5EndDate))
-		val week15pair = uk.ac.warwick.util.collections.Pair.of(new Integer(15), new Interval(week15StartDate, week15EndDate))
-		val weeksForYear = JArrayList(week5pair, week15pair)
+		val week5pair = (new Integer(5), new Interval(week5StartDate, week5EndDate))
+		val week15pair = (new Integer(15), new Interval(week15StartDate, week15EndDate))
+		val weeksForYear = Seq(week5pair, week15pair)
 		termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1))	returns weeksForYear
 
 		val autumnTerm = mock[Term]
 		autumnTerm.getTermTypeAsString returns "Autumn"
 		val christmasVacation = mock[Vacation]
 		christmasVacation.getTermTypeAsString returns "Christmas vacation"
-		termService.getTermFromDateIncludingVacations(week5StartDate.withDayOfWeek(1)) returns autumnTerm
-		termService.getTermFromDateIncludingVacations(week15StartDate.withDayOfWeek(1)) returns christmasVacation
+		termService.getTermFromDateIncludingVacations(week5StartDate.withDayOfWeek(DayOfWeek.Thursday.getAsInt)) returns autumnTerm
+		termService.getTermFromDateIncludingVacations(week15StartDate.withDayOfWeek(DayOfWeek.Thursday.getAsInt)) returns christmasVacation
 	}
 
 	@Test

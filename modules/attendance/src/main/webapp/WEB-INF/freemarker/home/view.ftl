@@ -1,1 +1,130 @@
-<h1>Attendance Monitoring</h1>
+<#escape x as x?html>
+<h1>View monitoring points for ${command.dept.name}</h1>
+
+<script>
+	var setsByRouteByAcademicYear = {
+		<#list command.setsByRouteByAcademicYear?keys as academicYear>
+			"${academicYear}" : [
+				<#list command.setsByRouteByAcademicYear[academicYear]?keys?sort_by("code") as route>
+					{
+						"code" : "${route.code}",
+						"name" : "${route.name}",
+						"sets" : [
+							<#list command.setsByRouteCodeByAcademicYear(academicYear, route.code) as set>
+								{
+									"id" : "${set.id}",
+									"year" : "<#if set.year??>${set.year}<#else>All</#if>"
+								}
+								<#if set_has_next>,</#if>
+							</#list>
+						]
+					}
+					<#if route_has_next>,</#if>
+				</#list>
+			]
+			<#if academicYear_has_next>,</#if>
+		</#list>
+	}
+</script>
+
+<form class="form-inline" action="<@url page="/${command.dept.code}"/>">
+	<label>Academic year
+		<select name="academicYear">
+			<#assign academicYears = [command.thisAcademicYear.previous.toString, command.thisAcademicYear.toString, command.thisAcademicYear.next.toString] />
+			<#list academicYears as year>
+				<option <#if command.academicYear.toString == year>selected</#if> value="${year}">${year}</option>
+			</#list>
+		</select>
+	</label>
+	<button type="submit" class="btn btn-primary">Change</button>
+</form>
+
+<#if command.setsByRouteByAcademicYear?keys?size == 0>
+
+	<p><em>There are no monitoring point schemes for ${command.dept.name}</em></p>
+
+<#elseif !command.setsByRouteByAcademicYear[command.academicYear.toString]??>
+
+	<p><em>There are no monitoring point schemes for ${command.dept.name} for the selected academic year</em></p>
+
+<#else>
+
+	<form id="viewChooseSet" class="form-inline" action="<@url page="/${command.dept.code}"/>">
+
+		<input type="hidden" value="${command.academicYear.toString}" name="academicYear" />
+
+		<select name="route" class="route input-xxlarge">
+			<option style="display:none;" disabled <#if !command.route??>selected</#if> value="">Route</option>
+			<#list command.setsByRouteByAcademicYear[command.academicYear.toString]?keys?sort_by("code") as route>
+				<option value="${route.code}" <#if command.route?? && command.route.code == route.code>selected</#if>>
+					${route.code?upper_case} ${route.name}
+				</option>
+			</#list>
+		</select>
+
+		<select name="set" class="input-medium copy">
+			<option style="display:none;" disabled <#if !command.route?? || !command.pointSet??>selected</#if> value="">Year of study</option>
+			<#if command.route?? && command.pointSet??>
+				<#list command.setsByRouteCodeByAcademicYear(command.academicYear.toString, command.route.code) as set>
+					<option value="${set.id}" <#if command.pointSet.id == set.id>selected</#if>>
+						<#if set.year??>${set.year}<#else>All</#if>
+					</option>
+				</#list>
+			</#if>
+		</select>
+
+		<button type="submit" class="btn btn-primary">View</button>
+
+		<#assign popoverContent>
+			<p>Select a route and year of study from the drop down lists to view the relevant attendance monitoring points.</p>
+			<p>If the monitoring points displayed are not correct please contact <a href="mailto:webteam@warwick.ac.uk">webteam@warwick.ac.uk</a></p>
+		</#assign>
+		<a class="use-popover" id="popover-choose-set"
+			data-title="View attendance monitoring points"
+			data-content="${popoverContent}"
+			data-html="true"
+		>
+			<i class="icon-question-sign"></i>
+		</a>
+	</form>
+
+</#if>
+
+<#if command.pointSet??>
+	<h2>Monitoring points for ${command.route.code?upper_case} ${command.route.name},
+		<#if command.pointSet.year??>year ${command.pointSet.year}<#else>all years</#if>
+	</h2>
+
+	<#if command.pointSet.points?size == 0>
+		<p><em>No points exist for the selected route and year of study</em></p>
+	<#else>
+		<div class="monitoring-points">
+        	<#macro pointsInATerm term>
+        		<div class="striped-section">
+        			<h2 class="section-title">${term}</h2>
+        			<div class="striped-section-contents">
+        				<#list command.monitoringPointsByTerm[term]?sort_by("week") as point>
+        					<div class="item-info row-fluid point">
+        						<div class="span12">
+        							<div class="pull-right">
+        								<a class="btn btn-primary" href="<@url page="/${command.dept.code}/record/${point.id}"/>">
+        									Record
+        								</a>
+        							</div>
+        							${point.name} (<@fmt.weekRanges point />)
+        						</div>
+        					</div>
+        				</#list>
+        			</div>
+        		</div>
+        	</#macro>
+			<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
+				<#if command.monitoringPointsByTerm[term]??>
+					<@pointsInATerm term/>
+				</#if>
+			</#list>
+        </div>
+	</#if>
+</#if>
+
+</#escape>

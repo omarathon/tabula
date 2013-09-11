@@ -34,20 +34,10 @@ trait EditMonitoringPointSetPermissions extends RequiresPermissionsChecking with
 	}
 }
 
-trait EditMonitoringPointSetState extends GroupMonitoringPointsByTerm with MonitoringPointServiceComponent {
+trait EditMonitoringPointSetState extends GroupMonitoringPointsByTerm with MonitoringPointServiceComponent with CanPointBeChanged {
 
 	def set: MonitoringPointSet
 
 	def monitoringPointsByTerm = groupByTerm(set.points.asScala, set.academicYear)
-
-	// TAB-1079
-	def canPointBeUpdated(point: MonitoringPoint) = {
-		monitoringPointService.countCheckpointsForPoint(point) == 0
-	}
-
-	// TAB-1079
-	def canPointBeRemoved(point: MonitoringPoint) = {
-		monitoringPointService.countCheckpointsForPoint(point) == 0
-	}
 
 }

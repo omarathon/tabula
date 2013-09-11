@@ -174,17 +174,23 @@
                                 </#if>
 
 
-								<ul class="unstyled">
+								<ul class="unstyled margin-fix">
 									<#list group.events as event>
 										<li class="clearfix">
 											<#-- Tutor, weeks, day/time, location -->
 											<span class="pull-left eventWeeks span6">
+											<#if setItem.canViewTutors && event.tutors?? >
+												<h6>Tutor<#if (event.tutors.size > 1)>s</#if>:
+													<#if (event.tutors.size < 1)>[no tutor]</#if>
+												<#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>
+												</h6>
+											</#if>
 											<@fmt.weekRanges event />,
 											${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
 											${event.location!"[no location]"}
 											</span>
 
-											<#if moduleItem.canManageGroups>
+											<#if ( moduleItem.canManageGroups  && features.smallGroupTeachingRecordAttendance )>
 											<span class="pull-right eventRegister">
 												<form method="get" action="/groups/event/${event.id}/register">
 

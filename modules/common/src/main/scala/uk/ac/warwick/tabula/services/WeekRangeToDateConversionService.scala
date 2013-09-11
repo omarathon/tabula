@@ -17,7 +17,7 @@ trait WeekToDateConverter {
 }
 
 trait TermAwareWeekToDateConverterComponent extends WeekToDateConverterComponent{
-	this: TermFactoryComponent =>
+	this: TermServiceComponent =>
 
 	val weekToDateConverter: WeekToDateConverter = new TermAwareWeekRangeToDateConversionService
 
@@ -51,11 +51,7 @@ trait TermAwareWeekToDateConverterComponent extends WeekToDateConverterComponent
 
 		// TODO consider cacheing this data
 		private def weeksForYear(year: AcademicYear) =
-			termFactory.getAcademicWeeksForYear(year.dateInTermOne)
-				.asScala.map {
-				pair => (pair.getLeft -> pair.getRight)
-			} // Utils pairs to Scala pairs
-				.toMap
+			termService.getAcademicWeeksForYear(year.dateInTermOne).toMap
 
 		def weekNumberToDate(year: AcademicYear, weekNumber: Int, dayOfWeek: DayOfWeek) =
 			weeksForYear(year)(weekNumber).getStart().withDayOfWeek(dayOfWeek.jodaDayOfWeek)

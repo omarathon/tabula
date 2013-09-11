@@ -9,26 +9,60 @@ exports.Manage = {}
 
 $(function(){
 
+	// SCRIPTS FOR VIEWING MONITORING POINTS
+
+	$('#viewChooseSet').find('select[name="route"]').on('change', function(){
+		var $this = $(this),
+			selectedRouteCode = $this.find(':selected').val(),
+			yearSelect = $this.parent()
+				.find('select[name="set"]').find('option:gt(0)').remove()
+				.end().find('option:first').prop('selected', true)
+				.end();
+
+		$.each(
+			$.grep(setsByRouteByAcademicYear[$('select[name="academicYear"] :selected').val()], function(r){
+				return selectedRouteCode === r.code;
+			})[0].sets,
+			function(i, set){
+				yearSelect.append(
+					$('<option/>').val(set.id).html(set.year)
+				);
+			}
+		)
+	});
+
+	// END SCRIPTS FOR VIEWING MONITORING POINTS
+
 	// SCRIPTS FOR MANAGING MONITORING POINTS
 
 	if ($('#chooseCreateType').length > 0 && setsByRouteByAcademicYear) {
-		var $form = $('#chooseCreateType').find('input.create').on('change', function(){
+		var $form = $('#chooseCreateType'),
+		    academicYearSelect = $form.find('select.academicYear'),
+		    routeSelect = $form.find('select.route'),
+		    yearSelect = $form.find('select.copy[name="existingSet"]');
+
+		$form.find('input.create').on('change', function(){
 			if ($(this).val() === 'copy') {
 				$form.find('button').html('Copy').prop('disabled', true);
-				$form.find('select.template[name="existingSet"]').prop('disabled', true).css('visibility','hidden');
+				$form.find('.existingSetOptions').css('visibility','hidden');
+				$form.find('select.template[name="existingSet"]').prop('disabled', true);
 				academicYearSelect.add(routeSelect).add(yearSelect).prop('disabled', false).css('visibility','hidden');
-				academicYearSelect.find('option:first').prop('selected', true)
-					.end().css('visibility','visible');
+				academicYearSelect.find('option:first').prop('selected', true);
+				academicYearSelect.css('visibility','visible');
 			} else if ($(this).val() === 'template') {
 				$form.find('button').html('Create').prop('disabled', false);
-                $form.find('select.template[name="existingSet"]').prop('disabled', false).css('visibility','visible');
+				$form.find('.existingSetOptions').css('visibility','visible');
+                $form.find('select.template[name="existingSet"]').prop('disabled', false);
                 academicYearSelect.add(routeSelect).add(yearSelect).prop('disabled', true).css('visibility','hidden');
 			} else {
 				$form.find('button').html('Create').prop('disabled', false);
-				$form.find('select.template[name="existingSet"]').prop('disabled', true).css('visibility','hidden');
+				$form.find('.existingSetOptions').css('visibility','hidden');
+				$form.find('select.template[name="existingSet"]').prop('disabled', true)
 				academicYearSelect.add(routeSelect).add(yearSelect).prop('disabled', true).css('visibility','hidden');
 			}
-		}).end().on('submit', function(){
+		});
+
+		$form.on('submit', function(){
 			var createType = $form.find('input.create:checked').val();
 			if (createType === 'copy') {
 				$form.find('select[name="existingSet"]').not('.copy').prop('disabled', true);
@@ -37,8 +71,9 @@ $(function(){
 			} else {
 				$form.find('select[name="existingSet"]').prop('disabled', true);
 			}
-		}),
-		academicYearSelect = $form.find('select.academicYear').on('change', function(){
+		});
+
+		academicYearSelect.on('change', function(){
 			routeSelect.find('option:gt(0)').remove()
 				.end().css('visibility','visible');
 			yearSelect.find('option:gt(0)').remove()
@@ -48,8 +83,9 @@ $(function(){
 					$('<option/>').data('sets', route.sets).html(route.code.toUpperCase() + ' ' + route.name)
 				);
 			});
-		}).prop('disabled', true).css('visibility','hidden'),
-		routeSelect = $form.find('select.route').on('change', function(){
+		});
+
+		routeSelect.on('change', function(){
 			yearSelect.find('option:gt(0)').remove()
 				.end().find('option:first').prop('selected', true)
 				.end().css('visibility','visible').change();
@@ -58,16 +94,25 @@ $(function(){
 					$('<option/>').val(set.id).html(set.year)
 				);
 			});
-		}).prop('disabled', true).css('visibility','hidden'),
-		yearSelect = $form.find('select.copy[name="existingSet"]').on('change', function(){
+		});
+
+		yearSelect.on('change', function(){
 			if (yearSelect.val() && yearSelect.val().length > 0) {
 				$form.find('button').prop('disabled', false);
 			} else {
 				$form.find('button').prop('disabled', true);
 			}
-		}).prop('disabled', true).css('visibility','hidden');
+		});
 
-		$form.find('select.template[name="existingSet"]').prop('disabled', true).css('visibility','hidden');
+		// Update Preview button to preview the currently selected template.
+		$form.find('select.template[name=existingSet]').on('change', function() {
+			var $button = $('.monitoring-point-preview-button'),
+			    newHref = $button.data('hreftemplate').replace('_TEMPLATE_ID_', this.value);
+			$button.attr('href', newHref);
+		}).trigger('change');
+
+		// Trigger the above change behaviour for the initial value
+		$form.find('input.create:checked').trigger('change');
 
 		if (academicYearSelect.length > 0) {
 			for (var academicYear in setsByRouteByAcademicYear) {

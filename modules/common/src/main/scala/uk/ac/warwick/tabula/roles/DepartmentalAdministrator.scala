@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.roles
 
-import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
 import uk.ac.warwick.tabula.permissions.PermissionsSelector
@@ -37,12 +36,14 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		MarkingWorkflow.Update,
 		MarkingWorkflow.Delete,
 
+		MonitoringPoints.View,
 		MonitoringPoints.Manage,
 
 		Department.ManageProfiles,
 
 		Profiles.Read.Core,
 		Profiles.Read.NextOfKin,
+	  Profiles.Read.Timetable,
 		Profiles.Read.StudentCourseDetails.Core,
 		Profiles.Read.StudentCourseDetails.Status,
 		Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
