@@ -24,7 +24,7 @@
 			<form action="" method="post">
 				<input type="hidden" name="monitoringPoint" value="${monitoringPoint.id}" />
 				<input type="hidden" value="<@url page="${returnTo}" />" />
-				<#list command.members as student>
+				<#list command.members?sort_by("lastName") as student>
 					<#assign checked = false />
 					<#list command.membersChecked as studentChecked>
 						<#if studentChecked.universityId == student.universityId>

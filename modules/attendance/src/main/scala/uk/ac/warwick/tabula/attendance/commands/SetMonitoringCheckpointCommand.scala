@@ -25,7 +25,7 @@ object SetMonitoringCheckpointCommand {
 }
 
 abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoint, user: CurrentUser)
-	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with SelfValidating {
+	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with SelfValidating with MembersForPointSet {
 	self: SetMonitoringCheckpointState with ProfileServiceComponent with MonitoringPointServiceComponent =>
 	type UniversityId = String
 
@@ -35,15 +35,7 @@ abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoi
 	var set = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
 
 	def populate() {
-		members = if(set.year == null) {
-			profileService.getStudentsByRoute(set.route).toStream.distinct
-		} else {
-			profileService.getStudentsByRoute(
-				set.route,
-				set.academicYear
-			).toStream.distinct
-		}
-
+		members = getMembers(monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet])
 		membersChecked = monitoringPointService.getCheckedStudents(monitoringPoint)
 	}
 
