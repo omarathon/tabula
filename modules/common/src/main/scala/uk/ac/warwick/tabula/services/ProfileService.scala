@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.PrsCode
-import uk.ac.warwick.tabula.data.MemberDao
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Member
@@ -15,8 +15,8 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
 import scala.collection.JavaConverters._
+import scala.Some
 
 /**
  * Service providing access to members and profiles.
@@ -38,12 +38,11 @@ trait ProfileService {
 	def getStudentsByRoute(route: Route, academicYear: AcademicYear): Seq[StudentMember]
 }
 
-@Service(value = "profileService")
-class ProfileServiceImpl extends ProfileService with Logging {
+abstract class AbstractProfileService extends ProfileService with Logging {
 
-	var memberDao = Wire.auto[MemberDao]
+	self: MemberDaoComponent with StudentCourseDetailsDaoComponent =>
+
 	var profileIndexService = Wire.auto[ProfileIndexService]
-	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
 
 	def getMemberByUniversityId(universityId: String) = transactional(readOnly = true) {
 		memberDao.getByUniversityId(universityId)
@@ -105,7 +104,7 @@ class ProfileServiceImpl extends ProfileService with Logging {
 
 	def getStudentsByRoute(route: Route, academicYear: AcademicYear): Seq[StudentMember] = transactional(readOnly = true) {
 		studentCourseDetailsDao.getByRoute(route)
-			.filter(_.studentCourseYearDetails.asScala.max.academicYear == academicYear)
+			.filter(_.studentCourseYearDetails.asScala.exists(s => s.academicYear == academicYear))
 			.map(_.student)
 	}
 
@@ -115,6 +114,12 @@ trait ProfileServiceComponent {
 	def profileService: ProfileService
 }
 
-trait AutowiringProfileServiceComponent extends ProfileServiceComponent{
+trait AutowiringProfileServiceComponent extends ProfileServiceComponent {
 	var profileService = Wire[ProfileService]
 }
+
+@Service("profileService")
+class ProfileServiceImpl
+	extends AbstractProfileService
+	with AutowiringMemberDaoComponent
+	with AutowiringStudentCourseDetailsDaoComponent

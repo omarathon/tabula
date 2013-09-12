@@ -5,24 +5,25 @@ import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import org.junit.Before
 
-import uk.ac.warwick.tabula.{PersistenceTestBase,Fixtures, Mockito}
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.{StudentCourseDetailsDaoImpl, MemberDaoImpl}
+import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase, Fixtures, Mockito}
+import uk.ac.warwick.tabula.data.model.{StudentMember, StudentCourseDetails, Route, Member}
+import uk.ac.warwick.tabula.data._
+import scala.Some
 
 // scalastyle:off magic.number
 class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
-	val relationshipService:RelationshipServiceImpl = new RelationshipServiceImpl
-	val profileService:ProfileServiceImpl = new ProfileServiceImpl
+	var profileService: ProfileService = _
 
 	@Before def setup: Unit = transactional { tx =>
-		val memberDao = new MemberDaoImpl
-	 memberDao.sessionFactory = sessionFactory
-	 val scd = new StudentCourseDetailsDaoImpl
-		scd.sessionFactory = sessionFactory
-		relationshipService.memberDao = memberDao
-		profileService.memberDao = memberDao
-		profileService.studentCourseDetailsDao =scd
+		val thisMemberDao = new MemberDaoImpl
+		thisMemberDao.sessionFactory = sessionFactory
+		val thisStudentCourseDetailsDao = new StudentCourseDetailsDaoImpl
+		thisStudentCourseDetailsDao.sessionFactory = sessionFactory
+		profileService = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+			val memberDao = thisMemberDao
+			val studentCourseDetailsDao = thisStudentCourseDetailsDao
+		}
 	}
 
 	@Test def crud = transactional { tx =>
@@ -146,6 +147,48 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.getRegisteredModules("0000002").toSet should be (Seq(mod1, mod2).toSet)
 		profileService.getRegisteredModules("0000003") should be (Seq(mod2))
 		profileService.getRegisteredModules("0000004") should be (Seq())
+	}
+
+	@Test def getStudentsByRouteForAcademicYear = {
+		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+			val memberDao = mock[MemberDao]
+			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
+		}
+
+		val testRoute = new Route
+		testRoute.code = "test"
+
+		val studentInBothYears = new StudentCourseDetails(Fixtures.student(), "studentInBothYears")
+		studentInBothYears.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+		studentInBothYears.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2013))
+		)
+
+		val studentInFirstYear = new StudentCourseDetails(Fixtures.student(), "studentInFirstYear")
+		studentInFirstYear.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+
+		val studentInSecondYear = new StudentCourseDetails(Fixtures.student(), "studentInSecondYear")
+		studentInSecondYear.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2013))
+		)
+
+		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(studentInBothYears, studentInFirstYear, studentInSecondYear)
+
+		val studentsInFirstYear = service.getStudentsByRoute(testRoute, AcademicYear(2012))
+		studentsInFirstYear.size should be (2)
+		studentsInFirstYear.exists(
+			s => s.studentCourseDetails.get(0).scjCode.equals(studentInSecondYear.scjCode)
+		) should be (false)
+
+		val studentsInSecondYear = service.getStudentsByRoute(testRoute, AcademicYear(2013))
+		studentsInSecondYear.size should be (2)
+		studentsInSecondYear.exists(
+			s => s.studentCourseDetails.get(0).scjCode.equals(studentInFirstYear.scjCode)
+		) should be (false)
 	}
 
 }
