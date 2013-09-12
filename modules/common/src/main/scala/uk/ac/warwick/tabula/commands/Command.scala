@@ -80,7 +80,7 @@ with JavaImports with EventHandling with NotificationHandling with PermissionsCh
 		if (EventHandling.enabled) {
 			if (maintenanceCheck(this))
 				recordEvent(this) { notify(this) { benchmark() { applyInternal() } } }
-			else throw maintenanceMode.exception()
+			else throw maintenanceMode.exception(this)
 		} else {
 			notify(this) { benchmark() { applyInternal() } }
 		}

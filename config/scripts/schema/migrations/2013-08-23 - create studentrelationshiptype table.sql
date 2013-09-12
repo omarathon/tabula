@@ -23,3 +23,9 @@ VALUES ('personalTutor', 'tutor', 'Personal Tutor', 'personal tutor', 'personal 
 
 INSERT INTO STUDENTRELATIONSHIPTYPE (ID, URLPART, DESCRIPTION, AGENTROLE, STUDENTROLE, DEFAULTSOURCE, DEFAULTDISPLAY, EXPECTED_UG, EXPECTED_PGT, EXPECTED_PGR, SORT_ORDER)
 VALUES ('supervisor', 'supervisor', 'Research Supervisor', 'supervisor', 'supervisee', 'sits', 1, 0, 0, 1, 1);
+
+UPDATE DEPARTMENT SET SETTINGS = REPLACE(SETTINGS, '"personalTutorSource":"SITS"', '"studentRelationshipSource": {"personalTutor": "sits"}')
+	WHERE SETTINGS LIKE '%personalTutorSource%';
+	
+UPDATE DEPARTMENT SET SETTINGS = REPLACE(SETTINGS, '"personalTutorSource": "SITS"', '"studentRelationshipSource": {"personalTutor": "sits"}')
+	WHERE SETTINGS LIKE '%personalTutorSource%';

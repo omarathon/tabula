@@ -45,6 +45,10 @@ class StudentCourseDetails
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	val studentCourseYearDetails: JList[StudentCourseYearDetails] = JArrayList()
 
+	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var moduleRegistrations: JList[ModuleRegistration] = JArrayList()
+
 	def toStringProps = Seq(
 		"scjCode" -> scjCode,
 		"sprCode" -> sprCode)
@@ -72,13 +76,12 @@ class StudentCourseDetails
 	}
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	def latestStudentCourseYearDetails: StudentCourseYearDetails = {
+	def latestStudentCourseYearDetails: StudentCourseYearDetails =
 		studentCourseYearDetails.asScala.max
-	}
 
 	def courseType = CourseType.fromCourseCode(course.code)
 
-	// We can't restrict this because it's not a getter. Restrict in 
+	// We can't restrict this because it's not a getter. Restrict in
 	// view code if necessary (or implement for all methods in  ScalaBeansWrapper)
 	def relationships(relationshipType: StudentRelationshipType) =
 		relationshipService.findCurrentRelationships(relationshipType, this.sprCode)
@@ -94,6 +97,10 @@ class StudentCourseDetails
 	def attachStudentCourseYearDetails(yearDetailsToAdd: StudentCourseYearDetails) {
 		studentCourseYearDetails.remove(yearDetailsToAdd)
 		studentCourseYearDetails.add(yearDetailsToAdd)
+	}
+
+	def hasModuleRegistrations = {
+		!moduleRegistrations.isEmpty()
 	}
 }
 

@@ -163,8 +163,10 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 						relationshipType, this
 			).isEmpty)
 	}
-	
+
 	def hasRelationship(relationshipType: StudentRelationshipType) = false
+
+	def hasModuleRegistrations = false
 
 	def mostSignificantCourseDetails: Option[StudentCourseDetails] = None
 
@@ -205,8 +207,11 @@ class StudentMember extends Member with StudentProperties {
 	}
 
 	override def hasCurrentEnrolment: Boolean = studentCourseDetails.asScala.exists(_.hasCurrentEnrolment)
-	override def hasRelationship(relationshipType: StudentRelationshipType): Boolean = 
+
+	override def hasRelationship(relationshipType: StudentRelationshipType): Boolean =
 		studentCourseDetails.asScala.exists(_.hasRelationship(relationshipType))
+
+	override def hasModuleRegistrations = studentCourseDetails.asScala.exists(_.hasModuleRegistrations)
 
 	override def routeName: String = mostSignificantCourseDetails match {
 		case Some(details) =>

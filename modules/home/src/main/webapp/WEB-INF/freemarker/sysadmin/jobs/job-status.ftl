@@ -17,7 +17,7 @@
 	
 	var $fragment = $('#job-status-fragment');
 	var updateFragment = function() {
-		$fragment.load('/sysadmin/jobs/job-status', {id: '${jobId}'}, function(){
+		$fragment.load('/sysadmin/jobs/job-status', {id: '${jobId}', ts: new Date().getTime()}, function(){
 			setTimeout(updateFragment, 2000);
 		});
 	};

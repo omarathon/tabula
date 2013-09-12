@@ -14,5 +14,3 @@ create unique index idx_modreg_notional_key on moduleregistration(scjcode, modul
 
 alter table studentcourseyeardetails add moduleregistrationstatus nvarchar2(10);
 
-
-

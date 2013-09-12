@@ -83,7 +83,10 @@ class ViewProfileController extends ProfilesController {
 		val agent = userLookup.getUserByWarwickUniId(agentId)
 
 		// the number of small groups that the student is a member of
-		val numSmallGroups = smallGroupService.findSmallGroupsByStudent(profiledStudentMember.asSsoUser).size
+		val numSmallGroups = 
+			if (securityService.can(user, Permissions.Profiles.Read.SmallGroups, profiledStudentMember))
+				smallGroupService.findSmallGroupsByStudent(profiledStudentMember.asSsoUser).size
+			else 0
 
 		Mav("profile/view",
 			"profile" -> profiledStudentMember,
