@@ -89,17 +89,21 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				logger.info("Fetching user details for " + userIdsAndCategories.size + " usercodes from websignon")
 				val users: Map[String, User] = userLookup.getUsersByUserIds(userIdsAndCategories.map(x => x.member.usercode)).toMap
 
-				logger.info("Fetching member details for " + userIdsAndCategories.size + " members from Membership")
-
 				transactional() {
+					logger.info("Fetching member details for " + userIdsAndCategories.size + " members from Membership")
 					profileImporter.getMemberDetails(userIdsAndCategories, users) map { _.apply }
 					session.flush
 					session.clear
+
+					logger.info("Fetching module registrations")
 					val importModRegCommands = moduleRegistrationImporter.getModuleRegistrationDetails(userIdsAndCategories, users)
+
+					logger.info("Saving or updating module registrations")
 					val newModuleRegistrations = (importModRegCommands map {_.apply }).flatten
 
 					val usercodesProcessed: Seq[String] = userIdsAndCategories map { _.member.usercode }
 
+					logger.info("Removing old module registrations")
 					deleteOldModuleRegistrations(usercodesProcessed, newModuleRegistrations)
 					session.flush
 					session.clear

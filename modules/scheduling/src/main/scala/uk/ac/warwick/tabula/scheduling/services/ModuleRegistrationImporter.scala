@@ -47,12 +47,11 @@ class ModuleRegistrationImporterImpl extends ModuleRegistrationImporter with Sit
 		val sitsCurrentAcademicYear = getCurrentSitsAcademicYearString
 
 		membersAndCategories flatMap { mac =>
-			val usercode = mac.member.usercode
-			val ssoUser = users(usercode)
+			val universityId = mac.member.universityId
 
 			mac.member.userType match {
 				case Student => {
-					var params = HashMap(("year", sitsCurrentAcademicYear), ("usercodes", usercode))
+					var params = HashMap(("year", sitsCurrentAcademicYear), ("universityId", universityId))
 					moduleRegistrationQuery().executeByNamedParam(params).toSeq
 
 					}
@@ -93,7 +92,7 @@ object ModuleRegistrationImporter {
 				where sms.spr_code = spr.spr_code
 					and spr.spr_stuc = stu.stu_code
 					and sms.ayr_code = :year
-					and stu.stu_udf3 in (:usercodes)
+					and stu.stu_code = :universityId
 					and scj.scj_sprc = spr.spr_code
 					and vco_crsc = scj.scj_crsc
 					and vco_rouc = spr.rou_code
@@ -107,7 +106,7 @@ object ModuleRegistrationImporter {
 				where smo.spr_code = spr.spr_code
 					and spr.spr_stuc = stu.stu_code
 					and smo.ayr_code = :year
-					and stu.stu_udf3 in (:usercodes)
+					and stu.stu_code = :universityId
 					and scj.scj_sprc = spr.spr_code
 					and vco_crsc = scj.scj_crsc
 					and vco_rouc = spr.rou_code
@@ -119,7 +118,7 @@ object ModuleRegistrationImporter {
 				where smo.spr_code = spr.spr_code
 				and spr.spr_stuc = stu.stu_code
 				and smo.ayr_code = :year
-				and stu.stu_udf3 in (:usercodes)
+				and stu.stu_code = :universityId
 				and scj.scj_sprc = spr.spr_code
 				and scj_udfa in ('Y','y')
 				and vco_crsc = scj.scj_crsc
@@ -131,7 +130,7 @@ object ModuleRegistrationImporter {
 
 	class ModuleRegistrationQuery(ds: DataSource)
 		extends MappingSqlQuery[ImportModuleRegistrationsCommand](ds, GetModuleRegistration) {
-			declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
+			declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 			declareParameter(new SqlParameter("year", Types.VARCHAR))
 			compile()
 			override def mapRow(resultSet: ResultSet, rowNumber: Int) = {
