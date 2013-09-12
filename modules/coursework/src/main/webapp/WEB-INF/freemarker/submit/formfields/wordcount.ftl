@@ -1,12 +1,12 @@
 <#assign help>
 	The number of words in the attachment you are submitting.
 	${field.conventions!""}
-	<#if field.min gt 0 && field.max lt assignment.MaximumWordCount>
-		It must be between ${field.min} and ${field.max} words.
-	<#elseif field.min == 0>
-		It must be <@fmt.p field.max "word" /> or less.
+	<#if (field.min)!0 gt 0 && (field.max)!assignment.MaximumWordCount lt assignment.MaximumWordCount>
+		It must be between ${(field.min)!0} and ${(field.max)!assignment.MaximumWordCount} words.
+	<#elseif (field.min)!0 == 0>
+		It must be <@fmt.p (field.max)!assignment.MaximumWordCount "word" /> or less.
 	<#else>
-		It must be <@fmt.p field.min "word" /> or more.
+		It must be <@fmt.p (field.min)!0 "word" /> or more.
 	</#if>
 </#assign>
 
