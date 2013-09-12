@@ -173,7 +173,7 @@
 				<li id="course-pane">
 					<#include "_course_details.ftl" />
 				</li>
-				
+
 				<#list (studentCourseDetails.department.displayedStudentRelationshipTypes)![] as relationshipType>
 					<#if studentCourseDetails.hasRelationship(relationshipType) || relationshipType.displayIfEmpty(studentCourseDetails)>
 						<li id="${relationshipType.id}-pane">
@@ -188,12 +188,18 @@
 						<#include "_small_groups.ftl" />
 					</li>
 				</#if>
+
+				<#if studentCourseDetails.hasModuleRegistrations>
+					<li id="module-registration-pane">
+						<#include "_module_registrations.ftl" />
+					</li>
+				</#if>
 			</ol>
-			
+
 			<div id="modal" class="modal hide fade" style="display:none;"></div>
 
 				<div id="modal-change-agent" class="modal hide fade"></div>
-		
+
 				<script type="text/javascript">
 				jQuery(function($){
 					// load edit personal agent
