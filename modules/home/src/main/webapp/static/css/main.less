@@ -201,3 +201,34 @@ ul.drag-list {
 		&.ui-selected { background: @btnPrimaryBackgroundHighlight !important; }
 	}
 }
+
+
+// fixHeaderFooter plugin CSS
+
+.floatingHeader, .floatingFooter {
+	position: fixed;
+	visibility: hidden;
+	background-color:white;
+	width: 100%;
+ }
+
+.floatingHeader {
+	top: 28px; 	// height of the top primary-navigation
+}
+
+.floatingFooter {
+	bottom: 0;
+	padding:2em 0.5em;
+}
+
+.persist-header, .persist-footer {
+	margin:0 -0.5em;
+}
+
+.persist-header {
+	padding:0 0.5em;
+}
+
+.persist-footer {
+	padding: 2em 0.5em;
+}

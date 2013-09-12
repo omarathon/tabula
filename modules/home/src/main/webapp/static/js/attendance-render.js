@@ -251,6 +251,9 @@ $(function(){
 	}
 
 	// END SCRIPTS FOR MANAGING MONITORING POINTS
+
+
+
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);

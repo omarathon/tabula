@@ -1,6 +1,13 @@
 <#escape x as x?html>
 <h1>View monitoring points for ${command.dept.name}</h1>
 
+<#if updatedPoint??>
+	<div class="alert alert-success">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		Attendance recorded for '${updatedPoint.name}'
+	</div>
+</#if>
+
 <form class="form-inline" action="<@url page="/${command.dept.code}"/>">
 	<label>Academic year
 		<select name="academicYear">
@@ -133,7 +140,7 @@
         					<div class="item-info row-fluid point">
         						<div class="span12">
         							<div class="pull-right">
-        								<a class="btn btn-primary" href="<@url page="/${command.dept.code}/record/${point.id}"/>">
+        								<a class="btn btn-primary" href="<@url page="/${command.dept.code}/${point.id}/record?returnTo=${(info.requestedUri!'')?url}"/>">
         									Record
         								</a>
         							</div>

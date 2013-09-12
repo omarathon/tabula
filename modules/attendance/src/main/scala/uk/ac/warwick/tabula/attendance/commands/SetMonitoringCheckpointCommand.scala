@@ -12,8 +12,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.CurrentUser
 
 object SetMonitoringCheckpointCommand {
-	def apply(monitoringPoint: MonitoringPoint, week: Int, user: CurrentUser) =
-		new SetMonitoringCheckpointCommand(monitoringPoint, week, user)
+	def apply(monitoringPoint: MonitoringPoint, user: CurrentUser) =
+		new SetMonitoringCheckpointCommand(monitoringPoint, user)
 			with ComposableCommand[Seq[MonitoringCheckpoint]]
 			with SetMonitoringCheckpointCommandPermissions
 			with SetMonitoringPointDescription
@@ -24,36 +24,38 @@ object SetMonitoringCheckpointCommand {
 	}
 }
 
-abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoint, val week: Int, user: CurrentUser)
-	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with SelfValidating {
+abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoint, user: CurrentUser)
+	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with SelfValidating with MembersForPointSet {
 	self: SetMonitoringCheckpointState with ProfileServiceComponent with MonitoringPointServiceComponent =>
 	type UniversityId = String
 
 	var studentIds: JList[UniversityId] = JArrayList()
 	var members: Seq[StudentMember] = _
-	var membersChecked: Seq[StudentMember] = _
+	var studentsChecked: Map[String, Boolean] = _
+	var set = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
 
 	def populate() {
-		members = if(monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].year == null) {
-			profileService.getStudentsByRoute(monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route)
-		} else {
-			profileService.getStudentsByRoute(
-				monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route,
-				monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear
-			)
-		}
-
-		membersChecked = monitoringPointService.getCheckedStudents(monitoringPoint)
+		members = getMembers(monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet])
+		studentsChecked = monitoringPointService.getStudents(monitoringPoint).map {
+			case(student, isChecked) => (student.id, isChecked)
+		}.toMap
 	}
 
 	def applyInternal(): Seq[MonitoringCheckpoint] = {
 		// convert list of university ids from form into StudentMembers
-		val studentMembers = studentIds.asScala.toSeq.map(profileService.getMemberByUniversityId(_).head.asInstanceOf[StudentMember])
+		val checkedStudentMembers = studentIds.asScala.toSeq.map(profileService.getMemberByUniversityId(_).head.asInstanceOf[StudentMember])
 
-		monitoringPointService.updateCheckedStudents(monitoringPoint, studentMembers, user)
+		members = getMembers(monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet])
+		val uncheckedStudentMembers = members.toSet -- checkedStudentMembers.toSet
+		val changedStudentMembers = checkedStudentMembers.map(student => (student, true)) ++ uncheckedStudentMembers.map(student => (student, false))
+		monitoringPointService.updateStudents(monitoringPoint, changedStudentMembers, user)
 	}
 
 	def validate(errors: Errors) {
+		if(set.sentToAcademicOffice) {
+			errors.reject("monitoringCheckpoint.sentToAcademicOffice.set")
+		}
+
 		if(monitoringPoint == null) {
 			errors.rejectValue("monitoringPoint", "monitoringPoint")
 		}
@@ -80,5 +82,4 @@ trait SetMonitoringPointDescription extends Describable[Seq[MonitoringCheckpoint
 
 trait SetMonitoringCheckpointState {
 	val monitoringPoint : MonitoringPoint
-	val week: Int
 }
