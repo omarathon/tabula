@@ -68,12 +68,13 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 		membersAndCategories flatMap { mac =>
 			val usercode = mac.member.usercode
 			val ssoUser = users(usercode)
+			val universityId = mac.member.universityId
 
 			mac.member.userType match {
 				case Staff | Emeritus => staffInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
 				case Student | Other => {
 					studentInformationQuery(mac, ssoUser).executeByNamedParam(
-											Map("year" -> sitsCurrentAcademicYear, "usercodes" -> usercode)
+											Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
 										  ).toSeq
 					}
 				case _ => Seq()
@@ -397,12 +398,12 @@ object ProfileImporter {
 				on spr.spr_code = ssn.ssn_sprc
 				and sce.sce_ayrc = ssn.ssn_ayrc
 
-		where stu.stu_udf3 in (:usercodes)
+		where stu.stu_code = :universityId
 		"""
 
 	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User)
 		extends MappingSqlQuery[ImportStudentRowCommand](ds, GetStudentInformation) {
-		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
+		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 		declareParameter(new SqlParameter("year", Types.VARCHAR))
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int)
