@@ -5,7 +5,7 @@
 <#escape x as x?html>
 <div id="agent-view">
 	<div class="pull-right">
-		<#if features.personalTutorAssignment>
+		<#if features.personalTutorAssignment && !relationshipType.readOnly(department)>
 			<a href="<@routes.relationship_allocate department relationshipType />" class="btn btn-medium pull-right">
 				<i class="icon-random icon-fixed-width"></i> Assign ${relationshipType.description}s</a>
 			</a>
