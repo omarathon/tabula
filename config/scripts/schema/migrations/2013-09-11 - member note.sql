@@ -1,5 +1,4 @@
 create table membernote (
-
       	id nvarchar2(255) not null,
       	memberid nvarchar2(255) not null,
         note nclob,
@@ -8,7 +7,7 @@ create table membernote (
       	creationdate timestamp not null,
       	lastupdateddate timestamp not null,
 
-        constraint "membernote_pk" primary key ("id")
+        constraint "membernote_pk" primary key ("ID")
       );
 
 create index idx_note_member on membernote (memberid);
