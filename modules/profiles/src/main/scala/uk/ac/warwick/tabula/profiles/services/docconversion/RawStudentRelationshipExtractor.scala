@@ -99,8 +99,10 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, v
 					foundStudentInRow = true
 				}
 				case "agent_id" => {
-					currentRawStudentRelationship.agentUniversityId = UniversityId.zeroPad(formattedValue)
-					foundAgentInRow = true
+					if (formattedValue.hasText && formattedValue != "ERROR:#N/A") {
+						currentRawStudentRelationship.agentUniversityId = UniversityId.zeroPad(formattedValue)
+						foundAgentInRow = true
+					}
 				}
 				case _ => // ignore anything else
 			}

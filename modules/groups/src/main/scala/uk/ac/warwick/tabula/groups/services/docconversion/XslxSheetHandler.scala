@@ -45,14 +45,14 @@ class XslxSheetHandler(var styles: StylesTable, var sst: ReadOnlySharedStringsTa
 		if (isFirstRow) columnMap(col) = formattedValue
 		else if (columnMap.containsKey(col)) {
 			columnMap(col) match {
-				case "student_id" => {
-					if (formattedValue.hasText) {
+				case "student_id" => {					
+					if (formattedValue.hasText) {					
 						currentAllocateStudentItem.universityId = UniversityId.zeroPad(formattedValue)
 						foundStudentInRow = true
 					}
 				}
 				case "group_id" => {
-					if (formattedValue.hasText)
+					if (formattedValue.hasText && formattedValue != "ERROR:#N/A")
 						currentAllocateStudentItem.groupId = formattedValue
 				}
 				case _ => // ignore anything else
