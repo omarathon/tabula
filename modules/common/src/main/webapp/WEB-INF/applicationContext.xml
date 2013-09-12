@@ -392,7 +392,6 @@
 						<value>uk.ac.warwick.tabula.services.HibernateStatisticsMessage</value>
 					</list>
 				</property>
-				<property name="objectMapper" ref="json" />
 			</bean>
 		</property>
 	</bean>
