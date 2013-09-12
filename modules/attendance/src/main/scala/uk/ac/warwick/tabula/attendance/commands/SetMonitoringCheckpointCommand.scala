@@ -31,19 +31,24 @@ abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoi
 
 	var studentIds: JList[UniversityId] = JArrayList()
 	var members: Seq[StudentMember] = _
-	var membersChecked: Seq[StudentMember] = _
+	var studentsChecked: Map[String, Boolean] = _
 	var set = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
 
 	def populate() {
 		members = getMembers(monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet])
-		membersChecked = monitoringPointService.getCheckedStudents(monitoringPoint)
+		studentsChecked = monitoringPointService.getStudents(monitoringPoint).map {
+			case(student, isChecked) => (student.id, isChecked)
+		}.toMap
 	}
 
 	def applyInternal(): Seq[MonitoringCheckpoint] = {
 		// convert list of university ids from form into StudentMembers
-		val studentMembers = studentIds.asScala.toSeq.map(profileService.getMemberByUniversityId(_).head.asInstanceOf[StudentMember])
+		val checkedStudentMembers = studentIds.asScala.toSeq.map(profileService.getMemberByUniversityId(_).head.asInstanceOf[StudentMember])
 
-		monitoringPointService.updateCheckedStudents(monitoringPoint, studentMembers, user)
+		members = getMembers(monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet])
+		val uncheckedStudentMembers = members.toSet -- checkedStudentMembers.toSet
+		val changedStudentMembers = checkedStudentMembers.map(student => (student, true)) ++ uncheckedStudentMembers.map(student => (student, false))
+		monitoringPointService.updateStudents(monitoringPoint, changedStudentMembers, user)
 	}
 
 	def validate(errors: Errors) {

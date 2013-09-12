@@ -19,8 +19,6 @@ class SetMonitoringCheckpointController extends AttendanceController {
 
 	validatesSelf[SetMonitoringCheckpointCommand]
 
-	@Autowired var service: RouteService = _
-
 	@ModelAttribute("command")
 	def command(@PathVariable monitoringPoint: MonitoringPoint, user: CurrentUser) = {
 		SetMonitoringCheckpointCommand(monitoringPoint, user)
@@ -48,9 +46,7 @@ class SetMonitoringCheckpointController extends AttendanceController {
 			form(command)
 		} else {
 			command.apply()
-			val deptcode = command.set.route.department.code
-
-			Redirect("/manage/" + deptcode, "updatedMonitoringPoint" -> command.monitoringPoint.id)
+			Redirect(Routes.managingDepartment(command.set.route.department), "updatedMonitoringPoint" -> command.monitoringPoint.id)
 		}
 	}
 

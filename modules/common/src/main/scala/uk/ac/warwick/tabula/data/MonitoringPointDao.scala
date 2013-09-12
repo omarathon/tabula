@@ -18,8 +18,7 @@ trait AutowiringMonitoringPointDaoComponent extends MonitoringPointDaoComponent 
 trait MonitoringPointDao {
 	def getPointById(id: String): Option[MonitoringPoint]
 	def getSetById(id: String): Option[MonitoringPointSet]
-	def list(page: Int) : Seq[MonitoringPoint]
-	def getStudentsChecked(monitoringPoint: MonitoringPoint): Seq[StudentMember]
+	def getStudents(monitoringPoint: MonitoringPoint): Seq[(StudentMember, Boolean)]
 	def saveOrUpdate(monitoringPoint: MonitoringPoint)
 	def delete(monitoringPoint: MonitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
@@ -44,20 +43,12 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def getSetById(id: String) =
 		getById[MonitoringPointSet](id)
 
-	def list(page: Int) = {
-		val perPage = 20
-		session.newCriteria[MonitoringPoint]
-			.setFirstResult(page*perPage)
-			.setMaxResults(perPage)
-			.list.asScala.toSeq
-	}
-
-	def getStudentsChecked(monitoringPoint: MonitoringPoint): Seq[StudentMember] = {
-		val checkpoints = session.newQuery[MonitoringCheckpoint]("from MonitoringCheckpoint where point = :point_id and checked = true")
+	def getStudents(monitoringPoint: MonitoringPoint): Seq[(StudentMember, Boolean)] = {
+		val checkpoints = session.newQuery[MonitoringCheckpoint]("from MonitoringCheckpoint where point = :point_id")
 				.setString("point_id", monitoringPoint.id)
 				.seq
 
-		checkpoints.map(_.studentCourseDetail.student)
+		checkpoints.map(checkpoint => (checkpoint.studentCourseDetail.student, checkpoint.checked))
 	}
 
 	def saveOrUpdate(monitoringPoint: MonitoringPoint) = session.saveOrUpdate(monitoringPoint)

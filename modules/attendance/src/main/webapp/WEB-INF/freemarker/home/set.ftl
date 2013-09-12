@@ -8,6 +8,8 @@
 
 </script>
 
+
+
 <div class="recordCheckpointForm">
 
 	<div class="persist-area">
@@ -25,12 +27,7 @@
 				<input type="hidden" name="monitoringPoint" value="${monitoringPoint.id}" />
 				<input type="hidden" value="<@url page="${returnTo}" />" />
 				<#list command.members?sort_by("lastName") as student>
-					<#assign checked = false />
-					<#list command.membersChecked as studentChecked>
-						<#if studentChecked.universityId == student.universityId>
-							<#assign checked = true />
-						</#if>
-					</#list>
+
 
 					<div class="row-fluid item-info clickable">
 						<label>
@@ -41,7 +38,8 @@
 							</div>
 							<div class="span1 text-center">
 								<div class="full-height">
-									<input type="checkbox" name="studentIds" value="${student.universityId}" <#if checked>checked="checked"</#if>/>
+									<#assign universityId = student.universityId />
+									<input type="checkbox" name="studentIds" value="${student.universityId}" <#if command.studentsChecked[universityId]!false>checked="checked"</#if>/>
 								</div>
 							</div>
 						</label>
