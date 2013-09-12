@@ -58,7 +58,7 @@
 										</td>
 										<#list yearList as year>
 											<#assign checked = ""/>
-											<#if command.selectedRoutesAndYearsByRouteCode(route.code)[year] && availableYearsForRoute[year]>
+											<#if command.selectedRoutesAndYearsByRouteCode(route)[year] && availableYearsForRoute[year]>
 												<#assign checked = "checked"/>
 											</#if>
 											<td class="year_${year}">

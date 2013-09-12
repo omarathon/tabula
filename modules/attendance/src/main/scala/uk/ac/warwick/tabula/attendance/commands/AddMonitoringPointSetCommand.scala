@@ -195,8 +195,5 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 		)
 	}.toMap.asJava
 
-	def selectedRoutesAndYearsByRouteCode(code: String) = routeService.getByCode(code) match {
-		case Some(r: Route) => selectedRoutesAndYears.get(r)
-		case _ => new ItemNotFoundException()
-	}
+	def selectedRoutesAndYearsByRouteCode(route: Route) = selectedRoutesAndYears.get(route)
 }

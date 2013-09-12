@@ -46,7 +46,7 @@
 		<select name="set" class="input-medium copy">
 			<option style="display:none;" disabled <#if !command.route?? || !command.pointSet??>selected</#if> value="">Year of study</option>
 			<#if command.route?? && command.pointSet??>
-				<#list command.setsByRouteCodeByAcademicYear(command.academicYear.toString, command.route.code) as set>
+				<#list command.setsByRouteCodeByAcademicYear(command.academicYear.toString, command.route) as set>
 					<option value="${set.id}" <#if command.pointSet.id == set.id>selected</#if>>
 						<#if set.year??>${set.year}<#else>All</#if>
 					</option>
@@ -170,7 +170,7 @@
 						"code" : "${route.code}",
 						"name" : "${route.name}",
 						"sets" : [
-							<#list command.setsByRouteCodeByAcademicYear(academicYear, route.code) as set>
+							<#list command.setsByRouteCodeByAcademicYear(academicYear, route) as set>
 								{
 									"id" : "${set.id}",
 									"year" : "<#if set.year??>${set.year}<#else>All</#if>"
