@@ -151,14 +151,16 @@
 		</#if>
 
 		<div class="tabbable">
-			<#if features.personalTimetables>
+			<#assign showTimetablePane=features.personalTimetables && can.do("Profiles.Read.Timetable", profile) />
+		
+			<#if showTimetablePane>
 				<script type="text/javascript">
 					var weeks = ${weekRangesDumper()}
 				</script>
 			</#if>
 			<ol class="panes">
 
-				<#if features.personalTimetables>
+				<#if showTimetablePane>
 					<li id="timetable-pane">
 						<section id="timetable-details" class="clearfix" >
 						<h4>Timetable</h4>
@@ -175,7 +177,8 @@
 				<#list (studentCourseDetails.department.displayedStudentRelationshipTypes)![] as relationshipType>
 					<#if studentCourseDetails.hasRelationship(relationshipType) || relationshipType.displayIfEmpty(studentCourseDetails)>
 						<li id="${relationshipType.id}-pane">
-							<@profile_macros.relationship_section studentCourseDetails relationshipType meetingsById[relationshipType.id] />
+							<#assign relMeetings=(meetingsById[relationshipType.id])![] />
+							<@profile_macros.relationship_section studentCourseDetails relationshipType relMeetings />
 						</li>
 					</#if>
 				</#list>
