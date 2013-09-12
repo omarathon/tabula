@@ -33,21 +33,26 @@ abstract class ViewMonitoringPointSetsCommand(
 	self: MonitoringPointServiceComponent with ProfileServiceComponent with TermServiceComponent =>
 
 	override def applyInternal() = {
-		val members = if(pointSet.year == null) {
-			profileService.getStudentsByRoute(pointSet.route)
-		} else {
-			profileService.getStudentsByRoute(
-				pointSet.route,
-				pointSet.academicYear
-			)
-		}
-		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
-		membersWithMissedCheckpoints = monitoringPointService.getCheckedForWeek(members, pointSet, currentAcademicWeek).filter{
-			case (member, checkMap) =>
-				checkMap.exists{
-					case (_, Some(b)) => !b
-					case _ => false
+		pointSetOption match {
+			case Some(pointSet) => {
+				val members = if(pointSet.year == null) {
+					profileService.getStudentsByRoute(pointSet.route)
+				} else {
+					profileService.getStudentsByRoute(
+						pointSet.route,
+						pointSet.academicYear
+					)
 				}
+				val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
+				membersWithMissedCheckpoints = monitoringPointService.getCheckedForWeek(members, pointSet, currentAcademicWeek).filter{
+					case (member, checkMap) =>
+						checkMap.exists{
+							case (_, Some(b)) => !b
+							case _ => false
+						}
+				}
+			}
+			case _ =>
 		}
 	}
 }
