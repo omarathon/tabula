@@ -1,17 +1,17 @@
-CREATE TABLE membernote (
+create table membernote (
 
-      	ID NVARCHAR2(255) NOT NULL,
-      	MEMBERID NVARCHAR2(255) NOT NULL,
-        NOTE NCLOB,
-        TITLE NVARCHAR2(500),
-        CREATORID NVARCHAR2(255) NOT NULL,
-      	CREATIONDATE TIMESTAMP NOT NULL,
-      	LASTUPDATEDDATE TIMESTAMP NOT NULL,
+      	id nvarchar2(255) not null,
+      	memberid nvarchar2(255) not null,
+        note nclob,
+        title nvarchar2(500),
+        creatorid nvarchar2(255) not null,
+      	creationdate timestamp not null,
+      	lastupdateddate timestamp not null,
 
-        CONSTRAINT "MEMBERNOTE_PK" PRIMARY KEY ("ID")
+        constraint "membernote_pk" primary key ("id")
       );
 
-      CREATE INDEX IDX_NOTE_MEMBER ON MEMBERNOTE ("MEMBERID");
+create index idx_note_member on membernote (memberid);
 
 alter table fileattachment
 add member_note_id nvarchar2(255);
