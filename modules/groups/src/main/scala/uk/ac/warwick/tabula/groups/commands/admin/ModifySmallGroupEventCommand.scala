@@ -89,7 +89,7 @@ abstract class ModifySmallGroupEventCommand extends PromisingCommand[SmallGroupE
 		event.startTime = startTime
 		event.endTime = endTime
 		
-		if (event.tutors == null) event.tutors = new UserGroup
+		if (event.tutors == null) event.tutors = UserGroup.ofUsercodes
 		event.tutors.includeUsers = tutors
 	}
 	

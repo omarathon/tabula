@@ -1,32 +1,24 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
+import scala.collection.JavaConverters._
 import java.sql.Date
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
 import org.joda.time.DateTimeConstants
 import org.joda.time.LocalDate
-import org.junit.Ignore
-import org.junit.Test
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD
 import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
 import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
-import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDaoImpl
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.Gender._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.data.model.RelationshipType._
-import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.data.model.StaffMember
@@ -37,26 +29,20 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
-import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporterImpl
 import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
 import uk.ac.warwick.tabula.services.CourseAndRouteService
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.services.ProfileServiceImpl
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.tabula.data.StudentCourseDetailsDaoImpl
-import uk.ac.warwick.tabula.data.MemberDaoImpl
-import uk.ac.warwick.tabula.Fixtures
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.data.DepartmentDaoImpl
 import uk.ac.warwick.tabula.data.ModeOfAttendanceDao
 import uk.ac.warwick.tabula.data.SitsStatusDao
 import uk.ac.warwick.tabula.services.MaintenanceModeService
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
+
 
 // scalastyle:off magic.number
-@DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
 class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	trait Environment {
 
@@ -118,14 +104,15 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rs.getString("homeDepartmentCode") returns ("PH")
 		rs.getString("department_code") returns ("PH")
 		rs.getString("scj_code") returns ("0672089/2")
-		rs.getDate("begin_date") returns new Date(new java.util.Date("12 May 2011").getTime())
-		rs.getDate("end_date") returns new Date(new java.util.Date("12 May 2014").getTime())
-		rs.getDate("expected_end_date") returns new Date(new java.util.Date("12 May 2015").getTime())
+		rs.getDate("begin_date") returns Date.valueOf("2011-05-12")
+		rs.getDate("end_date") returns Date.valueOf("2014-05-12")
+		rs.getDate("expected_end_date") returns Date.valueOf("2015-05-12")
 		rs.getInt("sce_sequence_number") returns (1)
 		rs.getString("enrolment_status_code") returns ("F")
 		rs.getString("mode_of_attendance_code") returns ("P")
 		rs.getString("sce_academic_year") returns ("10/11")
 		rs.getString("most_signif_indicator") returns ("Y")
+		rs.getString("mod_reg_status") returns "CON"
 
 		val mm = MembershipMember(
 			universityId 			= "0672089",
@@ -204,6 +191,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseDetails.sprCode = "0672089/2"
 			yearCommand.studentCourseDetails = studentCourseDetails
 
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
+
 			val studentCourseYearDetails = yearCommand.applyInternal()
 
 			// now the set up is done, run the apply command and test it:
@@ -224,6 +213,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	@Test
 	def testImportStudentRowCommandWorksWithNew {
 		new Environment {
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
+
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
 			val member = rowCommand.applyInternal()
 
@@ -255,9 +246,10 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	@Test
 	def worksWithExistingMember {
 		new Environment {
-
 			val existing = new StudentMember("0672089")
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
+
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
 
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
 			val member = rowCommand.applyInternal()
@@ -285,8 +277,12 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
 
+			val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (Some(tutorRelationshipType))
+
 			// if personalTutorSource is "local", there should be no update
-			department.personalTutorSource = "local"
+			department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.Local)
 
 			val member = rowCommand.applyInternal() match {
 				case stu: StudentMember => Some(stu)
@@ -297,7 +293,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.studentCourseDetails.size should not be (0)
 
-			there was no(relationshipService).saveStudentRelationship(PersonalTutor, "0672089/2","0070790");
+			there was no(relationshipService).saveStudentRelationship(tutorRelationshipType, "0672089/2","0070790");
 		}
 	}
 
@@ -308,12 +304,16 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			val existing = new StudentMember("0672089")
 			val existingStaffMember = new StaffMember("0070790")
 
-			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
-			memberDao.getByUniversityId("0672089") returns(Some(existing))
-			relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, "0672089/2") returns (Nil)
+			val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (Some(tutorRelationshipType))
 
 			// if personalTutorSource is "SITS", there *should* an update
-			department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits
+			department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.SITS)
+
+			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
+			memberDao.getByUniversityId("0672089") returns(Some(existing))
+			relationshipService.findCurrentRelationships(tutorRelationshipType, "0672089/2") returns (Nil)
 
 			val member = rowCommand.applyInternal() match {
 				case stu: StudentMember => Some(stu)
@@ -324,7 +324,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.mostSignificantCourseDetails should not be (null)
 
-			there was one(relationshipService).saveStudentRelationship(PersonalTutor, "0672089/2","0070790");
+			there was one(relationshipService).saveStudentRelationship(tutorRelationshipType, "0672089/2","0070790");
 		}
 	}
 }

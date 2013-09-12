@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>40</version>
+		<version>41</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -224,6 +224,7 @@
 								<include>libs/bootstrap-datetimepicker/css/datetimepicker.css</include>
 								<include>libs/popup/popup.css</include>
 								<include>libs/jquery-rating/jquery.rating.css</include>
+								<include>libs/jquery-fixedheadertable/jquery.fixedheadertable.css</include>
 							</includes>
 						</aggregation>
 						<aggregation>
@@ -231,8 +232,9 @@
 							<output>${project.build.directory}/${project.build.finalName}/static/js/render.js</output>
 							<inputDir>${basedir}/src/main/webapp/static</inputDir>
 							<includes>
+								<include>libs/jquery/jquery-1.8.3.js</include>
 								<include>js/id6scripts.js</include>
-								<include>libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js</include>
+								<include>libs/jquery-ui/js/jquery-ui-1.9.2.custom.js</include>
 								<include>libs/jquery.delayedObserver.js</include>
 								<include>libs/jquery-caret/jquery.caret.1.02.js</include>
 								<include>libs/jquery-fixedheadertable/jquery.fixedheadertable.min.js</include>
@@ -255,9 +257,12 @@
 								<include>scripts.js</include>
 								<include>jquery-copyable.js</include>
 								<include>jquery-biglist.js</include>
+								<include>jquery-confirmmodal.js</include>
 								<include>jquery-details.js</include>
 								<include>jquery-tableform.js</include>
 								<include>jquery-draganddrop.js</include>
+								<include>jquery-filteredlist.js</include>
+								<include>jquery-radiocontrolled.js</include>
 								<include>userpicker.js</include>
 								<include>flexipicker.js</include>
 								<include>ajax-popup.js</include>
@@ -297,6 +302,8 @@
 							<includes>
 								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
 								<include>profiles-render.js</include>
+								<include>profiles-admin.js</include>
+								<include>fullcalendar.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>
@@ -314,6 +321,15 @@
 							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
 							<includes>
 								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
+							</includes>
+						</aggregation>
+						<aggregation>
+							<insertNewLine>true</insertNewLine>
+							<output>${project.build.directory}/${project.build.finalName}/static/js/attendance.js</output>
+							<inputDir>${basedir}/src/main/webapp/static/js</inputDir>
+							<includes>
+								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
+								<include>attendance-render.js</include>
 							</includes>
 						</aggregation>
 					</aggregations>

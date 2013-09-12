@@ -1,15 +1,13 @@
 package uk.ac.warwick.tabula.groups.notifications
 
 import uk.ac.warwick.tabula.data.model.{SingleRecipientNotification, Notification}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.services.UserLookupService
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.groups.web.Routes
-import uk.ac.warwick.tabula.web.views.{TextRenderer, FreemarkerRendering}
-import freemarker.template.Configuration
+import uk.ac.warwick.tabula.web.views.TextRenderer
 
-class ReleaseSmallGroupSetNotification(private val group:SmallGroup, val agent:User, val recipient:User, private val isStudent:Boolean ) extends Notification[SmallGroup] with SingleRecipientNotification {
+class ReleaseSmallGroupSetNotification(private val group:SmallGroup, val agent:User, val recipient:User, private val isStudent:Boolean )
+	extends Notification[SmallGroup] with SingleRecipientNotification {
 
   this: TextRenderer=>
 

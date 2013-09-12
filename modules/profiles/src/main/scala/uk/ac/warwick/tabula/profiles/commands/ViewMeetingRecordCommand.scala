@@ -5,37 +5,33 @@ import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRe
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.CurrentUser
-import scala.Some
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import scala.Some
-import scala.Some
+import uk.ac.warwick.tabula.permissions.Permissions
 
 object ViewMeetingRecordCommand{
-	def apply(studentCourseDetails: StudentCourseDetails, currentUser: CurrentUser, relationshipType:RelationshipType)  =
+	def apply(studentCourseDetails: StudentCourseDetails, currentUser: CurrentUser, relationshipType: StudentRelationshipType)  =
 		new ViewMeetingRecordCommandInternal(studentCourseDetails, currentUser, relationshipType) with
+			ComposableCommand[Seq[MeetingRecord]] with
 			AutowiringProfileServiceComponent with
 			AutowiringMeetingRecordDaoComponent with
-		  AutowiringRelationshipServiceComponent with
-	  	ComposableCommand[Seq[MeetingRecord]] with
-		  ViewMeetingRecordCommandPermissions with
-	   	Unaudited
-
+			AutowiringRelationshipServiceComponent with
+			ViewMeetingRecordCommandPermissions with
+			ReadOnly with Unaudited
 }
 
 trait ViewMeetingRecordCommandState{
 	val studentCourseDetails: StudentCourseDetails
 	val requestingUser: CurrentUser
-	val relationshipType:RelationshipType
+	val relationshipType: StudentRelationshipType
 }
 
-class ViewMeetingRecordCommandInternal(val  studentCourseDetails: StudentCourseDetails, val requestingUser: CurrentUser, val relationshipType:RelationshipType)
+class ViewMeetingRecordCommandInternal(val  studentCourseDetails: StudentCourseDetails, val requestingUser: CurrentUser, val relationshipType: StudentRelationshipType)
 	extends CommandInternal[Seq[MeetingRecord]] with ViewMeetingRecordCommandState {
 
-	this:ProfileServiceComponent with RelationshipServiceComponent with  MeetingRecordDaoComponent=>
-
+	this: ProfileServiceComponent with RelationshipServiceComponent with MeetingRecordDaoComponent =>
 
 	def applyInternal() = {
-    val rels = relationshipService.getRelationships(relationshipType, studentCourseDetails.sprCode)
+		val rels = relationshipService.getRelationships(relationshipType, studentCourseDetails.sprCode)
 		val currentMember = profileService.getMemberByUniversityId(requestingUser.universityId)
 
 		currentMember match {
@@ -45,11 +41,10 @@ class ViewMeetingRecordCommandInternal(val  studentCourseDetails: StudentCourseD
 	}
 }
 
-trait ViewMeetingRecordCommandPermissions extends RequiresPermissionsChecking{
+trait ViewMeetingRecordCommandPermissions extends RequiresPermissionsChecking {
 	this:ViewMeetingRecordCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(MeetingPermissions.Read.permissionFor(relationshipType), studentCourseDetails)
-
+		p.PermissionCheck(Permissions.Profiles.MeetingRecord.Read(relationshipType), studentCourseDetails)
 	}
 }

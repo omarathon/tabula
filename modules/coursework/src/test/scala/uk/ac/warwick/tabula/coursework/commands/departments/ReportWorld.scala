@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.AuditEvent
-import uk.ac.warwick.tabula.services.{SubmissionService, AssignmentMembershipService, AuditEventQueryMethods}
+import uk.ac.warwick.tabula.services.{SubmissionService, FeedbackService, AssignmentMembershipService, AuditEventQueryMethods}
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.data.model.Assignment
@@ -41,9 +41,8 @@ trait ReportWorld extends TestBase with Mockito {
 	val assignmentFive = addAssignment("1005", "test five", dateTime(2013, 8, 23), 100, 50, moduleTwo)
 	val assignmentSix = addAssignment("1006", "test six", dateTime(2013, 7, 1), 73, 3, moduleTwo)
 	
-	
 	createPublishEvent(assignmentOne, 15, studentData(1, 10)) 	// all on time
-	createPublishEvent(assignmentTwo, 35, studentData(1, 29))		// all late
+	createPublishEvent(assignmentTwo, 35, studentData(1, 29))	// all late
 	createPublishEvent(assignmentThree, 10, studentData(1, 4))	// for test three - these on time
 	createPublishEvent(assignmentThree, 35, studentData(5, 13))	// ... and these late
 
@@ -87,6 +86,14 @@ trait ReportWorld extends TestBase with Mockito {
 		val assignment = args(0).asInstanceOf[Assignment]
 		val userId = args(1).asInstanceOf[String]
 		assignment.submissions.find(_.universityId == userId)
+	}}
+	
+	var feedbackService = mock[FeedbackService]
+	feedbackService.getFeedbackByUniId(any[Assignment], any[String]) answers { argsObj => {
+		val args = argsObj.asInstanceOf[Array[_]]
+		val assignment = args(0).asInstanceOf[Assignment]
+		val userId = args(1).asInstanceOf[String]
+		assignment.feedbacks.find(_.universityId == userId)
 	}}
 
 	def studentData(start:Int, end:Int) = (start to end).map(idFormat(_)).toList 
@@ -134,13 +141,13 @@ trait ReportWorld extends TestBase with Mockito {
 	}
 	
 	
-	def addFeedback(assignment:Assignment){
+	def addFeedback(assignment:Assignment) {
 		withFakeTime(dateTime(2013, 3, 13)) {	
-			val feedback = assignment.submissions.map{s=>
+			val feedback = assignment.submissions.map { s=>
 				val newFeedback = new Feedback
 				newFeedback.assignment = assignment
 				newFeedback.universityId = s.universityId
-				newFeedback.released = false
+				newFeedback.released = true
 				newFeedback
 			}
 			assignment.feedbacks = feedback
@@ -150,12 +157,13 @@ trait ReportWorld extends TestBase with Mockito {
 	
 	def idFormat(i:Int) = "1" + ("%06d" format i)
 
-	def generateSubmission(assignment:Assignment, num: Int, lateModNumber: Int) {
-		val submissionDate = if(lateModNumber !=0 && num % lateModNumber == 0){
+	def generateSubmission(assignment: Assignment, num: Int, lateModNumber: Int) {
+		val submissionDate = if (lateModNumber != 0 && num % lateModNumber == 0) {
 			assignment.closeDate.plusDays(1)
 		} else {
 			assignment.closeDate.minusDays(1)
 		}
+		
 		withFakeTime(submissionDate) {
 			val submission = new Submission()
 			submission.assignment = assignment
@@ -172,13 +180,11 @@ trait ReportWorld extends TestBase with Mockito {
 			event.parsedData = Some(json.readValue(event.data, classOf[Map[String, Any]]))
 		
 			auditEvents = event :: auditEvents
-			
-			
-		}	
+		}
 	}
 
 	def makeUserGroup(users: Seq[String]): UserGroup = {
-		val ug = new UserGroup
+		val ug = UserGroup.ofUsercodes
 		ug.includeUsers = users
 		ug
 	}

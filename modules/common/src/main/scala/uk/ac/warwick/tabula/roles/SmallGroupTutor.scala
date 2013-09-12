@@ -10,7 +10,9 @@ case object SmallGroupTutorRoleDefinition extends BuiltInRoleDefinition {
 	override def description = "SmallGroupTutor"
 	
 	GrantsScopedPermission(
-		SmallGroups.Read
+		SmallGroups.Read,
+		SmallGroups.ReadMembership,
+		SmallGroupEvents.Register
 	)
 
 }

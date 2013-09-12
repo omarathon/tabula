@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.coursework
 
-import org.scalatest.{GivenWhenThen, BeforeAndAfter, BeforeAndAfterAll}
+import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 import org.openqa.selenium.By
-import uk.ac.warwick.tabula.home.FeaturesDriver._
 
 class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 

@@ -16,7 +16,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
       command.notifyStudents = true
       val updatedSets = command.applyInternal()
       updatedSets.foreach(updatedSet=>
-        updatedSet.releasedToStudents.booleanValue should be(true)
+        updatedSet.set.releasedToStudents.booleanValue should be(true)
       )
    }}
 
@@ -28,7 +28,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     command.notifyStudents = false
     val updatedSets = command.applyInternal()
     updatedSets.foreach(updatedSet=>
-      updatedSet.releasedToStudents.booleanValue should be(true)
+      updatedSet.set.releasedToStudents.booleanValue should be(true)
     )
   }}
 
@@ -40,7 +40,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     command.notifyStudents = false
     val updatedSets = command.applyInternal()
     updatedSets.foreach(updatedSet=>
-      updatedSet.releasedToStudents.booleanValue should be(false)
+      updatedSet.set.releasedToStudents.booleanValue should be(false)
     )
   }}
 
@@ -51,7 +51,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     val updatedSet = command.applyInternal()
     val updatedSets = command.applyInternal()
     updatedSets.foreach(updatedSet=>
-      updatedSet.releasedToTutors.booleanValue should be(true)
+      updatedSet.set.releasedToTutors.booleanValue should be(true)
     )
   }}
 
@@ -63,7 +63,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     command.notifyTutors = false
     val updatedSets = command.applyInternal()
     updatedSets.foreach(updatedSet=>
-      updatedSet.releasedToTutors.booleanValue should be(true)
+      updatedSet.set.releasedToTutors.booleanValue should be(true)
     )
   }}
 
@@ -75,7 +75,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     command.notifyTutors = false
     val updatedSets = command.applyInternal()
     updatedSets.foreach(updatedSet=>
-      updatedSet.releasedToTutors.booleanValue should be(false)
+      updatedSet.set.releasedToTutors.booleanValue should be(false)
     )
   }}
 
@@ -96,7 +96,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     cmd.notifyStudents = true
     cmd.userLookup = userLookup
     cmd.applyInternal()
-		val notifications = cmd.emit
+		val notifications = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
 		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student1"))  should be (true)
     notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student2"))  should be (true)
 	}}
@@ -106,7 +106,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     val cmd = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
     cmd.notifyStudents = false
     cmd.userLookup = userLookup
-    val notifications = cmd.emit
+    val notifications = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
 
     notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student1"))  should be (false)
     notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student2"))  should be (false)
@@ -118,7 +118,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     cmd.notifyTutors = true
     cmd.userLookup = userLookup
     cmd.applyInternal()
-    val notifications = cmd.emit
+    val notifications = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
     notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor1"))  should be (true)
     notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor2"))  should be (true)
   }}
@@ -128,7 +128,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     val cmd = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
     cmd.notifyTutors = false
     cmd.userLookup = userLookup
-    val notifications = cmd.emit
+    val notifications = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
 
     notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor1"))  should be (false)
     notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor2"))  should be (false)
@@ -176,7 +176,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     command.userLookup = userLookup
     command.notifyTutors = true
     val updatedSets = command.applyInternal()
-    val notifications = command.emit
+    val notifications = command.emit(Seq(ReleasedSmallGroupSet(groupSet1, false, false), ReleasedSmallGroupSet(groupSet2, command.notifyStudents, true)))
     val allNotifiedGroupSets = notifications.flatMap(_._object.map(sg=>sg.groupSet))
     allNotifiedGroupSets.exists(_ == groupSet1) should be (false)
   }}
@@ -201,5 +201,24 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     command.singleGroupToPublish should be(groupSet1)
   }
   }
+
+	@Test
+	def describeOutcomeWorks(){new SmallGroupFixture {
+		val command = new ReleaseGroupSetCommandImpl(Seq(groupSet1),requestingUser)
+		command.notifyStudents = true
+		command.notifyTutors = true
+		command.describeOutcome() should be(Some("Tutors and students in <strong>A Groupset 1 for LA101</strong> have been notified"))
+		command.notifyStudents = true
+		command.notifyTutors = false
+		command.describeOutcome() should be(Some("Students in <strong>A Groupset 1 for LA101</strong> have been notified"))
+		command.notifyTutors = true
+		command.notifyStudents = false
+		command.describeOutcome() should be(Some("Tutors in <strong>A Groupset 1 for LA101</strong> have been notified"))
+		command.notifyTutors = false
+		command.notifyStudents = false
+		command.describeOutcome() should be(None)
+
+	}
+	}
 
 }

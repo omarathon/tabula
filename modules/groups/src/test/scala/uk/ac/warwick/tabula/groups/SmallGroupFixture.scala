@@ -89,9 +89,8 @@ trait SmallGroupFixture extends Mockito {
   }
 
   def createUserGroup(userIds:Seq[String], identifierIsUniNumber:Boolean = true) = {
-    val ug = new UserGroup
+    val ug = if (identifierIsUniNumber) UserGroup.ofUniversityIds else UserGroup.ofUsercodes
     ug.userLookup = userLookup
-    ug.universityIds = identifierIsUniNumber
     ug.includeUsers = userIds.asJava
     ug
   }
@@ -105,6 +104,7 @@ class SmallGroupSetBuilder(){
     if (template.module != null){
       template.module.groupSets.add(set)
     }
+		template.groups.asScala.foreach(g=>g.groupSet = set)
     set
   }
   def withGroups(groups:Seq[SmallGroup]):SmallGroupSetBuilder = {
@@ -112,6 +112,10 @@ class SmallGroupSetBuilder(){
     groups.foreach(g=>g.groupSet = template)
     this
   }
+	def withMembers(members:UserGroup):SmallGroupSetBuilder = {
+		template._membersGroup = members
+		this
+	}
   def withReleasedToStudents(b: Boolean): SmallGroupSetBuilder = {
     template.releasedToStudents = b
     this
@@ -132,6 +136,10 @@ class SmallGroupSetBuilder(){
     template.module = mod
     this
   }
+	def withAllocationMethod(method:SmallGroupAllocationMethod) = {
+		template.allocationMethod = method
+		this
+	}
 }
 class SmallGroupBuilder(val template:SmallGroup = new SmallGroup){
 
@@ -148,9 +156,13 @@ class SmallGroupBuilder(val template:SmallGroup = new SmallGroup){
     this
   }
   def withStudents(members:UserGroup):SmallGroupBuilder = {
-    template.students = members
+    template._studentsGroup = members
     this
   }
+	def withUserLookup(userLookup:UserLookupService)={
+		template._studentsGroup.userLookup = userLookup
+		this
+	}
   def withGroupName(s: String) = {
     template.name = s
     this

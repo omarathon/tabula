@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.data.model.groups
 
 import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 
 import javax.persistence._
 import javax.persistence.CascadeType._
@@ -36,7 +37,7 @@ object SmallGroupSet {
 @Filter(name = SmallGroupSet.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings with PostLoadBehaviour  {
+class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings with Serializable with PostLoadBehaviour  {
 	import SmallGroupSet.Settings
 	import SmallGroup._
 
@@ -61,7 +62,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
   @Column(name="released_to_students")
 	var releasedToStudents: JBoolean = false
   @Column(name="released_to_tutors")
-  var releasedToTutors:JBoolean = false
+  var releasedToTutors: JBoolean = false
 
   def fullyReleased= releasedToStudents && releasedToTutors
 
@@ -75,8 +76,20 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	var allocationMethod: SmallGroupAllocationMethod = _
 
 	@Column(name="self_group_switching")
-	var allowSelfGroupSwitching:Boolean = true
+	var allowSelfGroupSwitching: Boolean = true
 
+	// TODO consider changing this to be a string, and setting it to the name of the SmallGroupSetSelfSignUpState
+	// to allow for more states than just "open" and "closed"
+	@Column(name="open_for_signups")
+	var openForSignups: Boolean = false
+
+  def openState:SmallGroupSetSelfSignUpState = if (openForSignups) SmallGroupSetSelfSignUpState.Open else SmallGroupSetSelfSignUpState.Closed 
+  
+ def openState_= (value:SmallGroupSetSelfSignUpState):Unit =  value match {
+	  case SmallGroupSetSelfSignUpState.Open => openForSignups = true
+	  case SmallGroupSetSelfSignUpState.Closed => openForSignups = false
+  }
+	
 	@ManyToOne
 	@JoinColumn(name = "module_id")
 	var module: Module = _
@@ -85,26 +98,45 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	@JoinColumn(name = "set_id")
 	var groups: JList[SmallGroup] = JArrayList()
 
+	// only students manually added or excluded. use allStudents to get all students in the group set
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
-	var members: UserGroup = new UserGroup
-	
-	@ManyToMany(fetch = FetchType.LAZY, cascade = Array(ALL))
-	@JoinTable(name="smallgroupset_assessmentgroup",
-		joinColumns=Array(new JoinColumn(name="smallgroupset_id")),
-		inverseJoinColumns=Array(new JoinColumn(name="assessmentgroup_id")))
-	var assessmentGroups: JList[UpstreamAssessmentGroup] = JArrayList()
+	var _membersGroup = UserGroup.ofUniversityIds
+	def members: UnspecifiedTypeUserGroup= _membersGroup
+
+	// Cannot link directly to upstream assessment groups data model in sits is silly ...
+	@OneToMany(mappedBy = "smallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
+
+	// converts the assessmentGroups to upstream assessment groups
+	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = {
+		if(academicYear == null){
+			Seq()
+		}
+		else {
+			val validGroups = assessmentGroups.asScala.filterNot(group=> group.upstreamAssignment == null || group.occurrence == null)
+			validGroups.flatMap { group =>
+				val template = new UpstreamAssessmentGroup
+				template.academicYear = academicYear
+				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
+				template.moduleCode = group.upstreamAssignment.moduleCode
+				template.occurrence = group.occurrence
+				membershipService.getUpstreamAssessmentGroup(template)
+			}
+		}
+	}
+
+	def allStudents = membershipService.determineMembershipUsers(upstreamAssessmentGroups, Some(members))
+	def allStudentsCount = membershipService.countMembershipUsers(upstreamAssessmentGroups, Some(members))
 	
 	def unallocatedStudents = {
-		val allStudents = membershipService.determineMembershipUsers(assessmentGroups.asScala, Some(members))
 		val allocatedStudents = groups.asScala flatMap { _.students.users }
-		
+
 		allStudents diff allocatedStudents
 	}
 	
 	def unallocatedStudentsCount = {
-		val allStudentsCount = membershipService.countMembershipUsers(assessmentGroups.asScala, Some(members))
-		val allocatedStudentsCount = groups.asScala.foldLeft(0) { (acc, grp) => acc + grp.students.members.size }
+		val allocatedStudentsCount = groups.asScala.foldLeft(0) { (acc, grp) => acc + grp.students.size }
 		
 		allStudentsCount - allocatedStudentsCount
 	}
@@ -131,7 +163,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 		"name" -> name,
 		"module" -> module)
 
-  def duplicateTo( module:Module, assessmentGroups:JList[UpstreamAssessmentGroup] = JArrayList()):SmallGroupSet = {
+  def duplicateTo( module:Module, assessmentGroups:JList[AssessmentGroup] = JArrayList()):SmallGroupSet = {
     val newSet = new SmallGroupSet()
     newSet.id = id
     newSet.academicYear = academicYear
@@ -141,7 +173,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
     newSet.assessmentGroups = assessmentGroups
     newSet.format = format
     newSet.groups = groups.asScala.map(_.duplicateTo(newSet)).asJava
-    newSet.members = members.duplicate()
+    newSet._membersGroup = _membersGroup.duplicate()
     newSet.membershipService= membershipService
     newSet.module = module
     newSet.name = name

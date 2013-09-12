@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.coursework.commands.departments.ExtensionSettingsCom
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.coursework.web.Routes
-import org.hibernate.validator.Valid
+import javax.validation.Valid
 
 @Controller
 @RequestMapping(Array("/admin/department/{dept}/settings/extensions"))

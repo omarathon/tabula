@@ -19,7 +19,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 </#compress></#macro>
 <#macro assignmentdelete assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/delete"/></#macro>
 <#macro assignmentedit assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/edit"/></#macro>
-<#macro assignmentenrolment module><@url page="/admin/module/${module.code}/assignments/enrolment"/></#macro>
+<#macro enrolment module><@url page="/admin/module/${module.code}/assignments/enrolment"/></#macro>
+
+<#macro copyModuleAssignments module><@url page="/admin/module/${module.code}/copy-assignments" /></#macro>
+<#macro archiveModuleAssignments module><@url page="/admin/module/${module.code}/archive-assignments" /></#macro>
 
 <#macro listmarkersubmissions assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/list"/></#macro>
 <#macro downloadmarkersubmissions assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/submissions.zip"/></#macro>
@@ -55,6 +58,10 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro markingworkflowdelete scheme><@markingworkflowlist scheme.department />/delete/${scheme.id}</#macro>
 
 <#macro feedbackreport department><@url page="/admin/department/${department.code}/reports/feedback" /></#macro>
+
+
+<#macro copyDepartmentsAssignments department><@url page="/admin/department/${department.code}/copy-assignments" /></#macro>
+<#macro archiveDepartmentsAssignments department><@url page="/admin/department/${department.code}/archive-assignments" /></#macro>
 
 <#macro displaysettings department><@url page="/department/${department.code}/settings/display" context="/admin" /></#macro>
 

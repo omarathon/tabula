@@ -140,30 +140,18 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		student.description should be ("Undergraduate student, MEng Computer Science, IT Services")
 	}
 
-	@Test def isPersonalTutor {
+	@Test def isRelationshipAgent {
 		val staff = new StaffMember
 		staff.profileService = profileService
 		staff.relationshipService = relationshipService
+		
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
-		relationshipService.listStudentRelationshipsWithMember(RelationshipType.PersonalTutor, staff) returns (Seq())
-		staff.isAPersonalTutor should be (false)
+		relationshipService.listStudentRelationshipsWithMember(relationshipType, staff) returns (Seq())
+		staff.isRelationshipAgent(relationshipType) should be (false)
 
-		relationshipService.listStudentRelationshipsWithMember(RelationshipType.PersonalTutor, staff) returns (Seq(StudentRelationship("0672089", RelationshipType.PersonalTutor, "0205225/1")))
-		staff.isAPersonalTutor should be (true)
-	}
-
-	@Test def isSupervisor {
-		val staff = new StaffMember
-		staff.profileService = profileService
-		staff.relationshipService = relationshipService
-
-		relationshipService.listStudentRelationshipsWithMember(RelationshipType.Supervisor, staff) returns (Nil)
-		staff.isASupervisor should be(false)
-
-		relationshipService.listStudentRelationshipsWithMember(RelationshipType.Supervisor, staff) returns
-			(Seq(StudentRelationship("0672089", RelationshipType.Supervisor, "0205225/1")))
-		staff.isASupervisor should be(true)
-
+		relationshipService.listStudentRelationshipsWithMember(relationshipType, staff) returns (Seq(StudentRelationship("0672089", relationshipType, "0205225/1")))
+		staff.isRelationshipAgent(relationshipType) should be (true)
 	}
 
 	@Test def deleteFileAttachmentOnDelete = transactional { tx =>

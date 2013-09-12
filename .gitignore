@@ -18,6 +18,7 @@ local.properties
 console.properties
 tabula-private.properties
 !/modules/*/src/test/resources/tabula-private.properties
+atlassian-ide-plugin.xml
 
 # Error dumps, logs
 /hs_err*
@@ -44,8 +45,10 @@ ajcore*
 /.idea/libraries
 /.idea/dictionaries
 /.idea/scala_compiler.xml
-.iws
+/.idea/*
+.idea/
 *.iml
+*.iws
 
 # Sublime Text IDE
 *.sublime-project

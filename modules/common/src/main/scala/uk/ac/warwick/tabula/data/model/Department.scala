@@ -3,10 +3,8 @@ package uk.ac.warwick.tabula.data.model
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import scala.xml.NodeSeq
-
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.ForeignKey
-
 import javax.persistence._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -19,6 +17,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.services.RelationshipService
 
 @Entity @AccessType("field")
 class Department extends GeneratedId
@@ -48,6 +47,9 @@ class Department extends GeneratedId
 
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	var customRoleDefinitions:JList[CustomRoleDefinition] = JArrayList()
+	
+	@OneToMany(mappedBy="department", fetch = FetchType.LAZY)
+	var routes:JList[Route] = JArrayList()
 
 	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse(false)
 	def collectFeedbackRatings_= (collect: Boolean) = settings += (Settings.CollectFeedbackRatings -> collect)
@@ -68,16 +70,58 @@ class Department extends GeneratedId
 	def plagiarismDetectionEnabled = getBooleanSetting(Settings.PlagiarismDetection, true)
 	def plagiarismDetectionEnabled_= (enabled: Boolean) = settings += (Settings.PlagiarismDetection -> enabled)
 
+	def turnitinExcludeBibliography = getBooleanSetting(Settings.TurnitinExcludeBibliography, true)
+	def turnitinExcludeBibliography_= (exclude: Boolean) = settings += (Settings.TurnitinExcludeBibliography -> exclude)
+
+	def turnitinExcludeQuotations = getBooleanSetting(Settings.TurnitinExcludeQuotations, true)
+	def turnitinExcludeQuotations_= (exclude: Boolean) = settings += (Settings.TurnitinExcludeQuotations -> exclude)
+
+	def turnitinSmallMatchWordLimit = getIntSetting(Settings.TurnitinSmallMatchWordLimit, 0)
+	def turnitinSmallMatchWordLimit_= (limit: Int) = settings += (Settings.TurnitinSmallMatchWordLimit -> limit)
+
+	def turnitinSmallMatchPercentageLimit = getIntSetting(Settings.TurnitinSmallMatchPercentageLimit, 0)
+	def turnitinSmallMatchPercentageLimit_= (limit: Int) = settings += (Settings.TurnitinSmallMatchPercentageLimit -> limit)
+
 	def assignmentInfoView = getStringSetting(Settings.AssignmentInfoView) getOrElse(Assignment.Settings.InfoViewType.Default)
 	def assignmentInfoView_= (setting: String) = settings += (Settings.AssignmentInfoView -> setting)
+	
+	def getStudentRelationshipSource(relationshipType: StudentRelationshipType) =
+		getStringMapSetting(Settings.StudentRelationshipSource)
+			.flatMap { _.get(relationshipType.id) }
+			.map { StudentRelationshipSource.fromCode(_) }
+			.getOrElse(relationshipType.defaultSource)
+			
+	def setStudentRelationshipSource (relationshipType: StudentRelationshipType, source: StudentRelationshipSource) = {
+		val map = getStringMapSetting(Settings.StudentRelationshipSource, Map())
+		val newMap = (map + (relationshipType.id -> source.dbValue))
+		
+		settings += (Settings.StudentRelationshipSource -> newMap)
+	}
 
-	def personalTutorSource = getStringSetting(Settings.PersonalTutorSource) getOrElse(Department.Settings.PersonalTutorSourceValues.Local)
-	def personalTutorSource_= (ptSource: String) = settings += (Settings.PersonalTutorSource -> ptSource)
-
+	def studentRelationshipDisplayed = getStringMapSetting(Settings.StudentRelationshipDisplayed) getOrElse(Map())
+	def studentRelationshipDisplayed_= (setting: Map[String, String]) = settings += (Settings.StudentRelationshipDisplayed -> setting)
+			
+	def getStudentRelationshipDisplayed(relationshipType: StudentRelationshipType): Boolean =
+		studentRelationshipDisplayed
+			.get(relationshipType.id)
+			.map { _.toBoolean }
+			.getOrElse(relationshipType.defaultDisplay)
+			
+	def setStudentRelationshipDisplayed(relationshipType: StudentRelationshipType, isDisplayed: Boolean) = {	
+		studentRelationshipDisplayed = (studentRelationshipDisplayed + (relationshipType.id -> isDisplayed.toString))
+	}
+			
+	@transient
+	var relationshipService = Wire[RelationshipService]
+			
+	def displayedStudentRelationshipTypes =
+		relationshipService.allStudentRelationshipTypes.filter { getStudentRelationshipDisplayed(_) }
+			
 	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem) getOrElse(WeekRange.NumberingSystem.Default)
 	def weekNumberingSystem_= (wnSystem: String) = settings += (Settings.WeekNumberingSystem -> wnSystem)
 
-  def defaultGroupAllocationMethod = getStringSetting(Settings.DefaultGroupAllocationMethod).map(SmallGroupAllocationMethod(_)).getOrElse(SmallGroupAllocationMethod.Default)
+  def defaultGroupAllocationMethod =
+		getStringSetting(Settings.DefaultGroupAllocationMethod).map(SmallGroupAllocationMethod(_)).getOrElse(SmallGroupAllocationMethod.Default)
   def defaultGroupAllocationMethod_= (method:SmallGroupAllocationMethod) =  settings += (Settings.DefaultGroupAllocationMethod->method.dbValue)
 
 	// FIXME belongs in Freemarker
@@ -88,7 +132,7 @@ class Department extends GeneratedId
 	} getOrElse("")
 
 	@transient
-	var permissionsService = Wire.auto[PermissionsService]
+	var permissionsService = Wire[PermissionsService]
 	@transient
 	lazy val owners = permissionsService.ensureUserGroupFor(this, DepartmentalAdministratorRoleDefinition)
 	@transient
@@ -106,11 +150,6 @@ class Department extends GeneratedId
 	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.includes(user)
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
-
-	def canEditPersonalTutors: Boolean = {
-		personalTutorSource == null || personalTutorSource == Settings.PersonalTutorSourceValues.Local
-	}
-
 
 	// If hibernate sets owners to null, make a new empty usergroup
 	override def postLoad {
@@ -151,15 +190,15 @@ object Department {
 		val AssignmentInfoView = "assignmentInfoView"
 
 		val PlagiarismDetection = "plagiarismDetection"
+		val TurnitinExcludeBibliography = "turnitinExcludeBibliography"
+		val TurnitinExcludeQuotations = "turnitinExcludeQuotations"
+		val TurnitinSmallMatchWordLimit = "turnitinSmallMatchWordLimit"
+		val TurnitinSmallMatchPercentageLimit = "turnitinSmallMatchPercentageLimit"
 
-		val PersonalTutorSource = "personalTutorSource"
+		val StudentRelationshipSource = "studentRelationshipSource"
+		val StudentRelationshipDisplayed = "studentRelationshipDisplayed"
 
 		val WeekNumberingSystem = "weekNumberSystem"
-
-		object PersonalTutorSourceValues {
-			val Local = "local"
-			val Sits = "SITS"
-		}
 
     val DefaultGroupAllocationMethod = "defaultGroupAllocationMethod"
 	}

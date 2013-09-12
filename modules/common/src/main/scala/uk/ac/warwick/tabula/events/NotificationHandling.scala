@@ -10,10 +10,10 @@ trait NotificationHandling {
 
 	var notificationService = Wire.auto[NotificationService]
 
-	def notify[A](cmd: Command[A])(f: => A): A = cmd match {
-		case ns: Notifies[A] => {
+	def notify[A, B](cmd: Command[A])(f: => A): A = cmd match {
+		case ns: Notifies[A, B] => {
 			val result = f
-			for (notification <- ns.emit) {
+			for (notification <- ns.emit(result)) {
 				notificationService.push(notification)
 			}
 			result

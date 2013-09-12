@@ -28,7 +28,6 @@ object SmallGroup {
 	final val DefaultGroupSize = 15
 	object Settings {
 		val MaxGroupSize = "MaxGroupSize"
-		val MaxGroupSizeEnabled = "MaxGroupSizeEnabled"
 	}
 }
 
@@ -61,16 +60,21 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	var events: JList[SmallGroupEvent] = JArrayList()
 	
 	def permissionsParents = Option(groupSet).toStream
-		
+
+	/**
+	 * Direct access to the underlying UserGroup. Most of the time you don't want to us this; unless you're setting
+	 * it to a new UserGroup, you should probably access "students" instead and work with Users rather than guessing what
+	 * the right sort of UserId to use is.
+	 */
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "studentsgroup_id")
-	var students: UserGroup = new UserGroup
+	var _studentsGroup: UserGroup = UserGroup.ofUniversityIds
+  def students: UnspecifiedTypeUserGroup = _studentsGroup
 
 	def maxGroupSize = getIntSetting(Settings.MaxGroupSize)
 	def maxGroupSize_=(defaultSize:Int) = settings += (Settings.MaxGroupSize -> defaultSize)
 
-	def maxGroupSizeEnabled = getBooleanSetting(Settings.MaxGroupSizeEnabled).getOrElse(false)
-	def maxGroupSizeEnabled_=(isEnabled:Boolean) = settings += (Settings.MaxGroupSizeEnabled -> isEnabled)
+	def isFull = groupSet.defaultMaxGroupSizeEnabled && maxGroupSize.getOrElse(0) <= students.size
 
 	def toStringProps = Seq(
 		"id" -> id,
@@ -96,7 +100,7 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
     newGroup.groupSet = groupSet
     newGroup.name = name
     newGroup.permissionsService = permissionsService
-    newGroup.students = students.duplicate()
+    newGroup._studentsGroup = _studentsGroup.duplicate()
     newGroup.settings = Map() ++ settings
     newGroup
   }

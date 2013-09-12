@@ -9,25 +9,37 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.matchers.ShouldMatchers
 
 
-class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:WebDriver) extends Page with WebBrowser with	BreadcrumbsMatcher with Eventually with ShouldMatchers   {
+class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:WebDriver) extends Page with WebBrowser with	BreadcrumbsMatcher with Eventually with ShouldMatchers  with ModuleAndGroupSetList {
 
-	val url: String = FunctionalTestProperties.SiteRoot + "/groups/admin/department/" + departmentCode
+	val url = FunctionalTestProperties.SiteRoot + "/groups/admin/department/" + departmentCode
 
-	private def getModuleInfo(moduleCode: String):WebElement =
-		findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == moduleCode.toUpperCase).next().underlying
-
-	def isCurrentPage() {
+	def isCurrentPage(): Boolean = {
 		currentUrl should include ("/groups/admin/department/" + departmentCode)
-		find(cssSelector("h1")).get.text should be("Tabula » Small Group Teaching")
+		find(cssSelector("h1")).get.text == ("Tabula » Small Group Teaching")
 	}
 
-	def getGroupsetInfo(moduleCode: String, groupsetName: String) =
-		getModuleInfo(moduleCode).  findElements(By.className("item-info")).asScala.filter(_.findElement(By.className("name")).getText.trim == groupsetName).head
+	def getBatchOpenButton() = {
+		val manageButton = find(linkText("Manage")).get.underlying
+		manageButton.click()
+		val manageDropdownContainer = find(cssSelector("div.dept-toolbar")).get.underlying
+		val openButton = manageDropdownContainer.findElement(By.partialLinkText("Open"))
+		eventually {
+			openButton.isDisplayed should be (true)
+		}
+		openButton
+	}
+}
 
-	def goToEditPropertiesOf(moduleCode:String, groupSetName:String):EditSmallGroupSetPropertiesPage =  {
-		val groupsetElement = getGroupsetInfo(moduleCode,groupSetName)
-		groupsetElement.findElement(By.partialLinkText("Actions")).click()
-		val editGroupset = groupsetElement.findElement(By.partialLinkText("Edit properties"))
+class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: String)(implicit webDriver: WebDriver) extends Eventually with ShouldMatchers {
+
+	val groupsetId = {
+		val classes = underlying.getAttribute("class").split(" ")
+		classes.find(_.startsWith("groupset-")).get.replaceFirst("groupset-","")
+	}
+
+	def goToEditProperties:EditSmallGroupSetPropertiesPage = {
+		underlying.findElement(By.partialLinkText("Actions")).click()
+		val editGroupset = underlying.findElement(By.partialLinkText("Edit properties"))
 		eventually {
 			editGroupset.isDisplayed should be (true)
 		}
@@ -37,5 +49,86 @@ class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:W
 		propsPage.isCurrentPage(moduleCode.toUpperCase)
 		propsPage
 	}
+
+	def goToAllocate = {
+		underlying.findElement(By.partialLinkText("Actions")).click()
+		val allocate = underlying.findElement(By.partialLinkText("Allocate students"))
+		eventually {
+			allocate.isDisplayed should be(true)
+		}
+		allocate.click()
+		val allocatePage = new AllocateStudentsToGroupsPage()
+		allocatePage.isCurrentPage(moduleCode.toUpperCase())
+		allocatePage
+	}
+
+	def isShowingOpenButton() = {
+		underlying.findElement(By.partialLinkText("Actions")).click()
+		!underlying.findElements(By.partialLinkText("Open")).isEmpty
+	}
+
+	def getOpenButton() = {
+		underlying.findElement(By.partialLinkText("Actions")).click()
+		underlying.findElement(By.partialLinkText("Open"))
+	}
+
+	def getSignupButton() = {
+		underlying.findElement(By.className("sign-up-button"))
+	}
+
+	def findLeaveButtonFor(groupName:String) = {
+		underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).headOption.map(
+
+			groupNameHeading=>{
+				val parent = groupNameHeading.findElement(By.xpath(".."))
+				//groupNameHeading.findElement(By.xpath("../form/input[@type='submit']"))}
+				parent.findElement(By.cssSelector("form input.btn"))
+			}
+		)
+	}
+
+	def showsGroup(groupName:String) = {
+		underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).headOption.isDefined
+	}
+
+	def findSelectGroupCheckboxFor(groupName:String ) = {
+		val groupNameHeading = underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).head
+    // ugh. Might be worth investigating ways of using JQuery selector/traversals in selenium instead of this horror:
+		groupNameHeading.findElement(By.xpath("../../div[contains(@class,'span1')]/input"))
+	}
 }
 
+class BatchOpenPage(val departmentCode: String)(implicit webDriver: WebDriver) extends Page with WebBrowser with Eventually with ShouldMatchers {
+	val url = FunctionalTestProperties.SiteRoot + s"/groups/admin/department/${departmentCode}/groups/open"
+
+	def isCurrentPage(): Boolean = {
+		currentUrl should include (s"/groups/admin/department/${departmentCode}/groups/selfsignup/open")
+		find(cssSelector("#main-content h1")).get.text.startsWith("Open groups in ")
+	}
+
+	def checkboxForGroupSet(groupset: GroupSetInfoSummarySection) = {
+		findAll(tagName("input")).filter(_.underlying.getAttribute("value") == groupset.groupsetId).next.underlying
+	}
+
+	def submit() {
+		findAll(tagName("input")).filter(_.underlying.getAttribute("type") == "submit").next.underlying.click()
+	}
+}
+
+trait ModuleAndGroupSetList {
+	this: WebBrowser =>
+	private def getModuleInfo(moduleCode: String)(implicit webdriver:WebDriver): Option[WebElement] = {
+		val moduleInfoElements = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == moduleCode.toUpperCase)
+		if (moduleInfoElements.isEmpty) {
+			None
+		}	else {
+			Some(moduleInfoElements.next().underlying)
+		}
+	}
+
+	def getGroupsetInfo(moduleCode: String, groupsetName: String)(implicit webdriver:WebDriver): Option[GroupSetInfoSummarySection] = {
+		for (module <- getModuleInfo(moduleCode);
+				 groupSet <- module.findElements(By.className("item-info")).asScala.find(_.findElement(By.className("name")).getText.trim == groupsetName))
+		yield new GroupSetInfoSummarySection(groupSet, moduleCode)
+	}
+}

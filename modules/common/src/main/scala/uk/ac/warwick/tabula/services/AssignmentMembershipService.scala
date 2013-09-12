@@ -49,15 +49,15 @@ trait AssignmentMembershipService {
 
 	def getEnrolledAssignments(user: User): Seq[Assignment]
 
-	def countMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Int
-	def countMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Int
+	def countMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Int
+	def countMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Int
 	def countMembershipUsers(assignment: Assignment): Int
 
-	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): AssignmentMembershipInfo
-	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[User]
+	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssignmentMembershipInfo
+	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User]
 	def determineMembershipUsers(assignment: Assignment): Seq[User]
 
-	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Boolean
+	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean
 }
 
 
@@ -146,16 +146,17 @@ trait AssignmentMembershipMethods {
 
 	self: AssignmentMembershipService with UserLookupComponent =>
 
-	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): AssignmentMembershipInfo = {
+	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssignmentMembershipInfo = {
+		for (group <- upstream) assert(group.members.universityIds)
+
 		val sitsUsers =
 			upstream.flatMap { _.members.members }
 				.distinct
 				.par.map { id => id -> userLookup.getUserByWarwickUniId(id)
 			}.seq
 
-		def toUserMap(userIds: JList[String]) =  userIds.asScala map { id => id -> userLookup.getUserByUserId(id) }
-		def toUsers(group: UserGroup) = (toUserMap(group.includeUsers), toUserMap(group.excludeUsers))
-		val (includes, excludes) = others map toUsers getOrElse (Nil, Nil)
+		val includes = others.map(_.users.map(u => u.getUserId -> u)).getOrElse(Nil)
+		val excludes = others.map(_.excludes.map(u => u.getUserId -> u)).getOrElse(Nil)
 
 		// convert lists of Users to lists of MembershipItems that we can render neatly together.
 
@@ -169,7 +170,7 @@ trait AssignmentMembershipMethods {
 	/**
 	 * Returns just a list of User objects who are on this assessment group.
 	 */
-	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Seq[User] = {
+	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User] = {
 		determineMembership(upstream, others).items filter notExclude map toUser filter notNull
 	}
 
@@ -183,11 +184,11 @@ trait AssignmentMembershipMethods {
 	/**
 	 * May overestimate
 	 */
-	def countMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]) = {
+	def countMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]) = {
 		val sitsUsers = upstream.flatMap { _.members.members }.distinct
 
-		val includes = others map { _.includeUsers.asScala } getOrElse Nil
-		val excludes = others map { _.excludeUsers.asScala } getOrElse Nil
+		val includes = others map { _.users} getOrElse Nil
+		val excludes = others map { _.excludes } getOrElse Nil
 
 		((sitsUsers ++ includes) diff excludes).size
 	}
@@ -195,7 +196,7 @@ trait AssignmentMembershipMethods {
 	/**
 	 * Returns just a list of User objects who are on this assessment group.
 	 */
-	def countMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]) =
+	def countMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]) =
 		countMembership(upstream, others)
 
 	/**
@@ -204,9 +205,9 @@ trait AssignmentMembershipMethods {
 	def countMembershipUsers(assignment: Assignment): Int =
 		countMembershipUsers(assignment.upstreamAssessmentGroups, Option(assignment.members))
 
-	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UserGroup]): Boolean = {
-		if (others map {_.excludeUsers contains user.getUserId } getOrElse false) false
-		else if (others map { _.includeUsers contains user.getUserId } getOrElse false) true
+	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean = {
+		if (others map {_.excludes contains user } getOrElse false) false
+		else if (others map { _.users contains user } getOrElse false) true
 		else upstream exists {
 			_.members.staticIncludeUsers contains user.getWarwickId //Yes, definitely Uni ID when checking SITS group
 		}

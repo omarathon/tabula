@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.services.permissions.RoleService
 import uk.ac.warwick.tabula.roles.Role
 import scala.annotation.tailrec
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
+import uk.ac.warwick.tabula.permissions.SelectorPermission
 
 /**
  * Checks permissions.
@@ -58,8 +59,18 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 		def scopeMatches(permissionScope: PermissionsTarget, targetScope: PermissionsTarget): Boolean =
 			// The ID matches, or there exists a parent that matches (recursive)
 			permissionScope == targetScope || targetScope.permissionsParents.exists(scopeMatches(permissionScope, _))
+			
+		val matchingPermission = permission match {
+			case selectorPerm: SelectorPermission[_] => allPermissions.find {
+				case (otherSelectorPerm: SelectorPermission[_], target)
+					if (otherSelectorPerm.getClass == selectorPerm.getClass) && 
+						 (selectorPerm <= otherSelectorPerm) => true
+				case _ => false
+			} map { case (_, target) => target }
+			case _ => allPermissions.get(permission) 
+		}
 		
-		allPermissions.get(permission) match {
+		matchingPermission match {
 			case Some(permissionScope) => permissionScope match {
 				case Some(permissionScope) => if (scopeMatches(permissionScope, scope)) Allow else Continue
 				case None => 
@@ -116,7 +127,9 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 		
 	private def _can(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]): Boolean = transactional(readOnly=true) {
 		// Lazily go through the checks using a view, and try to get the first one that's Allow or Deny
-		val result: Response = cachedBy((user, permission, scope.orNull), checks.view.flatMap { _(user, permission, scope.orNull ) }.headOption)
+		val result: Response = cachedBy((user, permission, scope.orNull)) {
+			checks.view.flatMap { _(user, permission, scope.orNull ) }.headOption
+		}
 
 		result.map { canDo =>
 			if (debugEnabled) logger.debug("can " + user + " do " + permission + " on " + scope + "? " + (if (canDo) "Yes" else "NO"))

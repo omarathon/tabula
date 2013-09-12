@@ -1,16 +1,11 @@
 <#assign student = studentCourseDetails.student/>
-<#if relationshipType.dbValue=="supervisor">
-	<#assign agent_role= "supervisor" />
-	<#assign member_role= "supervisee" />
-<#elseif relationshipType.dbValue="personalTutor">
-	<#assign agent_role= "tutor" />
-	<#assign member_role= "tutee" />
-</#if>
+<#assign agent_role = relationshipType.agentRole />
+<#assign member_role = relationshipType.studentRole />
 
 <#assign heading>
 	<h2>Record a meeting</h2>
 	<h6>
-		<span class="muted">between ${agent_role}</span> ${agentName}
+		<span class="muted">between ${agent_role}</span> ${agentName!""}
 		<span class="muted">and ${member_role}</span> ${student.fullName}
 	</h6>
 </#assign>
@@ -26,7 +21,7 @@
 	${heading}
 </#if>
 <#if modal??>
-	<div class="modal-body"></div>
+	<div class="modal-body" id="meeting-record-modal-body"></div>
 	<div class="modal-footer">
 		<form class="double-submit-protection">
 			<span class="submit-buttons">
@@ -47,13 +42,34 @@
 		</@form.labelled_row>
 
 		<#if allRelationships?size gt 1>
-			<@form.labelled_row "relationship" "Tutor">
+			<#assign isCreatorAgent = creator.id == command.relationship.agent />
+			<#if !isCreatorAgent>
+				<#assign cssClass = "warning" />
+			</#if>
+
+			<@form.labelled_row "relationship" agent_role?cap_first cssClass!"">
 				<@f.select path="relationship" cssClass="input-large">
 					<@f.option disabled="true" selected="true" label="Please select one..." />
 					<@f.options items=allRelationships itemValue="agent" itemLabel="agentName" />
 				</@f.select>
+				<small class="help-block">
+					<#if isCreatorAgent>
+						You have been selected as ${agent_role} by default. Please change this if you're recording a colleague's meeting.
+					<#else>
+						The first ${agent_role} has been selected by default. Please check it's the correct one. <i id="supervisor-ok" class="icon-ok"></i>
+					</#if>
+				</small>
 			</@form.labelled_row>
 		</#if>
+
+		<script>
+			jQuery(function($) {
+				$("#supervisor-ok, #relationship").on("focus click keyup", function() {
+					$(this).closest(".warning").removeClass("warning");
+					$("#supervisor-ok").remove();
+				}).addClass("clickable-cursor");
+			});
+		</script>
 
 		<@form.labelled_row "meetingDate" "Date of meeting">
 			<div class="input-append">
@@ -114,7 +130,7 @@
 		<#else>
 			<#-- separate page, not modal -->
 			<div class="form-actions">
-				<#assign title>Submit record for approval by personal <#if isStudent>tutor<#else>tutee</#if></#assign>
+				<#assign title>Submit record for approval by <#if isStudent>${relationshipType.agentRole}<#else>${relationshipType.studentRole}</#if></#assign>
 				<button title="${title}" class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
 					Submit for approval
 				</button>

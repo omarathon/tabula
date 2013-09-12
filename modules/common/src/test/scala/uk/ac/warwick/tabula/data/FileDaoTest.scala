@@ -1,28 +1,27 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.AppContextTestBase
-import org.springframework.beans.factory.annotation.Autowired
-import org.junit.{Test, After}
+import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
+import org.junit.{Before, After}
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import java.io.{InputStream, ByteArrayInputStream, File}
 import org.joda.time.DateTime
-import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
-import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Repository
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.util.FileCopyUtils
 import org.joda.time.DateTimeConstants
 import org.springframework.transaction.annotation.Transactional
+import uk.ac.warwick.util.files.hash.FileHasher
+import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
 
 // scalastyle:off magic.number
 @Transactional
-class FileDaoTest extends AppContextTestBase {
+class FileDaoTest extends PersistenceTestBase with Mockito {
 
-	@Autowired var dao:FileDao =_
+	val dao = new FileDao
+
+	@Before def setup() {
+		dao.attachmentDir = createTemporaryDirectory()
+		dao.sessionFactory = sessionFactory
+		dao.fileHasher = new SHAFileHasher
+	}
 
 	@Test def deletingTemporaryFiles = withFakeTime(new DateTime(2012, DateTimeConstants.JANUARY, 15, 1, 0, 0, 0)) {
 		transactional { transactionStatus =>
@@ -32,6 +31,7 @@ class FileDaoTest extends AppContextTestBase {
 				val attachment = new FileAttachment
 				attachment.dateUploaded = new DateTime().plusHours(1).minusDays(i)
 				attachment.uploadedData = new ByteArrayInputStream("This is the best file ever".getBytes)
+				attachment.fileDao = dao
 				dao.saveTemporary(attachment)
 			}
 		}
@@ -40,7 +40,7 @@ class FileDaoTest extends AppContextTestBase {
 		}
 	}
 	
-	@After def bangtidy { transactional { tx => 
+	@After def bangtidy() { transactional { tx =>
 		session.createQuery("delete from FileAttachment").executeUpdate() 
 	}}
 	
@@ -51,6 +51,7 @@ class FileDaoTest extends AppContextTestBase {
 			val attachment = new FileAttachment
 			attachment.dateUploaded = new DateTime(2013, DateTimeConstants.FEBRUARY, i, 1, 0, 0, 0)
 			attachment.uploadedData = new ByteArrayInputStream("This is the best file ever".getBytes)
+			attachment.fileDao = dao
 			dao.savePermanent(attachment)
 			
 			attachment.hash should be ("f95a27f06df98ba26182c22e277af960c0be9be6")
@@ -112,8 +113,10 @@ class FileDaoTest extends AppContextTestBase {
 			val attachment = new FileAttachment("file.txt")
 			val string = "Doe, a deer, a female deer"
 			val bytes = string.getBytes("UTF-8")
+			attachment.fileDao = dao
 			attachment.uploadedDataLength = bytes.length
 			attachment.uploadedData = new ByteArrayInputStream(bytes)
+
 			dao.saveTemporary(attachment)
 
 			attachment.id should not be (null)
@@ -124,6 +127,7 @@ class FileDaoTest extends AppContextTestBase {
 			dao.getFileById(attachment.id) match {
 				case Some(loadedAttachment:FileAttachment) => {
 					//val blob = loadedAttachment.data
+					loadedAttachment.fileDao = dao
 					val data = readStream(loadedAttachment.dataStream, "UTF-8")
 					data should be (string)
 				}

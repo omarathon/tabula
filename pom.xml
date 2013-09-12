@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>40</version>
+	<version>41</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -68,7 +68,8 @@
 	<modules>
 		<module>modules/common</module>
 		<module>modules/home</module>
-    <module>modules/admin</module>
+		<module>modules/admin</module>
+		<module>modules/attendance</module>
 		<module>modules/coursework</module>
 		<module>modules/profiles</module>
 		<module>modules/groups</module>
@@ -88,6 +89,44 @@
 			<modules>
 				<module>modules/functional-test</module>
 			</modules>
+		</profile>
+
+		<!-- experimental version of functional-test using scalatest runner instead of junit bridge -->
+		<profile>
+			<id>functional-test-scalatest</id>
+			<modules>
+				<module>modules/functional-test</module>
+			</modules>
+
+			<build>
+				<defaultGoal>test</defaultGoal>
+				<plugins>
+					<plugin>
+						<groupId>org.scalatest</groupId>
+						<artifactId>maven-scalatest-plugin</artifactId>
+						<version>1.0-SNAPSHOT</version>
+						<configuration>
+							<reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+							<junitxml>.</junitxml>
+						</configuration>
+						<executions>
+							<execution>
+								<id>test</id>
+								<goals>
+									<goal>test</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<skipTests>true</skipTests>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
 		</profile>
 
 		<profile>
@@ -218,7 +257,7 @@
                 <configuration>
                     <prefix>git</prefix>
                     <dateFormat>dd.MM.yyyy '@' HH:mm:ss z</dateFormat>
-                    <verbose>true</verbose>
+                    <verbose>false</verbose>
                     <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
                     <generateGitPropertiesFile>false</generateGitPropertiesFile>
                     <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
@@ -605,7 +644,7 @@
 				<plugin>
 					<groupId>org.scalastyle</groupId>
 					<artifactId>scalastyle-maven-plugin</artifactId>
-					<version>0.2.0</version>
+					<version>0.3.2</version>
 					<configuration>
 						<!-- TAB-697 -->
 						<skip>true</skip>
@@ -613,7 +652,7 @@
 						<verbose>false</verbose>
 						<failOnViolation>true</failOnViolation>
 						<failOnWarning>false</failOnWarning>
-            <includeTestSourceDirectory>false</includeTestSourceDirectory>
+						<includeTestSourceDirectory>false</includeTestSourceDirectory>
 						<sourceDirectory>${basedir}/src/main/scala</sourceDirectory>
 						<testSourceDirectory>${basedir}/src/test/scala</testSourceDirectory>
 						<configLocation>${tabula.basedir}/config/scalastyle_config.xml</configLocation>
@@ -1022,6 +1061,13 @@
 			<dependency>
 				<groupId>uk.ac.warwick.tabula</groupId>
 				<artifactId>home</artifactId>
+				<version>${project.version}</version>
+				<type>jar</type>
+				<classifier>jar</classifier>
+			</dependency>
+			<dependency>
+				<groupId>uk.ac.warwick.tabula</groupId>
+				<artifactId>attendance</artifactId>
 				<version>${project.version}</version>
 				<type>jar</type>
 				<classifier>jar</classifier>

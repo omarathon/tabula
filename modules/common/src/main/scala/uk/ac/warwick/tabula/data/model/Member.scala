@@ -75,7 +75,6 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 		this.universityId = id
 	}
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var lastUpdatedDate = DateTime.now
 
 	def fullName: Option[String] = {
@@ -158,17 +157,16 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	def isStaff = (userType == MemberUserType.Staff)
 	def isStudent = (userType == MemberUserType.Student)
-	def isAPersonalTutor = {
+	def isRelationshipAgent(relationshipType: StudentRelationshipType) = {
 		(userType == MemberUserType.Staff &&
 				!relationshipService.listStudentRelationshipsWithMember(
-						RelationshipType.PersonalTutor, this
+						relationshipType, this
 			).isEmpty)
 	}
-	def isASupervisor = (userType == MemberUserType.Staff && !relationshipService.listStudentRelationshipsWithMember(RelationshipType.Supervisor, this).isEmpty)
-	def hasAPersonalTutor = false
 
-	def hasSupervisor = false
+	def hasRelationship(relationshipType: StudentRelationshipType) = false
 
+	def hasModuleRegistrations = false
 
 	def mostSignificantCourseDetails: Option[StudentCourseDetails] = None
 
@@ -181,7 +179,7 @@ class StudentMember extends Member with StudentProperties {
 	this.userType = MemberUserType.Student
 
 	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@Restricted(Array("Profiles.Read.StudentCourseDetails"))
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
 
 	def this(id: String) = {
@@ -203,19 +201,17 @@ class StudentMember extends Member with StudentProperties {
 		).distinct
 	}
 
-	override def mostSignificantCourseDetails = {
+	override def mostSignificantCourseDetails: Option[StudentCourseDetails] = {
 		if (studentCourseDetails == null || studentCourseDetails.isEmpty) None
-		else {
-			val mostSignifCourse = studentCourseDetails.asScala.filter {
-				details => details.mostSignificant != null && details.mostSignificant
-			}
-			mostSignifCourse.headOption
-		}
+		else studentCourseDetails.asScala.find { details => details.mostSignificant != null && details.mostSignificant }
 	}
 
 	override def hasCurrentEnrolment: Boolean = studentCourseDetails.asScala.exists(_.hasCurrentEnrolment)
-	override def hasAPersonalTutor: Boolean = studentCourseDetails.asScala.exists(_.hasAPersonalTutor)
-	override def hasSupervisor: Boolean = studentCourseDetails.asScala.exists(_.hasSupervisor)
+
+	override def hasRelationship(relationshipType: StudentRelationshipType): Boolean =
+		studentCourseDetails.asScala.exists(_.hasRelationship(relationshipType))
+
+	override def hasModuleRegistrations = studentCourseDetails.asScala.exists(_.hasModuleRegistrations)
 
 	override def routeName: String = mostSignificantCourseDetails match {
 		case Some(details) =>
@@ -290,7 +286,6 @@ trait MemberProperties {
 	var userType: MemberUserType = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.GenderUserType")
-	@Restricted(Array("Profiles.Read.Gender"))
 	var gender: Gender = _
 
 	@OneToOne(fetch = FetchType.LAZY, cascade=Array(ALL))
@@ -299,7 +294,6 @@ trait MemberProperties {
 
 	var inUseFlag: String = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 	var inactivationDate: LocalDate = _
 
 	var groupName: String = _
@@ -308,7 +302,6 @@ trait MemberProperties {
 	@JoinColumn(name = "home_department_id")
 	var homeDepartment: Department = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalDate")
 	@Restricted(Array("Profiles.Read.DateOfBirth"))
 	var dateOfBirth: LocalDate = _
 

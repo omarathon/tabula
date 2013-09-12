@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>40</version>
+		<version>41</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -71,6 +71,12 @@
 									<artifactId>groups</artifactId>
 									<bundleFileName>groups.war</bundleFileName>
 									<contextRoot>/groups</contextRoot>
+								</webModule>
+								<webModule>
+									<groupId>uk.ac.warwick.tabula</groupId>
+									<artifactId>attendance</artifactId>
+									<bundleFileName>attendance.war</bundleFileName>
+									<contextRoot>/attendance</contextRoot>
 								</webModule>
 							</modules>
 						</configuration>
@@ -143,7 +149,20 @@
 					<artifactId>groups</artifactId>
 					<version>${project.version}</version>
 					<type>pom</type>
-				</dependency>				
+				</dependency>
+
+				<dependency>
+					<groupId>uk.ac.warwick.tabula</groupId>
+					<artifactId>attendance</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+				<dependency>
+					<groupId>uk.ac.warwick.tabula</groupId>
+					<artifactId>attendance</artifactId>
+					<version>${project.version}</version>
+					<type>pom</type>
+				</dependency>
 			</dependencies>
 		</profile>
 	</profiles>

@@ -17,43 +17,41 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro photo profile><@url page="/view/photo/${profile.universityId}.jpg"/></#macro>
 <#macro relationshipPhoto profile relationship><@url page="/view/photo/${relationship.agent}.jpg"/></#macro>
 
-<#macro tutees><@url page="/tutees" /></#macro>
-<#macro supervisees><@url page="/supervisees" /></#macro>
-<#macro tutors department><@url page="/department/${department.code}/tutors" /></#macro>
-<#macro tutors_missing department><@url page="/department/${department.code}/tutors/missing" /></#macro>
+<#macro relationship_students relationshipType><@url page="/${relationshipType.urlPart}/students" /></#macro>
+<#macro relationship_agents department relationshipType><@url page="/department/${department.code}/${relationshipType.urlPart}" /></#macro>
+<#macro relationship_missing department relationshipType><@url page="/department/${department.code}/${relationshipType.urlPart}/missing" /></#macro>
+<#macro relationship_allocate department relationshipType><@url page="/department/${department.code}/${relationshipType.urlPart}/allocate" /></#macro>
+<#macro relationship_template department relationshipType><@url page="/department/${department.code}/${relationshipType.urlPart}/template" /></#macro>
 
-<#macro tutor_upload department><@url page="/department/${department.code}/tutors/upload" /></#macro>
-<#macro tutor_template department><@url page="/department/${department.code}/tutors/template" /></#macro>
-
-<#macro tutor_edit scjCode currentTutor>
-	<@url page="/tutor/${scjCode}/edit?currentTutor=${currentTutor.universityId}" />
+<#macro relationship_edit relationshipType scjCode currentAgent>
+	<@url page="/${relationshipType.urlPart}/${scjCode}/edit?currentAgent=${currentAgent.universityId}" />
 </#macro>
 
-<#macro tutor_edit_set scjCode newTutor>
-	<@url page="/tutor/${scjCode}/edit?tutor=${newTutor.universityId}" />
+<#macro relationship_edit_set relationshipType scjCode newAgent>
+	<@url page="/${relationshipType.urlPart}/${scjCode}/edit?agent=${newAgent.universityId}" />
 </#macro>
 
-<#macro tutor_edit_replace scjCode currentTutor newTutor>
-	<@url page="/tutor/${scjCode}/edit?currentTutor=${currentTutor.universityId}&tutor=${newTutor.universityId}" />
+<#macro relationship_edit_replace relationshipType scjCode currentAgent newAgent>
+	<@url page="/${relationshipType.urlPart}/${scjCode}/edit?currentAgent=${currentAgent.universityId}&agent=${newAgent.universityId}" />
 </#macro>
 
-<#macro tutor_edit_no_tutor scjCode>
-	<@url page="/tutor/${scjCode}/add" />
+<#macro relationship_edit_no_agent relationshipType scjCode>
+	<@url page="/${relationshipType.urlPart}/${scjCode}/add" />
 </#macro>
 
-<#macro meeting_record scjCode role>
-	<@url page="/${role}/meeting/${scjCode}/create" />
+<#macro meeting_record scjCode relationshipType>
+	<@url page="/${relationshipType.urlPart}/meeting/${scjCode}/create" />
 </#macro>
-<#macro edit_meeting_record scjCode meeting_record role>
-	<@url page="/${role}/meeting/${scjCode}/edit/${meeting_record.id}" />
+<#macro edit_meeting_record scjCode meeting_record>
+	<@url page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${scjCode}/edit/${meeting_record.id}" />
 </#macro>
 
-<#macro delete_meeting_record meeting_record role><@url page="/${role}/meeting/${meeting_record.id}/delete" /></#macro>
-<#macro restore_meeting_record meeting_record role><@url page="/${role}/meeting/${meeting_record.id}/restore" /></#macro>
-<#macro purge_meeting_record meeting_record role><@url page="/${role}/meeting/${meeting_record.id}/purge" /></#macro>
+<#macro delete_meeting_record meeting_record><@url page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/delete" /></#macro>
+<#macro restore_meeting_record meeting_record><@url page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/restore" /></#macro>
+<#macro purge_meeting_record meeting_record><@url page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/purge" /></#macro>
+<#macro save_meeting_approval meeting_record><@url page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/approval" /></#macro>
 
-
-<#macro save_meeting_approval meeting_record role><@url page="/${role}/meeting/${meeting_record.id}/approval" /></#macro>
+<#macro relationship_search><@url page="/relationships/agents/search" /></#macro>
+<#macro relationship_search_json><@url page="/relationships/agents/search.json" /></#macro>
 
 <#macro smallgroup group><@url page="/groups/${group.id}/view" /></#macro>
-

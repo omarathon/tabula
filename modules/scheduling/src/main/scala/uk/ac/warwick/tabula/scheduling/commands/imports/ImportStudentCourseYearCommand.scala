@@ -1,48 +1,27 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.ResultSet
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
+import ImportMemberHelpers.toAcademicYear
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.MemberDao
-import uk.ac.warwick.tabula.data.SitsStatusDao
 import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.AlumniProperties
-import uk.ac.warwick.tabula.data.model.MemberProperties
+import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.data.model.OtherMember
-import uk.ac.warwick.tabula.data.model.StaffProperties
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
 import uk.ac.warwick.tabula.data.model.StudentCourseYearProperties
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.StudentProperties
-import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
-import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
-import uk.ac.warwick.tabula.data.model.StudentCourseYearProperties
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.AcademicYear
-import org.hibernate.exception.ConstraintViolationException
-
+import uk.ac.warwick.tabula.data.model.ModuleRegistrationStatus
 
 class ImportStudentCourseYearCommand(resultSet: ResultSet)
 	extends Command[StudentCourseYearDetails] with Logging with Daoisms
@@ -60,6 +39,7 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 	var enrolmentStatusCode: String = _
 	var modeOfAttendanceCode: String = _
 	var academicYearString: String = _
+	var moduleRegistrationStatusCode: String = _
 
 	// This needs to be assigned before apply is called.
 	// (can't be in the constructor because it's not yet created then)
@@ -73,6 +53,7 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 	this.enrolmentStatusCode = rs.getString("enrolment_status_code")
 	this.modeOfAttendanceCode = rs.getString("mode_of_attendance_code")
 	this.academicYearString = rs.getString("sce_academic_year")
+	this.moduleRegistrationStatusCode = rs.getString("mod_reg_status")
 
 	override def applyInternal(): StudentCourseYearDetails = transactional() {
 		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKey(
@@ -89,6 +70,8 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 		val commandBean = new BeanWrapperImpl(this)
 		val studentCourseYearDetailsBean = new BeanWrapperImpl(studentCourseYearDetails)
 
+		moduleRegistrationStatus = ModuleRegistrationStatus.fromCode(moduleRegistrationStatusCode)
+
 		val hasChanged = copyStudentCourseYearProperties(commandBean, studentCourseYearDetailsBean)
 
 		if (isTransient || hasChanged) {
@@ -103,20 +86,19 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 
 	private val basicStudentCourseYearProperties = Set(
 		"yearOfStudy"
-		//,
-		//"fundingSource",
-		//"modeOfAttendance"
 	)
 
 	private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studentCourseYearBean: BeanWrapper) = {
 		copyBasicProperties(basicStudentCourseYearProperties, commandBean, studentCourseYearBean) |
 		copyObjectProperty("enrolmentStatus", enrolmentStatusCode, studentCourseYearBean, toSitsStatus(enrolmentStatusCode)) |
-		copyModeOfAttendance("modeOfAttendance", modeOfAttendanceCode, studentCourseYearBean)
+		copyModeOfAttendance(modeOfAttendanceCode, studentCourseYearBean) |
+		copyModuleRegistrationStatus(moduleRegistrationStatusCode, studentCourseYearBean)|
 		copyAcademicYear("academicYear", academicYearString, studentCourseYearBean)
 	}
 
-	private def copyModeOfAttendance(property: String, code: String, memberBean: BeanWrapper) = {
-		val oldValue = memberBean.getPropertyValue(property) match {
+	private def copyModeOfAttendance(code: String, studentCourseYearBean: BeanWrapper) = {
+		val property = "modeOfAttendance"
+		val oldValue = studentCourseYearBean.getPropertyValue(property) match {
 			case null => null
 			case value: ModeOfAttendance => value
 		}
@@ -124,18 +106,35 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 		if (oldValue == null && code == null) false
 		else if (oldValue == null) {
 			// From no MOA to having an MOA
-			memberBean.setPropertyValue(property, toModeOfAttendance(code))
+			studentCourseYearBean.setPropertyValue(property, toModeOfAttendance(code))
 			true
 		} else if (code == null) {
 			// User had an SPR status code but now doesn't
-			memberBean.setPropertyValue(property, null)
+			studentCourseYearBean.setPropertyValue(property, null)
 			true
 		} else if (oldValue.code == code.toLowerCase) {
 			false
 		}	else {
-			memberBean.setPropertyValue(property, toModeOfAttendance(code))
+			studentCourseYearBean.setPropertyValue(property, toModeOfAttendance(code))
 			true
 		}
+	}
+
+	def copyModuleRegistrationStatus(code: String, destinationBean: BeanWrapper) = {
+		val property = "moduleRegistrationStatus"
+		val oldValue = destinationBean.getPropertyValue(property)
+		val newValue = ModuleRegistrationStatus.fromCode(code)
+
+		logger.debug("Property " + property + ": " + oldValue + " -> " + newValue)
+
+		// null == null in Scala so this is safe for unset values
+		if (oldValue != newValue) {
+			logger.debug("Detected property change for " + property + " (" + oldValue + " -> " + newValue + "); setting value")
+
+			destinationBean.setPropertyValue(property, newValue)
+			true
+		}
+		else false
 	}
 
 	private def copyAcademicYear(property: String, acYearString: String, memberBean: BeanWrapper) = {

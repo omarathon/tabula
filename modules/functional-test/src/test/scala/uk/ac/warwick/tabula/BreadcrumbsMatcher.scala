@@ -11,6 +11,8 @@ trait BreadcrumbsMatcher extends ShouldMatchers {
 	def breadCrumbsMatch(crumbsToMatch:Seq[String])(implicit webDriver:WebDriver){
 		val crumbs = findAll(cssSelector("ul#primary-navigation li")).toSeq
 		crumbs.size should be (crumbsToMatch.size)
-		crumbs.map(e=>e.underlying.findElement(By.tagName("a")).getText) should be (crumbsToMatch)
+		val crumbText = crumbs.map(e=>e.underlying.findElement(By.tagName("a")).getText)
+		val x = crumbText.mkString(",")
+		crumbText should be (crumbsToMatch)
 	}
 }

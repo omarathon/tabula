@@ -4,8 +4,9 @@
 
 -->
 <#escape x as x?html>
-	<@form.labelled_row "members" "Students" "assignmentEnrolment">
-		<fieldset id="assignmentEnrolmentFields">
+
+<fieldset id="assignmentEnrolmentFields">
+	<@form.row "members" "assignmentEnrolment">
 
 		<#list command.upstreamGroups as item>
 			<@f.hidden path="upstreamGroups[${item_index}]" cssClass="upstreamGroups" />
@@ -20,12 +21,12 @@
 		<#assign excludeIcon><span class="use-tooltip" title="Removed manually, overriding SITS" data-placement="right"><i class="icon-ban-circle"></i></span><span class="hide">Removed</span></#assign>
 		<#assign sitsIcon><span class="use-tooltip" title="Automatically linked from SITS" data-placement="right"><i class="icon-list-alt"></i></span><span class="hide">SITS</span></#assign>
 
-		<#assign assignmentMembership = command.assignmentMembership />
-		<#assign hasMembers = assignmentMembership.totalCount gt 0 />
+		<#assign membershipInfo = command.membershipInfo />
+		<#assign hasMembers = membershipInfo.totalCount gt 0 />
 
 		<#macro what_is_this>
 			<#assign popoverText>
-				<p>You can link to an assignment in SITS and the list of students will be updated automatically from there.
+				<p>You can link to an assessment component in SITS and the list of students will be updated automatically from there.
 				If you are not using SITS you can manually add students by ITS usercode or university number.</p>
 
 				<p>It is also possible to tweak the list even when using SITS data, but this is only to be used
@@ -43,19 +44,20 @@
 		</#macro>
 
 		<details>
-			<summary>
+			<summary class="collapsible large-chevron">
+				<span class="legend" >Students <small>Select which students should be enrolled on this assignment</small> </span>
 				<#-- enumerate current state -->
 				<#if linkedUpstreamAssessmentGroups?has_content>
 					<span class="uneditable-value">
-						${assignmentMembership.totalCount} enrolled
-						<#if assignmentMembership.excludeCount gt 0 || assignmentMembership.includeCount gt 0>
-							<span class="muted">(${assignmentMembership.sitsCount} from SITS<#if assignmentMembership.usedExcludeCount gt 0> after ${assignmentMembership.usedExcludeCount} removed manually</#if><#if assignmentMembership.usedIncludeCount gt 0>, plus ${assignmentMembership.usedIncludeCount} added manually</#if>)</span>
+						${membershipInfo.totalCount} enrolled
+						<#if membershipInfo.excludeCount gt 0 || membershipInfo.includeCount gt 0>
+							<span class="muted">(${membershipInfo.sitsCount} from SITS<#if membershipInfo.usedExcludeCount gt 0> after ${membershipInfo.usedExcludeCount} removed manually</#if><#if membershipInfo.usedIncludeCount gt 0>, plus ${membershipInfo.usedIncludeCount} added manually</#if>)</span>
 						<#else>
 							<span class="muted">from SITS</span>
 						</#if>
 					<@what_is_this /></span>
 				<#elseif hasMembers>
-					<span class="uneditable-value">${assignmentMembership.includeCount} manually enrolled
+					<span class="uneditable-value">${membershipInfo.includeCount} manually enrolled
 					<@what_is_this /></span>
 				<#else>
 					<span class="uneditable-value">No students enrolled
@@ -74,7 +76,6 @@
 				<#else>
 					<a class="btn use-tooltip disabled" title="No assignments are recorded for this module in SITS. Add them there if you want to create a parallel link in Tabula.">No SITS link available</a>
 				</#if>
-				</a>
 
 				<a class="btn use-tooltip disabled show-adder"
 						<#if availableUpstreamGroups??>title="This will only enrol a student for this assignment in Tabula. If SITS data appears to be wrong then it's best to have it fixed there."</#if>
@@ -110,7 +111,7 @@
 						</thead>
 
 						<tbody>
-							<#list assignmentMembership.items as item>
+							<#list membershipInfo.items as item>
 								<#assign _u = item.user>
 
 								<tr class="membership-item item-type-${item.itemTypeString}"> <#-- item-type-(sits|include|exclude) -->
@@ -219,8 +220,8 @@
 
 			<#if command.availableUpstreamGroups?has_content>
 				<div class="modal-body">
-					<p>Add students by linking this assignment to one or more of the following SITS assignments for
-					${command.module.code?upper_case} which have assessment groups for ${command.academicYear.label}.</p>
+					<p>Add students by linking this assignment to one or more of the following SITS assessment components for
+					${command.module.code?upper_case} in ${command.academicYear.label}.</p>
 
 					<table id="sits-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-orangeLight">
 						<thead>
@@ -229,7 +230,7 @@
 								<th class="sortable">Name</th>
 								<th class="sortable">Members</th>
 								<th class="sortable">CATS</th>
-								<th class="sortable">Cohort</th>
+								<th class="sortable">Occurrence</th>
 								<th class="sortable">Sequence</th>
 							</tr>
 						</thead>
@@ -257,8 +258,8 @@
 				</div>
 			</#if>
 		</div>
-		</fieldset>
-	</@form.labelled_row>
+	</@form.row>
+</fieldset>
 
 	<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript">
@@ -275,13 +276,13 @@
 			$enrolment.tabulaPrepareSpinners();
 			$enrolment.find('summary:not([role="button"])').closest('details').details();
 
-			// TODO this is cribbed out of scripts.js - re-use would be better			
+			// TODO this is cribbed out of scripts.js - re-use would be better
 			$enrolment.find('.use-popover').each(function() {
 				if ($(this).attr('data-title')) {
 					$(this).attr('data-original-title', $(this).attr('data-title'));
 				}
 			});
-	
+
 			$enrolment.find('.use-popover').popover({
 				trigger: 'click',
 				container: '#container',
@@ -319,6 +320,31 @@
 		initEnrolment();
 
 		var $pendingAlert = $('<p class="alert alert-warning hide"><i class="icon-warning-sign"></i> Your changes will not be recorded until you save this assignment.	<input type="submit" value="Save" class="btn btn-primary btn-mini update-only"></p>');
+
+		<#-- TAB-830 expand submission details when collectSubmissions checkbox checked -->
+		$('input[name=collectSubmissions]').on('change click keypress',function(e) {
+
+			e.stopPropagation();
+
+			var collectSubmissions = $('input[name=collectSubmissions]').is(':checked');
+
+			if (collectSubmissions) {
+				$("html.no-details details.submissions:not(.open) summary").click();
+				$("html.details details.submissions:not([open]) summary").click();
+
+			}  else {
+				$("html.no-details details.submissions.open summary").click();
+				$("html.details details.submissions[open] summary").click();
+			}
+		});
+
+		<#-- if <summary> supported, disable defaults for this summary when a contained label element is clicked -->
+		$("summary").on("click", "label", function(e){
+			e.stopPropagation();
+			e.preventDefault();
+			$('#collectSubmissions').attr('checked', !$('#collectSubmissions').attr('checked') );
+			$('input[name=collectSubmissions]').triggerHandler("change");
+		});
 
 		<#-- manage check-all state -->
 		var updateCheckboxes = function($table) {
@@ -365,7 +391,7 @@
 		$enrolment.on('click', '.sits-picker .btn', function(e) {
 			e.preventDefault();
 			var $m = $(this).closest('.modal');
-			if ($(this).is(':not(.disabled)')) {			
+			if ($(this).is(':not(.disabled)')) {
 				$('.sits-picker .btn').addClass('disabled').prop('disabled', 'disabled');
 
 				<#-- get current list of values and remove and/or add changes -->
@@ -385,7 +411,7 @@
 
 				$.ajax({
 					type: 'POST',
-					url: '<@routes.assignmentenrolment module />',
+					url: '<@routes.enrolment module />',
 					data: $('#assignmentEnrolmentFields').find('input, textarea, select').serialize(),
 					error: function() {
 						$m.modal('hide');
@@ -402,14 +428,14 @@
 		});
 
 		<#-- adder click handler -->
-		$enrolment.on('click', '.adder .btn', function(e) {		
+		$enrolment.on('click', '.adder .btn', function(e) {
 			e.preventDefault();
-			var $m = $(this).closest('.modal');		
-			if ($(this).is(':not(.disabled)')) {	
+			var $m = $(this).closest('.modal');
+			if ($(this).is(':not(.disabled)')) {
 				$(this).addClass('disabled').prop('disabled', 'disabled');
 				$.ajax({
 					type: 'POST',
-					url: '<@routes.assignmentenrolment module />',
+					url: '<@routes.enrolment module />',
 					data: $('#assignmentEnrolmentFields').find('input, textarea, select').serialize(),
 					error: function() {
 						$m.modal('hide');
@@ -431,6 +457,8 @@
 			var empty = ($.trim($(this).val()) == "");
 			$('.add-students').toggleClass('disabled', empty);
 		});
+
+
 
 		<#-- show modals -->
 		$enrolment.on('click', '.show-sits-picker', function() {

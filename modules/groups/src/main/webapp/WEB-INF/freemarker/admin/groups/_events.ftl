@@ -95,13 +95,14 @@
 									<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
 								</#if>
 							</h3>
-							<@form.label checkbox=true>
-							<@f.checkbox path="maxGroupSizeEnabled" />
-							Set maximum group size:
-							</@form.label>
+							<#assign unlimited = !((smallGroupSet.defaultMaxGroupSizeEnabled)!false)>
 
-							<@f.input path="maxGroupSize" type="number" min="0" max="100" cssClass="input-small" />
-
+							<span class="groupSizeUnlimited groupSizeDetails" <#if !unlimited>style="display:none;"</#if>>
+								Unlimited group size
+							</span>
+							<span class="groupSizeLimited groupSizeDetails" <#if unlimited>style="display:none;"</#if>>
+								Maximum group size: <@f.input path="maxGroupSize" type="number" min="0" max="100" cssClass="input-small" />
+							</span>
 						</div>
 						<div class="span2">
 							<#if !deleteGroup>
@@ -119,52 +120,54 @@
 							</#if>
 						</div>
 					</div>
-					
+
 					<div class="row-fluid">
 						<div class="span12">
 							<ul class="events unstyled">
 								<#list group.events as event>
-									<@spring.nestedPath path="events[${event_index}]">
-										<li>
-											<@f.hidden path="delete" id="group${group_index}_event${event_index}_delete" />
-										
-											<#-- TODO display tutors -->
-										
-											<#-- TODO this should be a formatter, the current formatter expects a full fat event -->
-											<#if event.weekRanges?size gt 0 && event.day??>
-												<#noescape>${weekRangesFormatter(event.weekRanges, event.day, academicYear, module.department)}</#noescape>,
-											<#elseif event.weekRanges?size gt 0>
-												[no day of week selected]
-											<#else>
-												[no dates selected]
-											</#if>
+									<#if !((event.isEmpty())!false) || event_has_next>
+										<@spring.nestedPath path="events[${event_index}]">
+											<li>
+												<@f.hidden path="delete" id="group${group_index}_event${event_index}_delete" />
 											
-											${(event.day.shortName)!"[no day selected]"} 
-											<#if event.startTime??><@fmt.time event.startTime /><#else>[no start time]</#if> 
-											- 
-											<#if event.endTime??><@fmt.time event.endTime /><#else>[no end time]</#if>,
-											${event.location!"[no location]"}
+												<#-- TODO display tutors -->
 											
-											<@modal group_index event_index>
-												Edit event for ${group.name!""}
-											</@modal>
-											
-											<#if !deleteGroup>
-												<div class="buttons pull-right">
-													<@button group_index event_index "btn-mini btn-info">
-														Edit
-													</@button>
+												<#-- TODO this should be a formatter, the current formatter expects a full fat event -->
+												<#if event.weekRanges?size gt 0 && event.day??>
+													<#noescape>${weekRangesFormatter(event.weekRanges, event.day, academicYear, module.department)}</#noescape>,
+												<#elseif event.weekRanges?size gt 0>
+													[no day of week selected]
+												<#else>
+													[no dates selected]
+												</#if>
 												
-													<button type="button" class="btn btn-danger btn-mini" data-toggle="delete" data-value="true" data-target="#group${group_index}_event${event_index}_delete">
-														<i class="icon-remove"></i>
-													</button>
-													<button type="button" class="btn btn-info btn-mini" data-toggle="delete" data-value="false" data-target="#group${group_index}_event${event_index}_delete">
-														<i class="icon-undo"></i>
-													</button>
-												</div>
-											</#if>
-										</li>
-									</@spring.nestedPath>
+												${(event.day.shortName)!"[no day selected]"} 
+												<#if event.startTime??><@fmt.time event.startTime /><#else>[no start time]</#if> 
+												- 
+												<#if event.endTime??><@fmt.time event.endTime /><#else>[no end time]</#if>,
+												${event.location!"[no location]"}
+												
+												<@modal group_index event_index>
+													Edit event for ${group.name!""}
+												</@modal>
+												
+												<#if !deleteGroup>
+													<div class="buttons pull-right">
+														<@button group_index event_index "btn-mini btn-info">
+															Edit
+														</@button>
+													
+														<button type="button" class="btn btn-danger btn-mini" data-toggle="delete" data-value="true" data-target="#group${group_index}_event${event_index}_delete">
+															<i class="icon-remove"></i>
+														</button>
+														<button type="button" class="btn btn-info btn-mini" data-toggle="delete" data-value="false" data-target="#group${group_index}_event${event_index}_delete">
+															<i class="icon-undo"></i>
+														</button>
+													</div>
+												</#if>
+											</li>
+										</@spring.nestedPath>
+									</#if>
 								</#list>
 							</ul>
 						</div>

@@ -23,7 +23,7 @@ trait RoleProvider {
 }
 
 trait ScopelessRoleProvider extends RoleProvider with RequestLevelCaching[CurrentUser, Stream[Role]] {
-	final def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = cachedBy(user, getRolesFor(user))
+	final def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = cachedBy(user) { getRolesFor(user) }
 	
 	def getRolesFor(user: CurrentUser): Stream[Role]
 }
@@ -40,7 +40,7 @@ trait PermissionsProvider {
 }
 
 trait ScopelessPermissionsProvider extends PermissionsProvider with RequestLevelCaching[CurrentUser, Stream[PermissionDefinition]] {
-	final def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget) = cachedBy(user, getPermissionsFor(user))
+	final def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget) = cachedBy(user) { getPermissionsFor(user) }
 	
 	def getPermissionsFor(user: CurrentUser): Stream[PermissionDefinition]
 }

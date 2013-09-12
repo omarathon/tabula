@@ -111,7 +111,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
     val modifiedGroupA = groupA.withEvents(Seq(event)).build
     command.set.groups = JArrayList(modifiedGroupA, groupB)
 
-    val notifications = command.emit
+    val notifications = command.emit(command.set)
     notifications.size should be(2)
 
     notifications.exists(_.recipients == Seq(user1)) should be(true)
@@ -128,7 +128,7 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
     val modifiedGroupA = groupA.withEvents(Seq(event)).build
     cmd.set.groups = JArrayList(modifiedGroupA, groupB)
 
-    cmd.emit should be(Nil)
+    cmd.emit(cmd.set) should be(Nil)
   }}
 
   @Test
@@ -150,15 +150,16 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
 
   }}
 
-  @Test
-  def detectsAllocationChangesForTutors(){new Fixture {
+	@Test
+	def detectsAllocationChangesForTutors() {new Fixture {
 
-    val group = command.set.groups.asScala.find(_.name == "groupA").get
-    group.students.addUser("test")
-    val tutor =  group.events.asScala.head.tutors.users.head
-    command.hasAffectedTutorsEvents(tutor) should be(true)
-
-  }}
+			val group = command.set.groups.asScala.find(_.name == "groupA").get
+			val test: User = new User("test")
+			test.setWarwickId("123")
+			group.students.add(test)
+			val tutor = group.events.asScala.head.tutors.users.head
+			command.hasAffectedTutorsEvents(tutor) should be(true)
+	}}
 
 
   class StubCommand(val set: SmallGroupSet, val apparentUser: User, var userLookup: UserLookupService)

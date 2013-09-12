@@ -1,46 +1,29 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConverters.asScalaBufferConverter
 
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.FilterDefs
-import org.hibernate.annotations.Filters
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
-import org.junit.After
 import org.junit.Before
-import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
 
-import javax.persistence.DiscriminatorColumn
-import javax.persistence.DiscriminatorValue
-import javax.persistence.Entity
-import javax.persistence.Inheritance
-import javax.persistence.NamedQueries
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase, Fixtures, Mockito}
+import uk.ac.warwick.tabula.data.model.{StudentMember, StudentCourseDetails, Route, Member}
+import uk.ac.warwick.tabula.data._
+import scala.Some
 
 // scalastyle:off magic.number
-class ProfileServiceTest extends AppContextTestBase with Mockito {
+class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
-	@Autowired var relationshipService:RelationshipServiceImpl = _
-	@Autowired var profileService:ProfileServiceImpl = _
+	var profileService: ProfileService = _
 
 	@Before def setup: Unit = transactional { tx =>
-		session.enableFilter(Member.ActiveOnlyFilter)
-	}
-
-	@After def tidyUp: Unit = transactional { tx =>
-		session.disableFilter(Member.ActiveOnlyFilter)
-
-		session.createCriteria(classOf[Member]).list().asInstanceOf[JList[Member]].asScala map { session.delete(_) }
+		val thisMemberDao = new MemberDaoImpl
+		thisMemberDao.sessionFactory = sessionFactory
+		val thisStudentCourseDetailsDao = new StudentCourseDetailsDaoImpl
+		thisStudentCourseDetailsDao.sessionFactory = sessionFactory
+		profileService = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+			val memberDao = thisMemberDao
+			val studentCourseDetailsDao = thisStudentCourseDetailsDao
+		}
 	}
 
 	@Test def crud = transactional { tx =>
@@ -124,6 +107,7 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 	}
 
 	@Test def getRegisteredModules: Unit = transactional { tx =>
+
 		val mod1 = Fixtures.module("in101")
 		val mod2 = Fixtures.module("in102")
 		val mod3 = Fixtures.module("in103")
@@ -163,6 +147,48 @@ class ProfileServiceTest extends AppContextTestBase with Mockito {
 		profileService.getRegisteredModules("0000002").toSet should be (Seq(mod1, mod2).toSet)
 		profileService.getRegisteredModules("0000003") should be (Seq(mod2))
 		profileService.getRegisteredModules("0000004") should be (Seq())
+	}
+
+	@Test def getStudentsByRouteForAcademicYear = {
+		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+			val memberDao = mock[MemberDao]
+			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
+		}
+
+		val testRoute = new Route
+		testRoute.code = "test"
+
+		val studentInBothYears = new StudentCourseDetails(Fixtures.student(), "studentInBothYears")
+		studentInBothYears.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+		studentInBothYears.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2013))
+		)
+
+		val studentInFirstYear = new StudentCourseDetails(Fixtures.student(), "studentInFirstYear")
+		studentInFirstYear.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+
+		val studentInSecondYear = new StudentCourseDetails(Fixtures.student(), "studentInSecondYear")
+		studentInSecondYear.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2013))
+		)
+
+		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(studentInBothYears, studentInFirstYear, studentInSecondYear)
+
+		val studentsInFirstYear = service.getStudentsByRoute(testRoute, AcademicYear(2012))
+		studentsInFirstYear.size should be (2)
+		studentsInFirstYear.exists(
+			s => s.studentCourseDetails.get(0).scjCode.equals(studentInSecondYear.scjCode)
+		) should be (false)
+
+		val studentsInSecondYear = service.getStudentsByRoute(testRoute, AcademicYear(2013))
+		studentsInSecondYear.size should be (2)
+		studentsInSecondYear.exists(
+			s => s.studentCourseDetails.get(0).scjCode.equals(studentInFirstYear.scjCode)
+		) should be (false)
 	}
 
 }

@@ -7,8 +7,8 @@ import uk.ac.warwick.tabula.commands.Description
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.profiles.notifications.MeetingRecordApprovalNotification
 
-class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelationship)
-	extends ModifyMeetingRecordCommand(creator, relationship) {
+class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelationship, considerAlternatives: Boolean)
+	extends ModifyMeetingRecordCommand(creator, relationship, considerAlternatives) {
 
 	meetingDate = DateTime.now.toLocalDate
 
@@ -18,7 +18,7 @@ class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelations
 		file.onBind(result)
 	}
 
-	def emit = Seq(new MeetingRecordApprovalNotification(meeting, "create"))
+	def emit(meeting: MeetingRecord) = Seq(new MeetingRecordApprovalNotification(meeting, "create"))
 }
 
 

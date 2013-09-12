@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.roles
 
-import scala.collection.JavaConversions._
-
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
+import uk.ac.warwick.tabula.permissions.PermissionsSelector
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 case class DepartmentalAdministrator(department: model.Department) extends BuiltInRole(DepartmentalAdministratorRoleDefinition, department)
 
@@ -36,25 +36,29 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		MarkingWorkflow.Update,
 		MarkingWorkflow.Delete,
 
+		MonitoringPoints.View,
+		MonitoringPoints.Manage,
+
 		Department.ManageProfiles,
 
 		Profiles.Read.Core,
 		Profiles.Read.NextOfKin,
-		Profiles.Read.PersonalTutees,
-		Profiles.Read.StudentCourseDetails,
-	  Profiles.Read.Supervisees,
+	  Profiles.Read.Timetable,
+		Profiles.Read.StudentCourseDetails.Core,
+		Profiles.Read.StudentCourseDetails.Status,
+		Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
+
 		Profiles.Search,
 
-		Profiles.PersonalTutor.Upload,
-		Profiles.PersonalTutor.Create,
-		Profiles.PersonalTutor.Read,
-		Profiles.PersonalTutor.Update,
-		Profiles.PersonalTutor.Delete,
+		Profiles.StudentRelationship.Create(PermissionsSelector.Any[StudentRelationshipType]),
+		Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]),
+		Profiles.StudentRelationship.Update(PermissionsSelector.Any[StudentRelationshipType]),
+		Profiles.StudentRelationship.Delete(PermissionsSelector.Any[StudentRelationshipType]),
 
-	  Profiles.Supervisor.Read,
-		
-		Profiles.PersonalTutor.MeetingRecord.Read,
-    Profiles.Supervisor.MeetingRecord.Read
+		Profiles.MeetingRecord.Read(PermissionsSelector.Any[StudentRelationshipType]),
+
+		SmallGroups.Read,
+		Profiles.Read.SmallGroups
 	)
 
 }

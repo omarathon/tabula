@@ -15,9 +15,10 @@ import uk.ac.warwick.tabula.data.FileDao
 import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.Features
+import uk.ac.warwick.tabula.permissions.Permissions
 
-abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship)
-	extends Command[MeetingRecord] with Notifies[MeetingRecord] with SelfValidating with FormattedHtml
+abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship, val considerAlternatives: Boolean = false)
+	extends Command[MeetingRecord] with Notifies[MeetingRecord, MeetingRecord] with SelfValidating with FormattedHtml
 	with BindListener with Daoisms {
 
 	var features = Wire.auto[Features]
@@ -36,7 +37,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 	var posted: Boolean = false
 
-	PermissionCheck(MeetingPermissions.Create.permissionFor(relationship.relationshipType), mandatory(relationship.studentMember))
+	PermissionCheck(Permissions.Profiles.MeetingRecord.Create(relationship.relationshipType), mandatory(relationship.studentMember))
 
 	val meeting: MeetingRecord
 
@@ -45,7 +46,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 		def persistAttachments(meeting: MeetingRecord) {
 			// delete attachments that have been removed
 
-			if (meeting.attachments != null){
+			if (meeting.attachments != null) {
 				val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
 				val filesToRemove = meeting.attachments.asScala -- filesToKeep
 				meeting.attachments = JArrayList[FileAttachment](filesToKeep)
@@ -64,12 +65,13 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 		meeting.meetingDate = meetingDate.toDateTimeAtStartOfDay.withHourOfDay(MeetingRecord.DefaultMeetingTimeOfDay)
 		meeting.format = format
 		meeting.lastUpdatedDate = DateTime.now
+		meeting.relationship = relationship
 		persistAttachments(meeting)
 
 		// persist the meeting record
 		meetingRecordDao.saveOrUpdate(meeting)
 
-		if (features.meetingRecordApproval){
+		if (features.meetingRecordApproval) {
 			updateMeetingApproval(meeting)
 		}
 
@@ -104,6 +106,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 			errors.rejectValue("title", "meetingRecord.title.long", new Array(MeetingRecord.MaxTitleLength), "")
 		}
 
+		rejectIfEmptyOrWhitespace(errors, "relationship", "NotEmpty")
 		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
 
 		meetingDate match {
@@ -118,11 +121,10 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 		}
 	}
 
-	def describe(d: Description){
+	def describe(d: Description) {
 		d.properties(
-			"creator" -> meeting.creator,
-			"relationship" -> meeting.relationship,
-			"pendingApprovers" -> meeting.pendingApprovers
+			"creator" -> meeting.creator.universityId,
+			"relationship" -> meeting.relationship.relationshipType.toString()
 		)
 	}
 }

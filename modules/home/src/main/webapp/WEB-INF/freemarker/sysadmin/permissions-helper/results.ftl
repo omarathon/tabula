@@ -3,15 +3,15 @@
 <#macro debugPermission permission scope={}>
 	<#assign isTarget=permissionsHelperCommand.permission?? && (permission.name == permissionsHelperCommand.permission.name && (scope?size == 0 || (scope.id == results.resolvedScope.id)))>
 
-	<#if isTarget><strong></#if>
-	
+	<#if isTarget><strong class="text-success"></#if>
+
 	<span class="permission"><i class="icon-lock use-tooltip" title="${permission.name}"></i> ${permission.description}</span>
 	<#if scope?? && scope?size != 0>
 		on <span class="scope"><i class="icon-bookmark"></i> ${scope.toString}</span>
 	<#elseif permission.scoped>
 		<i class="icon-globe use-tooltip" title="Granted against any scope" data-placement="right"></i>
 	</#if>
-	
+
 	<#if isTarget></strong></#if>
 </#macro>
 
@@ -33,9 +33,9 @@
 	<div class="alert <#if permissionsHelperCommand.permission.scoped>alert-block<#else>alert-error</#if>">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
 		<h4>Warning!</h4>
-		
+
 		<p>There was a scope mismatch between the permission requested and the settings for the helper.</p>
-		
+
 		<#if permissionsHelperCommand.permission.scoped>
 			<p><span class="permission"><i class="icon-lock"></i> ${permissionsHelperCommand.permission.name}</span> is a scoped permission and can only be resolved against a provided scope.</p>
 		</#if>
@@ -66,7 +66,7 @@
 			<#if permissionsHelperCommand.permission??>
 				<tr>
 					<th>Result</th>
-					<td>
+					<td class="<#if results.canDo>text-success<#else>text-error</#if>">
 						<i class="icon-<#if results.canDo>ok<#else>remove</#if>"></i>
 						${permissionsHelperCommand.user.fullName}
 						<strong><#if results.canDo>CAN<#else>CANNOT</#if></strong>

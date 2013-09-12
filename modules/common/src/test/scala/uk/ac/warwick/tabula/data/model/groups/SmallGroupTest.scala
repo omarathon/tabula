@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.UserGroup
 import org.mockito.Mockito._
 import org.mockito.Matchers.anyObject
 import scala.collection.JavaConverters._
+import uk.ac.warwick.userlookup.User
 
 class SmallGroupTest extends TestBase with Mockito {
 
@@ -74,7 +75,7 @@ class SmallGroupTest extends TestBase with Mockito {
     source.name = "name"
     source.groupSet = sourceSet
     source.permissionsService = mock[PermissionsService]
-    source.students = mock[UserGroup]
+    source._studentsGroup = mock[UserGroup]
     source.deleted = false
     source.id = "123"
     source.events = JArrayList(event)
@@ -95,11 +96,51 @@ class SmallGroupTest extends TestBase with Mockito {
 
     target.permissionsService should be(source.permissionsService)
     target.students should not be(source.students)
-    verify(source.students, times(1)).duplicate()
+    verify(source._studentsGroup, times(1)).duplicate()
 
     target.events.size should be(1)
     target.events.asScala.head should be(clonedEvent)
 
   }
 
+	@Test
+	def isFullReportsFullnessWhenGroupSizeLimitsEnabled(){
+
+		// set up a group with 1 member, with group size limits enabled
+		val group = new SmallGroup()
+		group.groupSet = new SmallGroupSet()
+		group.groupSet.defaultMaxGroupSizeEnabled = true
+		group.students.add(new User("test"))
+
+
+		group.maxGroupSize = 2
+		group should not be('full)
+
+		group.maxGroupSize = 1
+		group should be('full)
+
+		group.maxGroupSize = 0
+		group should be('full)
+
+	}
+
+	@Test
+	def isFullIsFalseWhenGroupSizeLimitsNotEnabled(){
+
+		// set up a group with 1 member, with group size limits enabled
+		val group = new SmallGroup()
+		group.groupSet = new SmallGroupSet()
+		group.groupSet.defaultMaxGroupSizeEnabled = false
+		group.students.add(new User("test"))
+
+
+		group.maxGroupSize = 2
+		group should not be('full)
+
+		group.maxGroupSize = 1
+		group should not be('full)
+
+		group.maxGroupSize = 0
+		group should not be('full)
+	}
 }

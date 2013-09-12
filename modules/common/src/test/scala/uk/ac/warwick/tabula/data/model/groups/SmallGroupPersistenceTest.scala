@@ -1,18 +1,26 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import uk.ac.warwick.tabula.PersistenceTestBase
+import uk.ac.warwick.tabula.{FieldAccessByReflection, PersistenceTestBase, AppContextTestBase, AcademicYear}
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.AppContextTestBase
 import org.springframework.transaction.annotation.Transactional
 import org.joda.time.LocalTime
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.ModuleDaoImpl
+import org.junit.Before
+import uk.ac.warwick.userlookup.User
 
-class SmallGroupPersistenceTest extends AppContextTestBase {
-	
-	@Autowired var service: ModuleAndDepartmentService = _
+class SmallGroupPersistenceTest extends PersistenceTestBase with FieldAccessByReflection {
+
+	val moduleDao = new ModuleDaoImpl
+	val service: ModuleAndDepartmentService = new ModuleAndDepartmentService
+
+	@Before
+	def setup() {
+		moduleDao.sessionFactory = sessionFactory
+		service.moduleDao = moduleDao
+	}
 
 	@Test def nullSettingsAreReplacedWithEmptyMap(){
 		transactional{ts =>
@@ -56,8 +64,7 @@ class SmallGroupPersistenceTest extends AppContextTestBase {
 			
 			set1.groups.add(group1)
 			session.saveOrUpdate(set1)
-			
-			group1.students.addUser("cuscav")
+			group1.students.add(new User("cuscav"))
 			session.saveOrUpdate(group1)
 			
 			val event1 = new SmallGroupEvent(group1)

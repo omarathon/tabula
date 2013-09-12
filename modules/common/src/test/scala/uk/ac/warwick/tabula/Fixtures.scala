@@ -6,6 +6,8 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
+import org.joda.time.DateTime
 
 // scalastyle:off magic.number
 object Fixtures {
@@ -87,11 +89,11 @@ object Fixtures {
 
 	def upstreamAssignment(departmentCode:String, number:Int) = {
         val a = new UpstreamAssignment
-        a.name = "Assignment %d" format (number)
+        a.name = "Assignment %d" format number
         a.departmentCode = departmentCode.toUpperCase
         a.moduleCode = "%s1%02d-30" format (departmentCode.toUpperCase, number)
         a.assessmentGroup = "A"
-        a.sequence = "A%02d" format (number)
+        a.sequence = "A%02d" format number
         a
     }
 
@@ -145,7 +147,12 @@ object Fixtures {
 	def staff(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null) =
 		member(MemberUserType.Staff, universityId, userId, department).asInstanceOf[StaffMember]
 
-	def student(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null, courseDepartment: Department = null)	= {
+	def sitsStatus(code: String = "F", shortName: String = "Fully enrolled", fullName: String = "Fully enrolled for this session") = {
+		val status = new SitsStatus(code, shortName, fullName)
+		status
+	}
+
+	def student(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null, courseDepartment: Department = null, sprStatus: SitsStatus = null)	= {
 		val m = member(MemberUserType.Student, universityId, userId, department).asInstanceOf[StudentMember]
 
 		val studentCourseDetails = new StudentCourseDetails(m, m.universityId + "/1")
@@ -153,7 +160,24 @@ object Fixtures {
 		studentCourseDetails.sprCode = m.universityId + "/1"
 		studentCourseDetails.department = courseDepartment
 		studentCourseDetails.mostSignificant = true
+
+		studentCourseDetails.sprStatus = sprStatus
+
 		m.studentCourseDetails.add(studentCourseDetails)
 		m
+	}
+
+	def studentCourseYearDetails(academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)) = {
+		val scyd = new StudentCourseYearDetails
+		scyd.academicYear = academicYear
+		scyd
+	}
+
+	def monitoringPoint(name: String = "name", defaultValue: Boolean = false, week: Int = 0) = {
+		val point = new MonitoringPoint
+		point.name = name
+		point.week = week
+		point.defaultValue = defaultValue
+		point
 	}
 }

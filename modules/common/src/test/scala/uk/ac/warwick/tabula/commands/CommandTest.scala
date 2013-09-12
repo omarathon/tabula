@@ -9,22 +9,7 @@ import uk.ac.warwick.tabula.Fixtures
 
 class CommandTest extends TestBase {
 	
-	class TestCommand extends Command[Boolean] {
-		def describe(d:Description) {}
-		def applyInternal = true
-	}
-	
-	// set event name via overriding value
-	case class Spell6Command() extends TestCommand {
-		override lazy val eventName = "DefendCastle"
-	}
-	
-	// event name taken from class 
-	case class HealSelfSpell() extends TestCommand
-	
-	// event name taken from class ("Command" suffix removed)
-	case class CastFlameSpellCommand() extends TestCommand with ReadOnly
-	
+
 	@Test def commandName {
 		Spell6Command().eventName should be("DefendCastle")
 		HealSelfSpell().eventName should be("HealSelfSpell")
@@ -121,3 +106,20 @@ class CommandTest extends TestBase {
 	}
 	
 }
+// these commands need to not be nested inside "CommandTest", otherwise the name-munging code gets
+// confused by the fact that "Command" appears in the outer class name.
+class TestCommand extends Command[Boolean] {
+	def describe(d:Description) {}
+	def applyInternal = true
+}
+
+// set event name via overriding value
+case class Spell6Command() extends TestCommand {
+	override lazy val eventName = "DefendCastle"
+}
+
+// event name taken from class
+case class HealSelfSpell() extends TestCommand
+
+// event name taken from class ("Command" suffix removed)
+case class CastFlameSpellCommand() extends TestCommand with ReadOnly

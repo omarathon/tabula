@@ -36,10 +36,26 @@
 	--></#noescape><#--
 --></#macro>
 
-<#-- Format week ranges for a SmallGroupEvent -->
-<#macro weekRanges event><#--
+<#-- Format week ranges for a SmallGroupEvent or MonitoringPoint -->
+<#macro weekRanges object><#--
 	--><#noescape><#--
-		-->${weekRangesFormatter(event)}<#--
+		-->${weekRangesFormatter(object)}<#--
+	--></#noescape><#--
+--></#macro>
+
+<#macro singleWeekFormat week academicYear dept><#--
+	--><#noescape><#--
+		-->${weekRangesFormatter(week, academicYear, dept)}<#--
+	--></#noescape><#--
+--></#macro>
+
+<#macro weekRangeSelect event><#--
+	--><#noescape><#--
+		--><select name="week" class="weekSelector"><#--
+			--><#list weekRangeSelectFormatter(event) as week><#--
+				--><option value="${week.weekToDisplay}">week ${week.weekToStore}</option><#--
+			--></#list><#--
+		--></select><#--
 	--></#noescape><#--
 --></#macro>
 
@@ -213,23 +229,24 @@
 <#macro permission_button permission scope action_descr href="" tooltip="" classes="" type="a" data_attr="data-container=body" >
 	<#local class></#local>
 	<#local title></#local>
-	
+
 	<#if tooltip?has_content>
 		<#local title>title='${tooltip}.'</#local>
 		<#local classes='${classes} use-tooltip'?trim >
 	</#if>
-	
+
     <#if href??><#local href>href=${href}</#local></#if>
-    
+
 	<#if !can.do(permission,scope)>
-		<#local classes='${classes} disabled use-tooltip'?trim > 
+		<#local classes='${classes} disabled use-tooltip'?trim >
 		<#local title>title='You do not have permission to ${action_descr}.'</#local>
+		<#local data_attr='${data_attr}'?replace("data-toggle=modal","") >
 	</#if>
-	
-	<#local attr='${data_attr}'?replace("data-toggle=modal","") >
-	
+
+
+
 	<#if classes??><#local class>class='${classes}'</#local></#if>
-	<${type} ${href} ${class} ${title} ${attr}><#noescape><#nested></#noescape></${type}>
+	<${type} ${href} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
 </#macro>
 
 </#escape>

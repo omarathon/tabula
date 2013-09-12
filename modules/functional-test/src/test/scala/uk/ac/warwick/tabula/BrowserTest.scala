@@ -19,6 +19,8 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.time.SpanSugar
 import org.openqa.selenium.internal.seleniumemulation.WaitForPageToLoad
 import com.gargoylesoftware.htmlunit.BrowserVersion
+import uk.ac.warwick.userlookup.UserLookup
+import scala.util.{Success, Try}
 
 /** Abstract base class for Selenium tests.
   *
@@ -33,12 +35,13 @@ abstract class BrowserTest
 	with Eventually
 	with SpanSugar
 	with WebBrowser
-	with WebsignonMethods {
+	with WebsignonMethods
+	with UserKnowledge {
 
 	// Shorthand to expose properties to test classes
 	val P = FunctionalTestProperties
 
-	/** Generates a full URL to browse to, 
+	/** Generates a full URL to browse to,
 	  * e.g. Path("/coursework") -> "https://tabula-test.warwick.ac.uk/coursework"
 	  */
 	def Path(path: String) = P.SiteRoot + path
@@ -53,6 +56,13 @@ abstract class BrowserTest
 		case "firefox" => new FirefoxDriver
 		case "ie" => new InternetExplorerDriver
 	}
+
+	def ifHtmlUnitDriver(operation:HtmlUnitDriver=>Unit) = {
+		webDriver match {
+			case h:HtmlUnitDriver=>operation(h)
+			case _=> // do nothing
+		}
+	}
 	
 	/**
 	 * eventually{} is a generic ScalaTest method to repeatedly
@@ -65,18 +75,24 @@ abstract class BrowserTest
 
 }
 
-case class LoginDetails(val usercode: String, val password: String, description: String)
+case class LoginDetails(val usercode: String, val password: String, description: String, warwickId:String)
 
 /** Properties that can be overridden by a functionaltest.properties file in the classpath.
   *
   * Can also be overridden by a System property, which can be useful e.g. for running a similar
   * set of tests multiple times with a different browser. (Note that some properties cannot be
-  * system properties, such as 
+  * system properties, such as
   *
   * Defaults are in functionaltest-default.properties.
   */
 object FunctionalTestProperties {
 	private val properties = loadOptionalProps()
+
+	private val userLookup = new UserLookup
+	// hardcode the service URLs; if they ever change, it's as
+	// easy to change them here as it is in a properties file.
+	userLookup.setSsosUrl("https://websignon.warwick.ac.uk")
+	userLookup.setGroupServiceLocation("https://websignon.warwick.ac.uk")
 
 	val SiteRoot = prop("toplevel.url")
 	val Browser = prop("browser")
@@ -84,7 +100,7 @@ object FunctionalTestProperties {
 	/* Test user accounts who can sign in during tests. Populated from properties.
 	 * The tests currently REQUIRE that the user's first name is
 	 * equal to the usercode, since we look for "Signed in as X" to
-	 * determine whether we're signed in. Open to a better solution. 
+	 * determine whether we're signed in. Open to a better solution.
 	 */
 	lazy val Admin1 = userDetails("admin1", "Departmental admin")
 	lazy val Admin2 = userDetails("admin2", "Departmental admin")
@@ -105,11 +121,11 @@ object FunctionalTestProperties {
 	 * Get a property by name, or null if not found anywhere. Checks in this order
 	 * - System properties
 	 * - provided tabula-functionaltest.properties
-	 * - default properties 
+	 * - default properties
 	 */
-	private def prop(name: String) = 
+	private def prop(name: String) =
 		scala.util.Properties.propOrElse(name, fileProp(name))
-		
+
 	/** Like prop() but excludes system properties */
 	private def fileProp(name: String) = properties.getProperty(name)
 
@@ -126,14 +142,25 @@ object FunctionalTestProperties {
 
 	private def userDetails(identifier: String, description: String) = {
 		val usercodeKey = "user." + identifier + ".usercode"
-		val passwordKey = "user." + identifier + ".password"
+
 		if (properties.containsKey(usercodeKey)) {
+			val warwickId = Try(userLookup.getUserByUserId(fileProp(usercodeKey))) match {
+				case Success(user)=>user.getWarwickId
+				case _=>"UNKNOWN"
+			}
+
 			LoginDetails(
-				fileProp("user." + identifier + ".usercode"),
+				fileProp(usercodeKey),
 				fileProp("user." + identifier + ".password"),
-				description)
+				description,
+				warwickId
+			)
 		} else {
 			Assertions.fail("Properties missing for "+description+" (user."+identifier+".usercode)")
 		}
 	}
+}
+
+trait UserKnowledge {
+	var currentUser: LoginDetails = _
 }

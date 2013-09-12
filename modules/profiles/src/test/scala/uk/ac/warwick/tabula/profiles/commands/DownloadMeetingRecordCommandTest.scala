@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentRelationship
@@ -25,6 +24,7 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.FileAttachment
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 
 class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
@@ -52,7 +52,7 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		}
 
 		val relationship = transactional { tx =>
-			val relationship = StudentRelationship("Professor A Tutor", PersonalTutor, "0123456/1")
+			val relationship = StudentRelationship("Professor A Tutor", StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"), "0123456/1")
 			relationship.profileService = ps
 			ps.getStudentBySprCode("0123456/1") returns (Some(student))
 
@@ -60,7 +60,7 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 			relationship
 		}
 
-		val createMeetingRecordCommand = new CreateMeetingRecordCommand(creator, relationship)
+		val createMeetingRecordCommand = new CreateMeetingRecordCommand(creator, relationship, false)
 		createMeetingRecordCommand.title = "Title"
 		createMeetingRecordCommand.format = FaceToFace
 		createMeetingRecordCommand.meetingDate  = dateTime(3903, DateTimeConstants.MARCH).toLocalDate // it's the future
@@ -77,14 +77,14 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 		createMeetingRecordCommand.file = uploadedFile
 
-		val meeting = transactional { tx => createMeetingRecordCommand.apply() }
+		val meeting = transactional { tx => createMeetingRecordCommand.applyInternal() }
 
 		// test to see if DownloadMeetingRecordFilesCommand.apply() can be used to get the file
 		val downloadCommand = new DownloadMeetingRecordFilesCommand(meeting)
 
 		// normally for single files the filename is set in the command as it is a path variable (I think!)
 		downloadCommand.filename = "Beltane"
-		val retSingle = downloadCommand.apply()
+		val retSingle = downloadCommand.applyInternal()
 		val rendFile = retSingle.get
 		rendFile.filename should be ("Beltane")
 	}}

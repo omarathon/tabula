@@ -22,7 +22,7 @@ class ViewSmallGroupCommand(val user: CurrentUser, val smallGroup: SmallGroup) e
 	PermissionCheck(Permissions.SmallGroups.Read, smallGroup)
 
 	def applyInternal() = {
-		smallGroup.students.includeUsers.asScala.flatMap( memberDao.getByUniversityId )
+		smallGroup.students.users.flatMap(u => memberDao.getByUniversityId(u.getWarwickId))
 	}
 
 	def describe(d: Description) {

@@ -4,14 +4,16 @@ import uk.ac.warwick.tabula.{BreadcrumbsMatcher, LoginDetails, BrowserTest}
 import org.openqa.selenium.By
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.groups.pages.SmallGroupTeachingPage
+import uk.ac.warwick.tabula.home.{FeaturesDriver, FixturesDriver}
 
-trait SmallGroupsFixture extends BrowserTest {
+trait SmallGroupsFixture extends BrowserTest with FixturesDriver with FeaturesDriver {
 
   before{
     go to (Path("/scheduling/fixtures/setup"))
   }
 
   def as[T](user: LoginDetails)(fn: =>T) = {
+		currentUser = user
     signIn as(user) to (Path("/groups"))
     fn
   }

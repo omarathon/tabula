@@ -35,7 +35,6 @@ class MyObject extends PermissionsTarget {
   @Restricted(Array("Module.ManageAssignments")) def getPermsGreeting(name:String) = "Hello %s!" format (name)
   @Restricted(Array("Module.ManageAssignments", "Module.Delete", "GodMode")) def getPermsGreeting():String = getPermsGreeting("you")
 
-
   override def id = ""
 	override def permissionsParents = Stream.empty
 
@@ -172,7 +171,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 	    }
 	  }
 	}
-	
+		
 	@Test def nameCollision {
 		// TAB-766
 		

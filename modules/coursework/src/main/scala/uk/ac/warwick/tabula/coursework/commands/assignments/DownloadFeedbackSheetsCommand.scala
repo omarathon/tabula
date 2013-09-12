@@ -30,7 +30,7 @@ class DownloadFeedbackSheetsCommand(val module: Module, val assignment: Assignme
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 
 	override def applyInternal():RenderableZip = {
-		if (assignment.feedbackTemplate == null) logger.error("No feedback sheet for assignment - "+assignment.id)
+		if (assignment.feedbackTemplate == null) logger.error("No feedback sheet for assignment - " + assignment.id)
 		if (members == null)
 			members = assignmentMembershipService.determineMembershipUsers(assignment)
 		val zip = zipService.getMemberFeedbackTemplates(members, assignment)

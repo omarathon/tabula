@@ -66,6 +66,7 @@ class SubmitToTurnitinJob extends Job
 			val id = job.getString("assignment")
 			assignmentService.getAssignmentById(id) getOrElse (throw obsoleteJob)
 		}
+		val department = assignment.module.department
 		val classId = classIdFor(assignment, api.classPrefix)
 		val assignmentId = assignmentIdFor(assignment)
 		val className = classNameFor(assignment)
@@ -78,7 +79,7 @@ class SubmitToTurnitinJob extends Job
 			case ClassNotFound() | AssignmentNotFound() => { // class or assignment don't exist
 				// ensure assignment and course are created, as submitPaper doesn't always do that for you
 				debug("Missing class or assignment, creating...")
-				session.createAssignment(classId, className, assignmentId, assignmentName)
+				session.createAssignment(classId, className, assignmentId, assignmentName, department)
 				Nil // clearly there are no submissions yet.
 			}
 			case GotSubmissions(list) => {
@@ -154,7 +155,7 @@ class SubmitToTurnitinJob extends Job
 						debug("submitResponse: " + submitResponse)
 						if (!submitResponse.successful) {
 							//throw new FailedJobException("Failed to upload '" + attachment.name +"' - " + submitResponse.message)
-							logger.warn("Failed to upload '" + attachment.name +"' - " + submitResponse.message)
+							logger.warn("Failed to upload '" + attachment.name + "' - " + submitResponse.message)
 							uploadsFailed += 1
 							failedUploads.put(attachment.name, submitResponse.message)
 						}

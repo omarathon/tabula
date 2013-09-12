@@ -1,22 +1,6 @@
 package uk.ac.warwick.tabula.data
-import uk.ac.warwick.tabula.{TestBase, AppContextTestBase}
-import org.junit.Test
-import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import java.io.ByteArrayInputStream
-import org.springframework.transaction.annotation.Transactional
-import org.springframework.util.FileCopyUtils
-import java.io.InputStream
-import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Repository
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-import org.springframework.transaction.annotation.Transactional
 
 class FileAttachmentTest extends TestBase {
 

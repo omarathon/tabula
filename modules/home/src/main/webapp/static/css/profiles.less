@@ -1,6 +1,8 @@
 @import "bootstrap/variables.less";
 @import "bootstrap/mixins.less";
 @import "css3.less";
+@import "fullcalendar.css";
+@import "fullcalendar-custom.css";
 
 @header-colour: @tabulaPurple;
 
@@ -8,7 +10,7 @@
 	background: @header-colour;
 }
 
-#modal-change-tutor #edit-personal-tutor-modal {
+#modal-change-agent #edit-agent-modal {
 	overflow:visible;
 
 	.control-label {
@@ -29,12 +31,12 @@
 		}
 	}
 
-	#save-tutor {
+	#save-agent {
 		float: right;
 		margin-right: 20px;
 	}
 
-	#remove-tutor {
+	#remove-agent {
 		vertical-align: top;
 		margin: 0px 0 0 20px;
 	}
@@ -49,19 +51,19 @@
 }
 
 
-#notify-tutor-change {
+#notify-agent-change {
 	display:none;
 }
 
-#tuteeName {
+#studentName {
 	margin-bottom: 20px;
 }
 
-#editTutorCommand {
+#editStudentRelationshipCommand {
 	margin-bottom: 0;
 }
 
-#tutorSearchResults {
+#agentSearchResults {
 	max-height:200px;
 	overflow-y:auto;
 
@@ -140,7 +142,7 @@
 					color: @grayLight;
 					white-space: nowrap;
 
-					&:after { content: ':'; margin-right: 3px; }
+					&:after { content: ''; margin-right: 3px; }
 				}
 
 				td {
@@ -162,7 +164,7 @@
 					color: @grayLight;
 					white-space: nowrap;
 
-					&:after { content: ':'; margin-right: 3px; }
+					&:after { content: ''; margin-right: 3px; }
 				}
 
 				td {
@@ -176,13 +178,12 @@
 			}
 		}
 
-		#personal-development, #supervision {
+		.relationship-section {
 
-			.add-tutor-link {
+			.add-agent-link {
 				text-decoration: none;
 				margin-bottom:6px;
-				width: 140px;
-				display:block;
+				display: block;
 			}
 
 			section.meetings {
@@ -190,7 +191,7 @@
 
 				details.meeting {
 
-					padding-right: 15px;
+					padding-right: 0;
 
 					&.well {
 						padding: 1px;
@@ -202,6 +203,7 @@
 						padding-top: 9px;
 						font-weight: bold;
 						border-bottom: dotted 1px lighten(@grayLight, 35%);
+						overflow: auto;
 					}
 
 					.meeting-body {
@@ -240,12 +242,12 @@
 				span.date {
 					margin-right: 1em;
 					display: inline-block;
-					width: 13em;
+					width: 10em;
 				}
 
 				.meeting-record-toolbar {
 					float: right;
-					margin-right: 1em;
+					margin-right: 0.5em;
 					a {
 						text-decoration: none;
 					}
@@ -290,29 +292,31 @@
 				}
 			}
 		}
-	} // .profile
+	} // .profile container
 
-	#container .related_students {
-		.profile-link {
-			font-weight: bold;
-			color: @grayLight;
-			text-decoration: none;
-
-			&:hover,&:active {
+	#container {
+		.related_students, .students {
+			.profile-link {
+				font-weight: bold;
+				color: @grayLight;
 				text-decoration: none;
+
+				&:hover,&:active {
+					text-decoration: none;
+				}
+			}
+
+			.hover {
+				.cursor-pointer;
+				background-color: #ddd;
+				background-color: fadeout(lighten(#ff0,30%), 40%);
 			}
 		}
-
-		.hover {
-			.cursor-pointer;
-			background-color: #ddd;
-			background-color: fadeout(lighten(#ff0,30%), 40%);
-		}
-	} // .related_students
+	} // .related_students and students table hover behaviour
 
 
-	#container #tutors {
-		.tutor-detail {
+	#container #agents {
+		.agent-detail {
 			font-family: @baseFontFamily;
 			font-size: @baseFontSize * 1.1;
 			letter-spacing: 0;
@@ -320,11 +324,11 @@
 			margin-left: 12px;
 		}
 
-		.tutees {
+		.students {
 			width: 100%;
 
 			th.photo-col { width: 11%; }
-			th.tutee-col { width: 12%; }
+			th.student-col { width: 12%; }
 			th.id-col { width: 11%; }
 			th.type-col { width: 25%; }
 			th.year-col { width: 5%; }
@@ -336,7 +340,36 @@
 
 
 
-	} // #tutors
+	} // #agents
+
+	table.event-info {
+		// Reset
+		th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
+
+		width: 100%;
+
+		th {
+			text-align: right;
+			color: @grayLight;
+			white-space: nowrap;
+			font-size: @fontSizeSmall;
+
+			&:after { content: ''; margin-right: 3px; }
+		}
+
+		td {
+			color: #0c0c0c;
+			width: 99%;
+			font-size: @fontSizeSmall;
+			sup { font-size:0.8em }
+            padding-bottom: 0.5em;
+		}
+		tbody {
+			border-bottom: 15px solid transparent;
+		}
+
+	}
+
 
 	#container .profile-search {
 		margin: 4px 0 20px;
@@ -407,7 +440,7 @@
 		}
 	} // .profile-search
 
-	#container .tutor-search {
+	#container .agent-search {
 		.control-group { margin-top: 54px; }
 		.input-append .btn { margin-top: 1px; }
 
@@ -431,21 +464,86 @@
 			line-height: 28px;
 			font-size: @searchFontSize;
 		}
-	} // .tutor-search
+	} // .agent-search
 
-	#container .tutor-edit {
+	#container .agent-edit {
 		button {
 			text-align: right;
 			margin-right:220px
 			}
 
-	} // .tutor-edit
+	} // .agent-edit
 
-	#container .tutor-edit-return {
+	#container .agent-edit-return {
 		a {
 			margin-top: 54px;
 			}
 
-	} // .tutor-edit
+	} // .agent-edit
 
 } // .profiles-page
+
+// drag students into agents
+
+#allocateStudentsToRelationshipCommand {
+
+	// FIXME I hate that I have to do this. The .profiles-page CSS is clearly too wide-ranging
+	.profile {
+		margin-top: 0;
+	}
+
+	.filter {
+		select { width: 100%; }
+
+		margin: 0 0 10px;
+	}
+
+	// Give the student list some affordance for dragging around students
+	.student-list {
+		margin: -16px;
+		padding: 16px;
+	}
+
+	ul.drag-list li {
+		display: block;
+		float: none;
+
+		background: white;
+		margin: 0 0 10px;
+
+		&:hover { background-color: darken(@wellBackground, 10%); }
+
+		&.ui-selecting { background: darken(@wellBackground, 10%) !important; }
+		&.ui-selected { background: darken(@wellBackground, 15%) !important; }
+
+		.profile .photo {
+			float: left;
+			max-width: 50px;
+			padding-right: 10px;
+		}
+	}
+
+	.well.drop-hover {
+		background-color: #dddddd;
+	}
+
+	.agent-header {
+		> h4, > div { display: inline-block; }
+		> h4 { margin-right: 10px; }
+	}
+
+	.direction-icon {
+		font-size: 8em;
+		text-align: center;
+		padding-top: 33px;
+		color: #d6d6d6;
+	}
+
+}
+
+// end drag students into agents
+
+// meeting record modal
+.modal-body#meeting-record-modal-body {
+	max-height: 550px; //override boostrap default of 400px
+}

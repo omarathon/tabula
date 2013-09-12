@@ -4,9 +4,23 @@ import org.springframework.transaction._
 import org.springframework.transaction.support._
 import org.springframework.transaction.annotation._
 import org.springframework.transaction.interceptor._
-import org.springframework.beans.factory.annotation.{Autowired, Configurable}
 import scala.annotation.target.field
 import uk.ac.warwick.spring.Wire
+
+trait TransactionalComponent {
+	def transactional[A](
+												readOnly: Boolean = false,
+												propagation: Propagation = Propagation.REQUIRED
+												)(f: => A): A
+}
+
+trait AutowiringTransactionalComponent extends TransactionalComponent {
+	def transactional[A](
+												readOnly: Boolean = false,
+												propagation: Propagation = Propagation.REQUIRED
+												)(f: => A): A = Transactions.transactional(readOnly, propagation)(f)
+
+}
 
 object Transactions extends TransactionAspectSupport {
 
@@ -16,7 +30,7 @@ object Transactions extends TransactionAspectSupport {
 	var transactionManager = Wire.auto[PlatformTransactionManager]
 	override def getTransactionManager() = transactionManager
 	
-	private var enabled = true
+	var enabled = true
 
 	/** Disable transaction processing inside this method block.
 	  * Should be for testing only.

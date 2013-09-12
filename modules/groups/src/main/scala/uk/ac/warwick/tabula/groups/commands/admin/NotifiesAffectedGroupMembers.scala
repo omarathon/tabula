@@ -15,7 +15,7 @@ trait SmallGroupSetCommand {
 	var userLookup: UserLookupService
 }
 
-trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet] {
+trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet, SmallGroupSet] {
 	this: SmallGroupSetCommand =>
 
 	val setBeforeUpdates: SmallGroupSet = set.duplicateTo(set.module)
@@ -39,7 +39,7 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet] {
 			// no events have changed (therefore no groups relevant to this tutor can have changed), but the allocations might have
 			val previousGroups = setBeforeUpdates.groups.asScala
 			val currentGroups = set.groups.asScala
-			val allocationsUnchanged = previousGroups.forall(pg => currentGroups.exists(cg => cg == pg && cg.students.members == pg.students.members))
+			val allocationsUnchanged = previousGroups.forall(pg => currentGroups.exists(cg => cg == pg && cg.students.hasSameMembersAs(pg.students)))
 			!allocationsUnchanged
 		} else {
 			true
@@ -84,7 +84,7 @@ trait NotifiesAffectedGroupMembers extends Notifies[SmallGroupSet] {
 		}
 	}
 
-	def emit: Seq[Notification[SmallGroupSet]] = {
+	def emit(set: SmallGroupSet): Seq[Notification[SmallGroupSet]] = {
 		val tutorNotifications: Seq[Notification[SmallGroupSet]] = if (set.releasedToTutors) {
 			val allEvents = (setBeforeUpdates.groups.asScala ++ set.groups.asScala).flatMap(g => g.events.asScala)
 			val allTutors = allEvents.flatMap(e => e.tutors.users).distinct

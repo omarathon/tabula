@@ -1,0 +1,1 @@
+<#assign monitoringPointTermNames=["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] />

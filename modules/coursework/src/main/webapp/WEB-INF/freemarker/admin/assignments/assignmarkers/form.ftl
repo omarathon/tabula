@@ -9,12 +9,13 @@
 </#macro>
 
 <#macro assignStudents studentList markerList class name>
+<div class="tabula-dnd">
 	<div class="btn-toolbar">
-		<a class="random btn btn-mini"
+		<a class="random btn btn-mini" data-toggle="randomise" data-disabled-on="empty-list"
 		   href="#" >
 			<i class="icon-random"></i> Randomly allocate
 		</a>
-		<a class="return-items btn btn-mini"
+		<a class="return-items btn btn-mini" data-toggle="return" data-disabled-on="no-allocation"
 		   href="#" >
 			<i class="icon-arrow-left"></i> Remove all
 		</a>
@@ -50,6 +51,7 @@
 			</#list>
 		</div>
 	</div>
+</div>
 </#macro>
 
 

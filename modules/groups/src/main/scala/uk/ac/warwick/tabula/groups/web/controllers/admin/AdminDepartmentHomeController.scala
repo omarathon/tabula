@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{Module, Department}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.groups.commands.admin.AdminDepartmentHomeCommand
-import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{ViewModules, ViewSet, ViewModule}
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{Tutor, ViewModules, ViewSet, ViewModule}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.commands.Appliable
 
@@ -33,7 +33,7 @@ class AdminDepartmentHomeController extends GroupsController {
 		val moduleItems =
 			for (module <- modules) yield {
 				ViewModule(module,
-					module.groupSets.asScala map { set => ViewSet(set, set.groups.asScala) },
+					module.groupSets.asScala map { set => ViewSet(set, set.groups.asScala, Tutor) },
 					canManageGroups=securityService.can(user, Permissions.Module.ManageSmallGroups, module)
 				)
 			}

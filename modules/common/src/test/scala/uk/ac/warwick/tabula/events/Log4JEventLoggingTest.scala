@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.events
 
 import java.io.StringWriter
-import org.apache.log4j.Logger
-import org.apache.log4j.PatternLayout
-import org.apache.log4j.WriterAppender
+import org.apache.log4j.{Level, Logger, PatternLayout, WriterAppender}
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -23,10 +21,12 @@ class Log4JEventLoggingTest extends TestBase {
 	
 	@Before def attachAppender {
 		listener.logger.addAppender(appender)
+		listener.logger.setLevel(Level.DEBUG)
 	}
 	
 	@After def detachAppender {
 		listener.logger.removeAppender(appender)
+		listener.logger.setLevel(null)
 	}
 	
 	@Test def writesLogs {

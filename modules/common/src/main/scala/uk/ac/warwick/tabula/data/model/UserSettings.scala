@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.apache.commons.codec.digest.DigestUtils
 
 @Entity
-class UserSettings extends GeneratedId with SettingsMap[UserSettings] with PermissionsTarget {
+class UserSettings extends GeneratedId with SettingsMap with PermissionsTarget {
 	import UserSettings._
 
 	@Column(unique = true)

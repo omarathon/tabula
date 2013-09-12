@@ -68,6 +68,7 @@ summary {
 }
 
 // polyfill disclosure triangle
+
 .no-details details summary:before {
 	content: '\25ba\00a0';
 	font-size: 11px;
@@ -75,6 +76,55 @@ summary {
 }
 .no-details details.open summary:before {
 	content: '\25bc\00a0';
+}
+
+// some sections use a large chevron instead of the smaller triangle
+.no-details details summary.large-chevron:before {
+	font-family: FontAwesome;
+	content: '\f054';
+	font-size: 16px;
+	margin-right: 5px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+.no-details details.open summary.large-chevron:before {
+	font-family: FontAwesome;
+	content: '\f078';
+	font-size: 16px;
+	padding-bottom: 10px;
+	padding-top: 10px;
+	margin-right: 0;
+}
+
+.tabula-page, #container {
+
+	.legend {
+		border-bottom: 0;
+		border-top: 0;
+		width: 100%;
+		display: inline;
+		font-size: 21px;
+		line-height: 40px;
+		margin-bottom: 20px;
+		padding: 0;
+	}
+
+	.legend small {
+		color: #818285;
+		font-size: 15px;
+	}
+
+	summary.collapsible {
+		border-bottom: 0;
+		border-top: 1px solid #e5e5e5;
+		display: inline-block;
+		width: 100%;
+	}
+
+	summary p {
+		padding-left: 18px;
+	}
+
 }
 
 #container {
@@ -327,6 +377,10 @@ ul {
 
 .filter fieldset.filter-options {
 	margin-top: 20px !important;
+}
+
+fieldset.internal {
+	margin-left: 180px !important;
 }
 
 .workflow-container {
@@ -776,6 +830,8 @@ table {
    	  tr.anon-user {
    	    color: #666;
    	  }
+
+
    }
 }
 
@@ -810,6 +866,15 @@ table {
 	font-weight: bold;
 	font-size: 130%;
 	color: #606060;
+}
+
+h3 .mod-code,
+h4 .mod-code,
+h5 .mod-code,
+h6 .mod-code {
+	letter-spacing: 0.5px;
+	margin-left: 4px;
+	font-size: 100%;
 }
 
 .mod-name {
@@ -1366,6 +1431,55 @@ h1.with-settings {
 		font-weight:bold;
 	}
 
+	.permissionTitle {
+		display: inline-block;
+		margin-right: 10px;
+	}
+
+	.permission-list {
+		margin:4px 0 20px 0;
+
+		.user, .user-fullname, .user-id, .actions {
+			vertical-align: middle;
+		}
+
+		.user {
+			min-width: 240px;
+		}
+
+		.user-fullname {
+			min-width: 170px;
+		}
+
+		.user-id {
+			width: 70px;
+		}
+
+		.actions {
+			max-width: 30px;
+			text-align: center;
+		}
+
+		.highlight {
+			background-color: @grayLighter;
+		}
+	}
+
+	#module-permissions-page, #department-permissions-page {
+		.actions form {
+			margin:0;
+		}
+
+		.module-permissions, .department-permissions {
+			.form-inline {
+				margin-top: 13px;
+			}
+
+			.checkbox {
+				padding-left:6px;
+			}
+		}
+	}
 } // #container
 
 } // .tabula-page

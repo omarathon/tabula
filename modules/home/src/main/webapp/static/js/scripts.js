@@ -96,29 +96,43 @@
 		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
 	};
 
-	// apply to a checkbox or radio button
+	/* apply to a checkbox or radio button. When the target is selected a div containing further related form elements
+	   is revealed.
+
+	   Triggers a 'tabula.slideMoreOptions.shown' event on the div when it is revealed and a
+	   'tabula.slideMoreOptions.hidden' event when it is hidden.
+	*/
 	jQuery.fn.slideMoreOptions = function($slidingDiv, showWhenChecked) {
 		var $this = $(this);
 		var name = $this.attr("name");
 		var $form = $this.closest('form');
+		var doNothing = function(){};
 
 		// for checkboxes, there will just be one target - the current element (which will have the same name as itself).
 		// for radio buttons, each radio button will be a target.  They are identified as a group because they all have the same name.
 		var $changeTargets = $("input[name='" + name + "']", $form);
 		if (showWhenChecked) {
-			$changeTargets.change(function(){
-				if ($this.is(':checked'))
+			$changeTargets.change(function() {
+				if ($this.is(':checked')) {
 					$slidingDiv.stop().slideDown('fast');
-				else
+					$slidingDiv.trigger('tabula.slideMoreOptions.shown');
+				}
+				else {
 					$slidingDiv.stop().slideUp('fast');
+					$slidingDiv.trigger('tabula.slideMoreOptions.hidden');
+				}
 			});
 			$this.trigger('change');
 		} else {
-			$changeTargets.change(function(){
-				if ($this.is(':checked'))
+			$changeTargets.change(function() {
+				if ($this.is(':checked')) {
 					$slidingDiv.stop().slideUp('fast');
-				else
+					$slidingDiv.trigger('tabula.slideMoreOptions.hidden');
+				}
+				else {
 					$slidingDiv.stop().slideDown('fast');
+					$slidingDiv.trigger('tabula.slideMoreOptions.shown');
+				}
 			});
 			$this.trigger('change');
 		}
@@ -218,24 +232,7 @@
 			});
 		}
 	};
-	
-	$.fn.tabulaRadioActive = function(options) {
-		var $radios = this;
-		
-		this.on('change', function() {		
-			// fallback to plain "radioactive" attribute since FTL syntax doesn't allow dashes in macro parameter names.
-			
-			$.each($radios, function(i, radio) {
-				var radioActiveAttr = $(radio).data('radioactive') || $(radio).attr('radioactive');
-				if (radioActiveAttr) {
-					var $container = jQuery(radioActiveAttr);
-					$container.find('label,input,select').toggleClass('disabled', !radio.checked);
-					$container.find('input,select').attr({disabled: !radio.checked});
-				}
-			})
-		})
-	}
-	
+
 
 	/*
 	 * .double-submit-protection class on a form will detect submission
@@ -443,19 +440,21 @@
 		 */
 		$('html').addClass($.fn.details.support ? 'details' : 'no-details');
 		$('details').details();
+		// different selector for open details depending on if it's native or polyfill.
+		var openSlctr = $.fn.details.support ? '[open]' : '.open';
 
-		// togglers
+		// togglers - relies on everything being in a section element
 		$(".tabula-page").on("click", ".open-all-details", function() {
-			$("html.no-details details:not(.open) summary").click();
-			$("html.details details:not([open]) summary").click();
-			$(".open-all-details").hide();
-			$(".close-all-details").show();
+			var $container = $(this).closest('section');
+			$container.find('details:not(' + openSlctr + ') summary').click();
+			$container.find(".open-all-details").hide();
+			$container.find(".close-all-details").show();
 		});
 		$(".tabula-page").on("click", ".close-all-details", function() {
-			$("html.no-details details.open summary").click();
-			$("html.details details[open] summary").click();
-			$(".close-all-details").hide();
-			$(".open-all-details").show();
+			var $container = $(this).closest('section');
+			$container.find('details' + openSlctr + ' summary').click();
+			$container.find(".close-all-details").hide();
+			$container.find(".open-all-details").show();
 		});
 
 		// collapsible striped section
@@ -580,7 +579,7 @@
 				var $cols = $t.find('.cols');
 				$cols.find('.gadget').appendTo($panes);
 				$cols.remove();
-				$t.find('.tutor').removeClass('span4');
+				$t.find('.agent').removeClass('span4');
 				$t.find('.gadget-only').children().unwrap();
 				$t.find('.tab-container').remove();
 				$t.find('.gadget, .tab-content, .tab-pane, .active').removeClass('gadget tab-content tab-pane active');
@@ -596,10 +595,10 @@
 				reset();
 				var $tabContainer = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
 				var $tabs = $tabContainer.find('ul');
-				$panes.children().each(function() {
+				$panes.children('li').each(function() {
 					var title = $(this).find('h4').html();
 					var link = '#' + $(this).attr('id');
-					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '">' + title + ' <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>');
+					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '"><span class="title">' + title + '</span> <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>');
 					$tabs.append($tab);
 				});
 				$lt.after($tabContainer);
@@ -611,15 +610,15 @@
 			$t.on('click', '.layout-tools .icon-th-large', function() { // gadgetify
 				reset();
 				var $cols = $('<div class="cols row-fluid"><ol class="ex-panes span6" /><ol class="ex-panes span6" /></div>');
-				var paneCount = $panes.children().length;
+				var paneCount = $panes.children('li').length;
 				$t.append($cols);
-				$panes.children().each(function(idx) {
+				$panes.children('li').each(function(idx) {
 					var $gadget = $(this).addClass('gadget');
 					var title = $(this).find('h4').html();
 					var link = '#' + $(this).attr('id');
-					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '" title="Click and drag to move">' + title + ' <i class="icon-minus-sign-alt" title="Hide ' + title + '"></i></a></li>');
+					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '" title="Click and drag to move"><span class="title">' + title + '</span> <i class="icon-minus-sign-alt" title="Hide ' + title + '"></i></a></li>');
 					var $gadgetHeaderTab = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
-					$(this).find('.tutor').removeClass('span4');
+					$(this).find('.agent').removeClass('span4');
 					$gadgetHeaderTab.children().append($tab);
 					$gadget.wrapInner('<div class="tab-content gadget-only" />').children().wrapInner('<div class="gadget-only tab-pane active" />');
 					$gadget.prepend($gadgetHeaderTab).find('.tab-container li a').tab('show');
@@ -686,6 +685,10 @@
 			// default to gadgets
 			$t.find('.layout-tools .icon-th-large').click();
 		}
+		
+		// drag and drop containers
+		$('.tabula-dnd').dragAndDrop();
+		$('.tabula-filtered-list').filteredList();
 	}); // on ready
 
 
@@ -701,4 +704,30 @@ jQuery(function($){
         var elementHeight = ($(window).height() - scrollable.offset().top) - 20;
         scrollable.css({'max-height':elementHeight,'overflow-y': 'auto'});
     });
+});
+
+// code for department settings - lives here as department settings is included in most modules
+jQuery(function($){
+	var $deptSettingsForm = $('.department-settings-form');
+	if (!$deptSettingsForm.length) return;
+
+	$deptSettingsForm.find('input#plagiarismDetection').slideMoreOptions($('#turnitin-options'), true);
+
+	$deptSettingsForm.find('input#turnitinExcludeSmallMatches').slideMoreOptions($('#small-match-options'), true);
+
+	$deptSettingsForm.find('#small-match-options').on('tabula.slideMoreOptions.hidden',  function() {
+		// what is `this` here? can it ever be checked?
+		if(!$(this).is(':checked')){
+			$('#small-match-options input[type=text]').val('0');
+		}
+	}).find('input').on('disable.radiocontrolled', function() {
+		this.value = '0';
+	});
+
+	$deptSettingsForm.find('input[name=disable-radio]').radioControlled({
+		parentSelector: '.control-group',
+		selector: '.controls',
+		mode: 'readonly'
+	});
+
 });

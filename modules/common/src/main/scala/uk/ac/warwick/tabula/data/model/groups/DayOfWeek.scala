@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
 import uk.ac.warwick.tabula.JavaImports._
 
 sealed abstract class DayOfWeek(val jodaDayOfWeek: Int) {
-	def name = toString()
+	def name = toString
 	def shortName = name.substring(0, 3)
 	
 	// For Spring, the silly bum
@@ -26,22 +26,9 @@ object DayOfWeek {
 
 	// lame manual collection. Keep in sync with the case objects above
 	val members = Seq(Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday)
-	
-	def unapply(i: Int): Option[DayOfWeek] = i match {
-		case DateTimeConstants.MONDAY => Some(Monday)
-		case DateTimeConstants.TUESDAY => Some(Tuesday)
-		case DateTimeConstants.WEDNESDAY => Some(Wednesday)
-		case DateTimeConstants.THURSDAY => Some(Thursday)
-		case DateTimeConstants.FRIDAY => Some(Friday)
-		case DateTimeConstants.SATURDAY => Some(Saturday)
-		case DateTimeConstants.SUNDAY => Some(Sunday)
-		case _ => None
-	}
-	
-	def apply(i: Int): DayOfWeek = i match {
-		case DayOfWeek(d) => d
-		case _ => throw new IllegalArgumentException("Invalid value for day of week: %d" format (i))
-	}
+	private[groups] def find(i: Int) = members find { _.jodaDayOfWeek == i }
+
+	def apply(i: Int): DayOfWeek = find(i) getOrElse { throw new IllegalArgumentException(s"Invalid value for day of week: $i") }
 }
 
 class DayOfWeekUserType extends AbstractBasicUserType[DayOfWeek, JInteger] {

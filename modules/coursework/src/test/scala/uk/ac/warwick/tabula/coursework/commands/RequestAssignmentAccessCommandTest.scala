@@ -22,8 +22,8 @@ class RequestAssignmentAccessCommandTest extends TestBase with FunctionalContext
 			cmd.userLookup = userLookup
 			cmd.assignment = assignment
 			cmd.module = assignment.module
-			cmd.apply()
-			val notifications = cmd.emit
+			val admins = cmd.apply()
+			val notifications = cmd.emit(admins)
 			notifications.size should be (1)
 		}
 	}
@@ -49,7 +49,7 @@ trait AssignmentFixture extends Mockito{
 	when(userLookup.getUserByUserId("admin1")).thenReturn(admin1)
 	when(userLookup.getUserByUserId("admin2")).thenReturn(admin2)
 
-	val ownersGroup = new UserGroup
+	val ownersGroup = UserGroup.ofUsercodes
 	ownersGroup.includeUsers = List("admin1", "admin2").asJava
 
 	val student = newTestUser("student")

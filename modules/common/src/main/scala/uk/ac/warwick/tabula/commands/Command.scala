@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.{NotificationHandling, EventHandling, Event, EventDescription}
 import uk.ac.warwick.tabula.JavaImports
 import uk.ac.warwick.tabula.services.MaintenanceModeService
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, RequiresPermissionsChecking, PermissionsChecking}
@@ -20,6 +19,8 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.helpers.Promises
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSetTemplate, MonitoringPoint, MonitoringPointSet}
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -28,17 +29,26 @@ import uk.ac.warwick.tabula.helpers.Promises
  * make things more maintainable. assignment() will automatically
  * record its module and department info.
  */
-trait Describable[A] {
+trait BaseDescribable[A] {
 	// describe the thing that's happening.
 	def describe(d: Description)
 	// optional extra description after the thing's happened.
 	def describeResult(d: Description, result: A) { describeResult(d) }
 	def describeResult(d: Description) {}
+}
+
+trait Describable[A] extends BaseDescribable[A] with KnowsEventName
+
+// Broken out from describable so that we can write classes which just implement describe
+trait KnowsEventName {
 	val eventName: String
 }
 
-trait Notifies[A] {
-	def emit: Seq[Notification[A]]
+/**
+ * Takes an A (usually the result of a Command) and generates notifications for Bs. Often, A == B.
+ */
+trait Notifies[A, B] {
+	def emit(result: A): Seq[Notification[B]]
 }
 trait Appliable[A]{
   def apply():A
@@ -70,7 +80,7 @@ with JavaImports with EventHandling with NotificationHandling with PermissionsCh
 		if (EventHandling.enabled) {
 			if (maintenanceCheck(this))
 				recordEvent(this) { notify(this) { benchmark() { applyInternal() } } }
-			else throw maintenanceMode.exception()
+			else throw maintenanceMode.exception(this)
 		} else {
 			notify(this) { benchmark() { applyInternal() } }
 		}
@@ -97,7 +107,15 @@ with JavaImports with EventHandling with NotificationHandling with PermissionsCh
 	*/
 	protected def applyInternal(): A
 
-	lazy val eventName = getClass.getSimpleName.replaceAll("Command$", "")
+	lazy val eventName = {
+	  val name = getClass.getName.replaceFirst(".*\\.","").replaceFirst("Command.*","")
+		if (name.contains("anon$")) {
+			// This can currently happen quite easily with caked-up commands. This code should
+			// try to work around that if possible, I'm just making it explode now so it's more obvious
+			throw new IllegalStateException(s"Command name calculated incorrectly as $name")
+		}
+		name
+	}
 
 	private def maintenanceCheck(callee: Describable[_]) = {
 		callee.isInstanceOf[ReadOnly] || !maintenanceMode.enabled
@@ -211,19 +229,19 @@ abstract class Description {
 	 * Record a Feedback item, plus its assignment, module, department
 	 */
 	def feedback(feedback: Feedback) = {
-		map += "feedback" -> feedback.id
+		property("feedback" -> feedback.id)
 		if (feedback.assignment != null) assignment(feedback.assignment)
 		this
 	}
 
-    /**
-     * Record a Submission item, plus its assignment, module, department
-     */
-    def submission(submission: Submission) = {
-        map += "submission" -> submission.id
-        if (submission.assignment != null) assignment(submission.assignment)
-        this
-    }	
+	/**
+	 * Record a Submission item, plus its assignment, module, department
+	 */
+	def submission(submission: Submission) = {
+		property("submission" -> submission.id)
+		if (submission.assignment != null) assignment(submission.assignment)
+		this
+	}
 	
 	/**
 	 * University IDs
@@ -287,19 +305,38 @@ abstract class Description {
 	 * Record module, plus department.
 	 */
 	def module(module: Module) = {
-		property("module" -> module.id)
 		if (module.department != null) department(module.department)
-		this
+		property("module" -> module.id)
 	}
 
 	def department(department: Department) = {
 		property("department", department.code)
-		this
 	}
 
 	def member(member: Member) = {
 		property("member", member.universityId)
-		this
+	}
+
+	def route(route: Route) = {
+		if (route.department != null) department(route.department)
+		property("route", route.code)
+	}
+
+	def monitoringPointSet(set: MonitoringPointSet) = {
+		if (set.route != null) route(set.route)
+		property("monitoringPointSet", set.id)
+	}
+
+	def monitoringPointSetTemplate(template: MonitoringPointSetTemplate) = {
+		property("monitoringPointSetTemplate", template.id)
+	}
+
+	def monitoringPoint(monitoringPoint: MonitoringPoint) = {
+		property("monitoringPoint", monitoringPoint.id)
+	}
+
+	def monitoringCheckpoint(monitoringPoint: MonitoringPoint) = {
+		property("monitoringCheckpoint", monitoringPoint.id)
 	}
 
 	// delegate equality to the underlying map
@@ -330,6 +367,12 @@ trait CommandInternal[A] {
 
 trait ComposableCommand[A] extends Command[A] with PerformsPermissionsChecking{
 	this:CommandInternal[A] with Describable[A] with RequiresPermissionsChecking=>
-
 }
 
+/**
+ * ComposableCommands often need to include a user in their state, for notifications etc. Depending on this trait allows
+ * that to be mocked easily for testing
+ */
+trait UserAware {
+	val user:User
+}

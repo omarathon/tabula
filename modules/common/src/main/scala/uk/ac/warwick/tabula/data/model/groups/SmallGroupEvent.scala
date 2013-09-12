@@ -46,11 +46,9 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	@NotNull
 	var day: DayOfWeek = _
 	
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalTimeAsString")
 	@NotNull
 	var startTime: LocalTime = _
 	
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentLocalTimeAsString")
 	@NotNull
 	var endTime: LocalTime = _
 	
@@ -63,7 +61,7 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 		
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "tutorsgroup_id")
-	var tutors: UserGroup = new UserGroup
+	var tutors: UserGroup = UserGroup.ofUsercodes
 	
 	def permissionsParents = Option(group).toStream
 	

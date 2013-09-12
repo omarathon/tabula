@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>40</version>
+		<version>41</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 

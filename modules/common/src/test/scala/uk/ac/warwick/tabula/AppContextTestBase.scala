@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
 import java.lang.reflect.Modifier
 import org.springframework.test.annotation.DirtiesContext
 import scala.language.implicitConversions
-
+import uk.ac.warwick.tabula.data.Transactions
 
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
@@ -35,13 +35,16 @@ abstract class AppContextTestBase extends TestBase with ContextSetup with Transa
 			.sortBy { _.getPackage.getName }
 	}
 
+
+}
+
+trait FieldAccessByReflection{
 	// see http://stackoverflow.com/questions/1589603/scala-set-a-field-value-reflectively-from-field-name
 	implicit class FieldReflector(ref: AnyRef) {
 		def getV(name: String): Any = ref.getClass.getMethods.find(_.getName == name).get.invoke(ref)
 		def setV(name: String, value: Any): Unit = ref.getClass.getMethods.find(_.getName == name + "_$eq").get.invoke(ref, value.asInstanceOf[AnyRef])
 	}
 }
-
 @RunWith(classOf[SpringJUnit4ClassRunner])
 @ContextConfiguration(locations=Array("/WEB-INF/properties-context.xml","/WEB-INF/persistence-context.xml"))
 @ActiveProfiles(Array("test"))
@@ -66,6 +69,8 @@ trait TransactionalTesting {
 	@Autowired var transactionManager:PlatformTransactionManager =_
 	
 	def session = sessionFactory.getCurrentSession
+
+	Transactions.enabled = true
 	
 	def transactional[A](f : TransactionStatus=>A) : A = {
 		val template = new TransactionTemplate(transactionManager)

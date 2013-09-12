@@ -20,7 +20,7 @@ class FileAttachment extends GeneratedId {
 	import FileAttachment._
 
 	@transient var fileDao = Wire.auto[FileDao]
-	
+
 	@Column(name="file_hash")
 	var hash: String = _
 
@@ -38,6 +38,11 @@ class FileAttachment extends GeneratedId {
 	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="extension_id")
 	var extension:Extension =_
+
+	// optional link to a Member Note
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="member_note_id")
+	var memberNote:MemberNote =_
 
 	// optional link to Meeting Record
 	@ManyToOne(fetch = FetchType.LAZY)
@@ -65,7 +70,6 @@ class FileAttachment extends GeneratedId {
 
 	var temporary: JBoolean = true
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var dateUploaded: DateTime = new DateTime
 
 	@transient private var _file: File = null
@@ -122,9 +126,9 @@ class FileAttachment extends GeneratedId {
 		}
 		case _ => false
 	}
-	
+
 	@transient lazy val mimeType: String = file match {
-		case null => null
+		case null => "application/octet-stream"
 		case f => detectMimeType(f)
 	}
 }

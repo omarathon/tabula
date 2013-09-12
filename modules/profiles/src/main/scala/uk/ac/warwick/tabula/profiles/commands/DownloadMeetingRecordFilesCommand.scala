@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.permissions._
 
 class DownloadMeetingRecordFilesCommand (val meetingRecord: MeetingRecord) extends Command[Option[RenderableFile]] with ReadOnly {
 
-  PermissionCheck(MeetingPermissions.ReadDetails.permissionFor(meetingRecord.relationship.relationshipType), meetingRecord)
+	PermissionCheck(Permissions.Profiles.MeetingRecord.ReadDetails(meetingRecord.relationship.relationshipType), meetingRecord)
 
 	var filename: String = _
 

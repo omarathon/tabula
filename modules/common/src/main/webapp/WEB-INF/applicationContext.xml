@@ -1,23 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:mvc="http://www.springframework.org/schema/mvc"
-	xmlns:p="http://www.springframework.org/schema/p"
-	xmlns:c="http://www.springframework.org/schema/c"
-	xmlns:task="http://www.springframework.org/schema/task"
-	xmlns:tx="http://www.springframework.org/schema/tx"
-	xmlns:util="http://www.springframework.org/schema/util"
-	xmlns:jdbc="http://www.springframework.org/schema/jdbc"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:mvc="http://www.springframework.org/schema/mvc"
+	   xmlns:p="http://www.springframework.org/schema/p"
+	   xmlns:task="http://www.springframework.org/schema/task"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+
 		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
 		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.1.xsd
 		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd
-		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
-		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.1.xsd
+
 		http://go.warwick.ac.uk/elab-schemas/filterstack http://go.warwick.ac.uk/elab-schemas/filters.xsd">
 
 	<import resource="properties-context.xml" />
@@ -114,7 +110,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssignmentIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.AssessmentGroupIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.FeedbackIdConverter"/>
-							<bean class="uk.ac.warwick.tabula.data.convert.FeedbackTemplateIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.FeedbackTemplateIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.SubmissionIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.MarkingWorkflowIdConverter"/>
@@ -125,15 +121,23 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.ExtensionIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
                 <bean class="uk.ac.warwick.tabula.data.convert.RoleDefinitionConverter"/>
-							<bean class="uk.ac.warwick.tabula.data.model.StringToMarkingMethod"/>
-							<bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
-							<bean class="uk.ac.warwick.tabula.data.convert.RelationshipTypeConverter" />
+				<bean class="uk.ac.warwick.tabula.data.model.StringToMarkingMethod"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.MeetingFormatConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.StudentRelationshipTypeConverter" />
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupEventIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.SmallGroupEventOccurrenceIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.DayOfWeekConverter"/>
                 <bean class="uk.ac.warwick.tabula.data.convert.NumberConverterFactory"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.StudentCourseDetailsConverter"/>
-
+	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSelfSignUpStateConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.RouteCodeConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.AbstractMonitoringPointSetIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetTemplateIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalDateConverter"/>
 	        </list>
 	    </property>
 	    <property name="formatters">
@@ -147,6 +151,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.MemberUniversityIdConverter"/>
 	        </list>
 	    </property>
 	</bean>
@@ -171,7 +176,7 @@
 			<mvc:mapping path="/**"/>
 			<bean class="uk.ac.warwick.tabula.system.ConditionalInterceptor" p:excludePath="/static/*">
 				<constructor-arg>
-					<bean class="org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor" autowire="byName" />
+					<bean class="org.springframework.orm.hibernate4.support.OpenSessionInViewInterceptor" autowire="byName" />
 				</constructor-arg>
 			</bean>
 		</mvc:interceptor>
@@ -325,6 +330,8 @@
 				<entry key="intervalFormatter"><bean class="uk.ac.warwick.tabula.helpers.IntervalFormatter" /></entry>
 				<entry key="durationFormatter"><bean class="uk.ac.warwick.tabula.helpers.DurationFormatterTag" /></entry>
 				<entry key="weekRangesFormatter"><bean class="uk.ac.warwick.tabula.helpers.WeekRangesFormatterTag" /></entry>
+				<entry key="weekRangesDumper"><bean class="uk.ac.warwick.tabula.helpers.WeekRangesDumperTag" /></entry>
+				<entry key="weekRangeSelectFormatter"><bean class="uk.ac.warwick.tabula.helpers.WeekRangeSelectFormatterTag" /></entry>
 			</map>
 		</property>
 	</bean>
@@ -349,7 +356,6 @@
 	<bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
 
 	<bean class="uk.ac.warwick.util.files.hash.impl.SHAFileHasher" />
-	<bean class="uk.ac.warwick.util.termdates.TermFactoryImpl" />
 
 	<bean id="imageResizer" class="uk.ac.warwick.util.files.imageresize.CachingImageResizer">
 		<constructor-arg>
@@ -423,12 +429,24 @@
 		<!-- This is the default embedded broker -->
 		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider" factory-method="createEmbeddedBroker" />
 	</beans>
-
-	<beans profile="dev,sandbox,production">
+	
+	<beans profile="sandbox">
+		<bean id="userLookupDelegate" class="uk.ac.warwick.tabula.services.SandboxUserLookup" autowire-candidate="false">
+			<constructor-arg>
+				<bean class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false"
+					p:ssosUrl="${ssoclient.ssos.url}"
+					p:groupServiceLocation="${ssoclient.webgroups.url}" />		
+			</constructor-arg>
+		</bean>
+	</beans>
+	
+	<beans profile="dev,production">
 		<bean id="userLookupDelegate" class="uk.ac.warwick.userlookup.UserLookup" autowire-candidate="false"
 				p:ssosUrl="${ssoclient.ssos.url}"
-				p:groupServiceLocation="${ssoclient.webgroups.url}" />
+				p:groupServiceLocation="${ssoclient.webgroups.url}" />		
+	</beans>
 
+	<beans profile="dev,sandbox,production">
 		<!-- This may still be an embedded broker (i.e. for dev) but probably has JMX enabled -->
 		<bean id="queueProvider" class="uk.ac.warwick.util.queue.activemq.ActiveMQQueueProvider">
 			<constructor-arg value="${activemq.broker}" />
