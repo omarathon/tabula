@@ -16,7 +16,7 @@ object ViewMeetingRecordCommand{
 			AutowiringMeetingRecordDaoComponent with
 			AutowiringRelationshipServiceComponent with
 			ViewMeetingRecordCommandPermissions with
-			Unaudited
+			ReadOnly with Unaudited
 }
 
 trait ViewMeetingRecordCommandState{

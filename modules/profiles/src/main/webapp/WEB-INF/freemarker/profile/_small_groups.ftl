@@ -1,7 +1,7 @@
 <section id="small-groups" class="clearfix" >
 	<script type="text/javascript">
 		jQuery(function($){
-			$('#small-groups').load('/groups/student/${profile.universityId}', function() {
+			$('#small-groups').load('/groups/student/${profile.universityId}', {ts: new Date().getTime()}, function() {
 				var pane = $('#sg-pane');
 				var title = pane.find('h4').html();
 				if (title != '' && title != undefined) {

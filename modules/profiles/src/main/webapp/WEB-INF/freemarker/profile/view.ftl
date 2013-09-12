@@ -197,7 +197,7 @@
 					$(".relationship-section").on("click", ".edit-agent-link, .add-agent-link", function(e) {
 						e.preventDefault();
 						var url = $(this).attr('href');
-						$("#modal-change-agent").load(url,function(){
+						$("#modal-change-agent").load(url,{ts: new Date().getTime()},function(){
 							$("#modal-change-agent").modal('show');
 						});
 					});
