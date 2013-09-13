@@ -36,7 +36,9 @@ case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefini
     Profiles.MeetingRecord.ReadDetails(PermissionsSelector.Any[StudentRelationshipType]),
     Profiles.MeetingRecord.Create(PermissionsSelector.Any[StudentRelationshipType]),
     Profiles.MeetingRecord.Update(PermissionsSelector.Any[StudentRelationshipType]),
-    Profiles.MeetingRecord.Delete(PermissionsSelector.Any[StudentRelationshipType])
+    Profiles.MeetingRecord.Delete(PermissionsSelector.Any[StudentRelationshipType]),
+
+		MonitoringPoints.View
 	)
 
 	GrantsScopelessPermission(

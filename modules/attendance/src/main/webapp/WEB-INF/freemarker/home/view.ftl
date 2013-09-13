@@ -115,7 +115,7 @@
 							</#if>
 						</#list>
 						<td>
-							<span class="missed-count <#if (missedCount > 2)>red</#if>">${missedCount}</span>
+							<span class="badge badge-<#if (missedCount > 2)>important<#else>warning</#if>">${missedCount}</span>
 						</td>
 					</tr>
 				</#list>

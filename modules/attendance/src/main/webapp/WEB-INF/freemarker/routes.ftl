@@ -30,6 +30,7 @@
 
 	<#macro signup_to_group set><@url page="/module/${set.module.code}/groups/${set.id}/signup" /></#macro>
 	<#macro leave_group set><@url page="/module/${set.module.code}/groups/${set.id}/leave" /></#macro>
+	<#macro profile profile><@url page="/view/${profile.universityId}" context="/profiles"/></#macro>
 	<#macro photo profile><@url page="/view/photo/${profile.universityId}.jpg" context="/profiles" /></#macro>
 	<#macro relationshipPhoto profile relationship><@url page="/view/photo/${profile.universityId}/${relationship.relationshipType.dbValue}/${relationship.agent}.jpg" context="/profiles" /></#macro>
 

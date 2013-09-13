@@ -292,6 +292,31 @@
 				}
 			}
 		}
+
+		#attendance {
+			.pull-right .form-inline { margin-bottom: 0px; }
+			h3, .missed-info { display: inline-block; }
+			h3 { margin-right: 20px; }
+			.missed-info {
+				color: @successText;
+				vertical-align: middle;
+				.missed {
+					color: @errorText;
+				}
+			}
+			.ellipsis {
+				.text-overflow()
+			}
+			.state {
+				color: white;
+				font-size: 90%;
+				.missed { padding: 2px 4px; background-color: @errorText; }
+				.passed { padding: 2px 4px; background-color: @successText; }
+			}
+			.row-fluid.point:hover {
+				background-color: @tableBackgroundHover
+			}
+		}
 	} // .profile container
 
 	#container {

@@ -27,12 +27,10 @@
 				<input type="hidden" name="monitoringPoint" value="${monitoringPoint.id}" />
 				<input type="hidden" value="<@url page="${returnTo}" />" />
 				<#list command.members?sort_by("lastName") as student>
-
-
 					<div class="row-fluid item-info clickable">
 						<label>
 							<div class="span10">
-
+								<a id="student-${student.universityId}" style="width: 0px; height: 0px; position: relative; top: -200px;"></a>
 								<@fmt.member_photo student "tinythumbnail" true />
 								<div class="full-height">${student.fullName}</div>
 							</div>
@@ -50,7 +48,7 @@
 				<div class="persist-footer save-row">
 					<div class="pull-right">
 						<input type="submit" value="Save" class="btn btn-primary">
-						<a class="btn" href="<@url page="${returnTo}" context="/attendance" />">Cancel</a>
+						<a class="btn" href="${returnTo}">Cancel</a>
 					</div>
 				</div>
 			</form>

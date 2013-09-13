@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 
 
 trait GroupMonitoringPointsByTerm extends TermServiceComponent {
-	def groupByTerm(monitoringPoints: Seq[MonitoringPoint], academicYear: AcademicYear) = {
+	def groupByTerm(monitoringPoints: Seq[MonitoringPoint], academicYear: AcademicYear): Map[String, Seq[MonitoringPoint]] = {
 		val approxStartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
 		val day = DayOfWeek.Thursday
 		lazy val weeksForYear = termService.getAcademicWeeksForYear(approxStartDate).toMap
