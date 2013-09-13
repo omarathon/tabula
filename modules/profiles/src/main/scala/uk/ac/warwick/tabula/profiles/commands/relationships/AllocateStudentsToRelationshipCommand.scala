@@ -122,8 +122,9 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	def allMembersRoutes = {
 		val routes = for {
 			member <- membersById.values
-			course <- member.mostSignificantCourseDetails}
-		yield course.route
+			course <- member.mostSignificantCourseDetails
+			if Option(course.route).isDefined
+		} yield course.route
 		routes.toSeq.sortBy(_.code).distinct
 	}
 
