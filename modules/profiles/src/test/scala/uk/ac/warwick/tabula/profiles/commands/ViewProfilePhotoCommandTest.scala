@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.{Mockito, ItemNotFoundException, TestBase}
 import uk.ac.warwick.tabula.data.model.{FileAttachment, StudentMember, Member}
+import scala.language.reflectiveCalls
 
 class ViewProfilePhotoCommandTest extends TestBase with Mockito {
 
