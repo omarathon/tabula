@@ -1,6 +1,7 @@
 <#escape x as x?html>
 
 <#assign can_record=can.do("MonitoringPoints.Record", command.studentCourseDetails) />
+<#assign is_the_student=currentUser.warwickId==command.studentCourseDetails.student.universityId />
 
 <#macro pointsInATerm term>
 	<#list command.monitoringPointsByTerm[term]?sort_by("week") as point>
@@ -47,12 +48,22 @@
 	<h3 class="section-title">Monitoring points</h3>
 	<div class="missed-info">
 		<#if command.missedCountByTerm?keys?size == 0 && (command.monitoringPointsByTerm?keys?size > 0) >
-			${command.studentCourseDetails.student.firstName} has attended all monitoring points.
+			<#if is_the_student>
+				You have attended all monitoring points.
+			<#else>
+				${command.studentCourseDetails.student.firstName} has attended all monitoring points.
+			</#if>
 		<#else>
 			<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
 				<#if command.missedCountByTerm[term]??>
 					<div class="missed">
-						<i class="icon-warning-sign"></i> ${command.studentCourseDetails.student.firstName} has missed
+						<i class="icon-warning-sign"></i>
+						<#if is_the_student>
+							You have
+						<#else>
+							${command.studentCourseDetails.student.firstName} has
+						</#if>
+						 missed
 						<#if command.missedCountByTerm[term] == 1>
 							1 monitoring point
 						<#else>

@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.attendance.commands.ProfileCommand
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.userlookup.User
 
 @Controller
 @RequestMapping(value = Array("/profile/{studentCourseDetails}/{academicYear}"))
@@ -16,8 +17,8 @@ class ProfileController extends AttendanceController {
 		= ProfileCommand(studentCourseDetails, academicYear)
 
 	@RequestMapping
-	def render(@ModelAttribute("command") cmd: Appliable[Unit]) = {
+	def render(@ModelAttribute("command") cmd: Appliable[Unit], currentUser: User) = {
 		cmd.apply()
-		Mav("home/profile").noLayoutIf(ajax)
+		Mav("home/profile", "currentUser" -> currentUser).noLayoutIf(ajax)
 	}
 }
