@@ -28,21 +28,14 @@ object ViewMonitoringPointSetsCommand {
 abstract class ViewMonitoringPointSetsCommand(
 		val dept: Department, val academicYearOption: Option[AcademicYear],
 		val routeOption: Option[Route], val pointSetOption: Option[MonitoringPointSet]
-	)	extends CommandInternal[Unit]	with ViewMonitoringPointSetsState {
+	)	extends CommandInternal[Unit]	with ViewMonitoringPointSetsState with MembersForPointSet {
 
 	self: MonitoringPointServiceComponent with ProfileServiceComponent with TermServiceComponent =>
 
 	override def applyInternal() = {
 		pointSetOption match {
 			case Some(pointSet) => {
-				val members = if(pointSet.year == null) {
-					profileService.getStudentsByRoute(pointSet.route)
-				} else {
-					profileService.getStudentsByRoute(
-						pointSet.route,
-						pointSet.academicYear
-					)
-				}
+				val members = getMembers(pointSet)
 				val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
 				membersWithMissedCheckpoints = monitoringPointService.getCheckedForWeek(members, pointSet, currentAcademicWeek).filter{
 					case (member, checkMap) =>
@@ -52,7 +45,7 @@ abstract class ViewMonitoringPointSetsCommand(
 						}
 				}
 			}
-			case _ =>
+			case None =>
 		}
 	}
 }
