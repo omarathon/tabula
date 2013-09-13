@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.util.matching.Regex
-import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.{BatchSize, AccessType, ForeignKey}
 import javax.persistence._
 import javax.validation.constraints._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.permissions.ModuleGrantedRole
-import org.hibernate.annotations.ForeignKey
 import uk.ac.warwick.tabula.roles.ModuleAssistantRoleDefinition
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import scala.collection.JavaConverters._
@@ -48,6 +47,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	def permissionsParents = Option(department).toStream
 
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@BatchSize(size=100)
 	var assignments: JList[Assignment] = JArrayList()
 
 	def hasLiveAssignments = Option(assignments) match {

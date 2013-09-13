@@ -28,11 +28,13 @@ class RequestInfo(
 	val ajax: Boolean = false,
 	val maintenance: Boolean = false,
 	val requestLevelCache: RequestLevelCache = new RequestLevelCache)
+	extends EarlyRequestInfo
 
 object RequestInfo {
 	private val threadLocal = new ThreadLocal[Option[RequestInfo]] {
 		override def initialValue = None
 	}
+
 	def fromThread = threadLocal.get
 	def open(info: RequestInfo) = threadLocal.set(Some(info))
 
@@ -40,9 +42,9 @@ object RequestInfo {
 		try { open(info); fn }
 		finally close
 
-	def close = {
-		fromThread map { _.requestLevelCache.shutdown }
-		threadLocal.remove
+	def close() {
+		fromThread foreach { _.requestLevelCache.shutdown() }
+		threadLocal.remove()
 	}
 	
 	def mappedPage = {
@@ -53,4 +55,39 @@ object RequestInfo {
 		
 		mappedPage
 	}
+}
+
+
+/**
+ * A limited interface of things that can be available earlier on in a
+ * request than the whole RequestInfo. This is specifically to work around
+ * a cyclic dependency where creating a CurrentUser needs to use caching,
+ * but the caching is in RequestInfo which needs the CurrentUser to be created.
+ */
+trait EarlyRequestInfo {
+	val requestLevelCache: RequestLevelCache
+}
+
+object EarlyRequestInfo {
+	private val threadLocal = new ThreadLocal[Option[EarlyRequestInfo]] {
+		override def initialValue = None
+	}
+
+	def open(info: EarlyRequestInfo) = threadLocal.set(Some(info))
+
+	/** Only useful for an edge case. Use #fromThread usually.
+		* If a full RequestInfo is available, this is used instead of
+		* the EarlyRequestInfo. This is so tests can set up a RequestInfo
+		* as normal and don't need updating.
+		*/
+	def fromThread = RequestInfo.fromThread orElse threadLocal.get
+
+	def close() {
+		fromThread foreach { _.requestLevelCache.shutdown() }
+		threadLocal.remove()
+	}
+}
+
+class EarlyRequestInfoImpl extends EarlyRequestInfo {
+	val requestLevelCache: RequestLevelCache = new RequestLevelCache()
 }

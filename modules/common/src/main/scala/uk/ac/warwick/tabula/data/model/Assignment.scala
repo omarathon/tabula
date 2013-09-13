@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.reflect.Manifest
-import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
+import org.hibernate.annotations._
 import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
@@ -20,11 +20,15 @@ import uk.ac.warwick.tabula.data.model.forms.WordCountField
 import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
-import org.hibernate.annotations.ForeignKey
 import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import scala.reflect._
+import javax.persistence.OrderBy
+import scala.Some
+import javax.persistence.CascadeType
+import javax.persistence.Entity
+import org.hibernate.annotations.AccessType
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"
@@ -122,20 +126,25 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	def permissionsParents = Option(module).toStream
 
 	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@OrderBy("submittedDate")
+	@BatchSize(size=200)
 	var submissions: JList[Submission] = JArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
+	@BatchSize(size=200)
 	var extensions: JList[Extension] = JArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
+	@BatchSize(size=200)
 	var feedbacks: JList[Feedback] = JArrayList()
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_template_id")
+	@BatchSize(size=200)
 	var feedbackTemplate: FeedbackTemplate = _
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
