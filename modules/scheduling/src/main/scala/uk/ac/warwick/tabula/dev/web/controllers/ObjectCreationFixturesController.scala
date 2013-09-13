@@ -146,3 +146,18 @@ class RelationshipCreationFixturesController {
 		cmd.apply()
 	}
 }
+
+@Controller
+@RequestMapping(Array("/fixtures/create/moduleRegistration"))
+class ModuleRegistrationFixturesController {
+
+	@ModelAttribute("moduleRegistrationCommand")
+	def getModuleRegistrationCommand(): Appliable[Unit] = {
+		ModuleRegistrationFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("moduleRegistrationCommand") cmd: Appliable[Unit]) {
+		cmd.apply()
+	}
+}
