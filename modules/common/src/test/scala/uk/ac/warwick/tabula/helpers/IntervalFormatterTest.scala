@@ -47,7 +47,7 @@ class IntervalFormatterTest extends TestBase {
 	@Test
 	def startOffTheHourOmitMinutes {
 		val open = new DateTime(2012,10,10,/**/9,15,0)
-		val close = new DateTime(2012,11,5,/**/12,00,0)
+		val close = new DateTime(2012,11,5,/**/12,0,0)
 		val formatter = new ConfigurableIntervalFormatter(Hour12OptionalMins,IncludeDays)
 
 		formatter.format(new Interval(open,close)) should be  ("9:15am, Wed 10<sup>th</sup> Oct - 12pm, Mon 5<sup>th</sup> Nov 2012")

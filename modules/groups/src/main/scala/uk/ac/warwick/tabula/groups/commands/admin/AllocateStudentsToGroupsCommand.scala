@@ -63,9 +63,12 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 
 	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
 	// Do not modify the returned value!
-	override def mappingById = (mapping.asScala.map {
-		case (group, users) => (group.id, users)
-	}).toMap
+	override def mappingById = 
+		(mapping.asScala
+		.filter { case (group, users) => group != null && users != null }
+		.map {
+			case (group, users) => (group.id, users)
+		}).toMap
 
 	// For use by Freemarker to get a simple map of university IDs to Member objects - permissions aware!
 	lazy val membersById = loadMembersById
@@ -129,7 +132,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 		val allocations = groupsExtractor.readXSSFExcelFile(file.dataStream)
 
 		// work out users to add to set (all users mentioned in spreadsheet - users currently in set)
-		val allocateUsers = allocations.asScala.toList.map(x => userLookup.getUserByWarwickUniId(x.universityId)).toSet
+		val allocateUsers = allocations.asScala.filter { _.universityId.hasText }.map(x => userLookup.getUserByWarwickUniId(x.universityId)).toSet
 		val usersToAddToSet = allocateUsers.filterNot(set.allStudents.toSet)
 		for(user <- usersToAddToSet) set.members.add(user)
 

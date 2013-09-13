@@ -23,7 +23,7 @@ object Routes {
 	def students(relationshipType: StudentRelationshipType) = "/%s/students" format (encoded(relationshipType.urlPart))		
 		
 	object relationships {
-		def apply(department: Department, relationshipType: StudentRelationshipType) = "/department/%s/%s/all" format (encoded(department.code), encoded(relationshipType.urlPart))
+		def apply(department: Department, relationshipType: StudentRelationshipType) = "/department/%s/%s" format (encoded(department.code), encoded(relationshipType.urlPart))
 		def missing(department: Department, relationshipType: StudentRelationshipType) = "/department/%s/%s/missing" format (encoded(department.code), encoded(relationshipType.urlPart))
 		def allocate(department: Department, relationshipType: StudentRelationshipType) = "/department/%s/%s/allocate" format (encoded(department.code), encoded(relationshipType.urlPart))
 		def template(department: Department, relationshipType: StudentRelationshipType) = "/department/%s/%s/template" format (encoded(department.code), encoded(relationshipType.urlPart))
