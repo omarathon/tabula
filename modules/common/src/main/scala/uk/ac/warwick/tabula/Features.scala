@@ -63,6 +63,7 @@ abstract class Features {
 	@Value("${features.arbitraryRelationships:true}") var arbitraryRelationships = defaults.arbitraryRelationships
 	@Value("${features.personalTimetables:false}") var personalTimetables = defaults.personalTimetables
 	@Value("${features.smallGroupTeaching.recordAttendance:false}") var smallGroupTeachingRecordAttendance = defaults.smallGroupTeachingRecordAttendance
+	@Value("${features.profiles.memberNotes:false}") var profilesMemberNotes = defaults.profilesMemberNotes
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -121,6 +122,8 @@ class FeaturesMessage {
 	@BeanProperty var arbitraryRelationships = true
 	@BeanProperty var personalTimetables = false
 	@BeanProperty var smallGroupTeachingRecordAttendance = false
+	@BeanProperty var profilesMemberNotes = false
+
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
