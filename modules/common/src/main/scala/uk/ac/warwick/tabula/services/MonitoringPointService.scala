@@ -28,9 +28,8 @@ trait MonitoringPointService {
 	def saveOrUpdate(template: MonitoringPointSetTemplate)
 	def getPointById(id : String) : Option[MonitoringPoint]
 	def getSetById(id : String) : Option[MonitoringPointSet]
-	def list(page: Int) : Seq[MonitoringPoint]
-	def getCheckedStudents(monitoringPoint : MonitoringPoint) : Seq[StudentMember]
-	def updateCheckedStudents(monitoringPoint: MonitoringPoint, members: Seq[StudentMember], user: CurrentUser): Seq[MonitoringCheckpoint]
+	def getStudents(monitoringPoint : MonitoringPoint) : Seq[(StudentMember, Boolean)]
+	def updateStudents(monitoringPoint: MonitoringPoint, changedStudentMembers: Seq[(StudentMember, Boolean)], user: CurrentUser): Seq[MonitoringCheckpoint]
 	def listTemplates : Seq[MonitoringPointSetTemplate]
 	def getTemplateById(id: String) : Option[MonitoringPointSetTemplate]
 	def deleteTemplate(template: MonitoringPointSetTemplate)
@@ -49,38 +48,32 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def saveOrUpdate(template: MonitoringPointSetTemplate) = monitoringPointDao.saveOrUpdate(template)
 	def getPointById(id: String): Option[MonitoringPoint] = monitoringPointDao.getPointById(id)
 	def getSetById(id: String): Option[MonitoringPointSet] = monitoringPointDao.getSetById(id)
-	def list(page: Int) : Seq[MonitoringPoint] = monitoringPointDao.list(page)
-	def getCheckedStudents(monitoringPoint: MonitoringPoint): Seq[StudentMember] = monitoringPointDao.getStudentsChecked(monitoringPoint)
+	def getStudents(monitoringPoint: MonitoringPoint): Seq[(StudentMember, Boolean)] = monitoringPointDao.getStudents(monitoringPoint)
 
-	def updateCheckedStudents(monitoringPoint: MonitoringPoint, members: Seq[StudentMember], user: CurrentUser): Seq[MonitoringCheckpoint] = {
-		clearCheckedStudents(monitoringPoint)
-
-	 val updatedCheckpoints  = members.map(member => {
-		 val checkpoint = monitoringPointDao.getCheckpoint(monitoringPoint, member) getOrElse {
-			 val newCheckpoint = new MonitoringCheckpoint()
-			 newCheckpoint.studentCourseDetail = member.studentCourseDetails.asScala.filter(
-				 scd => scd.route == monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route
-			 ).head  //todo
-			 newCheckpoint.point = monitoringPoint
-			 newCheckpoint.createdBy = user.apparentId
-			 newCheckpoint.createdDate = DateTime.now
-			 newCheckpoint
-		 }
-		 checkpoint.checked = true
-		 saveOrUpdate(checkpoint)
-		 checkpoint
-	 })
-
-		updatedCheckpoints
-	}
-
-	private def clearCheckedStudents(monitoringPoint: MonitoringPoint) = {
-		val checkpoints = monitoringPointDao.getCheckpoints(monitoringPoint: MonitoringPoint)
-		for (checkpoint <- checkpoints) {
-			checkpoint.checked = false
+	def updateStudents(monitoringPoint: MonitoringPoint, changedStudentMembers: Seq[(StudentMember, Boolean)], user: CurrentUser): Seq[MonitoringCheckpoint] = {
+		val checkpointsChanged = changedStudentMembers.map(student => {
+			val checkpoint = monitoringPointDao.getCheckpoint(monitoringPoint, student._1) getOrElse {
+				createNewCheckpoint(monitoringPoint, student._1, user)
+			}
+			checkpoint.checked = student._2
 			saveOrUpdate(checkpoint)
-		}
+			checkpoint
+		})
+
+		checkpointsChanged
 	}
+
+	private def createNewCheckpoint(monitoringPoint: MonitoringPoint, student: StudentMember, user: CurrentUser): MonitoringCheckpoint =  {
+		val newCheckpoint = new MonitoringCheckpoint()
+		newCheckpoint.studentCourseDetail = student.studentCourseDetails.asScala.filter(
+			scd => scd.route == monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route
+		).head
+		newCheckpoint.point = monitoringPoint
+		newCheckpoint.createdBy = user.apparentId
+		newCheckpoint.createdDate = DateTime.now
+		newCheckpoint
+	}
+
 
 	def listTemplates = monitoringPointDao.listTemplates
 
