@@ -52,8 +52,7 @@ abstract class ProfileCommand(val studentCourseDetails: StudentCourseDetails, va
 	private def applyForPointSet(pointSet: MonitoringPointSet) = {
 		monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, pointSet.academicYear)
 
-		//val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, pointSet.academicYear)
-		val currentAcademicWeek = 50
+		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, pointSet.academicYear)
 		checkpointState = monitoringPointService
 			.getCheckedForWeek(Seq(studentCourseDetails.student), pointSet, currentAcademicWeek)(studentCourseDetails.student)
 			.map{
@@ -73,7 +72,7 @@ trait ProfilePermissions extends RequiresPermissionsChecking with PermissionsChe
 	self: ProfileCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) = {
-		p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(studentCourseDetails.route))
+		p.PermissionCheck(Permissions.MonitoringPoints.View, mandatory(studentCourseDetails))
 	}
 
 }

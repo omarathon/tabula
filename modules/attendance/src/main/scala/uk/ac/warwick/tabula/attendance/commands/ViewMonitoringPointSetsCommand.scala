@@ -34,10 +34,10 @@ abstract class ViewMonitoringPointSetsCommand(
 
 	override def applyInternal() = {
 		pointSetOption match {
-			case Some(pointSet) => {
-				val members = getMembers(pointSet)
+			case Some(p) => {
+				val members = getMembers(p)
 				val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
-				membersWithMissedCheckpoints = monitoringPointService.getCheckedForWeek(members, pointSet, currentAcademicWeek).filter{
+				membersWithMissedCheckpoints = monitoringPointService.getCheckedForWeek(members, p, currentAcademicWeek).filter{
 					case (member, checkMap) =>
 						checkMap.exists{
 							case (_, Some(b)) => !b

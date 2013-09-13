@@ -1,5 +1,7 @@
 <#escape x as x?html>
 
+<#assign can_record=can.do("MonitoringPoints.Record", command.studentCourseDetails) />
+
 <#macro pointsInATerm term>
 	<#list command.monitoringPointsByTerm[term]?sort_by("week") as point>
 		<div class="item-info row-fluid term">
@@ -14,9 +16,25 @@
 						<#if checkpointState == "null">
 
 						<#elseif checkpointState == "true">
-							<span class="passed">Attended</span>
+							<span class="label label-success">Attended</span>
 						<#else>
-							<span class="missed">Missed</span>
+							<span class="label label-important">Missed</span>
+						</#if>
+					</div>
+					<div class="span2">
+						<#if can_record>
+							<#assign returnTo>
+								<@routes.profile command.studentCourseDetails.student />
+							</#assign>
+							<a href="<@url page="/${point.pointSet.route.department.code}/${point.id}/record?returnTo=${returnTo}"/>#student-${command.studentCourseDetails.student.universityId}"
+								<#if point.pointSet.sentToAcademicOffice>
+									class="btn btn-mini disabled" title="Monitoring information for this point has been submitted and can no longer be edited"
+								<#else>
+									class="btn btn-mini btn-primary"
+								</#if>
+							>
+								Record
+							</a>
 						</#if>
 					</div>
 				</div>
