@@ -3,6 +3,35 @@
 (function ($) {
 	$(function() {
 		$('.persist-area').fixHeaderFooter();
+
+		// toggleCheckboxes
+		// toggles the checkboxes, and returns the number selected
+		var toggleCheckboxes = function(areaClass) {
+			var allCheckboxes = $(areaClass + ' [type=checkbox]');
+			var checked = allCheckboxes.not(":checked").length;
+			if(checked == 0) {
+				setAllCheckboxes(false);
+				return 0;
+			} else {
+				setAllCheckboxes(true);
+				return allCheckboxes.length;
+			}
+
+			function setAllCheckboxes(setting) {
+				allCheckboxes.each(function() { this.checked = setting });
+			}
+		}
+
+		$('.select-all').click(function(e) {
+			e.preventDefault();
+			var link = this;
+			if(toggleCheckboxes(".attendees") > 0) {
+				$(link).text("(unselect all)");
+			} else {
+				$(link).text("(select all)");
+			}
+		});
+
 	});
 } (jQuery));
 
@@ -15,9 +44,11 @@
 	<div class="persist-area">
 		<div class="persist-header">
 			<h1>Record attendance for <#if (monitoringPoint.pointSet.year)??>Year ${monitoringPoint.pointSet.year}</#if> ${monitoringPoint.pointSet.route.code?upper_case} ${monitoringPoint.pointSet.route.name} : ${monitoringPoint.name}</h1>
+
+
 			<div class="row-fluid">
 				<div class="span10"></div>
-				<div class="span1">Attended</div>
+				<div class="span2 text-center">Attended <br /> <a href="#" class="select-all">(select all)</button></div>
 			</div>
 		</div>
 
@@ -36,10 +67,10 @@
 								<@fmt.member_photo student "tinythumbnail" true />
 								<div class="full-height">${student.fullName}</div>
 							</div>
-							<div class="span1 text-center">
+							<div class="span2 text-center">
 								<div class="full-height">
 									<#assign universityId = student.universityId />
-									<input type="checkbox" name="studentIds" value="${student.universityId}" <#if command.studentsChecked[universityId]!false>checked="checked"</#if>/>
+									<input type="checkbox" name="studentIds" class="collection-checkbox" value="${student.universityId}" <#if command.studentsChecked[universityId]!false>checked="checked"</#if>/>
 								</div>
 							</div>
 						</label>
