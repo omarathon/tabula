@@ -125,7 +125,6 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					if (importMemberCommands.isEmpty) logger.warn("Refreshing student " + membInfo.member.universityId + " but found no data to import.")
 					val members = importMemberCommands map { _.apply }
 					session.flush
-					for (member <- members) session.evict(member)
 
 					// get the user's module registrations
 					val importModRegCommands = moduleRegistrationImporter.getModuleRegistrationDetails(List(membInfo), Map(usercode -> user))
@@ -133,6 +132,8 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					val newModuleRegistrations = (importModRegCommands map { _.apply }).flatten
 					deleteOldModuleRegistrations(Seq(usercode), newModuleRegistrations)
 					session.flush
+
+					for (member <- members) session.evict(member)
 					for (modReg <- newModuleRegistrations) session.evict(modReg)
 
 				}
