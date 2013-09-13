@@ -261,6 +261,16 @@ abstract class Description {
 		if (assignment.module != null) module(assignment.module)
 		this
 	}
+
+	/**
+	 * Record member note, plus its student.
+	 */
+	def memberNote(memberNote: MemberNote) = {
+		property("membernote" -> memberNote.id)
+		if (memberNote.member != null) member(memberNote.member)
+		if (memberNote.creator != null) member(memberNote.creator)
+		this
+	}
 	
 	/**
 	 * Record small group set, plus its module and department if available.
