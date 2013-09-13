@@ -54,4 +54,25 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 		}
 	}
 
+	@Test def getMonitoringPointSetWithoutYear {
+		transactional { tx =>
+			routeDao.saveOrUpdate(route)
+			session.save(monitoringPointSet)
+			monitoringPointDao.findMonitoringPointSet(route, Some(1)) should be (None)
+			monitoringPointDao.findMonitoringPointSet(route, None) should be (Some(monitoringPointSet))
+		}
+	}
+
+	@Test def getMonitoringPointSetWithYear {
+		transactional { tx =>
+			routeDao.saveOrUpdate(route)
+			monitoringPointSet.year = 2
+			session.save(monitoringPointSet)
+			monitoringPointDao.findMonitoringPointSet(route, Some(2)) should be (Some(monitoringPointSet))
+			monitoringPointDao.findMonitoringPointSet(route, Some(1)) should be (None)
+			monitoringPointDao.findMonitoringPointSet(route, None) should be (None)
+		}
+	}
+
+
 }

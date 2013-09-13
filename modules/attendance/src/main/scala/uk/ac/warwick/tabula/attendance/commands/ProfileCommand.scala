@@ -17,7 +17,6 @@ object ProfileCommand {
 		with ProfilePermissions
 		with ProfileCommandState
 		with AutowiringTermServiceComponent
-		with AutowiringRouteServiceComponent
 		with AutowiringMonitoringPointServiceComponent
 		with ReadOnly with Unaudited
 }
@@ -26,19 +25,19 @@ object ProfileCommand {
 abstract class ProfileCommand(val studentCourseDetails: StudentCourseDetails, val academicYear: AcademicYear)
 	extends CommandInternal[Unit] with GroupMonitoringPointsByTerm with ProfileCommandState {
 
-	self: RouteServiceComponent with MonitoringPointServiceComponent =>
+	self: MonitoringPointServiceComponent =>
 
 	override def applyInternal() = {
 		studentCourseDetails.studentCourseYearDetails.asScala.find(_.academicYear == academicYear) match {
 			case None => throw new ItemNotFoundException
 			case Some(studentCourseYearDetail) => {
-				routeService.findMonitoringPointSet(
+				monitoringPointService.findMonitoringPointSet(
 					studentCourseDetails.route,
 					studentCourseYearDetail.academicYear,
 					Option(studentCourseYearDetail.yearOfStudy)
 				) match {
 					case None => {
-						routeService.findMonitoringPointSet(studentCourseDetails.route, studentCourseYearDetail.academicYear, None) match {
+						monitoringPointService.findMonitoringPointSet(studentCourseDetails.route, studentCourseYearDetail.academicYear, None) match {
 							case None => throw new ItemNotFoundException
 							case Some(pointSet) => applyForPointSet(pointSet)
 						}
