@@ -206,7 +206,10 @@
 					$(".relationship-section").on("click", ".edit-agent-link, .add-agent-link", function(e) {
 						e.preventDefault();
 						var url = $(this).attr('href');
-						$("#modal-change-agent").load(url,{ts: new Date().getTime()},function(){
+						
+						// TAB-1111 we pass the second arg as a string, not an object, because if you use an object
+						// it makes it a POST request
+						$("#modal-change-agent").load(url, 'ts=' + new Date().getTime(),function(){
 							$("#modal-change-agent").modal('show');
 						});
 					});

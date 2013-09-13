@@ -8,6 +8,8 @@ import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import scala.collection.JavaConverters._
 import org.mockito.Mockito._
+import uk.ac.warwick.tabula.helpers.Tap
+import Tap.tap
 
 class SmallGroupSetTest extends TestBase with Mockito{
 
@@ -26,7 +28,8 @@ class SmallGroupSetTest extends TestBase with Mockito{
     source.assessmentGroups =  JArrayList()
     source.format = SmallGroupFormat.Lab
     source.groups  = JArrayList(group)
-    source._membersGroup =  mock[UserGroup]
+    source._membersGroup =  UserGroup.ofUniversityIds.tap(_.includeUsers = JArrayList("test user"))
+
     source.membershipService = mock[AssignmentMembershipService]
     source.module = new Module
     source.name = "test name"
@@ -50,7 +53,8 @@ class SmallGroupSetTest extends TestBase with Mockito{
     clone.format should be (source.format)
     clone.groups.size should be(1)
     clone.groups.asScala.head should be(cloneGroup)
-    verify(source._membersGroup, times(1)).duplicate()
+		clone._membersGroup should not be(source._membersGroup)
+    clone._membersGroup.hasSameMembersAs(source._membersGroup) should be (true)
     clone.module should be (cloneModule)
     clone.name should be(source.name)
     clone.permissionsService should be(source.permissionsService)

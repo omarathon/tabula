@@ -13,11 +13,13 @@
 					<td><@fmt.course_description studentCourseDetails /></td>
 				</tr>
 			</#if>
-			<tr>
-				<th>Department</th>
-				<td>${(studentCourseDetails.department.name)!} (${(studentCourseDetails.department.code?upper_case)})
-				</td>
-			</tr>
+			<#if (studentCourseDetails.department)??>
+				<tr>
+					<th>Department</th>
+					<td>${(studentCourseDetails.department.name)!} (${((studentCourseDetails.department.code)!)?upper_case})
+					</td>
+				</tr>
+			</#if>
 			<tr>
 				<th>Intended award</th>
 					<td>${(studentCourseDetails.awardCode)!}</td>

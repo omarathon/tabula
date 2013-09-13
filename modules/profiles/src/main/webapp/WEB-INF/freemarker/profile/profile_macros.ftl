@@ -53,23 +53,6 @@
 			</a>
 		</#if>
 
-		<#if relationships?size == 0>
-			<p>
-				Not recorded
-				<#if can.do_with_selector("Profiles.StudentRelationship.Update", profile, relationshipType) && acceptsChanges>
-					<a class="edit-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
-						data-target="#modal-change-agent"
-						data-scj="${studentCourseDetails.scjCode}"
-
-					>
-					<i class="icon-edit"></i>
-					</a>
-
-				</#if>
-			</p>
-		</#if>
-
-
 		<div class="relationships clearfix row-fluid">
 		<#list relationships as relationship>
 
@@ -118,6 +101,17 @@
 	<#else>
 		<h4>${relationshipType.agentRole?cap_first}</h4>
 		<p class="text-warning"><i class="icon-warning-sign"></i> No ${relationshipType.agentRole} details are recorded in Tabula for the current year.</p>
+		
+		<#assign acceptsChanges = (studentCourseDetails.sprCode)?? && (studentCourseDetails.department)?? && !relationshipType.readOnly(studentCourseDetails.department) />
+
+		<#if can.do_with_selector("Profiles.StudentRelationship.Update", profile, relationshipType) && acceptsChanges>
+			<a class="btn edit-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
+					data-target="#modal-change-agent"
+					data-scj="${studentCourseDetails.scjCode}"
+				>
+				<i class="icon-plus"></i> Add a ${relationshipType.agentRole}
+			</a>
+		</#if>
 	</#if>
 </section>
 </#macro>

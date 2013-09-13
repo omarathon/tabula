@@ -31,13 +31,12 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 
 	@Test
 	def commandApply() {
-		val event = mock[SmallGroupEvent]
+		val event = new SmallGroupEvent
 		val week = 1
-		val user = new User("abcde")
 
 		val command = new RecordAttendanceCommand(event, week) with CommandTestSupport
 		command.attendees.add("abcde")
-		val occurrence = command.applyInternal()
+	  command.applyInternal()
 
 		there was no(command.userLookup).getUsersByUserIds(Seq("abcde").asJava)
 		there was one(command.smallGroupService).updateAttendance(event, week, Seq("abcde"))
