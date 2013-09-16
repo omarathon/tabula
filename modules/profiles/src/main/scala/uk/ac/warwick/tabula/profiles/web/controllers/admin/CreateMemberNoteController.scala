@@ -15,9 +15,7 @@ class CreateMemberNoteController extends BaseController {
 	validatesSelf[CreateMemberNoteCommand]
 
 	@ModelAttribute("command")
-	def createCommand(@PathVariable member: Member) = {
-		 new CreateMemberNoteCommand(member, user)
-	}
+	def createCommand(@PathVariable member: Member) = new CreateMemberNoteCommand(member, user)
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: CreateMemberNoteCommand) = {

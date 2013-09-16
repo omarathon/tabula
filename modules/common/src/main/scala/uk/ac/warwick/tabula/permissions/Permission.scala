@@ -309,5 +309,6 @@ object Permissions {
 
 	object MemberNotes {
 		case object Create extends Permission("Create member notes")
+		case object Delete extends Permission("Delete member notes")
 	}
 }

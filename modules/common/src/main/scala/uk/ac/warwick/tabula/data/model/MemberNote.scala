@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 @Entity @AccessType("field")
-class MemberNote extends GeneratedId with PermissionsTarget {
+class MemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget {
 
 	@ManyToOne
 	@JoinColumn(name="memberid")
