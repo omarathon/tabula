@@ -16,6 +16,7 @@ object SetMonitoringCheckpointCommand {
 		new SetMonitoringCheckpointCommand(monitoringPoint, user)
 			with ComposableCommand[Seq[MonitoringCheckpoint]]
 			with SetMonitoringCheckpointCommandPermissions
+			with SetMonitoringCheckpointCommandValidation
 			with SetMonitoringPointDescription
 			with SetMonitoringCheckpointState
 			with AutowiringProfileServiceComponent
@@ -25,7 +26,8 @@ object SetMonitoringCheckpointCommand {
 }
 
 abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoint, user: CurrentUser)
-	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with SelfValidating with MembersForPointSet {
+	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with MembersForPointSet {
+
 	self: SetMonitoringCheckpointState with ProfileServiceComponent with MonitoringPointServiceComponent =>
 	type UniversityId = String
 
@@ -50,6 +52,11 @@ abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoi
 		val changedStudentMembers = checkedStudentMembers.map(student => (student, true)) ++ uncheckedStudentMembers.map(student => (student, false))
 		monitoringPointService.updateStudents(monitoringPoint, changedStudentMembers, user)
 	}
+
+}
+
+trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
+	self: SetMonitoringCheckpointState =>
 
 	def validate(errors: Errors) {
 		if(monitoringPoint.sentToAcademicOffice) {

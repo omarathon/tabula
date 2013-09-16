@@ -1,12 +1,23 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.{TestBase, Mockito}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringPoint, MonitoringPointSet}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.services.{MonitoringPointService, MonitoringPointServiceComponent, ProfileService, ProfileServiceComponent}
 
 class SetMonitoringPointsCommandTest extends TestBase with Mockito {
+
+	trait CommandTestSupport extends ProfileServiceComponent with MonitoringPointServiceComponent
+		with SetMonitoringCheckpointCommandValidation with SetMonitoringCheckpointState {
+		val profileService = mock[ProfileService]
+		val monitoringPointService = mock[MonitoringPointService]
+
+		def apply(): Seq[MonitoringCheckpoint] = {
+			null
+		}
+	}
 
 	trait Fixture {
 		val set = new MonitoringPointSet
@@ -31,7 +42,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 	def validateValid() = withUser("cuslat") {
 		new Fixture {
 			monitoringPoint.sentToAcademicOffice = false
-			val command = SetMonitoringCheckpointCommand(monitoringPoint, currentUser)
+			val command = new SetMonitoringCheckpointCommand(monitoringPoint, currentUser) with CommandTestSupport
 
 			var errors = new BindException(command, "command")
 			command.validate(errors)
@@ -44,7 +55,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 	def validateSentToAcademicOfficeNoChanges() = withUser("cuslat") {
 		new Fixture {
 			monitoringPoint.sentToAcademicOffice = true
-			val command = SetMonitoringCheckpointCommand(monitoringPoint, currentUser )
+			val command = new SetMonitoringCheckpointCommand(monitoringPoint, currentUser) with CommandTestSupport
 
 			var errors = new BindException(command, "command")
 			command.validate(errors)
