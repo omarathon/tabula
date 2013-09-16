@@ -29,12 +29,12 @@ class Department extends GeneratedId
 
 	var name:String = null
 
-	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY)
 	@BatchSize(size=200)
-	var children:JList[Department] = JArrayList();
+	var children:JList[Department] = JArrayList()
 
 	@ManyToOne(fetch = FetchType.LAZY, optional=true)
-	var parent:Department = null;
+	var parent:Department = null
 
 	// No orphanRemoval as it makes it difficult to move modules between Departments.
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
