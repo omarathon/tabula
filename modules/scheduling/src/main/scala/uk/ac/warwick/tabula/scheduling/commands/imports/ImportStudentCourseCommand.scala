@@ -40,6 +40,7 @@ import org.hibernate.exception.ConstraintViolationException
 import uk.ac.warwick.tabula.scheduling.services.CourseImporter
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
+import uk.ac.warwick.tabula.data.model.CourseType
 
 class ImportStudentCourseCommand(resultSet: ResultSet,
 		importStudentCourseYearCommand: ImportStudentCourseYearCommand,
@@ -176,7 +177,10 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 
 		if (dept == null)
 			logger.warn("Trying to capture tutor for " + sprCode + " but department is null.")
-		else 
+
+		// Mark Hadley in Physics says "I don't think the University uses the term 'tutor' for PGRs"
+		// so by default excluding PGRs from the personal tutor import:
+		else if (CourseType.fromCourseCode(courseCode) != CourseType.PGR)
 			// is this student in a department that is set to import tutor data from SITS?
 			relationshipService
 				.getStudentRelationshipTypeByUrlPart("tutor") // TODO this is awful
@@ -190,9 +194,9 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 							val member = memberDao.getByUniversityId(tutorUniId) match {
 								case Some(mem: Member) => {
 									logger.info("Got a personal tutor from SITS! SprCode: " + sprCode + ", tutorUniId: " + tutorUniId)
-		
+
 									val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, sprCode)
-		
+
 									// Does this relationship already exist?
 									currentRelationships.find(_.agent == tutorUniId) match {
 										case Some(existing) => existing
@@ -202,10 +206,10 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 												rel.endDate = DateTime.now
 												relationshipService.saveOrUpdate(rel)
 											}
-		
+
 											// Save the new one
 											val rel = relationshipService.saveStudentRelationship(relationshipType, sprCode, tutorUniId)
-		
+
 											rel
 										}
 									}
@@ -218,6 +222,6 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 						case _ => logger.warn("Can't parse PRS code " + sprTutor1 + " for student " + sprCode)
 					}
 				}
+		}
 	}
-}
 
