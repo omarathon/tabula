@@ -1,4 +1,5 @@
 @import "bootstrap/variables.less";
+@import "bootstrap/mixins.less";
 
 @header-colour: @tabulaRedDark;
 
@@ -13,14 +14,12 @@
 }
 
 .ellipsis {
-	overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+	.text-overflow()
 }
 
-	.hint {
-		color: #818285;
-	}
+.hint {
+	color: #818285;
+}
 
 #container .routeAndYearPicker {
 	.span2 {
@@ -75,4 +74,26 @@
 #missed-monitoring-points {
 	.icon-ok { color: @successText; }
 	.icon-remove { color: @errorText; }
+}
+
+.monitoring-points-profile {
+	.pull-right .form-inline { margin-bottom: 0px; }
+	h3, .missed-info { display: inline-block; }
+	h3 { margin-right: 20px; }
+	.missed-info {
+		color: @successText;
+		vertical-align: middle;
+		.missed {
+			color: @errorText;
+		}
+	}
+	.state {
+		color: white;
+		font-size: 90%;
+		.missed { padding: 2px 4px; background-color: @errorText; }
+		.passed { padding: 2px 4px; background-color: @successText; }
+	}
+	.row-fluid.point:hover {
+		background-color: @tableBackgroundHover
+	}
 }
