@@ -41,7 +41,7 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 			command.week = existingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors should be (false)
+			errors.hasFieldErrors should be (right = false)
 		}
 	}
 
@@ -52,7 +52,7 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 			command.week = 2
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors should be (false)
+			errors.hasFieldErrors should be (right = false)
 		}
 	}
 
@@ -63,7 +63,7 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 			command.week = existingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors should be (false)
+			errors.hasFieldErrors should be (right = false)
 		}
 	}
 
@@ -74,7 +74,7 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 			command.week = otherExistingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors should be (true)
+			errors.hasFieldErrors should be (right = true)
 			errors.getFieldError("name") should not be null
 			errors.getFieldError("week") should not be null
 		}
@@ -87,7 +87,7 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 			command.week = 53
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors should be (true)
+			errors.hasFieldErrors should be (right = true)
 			errors.getFieldError("week") should not be null
 		}
 	}
@@ -99,7 +99,7 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 			command.week = 1
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors should be (true)
+			errors.hasFieldErrors should be (right = true)
 			errors.getFieldError("name") should not be null
 		}
 	}
@@ -107,12 +107,12 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 	@Test
 	def validateSentToAcademicOfficeNoChanges() {
 		new Fixture {
-			set.sentToAcademicOffice = true
+			monitoringPoint.sentToAcademicOffice = true
 			command.name = "New name"
 			command.week = existingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasErrors should be (true)
+			errors.hasErrors should be (right = true)
 		}
 	}
 
@@ -124,7 +124,7 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 			command.week = existingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasErrors should be (true)
+			errors.hasErrors should be (right = true)
 		}
 	}
 

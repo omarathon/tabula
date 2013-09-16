@@ -52,8 +52,8 @@ abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoi
 	}
 
 	def validate(errors: Errors) {
-		if(set.sentToAcademicOffice) {
-			errors.reject("monitoringCheckpoint.sentToAcademicOffice.set")
+		if(monitoringPoint.sentToAcademicOffice) {
+			errors.reject("monitoringCheckpoint.sentToAcademicOffice")
 		}
 
 		if(monitoringPoint == null) {

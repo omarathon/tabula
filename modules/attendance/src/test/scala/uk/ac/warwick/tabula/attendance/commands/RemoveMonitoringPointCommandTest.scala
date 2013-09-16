@@ -38,18 +38,18 @@ class RemoveMonitoringPointCommandTest extends TestBase with Mockito {
 			command.confirm = false
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors should be (true)
+			errors.hasFieldErrors should be (right = true)
 		}
 	}
 
 	@Test
 	def validateSentToAcademicOfficeNoChanges() {
 		new Fixture {
-			set.sentToAcademicOffice = true
+			monitoringPoint.sentToAcademicOffice = true
 			command.confirm = true
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasErrors should be (true)
+			errors.hasErrors should be (right = true)
 		}
 	}
 
@@ -60,7 +60,7 @@ class RemoveMonitoringPointCommandTest extends TestBase with Mockito {
 			command.confirm = true
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasErrors should be (true)
+			errors.hasErrors should be (right = true)
 		}
 	}
 

@@ -43,8 +43,8 @@ trait UpdateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 	self: UpdateMonitoringPointState with MonitoringPointServiceComponent =>
 
 	override def validate(errors: Errors) {
-		if (set.sentToAcademicOffice) {
-			errors.reject("monitoringPointSet.sentToAcademicOffice.points.update")
+		if (point.sentToAcademicOffice) {
+			errors.reject("monitoringPoint.sentToAcademicOffice.points.update")
 		} else if (monitoringPointService.countCheckpointsForPoint(point) > 0) {
 			errors.reject("monitoringPoint.hasCheckpoints.update")
 		}

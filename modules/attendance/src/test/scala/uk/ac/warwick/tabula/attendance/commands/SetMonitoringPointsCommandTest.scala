@@ -30,13 +30,12 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 	@Test
 	def validateValid() = withUser("cuslat") {
 		new Fixture {
-			set.sentToAcademicOffice = false
-			monitoringPoint.pointSet = set
+			monitoringPoint.sentToAcademicOffice = false
 			val command = SetMonitoringCheckpointCommand(monitoringPoint, currentUser)
 
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasErrors should be (false)
+			errors.hasErrors should be (right = false)
 		}
 	}
 
@@ -44,13 +43,12 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 	@Test
 	def validateSentToAcademicOfficeNoChanges() = withUser("cuslat") {
 		new Fixture {
-			set.sentToAcademicOffice = true
-			monitoringPoint.pointSet = set
+			monitoringPoint.sentToAcademicOffice = true
 			val command = SetMonitoringCheckpointCommand(monitoringPoint, currentUser )
 
 			var errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasErrors should be (true)
+			errors.hasErrors should be (right = true)
 		}
 	}
 

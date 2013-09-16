@@ -28,7 +28,7 @@
 								<@routes.profile command.studentCourseDetails.student />
 							</#assign>
 							<a href="<@url page="/${point.pointSet.route.department.code}/${point.id}/record?returnTo=${returnTo}"/>#student-${command.studentCourseDetails.student.universityId}"
-								<#if point.pointSet.sentToAcademicOffice>
+								<#if point.sentToAcademicOffice>
 									class="btn btn-mini disabled" title="Monitoring information for this point has been submitted and can no longer be edited"
 								<#else>
 									class="btn btn-mini btn-primary"

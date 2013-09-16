@@ -85,16 +85,5 @@ class CreateMonitoringPointCommandTest extends TestBase with Mockito {
 		}
 	}
 
-	@Test
-	def validateSentToAcademicOfficeNoChanges() {
-		new Fixture {
-			set.sentToAcademicOffice = true
-			command.name = "New name"
-			command.week = existingWeek
-			var errors = new BindException(command, "command")
-			command.validate(errors)
-			errors.hasErrors should be (true)
-		}
-	}
 
 }
