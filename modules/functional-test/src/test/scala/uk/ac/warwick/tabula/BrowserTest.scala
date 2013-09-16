@@ -104,6 +104,7 @@ object FunctionalTestProperties {
 	 */
 	lazy val Admin1 = userDetails("admin1", "Departmental admin")
 	lazy val Admin2 = userDetails("admin2", "Departmental admin")
+	lazy val Admin3 = userDetails("admin3", "Departmental admin")
 	lazy val ExtensionManager1 = userDetails("extman1", "Extension manager")
 	lazy val ExtensionManager2 = userDetails("extman2", "Extension manager")
 	lazy val Marker1 = userDetails("marker1", "Marker")

@@ -67,7 +67,7 @@ trait SetMonitoringCheckpointCommandPermissions extends RequiresPermissionsCheck
 	self: SetMonitoringCheckpointState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Manage, monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route)
+		p.PermissionCheck(Permissions.MonitoringPoints.Record, monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route)
 	}
 }
 

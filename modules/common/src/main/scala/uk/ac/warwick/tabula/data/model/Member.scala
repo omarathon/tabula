@@ -109,11 +109,14 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	/**
 	 * Get all departments that this student touches. This includes their home department,
 	 * the department running their course and any departments that they are taking modules in.
+	 *
+	 * For each department, enumerate any sub-departments that the member matches
 	 */
 	def touchedDepartments = {
 		def moduleDepts = registeredModules.map(x => x.department).distinct.toStream
 
-		(affiliatedDepartments #::: moduleDepts).distinct
+		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct
+		topLevelDepts flatMap(_.subDepartmentsContaining(this))
 	}
 
 	def permissionsParents = touchedDepartments

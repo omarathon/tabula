@@ -194,6 +194,12 @@
 						<#include "_module_registrations.ftl" />
 					</li>
 				</#if>
+
+				<#if features.attendanceMonitoring>
+					<li id="attendance-pane" style="display:none;">
+                    	<#include "_attendance.ftl" />
+                    </li>
+				</#if>
 			</ol>
 
 			<div id="modal" class="modal hide fade" style="display:none;"></div>

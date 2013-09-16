@@ -32,6 +32,9 @@ case class StudentRelationshipAgentRoleDefinition(relationshipType: StudentRelat
 		Profiles.MeetingRecord.Delete(relationshipType),
 
 		SmallGroups.Read,
-		Profiles.Read.SmallGroups
+		Profiles.Read.SmallGroups,
+
+		MonitoringPoints.Record,
+		MonitoringPoints.View
 	)
 }

@@ -37,6 +37,7 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		MarkingWorkflow.Delete,
 
 		MonitoringPoints.View,
+		MonitoringPoints.Record,
 		MonitoringPoints.Manage,
 
 		Department.ManageProfiles,

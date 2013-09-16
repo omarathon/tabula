@@ -58,7 +58,7 @@ abstract class AddMonitoringPointSetCommand(val dept: Department, val existingSe
 }
 
 trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPointValidation {
-	self: AddMonitoringPointSetState with RouteServiceComponent =>
+	self: AddMonitoringPointSetState =>
 
 	override def validate(errors: Errors) {
 		selectedRoutesAndYears.asScala.map{case (route, allYears) => {
