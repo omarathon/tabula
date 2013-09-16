@@ -107,7 +107,7 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 		customFormValues.find( _.name == field.name )
 	}
 
-	def onlineFeedbackComments: Option[SavedFormValue] = assignment.feedbackCommentsField.flatMap(getValue(_))
+	def onlineFeedbackComments: Option[SavedFormValue] = Option(assignment).flatMap( _.feedbackCommentsField.flatMap(getValue(_)))
 
 	// Getters for marker feedback either return the marker feedback or create a new empty one if none exist
 	def retrieveFirstMarkerFeedback:MarkerFeedback = {
