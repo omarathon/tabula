@@ -180,7 +180,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 
 		// Mark Hadley in Physics says "I don't think the University uses the term 'tutor' for PGRs"
 		// so by default excluding PGRs from the personal tutor import:
-		else if (CourseType.fromCourseCode(courseCode) != CourseType.PGR)
+		else if (courseCode != null && courseCode.length() > 0 && CourseType.fromCourseCode(courseCode) != CourseType.PGR)
 			// is this student in a department that is set to import tutor data from SITS?
 			relationshipService
 				.getStudentRelationshipTypeByUrlPart("tutor") // TODO this is awful
