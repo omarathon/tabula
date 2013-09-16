@@ -59,6 +59,9 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 		val department = newDepartmentFrom(Fixtures.TestDepartment)
 
+		// make sure we can see names, as uni ids are not exposed in the fixtures
+		department.showStudentName = true
+
 		// Import a new, better department
 		transactional() {
 			session.save(department)

@@ -32,15 +32,48 @@ trait CourseworkFixtures extends BrowserTest {
 			moduleCode: String,
 			assignmentName: String,
 			settings: Seq[String] => Unit = allFeatures,
-			members: Seq[String] = Seq(P.Student1.usercode, P.Student2.usercode))(callback: String => Unit) = as(P.Admin1) {
+			members: Seq[String] = Seq(P.Student1.usercode, P.Student2.usercode),
+			managers: Seq[String] = Seq(),
+			assistants: Seq[String] = Seq())(callback: String => Unit) = as(P.Admin1) {
 		click on linkText("Go to the Test Services admin page")
 		click on linkText("Show")
 
-		// Add a module manager for moduleCode
-		val info = getModuleInfo(moduleCode)
+		if ((assistants ++ managers).size > 0) {
+			// Optionally add module assistants/managers if requested
+			val info = getModuleInfo(moduleCode)
+			click on (info.findElement(By.className("module-manage-button")).findElement(By.partialLinkText("Manage")))
 
+			val editPerms = info.findElement(By.partialLinkText("Edit module permissions"))
+			eventually {
+				editPerms.isDisplayed should be (true)
+			}
+			click on (editPerms)
+
+			def pick(table: String, usercodes: Seq[String]) {
+				usercodes.foreach { u =>
+					click on cssSelector(s"${table} .pickedUser")
+					enter(u)
+					val typeahead = cssSelector(s"${table} .typeahead .active a")
+					eventuallyAjax {
+						find(typeahead) should not be (None)
+					}
+					click on typeahead
+					find(cssSelector(s"${table} form.add-permissions")).get.underlying.submit()
+				}
+			}
+
+			pick(".manager-table", managers)
+			pick(".assistant-table", assistants)
+
+			// as you were...
+			go to (Path("/coursework"))
+			click on linkText("Go to the Test Services admin page")
+			click on linkText("Show")
+		}
+
+		val info = getModuleInfo(moduleCode)
 		click on (info.findElement(By.className("module-manage-button")).findElement(By.partialLinkText("Manage")))
-		
+
 		val addAssignment = info.findElement(By.partialLinkText("Create new assignment"))
 		eventually {
 			addAssignment.isDisplayed should be (true)
