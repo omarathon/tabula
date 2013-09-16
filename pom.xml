@@ -443,9 +443,9 @@
 			</snapshots>
 		</repository>
 		<repository>
-				<id>milestone.repo.springsource.org</id>
-				<name>repo.springsource.org-milestone</name>
-				<url>https://repo.springsource.org/libs-milestone</url>
+				<id>milestone.repo.spring.io</id>
+				<name>repo.spring.io-milestone</name>
+				<url>https://repo.spring.io/libs-milestone</url>
 		</repository>
 	</repositories>
 
