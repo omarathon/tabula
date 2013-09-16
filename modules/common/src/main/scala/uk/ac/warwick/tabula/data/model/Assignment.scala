@@ -2,16 +2,17 @@ package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import scala.reflect.Manifest
-import org.hibernate.annotations._
+
 import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
+
+import org.hibernate.annotations.{ForeignKey, Filter, FilterDef, AccessType, BatchSize, Type, IndexColumn}
 import org.joda.time.DateTime
+
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model.forms._
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports._
@@ -20,15 +21,9 @@ import uk.ac.warwick.tabula.data.model.forms.WordCountField
 import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
-import javax.persistence._
-import javax.persistence.FetchType._
-import javax.persistence.CascadeType._
+
 import scala.reflect._
-import javax.persistence.OrderBy
-import scala.Some
-import javax.persistence.CascadeType
-import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
+
 
 object Assignment {
 	val defaultCommentFieldName = "pretext"

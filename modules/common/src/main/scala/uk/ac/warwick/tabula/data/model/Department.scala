@@ -3,11 +3,13 @@ package uk.ac.warwick.tabula.data.model
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import scala.xml.NodeSeq
-import org.hibernate.annotations.{BatchSize, AccessType, ForeignKey}
+
 import javax.persistence._
+
+import org.hibernate.annotations.{BatchSize, AccessType, ForeignKey}
+
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, WeekRange}
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
@@ -17,7 +19,6 @@ import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.data.model.CourseType._
 
 @Entity @AccessType("field")
 class Department extends GeneratedId

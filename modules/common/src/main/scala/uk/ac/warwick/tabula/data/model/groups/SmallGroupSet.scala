@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.data.model.groups
 
 import scala.collection.JavaConverters._
-import scala.collection.JavaConversions._
 
 import javax.persistence._
 import javax.persistence.CascadeType._
 import javax.validation.constraints.NotNull
 
-import org.hibernate.annotations._
 import org.joda.time.DateTime
+import org.hibernate.annotations.{Type, Filter, FilterDef, AccessType, BatchSize}
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -19,10 +18,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
-import scala.Some
-import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
-import javax.persistence.CascadeType
 
 object SmallGroupSet {
 	final val NotDeletedFilter = "notDeleted"

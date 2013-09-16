@@ -1,10 +1,14 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations._
-import org.joda.time.DateTime
-import org.joda.time.LocalDate
+import scala.collection.JavaConverters._
+
 import javax.persistence._
 import javax.persistence.CascadeType._
+
+import org.hibernate.annotations.{ForeignKey, BatchSize, Filter, Filters, FilterDefs, FilterDef, Type}
+import org.joda.time.DateTime
+import org.joda.time.LocalDate
+
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
@@ -15,12 +19,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.services.RelationshipService
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.Logging
-import scala.Some
-import javax.persistence.CascadeType
-import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
