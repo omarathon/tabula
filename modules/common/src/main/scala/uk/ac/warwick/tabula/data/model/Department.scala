@@ -163,7 +163,7 @@ class Department extends GeneratedId
 
 	var filterRuleName: String = _
 
-	def filterRule: FilterRule = FilterRule.withName(Option(filterRuleName).getOrElse("All"))
+	def filterRule: FilterRule = Option(filterRuleName).map(FilterRule.withName).getOrElse(AllMembersFilterRule)
 
 	def includesMember(m: Member): Boolean = Option(parent) match {
 		case None => filterRule.matches(m)
