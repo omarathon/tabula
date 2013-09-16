@@ -1,12 +1,9 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.Daoisms
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.tabula.data.{ DepartmentDao, Daoisms}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
@@ -14,8 +11,6 @@ import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.scheduling.services.ModuleImporter
 import uk.ac.warwick.tabula.scheduling.services.RouteInfo
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.CourseAndRouteService
 
@@ -27,6 +22,7 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 	var moduleImporter = Wire.auto[ModuleImporter]
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	var courseAndRouteService = Wire.auto[CourseAndRouteService]
+	var departmentDao = Wire[DepartmentDao]
 
 	def applyInternal() {
 		transactional() {
@@ -96,7 +92,7 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 		logger.info("Importing departments")
 		for (dept <- moduleImporter.getDepartments) {
 			moduleService.getDepartmentByCode(dept.code) match {
-				case None => session.save(newDepartmentFrom(dept))
+				case None => session.save(newDepartmentFrom(dept,departmentDao))
 				case Some(dept) => {debug("Skipping %s as it is already in the database", dept.code) }
 			}
 		}
@@ -115,10 +111,17 @@ object ImportModulesCommand {
 		module
 	}
 
-	def newDepartmentFrom(d: DepartmentInfo): Department = {
+	def newDepartmentFrom(d: DepartmentInfo, dao:DepartmentDao): Department = {
 		val department = new Department
 		department.code = d.code
 		department.name = d.name
+		d.parentCode foreach { code =>
+			// Don't try and handle a badly-specified code - just let the .get fail
+			department.parent =  dao.getByCode(code).get
+		}
+		d.filterName foreach  {name =>
+			department.filterRuleName = name
+		}
 		department
 	}
 

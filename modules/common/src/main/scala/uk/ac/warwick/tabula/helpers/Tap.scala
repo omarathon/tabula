@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula.helpers
+import scala.language.implicitConversions
 /**
  * K-Combinator. (AKA, a copy of ruby's Object.tap() method)
  *

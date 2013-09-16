@@ -1,0 +1,1 @@
+alter table department add filterrulename nvarchar2(128);

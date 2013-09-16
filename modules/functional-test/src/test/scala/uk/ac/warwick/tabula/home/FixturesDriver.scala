@@ -93,12 +93,13 @@ trait FixturesDriver {
 
 	}
 
-	def createRoute(routeCode:String, departmentCode:String, routeName:String ){
+	def createRoute(routeCode:String, departmentCode:String, routeName:String, degreeType:String="UG" ){
 		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/route"
 		val req = url(uri).POST << Map(
 			"routeCode" -> routeCode,
 			"departmentCode"->departmentCode,
-		  "routeName"->routeName)
+		  "routeName"->routeName,
+		  "degreeType"->degreeType)
 		http.when(_==200)(req >|)
 
 	}
@@ -109,6 +110,15 @@ trait FixturesDriver {
 		val req = url(uri).POST << Map(
 			"courseCode" -> courseCode,
 			"courseName"->courseName)
+		http.when(_==200)(req >|)
+	}
+
+	def registerStudentsOnModule(students:Seq[LoginDetails], moduleCode:String){
+		val uniIds = students.map(_.warwickId).mkString(",")
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/moduleRegistration"
+		val req = url(uri).POST << Map(
+			"universityIds" -> uniIds,
+			"moduleCode" -> moduleCode)
 		http.when(_==200)(req >|)
 
 	}
