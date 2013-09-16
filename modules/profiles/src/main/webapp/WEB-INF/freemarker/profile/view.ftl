@@ -171,6 +171,13 @@
 				<li id="course-pane">
 					<#include "_course_details.ftl" />
 				</li>
+
+
+				<#if features.profilesMemberNotes>
+					<li id="membernote-pane"">
+						<#include "_member_notes.ftl" />
+					</li>
+				</#if>
 				
 				<#list (studentCourseDetails.department.displayedStudentRelationshipTypes)![] as relationshipType>
 					<#if studentCourseDetails.hasRelationship(relationshipType) || relationshipType.displayIfEmpty(studentCourseDetails)>
@@ -186,7 +193,8 @@
 					</li>
 				</#if>
 			</ol>
-			
+
+			<div id="note-modal" class="modal hide fade" style="display:none;"></div>
 			<div id="modal" class="modal hide fade" style="display:none;"></div>
 
 				<div id="modal-change-agent" class="modal hide fade"></div>
@@ -203,6 +211,19 @@
 					});
 				});
 				</script>
+
+			<script type="text/javascript">
+				jQuery(function($){
+				// load edit member note
+					$(".membernote").on("click", ".membernote_create", function(e) {
+						e.preventDefault();
+						var url = $(this).attr('href');
+						$("#note-modal").load(url,function(){
+							$("#note-modal").modal('show');
+						});
+					});
+				});
+			</script>
 		</div>
 
 
