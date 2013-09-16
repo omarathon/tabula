@@ -7,11 +7,13 @@ import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.{StudentSignUp, Manual}
-import uk.ac.warwick.tabula.data.model.Department.{PostgraduateFilterRule, UndergraduateFilterRule, AllMembersFilterRule}
+import uk.ac.warwick.tabula.data.model.Department._
 import scala.util.{Failure, Try}
 import uk.ac.warwick.tabula.helpers.Tap
 import Tap.tap
 import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.data.model.Department.CompositeFilterRule
+import scala.util.Failure
 
 class DepartmentTest extends TestBase with Mockito {
 	
@@ -106,6 +108,14 @@ class DepartmentTest extends TestBase with Mockito {
 	}
 
 	@Test
+	def canStackFilters(){
+		val department = new Department
+		department.filterRuleName="UG,Y2"
+		department.filterRule should be(CompositeFilterRule(Seq(UndergraduateFilterRule,InYearFilterRule(2))))
+	}
+
+
+	@Test
 	def invalidFilterCodeThrows(){
 		val department = new Department
 		department.filterRuleName="Fribble"
@@ -116,6 +126,7 @@ class DepartmentTest extends TestBase with Mockito {
 		val undergraduate = new StudentMember().tap(m=>{
 			val scd = new StudentCourseDetails().tap(s=>{
 				s.mostSignificant = true
+				s.attachStudentCourseYearDetails(new StudentCourseYearDetails().tap(_.yearOfStudy =1))
 				s.route = new Route().tap(_.degreeType = DegreeType.Undergraduate)
 			})
 			m.studentCourseDetails = JArrayList(scd)
@@ -123,6 +134,7 @@ class DepartmentTest extends TestBase with Mockito {
 		val postgraduate= new StudentMember().tap(m=>{
 			val scd = new StudentCourseDetails().tap(s=>{
 				s.mostSignificant = true
+				s.attachStudentCourseYearDetails(new StudentCourseYearDetails().tap(_.yearOfStudy =7))
 				s.route = new Route().tap(_.degreeType = DegreeType.Postgraduate)
 			})
 			m.studentCourseDetails = JArrayList(scd)
@@ -171,6 +183,23 @@ class DepartmentTest extends TestBase with Mockito {
 
 		postgraduate.mostSignificantCourseDetails.get.route.degreeType = DegreeType.PGCE
 		rule.matches(postgraduate) should be(true)
+
+	}}
+
+	@Test
+	def YearOfStudyRuleAllowsMatchingYear(){new FilterRuleFixture {
+		val firstYearRule = new InYearFilterRule(1)
+		val secondYearRule = new InYearFilterRule(2)
+		firstYearRule.matches(undergraduate) should be (true)
+		firstYearRule.matches(postgraduate) should be(false)
+		firstYearRule.matches(notStudentMemeber) should be(false)
+
+		secondYearRule.matches(undergraduate) should be(false)
+		undergraduate.mostSignificantCourseDetails.get.latestStudentCourseYearDetails.yearOfStudy = 2
+		secondYearRule.matches(undergraduate) should be(true)
+		firstYearRule.matches(undergraduate) should be (false)
+
+
 
 	}}
 

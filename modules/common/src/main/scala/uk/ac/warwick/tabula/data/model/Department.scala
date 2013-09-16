@@ -170,7 +170,22 @@ class Department extends GeneratedId
 
 	var filterRuleName: String = _
 
-	def filterRule: FilterRule = Option(filterRuleName).map(FilterRule.withName).getOrElse(AllMembersFilterRule)
+	// filterRuleName can be
+	//  - null (in which case we return all members),
+	//  - the name of a single rule (in which case, return that rule)
+	//  - a comma-separated list of rule names (in which case, return a composite rule of all the named rules)
+	//
+	// Failure to parse the rule name(s) causes an exception to be thrown.
+	def filterRule: FilterRule = {
+		val rules: Option[FilterRule] = Option(filterRuleName).map(ruleNames =>
+			ruleNames.split(",").toList match {
+				case Nil => AllMembersFilterRule // don't think this can ever happen; split never returns Nil.
+				case singleRule :: Nil => FilterRule.withName(singleRule)
+				case rules: Seq[String] => CompositeFilterRule(rules map FilterRule.withName)
+			}
+		)
+		rules.getOrElse(AllMembersFilterRule)
+	}
 
 	def includesMember(m: Member): Boolean = Option(parent) match {
 		case None => filterRule.matches(m)
@@ -208,13 +223,14 @@ object Department {
 
 	object FilterRule {
 		def withName(name: String): FilterRule = {
-			Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule).find(_.name == name).get
+				val inYearRules = (1 until 9).map(InYearFilterRule(_))
+			(Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule) ++ inYearRules).find(_.name == name).get
+
 		}
 	}
 
 	sealed trait FilterRule {
 		val name: String
-
 		def matches(member: Member): Boolean
 	}
 
@@ -251,6 +267,23 @@ object Department {
 
 		def matches(member: Member) = true
 	}
+
+
+	case class InYearFilterRule(year:Int) extends FilterRule {
+		val name=s"Y$year"
+		def matches(member: Member) = member match{
+			case s:StudentMember => s.mostSignificantCourseDetails.map(
+				_.latestStudentCourseYearDetails.yearOfStudy == year)
+				.getOrElse(false)
+			case _=>false
+		}
+	}
+
+	case class CompositeFilterRule(rules:Seq[FilterRule]) extends FilterRule{
+		val name = rules.map(_.name).mkString(",")
+		def matches(member:Member) = rules.forall(_.matches(member))
+	}
+
 
 	object Settings {
 		val CollectFeedbackRatings = "collectFeedbackRatings"
