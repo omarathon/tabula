@@ -9,6 +9,7 @@ import org.hibernate.annotations.{BatchSize, AccessType, Type}
 import org.joda.time.DateTime
 
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 

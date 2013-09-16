@@ -5,7 +5,7 @@ import scala.collection.JavaConverters._
 import javax.persistence._
 import javax.persistence.CascadeType._
 
-import org.hibernate.annotations.{ForeignKey, BatchSize, Filter, Filters, FilterDefs, FilterDef, Type}
+import org.hibernate.annotations.{AccessType, ForeignKey, BatchSize, Filter, Filters, FilterDefs, FilterDef, Type}
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 
