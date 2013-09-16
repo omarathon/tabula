@@ -7,7 +7,7 @@ import javax.persistence._
 import javax.persistence.CascadeType._
 import javax.validation.constraints.NotNull
 
-import org.hibernate.annotations.{AccessType, Filter, FilterDef, Type}
+import org.hibernate.annotations._
 import org.joda.time.DateTime
 
 import uk.ac.warwick.spring.Wire
@@ -19,6 +19,10 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import scala.Some
+import javax.persistence.Entity
+import org.hibernate.annotations.AccessType
+import javax.persistence.CascadeType
 
 object SmallGroupSet {
 	final val NotDeletedFilter = "notDeleted"
@@ -96,6 +100,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
 	@JoinColumn(name = "set_id")
+	@BatchSize(size=200)
 	var groups: JList[SmallGroup] = JArrayList()
 
 	// only students manually added or excluded. use allStudents to get all students in the group set
@@ -106,6 +111,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 
 	// Cannot link directly to upstream assessment groups data model in sits is silly ...
 	@OneToMany(mappedBy = "smallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 
 	// converts the assessmentGroups to upstream assessment groups

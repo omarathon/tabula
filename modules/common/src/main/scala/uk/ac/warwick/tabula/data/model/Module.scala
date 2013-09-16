@@ -56,12 +56,14 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	}
 
 	@OneToMany(mappedBy = "module", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@BatchSize(size=200)
 	var groupSets: JList[SmallGroupSet] = JArrayList()
 
 	var active: Boolean = _
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
+	@BatchSize(size=200)
 	var grantedRoles:JList[ModuleGrantedRole] = JArrayList()
 
 	override def toString = "Module[" + code + "]"

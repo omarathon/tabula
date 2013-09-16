@@ -154,6 +154,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 */
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@IndexColumn(name = "position")
+	@BatchSize(size=200)
 	var fields: JList[FormField] = JArrayList()
 
 	@OneToOne(cascade = Array(ALL))
@@ -471,6 +472,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
+	@BatchSize(size=200)
 	var grantedRoles:JList[AssignmentGrantedRole] = JArrayList()
 
 	def toStringProps = Seq(

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model.groups
 
-import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
+import org.hibernate.annotations._
 import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
@@ -22,6 +22,9 @@ import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 import javax.validation.constraints.NotNull
 import scala.collection.JavaConverters._
+import javax.persistence.Entity
+import org.hibernate.annotations.AccessType
+import javax.persistence.CascadeType
 
 object SmallGroup {
 	final val NotDeletedFilter = "notDeleted"
@@ -57,6 +60,7 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
 	@JoinColumn(name = "group_id")
+	@BatchSize(size=200)
 	var events: JList[SmallGroupEvent] = JArrayList()
 	
 	def permissionsParents = Option(groupSet).toStream

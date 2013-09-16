@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.data.model
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import scala.xml.NodeSeq
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.ForeignKey
+import org.hibernate.annotations.{BatchSize, AccessType, ForeignKey}
 import javax.persistence._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -31,6 +30,7 @@ class Department extends GeneratedId
 	var name:String = null
 
 	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@BatchSize(size=200)
 	var children:JList[Department] = JArrayList();
 
 	@ManyToOne(fetch = FetchType.LAZY, optional=true)
@@ -38,18 +38,23 @@ class Department extends GeneratedId
 
 	// No orphanRemoval as it makes it difficult to move modules between Departments.
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
+	@BatchSize(size=200)
 	var modules:JList[Module] = JArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var feedbackTemplates:JList[FeedbackTemplate] = JArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var markingWorkflows:JList[MarkingWorkflow] = JArrayList()
 
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var customRoleDefinitions:JList[CustomRoleDefinition] = JArrayList()
 	
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY)
+	@BatchSize(size=200)
 	var routes:JList[Route] = JArrayList()
 
 	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse(false)
@@ -159,6 +164,7 @@ class Department extends GeneratedId
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
+	@BatchSize(size=200)
 	var grantedRoles:JList[DepartmentGrantedRole] = JArrayList()
 
 	var filterRuleName: String = _
