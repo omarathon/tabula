@@ -27,6 +27,8 @@ trait FeedbackService {
 	def getFeedbackByUniId(assignment: Assignment, uniId: String): Option[Feedback]
 	def save(feedback: Feedback)
 	def delete(feedback: Feedback)
+	def save(feedback: MarkerFeedback)
+	def delete(feedback: MarkerFeedback)
 }
 
 @Service(value = "feedbackService")
@@ -75,6 +77,14 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 	}
 
 	def delete(feedback: Feedback) = transactional() {
+		dao.delete(feedback)
+	}
+
+	def save(feedback: MarkerFeedback) = transactional() {
+		dao.save(feedback)
+	}
+
+	def delete(feedback: MarkerFeedback) = transactional() {
 		dao.delete(feedback)
 	}
 }

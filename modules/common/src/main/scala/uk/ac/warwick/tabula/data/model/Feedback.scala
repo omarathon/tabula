@@ -13,8 +13,46 @@ import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 import java.util.HashSet
 
 
+trait FeedbackAttachments {
+
+	var attachments: JList[FileAttachment]
+	def addAttachment(attachment: FileAttachment)
+
+	def hasAttachments: Boolean = !attachments.isEmpty
+
+	def mostRecentAttachmentUpload =
+		if (attachments.isEmpty) null
+		else attachments.maxBy { _.dateUploaded }.dateUploaded
+
+	/* Adds new attachments to the feedback. Ignores feedback that has already been uploaded and overwrites attachments
+	   with the same name as exiting attachments. Returns the attachments that wern't ignored. */
+	def addAttachments(fileAttachments: Seq[FileAttachment]) : Seq[FileAttachment] = fileAttachments.filter { a =>
+		val isIdentical = attachments.exists(f => f.name == a.name && f.isDataEqual(a))
+		if (!isIdentical) {
+			// if an attachment with the same name as this one exists then replace it
+			val duplicateAttachment = attachments.find(_.name == a.name)
+			duplicateAttachment.foreach(removeAttachment(_))
+			addAttachment(a)
+		}
+		!isIdentical
+	}
+
+	def removeAttachment(attachment: FileAttachment) = {
+		attachment.feedback = null
+		attachment.markerFeedback = null
+		attachments.remove(attachment)
+	}
+
+	def clearAttachments() {
+		for(attachment <- attachments){
+			attachment.feedback = null
+		}
+		attachments.clear()
+	}
+}
+
 @Entity @AccessType("field")
-class Feedback extends GeneratedId with PermissionsTarget {
+class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget {
 
 	def this(universityId: String) {
 		this()
@@ -87,7 +125,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	}
 
 	// if the feedback has no marks or attachments then it is a placeholder for marker feedback
-	def isPlaceholder = !(hasMarkOrGrade || hasAttachments)
+	def isPlaceholder = !(hasMarkOrGrade || hasAttachments || hasOnlineFeedback)
 
 	def hasMarkOrGrade = hasMark || hasGrade
 
@@ -100,8 +138,6 @@ class Feedback extends GeneratedId with PermissionsTarget {
 		case Some(string) => true
 		case None => false
 	}
-
-	def hasAttachments: Boolean = !attachments.isEmpty
 
 	def hasOnlineFeedback: Boolean = onlineFeedbackComments.isDefined
 
@@ -117,42 +153,11 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	@OneToMany(mappedBy = "feedback", fetch = FetchType.LAZY, cascade=Array(ALL))
 	var attachments: JList[FileAttachment] = JArrayList()
 
-	def mostRecentAttachmentUpload =
-		if (attachments.isEmpty) null
-		else attachments.maxBy { _.dateUploaded }.dateUploaded
-
-	/* Adds new attachments to the feedback. Ignores feedback that has already been uploaded and overwrites attachments
-	   with the same name as exiting attachments. Returns the attachments that wern't ignored. */
-	def addAttachments(fileAttachments: Seq[FileAttachment]) : Seq[FileAttachment] = fileAttachments.filter { a =>
-		val isIdentical = attachments.exists(f => f.name == a.name && f.isDataEqual(a))
-		if (!isIdentical) {
-			// if an attachment with the same name as this one exists then replace it
-			val duplicateAttachment = attachments.find(_.name == a.name)
-			duplicateAttachment.foreach(removeAttachment(_))
-			addAttachment(a)
-		}
-		!isIdentical
-	}
-
-
-
 	def addAttachment(attachment: FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
 		attachment.temporary = false
 		attachment.feedback = this
 		attachments.add(attachment)
-	}
-
-	def removeAttachment(attachment: FileAttachment) = {
-		attachment.feedback = null
-		attachments.remove(attachment)
-	}
-
-	def clearAttachments() {
-		for(attachment <- attachments){
-			attachment.feedback = null
-		}
-		attachments.clear()
 	}
 
 	/**

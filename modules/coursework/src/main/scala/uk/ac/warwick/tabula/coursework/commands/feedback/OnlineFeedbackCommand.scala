@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
-import uk.ac.warwick.tabula.data.model.{Submission, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Assignment, Module}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.{FeedbackServiceComponent, SubmissionServiceComponent, AutowiringFeedbackServiceComponent, AutowiringSubmissionServiceComponent}
-import scala.Some
-import uk.ac.warwick.tabula.coursework.commands.feedback.StudentFeedbackGraph
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.coursework.commands.assignments.Student
+import scala.Some
+import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 
 object OnlineFeedbackCommand {
 	def apply(module: Module, assignment: Assignment) =
@@ -36,10 +35,56 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 				case Some(f) => (true, f.released.booleanValue)
 				case None => (false, false)
 			}
-			new StudentFeedbackGraph(student, hasSubmission, hasFeedback, hasPublishedFeedback)
+			new StudentFeedbackGraph(student, hasSubmission, hasFeedback, hasPublishedFeedback, false)
 		}
 	}
 }
+
+object OnlineMarkerFeedbackCommand {
+	def apply(module: Module, assignment: Assignment, marker: User) =
+		new OnlineMarkerFeedbackCommand(module, assignment, marker)
+			with ComposableCommand[Seq[StudentFeedbackGraph]]
+			with OnlineFeedbackPermissions
+			with AutowiringUserLookupComponent
+			with AutowiringSubmissionServiceComponent
+			with AutowiringFeedbackServiceComponent
+			with Unaudited
+			with ReadOnly
+}
+
+abstract class OnlineMarkerFeedbackCommand(val module: Module, val assignment: Assignment, val marker: User)
+	extends CommandInternal[Seq[StudentFeedbackGraph]]
+	with Appliable[Seq[StudentFeedbackGraph]] with OnlineFeedbackState {
+
+	self: SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent =>
+
+	def applyInternal() = {
+
+		val submissions = assignment.markingWorkflow.getSubmissions(assignment, marker)
+
+		submissions.filter(_.isReleasedForMarking).map { submission =>
+
+			val student = userLookup.getUserByWarwickUniId(submission.universityId)
+			val hasSubmission = true
+			val feedback = feedbackService.getFeedbackByUniId(assignment, submission.universityId)
+			val markerFeedback = assignment.getMarkerFeedback(submission.universityId, marker)
+
+			val (hasFeedback, hasCompletedFeedback) = markerFeedback match {
+				case Some(mf) => {
+					(mf.state == null, mf.state == MarkingCompleted)
+				}
+				case None => (false, false)
+			}
+
+			val hasPublishedFeedback = feedback match {
+				case Some(f) => f.released.booleanValue
+				case None => false
+			}
+			new StudentFeedbackGraph(student, hasSubmission, hasFeedback, hasPublishedFeedback, hasCompletedFeedback)
+		}
+	}
+}
+
 
 trait OnlineFeedbackPermissions extends RequiresPermissionsChecking {
 
@@ -58,8 +103,9 @@ trait OnlineFeedbackState {
 
 
 case class StudentFeedbackGraph(
-	val student: User,
-	val hasSubmission: Boolean,
-	val hasFeedback: Boolean,
-	val hasPublishedFeedback: Boolean
+	student: User,
+	hasSubmission: Boolean,
+	hasFeedback: Boolean,
+	hasPublishedFeedback: Boolean,
+	hasCompletedFeedback: Boolean
 )

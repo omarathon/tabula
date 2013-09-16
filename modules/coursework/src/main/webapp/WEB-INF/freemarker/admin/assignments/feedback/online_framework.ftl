@@ -20,6 +20,8 @@
 					</#if>
 					<#if graph.hasPublishedFeedback>
 						<div class="label label-success">Published</div>
+					<#elseif graph.hasCompletedFeedback>
+						<div class="label label-success">Marking completed</div>
 					<#elseif graph.hasFeedback>
 						<div class="label label-warning marked">Marked</div>
 					</#if>
@@ -74,7 +76,7 @@
 			};
 
 			$('#online-marking-table').expandingTable({
-				contentUrl: '<@routes.onlinemarking assignment />',
+				contentUrl: '${info.requestedUri!""}',
 				useIframe: true,
 				tableSorterOptions: tsOptions
 			});
@@ -218,6 +220,6 @@
 			});
 		</script>
 	<#else>
-		<p>There are no students recorded in Tabula for this assignment.</p>
+		<p>There are no submissions to mark for this assignment.</p>
 	</#if>
 </#escape>
