@@ -12,12 +12,13 @@ import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.commands.SelfValidating
 
 @RequestMapping(Array("/{department}/{monitoringPoint}/record"))
 @Controller
 class SetMonitoringCheckpointController extends AttendanceController {
 
-	validatesSelf[SetMonitoringCheckpointCommand]
+	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
 	def command(@PathVariable monitoringPoint: MonitoringPoint, user: CurrentUser) = {

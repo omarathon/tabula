@@ -29,4 +29,6 @@ class MonitoringPoint extends GeneratedId {
 	@NotNull
 	var week: Int = _
 
+	var sentToAcademicOffice: Boolean = false
+
 }

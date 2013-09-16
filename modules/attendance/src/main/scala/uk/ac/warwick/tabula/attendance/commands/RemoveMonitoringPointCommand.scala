@@ -35,8 +35,8 @@ trait RemoveMonitoringPointValidation extends SelfValidating {
 	self: RemoveMonitoringPointState with MonitoringPointServiceComponent =>
 
 	override def validate(errors: Errors) {
-		if (set.sentToAcademicOffice) {
-			errors.reject("monitoringPointSet.sentToAcademicOffice.points.remove")
+		if (point.sentToAcademicOffice) {
+			errors.reject("monitoringPoint.sentToAcademicOffice.points.remove")
 		} else if (monitoringPointService.countCheckpointsForPoint(point) > 0) {
 			errors.reject("monitoringPoint.hasCheckpoints.remove")
 		}
