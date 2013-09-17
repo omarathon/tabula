@@ -152,6 +152,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.MemberNoteIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.MemberUniversityIdConverter"/>
 	        </list>
 	    </property>

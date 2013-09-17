@@ -6,17 +6,17 @@ import uk.ac.warwick.tabula.data.model.{MemberNote, Member}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.commands.{SelfValidating, UploadedFile, Description, Command}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{MemberNoteService, ProfileService}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.joda.time.DateTime
 import org.springframework.validation.{Errors, BindingResult}
 
-class CreateMemberNoteCommand(val member: Member, val submitter: CurrentUser) extends Command[MemberNote] with BindListener with Daoisms with SelfValidating {
+class CreateMemberNoteCommand(val member: Member, val submitter: CurrentUser) extends Command[MemberNote] with BindListener with SelfValidating {
 
 	var profileService = Wire[ProfileService]
+	var memberNoteService = Wire[MemberNoteService]
 
 	PermissionCheck(Permissions.MemberNotes.Create, member)
 
@@ -34,21 +34,22 @@ class CreateMemberNoteCommand(val member: Member, val submitter: CurrentUser) ex
 		TODO somehow stop this being callable
 		*/
 	protected def applyInternal(): MemberNote = transactional() {
-		   val memberNote = new MemberNote
-		   memberNote.note = note
-		   memberNote.title = title
-		   memberNote.creationDate = DateTime.now
-		   memberNote.lastUpdatedDate = memberNote.creationDate
-		   memberNote.creator = profileService.getMemberByUniversityId(submitter.universityId).getOrElse(null)
-		   memberNote.member = member
-			if (!file.attached.isEmpty) {
-				for (attachment <- file.attached) {
-					memberNote.addAttachment(attachment)
-				}
+		val memberNote = new MemberNote
+		memberNote.note = note
+		memberNote.title = title
+		memberNote.creationDate = DateTime.now
+		memberNote.lastUpdatedDate = memberNote.creationDate
+		memberNote.creator = profileService.getMemberByUniversityId(submitter.universityId).getOrElse(null)
+		memberNote.member = member
+		if (!file.attached.isEmpty) {
+			for (attachment <- file.attached) {
+				memberNote.addAttachment(attachment)
 			}
-			 session.saveOrUpdate(memberNote)
+		}
 
-		   memberNote
+		memberNoteService.saveOrUpdate(memberNote)
+
+		memberNote
 	}
 
 	def validate(errors:Errors){
