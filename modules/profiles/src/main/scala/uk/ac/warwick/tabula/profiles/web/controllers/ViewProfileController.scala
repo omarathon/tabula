@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.{SmallGroupService, UserLookupService}
+import uk.ac.warwick.tabula.services.{MemberNoteService, SmallGroupService, UserLookupService, RelationshipService}
 import uk.ac.warwick.tabula.data.model.{MeetingRecord, Member, StudentMember}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
@@ -18,7 +18,6 @@ import uk.ac.warwick.tabula.commands.{Appliable, ViewViewableCommand}
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.services.RelationshipService
 
 class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
 
@@ -34,6 +33,7 @@ class ViewProfileController extends ProfilesController {
 
 	var userLookup = Wire[UserLookupService]
 	var smallGroupService = Wire[SmallGroupService]
+	var memberNoteService = Wire[MemberNoteService]
 
 	@ModelAttribute("searchProfilesCommand")
 	def searchProfilesCommand =
@@ -85,6 +85,9 @@ class ViewProfileController extends ProfilesController {
 		// the number of small groups that the student is a member of
 		val numSmallGroups = smallGroupService.findSmallGroupsByStudent(profiledStudentMember.asSsoUser).size
 
+		//Get all membernotes for student
+		val memberNotes = memberNoteService.list(member)
+
 		Mav("profile/view",
 			"profile" -> profiledStudentMember,
 			"viewer" -> currentMember,
@@ -92,6 +95,7 @@ class ViewProfileController extends ProfilesController {
 			"meetingsById" -> relationshipMeetings.map { case (relType, meetings) => (relType.id, meetings) },
 			"openMeeting" -> openMeeting,
 			"numSmallGroups" -> numSmallGroups,
+			"memberNotes" -> memberNotes,
 			"agent" -> agent)
 		.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}

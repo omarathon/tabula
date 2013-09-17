@@ -8,7 +8,7 @@ import scala.collection.JavaConversions.asScalaBuffer
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Assignment, Feedback, Submission}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import org.apache.commons.io.input.BoundedInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
@@ -17,9 +17,10 @@ import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.tabula.data.model.MeetingRecord
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
+import scala.Some
+import uk.ac.warwick.tabula.services.ZipFileItem
 
 /**
  * FIXME this could generate a corrupt file if two requests tried to generate the same zip simultaneously
@@ -168,6 +169,14 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	
 	private def getMeetingRecordZipItems(meetingRecord: MeetingRecord): Seq[ZipItem] =
 		meetingRecord.attachments.map { (attachment) =>
+			new ZipFileItem(attachment.name, attachment.dataStream)
+		}
+
+	def getSomeMemberNoteAttachmentsZip(memberNote: MemberNote): File =
+		createUnnamedZip(getMemberNoteZipItems(memberNote))
+
+	private def getMemberNoteZipItems(memberNote: MemberNote): Seq[ZipItem] =
+		memberNote.attachments.map { (attachment) =>
 			new ZipFileItem(attachment.name, attachment.dataStream)
 		}
 }

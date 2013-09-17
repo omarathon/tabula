@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.{Features, CurrentUser}
 import uk.ac.warwick.userlookup.Group
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.services.{SmallGroupService, UserLookupService, ProfileService, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.services.{SmallGroupService, UserLookupService, ProfileService, ModuleAndDepartmentService, MemberNoteService}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.web._
@@ -24,6 +24,7 @@ import uk.ac.warwick.tabula.services.RelationshipService
 	var smallGroupsService = Wire[SmallGroupService]
 	var features = Wire[Features]
 
+
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 
@@ -32,6 +33,8 @@ import uk.ac.warwick.tabula.services.RelationshipService
 			val smallGroups =
 				if (features.smallGroupTeachingTutorView) smallGroupsService.findSmallGroupsByTutor(user.apparentUser)
 				else Nil
+
+
 				
 			// Get all the relationships that the current member is an agent of
 			val downwardRelationships = relationshipService.listAllStudentRelationshipsWithMember(currentMember)

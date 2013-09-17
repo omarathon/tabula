@@ -16,7 +16,7 @@ trait AutowiringMemberNoteServiceComponent extends MemberNoteServiceComponent {
 trait MemberNoteService {
 
 	def getNoteById(id: String): Option[MemberNote]
-	def list(student: Member, currentUser: Member): Seq[MemberNote]
+	def list(student: Member): Seq[MemberNote]
 	def saveOrUpdate(memberNote: MemberNote)
 
 }
@@ -26,7 +26,7 @@ abstract class AbstractMemberNotePointService extends MemberNoteService {
 	self: MemberNoteDaoComponent =>
 
 	def getNoteById(id: String): Option[MemberNote] = memberNoteDao.getById(id)
-	def list(student: Member, currentUser: Member): Seq[MemberNote] = memberNoteDao.list(student, currentUser)
+	def list(student: Member): Seq[MemberNote] = memberNoteDao.list(student)
 	def saveOrUpdate(memberNote: MemberNote) = memberNoteDao.saveOrUpdate(memberNote)
 
 }

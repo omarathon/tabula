@@ -15,7 +15,7 @@ trait AutowiringMemberNoteDaoComponent extends MemberNoteDaoComponent {
 
 trait MemberNoteDao {
 	def getById(id: String): Option[MemberNote]
-	def list(student: Member, currentUser: Member): Seq[MemberNote]
+	def list(student: Member): Seq[MemberNote]
 	def saveOrUpdate(memberNote: MemberNote)
 
 }
@@ -24,13 +24,12 @@ trait MemberNoteDao {
 class MemberNoteDaoImpl extends MemberNoteDao with Daoisms {
 	def getById(id: String): Option[MemberNote] = getById[MemberNote](id)
 
-	def list(student: Member, currentUser: Member): Seq[MemberNote] =
+	def list(student: Member): Seq[MemberNote] =
 		{
 		 session.newCriteria[MemberNote]
 			 .add(Restrictions.eq("member", student))
 			 .add(Restrictions.disjunction()
 			 .add(Restrictions.eq("deleted", false))
-			 .add(Restrictions.eq("creator", currentUser))
 		 )
 			 .addOrder(Order.desc("lastUpdatedDate"))
 			 .seq
