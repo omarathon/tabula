@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
-import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
@@ -33,7 +33,7 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 			val feedback = feedbackService.getFeedbackByUniId(assignment, student.getWarwickId)
 			val (hasFeedback, hasPublishedFeedback) = feedback match {
 				case Some(f) => (true, f.released.booleanValue)
-				case None => (false, false)
+				case _ => (false, false)
 			}
 			new StudentFeedbackGraph(student, hasSubmission, hasFeedback, hasPublishedFeedback, false)
 		}

@@ -167,8 +167,8 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 		}.toSet[SavedFormValue].asJava
 
 		// save mark and grade
-		if (assignment.collectMarks){
-			feedback.actualMark = Some(mark.toInt)
+		if (assignment.collectMarks) {
+			Option(mark).foreach(mark => feedback.actualMark = Some(mark.toInt))
 			feedback.actualGrade = Some(grade)
 		}
 
@@ -177,7 +177,7 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 			val filesToKeep =  Option(attachedFiles).getOrElse(JList()).asScala
 			val existingFiles = Option(feedback.attachments).getOrElse(JList()).asScala
 			val filesToRemove = existingFiles -- filesToKeep
-			filesToRemove.foreach(fileAttachmentService.delete(_))
+			filesToRemove.foreach(fileAttachmentService.delete)
 			feedback.attachments = JArrayList[FileAttachment](filesToKeep)
 		}
 		feedback.addAttachments(file.attached.asScala)
@@ -306,7 +306,7 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 			val filesToKeep =  Option(attachedFiles).getOrElse(JList()).asScala
 			val existingFiles = Option(markerFeedback.attachments).getOrElse(JList()).asScala
 			val filesToRemove = existingFiles -- filesToKeep
-			filesToRemove.foreach(fileAttachmentService.delete(_))
+			filesToRemove.foreach(fileAttachmentService.delete)
 			markerFeedback.attachments = JArrayList[FileAttachment](filesToKeep)
 		}
 		markerFeedback.addAttachments(file.attached.asScala)
