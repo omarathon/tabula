@@ -161,9 +161,14 @@
 	<!-- Resolves user from request but can also be used sparingly elsewhere to generate a CurrentUser from Users -->
 	<bean id="currentUserInterceptor" class="uk.ac.warwick.tabula.system.CurrentUserInterceptor" />
 
+	<bean id="earlyRequestInfoInterceptor" class="uk.ac.warwick.tabula.system.EarlyRequestInfoInterceptor" />
 	<bean id="requestInfoInterceptor" class="uk.ac.warwick.tabula.system.RequestInfoInterceptor" />
 
 	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<ref bean="earlyRequestInfoInterceptor" />
+		</mvc:interceptor>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
 			<ref bean="currentUserInterceptor" />

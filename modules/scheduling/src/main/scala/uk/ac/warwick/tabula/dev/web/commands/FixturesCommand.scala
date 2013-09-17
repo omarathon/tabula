@@ -65,12 +65,24 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 			moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code) map { dept =>
 				val routes: Seq[Route] = routeDao.findByDepartment(dept)
 			  val scds = scdDao.findByDepartment(dept)
+
 				for (module <- dept.modules) session.delete(module)
+				dept.modules.clear()
+
 				for (feedbackTemplate <- dept.feedbackTemplates) session.delete(feedbackTemplate)
+				dept.feedbackTemplates.clear()
+
 				for (markingWorkflow <- dept.markingWorkflows) session.delete(markingWorkflow)
+				dept.markingWorkflows.clear()
+
 				for (route<-routes) session.delete(route)
-			  for (scd<-scds) session.delete(scd)
-			  for (sub<-dept.children) session.delete(sub)
+				dept.routes.clear()
+
+				for (scd<-scds) session.delete(scd)
+
+				for (sub<-dept.children) session.delete(sub)
+				dept.children.clear()
+
 				session.delete(dept)
 			}
 		}

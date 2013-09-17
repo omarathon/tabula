@@ -4,7 +4,7 @@ import javax.persistence._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.ToString
 import org.joda.time.DateTime
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{BatchSize, Type}
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
@@ -52,6 +52,7 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
   @RestrictionProvider("readPermissions")
+	@BatchSize(size=200)
 	var attachments: JList[FileAttachment] = JArrayList()
 
   @RestrictionProvider("readPermissions")
@@ -71,6 +72,7 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	// Workflow definitions
 
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
+	@BatchSize(size=200)
 	var approvals: JList[MeetingRecordApproval] = JArrayList()
 
 	// true if the specified user needs to perform a workflow action on this meeting record

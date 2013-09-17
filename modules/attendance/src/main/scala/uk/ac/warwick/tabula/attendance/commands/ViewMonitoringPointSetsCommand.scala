@@ -86,11 +86,8 @@ trait ViewMonitoringPointSetsState extends RouteServiceComponent with Monitoring
 		}
 		sets
 	}
-	def setsByRouteCodeByAcademicYear(academicYear: String, code: String) =
-		routeService.getByCode(code) match {
-			case Some(r: Route) => setsByRouteByAcademicYear(academicYear)(r)
-			case _ => new ItemNotFoundException()
-	}
+	def setsByRouteCodeByAcademicYear(academicYear: String, route: Route) =
+		setsByRouteByAcademicYear(academicYear)(route)
 
 	def monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, academicYear)
 

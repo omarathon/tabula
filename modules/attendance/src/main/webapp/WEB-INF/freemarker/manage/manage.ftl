@@ -9,7 +9,7 @@
 						"code" : "${route.code}",
 						"name" : "${route.name}",
 						"sets" : [
-							<#list command.setsByRouteCodeByAcademicYear(academicYear, route.code) as set>
+							<#list command.setsByRouteCodeByAcademicYear(academicYear, route) as set>
 								{
 									"id" : "${set.id}",
 									"year" : "<#if set.year??>${set.year}<#else>All</#if>"
@@ -117,7 +117,7 @@
 
 		<div class="striped-section-contents">
 			<#list command.setsByRouteByAcademicYear[command.academicYear.toString]?keys?sort_by("code") as route>
-				<#assign pointSets = command.setsByRouteCodeByAcademicYear(command.academicYear.toString, route.code) />
+				<#assign pointSets = command.setsByRouteCodeByAcademicYear(command.academicYear.toString, route) />
 				<div class="item-info">
 					<div class="row-fluid">
 						<div class="span10 collapsible">
