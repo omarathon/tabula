@@ -58,7 +58,7 @@
 
 		<#assign popoverContent>
 			<p>Select a route and year of study from the drop down lists to view the relevant attendance monitoring points.</p>
-			<p>If the monitoring points displayed are not correct please contact <a href="mailto:webteam@warwick.ac.uk">webteam@warwick.ac.uk</a></p>
+			<p>If the monitoring points displayed are not correct please contact a departmental administrator.</p>
 		</#assign>
 		<a class="use-popover" id="popover-choose-set"
 			data-title="View attendance monitoring points"

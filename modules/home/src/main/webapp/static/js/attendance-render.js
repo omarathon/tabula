@@ -29,7 +29,7 @@ $(function(){
 				);
 			}
 		)
-	});
+	}).change();
 
 	// END SCRIPTS FOR VIEWING MONITORING POINTS
 
@@ -103,9 +103,6 @@ $(function(){
 				$form.find('button').prop('disabled', true);
 			}
 		});
-
-		// Populate the year drop-down if the route is set on load
-		routeSelect.change();
 
 		// Update Preview button to preview the currently selected template.
 		$form.find('select.template[name=existingSet]').on('change', function() {
