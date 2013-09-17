@@ -158,7 +158,7 @@
 
 			<#if command.availableUpstreamGroups?has_content>
 				<div class="modal-body">
-					<p>Add students by linking this group set to one or more of the following module assessment groups in SITS for
+					<p>Add students by linking this group set to one or more of the following assessment components in SITS for
 						${command.module.code?upper_case} in ${command.academicYear.label}.</p>
 
 					<table id="sits-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-orangeLight">
