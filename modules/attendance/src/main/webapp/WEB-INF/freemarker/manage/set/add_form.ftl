@@ -2,7 +2,7 @@
 
 <h1>Create monitoring schemes</h1>
 
-<form id="addMonitoringPointSet" action="<@url page="/manage/${command.dept.code}/sets/add"/>" method="POST" class="modify-monitoring-points">
+<form id="addMonitoringPointSet" action="<@url page="/manage/${command.dept.code}/sets/add/${command.academicYear.startYear?c}"/>" method="POST" class="modify-monitoring-points">
 
 	<div class="routeAndYearPicker">
 		<div class="row-fluid">
