@@ -1,43 +1,17 @@
 <script>
-
 (function ($) {
 	$(function() {
 		$('.persist-area').fixHeaderFooter();
 
-		// toggleCheckboxes
-		// toggles the checkboxes, and returns the number selected
-		var toggleCheckboxes = function(areaClass) {
-			var allCheckboxes = $(areaClass + ' [type=checkbox]');
-			var checked = allCheckboxes.not(":checked").length;
-			if(checked == 0) {
-				setAllCheckboxes(false);
-				return 0;
-			} else {
-				setAllCheckboxes(true);
-				return allCheckboxes.length;
-			}
-
-			function setAllCheckboxes(setting) {
-				allCheckboxes.each(function() { this.checked = setting });
-			}
-		}
-
-		$('.select-all').click(function(e) {
-			e.preventDefault();
-			var link = this;
-			if(toggleCheckboxes(".attendees") > 0) {
-				$(link).text("(unselect all)");
-			} else {
-				$(link).text("(select all)");
-			}
+		$('.select-all').change(function(e) {
+			$('.select-all').attr("checked", $(this).prop('checked'));
+			$('.attendees').selectDeselectCheckboxes(this);
 		});
 
 	});
 } (jQuery));
 
 </script>
-
-
 
 <div class="recordCheckpointForm">
 
@@ -46,9 +20,8 @@
 			<h1>Record attendance for <#if (monitoringPoint.pointSet.year)??>Year ${monitoringPoint.pointSet.year}</#if> ${monitoringPoint.pointSet.route.code?upper_case} ${monitoringPoint.pointSet.route.name} : ${monitoringPoint.name}</h1>
 
 
-			<div class="row-fluid">
-				<div class="span10"></div>
-				<div class="span2 text-center">Attended <br /> <a href="#" class="select-all">(select all)</button></div>
+			<div class="row-fluid record-attendance-form-header">
+				<div class="span2 offset10 text-center ">Attended <br /><input type="checkbox" name="select-all" class="select-all"/></div>
 			</div>
 		</div>
 
