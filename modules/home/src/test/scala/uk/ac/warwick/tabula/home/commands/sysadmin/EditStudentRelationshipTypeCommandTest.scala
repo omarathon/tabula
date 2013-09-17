@@ -105,7 +105,9 @@ class EditStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 	@Test
 	def permissionsRequireGlobalStudentRelationshipTypeUpdate {
 		new Fixture {
-			val perms = new EditStudentRelationshipTypeCommandPermissions() {}
+			val perms = new EditStudentRelationshipTypeCommandPermissions with HasExistingStudentRelationshipType {
+				val relationshipType = testRelationshipType
+			}
 			val checking = mock[PermissionsChecking]
 			perms.permissionsCheck(checking)
 			there was one(checking).PermissionCheck(Permissions.StudentRelationshipType.Update)

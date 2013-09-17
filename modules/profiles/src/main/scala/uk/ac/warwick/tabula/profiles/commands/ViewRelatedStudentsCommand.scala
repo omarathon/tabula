@@ -43,6 +43,6 @@ trait ViewRelatedStudentsCommandPermissions extends RequiresPermissionsChecking 
 	this: ViewRelatedStudentsCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(relationshipType), currentMember)
+		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(p.mandatory(relationshipType)), currentMember)
 	}
 }
