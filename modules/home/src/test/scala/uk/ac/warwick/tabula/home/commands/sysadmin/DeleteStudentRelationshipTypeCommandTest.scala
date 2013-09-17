@@ -39,8 +39,8 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			val command = DeleteStudentRelationshipTypeCommand(testRelationshipType)
 
 			command.isInstanceOf[Appliable[StudentRelationshipType]] should be (true)
-			command.isInstanceOf[HasStudentRelationshipType] should be (true)
-			command.asInstanceOf[HasStudentRelationshipType].relationshipType should be (testRelationshipType)
+			command.isInstanceOf[HasExistingStudentRelationshipType] should be (true)
+			command.asInstanceOf[HasExistingStudentRelationshipType].relationshipType should be (testRelationshipType)
 		}
 	}
 	
@@ -56,7 +56,7 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 	@Test
 	def commandDescriptionDescribedProperties() {
 		new Fixture {
-			val describable = new DeleteStudentRelationshipTypeCommandDescription with HasStudentRelationshipType {
+			val describable = new DeleteStudentRelationshipTypeCommandDescription with HasExistingStudentRelationshipType {
 				val eventName: String = "test"
 				val relationshipType = testRelationshipType
 			}
@@ -74,7 +74,9 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 	@Test
 	def permissionsRequireGlobalStudentRelationshipTypeDelete {
 		new Fixture {
-			val perms = new DeleteStudentRelationshipTypeCommandPermissions() {}
+			val perms = new DeleteStudentRelationshipTypeCommandPermissions with HasExistingStudentRelationshipType {
+				val relationshipType = testRelationshipType
+			}
 			val checking = mock[PermissionsChecking]
 			perms.permissionsCheck(checking)
 			there was one(checking).PermissionCheck(Permissions.StudentRelationshipType.Delete)

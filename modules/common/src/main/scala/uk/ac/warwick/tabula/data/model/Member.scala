@@ -1,10 +1,14 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.{AccessType, FilterDefs, FilterDef, Filters, Filter, Type}
-import org.joda.time.DateTime
-import org.joda.time.LocalDate
+import scala.collection.JavaConverters._
+
 import javax.persistence._
 import javax.persistence.CascadeType._
+
+import org.hibernate.annotations.{AccessType, ForeignKey, BatchSize, Filter, Filters, FilterDefs, FilterDef, Type}
+import org.joda.time.DateTime
+import org.joda.time.LocalDate
+
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
@@ -13,10 +17,8 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
-import org.hibernate.annotations.ForeignKey
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.services.RelationshipService
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.Logging
 
 object Member {
@@ -131,6 +133,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
+	@BatchSize(size=200)
 	var grantedRoles:JList[MemberGrantedRole] = JArrayList()
 
 	def asSsoUser = {
@@ -183,6 +186,7 @@ class StudentMember extends Member with StudentProperties {
 
 	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	@BatchSize(size=200)
 	var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
 
 	def this(id: String) = {
@@ -333,6 +337,7 @@ trait StudentProperties {
 
 	@OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = Array(ALL))
 	@Restricted(Array("Profiles.Read.NextOfKin"))
+	@BatchSize(size=200)
 	var nextOfKins:JList[NextOfKin] = JArrayList()
 }
 

@@ -38,6 +38,8 @@ trait ModuleRegistrationImporter {
 @Service
 class ModuleRegistrationImporterImpl extends ModuleRegistrationImporter with SitsAcademicYearAware {
 	import ModuleRegistrationImporter._
+	
+	var sits = Wire[DataSource]("sitsDataSource")
 
 	def moduleRegistrationQuery() = {
 		new ModuleRegistrationQuery(sits)

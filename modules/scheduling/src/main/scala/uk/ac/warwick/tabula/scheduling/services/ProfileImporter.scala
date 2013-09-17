@@ -47,6 +47,8 @@ trait ProfileImporter {
 @Service
 class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademicYearAware {
 	import ProfileImporter._
+	
+	var sits = Wire[DataSource]("sitsDataSource")
 
 	var membership = Wire[DataSource]("membershipDataSource")
 	var membershipInterface = Wire.auto[MembershipInterfaceWrapper]

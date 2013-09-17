@@ -3,12 +3,13 @@ package uk.ac.warwick.tabula.data.model
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import scala.xml.NodeSeq
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.ForeignKey
+
 import javax.persistence._
+
+import org.hibernate.annotations.{BatchSize, AccessType, ForeignKey}
+
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, WeekRange}
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
@@ -18,7 +19,6 @@ import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.data.model.CourseType._
 
 @Entity @AccessType("field")
 class Department extends GeneratedId
@@ -30,26 +30,32 @@ class Department extends GeneratedId
 
 	var name:String = null
 
-	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	var children:JList[Department] = JArrayList();
+	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY)
+	@BatchSize(size=200)
+	var children:JList[Department] = JArrayList()
 
 	@ManyToOne(fetch = FetchType.LAZY, optional=true)
-	var parent:Department = null;
+	var parent:Department = null
 
 	// No orphanRemoval as it makes it difficult to move modules between Departments.
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
+	@BatchSize(size=200)
 	var modules:JList[Module] = JArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var feedbackTemplates:JList[FeedbackTemplate] = JArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var markingWorkflows:JList[MarkingWorkflow] = JArrayList()
 
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var customRoleDefinitions:JList[CustomRoleDefinition] = JArrayList()
 	
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY)
+	@BatchSize(size=200)
 	var routes:JList[Route] = JArrayList()
 
 	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse(false)
@@ -159,6 +165,7 @@ class Department extends GeneratedId
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
+	@BatchSize(size=200)
 	var grantedRoles:JList[DepartmentGrantedRole] = JArrayList()
 
 	var filterRuleName: String = _

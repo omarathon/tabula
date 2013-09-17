@@ -83,7 +83,8 @@ class RoleServiceImpl extends RoleService with Logging {
 		val (scopeless, scoped) = roleProviders.partition(_.isInstanceOf[ScopelessRoleProvider])
 		
 		// We only need to do scopeless once
-		val scopelessStream = scopeless.toStream flatMap { _.asInstanceOf[ScopelessRoleProvider].getRolesFor(user) }
+		// (we call the (User, Target) method signature otherwise it bypasses the request level caching)
+		val scopelessStream = scopeless.toStream flatMap { _.asInstanceOf[ScopelessRoleProvider].getRolesFor(user, null) }
 		
 		/* We don't want to needlessly continue to interrogate scoped providers even after they 
 		 * have returned something that isn't an empty Seq. Anything that isn't an empty Seq 
@@ -110,7 +111,7 @@ class RoleServiceImpl extends RoleService with Logging {
 		
 		// Go through the list of RoleProviders and get any that provide this role
 		val allRoles = roleProviders.filter(_.rolesProvided contains targetClass) flatMap {
-			case scopeless: ScopelessRoleProvider => scopeless.getRolesFor(user)
+			case scopeless: ScopelessRoleProvider => scopeless.getRolesFor(user, null)
 			case provider if role.scope.isDefined => provider.getRolesFor(user, role.scope.get)
 			case _ => Seq()
 		}

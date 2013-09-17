@@ -47,7 +47,7 @@ class StudentRelationshipPhotoController extends ProfilesController {
 		@PathVariable("relationshipType") relationshipType: StudentRelationshipType,
 		@PathVariable("agent") agent: String
 	) = {
-			val relationships = relationshipService.findCurrentRelationships(relationshipType, sprCode)
+			val relationships = relationshipService.findCurrentRelationships(mandatory(relationshipType), sprCode)
 			val relationship = relationships.find(_.agent == agent) getOrElse(throw new ItemNotFoundException)
 
 			profileService.getStudentBySprCode(sprCode) match {

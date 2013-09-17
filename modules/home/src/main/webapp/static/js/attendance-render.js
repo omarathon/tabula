@@ -29,7 +29,7 @@ $(function(){
 				);
 			}
 		)
-	});
+	}).change();
 
 	$('a.report').off().not('.disabled').on('click', function(e){
 		e.preventDefault();
@@ -187,15 +187,6 @@ $(function(){
 	$('.striped-section.routes .collapsible').each(function(){
 		var $this = $(this), $target = $this.closest('.item-info').find('.collapsible-target');
 		setupCollapsible($this, $target);
-	});
-
-	$('#addMonitoringPointSet select[name="academicYear"]').on('change', function(){
-		$(this).closest('form').append(
-			$('<input/>').attr({
-				'name':'changeYear',
-				'type':'hidden'
-			}).val(true)
-		).submit();
 	});
 
 	$('.routeAndYearPicker').find('.collapsible').each(function(){

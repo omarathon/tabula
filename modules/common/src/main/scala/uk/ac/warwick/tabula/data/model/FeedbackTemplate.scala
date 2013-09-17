@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import reflect.BeanProperty
 import javax.persistence._
 import javax.persistence.CascadeType._
-import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.{BatchSize, AccessType}
 import scala.Array
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -24,6 +24,7 @@ class FeedbackTemplate extends GeneratedId with PermissionsTarget {
 	var department:Department = _
 
 	@OneToMany(mappedBy = "feedbackTemplate", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
+	@BatchSize(size=200)
 	var assignments: JList[Assignment] = JArrayList()
 	
 	/* For permission parents, we include both the department and any assignments linked to this template */

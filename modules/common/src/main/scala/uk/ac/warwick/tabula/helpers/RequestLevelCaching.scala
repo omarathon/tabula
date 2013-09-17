@@ -1,11 +1,13 @@
 package uk.ac.warwick.tabula.helpers
 
 import scala.collection.mutable
-import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.{EarlyRequestInfo, RequestInfo}
 
 trait RequestLevelCaching[A, B] extends Logging {
-	
-	def cache = RequestInfo.fromThread map { _.requestLevelCache.getCacheByName[A, B](getClass.getName) }
+
+	// Uses EarlyRequestInfo which is available before the full RequestInfo, since we need some caching
+	// for permissions lookups to create the CurrentUser.
+	def cache = EarlyRequestInfo.fromThread map { _.requestLevelCache.getCacheByName[A, B](getClass.getName) }
 	
 	def cachedBy(key: A)(default: => B) = cache match {
 		case Some(cache) => cache.getOrElseUpdate(key, default)
@@ -36,7 +38,7 @@ class RequestLevelCache {
 		}
 	}
 	
-	def shutdown = {
+	def shutdown() {
 		for ((name, cache) <- cacheMap) {
 			cache.clear()
 		}
