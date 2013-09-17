@@ -18,7 +18,7 @@
 
 		<#macro what_is_this>
 			<#assign popoverText>
-				<p>You can link to a module assessment group in SITS and the list of students will be updated automatically from there.
+				<p>You can link to one or more assessment components in SITS and the list of students will be updated automatically from there.
 				If you are not using SITS you can manually add students by ITS usercode or university number.</p>
 
 				<p>It is also possible to tweak the list even when using SITS data, but this is only to be used
