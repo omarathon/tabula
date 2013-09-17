@@ -33,7 +33,7 @@ class DeleteMemberNoteCommand(val memberNote: MemberNote, val member: Member, va
 		// should any member note be able to be deleted?
 		// should only the creator be able to delete???
 
-		// maybe this is too much and we don't need the member as well as the note
+		// not sure we need this
 		if (!memberNote.member.universityId.equals(member.universityId)) errors.reject("")
 	}
 
