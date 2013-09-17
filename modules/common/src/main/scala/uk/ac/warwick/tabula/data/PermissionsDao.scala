@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data
 import org.hibernate.criterion._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.permissions._
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.permissions.Permission
@@ -32,10 +31,10 @@ trait PermissionsDao {
 	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]]
 	
 	def getGrantedRolesForUser[A <: PermissionsTarget: ClassTag](user: User): Seq[GrantedRole[A]]
-	def getGrantedRolesForWebgroup[A <: PermissionsTarget: ClassTag](groupName: String): Seq[GrantedRole[A]]
+	def getGrantedRolesForWebgroups[A <: PermissionsTarget: ClassTag](groupNames: Seq[String]): Seq[GrantedRole[A]]
 	
 	def getGrantedPermissionsForUser[A <: PermissionsTarget: ClassTag](user: User): Seq[GrantedPermission[A]]
-	def getGrantedPermissionsForWebgroup[A <: PermissionsTarget: ClassTag](groupName: String): Seq[GrantedPermission[A]]
+	def getGrantedPermissionsForWebgroups[A <: PermissionsTarget: ClassTag](groupNames: Seq[String]): Seq[GrantedPermission[A]]
 }
 
 @Repository
@@ -137,16 +136,18 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 			.setString("userId", user.getUserId())
 			.seq
 	
-	def getGrantedRolesForWebgroup[A <: PermissionsTarget: ClassTag](groupName: String) = {
-		val c = session.newCriteria[GrantedRole[A]]
-			.createAlias("users", "users")
-			.add(is("users.baseWebgroup", groupName))
-			
-			GrantedRole.discriminator[A] map { discriminator => 
+	def getGrantedRolesForWebgroups[A <: PermissionsTarget: ClassTag](groupNames: Seq[String]) = {
+		groupNames.grouped(Daoisms.MaxInClauseCount).flatMap { names =>
+			val c = session.newCriteria[GrantedRole[A]]
+				.createAlias("users", "users")
+				.add(in("users.baseWebgroup", names.asJava))
+
+			GrantedRole.discriminator[A] foreach { discriminator =>
 				c.add(is("class", discriminator))
 			}
-			
+
 			c.seq
+		}.toSeq
 	}
 	
 	def getGrantedPermissionsForUser[A <: PermissionsTarget: ClassTag](user: User) =
@@ -171,16 +172,18 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 			.seq
 	
 	
-	def getGrantedPermissionsForWebgroup[A <: PermissionsTarget: ClassTag](groupName: String) = {
-		val c = session.newCriteria[GrantedPermission[A]]
-			.createAlias("users", "users")
-			.add(is("users.baseWebgroup", groupName))
+	def getGrantedPermissionsForWebgroups[A <: PermissionsTarget: ClassTag](groupNames: Seq[String]) = {
+		groupNames.grouped(Daoisms.MaxInClauseCount).flatMap { names =>
+			val c = session.newCriteria[GrantedPermission[A]]
+				.createAlias("users", "users")
+				.add(in("users.baseWebgroup", names.asJava))
 			
 			GrantedPermission.discriminator[A] map { discriminator => 
 				c.add(is("class", discriminator))
 			}
 			
 			c.seq
+		}.toSeq
 	}
 }
 

@@ -12,20 +12,21 @@ import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 
 @Controller
-@RequestMapping(value=Array("/manage/{dept}/sets/add"))
+@RequestMapping(value=Array("/manage/{dept}/sets/add/{academicYear}"))
 class AddMonitoringPointSetController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def createCommand(@PathVariable dept: Department, @RequestParam(value="existingSet",required=false) existingSet: AbstractMonitoringPointSet) =
-		AddMonitoringPointSetCommand(dept, Option(existingSet))
+	def createCommand(
+		@PathVariable dept: Department,
+		@PathVariable academicYear: AcademicYear,
+		@RequestParam(value="existingSet",required=false) existingSet: AbstractMonitoringPointSet) =
+		AddMonitoringPointSetCommand(dept, academicYear, Option(existingSet))
 
 	@RequestMapping(method=Array(GET,HEAD))
 	def form(@PathVariable dept: Department, @ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointSet]]) = {
-		Mav("manage/set/add_form",
-			"thisAcademicYear" -> AcademicYear.guessByDate(new DateTime())
-		).crumbs(Breadcrumbs.ManagingDepartment(dept))
+		Mav("manage/set/add_form").crumbs(Breadcrumbs.ManagingDepartment(dept))
 	}
 
 	@RequestMapping(method=Array(POST))

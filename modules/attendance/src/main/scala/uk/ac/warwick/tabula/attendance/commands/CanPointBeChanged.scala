@@ -7,12 +7,12 @@ trait CanPointBeChanged extends MonitoringPointServiceComponent {
 
 	// TAB-1079
 	def canPointBeUpdated(point: MonitoringPoint) = {
-		monitoringPointService.countCheckpointsForPoint(point) == 0
+		!point.sentToAcademicOffice && monitoringPointService.countCheckpointsForPoint(point) == 0
 	}
 
 	// TAB-1079
 	def canPointBeRemoved(point: MonitoringPoint) = {
-		monitoringPointService.countCheckpointsForPoint(point) == 0
+		!point.sentToAcademicOffice && monitoringPointService.countCheckpointsForPoint(point) == 0
 	}
 
 }

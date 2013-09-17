@@ -24,39 +24,45 @@
 			</div>
 		</div>
 
-		<div class="striped-section-contents attendees">
+		<#if command.members?size == 0>
 
-			<form action="" method="post">
-				<input type="hidden" name="monitoringPoint" value="${monitoringPoint.id}" />
-				<input type="hidden" value="<@url page="${returnTo}" />" />
-				<#list command.members?sort_by("lastName") as student>
+			<p><em>There are no students registered to this course for this year of study.</em></p>
 
+		<#else>
 
-					<div class="row-fluid item-info clickable">
-						<label>
-							<div class="span10">
+			<div class="striped-section-contents attendees">
 
-								<@fmt.member_photo student "tinythumbnail" true />
-								<div class="full-height">${student.fullName}</div>
-							</div>
-							<div class="span2 text-center">
-								<div class="full-height">
-									<#assign universityId = student.universityId />
-									<input type="checkbox" name="studentIds" class="collection-checkbox" value="${student.universityId}" <#if command.studentsChecked[universityId]!false>checked="checked"</#if>/>
+				<form action="" method="post">
+					<input type="hidden" name="monitoringPoint" value="${monitoringPoint.id}" />
+					<input type="hidden" value="<@url page="${returnTo}" />" />
+					<#list command.members?sort_by("lastName") as student>
+						<div class="row-fluid item-info clickable">
+							<label>
+								<div class="span10">
+									<a id="student-${student.universityId}" style="width: 0px; height: 0px; position: relative; top: -200px;"></a>
+									<@fmt.member_photo student "tinythumbnail" true />
+									<div class="full-height">${student.fullName}</div>
 								</div>
-							</div>
-						</label>
-					</div>
-				</#list>
+								<div class="span2 text-center">
+									<div class="full-height">
+										<#assign universityId = student.universityId />
+										<input type="checkbox" name="studentIds" value="${student.universityId}" <#if command.studentsChecked[universityId]!false>checked="checked"</#if>/>
+									</div>
+								</div>
+							</label>
+						</div>
+					</#list>
 
 
-				<div class="persist-footer save-row">
-					<div class="pull-right">
-						<input type="submit" value="Save" class="btn btn-primary">
-						<a class="btn" href="<@url page="${returnTo}" context="/attendance" />">Cancel</a>
+					<div class="persist-footer save-row">
+						<div class="pull-right">
+							<input type="submit" value="Save" class="btn btn-primary">
+							<a class="btn" href="${returnTo}">Cancel</a>
+						</div>
 					</div>
-				</div>
-			</form>
-		</div>
+				</form>
+			</div>
+
+		</#if>
 	</div>
 </div>

@@ -14,8 +14,13 @@ import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.ss.util.WorkbookUtil
 import org.apache.commons.lang3.text.WordUtils
 import org.apache.poi.hssf.usermodel.HSSFDataFormat
+import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.spring.Wire
 
 class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module: Module) extends SubmissionAndFeedbackExport {
+
+	var topLevelUrl: String = Wire.property("${toplevel.url}")
+
 	// Pimp XML elements to allow a map mutator for attributes
 	implicit class PimpedElement(elem: Elem) {
 		def %(attrs:Map[String,Any]) = {
@@ -24,7 +29,8 @@ class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module
 		}
   }
 	
-	def toXMLString(value: Option[Any]) = value match {
+	def toXMLString(value: Option[Any]): String = value match {
+		case Some(o: Option[Any]) => toXMLString(o)
 		case Some(i: ReadableInstant) => isoFormat(i)
 		case Some(b: Boolean) => b.toString.toLowerCase
 		case Some(i: Int) => i.toString
@@ -43,14 +49,21 @@ class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module
 	
 	def studentElement(item: Student) = {
 		<student>
-			{ <submission>
-				{ 
-					item.coursework.enhancedSubmission map { item => item.submission.values.asScala.toSeq map fieldElement(item) } getOrElse(Nil)
-				}
-			</submission> % submissionData(item) % submissionStatusData(item) }
-			{ <marking /> % (if (assignment.markingWorkflow != null) markerData(item) else Map[String, Any]()) % plagiarismData(item) }
+			{
+				<submission>
+					{
+						item.coursework.enhancedSubmission map { item => item.submission.values.asScala.toSeq map fieldElement(item) } getOrElse(Nil)
+					}
+				</submission> % submissionData(item) % submissionStatusData(item)
+			}
+			{ <marking /> % markerData(item, assignment) % plagiarismData(item) }
 			{ <feedback /> % feedbackData(item) }
 		</student> % identityData(item)
+	}
+
+	private def markerData(item: Student, assignment: Assignment): Map[String, Any] = {
+		if (assignment.markingWorkflow != null) markerData(item)
+		else Map()
 	}
 
 	def fieldElement(item: SubmissionListItem)(value: SavedSubmissionValue) =
@@ -73,17 +86,22 @@ class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module
 class CSVBuilder(val items: Seq[Student], val assignment: Assignment, val module: Module)
 	extends CSVLineWriter[Student] with SubmissionAndFeedbackSpreadsheetExport {
 
+	var topLevelUrl: String = Wire.property("${toplevel.url}")
+
 	def getNoOfColumns(item:Student) = headers.size
 	
 	def getColumn(item:Student, i:Int) = formatData(itemData(item).get(headers(i)))
 }
 
-class ExcelBuilder(val items: Seq[Student], val assignment: Assignment, val module: Module) extends SubmissionAndFeedbackSpreadsheetExport {	
+class ExcelBuilder(val items: Seq[Student], val assignment: Assignment, val module: Module) extends SubmissionAndFeedbackSpreadsheetExport {
+
+	var topLevelUrl: String = Wire.property("${toplevel.url}")
+
 	def toXLSX = {
 		val workbook = new XSSFWorkbook()
 		val sheet = generateNewSheet(workbook)
 		
-		items map addRow(sheet)
+		items foreach { addRow(sheet)(_) }
 		
 		formatWorksheet(sheet)
 		workbook
@@ -200,16 +218,19 @@ trait SubmissionAndFeedbackSpreadsheetExport extends SubmissionAndFeedbackExport
 		prefix(plagiarismData(item), "marking") ++ 
 		prefix(feedbackData(item), "feedback")
 	
-	private def prefix(fields: Seq[String], prefix: String) =
-		fields map { name => prefix + "-" + name }
+	private def prefix(fields: Seq[String], prefix: String) = fields map { name => prefix + "-" + name }
 	
-	private def prefix(data: Map[String, Any], prefix: String) =
-		data map { entry => (prefix + "-" + entry._1) -> entry._2 }
+	private def prefix(data: Map[String, Any], prefix: String) = data map {
+		case (key, value) => prefix + "-" + key -> value
+	}
+
 }
 
 trait SubmissionAndFeedbackExport {
 	val assignment: Assignment
 	val module: Module
+
+	def topLevelUrl: String
 	
 	val isoFormatter = DateFormats.IsoDateTime
 	def isoFormat(i: ReadableInstant) = isoFormatter print i
@@ -231,7 +252,8 @@ trait SubmissionAndFeedbackExport {
 		"id" -> assignment.id,
 		"open-date" -> assignment.openDate,
 		"open-ended" -> assignment.openEnded,
-		"close-date" -> (if (assignment.openEnded) "" else assignment.closeDate)
+		"close-date" -> (if (assignment.openEnded) "" else assignment.closeDate),
+		"submissions-zip-url" -> (topLevelUrl + "/coursework" + Routes.admin.assignment.submissionsZip(assignment))
 	)
 	
 	protected def identityData(item: Student): Map[String, Any] = Map(
@@ -240,11 +262,14 @@ trait SubmissionAndFeedbackExport {
 	
 	protected def submissionData(item: Student): Map[String, Any] = item.coursework.enhancedSubmission match { 
 		case Some(item) if item.submission.id.hasText => Map(
+			"submitted" -> true,
 			"id" -> item.submission.id,
 			"time" -> item.submission.submittedDate,
 			"downloaded" -> item.downloaded
 		)
-		case _ => Map()
+		case _ => Map(
+			"submitted" -> false
+		)
 	}
 	
 	protected def submissionStatusData(item: Student): Map[String, Any] = item.coursework.enhancedSubmission match { 

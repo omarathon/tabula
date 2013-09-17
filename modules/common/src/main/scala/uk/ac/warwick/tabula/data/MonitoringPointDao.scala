@@ -4,8 +4,11 @@ import scala.collection.JavaConverters._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.{Route, StudentMember}
 import org.hibernate.criterion.{Projections, Order}
+import uk.ac.warwick.tabula.AcademicYear
+import org.hibernate.criterion.Restrictions._
+import scala.Some
 
 trait MonitoringPointDaoComponent {
 	val monitoringPointDao: MonitoringPointDao
@@ -24,6 +27,10 @@ trait MonitoringPointDao {
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
 	def saveOrUpdate(template: MonitoringPointSetTemplate)
 	def saveOrUpdate(set: MonitoringPointSet)
+	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet]
+	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
+	def findMonitoringPointSet(route: Route, year: Option[Int]): Option[MonitoringPointSet]
+	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]): Option[MonitoringPointSet]
 	def getCheckpoint(monitoringPoint: MonitoringPoint, member: StudentMember) : Option[MonitoringCheckpoint]
 	def getCheckpoints(montitoringPoint: MonitoringPoint) : Seq[MonitoringCheckpoint]
 	def listTemplates : Seq[MonitoringPointSetTemplate]
@@ -56,6 +63,32 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint) = session.saveOrUpdate(monitoringCheckpoint)
 	def saveOrUpdate(set: MonitoringPointSet) = session.saveOrUpdate(set)
 	def saveOrUpdate(template: MonitoringPointSetTemplate) = session.saveOrUpdate(template)
+
+	def findMonitoringPointSets(route: Route) =
+		session.newCriteria[MonitoringPointSet]
+			.add(is("route", route))
+			.seq
+
+	def findMonitoringPointSets(route: Route, academicYear: AcademicYear) =
+		session.newCriteria[MonitoringPointSet]
+			.add(is("route", route))
+			.add(is("academicYear", academicYear))
+			.seq
+
+	def findMonitoringPointSet(route: Route, year: Option[Int]) =
+		session.newCriteria[MonitoringPointSet]
+			.add(is("route", route))
+			.add(yearRestriction(year))
+			.uniqueResult
+
+	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]) =
+		session.newCriteria[MonitoringPointSet]
+			.add(is("route", route))
+			.add(is("academicYear", academicYear))
+			.add(yearRestriction(year))
+			.uniqueResult
+
+	private def yearRestriction(opt: Option[Any]) = opt map { is("year", _) } getOrElse { isNull("year") }
 
 	def getCheckpoint(monitoringPoint: MonitoringPoint, member: StudentMember): Option[MonitoringCheckpoint] = {
 	  val studentCourseDetailOption = member.studentCourseDetails.asScala.find(

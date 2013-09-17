@@ -7,10 +7,11 @@ import uk.ac.warwick.tabula.services.{AssignmentServiceComponent, AutowiringAssi
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.Department
 
 object ArchiveAssignmentsCommand {
-	def apply(modules: Seq[Module]) =
-		new ArchiveAssignmentsCommand(modules: Seq[Module])
+	def apply(department: Department, modules: Seq[Module]) =
+		new ArchiveAssignmentsCommand(department, modules)
 			with ComposableCommand[Seq[Assignment]]
 			with ArchiveAssignmentsPermissions
 			with ArchiveAssignmentsDescription
@@ -19,7 +20,7 @@ object ArchiveAssignmentsCommand {
 		}
 }
 
-abstract class ArchiveAssignmentsCommand(val modules: Seq[Module]) extends CommandInternal[Seq[Assignment]]
+abstract class ArchiveAssignmentsCommand(val department: Department, val modules: Seq[Module]) extends CommandInternal[Seq[Assignment]]
 with Appliable[Seq[Assignment]] with ArchiveAssignmentsState {
 
 	self: AssignmentServiceComponent =>
@@ -39,13 +40,16 @@ with Appliable[Seq[Assignment]] with ArchiveAssignmentsState {
 trait ArchiveAssignmentsPermissions extends RequiresPermissionsChecking {
 	self: ArchiveAssignmentsState =>
 	def permissionsCheck(p: PermissionsChecking) {
-		for(module <- modules) {
-			p.PermissionCheck(Permissions.Assignment.Update, module)
+		if (modules.isEmpty) p.PermissionCheck(Permissions.Assignment.Archive, p.mandatory(department))
+		else for (module <- modules) {
+			p.mustBeLinked(p.mandatory(module), p.mandatory(department))
+			p.PermissionCheck(Permissions.Assignment.Archive, module)
 		}
 	}
 }
 
 trait ArchiveAssignmentsState {
+	val department: Department
 	val modules: Seq[Module]
 	var assignments: JList[Assignment] = JArrayList()
 }

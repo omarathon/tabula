@@ -21,7 +21,7 @@ case class RelationshipGraph(val studentMap: TreeMap[String, Seq[StudentRelation
 
 class ViewStudentRelationshipsCommand(val department: Department, val relationshipType: StudentRelationshipType) extends Command[RelationshipGraph] with Unaudited {
 
-	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(relationshipType), department)
+	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
 
 	var relationshipService = Wire.auto[RelationshipService]
 
@@ -46,7 +46,7 @@ class ViewStudentRelationshipsCommand(val department: Department, val relationsh
 
 class MissingStudentRelationshipCommand(val department: Department, val relationshipType: StudentRelationshipType) extends Command[(Int, Seq[Member])] with Unaudited {
 
-	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(relationshipType), department)
+	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
 
 	var profileService = Wire.auto[ProfileService]
 	var relationshipService = Wire.auto[RelationshipService]

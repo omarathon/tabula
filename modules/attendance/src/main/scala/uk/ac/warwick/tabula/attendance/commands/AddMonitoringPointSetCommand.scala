@@ -15,8 +15,8 @@ import org.springframework.util.AutoPopulatingList
 import scala.Some
 
 object AddMonitoringPointSetCommand {
-	def apply(dept: Department, existingSetOption: Option[AbstractMonitoringPointSet]) =
-		new AddMonitoringPointSetCommand(dept, existingSetOption)
+	def apply(dept: Department, academicYear: AcademicYear, existingSetOption: Option[AbstractMonitoringPointSet]) =
+		new AddMonitoringPointSetCommand(dept, academicYear, existingSetOption)
 		with ComposableCommand[Seq[MonitoringPointSet]]
 		with AutowiringRouteServiceComponent
 		with AutowiringTermServiceComponent
@@ -27,8 +27,9 @@ object AddMonitoringPointSetCommand {
 }
 
 
-abstract class AddMonitoringPointSetCommand(val dept: Department, val existingSetOption: Option[AbstractMonitoringPointSet]) extends CommandInternal[Seq[MonitoringPointSet]]
-	with AddMonitoringPointSetState {
+abstract class AddMonitoringPointSetCommand(val dept: Department, val academicYear: AcademicYear, val existingSetOption: Option[AbstractMonitoringPointSet])
+	extends CommandInternal[Seq[MonitoringPointSet]] with AddMonitoringPointSetState {
+
 	self: MonitoringPointServiceComponent =>
 
 	override def applyInternal() = {
@@ -58,7 +59,7 @@ abstract class AddMonitoringPointSetCommand(val dept: Department, val existingSe
 }
 
 trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPointValidation {
-	self: AddMonitoringPointSetState with RouteServiceComponent =>
+	self: AddMonitoringPointSetState =>
 
 	override def validate(errors: Errors) {
 		selectedRoutesAndYears.asScala.map{case (route, allYears) => {
@@ -160,7 +161,7 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 
 	def existingSetOption: Option[AbstractMonitoringPointSet]
 
-	var academicYear = AcademicYear.guessByDate(new DateTime())
+	def academicYear: AcademicYear
 
 	var changeYear = false
 
@@ -195,8 +196,5 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 		)
 	}.toMap.asJava
 
-	def selectedRoutesAndYearsByRouteCode(code: String) = routeService.getByCode(code) match {
-		case Some(r: Route) => selectedRoutesAndYears.get(r)
-		case _ => new ItemNotFoundException()
-	}
+	def selectedRoutesAndYearsByRouteCode(route: Route) = selectedRoutesAndYears.get(route)
 }

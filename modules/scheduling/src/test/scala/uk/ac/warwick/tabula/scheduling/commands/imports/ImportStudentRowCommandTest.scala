@@ -40,6 +40,8 @@ import uk.ac.warwick.tabula.data.SitsStatusDao
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
+import uk.ac.warwick.tabula.scheduling.services.CourseImporter
+import uk.ac.warwick.tabula.data.model.Course
 
 
 // scalastyle:off magic.number
@@ -84,6 +86,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		sitsStatusesImporter.getSitsStatusForCode("P") returns  Some(new SitsStatus("P", "P", "Permanently Withdrawn"))
 
 
+		val courseImporter = smartMock[CourseImporter]
+		courseImporter.getCourseForCode("UESA-H612") returns new Course("UESA-H612", "Computer Systems Engineering MEng")
+
 		//department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits
 
 		val rs = smartMock[ResultSet]
@@ -113,6 +118,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rs.getString("sce_academic_year") returns ("10/11")
 		rs.getString("most_signif_indicator") returns ("Y")
 		rs.getString("mod_reg_status") returns "CON"
+		rs.getString("course_code") returns "UESA-H612"
 
 		val mm = MembershipMember(
 			universityId 			= "0672089",
@@ -154,6 +160,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		courseCommand.moduleAndDepartmentService = modAndDeptService
 		courseCommand.memberDao = memberDao
 		courseCommand.relationshipService = relationshipService
+		courseCommand.courseImporter = courseImporter
 
 		val rowCommand = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, courseCommand)
 		rowCommand.memberDao = memberDao

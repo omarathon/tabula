@@ -4,7 +4,7 @@ import java.util.HashSet
 
 import scala.collection.JavaConversions._
 
-import org.hibernate.annotations.{AccessType, Type}
+import org.hibernate.annotations.{BatchSize, AccessType, Type}
 import org.joda.time.DateTime
 
 import javax.persistence._
@@ -63,6 +63,7 @@ class Submission extends GeneratedId with PermissionsTarget {
 	var state : MarkingState = _
 
 	@OneToMany(mappedBy = "submission", cascade = Array(ALL))
+	@BatchSize(size=200)
 	var values: JSet[SavedSubmissionValue] = new HashSet
 
 	def getValue(field: FormField): Option[SavedSubmissionValue] = {
@@ -114,6 +115,7 @@ class SavedSubmissionValue extends GeneratedId {
 	 * Optional, only for file fields
 	 */
 	@OneToMany(mappedBy = "submissionValue", fetch = LAZY, cascade=Array(ALL))
+	@BatchSize(size=200)
 	var attachments: JSet[FileAttachment] = JSet()
 
 	def hasAttachments = attachments != null && !attachments.isEmpty

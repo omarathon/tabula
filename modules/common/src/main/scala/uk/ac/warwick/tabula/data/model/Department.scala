@@ -3,12 +3,13 @@ package uk.ac.warwick.tabula.data.model
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import scala.xml.NodeSeq
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.ForeignKey
+
 import javax.persistence._
+
+import org.hibernate.annotations.{BatchSize, AccessType, ForeignKey}
+
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, WeekRange}
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
@@ -29,26 +30,32 @@ class Department extends GeneratedId
 
 	var name:String = null
 
-	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	var children:JList[Department] = JArrayList();
+	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY)
+	@BatchSize(size=200)
+	var children:JList[Department] = JArrayList()
 
 	@ManyToOne(fetch = FetchType.LAZY, optional=true)
-	var parent:Department = null;
+	var parent:Department = null
 
 	// No orphanRemoval as it makes it difficult to move modules between Departments.
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
+	@BatchSize(size=200)
 	var modules:JList[Module] = JArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var feedbackTemplates:JList[FeedbackTemplate] = JArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var markingWorkflows:JList[MarkingWorkflow] = JArrayList()
 
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var customRoleDefinitions:JList[CustomRoleDefinition] = JArrayList()
 	
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY)
+	@BatchSize(size=200)
 	var routes:JList[Route] = JArrayList()
 
 	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse(false)
@@ -158,7 +165,26 @@ class Department extends GeneratedId
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
+	@BatchSize(size=200)
 	var grantedRoles:JList[DepartmentGrantedRole] = JArrayList()
+
+	var filterRuleName: String = _
+
+	def filterRule: FilterRule = Option(filterRuleName).map(FilterRule.withName).getOrElse(AllMembersFilterRule)
+
+	def includesMember(m: Member): Boolean = Option(parent) match {
+		case None => filterRule.matches(m)
+		case Some(p) => filterRule.matches(m) && p.includesMember(m)
+	}
+
+
+	def subDepartmentsContaining(member: Member): Stream[Department] = {
+		if (!includesMember(member)) {
+			Stream.empty // no point looking further down the tree if this level doesn't contain the required member
+		} else {
+			this #:: children.flatMap(child => child.subDepartmentsContaining(member)).toStream
+		}
+	}
 
 	def permissionsParents = Option(parent).toStream
 
@@ -179,6 +205,53 @@ class Department extends GeneratedId
 }
 
 object Department {
+
+	object FilterRule {
+		def withName(name: String): FilterRule = {
+			Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule).find(_.name == name).get
+		}
+	}
+
+	sealed trait FilterRule {
+		val name: String
+
+		def matches(member: Member): Boolean
+	}
+
+	case object UndergraduateFilterRule extends FilterRule {
+		val name = "UG"
+
+		def matches(member: Member) = member match {
+			case s: StudentMember => s.mostSignificantCourseDetails.map {
+				cd => cd.route.degreeType match {
+					case DegreeType.Undergraduate => true
+					case _ => false
+				}
+			}.getOrElse(false)
+			case _ => false
+		}
+	}
+
+	case object PostgraduateFilterRule extends FilterRule {
+		val name = "PG"
+
+		def matches(member: Member) = member match {
+			case s: StudentMember => s.mostSignificantCourseDetails.map {
+				cd => cd.route.degreeType match {
+					case DegreeType.Undergraduate => false
+					case _ => true
+				}
+			}.getOrElse(false)
+			case _ => false
+		}
+	}
+
+	case object AllMembersFilterRule extends FilterRule {
+		val name = "All"
+
+		def matches(member: Member) = true
+	}
+
 	object Settings {
 		val CollectFeedbackRatings = "collectFeedbackRatings"
 

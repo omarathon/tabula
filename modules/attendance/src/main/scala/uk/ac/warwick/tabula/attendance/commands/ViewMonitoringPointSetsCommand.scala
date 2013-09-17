@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.permissions.Permissions
 import scala.collection.mutable
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
+import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
 import scala.Some
@@ -34,10 +34,10 @@ abstract class ViewMonitoringPointSetsCommand(
 
 	override def applyInternal() = {
 		pointSetOption match {
-			case Some(pointSet) => {
-				val members = getMembers(pointSet)
+			case Some(p) => {
+				val members = getMembers(p)
 				val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
-				membersWithMissedCheckpoints = monitoringPointService.getCheckedForWeek(members, pointSet, currentAcademicWeek).filter{
+				membersWithMissedCheckpoints = monitoringPointService.getCheckedForWeek(members, p, currentAcademicWeek).filter{
 					case (member, checkMap) =>
 						checkMap.exists{
 							case (_, Some(b)) => !b
@@ -78,7 +78,14 @@ trait ViewMonitoringPointSetsState extends RouteServiceComponent with Monitoring
 				|| s.academicYear.equals(thisAcademicYear)
 				|| s.academicYear.equals(thisAcademicYear.next)
 			)
-		}.flatten.foreach{set =>
+		}.flatten.sortWith{(a, b) =>
+			if (a.year == null)
+				true
+			else if (b.year == null)
+				false
+			else
+				a.year < b.year
+		}.foreach{set =>
 			sets
 				.getOrElseUpdate(set.academicYear.toString, mutable.HashMap())
 				.getOrElseUpdate(set.route, mutable.Buffer())
@@ -86,11 +93,8 @@ trait ViewMonitoringPointSetsState extends RouteServiceComponent with Monitoring
 		}
 		sets
 	}
-	def setsByRouteCodeByAcademicYear(academicYear: String, code: String) =
-		routeService.getByCode(code) match {
-			case Some(r: Route) => setsByRouteByAcademicYear(academicYear)(r)
-			case _ => new ItemNotFoundException()
-	}
+	def setsByRouteCodeByAcademicYear(academicYear: String, route: Route) =
+		setsByRouteByAcademicYear(academicYear)(route)
 
 	def monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, academicYear)
 

@@ -8,8 +8,8 @@
 					<div class="item-info row-fluid point">
 						<div class="span12">
 							<div class="pull-right">
-								<#assign noUpdate = command.set.sentToAcademicOffice || !command.canPointBeUpdated(point)/>
-								<#assign noRemove = command.set.sentToAcademicOffice || !command.canPointBeRemoved(point)/>
+								<#assign noUpdate = !command.canPointBeUpdated(point)/>
+								<#assign noRemove = !command.canPointBeRemoved(point)/>
 								<a class="btn btn-primary edit-point <#if noUpdate>disabled</#if>" <#if noUpdate>title="Unavailable"</#if> href="<@url page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/points/${point.id}/edit"/>">
 									Edit
 								</a>

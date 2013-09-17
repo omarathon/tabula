@@ -7,6 +7,8 @@
 	window.Supports = {};
 	window.Supports.multipleFiles = !!('multiple' in (document.createElement('input')));
 
+	var exports = {};
+
 	// All WPopupBoxes will inherit this default configuration.
 	WPopupBox.defaultConfig = {imageroot:'/static/libs/popup/'};
 
@@ -356,6 +358,44 @@
 		});
 	});
 
+	// collapsible striped section
+	// exported so can be called on-demand e.g. after an ajax-load
+	// adds a class to prevent double-init
+	exports.initCollapsible = function() {
+		$('.striped-section.collapsible:not(.collapsible-init)').each(function() {
+			var $section = $(this).addClass('collapsible-init');
+			var open = function() {
+				return $section.hasClass('expanded');
+			};
+
+			var $icon = $('<i class="icon-fixed-width"></i>');
+			if (open()) $icon.addClass('icon-chevron-down');
+			else $icon.addClass('icon-chevron-right');
+
+			var $title = $section.find('.section-title');
+			$title.prepend(' ').prepend($icon);
+
+			$title.css('cursor', 'pointer').on('click', function() {
+				if (open()) {
+					$section.removeClass('expanded');
+					$icon.removeClass('icon-chevron-down').addClass('icon-chevron-right');
+				} else {
+					$section.addClass('expanded');
+					$icon.removeClass('icon-chevron-right').addClass('icon-chevron-down');
+
+					if ($section.data('name')) {
+						window.location.hash = $section.data('name');
+					}
+				}
+			});
+
+			if (!open() && window.location.hash && window.location.hash.substring(1) == $section.data('name')) {
+				// simulate a click
+				$title.trigger('click');
+			}
+		});
+	};
+
 	// on ready
 	$(function() {
 		// form behavioural hooks
@@ -457,39 +497,7 @@
 			$container.find(".open-all-details").show();
 		});
 
-		// collapsible striped section
-		$('.striped-section.collapsible').each(function() {
-			var $section = $(this);
-			var open = function() {
-				return $section.hasClass('expanded');
-			};
-
-			var $icon = $('<i class="icon-fixed-width"></i>');
-			if (open()) $icon.addClass('icon-chevron-down');
-			else $icon.addClass('icon-chevron-right');
-
-			var $title = $section.find('.section-title');
-			$title.prepend(' ').prepend($icon);
-
-			$title.css('cursor', 'pointer').on('click', function() {
-				if (open()) {
-					$section.removeClass('expanded');
-					$icon.removeClass('icon-chevron-down').addClass('icon-chevron-right');
-				} else {
-					$section.addClass('expanded');
-					$icon.removeClass('icon-chevron-right').addClass('icon-chevron-down');
-
-					if ($section.data('name')) {
-						window.location.hash = $section.data('name');
-					}
-				}
-			});
-
-			if (!open() && window.location.hash && window.location.hash.substring(1) == $section.data('name')) {
-				// simulate a click
-				$title.trigger('click');
-			}
-		});
+		exports.initCollapsible();
 
 		// sticky table headers
 		//$('table.sticky-table-headers').fixedHeaderTable('show');
@@ -693,7 +701,9 @@
 		$('.tabula-filtered-list').filteredList();
 	}); // on ready
 
-
+	// take anything we've attached to "exports" and add it to the global "Profiles"
+	// we use extend() to add to any existing variable rather than clobber it
+	window.GlobalScripts = jQuery.extend(window.GlobalScripts, exports);
 
 })(jQuery);
 

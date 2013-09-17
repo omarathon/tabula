@@ -42,10 +42,6 @@ trait CreateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 	self: CreateMonitoringPointState =>
 
 	override def validate(errors: Errors) {
-		if (set.sentToAcademicOffice) {
-			errors.reject("monitoringPointSet.sentToAcademicOffice.points.create")
-		}
-
 		validateWeek(errors, week, "week")
 		validateName(errors, name, "name")
 

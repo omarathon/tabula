@@ -60,11 +60,8 @@ trait ManageMonitoringPointSetState extends RouteServiceComponent with Monitorin
 		}
 		sets
 	}
-	def setsByRouteCodeByAcademicYear(academicYear: String, code: String) =
-		routeService.getByCode(code) match {
-			case Some(r: Route) => setsByRouteByAcademicYear(academicYear)(r)
-			case _ => new ItemNotFoundException()
-	}
+	def setsByRouteCodeByAcademicYear(academicYear: String, route: Route) =
+		setsByRouteByAcademicYear(academicYear)(route)
 
 	var templates: Seq[MonitoringPointSetTemplate] = _
 

@@ -2,16 +2,7 @@
 
 <h1>Create monitoring schemes</h1>
 
-<form id="addMonitoringPointSet" action="<@url page="/manage/${command.dept.code}/sets/add"/>" method="POST" class="modify-monitoring-points">
-
-	<label>Academic year for new schemes <select name="academicYear" style="margin-bottom: 0px;">
-		<#assign academicYears = [thisAcademicYear.previous.toString, thisAcademicYear.toString, thisAcademicYear.next.toString] />
-        <#list academicYears as year>
-        	<option <#if command.academicYear.toString == year>selected</#if> value="${year}">${year}</option>
-        </#list>
-	</select></label>
-
-	<hr />
+<form id="addMonitoringPointSet" action="<@url page="/manage/${command.dept.code}/sets/add/${command.academicYear.startYear?c}"/>" method="POST" class="modify-monitoring-points">
 
 	<div class="routeAndYearPicker">
 		<div class="row-fluid">
@@ -20,7 +11,7 @@
 			</div>
 			<div class="span10">
 				<span class="hint">
-					Create monitoring schemes for the following students
+					Create monitoring schemes for the following students for Academic year ${command.academicYear.toString}
 				</span>
 			</div>
 		</div>
@@ -58,7 +49,7 @@
 										</td>
 										<#list yearList as year>
 											<#assign checked = ""/>
-											<#if command.selectedRoutesAndYearsByRouteCode(route.code)[year] && availableYearsForRoute[year]>
+											<#if command.selectedRoutesAndYearsByRouteCode(route)[year] && availableYearsForRoute[year]>
 												<#assign checked = "checked"/>
 											</#if>
 											<td class="year_${year}">

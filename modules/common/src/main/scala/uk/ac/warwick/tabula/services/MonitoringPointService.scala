@@ -8,8 +8,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{AutowiringMonitoringPointDaoComponent, MonitoringPointDaoComponent }
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.model.{Route, StudentMember}
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import org.joda.time.DateTime
 
 trait MonitoringPointServiceComponent {
@@ -28,6 +28,10 @@ trait MonitoringPointService {
 	def saveOrUpdate(template: MonitoringPointSetTemplate)
 	def getPointById(id : String) : Option[MonitoringPoint]
 	def getSetById(id : String) : Option[MonitoringPointSet]
+	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
+	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet]
+	def findMonitoringPointSet(route: Route, year: Option[Int]): Option[MonitoringPointSet]
+	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]): Option[MonitoringPointSet]
 	def getStudents(monitoringPoint : MonitoringPoint) : Seq[(StudentMember, Boolean)]
 	def updateStudents(monitoringPoint: MonitoringPoint, changedStudentMembers: Seq[(StudentMember, Boolean)], user: CurrentUser): Seq[MonitoringCheckpoint]
 	def listTemplates : Seq[MonitoringPointSetTemplate]
@@ -48,6 +52,11 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def saveOrUpdate(template: MonitoringPointSetTemplate) = monitoringPointDao.saveOrUpdate(template)
 	def getPointById(id: String): Option[MonitoringPoint] = monitoringPointDao.getPointById(id)
 	def getSetById(id: String): Option[MonitoringPointSet] = monitoringPointDao.getSetById(id)
+	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet] = monitoringPointDao.findMonitoringPointSets(route)
+	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet] = monitoringPointDao.findMonitoringPointSets(route, academicYear)
+	def findMonitoringPointSet(route: Route, year: Option[Int]) = monitoringPointDao.findMonitoringPointSet(route, year)
+	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]) = monitoringPointDao.findMonitoringPointSet(route, academicYear, year)
+	
 	def getStudents(monitoringPoint: MonitoringPoint): Seq[(StudentMember, Boolean)] = monitoringPointDao.getStudents(monitoringPoint)
 
 	def updateStudents(monitoringPoint: MonitoringPoint, changedStudentMembers: Seq[(StudentMember, Boolean)], user: CurrentUser): Seq[MonitoringCheckpoint] = {

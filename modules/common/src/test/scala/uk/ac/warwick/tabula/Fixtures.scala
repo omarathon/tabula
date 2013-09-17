@@ -74,16 +74,19 @@ object Fixtures {
 
 	def assignment(name:String) = {
 		val a = new Assignment
+		a.name = name
 		a
 	}
 
 	def smallGroupSet(name:String) = {
 		val s = new SmallGroupSet
+		s.name = name
 		s
 	}
 
 	def smallGroup(name:String) = {
 		val s = new SmallGroup
+		s.name = name
 		s
 	}
 

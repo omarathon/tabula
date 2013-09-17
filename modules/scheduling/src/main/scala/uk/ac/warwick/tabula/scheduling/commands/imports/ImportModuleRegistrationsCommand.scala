@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import uk.ac.warwick.tabula.scheduling.services.ModuleRegistrationRow
 import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
 import org.springframework.beans.BeanWrapper
+import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 
 
 class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends Command[Option[ModuleRegistration]]
@@ -44,33 +45,41 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 			case Some(module: Module) => {
 				logger.debug("Importing module registration for student " + scjCode + ", module " + modRegRow.sitsModuleCode + " in " + academicYear)
 
-				val scd = studentCourseDetailsDao.getByScjCode(scjCode).getOrElse(throw new IllegalStateException("Can't record module registration - could not find a StudentCourseDetails for " + scjCode))
-				val moduleRegistrationExisting: Option[ModuleRegistration] = moduleRegistrationDao.getByNotionalKey(scd, module, cats, academicYear)
+				studentCourseDetailsDao.getByScjCode(scjCode) match {
+					case None => {
+						logger.warn("Can't record module registration - could not find a StudentCourseDetails for " + scjCode)
+						None
+					}
+					case Some(scd: StudentCourseDetails) => {
+						val scd = studentCourseDetailsDao.getByScjCode(scjCode).getOrElse(throw new IllegalStateException("Can't record module registration - could not find a StudentCourseDetails for " + scjCode))
+						val moduleRegistrationExisting: Option[ModuleRegistration] = moduleRegistrationDao.getByNotionalKey(scd, module, cats, academicYear)
 
-				val isTransient = !moduleRegistrationExisting.isDefined
+						val isTransient = !moduleRegistrationExisting.isDefined
 
-				val moduleRegistration = moduleRegistrationExisting match {
-					case Some(moduleRegistration: ModuleRegistration) => moduleRegistration
-					case _ => {
-						new ModuleRegistration(scd, module, cats, academicYear)
+						val moduleRegistration = moduleRegistrationExisting match {
+							case Some(moduleRegistration: ModuleRegistration) => moduleRegistration
+							case _ => {
+								new ModuleRegistration(scd, module, cats, academicYear)
+							}
+						}
+
+						val commandBean = new BeanWrapperImpl(ImportModuleRegistrationsCommand.this)
+						val moduleRegistrationBean = new BeanWrapperImpl(moduleRegistration)
+
+						val hasChanged = copyBasicProperties(properties, commandBean, moduleRegistrationBean) |
+							copySelectionStatus(moduleRegistrationBean, selectionStatusCode)
+
+
+						if (isTransient || hasChanged) {
+							logger.debug("Saving changes for " + moduleRegistration)
+
+							moduleRegistration.lastUpdatedDate = DateTime.now
+							moduleRegistrationDao.saveOrUpdate(moduleRegistration)
+						}
+
+						Some(moduleRegistration)
 					}
 				}
-
-				val commandBean = new BeanWrapperImpl(ImportModuleRegistrationsCommand.this)
-				val moduleRegistrationBean = new BeanWrapperImpl(moduleRegistration)
-
-				val hasChanged = copyBasicProperties(properties, commandBean, moduleRegistrationBean) |
-					copySelectionStatus(moduleRegistrationBean, selectionStatusCode)
-
-
-				if (isTransient || hasChanged) {
-					logger.debug("Saving changes for " + moduleRegistration)
-
-					moduleRegistration.lastUpdatedDate = DateTime.now
-					moduleRegistrationDao.saveOrUpdate(moduleRegistration)
-				}
-
-				Some(moduleRegistration)
 			}
 		}
 	})

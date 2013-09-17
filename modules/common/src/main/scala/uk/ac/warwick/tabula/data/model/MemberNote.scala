@@ -1,11 +1,13 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.{Fetch, FetchMode, Type, AccessType}
+import org.hibernate.annotations._
 import javax.persistence._
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
+import org.hibernate.annotations.AccessType
+import javax.persistence.Entity
 
 @Entity @AccessType("field")
 class MemberNote extends GeneratedId {
@@ -19,6 +21,7 @@ class MemberNote extends GeneratedId {
 	var title: String =_
 
 	@OneToMany(mappedBy="memberNote", fetch=LAZY, cascade=Array(ALL))
+	@BatchSize(size=200)
 	var attachments:JSet[FileAttachment] = JSet()
 
 	@ManyToOne

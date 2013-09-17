@@ -16,6 +16,7 @@ object SetMonitoringCheckpointCommand {
 		new SetMonitoringCheckpointCommand(monitoringPoint, user)
 			with ComposableCommand[Seq[MonitoringCheckpoint]]
 			with SetMonitoringCheckpointCommandPermissions
+			with SetMonitoringCheckpointCommandValidation
 			with SetMonitoringPointDescription
 			with SetMonitoringCheckpointState
 			with AutowiringProfileServiceComponent
@@ -25,7 +26,8 @@ object SetMonitoringCheckpointCommand {
 }
 
 abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoint, user: CurrentUser)
-	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with SelfValidating with MembersForPointSet {
+	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with MembersForPointSet {
+
 	self: SetMonitoringCheckpointState with ProfileServiceComponent with MonitoringPointServiceComponent =>
 	type UniversityId = String
 
@@ -51,9 +53,14 @@ abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoi
 		monitoringPointService.updateStudents(monitoringPoint, changedStudentMembers, user)
 	}
 
+}
+
+trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
+	self: SetMonitoringCheckpointState =>
+
 	def validate(errors: Errors) {
-		if(set.sentToAcademicOffice) {
-			errors.reject("monitoringCheckpoint.sentToAcademicOffice.set")
+		if(monitoringPoint.sentToAcademicOffice) {
+			errors.reject("monitoringCheckpoint.sentToAcademicOffice")
 		}
 
 		if(monitoringPoint == null) {
@@ -67,7 +74,7 @@ trait SetMonitoringCheckpointCommandPermissions extends RequiresPermissionsCheck
 	self: SetMonitoringCheckpointState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Manage, monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route)
+		p.PermissionCheck(Permissions.MonitoringPoints.Record, monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route)
 	}
 }
 

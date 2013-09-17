@@ -46,7 +46,7 @@
 		<select name="set" class="input-medium copy">
 			<option style="display:none;" disabled <#if !command.route?? || !command.pointSet??>selected</#if> value="">Year of study</option>
 			<#if command.route?? && command.pointSet??>
-				<#list command.setsByRouteCodeByAcademicYear(command.academicYear.toString, command.route.code) as set>
+				<#list command.setsByRouteCodeByAcademicYear(command.academicYear.toString, command.route) as set>
 					<option value="${set.id}" <#if command.pointSet.id == set.id>selected</#if>>
 						<#if set.year??>${set.year}<#else>All</#if>
 					</option>
@@ -58,7 +58,7 @@
 
 		<#assign popoverContent>
 			<p>Select a route and year of study from the drop down lists to view the relevant attendance monitoring points.</p>
-			<p>If the monitoring points displayed are not correct please contact <a href="mailto:webteam@warwick.ac.uk">webteam@warwick.ac.uk</a></p>
+			<p>If the monitoring points displayed are not correct please contact a departmental administrator.</p>
 		</#assign>
 		<a class="use-popover" id="popover-choose-set"
 			data-title="View attendance monitoring points"
@@ -115,7 +115,7 @@
 							</#if>
 						</#list>
 						<td>
-							<span class="missed-count <#if (missedCount > 2)>red</#if>">${missedCount}</span>
+							<span class="badge badge-<#if (missedCount > 2)>important<#else>warning</#if>">${missedCount}</span>
 						</td>
 					</tr>
 				</#list>
@@ -170,7 +170,7 @@
 						"code" : "${route.code}",
 						"name" : "${route.name}",
 						"sets" : [
-							<#list command.setsByRouteCodeByAcademicYear(academicYear, route.code) as set>
+							<#list command.setsByRouteCodeByAcademicYear(academicYear, route) as set>
 								{
 									"id" : "${set.id}",
 									"year" : "<#if set.year??>${set.year}<#else>All</#if>"
