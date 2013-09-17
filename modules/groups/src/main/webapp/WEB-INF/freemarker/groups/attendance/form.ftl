@@ -4,7 +4,6 @@
 		$('.persist-area').fixHeaderFooter();
 
 		$('.select-all').change(function(e) {
-			$('.select-all').attr("checked", $(this).prop('checked'));
 			$('.attendees').selectDeselectCheckboxes(this);
 		});
 
