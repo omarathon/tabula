@@ -9,11 +9,11 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.{Member, MemberNote}
 
 @Controller
-@RequestMapping(value = Array("/{member}/note/{memberNote}/delete"))
+@RequestMapping(value = Array("/{member}/note/{note}/delete"))
 class DeleteMemberNoteController extends BaseController {
 
 	@ModelAttribute("command")
-	def deleteCommand(@PathVariable member: Member, @PathVariable memberNote: MemberNote) = new DeleteMemberNoteCommand(memberNote, member, user)
+	def deleteCommand(@PathVariable member: Member, @PathVariable note: MemberNote) = new DeleteMemberNoteCommand(note, member, user)
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: DeleteMemberNoteCommand) = Mav("membernote/delete_form").noLayoutIf(ajax)

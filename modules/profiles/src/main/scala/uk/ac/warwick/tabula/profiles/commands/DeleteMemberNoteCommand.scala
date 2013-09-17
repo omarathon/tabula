@@ -32,6 +32,9 @@ class DeleteMemberNoteCommand(val memberNote: MemberNote, val member: Member, va
 	def validate(errors:Errors){
 		// should any member note be able to be deleted?
 		// should only the creator be able to delete???
+
+		// maybe this is too much and we don't need the member as well as the note
+		if (!memberNote.member.universityId.equals(member.universityId)) errors.reject("")
 	}
 
 	// describe the thing that's happening.

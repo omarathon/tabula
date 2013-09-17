@@ -41,4 +41,5 @@ class MemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget {
 
 	def permissionsParents = Stream(member)
 
+	override def toString = "MemberNote(" + id + ")"
 }

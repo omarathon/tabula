@@ -12,6 +12,6 @@ class MemberNoteIdConverter extends TwoWayConverter[String, MemberNote] {
 
 	override def convertRight(id: String) = service.getNoteById(id).orNull
 
-	override def convertLeft(memberNote: MemberNote) = (Option(memberNote) map {_.id}).orNull
+	override def convertLeft(note: MemberNote) = (Option(note) map {_.id}).orNull
 
 }
