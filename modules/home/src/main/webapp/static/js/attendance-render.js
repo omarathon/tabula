@@ -104,6 +104,9 @@ $(function(){
 			}
 		});
 
+		// Populate the year drop-down if the route is set on load
+		routeSelect.change();
+
 		// Update Preview button to preview the currently selected template.
 		$form.find('select.template[name=existingSet]').on('change', function() {
 			var $button = $('.monitoring-point-preview-button'),
@@ -159,15 +162,6 @@ $(function(){
 	$('.striped-section.routes .collapsible').each(function(){
 		var $this = $(this), $target = $this.closest('.item-info').find('.collapsible-target');
 		setupCollapsible($this, $target);
-	});
-
-	$('#addMonitoringPointSet select[name="academicYear"]').on('change', function(){
-		$(this).closest('form').append(
-			$('<input/>').attr({
-				'name':'changeYear',
-				'type':'hidden'
-			}).val(true)
-		).submit();
 	});
 
 	$('.routeAndYearPicker').find('.collapsible').each(function(){
