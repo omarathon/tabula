@@ -328,8 +328,8 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.saveOrUpdate(relBetweenStaff1AndStu1)
 		memberDao.saveOrUpdate(relBetweenStaff1AndStu2)
 
-		memberDao.countStudentsByDepartment(dept1) should be (1)
-		memberDao.countStudentsByRelationshipAndDepartment(relationshipType, dept1) should be (1)
+		memberDao.getStudentsByDepartment(dept1).size should be (1)
+		memberDao.getStudentsByRelationshipAndDepartment(relationshipType, dept1).size should be (1)
 	}
 
 }

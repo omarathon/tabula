@@ -4,10 +4,8 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data.{DepartmentDao, StudentCourseDetailsDao, RouteDao, Daoisms}
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
-import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
@@ -15,8 +13,11 @@ import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.data.model.{Department, Route}
 import uk.ac.warwick.tabula.roles.StudentRelationshipAgentRoleDefinition
-import uk.ac.warwick.tabula.data.model.{Department, StudentCourseDetails, Route}
+import scala.Some
+import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
+import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
 
 /** This command is intentionally Public. It only exists on dev and is designed,
   * in essence, to blitz a department and set up some sample data in it.

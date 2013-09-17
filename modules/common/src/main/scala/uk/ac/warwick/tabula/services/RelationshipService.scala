@@ -88,8 +88,10 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		}
 	}
 
-	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department) = transactional(readOnly=true) {
-		memberDao.getRelationshipsByDepartment(relationshipType, department)
+	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department) = transactional(readOnly = true) {
+
+		memberDao.getRelationshipsByDepartment(relationshipType, department.rootDepartment)
+			.filter(_.studentMember.exists(department.filterRule.matches))
 	}
 
 	def listAllStudentRelationshipsWithMember(agent: Member) = transactional(readOnly = true) {
@@ -109,11 +111,12 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	}
 
   def listStudentsWithoutRelationship(relationshipType: StudentRelationshipType, department: Department) = transactional(readOnly = true) {
-		memberDao.getStudentsWithoutRelationshipByDepartment(relationshipType, department)
+		memberDao.getStudentsWithoutRelationshipByDepartment(relationshipType, department.rootDepartment).filter(department.filterRule.matches)
 	}
 
   def countStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): (Int, Int) = transactional(readOnly = true) {
-		(memberDao.countStudentsByDepartment(department).intValue, memberDao.countStudentsByRelationshipAndDepartment(relationshipType, department).intValue)
+		val matchingStudents = memberDao.getStudentsByRelationshipAndDepartment(relationshipType, department.rootDepartment).filter(department.filterRule.matches)
+		(profileService.countStudentsByDepartment(department), matchingStudents.size)
 	}
 
   def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int = transactional(readOnly = true) {
