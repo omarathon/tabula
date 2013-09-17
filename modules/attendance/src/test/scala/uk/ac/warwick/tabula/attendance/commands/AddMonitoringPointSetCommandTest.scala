@@ -49,14 +49,15 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 		emptyRoute.code = emptyRouteCode
 
 		dept.routes = JArrayList(routeWithAllYears, routeWithOneYear, emptyRoute)
-		val command = new AddMonitoringPointSetCommand(dept, None) with CommandTestSupport
+		val thisYearCommand = new AddMonitoringPointSetCommand(dept, thisAcademicYear, None) with CommandTestSupport
+		val lastYearCommand = new AddMonitoringPointSetCommand(dept, lastAcademicYear, None) with CommandTestSupport
 	}
 
 	@Test
 	def validateNoYears() {
 		new Fixture {
-			var errors = new BindException(command, "command")
-			command.validate(errors)
+			var errors = new BindException(thisYearCommand, "command")
+			thisYearCommand.validate(errors)
 			errors.hasFieldErrors should be (right = true)
 			errors.getFieldErrors("selectedRoutesAndYears").size() should be (1)
 		}
@@ -65,8 +66,8 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 	@Test
 	def validateNoPoints() {
 		new Fixture {
-			var errors = new BindException(command, "command")
-			command.validate(errors)
+			var errors = new BindException(thisYearCommand, "command")
+			thisYearCommand.validate(errors)
 			errors.hasFieldErrors should be (right = true)
 			errors.getFieldErrors("monitoringPoints").size() should be (1)
 		}
@@ -75,10 +76,9 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 	@Test
 	def validateAllYearsExists() {
 		new Fixture {
-			command.selectedRoutesAndYears.get(routeWithAllYears).put("All", true)
-			command.academicYear = thisAcademicYear
-			var errors = new BindException(command, "command")
-			command.validate(errors)
+			thisYearCommand.selectedRoutesAndYears.get(routeWithAllYears).put("All", true)
+			var errors = new BindException(thisYearCommand, "command")
+			thisYearCommand.validate(errors)
 			errors.hasFieldErrors should be (right = true)
 			errors.getFieldErrors("selectedRoutesAndYears").size() should be (1)
 			errors.getFieldErrors("selectedRoutesAndYears").get(0).getCode should be ("monitoringPointSet.allYears")
@@ -88,10 +88,9 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 	@Test
 	def validateAllYearsExistsDifferentAcademicYear() {
 		new Fixture {
-			command.selectedRoutesAndYears.get(routeWithAllYears).put("All", true)
-			command.academicYear = lastAcademicYear
-			var errors = new BindException(command, "command")
-			command.validate(errors)
+			lastYearCommand.selectedRoutesAndYears.get(routeWithAllYears).put("All", true)
+			var errors = new BindException(lastYearCommand, "command")
+			lastYearCommand.validate(errors)
 			errors.getFieldErrors("selectedRoutesAndYears").size() should be (0)
 		}
 	}
@@ -99,10 +98,9 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 	@Test
 	def validateOneYearExistsDuplicate() {
 		new Fixture {
-			command.selectedRoutesAndYears.get(routeWithOneYear).put("1", true)
-			command.academicYear = thisAcademicYear
-			var errors = new BindException(command, "command")
-			command.validate(errors)
+			thisYearCommand.selectedRoutesAndYears.get(routeWithOneYear).put("1", true)
+			var errors = new BindException(thisYearCommand, "command")
+			thisYearCommand.validate(errors)
 			errors.hasFieldErrors should be (right = true)
 			errors.getFieldErrors("selectedRoutesAndYears").size() should be (1)
 			errors.getFieldErrors("selectedRoutesAndYears").get(0).getCode should be ("monitoringPointSet.duplicate")
@@ -112,10 +110,9 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 	@Test
 	def validateOneYearExistsDuplicateDifferentAcademicYear() {
 		new Fixture {
-			command.selectedRoutesAndYears.get(routeWithOneYear).put("1", true)
-			command.academicYear = lastAcademicYear
-			var errors = new BindException(command, "command")
-			command.validate(errors)
+			lastYearCommand.selectedRoutesAndYears.get(routeWithOneYear).put("1", true)
+			var errors = new BindException(lastYearCommand, "command")
+			lastYearCommand.validate(errors)
 			errors.getFieldErrors("selectedRoutesAndYears").size() should be (0)
 		}
 	}
@@ -123,10 +120,9 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 	@Test
 	def validateOneYearExistsAllYearsSet() {
 		new Fixture {
-			command.selectedRoutesAndYears.get(routeWithOneYear).put("All", true)
-			command.academicYear = thisAcademicYear
-			var errors = new BindException(command, "command")
-			command.validate(errors)
+			thisYearCommand.selectedRoutesAndYears.get(routeWithOneYear).put("All", true)
+			var errors = new BindException(thisYearCommand, "command")
+			thisYearCommand.validate(errors)
 			errors.hasFieldErrors should be (right = true)
 			errors.getFieldErrors("selectedRoutesAndYears").size() should be (1)
 			errors.getFieldErrors("selectedRoutesAndYears").get(0).getCode should be ("monitoringPointSet.alreadyYear")
@@ -136,10 +132,9 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 	@Test
 	def validateOneYearExistsAllYearsSetDifferentAcademicYear() {
 		new Fixture {
-			command.selectedRoutesAndYears.get(routeWithOneYear).put("All", true)
-			command.academicYear = lastAcademicYear
-			var errors = new BindException(command, "command")
-			command.validate(errors)
+			lastYearCommand.selectedRoutesAndYears.get(routeWithOneYear).put("All", true)
+			var errors = new BindException(lastYearCommand, "command")
+			lastYearCommand.validate(errors)
 			errors.getFieldErrors("selectedRoutesAndYears").size() should be (0)
 		}
 	}
@@ -147,11 +142,10 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 	@Test
 	def validateMixedYears() {
 		new Fixture {
-			command.selectedRoutesAndYears.get(emptyRoute).put("1", true)
-			command.selectedRoutesAndYears.get(emptyRoute).put("All", true)
-			command.academicYear = thisAcademicYear
-			var errors = new BindException(command, "command")
-			command.validate(errors)
+			thisYearCommand.selectedRoutesAndYears.get(emptyRoute).put("1", true)
+			thisYearCommand.selectedRoutesAndYears.get(emptyRoute).put("All", true)
+			var errors = new BindException(thisYearCommand, "command")
+			thisYearCommand.validate(errors)
 			errors.hasFieldErrors should be (right = true)
 			errors.getFieldErrors("selectedRoutesAndYears").size() should be (1)
 			errors.getFieldErrors("selectedRoutesAndYears").get(0).getCode should be ("monitoringPointSet.mixed")
@@ -161,12 +155,11 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 	@Test
 	def validatePointsNoNameNoWeek() {
 		new Fixture {
-			command.selectedRoutesAndYears.get(emptyRoute).put("1", true)
-			command.academicYear = thisAcademicYear
+			thisYearCommand.selectedRoutesAndYears.get(emptyRoute).put("1", true)
 			val newPoint = new MonitoringPoint
-			command.monitoringPoints.add(newPoint)
-			var errors = new BindException(command, "command")
-			command.validate(errors)
+			thisYearCommand.monitoringPoints.add(newPoint)
+			var errors = new BindException(thisYearCommand, "command")
+			thisYearCommand.validate(errors)
 			errors.hasFieldErrors should be (right = true)
 			errors.getFieldErrors("monitoringPoints[0].name").size() should be (1)
 			errors.getFieldErrors("monitoringPoints[0].week").size() should be (1)
@@ -176,15 +169,14 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 	@Test
 	def validatePointsDuplicate() {
 		new Fixture {
-			command.selectedRoutesAndYears.get(emptyRoute).put("1", true)
-			command.academicYear = thisAcademicYear
-			command.monitoringPoints.add(monitoringPoint)
+			thisYearCommand.selectedRoutesAndYears.get(emptyRoute).put("1", true)
+			thisYearCommand.monitoringPoints.add(monitoringPoint)
 			val newPoint = new MonitoringPoint
 			newPoint.name = existingName
 			newPoint.week = existingWeek
-			command.monitoringPoints.add(newPoint)
-			var errors = new BindException(command, "command")
-			command.validate(errors)
+			thisYearCommand.monitoringPoints.add(newPoint)
+			var errors = new BindException(thisYearCommand, "command")
+			thisYearCommand.validate(errors)
 			errors.hasFieldErrors should be (right = true)
 			errors.getFieldErrors("monitoringPoints[0].name").size() should be (1)
 			errors.getFieldErrors("monitoringPoints[1].name").size() should be (1)

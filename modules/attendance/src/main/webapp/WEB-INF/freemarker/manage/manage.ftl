@@ -45,7 +45,7 @@
 	<button type="submit" class="btn btn-primary">Change</button>
 </form>
 
-<form id="chooseCreateType" class="form-inline" action="<@url page="/manage/${command.dept.code}/sets/add"/>">
+<form id="chooseCreateType" class="form-inline" action="<@url page="/manage/${command.dept.code}/sets/add/${command.academicYear.startYear?c}"/>">
 	<h2>Create monitoring schemes</h2>
 	<label>
 		<input class="create blank" type="radio" checked name="createType" value="blank"/>
