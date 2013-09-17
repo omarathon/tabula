@@ -31,6 +31,34 @@ $(function(){
 		)
 	});
 
+	$('a.report').off().not('.disabled').on('click', function(e){
+		e.preventDefault();
+		var formLoad = function(data){
+			var $m = $('#modal');
+			$m.html(data);
+			if ($m.find('.report-sent').length > 0) {
+				$m.modal("hide");
+				bindReportButton();
+				return;
+			}
+			var $f = $m.find('form');
+			$f.on('submit', function(event){
+				event.preventDefault();
+			});
+			$m.find('.modal-footer button[type=submit]').on('click', function(){
+				$(this).button('loading');
+				$.post($f.attr('action'), $f.serialize(), function(data){
+					$(this).button('reset');
+					formLoad(data);
+				})
+			});
+			$m.off('shown').on('shown', function(){
+				$f.find('input[name="name"]').focus();
+			}).modal("show");
+		};
+		$.get($(this).attr('href'), formLoad);
+	});
+
 	// END SCRIPTS FOR VIEWING MONITORING POINTS
 
 	// SCRIPTS FOR MANAGING MONITORING POINTS

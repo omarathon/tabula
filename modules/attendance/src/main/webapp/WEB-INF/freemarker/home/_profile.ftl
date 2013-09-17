@@ -1,5 +1,5 @@
 <#escape x as x?html>
-
+<#include "*/attendance_variables.ftl" />
 <#assign can_record=can.do("MonitoringPoints.Record", command.studentCourseDetails) />
 <#assign is_the_student=currentUser.apparentUser.warwickId==command.studentCourseDetails.student.universityId />
 
@@ -44,7 +44,7 @@
 	</#list>
 </#macro>
 
-<div class="monitoring-points-profile striped-section collapsible <#if defaultExpand??>expanded</#if>">
+<div class="monitoring-points-profile striped-section collapsible <#if defaultExpand??></#if>">
 	<h3 class="section-title">Monitoring points</h3>
 	<div class="missed-info">
 		<#if command.missedCountByTerm?keys?size == 0 && (command.monitoringPointsByTerm?keys?size > 0) >
@@ -54,7 +54,7 @@
 				${command.studentCourseDetails.student.firstName} has attended all monitoring points.
 			</#if>
 		<#else>
-			<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
+			<#list monitoringPointTermNames as term>
 				<#if command.missedCountByTerm[term]??>
 					<div class="missed">
 						<i class="icon-warning-sign"></i>
@@ -82,7 +82,7 @@
 				<div class="span12"><em>There are no monitoring points for this route and year of study.</em></div>
 			</div>
 		<#else>
-			<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
+			<#list monitoringPointTermNames as term>
         		<#if command.monitoringPointsByTerm[term]??>
         			<@pointsInATerm term/>
         		</#if>

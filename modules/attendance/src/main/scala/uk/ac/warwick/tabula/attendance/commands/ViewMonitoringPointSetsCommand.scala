@@ -36,7 +36,8 @@ abstract class ViewMonitoringPointSetsCommand(
 		pointSetOption match {
 			case Some(p) => {
 				val members = getMembers(p)
-				val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
+				//val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
+				val currentAcademicWeek = 20
 				membersWithMissedCheckpoints = monitoringPointService.getCheckedForWeek(members, p, currentAcademicWeek).filter{
 					case (member, checkMap) =>
 						checkMap.exists{

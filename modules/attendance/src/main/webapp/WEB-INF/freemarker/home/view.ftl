@@ -1,4 +1,5 @@
 <#escape x as x?html>
+<#include "*/attendance_variables.ftl" />
 <h1>View monitoring points for ${command.dept.name}</h1>
 
 <#if updatedPoint??>
@@ -72,6 +73,10 @@
 </#if>
 
 <#if command.pointSet??>
+	<#if can.do("MonitoringPoints.Manage", command.pointSet.route)>
+		<div class="pull-right"><a href="<@url page="/${command.dept.code}/${command.pointSet.id}/report" />" class="btn btn-primary report" title="Report missed monitoring points to the Academic Office">Report</a></div>
+	</#if>
+
 	<h2>Students who have missed monitoring points</h2>
 
 	<#if command.membersWithMissedCheckpoints?keys?size == 0>
@@ -83,7 +88,7 @@
 				<tr>
 					<th class="sortable">First name</th>
 					<th class="sortable">Last name</th>
-					<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
+					<#list monitoringPointTermNames as term>
 						<#if command.monitoringPointsByTerm[term]??>
 							<th>${term}</th>
 						</#if>
@@ -97,7 +102,7 @@
 					<tr>
 						<td>${member.firstName}</td>
 						<td>${member.lastName}</td>
-						<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
+						<#list monitoringPointTermNames as term>
 							<#if command.monitoringPointsByTerm[term]??>
 								<td>
 									<#list command.monitoringPointsByTerm[term]?sort_by("week") as point>
@@ -151,13 +156,15 @@
         			</div>
         		</div>
         	</#macro>
-			<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
+			<#list monitoringPointTermNames as term>
 				<#if command.monitoringPointsByTerm[term]??>
 					<@pointsInATerm term/>
 				</#if>
 			</#list>
         </div>
 	</#if>
+
+	<div id="modal" class="modal hide"></div>
 </#if>
 
 <script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
@@ -189,7 +196,12 @@
 	jQuery(function($){
 		$('#missed-monitoring-points')
 			.sortableTable()
-			.trigger('sorton', [[[$('#missed-monitoring-points th').length - 1,1]]]);
+			.trigger('sorton', [
+				[
+					[$('#missed-monitoring-points th').length - 1,1],
+					[1,0]
+				]
+			]);
 	});
 </script>
 
