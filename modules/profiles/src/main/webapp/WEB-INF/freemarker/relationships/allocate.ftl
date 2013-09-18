@@ -105,7 +105,7 @@
 											<select data-filter-attr="fRoute">
 												<option data-filter-value="*">Any Route</option>
 												<#list allocateStudentsToRelationshipCommand.allMembersRoutes as route>
-													<option data-filter-value="${route.code}">${route.code?upper_case} ${route.name}</option>
+													<option data-filter-value="${route.code}"><@fmt.route_name route /></option>
 												</#list>
 											</select>
 										</div>

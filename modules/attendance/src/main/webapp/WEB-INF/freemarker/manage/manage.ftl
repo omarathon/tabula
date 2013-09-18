@@ -121,7 +121,7 @@
 				<div class="item-info">
 					<div class="row-fluid">
 						<div class="span10 collapsible">
-							<h3><i class="icon-fixed-width icon-chevron-right ellipsis"></i> ${route.code?upper_case} ${route.name}</h3>
+							<h3><i class="icon-fixed-width icon-chevron-right ellipsis"></i> <@fmt.route_name route /></h3>
 						</div>
 						<div class="span2">
 							<#if pointSets?size == 1 && !pointSets?first.year??>

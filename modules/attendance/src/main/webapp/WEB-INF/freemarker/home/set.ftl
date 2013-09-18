@@ -16,7 +16,7 @@
 
 	<div class="persist-area">
 		<div class="persist-header">
-			<h1>Record attendance for <#if (monitoringPoint.pointSet.year)??>Year ${monitoringPoint.pointSet.year}</#if> ${monitoringPoint.pointSet.route.code?upper_case} ${monitoringPoint.pointSet.route.name} : ${monitoringPoint.name}</h1>
+			<h1>Record attendance for <#if (monitoringPoint.pointSet.year)??>Year ${monitoringPoint.pointSet.year}</#if> <@fmt.route_name monitoringPoint.pointSet.route /> : ${monitoringPoint.name}</h1>
 
 
 			<div class="row-fluid record-attendance-form-header">

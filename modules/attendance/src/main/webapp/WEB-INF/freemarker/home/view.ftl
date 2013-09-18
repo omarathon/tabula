@@ -38,7 +38,7 @@
 			<option style="display:none;" disabled <#if !command.route??>selected</#if> value="">Route</option>
 			<#list command.setsByRouteByAcademicYear[command.academicYear.toString]?keys?sort_by("code") as route>
 				<option value="${route.code}" <#if command.route?? && command.route.code == route.code>selected</#if>>
-					${route.code?upper_case} ${route.name}
+					<@fmt.route_name route />
 				</option>
 			</#list>
 		</select>
@@ -75,7 +75,7 @@
 	<h2>Students who have missed monitoring points</h2>
 
 	<#if command.membersWithMissedCheckpoints?keys?size == 0>
-		<p>There are no students in ${command.route.code?upper_case} ${command.route.name} who have missed monitoring points</p>
+		<p>There are no students in <@fmt.route_name command.route /> who have missed monitoring points</p>
 	<#else>
 
 		<table id="missed-monitoring-points" class="table table-striped table-bordered table-condensed">
@@ -124,7 +124,7 @@
 
 	</#if>
 
-	<h2>Monitoring points for ${command.route.code?upper_case} ${command.route.name},
+	<h2>Monitoring points for <@fmt.route_name command.route />,
 		<#if command.pointSet.year??>year ${command.pointSet.year}<#else>all years</#if>
 	</h2>
 
