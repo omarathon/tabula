@@ -25,4 +25,9 @@ class DepartmentFilterRuleUserTypeTest extends TestBase {
 		Try(userType.convertToObject("Fribble")) should be(anInstanceOf[Failure[Any]])
 	}
 
+	@Test
+	def convertAndReconvertPreservesOrder(){
+		val userType = new DepartmentFilterRuleUserType
+		userType.convertToValue(userType.convertToObject("UG,Y2")) should be ("UG,Y2")
+	}
 }
