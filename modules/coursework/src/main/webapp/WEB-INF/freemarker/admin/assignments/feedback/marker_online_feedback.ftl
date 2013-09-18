@@ -1,4 +1,11 @@
 <#if !isCompleted>
+	<#if !isFirstMarker>
+		<div class="well">
+			<h3>First markers feedback</h3>
+			<#assign feedback = firstMarkerFeedback />
+			<#include "_feedback_summary.ftl">
+		</div>
+	</#if>
 	<#include "online_feedback.ftl">
 <#else>
 	<#if command.submission??>

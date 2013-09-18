@@ -6,13 +6,6 @@
 		<#assign submission = command.submission />
 		<#include "_submission_summary.ftl">
 	</#if>
-	<#if !isFirstMarker>
-		<div class="well">
-			<h3>First markers feedback</h3>
-			<#assign feedback = firstMarkerFeedback />
-			<#include "_feedback_summary.ftl">
-		</div>
-	</#if>
 	<div class="form onlineFeedback">
 		<@f.form cssClass="form-horizontal double-submit-protection"
 				 method="post" enctype="multipart/form-data" commandName="command" action="online/${command.student.universityId}">

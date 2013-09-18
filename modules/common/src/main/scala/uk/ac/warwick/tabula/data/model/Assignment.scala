@@ -115,6 +115,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	// allow students to request extensions via the app
 
 	var allowExtensionRequests: JBoolean = false
+	var genericFeedback: String = ""
 
 	@ManyToOne
 	@JoinColumn(name = "module_id")
