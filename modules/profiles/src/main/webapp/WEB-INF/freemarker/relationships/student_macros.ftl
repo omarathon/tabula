@@ -17,7 +17,7 @@
 <#-- Print out a table of students.
  is_relationship=true means each item is a StudentRelationship rather than a member-->
 <#macro table students is_relationship>
-<table class="students table-bordered table-striped table-condensed tabula-purple">
+<table class="students table table-bordered table-striped table-condensed tabula-purple">
 	<thead>
 	<tr>
 		<th class="photo-col">Photo</th>

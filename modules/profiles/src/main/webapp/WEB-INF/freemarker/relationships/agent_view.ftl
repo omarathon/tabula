@@ -42,7 +42,7 @@
 								</h4>
 
 								<div id="${studentKey}" class="collapse">
-									<table class="students table-bordered table-striped table-condensed tabula-purple">
+									<table class="students table table-bordered table-striped table-condensed tabula-purple">
 										<thead>
 											<tr>
 												<th class="student-col">First name</th>
@@ -72,6 +72,10 @@
 											</#list>
 										</tbody>
 									</table>
+									
+									<p>
+										<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
+									</p>
 								</div>
 							</td>
 						</tr>
