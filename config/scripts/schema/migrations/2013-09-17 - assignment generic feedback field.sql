@@ -1,5 +1,5 @@
 -- TAB-571
 ALTER TABLE ASSIGNMENT
 ADD (
-	genericFeedback NCLOB,
+	genericFeedback nvarchar2(4000)
 );
