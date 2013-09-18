@@ -39,6 +39,7 @@ trait MonitoringPointService {
 	def deleteTemplate(template: MonitoringPointSetTemplate)
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
 	def getCheckedForWeek(members: Seq[StudentMember], set: MonitoringPointSet, week: Int): Map[StudentMember, Map[MonitoringPoint, Option[Boolean]]]
+	def setSentToAcademicOfficeForWeek(set: MonitoringPointSet, currentAcademicWeek: Int): Unit
 }
 
 
@@ -106,6 +107,14 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 				})
 			).toMap
 		).toMap
+
+	def setSentToAcademicOfficeForWeek(set: MonitoringPointSet, currentAcademicWeek: Int) = {
+		set.points.asScala.filter(p => p.week < currentAcademicWeek).foreach(p => {
+			p.sentToAcademicOffice = true
+			p.updatedDate = DateTime.now
+			monitoringPointDao.saveOrUpdate(p)
+		})
+	}
 }
 
 @Service("monitoringPointService")

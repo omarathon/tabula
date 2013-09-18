@@ -35,6 +35,8 @@ abstract class MonitoringPointSetReportCommand(val monitoringPointSet: Monitorin
 				case _ => false
 			})
 		}.toSeq.sortBy{case (member, count) => (count, member.lastName)}
+
+
 	}
 
 	def applyInternal() {
@@ -51,7 +53,7 @@ abstract class MonitoringPointSetReportCommand(val monitoringPointSet: Monitorin
 
 		// TODO: Push counts to SITS
 
-		// TODO: Mark points as sent
+		monitoringPointService.setSentToAcademicOfficeForWeek(monitoringPointSet, currentAcademicWeek)
 	}
 
 }

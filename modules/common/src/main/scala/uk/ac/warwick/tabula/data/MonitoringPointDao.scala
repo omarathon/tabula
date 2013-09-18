@@ -126,4 +126,5 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			.add(is("point", point))
 			.setProjection(Projections.rowCount())
 			.uniqueResult.get.asInstanceOf[Number].intValue()
+
 }
