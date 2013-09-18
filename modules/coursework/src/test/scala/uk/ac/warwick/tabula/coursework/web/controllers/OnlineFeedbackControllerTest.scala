@@ -2,14 +2,14 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.tabula.coursework.web.controllers.admin.{OnlineFeedbackFormController, OnlineFeedbackController}
-import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineFeedbackFormCommandTestSupport, OnlineFeedbackFormCommand, OnlineFeedbackCommandTestSupport, OnlineFeedbackCommand}
+import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineFeedbackFormCommand, OnlineFeedbackCommandTestSupport, OnlineFeedbackCommand}
 import uk.ac.warwick.tabula.data.model.{StudentMember, Department, Module, Assignment}
 import uk.ac.warwick.userlookup.User
 import org.mockito.Mockito._
 import org.springframework.validation.Errors
 
 
-class OnlineFeedbackControllerTestextends extends TestBase {
+class OnlineFeedbackControllerTest extends TestBase {
 
 	trait Fixture {
 		val department = new Department
@@ -20,6 +20,7 @@ class OnlineFeedbackControllerTestextends extends TestBase {
 		val assignment = new Assignment
 		assignment.module = module
 		assignment.name = "Herons are evil"
+
 		val command = new OnlineFeedbackCommand(module, assignment) with OnlineFeedbackCommandTestSupport
 	}
 
@@ -50,9 +51,8 @@ class OnlineFeedbackFormControllerTest extends TestBase with Mockito {
 		val student = new StudentMember("student")
 		val marker = new User("marker")
 		val currentUser = new CurrentUser(marker, marker)
-		val command = new OnlineFeedbackFormCommand(module, assignment, student, currentUser)
-			with OnlineFeedbackFormCommandTestSupport
 
+		val command = mock[OnlineFeedbackFormCommand]
 		val controller = new OnlineFeedbackFormController
 	}
 
@@ -79,6 +79,7 @@ class OnlineFeedbackFormControllerTest extends TestBase with Mockito {
 			val errors = mock[Errors]
 			when(errors.hasErrors) thenReturn(false)
 			val mav = controller.submit(command, errors)
+			there was one(command).apply()
 			mav.viewName should be ("ajax_success")
 			mav.map("renderLayout") should be("none")
 		}
