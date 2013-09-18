@@ -2,11 +2,17 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.{Fixtures, TestBase, Mockito}
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.data.model.StaffMember
 
 class CreateMemberNoteCommandTest extends TestBase with Mockito {
 
 	@Test
 	def invalidMemberNote = withUser("cuscao") {
+
+			val staffMember = new StaffMember
+			staffMember.universityId = currentUser.universityId
+
 		  val member = Fixtures.student(universityId = "12345")
 		  val cmd = new CreateMemberNoteCommand(member, currentUser)
 
@@ -25,6 +31,10 @@ class CreateMemberNoteCommandTest extends TestBase with Mockito {
 
 	@Test
 	def validMemberNote = withUser("cuscao") {
+
+		val staffMember = new StaffMember
+		staffMember.universityId = currentUser.universityId
+
 		val member = Fixtures.student(universityId = "12345")
 		val cmd = new CreateMemberNoteCommand(member, currentUser)
 

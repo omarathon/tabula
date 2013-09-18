@@ -20,7 +20,7 @@ class MemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget {
 	var title: String =_
 
 	@OneToMany(mappedBy="memberNote", fetch=LAZY, cascade=Array(ALL))
-	var attachments:JList[FileAttachment] = JList()
+	var attachments:JList[FileAttachment] = JArrayList()
 
 	@ManyToOne
 	@JoinColumn(name="creatorid")
