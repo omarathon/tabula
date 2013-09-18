@@ -97,31 +97,6 @@ class DepartmentTest extends TestBase with Mockito {
 		department.filterRule should be (AllMembersFilterRule)
 	}
 
-	@Test
-	def canSetFilterRuleFromCode(){
-		val department = new Department
-		department.filterRuleName="UG"
-		department.filterRule should be(UndergraduateFilterRule)
-
-		department.filterRuleName="PG"
-		department.filterRule should be(PostgraduateFilterRule)
-	}
-
-	@Test
-	def canStackFilters(){
-		val department = new Department
-		department.filterRuleName="UG,Y2"
-		department.filterRule should be(CompositeFilterRule(Seq(UndergraduateFilterRule,InYearFilterRule(2))))
-	}
-
-
-	@Test
-	def invalidFilterCodeThrows(){
-		val department = new Department
-		department.filterRuleName="Fribble"
-		Try(department.filterRule) should be(anInstanceOf[Failure[Any]])
-	}
-
 	private trait FilterRuleFixture{
 		val undergraduate = new StudentMember().tap(m=>{
 			val scd = new StudentCourseDetails().tap(s=>{

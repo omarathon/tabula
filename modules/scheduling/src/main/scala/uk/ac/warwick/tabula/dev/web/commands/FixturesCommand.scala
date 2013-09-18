@@ -15,7 +15,6 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, Small
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.data.model.{Department, Route}
 import uk.ac.warwick.tabula.roles.StudentRelationshipAgentRoleDefinition
-import scala.Some
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
 

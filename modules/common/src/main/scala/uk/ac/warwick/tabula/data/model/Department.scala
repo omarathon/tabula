@@ -6,7 +6,7 @@ import scala.xml.NodeSeq
 
 import javax.persistence._
 
-import org.hibernate.annotations.{BatchSize, AccessType, ForeignKey}
+import org.hibernate.annotations.{Type, BatchSize, AccessType, ForeignKey}
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
@@ -168,24 +168,9 @@ class Department extends GeneratedId
 	@BatchSize(size=200)
 	var grantedRoles:JList[DepartmentGrantedRole] = JArrayList()
 
-	var filterRuleName: String = _
-
-	// filterRuleName can be
-	//  - null (in which case we return all members),
-	//  - the name of a single rule (in which case, return that rule)
-	//  - a comma-separated list of rule names (in which case, return a composite rule of all the named rules)
-	//
-	// Failure to parse the rule name(s) causes an exception to be thrown.
-	def filterRule: FilterRule = {
-		val rules: Option[FilterRule] = Option(filterRuleName).map(ruleNames =>
-			ruleNames.split(",").toList match {
-				case Nil => AllMembersFilterRule // don't think this can ever happen; split never returns Nil.
-				case singleRule :: Nil => FilterRule.withName(singleRule)
-				case rules: Seq[String] => CompositeFilterRule(rules map FilterRule.withName)
-			}
-		)
-		rules.getOrElse(AllMembersFilterRule)
-	}
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.DepartmentFilterRuleUserType")
+	@Column(name="FilterRuleName")
+	var filterRule: FilterRule = AllMembersFilterRule
 
 	def includesMember(m: Member): Boolean = Option(parent) match {
 		case None => filterRule.matches(m)
