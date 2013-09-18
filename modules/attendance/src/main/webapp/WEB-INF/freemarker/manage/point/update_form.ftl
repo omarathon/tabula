@@ -24,6 +24,7 @@
 	<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Updating&hellip;">
 		Update
 	</button>
+	<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
 </@modal.footer>
 
 </#escape>
