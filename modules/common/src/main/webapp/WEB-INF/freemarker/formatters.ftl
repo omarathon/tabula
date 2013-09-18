@@ -23,6 +23,10 @@
 	</a>
 </#macro>
 
+<#macro route_name route>
+	${route.code?upper_case} ${route.name}
+</#macro>
+
 <#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true><#--
 	--><#noescape><#--
 		-->${dateBuilder(date, seconds, at, timezone, capitalise, relative, split, shortMonth, includeTime)}<#--

@@ -95,7 +95,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	}
 
   def countStudentsByDepartment(department: Department): Int = transactional(readOnly = true) {
-		memberDao.countStudentsByDepartment(department).intValue
+			memberDao.getStudentsByDepartment(department.rootDepartment).filter(department.filterRule.matches).size
 	}
 
 	def getStudentsByRoute(route: Route): Seq[StudentMember] = transactional(readOnly = true) {

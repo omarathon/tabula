@@ -502,6 +502,8 @@
 		// sticky table headers
 		//$('table.sticky-table-headers').fixedHeaderTable('show');
 
+
+
 		// If we're on OS X, replace all kbd.keyboard-control-key with Cmd instead of Ctrl
 		if (navigator.platform.indexOf('Mac') != -1) {
 			$('kbd.keyboard-control-key').html('<span class="mac-cmd">&#8984;</span> cmd');

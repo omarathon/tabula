@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<h1>Edit monitoring scheme ${command.set.route.code?upper_case} ${command.set.route.name}, <#if command.set.year??>Year ${command.set.year}<#else>All years</#if></h1>
+<h1>Edit monitoring scheme <@fmt.route_name command.set.route />, <#if command.set.year??>Year ${command.set.year}<#else>All years</#if></h1>
 
 <div class="modify-monitoring-points">
 	<div class="row-fluid">

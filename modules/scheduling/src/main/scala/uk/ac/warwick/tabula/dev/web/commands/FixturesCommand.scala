@@ -4,10 +4,8 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.data.{DepartmentDao, StudentCourseDetailsDao, RouteDao, Daoisms}
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
-import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
@@ -15,8 +13,10 @@ import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.data.model.{Department, Route}
 import uk.ac.warwick.tabula.roles.StudentRelationshipAgentRoleDefinition
-import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, Route}
+import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
+import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
 
 /** This command is intentionally Public. It only exists on dev and is designed,
   * in essence, to blitz a department and set up some sample data in it.
@@ -33,10 +33,11 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	def applyInternal() {
 		setupDepartmentAndModules()
 
-		// Two department admins, first is also a senior tutor and senior supervisor
 		val department = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code).get
 		val subDept = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestSubDepartment.code).get
+		val subSubDept = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestSubSubDepartment.code).get
 
+		// Two department admins, first is also a senior tutor and senior supervisor
 		val cmd = new GrantRoleCommand(department)
 		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
 		cmd.usercodes.addAll(Seq(Fixtures.TestAdmin1, Fixtures.TestAdmin2))
@@ -47,6 +48,12 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		subDepartmentAdminCommand.roleDefinition = DepartmentalAdministratorRoleDefinition
 		subDepartmentAdminCommand.usercodes.addAll(Seq(Fixtures.TestAdmin3))
 		subDepartmentAdminCommand.apply()
+
+		// admin on the sub-department;
+		val subSubDepartmentAdminCommand = new GrantRoleCommand(subSubDept)
+		subSubDepartmentAdminCommand.roleDefinition = DepartmentalAdministratorRoleDefinition
+		subSubDepartmentAdminCommand.usercodes.addAll(Seq(Fixtures.TestAdmin4))
+		subSubDepartmentAdminCommand.apply()
 
 		cmd.roleDefinition = StudentRelationshipAgentRoleDefinition(relationshipService.getStudentRelationshipTypeByUrlPart("tutor").get)
 		cmd.usercodes.clear()
@@ -78,13 +85,14 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				for (route<-routes) session.delete(route)
 				dept.routes.clear()
 
-				for (scd<-scds) session.delete(scd)
-
-				for (sub<-dept.children) session.delete(sub)
-				dept.children.clear()
-
+			  for (scd<-scds) session.delete(scd)
+			  for (sub<-recursivelyGetChildren(dept,Nil)) {session.delete(sub)}
 				session.delete(dept)
 			}
+		}
+		def recursivelyGetChildren(department:Department, gotSoFar:Seq[Department]):Seq[Department] = {
+			val descendents = for (child<-department.children) yield recursivelyGetChildren(child, Nil)
+			descendents.flatten ++ department.children
 		}
 
 		val department = newDepartmentFrom(Fixtures.TestDepartment,departmentDao)
@@ -99,6 +107,10 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		val subDepartment = newDepartmentFrom(Fixtures.TestSubDepartment, departmentDao)
 		transactional() {
 			session.save(subDepartment)
+		}
+		val subSubDepartment = newDepartmentFrom(Fixtures.TestSubSubDepartment, departmentDao)
+			transactional() {
+				session.save(subSubDepartment)
 		}
 
 		// Setup some modules in the department, deleting anything existing
@@ -157,6 +169,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 object Fixtures {
 	val TestDepartment = DepartmentInfo("Test Services", "xxx", null)
 	val TestSubDepartment = DepartmentInfo("Test Services - Undergraduates", "xxx-ug", null,Some("xxx"),Some("UG"))
+	val TestSubSubDepartment = DepartmentInfo("Test Services - Freshers", "xxx-ug1", null,Some("xxx-ug"),Some("UG,Y1"))
 
 	val TestModule1 = ModuleInfo("Test Module 1", "xxx101", "xxx-xxx101")
 	val TestModule2 = ModuleInfo("Test Module 2", "xxx102", "xxx-xxx102")
@@ -167,4 +180,5 @@ object Fixtures {
 	val TestAdmin1 = "tabula-functest-admin1"
 	val TestAdmin2 = "tabula-functest-admin2"
 	val TestAdmin3 = "tabula-functest-admin3"
+	val TestAdmin4 = "tabula-functest-admin4"
 }

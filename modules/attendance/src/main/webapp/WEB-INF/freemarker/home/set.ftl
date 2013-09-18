@@ -1,23 +1,26 @@
 <script>
-
 (function ($) {
 	$(function() {
 		$('.persist-area').fixHeaderFooter();
+
+		$('.select-all').change(function(e) {
+			$('.attendees').selectDeselectCheckboxes(this);
+		});
+
 	});
 } (jQuery));
 
 </script>
 
-
-
 <div class="recordCheckpointForm">
 
 	<div class="persist-area">
 		<div class="persist-header">
-			<h1>Record attendance for <#if (monitoringPoint.pointSet.year)??>Year ${monitoringPoint.pointSet.year}</#if> ${monitoringPoint.pointSet.route.code?upper_case} ${monitoringPoint.pointSet.route.name} : ${monitoringPoint.name}</h1>
-			<div class="row-fluid">
-				<div class="span10"></div>
-				<div class="span1">Attended</div>
+			<h1>Record attendance for <#if (monitoringPoint.pointSet.year)??>Year ${monitoringPoint.pointSet.year}</#if> <@fmt.route_name monitoringPoint.pointSet.route /> : ${monitoringPoint.name}</h1>
+
+
+			<div class="row-fluid record-attendance-form-header">
+				<div class="span2 offset10 text-center ">Attended <br /><input type="checkbox" name="select-all" class="select-all"/></div>
 			</div>
 		</div>
 
@@ -40,7 +43,7 @@
 									<@fmt.member_photo student "tinythumbnail" true />
 									<div class="full-height">${student.fullName}</div>
 								</div>
-								<div class="span1 text-center">
+								<div class="span2 text-center">
 									<div class="full-height">
 										<#assign universityId = student.universityId />
 										<input type="checkbox" name="studentIds" value="${student.universityId}" <#if command.studentsChecked[universityId]!false>checked="checked"</#if>/>
@@ -60,6 +63,6 @@
 				</form>
 			</div>
 
-        </#if>
+		</#if>
 	</div>
 </div>
