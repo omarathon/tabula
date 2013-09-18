@@ -19,6 +19,7 @@ class ReleaseForMarkingTest extends AppContextTestBase with Mockito {
 
 			val assignment = newDeepAssignment()
 			assignment.closeDate = DateTime.parse("2012-08-15T12:00")
+			session.save(assignment)
 
 			generateSubmission(assignment, "0678022")
 			generateSubmission(assignment, "1170836")

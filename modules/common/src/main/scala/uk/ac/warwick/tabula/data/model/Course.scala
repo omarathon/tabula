@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import javax.persistence.Entity
 import javax.persistence.Id
@@ -23,8 +22,7 @@ class Course {
 	var name: String = _
 	var title: String = _
 	
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
-	var lastUpdatedDate = DateTime.now	
+	var lastUpdatedDate = DateTime.now
 	
 	override def toString = name
 

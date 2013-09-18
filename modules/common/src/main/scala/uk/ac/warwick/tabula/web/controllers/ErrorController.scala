@@ -23,7 +23,7 @@ class ErrorController extends BaseController {
 	}
 
 	@RequestMapping(Array("/error/404"))
-	def pageNotFound(@RequestHeader("X-Requested-Uri") requestedUri: String) = {
+	def pageNotFound(@RequestHeader(value="X-Requested-Uri", required=false) requestedUri: String) = {
 		Mav("errors/404", "requestedUri" -> requestedUri).noLayoutIf(ajax)
 	}
 

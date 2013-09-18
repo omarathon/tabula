@@ -108,7 +108,7 @@
 						clearInterval(wait);
 						$m.find(".modal-body").animate({ height: h });
 					}
-				}, 50);
+				}, 300); // this didn't work for me (ZLJ) at 150 but did at 200; upping to 300 to include safety margin
 
 				// show-time
 				$m.modal("show");
@@ -261,6 +261,100 @@
 
 
 	});
-	//MEETING RECORD APPROVAL STUFF
+	//END MEETING RECORD APPROVAL STUFF
 
+	// TIMETABLE STUFF
+    $(function() {
+		function getEvents(studentId){
+			return function (start, end,callback){
+				$.ajax({url:'/profiles/timetable/api',
+					  // make the from/to params compatible with what FullCalendar sends if you just specify a URL
+					  // as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
+					  data:{'from':start.getTime()/1000,
+							'to':end.getTime()/1000,
+							'whoFor':studentId
+							},
+					  success:function(data){
+						//
+						// TODO
+						//
+						// insert code here to look through the events and magically display weekends if a weekend event is found
+						// (cal.fullCalendar('option','weekends',true); doesn't work, although some other options do)
+						// https://code.google.com/p/fullcalendar/issues/detail?id=293 has some discussion and patches
+						//
+						callback(data);
+					  }
+					  });
+			};
+		}
+		function onViewUpdate(view,element){
+		   updateCalendarTitle(view, element);
+		   $('.popover').hide();
+		}
+		// relies on the variable "weeks" having been defined elsewhere, by using the WeekRangesDumperTag
+		function updateCalendarTitle(view,element){
+            var start = view.start.getTime();
+            var end = view.end.getTime();
+            var week = $.grep(weeks, function(week){
+                return (week.start >=start) && (week.end <= end);
+            });
+            if (week.length >0){
+                var decodedTitle = $("<div/>").html(week[0].desc).text();
+                view.title=decodedTitle;
+                view.calendar.updateTitle();
+            } // We should have an entry for every week; in the event that one's missing
+              // we'll just leave it blank. The day columns still have the date on them.
+            return true;
+		}
+
+		function createCalendar(container,defaultViewName, studentId){
+			var showWeekends = (defaultViewName == "month");
+			var cal = $(container).fullCalendar({
+									events:getEvents(studentId),
+									defaultView: defaultViewName,
+									allDaySlot: false,
+									slotMinutes: 60,
+									firstHour:8,
+									firstDay: 1, //monday
+									timeFormat: {
+                                        agendaWeek: '', // don't display time on event
+                                        // for all other views
+                                        '': 'h:mm{ - h:mm}'   //  5:00 - 6:30
+                                    },
+									weekends:showWeekends,
+									viewRender:onViewUpdate,
+									header: {
+										left:   'title',
+										center: '',
+										right:  'today prev,next'
+									},
+									eventClick: function(event, jsEvent, view) {
+										var $this = $(this);
+										$this.popover('show');
+										return false;
+                                    },
+                                    eventAfterRender: function(event, element, view){
+										var content = "<table class='event-info'>";
+                                        if (event.description.length > 0){
+                                        	content = content + "<tr><th>What</th><td>" + event.description +"</td></tr>";
+                                        }
+                                        content = content + "<tr><th>When</th><td>"  + event.formattedInterval + "</td></tr>";
+                                        content = content + "<tr><th>Where</th><td>" + event.location + "</td></tr>";
+                                        if (event.tutorNames.length > 0){
+                                        	content = content + "<tr><th>Who</th><td> " + event.tutorNames + "</td></tr>";
+                                        }
+                                    	content = content + "</table>";
+                                    	$(element).tabulaPopover({html:true, container:"#container",title:event.shorterTitle, content:content})
+                                    }
+			});
+			$(document).on('tabbablechanged', function(e) {
+				// redraw the calendar if the layout updates
+				cal.fullCalendar('render');
+			});
+		}
+
+        $(".fullCalendar").each(function(index){
+    			createCalendar($(this),$(this).data('viewname'),$(this).data('studentid'));
+    		});
+    	});
 }(jQuery));

@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.{NotificationHandling, EventHandling, Event, EventDescription}
 import uk.ac.warwick.tabula.JavaImports
 import uk.ac.warwick.tabula.services.MaintenanceModeService
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, RequiresPermissionsChecking, PermissionsChecking}
@@ -21,6 +20,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSetTemplate, MonitoringPoint, MonitoringPointSet}
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -44,8 +44,11 @@ trait KnowsEventName {
 	val eventName: String
 }
 
-trait Notifies[A] {
-	def emit: Seq[Notification[A]]
+/**
+ * Takes an A (usually the result of a Command) and generates notifications for Bs. Often, A == B.
+ */
+trait Notifies[A, B] {
+	def emit(result: A): Seq[Notification[B]]
 }
 trait Appliable[A]{
   def apply():A
@@ -77,7 +80,7 @@ with JavaImports with EventHandling with NotificationHandling with PermissionsCh
 		if (EventHandling.enabled) {
 			if (maintenanceCheck(this))
 				recordEvent(this) { notify(this) { benchmark() { applyInternal() } } }
-			else throw maintenanceMode.exception()
+			else throw maintenanceMode.exception(this)
 		} else {
 			notify(this) { benchmark() { applyInternal() } }
 		}
@@ -226,19 +229,19 @@ abstract class Description {
 	 * Record a Feedback item, plus its assignment, module, department
 	 */
 	def feedback(feedback: Feedback) = {
-		map += "feedback" -> feedback.id
+		property("feedback" -> feedback.id)
 		if (feedback.assignment != null) assignment(feedback.assignment)
 		this
 	}
 
-    /**
-     * Record a Submission item, plus its assignment, module, department
-     */
-    def submission(submission: Submission) = {
-        map += "submission" -> submission.id
-        if (submission.assignment != null) assignment(submission.assignment)
-        this
-    }	
+	/**
+	 * Record a Submission item, plus its assignment, module, department
+	 */
+	def submission(submission: Submission) = {
+		property("submission" -> submission.id)
+		if (submission.assignment != null) assignment(submission.assignment)
+		this
+	}
 	
 	/**
 	 * University IDs
@@ -302,19 +305,38 @@ abstract class Description {
 	 * Record module, plus department.
 	 */
 	def module(module: Module) = {
-		property("module" -> module.id)
 		if (module.department != null) department(module.department)
-		this
+		property("module" -> module.id)
 	}
 
 	def department(department: Department) = {
 		property("department", department.code)
-		this
 	}
 
 	def member(member: Member) = {
 		property("member", member.universityId)
-		this
+	}
+
+	def route(route: Route) = {
+		if (route.department != null) department(route.department)
+		property("route", route.code)
+	}
+
+	def monitoringPointSet(set: MonitoringPointSet) = {
+		if (set.route != null) route(set.route)
+		property("monitoringPointSet", set.id)
+	}
+
+	def monitoringPointSetTemplate(template: MonitoringPointSetTemplate) = {
+		property("monitoringPointSetTemplate", template.id)
+	}
+
+	def monitoringPoint(monitoringPoint: MonitoringPoint) = {
+		property("monitoringPoint", monitoringPoint.id)
+	}
+
+	def monitoringCheckpoint(monitoringPoint: MonitoringPoint) = {
+		property("monitoringCheckpoint", monitoringPoint.id)
 	}
 
 	// delegate equality to the underlying map

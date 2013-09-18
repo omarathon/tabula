@@ -4,7 +4,7 @@ import java.util.HashSet
 
 import scala.collection.JavaConversions._
 
-import org.hibernate.annotations.{AccessType, Type}
+import org.hibernate.annotations.{BatchSize, AccessType, Type}
 import org.joda.time.DateTime
 
 import javax.persistence._
@@ -41,7 +41,6 @@ class Submission extends GeneratedId with PermissionsTarget {
 	var submitted: Boolean = false
 
 	@Column(name = "submitted_date")
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var submittedDate: DateTime = _
 
 	@NotNull
@@ -64,6 +63,7 @@ class Submission extends GeneratedId with PermissionsTarget {
 	var state : MarkingState = _
 
 	@OneToMany(mappedBy = "submission", cascade = Array(ALL))
+	@BatchSize(size=200)
 	var values: JSet[SavedFormValue] = new HashSet
 
 	def getValue(field: FormField): Option[SavedFormValue] = {

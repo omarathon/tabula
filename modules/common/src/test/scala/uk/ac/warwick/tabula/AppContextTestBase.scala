@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
 import java.lang.reflect.Modifier
 import org.springframework.test.annotation.DirtiesContext
 import scala.language.implicitConversions
-
+import uk.ac.warwick.tabula.data.Transactions
 
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
@@ -69,6 +69,8 @@ trait TransactionalTesting {
 	@Autowired var transactionManager:PlatformTransactionManager =_
 	
 	def session = sessionFactory.getCurrentSession
+
+	Transactions.enabled = true
 	
 	def transactional[A](f : TransactionStatus=>A) : A = {
 		val template = new TransactionTemplate(transactionManager)

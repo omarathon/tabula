@@ -36,10 +36,16 @@
 	--></#noescape><#--
 --></#macro>
 
-<#-- Format week ranges for a SmallGroupEvent -->
-<#macro weekRanges event><#--
+<#-- Format week ranges for a SmallGroupEvent or MonitoringPoint -->
+<#macro weekRanges object><#--
 	--><#noescape><#--
-		-->${weekRangesFormatter(event)}<#--
+		-->${weekRangesFormatter(object)}<#--
+	--></#noescape><#--
+--></#macro>
+
+<#macro singleWeekFormat week academicYear dept><#--
+	--><#noescape><#--
+		-->${weekRangesFormatter(week, academicYear, dept)}<#--
 	--></#noescape><#--
 --></#macro>
 
@@ -234,12 +240,13 @@
 	<#if !can.do(permission,scope)>
 		<#local classes='${classes} disabled use-tooltip'?trim >
 		<#local title>title='You do not have permission to ${action_descr}.'</#local>
+		<#local data_attr='${data_attr}'?replace("data-toggle=modal","") >
 	</#if>
 
-	<#local attr='${data_attr}'?replace("data-toggle=modal","") >
+
 
 	<#if classes??><#local class>class='${classes}'</#local></#if>
-	<${type} ${href} ${class} ${title} ${attr}><#noescape><#nested></#noescape></${type}>
+	<${type} ${href} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
 </#macro>
 
 </#escape>

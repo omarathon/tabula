@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.{ RequestMapping, PathVariable, ModelAttribute }
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import org.springframework.validation.Errors
-import org.hibernate.validator.Valid
+import javax.validation.Valid
 import uk.ac.warwick.tabula.groups.web.Routes
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.web.bind.annotation.RequestParam

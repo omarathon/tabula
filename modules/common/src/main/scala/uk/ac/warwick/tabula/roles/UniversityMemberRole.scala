@@ -1,8 +1,9 @@
 package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.data._
-
 import uk.ac.warwick.tabula.permissions.Permissions._
+import uk.ac.warwick.tabula.permissions.PermissionsSelector
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 case class UniversityMemberRole(member: model.Member) extends BuiltInRole(UniversityMemberRoleDefinition, member)
 
@@ -22,24 +23,22 @@ case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefini
 		Profiles.Read.TelephoneNumber,
 		Profiles.Read.MobileNumber,
 		Profiles.Read.Usercode,
-		Profiles.PersonalTutor.Read,
-		Profiles.Supervisor.Read,
-		Profiles.Read.PersonalTutees,
 		Profiles.Read.StudentCourseDetails.Core,
 		Profiles.Read.StudentCourseDetails.Status,
-		Profiles.Read.Supervisees,
 		Profiles.Read.SmallGroups,
+    Profiles.Read.Timetable,
 
-		Profiles.PersonalTutor.MeetingRecord.Read,
-    Profiles.PersonalTutor.MeetingRecord.ReadDetails,
-    Profiles.PersonalTutor.MeetingRecord.Create,
-    Profiles.PersonalTutor.MeetingRecord.Update,
-    Profiles.PersonalTutor.MeetingRecord.Delete,
-    Profiles.Supervisor.MeetingRecord.Read,
-    Profiles.Supervisor.MeetingRecord.ReadDetails,
-    Profiles.Supervisor.MeetingRecord.Create,
-    Profiles.Supervisor.MeetingRecord.Update,
-    Profiles.Supervisor.MeetingRecord.Delete
+    Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
+		
+    Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]),
+
+    Profiles.MeetingRecord.Read(PermissionsSelector.Any[StudentRelationshipType]),
+    Profiles.MeetingRecord.ReadDetails(PermissionsSelector.Any[StudentRelationshipType]),
+    Profiles.MeetingRecord.Create(PermissionsSelector.Any[StudentRelationshipType]),
+    Profiles.MeetingRecord.Update(PermissionsSelector.Any[StudentRelationshipType]),
+    Profiles.MeetingRecord.Delete(PermissionsSelector.Any[StudentRelationshipType]),
+
+		MonitoringPoints.View
 	)
 
 	GrantsScopelessPermission(

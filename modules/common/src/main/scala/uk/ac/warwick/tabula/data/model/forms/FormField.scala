@@ -7,7 +7,8 @@ import org.hibernate.annotations.Type
 import org.springframework.validation.Errors
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{Gender, AbstractBasicUserType, Assignment, GeneratedId}
+import uk.ac.warwick.tabula.data.model.{ AbstractBasicUserType, GeneratedId}
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserLookupService

@@ -3,10 +3,10 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.profiles.web.ProfileBreadcrumbs
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, AutowiringProfileServiceComponent, ProfileServiceComponent, ProfileService}
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, AutowiringProfileServiceComponent}
 
-abstract class ProfilesController extends BaseController with ProfileBreadcrumbs with CurrentMemberComponent with AutowiringProfileServiceComponent with AutowiringRelationshipServiceComponent{
+abstract class ProfilesController extends BaseController with ProfileBreadcrumbs with CurrentMemberComponent
+	with AutowiringProfileServiceComponent with AutowiringRelationshipServiceComponent {
 	
 	hideDeletedItems
 	activeProfilesOnly

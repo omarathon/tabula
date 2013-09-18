@@ -73,6 +73,8 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignment.addDefaultFields()
 		assignmentService.save(assignment)
 
+		assignment.fields.get(1)
+
 		assignmentService.isFilterEnabled("notDeleted") should be (false)
 		assignmentService.getAssignmentById(assignment.id) should be (Some(assignment))
 		session.enableFilter("notDeleted")
@@ -478,12 +480,12 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentService.save(assignment1)
 
 		val assignment2 = newDeepAssignment("ch101")
+		assignment2.module = assignment1.module
 		assignment2.academicYear = year
 
 		val department2 = assignment2.module.department
 
 		session.save(department2)
-		session.save(assignment2.module)
 		assignmentService.save(assignment2)
 
 		val up1 = new UpstreamAssignment

@@ -20,6 +20,7 @@
 
 <#-- This is also included by _fields.ftl -->
 <#include "_common_fields.ftl" />
+<#include "_submissions_common_fields.ftl" />
 
 </@f.form>
 

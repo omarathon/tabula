@@ -16,10 +16,10 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notificat
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 
 
-class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val universityId: String, val submitter: CurrentUser) extends Command[List[String]]
-	with Notifies[Option[Extension]] with Daoisms with Logging {
+class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val universityId: String, val submitter: CurrentUser) extends Command[Seq[String]]
+	with Notifies[Seq[String], Option[Extension]] with Daoisms with Logging {
 	
-	var universityIds: JList[String] = LazyLists.simpleFactory()
+	var universityIds: JList[String] = LazyLists.create()
 
 	universityIds.add(universityId)
 
@@ -28,7 +28,7 @@ class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val
 
 	var userLookup = Wire.auto[UserLookupService]
 	
-	override def applyInternal(): List[String] = transactional() {
+	override def applyInternal(): Seq[String] = transactional() {
 
 		// return false if no extension exists for the given ID. Otherwise deletes that extension and returns true
 		def deleteExtension(universityId: String): Boolean = {
@@ -42,7 +42,7 @@ class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val
 
 		// return the IDs of all the deleted extensions
 		universityIds = universityIds.filter(deleteExtension(_))
-		universityIds.toList
+		universityIds.toSeq
 	}
 
 	def describe(d: Description) {
@@ -51,7 +51,7 @@ class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val
 		d.studentIds(universityIds)
 	}
 
-	def emit = {
+	def emit(universityIds: Seq[String]) = {
 		universityIds.map(studentId => {
 			val student = userLookup.getUserByWarwickUniId(studentId)
 			new ExtensionRevokedNotification(assignment, student, submitter.apparentUser) with FreemarkerTextRenderer

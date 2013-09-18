@@ -4,9 +4,9 @@ import org.joda.time.DateTimeConstants
 import org.junit.Before
 import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures}
 import uk.ac.warwick.tabula.data.model.MeetingRecord
-import uk.ac.warwick.tabula.data.model.RelationshipType.PersonalTutor
 import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 // scalastyle:off magic.number
 class MeetingRecordDaoTest extends PersistenceTestBase {
@@ -22,9 +22,11 @@ class MeetingRecordDaoTest extends PersistenceTestBase {
 	}
 
 	@Test def createAndList = transactional { tx =>
-
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		memberDao.saveOrUpdate(relationshipType)
+		
 		val creator = Fixtures.staff(universityId = "0000001", userId="staff1")
-		val relationship = StudentRelationship("Professor A Tutor", PersonalTutor, "0123456/1")
+		val relationship = StudentRelationship("Professor A Tutor", relationshipType, "0123456/1")
 
 		memberDao.saveOrUpdate(creator)
 		memberDao.saveOrUpdate(relationship)

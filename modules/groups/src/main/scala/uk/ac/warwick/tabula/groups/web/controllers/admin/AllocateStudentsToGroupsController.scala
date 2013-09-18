@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.groups.commands.admin.AllocateStudentsToGroupsCommand
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.web.Mav
-import org.hibernate.validator.Valid
+import javax.validation.Valid
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.groups.web.Routes
 

@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.home
 import dispatch.classic._
 import org.apache.http.client.params.{CookiePolicy, ClientPNames}
 import dispatch.classic.thread.ThreadSafeHttpClient
-import uk.ac.warwick.tabula.FunctionalTestProperties
+import uk.ac.warwick.tabula.{LoginDetails, FunctionalTestProperties}
 import scala.util.parsing.json.JSON
 import scala.language.postfixOps
 
@@ -30,6 +30,7 @@ trait FixturesDriver {
 													allocationMethodName:String="Manual",
 													openForSignups:Boolean = true,
 													maxGroupSize:Int = 0,
+													releasedToStudents:Boolean = true,
 													allowSelfGroupSwitching:Boolean  = true):String  = {
 		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/groupset"
 		val req = url(uri).POST << Map(
@@ -39,6 +40,7 @@ trait FixturesDriver {
 		  "allocationMethodName"->allocationMethodName,
 		  "groupCount"->groupCount.toString,
 		  "openForSignups"->openForSignups.toString,
+		  "releasedToStudents"->releasedToStudents.toString,
 		  "maxGroupSize"->maxGroupSize.toString,
 		  "allowSelfGroupSwitching"->allowSelfGroupSwitching.toString
 		)
@@ -47,6 +49,13 @@ trait FixturesDriver {
 		val id = JSON.parseFull(resp).get.asInstanceOf[Map[String,Any]]("id").toString
 		id
 	}
+
+	def createSmallGroupEvent(setId: String,title: String, weekRange:String="1") {
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/groupEvent"
+		val req = url(uri).POST << Map("setId" -> setId, "title" -> title, "weekRange"->weekRange)
+		http.when(_==200)(req >| )
+	}
+
 
   def addStudentToGroupSet(studentUserId: String, setId:String){
 		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/groupsetMembership"
@@ -65,7 +74,64 @@ trait FixturesDriver {
 		http.when(_==200)(req >|)
 	}
 
+	def createStudentMember(userId:String,
+													genderCode:String = "M",
+													routeCode:String="",
+													yearOfStudy:Int=1,
+													courseCode:String="",
+													deptCode:String=""){
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/studentMember"
+		val req = url(uri).POST << Map(
+			"userId" -> userId,
+			"genderCode"->genderCode,
+		  "yearOfStudy"->yearOfStudy.toString,
+		  "routeCode"->routeCode,
+		  "courseCode"->courseCode,
+		  "deptCode"->deptCode
+		)
+		http.when(_==200)(req >|)
 
+	}
+
+	def createRoute(routeCode:String, departmentCode:String, routeName:String, degreeType:String="UG" ){
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/route"
+		val req = url(uri).POST << Map(
+			"routeCode" -> routeCode,
+			"departmentCode"->departmentCode,
+		  "routeName"->routeName,
+		  "degreeType"->degreeType)
+		http.when(_==200)(req >|)
+
+	}
+
+
+	def createCourse(courseCode:String, courseName:String ){
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/course"
+		val req = url(uri).POST << Map(
+			"courseCode" -> courseCode,
+			"courseName"->courseName)
+		http.when(_==200)(req >|)
+	}
+
+	def registerStudentsOnModule(students:Seq[LoginDetails], moduleCode:String){
+		val uniIds = students.map(_.warwickId).mkString(",")
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/moduleRegistration"
+		val req = url(uri).POST << Map(
+			"universityIds" -> uniIds,
+			"moduleCode" -> moduleCode)
+		http.when(_==200)(req >|)
+
+	}
+
+	def createStudentRelationship(student:LoginDetails, agent:LoginDetails, relationhipType:String = "tutor"){
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/relationship"
+		val req = url(uri).POST << Map(
+			"studentUniId" -> student.warwickId,
+			"agent"->agent.warwickId,
+		  "relationshipType"->relationhipType)
+		http.when(_==200)(req >|)
+
+	}
 
 }
 

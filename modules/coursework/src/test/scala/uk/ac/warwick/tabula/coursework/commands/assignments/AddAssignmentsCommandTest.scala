@@ -1,14 +1,15 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
-import org.junit.Test
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.CurrentUser
+import org.springframework.web.bind.WebDataBinder
+import org.springframework.beans.MutablePropertyValues
+import uk.ac.warwick.tabula.system.{NoAutoGrownNestedPaths, CustomDataBinder}
 
 //scalastyle:off magic.number
 class AddAssignmentsCommandTest extends AppContextTestBase {
@@ -55,7 +56,18 @@ class AddAssignmentsCommandTest extends AppContextTestBase {
 		withClue("Expecting comment field.") { result2.commentField should be ('defined) }
 		withClue("Expected open ended") { assert(result2.openEnded === true) }
 	} 
-	
+
+	@Test
+	def optionsMapBinding() {
+		val command = new AddAssignmentsCommand(null, null)
+		val binder = new CustomDataBinder(command, "cmd") with NoAutoGrownNestedPaths
+		val pvs = new MutablePropertyValues()
+
+		pvs.add("optionsMap[A].allowExtensions", true)
+		binder.bind(pvs)
+
+		command.optionsMap("A").allowExtensions.booleanValue should be (true)
+	}
 	
 	case class MyFixtures() {
 		val department = Fixtures.department(code="ls", name="Life Sciences")

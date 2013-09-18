@@ -19,7 +19,14 @@ case object SysadminRoleDefinition extends UnassignableBuiltInRoleDefinition {
 		GodMode,
 		ManageMaintenanceMode,
 		ImportSystemData,
-		ReplicaSyncing
+		ReplicaSyncing,
+		
+		StudentRelationshipType.Create,
+		StudentRelationshipType.Read,
+		StudentRelationshipType.Update,
+		StudentRelationshipType.Delete,
+
+		MonitoringPointSetTemplates.Manage
 	)
 	
 	GrantsGlobalPermission(

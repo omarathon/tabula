@@ -165,6 +165,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 		report.assignmentMembershipService = assignmentMembershipService
 		report.auditEventQueryMethods = auditEventQueryMethods
 		report.submissionService = submissionService
+		report.feedbackService = feedbackService
 		report
 	}
 

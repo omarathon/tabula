@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
 import scala.collection.JavaConversions._
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{BatchSize, Type}
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.Department
@@ -37,6 +37,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	var customBaseRoleDefinition: CustomRoleDefinition = _
 
 	@OneToMany(mappedBy="customBaseRoleDefinition", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var subDefinitions:JList[CustomRoleDefinition] = List()
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.permissions.BuiltInRoleDefinitionUserType")
@@ -60,6 +61,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 
 	// A set of role overrides
 	@OneToMany(mappedBy="customRoleDefinition", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var overrides:JList[RoleOverride] = JArrayList()
 
 	def permissionsParents =

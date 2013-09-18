@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import org.hibernate.validator.Valid
+import javax.validation.Valid
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 
 /**
@@ -71,7 +71,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 	// end of complicated membership stuff
 		
 	// A collection of sub-commands for modifying the child groups
-	var groups: JList[ModifySmallGroupCommand] = LazyLists.withFactory { () => 
+	var groups: JList[ModifySmallGroupCommand] = LazyLists.create { () => 
 		new CreateSmallGroupCommand(this, module, this)
 	}
 	
@@ -123,7 +123,6 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 		for (group <- set.assessmentGroups if group.smallGroupSet == null) {
 			group.smallGroupSet = set
 		}
-
 		
 		set.allowSelfGroupSwitching = allowSelfGroupSwitching
 		set.studentsCanSeeOtherMembers = studentsCanSeeOtherMembers
@@ -140,7 +139,6 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 	}
 	
 	override def onBind(result: BindingResult) {
-
 		// If the last element of groups is both a Creation and is empty, disregard it
 		def isEmpty(cmd: ModifySmallGroupCommand) = cmd match {
 			case cmd: CreateSmallGroupCommand if !cmd.name.hasText && cmd.events.isEmpty => true
@@ -149,9 +147,11 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 		
 		while (!groups.isEmpty() && isEmpty(groups.asScala.last))
 			groups.remove(groups.asScala.last)
+			
+		// For each empty group, take our bound max group size value
+		groups.asScala.filter { _.events.isEmpty }.foreach { _.maxGroupSize = defaultMaxGroupSize }
 		
 		groups.asScala.foreach(_.onBind(result))
-
 	}
 
 }

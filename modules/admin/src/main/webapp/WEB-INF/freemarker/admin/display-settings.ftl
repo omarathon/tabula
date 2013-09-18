@@ -1,7 +1,7 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#escape x as x?html>
 <h1>Settings for ${department.name}</h1>
-<@f.form method="post" class="form-horizontal settings-form" action="" commandName="displaySettingsCommand">
+<@f.form method="post" class="form-horizontal department-settings-form" action="" commandName="displaySettingsCommand">
 	<@form.row>
 		<@form.label></@form.label>
 		<@form.field>
@@ -135,7 +135,7 @@
 			</@form.row>
 			<#assign checkedMarkup><#if displaySettingsCommand.turnitinSmallMatchPercentageLimit!=0>checked="checked"</#if></#assign>
 			<@form.row>
-				<@form.label path="turnitinSmallMatchPercentageLimit"><input type="radio" name="disable-radio"  ${checkedMarkup}/> Percentage limit</@form.label>
+				<@form.label path="turnitinSmallMatchPercentageLimit"><input type="radio" name="disable-radio" ${checkedMarkup}/> Percentage limit</@form.label>
 				<@form.field>
 					<@f.errors path="turnitinSmallMatchPercentageLimit" cssClass="error" />
 					<@f.input path="turnitinSmallMatchPercentageLimit" cssClass="input-small" /> %
@@ -143,6 +143,26 @@
 			</@form.row>
 		</fieldset>
 	</fieldset>
+	
+	<#if features.arbitraryRelationships>
+		<fieldset id="relationship-options">
+			<legend>Student relationship options</legend>
+			
+			<@form.row>
+				<@form.label>Display</@form.label>
+				<@form.field>
+					<#list allRelationshipTypes as relationshipType>
+						<@form.label checkbox=true>
+							<@f.checkbox path="studentRelationshipDisplayed[${relationshipType.id}]" id="studentRelationshipDisplayed_${relationshipType.id}" />
+							${relationshipType.description}
+						</@form.label>
+					</#list>
+					
+					<@f.errors path="studentRelationshipDisplayed" cssClass="error" />
+				</@form.field>
+			</@form.row>
+		</fieldset>
+	</#if>
 
 <div class="submit-buttons">
 	<input type="submit" value="Save" class="btn btn-primary">

@@ -14,7 +14,7 @@ class ListGroupStudentsCommand(val group: SmallGroup) extends Command[Seq[Member
 
 	var profileService = Wire[ProfileService]
 
-	PermissionCheck(Permissions.SmallGroups.Read, group)
+	PermissionCheck(Permissions.SmallGroups.ReadMembership, group)
 
 	override def applyInternal() = {
 		group.students.users map { user =>

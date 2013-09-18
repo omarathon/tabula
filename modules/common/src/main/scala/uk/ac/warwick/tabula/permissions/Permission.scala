@@ -1,6 +1,10 @@
 package uk.ac.warwick.tabula.permissions
 
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import org.apache.commons.lang3.builder.HashCodeBuilder
+import org.apache.commons.lang3.builder.EqualsBuilder
+import scala.reflect.ClassTag
 
 sealed abstract class Permission(val description: String) extends CaseObjectEqualityFixes[Permission] {
 	val getName = Permissions.shortName(getClass.asInstanceOf[Class[_ <: Permission]])
@@ -10,12 +14,82 @@ sealed abstract class Permission(val description: String) extends CaseObjectEqua
 sealed abstract class ScopelessPermission(description: String) extends Permission(description) {
 	override val isScoped = false
 }
+sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val selector: PermissionsSelector[A], description: String) extends Permission(description) {
+	override val getName = SelectorPermission.shortName(getClass.asInstanceOf[Class[_ <: SelectorPermission[A]]])
+	
+	def <= [B <: PermissionsSelector[B]](other: SelectorPermission[B]) = other match {
+		case that: SelectorPermission[A] => selector <= that.selector.asInstanceOf[PermissionsSelector[A]]
+		case _ => false
+	}
+	
+	override def equals(other: Any) = other match {
+		case that: SelectorPermission[A] => {
+			new EqualsBuilder()
+			.append(getName, that.getName)
+			.append(selector, that.getName)
+			.build()
+		}
+		case _ => false
+	}
+	
+	override def hashCode() = 
+		new HashCodeBuilder()
+		.append(getName)
+		.append(selector)
+		.build()
+		
+	override def toString() = "%s(%s)".format(super.toString, selector) 
+}
+
+trait PermissionsSelector[A <: PermissionsSelector[A]] {
+	def id: String
+	
+	def isWildcard = false
+	def <=(that: PermissionsSelector[A]) = that match {
+		case any if any.isWildcard => true
+		case that => this == that
+	}
+}
+
+object PermissionsSelector {
+	val AnyId = "*" // A special ID for converting to and from the catch-all selector
+	
+	def Any[A <: PermissionsSelector[A] : ClassTag] = new PermissionsSelector[A] {
+		def id = AnyId
+		
+		override def isWildcard = true
+		
+		override def <=(that: PermissionsSelector[A]) = {
+			// Any is only <= other wildcards
+			that.isWildcard
+		}
+			
+		override def toString() = "*" 
+	}
+}
 
 case class CheckablePermission(val permission: Permission, val scope: Option[PermissionsTarget])
 
 object CheckablePermission {
 	def apply(permission: ScopelessPermission): CheckablePermission = new CheckablePermission(permission, None)
 	def apply(permission: Permission, scope: PermissionsTarget): CheckablePermission = new CheckablePermission(permission, Some(scope))
+}
+
+object SelectorPermission {
+	private val ObjectClassPrefix = Permissions.getClass.getName
+	
+	def of[A <: PermissionsSelector[A]](name: String, selector: A): SelectorPermission[A] = {
+		try {
+			// Go through the magical hierarchy
+			val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$'))
+			clz.getConstructors()(0).newInstance(selector).asInstanceOf[SelectorPermission[A]]
+		} catch {
+			case e: ClassNotFoundException => throw new IllegalArgumentException("Selector permission " + name + " not recognised")
+		}
+	}
+	
+	def shortName(clazz: Class[_ <: SelectorPermission[_]])
+		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length).replace('$', '.')
 }
 
 /* To avoid nasty namespace/scope clashes, stick all of this in a Permission object */
@@ -151,7 +225,6 @@ object Permissions {
 			case object Core extends Permission("View a member's photo, name, Warwick email, job title and University number")
 			case object DateOfBirth extends Permission("View a member's date of birth")
 			case object Nationality extends Permission("View a member's nationality")
-			case object Gender extends Permission("View a member's gender")
 			case object NextOfKin extends Permission("View a member's next of kin")
 			case object HomeAddress extends Permission("View a member's home address")
 			case object TermTimeAddress extends Permission("View a member's term-time address")
@@ -160,46 +233,40 @@ object Permissions {
 			case object HomeEmail extends Permission("View a member's alternative email address")
 			case object Usercode extends Permission("View a member's usercode")
 			case object SmallGroups extends Permission("View a member's small groups")
+			case object Timetable extends Permission("View a member's personal timetable")
 
 			object StudentCourseDetails {
 				case object Core extends Permission("View a student's basic course, route and department details")
 				case object Status extends Permission("View a student's enrolment and study status")
 			}
 			
-			case object PersonalTutees extends Permission("View a member's personal tutees")
-			case object Supervisees extends Permission("View a member's supervisees")
+			case class RelationshipStudents(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+				extends SelectorPermission(relationshipType, "View a member's students")
 		}
-
-		// Person's own tutor ('upward' relationship)
-		object PersonalTutor {
-			case object Upload extends Permission("Upload personal tutors from a spreadsheet")
-
-			case object Create extends Permission("Add a personal tutor")
-			case object Read extends Permission("View a personal tutor")
-			case object Update extends Permission("Edit a personal tutor")
-			case object Delete extends Permission("Remove a personal tutor")
-
-      object MeetingRecord {
-        case object Create extends Permission("Add a tutor meeting record")
-        case object Read extends Permission("View a tutor meeting record")
-        case object ReadDetails extends Permission("View the contents of a tutor meeting record")
-        case object Update extends Permission("Edit a tutor meeting record")
-        case object Delete extends Permission("Remove a tutor meeting record")
-      }
-
+		
+		object StudentRelationship {		
+			case class Create(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+				extends SelectorPermission(relationshipType, "Add a student relationship")
+			case class Read(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+				extends SelectorPermission(relationshipType, "View a student relationship")
+			case class Update(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+				extends SelectorPermission(relationshipType, "Edit a student relationship")
+			case class Delete(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+				extends SelectorPermission(relationshipType, "Remove a student relationship")
 		}
-
-		// Person's own supervisor ('upward' relationship)
-		object Supervisor {
-			case object Read extends Permission("View a supervisor")
-      object MeetingRecord {
-        case object Create extends Permission("Add a supervisor meeting record")
-        case object Read extends Permission("View a supervisor meeting record")
-        case object ReadDetails extends Permission("View the contents of a supervisor meeting record")
-        case object Update extends Permission("Edit a supervisor meeting record")
-        case object Delete extends Permission("Remove a supervisor meeting record")
-      }
-		}
+		
+		object MeetingRecord {
+      case class Create(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      	extends SelectorPermission(relationshipType, "Add a meeting record")
+      case class Read(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      	extends SelectorPermission(relationshipType, "View a meeting record")
+      case class ReadDetails(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      	extends SelectorPermission(relationshipType, "View the contents of a meeting record")
+      case class Update(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      	extends SelectorPermission(relationshipType, "Edit a meeting record")
+      case class Delete(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      	extends SelectorPermission(relationshipType, "Remove a meeting record")
+    }
 	}
 
 	object SmallGroups {
@@ -207,6 +274,7 @@ object Permissions {
 
 		case object Create extends Permission("Create small groups")
 		case object Read extends Permission("View small groups")
+		case object ReadMembership extends Permission("View small group membership")
 		case object Update extends Permission("Edit small groups")
 		case object Delete extends Permission("Delete small groups")
 
@@ -221,5 +289,22 @@ object Permissions {
 	object UserSettings {
 		case object Update extends Permission("Edit user settings")
 	}
+	
+	object MonitoringPoints {
+		case object Manage extends Permission("Manage monitoring points")
+		case object View extends Permission("View monitoring points")
+		case object Record extends Permission("View monitoring points")
+	}
 
+	object MonitoringPointSetTemplates {
+		case object View extends ScopelessPermission("View monitoring point set templates")
+		case object Manage extends ScopelessPermission("Manage monitoring point set templates")
+	}
+	
+	object StudentRelationshipType {
+		case object Create extends ScopelessPermission("Create student relationship types")
+		case object Read extends ScopelessPermission("View student relationship types")
+		case object Update extends ScopelessPermission("Edit student relationship types")
+		case object Delete extends ScopelessPermission("Remove student relationship types")
+	}
 }

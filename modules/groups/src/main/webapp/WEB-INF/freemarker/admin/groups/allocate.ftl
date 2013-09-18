@@ -6,10 +6,12 @@
 
 <#macro student_item student bindpath="">
 	<#assign profile = membersById[student.warwickId]!{} />
-	<li class="student well well-small">
+	<li class="student well well-small"
+	data-f-gender="${(profile.gender.dbValue)!}"
+	data-f-route="${(profile.mostSignificantCourseDetails.route.code)!}"
+	data-f-year="${(profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
 		<div class="profile clearfix">
 			<@fmt.member_photo profile "tinythumbnail" false />
-
 			<div class="name">
 				<h6>${profile.fullName!student.fullName}</h6>
 				${(profile.mostSignificantCourseDetails.route.name)!student.shortDepartment}
@@ -59,30 +61,65 @@
 
 			<#assign submitUrl><@routes.allocateset set /></#assign>
 			<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToGroupsCommand">
+			<div class="tabula-dnd" 
+					 data-item-name="student" 
+					 data-text-selector=".name h6"
+					 data-use-handle="false"
+					 data-selectables=".students .drag-target"
+					 data-scroll="true"
+					 data-remove-tooltip="Remove this student from this group">
 				<div class="btn-toolbar">
-					<a class="random btn"
+					<a class="random btn" data-toggle="randomise" data-disabled-on="empty-list"
 					   href="#" >
 						<i class="icon-random"></i> Randomly allocate
 					</a>
-					<a class="return-items btn"
+					<a class="return-items btn" data-toggle="return" data-disabled-on="no-allocation"
 					   href="#" >
 						<i class="icon-arrow-left"></i> Remove all
 					</a>
 				</div>
 				<div class="row-fluid fix-on-scroll-container">
 					<div class="span5">
-						<div id="studentslist" class="students">
+						<div id="studentslist" 
+								 class="students tabula-filtered-list"
+								 data-item-selector=".student-list li">
 							<h3>Students</h3>
-							<div class="well student-list drag-target">
-								<h4>Not allocated to a group</h4>
-
-								<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
-									<@spring.bind path="unallocated">
-										<#list status.actualValue as student>
-											<@student_item student "${status.expression}[${student_index}]" />
-										</#list>
-									</@spring.bind>
-								</ul>
+							<div class="well ">
+									<h4>Not allocated to a group</h4>
+									<#if features.smallGroupAllocationFiltering>
+										<div class="filter" id="filter-by-gender-controls">
+											<select data-filter-attr="fGender">
+												<option data-filter-value="*">Any Gender</option>
+												<option data-filter-value="M">Male</option>
+												<option data-filter-value="F">Female</option>
+											</select>
+										</div>
+										<div class="filter" id="filter-by-year-controls">
+											<select data-filter-attr="fYear">
+												<option data-filter-value="*">Any Year of study</option>
+												<#list allocateStudentsToGroupsCommand.allMembersYears as year>
+													<option data-filter-value="${year}">Year ${year}</option>
+												</#list>
+											</select>
+										</div>
+										<div class="filter" id="filter-by-route-controls">
+											<select data-filter-attr="fRoute">
+												<option data-filter-value="*">Any Route</option>
+												<#list allocateStudentsToGroupsCommand.allMembersRoutes as route>
+													<option data-filter-value="${route.code}">${route.code?upper_case} ${route.name}</option>
+												</#list>
+											</select>
+										</div>
+									</#if>
+								<div class="student-list drag-target">
+									<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
+										<@spring.bind path="unallocated">
+											<#list status.actualValue as student>
+												<@student_item student "${status.expression}[${student_index}]" />
+											</#list>
+										</@spring.bind>
+									</ul>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -136,7 +173,8 @@
 						</div>
 					</div>
 				</div>
-
+			</div>
+			
 				<div class="submit-buttons">
 					<input type="submit" class="btn btn-primary" value="Save">
 					<a href="<@routes.depthome module />" class="btn">Cancel</a>
@@ -151,10 +189,10 @@
 					<p>You can allocate students to groups using a spreadsheet.</p>
 
 					<ol>
-						<li><strong><a href="allocate/template">Download a template spreadsheet</a></strong>. This will be prefilled with the names and University ID numbers of students you have selected to be in Term 1 seminars. In Excel you may need to <a href="http://office.microsoft.com/en-gb/excel-help/what-is-protected-view-RZ101665538.aspx?CTT=1&section=7">exit protected view</a> to edit the spreadsheet.
+						<li><strong><a href="allocate/template">Download a template spreadsheet</a></strong>. This will be prefilled with the names and University ID numbers of students you have selected to be in ${set.name}. In Excel you may need to <a href="http://office.microsoft.com/en-gb/excel-help/what-is-protected-view-RZ101665538.aspx?CTT=1&section=7">exit protected view</a> to edit the spreadsheet.
 						</li>
-						<li><strong>Allocate students</strong> to groups using the dropdown menu in the <strong>Group name</strong> column or by pasting in a list of group names. The group names must match the groups you have already created for Term 1 seminars. The <strong>group_id</strong> field will be updated with a unique ID number for that group.
-							You can select additional students to be in Term 1 seminars by entering their University ID numbers in the <strong>student_id</strong> column. Any students with an empty group_id field will be added to the list of students who haven't been allocated to a group.</li>
+						<li><strong>Allocate students</strong> to groups using the dropdown menu in the <strong>Group name</strong> column or by pasting in a list of group names. The group names must match the groups you have already created for ${set.name}. The <strong>group_id</strong> field will be updated with a unique ID number for that group.
+							You can select additional students to be in ${set.name} by entering their University ID numbers in the <strong>student_id</strong> column. Any students with an empty group_id field will be added to the list of students who haven't been allocated to a group.</li>
 						<li><strong>Save</strong> your updated spreadsheet.</li>
 					    <li><@form.labelled_row "file.upload" "Choose your updated spreadsheet" "step-action" ><input type="file" name="file.upload"  /> </@form.labelled_row></li>
 					</ol>
@@ -178,6 +216,15 @@
 			<!--TAB-1008 - fix scrolling bug when student list is shorter than the group list-->
 			$('#studentslist').css('min-height', function() {
 				return $('#groupslist').outerHeight();
+			});
+
+			// When the return list has changed, make sure the filter is re-run			
+			$('.return-list').on('changed.tabula', function(e) {
+				// Make sure it exists before doing it
+				var filter = $('.tabula-filtered-list').data('tabula-filtered-list');
+				if (filter) {
+					filter.filter();
+				}
 			});
 		})(jQuery);
 	</script>

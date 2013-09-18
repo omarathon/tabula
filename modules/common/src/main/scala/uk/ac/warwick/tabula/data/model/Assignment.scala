@@ -3,7 +3,13 @@ package uk.ac.warwick.tabula.data.model
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
+import javax.persistence._
+import javax.persistence.FetchType._
+import javax.persistence.CascadeType._
+
+import org.hibernate.annotations.{ForeignKey, Filter, FilterDef, AccessType, BatchSize, Type, IndexColumn}
 import org.joda.time.DateTime
+
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model.forms._
@@ -16,11 +22,9 @@ import uk.ac.warwick.tabula.data.model.forms.WordCountField
 import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
-import org.hibernate.annotations.ForeignKey
-import javax.persistence._
-import javax.persistence.FetchType._
-import javax.persistence.CascadeType._
+
 import scala.reflect._
+
 
 object Assignment {
 	// don't use the same name in different contexts, as that will kill find methods
@@ -93,13 +97,10 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	var archived: JBoolean = false
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var openDate: DateTime = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var closeDate: DateTime = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var createdDate = DateTime.now()
 
 	var openEnded: JBoolean = false
@@ -124,26 +125,33 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	def permissionsParents = Option(module).toStream
 
 	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@OrderBy("submittedDate")
+	@BatchSize(size=200)
 	var submissions: JList[Submission] = JArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
+	@BatchSize(size=200)
 	var extensions: JList[Extension] = JArrayList()
 
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
+	@BatchSize(size=200)
 	var feedbacks: JList[Feedback] = JArrayList()
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "feedback_template_id")
+	@BatchSize(size=200)
 	var feedbackTemplate: FeedbackTemplate = _
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
 
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
+	@IndexColumn(name = "position")
+	@BatchSize(size=200)
 	var fields: JList[FormField] = JArrayList()
 
 	// IndexColumn is a busted flush for fields because of reuse of non-uniqueness.
@@ -492,6 +500,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
+	@BatchSize(size=200)
 	var grantedRoles:JList[AssignmentGrantedRole] = JArrayList()
 
 	def toStringProps = Seq(

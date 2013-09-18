@@ -138,7 +138,7 @@ jQuery(function($){
 	var optsUrl = $optsButton.attr('href');
 
 	var decorateOptionsModal = function() {
-		Courses.decorateSubmissionsForm();
+		//Courses.decorateSubmissionsForm();
 		// do all sorts of clever stuff when we submit this form.
 		$optsModalBody.find('form').on('submit', function(e){
 			e.preventDefault();

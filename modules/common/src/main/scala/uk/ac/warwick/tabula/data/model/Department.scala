@@ -4,13 +4,12 @@ import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import scala.xml.NodeSeq
 
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.ForeignKey
-
 import javax.persistence._
+
+import org.hibernate.annotations.{Type, BatchSize, AccessType, ForeignKey}
+
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, WeekRange}
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
@@ -19,6 +18,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import uk.ac.warwick.tabula.services.RelationshipService
 
 @Entity @AccessType("field")
 class Department extends GeneratedId
@@ -30,24 +30,33 @@ class Department extends GeneratedId
 
 	var name:String = null
 
-	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
-	var children:JList[Department] = JArrayList();
+	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY)
+	@BatchSize(size=200)
+	var children:JList[Department] = JArrayList()
 
 	@ManyToOne(fetch = FetchType.LAZY, optional=true)
-	var parent:Department = null;
+	var parent:Department = null
 
 	// No orphanRemoval as it makes it difficult to move modules between Departments.
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = false)
+	@BatchSize(size=200)
 	var modules:JList[Module] = JArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var feedbackTemplates:JList[FeedbackTemplate] = JArrayList()
 
 	@OneToMany(mappedBy = "department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var markingWorkflows:JList[MarkingWorkflow] = JArrayList()
 
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var customRoleDefinitions:JList[CustomRoleDefinition] = JArrayList()
+	
+	@OneToMany(mappedBy="department", fetch = FetchType.LAZY)
+	@BatchSize(size=200)
+	var routes:JList[Route] = JArrayList()
 
 	def collectFeedbackRatings = getBooleanSetting(Settings.CollectFeedbackRatings) getOrElse(false)
 	def collectFeedbackRatings_= (collect: Boolean) = settings += (Settings.CollectFeedbackRatings -> collect)
@@ -82,14 +91,44 @@ class Department extends GeneratedId
 
 	def assignmentInfoView = getStringSetting(Settings.AssignmentInfoView) getOrElse(Assignment.Settings.InfoViewType.Default)
 	def assignmentInfoView_= (setting: String) = settings += (Settings.AssignmentInfoView -> setting)
+	
+	def getStudentRelationshipSource(relationshipType: StudentRelationshipType) =
+		getStringMapSetting(Settings.StudentRelationshipSource)
+			.flatMap { _.get(relationshipType.id) }
+			.map { StudentRelationshipSource.fromCode(_) }
+			.getOrElse(relationshipType.defaultSource)
+			
+	def setStudentRelationshipSource (relationshipType: StudentRelationshipType, source: StudentRelationshipSource) = {
+		val map = getStringMapSetting(Settings.StudentRelationshipSource, Map())
+		val newMap = (map + (relationshipType.id -> source.dbValue))
+		
+		settings += (Settings.StudentRelationshipSource -> newMap)
+	}
 
-	def personalTutorSource = getStringSetting(Settings.PersonalTutorSource) getOrElse(Department.Settings.PersonalTutorSourceValues.Local)
-	def personalTutorSource_= (ptSource: String) = settings += (Settings.PersonalTutorSource -> ptSource)
-
+	def studentRelationshipDisplayed = getStringMapSetting(Settings.StudentRelationshipDisplayed) getOrElse(Map())
+	def studentRelationshipDisplayed_= (setting: Map[String, String]) = settings += (Settings.StudentRelationshipDisplayed -> setting)
+			
+	def getStudentRelationshipDisplayed(relationshipType: StudentRelationshipType): Boolean =
+		studentRelationshipDisplayed
+			.get(relationshipType.id)
+			.map { _.toBoolean }
+			.getOrElse(relationshipType.defaultDisplay)
+			
+	def setStudentRelationshipDisplayed(relationshipType: StudentRelationshipType, isDisplayed: Boolean) = {	
+		studentRelationshipDisplayed = (studentRelationshipDisplayed + (relationshipType.id -> isDisplayed.toString))
+	}
+			
+	@transient
+	var relationshipService = Wire[RelationshipService]
+			
+	def displayedStudentRelationshipTypes =
+		relationshipService.allStudentRelationshipTypes.filter { getStudentRelationshipDisplayed(_) }
+			
 	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem) getOrElse(WeekRange.NumberingSystem.Default)
 	def weekNumberingSystem_= (wnSystem: String) = settings += (Settings.WeekNumberingSystem -> wnSystem)
 
-  def defaultGroupAllocationMethod = getStringSetting(Settings.DefaultGroupAllocationMethod).map(SmallGroupAllocationMethod(_)).getOrElse(SmallGroupAllocationMethod.Default)
+  def defaultGroupAllocationMethod =
+		getStringSetting(Settings.DefaultGroupAllocationMethod).map(SmallGroupAllocationMethod(_)).getOrElse(SmallGroupAllocationMethod.Default)
   def defaultGroupAllocationMethod_= (method:SmallGroupAllocationMethod) =  settings += (Settings.DefaultGroupAllocationMethod->method.dbValue)
 
 	// FIXME belongs in Freemarker
@@ -100,7 +139,7 @@ class Department extends GeneratedId
 	} getOrElse("")
 
 	@transient
-	var permissionsService = Wire.auto[PermissionsService]
+	var permissionsService = Wire[PermissionsService]
 	@transient
 	lazy val owners = permissionsService.ensureUserGroupFor(this, DepartmentalAdministratorRoleDefinition)
 	@transient
@@ -119,11 +158,6 @@ class Department extends GeneratedId
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
 
-	def canEditPersonalTutors: Boolean = {
-		personalTutorSource == null || personalTutorSource == Settings.PersonalTutorSourceValues.Local
-	}
-
-
 	// If hibernate sets owners to null, make a new empty usergroup
 	override def postLoad {
 		ensureSettings
@@ -131,7 +165,26 @@ class Department extends GeneratedId
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
+	@BatchSize(size=200)
 	var grantedRoles:JList[DepartmentGrantedRole] = JArrayList()
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.DepartmentFilterRuleUserType")
+	@Column(name="FilterRuleName")
+	var filterRule: FilterRule = AllMembersFilterRule
+
+	def includesMember(m: Member): Boolean = Option(parent) match {
+		case None => filterRule.matches(m)
+		case Some(p) => filterRule.matches(m) && p.includesMember(m)
+	}
+
+
+	def subDepartmentsContaining(member: Member): Stream[Department] = {
+		if (!includesMember(member)) {
+			Stream.empty // no point looking further down the tree if this level doesn't contain the required member
+		} else {
+			this #:: children.flatMap(child => child.subDepartmentsContaining(member)).toStream
+		}
+	}
 
 	def permissionsParents = Option(parent).toStream
 
@@ -152,6 +205,71 @@ class Department extends GeneratedId
 }
 
 object Department {
+
+	object FilterRule {
+		def withName(name: String): FilterRule = {
+				val inYearRules = (1 until 9).map(InYearFilterRule(_))
+			(Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule) ++ inYearRules).find(_.name == name).get
+
+		}
+	}
+
+	sealed trait FilterRule {
+		val name: String
+		def matches(member: Member): Boolean
+	}
+
+	case object UndergraduateFilterRule extends FilterRule {
+		val name = "UG"
+
+		def matches(member: Member) = member match {
+			case s: StudentMember => s.mostSignificantCourseDetails.map {
+				cd => cd.route.degreeType match {
+					case DegreeType.Undergraduate => true
+					case _ => false
+				}
+			}.getOrElse(false)
+			case _ => false
+		}
+	}
+
+	case object PostgraduateFilterRule extends FilterRule {
+		val name = "PG"
+
+		def matches(member: Member) = member match {
+			case s: StudentMember => s.mostSignificantCourseDetails.map {
+				cd => cd.route.degreeType match {
+					case DegreeType.Undergraduate => false
+					case _ => true
+				}
+			}.getOrElse(false)
+			case _ => false
+		}
+	}
+
+	case object AllMembersFilterRule extends FilterRule {
+		val name = "All"
+
+		def matches(member: Member) = true
+	}
+
+
+	case class InYearFilterRule(year:Int) extends FilterRule {
+		val name=s"Y$year"
+		def matches(member: Member) = member match{
+			case s:StudentMember => s.mostSignificantCourseDetails.map(
+				_.latestStudentCourseYearDetails.yearOfStudy == year)
+				.getOrElse(false)
+			case _=>false
+		}
+	}
+
+	case class CompositeFilterRule(rules:Seq[FilterRule]) extends FilterRule{
+		val name = rules.map(_.name).mkString(",")
+		def matches(member:Member) = rules.forall(_.matches(member))
+	}
+
+
 	object Settings {
 		val CollectFeedbackRatings = "collectFeedbackRatings"
 
@@ -168,14 +286,10 @@ object Department {
 		val TurnitinSmallMatchWordLimit = "turnitinSmallMatchWordLimit"
 		val TurnitinSmallMatchPercentageLimit = "turnitinSmallMatchPercentageLimit"
 
-		val PersonalTutorSource = "personalTutorSource"
+		val StudentRelationshipSource = "studentRelationshipSource"
+		val StudentRelationshipDisplayed = "studentRelationshipDisplayed"
 
 		val WeekNumberingSystem = "weekNumberSystem"
-
-		object PersonalTutorSourceValues {
-			val Local = "local"
-			val Sits = "SITS"
-		}
 
     val DefaultGroupAllocationMethod = "defaultGroupAllocationMethod"
 	}

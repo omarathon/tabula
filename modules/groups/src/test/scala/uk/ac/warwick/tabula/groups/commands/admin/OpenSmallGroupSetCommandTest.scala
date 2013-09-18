@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
 
 class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
@@ -115,16 +116,23 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test
 	def notifiesEachAffectedUser() { new NotificationFixture {
-
+		val membershipService = mock[AssignmentMembershipService]
+		
 		val set1 = new SmallGroupSet()
 		set1._membersGroup.includeUsers = Seq(student1.getWarwickId,student2.getWarwickId).asJava
 		set1._membersGroup.userLookup = userLookup
+		
+		set1.membershipService = membershipService
+		membershipService.determineMembershipUsers(set1.upstreamAssessmentGroups, Some(set1._membersGroup)) returns (set1._membersGroup.users)
 
 		val s1 = set1.members.users
 
 		val set2 = new SmallGroupSet()
 		set2._membersGroup.includeUsers = Seq(student2.getWarwickId,student3.getWarwickId).asJava
 		set2._membersGroup.userLookup = userLookup
+		
+		set2.membershipService = membershipService
+		membershipService.determineMembershipUsers(set2.upstreamAssessmentGroups, Some(set2._membersGroup)) returns (set2._membersGroup.users)
 
 		val s2 = set2.members.users
 
@@ -133,7 +141,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 			val user: User = operator
 		}
 
-		val notifications:Seq[Notification[Seq[SmallGroupSet]]]  = notifier.emit()
+		val notifications:Seq[Notification[Seq[SmallGroupSet]]]  = notifier.emit(Seq(set1,set2))
 
 		notifications.size should be(3)
 		notifications.find(_.recipients.head == student1) should be('defined)
@@ -173,7 +181,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val command = OpenSmallGroupSetCommand(Seq(new SmallGroupSet), operator, SmallGroupSetSelfSignUpState.Open)
 
 		command should be (anInstanceOf[Appliable[SmallGroupSet]])
-		command should be (anInstanceOf[Notifies[Seq[SmallGroupSet]]])
+		command should be (anInstanceOf[Notifies[Seq[SmallGroupSet], Seq[SmallGroupSet]]])
 		command should be (anInstanceOf[OpenSmallGroupSet])
 		command should be (anInstanceOf[OpenSmallGroupSetAudit])
 		command should be (anInstanceOf[OpenSmallGroupSetNotifier])

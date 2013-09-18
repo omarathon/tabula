@@ -44,8 +44,8 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 		userSettings.alertsSubmission = "allSubmissions"
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
 
-		sc.applyInternal()
-		val notification = sc.emit.get(0) // should only be one so get it!
+		val admins = sc.applyInternal()
+		val notification = sc.emit(admins).get(0) // should only be one so get it!
 		notification.recipients.size should be(1)
 
 		val text = notification.content
@@ -58,8 +58,8 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 		userSettings.alertsSubmission = "none"
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
 
-		sc.applyInternal()
-		sc.emit should be(Nil) // should not be any notifications
+		val admins = sc.applyInternal()
+		sc.emit(admins) should be(Nil) // should not be any notifications
 	}
 
 
@@ -69,8 +69,8 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 		submission.assignment.extensions add newExtension
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
 
-		sc.applyInternal()
-		val notification = sc.emit.get(0) // should only be one so get it!
+		val admins = sc.applyInternal()
+		val notification = sc.emit(admins).get(0) // should only be one so get it!
 		notification.recipients.size should be(1)
 	}
 
@@ -80,8 +80,8 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
 
 		sc.applyInternal()
-		sc.applyInternal()
-		sc.emit should be(Nil) // should not be any notifications
+		val admins = sc.applyInternal()
+		sc.emit(admins) should be(Nil) // should not be any notifications
 	}
 
 

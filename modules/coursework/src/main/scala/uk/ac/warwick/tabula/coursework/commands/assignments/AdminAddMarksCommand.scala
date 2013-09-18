@@ -12,12 +12,12 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.notifications.Feedba
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 
 class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: CurrentUser)
-	extends AddMarksCommand[List[Feedback]](module, assignment, submitter) with Notifies[Feedback] {
+	extends AddMarksCommand[Seq[Feedback]](module, assignment, submitter) with Notifies[Seq[Feedback], Feedback] {
 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Marks.Create, assignment)
-
-	var updatedReleasedFeedback : List[Feedback] = Nil
+	
+	var updatedReleasedFeedback: Seq[Feedback] = Nil
 
 	override def checkMarkUpdated(mark: MarkItem) {
 		// Warn if marks for this student are already uploaded
@@ -57,8 +57,8 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 			feedback.actualGrade = Option(actualGrade)
 			session.saveOrUpdate(feedback)
 
-			if (feedback.released && isModified){
-				updatedReleasedFeedback =  feedback :: updatedReleasedFeedback
+			if (feedback.released && isModified) {
+				updatedReleasedFeedback = feedback +: updatedReleasedFeedback
 			}
 
 			feedback
@@ -72,7 +72,7 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 		markList.toList
 	}
 
-	def emit: Seq[Notification[Feedback]] = updatedReleasedFeedback.map( feedback => {
+	def emit(updatedFeedback: Seq[Feedback]): Seq[Notification[Feedback]] = updatedReleasedFeedback.map( feedback => {
 		val student = userLookup.getUserByWarwickUniId(feedback.universityId)
 		new FeedbackChangeNotification(feedback, submitter.apparentUser, student) with FreemarkerTextRenderer
 	})

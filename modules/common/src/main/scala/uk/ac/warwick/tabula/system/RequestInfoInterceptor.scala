@@ -5,15 +5,30 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.sso.client.SSOClientFilter
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.NoCurrentUser
+import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.services.SecurityService
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.util.web.Uri
 import collection.JavaConversions._
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.services.MaintenanceModeService
+import uk.ac.warwick.tabula.helpers.RequestLevelCache
+
+/** Provides a limited interface of request-level things, which are required by some objects
+	* like CurrentUser before a full RequestInfo can be created.
+	*/
+class EarlyRequestInfoInterceptor extends HandlerInterceptorAdapter {
+
+	override def preHandle(request: HttpServletRequest, response: HttpServletResponse, obj: Any) = {
+		implicit val req = request
+		EarlyRequestInfo.open(new EarlyRequestInfoImpl())
+		true
+	}
+
+	override def afterCompletion(request: HttpServletRequest, response: HttpServletResponse, handler: Object, ex: Exception) {
+		EarlyRequestInfo.close()
+	}
+}
 
 class RequestInfoInterceptor extends HandlerInterceptorAdapter {
 	import RequestInfoInterceptor._
@@ -52,12 +67,16 @@ object RequestInfoInterceptor {
 	val RequestInfoAttribute = "APP_REQUEST_INFO_ATTRIBUTE"
 	  
 	def newRequestInfo(request: HttpServletRequest, isMaintenance: Boolean = false) = {
+		// Transfer cache from an EarlyAccessInfo if one exists.
+		val cache = EarlyRequestInfo.fromThread map { _.requestLevelCache } getOrElse { new RequestLevelCache() }
+
 		new RequestInfo(
 			user = getUser(request),
 			requestedUri = getRequestedUri(request),
 			requestParameters = getParameters(request),
 			ajax = isAjax(request),
-			maintenance = isMaintenance)
+			maintenance = isMaintenance,
+			requestLevelCache = cache)
 	}
 
 	private def getUser(implicit request: HttpServletRequest) = request.getAttribute(CurrentUser.keyName) match {

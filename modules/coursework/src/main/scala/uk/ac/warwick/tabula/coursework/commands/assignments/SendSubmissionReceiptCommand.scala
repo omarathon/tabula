@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.notifications.Submis
  * who submitted it.
  */
 class SendSubmissionReceiptCommand(val module: Module, val assignment: Assignment, val submission: Submission, val user: CurrentUser)
-	extends Command[Boolean] with Notifies[Submission] with ReadOnly {
+	extends Command[Boolean] with Notifies[Boolean, Submission] with ReadOnly {
 	
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.SendReceipt, mandatory(submission))
@@ -34,8 +34,8 @@ class SendSubmissionReceiptCommand(val module: Module, val assignment: Assignmen
 		d.assignment(assignment)
 	}
 
-	def emit: Seq[Notification[Submission]] = {
-		if (user.email.hasText) {
+	def emit(sendNotification: Boolean): Seq[Notification[Submission]] = {
+		if (sendNotification) {
 			Seq(new SubmissionRecieptNotification(submission, user.apparentUser) with FreemarkerTextRenderer)
 		} else {
 			Nil

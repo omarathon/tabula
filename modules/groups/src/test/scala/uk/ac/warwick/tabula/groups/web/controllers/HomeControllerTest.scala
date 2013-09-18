@@ -102,6 +102,26 @@ class HomeControllerTest extends TestBase with Mockito{
 	}}
 
 	@Test
+	def getManualGroupSetsReleasedToStudents(){new Fixture{
+		groupSet.allocationMethod=Manual
+		groupSet.releasedToStudents=false
+		getGroupSetsReleasedToStudents(Seq(groupSet)) should be (Nil)
+		groupSet.releasedToStudents=true
+		getGroupSetsReleasedToStudents(Seq(groupSet)) should not be (Nil)
+
+	}}
+
+	@Test
+	def getSelfSignUpGroupSetsReleasedToStudents(){new Fixture{
+		groupSet.allocationMethod=StudentSignUp
+		// self signup groups should be returned - we ignore the releasedToStudents flag
+		groupSet.releasedToStudents=false
+		getGroupSetsReleasedToStudents(Seq(groupSet)) should not be (Nil)
+		groupSet.releasedToStudents=true
+		getGroupSetsReleasedToStudents(Seq(groupSet)) should not be (Nil)
+	}}
+
+	@Test
 	def getViewModulesConvertsModuleToViewModule(){new Fixture{
 		// dummy getGroupsToDisplay that always returns all groups in the set
 		def allGroups(set:SmallGroupSet):(Seq[SmallGroup],ViewerRole)  = (set.groups.asScala,StudentNotAssignedToGroup )

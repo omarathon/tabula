@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model.forms
 
 import scala.collection.JavaConversions._
 
-import org.hibernate.annotations.{Type, AccessType}
+import org.hibernate.annotations.{BatchSize, Type, AccessType}
 import org.joda.time.DateTime
 
 import javax.persistence._
@@ -35,15 +35,16 @@ class Extension extends GeneratedId with PermissionsTarget {
 	var universityId:String =_
 
 	// TODO should there be a single def that returns the expiry date for approved/manual extensions, and requested expiry date otherwise?
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var requestedExpiryDate:DateTime =_
 
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var expiryDate:DateTime =_
 
 	var reason:String =_
 
 	@OneToMany(mappedBy="extension", fetch=LAZY, cascade=Array(ALL))
+	@BatchSize(size=200)
 	var attachments:JSet[FileAttachment] = JSet()
 
 	def nonEmptyAttachments = attachments.toSeq filter(_.hasData)
@@ -58,10 +59,10 @@ class Extension extends GeneratedId with PermissionsTarget {
 	var approved:Boolean = false
 	var rejected:Boolean = false
 
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var requestedOn:DateTime =_
 
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var approvedOn:DateTime =_
 
 	var approvalComments:String =_

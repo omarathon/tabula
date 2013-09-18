@@ -12,8 +12,23 @@ import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
+import uk.ac.warwick.spring.Wire
+
+trait MemberDaoComponent {
+	val memberDao: MemberDao
+}
+
+trait AutowiringMemberDaoComponent extends MemberDaoComponent {
+	val memberDao = Wire[MemberDao]
+}
 
 trait MemberDao {
+	def allStudentRelationshipTypes: Seq[StudentRelationshipType]
+	def getStudentRelationshipTypeById(id: String): Option[StudentRelationshipType]
+	def getStudentRelationshipTypeByUrlPart(urlPart: String): Option[StudentRelationshipType]
+	def saveOrUpdate(relationshipType: StudentRelationshipType)
+	def delete(relationshipType: StudentRelationshipType)
+	
 	def saveOrUpdate(member: Member)
 	def delete(member: Member)
 	def saveOrUpdate(rel: StudentRelationship)
@@ -24,13 +39,15 @@ trait MemberDao {
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
 	def getRegisteredModules(universityId: String): Seq[Module]
-	def getCurrentRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
-	def getRelationshipsByTarget(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship]
-	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship]
-	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship]
-	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member]
-	def countStudentsByDepartment(department: Department): Number
-	def countStudentsByRelationshipAndDepartment(relationshipType: RelationshipType, department: Department): Number
+	def getCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
+	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
+	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
+	def getAllRelationshipsByAgent(agentId: String): Seq[StudentRelationship]
+	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
+	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[Member]
+	def getStudentsByDepartment(department: Department): Seq[StudentMember]
+	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
+	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
 }
 
 @Repository
@@ -38,6 +55,21 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	import Restrictions._
 	import Order._
 
+	def allStudentRelationshipTypes: Seq[StudentRelationshipType] = 
+		session.newCriteria[StudentRelationshipType]
+			.addOrder(Order.asc("sortOrder"))
+			.addOrder(Order.asc("id"))
+			.seq
+	
+	def getStudentRelationshipTypeById(id: String) = getById[StudentRelationshipType](id)
+	def getStudentRelationshipTypeByUrlPart(urlPart: String) = 
+		session.newCriteria[StudentRelationshipType]
+			.add(is("urlPart", urlPart))
+			.uniqueResult
+	
+	def saveOrUpdate(relationshipType: StudentRelationshipType) = session.saveOrUpdate(relationshipType)
+	def delete(relationshipType: StudentRelationshipType) = session.delete(relationshipType)
+	
 	def saveOrUpdate(member: Member) = member match {
 		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
 		case _ => session.saveOrUpdate(member)
@@ -108,7 +140,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					.setString("universityId", universityId)
 					.seq
 
-	def getCurrentRelationships(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
+	def getCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
 					.add(is("targetSprCode", targetSprCode))
 					.add(is("relationshipType", relationshipType))
@@ -119,14 +151,14 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					.seq
 	}
 
-	def getRelationshipsByTarget(relationshipType: RelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
+	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
 					.add(is("targetSprCode", targetSprCode))
 					.add(is("relationshipType", relationshipType))
 					.seq
 	}
 
-	def getRelationshipsByDepartment(relationshipType: RelationshipType, department: Department): Seq[StudentRelationship] = {
+	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = {
 		// order by agent to separate any named (external) from numeric (member) agents
 		// then by student properties
 		session.newQuery[StudentRelationship]("""
@@ -142,16 +174,27 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.department = :department
 			and
+				scd.sprStatus.code not like 'P%'
+			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
 			order by
 				sr.agent, sr.targetSprCode
 		""")
 			.setEntity("department", department)
-			.setParameter("relationshipType", relationshipType)
+			.setEntity("relationshipType", relationshipType)
 			.seq
 	}
 
-	def getRelationshipsByAgent(relationshipType: RelationshipType, agentId: String): Seq[StudentRelationship] =
+	def getAllRelationshipsByAgent(agentId: String): Seq[StudentRelationship] =
+		session.newCriteria[StudentRelationship]
+			.add(is("agent", agentId))
+			.add( Restrictions.or(
+				Restrictions.isNull("endDate"),
+				Restrictions.ge("endDate", new DateTime())
+			))
+			.seq
+
+	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship] =
 		session.newCriteria[StudentRelationship]
 			.add(is("agent", agentId))
 			.add(is("relationshipType", relationshipType))
@@ -161,7 +204,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			))
 			.seq
 
-	def getStudentsWithoutRelationshipByDepartment(relationshipType: RelationshipType, department: Department): Seq[Member] =
+	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[Member] =
 		if (relationshipType == null) Seq()
 		else session.newQuery[Member]("""
 			select
@@ -170,28 +213,67 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				StudentMember sm
 				inner join sm.studentCourseDetails as scd
 			where
-				sm.homeDepartment = :department
+				scd.department = :department
 			and
-				scd.sprCode not in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
+				scd.sprStatus.code not like 'P%'
+			and
+				scd.sprCode not in (
+					select 
+						sr.targetSprCode 
+					from 
+						StudentRelationship sr 
+					where 
+						sr.relationshipType = :relationshipType
+					and
+						(sr.endDate is null or sr.endDate >= SYSDATE)
+				)
 		""")
 			.setEntity("department", department)
-			.setParameter("relationshipType", relationshipType)
+			.setEntity("relationshipType", relationshipType)
 			.seq
 
-	def countStudentsByDepartment(department: Department): Number =
-		if (department == null) 0
-		else session.newQuery[Number]("""
-			select
-				count(distinct student)
+	/**
+	 * n.b. this will only return students with a direct relationship to a department. For sub-department memberships,
+	 * see ProfileService/RelationshipService
+	 */
+	def getStudentsByDepartment(department: Department): Seq[StudentMember] =
+		if (department == null) Nil
+		else {
+
+			val s = session.newQuery[StudentMember]("""
+			select distinct student
 			from
 				StudentCourseDetails scd
 			where
 				scd.department = :department
+			and
+				scd.sprStatus.code not like 'P%'
+			""")
+			.setEntity("department", department).seq
+			s
+		}
+	/**
+	 * n.b. this will only return students with a direct relationship to a department. For sub-department memberships,
+	 * see ProfileService/RelationshipService
+	 */
+	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]=
+		if (relationshipType == null) Nil
+		else session.newQuery[StudentMember]("""
+			select distinct student
+			from
+				StudentCourseDetails scd
+			where
+				scd.department = :department
+			and
+				scd.sprStatus.code not like 'P%'
+			and
+				scd.sprCode in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
 			""")
 			.setEntity("department", department)
-			.uniqueResult.getOrElse(0)
+			.setEntity("relationshipType", relationshipType)
+			.seq
 
-	def countStudentsByRelationshipAndDepartment(relationshipType: RelationshipType, department: Department): Number =
+	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number =
 		if (relationshipType == null) 0
 		else session.newQuery[Number]("""
 			select
@@ -199,12 +281,10 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			from
 				StudentCourseDetails scd
 			where
-				scd.department = :department
-			and
 				scd.sprCode in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
 			""")
-			.setEntity("department", department)
-			.setParameter("relationshipType", relationshipType)
+			.setEntity("relationshipType", relationshipType)
 			.uniqueResult.getOrElse(0)
 
 }
+

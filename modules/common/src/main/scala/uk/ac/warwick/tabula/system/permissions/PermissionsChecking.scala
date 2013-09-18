@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.data.model.FeedbackTemplate
 import scala.reflect.ClassTag
 import uk.ac.warwick.tabula.services.SecurityService
 import scala.annotation.target
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 /**
  * Trait that allows classes to call ActionCheck() in their inline definitions
@@ -55,6 +56,12 @@ trait PermissionsChecking extends PermissionsCheckingMethods  {
 trait Public extends PermissionsChecking
 
 trait PermissionsCheckingMethods extends Logging {
+	def mustBeLinked(module: Module, department: Department) =
+		if (mandatory(module).department.id != mandatory(department).id) {
+			logger.info("Not displaying module as it doesn't belong to specified department")
+			throw new ItemNotFoundException(module)
+		}
+	
 	def mustBeLinked(assignment: Assignment, module: Module) =
 		if (mandatory(assignment).module.id != mandatory(module).id) {
 			logger.info("Not displaying assignment as it doesn't belong to specified module")

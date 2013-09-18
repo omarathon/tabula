@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>41-SNAPSHOT</version>
+		<version>43-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -180,12 +180,6 @@
 					<groupId>commons-codec</groupId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		
-		<dependency>
-			<groupId>uk.co.halfninja</groupId>
-			<artifactId>random-name-generator_${scala.major.version}</artifactId>
-			<version>0.1-warwick</version>
 		</dependency>
 	</dependencies>
 </project>

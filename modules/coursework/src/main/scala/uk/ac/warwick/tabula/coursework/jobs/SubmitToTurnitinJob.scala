@@ -155,7 +155,7 @@ class SubmitToTurnitinJob extends Job
 						debug("submitResponse: " + submitResponse)
 						if (!submitResponse.successful) {
 							//throw new FailedJobException("Failed to upload '" + attachment.name +"' - " + submitResponse.message)
-							logger.warn("Failed to upload '" + attachment.name +"' - " + submitResponse.message)
+							logger.warn("Failed to upload '" + attachment.name + "' - " + submitResponse.message)
 							uploadsFailed += 1
 							failedUploads.put(attachment.name, submitResponse.message)
 						}

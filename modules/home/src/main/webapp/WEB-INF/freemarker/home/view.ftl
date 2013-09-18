@@ -43,9 +43,18 @@
 		</#if>
 		
 		<#if features.attendanceMonitoring>
-			<li>
-				<h2><a href="<@url page="/" context="/attendance" />" />Attendance Monitoring</a></h2>
-			</li>
+			<#if user.staff>
+				<li>
+					<h2><a href="<@url page="/" context="/attendance" />" />Attendance Monitoring</a></h2>
+					<span class="hint">View and record attendance at specified monitoring points</span>
+				</li>
+			<#elseif user.student>
+				<li>
+					<h2><a href="<@url page="/profile" context="/attendance" />" />My Attendance</a></h2>
+					<span class="hint">View your attendance at specified monitoring points</span>
+				</li>
+			</#if>
+
 		</#if>
 	</ul>
 </#if>

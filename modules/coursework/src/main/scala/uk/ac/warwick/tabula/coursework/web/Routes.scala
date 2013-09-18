@@ -47,6 +47,8 @@ object Routes {
 			def edit(assignment: Assignment) = assignmentroot(assignment) + "/edit"
 
 			def delete(assignment: Assignment) = assignmentroot(assignment) + "/delete"
+
+			def submissionsZip(assignment: Assignment) = assignmentroot(assignment) + "/submissions.zip"
 			
 			object submissionsandfeedback {
 				def apply(assignment: Assignment) = assignmentroot(assignment) + "/list"
@@ -59,7 +61,7 @@ object Routes {
 			}
 
 			object extension {
-				def review(assignment: Assignment, uniId: String) = assignmentroot(assignment) + "/extensions?highlight="+uniId
+				def review(assignment: Assignment, uniId: String) = assignmentroot(assignment) + "/extensions?highlight=" + uniId
 			}
 		}
 	}

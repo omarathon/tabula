@@ -44,7 +44,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 	}
 
 	// scalastyle:off
-	override def wrap(obj: Object): TemplateModel = {	
+	override def wrap(obj: Object): TemplateModel = {
 		obj match {
 			case Some(x: Object) => wrap(x)
 			case Some(null) => null
@@ -102,7 +102,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
         val restrictionProviderAnnotation = m.getAnnotation(classOf[RestrictionProvider])
 				val perms: PermissionsFetcher =
 					if (restrictedAnnotation != null) {
-              (_)=>restrictedAnnotation.value map { name => Permissions.of(name) }
+              (_) => restrictedAnnotation.value map { name => Permissions.of(name) }
           }
           else if (restrictionProviderAnnotation != null){
             Try(cls.getMethod(restrictionProviderAnnotation.value())) match{

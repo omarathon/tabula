@@ -19,29 +19,20 @@ import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler
 import org.apache.poi.ss.util.CellReference
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.UniversityId
 
 class RawStudentRelationship {
 
 	var targetUniversityId: String = _
 	var agentUniversityId: String = _
-	var agentName: String = _
-	var isValid = true
-	var warningMessage: String = _
 
-	var agentMember: Member = _
-	var targetMember: Member = _
-
-	def this(targetUniversityId: String, agentUniversityId: String, agentName: String) = {
+	def this(targetUniversityId: String, agentUniversityId: String) = {
 		this();
 		this.targetUniversityId = targetUniversityId
 		this.agentUniversityId = agentUniversityId
-		this.agentName = agentName
 	}
-
-	def getAgentNameIfNonMember(): String = {
-		if (agentUniversityId.hasText) ""
-		else agentName
-	}
+	
+	override def toString() = "Student=%s, Agent=%s".format(targetUniversityId, agentUniversityId)
 }
 
 @Service
@@ -67,12 +58,12 @@ class RawStudentRelationshipExtractor {
 	}
 }
 
-class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, var rawStudentRelationships: JList[RawStudentRelationship])
+class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, val rawStudentRelationships: JList[RawStudentRelationship])
 	extends SheetContentsHandler with Logging {
 
 	var isParsingHeader = true // flag to parse the first row for column headers
 	var foundStudentInRow = false
-	var foundTutorInRow = false
+	var foundAgentInRow = false
 
 	var columnMap = scala.collection.mutable.Map[Short, String]()
 	var currentRawStudentRelationship: RawStudentRelationship = _
@@ -91,48 +82,32 @@ class XslxParser(var styles: StylesTable, var sst: ReadOnlySharedStringsTable, v
 
 	def startRow(row: Int) = {
 		logger.debug("startRow: " + row.toString)
-		if (row > 0) {
-			isParsingHeader = false
-			currentRawStudentRelationship = new RawStudentRelationship
-			foundStudentInRow = false
-			foundTutorInRow = false
-		}
+		isParsingHeader = (row == 0)
+		currentRawStudentRelationship = new RawStudentRelationship
+		foundStudentInRow = false
+		foundAgentInRow = false
 	}
 
 	def cell(cellReference: String, formattedValue: String) = {
 		val col = new CellReference(cellReference).getCol
-		//logger.debug("cell: " + col.toString + ": " + formattedValue)
 
-		isParsingHeader match {
-			case true => {
-				columnMap(col) = formattedValue
-			}
-			case false => {
-				if (columnMap.containsKey(col)) {
-					columnMap(col) match {
-						case "student_id" => {
-							currentRawStudentRelationship.targetUniversityId = formattedValue
-							foundStudentInRow = true
-						}
-						case "tutor_id" => {
-							currentRawStudentRelationship.agentUniversityId = formattedValue
-							foundTutorInRow = true
-						}
-						case "tutor_name" => {
-							currentRawStudentRelationship.agentName = formattedValue
-							foundTutorInRow = true
-						}
-						case _ => // ignore anything else
+		if (isParsingHeader) columnMap(col) = formattedValue
+		else if (columnMap.containsKey(col)) {
+			columnMap(col) match {
+				case "student_id" => {
+					currentRawStudentRelationship.targetUniversityId = UniversityId.zeroPad(formattedValue)
+					foundStudentInRow = true
+				}
+				case "agent_id" => {
+					if (formattedValue.hasText && formattedValue != "ERROR:#N/A") {
+						currentRawStudentRelationship.agentUniversityId = UniversityId.zeroPad(formattedValue)
+						foundAgentInRow = true
 					}
 				}
+				case _ => // ignore anything else
 			}
 		}
 	}
 
-	def endRow = {
-		if (!isParsingHeader)
-			//if (foundStudentInRow)
-				rawStudentRelationships.add(currentRawStudentRelationship)
-			//else if (foundTutorInRow) // TODO need to give some kind of warning
-	}
+	def endRow = if (!isParsingHeader && foundStudentInRow) rawStudentRelationships.add(currentRawStudentRelationship)
 }

@@ -7,6 +7,8 @@
 	window.Supports = {};
 	window.Supports.multipleFiles = !!('multiple' in (document.createElement('input')));
 
+	var exports = {};
+
 	// All WPopupBoxes will inherit this default configuration.
 	WPopupBox.defaultConfig = {imageroot:'/static/libs/popup/'};
 
@@ -232,24 +234,7 @@
 			});
 		}
 	};
-	
-	$.fn.tabulaRadioActive = function(options) {
-		var $radios = this;
-		
-		this.on('change', function() {		
-			// fallback to plain "radioactive" attribute since FTL syntax doesn't allow dashes in macro parameter names.
-			
-			$.each($radios, function(i, radio) {
-				var radioActiveAttr = $(radio).data('radioactive') || $(radio).attr('radioactive');
-				if (radioActiveAttr) {
-					var $container = jQuery(radioActiveAttr);
-					$container.find('label,input,select').toggleClass('disabled', !radio.checked);
-					$container.find('input,select').attr({disabled: !radio.checked});
-				}
-			})
-		})
-	}
-	
+
 
 	/*
 	 * .double-submit-protection class on a form will detect submission
@@ -373,6 +358,44 @@
 		});
 	});
 
+	// collapsible striped section
+	// exported so can be called on-demand e.g. after an ajax-load
+	// adds a class to prevent double-init
+	exports.initCollapsible = function() {
+		$('.striped-section.collapsible:not(.collapsible-init)').each(function() {
+			var $section = $(this).addClass('collapsible-init');
+			var open = function() {
+				return $section.hasClass('expanded');
+			};
+
+			var $icon = $('<i class="icon-fixed-width"></i>');
+			if (open()) $icon.addClass('icon-chevron-down');
+			else $icon.addClass('icon-chevron-right');
+
+			var $title = $section.find('.section-title');
+			$title.prepend(' ').prepend($icon);
+
+			$title.css('cursor', 'pointer').on('click', function() {
+				if (open()) {
+					$section.removeClass('expanded');
+					$icon.removeClass('icon-chevron-down').addClass('icon-chevron-right');
+				} else {
+					$section.addClass('expanded');
+					$icon.removeClass('icon-chevron-right').addClass('icon-chevron-down');
+
+					if ($section.data('name')) {
+						window.location.hash = $section.data('name');
+					}
+				}
+			});
+
+			if (!open() && window.location.hash && window.location.hash.substring(1) == $section.data('name')) {
+				// simulate a click
+				$title.trigger('click');
+			}
+		});
+	};
+
 	// on ready
 	$(function() {
 		// form behavioural hooks
@@ -457,57 +480,29 @@
 		 */
 		$('html').addClass($.fn.details.support ? 'details' : 'no-details');
 		$('details').details();
+		// different selector for open details depending on if it's native or polyfill.
+		var openSlctr = $.fn.details.support ? '[open]' : '.open';
 
-		// togglers
+		// togglers - relies on everything being in a section element
 		$(".tabula-page").on("click", ".open-all-details", function() {
-			$("html.no-details details:not(.open) summary").click();
-			$("html.details details:not([open]) summary").click();
-			$(".open-all-details").hide();
-			$(".close-all-details").show();
+			var $container = $(this).closest('section');
+			$container.find('details:not(' + openSlctr + ') summary').click();
+			$container.find(".open-all-details").hide();
+			$container.find(".close-all-details").show();
 		});
 		$(".tabula-page").on("click", ".close-all-details", function() {
-			$("html.no-details details.open summary").click();
-			$("html.details details[open] summary").click();
-			$(".close-all-details").hide();
-			$(".open-all-details").show();
+			var $container = $(this).closest('section');
+			$container.find('details' + openSlctr + ' summary').click();
+			$container.find(".close-all-details").hide();
+			$container.find(".open-all-details").show();
 		});
 
-		// collapsible striped section
-		$('.striped-section.collapsible').each(function() {
-			var $section = $(this);
-			var open = function() {
-				return $section.hasClass('expanded');
-			};
-
-			var $icon = $('<i class="icon-fixed-width"></i>');
-			if (open()) $icon.addClass('icon-chevron-down');
-			else $icon.addClass('icon-chevron-right');
-
-			var $title = $section.find('.section-title');
-			$title.prepend(' ').prepend($icon);
-
-			$title.css('cursor', 'pointer').on('click', function() {
-				if (open()) {
-					$section.removeClass('expanded');
-					$icon.removeClass('icon-chevron-down').addClass('icon-chevron-right');
-				} else {
-					$section.addClass('expanded');
-					$icon.removeClass('icon-chevron-right').addClass('icon-chevron-down');
-
-					if ($section.data('name')) {
-						window.location.hash = $section.data('name');
-					}
-				}
-			});
-
-			if (!open() && window.location.hash && window.location.hash.substring(1) == $section.data('name')) {
-				// simulate a click
-				$title.trigger('click');
-			}
-		});
+		exports.initCollapsible();
 
 		// sticky table headers
 		//$('table.sticky-table-headers').fixedHeaderTable('show');
+
+
 
 		// If we're on OS X, replace all kbd.keyboard-control-key with Cmd instead of Ctrl
 		if (navigator.platform.indexOf('Mac') != -1) {
@@ -594,7 +589,7 @@
 				var $cols = $t.find('.cols');
 				$cols.find('.gadget').appendTo($panes);
 				$cols.remove();
-				$t.find('.tutor').removeClass('span4');
+				$t.find('.agent').removeClass('span4');
 				$t.find('.gadget-only').children().unwrap();
 				$t.find('.tab-container').remove();
 				$t.find('.gadget, .tab-content, .tab-pane, .active').removeClass('gadget tab-content tab-pane active');
@@ -610,7 +605,7 @@
 				reset();
 				var $tabContainer = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
 				var $tabs = $tabContainer.find('ul');
-				$panes.children().each(function() {
+				$panes.children('li').each(function() {
 					var title = $(this).find('h4').html();
 					var link = '#' + $(this).attr('id');
 					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '"><span class="title">' + title + '</span> <i class="icon-move" title="Click and drag to move"></i> <i class="icon-resize-small" title="Collapse"></i></a></li>');
@@ -625,15 +620,15 @@
 			$t.on('click', '.layout-tools .icon-th-large', function() { // gadgetify
 				reset();
 				var $cols = $('<div class="cols row-fluid"><ol class="ex-panes span6" /><ol class="ex-panes span6" /></div>');
-				var paneCount = $panes.children().length;
+				var paneCount = $panes.children('li').length;
 				$t.append($cols);
-				$panes.children().each(function(idx) {
+				$panes.children('li').each(function(idx) {
 					var $gadget = $(this).addClass('gadget');
 					var title = $(this).find('h4').html();
 					var link = '#' + $(this).attr('id');
 					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '" title="Click and drag to move"><span class="title">' + title + '</span> <i class="icon-minus-sign-alt" title="Hide ' + title + '"></i></a></li>');
 					var $gadgetHeaderTab = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
-					$(this).find('.tutor').removeClass('span4');
+					$(this).find('.agent').removeClass('span4');
 					$gadgetHeaderTab.children().append($tab);
 					$gadget.wrapInner('<div class="tab-content gadget-only" />').children().wrapInner('<div class="gadget-only tab-pane active" />');
 					$gadget.prepend($gadgetHeaderTab).find('.tab-container li a').tab('show');
@@ -700,9 +695,15 @@
 			// default to gadgets
 			$t.find('.layout-tools .icon-th-large').click();
 		}
+		
+		// drag and drop containers
+		$('.tabula-dnd').dragAndDrop();
+		$('.tabula-filtered-list').filteredList();
 	}); // on ready
 
-
+	// take anything we've attached to "exports" and add it to the global "Profiles"
+	// we use extend() to add to any existing variable rather than clobber it
+	window.GlobalScripts = jQuery.extend(window.GlobalScripts, exports);
 
 })(jQuery);
 
@@ -719,19 +720,26 @@ jQuery(function($){
 
 // code for department settings - lives here as department settings is included in most modules
 jQuery(function($){
-	$('input#plagiarismDetection').slideMoreOptions($('#turnitin-options'), true);
+	var $deptSettingsForm = $('.department-settings-form');
+	if (!$deptSettingsForm.length) return;
 
-	$('input#turnitinExcludeSmallMatches').slideMoreOptions($('#small-match-options'), true);
+	$deptSettingsForm.find('input#plagiarismDetection').slideMoreOptions($('#turnitin-options'), true);
 
-	$('#small-match-options').on('tabula.slideMoreOptions.hidden',  function() {
+	$deptSettingsForm.find('input#turnitinExcludeSmallMatches').slideMoreOptions($('#small-match-options'), true);
+
+	$deptSettingsForm.find('#small-match-options').on('tabula.slideMoreOptions.hidden',  function() {
+		// what is `this` here? can it ever be checked?
 		if(!$(this).is(':checked')){
 			$('#small-match-options input[type=text]').val('0');
 		}
+	}).find('input').on('disable.radiocontrolled', function() {
+		this.value = '0';
 	});
 
-	$('.settings-form').radioDisable({
-		onDisable: function($input){
-			$input.val("0");
-		}
+	$deptSettingsForm.find('input[name=disable-radio]').radioControlled({
+		parentSelector: '.control-group',
+		selector: '.controls',
+		mode: 'readonly'
 	});
+
 });

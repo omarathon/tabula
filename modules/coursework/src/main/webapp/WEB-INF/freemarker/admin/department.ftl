@@ -209,7 +209,7 @@
 	</div>
 
 
-	<#if has_assignments>
+	<#if has_assignments || has_archived_assignments>
 	<div class="module-info-contents">
 		<#list module.assignments as assignment>
 		<#if !assignment.deleted>

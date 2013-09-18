@@ -1,40 +1,26 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import uk.ac.warwick.tabula.data.model.GeneratedId
-import org.hibernate.annotations.Entity
-import javax.validation.constraints.NotNull
+import uk.ac.warwick.tabula.JavaImports._
+import javax.persistence._
 import uk.ac.warwick.tabula.data.model.Route
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.JavaImports.JList
-import javax.persistence.OneToMany
-import javax.persistence.OrderColumn
 import org.joda.time.DateTime
 import org.hibernate.annotations.Type
+import uk.ac.warwick.tabula.AcademicYear
 
 @Entity
-class MonitoringPointSet extends GeneratedId {
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorValue("normal")
+class MonitoringPointSet extends AbstractMonitoringPointSet {
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name = "route_id")
 	var route: Route = _
-	
-	@OneToMany(mappedBy = "pointSet")
-	@OrderColumn(name = "position")
-	var points: JList[MonitoringPoint] = JArrayList()
 
-	var year: Int = _
-	
-	var sentToAcademicOffice: Boolean = false
-	
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
-	var createdDate: DateTime = _
-	
-	@Type(`type`="org.joda.time.contrib.hibernate.PersistentDateTime")
-	var updatedDate: DateTime = _
-	
-	@NotNull
-	var templateName: String = _
+	// Can be null, which indicates it applies to all years on this course.
+	var year: JInteger = _
 
+	@Basic
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
+	@Column(nullable = false)
+	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
 }

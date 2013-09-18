@@ -1,7 +1,10 @@
 package uk.ac.warwick.tabula
-import org.joda.time.DateTime
+import org.joda.time.{DateTimeConstants, DateMidnight, DateTime}
 import org.joda.time.DateTimeConstants._
-import java.beans.PropertyEditorSupport
+import org.joda.time.base.BaseDateTime
+import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.util.termdates.Term.TermType
+import uk.ac.warwick.tabula.services.TermService
 
 /**
  * Represents a particular academic year. Traditionally they are displayed as
@@ -40,6 +43,15 @@ case class AcademicYear(val startYear: Int) extends Ordered[AcademicYear] {
 		Iterable.iterate(first, length) { y => y.next }.toSeq
 	}
 
+	/**
+	 * Returns a date guaranteed* to be some time in the first term of the specified year,
+	 * suitable for passing to TermFactory.getAcademicWeeksForYear
+	 *
+	 *  *Restrictions apply. Always read the small print. We are confident
+	 *   that November 1st is always in term 1 of the year
+	 */
+	def dateInTermOne =	new DateMidnight(startYear, DateTimeConstants.NOVEMBER, 1)
+
 	def compare(that:AcademicYear): Int = {
 			this.startYear - that.startYear
 	}
@@ -71,6 +83,15 @@ object AcademicYear {
 		case y => 2000 + y
 	}
 
+
+	/**
+	 * n.b. this does *not* tell you what academic year the date "now" lies within.
+	 *
+	 * e.g. Sept. 1st 2012 (Academic week 48, year 2011-12) will return year 2012-13.
+	 *
+	 * This function returns the year based on when SITS rolls over,
+	 * not when the academic year starts/stops
+	 */
 	def guessByDate(now: DateTime) = {
 		if (now.getMonthOfYear() >= AUGUST) {
 			new AcademicYear(now.getYear())
@@ -78,4 +99,21 @@ object AcademicYear {
 			new AcademicYear(now.getYear() - 1)
 		}
 	}
+
+	/**
+	 * This will tell you which academic year you're currently in, assuming that the year starts on day 1 of week 1 in term 1
+	 *
+	 */
+	def findAcademicYearContainingDate(date: BaseDateTime, termService:TermService): AcademicYear = {
+		val termContainingIntervalStart = termService.getTermFromDateIncludingVacations(date)
+		def findAutumnTermForTerm(term: Term): Term = {
+			term.getTermType match {
+				case TermType.autumn => term
+				case _ => findAutumnTermForTerm(termService.getPreviousTerm(term))
+			}
+		}
+		val firstWeekOfYear =  findAutumnTermForTerm(termContainingIntervalStart).getStartDate
+		AcademicYear(firstWeekOfYear.getYear)
+	}
+
 }

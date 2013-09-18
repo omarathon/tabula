@@ -12,14 +12,6 @@
 	color: @grayLight;
 }
 
-.tabula-page, #container {
-	/* Position dividing line ABOVE legends, not below */
-	legend {
-		border-bottom: 0;
-		border-top: 1px solid #e5e5e5;
-	}
-}
-
 input.deleted {
 	cursor: not-allowed;
   background-color: @inputDisabledBackground !important;
@@ -46,7 +38,7 @@ input.deleted {
 		padding-left: 12px;
 		padding-top: 6px;
 	}
-	.input-small {
+	&.maxGroupSize .input-small {
 		margin-top: 8px;
 	}
 }
@@ -55,12 +47,24 @@ input.deleted {
 
 #allocateStudentsToGroupsCommand {
 	
+	.filter {
+		select { width: 100%; }
+		
+		margin: 0 0 10px;
+	}
+
+	// Give the student list some affordance for dragging around students
+	.student-list {
+		margin: -16px;
+		padding: 16px;
+	}
+	
 	ul.drag-list li {
 		display: block;
 		float: none;
 	
 		background: white;
-		margin-bottom: 10px;
+		margin: 0 0 10px;
 
 		&:hover { background-color: darken(@wellBackground, 10%); }
 
@@ -114,4 +118,16 @@ input.deleted {
 // fix width of week select for recording attendance
 #container .weekSelector {
 	width: 7em;
+}
+
+//Change margins for ul,h6 in module view group list.
+#container .small-group-modules-list .item-info {
+	.margin-fix {
+		margin: 0 0 14px 0;
+		h6 { margin: 0; }
+	}
+}
+
+.record-attendance-form-header {
+	background-color: lighten(@tabulaGreenLightTint, 5%);
 }

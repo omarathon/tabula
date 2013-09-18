@@ -10,7 +10,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.validators.CompositeValidator
 import uk.ac.warwick.tabula.validators.ClassValidator
 import org.hibernate.SessionFactory
-import org.hibernate.classic.Session
+import org.hibernate.Session
 
 class BaseControllerTest extends TestBase with Mockito {
 	

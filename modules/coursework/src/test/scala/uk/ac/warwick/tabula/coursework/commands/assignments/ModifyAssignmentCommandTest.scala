@@ -11,15 +11,44 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import uk.ac.warwick.tabula.services.UserLookupService
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.UserGroup
+import org.junit.Before
 
 // scalastyle:off magic.number
 class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 
-	val userLookup = mock[UserLookupService]
-	userLookup.getUsersByUserIds(any[JList[String]]) answers {case ids:JList[String]=>
-		val users = ids.asScala.map(id=>(id,new User(id)))
-		JHashMap(users:_*)
+	var userDatabase = Seq(
+		("0000000","aaslat","aaaaa"),
+		("0000001","baslat","aaaab")
+	) map { case(warwickId,userId,code) =>
+		val user = new User(code)
+		user.setWarwickId(warwickId)
+		user.setUserId(userId)
+		user.setFoundUser(true)
+		user.setFullName("Roger " + code.head.toUpper + code.tail)
+		user
 	}
+
+	var userLookup: UserLookupService = _
+
+	@Before def before {
+
+		userLookup = mock[UserLookupService]
+
+		userLookup.getUsersByUserIds(any[JList[String]]) answers { case ids: JList[String @unchecked] =>
+			val users = ids.asScala.map(id=>(id,new User(id)))
+			JHashMap(users:_*)
+		}
+
+		userLookup.getUserByUserId(any[String]) answers { id =>
+			userDatabase find {_.getUserId == id} getOrElse (new AnonymousUser)
+		}
+		userLookup.getUserByWarwickUniId(any[String]) answers { id =>
+			userDatabase find {_.getWarwickId == id} getOrElse (new AnonymousUser)
+		}
+	}
+
+
+
 
 	@Test def validateCloseDate = transactional { t =>
 		// TAB-236
@@ -51,32 +80,33 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 		t =>
 			val f = MyFixtures()
 			val cmd = new EditAssignmentCommand(f.module, f.assignment)
+			cmd.userLookup = userLookup
 			cmd.members match {
 				case ug: UserGroup => ug.userLookup = userLookup
 				case _ => fail("Expected to be able to set the userlookup on the usergroup.")
 			}
 
 			// have one user, add a new one and check re-add does nothing
-			cmd.members.add(new User("already"))
-			cmd.includeUsers = JList("custard", "already")
+			cmd.members.add(new User("aaslat"))
+			cmd.includeUsers = JList("baslat", "aaslat")
 			cmd.afterBind()
 			cmd.members.users.size should be(2)
 			cmd.members.excludes.size should be(0)
 
 			// remove one
-			cmd.excludeUsers = JList("already")
+			cmd.excludeUsers = JList("aaslat")
 			cmd.afterBind()
 			cmd.members.users.size should be(1)
 			cmd.members.excludes.size should be(0)
 
 			// now exclude (blacklist) it
-			cmd.excludeUsers = JList("already")
+			cmd.excludeUsers = JList("aaslat")
 			cmd.afterBind()
 			cmd.members.users.size should be(1)
 			cmd.members.excludes.size should be(1)
 
 			// now unexclude it
-			cmd.includeUsers = JList("already")
+			cmd.includeUsers = JList("aaslat")
 			cmd.afterBind()
 			cmd.members.users.size should be(1)
 			cmd.members.excludes.size should be(0)

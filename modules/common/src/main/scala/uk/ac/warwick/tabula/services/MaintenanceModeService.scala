@@ -13,6 +13,10 @@ import org.codehaus.jackson.annotate.JsonAutoDetect
 import uk.ac.warwick.util.queue.conversion.ItemType
 import uk.ac.warwick.util.queue.Queue
 import org.springframework.beans.BeanWrapperImpl
+import uk.ac.warwick.tabula.commands.Describable
+import uk.ac.warwick.tabula.commands.DescriptionImpl
+import uk.ac.warwick.tabula.events.Event
+import uk.ac.warwick.tabula.events.EventDescription
 
 trait MaintenanceStatus {
 	def enabled: Boolean
@@ -42,7 +46,7 @@ trait MaintenanceModeService extends MaintenanceStatus {
 	 * to do an unsupported op while in maintenance mode. Only returns
 	 * it; you need to throw it yourself. Like a dog!
 	 */
-	def exception(): Exception
+	def exception(callee: Describable[_]): Exception
 
 	var until: Option[DateTime]
 	var message: Option[String]
@@ -65,7 +69,7 @@ trait MaintenanceModeService extends MaintenanceStatus {
 }
 
 @Service
-class MaintenanceModeServiceImpl extends MaintenanceModeService {
+class MaintenanceModeServiceImpl extends MaintenanceModeService with Logging {
 	@Value("${environment.standby}") var _enabled: Boolean = _
 
 	def enabled: Boolean = _enabled
@@ -75,9 +79,12 @@ class MaintenanceModeServiceImpl extends MaintenanceModeService {
 	// for other classes to listen to changes to maintenance mode.
 	val changingState = EventSource[Boolean]
 
-	def exception() = new MaintenanceModeEnabledException(
-		until,
-		message)
+	def exception(callee: Describable[_]) = {
+		val m = EventDescription.generateMessage(Event.fromDescribable(callee))
+		logger.info("[Maintenance Reject] " + m)
+		
+		new MaintenanceModeEnabledException(until, message)
+	}
 
 	private def notEnabled = new IllegalStateException("Maintenance not enabled")
 

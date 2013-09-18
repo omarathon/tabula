@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.groups.web.controllers.admin
 
-import org.hibernate.validator.Valid
+import javax.validation.Valid
 import org.joda.time.DateTime
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
@@ -222,7 +222,7 @@ class ReleaseSmallGroupSetController extends GroupsController {
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("releaseGroupSetCommand") cmd: ReleaseSmallGroupSetCommand) = {
 		val updatedSet = cmd.apply() match {
-			case set :: Nil => set
+			case releasedSet :: Nil => releasedSet.set
 			case _ => throw new IllegalStateException("Received multiple updated sets from a single update operation!")
 		}
 		val groupSetItem = new ViewSet(updatedSet, updatedSet.groups.asScala, GroupsViewModel.Tutor)
@@ -239,7 +239,10 @@ class ReleaseSmallGroupSetController extends GroupsController {
 class OpenSmallGroupSetController extends GroupsController {
 	
 	@ModelAttribute("openGroupSetCommand")
-	def getOpenGroupSetCommand(@PathVariable("set") set: SmallGroupSet, @PathVariable action: SmallGroupSetSelfSignUpState): Appliable[Seq[SmallGroupSet]] with OpenSmallGroupSetState = {
+	def getOpenGroupSetCommand(
+		@PathVariable("set") set: SmallGroupSet,
+		@PathVariable action: SmallGroupSetSelfSignUpState
+	): Appliable[Seq[SmallGroupSet]] with OpenSmallGroupSetState = {
 		OpenSmallGroupSetCommand(Seq(set), user.apparentUser, action)
 		
 	}
@@ -292,7 +295,7 @@ class ReleaseAllSmallGroupSetsController extends GroupsController {
 			}
 		}
 
-		def createCommand(user: User): Appliable[Seq[SmallGroupSet]] = {
+		def createCommand(user: User): Appliable[Seq[ReleasedSmallGroupSet]] = {
 			val command = new ReleaseGroupSetCommandImpl(smallGroupSets(), user)
 			command.notifyStudents = notifyStudents
 			command.notifyTutors = notifyTutors

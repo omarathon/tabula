@@ -1,5 +1,5 @@
 /**
- * Scripts used only by the coursework admin section. 
+ * Scripts used only by the small group teaching admin section. 
  */
 (function ($) { "use strict";
 
@@ -75,51 +75,5 @@ $(function() {
 	        }
         });
     });
-});
-// Drag and drop allocation
-$(function() {
-	$('#allocateStudentsToGroupsCommand')
-		.dragAndDrop({
-			itemName: 'student',
-			textSelector: '.name h6',
-			useHandle: false,
-			selectables: '.students .drag-target',
-			scroll: true,
-			removeTooltip: 'Remove this student from this group'
-		})
-		.each(function(i, container) {
-			var $container = $(container);
-			$container.find('a.random').on('click', function(e) {			
-				$container.dragAndDrop('randomise');
-				
-				e.preventDefault();
-				e.stopPropagation();
-				return false;
-			});
-		});
-	
-	if ($('#allocateStudentsToGroupsCommand .student-list').length) {
-		// Manage button disabled-ness when there are items in/out the source and target lists
-		var manageButtons = function() {
-			var stillToAllocate = $('#allocateStudentsToGroupsCommand .student-list .drag-list li').length;
-			
-			if (stillToAllocate > 0) {
-				$('#allocateStudentsToGroupsCommand a.random').removeClass('disabled');
-			} else {
-				$('#allocateStudentsToGroupsCommand a.random').addClass('disabled');
-			}
-			
-			var alreadyAllocated = $('#allocateStudentsToGroupsCommand .groups .drag-list li').length;
-			
-			if (alreadyAllocated > 0) {
-				$('#allocateStudentsToGroupsCommand a.return-items').removeClass('disabled');
-			} else {
-				$('#allocateStudentsToGroupsCommand a.return-items').addClass('disabled');
-			}
-		};
-		
-		$('#allocateStudentsToGroupsCommand .student-list').on('changed.tabula', manageButtons);
-		manageButtons();
-	}
 });
 }(jQuery));

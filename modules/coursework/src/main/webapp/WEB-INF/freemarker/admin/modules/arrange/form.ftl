@@ -33,7 +33,7 @@ drag a box from one module name to another. You can also hold the <kbd class="ke
 </@spring.hasBindErrors>
 
 <@f.form commandName="sortModulesCommand" action="/coursework/admin/department/${department.code}/sort-modules">
-	
+<div class="tabula-dnd">	
 	<#macro mods department modules>
 		<div class="drag-target">
 			<h1>${department.name}</h1>
@@ -53,7 +53,7 @@ drag a box from one module name to another. You can also hold the <kbd class="ke
 	</#list>
 	
 	<input id="sort-modules-submit" class="btn btn-primary" type="submit" value="Save changes" />
-
+</div>
 </@f.form>
 
 </#escape> 

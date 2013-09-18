@@ -1,22 +1,5 @@
+<#import "profile_macros.ftl" as profile_macros />
 <#escape x as x?html>
-
-<#macro address address>
-	<div class="vcard">
-		<#if address.line1??>
-			<p class="address">
-				<span class="line1">${address.line1}</span>
-				<#if address.line2??><br><span class="line2">${address.line2}</span></#if>
-				<#if address.line3??><br><span class="line3">${address.line3}</span></#if>
-				<#if address.line4??><br><span class="line4">${address.line4}</span></#if>
-				<#if address.line5??><br><span class="line5">${address.line5}</span></#if>
-				<#if address.postcode??><br><span class="postcode">${address.postcode}</span></#if>
-			</p>
-		</#if>
-		<#if address.telephone??>
-			<p class="tel">${phoneNumberFormatter(address.telephone)}</p>
-		</#if>
-	</div>
-</#macro>
 
 <#if user.staff>
 	<#include "search/form.ftl" />
@@ -73,7 +56,7 @@
 						<#if profile.student && profile.termtimeAddress??>
 							<tr class="address">
 								<th>Term-time address</th>
-								<td><@address profile.termtimeAddress /></td>
+								<td><@profile_macros.address profile.termtimeAddress /></td>
 							</tr>
 						</#if>
 
@@ -144,7 +127,7 @@
 						<#if profile.student && profile.homeAddress??>
 							<tr class="address">
 								<th>Home address</th>
-								<td><@address profile.homeAddress /></td>
+								<td><@profile_macros.address profile.homeAddress /></td>
 							</tr>
 						</#if>
 					</tbody>
@@ -168,42 +151,72 @@
 		</#if>
 
 		<div class="tabbable">
+			<#assign showTimetablePane=features.personalTimetables && can.do("Profiles.Read.Timetable", profile) />
+		
+			<#if showTimetablePane>
+				<script type="text/javascript">
+					var weeks = ${weekRangesDumper()}
+				</script>
+			</#if>
 			<ol class="panes">
+
+				<#if showTimetablePane>
+					<li id="timetable-pane">
+						<section id="timetable-details" class="clearfix" >
+						<h4>Timetable</h4>
+						<div class='fullCalendar' data-viewname='agendaWeek' data-studentid='${studentCourseDetails.student.universityId}'>
+						</div>
+            </section>
+					</li>
+				</#if>
+
 				<li id="course-pane">
 					<#include "_course_details.ftl" />
 				</li>
 
-				<#if profile.hasAPersonalTutor || studentCourseDetails.courseType.code != "PG(R)">
-					<li id="pd-pane">
-						<#include "_personal_development.ftl" />
-					</li>
-				</#if>
-
-				<#if profile.hasSupervisor || studentCourseDetails.courseType.code == "PG(R)">
-					<li id="supervision-pane">
-						<#include "_supervision.ftl" />
-					</li>
-				</#if>
+				<#list (studentCourseDetails.department.displayedStudentRelationshipTypes)![] as relationshipType>
+					<#if studentCourseDetails.hasRelationship(relationshipType) || relationshipType.displayIfEmpty(studentCourseDetails)>
+						<li id="${relationshipType.id}-pane">
+							<#assign relMeetings=(meetingsById[relationshipType.id])![] />
+							<@profile_macros.relationship_section studentCourseDetails relationshipType relMeetings />
+						</li>
+					</#if>
+				</#list>
 
 				<#if numSmallGroups gt 0>
 					<li id="sg-pane" style="display:none;">
 						<#include "_small_groups.ftl" />
 					</li>
 				</#if>
+
+				<#if studentCourseDetails.hasModuleRegistrations>
+					<li id="module-registration-pane">
+						<#include "_module_registrations.ftl" />
+					</li>
+				</#if>
+
+				<#if features.attendanceMonitoring>
+					<li id="attendance-pane" style="display:none;">
+                    	<#include "_attendance.ftl" />
+                    </li>
+				</#if>
 			</ol>
-			
+
 			<div id="modal" class="modal hide fade" style="display:none;"></div>
 
-				<div id="modal-change-tutor" class="modal hide fade"></div>
-		
+				<div id="modal-change-agent" class="modal hide fade"></div>
+
 				<script type="text/javascript">
 				jQuery(function($){
-					// load edit personal tutor
-					$("#personal-development, #supervision").on("click", ".edit-tutor-link, .add-tutor-link", function(e) {
+					// load edit personal agent
+					$(".relationship-section").on("click", ".edit-agent-link, .add-agent-link", function(e) {
 						e.preventDefault();
 						var url = $(this).attr('href');
-						$("#modal-change-tutor").load(url,function(){
-							$("#modal-change-tutor").modal('show');
+						
+						// TAB-1111 we pass the second arg as a string, not an object, because if you use an object
+						// it makes it a POST request
+						$("#modal-change-agent").load(url, 'ts=' + new Date().getTime(),function(){
+							$("#modal-change-agent").modal('show');
 						});
 					});
 				});

@@ -56,6 +56,9 @@ class CurrentUser(
 	def email = apparentUser.getEmail
 	/** User code of the apparent user. */	
 	def userId = apparentUser.getUserId
+
+	/** Is of type Postgraduate research student (FT )? (includes PT) */
+	def isPGR = apparentUser.getExtraProperty("warwickitsclass") == "PG(R)"
 	
 	/** Is of type Student? (includes PGT) */
 	def isStudent = apparentUser.isStudent

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.dev.web.commands
 
 import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, CommandInternal}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.data.{Daoisms, SessionComponent}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupAllocationMethod, SmallGroupFormat, SmallGroupSet}
@@ -10,10 +10,12 @@ import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.StudentSignUp
 import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.AcademicYear
+import org.joda.time.DateTime
 
 class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Logging {
 
-	this: ModuleAndDepartmentServiceComponent with SessionComponent =>
+	this: ModuleAndDepartmentServiceComponent with SessionComponent with TermServiceComponent =>
 
 	var moduleCode:String = _
 	var groupSetName:String = _
@@ -23,6 +25,7 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 	var groupCount:Int = _
 	var maxGroupSize:Int = 0
 	var allowSelfGroupSwitching:Boolean = true
+	var releasedToStudents:Boolean = true
 
 	protected def applyInternal() = {
 		transactional() {
@@ -31,11 +34,13 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 			groupSet.name = groupSetName
 			groupSet.format = SmallGroupFormat.fromCode(formatName)
 			groupSet.module = module
+			groupSet.academicYear =AcademicYear.findAcademicYearContainingDate(DateTime.now, termService)
 			groupSet.allocationMethod = SmallGroupAllocationMethod.fromDatabase(allocationMethodName)
 			if (groupSet.allocationMethod == StudentSignUp ){
 				groupSet.allowSelfGroupSwitching = allowSelfGroupSwitching
 			}
 			groupSet.openForSignups = openForSignups
+			groupSet.releasedToStudents = releasedToStudents
 			groupSet.groups = JArrayList()
 			groupSet._membersGroup = UserGroup.ofUsercodes
 			if (maxGroupSize > 0){
@@ -66,5 +71,6 @@ object SmallGroupSetFixtureCommand{
 			with Daoisms
 			with Unaudited
 			with PubliclyVisiblePermissions
+			with AutowiringTermServiceComponent
 	}
 }

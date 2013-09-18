@@ -1,33 +1,26 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import org.hibernate.validator.constraints._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat
-import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.commands.PromisingCommand
 import uk.ac.warwick.tabula.helpers.LazyLists
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.UniversityId
 import org.springframework.validation.BindingResult
-import uk.ac.warwick.tabula.services.{SmallGroupService, UserLookupService}
+import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
-import org.hibernate.validator.Valid
 import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
  * Common superclass for creation and modification. Note that any defaults on the vars here are defaults
  * for creation; the Edit command should call .copyFrom(SmallGroup) to copy any existing properties.
  */
-abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSetProperties) extends PromisingCommand[SmallGroup] with SelfValidating with BindListener {
+abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSetProperties)
+	extends PromisingCommand[SmallGroup] with SelfValidating with BindListener {
 
 	var userLookup = Wire[UserLookupService]
 	
@@ -67,7 +60,7 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 	///// end of complicated membership stuff
 		
 	// A collection of sub-commands for modifying the events
-	var events: JList[ModifySmallGroupEventCommand] = LazyLists.withFactory { () => 
+	var events: JList[ModifySmallGroupEventCommand] = LazyLists.create { () => 
 		new CreateSmallGroupEventCommand(this, module)
 	}
 	

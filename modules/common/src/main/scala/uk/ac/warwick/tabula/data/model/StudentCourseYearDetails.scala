@@ -1,10 +1,15 @@
 package uk.ac.warwick.tabula.data.model
 
+import scala.Option.option2Iterable
 import org.hibernate.annotations.Type
 import org.joda.time.DateTime
-import javax.persistence._
+import javax.persistence.Basic
+import javax.persistence.Entity
+import javax.persistence.JoinColumn
+import javax.persistence.ManyToOne
+import javax.persistence.NamedQueries
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.JavaImports.JInteger
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.system.permissions.Restricted
@@ -64,7 +69,10 @@ trait StudentCourseYearProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var yearOfStudy: JInteger = _
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleRegistrationStatusUserType")
+	var moduleRegistrationStatus: ModuleRegistrationStatus = _ // intuit.cam_ssn.ssn_mrgs
+
 	var lastUpdatedDate = DateTime.now
 
 }
+

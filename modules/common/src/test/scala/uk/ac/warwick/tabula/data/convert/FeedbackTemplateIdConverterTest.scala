@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.convert
 import org.hibernate.SessionFactory
-import org.hibernate.classic.Session
+import org.hibernate.Session
 
 import uk.ac.warwick.tabula.Mockito
 

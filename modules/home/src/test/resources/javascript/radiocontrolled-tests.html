@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>QUnit - Common tests</title>
+	<link rel="stylesheet" href="./qunit/qunit.css">
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	<script src="./base.js"></script>
+	<script>
+		includeHomeScript('jquery-radiocontrolled.js');
+	</script>
+</head>
+<body>
+<div id="qunit"></div>
+<div id="qunit-fixture">
+
+	<!-- A set of radio buttons, two of which specify custom selectors for areas to disable. -->
+	<form id="radioActiveArea">
+		<input type="radio" name="a" value="good" data-selector="#RAgoodArea" checked="true">
+		<input type="radio" name="a" value="bad">
+		<input type="radio" name="a" value="ugly" data-selector="#RAuglyArea">
+
+		<div id="RAgoodArea">
+			<input name="egg">
+			<select name="egg-type"></select>
+		</div>
+
+		<div id="RAuglyArea">
+			<input name="butt">
+			<select name="butt-type"></select>
+		</div>
+	</form>
+
+	<!-- A set of radio buttons, which are contained within a .control-group and control
+		the inputs in a neighbouring .controls div -->
+	<form id="radioReadOnly">
+
+		<div class="control-group first">
+			<label><input name="togetherness" type="radio" checked></label>
+			<div class="controls">
+				<input name="butt" value="x">
+				<select name="butt-type"></select>
+			</div>
+		</div>
+
+		<div class="control-group second">
+			<label><input name="togetherness" type="radio"></label>
+			<div class="controls">
+				<input name="butt" value="x">
+				<select name="butt-type"></select>
+			</div>
+		</div>
+	</form>
+
+	<!-- A dropdown, of which one value specifies a div to unhide when selected. -->
+	<form id="selectShowArea">
+
+		<div class="controls">
+
+			<select name="template">
+				<option selected>Year 1</option>
+				<option>Year 2</option>
+				<option>Year 3</option>
+				<option value="" data-selector=".custom-text-area">Other...</option>
+			</select>
+
+			<div class="custom-text-area">
+				Custom template: <input name="customTemplate" />
+			</div>
+
+		</div>
+
+	</form>
+
+</div>
+<script src="./qunit/qunit.js"></script>
+<script src="./radiocontrolled-tests.js"></script>
+</body>
+</html>

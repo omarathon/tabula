@@ -1,10 +1,12 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Type
-import org.joda.time.DateTime
+
 import javax.persistence._
+
+import org.hibernate.annotations.{BatchSize, AccessType, Type}
+import org.joda.time.DateTime
+
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
@@ -67,7 +69,6 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	var uploaderId: String = _
 
 	@Column(name = "uploaded_date")
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var uploadedDate: DateTime = new DateTime
 
 	var universityId: String = _
@@ -97,7 +98,6 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	var secondMarkerFeedback: MarkerFeedback = _
 
 	@Column(name = "released_date")
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var releasedDate: DateTime = _
 
 	@OneToMany(mappedBy = "feedback", cascade = Array(ALL))
@@ -151,6 +151,7 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	}
 
 	@OneToMany(mappedBy = "feedback", fetch = FetchType.LAZY, cascade=Array(ALL))
+	@BatchSize(size=200)
 	var attachments: JList[FileAttachment] = JArrayList()
 
 	def addAttachment(attachment: FileAttachment) {

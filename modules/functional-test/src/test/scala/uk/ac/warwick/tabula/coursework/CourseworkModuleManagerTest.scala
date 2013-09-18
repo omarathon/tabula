@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.coursework
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.BrowserTest
 import org.openqa.selenium.By
-import org.openqa.selenium.remote.RemoteWebDriver.When
 
 class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
 
@@ -81,7 +80,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 			find(cssSelector(s"${parentElement} form.add-permissions")).get.underlying.submit()
 
 		Then("I should see the new entry")
-			changedUsers should be (Set(usersToBeAdded.head))
+			withClue(pageSource) { changedUsers should be (Set(usersToBeAdded.head)) }
 
 		When("I add another entry")
 		({

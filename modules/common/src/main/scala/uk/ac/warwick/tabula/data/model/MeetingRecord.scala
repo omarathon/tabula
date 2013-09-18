@@ -4,7 +4,7 @@ import javax.persistence._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.ToString
 import org.joda.time.DateTime
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{BatchSize, Type}
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
@@ -27,11 +27,9 @@ object MeetingRecord {
 class MeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted with FormattedHtml {
 
 	@Column(name="creation_date")
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var creationDate: DateTime = DateTime.now
 
 	@Column(name="last_updated_date")
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var lastUpdatedDate: DateTime = creationDate
 
 	@ManyToOne
@@ -39,7 +37,6 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	var relationship: StudentRelationship = _
 
 	@Column(name="meeting_date")
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var meetingDate: DateTime = _
 
@@ -51,15 +48,11 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	@JoinColumn(name="creator_id")
 	var creator: Member = _
 
-  def readPermissions():Seq[Permission]={
-    Seq(relationship.relationshipType match {
-      case RelationshipType.PersonalTutor =>Permissions.Profiles.PersonalTutor.MeetingRecord.ReadDetails
-      case RelationshipType.Supervisor => Permissions.Profiles.Supervisor.MeetingRecord.ReadDetails
-    })
-  }
+  def readPermissions(): Seq[Permission] = Seq(Permissions.Profiles.MeetingRecord.ReadDetails(relationship.relationshipType))
 
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
   @RestrictionProvider("readPermissions")
+	@BatchSize(size=200)
 	var attachments: JList[FileAttachment] = JArrayList()
 
   @RestrictionProvider("readPermissions")
@@ -79,6 +72,7 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	// Workflow definitions
 
 	@OneToMany(mappedBy="meetingRecord", fetch=FetchType.LAZY, cascade=Array(ALL))
+	@BatchSize(size=200)
 	var approvals: JList[MeetingRecordApproval] = JArrayList()
 
 	// true if the specified user needs to perform a workflow action on this meeting record

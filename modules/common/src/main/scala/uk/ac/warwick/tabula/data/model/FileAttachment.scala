@@ -39,6 +39,11 @@ class FileAttachment extends GeneratedId {
 	@JoinColumn(name="extension_id")
 	var extension:Extension =_
 
+	// optional link to a Member Note
+	@ManyToOne(fetch=FetchType.LAZY)
+	@JoinColumn(name="member_note_id")
+	var memberNote:MemberNote =_
+
 	// optional link to Meeting Record
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "meetingrecord_id")
@@ -65,7 +70,6 @@ class FileAttachment extends GeneratedId {
 
 	var temporary: JBoolean = true
 
-	@Type(`type` = "org.joda.time.contrib.hibernate.PersistentDateTime")
 	var dateUploaded: DateTime = new DateTime
 
 	@transient private var _file: File = null

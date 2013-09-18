@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import scala.collection.JavaConverters._
-
 import java.sql.Date
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
@@ -20,8 +19,6 @@ import uk.ac.warwick.tabula.data.model.Gender._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.data.model.RelationshipType._
-import uk.ac.warwick.tabula.data.model.RelationshipType
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.data.model.StaffMember
@@ -41,6 +38,10 @@ import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.data.ModeOfAttendanceDao
 import uk.ac.warwick.tabula.data.SitsStatusDao
 import uk.ac.warwick.tabula.services.MaintenanceModeService
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
+import uk.ac.warwick.tabula.scheduling.services.CourseImporter
+import uk.ac.warwick.tabula.data.model.Course
 
 
 // scalastyle:off magic.number
@@ -85,6 +86,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		sitsStatusesImporter.getSitsStatusForCode("P") returns  Some(new SitsStatus("P", "P", "Permanently Withdrawn"))
 
 
+		val courseImporter = smartMock[CourseImporter]
+		courseImporter.getCourseForCode("UESA-H612") returns new Course("UESA-H612", "Computer Systems Engineering MEng")
+
 		//department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits
 
 		val rs = smartMock[ResultSet]
@@ -113,6 +117,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rs.getString("mode_of_attendance_code") returns ("P")
 		rs.getString("sce_academic_year") returns ("10/11")
 		rs.getString("most_signif_indicator") returns ("Y")
+		rs.getString("mod_reg_status") returns "CON"
+		rs.getString("course_code") returns "UESA-H612"
 
 		val mm = MembershipMember(
 			universityId 			= "0672089",
@@ -154,6 +160,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		courseCommand.moduleAndDepartmentService = modAndDeptService
 		courseCommand.memberDao = memberDao
 		courseCommand.relationshipService = relationshipService
+		courseCommand.courseImporter = courseImporter
 
 		val rowCommand = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, courseCommand)
 		rowCommand.memberDao = memberDao
@@ -191,6 +198,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseDetails.sprCode = "0672089/2"
 			yearCommand.studentCourseDetails = studentCourseDetails
 
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
+
 			val studentCourseYearDetails = yearCommand.applyInternal()
 
 			// now the set up is done, run the apply command and test it:
@@ -211,6 +220,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	@Test
 	def testImportStudentRowCommandWorksWithNew {
 		new Environment {
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
+
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
 			val member = rowCommand.applyInternal()
 
@@ -242,9 +253,10 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	@Test
 	def worksWithExistingMember {
 		new Environment {
-
 			val existing = new StudentMember("0672089")
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
+
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
 
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
 			val member = rowCommand.applyInternal()
@@ -272,8 +284,12 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
 
+			val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (Some(tutorRelationshipType))
+
 			// if personalTutorSource is "local", there should be no update
-			department.personalTutorSource = "local"
+			department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.Local)
 
 			val member = rowCommand.applyInternal() match {
 				case stu: StudentMember => Some(stu)
@@ -284,7 +300,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.studentCourseDetails.size should not be (0)
 
-			there was no(relationshipService).saveStudentRelationship(PersonalTutor, "0672089/2","0070790");
+			there was no(relationshipService).saveStudentRelationship(tutorRelationshipType, "0672089/2","0070790");
 		}
 	}
 
@@ -295,12 +311,16 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			val existing = new StudentMember("0672089")
 			val existingStaffMember = new StaffMember("0070790")
 
-			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
-			memberDao.getByUniversityId("0672089") returns(Some(existing))
-			relationshipService.findCurrentRelationships(RelationshipType.PersonalTutor, "0672089/2") returns (Nil)
+			val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (Some(tutorRelationshipType))
 
 			// if personalTutorSource is "SITS", there *should* an update
-			department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits
+			department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.SITS)
+
+			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
+			memberDao.getByUniversityId("0672089") returns(Some(existing))
+			relationshipService.findCurrentRelationships(tutorRelationshipType, "0672089/2") returns (Nil)
 
 			val member = rowCommand.applyInternal() match {
 				case stu: StudentMember => Some(stu)
@@ -311,7 +331,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.mostSignificantCourseDetails should not be (null)
 
-			there was one(relationshipService).saveStudentRelationship(PersonalTutor, "0672089/2","0070790");
+			there was one(relationshipService).saveStudentRelationship(tutorRelationshipType, "0672089/2","0070790");
 		}
 	}
 }

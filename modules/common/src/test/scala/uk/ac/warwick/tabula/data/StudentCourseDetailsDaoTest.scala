@@ -62,5 +62,29 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		session.flush()
 	}
 
+	@Test def getByDepartment = transactional { tx =>
+		val dept1 = Fixtures.department("ms", "Motorsport")
+		val dept2 = Fixtures.department("vr", "Vehicle Repair")
+
+		session.save(dept1)
+		session.save(dept2)
+
+		session.flush
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		stu1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
+
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		stu2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
+
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(stu2)
+
+		session.flush()
+
+		dao.findByDepartment(dept1).head.student should be(stu1)
+		dao.findByDepartment(dept2).head.student should be(stu2)
+
+	}
 
 }

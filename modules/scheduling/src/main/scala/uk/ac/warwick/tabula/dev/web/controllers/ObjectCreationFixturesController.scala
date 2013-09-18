@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.dev.web.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import org.springframework.web.bind.annotation.RequestMethod.POST
-import uk.ac.warwick.tabula.dev.web.commands.{GroupMembershipFixtureCommand, GroupsetMembershipFixtureCommand, SmallGroupSetFixtureCommand, ModuleFixtureCommand}
+import uk.ac.warwick.tabula.dev.web.commands._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import org.springframework.web.servlet.View
 import uk.ac.warwick.tabula.commands.Appliable
@@ -58,6 +58,20 @@ class SmallGroupSetMembershipCreationFixturesController {
 }
 
 @Controller
+@RequestMapping(Array("/fixtures/create/groupEvent"))
+class SmallGroupEventCreationFixturesController {
+
+	@ModelAttribute("createEventCommand")
+	def getCreateEventCommand(): Appliable[Unit] = {
+		SmallGroupEventFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createEventCommand") cmd: Appliable[Unit]) {
+		cmd.apply()
+	}
+}
+@Controller
 @RequestMapping(Array("/fixtures/create/groupMembership"))
 class SmallGroupMembershipCreationFixturesController {
 
@@ -69,6 +83,81 @@ class SmallGroupMembershipCreationFixturesController {
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("createMembershipCommand") cmd: Appliable[Unit]) {
+		cmd.apply()
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/create/studentMember"))
+class StudentMemberCreationFixturesController {
+
+	@ModelAttribute("createMemberCommand")
+	def getCreateModuleCommand(): Appliable[Unit] = {
+		StudentMemberFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createMemberCommand") cmd: Appliable[Unit]) {
+		cmd.apply()
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/create/route"))
+class RouteCreationFixturesController {
+
+	@ModelAttribute("createRouteCommand")
+	def getCreateRouteCommand(): Appliable[Unit] = {
+		RouteCreationFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createRouteCommand") cmd: Appliable[Unit]) {
+		cmd.apply()
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/create/course"))
+class CourseCreationFixturesController {
+
+	@ModelAttribute("createCourseCommand")
+	def getCreatecourseCommand(): Appliable[Unit] = {
+		CourseCreationFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createCourseCommand") cmd: Appliable[Unit]) {
+		cmd.apply()
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/create/relationship"))
+class RelationshipCreationFixturesController {
+
+	@ModelAttribute("createRelationship")
+	def getCreateRelationshipCommand(): Appliable[Unit] = {
+		RelationshipFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createRelationship") cmd: Appliable[Unit]) {
+		cmd.apply()
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/create/moduleRegistration"))
+class ModuleRegistrationFixturesController {
+
+	@ModelAttribute("moduleRegistrationCommand")
+	def getModuleRegistrationCommand(): Appliable[Unit] = {
+		ModuleRegistrationFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("moduleRegistrationCommand") cmd: Appliable[Unit]) {
 		cmd.apply()
 	}
 }

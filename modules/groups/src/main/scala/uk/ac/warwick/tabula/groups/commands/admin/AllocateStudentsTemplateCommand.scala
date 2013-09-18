@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.web.views.ExcelView
 import org.apache.poi.ss.util.CellRangeAddressList
-import org.apache.poi.ss.usermodel.CellStyle
 
 class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSet, viewer: CurrentUser)
 		extends Command[ExcelView] with ReadOnly with Unaudited {
@@ -38,27 +37,34 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 		generateGroupDropdowns(sheet, groups)
 
 		val groupLookupRange = groupLookupSheetName + "!$A2:$B" + (groups.length + 1)
-		val userIterator = set.members.users.iterator
+		val userIterator = set.allStudents.iterator
 
 		while (sheet.getLastRowNum < spreadsheetRows) {
-
 			val row = sheet.createRow(sheet.getLastRowNum + 1)
 
 			// put the student details into the cells
 			// otherwise create blank unprotected cells for the user to enter
-			if(userIterator.hasNext) {
+			if (userIterator.hasNext) {
 				val user = userIterator.next
 				val thisUser = user
 				row.createCell(0).setCellValue(thisUser.getWarwickId)
 				row.createCell(1).setCellValue(thisUser.getFullName)
-				createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown group name
+				
+				val groupNameCell = createUnprotectedCell(workbook, row, 2) // unprotect cell for the dropdown group name
+				
+				// If this user is already in a group, prefill
+				groups.find { _.students.includesUser(user) }.foreach { group =>
+					groupNameCell.setCellValue(group.name)
+				}
 			} else {
 				createUnprotectedCell(workbook, row, 0) // cell for student_id
 				createUnprotectedCell(workbook, row, 1) // cell for name (for the user's info only)
 				createUnprotectedCell(workbook, row, 2) // cell for the group name
 			}
 
-			row.createCell(3).setCellFormula("IF(ISTEXT($C"+(row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + groupLookupRange + ", 2, FALSE), \" \")")
+			row.createCell(3).setCellFormula(
+				"IF(ISTEXT($C" + (row.getRowNum + 1) + "), VLOOKUP($C" + (row.getRowNum + 1) + ", " + groupLookupRange + ", 2, FALSE), \" \")"
+			)
 		}
 
 		formatWorkbook(workbook)
@@ -66,30 +72,30 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 	}
 
 
-	def createUnprotectedCell(workbook: XSSFWorkbook, row: XSSFRow, col: Int, value: String = "") {
-		val lockedCellStyle = workbook.createCellStyle();
-		lockedCellStyle.setLocked(false);
+	def createUnprotectedCell(workbook: XSSFWorkbook, row: XSSFRow, col: Int, value: String = "") = {
+		val lockedCellStyle = workbook.createCellStyle()
+		lockedCellStyle.setLocked(false)
 		val cell = row.createCell(col)
 		cell.setCellValue(value)
 		cell.setCellStyle(lockedCellStyle)
+		cell
 	}
 
 
 
 	// attaches the data validation to the sheet
-	def generateGroupDropdowns(sheet: XSSFSheet, groups: List[SmallGroup]) {
-		val dropdownChoices = groups.map(_.name).toArray
+	def generateGroupDropdowns(sheet: XSSFSheet, groups: Seq[_]) {
 		val dropdownRange = new CellRangeAddressList(1, spreadsheetRows, 2, 2)
-		val validation = getDataValidation(dropdownChoices, sheet, dropdownRange)
+		val validation = getDataValidation(groups, sheet, dropdownRange)
 
 		sheet.addValidationData(validation)
 	}
 
 
 	// Excel data validation - will only accept the values fed to this method, also puts a dropdown on each cell
-	def getDataValidation(dropdownChoices: Array[String], sheet: XSSFSheet, addressList: CellRangeAddressList) = {
+	def getDataValidation(groups: Seq[_], sheet: XSSFSheet, addressList: CellRangeAddressList) = {
 		val dvHelper = new XSSFDataValidationHelper(sheet)
-		val dvConstraint = dvHelper.createExplicitListConstraint(dropdownChoices).asInstanceOf[XSSFDataValidationConstraint]
+		val dvConstraint = dvHelper.createFormulaListConstraint(groupLookupSheetName + "!$A$2:$A$" + (groups.length + 1)).asInstanceOf[XSSFDataValidationConstraint]
 		val validation = dvHelper.createValidation(dvConstraint, addressList).asInstanceOf[XSSFDataValidation]
 
 		validation.setShowErrorBox(true)
@@ -97,7 +103,7 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 	}
 
 
-	def generateGroupLookupSheet(workbook: XSSFWorkbook) {
+	def generateGroupLookupSheet(workbook: XSSFWorkbook) = {
 		val groupSheet: XSSFSheet = workbook.createSheet(groupLookupSheetName)
 
 		for (group <- set.groups.asScala) {
@@ -107,6 +113,7 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 		}
 
 		groupSheet.protectSheet(sheetPassword)
+		groupSheet
 	}
 
 
@@ -135,7 +142,7 @@ class AllocateStudentsTemplateCommand (val module: Module, val set: SmallGroupSe
 
 		val sheet = workbook.getSheet(allocateSheetName)
 
-			// set style on all columns
+		// set style on all columns
 		0 to 3 foreach  {
 			col => sheet.setDefaultColumnStyle(col, style)
 			sheet.autoSizeColumn(col)

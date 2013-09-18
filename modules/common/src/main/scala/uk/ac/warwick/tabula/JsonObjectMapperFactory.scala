@@ -3,7 +3,7 @@ import scala.reflect._
 
 import org.springframework.beans.factory.config.AbstractFactoryBean
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.{SerializationFeature, ObjectMapper}
 import com.fasterxml.jackson.datatype.joda.JodaModule
 
 abstract class ScalaFactoryBean[A : ClassTag] extends AbstractFactoryBean[A] {
@@ -11,7 +11,7 @@ abstract class ScalaFactoryBean[A : ClassTag] extends AbstractFactoryBean[A] {
 }
 
 class JsonObjectMapperFactory extends ScalaFactoryBean[ObjectMapper] {
-	override def createInstance: ObjectMapper = JsonObjectMapperFactory.instance
+	override def createInstance: ObjectMapper = JsonObjectMapperFactory.createInstance
 }
 
 object JsonObjectMapperFactory  {
@@ -20,6 +20,7 @@ object JsonObjectMapperFactory  {
 		val mapper = new ObjectMapper
 		mapper.registerModule(DefaultScalaModule)
 		mapper.registerModule(new JodaModule)
+		mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS)
 		mapper
 	}
 }

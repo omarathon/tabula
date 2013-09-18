@@ -38,7 +38,6 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 	}
 
 	def goToEditProperties:EditSmallGroupSetPropertiesPage = {
-		//val groupsetElement = getGroupsetInfo(moduleCode,groupSetName)
 		underlying.findElement(By.partialLinkText("Actions")).click()
 		val editGroupset = underlying.findElement(By.partialLinkText("Edit properties"))
 		eventually {
@@ -49,6 +48,18 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 		// HACK: the module name is the module code in uppercase in the test data. Should really pass it around separately
 		propsPage.isCurrentPage(moduleCode.toUpperCase)
 		propsPage
+	}
+
+	def goToAllocate = {
+		underlying.findElement(By.partialLinkText("Actions")).click()
+		val allocate = underlying.findElement(By.partialLinkText("Allocate students"))
+		eventually {
+			allocate.isDisplayed should be(true)
+		}
+		allocate.click()
+		val allocatePage = new AllocateStudentsToGroupsPage()
+		allocatePage.isCurrentPage(moduleCode.toUpperCase())
+		allocatePage
 	}
 
 	def isShowingOpenButton() = {

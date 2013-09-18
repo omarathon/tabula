@@ -3,11 +3,12 @@ package uk.ac.warwick.tabula.data.model.groups
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.util.termdates.TermFactoryImpl
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.services.{TermServiceImpl, TermService}
 
 class WeekRangeTest extends TestBase {
 	
-	val termFactory = new TermFactoryImpl
-	WeekRange.termFactory = termFactory
+	val termService = new TermServiceImpl
+	WeekRange.termService = termService
 	
 	@Test
 	def fromString {
