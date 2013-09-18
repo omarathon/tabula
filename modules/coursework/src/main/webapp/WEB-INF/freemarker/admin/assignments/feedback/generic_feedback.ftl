@@ -7,7 +7,7 @@
 			<@f.textarea path="genericFeedback" cssClass="span9" rows="6"/>
 		</div>
 		<div class="help-block">
-			The following comments will be released to all students along with there individual feedback.
+			The following comments will be released to all students along with their individual feedback.
 		</div>
 		<div class="submit-buttons">
 			<input class="before-save btn btn-primary" type="submit" value="Save">
