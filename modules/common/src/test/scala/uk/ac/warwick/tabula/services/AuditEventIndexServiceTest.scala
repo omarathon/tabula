@@ -245,7 +245,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 			stopwatch.start("searching for newest item forever attempt "+i)
 			val newest = indexer.newest()
 			stopwatch.stop()
-			newest.head.getValues("id").toList.head should be ("1000")
+      newest.head.getValues("eventId").toList.head should be ("d1000")
 		}
 		
 		// index again to check that it doesn't do any once-only stuff

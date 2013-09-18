@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.scheduling.services.RouteInfo
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.CourseAndRouteService
+import uk.ac.warwick.tabula.data.model.Department.FilterRule
 
 class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 	import ImportModulesCommand._
@@ -120,7 +121,7 @@ object ImportModulesCommand {
 			department.parent =  dao.getByCode(code).get
 		}
 		d.filterName foreach  {name =>
-			department.filterRuleName = name
+			department.filterRule = new DepartmentFilterRuleUserType().convertToObject(name)
 		}
 		department
 	}
