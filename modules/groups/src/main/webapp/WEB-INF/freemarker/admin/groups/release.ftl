@@ -15,7 +15,7 @@
 
     <div class="modal-body">
         <p>Notify these people via email that ${smallGroupSet.name}
-            allocations for ${smallGroupSet.module.code} are ready to view
+            allocations for ${smallGroupSet.module.code?upper_case} are ready to view
             in Tabula</p>
         <@form.row "notifyStudents">
             <label class='checkbox ${smallGroupSet.releasedToStudents?string("disabled use-tooltip' title='Already notified'","'") }>
