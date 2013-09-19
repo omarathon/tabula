@@ -17,17 +17,19 @@ trait MemberNoteService {
 
 	def getNoteById(id: String): Option[MemberNote]
 	def list(student: Member): Seq[MemberNote]
+	def listNonDeleted(student: Member): Seq[MemberNote]
 	def saveOrUpdate(memberNote: MemberNote)
 	def deleteNote(note: MemberNote)
 
 }
 
 
-abstract class AbstractMemberNotePointService extends MemberNoteService {
+abstract class AbstractMemberNoteService extends MemberNoteService {
 	self: MemberNoteDaoComponent =>
 
 	def getNoteById(id: String): Option[MemberNote] = memberNoteDao.getById(id)
-	def list(student: Member): Seq[MemberNote] = memberNoteDao.list(student)
+	def list(student: Member): Seq[MemberNote] = memberNoteDao.list(student, true)
+	def listNonDeleted(student: Member): Seq[MemberNote] = memberNoteDao.list(student, false)
 	def saveOrUpdate(memberNote: MemberNote) = memberNoteDao.saveOrUpdate(memberNote)
 	def deleteNote(memberNote: MemberNote) = memberNoteDao.delete(memberNote)
 
@@ -35,5 +37,5 @@ abstract class AbstractMemberNotePointService extends MemberNoteService {
 
 @Service("memberNoteService")
 class MemberNoteServiceImpl
-	extends AbstractMemberNotePointService
+	extends AbstractMemberNoteService
 	with AutowiringMemberNoteDaoComponent

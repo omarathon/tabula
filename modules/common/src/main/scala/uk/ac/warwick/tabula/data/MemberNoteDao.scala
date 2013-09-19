@@ -15,7 +15,7 @@ trait AutowiringMemberNoteDaoComponent extends MemberNoteDaoComponent {
 
 trait MemberNoteDao {
 	def getById(id: String): Option[MemberNote]
-	def list(student: Member): Seq[MemberNote]
+	def list(student: Member, includeDeleted: Boolean = false): Seq[MemberNote]
 	def saveOrUpdate(memberNote: MemberNote)
 	def delete(memberNote: MemberNote)
 
@@ -25,18 +25,17 @@ trait MemberNoteDao {
 class MemberNoteDaoImpl extends MemberNoteDao with Daoisms {
 	def getById(id: String): Option[MemberNote] = getById[MemberNote](id)
 
-	def list(student: Member): Seq[MemberNote] =
+	def list(student: Member, includeDeleted: Boolean): Seq[MemberNote] =
 		{
-		 session.newCriteria[MemberNote]
-			 .add(Restrictions.eq("member", student))
-			 .add(Restrictions.disjunction()
-			 .add(Restrictions.eq("deleted", false))
-		 )
-			 .addOrder(Order.desc("lastUpdatedDate"))
-			 .seq
+			val criteria = session.newCriteria[MemberNote].add(Restrictions.eq("member", student))
+			if (!includeDeleted) {
+				criteria.add(Restrictions.eq("deleted", false))
+			}
+			criteria.addOrder(Order.desc("lastUpdatedDate")).seq
 	}
 
 	def saveOrUpdate(memberNote: MemberNote) = session.saveOrUpdate(memberNote)
 
 	def delete(memberNote: MemberNote) = session.delete(memberNote)
+
 }

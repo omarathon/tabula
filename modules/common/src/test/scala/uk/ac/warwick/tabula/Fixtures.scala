@@ -180,4 +180,12 @@ object Fixtures {
 		point.defaultValue = defaultValue
 		point
 	}
+
+	def memberNote(note: String, student: Member, id: String ) = {
+		val memberNote = new MemberNote
+		memberNote.note = note
+		memberNote.member = student
+		memberNote.id = id
+		memberNote
+	}
 }
