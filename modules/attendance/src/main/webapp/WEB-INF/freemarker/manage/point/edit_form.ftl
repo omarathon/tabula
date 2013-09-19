@@ -1,11 +1,11 @@
 <#escape x as x?html>
+<#import "*/modal_macros.ftl" as modal />
 
-<div class="modal-header">
-	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+<@modal.header>
 	<h2>Edit monitoring point</h2>
-</div>
+</@modal.header>
 
-<div class="modal-body">
+<@modal.body>
 
 	<#assign action><@url page="/manage/${command.dept.code}/sets/add/points/edit/${command.pointIndex}" /></#assign>
 
@@ -18,13 +18,13 @@
 		<#include "_fields.ftl" />
 	</@f.form>
 
-</div>
+</@modal.body>
 
-<div class="modal-footer">
+<@modal.footer>
 	<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Editing&hellip;">
 		Edit
 	</button>
 	<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-</div>
+</@modal.footer>
 
 </#escape>
