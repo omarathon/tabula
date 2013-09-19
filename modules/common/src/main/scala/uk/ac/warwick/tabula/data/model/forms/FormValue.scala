@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.BindingResult
-import javax.persistence.{OneToMany, JoinColumn, ManyToOne, Entity}
+import javax.persistence.{JoinColumn, ManyToOne, OneToMany, Entity}
 import org.hibernate.annotations.AccessType
 import javax.persistence.FetchType._
 import scala.Array

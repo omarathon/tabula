@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 import java.util.HashSet
+import scala.collection.JavaConverters._
 
 
 trait FeedbackAttachments {
@@ -106,6 +107,7 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	def getValue(field: FormField): Option[SavedFormValue] = {
 		customFormValues.find( _.name == field.name )
 	}
+	def defaultFeedbackComments = customFormValues.find(_.name == Assignment.defaultFeedbackTextFieldName).map(_.value)
 
 	def onlineFeedbackComments: Option[SavedFormValue] = Option(assignment).flatMap( _.feedbackCommentsField.flatMap(getValue(_)))
 

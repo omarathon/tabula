@@ -16,6 +16,17 @@
 	</div>
 </#if>
 
+<#if  assignment.genericFeedback??>
+<div class="feedback-notes">
+<h3>General feedback on the assignment:</h3> ${assignment.genericFeedback!""}
+</div>
+</#if>
+<#if feedback.defaultFeedbackComments??>
+<div class="feedback-notes">
+<h3>Feedback on your submission</h3> ${feedback.defaultFeedbackComments!""}
+</div>
+</#if>
+
 <p>
 	<#assign feedbackcount=feedback.attachments?size>
 	<#-- Only offer a Zip if there's more than one file. -->
