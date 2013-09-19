@@ -22,6 +22,7 @@ sealed trait MemberOrUser{
 	def fullName: Option[String]
 	def universityId: String
 	def shortDepartment: String
+	def email: String
 }
 
 private case class WrappedUser(user: User) extends MemberOrUser {
@@ -29,6 +30,7 @@ private case class WrappedUser(user: User) extends MemberOrUser {
 	def fullName = Some(user.getFullName)
 	def universityId = user.getWarwickId
 	def shortDepartment = user.getShortDepartment
+	def email = user.getEmail
 }
 
 private case class WrappedMember(member: Member) extends MemberOrUser {
@@ -36,4 +38,5 @@ private case class WrappedMember(member: Member) extends MemberOrUser {
 	def fullName = member.fullName
 	def universityId = member.universityId
 	def shortDepartment = member.homeDepartment.name
+	def email = member.email
 }

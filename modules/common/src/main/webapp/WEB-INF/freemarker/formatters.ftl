@@ -253,5 +253,35 @@
 	<${type} ${href} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
 </#macro>
 
+<#macro bulk_email emails title subject>
+	<#if emails?size gt 0 && emails?size lte 50>
+		<a href="mailto:<#list emails as email>${email}<#if email_has_next>,</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>" class="btn">
+			<i class="icon-envelope"></i> ${title}
+		</a>
+	</#if>
+</#macro>
+
+<#macro bulk_email_students students title="Email these students" subject="">
+	<#assign emails = [] />
+	<#list students as student>
+		<#if student.email??>
+			<#assign emails = emails + [student.email] />
+		</#if>
+	</#list>
+	
+	<@bulk_email emails title subject />
+</#macro>
+
+<#macro bulk_email_student_relationships relationships title="Email these students" subject="">
+	<#assign emails = [] />
+	<#list relationships as rel>
+		<#if rel.studentMember?? && rel.studentMember.email??>
+			<#assign emails = emails + [rel.studentMember.email] />
+		</#if>
+	</#list>
+	
+	<@bulk_email emails title subject />
+</#macro>
+
 </#escape>
 
