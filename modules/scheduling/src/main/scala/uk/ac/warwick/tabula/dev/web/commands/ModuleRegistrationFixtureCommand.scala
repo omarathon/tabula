@@ -1,23 +1,14 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.commands.CommandInternal
-import uk.ac.warwick.tabula.commands.ComposableCommand
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
-import uk.ac.warwick.tabula.data.model.UserGroup
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.TermServiceImpl
-import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
-import uk.ac.warwick.tabula.data._
+import scala.collection.JavaConverters.asScalaBufferConverter
+
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.StudentMember
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.ModuleRegistration
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
+import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, Daoisms, MemberDao, MemberDaoImpl, ModuleDao, ModuleDaoImpl, SessionComponent, TransactionalComponent}
+import uk.ac.warwick.tabula.data.model.{ModuleRegistration, StudentMember}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
 class ModuleRegistrationFixtureCommand extends CommandInternal[Unit] with Logging {
 	this: SessionComponent with TransactionalComponent  =>
