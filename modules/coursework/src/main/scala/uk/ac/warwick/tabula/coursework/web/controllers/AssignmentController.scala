@@ -20,6 +20,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.coursework.commands.assignments.SendSubmissionNotifyCommand
 import uk.ac.warwick.tabula.services.SubmissionService
+import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, FreemarkerTextRenderer, PDFView}
+import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
 
 /** This is the main student-facing controller for handling esubmission and return of feedback.
  *
@@ -107,6 +109,15 @@ class AssignmentController extends CourseworkController {
 				.withTitle(module.name + " (" + module.code.toUpperCase + ")" + " - " + assignment.name)
 
 		}
+	}
+
+	@RequestMapping(method = Array(GET), value=Array("/feedback.pdf"))
+	def viewAsPdf(
+		@PathVariable("module") module: Module,
+		@PathVariable("assignment") assignment: Assignment,
+		user: CurrentUser)={
+		val feedback = getFeedback(assignment, user)
+		new PDFView("feedback.pdf", "/WEB-INF/freemarker/admin/assignments/markerfeedback/feedback-download.ftl", Map("feedback" -> feedback, "user"->user)) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
 	}
 
 	@RequestMapping(method = Array(POST))
