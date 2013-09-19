@@ -59,4 +59,5 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 			.add(is("route.code", route.code))
 			.seq
 	}
+
 }
