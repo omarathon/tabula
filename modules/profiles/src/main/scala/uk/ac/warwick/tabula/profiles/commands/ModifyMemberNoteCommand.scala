@@ -30,7 +30,7 @@ abstract class ModifyMemberNoteCommand(val member: Member, val submitter: Curren
 
 	val memberNote: MemberNote
 
-	protected def applyInternal(): MemberNote = transactional() {
+	def applyInternal(): MemberNote = transactional() {
 
 		creator = profileService.getMemberByUniversityId(submitter.universityId).getOrElse(null)
 
