@@ -18,6 +18,7 @@ trait MemberNoteService {
 	def getNoteById(id: String): Option[MemberNote]
 	def list(student: Member): Seq[MemberNote]
 	def saveOrUpdate(memberNote: MemberNote)
+	def deleteNote(note: MemberNote)
 
 }
 
@@ -28,6 +29,7 @@ abstract class AbstractMemberNotePointService extends MemberNoteService {
 	def getNoteById(id: String): Option[MemberNote] = memberNoteDao.getById(id)
 	def list(student: Member): Seq[MemberNote] = memberNoteDao.list(student)
 	def saveOrUpdate(memberNote: MemberNote) = memberNoteDao.saveOrUpdate(memberNote)
+	def deteleNote(memberNote: MemberNote) = memberNoteDao.
 
 }
 

@@ -17,6 +17,7 @@ trait MemberNoteDao {
 	def getById(id: String): Option[MemberNote]
 	def list(student: Member): Seq[MemberNote]
 	def saveOrUpdate(memberNote: MemberNote)
+	def delete(memberNote: MemberNote)
 
 }
 
@@ -36,4 +37,6 @@ class MemberNoteDaoImpl extends MemberNoteDao with Daoisms {
 	}
 
 	def saveOrUpdate(memberNote: MemberNote) = session.saveOrUpdate(memberNote)
+
+	def delete(memberNote: MemberNote) = session.delete(memberNote)
 }
