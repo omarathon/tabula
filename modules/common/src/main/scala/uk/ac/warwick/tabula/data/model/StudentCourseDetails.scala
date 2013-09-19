@@ -12,9 +12,9 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import scala.collection.JavaConverters._
 import javax.persistence.Entity
 import javax.persistence.CascadeType
+import scala.collection.JavaConverters._
 
 @Entity
 class StudentCourseDetails
@@ -50,6 +50,14 @@ class StudentCourseDetails
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
 	var moduleRegistrations: JList[ModuleRegistration] = JArrayList()
+
+	def registeredModules(year: AcademicYear): Seq[Module] =
+		moduleRegistrations.asScala.filter(_.academicYear == year).map(_.module)
+
+	def registeredModulesAnyYear = moduleRegistrations.asScala.map(_.module)
+
+	def moduleRegistrationsByYear(year: AcademicYear) =
+		moduleRegistrations.asScala.filter(_.academicYear == year)
 
 	def toStringProps = Seq(
 		"scjCode" -> scjCode,

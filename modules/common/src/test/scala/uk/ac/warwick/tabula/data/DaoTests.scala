@@ -27,17 +27,19 @@ class DaoTests extends PersistenceTestBase with Logging {
 		group.staticIncludeUsers.add("1112939")
 		val module = new Module()
 		module.code="en107"
-		
+
 		val upAssessGroup = new UpstreamAssessmentGroup()
 		upAssessGroup.moduleCode = "EN107-15"
 		upAssessGroup.members = group
-		
+
 		session.saveOrUpdate(group)
 		session.saveOrUpdate(module)
 		session.saveOrUpdate(upAssessGroup)
-		
-	  val modules = memberDao.getRegisteredModules("1112939")
+
+		memberDao.getByUniversityId("1112939")
+
+		val modules = memberDao.getByUniversityId("1112939").toSeq.flatMap(_.registeredModulesAnyYear)
 	  modules.size should be (1)
-	  modules.head.code should be ("en107")
+		modules.head.code should be ("en107")
 	}
 }

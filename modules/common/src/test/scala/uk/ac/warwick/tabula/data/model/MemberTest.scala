@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.services.RelationshipServiceImpl
+import uk.ac.warwick.tabula.AcademicYear
 
 class MemberTest extends PersistenceTestBase with Mockito {
 
@@ -23,18 +24,9 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		val extDept = new Department
 		extDept.code = "pi"
 
-		// mock profile service to fetch list of registered modules (from these depts)
-		val mod1 = new Module
-		val mod2 = new Module
-		mod1.department = extDept
-		mod2.department = homeDept
-		member.profileService = mock[ProfileService]
-		member.profileService.getRegisteredModules(member.universityId) returns (Seq(mod1, mod2))
-
 		// set home department and test
 		member.homeDepartment = homeDept
 		member.affiliatedDepartments should be (Stream(homeDept))
-		member.touchedDepartments should be (Stream(homeDept, extDept))
 
 		// set course department and test
 		// create their course department
@@ -48,8 +40,19 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		member.studentCourseDetails.add(studentCourseDetails)
 
+		// add module registrations
+		val mod1 = new Module
+		val mod2 = new Module
+		mod1.department = extDept
+		mod2.department = homeDept
+		val modReg1 = new ModuleRegistration(studentCourseDetails, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012))
+		val modReg2 = new ModuleRegistration(studentCourseDetails, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013))
+		studentCourseDetails.moduleRegistrations.add(modReg1)
+		studentCourseDetails.moduleRegistrations.add(modReg2)
 
 		member.mostSignificantCourseDetails.get.department = courseDept
+
+		// now test that the member is attached to the right departments
 		member.affiliatedDepartments should be (Stream(homeDept, courseDept))
 		member.touchedDepartments should be (Stream(homeDept, courseDept, extDept))
 
@@ -69,6 +72,42 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		member.affiliatedDepartments should be (Stream(homeDept, courseDept))
 		member.touchedDepartments should be (Stream(homeDept, courseDept, extDept))
+	}
+
+	@Test def testModuleRegistrations {
+		val member = new StudentMember
+		member.universityId = "01234567"
+
+		// create a student course details with module registrations
+		val scd1 = new StudentCourseDetails(member, "2222222/2")
+		member.studentCourseDetails.add(scd1)
+
+		val mod1 = new Module
+		val mod2 = new Module
+		val modReg1 = new ModuleRegistration(scd1, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012))
+		val modReg2 = new ModuleRegistration(scd1, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013))
+		scd1.moduleRegistrations.add(modReg1)
+		scd1.moduleRegistrations.add(modReg2)
+
+		member.registeredModules(AcademicYear(2013)) should be (Stream(mod2))
+		member.registeredModulesAnyYear should be (Stream(mod1, mod2))
+
+		// create another student course details with module registrations
+		val scd2 = new StudentCourseDetails(member, "2222222/3")
+		member.studentCourseDetails.add(scd2)
+
+		val mod3 = new Module
+		val mod4 = new Module
+		val modReg3 = new ModuleRegistration(scd2, mod3, new java.math.BigDecimal("12.0"), AcademicYear(2012))
+		val modReg4 = new ModuleRegistration(scd2, mod4, new java.math.BigDecimal("12.0"), AcademicYear(2013))
+		scd2.moduleRegistrations.add(modReg3)
+		scd2.moduleRegistrations.add(modReg4)
+
+		member.registeredModules(AcademicYear(2013)) should be (Stream(mod2, mod4))
+		member.registeredModulesAnyYear should be (Stream(mod1, mod2, mod3, mod4))
+
+		member.moduleRegistrations should be (Stream(modReg1, modReg2, modReg3, modReg4))
+		member.moduleRegistrationsByYear(AcademicYear(2012)) should be (Stream(modReg1, modReg3))
 	}
 
 	@Test def nullUsers {
@@ -144,7 +183,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		val staff = new StaffMember
 		staff.profileService = profileService
 		staff.relationshipService = relationshipService
-		
+
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
 		relationshipService.listStudentRelationshipsWithMember(relationshipType, staff) returns (Seq())

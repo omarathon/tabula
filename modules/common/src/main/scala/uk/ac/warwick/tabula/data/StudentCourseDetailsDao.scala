@@ -4,6 +4,7 @@ import scala.collection.JavaConversions._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.AcademicYear
 
 trait StudentCourseDetailsDaoComponent {
 	val studentCourseDetailsDao: StudentCourseDetailsDao
@@ -59,5 +60,4 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 			.add(is("route.code", route.code))
 			.seq
 	}
-
 }

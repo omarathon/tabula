@@ -28,7 +28,7 @@ trait MemberDao {
 	def getStudentRelationshipTypeByUrlPart(urlPart: String): Option[StudentRelationshipType]
 	def saveOrUpdate(relationshipType: StudentRelationshipType)
 	def delete(relationshipType: StudentRelationshipType)
-	
+
 	def saveOrUpdate(member: Member)
 	def delete(member: Member)
 	def saveOrUpdate(rel: StudentRelationship)
@@ -38,7 +38,6 @@ trait MemberDao {
 	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
-	def getRegisteredModules(universityId: String): Seq[Module]
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
@@ -55,21 +54,21 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	import Restrictions._
 	import Order._
 
-	def allStudentRelationshipTypes: Seq[StudentRelationshipType] = 
+	def allStudentRelationshipTypes: Seq[StudentRelationshipType] =
 		session.newCriteria[StudentRelationshipType]
 			.addOrder(Order.asc("sortOrder"))
 			.addOrder(Order.asc("id"))
 			.seq
-	
+
 	def getStudentRelationshipTypeById(id: String) = getById[StudentRelationshipType](id)
-	def getStudentRelationshipTypeByUrlPart(urlPart: String) = 
+	def getStudentRelationshipTypeByUrlPart(urlPart: String) =
 		session.newCriteria[StudentRelationshipType]
 			.add(is("urlPart", urlPart))
 			.uniqueResult
-	
+
 	def saveOrUpdate(relationshipType: StudentRelationshipType) = session.saveOrUpdate(relationshipType)
 	def delete(relationshipType: StudentRelationshipType) = session.delete(relationshipType)
-	
+
 	def saveOrUpdate(member: Member) = member match {
 		case ignore: RuntimeMember => // shouldn't ever get here, but making sure
 		case _ => session.saveOrUpdate(member)
@@ -129,16 +128,6 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def listUpdatedSince(startDate: DateTime, max: Int) =
 		session.newCriteria[Member].add(gt("lastUpdatedDate", startDate)).setMaxResults(max).addOrder(asc("lastUpdatedDate")).list
-
-	def getRegisteredModules(universityId: String): Seq[Module] =
-		session.newQuery[Module]("""
-				 select distinct m from Module m where code in
-				(select distinct substring(lower(uag.moduleCode),1,5)
-					from UpstreamAssessmentGroup uag
-				  where :universityId in elements(uag.members.staticIncludeUsers))
-				""")
-					.setString("universityId", universityId)
-					.seq
 
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
@@ -218,11 +207,11 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				scd.sprStatus.code not like 'P%'
 			and
 				scd.sprCode not in (
-					select 
-						sr.targetSprCode 
-					from 
-						StudentRelationship sr 
-					where 
+					select
+						sr.targetSprCode
+					from
+						StudentRelationship sr
+					where
 						sr.relationshipType = :relationshipType
 					and
 						(sr.endDate is null or sr.endDate >= SYSDATE)

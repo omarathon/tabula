@@ -5,6 +5,8 @@ import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.services.RelationshipServiceImpl
+import uk.ac.warwick.tabula.AcademicYear
+import scala.collection.JavaConverters._
 
 class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
@@ -20,7 +22,7 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
 		student.studentCourseDetails.add(studentCourseDetails)
 		student.profileService = profileService
-		
+
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
 		profileService.getStudentBySprCode("0205225/1") returns (Some(student))
@@ -42,6 +44,30 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 		profileService.getMemberByUniversityId("0672089") returns (Some(staff))
 
 		student.studentCourseDetails.get(0).relationships(relationshipType) map { _.agentParsed } should be (Seq(staff))
+	}
+
+	@Test def testModuleRegistrations {
+		val member = new StudentMember
+		member.universityId = "01234567"
+
+		// create a student course details with module registrations
+		val scd1 = new StudentCourseDetails(member, "2222222/2")
+		member.studentCourseDetails.add(scd1)
+
+		val mod1 = new Module
+		val mod2 = new Module
+		val modReg1 = new ModuleRegistration(scd1, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012))
+		val modReg2 = new ModuleRegistration(scd1, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013))
+
+		scd1.moduleRegistrations.add(modReg1)
+		scd1.moduleRegistrations.add(modReg2)
+
+		scd1.registeredModules(AcademicYear(2013)) should be (Stream(mod2))
+		scd1.registeredModulesAnyYear should be (Stream(mod1, mod2))
+
+		scd1.moduleRegistrations.asScala should be (Stream(modReg1, modReg2))
+		scd1.moduleRegistrationsByYear(AcademicYear(2012)) should be (Stream(modReg1))
+
 	}
 
 }

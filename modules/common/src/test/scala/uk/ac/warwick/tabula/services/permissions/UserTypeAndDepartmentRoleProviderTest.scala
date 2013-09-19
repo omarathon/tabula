@@ -29,7 +29,6 @@ class UserTypeAndDepartmentRoleProviderTest extends TestBase with Mockito {
 		member.profileService = profileService
 
 		profileService.getAllMembersWithUserId("cuscav", true) returns (Seq(member))
-		profileService.getRegisteredModules("0123456") returns (Seq())
 
 		provider.getRolesFor(currentUser) should be (Seq(UniversityMemberRole(member), StudentRole(dept1), StudentRole(dept3)))
 	}
@@ -61,7 +60,6 @@ class UserTypeAndDepartmentRoleProviderTest extends TestBase with Mockito {
 		val member2 = Fixtures.staff(department=dept2)
 
 		profileService.getAllMembersWithUserId("cuscav", true) returns (Seq(member1, member2))
-		profileService.getRegisteredModules("0123456") returns (Seq())
 
 		provider.getRolesFor(currentUser) should be (Seq(UniversityMemberRole(member1), StudentRole(dept1), StudentRole(dept3), UniversityMemberRole(member2), StaffRole(dept2)))
 	}
