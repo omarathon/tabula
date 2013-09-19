@@ -1,8 +1,12 @@
 <#ftl strip_text=true />
 <#escape x as x?html>
 
-<#macro module_name module>
-	<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
+<#macro module_name module withFormatting=true>
+	<#if withFormatting>
+		<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
+	<#else>
+		${module.code?upper_case} ${module.name}
+	</#if>
 </#macro>
 
 <#macro assignment_name assignment>

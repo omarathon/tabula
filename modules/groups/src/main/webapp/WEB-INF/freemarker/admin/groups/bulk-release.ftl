@@ -44,7 +44,7 @@
                 </td>
                 <td>
                     <span class="${module.hasUnreleasedGroupSets?string('','muted')}">
-                        ${module.code} - ${module.name}
+                        <@fmt.module_name module false />
                     </span>
                 </td>
             </tr>
