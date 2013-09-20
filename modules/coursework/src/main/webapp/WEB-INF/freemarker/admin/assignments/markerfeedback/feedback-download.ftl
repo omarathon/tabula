@@ -21,7 +21,7 @@
 
 <#if  feedback.assignment.genericFeedback??>
 <div class="feedback-notes">
-<h3>General feedback on the assignment:</h3> ${assignment.genericFeedback!""}
+<h3>General feedback on the assignment:</h3> ${feedback.assignment.genericFeedback!""}
 </div>
 </#if>
 <#if feedback.defaultFeedbackComments??>
