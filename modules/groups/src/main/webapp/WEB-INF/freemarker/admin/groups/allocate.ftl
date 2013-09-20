@@ -5,7 +5,7 @@
 
 
 <#macro student_item student bindpath="">
-	<#assign profile = membersById[student.warwickId]!{} />
+	<#local profile = membersById[student.warwickId]!{} />
 	<li class="student well well-small"
 	data-f-gender="${(profile.gender.dbValue)!}"
 	data-f-route="${(profile.mostSignificantCourseDetails.route.code)!}"

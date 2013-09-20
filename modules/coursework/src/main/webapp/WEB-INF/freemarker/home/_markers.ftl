@@ -5,17 +5,17 @@
 	<#local numSubmissions = info.numSubmissions!0 />
 	<#assign time_remaining=durationFormatter(assignment.closeDate) />
 	<#if numSubmissions==0>
-		<#assign class="disabled use-tooltip" />
-		<#assign href="" />
-		<#assign title>
+		<#local class="disabled use-tooltip" />
+		<#local href="" />
+		<#local title>
 			You'll be able to download submissions for marking when an administrator releases them.
-		</#assign>
+		</#local>
 	<#else>
-		<#assign class="" />
-		<#assign title="" />
-		<#assign href>
+		<#local class="" />
+		<#local title="" />
+		<#local href>
 			<@routes.listmarkersubmissions assignment=assignment />
-		</#assign>
+		</#local>
 	</#if>
 	<#if assignment.closed>
 		<div class="alert alert-success deadline">

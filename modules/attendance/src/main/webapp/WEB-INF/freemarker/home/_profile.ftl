@@ -13,7 +13,7 @@
 						${point.name} (<@fmt.weekRanges point />)
 					</div>
 					<div class="span2 state">
-						<#assign checkpointState = (command.checkpointState[point.id]?string("true", "false"))!"null" />
+						<#local checkpointState = (command.checkpointState[point.id]?string("true", "false"))!"null" />
 						<#if checkpointState == "null">
 
 						<#elseif checkpointState == "true">
@@ -24,9 +24,9 @@
 					</div>
 					<div class="span2">
 						<#if can_record>
-							<#assign returnTo>
+							<#local returnTo>
 								<@routes.profile command.studentCourseDetails.student />
-							</#assign>
+							</#local>
 							<a href="<@url page="/${point.pointSet.route.department.code}/${point.id}/record?returnTo=${returnTo}"/>#student-${command.studentCourseDetails.student.universityId}"
 								<#if point.sentToAcademicOffice>
 									class="btn btn-mini disabled" title="Monitoring information for this point has been submitted and can no longer be edited"

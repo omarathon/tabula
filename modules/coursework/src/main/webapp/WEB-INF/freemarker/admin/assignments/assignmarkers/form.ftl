@@ -34,7 +34,7 @@
 		<div class="${class} span8">
 			<h3>${name}</h3>
 			<#list markerList as marker>
-				<#assign existingStudents = marker.students />
+				<#local existingStudents = marker.students />
 				<div class="marker drag-target">
 					<span class="name">${marker.fullName}</span>
 					<span class="drag-count badge badge-info">${existingStudents?size}</span>

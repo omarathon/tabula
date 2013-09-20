@@ -102,7 +102,7 @@
 <#macro user_list_csv ids>
 <@userlookup ids=ids>
 	<#list returned_users?keys?sort as id>
-		<#assign returned_user=returned_users[id] />
+		<#local returned_user=returned_users[id] />
 		<#if returned_user.foundUser>
 			${returned_user.fullName}<#if id_has_next>,</#if>
 		<#else>
@@ -138,31 +138,31 @@
 <#macro download_attachments attachments page context="" zipFilename="download">
 	<#if !page?ends_with("/")>
 		<#-- ensure page is slash-terminated -->
-		<#assign page = page + "/" />
+		<#local page = page + "/" />
 	</#if>
 
 	<#if !attachments?is_enumerable>
 		<#-- assume it's a FileAttachment -->
-		<#assign attachment = attachments />
+		<#local attachment = attachments />
 	<#elseif attachments?size == 1>
 		<#-- take the first and continue as above -->
-		<#assign attachment = attachments?first />
+		<#local attachment = attachments?first />
 	</#if>
 
 	<#if attachment??>
-		<#assign title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#assign>
+		<#local title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#local>
 		<div class="attachment">
 			<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
 		</div>
 	<#elseif attachments?size gt 1>
 		<details class="attachment">
 			<summary>
-				<#assign title>Download a zip file of attachments<#if context?has_content> ${context}</#if></#assign>
+				<#local title>Download a zip file of attachments<#if context?has_content> ${context}</#if></#local>
 				<@download_link filePath="${page}attachments/${zipFilename}.zip" mimeType="application/zip" title="${title}" text="Download files as zip" />
 			</summary>
 
 			<#list attachments as attachment>
-				<#assign title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#assign>
+				<#local title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#local>
 				<div class="attachment">
 					<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
 				</div>
@@ -266,10 +266,10 @@
 </#macro>
 
 <#macro bulk_email_students students title="Email these students" subject="">
-	<#assign emails = [] />
+	<#local emails = [] />
 	<#list students as student>
 		<#if student.email??>
-			<#assign emails = emails + [student.email] />
+			<#local emails = emails + [student.email] />
 		</#if>
 	</#list>
 	
@@ -277,10 +277,10 @@
 </#macro>
 
 <#macro bulk_email_student_relationships relationships title="Email these students" subject="">
-	<#assign emails = [] />
+	<#local emails = [] />
 	<#list relationships as rel>
 		<#if rel.studentMember?? && rel.studentMember.email??>
-			<#assign emails = emails + [rel.studentMember.email] />
+			<#local emails = emails + [rel.studentMember.email] />
 		</#if>
 	</#list>
 	
