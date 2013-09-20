@@ -10,6 +10,6 @@ final class AcademicYearUserType extends AbstractIntegerUserType[AcademicYear] {
 	def convertToObject(input: JInteger) = new AcademicYear(input)
 	def convertToValue(year: AcademicYear) = year.startYear
 
-	val nullValue = 0: JInteger
+	val nullValue = null: JInteger
 	val nullObject = null
 }

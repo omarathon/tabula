@@ -8,6 +8,8 @@ import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupC
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, StudentCourseDetails, Gender, StudentMember}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
+import uk.ac.warwick.tabula.AcademicYear
+import org.joda.time.DateTime
 
 class StudentMemberFixtureCommand extends CommandInternal[Unit] with Logging {
 	this: UserLookupComponent =>
@@ -56,7 +58,7 @@ class StudentMemberFixtureCommand extends CommandInternal[Unit] with Logging {
 			if (route.isDefined) scd.route = route.get
 			if (course.isDefined) scd.course = course.get
 			if (dept.isDefined)  scd.department = dept.get
-			val yd = new StudentCourseYearDetails(scd, 1)
+			val yd = new StudentCourseYearDetails(scd, 1, AcademicYear.guessByDate(DateTime.now))
 			yd.yearOfStudy = yearOfStudy
 
 			scd.attachStudentCourseYearDetails(yd)
