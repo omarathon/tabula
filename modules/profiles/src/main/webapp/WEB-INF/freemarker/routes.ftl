@@ -55,4 +55,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro relationship_search_json><@url page="/relationships/agents/search.json" /></#macro>
 
 <#macro smallgroup group><@url page="/groups/${group.id}/view" /></#macro>
+
 <#macro create_member_note profile><@url page="/${profile.universityId}/note/add" /></#macro>
+<#macro edit_member_note memberNote><@url page="/${memberNote.member.universityId}/note/${memberNote.id}/edit" /></#macro>
+<#macro delete_member_note memberNote ><@url page="/${memberNote.member.universityId}/note/${memberNote.id}/delete" /></#macro>
+<#macro restore_member_note memberNote ><@url page="/${memberNote.member.universityId}/note/${memberNote.id}/restore" /></#macro>
+<#macro purge_member_note memberNote ><@url page="/${memberNote.member.universityId}/note/${memberNote.id}/purge" /></#macro>

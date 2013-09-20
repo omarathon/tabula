@@ -174,7 +174,7 @@
 
 
 				<#if features.profilesMemberNotes>
-					<li id="membernote-pane"">
+					<li id="membernote-pane">
 						<#include "_member_notes.ftl" />
 					</li>
 				</#if>
@@ -194,7 +194,17 @@
 				</#if>
 			</ol>
 
-			<div id="note-modal" class="modal hide fade" style="display:none;"></div>
+			<div id="note-modal" class="modal hide fade" style="display:none;">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h3>Create new note for ${profile.fullName}</h3>
+				</div>
+				<div style="height: 350px; overflow-y: hidden;" class="modal-body"></div>
+
+				<div class="modal-footer">
+					<input id="member-note-save" type="submit" class="btn btn-primary" value="Save">
+				</div>
+			</div>
 			<div id="modal" class="modal hide fade" style="display:none;"></div>
 
 				<div id="modal-change-agent" class="modal hide fade"></div>
@@ -213,17 +223,74 @@
 				</script>
 
 			<script type="text/javascript">
-				jQuery(function($){
-				// load edit member note
-					$(".membernote").on("click", ".membernote_create", function(e) {
-						e.preventDefault();
-						var url = $(this).attr('href');
-						$("#note-modal").load(url,function(){
-							$("#note-modal").modal('show');
+
+
+				var noteFrameLoad = function(frame){
+					if(jQuery(frame).contents().find("form").length == 0){
+						jQuery("#note-modal").modal('hide');
+						document.location.reload(true);
+					} else {
+						//Bind iframe form submission to modal button
+						jQuery("#member-note-save").on('click', function(e){
+							e.preventDefault();
+							jQuery("#note-modal .modal-body").find('iframe').contents().find('form').submit();
+							jQuery(this).off()  //remove click event to prevent bindings from building up
 						});
+					}
+				}
+
+				jQuery(function($){
+				// load creat-edit member note
+					$("#membernote-details").on("click", ".membernote_create, .edit", function(e) {
+						if ($(this).hasClass("disabled")) return false;
+						var url = $(this).attr('data-url');
+						$("#note-modal .modal-body").html('<iframe src="'+url+'" style="height:100%; width:100%;" onLoad="noteFrameLoad(this)" frameBorder="0" scrolling="no"></iframe>')
+						$("#note-modal").modal('show');
+						return false;
 					});
 				});
+
+
 			</script>
+
+			<script>
+				jQuery(function($){
+
+					$('.member-note-toolbar a:not(.edit)').on('click', function(e) {
+
+						var $this = $(this);
+						var $details = $this.closest('details');
+						var $toolbaritems = $this.closest('.member-note-toolbar').children();
+
+						if($this.hasClass("disabled")) return false;
+
+						$details.addClass("processing");
+						var url = $this.attr("href");
+
+						$.post(url, function() {
+							if($this.hasClass('delete') || $this.hasClass('restore')) {
+								$toolbaritems.toggleClass("disabled");
+								$details.toggleClass("muted deleted");
+								$details.find('.deleted-files').toggleClass('hidden')
+							}
+
+							if($this.hasClass('purge')) { $details.slideUp("slow") }
+
+							$details.removeClass("processing");
+						});
+
+
+						return false;
+					});
+
+				});
+
+
+
+			</script>
+
+
+
 		</div>
 
 

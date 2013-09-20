@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.profiles.commands.RestoreMemberNoteCommand
 import uk.ac.warwick.tabula.web.controllers.BaseController
 
 @Controller
-@RequestMapping(value = Array("/{member}/note{note}/restore"))
+@RequestMapping(value = Array("/{member}/note/{note}/restore"))
 class RestoreMemberNoteController extends BaseController {
 
 	@ModelAttribute("command")

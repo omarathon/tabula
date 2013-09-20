@@ -9,7 +9,7 @@ import org.springframework.validation.Errors
 import javax.validation.Valid
 
 @Controller
-@RequestMapping(value = Array("/{member}/note{note}/purge"))
+@RequestMapping(value = Array("/{member}/note/{note}/purge"))
 class PurgeMemberNoteController extends BaseController {
 
 @ModelAttribute("command")

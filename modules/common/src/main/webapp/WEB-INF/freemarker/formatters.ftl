@@ -135,10 +135,10 @@
 
 	<#if !attachments?is_enumerable>
 		<#-- assume it's a FileAttachment -->
-		<#assign attachment = attachments />
+		<#local attachment = attachments />
 	<#elseif attachments?size == 1>
 		<#-- take the first and continue as above -->
-		<#assign attachment = attachments?first />
+		<#local attachment = attachments?first />
 	</#if>
 
 	<#if attachment??>

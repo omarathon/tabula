@@ -17,7 +17,7 @@ class EditMemberNoteController extends BaseController {
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: EditMemberNoteCommand) = {
-		Mav("membernote/edit_form").noLayoutIf(ajax)
+		Mav("membernote/edit_form").noNavigation()
 
 	}
 
@@ -27,7 +27,7 @@ class EditMemberNoteController extends BaseController {
 			form(cmd)
 		} else {
 			cmd.apply()
-			Mav("membernote/edit_success").noLayoutIf(ajax)
+			Mav("membernote/edit_success").noNavigation()
 		}
 	}
 
