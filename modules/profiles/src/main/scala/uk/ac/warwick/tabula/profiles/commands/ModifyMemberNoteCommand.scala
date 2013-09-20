@@ -6,13 +6,16 @@ import uk.ac.warwick.tabula.commands.{UploadedFile, SelfValidating, Command}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.data.Transactions._
 import scala.collection.JavaConversions._
+import collection.JavaConverters._
 import org.joda.time.DateTime
 import org.springframework.validation.{Errors, BindingResult}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{MemberNoteService, ProfileService}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.data.Daoisms
 
-abstract class ModifyMemberNoteCommand(val member: Member, val submitter: CurrentUser) extends Command[MemberNote] with BindListener with SelfValidating   {
+abstract class ModifyMemberNoteCommand(val member: Member, val submitter: CurrentUser) extends Command[MemberNote] with BindListener with SelfValidating with Daoisms  {
 
 	var profileService = Wire[ProfileService]
 	var memberNoteService = Wire[MemberNoteService]
@@ -35,6 +38,13 @@ abstract class ModifyMemberNoteCommand(val member: Member, val submitter: Curren
 		creator = profileService.getMemberByUniversityId(submitter.universityId).getOrElse(null)
 
 		this.copyTo(memberNote)
+
+		if (memberNote.attachments != null) {
+			val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
+			val filesToRemove = memberNote.attachments.asScala -- filesToKeep
+			memberNote.attachments = JArrayList[FileAttachment](filesToKeep)
+			filesToRemove.foreach(session.delete(_))
+		}
 
 		if (!file.attached.isEmpty) {
 			for (attachment <- file.attached) {
