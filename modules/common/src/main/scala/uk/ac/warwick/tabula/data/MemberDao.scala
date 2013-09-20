@@ -118,13 +118,31 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def getByUserId(userId: String, disableFilter: Boolean = false) = getAllByUserId(userId, disableFilter).headOption
 
-	def listUpdatedSince(startDate: DateTime, department: Department, max: Int) =
-		session.newCriteria[Member]
-				.add(gt("lastUpdatedDate", startDate))
-				.add(is("homeDepartment", department))
-				.setMaxResults(max)
-				.addOrder(asc("lastUpdatedDate"))
-				.list
+	def listUpdatedSince(startDate: DateTime, department: Department, max: Int) = {
+		val homeDepartmentMatches = session.newCriteria[Member]
+			.add(gt("lastUpdatedDate", startDate))
+			.add(is("homeDepartment", department))
+			.setMaxResults(max)
+			.addOrder(asc("lastUpdatedDate"))
+			.list
+		val courseMatches = session.newQuery[StudentMember]( """
+                       select distinct student
+                       from
+                               StudentCourseDetails scd
+                       where
+                               scd.department = :department
+        and scd.student.lastUpdatedDate = :lastUpdated
+                       and
+                               scd.sprStatus.code not like 'P%'
+                       order by lastUpdatedDate asc """)
+			.setEntity("department", department)
+			.setParameter("lastUpdated", startDate).seq
+
+		// do not remove; import needed for sorting
+		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+		(homeDepartmentMatches ++ courseMatches).distinct.sortBy(_.lastUpdatedDate)
+	}
+
 
 	def listUpdatedSince(startDate: DateTime, max: Int) =
 		session.newCriteria[Member].add(gt("lastUpdatedDate", startDate)).setMaxResults(max).addOrder(asc("lastUpdatedDate")).list
