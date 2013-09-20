@@ -62,12 +62,12 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 
 		logger.debug("Importing student course details for " + studentCourseDetails.scjCode + ", " + sceSequenceNumber)
 
+		val commandBean = new BeanWrapperImpl(this)
+
 		val (isTransient, studentCourseYearDetails) = studentCourseYearDetailsExisting match {
 			case Some(studentCourseYearDetails: StudentCourseYearDetails) => (false, studentCourseYearDetails)
-			case _ => (true, new StudentCourseYearDetails(studentCourseDetails, sceSequenceNumber))
+			case _ => (true, new StudentCourseYearDetails(studentCourseDetails, sceSequenceNumber,AcademicYear.parse(academicYearString)))
 		}
-
-		val commandBean = new BeanWrapperImpl(this)
 		val studentCourseYearDetailsBean = new BeanWrapperImpl(studentCourseYearDetails)
 
 		moduleRegistrationStatus = ModuleRegistrationStatus.fromCode(moduleRegistrationStatusCode)
