@@ -181,11 +181,18 @@ object Fixtures {
 		point
 	}
 
-	def memberNote(note: String, student: Member, id: String ) = {
+	def memberNoteWithId(note: String, student: Member, id: String ) = {
 		val memberNote = new MemberNote
 		memberNote.note = note
 		memberNote.member = student
 		memberNote.id = id
+		memberNote
+	}
+
+	def memberNote(note: String, student: Member ) = {
+		val memberNote = new MemberNote
+		memberNote.note = note
+		memberNote.member = student
 		memberNote
 	}
 }
