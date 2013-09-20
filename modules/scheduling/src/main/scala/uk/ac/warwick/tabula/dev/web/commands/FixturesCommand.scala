@@ -13,10 +13,13 @@ import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.data.model.{Department, Route}
+import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroup, UpstreamAssignment, Department, Route}
 import uk.ac.warwick.tabula.roles.StudentRelationshipAgentRoleDefinition
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
+import uk.ac.warwick.tabula.AcademicYear
+import org.joda.time.DateTime
+import org.hibernate.criterion.Restrictions
 
 /** This command is intentionally Public. It only exists on dev and is designed,
   * in essence, to blitz a department and set up some sample data in it.
@@ -64,6 +67,21 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		cmd.usercodes.clear()
 		cmd.usercodes.add(Fixtures.TestAdmin1)
 		cmd.apply()
+
+		val upstreamAssignment = new UpstreamAssignment
+		upstreamAssignment.assessmentGroup = "A"
+		upstreamAssignment.departmentCode = "XXX"
+		upstreamAssignment.sequence = "A"
+		upstreamAssignment.moduleCode = "XXX101-30"
+		upstreamAssignment.name = "Assignment from SITS"
+		session.save(upstreamAssignment)
+
+		val upstreamAssessmentGroup = new UpstreamAssessmentGroup
+		upstreamAssessmentGroup.academicYear = new AcademicYear(new DateTime().getYear)
+		upstreamAssessmentGroup.moduleCode = "XXX101-30"
+		upstreamAssessmentGroup.assessmentGroup = "A"
+		upstreamAssessmentGroup.occurrence = "A"
+		session.save(upstreamAssessmentGroup)
 	}
 
 	private def setupDepartmentAndModules() {
@@ -82,23 +100,34 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				for (markingWorkflow <- dept.markingWorkflows) session.delete(markingWorkflow)
 				dept.markingWorkflows.clear()
 
-				for (route<-routes) session.delete(route)
+				for (route <- routes) session.delete(route)
 				dept.routes.clear()
 
-			  for (scd<-scds) session.delete(scd)
-			  for (sub<-recursivelyGetChildren(dept,Nil)) {session.delete(sub)}
+			  for (scd <- scds) session.delete(scd)
+			  for (sub <- recursivelyGetChildren(dept)) session.delete(sub)
 				session.delete(dept)
 			}
 		}
-		def recursivelyGetChildren(department:Department, gotSoFar:Seq[Department]):Seq[Department] = {
-			val descendents = for (child<-department.children) yield recursivelyGetChildren(child, Nil)
-			descendents.flatten ++ department.children
+		def recursivelyGetChildren(department:Department): Seq[Department] = {
+			val descendents = department.children flatMap { recursivelyGetChildren(_) }
+			descendents ++ department.children
 		}
 
 		val department = newDepartmentFrom(Fixtures.TestDepartment,departmentDao)
 
 		// make sure we can see names, as uni ids are not exposed in the fixtures
 		department.showStudentName = true
+		transactional() {
+			session.newCriteria[UpstreamAssignment]
+				.add(Restrictions.in("departmentCode", JList("xxx","XXX")))
+				.list
+				.foreach { ua => session.delete(ua); }
+
+			session.newCriteria[UpstreamAssessmentGroup]
+				.add(Restrictions.like("moduleCode", "XXX%"))
+				.seq
+				.foreach { uag => session.delete(uag); }
+		}
 
 		// Import a new, better department
 		transactional() {

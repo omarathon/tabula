@@ -12,8 +12,8 @@ class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures 
 		
 		checkbox("showStudentName").select()
 		
-		submit()
-		
+		cssSelector("div.submit-buttons input.btn-primary").webElement.click()
+
 		// Ensure that we've been redirected back to the dept admin page
 		currentUrl should endWith ("/department/xxx/")
 		
@@ -57,9 +57,11 @@ class CourseworkDisplaySettingsTest extends BrowserTest with CourseworkFixtures 
 		}}
 
 	def openDisplaySettings() = {
+		eventually {
+			find(cssSelector(".dept-settings a.dropdown-toggle")) should be('defined)
+		}
 		click on (cssSelector(".dept-settings a.dropdown-toggle"))
-
-		val displayLink = cssSelector(".dept-settings .dropdown-menu").webElement.findElement(By.partialLinkText(" Settings"))
+		val displayLink = cssSelector(".dept-settings .dropdown-menu").webElement.findElement(By.partialLinkText("Settings"))
 		eventually {
 			displayLink.isDisplayed should be (true)
 		}

@@ -65,7 +65,7 @@
 						data-target="#modal-change-agent"
 						data-scj="${studentCourseDetails.scjCode}"
 						>
-						<i class="icon-edit"></i
+						<i class="icon-edit"></i>
 						</a>
 					</#if>
 				<#else>

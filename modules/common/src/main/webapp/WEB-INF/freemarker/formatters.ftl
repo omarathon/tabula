@@ -1,8 +1,12 @@
 <#ftl strip_text=true />
 <#escape x as x?html>
 
-<#macro module_name module>
-	<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
+<#macro module_name module withFormatting=true>
+	<#if withFormatting>
+		<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
+	<#else>
+		${module.code?upper_case} ${module.name}
+	</#if>
 </#macro>
 
 <#macro assignment_name assignment>
@@ -21,6 +25,10 @@
 	<a href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/list' />">
 		<span class="ass-name">${assignment.name}</span>
 	</a>
+</#macro>
+
+<#macro route_name route>
+	${route.code?upper_case} ${route.name}
 </#macro>
 
 <#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true><#--
@@ -247,6 +255,36 @@
 
 	<#if classes??><#local class>class='${classes}'</#local></#if>
 	<${type} ${href} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
+</#macro>
+
+<#macro bulk_email emails title subject>
+	<#if emails?size gt 0 && emails?size lte 50>
+		<a href="mailto:<#list emails as email>${email}<#if email_has_next>,</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>" class="btn">
+			<i class="icon-envelope"></i> ${title}
+		</a>
+	</#if>
+</#macro>
+
+<#macro bulk_email_students students title="Email these students" subject="">
+	<#assign emails = [] />
+	<#list students as student>
+		<#if student.email??>
+			<#assign emails = emails + [student.email] />
+		</#if>
+	</#list>
+	
+	<@bulk_email emails title subject />
+</#macro>
+
+<#macro bulk_email_student_relationships relationships title="Email these students" subject="">
+	<#assign emails = [] />
+	<#list relationships as rel>
+		<#if rel.studentMember?? && rel.studentMember.email??>
+			<#assign emails = emails + [rel.studentMember.email] />
+		</#if>
+	</#list>
+	
+	<@bulk_email emails title subject />
 </#macro>
 
 </#escape>

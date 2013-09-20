@@ -17,7 +17,7 @@
     <@f.form method="post" action="${submitAction}" commandName="openGroupSetCommand" cssClass="form-horizonatal form-tiny" style="margin-bottom:0">
 
     <div class="modal-body">
-        <p>${setState} ${smallGroupSet.name} ${smallGroupSet.format.description} for ${smallGroupSet.module.code} for self sign-up.
+        <p>${setState} ${smallGroupSet.name} ${smallGroupSet.format.description} for ${smallGroupSet.module.code?upper_case} for self sign-up.
         <#if setState == "Open"> Students will be notified via email that they can now sign up for these groups in tabula.</#if>
         </p>
     </div>

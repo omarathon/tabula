@@ -4,7 +4,7 @@
 
 <@form.labelled_row "defaultValue" "Default value">
 	<@f.select path="defaultValue">
-		<@f.option value="true">Passed</@f.option>
+		<@f.option value="true">Attended</@f.option>
 		<@f.option value="false">Missed</@f.option>
 	</@f.select>
 </@form.labelled_row>

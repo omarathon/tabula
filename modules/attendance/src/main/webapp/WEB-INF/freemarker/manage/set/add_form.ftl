@@ -44,8 +44,8 @@
 								<#list command.availableRoutes as route>
 									<#assign availableYearsForRoute = command.availableYears[route.code]/>
 									<tr>
-										<td class="ellipsis" title="${route.code?upper_case} ${route.name}">
-											${route.code?upper_case} ${route.name}
+										<td class="ellipsis" title="<@fmt.route_name route />">
+											<@fmt.route_name route />
 										</td>
 										<#list yearList as year>
 											<#assign checked = ""/>
