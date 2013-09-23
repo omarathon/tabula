@@ -8,7 +8,7 @@
 		</@form.labelled_row>
 
 		<@form.labelled_row "note" "Note">
-			<@f.textarea path="note" cssClass="input-block-level" rows="5" />
+			<@f.textarea path="note" cssClass="input-block-level" rows="5" cssStyle="height: 150px;" />
 		</@form.labelled_row>
 
 		<#assign fileTypes=command.attachmentTypes />

@@ -86,7 +86,7 @@ class ViewProfileController extends ProfilesController {
 		val numSmallGroups = smallGroupService.findSmallGroupsByStudent(profiledStudentMember.asSsoUser).size
 
 		//Get all membernotes for student
-		val memberNotes = memberNoteService.list(member)
+		val memberNotes = if(isSelf) memberNoteService.listNonDeleted(member) else memberNoteService.list(member)
 
 		Mav("profile/view",
 			"profile" -> profiledStudentMember,

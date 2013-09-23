@@ -13,7 +13,7 @@
 		<#macro member_note_list memberNotes>
 
 
-			<a style="float: right; text-decoration: none; margin-left: 5px; display: block;" class="btn-like membernote_create" data-toggle="modal" data-target="#note-modal" href="#note-modal" data-url="<@routes.create_member_note profile/>" title="Create a new student note"><i class="icon-edit"></i> New administrative note</a>
+			<a style="float: right; text-decoration: none; margin-left: 5px; display: block;" class="btn-like create" data-toggle="modal" data-target="#note-modal" href="#note-modal" data-url="<@routes.create_member_note profile/>" title="Create a new student note"><i class="icon-edit"></i> New administrative note</a>
 			<a style="float: right; cursor: pointer;" class="toggle-all-details btn-like open-all-details" title="Expand all notes"><i class="icon-plus"></i> Expand all</a>
 			<a style="float: right; cursor: pointer;" class="toggle-all-details btn-like close-all-details hide" title="Collapse all notes"><i class="icon-minus"></i> Collapse all</a>
 
@@ -33,7 +33,7 @@
 
 				<details class="${deleted}" style="margin: 10px 0 10px 0;">
 					<summary style="border-bottom: dotted 1px #dcdcdd;">
-						<div style="display: inline-block; width: 95%; margin-bottom: -7px;">
+						<div style="display: inline-block; width: 94%; margin-bottom: -7px;">
 
 							<div class="member-note-toolbar" style="display: inline-block; float: right; width: 65px;">
 								<a data-toggle="modal" data-target="#note-modal" href="#note-modal" data-url="<@routes.edit_member_note note />" class="btn-like edit${nonDeleteTools}" title="Edit note"><i class="icon-edit" ></i></a>
@@ -44,7 +44,7 @@
 							</div>
 
 							<div style="display: table-row">
-								<div class="date" style="display: table-cell; vertical-align: bottom; width: 140px; font-weight: bold;"><@fmt.date date=note.creationDate includeTime=false shortMonth=true /><div style="clear: both;"></div></div>
+								<div class="date" style="display: table-cell; vertical-align: bottom; width: 10em; font-weight: bold;"><@fmt.date date=note.creationDate includeTime=false shortMonth=true /><div style="clear: both;"></div></div>
 								<div class="title" style="display: table-cell; font-weight: bold; padding-right: 5px;">${note.title!} <#if attachments><i class="icon-paper-clip"></i></#if></div>
 							</div>
 
@@ -55,7 +55,7 @@
 					<div class="description" style="padding: 15px;">
 					<#if note.note??>
 
-							${note.note}
+							<#noescape>${note.escapedNote}</#noescape>
 
 					</#if>
 					 <#if attachments >

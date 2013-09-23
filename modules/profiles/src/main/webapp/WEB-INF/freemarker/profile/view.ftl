@@ -194,12 +194,12 @@
 				</#if>
 			</ol>
 
-			<div id="note-modal" class="modal hide fade" style="display:none;">
+			<div id="note-modal" class="modal hide fade">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h3>Create new note for ${profile.fullName}</h3>
+					<h3>Create note for ${profile.fullName}</h3>
 				</div>
-				<div style="height: 350px; overflow-y: hidden;" class="modal-body"></div>
+				<div class="modal-body"></div>
 
 				<div class="modal-footer">
 					<input id="member-note-save" type="submit" class="btn btn-primary" value="Save">
@@ -223,30 +223,50 @@
 				</script>
 
 			<script type="text/javascript">
-
-
 				var noteFrameLoad = function(frame){
+
 					if(jQuery(frame).contents().find("form").length == 0){
+
 						jQuery("#note-modal").modal('hide');
 						document.location.reload(true);
+
 					} else {
+
+						var $frame = jQuery(frame)
+						var frameHeight = $frame.contents().find("html").height();
+						var $modalBody = jQuery("#note-modal .modal-body")
+
+						$modalBody.height(frameHeight);
+						if(frameHeight < 400) {
+							$modalBody.css("overflow-y", "hidden")
+						} else {
+							$modalBody.css("overflow-y", "auto")
+				            $frame.height(frameHeight + 10)  //Work around for case of overflow where iframe html is 20px smaller than iframe window
+						}
+
 						//Bind iframe form submission to modal button
 						jQuery("#member-note-save").on('click', function(e){
 							e.preventDefault();
 							jQuery("#note-modal .modal-body").find('iframe').contents().find('form').submit();
 							jQuery(this).off()  //remove click event to prevent bindings from building up
 						});
+
+
 					}
 				}
 
+
 				jQuery(function($){
 				// load creat-edit member note
-					$("#membernote-details").on("click", ".membernote_create, .edit", function(e) {
+					$("#membernote-details").on("click", ".create, .edit", function(e) {
 						if ($(this).hasClass("disabled")) return false;
+
 						var url = $(this).attr('data-url');
-						$("#note-modal .modal-body").html('<iframe src="'+url+'" style="height:100%; width:100%;" onLoad="noteFrameLoad(this)" frameBorder="0" scrolling="no"></iframe>')
-						$("#note-modal").modal('show');
-						return false;
+						var $modalBody =  $("#note-modal .modal-body")
+
+						$modalBody.html('<iframe src="'+url+'" style="height:100%; width:100%;" onLoad="noteFrameLoad(this)" frameBorder="0" scrolling="no"></iframe>')
+						$("#note-modal").modal('show')
+						return false; //stop propagation and prevent default
 					});
 				});
 
@@ -269,12 +289,16 @@
 
 						$.post(url, function() {
 							if($this.hasClass('delete') || $this.hasClass('restore')) {
+
 								$toolbaritems.toggleClass("disabled");
 								$details.toggleClass("muted deleted");
 								$details.find('.deleted-files').toggleClass('hidden')
-							}
 
-							if($this.hasClass('purge')) { $details.slideUp("slow") }
+							} else if($this.hasClass('purge')) {
+
+								$details.slideUp("slow")
+
+							}
 
 							$details.removeClass("processing");
 						});

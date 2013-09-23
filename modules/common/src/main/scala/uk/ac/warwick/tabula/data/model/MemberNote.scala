@@ -7,15 +7,18 @@ import javax.persistence.FetchType._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 
 @Entity @AccessType("field")
-class MemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget {
+class MemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget with FormattedHtml {
 
 	@ManyToOne
 	@JoinColumn(name="memberid")
 	var member: Member =_
 
 	var note: String =_
+
+	def escapedNote: String = formattedHtml(note)
 
 	var title: String =_
 
