@@ -15,14 +15,14 @@ object MarkingState {
 	case object Received extends MarkingState("Received", Set ())
 	
 	// initial state - ready to be distributed to markers
-	case object ReleasedForMarking extends MarkingState("ReleasedForMarking", Set(DownloadedByMarker, MarkingCompleted))
+	case object ReleasedForMarking extends MarkingState("ReleasedForMarking", Set(InProgress, MarkingCompleted))
 	// has been downloaded by the marker and is being marked
-	case object DownloadedByMarker extends MarkingState("DownloadedByMarker", Set(MarkingCompleted))
+	case object InProgress extends MarkingState("InProgress", Set(MarkingCompleted))
 	// submission has been marked and feedback has been uploaded
 	case object MarkingCompleted extends MarkingState("MarkingCompleted", Set())
 	
 	
-	val values: Set[MarkingState] = Set(Received, ReleasedForMarking, DownloadedByMarker, MarkingCompleted)
+	val values: Set[MarkingState] = Set(Received, ReleasedForMarking, InProgress, MarkingCompleted)
 
 	def fromCode(code: String): MarkingState =
 		if (code == null) null
