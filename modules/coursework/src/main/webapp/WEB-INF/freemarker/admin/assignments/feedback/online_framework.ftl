@@ -44,13 +44,16 @@
 
 	<#-- TODO 20 day turnaround deadline status alert thing rendering -->
 
-	<div class="generic-feedback">
-		<h6 class="toggle-icon edit-generic">
-			<i class="row-icon icon-chevron-right icon-fixed-width" style="margin-top: 2px;"></i>
-			Generic feedback
-		</h6>
-		<div class="edit-generic-container" style="display: none;"></div>
-	</div>
+	<#if canAddGenericFeedback>
+		<div class="generic-feedback">
+			<h6 class="toggle-icon edit-generic">
+				<i class="row-icon icon-chevron-right icon-fixed-width" style="margin-top: 2px;"></i>
+				Generic feedback
+			</h6>
+			<div class="edit-generic-container" style="display: none;"></div>
+		</div>
+	</#if>
+
 
 	<table id="online-marking-table" class="students table table-bordered table-striped tabula-greenLight sticky-table-headers">
 		<thead<#if feedbackGraphs?size == 0> style="display: none;"</#if>>
