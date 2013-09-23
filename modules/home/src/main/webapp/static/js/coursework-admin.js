@@ -549,12 +549,20 @@ $(function() {
 			 .toggleClass('icon-chevron-down');
 		var $container = $('.edit-generic-container');
 		if($container.is(':visible')){
+			$icon.addClass('icon-chevron-right')
+			$icon.removeClass('icon-chevron-down');
 			$container.hide();
 		} else {
 			if($container.find('form').length) {
+				$icon.removeClass('icon-chevron-right')
+               	$icon.addClass('icon-chevron-down');
 				$container.show();
 			} else {
+				$icon.removeClass('icon-chevron-right');
+				$icon.addClass('icon-spinner icon-spin');
 				$container.load('generic', function(){
+					$icon.removeClass('icon-spinner icon-spin');
+					$icon.addClass('icon-chevron-down');
 					$(this).show();
 				});
 			}

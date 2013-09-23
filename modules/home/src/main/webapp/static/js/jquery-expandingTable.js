@@ -142,8 +142,11 @@ jQuery.fn.expandingTable = function(options) {
 				if(options.contentUrl && !$content.data("loaded")) {
 					var contentId = $row.attr("data-contentid");
 					var dataUrl = options.contentUrl + '/' + contentId;
-					
+
+					$icon.removeClass('icon-chevron-right').addClass('icon-spinner icon-spin');
+
 					$content.load(dataUrl, function() {
+						$icon.removeClass('icon-spinner icon-spin');
 						showContent($content, $row, $icon);
 						$content.data("loaded", "true");
 						$content.trigger('tabula.expandingTable.contentChanged');
