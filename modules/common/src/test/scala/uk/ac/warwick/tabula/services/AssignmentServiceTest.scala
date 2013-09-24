@@ -1,17 +1,13 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula._
-import org.junit.Test
-import uk.ac.warwick.tabula.data.model._
+import scala.collection.JavaConverters._
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.beans.factory.annotation.Autowired
 import org.junit.Before
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.forms.Extension
 import org.joda.time.DateTime
-import scala.Some
-import uk.ac.warwick.tabula.data.{AssignmentMembershipDaoImpl, AssignmentMembershipDao, DepartmentDaoImpl}
-import scala.Some
+import uk.ac.warwick.tabula._
+import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.{AssignmentMembershipDaoImpl, DepartmentDaoImpl}
 
 // scalastyle:off magic.number
 class AssignmentServiceTest extends PersistenceTestBase {

@@ -84,6 +84,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour {
 		sequence = other.sequence
 		departmentCode = other.departmentCode
 		name = other.name
+		assessmentCode = other.assessmentCode
 	}
 	
 	def upstreamAssessmentGroups(year: AcademicYear) = membershipService.getUpstreamAssessmentGroups(this, year)
