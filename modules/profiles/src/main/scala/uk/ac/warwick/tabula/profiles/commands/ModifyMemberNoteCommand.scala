@@ -9,10 +9,10 @@ import scala.collection.JavaConversions._
 import collection.JavaConverters._
 import org.joda.time.DateTime
 import org.springframework.validation.{Errors, BindingResult}
+import scala.language.implicitConversions
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{MemberNoteService, ProfileService}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.Daoisms
 
 abstract class ModifyMemberNoteCommand(val member: Member, val submitter: CurrentUser) extends Command[MemberNote] with BindListener with SelfValidating with Daoisms  {
@@ -26,12 +26,16 @@ abstract class ModifyMemberNoteCommand(val member: Member, val submitter: Curren
 	var lastUpdatedDate = DateTime.now
 
 	var file: UploadedFile = new UploadedFile
-	var attachedFiles:JList[FileAttachment] = JArrayList()
+	var attachedFiles:JList[FileAttachment] =  JArrayList()
 
 	var creator: Member = _
 	var attachmentTypes = Seq[String]()
 
 	val memberNote: MemberNote
+
+	def showForm() {
+		this.copyFrom(memberNote)
+	}
 
 	def applyInternal(): MemberNote = transactional() {
 
@@ -43,6 +47,7 @@ abstract class ModifyMemberNoteCommand(val member: Member, val submitter: Curren
 			val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
 			val filesToRemove = memberNote.attachments.asScala -- filesToKeep
 			memberNote.attachments = JArrayList[FileAttachment](filesToKeep)
+			// shouldn't we have a service to do this
 			filesToRemove.foreach(session.delete(_))
 		}
 
@@ -68,6 +73,7 @@ abstract class ModifyMemberNoteCommand(val member: Member, val submitter: Curren
 	}
 
 	def copyFrom(memberNote: MemberNote) {
+
 		this.note = memberNote.note
 		this.title = memberNote.title
 		this.creationDate = memberNote.creationDate
@@ -82,7 +88,6 @@ abstract class ModifyMemberNoteCommand(val member: Member, val submitter: Curren
 		memberNote.creationDate = this.creationDate
 		memberNote.creator = this.creator
 		memberNote.member = this.member
-		memberNote.attachments = this.attachedFiles
 		memberNote.lastUpdatedDate = new DateTime()
 
 	}

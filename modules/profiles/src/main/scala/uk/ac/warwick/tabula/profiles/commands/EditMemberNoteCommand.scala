@@ -11,8 +11,6 @@ class EditMemberNoteCommand(note: MemberNote, currentUser: CurrentUser ) extends
 
 	val memberNote = note
 
-	this.copyFrom(note)
-
 	def describe(d: Description) = d.memberNote(memberNote)
 
 }

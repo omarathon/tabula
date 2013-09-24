@@ -17,6 +17,7 @@ class EditMemberNoteController extends BaseController {
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: EditMemberNoteCommand) = {
+		cmd.showForm()
 		Mav("membernote/edit_form").noNavigation()
 
 	}
