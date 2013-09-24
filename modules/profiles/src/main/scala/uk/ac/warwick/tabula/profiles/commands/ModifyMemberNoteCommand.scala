@@ -26,7 +26,7 @@ abstract class ModifyMemberNoteCommand(val member: Member, val submitter: Curren
 	var lastUpdatedDate = DateTime.now
 
 	var file: UploadedFile = new UploadedFile
-	var attachedFiles:JList[FileAttachment] =  JArrayList()
+	var attachedFiles:JList[FileAttachment] = JArrayList()
 
 	var creator: Member = _
 	var attachmentTypes = Seq[String]()
