@@ -35,6 +35,7 @@ class ModuleRegistrationFixtureCommand extends CommandInternal[Unit] with Loggin
 							session.save(modReg)
 							scd.moduleRegistrations.add(modReg)
 							session.save(scd)
+							session.flush
 						}
 					}
 					case _ => None
