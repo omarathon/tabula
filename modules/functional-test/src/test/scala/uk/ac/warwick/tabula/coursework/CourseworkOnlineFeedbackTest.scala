@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework
 
 import org.scalatest.GivenWhenThen
-import uk.ac.warwick.tabula.BrowserTest
+import uk.ac.warwick.tabula.{Download, BrowserTest}
 import org.joda.time.DateTime
 
 class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures with GivenWhenThen {
@@ -84,6 +84,11 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 					Then("I see the feedback")
 					pageSource should include("That was RUBBISH")
 				}
+				And("I can download the results as a PDF")
+
+				val pdfDownload = Download(Path(s"/coursework/module/${moduleCode.toLowerCase}/${assignmentId}/feedback.pdf")).as(P.Student1)
+				pdfDownload should be ('successful)
+				pdfDownload.contentAsString should include("PDF")
 		}
 	}
 
