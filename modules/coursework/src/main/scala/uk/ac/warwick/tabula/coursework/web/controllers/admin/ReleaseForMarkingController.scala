@@ -15,11 +15,11 @@ import uk.ac.warwick.tabula.CurrentUser
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/release-submissions"))
 class ReleaseForMarkingController extends CourseworkController {
 
-	@ModelAttribute
+	@ModelAttribute("releaseForMarkingCommand")
 	def command(@PathVariable("module") module: Module,
 				@PathVariable("assignment") assignment: Assignment,
 				user: CurrentUser
-				) = new ReleaseForMarkingCommand(module, assignment, user)
+				) = ReleaseForMarkingCommand(module, assignment, user)
 
 	validatesSelf[ReleaseForMarkingCommand]
 
@@ -34,13 +34,13 @@ class ReleaseForMarkingController extends CourseworkController {
 	def get(@PathVariable("assignment") assignment: Assignment) = RedirectBack(assignment)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
-	def showForm(cmd: ReleaseForMarkingCommand, errors: Errors) = {
+	def showForm( @ModelAttribute("releaseForMarkingCommand") cmd: ReleaseForMarkingCommand, errors: Errors) = {
 		cmd.preSubmitValidation()
 		confirmView(cmd.assignment)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
-	def submit(@Valid cmd: ReleaseForMarkingCommand, errors: Errors) = {
+	def submit(@Valid @ModelAttribute("releaseForMarkingCommand") cmd: ReleaseForMarkingCommand, errors: Errors) = {
 		transactional() {
 			if (errors.hasErrors)
 				showForm(cmd, errors)

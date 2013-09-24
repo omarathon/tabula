@@ -1,20 +1,20 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import collection.JavaConversions._
-import reflect.BeanProperty
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.{SelfValidating, Description, Command}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{StateService, AssignmentService}
-import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.{SessionComponent, Daoisms}
+import scala.collection.JavaConverters._
 
 class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser) 
-	extends Command[List[Feedback]] with SelfValidating with Daoisms {
+	extends Command[List[Feedback]] with SelfValidating  {
+	this:SessionComponent=>
 	
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.ReleaseForMarking, assignment)
@@ -28,9 +28,15 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 
 	var feedbacksUpdated = 0
 
+	def studentsWithKnownMarkers:Seq[String] = students.intersect(assignment.markerMap.values.map(_.users).flatten.map(_.getWarwickId).toSeq)
+	def unreleasableSubmissions:Seq[String] = (studentsWithoutKnownMarkers ++ studentsAlreadyReleased).distinct
+
+	def studentsWithoutKnownMarkers:Seq[String] = students -- studentsWithKnownMarkers
+	def studentsAlreadyReleased = invalidFeedback.asScala.map(f=>f.universityId)
+
 	def applyInternal() = {
 		// get the parent feedback or create one if none exist
-		val feedbacks = students.map{ uniId:String =>
+		val feedbacks = studentsWithKnownMarkers.toBuffer.map{ uniId:String =>
 			val parentFeedback = assignment.feedbacks.find(_.universityId == uniId).getOrElse({
 				val newFeedback = new Feedback
 				newFeedback.assignment = assignment
@@ -68,7 +74,13 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 	}
 
 	def validate(errors: Errors) {
-		if (!confirm) errors.rejectValue("confirm", "submission.mark.plagiarised.confirm")
+		if (!confirm) errors.rejectValue("confirm", "submission.release.for.marking.confirm")
 	}
 
+}
+
+object ReleaseForMarkingCommand{
+	def apply(module: Module, assignment: Assignment, currentUser: CurrentUser):ReleaseForMarkingCommand = {
+		new ReleaseForMarkingCommand(module,assignment, currentUser) with Daoisms
+	}
 }
