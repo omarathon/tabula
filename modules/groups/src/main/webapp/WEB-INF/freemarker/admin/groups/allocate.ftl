@@ -23,7 +23,9 @@
 
 <#escape x as x?html>
 	<h1>Allocate students to ${set.name}</h1>
-	<div class="alert">These groups are currently <strong>${set.openForSignups?string("open","closed")}</strong> for self sign-up</div>
+	<#if (allocateStudentsToGroupsCommand.isStudentSignup())>
+		<div class="alert">These groups are currently <strong>${set.openForSignups?string("open","closed")}</strong> for self sign-up</div>
+	</#if>
 	<noscript>
 		<div class="alert">This page requires Javascript.</div>
 	</noscript>
