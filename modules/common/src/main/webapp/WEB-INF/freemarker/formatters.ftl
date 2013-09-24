@@ -51,9 +51,9 @@
 	--></#noescape><#--
 --></#macro>
 
-<#macro singleWeekFormat week academicYear dept><#--
+<#macro singleWeekFormat validFromWeek requiredFromWeek academicYear dept><#--
 	--><#noescape><#--
-		-->${weekRangesFormatter(week, academicYear, dept)}<#--
+		-->${weekRangesFormatter(validFromWeek, requiredFromWeek, academicYear, dept)}<#--
 	--></#noescape><#--
 --></#macro>
 

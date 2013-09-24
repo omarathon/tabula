@@ -8,7 +8,7 @@
 			<h2>Monitoring points</h2>
 		</div>
 		<div class="span9">
-			<a href="<@url page="/manage/${command.set.route.department.code}/sets/${command.set.id}/points/add" />" class="btn btn-primary new-point">
+			<a href="<@url page="/manage/${command.set.route.department.code}/sets/${command.set.id}/edit/points/add" />" class="btn btn-primary new-point">
 				<i class="icon-plus"></i>
 				Create new point
 			</a>

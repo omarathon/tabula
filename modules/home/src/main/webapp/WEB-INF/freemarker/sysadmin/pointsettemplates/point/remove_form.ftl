@@ -7,10 +7,10 @@
 
 <div class="modal-body">
 
-	<#assign action><@url page="/sysadmin/pointsettemplates/${command.template.id}/points/${command.point.id}/delete" /></#assign>
+	<#assign action><@url page="/sysadmin/pointsettemplates/${command.template.id}/edit/points/${command.point.id}/delete" /></#assign>
 
 	<@f.form id="deleteMonitoringPoint" action="${action}" method="POST" commandName="command" class="form-horizontal">
-		<p>You are deleting the monitoring point: ${command.point.name} (week ${command.point.week}).</p>
+		<p>You are deleting the monitoring point: ${command.point.name} (week ${command.point.validFromWeek} - ${command.point.requiredFromWeek}).</p>
 
 		<p>
 			<@form.label checkbox=true>

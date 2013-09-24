@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.data.model.Route
 import org.joda.time.{Interval, DateTimeConstants, DateMidnight}
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.util.termdates.Term
 import uk.ac.warwick.tabula.services.Vacation
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
@@ -20,10 +19,10 @@ class GroupMonitoringPointsByTermTest extends TestBase with Mockito {
 		val academicYear = AcademicYear(2013)
 		val monitoringPoint1 = new MonitoringPoint
 		monitoringPoint1.name = "Point 1"
-		monitoringPoint1.week = 5
+		monitoringPoint1.validFromWeek = 5
 		val monitoringPoint2 = new MonitoringPoint
 		monitoringPoint2.name = "Point 2"
-		monitoringPoint2.week = 15
+		monitoringPoint2.validFromWeek = 15
 		val monitoringPoints = List(monitoringPoint1, monitoringPoint2)
 
 		val week5StartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
