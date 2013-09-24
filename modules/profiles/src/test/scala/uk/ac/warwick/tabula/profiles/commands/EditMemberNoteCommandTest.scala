@@ -36,6 +36,7 @@ class EditMemberNoteCommandTest extends TestBase with Mockito {
 		note.note = "Existing, non-edited note"
 		val cmd = new EditMemberNoteCommand(note, currentUser)
 		val errors = new BindException(cmd, "command")
+		cmd.showForm()
 		cmd.validate(errors)
 		errors.hasFieldErrors should be (false)
 
@@ -50,9 +51,11 @@ class EditMemberNoteCommandTest extends TestBase with Mockito {
 		note.note = "Valid existing, non-edited note"
 		val cmd = new EditMemberNoteCommand(note, currentUser)
 		val errors = new BindException(cmd, "command")
+		cmd.showForm()
 		cmd.validate(errors)
 		errors.hasFieldErrors should be (false)
 
+		cmd.showForm()
 		cmd.note = " "
 		cmd.validate(errors)
 		errors.hasFieldErrors should be (true)
