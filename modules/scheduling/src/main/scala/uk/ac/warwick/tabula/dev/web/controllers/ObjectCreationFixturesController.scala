@@ -161,3 +161,17 @@ class ModuleRegistrationFixturesController {
 		cmd.apply()
 	}
 }
+@Controller
+@RequestMapping(Array("/fixtures/update/assignment"))
+class UpdateAssignmentFixturesController {
+
+	@ModelAttribute("updateAssignmentCommand")
+	def getUpdateAssignmentCommand(): Appliable[Unit] = {
+		UpdateAssignmentCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("updateAssignmentCommand") cmd: Appliable[Unit]) {
+		cmd.apply()
+	}
+}

@@ -13,9 +13,10 @@ import org.openqa.selenium.htmlunit.HtmlUnitWebElement
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.Keys
 import org.openqa.selenium.internal.seleniumemulation.FireEvent
-import uk.ac.warwick.tabula.home.FeaturesDriver
+import uk.ac.warwick.tabula.home.{FixturesDriver, FeaturesDriver}
+import org.openqa.selenium.firefox.FirefoxDriver
 
-trait CourseworkFixtures extends BrowserTest with FeaturesDriver{
+trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver{
 
 	before {
 		go to (Path("/scheduling/fixtures/setup"))
@@ -37,6 +38,11 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver{
 			managers: Seq[String] = Seq(),
 			assistants: Seq[String] = Seq())(callback: String => Unit) = as(P.Admin1) {
 		click on linkText("Go to the Test Services admin page")
+		verifyPageLoaded {
+			// wait for the page to load
+			find(cssSelector("div.dept-show")) should be('defined)
+		}
+
 		click on linkText("Show")
 
 		if ((assistants ++ managers).size > 0) {
@@ -51,6 +57,9 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver{
 			click on (editPerms)
 
 			def pick(table: String, usercodes: Seq[String]) {
+				verifyPageLoaded{
+					find(cssSelector(s"${table} .pickedUser")) should be ('defined)
+				}
 				usercodes.foreach { u =>
 					click on cssSelector(s"${table} .pickedUser")
 					enter(u)
@@ -69,6 +78,10 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver{
 			// as you were...
 			go to (Path("/coursework"))
 			click on linkText("Go to the Test Services admin page")
+			verifyPageLoaded{
+				// wait for the page to load
+				find(cssSelector("div.dept-show")) should be ('defined)
+			}
 			click on linkText("Show")
 		}
 
@@ -122,16 +135,13 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver{
 		checkbox("plagiarismDeclaration").select()
 
 		submit()
-
-		pageSource contains "Thanks, we've received your submission." should be (true)
+		verifyPageLoaded(
+			pageSource contains "Thanks, we've received your submission." should be (true)
+		)
 	}
 
 	def allFeatures(members: Seq[String]) {
-		// Change the open date to yesterday, else this test will fail in the morning
-		executeScript(
-			"""window.document.getElementsByName('openDate')[0].setAttribute('value', arguments[0]);""",
-			DateTime.now.minusDays(1).toString("dd-MMM-yyyy HH:mm:ss")
-		)
+
 
 		// TODO Can't test link to SITS for our fixture department
 		// Don't bother messing around with assigning students, let's just assume students will magically find the submit page
@@ -181,6 +191,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver{
 
 		textField("wordCountMin").value = "1"
 		textField("wordCountMax").value = "10000"
+
 	}
 
 	def getModuleInfo(moduleCode: String) =
