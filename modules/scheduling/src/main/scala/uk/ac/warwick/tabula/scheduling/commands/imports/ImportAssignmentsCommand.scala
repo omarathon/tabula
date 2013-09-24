@@ -35,7 +35,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 
 	def doAssignments {
 		transactional() {
-			for (assignment <- logSize(assignmentImporter.getAllAssignments)) {
+			for (assignment <- logSize(assignmentImporter.getAllAssessmentComponents)) {
 				if (assignment.name == null) {
 					// Some SITS data is bad, but try to carry on.
 					assignment.name = "Assignment"

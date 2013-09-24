@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands.{ SelfValidating, Description, Command }
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.{LazyMaps, LazyLists}
-import uk.ac.warwick.tabula.data.model.{ Department, UpstreamAssignment }
+import uk.ac.warwick.tabula.data.model.{ Department, AssessmentComponent }
 import uk.ac.warwick.tabula.{ DateFormats, AcademicYear }
 import org.joda.time.DateTime
 import org.springframework.beans.factory.annotation.{ Autowired, Configurable }
@@ -35,7 +35,7 @@ class AssignmentItem(
 	// whether to create an assignment from this item or not
 	var include: Boolean,
 	var occurrence: String,
-	var upstreamAssignment: UpstreamAssignment) {
+	var upstreamAssignment: AssessmentComponent) {
 	
     def this() = this(true, null, null)
     
@@ -129,7 +129,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 				
 				val assessmentGroup = new AssessmentGroup
 				assessmentGroup.occurrence = item.occurrence
-				assessmentGroup.upstreamAssignment = item.upstreamAssignment
+				assessmentGroup.assessmentComponent = item.upstreamAssignment
 				assessmentGroup.assignment = assignment
 				assignmentMembershipService.save(assessmentGroup)
 				
@@ -139,7 +139,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 		}
 	}
 
-	def findModule(upstreamAssignment: UpstreamAssignment): Option[Module] = {
+	def findModule(upstreamAssignment: AssessmentComponent): Option[Module] = {
 		val moduleCode = upstreamAssignment.moduleCodeBasic.toLowerCase
 		moduleDao.getByCode(moduleCode)
 	}
@@ -258,7 +258,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 		}
 	}
 
-	def shouldIncludeByDefault(assignment: UpstreamAssignment) = {
+	def shouldIncludeByDefault(assignment: AssessmentComponent) = {
 		// currently just exclude "Audit Only" assignments.
 		assignment.sequence != "AO"
 	}

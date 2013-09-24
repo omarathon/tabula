@@ -22,19 +22,20 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			val assignmentMembershipService = new AssignmentMembershipServiceImpl
 			assignmentMembershipService.dao = dao
 
-			val law = new UpstreamAssignment
+			val law = new AssessmentComponent
 			law.moduleCode = "la155-10"
 			law.assessmentGroup = "A"
 			law.sequence = "A02"
 			law.departmentCode = "la"
+			law.assessmentCode = AssessmentCode.Assignment
 			law.name = "Cool Essay"
 
 			val assessmentGroup2010 = new AssessmentGroup
-			assessmentGroup2010.upstreamAssignment = law
+			assessmentGroup2010.assessmentComponent = law
 			assessmentGroup2010.occurrence = "A"
 
 			val assessmentGroup2011 = new AssessmentGroup
-			assessmentGroup2011.upstreamAssignment = law
+			assessmentGroup2011.assessmentComponent = law
 			assessmentGroup2011.occurrence = "A"
 
 			val law2010 = new Assignment

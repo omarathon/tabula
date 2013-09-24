@@ -1,19 +1,25 @@
 package uk.ac.warwick.tabula.data.model
 
-import javax.persistence.Entity
+import javax.persistence.{Column, Table, Entity}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import org.hibernate.annotations.Type
 
 
 /**
- * Represents an upstream assignment as found in the central
- * University systems. An upstream assignment is timeless - it doesn't
- * relate to a specific instance of an assignment or even a particular year.
+ * Represents an upstream assessment component as found in the central
+ * University systems. An component is timeless - it doesn't
+ * relate to a specific instance of an assignment/exam or even a particular year.
+ *
+ * This used to be UpstreamAssignment when we were only importing assignment-type
+ * components. Now we include other things like exams, so it has been renamed
+ * AssessmentComponent in line with what it's called in SITS.
  */
 @Entity
-class UpstreamAssignment extends GeneratedId with PreSaveBehaviour {
+@Table(name="UPSTREAMASSIGNMENT")
+class AssessmentComponent extends GeneratedId with PreSaveBehaviour {
 
 	@transient var membershipService = Wire.auto[AssignmentMembershipService]
 
@@ -35,10 +41,19 @@ class UpstreamAssignment extends GeneratedId with PreSaveBehaviour {
 	 * Lowercase department code, e.g. md.
 	 */
 	var departmentCode: String = _
+
 	/**
 	 * Name as defined upstream.
 	 */
 	var name: String = _
+
+	/**
+	 * The type of component. Typical values are A for assignment,
+	 * E for summer exam. Other values exist.
+	 */
+	@Type(`type`="uk.ac.warwick.tabula.data.model.AssessmentCodeUserType")
+	@Column(nullable=false)
+	var assessmentCode: AssessmentCode = _
 
 	/**
 	 * Returns moduleCode without CATS. e.g. in304
@@ -50,7 +65,7 @@ class UpstreamAssignment extends GeneratedId with PreSaveBehaviour {
 	 */
 	def cats: Option[String] = Module.extractCats(moduleCode)
 
-	def needsUpdatingFrom(other: UpstreamAssignment) = (
+	def needsUpdatingFrom(other: AssessmentComponent) = (
 		this.name != other.name ||
 		this.departmentCode != other.departmentCode)
 
@@ -63,7 +78,7 @@ class UpstreamAssignment extends GeneratedId with PreSaveBehaviour {
 		if (value == null) throw new IllegalStateException("null " + name + " not allowed")
 	}
 
-	def copyFrom(other: UpstreamAssignment) {
+	def copyFrom(other: AssessmentComponent) {
 		moduleCode = other.moduleCode
 		assessmentGroup = other.assessmentGroup
 		sequence = other.sequence

@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroup, UpstreamAssignment, Department, Route}
+import uk.ac.warwick.tabula.data.model.{AssessmentCode, UpstreamAssessmentGroup, AssessmentComponent, Department, Route}
 import uk.ac.warwick.tabula.roles.StudentRelationshipAgentRoleDefinition
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
@@ -68,12 +68,13 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		cmd.usercodes.add(Fixtures.TestAdmin1)
 		cmd.apply()
 
-		val upstreamAssignment = new UpstreamAssignment
+		val upstreamAssignment = new AssessmentComponent
 		upstreamAssignment.assessmentGroup = "A"
 		upstreamAssignment.departmentCode = "XXX"
 		upstreamAssignment.sequence = "A"
 		upstreamAssignment.moduleCode = "XXX101-30"
 		upstreamAssignment.name = "Assignment from SITS"
+		upstreamAssignment.assessmentCode = AssessmentCode.Assignment
 		session.save(upstreamAssignment)
 
 		val upstreamAssessmentGroup = new UpstreamAssessmentGroup
@@ -116,7 +117,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		val department = newDepartmentFrom(Fixtures.TestDepartment,departmentDao)
 
 		transactional() {
-			session.newCriteria[UpstreamAssignment]
+			session.newCriteria[AssessmentComponent]
 				.add(Restrictions.in("departmentCode", JList("xxx","XXX")))
 				.list
 				.foreach { ua => session.delete(ua); }

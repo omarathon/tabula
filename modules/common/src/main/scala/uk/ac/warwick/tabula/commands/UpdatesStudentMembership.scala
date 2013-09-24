@@ -165,13 +165,13 @@ trait UpdatesStudentMembership {
 			Seq()
 		}
 		else {
-			val validGroups = assessmentGroups.asScala.filterNot(group => group.upstreamAssignment == null || group.occurrence == null).toList
+			val validGroups = assessmentGroups.asScala.filterNot(group => group.assessmentComponent == null || group.occurrence == null).toList
 
 			validGroups.flatMap{group =>
 				val template = new UpstreamAssessmentGroup
 				template.academicYear = academicYear
-				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
-				template.moduleCode = group.upstreamAssignment.moduleCode
+				template.assessmentGroup = group.assessmentComponent.assessmentGroup
+				template.moduleCode = group.assessmentComponent.moduleCode
 				template.occurrence = group.occurrence
 				membershipService.getUpstreamAssessmentGroup(template)
 			}
@@ -188,7 +188,7 @@ trait UpdatesStudentMembership {
 /**
  * convenience classes
  */
-class UpstreamGroup(val upstreamAssignment: UpstreamAssignment, val group: UpstreamAssessmentGroup) {
+class UpstreamGroup(val upstreamAssignment: AssessmentComponent, val group: UpstreamAssessmentGroup) {
 	val id = upstreamAssignment.id + ";" + group.id
 
 	val name = upstreamAssignment.name
@@ -198,9 +198,9 @@ class UpstreamGroup(val upstreamAssignment: UpstreamAssignment, val group: Upstr
 	val sequence = upstreamAssignment.sequence
 
 	def isLinked(assessmentGroups: JList[AssessmentGroup]) = assessmentGroups.asScala.exists(ag =>
-		ag.upstreamAssignment.id == upstreamAssignment.id && ag.occurrence == group.occurrence)
+		ag.assessmentComponent.id == upstreamAssignment.id && ag.occurrence == group.occurrence)
 
-	override def toString = "upstreamAssignment: " + upstreamAssignment.id + ", occurrence: " + group.occurrence
+	override def toString = "assessmentComponent: " + upstreamAssignment.id + ", occurrence: " + group.occurrence
 }
 
 

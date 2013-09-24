@@ -13,6 +13,10 @@ import uk.ac.warwick.tabula.JavaImports._
 import xml.Utility
 import scala.xml.MinimizeMode
 
+/**
+ * Allows you to return a Scala XML Elem object from a controller RequestMapping,
+ * and it will render it.
+ */
 class XmlReturnValueHandler extends HandlerMethodReturnValueHandler {
 
 	override def supportsReturnType(methodParam: MethodParameter) = {

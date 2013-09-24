@@ -20,6 +20,8 @@
 	@TypeDef(name = "localTime",
 			typeClass = org.jadira.usertype.dateandtime.joda.PersistentLocalTimeAsString.class,
 			defaultForType = org.joda.time.LocalTime.class)
+//	@TypeDef(name = "assessmentCode",
+//			typeClass = uk.ac.warwick.)
 })
 package uk.ac.warwick.tabula.data.model.typedefs;
 

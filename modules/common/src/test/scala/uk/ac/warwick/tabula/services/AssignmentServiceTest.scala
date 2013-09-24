@@ -2,23 +2,16 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula._
 import org.junit.Test
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model._
 import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.data.model.UpstreamAssignment
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Submission
 import org.junit.Before
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.AssessmentGroup
-import uk.ac.warwick.tabula.data.model.MarkingWorkflow
 import scala.Some
 import uk.ac.warwick.tabula.data.{AssignmentMembershipDaoImpl, AssignmentMembershipDao, DepartmentDaoImpl}
+import scala.Some
 
 // scalastyle:off magic.number
 class AssignmentServiceTest extends PersistenceTestBase {
@@ -172,23 +165,25 @@ class AssignmentServiceTest extends PersistenceTestBase {
 	}
 
 	@Transactional @Test def updateUpstreamAssignment {
-		val upstream = new UpstreamAssignment
+		val upstream = new AssessmentComponent
 		upstream.departmentCode = "ch"
 		upstream.moduleCode = "ch101"
 		upstream.sequence = "A01"
 		upstream.assessmentGroup = "A"
+		upstream.assessmentCode = AssessmentCode.Assignment
 		upstream.name = "Egg plants"
 
 		assignmentMembershipService.save(upstream)
 
-		val upstream2 = new UpstreamAssignment
-        upstream2.departmentCode = "ch"
-        upstream2.moduleCode = "ch101"
-        upstream2.sequence = "A01"
-        upstream2.assessmentGroup = "A"
-        upstream2.name = "Greg's plants"
+		val upstream2 = new AssessmentComponent
+		upstream2.departmentCode = "ch"
+		upstream2.moduleCode = "ch101"
+		upstream2.sequence = "A01"
+		upstream2.assessmentGroup = "A"
+		upstream2.assessmentCode = AssessmentCode.Assignment
+		upstream2.name = "Greg's plants"
 
-        assignmentMembershipService.save(upstream2)
+		assignmentMembershipService.save(upstream2)
 	}
 
 	@Transactional @Test def findAssignmentsWithFeedback {
@@ -287,18 +282,19 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.save(group)
 		session.flush
 
-		val ua = new UpstreamAssignment
+		val ua = new AssessmentComponent
 		ua.departmentCode = "LA"
 		ua.moduleCode = "LA155-10"
 		ua.sequence = "A01"
 		ua.assessmentGroup = "A"
+		ua.assessmentCode = AssessmentCode.Assignment
 		ua.name = "Egg plants"
 
 		assignmentMembershipService.save(ua) should be (ua)
 
 		assignmentMembershipService.getUpstreamAssessmentGroups(ua, new AcademicYear(2010)) should be (Seq(group))
 		assignmentMembershipService.getUpstreamAssessmentGroups(ua, new AcademicYear(2011)) should be (Seq())
-		assignmentMembershipService.getUpstreamAssessmentGroups(new UpstreamAssignment, new AcademicYear(2010)) should be (Seq())
+		assignmentMembershipService.getUpstreamAssessmentGroups(new AssessmentComponent, new AcademicYear(2010)) should be (Seq())
 
 		session.clear
 
@@ -317,32 +313,36 @@ class AssignmentServiceTest extends PersistenceTestBase {
 	}
 
 	@Test def upstreamAssignments = transactional { tx =>
-		val ua1 = new UpstreamAssignment
+		val ua1 = new AssessmentComponent
 		ua1.departmentCode = "CH"
 		ua1.moduleCode = "CH101-10"
 		ua1.sequence = "A01"
 		ua1.assessmentGroup = "A"
+		ua1.assessmentCode = AssessmentCode.Assignment
 		ua1.name = "Egg plants"
 
-		val ua2 = new UpstreamAssignment
+		val ua2 = new AssessmentComponent
 		ua2.departmentCode = "CH"
 		ua2.moduleCode = "CH101-20"
 		ua2.sequence = "A02"
 		ua2.assessmentGroup = "A"
+		ua2.assessmentCode = AssessmentCode.Assignment
 		ua2.name = "Egg plants"
 
-		val ua3 = new UpstreamAssignment
+		val ua3 = new AssessmentComponent
 		ua3.departmentCode = "LA"
 		ua3.moduleCode = "LA101-10"
 		ua3.sequence = "A01"
 		ua3.assessmentGroup = "A"
+		ua3.assessmentCode = AssessmentCode.Assignment
 		ua3.name = "Egg plants"
 
-		val ua4 = new UpstreamAssignment
+		val ua4 = new AssessmentComponent
 		ua4.departmentCode = "LA"
 		ua4.moduleCode = "LA101-10"
 		ua4.sequence = "A02"
 		ua4.assessmentGroup = "A"
+		ua4.assessmentCode = AssessmentCode.Assignment
 		ua4.name = "Egg plants NOT IN USE"
 
 		assignmentMembershipService.save(ua1) should be (ua1)
@@ -375,11 +375,12 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 		assignmentMembershipService.save(upstreamGroup)
 
-		val upstreamAssignment = new UpstreamAssignment
+		val upstreamAssignment = new AssessmentComponent
 		upstreamAssignment.departmentCode = "ch"
 		upstreamAssignment.moduleCode = "ch101-10"
 		upstreamAssignment.sequence = "A01"
 		upstreamAssignment.assessmentGroup = "A"
+		upstreamAssignment.assessmentCode = AssessmentCode.Assignment
 		upstreamAssignment.name = "Egg plants"
 
 		assignmentMembershipService.save(upstreamAssignment) should be (upstreamAssignment)
@@ -393,7 +394,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 		val group = new AssessmentGroup
 		group.assignment = assignment
-		group.upstreamAssignment = upstreamAssignment
+		group.assessmentComponent = upstreamAssignment
 		group.occurrence = "A"
 
 		session.save(group)
@@ -488,30 +489,33 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		session.save(department2)
 		assignmentService.save(assignment2)
 
-		val up1 = new UpstreamAssignment
+		val up1 = new AssessmentComponent
 		up1.departmentCode = "ch"
 		up1.moduleCode = "ch101"
 		up1.sequence = "A01"
 		up1.assessmentGroup = "A"
+		up1.assessmentCode = AssessmentCode.Assignment
 		up1.name = "Egg plants"
 
 		val upstream1 = assignmentMembershipService.save(up1)
 
-		val up2 = new UpstreamAssignment
-        up2.departmentCode = "ch"
-        up2.moduleCode = "ch101"
-        up2.sequence = "A02"
-        up2.assessmentGroup = "B"
-        up2.name = "Greg's plants"
+		val up2 = new AssessmentComponent
+		up2.departmentCode = "ch"
+		up2.moduleCode = "ch101"
+		up2.sequence = "A02"
+		up2.assessmentGroup = "B"
+		up2.assessmentCode = AssessmentCode.Assignment
+		up2.name = "Greg's plants"
 
-    val upstream2 = assignmentMembershipService.save(up2)
+		val upstream2 = assignmentMembershipService.save(up2)
 
-		val up3 = new UpstreamAssignment
-        up3.departmentCode = "ch"
-        up3.moduleCode = "ch101"
-        up3.sequence = "A03"
-        up3.assessmentGroup = "C"
-        up3.name = "Steg's plants"
+		val up3 = new AssessmentComponent
+		up3.departmentCode = "ch"
+		up3.moduleCode = "ch101"
+		up3.sequence = "A03"
+		up3.assessmentGroup = "C"
+		up3.assessmentCode = AssessmentCode.Assignment
+		up3.name = "Steg's plants"
 
     val upstream3 = assignmentMembershipService.save(up3)
 
@@ -568,17 +572,17 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 		val ag1 = new AssessmentGroup
 		ag1.assignment = assignment1
-		ag1.upstreamAssignment = upstream1
+		ag1.assessmentComponent = upstream1
 		ag1.occurrence = "A"
 
 		val ag2 = new AssessmentGroup
 		ag2.assignment = assignment1
-		ag2.upstreamAssignment = upstream2
+		ag2.assessmentComponent = upstream2
 		ag2.occurrence = "B"
 
 		val ag3 = new AssessmentGroup
 		ag3.assignment = assignment2
-		ag3.upstreamAssignment = upstream3
+		ag3.assessmentComponent = upstream3
 		ag3.occurrence = "C"
 
 		assignment1.assessmentGroups.add(ag1)

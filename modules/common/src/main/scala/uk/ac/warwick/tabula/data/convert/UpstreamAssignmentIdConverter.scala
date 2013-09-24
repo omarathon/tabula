@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.system.TwoWayConverter
 
-class UpstreamAssignmentIdConverter extends TwoWayConverter[String, UpstreamAssignment] {
+class UpstreamAssignmentIdConverter extends TwoWayConverter[String, AssessmentComponent] {
 
 	@Autowired var service: AssignmentMembershipService = _
 
@@ -13,6 +13,6 @@ class UpstreamAssignmentIdConverter extends TwoWayConverter[String, UpstreamAssi
 	override def convertRight(id: String) = service.getUpstreamAssignment(id).orNull
 	
 	// Formatter used for generating textual value in template
-	override def convertLeft(assignment: UpstreamAssignment) = (Option(assignment) map { _.id }).orNull
+	override def convertLeft(assignment: AssessmentComponent) = (Option(assignment) map { _.id }).orNull
 
 }

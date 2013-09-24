@@ -1,17 +1,22 @@
 package uk.ac.warwick.tabula
+
+import scala.language.implicitConversions
 import org.joda.time.{DateTimeConstants, DateMidnight, DateTime}
 import org.joda.time.DateTimeConstants._
 import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.util.termdates.Term
 import uk.ac.warwick.util.termdates.Term.TermType
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.TermService
+import uk.ac.warwick.tabula.data.model.Convertible
+
 
 /**
  * Represents a particular academic year. Traditionally they are displayed as
  * "99/00" or "11/12" but we just store the first year as a 4-digit number.
  * toString() returns the traditional format.
  */
-case class AcademicYear(val startYear: Int) extends Ordered[AcademicYear] {
+case class AcademicYear(val startYear: Int) extends Ordered[AcademicYear] with Convertible[JInteger] {
 	val endYear = startYear + 1
 	if (endYear > 9999 || startYear < 1000) throw new IllegalArgumentException()
 
@@ -21,6 +26,7 @@ case class AcademicYear(val startYear: Int) extends Ordered[AcademicYear] {
 	// properties for binding to dropdown box
 	def getStoreValue = startYear
 	def getLabel = toString
+	def value = startYear
 
 	def previous = new AcademicYear(startYear - 1)
 	def next = new AcademicYear(startYear + 1)
@@ -68,6 +74,9 @@ object AcademicYear {
 	 * Anyway, this will only break near the year 2090.
 	 */
 	private val CenturyBreak = 90
+
+	// An implicit for the UserType to create instances
+	implicit val factory = (year: JInteger) => AcademicYear(year)
 
 	def parse(string: String) = string match {
 		case SitsPattern(year1, year2) => AcademicYear(parseTwoDigits(year1))
