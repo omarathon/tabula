@@ -27,6 +27,7 @@ import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import uk.ac.warwick.tabula.commands.GroupsObjects
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.StudentSignUp
 
 class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet, val viewer: CurrentUser)
 	extends Command[SmallGroupSet]
@@ -51,6 +52,8 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	var groupsExtractor = Wire.auto[GroupsExtractor]
 
 	for (group <- set.groups.asScala) mapping.put(group, JArrayList())
+
+	var isStudentSignup = set.allocationMethod == StudentSignUp
 
 	// Only called on initial form view
 	override def populate() {

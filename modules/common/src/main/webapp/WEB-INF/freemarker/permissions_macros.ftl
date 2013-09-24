@@ -4,7 +4,7 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
 <#macro alerts commandName scope users="" role="">
-	<#assign bindingError><@f.errors path="${commandName}.*" /></#assign>
+	<#local bindingError><@f.errors path="${commandName}.*" /></#local>
 	<#if bindingError?has_content>
 		<p class="alert alert-error">
 			<button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -20,9 +20,9 @@
 					<strong>${users[key].getFullName()}</strong> <#if users[key].getFullName()!=""> (${key})</#if>
 				</#list>
 				<#if action = "add">
-					<#assign actionWords = "now" />
+					<#local actionWords = "now" />
 					<#else>
-					<#assign actionWords = "no longer" />
+					<#local actionWords = "no longer" />
 				</#if>
 
 				<#if users?size gt 1>
@@ -55,7 +55,7 @@
 				</td>
 			</tr>
 
-			<#assign users = usersWithRole('${roleDefinition}', scope) />
+			<#local users = usersWithRole('${roleDefinition}', scope) />
 			<#if users?size gt 0>
 				<#list users as u>
 					<tr>

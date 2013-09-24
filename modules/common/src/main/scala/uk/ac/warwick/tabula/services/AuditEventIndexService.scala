@@ -141,15 +141,24 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		val assignmentTerm = termQuery("assignment", assignment.id)
 
 		// find events where you downloaded all available submissions
-		val allDownloaded = parsedAuditEvents(search(
-			all(assignmentTerm, termQuery("eventType", "DownloadAllSubmissions"))))
+		val allDownloaded = parsedAuditEvents(
+			search(
+				query = all(
+					assignmentTerm, 
+					termQuery("eventType", "DownloadAllSubmissions")
+				),
+				max = 1, sort = reverseDateSort // we only want the most recent one
+			)
+		)
+		
 		// take most recent event and find submissions made before then.
-		val submissions1: Seq[Submission] =
-			if (allDownloaded.isEmpty) { Nil }
-			else {
-				val latestDate = allDownloaded.map { _.eventDate }.max
+		val submissions1: Seq[Submission] = allDownloaded.headOption match {
+			case None => Nil
+			case Some(event) => {
+				val latestDate = event.eventDate
 				assignment.submissions.filter { _.submittedDate isBefore latestDate }
 			}
+		}
 
 		// find events where selected submissions were downloaded
 		val someDownloaded = parsedAuditEvents(search(

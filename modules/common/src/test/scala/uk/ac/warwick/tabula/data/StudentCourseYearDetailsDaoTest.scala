@@ -41,8 +41,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 			val nonexistantYearDetails = scydDao.getBySceKey(scd, 1)
 			nonexistantYearDetails should be (None)
 
-			val scyd = new StudentCourseYearDetails(scd, 1)
-			scyd.academicYear = AcademicYear(2013)
+			val scyd = new StudentCourseYearDetails(scd, 1,AcademicYear(2013))
 
 			scd.studentCourseYearDetails.add(scyd)
 

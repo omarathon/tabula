@@ -14,7 +14,7 @@
 					</div>
 					<div class="span2 state">
 						<#if command.checkpointState[point.id]??>
-							<#assign checkpointState = command.checkpointState[point.id] />
+							<#local checkpointState = command.checkpointState[point.id] />
 							<#if checkpointState == "attended">
 								<span class="label label-success">Attended</span>
 							<#elseif checkpointState == "authorised">
@@ -26,9 +26,9 @@
 					</div>
 					<div class="span2">
 						<#if can_record>
-							<#assign returnTo>
+							<#local returnTo>
 								<@routes.profile command.studentCourseDetails.student />
-							</#assign>
+							</#local>
 							<a href="<@url page="/${point.pointSet.route.department.code}/${point.id}/record?returnTo=${returnTo}"/>#student-${command.studentCourseDetails.student.universityId}"
 								<#if point.sentToAcademicOffice>
 									class="btn btn-mini disabled" title="Monitoring information for this point has been submitted and can no longer be edited"

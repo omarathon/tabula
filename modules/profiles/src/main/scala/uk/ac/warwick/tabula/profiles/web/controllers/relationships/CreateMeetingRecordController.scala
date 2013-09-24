@@ -17,7 +17,7 @@ class CreateMeetingRecordController extends ProfilesController with MeetingRecor
 
 	@ModelAttribute("command")
 	def getCommand(@PathVariable("relationshipType") relationshipType: StudentRelationshipType,
-								 @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =  {
+				   @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =  {
 		relationshipService.findCurrentRelationships(mandatory(relationshipType), studentCourseDetails.sprCode) match {
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
