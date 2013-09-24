@@ -122,14 +122,7 @@ object MarkingMethod {
 		}
 }
 
-class MarkingMethodUserType extends AbstractBasicUserType[MarkingMethod, String]{
-
-	val basicType = StandardBasicTypes.STRING
-	override def sqlTypes = Array(Types.VARCHAR)
-
-	val nullValue = null
-	val nullObject = null
-
+class MarkingMethodUserType extends AbstractStringUserType[MarkingMethod]{
 	override def convertToObject(string: String) = MarkingMethod.fromCode(string)
 	override def convertToValue(state: MarkingMethod) = state.name
 }

@@ -10,6 +10,12 @@ import java.sql.ResultSet
 import java.{ io => jio }
 import org.hibernate.engine.spi.SessionImplementor
 
+/** Trait for a class that can be converted to a value for storing,
+	* usually a string or jinteger.
+	*/
+trait Convertible[A >: Null <: AnyRef] {
+	def value: A
+}
 
 /**
  * Handles a lot of the junk that isn't necessary if all you want to do is

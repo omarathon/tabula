@@ -91,16 +91,17 @@ object Fixtures {
 	}
 
 	def upstreamAssignment(departmentCode:String, number:Int) = {
-        val a = new UpstreamAssignment
-        a.name = "Assignment %d" format number
-        a.departmentCode = departmentCode.toUpperCase
-        a.moduleCode = "%s1%02d-30" format (departmentCode.toUpperCase, number)
-        a.assessmentGroup = "A"
-        a.sequence = "A%02d" format number
-        a
-    }
+		val a = new AssessmentComponent
+		a.name = "Assignment %d" format number
+		a.departmentCode = departmentCode.toUpperCase
+		a.moduleCode = "%s1%02d-30" format (departmentCode.toUpperCase, number)
+		a.assessmentGroup = "A"
+		a.sequence = "A%02d" format number
+		a.assessmentType = AssessmentType.Assignment
+		a
+	}
 
-	def assessmentGroup(assignment:UpstreamAssignment) = {
+	def assessmentGroup(assignment:AssessmentComponent) = {
 		val group = new UpstreamAssessmentGroup
 		group.academicYear = new AcademicYear(2012)
 		group.assessmentGroup = assignment.assessmentGroup
