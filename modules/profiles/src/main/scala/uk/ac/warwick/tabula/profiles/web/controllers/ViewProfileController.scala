@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.{MemberNoteService, SmallGroupService, UserLookupService, RelationshipService}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{MeetingRecord, Member, StudentMember}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, ViewViewableCommand}
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.commands.Command
+import scala.Some
 
 class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
 
@@ -86,7 +87,11 @@ class ViewProfileController extends ProfilesController {
 		val numSmallGroups = smallGroupService.findSmallGroupsByStudent(profiledStudentMember.asSsoUser).size
 
 		//Get all membernotes for student
-		val memberNotes = if(isSelf) memberNoteService.listNonDeleted(member) else memberNoteService.list(member)
+
+		val memberNotes =
+			if (securityService.can(user, Permissions.MemberNotes.Update, member)) memberNoteService.list(member)
+			else if (securityService.can(user, Permissions.MemberNotes.Read, member)) memberNoteService.listNonDeleted(member)
+			else null
 
 		Mav("profile/view",
 			"profile" -> profiledStudentMember,

@@ -133,6 +133,8 @@
 		<#assign page = page + "/" />
 	</#if>
 
+	<#local attachment />
+
 	<#if !attachments?is_enumerable>
 		<#-- assume it's a FileAttachment -->
 		<#local attachment = attachments />
@@ -141,7 +143,7 @@
 		<#local attachment = attachments?first />
 	</#if>
 
-	<#if attachment??>
+	<#if attachment?has_content>
 		<#assign title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#assign>
 		<div class="attachment">
 			<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
@@ -179,6 +181,15 @@
 <#macro role_definition_description role_definition><#compress>
 	${role_definition.description?lower_case}
 </#compress></#macro>
+
+
+<#macro display_deleted_attachments attachments visible="">
+	<ul class="deleted-files ${visible}">
+		<#list attachments as files>
+			<li class="muted deleted"><i class="icon-file-alt"></i> ${files.name}</li>
+		</#list>
+	</ul>
+</#macro>
 
 <#macro course_description_for_heading studentCourseDetails>
 		${(studentCourseDetails.course.name)!} (${(studentCourseDetails.course.code?upper_case)!})

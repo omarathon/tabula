@@ -60,6 +60,7 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		SmallGroups.Read,
 		Profiles.Read.SmallGroups,
 
+		MemberNotes.Read,
 		MemberNotes.Create,
 		MemberNotes.Update,
 		MemberNotes.Delete

@@ -20,7 +20,7 @@ abstract class ModifyMemberNoteCommand(val member: Member, val submitter: Curren
 	var profileService = Wire[ProfileService]
 	var memberNoteService = Wire[MemberNoteService]
 
-	var note: String = member.fullName.getOrElse(null)
+	var note: String = _
 	var title: String = _
 	var creationDate = DateTime.now
 	var lastUpdatedDate = DateTime.now

@@ -19,7 +19,7 @@ class CreateMemberNoteController extends BaseController {
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: CreateMemberNoteCommand) = {
-	 Mav("membernote/create_form").noNavigation()
+	 Mav("membernote/form").noNavigation()
 	}
 
 	@RequestMapping(method=Array(POST))
@@ -28,7 +28,8 @@ class CreateMemberNoteController extends BaseController {
 		 form(cmd)
 	 } else {
 		 cmd.apply()
-		 Mav("membernote/create_success").noNavigation()
+		 Mav("membernote/form",
+			 	 "memberNoteSuccess" -> true).noNavigation()
 	 }
 	}
 

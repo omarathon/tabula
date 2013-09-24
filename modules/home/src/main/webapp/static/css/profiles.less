@@ -178,14 +178,63 @@
 			}
 		}
 
-		#membernote-details {
+		.membernote {
+
+			 .list-controls {
+			 	height: 2em;
+			 }
+
+			 details {
+
+			 	summary {
+
+			 		border-bottom: 1px dotted lighten(@grayLight, 35%);
+			 		padding-top: 15px;
+
+			 		&:hover {
+                    	background-color: @zebra-dark;
+                    	.transition-duration(0.3s);
+                    }
+
+					//Workaround to avoid styling details arrow
+			 		.detail-arrow-fix {
+			 			display: inline-block;
+			 			width: 94%;
+			 			margin-bottom: -7px;
+			 		}
+
+			 		.date-title {
+			 			 display: table-row;
+        			     .date { display: table-cell; vertical-align: bottom; width: 10em; font-weight: bold; }
+        			     .title { display: table-cell; font-weight: bold; padding-right: 5px; }
+			 		}
+			 	}
+			 	.description { padding: 15px; }
+			 	small { padding-top: 10px; }
+			 }
 
 
-			 .member-note-toolbar {
-					.icon-spinner {
-						display: none;
-					}
+			.toggle-all-details { float: right;	cursor: pointer; }
+
+			.create {
+				margin-left: 5px;
+				display: block;
+				float: right;
+				text-decoration: none;
+			}
+
+
+			.member-note-toolbar {
+
+				display: inline-block;
+			 	float: right;
+			 	width: 65px;
+
+				.icon-spinner {
+					display: none;
+					float: right;
 				}
+			}
 
 			 .processing {
 				i {	display: none; }

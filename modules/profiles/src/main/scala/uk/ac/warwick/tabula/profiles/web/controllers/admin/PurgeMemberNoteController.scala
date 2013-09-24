@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.{MemberNote, Member}
 import uk.ac.warwick.tabula.profiles.commands.PurgeMemberNoteCommand
 import org.springframework.validation.Errors
 import javax.validation.Valid
+import uk.ac.warwick.tabula.web.views.{JSONView, JSONErrorView}
 
 @Controller
 @RequestMapping(value = Array("/{member}/note/{note}/purge"))
@@ -15,16 +16,13 @@ class PurgeMemberNoteController extends BaseController {
 @ModelAttribute("command")
 def restoreCommand(@PathVariable member: Member, @PathVariable note: MemberNote) = new PurgeMemberNoteCommand(note, member, user)
 
-@RequestMapping(method=Array(GET, HEAD))
-def form(@ModelAttribute("command") cmd: PurgeMemberNoteCommand) = Mav("membernote/purge_form").noLayoutIf(ajax)
-
 @RequestMapping(method=Array(POST))
 def submit(@Valid @ModelAttribute("command") cmd: PurgeMemberNoteCommand, errors: Errors) = {
 	if (errors.hasErrors) {
-		form(cmd)
+		Mav(new JSONErrorView(errors))
 	} else {
 		cmd.apply()
-		Mav("membernote/purge_success").noLayoutIf(ajax)
+		Mav(new JSONView(Map("status" -> "successful")))
 	}
 }
 

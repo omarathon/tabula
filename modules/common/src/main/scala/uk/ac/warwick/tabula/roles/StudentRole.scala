@@ -18,4 +18,8 @@ case object StudentRoleDefinition extends UnassignableBuiltInRoleDefinition {
 		UserPicker,
 		MonitoringPointSetTemplates.View
 	)
+
+	GrantsScopedPermission(
+		MemberNotes.Read
+	)
 }
