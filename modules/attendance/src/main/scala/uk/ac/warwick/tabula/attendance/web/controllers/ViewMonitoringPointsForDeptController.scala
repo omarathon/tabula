@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.{Route, Department}
-import uk.ac.warwick.tabula.attendance.commands.{ViewMonitoringPointSetsCommand, ManageMonitoringPointSetCommand}
+import uk.ac.warwick.tabula.attendance.commands.ViewMonitoringPointSetsCommand
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
 

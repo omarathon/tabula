@@ -4,7 +4,7 @@
 <#assign is_the_student=currentUser.apparentUser.warwickId==command.studentCourseDetails.student.universityId />
 
 <#macro pointsInATerm term>
-	<#list command.monitoringPointsByTerm[term]?sort_by("week") as point>
+	<#list command.monitoringPointsByTerm[term]?sort_by("validFromWeek") as point>
 		<div class="item-info row-fluid term">
 			<div class="span12">
 				<h4>${term}</h4>
@@ -13,13 +13,15 @@
 						${point.name} (<@fmt.weekRanges point />)
 					</div>
 					<div class="span2 state">
-						<#assign checkpointState = (command.checkpointState[point.id]?string("true", "false"))!"null" />
-						<#if checkpointState == "null">
-
-						<#elseif checkpointState == "true">
-							<span class="label label-success">Attended</span>
-						<#else>
-							<span class="label label-important">Missed</span>
+						<#if command.checkpointState[point.id]??>
+							<#assign checkpointState = command.checkpointState[point.id] />
+							<#if checkpointState == "attended">
+								<span class="label label-success">Attended</span>
+							<#elseif checkpointState == "authorised">
+								<span class="label label-info" title="Missed (authorised)">Missed</span>
+							<#elseif checkpointState == "unauthorised">
+								<span class="label label-important" title="Missed (unauthorised)">Missed</span>
+							</#if>
 						</#if>
 					</div>
 					<div class="span2">

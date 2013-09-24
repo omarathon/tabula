@@ -9,7 +9,7 @@ import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.attendance.commands.UpdateMonitoringPointCommand
 
 @Controller
-@RequestMapping(Array("/manage/{dept}/sets/{set}/points/{point}/edit"))
+@RequestMapping(Array("/manage/{dept}/sets/{set}/edit/points/{point}/edit"))
 class UpdateMonitoringPointController extends AttendanceController {
 
 	validatesSelf[SelfValidating]

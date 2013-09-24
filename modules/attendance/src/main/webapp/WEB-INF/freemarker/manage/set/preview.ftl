@@ -11,10 +11,10 @@
 <div class="striped-section">
 	<h2 class="section-title">${term}</h2>
 	<div class="striped-section-contents">
-		<#list command.monitoringPointsByTerm[term]?sort_by("week") as point>
+		<#list command.monitoringPointsByTerm[term]?sort_by("validFromWeek") as point>
 			<div class="item-info row-fluid point">
 				<div class="span12">
-					${point.name} (<@fmt.singleWeekFormat point.week command.academicYearToUse command.department />)
+					${point.name} (<@fmt.singleWeekFormat point.validFromWeek point.requiredFromWeek command.academicYearToUse command.department />)
 				</div>
 			</div>
 		</#list>

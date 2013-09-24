@@ -26,7 +26,8 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 		val existingName = "Point 1"
 		val existingWeek = 1
 		monitoringPoint.name = existingName
-		monitoringPoint.week = existingWeek
+		monitoringPoint.validFromWeek = existingWeek
+		monitoringPoint.requiredFromWeek = existingWeek
 
 		val routeWithAllYears = new Route
 		val routeWithAllYearsCode = "a101"
@@ -162,7 +163,7 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 			thisYearCommand.validate(errors)
 			errors.hasFieldErrors should be (right = true)
 			errors.getFieldErrors("monitoringPoints[0].name").size() should be (1)
-			errors.getFieldErrors("monitoringPoints[0].week").size() should be (1)
+			errors.getFieldErrors("monitoringPoints[0].validFromWeek").size() should be (1)
 		}
 	}
 
@@ -173,7 +174,8 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 			thisYearCommand.monitoringPoints.add(monitoringPoint)
 			val newPoint = new MonitoringPoint
 			newPoint.name = existingName
-			newPoint.week = existingWeek
+			newPoint.validFromWeek = existingWeek
+			newPoint.requiredFromWeek = existingWeek
 			thisYearCommand.monitoringPoints.add(newPoint)
 			var errors = new BindException(thisYearCommand, "command")
 			thisYearCommand.validate(errors)

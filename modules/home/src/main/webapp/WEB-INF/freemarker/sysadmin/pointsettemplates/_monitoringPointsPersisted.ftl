@@ -2,7 +2,7 @@
 	<#if command.template.points?size == 0>
 		<div class="striped-section">
 			<div class="pull-right">
-				<a href="<@url page="/sysadmin/pointsettemplates/${command.template.id}/points/add" />" class="btn btn-primary new-point"><i class="icon-plus"></i> Create new point</a>
+				<a href="<@url page="/sysadmin/pointsettemplates/${command.template.id}/edit/points/add" />" class="btn btn-primary new-point"><i class="icon-plus"></i> Create new point</a>
 			</div>
 			<h2 class="section-title">Monitoring points</h2>
 			<div class="striped-section-contents">
@@ -14,7 +14,7 @@
 	<#else>
 		<div class="striped-section">
 			<div class="pull-right">
-            	<a href="<@url page="/sysadmin/pointsettemplates/${command.template.id}/points/add" />" class="btn btn-primary new-point"><i class="icon-plus"></i> Create new point</a>
+            	<a href="<@url page="/sysadmin/pointsettemplates/${command.template.id}/edit/points/add" />" class="btn btn-primary new-point"><i class="icon-plus"></i> Create new point</a>
             </div>
 			<h2 class="section-title">Monitoring points</h2>
         	<div class="striped-section-contents">
@@ -22,10 +22,10 @@
             		<div class="item-info row-fluid point">
 						<div class="span12">
 							<div class="pull-right">
-								<a class="btn btn-primary edit-point" href="<@url page="/sysadmin/pointsettemplates/${command.template.id}/points/${point.id}/edit"/>">Edit</a>
-								<a class="btn btn-danger delete-point" title="Delete" href="<@url page="/sysadmin/pointsettemplates/${command.template.id}/points/${point.id}/delete"/>"><i class="icon-remove"></i></a>
+								<a class="btn btn-primary edit-point" href="<@url page="/sysadmin/pointsettemplates/${command.template.id}/edit/points/${point.id}/edit"/>">Edit</a>
+								<a class="btn btn-danger delete-point" title="Delete" href="<@url page="/sysadmin/pointsettemplates/${command.template.id}/edit/points/${point.id}/delete"/>"><i class="icon-remove"></i></a>
 							</div>
-							${point.name} (week ${point.week})
+							${point.name} (week ${point.validFromWeek} - ${point.requiredFromWeek})
 						</div>
 					</div>
             	</#list>

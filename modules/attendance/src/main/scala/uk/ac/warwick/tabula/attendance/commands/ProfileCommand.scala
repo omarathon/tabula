@@ -5,9 +5,8 @@ import uk.ac.warwick.tabula.commands.{ReadOnly, Unaudited, ComposableCommand, Co
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPointSet, MonitoringPoint}
 import scala.collection.JavaConverters._
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.permissions.Permissions
 
 object ProfileCommand {
@@ -50,16 +49,18 @@ abstract class ProfileCommand(val studentCourseDetails: StudentCourseDetails, va
 
 	private def applyForPointSet(pointSet: MonitoringPointSet) = {
 		monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, pointSet.academicYear)
-
-		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, pointSet.academicYear)
 		checkpointState = monitoringPointService
-			.getCheckedForWeek(Seq(studentCourseDetails.student), pointSet, currentAcademicWeek)(studentCourseDetails.student)
-			.map{
-			case (point, option) => point.id -> option
+			.getChecked(Seq(studentCourseDetails.student), pointSet)(studentCourseDetails.student)
+			.map{	case (point, option) => point.id -> (option match {
+				case Some(state) => state.dbValue
+				case _ => "late"
+			})
 		}
 
 		missedCountByTerm = monitoringPointsByTerm.map{
-			case (termName, points) => termName -> points.count(p => !checkpointState(p.id).getOrElse(true))
+			case (termName, points) => termName -> points.count(
+				p => checkpointState(p.id).equals(MonitoringCheckpointState.MissedUnauthorised.dbValue)
+			)
 		}.filter{
 			case (termName, count) => count > 0
 		}
@@ -81,6 +82,6 @@ trait ProfileCommandState {
 	def academicYear: AcademicYear
 
 	var monitoringPointsByTerm: Map[String, Seq[MonitoringPoint]] = _
-	var checkpointState: Map[String, Option[Boolean]] = _
+	var checkpointState: Map[String, String] = _
 	var missedCountByTerm: Map[String, Int] = _
 }

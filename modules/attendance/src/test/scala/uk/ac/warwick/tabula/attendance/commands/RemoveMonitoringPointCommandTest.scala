@@ -22,12 +22,14 @@ class RemoveMonitoringPointCommandTest extends TestBase with Mockito {
 		val existingName = "Point 1"
 		val existingWeek = 1
 		monitoringPoint.name = existingName
-		monitoringPoint.week = existingWeek
+		monitoringPoint.validFromWeek = existingWeek
+		monitoringPoint.requiredFromWeek = existingWeek
 		val otherMonitoringPoint = new MonitoringPoint
 		val otherExistingName = "Point 2"
 		val otherExistingWeek = 2
 		otherMonitoringPoint.name = otherExistingName
-		otherMonitoringPoint.week = otherExistingWeek
+		otherMonitoringPoint.validFromWeek = otherExistingWeek
+		otherMonitoringPoint.requiredFromWeek = otherExistingWeek
 		set.points = JArrayList(monitoringPoint, otherMonitoringPoint)
 		val command = new RemoveMonitoringPointCommand(set, monitoringPoint) with CommandTestSupport
 	}

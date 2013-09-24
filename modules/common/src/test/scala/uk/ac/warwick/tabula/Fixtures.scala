@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringCheckpointState, MonitoringPoint}
 import org.joda.time.DateTime
 
 // scalastyle:off magic.number
@@ -176,11 +176,19 @@ object Fixtures {
 		scyd
 	}
 
-	def monitoringPoint(name: String = "name", defaultValue: Boolean = false, week: Int = 0) = {
+	def monitoringPoint(name: String = "name", validFromWeek: Int = 0, requiredFromWeek: Int = 0) = {
 		val point = new MonitoringPoint
 		point.name = name
-		point.week = week
-		point.defaultValue = defaultValue
+		point.validFromWeek = validFromWeek
+		point.requiredFromWeek = requiredFromWeek
 		point
+	}
+
+	def monitoringCheckpoint(point: MonitoringPoint, studentCourseDetails: StudentCourseDetails, state: MonitoringCheckpointState) = {
+		val checkpoint = new MonitoringCheckpoint
+		checkpoint.point = point
+		checkpoint.studentCourseDetail = studentCourseDetails
+		checkpoint.state = state
+		checkpoint
 	}
 }

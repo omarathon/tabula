@@ -9,7 +9,7 @@ import scala.collection.mutable
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPoint, MonitoringPointSet}
 import scala.Some
 
 object ViewMonitoringPointSetsCommand {
@@ -36,13 +36,20 @@ abstract class ViewMonitoringPointSetsCommand(
 		pointSetOption match {
 			case Some(p) => {
 				val members = getMembers(p)
-				val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
-				membersWithMissedCheckpoints = monitoringPointService.getCheckedForWeek(members, p, currentAcademicWeek).filter{
+				//val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
+				val currentAcademicWeek = 30
+				membersWithMissedOrLateCheckpoints = monitoringPointService.getChecked(members, p).filter{
 					case (member, checkMap) =>
 						checkMap.exists{
-							case (_, Some(b)) => !b
+							case (_, Some(MonitoringCheckpointState.MissedUnauthorised)) => true
+							case (point, None) => currentAcademicWeek >= point.requiredFromWeek
 							case _ => false
 						}
+				}.map{ case(member, checkMap) =>
+					member -> checkMap.map{ case(point, option) => point -> (option match {
+						case Some(state) => state.dbValue
+						case _ => "late"
+					})}
 				}
 			}
 			case None =>
@@ -98,12 +105,12 @@ trait ViewMonitoringPointSetsState extends RouteServiceComponent with Monitoring
 
 	def monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, academicYear)
 
-	var membersWithMissedCheckpoints: Map[StudentMember, Map[MonitoringPoint, Option[Boolean]]] = _
+	var membersWithMissedOrLateCheckpoints: Map[StudentMember, Map[MonitoringPoint, String]] = _
 
 	def missedCheckpointsByMember(member: StudentMember) =
-		membersWithMissedCheckpoints(member)
+		membersWithMissedOrLateCheckpoints(member)
 
 	def missedCheckpointsByMemberByPoint(member: StudentMember, point: MonitoringPoint) =
-		membersWithMissedCheckpoints(member)(point)
+		membersWithMissedOrLateCheckpoints(member)(point)
 
 }

@@ -46,7 +46,7 @@
 		}
 
 		var cloneRow = function(row, className) {
-			row.before(row.clone())
+			row.before(row.clone(true))
 				.css("width", row.width())
 				.addClass(className);
 		};
