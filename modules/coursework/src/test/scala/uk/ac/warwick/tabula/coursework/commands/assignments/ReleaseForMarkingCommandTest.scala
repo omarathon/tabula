@@ -7,7 +7,7 @@ import java.util
 import uk.ac.warwick.tabula.helpers.Tap.tap
 import uk.ac.warwick.tabula.data.SessionComponent
 import org.hibernate.Session
-import uk.ac.warwick.tabula.services.StateService
+import uk.ac.warwick.tabula.services.{FeedbackService, StateService}
 
 class ReleaseForMarkingCommandTest extends TestBase  with Mockito{
 
@@ -63,11 +63,11 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito{
 					a.module = new Module().tap(_.id = "module_id")
 			}
 
-			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser) with SessionComponent{
-				protected def session: Session = mock[Session]
-			}
+			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser) 
 			cmd.students = Seq("1", "2", "3").asJava
 			cmd.stateService = mock[StateService]
+			cmd.feedbackService = mock[FeedbackService]
+
 
 			val feedbacks = cmd.applyInternal()
 			feedbacks.length should be (3)
@@ -84,11 +84,10 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito{
 					a.module = new Module().tap(_.id = "module_id")
 			}
 
-			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser) with SessionComponent{
-				protected def session: Session = mock[Session]
-			}
+			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser)
 			cmd.students = Seq("1", "2", "3").asJava
 			cmd.stateService = mock[StateService]
+			cmd.feedbackService = mock[FeedbackService]
 
 			val feedbacks = cmd.applyInternal()
 			feedbacks.length should be (2)

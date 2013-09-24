@@ -4,7 +4,7 @@ import collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands.{SelfValidating, Description, Command}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{StateService, AssignmentService}
+import uk.ac.warwick.tabula.services.{FeedbackService, StateService, AssignmentService}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
@@ -14,13 +14,13 @@ import scala.collection.JavaConverters._
 
 class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser) 
 	extends Command[List[Feedback]] with SelfValidating  {
-	this:SessionComponent=>
-	
+
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.ReleaseForMarking, assignment)
 	
 	var assignmentService = Wire.auto[AssignmentService]
 	var stateService = Wire.auto[StateService]
+	var feedbackService = Wire[FeedbackService]
 
 	var students: JList[String] = JArrayList()
 	var confirm: Boolean = false
@@ -43,7 +43,7 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 				newFeedback.uploaderId = currentUser.apparentId
 				newFeedback.universityId = uniId
 				newFeedback.released = false
-				session.saveOrUpdate(newFeedback)
+				feedbackService.saveOrUpdate(newFeedback)
 				newFeedback
 			})
 			parentFeedback
