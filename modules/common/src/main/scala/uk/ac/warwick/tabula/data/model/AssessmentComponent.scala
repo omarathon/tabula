@@ -51,7 +51,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour {
 	 * The type of component. Typical values are A for assignment,
 	 * E for summer exam. Other values exist.
 	 */
-	@Type(`type`="uk.ac.warwick.tabula.data.model.AssessmentCodeUserType")
+	@Type(`type`="uk.ac.warwick.tabula.data.model.AssessmentTypeUserType")
 	@Column(nullable=false)
 	var assessmentType: AssessmentType = _
 

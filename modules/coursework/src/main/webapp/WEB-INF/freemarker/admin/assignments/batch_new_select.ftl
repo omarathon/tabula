@@ -136,10 +136,10 @@ first page of the form to setup a bunch of assignments from SITS.
 		</#if>
 	</td>
 	<td class="selectable">
-		${item.upstreamAssignment.moduleCode?upper_case}
+		${item.assessmentComponent.moduleCode?upper_case}
 	</td>
 	<td class="selectable">
-		${item.upstreamAssignment.sequence}
+		${item.sequence}
 	</td>
 	<td class="selectable">
 		${item.occurrence}

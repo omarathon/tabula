@@ -31,7 +31,7 @@ abstract class AbstractIntegerUserType[A <: Object : ClassTag] extends AbstractB
  * implicit JInteger=>A factory. One of the places the Scala compiler will look for this
  * is in the companion object for A, so defining an implicit def there will do the job.
  */
-abstract class ConvertibleIntegerUserType[A >: Null <: Convertible[JInteger]](implicit factory: JInteger => A, classTag: ClassTag[A]) extends AbstractIntegerUserType[A] {
+class ConvertibleIntegerUserType[A >: Null <: Convertible[JInteger]](implicit factory: JInteger => A, classTag: ClassTag[A]) extends AbstractIntegerUserType[A] {
 	final override def convertToValue(obj: A) = obj.value
 	final override def convertToObject(value: JInteger) = factory(value)
 	final val nullValue = null

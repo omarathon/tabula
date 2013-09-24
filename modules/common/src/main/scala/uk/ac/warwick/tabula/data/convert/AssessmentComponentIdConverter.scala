@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.system.TwoWayConverter
 
-class UpstreamAssignmentIdConverter extends TwoWayConverter[String, AssessmentComponent] {
+class AssessmentComponentIdConverter extends TwoWayConverter[String, AssessmentComponent] {
 
 	@Autowired var service: AssignmentMembershipService = _
 

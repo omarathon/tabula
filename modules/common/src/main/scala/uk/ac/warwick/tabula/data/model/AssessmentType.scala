@@ -23,6 +23,6 @@ object AssessmentType {
 }
 
 // usertype for hib, converter for spring
-class AssessmentCodeUserType extends ConvertibleStringUserType[AssessmentType]
-class AssessmentCodeConverter extends ConvertibleConverter[String, AssessmentType]
+class AssessmentTypeUserType extends ConvertibleStringUserType[AssessmentType]
+class AssessmentTypeConverter extends ConvertibleConverter[String, AssessmentType]
 
