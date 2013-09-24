@@ -166,7 +166,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		upstream.moduleCode = "ch101"
 		upstream.sequence = "A01"
 		upstream.assessmentGroup = "A"
-		upstream.assessmentCode = AssessmentCode.Assignment
+		upstream.assessmentType = AssessmentType.Assignment
 		upstream.name = "Egg plants"
 
 		assignmentMembershipService.save(upstream)
@@ -176,7 +176,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		upstream2.moduleCode = "ch101"
 		upstream2.sequence = "A01"
 		upstream2.assessmentGroup = "A"
-		upstream2.assessmentCode = AssessmentCode.Assignment
+		upstream2.assessmentType = AssessmentType.Assignment
 		upstream2.name = "Greg's plants"
 
 		assignmentMembershipService.save(upstream2)
@@ -283,7 +283,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		ua.moduleCode = "LA155-10"
 		ua.sequence = "A01"
 		ua.assessmentGroup = "A"
-		ua.assessmentCode = AssessmentCode.Assignment
+		ua.assessmentType = AssessmentType.Assignment
 		ua.name = "Egg plants"
 
 		assignmentMembershipService.save(ua) should be (ua)
@@ -314,7 +314,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		ua1.moduleCode = "CH101-10"
 		ua1.sequence = "A01"
 		ua1.assessmentGroup = "A"
-		ua1.assessmentCode = AssessmentCode.Assignment
+		ua1.assessmentType = AssessmentType.Assignment
 		ua1.name = "Egg plants"
 
 		val ua2 = new AssessmentComponent
@@ -322,7 +322,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		ua2.moduleCode = "CH101-20"
 		ua2.sequence = "A02"
 		ua2.assessmentGroup = "A"
-		ua2.assessmentCode = AssessmentCode.Assignment
+		ua2.assessmentType = AssessmentType.Assignment
 		ua2.name = "Egg plants"
 
 		val ua3 = new AssessmentComponent
@@ -330,7 +330,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		ua3.moduleCode = "LA101-10"
 		ua3.sequence = "A01"
 		ua3.assessmentGroup = "A"
-		ua3.assessmentCode = AssessmentCode.Assignment
+		ua3.assessmentType = AssessmentType.Assignment
 		ua3.name = "Egg plants"
 
 		val ua4 = new AssessmentComponent
@@ -338,7 +338,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		ua4.moduleCode = "LA101-10"
 		ua4.sequence = "A02"
 		ua4.assessmentGroup = "A"
-		ua4.assessmentCode = AssessmentCode.Assignment
+		ua4.assessmentType = AssessmentType.Assignment
 		ua4.name = "Egg plants NOT IN USE"
 
 		assignmentMembershipService.save(ua1) should be (ua1)
@@ -376,7 +376,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		upstreamAssignment.moduleCode = "ch101-10"
 		upstreamAssignment.sequence = "A01"
 		upstreamAssignment.assessmentGroup = "A"
-		upstreamAssignment.assessmentCode = AssessmentCode.Assignment
+		upstreamAssignment.assessmentType = AssessmentType.Assignment
 		upstreamAssignment.name = "Egg plants"
 
 		assignmentMembershipService.save(upstreamAssignment) should be (upstreamAssignment)
@@ -490,7 +490,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		up1.moduleCode = "ch101"
 		up1.sequence = "A01"
 		up1.assessmentGroup = "A"
-		up1.assessmentCode = AssessmentCode.Assignment
+		up1.assessmentType = AssessmentType.Assignment
 		up1.name = "Egg plants"
 
 		val upstream1 = assignmentMembershipService.save(up1)
@@ -500,7 +500,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		up2.moduleCode = "ch101"
 		up2.sequence = "A02"
 		up2.assessmentGroup = "B"
-		up2.assessmentCode = AssessmentCode.Assignment
+		up2.assessmentType = AssessmentType.Assignment
 		up2.name = "Greg's plants"
 
 		val upstream2 = assignmentMembershipService.save(up2)
@@ -510,7 +510,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		up3.moduleCode = "ch101"
 		up3.sequence = "A03"
 		up3.assessmentGroup = "C"
-		up3.assessmentCode = AssessmentCode.Assignment
+		up3.assessmentType = AssessmentType.Assignment
 		up3.name = "Steg's plants"
 
     val upstream3 = assignmentMembershipService.save(up3)

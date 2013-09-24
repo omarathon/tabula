@@ -97,7 +97,7 @@ object Fixtures {
 		a.moduleCode = "%s1%02d-30" format (departmentCode.toUpperCase, number)
 		a.assessmentGroup = "A"
 		a.sequence = "A%02d" format number
-		a.assessmentCode = AssessmentCode.Assignment
+		a.assessmentType = AssessmentType.Assignment
 		a
 	}
 

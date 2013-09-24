@@ -27,7 +27,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			law.assessmentGroup = "A"
 			law.sequence = "A02"
 			law.departmentCode = "la"
-			law.assessmentCode = AssessmentCode.Assignment
+			law.assessmentType = AssessmentType.Assignment
 			law.name = "Cool Essay"
 
 			val assessmentGroup2010 = new AssessmentGroup

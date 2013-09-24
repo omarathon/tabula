@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.data.model.{AssessmentCode, UpstreamAssessmentGroup, AssessmentComponent, Department, Route}
+import uk.ac.warwick.tabula.data.model.{AssessmentType, UpstreamAssessmentGroup, AssessmentComponent, Department, Route}
 import uk.ac.warwick.tabula.roles.StudentRelationshipAgentRoleDefinition
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
@@ -74,7 +74,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		upstreamAssignment.sequence = "A"
 		upstreamAssignment.moduleCode = "XXX101-30"
 		upstreamAssignment.name = "Assignment from SITS"
-		upstreamAssignment.assessmentCode = AssessmentCode.Assignment
+		upstreamAssignment.assessmentType = AssessmentType.Assignment
 		session.save(upstreamAssignment)
 
 		val upstreamAssessmentGroup = new UpstreamAssessmentGroup

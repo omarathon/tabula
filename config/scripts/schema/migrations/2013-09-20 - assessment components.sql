@@ -11,6 +11,6 @@ DROP COLUMN OCCURRENCE;
 
 -- now known as AssessmentComponent
 ALTER TABLE UPSTREAMASSIGNMENT
-	ADD ASSESSMENTCODE NVARCHAR2(32);
+	ADD ASSESSMENTTYPE NVARCHAR2(32);
 
 -- to come in an upcoming migration: NOT NULL constraint

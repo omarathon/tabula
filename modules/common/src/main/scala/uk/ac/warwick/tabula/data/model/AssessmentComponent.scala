@@ -53,7 +53,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour {
 	 */
 	@Type(`type`="uk.ac.warwick.tabula.data.model.AssessmentCodeUserType")
 	@Column(nullable=false)
-	var assessmentCode: AssessmentCode = _
+	var assessmentType: AssessmentType = _
 
 	/**
 	 * Returns moduleCode without CATS. e.g. in304
@@ -84,7 +84,7 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour {
 		sequence = other.sequence
 		departmentCode = other.departmentCode
 		name = other.name
-		assessmentCode = other.assessmentCode
+		assessmentType = other.assessmentType
 	}
 	
 	def upstreamAssessmentGroups(year: AcademicYear) = membershipService.getUpstreamAssessmentGroups(this, year)

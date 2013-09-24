@@ -14,7 +14,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{AssessmentCode, UpstreamAssessmentGroup, AssessmentComponent}
+import uk.ac.warwick.tabula.data.model.{AssessmentType, UpstreamAssessmentGroup, AssessmentComponent}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.SprCode
 import org.springframework.context.annotation.Profile
@@ -147,7 +147,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			a.name = "Coursework"
 			a.assessmentGroup = "A"
 			a.departmentCode = d.code.toUpperCase
-			a.assessmentCode = AssessmentCode.Assignment
+			a.assessmentType = AssessmentType.Assignment
 			a
 		}
 	
@@ -222,7 +222,7 @@ object AssignmentImporter {
 			a.name = rs.getString("name")
 			a.assessmentGroup = rs.getString("assessment_group")
 			a.departmentCode = rs.getString("department_code")
-			a.assessmentCode = AssessmentCode(rs.getString("assessment_code"))
+			a.assessmentType = AssessmentType(rs.getString("assessment_code"))
 			a
 		}
 	}

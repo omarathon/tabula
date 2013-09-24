@@ -138,8 +138,8 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 			.add(Restrictions.like("moduleCode", module.code.toUpperCase + "-%"))
 			.add(
 				Restrictions.or(
-					Restrictions.isNull("assessmentCode"), // temporary, to handle legacy data (TAB-1174)
-					Restrictions.eq("assessmentCode", AssessmentCode.Assignment)
+					Restrictions.isNull("assessmentType"), // temporary, to handle legacy data (TAB-1174)
+					Restrictions.eq("assessmentType", AssessmentType.Assignment)
 				)
 			 )
 			.addOrder(Order.asc("sequence"))
@@ -152,8 +152,8 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 			.add(Restrictions.eq("departmentCode", department.code.toUpperCase))
 			.add(
 				Restrictions.or(
-					Restrictions.isNull("assessmentCode"), // temporary, to handle legacy data (TAB-1174)
-					Restrictions.eq("assessmentCode", AssessmentCode.Assignment)
+					Restrictions.isNull("assessmentType"), // temporary, to handle legacy data (TAB-1174)
+					Restrictions.eq("assessmentType", AssessmentType.Assignment)
 				)
 			)
 			.addOrder(Order.asc("moduleCode"))
