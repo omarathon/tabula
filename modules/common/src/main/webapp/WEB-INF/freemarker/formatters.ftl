@@ -133,7 +133,7 @@
 		<#assign page = page + "/" />
 	</#if>
 
-	<#local attachment />
+	<#local attachment = "" />
 
 	<#if !attachments?is_enumerable>
 		<#-- assume it's a FileAttachment -->
