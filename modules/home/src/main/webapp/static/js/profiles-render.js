@@ -276,12 +276,12 @@
 		} else {
 			//Set the modal body height and disable overflow
 			var $frame = $(frame)
-			var frameHeight = $frame.contents().find("html").height();
+			var frameHeight = frame.contentWindow.document.body.scrollHeight
 			var $modalBody = $("#note-modal .modal-body")
 
 			$modalBody.height(frameHeight);
 
-			if(frameHeight < 400) {
+			if(frameHeight < 500) {
 				$modalBody.css("overflow-y", "hidden")
 			} else {
 				$modalBody.css("overflow-y", "auto")
