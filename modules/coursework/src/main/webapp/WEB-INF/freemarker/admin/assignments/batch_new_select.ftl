@@ -136,7 +136,7 @@ first page of the form to setup a bunch of assignments from SITS.
 		</#if>
 	</td>
 	<td class="selectable">
-		${item.assessmentComponent.moduleCode?upper_case}
+		${item.upstreamAssignment.moduleCode?upper_case}
 	</td>
 	<td class="selectable">
 		${item.sequence}
