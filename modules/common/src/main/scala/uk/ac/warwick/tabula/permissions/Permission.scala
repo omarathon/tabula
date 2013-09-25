@@ -310,6 +310,7 @@ object Permissions {
 
 	object MemberNotes {
 		case object Read extends Permission("View member notes")
+		case object ReadMetadata extends Permission("View metadata on member notes")
 		case object Create extends Permission("Create member notes")
 		case object Update extends Permission("Edit member notes")
 		case object Delete extends Permission("Delete member notes")

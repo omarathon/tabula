@@ -11,14 +11,15 @@ import org.joda.time.DateTime
 import org.springframework.validation.{Errors, BindingResult}
 import scala.language.implicitConversions
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{MemberNoteService, ProfileService}
+import uk.ac.warwick.tabula.services.{FileAttachmentService, MemberNoteService, ProfileService}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.data.Daoisms
+import scala.collection.mutable
 
-abstract class ModifyMemberNoteCommand(val member: Member, val submitter: CurrentUser) extends Command[MemberNote] with BindListener with SelfValidating with Daoisms  {
+abstract class ModifyMemberNoteCommand(val member: Member, val submitter: CurrentUser) extends Command[MemberNote] with BindListener with SelfValidating  {
 
 	var profileService = Wire[ProfileService]
 	var memberNoteService = Wire[MemberNoteService]
+	var fileAttachmentService = Wire[FileAttachmentService]
 
 	var note: String = _
 	var title: String = _
@@ -45,10 +46,9 @@ abstract class ModifyMemberNoteCommand(val member: Member, val submitter: Curren
 
 		if (memberNote.attachments != null) {
 			val filesToKeep = Option(attachedFiles).map(_.asScala.toList).getOrElse(List())
-			val filesToRemove = memberNote.attachments.asScala -- filesToKeep
+			val filesToRemove: mutable.Buffer[FileAttachment] = memberNote.attachments.asScala -- filesToKeep
 			memberNote.attachments = JArrayList[FileAttachment](filesToKeep)
-			// shouldn't we have a service to do this
-			filesToRemove.foreach(session.delete(_))
+			fileAttachmentService.deleteAttachments(filesToRemove)
 		}
 
 		if (!file.attached.isEmpty) {

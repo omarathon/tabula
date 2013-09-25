@@ -11,6 +11,8 @@ import org.springframework.validation.Errors
 
 class DeleteMemberNoteCommand(val memberNote: MemberNote, val member: Member, val user: CurrentUser) extends Command[MemberNote] with SelfValidating {
 
+	mustBeLinked(memberNote, member)
+
 	var memberNoteService = Wire[MemberNoteService]
 
 	PermissionCheck(Permissions.MemberNotes.Delete, memberNote)
@@ -21,8 +23,7 @@ class DeleteMemberNoteCommand(val memberNote: MemberNote, val member: Member, va
 			memberNote
 	}
 	def validate(errors:Errors) {
-		// this just validates the url really
-		if (!memberNote.member.universityId.equals(member.universityId)) errors.reject("profiles.memberNote.wrongUser")
+		if (memberNote.deleted) errors.reject("profiles.memberNote.delete.notDeleted")
 	}
 
 	// describe the thing that's happening.

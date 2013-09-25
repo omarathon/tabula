@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.spring.Wire
-import org.hibernate.criterion.{Order, Restrictions}
+import org.hibernate.criterion.Order._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model._
 
@@ -25,13 +25,12 @@ trait MemberNoteDao {
 class MemberNoteDaoImpl extends MemberNoteDao with Daoisms {
 	def getById(id: String): Option[MemberNote] = getById[MemberNote](id)
 
-	def list(student: Member, includeDeleted: Boolean): Seq[MemberNote] =
-		{
-			val criteria = session.newCriteria[MemberNote].add(Restrictions.eq("member", student))
+	def list(student: Member, includeDeleted: Boolean): Seq[MemberNote] =	{
+			val criteria = session.newCriteria[MemberNote].add(is("member", student))
 			if (!includeDeleted) {
-				criteria.add(Restrictions.eq("deleted", false))
+				criteria.add(is("deleted", false))
 			}
-			criteria.addOrder(Order.desc("lastUpdatedDate")).seq
+			criteria.addOrder(desc("lastUpdatedDate")).seq
 	}
 
 	def saveOrUpdate(memberNote: MemberNote) = session.saveOrUpdate(memberNote)

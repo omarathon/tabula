@@ -9,6 +9,9 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
 
 class PurgeMemberNoteCommand (val memberNote: MemberNote, val member: Member, val user: CurrentUser) extends Command[Unit] with SelfValidating {
+
+	mustBeLinked(memberNote, member)
+
 	var memberNoteService = Wire[MemberNoteService]
 
 	PermissionCheck(Permissions.MemberNotes.Delete, memberNote)
@@ -17,8 +20,6 @@ class PurgeMemberNoteCommand (val memberNote: MemberNote, val member: Member, va
 
 	def validate(errors:Errors) {
 		if (!memberNote.deleted) errors.reject("profiles.memberNote.delete.notDeleted")
-
-		if (!memberNote.member.universityId.equals(member.universityId)) errors.reject("profiles.memberNote.wrongUser")
 	}
 
 	def describe(d: Description) {

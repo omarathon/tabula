@@ -11,6 +11,8 @@ import org.springframework.validation.Errors
 
 class RestoreMemberNoteCommand (val memberNote: MemberNote, val member: Member, val user: CurrentUser) extends Command[MemberNote] with SelfValidating {
 
+	mustBeLinked(memberNote, member)
+
 	var memberNoteService = Wire[MemberNoteService]
 
 	PermissionCheck(Permissions.MemberNotes.Delete, memberNote)
@@ -22,8 +24,6 @@ class RestoreMemberNoteCommand (val memberNote: MemberNote, val member: Member, 
 	}
 	def validate(errors:Errors) {
 		if (!memberNote.deleted) errors.reject("profiles.memberNote.restore.notDeleted")
-
-		if (!memberNote.member.universityId.equals(member.universityId)) errors.reject("profiles.memberNote.wrongUser")
 	}
 
 	def describe(d: Description) {
