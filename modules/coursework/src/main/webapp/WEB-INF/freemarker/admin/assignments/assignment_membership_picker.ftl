@@ -474,8 +474,10 @@
 
 		<#-- reset on modal close -->
 		$enrolment.on('hidden', '.modal', function(e) {
-			$(this).find('input:checked').removeAttr('checked');
-			$(this).find('.spinnable').spin(false);
+			if (this == e.target) { // ignore 'hidden' events from within the modal
+				$(this).find('input:checked').removeAttr('checked');
+				$(this).find('.spinnable').spin(false);
+			}
 		});
 
 		<#-- remove user from enrolment table -->
