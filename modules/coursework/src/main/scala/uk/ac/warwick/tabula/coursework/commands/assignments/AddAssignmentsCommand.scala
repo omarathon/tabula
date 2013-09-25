@@ -2,30 +2,23 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.{ SelfValidating, Description, Command }
-import reflect.BeanProperty
+import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.{LazyMaps, LazyLists}
-import uk.ac.warwick.tabula.data.model.{ Department, AssessmentComponent }
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{ DateFormats, AcademicYear }
 import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.{ Autowired, Configurable }
 import uk.ac.warwick.tabula.services.AssignmentService
 import org.springframework.validation.Errors
-import org.apache.commons.collections.map.LazyMap
-import org.apache.commons.collections.Factory
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.ValidationUtils
-import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.ModuleDao
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
-import uk.ac.warwick.tabula.data.model.AssessmentGroup
 
 
 /**
@@ -246,7 +239,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 
 	def fetchAssignmentItems(): JList[AssignmentItem] = {
 		for {
-			upstreamAssignment <- assignmentMembershipService.getUpstreamAssignments(department);
+			upstreamAssignment <- assignmentMembershipService.getAssessmentComponents(department);
 			assessmentGroup <- assignmentMembershipService.getUpstreamAssessmentGroups(upstreamAssignment, academicYear).sortBy{ _.occurrence }
 		} yield {
 			val item = new AssignmentItem(
@@ -258,8 +251,15 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 		}
 	}
 
-	def shouldIncludeByDefault(assignment: AssessmentComponent) = {
-		// currently just exclude "Audit Only" assignments.
-		assignment.sequence != "AO"
-	}
+	/**
+	 * Determines whether this component should have its checkbox checked
+	 * by default when first loading up the list of assignments. We exclude
+	 * any items that most people probably won't want to import, but they
+	 * can alter this choice before continuing.
+	 */
+	def shouldIncludeByDefault(component: AssessmentComponent) =
+		component.assessmentType == AssessmentType.Assignment &&
+		component.assessmentGroup != "AO"
+
+
 }
