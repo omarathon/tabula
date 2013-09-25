@@ -1,19 +1,19 @@
 <#escape x as x?html>
 
-
-<#-- STATE INPUTS - These are important!
-	 Everytime the membership data is refreshed this template is reloaded and replaces the
-	 form on the page. By doing this the user can see what the membership will look like
-	 after they save. HOWEVER, if we don't render the inputs again then no changes will
-	 be persisted on save.
--->
-<#list command.upstreamGroups as item>
-	<@f.hidden path="upstreamGroups[${item_index}]" cssClass="upstreamGroups" />
-</#list>
-<#-- END OF STATE INPUTS -->
-
 <fieldset id="groupEnrolmentFields">
 <div class="groupEnrolmentInner">
+
+	<#-- STATE INPUTS - These are important!
+		Everytime the membership data is refreshed this template is reloaded and replaces the
+		form on the page. By doing this the user can see what the membership will look like
+		after they save. HOWEVER, if we don't render the inputs again then no changes will
+		be persisted on save.
+		-->
+	<#list command.upstreamGroups as item>
+		<@f.hidden path="upstreamGroups[${item_index}]" cssClass="upstreamGroups" />
+	</#list>
+	<#-- END OF STATE INPUTS -->
+
 	<#-- FIXME: alerts fired post SITS change go here, if controller returns something to say -->
 		<#-- <p class="alert alert-success"><i class="icon-ok"></i> This group set is (now linked|no longer linked) to ${r"${name}"} and ${r"${name}"}</p> -->
 

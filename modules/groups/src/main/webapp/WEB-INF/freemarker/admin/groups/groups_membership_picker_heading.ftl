@@ -1,9 +1,5 @@
 <#escape x as x?html>
 
-		<#list command.upstreamGroups as item>
-			<@f.hidden path="upstreamGroups[${item_index}]" cssClass="upstreamGroups" />
-		</#list>
-
 		<@spring.bind path="members">
 			<#assign membersGroup=status.actualValue />
 		</@spring.bind>
