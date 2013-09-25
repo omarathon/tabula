@@ -20,12 +20,10 @@ class RestoreMemberNoteCommand (val memberNote: MemberNote, val member: Member, 
 		memberNoteService.saveOrUpdate(memberNote)
 		memberNote
 	}
-	def validate(errors:Errors)
-	{
+	def validate(errors:Errors) {
 		if (!memberNote.deleted) errors.reject("profiles.memberNote.restore.notDeleted")
 
-		// not sure we need this
-		if (!memberNote.member.universityId.equals(member.universityId)) errors.reject("")
+		if (!memberNote.member.universityId.equals(member.universityId)) errors.reject("profiles.memberNote.wrongUser")
 	}
 
 	def describe(d: Description) {

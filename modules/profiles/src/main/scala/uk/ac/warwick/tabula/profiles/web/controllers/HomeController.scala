@@ -24,7 +24,6 @@ import uk.ac.warwick.tabula.services.RelationshipService
 	var smallGroupsService = Wire[SmallGroupService]
 	var features = Wire[Features]
 
-
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 
@@ -33,8 +32,6 @@ import uk.ac.warwick.tabula.services.RelationshipService
 			val smallGroups =
 				if (features.smallGroupTeachingTutorView) smallGroupsService.findSmallGroupsByTutor(user.apparentUser)
 				else Nil
-
-
 				
 			// Get all the relationships that the current member is an agent of
 			val downwardRelationships = relationshipService.listAllStudentRelationshipsWithMember(currentMember)

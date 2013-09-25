@@ -15,12 +15,10 @@ class PurgeMemberNoteCommand (val memberNote: MemberNote, val member: Member, va
 
 	protected def applyInternal() = memberNoteService.deleteNote(memberNote)
 
-	def validate(errors:Errors)
-	{
+	def validate(errors:Errors) {
 		if (!memberNote.deleted) errors.reject("profiles.memberNote.delete.notDeleted")
 
-		// not sure we need this
-		if (!memberNote.member.universityId.equals(member.universityId)) errors.reject("")
+		if (!memberNote.member.universityId.equals(member.universityId)) errors.reject("profiles.memberNote.wrongUser")
 	}
 
 	def describe(d: Description) {

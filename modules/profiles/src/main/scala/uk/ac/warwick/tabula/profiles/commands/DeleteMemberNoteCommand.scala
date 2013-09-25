@@ -20,13 +20,9 @@ class DeleteMemberNoteCommand(val memberNote: MemberNote, val member: Member, va
 			memberNoteService.saveOrUpdate(memberNote)
 			memberNote
 	}
-	def validate(errors:Errors)
-{
-		// should any member note be able to be deleted?
-		// should only the creator be able to delete???
-
-		// not sure we need this
-		if (!memberNote.member.universityId.equals(member.universityId)) errors.reject("")
+	def validate(errors:Errors) {
+		// this just validates the url really
+		if (!memberNote.member.universityId.equals(member.universityId)) errors.reject("profiles.memberNote.wrongUser")
 	}
 
 	// describe the thing that's happening.
