@@ -27,7 +27,15 @@ class ViewStudentRelationshipsCommand(val department: Department, val relationsh
 
 	override def applyInternal(): RelationshipGraph = transactional(readOnly = true) {
 		// get all agent/student relationships by dept
-		val unsortedAgentRelationships = relationshipService.listStudentRelationshipsByDepartment(relationshipType, department)
+
+		// all students in department X
+		val unsortedAgentRelationshipsByStudentDept = relationshipService.listStudentRelationshipsByDepartment(relationshipType, department)
+
+		// all students with a tutor in department X
+		val unsortedAgentRelationshipsByStaffDept = relationshipService.listStudentRelationshipsByStaffDepartment(relationshipType, department)
+
+		// combine the two and remove the dups
+		val unsortedAgentRelationships = (unsortedAgentRelationshipsByStudentDept ++unsortedAgentRelationshipsByStaffDept).distinct
 
 		// group into map by agent id
 		val groupedAgentRelationships = unsortedAgentRelationships.groupBy(_.agent)
