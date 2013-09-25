@@ -1,7 +1,7 @@
 <#escape x as x?html>
 <div id="agents">
 	<div class="pull-right">
-		<#if features.personalTutorAssignment>
+		<#if features.personalTutorAssignment && !relationshipType.readOnly(department)>
 			<a href="<@routes.relationship_allocate department relationshipType />" class="btn btn-medium pull-right">
 				<i class="icon-random icon-fixed-width"></i> Assign ${relationshipType.description}s</a>
 			</a>
@@ -12,7 +12,7 @@
 
 	<#if studentCount gt 0>
 		<#if missingStudents?has_content>
-			<table class="students table-bordered table-striped table-condensed tabula-purple">
+			<table class="students table table-bordered table-striped table-condensed tabula-purple">
 				<thead>
 					<tr>
 						<th class="student-col">First name</th>
@@ -30,7 +30,7 @@
 							<td><h6>${student.firstName}</h6></td>
 							<td><h6>${student.lastName}</h6></td>
 							<td><a class="profile-link" href="<@routes.profile student />">${student.universityId}</a></td>
-							<td>${student.groupName}</td>
+							<td>${student.groupName!""}</td>
 							<td>
 								${(student.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}
 							</td>
@@ -41,6 +41,10 @@
 					</#list>
 				</tbody>
 			</table>
+			
+			<p>
+				<@fmt.bulk_email_students students=missingStudents subject="${relationshipType.agentRole?cap_first}" />
+			</p>
 		<#else>
 			<p class="alert alert-success"><i class="icon-ok"></i> All students in ${department.name} have ${relationshipType.agentRole}s recorded.</p>
 		</#if>

@@ -1,4 +1,5 @@
 @import "bootstrap/variables.less";
+@import "bootstrap/mixins.less";
 
 @header-colour: @tabulaRedDark;
 
@@ -13,14 +14,12 @@
 }
 
 .ellipsis {
-	overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+	.text-overflow()
 }
 
-	.hint {
-		color: #818285;
-	}
+.hint {
+	color: #818285;
+}
 
 #container .routeAndYearPicker {
 	.span2 {
@@ -59,15 +58,45 @@
 	}
 }
 
-#missed-monitoring-points {
-	.icon-ok { color: @successText; }
-	.icon-remove { color: @errorText; }
-	.missed-count {
-		padding: 2px 5px;
-		background: @tabulaOrangeLight;
-		&.red {
-			background: @errorText;
-			color: white;
-		}
+.recordCheckpointForm .save-row {
+	width:100%;
+	.pull-right {
+		padding-right:2.5em;
 	}
 }
+
+.record-attendance-form-header {
+	background-color: lighten(@tabulaRed, 35%);
+	div.span9 {
+        padding: 15px 0px;
+        span {
+			margin-right: 10px
+		}
+    }
+    div.span3 {
+        padding-top: 9px;
+    }
+}
+
+.icon-ok.attended { color: @successText; }
+.icon-remove.unauthorised { color: @errorText; }
+.icon-remove.authorised { color: @infoText; }
+.icon-warning-sign.late { color: @warningText; }
+
+.monitoring-points-profile {
+	.pull-right .form-inline { margin-bottom: 0px; }
+	h3, .missed-info { display: inline-block; }
+	h3 { margin-right: 20px; }
+	.missed-info {
+		color: @successText;
+		vertical-align: middle;
+		.missed {
+			color: @errorText;
+		}
+	}
+	.row-fluid.point:hover {
+		background-color: @tableBackgroundHover
+	}
+}
+
+.btn-group button { margin-right: 0px; }

@@ -7,9 +7,9 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.permissions.Permissions
 import scala.collection.mutable
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
+import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPoint, MonitoringPointSet}
 import scala.Some
 
 object ViewMonitoringPointSetsCommand {
@@ -28,26 +28,31 @@ object ViewMonitoringPointSetsCommand {
 abstract class ViewMonitoringPointSetsCommand(
 		val dept: Department, val academicYearOption: Option[AcademicYear],
 		val routeOption: Option[Route], val pointSetOption: Option[MonitoringPointSet]
-	)	extends CommandInternal[Unit]	with ViewMonitoringPointSetsState {
+	)	extends CommandInternal[Unit]	with ViewMonitoringPointSetsState with MembersForPointSet {
 
 	self: MonitoringPointServiceComponent with ProfileServiceComponent with TermServiceComponent =>
 
 	override def applyInternal() = {
-		val members = if(pointSet.year == null) {
-			profileService.getStudentsByRoute(pointSet.route)
-		} else {
-			profileService.getStudentsByRoute(
-				pointSet.route,
-				pointSet.academicYear
-			)
-		}
-		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
-		membersWithMissedCheckpoints = monitoringPointService.getCheckedForWeek(members, pointSet, currentAcademicWeek).filter{
-			case (member, checkMap) =>
-				checkMap.exists{
-					case (_, Some(b)) => !b
-					case _ => false
+		pointSetOption match {
+			case Some(p) => {
+				val members = getMembers(p)
+				//val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
+				val currentAcademicWeek = 30
+				membersWithMissedOrLateCheckpoints = monitoringPointService.getChecked(members, p).filter{
+					case (member, checkMap) =>
+						checkMap.exists{
+							case (_, Some(MonitoringCheckpointState.MissedUnauthorised)) => true
+							case (point, None) => currentAcademicWeek >= point.requiredFromWeek
+							case _ => false
+						}
+				}.map{ case(member, checkMap) =>
+					member -> checkMap.map{ case(point, option) => point -> (option match {
+						case Some(state) => state.dbValue
+						case _ => "late"
+					})}
 				}
+			}
+			case None =>
 		}
 	}
 }
@@ -80,7 +85,14 @@ trait ViewMonitoringPointSetsState extends RouteServiceComponent with Monitoring
 				|| s.academicYear.equals(thisAcademicYear)
 				|| s.academicYear.equals(thisAcademicYear.next)
 			)
-		}.flatten.foreach{set =>
+		}.flatten.sortWith{(a, b) =>
+			if (a.year == null)
+				true
+			else if (b.year == null)
+				false
+			else
+				a.year < b.year
+		}.foreach{set =>
 			sets
 				.getOrElseUpdate(set.academicYear.toString, mutable.HashMap())
 				.getOrElseUpdate(set.route, mutable.Buffer())
@@ -88,20 +100,17 @@ trait ViewMonitoringPointSetsState extends RouteServiceComponent with Monitoring
 		}
 		sets
 	}
-	def setsByRouteCodeByAcademicYear(academicYear: String, code: String) =
-		routeService.getByCode(code) match {
-			case Some(r: Route) => setsByRouteByAcademicYear(academicYear)(r)
-			case _ => new ItemNotFoundException()
-	}
+	def setsByRouteCodeByAcademicYear(academicYear: String, route: Route) =
+		setsByRouteByAcademicYear(academicYear)(route)
 
 	def monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, academicYear)
 
-	var membersWithMissedCheckpoints: Map[StudentMember, Map[MonitoringPoint, Option[Boolean]]] = _
+	var membersWithMissedOrLateCheckpoints: Map[StudentMember, Map[MonitoringPoint, String]] = _
 
 	def missedCheckpointsByMember(member: StudentMember) =
-		membersWithMissedCheckpoints(member)
+		membersWithMissedOrLateCheckpoints(member)
 
 	def missedCheckpointsByMemberByPoint(member: StudentMember, point: MonitoringPoint) =
-		membersWithMissedCheckpoints(member)(point)
+		membersWithMissedOrLateCheckpoints(member)(point)
 
 }

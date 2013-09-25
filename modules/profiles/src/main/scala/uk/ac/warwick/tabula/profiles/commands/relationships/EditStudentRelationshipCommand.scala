@@ -37,7 +37,7 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 
 	var agent: Member = _
 
-	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(relationshipType), studentCourseDetails)
+	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), studentCourseDetails)
 
 	// throw this request out if the relationship can't be edited in Tabula for this department
 	if (relationshipType.readOnly(studentCourseDetails.department)) {
@@ -95,7 +95,9 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 		}
 	}
 
-	override def describe(d: Description) = d.property("student SPR code" -> studentCourseDetails.sprCode).property("new agent ID" -> agent.universityId)
+	override def describe(d: Description) = 
+		d.property("student SPR code" -> studentCourseDetails.sprCode)
+		 .property("new agent ID" -> Option(agent).map { _.universityId }.getOrElse(""))
 
 	def emit(modifiedRelationships: Seq[StudentRelationship]): Seq[Notification[StudentRelationship]] = {	
 		val notifications = modifiedRelationships.flatMap(relationship => {

@@ -136,10 +136,10 @@ first page of the form to setup a bunch of assignments from SITS.
 		</#if>
 	</td>
 	<td class="selectable">
-		${item.upstreamAssignment.moduleCode?upper_case}
+		${item.assessmentComponent.moduleCode?upper_case}
 	</td>
 	<td class="selectable">
-		${item.upstreamAssignment.sequence}
+		${item.sequence}
 	</td>
 	<td class="selectable">
 		${item.occurrence}
@@ -203,7 +203,6 @@ first page of the form to setup a bunch of assignments from SITS.
 		<div class="options-group">
 			<@spring.nestedPath path="optionsMap[${optionsId}]">
 				<#include "_common_fields_hidden.ftl" />
-				<#include "_submissions_common_fields.ftl" />
 			</@spring.nestedPath>
 		</div>
 	</#list>
@@ -234,7 +233,6 @@ first page of the form to setup a bunch of assignments from SITS.
 			<@spring.nestedPath path="optionsMap[${optionsId}]">
 				<#-- Include all the common fields as hidden fields -->
 				<#include "_common_fields_hidden.ftl" />
-				<#include "_submissions_common_fields.ftl" />
 			</@spring.nestedPath>
 		</div>
 	</div>

@@ -39,7 +39,7 @@ class ModuleAndDepartmentService extends Logging {
 	def allDepartments = transactional(readOnly = true) {
 		departmentDao.allDepartments
 	}
-	
+
 	def allModules = transactional(readOnly = true) {
 		moduleDao.allModules
 	}
@@ -56,32 +56,36 @@ class ModuleAndDepartmentService extends Logging {
 		moduleDao.getByCode(code)
 	}
 
+	def getModuleBySitsCode(sitsModuleCode: String) = transactional(readOnly = true) {
+		moduleDao.getByCode(Module.stripCats(sitsModuleCode).toLowerCase())
+	}
+
 	def getModuleById(code: String) = transactional(readOnly = true) {
 		moduleDao.getById(code)
 	}
 
 	// We may have a granted role that's overridden later, so we also need to do a security service check as well
 	// as getting the role itself
-	
-	def departmentsWithPermission(user: CurrentUser, permission: Permission): Set[Department] = 
+
+	def departmentsWithPermission(user: CurrentUser, permission: Permission): Set[Department] =
 		permissionsService.getAllPermissionDefinitionsFor[Department](user, permission)
 			.filter { department => securityService.can(user, permission, department) }
 
-	def modulesWithPermission(user: CurrentUser, permission: Permission): Set[Module] = 
+	def modulesWithPermission(user: CurrentUser, permission: Permission): Set[Module] =
 		permissionsService.getAllPermissionDefinitionsFor[Module](user, permission)
 			.filter { module => securityService.can(user, permission, module) }
-	
-	def modulesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Module] = 
+
+	def modulesWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Module] =
 		modulesWithPermission(user, permission).filter { _.department == dept }
-	
+
 	def modulesInDepartmentsWithPermission(user: CurrentUser, permission: Permission) = {
 		departmentsWithPermission(user, permission) flatMap (dept => dept.modules.asScala)
 	}
 	def modulesinDepartmentWithPermission(user: CurrentUser, permission: Permission, dept: Department): Set[Module] = {
 		if (departmentsWithPermission(user, permission) contains dept) dept.modules.asScala.toSet else Set()
 	}
-	
-	private def getRole[A <: PermissionsTarget : ClassTag](target: A, defn: RoleDefinition) = 
+
+	private def getRole[A <: PermissionsTarget : ClassTag](target: A, defn: RoleDefinition) =
 		permissionsService.getGrantedRole(target, defn) match {
 			case Some(role) => role
 			case _ => GrantedRole(target, defn)
@@ -110,7 +114,7 @@ class ModuleAndDepartmentService extends Logging {
 		role.users.removeUser(owner)
 		permissionsService.saveOrUpdate(role)
 	}
-	
+
 	def save(dept: Department) = transactional() {
 		departmentDao.save(dept)
 	}

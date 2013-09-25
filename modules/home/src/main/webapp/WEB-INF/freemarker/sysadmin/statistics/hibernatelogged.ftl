@@ -1,0 +1,1 @@
+<p>Each module should now report hibernate statistics to the log.</p>

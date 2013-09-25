@@ -75,7 +75,9 @@ class SmallGroupTest extends TestBase with Mockito {
     source.name = "name"
     source.groupSet = sourceSet
     source.permissionsService = mock[PermissionsService]
-    source._studentsGroup = mock[UserGroup]
+		// would be nice to use a mock here, but they don't work well with GeneratedId classes
+    source._studentsGroup = UserGroup.ofUniversityIds
+		source._studentsGroup.includeUsers = JArrayList("test user")
     source.deleted = false
     source.id = "123"
     source.events = JArrayList(event)
@@ -96,8 +98,7 @@ class SmallGroupTest extends TestBase with Mockito {
 
     target.permissionsService should be(source.permissionsService)
     target.students should not be(source.students)
-    verify(source._studentsGroup, times(1)).duplicate()
-
+		target.students.hasSameMembersAs(source.students) should be(true)
     target.events.size should be(1)
     target.events.asScala.head should be(clonedEvent)
 

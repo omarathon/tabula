@@ -24,12 +24,8 @@ object DeleteStudentRelationshipTypeCommand {
 			with DeleteStudentRelationshipTypeCommandDescription
 }
 
-trait HasStudentRelationshipType {
-	val relationshipType: StudentRelationshipType
-}
-
 class DeleteStudentRelationshipTypeCommandInternal(val relationshipType: StudentRelationshipType) 
-	extends CommandInternal[StudentRelationshipType] with HasStudentRelationshipType with SelfValidating {
+	extends CommandInternal[StudentRelationshipType] with HasExistingStudentRelationshipType with SelfValidating {
 	this: RelationshipServiceComponent =>
 		
 	override def applyInternal() = transactional() {
@@ -46,13 +42,17 @@ class DeleteStudentRelationshipTypeCommandInternal(val relationshipType: Student
 }
 
 trait DeleteStudentRelationshipTypeCommandPermissions extends RequiresPermissionsChecking {
+	this: HasExistingStudentRelationshipType =>
+	
 	def permissionsCheck(p: PermissionsChecking) {
+		p.mandatory(relationshipType)
 		p.PermissionCheck(Permissions.StudentRelationshipType.Delete)
 	}
 }
 
 trait DeleteStudentRelationshipTypeCommandDescription extends Describable[StudentRelationshipType] {
-	this: HasStudentRelationshipType =>
+	this: HasExistingStudentRelationshipType =>
+		
 	// describe the thing that's happening.
 	override def describe(d: Description) =
 		d.properties(

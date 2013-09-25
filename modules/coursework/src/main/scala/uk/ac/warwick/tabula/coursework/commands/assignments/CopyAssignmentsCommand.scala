@@ -9,10 +9,11 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.model.Department
 
 object CopyAssignmentsCommand {
-	def apply(modules: Seq[Module]) =
-		new CopyAssignmentsCommand(modules: Seq[Module])
+	def apply(department: Department, modules: Seq[Module]) =
+		new CopyAssignmentsCommand(department, modules)
 			with ComposableCommand[Seq[Assignment]]
 			with CopyAssignmentsPermissions
 			with CopyAssignmentsDescription
@@ -21,7 +22,7 @@ object CopyAssignmentsCommand {
 			}
 }
 
-abstract class CopyAssignmentsCommand(val modules: Seq[Module]) extends CommandInternal[Seq[Assignment]]
+abstract class CopyAssignmentsCommand(val department: Department, val modules: Seq[Module]) extends CommandInternal[Seq[Assignment]]
 	with Appliable[Seq[Assignment]] with CopyAssignmentsState with FindAssignmentFields {
 
 	self: AssignmentServiceComponent =>
@@ -92,11 +93,13 @@ abstract class CopyAssignmentsCommand(val modules: Seq[Module]) extends CommandI
 trait CopyAssignmentsPermissions extends ArchiveAssignmentsPermissions {
 	self: CopyAssignmentsState =>
 	override def permissionsCheck(p: PermissionsChecking) {
-		if(archive) {
+		if (archive) {
 			super.permissionsCheck(p)
 		}
-
-		for(module <- modules) {
+		
+		if (modules.isEmpty) p.PermissionCheck(Permissions.Assignment.Create, p.mandatory(department))
+		else for (module <- modules) {
+			p.mustBeLinked(p.mandatory(module), p.mandatory(department))
 			p.PermissionCheck(Permissions.Assignment.Create, module)
 		}
 	}

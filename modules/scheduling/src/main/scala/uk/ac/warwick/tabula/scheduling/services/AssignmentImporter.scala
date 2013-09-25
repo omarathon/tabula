@@ -14,8 +14,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
-import uk.ac.warwick.tabula.data.model.UpstreamAssignment
+import uk.ac.warwick.tabula.data.model.{AssessmentType, UpstreamAssessmentGroup, AssessmentComponent}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.SprCode
 import org.springframework.context.annotation.Profile
@@ -30,7 +29,7 @@ trait AssignmentImporter {
 	
 	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup]
 	
-	def getAllAssignments: Seq[UpstreamAssignment]
+	def getAllAssessmentComponents: Seq[AssessmentComponent]
 }
 
 @Profile(Array("dev", "test", "production")) @Service
@@ -40,17 +39,17 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 	@Resource(name = "academicDataStore") var ads: DataSource = _
 	var assessmentGroupMemberQuery: AssessmentGroupMembersQuery = _
 	var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
-	var upstreamAssignmentQuery: UpstreamAssignmentQuery = _
+	var assessmentComponentQuery: AssessmentComponentQuery = _
 	var jdbc: NamedParameterJdbcTemplate = _
 
 	override def afterPropertiesSet() {
 		assessmentGroupMemberQuery = new AssessmentGroupMembersQuery(ads)
 		upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(ads)
-		upstreamAssignmentQuery = new UpstreamAssignmentQuery(ads)
+		assessmentComponentQuery = new AssessmentComponentQuery(ads)
 		jdbc = new NamedParameterJdbcTemplate(ads)
 	}
 
-	def getAllAssignments: Seq[UpstreamAssignment] = upstreamAssignmentQuery.execute
+	def getAllAssessmentComponents: Seq[AssessmentComponent] = assessmentComponentQuery.execute
 
 	private def yearsToImportArray = yearsToImport.map(_.toString): JList[String]
 
@@ -105,22 +104,21 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 				moduleCode -> (moduleCodesToIds.getOrElse(moduleCode, Seq()) :+ range)
 			)
 		}
-		
-		moduleCodesToIds.foreach { case (moduleCode, ranges) => 
-			ranges.foreach { range => 
-				range.foreach { uniId =>
-					callback(
-						ModuleRegistration(
-							year = AcademicYear.guessByDate(DateTime.now).toString,
-							sprCode = "%d/1".format(uniId),
-							occurrence = "A",
-							moduleCode = "%s-15".format(moduleCode.toUpperCase),
-							assessmentGroup = "A"
-						)
-					)
-				}
-			}
-		}
+
+		for {
+			(moduleCode, ranges) <- moduleCodesToIds
+			range <- ranges
+			uniId <- range
+		} callback(
+			ModuleRegistration(
+				year = AcademicYear.guessByDate(DateTime.now).toString,
+				sprCode = "%d/1".format(uniId),
+				occurrence = "A",
+				moduleCode = "%s-15".format(moduleCode.toUpperCase),
+				assessmentGroup = "A"
+			)
+		)
+
 	}
 	
 	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] =
@@ -137,18 +135,19 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			ag
 		}
 	
-	def getAllAssignments: Seq[UpstreamAssignment] =
+	def getAllAssessmentComponents: Seq[AssessmentComponent] =
 		for {
 			(code, d) <- SandboxData.Departments.toSeq
 			route <- d.routes.values.toSeq
 			moduleCode <- route.moduleCodes
 		} yield {
-			val a = new UpstreamAssignment
+			val a = new AssessmentComponent
 			a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
 			a.sequence = "A01"
 			a.name = "Coursework"
 			a.assessmentGroup = "A"
 			a.departmentCode = d.code.toUpperCase
+			a.assessmentType = AssessmentType.Assignment
 			a
 		}
 	
@@ -179,12 +178,11 @@ case class ModuleRegistration(year: String, sprCode: String, occurrence: String,
 
 object AssignmentImporter {
 
-	val GetAssignmentsQuery = """ 
-		select mad.module_code, seq, mad.name, mad.assessment_group, m.department_code
+	val GetAssessmentsQuery = """
+		select mad.module_code, seq, mad.name, mad.assessment_group, m.department_code, assessment_code
 		from module_assessment_details mad
 		join module m on (m.module_code = mad.module_code and m.in_use = 'Y')
-		where assessment_code = 'A'
-		and m.department_code is not null """
+		where m.department_code is not null """
 	// Department code should be set for any modules since 10/11
 
 	val GetAllAssessmentGroups = """
@@ -215,15 +213,16 @@ object AssignmentImporter {
 		order by academic_year_code, module_code, mav_occurrence, assessment_group
 		"""
 
-	class UpstreamAssignmentQuery(ds: DataSource) extends MappingSqlQuery[UpstreamAssignment](ds, GetAssignmentsQuery) {
+	class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int) = {
-			val a = new UpstreamAssignment
+			val a = new AssessmentComponent
 			a.moduleCode = rs.getString("module_code")
 			a.sequence = rs.getString("seq")
 			a.name = rs.getString("name")
 			a.assessmentGroup = rs.getString("assessment_group")
 			a.departmentCode = rs.getString("department_code")
+			a.assessmentType = AssessmentType(rs.getString("assessment_code"))
 			a
 		}
 	}

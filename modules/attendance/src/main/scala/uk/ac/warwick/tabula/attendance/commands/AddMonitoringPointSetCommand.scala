@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.{Route, Department}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
+import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports.JHashMap
@@ -15,8 +15,8 @@ import org.springframework.util.AutoPopulatingList
 import scala.Some
 
 object AddMonitoringPointSetCommand {
-	def apply(dept: Department, existingSetOption: Option[AbstractMonitoringPointSet]) =
-		new AddMonitoringPointSetCommand(dept, existingSetOption)
+	def apply(dept: Department, academicYear: AcademicYear, existingSetOption: Option[AbstractMonitoringPointSet]) =
+		new AddMonitoringPointSetCommand(dept, academicYear, existingSetOption)
 		with ComposableCommand[Seq[MonitoringPointSet]]
 		with AutowiringRouteServiceComponent
 		with AutowiringTermServiceComponent
@@ -27,8 +27,9 @@ object AddMonitoringPointSetCommand {
 }
 
 
-abstract class AddMonitoringPointSetCommand(val dept: Department, val existingSetOption: Option[AbstractMonitoringPointSet]) extends CommandInternal[Seq[MonitoringPointSet]]
-	with AddMonitoringPointSetState {
+abstract class AddMonitoringPointSetCommand(val dept: Department, val academicYear: AcademicYear, val existingSetOption: Option[AbstractMonitoringPointSet])
+	extends CommandInternal[Seq[MonitoringPointSet]] with AddMonitoringPointSetState {
+
 	self: MonitoringPointServiceComponent =>
 
 	override def applyInternal() = {
@@ -40,11 +41,11 @@ abstract class AddMonitoringPointSetCommand(val dept: Department, val existingSe
 				set.points = monitoringPoints.asScala.map{m =>
 					val point = new MonitoringPoint
 					point.createdDate = new DateTime()
-					point.defaultValue = m.defaultValue
 					point.name = m.name
 					point.pointSet = set
 					point.updatedDate = new DateTime()
-					point.week = m.week
+					point.validFromWeek = m.validFromWeek
+					point.requiredFromWeek = m.requiredFromWeek
 					point
 				}.asJava
 				set.route = route
@@ -58,7 +59,7 @@ abstract class AddMonitoringPointSetCommand(val dept: Department, val existingSe
 }
 
 trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPointValidation {
-	self: AddMonitoringPointSetState with RouteServiceComponent =>
+	self: AddMonitoringPointSetState =>
 
 	override def validate(errors: Errors) {
 		selectedRoutesAndYears.asScala.map{case (route, allYears) => {
@@ -89,17 +90,16 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 
 		monitoringPoints.asScala.zipWithIndex.foreach{case (point, index) => {
 			validateName(errors, point.name, s"monitoringPoints[$index].name")
-			validateWeek(errors, point.week, s"monitoringPoints[$index].week")
+			validateWeek(errors, point.validFromWeek, s"monitoringPoints[$index].validFromWeek")
+			validateWeek(errors, point.requiredFromWeek, s"monitoringPoints[$index].requiredFromWeek")
+			validateWeeks(errors, point.validFromWeek, point.requiredFromWeek, s"monitoringPoints[$index].validFromWeek")
 
-			if (monitoringPoints.asScala.count(p => p.name == point.name && p.week == point.week) > 1) {
+			if (monitoringPoints.asScala.count(p =>
+				p.name == point.name && p.validFromWeek == point.validFromWeek && p.requiredFromWeek == point.requiredFromWeek
+			) > 1) {
 				errors.rejectValue(s"monitoringPoints[$index].name", "monitoringPoint.name.exists")
 			}
 		}}
-
-		// when changing year fail validation so nothing is committed
-		if (changeYear) {
-			errors.reject("")
-		}
 	}
 }
 
@@ -160,7 +160,7 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 
 	def existingSetOption: Option[AbstractMonitoringPointSet]
 
-	var academicYear = AcademicYear.guessByDate(new DateTime())
+	def academicYear: AcademicYear
 
 	var changeYear = false
 
@@ -195,8 +195,5 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 		)
 	}.toMap.asJava
 
-	def selectedRoutesAndYearsByRouteCode(code: String) = routeService.getByCode(code) match {
-		case Some(r: Route) => selectedRoutesAndYears.get(r)
-		case _ => new ItemNotFoundException()
-	}
+	def selectedRoutesAndYearsByRouteCode(route: Route) = selectedRoutesAndYears.get(route)
 }

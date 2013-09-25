@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.Fixtures
 
 class CopyAssignmentsCommandTest extends TestBase with Mockito {
 
@@ -14,14 +15,16 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 	}
 
 	trait Fixture {
-		val module = new Module("BS101")
+		val department = Fixtures.department("bs")
+		val module = Fixtures.module("bs101")
+		module.department = department
+		
 		val fakeDate = new DateTime(2013, 8, 23, 0, 0)
 
-		val assignment = new Assignment
+		val assignment = Fixtures.assignment("Test")
 		assignment.addDefaultFields()
 		assignment.academicYear = AcademicYear.parse("12/13")
 		assignment.module = module
-		assignment.name = "Test"
 		assignment.openDate = fakeDate
 		assignment.closeDate = fakeDate.plusDays(30)
 		assignment.openEnded = false
@@ -39,7 +42,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 	@Test
 	def commandApply() {
 		new Fixture {
-			val command = new CopyAssignmentsCommand(Seq(module)) with CommandTestSupport
+			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
 			command.assignments = Seq(assignment)
 			command.archive = true
 			val newAssignment = command.applyInternal().get(0)
@@ -53,7 +56,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 	def copy() {
 		new Fixture with FindAssignmentFields {
 			withFakeTime(fakeDate) {
-				val command = new CopyAssignmentsCommand(Seq(module)) with CommandTestSupport
+				val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
 				command.assignments = Seq(assignment)
 				command.archive = true
 				val newAssignment = command.applyInternal().get(0)
@@ -81,7 +84,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 	@Test
 	def copyDefaultFields() {
 		new Fixture with FindAssignmentFields {
-			val command = new CopyAssignmentsCommand(Seq(module)) with CommandTestSupport
+			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
 			command.assignments = Seq(assignment)
 			val newAssignment = command.applyInternal().get(0)
 
@@ -106,7 +109,7 @@ class CopyAssignmentsCommandTest extends TestBase with Mockito {
 			findCommentField(assignment).get.value = extremeHeronRant
 			findFileField(assignment).get.attachmentLimit = 9999
 			findFileField(assignment).get.attachmentTypes = Seq(".hateherons")
-			val command = new CopyAssignmentsCommand(Seq(module)) with CommandTestSupport
+			val command = new CopyAssignmentsCommand(department, Seq(module)) with CommandTestSupport
 			command.assignments = Seq(assignment)
 			val newAssignment = command.applyInternal().get(0)
 

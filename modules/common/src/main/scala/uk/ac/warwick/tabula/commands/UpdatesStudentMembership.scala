@@ -150,8 +150,9 @@ trait UpdatesStudentMembership {
 	 * Build a seq of available upstream groups for upstream assignments on this module
 	 */
 	lazy val availableUpstreamGroups: Seq[UpstreamGroup] = {
-		val upstreamAssignments = membershipService.getUpstreamAssignments(module)
-
+		// These methods just get assignments. You may want to change this to get
+		// other assessment components, but remember this is also used by places
+		// that won't want that.
 		for {
 			ua <- membershipService.getUpstreamAssignments(module)
 			uag <- membershipService.getUpstreamAssessmentGroups(ua, academicYear)
@@ -165,13 +166,13 @@ trait UpdatesStudentMembership {
 			Seq()
 		}
 		else {
-			val validGroups = assessmentGroups.asScala.filterNot(group => group.upstreamAssignment == null || group.occurrence == null).toList
+			val validGroups = assessmentGroups.asScala.filterNot(group => group.assessmentComponent == null || group.occurrence == null).toList
 
 			validGroups.flatMap{group =>
 				val template = new UpstreamAssessmentGroup
 				template.academicYear = academicYear
-				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
-				template.moduleCode = group.upstreamAssignment.moduleCode
+				template.assessmentGroup = group.assessmentComponent.assessmentGroup
+				template.moduleCode = group.assessmentComponent.moduleCode
 				template.occurrence = group.occurrence
 				membershipService.getUpstreamAssessmentGroup(template)
 			}
@@ -188,19 +189,20 @@ trait UpdatesStudentMembership {
 /**
  * convenience classes
  */
-class UpstreamGroup(val upstreamAssignment: UpstreamAssignment, val group: UpstreamAssessmentGroup) {
-	val id = upstreamAssignment.id + ";" + group.id
+class UpstreamGroup(val assessmentComponent: AssessmentComponent, val group: UpstreamAssessmentGroup) {
+	val id = assessmentComponent.id + ";" + group.id
 
-	val name = upstreamAssignment.name
+	val name = assessmentComponent.name
 	val memberCount = group.memberCount
-	val cats = upstreamAssignment.cats
+	val cats = assessmentComponent.cats
 	val occurrence = group.occurrence
-	val sequence = upstreamAssignment.sequence
+	val sequence = assessmentComponent.sequence
+	val assessmentType = assessmentComponent.assessmentType.value
 
 	def isLinked(assessmentGroups: JList[AssessmentGroup]) = assessmentGroups.asScala.exists(ag =>
-		ag.upstreamAssignment.id == upstreamAssignment.id && ag.occurrence == group.occurrence)
+		ag.assessmentComponent.id == assessmentComponent.id && ag.occurrence == group.occurrence)
 
-	override def toString = "upstreamAssignment: " + upstreamAssignment.id + ", occurrence: " + group.occurrence
+	override def toString = "assessmentComponent: " + assessmentComponent.id + ", occurrence: " + group.occurrence
 }
 
 

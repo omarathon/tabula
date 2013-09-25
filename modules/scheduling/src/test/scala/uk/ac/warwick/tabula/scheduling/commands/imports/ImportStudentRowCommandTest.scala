@@ -40,6 +40,8 @@ import uk.ac.warwick.tabula.data.SitsStatusDao
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
+import uk.ac.warwick.tabula.scheduling.services.CourseImporter
+import uk.ac.warwick.tabula.data.model.Course
 
 
 // scalastyle:off magic.number
@@ -84,6 +86,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		sitsStatusesImporter.getSitsStatusForCode("P") returns  Some(new SitsStatus("P", "P", "Permanently Withdrawn"))
 
 
+		val courseImporter = smartMock[CourseImporter]
+		courseImporter.getCourseForCode("UESA-H612") returns new Course("UESA-H612", "Computer Systems Engineering MEng")
+
 		//department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits
 
 		val rs = smartMock[ResultSet]
@@ -112,6 +117,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rs.getString("mode_of_attendance_code") returns ("P")
 		rs.getString("sce_academic_year") returns ("10/11")
 		rs.getString("most_signif_indicator") returns ("Y")
+		rs.getString("mod_reg_status") returns "CON"
+		rs.getString("course_code") returns "UESA-H612"
 
 		val mm = MembershipMember(
 			universityId 			= "0672089",
@@ -153,6 +160,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		courseCommand.moduleAndDepartmentService = modAndDeptService
 		courseCommand.memberDao = memberDao
 		courseCommand.relationshipService = relationshipService
+		courseCommand.courseImporter = courseImporter
 
 		val rowCommand = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, courseCommand)
 		rowCommand.memberDao = memberDao
@@ -189,7 +197,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseDetails.scjCode = "0672089/2"
 			studentCourseDetails.sprCode = "0672089/2"
 			yearCommand.studentCourseDetails = studentCourseDetails
-				
+
 			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
 
 			val studentCourseYearDetails = yearCommand.applyInternal()
@@ -213,7 +221,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	def testImportStudentRowCommandWorksWithNew {
 		new Environment {
 			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
-			
+
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
 			val member = rowCommand.applyInternal()
 
@@ -247,7 +255,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		new Environment {
 			val existing = new StudentMember("0672089")
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
-				
+
 			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
 
 			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
@@ -269,15 +277,15 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	@Transactional
 	@Test def testCaptureTutorIfSourceIsLocal {
 
-		new Environment {			
+		new Environment {
 			val existing = new StudentMember("0672089")
 			val existingStaffMember = new StaffMember("0070790")
 
 			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
-			
+
 			val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-				
+
 			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (Some(tutorRelationshipType))
 
 			// if personalTutorSource is "local", there should be no update
@@ -302,9 +310,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		new Environment {
 			val existing = new StudentMember("0672089")
 			val existingStaffMember = new StaffMember("0070790")
-			
+
 			val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-				
+
 			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (Some(tutorRelationshipType))
 
 			// if personalTutorSource is "SITS", there *should* an update

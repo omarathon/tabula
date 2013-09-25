@@ -29,16 +29,7 @@ class StudentTimetableTest extends BrowserTest with TimetablingFixture with  Giv
 	// The code that updates the calendar title seems to trigger the error, but it doesn't happen
 	// in any real browsers that I've tested with.
 	// Using Firefox JS emulation avoids the problem.
-	override implicit lazy val webDriver: WebDriver = P.Browser match {
-		case "htmlunit" => {
-		val driver = new HtmlUnitDriver(BrowserVersion.FIREFOX_17)
-			driver.setJavascriptEnabled(true)
-			driver
-		}
-		case "chrome" => new ChromeDriver
-		case "firefox" => new FirefoxDriver
-		case "ie" => new InternetExplorerDriver
-	}
+	override val htmlUnitBrowserVersion = BrowserVersion.FIREFOX_17
 
 	// TODO provide the functional tests with a TermFactory so we can work out what week we're in right now,
 	// and create the events in that week. Then we can verify that they actually show up on the calendar

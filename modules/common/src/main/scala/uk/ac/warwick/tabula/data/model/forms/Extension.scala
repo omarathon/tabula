@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model.forms
 
 import scala.collection.JavaConversions._
 
-import org.hibernate.annotations.{Type, AccessType}
+import org.hibernate.annotations.{BatchSize, Type, AccessType}
 import org.joda.time.DateTime
 
 import javax.persistence._
@@ -44,6 +44,7 @@ class Extension extends GeneratedId with PermissionsTarget {
 	var reason:String =_
 
 	@OneToMany(mappedBy="extension", fetch=LAZY, cascade=Array(ALL))
+	@BatchSize(size=200)
 	var attachments:JSet[FileAttachment] = JSet()
 
 	def nonEmptyAttachments = attachments.toSeq filter(_.hasData)

@@ -9,7 +9,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.commands.CreateMonitoringPointCommand
 
 @Controller
-@RequestMapping(Array("/manage/{dept}/sets/{set}/points/add"))
+@RequestMapping(Array("/manage/{dept}/sets/{set}/edit/points/add"))
 class CreateMonitoringPointController extends AttendanceController {
 
 	validatesSelf[SelfValidating]

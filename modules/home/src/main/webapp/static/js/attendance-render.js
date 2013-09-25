@@ -9,27 +9,60 @@ exports.Manage = {}
 
 $(function(){
 
-	// SCRIPTS FOR VIEWING MONITORING POINTS
+	// SCRIPTS FOR RECORDING MONITORING POINTS
 
-	$('#viewChooseSet').find('select[name="route"]').on('change', function(){
-		var $this = $(this),
-			selectedRouteCode = $this.find(':selected').val(),
-			yearSelect = $this.parent()
-				.find('select[name="set"]').find('option:gt(0)').remove()
-				.end().find('option:first').prop('selected', true)
-				.end();
-
-		$.each(
-			$.grep(setsByRouteByAcademicYear[$('select[name="academicYear"] :selected').val()], function(r){
-				return selectedRouteCode === r.code;
-			})[0].sets,
-			function(i, set){
-				yearSelect.append(
-					$('<option/>').val(set.id).html(set.year)
-				);
-			}
-		)
+	$('.recordCheckpointForm').find('select').each(function(){
+		var $this = $(this), selectedValue = $this.find('option:selected').val();
+		$('.recordCheckpointForm div.forCloning div.btn-group')
+			.clone(true)
+			.appendTo($this.parent())
+			.find('button').on('click', function(){
+				var _$this = $(this);
+				$this.find('option').filter(function(){
+					return $(this).val() == _$this.data('state');
+				}).prop('selected', true);
+			}).filter(function(){
+				return $(this).data('state') == selectedValue;
+			}).trigger('click');
+		$this.hide();
+	}).end().find('.persist-header').each(function(){
+		$(this).find('.btn-group button').each(function(i){
+			$(this).on('click', function(){
+				$('.attendees .item-info').each(function(){
+					$(this).find('button').eq(i).trigger('click');
+				})
+			});
+		});
 	});
+
+	// END SCRIPTS FOR RECORDING MONITORING POINTS
+
+	// SCRIPTS FOR VIEWING MONITORING POINTS
+	(function(){
+		var routeSelect = $('#viewChooseSet').find('select[name="route"]').on('change', function(){
+			var $this = $(this),
+				selectedRouteCode = $this.find(':selected').val(),
+				yearSelect = $this.parent()
+					.find('select[name="set"]').find('option:gt(0)').remove()
+					.end().find('option:first').prop('selected', true)
+					.end();
+
+			$.each(
+				$.grep(setsByRouteByAcademicYear[$('select[name="academicYear"] :selected').val()], function(r){
+					return selectedRouteCode === r.code;
+				})[0].sets,
+				function(i, set){
+					yearSelect.append(
+						$('<option/>').val(set.id).html(set.year)
+					);
+				}
+			)
+		});
+		// If a route us selected by not a year/set on load then populate the year of study drop-down
+		if (routeSelect.length > 0 && routeSelect.parent().find('select[name="set"]').find('option:selected').val().length == 0) {
+			routeSelect.change();
+		}
+	})();
 
 	// END SCRIPTS FOR VIEWING MONITORING POINTS
 
@@ -161,15 +194,6 @@ $(function(){
 		setupCollapsible($this, $target);
 	});
 
-	$('#addMonitoringPointSet select[name="academicYear"]').on('change', function(){
-		$(this).closest('form').append(
-			$('<input/>').attr({
-				'name':'changeYear',
-				'type':'hidden'
-			}).val(true)
-		).submit();
-	});
-
 	$('.routeAndYearPicker').find('.collapsible').each(function(){
 		var $this = $(this), $target = $this.parent().find('.collapsible-target');
 		if ($target.find('input:checked').length > 0) {
@@ -251,6 +275,9 @@ $(function(){
 	}
 
 	// END SCRIPTS FOR MANAGING MONITORING POINTS
+
+
+
 });
 
 window.Attendance = jQuery.extend(window.Attendance, exports);

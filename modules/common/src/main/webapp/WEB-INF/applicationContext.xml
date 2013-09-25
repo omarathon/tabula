@@ -107,7 +107,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.ModuleCodeConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.MeetingRecordIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssignmentIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.AssessmentComponentIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.AssessmentGroupIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.FeedbackIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.FeedbackTemplateIdConverter"/>
@@ -139,6 +139,8 @@
 				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetTemplateIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalDateConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringCheckpointStateConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.model.AssessmentTypeConverter" />
 	        </list>
 	    </property>
 	    <property name="formatters">
@@ -148,7 +150,7 @@
 	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter"/>
    				<bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssignmentIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.AssessmentComponentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
@@ -163,9 +165,14 @@
 	<!-- Resolves user from request but can also be used sparingly elsewhere to generate a CurrentUser from Users -->
 	<bean id="currentUserInterceptor" class="uk.ac.warwick.tabula.system.CurrentUserInterceptor" />
 
+	<bean id="earlyRequestInfoInterceptor" class="uk.ac.warwick.tabula.system.EarlyRequestInfoInterceptor" />
 	<bean id="requestInfoInterceptor" class="uk.ac.warwick.tabula.system.RequestInfoInterceptor" />
 
 	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<ref bean="earlyRequestInfoInterceptor" />
+		</mvc:interceptor>
 		<mvc:interceptor>
 			<mvc:mapping path="/**"/>
 			<ref bean="currentUserInterceptor" />
@@ -391,6 +398,7 @@
 						<value>uk.ac.warwick.tabula.FeaturesMessage</value>
 						<value>uk.ac.warwick.tabula.services.MaintenanceModeMessage</value>
 						<value>uk.ac.warwick.tabula.services.permissions.PermissionsCacheBusterMessage</value>
+						<value>uk.ac.warwick.tabula.services.HibernateStatisticsMessage</value>
 					</list>
 				</property>
 			</bean>

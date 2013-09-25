@@ -4,9 +4,9 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.{Route, Department}
-import uk.ac.warwick.tabula.attendance.commands.{ViewMonitoringPointSetsCommand, ManageMonitoringPointSetCommand}
+import uk.ac.warwick.tabula.attendance.commands.ViewMonitoringPointSetsCommand
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
 
 /**
  * Displays the screen for viewing monitoring points for a department
@@ -25,9 +25,12 @@ class ViewMonitoringPointsForDeptController extends AttendanceController {
 			ViewMonitoringPointSetsCommand(dept, Option(academicYear), Option(route), Option(set))
 
 	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[Unit]) = {
+	def home(
+		@ModelAttribute("command") cmd: Appliable[Unit],
+		@RequestParam(value="updatedMonitoringPoint", required = false) updatedPoint: MonitoringPoint
+	) = {
 		cmd.apply()
-		Mav("home/view")
+		Mav("home/view", "updatedPoint" -> updatedPoint)
 	}
 
 }

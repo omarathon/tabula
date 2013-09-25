@@ -31,16 +31,16 @@ Include by default as "form", e.g.
 <#macro row path="" cssClass="" defaultClass="control-group">
 
 	<#if cssClass="">
-		<#assign baseClass=defaultClass/>
+		<#local baseClass=defaultClass/>
 	<#else>
-		<#assign baseClass=defaultClass + " " + cssClass />
+		<#local baseClass=defaultClass + " " + cssClass />
 	</#if>
 	<#if path="">
 		<div class="${baseClass}"><#nested/></div>
 	<#else>
 		<@spring.bind path=path>
 			<#if status.error>
-				<#assign baseClass=baseClass + " error" />
+				<#local baseClass=baseClass + " error" />
 			</#if>
 			<div class="${baseClass}"><#nested/></div>
 		</@spring.bind>
@@ -49,9 +49,9 @@ Include by default as "form", e.g.
 
 <#macro field cssClass="">
 	<#if cssClass="">
-		<#assign baseClass="controls"/>
+		<#local baseClass="controls"/>
 	<#else>
-		<#assign baseClass="controls " + cssClass />
+		<#local baseClass="controls " + cssClass />
 	</#if>
 	<div class="${baseClass}"><#nested/></div>
 </#macro>
@@ -115,14 +115,14 @@ To not bind:
 	<@spring.bind path=path>
 	<#-- This handles whether we're binding to a list or not but I think
 		it might still be more verbose than it needs to be. -->
-	<#assign ids=[] />
+	<#local ids=[] />
 	<#if status.actualValue??>
 		<#if list && status.actualValue?is_sequence>
-			<#assign ids=status.actualValue />
+			<#local ids=status.actualValue />
 		<#elseif object>
-			<#assign ids=[status.actualValue.userId] />
+			<#local ids=[status.actualValue.userId] />
 		<#elseif status.actualValue?is_string>
-			<#assign ids=[status.actualValue] />
+			<#local ids=[status.actualValue] />
 		</#if>
 	</#if>
 	<@render_userpicker expression=status.expression value=ids multiple=multiple spanClass=spanClass htmlId=htmlId/>
@@ -180,14 +180,14 @@ To not bind:
 	<@spring.bind path=path>
 		<#-- This handles whether we're binding to a list or not but I think
 				it might still be more verbose than it needs to be. -->
-			<#assign ids=[] />
+			<#local ids=[] />
 			<#if status.value??>
 				<#if list && status.actualValue?is_sequence>
-					<#assign ids=status.actualValue />
+					<#local ids=status.actualValue />
 				<#elseif object>
-					<#assign ids=[status.value.userId] />
+					<#local ids=[status.value.userId] />
 				<#elseif status.value?is_string>
-					<#assign ids=[status.value] />
+					<#local ids=[status.value] />
 				</#if>
 			</#if>
 		<@render_flexipicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers multiple=multiple />
@@ -252,7 +252,7 @@ To not bind:
 	<div id="${elementId}">
 	<#if f.exists>
 		<#list f.attached as attached>
-			<#assign uploadedId=attached.id />
+			<#local uploadedId=attached.id />
 			<div class="hidden-attachment" id="attachment-${uploadedId}">
 			<input type="hidden" name="${basename}.attached" value="${uploadedId}">
 			${attached.name} <a id="remove-attachment-${uploadedId}" href="#">Remove attachment</a>

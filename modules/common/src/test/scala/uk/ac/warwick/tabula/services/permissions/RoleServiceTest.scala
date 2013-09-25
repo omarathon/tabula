@@ -29,30 +29,30 @@ class RoleServiceTest extends TestBase with Mockito {
 	}
 	
 	@Test def getRolesScopeless() = withUser("cuscav", "0672089") {
-		val scopedProvider = mock[RoleProvider]
-		val provider1 = mock[ScopelessRoleProvider]
-		val provider2 = mock[ScopelessRoleProvider]
+		val scopedProvider = smartMock[RoleProvider]
+		val provider1 = smartMock[ScopelessRoleProvider]
+		val provider2 = smartMock[ScopelessRoleProvider]
 			
 		when(scopedProvider.getRolesFor(isEq(currentUser), isA[PermissionsTarget])) thenThrow(classOf[RuntimeException])
-		when(provider1.getRolesFor(currentUser)) thenReturn(Stream(Sysadmin()))
-		when(provider2.getRolesFor(currentUser)) thenThrow(classOf[RuntimeException])
+		when(provider1.getRolesFor(currentUser, null)) thenReturn(Stream(Sysadmin()))
+		when(provider2.getRolesFor(currentUser, null)) thenThrow(classOf[RuntimeException])
 				
 		val service = new RoleServiceImpl()
 		service.roleProviders = Array(scopedProvider, provider1, provider2)
 		
 		val isSysadminRole = service.getRolesFor(currentUser, null) exists { _ == Sysadmin() }
 		
-		there was one(provider1).getRolesFor(currentUser)
-		there were no(provider2).getRolesFor(currentUser)
+		there was one(provider1).getRolesFor(currentUser, null)
+		there were no(provider2).getRolesFor(currentUser, null)
 		
 		isSysadminRole should be (true)
 	}
 	
 	@Test def getRolesScoped() = withUser("cuscav", "0672089") {
-		val provider1 = mock[ScopelessRoleProvider]
-		val provider2 = mock[RoleProvider]
-		val provider3 = mock[RoleProvider]
-		val provider4 = mock[ScopelessRoleProvider]
+		val provider1 = smartMock[ScopelessRoleProvider]
+		val provider2 = smartMock[RoleProvider]
+		val provider3 = smartMock[RoleProvider]
+		val provider4 = smartMock[ScopelessRoleProvider]
 		
 		val dept = Fixtures.department("in")
 		val module = Fixtures.module("in101")
@@ -61,16 +61,16 @@ class RoleServiceTest extends TestBase with Mockito {
 		val service = new RoleServiceImpl()
 		service.roleProviders = Array(provider1, provider2, provider3, provider4)
 		
-		when(provider1.getRolesFor(currentUser)) thenReturn(Stream(Sysadmin()))
+		when(provider1.getRolesFor(currentUser, null)) thenReturn(Stream(Sysadmin()))
 		when(provider2.getRolesFor(currentUser, module)) thenReturn(Stream(ModuleManager(module)))
 		when(provider3.getRolesFor(currentUser, dept)) thenReturn(Stream(DepartmentalAdministrator(dept)))
 		when(provider3.getRolesFor(currentUser, module)) thenReturn(Stream.empty)
-		when(provider4.getRolesFor(currentUser)) thenReturn(Stream.empty)
+		when(provider4.getRolesFor(currentUser, null)) thenReturn(Stream.empty)
 		
 		(service.getRolesFor(currentUser, module) exists { _ == DepartmentalAdministrator(dept) }) should be (true)
 		
-		there was one(provider1).getRolesFor(currentUser)
-		there was one(provider4).getRolesFor(currentUser)
+		there was one(provider1).getRolesFor(currentUser, null)
+		there was one(provider4).getRolesFor(currentUser, null)
 		
 		there was no(provider2).getRolesFor(currentUser, dept) // We don't bubble up on this one because it's not exhaustive
 		there was one(provider2).getRolesFor(currentUser, module)

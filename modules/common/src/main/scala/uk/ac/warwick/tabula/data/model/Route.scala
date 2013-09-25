@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{BatchSize, Type}
 import javax.persistence._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.JavaImports._
@@ -37,6 +37,7 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 	def permissionsParents = Stream(department)
 
 	@OneToMany(mappedBy="route", fetch = FetchType.LAZY)
+	@BatchSize(size=100)
 	var monitoringPointSets: JList[MonitoringPointSet] = JArrayList()
 
 }

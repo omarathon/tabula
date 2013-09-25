@@ -5,7 +5,7 @@
 
 
 <#macro student_item student bindpath="">
-	<#assign profile = membersById[student.warwickId]!{} />
+	<#local profile = membersById[student.warwickId]!{} />
 	<li class="student well well-small"
 	data-f-gender="${(profile.gender.dbValue)!}"
 	data-f-route="${(profile.mostSignificantCourseDetails.route.code)!}"
@@ -23,7 +23,9 @@
 
 <#escape x as x?html>
 	<h1>Allocate students to ${set.name}</h1>
-	<div class="alert">These groups are currently <strong>${set.openForSignups?string("open","closed")}</strong> for self sign-up</div>
+	<#if (allocateStudentsToGroupsCommand.isStudentSignup())>
+		<div class="alert">These groups are currently <strong>${set.openForSignups?string("open","closed")}</strong> for self sign-up</div>
+	</#if>
 	<noscript>
 		<div class="alert">This page requires Javascript.</div>
 	</noscript>
@@ -106,7 +108,7 @@
 											<select data-filter-attr="fRoute">
 												<option data-filter-value="*">Any Route</option>
 												<#list allocateStudentsToGroupsCommand.allMembersRoutes as route>
-													<option data-filter-value="${route.code}">${route.code?upper_case} ${route.name}</option>
+													<option data-filter-value="${route.code}"><@fmt.route_name route /></option>
 												</#list>
 											</select>
 										</div>

@@ -1,8 +1,12 @@
 <#ftl strip_text=true />
 <#escape x as x?html>
 
-<#macro module_name module>
-	<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
+<#macro module_name module withFormatting=true>
+	<#if withFormatting>
+		<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
+	<#else>
+		${module.code?upper_case} ${module.name}
+	</#if>
 </#macro>
 
 <#macro assignment_name assignment>
@@ -21,6 +25,10 @@
 	<a href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/list' />">
 		<span class="ass-name">${assignment.name}</span>
 	</a>
+</#macro>
+
+<#macro route_name route>
+	${route.code?upper_case} ${route.name}
 </#macro>
 
 <#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true><#--
@@ -43,9 +51,9 @@
 	--></#noescape><#--
 --></#macro>
 
-<#macro singleWeekFormat week academicYear dept><#--
+<#macro singleWeekFormat validFromWeek requiredFromWeek academicYear dept><#--
 	--><#noescape><#--
-		-->${weekRangesFormatter(week, academicYear, dept)}<#--
+		-->${weekRangesFormatter(validFromWeek, requiredFromWeek, academicYear, dept)}<#--
 	--></#noescape><#--
 --></#macro>
 
@@ -94,7 +102,7 @@
 <#macro user_list_csv ids>
 <@userlookup ids=ids>
 	<#list returned_users?keys?sort as id>
-		<#assign returned_user=returned_users[id] />
+		<#local returned_user=returned_users[id] />
 		<#if returned_user.foundUser>
 			${returned_user.fullName}<#if id_has_next>,</#if>
 		<#else>
@@ -130,7 +138,7 @@
 <#macro download_attachments attachments page context="" zipFilename="download">
 	<#if !page?ends_with("/")>
 		<#-- ensure page is slash-terminated -->
-		<#assign page = page + "/" />
+		<#local page = page + "/" />
 	</#if>
 
 	<#local attachment = "" />
@@ -144,19 +152,19 @@
 	</#if>
 
 	<#if attachment?has_content>
-		<#assign title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#assign>
+		<#local title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#local>
 		<div class="attachment">
 			<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
 		</div>
 	<#elseif attachments?size gt 1>
 		<details class="attachment">
 			<summary>
-				<#assign title>Download a zip file of attachments<#if context?has_content> ${context}</#if></#assign>
+				<#local title>Download a zip file of attachments<#if context?has_content> ${context}</#if></#local>
 				<@download_link filePath="${page}attachments/${zipFilename}.zip" mimeType="application/zip" title="${title}" text="Download files as zip" />
 			</summary>
 
 			<#list attachments as attachment>
-				<#assign title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#assign>
+				<#local title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#local>
 				<div class="attachment">
 					<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
 				</div>
@@ -258,6 +266,36 @@
 
 	<#if classes??><#local class>class='${classes}'</#local></#if>
 	<${type} ${href} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
+</#macro>
+
+<#macro bulk_email emails title subject>
+	<#if emails?size gt 0 && emails?size lte 50>
+		<a href="mailto:<#list emails as email>${email}<#if email_has_next>,</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>" class="btn">
+			<i class="icon-envelope"></i> ${title}
+		</a>
+	</#if>
+</#macro>
+
+<#macro bulk_email_students students title="Email these students" subject="">
+	<#local emails = [] />
+	<#list students as student>
+		<#if student.email??>
+			<#local emails = emails + [student.email] />
+		</#if>
+	</#list>
+	
+	<@bulk_email emails title subject />
+</#macro>
+
+<#macro bulk_email_student_relationships relationships title="Email these students" subject="">
+	<#local emails = [] />
+	<#list relationships as rel>
+		<#if rel.studentMember?? && rel.studentMember.email??>
+			<#local emails = emails + [rel.studentMember.email] />
+		</#if>
+	</#list>
+	
+	<@bulk_email emails title subject />
 </#macro>
 
 </#escape>

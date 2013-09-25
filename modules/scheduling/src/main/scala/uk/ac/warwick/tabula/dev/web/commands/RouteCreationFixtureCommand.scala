@@ -14,6 +14,7 @@ class RouteCreationFixtureCommand extends CommandInternal[Unit] {
 	var departmentCode: String = _
 	var routeCode: String = _
 	var routeName: String = _
+  var degreeType:String = "UG"
 
 	protected def applyInternal() {
 		transactional() {
@@ -30,7 +31,7 @@ class RouteCreationFixtureCommand extends CommandInternal[Unit] {
 			r.department = dept
 			r.active = true
 			r.code = routeCode
-			r.degreeType = DegreeType.Undergraduate
+			r.degreeType = DegreeType.fromCode(degreeType)
 			r.name = routeName
 			routeDao.saveOrUpdate(r)
 		}

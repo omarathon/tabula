@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.services._
 import org.joda.time.{Interval, LocalDate}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering
+import uk.ac.warwick.tabula.commands.ReadOnly
 
 trait ViewStudentPersonalTimetableCommandState {
 	val student: StudentMember
@@ -68,7 +69,7 @@ object ViewStudentPersonalTimetableCommand {
 		new ViewStudentPersonalTimetableCommandImpl(eventSource, student)
 			with ComposableCommand[Seq[EventOccurrence]]
 			with ViewStudentTimetablePermissions
-			with Unaudited
+			with ReadOnly with Unaudited
 			with TermBasedEventOccurrenceComponent
 			with TermAwareWeekToDateConverterComponent
 			with AutowiringTermServiceComponent

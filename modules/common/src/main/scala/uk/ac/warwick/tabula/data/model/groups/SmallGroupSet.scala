@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.data.model.groups
 
 import scala.collection.JavaConverters._
-import scala.collection.JavaConversions._
 
 import javax.persistence._
 import javax.persistence.CascadeType._
 import javax.validation.constraints.NotNull
 
-import org.hibernate.annotations.{AccessType, Filter, FilterDef, Type}
 import org.joda.time.DateTime
+import org.hibernate.annotations.{Type, Filter, FilterDef, AccessType, BatchSize}
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -96,6 +95,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	
 	@OneToMany(fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval=true)
 	@JoinColumn(name = "set_id")
+	@BatchSize(size=200)
 	var groups: JList[SmallGroup] = JArrayList()
 
 	// only students manually added or excluded. use allStudents to get all students in the group set
@@ -106,6 +106,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 
 	// Cannot link directly to upstream assessment groups data model in sits is silly ...
 	@OneToMany(mappedBy = "smallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
 
 	// converts the assessmentGroups to upstream assessment groups
@@ -114,12 +115,12 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 			Seq()
 		}
 		else {
-			val validGroups = assessmentGroups.asScala.filterNot(group=> group.upstreamAssignment == null || group.occurrence == null)
+			val validGroups = assessmentGroups.asScala.filterNot(group=> group.assessmentComponent == null || group.occurrence == null)
 			validGroups.flatMap { group =>
 				val template = new UpstreamAssessmentGroup
 				template.academicYear = academicYear
-				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
-				template.moduleCode = group.upstreamAssignment.moduleCode
+				template.assessmentGroup = group.assessmentComponent.assessmentGroup
+				template.moduleCode = group.assessmentComponent.moduleCode
 				template.occurrence = group.occurrence
 				membershipService.getUpstreamAssessmentGroup(template)
 			}

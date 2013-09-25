@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.data.model
 
 import org.joda.time.DateTime
-import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
-import javax.persistence.Column
-import org.hibernate.annotations.Type
-import javax.persistence.Id
 import uk.ac.warwick.tabula.events.Event
+import uk.ac.warwick.tabula.data.model.AuditEvent._
+
+object AuditEvent {
+	type DataType = Map[String, Any]
+	val BlankData = Map.empty[String, Any]
+}
 
 /**
  * Represents a single item in the audit trail.
@@ -41,19 +42,19 @@ case class AuditEvent(
 	var data: String = null,
 
 	/** this is set manually */
-	var parsedData: Option[Map[String, Any]] = None,
+	var parsedData: Option[DataType] = None,
 
 	// list of other related events (with same eventId) manually set by DAO
 	var related: Seq[AuditEvent] = Nil) {
 
 	/** Collects up all the parsed data maps for all related events. */
-	def relatedParsedData: Seq[Map[String, Any]] = related.flatMap { _.parsedData }
+	def relatedParsedData: Seq[DataType] = related.flatMap { _.parsedData }
 
 	/**
 	 * Joins the JSON data for all the related audit events into one map. It is a simple
 	 * merge by key - if any events re-use the same key, only one will get returned.
 	 */
-	def combinedParsedData = relatedParsedData.foldLeft(Map.empty[String, Any]) { (list, map) => map ++ list }
+	def combinedParsedData = relatedParsedData.foldLeft(BlankData) { (combined, map) => map ++ combined }
 
 	def assignmentId = stringProperty("assignment")
 	def submissionId = stringProperty("submission")
@@ -73,10 +74,7 @@ case class AuditEvent(
 	def hasProperty(name: String): Boolean = stringProperty(name).isDefined
 
 	/** Returns whether any of the events have a property with this string value. */
-	def hasProperty(name: String, value: String): Boolean =
-		stringProperty(name)
-			.map(_ == value)
-			.getOrElse(false)
+	def hasProperty(name: String, value: String): Boolean = stringProperty(name).exists(_ == value)
 
 	/**
 	 * Looks among the JSON data for a string value under this name.

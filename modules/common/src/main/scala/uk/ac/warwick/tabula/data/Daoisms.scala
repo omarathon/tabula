@@ -48,6 +48,10 @@ object Daoisms {
 		def newCriteria[A: ClassTag] = new ScalaCriteria[A](session.createCriteria(classTag[A].runtimeClass))
 		def newQuery[A](hql: String) = new ScalaQuery[A](session.createQuery(hql))
 	}
+
+	// The maximum number of clauses supported in an IN(..) before it will
+	// unceremoniously fail. Use `grouped` with this to split up work
+	val MaxInClauseCount = 1000
 }
 
 /**
@@ -80,3 +84,4 @@ trait Daoisms extends ExtendedSessionComponent {
 	implicit def implicitNiceSession(session: Session) = new NiceQueryCreator(session)
 
 }
+

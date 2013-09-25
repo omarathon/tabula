@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 class StudentRelationshipTemplateCommand(val department: Department, val relationshipType: StudentRelationshipType) extends Command[ExcelView] with ReadOnly with Unaudited {
 
-	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(relationshipType), department)
+	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
 	
 	var service = Wire[RelationshipService]
 	var profileService = Wire[ProfileService]
@@ -71,8 +71,8 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 
 		val workbook = new XSSFWorkbook()
 		val sheet: XSSFSheet = generateAllocationSheet(workbook)
-		generateAgentLookupSheet(workbook, allAgents)
-		generateAgentDropdowns(sheet, allAgents)
+		val agentSheet = generateAgentLookupSheet(workbook, allAgents)
+		generateAgentDropdowns(sheet, allAgents, allAllocations)
 
 		val agentLookupRange = agentLookupSheetName + "!$A2:$B" + (allAgents.length + 1)
 		val allocationIterator = allAllocations.iterator
@@ -95,7 +95,7 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 		workbook
 	}
 	
-	def generateAgentLookupSheet(workbook: XSSFWorkbook, agents: Seq[Member]) {
+	def generateAgentLookupSheet(workbook: XSSFWorkbook, agents: Seq[Member]) = {
 		val agentSheet: XSSFSheet = workbook.createSheet(agentLookupSheetName)
 
 		for (agent <- agents) {
@@ -105,23 +105,23 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 		}
 
 		agentSheet.protectSheet(sheetPassword)
+		agentSheet
 	}
 	
 	// attaches the data validation to the sheet
-	def generateAgentDropdowns(sheet: XSSFSheet, agents: Seq[Member]) {
+	def generateAgentDropdowns(sheet: XSSFSheet, agents: Seq[_], allAllocations: Seq[_]) {
 		if (!agents.isEmpty) {
-			val dropdownChoices = agents.flatMap(_.fullName).toArray
-			val dropdownRange = new CellRangeAddressList(1, agents.length, 2, 2)
-			val validation = getDataValidation(dropdownChoices, sheet, dropdownRange)
+			val dropdownRange = new CellRangeAddressList(1, allAllocations.length, 2, 2)
+			val validation = getDataValidation(agents, sheet, dropdownRange)
 	
 			sheet.addValidationData(validation)
 		}
 	}
 	
 	// Excel data validation - will only accept the values fed to this method, also puts a dropdown on each cell
-	def getDataValidation(dropdownChoices: Array[String], sheet: XSSFSheet, addressList: CellRangeAddressList) = {
+	def getDataValidation(agents: Seq[_], sheet: XSSFSheet, addressList: CellRangeAddressList) = {
 		val dvHelper = new XSSFDataValidationHelper(sheet)
-		val dvConstraint = dvHelper.createExplicitListConstraint(dropdownChoices).asInstanceOf[XSSFDataValidationConstraint]
+		val dvConstraint = dvHelper.createFormulaListConstraint(agentLookupSheetName + "!$A$2:$A$" + (agents.length + 1)).asInstanceOf[XSSFDataValidationConstraint]
 		val validation = dvHelper.createValidation(dvConstraint, addressList).asInstanceOf[XSSFDataValidation]
 
 		validation.setShowErrorBox(true)
@@ -129,8 +129,8 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 	}
 
 	def createUnprotectedCell(workbook: XSSFWorkbook, row: XSSFRow, col: Int, value: String = "") = {
-		val lockedCellStyle = workbook.createCellStyle();
-		lockedCellStyle.setLocked(false);
+		val lockedCellStyle = workbook.createCellStyle()
+		lockedCellStyle.setLocked(false)
 		val cell = row.createCell(col)
 		cell.setCellValue(value)
 		cell.setCellStyle(lockedCellStyle)

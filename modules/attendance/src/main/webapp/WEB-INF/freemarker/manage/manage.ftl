@@ -9,7 +9,7 @@
 						"code" : "${route.code}",
 						"name" : "${route.name}",
 						"sets" : [
-							<#list command.setsByRouteCodeByAcademicYear(academicYear, route.code) as set>
+							<#list command.setsByRouteCodeByAcademicYear(academicYear, route) as set>
 								{
 									"id" : "${set.id}",
 									"year" : "<#if set.year??>${set.year}<#else>All</#if>"
@@ -45,7 +45,7 @@
 	<button type="submit" class="btn btn-primary">Change</button>
 </form>
 
-<form id="chooseCreateType" class="form-inline" action="<@url page="/manage/${command.dept.code}/sets/add"/>">
+<form id="chooseCreateType" class="form-inline" action="<@url page="/manage/${command.dept.code}/sets/add/${command.academicYear.startYear?c}"/>">
 	<h2>Create monitoring schemes</h2>
 	<label>
 		<input class="create blank" type="radio" checked name="createType" value="blank"/>
@@ -117,11 +117,11 @@
 
 		<div class="striped-section-contents">
 			<#list command.setsByRouteByAcademicYear[command.academicYear.toString]?keys?sort_by("code") as route>
-				<#assign pointSets = command.setsByRouteCodeByAcademicYear(command.academicYear.toString, route.code) />
+				<#assign pointSets = command.setsByRouteCodeByAcademicYear(command.academicYear.toString, route) />
 				<div class="item-info">
 					<div class="row-fluid">
 						<div class="span10 collapsible">
-							<h3><i class="icon-fixed-width icon-chevron-right ellipsis"></i> ${route.code?upper_case} ${route.name}</h3>
+							<h3><i class="icon-fixed-width icon-chevron-right ellipsis"></i> <@fmt.route_name route /></h3>
 						</div>
 						<div class="span2">
 							<#if pointSets?size == 1 && !pointSets?first.year??>

@@ -43,37 +43,40 @@ trait ProfileImporter {
 	def userIdAndCategory(member: Member): Option[MembershipInformation]
 }
 
-@Profile(Array("dev", "test", "production")) @Service
-class ProfileImporterImpl extends ProfileImporter with Logging {
+@Profile(Array("dev", "test", "production"))
+@Service
+class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademicYearAware {
 	import ProfileImporter._
-
+	
 	var sits = Wire[DataSource]("sitsDataSource")
+
 	var membership = Wire[DataSource]("membershipDataSource")
 	var membershipInterface = Wire.auto[MembershipInterfaceWrapper]
-
-	lazy val currentAcademicYear = new GetCurrentAcademicYearQuery(sits).execute().head
 
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
 	lazy val membershipByUsercodeQuery = new MembershipByUsercodeQuery(membership)
 
 	def studentInformationQuery(member: MembershipInformation, ssoUser: User) = {
-		val ret = new StudentInformationQuery(sits, member, ssoUser)
-		ret
+		new StudentInformationQuery(sits, member, ssoUser)
 	}
+
 	def staffInformationQuery(member: MembershipInformation, ssoUser: User) = new StaffInformationQuery(sits, member, ssoUser)
 
 	def getMemberDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportMemberCommand] = {
 		// TODO we could probably chunk this into 20 or 30 users at a time for the query, or even split by category and query all at once
 
+		val sitsCurrentAcademicYear = getCurrentSitsAcademicYearString
+
 		membersAndCategories flatMap { mac =>
 			val usercode = mac.member.usercode
 			val ssoUser = users(usercode)
+			val universityId = mac.member.universityId
 
 			mac.member.userType match {
 				case Staff | Emeritus => staffInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
 				case Student | Other => {
 					studentInformationQuery(mac, ssoUser).executeByNamedParam(
-											Map("year" -> currentAcademicYear, "usercodes" -> usercode)
+											Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
 										  ).toSeq
 					}
 				case _ => Seq()
@@ -117,7 +120,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			case Student => studentMemberDetails(mac)
 			case _ => staffMemberDetails(mac)
 		}}
-	
+
 	def studentMemberDetails(mac: MembershipInformation) = {
 		val member = mac.member
 		val ssoUser = new User(member.usercode)
@@ -167,7 +170,8 @@ class SandboxProfileImporter extends ProfileImporter {
 			"year_of_study" -> ((member.universityId.toLong % 3) + 1).toInt,
 			"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
 			"sce_academic_year" -> AcademicYear.guessByDate(DateTime.now).toString,
-			"sce_sequence_number" -> 1
+			"sce_sequence_number" -> 1,
+			"mod_reg_status" -> "CON"
 		))
 		new ImportStudentRowCommand(
 			mac,
@@ -176,7 +180,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			new ImportStudentCourseCommand(rs, new ImportStudentCourseYearCommand(rs), new ImportSupervisorsForStudentCommand())
 		)
 	}
-	
+
 	def staffMemberDetails(mac: MembershipInformation) = {
 		val member = mac.member
 		val ssoUser = new User(member.usercode)
@@ -210,10 +214,10 @@ class SandboxProfileImporter extends ProfileImporter {
 
 	def userIdsAndCategories(department: Department): Seq[MembershipInformation] = {
 		val dept = SandboxData.Departments(department.code)
-		
+
 		studentsForDepartment(dept) ++ staffForDepartment(dept)
 	}
-		
+
 	def staffForDepartment(department: SandboxData.Department) =
 		(department.staffStartId to department.staffEndId).map { uniId =>
 			val gender = if (uniId % 2 == 0) Gender.Male else Gender.Female
@@ -221,7 +225,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			val title = "Professor"
 			val userType = MemberUserType.Staff
 			val groupName = "Academic staff"
-				
+
 			MembershipInformation(
 				MembershipMember(
 					uniId.toString,
@@ -244,8 +248,8 @@ class SandboxProfileImporter extends ProfileImporter {
 				), () => None
 			)
 		}.toSeq
-		
-	def studentsForDepartment(department: SandboxData.Department) = 
+
+	def studentsForDepartment(department: SandboxData.Department) =
 		department.routes.values.flatMap { route =>
 			(route.studentsStartId to route.studentsEndId).map { uniId =>
 				val gender = if (uniId % 2 == 0) Gender.Male else Gender.Female
@@ -360,7 +364,9 @@ object ProfileImporter {
 			sce.sce_blok as year_of_study,
 			sce.sce_moac as mode_of_attendance_code,
 			sce.sce_ayrc as sce_academic_year,
-			sce.sce_seq2 as sce_sequence_number
+			sce.sce_seq2 as sce_sequence_number,
+
+			ssn.ssn_mrgs as mod_reg_status
 
 		from intuit.ins_stu stu
 
@@ -390,12 +396,16 @@ object ProfileImporter {
 			left outer join intuit.srs_sta sts
 				on spr.sts_code = sts.sta_code
 
-		where stu.stu_udf3 in (:usercodes)
+			left outer join intuit.cam_ssn ssn
+				on spr.spr_code = ssn.ssn_sprc
+				and sce.sce_ayrc = ssn.ssn_ayrc
+
+		where stu.stu_code = :universityId
 		"""
 
 	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User)
 		extends MappingSqlQuery[ImportStudentRowCommand](ds, GetStudentInformation) {
-		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
+		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 		declareParameter(new SqlParameter("year", Types.VARCHAR))
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int)
@@ -431,15 +441,6 @@ object ProfileImporter {
 		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportStaffMemberCommand(member, ssoUser, rs)
-	}
-
-	val GetCurrentAcademicYear = """
-		select UWTABS.GET_AYR() ayr from dual
-		"""
-
-	class GetCurrentAcademicYearQuery(ds: DataSource) extends MappingSqlQuery[String](ds, GetCurrentAcademicYear) {
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = rs.getString("ayr")
 	}
 
 	val GetMembershipByUsercodeInformation = """

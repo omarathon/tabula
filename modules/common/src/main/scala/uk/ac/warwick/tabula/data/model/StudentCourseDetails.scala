@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.{AccessType, Type}
-import org.hibernate.annotations.GenericGenerator
-import org.hibernate.annotations.Parameter
+import org.hibernate.annotations._
 import org.joda.time.LocalDate
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
@@ -15,6 +13,8 @@ import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import scala.collection.JavaConverters._
+import javax.persistence.Entity
+import javax.persistence.CascadeType
 
 @Entity
 class StudentCourseDetails
@@ -43,7 +43,13 @@ class StudentCourseDetails
 
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	@BatchSize(size=200)
 	val studentCourseYearDetails: JList[StudentCourseYearDetails] = JArrayList()
+
+	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	@BatchSize(size=200)
+	var moduleRegistrations: JList[ModuleRegistration] = JArrayList()
 
 	def toStringProps = Seq(
 		"scjCode" -> scjCode,
@@ -72,13 +78,12 @@ class StudentCourseDetails
 	}
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	def latestStudentCourseYearDetails: StudentCourseYearDetails = {
+	def latestStudentCourseYearDetails: StudentCourseYearDetails =
 		studentCourseYearDetails.asScala.max
-	}
 
 	def courseType = CourseType.fromCourseCode(course.code)
 
-	// We can't restrict this because it's not a getter. Restrict in 
+	// We can't restrict this because it's not a getter. Restrict in
 	// view code if necessary (or implement for all methods in  ScalaBeansWrapper)
 	def relationships(relationshipType: StudentRelationshipType) =
 		relationshipService.findCurrentRelationships(relationshipType, this.sprCode)
@@ -94,6 +99,10 @@ class StudentCourseDetails
 	def attachStudentCourseYearDetails(yearDetailsToAdd: StudentCourseYearDetails) {
 		studentCourseYearDetails.remove(yearDetailsToAdd)
 		studentCourseYearDetails.add(yearDetailsToAdd)
+	}
+
+	def hasModuleRegistrations = {
+		!moduleRegistrations.isEmpty()
 	}
 }
 

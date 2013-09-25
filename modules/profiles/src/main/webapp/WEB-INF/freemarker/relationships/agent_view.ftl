@@ -5,7 +5,7 @@
 <#escape x as x?html>
 <div id="agent-view">
 	<div class="pull-right">
-		<#if features.personalTutorAssignment>
+		<#if features.personalTutorAssignment && !relationshipType.readOnly(department)>
 			<a href="<@routes.relationship_allocate department relationshipType />" class="btn btn-medium pull-right">
 				<i class="icon-random icon-fixed-width"></i> Assign ${relationshipType.description}s</a>
 			</a>
@@ -42,7 +42,7 @@
 								</h4>
 
 								<div id="${studentKey}" class="collapse">
-									<table class="students table-bordered table-striped table-condensed tabula-purple">
+									<table class="students table table-bordered table-striped table-condensed tabula-purple">
 										<thead>
 											<tr>
 												<th class="student-col">First name</th>
@@ -61,7 +61,7 @@
 													<td><h6>${student.firstName}</h6></td>
 													<td><h6>${student.lastName}</h6></td>
 													<td><a class="profile-link" href="<@routes.profile student />">${student.universityId}</a></td>
-													<td>${student.groupName}</td>
+													<td>${student.groupName!""}</td>
 													<td>
 														${(student.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}
 													</td>
@@ -72,6 +72,10 @@
 											</#list>
 										</tbody>
 									</table>
+									
+									<p>
+										<@fmt.bulk_email_student_relationships relationships=students subject="${relationshipType.agentRole?cap_first}" />
+									</p>
 								</div>
 							</td>
 						</tr>

@@ -6,6 +6,7 @@ import javax.validation.constraints.NotNull
 import org.joda.time.DateTime
 import scala.Array
 import uk.ac.warwick.tabula.JavaImports._
+import org.hibernate.annotations.BatchSize
 
 @Entity
 class MonitoringPoint extends GeneratedId {
@@ -15,18 +16,22 @@ class MonitoringPoint extends GeneratedId {
 	var pointSet: AbstractMonitoringPointSet = _
 
 	@OneToMany(mappedBy = "point", cascade=Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
 	var checkpoints: JList[MonitoringCheckpoint] = JArrayList()
 	
 	@NotNull
 	var name: String = _
-	
-	var defaultValue: Boolean = true
 	
 	var createdDate: DateTime = _
 	
 	var updatedDate: DateTime = _
 
 	@NotNull
-	var week: Int = _
+	var validFromWeek: Int = _
+
+	@NotNull
+	var requiredFromWeek: Int = _
+
+	var sentToAcademicOffice: Boolean = false
 
 }
