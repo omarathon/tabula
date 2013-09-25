@@ -1,25 +1,19 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 
-
-	import scala.collection.JavaConversions.asScalaBuffer
-	import org.springframework.beans.factory.annotation.Autowired
-	import org.springframework.beans.factory.annotation.Configurable
-	import uk.ac.warwick.tabula.commands._
-	import uk.ac.warwick.tabula.data.model.MemberNote
-	import uk.ac.warwick.tabula.data._
-	import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
-	import uk.ac.warwick.tabula.services.fileserver._
-	import uk.ac.warwick.tabula.services.ZipService
-	import uk.ac.warwick.tabula.CurrentUser
-	import uk.ac.warwick.spring.Wire
-	import uk.ac.warwick.tabula.JavaImports._
-	import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.MemberNote
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
+import uk.ac.warwick.tabula.services.fileserver._
+import uk.ac.warwick.tabula.services.ZipService
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.permissions._
 
 
 class DownloadMemberNoteFilesCommand (val memberNote: MemberNote) extends Command[Option[RenderableFile]] with ReadOnly {
 
-		PermissionCheck(Permissions.MemberNotes.Create, memberNote)
+		PermissionCheck(Permissions.MemberNotes.Read, memberNote)
 
 		var filename: String = _
 
@@ -37,7 +31,7 @@ class DownloadMemberNoteFilesCommand (val memberNote: MemberNote) extends Comman
 			val result: Option[RenderableFile] =
 				filename match {
 					case filename: String if filename.hasText => {
-						memberNote.attachments.find(_.name == filename).map(new RenderableAttachment(_))
+						memberNote.attachments.asScala.find(_.name == filename).map(new RenderableAttachment(_))
 					}
 					case _ => Some(zipped(memberNote))
 				}
