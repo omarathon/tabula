@@ -352,13 +352,13 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.getUpstreamAssignment(ua4.id) should be (Some(ua4))
 		assignmentMembershipService.getUpstreamAssignment("wibble") should be (None)
 
-		assignmentMembershipService.getUpstreamAssignments(Fixtures.module("ch101")) should be (Seq(ua1, ua2))
-		assignmentMembershipService.getUpstreamAssignments(Fixtures.module("la101")) should be (Seq(ua3))
-		assignmentMembershipService.getUpstreamAssignments(Fixtures.module("cs101")) should be (Seq())
+		assignmentMembershipService.getAssessmentComponents(Fixtures.module("ch101")) should be (Seq(ua1, ua2))
+		assignmentMembershipService.getAssessmentComponents(Fixtures.module("la101")) should be (Seq(ua3))
+		assignmentMembershipService.getAssessmentComponents(Fixtures.module("cs101")) should be (Seq())
 
-		assignmentMembershipService.getUpstreamAssignments(Fixtures.department("ch")) should be (Seq(ua1, ua2))
-		assignmentMembershipService.getUpstreamAssignments(Fixtures.department("la")) should be (Seq(ua3))
-		assignmentMembershipService.getUpstreamAssignments(Fixtures.department("cs")) should be (Seq())
+		assignmentMembershipService.getAssessmentComponents(Fixtures.department("ch")) should be (Seq(ua1, ua2))
+		assignmentMembershipService.getAssessmentComponents(Fixtures.department("la")) should be (Seq(ua3))
+		assignmentMembershipService.getAssessmentComponents(Fixtures.department("cs")) should be (Seq())
 	}
 
 	@Test def assessmentGroups = transactional { tx =>

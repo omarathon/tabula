@@ -28,13 +28,13 @@ trait AssignmentMembershipService {
 	def getUpstreamAssignment(group: UpstreamAssessmentGroup): Option[AssessmentComponent]
 
 	/**
-	 * Get all Assignment-type AssessmentComponents that appear to belong to this module.
+	 * Get all AssessmentComponents that appear to belong to this module.
 	 *
 	 *  Typically used to provide possible candidates to link to an app assignment,
 	 *  in conjunction with #getUpstreamAssessmentGroups.
 	 */
-	def getUpstreamAssignments(module: Module): Seq[AssessmentComponent]
-	def getUpstreamAssignments(department: Department): Seq[AssessmentComponent]
+	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
+	def getAssessmentComponents(department: Department): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -113,16 +113,14 @@ class AssignmentMembershipServiceImpl
 	def getUpstreamAssignment(group: UpstreamAssessmentGroup) = dao.getUpstreamAssignment(group)
 
 	/**
-	 * Gets assessment components of type assignment for this module.
-	 * Doesn't get any other kind of components that may have been imported.
+	 * Gets assessment components for this module.
 	 */
-	def getUpstreamAssignments(module: Module) = dao.getUpstreamAssignments(module)
+	def getAssessmentComponents(module: Module) = dao.getAssessmentComponents(module)
 
 	/**
-	 * Gets assessment components of type assignment for this department.
-	 * Doesn't get any other kind of components that may have been imported.
+	 * Gets assessment components for this department.
 	 */
-	def getUpstreamAssignments(department: Department) = dao.getUpstreamAssignments(department)
+	def getAssessmentComponents(department: Department) = dao.getAssessmentComponents(department)
 
 	def countPublishedFeedback(assignment: Assignment): Int = dao.countPublishedFeedback(assignment)
 
