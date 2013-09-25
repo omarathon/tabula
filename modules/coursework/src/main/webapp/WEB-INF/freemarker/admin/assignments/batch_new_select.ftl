@@ -139,7 +139,7 @@ first page of the form to setup a bunch of assignments from SITS.
 		${item.upstreamAssignment.moduleCode?upper_case}
 	</td>
 	<td class="selectable">
-		${item.sequence}
+		${item.upstreamAssignment.sequence}
 	</td>
 	<td class="selectable">
 		${item.occurrence}
