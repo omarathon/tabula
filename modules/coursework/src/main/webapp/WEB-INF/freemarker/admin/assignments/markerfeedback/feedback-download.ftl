@@ -10,7 +10,9 @@
 	<title>Test document</title>
 </head>
 <body>
-<h2>Feedback for ${user.universityId} on ${feedback.assignment.module.code}</h2>
+<h2>${feedback.assignment.module.name} (${feedback.assignment.module.code?upper_case})</h2>
+<h2>${feedback.assignment.name}</h2>
+<h3>Feedback for ${user.universityId} </h3>
 
 <#if feedback.hasMarkOrGrade>
 	<div class="mark-and-grade">
@@ -21,12 +23,14 @@
 
 <#if  feedback.assignment.genericFeedback??>
 <div class="feedback-notes">
-<h3>General feedback on the assignment:</h3> ${feedback.assignment.genericFeedback!""}
+<h4>Feedback for all students on this assignment</h4>
+${feedback.assignment.genericFeedback!""}
 </div>
 </#if>
 <#if feedback.defaultFeedbackComments??>
 <div class="feedback-notes">
-<h3>Feedback on your submission</h3> ${feedback.defaultFeedbackComments!""}
+<h4>Feedback on your submission</h4>
+${feedback.defaultFeedbackComments!""}
 </div>
 </#if>
 

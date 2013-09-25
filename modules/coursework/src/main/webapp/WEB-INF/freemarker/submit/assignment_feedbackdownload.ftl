@@ -54,3 +54,5 @@
 		</ul>
 	</#if>
 </p>
+
+<a href="${assignment.id}/feedback.pdf"> Download feedback as a PDF file</a>
