@@ -30,7 +30,7 @@
 
 	<div class="striped-section-contents attendees">
 		<form action="" method="post">
-			<input type="hidden" value="<@url page="${returnTo}" />" />
+			<input type="hidden" name="returnTo" value="<#if returnTo?starts_with('http')>${returnTo}<#else><@url page="${returnTo}" /></#if>" />
 			<#list command.members as student>
 				<#assign checked = false />
 				<#list command.attendees as attendedStudent>
