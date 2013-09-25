@@ -259,7 +259,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	 */
 	def shouldIncludeByDefault(component: AssessmentComponent) =
 		component.assessmentType == AssessmentType.Assignment &&
-		component.sequence != "AO"
+		component.assessmentGroup != "AO"
 
 
 }
