@@ -62,7 +62,12 @@ abstract class ModifyMemberNoteCommand(val member: Member, val submitter: Curren
 		memberNote
 	}
 
+	// can be overridden in concrete implementations to provide additional validation
+	def contextSpecificValidation(errors: Errors)
+
 	def validate(errors:Errors){
+		contextSpecificValidation(errors)
+
 		if (!note.hasText && !file.hasAttachments){
 			errors.rejectValue("note", "profiles.memberNote.empty")
 		}

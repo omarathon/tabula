@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.{Fixtures, TestBase, Mockito}
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.services.{MemberNoteService, ProfileService}
+import uk.ac.warwick.tabula.services.{FileAttachmentService, MemberNoteService, ProfileService}
 
 class CreateMemberNoteCommandTest extends TestBase with Mockito {
 
@@ -16,6 +16,7 @@ class CreateMemberNoteCommandTest extends TestBase with Mockito {
 		profileService.getMemberByUniversityId(currentUser.universityId) returns Some(submitter)
 		cmd.profileService = profileService
 		cmd.memberNoteService = mock[MemberNoteService]
+		cmd.fileAttachmentService = mock[FileAttachmentService]
 
 		cmd.note = "the note"
 

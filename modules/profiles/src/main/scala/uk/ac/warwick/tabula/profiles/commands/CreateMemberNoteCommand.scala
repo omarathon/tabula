@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.{MemberNote, Member}
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.permissions.Permissions
+import org.springframework.validation.Errors
 
 class CreateMemberNoteCommand(member: Member, submitter: CurrentUser) extends ModifyMemberNoteCommand(member, submitter) {
 
@@ -13,4 +14,5 @@ class CreateMemberNoteCommand(member: Member, submitter: CurrentUser) extends Mo
 
 	def describe(d: Description) = d.member(member)
 
+	def contextSpecificValidation(errors: Errors) {}
 }

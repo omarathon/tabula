@@ -14,8 +14,8 @@ class EditMemberNoteCommand(note: MemberNote, currentUser: CurrentUser ) extends
 
 	def describe(d: Description) = d.memberNote(memberNote)
 
-	override def validate(errors:Errors){
-		if (memberNote.deleted) errors.reject("profiles.memberNote.edit.deleted")
+	override def contextSpecificValidation(errors:Errors){
+		if (memberNote.deleted) errors.rejectValue("note", "profiles.memberNote.edit.deleted")
 	}
 
 }
