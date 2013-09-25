@@ -9,7 +9,6 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.{SessionComponent, Daoisms}
 import scala.collection.JavaConverters._
 
 class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser) 
@@ -81,6 +80,6 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 
 object ReleaseForMarkingCommand{
 	def apply(module: Module, assignment: Assignment, currentUser: CurrentUser):ReleaseForMarkingCommand = {
-		new ReleaseForMarkingCommand(module,assignment, currentUser) with Daoisms
+		new ReleaseForMarkingCommand(module,assignment, currentUser) 
 	}
 }
