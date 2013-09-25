@@ -197,7 +197,7 @@ class UpstreamGroup(val assessmentComponent: AssessmentComponent, val group: Ups
 	val cats = assessmentComponent.cats
 	val occurrence = group.occurrence
 	val sequence = assessmentComponent.sequence
-	val assessmentType = assessmentComponent.assessmentType.value
+	val assessmentType = Option(assessmentComponent.assessmentType).map(_.value).orNull
 
 	def isLinked(assessmentGroups: JList[AssessmentGroup]) = assessmentGroups.asScala.exists(ag =>
 		ag.assessmentComponent.id == assessmentComponent.id && ag.occurrence == group.occurrence)
