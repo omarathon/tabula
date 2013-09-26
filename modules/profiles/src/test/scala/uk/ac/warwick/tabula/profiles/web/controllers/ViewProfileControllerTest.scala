@@ -14,6 +14,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 	// need to have a security service defined or we'll get a NPE in PermissionsCheckingMethods.restricted()
 	controller.securityService = mock[SecurityService]
 	controller.smallGroupService = mock[SmallGroupService]
+	controller.profileService = mock[ProfileService]
 
 	val member = new StudentMember()
 	val courseDetails = new StudentCourseDetails()
@@ -42,7 +43,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 		withUser("test") {
 			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 			
-			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
+			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)			
 			val cmd = controller.getViewMeetingRecordCommand(member, relationshipType)
 			cmd should not be(None)
 
