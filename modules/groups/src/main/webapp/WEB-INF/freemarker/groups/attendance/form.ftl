@@ -56,7 +56,7 @@
 			<div class="persist-footer">
 				<div class="pull-right span2">
 					<input type="submit" value="Save" class="btn btn-primary">
-					<a class="btn" href="<@url page="${returnTo}" />">Cancel</a>
+					<a class="btn" href="${returnTo}">Cancel</a>
 				</div>
 			</div>
 		</form>
