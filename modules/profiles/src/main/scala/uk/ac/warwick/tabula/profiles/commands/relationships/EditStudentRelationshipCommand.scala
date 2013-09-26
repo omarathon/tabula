@@ -37,10 +37,10 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 
 	var agent: Member = _
 
-	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), studentCourseDetails)
+	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), mandatory(studentCourseDetails))
 
 	// throw this request out if the relationship can't be edited in Tabula for this department
-	if (relationshipType.readOnly(studentCourseDetails.department)) {
+	if (relationshipType.readOnly(mandatory(studentCourseDetails.department))) {
 		logger.info("Denying access to EditStudentRelationshipCommand since relationship %s is read-only".format(relationshipType))
 		throw new ItemNotFoundException()
 	}
