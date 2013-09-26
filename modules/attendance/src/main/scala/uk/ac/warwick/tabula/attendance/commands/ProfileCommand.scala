@@ -28,7 +28,7 @@ abstract class ProfileCommand(val studentCourseDetails: StudentCourseDetails, va
 
 	override def applyInternal() = {
 		studentCourseDetails.studentCourseYearDetails.asScala.find(_.academicYear == academicYear) match {
-			case None => throw new ItemNotFoundException
+			case None =>
 			case Some(studentCourseYearDetail) => {
 				monitoringPointService.findMonitoringPointSet(
 					studentCourseDetails.route,
@@ -37,7 +37,7 @@ abstract class ProfileCommand(val studentCourseDetails: StudentCourseDetails, va
 				) match {
 					case None => {
 						monitoringPointService.findMonitoringPointSet(studentCourseDetails.route, studentCourseYearDetail.academicYear, None) match {
-							case None => throw new ItemNotFoundException
+							case None =>
 							case Some(pointSet) => applyForPointSet(pointSet)
 						}
 					}

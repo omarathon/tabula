@@ -1,17 +1,12 @@
 package uk.ac.warwick.tabula.commands
 
-import scala.annotation.target._
-import collection.mutable
 import org.springframework.validation.Errors
-import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.events.{NotificationHandling, EventHandling, Event, EventDescription}
 import uk.ac.warwick.tabula.JavaImports
 import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, RequiresPermissionsChecking, PermissionsChecking}
-import uk.ac.warwick.tabula.system.NoBind
 import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
 import org.apache.log4j.Logger
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
@@ -259,6 +254,15 @@ abstract class Description {
 	def assignment(assignment: Assignment) = {
 		property("assignment" -> assignment.id)
 		if (assignment.module != null) module(assignment.module)
+		this
+	}
+
+	/**
+	 * Record member note, plus its student.
+	 */
+	def memberNote(memberNote: MemberNote) = {
+		property("membernote" -> memberNote.id)
+		if (memberNote.member != null) member(memberNote.member)
 		this
 	}
 	

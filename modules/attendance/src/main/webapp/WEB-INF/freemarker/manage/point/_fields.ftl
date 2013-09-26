@@ -5,7 +5,7 @@
 <@form.labelled_row "validFromWeek" "'Valid from' week">
 	<@f.select path="validFromWeek">
 		<#list 1..52 as week>
-			<@f.option value="${week}"><@fmt.singleWeekFormat week week command.academicYear command.dept /></@f.option>
+			<@f.option value="${week}"><@fmt.singleWeekFormat week command.academicYear command.dept /></@f.option>
 		</#list>
 	</@f.select>
 	<a class="use-popover" id="popover-validFromWeek" data-content="Before this week a point can only be marked as Missed (authorised)"><i class="icon-question-sign"></i></a>
@@ -14,7 +14,7 @@
 <@form.labelled_row "requiredFromWeek" "'Required from' week">
 	<@f.select path="requiredFromWeek">
 		<#list 1..52 as week>
-			<@f.option value="${week}"><@fmt.singleWeekFormat week week command.academicYear command.dept /></@f.option>
+			<@f.option value="${week}"><@fmt.singleWeekFormat week command.academicYear command.dept /></@f.option>
 		</#list>
 	</@f.select>
 	<a class="use-popover" id="popover-requiredFromWeek" data-content="From this week a point with a checkpoint for each student will be marked as unrecorded"><i class="icon-question-sign"></i></a>

@@ -263,6 +263,85 @@
 	});
 	//END MEETING RECORD APPROVAL STUFF
 
+	//MEMBERNOTE STUFF
+
+	  //Iframe onload function call - sets size and binds iframe submit click to modal
+	  window.noteFrameLoad = function(frame) {
+
+		if($(frame).contents().find("form").length == 0){
+			//Handle empty response from iframe form submission
+			$("#note-modal").modal('hide');
+			document.location.reload(true);
+
+		} else {
+			//Set the modal body height and disable overflow
+			var $frame = $(frame)
+			var frameHeight = frame.contentWindow.document.body.scrollHeight
+			var $modalBody = $("#note-modal .modal-body")
+
+			$modalBody.height(frameHeight);
+
+			if(frameHeight < 500) {
+				$modalBody.css("overflow-y", "hidden")
+			} else {
+				$modalBody.css("overflow-y", "auto")
+				$frame.height(frameHeight + 10)  //Work around for case of overflow where iframe html is 20px smaller than iframe window
+			}
+
+			//Bind iframe form submission to modal button
+			$("#member-note-save").on('click', function(e){
+				e.preventDefault();
+				$("#note-modal .modal-body").find('iframe').contents().find('form').submit();
+				$(this).off()  //remove click event to prevent bindings from building up
+			});
+		}
+	}
+
+    $(function() {
+		// Bind click to load create-edit member note
+		$("#membernote-details").on("click", ".create, .edit", function(e) {
+			if ($(this).hasClass("disabled")) return false;
+
+			var url = $(this).attr('data-url');
+			var $modalBody =  $("#note-modal .modal-body")
+
+			$modalBody.html('<iframe src="'+url+'" style="height:100%; width:100%;" onLoad="noteFrameLoad(this)" frameBorder="0" scrolling="no"></iframe>')
+			$("#note-modal .modal-header h3 span").text($(this).attr("title"))
+			$("#note-modal").modal('show')
+			return false; //stop propagation and prevent default
+		});
+
+        //Bind click events for toolbar
+		$('.member-note-toolbar a:not(.edit)').on('click', function(e) {
+
+			var $this = $(this);
+			var $details = $this.closest('details');
+			var $toolbaritems = $this.closest('.member-note-toolbar').children();
+
+			if($this.hasClass("disabled")) return false;
+
+			$details.addClass("processing");
+			var url = $this.attr("href");
+
+			$.post(url, function(data) {
+				if (data.status == "successful") {
+					if($this.hasClass('delete') || $this.hasClass('restore')) {
+						$toolbaritems.toggleClass("disabled");
+						$details.toggleClass("muted deleted");
+						$details.find('.deleted-files').toggleClass('hidden');
+					} else if($this.hasClass('purge')) {
+						$details.slideUp("slow")
+					}
+				}
+                $details.removeClass("processing");
+			}, "json");
+
+			return false; //stop propagation and prevent default
+		});
+
+	});
+    //END OF MEMBERNOTE STUFF
+
 	// TIMETABLE STUFF
     $(function() {
 		function getEvents(studentId){

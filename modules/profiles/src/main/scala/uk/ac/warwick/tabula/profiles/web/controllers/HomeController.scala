@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.{Features, CurrentUser}
 import uk.ac.warwick.userlookup.Group
 import collection.JavaConversions._
-import uk.ac.warwick.tabula.services.{SmallGroupService, UserLookupService, ProfileService, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.services.{SmallGroupService, UserLookupService, ProfileService, ModuleAndDepartmentService, MemberNoteService}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.web._
