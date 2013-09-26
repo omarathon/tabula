@@ -42,5 +42,6 @@ abstract class ProfilesController extends BaseController with ProfileBreadcrumbs
 }
 
 trait CurrentMemberComponent {
-	def currentMember:Member
+	def optionalCurrentMember: Option[Member]
+	def currentMember: Member
 }

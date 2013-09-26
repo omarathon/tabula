@@ -11,6 +11,7 @@ import javax.persistence.Entity
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 
@@ -89,13 +90,13 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def getByUniversityId(universityId: String) =
 		session.newCriteria[Member]
-			.add(is("universityId", universityId.trim))
+			.add(is("universityId", universityId.safeTrim))
 			.uniqueResult
 
 	def getAllWithUniversityIds(universityIds: Seq[String]) =
 		if (universityIds.isEmpty) Seq.empty
 		else session.newCriteria[Member]
-			.add(in("universityId", universityIds map { _.trim }))
+			.add(in("universityId", universityIds map { _.safeTrim }))
 			.seq
 
 	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {
@@ -105,7 +106,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				session.disableFilter(Member.StudentsOnlyFilter)
 
 			session.newCriteria[Member]
-					.add(is("userId", userId.trim.toLowerCase))
+					.add(is("userId", userId.safeTrim.toLowerCase))
 					.add(disjunction()
 						.add(is("inUseFlag", "Active"))
 						.add(like("inUseFlag", "Inactive - Starts %"))

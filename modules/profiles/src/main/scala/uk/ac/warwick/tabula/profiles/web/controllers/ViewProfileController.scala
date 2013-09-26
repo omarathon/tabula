@@ -42,7 +42,7 @@ class ViewProfileController extends ProfilesController {
 
 	def getViewMeetingRecordCommand(member: Member, relationshipType: StudentRelationshipType): Option[Command[Seq[MeetingRecord]]] = {
 		member.mostSignificantCourseDetails match {
-			case Some(scd) => restricted(ViewMeetingRecordCommand(scd, user, relationshipType))
+			case Some(scd) => restricted(ViewMeetingRecordCommand(scd, optionalCurrentMember, relationshipType))
 			case _ => {
 				logger.warn("Member " + member.universityId + " has no most significant course details")
 				None
