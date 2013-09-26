@@ -4,9 +4,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.Notifies
+import uk.ac.warwick.tabula.commands.{SelfValidating, Command, Description, Notifies}
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
@@ -17,6 +15,7 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.profiles.notifications.StudentRelationshipChangeNotification
+import org.springframework.validation.Errors
 
 /**
  * Command to edit the relationship for the StudentCourseDetails passed in, passing 
@@ -31,7 +30,7 @@ import uk.ac.warwick.tabula.profiles.notifications.StudentRelationshipChangeNoti
  */
 class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDetails, val relationshipType: StudentRelationshipType, val currentAgent: Option[Member], val currentUser: CurrentUser, val remove: Boolean)
 	extends Command[Seq[StudentRelationship]] 
-	with Notifies[Seq[StudentRelationship], StudentRelationship] {
+	with Notifies[Seq[StudentRelationship], StudentRelationship] 		with SelfValidating {
 
 	var relationshipService = Wire[RelationshipService]
 
@@ -51,10 +50,14 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 	var notifyOldAgent: Boolean = false
 	var notifyNewAgent: Boolean = false
 
-	def applyInternal = {
+	def validate(errors: Errors) {
 		if(agent == null){
-			Nil // TAB-1173 NPE caused by agent being null. Can't see how user could have submitted in this state but guard anyway
-		} else if (!currentAgent.isDefined) {
+			errors.rejectValue("agent", "profiles.relationship.add.noAgent")
+		}
+	}
+
+	def applyInternal = {
+		if (!currentAgent.isDefined) {
 			// Brand new agent
 			val newRelationship = relationshipService.saveStudentRelationship(relationshipType, studentCourseDetails.sprCode, agent.universityId)
 
