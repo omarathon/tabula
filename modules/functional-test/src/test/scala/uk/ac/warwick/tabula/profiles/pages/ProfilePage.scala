@@ -19,10 +19,5 @@ class ProfilePage (implicit val webDriver:WebDriver)  extends WebBrowser with	Br
 		val timetableSection: Option[Element] = find(cssSelector("#timetable-details"))
 		timetableSection.map(e=>new TimetablePane(e.underlying))
 	}
-
-	def memberNotesPane(): Option[MemberNotePane] = {
-		val memberNoteSection: Option[Element] = find(cssSelector("#membernote-details"))
-		memberNoteSection.map(e=>new MemberNotePane(e.underlying))
-	}
 }
 
