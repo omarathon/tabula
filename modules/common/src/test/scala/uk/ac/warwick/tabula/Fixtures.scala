@@ -185,6 +185,21 @@ object Fixtures {
 		point
 	}
 
+	def memberNoteWithId(note: String, student: Member, id: String ) = {
+		val memberNote = new MemberNote
+		memberNote.note = note
+		memberNote.member = student
+		memberNote.id = id
+		memberNote
+	}
+
+	def memberNote(note: String, student: Member ) = {
+		val memberNote = new MemberNote
+		memberNote.note = note
+		memberNote.member = student
+		memberNote
+	}
+
 	def monitoringCheckpoint(point: MonitoringPoint, studentCourseDetails: StudentCourseDetails, state: MonitoringCheckpointState) = {
 		val checkpoint = new MonitoringCheckpoint
 		checkpoint.point = point

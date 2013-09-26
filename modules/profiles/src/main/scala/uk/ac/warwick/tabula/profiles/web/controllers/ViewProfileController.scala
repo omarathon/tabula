@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.{SmallGroupService, UserLookupService}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{MeetingRecord, Member, StudentMember}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, ViewViewableCommand}
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.services.RelationshipService
+import scala.Some
 
 class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
 
@@ -34,6 +34,7 @@ class ViewProfileController extends ProfilesController {
 
 	var userLookup = Wire[UserLookupService]
 	var smallGroupService = Wire[SmallGroupService]
+	var memberNoteService = Wire[MemberNoteService]
 
 	@ModelAttribute("searchProfilesCommand")
 	def searchProfilesCommand =
@@ -41,7 +42,7 @@ class ViewProfileController extends ProfilesController {
 
 	def getViewMeetingRecordCommand(member: Member, relationshipType: StudentRelationshipType): Option[Command[Seq[MeetingRecord]]] = {
 		member.mostSignificantCourseDetails match {
-			case Some(scd) => restricted(ViewMeetingRecordCommand(scd, user, relationshipType))
+			case Some(scd) => restricted(ViewMeetingRecordCommand(scd, optionalCurrentMember, relationshipType))
 			case _ => {
 				logger.warn("Member " + member.universityId + " has no most significant course details")
 				None
@@ -88,6 +89,13 @@ class ViewProfileController extends ProfilesController {
 				smallGroupService.findSmallGroupsByStudent(profiledStudentMember.asSsoUser).size
 			else 0
 
+		//Get all membernotes for student
+
+		val memberNotes =
+			if (securityService.can(user, Permissions.MemberNotes.Update, member)) memberNoteService.list(member)
+			else if (securityService.can(user, Permissions.MemberNotes.Read, member)) memberNoteService.listNonDeleted(member)
+			else null
+
 		Mav("profile/view",
 			"profile" -> profiledStudentMember,
 			"viewer" -> currentMember,
@@ -95,6 +103,7 @@ class ViewProfileController extends ProfilesController {
 			"meetingsById" -> relationshipMeetings.map { case (relType, meetings) => (relType.id, meetings) },
 			"openMeeting" -> openMeeting,
 			"numSmallGroups" -> numSmallGroups,
+			"memberNotes" -> memberNotes,
 			"agent" -> agent)
 		.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}

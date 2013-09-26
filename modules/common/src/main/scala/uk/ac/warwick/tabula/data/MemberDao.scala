@@ -11,6 +11,7 @@ import javax.persistence.Entity
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 
@@ -42,6 +43,7 @@ trait MemberDao {
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
+	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getAllRelationshipsByAgent(agentId: String): Seq[StudentRelationship]
 	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[Member]
@@ -88,13 +90,13 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def getByUniversityId(universityId: String) =
 		session.newCriteria[Member]
-			.add(is("universityId", universityId.trim))
+			.add(is("universityId", universityId.safeTrim))
 			.uniqueResult
 
 	def getAllWithUniversityIds(universityIds: Seq[String]) =
 		if (universityIds.isEmpty) Seq.empty
 		else session.newCriteria[Member]
-			.add(in("universityId", universityIds map { _.trim }))
+			.add(in("universityId", universityIds map { _.safeTrim }))
 			.seq
 
 	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {
@@ -104,7 +106,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				session.disableFilter(Member.StudentsOnlyFilter)
 
 			session.newCriteria[Member]
-					.add(is("userId", userId.trim.toLowerCase))
+					.add(is("userId", userId.safeTrim.toLowerCase))
 					.add(disjunction()
 						.add(is("inUseFlag", "Active"))
 						.add(like("inUseFlag", "Inactive - Starts %"))
@@ -202,6 +204,35 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setEntity("relationshipType", relationshipType)
 			.seq
 	}
+
+	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = {
+		session.newQuery[StudentRelationship]("""
+			select
+				distinct sr
+			from
+				StudentRelationship sr,
+				StudentCourseDetails scd,
+				Member staff
+			where
+				sr.targetSprCode = scd.sprCode
+      and
+        staff.universityId = sr.agent
+			and
+				sr.relationshipType = :relationshipType
+			and
+				staff.homeDepartment = :department
+			and
+				scd.sprStatus.code not like 'P%'
+			and
+				(sr.endDate is null or sr.endDate >= SYSDATE)
+			order by
+				sr.agent, sr.targetSprCode
+																					""")
+			.setEntity("department", department)
+			.setEntity("relationshipType", relationshipType)
+			.seq
+	}
+
 
 	def getAllRelationshipsByAgent(agentId: String): Seq[StudentRelationship] =
 		session.newCriteria[StudentRelationship]

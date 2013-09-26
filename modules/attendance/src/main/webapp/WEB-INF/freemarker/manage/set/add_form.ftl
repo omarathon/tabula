@@ -21,7 +21,10 @@
 				<h3>Route and year of study</h3>
 			</div>
 			<div class="span10">
-				<p class="collapsible"><i class="icon-fixed-width icon-chevron-right"></i> There <span class="routes-count">are no routes</span> selected</p>
+				<p class="collapsible">
+					<i class="icon-fixed-width icon-chevron-right"></i>
+					There <span class="routes-count">are no routes</span> selected <span class="expand-button"><a class="btn btn-primary">Add routes</a></span>
+				</p>
 				<#assign yearList = ["1","2","3","4","5","6","7","8","All"] />
 				<div class="collapsible-target">
 					<table class="table table-bordered table-striped table-condensed table-hover header">

@@ -348,3 +348,95 @@ class WeekRangesDumperTag extends TemplateMethodModelEx with WeekRangesDumper wi
 		  getWeekRangesAsJSON(formatWeekName)
 	}
 }
+
+
+class SingleWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYear)  {
+
+	implicit class PimpedTerm(term: Term) {
+		def print(weekNumber: Int, weekStartDate: DateTime, dayOfWeek: DayOfWeek, numberingSystem: String) = {
+			term match {
+				case vac: Vacation => {
+					// Date range
+					"%s, w/c %s" format (vac.getTermTypeAsString, IntervalFormatter.format(weekStartDate.withDayOfWeek(1), includeTime = false))
+				}
+				case term => {
+					// Convert week numbers to the correct style
+					val termNumber = term.getTermType match {
+						case Term.TermType.autumn => 1
+						case Term.TermType.spring => 2
+						case Term.TermType.summer => 3
+					}
+
+					def weekNumber(date: DateTime) =
+						numberingSystem match {
+							case WeekRange.NumberingSystem.Term => term.getWeekNumber(date)
+							case WeekRange.NumberingSystem.Cumulative => term.getCumulativeWeekNumber(date)
+						}
+
+					"Term %d, week %d" format (termNumber, weekNumber(weekStartDate))
+				}
+			}
+		}
+	}
+
+
+	def format(weekNumber: Int, dayOfWeek: DayOfWeek, numberingSystem: String) = numberingSystem match {
+		case WeekRange.NumberingSystem.Academic => {
+			"Week " + weekNumber
+		}
+		case WeekRange.NumberingSystem.None => {
+			weekNumberToDate(weekNumber, dayOfWeek)
+		}
+		case _ => {
+			val weekStartDate = weekNumberToDate(weekNumber, dayOfWeek)
+			val term = termService.getTermFromDateIncludingVacations(weekStartDate)
+			term.print(weekNumber, weekStartDate, dayOfWeek, numberingSystem)
+		}
+	}
+}
+
+
+
+object SingleWeekFormatter {
+
+	val separator = "; "
+
+	private val formatterMap = new SingleWeekFormatterCache
+
+	/** The reason we need the academic year and day of the week here is that it might affect
+	  * which term a date falls under. Often, the Spring term starts on a Wednesday after New
+	  * Year's Day, so Monday of that week is in the vacation, but Thursday is week 1 of term 2.
+	  */
+	def format(weekNumber: Int, dayOfWeek: DayOfWeek, year: AcademicYear, numberingSystem: String) =
+		formatterMap.retrieve(year) format (weekNumber, dayOfWeek, numberingSystem)
+
+	class SingleWeekFormatterCache {
+		private val map = mutable.HashMap[AcademicYear, SingleWeekFormatter]()
+		def retrieve(year: AcademicYear) = map.getOrElseUpdate(year, new SingleWeekFormatter(year))
+	}
+}
+
+/* Freemarker companion for the SingleWeekFormatter */
+
+class SingleWeekFormatterTag extends TemplateMethodModelEx with KnowsUserNumberingSystem  {
+	import SingleWeekFormatter.format
+
+	@Autowired var userSettings: UserSettingsService = _
+
+	/** Pass through all the arguments  */
+	override def exec(list: JList[_]) = {
+		val user = RequestInfo.fromThread.get.user
+
+		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
+		args match {
+			case Seq(weekNumber: Integer, academicYear: AcademicYear, dept: Department) => {
+				format(weekNumber, DayOfWeek.Thursday, academicYear, numberingSystem(user, () => Option(dept)))
+			}
+
+			case _ => throw new IllegalArgumentException("Bad args: " + args)
+		}
+	}
+}
+
+
+

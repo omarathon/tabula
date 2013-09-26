@@ -307,4 +307,12 @@ object Permissions {
 		case object Update extends ScopelessPermission("Edit student relationship types")
 		case object Delete extends ScopelessPermission("Remove student relationship types")
 	}
+
+	object MemberNotes {
+		case object Read extends Permission("View member notes")
+		case object ReadMetadata extends Permission("View metadata on member notes")
+		case object Create extends Permission("Create member notes")
+		case object Update extends Permission("Edit member notes")
+		case object Delete extends Permission("Delete member notes")
+	}
 }

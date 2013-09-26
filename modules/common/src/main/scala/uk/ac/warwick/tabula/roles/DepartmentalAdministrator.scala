@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
-import uk.ac.warwick.tabula.permissions.PermissionsSelector
+import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsSelector}
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 case class DepartmentalAdministrator(department: model.Department) extends BuiltInRole(DepartmentalAdministratorRoleDefinition, department)
@@ -59,7 +59,13 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Profiles.MeetingRecord.Read(PermissionsSelector.Any[StudentRelationshipType]),
 
 		SmallGroups.Read,
-		Profiles.Read.SmallGroups
+		Profiles.Read.SmallGroups,
+
+		MemberNotes.Read,
+		MemberNotes.Create,
+		MemberNotes.Update,
+		MemberNotes.Delete
+
 	)
 
 }
