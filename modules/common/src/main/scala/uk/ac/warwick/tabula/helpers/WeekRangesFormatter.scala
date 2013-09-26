@@ -385,7 +385,8 @@ class SingleWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 			"Week " + weekNumber
 		}
 		case WeekRange.NumberingSystem.None => {
-			weekNumberToDate(weekNumber, dayOfWeek)
+			val weekDate = weekNumberToDate(weekNumber, dayOfWeek)
+			"w/c " + IntervalFormatter.format(weekDate.withDayOfWeek(1), includeTime = false)
 		}
 		case _ => {
 			val weekStartDate = weekNumberToDate(weekNumber, dayOfWeek)
