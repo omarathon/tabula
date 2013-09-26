@@ -26,7 +26,7 @@ class OnlineFeedbackController extends CourseworkController {
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
 		Mav("admin/assignments/feedback/online_framework",
-			"canAddGenericFeedback" -> true,
+			"isMarkerView" -> false,
 			"assignment" -> assignment,
 			"command" -> command,
 			"studentFeedbackGraphs" -> feedbackGraphs)
@@ -49,7 +49,7 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
 		Mav("admin/assignments/feedback/online_framework",
-			"canAddGenericFeedback" -> false,
+			"isMarkerView" -> true,
 			"assignment" -> assignment,
 			"command" -> command,
 			"studentFeedbackGraphs" -> feedbackGraphs)

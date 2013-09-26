@@ -83,7 +83,7 @@ $(function(){
     // enable shift-click on multiple checkboxes in tables
     $('table').find('input[type="checkbox"]').shiftSelectable();
 
-    $('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list, #coursework-progress-table').bigList({
+    $('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list, #coursework-progress-table, #online-marking-table').bigList({
         setup : function() {
             var $container = this;
             // #delete-selected-button won't work for >1 set of checkboxes on a page.
@@ -129,6 +129,9 @@ $(function(){
                 if ($container.data('checked') != 'none') {
                     var $checkedBoxes = $(".collection-checkbox:checked", $container);
                     $form.append($checkedBoxes.clone());
+
+                    var $extraInputs = $(".post-field", $container);
+                    $form.append($extraInputs.clone());
 
                     doFormSubmit = true;
                 }

@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import scala.Some
 import uk.ac.warwick.tabula.data.{AutowiringSavedFormValueDaoComponent, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.data.model.MarkingState.InProgress
 
 abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignment: Assignment, val student: Member, val currentUser: CurrentUser)
 	extends OnlineFeedbackState with OnlineFeedbackStudentState with BindListener with SelfValidating {
@@ -238,6 +239,7 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 		}
 
 		copyTo(markerFeedback)
+		markerFeedback.state = InProgress
 
 		feedbackService.save(parentFeedback)
 		feedbackService.save(markerFeedback)

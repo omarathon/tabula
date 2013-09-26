@@ -4,6 +4,11 @@
 <#macro row graph>
 	<#assign u = graph.student />
 	<tr class="itemContainer" data-contentid="${u.warwickId}">
+		<#if isMarkerView>
+			<td class="check-col">
+				<input type="checkbox" class="collection-checkbox" name="students" value="${u.warwickId}">
+			</td>
+		</#if>
 		<#if department.showStudentName>
 			<td class="student-col toggle-cell"><h6 class="toggle-icon" >${u.firstName}</h6></td>
 			<td class="student-col toggle-cell"><h6>${u.lastName}</h6></td>
@@ -44,7 +49,21 @@
 
 	<#-- TODO 20 day turnaround deadline status alert thing rendering -->
 
-	<#if canAddGenericFeedback>
+	<#if isMarkerView>
+		<div class="btn-toolbar">
+			<div class="btn-group-group">
+				<div class="btn-group">
+					<a class="btn hover"><i class="icon-cog"></i> Actions:</a>
+				</div>
+				<div class="btn-group">
+					<a id="marking-complete-button" class="must-have-selected btn use-tooltip form-post" href="../marking-completed" title="" data-original-title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point.">
+						<i class="icon-ok"></i>
+						Marking completed
+					</a>
+				</div>
+			</div>
+		</div>
+	<#else>
 		<div class="generic-feedback">
 			<h6 class="toggle-icon edit-generic">
 				<i class="row-icon icon-chevron-right icon-fixed-width" style="margin-top: 2px;"></i>
@@ -58,6 +77,12 @@
 	<table id="online-marking-table" class="students table table-bordered table-striped tabula-greenLight sticky-table-headers">
 		<thead<#if feedbackGraphs?size == 0> style="display: none;"</#if>>
 			<tr>
+				<#if isMarkerView>
+					<th class="check-col" style="padding-right: 0px;">
+						<input class="collection-check-all" type="checkbox">
+						<input class="post-field" name="onlineMarking" type="hidden" value="true">
+					</th>
+				</#if>
 				<#if department.showStudentName>
 					<th class="student-col">First name</th>
 					<th class="student-col">Last name</th>
@@ -83,7 +108,12 @@
 		<script type="text/javascript">
 		(function($) {
 			var tsOptions = {
-				sortList: [<#if department.showStudentName>[2, 0], </#if>[1, 0], [0,0]]
+				<#if isMarkerView>
+					sortList: [<#if department.showStudentName>[3, 0], </#if>[2, 0], [1,0]],
+					headers: { 0: { sorter: false} }
+				<#else>
+					sortList: [<#if department.showStudentName>[2, 0], </#if>[1, 0], [0,0]]
+				</#if>
 			};
 
 			$('#online-marking-table').expandingTable({

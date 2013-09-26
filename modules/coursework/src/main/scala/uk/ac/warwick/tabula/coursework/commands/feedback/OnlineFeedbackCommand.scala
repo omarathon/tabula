@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import scala.Some
-import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
+import uk.ac.warwick.tabula.data.model.MarkingState.{InProgress, MarkingCompleted}
 
 object OnlineFeedbackCommand {
 	def apply(module: Module, assignment: Assignment) =
@@ -60,7 +60,10 @@ abstract class OnlineMarkerFeedbackCommand(val module: Module, val assignment: A
 
 	def applyInternal() = {
 
-		val submissions = assignment.markingWorkflow.getSubmissions(assignment, marker)
+		val submissions = Option(assignment.markingWorkflow) match {
+			case Some(mw) => mw.getSubmissions(assignment, marker)
+			case _ => Seq()
+		}
 
 		submissions.filter(_.isReleasedForMarking).map { submission =>
 
@@ -71,7 +74,7 @@ abstract class OnlineMarkerFeedbackCommand(val module: Module, val assignment: A
 
 			val (hasFeedback, hasCompletedFeedback) = markerFeedback match {
 				case Some(mf) => {
-					(mf.state == null, mf.state == MarkingCompleted)
+					(mf.state == InProgress, mf.state == MarkingCompleted)
 				}
 				case None => (false, false)
 			}
