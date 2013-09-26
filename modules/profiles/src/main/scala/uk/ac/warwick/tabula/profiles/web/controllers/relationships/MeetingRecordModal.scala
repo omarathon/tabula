@@ -47,7 +47,7 @@ trait MeetingRecordModal  {
 	@ModelAttribute("viewMeetingRecordCommand")
 	def viewMeetingRecordCommand(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
 								 @PathVariable("relationshipType") relationshipType: StudentRelationshipType) = {
-		restricted(ViewMeetingRecordCommand(studentCourseDetails, user, relationshipType))
+		restricted(ViewMeetingRecordCommand(studentCourseDetails, optionalCurrentMember, relationshipType))
 	}
 
 	// modal chrome
