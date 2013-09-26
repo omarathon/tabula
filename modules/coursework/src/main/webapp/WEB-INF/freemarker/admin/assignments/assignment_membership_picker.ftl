@@ -25,13 +25,13 @@
 		<#assign hasMembers = membershipInfo.totalCount gt 0 />
 
 		<#macro what_is_this>
-			<#assign popoverText>
+			<#local popoverText>
 				<p>You can link to an assessment component in SITS and the list of students will be updated automatically from there.
 				If you are not using SITS you can manually add students by ITS usercode or university number.</p>
 
 				<p>It is also possible to tweak the list even when using SITS data, but this is only to be used
 				when necessary and you still need to ensure that the upstream SITS data gets fixed.</p>
-			</#assign>
+			</#local>
 
 			<a href="#"
 			   title="What's this?"
@@ -232,6 +232,7 @@
 								<th class="sortable">CATS</th>
 								<th class="sortable">Occurrence</th>
 								<th class="sortable">Sequence</th>
+								<th class="sortable">Type</th>
 							</tr>
 						</thead>
 						<tbody><#list command.availableUpstreamGroups as available>
@@ -239,10 +240,11 @@
 							<tr>
 								<td><input type="checkbox" id="chk-${available.id}" name="" value="${available.id}"></td>
 								<td><label for="chk-${available.id}">${available.name}<#if isLinked> <span class="label label-success">Linked</span></#if></label></td>
-								<td>${available.memberCount}</td><#-- FIXME: <a/> popover (overflow-y: scroll) with member list -->
+								<td>${available.memberCount}</td><#-- FIXME: a.popover (overflow-y: scroll) with member list -->
 								<td>${available.cats!'-'}</td>
 								<td>${available.occurrence}</td>
 								<td>${available.sequence}</td>
+								<td>${available.assessmentType!'A'}</td> <#-- TAB-1174 can remove default when non-null -->
 							</tr>
 						</#list></tbody>
 					</table>
@@ -472,8 +474,10 @@
 
 		<#-- reset on modal close -->
 		$enrolment.on('hidden', '.modal', function(e) {
-			$(this).find('input:checked').removeAttr('checked');
-			$(this).find('.spinnable').spin(false);
+			if (this == e.target) { // ignore 'hidden' events from within the modal
+				$(this).find('input:checked').removeAttr('checked');
+				$(this).find('.spinnable').spin(false);
+			}
 		});
 
 		<#-- remove user from enrolment table -->

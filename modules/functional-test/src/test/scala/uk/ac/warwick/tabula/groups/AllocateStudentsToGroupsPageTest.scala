@@ -14,6 +14,7 @@ class AllocateStudentsToGroupsPageTest extends SmallGroupsFixture with GivenWhen
 		val setId = createSmallGroupSet(TEST_MODULE_CODE, TEST_GROUPSET_NAME)
 
 		And("Two routes exist")
+		createCourse("Ux123","AllocCourse")
 		createRoute("xx123", "xxx", "Allocation Test Route")
 		createRoute("xx456", "xxx", "Allocation Test Route 2")
 
@@ -25,7 +26,7 @@ class AllocateStudentsToGroupsPageTest extends SmallGroupsFixture with GivenWhen
 			(P.Student3.usercode, "F", 1, "xx456"),
 			(P.Student4.usercode, "M", 2, "xx123"),
 			(P.Student5.usercode, "F", 3, "xx123"))) {
-			createStudentMember(studentId, gender, route, year)
+			createStudentMember(studentId, gender, route, year,"Ux123")
 			addStudentToGroupSet(studentId, setId)
 		}
 

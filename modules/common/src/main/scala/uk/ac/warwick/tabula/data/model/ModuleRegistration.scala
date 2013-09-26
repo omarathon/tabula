@@ -17,12 +17,13 @@ import uk.ac.warwick.tabula.AcademicYear
 @AccessType("field")
 class ModuleRegistration() extends GeneratedId {
 
-	def this(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear) {
+	def this(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String) {
 		this()
 		this.studentCourseDetails = studentCourseDetails
 		this.module = module
 		this.academicYear = academicYear
 		this.cats = cats
+		this.occurrence = occurrence
 	}
 
 	@ManyToOne
@@ -38,6 +39,8 @@ class ModuleRegistration() extends GeneratedId {
 	var studentCourseDetails: StudentCourseDetails = _
 
 	var assessmentGroup: String = null
+
+	var occurrence: String = null
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleSelectionStatusUserType")
 	@Column(name="selectionstatuscode")

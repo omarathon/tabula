@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 class CopyModuleAssignmentsController extends CourseworkController with UnarchivedAssignmentsMap {
 
 	@ModelAttribute
-	def copyAssignmentsCommand(@PathVariable("module") module: Module) = CopyAssignmentsCommand(Seq(module))
+	def copyAssignmentsCommand(@PathVariable("module") module: Module) = CopyAssignmentsCommand(module.department, Seq(module))
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def showForm(@PathVariable("module") module: Module, cmd: CopyAssignmentsCommand) = {
@@ -43,7 +43,7 @@ class CopyDepartmentAssignmentsController extends CourseworkController with Unar
 	@ModelAttribute
 	def copyAssignmentsCommand(@PathVariable("department") department: Department) = {
 		val modules = department.modules.asScala.filter(_.assignments.asScala.exists(_.isAlive))
-		CopyAssignmentsCommand(modules)
+		CopyAssignmentsCommand(department, modules)
 	}
 
 	@RequestMapping(method = Array(HEAD, GET))

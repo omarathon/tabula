@@ -16,8 +16,8 @@ If you are doing any work on this, it would be good to do the above first.
 <#escape x as x?html>
 
 <#macro longDateRange start end>
-	<#assign openTZ><@warwick.formatDate value=start pattern="z" /></#assign>
-	<#assign closeTZ><@warwick.formatDate value=end pattern="z" /></#assign>
+	<#local openTZ><@warwick.formatDate value=start pattern="z" /></#local>
+	<#local closeTZ><@warwick.formatDate value=end pattern="z" /></#local>
 	<@fmt.date start /> 
 	<#if openTZ != closeTZ>(${openTZ})</#if>
 	-<br>

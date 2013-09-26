@@ -57,13 +57,17 @@ case class FunctionalTestVacation(before: Term, after: Term) extends Term {
 
 	def getAcademicWeekNumber(date: BaseDateTime) = after.getAcademicWeekNumber(date)
 }
+
 case class FunctionalTestAcademicYear(val startYear: Int) extends Ordered[FunctionalTestAcademicYear] {
 	val endYear = startYear + 1
 	def compare(that:FunctionalTestAcademicYear): Int = {
 		this.startYear - that.startYear
 	}
 	def toSyllabusPlusFormat:String = (startYear%100).toString + ((startYear+1)%100).toString
+	override def toString = s"${startYear%100}/${endYear%100}"
 }
+
 object FunctionalTestAcademicYear{
-	def current = new AcademicDateHelper(new TermFactoryImpl).getAcademicYearContainingDate(DateTime.now)
+	private lazy val termFactory = new TermFactoryImpl
+	def current = new AcademicDateHelper(termFactory).getAcademicYearContainingDate(DateTime.now)
 }

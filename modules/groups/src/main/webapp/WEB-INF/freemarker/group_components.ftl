@@ -190,17 +190,22 @@
 											${event.location!"[no location]"}
 											</span>
 
-											<#if ( moduleItem.canManageGroups  && features.smallGroupTeachingRecordAttendance )>
+											<#if features.smallGroupTeachingRecordAttendance>
+											<#if can.do("SmallGroupEvents.Register", event)>
 											<span class="pull-right eventRegister">
 												<form method="get" action="/groups/event/${event.id}/register">
 
-													<input type="hidden" name="returnTo" value="/admin/department/${groupSet.module.department.code}" />
+													<#if !returnTo??>
+														<#local returnTo=info.requestedUri />
+													</#if>
+													<input type="hidden" name="returnTo" value="${returnTo}" />
 													<span class="form-horizontal">
 														<@fmt.weekRangeSelect event />
 														<button class="btn btn-small btn-primary register-button">Record</button>
 													 </span>
 												</form>
 											</span>
+											</#if>
 											</#if>
 										</li>
 									</#list>

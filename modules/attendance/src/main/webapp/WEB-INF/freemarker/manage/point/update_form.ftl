@@ -1,13 +1,13 @@
 <#escape x as x?html>
+<#import "*/modal_macros.ftl" as modal />
 
-<div class="modal-header">
-	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+<@modal.header>
 	<h2>Update monitoring point</h2>
-</div>
+</@modal.header>
 
-<div class="modal-body">
+<@modal.body>
 
-	<#assign action><@url page="/manage/${command.set.route.department.code}/sets/${command.set.id}/points/${command.point.id}/edit" /></#assign>
+	<#assign action><@url page="/manage/${command.set.route.department.code}/sets/${command.set.id}/edit/points/${command.point.id}/edit" /></#assign>
 
 	<@f.form id="updateMonitoringPoint" action="${action}" method="POST" commandName="command" class="form-horizontal">
 		<@spring.bind path="command">
@@ -18,13 +18,13 @@
 		<#include "_fields.ftl" />
 	</@f.form>
 
-</div>
+</@modal.body>
 
-<div class="modal-footer">
+<@modal.footer>
 	<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Updating&hellip;">
 		Update
 	</button>
 	<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
-</div>
+</@modal.footer>
 
 </#escape>

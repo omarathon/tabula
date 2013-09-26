@@ -5,9 +5,8 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.userlookup.{User, GroupService}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.util.cache.{SingularCacheEntryFactory, Caches, CacheEntryFactory}
-import java.util
-import org.joda.time.Days
+import org.hibernate.criterion.Restrictions._
+import uk.ac.warwick.util.cache.SingularCacheEntryFactory
 
 trait UserGroupMembershipHelperMethods[A <: Serializable] {
 	def findBy(user: User): Seq[A]
@@ -100,16 +99,16 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] 
 
 		val webgroupNames: Seq[String] = getWebgroups(user.getUserId)
 
-		val groupsByWebgroup = webgroupNames.flatMap { webgroupName =>
-      val criteria = session.newCriteria[A]
+		val groupsByWebgroup = webgroupNames.grouped(Daoisms.MaxInClauseCount).flatMap { names =>
+			val criteria = session.newCriteria[A]
 
-      for (table <- joinTable) {
-        criteria.createAlias(table, table)
-      }
+			joinTable foreach { table =>
+				criteria.createAlias(table, table)
+			}
 
 			criteria
-        .createAlias(prop, "usergroupAlias")
-        .add(is("usergroupAlias.baseWebgroup", webgroupName))
+				.createAlias(prop, "usergroupAlias")
+				.add(in("usergroupAlias.baseWebgroup", names.asJava))
 				.seq
 		}
 

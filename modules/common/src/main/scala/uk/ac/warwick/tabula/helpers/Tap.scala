@@ -1,4 +1,7 @@
 package uk.ac.warwick.tabula.helpers
+
+import language.implicitConversions
+
 /**
  * K-Combinator. (AKA, a copy of ruby's Object.tap() method)
  *
@@ -12,7 +15,7 @@ package uk.ac.warwick.tabula.helpers
  *
  *  Add a tap  ===>
  *
- *  def getStuff(keys) = dao.getTheStuffs(keys).tap(logger.info(stuffs=>stuffs.map(_.stuffCode).mkString(",")))
+ *  def getStuff(keys) = dao.getTheStuffs(keys).tap(stuffs=> logger.info(stuffs.map(_.stuffCode).mkString(",")) )
  *
  */
 class Tap[A](any: A) {

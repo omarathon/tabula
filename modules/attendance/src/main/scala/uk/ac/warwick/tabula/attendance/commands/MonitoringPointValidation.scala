@@ -20,4 +20,10 @@ trait MonitoringPointValidation {
 			case _ =>
 		}
 	}
+
+	def validateWeeks(errors: Errors, validFromWeek: Int, requiredFromWeek: Int, bindPoint: String) {
+		if (validFromWeek > requiredFromWeek) {
+			errors.rejectValue(bindPoint, "monitoringPoint.weeks")
+		}
+	}
 }

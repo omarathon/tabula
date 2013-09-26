@@ -47,7 +47,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 			module.code = "ab123"
 			moduleDao.saveOrUpdate(module)
 
-			val modReg = new ModuleRegistration(scd, module, new java.math.BigDecimal("10.0"), AcademicYear(2012))
+			val modReg = new ModuleRegistration(scd, module, new java.math.BigDecimal("10.0"), AcademicYear(2012), "A")
 			modReg.assessmentGroup = "D"
 			modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
 			modRegDao.saveOrUpdate(modReg)
@@ -67,7 +67,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 			module2.code = "cd456"
 			moduleDao.saveOrUpdate(module2)
 
-			val modReg2 = new ModuleRegistration(scd, module2, new java.math.BigDecimal("30.0"), AcademicYear(2012))
+			val modReg2 = new ModuleRegistration(scd, module2, new java.math.BigDecimal("30.0"), AcademicYear(2012), "A")
 			modReg2.assessmentGroup = "E"
 			modReg2.selectionStatus = ModuleSelectionStatus.Core
 			modRegDao.saveOrUpdate(modReg2)
@@ -100,13 +100,13 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 
 			val module = new Module
 
-			val nonexistantModReg = modRegDao.getByNotionalKey(scd, module, new java.math.BigDecimal("10.0"), AcademicYear(2012))
+			val nonexistantModReg = modRegDao.getByNotionalKey(scd, module, new java.math.BigDecimal("10.0"), AcademicYear(2012), "A")
 			nonexistantModReg should be (None)
 
 			module.code = "ab123"
 			moduleDao.saveOrUpdate(module)
 
-			val modReg = new ModuleRegistration(scd, module, new java.math.BigDecimal("10.0"), AcademicYear(2012))
+			val modReg = new ModuleRegistration(scd, module, new java.math.BigDecimal("10.0"), AcademicYear(2012), "A")
 			modReg.assessmentGroup = "D"
 			modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
 			modRegDao.saveOrUpdate(modReg)
@@ -115,7 +115,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 
 			scdDao.saveOrUpdate(scd)
 
-			val retrievedModReg = modRegDao.getByNotionalKey(scd, module, new java.math.BigDecimal("10.0"), AcademicYear(2012)).get
+			val retrievedModReg = modRegDao.getByNotionalKey(scd, module, new java.math.BigDecimal("10.0"), AcademicYear(2012), "A").get
 
 			retrievedModReg.isInstanceOf[ModuleRegistration] should be (true)
 			retrievedModReg.studentCourseDetails.scjCode should be ("0123456/1")

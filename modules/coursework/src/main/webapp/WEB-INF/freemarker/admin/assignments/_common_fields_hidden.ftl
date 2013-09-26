@@ -1,8 +1,10 @@
 <#-- 
 
 This must include all the fields that are included
-in _common_fields.ftl or else some values will get
-lost between requests.
+in _common_fields.ftl and _submissions_common_fields.ftl
+or else some values will get lost between requests.
+
+TODO a way to not have to do these, or at least way to make it obvious when this hasn't been updated
 
 -->
 

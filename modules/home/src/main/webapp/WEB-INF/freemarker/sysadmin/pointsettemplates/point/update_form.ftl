@@ -7,7 +7,7 @@
 
 <div class="modal-body">
 
-	<#assign action><@url page="/sysadmin/pointsettemplates/${command.template.id}/points/${command.point.id}/edit" /></#assign>
+	<#assign action><@url page="/sysadmin/pointsettemplates/${command.template.id}/edit/points/${command.point.id}/edit" /></#assign>
 
 	<@f.form id="updateMonitoringPoint" action="${action}" method="POST" commandName="command" class="form-horizontal">
 		<#include "_fields.ftl" />

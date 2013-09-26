@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>42</version>
+	<version>43</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -443,9 +443,9 @@
 			</snapshots>
 		</repository>
 		<repository>
-				<id>milestone.repo.springsource.org</id>
-				<name>repo.springsource.org-milestone</name>
-				<url>https://repo.springsource.org/libs-milestone</url>
+				<id>milestone.repo.spring.io</id>
+				<name>repo.spring.io-milestone</name>
+				<url>https://repo.spring.io/libs-milestone</url>
 		</repository>
 	</repositories>
 

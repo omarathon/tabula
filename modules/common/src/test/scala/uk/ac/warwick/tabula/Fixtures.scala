@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringCheckpointState, MonitoringPoint}
 import org.joda.time.DateTime
 
 // scalastyle:off magic.number
@@ -74,30 +74,34 @@ object Fixtures {
 
 	def assignment(name:String) = {
 		val a = new Assignment
+		a.name = name
 		a
 	}
 
 	def smallGroupSet(name:String) = {
 		val s = new SmallGroupSet
+		s.name = name
 		s
 	}
 
 	def smallGroup(name:String) = {
 		val s = new SmallGroup
+		s.name = name
 		s
 	}
 
 	def upstreamAssignment(departmentCode:String, number:Int) = {
-        val a = new UpstreamAssignment
-        a.name = "Assignment %d" format number
-        a.departmentCode = departmentCode.toUpperCase
-        a.moduleCode = "%s1%02d-30" format (departmentCode.toUpperCase, number)
-        a.assessmentGroup = "A"
-        a.sequence = "A%02d" format number
-        a
-    }
+		val a = new AssessmentComponent
+		a.name = "Assignment %d" format number
+		a.departmentCode = departmentCode.toUpperCase
+		a.moduleCode = "%s1%02d-30" format (departmentCode.toUpperCase, number)
+		a.assessmentGroup = "A"
+		a.sequence = "A%02d" format number
+		a.assessmentType = AssessmentType.Assignment
+		a
+	}
 
-	def assessmentGroup(assignment:UpstreamAssignment) = {
+	def assessmentGroup(assignment:AssessmentComponent) = {
 		val group = new UpstreamAssessmentGroup
 		group.academicYear = new AcademicYear(2012)
 		group.assessmentGroup = assignment.assessmentGroup
@@ -173,11 +177,19 @@ object Fixtures {
 		scyd
 	}
 
-	def monitoringPoint(name: String = "name", defaultValue: Boolean = false, week: Int = 0) = {
+	def monitoringPoint(name: String = "name", validFromWeek: Int = 0, requiredFromWeek: Int = 0) = {
 		val point = new MonitoringPoint
 		point.name = name
-		point.week = week
-		point.defaultValue = defaultValue
+		point.validFromWeek = validFromWeek
+		point.requiredFromWeek = requiredFromWeek
 		point
+	}
+
+	def monitoringCheckpoint(point: MonitoringPoint, studentCourseDetails: StudentCourseDetails, state: MonitoringCheckpointState) = {
+		val checkpoint = new MonitoringCheckpoint
+		checkpoint.point = point
+		checkpoint.studentCourseDetail = studentCourseDetails
+		checkpoint.state = state
+		checkpoint
 	}
 }

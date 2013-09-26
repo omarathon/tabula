@@ -1,23 +1,23 @@
 package uk.ac.warwick.tabula.attendance.web.controllers
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import scala.Array
 import uk.ac.warwick.tabula.attendance.commands.SetMonitoringCheckpointCommand
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
-import uk.ac.warwick.tabula.services.RouteService
 import uk.ac.warwick.tabula.web.Mav
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.data.model.Department
 
 @RequestMapping(Array("/{department}/{monitoringPoint}/record"))
 @Controller
 class SetMonitoringCheckpointController extends AttendanceController {
 
-	validatesSelf[SetMonitoringCheckpointCommand]
+	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
 	def command(@PathVariable monitoringPoint: MonitoringPoint, user: CurrentUser) = {
@@ -33,7 +33,7 @@ class SetMonitoringCheckpointController extends AttendanceController {
 
 
 	def form(@ModelAttribute command: SetMonitoringCheckpointCommand): Mav = {
-		Mav("home/set",
+		Mav("home/record",
 				"command" -> command,
 				"monitoringPoint" -> command.monitoringPoint,
 				"returnTo" -> getReturnTo(Routes.monitoringPoints))
@@ -41,12 +41,12 @@ class SetMonitoringCheckpointController extends AttendanceController {
 
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") command: SetMonitoringCheckpointCommand, errors: Errors) = {
+	def submit(@Valid @ModelAttribute("command") command: SetMonitoringCheckpointCommand, @PathVariable department: Department, errors: Errors) = {
 		if(errors.hasErrors) {
 			form(command)
 		} else {
 			command.apply()
-			Redirect(Routes.managingDepartment(command.set.route.department), "updatedMonitoringPoint" -> command.monitoringPoint.id)
+			Redirect(Routes.managingDepartment(department), "updatedMonitoringPoint" -> command.monitoringPoint.id)
 		}
 	}
 

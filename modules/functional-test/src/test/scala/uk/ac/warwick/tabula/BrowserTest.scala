@@ -14,10 +14,8 @@ import org.openqa.selenium.firefox.FirefoxDriver
 import org.openqa.selenium.ie.InternetExplorerDriver
 import java.io.File
 import java.io.FileInputStream
-import org.specs.matcher.EventuallyMatchers
 import org.scalatest.concurrent.Eventually
 import org.scalatest.time.SpanSugar
-import org.openqa.selenium.internal.seleniumemulation.WaitForPageToLoad
 import com.gargoylesoftware.htmlunit.BrowserVersion
 import uk.ac.warwick.userlookup.UserLookup
 import scala.util.{Success, Try}
@@ -47,15 +45,18 @@ abstract class BrowserTest
 	def Path(path: String) = P.SiteRoot + path
 
 	implicit lazy val webDriver: WebDriver = P.Browser match {
-		case "htmlunit" => { new HtmlUnitDriver(true) // JS enabled
-//			val driver = new HtmlUnitDriver(BrowserVersion.INTERNET_EXPLORER_8) // JS enabled
-//			driver.setJavascriptEnabled(true)
-//			driver
+		case "htmlunit" => { //new HtmlUnitDriver(true) // JS enabled
+			val driver = new HtmlUnitDriver(htmlUnitBrowserVersion) // JS enabled
+			driver.setJavascriptEnabled(true)
+			driver
 		}
 		case "chrome" => new ChromeDriver
 		case "firefox" => new FirefoxDriver
 		case "ie" => new InternetExplorerDriver
 	}
+
+	// Can be overridden by a test if necessary.
+	val htmlUnitBrowserVersion = BrowserVersion.INTERNET_EXPLORER_8
 
 	def ifHtmlUnitDriver(operation:HtmlUnitDriver=>Unit) = {
 		webDriver match {
@@ -104,6 +105,8 @@ object FunctionalTestProperties {
 	 */
 	lazy val Admin1 = userDetails("admin1", "Departmental admin")
 	lazy val Admin2 = userDetails("admin2", "Departmental admin")
+	lazy val Admin3 = userDetails("admin3", "Departmental admin")
+	lazy val Admin4 = userDetails("admin4", "Departmental admin")
 	lazy val ExtensionManager1 = userDetails("extman1", "Extension manager")
 	lazy val ExtensionManager2 = userDetails("extman2", "Extension manager")
 	lazy val Marker1 = userDetails("marker1", "Marker")

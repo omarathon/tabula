@@ -17,7 +17,7 @@
 <#-- Print out a table of students/agents.
  is_relationship=true means each item is a StudentRelationship rather than a member-->
 <#macro table students is_relationship>
-<table class="related_students table-bordered table-striped table-condensed tabula-purple">
+<table class="related_students table table-bordered table-striped table-condensed tabula-purple">
 	<thead>
 	<tr>
 		<th class="photo-col">Photo</th>
@@ -63,6 +63,7 @@
         });
     })(jQuery);
 </script>
+<#-- deliberately a global assign, so only the first macro includes script. -->
 <#assign student_table_script_included=true />
 </#if>
 

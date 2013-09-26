@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures}
 import org.junit.Before
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringCheckpoint, MonitoringPointSet}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 
@@ -30,7 +30,7 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 		memberDao.sessionFactory = sessionFactory
 	}
 
-	@Test def getCheckpoint {
+	@Test def getCheckpointByMember {
 		transactional { tx =>
 			val student1 = Fixtures.student("1234")
 			student1.studentCourseDetails.get(0).route = route
@@ -45,7 +45,8 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 			val checkpoint = new MonitoringCheckpoint
 			checkpoint.point = monitoringPoint
 			checkpoint.studentCourseDetail = student1.studentCourseDetails.get(0)
-			checkpoint.createdBy = "foo"
+			checkpoint.updatedBy = "foo"
+			checkpoint.state = MonitoringCheckpointState.fromCode("attended")
 			monitoringPointDao.saveOrUpdate(checkpoint)
 
 			monitoringPointDao.getCheckpoint(monitoringPoint, student1) should be (Option(checkpoint))
@@ -53,5 +54,51 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 
 		}
 	}
+
+	@Test def getCheckpointByScjCode {
+		transactional { tx =>
+			val student1 = Fixtures.student("1234")
+			student1.studentCourseDetails.get(0).route = route
+			val student2 = Fixtures.student("2345")
+			student2.studentCourseDetails.get(0).route = route
+
+			routeDao.saveOrUpdate(route)
+			monitoringPointDao.saveOrUpdate(monitoringPointSet)
+			memberDao.saveOrUpdate(student1)
+			memberDao.saveOrUpdate(student2)
+
+			val checkpoint = new MonitoringCheckpoint
+			checkpoint.point = monitoringPoint
+			checkpoint.studentCourseDetail = student1.studentCourseDetails.get(0)
+			checkpoint.updatedBy = "foo"
+			checkpoint.state = MonitoringCheckpointState.fromCode("attended")
+			monitoringPointDao.saveOrUpdate(checkpoint)
+
+			monitoringPointDao.getCheckpoint(monitoringPoint, student1.mostSignificantCourseDetails.get.scjCode) should be (Option(checkpoint))
+			monitoringPointDao.getCheckpoint(monitoringPoint, student2.mostSignificantCourseDetails.get.scjCode) should be (None)
+
+		}
+	}
+
+	@Test def getMonitoringPointSetWithoutYear() {
+		transactional { tx =>
+			routeDao.saveOrUpdate(route)
+			session.save(monitoringPointSet)
+			monitoringPointDao.findMonitoringPointSet(route, Some(1)) should be (None)
+			monitoringPointDao.findMonitoringPointSet(route, None) should be (Some(monitoringPointSet))
+		}
+	}
+
+	@Test def getMonitoringPointSetWithYear {
+		transactional { tx =>
+			routeDao.saveOrUpdate(route)
+			monitoringPointSet.year = 2
+			session.save(monitoringPointSet)
+			monitoringPointDao.findMonitoringPointSet(route, Some(2)) should be (Some(monitoringPointSet))
+			monitoringPointDao.findMonitoringPointSet(route, Some(1)) should be (None)
+			monitoringPointDao.findMonitoringPointSet(route, None) should be (None)
+		}
+	}
+
 
 }

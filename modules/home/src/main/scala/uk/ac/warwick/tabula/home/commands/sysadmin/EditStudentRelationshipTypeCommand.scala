@@ -19,20 +19,24 @@ object EditStudentRelationshipTypeCommand {
 			with ModifyStudentRelationshipTypeCommandDescription
 }
 
-class EditStudentRelationshipTypeCommandInternal(val tpe: StudentRelationshipType) extends ModifyStudentRelationshipTypeCommandInternal {
+class EditStudentRelationshipTypeCommandInternal(val relationshipType: StudentRelationshipType) 
+	extends ModifyStudentRelationshipTypeCommandInternal with HasExistingStudentRelationshipType {
 	this: RelationshipServiceComponent =>
 		
-	this.copyFrom(tpe)
+	this.copyFrom(relationshipType)
 		
 	override def applyInternal() = transactional() {
-		copyTo(tpe)
-		relationshipService.saveOrUpdate(tpe)
-		tpe
+		copyTo(relationshipType)
+		relationshipService.saveOrUpdate(relationshipType)
+		relationshipType
 	}
 }
 
 trait EditStudentRelationshipTypeCommandPermissions extends RequiresPermissionsChecking {
+	this: HasExistingStudentRelationshipType =>
+	
 	def permissionsCheck(p: PermissionsChecking) {
+		p.mandatory(relationshipType)
 		p.PermissionCheck(Permissions.StudentRelationshipType.Update)
 	}
 }

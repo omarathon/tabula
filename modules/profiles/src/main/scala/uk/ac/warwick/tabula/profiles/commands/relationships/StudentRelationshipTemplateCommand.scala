@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 class StudentRelationshipTemplateCommand(val department: Department, val relationshipType: StudentRelationshipType) extends Command[ExcelView] with ReadOnly with Unaudited {
 
-	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(relationshipType), department)
+	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
 	
 	var service = Wire[RelationshipService]
 	var profileService = Wire[ProfileService]

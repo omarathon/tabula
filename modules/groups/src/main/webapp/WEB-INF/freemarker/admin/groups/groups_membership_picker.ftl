@@ -2,6 +2,18 @@
 
 <fieldset id="groupEnrolmentFields">
 <div class="groupEnrolmentInner">
+
+	<#-- STATE INPUTS - These are important!
+		Everytime the membership data is refreshed this template is reloaded and replaces the
+		form on the page. By doing this the user can see what the membership will look like
+		after they save. HOWEVER, if we don't render the inputs again then no changes will
+		be persisted on save.
+		-->
+	<#list command.upstreamGroups as item>
+		<@f.hidden path="upstreamGroups[${item_index}]" cssClass="upstreamGroups" />
+	</#list>
+	<#-- END OF STATE INPUTS -->
+
 	<#-- FIXME: alerts fired post SITS change go here, if controller returns something to say -->
 		<#-- <p class="alert alert-success"><i class="icon-ok"></i> This group set is (now linked|no longer linked) to ${r"${name}"} and ${r"${name}"}</p> -->
 
@@ -158,7 +170,7 @@
 
 			<#if command.availableUpstreamGroups?has_content>
 				<div class="modal-body">
-					<p>Add students by linking this group set to one or more of the following module assessment groups in SITS for
+					<p>Add students by linking this group set to one or more of the following assessment components in SITS for
 						${command.module.code?upper_case} in ${command.academicYear.label}.</p>
 
 					<table id="sits-table" class="table table-bordered table-striped table-condensed table-hover table-sortable table-checkable sticky-table-headers tabula-orangeLight">
@@ -170,6 +182,7 @@
 							<th class="sortable">CATS</th>
 							<th class="sortable">Occurrence</th>
 							<th class="sortable">Sequence</th>
+							<th class="sortable">Type</th>
 						</tr>
 						</thead>
 						<tbody><#list command.availableUpstreamGroups as available>
@@ -181,6 +194,7 @@
 								<td>${available.cats!'-'}</td>
 								<td>${available.occurrence}</td>
 								<td>${available.sequence}</td>
+								<td>${available.assessmentType!'A'}</td> <#-- TAB-1174 can remove default when non-null -->
 							</tr>
 						</#list></tbody>
 					</table>
@@ -203,57 +217,57 @@
 
 <script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
 <script type="text/javascript">
-jQuery(function($) {
-var $enrolment = $('.assignmentEnrolment');
+	jQuery(function($) {
+		var $enrolment = $('.assignmentEnrolment');
 
-var initEnrolment = function() {
-<#-- well, if we're here, JS must be available :) -->
-$('#js-hint').remove();
-$('.show-sits-picker, .show-adder').removeClass('disabled');
+		var initEnrolment = function() {
+			<#-- well, if we're here, JS must be available :) -->
+			$('#js-hint').remove();
+			$('.show-sits-picker, .show-adder').removeClass('disabled');
 
-<#-- sortable tables -->
-$enrolment.find('.table-sortable').sortableTable();
-$enrolment.tabulaPrepareSpinners();
-$enrolment.find('summary:not([role="button"])').closest('details').details();
+			<#-- sortable tables -->
+			$enrolment.find('.table-sortable').sortableTable();
+			$enrolment.tabulaPrepareSpinners();
+			$enrolment.find('summary:not([role="button"])').closest('details').details();
 
-// TODO this is cribbed out of scripts.js - re-use would be better
-$enrolment.find('.use-popover').each(function() {
-if ($(this).attr('data-title')) {
-$(this).attr('data-original-title', $(this).attr('data-title'));
-}
-});
+			// TODO this is cribbed out of scripts.js - re-use would be better
+			$enrolment.find('.use-popover').each(function() {
+				if ($(this).attr('data-title')) {
+					$(this).attr('data-original-title', $(this).attr('data-title'));
+				}
+			});
 
-$enrolment.find('.use-popover').popover({
-trigger: 'click',
-container: '#container',
-template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
-}).click(function(){ return false; });
+			$enrolment.find('.use-popover').popover({
+				trigger: 'click',
+				container: '#container',
+				template: '<div class="popover"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+			}).click(function(){ return false; });
 
-<#-- FIXME: temporary pop-out hiding. Do this properly at source in SBTWO idscripts -->
-setTimeout(function() { $('.sb-table-wrapper-popout').remove() }, 500);
+			<#-- FIXME: temporary pop-out hiding. Do this properly at source in SBTWO idscripts -->
+			setTimeout(function() { $('.sb-table-wrapper-popout').remove() }, 500);
 
-<#-- dynamically attach check-all checkbox -->
-$('.for-check-all').append($('<input />', { type: 'checkbox', 'class': 'check-all use-tooltip', title: 'Select all/none' }));
-$('.check-all').tooltip({ delay: 1500 });
-$enrolment.on('click', '.table-checkable th .check-all', function(e) {
-var $table = $(this).closest('table');
-var checkStatus = this.checked;
-$table.find('td input:checkbox').prop('checked', checkStatus);
+			<#-- dynamically attach check-all checkbox -->
+			$('.for-check-all').append($('<input />', { type: 'checkbox', 'class': 'check-all use-tooltip', title: 'Select all/none' }));
+			$('.check-all').tooltip({ delay: 1500 });
+			$enrolment.on('click', '.table-checkable th .check-all', function(e) {
+				var $table = $(this).closest('table');
+				var checkStatus = this.checked;
+				$table.find('td input:checkbox').prop('checked', checkStatus);
 
-updateCheckboxes($table);
-enableActions($table);
-});
+				updateCheckboxes($table);
+				enableActions($table);
+			});
 
-<#-- preset to open -->
-	if ($enrolment.data('open')) {
-	$('.assignmentEnrolment details').prop('open', 'open');
-	$("html, body").delay(200).animate({
-	scrollTop: $enrolment.offset().top - window.id6nav.navigationHeight
-	}, 300);
-	}
-	};
+			<#-- preset to open -->
+			if ($enrolment.data('open')) {
+				$('.assignmentEnrolment details').prop('open', 'open');
+				$("html, body").delay(200).animate({
+					scrollTop: $enrolment.offset().top - window.id6nav.navigationHeight
+				}, 300);
+			}
+		};
 
-	<#-- initialise the scripting for enrolment management -->
+		<#-- initialise the scripting for enrolment management -->
 		<#if RequestParameters.open?? || openDetails!false>
 			$enrolment.data('open', true);
 		</#if>
@@ -262,182 +276,182 @@ enableActions($table);
 		var $pendingAlert = $('<p class="alert alert-warning hide"><i class="icon-warning-sign"></i> Your changes will not be recorded until you save this group set.	<input type="submit" value="Save" class="btn btn-primary btn-mini update-only"></p>');
 
 		<#-- manage check-all state -->
-			var updateCheckboxes = function($table) {
+		var updateCheckboxes = function($table) {
 			var checked = $table.find('td input:checked').length;
 			if (checked == $table.find('td input').length) $table.find('.check-all').prop('checked', true);
 			if (checked == 0) $table.find('.check-all').prop('checked', false);
-			}
+		}
 
-			<#-- en/disable action buttons -->
-				var enableActions = function($table) {
-				var context = $table.prop('id');
+		<#-- en/disable action buttons -->
+		var enableActions = function($table) {
+			var context = $table.prop('id');
 
-				if (context == 'sits-table') {
+			if (context == 'sits-table') {
 				$('.sits-picker-action').toggleClass('disabled', $table.find('input:checked').length==0);
-				} else if (context == 'enrolment-table') {
+			} else if (context == 'enrolment-table') {
 				$('.remove-users').toggleClass('disabled', $table.find('tr.item-type-include input:checked, tr.item-type-sits input:checked').length==0);
 				$('.restore-users').toggleClass('disabled', $table.find('tr.item-type-exclude input:checked').length==0);
-				}
-				}
+			}
+		}
 
-				var alertPending = function() {
-				if (window.location.pathname.indexOf('/groups/new') == -1) {
+		var alertPending = function() {
+			if (window.location.pathname.indexOf('/groups/new') == -1) {
 				$('#enrolment').before($pendingAlert);
 				$pendingAlert.delay(750).slideDown();
-				}
-				}
+			}
+		}
 
-				<#-- make table rows clickable -->
-					$enrolment.on('click', '.table-checkable tr', function(e) {
-					if ($(e.target).is(':not(input:checkbox)')) {
-					e.preventDefault();
-					var $chk = $(this).find('input:checkbox');
-					if ($chk.length) {
+		<#-- make table rows clickable -->
+		$enrolment.on('click', '.table-checkable tr', function(e) {
+			if ($(e.target).is(':not(input:checkbox)')) {
+				e.preventDefault();
+				var $chk = $(this).find('input:checkbox');
+				if ($chk.length) {
 					$chk.prop('checked', !$chk.prop('checked'));
+				}
+			}
+
+			var $table = $(this).closest('table');
+			updateCheckboxes($table);
+			enableActions($table);
+		});
+
+		<#-- sits-picker click handler -->
+		$enrolment.on('click', '.sits-picker .btn', function(e) {
+			e.preventDefault();
+			var $m = $(this).closest('.modal');
+			if ($(this).is(':not(.disabled)')) {
+				$('.sits-picker .btn').addClass('disabled').prop('disabled', 'disabled');
+
+				<#-- get current list of values and remove and/or add changes -->
+				var current = $('.upstreamGroups').map(function(i, input) { return input.value }).toArray();
+				var changes = $m.find('td input:checked').map(function(i, input) { return input.value }).toArray();
+				// always remove even when adding, to dedupe
+				var data = $(current).not(changes).toArray();
+				if (this.id == 'link-sits') {
+					data = data.concat(changes);
+				}
+
+				var $newInputs = $(data).map(function(i, value) {
+					return $('<input>', { 'class': 'upstreamGroups', type: 'hidden', name: 'upstreamGroups['+i+']', value:value })[0];
+				});
+				$('.upstreamGroups').remove();
+				$('#enrolment-table').append($newInputs);
+
+				$.ajax({
+					type: 'POST',
+					url: '<@routes.enrolment module />',
+					data: $('#groupEnrolmentFields').find('input, textarea, select').serialize(),
+					error: function() {
+						$m.modal('hide');
+					},
+					success: function(data, status) {
+						$m.modal('hide');
+						$enrolment.find('.groupEnrolmentInner').html($(data).find('.groupEnrolmentInner').contents());
+						$enrolment.find('.enrolledCount').html($(data).find('.enrolledCount').contents());
+						$enrolment.find('.groupModals').html($(data).find('.groupModals').contents());
+						$enrolment.data('open', true);
+						initEnrolment();
+						alertPending();
 					}
+				});
+			}
+		});
+
+		<#-- adder click handler -->
+		$enrolment.on('click', '.adder .btn', function(e) {
+			e.preventDefault();
+			var $m = $(this).closest('.modal');
+			if ($(this).is(':not(.disabled)')) {
+				$(this).addClass('disabled').prop('disabled', 'disabled');
+				$.ajax({
+					type: 'POST',
+					url: '<@routes.enrolment module />',
+					data: $('#groupEnrolmentFields').find('input, textarea, select').serialize(),
+					error: function() {
+						$m.modal('hide');
+					},
+					success: function(data, status) {
+						$m.modal('hide');
+						$enrolment.find('.groupEnrolmentInner').html($(data).find('.groupEnrolmentInner').contents());
+						$enrolment.find('.enrolledCount').html($(data).find('.enrolledCount').contents());
+						$enrolment.find('.groupModals').html($(data).find('.groupModals').contents());
+						$enrolment.data('open', true);
+						initEnrolment();
+						alertPending();
 					}
+				});
+			}
+		});
 
-					var $table = $(this).closest('table');
-					updateCheckboxes($table);
-					enableActions($table);
-					});
+		<#-- adder dis/enabled -->
+		$enrolment.on('input propertychange keyup', '.adder textarea', function(e) {
+			e.preventDefault();
+			var empty = ($.trim($(this).val()) == "");
+			$('.add-students').toggleClass('disabled', empty);
+		});
 
-					<#-- sits-picker click handler -->
-						$enrolment.on('click', '.sits-picker .btn', function(e) {
-						e.preventDefault();
-						var $m = $(this).closest('.modal');
-						if ($(this).is(':not(.disabled)')) {
-						$('.sits-picker .btn').addClass('disabled').prop('disabled', 'disabled');
+		<#-- show modals -->
+		$enrolment.on('click', '.show-sits-picker', function() {
+			$('.sits-picker').modal('show');
+		});
+		$enrolment.on('click', '.show-adder', function() {
+			$('.adder').on('shown', function() {
+				$(this).find('textarea').focus();
+			}).modal('show');
+		});
 
-						<#-- get current list of values and remove and/or add changes -->
-							var current = $('.upstreamGroups').map(function(i, input) { return input.value }).toArray();
-							var changes = $m.find('td input:checked').map(function(i, input) { return input.value }).toArray();
-							// always remove even when adding, to dedupe
-							var data = $(current).not(changes).toArray();
-							if (this.id == 'link-sits') {
-							data = data.concat(changes);
-							}
+		<#-- reset on modal close -->
+		$enrolment.on('hidden', '.modal', function(e) {
+			$(this).find('input:checked').removeAttr('checked');
+			$(this).find('.spinnable').spin(false);
+		});
 
-							var $newInputs = $(data).map(function(i, value) {
-							return $('<input>', { 'class': 'upstreamGroups', type: 'hidden', name: 'upstreamGroups['+i+']', value:value })[0];
-							});
-							$('.upstreamGroups').remove();
-							$('#enrolment-table').append($newInputs);
+		<#-- remove user from enrolment table -->
+		$enrolment.on('click', '.remove-users', function(e) {
+			e.preventDefault();
+			$('#enrolment-table').find('tr.item-type-include input:checked, tr.item-type-sits input:checked').each(function() {
+				var usercode = $(this).val();
+				var $tr = $(this).closest('tr');
 
-							$.ajax({
-							type: 'POST',
-							url: '<@routes.enrolment module />',
-							data: $('#groupEnrolmentFields').find('input, textarea, select').serialize(),
-							error: function() {
-							$m.modal('hide');
-							},
-							success: function(data, status) {
-							$m.modal('hide');
-							$enrolment.find('.groupEnrolmentInner').html($(data).find('.groupEnrolmentInner').contents());
-							$enrolment.find('.enrolledCount').html($(data).find('.enrolledCount').contents());
-							$enrolment.find('.groupModals').html($(data).find('.groupModals').contents());
-							$enrolment.data('open', true);
-							initEnrolment();
-							alertPending();
-							}
-							});
-							}
-							});
+				// update both hidden fields and table
+				$('#enrolment-table').find('input:hidden[name=includeUsers][value='+ usercode + ']').remove();
 
-							<#-- adder click handler -->
-								$enrolment.on('click', '.adder .btn', function(e) {
-								e.preventDefault();
-								var $m = $(this).closest('.modal');
-								if ($(this).is(':not(.disabled)')) {
-								$(this).addClass('disabled').prop('disabled', 'disabled');
-								$.ajax({
-								type: 'POST',
-								url: '<@routes.enrolment module />',
-								data: $('#groupEnrolmentFields').find('input, textarea, select').serialize(),
-								error: function() {
-								$m.modal('hide');
-								},
-								success: function(data, status) {
-								$m.modal('hide');
-								$enrolment.find('.groupEnrolmentInner').html($(data).find('.groupEnrolmentInner').contents());
-								$enrolment.find('.enrolledCount').html($(data).find('.enrolledCount').contents());
-								$enrolment.find('.groupModals').html($(data).find('.groupModals').contents());
-								$enrolment.data('open', true);
-								initEnrolment();
-								alertPending();
-								}
-								});
-								}
-								});
+				$('#enrolment-table').append($('<input type="hidden" name="excludeUsers" />').val(usercode));
+				if ($tr.is('.item-type-sits')) {
+					$tr.find('.source').html('<#noescape>${excludeIcon}</#noescape>');
+				} else {
+					$tr.find('.source').html('<#noescape>${pendingDeletionIcon}</#noescape>');
+				}
+				$tr.removeClass(function(i, css) {
+					return (css.match(/\bitem-type-\S+/g) || []).join(' ');
+				}).addClass('item-type-exclude');
 
-								<#-- adder dis/enabled -->
-									$enrolment.on('input propertychange keyup', '.adder textarea', function(e) {
-									e.preventDefault();
-									var empty = ($.trim($(this).val()) == "");
-									$('.add-students').toggleClass('disabled', empty);
-									});
+				this.checked = '';
+				alertPending();
+			});
+		});
 
-									<#-- show modals -->
-										$enrolment.on('click', '.show-sits-picker', function() {
-										$('.sits-picker').modal('show');
-										});
-										$enrolment.on('click', '.show-adder', function() {
-										$('.adder').on('shown', function() {
-										$(this).find('textarea').focus();
-										}).modal('show');
-										});
+		<#-- restore excluded user -->
+		$enrolment.on('click', '.restore-users', function(e) {
+			e.preventDefault();
+			$('#enrolment-table').find('tr.item-type-exclude input:checked').each(function() {
+				var usercode = $(this).val();
+				var $tr = $(this).closest('tr');
 
-										<#-- reset on modal close -->
-											$enrolment.on('hidden', '.modal', function(e) {
-											$(this).find('input:checked').removeAttr('checked');
-											$(this).find('.spinnable').spin(false);
-											});
+				// update both hidden fields and table
+				$('#enrolment-table').find('input:hidden[name=excludeUsers][value='+ usercode + ']').remove();
+				$('#enrolment-table').append($('<input type="hidden" name="includeUsers" />').val(usercode));
+				$tr.find('.source').html('<#noescape>${includeIcon}</#noescape>');
 
-											<#-- remove user from enrolment table -->
-												$enrolment.on('click', '.remove-users', function(e) {
-												e.preventDefault();
-												$('#enrolment-table').find('tr.item-type-include input:checked, tr.item-type-sits input:checked').each(function() {
-												var usercode = $(this).val();
-												var $tr = $(this).closest('tr');
+				$tr.removeClass(function(i, css) {
+					return (css.match(/\bitem-type-\S+/g) || []).join(' ');
+				}).addClass('item-type-include pending');
 
-												// update both hidden fields and table
-												$('#enrolment-table').find('input:hidden[name=includeUsers][value='+ usercode + ']').remove();
-
-												$('#enrolment-table').append($('<input type="hidden" name="excludeUsers" />').val(usercode));
-												if ($tr.is('.item-type-sits')) {
-												$tr.find('.source').html('<#noescape>${excludeIcon}</#noescape>');
-												} else {
-												$tr.find('.source').html('<#noescape>${pendingDeletionIcon}</#noescape>');
-												}
-												$tr.removeClass(function(i, css) {
-												return (css.match(/\bitem-type-\S+/g) || []).join(' ');
-												}).addClass('item-type-exclude');
-
-												this.checked = '';
-												alertPending();
-												});
-												});
-
-												<#-- restore excluded user -->
-													$enrolment.on('click', '.restore-users', function(e) {
-													e.preventDefault();
-													$('#enrolment-table').find('tr.item-type-exclude input:checked').each(function() {
-													var usercode = $(this).val();
-													var $tr = $(this).closest('tr');
-
-													// update both hidden fields and table
-													$('#enrolment-table').find('input:hidden[name=excludeUsers][value='+ usercode + ']').remove();
-													$('#enrolment-table').append($('<input type="hidden" name="includeUsers" />').val(usercode));
-													$tr.find('.source').html('<#noescape>${includeIcon}</#noescape>');
-
-													$tr.removeClass(function(i, css) {
-													return (css.match(/\bitem-type-\S+/g) || []).join(' ');
-													}).addClass('item-type-include pending');
-
-													this.checked = '';
-													alertPending();
-													});
-													});
-													});
+				this.checked = '';
+				alertPending();
+			});
+		});
+	});
 </script>
 </#escape>

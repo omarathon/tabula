@@ -29,8 +29,8 @@ abstract class CreateMonitoringPointCommand(val set: MonitoringPointSet) extends
 	override def applyInternal() = {
 		val point = new MonitoringPoint
 		point.name = name
-		point.defaultValue = defaultValue
-		point.week = week
+		point.validFromWeek = validFromWeek
+		point.requiredFromWeek = requiredFromWeek
 		point.createdDate = new DateTime()
 		point.updatedDate = new DateTime()
 		set.add(point)
@@ -42,16 +42,16 @@ trait CreateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 	self: CreateMonitoringPointState =>
 
 	override def validate(errors: Errors) {
-		if (set.sentToAcademicOffice) {
-			errors.reject("monitoringPointSet.sentToAcademicOffice.points.create")
-		}
-
-		validateWeek(errors, week, "week")
+		validateWeek(errors, validFromWeek, "validFromWeek")
+		validateWeek(errors, requiredFromWeek, "requiredFromWeek")
+		validateWeeks(errors, validFromWeek, requiredFromWeek, "validFromWeek")
 		validateName(errors, name, "name")
 
-		if (set.points.asScala.count(p => p.name == name && p.week == week) > 0) {
+		if (set.points.asScala.count(p =>
+			p.name == name && p.validFromWeek == validFromWeek && p.requiredFromWeek == requiredFromWeek
+		) > 0) {
 			errors.rejectValue("name", "monitoringPoint.name.exists")
-			errors.rejectValue("week", "monitoringPoint.name.exists")
+			errors.rejectValue("validFromWeek", "monitoringPoint.name.exists")
 		}
 	}
 }
@@ -72,8 +72,8 @@ trait CreateMonitoringPointDescription extends Describable[MonitoringPoint] {
 	override def describe(d: Description) {
 		d.monitoringPointSet(set)
 		d.property("name", name)
-		d.property("week", week)
-		d.property("defaultValue", defaultValue)
+		d.property("validFromWeek", validFromWeek)
+		d.property("requiredFromWeek", requiredFromWeek)
 	}
 }
 
@@ -82,8 +82,8 @@ trait CreateMonitoringPointState extends GroupMonitoringPointsByTerm with CanPoi
 	val academicYear = set.academicYear
 	val dept = set.route.department
 	var name: String = _
-	var defaultValue: Boolean = true
-	var week: Int = 0
+	var validFromWeek: Int = 0
+	var requiredFromWeek: Int = 0
 
 	def monitoringPointsByTerm = groupByTerm(set.points.asScala, set.academicYear)
 }

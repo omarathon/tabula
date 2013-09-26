@@ -23,6 +23,4 @@ class MonitoringPointSet extends AbstractMonitoringPointSet {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	@Column(nullable = false)
 	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
-	
-	var sentToAcademicOffice: Boolean = false
 }

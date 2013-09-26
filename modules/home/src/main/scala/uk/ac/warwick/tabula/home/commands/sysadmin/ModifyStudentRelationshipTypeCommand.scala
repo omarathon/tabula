@@ -11,6 +11,10 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands.Describable
 import uk.ac.warwick.tabula.commands.Description
 
+trait HasExistingStudentRelationshipType {
+	val relationshipType: StudentRelationshipType
+}
+
 abstract class ModifyStudentRelationshipTypeCommandInternal extends CommandInternal[StudentRelationshipType]
 	with StudentRelationshipTypeProperties with SelfValidating {
 	this: RelationshipServiceComponent =>
@@ -46,7 +50,7 @@ abstract class ModifyStudentRelationshipTypeCommandInternal extends CommandInter
 	def validate(errors: Errors) {
 		// Ensure that we don't dupe url part
 		relationshipService.getStudentRelationshipTypeByUrlPart(urlPart).filter { _.id != id }.foreach { dupe =>
-			errors.rejectValue("urlPart", "errors.relationshipType.urlPart.duplicate")
+			errors.rejectValue("urlPart", "relationshipType.urlPart.duplicate")
 		}
 	}
 }

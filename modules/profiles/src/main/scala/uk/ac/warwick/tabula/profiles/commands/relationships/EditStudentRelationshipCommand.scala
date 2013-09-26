@@ -37,7 +37,7 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 
 	var agent: Member = _
 
-	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(relationshipType), studentCourseDetails)
+	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), studentCourseDetails)
 
 	// throw this request out if the relationship can't be edited in Tabula for this department
 	if (relationshipType.readOnly(studentCourseDetails.department)) {
@@ -52,7 +52,9 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 	var notifyNewAgent: Boolean = false
 
 	def applyInternal = {
-		if (!currentAgent.isDefined) {
+		if(agent == null){
+			Nil // TAB-1173 NPE caused by agent being null. Can't see how user could have submitted in this state but guard anyway
+		} else if (!currentAgent.isDefined) {
 			// Brand new agent
 			val newRelationship = relationshipService.saveStudentRelationship(relationshipType, studentCourseDetails.sprCode, agent.universityId)
 

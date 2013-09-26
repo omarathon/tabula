@@ -1,14 +1,16 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Type
-import org.joda.time.DateTime
+
 import javax.persistence._
+import javax.persistence.CascadeType._
+
+import org.hibernate.annotations.{BatchSize, AccessType, Type}
+import org.joda.time.DateTime
+
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import javax.persistence.CascadeType._
 
 
 @Entity @AccessType("field")
@@ -102,6 +104,7 @@ class Feedback extends GeneratedId with PermissionsTarget {
 	}
 
 	@OneToMany(mappedBy = "feedback", fetch = FetchType.LAZY, cascade=Array(ALL))
+	@BatchSize(size=200)
 	var attachments: JList[FileAttachment] = JArrayList()
 	
 	def mostRecentAttachmentUpload =

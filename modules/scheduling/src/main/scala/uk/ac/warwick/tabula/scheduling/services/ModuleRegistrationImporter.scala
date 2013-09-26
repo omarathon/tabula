@@ -39,6 +39,8 @@ trait ModuleRegistrationImporter {
 class ModuleRegistrationImporterImpl extends ModuleRegistrationImporter with SitsAcademicYearAware {
 	import ModuleRegistrationImporter._
 
+	var sits = Wire[DataSource]("sitsDataSource")
+
 	def moduleRegistrationQuery() = {
 		new ModuleRegistrationQuery(sits)
 	}
@@ -87,7 +89,7 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 object ModuleRegistrationImporter {
 
 	val GetModuleRegistration = """
-			select scj_code, sms.mod_code, sms.sms_mcrd, sms.sms_agrp, sms.ses_code, sms.ayr_code
+			select scj_code, sms.mod_code, sms.sms_mcrd, sms.sms_agrp, sms.ses_code, sms.ayr_code, sms_occl as occurrence
 				from intuit.cam_sms sms, intuit.ins_stu stu, intuit.ins_spr spr, intuit.srs_scj scj, intuit.srs_vco, intuit.cam_ssn ssn
 				where sms.spr_code = spr.spr_code
 					and spr.spr_stuc = stu.stu_code
@@ -101,7 +103,7 @@ object ModuleRegistrationImporter {
 					and ssn_mrgs != 'CON'
 					and scj_udfa in ('Y','y')
 		union
-			select scj_code, smo.mod_code, smo.smo_mcrd, smo.smo_agrp, smo.ses_code, smo.ayr_code
+			select scj_code, smo.mod_code, smo.smo_mcrd, smo.smo_agrp, smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence
 				from intuit.cam_smo smo, intuit.ins_stu stu, intuit.ins_spr spr, intuit.srs_scj scj, intuit.srs_vco, intuit.cam_ssn ssn
 				where smo.spr_code = spr.spr_code
 					and spr.spr_stuc = stu.stu_code
@@ -113,7 +115,7 @@ object ModuleRegistrationImporter {
 					and ssn_mrgs = 'CON'
 					and scj_udfa in ('Y','y')
 		union
-			select scj_code, smo.mod_code, smo.smo_mcrd, smo.smo_agrp, smo.ses_code, smo.ayr_code
+			select scj_code, smo.mod_code, smo.smo_mcrd, smo.smo_agrp, smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence
 				from intuit.cam_smo smo, intuit.ins_stu stu, intuit.ins_spr spr, intuit.srs_scj scj, intuit.srs_vco
 				where smo.spr_code = spr.spr_code
 				and spr.spr_stuc = stu.stu_code
@@ -140,6 +142,7 @@ object ModuleRegistrationImporter {
 						resultSet.getBigDecimal("sms_mcrd"),
 						resultSet.getString("sms_agrp"),
 						resultSet.getString("ses_code"),
+						resultSet.getString("occurrence"),
 						AcademicYear.parse(resultSet.getString("ayr_code")) )// shouldn't need to parse this out of the result set, must be a better way ...
 
 				new ImportModuleRegistrationsCommand(modRegRow)
@@ -153,6 +156,7 @@ class ModuleRegistrationRow(
 	val cats: java.math.BigDecimal,
 	val assessmentGroup: String,
 	val selectionStatusCode: String,
+	val occurrence: String,
 	val academicYear: AcademicYear) {
 
 	var madService = Wire.auto[ModuleAndDepartmentService]

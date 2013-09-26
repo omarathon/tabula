@@ -32,8 +32,8 @@ abstract class AddMonitoringPointCommand(val dept: Department) extends CommandIn
 	override def applyInternal() = {
 		val point = new MonitoringPoint
 		point.name = name
-		point.defaultValue = defaultValue
-		point.week = week
+		point.validFromWeek = validFromWeek
+		point.requiredFromWeek = requiredFromWeek
 		monitoringPoints.add(point)
 	}
 }
@@ -50,12 +50,16 @@ trait AddMonitoringPointValidation extends SelfValidating with MonitoringPointVa
 	self: AddMonitoringPointState =>
 
 	override def validate(errors: Errors) {
-		validateWeek(errors, week, "week")
+		validateWeek(errors, validFromWeek, "validFromWeek")
+		validateWeek(errors, requiredFromWeek, "requiredFromWeek")
+		validateWeeks(errors, validFromWeek, requiredFromWeek, "validFromWeek")
 		validateName(errors, name, "name")
 
-		if (monitoringPoints.asScala.count(p => p.name == name && p.week == week) > 0) {
+		if (monitoringPoints.asScala.count(p =>
+			p.name == name && p.validFromWeek == validFromWeek && p.requiredFromWeek == requiredFromWeek
+		) > 0) {
 			errors.rejectValue("name", "monitoringPoint.name.exists")
-			errors.rejectValue("week", "monitoringPoint.name.exists")
+			errors.rejectValue("validFromWeek", "monitoringPoint.name.exists")
 		}
 	}
 }
@@ -64,8 +68,8 @@ trait AddMonitoringPointState extends GroupMonitoringPointsByTerm {
 	val dept: Department
 	var monitoringPoints = new AutoPopulatingList(classOf[MonitoringPoint])
 	var name: String = _
-	var defaultValue: Boolean = true
-	var week: Int = 0
+	var validFromWeek: Int = 0
+	var requiredFromWeek: Int = 0
 	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
 }

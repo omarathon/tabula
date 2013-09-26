@@ -20,7 +20,8 @@ import javax.persistence.CascadeType
  */
 @Entity
 class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
-	
+
+	// Long-form module code with hyphen and CATS value
 	var moduleCode: String = _
 	var assessmentGroup: String = _
 	var occurrence: String = _

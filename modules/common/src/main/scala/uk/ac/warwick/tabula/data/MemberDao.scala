@@ -45,8 +45,8 @@ trait MemberDao {
 	def getAllRelationshipsByAgent(agentId: String): Seq[StudentRelationship]
 	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[Member]
-	def countStudentsByDepartment(department: Department): Number
-	def countStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Number
+	def getStudentsByDepartment(department: Department): Seq[StudentMember]
+	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
 }
 
@@ -119,13 +119,31 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def getByUserId(userId: String, disableFilter: Boolean = false) = getAllByUserId(userId, disableFilter).headOption
 
-	def listUpdatedSince(startDate: DateTime, department: Department, max: Int) =
-		session.newCriteria[Member]
-				.add(gt("lastUpdatedDate", startDate))
-				.add(is("homeDepartment", department))
-				.setMaxResults(max)
-				.addOrder(asc("lastUpdatedDate"))
-				.list
+	def listUpdatedSince(startDate: DateTime, department: Department, max: Int) = {
+		val homeDepartmentMatches = session.newCriteria[Member]
+			.add(gt("lastUpdatedDate", startDate))
+			.add(is("homeDepartment", department))
+			.setMaxResults(max)
+			.addOrder(asc("lastUpdatedDate"))
+			.list
+		val courseMatches = session.newQuery[StudentMember]( """
+                       select distinct student
+                       from
+                               StudentCourseDetails scd
+                       where
+                               scd.department = :department
+        and scd.student.lastUpdatedDate = :lastUpdated
+                       and
+                               scd.sprStatus.code not like 'P%'
+                       order by lastUpdatedDate asc """)
+			.setEntity("department", department)
+			.setParameter("lastUpdated", startDate).seq
+
+		// do not remove; import needed for sorting
+		import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+		(homeDepartmentMatches ++ courseMatches).distinct.sortBy(_.lastUpdatedDate)
+	}
+
 
 	def listUpdatedSince(startDate: DateTime, max: Int) =
 		session.newCriteria[Member].add(gt("lastUpdatedDate", startDate)).setMaxResults(max).addOrder(asc("lastUpdatedDate")).list
@@ -213,7 +231,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				StudentMember sm
 				inner join sm.studentCourseDetails as scd
 			where
-				sm.homeDepartment = :department
+				scd.department = :department
 			and
 				scd.sprStatus.code not like 'P%'
 			and
@@ -232,11 +250,16 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setEntity("relationshipType", relationshipType)
 			.seq
 
-	def countStudentsByDepartment(department: Department): Number =
-		if (department == null) 0
-		else session.newQuery[Number]("""
-			select
-				count(distinct student)
+	/**
+	 * n.b. this will only return students with a direct relationship to a department. For sub-department memberships,
+	 * see ProfileService/RelationshipService
+	 */
+	def getStudentsByDepartment(department: Department): Seq[StudentMember] =
+		if (department == null) Nil
+		else {
+
+			val s = session.newQuery[StudentMember]("""
+			select distinct student
 			from
 				StudentCourseDetails scd
 			where
@@ -244,14 +267,17 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.sprStatus.code not like 'P%'
 			""")
-			.setEntity("department", department)
-			.uniqueResult.getOrElse(0)
-
-	def countStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Number =
-		if (relationshipType == null) 0
-		else session.newQuery[Number]("""
-			select
-				count(distinct student)
+			.setEntity("department", department).seq
+			s
+		}
+	/**
+	 * n.b. this will only return students with a direct relationship to a department. For sub-department memberships,
+	 * see ProfileService/RelationshipService
+	 */
+	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]=
+		if (relationshipType == null) Nil
+		else session.newQuery[StudentMember]("""
+			select distinct student
 			from
 				StudentCourseDetails scd
 			where
@@ -263,7 +289,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			""")
 			.setEntity("department", department)
 			.setEntity("relationshipType", relationshipType)
-			.uniqueResult.getOrElse(0)
+			.seq
 
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number =
 		if (relationshipType == null) 0

@@ -25,9 +25,9 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 	val ImportGroupSize = 100
 
 	def applyInternal() {
-		benchmark("ImportAssignments") {
+		benchmark("ImportAssessment") {
 			doAssignments
-			logger.debug("Imported UpstreamAssignments. Importing assessment groups...")
+			logger.debug("Imported AssessmentComponents. Importing assessment groups...")
 			doGroups
 			doGroupMembers
 		}
@@ -35,7 +35,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 
 	def doAssignments {
 		transactional() {
-			for (assignment <- logSize(assignmentImporter.getAllAssignments)) {
+			for (assignment <- logSize(assignmentImporter.getAllAssessmentComponents)) {
 				if (assignment.name == null) {
 					// Some SITS data is bad, but try to carry on.
 					assignment.name = "Assignment"

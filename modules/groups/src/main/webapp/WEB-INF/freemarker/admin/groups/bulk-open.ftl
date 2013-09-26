@@ -44,7 +44,7 @@
                 </td>
                 <td>
                     <span class=${(set.openForSignups == stateChange)?string("muted","")}>
-                        ${set.module.code} - ${set.module.name} - ${set.name}
+                    	<@fmt.module_name set.module false /> - ${set.name}
                     </span>
                 </td>
             </tr>

@@ -2,12 +2,14 @@ package uk.ac.warwick.tabula.dev.web.commands
 
 import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, CommandInternal}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.{DepartmentDao, CourseDao, RouteDao, MemberDao}
+import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, StudentCourseDetails, Gender, StudentMember}
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
+import uk.ac.warwick.tabula.AcademicYear
+import org.joda.time.DateTime
 
 class StudentMemberFixtureCommand extends CommandInternal[Unit] with Logging {
 	this: UserLookupComponent =>
@@ -24,6 +26,7 @@ class StudentMemberFixtureCommand extends CommandInternal[Unit] with Logging {
 	var routeDao = Wire[RouteDao]
 	var courseDao= Wire[CourseDao]
   var deptDao = Wire[DepartmentDao]
+	var statusDao = Wire[SitsStatusDao]
 
 	def applyInternal() {
 		val userLookupUser = userLookup.getUserByUserId(userId)
@@ -33,6 +36,7 @@ class StudentMemberFixtureCommand extends CommandInternal[Unit] with Logging {
 			val route = if (routeCode != "") routeDao.getByCode(routeCode) else None
 			val course = if (courseCode!= "") courseDao.getByCode(courseCode) else None
 			val dept = if (deptCode!= "") deptDao.getByCode(deptCode) else None
+			val currentStudentStatus = statusDao.getByCode("C").get
 
 			existing foreach {
 				memberDao.delete
@@ -49,11 +53,12 @@ class StudentMemberFixtureCommand extends CommandInternal[Unit] with Logging {
 			val scd = new StudentCourseDetails(newMember, userLookupUser.getWarwickId + "/" + yearOfStudy)
 			scd.mostSignificant = true
 			scd.sprCode = scd.scjCode
+			scd.sprStatus = currentStudentStatus
 
 			if (route.isDefined) scd.route = route.get
 			if (course.isDefined) scd.course = course.get
-			if (dept.isDefined) scd.department = dept.get
-			val yd = new StudentCourseYearDetails(scd, 1)
+			if (dept.isDefined)  scd.department = dept.get
+			val yd = new StudentCourseYearDetails(scd, 1, AcademicYear.guessByDate(DateTime.now))
 			yd.yearOfStudy = yearOfStudy
 
 			scd.attachStudentCourseYearDetails(yd)
