@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommandState
 import uk.ac.warwick.tabula.services.{SmallGroupService, ProfileService, UserLookupService, SecurityService}
 import uk.ac.warwick.tabula.commands.Appliable
-import scala.Some
 import uk.ac.warwick.tabula.services.RelationshipService
 
 class ViewProfileControllerTest extends TestBase with Mockito{
