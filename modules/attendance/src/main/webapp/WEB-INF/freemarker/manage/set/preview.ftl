@@ -14,7 +14,7 @@
 		<#list command.monitoringPointsByTerm[term]?sort_by("validFromWeek") as point>
 			<div class="item-info row-fluid point">
 				<div class="span12">
-					${point.name} (<@fmt.singleWeekFormat point.validFromWeek point.requiredFromWeek command.academicYearToUse command.department />)
+					${point.name} (<@fmt.monitoringPointWeeksFormat point.validFromWeek point.requiredFromWeek command.academicYearToUse command.department />)
 				</div>
 			</div>
 		</#list>
