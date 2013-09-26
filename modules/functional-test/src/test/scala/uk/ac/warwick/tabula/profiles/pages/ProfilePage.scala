@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.BreadcrumbsMatcher
 
 class ProfilePage (implicit val webDriver:WebDriver)  extends WebBrowser with	BreadcrumbsMatcher{
 
-	def isCurrentPage():Boolean = {
+	def isCurrentPage(): Boolean = {
 		//TODO this can be fixed now; LoginDetails _does_ include warwickID
 		//
 		// ideally, we'd check the URL looked like /profiles/view/{warwickID}, but unfortunately the
@@ -15,9 +15,14 @@ class ProfilePage (implicit val webDriver:WebDriver)  extends WebBrowser with	Br
 		pageTitle == ("Tabula - Student Profiles - Your profile")
 	}
 
-	def timetablePane():Option[TimetablePane] = {
-		val timetableSection:Option[Element] = find(cssSelector("#timetable-details"))
+	def timetablePane(): Option[TimetablePane] = {
+		val timetableSection: Option[Element] = find(cssSelector("#timetable-details"))
 		timetableSection.map(e=>new TimetablePane(e.underlying))
+	}
+
+	def memberNotesPane(): Option[MemberNotePane] = {
+		val memberNoteSection: Option[Element] = find(cssSelector("#membernote-details"))
+		memberNoteSection.map(e=>new MemberNotePane(e.underlying))
 	}
 }
 
