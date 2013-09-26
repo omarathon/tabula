@@ -31,10 +31,6 @@
 						$('#attendance-pane').show();
 						window.GlobalScripts.initCollapsible();
 					}
-				}).fail(function(xhr){
-					if (xhr.status == '404') {
-						$('#attendance .monitoring-points').html('<em>No monitoring points for the selected academic year.</em>');
-					}
 				});
 			}
 			$('#attendance select.academicYear').on('change', monitoringPointsLoader);

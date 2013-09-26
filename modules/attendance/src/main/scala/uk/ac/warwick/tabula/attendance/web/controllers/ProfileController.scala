@@ -16,7 +16,7 @@ class ProfileHomeController extends AttendanceController with AutowiringProfileS
 
 	@RequestMapping
 	def render() = {
-		val optionalCurrentMember = profileService.getMemberByUserId(user.apparentId, disableFilter = true)
+		val optionalCurrentMember = profileService.getMemberByUserId(user.apparentId)
 		val currentMember = optionalCurrentMember getOrElse new RuntimeMember(user)
 		if (currentMember.isStudent) {
 			currentMember.asInstanceOf[StudentMember].mostSignificantCourseDetails match {
@@ -38,7 +38,10 @@ class ProfileController extends AttendanceController {
 
 	@RequestMapping
 	def render(@ModelAttribute("command") cmd: Appliable[Unit]) = {
-		cmd.apply()
+		try {
+			cmd.apply()
+		}
+
 		if (ajax)
 			Mav("home/_profile", "currentUser" -> user).noLayout()
 		else

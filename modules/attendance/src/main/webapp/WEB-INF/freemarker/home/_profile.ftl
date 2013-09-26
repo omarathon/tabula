@@ -1,5 +1,9 @@
 <#escape x as x?html>
 
+<#if !command.monitoringPointsByTerm??>
+	<p><em>There are no monitoring points defined for this academic year.</em></p>
+<#else>
+
 <#assign can_record=can.do("MonitoringPoints.Record", command.studentCourseDetails) />
 <#assign is_the_student=currentUser.apparentUser.warwickId==command.studentCourseDetails.student.universityId />
 
@@ -92,5 +96,7 @@
 		</#if>
 	</div>
 </div>
+
+</#if>
 
 </#escape>
