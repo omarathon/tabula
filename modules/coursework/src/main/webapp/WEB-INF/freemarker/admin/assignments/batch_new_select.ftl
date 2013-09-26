@@ -18,16 +18,21 @@ first page of the form to setup a bunch of assignments from SITS.
 
 <#if step='select'>
 
+	<div class="alert alert-warning slow-page-warning">
+		<p>This page may take a few seconds to fully load, please wait &hellip;</p>
+	</div>
+
 	<h2>Step 1 - choose which assignments to setup</h2>
 
 	<div class="row-fluid">
   <div class="span10">
 
-	<p>Below are all of the assignments defined for this department in SITS, the central system.</p>
+	<p>Below are all of the assessment components defined for this department in SITS, the central system.</p>
 
 	<p>The first thing to do is choose which ones you want to set up to use for assessment.
 	Use the checkboxes on the left hand side to choose which ones you want to setup in the coursework submission system,
-	and then click Next. Some items (such as those marked "Audit Only") have already been unchecked.
+	and then click Next. Some items (such as exams and "Audit Only" components) have already been unchecked,
+	but you can check them if you want (for example, if you want to publish feedback for an exam).
 	</p>
 
 <#elseif step='options'>
@@ -110,9 +115,10 @@ first page of the form to setup a bunch of assignments from SITS.
     	<#-- </#if> -->
 	</th>
 	<th>Module</th>
+	<th><abbr title="Component type">Type</abbr></th>
 	<th><abbr title="Sequence">Seq</abbr></th>
 	<th><abbr title="Occurrence/Cohort">Occ</abbr></th>
-	<th>Assignment name</th>
+	<th>Component name</th>
 	<#if step="options">
 	<th></th>
 	<th></th>
@@ -136,15 +142,18 @@ first page of the form to setup a bunch of assignments from SITS.
 		</#if>
 	</td>
 	<td class="selectable">
-		${item.assessmentComponent.moduleCode?upper_case}
+		${item.upstreamAssignment.moduleCode?upper_case}
 	</td>
 	<td class="selectable">
-		${item.sequence}
+		${(item.upstreamAssignment.assessmentType.value)!'A'}
+	</td>
+	<td class="selectable">
+		${item.upstreamAssignment.sequence}
 	</td>
 	<td class="selectable">
 		${item.occurrence}
 	</td>
-	<td class="selectable">	
+	<td class="selectable">
 		<span class="editable-name" id="editable-name-${item_index}">${item.name!''}</span>
 		<#-- TODO expose as click-to-edit -->
 		
@@ -345,6 +354,9 @@ first page of the form to setup a bunch of assignments from SITS.
 //<[![CDATA[
 <#include "batch_new_select_js.ftl" />
 //]]>
+
+jQuery('.slow-page-warning').hide('fast');
+
 </script>
 
 </#escape>

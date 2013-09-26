@@ -232,6 +232,7 @@
 								<th class="sortable">CATS</th>
 								<th class="sortable">Occurrence</th>
 								<th class="sortable">Sequence</th>
+								<th class="sortable">Type</th>
 							</tr>
 						</thead>
 						<tbody><#list command.availableUpstreamGroups as available>
@@ -239,10 +240,11 @@
 							<tr>
 								<td><input type="checkbox" id="chk-${available.id}" name="" value="${available.id}"></td>
 								<td><label for="chk-${available.id}">${available.name}<#if isLinked> <span class="label label-success">Linked</span></#if></label></td>
-								<td>${available.memberCount}</td><#-- FIXME: <a/> popover (overflow-y: scroll) with member list -->
+								<td>${available.memberCount}</td><#-- FIXME: a.popover (overflow-y: scroll) with member list -->
 								<td>${available.cats!'-'}</td>
 								<td>${available.occurrence}</td>
 								<td>${available.sequence}</td>
+								<td>${available.assessmentType!'A'}</td> <#-- TAB-1174 can remove default when non-null -->
 							</tr>
 						</#list></tbody>
 					</table>
@@ -472,8 +474,10 @@
 
 		<#-- reset on modal close -->
 		$enrolment.on('hidden', '.modal', function(e) {
-			$(this).find('input:checked').removeAttr('checked');
-			$(this).find('.spinnable').spin(false);
+			if (this == e.target) { // ignore 'hidden' events from within the modal
+				$(this).find('input:checked').removeAttr('checked');
+				$(this).find('.spinnable').spin(false);
+			}
 		});
 
 		<#-- remove user from enrolment table -->

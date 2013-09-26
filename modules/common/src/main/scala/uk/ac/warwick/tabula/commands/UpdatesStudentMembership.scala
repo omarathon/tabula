@@ -154,7 +154,7 @@ trait UpdatesStudentMembership {
 		// other assessment components, but remember this is also used by places
 		// that won't want that.
 		for {
-			ua <- membershipService.getUpstreamAssignments(module)
+			ua <- membershipService.getAssessmentComponents(module)
 			uag <- membershipService.getUpstreamAssessmentGroups(ua, academicYear)
 		} yield new UpstreamGroup(ua, uag)
 	}
@@ -197,7 +197,7 @@ class UpstreamGroup(val assessmentComponent: AssessmentComponent, val group: Ups
 	val cats = assessmentComponent.cats
 	val occurrence = group.occurrence
 	val sequence = assessmentComponent.sequence
-	val assessmentType = assessmentComponent.assessmentType.value
+	val assessmentType = Option(assessmentComponent.assessmentType).map(_.value).orNull // TAB-1174 remove Option wrap when non-null is in place
 
 	def isLinked(assessmentGroups: JList[AssessmentGroup]) = assessmentGroups.asScala.exists(ag =>
 		ag.assessmentComponent.id == assessmentComponent.id && ag.occurrence == group.occurrence)

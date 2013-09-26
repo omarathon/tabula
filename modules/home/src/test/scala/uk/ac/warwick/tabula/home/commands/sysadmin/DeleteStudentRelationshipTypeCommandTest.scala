@@ -89,6 +89,8 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			var relationshipService = mock[RelationshipService]
 			relationshipService.countStudentsByRelationship(testRelationshipType) returns (5)
 			testRelationshipType.relationshipService = relationshipService
+			
+			commandInternal.confirm = true
 
 			var errors = new BindException(commandInternal, "command")
 			commandInternal.validate(errors)
@@ -97,6 +99,25 @@ class DeleteStudentRelationshipTypeCommandTest extends TestBase with Mockito {
 			relationshipService = mock[RelationshipService]
 			relationshipService.countStudentsByRelationship(testRelationshipType) returns (0)
 			testRelationshipType.relationshipService = relationshipService
+
+			errors = new BindException(commandInternal, "command")
+			commandInternal.validate(errors)
+			errors.hasErrors should be (false)
+		}
+	}
+	
+	@Test
+	def confirmValidation {
+		new Fixture {
+			var relationshipService = mock[RelationshipService]
+			relationshipService.countStudentsByRelationship(testRelationshipType) returns (0)
+			testRelationshipType.relationshipService = relationshipService
+
+			var errors = new BindException(commandInternal, "command")
+			commandInternal.validate(errors)
+			errors.hasErrors should be (true)
+			
+			commandInternal.confirm = true
 
 			errors = new BindException(commandInternal, "command")
 			commandInternal.validate(errors)

@@ -28,8 +28,8 @@ trait AssignmentMembershipDao {
 	 *  Typically used to provide possible candidates to link to an app assignment,
 	 *  in conjunction with #getUpstreamAssessmentGroups.
 	 */
-	def getUpstreamAssignments(module: Module): Seq[AssessmentComponent]
-	def getUpstreamAssignments(department: Department): Seq[AssessmentComponent]
+	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
+	def getAssessmentComponents(department: Department): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
@@ -133,29 +133,17 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 	}
 
 	/** Just gets components of type Assignment for this module, not all components. */
-	def getUpstreamAssignments(module: Module) = {
+	def getAssessmentComponents(module: Module) = {
 		session.newCriteria[AssessmentComponent]
 			.add(Restrictions.like("moduleCode", module.code.toUpperCase + "-%"))
-			.add(
-				Restrictions.or(
-					Restrictions.isNull("assessmentType"), // temporary, to handle legacy data (TAB-1174)
-					Restrictions.eq("assessmentType", AssessmentType.Assignment)
-				)
-			 )
 			.addOrder(Order.asc("sequence"))
 			.seq filter isInteresting
 	}
 
 	/** Just gets components of type Assignment for this department, not all components. */
-	def getUpstreamAssignments(department: Department) = {
+	def getAssessmentComponents(department: Department) = {
 		session.newCriteria[AssessmentComponent]
 			.add(Restrictions.eq("departmentCode", department.code.toUpperCase))
-			.add(
-				Restrictions.or(
-					Restrictions.isNull("assessmentType"), // temporary, to handle legacy data (TAB-1174)
-					Restrictions.eq("assessmentType", AssessmentType.Assignment)
-				)
-			)
 			.addOrder(Order.asc("moduleCode"))
 			.addOrder(Order.asc("sequence"))
 			.seq filter isInteresting

@@ -52,7 +52,9 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 	var notifyNewAgent: Boolean = false
 
 	def applyInternal = {
-		if (!currentAgent.isDefined) {
+		if(agent == null){
+			Nil // TAB-1173 NPE caused by agent being null. Can't see how user could have submitted in this state but guard anyway
+		} else if (!currentAgent.isDefined) {
 			// Brand new agent
 			val newRelationship = relationshipService.saveStudentRelationship(relationshipType, studentCourseDetails.sprCode, agent.universityId)
 
