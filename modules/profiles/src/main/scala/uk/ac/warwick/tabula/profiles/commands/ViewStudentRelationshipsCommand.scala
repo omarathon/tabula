@@ -17,30 +17,57 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 // wrapper class for relationship data - just for less crufty method signature
-case class RelationshipGraph(val studentMap: TreeMap[String, Seq[StudentRelationship]], val studentCount: Int, val missingCount: Int)
-
+case class RelationshipGraph(val studentMap: TreeMap[SortableAgentIdentifier, Seq[StudentRelationship]], val studentCount: Int, val missingCount: Int)
+case class SortableAgentIdentifier(val agentId:String, val lastName:Option[String]){
+	 val sortkey = lastName map (_+agentId) getOrElse agentId
+	 override def toString() = sortkey
+}
+object SortableAgentIdentifier{
+	def apply(r:StudentRelationship) = {
+		new SortableAgentIdentifier(r.agent, r.agentMember.map(_.lastName))
+	}
+}
+object AgentOrdering extends Ordering[SortableAgentIdentifier]{
+	def compare(x: SortableAgentIdentifier, y: SortableAgentIdentifier): Int = {
+		x.sortkey.compareTo(y.sortkey)
+	}
+}
 class ViewStudentRelationshipsCommand(val department: Department, val relationshipType: StudentRelationshipType) extends Command[RelationshipGraph] with Unaudited {
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
 
 	var relationshipService = Wire.auto[RelationshipService]
+	var profileService = Wire.auto[ProfileService]
+
 
 	override def applyInternal(): RelationshipGraph = transactional(readOnly = true) {
 		// get all agent/student relationships by dept
-		val unsortedAgentRelationships = relationshipService.listStudentRelationshipsByDepartment(relationshipType, department)
 
-		// group into map by agent id
-		val groupedAgentRelationships = unsortedAgentRelationships.groupBy(_.agent)
+		// all students in department X
+		val unsortedAgentRelationshipsByStudentDept = relationshipService.listStudentRelationshipsByDepartment(relationshipType, department)
 
-		// map id to lastname, where possible, and alpha sort by constructing a TreeMap
-		val sortedAgentRelationships = TreeMap((groupedAgentRelationships map {
-			case (agent, students) => (StudentRelationship.getLastNameFromAgent(agent), students)
-		}).toSeq:_*)
+		// all students with a tutor in department X
+		val unsortedAgentRelationshipsByStaffDept = relationshipService.listStudentRelationshipsByStaffDepartment(relationshipType, department)
+
+		// combine the two and remove the dups
+		val unsortedAgentRelationships = (unsortedAgentRelationshipsByStudentDept ++unsortedAgentRelationshipsByStaffDept).distinct
+
+		// group into map by agent lastname, or id if the lastname is unavailable
+		val groupedAgentRelationships = unsortedAgentRelationships.groupBy(r=>SortableAgentIdentifier(r))
+
+		//  alpha sort by constructing a TreeMap
+		val sortedAgentRelationships = TreeMap((groupedAgentRelationships).toSeq:_*)(AgentOrdering)
 
 		// count students
-		val (studentCount, withAgentsCount) = relationshipService.countStudentsByRelationshipAndDepartment(relationshipType, department)
+		val studentsInDepartmentCount = profileService.countStudentsByDepartment(department)
+		val studentsWithAgentsCount = unsortedAgentRelationships.map(_.studentId).distinct.size
 
-		RelationshipGraph(sortedAgentRelationships, studentCount, studentCount - withAgentsCount)
+		val studentIdsInDepartment = unsortedAgentRelationshipsByStudentDept.map(_.studentId).distinct
+		val studentsOutsideDepartmentCount =
+			unsortedAgentRelationshipsByStaffDept.map(_.studentId).distinct
+				.filterNot(id=>studentIdsInDepartment.exists(_ == id)).size
+
+		RelationshipGraph(sortedAgentRelationships, studentsInDepartmentCount + studentsOutsideDepartmentCount, (studentsInDepartmentCount + studentsOutsideDepartmentCount) - studentsWithAgentsCount)
 	}
 }
 

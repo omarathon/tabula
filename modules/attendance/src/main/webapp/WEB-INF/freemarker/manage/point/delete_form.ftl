@@ -16,7 +16,7 @@
 			<input type="hidden" name="monitoringPoints[${point_index}].requiredFromWeek" value="${point.requiredFromWeek}" />
 		</#list>
 		<#assign point = command.monitoringPoints[pointIndex] />
-		<p>You are deleting the monitoring point: ${point.name} (<@fmt.singleWeekFormat point.validFromWeek point.requiredFromWeek command.academicYear command.dept />).</p>
+		<p>You are deleting the monitoring point: ${point.name} (<@fmt.monitoringPointWeeksFormat point.validFromWeek point.requiredFromWeek command.academicYear command.dept />).</p>
 
 		<p>
 			<@form.label checkbox=true>

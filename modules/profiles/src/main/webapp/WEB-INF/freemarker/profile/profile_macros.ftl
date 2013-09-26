@@ -23,11 +23,14 @@
 <section id="relationship-${relationshipType.id}" class="relationship-section clearfix">
 
 	<#if RequestParameters.action??>
-		<#if RequestParameters.action?? && RequestParameters.action == "agentremoved" || RequestParameters.action == "agentchanged">
-			<div id="agentsMessage" class="alert alert-success">
+		<#if RequestParameters.action?? && RequestParameters.action == "agentremoved" || RequestParameters.action == "agentchanged" || RequestParameters.action == "agenterror">
+			<#if RequestParameters.action = "agenterror"><#assign alertClass="alert-danger"><#else><#assign alertClass="alert-success"></#if>
+			<div id="agentsMessage" class="alert ${alertClass}">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 				<p>
-					<#if RequestParameters.action = "agentremoved">
+					<#if RequestParameters.action = "agenterror">
+						There was a problem when attempting to update this personal tutor. No tutor was specified
+					<#elseif RequestParameters.action = "agentremoved">
 						<strong>${agent.fullName}</strong> is no longer ${profile.firstName}'s ${relationshipType.agentRole}.
 					<#else>
 						<strong>${agent.fullName}</strong> is now ${profile.firstName}'s ${relationshipType.agentRole}.

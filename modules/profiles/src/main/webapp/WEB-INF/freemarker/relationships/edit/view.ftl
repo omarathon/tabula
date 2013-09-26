@@ -5,6 +5,8 @@
 	<#else>
 		<#assign pageAction="add" >
 	</#if>
+
+
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 		<h3>${pageAction?capitalize} ${relationshipType.agentRole?cap_first}</h3>
@@ -15,7 +17,6 @@
 		<#assign student = studentCourseDetails.student/>
 		<div id="edit-agent-modal" class="modal-body">
 		<@f.form method="post" commandName="editStudentRelationshipCommand" action="" cssClass="form-horizontal">
-
 
 				<h5 id="studentName">${relationshipType.studentRole?capitalize}: ${student.fullName}</h5>
 				<input id="student" name="student" type="hidden" value="${student.universityId}" />
@@ -86,10 +87,11 @@
 		</div>
 		<div class="modal-footer">
 				<div type="button" class="btn disabled" id="save-agent">Save</div>
-			</div>
+		</div>
+
 	</#if>
 
-	<script>
+	<script type="text/javascript">
 		jQuery(document).ready(function($) {
 
 			$('#save-agent').click(function() {
@@ -98,7 +100,13 @@
 					$('#modal-change-agent').modal('hide');
 					var agentId = $('#editStudentRelationshipCommand input[name=agent]').val();
 					var remove = $('#editStudentRelationshipCommand input[name=remove]').val();
-					if(remove == "true") {
+					var error = $('input[name=error]').val();
+
+
+					if(agentId == undefined) {
+						var action = "error";
+					}
+					else if(remove == "true") {
 						var action = "removed";
 					} else {
 						var action = "changed";

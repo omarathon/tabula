@@ -43,6 +43,7 @@ trait MemberDao {
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
+	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getAllRelationshipsByAgent(agentId: String): Seq[StudentRelationship]
 	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[Member]
@@ -203,6 +204,35 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setEntity("relationshipType", relationshipType)
 			.seq
 	}
+
+	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = {
+		session.newQuery[StudentRelationship]("""
+			select
+				distinct sr
+			from
+				StudentRelationship sr,
+				StudentCourseDetails scd,
+				Member staff
+			where
+				sr.targetSprCode = scd.sprCode
+      and
+        staff.universityId = sr.agent
+			and
+				sr.relationshipType = :relationshipType
+			and
+				staff.homeDepartment = :department
+			and
+				scd.sprStatus.code not like 'P%'
+			and
+				(sr.endDate is null or sr.endDate >= SYSDATE)
+			order by
+				sr.agent, sr.targetSprCode
+																					""")
+			.setEntity("department", department)
+			.setEntity("relationshipType", relationshipType)
+			.seq
+	}
+
 
 	def getAllRelationshipsByAgent(agentId: String): Seq[StudentRelationship] =
 		session.newCriteria[StudentRelationship]
