@@ -19,7 +19,7 @@
 								<a class="btn btn-primary edit-point" href="<@url page="/manage/${command.dept.code}/sets/add/points/edit/${pointCount}?form=true"/>">Edit</a>
 								<a class="btn btn-danger delete-point" title="Delete" href="<@url page="/manage/${command.dept.code}/sets/add/points/delete/${pointCount}?form=true"/>"><i class="icon-remove"></i></a>
 							</div>
-							${point.name} (<@fmt.singleWeekFormat point.validFromWeek point.requiredFromWeek command.academicYear command.dept />)
+							${point.name} (<@fmt.monitoringPointWeeksFormat point.validFromWeek point.requiredFromWeek command.academicYear command.dept />)
 
 							<#list pointFields as pointField>
 								<@spring.bind path="command.monitoringPoints[${pointCount}].${pointField}">
