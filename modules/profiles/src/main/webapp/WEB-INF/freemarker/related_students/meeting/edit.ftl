@@ -38,7 +38,7 @@
 	<@f.form id="meeting-record-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="form-horizontal double-submit-protection">
 
 		<@form.labelled_row "title" "Title">
-			<@f.input type="text" path="title" cssClass="input-block-level" maxlength="255" placeholder="Subject of meeting" />
+			<@f.input type="text" path="title" cssClass="input-xxlarge" maxlength="255" placeholder="Subject of meeting" />
 		</@form.labelled_row>
 
 		<#if allRelationships?size gt 1>
@@ -122,7 +122,7 @@
 
 <#-- TODO: TinyMCE editor, bleh -->
 <@form.labelled_row "description" "Description (optional)">
-<@f.textarea rows="6" path="description" cssClass="input-block-level" />
+<@f.textarea rows="6" path="description" cssClass="input-xxlarge" />
 </@form.labelled_row>
 
 		<#if iframe??>
