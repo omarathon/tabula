@@ -1,5 +1,9 @@
 <#escape x as x?html>
 
+<#if !command.monitoringPointsByTerm??>
+	<p><em>There are no monitoring points defined for this academic year.</em></p>
+<#else>
+
 <#assign can_record=can.do("MonitoringPoints.Record", command.studentCourseDetails) />
 <#assign is_the_student=currentUser.apparentUser.warwickId==command.studentCourseDetails.student.universityId />
 
@@ -51,9 +55,9 @@
 	<div class="missed-info">
 		<#if command.missedCountByTerm?keys?size == 0 && (command.monitoringPointsByTerm?keys?size > 0) >
 			<#if is_the_student>
-				You have attended all monitoring points.
+				You have missed 0 monitoring points.
 			<#else>
-				${command.studentCourseDetails.student.firstName} has attended all monitoring points.
+				${command.studentCourseDetails.student.firstName} has missed 0 monitoring points.
 			</#if>
 		<#else>
 			<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
@@ -92,5 +96,7 @@
 		</#if>
 	</div>
 </div>
+
+</#if>
 
 </#escape>

@@ -28,6 +28,8 @@ class DeleteStudentRelationshipTypeCommandInternal(val relationshipType: Student
 	extends CommandInternal[StudentRelationshipType] with HasExistingStudentRelationshipType with SelfValidating {
 	this: RelationshipServiceComponent =>
 		
+	var confirm: Boolean = _
+		
 	override def applyInternal() = transactional() {
 		relationshipService.delete(relationshipType)
 		relationshipType
@@ -36,8 +38,10 @@ class DeleteStudentRelationshipTypeCommandInternal(val relationshipType: Student
 	def validate(errors: Errors) {
 		// Don't allow removal if non-empty
 		if (!relationshipType.empty) {
-			errors.reject("errors.relationshipType.nonEmpty")
+			errors.reject("relationshipType.delete.nonEmpty")
 		}
+		
+		if (!confirm) errors.rejectValue("confirm", "relationshipType.delete.confirm")
 	}
 }
 

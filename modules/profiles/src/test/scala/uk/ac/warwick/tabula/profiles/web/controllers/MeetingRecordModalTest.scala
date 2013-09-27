@@ -18,6 +18,7 @@ class MeetingRecordModalTest extends TestBase with Mockito {
 		var requestInfo: Option[RequestInfo] = _
 		var user: CurrentUser = _
 		var securityService: SecurityService = mock[SecurityService]
+		var optionalCurrentMember: Option[Member] = None
 		var currentMember: Member = _
 		var profileService: ProfileService = mock[ProfileService]
 		var relationshipService: RelationshipService = mock[RelationshipService]

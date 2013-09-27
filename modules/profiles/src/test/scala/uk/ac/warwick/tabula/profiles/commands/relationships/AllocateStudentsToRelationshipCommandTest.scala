@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import org.springframework.validation.BindException
 
 class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 	
@@ -62,7 +63,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 		cmd.mapping should be (JMap(staff1 -> JArrayList(student1, student2), staff2 -> JArrayList(student3)))
 		
 		cmd.additionalAgents = JArrayList(staff3.userId)
-		cmd.onBind(null)
+		cmd.onBind(new BindException(cmd, "cmd"))
 		
 		cmd.unallocated should be (JList(student4, student5, student6, student7))
 		cmd.mapping should be (JMap(staff1 -> JArrayList(student1, student2), staff2 -> JArrayList(student3), staff3 -> JArrayList()))

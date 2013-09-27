@@ -130,6 +130,16 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	}
 
 	private def validUser(user: User) = user.isFoundUser && user.getWarwickId.hasText
+	
+	def validateUploadedFile(result: BindingResult) {
+		val fileNames = file.fileNames map (_.toLowerCase)
+		val invalidFiles = fileNames.filter(s => !GroupsExtractor.AcceptedFileExtensions.exists(s.endsWith))
+
+		if (invalidFiles.size > 0) {
+			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
+			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+		}
+	}
 
 	def extractDataFromFile(file: FileAttachment) = {
 		val allocations = groupsExtractor.readXSSFExcelFile(file.dataStream)

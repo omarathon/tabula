@@ -1,23 +1,15 @@
 package uk.ac.warwick.tabula.system.permissions
 
 import org.springframework.util.Assert
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.data.model.MarkingWorkflow
-import uk.ac.warwick.tabula.data.model.Submission
-import uk.ac.warwick.tabula.data.model.CanBeDeleted
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{CurrentUser, PermissionDeniedException, ItemNotFoundException}
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.permissions.Permission
-import uk.ac.warwick.tabula.data.model.FeedbackTemplate
 import scala.reflect.ClassTag
 import uk.ac.warwick.tabula.services.SecurityService
-import scala.annotation.target
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import scala.Some
 
 /**
  * Trait that allows classes to call ActionCheck() in their inline definitions
@@ -97,6 +89,12 @@ trait PermissionsCheckingMethods extends Logging {
       logger.info("Not displaying submission as it doesn't belong to specified assignment")
       throw new ItemNotFoundException(submission)
     }
+
+	def mustBeLinked(memberNote: MemberNote, member: Member) =
+		if (mandatory(memberNote).member.id != mandatory(member).id) {
+			logger.info("Not displaying member note as it doesn't belong to specified member")
+			throw new ItemNotFoundException(memberNote)
+		}
 
 	/**
 	 * Returns an object if it is non-null and not None. Otherwise

@@ -1,18 +1,9 @@
 <#assign has_assignments = enrolledAssignments?has_content />
 <#assign has_historical_items = historicAssignments?has_content />
 
-<#assign missing_assignments_markup>
-	<p>Talk to your module convenor if this seems like a mistake.</p>
-	<ul>
-		<li>They may not have set up the assignment yet</li>
-		<li>They may not be using Tabula for assessment</li>
-		<li>You may not be correctly enrolled.</li>
-	</ul>
-</#assign>
-
 <#if has_assignments || has_historical_items || user.student>
 	<div class="header-with-tooltip" id="your-assignments">
-		<h2 class="section">Your assignments</h2>
+		<h2 class="section">My assignments</h2>
 		<span class="use-tooltip" data-toggle="tooltip" data-html="true" data-placement="bottom" data-title="Talk to your module convenor if you think an assignment is missing - maybe it isn't set up yet, or they aren't using Tabula.">Missing an assignment?</span>
 	</div>
 	

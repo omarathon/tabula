@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 
-import javax.servlet.http.HttpServletRequest
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.Member
@@ -15,10 +14,15 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.profiles.commands.relationships.EditStudentRelationshipCommand
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.web.controllers.BaseController
+import javax.validation.Valid
+import org.springframework.validation.Errors
 
 @Controller
 @RequestMapping(Array("/{relationshipType}/{studentCourseDetails}"))
 class EditStudentRelationshipController extends BaseController {
+
+	validatesSelf[EditStudentRelationshipCommand]
+
 	var profileService = Wire.auto[ProfileService]
 
 	@ModelAttribute("editStudentRelationshipCommand")
@@ -33,7 +37,7 @@ class EditStudentRelationshipController extends BaseController {
 
 	// initial form display
 	@RequestMapping(value = Array("/edit","/add"),method=Array(GET))
-	def editAgent(@ModelAttribute("editStudentRelationshipCommand") cmd: EditStudentRelationshipCommand, request: HttpServletRequest) = {
+	def editAgent(@ModelAttribute("editStudentRelationshipCommand") cmd: EditStudentRelationshipCommand, errors: Errors) = {
 		Mav("relationships/edit/view",
 			"studentCourseDetails" -> cmd.studentCourseDetails,
 			"agentToDisplay" -> cmd.currentAgent
@@ -41,12 +45,16 @@ class EditStudentRelationshipController extends BaseController {
 	}
 
 	@RequestMapping(value = Array("/edit", "/add"), method=Array(POST))
-	def saveAgent(@ModelAttribute("editStudentRelationshipCommand") cmd: EditStudentRelationshipCommand, request: HttpServletRequest ) = {
-		cmd.apply()
+	def saveAgent(@Valid @ModelAttribute("editStudentRelationshipCommand") cmd: EditStudentRelationshipCommand, errors: Errors) = {
+		if(errors.hasErrors){
+			editAgent(cmd, errors)
+		} else {
+			cmd.apply()
 
-		Mav("relationships/edit/view",
-			"student" -> cmd.studentCourseDetails.student,
-			"agentToDisplay" -> cmd.currentAgent
-		)
+			Mav("relationships/edit/view",
+				"student" -> cmd.studentCourseDetails.student,
+				"agentToDisplay" -> cmd.currentAgent
+			)
+		}
 	}
 }

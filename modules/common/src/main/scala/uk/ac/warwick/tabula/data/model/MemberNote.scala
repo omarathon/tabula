@@ -7,10 +7,13 @@ import javax.persistence.FetchType._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.annotations.AccessType
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import javax.persistence.Entity
 
+
 @Entity @AccessType("field")
-class MemberNote extends GeneratedId {
+class MemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget with FormattedHtml {
 
 	@ManyToOne
 	@JoinColumn(name="memberid")
@@ -18,11 +21,13 @@ class MemberNote extends GeneratedId {
 
 	var note: String =_
 
+	def escapedNote: String = formattedHtml(note)
+
 	var title: String =_
 
 	@OneToMany(mappedBy="memberNote", fetch=LAZY, cascade=Array(ALL))
 	@BatchSize(size=200)
-	var attachments:JSet[FileAttachment] = JSet()
+	var attachments: JList[FileAttachment] = JArrayList()
 
 	@ManyToOne
 	@JoinColumn(name="creatorid")
@@ -34,4 +39,14 @@ class MemberNote extends GeneratedId {
 	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var lastUpdatedDate: DateTime = creationDate
 
+	def addAttachment(attachment:FileAttachment) {
+		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
+		attachment.temporary = false
+		attachment.memberNote = this
+		attachments.add(attachment)
+	}
+
+	def permissionsParents = Stream(member)
+
+	override def toString = "MemberNote(" + id + ")"
 }

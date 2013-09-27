@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommandState
 import uk.ac.warwick.tabula.services.{SmallGroupService, ProfileService, UserLookupService, SecurityService}
 import uk.ac.warwick.tabula.commands.Appliable
-import scala.Some
 import uk.ac.warwick.tabula.services.RelationshipService
 
 class ViewProfileControllerTest extends TestBase with Mockito{
@@ -14,6 +13,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 	// need to have a security service defined or we'll get a NPE in PermissionsCheckingMethods.restricted()
 	controller.securityService = mock[SecurityService]
 	controller.smallGroupService = mock[SmallGroupService]
+	controller.profileService = mock[ProfileService]
 
 	val member = new StudentMember()
 	val courseDetails = new StudentCourseDetails()
@@ -42,7 +42,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 		withUser("test") {
 			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 			
-			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
+			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)			
 			val cmd = controller.getViewMeetingRecordCommand(member, relationshipType)
 			cmd should not be(None)
 

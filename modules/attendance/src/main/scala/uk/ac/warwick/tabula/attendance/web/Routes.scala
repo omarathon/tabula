@@ -25,6 +25,8 @@ object Routes {
 	}
 
 	object profile {
+		def apply() = "/profile"
+		
 		def apply(scd: StudentCourseDetails, academicYear: AcademicYear) =
 			"/profile/%s/%s" format(encoded(scd.urlSafeId), encoded(academicYear.startYear.toString))
 	}

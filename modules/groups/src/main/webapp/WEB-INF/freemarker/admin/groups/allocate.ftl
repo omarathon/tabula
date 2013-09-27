@@ -54,6 +54,10 @@
 							<#list errors.globalErrors as e>
 								<div><@spring.message message=e /></div>
 							</#list>
+						<#elseif errors.hasFieldErrors('file')>
+							<#list errors.getFieldErrors('file') as e>
+								<div><@spring.message message=e /></div>
+							</#list>
 						<#else>
 							<div>See the errors below.</div>
 						</#if>

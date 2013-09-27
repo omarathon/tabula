@@ -20,6 +20,10 @@ class AllocateStudentItem {
 	}
 }
 
+object GroupsExtractor {
+	val AcceptedFileExtensions = Seq(".xlsx")
+}
+
 @Service
 class GroupsExtractor {
 
