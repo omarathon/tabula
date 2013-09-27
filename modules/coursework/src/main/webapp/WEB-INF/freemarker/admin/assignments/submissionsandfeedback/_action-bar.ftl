@@ -148,6 +148,9 @@
 					</li>
 					<li class="divider"></li>
 					<li>
+						<a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/online" />"><i class="icon-edit"></i> Online feedback</a>
+					</li>
+					<li>
 						<a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />"><i class="icon-upload"></i> Upload feedback</a>
 					</li>
 					<li class="must-have-selected">
