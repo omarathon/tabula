@@ -35,6 +35,10 @@ class RawStudentRelationship {
 	override def toString() = "Student=%s, Agent=%s".format(targetUniversityId, agentUniversityId)
 }
 
+object RawStudentRelationshipExtractor {
+	val AcceptedFileExtensions = Seq(".xlsx")
+}
+
 @Service
 class RawStudentRelationshipExtractor {
 
