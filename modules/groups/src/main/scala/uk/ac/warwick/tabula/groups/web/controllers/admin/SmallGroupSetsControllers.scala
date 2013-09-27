@@ -242,10 +242,11 @@ class OpenSmallGroupSetController extends GroupsController {
 	
 	@ModelAttribute("openGroupSetCommand")
 	def getOpenGroupSetCommand(
+		@PathVariable("module") module: Module,
 		@PathVariable("set") set: SmallGroupSet,
 		@PathVariable action: SmallGroupSetSelfSignUpState
 	): Appliable[Seq[SmallGroupSet]] with OpenSmallGroupSetState = {
-		OpenSmallGroupSetCommand(Seq(set), user.apparentUser, action)
+		OpenSmallGroupSetCommand(module.department, Seq(set), user.apparentUser, action)
 		
 	}
 
@@ -310,8 +311,10 @@ class ReleaseAllSmallGroupSetsController extends GroupsController {
 @Controller
 class OpenAllSmallGroupSetsController extends GroupsController {
 	
-	@ModelAttribute("setList") def newViewModelOpen(@PathVariable action: SmallGroupSetSelfSignUpState): GroupsetListViewModel = {
-		new GroupsetListViewModel((user, sets) => OpenSmallGroupSetCommand(sets, user, action), action)
+	@ModelAttribute("setList") def newViewModelOpen(
+		@PathVariable department: Department, @PathVariable action: SmallGroupSetSelfSignUpState
+	): GroupsetListViewModel = {
+		new GroupsetListViewModel((user, sets) => OpenSmallGroupSetCommand(department, sets, user, action), action)
 	}
 	
 	@RequestMapping
