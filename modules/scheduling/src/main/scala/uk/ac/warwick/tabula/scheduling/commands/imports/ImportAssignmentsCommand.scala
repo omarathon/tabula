@@ -38,7 +38,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 			for (assignment <- logSize(assignmentImporter.getAllAssessmentComponents)) {
 				if (assignment.name == null) {
 					// Some SITS data is bad, but try to carry on.
-					assignment.name = "Assignment"
+					assignment.name = "Assessment Component"
 				}
 				assignmentMembershipService.save(assignment)
 			}
