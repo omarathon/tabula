@@ -279,7 +279,10 @@
 		Customised Popover wrapper. Implements click away to dismiss.
 	*/
 	$.fn.tabulaPopover = function(options) {
-		var $items = this;
+		var $items = this, initClass = '.tabulaPopover-init';
+
+		// filter already initialized popovers
+		$items = $items.not(initClass);
 
 		// set options, with defaults
 		var defaults = {
@@ -340,7 +343,7 @@
 		});
 
 		// now that's all done, bind the popover
-		$items.popover(options);
+		$items.popover(options).addClass(initClass);
 
 		// ensure popovers/introductorys override title with data-title attribute where available
 		$items.each(function() {

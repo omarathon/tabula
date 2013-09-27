@@ -17,10 +17,10 @@
 	<#if studentCount gt 0>
 		<#if agentRelationships?has_content>
 			<table id="agents" class="table table-bordered">
-				<#list agentRelationships?keys?sort as key>
-					<#assign agent = agentRelationships[key]?first.agentParsed />
-					<#assign students = agentRelationships[key] />
-					<#assign studentKey = sanitise(key) + "-students" />
+				<#list agentRelationships?keys as key>
+					<#assign students = mapGet(agentRelationships,key) />
+					<#assign agent = students?first.agentParsed />
+					<#assign studentKey = sanitise(key.sortkey) + "-students" />
 
 					<tbody>
 						<tr>

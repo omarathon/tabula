@@ -25,8 +25,8 @@ abstract class AddMonitoringPointCommand() extends CommandInternal[Unit] with Ad
 	override def applyInternal() = {
 		val point = new MonitoringPoint
 		point.name = name
-		point.defaultValue = defaultValue
-		point.week = week
+		point.validFromWeek = validFromWeek
+		point.requiredFromWeek = requiredFromWeek
 		monitoringPoints.add(point)
 	}
 }
@@ -35,12 +35,16 @@ trait AddMonitoringPointValidation extends SelfValidating with MonitoringPointVa
 	self: AddMonitoringPointState =>
 
 	override def validate(errors: Errors) {
-		validateWeek(errors, week, "week")
+		validateWeek(errors, validFromWeek, "validFromWeek")
+		validateWeek(errors, requiredFromWeek, "requiredFromWeek")
+		validateWeeks(errors, validFromWeek, requiredFromWeek, "validFromWeek")
 		validateName(errors, name, "name")
 
-		if (monitoringPoints.asScala.count(p => p.name == name && p.week == week) > 0) {
+		if (monitoringPoints.asScala.count(p =>
+			p.name == name && p.validFromWeek == validFromWeek && p.requiredFromWeek == requiredFromWeek
+		) > 0) {
 			errors.rejectValue("name", "monitoringPoint.name.exists")
-			errors.rejectValue("week", "monitoringPoint.name.exists")
+			errors.rejectValue("validFromWeek", "monitoringPoint.name.exists")
 		}
 	}
 }
@@ -48,7 +52,7 @@ trait AddMonitoringPointValidation extends SelfValidating with MonitoringPointVa
 trait AddMonitoringPointState {
 	var monitoringPoints = new AutoPopulatingList(classOf[MonitoringPoint])
 	var name: String = _
-	var defaultValue: Boolean = true
-	var week: Int = 0
+	var validFromWeek: Int = 0
+	var requiredFromWeek: Int = 0
 }
 

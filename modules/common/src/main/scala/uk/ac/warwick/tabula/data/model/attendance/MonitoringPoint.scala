@@ -22,14 +22,15 @@ class MonitoringPoint extends GeneratedId {
 	@NotNull
 	var name: String = _
 	
-	var defaultValue: Boolean = true
-	
 	var createdDate: DateTime = _
 	
 	var updatedDate: DateTime = _
 
 	@NotNull
-	var week: Int = _
+	var validFromWeek: Int = _
+
+	@NotNull
+	var requiredFromWeek: Int = _
 
 	var sentToAcademicOffice: Boolean = false
 

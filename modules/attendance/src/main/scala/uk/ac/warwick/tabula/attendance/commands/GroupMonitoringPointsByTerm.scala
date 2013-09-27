@@ -14,7 +14,7 @@ trait GroupMonitoringPointsByTerm extends TermServiceComponent {
 		lazy val weeksForYear = termService.getAcademicWeeksForYear(approxStartDate).toMap
 
 		monitoringPoints groupBy { point =>
-			val date = weeksForYear(point.week).getStart.withDayOfWeek(day.jodaDayOfWeek)
+			val date = weeksForYear(point.validFromWeek).getStart.withDayOfWeek(day.jodaDayOfWeek)
 			termService.getTermFromDateIncludingVacations(date).getTermTypeAsString
 		}
 	}

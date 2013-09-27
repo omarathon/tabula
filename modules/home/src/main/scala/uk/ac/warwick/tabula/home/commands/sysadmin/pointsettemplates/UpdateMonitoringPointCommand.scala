@@ -40,12 +40,16 @@ trait UpdateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 	self: UpdateMonitoringPointState =>
 
 	override def validate(errors: Errors) {
-		validateWeek(errors, week, "week")
+		validateWeek(errors, validFromWeek, "validFromWeek")
+		validateWeek(errors, requiredFromWeek, "requiredFromWeek")
+		validateWeeks(errors, validFromWeek, requiredFromWeek, "validFromWeek")
 		validateName(errors, name, "name")
 
-		if (template.points.asScala.count(p => p.name == name && p.week == week && p.id != point.id) > 0) {
+		if (template.points.asScala.count(p =>
+			p.name == name && p.validFromWeek == validFromWeek && p.requiredFromWeek == requiredFromWeek && p.id != point.id
+		) > 0) {
 			errors.rejectValue("name", "monitoringPoint.name.exists")
-			errors.rejectValue("week", "monitoringPoint.name.exists")
+			errors.rejectValue("validFromWeek", "monitoringPoint.name.exists")
 		}
 	}
 }
@@ -65,19 +69,19 @@ trait UpdateMonitoringPointState {
 	def template: MonitoringPointSetTemplate
 	def point: MonitoringPoint
 	var name: String = _
-	var defaultValue: Boolean = true
-	var week: Int = 0
+	var validFromWeek: Int = 0
+	var requiredFromWeek: Int = 0
 
 	def copyTo(point: MonitoringPoint) {
 		point.name = this.name
-		point.defaultValue = this.defaultValue
-		point.week = this.week
+		point.validFromWeek = this.validFromWeek
+		point.requiredFromWeek = this.requiredFromWeek
 	}
 
 	def copyFrom(point: MonitoringPoint) {
 		this.name = point.name
-		this.defaultValue = point.defaultValue
-		this.week = point.week
+		this.validFromWeek = point.validFromWeek
+		this.requiredFromWeek = point.requiredFromWeek
 	}
 }
 

@@ -14,15 +14,24 @@
 		<@form.errors path="students" />
 		<#assign students=status.actualValue />
 
-		<#if releaseForMarkingCommand.invalidFeedback?has_content>
+		<#if releaseForMarkingCommand.unreleasableSubmissions?has_content>
 			<p>
-				<a href="" class="invalid-submissions"><@fmt.p (releaseForMarkingCommand.invalidFeedback?size ) "submission" /></a>
-				could not be released for marking. Marked submissions cannot be re-released.
+				<a href="" class="invalid-submissions"><@fmt.p (releaseForMarkingCommand.unreleasableSubmissions?size ) "submission" /></a>
+				could not be released for marking.
 			</p>
 			<div class="hidden invalid-submissions-list">
-				<ul><#list releaseForMarkingCommand.invalidFeedback as submission>
-					<li>${submission.universityId}</li>
+			<#if releaseForMarkingCommand.studentsAlreadyReleased?has_content>
+			    <p>Already released for marking</p>
+				<ul><#list releaseForMarkingCommand.studentsAlreadyReleased as submission>
+					<li>${submission}</li>
 				</#list></ul>
+			</#if>
+			<#if releaseForMarkingCommand.studentsWithoutKnownMarkers?has_content>
+			    <p>No marker allocated</p>
+				<ul><#list releaseForMarkingCommand.studentsWithoutKnownMarkers as submission>
+					<li>${submission}</li>
+				</#list></ul>
+			</#if>
 			</div>
 			<script>
 				var listHtml = jQuery(".invalid-submissions-list").html();
@@ -35,7 +44,7 @@
 			</script>
 		</#if>
 		<p>
-			Releasing <strong><@fmt.p (students?size - releaseForMarkingCommand.invalidFeedback?size ) "student" /></strong> submissions to markers.
+			Releasing <strong><@fmt.p (students?size - releaseForMarkingCommand.unreleasableSubmissions?size ) "student" /></strong> submissions to markers.
 		</p>
 		<#list students as uniId>
 			<input type="hidden" name="students" value="${uniId}" />

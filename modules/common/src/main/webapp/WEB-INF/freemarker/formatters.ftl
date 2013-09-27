@@ -51,11 +51,18 @@
 	--></#noescape><#--
 --></#macro>
 
-<#macro singleWeekFormat week academicYear dept><#--
+<#macro monitoringPointWeeksFormat validFromWeek requiredFromWeek academicYear dept><#--
 	--><#noescape><#--
-		-->${weekRangesFormatter(week, academicYear, dept)}<#--
+		-->${weekRangesFormatter(validFromWeek, requiredFromWeek, academicYear, dept)}<#--
 	--></#noescape><#--
 --></#macro>
+
+<#macro singleWeekFormat week academicYear dept><#--
+	--><#noescape><#--
+		-->${singleWeekFormatter(week, academicYear, dept)}<#--
+	--></#noescape><#--
+--></#macro>
+
 
 <#macro weekRangeSelect event><#--
 	--><#noescape><#--
@@ -102,7 +109,7 @@
 <#macro user_list_csv ids>
 <@userlookup ids=ids>
 	<#list returned_users?keys?sort as id>
-		<#assign returned_user=returned_users[id] />
+		<#local returned_user=returned_users[id] />
 		<#if returned_user.foundUser>
 			${returned_user.fullName}<#if id_has_next>,</#if>
 		<#else>
@@ -138,31 +145,33 @@
 <#macro download_attachments attachments page context="" zipFilename="download">
 	<#if !page?ends_with("/")>
 		<#-- ensure page is slash-terminated -->
-		<#assign page = page + "/" />
+		<#local page = page + "/" />
 	</#if>
+
+	<#local attachment = "" />
 
 	<#if !attachments?is_enumerable>
 		<#-- assume it's a FileAttachment -->
-		<#assign attachment = attachments />
+		<#local attachment = attachments />
 	<#elseif attachments?size == 1>
 		<#-- take the first and continue as above -->
-		<#assign attachment = attachments?first />
+		<#local attachment = attachments?first />
 	</#if>
 
-	<#if attachment??>
-		<#assign title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#assign>
+	<#if attachment?has_content>
+		<#local title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#local>
 		<div class="attachment">
 			<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
 		</div>
 	<#elseif attachments?size gt 1>
 		<details class="attachment">
 			<summary>
-				<#assign title>Download a zip file of attachments<#if context?has_content> ${context}</#if></#assign>
+				<#local title>Download a zip file of attachments<#if context?has_content> ${context}</#if></#local>
 				<@download_link filePath="${page}attachments/${zipFilename}.zip" mimeType="application/zip" title="${title}" text="Download files as zip" />
 			</summary>
 
 			<#list attachments as attachment>
-				<#assign title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#assign>
+				<#local title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#local>
 				<div class="attachment">
 					<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
 				</div>
@@ -187,6 +196,15 @@
 <#macro role_definition_description role_definition><#compress>
 	${role_definition.description?lower_case}
 </#compress></#macro>
+
+
+<#macro display_deleted_attachments attachments visible="">
+	<ul class="deleted-files ${visible}">
+		<#list attachments as files>
+			<li class="muted deleted"><i class="icon-file-alt"></i> ${files.name}</li>
+		</#list>
+	</ul>
+</#macro>
 
 <#macro course_description_for_heading studentCourseDetails>
 		${(studentCourseDetails.course.name)!} (${(studentCourseDetails.course.code?upper_case)!})
@@ -258,18 +276,23 @@
 </#macro>
 
 <#macro bulk_email emails title subject>
+	<#assign separator = ";" />
+	<#if user?? && userSetting('bulkEmailSeparator')?has_content>
+		<#assign separator = userSetting('bulkEmailSeparator') />
+	</#if>
+
 	<#if emails?size gt 0 && emails?size lte 50>
-		<a href="mailto:<#list emails as email>${email}<#if email_has_next>,</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>" class="btn">
+		<a href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>" class="btn">
 			<i class="icon-envelope"></i> ${title}
 		</a>
 	</#if>
 </#macro>
 
 <#macro bulk_email_students students title="Email these students" subject="">
-	<#assign emails = [] />
+	<#local emails = [] />
 	<#list students as student>
 		<#if student.email??>
-			<#assign emails = emails + [student.email] />
+			<#local emails = emails + [student.email] />
 		</#if>
 	</#list>
 	
@@ -277,10 +300,10 @@
 </#macro>
 
 <#macro bulk_email_student_relationships relationships title="Email these students" subject="">
-	<#assign emails = [] />
+	<#local emails = [] />
 	<#list relationships as rel>
 		<#if rel.studentMember?? && rel.studentMember.email??>
-			<#assign emails = emails + [rel.studentMember.email] />
+			<#local emails = emails + [rel.studentMember.email] />
 		</#if>
 	</#list>
 	

@@ -33,7 +33,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		with RelationshipChangingCommand
 		with NotifiesAffectedStudents {
 
-	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), department)
+	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), mandatory(department))
 
 	// throw this request out if this relationship can't be edited in Tabula for this department
 	if (relationshipType.readOnly(department)) {
@@ -184,6 +184,16 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 			cmd.apply().map { modifiedRelationship => StudentRelationshipChange(cmd.currentAgent, modifiedRelationship) }
 		}.flatten
+	}
+	
+	def validateUploadedFile(result: BindingResult) {
+		val fileNames = file.fileNames map (_.toLowerCase)
+		val invalidFiles = fileNames.filter(s => !RawStudentRelationshipExtractor.AcceptedFileExtensions.exists(s.endsWith))
+
+		if (invalidFiles.size > 0) {
+			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
+			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+		}
 	}
 
 	def extractDataFromFile(file: FileAttachment) = {

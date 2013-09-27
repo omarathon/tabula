@@ -1,3 +1,4 @@
+<#if nonempty(ownedDepartments) || nonempty(ownedModuleDepartments) || nonempty(taughtGroups)>
 <div class="row">
 
 <#if nonempty(ownedDepartments) || nonempty(ownedModuleDepartments)>
@@ -40,3 +41,4 @@
 </#if>
 
 </div>
+</#if>

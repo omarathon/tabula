@@ -19,10 +19,11 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	with GeneratedId with ToString with HibernateVersioned with PermissionsTarget
 	with Ordered[StudentCourseYearDetails]{
 
-	def this(studentCourseDetails: StudentCourseDetails, sceSequenceNumber: JInteger) {
+	def this(studentCourseDetails: StudentCourseDetails, sceSequenceNumber: JInteger,year:AcademicYear) {
 		this()
 		this.studentCourseDetails = studentCourseDetails
 		this.sceSequenceNumber = sceSequenceNumber
+		this.academicYear = year
 	}
 
 	@ManyToOne

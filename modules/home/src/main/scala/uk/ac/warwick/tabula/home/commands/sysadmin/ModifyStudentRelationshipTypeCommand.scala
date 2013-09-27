@@ -50,7 +50,7 @@ abstract class ModifyStudentRelationshipTypeCommandInternal extends CommandInter
 	def validate(errors: Errors) {
 		// Ensure that we don't dupe url part
 		relationshipService.getStudentRelationshipTypeByUrlPart(urlPart).filter { _.id != id }.foreach { dupe =>
-			errors.rejectValue("urlPart", "errors.relationshipType.urlPart.duplicate")
+			errors.rejectValue("urlPart", "relationshipType.urlPart.duplicate")
 		}
 	}
 }

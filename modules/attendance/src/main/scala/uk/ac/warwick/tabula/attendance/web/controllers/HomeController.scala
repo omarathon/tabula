@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.attendance.commands.{HomeCommand, ManageHomeCommand}
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.attendance.web.Routes
 
 /**
  * Displays the Attendance home screen, allowing users to choose the department to view or manage.
@@ -20,12 +21,16 @@ class HomeController extends AttendanceController {
 
 	@RequestMapping
 	def home(@ModelAttribute("command") cmd: Appliable[Map[String, Set[Department]]]) = {
-		val map = cmd.apply()
-		if (map("Manage").size == 0 && map("View").size == 1) {
-			Redirect(s"/${map("View").head.code}")
-		} else {
-			Mav("home/home", "permissionMap" -> map)
-		}
+		if (user.isStaff) {
+			val map = cmd.apply()
+			if (map("Manage").size == 0 && map("View").size == 1) {
+				Redirect(s"/${map("View").head.code}")
+			} else {
+				Mav("home/home", "permissionMap" -> map)
+			}
+		} else if (user.isStudent) {
+			Redirect(Routes.profile())
+		} else Mav("home/nopermission")
 	}
 
 }

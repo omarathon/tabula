@@ -31,11 +31,11 @@ abstract class AddMonitoringPointSetTemplateCommand extends CommandInternal[Moni
 		set.points = monitoringPoints.asScala.map{m =>
 			val point = new MonitoringPoint
 			point.createdDate = new DateTime()
-			point.defaultValue = m.defaultValue
 			point.name = m.name
 			point.pointSet = set
 			point.updatedDate = new DateTime()
-			point.week = m.week
+			point.validFromWeek = m.validFromWeek
+			point.requiredFromWeek = m.requiredFromWeek
 			point
 		}.asJava
 		set.updatedDate = new DateTime()
@@ -53,9 +53,13 @@ trait AddMonitoringPointSetTemplateValidation extends SelfValidating with Monito
 		} else {
 			monitoringPoints.asScala.zipWithIndex.foreach{case (point, index) => {
 				validateName(errors, point.name, s"monitoringPoints[$index].name")
-				validateWeek(errors, point.week, s"monitoringPoints[$index].week")
+				validateWeek(errors, point.validFromWeek, s"monitoringPoints[$index].validFromWeek")
+				validateWeek(errors, point.requiredFromWeek, s"monitoringPoints[$index].requiredFromWeek")
+				validateWeeks(errors, point.validFromWeek, point.requiredFromWeek, s"monitoringPoints[$index].validFromWeek")
 
-				if (monitoringPoints.asScala.count(p => p.name == point.name && p.week == point.week) > 1) {
+				if (monitoringPoints.asScala.count(p =>
+					p.name == point.name && p.validFromWeek == point.validFromWeek && p.requiredFromWeek == point.requiredFromWeek
+				) > 1) {
 					errors.rejectValue(s"monitoringPoints[$index].name", "monitoringPoint.name.exists")
 				}
 			}}

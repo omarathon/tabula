@@ -120,7 +120,7 @@ class AssignmentServiceImpl
 		//auditEventIndexService.recentAssignment(department)
 		session.newCriteria[Assignment]
 			.createAlias("module", "m")
-			.add(Restrictions.eq("m.department", department))
+			.add(is("m.department", department))
 			.add(Restrictions.isNotNull("createdDate"))
 			.addOrder(Order.desc("createdDate"))
 			.setMaxResults(1)
@@ -132,7 +132,7 @@ class AssignmentServiceImpl
 	def getAssignmentsByName(partialName: String, department: Department) = {
 		session.newCriteria[Assignment]
 			.createAlias("module", "mod")
-			.add(Restrictions.eq("mod.department", department))
+			.add(is("mod.department", department))
 			.add(Restrictions.ilike("name", "%" + partialName + "%"))
 			.addOrder(Order.desc("createdDate"))
 			.setMaxResults(MaxAssignmentsByName)

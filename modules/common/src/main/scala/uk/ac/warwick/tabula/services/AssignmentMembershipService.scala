@@ -15,7 +15,7 @@ import org.hibernate.criterion.{Order, Restrictions}
 
 
 trait AssignmentMembershipService {
-	def find(assignment: UpstreamAssignment): Option[UpstreamAssignment]
+	def find(assignment: AssessmentComponent): Option[AssessmentComponent]
 	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
 	def find(group: AssessmentGroup): Option[AssessmentGroup]
 	def save(group: AssessmentGroup): Unit
@@ -24,26 +24,26 @@ trait AssignmentMembershipService {
 	def getAssessmentGroup(template: AssessmentGroup): Option[AssessmentGroup]
 	def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroup(id:String): Option[UpstreamAssessmentGroup]
-	def getUpstreamAssignment(id: String): Option[UpstreamAssignment]
-	def getUpstreamAssignment(group: UpstreamAssessmentGroup): Option[UpstreamAssignment]
+	def getUpstreamAssignment(id: String): Option[AssessmentComponent]
+	def getUpstreamAssignment(group: UpstreamAssessmentGroup): Option[AssessmentComponent]
 
 	/**
-	 * Get all UpstreamAssignments that appear to belong to this module.
+	 * Get all AssessmentComponents that appear to belong to this module.
 	 *
 	 *  Typically used to provide possible candidates to link to an app assignment,
 	 *  in conjunction with #getUpstreamAssessmentGroups.
 	 */
-	def getUpstreamAssignments(module: Module): Seq[UpstreamAssignment]
-	def getUpstreamAssignments(department: Department): Seq[UpstreamAssignment]
+	def getAssessmentComponents(module: Module): Seq[AssessmentComponent]
+	def getAssessmentComponents(department: Department): Seq[AssessmentComponent]
 
 	/**
 	 * Get all assessment groups that can serve this assignment this year.
 	 * Should return as many groups as there are distinct OCCURRENCE values for a given
 	 * assessment group code, which most of the time is just 1.
 	 */
-	def getUpstreamAssessmentGroups(upstreamAssignment: UpstreamAssignment, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroups(upstreamAssignment: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
 
-	def save(assignment: UpstreamAssignment): UpstreamAssignment
+	def save(assignment: AssessmentComponent): AssessmentComponent
 	def save(group: UpstreamAssessmentGroup)
 	def replaceMembers(group: UpstreamAssessmentGroup, universityIds: Seq[String])
 
@@ -91,14 +91,14 @@ class AssignmentMembershipServiceImpl
 	}
 
 	/**
-	 * Tries to find an identical UpstreamAssignment in the database, based on the
+	 * Tries to find an identical AssessmentComponent in the database, based on the
 	 * fact that moduleCode and sequence uniquely identify the assignment.
 	 */
-	def find(assignment: UpstreamAssignment): Option[UpstreamAssignment] = dao.find(assignment)
+	def find(assignment: AssessmentComponent): Option[AssessmentComponent] = dao.find(assignment)
 	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = dao.find(group)
 	def find(group: AssessmentGroup): Option[AssessmentGroup] = dao.find(group)
 	def save(group:AssessmentGroup) = dao.save(group)
-	def save(assignment: UpstreamAssignment): UpstreamAssignment = dao.save(assignment)
+	def save(assignment: AssessmentComponent): AssessmentComponent = dao.save(assignment)
 	def save(group: UpstreamAssessmentGroup) = dao.save(group)
 
 	def getAssessmentGroup(id:String) = dao.getAssessmentGroup(id)
@@ -112,19 +112,25 @@ class AssignmentMembershipServiceImpl
 
 	def getUpstreamAssignment(group: UpstreamAssessmentGroup) = dao.getUpstreamAssignment(group)
 
-	def getUpstreamAssignments(module: Module) = dao.getUpstreamAssignments(module)
+	/**
+	 * Gets assessment components for this module.
+	 */
+	def getAssessmentComponents(module: Module) = dao.getAssessmentComponents(module)
 
-	def getUpstreamAssignments(department: Department) = dao.getUpstreamAssignments(department)
+	/**
+	 * Gets assessment components for this department.
+	 */
+	def getAssessmentComponents(department: Department) = dao.getAssessmentComponents(department)
 
 	def countPublishedFeedback(assignment: Assignment): Int = dao.countPublishedFeedback(assignment)
 
 	def countFullFeedback(assignment: Assignment): Int = dao.countFullFeedback(assignment)
 
-	// private def isInteresting(assignment: UpstreamAssignment) = {
+	// private def isInteresting(assignment: AssessmentComponent) = {
 	// 	!(assignment.name contains "NOT IN USE")
 	// }
 
-	def getUpstreamAssessmentGroups(upstreamAssignment: UpstreamAssignment, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] = 
+	def getUpstreamAssessmentGroups(upstreamAssignment: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] =
 		dao.getUpstreamAssessmentGroups(upstreamAssignment, academicYear)
 	
 }

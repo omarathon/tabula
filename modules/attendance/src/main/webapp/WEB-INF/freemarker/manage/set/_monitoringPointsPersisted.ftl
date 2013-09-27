@@ -4,16 +4,16 @@
 		<div class="striped-section">
 			<h2 class="section-title">${term}</h2>
 			<div class="striped-section-contents">
-				<#list command.monitoringPointsByTerm[term]?sort_by("week") as point>
+				<#list command.monitoringPointsByTerm[term]?sort_by("validFromWeek") as point>
 					<div class="item-info row-fluid point">
 						<div class="span12">
 							<div class="pull-right">
-								<#assign noUpdate = !command.canPointBeUpdated(point)/>
-								<#assign noRemove = !command.canPointBeRemoved(point)/>
-								<a class="btn btn-primary edit-point <#if noUpdate>disabled</#if>" <#if noUpdate>title="Unavailable"</#if> href="<@url page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/points/${point.id}/edit"/>">
+								<#local noUpdate = !command.canPointBeUpdated(point)/>
+								<#local noRemove = !command.canPointBeRemoved(point)/>
+								<a class="btn btn-primary edit-point <#if noUpdate>disabled</#if>" <#if noUpdate>title="Unavailable"</#if> href="<@url page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/edit/points/${point.id}/edit"/>">
 									Edit
 								</a>
-								<a class="btn btn-danger delete-point <#if noRemove>disabled</#if>" title="Delete<#if noRemove> (unavailable)</#if>" href="<@url page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/points/${point.id}/delete"/>">
+								<a class="btn btn-danger delete-point <#if noRemove>disabled</#if>" title="Delete<#if noRemove> (unavailable)</#if>" href="<@url page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/edit/points/${point.id}/delete"/>">
 									<i class="icon-remove"></i>
 								</a>
 							</div>

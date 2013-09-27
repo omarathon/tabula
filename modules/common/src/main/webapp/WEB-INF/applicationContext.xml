@@ -107,7 +107,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.ModuleCodeConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.MeetingRecordIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssignmentIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.AssessmentComponentIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.AssessmentGroupIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.FeedbackIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.FeedbackTemplateIdConverter"/>
@@ -115,6 +115,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.MarkingWorkflowIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.MemberUniversityIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.MemberNoteIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.PermissionConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.UserCodeConverter"/>
@@ -138,6 +139,8 @@
 				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointSetTemplateIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.JodaLocalDateConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringCheckpointStateConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.model.AssessmentTypeConverter" />
 	        </list>
 	    </property>
 	    <property name="formatters">
@@ -147,10 +150,11 @@
 	    		<bean class="uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter"/>
    				<bean class="uk.ac.warwick.tabula.data.convert.FileAttachmentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.UpstreamAssignmentIdConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.AssessmentComponentIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.SmallGroupSetIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.MemberNoteIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.MemberUniversityIdConverter"/>
 	        </list>
 	    </property>
@@ -337,6 +341,9 @@
 				<entry key="weekRangesFormatter"><bean class="uk.ac.warwick.tabula.helpers.WeekRangesFormatterTag" /></entry>
 				<entry key="weekRangesDumper"><bean class="uk.ac.warwick.tabula.helpers.WeekRangesDumperTag" /></entry>
 				<entry key="weekRangeSelectFormatter"><bean class="uk.ac.warwick.tabula.helpers.WeekRangeSelectFormatterTag" /></entry>
+				<entry key="mapGet"><bean class="uk.ac.warwick.tabula.helpers.FreemarkerMapHelper" /></entry>
+				<entry key="singleWeekFormatter"><bean class="uk.ac.warwick.tabula.helpers.SingleWeekFormatterTag" /></entry>
+				<entry key="userSetting"><bean class="uk.ac.warwick.tabula.web.views.UserSettingFunction" /></entry>
 			</map>
 		</property>
 	</bean>

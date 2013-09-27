@@ -21,15 +21,17 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 		val monitoringPoint = new MonitoringPoint
 		monitoringPoint.id = "1"
 		val existingName = "Point 1"
-		val existingWeek = 1
+		val existingWeek = 5
 		monitoringPoint.name = existingName
-		monitoringPoint.week = existingWeek
+		monitoringPoint.validFromWeek = existingWeek
+		monitoringPoint.requiredFromWeek = existingWeek
 		val otherMonitoringPoint = new MonitoringPoint
 		otherMonitoringPoint.id = "2"
 		val otherExistingName = "Point 2"
-		val otherExistingWeek = 2
+		val otherExistingWeek = 6
 		otherMonitoringPoint.name = otherExistingName
-		otherMonitoringPoint.week = otherExistingWeek
+		otherMonitoringPoint.validFromWeek = otherExistingWeek
+		otherMonitoringPoint.requiredFromWeek = otherExistingWeek
 		set.points = JArrayList(monitoringPoint, otherMonitoringPoint)
 		val command = new UpdateMonitoringPointCommand(set, monitoringPoint) with CommandTestSupport
 	}
@@ -38,7 +40,8 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 	def validateValid() {
 		new Fixture {
 			command.name = "New name"
-			command.week = existingWeek
+			command.validFromWeek = existingWeek
+			command.requiredFromWeek = existingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
 			errors.hasFieldErrors should be (right = false)
@@ -49,7 +52,20 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 	def validateAlsoValid() {
 		new Fixture {
 			command.name = existingName
-			command.week = 2
+			command.validFromWeek = 2
+			command.requiredFromWeek = existingWeek
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = false)
+		}
+	}
+
+	@Test
+	def validateAlsoAlsoValid() {
+		new Fixture {
+			command.name = existingName
+			command.validFromWeek = existingWeek
+			command.requiredFromWeek = 10
 			var errors = new BindException(command, "command")
 			command.validate(errors)
 			errors.hasFieldErrors should be (right = false)
@@ -60,7 +76,8 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 	def validateSamePoint() {
 		new Fixture {
 			command.name = existingName
-			command.week = existingWeek
+			command.validFromWeek = existingWeek
+			command.requiredFromWeek = existingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
 			errors.hasFieldErrors should be (right = false)
@@ -71,24 +88,39 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 	def validateDuplicatePoint() {
 		new Fixture {
 			command.name = otherExistingName
-			command.week = otherExistingWeek
+			command.validFromWeek = otherExistingWeek
+			command.requiredFromWeek = otherExistingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
 			errors.hasFieldErrors should be (right = true)
 			errors.getFieldError("name") should not be null
-			errors.getFieldError("week") should not be null
+			errors.getFieldError("validFromWeek") should not be null
 		}
 	}
 
 	@Test
-	def validateInvalidWeek() {
+	def validateInvalidValidFromWeek() {
 		new Fixture {
 			command.name = existingName
-			command.week = 53
+			command.validFromWeek = 53
+			command.requiredFromWeek = existingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
 			errors.hasFieldErrors should be (right = true)
-			errors.getFieldError("week") should not be null
+			errors.getFieldError("validFromWeek") should not be null
+		}
+	}
+
+	@Test
+	def validateInvalidRequiredFromWeek() {
+		new Fixture {
+			command.name = existingName
+			command.validFromWeek = existingWeek
+			command.requiredFromWeek = 53
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = true)
+			errors.getFieldError("requiredFromWeek") should not be null
 		}
 	}
 
@@ -96,7 +128,8 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 	def validateMissingName() {
 		new Fixture {
 			command.name = ""
-			command.week = 1
+			command.validFromWeek = existingWeek
+			command.requiredFromWeek = existingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
 			errors.hasFieldErrors should be (right = true)
@@ -109,7 +142,8 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 		new Fixture {
 			monitoringPoint.sentToAcademicOffice = true
 			command.name = "New name"
-			command.week = existingWeek
+			command.validFromWeek = existingWeek
+			command.requiredFromWeek = existingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
 			errors.hasErrors should be (right = true)
@@ -121,7 +155,8 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 		new Fixture {
 			command.monitoringPointService.countCheckpointsForPoint(monitoringPoint) returns 2
 			command.name = "New name"
-			command.week = existingWeek
+			command.validFromWeek = existingWeek
+			command.requiredFromWeek = existingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
 			errors.hasErrors should be (right = true)

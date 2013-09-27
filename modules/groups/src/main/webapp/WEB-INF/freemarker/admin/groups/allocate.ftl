@@ -5,7 +5,7 @@
 
 
 <#macro student_item student bindpath="">
-	<#assign profile = membersById[student.warwickId]!{} />
+	<#local profile = membersById[student.warwickId]!{} />
 	<li class="student well well-small"
 	data-f-gender="${(profile.gender.dbValue)!}"
 	data-f-route="${(profile.mostSignificantCourseDetails.route.code)!}"
@@ -23,7 +23,9 @@
 
 <#escape x as x?html>
 	<h1>Allocate students to ${set.name}</h1>
-	<div class="alert">These groups are currently <strong>${set.openForSignups?string("open","closed")}</strong> for self sign-up</div>
+	<#if (allocateStudentsToGroupsCommand.isStudentSignup())>
+		<div class="alert">These groups are currently <strong>${set.openForSignups?string("open","closed")}</strong> for self sign-up</div>
+	</#if>
 	<noscript>
 		<div class="alert">This page requires Javascript.</div>
 	</noscript>
@@ -50,6 +52,10 @@
 						<h3>Some problems need fixing</h3>
 						<#if errors.hasGlobalErrors()>
 							<#list errors.globalErrors as e>
+								<div><@spring.message message=e /></div>
+							</#list>
+						<#elseif errors.hasFieldErrors('file')>
+							<#list errors.getFieldErrors('file') as e>
 								<div><@spring.message message=e /></div>
 							</#list>
 						<#else>

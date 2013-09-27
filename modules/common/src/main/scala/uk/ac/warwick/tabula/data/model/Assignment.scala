@@ -264,12 +264,12 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 			Seq()
 		}
 		else {
-			val validGroups = assessmentGroups.filterNot(group=> group.upstreamAssignment == null || group.occurrence == null)
+			val validGroups = assessmentGroups.filterNot(group=> group.assessmentComponent == null || group.occurrence == null)
 			validGroups.flatMap{group =>
 				val template = new UpstreamAssessmentGroup
 				template.academicYear = academicYear
-				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
-				template.moduleCode = group.upstreamAssignment.moduleCode
+				template.assessmentGroup = group.assessmentComponent.assessmentGroup
+				template.moduleCode = group.assessmentComponent.moduleCode
 				template.occurrence = group.occurrence
 				assignmentMembershipService.getUpstreamAssessmentGroup(template)
 			}

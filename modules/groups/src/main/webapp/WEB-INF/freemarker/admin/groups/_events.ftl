@@ -95,7 +95,7 @@
 									<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
 								</#if>
 							</h3>
-							<#assign unlimited = !((smallGroupSet.defaultMaxGroupSizeEnabled)!false)>
+							<#assign unlimited = !((smallGroupSet.defaultMaxGroupSizeEnabled)!false) />
 
 							<span class="groupSizeUnlimited groupSizeDetails" <#if !unlimited>style="display:none;"</#if>>
 								Unlimited group size

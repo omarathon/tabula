@@ -14,8 +14,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
-import uk.ac.warwick.tabula.data.model.UpstreamAssignment
+import uk.ac.warwick.tabula.data.model.{AssessmentType, UpstreamAssessmentGroup, AssessmentComponent}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.SprCode
 import org.springframework.context.annotation.Profile
@@ -30,7 +29,7 @@ trait AssignmentImporter {
 	
 	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup]
 	
-	def getAllAssignments: Seq[UpstreamAssignment]
+	def getAllAssessmentComponents: Seq[AssessmentComponent]
 }
 
 @Profile(Array("dev", "test", "production")) @Service
@@ -38,19 +37,18 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 	import AssignmentImporter._
 
 	@Resource(name = "academicDataStore") var ads: DataSource = _
-	var assessmentGroupMemberQuery: AssessmentGroupMembersQuery = _
 	var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
-	var upstreamAssignmentQuery: UpstreamAssignmentQuery = _
+	var assessmentComponentQuery: AssessmentComponentQuery = _
 	var jdbc: NamedParameterJdbcTemplate = _
 
 	override def afterPropertiesSet() {
-		assessmentGroupMemberQuery = new AssessmentGroupMembersQuery(ads)
 		upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(ads)
-		upstreamAssignmentQuery = new UpstreamAssignmentQuery(ads)
+		assessmentComponentQuery = new AssessmentComponentQuery(ads)
 		jdbc = new NamedParameterJdbcTemplate(ads)
 	}
 
-	def getAllAssignments: Seq[UpstreamAssignment] = upstreamAssignmentQuery.execute
+	def getAllAssessmentComponents: Seq[AssessmentComponent] = assessmentComponentQuery.executeByNamedParam(Map(
+		"academic_year_code" -> (yearsToImportArray)))
 
 	private def yearsToImportArray = yearsToImport.map(_.toString): JList[String]
 
@@ -59,12 +57,6 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 	// it by trying to stream or batch the data.
 	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] = upstreamAssessmentGroupQuery.executeByNamedParam(Map(
 		"academic_year_code" -> (yearsToImportArray)))
-
-	def getMembers(group: UpstreamAssessmentGroup): Seq[String] = assessmentGroupMemberQuery.executeByNamedParam(Map(
-		"module_code" -> group.moduleCode,
-		"academic_year_code" -> group.academicYear.toString,
-		"mav_occurrence" -> group.occurrence,
-		"assessment_group" -> group.assessmentGroup))
 
 	/**
 	 * Iterates through ALL module registration elements in ADS (that's many),
@@ -80,10 +72,15 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 					sprCode = rs.getString("spr_code"),
 					occurrence = rs.getString("mav_occurrence"),
 					moduleCode = rs.getString("module_code"),
-					assessmentGroup = rs.getString("assessment_group")))
+					assessmentGroup = convertAssessmentGroupFromSITS(rs.getString("assessment_group"))))
 			}
 		})
 	}
+
+	/** Convert incoming null assessment groups into the NONE value */
+	private def convertAssessmentGroupFromSITS(string: String) =
+		if (string == null) AssessmentComponent.NoneAssessmentGroup
+		else string
 
 	private def yearsToImport = AcademicYear.guessByDate(DateTime.now).yearsSurrounding(0, 1)
 }
@@ -105,22 +102,21 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 				moduleCode -> (moduleCodesToIds.getOrElse(moduleCode, Seq()) :+ range)
 			)
 		}
-		
-		moduleCodesToIds.foreach { case (moduleCode, ranges) => 
-			ranges.foreach { range => 
-				range.foreach { uniId =>
-					callback(
-						ModuleRegistration(
-							year = AcademicYear.guessByDate(DateTime.now).toString,
-							sprCode = "%d/1".format(uniId),
-							occurrence = "A",
-							moduleCode = "%s-15".format(moduleCode.toUpperCase),
-							assessmentGroup = "A"
-						)
-					)
-				}
-			}
-		}
+
+		for {
+			(moduleCode, ranges) <- moduleCodesToIds
+			range <- ranges
+			uniId <- range
+		} callback(
+			ModuleRegistration(
+				year = AcademicYear.guessByDate(DateTime.now).toString,
+				sprCode = "%d/1".format(uniId),
+				occurrence = "A",
+				moduleCode = "%s-15".format(moduleCode.toUpperCase),
+				assessmentGroup = "A"
+			)
+		)
+
 	}
 	
 	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] =
@@ -137,18 +133,19 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			ag
 		}
 	
-	def getAllAssignments: Seq[UpstreamAssignment] =
+	def getAllAssessmentComponents: Seq[AssessmentComponent] =
 		for {
 			(code, d) <- SandboxData.Departments.toSeq
 			route <- d.routes.values.toSeq
 			moduleCode <- route.moduleCodes
 		} yield {
-			val a = new UpstreamAssignment
+			val a = new AssessmentComponent
 			a.moduleCode = "%s-15".format(moduleCode.toUpperCase)
 			a.sequence = "A01"
 			a.name = "Coursework"
 			a.assessmentGroup = "A"
 			a.departmentCode = d.code.toUpperCase
+			a.assessmentType = AssessmentType.Assignment
 			a
 		}
 	
@@ -171,28 +168,57 @@ case class ModuleRegistration(year: String, sprCode: String, occurrence: String,
 		val g = new UpstreamAssessmentGroup
 		g.academicYear = AcademicYear.parse(year)
 		g.moduleCode = moduleCode
-		g.occurrence = occurrence
 		g.assessmentGroup = assessmentGroup
+		// for the NONE group, override occurrence to also be NONE, because we create a single UpstreamAssessmentGroup
+		// for each module with group=NONE and occurrence=NONE, and all unallocated students go in there together.
+		g.occurrence =
+			if (assessmentGroup == AssessmentComponent.NoneAssessmentGroup)
+				AssessmentComponent.NoneAssessmentGroup
+			else
+				occurrence
 		g
 	}
 }
 
 object AssignmentImporter {
 
-	val GetAssignmentsQuery = """ 
-		select mad.module_code, seq, mad.name, mad.assessment_group, m.department_code
+	/** Get AssessmentComponents, and also some fake ones for linking to
+		* the group of students with no selected assessment group.
+		*/
+	val GetAssessmentsQuery = s"""
+		select distinct
+		mr.module_code,
+		'${AssessmentComponent.NoneAssessmentGroup}' as seq,
+		'Students not registered for assessment' as name,
+		'${AssessmentComponent.NoneAssessmentGroup}' as assessment_group,
+		m.department_code,
+		'X' as assessment_code
+		from module_registration mr
+		join module m on m.module_code = mr.module_code
+		where academic_year_code in (:academic_year_code) and mr.assessment_group is null
+	union
+		select mad.module_code, seq, mad.name, mad.assessment_group, m.department_code, assessment_code
 		from module_assessment_details mad
 		join module m on (m.module_code = mad.module_code and m.in_use = 'Y')
-		where assessment_code = 'A'
-		and m.department_code is not null """
+		where m.department_code is not null"""
 	// Department code should be set for any modules since 10/11
 
-	val GetAllAssessmentGroups = """
+	val GetAllAssessmentGroups = s"""
+		select distinct
+			mav.academic_year_code,
+			mav.module_code,
+			'${AssessmentComponent.NoneAssessmentGroup}' as mav_occurrence,
+			'${AssessmentComponent.NoneAssessmentGroup}' as assessment_group
+		from module_availability mav
+		join module_assessment_details mad on mad.module_code = mav.module_code
+		join module m on (m.module_code = mad.module_code and m.in_use = 'Y')
+		where academic_year_code in (:academic_year_code)
+	union
 		select distinct mav.academic_year_code, mav.module_code, mav_occurrence, mad.assessment_group
 		from module_availability mav
 		join module_assessment_details mad on mad.module_code = mav.module_code
 		join module m on (m.module_code = mad.module_code and m.in_use = 'Y')
-		where academic_year_code in (:academic_year_code) """
+		where academic_year_code in (:academic_year_code)"""
 
 	val GetAssessmentGroupMembers = """
 		select spr_code
@@ -215,15 +241,17 @@ object AssignmentImporter {
 		order by academic_year_code, module_code, mav_occurrence, assessment_group
 		"""
 
-	class UpstreamAssignmentQuery(ds: DataSource) extends MappingSqlQuery[UpstreamAssignment](ds, GetAssignmentsQuery) {
+	class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
+		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int) = {
-			val a = new UpstreamAssignment
+			val a = new AssessmentComponent
 			a.moduleCode = rs.getString("module_code")
 			a.sequence = rs.getString("seq")
 			a.name = rs.getString("name")
 			a.assessmentGroup = rs.getString("assessment_group")
 			a.departmentCode = rs.getString("department_code")
+			a.assessmentType = AssessmentType(rs.getString("assessment_code"))
 			a
 		}
 	}

@@ -116,7 +116,7 @@ import scala.Some
 	def copyGroupsFrom(assignment: Assignment) {
 		assessmentGroups = assignment.assessmentGroups
 		upstreamGroups.addAll(availableUpstreamGroups filter { ug =>
-			assessmentGroups.exists( ag => ug.upstreamAssignment == ag.upstreamAssignment && ag.occurrence == ug.occurrence )
+			assessmentGroups.exists( ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence )
 		})
 	}
 
@@ -139,7 +139,7 @@ import scala.Some
 	def updateAssessmentGroups(){
 		assessmentGroups = upstreamGroups.asScala.flatMap ( ug => {
 			val template = new AssessmentGroup
-			template.upstreamAssignment = ug.upstreamAssignment
+			template.assessmentComponent = ug.assessmentComponent
 			template.occurrence = ug.occurrence
 			template.assignment = assignment
 			membershipService.getAssessmentGroup(template) orElse Some(template)

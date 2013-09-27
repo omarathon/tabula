@@ -48,16 +48,7 @@ object MemberUserType {
 }
 
 // Hmm, badly named.
-class MemberUserTypeUserType extends AbstractBasicUserType[MemberUserType, String] {
-
-	val basicType = StandardBasicTypes.STRING
-	override def sqlTypes = Array(Types.VARCHAR)
-
-	val nullValue = null
-	val nullObject = null
-
+class MemberUserTypeUserType extends AbstractStringUserType[MemberUserType] {
 	override def convertToObject(string: String) = MemberUserType.fromCode(string)
-	
 	override def convertToValue(MemberUserType: MemberUserType) = MemberUserType.dbValue
-
 }

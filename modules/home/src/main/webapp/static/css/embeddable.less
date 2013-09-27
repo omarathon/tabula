@@ -247,7 +247,7 @@ h2.section {
 }
 
 #container {
-	h1 + .header-with-tooltip h2 {
+	.header-with-tooltip h2 {
 		margin-top: -8px;
 	}
 
@@ -1181,7 +1181,7 @@ h1.with-settings {
 }
 
 // Fix modals to be wider (e.g. for SITS import options)
-.modal {
+#container .modal {
 	@modal-width: 840px;
 	width: @modal-width;
 	margin-left: -(@modal-width/2);

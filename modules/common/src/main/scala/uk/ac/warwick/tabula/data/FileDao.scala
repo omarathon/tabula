@@ -1,13 +1,9 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import org.hibernate.Hibernate
 import org.springframework.stereotype.Repository
-import java.io.BufferedInputStream
 import org.joda.time.DateTime
 import org.joda.time.DateTime.now
-import org.joda.time.ReadableInstant
-import uk.ac.warwick.tabula.data.model.Feedback
 import java.io.File
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.InitializingBean
@@ -17,16 +13,12 @@ import java.io.InputStream
 import org.hibernate.criterion.{ Restrictions => Is }
 import org.hibernate.criterion.Order._
 import collection.JavaConversions._
-import collection.JavaConverters._
-import uk.ac.warwick.util.core.spring.FileUtils
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Projections
 import org.hibernate.`type`.StringType
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.util.files.hash.impl.SHAFileHasher
 import uk.ac.warwick.util.files.hash.FileHasher
 import uk.ac.warwick.spring.Wire
 import java.io.FileInputStream
@@ -141,13 +133,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 		criteria.listOf[String].toSet
 	}
 
-
-	def deleteFile(attachment: FileAttachment) = {
-		session.delete(attachment)
-		for (file <- getData(attachment.id)) {
-			file.delete()
-		}
-	}
+	def deleteAttachments(files: Seq[FileAttachment]) = files.foreach(session.delete(_))
 
 	/**
 	 * Delete any temporary blobs that are more than 2 days old.
@@ -166,7 +152,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 
 	private def findOldTemporaryFiles = transactional() {
 		session.newCriteria[FileAttachment]
-			.add(Is.eq("temporary", true))
+			.add(is("temporary", true))
 			.add(Is.lt("dateUploaded", now minusDays (2)))
 			.setMaxResults(TemporaryFileBatch)
 			.list

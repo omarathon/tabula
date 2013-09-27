@@ -23,11 +23,14 @@
 <section id="relationship-${relationshipType.id}" class="relationship-section clearfix">
 
 	<#if RequestParameters.action??>
-		<#if RequestParameters.action?? && RequestParameters.action == "agentremoved" || RequestParameters.action == "agentchanged">
-			<div id="agentsMessage" class="alert alert-success">
+		<#if RequestParameters.action?? && RequestParameters.action == "agentremoved" || RequestParameters.action == "agentchanged" || RequestParameters.action == "agenterror">
+			<#if RequestParameters.action = "agenterror"><#assign alertClass="alert-danger"><#else><#assign alertClass="alert-success"></#if>
+			<div id="agentsMessage" class="alert ${alertClass}">
 				<button type="button" class="close" data-dismiss="alert">&times;</button>
 				<p>
-					<#if RequestParameters.action = "agentremoved">
+					<#if RequestParameters.action = "agenterror">
+						There was a problem when attempting to update this personal tutor. No tutor was specified
+					<#elseif RequestParameters.action = "agentremoved">
 						<strong>${agent.fullName}</strong> is no longer ${profile.firstName}'s ${relationshipType.agentRole}.
 					<#else>
 						<strong>${agent.fullName}</strong> is now ${profile.firstName}'s ${relationshipType.agentRole}.
@@ -37,12 +40,12 @@
 		</#if>
 	</#if>
 
+	<#local acceptsChanges = (studentCourseDetails.sprCode)?? && (studentCourseDetails.department)?? && !relationshipType.readOnly(studentCourseDetails.department) />
+
 	<#if ((studentCourseDetails.relationships(relationshipType))![])?size gt 0>
-		<#assign relationships = studentCourseDetails.relationships(relationshipType) />
+		<#local relationships = studentCourseDetails.relationships(relationshipType) />
 	
 		<h4>${relationshipType.agentRole?cap_first}<#if relationships?size gt 1>s</#if></h4>
-		
-		<#assign acceptsChanges = (studentCourseDetails.sprCode)?? && (studentCourseDetails.department)?? && !relationshipType.readOnly(studentCourseDetails.department) />
 
 		<#if relationships?size gt 0 && can.do_with_selector("Profiles.StudentRelationship.Create", profile, relationshipType) && acceptsChanges>
 			<a class="add-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
@@ -56,9 +59,8 @@
 		<div class="relationships clearfix row-fluid">
 		<#list relationships as relationship>
 
-			<#assign agent = relationship.agentMember />
 			<div class="agent clearfix span4">
-				<#if !agent??>
+				<#if !relationship.agentMember??>
 					${relationship.agentName} <span class="muted">External to Warwick</span>
 					<#if can.do_with_selector("Profiles.StudentRelationship.Update", profile, relationshipType) && acceptsChanges>
 						<a class="edit-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
@@ -69,6 +71,7 @@
 						</a>
 					</#if>
 				<#else>
+					<#local agent = relationship.agentMember />
 
 					<@fmt.relation_photo member relationship "tinythumbnail" />
 
@@ -101,8 +104,6 @@
 	<#else>
 		<h4>${relationshipType.agentRole?cap_first}</h4>
 		<p class="text-warning"><i class="icon-warning-sign"></i> No ${relationshipType.agentRole} details are recorded in Tabula for the current year.</p>
-		
-		<#assign acceptsChanges = (studentCourseDetails.sprCode)?? && (studentCourseDetails.department)?? && !relationshipType.readOnly(studentCourseDetails.department) />
 
 		<#if can.do_with_selector("Profiles.StudentRelationship.Update", profile, relationshipType) && acceptsChanges>
 			<a class="btn edit-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"

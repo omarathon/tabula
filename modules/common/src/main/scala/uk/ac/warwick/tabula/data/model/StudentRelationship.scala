@@ -73,7 +73,6 @@ class StudentRelationship extends GeneratedId {
 }
 
 object StudentRelationship {
-	@transient var profileService = Wire.auto[ProfileService]
 
 	def apply(agent: String, relType: StudentRelationshipType, targetSprCode: String) = {
 
@@ -84,14 +83,4 @@ object StudentRelationship {
 		rel
 	}
 
-	def getLastNameFromAgent(agent: String) = {
-		if (agent.forall(_.isDigit)) {
-			profileService.getMemberByUniversityId(agent) match {
-				case None => agent
-				case Some(member) => member.lastName
-			}
-		} else {
-			agent
-		}
-	}
 }

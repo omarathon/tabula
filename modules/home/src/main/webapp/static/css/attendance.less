@@ -22,6 +22,9 @@
 }
 
 #container .routeAndYearPicker {
+	.expanded .expand-button {
+		visibility: hidden;
+	}
 	.span2 {
 		text-align: right;
 	}
@@ -67,13 +70,21 @@
 
 .record-attendance-form-header {
 	background-color: lighten(@tabulaRed, 35%);
+	div.span9 {
+        padding: 15px 0px;
+        span {
+			margin-right: 10px
+		}
+    }
+    div.span3 {
+        padding-top: 9px;
+    }
 }
 
-
-#missed-monitoring-points {
-	.icon-ok { color: @successText; }
-	.icon-remove { color: @errorText; }
-}
+.icon-ok.attended { color: @successText; }
+.icon-remove.unauthorised { color: @errorText; }
+.icon-remove.authorised { color: @infoText; }
+.icon-warning-sign.late { color: @warningText; }
 
 .monitoring-points-profile {
 	.pull-right .form-inline { margin-bottom: 0px; }
@@ -90,3 +101,5 @@
 		background-color: @tableBackgroundHover
 	}
 }
+
+.btn-group button { margin-right: 0px; }

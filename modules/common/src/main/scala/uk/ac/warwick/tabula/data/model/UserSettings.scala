@@ -23,6 +23,11 @@ class UserSettings extends GeneratedId with SettingsMap with PermissionsTarget {
 	// It's okay for this to be null - the null choice is to use the department's setting
 	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem).orNull
 	def weekNumberingSystem_= (wnSystem: String) = settings += (Settings.WeekNumberingSystem -> wnSystem)
+	
+	def bulkEmailSeparator = getStringSetting(Settings.BulkEmailSeparator) getOrElse(DefaultBulkEmailSeparator)
+	def bulkEmailSeparator_= (separator: String) = settings += (Settings.BulkEmailSeparator -> separator)
+	
+	def string(key: String) = getStringSetting(key).orNull
 		
 	def this(userId: String) = {
 		this()
@@ -38,11 +43,14 @@ object UserSettings {
 	val AlertsAllSubmissions = "allSubmissions"
 	val AlertsLateSubmissions = "lateSubmissions"
 	val AlertsNoSubmissions = "none"
+		
+	val DefaultBulkEmailSeparator = ";"
 	
 	object Settings {
 		val AlertsSubmission = "alertsSubmission"
 		val HiddenIntros = "hiddenIntros"
 		val WeekNumberingSystem = "weekNumberSystem"
+		val BulkEmailSeparator = "bulkEmailSeparator"
 			
 		def hiddenIntroHash(mappedPage: String, setting: String) = {
 			val popover = mappedPage + ":" + setting

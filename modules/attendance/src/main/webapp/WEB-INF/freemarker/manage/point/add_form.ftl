@@ -12,8 +12,8 @@
 	<@f.form id="newMonitoringPoint" action="${action}" method="POST" commandName="command" class="form-horizontal">
 		<#list command.monitoringPoints as point>
 			<input type="hidden" name="monitoringPoints[${point_index}].name" value="${point.name}" />
-			<input type="hidden" name="monitoringPoints[${point_index}].defaultValue" value="<#if point.defaultValue>true<#else>false</#if>" />
-			<input type="hidden" name="monitoringPoints[${point_index}].week" value="${point.week}" />
+			<input type="hidden" name="monitoringPoints[${point_index}].validFromWeek" value="${point.validFromWeek}" />
+			<input type="hidden" name="monitoringPoints[${point_index}].requiredFromWeek" value="${point.requiredFromWeek}" />
 		</#list>
 		<#include "_fields.ftl" />
 	</@f.form>

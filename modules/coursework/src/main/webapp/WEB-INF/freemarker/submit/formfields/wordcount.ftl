@@ -3,7 +3,7 @@
 	${field.conventions!""}
 	<#if ((field.min)!0) gt 0 && ((field.max)!1000000) lt 1000000>
 		It must be between ${(field.min)!0} and ${(field.max)!1000000} words.
-	<#elseif (field.min)!0 == 0>
+	<#elseif ((field.min)!0) == 0>
 		It must be <@fmt.p (field.max)!1000000 "word" /> or less.
 	<#else>
 		It must be <@fmt.p (field.min)!0 "word" /> or more.

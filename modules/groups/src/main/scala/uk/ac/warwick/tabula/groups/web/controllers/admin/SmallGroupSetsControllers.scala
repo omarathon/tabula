@@ -120,7 +120,9 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	}
 	
 	@RequestMapping
-	def form(cmd: EditSmallGroupSetCommand) = {
+	def form(cmd: EditSmallGroupSetCommand, @PathVariable("set") set: SmallGroupSet) = {
+		cmd.copyGroupsFrom(set)
+
 		cmd.afterBind()
 
 		Mav("admin/groups/edit",
@@ -132,21 +134,21 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("action=update"))
-	def update(@Valid cmd: EditSmallGroupSetCommand, errors: Errors) = {
+	def update(@Valid cmd: EditSmallGroupSetCommand, @PathVariable("set") set: SmallGroupSet, errors: Errors) = {
 		cmd.afterBind()
 
 		if (!errors.hasErrors) {
 			cmd.apply()
 		}
 
-		form(cmd)
+		form(cmd, set)
 	}
 
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh", "action!=update"))
-	def submit(@Valid cmd: EditSmallGroupSetCommand, errors: Errors) = {
+	def submit(@Valid cmd: EditSmallGroupSetCommand, @PathVariable("set") set: SmallGroupSet, errors: Errors) = {
 		cmd.afterBind()
 
-		if (errors.hasErrors) form(cmd)
+		if (errors.hasErrors) form(cmd, set)
 		else {
 			cmd.apply()
 			Redirect(Routes.admin.module(cmd.module))

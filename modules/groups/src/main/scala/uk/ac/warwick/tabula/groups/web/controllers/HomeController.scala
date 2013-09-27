@@ -22,20 +22,21 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewModules
 
 
 	@RequestMapping(Array("/")) def home(user: CurrentUser) = {
-
-		val ownedDepartments = moduleService.departmentsWithPermission(user, Permissions.Module.ManageSmallGroups)
-		val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageSmallGroups)
-		val taughtGroups = smallGroupService.findSmallGroupsByTutor(user.apparentUser)
-		val memberGroupSets = smallGroupService.findSmallGroupSetsByMember(user.apparentUser)
-		val releasedMemberGroupSets = getGroupSetsReleasedToStudents(memberGroupSets)
-		val nonEmptyMemberViewModules = getViewModulesForStudent(releasedMemberGroupSets,getGroupsToDisplay(_,user.apparentUser))
-
-		Mav("home/view",
-			"ownedDepartments" -> ownedDepartments,
-			"ownedModuleDepartments" -> ownedModules.map { _.department },
-			"taughtGroups" -> taughtGroups,
-			"memberGroupsetModules"->ViewModules(nonEmptyMemberViewModules, false)
-		)
+		if (user.loggedIn) {
+			val ownedDepartments = moduleService.departmentsWithPermission(user, Permissions.Module.ManageSmallGroups)
+			val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageSmallGroups)
+			val taughtGroups = smallGroupService.findSmallGroupsByTutor(user.apparentUser)
+			val memberGroupSets = smallGroupService.findSmallGroupSetsByMember(user.apparentUser)
+			val releasedMemberGroupSets = getGroupSetsReleasedToStudents(memberGroupSets)
+			val nonEmptyMemberViewModules = getViewModulesForStudent(releasedMemberGroupSets,getGroupsToDisplay(_,user.apparentUser))
+	
+			Mav("home/view",
+				"ownedDepartments" -> ownedDepartments,
+				"ownedModuleDepartments" -> ownedModules.map { _.department },
+				"taughtGroups" -> taughtGroups,
+				"memberGroupsetModules"->ViewModules(nonEmptyMemberViewModules, false)
+			)
+		} else Mav("home/view")
 	}
 
 }
