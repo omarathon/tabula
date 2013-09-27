@@ -1,14 +1,11 @@
 package uk.ac.warwick.tabula.data.model.groups
 
 import scala.collection.JavaConverters._
-
 import javax.persistence._
 import javax.persistence.CascadeType._
 import javax.validation.constraints.NotNull
-
 import org.joda.time.DateTime
 import org.hibernate.annotations.{Type, Filter, FilterDef, AccessType, BatchSize}
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
@@ -18,6 +15,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.userlookup.User
 
 object SmallGroupSet {
 	final val NotDeletedFilter = "notDeleted"
@@ -125,6 +123,11 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 				membershipService.getUpstreamAssessmentGroup(template)
 			}
 		}
+	}
+	
+	def isStudentMember(user: User): Boolean = {
+		groups.asScala.exists(_.students.includesUser(user)) ||
+		membershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
 	}
 
 	def allStudents = membershipService.determineMembershipUsers(upstreamAssessmentGroups, Some(members))

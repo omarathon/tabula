@@ -390,7 +390,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	def canSubmit(user: User): Boolean = {
 		if (restrictSubmissions) {
-			// users can always submit to assignments if they have a submission or peice of feedback
+			// users can always submit to assignments if they have a submission or piece of feedback
 			submissions.asScala.exists(_.universityId == user.getWarwickId) ||
 			fullFeedback.exists(_.universityId == user.getWarwickId) ||
 			assignmentMembershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
