@@ -97,10 +97,6 @@
 			</div>
 		</#list>
 		</div>
-
-		<#if relationships?size gt 0>
-			<@meeting_macros.list studentCourseDetails meetings relationshipType />
-		</#if>
 	<#else>
 		<h4>${relationshipType.agentRole?cap_first}</h4>
 		<p class="text-warning"><i class="icon-warning-sign"></i> No ${relationshipType.agentRole} details are recorded in Tabula for the current year.</p>
@@ -114,6 +110,8 @@
 			</a>
 		</#if>
 	</#if>
+	
+	<@meeting_macros.list studentCourseDetails meetings relationshipType />
 </section>
 </#macro>
 
