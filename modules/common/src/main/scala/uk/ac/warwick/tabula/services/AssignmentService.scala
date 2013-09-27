@@ -62,28 +62,52 @@ class AssignmentServiceImpl
 		session.delete(field)
 	}
 
+//	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] =
+//		session.newQuery[Assignment]("""select distinct a from Assignment a
+//				join a.feedbacks as f
+//				where f.universityId = :universityId
+//				and f.released=true""")
+//			.setString("universityId", universityId)
+//			.seq
+
+//	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] =
+//		session.newQuery[Assignment]("""select distinct a from Assignment a
+//				join a.submissions as f
+//				where f.universityId = :universityId""")
+//			.setString("universityId", universityId)
+//			.seq
+
+//	def getAssignmentWhereMarker(user: User): Seq[Assignment] =
+//		session.newQuery[Assignment]("""select distinct a
+//				from Assignment a
+//				where (:userId in elements(a.markingWorkflow.firstMarkers.includeUsers)
+//					or :userId in elements(a.markingWorkflow.secondMarkers.includeUsers))
+//					and a.deleted = false and a.archived = false
+//		""").setString("userId", user.getUserId()).seq
+
+
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] =
-		session.newQuery[Assignment]("""select distinct a from Assignment a
+		session.newQuery[Assignment]("""select a from Assignment a
 				join a.feedbacks as f
 				where f.universityId = :universityId
 				and f.released=true""")
 			.setString("universityId", universityId)
-			.seq
+			.seq.distinct
 
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] =
-		session.newQuery[Assignment]("""select distinct a from Assignment a
+		session.newQuery[Assignment]("""select a from Assignment a
 				join a.submissions as f
 				where f.universityId = :universityId""")
 			.setString("universityId", universityId)
-			.seq
+			.seq.distinct
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment] =
-		session.newQuery[Assignment]("""select distinct a
+		session.newQuery[Assignment]("""select a
 				from Assignment a
 				where (:userId in elements(a.markingWorkflow.firstMarkers.includeUsers)
 					or :userId in elements(a.markingWorkflow.secondMarkers.includeUsers))
 					and a.deleted = false and a.archived = false
-		""").setString("userId", user.getUserId()).seq
+																 """).setString("userId", user.getUserId).seq.distinct
 
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module) =
 		session.newQuery[Assignment]("from Assignment where name=:name and academicYear=:year and module=:module and deleted=0")

@@ -46,8 +46,9 @@ trait AssignmentMembershipDao {
 
 @Repository
 class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
+
 	def getEnrolledAssignments(user: User): Seq[Assignment] =
-		session.newQuery[Assignment]("""select distinct a
+		session.newQuery[Assignment]("""select a
 			from Assignment a
 			left join fetch a.assessmentGroups ag
 			where
@@ -63,7 +64,7 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 				and a.deleted = false and a.archived = false""")
 			.setString("universityId", user.getWarwickId)
 			.setString("userId", user.getUserId)
-			.seq
+			.seq.distinct
 
 	/**
 	 * Tries to find an identical UpstreamAssignment in the database, based on the
