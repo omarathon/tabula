@@ -26,7 +26,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 		val group = new SmallGroup()
 
 		studentGroupMembershipHelper.findBy(user) returns  Seq(group)
-		service.findSmallGroupSetsByMember(user) should be(Seq(group))
+		service.findSmallGroupsByStudent(user) should be(Seq(group))
 		there was one (studentGroupMembershipHelper).findBy(user)
 	}
 }
