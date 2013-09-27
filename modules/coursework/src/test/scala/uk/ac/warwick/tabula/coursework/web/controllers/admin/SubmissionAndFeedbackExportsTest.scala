@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.Student
 import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
 import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
 import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
 class SubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 
@@ -20,7 +21,7 @@ class SubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 
 	val plagiarisedReport = new OriginalityReport
 	plagiarisedReport.overlap = Some(97)
-	val plagiarisedFile = new SavedSubmissionValue
+	val plagiarisedFile = new SavedFormValue
 	plagiarisedFile.name = "upload"
 	plagiarisedFile.attachments = JSet(
 		{

@@ -1,16 +1,17 @@
 package uk.ac.warwick.tabula.data.model
 
+import scala.collection.JavaConversions._
 import org.hibernate.annotations._
 import org.joda.time.DateTime
-
 import javax.persistence._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
 import org.hibernate.annotations.AccessType
 import javax.persistence.Entity
 
 @Entity @AccessType("field")
-class MarkerFeedback extends GeneratedId {
+class MarkerFeedback extends GeneratedId with FeedbackAttachments {
 
 	def this(parent:Feedback){
 		this()
@@ -44,10 +45,12 @@ class MarkerFeedback extends GeneratedId {
 		attachment.markerFeedback = this
 		attachments.add(attachment)
 	}
-		
-	def removeAttachment(attachment: FileAttachment) = {
-		attachment.markerFeedback = null
-		attachments.remove(attachment)
+
+	@OneToMany(mappedBy = "markerFeedback", cascade = Array(ALL))
+	var customFormValues: JSet[SavedFormValue] = JHashSet()
+
+	def getValue(field: FormField): Option[SavedFormValue] = {
+		customFormValues.find( _.name == field.name )
 	}
 
 	def hasMarkOrGrade = hasMark || hasGrade

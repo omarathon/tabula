@@ -261,6 +261,8 @@
 								<include>jquery-details.js</include>
 								<include>jquery-tableform.js</include>
 								<include>jquery-draganddrop.js</include>
+								<include>jquery-expandingTable.js</include>
+								<include>jquery.form.js</include>
 								<include>jquery-filteredlist.js</include>
 								<include>jquery-radiocontrolled.js</include>
 								<include>jquery-fixheaderfooter.js</include>

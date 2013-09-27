@@ -3,43 +3,41 @@ package uk.ac.warwick.tabula.data.model.forms
 import java.io.StringReader
 import scala.annotation.target.field
 import collection.JavaConversions._
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.hibernate.annotations.Type
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.validation.Errors
-import org.springframework.web.util.HtmlUtils._
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.commands.UploadedFile
+import uk.ac.warwick.tabula.data.model.{ AbstractBasicUserType, GeneratedId}
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
-import uk.ac.warwick.tabula.data.FileDao
-import scala.xml.NodeSeq
-import org.springframework.web.multipart.commons.CommonsMultipartFile
-import org.springframework.web.multipart.MultipartFile
-import uk.ac.warwick.tabula.data.model.MarkingWorkflow
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.UserLookupService
 import scala.reflect._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JsonObjectMapperFactory
+import org.hibernate.`type`.StandardBasicTypes
+import java.sql.Types
+import uk.ac.warwick.tabula.data.model.Gender.{Unspecified, Female, Male}
 
 /**
  * A FormField defines a field to be displayed on an Assignment
- * when a student is making a submission.
+ * when a student is making a submission or a marker is entering feedback.
  *
- * Submissions are bound in the command as SubmissionValue items,
+ * Submissions are bound in the command as FormValue items,
  * and if validation passes a Submission object is saved with a
- * collection of SavedSubmissionValue objects.
+ * collection of SavedFormValue objects.
  *
  * Although there can be many types of FormField, many of them
- * can use the same SubmissionValue class if they contain the
+ * can use the same FormValue class if they contain the
  * same sort of data (e.g. a string), and there is only one
- * SavedSubmissionValue class.
+ * SavedFormValue class.
  *
  */
+
+object FormField {
+	final val FormFieldMaxSize = 4000
+}
+
 @Entity @Access(AccessType.FIELD)
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "fieldtype")
@@ -57,6 +55,9 @@ abstract class FormField extends GeneratedId with Logging {
 	var label: String = _
 	var instructions: String = _
 	var required: Boolean = _
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.forms.FormFieldContextUserType")
+	var context: FormFieldContext = _
 
 	@Basic(optional = false)
 	@Access(AccessType.PROPERTY)
@@ -103,12 +104,17 @@ abstract class FormField extends GeneratedId with Logging {
 	@transient lazy val template = getClass.getAnnotation(classOf[DiscriminatorValue]).value
 
 	/**
-	 * Return a blank SubmissionValue that can be used to bind a submission
+	 * Return a blank FormValue that can be used to bind a submission
 	 * of the same type as this FormField.
 	 */
-	def blankSubmissionValue: SubmissionValue
+	def blankFormValue: FormValue
 
-	def validate(value: SubmissionValue, errors: Errors)
+	/**
+	 * Return a form value of the appropriate type with its value set
+	 */
+	def populatedFormValue(value: SavedFormValue) : FormValue
+
+	def validate(value: FormValue, errors: Errors)
 
 }
 
@@ -119,7 +125,25 @@ trait SimpleValue[A] { self: FormField =>
 	def value: A = propertiesMap.getOrElse("value", null).asInstanceOf[A]
 	def getValue() = value
 
-	def blankSubmissionValue = new StringSubmissionValue(this)
+	override def validate(value: FormValue, errors: Errors) {
+		value match {
+			case s: StringFormValue if s.value != null => {
+				val length = s.value.toString.length
+				if (length > FormField.FormFieldMaxSize)
+					errors.rejectValue("value", "textfield.tooLarge", Array[Object](length: JInteger, FormField.FormFieldMaxSize: JInteger), "")
+			}
+			case _ =>
+		}
+	}
+
+	def blankFormValue = new StringFormValue(this)
+
+	def populatedFormValue(savedFormValue: SavedFormValue) = {
+		val formValue = new StringFormValue(this)
+		formValue.value = savedFormValue.value
+		formValue
+	}
+
 }
 
 @Entity
@@ -128,31 +152,35 @@ class CommentField extends FormField with SimpleValue[String] with FormattedHtml
 	override def isReadOnly = true
 
 	def formattedHtml: String = formattedHtml(Option(value))
-
-	override def validate(value: SubmissionValue, errors: Errors) {}
 }
 
 @Entity
 @DiscriminatorValue("text")
 class TextField extends FormField with SimpleValue[String] {
-	override def validate(value: SubmissionValue, errors: Errors) {}
 }
 
 @Entity
 @DiscriminatorValue("wordcount")
 class WordCountField extends FormField {
+	context = FormFieldContext.Submission
+
 	def min: JInteger = getProperty[JInteger]("min", null)
 	def min_=(limit: JInteger) = setProperty("min", limit)
 	def max: JInteger = getProperty[JInteger]("max", null)
 	def max_=(limit: JInteger) = setProperty("max", limit)
 	def conventions: String = getProperty[String]("conventions", null)
 	def conventions_=(conventions: String) = setProperty("conventions", conventions)
-	
-	def blankSubmissionValue = new IntegerSubmissionValue(this)
 
-	override def validate(value: SubmissionValue, errors: Errors) {
+	def blankFormValue = new IntegerFormValue(this)
+	def populatedFormValue(savedFormValue: SavedFormValue) = {
+		val formValue = new IntegerFormValue(this)
+		formValue.value = savedFormValue.value.asInstanceOf[Integer]
+		formValue
+	}
+
+	override def validate(value: FormValue, errors: Errors) {
 		value match {
-			case i:IntegerSubmissionValue => {
+			case i:IntegerFormValue => {
 				 if (i.value == null) errors.rejectValue("value", "assignment.submit.wordCount.missing")
 				 else if (i.value < min || i.value > max) errors.rejectValue("value", "assignment.submit.wordCount.outOfRange")
 			}
@@ -163,29 +191,34 @@ class WordCountField extends FormField {
 
 @Entity
 @DiscriminatorValue("textarea")
-class TextareaField extends FormField with SimpleValue[String] {
-	override def validate(value: SubmissionValue, errors: Errors) {}
-}
+class TextareaField extends FormField with SimpleValue[String] {}
 
 @Entity
 @DiscriminatorValue("checkbox")
 class CheckboxField extends FormField {
-	def blankSubmissionValue = new BooleanSubmissionValue(this)
-	override def validate(value: SubmissionValue, errors: Errors) {}
+	def blankFormValue = new BooleanFormValue(this)
+	def populatedFormValue(savedFormValue: SavedFormValue) = {
+		val formValue = new BooleanFormValue(this)
+		formValue.value = savedFormValue.value.asInstanceOf[Boolean]
+		formValue
+	}
+	override def validate(value: FormValue, errors: Errors) {}
 }
 
 @Entity
 @DiscriminatorValue("marker")
 class MarkerSelectField extends FormField with SimpleValue[String] {
+	context = FormFieldContext.Submission
 
 	def markers:Seq[User] = {
 		if (assignment.markingWorkflow == null) Seq()
 		else assignment.markingWorkflow.firstMarkers.includeUsers.map(userLookup.getUserByUserId(_))
 	}
 
-	override def validate(value: SubmissionValue, errors: Errors) {
+	override def validate(value: FormValue, errors: Errors) {
+		super.validate(value, errors)
 		value match {
-			case v: StringSubmissionValue => {
+			case v: StringFormValue => {
 				Option(v.value) match {
 					case None => errors.rejectValue("value", "marker.missing")
 					case Some(v) if v == "" => errors.rejectValue("value", "marker.missing")
@@ -200,7 +233,8 @@ class MarkerSelectField extends FormField with SimpleValue[String] {
 @Entity
 @DiscriminatorValue("file")
 class FileField extends FormField {
-	def blankSubmissionValue = new FileSubmissionValue(this)
+	def blankFormValue = new FileFormValue(this)
+	def populatedFormValue(savedFormValue: SavedFormValue) = blankFormValue
 
 	def attachmentLimit: Int = getProperty[JInteger]("attachmentLimit", 1)
 	def attachmentLimit_=(limit: Int) = setProperty("attachmentLimit", limit)
@@ -208,15 +242,15 @@ class FileField extends FormField {
 	// List of extensions.
 	def attachmentTypes: Seq[String] = getProperty[Seq[String]]("attachmentTypes", Seq())
 	def attachmentTypes_=(types: Seq[String]) = setProperty("attachmentTypes", types: Seq[String])
-	
+
 	// This is after onBind is called, so any multipart files have been persisted as attachments
-	override def validate(value: SubmissionValue, errors: Errors) {
-		
+	override def validate(value: FormValue, errors: Errors) {
+
 		/** Are there any duplicate values (ignoring case)? */
 		def hasDuplicates(names: Seq[String]) = names.size != names.map(_.toLowerCase()).distinct.size
-		
+
 		value match {
-			case v: FileSubmissionValue => {
+			case v: FileFormValue => {
 				if (v.file.isMissing) {
 					errors.rejectValue("file", "file.missing")
 				} else if (v.file.size > attachmentLimit) {
@@ -236,4 +270,31 @@ class FileField extends FormField {
 			}
 		}
 	}
+}
+
+sealed abstract class FormFieldContext(val dbValue: String, val description: String)
+
+object FormFieldContext {
+	case object Submission extends FormFieldContext("submission", "Submission")
+	case object Feedback extends FormFieldContext("feedback", "Feedback")
+
+	def fromCode(code: String) = code match {
+		case Submission.dbValue => Submission
+		case Feedback.dbValue => Feedback
+		case _ => throw new IllegalArgumentException()
+	}
+}
+
+class FormFieldContextUserType extends AbstractBasicUserType[FormFieldContext, String] {
+
+	val basicType = StandardBasicTypes.STRING
+	override def sqlTypes = Array(Types.VARCHAR)
+
+	val nullValue = null
+	val nullObject = null
+
+	override def convertToObject(string: String) = FormFieldContext.fromCode(string)
+
+	override def convertToValue(context: FormFieldContext) = context.dbValue
+
 }

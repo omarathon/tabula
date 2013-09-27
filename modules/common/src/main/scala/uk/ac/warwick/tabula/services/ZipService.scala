@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.AnonymousUser
 import scala.collection.JavaConverters._
-import scala.Some
+import uk.ac.warwick.spring.Wire
 
 /**
  * FIXME this could generate a corrupt file if two requests tried to generate the same zip simultaneously
@@ -177,6 +177,14 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 		memberNote.attachments.asScala.map { (attachment) =>
 			new ZipFileItem(attachment.name, attachment.dataStream)
 		}
+}
+
+trait ZipServiceComponent {
+	def zipService: ZipService
+}
+
+trait AutowiringZipServiceComponent extends ZipServiceComponent {
+	var zipService = Wire[ZipService]
 }
 
 /**

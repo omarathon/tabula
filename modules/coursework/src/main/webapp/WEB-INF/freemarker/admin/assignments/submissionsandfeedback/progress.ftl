@@ -1,7 +1,9 @@
+<#import "_submission_details.ftl" as sd />
+
 <#escape x as x?html>
 <div>
 	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
-	
+
 	<#if assignment.openEnded>
 		<p class="dates">
 			<@fmt.interval assignment.openDate />, never closes
@@ -19,15 +21,15 @@
 			<#if !assignment.opened>
 				<span class="label label-warning">Not yet open</span>
 			</#if>
-								
+
 		</p>
 	</#if>
-	
+
 	<#assign module=assignment.module />
 	<#assign department=module.department />
-	
+
 	<#include "_filter.ftl" />
-	
+
 	<#assign currentView = "summary" />
 	<#include "_action-bar.ftl" />
 
@@ -72,36 +74,36 @@
 			<#else>
 				<th class="student-col">University ID</th>
 			</#if>
-			
+
 			<th class="progress-col">Progress</th>
 			<th class="action-col">Next action</th>
 		</tr>
 	</thead>
-	
+
 	<#if students?size gt 0>
 		<tbody>
 			<#macro action actionCode student>
 				<#local studentDetails><span data-profile="${student.user.warwickId}"><#if department.showStudentName>${student.user.fullName}<#else>${student.user.warwickId}</#if></span></#local>
 				<#local firstMarker="first marker" />
 				<#local secondMarker="second marker" />
-				
+
 				<#if student.coursework.enhancedSubmission??>
 					<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission?? && student.coursework.enhancedSubmission.submission.assignment??>
 						<#if student.coursework.enhancedSubmission.submission.firstMarker?has_content>
 							<#local firstMarker><span data-profile="${student.coursework.enhancedSubmission.submission.firstMarker.warwickId}">${student.coursework.enhancedSubmission.submission.firstMarker.fullName}</span></#local>
 						</#if>
-						
+
 						<#if student.coursework.enhancedSubmission.submission.secondMarker?has_content>
 							<#local secondMarker><span data-profile="${student.coursework.enhancedSubmission.submission.secondMarker.warwickId}">${student.coursework.enhancedSubmission.submission.secondMarker.fullName}</span></#local>
 						</#if>
 					</#if>
 				</#if>
-				
+
 				<#local text><@spring.message code=actionCode /></#local>
-			
+
 				<#noescape>${(text!"")?replace("[STUDENT]", studentDetails)?replace("[FIRST_MARKER]", firstMarker)?replace("[SECOND_MARKER]", secondMarker)}</#noescape>
 			</#macro>
-		
+
 			<#macro stage stage>
 				<#if stage.messageCode?default("")?length gt 0>
 					<div class="stage<#if !stage.completed> incomplete<#if !stage.preconditionsMet> preconditions-not-met</#if></#if><#if stage.started && !stage.completed> current</#if>">
@@ -118,7 +120,7 @@
 					</div>
 				</#if>
 			</#macro>
-		
+
 			<#macro workflow student>
 				<#if student.coursework.enhancedSubmission??>
 					<#local enhancedSubmission=student.coursework.enhancedSubmission>
@@ -132,24 +134,18 @@
 					<#local enhancedExtension=student.coursework.enhancedExtension>
 					<#local extension=enhancedExtension.extension>
 				</#if>
-				
-				<#if submission?? && submission.submittedDate?? && (submission.late || submission.authorisedLate)>
-					<#local lateness = "${durationFormatter(assignment.closeDate, submission.submittedDate)} after close" />
-				<#else>
-					<#local lateness = "" />
-				</#if>
-			
-				<div class="workflow">
+
+				<div class="workflow content">
 					<#if student.stages?keys?seq_contains('Submission')>
 						<div class="stage-group clearfix">
 							<h3>Submission</h3>
-							
+
 							<div class="labels">
 								<#if submission??>
 									<#if submission.late>
-										<span class="label label-important use-tooltip" title="${lateness!''}" data-container="body">Late</span>
+										<span class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span>
 									<#elseif  submission.authorisedLate>
-										<span class="label label-info use-tooltip" title="${lateness!''}" data-container="body">Within Extension</span>
+										<span class="label label-info use-tooltip" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
 									</#if>
 								<#elseif !enhancedFeedback??>
 									<#if enhancedExtension?has_content>
@@ -173,64 +169,39 @@
 									</#if>
 								</#if>
 							</div>
-							
+
 							<#-- If the current action is in this section, then add the next action blowout here -->
 							<#if student.nextStage?? && ['Submission','DownloadSubmission']?seq_contains(student.nextStage.toString) && student.progress.messageCode != 'workflow.Submission.unsubmitted.failedToSubmit'>
 								<div class="alert pull-right">
 									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
 								</div>
 							</#if>
-							
-							<@stage student.stages['Submission']><#compress>
-								<#if submission??>: <#compress>
-									<#local attachments=submission.allAttachments />
-									<#if attachments?size gt 0>
-										<#if attachments?size == 1> 
-											<#local filename = "${attachments[0].name}">
-										<#else>
-											<#local filename = "submission-${submission.universityId}.zip">
-										</#if>
-										<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/${filename}'/>"><#compress>
-											${attachments?size}
-											<#if attachments?size == 1> file
-											<#else> files
-											</#if>
-										</#compress></a><#--
-									--></#if><#--
-									--><#if submission.submittedDate??> <#compress>
-										<span class="date use-tooltip" title="${lateness!''}" data-container="body"><#compress>
-											<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true />
-										</#compress></span>
-									</#compress></#if><#--
-									--><#if assignment.wordCountField?? && submission.valuesByFieldName[assignment.defaultWordCountName]??><#compress>
-										, ${submission.valuesByFieldName[assignment.defaultWordCountName]?number} words
-									</#compress></#if>
-								</#compress></#if>
-							</#compress></@stage>
-							
+
+							<@stage student.stages['Submission']><@sd.submission_details submission /></@stage>
+
 							<#if student.stages?keys?seq_contains('DownloadSubmission')>
 								<@stage student.stages['DownloadSubmission'] />
 							</#if>
 						</div>
 					</#if>
-						
+
 					<#if student.stages?keys?seq_contains('CheckForPlagiarism')>
 						<div class="stage-group clearfix">
 							<h3>Plagiarism</h3>
-							
+
 							<div class="labels">
 								<#if submission?? && submission.suspectPlagiarised>
 									<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised" data-container="body"></i>
 								</#if>
 							</div>
-							
+
 							<#-- If the current action is in this section, then add the next action blowout here -->
 							<#if student.nextStage?? && ['CheckForPlagiarism']?seq_contains(student.nextStage.toString)>
 								<div class="alert pull-right">
 									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
 								</div>
 							</#if>
-							
+
 							<@stage student.stages['CheckForPlagiarism']><#compress>
 								<#if submission??>
 									<#list submission.allAttachments as attachment>
@@ -239,60 +210,60 @@
 											: <@originalityReport attachment />
 										</#if>
 									</#list>
-								</#if>						
+								</#if>
 							</#compress></@stage>
 						</div>
 					</#if>
-					
+
 					<#if student.stages?keys?seq_contains('ReleaseForMarking')>
 						<div class="stage-group clearfix">
 							<h3>Marking</h3>
-							
+
 							<div class="labels">
 								<#if submission?? && submission.assignment?? && submission.releasedForMarking>
 									<span class="label label-success">Markable</span>
 								</#if>
 							</div>
-							
+
 							<#-- If the current action is in this section, then add the next action blowout here -->
 							<#if student.nextStage?? && ['ReleaseForMarking','FirstMarking','SecondMarking']?seq_contains(student.nextStage.toString)>
 								<div class="alert pull-right">
 									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
 								</div>
 							</#if>
-							
+
 							<@stage student.stages['ReleaseForMarking'] />
-							
+
 							<#if student.stages?keys?seq_contains('FirstMarking')>
 								<#if submission?? && submission.assignment??>
 									<#if submission.firstMarker?has_content>
 										<#local firstMarker><span data-profile="${submission.firstMarker.warwickId}">${submission.firstMarker.fullName}</span></#local>
 									</#if>
 								</#if>
-							
+
 								<@stage student.stages['FirstMarking']> <#compress>
 									<#if firstMarker?default("")?length gt 0>(<#noescape>${firstMarker}</#noescape>)</#if>
 								</#compress></@stage>
 							</#if>
-							
+
 							<#if student.stages?keys?seq_contains('SecondMarking')>
 								<#if submission?? && submission.assignment??>
 									<#if submission.secondMarker?has_content>
 										<#local secondMarker><span data-profile="${submission.secondMarker.warwickId}">${submission.secondMarker.fullName}</span></#local>
 									</#if>
 								</#if>
-							
+
 								<@stage student.stages['SecondMarking']> <#compress>
 									<#if secondMarker?default("")?length gt 0>(<#noescape>${secondMarker}</#noescape>)</#if>
 								</#compress></@stage>
 							</#if>
 						</div>
 					</#if>
-					
+
 					<#if student.stages?keys?seq_contains('AddMarks') || student.stages?keys?seq_contains('AddFeedback')>
 						<div class="stage-group">
 							<h3>Feedback</h3>
-							
+
 							<div class="labels">
 								<#if enhancedFeedback?? && feedback??>
 									<#if feedback.released>
@@ -303,14 +274,14 @@
 									</#if>
 								</#if>
 							</div>
-							
+
 							<#-- If the current action is in this section, then add the next action blowout here -->
 							<#if student.nextStage?? && ['AddMarks','AddFeedback','ReleaseFeedback','DownloadFeedback']?seq_contains(student.nextStage.toString)>
 								<div class="alert pull-right">
 									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
 								</div>
 							</#if>
-							
+
 							<#if student.stages?keys?seq_contains('AddMarks')>
 								<@stage student.stages['AddMarks']><#compress>
 									<#if feedback?? && feedback.hasMarkOrGrade>
@@ -325,13 +296,13 @@
 									</#if>
 								</#compress></@stage>
 							</#if>
-							
+
 							<#if student.stages?keys?seq_contains('AddFeedback')>
 								<@stage student.stages['AddFeedback']><#compress>
-									<#if feedback?? && feedback.hasAttachments>: <#compress>
+									<#if feedback?? && (feedback.hasAttachments || feedback.hasOnlineFeedback)>: <#compress>
 										<#local attachments=feedback.attachments />
 										<#if attachments?size gt 0>
-											<#if attachments?size == 1> 
+											<#if attachments?size == 1>
 												<#local attachmentExtension = student.coursework.enhancedFeedback.feedback.attachments[0].fileExt>
 											<#else>
 												<#local attachmentExtension = "zip">
@@ -341,9 +312,12 @@
 												<#if attachments?size == 1> file
 												<#else> files
 												</#if>
-											</#compress></a><#--
-										--></#if><#--
-										--><#if feedback.uploadedDate??> <#compress>
+											</#compress></a>
+										<#-- If the feedback was entered online there may not be attachments  -->
+										<#elseif feedback?? && feedback.hasOnlineFeedback>
+											Comments entered online
+										</#if>
+										<#if feedback.uploadedDate??><#compress>
 												<@fmt.date date=feedback.uploadedDate seconds=true capitalise=true shortMonth=true />
 										</#compress></#if>
 									</#compress></#if>
@@ -366,27 +340,27 @@
 					</#if>
 				</div>
 			</#macro>
-			
+
 			<#macro row student>
-				<tr class="itemContainer<#if !student.coursework.enhancedSubmission??> awaiting-submission</#if>"<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission.suspectPlagiarised> data-plagiarised="true"</#if>>
+				<tr data-contentid="${student.user.warwickId}" class="itemContainer<#if !student.coursework.enhancedSubmission??> awaiting-submission</#if>"<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission.suspectPlagiarised> data-plagiarised="true"</#if>>
 					<td class="check-col"><#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??><input type="checkbox" class="collection-checkbox" name="students" value="${student.user.warwickId}"></#if></td>
 					<#if department.showStudentName>
-						<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.firstName}</h6></td>
-						<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.lastName}</h6></td>
+						<td class="student-col toggle-cell"><h6 class="toggle-icon" data-profile="${student.user.warwickId}">${student.user.firstName}</h6></td>
+						<td class="student-col toggle-cell"><h6 data-profile="${student.user.warwickId}">${student.user.lastName}</h6></td>
 					<#else>
-						<td class="student-col"><h6 data-profile="${student.user.warwickId}">${student.user.warwickId}</h6></td>
+						<td class="student-col toggle-icon toggle-cell"><h6 class="toggle-icon" data-profile="${student.user.warwickId}">${student.user.warwickId}</h6></td>
 					</#if>
-					<td class="progress-col">	
+					<td class="progress-col content-cell toggle-cell">
 						<#if student.stages?keys?seq_contains('Submission') && student.nextStage?? && student.nextStage.toString != 'Submission' && student.stages['Submission'].messageCode != student.progress.messageCode>
 							<#local progressTooltip><@spring.message code=student.stages['Submission'].messageCode />. <@spring.message code=student.progress.messageCode /></#local>
 						<#else>
 							<#local progressTooltip><@spring.message code=student.progress.messageCode /></#local>
 						</#if>
-					
+
 						<dl class="progress progress-${student.progress.t} use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
 							<dt class="bar" style="width: ${student.progress.percentage}%;"></dt>
-							<dd style="display: none;" class="workflow-progress-container" data-profile="${student.user.warwickId}">
-								<div id="workflow-${student.user.warwickId}" class="workflow-container">
+							<dd style="display: none;" class="table-content-container" data-contentid="${student.user.warwickId}">
+								<div id="content-${student.user.warwickId}" class="workflow-container content-container">
 									<@workflow student />
 								</div>
 							</dd>
@@ -405,7 +379,7 @@
 					</td>
 				</tr>
 			</#macro>
-		
+
 			<#list students as student>
 				<@row student />
 			</#list>
@@ -415,119 +389,19 @@
 
 <#if students?size gt 0>
 <script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
+
 <script type="text/javascript">
 (function($) {
-	
-	
-	var repositionWorkflowBoxes = function() {
-		// These have to be positioned in the right order, so we loop through workflow-progress-container rather than directly on workflow
-		$('.workflow-progress-container').hide().each(function() {
-			var universityId = $(this).attr('data-profile');
-			var $workflow = $('#workflow-' + universityId);
-			
-			if ($workflow.length) {
-				var isOpen = $workflow.data('open');
-			
-				if (isOpen) {
-					$(this).show();
-					var $progressField = $(this).closest('.progress-col');
-					
-					// Add bottom padding equivalent to the height of the workflow div to the progress field
-					var fieldPosition = $progressField.position();
-					
-					$progressField.css('padding-bottom', '');
-					var fieldHeight = $progressField.outerHeight();
-					var workflowHeight = $workflow.outerHeight();
-					$progressField.css('padding-bottom', workflowHeight + 10);
-					
-					// Position the workflow div in the correct location
-					$workflow.css({
-						top: (fieldPosition.top + fieldHeight - 2) + 'px',
-						left: ($('.students').position().left + 1) + 'px'
-					});
-				}
-			}
-		});
-	};
-	
-	$.tablesorter.addWidget({
-		id: 'repositionWorkflowBoxes',
-		format: repositionWorkflowBoxes
-	});
-	
-	// Expanding and contracting
-	$('.students tbody tr').each(function() {
-		var $nameField = $(this).find('.student-col h6').first();
-		var $progressField = $(this).find('.progress-col').first();
-		var $icon = $('<i class="icon-chevron-right icon-fixed-width"></i>').css('margin-top', '2px');
-		
-		$nameField
-			.prepend(' ')
-			.prepend($icon)
-			.closest('tr')
-			.find('.student-col,.progress-col')
-			.css('cursor', 'pointer')
-			.on('click', function(evt) {
-				var universityId = $nameField.attr('data-profile');
-				var $workflow = $('#workflow-' + universityId);
-				if ($workflow.length) {
-					var isOpen = $workflow.data('open');
-				
-					if (isOpen) {
-						// Hide the workflow div and move it back to where it was before
-						$workflow.hide();
-						$progressField.find('dd').append($workflow);
-						
-						// Remove the bottom padding on the progress field
-						$progressField.css('padding-bottom', '');
-						
-						// Remove any position data from the workflow div
-						$workflow.attr('style', '');
-						
-						// Change the icon to closed
-						$icon.removeClass('icon-chevron-down').addClass('icon-chevron-right');
-						
-						// Set the data
-						$workflow.data('open', false); 
-					} else {
-						// Move the workflow div to be at the end of the offset parent and display it
-						$('#main-content').append($workflow);
-						$workflow.show();
-						
-						if ($progressField.closest('tr').is(':nth-child(odd)')) {
-							$workflow.css('background-color', '#ebebeb');
-						} else {
-							$workflow.css('background-color', '#f5f5f5');
-						}
-						
-						$workflow.css({
-							width: ($('.students').width() - 21) + 'px'
-						});
-						
-						// Change the icon to open
-						$icon.removeClass('icon-chevron-right').addClass('icon-chevron-down');
-						
-						// Set the data
-						$workflow.data('open', true);
-					}
-					
-					repositionWorkflowBoxes();
-					
-					evt.preventDefault();
-					evt.stopPropagation();
-				}
-			});
-	});
 
-	$('.students').tablesorter({
+	var options = {
 		sortList: [[<#if department.showStudentName>3<#else>2</#if>,0]],
 		headers: { 0: { sorter: false } },
 		textExtraction: function(node) {
 			var $el = $(node);
 			if ($el.hasClass('progress-col')) {
 				var width = $el.find('.bar').width();
-				
-				// Add differing amounts for info, success, warning and danger so that they are sorted in the right order. 
+
+				// Add differing amounts for info, success, warning and danger so that they are sorted in the right order.
 				// info is the default, so == 0
 				if ($el.find('.progress').hasClass('progress-success')) {
 					width += 3;
@@ -541,9 +415,11 @@
 			} else {
 				return $el.text().trim();
 			}
-		},
-		widgets: ['repositionWorkflowBoxes']
-	});
+		}
+	};
+
+	$('#coursework-progress-table').expandingTable({ tableSorterOptions: options });
+
 })(jQuery);
 </script>
 <#else>
@@ -556,7 +432,7 @@
 				<#list filter.parameters as param>${param._1()}=${filterParameters[param._1()]}<#if param_has_next>, </#if></#list>
 			</#compress>)</#if>
 		</#compress></#macro>
-	
+
 		<p>There are no <@filterDescription submissionAndFeedbackCommand.filter submissionAndFeedbackCommand.filterParameters /> for this assignment.</p>
 	</#if>
 </#if>

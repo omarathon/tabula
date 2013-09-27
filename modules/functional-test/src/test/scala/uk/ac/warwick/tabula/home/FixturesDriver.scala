@@ -6,6 +6,7 @@ import dispatch.classic.thread.ThreadSafeHttpClient
 import uk.ac.warwick.tabula.{LoginDetails, FunctionalTestProperties}
 import scala.util.parsing.json.JSON
 import scala.language.postfixOps
+import org.joda.time.DateTime
 
 
 trait FixturesDriver {
@@ -88,6 +89,21 @@ trait FixturesDriver {
 		  "routeCode"->routeCode,
 		  "courseCode"->courseCode,
 		  "deptCode"->deptCode
+		)
+		http.when(_==200)(req >|)
+
+	}
+
+	def updateAssignment(deptCode:String, assignmentName:String, openDate:Option[DateTime] = None, closeDate:Option[DateTime] = None){
+
+		val datesToUpdate:Seq[(String,String)] = Seq("openDate"->openDate,"closeDate"->closeDate).map(t=>t._2 match {
+			case None=>None
+			case Some(d)=>Some(t._1, d.toString("dd-MMM-yyyy HH:mm:ss"))
+		}).flatten
+		val params:Seq[(String,String)] = Seq("deptCode"->deptCode,"assignmentName"->assignmentName) ++ datesToUpdate
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/update/assignment"
+		val req = url(uri).POST << Map(
+			params :_*
 		)
 		http.when(_==200)(req >|)
 

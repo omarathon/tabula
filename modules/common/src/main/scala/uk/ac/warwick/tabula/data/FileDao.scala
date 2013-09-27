@@ -111,7 +111,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	def getFilesCreatedOn(createdOn: DateTime, maxResults: Int, startingId: String): Seq[FileAttachment] = transactional(readOnly = true) {
 		val criteria =
 			session.newCriteria[FileAttachment]
-				.add(is("dateUploaded", createdOn))
+				.add(Is.eq("dateUploaded", createdOn))
 
 		if (startingId.hasText)
 			criteria.add(Is.gt("id", startingId))

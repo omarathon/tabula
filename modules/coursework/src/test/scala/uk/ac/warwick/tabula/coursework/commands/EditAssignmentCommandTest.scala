@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.Module
 class EditAssignmentCommandTest extends TestBase {
   @Test def instantiate {
     val assignment = new Assignment()
-    assignment.addDefaultFields
+    assignment.addDefaultFields()
     assignment.module = new Module()
     assignment.members = null // simulate a slightly older assignment that has no initial linked group
     assignment.name = "Big Essay"

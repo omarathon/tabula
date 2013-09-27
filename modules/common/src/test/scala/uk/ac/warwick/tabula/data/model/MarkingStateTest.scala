@@ -8,9 +8,9 @@ class MarkingStateTest extends TestBase with Mockito {
 	// test all valid state transitions
 	@Test def stateTransitionTest() {
 		Received.canTransitionTo(MarkingCompleted) should be (false)
-		MarkingCompleted.canTransitionTo(DownloadedByMarker) should be (false)
-		ReleasedForMarking.canTransitionTo(DownloadedByMarker) should be (true)
-		DownloadedByMarker.canTransitionTo(MarkingCompleted) should be (true)
+		MarkingCompleted.canTransitionTo(InProgress) should be (false)
+		ReleasedForMarking.canTransitionTo(InProgress) should be (true)
+		InProgress.canTransitionTo(MarkingCompleted) should be (true)
 		ReleasedForMarking.canTransitionTo(MarkingCompleted) should be (true)
 	}
 

@@ -4,8 +4,12 @@ import org.scalatest.selenium.WebBrowser
 import org.scalatest.Assertions
 import org.scalatest.matchers.ShouldMatchers
 import org.openqa.selenium.WebDriver
+import org.scalatest.concurrent.Eventually
+import org.scalatest.time.SpanSugar._
 
-trait WebsignonMethods extends ShouldMatchers {
+
+
+trait WebsignonMethods extends ShouldMatchers  with Eventually{
 	import WebBrowser._ // include methods like "go to"
 	implicit val webDriver: WebDriver // let the trait know this will be implemented
 	
@@ -41,8 +45,11 @@ trait WebsignonMethods extends ShouldMatchers {
           if (!pageTitle.contains("Sign in")) {
 						click on linkText("Sign in")
           }
-          pageTitle should include ("Sign in")
-          textField("userName").value = details.usercode
+					// wait for the page to load
+					eventually(timeout(10.seconds), interval(200.millis))(
+						pageTitle should include("Sign in")
+					)
+					textField("userName").value = details.usercode
           // FIXME lame way of setting password field - fixed in scalatest but not
           // yet released. fix it when it's released. https://groups.google.com/forum/?fromgroups=#!topic/scalatest-users/ojW9g4-2fmI
           id("password").webElement.sendKeys(details.password)

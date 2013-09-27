@@ -41,24 +41,24 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	var assignmentService = Wire.auto[AssignmentService]
 	var userLookup = Wire.auto[UserLookupService]
 	var features = Wire.auto[Features]
-	
+
 	validatesSelf[SubmissionAndFeedbackCommand]
-	
-	@ModelAttribute("assignment") 
+
+	@ModelAttribute("assignment")
 	def assignment(@PathVariable("assignment") assignment: Assignment) = assignment
-	
+
 	@ModelAttribute("submissionAndFeedbackCommand")
-	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = 
+	def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) =
 		new SubmissionAndFeedbackCommand(module, assignment)
-	
-	@ModelAttribute("allFilters") 
+
+	@ModelAttribute("allFilters")
 	def allFilters(@PathVariable("assignment") assignment: Assignment) =
 		CourseworkFilters.AllFilters.filter(_.applies(assignment))
-		
+
 	@RequestMapping(Array("/list"))
 	def list(@Valid command: SubmissionAndFeedbackCommand, errors: Errors) = {
 		val (assignment, module) = (command.assignment, command.module)
-		
+
 		module.department.assignmentInfoView match {
 			case Assignment.Settings.InfoViewType.Summary =>
 				Redirect(Routes.admin.assignment.submissionsandfeedback.summary(assignment))
@@ -75,15 +75,15 @@ class SubmissionAndFeedbackController extends CourseworkController {
 	@RequestMapping(Array("/summary"))
 	def summary(@Valid command: SubmissionAndFeedbackCommand, errors: Errors) = {
 		val (assignment, module) = (command.assignment, command.module)
-		
+
 		if (!features.assignmentProgressTable) Redirect(Routes.admin.assignment.submissionsandfeedback.table(assignment))
 		else {
 			if (errors.hasErrors) {
 				Mav("admin/assignments/submissionsandfeedback/progress")
-					.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+					.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
 			} else {
 				val results = command.apply()
-				
+
 				Mav("admin/assignments/submissionsandfeedback/progress",
 					"students" -> results.students,
 					"whoDownloaded" -> results.whoDownloaded,
@@ -91,21 +91,21 @@ class SubmissionAndFeedbackController extends CourseworkController {
 					"hasPublishedFeedback" -> results.hasPublishedFeedback,
 					"hasOriginalityReport" -> results.hasOriginalityReport,
 					"mustReleaseForMarking" -> results.mustReleaseForMarking
-				).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+				).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
 			}
 		}
 	}
-	
+
 	@RequestMapping(Array("/table"))
 	def table(@Valid command: SubmissionAndFeedbackCommand, errors: Errors) = {
 		val (assignment, module) = (command.assignment, command.module)
 
 		if (errors.hasErrors) {
 			Mav("admin/assignments/submissionsandfeedback/list")
-				.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+				.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
 		} else {
 			val results = command.apply()
-		
+
 			Mav("admin/assignments/submissionsandfeedback/list",
 				"students" -> results.students,
 				"whoDownloaded" -> results.whoDownloaded,
@@ -113,15 +113,15 @@ class SubmissionAndFeedbackController extends CourseworkController {
 				"hasPublishedFeedback" -> results.hasPublishedFeedback,
 				"hasOriginalityReport" -> results.hasOriginalityReport,
 				"mustReleaseForMarking" -> results.mustReleaseForMarking
-			).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
+			).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
 		}
 	}
-	
+
 	@RequestMapping(Array("/export.csv"))
 	def csv(@Valid command: SubmissionAndFeedbackCommand) = {
 		val (assignment, module) = (command.assignment, command.module)
 		val results = command.apply()
-		
+
 		val items = results.students
 
 		val writer = new StringWriter
@@ -135,34 +135,34 @@ class SubmissionAndFeedbackController extends CourseworkController {
 
 		new CSVView(module.code + "-" + assignment.id + ".csv", writer.toString)
 	}
-	
+
 	@RequestMapping(Array("/export.xml"))
 	def xml(@Valid command: SubmissionAndFeedbackCommand) = {
 		val (assignment, module) = (command.assignment, command.module)
 		val results = command.apply()
-		
+
 		val items = results.students
-		
+
 		new XMLBuilder(items, assignment, module).toXML
 	}
-	
+
 	@RequestMapping(Array("/export.xlsx"))
 	def xlsx(@Valid command: SubmissionAndFeedbackCommand) = {
 		val (assignment, module) = (command.assignment, command.module)
 		val results = command.apply()
-		
+
 		val items = results.students
-		
+
 		val workbook = new ExcelBuilder(items, assignment, module).toXLSX
-		
+
 		new ExcelView(assignment.name + ".xlsx", workbook)
 	}
-	
+
 	override def binding[A](binder: WebDataBinder, cmd: A) {
 		binder.registerCustomEditor(classOf[CourseworkFilter], new AbstractPropertyEditor[CourseworkFilter] {
-			override def fromString(name: String) = CourseworkFilters.of(name)			
+			override def fromString(name: String) = CourseworkFilters.of(name)
 			override def toString(filter: CourseworkFilter) = filter.getName
 		})
 	}
-	
+
 }

@@ -9,8 +9,7 @@ import uk.ac.warwick.tabula.RequestInfo
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.model.forms.FileField
-import uk.ac.warwick.tabula.data.model.forms.FileSubmissionValue
+import uk.ac.warwick.tabula.data.model.forms.{FormFieldContext, FileField, FileFormValue}
 import uk.ac.warwick.tabula.data.model.Module
 
 
@@ -51,16 +50,17 @@ class SubmitAssignmentCommandTest extends TestBase {
 		val file = new FileField
 		file.name = "upload"
 		file.id = "upload"
+		file.context = FormFieldContext.Submission
 		file.attachmentLimit = 4
 		file.attachmentTypes = Seq("doc", "docx", "pdf")
 		assignment.addField(file)
-		
+
 
 		// common reusable setup
 		trait Setup {
 			val cmd = new SubmitAssignmentCommand(assignment.module, assignment, user)
 			var errors = new BindException(cmd, "command")
-			val submissionValue = cmd.fields.get("upload").asInstanceOf[FileSubmissionValue]
+			val submissionValue = cmd.fields.get("upload").asInstanceOf[FileFormValue]
 		}
 
 		new Setup {

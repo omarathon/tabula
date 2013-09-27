@@ -521,6 +521,12 @@
 			<groupId>org.springframework.scala</groupId>
 			<artifactId>spring-scala</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.xhtmlrenderer</groupId>
+			<artifactId>flying-saucer-pdf-itext5</artifactId>
+			<version>9.0.3</version>
+		</dependency>
 		
 		<dependency>
 			<groupId>uk.co.halfninja</groupId>

@@ -14,3 +14,9 @@ trait FreemarkerTextRenderer extends TextRenderer with FreemarkerRendering{
   def renderTemplate(templateId:String, model:Any):String = renderToString(templateId, model)
 
 }
+trait TextRendererComponent{
+	def textRenderer:TextRenderer
+}
+trait AutowiredTextRendererComponent extends TextRendererComponent{
+	def textRenderer = new FreemarkerTextRenderer {}
+}

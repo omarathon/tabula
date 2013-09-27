@@ -42,7 +42,7 @@
 	
 	<div class="submission-fields">
 	
-	<#list assignment.fields as field>
+	<#list assignment.submissionFields as field>
 	<div class="submission-field">
 	<#include "/WEB-INF/freemarker/submit/formfields/${field.template}.ftl" >
 	</div>

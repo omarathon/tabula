@@ -39,6 +39,10 @@ object Routes {
 				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/list"
 			}
 
+			object onlineMarkerFeedback {
+				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online"
+			}
+
 
 			def create(module: Module) = "/admin/module/%s/assignments/new" format (encoded(module.code))
 

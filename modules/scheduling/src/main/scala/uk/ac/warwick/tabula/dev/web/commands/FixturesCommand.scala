@@ -116,6 +116,8 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 		val department = newDepartmentFrom(Fixtures.TestDepartment,departmentDao)
 
+		// make sure we can see names, as uni ids are not exposed in the fixtures
+		department.showStudentName = true
 		transactional() {
 			session.newCriteria[AssessmentComponent]
 				.add(Restrictions.in("departmentCode", JList("xxx","XXX")))
