@@ -10,19 +10,20 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState._
+import uk.ac.warwick.tabula.data.model.Department
 
 
 object OpenSmallGroupSetCommand {
-	def apply(setsToUpdate: Seq[SmallGroupSet], user: User, desiredState: SmallGroupSetSelfSignUpState) = desiredState match {
+	def apply(department: Department, setsToUpdate: Seq[SmallGroupSet], user: User, desiredState: SmallGroupSetSelfSignUpState) = desiredState match {
 		
 	
-		case Open => new OpenSmallGroupSet(setsToUpdate, user, desiredState)
+		case Open => new OpenSmallGroupSet(department, setsToUpdate, user, desiredState)
 											with ComposableCommand[Seq[SmallGroupSet]]
 											with OpenSmallGroupSetPermissions
 											with OpenSmallGroupSetAudit
 											with OpenSmallGroupSetNotifier 
 		
-		case Closed => new OpenSmallGroupSet(setsToUpdate, user, desiredState)
+		case Closed => new OpenSmallGroupSet(department, setsToUpdate, user, desiredState)
 									with ComposableCommand[Seq[SmallGroupSet]]
 									with OpenSmallGroupSetPermissions
 									with OpenSmallGroupSetAudit
@@ -31,6 +32,7 @@ object OpenSmallGroupSetCommand {
 }
 
 trait OpenSmallGroupSetState {
+	val department: Department
 	val applicableSets: Seq[SmallGroupSet]
 	// convenience value for freemarker to use when we're opening a single
 	// set rather than a batch.
@@ -42,7 +44,7 @@ trait OpenSmallGroupSetState {
 		}
 	}
 }
-class OpenSmallGroupSet(val requestedSets: Seq[SmallGroupSet], val user: User, val setState: SmallGroupSetSelfSignUpState)
+class OpenSmallGroupSet(val department: Department, val requestedSets: Seq[SmallGroupSet], val user: User, val setState: SmallGroupSetSelfSignUpState)
 	extends CommandInternal[Seq[SmallGroupSet]] with OpenSmallGroupSetState with UserAware {
 
 	 val applicableSets = requestedSets.filter(s => s.allocationMethod == SmallGroupAllocationMethod.StudentSignUp && s.openState != setState)
@@ -57,7 +59,8 @@ trait OpenSmallGroupSetPermissions extends RequiresPermissionsChecking {
   this: OpenSmallGroupSetState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		applicableSets.foreach(g => p.PermissionCheck(Permissions.SmallGroups.Update, g))
+		if (applicableSets.isEmpty) p.PermissionCheck(Permissions.SmallGroups.Update, department)
+		else applicableSets.foreach(g => p.PermissionCheck(Permissions.SmallGroups.Update, g))
 	}
 }
 
