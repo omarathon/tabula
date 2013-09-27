@@ -276,8 +276,13 @@
 </#macro>
 
 <#macro bulk_email emails title subject>
+	<#assign separator = ";" />
+	<#if user?? && userSetting('bulkEmailSeparator')?has_content>
+		<#assign separator = userSetting('bulkEmailSeparator') />
+	</#if>
+
 	<#if emails?size gt 0 && emails?size lte 50>
-		<a href="mailto:<#list emails as email>${email}<#if email_has_next>,</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>" class="btn">
+		<a href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>" class="btn">
 			<i class="icon-envelope"></i> ${title}
 		</a>
 	</#if>
