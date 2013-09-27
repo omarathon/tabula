@@ -111,7 +111,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	def getFilesCreatedOn(createdOn: DateTime, maxResults: Int, startingId: String): Seq[FileAttachment] = transactional(readOnly = true) {
 		val criteria =
 			session.newCriteria[FileAttachment]
-				.add(Is.eq("dateUploaded", createdOn))
+				.add(is("dateUploaded", createdOn))
 
 		if (startingId.hasText)
 			criteria.add(Is.gt("id", startingId))
@@ -152,7 +152,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 
 	private def findOldTemporaryFiles = transactional() {
 		session.newCriteria[FileAttachment]
-			.add(Is.eq("temporary", true))
+			.add(is("temporary", true))
 			.add(Is.lt("dateUploaded", now minusDays (2)))
 			.setMaxResults(TemporaryFileBatch)
 			.list

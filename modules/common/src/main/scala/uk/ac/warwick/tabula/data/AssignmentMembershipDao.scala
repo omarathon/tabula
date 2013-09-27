@@ -70,26 +70,26 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 	 * fact that moduleCode and sequence uniquely identify the assignment.
 	 */
 	def find(assignment: AssessmentComponent): Option[AssessmentComponent] = session.newCriteria[AssessmentComponent]
-		.add(Restrictions.eq("moduleCode", assignment.moduleCode))
-		.add(Restrictions.eq("sequence", assignment.sequence))
+		.add(is("moduleCode", assignment.moduleCode))
+		.add(is("sequence", assignment.sequence))
 		.uniqueResult
 
 	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = session.newCriteria[UpstreamAssessmentGroup]
-		.add(Restrictions.eq("assessmentGroup", group.assessmentGroup))
-		.add(Restrictions.eq("academicYear", group.academicYear))
-		.add(Restrictions.eq("moduleCode", group.moduleCode))
-		.add(Restrictions.eq("occurrence", group.occurrence))
+		.add(is("assessmentGroup", group.assessmentGroup))
+		.add(is("academicYear", group.academicYear))
+		.add(is("moduleCode", group.moduleCode))
+		.add(is("occurrence", group.occurrence))
 		.uniqueResult
 
 	def find(group: AssessmentGroup): Option[AssessmentGroup] = {
 		val criteria = session.newCriteria[AssessmentGroup]
-		.add(Restrictions.eq("assessmentComponent", group.assessmentComponent))
-		.add(Restrictions.eq("occurrence", group.occurrence))
+		.add(is("assessmentComponent", group.assessmentComponent))
+		.add(is("occurrence", group.occurrence))
 
 		if (group.assignment != null) {
-			criteria.add(Restrictions.eq("assignment", group.assignment))
+			criteria.add(is("assignment", group.assignment))
 		} else {
-			criteria.add(Restrictions.eq("smallGroupSet", group.smallGroupSet))
+			criteria.add(is("smallGroupSet", group.smallGroupSet))
 		}
 
 		criteria.uniqueResult
@@ -127,8 +127,8 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 
 	def getUpstreamAssignment(group: UpstreamAssessmentGroup) = {
 		session.newCriteria[AssessmentComponent]
-			.add(Restrictions.eq("moduleCode", group.moduleCode))
-			.add(Restrictions.eq("assessmentGroup", group.assessmentGroup))
+			.add(is("moduleCode", group.moduleCode))
+			.add(is("assessmentGroup", group.assessmentGroup))
 			.uniqueResult
 	}
 
@@ -143,7 +143,7 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 	/** Just gets components of type Assignment for this department, not all components. */
 	def getAssessmentComponents(department: Department) = {
 		session.newCriteria[AssessmentComponent]
-			.add(Restrictions.eq("departmentCode", department.code.toUpperCase))
+			.add(is("departmentCode", department.code.toUpperCase))
 			.addOrder(Order.asc("moduleCode"))
 			.addOrder(Order.asc("sequence"))
 			.seq filter isInteresting
@@ -171,9 +171,9 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 
 	def getUpstreamAssessmentGroups(upstreamAssignment: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] = {
 		session.newCriteria[UpstreamAssessmentGroup]
-			.add(Restrictions.eq("academicYear", academicYear))
-			.add(Restrictions.eq("moduleCode", upstreamAssignment.moduleCode))
-			.add(Restrictions.eq("assessmentGroup", upstreamAssignment.assessmentGroup))
+			.add(is("academicYear", academicYear))
+			.add(is("moduleCode", upstreamAssignment.moduleCode))
+			.add(is("assessmentGroup", upstreamAssignment.assessmentGroup))
 			.seq
 	}
 }

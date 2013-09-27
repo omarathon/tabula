@@ -39,7 +39,7 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, week: Int) =
 		session.newCriteria[SmallGroupEventOccurrence]
-			.add(Restrictions.eq("event", event))
-			.add(Restrictions.eq("week", week))
+			.add(is("event", event))
+			.add(is("week", week))
 			.uniqueResult
 }

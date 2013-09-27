@@ -44,7 +44,7 @@ object ListMarkingWorkflowController {
 
 		def applyInternal() = {
 			val markingWorkflows = session.newCriteria[MarkingWorkflow]
-				.add(Restrictions.eq("department", department))
+				.add(is("department", department))
 				.list
 		  
 			for (markingWorkflow <- markingWorkflows) yield {
