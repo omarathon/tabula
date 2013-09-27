@@ -13,6 +13,8 @@ import scala.Some
 import uk.ac.warwick.tabula.data.{AutowiringSavedFormValueDaoComponent, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.MarkingState.InProgress
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.permissions.Permissions
 
 abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignment: Assignment, val student: Member, val currentUser: CurrentUser)
 	extends OnlineFeedbackState with OnlineFeedbackStudentState with BindListener with SelfValidating {
@@ -65,7 +67,7 @@ object OnlineFeedbackFormCommand {
 	def apply(module: Module, assignment: Assignment, student: Member, currentUser: CurrentUser) =
 		new OnlineFeedbackFormCommand(module, assignment, student, currentUser)
 			with ComposableCommand[Feedback]
-			with OnlineFeedbackPermissions
+			with OnlineFeedbackFormPermissions
 			with AutowiringFeedbackServiceComponent
 			with AutowiringFileAttachmentServiceComponent
 			with AutowiringZipServiceComponent
@@ -79,7 +81,7 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, currentUser)
 	with CommandInternal[Feedback] with Appliable[Feedback] {
 
-	self: FeedbackServiceComponent with SavedFormValueDaoComponent with FileAttachmentServiceComponent with ZipServiceComponent =>
+	self: FeedbackServiceComponent with SavedFormValueDaoComponent with FileAttachmentComponent with ZipServiceComponent =>
 
 	def feedback = assignment.findFullFeedback(student.universityId)
 
@@ -112,7 +114,7 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 			zipService.invalidateFeedbackZip(assignment)
 		}
 
-		feedbackService.save(feedback)
+		feedbackService.saveOrUpdate(feedback)
 		feedback
 	}
 
@@ -178,7 +180,7 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 			val filesToKeep =  Option(attachedFiles).getOrElse(JList()).asScala
 			val existingFiles = Option(feedback.attachments).getOrElse(JList()).asScala
 			val filesToRemove = existingFiles -- filesToKeep
-			filesToRemove.foreach(fileAttachmentService.delete)
+			fileAttachmentService.deleteAttachments(filesToRemove)
 			feedback.attachments = JArrayList[FileAttachment](filesToKeep)
 		}
 		feedback.addAttachments(file.attached.asScala)
@@ -190,7 +192,7 @@ object OnlineMarkerFeedbackFormCommand {
 	def apply(module: Module, assignment: Assignment, student: Member, currentUser: CurrentUser) =
 		new OnlineMarkerFeedbackFormCommand(module, assignment, student, currentUser)
 			with ComposableCommand[MarkerFeedback]
-			with OnlineFeedbackPermissions
+			with OnlineFeedbackFormPermissions
 			with AutowiringFeedbackServiceComponent
 			with AutowiringFileAttachmentServiceComponent
 			with AutowiringZipServiceComponent
@@ -204,7 +206,7 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, currentUser)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] {
 
-	self: FeedbackServiceComponent with SavedFormValueDaoComponent with FileAttachmentServiceComponent with ZipServiceComponent =>
+	self: FeedbackServiceComponent with SavedFormValueDaoComponent with FileAttachmentComponent with ZipServiceComponent =>
 
 	def markerFeedback = assignment.getMarkerFeedback(student.universityId, currentUser.apparentUser)
 
@@ -241,7 +243,7 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 		copyTo(markerFeedback)
 		markerFeedback.state = InProgress
 
-		feedbackService.save(parentFeedback)
+		feedbackService.saveOrUpdate(parentFeedback)
 		feedbackService.save(markerFeedback)
 		markerFeedback
 	}
@@ -308,12 +310,23 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 			val filesToKeep =  Option(attachedFiles).getOrElse(JList()).asScala
 			val existingFiles = Option(markerFeedback.attachments).getOrElse(JList()).asScala
 			val filesToRemove = existingFiles -- filesToKeep
-			filesToRemove.foreach(fileAttachmentService.delete)
+			fileAttachmentService.deleteAttachments(filesToRemove)
+			filesToRemove
 			markerFeedback.attachments = JArrayList[FileAttachment](filesToKeep)
 		}
 		markerFeedback.addAttachments(file.attached.asScala)
 	}
 
+}
+
+trait OnlineFeedbackFormPermissions extends RequiresPermissionsChecking {
+
+	self: OnlineFeedbackState =>
+
+	def permissionsCheck(p: PermissionsChecking) {
+		p.mustBeLinked(assignment, module)
+		p.PermissionCheck(Permissions.Feedback.Create, assignment)
+	}
 }
 
 trait OnlineFeedbackStudentState {

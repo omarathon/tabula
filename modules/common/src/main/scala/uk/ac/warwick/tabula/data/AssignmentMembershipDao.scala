@@ -64,7 +64,7 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 				and a.deleted = false and a.archived = false""")
 			.setString("universityId", user.getWarwickId)
 			.setString("userId", user.getUserId)
-			.seq.distinct
+			.distinct.seq
 
 	/**
 	 * Tries to find an identical AssessmentComponent in the database, based on the

@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
-import java.util.HashSet
 import scala.collection.JavaConverters._
 
 
@@ -102,7 +101,7 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	var releasedDate: DateTime = _
 
 	@OneToMany(mappedBy = "feedback", cascade = Array(ALL))
-	var customFormValues: JSet[SavedFormValue] = new HashSet
+	var customFormValues: JSet[SavedFormValue] = JHashSet()
 
 	def getValue(field: FormField): Option[SavedFormValue] = {
 		customFormValues.find( _.name == field.name )

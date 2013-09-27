@@ -16,7 +16,6 @@ import scala.reflect._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JsonObjectMapperFactory
 import org.hibernate.`type`.StandardBasicTypes
-import scala.Array
 import java.sql.Types
 import uk.ac.warwick.tabula.data.model.Gender.{Unspecified, Female, Male}
 

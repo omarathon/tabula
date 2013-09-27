@@ -26,6 +26,8 @@ object MarkingState {
 
 	def fromCode(code: String): MarkingState =
 		if (code == null) null
+		// Temporary catch old values until we can run the migration to remove these from the DB
+		else if(code == "DownloadedByMarker") InProgress
 		else values.find{_.name == code} match {
 			case Some(state) => state
 			case None => throw new IllegalArgumentException()

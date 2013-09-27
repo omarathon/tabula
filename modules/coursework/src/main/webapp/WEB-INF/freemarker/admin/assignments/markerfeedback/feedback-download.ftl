@@ -7,7 +7,7 @@
 		body {font-family: "Helvetica Neue", Helvetica, Arial, sans-serif 
 		}
 	</style>
-	<title>Test document</title>
+	<title>${feedback.assignment.module.name} (${feedback.assignment.module.code?upper_case}) - ${feedback.assignment.name}</title>
 </head>
 <body>
 <h2>${feedback.assignment.module.name} (${feedback.assignment.module.code?upper_case})</h2>

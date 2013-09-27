@@ -7,7 +7,6 @@ import javax.persistence._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{FormField, SavedFormValue}
-import java.util.HashSet
 import org.hibernate.annotations.AccessType
 import javax.persistence.Entity
 
@@ -48,7 +47,7 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments {
 	}
 
 	@OneToMany(mappedBy = "markerFeedback", cascade = Array(ALL))
-	var customFormValues: JSet[SavedFormValue] = new HashSet
+	var customFormValues: JSet[SavedFormValue] = JHashSet()
 
 	def getValue(field: FormField): Option[SavedFormValue] = {
 		customFormValues.find( _.name == field.name )

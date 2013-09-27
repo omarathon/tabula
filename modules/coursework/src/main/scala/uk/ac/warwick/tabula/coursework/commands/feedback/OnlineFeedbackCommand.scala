@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
-import scala.Some
 import uk.ac.warwick.tabula.data.model.MarkingState.{InProgress, MarkingCompleted}
 
 object OnlineFeedbackCommand {
@@ -95,7 +94,7 @@ trait OnlineFeedbackPermissions extends RequiresPermissionsChecking {
 
 	def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assignment, module)
-		p.PermissionCheck(Permissions.Feedback.Create, assignment)
+		p.PermissionCheck(Permissions.Feedback.Read, assignment)
 	}
 }
 

@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.AnonymousUser
 import scala.collection.JavaConverters._
-import scala.Some
+import uk.ac.warwick.spring.Wire
 
 /**
  * FIXME this could generate a corrupt file if two requests tried to generate the same zip simultaneously
