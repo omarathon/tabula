@@ -2,12 +2,14 @@
 	<h4>Course details</h4>
 	<table class="course-info">
 		<tbody>
-			<tr>
-				<th>Route</th>
-				<td>${(studentCourseDetails.route.name)!} (${(studentCourseDetails.route.code?upper_case)!})
-				</td>
-			</tr>
-			<#if profile.studentCourseDetails?size lt 2>
+			<#if (studentCourseDetails.route)??>
+				<tr>
+					<th>Route</th>
+					<td>${(studentCourseDetails.route.name)!} (${(studentCourseDetails.route.code?upper_case)!})
+					</td>
+				</tr>
+			</#if>
+			<#if profile.studentCourseDetails?size lt 2 && (studentCourseDetails.route)?? && (studentCourseDetails.course)??>
 				<tr>
 					<th>Course</th>
 					<td><@fmt.course_description studentCourseDetails /></td>
@@ -65,11 +67,13 @@
 			</tr>
 		</tbody>
 		<tbody>
-			<tr>
-				<th>UG/PG</th>
-				<td>${(studentCourseDetails.route.degreeType.toString)!}
-				</td>
-			</tr>
+			<#if (studentCourseDetails.route)??>
+				<tr>
+					<th>UG/PG</th>
+					<td>${(studentCourseDetails.route.degreeType.toString)!}
+					</td>
+				</tr>
+			</#if>
 			<tr>
 				<th>Attendance</th>
 				<td>${(studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.fullNameToDisplay)!}
