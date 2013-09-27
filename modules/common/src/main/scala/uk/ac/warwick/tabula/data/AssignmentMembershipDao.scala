@@ -5,7 +5,20 @@ import uk.ac.warwick.tabula.data.model._
 import org.hibernate.criterion.{Order, Restrictions}
 import uk.ac.warwick.tabula.AcademicYear
 import org.springframework.stereotype.Repository
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 
+trait AssignmentMembershipDaoComponent {
+	val membershipDao: AssignmentMembershipDao
+}
+
+trait AutowiringAssignmentMembershipDaoComponent extends AssignmentMembershipDaoComponent {
+	val membershipDao = Wire[AssignmentMembershipDao]
+}
+
+/**
+ * TODO Rename all of this to be less Assignment-centric
+ */
 trait AssignmentMembershipDao {
 	def find(assignment: AssessmentComponent): Option[AssessmentComponent]
 	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
@@ -42,6 +55,7 @@ trait AssignmentMembershipDao {
 	def countFullFeedback(assignment: Assignment): Int
 
 	def getEnrolledAssignments(user: User): Seq[Assignment]
+	def getEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet]
 }
 
 @Repository
@@ -64,6 +78,31 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 			.setString("universityId", user.getWarwickId)
 			.setString("userId", user.getUserId)
 			.seq
+			
+	def getEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet] =
+		session.newQuery[SmallGroupSet]("""select sgs
+			from SmallGroupSet sgs
+			left join fetch sgs.assessmentGroups ag
+			where
+				(1 = (
+					select 1 from uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup uag
+					where uag.moduleCode = ag.assessmentComponent.moduleCode
+						and uag.assessmentGroup = ag.assessmentComponent.assessmentGroup
+						and uag.academicYear = sgs.academicYear
+						and uag.occurrence = ag.occurrence
+						and :universityId in elements(uag.members.staticIncludeUsers)
+				) or (
+					(sgs._membersGroup.universityIds = false and :userId in elements(sgs._membersGroup.includeUsers)) or
+					(sgs._membersGroup.universityIds = true and :universityId in elements(sgs._membersGroup.includeUsers))
+				))
+				and (
+					(sgs._membersGroup.universityIds = false and :userId not in elements(sgs._membersGroup.excludeUsers)) or
+					(sgs._membersGroup.universityIds = true and :universityId not in elements(sgs._membersGroup.excludeUsers))
+				)
+				and sgs.deleted = false and sgs.archived = false""")
+			.setString("universityId", user.getWarwickId)
+			.setString("userId", user.getUserId)
+			.distinct.seq
 
 	/**
 	 * Tries to find an identical AssessmentComponent in the database, based on the

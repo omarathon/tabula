@@ -84,7 +84,7 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] 
 	protected def getUser(usercode: String) = userlookup.getUserByUserId(usercode)
 	protected def getWebgroups(usercode: String): Seq[String] = groupService.getGroupsNamesForUser(usercode).asScala
 
-	def findBy(user: User): Seq[A] = {
+	def findBy(user: User): Seq[A] = {		
 		// Caching disabled for the moment until we have a proper cache dirtying strategy
 		//cache.get(user.getUserId)
 		findByInternal(user)
