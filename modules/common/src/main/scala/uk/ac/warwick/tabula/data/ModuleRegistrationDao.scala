@@ -20,29 +20,14 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 
 	def saveOrUpdate(moduleRegistration: ModuleRegistration) = session.saveOrUpdate(moduleRegistration)
 
-	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String) = {
-
-		if (cats == null) {
-			val criteria = session.newCriteria[ModuleRegistration]
-				.add(is("studentCourseDetails", studentCourseDetails))
-				.add(is("module", module))
-				.add(is("academicYear", academicYear))
-				.add(is("occurrence", occurrence))
-
-			criteria.add(Restrictions.isNull("cats"))
-			criteria.uniqueResult
-		}
-		else {
-			session.newCriteria[ModuleRegistration]
+	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String) =
+		session.newCriteria[ModuleRegistration]
 				.add(is("studentCourseDetails", studentCourseDetails))
 				.add(is("module", module))
 				.add(is("academicYear", academicYear))
 				.add(is("cats", cats))
 				.add(is("occurrence", occurrence))
 				.uniqueResult
-		}
-
-	}
 
 	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration] = {
 		val usercodeString: String = usercodes.mkString(", ")
