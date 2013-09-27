@@ -73,6 +73,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito with Loggi
 		m.homeDepartment = dept
 		m.lastUpdatedDate = new DateTime(2000,1,2,0,0,0)
 		m.userType = Student
+		m.inUseFlag = "Active"
 		
 		session.save(m)
 		session.flush
@@ -105,6 +106,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito with Loggi
 				m.userId = i.toString
 				m.lastUpdatedDate = new DateTime(2000,1,2,0,0,0).plusSeconds(i)
 				m.userType = Student
+				m.inUseFlag = "Active"
 				
 				m
 			}
@@ -135,6 +137,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito with Loggi
 			m.universityId = "x9000"
 			m.userId = "x9000"
 			m.lastUpdatedDate = new DateTime(2000,1,1,0,0,0).plusSeconds(9000)
+			m.inUseFlag = "Active"
 			
 			val events = Seq(m)
 			events.foreach { dao.saveOrUpdate(_) }
