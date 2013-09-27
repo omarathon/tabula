@@ -19,7 +19,7 @@ object ViewRelatedStudentsCommand{
 			with ComposableCommand[Seq[StudentRelationship]]
 			with AutowiringRelationshipServiceComponent
 			with ViewRelatedStudentsCommandPermissions
-			with Unaudited
+			with Unaudited with ReadOnly
 	}
 }
 

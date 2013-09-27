@@ -138,7 +138,7 @@
 									${route.code?upper_case} All years
 								</div>
 								<div class="span2">
-									<a href="" class="btn btn-primary btn-mini">Edit</a>
+									<a href="<@url page="/manage/${command.dept.code}/sets/${set.id}/edit"/>" class="btn btn-primary btn-mini">Edit</a>
 								</div>
 							</div>
 						<#else>

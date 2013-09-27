@@ -24,21 +24,30 @@ class MarkingCompletedController extends CourseworkController {
 
 	validatesSelf[MarkingCompletedCommand]
 
-	def confirmView(assignment: Assignment) = Mav("admin/assignments/markerfeedback/marking-complete",
-		"assignment" -> assignment)
+	def confirmView(assignment: Assignment, command: MarkingCompletedCommand) =
+		Mav("admin/assignments/markerfeedback/marking-complete",
+			"assignment" -> assignment,
+			"onlineMarking" -> command.onlineMarking)
 
-	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.markerFeedback(assignment))
+
+	def RedirectBack(assignment: Assignment, command: MarkingCompletedCommand) = {
+		if(command.onlineMarking){
+			Redirect(Routes.admin.assignment.onlineMarkerFeedback(assignment))
+		} else {
+			Redirect(Routes.admin.assignment.markerFeedback(assignment))
+		}
+	}
 
 	// shouldn't ever be called as a GET - if it is, just redirect back to the submission list
 	@RequestMapping(method = Array(GET))
-	def get(@PathVariable assignment: Assignment) = RedirectBack(assignment)
+	def get(@PathVariable assignment: Assignment, form: MarkingCompletedCommand) = RedirectBack(assignment, form)
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment,
 		            form: MarkingCompletedCommand, errors: Errors) = {
 		form.onBind()
 		form.preSubmitValidation()
-		confirmView(assignment)
+		confirmView(assignment, form)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))
@@ -51,7 +60,7 @@ class MarkingCompletedController extends CourseworkController {
 			else {
 				form.preSubmitValidation()
 				form.apply()
-				RedirectBack(assignment)
+				RedirectBack(assignment, form)
 			}
 		}
 	}

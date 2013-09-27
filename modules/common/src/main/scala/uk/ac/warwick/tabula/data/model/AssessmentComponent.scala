@@ -89,3 +89,13 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour {
 	
 	def upstreamAssessmentGroups(year: AcademicYear) = membershipService.getUpstreamAssessmentGroups(this, year)
 }
+
+object AssessmentComponent {
+	/** The value we store as the assessment group when no group has been chosen for this student
+	  * (in ADS it is null)
+	  *
+	  * We also use this value for a few other fields, like Occurrence, so the variable
+	  * name is a bit too specific.
+	  */
+	val NoneAssessmentGroup = "NONE"
+}

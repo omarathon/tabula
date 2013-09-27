@@ -102,10 +102,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 
 		// linked assessmentGroups
 		assessmentGroups = set.assessmentGroups
-		upstreamGroups.addAll(availableUpstreamGroups filter { ug =>
-			assessmentGroups.exists( ag => ug.assessmentComponent == ag.assessmentComponent && ag.occurrence == ug.occurrence )
-		})
-		
+
 		groups.clear()
 		groups.addAll(set.groups.asScala.map(x => {new EditSmallGroupCommand(x, this)}).asJava)
 		

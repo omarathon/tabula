@@ -20,10 +20,12 @@ class UserSettingsCommand(user: CurrentUser, settings: UserSettings) extends Com
 	
 	var alertsSubmission = settings.alertsSubmission
 	var weekNumberingSystem = settings.weekNumberingSystem
+	var bulkEmailSeparator = settings.bulkEmailSeparator
 		
 	override def applyInternal() = transactional() {
 		settings.alertsSubmission = alertsSubmission
 		settings.weekNumberingSystem = if (weekNumberingSystem.hasText) weekNumberingSystem else null
+		settings.bulkEmailSeparator = bulkEmailSeparator
 		
 		service.save(user, settings)
 	}
@@ -33,7 +35,7 @@ class UserSettingsCommand(user: CurrentUser, settings: UserSettings) extends Com
 	}	
 	
 	override def validate(errors:Errors) {
-		if (!user.exists){
+		if (!user.exists) {
 			errors.reject("user.mustBeLoggedIn")
 		}
 	}

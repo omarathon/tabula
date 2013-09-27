@@ -27,19 +27,19 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 	var sc: SendSubmissionNotifyCommand = _
 	val userLookup = mock[UserLookupService]
 	when(userLookup.getUserByUserId("test")).thenReturn(u)
-	
+
 	@Before def before {
 		ug.includeUsers = List ("test")
 		submission = newBaseSubmission
-		sc = { 
+		sc = {
 			val sendCmd = new SendSubmissionNotifyCommand(submission, ug)
 			sendCmd.userLookup = userLookup
 			sendCmd.userSettings = mock[UserSettingsService]
 			sendCmd
 		}
 	}
-	
-	
+
+
 	@Test def allSubmissions {
 		userSettings.alertsSubmission = "allSubmissions"
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
@@ -47,13 +47,13 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 		val admins = sc.applyInternal()
 		val notification = sc.emit(admins).get(0) // should only be one so get it!
 		notification.recipients.size should be(1)
-		
+
 		val text = notification.content
 		text should include (submission.assignment.module.name)
 		text should include (submission.id)
 	}
-	
-	
+
+
 	@Test def noAlerts {
 		userSettings.alertsSubmission = "none"
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
@@ -61,29 +61,29 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 		val admins = sc.applyInternal()
 		sc.emit(admins) should be(Nil) // should not be any notifications
 	}
-	
-	
+
+
 	@Test def lateSubmissions {
 		userSettings.alertsSubmission = "lateSubmissions"
 		submission.submittedDate = new DateTime(2013, 1, 12, 12, 0)
 		submission.assignment.extensions add newExtension
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
-		
+
 		val admins = sc.applyInternal()
 		val notification = sc.emit(admins).get(0) // should only be one so get it!
 		notification.recipients.size should be(1)
 	}
-	
-	
+
+
 	@Test def lateSubmissionsIgnoreOnTime {
 		userSettings.alertsSubmission= "lateSubmissions"
 		when(sc.userSettings.getByUserId("test")).thenReturn(Option(userSettings))
-		
+
 		sc.applyInternal()
 		val admins = sc.applyInternal()
 		sc.emit(admins) should be(Nil) // should not be any notifications
 	}
-	
+
 
 	def newExtension() = {
 		val extension = new Extension()
@@ -96,9 +96,9 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 	    extension.approvedOn = new DateTime(2012, 7, 22, 14, 42)
 		extension
 	}
-	
-	
-	def newTestUser = { 
+
+
+	def newTestUser = {
 		val u = new User("test")
 		u.setFoundUser(true)
 		u.setWarwickId("1000000")
@@ -106,7 +106,7 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 		u
 	}
 
-	
+
 	def newBaseSubmission = {
 		var submission = new Submission
 		submission.id = "000000001"
@@ -115,18 +115,18 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 		submission.assignment = newBaseAssignment
 		submission
 	}
-	
-	
+
+
 	def newBaseAssignment = {
 		var assignment = new Assignment
-	    assignment.addDefaultFields
+	    assignment.addDefaultFields()
 	    assignment.module = new Module
 	    assignment.module.code = "AA001"
 	    assignment.module.name = "Really difficult module"
 	    assignment.members = null
 	    assignment.id ="0000123"
 	    assignment.name = "My essay"
-	    assignment.commentField.get.value = "Instructions"	
+	    assignment.commentField.get.value = "Instructions"
 	    assignment.closeDate = 	new DateTime(2012, 7, 12, 12, 0)
 	    assignment
 	}

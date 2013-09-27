@@ -120,7 +120,9 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	}
 	
 	@RequestMapping
-	def form(cmd: EditSmallGroupSetCommand) = {
+	def form(cmd: EditSmallGroupSetCommand, @PathVariable("set") set: SmallGroupSet) = {
+		cmd.copyGroupsFrom(set)
+
 		cmd.afterBind()
 
 		Mav("admin/groups/edit",
@@ -132,21 +134,21 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("action=update"))
-	def update(@Valid cmd: EditSmallGroupSetCommand, errors: Errors) = {
+	def update(@Valid cmd: EditSmallGroupSetCommand, @PathVariable("set") set: SmallGroupSet, errors: Errors) = {
 		cmd.afterBind()
 
 		if (!errors.hasErrors) {
 			cmd.apply()
 		}
 
-		form(cmd)
+		form(cmd, set)
 	}
 
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh", "action!=update"))
-	def submit(@Valid cmd: EditSmallGroupSetCommand, errors: Errors) = {
+	def submit(@Valid cmd: EditSmallGroupSetCommand, @PathVariable("set") set: SmallGroupSet, errors: Errors) = {
 		cmd.afterBind()
 
-		if (errors.hasErrors) form(cmd)
+		if (errors.hasErrors) form(cmd, set)
 		else {
 			cmd.apply()
 			Redirect(Routes.admin.module(cmd.module))
@@ -240,10 +242,11 @@ class OpenSmallGroupSetController extends GroupsController {
 	
 	@ModelAttribute("openGroupSetCommand")
 	def getOpenGroupSetCommand(
+		@PathVariable("module") module: Module,
 		@PathVariable("set") set: SmallGroupSet,
 		@PathVariable action: SmallGroupSetSelfSignUpState
 	): Appliable[Seq[SmallGroupSet]] with OpenSmallGroupSetState = {
-		OpenSmallGroupSetCommand(Seq(set), user.apparentUser, action)
+		OpenSmallGroupSetCommand(module.department, Seq(set), user.apparentUser, action)
 		
 	}
 
@@ -308,8 +311,10 @@ class ReleaseAllSmallGroupSetsController extends GroupsController {
 @Controller
 class OpenAllSmallGroupSetsController extends GroupsController {
 	
-	@ModelAttribute("setList") def newViewModelOpen(@PathVariable action: SmallGroupSetSelfSignUpState): GroupsetListViewModel = {
-		new GroupsetListViewModel((user, sets) => OpenSmallGroupSetCommand(sets, user, action), action)
+	@ModelAttribute("setList") def newViewModelOpen(
+		@PathVariable department: Department, @PathVariable action: SmallGroupSetSelfSignUpState
+	): GroupsetListViewModel = {
+		new GroupsetListViewModel((user, sets) => OpenSmallGroupSetCommand(department, sets, user, action), action)
 	}
 	
 	@RequestMapping

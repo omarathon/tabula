@@ -152,7 +152,7 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 
 	private def findOldTemporaryFiles = transactional() {
 		session.newCriteria[FileAttachment]
-			.add(Is.eq("temporary", true))
+			.add(is("temporary", true))
 			.add(Is.lt("dateUploaded", now minusDays (2)))
 			.setMaxResults(TemporaryFileBatch)
 			.list

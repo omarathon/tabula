@@ -343,6 +343,7 @@
 				<entry key="weekRangeSelectFormatter"><bean class="uk.ac.warwick.tabula.helpers.WeekRangeSelectFormatterTag" /></entry>
 				<entry key="mapGet"><bean class="uk.ac.warwick.tabula.helpers.FreemarkerMapHelper" /></entry>
 				<entry key="singleWeekFormatter"><bean class="uk.ac.warwick.tabula.helpers.SingleWeekFormatterTag" /></entry>
+				<entry key="userSetting"><bean class="uk.ac.warwick.tabula.web.views.UserSettingFunction" /></entry>
 			</map>
 		</property>
 	</bean>

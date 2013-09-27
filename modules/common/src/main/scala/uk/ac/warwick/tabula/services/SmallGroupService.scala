@@ -8,6 +8,9 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.AssignmentMembershipDao
+import uk.ac.warwick.tabula.data.AssignmentMembershipDaoComponent
+import uk.ac.warwick.tabula.data.AutowiringAssignmentMembershipDaoComponent
 
 trait SmallGroupServiceComponent {
 	def smallGroupService: SmallGroupService
@@ -35,7 +38,7 @@ trait SmallGroupService {
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
-	self: SmallGroupDaoComponent with SmallGroupMembershipHelpers=>
+	self: SmallGroupDaoComponent with AssignmentMembershipDaoComponent with SmallGroupMembershipHelpers =>
 
 	def getSmallGroupSetById(id: String) = smallGroupDao.getSmallGroupSetById(id)
 	def getSmallGroupById(id: String) = smallGroupDao.getSmallGroupById(id)
@@ -49,8 +52,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = groupTutorsHelper.findBy(user)
 
-	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet] = groupSetMembersHelper.findBy(user)
-
+	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet] = membershipDao.getEnrolledSmallGroupSets(user)
 	def findSmallGroupsByStudent(user: User): Seq[SmallGroup] = studentGroupHelper.findBy(user)
 	
 	def getAttendees(event: SmallGroupEvent, weekNumber: Int): JList[String] = 
@@ -75,18 +77,21 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 }
 
 trait SmallGroupMembershipHelpers {
-	val eventTutorsHelper:UserGroupMembershipHelper[SmallGroupEvent]
+	val eventTutorsHelper: UserGroupMembershipHelper[SmallGroupEvent]
   //TODO can this be removed? findSmallGroupsByTutor could just call findSmallGroupEventsByTutor and then group by group
-	val groupTutorsHelper:UserGroupMembershipHelper[SmallGroup]
-	val groupSetMembersHelper:UserGroupMembershipHelper[SmallGroupSet]
+	val groupTutorsHelper: UserGroupMembershipHelper[SmallGroup]
 	val studentGroupHelper: UserGroupMembershipHelper[SmallGroup]
+	val membershipDao: AssignmentMembershipDao
 }
 
 // new up UGMHs which will Wire.auto() their dependencies
 trait SmallGroupMembershipHelpersImpl extends SmallGroupMembershipHelpers {
 	val eventTutorsHelper = new UserGroupMembershipHelper[SmallGroupEvent]("tutors")
 	val groupTutorsHelper = new UserGroupMembershipHelper[SmallGroup]("events.tutors")
-	val groupSetMembersHelper = new UserGroupMembershipHelper[SmallGroupSet]("_membersGroup")
+	
+	// Don't use this, it's misleading - it won't use linked assessment components
+//	val groupSetMembersHelper = new UserGroupMembershipHelper[SmallGroupSet]("_membersGroup")
+	
 	val studentGroupHelper = new UserGroupMembershipHelper[SmallGroup]("_studentsGroup")
 }
 
@@ -94,5 +99,6 @@ trait SmallGroupMembershipHelpersImpl extends SmallGroupMembershipHelpers {
 class SmallGroupServiceImpl 
 	extends AbstractSmallGroupService
 		with AutowiringSmallGroupDaoComponent
+		with AutowiringAssignmentMembershipDaoComponent
 	  with SmallGroupMembershipHelpersImpl
 		with Logging

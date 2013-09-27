@@ -10,7 +10,7 @@ trait FileAttachmentComponent {
 	def fileAttachmentService: FileAttachmentService
 }
 
-trait AutowiringFileAttachmentServiceComponent {
+trait AutowiringFileAttachmentServiceComponent extends FileAttachmentComponent {
 	var fileAttachmentService = Wire[FileAttachmentService]
 }
 

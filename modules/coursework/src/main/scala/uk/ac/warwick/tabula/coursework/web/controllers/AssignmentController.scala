@@ -20,6 +20,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.coursework.commands.assignments.SendSubmissionNotifyCommand
 import uk.ac.warwick.tabula.services.SubmissionService
+import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, FreemarkerTextRenderer, PDFView}
+import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
 
 /** This is the main student-facing controller for handling esubmission and return of feedback.
  *
@@ -27,18 +29,18 @@ import uk.ac.warwick.tabula.services.SubmissionService
 @Controller
 @RequestMapping(Array("/module/{module}/{assignment}"))
 class AssignmentController extends CourseworkController {
-	
+
 	var submissionService = Wire.auto[SubmissionService]
 	var feedbackDao = Wire.auto[FeedbackDao]
 
 	hideDeletedItems
 
 	validatesSelf[SubmitAssignmentCommand]
-	
-	private def getFeedback(assignment: Assignment, user: CurrentUser) = 
+
+	private def getFeedback(assignment: Assignment, user: CurrentUser) =
 		feedbackDao.getFeedbackByUniId(assignment, user.universityId).filter(_.released)
 
-	@ModelAttribute def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = 
+	@ModelAttribute def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
 		restrictedBy {
 			getFeedback(assignment, user).isDefined
 		} (new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)).orNull
@@ -48,23 +50,23 @@ class AssignmentController extends CourseworkController {
 	 */
 	@RequestMapping(method = Array(HEAD, GET), params = Array("embedded"))
 	def embeddedView(
-			@PathVariable("module") module: Module, 
-			@PathVariable("assignment") assignment: Assignment, 
-			user: CurrentUser, 
-			formOrNull: SubmitAssignmentCommand, 
+			@PathVariable("module") module: Module,
+			@PathVariable("assignment") assignment: Assignment,
+			user: CurrentUser,
+			formOrNull: SubmitAssignmentCommand,
 			errors: Errors) = {
 		view(module, assignment, user, formOrNull, errors).embedded
 	}
 
 	@RequestMapping(method = Array(HEAD, GET), params = Array("!embedded"))
 	def view(
-			@PathVariable("module") module: Module, 
-			@PathVariable("assignment") assignment: Assignment, 
-			user: CurrentUser, 
-			formOrNull: SubmitAssignmentCommand, 
+			@PathVariable("module") module: Module,
+			@PathVariable("assignment") assignment: Assignment,
+			user: CurrentUser,
+			formOrNull: SubmitAssignmentCommand,
 			errors: Errors) = {
 		val form = Option(formOrNull)
-		
+
 		// If the user has feedback but doesn't have permission to submit, form will be null here, so we can't just get module/assignment from that
 		if (!user.loggedIn) {
 			RedirectToSignin()
@@ -83,12 +85,12 @@ class AssignmentController extends CourseworkController {
 			/*
 			 * Submission values are an unordered set without any proper name, so
 			 * match them up into an ordered sequence of pairs.
-			 * 
+			 *
 			 * If a submission value is missing, the right hand is None.
 			 * If any submission value doesn't match the assignment fields, it just isn't shown.
-			 */		
+			 */
 			val submissionValues = submission.map { submission =>
-				for (field <- assignment.fields) yield ( field -> submission.getValue(field) )
+				for (field <- assignment.submissionFields) yield ( field -> submission.getValue(field) )
 			}.getOrElse(Seq.empty)
 
 			Mav(
@@ -109,17 +111,26 @@ class AssignmentController extends CourseworkController {
 		}
 	}
 
+	@RequestMapping(method = Array(GET), value=Array("/feedback.pdf"))
+	def viewAsPdf(
+		@PathVariable("module") module: Module,
+		@PathVariable("assignment") assignment: Assignment,
+		user: CurrentUser)={
+		val feedback = getFeedback(assignment, user)
+		new PDFView("feedback.pdf", "/WEB-INF/freemarker/admin/assignments/markerfeedback/feedback-download.ftl", Map("feedback" -> feedback, "user"->user)) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
+	}
+
 	@RequestMapping(method = Array(POST))
 	def submit(
-			@PathVariable("module") module: Module, 
-			@PathVariable("assignment") assignment: Assignment, 
-			user: CurrentUser, 
-			@Valid formOrNull: SubmitAssignmentCommand, 
+			@PathVariable("module") module: Module,
+			@PathVariable("assignment") assignment: Assignment,
+			user: CurrentUser,
+			@Valid formOrNull: SubmitAssignmentCommand,
 			errors: Errors) = {
 		val form: SubmitAssignmentCommand = Option(formOrNull) getOrElse {
 			throw new SubmitPermissionDeniedException(assignment)
 		}
-				
+
 		/*
 		 * Note the multiple transactions. The submission transaction should commit before the confirmation email
 		 * command runs, to ensure that it has fully committed successfully. So don't wrap this method in an outer transaction
@@ -129,19 +140,19 @@ class AssignmentController extends CourseworkController {
 			view(form.module, form.assignment, user, form, errors)
 		} else {
 			val submission = transactional() { form.apply() }
-			// submission creation should be committed to DB at this point, 
+			// submission creation should be committed to DB at this point,
 			// so we can safely send out a submission receipt.
 			transactional() {
 				val sendReceipt = new SendSubmissionReceiptCommand(module, assignment, submission, user)
 				sendReceipt.apply()
 			}
-			
+
 			transactional() {
  				val moduleManagers = submission.assignment.module.managers
  				val notifyModuleManager = new SendSubmissionNotifyCommand(submission, moduleManagers)
  				notifyModuleManager.apply()
  			}
-			
+
 			Redirect(Routes.assignment(form.assignment)).addObjects("justSubmitted" -> true)
 		}
 	}

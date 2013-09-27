@@ -5,9 +5,11 @@ import uk.ac.warwick.tabula.groups.web.controllers.admin.OpenSmallGroupSetContro
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupSet}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
+import uk.ac.warwick.tabula.data.model.Module
 
 class OpenSingleSmallGroupSetControllerTest extends TestBase with Mockito {
 	val controller = new OpenSmallGroupSetController
+	val module = new Module
 	val set = new SmallGroupSet
 	set.allocationMethod = SmallGroupAllocationMethod.StudentSignUp
 
@@ -15,7 +17,7 @@ class OpenSingleSmallGroupSetControllerTest extends TestBase with Mockito {
 	@Test
 	def createsCommand() {
 		withUser("test") {
-			val command = controller.getOpenGroupSetCommand(set, SmallGroupSetSelfSignUpState.Open)
+			val command = controller.getOpenGroupSetCommand(module, set, SmallGroupSetSelfSignUpState.Open)
 			command.singleSetToOpen should be(set)
 		}
 	}

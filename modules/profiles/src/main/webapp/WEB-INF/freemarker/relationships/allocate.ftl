@@ -26,6 +26,17 @@
 	<noscript>
 		<div class="alert">This page requires Javascript.</div>
 	</noscript>
+	
+	<div class="alert">
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+		<h4>Students with multiple ${relationshipType.agentRole}s</h4>
+		
+		<p>This page expects students to have exactly one ${relationshipType.agentRole}. If you allocate a student to a ${relationshipType.agentRole}, 
+		it will remove any existing ${relationshipType.agentRole}s that the student has. This makes this page unsuitable for students who
+		are expected to have multiple ${relationshipType.agentRole}s.</p>
+		
+		<p>We hope to change this behaviour in the future to make it easier to manage ${relationshipType.agentRole}s for students.</p>
+	</div>
 
 	<div class="tabbable">
 		<ul class="nav nav-tabs">
@@ -49,6 +60,10 @@
 						<h3>Some problems need fixing</h3>
 						<#if errors.hasGlobalErrors()>
 							<#list errors.globalErrors as e>
+								<div><@spring.message message=e /></div>
+							</#list>
+						<#elseif errors.hasFieldErrors('file')>
+							<#list errors.getFieldErrors('file') as e>
 								<div><@spring.message message=e /></div>
 							</#list>
 						<#else>

@@ -5,7 +5,20 @@ import uk.ac.warwick.tabula.data.model._
 import org.hibernate.criterion.{Order, Restrictions}
 import uk.ac.warwick.tabula.AcademicYear
 import org.springframework.stereotype.Repository
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 
+trait AssignmentMembershipDaoComponent {
+	val membershipDao: AssignmentMembershipDao
+}
+
+trait AutowiringAssignmentMembershipDaoComponent extends AssignmentMembershipDaoComponent {
+	val membershipDao = Wire[AssignmentMembershipDao]
+}
+
+/**
+ * TODO Rename all of this to be less Assignment-centric
+ */
 trait AssignmentMembershipDao {
 	def find(assignment: AssessmentComponent): Option[AssessmentComponent]
 	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
@@ -42,12 +55,14 @@ trait AssignmentMembershipDao {
 	def countFullFeedback(assignment: Assignment): Int
 
 	def getEnrolledAssignments(user: User): Seq[Assignment]
+	def getEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet]
 }
 
 @Repository
 class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
+
 	def getEnrolledAssignments(user: User): Seq[Assignment] =
-		session.newQuery[Assignment]("""select distinct a
+		session.newQuery[Assignment]("""select a
 			from Assignment a
 			left join fetch a.assessmentGroups ag
 			where
@@ -63,33 +78,58 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 				and a.deleted = false and a.archived = false""")
 			.setString("universityId", user.getWarwickId)
 			.setString("userId", user.getUserId)
-			.seq
+			.distinct.seq
+			
+	def getEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet] =
+		session.newQuery[SmallGroupSet]("""select sgs
+			from SmallGroupSet sgs
+			left join fetch sgs.assessmentGroups ag
+			where
+				(1 = (
+					select 1 from uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup uag
+					where uag.moduleCode = ag.assessmentComponent.moduleCode
+						and uag.assessmentGroup = ag.assessmentComponent.assessmentGroup
+						and uag.academicYear = sgs.academicYear
+						and uag.occurrence = ag.occurrence
+						and :universityId in elements(uag.members.staticIncludeUsers)
+				) or (
+					(sgs._membersGroup.universityIds = false and :userId in elements(sgs._membersGroup.includeUsers)) or
+					(sgs._membersGroup.universityIds = true and :universityId in elements(sgs._membersGroup.includeUsers))
+				))
+				and (
+					(sgs._membersGroup.universityIds = false and :userId not in elements(sgs._membersGroup.excludeUsers)) or
+					(sgs._membersGroup.universityIds = true and :universityId not in elements(sgs._membersGroup.excludeUsers))
+				)
+				and sgs.deleted = false and sgs.archived = false""")
+			.setString("universityId", user.getWarwickId)
+			.setString("userId", user.getUserId)
+			.distinct.seq
 
 	/**
 	 * Tries to find an identical AssessmentComponent in the database, based on the
 	 * fact that moduleCode and sequence uniquely identify the assignment.
 	 */
 	def find(assignment: AssessmentComponent): Option[AssessmentComponent] = session.newCriteria[AssessmentComponent]
-		.add(Restrictions.eq("moduleCode", assignment.moduleCode))
-		.add(Restrictions.eq("sequence", assignment.sequence))
+		.add(is("moduleCode", assignment.moduleCode))
+		.add(is("sequence", assignment.sequence))
 		.uniqueResult
 
 	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup] = session.newCriteria[UpstreamAssessmentGroup]
-		.add(Restrictions.eq("assessmentGroup", group.assessmentGroup))
-		.add(Restrictions.eq("academicYear", group.academicYear))
-		.add(Restrictions.eq("moduleCode", group.moduleCode))
-		.add(Restrictions.eq("occurrence", group.occurrence))
+		.add(is("assessmentGroup", group.assessmentGroup))
+		.add(is("academicYear", group.academicYear))
+		.add(is("moduleCode", group.moduleCode))
+		.add(is("occurrence", group.occurrence))
 		.uniqueResult
 
 	def find(group: AssessmentGroup): Option[AssessmentGroup] = {
 		val criteria = session.newCriteria[AssessmentGroup]
-		.add(Restrictions.eq("assessmentComponent", group.assessmentComponent))
-		.add(Restrictions.eq("occurrence", group.occurrence))
+		.add(is("assessmentComponent", group.assessmentComponent))
+		.add(is("occurrence", group.occurrence))
 
 		if (group.assignment != null) {
-			criteria.add(Restrictions.eq("assignment", group.assignment))
+			criteria.add(is("assignment", group.assignment))
 		} else {
-			criteria.add(Restrictions.eq("smallGroupSet", group.smallGroupSet))
+			criteria.add(is("smallGroupSet", group.smallGroupSet))
 		}
 
 		criteria.uniqueResult
@@ -127,8 +167,8 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 
 	def getUpstreamAssignment(group: UpstreamAssessmentGroup) = {
 		session.newCriteria[AssessmentComponent]
-			.add(Restrictions.eq("moduleCode", group.moduleCode))
-			.add(Restrictions.eq("assessmentGroup", group.assessmentGroup))
+			.add(is("moduleCode", group.moduleCode))
+			.add(is("assessmentGroup", group.assessmentGroup))
 			.uniqueResult
 	}
 
@@ -143,7 +183,7 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 	/** Just gets components of type Assignment for this department, not all components. */
 	def getAssessmentComponents(department: Department) = {
 		session.newCriteria[AssessmentComponent]
-			.add(Restrictions.eq("departmentCode", department.code.toUpperCase))
+			.add(is("departmentCode", department.code.toUpperCase))
 			.addOrder(Order.asc("moduleCode"))
 			.addOrder(Order.asc("sequence"))
 			.seq filter isInteresting
@@ -171,9 +211,9 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 
 	def getUpstreamAssessmentGroups(upstreamAssignment: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] = {
 		session.newCriteria[UpstreamAssessmentGroup]
-			.add(Restrictions.eq("academicYear", academicYear))
-			.add(Restrictions.eq("moduleCode", upstreamAssignment.moduleCode))
-			.add(Restrictions.eq("assessmentGroup", upstreamAssignment.assessmentGroup))
+			.add(is("academicYear", academicYear))
+			.add(is("moduleCode", upstreamAssignment.moduleCode))
+			.add(is("assessmentGroup", upstreamAssignment.assessmentGroup))
 			.seq
 	}
 }

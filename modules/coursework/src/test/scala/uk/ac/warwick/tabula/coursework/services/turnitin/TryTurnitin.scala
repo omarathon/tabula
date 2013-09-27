@@ -1,42 +1,34 @@
 package uk.ac.warwick.tabula.coursework.services.turnitin
 
-import collection.JavaConversions._
-import org.apache.commons.codec.digest.DigestUtils
 import java.util.Properties
 import java.io.FileInputStream
 import java.io.File
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.TestHelpers
-import java.io.FileWriter
-import uk.ac.warwick.tabula.coursework.commands.turnitin.SubmitToTurnitinCommand
 import uk.ac.warwick.tabula.TestFixtures
-import uk.ac.warwick.tabula.data.model.Submission
-import uk.ac.warwick.tabula.data.model.SavedSubmissionValue
-import uk.ac.warwick.tabula.data.model.FileAttachment
 
-import uk.ac.warwick.util.web.UriBuilder
 
 /**
  * There should be a functional test for the Turnitin
  * support but in the meantime I'm just running this
- * little app manually to find out how it works. 
+ * little app manually to find out how it works.
  */
 object TryTurnitin extends App with Logging with TestHelpers with TestFixtures {
-	
+
 	val api = new Turnitin
 	try {
 		emptyTempDirSet
-		
+
 		setupAspects
-	
+
 		val props = new Properties
 		props.load(new FileInputStream( new File("local.properties") ))
 		Seq("turnitin.key", "turnitin.aid", "turnitin.said").foreach { key =>
 			if (!props.containsKey(key)) throw new RuntimeException("Config property " + key + " not set in local.properties")
 		}
-		
+
 		logger.debug("Creating instance")
-		
+
 		api.sharedSecretKey = props.getProperty("turnitin.key")
 		api.aid = props.getProperty("turnitin.aid")
 		//api.said = props.getProperty("turnitin.said")
@@ -46,18 +38,18 @@ object TryTurnitin extends App with Logging with TestHelpers with TestFixtures {
 
 		println("Hello")
 		val nick = api.login("nick@nickhowes.co.uk", "Nick","Howes")
-		
+
 		val ritchie = api.login("ritchie.allen@warwick.ac.uk", "Ritchie", "Allllen")
-		
+
 		println(ritchie)
-		
+
 
 		val testClassName = ClassName("TestClass1")
 		val testAssName = AssignmentName("TestAss1")
 		// think we just have to store these and know them.
         val classId = ClassId("ExtNewClassId")
         val assId = AssignmentId("ExtNewAssId")
-			
+
 		val f = new File("src/test/resources/turnitin-submission.doc")
 		if (!f.exists) throw new IllegalArgumentException("Whoops, test file doesn't exist")
 
@@ -65,7 +57,7 @@ object TryTurnitin extends App with Logging with TestHelpers with TestFixtures {
 			println("logged in " + session.userEmail)
 
 			println("userid is %s" format session.userId)
-			
+
 //			println(session.createClass(classId, ClassName(classId.value + " Name")))
 //			println(session.createAssignment(classId, testClassName, assId, testAssName))
 
@@ -93,11 +85,11 @@ object TryTurnitin extends App with Logging with TestHelpers with TestFixtures {
 			// don't logout as this will invalidate any URLs we've generated.
 			//session.logout()
 		}
-		
-	
+
+
 	} finally {
 		deleteTemporaryDirs
 		api.destroy()
 	}
-	
+
 }

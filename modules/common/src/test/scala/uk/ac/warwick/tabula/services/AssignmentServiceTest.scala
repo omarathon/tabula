@@ -59,7 +59,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignment.module = module
 		assignment.academicYear = new AcademicYear(2009)
 		assignment.markDeleted()
-		assignment.addDefaultFields
+		assignment.addDefaultFields()
 		assignmentService.save(assignment)
 
 		assignment.fields.get(1)

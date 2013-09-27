@@ -55,9 +55,9 @@
 	<div class="missed-info">
 		<#if command.missedCountByTerm?keys?size == 0 && (command.monitoringPointsByTerm?keys?size > 0) >
 			<#if is_the_student>
-				You have attended all monitoring points.
+				You have missed 0 monitoring points.
 			<#else>
-				${command.studentCourseDetails.student.firstName} has attended all monitoring points.
+				${command.studentCourseDetails.student.firstName} has missed 0 monitoring points.
 			</#if>
 		<#else>
 			<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>

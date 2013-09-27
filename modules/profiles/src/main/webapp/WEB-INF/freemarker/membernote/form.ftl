@@ -1,5 +1,6 @@
 <#if memberNoteSuccess??>
 <#else>
+	<div class="alert">Administrative notes are visible to students.</div>
 	<@f.form id="edit-member-note-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="form-horizontal double-submit-protection">
 
 		<@form.labelled_row "title" "Title">

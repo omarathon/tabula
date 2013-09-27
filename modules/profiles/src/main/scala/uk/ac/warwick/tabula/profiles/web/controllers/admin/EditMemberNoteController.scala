@@ -12,6 +12,8 @@ import org.springframework.validation.Errors
 @RequestMapping(value = Array("/{member}/note/{memberNote}/edit"))
 class EditMemberNoteController extends BaseController {
 
+	validatesSelf[EditMemberNoteCommand]
+
 	@ModelAttribute("command")
 	def editCommand(@PathVariable member: Member, @PathVariable memberNote: MemberNote) = new EditMemberNoteCommand(memberNote, user)
 

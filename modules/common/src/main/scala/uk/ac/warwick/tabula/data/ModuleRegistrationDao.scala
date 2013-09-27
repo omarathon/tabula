@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.ModuleRegistration
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Module
+import org.hibernate.criterion.Restrictions
 
 trait ModuleRegistrationDao {
 	def saveOrUpdate(moduleRegistration: ModuleRegistration)
@@ -19,15 +20,14 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 
 	def saveOrUpdate(moduleRegistration: ModuleRegistration) = session.saveOrUpdate(moduleRegistration)
 
-	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String) = {
+	def getByNotionalKey(studentCourseDetails: StudentCourseDetails, module: Module, cats: java.math.BigDecimal, academicYear: AcademicYear, occurrence: String) =
 		session.newCriteria[ModuleRegistration]
-			.add(is("studentCourseDetails", studentCourseDetails))
-			.add(is("module", module))
-			.add(is("academicYear", academicYear))
-			.add(is("cats", cats))
-			.add(is("occurrence", occurrence))
-			.uniqueResult
-	}
+				.add(is("studentCourseDetails", studentCourseDetails))
+				.add(is("module", module))
+				.add(is("academicYear", academicYear))
+				.add(is("cats", cats))
+				.add(is("occurrence", occurrence))
+				.uniqueResult
 
 	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration] = {
 		val usercodeString: String = usercodes.mkString(", ")

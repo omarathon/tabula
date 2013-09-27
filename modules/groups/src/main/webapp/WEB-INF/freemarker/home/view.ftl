@@ -21,12 +21,10 @@
 		You're currently not signed in. <a class="sso-link" href="<@sso.loginlink />">Sign in</a>
 		to see a personalised view.
 	</p>
-</#if>
+<#else>
+	<#include "_student.ftl" />
+	<#include "_admin.ftl" />
 
-<#include "_student.ftl" />
-<#include "_admin.ftl" />
-
-<#if user.loggedIn>
 	<#assign is_student=user.student /> <#-- Non-students may also have groups, but we still show them the intro text -->
 	<#assign is_tutor=nonempty(taughtGroups) />
 	<#assign is_admin=(nonempty(ownedDepartments) || nonempty(ownedModuleDepartments)) />

@@ -5,9 +5,11 @@
 
 <@f.form method="post" action="${formAction}" commandName="markingCompletedCommand">
 
-<h1>Marking completed </h1>
+<h1>Marking completed</h1>
 
 <@form.errors path="" />
+
+<input type="hidden" name="onlineMarking" value="${onlineMarking?string}" />
 <input type="hidden" name="confirmScreen" value="true" />
 
 <@spring.bind path="students">

@@ -16,6 +16,7 @@ import org.apache.commons.lang3.text.WordUtils
 import org.apache.poi.hssf.usermodel.HSSFDataFormat
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.forms.SavedFormValue
 
 class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module: Module) extends SubmissionAndFeedbackExport {
 
@@ -66,7 +67,7 @@ class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module
 		else Map()
 	}
 
-	def fieldElement(item: SubmissionListItem)(value: SavedSubmissionValue) =
+	def fieldElement(item: SubmissionListItem)(value: SavedFormValue) =
 		if (value.hasAttachments)
 			<field name={ value.name }>
 				{
