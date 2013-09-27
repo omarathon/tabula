@@ -31,7 +31,7 @@ class AssignmentImporterTest extends PersistenceTestBase with Mockito {
 		)
 		val paramSource = new MapSqlParameterSource(paramMap)
 		val sqlToUse = NamedParameterUtils.substituteNamedParameters(AssignmentImporter.GetAllAssessmentGroups, paramSource)
-		sqlToUse.trim should endWith ("(?, ?)\n\t)")
+		sqlToUse.trim should endWith ("(?, ?)")
 	}
 	
 	@Test def importMembers {

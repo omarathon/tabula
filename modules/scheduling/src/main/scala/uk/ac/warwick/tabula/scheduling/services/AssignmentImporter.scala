@@ -186,7 +186,6 @@ object AssignmentImporter {
 		* the group of students with no selected assessment group.
 		*/
 	val GetAssessmentsQuery = s"""
-	(
 		select distinct
 		mr.module_code,
 		'${AssessmentComponent.NoneAssessmentGroup}' as seq,
@@ -197,17 +196,14 @@ object AssignmentImporter {
 		from module_registration mr
 		join module m on m.module_code = mr.module_code
 		where academic_year_code in (:academic_year_code) and mr.assessment_group is null
-	) union (
+	union
 		select mad.module_code, seq, mad.name, mad.assessment_group, m.department_code, assessment_code
 		from module_assessment_details mad
 		join module m on (m.module_code = mad.module_code and m.in_use = 'Y')
-		where m.department_code is not null
-	)
-														"""
+		where m.department_code is not null"""
 	// Department code should be set for any modules since 10/11
 
 	val GetAllAssessmentGroups = s"""
-	(
 		select distinct
 			mav.academic_year_code,
 			mav.module_code,
@@ -217,13 +213,12 @@ object AssignmentImporter {
 		join module_assessment_details mad on mad.module_code = mav.module_code
 		join module m on (m.module_code = mad.module_code and m.in_use = 'Y')
 		where academic_year_code in (:academic_year_code)
-	) union (
+	union
 		select distinct mav.academic_year_code, mav.module_code, mav_occurrence, mad.assessment_group
 		from module_availability mav
 		join module_assessment_details mad on mad.module_code = mav.module_code
 		join module m on (m.module_code = mad.module_code and m.in_use = 'Y')
-		where academic_year_code in (:academic_year_code)
-	)"""
+		where academic_year_code in (:academic_year_code)"""
 
 	val GetAssessmentGroupMembers = """
 		select spr_code
