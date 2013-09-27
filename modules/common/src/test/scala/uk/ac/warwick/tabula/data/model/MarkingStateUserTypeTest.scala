@@ -9,7 +9,7 @@ class MarkingStateUserTypeTest extends TestBase {
 		val t = new MarkingStateUserType
 		t.convertToObject("Received") should be (Received)
 		t.convertToObject("ReleasedForMarking") should be (ReleasedForMarking)
-		t.convertToObject("DownloadedByMarker") should be (InProgress)
+		t.convertToObject("InProgress") should be (InProgress)
 		t.convertToObject("MarkingCompleted") should be (MarkingCompleted)
 		evaluating { t.convertToObject("Q") } should produce [IllegalArgumentException]
 	}
@@ -18,7 +18,7 @@ class MarkingStateUserTypeTest extends TestBase {
 		val t = new MarkingStateUserType
 		t.convertToValue(Received) should be ("Received")
 		t.convertToValue(ReleasedForMarking) should be ("ReleasedForMarking")
-		t.convertToValue(InProgress) should be ("DownloadedByMarker")
+		t.convertToValue(InProgress) should be ("InProgress")
 		t.convertToValue(MarkingCompleted) should be ("MarkingCompleted")
 	}
 
