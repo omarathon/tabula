@@ -133,6 +133,7 @@
 					</div>
 					<div class="collapsible-target">
 						<#if pointSets?size == 1 && !pointSets?first.year??>
+							<#assign set=pointSets?first />
 							<div class="row-fluid">
 								<div class="span10">
 									${route.code?upper_case} All years
