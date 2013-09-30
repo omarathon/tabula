@@ -55,6 +55,11 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		currentRelationshipsUpdated.find(_.agent == "7654321") should be ('defined)
 
 		relationshipService.getRelationships(relationshipType, "1250148/1").size should be (2)
+		
+		val stu = Fixtures.student(universityId = "1250148", userId="student", sprStatus=sprFullyEnrolledStatus)
+		stu.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
+		
+		profileService.save(stu)
 
 		relationshipService.listStudentRelationshipsWithUniversityId(relationshipType, "1234567").size should be (1)
 		relationshipService.listStudentRelationshipsWithUniversityId(relationshipType, "7654321").size should be (1)
