@@ -38,9 +38,7 @@ class ProfileController extends AttendanceController {
 
 	@RequestMapping
 	def render(@ModelAttribute("command") cmd: Appliable[Unit]) = {
-		try {
-			cmd.apply()
-		}
+		cmd.apply()
 
 		if (ajax)
 			Mav("home/_profile", "currentUser" -> user).noLayout()
