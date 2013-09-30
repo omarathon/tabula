@@ -24,8 +24,8 @@ trait AssignmentMembershipService {
 	def getAssessmentGroup(template: AssessmentGroup): Option[AssessmentGroup]
 	def getUpstreamAssessmentGroup(template: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
 	def getUpstreamAssessmentGroup(id:String): Option[UpstreamAssessmentGroup]
-	def getUpstreamAssignment(id: String): Option[AssessmentComponent]
-	def getUpstreamAssignment(group: UpstreamAssessmentGroup): Option[AssessmentComponent]
+	def getAssessmentComponent(id: String): Option[AssessmentComponent]
+	def getAssessmentComponent(group: UpstreamAssessmentGroup): Option[AssessmentComponent]
 
 	/**
 	 * Get all AssessmentComponents that appear to belong to this module.
@@ -41,7 +41,7 @@ trait AssignmentMembershipService {
 	 * Should return as many groups as there are distinct OCCURRENCE values for a given
 	 * assessment group code, which most of the time is just 1.
 	 */
-	def getUpstreamAssessmentGroups(upstreamAssignment: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
 
 	def save(assignment: AssessmentComponent): AssessmentComponent
 	def save(group: UpstreamAssessmentGroup)
@@ -108,9 +108,9 @@ class AssignmentMembershipServiceImpl
 
 	def delete(group: AssessmentGroup) { dao.delete(group) }
 
-	def getUpstreamAssignment(id: String) = dao.getUpstreamAssignment(id)
+	def getAssessmentComponent(id: String) = dao.getAssessmentComponent(id)
 
-	def getUpstreamAssignment(group: UpstreamAssessmentGroup) = dao.getUpstreamAssignment(group)
+	def getAssessmentComponent(group: UpstreamAssessmentGroup) = dao.getAssessmentComponent(group)
 
 	/**
 	 * Gets assessment components for this module.
@@ -130,8 +130,8 @@ class AssignmentMembershipServiceImpl
 	// 	!(assignment.name contains "NOT IN USE")
 	// }
 
-	def getUpstreamAssessmentGroups(upstreamAssignment: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] =
-		dao.getUpstreamAssessmentGroups(upstreamAssignment, academicYear)
+	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] =
+		dao.getUpstreamAssessmentGroups(component, academicYear)
 	
 }
 

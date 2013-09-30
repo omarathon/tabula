@@ -15,13 +15,13 @@ class AssessmentComponentIdConverterTest extends TestBase with Mockito {
 		val assignment = new AssessmentComponent
 		assignment.id = "steve"
 			
-		service.getUpstreamAssignment("steve") returns (Some(assignment))
+		service.getAssessmentComponent("steve") returns (Some(assignment))
 		
 		converter.convertRight("steve") should be (assignment)
 	}
 	
 	@Test def invalidInput {
-		service.getUpstreamAssignment("20X6") returns (None)
+		service.getAssessmentComponent("20X6") returns (None)
 		
 		converter.convertRight("20X6") should be (null)
 	}
