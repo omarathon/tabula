@@ -8,6 +8,7 @@
 </#if>
 
 <article class="profile">
+
 	<section id="personal-details" class="clearfix">
 
 		<@fmt.member_photo profile />
@@ -256,6 +257,10 @@
 			</#if>
 		</#list>
 	</#if>
+
+	<p class="rendered-timestamp">
+		Page generated ${.now}
+	</p>
 </article>
 
 <#if user.sysadmin>
