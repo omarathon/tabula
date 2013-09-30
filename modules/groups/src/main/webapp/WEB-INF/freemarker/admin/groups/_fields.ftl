@@ -213,8 +213,6 @@
 				<@f.errors path="defaultMaxGroupSize" cssClass="error" />
 			</@form.field>
 		</@form.row>
-
-		<#include "_groups_modal.ftl" />
 	
 		<div class="striped-section">
 			<div class="clearfix">
@@ -233,6 +231,10 @@
 		</div>
 	</details>
 </fieldset>
+<#if groups?size gt 0>
+	<#include "_events_modals.ftl" />
+</#if>
+<#include "_groups_modal.ftl" />
 
 <script type="text/javascript">
 
