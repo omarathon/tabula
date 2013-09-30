@@ -5,7 +5,7 @@ ${groupSet.name} ${groupSet.format.description} for ${groupSet.module.code?upper
 <#list groupSet.groups as group>
 ${group.name} - <@fmt.p number=group.students.members?size singular="student"/>
 <#list group.events as event>
-   <@fmt.time time=event.startTime /> ${event.day.name}, ${event.location}, <@fmt.weekRanges event />
+   <@fmt.time time=event.startTime /> ${event.day.name}, ${event.location!}, <@fmt.weekRanges event />
 </#list>
 
 </#list>
