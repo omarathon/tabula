@@ -2659,7 +2659,7 @@ setTimeout(function(){o(window).trigger("hashchange")
 },200)
 }}}if(!id6nav.isiOS&&!id6nav.isAndroid&&!id6nav.isIE6or7){o(window).on("scroll resize",id6nav.repositionNavigation)
 }var w=function(x,z){if(z){id6nav.changeState(id6nav.states.SMALLSCREEN)
-}else{if(!id6nav.isiOS&&!id6nav.isAndroid&&!id6nav.isIE6or7){id6nav.navigationOffset=id6nav.$element.offset().top;
+}else{if(!id6nav.isiOS&&!id6nav.isAndroid&&!id6nav.isIE6or7&&id6nav.$element.length>0){id6nav.navigationOffset=id6nav.$element.offset().top;
 id6nav.navigationHeight=id6nav.$element.outerHeight(true);
 id6nav.repositionNavigation();
 if(id6nav.layout==id6nav.layouts.VERTICAL){id6nav.fixHorizontalNavLinkHeight()
