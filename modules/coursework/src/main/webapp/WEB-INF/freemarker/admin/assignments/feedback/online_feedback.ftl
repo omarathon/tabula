@@ -7,8 +7,9 @@
 		<#include "_submission_summary.ftl">
 	</#if>
 	<div class="form onlineFeedback">
+	    <#assign submit_url><@routes.onlinefeedbackform assignment command.student.universityId /></#assign>
 		<@f.form cssClass="form-horizontal double-submit-protection"
-				 method="post" enctype="multipart/form-data" commandName="command" action="<@routes.onlinefeedbackform assignment command.student.universityId />">
+				 method="post" enctype="multipart/form-data" commandName="command" action="${submit_url}">
 
 			<#list assignment.feedbackFields as field>
 				<div class="feedback-field">
