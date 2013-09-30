@@ -45,15 +45,18 @@ trait AllocateSelfToGroupValidator extends SelfValidating {
 trait DeallocateSelfFromGroupValidator extends SelfValidating {
 	this:StudentSignUpCommandState=>
 	override def validate(errors: Errors){
-		if (!group.groupSet.openForSignups){
-			errors.reject("smallGroup.closed")
-		}
-		if (!(group.groupSet.allocationMethod == StudentSignUp)){
-			errors.reject("smallGroup.notStudentSignUp")
-		}
-		if (!(group.groupSet.allowSelfGroupSwitching)){
-			errors.reject("smallGroup.noSwitching")
-
+		if (group == null) {
+			errors.reject("NotEmpty")
+		} else {
+			if (!group.groupSet.openForSignups){
+				errors.reject("smallGroup.closed")
+			}
+			if (!(group.groupSet.allocationMethod == StudentSignUp)){
+				errors.reject("smallGroup.notStudentSignUp")
+			}
+			if (!(group.groupSet.allowSelfGroupSwitching)){
+				errors.reject("smallGroup.noSwitching")
+			}
 		}
 	}
 
