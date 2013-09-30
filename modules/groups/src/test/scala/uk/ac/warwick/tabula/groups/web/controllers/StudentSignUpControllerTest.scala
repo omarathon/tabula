@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.groups.commands._
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
+import org.springframework.validation.BindException
 
 class StudentSignUpControllerTest extends TestBase with Mockito {
 
@@ -23,7 +24,7 @@ class StudentSignUpControllerTest extends TestBase with Mockito {
 	def signUpAppliesCommand(){
 		val controller = new StudentSignUpController
 		val command = mock[Appliable[SmallGroupSet]]
-		controller.signUp(command, null).viewName should be("redirect:/")
+		controller.signUp(command, new BindException(command, "command")).viewName should be("redirect:/")
 		there was one(command).apply
 	}
 
@@ -43,7 +44,7 @@ class StudentSignUpControllerTest extends TestBase with Mockito {
 	def unSignUpAppliesCommand(){
 		val controller = new StudentUnSignUpController
 		val command = mock[Appliable[SmallGroupSet]]
-		controller.signUp(command, null).viewName should be("redirect:/")
+		controller.signUp(command, new BindException(command, "command")).viewName should be("redirect:/")
 		there was one(command).apply
 	}
 }
