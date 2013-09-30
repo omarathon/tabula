@@ -2,13 +2,14 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.TestBase
 import org.joda.time.DateTime
+import org.joda.time.DateTimeConstants
 
 class TermServiceTest extends TestBase{
 
 	@Test
 	def canGetAcademicWeeksBetweenDates(){
 		val service = new TermServiceImpl
-		val now = DateTime.now
+		val now = new DateTime(2013, DateTimeConstants.SEPTEMBER, 27, 0, 0, 0, 0)
 		val weeks = service.getAcademicWeeksBetween(now.minusYears(1), now.plusYears(1))
 		weeks.size should be(53 * 2) // 2 year span
 		weeks.head._2 should be(1) // list starts with term1 week 1
