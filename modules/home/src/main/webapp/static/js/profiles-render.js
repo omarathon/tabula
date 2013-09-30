@@ -101,14 +101,14 @@
 				// wipe any existing state information for the submit protection
 				$form.removeData('submitOnceSubmitted');
 
-				// firefox fix
-				var wait = setInterval(function() {
-					var h = $f.find("body").height();
-					if (h > 0) {
-						clearInterval(wait);
-						$m.find(".modal-body").animate({ height: h });
-					}
-				}, 300); // this didn't work for me (ZLJ) at 150 but did at 200; upping to 300 to include safety margin
+//				// firefox fix
+//				var wait = setInterval(function() {
+//					var h = $f.find("body").height();
+//					if (h > 0) {
+//						clearInterval(wait);
+//						$m.find(".modal-body").animate({ height: h });
+//					}
+//				}, 300); // this didn't work for me (ZLJ) at 150 but did at 200; upping to 300 to include safety margin
 
 				// show-time
 				$m.modal("show");
