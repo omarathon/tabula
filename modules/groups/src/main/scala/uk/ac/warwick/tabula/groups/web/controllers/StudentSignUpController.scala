@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.CurrentUser
 import javax.validation.Valid
 import uk.ac.warwick.tabula.groups.web.Routes
+import org.springframework.validation.Errors
 
 
 @Controller
@@ -27,9 +28,13 @@ class StudentSignUpController extends GroupsController {
 	def get(): Mav = Redirect(Routes.home)
 
 	@RequestMapping(method=Array(POST))
-	def signUp(@Valid @ModelAttribute("command") command:Appliable[SmallGroupSet]): Mav = {
-		command.apply()
-		Redirect(Routes.home)
+	def signUp(@Valid @ModelAttribute("command") command:Appliable[SmallGroupSet], errors: Errors): Mav = {
+		if (errors.hasErrors) {
+			Mav("groups/signup/problems", "action" -> "signup")
+		} else {
+			command.apply()
+			Redirect(Routes.home)
+		}
 	}
 }
 
@@ -48,8 +53,12 @@ class StudentUnSignUpController extends GroupsController {
 	def get(): Mav = Redirect(Routes.home)
 
 	@RequestMapping(method=Array(POST))
-	def signUp(@Valid @ModelAttribute("command") command:Appliable[SmallGroupSet]): Mav = {
-		command.apply()
-		Redirect(Routes.home)
+	def signUp(@Valid @ModelAttribute("command") command:Appliable[SmallGroupSet], errors: Errors): Mav = {
+		if (errors.hasErrors) {
+			Mav("groups/signup/problems", "action" -> "leave")
+		} else {
+			command.apply()
+			Redirect(Routes.home)
+		}
 	}
 }
