@@ -702,6 +702,27 @@
 		// drag and drop containers
 		$('.tabula-dnd').dragAndDrop();
 		$('.tabula-filtered-list').filteredList();
+
+		// TAB-1236 Ensure modals fit in the viewport
+		$('.modal').on('shown', function(){
+			var $this = $(this)
+				, modalBodyHeight = $this.find('.modal-body').height()
+				, modalHeight = $this.height()
+				, viewportHeight = $(window).height()
+			;
+			if (viewportHeight === 0 || modalHeight === 0 || modalBodyHeight === 0) {
+				// can't work out the relative heights so give up
+				return false;
+			}
+
+			// modal is positioned at 10% top, so add that in
+			var modalNotBodyHeight = modalHeight - modalBodyHeight
+				, viewportMaxHeight = (viewportHeight / 1.1) - modalNotBodyHeight
+			;
+			if (viewportMaxHeight < 400) {
+				$this.find('.modal-body').css('max-height', viewportMaxHeight);
+			}
+		});
 	}); // on ready
 
 	// take anything we've attached to "exports" and add it to the global "Profiles"
