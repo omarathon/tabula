@@ -16,7 +16,6 @@ sealed abstract class ScopelessPermission(description: String) extends Permissio
 }
 sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val selector: PermissionsSelector[A], description: String) extends Permission(description) {
 	override val getName = SelectorPermission.shortName(getClass.asInstanceOf[Class[_ <: SelectorPermission[A]]])
-	
 	def <= [B <: PermissionsSelector[B]](other: SelectorPermission[B]) = other match {
 		case that: SelectorPermission[A] => selector <= that.selector.asInstanceOf[PermissionsSelector[A]]
 		case _ => false
@@ -26,7 +25,7 @@ sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val select
 		case that: SelectorPermission[A] => {
 			new EqualsBuilder()
 			.append(getName, that.getName)
-			.append(selector, that.getName)
+			.append(selector, that.selector)
 			.build()
 		}
 		case _ => false
@@ -53,18 +52,30 @@ trait PermissionsSelector[A <: PermissionsSelector[A]] {
 
 object PermissionsSelector {
 	val AnyId = "*" // A special ID for converting to and from the catch-all selector
-	
+
 	def Any[A <: PermissionsSelector[A] : ClassTag] = new PermissionsSelector[A] {
 		def id = AnyId
-		
+
 		override def isWildcard = true
-		
+
 		override def <=(that: PermissionsSelector[A]) = {
 			// Any is only <= other wildcards
 			that.isWildcard
 		}
-			
-		override def toString() = "*" 
+
+		override def toString() = "*"
+
+		override def hashCode = id.hashCode
+
+		override def equals(other: Any) = other match {
+			case that: PermissionsSelector[A] => {
+				new EqualsBuilder()
+					.append(id, that.id)
+					.build()
+			}
+			case _ => false
+		}
+
 	}
 }
 

@@ -14,15 +14,12 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 	// Implicitly grants module manager role for all modules in this department
 	GeneratesSubRole(ModuleManagerRoleDefinition)
 
+	AllowsDelegationOfPermissions
+
 	GrantsScopedPermission(
 		Department.ManageExtensionSettings,
 		Department.ManageDisplaySettings,
 		Department.DownloadFeedbackReport,
-
-		RolesAndPermissions.Create,
-		RolesAndPermissions.Read,
-		RolesAndPermissions.Update,
-		RolesAndPermissions.Delete,
 
 		Assignment.ImportFromExternalSystem,
 
