@@ -25,7 +25,6 @@
 		</p>
 	</#if>
 
-	<#if isPGR><h2><a href="<@routes.profile_by_id universityId />">My Student Profile</a></h2></#if>
 	<div class="row-fluid">
 		<div class="span<#if is_admin>6<#else>12</#if>">
 			<#if is_staff>
@@ -35,6 +34,10 @@
 				</div>
 			
 				<#include "../profile/search/form.ftl" />
+			</#if>
+
+			<#if isPGR>
+				<h2><a href="<@routes.profile_by_id universityId />">My student profile</a></h2>
 			</#if>
 	
 			<#if showMyStudents>
