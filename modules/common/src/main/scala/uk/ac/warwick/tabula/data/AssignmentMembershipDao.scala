@@ -32,11 +32,11 @@ trait AssignmentMembershipDao {
 
 	def getAssessmentGroup(id: String): Option[AssessmentGroup]
 	def getUpstreamAssessmentGroup(id:String): Option[UpstreamAssessmentGroup]
-	def getUpstreamAssignment(id: String): Option[AssessmentComponent]
-	def getUpstreamAssignment(group: UpstreamAssessmentGroup): Option[AssessmentComponent]
+	def getAssessmentComponent(id: String): Option[AssessmentComponent]
+	def getAssessmentComponent(group: UpstreamAssessmentGroup): Option[AssessmentComponent]
 
 	/**
-	 * Get all UpstreamAssignments that appear to belong to this module.
+	 * Get all AssessmentComponents that appear to belong to this module.
 	 *
 	 *  Typically used to provide possible candidates to link to an app assignment,
 	 *  in conjunction with #getUpstreamAssessmentGroups.
@@ -49,7 +49,7 @@ trait AssignmentMembershipDao {
 	 * Should return as many groups as there are distinct OCCURRENCE values for a given
 	 * assessment group code, which most of the time is just 1.
 	 */
-	def getUpstreamAssessmentGroups(upstreamAssignment: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
+	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup]
 
 	def countPublishedFeedback(assignment: Assignment): Int
 	def countFullFeedback(assignment: Assignment): Int
@@ -122,17 +122,20 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 		.uniqueResult
 
 	def find(group: AssessmentGroup): Option[AssessmentGroup] = {
-		val criteria = session.newCriteria[AssessmentGroup]
-		.add(is("assessmentComponent", group.assessmentComponent))
-		.add(is("occurrence", group.occurrence))
-
-		if (group.assignment != null) {
-			criteria.add(is("assignment", group.assignment))
-		} else {
-			criteria.add(is("smallGroupSet", group.smallGroupSet))
+		if (group.assignment == null && group.smallGroupSet == null) None
+		else {
+			val criteria = session.newCriteria[AssessmentGroup]
+			.add(is("assessmentComponent", group.assessmentComponent))
+			.add(is("occurrence", group.occurrence))
+	
+			if (group.assignment != null) {
+				criteria.add(is("assignment", group.assignment))
+			} else {
+				criteria.add(is("smallGroupSet", group.smallGroupSet))
+			}
+	
+			criteria.uniqueResult
 		}
-
-		criteria.uniqueResult
 	}
 
 	def save(group:AssessmentGroup) = session.saveOrUpdate(group)
@@ -163,9 +166,9 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 		session.flush()
 	}
 
-	def getUpstreamAssignment(id: String) = getById[AssessmentComponent](id)
+	def getAssessmentComponent(id: String) = getById[AssessmentComponent](id)
 
-	def getUpstreamAssignment(group: UpstreamAssessmentGroup) = {
+	def getAssessmentComponent(group: UpstreamAssessmentGroup) = {
 		session.newCriteria[AssessmentComponent]
 			.add(is("moduleCode", group.moduleCode))
 			.add(is("assessmentGroup", group.assessmentGroup))
@@ -209,11 +212,11 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 		!(assignment.name contains "NOT IN USE")
 	}
 
-	def getUpstreamAssessmentGroups(upstreamAssignment: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] = {
+	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] = {
 		session.newCriteria[UpstreamAssessmentGroup]
 			.add(is("academicYear", academicYear))
-			.add(is("moduleCode", upstreamAssignment.moduleCode))
-			.add(is("assessmentGroup", upstreamAssignment.assessmentGroup))
+			.add(is("moduleCode", component.moduleCode))
+			.add(is("assessmentGroup", component.assessmentGroup))
 			.seq
 	}
 }

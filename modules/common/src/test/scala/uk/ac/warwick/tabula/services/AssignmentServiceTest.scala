@@ -160,7 +160,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 	}
 
-	@Transactional @Test def updateUpstreamAssignment {
+	@Transactional @Test def updateAssessmentComponent {
 		val upstream = new AssessmentComponent
 		upstream.departmentCode = "ch"
 		upstream.moduleCode = "ch101"
@@ -348,9 +348,9 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 		session.flush
 
-		assignmentMembershipService.getUpstreamAssignment(ua1.id) should be (Some(ua1))
-		assignmentMembershipService.getUpstreamAssignment(ua4.id) should be (Some(ua4))
-		assignmentMembershipService.getUpstreamAssignment("wibble") should be (None)
+		assignmentMembershipService.getAssessmentComponent(ua1.id) should be (Some(ua1))
+		assignmentMembershipService.getAssessmentComponent(ua4.id) should be (Some(ua4))
+		assignmentMembershipService.getAssessmentComponent("wibble") should be (None)
 
 		assignmentMembershipService.getAssessmentComponents(Fixtures.module("ch101")) should be (Seq(ua1, ua2))
 		assignmentMembershipService.getAssessmentComponents(Fixtures.module("la101")) should be (Seq(ua3))

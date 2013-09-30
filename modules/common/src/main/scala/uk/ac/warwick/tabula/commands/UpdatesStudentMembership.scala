@@ -214,7 +214,7 @@ class UpstreamGroupPropertyEditor extends AbstractPropertyEditor[UpstreamGroup] 
 
 		id.split(";") match {
 			case Array(uaId: String, groupId: String) =>
-				val ua = membershipService.getUpstreamAssignment(uaId).getOrElse(explode)
+				val ua = membershipService.getAssessmentComponent(uaId).getOrElse(explode)
 				val uag = membershipService.getUpstreamAssessmentGroup(groupId).getOrElse(explode)
 				new UpstreamGroup(ua, uag)
 			case _ => explode
