@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.groups.commands.{DeallocateSelfFromGroupValidator, AllocateSelfToGroupValidator}
 import uk.ac.warwick.tabula.groups.commands.{DeallocateSelfFromGroupCommand, AllocateSelfToGroupCommand}
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute}
+import org.springframework.web.bind.annotation.{RequestMethod, RequestMapping, PathVariable, ModelAttribute}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.CurrentUser
@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.groups.web.Routes
 
 
 @Controller
+@RequestMapping(value=Array("/module/{module_code}/groups/{set_id}/signup"))
 class StudentSignUpController extends GroupsController {
 
 	validatesSelf[AllocateSelfToGroupValidator]
@@ -22,12 +23,17 @@ class StudentSignUpController extends GroupsController {
 		AllocateSelfToGroupCommand(user.apparentUser, groupSet)
 	}
 
-	@RequestMapping(method=Array(POST),value =Array("/module/{module_code}/groups/{set_id}/signup"))
+	@RequestMapping(method=Array(GET, HEAD))
+	def get(): Mav = Redirect(Routes.home)
+
+	@RequestMapping(method=Array(POST))
 	def signUp(@Valid @ModelAttribute("command") command:Appliable[SmallGroupSet]): Mav = {
 		command.apply()
 		Redirect(Routes.home)
 	}
 }
+
+@RequestMapping(value=Array("/module/{module_code}/groups/{set_id}/leave"))
 @Controller
 class StudentUnSignUpController extends GroupsController {
 
@@ -38,7 +44,10 @@ class StudentUnSignUpController extends GroupsController {
 		DeallocateSelfFromGroupCommand(user.apparentUser, groupSet)
 	}
 
-	@RequestMapping(method=Array(POST),value =Array("/module/{module_code}/groups/{set_id}/leave"))
+	@RequestMapping(method=Array(GET, HEAD))
+	def get(): Mav = Redirect(Routes.home)
+
+	@RequestMapping(method=Array(POST))
 	def signUp(@Valid @ModelAttribute("command") command:Appliable[SmallGroupSet]): Mav = {
 		command.apply()
 		Redirect(Routes.home)
