@@ -355,11 +355,11 @@
 						<li>
 							<#assign publishfeedbackurl><@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" /></#assign>
 							<@fmt.permission_button permission='Feedback.Publish' scope=module action_descr='release feedback to students' href=publishfeedbackurl data_attr='data-container=body'>
-								<i class="icon-envelope"></i> Publish feedback
+								<i class="icon-envelope-alt"></i> Publish feedback
 							</@fmt.permission_button>						
 						</li>
 					<#else>
-						<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish."><i class="icon-envelope"></i> Publish feedback </a></li>
+						<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish."><i class="icon-envelope-alt"></i> Publish feedback </a></li>
 					</#if>
 
 

@@ -86,14 +86,14 @@
 						<#if profile.email??>
 							<tr>
 								<th>Warwick email</th>
-								<td><i class="icon-envelope"></i> <a href="mailto:${profile.email}">${profile.email}</a></td>
+								<td><i class="icon-envelope-alt"></i> <a href="mailto:${profile.email}">${profile.email}</a></td>
 							</tr>
 						</#if>
 
 						<#if profile.homeEmail??>
 							<tr>
 								<th>Alternative email</th>
-								<td><i class="icon-envelope"></i> <a href="mailto:${profile.homeEmail}">${profile.homeEmail}</a></td>
+								<td><i class="icon-envelope-alt"></i> <a href="mailto:${profile.homeEmail}">${profile.homeEmail}</a></td>
 							</tr>
 						</#if>
 

@@ -30,7 +30,7 @@
 	<#assign receiptFormUrl><@routes.assignmentreceipt assignment=assignment /></#assign>
 	<form action="${receiptFormUrl}" method="POST">
 		<div class="submit-buttons">
-		<button class="btn" name="resend" value=""><i class="icon-envelope"></i> Re-send email receipt</button>
+		<button class="btn" name="resend" value=""><i class="icon-envelope-alt"></i> Re-send email receipt</button>
 		</div>
 	</form> 
 	
