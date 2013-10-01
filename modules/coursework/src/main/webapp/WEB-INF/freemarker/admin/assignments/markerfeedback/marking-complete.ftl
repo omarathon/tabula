@@ -1,7 +1,7 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
-<#assign formAction><@url page='/admin/module/${module.code}/assignments/${assignment.id}/marker/marking-completed'/></#assign>
+<#assign formAction><@routes.markingCompleted assignment /></#assign>
 
 <@f.form method="post" action="${formAction}" commandName="markingCompletedCommand">
 

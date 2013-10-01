@@ -7,9 +7,9 @@
 		<#include "_submission_summary.ftl">
 	</#if>
 	<div class="form onlineFeedback">
-	    <#assign submit_url><@routes.onlinefeedbackform assignment command.student.universityId /></#assign>
+	    <#-- Make the action of this form relative so that marker feedback works as well -->
 		<@f.form cssClass="form-horizontal double-submit-protection"
-				 method="post" enctype="multipart/form-data" commandName="command" action="${submit_url}">
+				method="post" enctype="multipart/form-data" commandName="command" action="${command.student.universityId}">
 
 			<#list assignment.feedbackFields as field>
 				<div class="feedback-field">

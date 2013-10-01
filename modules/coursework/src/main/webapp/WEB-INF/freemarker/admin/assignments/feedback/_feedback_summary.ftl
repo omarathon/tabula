@@ -32,15 +32,13 @@
 			<div class="control-group">
 				<label class="control-label">Attachments</label>
 				<div class="controls">
-					<ul class="unstyled">
-						<#list feedback.attachments as attachment>
-							<li id="attachment-${attachment.id}">
-								<span>${attachment.name}</span>
-							</li>
-						</#list>
-					</ul>
+					<a class="btn long-running" href="<@routes.markerFeedbackFiles assignment feedback/>">
+						<i class="icon-download"></i>
+						${feedback.attachments?size} <#if feedback.attachments?size == 1> file<#else> files</#if>
+					</a>
 				</div>
 			</div>
 		</#if>
+
 	</form>
 </div>
