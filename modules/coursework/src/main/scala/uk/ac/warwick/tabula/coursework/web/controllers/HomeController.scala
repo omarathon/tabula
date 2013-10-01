@@ -40,7 +40,7 @@ import uk.ac.warwick.tabula.data.model.Department
 		if (user.loggedIn) {
 			try {
 				val pagedActivities = activityService.getNoteworthySubmissions(user, doc, field, token)
-				
+
 				Mav("home/activities",
 					"activities" -> pagedActivities,
 					"async" -> true).noLayout
@@ -60,7 +60,7 @@ import uk.ac.warwick.tabula.data.model.Department
 		if (user.loggedIn) {
 			val ownedDepartments = moduleService.departmentsWithPermission(user, Permissions.Module.ManageAssignments)
 			val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageAssignments)
-			
+
 			val pagedActivities = activityService.getNoteworthySubmissions(user)
 
 			val assignmentsForMarking = assignmentService.getAssignmentWhereMarker(user.apparentUser).sortBy(_.closeDate)
@@ -76,20 +76,22 @@ import uk.ac.warwick.tabula.data.model.Department
 
 			val assignmentsWithFeedback = assignmentService.getAssignmentsWithFeedback(user.universityId)
 
-			val enrolledAssignments = 
+			val enrolledAssignments =
 				if (features.assignmentMembership) assignmentMembershipService.getEnrolledAssignments(user.apparentUser)
 				else Seq.empty
 			val assignmentsWithSubmission =
 				if (features.submissions) assignmentService.getAssignmentsWithSubmission(user.universityId)
 				else Seq.empty
-				
+			val lateFormativeAssignments = enrolledAssignments.filter { ass => !ass.summative && ass.isClosed } // TAB-706
+
 			// exclude assignments already included in other lists.
-			val enrolledAssignmentsTrimmed = 
+			val enrolledAssignmentsTrimmed =
 				enrolledAssignments
 					.diff(assignmentsWithFeedback)
 					.diff(assignmentsWithSubmission)
 					.filter {_.collectSubmissions} // TAB-475
-					.sortWith { (ass1, ass2) => 
+					.filterNot(lateFormativeAssignments.contains(_))
+					.sortWith { (ass1, ass2) =>
 						// TAB-569 personal time to deadline - if ass1 is "due" before ass2 for the current user
 						// Show open ended assignments after
 						if (ass2.openEnded && !ass1.openEnded) true
@@ -98,16 +100,16 @@ import uk.ac.warwick.tabula.data.model.Department
 							def timeToDeadline(ass: Assignment) = {
 								val extension = ass.extensions.find(_.userId == user.apparentId)
 								val isExtended = ass.isWithinExtension(user.apparentId)
-								
+
 								if (ass.openEnded) ass.openDate
 								else if (isExtended) (extension map { _.expiryDate }).get
 								else ass.closeDate
 							}
-							
+
 							timeToDeadline(ass1) < timeToDeadline(ass2)
 						}
 					}
-					
+
 			def enhanced(assignment: Assignment) = {
 				val extension = assignment.extensions.find(_.userId == user.apparentId)
 				val isExtended = assignment.isWithinExtension(user.apparentId)
@@ -126,26 +128,29 @@ import uk.ac.warwick.tabula.data.model.Department
 					"extensionRequested" -> extensionRequested,
 					"submittable" -> assignment.submittable(user.apparentId),
 					"resubmittable" -> assignment.resubmittable(user.apparentId),
-					"closed" -> assignment.isClosed
+					"closed" -> assignment.isClosed,
+					"summative" -> assignment.summative.booleanValue
 				)
 			}
-				
+
 			// adorn the enrolled assignments with extra data.
 			val enrolledAssignmentsInfo = for (assignment <- enrolledAssignmentsTrimmed) yield enhanced(assignment)
 			val assignmentsWithFeedbackInfo = for (assignment <- assignmentsWithFeedback) yield enhanced(assignment)
 			val assignmentsWithSubmissionInfo = for (assignment <- assignmentsWithSubmission.diff(assignmentsWithFeedback)) yield enhanced(assignment)
-			
+			val lateFormativeAssignmentsInfo = for (assignment <- lateFormativeAssignments) yield enhanced(assignment)
+
 			val historicAssignmentsInfo =
 				assignmentsWithFeedbackInfo
 				.union(assignmentsWithSubmissionInfo)
+				.union(lateFormativeAssignmentsInfo)
 				.sortWith { (info1, info2) =>
 					def toDate(info: Map[String, Any]) = {
 						val assignment = info("assignment").asInstanceOf[Assignment]
 						val submission = info("submission").asInstanceOf[Option[Submission]]
-						
+
 						submission map { _.submittedDate } getOrElse { if (assignment.openEnded) assignment.openDate else assignment.closeDate }
 					}
-					
+
 					toDate(info1) < toDate(info2)
 				}
 				.reverse
@@ -153,7 +158,7 @@ import uk.ac.warwick.tabula.data.model.Department
 			Mav("home/view",
 				"enrolledAssignments" -> enrolledAssignmentsInfo,
 				"historicAssignments" -> historicAssignmentsInfo,
-				
+
 				"assignmentsForMarking" -> assignmentsForMarkingInfo,
 				"ownedDepartments" -> ownedDepartments,
 				"ownedModule" -> ownedModules,
