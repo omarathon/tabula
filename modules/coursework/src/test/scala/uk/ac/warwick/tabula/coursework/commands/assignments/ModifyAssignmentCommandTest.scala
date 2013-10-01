@@ -49,9 +49,8 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 
 
 
-
 	@Test def validateCloseDate = transactional { t =>
-		// TAB-236
+	// TAB-236
 		val f = MyFixtures()
 
 		val cmd = new AddAssignmentCommand(f.module)
@@ -74,6 +73,35 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 		cmd.validate(errors)
 		errors.getErrorCount() should be (1)
 		withClue("correct error code") { errors.getGlobalError().getCode() should be ("closeDate.early") }
+	}
+
+	@Test def validateName = transactional { t =>
+	// TAB-1263
+		val f = MyFixtures()
+
+		val cmd = new AddAssignmentCommand(f.module)
+		var errors = new BindException(cmd, "command")
+
+		// No error, different name
+		cmd.name = "New assignment"
+		cmd.validate(errors)
+		errors.getErrorCount() should be (0)
+
+		// Error, existing name
+		cmd.name = "test"
+		cmd.validate(errors)
+		errors.getErrorCount() should not be (0)
+		withClue("correct error code") { errors.getFieldErrors("name").asScala.map(_.getCode).head should be ("name.duplicate.assignment") }
+
+		// Archive existing, should stop error
+		f.module.assignments.get(0).archived = true
+		session.save(f.module)
+		session.save(f.assignment)
+		errors = new BindException(cmd, "command")
+
+		cmd.name = "test"
+		cmd.validate(errors)
+		errors.getErrorCount() should be (0)
 	}
 
 	@Test def includeAndExcludeUsers = transactional {
