@@ -9,6 +9,7 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 	final val assignmentName = "Online marking for Dummies"
 
 	private def setup(assignmentId: String) {
+
 		submitAssignment(P.Student1, moduleCode, assignmentName, assignmentId, "/file1.txt")
 		submitAssignment(P.Student2, moduleCode, assignmentName, assignmentId, "/file2.txt")
 	}
@@ -48,6 +49,9 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 
 	"Student" should "be able to view feedback on their submission" in {
 		withAssignment(moduleCode = moduleCode, assignmentName = assignmentName, assistants = Seq(P.Marker1.usercode)) {
+
+			createStudentMember(P.Student1.usercode, "F", "xx123", 1,"Ux123")
+
 			Given("We have two students with submitted assignments")
 			assignmentId => setup(assignmentId)
 
