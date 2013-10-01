@@ -101,12 +101,12 @@ object Fixtures {
 		a
 	}
 
-	def assessmentGroup(assignment:AssessmentComponent) = {
+	def assessmentGroup(academicYear: AcademicYear, code: String, module: String, occurrence: String) = {
 		val group = new UpstreamAssessmentGroup
-		group.academicYear = new AcademicYear(2012)
-		group.assessmentGroup = assignment.assessmentGroup
-		group.moduleCode = assignment.moduleCode
-		group.occurrence = "A"
+		group.academicYear = academicYear
+		group.assessmentGroup = code
+		group.moduleCode = module
+		group.occurrence = occurrence
 		group.members.staticIncludeUsers.addAll(Seq(
 			"0123456",
 			"0123457",
@@ -114,6 +114,14 @@ object Fixtures {
 		))
 		group
 	}
+
+	def assessmentGroup(assignment:AssessmentComponent): UpstreamAssessmentGroup =
+		assessmentGroup(
+			academicYear = new AcademicYear(2012),
+			code = assignment.assessmentGroup,
+			module = assignment.moduleCode + "-30",
+			occurrence = "A")
+
 
 	def markingWorkflow(name: String) = {
 		val workflow = new MarkingWorkflow

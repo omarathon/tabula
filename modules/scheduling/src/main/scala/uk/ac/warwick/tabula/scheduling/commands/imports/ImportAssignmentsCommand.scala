@@ -4,20 +4,34 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.Daoisms
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
+import uk.ac.warwick.tabula.data.{SessionComponent, Daoisms}
 import uk.ac.warwick.tabula.data.Transactions._
-import collection.JavaConversions._
 import uk.ac.warwick.tabula.SprCode
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 import uk.ac.warwick.tabula.scheduling.services.ModuleRegistration
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.system.permissions.{RequiresPermissionsChecking, PermissionsChecking}
 
-class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
-	
-	PermissionCheck(Permissions.ImportSystemData)
+object ImportAssignmentsCommand {
+	def apply() = new ComposableCommand[Unit]
+		with ImportAssignmentsCommand
+		with ImportAssignmentsDescription
+		with Daoisms
+
+	case class Result(
+		assignmentsFound: Int,
+		assignmentsChanged: Int,
+		groupsFound: Int,
+		groupsChanged: Int)
+}
+
+
+trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermissionsChecking with Logging with SessionComponent {
+
+	def permissionsCheck(p:PermissionsChecking) {
+		p.PermissionCheck(Permissions.ImportSystemData)
+	}
 
 	var assignmentImporter = Wire.auto[AssignmentImporter]
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
@@ -26,14 +40,14 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 
 	def applyInternal() {
 		benchmark("ImportAssessment") {
-			doAssignments
+			doAssignments()
 			logger.debug("Imported AssessmentComponents. Importing assessment groups...")
-			doGroups
-			doGroupMembers
+			doGroups()
+			doGroupMembers()
 		}
 	}
 
-	def doAssignments {
+	def doAssignments() {
 		transactional() {
 			for (assignment <- logSize(assignmentImporter.getAllAssessmentComponents)) {
 				if (assignment.name == null) {
@@ -45,7 +59,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 		}
 	}
 
-	def doGroups {
+	def doGroups() {
 		// Split into chunks so we commit transactions periodically.
 		for (groups <- logSize(assignmentImporter.getAllAssessmentGroups).grouped(ImportGroupSize)) {
 			saveGroups(groups)
@@ -62,7 +76,7 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 	 * what it's got and starts a new list. This way we don't have to load many
 	 * things into memory at once.
 	 */
-	def doGroupMembers {
+	def doGroupMembers() {
 		transactional() {
 			benchmark("Import all group members") {
 				var registrations = List[ModuleRegistration]()
@@ -78,6 +92,10 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 					if (count % 1000 == 0) {
 						logger.info("Processed " + count + " group members")
 					}
+				}
+				// TAB-1265 Don't forget the very last bunch.
+				if (!registrations.isEmpty) {
+					save(registrations)
 				}
 				logger.info("Processed all " + count + " group members")
 			}
@@ -108,19 +126,9 @@ class ImportAssignmentsCommand extends Command[Unit] with Logging with Daoisms {
 		}
 	}
 
-	def equal(s1: Seq[String], s2: Seq[String]) =
-		s1.length == s2.length && s1.sorted == s2.sorted
-
-	def describe(d: Description) {
-
-	}
-
 }
 
-object ImportAssignmentsCommand {
-	case class Result(
-		val assignmentsFound: Int,
-		val assignmentsChanged: Int,
-		val groupsFound: Int,
-		val groupsChanged: Int)
+
+trait ImportAssignmentsDescription extends Describable[Unit] {
+	def describe(d: Description) {}
 }
