@@ -57,7 +57,7 @@ If you are doing any work on this, it would be good to do the above first.
 			</div>
 		</#if>
 
-		<#if !modules?has_content && department.children?has_content>
+		<#if !data.moduleItems?has_content && department.children?has_content>
 			<a class="btn btn-medium dropdown-toggle disabled use-tooltip" title="This department doesn't directly contain any modules. Check subdepartments.">
 				<i class="icon-wrench"></i>
 				Manage
@@ -93,10 +93,6 @@ If you are doing any work on this, it would be good to do the above first.
 
 		</#if>
 	</div>
-
-<#if !data.moduleItems?has_content && department.children?has_content>
-<p>This department doesn't directly contain any modules. Check subdepartments.</p>
-</#if>
 
 <#-- This is the big list of modules -->
 <@components.module_info data />
