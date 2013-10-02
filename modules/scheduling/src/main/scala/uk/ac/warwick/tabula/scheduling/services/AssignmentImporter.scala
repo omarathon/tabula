@@ -4,7 +4,7 @@ import java.sql.ResultSet
 import java.sql.Types
 import javax.sql.DataSource
 import javax.annotation.Resource
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Service
@@ -28,6 +28,12 @@ trait AssignmentImporter {
 	def allMembers(callback: ModuleRegistration => Unit): Unit
 	
 	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup]
+
+	/**
+	 * The UpstreamAssessmentGroups that don't have any module registrations
+	 * against them.
+	 */
+	def getEmptyAssessmentGroups: Seq[UpstreamAssessmentGroup]
 	
 	def getAllAssessmentComponents: Seq[AssessmentComponent]
 }
@@ -39,31 +45,33 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 	@Resource(name = "academicDataStore") var ads: DataSource = _
 	var upstreamAssessmentGroupQuery: UpstreamAssessmentGroupQuery = _
 	var assessmentComponentQuery: AssessmentComponentQuery = _
+	var emptyAssessmentGroupsQuery: EmptyUpstreamAssessmentGroupQuery = _
 	var jdbc: NamedParameterJdbcTemplate = _
 
 	override def afterPropertiesSet() {
 		upstreamAssessmentGroupQuery = new UpstreamAssessmentGroupQuery(ads)
 		assessmentComponentQuery = new AssessmentComponentQuery(ads)
+		emptyAssessmentGroupsQuery = new EmptyUpstreamAssessmentGroupQuery(ads)
 		jdbc = new NamedParameterJdbcTemplate(ads)
 	}
 
-	def getAllAssessmentComponents: Seq[AssessmentComponent] = assessmentComponentQuery.executeByNamedParam(Map(
-		"academic_year_code" -> (yearsToImportArray)))
+	def getAllAssessmentComponents: Seq[AssessmentComponent] = assessmentComponentQuery.executeByNamedParam(JMap(
+		"academic_year_code" -> yearsToImportArray)).asScala
 
-	private def yearsToImportArray = yearsToImport.map(_.toString): JList[String]
+	private def yearsToImportArray = yearsToImport.map(_.toString).asJava: JList[String]
 
 	// This will be quite a few thousand records, but not more than
 	// 20k. Shouldn't cause any memory problems, so no point complicating
 	// it by trying to stream or batch the data.
-	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] = upstreamAssessmentGroupQuery.executeByNamedParam(Map(
-		"academic_year_code" -> (yearsToImportArray)))
+	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup] = upstreamAssessmentGroupQuery.executeByNamedParam(JMap(
+		"academic_year_code" -> yearsToImportArray)).asScala
 
 	/**
 	 * Iterates through ALL module registration elements in ADS (that's many),
 	 * passing each ModuleRegistration item to the given callback for it to process.
 	 */
 	def allMembers(callback: ModuleRegistration => Unit) {
-		val params: JMap[String, Object] = Map(
+		val params: JMap[String, Object] = JMap(
 			"academic_year_code" -> yearsToImportArray)
 		jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new RowCallbackHandler {
 			override def processRow(rs: ResultSet) {
@@ -76,6 +84,10 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 			}
 		})
 	}
+
+	def getEmptyAssessmentGroups: Seq[UpstreamAssessmentGroup] =
+		emptyAssessmentGroupsQuery.executeByNamedParam(JMap("academic_year_code" -> yearsToImportArray)).asScala
+
 
 	/** Convert incoming null assessment groups into the NONE value */
 	private def convertAssessmentGroupFromSITS(string: String) =
@@ -148,11 +160,14 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			a.assessmentType = AssessmentType.Assignment
 			a
 		}
+
+	def getEmptyAssessmentGroups: Seq[UpstreamAssessmentGroup] = Nil
 	
 }
 
 /**
  * Holds data about an individual student's registration on a single module.
+ * FIXME this class name is confusing now there's an unrelated ModuleRegistration entity
  */
 case class ModuleRegistration(year: String, sprCode: String, occurrence: String, moduleCode: String, assessmentGroup: String) {
 	def differentGroup(other: ModuleRegistration) =
@@ -215,7 +230,7 @@ object AssignmentImporter {
 		where academic_year_code in (:academic_year_code)
 	union
 		select distinct mav.academic_year_code, mav.module_code, mav_occurrence, mad.assessment_group
-		from module_availability mavch
+		from module_availability mav
 		join module_assessment_details mad on mad.module_code = mav.module_code
 		join module m on (m.module_code = mad.module_code and m.in_use = 'Y')
 		where academic_year_code in (:academic_year_code)"""
@@ -231,6 +246,27 @@ object AssignmentImporter {
 		where academic_year_code in (:academic_year_code)
 		order by academic_year_code, module_code, mav_occurrence, assessment_group
 		"""
+
+	/** AssessmentGroups without a cause */
+	val GetEmptyAssessmentGroups = """
+		select distinct
+		  mav.module_code,
+		  mav.academic_year_code,
+		  mav.mav_occurrence,
+		  mad.assessment_group
+		  from module_availability mav
+		  join module_assessment_details mad
+		    on mad.module_code = mav.module_code
+		  join module m
+		    on mav.module_code = m.module_code
+		    and m.in_use = 'Y'
+		  left join module_registration mr
+		    on mav.module_code = mr.module_code
+		    and mav.academic_year_code = mr.academic_year_code
+		    and mav.mav_occurrence = mr.mav_occurrence
+		where mav.academic_year_code in (:academic_year_code)
+		  and mr.module_code is null
+		  order by mav.module_code"""
 
 	class AssessmentComponentQuery(ds: DataSource) extends MappingSqlQuery[AssessmentComponent](ds, GetAssessmentsQuery) {
 		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
@@ -250,22 +286,24 @@ object AssignmentImporter {
 	class UpstreamAssessmentGroupQuery(ds: DataSource) extends MappingSqlQueryWithParameters[UpstreamAssessmentGroup](ds, GetAllAssessmentGroups) {
 		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
-			val ag = new UpstreamAssessmentGroup()
-			ag.moduleCode = rs.getString("module_code")
-			ag.academicYear = AcademicYear.parse(rs.getString("academic_year_code"))
-			ag.assessmentGroup = rs.getString("assessment_group")
-			ag.occurrence = rs.getString("mav_occurrence")
-			ag
-		}
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) =
+			mapRowToAssessmentGroup(rs)
 	}
 
-	class AllAssessmentGroupMembers(ds: DataSource) extends MappingSqlQueryWithParameters[String](ds, GetAllAssessmentGroupMembers) {
+	class EmptyUpstreamAssessmentGroupQuery(ds: DataSource) extends MappingSqlQueryWithParameters[UpstreamAssessmentGroup](ds, GetEmptyAssessmentGroups) {
 		declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
-			SprCode.getUniversityId(rs.getString("spr_code"))
-		}
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) =
+			mapRowToAssessmentGroup(rs)
+	}
+
+	def mapRowToAssessmentGroup(rs: ResultSet) = {
+		val ag = new UpstreamAssessmentGroup()
+		ag.moduleCode = rs.getString("module_code")
+		ag.academicYear = AcademicYear.parse(rs.getString("academic_year_code"))
+		ag.assessmentGroup = rs.getString("assessment_group")
+		ag.occurrence = rs.getString("mav_occurrence")
+		ag
 	}
 
 }

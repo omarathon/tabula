@@ -97,6 +97,14 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 				if (!registrations.isEmpty) {
 					save(registrations)
 				}
+
+				// Empty groups with no members
+				val emptyGroups = assignmentImporter.getEmptyAssessmentGroups
+				//logger.info("Found " + emptyGroups.size + " groups with no members, emptying...")
+				for (emptyGroup <- emptyGroups) {
+					assignmentMembershipService.replaceMembers(emptyGroup, Nil)
+				}
+
 				logger.info("Processed all " + count + " group members")
 			}
 		}
