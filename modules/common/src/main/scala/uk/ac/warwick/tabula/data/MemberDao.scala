@@ -128,16 +128,16 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setMaxResults(max)
 			.addOrder(asc("lastUpdatedDate"))
 			.list
+			
 		val courseMatches = session.newQuery[StudentMember]( """
-                       select distinct student
-                       from
-                               StudentCourseDetails scd
-                       where
-                               scd.department = :department
-        and scd.student.lastUpdatedDate = :lastUpdated
-                       and
-                               scd.sprStatus.code not like 'P%'
-                       order by lastUpdatedDate asc """)
+				select distinct student
+        	from
+          	StudentCourseDetails scd
+          where
+            scd.department = :department and
+        		scd.student.lastUpdatedDate > :lastUpdated and
+            scd.sprStatus.code not like 'P%'
+          order by lastUpdatedDate asc """)
 			.setEntity("department", department)
 			.setParameter("lastUpdated", startDate).seq
 
@@ -193,6 +193,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				sr.relationshipType = :relationshipType
 			and
 				scd.department = :department
+			and
+				scd.mostSignificant = true
 			and
 				scd.sprStatus.code not like 'P%'
 			and
@@ -264,6 +266,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			where
 				scd.department = :department
 			and
+				scd.mostSignificant = true
+			and
 				scd.sprStatus.code not like 'P%'
 			and
 				scd.sprCode not in (
@@ -296,6 +300,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			where
 				scd.department = :department
 			and
+				scd.mostSignificant = true
+			and
 				scd.sprStatus.code not like 'P%'
 			""")
 			.setEntity("department", department).seq
@@ -313,6 +319,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				StudentCourseDetails scd
 			where
 				scd.department = :department
+			and
+				scd.mostSignificant = true
 			and
 				scd.sprStatus.code not like 'P%'
 			and
