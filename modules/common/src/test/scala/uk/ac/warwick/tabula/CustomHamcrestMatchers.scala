@@ -25,11 +25,13 @@ trait CustomHamcrestMatchers {
 		}
 
 		def describeTo(d: Description) {
-			d.appendText("property ").appendValue(name).appendText(" equals ").appendValue(value)
+			d.appendText("Has property ").appendValue(name.name).appendText(" with value ").appendValue(value)
 		}
 	}
+
 	def hasProperty[A](name: Symbol, value: AnyRef) = new HasPropertyMatcher(name, value)
 
 }
 
+// Use as a static import (recommended)
 object CustomHamcrestMatchers extends CustomHamcrestMatchers

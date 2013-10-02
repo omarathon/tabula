@@ -145,9 +145,10 @@
 			p:dataSource-ref="dataSource"
 			p:scripts-ref="testScripts" />
 			
+		<!-- We have ads.sql to make some tables and data but we just want a blank
+		     datasource here - ads.sql is used by the importer test only -->
 		<bean id="adsInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner" 
-			p:dataSource-ref="academicDataStore"
-			p:scripts="ads.sql" />
+			p:dataSource-ref="academicDataStore" />
 			
 		<bean id="sitsInit" class="uk.ac.warwick.tabula.system.DatabaseScriptRunner" 
 			p:dataSource-ref="sitsDataSource"

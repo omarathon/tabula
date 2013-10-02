@@ -6,7 +6,7 @@ import org.scalatest.FlatSpec
 import org.scalatest.matchers.ShouldMatchers
 import org.junit.runner.RunWith
 
-import uk.ac.warwick.tabula.{CustomHamcrestMatchers, Mockito}
+import uk.ac.warwick.tabula.{AcademicYear, CustomHamcrestMatchers, Mockito}
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
@@ -26,6 +26,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 		command.assignmentMembershipService = membershipService
 
 		val registrations: Seq[ModuleRegistration]
+
 		importer.allMembers(any[ModuleRegistration=>Unit]) answers {
 			case fn: (ModuleRegistration=>Unit) @unchecked => registrations.foreach(fn)
 		}
@@ -35,6 +36,7 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 
 	it should "process all collections" in {
 		new Fixture {
+			importer.getEmptyAssessmentGroups returns (Nil)
 			val registrations = Seq(
 				ModuleRegistration("13/14", "0100001/1", "A", "HI33M-30", "A"),
 				ModuleRegistration("13/14", "0100001/1", "A", "HI100-30", "A"),
@@ -47,13 +49,18 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 
 	/**
 	 * TAB-1265
-	 * Test doesn't currently check that it does anything special when no
-	 * registrations exist for a module, because that's all it considers -
-	 * need to change the command first so that it compares against the existing
-	 * upstream assessment groups somehow.
 	 */
-	ignore should "process empty groups" in {
+	it should "process empty groups" in {
 		new Fixture {
+			val hi900_30 = {
+				val g = new UpstreamAssessmentGroup
+				g.moduleCode = "HI900-30"
+				g.occurrence = "A"
+				g.assessmentGroup = "A"
+				g.academicYear = AcademicYear.parse("13/14")
+				g
+			}
+
 			val registrations = Seq(
 				ModuleRegistration("13/14", "0100001/1", "A", "HI33M-30", "A"),
 				ModuleRegistration("13/14", "0100002/1", "A", "HI33M-30", "A"),
@@ -61,10 +68,15 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 				ModuleRegistration("13/14", "0100002/1", "A", "HI100-30", "A")
 			)
 
+			importer.getEmptyAssessmentGroups returns (Seq(hi900_30))
+
 			command.doGroupMembers()
 
 			there was one(membershipService).replaceMembers(argThat(hasModuleCode("HI33M-30")), isEq(Seq("0100001", "0100002")))
 			there was one(membershipService).replaceMembers(argThat(hasModuleCode("HI100-30")), isEq(Seq("0100003", "0100002")))
+
+			// The bug is that we don't update any group we don't have moduleregistrations for.
+			there was one(membershipService).replaceMembers(argThat(hasModuleCode("HI900-30")), isEq(Nil))
 
 		}
 	}
