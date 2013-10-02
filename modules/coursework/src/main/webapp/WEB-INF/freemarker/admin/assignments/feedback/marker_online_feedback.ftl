@@ -1,3 +1,4 @@
+<#assign isMarker=false />
 <#if !isCompleted>
 	<#if !isFirstMarker>
 		<div class="well">

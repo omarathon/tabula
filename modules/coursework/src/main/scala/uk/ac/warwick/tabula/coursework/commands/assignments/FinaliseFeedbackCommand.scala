@@ -32,7 +32,6 @@ class FinaliseFeedbackCommand(val assignment: Assignment, val markerFeedbacks:JL
 
 	def copyToFeedback(markerFeedback: MarkerFeedback): Feedback = {
 		val parent = markerFeedback.feedback
-		parent.customFormValues = markerFeedback.customFormValues
 
 		// save custom fields
 		parent.customFormValues = markerFeedback.customFormValues.map { formValue =>

@@ -34,7 +34,7 @@
 				<div class="controls">
 					<a class="btn long-running" href="<@routes.markerFeedbackFiles assignment feedback/>">
 						<i class="icon-download"></i>
-						${feedback.attachments?size} <#if feedback.attachments?size == 1> file<#else> files</#if>
+						<@fmt.p number=feedback.attachments?size singular="file" />
 					</a>
 				</div>
 			</div>
