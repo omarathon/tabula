@@ -45,94 +45,101 @@
 		</div>
 		</#if>
 
-		<div class="btn-group dept-settings">
-			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+		<#if !modules?has_content && department.children?has_content>
+			<a class="btn btn-medium dropdown-toggle disabled use-tooltip" title="This department doesn't directly contain any modules. Check subdepartments.">
 				<i class="icon-wrench"></i>
 				Manage
-				<span class="caret"></span>
 			</a>
-			<ul class="dropdown-menu pull-right">
-			
-			<#if features.extensions>
-			<li>
-				<#assign extensions_url><@routes.extensionsettings department /></#assign>
-				<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
-					<i class="icon-calendar"></i> Extensions 
-                </@fmt.permission_button>
-           </li>
-           </#if>
-			
-			<#if features.feedbackTemplates>
-			<li>
-				<#assign feedback_url><@routes.feedbacktemplates department /></#assign>
-				<@fmt.permission_button permission='FeedbackTemplate.Create' scope=department action_descr='create feedback template' href=feedback_url>
-					<i class="icon-comment"></i> Feedback templates 
-                </@fmt.permission_button>
-           </li>
-           </#if>
-            
-            <#if features.markingWorkflows>
-            <li>                   		
-           		<#assign markingflow_url><@routes.markingworkflowlist department /></#assign>
-				<@fmt.permission_button permission='MarkingWorkflow.Read' scope=department action_descr='manage marking workflows' href=markingflow_url>
-					<i class="icon-check"></i> Marking workflows 
-                </@fmt.permission_button>
-            </li>
-            </#if>
-            
-            <li id="feedback-report-button">                   		
-				<#assign feedbackrep_url><@routes.feedbackreport department /></#assign>
-				<@fmt.permission_button permission='Department.DownloadFeedbackReport' scope=department action_descr='generate a feedback report' href=feedbackrep_url 
-                               			data_attr='data-container=body data-toggle=modal data-target=#feedback-report-modal'>
-                	<i class="icon-book"></i> Feedback report
-                </@fmt.permission_button>
-            </li>
+		<#else>
+			<div class="btn-group dept-settings">
+				<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+					<i class="icon-wrench"></i>
+					Manage
+					<span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu pull-right">
 
-			<li>
-				<#assign copy_url><@routes.copyDepartmentsAssignments department /></#assign>
-				<@fmt.permission_button
-					permission='Assignment.Create'
-					scope=department
-					action_descr='copy existing assignments'
-					href=copy_url>
-					<i class="icon-share-alt"></i> Create assignments from previous
-				</@fmt.permission_button>
-			</li>
-			<li>
-				<#assign archive_url><@routes.archiveDepartmentsAssignments department /></#assign>
-				<@fmt.permission_button
-					permission='Assignment.Archive'
-					scope=department
-					action_descr='archive existing assignments'
-					href=archive_url>
-					<i class="icon-folder-close"></i> Archive assignments
-				</@fmt.permission_button>
-			</li>
-			
-			<#--
 				<#if features.extensions>
-					<li><a href="<@routes.extensionsettings department />"><i class="icon-calendar"></i> Extensions</a></li>
-				</#if>
-				<#if features.feedbackTemplates>
-					<li><a href="<@routes.feedbacktemplates department />"><i class="icon-comment"></i> Feedback templates</a></li>
-				</#if>
-				<#if features.markingWorkflows>
-					<li><a href="<@routes.markingworkflowlist department />"><i class="icon-check"></i> Marking workflows</a></li>
-				</#if>
-				<li id="feedback-report-button"><a href="<@routes.feedbackreport department />"  data-toggle="modal"  data-target="#feedback-report-modal"><i class="icon-book"></i> Feedback report</a></li>
-				
-				
-				-->
-				
-				<#if can_manage_dept>
-					<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt"></i> Settings</a></li>
-				</#if>
-				
-				
-			</ul>
-		</div>
+				<li>
+					<#assign extensions_url><@routes.extensionsettings department /></#assign>
+					<@fmt.permission_button permission='Department.ManageExtensionSettings' scope=department action_descr='manage extension settings' href=extensions_url>
+						<i class="icon-calendar"></i> Extensions
+					</@fmt.permission_button>
+			   </li>
+			   </#if>
 
-		<#if can_manage_dept>
+				<#if features.feedbackTemplates>
+				<li>
+					<#assign feedback_url><@routes.feedbacktemplates department /></#assign>
+					<@fmt.permission_button permission='FeedbackTemplate.Create' scope=department action_descr='create feedback template' href=feedback_url>
+						<i class="icon-comment"></i> Feedback templates
+					</@fmt.permission_button>
+			   </li>
+			   </#if>
+
+				<#if features.markingWorkflows>
+				<li>
+					<#assign markingflow_url><@routes.markingworkflowlist department /></#assign>
+					<@fmt.permission_button permission='MarkingWorkflow.Read' scope=department action_descr='manage marking workflows' href=markingflow_url>
+						<i class="icon-check"></i> Marking workflows
+					</@fmt.permission_button>
+				</li>
+				</#if>
+
+				<li id="feedback-report-button">
+					<#assign feedbackrep_url><@routes.feedbackreport department /></#assign>
+					<@fmt.permission_button permission='Department.DownloadFeedbackReport' scope=department action_descr='generate a feedback report' href=feedbackrep_url
+											data_attr='data-container=body data-toggle=modal data-target=#feedback-report-modal'>
+						<i class="icon-book"></i> Feedback report
+					</@fmt.permission_button>
+				</li>
+
+				<li>
+					<#assign copy_url><@routes.copyDepartmentsAssignments department /></#assign>
+					<@fmt.permission_button
+						permission='Assignment.Create'
+						scope=department
+						action_descr='copy existing assignments'
+						href=copy_url>
+						<i class="icon-share-alt"></i> Create assignments from previous
+					</@fmt.permission_button>
+				</li>
+				<li>
+					<#assign archive_url><@routes.archiveDepartmentsAssignments department /></#assign>
+					<@fmt.permission_button
+						permission='Assignment.Archive'
+						scope=department
+						action_descr='archive existing assignments'
+						href=archive_url>
+						<i class="icon-folder-close"></i> Archive assignments
+					</@fmt.permission_button>
+				</li>
+
+				<#--
+					<#if features.extensions>
+						<li><a href="<@routes.extensionsettings department />"><i class="icon-calendar"></i> Extensions</a></li>
+					</#if>
+					<#if features.feedbackTemplates>
+						<li><a href="<@routes.feedbacktemplates department />"><i class="icon-comment"></i> Feedback templates</a></li>
+					</#if>
+					<#if features.markingWorkflows>
+						<li><a href="<@routes.markingworkflowlist department />"><i class="icon-check"></i> Marking workflows</a></li>
+					</#if>
+					<li id="feedback-report-button"><a href="<@routes.feedbackreport department />"  data-toggle="modal"  data-target="#feedback-report-modal"><i class="icon-book"></i> Feedback report</a></li>
+
+
+					-->
+
+					<#if can_manage_dept>
+						<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt"></i> Settings</a></li>
+					</#if>
+
+
+				</ul>
+			</div>
+		</#if>
+
+		<#if can_manage_dept && modules?has_content>
 		<div class="btn-group dept-show">
 			<a class="btn btn-medium use-tooltip" href="#" data-container="body" title="Modules with no assignments are hidden. Click to show all modules." data-title-show="Modules with no assignments are hidden. Click to show all modules." data-title-hide="Modules with no assignments are shown. Click to hide them">
 				<i class="icon-eye-open"></i>

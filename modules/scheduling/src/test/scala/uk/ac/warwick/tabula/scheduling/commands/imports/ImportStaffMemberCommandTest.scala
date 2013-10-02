@@ -28,35 +28,15 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 	trait Environment {
 		val blobBytes = Array[Byte](1,2,3,4,5)
 
-		val rs = mock[ResultSet]
-		val md = mock[ResultSetMetaData]
-		rs.getMetaData() returns(md)
-		md.getColumnCount() returns(3)
-		md.getColumnName(1) returns("gender")
-		md.getColumnName(2) returns("year_of_study")
-		md.getColumnName(3) returns("teaching_staff")
-
-		rs.getString("gender") returns("M")
-		rs.getInt("year_of_study") returns(3)
-		rs.getString("teaching_staff") returns("Y")
-
 		val mm = MembershipMember(
 			universityId 			= "0672089",
-			departmentCode			= null,
 			email					= "M.Mannion@warwick.ac.uk",
-			targetGroup				= null,
 			title					= "Mr",
 			preferredForenames		= "Mathew",
 			preferredSurname		= "Mannion",
-			position				= null,
 			dateOfBirth				= new LocalDate(1984, DateTimeConstants.AUGUST, 19),
 			usercode				= "cuscav",
-			startDate				= null,
-			endDate					= null,
-			modified				= null,
-			phoneNumber				= null,
-			gender					= null,
-			alternativeEmailAddress	= null,
+			gender					= Male,
 			userType				= Staff
 		)
 
@@ -71,7 +51,7 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			val memberDao = mock[MemberDao]
 			memberDao.getByUniversityId("0672089") returns(None)
 
-			val command = new ImportStaffMemberCommand(mac, new AnonymousUser(), rs)
+			val command = new ImportStaffMemberCommand(mac, new AnonymousUser())
 			command.memberDao = memberDao
 			command.fileDao = fileDao
 
@@ -87,7 +67,6 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			member.lastName should be ("Mannion")
 			member.photo should not be (null)
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
-			member.asInstanceOf[StaffProperties].teachingStaff.booleanValue() should be (true)
 
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])
@@ -105,7 +84,7 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			val memberDao = mock[MemberDao]
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
 
-			val command = new ImportStaffMemberCommand(mac, new AnonymousUser(), rs)
+			val command = new ImportStaffMemberCommand(mac, new AnonymousUser())
 			command.memberDao = memberDao
 			command.fileDao = fileDao
 
@@ -121,7 +100,6 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			member.lastName should be ("Mannion")
 			member.photo should not be (null)
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
-			member.asInstanceOf[StaffProperties].teachingStaff.booleanValue() should be (true)
 
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])

@@ -33,22 +33,29 @@
 				</ul>
 			</div>
 		</#if>
-		
-		<div class="btn-group dept-settings">
-			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+
+		<#if !modules?has_content && department.children?has_content>
+			<a class="btn btn-medium dropdown-toggle disabled use-tooltip" title="This department doesn't directly contain any modules. Check subdepartments.">
 				<i class="icon-wrench"></i>
 				Manage
-				<span class="caret"></span>
 			</a>
-			<ul class="dropdown-menu pull-right">
-				<li><a href="<@routes.deptperms department/>">
-					<i class="icon-user"></i> Edit departmental permissions
-				</a></li>
-				<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}">
-					<i class="icon-list-alt"></i> Settings</a>
-				</li>
-			</ul>
-		</div>
+		<#else>
+			<div class="btn-group dept-settings">
+				<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+					<i class="icon-wrench"></i>
+					Manage
+					<span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu pull-right">
+					<li><a href="<@routes.deptperms department/>">
+						<i class="icon-user"></i> Edit departmental permissions
+					</a></li>
+					<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}">
+						<i class="icon-list-alt"></i> Settings</a>
+					</li>
+				</ul>
+			</div>
+		</#if>
 	</div>
 	
 <ul class="unstyled">

@@ -215,19 +215,10 @@ object AssignmentImporter {
 		where academic_year_code in (:academic_year_code)
 	union
 		select distinct mav.academic_year_code, mav.module_code, mav_occurrence, mad.assessment_group
-		from module_availability mav
+		from module_availability mavch
 		join module_assessment_details mad on mad.module_code = mav.module_code
 		join module m on (m.module_code = mad.module_code and m.in_use = 'Y')
 		where academic_year_code in (:academic_year_code)"""
-
-	val GetAssessmentGroupMembers = """
-		select spr_code
-		from module_registration mr
-		where mr.academic_year_code = :academic_year_code
-		and mr.module_code = :module_code
-		and mr.mav_occurrence = :mav_occurrence
-		and mr.assessment_group = :assessment_group
-		"""
 
 	val GetAllAssessmentGroupMembers = """
 		select 
@@ -277,14 +268,4 @@ object AssignmentImporter {
 		}
 	}
 
-	class AssessmentGroupMembersQuery(ds: DataSource) extends MappingSqlQueryWithParameters[String](ds, GetAssessmentGroupMembers) {
-		this.declareParameter(new SqlParameter("academic_year_code", Types.VARCHAR))
-		this.declareParameter(new SqlParameter("module_code", Types.VARCHAR))
-		this.declareParameter(new SqlParameter("mav_occurrence", Types.VARCHAR))
-		this.declareParameter(new SqlParameter("assessment_group", Types.VARCHAR))
-		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
-			SprCode.getUniversityId(rs.getString("spr_code"))
-		}
-	}
 }

@@ -60,8 +60,6 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 		new StudentInformationQuery(sits, member, ssoUser)
 	}
 
-	def staffInformationQuery(member: MembershipInformation, ssoUser: User) = new StaffInformationQuery(sits, member, ssoUser)
-
 	def getMemberDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportMemberCommand] = {
 		// TODO we could probably chunk this into 20 or 30 users at a time for the query, or even split by category and query all at once
 
@@ -73,7 +71,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 			val universityId = mac.member.universityId
 
 			mac.member.userType match {
-				case Staff | Emeritus => staffInformationQuery(mac, ssoUser).executeByNamedParam(Map("usercodes" -> usercode)).toSeq
+				case Staff | Emeritus => Seq(new ImportStaffMemberCommand(mac, ssoUser))
 				case Student | Other => {
 					studentInformationQuery(mac, ssoUser).executeByNamedParam(
 											Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
@@ -194,22 +192,7 @@ class SandboxProfileImporter extends ProfileImporter {
 		ssoUser.setStaff(true)
 		ssoUser.setWarwickId(member.universityId)
 
-		val rs = new MapResultSet(Map(
-			"university_id" -> member.universityId,
-			"title" -> member.title,
-			"preferred_forename" -> member.preferredForenames,
-			"forenames" -> member.preferredForenames,
-			"family_name" -> member.preferredSurname,
-			"gender" -> member.gender.dbValue,
-			"email_address" -> member.email,
-			"user_code" -> member.usercode,
-			"date_of_birth" -> member.dateOfBirth.toDateTimeAtStartOfDay(),
-			"in_use_flag" -> "Active",
-			"date_of_inactivation" -> null,
-			"alternative_email_address" -> null,
-			"teaching_staff" -> "Y"
-		))
-		new ImportStaffMemberCommand(mac, ssoUser, rs)
+		new ImportStaffMemberCommand(mac, ssoUser)
 	}
 
 	def userIdsAndCategories(department: Department): Seq[MembershipInformation] = {
@@ -415,32 +398,6 @@ object ProfileImporter {
 				rs,
 				new ImportStudentCourseCommand(rs, new ImportStudentCourseYearCommand(rs), new ImportSupervisorsForStudentCommand())
 			)
-	}
-
-	val GetStaffInformation = """
-		select
-			prs.prs_udf1 as university_id,
-			prs.prs_ttlc as title,
-			prs.prs_fusd as preferred_forename,
-			trim(prs.prs_fnm1 || ' ' || prs.prs_fnm2 || ' ' || prs.prs_fnm3) as forenames,
-			prs.prs_surn as family_name,
-			prs.prs_gend as gender,
-			case prs.prs_iuse when 'Y' then 'Active' else 'Inactive' end as in_use_flag,
-			prs.prs_dptc as home_department_code,
-			prs.prs_emad as email_address,
-			prs.prs_exid as user_code,
-			prs.prs_dob as date_of_birth,
-
-			case when prs.prs_psac is null then 'N' else 'Y' end as teaching_staff
-		from intuit.ins_prs prs
-			where prs.prs_exid in (:usercodes)
-		"""
-
-	class StaffInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User)
-		extends MappingSqlQuery[ImportStaffMemberCommand](ds, GetStaffInformation) {
-		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
-		compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int) = new ImportStaffMemberCommand(member, ssoUser, rs)
 	}
 
 	val GetMembershipByUsercodeInformation = """
