@@ -226,7 +226,7 @@
 		<#assign feedbackLabel = "" />
 		<#assign feedbackDeadline = "" />
 		<#if assignment.isClosed() && (features.submissions && assignment.collectSubmissions)>
-			<#assign workingDaysAway = assignment.feedbackDeadlineDaysAway() />
+			<#assign workingDaysAway = assignment.feedbackDeadlineWorkingDaysAway() />
 			<#if workingDaysAway lt 0>
 				<#if assignment.hasUnreleasedFeedback>
 					<#assign feedbackLabel><span class="label label-important use-tooltip" title="There is unreleased feedback, and the default deadline has passed. Drill down to see if there is good reason, such as late submissions.">Late feedback</span></#assign>
