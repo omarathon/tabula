@@ -311,7 +311,6 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 			val existingFiles = Option(markerFeedback.attachments).getOrElse(JList()).asScala
 			val filesToRemove = existingFiles -- filesToKeep
 			fileAttachmentService.deleteAttachments(filesToRemove)
-			filesToRemove
 			markerFeedback.attachments = JArrayList[FileAttachment](filesToKeep)
 		}
 		markerFeedback.addAttachments(file.attached.asScala)

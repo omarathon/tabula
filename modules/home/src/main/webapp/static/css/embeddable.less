@@ -196,6 +196,10 @@ tr.error, tr.warning {
 	display: table-row;
 }
 
+td.error, td.warning {
+	display: table-cell;
+}
+
 .module-info, .striped-section {
 	.box-style;
 
@@ -1287,6 +1291,16 @@ h1.with-settings {
 	    	border-top: 1px solid @tableRowBorderTop;
 	      border-bottom: 1px solid @tableRowBorderBottom;
 	    }
+	    
+	    > tr.no-bottom-border > td,
+	    > tr.no-bottom-border > th {
+	    	border-bottom: 0;
+	    }
+	    
+	    > tr.no-top-border > td,
+	    > tr.no-top-border > th {
+	    	border-top: 0;
+	    }
 	  }
 
 	  tbody > tr:last-child > td,
@@ -1605,3 +1619,38 @@ input.flexi-picker {
 }
 
 //---- END Flexi Picker -----//
+
+// TABLE CELL BACKGROUNDS
+// -----------------
+// Exact selectors below required to override .table-striped
+
+.table tbody tr td {
+  &.success {
+    background-color: @successBackground;
+  }
+  &.error {
+    background-color: @errorBackground;
+  }
+  &.warning {
+    background-color: @warningBackground;
+  }
+  &.info {
+    background-color: @infoBackground;
+  }
+}
+
+// Hover states for .table-hover
+.table-hover tbody tr td {
+  &.success:hover {
+    background-color: darken(@successBackground, 5%);
+  }
+  &.error:hover {
+    background-color: darken(@errorBackground, 5%);
+  }
+  &.warning:hover {
+    background-color: darken(@warningBackground, 5%);
+  }
+  &.info:hover {
+    background-color: darken(@infoBackground, 5%);
+  }
+}

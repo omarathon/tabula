@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.profiles.services.docconversion
 
 import java.io.ByteArrayInputStream
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.apache.poi.openxml4j.opc.OPCPackage
 import org.apache.poi.xssf.eventusermodel.XSSFReader
 import org.apache.poi.xssf.model.SharedStringsTable
@@ -20,20 +20,11 @@ import org.apache.poi.ss.util.CellReference
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.UniversityId
-
-class RawStudentRelationship {
-
-	var targetUniversityId: String = _
-	var agentUniversityId: String = _
-
-	def this(targetUniversityId: String, agentUniversityId: String) = {
-		this();
-		this.targetUniversityId = targetUniversityId
-		this.agentUniversityId = agentUniversityId
-	}
-	
-	override def toString() = "Student=%s, Agent=%s".format(targetUniversityId, agentUniversityId)
-}
+import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 object RawStudentRelationshipExtractor {
 	val AcceptedFileExtensions = Seq(".xlsx")
@@ -41,77 +32,62 @@ object RawStudentRelationshipExtractor {
 
 @Service
 class RawStudentRelationshipExtractor {
+	
+	type RowData = Map[String, String]
+	type RawStudentRelationship = (Member, Option[Member])
+	type ErrorCode = (String, String)
+	
+	type ParsedRow = (RowData, Option[RawStudentRelationship], Seq[ErrorCode])
+	
+	var profileService = Wire[ProfileService]
 
 	/**
 	 * Method for reading in a xlsx spreadsheet and converting it into a list of relationships
 	 */
-	def readXSSFExcelFile(file: InputStream): JList[RawStudentRelationship] = {
-		val pkg = OPCPackage.open(file);
-		val sst = new ReadOnlySharedStringsTable(pkg)
-		val reader = new XSSFReader(pkg)
-		val styles = reader.getStylesTable
-		val rawStudentRelationships: JList[RawStudentRelationship] = JArrayList()
-		val handler = new XslxParser(styles, sst, rawStudentRelationships)
-		val parser = handler.fetchSheetParser
-		for (sheet <- reader.getSheetsData) {
-			val sheetSource = new InputSource(sheet)
-			parser.parse(sheetSource)
-			sheet.close()
-		}
-		rawStudentRelationships
-	}
-}
-
-class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, val rawStudentRelationships: JList[RawStudentRelationship])
-	extends SheetContentsHandler with Logging {
-
-	var isParsingHeader = true // flag to parse the first row for column headers
-	var foundStudentInRow = false
-	var foundAgentInRow = false
-
-	var columnMap = scala.collection.mutable.Map[Short, String]()
-	var currentRawStudentRelationship: RawStudentRelationship = _
-	val xssfHandler = new XSSFSheetXMLHandler(styles, sst, this, false)
-
-	def fetchSheetParser = {
-		val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
-		parser.setContentHandler(xssfHandler)
-		parser
-	}
-
-	// implement SheetContentsHandler
-	def headerFooter(text: String, isHeader: Boolean, tagName: String) = {
-		// don't care about handling this, but required for interface
-	}
-
-	def startRow(row: Int) = {
-		logger.debug("startRow: " + row.toString)
-		isParsingHeader = (row == 0)
-		currentRawStudentRelationship = new RawStudentRelationship
-		foundStudentInRow = false
-		foundAgentInRow = false
-	}
-
-	def cell(cellReference: String, formattedValue: String) = {
-		val col = new CellReference(cellReference).getCol
-
-		if (isParsingHeader) columnMap(col) = formattedValue
-		else if (columnMap.containsKey(col)) {
-			columnMap(col) match {
-				case "student_id" => {
-					currentRawStudentRelationship.targetUniversityId = UniversityId.zeroPad(formattedValue)
-					foundStudentInRow = true
-				}
-				case "agent_id" => {
-					if (formattedValue.hasText && formattedValue != "ERROR:#N/A") {
-						currentRawStudentRelationship.agentUniversityId = UniversityId.zeroPad(formattedValue)
-						foundAgentInRow = true
+	def readXSSFExcelFile(file: InputStream, relationshipType: StudentRelationshipType): Seq[ParsedRow] = {
+		def parseStudent(row: RowData): (Option[StudentMember], Option[ErrorCode]) = {
+			row("student_id") match {
+				case strStudentId if strStudentId.matches("\\d+") =>
+					val studentId = UniversityId.zeroPad(strStudentId)
+					
+					profileService.getMemberByUniversityId(studentId) match {
+						case Some(student: StudentMember) =>
+							student.mostSignificantCourseDetails match {
+								case Some(scd) if scd.department == null => 
+									(Some(student), Some("student_id" -> "profiles.relationship.allocate.student.noDepartment"))
+								case Some(scd) if relationshipType.readOnly(scd.department) =>
+									(Some(student), Some("student_id" -> "profiles.relationship.allocate.student.readOnlyDepartment"))
+								case Some(scd) => (Some(student), None)
+								case None => (Some(student), Some("student_id" -> "profiles.relationship.allocate.student.noCourseDetails"))
+							}
+						case Some(member) => (None, Some("student_id" -> "profiles.relationship.allocate.universityId.notStudent"))
+						case _ => (None, Some("student_id" -> "profiles.relationship.allocate.universityId.notMember"))
 					}
-				}
-				case _ => // ignore anything else
+				case _ => (None, Some("student_id" -> "profiles.relationship.allocate.universityId.badFormat"))
 			}
 		}
+		
+		def parseAgent(row: RowData): (Option[Member], Option[ErrorCode]) = {
+			row.get("agent_id") match {
+				case Some(strAgentId) if strAgentId.hasText && strAgentId.matches("\\d+") =>
+					val agentId = UniversityId.zeroPad(strAgentId)
+					
+					profileService.getMemberByUniversityId(agentId) match {
+						case Some(member) => (Some(member), None)
+						case _ => (None, Some("agent_id" -> "profiles.relationship.allocate.universityId.notMember"))
+					}							
+				case Some("ERROR:#N/A") | None => (None, None)
+				case _ => (None, Some("agent_id" -> "profiles.relationship.allocate.universityId.badFormat"))
+			}
+		}
+		
+		SpreadsheetHelpers.parseXSSFExcelFile(file)
+			.filter { row => row.contains("student_id") && row("student_id").hasText } // Only if there is a student ID in the row
+			.map { row =>
+				val (student, studentError) = parseStudent(row)
+				val (agent, agentError) = parseAgent(row)
+				
+				(row, student.map { student => student -> agent }, Seq(studentError, agentError).flatten)
+			}
 	}
-
-	def endRow = if (!isParsingHeader && foundStudentInRow) rawStudentRelationships.add(currentRawStudentRelationship)
 }
