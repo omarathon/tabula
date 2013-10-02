@@ -2,12 +2,9 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.ResultSet
 import java.sql.ResultSetMetaData
-
 import scala.language.implicitConversions
-
 import org.apache.commons.lang3.text.WordUtils
 import org.joda.time.LocalDate
-
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.data.Daoisms
@@ -26,6 +23,7 @@ import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.userlookup.User
+import org.joda.time.DateTime
 
 abstract class ImportMemberFromMembershipCommand
 	extends ImportMemberCommand with Logging with Daoisms
@@ -33,11 +31,10 @@ abstract class ImportMemberFromMembershipCommand
 
 	import ImportMemberHelpers._
 
-	def this(mac: MembershipInformation, ssoUser: User, rs: ResultSet) {
+	def this(mac: MembershipInformation, ssoUser: User, rs: Option[ResultSet]) {
 		this()
 
 		implicit val resultSet = rs
-		implicit val metadata = rs.getMetaData
 
 		val member = mac.member
 		this.membershipLastUpdated = member.modified
@@ -65,7 +62,7 @@ abstract class ImportMemberFromMembershipCommand
 		this.jobTitle = member.position
 		this.phoneNumber = member.phoneNumber
 
-		this.inUseFlag = rs.getString("in_use_flag")
+		this.inUseFlag = getInUseFlag(rs.map { _.getString("in_use_flag") }, member)
 		this.groupName = member.targetGroup
 		this.inactivationDate = member.endDate
 

@@ -51,7 +51,6 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	import ImportMemberHelpers._
 
 	implicit val rs = resultSet
-	implicit val metadata = rs.getMetaData
 
 	var memberDao = Wire.auto[MemberDao]
 	var relationshipService = Wire.auto[RelationshipService]

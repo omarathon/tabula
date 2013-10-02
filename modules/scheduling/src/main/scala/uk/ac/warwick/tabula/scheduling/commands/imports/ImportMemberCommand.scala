@@ -30,6 +30,7 @@ import org.apache.commons.lang3.text.WordUtils
 import scala.util.matching.Regex
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import language.implicitConversions
+import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 
 abstract class ImportMemberCommand extends Command[Member] with Logging with Daoisms
 	with MemberProperties with Unaudited with PropertyCopying {
@@ -46,11 +47,10 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 
 	var membershipLastUpdated: DateTime = _
 
-	def this(mac: MembershipInformation, ssoUser: User, rs: ResultSet) {
+	def this(mac: MembershipInformation, ssoUser: User, rs: Option[ResultSet]) {
 		this()
 
 		implicit val resultSet = rs
-		implicit val metadata = rs.getMetaData
 
 		val member = mac.member
 		this.membershipLastUpdated = member.modified
@@ -78,7 +78,7 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		this.jobTitle = member.position
 		this.phoneNumber = member.phoneNumber
 
-		this.inUseFlag = rs.getString("in_use_flag")
+		this.inUseFlag = getInUseFlag(rs.map { _.getString("in_use_flag") }, member)
 		this.groupName = member.targetGroup
 		this.inactivationDate = member.endDate
 
@@ -203,15 +203,20 @@ object ImportMemberHelpers {
 	/** Return the first Option that has a value, else None. */
 	def oneOf[A](options: Option[A]*) = options.flatten.headOption
 
-	def optString(columnName: String)(implicit rs: ResultSet, metadata: ResultSetMetaData): Option[String] =
-		if (hasColumn(columnName)) Some(rs.getString(columnName))
-		else None
+	def optString(columnName: String)(implicit rs: Option[ResultSet]): Option[String] =
+		rs.flatMap { rs => 
+			if (hasColumn(rs, columnName)) Some(rs.getString(columnName))
+			else None
+		}
 
-	def optLocalDate(columnName: String)(implicit rs: ResultSet, metadata: ResultSetMetaData): Option[LocalDate] =
-		if (hasColumn(columnName)) Some(rs.getDate(columnName)) map { new LocalDate(_) }
-		else None
+	def optLocalDate(columnName: String)(implicit rs: Option[ResultSet]): Option[LocalDate] =
+		rs.flatMap { rs => 
+			if (hasColumn(rs, columnName)) Some(rs.getDate(columnName)).map { new LocalDate(_) }
+			else None
+		}
 
-	def hasColumn(columnName: String)(implicit rs: ResultSet, metadata: ResultSetMetaData) = {
+	def hasColumn(rs: ResultSet, columnName: String) = {
+		val metadata = rs.getMetaData
 		val cols = for (col <- 1 to metadata.getColumnCount) yield columnName == metadata.getColumnName(col)
 		cols.exists(b => b)
 	}
@@ -231,6 +236,16 @@ object ImportMemberHelpers {
 			AcademicYear.parse(code)
 		}
 	}
+	
+	def getInUseFlag(flag: Option[String], member: MembershipMember) =
+		flag.getOrElse {
+			val (startDate, endDate) = (member.startDate, member.endDate)
+			if (startDate != null && startDate.toDateTimeAtStartOfDay.isAfter(DateTime.now)) 
+				"Inactive - Starts " + startDate.toString("dd/MM/yyyy")
+			else if (endDate != null && endDate.toDateTimeAtStartOfDay.isBefore(DateTime.now)) 
+				"Inactive - Ended " + endDate.toString("dd/MM/yyyy")
+			else "Active"
+		}
 
 	private val CapitaliseForenamePattern = """(?:(\p{Lu})(\p{L}*)([^\p{L}]?))""".r
 

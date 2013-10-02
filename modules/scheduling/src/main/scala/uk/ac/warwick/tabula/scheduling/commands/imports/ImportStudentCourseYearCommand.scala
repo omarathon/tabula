@@ -29,7 +29,6 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 	import ImportMemberHelpers._
 
 	implicit val rs = resultSet
-	implicit val metadata = rs.getMetaData
 
 	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	var profileService = Wire.auto[ProfileService]
