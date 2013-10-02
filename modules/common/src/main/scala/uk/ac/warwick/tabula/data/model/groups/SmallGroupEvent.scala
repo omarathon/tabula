@@ -53,7 +53,7 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	
 	var title: String = _
 	
-	def isUnscheduled = day == null || startTime == null || endTime == null || weekRanges.isEmpty
+	def isUnscheduled = day == null || (startTime == null && endTime == null)
 	def isSingleEvent = weekRanges.size == 1 && weekRanges.head.isSingleWeek
 		
 	@OneToOne(cascade = Array(ALL))
