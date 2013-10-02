@@ -6,6 +6,7 @@
 			<#include "_feedback_summary.ftl">
 		</div>
 	</#if>
+	<#assign isMarker=true />
 	<#include "online_feedback.ftl">
 <#else>
 	<#if command.submission??>
