@@ -22,7 +22,7 @@
 			<h2>Invalid rows</h2>
 			
 			<div class="alert">
-				<p>Some rows in your spreadsheet couldn't be parsed. If you confirm, these rows will be ignored.</p>
+				<p>There were problems with some rows in your spreadsheet. If you confirm, these rows will be ignored.</p>
 			</div>
 			
 			<table class="table table-bordered table-condensed table-striped">
