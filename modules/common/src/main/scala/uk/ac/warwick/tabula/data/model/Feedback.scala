@@ -176,3 +176,7 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	 */
 	def collectMarks: Boolean = assignment.collectMarks
 }
+
+object Feedback {
+	val PublishDeadlineInWorkingDays = 20
+}

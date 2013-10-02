@@ -220,7 +220,38 @@
 	<div class="module-info-contents">
 		<#list module.assignments as assignment>
 		<#if !assignment.deleted>
-		<#assign has_feedback = assignment.hasFullFeedback >
+		<#assign has_feedback = assignment.hasFullFeedback />
+
+		<#-- Build feedback deadline rendering -->
+		<#assign feedbackLabel = "" />
+		<#assign feedbackDeadline = "" />
+		<#if assignment.isClosed() && (features.submissions && assignment.collectSubmissions)>
+			<#assign workingDaysAway = assignment.feedbackDeadlineDaysAway() />
+			<#if workingDaysAway lt 0>
+				<#if assignment.hasUnreleasedFeedback>
+					<#assign feedbackLabel><span class="label label-important use-tooltip" title="There is unreleased feedback, and the default deadline has passed. Drill down to see if there is good reason, such as late submissions.">Late feedback</span></#assign>
+				<#elseif assignment.submissions?has_content && !assignment.hasReleasedFeedback>
+					<#assign feedbackLabel><span class="label label-important use-tooltip" title="There have been submissions, but no feedback, and the default deadline has passed. Drill down to see if there is good reason, such as late submissions.">Feedback overdue</span></#assign>
+				</#if>
+			<#elseif workingDaysAway lte 5>
+				<#assign feedbackLabel><span class="label use-tooltip" title=""The default deadline for feedback is less than five working days away.">Feedback due soon</span></#assign>
+			</#if>
+
+			<#assign feedbackDeadline>
+				<div class="use-tooltip" title="The deadline for returning feedback is calculated using working days at Warwick.">
+					<#if workingDaysAway == 0>
+						Feedback due today />
+					<#elseif workingDaysAway lt 0>
+						Feedback deadline was <@fmt.p -workingDaysAway "working day" /> ago,
+						on <@fmt.date date=assignment.feedbackDeadline includeTime=false />
+					<#else>
+						Feedback due in <@fmt.p workingDaysAway "working day" />,
+						on <@fmt.date date=assignment.feedbackDeadline includeTime=false />
+					</#if>
+				</div>
+			</#assign>
+		</#if>
+
 		<div class="assignment-info<#if assignment.archived> archived</#if>">
 			<div class="column1">
 				<h3 class="name">
@@ -256,7 +287,7 @@
 				<#if assignment.openEnded>
 					<div class="dates">
 						<#noescape>${memberCount}</#noescape>
-            <@fmt.interval assignment.openDate />, never closes
+						<@fmt.interval assignment.openDate />, never closes
 						(open-ended)
 						<#if !assignment.opened>
 							<span class="label label-warning">Not yet open</span>
@@ -265,13 +296,15 @@
 				<#else>
 					<div class="dates">
 						<#noescape>${memberCount}</#noescape>
-            <@fmt.interval assignment.openDate assignment.closeDate />
+						<@fmt.interval assignment.openDate assignment.closeDate />
 						<#if assignment.closed>
 							<span class="label label-warning">Closed</span>
 						</#if>
 						<#if !assignment.opened>
 							<span class="label label-warning">Not yet open</span>
 						</#if>
+
+						<#noescape>${feedbackLabel!""}</#noescape>
 					</div>
 				</#if>
 
@@ -279,9 +312,9 @@
 					<div class="submission-and-feedback-count">
 						<i class="icon-file"></i>
 						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback">
-							<@fmt.p assignment.submissions?size "submission" />
-							<#if has_feedback> and ${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> of feedback</#if>
-						</a>
+							<@fmt.p assignment.submissions?size "submission" /><#--
+							--><#if has_feedback> and ${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> of feedback</#if><#--
+						--></a>
 
 						<#assign numUnapprovedExtensions = assignment.countUnapprovedExtensions />
 						<#if numUnapprovedExtensions gt 0>
@@ -307,6 +340,8 @@
 								</#if>
 							</span>
 						</#if>
+
+						<#noescape>${feedbackDeadline!""}</#noescape>
 					</div>
 				</#if>
 
@@ -325,9 +360,9 @@
 						<#else>
 							<#assign archive_caption>Archive assignment</#assign>
 						</#if>
-                        <@fmt.permission_button permission='SmallGroups.Archive' scope=module action_descr='${archive_caption}'?lower_case classes='archive-assignment-link ajax-popup' href=archive_url 
+                        <@fmt.permission_button permission='SmallGroups.Archive' scope=module action_descr='${archive_caption}'?lower_case classes='archive-assignment-link ajax-popup' href=archive_url
                                         		data_attr='data-popup-target=.btn-group data-container=body'>
-                        	<i class="icon-folder-close"></i> ${archive_caption} 
+                        	<i class="icon-folder-close"></i> ${archive_caption}
                         </@fmt.permission_button>
 					</a></li>
 
@@ -363,7 +398,7 @@
 							<#assign publishfeedbackurl><@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" /></#assign>
 							<@fmt.permission_button permission='Feedback.Publish' scope=module action_descr='release feedback to students' href=publishfeedbackurl data_attr='data-container=body'>
 								<i class="icon-envelope-alt"></i> Publish feedback
-							</@fmt.permission_button>						
+							</@fmt.permission_button>
 						</li>
 					<#else>
 						<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish."><i class="icon-envelope-alt"></i> Publish feedback </a></li>

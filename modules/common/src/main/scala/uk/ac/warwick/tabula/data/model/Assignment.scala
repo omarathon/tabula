@@ -8,7 +8,7 @@ import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 
 import org.hibernate.annotations.{ForeignKey, Filter, FilterDef, AccessType, BatchSize, Type, IndexColumn}
-import org.joda.time.DateTime
+import org.joda.time.{Days, LocalDate, DateTime}
 
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
@@ -24,6 +24,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 
 import scala.reflect._
+import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 
 object Assignment {
@@ -147,6 +148,19 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	var feedbackTemplate: FeedbackTemplate = _
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
+
+	def feedbackDeadline: Option[LocalDate] = if (openEnded) {
+		None
+	} else {
+		val workingDaysHelper = new WorkingDaysHelperImpl
+		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
+	}
+	def feedbackDeadlineWorkingDaysAway: Option[Int] =  if (openEnded) {
+		None
+	} else {
+		val workingDaysHelper = new WorkingDaysHelperImpl
+		Option(workingDaysHelper.getNumWorkingDays(LocalDate.now, workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)))
+	}
 
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
