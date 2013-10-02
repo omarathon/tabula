@@ -70,17 +70,17 @@ class RawStudentRelationshipRow(relationshipType: StudentRelationshipType, val r
 		}
 	}
 	
-	def extractAgent(): (Option[Member], Option[ErrorCode]) = {
+	def extractAgent(): Either[Option[Member], ErrorCode] = {
 		rowData.get("agent_id") match {
 			case Some(strAgentId) if strAgentId.hasText && strAgentId.matches("\\d+") =>
 				val agentId = UniversityId.zeroPad(strAgentId)
 				
 				profileService.getMemberByUniversityId(agentId) match {
-					case Some(member) => (Some(member), None)
-					case _ => (None, Some("agent_id" -> "profiles.relationship.allocate.universityId.notMember"))
+					case Some(member) => Left(Some(member))
+					case _ => Right("agent_id" -> "profiles.relationship.allocate.universityId.notMember")
 				}
-			case Some("ERROR:#N/A") | None => (None, None)
-			case _ => (None, Some("agent_id" -> "profiles.relationship.allocate.universityId.badFormat"))
+			case Some("ERROR:#N/A") | None => Left(None)
+			case _ => Right("agent_id" -> "profiles.relationship.allocate.universityId.badFormat")
 		}
 	}
 	
@@ -101,8 +101,20 @@ class RawStudentRelationshipExtractor {
 			.filter { _.isValid } // Ignore blank rows
 			.map { row =>
 				val (student, studentError) = row.extractStudent()
-				val (agent, agentError) = row.extractAgent()
+				val agentOrError = row.extractAgent()
 				
-				(row.rowData, student.map { student => (student -> agent) }, Seq(studentError, agentError).flatten)
+				val relationship = student.map { student => 
+					agentOrError match {
+						case Left(agent) => student -> agent
+						case _ => student -> None
+					}
+				}
+				
+				val errors = agentOrError match {
+					case Right(agentError) => Seq(studentError).flatten :+ agentError
+					case _ => Seq(studentError).flatten
+				}
+				
+				(row.rowData, relationship, errors)
 			}
 }
