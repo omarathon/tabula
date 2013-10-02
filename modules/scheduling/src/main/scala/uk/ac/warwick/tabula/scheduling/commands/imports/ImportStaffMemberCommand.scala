@@ -53,8 +53,8 @@ class ImportStaffMemberCommand(member: MembershipInformation, ssoUser: User)
 		member
 	}
 
-	private val basicStaffProperties = Set(
-		"teachingStaff"
+	private val basicStaffProperties: Set[String] = Set(
+//		"teachingStaff"
 	)
 
 	private def copyStaffProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
