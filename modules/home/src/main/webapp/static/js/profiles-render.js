@@ -13,10 +13,16 @@
 
 			var xhr = null;
 			container.find('input[name="query"]').prop('autocomplete','off').each(function() {
-				var $spinner = $('<div class="spinner-container" />');
-				$(this).before($spinner);
-
-				$(this).typeahead({
+				var $spinner = $('<div class="spinner-container" />'), $this = $(this);
+				$this
+					.before($spinner)
+					.on('focus', function(){
+						container.find('.use-tooltip').trigger('mouseover');
+					})
+					.on('blur', function(){
+						container.find('.use-tooltip').trigger('mouseout');
+					})
+					.typeahead({
 					source: function(query, process) {
 						if (xhr != null) {
 							xhr.abort();
