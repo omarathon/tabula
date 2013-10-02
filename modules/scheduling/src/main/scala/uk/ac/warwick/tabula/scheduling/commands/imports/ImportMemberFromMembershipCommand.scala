@@ -23,7 +23,6 @@ import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.userlookup.User
-import org.joda.time.DateTime
 
 abstract class ImportMemberFromMembershipCommand
 	extends ImportMemberCommand with Logging with Daoisms
