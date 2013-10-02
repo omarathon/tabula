@@ -99,7 +99,7 @@
 					<li>
 						<a class="use-tooltip form-post"
 						   title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point."
-						   href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/marking-completed' />"
+						   href="<@routes.markingCompleted assignment />"
 						   id="marking-complete-button">
 							<i class="icon-ok"></i> Marking completed
 						</a>

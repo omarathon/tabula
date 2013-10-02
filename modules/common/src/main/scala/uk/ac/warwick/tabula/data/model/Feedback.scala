@@ -106,6 +106,7 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	def getValue(field: FormField): Option[SavedFormValue] = {
 		customFormValues.find( _.name == field.name )
 	}
+
 	def defaultFeedbackComments = customFormValues.find(_.name == Assignment.defaultFeedbackTextFieldName).map(_.value)
 
 	def onlineFeedbackComments: Option[SavedFormValue] = Option(assignment).flatMap( _.feedbackCommentsField.flatMap(getValue(_)))

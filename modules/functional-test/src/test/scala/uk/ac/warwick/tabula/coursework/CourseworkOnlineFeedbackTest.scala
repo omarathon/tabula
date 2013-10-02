@@ -9,7 +9,6 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 	final val assignmentName = "Online marking for Dummies"
 
 	private def setup(assignmentId: String) {
-
 		submitAssignment(P.Student1, moduleCode, assignmentName, assignmentId, "/file1.txt")
 		submitAssignment(P.Student2, moduleCode, assignmentName, assignmentId, "/file2.txt")
 	}
