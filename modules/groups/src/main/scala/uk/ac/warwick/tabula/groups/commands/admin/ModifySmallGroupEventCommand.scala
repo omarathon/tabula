@@ -58,15 +58,17 @@ abstract class ModifySmallGroupEventCommand extends PromisingCommand[SmallGroupE
 	def validate(errors: Errors) {
 		// Skip validation when this event is being deleted
 		if (!delete) {
-			if (weeks == null || weeks.isEmpty) errors.rejectValue("weeks", "smallGroupEvent.weeks.NotEmpty")
+			if (tutors.isEmpty) { // TAB-1278 Allow unscheduled events
+				if (weeks == null || weeks.isEmpty) errors.rejectValue("weeks", "smallGroupEvent.weeks.NotEmpty")
+				
+				if (day == null) errors.rejectValue("day", "smallGroupEvent.day.NotEmpty")
+	
+				if (startTime == null) errors.rejectValue("startTime", "smallGroupEvent.startTime.NotEmpty")
+				
+				if (endTime == null) errors.rejectValue("endTime", "smallGroupEvent.endTime.NotEmpty")
+			}
 			
-			if (day == null) errors.rejectValue("day", "smallGroupEvent.day.NotEmpty")
-
-			if (startTime == null) errors.rejectValue("startTime", "smallGroupEvent.startTime.NotEmpty")
-			
-			if (endTime == null) errors.rejectValue("endTime", "smallGroupEvent.endTime.NotEmpty")
-			
-			if (endTime.isBefore(startTime)) errors.rejectValue("endTime", "smallGroupEvent.endTime.beforeStartTime")
+			if (endTime != null && endTime.isBefore(startTime)) errors.rejectValue("endTime", "smallGroupEvent.endTime.beforeStartTime")
 		}
 	}
 	

@@ -5,6 +5,17 @@
 	<#return "module-${module.code}" />
 </#function>
 
+<#macro event_schedule_info event>
+<#if event.unscheduled>
+	<span class="badge badge-warning use-tooltip" data-toggle="tooltip" data-placement="bottom" data-title="This event has not yet been scheduled">Not scheduled</span>
+<#else>
+	<#-- Weeks, day/time, location -->
+	<@fmt.weekRanges event />,
+	${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime /><#if event.location?has_content>,</#if>
+	${event.location!"[no location]"}
+</#if>
+</#macro>
+
 <#-- Output a dropdown menu only if there is anything in it. -->
 <#macro dropdown_menu text icon>
 	<#-- Capture the content between the macro tags into a string -->
@@ -185,12 +196,10 @@
 												<#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>
 												</h6>
 											</#if>
-											<@fmt.weekRanges event />,
-											${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
-											${event.location!"[no location]"}
+											<@event_schedule_info event />
 											</span>
 
-											<#if features.smallGroupTeachingRecordAttendance>
+											<#if features.smallGroupTeachingRecordAttendance && !event.unscheduled>
 											<#if can.do("SmallGroupEvents.Register", event)>
 											<span class="pull-right eventRegister">
 												<form method="get" action="/groups/event/${event.id}/register">
