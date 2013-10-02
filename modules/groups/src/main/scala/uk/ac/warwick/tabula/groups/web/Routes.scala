@@ -17,6 +17,7 @@ object Routes {
 	object tutor {
 		def mygroups(member: User) = "/tutor"
 	}
+	
 	// These are relative to the /profiles app, not the /groups app.
 	object profile {
 		def view(member: User) = "/view/%s" format (encoded(member.getWarwickId))

@@ -31,7 +31,7 @@ class CreateSmallGroupEventCommand(group: Promise[SmallGroup], module: Module) e
 		event
 	}
 	
-	def isEmpty = weekRanges.isEmpty && day == null && startTime == DefaultStartTime && endTime == DefaultEndTime
+	def isEmpty = tutors.isEmpty && weekRanges.isEmpty && day == null && startTime == DefaultStartTime && endTime == DefaultEndTime
 
 	override def describeResult(d: Description, smallGroupEvent: SmallGroupEvent) = d.smallGroupEvent(smallGroupEvent)
 

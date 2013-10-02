@@ -26,13 +26,13 @@
 					<#local full = term_week_range.isFull(allWeeks) />
 					<#local partial = !full && term_week_range.isPartial(allWeeks) />
 
-					<div class="span3">
+					<div class="span1">
 						<@form.label checkbox=true>
 							<input id="group${group_index}-event${event_index}-weeks${term_week_range_index}-checkbox" type="checkbox" value="true" <#if full || partial>checked="checked"</#if> data-indeterminate="<#if partial>true<#else>false</#if>" data-target="#group${group_index}-event${event_index}-weeks${term_week_range_index}">
 							Term ${term_week_range_index+1}
 						</@form.label>
 
-						<@f.select path="weeks" id="group${group_index}-event${event_index}-weeks${term_week_range_index}" size="${weeks?size?c}" multiple="true" cssClass="individual-weeks span9">
+						<@f.select path="weeks" id="group${group_index}-event${event_index}-weeks${term_week_range_index}" size="${weeks?size?c}" multiple="true" cssClass="individual-weeks span1">
 						<#list weeks as week>
 							<@f.option value="${week}" label="${week_index+1}" />
 						</#list>

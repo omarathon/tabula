@@ -71,7 +71,7 @@
 												${(event.day.shortName)!"[no day selected]"} 
 												<#if event.startTime??><@fmt.time event.startTime /><#else>[no start time]</#if> 
 												- 
-												<#if event.endTime??><@fmt.time event.endTime /><#else>[no end time]</#if>,
+												<#if event.endTime??><@fmt.time event.endTime /><#else>[no end time]</#if><#if event.location?has_content>,</#if>
 												${event.location!"[no location]"}
 												
 												<#if !deleteGroup>
