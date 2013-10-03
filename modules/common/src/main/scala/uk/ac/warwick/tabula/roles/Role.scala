@@ -34,7 +34,10 @@ trait RoleDefinition {
 	 * Return all permissions, resolving sub-roles
 	 */
 	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]]
-	def delegatablePermissions(scope:Option[PermissionsTarget]):Map[Permission, Option[PermissionsTarget]]
+
+	def delegatablePermissions(scope:Option[PermissionsTarget]):Map[Permission, Option[PermissionsTarget]] = {
+		if (canDelegateThisRolesPermissions) allPermissions(scope) else Map.empty
+	}
 	def canDelegateThisRolesPermissions:JBoolean
 
 	def mayGrant(target: Permission): Boolean
@@ -83,7 +86,6 @@ trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinitio
 	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] =
 		permissions(scope) ++ (subRoleDefinitions flatMap { _.allPermissions(scope) })
 
-	def delegatablePermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] = Map.empty
 	var canDelegateThisRolesPermissions:JBoolean = false
 	def isAssignable = true
 }

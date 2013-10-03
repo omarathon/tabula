@@ -89,10 +89,6 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] =
 		permissions(scope)
 
-	def delegatablePermissions(scope:Option[PermissionsTarget]):Map[Permission, Option[PermissionsTarget]] = {
-		if (canDelegateThisRolesPermissions) permissions(scope) else Map.empty
-	}
-
 	def mayGrant(target: Permission) =
 		baseRoleDefinition.mayGrant(target) ||
 		(overrides exists { o => o.overrideType == RoleOverride.Allow && o.permission == target })

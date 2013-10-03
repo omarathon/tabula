@@ -44,13 +44,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 		// Two department admins, first is also a senior tutor and senior supervisor, and can delegate roles down
 		val cmd = new GrantRoleCommand(department)
-		val roleDef = new CustomRoleDefinition
-		roleDef.canDelegateThisRolesPermissions = true
-		roleDef.builtInBaseRoleDefinition = DepartmentalAdministratorRoleDefinition
-		roleDef.department = department
-		roleDef.name="Departmental Admin with Grant Option on " + department.code
-		session.save(roleDef)
-		cmd.roleDefinition = roleDef
+		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
 
 		cmd.usercodes.addAll(Seq(Fixtures.TestAdmin1, Fixtures.TestAdmin2))
 		cmd.apply()
