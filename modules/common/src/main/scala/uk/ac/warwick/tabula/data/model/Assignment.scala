@@ -149,6 +149,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
 
+	@transient
 	lazy val workingDaysHelper = new WorkingDaysHelperImpl
 
 	def feedbackDeadline: Option[LocalDate] = if (openEnded) {
