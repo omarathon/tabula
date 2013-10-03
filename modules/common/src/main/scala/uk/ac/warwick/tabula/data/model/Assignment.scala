@@ -159,7 +159,14 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 		None
 	} else {
 		val workingDaysHelper = new WorkingDaysHelperImpl
-		Option(workingDaysHelper.getNumWorkingDays(LocalDate.now, workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)))
+		val deadline = workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)
+		if (deadline.isBefore(LocalDate.now)) {
+			// helper explodes with negative differences, so just return simple count of days late
+			// maybe review helper and revert in future
+			Option(Days.daysBetween(LocalDate.now, deadline).getDays)
+		} else {
+			Option(workingDaysHelper.getNumWorkingDays(LocalDate.now, deadline)-1)
+		}
 	}
 
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access

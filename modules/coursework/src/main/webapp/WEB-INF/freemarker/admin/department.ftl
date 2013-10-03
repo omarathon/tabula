@@ -226,7 +226,7 @@
 		<#assign feedbackLabel = "" />
 		<#assign feedbackDeadline = "" />
 		<#if assignment.isClosed() && (features.submissions && assignment.collectSubmissions)>
-			<#assign workingDaysAway = assignment.feedbackDeadlineWorkingDaysAway() />
+			<#assign workingDaysAway = assignment.feedbackDeadlineWorkingDaysAway />
 			<#if workingDaysAway lt 0>
 				<#if assignment.hasUnreleasedFeedback>
 					<#assign feedbackLabel><span class="label label-important use-tooltip" title="There is unreleased feedback, and the default deadline has passed. Drill down to see if there is good reason, such as late submissions.">Late feedback</span></#assign>
@@ -238,15 +238,15 @@
 			</#if>
 
 			<#assign feedbackDeadline>
-				<div class="use-tooltip" title="The deadline for returning feedback is calculated using working days at Warwick.">
+				<div class="use-tooltip" title="The deadline for returning feedback is calculated using working days at Warwick. After the deadline, Tabula shows how calendar days overdue where appropriate.">
 					<#if workingDaysAway == 0>
-						Feedback due today />
+						<b>Feedback due today</b>
 					<#elseif workingDaysAway lt 0>
-						Feedback deadline was <@fmt.p -workingDaysAway "working day" /> ago,
-						on <@fmt.date date=assignment.feedbackDeadline includeTime=false />
+						Feedback deadline was <@fmt.p -workingDaysAway "day" /> ago,
+						<@fmt.date date=assignment.feedbackDeadline includeTime=false />
 					<#else>
 						Feedback due in <@fmt.p workingDaysAway "working day" />,
-						on <@fmt.date date=assignment.feedbackDeadline includeTime=false />
+						<@fmt.date date=assignment.feedbackDeadline includeTime=false />
 					</#if>
 				</div>
 			</#assign>
