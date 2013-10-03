@@ -51,15 +51,16 @@
 		<input class="create blank" type="radio" checked name="createType" value="blank"/>
 		Create blank scheme
 		<a class="use-popover" id="popover-create-blank" data-content="Create a new scheme from scratch"><i class="icon-question-sign"></i></a>
-		<select style="visibility:hidden"></select>
 	</label>
+	<select style="visibility:hidden"></select>
 	<br/>
 	<#if (command.templates?size > 0)>
 		<label>
 			<input class="create template" type="radio" name="createType" value="template"/>
 			Create from template
 			<a class="use-popover" id="popover-create-template" data-content="Choose a template monitoring scheme developed for each year of study"><i class="icon-question-sign"></i></a>
-			<span class="existingSetOptions">
+		</label>
+		<span class="existingSetOptions">
 			<select name="existingSet" class="template">
 				<#list command.templates as template>
 					<option value="${template.id}">${template.templateName}</option>
@@ -68,8 +69,7 @@
 			<a class="btn monitoring-point-preview-button ajax-modal" data-target="#monitoring-point-preview-modal" href="#" data-hreftemplate="/attendance/monitoringpoints/preview/_TEMPLATE_ID_?department=${command.dept.code}&academicYear=${command.thisAcademicYear.storeValue?c}">
 				Preview&hellip; <#-- wired by class in js -->
 			</a>
-			</span>
-		</label>
+		</span>
 		<br />
 	</#if>
 	<#if (command.setsByRouteByAcademicYear?keys?size > 0)>
@@ -77,16 +77,16 @@
 			<input class="create copy" type="radio" name="createType" value="copy"/>
 			Copy an existing scheme
 			<a class="use-popover" id="popover-create-copy" data-content="Choose an existing scheme to copy by academic year, route, and year of study"><i class="icon-question-sign"></i></a>
-			<select class="academicYear input-medium">
-				<option style="display:none;" disabled selected value="">Academic year</option>
-			</select>
-			<select class="route input-xlarge">
-				<option style="display:none;" disabled selected value="">Route</option>
-			</select>
-			<select name="existingSet" class="input-medium copy">
-				<option style="display:none;" disabled selected value="">Year of study</option>
-			</select>
 		</label>
+		<select class="academicYear input-medium">
+			<option style="display:none;" disabled selected value="">Academic year</option>
+		</select>
+		<select class="route input-xlarge">
+			<option style="display:none;" disabled selected value="">Route</option>
+		</select>
+		<select name="existingSet" class="input-medium copy">
+			<option style="display:none;" disabled selected value="">Year of study</option>
+		</select>
 	<#else>
 		<label>
 			<input class="create copy" type="radio" disabled name="createType"/>
