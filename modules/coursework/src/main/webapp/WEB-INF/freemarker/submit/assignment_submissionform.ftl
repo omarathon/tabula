@@ -1,4 +1,4 @@
-<#if !submission?? && assignment.collectSubmissions>
+<#if !submission?? && assignment.collectSubmissions && !assignment.archived>
 	<#include "_assignment_deadline.ftl" />
 </#if>
 
@@ -153,7 +153,7 @@
 			When it's published you'll receive an automated email.
 		</p>
 		
-	<#elseif assignment.closed>
+	<#elseif assignment.closed && !isExtended>
 		<div class="alert alert-error">
 			<h3>Submission date has passed</h3>
 			
@@ -161,9 +161,18 @@
 		</div>
 	<#elseif !assignment.opened>
 		<p>This assignment isn't open yet - it will open <@fmt.date date=assignment.openDate at=true />.</p>
-	<#else>
+	<#elseif assignment.archived>
 		<p>
-			
+			This assignment is no longer collecting submissions through Tabula because it has been archived.
+		</p>
+		
+		<h3>Expecting your feedback?</h3>
+		
+		<p>
+			Sorry, but there doesn't seem to be anything here for you. 
+			If you've been told to come here to retrieve your feedback 
+			or submit your assignment then you'll need to get in touch directly with your 
+			course/module convenor as the assignment has now been archived.
 		</p>
 	</#if>
 	

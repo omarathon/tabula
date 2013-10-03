@@ -120,11 +120,21 @@ input.deleted {
 	width: 7em;
 }
 
-//Change margins for ul,h6 in module view group list.
+
 #container .small-group-modules-list .item-info {
+	//Change margins for ul,h6 in module view group list.
 	.margin-fix {
 		margin: 0 0 14px 0;
 		h6 { margin: 0; }
+	}
+	h3 i {
+		margin-left: 0.2em;
+		font-size: 0.8em;
+	}
+	// Fix tooltips inside headings
+	.tooltip {
+		letter-spacing: normal;
+		font-family: @baseFontFamily;
 	}
 }
 

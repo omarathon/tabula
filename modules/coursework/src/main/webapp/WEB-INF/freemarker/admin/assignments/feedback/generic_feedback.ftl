@@ -2,7 +2,10 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
 <div class="form onlineFeedback">
-	<@f.form cssClass="form-horizontal" method="post" commandName="command" action="<@routes.genericfeedback assignment />">
+
+	<#assign submit_url><@routes.genericfeedback assignment /></#assign>
+
+	<@f.form cssClass="form-horizontal" method="post" commandName="command" action="${submit_url}">
 		<div>
 			<@f.textarea path="genericFeedback" cssClass="span9" rows="6"/>
 		</div>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	This file defines war dependencies for newer versions of
+	JBoss (7, Wildfly) that use JBoss Modules.
+-->
+<jboss-deployment-structure>
+  <deployment>
+<dependencies>
+        <!-- conf directory module -->
+	    <module name="warwick.tabula.configuration"/>
+        <!-- XML libs for OpenSAML -->
+	    <module name="org.apache.xalan"/>
+        <module name="org.apache.xerces"/>
+    </dependencies>
+    <!--
+     JBoss will look for certain properties of a deployment to implicitly add a dependency.
+     Some of these are useful, like Servlet API, but in our case it's adding a dependency
+     on Hibernate Validator that we don't want. We already have that API and JBoss's version
+     is different, causing runtime class errors.
+     https://docs.jboss.org/author/display/AS7/Implicit+module+dependencies+for+deployments
+    -->
+    <exclusions>
+      <module name="org.hibernate.validator" />
+    </exclusions>
+</deployment>
+</jboss-deployment-structure>

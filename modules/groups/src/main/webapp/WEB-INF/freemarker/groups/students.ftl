@@ -1,3 +1,5 @@
+<#import "../group_components.ftl" as components />
+
 <div class="modal-header">
 	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 	<h3>Students in ${command.group.name}</h3>
@@ -11,9 +13,7 @@
 	<#assign tutorUsers=event.tutors.users />
 	<li>
 		<div>
-		<@fmt.weekRanges event />,
-		${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
-		${event.location!"[no location]"}
+			<@components.event_schedule_info event />
 		</div>
 
 		<#if studentsCanSeeTutorName>

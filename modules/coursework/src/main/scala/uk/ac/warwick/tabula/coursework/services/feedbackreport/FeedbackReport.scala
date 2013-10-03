@@ -7,7 +7,7 @@ import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
 import org.joda.time.DateTime
 
 import uk.ac.warwick.tabula.helpers.SpreadsheetHelpers._
-import uk.ac.warwick.tabula.data.model.{Assignment, Department}
+import uk.ac.warwick.tabula.data.model.{Assignment, Department, Feedback}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{SubmissionService, FeedbackService, AssignmentMembershipService, AuditEventQueryMethods}
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
@@ -60,7 +60,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			addStringCell(assignment.name, row)
 			addStringCell(assignment.module.code.toUpperCase, row)
 			addDateCell(assignment.closeDate, row, dateCellStyle(workbook))
-			val publishDeadline = workingDaysHelper.datePlusWorkingDays(assignment.closeDate.toLocalDate, PublishDeadlineInWorkingDays)
+			val publishDeadline = workingDaysHelper.datePlusWorkingDays(assignment.closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)
 			addDateCell(publishDeadline, row, dateCellStyle(workbook))
 			addStringCell(if (assignment.summative) "Summative" else "Formative", row)
 			val numberOfStudents = assignmentMembershipService.determineMembershipUsers(assignment).size
@@ -183,35 +183,35 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			publishEventDate <- Option(feedback.releasedDate).orElse { auditEventQueryMethods.publishFeedbackForStudent(assignment, student).headOption.map { _.eventDate } }
 			assignmentCloseDate <- Option(assignment.closeDate)
 		} yield {
-			val submissionCandidateDate = 
+			val submissionCandidateDate =
 				if(submissionEventDate.isAfter(assignmentCloseDate)) submissionEventDate
 				else assignmentCloseDate
-			
+
 			// was feedback returned within 20 working days?
-			val numOfDays = workingDaysHelper.getNumWorkingDays(submissionCandidateDate.toLocalDate, publishEventDate.toLocalDate) 
-				
+			val numOfDays = workingDaysHelper.getNumWorkingDays(submissionCandidateDate.toLocalDate, publishEventDate.toLocalDate)
+
 			// note +1 working day  - getNumWorkingDays is inclusive (starts at 1)
 			// we want n working days after the close date
-			if (numOfDays > (PublishDeadlineInWorkingDays + 1)) FeedbackCount(0, 1, publishEventDate, publishEventDate) // was late
+			if (numOfDays > (Feedback.PublishDeadlineInWorkingDays + 1)) FeedbackCount(0, 1, publishEventDate, publishEventDate) // was late
 			else FeedbackCount(1, 0, publishEventDate, publishEventDate) // on time
 		}
-		
+
 		// merge our list of pairs into a single pair of (on time, late)
 		times.foldLeft(FeedbackCount(0, 0, null, null)) { (a, b) =>
 			val onTime = a.onTime + b.onTime
 			val late = a.late + b.late
-			val earliest = 
+			val earliest =
 				if (a.earliest == null) b.earliest
 				else if (b.earliest == null) a.earliest
 				else if (a.earliest.isBefore(b.earliest)) a.earliest
 				else b.earliest
-			val latest = 
+			val latest =
 				if (a.latest == null) b.latest
 				else if (b.latest == null) a.latest
 				else if (a.latest.isAfter(b.latest)) a.latest
 				else b.latest
-			
-			FeedbackCount(onTime, late, earliest, latest) 
+
+			FeedbackCount(onTime, late, earliest, latest)
 		}
 	}
 }
@@ -220,9 +220,7 @@ object FeedbackReport {
 
 	val AssignmentSheetSize = 15
 	val ModuleSheetSize = 11
-	
-	val PublishDeadlineInWorkingDays = 20
-	
+
 	case class FeedbackCount(
 		val onTime: Int,
 		val late: Int,
@@ -242,5 +240,5 @@ object FeedbackReport {
 		val totalPublished: Int,
 		val assignment: Assignment
 	)
-	
+
 }

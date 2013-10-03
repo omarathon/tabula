@@ -399,6 +399,11 @@
 		});
 	};
 
+	exports.resizeModalIframes = function(height){
+		// 30px of padding... plus 6 more for reasons I can't work out
+		$('.modal-body > iframe').closest('.modal-body').height(height + 36);
+	};
+
 	// on ready
 	$(function() {
 		// form behavioural hooks
@@ -725,6 +730,21 @@
 				}
 			}
 		});
+
+		if (window != window.top) {
+			// this is an iframe
+			(function(){
+				var bodyHeight = $('body').height();
+				setInterval(function(){
+					var newBodyHeight = $('body').height();
+					if (newBodyHeight != bodyHeight) {
+						bodyHeight = newBodyHeight;
+						window.parent.GlobalScripts.resizeModalIframes(newBodyHeight);
+					}
+				}, 500);
+				window.parent.GlobalScripts.resizeModalIframes(bodyHeight);
+			})()
+		}
 	}); // on ready
 
 	// take anything we've attached to "exports" and add it to the global "Profiles"

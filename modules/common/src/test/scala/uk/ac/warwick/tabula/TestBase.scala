@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula
 import java.io.File
 import java.io.StringReader
 import scala.collection.JavaConversions._
+import scala.collection.GenSeq
 import org.apache.commons.configuration.PropertiesConfiguration
 import org.hamcrest.Matcher
 import org.hamcrest.Matchers.allOf
@@ -245,7 +246,7 @@ trait TestHelpers extends TestFixtures {
 		}
 	}
 
-	def containMatching[A](f: (A)=>Boolean) = org.scalatest.matchers.Matcher[Seq[A]] { (v:Seq[A]) =>
+	def containMatching[A](f: (A)=>Boolean) = org.scalatest.matchers.Matcher[GenSeq[A]] { (v:GenSeq[A]) =>
 		org.scalatest.matchers.MatchResult(
     		v exists f,
     		"Contained a matching value",

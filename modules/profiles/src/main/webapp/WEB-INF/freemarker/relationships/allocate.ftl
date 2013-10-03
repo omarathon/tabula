@@ -1,8 +1,5 @@
 <#assign department=allocateStudentsToRelationshipCommand.department />
 <#assign mappingById=allocateStudentsToRelationshipCommand.mappingById />
-<#assign membersById=allocateStudentsToRelationshipCommand.membersById />
-
-
 
 <#macro student_item profile bindpath="">
 	<li class="student well well-small"
@@ -10,7 +7,6 @@
 	data-f-route="${(profile.mostSignificantCourseDetails.route.code)!}"
 	data-f-year="${(profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
 		<div class="profile clearfix">
-			<@fmt.member_photo profile "tinythumbnail" false />
 			<div class="name">
 				<h6>${profile.fullName}</h6>
 				${(profile.mostSignificantCourseDetails.route.name)!profile.homeDepartment.name}

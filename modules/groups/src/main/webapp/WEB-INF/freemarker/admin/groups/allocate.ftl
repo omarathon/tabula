@@ -1,3 +1,5 @@
+<#import "../../group_components.ftl" as components />
+
 <#assign set=allocateStudentsToGroupsCommand.set />
 <#assign mappingById=allocateStudentsToGroupsCommand.mappingById />
 <#assign membersById=allocateStudentsToGroupsCommand.membersById />
@@ -147,11 +149,7 @@
 											<ul class="unstyled">
 												<#list group.events as event>
 													<li>
-														<#-- Tutor, weeks, day/time, location -->
-
-														<@fmt.weekRanges event />,
-														${event.day.shortName} <@fmt.time event.startTime /> - <@fmt.time event.endTime />,
-														${event.location!"[no location]"}
+														<@components.event_schedule_info event />
 													</li>
 												</#list>
 											</ul>

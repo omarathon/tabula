@@ -34,7 +34,7 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewModules
 				"ownedDepartments" -> ownedDepartments,
 				"ownedModuleDepartments" -> ownedModules.map { _.department },
 				"taughtGroups" -> taughtGroups,
-				"memberGroupsetModules"->ViewModules(nonEmptyMemberViewModules, false)
+				"memberGroupsetModules"->ViewModules(nonEmptyMemberViewModules.sortBy(_.module.code), false)
 			)
 		} else Mav("home/view")
 	}

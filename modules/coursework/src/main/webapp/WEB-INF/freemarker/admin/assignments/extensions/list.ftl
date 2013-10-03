@@ -11,7 +11,7 @@
 		on <strong><@fmt.date date=assignment.closeDate at=true timezone=true /> (${time_remaining})</strong>.
     </p>
     <div class="alert alert-info">
-    	<i class="icon-envelope"></i> Students will automatically be notified by email when you grant, modify or revoke an extension.
+    	<i class="icon-envelope-alt"></i> Students will automatically be notified by email when you grant, modify or revoke an extension.
     </div>
     <div id="extension-list">
         <table class="extensionListTable table table-striped table-bordered tabula-greenLight tablesorter">

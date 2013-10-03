@@ -10,10 +10,16 @@ import org.hibernate.annotations.AccessType
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import javax.persistence.Entity
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.userlookup.User
 
 
 @Entity @AccessType("field")
 class MemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget with FormattedHtml {
+
+	@transient
+	var userLookup = Wire.auto[UserLookupService]
 
 	@ManyToOne
 	@JoinColumn(name="memberid")
@@ -29,9 +35,7 @@ class MemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget wi
 	@BatchSize(size=200)
 	var attachments: JList[FileAttachment] = JArrayList()
 
-	@ManyToOne
-	@JoinColumn(name="creatorid")
-	var creator: Member =_
+	var creatorId: String =_
 
 	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var creationDate: DateTime = DateTime.now
@@ -49,4 +53,7 @@ class MemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget wi
 	def permissionsParents = Stream(member)
 
 	override def toString = "MemberNote(" + id + ")"
+
+	def creator: User = userLookup.getUserByWarwickUniId(creatorId)
+
 }

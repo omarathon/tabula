@@ -1,7 +1,8 @@
 <#-- Scripts that should be included both in the app and embedded in to Sitebuilder -->
 <#if info?? && info.requestedUri?? && info.requestedUri.getQueryParameter("debug")??>
+	<@script "/static/libs/jquery/jquery-1.8.3.js" />
 	<@script "/static/js/id6scripts.js" />
-	<@script "/static/libs/jquery-ui/js/jquery-ui-1.8.16.custom.min.js" />
+	<@script "/static/libs/jquery-ui/js/jquery-ui-1.9.2.custom.js" />
 	<@script "/static/libs/jquery.delayedObserver.js" />
 	<@script "/static/libs/jquery-caret/jquery.caret.1.02.min.js" />
 	<@script "/static/libs/jquery-fixedheadertable/jquery.fixedheadertable.min.js" />

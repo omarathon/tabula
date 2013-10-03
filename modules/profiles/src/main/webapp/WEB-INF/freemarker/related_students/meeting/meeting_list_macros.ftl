@@ -41,7 +41,7 @@
 					<details class="meeting ${deletedClasses} ${pendingActionClasses} ${openClass!}" ${openAttribute!}>
 						<summary>
 							<span class="date"><@fmt.date date=meeting.meetingDate includeTime=false /></span>
-							<span class="title">${meeting.title!}</title></span>
+							<span class="title">${meeting.title!}</span>
 
 							<#if !meeting.approved && viewer.universityId == meeting.creator.universityId>
 								<div class="meeting-record-toolbar">

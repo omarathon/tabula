@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.groups.notifications
 
-import uk.ac.warwick.tabula.data.model.{SingleRecipientNotification, Notification}
+import uk.ac.warwick.tabula.data.model.{ SingleRecipientNotification, Notification }
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.TextRenderer
@@ -23,14 +23,14 @@ class OpenSmallGroupSetsNotification(val agent: User, val recipient: User, val _
 		val formats = _object.map(_.format.description).distinct
 
 		val formatsString = formats match {
-			case singleFormat::Nil =>singleFormat
-			case multipleFormats => Seq(formats.init.mkString(", "),formats.last).mkString(" and ")
+			case singleFormat :: Nil => singleFormat
+			case multipleFormats => Seq(formats.init.mkString(", "), formats.last).mkString(" and ")
 		}
 		formatsString + " groups are now open for sign up."
 	}
 
 	def content: String = renderTemplate(templateLocation, Map("user" -> recipient, "groupsets" -> _object, "profileUrl" -> url))
 
-	def url: String = "/"
+	def url: String = "/groups"
 
 }

@@ -90,7 +90,7 @@
 						<span class="muted">(you)</span>
 					<#else>
 						<#if agent.email??>
-							<p><i class="icon-envelope"></i> <a href="mailto:${agent.email}">${agent.email}</a></p>
+							<p><i class="icon-envelope-alt"></i> <a href="mailto:${agent.email}">${agent.email}</a></p>
 						</#if>
 					</#if>
 				</#if>

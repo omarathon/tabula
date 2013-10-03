@@ -153,8 +153,10 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 				val cmd = new EditStudentRelationshipCommand(
 					studentCourseDetails,
 					relationshipType,
-					service.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode
-				).headOption.flatMap { _.agentMember }, viewer, false)
+					service.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode).headOption.flatMap { _.agentMember }, 
+					viewer, 
+					false
+				)
 				cmd.agent = agent
 				cmd
 			}
@@ -196,29 +198,26 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		}
 	}
 
-	def extractDataFromFile(file: FileAttachment) = {
-		val allocations = relationshipExtractor.readXSSFExcelFile(file.dataStream)
-
-		// Convert to (student -> Option(staff))
-		val map = allocations.asScala
-			.filter { _.targetUniversityId.hasText }
-			.flatMap { rel =>
-				val student = profileService.getMemberByUniversityId(rel.targetUniversityId)
-				val staff =
-					if (rel.agentUniversityId.hasText) profileService.getMemberByUniversityId(rel.agentUniversityId)
-					else None
-
-				student.map { (_ -> staff) }
+	def extractDataFromFile(file: FileAttachment, result: BindingResult) = {
+		val allocations = relationshipExtractor.readXSSFExcelFile(file.dataStream, relationshipType)
+		
+		// Put any errors into the BindingResult
+		allocations.foreach { case (row, _, errors) =>
+			errors.foreach { case (field, code) =>
+				result.rejectValue("", code, Array(field, row), "")
 			}
+		}
+		
+		val rawRelationships = allocations.flatMap { case (_, rel, _) => rel }
 
 		unallocated.clear()
 		unallocated.addAll(
-			map.filter { case (_, staff) => staff.isEmpty }
+			rawRelationships.filter { case (_, staff) => staff.isEmpty }
 			   .map { case (student, _) => student }
 			   .asJavaCollection
 		)
 
-		map
+		rawRelationships
 			.filter { case (_, staff) => staff.isDefined }
 		   	.map { case (student, staff) => (student, staff.get) }
 		   	.groupBy { case (_, staff) => staff }
