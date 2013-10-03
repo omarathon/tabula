@@ -16,6 +16,17 @@
 				<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
 			</@f.select>
 		</@form.labelled_row>
+	
+		<script type="text/javascript">
+			jQuery(function($) {
+				$('#academicYear').on('change', function(e) {
+					var $form = $(this).closest('form');
+					$('#action-input').val('refresh');
+					
+					$form.submit();
+				});
+			});
+		</script>
 		
 	<#else>
 	
@@ -202,8 +213,6 @@
 				<@f.errors path="defaultMaxGroupSize" cssClass="error" />
 			</@form.field>
 		</@form.row>
-
-		<#include "_groups_modal.ftl" />
 	
 		<div class="striped-section">
 			<div class="clearfix">
@@ -222,6 +231,10 @@
 		</div>
 	</details>
 </fieldset>
+<#if groups?size gt 0>
+	<#include "_events_modals.ftl" />
+</#if>
+<#include "_groups_modal.ftl" />
 
 <script type="text/javascript">
 

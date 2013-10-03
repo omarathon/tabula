@@ -46,7 +46,7 @@ trait MemberDao {
 	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getAllRelationshipsByAgent(agentId: String): Seq[StudentRelationship]
 	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
-	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[Member]
+	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
 	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
@@ -128,16 +128,16 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setMaxResults(max)
 			.addOrder(asc("lastUpdatedDate"))
 			.list
+			
 		val courseMatches = session.newQuery[StudentMember]( """
-                       select distinct student
-                       from
-                               StudentCourseDetails scd
-                       where
-                               scd.department = :department
-        and scd.student.lastUpdatedDate = :lastUpdated
-                       and
-                               scd.sprStatus.code not like 'P%'
-                       order by lastUpdatedDate asc """)
+				select distinct student
+        	from
+          	StudentCourseDetails scd
+          where
+            scd.department = :department and
+        		scd.student.lastUpdatedDate > :lastUpdated and
+            scd.sprStatus.code not like 'P%'
+          order by lastUpdatedDate asc """)
 			.setEntity("department", department)
 			.setParameter("lastUpdated", startDate).seq
 
@@ -193,6 +193,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				sr.relationshipType = :relationshipType
 			and
 				scd.department = :department
+			and
+				scd.mostSignificant = true
 			and
 				scd.sprStatus.code not like 'P%'
 			and
@@ -253,9 +255,9 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			))
 			.seq
 
-	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[Member] =
+	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember] =
 		if (relationshipType == null) Seq()
-		else session.newQuery[Member]("""
+		else session.newQuery[StudentMember]("""
 			select
 				distinct sm
 			from
@@ -263,6 +265,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				inner join sm.studentCourseDetails as scd
 			where
 				scd.department = :department
+			and
+				scd.mostSignificant = true
 			and
 				scd.sprStatus.code not like 'P%'
 			and
@@ -296,6 +300,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			where
 				scd.department = :department
 			and
+				scd.mostSignificant = true
+			and
 				scd.sprStatus.code not like 'P%'
 			""")
 			.setEntity("department", department).seq
@@ -313,6 +319,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				StudentCourseDetails scd
 			where
 				scd.department = :department
+			and
+				scd.mostSignificant = true
 			and
 				scd.sprStatus.code not like 'P%'
 			and

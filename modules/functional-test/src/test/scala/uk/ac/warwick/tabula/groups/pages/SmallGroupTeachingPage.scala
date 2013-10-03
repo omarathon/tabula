@@ -94,7 +94,7 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 	def findSelectGroupCheckboxFor(groupName:String ) = {
 		val groupNameHeading = underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).head
     // ugh. Might be worth investigating ways of using JQuery selector/traversals in selenium instead of this horror:
-		groupNameHeading.findElement(By.xpath("../../div[contains(@class,'span1')]/input"))
+		groupNameHeading.findElement(By.xpath("../../div[contains(@class,'pull-left')]/input"))
 	}
 }
 

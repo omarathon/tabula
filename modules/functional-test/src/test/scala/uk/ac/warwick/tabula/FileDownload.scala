@@ -17,7 +17,7 @@ class FileDownload(uri: String, credentials: Option[LoginDetails]) {
 	val request = (url(uri))
 	val authorizedRequest = credentials map (cred => request.as_!(cred.usercode, cred.password)) getOrElse (request)
 
-	def streamToString(is:InputStream):String = new String(Stream.continually(is.read).takeWhile(-1 !=).map(_.toByte).toArray,"UTF-8" )
+	def streamToString(is:InputStream):String = new String(Stream.continually(is.read).takeWhile(-1 != _).map(_.toByte).toArray,"UTF-8" )
 
 	case class Result(content:Option[String], statusCode:Option[Int])
 

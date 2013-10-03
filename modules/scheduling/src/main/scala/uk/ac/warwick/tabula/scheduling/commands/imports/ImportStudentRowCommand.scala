@@ -23,14 +23,13 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
 
 class ImportStudentRowCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet, importStudentCourseCommand: ImportStudentCourseCommand)
-	extends ImportMemberCommand(member, ssoUser, resultSet)
+	extends ImportMemberCommand(member, ssoUser, Some(resultSet))
 	with Logging with Daoisms
 	with StudentProperties with Unaudited with PropertyCopying {
 
 	import ImportMemberHelpers._
 
 	implicit val rs = resultSet
-	implicit val metadata = rs.getMetaData
 
 	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	var profileService = Wire.auto[ProfileService]

@@ -65,6 +65,7 @@
     <init-param><param-name>ContentType</param-name><param-value>text/html</param-value></init-param>
     <init-param><param-name>default_encoding</param-name><param-value>UTF-8</param-value></init-param>
     <init-param><param-name>output_encoding</param-name><param-value>UTF-8</param-value></init-param>
+    <init-param><param-name>template_exception_handler</param-name><param-value>uk.ac.warwick.tabula.web.views.CustomFreemarkerExceptionHandler</param-value></init-param>
     <load-on-startup>5</load-on-startup>
   </servlet>
   <servlet-mapping>

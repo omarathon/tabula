@@ -283,7 +283,7 @@
 
 	<#if emails?size gt 0 && emails?size lte 50>
 		<a href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>" class="btn">
-			<i class="icon-envelope"></i> ${title}
+			<i class="icon-envelope-alt"></i> ${title}
 		</a>
 	</#if>
 </#macro>

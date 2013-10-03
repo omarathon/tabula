@@ -8,6 +8,7 @@
 </#if>
 
 <article class="profile">
+
 	<section id="personal-details" class="clearfix">
 
 		<@fmt.member_photo profile />
@@ -85,14 +86,14 @@
 						<#if profile.email??>
 							<tr>
 								<th>Warwick email</th>
-								<td><i class="icon-envelope"></i> <a href="mailto:${profile.email}">${profile.email}</a></td>
+								<td><i class="icon-envelope-alt"></i> <a href="mailto:${profile.email}">${profile.email}</a></td>
 							</tr>
 						</#if>
 
 						<#if profile.homeEmail??>
 							<tr>
 								<th>Alternative email</th>
-								<td><i class="icon-envelope"></i> <a href="mailto:${profile.homeEmail}">${profile.homeEmail}</a></td>
+								<td><i class="icon-envelope-alt"></i> <a href="mailto:${profile.homeEmail}">${profile.homeEmail}</a></td>
 							</tr>
 						</#if>
 
@@ -211,7 +212,7 @@
 			<div id="note-modal" class="modal hide fade">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h3><span></span> for ${profile.fullName}</span></h3>
+					<h3><span></span> for ${profile.fullName}</h3>
 				</div>
 				<div class="modal-body"></div>
 
@@ -256,6 +257,10 @@
 			</#if>
 		</#list>
 	</#if>
+
+	<p class="rendered-timestamp">
+		Page generated ${.now}
+	</p>
 </article>
 
 <#if user.sysadmin>

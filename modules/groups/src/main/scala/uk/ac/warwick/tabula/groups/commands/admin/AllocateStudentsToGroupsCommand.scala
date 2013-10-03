@@ -141,7 +141,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 		}
 	}
 
-	def extractDataFromFile(file: FileAttachment) = {
+	def extractDataFromFile(file: FileAttachment, result: BindingResult) = {
 		val allocations = groupsExtractor.readXSSFExcelFile(file.dataStream)
 
 		// work out users to add to set (all users mentioned in spreadsheet - users currently in set)

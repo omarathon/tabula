@@ -134,7 +134,7 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("action=update"))
-	def update(@Valid cmd: EditSmallGroupSetCommand, @PathVariable("set") set: SmallGroupSet, errors: Errors) = {
+	def update(@Valid cmd: EditSmallGroupSetCommand, errors: Errors, @PathVariable("set") set: SmallGroupSet) = {
 		cmd.afterBind()
 
 		if (!errors.hasErrors) {
@@ -145,7 +145,7 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 	}
 
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh", "action!=update"))
-	def submit(@Valid cmd: EditSmallGroupSetCommand, @PathVariable("set") set: SmallGroupSet, errors: Errors) = {
+	def submit(@Valid cmd: EditSmallGroupSetCommand, errors: Errors, @PathVariable("set") set: SmallGroupSet) = {
 		cmd.afterBind()
 
 		if (errors.hasErrors) form(cmd, set)

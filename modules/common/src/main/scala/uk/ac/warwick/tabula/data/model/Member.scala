@@ -342,7 +342,7 @@ trait StudentProperties {
 }
 
 trait StaffProperties {
-	var teachingStaff: JBoolean = _
+//	var teachingStaff: JBoolean = _
 }
 
 trait AlumniProperties

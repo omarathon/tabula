@@ -8,7 +8,7 @@ import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 
 import org.hibernate.annotations.{ForeignKey, Filter, FilterDef, AccessType, BatchSize, Type, IndexColumn}
-import org.joda.time.DateTime
+import org.joda.time.{Days, LocalDate, DateTime}
 
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
@@ -24,6 +24,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 
 import scala.reflect._
+import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 
 object Assignment {
@@ -147,6 +148,29 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	var feedbackTemplate: FeedbackTemplate = _
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
+
+	@transient
+	lazy val workingDaysHelper = new WorkingDaysHelperImpl
+
+	def feedbackDeadline: Option[LocalDate] = if (openEnded) {
+		None
+	} else {
+		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
+	}
+
+	def feedbackDeadlineWorkingDaysAway: Option[Int] = if (openEnded) {
+		None
+	} else {
+		val now = LocalDate.now
+		val deadline = workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)
+
+		// need an offset, as the helper always includes both start and end date, off-by-one from what we want to show
+		val offset =
+			if (deadline.isBefore(now)) 1
+			else -1 // today or in the future
+
+		Option(workingDaysHelper.getNumWorkingDays(now, deadline) + offset)
+	}
 
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))

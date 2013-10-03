@@ -28,7 +28,7 @@ trait GroupsObjects[A >: Null, B >: Null] extends BindListener {
 	def mappingById: Map[String, JList[A]]
 	
 	def validateUploadedFile(result: BindingResult): Unit
-	def extractDataFromFile(file: FileAttachment): Map[B, JList[A]]
+	def extractDataFromFile(file: FileAttachment, result: BindingResult): Map[B, JList[A]]
 	
 	override def onBind(result: BindingResult) {
 		validateUploadedFile(result)
@@ -41,7 +41,7 @@ trait GroupsObjects[A >: Null, B >: Null] extends BindListener {
 				}
 	
 				def processFiles(files: Seq[FileAttachment]) {
-					val data = files.filter(_.hasData).flatMap { extractDataFromFile(_) }.toMap
+					val data = files.filter(_.hasData).flatMap { extractDataFromFile(_, result) }.toMap
 					
 					mapping.clear()
 					mapping.putAll( data.asJava )

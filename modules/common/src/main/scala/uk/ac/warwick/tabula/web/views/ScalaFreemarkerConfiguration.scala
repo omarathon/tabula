@@ -1,15 +1,15 @@
 package uk.ac.warwick.tabula.web.views
 
-import freemarker.ext.beans.BeansWrapper
-import freemarker.template.TemplateDateModel
-import freemarker.template.Configuration
-import freemarker.template.TemplateExceptionHandler
-import org.springframework.web.context.ServletContextAware
-import collection.JavaConversions._
-import org.springframework.beans.factory.annotation.Autowired
+import scala.collection.JavaConversions._
+
 import org.springframework.beans.factory.annotation.Required
-import collection.mutable
+import org.springframework.web.context.ServletContextAware
 import org.springframework.web.servlet.tags.form.FormTag
+
+import freemarker.ext.beans.BeansWrapper
+import freemarker.template.Configuration
+import freemarker.template.TemplateDateModel
+import freemarker.template.TemplateExceptionHandler
 import uk.ac.warwick.tabula.JavaImports._
 
 /**
@@ -20,14 +20,15 @@ import uk.ac.warwick.tabula.JavaImports._
  * have to convert them to Java collections manually every time.
  */
 class ScalaFreemarkerConfiguration extends Configuration with ServletContextAware {
-	//Default constructor initialzation
+	// Default constructor init
 	this.setStrictSyntaxMode(true)
-	this.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX)
-	this.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER)
+	this.setTagSyntax(Configuration.AUTO_DETECT_TAG_SYNTAX)	
 	this.setAutoIncludes(List("/WEB-INF/freemarker/prelude.ftl"))
+	
+	// Note that this doesn't affect inside servlet; see CustomFreemarkerExceptionHandler
+	this.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER)
 
 	this.setObjectWrapper(createWrapper(true))
-
 
 	private def createWrapper(useCache:Boolean) = {
 		val wrapper = new ScalaBeansWrapper

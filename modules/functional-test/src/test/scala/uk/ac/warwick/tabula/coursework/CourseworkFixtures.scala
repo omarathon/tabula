@@ -16,7 +16,7 @@ import org.openqa.selenium.internal.seleniumemulation.FireEvent
 import uk.ac.warwick.tabula.home.{FixturesDriver, FeaturesDriver}
 import org.openqa.selenium.firefox.FirefoxDriver
 
-trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver{
+trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver {
 
 	before {
 		go to (Path("/scheduling/fixtures/setup"))

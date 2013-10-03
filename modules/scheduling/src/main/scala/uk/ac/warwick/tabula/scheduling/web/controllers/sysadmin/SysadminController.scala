@@ -131,7 +131,7 @@ class ImportSitsController extends BaseSysadminController {
 
 	@RequestMapping(method = Array(POST))
 	def reindex() = {
-		val command = new ImportAssignmentsCommand
+		val command = ImportAssignmentsCommand()
 		command.apply()
 		redirectToHome
 	}

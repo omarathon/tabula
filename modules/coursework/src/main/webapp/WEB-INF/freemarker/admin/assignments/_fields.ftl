@@ -59,6 +59,17 @@ the comments textarea needs to maintain newlines.
 			<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
 		</@f.select>
 	</@form.labelled_row>
+	
+	<script type="text/javascript">
+		jQuery(function($) {
+			$('#academicYear').on('change', function(e) {
+				var $form = $(this).closest('form');
+				$('#action-submit').val('refresh');
+				
+				$form.submit();
+			});
+		});
+	</script>
 
 <#else>
 

@@ -34,7 +34,7 @@ class OpenGroupSetNotificationTest extends TestBase with Mockito {
 	@Test
 	def urlIsSmallGroupTeachingHomePage(): Unit = new SmallGroupFixture {
 		val n =  createNotification(Seq(groupSet1), actor, recipient)
-		n.url should be("/")
+		n.url should be("/groups")
 	}
 
 	@Test

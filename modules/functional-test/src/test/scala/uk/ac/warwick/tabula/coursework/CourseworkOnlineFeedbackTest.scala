@@ -48,6 +48,9 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 
 	"Student" should "be able to view feedback on their submission" in {
 		withAssignment(moduleCode = moduleCode, assignmentName = assignmentName, assistants = Seq(P.Marker1.usercode)) {
+
+			createStudentMember(P.Student1.usercode, "F", "xx123", 1,"Ux123")
+
 			Given("We have two students with submitted assignments")
 			assignmentId => setup(assignmentId)
 
@@ -61,7 +64,7 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 					And("I give feedback for student 1")
 					val toggleLink = findAll(cssSelector("h6.toggle-icon")).filter(e=>e.text.contains(P.Student1.usercode)).next()
 					toggleLink.underlying.click()
-					eventually(getInputByLabel("Feedback") should be ('defined))
+					eventuallyAjax(getInputByLabel("Feedback") should be ('defined))
 
 					textArea(cssSelector(s"#content-${P.Student1.warwickId} textarea")).value = "That was RUBBISH"
 					textField(cssSelector(s"#content-${P.Student1.warwickId} input#mark")).value="12"

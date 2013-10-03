@@ -2,12 +2,12 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.{Fixtures, TestBase, Mockito}
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.services.{FileAttachmentService, MemberNoteService, ProfileService}
+import uk.ac.warwick.tabula.services.{UserLookupService, FileAttachmentService, MemberNoteService, ProfileService}
 
 class CreateMemberNoteCommandTest extends TestBase with Mockito {
 
 	@Test
-	def testApply = withUser("cuscao") {
+	def testApply = withUser("cuscao", "09876") {
 		val member = Fixtures.student(universityId = "12345")
 		val submitter = Fixtures.staff(currentUser.universityId, currentUser.userId)
 		val cmd = new CreateMemberNoteCommand(member, currentUser)
@@ -17,18 +17,19 @@ class CreateMemberNoteCommandTest extends TestBase with Mockito {
 		cmd.profileService = profileService
 		cmd.memberNoteService = mock[MemberNoteService]
 		cmd.fileAttachmentService = mock[FileAttachmentService]
+		cmd.userLookup = mock[UserLookupService]
 
 		cmd.note = "the note"
 
 		val memberNote = cmd.applyInternal
 		memberNote.member should be (member)
-		memberNote.creator should be (submitter)
+		memberNote.creatorId should be (submitter.universityId)
 		memberNote.note should be (cmd.note)
 
 	}
 
 	@Test
-	def validMemberNote = withUser("cuscao") {
+	def validMemberNote = withUser("cuscao", "09876") {
 
 		val member = Fixtures.student(universityId = "12345")
 		val cmd = new CreateMemberNoteCommand(member, currentUser)

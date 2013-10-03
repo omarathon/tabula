@@ -11,15 +11,17 @@ import org.joda.time.DateTime
 import org.springframework.validation.{Errors, BindingResult}
 import scala.language.implicitConversions
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{FileAttachmentService, MemberNoteService, ProfileService}
+import uk.ac.warwick.tabula.services.{UserLookupService, FileAttachmentService, MemberNoteService, ProfileService}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.mutable
+import uk.ac.warwick.userlookup.User
 
 abstract class ModifyMemberNoteCommand(val member: Member, val submitter: CurrentUser) extends Command[MemberNote] with BindListener with SelfValidating  {
 
 	var profileService = Wire[ProfileService]
 	var memberNoteService = Wire[MemberNoteService]
 	var fileAttachmentService = Wire[FileAttachmentService]
+	var userLookup = Wire[UserLookupService]
 
 	var note: String = _
 	var title: String = _
@@ -29,7 +31,7 @@ abstract class ModifyMemberNoteCommand(val member: Member, val submitter: Curren
 	var file: UploadedFile = new UploadedFile
 	var attachedFiles:JList[FileAttachment] = JArrayList()
 
-	var creator: Member = _
+	var creator: User = _
 	var attachmentTypes = Seq[String]()
 
 	val memberNote: MemberNote
@@ -40,7 +42,7 @@ abstract class ModifyMemberNoteCommand(val member: Member, val submitter: Curren
 
 	def applyInternal(): MemberNote = transactional() {
 
-		creator = profileService.getMemberByUniversityId(submitter.universityId).getOrElse(null)
+		creator = submitter.apparentUser
 
 		this.copyTo(memberNote)
 
@@ -91,7 +93,7 @@ abstract class ModifyMemberNoteCommand(val member: Member, val submitter: Curren
 		memberNote.note = this.note
 		memberNote.title = this.title
 		memberNote.creationDate = this.creationDate
-		memberNote.creator = this.creator
+		memberNote.creatorId = this.creator.getWarwickId
 		memberNote.member = this.member
 		memberNote.lastUpdatedDate = new DateTime()
 

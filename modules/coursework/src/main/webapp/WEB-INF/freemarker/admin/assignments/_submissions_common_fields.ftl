@@ -12,7 +12,9 @@ so that they can be passed around between requests.
 	<fieldset id="submission-options">
 		<details <#if ((assignment.collectSubmissions)?? && assignment.collectSubmissions) || collectSubmissions?? && collectSubmissions > open </#if> class="submissions">
 			<summary class="collapsible large-chevron">
-				<span class="legend collapsible" >Submissions <small>Set submission options for this assignment</small>
+				<span class="legend collapsible" >
+					Submissions <small>Set submission options for this assignment</small>
+				</span>
 				<@form.row>
 					<@form.field>
 						<@form.label checkbox=true>
