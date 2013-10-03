@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import org.hibernate.criterion.Restrictions
+import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 
 /** This command is intentionally Public. It only exists on dev and is designed,
   * in essence, to blitz a department and set up some sample data in it.
@@ -33,6 +34,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	var relationshipService = Wire[RelationshipService]
 	var scdDao = Wire[StudentCourseDetailsDao]
 
+
 	def applyInternal() {
 		setupDepartmentAndModules()
 
@@ -40,10 +42,34 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		val subDept = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestSubDepartment.code).get
 		val subSubDept = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestSubSubDepartment.code).get
 
-		// Two department admins, first is also a senior tutor and senior supervisor
+		// Two department admins, first is also a senior tutor and senior supervisor, and can delegate roles down
 		val cmd = new GrantRoleCommand(department)
 		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
+
 		cmd.usercodes.addAll(Seq(Fixtures.TestAdmin1, Fixtures.TestAdmin2))
+		cmd.apply()
+
+		val tutorRoleDef = new CustomRoleDefinition
+		tutorRoleDef.canDelegateThisRolesPermissions = true
+		tutorRoleDef.department = department
+		tutorRoleDef.name="StudentRelationshipAgent (tutor) with grant option on " + department.code
+		tutorRoleDef.builtInBaseRoleDefinition = StudentRelationshipAgentRoleDefinition(relationshipService.getStudentRelationshipTypeByUrlPart("tutor").get)
+		session.save(tutorRoleDef)
+		cmd.roleDefinition = tutorRoleDef
+		cmd.usercodes.clear()
+		cmd.usercodes.add(Fixtures.TestAdmin1)
+		cmd.apply()
+
+		val superRoleDef = new CustomRoleDefinition
+		superRoleDef.canDelegateThisRolesPermissions = true
+		superRoleDef.department = department
+		superRoleDef.name="StudentRelationshipAgent (supervisor) with grant option on " + department.code
+		superRoleDef.builtInBaseRoleDefinition = StudentRelationshipAgentRoleDefinition(relationshipService.getStudentRelationshipTypeByUrlPart("supervisor").get)
+		session.save(superRoleDef)
+
+		cmd.roleDefinition = superRoleDef
+		cmd.usercodes.clear()
+		cmd.usercodes.add(Fixtures.TestAdmin1)
 		cmd.apply()
 
 		// admin on the sub-department
@@ -58,15 +84,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		subSubDepartmentAdminCommand.usercodes.addAll(Seq(Fixtures.TestAdmin4))
 		subSubDepartmentAdminCommand.apply()
 
-		cmd.roleDefinition = StudentRelationshipAgentRoleDefinition(relationshipService.getStudentRelationshipTypeByUrlPart("tutor").get)
-		cmd.usercodes.clear()
-		cmd.usercodes.add(Fixtures.TestAdmin1)
-		cmd.apply()
-
-		cmd.roleDefinition = StudentRelationshipAgentRoleDefinition(relationshipService.getStudentRelationshipTypeByUrlPart("supervisor").get)
-		cmd.usercodes.clear()
-		cmd.usercodes.add(Fixtures.TestAdmin1)
-		cmd.apply()
 
 		val upstreamAssignment = new AssessmentComponent
 		upstreamAssignment.assessmentGroup = "A"

@@ -5,25 +5,26 @@ import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, DepartmentGrantedRole, GrantedRole}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import uk.ac.warwick.tabula.roles.{UniversityMemberRoleDefinition, BuiltInRoleDefinition, ModuleAssistantRoleDefinition, DepartmentalAdministratorRoleDefinition}
 import org.mockito.Matchers._
 import uk.ac.warwick.tabula.permissions.Permission
 import scala.reflect.ClassTag
+import uk.ac.warwick.tabula.helpers.Tap.tap
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.permissions.Permissions.{ReplicaSyncing, ImportSystemData, Module}
 
 class GrantRoleCommandTest extends TestBase with Mockito {
 	
 	val permissionsService = mock[PermissionsService]
-	val securityService = mock[SecurityService]
-	
+
 	private def command[A <: PermissionsTarget: ClassTag](scope: A) = {
 		val cmd = new GrantRoleCommand(scope)
 		cmd.permissionsService = permissionsService
-		cmd.securityService = securityService
-		
+
 		cmd
 	}
 	
@@ -79,8 +80,12 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cusebr")
 		
 		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (None)
-		securityService.can(isEq(currentUser), isA[Permission], isEq(dept)) returns (true)
-		
+		val deptAdminWithGrantOption = new CustomRoleDefinition().tap(crd=>{
+			crd.baseRoleDefinition = DepartmentalAdministratorRoleDefinition
+			crd.canDelegateThisRolesPermissions = true
+		})
+		permissionsService.getAllGrantedRolesFor(currentUser) returns Seq(new DepartmentGrantedRole(dept, deptAdminWithGrantOption))
+
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 
@@ -94,8 +99,12 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
 		
 		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (None)
-		securityService.can(isEq(currentUser), isA[Permission], isEq(dept)) returns (true)
-		
+		val deptAdminWithGrantOption = new CustomRoleDefinition().tap(crd=>{
+			crd.baseRoleDefinition = DepartmentalAdministratorRoleDefinition
+			crd.canDelegateThisRolesPermissions = true
+		})
+		permissionsService.getAllGrantedRolesFor(currentUser) returns Seq(new DepartmentGrantedRole(dept, deptAdminWithGrantOption))
+
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 
@@ -118,7 +127,11 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		existing.users.addUser("cuscao")
 		
 		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (Some(existing))
-		securityService.can(isEq(currentUser), isA[Permission], isEq(dept)) returns (true)
+		val deptAdminWithGrantOption = new CustomRoleDefinition().tap(crd=>{
+			crd.baseRoleDefinition = DepartmentalAdministratorRoleDefinition
+			crd.canDelegateThisRolesPermissions = true
+		})
+		permissionsService.getAllGrantedRolesFor(currentUser) returns Seq(new DepartmentGrantedRole(dept, deptAdminWithGrantOption))
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -156,7 +169,11 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cusebr")
 		
 		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (None)
-		securityService.can(isEq(currentUser), isA[Permission], isEq(dept)) returns (false)
+		val deptAdminWithoutGrantOption = new CustomRoleDefinition().tap(crd=>{
+			crd.baseRoleDefinition = DepartmentalAdministratorRoleDefinition
+			crd.canDelegateThisRolesPermissions = false
+		})
+		permissionsService.getAllGrantedRolesFor(currentUser) returns Seq(new DepartmentGrantedRole(dept, deptAdminWithoutGrantOption))
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -166,5 +183,79 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getField should be ("roleDefinition")
 		errors.getFieldError.getCode should be ("permissions.cantGiveWhatYouDontHave")
 	}}
+
+
+	object TestRoleDef extends BuiltInRoleDefinition{
+		override def description="test"
+		GrantsScopedPermission(
+			Permissions.Module.ManageAssignments,
+			Permissions.Department.ArrangeModules)
+	}
+
+	object TestScopelessRoleDef extends BuiltInRoleDefinition{
+		override def description ="test"
+		GrantsScopelessPermission(ImportSystemData)
+		GrantsScopelessPermission(ReplicaSyncing)
+	}
+	val testScope:PermissionsTarget = new PermissionsTarget {
+		def permissionsParents: Stream[PermissionsTarget] = Stream.empty
+		def id: String = "test"
+	}
+
+	val testChildScope = new PermissionsTarget {
+		def permissionsParents: Stream[PermissionsTarget] =testScope #:: Stream.empty
+		def id: String = "testChild"
+	}
+
+	val unrelatedScope:PermissionsTarget = new PermissionsTarget {
+		def permissionsParents: Stream[PermissionsTarget] = Stream.empty
+		def id: String = "fribble"
+	}
+
+	type DelegatePerms = Map[Permission,Seq[Option[PermissionsTarget]]]
+	@Test
+	def getDeniedPermissionsWithASinglePermission(){
+		val delegatablePermissions:DelegatePerms = Map(Permissions.Department.ArrangeModules->Seq(Some(testScope)))
+		GrantRoleCommand.getDeniedPermissions(delegatablePermissions,TestRoleDef,testScope).head should be(Permissions.Module.ManageAssignments)
+		GrantRoleCommand.getDeniedPermissions(delegatablePermissions,TestRoleDef,testScope).tail should be(Nil)
+	}
+
+	@Test
+	def getDeniedPermissionWithParentScope(){
+		// if I can delegate on the parent, then I can delegate on the child
+		val delegatablePermissions:DelegatePerms = Map(Permissions.Department.ArrangeModules->Seq(Some(testScope)))
+		GrantRoleCommand.getDeniedPermissions(delegatablePermissions,TestRoleDef,testChildScope).head should be(Permissions.Module.ManageAssignments)
+		GrantRoleCommand.getDeniedPermissions(delegatablePermissions,TestRoleDef,testChildScope).tail should be(Nil)
+	}
+
+	@Test
+	def getDeniedPermissionWithChildScope(){
+		// Being able to delegate permissions on a child scope doesn't mean I can delegate on its parent
+		val delegatablePermissions:DelegatePerms = Map(Permissions.Department.ArrangeModules->Seq(Some(testChildScope)))
+		GrantRoleCommand.getDeniedPermissions(delegatablePermissions,TestRoleDef,testScope).toSeq.contains(Permissions.Department.ArrangeModules) should be(true)
+	}
+
+	@Test
+	def getDeniedPermissionAllowsScopelessPermissions(){
+		// A scopeless permission should be permitted it the delgatable permissions list contains it, regardless of whether scopes match
+		val delegatablePermissions:DelegatePerms = Map(ImportSystemData->Seq(None))
+		GrantRoleCommand.getDeniedPermissions(delegatablePermissions,TestScopelessRoleDef,testScope).head should be(ReplicaSyncing)
+		GrantRoleCommand.getDeniedPermissions(delegatablePermissions,TestScopelessRoleDef,testScope).tail should be(Nil)
+	}
+
+	@Test
+	def canGrantUniversityMember(){
+		// university member is a good role to test with as it has a mix of scoped and scopeless permissions
+		// the test is a bit contrived though as we first create a role with universityMember over a whole department
+		// use that granting role to grant UniversityMember to a user - normally this would never happen
+		// as UniversityMemberRole can only be created with a Member as it's scope.
+
+		val uniMemberGrantingRole = new CustomRoleDefinition().tap(d=>{
+			d.canDelegateThisRolesPermissions = true
+			d.builtInBaseRoleDefinition = UniversityMemberRoleDefinition
+		})
+		val uniMemberDelegatablePermissions = uniMemberGrantingRole.delegatablePermissions(Some(testScope)).mapValues(Seq(_))
+		GrantRoleCommand.getDeniedPermissions(uniMemberDelegatablePermissions, UniversityMemberRoleDefinition,testChildScope) should be (Nil)
+	}
 
 }

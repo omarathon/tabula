@@ -4,7 +4,7 @@ import org.hibernate.criterion._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.permissions._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
+import uk.ac.warwick.tabula.roles.{RoleDefinition, BuiltInRoleDefinition}
 import uk.ac.warwick.tabula.permissions.Permission
 import scala.reflect.ClassTag
 import uk.ac.warwick.userlookup.User
@@ -35,6 +35,8 @@ trait PermissionsDao {
 	
 	def getGrantedPermissionsForUser[A <: PermissionsTarget: ClassTag](user: User): Seq[GrantedPermission[A]]
 	def getGrantedPermissionsForWebgroups[A <: PermissionsTarget: ClassTag](groupNames: Seq[String]): Seq[GrantedPermission[A]]
+	def getCustomRoleDefinitionsBasedOn(baseDef:BuiltInRoleDefinition):Seq[CustomRoleDefinition]
+
 }
 
 @Repository
@@ -184,6 +186,12 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 			
 			c.seq
 		}.toSeq
+	}
+
+	def getCustomRoleDefinitionsBasedOn(baseDef: BuiltInRoleDefinition): Seq[CustomRoleDefinition] = {
+		session.newCriteria[CustomRoleDefinition]
+		.add(is("builtInBaseRoleDefinition", baseDef))
+		.seq
 	}
 }
 

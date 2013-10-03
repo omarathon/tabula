@@ -6,7 +6,7 @@ import org.scalatest.GivenWhenThen
 class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixtures with GivenWhenThen {
 
 	def withRoleInElement[T](permittedUser: String)(fn: => T) =
-		as(P.Sysadmin) {
+		as(P.Sysadmin) { withGodModeEnabled {
 
 			def usercodes = findAll(cssSelector(".deptadmin-table .user .muted")).toList.map(_.underlying.getText.trim)
 
@@ -83,7 +83,7 @@ class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixture
 				onlyNormalAdmins
 
 			fn
-		}
+		}}
 
 	"Sysadmin" should "be able to add departmental admins" in {
 		withRoleInElement(P.Marker1.usercode) {

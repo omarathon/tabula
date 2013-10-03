@@ -12,15 +12,12 @@ case object ModuleManagerRoleDefinition extends BuiltInRoleDefinition {
 	override def description = "Module Manager"
 	
 	GeneratesSubRole(ModuleAssistantRoleDefinition)
-	
+	AllowsDelegationOfPermissions
+
 	GrantsScopedPermission( 	
 		Assignment.Archive,
 		Assignment.Delete,
-		
-		RolesAndPermissions.Create,
-		RolesAndPermissions.Update,
-		RolesAndPermissions.Delete,
-		
+
 		Submission.Delete,
 		
 		Feedback.Publish,

@@ -4,6 +4,8 @@ import uk.ac.warwick.tabula.BrowserTest
 import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 
+// n.b. this test doesn't work with the FirefoxDriver  because the UI pops up modal dialogs which the
+// test isn't expecting. HTMLUnit ignores them.
 class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with GivenWhenThen {
 
 	def withRoleInElement[T](permittedUser: String, parentElement: String)(fn: => T) =
@@ -18,7 +20,7 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 
 			def nowhereElse() = {
 				// doesn't like CSS :not() selector, so have to get all permission-lists and filter out the current one by scala text-mungery
-				val allLists = findAll(cssSelector(".permission-list")).toList.filterNot(_.underlying.getAttribute("class").contains(parentElement))
+				val allLists = findAll(cssSelector(".permission-list")).toList.filterNot(_.underlying.getAttribute("class").contains(parentElement.replace(".","")))
 				// then delve further to get the usercodes included
 				val filteredUsercodes = allLists map (list => list.underlying.findElement(By.cssSelector(".user .muted")).getText.trim)
 				filteredUsercodes should contain (P.Admin1.usercode)

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model.permissions
 
 import uk.ac.warwick.tabula.{TestBase, Fixtures}
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
-import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget, Permissions}
 
 class CustomRoleDefinitionTest extends TestBase {
 	
@@ -14,6 +14,7 @@ class CustomRoleDefinitionTest extends TestBase {
 		GrantsScopelessPermission(Masquerade)
 		GrantsScopedPermission(Department.ManageExtensionSettings)
 		GrantsGlobalPermission(Module.Create)
+
 	}
 	
 	@Test def polymorphicGetterAndSetter {
@@ -85,5 +86,57 @@ class CustomRoleDefinitionTest extends TestBase {
 			Permissions.Masquerade -> None
 		))
 	}
+
+	@Test
+	def delegatablePermisionsIsNilIfCanDelegateIsFalse(){
+		val crd = new CustomRoleDefinition
+		crd.baseRoleDefinition = TestBuiltInDefinition
+		val dept = Fixtures.department("in")
+
+		crd.permissions(Some(dept)) should not be (Map.empty)
+
+		crd.delegatablePermissions(Some(dept)) should be (Map.empty)
+	}
+
+	@Test
+	def delegatablePermisionsIsEqualToAllPermisionsIfCanDelegateIsTrue(){
+		val crd = new CustomRoleDefinition
+		crd.baseRoleDefinition = TestBuiltInDefinition
+		val dept = Fixtures.department("in")
+		crd.canDelegateThisRolesPermissions = true
+		crd.permissions(Some(dept)) should not be (Map.empty)
+
+		crd.delegatablePermissions(Some(dept)) should be (crd.permissions(Some(dept)))
+	}
+
+	/*
+	* Whether or not a base role definition sets the "canDelegate" flag is irrelevant to this Role's delegatability
+	*
+	* The permissions that a role grants are always delegatable if that role has canDelegate=true, and never if not
+	*
+	* Otherwise, you'd end up having to make delegatable copies of every base role, and keep them in sync with the
+	* originals, which kind of misses the point of re-using the base role definition
+	 */
+	@Test
+	def delegatablePermisionsIsIgnoredOnBaseRoleDefinition(){
+		val baseCrd = new CustomRoleDefinition
+		baseCrd.baseRoleDefinition = TestBuiltInDefinition
+		val dept = Fixtures.department("in")
+
+		baseCrd.canDelegateThisRolesPermissions = true
+
+		val derivedCrd = new CustomRoleDefinition
+		derivedCrd.customBaseRoleDefinition = baseCrd
+
+		derivedCrd.permissions(Some(dept)) should not be (Map.empty)
+		derivedCrd.delegatablePermissions(Some(dept)) should be (Map.empty)
+
+
+		baseCrd.canDelegateThisRolesPermissions = false
+		derivedCrd.canDelegateThisRolesPermissions = true
+
+		derivedCrd.delegatablePermissions(Some(dept)) should be (baseCrd.permissions(Some(dept)))
+	}
+
 
 }

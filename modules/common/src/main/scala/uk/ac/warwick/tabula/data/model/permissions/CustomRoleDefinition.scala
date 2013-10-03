@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.roles.RoleDefinition
-import scala.collection.immutable.ListMap
 import uk.ac.warwick.tabula.data.model.HibernateVersioned
 import uk.ac.warwick.tabula.permissions.Permission
 
@@ -36,10 +35,6 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	@JoinColumn(name = "custom_base_role_id")
 	var customBaseRoleDefinition: CustomRoleDefinition = _
 
-	@OneToMany(mappedBy="customBaseRoleDefinition", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
-	@BatchSize(size=200)
-	var subDefinitions:JList[CustomRoleDefinition] = List()
-
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.permissions.BuiltInRoleDefinitionUserType")
 	var builtInBaseRoleDefinition: BuiltInRoleDefinition = _
 
@@ -58,6 +53,9 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 			builtInBaseRoleDefinition = null
 		}
 	}
+
+	@Column(name="CanDelegate")
+	var canDelegateThisRolesPermissions:JBoolean = false
 
 	// A set of role overrides
 	@OneToMany(mappedBy="customRoleDefinition", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
@@ -90,7 +88,7 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	 */
 	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] =
 		permissions(scope)
-		
+
 	def mayGrant(target: Permission) =
 		baseRoleDefinition.mayGrant(target) ||
 		(overrides exists { o => o.overrideType == RoleOverride.Allow && o.permission == target })

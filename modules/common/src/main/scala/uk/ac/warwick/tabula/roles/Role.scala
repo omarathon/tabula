@@ -9,6 +9,7 @@ import javax.persistence.Transient
 import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.EqualsBuilder
+import uk.ac.warwick.tabula.JavaImports._
 
 trait RoleDefinition {
 	/**
@@ -33,7 +34,12 @@ trait RoleDefinition {
 	 * Return all permissions, resolving sub-roles
 	 */
 	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]]
-	
+
+	def delegatablePermissions(scope:Option[PermissionsTarget]):Map[Permission, Option[PermissionsTarget]] = {
+		if (canDelegateThisRolesPermissions) allPermissions(scope) else Map.empty
+	}
+	def canDelegateThisRolesPermissions:JBoolean
+
 	def mayGrant(target: Permission): Boolean
 }
 
@@ -57,6 +63,8 @@ trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinitio
 	def GeneratesSubRole(roles: BuiltInRoleDefinition*) =
 		for (role <- roles) subRoleDefinitions += role
 
+	def AllowsDelegationOfPermissions = canDelegateThisRolesPermissions=true
+
 	def permissions(scope: Option[PermissionsTarget]) =
 		ListMap() ++
 		(if (scope.isDefined) scopedPermissions map { _ -> scope } else Map()) ++
@@ -77,7 +85,8 @@ trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinitio
 	 */
 	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] =
 		permissions(scope) ++ (subRoleDefinitions flatMap { _.allPermissions(scope) })
-		
+
+	var canDelegateThisRolesPermissions:JBoolean = false
 	def isAssignable = true
 }
 
@@ -160,11 +169,16 @@ abstract class Role(val definition: RoleDefinition, val scope: Option[Permission
 	lazy val explicitPermissionsAsList = explicitPermissions.toList
 	lazy val subRoles = roles
 
-	private def grant(scope: Option[PermissionsTarget], perms: Iterable[Permission]): Unit =
-		permissions ++= (perms map { _ -> scope })
-
 	private final def applyRoleDefinition(definition: RoleDefinition): Role = {
 		permissions ++= definition.permissions(scope)
+		if (definition.canDelegateThisRolesPermissions){
+			permissions ++= Map(
+				Permissions.RolesAndPermissions.Create->scope,
+				Permissions.RolesAndPermissions.Read->scope,
+				Permissions.RolesAndPermissions.Update->scope,
+			  Permissions.RolesAndPermissions.Delete->scope
+			)
+		}
 		roles ++= definition.subRoles(scope)
 
 		this

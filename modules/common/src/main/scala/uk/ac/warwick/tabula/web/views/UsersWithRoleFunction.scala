@@ -30,16 +30,15 @@ class UsersWithRoleFunction extends TemplateMethodModelEx {
 		if (arguments == null || args.size() != 2) throw new TemplateModelException("Invalid number of arguments")
 		
 		val roleDefinition = new BuiltInRoleDefinitionUserType().convertToObject(DeepUnwrap.unwrap(arguments.get(0)).asInstanceOf[String])
+		val derivedRoleDefinitions = permissionsService.getCustomRoleDefinitionsBasedOn(roleDefinition)
+
 		val scope = DeepUnwrap.unwrap(arguments.get(1)).asInstanceOf[PermissionsTarget]
 			
-		permissionsService.getGrantedRole(scope, roleDefinition) map { role =>
-			val usercodes = role.users.members
-			val users = 
-				userLookup.getUsersByUserIds(usercodes).values().asScala.toSeq
-				.sortBy(user => (user.getLastName, user.getFirstName))
-			
-			users
-		} getOrElse(Seq())
+		for {
+			definition <- roleDefinition +: derivedRoleDefinitions
+			role <- permissionsService.getGrantedRole(scope, definition).toSeq
+			user <- role.users.users
+		} yield user
 	}
 
 }
