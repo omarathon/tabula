@@ -212,7 +212,7 @@
 			<div id="note-modal" class="modal hide fade">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h3><span></span> for ${profile.fullName}</span></h3>
+					<h3><span></span> for ${profile.fullName}</h3>
 				</div>
 				<div class="modal-body"></div>
 
