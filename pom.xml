@@ -33,8 +33,8 @@
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
 
-		<warwickutils.version>20130722-1137</warwickutils.version>
-	        <surefire.version>2.14.1</surefire.version>
+		<warwickutils.version>20131003</warwickutils.version>
+		<surefire.version>2.14.1</surefire.version>
 		<recompileMode><!-- incremental --></recompileMode>
 
 		<tabula.basedir>${project.basedir}</tabula.basedir>
@@ -406,10 +406,10 @@
 				</dependency>
 			</dependencies>
 		</profile>
-		
+
 		<profile>
 			<id>skinny</id>
-			
+
 			<build>
 				<plugins>
 					<plugin>
@@ -537,7 +537,7 @@
 					<source>1.6</source>
 					<target>1.6</target>
 				</configuration>
-			</plugin> 
+			</plugin>
 
 
 			<!-- Scalastyle for build verification -->
@@ -624,7 +624,7 @@
 						</overlays>
 					</configuration>
 				</plugin>
-				
+
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-ear-plugin</artifactId>
@@ -648,7 +648,7 @@
 					<configuration>
 						<!-- TAB-697 -->
 						<skip>true</skip>
-						
+
 						<verbose>false</verbose>
 						<failOnViolation>true</failOnViolation>
 						<failOnWarning>false</failOnWarning>

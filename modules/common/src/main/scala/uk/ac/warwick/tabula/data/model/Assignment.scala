@@ -149,24 +149,26 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
 
+	lazy val workingDaysHelper = new WorkingDaysHelperImpl
+
 	def feedbackDeadline: Option[LocalDate] = if (openEnded) {
 		None
 	} else {
-		val workingDaysHelper = new WorkingDaysHelperImpl
 		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
 	}
-	def feedbackDeadlineWorkingDaysAway: Option[Int] =  if (openEnded) {
+
+	def feedbackDeadlineWorkingDaysAway: Option[Int] = if (openEnded) {
 		None
 	} else {
-		val workingDaysHelper = new WorkingDaysHelperImpl
+		val now = LocalDate.now
 		val deadline = workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)
-		if (deadline.isBefore(LocalDate.now)) {
-			// helper explodes with negative differences, so just return simple count of days late
-			// maybe review helper and revert in future
-			Option(Days.daysBetween(LocalDate.now, deadline).getDays)
-		} else {
-			Option(workingDaysHelper.getNumWorkingDays(LocalDate.now, deadline)-1)
-		}
+
+		// need an offset, as the helper always includes both start and end date, off-by-one from what we want to show
+		val offset =
+			if (deadline.isBefore(now)) 1
+			else -1 // today or in the future
+
+		Option(workingDaysHelper.getNumWorkingDays(now, deadline) + offset)
 	}
 
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access

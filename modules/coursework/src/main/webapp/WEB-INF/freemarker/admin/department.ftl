@@ -238,11 +238,11 @@
 			</#if>
 
 			<#assign feedbackDeadline>
-				<div class="use-tooltip" title="The deadline for returning feedback is calculated using working days at Warwick. After the deadline, Tabula shows how calendar days overdue where appropriate.">
+				<div class="use-tooltip" title="The deadline for returning feedback is calculated using working days at Warwick.">
 					<#if workingDaysAway == 0>
 						<b>Feedback due today</b>
 					<#elseif workingDaysAway lt 0>
-						Feedback deadline was <@fmt.p -workingDaysAway "day" /> ago,
+						Feedback deadline was <@fmt.p -workingDaysAway "working day" /> ago,
 						<@fmt.date date=assignment.feedbackDeadline includeTime=false />
 					<#else>
 						Feedback due in <@fmt.p workingDaysAway "working day" />,
