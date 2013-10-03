@@ -114,6 +114,26 @@
 									(Archived)
 								</#if>
 							</small>
+							<#if setItem.viewerIsStudent >
+								<#if !setItem.isStudentSignUp()
+									 || (setItem.isStudentSignUp() && !setItem.set.allowSelfGroupSwitching)
+									 || (setItem.isStudentSignUp() && !setItem.set.openForSignups)
+								>
+									<span class="use-tooltip" title="You cannot change this group allocation via tabula. Please speak to your department if you need to change groups"><i class="icon-lock"></i></span>
+								<#else>
+									<span class="use-tooltip" title="This group is open for self sign-up"><i class="icon-unlock-alt"></i></span>
+								</#if>
+							<#else>
+								<#if setItem.isStudentSignUp()>
+									<#if setItem.set.openForSignups>
+										<span class="use-tooltip" title="This group is open for self sign-up"><i class="icon-unlock-alt"></i></span>
+									<#else>
+										<span class="use-tooltip" title="This group is closed for self sign-up"><i class="icon-lock"></i></span>
+									</#if>
+								<#else>
+									<span class="use-tooltip" title="This is a manually allocated group"><i class="icon-random"></i></span>
+								</#if>
+							</#if>
 						</h3>
 
 						<span class="format">
@@ -137,88 +157,89 @@
 
 						<#list setItem.groups as group>
 							<div class="row-fluid group">
-							<div class="span1 ${(setItem.viewerMustSignUp && group.full)?string('use-tooltip" title="There are no spaces left on this group"','"')}>
-							 <#if setItem.viewerMustSignUp>
-							   <input type="radio"
-							          name="group"
-							          value="${group.id}"
-							          ${group.full?string(' disabled ','')}
-							          class="radio inline group-selection-radio"/>
-							</#if>
-							</div>
-							<div class="span11">
-								<h4 class="name">
-								${group.name!""}
-								<#if setItem.canViewMembers >
-								<a href="<@routes.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
-								<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
-								</a>
-								<#else>
-								<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
-								</#if>
-								</h4>
+								<div class="span12">
+									<#if setItem.viewerMustSignUp>
+										<div class="pull-left ${group.full?string('use-tooltip" title="There are no spaces left on this group"','"')}>
+											<input type="radio"
+												name="group"
+												value="${group.id}"
+												${group.full?string(' disabled ','')}
+												class="radio inline group-selection-radio"/>
+										</div>
+										<div style="margin-left: 20px;">
+									<#else>
+										<div>
+									</#if>
+										<h4 class="name">
+											${group.name!""}
+											<#if setItem.canViewMembers >
+												<a href="<@routes.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
+													<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
+												</a>
+											<#else>
+												<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
+											</#if>
+										</h4>
 
-								<#if setItem.viewerIsStudent >
-                                    <#if !setItem.isStudentSignUp()
-                                         || (setItem.isStudentSignUp() && !setItem.set.allowSelfGroupSwitching)
-                                         || (setItem.isStudentSignUp() && !setItem.set.openForSignups)
-                                         >
-                                      <form> <!-- targetless form here to make the DOM match the student-sign-up version, for ease of testing -->
-									     <input type="submit"
-									            disabled
-									            class="disabled btn btn-primary btn-medium pull-right use-tooltip"
-									            title='You cannot change this group allocation via tabula.
-									                   Please speak to your department if you need to change groups'
-									            value="Leave" />
-                                      </form>
-                                    <#else >
-	                                    <#if !setItem.viewerMustSignUp >
-	                                     <form id="leave-${setItem.set.id}" method="post" action="<@routes.leave_group setItem.set />" >
-                                            <input type="hidden" name="group" value="${group.id}" />
-                                            <input type="submit"
-                                                   class="btn btn-primary  pull-right use-tooltip"
-                                                   title='Leave this group. You will need to sign up for a different group.'
-                                                   value="Leave"/>
-										 </form>
+										<#if setItem.viewerIsStudent >
+											<#if !setItem.isStudentSignUp()
+												 || (setItem.isStudentSignUp() && !setItem.set.allowSelfGroupSwitching)
+												 || (setItem.isStudentSignUp() && !setItem.set.openForSignups)
+												 >
+											  <form style="display: none;"> <!-- targetless form here to make the DOM match the student-sign-up version, for ease of testing -->
+												 <input type="submit"
+														disabled
+														class="disabled btn btn-primary btn-medium pull-right use-tooltip"
+														value="Leave" />
+											  </form>
+											<#else >
+												<#if !setItem.viewerMustSignUp >
+												<form id="leave-${setItem.set.id}" method="post" action="<@routes.leave_group setItem.set />" >
+													<input type="hidden" name="group" value="${group.id}" />
+													<input type="submit"
+														   class="btn btn-primary pull-right use-tooltip"
+														   title='Leave this group. You will need to sign up for a different group.'
+														   value="Leave"/>
+												 </form>
+												</#if>
+											</#if>
 										</#if>
-                                    </#if>
-                                </#if>
 
 
-								<ul class="unstyled margin-fix">
-									<#list group.events as event>
-										<li class="clearfix">
-											<#-- Tutor, weeks, day/time, location -->
-											<span class="pull-left eventWeeks span6">
-											<#if setItem.canViewTutors && event.tutors?? >
-												<h6>Tutor<#if (event.tutors.size > 1)>s</#if>:
-													<#if (event.tutors.size < 1)>[no tutor]</#if>
-												<#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>
-												</h6>
-											</#if>
-											<@event_schedule_info event />
-											</span>
+										<ul class="unstyled margin-fix">
+											<#list group.events as event>
+												<li class="clearfix">
+													<#if features.smallGroupTeachingRecordAttendance && !event.unscheduled>
+														<#if can.do("SmallGroupEvents.Register", event)>
+															<div class="pull-right eventRegister">
+																<form method="get" action="/groups/event/${event.id}/register">
 
-											<#if features.smallGroupTeachingRecordAttendance && !event.unscheduled>
-											<#if can.do("SmallGroupEvents.Register", event)>
-											<span class="pull-right eventRegister">
-												<form method="get" action="/groups/event/${event.id}/register">
-
-													<#if !returnTo??>
-														<#local returnTo=info.requestedUri />
+																	<#if !returnTo??>
+																		<#local returnTo=info.requestedUri />
+																	</#if>
+																	<input type="hidden" name="returnTo" value="${returnTo}" />
+																	<span class="form-horizontal">
+																		<@fmt.weekRangeSelect event />
+																		<button class="btn btn-small btn-primary register-button">Record</button>
+																	 </span>
+																</form>
+															</div>
+														</#if>
 													</#if>
-													<input type="hidden" name="returnTo" value="${returnTo}" />
-													<span class="form-horizontal">
-														<@fmt.weekRangeSelect event />
-														<button class="btn btn-small btn-primary register-button">Record</button>
-													 </span>
-												</form>
-											</span>
-											</#if>
-											</#if>
-										</li>
-									</#list>
-								</ul>
+													<#-- Tutor, weeks, day/time, location -->
+													<div class="eventWeeks">
+														<#if setItem.canViewTutors && event.tutors?? >
+															<h6>Tutor<#if (event.tutors.size > 1)>s</#if>:
+																<#if (event.tutors.size < 1)>[no tutor]</#if>
+															<#list event.tutors.users as tutor>${tutor.fullName}<#if tutor_has_next>, </#if></#list>
+															</h6>
+														</#if>
+														<@event_schedule_info event />
+													</div>
+												</li>
+											</#list>
+										</ul>
+									</div>
 								</div>
 							</div>
 						</#list>
