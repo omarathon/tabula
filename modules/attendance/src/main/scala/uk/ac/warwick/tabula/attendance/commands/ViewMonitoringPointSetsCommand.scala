@@ -47,7 +47,11 @@ abstract class ViewMonitoringPointSetsCommand(
 				}.map{ case(member, checkMap) =>
 					member -> checkMap.map{ case(point, option) => point -> (option match {
 						case Some(state) => state.dbValue
-						case _ => "late"
+						case _ =>
+							if (currentAcademicWeek >= point.requiredFromWeek)
+								"late"
+							else
+								""
 					})}
 				}
 			}
