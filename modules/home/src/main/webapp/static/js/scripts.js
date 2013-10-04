@@ -307,7 +307,7 @@
 				$items.popover('hide');
 			}
 		});
-		
+
 		// TAB-945 support popovers within fix-on-scroll
 		$items.closest('.fix-on-scroll').on('fixed', function(e, isFixed, fixLocation) {
 			// Re-position any currently shown popover whenever we trigger a change in fix behaviour
@@ -360,6 +360,91 @@
 			e.preventDefault();
 		});
 	});
+
+
+	/*
+	  Invoke on .nav-tabs to overflow items into a dropdown
+	  instead of onto another row.
+	*/
+	jQuery.fn.tabOverflow = function() {
+
+		var selector = '.nav-tabs', $target = $(this).find(selector).add($(this).filter(selector)), initClass = selector + '-overflow-inited';
+		// filter already initialized tabs
+		$target = $target.not(initClass);
+
+		// Packs the given list items into a dropdown.
+		var overflowThese = function($items) {
+			var $dropdown = $('<li>').addClass('dropdown').addClass('pull-right');
+			var $link = $('<a>').addClass('dropdown-toggle').html('More...');
+			var $caret = $('<b>').addClass('caret');
+			var $ul = $('<ul>', { 'class' : 'dropdown-menu' });
+			$dropdown
+			  .append($ul)
+			  .append($link.append($caret));
+			$items.first().before($dropdown);
+			$ul.append($items);
+			$link.dropdown();
+		};
+
+		function overflow($items) {
+			$items.each(function(i, e) {
+				var x = 0;
+				// find the first child that hits a new line by comparing leftness.
+				$(e).children().each(function(j, child) {
+					var left = $(child).position().left;
+					if (left < x) {
+						// The first prev() is so nextAll includes child;
+						// The second prev() is a silly hack to put an extra
+						// item into the menu to make way for the dropdown item;
+						// not very scientific. Could measure required width?
+						overflowThese($(child).prev().prev().nextAll());
+						return false;
+					} else {
+						x = left;
+					}
+				});
+			});
+		}
+
+		function dropflow($items) {
+			// remove the dropdown nature
+			$items.find('.dropdown-menu li').unwrap();
+			$items.find('.dropdown li').unwrap();
+			$items.find('.dropdown-toggle').remove();
+		}
+
+		function reflow($items) {
+			// convenience method
+			dropflow($items);
+			overflow($items);
+		}
+
+		// overflow on init
+		overflow($target);
+
+		// on click, move active tab to head, and reflow
+		this.on('click', '.dropdown-menu li', function() {
+			var $tabs = $(this).closest(selector);
+			$tabs.prepend($(this));
+			reflow($tabs);
+		});
+
+		// on tabbable sort or custom change, reflow
+		this.on('tabbablechanged sortstop', function() {
+			var $tabs = $(this).find(selector).add($(this).filter(selector));
+			reflow($tabs);
+			// if active item pushed into dropdown, try again
+			var hiddenActiveTab = $tabs.find('.dropdown-menu .active');
+			if (hiddenActiveTab.length) {
+				$tabs.prepend(hiddenActiveTab);
+				reflow($tabs);
+			}
+		});
+
+		// tidy up and return for chaining
+		$target.addClass(initClass);
+		return this;
+	};
 
 	// collapsible striped section
 	// exported so can be called on-demand e.g. after an ajax-load
@@ -603,9 +688,10 @@
 				$t.find('.gadget, .tab-content, .tab-pane, .active').removeClass('gadget tab-content tab-pane active');
 			}
 
-			$(document).on('tabbablechanged', function(e) {
+			$(document).on('tabbablechanged', function(e, callback) {
 				$('.tooltip').remove();
 				$t.show().find('.tab-container i, .layout-tools i').tooltip({ delay: { show: 750, hide: 100 } });
+				if (typeof(callback) == typeof(Function)) callback();
 			});
 
 			// layout options
@@ -621,8 +707,11 @@
 				});
 				$lt.after($tabContainer);
 				$panes.addClass('tab-content').children().addClass('tab-pane');
-				$t.find('.nav-tabs').sortable({ handle: '.icon-move' }).show().find('li:first a').tab('show');
-				$t.trigger('tabbablechanged');
+				$t.find('.nav-tabs').sortable({
+					handle: '.icon-move',
+					placeholder: 'tabbable-placeholder'
+				}).show().find('li:first a').tab('show');
+				$t.trigger('tabbablechanged', function() { $('.tabbable').tabOverflow(); });
 			});
 
 			$t.on('click', '.layout-tools .icon-th-large', function() { // gadgetify
@@ -703,7 +792,7 @@
 			// default to gadgets
 			$t.find('.layout-tools .icon-th-large').click();
 		}
-		
+
 		// drag and drop containers
 		$('.tabula-dnd').dragAndDrop();
 		$('.tabula-filtered-list').filteredList();
