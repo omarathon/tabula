@@ -2,22 +2,22 @@
 	<@f.input path="name" cssClass="input-block-level"/>
 </@form.labelled_row>
 
-<@form.labelled_row "validFromWeek" "'Valid from' week">
+<@form.labelled_row "validFromWeek" "Start">
 	<@f.select path="validFromWeek">
 		<#list 1..52 as week>
 			<@f.option value="${week}">Week ${week}</@f.option>
 		</#list>
 	</@f.select>
-	<a class="use-popover" id="popover-validFromWeek" data-content="Before this week a point can only be marked as Missed (authorised)"><i class="icon-question-sign"></i></a>
+	<a class="use-popover" id="popover-validFromWeek" data-content="You cannot mark a point as attended or missed (unauthorised) before its start date"><i class="icon-question-sign"></i></a>
 </@form.labelled_row>
 
-<@form.labelled_row "requiredFromWeek" "'Required from' week">
+<@form.labelled_row "requiredFromWeek" "End">
 	<@f.select path="requiredFromWeek">
 		<#list 1..52 as week>
 			<@f.option value="${week}">Week ${week}</@f.option>
 		</#list>
 	</@f.select>
-	<a class="use-popover" id="popover-requiredFromWeek" data-content="From this week a point with a checkpoint for each student will be marked as unrecorded"><i class="icon-question-sign"></i></a>
+	<a class="use-popover" id="popover-requiredFromWeek" data-content="A warning will appear for unrecorded attendance after its end date"><i class="icon-question-sign"></i></a>
 </@form.labelled_row>
 
 <script>

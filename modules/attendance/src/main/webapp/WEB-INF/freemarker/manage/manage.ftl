@@ -57,7 +57,7 @@
 	<#if (command.templates?size > 0)>
 		<label>
 			<input class="create template" type="radio" name="createType" value="template"/>
-			Create from template
+			Create from approved template
 			<a class="use-popover" id="popover-create-template" data-content="Choose a template monitoring scheme developed for each year of study"><i class="icon-question-sign"></i></a>
 		</label>
 		<span class="existingSetOptions">
@@ -75,7 +75,7 @@
 	<#if (command.setsByRouteByAcademicYear?keys?size > 0)>
 		<label>
 			<input class="create copy" type="radio" name="createType" value="copy"/>
-			Copy an existing scheme
+			Copy an existing scheme in your department
 			<a class="use-popover" id="popover-create-copy" data-content="Choose an existing scheme to copy by academic year, route, and year of study"><i class="icon-question-sign"></i></a>
 		</label>
 		<select class="academicYear input-medium">

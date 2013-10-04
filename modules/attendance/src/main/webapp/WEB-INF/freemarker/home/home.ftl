@@ -22,7 +22,7 @@
 		</#if>
 		
 		<#if (permissionMap["Manage"]?size > 0)>
-			<h2>Manage monitoring points</h2>
+			<h2>Create and edit monitoring schemes</h2>
 			<ul class="links">
 				<#list permissionMap["Manage"] as department>
 					<li>

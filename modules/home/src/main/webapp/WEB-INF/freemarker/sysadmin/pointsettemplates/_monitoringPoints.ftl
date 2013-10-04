@@ -30,7 +30,7 @@
             		<div class="item-info row-fluid point">
 						<div class="span12">
 							<div class="pull-right">
-								<a class="btn btn-primary edit-point" href="<@url page="/sysadmin/pointsettemplates/add/points/edit/${pointCount}?form=true"/>">Edit</a>
+								<a class="btn btn-primary edit-point" href="<@url page="/sysadmin/pointsettemplates/add/points/edit/${pointCount}?form=true"/>">Update</a>
 								<a class="btn btn-danger delete-point" title="Delete" href="<@url page="/sysadmin/pointsettemplates/add/points/delete/${pointCount}?form=true"/>"><i class="icon-remove"></i></a>
 							</div>
 							${point.name} (week ${point.validFromWeek} - ${point.requiredFromWeek})
