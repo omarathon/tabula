@@ -136,17 +136,59 @@ the comments textarea needs to maintain newlines.
 <#-- These fields are also used by the batch assignment importer so they are in a separate file. -->
 <#include "_common_fields.ftl" />
 
+<#import "*/membership_picker_macros.ftl" as membership_picker />
+
 <#-- Members picker is pretty hefty so it is in a separate file -->
 <#if features.assignmentMembership>
-	<#include "assignment_membership_picker.ftl" />
+
+<@form.row "members" "assignmentEnrolment">
+	<details id="students-details">
+		<summary id="students-summary" class="collapsible large-chevron">
+			<span class="legend" >Students <small>Select which students should be in this assignment</small> </span>
+			<div class="alert alert-success" style="display: none;" data-display="fragment">
+				The membership list for this assignment has been updated
+			</div>
+			<@membership_picker.header command />
+		</summary>
+		<@membership_picker.fieldset command 'assignment' 'assignment'/>
+	</details>
+</@form.row>
+
 </#if>
 <#include "_submissions_common_fields.ftl" />
 
 <script>
 jQuery(function ($) {
+
+	<#-- TAB-830 expand submission details when collectSubmissions checkbox checked -->
+	$('input[name=collectSubmissions]').on('change click keypress',function(e) {
+
+		e.stopPropagation();
+
+		var collectSubmissions = $('input[name=collectSubmissions]').is(':checked');
+
+		if (collectSubmissions) {
+			$("html.no-details details.submissions:not(.open) summary").click();
+			$("html.details details.submissions:not([open]) summary").click();
+
+		}  else {
+			$("html.no-details details.submissions.open summary").click();
+			$("html.details details.submissions[open] summary").click();
+		}
+	});
+
+	<#-- if summary supported, disable defaults for this summary when a contained label element is clicked -->
+	$("summary").on("click", "label", function(e){
+		e.stopPropagation();
+		e.preventDefault();
+		$('#collectSubmissions').attr('checked', !$('#collectSubmissions').attr('checked') );
+		$('input[name=collectSubmissions]').triggerHandler("change");
+	});
+
 	$('#action-submit').closest('form').on('click', '.update-only', function() {
 		$('#action-submit').val('update');
 	});
+
 });
 </script>
 </#escape>
