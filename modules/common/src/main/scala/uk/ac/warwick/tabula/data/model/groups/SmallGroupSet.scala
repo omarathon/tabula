@@ -131,7 +131,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	}
 
 	def allStudents = membershipService.determineMembershipUsers(upstreamAssessmentGroups, Some(members))
-	def allStudentsCount = membershipService.countMembershipUsers(upstreamAssessmentGroups, Some(members))
+	def allStudentsCount = membershipService.countMembershipWithUniversityIdGroup(upstreamAssessmentGroups, Some(members))
 	
 	def unallocatedStudents = {
 		val allocatedStudents = groups.asScala flatMap { _.students.users }
