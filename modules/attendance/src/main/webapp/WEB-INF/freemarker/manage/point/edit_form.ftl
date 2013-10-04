@@ -2,7 +2,7 @@
 <#import "*/modal_macros.ftl" as modal />
 
 <@modal.header>
-	<h2>Edit monitoring point</h2>
+	<h2>Update monitoring point</h2>
 </@modal.header>
 
 <@modal.body>
@@ -21,8 +21,8 @@
 </@modal.body>
 
 <@modal.footer>
-	<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Editing&hellip;">
-		Edit
+	<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Updating&hellip;">
+		Update
 	</button>
 	<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
 </@modal.footer>
