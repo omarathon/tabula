@@ -188,7 +188,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		GrantsScopedPermission(
 			Permissions.Module.ManageAssignments,
 			Permissions.Department.ArrangeModules)
-		  var canDelegateThisRolesPermissions:JBoolean = false
+		  def canDelegateThisRolesPermissions:JBoolean = false
 
 	}
 
@@ -196,7 +196,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		override def description ="test"
 		GrantsScopelessPermission(ImportSystemData)
 		GrantsScopelessPermission(ReplicaSyncing)
-		var canDelegateThisRolesPermissions:JBoolean = false
+		def canDelegateThisRolesPermissions:JBoolean = false
 
 	}
 	val testScope:PermissionsTarget = new PermissionsTarget {

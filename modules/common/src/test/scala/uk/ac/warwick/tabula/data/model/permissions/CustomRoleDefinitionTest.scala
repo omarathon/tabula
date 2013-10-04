@@ -15,7 +15,7 @@ class CustomRoleDefinitionTest extends TestBase {
 		GrantsScopelessPermission(Masquerade)
 		GrantsScopedPermission(Department.ManageExtensionSettings)
 		GrantsGlobalPermission(Module.Create)
-		var canDelegateThisRolesPermissions:JBoolean = false
+		def canDelegateThisRolesPermissions:JBoolean = false
 
 	}
 	
