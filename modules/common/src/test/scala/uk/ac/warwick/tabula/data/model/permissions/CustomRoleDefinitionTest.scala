@@ -2,7 +2,8 @@ package uk.ac.warwick.tabula.data.model.permissions
 
 import uk.ac.warwick.tabula.{TestBase, Fixtures}
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
-import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget, Permissions}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.JavaImports._
 
 class CustomRoleDefinitionTest extends TestBase {
 	
@@ -14,6 +15,7 @@ class CustomRoleDefinitionTest extends TestBase {
 		GrantsScopelessPermission(Masquerade)
 		GrantsScopedPermission(Department.ManageExtensionSettings)
 		GrantsGlobalPermission(Module.Create)
+		var canDelegateThisRolesPermissions:JBoolean = false
 
 	}
 	

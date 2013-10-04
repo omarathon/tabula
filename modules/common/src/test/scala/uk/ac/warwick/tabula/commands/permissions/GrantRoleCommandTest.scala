@@ -8,14 +8,12 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, DepartmentGrantedRole, GrantedRole}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.roles.{UniversityMemberRoleDefinition, BuiltInRoleDefinition, ModuleAssistantRoleDefinition, DepartmentalAdministratorRoleDefinition}
-import org.mockito.Matchers._
+import uk.ac.warwick.tabula.roles.{UniversityMemberRoleDefinition, BuiltInRoleDefinition, DepartmentalAdministratorRoleDefinition}
 import uk.ac.warwick.tabula.permissions.Permission
 import scala.reflect.ClassTag
 import uk.ac.warwick.tabula.helpers.Tap.tap
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.permissions.Permissions.{ReplicaSyncing, ImportSystemData, Module}
+import uk.ac.warwick.tabula.permissions.Permissions.{ReplicaSyncing, ImportSystemData}
+import uk.ac.warwick.tabula.JavaImports._
 
 class GrantRoleCommandTest extends TestBase with Mockito {
 	
@@ -190,12 +188,16 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		GrantsScopedPermission(
 			Permissions.Module.ManageAssignments,
 			Permissions.Department.ArrangeModules)
+		  var canDelegateThisRolesPermissions:JBoolean = false
+
 	}
 
 	object TestScopelessRoleDef extends BuiltInRoleDefinition{
 		override def description ="test"
 		GrantsScopelessPermission(ImportSystemData)
 		GrantsScopelessPermission(ReplicaSyncing)
+		var canDelegateThisRolesPermissions:JBoolean = false
+
 	}
 	val testScope:PermissionsTarget = new PermissionsTarget {
 		def permissionsParents: Stream[PermissionsTarget] = Stream.empty

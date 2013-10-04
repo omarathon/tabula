@@ -2,11 +2,10 @@ package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.permissions.Permissions._
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{JavaImports, CurrentUser, CaseObjectEqualityFixes}
 import scala.annotation.tailrec
 import scala.collection.immutable.ListMap
 import javax.persistence.Transient
-import uk.ac.warwick.tabula.CaseObjectEqualityFixes
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.EqualsBuilder
 import uk.ac.warwick.tabula.JavaImports._
@@ -63,8 +62,6 @@ trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinitio
 	def GeneratesSubRole(roles: BuiltInRoleDefinition*) =
 		for (role <- roles) subRoleDefinitions += role
 
-	def AllowsDelegationOfPermissions = canDelegateThisRolesPermissions=true
-
 	def permissions(scope: Option[PermissionsTarget]) =
 		ListMap() ++
 		(if (scope.isDefined) scopedPermissions map { _ -> scope } else Map()) ++
@@ -86,7 +83,6 @@ trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinitio
 	def allPermissions(scope: Option[PermissionsTarget]): Map[Permission, Option[PermissionsTarget]] =
 		permissions(scope) ++ (subRoleDefinitions flatMap { _.allPermissions(scope) })
 
-	var canDelegateThisRolesPermissions:JBoolean = false
 	def isAssignable = true
 }
 
@@ -131,6 +127,8 @@ object SelectorBuiltInRoleDefinition {
 
 trait UnassignableBuiltInRoleDefinition extends BuiltInRoleDefinition {
 	override def isAssignable = false
+	final def canDelegateThisRolesPermissions: JavaImports.JBoolean = false
+
 }
 
 object RoleDefinition {

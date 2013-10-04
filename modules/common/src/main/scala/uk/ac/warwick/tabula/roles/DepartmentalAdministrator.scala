@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
 import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsSelector}
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.JavaImports._
 
 case class DepartmentalAdministrator(department: model.Department) extends BuiltInRole(DepartmentalAdministratorRoleDefinition, department)
 
@@ -14,7 +15,6 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 	// Implicitly grants module manager role for all modules in this department
 	GeneratesSubRole(ModuleManagerRoleDefinition)
 
-	AllowsDelegationOfPermissions
 
 	GrantsScopedPermission(
 		Department.ManageExtensionSettings,
@@ -64,5 +64,6 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		MemberNotes.Delete
 
 	)
+	var canDelegateThisRolesPermissions:JBoolean = true
 
 }
