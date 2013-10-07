@@ -108,7 +108,7 @@
 											<#if checkpointState == "attended">
 												<i class="icon-ok icon-fixed-width attended" title="Attended: ${point.name} (<@fmt.weekRanges point />)"></i>
 											<#elseif checkpointState == "authorised">
-												<i class="icon-remove icon-fixed-width authorised" title="Missed (authorised): ${point.name} (<@fmt.weekRanges point />)"></i>
+												<i class="icon-remove-circle icon-fixed-width authorised" title="Missed (authorised): ${point.name} (<@fmt.weekRanges point />)"></i>
 											<#elseif checkpointState == "unauthorised">
 												<#assign missedCount = missedCount + 1 />
 												<i class="icon-remove icon-fixed-width unauthorised" title="Missed (unauthorised): ${point.name} (<@fmt.weekRanges point />)"></i>
