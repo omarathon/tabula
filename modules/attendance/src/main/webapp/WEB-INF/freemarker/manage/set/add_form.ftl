@@ -2,7 +2,7 @@
 
 <h1>Create monitoring schemes</h1>
 
-<form id="addMonitoringPointSet" action="<@url page="/manage/${command.dept.code}/sets/add/${command.academicYear.startYear?c}"/>" method="POST" class="modify-monitoring-points">
+<form id="addMonitoringPointSet" action="<@routes.createSet command.dept command.academicYear />" method="POST" class="modify-monitoring-points">
 
 	<div class="routeAndYearPicker">
 		<div class="row-fluid">
@@ -86,13 +86,13 @@
 			<h2>Monitoring points</h2>
 		</div>
 		<div class="span9">
-			<a href="<@url page="/manage/${command.dept.code}/sets/add/points/add?form=true" />" class="btn btn-primary new-point"><i class="icon-plus"></i> Create new point</a>
+			<a href="<@routes.addPoint command.dept />?form=true" class="btn btn-primary new-point"><i class="icon-plus"></i> Create new point</a>
 		</div>
 	</div>
 
 	<#include "_monitoringPoints.ftl" />
 
-	<input type="submit" value="Create" class="btn btn-primary"/> <a class="btn" href="<@url page="/manage/${command.dept.code}"/>">Cancel</a>
+	<input type="submit" value="Create" class="btn btn-primary"/> <a class="btn" href="<@routes.manageDepartment command.dept />">Cancel</a>
 
 </form>
 

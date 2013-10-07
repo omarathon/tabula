@@ -72,7 +72,7 @@
 
 				<form action="" method="post">
 					<input type="hidden" name="monitoringPoint" value="${monitoringPoint.id}" />
-					<input type="hidden" value="<@url page="${returnTo}" />" />
+					<input type="hidden" name="returnTo" value="<@url page="${returnTo}" />" />
 					<#list command.members?sort_by("lastName") as student>
 						<div class="row-fluid item-info clickable">
 							<label>

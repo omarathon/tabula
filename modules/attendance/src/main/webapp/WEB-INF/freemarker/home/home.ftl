@@ -15,7 +15,7 @@
 			<ul class="links">
 				<#list permissionMap["View"] as department>
 					<li>
-						<a href="<@url page="/${department.code}"/>">${department.name}</a>
+						<a href="<@routes.viewDepartment department />">${department.name}</a>
 					</li>
 				</#list>
 			</ul>
@@ -26,7 +26,7 @@
 			<ul class="links">
 				<#list permissionMap["Manage"] as department>
 					<li>
-						<a href="<@url page="/manage/${department.code}"/>">${department.name}</a>
+						<a href="<@routes.manageDepartment department />">${department.name}</a>
 					</li>
 				</#list>
 			</ul>

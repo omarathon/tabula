@@ -8,7 +8,7 @@
 			<h2>Monitoring points</h2>
 		</div>
 		<div class="span9">
-			<a href="<@url page="/manage/${command.set.route.department.code}/sets/${command.set.id}/edit/points/add" />" class="btn btn-primary new-point">
+			<a href="<@routes.createPoint command.set />" class="btn btn-primary new-point">
 				<i class="icon-plus"></i>
 				Create new point
 			</a>
@@ -18,7 +18,7 @@
 	<#include "_monitoringPointsPersisted.ftl" />
 </div>
 
-<a class="btn" href="<@url page="/manage/${command.set.route.department.code}"/>">Done</a>
+<a class="btn" href="<@routes.manageDepartment command.set.route.department />">Done</a>
 
 <div id="modal" class="modal hide fade" style="display:none;"></div>
 
