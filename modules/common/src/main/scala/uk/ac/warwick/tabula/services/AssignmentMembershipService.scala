@@ -149,7 +149,7 @@ class AssignmentMembershipInfo(val items: Seq[MembershipItem]) {
 
 }
 
-trait AssignmentMembershipMethods {
+trait AssignmentMembershipMethods extends Logging {
 
 	self: AssignmentMembershipService with UserLookupComponent =>
 
@@ -189,16 +189,20 @@ trait AssignmentMembershipMethods {
 	}
 
 	def countMembershipWithUniversityIdGroup(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]) = {
-		others.filter(!_.universityIds).foreach { grp =>
-			throw new IllegalArgumentException("Can not call with a UserGroup of anything other than University IDs (got %s). Use determineMembership().size".format(grp)) 
-		}
+		others match {
+			case Some(group) if !group.universityIds => {
+				logger.warn("Attempted to use countMembershipWithUniversityIdGroup() with a usercode-type UserGroup. Falling back to determineMembership()")
+				determineMembershipUsers(upstream, others).size
+			}
+			case _ => {
+				val sitsUsers = upstream.flatMap { _.members.members }
+
+				val includes = others map { _.knownType.allIncludedIds } getOrElse Nil		
+				val excludes = others map { _.knownType.allExcludedIds } getOrElse Nil
 		
-		val sitsUsers = upstream.flatMap { _.members.members }
-
-		val includes = others map { _.knownType.allIncludedIds } getOrElse Nil		
-		val excludes = others map { _.knownType.allExcludedIds } getOrElse Nil
-
-		((sitsUsers ++ includes).distinct diff excludes).size
+				((sitsUsers ++ includes).distinct diff excludes).size
+			}
+		}
 	}
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean = {

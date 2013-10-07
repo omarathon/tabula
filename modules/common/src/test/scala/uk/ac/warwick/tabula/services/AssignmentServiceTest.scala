@@ -748,11 +748,8 @@ class AssignmentServiceTest extends PersistenceTestBase {
 			
 			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg1, upstreamAg2, upstreamAg3), Some(universityIdGroup)) should be (7)
 			
-			// UserID Group is invalid
-			
-			evaluating {
-				assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg1, upstreamAg2, upstreamAg3), Some(userIdGroup))
-			} should produce [IllegalArgumentException]
+			// UserID Group should fall back to using the other strategy, but get the same result
+			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg1, upstreamAg2, upstreamAg3), Some(userIdGroup)) should be (7)
 		}
 	}}
 }
