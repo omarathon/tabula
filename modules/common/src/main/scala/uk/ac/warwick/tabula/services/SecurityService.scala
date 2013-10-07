@@ -41,8 +41,9 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 	val Deny: Response = Some(false)
 	val Continue: Response = None // delegate to the next handler
 
-	val checks: Seq[PermissionChecker] = List(checkRuntimeMember _, checkGod _, checkPermissions _, checkRoles _)
-	
+	val checks: Seq[PermissionChecker] = List(checkRuntimeMember _, checkGod _, checkPermissions(_,_,_), checkRoles(delegatablePermissionsOnly = false, _,_,_))
+	val delegationChecks:Seq[PermissionChecker] = List(checkGod _, checkRoles(delegatablePermissionsOnly = true,_,_,_))
+
 	def checkRuntimeMember(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response = scope match {
 		case ignore: RuntimeMember => Deny
 		case _ => Continue
@@ -119,16 +120,23 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 		})
 	)
 	
-	def checkRoles(user: CurrentUser, permission: Permission, scope: PermissionsTarget): Response =
-		checkRoles(roleService.getRolesFor(user, scope), user, permission, scope)
+	def checkRoles(delegatablePermissionsOnly:Boolean, user: CurrentUser, permission: Permission, scope: PermissionsTarget ): Response ={
+		val rolesToCheck = roleService.getRolesFor(user, scope).filter(r=>{
+			(! delegatablePermissionsOnly) ||r.definition.canDelegateThisRolesPermissions})
+		checkRoles(rolesToCheck, user, permission, scope)
+	}
 
-	def can(user: CurrentUser, permission: ScopelessPermission) = _can(user, permission, None)
-	def can(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope)) 
-		
-	private def _can(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]): Boolean = transactional(readOnly=true) {
+
+	def can(user: CurrentUser, permission: ScopelessPermission ) = _can(user, permission, None, false)
+	def can(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope), false)
+	def canDelegate(user: CurrentUser, permission: ScopelessPermission ) = _can(user, permission, None, true)
+	def canDelegate(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _can(user, permission, Option(scope), true)
+
+	private def _can(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget],canDelegate:Boolean): Boolean = transactional(readOnly=true) {
 		// Lazily go through the checks using a view, and try to get the first one that's Allow or Deny
+		val checksToRun = if (canDelegate) delegationChecks else checks
 		val result: Response = cachedBy((user, permission, scope.orNull)) {
-			checks.view.flatMap { _(user, permission, scope.orNull ) }.headOption
+			checksToRun.view.flatMap { _(user, permission, scope.orNull ) }.headOption
 		}
 
 		result.map { canDo =>
@@ -142,7 +150,7 @@ class SecurityService extends Logging with RequestLevelCaching[(CurrentUser, Per
 	def check(user: CurrentUser, permission: ScopelessPermission) = _check(user, permission, None)
 	def check(user: CurrentUser, permission: Permission, scope: PermissionsTarget) = _check(user, permission, Option(scope))
 
-	private def _check(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]) = if (!_can(user, permission, scope)) {
+	private def _check(user: CurrentUser, permission: Permission, scope: Option[PermissionsTarget]) = if (!_can(user, permission, scope, false)) {
 		(permission, scope) match {
 			case (Permissions.Submission.Create, Some(assignment: Assignment)) => throw new SubmitPermissionDeniedException(assignment)
 			case (permission, scope) => throw new PermissionDeniedException(user, permission, scope)
