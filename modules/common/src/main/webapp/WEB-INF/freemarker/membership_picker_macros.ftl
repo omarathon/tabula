@@ -420,7 +420,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				$.ajax({
 					type: 'POST',
 					url: '<@routes.enrolment module />',
-					data: $('#${classifier}EnrolmentFields').find('input, textarea, select').serialize(),
+					data: $('#${classifier}EnrolmentFields').find('input, textarea, select').add('#academicYear').serialize(),
 					error: function() {
 						$m.modal('hide');
 					},
@@ -446,7 +446,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				$.ajax({
 					type: 'POST',
 					url: '<@routes.enrolment module />',
-					data: $('#${classifier}EnrolmentFields').find('input, textarea, select').serialize(),
+					data: $('#${classifier}EnrolmentFields').find('input, textarea, select').add('#academicYear').serialize(),
 					error: function() {
 						$m.modal('hide');
 					},
