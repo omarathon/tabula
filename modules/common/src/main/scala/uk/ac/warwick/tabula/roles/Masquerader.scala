@@ -11,5 +11,6 @@ case object MasqueraderRoleDefinition extends UnassignableBuiltInRoleDefinition 
 	GrantsScopelessPermission(
 		Masquerade
 	)
-	
+
+
 }

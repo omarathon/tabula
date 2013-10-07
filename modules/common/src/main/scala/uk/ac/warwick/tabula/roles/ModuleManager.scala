@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
-import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import uk.ac.warwick.tabula.JavaImports._
 
 case class DepartmentModuleManager(department: model.Department) extends BuiltInRole(ModuleManagerRoleDefinition, department)
 case class ModuleManager(module: model.Module) extends BuiltInRole(ModuleManagerRoleDefinition, module)
@@ -12,7 +12,6 @@ case object ModuleManagerRoleDefinition extends BuiltInRoleDefinition {
 	override def description = "Module Manager"
 	
 	GeneratesSubRole(ModuleAssistantRoleDefinition)
-	AllowsDelegationOfPermissions
 
 	GrantsScopedPermission( 	
 		Assignment.Archive,
@@ -25,5 +24,5 @@ case object ModuleManagerRoleDefinition extends BuiltInRoleDefinition {
 		SmallGroups.Archive,
 		SmallGroups.Delete
 	)
-
+	def canDelegateThisRolesPermissions: JBoolean = true
 }
