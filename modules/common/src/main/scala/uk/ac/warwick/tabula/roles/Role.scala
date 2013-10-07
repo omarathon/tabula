@@ -164,6 +164,7 @@ abstract class Role(val definition: RoleDefinition, val scope: Option[Permission
 	def isScoped = scope.isDefined
 
 	lazy val explicitPermissions = permissions
+
 	lazy val explicitPermissionsAsList = explicitPermissions.toList
 	lazy val subRoles = roles
 
