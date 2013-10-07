@@ -110,34 +110,33 @@
 		var $form = $this.closest('form');
 		var doNothing = function(){};
 
+		var show = function($div, data) {
+			if (data === 'init') $div.show(); // no animation on init
+			else $div.stop().slideDown('fast');
+			$div.trigger('tabula.slideMoreOptions.shown');
+		};
+
+		var hide = function($div, data) {
+			if (data === 'init') $div.hide(); // no animation on init
+			else $div.stop().slideUp('fast');
+			$div.trigger('tabula.slideMoreOptions.hidden');
+		}
+
 		// for checkboxes, there will just be one target - the current element (which will have the same name as itself).
 		// for radio buttons, each radio button will be a target.  They are identified as a group because they all have the same name.
 		var $changeTargets = $("input[name='" + name + "']", $form);
 		if (showWhenChecked) {
-			$changeTargets.change(function() {
-				if ($this.is(':checked')) {
-					$slidingDiv.stop().slideDown('fast');
-					$slidingDiv.trigger('tabula.slideMoreOptions.shown');
-				}
-				else {
-					$slidingDiv.stop().slideUp('fast');
-					$slidingDiv.trigger('tabula.slideMoreOptions.hidden');
-				}
+			$changeTargets.change(function(event, data) {
+				if ($this.is(':checked')) show($slidingDiv, data);
+				else hide($slidingDiv, data);
 			});
-			$this.trigger('change');
 		} else {
-			$changeTargets.change(function() {
-				if ($this.is(':checked')) {
-					$slidingDiv.stop().slideUp('fast');
-					$slidingDiv.trigger('tabula.slideMoreOptions.hidden');
-				}
-				else {
-					$slidingDiv.stop().slideDown('fast');
-					$slidingDiv.trigger('tabula.slideMoreOptions.shown');
-				}
+			$changeTargets.change(function(event, data) {
+				if ($this.is(':checked')) hide($slidingDiv, data);
+				else show($slidingDiv, data);
 			});
-			$this.trigger('change');
 		}
+		$this.trigger('change', 'init'); // pass 'init' to suppress animation on load.
 	};
 
 
