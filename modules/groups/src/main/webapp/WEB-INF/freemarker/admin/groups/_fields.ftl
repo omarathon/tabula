@@ -206,7 +206,7 @@
 					<#assign disabled = "true" >
 				</#if>
 
-				<@f.input path="defaultMaxGroupSize" type="number" min="0" max="100" cssClass="input-small" disabled="${disabled?string}" />
+				<@f.input path="defaultMaxGroupSize" type="number" min="0" cssClass="input-small" disabled="${disabled?string}" />
 
 				<a class="use-popover" data-html="true"
 				   data-content="This is the default maximum size for any new groups you create.  You can adjust the maximum size of individual groups">
