@@ -69,6 +69,6 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		MemberNotes.Delete
 
 	)
-	def canDelegateThisRolesPermissions:JBoolean = false
+	def canDelegateThisRolesPermissions:JBoolean = true
 
 }
