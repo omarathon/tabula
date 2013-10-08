@@ -144,7 +144,7 @@ the comments textarea needs to maintain newlines.
 <@form.row "members" "assignmentEnrolment">
 	<details id="students-details">
 		<summary id="students-summary" class="collapsible large-chevron">
-			<span class="legend" >Students <small>Select which students should be in this assignment</small> </span>
+			<span class="legend" id="student-summary-legend">Students <small>Select which students should be in this assignment</small> </span>
 			<div class="alert alert-success" style="display: none;" data-display="fragment">
 				The membership list for this assignment has been updated
 			</div>
