@@ -6,7 +6,8 @@
 <h1>Create module in ${department.name}</h1>
 <#assign commandName="addModuleCommand" />
 <#assign command=addModuleCommand />
-<@f.form method="post" action="${url('/admin/module/new')}" commandName=commandName cssClass="form-horizontal">
+<#assign submitUrl><@routes.createmodule department /></#assign>
+<@f.form method="post" action="${submitUrl}" commandName=commandName cssClass="form-horizontal">
 <@f.errors cssClass="error form-errors" />
 
 	<@f.hidden path="department" />
