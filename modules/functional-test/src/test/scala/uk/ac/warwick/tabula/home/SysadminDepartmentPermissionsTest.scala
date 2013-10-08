@@ -5,17 +5,17 @@ import org.scalatest.GivenWhenThen
 
 class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixtures with GivenWhenThen {
 
-	def withRoleInElement[T](permittedUser: String)(fn: => T) =
+	def withRoleInElement[T](permittedUser: String, parentElement:String, fixtureAdmins:Seq[String])(fn: => T) =
 		as(P.Sysadmin) { withGodModeEnabled {
 
-			def usercodes = findAll(cssSelector(".deptadmin-table .user .muted")).toList.map(_.underlying.getText.trim)
+			def usercodes = findAll(cssSelector(s"${parentElement} .user .muted")).toList.map(_.underlying.getText.trim)
 
 			def normalAdmins = {
-				usercodes should contain (P.Admin1.usercode)
-				usercodes should contain (P.Admin2.usercode)
+				fixtureAdmins.foreach(usercode=>usercodes should contain (usercode))
 			}
+
 			def onlyNormalAdmins = {
-				usercodes.size should be (2)
+				usercodes.size should be (fixtureAdmins.size)
 				normalAdmins
 			}
 
@@ -43,39 +43,39 @@ class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixture
 				onlyNormalAdmins
 
 			When("I enter a usercode in the picker")
-				click on cssSelector(".deptadmin-table .pickedUser")
+				click on cssSelector(s"${parentElement} .pickedUser")
 				enter(permittedUser)
 
 			Then("I should get a result back")
-				val typeahead = cssSelector(".deptadmin-table .typeahead .active a")
+				val typeahead = cssSelector(s"${parentElement} .typeahead .active a")
 				eventuallyAjax {
 					find(typeahead) should not be (None)
 				}
 
 			And("The picker result should match the entry")
-				textField(cssSelector(".deptadmin-table .pickedUser")).value should be (permittedUser)
+				textField(cssSelector(s"${parentElement} .pickedUser")).value should be (permittedUser)
 
 			When("I pick the matching user")
 				click on typeahead
 
 			Then("It should stay in the picker (confirming HTMLUnit hasn't introduced a regression)")
-				textField(cssSelector(".deptadmin-table .pickedUser")).value should be (permittedUser)
+				textField(cssSelector(s"${parentElement} .pickedUser")).value should be (permittedUser)
 
 			And("The usercode should be injected into the form correctly")
-				val injected = find(cssSelector(".deptadmin-table .add-permissions [name=usercodes]"))
+				val injected = find(cssSelector(s"${parentElement} .add-permissions [name=usercodes]"))
 				injected should not be (None)
 				injected.get.underlying.getAttribute("value").trim should be (permittedUser)
 
 			When("I submit the form")
-				find(cssSelector(".deptadmin-table form.add-permissions")).get.underlying.submit()
+				find(cssSelector(s"${parentElement} form.add-permissions")).get.underlying.submit()
 
 			Then("I should see the old and new entries")
-				usercodes.size should be (3)
+				usercodes.size should be (fixtureAdmins.size + 1)
 				normalAdmins
 				usercodes should contain (permittedUser)
 
 			When("I remove the new entry")
-				val removable = find(cssSelector(s".deptadmin-table .remove-permissions [name=usercodes][value=${permittedUser}]"))
+				val removable = find(cssSelector(s"${parentElement} .remove-permissions [name=usercodes][value=${permittedUser}]"))
 				removable should not be (None)
 				removable.get.underlying.submit()
 
@@ -86,8 +86,15 @@ class SysadminDepartmentPermissionsTest extends BrowserTest with SysadminFixture
 		}}
 
 	"Sysadmin" should "be able to add departmental admins" in {
-		withRoleInElement(P.Marker1.usercode) {
+		withRoleInElement(P.Marker1.usercode,".deptadmin-table", fixtureAdmins = Seq(P.Admin2.usercode)) {
 			// Nothing more to do, the with...() tests enough
 		}
 	}
+
+	"God user" should "be able to add user access managers" in {
+		withRoleInElement(P.Marker1.usercode,".deptuam-table",fixtureAdmins = Seq(P.Admin1.usercode)) {
+			// Nothing more to do, the with...() tests enough
+		}
+	}
+
 }

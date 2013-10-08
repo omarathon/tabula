@@ -17,7 +17,9 @@ trait SysadminFixtures extends BrowserTest {
 
 	def withGodModeEnabled[T](fn: =>T)={
 		go to (Path("/sysadmin"))
-		click on id("enable-godmode-button")
+		find("enable-godmode-button").foreach(e=>{
+			click on e
+		})
 		// if it wasn't found, perhaps god-mode is already enabled. Either way, check that it's enabled now.
 		eventually(pageSource.contains("God mode enabled") should be (true))
 		fn
