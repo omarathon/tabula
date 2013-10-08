@@ -1,2 +1,2 @@
 
-alter table Member add mostsignificantcourse NVARCHAR(20);
+alter table Member add mostsignificantcourse NVARCHAR2(20) null;
