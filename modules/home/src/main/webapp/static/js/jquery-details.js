@@ -1,4 +1,4 @@
-/*! http://mths.be/details v0.0.6 by @mathias | includes http://mths.be/noselect v1.0.3 */
+/*! http://mths.be/details v0.1.0 by @mathias | includes http://mths.be/noselect v1.0.3 */
 ;(function(document, $) {
 
 	var proto = $.fn,
@@ -32,7 +32,7 @@
 	    	return diff;
 	    }(document)),
 	    toggleOpen = function($details, $detailsSummary, $detailsNotSummary, toggle) {
-	    	var isOpen = typeof $details.attr('open') == 'string',
+	    	var isOpen = $details.prop('open'),
 	    	    close = isOpen && toggle || !isOpen && !toggle;
 	    	if (close) {
 	    		$details.removeClass('open').prop('open', false).triggerHandler('close.details');
@@ -113,11 +113,11 @@
 				    $detailsNotSummaryContents = $details.contents(':not(summary)');
 
 				if (op === 'open') {
-					$details.attr('open', 'open');
+					$details.prop('open', true);
 					toggleOpen($details, $detailsSummary, $detailsNotSummary);
 					return;
 				} else if (op === 'close') {
-					$details.attr('open', null);
+					$details.prop('open', false);
 					toggleOpen($details, $detailsSummary, $detailsNotSummary);
 					return;
 				}
@@ -141,6 +141,7 @@
 				}
 
 				// Hide content unless there’s an `open` attribute
+				$details.prop('open', typeof $details.attr('open') == 'string');
 				toggleOpen($details, $detailsSummary, $detailsNotSummary);
 
 				// Add `role=button` and set the `tabindex` of the `summary` element to `0` to make it keyboard accessible
@@ -165,4 +166,5 @@
 		details.support = isDetailsSupported;
 
 	}
+
 }(document, jQuery));
