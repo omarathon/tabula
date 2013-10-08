@@ -23,6 +23,14 @@
 
 			<@pm.roleTable deptperms_url "deptadmin-table" department "DepartmentalAdministratorRoleDefinition" "departmental administrators" />
 		</div>
+		<div class="span6">
+			<h3 class="permissionTitle">Departmental User Access Manager</h3> <a class="use-popover" id="popover-uam" data-html="true"
+			   data-original-title="Departmental User Access Manager"
+			   data-content="${popover}"><i class="icon-question-sign"></i></a>
+
+			<@pm.roleTable deptperms_url "deptuam-table" department "UserAccessMgrRoleDefinition" "user access managers" />
+		</div>
+
 	</div>
 </div>
 

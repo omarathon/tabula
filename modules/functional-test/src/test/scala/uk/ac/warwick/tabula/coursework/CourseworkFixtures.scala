@@ -145,7 +145,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 		// TODO Can't test link to SITS for our fixture department
 		// Don't bother messing around with assigning students, let's just assume students will magically find the submit page
-		executeScript("jQuery('#assignmentEnrolmentFields details > *:not(summary)').show();") // expand expander
+		click on id("student-summary-legend")
 		className("show-adder").findElement map { _.underlying.isDisplayed } should be (Some(true))
 
 		// Make sure JS is working

@@ -17,14 +17,16 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 				usercodes.size should be (1)
 				usercodes.apply(0) should be (P.Admin1.usercode)
 			}
+			def nobodyListed(){
+				usercodes.size should be (0)
+			}
 
 			def nowhereElse() = {
 				// doesn't like CSS :not() selector, so have to get all permission-lists and filter out the current one by scala text-mungery
 				val allLists = findAll(cssSelector(".permission-list")).toList.filterNot(_.underlying.getAttribute("class").contains(parentElement.replace(".","")))
 				// then delve further to get the usercodes included
-				val filteredUsercodes = allLists map (list => list.underlying.findElement(By.cssSelector(".user .muted")).getText.trim)
-				filteredUsercodes should contain (P.Admin1.usercode)
-				filteredUsercodes should not contain (permittedUser)
+				val filteredUsercodes = allLists map (list => list.underlying.findElements(By.cssSelector(".user .muted")))
+				filteredUsercodes.foreach(_.size should be(0))
 			}
 
 			When("I go the admin page")
@@ -46,8 +48,8 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 			Then("I should reach the permissions page")
 				currentUrl should include("/permissions")
 
-			And("I should see myself with the role")
-				onlyMe()
+			And("I should see no users with the role")
+			nobodyListed()
 
 			And("I should not see anyone else with any other roles")
 				nowhereElse()
@@ -79,10 +81,9 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 			When("I submit the form")
 				find(cssSelector(s"${parentElement} form.add-permissions")).get.underlying.submit()
 
-			Then("I should see myself and the new entry")
+			Then("I should see  the new entry")
 				({
-					usercodes.size should be (2)
-					usercodes should contain (P.Admin1.usercode)
+					usercodes.size should be (1)
 					usercodes should contain (permittedUser)
 				})
 
@@ -94,8 +95,8 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 				removable should not be (None)
 				removable.get.underlying.submit()
 
-			Then("There should only be me left")
-				onlyMe()
+			Then("There should be no users listed")
+				nobodyListed()
 
 			And("I should not see anyone else with any other roles")
 				nowhereElse()
