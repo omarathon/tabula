@@ -160,30 +160,6 @@ the comments textarea needs to maintain newlines.
 <script>
 jQuery(function ($) {
 
-	<#-- TAB-830 expand submission details when collectSubmissions checkbox checked -->
-	$('input[name=collectSubmissions]').on('change click keypress',function(e) {
-
-		e.stopPropagation();
-
-		var collectSubmissions = $('input[name=collectSubmissions]').is(':checked');
-
-		if (collectSubmissions) {
-			$("html.no-details details.submissions:not(.open) summary").click();
-			$("html.details details.submissions:not([open]) summary").click();
-
-		}  else {
-			$("html.no-details details.submissions.open summary").click();
-			$("html.details details.submissions[open] summary").click();
-		}
-	});
-
-	<#-- if summary supported, disable defaults for this summary when a contained label element is clicked -->
-	$("summary").on("click", "label", function(e){
-		e.stopPropagation();
-		e.preventDefault();
-		$('#collectSubmissions').attr('checked', !$('#collectSubmissions').attr('checked') );
-		$('input[name=collectSubmissions]').triggerHandler("change");
-	});
 
 	$('#action-submit').closest('form').on('click', '.update-only', function() {
 		$('#action-submit').val('update');

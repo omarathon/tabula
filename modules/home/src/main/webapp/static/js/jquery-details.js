@@ -67,11 +67,20 @@
 	// Execute the fallback only if there’s no native `details` support
 	if (isDetailsSupported) {
 
-		details = proto.details = function() {
+		details = proto.details = function(op) {
 
 			return this.each(function() {
 				var $details = $(this),
 				    $summary = $('summary', $details).first();
+
+				if (op === 'open') {
+					$details.prop('open', 'open');
+					return;
+				} else if (op === 'close') {
+					$details.prop('open', false);
+					return;
+				}
+
 				$summary.attr({
 					'role': 'button',
 					'aria-expanded': $details.prop('open')
@@ -89,7 +98,7 @@
 
 	} else {
 
-		details = proto.details = function() {
+		details = proto.details = function(op) {
 
 			// Loop through all `details` elements
 			return this.each(function() {
@@ -102,6 +111,16 @@
 				    $detailsNotSummary = $details.children(':not(summary)'),
 				    // This will be used later to look for direct child text nodes
 				    $detailsNotSummaryContents = $details.contents(':not(summary)');
+
+				if (op === 'open') {
+					$details.attr('open', 'open');
+					toggleOpen($details, $detailsSummary, $detailsNotSummary);
+					return;
+				} else if (op === 'close') {
+					$details.attr('open', null);
+					toggleOpen($details, $detailsSummary, $detailsNotSummary);
+					return;
+				}
 
 				// If there is no `summary` in the current `details` element…
 				if (!$detailsSummary.length) {
