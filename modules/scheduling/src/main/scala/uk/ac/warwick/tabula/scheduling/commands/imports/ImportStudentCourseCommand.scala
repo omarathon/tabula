@@ -110,7 +110,6 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 
 				if (this.mostSignificant == true) {
 						stuMem.mostSignificantCourse = studentCourseDetails
-						memberDao.saveOrUpdate(stuMem)
 						logger.debug("Updating member most significant course to "+ studentCourseDetails +" for " + stuMem)
 				}
 
