@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.{AssignmentMembershipDaoImpl, DepartmentDaoImpl}
+import uk.ac.warwick.spring.Wire
 
 // scalastyle:off magic.number
 class AssignmentServiceTest extends PersistenceTestBase {
@@ -611,11 +612,12 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 		session.save(department)
 
-		val workflow1 = new MarkingWorkflow
+		val workflow1 = new StudentsChooseMarkerWorkflow
+
 		workflow1.name = "mw1"
 		workflow1.department = department
 
-		val workflow2 = new MarkingWorkflow
+		val workflow2 = new SeenSecondMarkingWorkflow
 		workflow2.name = "mw2"
 		workflow2.department = department
 
@@ -652,3 +654,4 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		withUser("cusmab") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq().toSet) }
 	}
 }
+

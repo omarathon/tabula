@@ -24,11 +24,11 @@ class EditMarkingWorkflowCommand(department: Department, val markingWorkflow: Ma
 	copyFrom(markingWorkflow)
 
 	def contextSpecificValidation(errors:Errors){
+
+		if (markingWorkflow.markingMethod != markingMethod)
+			errors.rejectValue("markingMethod", "markingWorkflow.markingMethod.cannotUpdate")
+
 		if (hasExistingSubmissions){
-
-			if (markingWorkflow.markingMethod != markingMethod)
-				errors.rejectValue("markingMethod", "markingWorkflow.markingMethod.submissionsExist")
-
 			if (markingWorkflow.studentsChooseMarker){
 				val existingFirstMarkers = markingWorkflow.firstMarkers.includeUsers.toSet
 				val newFirstMarkers = firstMarkers.toSet

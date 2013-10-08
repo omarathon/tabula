@@ -21,17 +21,13 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
   */
 @Entity
 @Table(name="MarkScheme")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="MarkingMethod", discriminatorType = DiscriminatorType.STRING, length=255)
 @AccessType("field")
-class MarkingWorkflow extends GeneratedId with PermissionsTarget {
-	import MarkingMethod._
-	
+abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
+
 	@transient
 	var userLookup = Wire[UserLookupService]("userLookup")
-
-	def this(dept: Department) = {
-		this()
-		this.department = dept
-	}
 
 	/** A descriptive name for the users' reference. */
 	@Basic(optional = false)
@@ -40,7 +36,7 @@ class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "department_id")
 	var department: Department = null
-	
+
 	def permissionsParents = Option(department).toStream
 
 	/** The group of first markers. */
@@ -55,46 +51,23 @@ class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	@JoinColumn(name = "secondmarkers_id")
 	var secondMarkers = UserGroup.ofUsercodes
 
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingMethodUserType")
-	var markingMethod: MarkingMethod = _
+	def markingMethod: MarkingMethod
 
 	/** If true, the submitter chooses their first marker from a dropdown */
-	def studentsChooseMarker = markingMethod == StudentsChooseMarker
+	def studentsChooseMarker = false
 
+	// True if this marking workflow uses a second marker
+	def hasSecondMarker: Boolean
 
-	def getSubmissions(assignment: Assignment, user: User): Seq[Submission] = markingMethod match {
-		case StudentsChooseMarker =>  assignment.markerSelectField match {
-			case Some(markerField) => {
-				val releasedSubmission = assignment.submissions.filter(_.isReleasedForMarking)
-				releasedSubmission.filter(submission => {
-					submission.getValue(markerField) match {
-						case Some(subValue) => user.getUserId == subValue.value
-						case None => false
-					}
-				})
-			}
-			case None => Seq()
-		}
-		case SeenSecondMarking => {
-			val isFirstMarker = assignment.isFirstMarker(user)
-			val isSecondMarker = assignment.isSecondMarker(user)		
-			val studentUg = Option(assignment.markerMap.get(user.getUserId))
-			studentUg match {
-				case Some(ug) => {
-					val submissionIds = ug.includeUsers
-					if(isFirstMarker)
-						assignment.submissions.filter(s => submissionIds.exists(_ == s.userId) && s.isReleasedForMarking)
-					else if(isSecondMarker)
-						assignment.submissions.filter(s => submissionIds.exists(_ == s.userId) && s.isReleasedToSecondMarker)
-					else
-						Seq()
-				}
-				case None => Seq()
-			}
-		}
-		case _ => Seq()
-	}
-	
+	def studentHasMarker(assignment:Assignment, universityId: String): Boolean =
+		getStudentsFirstMarker(assignment, universityId).isDefined || getStudentsSecondMarker(assignment, universityId).isDefined
+
+	def getStudentsFirstMarker(assignment:Assignment, universityId: String): Option[String]
+
+	def getStudentsSecondMarker(assignment:Assignment, universityId: String): Option[String]
+
+	def getSubmissions(assignment: Assignment, user: User): Seq[Submission]
+
 	override def toString = "MarkingWorkflow(" + id + ")"
 
 }

@@ -1,20 +1,21 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{Mockito, TestBase, Fixtures}
 import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, MarkerSelectField}
 import collection.JavaConverters._
-import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.services.{UserLookupService, SubmissionService}
+import org.mockito.Mockito._
 
-class MarkingWorkflowTest extends TestBase {
+class MarkingWorkflowTest extends TestBase with Mockito {
 
 	@Test def studentsChooseMarker = withUser("cuscav") {
-		val workflow = new MarkingWorkflow
+		val workflow = new StudentsChooseMarkerWorkflow
+
 		val assignment = Fixtures.assignment("my assignment")
 		assignment.markingWorkflow = workflow
 
 		workflow.getSubmissions(assignment, currentUser.apparentUser) should be (Seq())
 
-		workflow.markingMethod = MarkingMethod.StudentsChooseMarker
 		workflow.studentsChooseMarker should be (true)
 
 		workflow.getSubmissions(assignment, currentUser.apparentUser) should be (Seq())
@@ -36,6 +37,12 @@ class MarkingWorkflowTest extends TestBase {
 		assignment.submissions.addAll(Seq(sub1, sub2, sub3, sub4).toList.asJava)
 		assignment.submissions.asScala.toList foreach { _.assignment = assignment }
 		assignment.feedbacks.addAll(Seq(f1, f2, f3, f4).toList.asJava)
+
+		workflow.submissionService = mock[SubmissionService]
+		when(workflow.submissionService.getSubmissionByUniId(assignment, f1.universityId)).thenReturn(Some(sub1))
+		when(workflow.submissionService.getSubmissionByUniId(assignment, f2.universityId)).thenReturn(Some(sub2))
+		when(workflow.submissionService.getSubmissionByUniId(assignment, f3.universityId)).thenReturn(Some(sub3))
+		when(workflow.submissionService.getSubmissionByUniId(assignment, f4.universityId)).thenReturn(Some(sub4))
 
 		// f1 isn't released yet
 		f2.firstMarkerFeedback = Fixtures.markerFeedback(f2)
@@ -60,11 +67,10 @@ class MarkingWorkflowTest extends TestBase {
 	}
 
 	@Test def seenSecondMarking {
-		val workflow = new MarkingWorkflow
+		val workflow = new SeenSecondMarkingWorkflow
 		val assignment = Fixtures.assignment("my assignment")
 		assignment.markingWorkflow = workflow
 
-		workflow.markingMethod = MarkingMethod.SeenSecondMarking
 		workflow.studentsChooseMarker should be (false)
 
 		workflow.firstMarkers.addUser("cuscav")
@@ -83,6 +89,17 @@ class MarkingWorkflowTest extends TestBase {
 		assignment.markerMap.get("cuscav").addUser("student1")
 		assignment.markerMap.get("cuscav").addUser("student2")
 		assignment.markerMap.get("curef").addUser("student4")
+
+		val s1 = Fixtures.user(universityId="0000001", userId="student1")
+		val s2 = Fixtures.user(universityId="0000002", userId="student2")
+		val s3 = Fixtures.user(universityId="0000003", userId="student3")
+		val s4 = Fixtures.user(universityId="0000004", userId="student4")
+
+		workflow.userLookup = mock[UserLookupService]
+		when(workflow.userLookup.getUserByWarwickUniId("0000001")).thenReturn(s1)
+		when(workflow.userLookup.getUserByWarwickUniId("0000002")).thenReturn(s2)
+		when(workflow.userLookup.getUserByWarwickUniId("0000003")).thenReturn(s3)
+		when(workflow.userLookup.getUserByWarwickUniId("0000004")).thenReturn(s4)
 
 		withUser("cuscav") {
 			workflow.getSubmissions(assignment, currentUser.apparentUser) should be (Seq())

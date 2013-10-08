@@ -252,7 +252,7 @@ object CourseworkFilters {
 		def applies(assignment: Assignment) = 
 			assignment.collectSubmissions && 
 			assignment.markingWorkflow != null && 
-			assignment.markingWorkflow.markingMethod == MarkingMethod.SeenSecondMarking
+			assignment.markingWorkflow.hasSecondMarker
 	}
 	
 	case object CheckedForPlagiarism extends ParameterlessCourseworkFilter {

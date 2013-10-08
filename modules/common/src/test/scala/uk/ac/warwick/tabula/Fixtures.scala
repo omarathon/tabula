@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringCheckpointState, MonitoringPoint}
 import org.joda.time.DateTime
+import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
 object Fixtures {
@@ -123,8 +124,14 @@ object Fixtures {
 			occurrence = "A")
 
 
-	def markingWorkflow(name: String) = {
-		val workflow = new MarkingWorkflow
+	def seenSecondMarkingWorkflow(name: String) = {
+		val workflow = new SeenSecondMarkingWorkflow
+		workflow.name = name
+		workflow
+	}
+
+	def studentsChooseMarkerWorkflow(name: String) = {
+		val workflow = new StudentsChooseMarkerWorkflow
 		workflow.name = name
 		workflow
 	}
@@ -139,6 +146,13 @@ object Fixtures {
 		val settings = new UserSettings
 		settings.userId = userId
 		settings
+	}
+
+	def user(universityId: String = "0123456", userId: String = "cuspxp") = {
+		val user = new User()
+		user.setUserId(userId)
+		user.setWarwickId(universityId)
+		user
 	}
 
 	def member(userType: MemberUserType, universityId: String = "0123456", userId: String = "cuspxp", department: Department = null) = {

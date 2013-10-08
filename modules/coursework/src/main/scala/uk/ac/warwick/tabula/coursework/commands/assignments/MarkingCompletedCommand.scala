@@ -54,6 +54,7 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 			}
 		}
 
+		// TODO - Work out how not to grow this without putting loads of command stuff in the model
 		assignment.markingWorkflow.markingMethod match {
 			case StudentsChooseMarker => finaliseFeedback()
 			case SeenSecondMarking if firstMarker => createSecondMarkerFeedback()

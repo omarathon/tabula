@@ -31,14 +31,16 @@ Common form fields.
 </@form.labelled_row>
 
 <@form.labelled_row "markingMethod" "Marking Method">
-	<@f.select disabled="${hasSubmissions?string}" path="markingMethod">
+
+	<#assign isDisabled><#if view_type=="edit">true<#else>false</#if></#assign>
+	<@f.select disabled="${isDisabled}" path="markingMethod">
 		<@f.option />
 		<@f.option value="StudentsChooseMarker" label="Students choose marker" />
 		<@f.option class="uses-second-markers" value="SeenSecondMarking" label="Seen second marking" />
 	</@f.select>
-	<#if hasSubmissions>
+	<#if view_type=="edit">
 		<div class="help-block">
-			It is not possible to change the marking method as submissions exist.
+			It is not possible to modify the marking method once a marking workflow has been created.
 		</div>
 	</#if>
 </@form.labelled_row>

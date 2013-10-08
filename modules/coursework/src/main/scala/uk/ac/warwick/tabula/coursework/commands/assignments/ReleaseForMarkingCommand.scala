@@ -12,11 +12,11 @@ import uk.ac.warwick.tabula.CurrentUser
 import scala.collection.JavaConverters._
 
 class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser) 
-	extends Command[List[Feedback]] with SelfValidating  {
+	extends Command[List[Feedback]] with SelfValidating {
 
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Submission.ReleaseForMarking, assignment)
-	
+
 	var assignmentService = Wire.auto[AssignmentService]
 	var stateService = Wire.auto[StateService]
 	var feedbackService = Wire[FeedbackService]
@@ -27,7 +27,8 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 
 	var feedbacksUpdated = 0
 
-	def studentsWithKnownMarkers:Seq[String] = students.intersect(assignment.markerMap.values.map(_.users).flatten.map(_.getWarwickId).toSeq)
+	// we must go via the marking workflow directly to determine if the student has a marker - not all workflows use the markerMap on assignment
+	def studentsWithKnownMarkers:Seq[String] = students.filter(assignment.markingWorkflow.studentHasMarker(assignment, _))
 	def unreleasableSubmissions:Seq[String] = (studentsWithoutKnownMarkers ++ studentsAlreadyReleased).distinct
 
 	def studentsWithoutKnownMarkers:Seq[String] = students -- studentsWithKnownMarkers

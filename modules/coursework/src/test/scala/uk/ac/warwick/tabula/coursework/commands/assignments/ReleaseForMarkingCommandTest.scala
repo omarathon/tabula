@@ -30,7 +30,10 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito{
 					a.module = new Module().tap(_.id = "module_id")
 			}
 
-			val cmd = ReleaseForMarkingCommand(assignment.module, assignment, currentUser)
+			val cmd =  new ReleaseForMarkingCommand(assignment.module, assignment, currentUser) {
+				override def studentsWithKnownMarkers = Seq()
+			}
+
 			cmd.students = Seq("1", "2", "3").asJava
 			cmd.unreleasableSubmissions should be(Seq("1","2","3"))
 			cmd.studentsWithKnownMarkers should be(Seq())
@@ -47,7 +50,10 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito{
 					a.module = new Module().tap(_.id = "module_id")
 			}
 
-			val cmd = ReleaseForMarkingCommand(assignment.module, assignment, currentUser)
+			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser) {
+				override def studentsWithKnownMarkers = Seq("1","2")
+			}
+
 			cmd.students = Seq("1", "2", "3").asJava
 			cmd.unreleasableSubmissions should be(Seq("3"))
 			cmd.studentsWithKnownMarkers should be(Seq("1","2"))
@@ -63,7 +69,9 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito{
 					a.module = new Module().tap(_.id = "module_id")
 			}
 
-			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser) 
+			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser) {
+				override def studentsWithKnownMarkers = Seq("1","2", "3")
+			}
 			cmd.students = Seq("1", "2", "3").asJava
 			cmd.stateService = mock[StateService]
 			cmd.feedbackService = mock[FeedbackService]
@@ -84,7 +92,9 @@ class ReleaseForMarkingCommandTest extends TestBase  with Mockito{
 					a.module = new Module().tap(_.id = "module_id")
 			}
 
-			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser)
+			val cmd = new ReleaseForMarkingCommand(assignment.module, assignment, currentUser) {
+				override def studentsWithKnownMarkers = Seq("1","2")
+			}
 			cmd.students = Seq("1", "2", "3").asJava
 			cmd.stateService = mock[StateService]
 			cmd.feedbackService = mock[FeedbackService]

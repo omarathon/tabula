@@ -108,7 +108,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 	}
 
 	@Test def linkedMarkingWorkflowToDepartment {
-		val markingWorkflow = Fixtures.markingWorkflow("my workflow")
+		val markingWorkflow = Fixtures.seenSecondMarkingWorkflow("my workflow")
 		markingWorkflow.department = dept
 
 		mustBeLinked(markingWorkflow, dept)

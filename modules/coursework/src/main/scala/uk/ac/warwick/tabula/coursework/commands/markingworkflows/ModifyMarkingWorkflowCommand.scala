@@ -83,7 +83,6 @@ abstract class ModifyMarkingWorkflowCommand(
 		scheme.name = name
 		scheme.firstMarkers.includeUsers = firstMarkers
 		scheme.secondMarkers.includeUsers = secondMarkers
-		scheme.markingMethod = markingMethod
 	}
 
 	def copyFrom(scheme: MarkingWorkflow) {
