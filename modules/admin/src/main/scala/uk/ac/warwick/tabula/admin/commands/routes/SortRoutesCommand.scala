@@ -1,29 +1,26 @@
-package uk.ac.warwick.tabula.coursework.commands.modules
+package uk.ac.warwick.tabula.admin.commands.routes
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-
 import org.springframework.validation.Errors
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.Module.CodeOrdering
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.data.model.Route
 
-/** Arranges modules between a department and its child departments. */
-class SortModulesCommand(val department: Department) extends Command[Unit] with SelfValidating {
+/** Arranges routes between a department and its child departments. */
+class SortRoutesCommand(val department: Department) extends Command[Unit] with SelfValidating {
 
 	var mads = Wire[ModuleAndDepartmentService]
 
-	PermissionCheck(Permissions.Department.ArrangeModules, department)
+	PermissionCheck(Permissions.Department.ArrangeRoutes, department)
 
-	/** Mapping from departments to an ArrayList containing module IDs. */
-	var mapping = JMap[Department, JList[Module]]()
+	/** Mapping from departments to an ArrayList containing route IDs. */
+	var mapping = JMap[Department, JList[Route]]()
 	for (dept <- (departments))
 		mapping.put(dept, JArrayList())
 
@@ -32,20 +29,20 @@ class SortModulesCommand(val department: Department) extends Command[Unit] with 
 	// Only called on initial form view
 	def populate() {
 		for (dept <- (departments))
-			mapping.put(dept, dept.modules)
+			mapping.put(dept, dept.routes)
 	}
 
 	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
 	// Do not modify the returned value!
 	def mappingByCode = mapping.asScala.map {
-		case (dept, modules) => (dept.code, modules)
+		case (dept, routes) => (dept.code, routes)
 	}
 
 	final def applyInternal() = transactional() {
-		for ((dept, modules) <- mapping.asScala) {
-			dept.modules.clear()
-			dept.modules.addAll(modules)
-			for (m <- modules) m.department = dept
+		for ((dept, routes) <- mapping.asScala) {
+			dept.routes.clear()
+			dept.routes.addAll(routes)
+			for (r <- routes) r.department = dept
 			mads.save(dept)
 		}
 	}
@@ -53,33 +50,33 @@ class SortModulesCommand(val department: Department) extends Command[Unit] with 
 	def validate(errors: Errors) {
 		val mappingMap = mapping.asScala
 		val allDepartments = mappingMap.keys
-		val currentModules = allDepartments.map(_.modules.asScala).flatten.toList
-		val newModules = mappingMap.values.map(_.asScala).flatten.toList.filter(validModule)
+		val currentRoutes = allDepartments.map(_.routes.asScala).flatten.toList
+		val newRoutes = mappingMap.values.map(_.asScala).flatten.toList.filter(validRoute)
 
 		/* These next errors shouldn't really be possible from the UI unless there's a bug. */
 
 		// Disallow submitting unrelated Departments
 		if (!mappingMap.keys.forall( d => departments.contains(d) )) {
-			errors.reject("sortModules.departments.invalid")
+			errors.reject("sortRoutes.departments.invalid")
 		}
 
-		// Disallow referencing any Modules from other departments.
-		// Also disallow removing modules from the ones we started with.
-		if (newModules.sorted != currentModules.sorted) {
-			errors.reject("sortModules.modules.invalid")
+		// Disallow referencing any Routes from other departments.
+		// Also disallow removing routes from the ones we started with.
+		if (newRoutes.sorted != currentRoutes.sorted) {
+			errors.reject("sortRoutes.routes.invalid")
 		}
 	}
 
-	// Sort all the lists of modules by code.
+	// Sort all the lists of routes by code.
 	def sort() {
 		// Because sortBy is not an in-place sort, we have to replace the lists entirely.
 		// Alternative is Collections.sort or math.Sorting but these would be more code.
-		for ((dept, modules) <- mapping.asScala) {
-			mapping.put(dept, modules.asScala.toList.filter(validModule).sorted)
+		for ((dept, routes) <- mapping.asScala) {
+			mapping.put(dept, routes.asScala.toList.filter(validRoute).sorted)
 		}
 	}
 
-	private def validModule(module: Module) = module.code != null
+	private def validRoute(route: Route) = route.code != null
 
 	def describe(d: Description) {
 		d.department(department)

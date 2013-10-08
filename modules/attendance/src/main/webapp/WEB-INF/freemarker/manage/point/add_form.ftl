@@ -7,7 +7,7 @@
 
 <@modal.body>
 
-	<#assign action><@url page="/manage/${command.dept.code}/sets/add/points/add" /></#assign>
+	<#assign action><@routes.addPoint command.dept /></#assign>
 
 	<@f.form id="newMonitoringPoint" action="${action}" method="POST" commandName="command" class="form-horizontal">
 		<#list command.monitoringPoints as point>

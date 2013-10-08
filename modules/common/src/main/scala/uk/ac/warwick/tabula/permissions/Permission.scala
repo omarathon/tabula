@@ -147,6 +147,7 @@ object Permissions {
 
 	object Department {
 		case object ArrangeModules extends Permission("Sort modules into sub-departments")
+		case object ArrangeRoutes extends Permission("Sort routes into sub-departments")
 		case object ManageExtensionSettings extends Permission("Manage extension settings")
 		case object ManageDisplaySettings extends Permission("Manage display settings")
 		case object DownloadFeedbackReport extends Permission("Generate a feedback report")

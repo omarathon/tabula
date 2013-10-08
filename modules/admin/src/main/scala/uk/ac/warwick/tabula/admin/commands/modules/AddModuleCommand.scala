@@ -1,15 +1,12 @@
-package uk.ac.warwick.tabula.coursework.commands.modules
-
-import uk.ac.warwick.tabula
+package uk.ac.warwick.tabula.admin.commands.modules
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.Transactions._
-import commands.{ Description, SelfValidating }
-import data.Daoisms
-import data.model._
+import uk.ac.warwick.tabula.commands.{Description, SelfValidating}
+import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.model._
 import collection.JavaConversions._
 import reflect.BeanProperty
 import org.springframework.validation.{ ValidationUtils, Errors }
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.Command
 
