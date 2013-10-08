@@ -108,6 +108,11 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 			try {
 				logger.debug("Saving changes for " + studentCourseDetails)
 
+				if (this.mostSignificant == true) {
+						stuMem.mostSignificantCourse = studentCourseDetails
+						logger.debug("Updating member most significant course to "+ studentCourseDetails +" for " + stuMem)
+				}
+
 				studentCourseDetails.lastUpdatedDate = DateTime.now
 				studentCourseDetailsDao.saveOrUpdate(studentCourseDetails)
 			}
