@@ -9,7 +9,7 @@
 
 	<@pm.alerts "addCommand" department.name users role />
 
-	<div class="row-fluid">
+	<div class="row-fluid" id="tutors-supervisors-row">
 		<div class="span6">
 			<h3 class="permissionTitle">Senior tutors</h3> <a class="use-popover" id="popover-seniortutors" data-html="true"
 			   data-original-title="Senior tutors"
@@ -25,6 +25,16 @@
 
 			<@pm.roleTable deptperms_url "supervisor-table" department "StudentRelationshipAgentRoleDefinition(supervisor)" "senior supervisors" />
 		</div>
+	</div>
+	<div class="row-fluid">
+		<div class="span6">
+			<h3 class="permissionTitle">Departmental administrators</h3> <a class="use-popover" id="popover-deptadmins" data-html="true"
+			   data-original-title="Departmental Administrators"
+			   data-content="A departmental administrator can manage Modules, Marking Workflows and Extension settings; and can assign tutors and supervisors."><i class="icon-question-sign"></i></a>
+
+			<@pm.roleTable deptperms_url "admin-table" department "DepartmentalAdministratorRoleDefinition" "departmental administrators" />
+		</div>
+
 	</div>
 </div>
 
