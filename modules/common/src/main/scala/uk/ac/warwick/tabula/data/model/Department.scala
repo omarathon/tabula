@@ -223,12 +223,10 @@ object Department {
 		val name = "UG"
 
 		def matches(member: Member) = member match {
-			case s: StudentMember => s.mostSignificantCourseDetails.map {
-				cd => cd.route.degreeType match {
-					case DegreeType.Undergraduate => true
-					case _ => false
-				}
-			}.getOrElse(false)
+			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.flatMap { route => Option(route.degreeType) } match {
+				case Some(DegreeType.Undergraduate) => true
+				case _ => false
+			}
 			case _ => false
 		}
 	}
@@ -237,12 +235,10 @@ object Department {
 		val name = "PG"
 
 		def matches(member: Member) = member match {
-			case s: StudentMember => s.mostSignificantCourseDetails.map {
-				cd => cd.route.degreeType match {
-					case DegreeType.Undergraduate => false
-					case _ => true
-				}
-			}.getOrElse(false)
+			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.flatMap { route => Option(route.degreeType) } match {
+				case Some(DegreeType.Undergraduate) => false
+				case _ => false
+			}
 			case _ => false
 		}
 	}
