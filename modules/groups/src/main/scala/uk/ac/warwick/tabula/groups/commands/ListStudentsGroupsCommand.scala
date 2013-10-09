@@ -26,6 +26,7 @@ class ListStudentsGroupsCommandImpl(member: Member)
 
 	def applyInternal() =
 		smallGroupService.findSmallGroupsByStudent(member.asSsoUser)
+			.filter(_.groupSet.releasedToStudents)
 			.groupBy { group => group.groupSet }
 			.groupBy { case (set, groups) => set.module }
 

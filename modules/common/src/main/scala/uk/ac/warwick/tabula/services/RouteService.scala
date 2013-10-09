@@ -16,6 +16,7 @@ trait AutowiringRouteServiceComponent extends RouteServiceComponent {
 trait RouteService {
 	def save(route: Route)
 	def getByCode(code: String): Option[Route]
+	def getById(id: String): Option[Route]
 }
 
 abstract class AbstractRouteService extends RouteService {
@@ -23,6 +24,7 @@ abstract class AbstractRouteService extends RouteService {
 
 	def save(route: Route) = routeDao.saveOrUpdate(route)
 	def getByCode(code: String): Option[Route] = routeDao.getByCode(code)
+	def getById(id: String): Option[Route] = routeDao.getById(id)
 }
 
 @Service("routeService")
