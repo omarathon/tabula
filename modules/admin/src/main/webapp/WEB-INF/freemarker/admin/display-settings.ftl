@@ -156,15 +156,30 @@
 					<@f.errors path="defaultGroupAllocationMethod" cssClass="error" />
 				</@form.field>
 			</@form.row>
+
+	    	<@form.row>
+				<@form.label></@form.label>
+				<@form.field>
+					<@form.label checkbox=true>
+						<@f.checkbox path="autoGroupDeregistration" id="autoGroupDeregistration" />
+						Automatically deregister students from groups when they deregister from the associated module
+					</@form.label>
+					<@f.errors path="autoGroupDeregistration" cssClass="error" />
+					<div class="help-block">
+						This will only apply if they are linked to the small group from SITS.
+					</div>
+				</@form.field>
+			</@form.row>
+
 		</fieldset>
     </#if>
-	
+
 	<#if features.arbitraryRelationships>
 		<hr />
 
 		<fieldset id="relationship-options">
 			<h2>Student relationship options</h2>
-			
+
 			<@form.row>
 				<@form.label>Display</@form.label>
 				<@form.field>
@@ -174,7 +189,7 @@
 							${relationshipType.description}
 						</@form.label>
 					</#list>
-					
+
 					<@f.errors path="studentRelationshipDisplayed" cssClass="error" />
 				</@form.field>
 			</@form.row>
