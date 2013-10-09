@@ -32,7 +32,7 @@
 								Unlimited group size
 							</span>
 							<span class="groupSizeLimited groupSizeDetails" <#if unlimited>style="display:none;"</#if>>
-								Maximum group size: <@f.input path="maxGroupSize" type="number" min="0" max="100" cssClass="input-small" />
+								Maximum group size: <@f.input path="maxGroupSize" type="number" min="0" cssClass="input-small" />
 							</span>
 						</div>
 						<div class="span2">

@@ -9,8 +9,9 @@
 
 <@f.errors cssClass="error form-errors" />
 
-<#include "groups_membership_picker_heading.ftl" />
-<#include "groups_membership_picker.ftl" />
+<#import "*/membership_picker_macros.ftl" as membership_picker />
+<@membership_picker.header command />
+<@membership_picker.fieldset command 'group' 'group set'/>
 
 </@f.form>
 </#escape>

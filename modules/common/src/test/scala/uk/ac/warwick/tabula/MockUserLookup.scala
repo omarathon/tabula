@@ -90,6 +90,12 @@ class MockUserLookup(var defaultFoundUser: Boolean) extends UserLookupAdapter(nu
             users += (id -> user)
         }
     }
+    
+    def registerUserObjects(u: User*) {
+    	for (user <- u) {
+    		users += (user.getUserId -> user)
+    	}
+    }
 
 }
 

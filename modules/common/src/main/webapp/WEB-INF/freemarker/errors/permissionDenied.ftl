@@ -17,7 +17,11 @@
 
 			<#if originalException.scope??>
 				<input type="hidden" name="scopeType" value="${originalException.scope.class.name}" />
+				<#attempt>
 				<input type="hidden" name="scope" value="${originalException.scope.id}" />
+				<#recover>
+				<!-- Exception accessing scope.id - perhaps scope is Global? -->
+				</#attempt>
 			</#if>
 
 			<#if originalException.permission??>

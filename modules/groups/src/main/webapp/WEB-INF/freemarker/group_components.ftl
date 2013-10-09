@@ -219,9 +219,13 @@
 																	</#if>
 																	<input type="hidden" name="returnTo" value="${returnTo}" />
 																	<span class="form-horizontal">
-																		<@fmt.weekRangeSelect event />
-																		<button class="btn btn-small btn-primary register-button">Record</button>
-																	 </span>
+																		<#if weekRangeSelectFormatter(event)?has_content>
+																			<@fmt.weekRangeSelect event />
+																			<button type="submit" class="btn btn-small btn-primary register-button">Record</button>
+																		<#else>
+																			<button type="button" class="btn btn-small btn-primary register-button disabled use-tooltip" title="There are no events running in this term">Record</button>
+																		</#if>
+																	</span>
 																</form>
 															</div>
 														</#if>

@@ -42,7 +42,7 @@ sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val select
 
 trait PermissionsSelector[A <: PermissionsSelector[A]] {
 	def id: String
-	
+	def description:String
 	def isWildcard = false
 	def <=(that: PermissionsSelector[A]) = that match {
 		case any if any.isWildcard => true
@@ -55,7 +55,7 @@ object PermissionsSelector {
 
 	def Any[A <: PermissionsSelector[A] : ClassTag] = new PermissionsSelector[A] {
 		def id = AnyId
-
+		def description = "*"
 		override def isWildcard = true
 
 		override def <=(that: PermissionsSelector[A]) = {
@@ -147,6 +147,7 @@ object Permissions {
 
 	object Department {
 		case object ArrangeModules extends Permission("Sort modules into sub-departments")
+		case object ArrangeRoutes extends Permission("Sort routes into sub-departments")
 		case object ManageExtensionSettings extends Permission("Manage extension settings")
 		case object ManageDisplaySettings extends Permission("Manage display settings")
 		case object DownloadFeedbackReport extends Permission("Generate a feedback report")

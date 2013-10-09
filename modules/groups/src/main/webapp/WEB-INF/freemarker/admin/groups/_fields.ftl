@@ -129,7 +129,9 @@
 
 </fieldset>
 
-<@form.row "members" "assignmentEnrolment">
+<#import "*/membership_picker_macros.ftl" as membership_picker />
+
+<@form.row "members" "groupEnrolment">
 	<details id="students-details">
 		<summary id="students-summary" class="collapsible large-chevron">
 			<span class="legend" >Students <small>Select which students should be in this set of groups</small> </span>
@@ -149,9 +151,9 @@
 			<#else>
 				<#assign command=createSmallGroupSetCommand />
 			</#if>
-			<#include "groups_membership_picker_heading.ftl" />
+			<@membership_picker.header command />
 		</summary>
-		<#include "groups_membership_picker.ftl" />
+		<@membership_picker.fieldset command 'group' 'group set'/>
 	</details>
 </@form.row>
 
@@ -204,7 +206,7 @@
 					<#assign disabled = "true" >
 				</#if>
 
-				<@f.input path="defaultMaxGroupSize" type="number" min="0" max="100" cssClass="input-small" disabled="${disabled?string}" />
+				<@f.input path="defaultMaxGroupSize" type="number" min="0" cssClass="input-small" disabled="${disabled?string}" />
 
 				<a class="use-popover" data-html="true"
 				   data-content="This is the default maximum size for any new groups you create.  You can adjust the maximum size of individual groups">

@@ -12,6 +12,11 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 
 	override def description = "Departmental Administrator"
 
+	//
+	// If you're removing permissions from here, please consider whether you should be
+	// adding them back into UserAccessManager at the same time.
+	//
+
 	// Implicitly grants module manager role for all modules in this department
 	GeneratesSubRole(ModuleManagerRoleDefinition)
 

@@ -8,7 +8,7 @@
 	</div>
 </#if>
 
-<form class="form-inline" action="<@url page="/${command.dept.code}"/>">
+<form class="form-inline" action="<@routes.viewDepartment command.dept />">
 	<label>Academic year
 		<select name="academicYear">
 			<#assign academicYears = [command.thisAcademicYear.previous.toString, command.thisAcademicYear.toString, command.thisAcademicYear.next.toString] />
@@ -30,7 +30,7 @@
 
 <#else>
 
-	<form id="viewChooseSet" class="form-inline" action="<@url page="/${command.dept.code}"/>">
+	<form id="viewChooseSet" class="form-inline" action="<@routes.viewDepartment command.dept />">
 
 		<input type="hidden" value="${command.academicYear.toString}" name="academicYear" />
 
@@ -108,7 +108,7 @@
 											<#if checkpointState == "attended">
 												<i class="icon-ok icon-fixed-width attended" title="Attended: ${point.name} (<@fmt.weekRanges point />)"></i>
 											<#elseif checkpointState == "authorised">
-												<i class="icon-remove icon-fixed-width authorised" title="Missed (authorised): ${point.name} (<@fmt.weekRanges point />)"></i>
+												<i class="icon-remove-circle icon-fixed-width authorised" title="Missed (authorised): ${point.name} (<@fmt.weekRanges point />)"></i>
 											<#elseif checkpointState == "unauthorised">
 												<#assign missedCount = missedCount + 1 />
 												<i class="icon-remove icon-fixed-width unauthorised" title="Missed (unauthorised): ${point.name} (<@fmt.weekRanges point />)"></i>
@@ -139,7 +139,7 @@
 	<#if command.pointSet.points?size == 0>
 		<p><em>No points exist for the selected route and year of study</em></p>
 	<#else>
-		<#assign returnTo><@url page="/${command.dept.code}?academicYear=${command.academicYear.toString}&route=${command.route.code}&set=${command.pointSet.id}" /></#assign>
+		<#assign returnTo><@routes.viewDepartmentSpecific command.dept command.academicYear command.route command.pointSet /></#assign>
 		<div class="monitoring-points">
         	<#macro pointsInATerm term>
         		<div class="striped-section">
@@ -149,9 +149,7 @@
         					<div class="item-info row-fluid point">
         						<div class="span12">
         							<div class="pull-right">
-        								<a class="btn btn-primary" href="
-        									<@url page="/${command.dept.code}/${point.id}/record?returnTo=${returnTo?url}"/>
-        								">
+        								<a class="btn btn-primary" href="<@routes.record point returnTo />">
         									Record
         								</a>
         							</div>

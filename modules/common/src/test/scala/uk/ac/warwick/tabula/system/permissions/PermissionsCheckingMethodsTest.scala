@@ -220,6 +220,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 			Permissions.Assignment.Create -> Some(mod1)
 		))
 
+		roleService.getRolesFor(currentUser, null) returns Stream.empty
 		try { withCurrentUser(currentUser) {
 			new Binder(this, "OneFromOneScopedOneScopeless", securityService)
 		}} catch {
