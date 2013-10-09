@@ -237,7 +237,7 @@ object Department {
 		def matches(member: Member) = member match {
 			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.flatMap { route => Option(route.degreeType) } match {
 				case Some(DegreeType.Undergraduate) => false
-				case _ => false
+				case _ => true
 			}
 			case _ => false
 		}
