@@ -166,18 +166,22 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 			Fixtures.studentCourseYearDetails(AcademicYear(2013))
 		)
 		studentInBothYears.sprStatus = new SitsStatus("C")
+		studentInBothYears.mostSignificant = true
 
 		val studentInFirstYear = new StudentCourseDetails(Fixtures.student(), "studentInFirstYear")
 		studentInFirstYear.studentCourseYearDetails.add(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 		studentInFirstYear.sprStatus = new SitsStatus("C")
+		studentInFirstYear.mostSignificant = true
 
 		val studentInSecondYear = new StudentCourseDetails(Fixtures.student(), "studentInSecondYear")
 		studentInSecondYear.studentCourseYearDetails.add(
 			Fixtures.studentCourseYearDetails(AcademicYear(2013))
 		)
 		studentInSecondYear.sprStatus = new SitsStatus("C")
+		studentInSecondYear.mostSignificant = true
+
 
 		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(studentInBothYears, studentInFirstYear, studentInSecondYear)
 
@@ -237,5 +241,69 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		val students = service.getStudentsByRoute(testRoute)
 		students.size should be (0)
 	}
+
+
+
+	@Test def getStudentsByRouteMostSignificantCourse = {
+		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+			val memberDao = mock[MemberDao]
+			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
+		}
+
+		val testRoute = new Route
+		testRoute.code = "test"
+		val testYear = AcademicYear(2012)
+
+		val student = new StudentCourseDetails(Fixtures.student(), "student")
+
+		student.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+		student.sprStatus = new SitsStatus("C")
+		student.mostSignificant = true
+
+		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(student)
+
+		val students = service.getStudentsByRoute(testRoute, testYear)
+		students.size should be (1)
+
+		students.exists(
+			s => s.studentCourseDetails.get(0).mostSignificant.equals(true)
+		) should be (true)
+
+	}
+
+
+
+	@Test def getStudentsByRouteNotMostSignificantCourse = {
+		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+			val memberDao = mock[MemberDao]
+			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
+		}
+
+		val testRoute = new Route
+		testRoute.code = "test"
+		val testYear = AcademicYear(2012)
+
+		val student = new StudentCourseDetails(Fixtures.student(), "student")
+
+		student.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+		student.sprStatus = new SitsStatus("C")
+		student.mostSignificant = false
+
+		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(student)
+
+		val students = service.getStudentsByRoute(testRoute, testYear)
+		students.size should be (0)
+
+		students.exists(
+			s => s.studentCourseDetails.get(0).mostSignificant.equals(true)
+		) should be (false)
+
+	}
+
+
 
 }
