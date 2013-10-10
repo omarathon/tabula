@@ -1,6 +1,6 @@
 <#compress><#escape x as x?html>
 
-<#import "/WEB-INF/freemarker/permissions_macros.ftl" as pm />
+<#import "*/permissions_macros.ftl" as pm />
 <#assign deptperms_url><@routes.deptperms department/></#assign>
 
 <div id="department-permissions-page">
