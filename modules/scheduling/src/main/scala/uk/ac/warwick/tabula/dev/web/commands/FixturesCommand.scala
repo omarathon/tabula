@@ -50,6 +50,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 
 		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
+		cmd.usercodes.clear()
 		cmd.usercodes.add(Fixtures.TestAdmin2)
 		cmd.apply()
 
