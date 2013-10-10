@@ -23,47 +23,21 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 	extends PromisingCommand[SmallGroup] with SelfValidating with BindListener {
 
 	var userLookup = Wire[UserLookupService]
-	
+
 	var name: String = _
 
 	var maxGroupSize: Int = if (properties.defaultMaxGroupSizeEnabled) properties.defaultMaxGroupSize else SmallGroup.DefaultGroupSize
 
 	// Used by parent command
 	var delete: Boolean = false
-	
-	// start complicated membership stuff
-	
-	/**
-	 * If copying from existing SmallGroup, this must be a DEEP COPY
-	 * with changes copied back to the original UserGroup, don't pass
-	 * the same UserGroup around because it'll just cause Hibernate
-	 * problems. This copy should be transient.
-	 *
-	 * Changes to members are done via includeUsers and excludeUsers, since
-	 * it is difficult to bind additions and removals directly to a collection
-	 * with Spring binding.
-	 */
+
 	var students: UserGroup = UserGroup.ofUniversityIds
 
-	// items added here are added to members.includeUsers.
-	var includeUsers: JList[String] = JArrayList()
-
-	// bind property for the big free-for-all textarea of usercodes/uniIDs to add.
-	// These are first resolved to userIds and then added to includeUsers
-	var massAddUsers: String = _
-
-	// parse massAddUsers into a collection of individual tokens
-	def massAddUsersEntries: Seq[String] =
-		if (massAddUsers == null) Nil
-		else massAddUsers split ("\\s+") map (_.trim) filterNot (_.isEmpty)
-
-	///// end of complicated membership stuff
-		
 	// A collection of sub-commands for modifying the events
-	var events: JList[ModifySmallGroupEventCommand] = LazyLists.create { () => 
+	var events: JList[ModifySmallGroupEventCommand] = LazyLists.create { () =>
 		new CreateSmallGroupEventCommand(this, module)
 	}
-	
+
 	def validate(errors: Errors) {
 		// Skip validation when this group is being deleted
 		if (!delete) {
@@ -77,7 +51,7 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 			}
 		}
 	}
-	
+
 	def copyFrom(group: SmallGroup) {
 		name = group.name
 
@@ -88,12 +62,12 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 
 		if (group.students != null) students = group._studentsGroup.duplicate()
 	}
-	
+
 	def copyTo(group: SmallGroup) {
 		group.name = name
 
 		group.maxGroupSize = maxGroupSize
-		
+
 		// Clear the groups on the set and add the result of each command; this may result in a new group or an existing one.
 		group.events.clear()
 		for (event <- events.asScala.filter(!_.delete).map(_.apply())) {
@@ -103,51 +77,21 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
       group.events.add(event)
     }
 
-		
 		if (students != null) group._studentsGroup = students.duplicate()
 	}
-	
+
 	override def onBind(result: BindingResult) {
-		def addUserId(item: String) {
-			val user = userLookup.getUserByUserId(item)
-			if (user.isFoundUser && null != user.getWarwickId) {
-				includeUsers.add(user.getUserId)
-			}
-		}
-
-		// parse items from textarea into includeUsers collection
-		for (item <- massAddUsersEntries) {
-			if (UniversityId.isValid(item)) {
-				val user = userLookup.getUserByWarwickUniId(item)
-				if (user.isFoundUser) {
-					includeUsers.add(user.getUserId)
-				} else {
-					addUserId(item)
-				}
-			} else {
-				addUserId(item)
-			}
-		}
-
-		// add includeUsers to members.includeUsers
-		((includeUsers.asScala.map { _.trim }.filterNot { _.isEmpty }).distinct) foreach { userId =>
-			students.addUser(userId)
-		}
-
-		// empty these out to make it clear that we've "moved" the data into members
-		massAddUsers = ""
-			
 		// If the last element of events is both a Creation and is empty, disregard it
 		if (!events.isEmpty()) {
 			val last = events.asScala.last
-			
+
 			last match {
 				case cmd: CreateSmallGroupEventCommand if cmd.isEmpty =>
 					events.remove(last)
 				case _ => // do nothing
 			}
 		}
-		
+
 		events.asScala.foreach(_.onBind(result))
 	}
 }
