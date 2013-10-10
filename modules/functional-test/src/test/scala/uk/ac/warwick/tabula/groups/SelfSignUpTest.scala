@@ -137,9 +137,8 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 		val groupsPage = new GroupsHomePage
 		val groupInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
-		And("The leave button is shown greyed out")
-		groupInfo.findLeaveButtonFor("Group 1") should be('defined)
-		groupInfo.findLeaveButtonFor("Group 1").get should not be('enabled)
+		And("The leave button is not shown ")
+		groupInfo.findLeaveButtonFor("Group 1") should not be('defined)
 	}
 
 	"A student" should "not see a self-sign-up groupset which is not open if they aren't allocated" in {
@@ -176,9 +175,8 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 		val groupsPage = new GroupsHomePage
 		val groupInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
-		And("The leave button is shown greyed out")
-		groupInfo.findLeaveButtonFor("Group 1") should be('defined)
-		groupInfo.findLeaveButtonFor("Group 1").get should not be('enabled)
+		And("The leave button is not shown ")
+		groupInfo.findLeaveButtonFor("Group 1") should not be('defined)
 
 	}
 
@@ -229,9 +227,8 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 		val groupsPage = new GroupsHomePage
 		val groupInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
-		And("The leave button is shown greyed out")
-		groupInfo.findLeaveButtonFor("Group 1") should be('defined)
-		groupInfo.findLeaveButtonFor("Group 1").get should not be('enabled)
+		And("The leave button is not shown")
+		groupInfo.findLeaveButtonFor("Group 1") should not be('defined)
 	}
 
 }
