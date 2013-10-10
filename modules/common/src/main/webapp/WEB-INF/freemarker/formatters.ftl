@@ -176,7 +176,7 @@
 			<#list attachments as attachment>
 				<#local title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#local>
 				<div class="attachment">
-					<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
+					<@download_link filePath="${page}attachment/${attachment.name?url}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
 				</div>
 			</#list>
 		</details>

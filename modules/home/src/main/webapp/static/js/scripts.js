@@ -484,8 +484,8 @@
 	};
 
 	exports.resizeModalIframes = function(height){
-		// 30px of padding... plus 6 more for reasons I can't work out
-		$('.modal-body > iframe').closest('.modal-body').height(height + 36);
+		//Adding extra height for 'browser knows iframe size' purposes
+		$('.modal-body > iframe').height(height + 36);
 	};
 
 	// on ready
