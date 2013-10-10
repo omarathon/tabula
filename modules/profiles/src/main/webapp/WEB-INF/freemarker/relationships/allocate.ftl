@@ -70,30 +70,49 @@
 			</@spring.hasBindErrors>
 
 			<#assign submitUrl><@routes.relationship_allocate department relationshipType /></#assign>
+			<div class="persist-area">
 			<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToRelationshipCommand" cssClass="form-horizontal">
-			<div class="tabula-dnd" 
+			<div class="tabula-dnd"
 					 data-item-name="student" 
 					 data-text-selector=".name h6"
 					 data-use-handle="false"
 					 data-selectables=".students .drag-target"
 					 data-scroll="true"
 					 data-remove-tooltip="Remove this student from this ${relationshipType.agentRole}">
-				<div class="btn-toolbar">
-					<a class="random btn" data-toggle="randomise" data-disabled-on="empty-list"
-					   href="#" >
-						<i class="icon-random"></i> Randomly allocate
-					</a>
-					<a class="return-items btn" data-toggle="return" data-disabled-on="no-allocation"
-					   href="#" >
-						<i class="icon-arrow-left"></i> Remove all
-					</a>
+				<div class="persist-header">
+					<div class="btn-toolbar">
+						<a class="random btn" data-toggle="randomise" data-disabled-on="empty-list"
+						   href="#" >
+							<i class="icon-random"></i> Randomly allocate
+						</a>
+						<a class="return-items btn" data-toggle="return" data-disabled-on="no-allocation"
+						   href="#" >
+							<i class="icon-arrow-left"></i> Remove all
+						</a>
+					</div>
+
+				<div class="row-fluid">
+					<div class="span5"><h3>Students</h3></div>
+					<div class="span2">
+					</div>
+					<div class="span5">
+						<button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#add-agents">Add ${relationshipType.agentRole}s</button>
+						<h3>${relationshipType.agentRole?cap_first}s</h3>
+
+					</div>
+
 				</div>
+
+
+
+
+				</div><!-- end persist-header -->
+
 				<div class="row-fluid fix-on-scroll-container">
 					<div class="span5">
 						<div id="studentslist" 
 								 class="students tabula-filtered-list"
 								 data-item-selector=".student-list li">
-							<h3>Students</h3>
 							<div class="well ">
 									<h4>Students with no ${relationshipType.agentRole}</h4>
 									<#if features.personalTutorAssignmentFiltering>
@@ -135,13 +154,13 @@
 					</div>
 					<div class="span2">
 						<#-- I, for one, welcome our new jumbo icon overlords -->
-						<div class="direction-icon fix-on-scroll">
+						<div class="direction-icon">
 							<i class="icon-arrow-right"></i>
 						</div>
 					</div>
 					<div class="span5">
 						<div id="agentslist" class="agents fix-on-scroll">
-							<button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#add-agents">Add ${relationshipType.agentRole}s</button>
+
 							
 							<#-- Modal to add students manually -->
 							<div class="modal fade hide" id="add-agents" tabindex="-1" role="dialog" aria-labelledby="add-agents-label" aria-hidden="true">
@@ -165,7 +184,7 @@
 								</div>
 							</div>
 						
-							<h3>${relationshipType.agentRole?cap_first}s</h3>
+
 							
 							<#macro agent_item university_id full_name existing_students=[]>
 								<div class="drag-target well clearfix agent-${university_id}">
@@ -208,11 +227,16 @@
 			
 				<#include "_allocate_notifications_modal.ftl" />
 
-				<div class="submit-buttons">
-					<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#notify-modal">Save</button>
-					<a href="<@routes.home />" class="btn">Cancel</a> <#-- TODO better url -->
-				</div>
+					<div class="submit-buttons persist-footer">
+						<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#notify-modal">Save</button>
+						<a href="<@routes.home />" class="btn">Cancel</a> <#-- TODO better url -->
+					</div>
+
+
+
 			</@f.form>
+			</div><!-- end persist-area -->
+
 			</div><!-- end 1st tab -->
 
 			<div class="tab-pane" id="allocatestudents-tab2">
@@ -223,13 +247,48 @@
 
 	</div> <!-- end tabbable -->
 
+
 	<script type="text/javascript">
 		(function($) {
 			<!--TAB-1008 - fix scrolling bug when student list is shorter than the group list-->
 			$('#studentslist').css('min-height', function() {
 				return $('#agentslist').outerHeight();
 			});
-			
+
+			$('.persist-area').fixHeaderFooter();
+
+			$(window).scroll(function() {
+		    	fixDirectionIcon();
+				fixAgentsList(); // eg. personal tutors column
+			});
+
+			function fixDirectionIcon() {
+		        var directionIcon = $('.direction-icon');
+				var fixContainer = $('.fix-on-scroll-container');
+				var persistAreaTop = $('.persist-header').height() + $('#primary-navigation').height();
+
+				if(fixContainer.offset().top - $(window).scrollTop() < $('.persist-header').height() + $('#primary-navigation').height()) {
+					directionIcon.css({ "top" : persistAreaTop, "position": "fixed", "width": directionIcon.width() });
+				} else {
+					directionIcon.css({"top": "auto", "position": "static", "width": directionIcon.width });
+				}
+			}
+
+			// if the list of agents is shorter than the (viewport+fixed screen areas)
+			// and we've scrolled past the top of the persist-area container, then fix it
+			// (otherwise don't, because the user won't be able to see all of the personal tutors)
+			function fixAgentsList() {
+				var agentsList = $('#agentslist');
+				var persistAreaTop = $('.persist-header').height() + $('#primary-navigation').height();
+				var viewableArea = $(window).height() - ($('.persist-header').height() + $('#primary-navigation').height() + $('.persist-footer').height());
+
+				if (agentsList.height() < viewableArea && ($(window).scrollTop() > $('.persist-area').offset().top)) {
+					agentsList.css({"top": persistAreaTop + 14, "position": "fixed"});
+				} else {
+					agentsList.css({"top": "auto", "position": "relative"});
+				}
+			}
+
 			$('.btn.refresh-form').on('click', function(e) {
 				var $form = $(e.target).closest('form');
 				$form.prepend($('<input />').attr({type: 'hidden', name: 'action', value: 'refresh'}));
