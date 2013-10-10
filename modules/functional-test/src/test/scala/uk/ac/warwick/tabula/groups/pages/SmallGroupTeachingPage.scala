@@ -92,6 +92,11 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 		)
 	}
 
+	def showsGroupLockedIcon(): Boolean = {
+		(underlying.findElements(By.className("icon-lock")).asScala.headOption).isDefined
+
+	}
+
 	def showsGroup(groupName:String) = {
 		underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).headOption.isDefined
 	}
