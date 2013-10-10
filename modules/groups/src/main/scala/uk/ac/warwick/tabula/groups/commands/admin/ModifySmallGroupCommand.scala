@@ -31,8 +31,6 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 	// Used by parent command
 	var delete: Boolean = false
 
-	var students: UserGroup = UserGroup.ofUniversityIds
-
 	// A collection of sub-commands for modifying the events
 	var events: JList[ModifySmallGroupEventCommand] = LazyLists.create { () =>
 		new CreateSmallGroupEventCommand(this, module)
@@ -59,8 +57,6 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
 
 		events.clear()
 		events.addAll(group.events.asScala.map(new EditSmallGroupEventCommand(_)).asJava)
-
-		if (group.students != null) students = group._studentsGroup.duplicate()
 	}
 
 	def copyTo(group: SmallGroup) {
@@ -76,8 +72,6 @@ abstract class ModifySmallGroupCommand(module: Module, properties: SmallGroupSet
       event.group = group
       group.events.add(event)
     }
-
-		if (students != null) group._studentsGroup = students.duplicate()
 	}
 
 	override def onBind(result: BindingResult) {
