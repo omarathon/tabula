@@ -29,3 +29,4 @@
 	<#macro removePoint point><@url page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/edit/points/${point.id}/delete" /></#macro>
 	
 	<#macro profile profile><@url page="/view/${profile.universityId}" context="/profiles"/></#macro>
+	<#macro attendanceProfile><@url page="/profile" /></#macro>

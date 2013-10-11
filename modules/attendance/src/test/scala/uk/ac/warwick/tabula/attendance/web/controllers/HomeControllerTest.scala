@@ -35,13 +35,16 @@ class HomeControllerTest extends  TestBase with Mockito{
 	}}
 
 	@Test
-	def PGRsGetRedirectedToProfileView(){new Fixture{
+	def PGRsGetAdminViewWithHasOwnPointsFlag(){new Fixture{
 		withCurrentUser(new CurrentUser(pgr,pgr)){
 
+			command.apply() returns Map(
+				"View"->Set(new Department().tap(_.code="xx")),
+				"Manage"->Set(new Department().tap(_.code="xx"))
+			)
 			val mav = new HomeController().home(command)
-			mav.viewName should be("redirect:/profile")
-
-			there were no(command).apply()
+			mav.viewName should be("home/home")
+			mav.toModel("hasOwnMonitoringPoints") should be(JBoolean(Some(true)))
 		}
 	}}
 

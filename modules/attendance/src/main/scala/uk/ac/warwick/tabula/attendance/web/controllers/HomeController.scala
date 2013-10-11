@@ -21,7 +21,7 @@ class HomeController extends AttendanceController {
 
 	@RequestMapping
 	def home(@ModelAttribute("command") cmd: Appliable[Map[String, Set[Department]]]) = {
-		if (user.isStudent || user.isPGR) {
+		if (user.isStudent) {
 			Redirect(Routes.profile())
 
 		} else if (user.isStaff ) {
@@ -29,7 +29,7 @@ class HomeController extends AttendanceController {
 			if (map("Manage").size == 0 && map("View").size == 1) {
 				Redirect(s"/${map("View").head.code}")
 			} else {
-				Mav("home/home", "permissionMap" -> map)
+				Mav("home/home", "permissionMap" -> map, "hasOwnMonitoringPoints"->user.isPGR)
 			}
 		} else Mav("home/nopermission")
 	}

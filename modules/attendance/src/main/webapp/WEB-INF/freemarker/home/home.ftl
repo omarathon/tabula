@@ -8,7 +8,7 @@
 	
 	<#assign can_record = (permissionMap["View"]?size > 0) />
 	<#assign can_manage = (permissionMap["Manage"]?size > 0) />
-	
+
 	<#if can_record || can_manage>
 		<#if (permissionMap["View"]?size > 0)>
 			<h2>View and record monitoring points</h2>
@@ -34,6 +34,11 @@
 	<#else>
 		<p class="lead muted">
 			This is a service for managing attendance monitoring points.
+		</p>
+		<p>
+		<#if hasOwnMonitoringPoints >
+		   <a href="<@routes.attendanceProfile />">My attendance profile</a>
+		</#if>
 		</p>
 		
 		<#if user.staff>
