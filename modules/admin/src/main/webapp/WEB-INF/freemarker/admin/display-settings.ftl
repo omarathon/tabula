@@ -137,11 +137,11 @@
 		</fieldset>
 	</fieldset>
 
-    <#if features.smallGroupTeachingStudentSignUp>
-    	<hr />
+	<hr />
 
-    	<fieldset id="small-groups-options">
-    		<h2>Small group options</h2>
+	<fieldset id="small-groups-options">
+		<h2>Small group options</h2>
+	    <#if features.smallGroupTeachingStudentSignUp>
 			<@form.row>
 				<@form.label>Default allocation method for small groups</@form.label>
 				<@form.field>
@@ -156,15 +156,30 @@
 					<@f.errors path="defaultGroupAllocationMethod" cssClass="error" />
 				</@form.field>
 			</@form.row>
-		</fieldset>
-    </#if>
-	
+	    </#if>
+
+    	<@form.row>
+			<@form.label></@form.label>
+			<@form.field>
+				<@form.label checkbox=true>
+					<@f.checkbox path="autoGroupDeregistration" id="autoGroupDeregistration" />
+					Automatically deregister students from groups
+				</@form.label>
+				<@f.errors path="autoGroupDeregistration" cssClass="error" />
+				<div class="help-block">
+					Students will be removed from the group when they deregister from the associated module.
+				</div>
+			</@form.field>
+		</@form.row>
+
+	</fieldset>
+
 	<#if features.arbitraryRelationships>
 		<hr />
 
 		<fieldset id="relationship-options">
 			<h2>Student relationship options</h2>
-			
+
 			<@form.row>
 				<@form.label>Display</@form.label>
 				<@form.field>
@@ -174,7 +189,7 @@
 							${relationshipType.description}
 						</@form.label>
 					</#list>
-					
+
 					<@f.errors path="studentRelationshipDisplayed" cssClass="error" />
 				</@form.field>
 			</@form.row>

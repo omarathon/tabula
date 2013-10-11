@@ -53,7 +53,7 @@ class Department extends GeneratedId
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
 	var customRoleDefinitions:JList[CustomRoleDefinition] = JArrayList()
-	
+
 	@OneToMany(mappedBy="department", fetch = FetchType.LAZY)
 	@BatchSize(size=200)
 	var routes:JList[Route] = JArrayList()
@@ -91,39 +91,42 @@ class Department extends GeneratedId
 
 	def assignmentInfoView = getStringSetting(Settings.AssignmentInfoView) getOrElse(Assignment.Settings.InfoViewType.Default)
 	def assignmentInfoView_= (setting: String) = settings += (Settings.AssignmentInfoView -> setting)
-	
+
+	def autoGroupDeregistration = getBooleanSetting(Settings.AutoGroupDeregistration, true)
+	def autoGroupDeregistration_=(dereg: Boolean) { settings += (Settings.AutoGroupDeregistration -> dereg) }
+
 	def getStudentRelationshipSource(relationshipType: StudentRelationshipType) =
 		getStringMapSetting(Settings.StudentRelationshipSource)
 			.flatMap { _.get(relationshipType.id) }
 			.map { StudentRelationshipSource.fromCode(_) }
 			.getOrElse(relationshipType.defaultSource)
-			
+
 	def setStudentRelationshipSource (relationshipType: StudentRelationshipType, source: StudentRelationshipSource) = {
 		val map = getStringMapSetting(Settings.StudentRelationshipSource, Map())
 		val newMap = (map + (relationshipType.id -> source.dbValue))
-		
+
 		settings += (Settings.StudentRelationshipSource -> newMap)
 	}
 
 	def studentRelationshipDisplayed = getStringMapSetting(Settings.StudentRelationshipDisplayed) getOrElse(Map())
 	def studentRelationshipDisplayed_= (setting: Map[String, String]) = settings += (Settings.StudentRelationshipDisplayed -> setting)
-			
+
 	def getStudentRelationshipDisplayed(relationshipType: StudentRelationshipType): Boolean =
 		studentRelationshipDisplayed
 			.get(relationshipType.id)
 			.map { _.toBoolean }
 			.getOrElse(relationshipType.defaultDisplay)
-			
-	def setStudentRelationshipDisplayed(relationshipType: StudentRelationshipType, isDisplayed: Boolean) = {	
+
+	def setStudentRelationshipDisplayed(relationshipType: StudentRelationshipType, isDisplayed: Boolean) = {
 		studentRelationshipDisplayed = (studentRelationshipDisplayed + (relationshipType.id -> isDisplayed.toString))
 	}
-			
+
 	@transient
 	var relationshipService = Wire[RelationshipService]
-			
+
 	def displayedStudentRelationshipTypes =
 		relationshipService.allStudentRelationshipTypes.filter { getStudentRelationshipDisplayed(_) }
-			
+
 	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem) getOrElse(WeekRange.NumberingSystem.Default)
 	def weekNumberingSystem_= (wnSystem: String) = settings += (Settings.WeekNumberingSystem -> wnSystem)
 
@@ -292,5 +295,7 @@ object Department {
 		val WeekNumberingSystem = "weekNumberSystem"
 
     val DefaultGroupAllocationMethod = "defaultGroupAllocationMethod"
+
+    val AutoGroupDeregistration = "autoGroupDeregistration"
 	}
 }
