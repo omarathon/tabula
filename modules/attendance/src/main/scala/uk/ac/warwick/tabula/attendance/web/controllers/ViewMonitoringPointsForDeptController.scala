@@ -30,7 +30,7 @@ class ViewMonitoringPointsForDeptController extends AttendanceController {
 		@RequestParam(value="updatedMonitoringPoint", required = false) updatedPoint: MonitoringPoint
 	) = {
 		cmd.apply()
-		Mav("home/view", "updatedPoint" -> updatedPoint)
+		Mav("home/view", "updatedPoint" -> updatedPoint,  "hasOwnMonitoringPoints"->user.isPGR)
 	}
 
 }

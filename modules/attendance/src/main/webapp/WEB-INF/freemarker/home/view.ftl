@@ -1,6 +1,10 @@
 <#escape x as x?html>
 <h1>View monitoring points for ${command.dept.name}</h1>
-
+		<#if hasOwnMonitoringPoints >
+		<p>
+		   <a href="<@routes.attendanceProfile />">My attendance profile</a>
+		</p>
+		</#if>
 <#if updatedPoint??>
 	<div class="alert alert-success">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>

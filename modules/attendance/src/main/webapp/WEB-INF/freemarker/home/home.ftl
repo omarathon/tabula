@@ -35,12 +35,12 @@
 		<p class="lead muted">
 			This is a service for managing attendance monitoring points.
 		</p>
-		<p>
 		<#if hasOwnMonitoringPoints >
+		<p>
 		   <a href="<@routes.attendanceProfile />">My attendance profile</a>
-		</#if>
 		</p>
-		
+		</#if>
+
 		<#if user.staff>
 			<p>
 				You do not currently have permission to manage any monitoring points. Please contact your
