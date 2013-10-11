@@ -137,9 +137,12 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 		val groupsPage = new GroupsHomePage
 		val groupInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
-		And("The leave button is shown greyed out")
-		groupInfo.findLeaveButtonFor("Group 1") should be('defined)
-		groupInfo.findLeaveButtonFor("Group 1").get should not be('enabled)
+		And("The leave button is not shown ")
+		groupInfo.findLeaveButtonFor("Group 1") should not be('defined)
+
+		And("The group locked icon is shown")
+		groupInfo.showsGroupLockedIcon should be (true)
+
 	}
 
 	"A student" should "not see a self-sign-up groupset which is not open if they aren't allocated" in {
@@ -176,10 +179,11 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 		val groupsPage = new GroupsHomePage
 		val groupInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
-		And("The leave button is shown greyed out")
-		groupInfo.findLeaveButtonFor("Group 1") should be('defined)
-		groupInfo.findLeaveButtonFor("Group 1").get should not be('enabled)
+		And("The leave button is not shown ")
+		groupInfo.findLeaveButtonFor("Group 1") should not be('defined)
 
+		And("The group locked icon is shown")
+		groupInfo.showsGroupLockedIcon should be (true)
 	}
 
 	"A student" should "not be able to select a group which is full" in {
@@ -209,6 +213,9 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 		And("Group 2's checkbox should be enabled")
 		val group2Checkbox = groupsetInfo.findSelectGroupCheckboxFor("Group 2")
 		group2Checkbox should be('enabled)
+
+		And("The group locked icon is not shown")
+		groupsetInfo.showsGroupLockedIcon should be(false)
 	}
 
 	"A student" should "not be able to leave a self-signup group which doesn't allow switching" in{
@@ -229,9 +236,11 @@ class SelfSignUpTest  extends SmallGroupsFixture with GivenWhenThen {
 		val groupsPage = new GroupsHomePage
 		val groupInfo = groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME).get
 
-		And("The leave button is shown greyed out")
-		groupInfo.findLeaveButtonFor("Group 1") should be('defined)
-		groupInfo.findLeaveButtonFor("Group 1").get should not be('enabled)
+		And("The leave button is not shown ")
+		groupInfo.findLeaveButtonFor("Group 1") should not be('defined)
+
+		And("The group locked icon is shown")
+		groupInfo.showsGroupLockedIcon should be (true)
 	}
 
 }

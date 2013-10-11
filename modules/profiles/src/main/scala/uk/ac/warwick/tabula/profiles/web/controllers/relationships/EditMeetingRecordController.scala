@@ -14,5 +14,5 @@ class EditMeetingRecordController extends ProfilesController with MeetingRecordM
 
 	@ModelAttribute("command")
 	def getCommand(@PathVariable("meetingRecord") meetingRecord: MeetingRecord) =
-		new EditMeetingRecordCommand(meetingRecord)
+		new EditMeetingRecordCommand(mandatory(meetingRecord))
 }

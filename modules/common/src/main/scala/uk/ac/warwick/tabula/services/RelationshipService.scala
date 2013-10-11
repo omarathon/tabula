@@ -75,12 +75,13 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def saveStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {
 		this.findCurrentRelationships(relationshipType, targetSprCode).find(_.agent == agent) match {
 			case Some(existingRelationship) => {
-				// the same relationship is already there in the db - don't save
+				// the same relationship is already there in the db - don't create new one
+				existingRelationship.endDate = null
+				memberDao.saveOrUpdate(existingRelationship)
 				existingRelationship
 			}
 			case _ => {
-				// TODO handle existing relationships?
-				// and then create the new one
+				// create the new one
 				val newRelationship = StudentRelationship(agent, relationshipType, targetSprCode)
 				newRelationship.startDate = new DateTime
 				memberDao.saveOrUpdate(newRelationship)

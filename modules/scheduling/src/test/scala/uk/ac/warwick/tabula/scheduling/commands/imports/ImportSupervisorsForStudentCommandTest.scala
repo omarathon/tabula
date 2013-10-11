@@ -8,17 +8,10 @@ import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.model.DegreeType.Postgraduate
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
-import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
-import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
-import uk.ac.warwick.tabula.data.model.Department
+import org.joda.time.DateTime
 
 
 class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Mockito with Logging {
@@ -68,7 +61,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 	}
 
 	@Transactional
-	@Test def testCaptureValidSupervisor {
+	@Test def testCaptureValidSupervisor() {
 		new Environment {
 			// set up importer to return supervisor
 			val codes = Seq(prsCode)
@@ -93,7 +86,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 	}
 
 	@Transactional
-	@Test def testCaptureInvalidSupervisor {
+	@Test def testCaptureInvalidSupervisor() {
 		new Environment {
 			// set up importer to return supervisor
 			val importer = smartMock[SupervisorImporter]
@@ -108,6 +101,41 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			// check results
 			val supRels = supervisee.studentCourseDetails.get(0).relationships(relationshipType)
 			supRels.size should be (0)
+		}
+	}
+
+	@Transactional
+	@Test def testCaptureExistingOtherSupervisor() {
+		new Environment {
+			// create and persist existing supervisor
+			val existingSupervisorMember = new StaffMember("1234")
+			existingSupervisorMember.userId = "cusfal"
+			session.saveOrUpdate(existingSupervisorMember)
+
+			// create and persist existing relationship
+			val existingRelationhip = StudentRelationship("1234", relationshipType, prsCode)
+			existingRelationhip.startDate = new DateTime
+			session.saveOrUpdate(existingRelationhip)
+
+			// set up importer to return supervisor
+			val codes = Seq(prsCode)
+			val importer = smartMock[SupervisorImporter]
+			importer.getSupervisorPrsCodes(scjCode) returns codes
+
+			// test command
+			val command = new ImportSupervisorsForStudentCommand()
+			command.studentCourseDetails = studentCourseDetails
+			command.supervisorImporter = importer
+			command.applyInternal
+
+			// check results
+			val supRels = supervisee.studentCourseDetails.get(0).relationships(relationshipType)
+			supRels.size should be (1)
+			val rel = supRels.head
+
+			rel.agent should be (supervisorUniId)
+			rel.targetSprCode should be (sprCode)
+			rel.relationshipType should be (relationshipType)
 		}
 	}
 }

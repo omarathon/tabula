@@ -6,9 +6,9 @@ import org.scalatest.GivenWhenThen
 
 // n.b. this test doesn't work with the FirefoxDriver  because the UI pops up modal dialogs which the
 // test isn't expecting. HTMLUnit ignores them.
-class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with GivenWhenThen {
+class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with GivenWhenThen {
 
-	def withRoleInElement[T](permittedUser: String, parentElement: String)(fn: => T) =
+	def withRoleInElement[T](permittedUser: String, parentElement: String, usersFromFixture:Seq[String]=Nil)(fn: => T) =
 		as(P.Admin1) {
 
 			def usercodes = findAll(cssSelector(s"${parentElement} .user .muted")).toList.map(_.underlying.getText.trim)
@@ -17,13 +17,13 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 				usercodes.size should be (1)
 				usercodes.apply(0) should be (P.Admin1.usercode)
 			}
-			def nobodyListed(){
-				usercodes.size should be (0)
+			def noNewUsersListed(){
+				usercodes.size should be (usersFromFixture.size)
 			}
 
 			def nowhereElse() = {
 				// doesn't like CSS :not() selector, so have to get all permission-lists and filter out the current one by scala text-mungery
-				val allLists = findAll(cssSelector(".permission-list")).toList.filterNot(_.underlying.getAttribute("class").contains(parentElement.replace(".","")))
+				val allLists = findAll(cssSelector("#tutors-supervisors-row .permission-list")).toList.filterNot(_.underlying.getAttribute("class").contains(parentElement.replace(".","")))
 				// then delve further to get the usercodes included
 				val filteredUsercodes = allLists map (list => list.underlying.findElements(By.cssSelector(".user .muted")))
 				filteredUsercodes.foreach(_.size should be(0))
@@ -49,7 +49,7 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 				currentUrl should include("/permissions")
 
 			And("I should see no users with the role")
-			nobodyListed()
+			noNewUsersListed()
 
 			And("I should not see anyone else with any other roles")
 				nowhereElse()
@@ -83,7 +83,7 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 
 			Then("I should see  the new entry")
 				({
-					usercodes.size should be (1)
+					usercodes.size should be (1 + usersFromFixture.size)
 					usercodes should contain (permittedUser)
 				})
 
@@ -96,7 +96,7 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 				removable.get.underlying.submit()
 
 			Then("There should be no users listed")
-				nobodyListed()
+				noNewUsersListed()
 
 			And("I should not see anyone else with any other roles")
 				nowhereElse()
@@ -104,14 +104,20 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 			fn
 		}
 
-	"Department admin" should "be able to add and remove senior tutors" in {
+	"User Access Manager" should "be able to add and remove senior tutors" in {
 		withRoleInElement(P.Marker1.usercode, ".tutor-table") {
 			// Nothing more to do, the with...() tests enough
 		}
 	}
 
-	"Department admin" should "be able to add and remove senior supervisors" in {
+	"User Access Manager" should "be able to add and remove senior supervisors" in {
 		withRoleInElement(P.Marker1.usercode, ".supervisor-table") {
+			// Nothing more to do, the with...() tests enough
+		}
+	}
+
+	"User Access Manager" should "be able to add and remove departmental admins" in {
+		withRoleInElement(P.Marker1.usercode, ".admin-table", usersFromFixture = Seq(P.Admin2.usercode)) {
 			// Nothing more to do, the with...() tests enough
 		}
 	}

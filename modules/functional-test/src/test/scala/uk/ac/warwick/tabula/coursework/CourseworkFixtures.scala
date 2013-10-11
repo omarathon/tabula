@@ -151,22 +151,17 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		// Make sure JS is working
 		id("js-hint").findElement should be ('empty)
 
-		// this sometimes fails for no obvious reason; if it does, then we'll try it again.
-		var tries = 0
-		Stream.continually({
-			click on linkText("Add students manually")
-			eventually { textArea("massAddUsers").isDisplayed should be (true) }
+		click on linkText("Add students manually")
+		eventually { textArea("massAddUsers").isDisplayed should be (true) }
 
-			textArea("massAddUsers").value = members.mkString("\n")
-			click on className("add-students")
+		textArea("massAddUsers").value = members.mkString("\n")
+		click on className("add-students")
 
-			// Eventually, a Jax!
-			eventuallyAjax { textArea("massAddUsers").isDisplayed should be (false) }
-			tries = tries + 1
-		}).takeWhile(
-			(Unit)=> (! pageSource.contains(members.size + " manually enrolled") && tries < 3)
-		)
-			pageSource should include(members.size + " manually enrolled")
+		// Eventually, a Jax!
+		eventuallyAjax { textArea("massAddUsers").isDisplayed should be (false) }
+		// there will be a delay between the dialog being dismissed and the source being updated by the
+		// ajax response. So wait some more
+		eventuallyAjax{pageSource should include(members.size + " manually enrolled")}
 
 		checkbox("collectSubmissions").select()
 
