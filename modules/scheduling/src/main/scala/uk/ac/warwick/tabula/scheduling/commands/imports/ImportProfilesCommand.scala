@@ -150,8 +150,6 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 			if (!newModuleRegistrations.contains(existingMR)) {
 				session.delete(existingMR)
 				smallGroupService.removeFromSmallGroups(existingMR)
-
-
 			}
 		}
 	}

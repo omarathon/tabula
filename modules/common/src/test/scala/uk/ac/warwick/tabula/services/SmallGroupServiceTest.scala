@@ -34,6 +34,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 
 	val service = new AbstractSmallGroupService
 		with AutowiringAssignmentMembershipDaoComponent // don't need this component, so autowiring to null is fine
+		with AutowiringAssignmentMembershipServiceComponent // don't need this component, so autowiring to null is fine
 		with SmallGroupMembershipHelpers
 		with UserLookupComponent
 		with UserGroupDaoComponent

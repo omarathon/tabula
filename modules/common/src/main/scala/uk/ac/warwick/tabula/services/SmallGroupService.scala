@@ -1,21 +1,18 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConverters._
+import scala.collection.JavaConverters.seqAsJavaListConverter
+
+import org.hibernate.annotations.{AccessType, Filter, FilterDef}
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.{AutowiringSmallGroupDaoComponent, SmallGroupDaoComponent, Daoisms}
-import uk.ac.warwick.tabula.data.model.groups._
-import uk.ac.warwick.tabula.helpers.Logging
+
+import javax.persistence.{Entity, Table}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports.{JArrayList, JList}
+import uk.ac.warwick.tabula.data.{AssignmentMembershipDao, AssignmentMembershipDaoComponent, AutowiringAssignmentMembershipDaoComponent, AutowiringSmallGroupDaoComponent, AutowiringUserGroupDaoComponent, SmallGroupDaoComponent, UserGroupDaoComponent}
+import uk.ac.warwick.tabula.data.model.{ModuleRegistration, UserGroup}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupSet}
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.AssignmentMembershipDao
-import uk.ac.warwick.tabula.data.AssignmentMembershipDaoComponent
-import uk.ac.warwick.tabula.data.AutowiringAssignmentMembershipDaoComponent
-import uk.ac.warwick.tabula.data.model.ModuleRegistration
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.UserGroupDaoComponent
-import uk.ac.warwick.tabula.data.model.UserGroup
-import uk.ac.warwick.tabula.data.AutowiringUserGroupDaoComponent
 
 trait SmallGroupServiceComponent {
 	def smallGroupService: SmallGroupService
@@ -23,6 +20,7 @@ trait SmallGroupServiceComponent {
 
 trait AutowiringSmallGroupServiceComponent extends SmallGroupServiceComponent {
 	var smallGroupService = Wire[SmallGroupService]
+	var assignmentMembershipService = Wire[AssignmentMembershipService]
 }
 
 trait SmallGroupService {
@@ -50,7 +48,8 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		with SmallGroupMembershipHelpers
 		with UserLookupComponent
 		with UserGroupDaoComponent
-		with Logging =>
+		with Logging
+		with AssignmentMembershipServiceComponent =>
 
 	def getSmallGroupSetById(id: String) = smallGroupDao.getSmallGroupSetById(id)
 	def getSmallGroupById(id: String) = smallGroupDao.getSmallGroupById(id)
@@ -88,29 +87,23 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	}
 
 	def removeFromSmallGroups(modReg: ModuleRegistration) {
-		val userId = modReg.studentCourseDetails.student.userId
-		val user = userLookup.getUserByUserId(userId)
+		if (modReg.module.department.autoGroupDeregistration) {
+			val userId = modReg.studentCourseDetails.student.userId
+			val user = userLookup.getUserByUserId(userId)
 
-		val groups = smallGroupDao.findByModuleAndYear(modReg.module, modReg.academicYear)
-		for (smallGroup <- groups) {
-			val userGroup = smallGroup.students
+			val groups = smallGroupDao.findByModuleAndYear(modReg.module, modReg.academicYear)
+			for (smallGroup <- groups) {
+				val userGroup = smallGroup.students
 
-			userGroup match {
-				case uGroup: UserGroup => {
-					val userGroupForSet = smallGroup.groupSet.members
-					userGroupForSet match {
-						case uGroupForSet: UserGroup => {
-							if (!uGroupForSet.includesUser(user) && modReg.module.department.autoGroupDeregistration) {
-								// if the person is not in includeUsers for the small group set,
-								// their membership is linked to SITS imports so we can delete them
-								uGroup.remove(user)
-								userGroupDao.saveOrUpdate(uGroup)
-							}
+				if (userGroup.includesUser(user)) {
+					userGroup match {
+						case uGroup: UserGroup => {
+							uGroup.remove(user)
+							userGroupDao.saveOrUpdate(uGroup)
 						}
-						case _ => logger.warn("Could not remove user from group - userGroup " + userGroupForSet + " was not of type UserGroup as expected.")
+						case _ => logger.warn("Could not remove user from group - userGroup " + userGroup + " was not of type UserGroup as expected.")
 					}
 				}
-				case _ => logger.warn("Could not remove user from group - userGroup " + userGroup + " was not of type UserGroup as expected.")
 			}
 		}
 	}
@@ -145,3 +138,4 @@ class SmallGroupServiceImpl
 		with UserLookupComponent
 		with AutowiringUserGroupDaoComponent
 		with Logging
+		with AutowiringAssignmentMembershipServiceComponent
