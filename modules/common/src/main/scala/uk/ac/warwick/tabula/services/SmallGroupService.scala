@@ -48,8 +48,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		with SmallGroupMembershipHelpers
 		with UserLookupComponent
 		with UserGroupDaoComponent
-		with Logging
-		with AssignmentMembershipServiceComponent =>
+		with Logging =>
 
 	def getSmallGroupSetById(id: String) = smallGroupDao.getSmallGroupSetById(id)
 	def getSmallGroupById(id: String) = smallGroupDao.getSmallGroupById(id)
@@ -138,4 +137,3 @@ class SmallGroupServiceImpl
 		with UserLookupComponent
 		with AutowiringUserGroupDaoComponent
 		with Logging
-		with AutowiringAssignmentMembershipServiceComponent

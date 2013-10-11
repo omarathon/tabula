@@ -1,28 +1,18 @@
 package uk.ac.warwick.tabula.services
 
-import scala.annotation.elidable
-import scala.annotation.elidable.ASSERTION
-import scala.collection.JavaConverters.seqAsJavaListConverter
+import collection.JavaConverters._
 
-import org.hibernate.annotations.{AccessType, Filter, FilterDef}
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.beans.factory.annotation.Autowired
 
-import javax.persistence.{Entity, NamedQueries, Table}
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.AssignmentMembershipDao
-import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentGroup, Assignment, Department, Module, UnspecifiedTypeUserGroup, UpstreamAssessmentGroup}
+import uk.ac.warwick.tabula.data.{AssignmentMembershipDao, Daoisms}
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.userlookup.User
+import org.hibernate.criterion.{Order, Restrictions}
 
-trait AssignmentMembershipServiceComponent {
-	val assignmentMembershipService: AssignmentMembershipService
-}
-
-trait AutowiringAssignmentMembershipServiceComponent extends AssignmentMembershipServiceComponent {
-	val assignmentMembershipService = Wire[AssignmentMembershipService]
-}
 
 trait AssignmentMembershipService {
 	def find(assignment: AssessmentComponent): Option[AssessmentComponent]
@@ -143,7 +133,7 @@ class AssignmentMembershipServiceImpl
 
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] =
 		dao.getUpstreamAssessmentGroups(component, academicYear)
-
+	
 }
 
 
@@ -207,9 +197,9 @@ trait AssignmentMembershipMethods extends Logging {
 			case _ => {
 				val sitsUsers = upstream.flatMap { _.members.members }
 
-				val includes = others map { _.knownType.allIncludedIds } getOrElse Nil
+				val includes = others map { _.knownType.allIncludedIds } getOrElse Nil		
 				val excludes = others map { _.knownType.allExcludedIds } getOrElse Nil
-
+		
 				((sitsUsers ++ includes).distinct diff excludes).size
 			}
 		}
