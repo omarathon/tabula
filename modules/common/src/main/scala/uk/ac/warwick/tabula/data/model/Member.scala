@@ -189,6 +189,11 @@ class StudentMember extends Member with StudentProperties {
 	@BatchSize(size=200)
 	var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
 
+	@OneToOne
+	@JoinColumn(name = "mostSignificantCourse")
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var mostSignificantCourse: StudentCourseDetails = _
+
 	def this(id: String) = {
 		this()
 		this.universityId = id
@@ -211,6 +216,10 @@ class StudentMember extends Member with StudentProperties {
 	override def mostSignificantCourseDetails: Option[StudentCourseDetails] = {
 		if (studentCourseDetails == null || studentCourseDetails.isEmpty) None
 		else studentCourseDetails.asScala.find { details => details.mostSignificant != null && details.mostSignificant }
+
+		//Needs uncommenting once the data is present in the database - replacing the contents of this method
+		//if (mostSignificantCourse == null) None
+	  //else Some(mostSignificantCourse)
 	}
 
 	override def hasCurrentEnrolment: Boolean = studentCourseDetails.asScala.exists(_.hasCurrentEnrolment)
@@ -352,7 +361,7 @@ trait StudentProperties {
 }
 
 trait StaffProperties {
-	var teachingStaff: JBoolean = _
+//	var teachingStaff: JBoolean = _
 }
 
 trait AlumniProperties

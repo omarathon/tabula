@@ -11,6 +11,7 @@ import javax.persistence.Entity
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 
@@ -41,9 +42,10 @@ trait MemberDao {
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
+	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getAllRelationshipsByAgent(agentId: String): Seq[StudentRelationship]
 	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
-	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[Member]
+	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
 	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
@@ -87,13 +89,13 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def getByUniversityId(universityId: String) =
 		session.newCriteria[Member]
-			.add(is("universityId", universityId.trim))
+			.add(is("universityId", universityId.safeTrim))
 			.uniqueResult
 
 	def getAllWithUniversityIds(universityIds: Seq[String]) =
 		if (universityIds.isEmpty) Seq.empty
 		else session.newCriteria[Member]
-			.add(in("universityId", universityIds map { _.trim }))
+			.add(in("universityId", universityIds map { _.safeTrim }))
 			.seq
 
 	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {
@@ -103,7 +105,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				session.disableFilter(Member.StudentsOnlyFilter)
 
 			session.newCriteria[Member]
-					.add(is("userId", userId.trim.toLowerCase))
+					.add(is("userId", userId.safeTrim.toLowerCase))
 					.add(disjunction()
 						.add(is("inUseFlag", "Active"))
 						.add(like("inUseFlag", "Inactive - Starts %"))
@@ -125,16 +127,16 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setMaxResults(max)
 			.addOrder(asc("lastUpdatedDate"))
 			.list
+			
 		val courseMatches = session.newQuery[StudentMember]( """
-                       select distinct student
-                       from
-                               StudentCourseDetails scd
-                       where
-                               scd.department = :department
-        and scd.student.lastUpdatedDate = :lastUpdated
-                       and
-                               scd.sprStatus.code not like 'P%'
-                       order by lastUpdatedDate asc """)
+				select distinct student
+        	from
+          	StudentCourseDetails scd
+          where
+            scd.department = :department and
+        		scd.student.lastUpdatedDate > :lastUpdated and
+            scd.sprStatus.code not like 'P%'
+          order by lastUpdatedDate asc """)
 			.setEntity("department", department)
 			.setParameter("lastUpdated", startDate).seq
 
@@ -181,6 +183,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.department = :department
 			and
+				scd.mostSignificant = true
+			and
 				scd.sprStatus.code not like 'P%'
 			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
@@ -191,6 +195,35 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setEntity("relationshipType", relationshipType)
 			.seq
 	}
+
+	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = {
+		session.newQuery[StudentRelationship]("""
+			select
+				distinct sr
+			from
+				StudentRelationship sr,
+				StudentCourseDetails scd,
+				Member staff
+			where
+				sr.targetSprCode = scd.sprCode
+      and
+        staff.universityId = sr.agent
+			and
+				sr.relationshipType = :relationshipType
+			and
+				staff.homeDepartment = :department
+			and
+				scd.sprStatus.code not like 'P%'
+			and
+				(sr.endDate is null or sr.endDate >= SYSDATE)
+			order by
+				sr.agent, sr.targetSprCode
+																					""")
+			.setEntity("department", department)
+			.setEntity("relationshipType", relationshipType)
+			.seq
+	}
+
 
 	def getAllRelationshipsByAgent(agentId: String): Seq[StudentRelationship] =
 		session.newCriteria[StudentRelationship]
@@ -211,9 +244,9 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			))
 			.seq
 
-	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[Member] =
+	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember] =
 		if (relationshipType == null) Seq()
-		else session.newQuery[Member]("""
+		else session.newQuery[StudentMember]("""
 			select
 				distinct sm
 			from
@@ -221,6 +254,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				inner join sm.studentCourseDetails as scd
 			where
 				scd.department = :department
+			and
+				scd.mostSignificant = true
 			and
 				scd.sprStatus.code not like 'P%'
 			and
@@ -254,6 +289,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			where
 				scd.department = :department
 			and
+				scd.mostSignificant = true
+			and
 				scd.sprStatus.code not like 'P%'
 			""")
 			.setEntity("department", department).seq
@@ -271,6 +308,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				StudentCourseDetails scd
 			where
 				scd.department = :department
+			and
+				scd.mostSignificant = true
 			and
 				scd.sprStatus.code not like 'P%'
 			and

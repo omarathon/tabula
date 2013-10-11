@@ -32,7 +32,7 @@ import org.hibernate.annotations.AccessType
  */
 @Entity
 @AccessType("field")
-class UserGroup private(val universityIds: Boolean) extends GeneratedId with UnspecifiedTypeUserGroup{
+class UserGroup private(val universityIds: Boolean) extends GeneratedId with UnspecifiedTypeUserGroup with KnownTypeUserGroup {
 
 	/* For Hibernate xx */
 	private def this() { this(false) }
@@ -106,6 +106,9 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 
 	def members: Seq[String] =
 		(includeUsers.toList ++ staticIncludeUsers ++ webgroupMembers) filterNot excludeUsers.contains
+		
+	def allIncludedIds: Seq[String] = (includeUsers.asScala.toSeq ++ staticIncludeUsers.asScala ++ webgroupMembers)
+	def allExcludedIds: Seq[String] = excludeUsers.asScala.toSeq
 
 	private def getIdFromUser(user:User):String = {
 		if (universityIds)
@@ -168,6 +171,8 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 			case _ => this.users == other.users
 		}
 	}
+	
+	def knownType = this
 }
 
 object UserGroup {
@@ -183,7 +188,7 @@ object UserGroup {
  *
  */
 
-trait UnspecifiedTypeUserGroup{
+trait UnspecifiedTypeUserGroup {
 	/**
 	 * @return All of the included users (includedUsers, staticUsers, and webgroup members), minus the excluded users
 	 */
@@ -203,5 +208,13 @@ trait UnspecifiedTypeUserGroup{
 	/**
 	 * @return true if the other.users() would return the same values as this.users(), else false
 	 */
-	def hasSameMembersAs(other:UnspecifiedTypeUserGroup):Boolean
+	def hasSameMembersAs(other:UnspecifiedTypeUserGroup): Boolean
+	
+	val universityIds: Boolean
+	def knownType: KnownTypeUserGroup
+}
+
+trait KnownTypeUserGroup {
+	def allIncludedIds: Seq[String]
+	def allExcludedIds: Seq[String]
 }

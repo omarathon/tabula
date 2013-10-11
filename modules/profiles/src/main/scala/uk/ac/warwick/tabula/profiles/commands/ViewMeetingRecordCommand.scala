@@ -9,8 +9,8 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.permissions.Permissions
 
 object ViewMeetingRecordCommand{
-	def apply(studentCourseDetails: StudentCourseDetails, currentUser: CurrentUser, relationshipType: StudentRelationshipType)  =
-		new ViewMeetingRecordCommandInternal(studentCourseDetails, currentUser, relationshipType) with
+	def apply(studentCourseDetails: StudentCourseDetails, currentMember: Option[Member], relationshipType: StudentRelationshipType)  =
+		new ViewMeetingRecordCommandInternal(studentCourseDetails, currentMember, relationshipType) with
 			ComposableCommand[Seq[MeetingRecord]] with
 			AutowiringProfileServiceComponent with
 			AutowiringMeetingRecordDaoComponent with
@@ -21,18 +21,17 @@ object ViewMeetingRecordCommand{
 
 trait ViewMeetingRecordCommandState{
 	val studentCourseDetails: StudentCourseDetails
-	val requestingUser: CurrentUser
+	val currentMember: Option[Member]
 	val relationshipType: StudentRelationshipType
 }
 
-class ViewMeetingRecordCommandInternal(val  studentCourseDetails: StudentCourseDetails, val requestingUser: CurrentUser, val relationshipType: StudentRelationshipType)
+class ViewMeetingRecordCommandInternal(val  studentCourseDetails: StudentCourseDetails, val currentMember: Option[Member], val relationshipType: StudentRelationshipType)
 	extends CommandInternal[Seq[MeetingRecord]] with ViewMeetingRecordCommandState {
 
 	this: ProfileServiceComponent with RelationshipServiceComponent with MeetingRecordDaoComponent =>
 
 	def applyInternal() = {
 		val rels = relationshipService.getRelationships(relationshipType, studentCourseDetails.sprCode)
-		val currentMember = profileService.getMemberByUniversityId(requestingUser.universityId)
 
 		currentMember match {
 			case None => Seq()

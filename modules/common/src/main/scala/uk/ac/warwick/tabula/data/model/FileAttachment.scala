@@ -9,7 +9,7 @@ import org.joda.time.DateTime
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.FileDao
-import forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, Extension}
 import scala.util.matching.Regex
 import javax.persistence.CascadeType._
 import uk.ac.warwick.spring.Wire
@@ -27,7 +27,7 @@ class FileAttachment extends GeneratedId {
 	// optional link to a SubmissionValue
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "submission_id")
-	var submissionValue: SavedSubmissionValue = null
+	var submissionValue: SavedFormValue = null
 
 	// optional link to some Feedback
 	@ManyToOne(fetch = FetchType.LAZY)

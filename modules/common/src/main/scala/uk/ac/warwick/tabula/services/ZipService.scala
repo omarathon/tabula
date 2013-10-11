@@ -4,11 +4,11 @@ import java.io.File
 import java.io.InputStream
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
-import scala.collection.JavaConversions.asScalaBuffer
+
 import org.springframework.beans.factory.annotation.{Autowired, Value}
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Assignment, Feedback, Submission}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import org.apache.commons.io.input.BoundedInputStream
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream
@@ -17,9 +17,8 @@ import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.tabula.data.model.MeetingRecord
+import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports._
 
 /**
  * FIXME this could generate a corrupt file if two requests tried to generate the same zip simultaneously
@@ -67,12 +66,12 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 		getZip(resolvePath(submission), getSubmissionZipItems(submission))
 
 	private def getFeedbackZipItems(feedback: Feedback): Seq[ZipItem] =
-		feedback.attachments.map { (attachment) =>
+		feedback.attachments.asScala.map { (attachment) =>
 			new ZipFileItem(feedback.universityId + " - " + attachment.name, attachment.dataStream)
 		}
 	
 	private def getMarkerFeedbackZipItems(markerFeedback: MarkerFeedback): Seq[ZipItem] =
-		markerFeedback.attachments.map { (attachment) =>
+		markerFeedback.attachments.asScala.map { (attachment) =>
 			new ZipFileItem(markerFeedback.feedback.universityId + " - " + attachment.name, attachment.dataStream)
 		}
 
@@ -81,7 +80,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	 */
 	def getAllFeedbackZips(assignment: Assignment): File = {
 		getZip(resolvePathForFeedback(assignment),
-			assignment.feedbacks flatMap getFeedbackZipItems //flatmap - take the lists of items, and flattens them to one single list
+			assignment.feedbacks.asScala flatMap getFeedbackZipItems //flatmap - take the lists of items, and flattens them to one single list
 			)
 	}
 
@@ -136,7 +135,7 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 	 */
 	def getAllSubmissionsZip(assignment: Assignment): File =
 		getZip(resolvePathForSubmission(assignment),
-			assignment.submissions flatMap getSubmissionZipItems)
+			assignment.submissions.asScala flatMap getSubmissionZipItems)
 
 	/**
 	 * A zip of feedback templates for each student registered on the assignment
@@ -167,9 +166,25 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 		createUnnamedZip(getMeetingRecordZipItems(meetingRecord))
 	
 	private def getMeetingRecordZipItems(meetingRecord: MeetingRecord): Seq[ZipItem] =
-		meetingRecord.attachments.map { (attachment) =>
+		meetingRecord.attachments.asScala.map { (attachment) =>
 			new ZipFileItem(attachment.name, attachment.dataStream)
 		}
+
+	def getSomeMemberNoteAttachmentsZip(memberNote: MemberNote): File =
+		createUnnamedZip(getMemberNoteZipItems(memberNote))
+
+	private def getMemberNoteZipItems(memberNote: MemberNote): Seq[ZipItem] =
+		memberNote.attachments.asScala.map { (attachment) =>
+			new ZipFileItem(attachment.name, attachment.dataStream)
+		}
+}
+
+trait ZipServiceComponent {
+	def zipService: ZipService
+}
+
+trait AutowiringZipServiceComponent extends ZipServiceComponent {
+	var zipService = Wire[ZipService]
 }
 
 /**

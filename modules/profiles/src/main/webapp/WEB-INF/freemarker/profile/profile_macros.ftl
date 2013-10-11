@@ -22,18 +22,23 @@
 <#macro relationship_section studentCourseDetails relationshipType meetings>
 <section id="relationship-${relationshipType.id}" class="relationship-section clearfix">
 
-	<#if RequestParameters.action??>
-		<#if RequestParameters.action?? && RequestParameters.action == "agentremoved" || RequestParameters.action == "agentchanged">
-			<div id="agentsMessage" class="alert alert-success">
-				<button type="button" class="close" data-dismiss="alert">&times;</button>
-				<p>
-					<#if RequestParameters.action = "agentremoved">
-						<strong>${agent.fullName}</strong> is no longer ${profile.firstName}'s ${relationshipType.agentRole}.
-					<#else>
-						<strong>${agent.fullName}</strong> is now ${profile.firstName}'s ${relationshipType.agentRole}.
-					</#if>
-				</p>
-			</div>
+	<#if (RequestParameters.relationshipType!) == relationshipType.id>
+		<#if RequestParameters.action??>
+			<#if RequestParameters.action?? && RequestParameters.action == "agentremoved" || RequestParameters.action == "agentchanged" || RequestParameters.action == "agenterror">
+				<#if RequestParameters.action = "agenterror"><#assign alertClass="alert-danger"><#else><#assign alertClass="alert-success"></#if>
+				<div id="agentsMessage" class="alert ${alertClass}">
+					<button type="button" class="close" data-dismiss="alert">&times;</button>
+					<p>
+						<#if RequestParameters.action = "agenterror">
+							There was a problem when attempting to update this personal tutor. No tutor was specified
+						<#elseif RequestParameters.action = "agentremoved">
+							<strong>${agent.fullName}</strong> is no longer ${profile.firstName}'s ${relationshipType.agentRole}.
+						<#else>
+							<strong>${agent.fullName}</strong> is now ${profile.firstName}'s ${relationshipType.agentRole}.
+						</#if>
+					</p>
+				</div>
+			</#if>
 		</#if>
 	</#if>
 
@@ -87,17 +92,13 @@
 						<span class="muted">(you)</span>
 					<#else>
 						<#if agent.email??>
-							<p><i class="icon-envelope"></i> <a href="mailto:${agent.email}">${agent.email}</a></p>
+							<p><i class="icon-envelope-alt"></i> <a href="mailto:${agent.email}">${agent.email}</a></p>
 						</#if>
 					</#if>
 				</#if>
 			</div>
 		</#list>
 		</div>
-
-		<#if relationships?size gt 0>
-			<@meeting_macros.list studentCourseDetails meetings relationshipType />
-		</#if>
 	<#else>
 		<h4>${relationshipType.agentRole?cap_first}</h4>
 		<p class="text-warning"><i class="icon-warning-sign"></i> No ${relationshipType.agentRole} details are recorded in Tabula for the current year.</p>
@@ -111,6 +112,8 @@
 			</a>
 		</#if>
 	</#if>
+	
+	<@meeting_macros.list studentCourseDetails meetings relationshipType />
 </section>
 </#macro>
 

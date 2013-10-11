@@ -34,6 +34,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 	var cats: java.math.BigDecimal = modRegRow.cats
 	var assessmentGroup = modRegRow.assessmentGroup
 	var selectionStatusCode = modRegRow.selectionStatusCode
+	var occurrence = modRegRow.occurrence
 	var selectionStatus: ModuleSelectionStatus = null
 
 	override def applyInternal(): Option[ModuleRegistration] = transactional() ({
@@ -52,14 +53,14 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 					}
 					case Some(scd: StudentCourseDetails) => {
 						val scd = studentCourseDetailsDao.getByScjCode(scjCode).getOrElse(throw new IllegalStateException("Can't record module registration - could not find a StudentCourseDetails for " + scjCode))
-						val moduleRegistrationExisting: Option[ModuleRegistration] = moduleRegistrationDao.getByNotionalKey(scd, module, cats, academicYear)
+						val moduleRegistrationExisting: Option[ModuleRegistration] = moduleRegistrationDao.getByNotionalKey(scd, module, cats, academicYear, occurrence)
 
 						val isTransient = !moduleRegistrationExisting.isDefined
 
 						val moduleRegistration = moduleRegistrationExisting match {
 							case Some(moduleRegistration: ModuleRegistration) => moduleRegistration
 							case _ => {
-								new ModuleRegistration(scd, module, cats, academicYear)
+								new ModuleRegistration(scd, module, cats, academicYear, occurrence)
 							}
 						}
 
@@ -102,7 +103,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 	}
 
 	private val properties = Set(
-		"assessmentGroup", "selectionStatus"
+		"assessmentGroup", "selectionStatus", "occurrence"
 	)
 
 	override def describe(d: Description) = d.properties(

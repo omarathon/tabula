@@ -33,7 +33,7 @@
 				</ul>
 			</div>
 		</#if>
-		
+
 		<div class="btn-group dept-settings">
 			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
 				<i class="icon-wrench"></i>
@@ -44,9 +44,28 @@
 				<li><a href="<@routes.deptperms department/>">
 					<i class="icon-user"></i> Edit departmental permissions
 				</a></li>
-				<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}">
-					<i class="icon-list-alt"></i> Settings</a>
-				</li>
+				
+				<#if modules?has_content || !department.children?has_content>
+					<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}">
+						<i class="icon-list-alt"></i> Settings</a>
+					</li>
+				</#if>
+				
+				<#if can.do("Module.Create", department)>
+					<li><a href="<@routes.createmodule department />">
+						<i class="icon-plus"></i> Create module</a>
+					</li>
+				</#if>
+				<#if department.children?has_content && can.do("Department.ArrangeModules", department)>
+					<li><a href="<@routes.sortmodules department />">
+						<i class="icon-random"></i> Arrange modules</a>
+					</li>
+				</#if>
+				<#if department.children?has_content && can.do("Department.ArrangeRoutes", department)>
+					<li><a href="<@routes.sortroutes department />">
+						<i class="icon-random"></i> Arrange routes</a>
+					</li>
+				</#if>
 			</ul>
 		</div>
 	</div>

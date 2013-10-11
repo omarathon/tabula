@@ -8,7 +8,7 @@
 	</div>
 </#if>
 
-<form class="form-inline" action="<@url page="/${command.dept.code}"/>">
+<form class="form-inline" action="<@routes.viewDepartment command.dept />">
 	<label>Academic year
 		<select name="academicYear">
 			<#assign academicYears = [command.thisAcademicYear.previous.toString, command.thisAcademicYear.toString, command.thisAcademicYear.next.toString] />
@@ -30,7 +30,7 @@
 
 <#else>
 
-	<form id="viewChooseSet" class="form-inline" action="<@url page="/${command.dept.code}"/>">
+	<form id="viewChooseSet" class="form-inline" action="<@routes.viewDepartment command.dept />">
 
 		<input type="hidden" value="${command.academicYear.toString}" name="academicYear" />
 
@@ -74,7 +74,7 @@
 <#if command.pointSet??>
 	<h2>Students who have missed monitoring points</h2>
 
-	<#if command.membersWithMissedCheckpoints?keys?size == 0>
+	<#if command.membersWithMissedOrLateCheckpoints?keys?size == 0>
 		<p>There are no students in <@fmt.route_name command.route /> who have missed monitoring points</p>
 	<#else>
 
@@ -92,7 +92,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<#list command.membersWithMissedCheckpoints?keys as member>
+				<#list command.membersWithMissedOrLateCheckpoints?keys as member>
 					<#assign missedCount = 0 />
 					<tr>
 						<td>${member.firstName}</td>
@@ -100,15 +100,23 @@
 						<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
 							<#if command.monitoringPointsByTerm[term]??>
 								<td>
-									<#list command.monitoringPointsByTerm[term]?sort_by("week") as point>
-										<#assign checkpointState = (command.missedCheckpointsByMemberByPoint(member, point)?string("true", "false"))!"null" />
-										<#if checkpointState == "null">
+									<#list command.monitoringPointsByTerm[term]?sort_by("validFromWeek") as point>
+										<#if !command.missedCheckpointsByMemberByPoint(member, point)??>
 											<i class="icon-minus icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
-										<#elseif checkpointState == "true">
-											<i class="icon-ok icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
 										<#else>
-											<#assign missedCount = missedCount + 1 />
-											<i class="icon-remove icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
+											<#assign checkpointState = command.missedCheckpointsByMemberByPoint(member, point) />
+											<#if checkpointState == "attended">
+												<i class="icon-ok icon-fixed-width attended" title="Attended: ${point.name} (<@fmt.weekRanges point />)"></i>
+											<#elseif checkpointState == "authorised">
+												<i class="icon-remove-circle icon-fixed-width authorised" title="Missed (authorised): ${point.name} (<@fmt.weekRanges point />)"></i>
+											<#elseif checkpointState == "unauthorised">
+												<#assign missedCount = missedCount + 1 />
+												<i class="icon-remove icon-fixed-width unauthorised" title="Missed (unauthorised): ${point.name} (<@fmt.weekRanges point />)"></i>
+											<#elseif checkpointState == "late">
+												<i class="icon-warning-sign icon-fixed-width late" title="No data: ${point.name} (<@fmt.weekRanges point />)"></i>
+											<#else>
+												<i class="icon-minus icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
+											</#if>
 										</#if>
 									</#list>
 								</td>
@@ -131,16 +139,17 @@
 	<#if command.pointSet.points?size == 0>
 		<p><em>No points exist for the selected route and year of study</em></p>
 	<#else>
+		<#assign returnTo><@routes.viewDepartmentSpecific command.dept command.academicYear command.route command.pointSet /></#assign>
 		<div class="monitoring-points">
         	<#macro pointsInATerm term>
         		<div class="striped-section">
         			<h2 class="section-title">${term}</h2>
         			<div class="striped-section-contents">
-        				<#list command.monitoringPointsByTerm[term]?sort_by("week") as point>
+        				<#list command.monitoringPointsByTerm[term]?sort_by("validFromWeek") as point>
         					<div class="item-info row-fluid point">
         						<div class="span12">
         							<div class="pull-right">
-        								<a class="btn btn-primary" href="<@url page="/${command.dept.code}/${point.id}/record?returnTo=${(info.requestedUri!'')?url}"/>">
+        								<a class="btn btn-primary" href="<@routes.record point returnTo />">
         									Record
         								</a>
         							</div>

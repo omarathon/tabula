@@ -42,7 +42,7 @@ class DownloadMarkersSubmissionsCommand(
 		submissions.foreach{s =>
 			assignment.feedbacks.find(_.universityId == s.universityId) match {
 				case Some(f) if f.firstMarkerFeedback != null =>
-					stateService.updateState(f.firstMarkerFeedback, DownloadedByMarker)
+					stateService.updateState(f.firstMarkerFeedback, InProgress)
 				case _ => // do nothing
 			}
 		}

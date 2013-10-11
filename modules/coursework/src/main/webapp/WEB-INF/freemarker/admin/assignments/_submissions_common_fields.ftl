@@ -12,7 +12,9 @@ so that they can be passed around between requests.
 	<fieldset id="submission-options">
 		<details <#if ((assignment.collectSubmissions)?? && assignment.collectSubmissions) || collectSubmissions?? && collectSubmissions > open </#if> class="submissions">
 			<summary class="collapsible large-chevron">
-				<span class="legend collapsible" >Submissions <small>Set submission options for this assignment</small>
+				<span class="legend collapsible" >
+					Submissions <small>Set submission options for this assignment</small>
+				</span>
 				<@form.row>
 					<@form.field>
 						<@form.label checkbox=true>
@@ -187,4 +189,36 @@ so that they can be passed around between requests.
 			</div>
 		</details>
 	</fieldset>
+
+<script>
+jQuery(function($) {
+
+	var updateSubmissionsDetails = function() {
+		var collectSubmissions = $('input[name=collectSubmissions]').is(':checked');
+		if (collectSubmissions) {
+			$('details.submissions').details('open');
+		}  else {
+			$('details.submissions').details('close');
+		}
+	}
+
+	<#-- TAB-830 expand submission details when collectSubmissions checkbox checked -->
+	$('input[name=collectSubmissions]').on('change click keypress',function(e) {
+		e.stopPropagation();
+		updateSubmissionsDetails();
+	});
+
+	updateSubmissionsDetails();
+
+	<#-- if summary supported, disable defaults for this summary when a contained label element is clicked -->
+	$("summary").on("click", "label", function(e){
+		e.stopPropagation();
+		e.preventDefault();
+		$('#collectSubmissions').attr('checked', !$('#collectSubmissions').attr('checked') );
+		$('input[name=collectSubmissions]').triggerHandler("change");
+	});
+
+});
+</script>
+
 </#if>

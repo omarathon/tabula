@@ -4,10 +4,10 @@ ${groupSet.name} ${groupSet.format.description} for ${groupSet.module.code?upper
 
 <#list groupSet.groups as group>
 ${group.name} - <@fmt.p number=group.students.members?size singular="student"/>
-<#list group.events as event>
-   <@fmt.time time=event.startTime /> ${event.day.name}, ${event.location}, <@fmt.weekRanges event />
-</#list>
+<#list group.events as event><#if !event.unscheduled>
+   <@fmt.time time=event.startTime /> ${event.day.name}, ${event.location!}, <@fmt.weekRanges event />
+</#if></#list>
 
 </#list>
 
-Please visit  <@url page=profileUrl context="/profiles" /> to view this group.
+Please visit  <@url page=profileUrl context="/" /> to view this group.

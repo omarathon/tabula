@@ -54,6 +54,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			preferredSurname		= "MacIntosh",
 			dateOfBirth				= new LocalDate(1984, DateTimeConstants.AUGUST, 19),
 			usercode				= "cuscav",
+			gender					= Male,
 			userType				= Staff
 		)
 
@@ -122,8 +123,8 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			user2.setFirstName("different")
 			user2.setLastName("strokes")
 
-			val member1 = new ImportStaffMemberCommand(mac, user1, rs)
-			val member2 = new ImportStaffMemberCommand(mac, user2, rs)
+			val member1 = new ImportStaffMemberCommand(mac, user1)
+			val member2 = new ImportStaffMemberCommand(mac, user2)
 
 			member1.firstName should be ("MatHEW")
 			member1.lastName should be ("Macintosh")
@@ -136,16 +137,6 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 	@Test def importStaff {
 		val blobBytes = Array[Byte](1,2,3,4,5)
 
-		val rs = mock[ResultSet]
-		val md = mock[ResultSetMetaData]
-		rs.getMetaData() returns(md)
-		md.getColumnCount() returns(2)
-		md.getColumnName(1) returns("gender")
-		md.getColumnName(2) returns("year_of_study")
-
-		rs.getString("gender") returns("M")
-		rs.getInt("year_of_study") returns(3)
-
 		val mac = MembershipInformation(MembershipMember(
 			universityId 			= "0672089",
 			email					= "M.Mannion@warwick.ac.uk",
@@ -154,6 +145,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			preferredSurname		= "Mannion",
 			dateOfBirth				= new LocalDate(1984, DateTimeConstants.AUGUST, 19),
 			usercode				= "cuscav",
+			gender					= Male,
 			userType				= Staff
 		), () => Some(blobBytes))
 
@@ -164,7 +156,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 		val memberDao = mock[MemberDao]
 		memberDao.getByUniversityId("0672089") returns(None)
 
-		val command = new ImportStaffMemberCommand(mac, new AnonymousUser, rs)
+		val command = new ImportStaffMemberCommand(mac, new AnonymousUser)
 
 		command.memberDao = memberDao
 		command.fileDao = fileDao

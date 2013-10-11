@@ -2,30 +2,23 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.{ SelfValidating, Description, Command }
-import reflect.BeanProperty
+import scala.beans.BeanProperty
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.{LazyMaps, LazyLists}
-import uk.ac.warwick.tabula.data.model.{ Department, UpstreamAssignment }
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{ DateFormats, AcademicYear }
 import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.{ Autowired, Configurable }
 import uk.ac.warwick.tabula.services.AssignmentService
 import org.springframework.validation.Errors
-import org.apache.commons.collections.map.LazyMap
-import org.apache.commons.collections.Factory
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.ValidationUtils
-import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.ModuleDao
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
-import uk.ac.warwick.tabula.data.model.AssessmentGroup
 
 
 /**
@@ -35,10 +28,10 @@ class AssignmentItem(
 	// whether to create an assignment from this item or not
 	var include: Boolean,
 	var occurrence: String,
-	var upstreamAssignment: UpstreamAssignment) {
+	var upstreamAssignment: AssessmentComponent) {
 	
     def this() = this(true, null, null)
-    
+
 	var assignmentService = Wire.auto[AssignmentService]
 
 	// set after bind
@@ -55,7 +48,7 @@ class AssignmentItem(
 	var openDate: DateTime = _
 
 	var closeDate: DateTime = _
-	
+
 	var openEnded: JBoolean = false
 
 	def sameAssignment(other: AssignmentItem) =
@@ -67,9 +60,9 @@ class AssignmentItem(
  * Command for adding many assignments at once, usually from SITS.
  */
 class AddAssignmentsCommand(val department: Department, user: CurrentUser) extends Command[Unit] with SelfValidating {
-	
+
 	PermissionCheck(Permissions.Assignment.ImportFromExternalSystem, department)
-	
+
 	val DEFAULT_OPEN_HOUR = 12
 	val DEFAULT_WEEKS_LENGTH = 4
 
@@ -101,7 +94,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty
 	val defaultCloseDate = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH)
-	
+
 	@BeanProperty
 	val defaultOpenEnded = false
 
@@ -112,7 +105,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 				assignment.addDefaultFields()
 				assignment.academicYear = academicYear
 				assignment.name = item.name
-				
+
 				assignment.module = findModule(item.upstreamAssignment).get
 
 				assignment.openDate = item.openDate
@@ -121,25 +114,25 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 				// validation should have verified that there is an options set for us to use
 				val options = optionsMap.get(item.optionsId)
 				options.copySharedTo(assignment)
-				
+
 				// Do open-ended afterwards; it's a date item that we're copying, not from shared options
 				assignment.openEnded = item.openEnded
 
 				assignmentService.save(assignment)
-				
+
 				val assessmentGroup = new AssessmentGroup
 				assessmentGroup.occurrence = item.occurrence
-				assessmentGroup.upstreamAssignment = item.upstreamAssignment
+				assessmentGroup.assessmentComponent = item.upstreamAssignment
 				assessmentGroup.assignment = assignment
 				assignmentMembershipService.save(assessmentGroup)
-				
+
 				assignment.assessmentGroups.add(assessmentGroup)
 				assignmentService.save(assignment)
 			}
 		}
 	}
 
-	def findModule(upstreamAssignment: UpstreamAssignment): Option[Module] = {
+	def findModule(upstreamAssignment: AssessmentComponent): Option[Module] = {
 		val moduleCode = upstreamAssignment.moduleCodeBasic.toLowerCase
 		moduleDao.getByCode(moduleCode)
 	}
@@ -170,7 +163,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 		}
 
 		validateNames(errors)
-		
+
 		if (!errors.hasErrors()) checkPermissions()
 	}
 
@@ -207,14 +200,14 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 			for ((modCode, moduleItems) <- groupedByModule;
 				  item <- moduleItems
 				  if moduleItems.exists(sameNameAs(item))) {
-				
+
 				val path = "assignmentItems[%d]" format (assignmentItems.indexOf(item))
 				// Can't work out why it will end up trying to add the same error multiple times,
 				// so wrapping in hasFieldErrors to limit it to showing just the first
 				if (!errors.hasFieldErrors(path)) {
 				    errors.rejectValue(path, "name.duplicate.assignment.upstream", item.name)
 				}
-				
+
 			}
 		}
 	}
@@ -246,7 +239,7 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 
 	def fetchAssignmentItems(): JList[AssignmentItem] = {
 		for {
-			upstreamAssignment <- assignmentMembershipService.getUpstreamAssignments(department);
+			upstreamAssignment <- assignmentMembershipService.getAssessmentComponents(department);
 			assessmentGroup <- assignmentMembershipService.getUpstreamAssessmentGroups(upstreamAssignment, academicYear).sortBy{ _.occurrence }
 		} yield {
 			val item = new AssignmentItem(
@@ -258,8 +251,15 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 		}
 	}
 
-	def shouldIncludeByDefault(assignment: UpstreamAssignment) = {
-		// currently just exclude "Audit Only" assignments.
-		assignment.sequence != "AO"
-	}
+	/**
+	 * Determines whether this component should have its checkbox checked
+	 * by default when first loading up the list of assignments. We exclude
+	 * any items that most people probably won't want to import, but they
+	 * can alter this choice before continuing.
+	 */
+	def shouldIncludeByDefault(component: AssessmentComponent) =
+		component.assessmentType == AssessmentType.Assignment &&
+		component.assessmentGroup != "AO"
+
+
 }

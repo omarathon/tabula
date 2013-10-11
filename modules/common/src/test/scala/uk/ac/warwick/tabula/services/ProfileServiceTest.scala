@@ -6,7 +6,7 @@ import org.joda.time.DateTimeConstants
 import org.junit.Before
 
 import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase, Fixtures, Mockito}
-import uk.ac.warwick.tabula.data.model.{StudentMember, StudentCourseDetails, Route, Member}
+import uk.ac.warwick.tabula.data.model.{SitsStatus, StudentMember, StudentCourseDetails, Route, Member}
 import uk.ac.warwick.tabula.data._
 import scala.Some
 
@@ -122,16 +122,19 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		studentInBothYears.studentCourseYearDetails.add(
 			Fixtures.studentCourseYearDetails(AcademicYear(2013))
 		)
+		studentInBothYears.sprStatus = new SitsStatus("C")
 
 		val studentInFirstYear = new StudentCourseDetails(Fixtures.student(), "studentInFirstYear")
 		studentInFirstYear.studentCourseYearDetails.add(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
+		studentInFirstYear.sprStatus = new SitsStatus("C")
 
 		val studentInSecondYear = new StudentCourseDetails(Fixtures.student(), "studentInSecondYear")
 		studentInSecondYear.studentCourseYearDetails.add(
 			Fixtures.studentCourseYearDetails(AcademicYear(2013))
 		)
+		studentInSecondYear.sprStatus = new SitsStatus("C")
 
 		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(studentInBothYears, studentInFirstYear, studentInSecondYear)
 
@@ -146,6 +149,50 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		studentsInSecondYear.exists(
 			s => s.studentCourseDetails.get(0).scjCode.equals(studentInFirstYear.scjCode)
 		) should be (false)
+	}
+
+	@Test def getStudentsByRouteWithdrawn = {
+		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+			val memberDao = mock[MemberDao]
+			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
+		}
+
+		val testRoute = new Route
+		testRoute.code = "test"
+
+		val studentNoShow = new StudentCourseDetails(Fixtures.student(), "studentNoShow")
+		studentNoShow.sprStatus = new SitsStatus("PNS")
+		studentNoShow.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+
+		val studentPermWithdrawn = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawn")
+		studentPermWithdrawn.sprStatus = new SitsStatus("P")
+		studentPermWithdrawn.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+
+		val studentPermWithdrawnDebt = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawnDebt")
+		studentPermWithdrawnDebt.sprStatus = new SitsStatus("PD")
+		studentPermWithdrawnDebt.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+
+		val studentPermWithdrawnWrittenOff = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawnWrittenOff")
+		studentPermWithdrawnWrittenOff.sprStatus = new SitsStatus("PR")
+		studentPermWithdrawnWrittenOff.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+
+		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(
+			studentNoShow, studentPermWithdrawn, studentPermWithdrawnDebt, studentPermWithdrawnWrittenOff
+		)
+
+		val studentsWithYear = service.getStudentsByRoute(testRoute, AcademicYear(2012))
+		studentsWithYear.size should be (0)
+
+		val students = service.getStudentsByRoute(testRoute)
+		students.size should be (0)
 	}
 
 }

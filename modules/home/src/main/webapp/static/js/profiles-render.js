@@ -13,10 +13,16 @@
 
 			var xhr = null;
 			container.find('input[name="query"]').prop('autocomplete','off').each(function() {
-				var $spinner = $('<div class="spinner-container" />');
-				$(this).before($spinner);
-
-				$(this).typeahead({
+				var $spinner = $('<div class="spinner-container" />'), $this = $(this);
+				$this
+					.before($spinner)
+					.on('focus', function(){
+						container.find('.use-tooltip').trigger('mouseover');
+					})
+					.on('blur', function(){
+						container.find('.use-tooltip').trigger('mouseout');
+					})
+					.typeahead({
 					source: function(query, process) {
 						if (xhr != null) {
 							xhr.abort();
@@ -101,14 +107,14 @@
 				// wipe any existing state information for the submit protection
 				$form.removeData('submitOnceSubmitted');
 
-				// firefox fix
-				var wait = setInterval(function() {
-					var h = $f.find("body").height();
-					if (h > 0) {
-						clearInterval(wait);
-						$m.find(".modal-body").animate({ height: h });
-					}
-				}, 300); // this didn't work for me (ZLJ) at 150 but did at 200; upping to 300 to include safety margin
+//				// firefox fix
+//				var wait = setInterval(function() {
+//					var h = $f.find("body").height();
+//					if (h > 0) {
+//						clearInterval(wait);
+//						$m.find(".modal-body").animate({ height: h });
+//					}
+//				}, 300); // this didn't work for me (ZLJ) at 150 but did at 200; upping to 300 to include safety margin
 
 				// show-time
 				$m.modal("show");
@@ -202,7 +208,7 @@
 			});
 
 			// make modal links use ajax
-			$('section.meetings').ajaxSubmit(function() {
+			$('section.meetings').tabulaAjaxSubmit(function() {
 				document.location.reload(true);
 			});
 
@@ -262,6 +268,71 @@
 
 	});
 	//END MEETING RECORD APPROVAL STUFF
+
+	//MEMBERNOTE STUFF
+
+	  //Iframe onload function call - sets size and binds iframe submit click to modal
+	  window.noteFrameLoad = function(frame) {
+
+		if($(frame).contents().find("form").length == 0){
+			//Handle empty response from iframe form submission
+			$("#note-modal").modal('hide');
+			document.location.reload(true);
+
+		} else {
+			//Bind iframe form submission to modal button
+			$("#member-note-save").on('click', function(e){
+				e.preventDefault();
+				$("#note-modal .modal-body").find('iframe').contents().find('form').submit();
+				$(this).off()  //remove click event to prevent bindings from building up
+			});
+		}
+	}
+
+    $(function() {
+		// Bind click to load create-edit member note
+		$("#membernote-details").on("click", ".create, .edit", function(e) {
+			if ($(this).hasClass("disabled")) return false;
+
+			var url = $(this).attr('data-url');
+			var $modalBody =  $("#note-modal .modal-body")
+
+			$modalBody.html('<iframe src="'+url+'" style="height:100%; width:100%;" onLoad="noteFrameLoad(this)" frameBorder="0" scrolling="no"></iframe>')
+			$("#note-modal .modal-header h3 span").text($(this).attr("title"))
+			$("#note-modal").modal('show')
+			return false; //stop propagation and prevent default
+		});
+
+        //Bind click events for toolbar
+		$('.member-note-toolbar a:not(.edit)').on('click', function(e) {
+
+			var $this = $(this);
+			var $details = $this.closest('details');
+			var $toolbaritems = $this.closest('.member-note-toolbar').children();
+
+			if($this.hasClass("disabled")) return false;
+
+			$details.addClass("processing");
+			var url = $this.attr("href");
+
+			$.post(url, function(data) {
+				if (data.status == "successful") {
+					if($this.hasClass('delete') || $this.hasClass('restore')) {
+						$toolbaritems.toggleClass("disabled");
+						$details.toggleClass("muted deleted");
+						$details.find('.deleted-files').toggleClass('hidden');
+					} else if($this.hasClass('purge')) {
+						$details.slideUp("slow")
+					}
+				}
+                $details.removeClass("processing");
+			}, "json");
+
+			return false; //stop propagation and prevent default
+		});
+
+	});
+    //END OF MEMBERNOTE STUFF
 
 	// TIMETABLE STUFF
     $(function() {

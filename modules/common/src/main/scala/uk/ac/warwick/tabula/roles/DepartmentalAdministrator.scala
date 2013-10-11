@@ -2,8 +2,9 @@ package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
-import uk.ac.warwick.tabula.permissions.PermissionsSelector
+import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsSelector}
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.JavaImports._
 
 case class DepartmentalAdministrator(department: model.Department) extends BuiltInRole(DepartmentalAdministratorRoleDefinition, department)
 
@@ -11,18 +12,19 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 
 	override def description = "Departmental Administrator"
 
+	//
+	// If you're removing permissions from here, please consider whether you should be
+	// adding them back into UserAccessManager at the same time.
+	//
+
 	// Implicitly grants module manager role for all modules in this department
 	GeneratesSubRole(ModuleManagerRoleDefinition)
+
 
 	GrantsScopedPermission(
 		Department.ManageExtensionSettings,
 		Department.ManageDisplaySettings,
 		Department.DownloadFeedbackReport,
-
-		RolesAndPermissions.Create,
-		RolesAndPermissions.Read,
-		RolesAndPermissions.Update,
-		RolesAndPermissions.Delete,
 
 		Assignment.ImportFromExternalSystem,
 
@@ -59,7 +61,14 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Profiles.MeetingRecord.Read(PermissionsSelector.Any[StudentRelationshipType]),
 
 		SmallGroups.Read,
-		Profiles.Read.SmallGroups
+		Profiles.Read.SmallGroups,
+
+		MemberNotes.Read,
+		MemberNotes.Create,
+		MemberNotes.Update,
+		MemberNotes.Delete
+
 	)
+	def canDelegateThisRolesPermissions:JBoolean = true
 
 }

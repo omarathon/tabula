@@ -7,13 +7,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.PrsCode
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.MemberUserType
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
 import scala.Some
@@ -35,6 +29,7 @@ trait ProfileService {
 	def countStudentsByDepartment(department: Department): Int
 	def getStudentsByRoute(route: Route): Seq[StudentMember]
 	def getStudentsByRoute(route: Route, academicYear: AcademicYear): Seq[StudentMember]
+	def getStudentCourseDetailsByScjCode(scjCode: String): Option[StudentCourseDetails]
 }
 
 abstract class AbstractProfileService extends ProfileService with Logging {
@@ -90,18 +85,22 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	def saveOrUpdate(relationship: StudentRelationship) = memberDao.saveOrUpdate(relationship)
 
   def countStudentsByDepartment(department: Department): Int = transactional(readOnly = true) {
-			memberDao.getStudentsByDepartment(department.rootDepartment).filter(department.filterRule.matches).size
+			memberDao.getStudentsByDepartment(department.rootDepartment).count(department.filterRule.matches)
 	}
 
 	def getStudentsByRoute(route: Route): Seq[StudentMember] = transactional(readOnly = true) {
-		studentCourseDetailsDao.getByRoute(route).map(_.student)
+		studentCourseDetailsDao.getByRoute(route).filter{s => !s.sprStatus.code.startsWith("P")}.map(_.student)
 	}
 
 	def getStudentsByRoute(route: Route, academicYear: AcademicYear): Seq[StudentMember] = transactional(readOnly = true) {
 		studentCourseDetailsDao.getByRoute(route)
+			.filter{s => !s.sprStatus.code.startsWith("P")}
 			.filter(_.studentCourseYearDetails.asScala.exists(s => s.academicYear == academicYear))
 			.map(_.student)
 	}
+
+	def getStudentCourseDetailsByScjCode(scjCode: String): Option[StudentCourseDetails] =
+		studentCourseDetailsDao.getByScjCode(scjCode)
 
 }
 

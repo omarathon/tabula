@@ -1,10 +1,14 @@
 <#escape x as x?html>
 
+<#if !command.monitoringPointsByTerm??>
+	<p><em>There are no monitoring points defined for this academic year.</em></p>
+<#else>
+
 <#assign can_record=can.do("MonitoringPoints.Record", command.studentCourseDetails) />
 <#assign is_the_student=currentUser.apparentUser.warwickId==command.studentCourseDetails.student.universityId />
 
 <#macro pointsInATerm term>
-	<#list command.monitoringPointsByTerm[term]?sort_by("week") as point>
+	<#list command.monitoringPointsByTerm[term]?sort_by("validFromWeek") as point>
 		<div class="item-info row-fluid term">
 			<div class="span12">
 				<h4>${term}</h4>
@@ -13,21 +17,23 @@
 						${point.name} (<@fmt.weekRanges point />)
 					</div>
 					<div class="span2 state">
-						<#assign checkpointState = (command.checkpointState[point.id]?string("true", "false"))!"null" />
-						<#if checkpointState == "null">
-
-						<#elseif checkpointState == "true">
-							<span class="label label-success">Attended</span>
-						<#else>
-							<span class="label label-important">Missed</span>
+						<#if command.checkpointState[point.id]??>
+							<#local checkpointState = command.checkpointState[point.id] />
+							<#if checkpointState == "attended">
+								<span class="label label-success">Attended</span>
+							<#elseif checkpointState == "authorised">
+								<span class="label label-info" title="Missed (authorised)">Missed</span>
+							<#elseif checkpointState == "unauthorised">
+								<span class="label label-important" title="Missed (unauthorised)">Missed</span>
+							</#if>
 						</#if>
 					</div>
 					<div class="span2">
 						<#if can_record>
-							<#assign returnTo>
+							<#local returnTo>
 								<@routes.profile command.studentCourseDetails.student />
-							</#assign>
-							<a href="<@url page="/${point.pointSet.route.department.code}/${point.id}/record?returnTo=${returnTo}"/>#student-${command.studentCourseDetails.student.universityId}"
+							</#local>
+							<a href="<@routes.recordStudent point command.studentCourseDetails.student returnTo />"
 								<#if point.sentToAcademicOffice>
 									class="btn btn-mini disabled" title="Monitoring information for this point has been submitted and can no longer be edited"
 								<#else>
@@ -49,9 +55,9 @@
 	<div class="missed-info">
 		<#if command.missedCountByTerm?keys?size == 0 && (command.monitoringPointsByTerm?keys?size > 0) >
 			<#if is_the_student>
-				You have attended all monitoring points.
+				You have missed 0 monitoring points.
 			<#else>
-				${command.studentCourseDetails.student.firstName} has attended all monitoring points.
+				${command.studentCourseDetails.student.firstName} has missed 0 monitoring points.
 			</#if>
 		<#else>
 			<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
@@ -90,5 +96,7 @@
 		</#if>
 	</div>
 </div>
+
+</#if>
 
 </#escape>

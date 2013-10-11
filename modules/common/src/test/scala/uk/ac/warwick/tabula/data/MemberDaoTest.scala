@@ -252,6 +252,47 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.getStudentsWithoutRelationshipByDepartment(null, dept1) should be (Seq())
 	}
 
+	@Test def studentRelationshipsByStaffDepartments = transactional{tx=>
+		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
+
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
+
+		session.save(dept1)
+		session.save(dept2)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1, sprStatus=sprFullyEnrolledStatus)
+		stu1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
+
+		val staff2 = Fixtures.staff(universityId = "1000004", userId="staff2", department=dept2)
+		staff2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 1, 0, 0, 0)
+
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(staff2)
+
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		memberDao.saveOrUpdate(relationshipType)
+
+		val relBetweenStaff1AndStu2 = StudentRelationship("1000004", relationshipType, "1000001/1")
+
+		memberDao.saveOrUpdate(relBetweenStaff1AndStu2)
+
+		// relationship Wires in a ProfileService, awkward.
+		// Fortunately we have a chance to inject a mock in here.
+		val profileService = smartMock[ProfileService]
+		profileService.getStudentBySprCode("1000001/1") returns (Some(stu1))
+
+		val ret = memberDao.getRelationshipsByDepartment(relationshipType, dept1)
+		ret(0).profileService = profileService
+		ret(0).studentMember.get.universityId should be ("1000001")
+		ret(0).studentMember.get.mostSignificantCourseDetails.get.department.code should be ("hm")
+
+		// staff department
+		memberDao.getRelationshipsByStaffDepartment(relationshipType, dept2) should be (Seq(relBetweenStaff1AndStu2))
+
+	}
+
+
 	@Test def studentsCounting = transactional { tx =>
 		val dept1 = Fixtures.department("ms", "Motorsport")
 		val dept2 = Fixtures.department("vr", "Vehicle Repair")

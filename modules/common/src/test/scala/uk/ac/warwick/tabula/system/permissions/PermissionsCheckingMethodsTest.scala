@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.system.permissions
 
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Department}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.userlookup.User
@@ -220,6 +220,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 			Permissions.Assignment.Create -> Some(mod1)
 		))
 
+		roleService.getRolesFor(currentUser, null) returns Stream.empty
 		try { withCurrentUser(currentUser) {
 			new Binder(this, "OneFromOneScopedOneScopeless", securityService)
 		}} catch {

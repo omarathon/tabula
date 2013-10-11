@@ -53,6 +53,13 @@ class AddAssignmentController extends CourseworkController {
 			Redirect(Routes.admin.module(form.module))
 		}
 	}
+	
+	@RequestMapping(method = Array(POST), params = Array("action=refresh"))
+	def submit(form: AddAssignmentCommand) = {
+		// No validation here
+		form.afterBind()
+		showForm(form)
+	}
 
 	@RequestMapping(method = Array(POST), params = Array("action=update"))
 	def update(@Valid form: AddAssignmentCommand, errors: Errors) = {
@@ -63,7 +70,6 @@ class AddAssignmentController extends CourseworkController {
 			form.apply()
 			Redirect(Routes.admin.assignment.edit(form.assignment) + "?open")
 		}
-
 	}
 
 	def showForm(form: AddAssignmentCommand) = {

@@ -42,18 +42,29 @@ class TermServiceImpl extends TermService {
 	 * Return all the academic weeks for the specifed range, as a tuple of year, weeknumber, date interval
 	 */
 	def getAcademicWeeksBetween(start:DateTime, end:DateTime):Seq[(AcademicYear,Int,Interval)] = {
+		val targetInterval = new Interval(start, end)
+
 		val autumnTerms:Seq[Term]= termFactory.getTermDates.asScala
 			.filter(t => t.getTermType == TermType.autumn)
-			.filter(t=>t.getStartDate.isAfter(start))
-			.filter(t=>t.getStartDate.isBefore(end))
+			.filter(t=>t.getStartDate.isAfter(start.minusYears(1))) //go back a year to get the current year's autumn term
+			.filter(t=> !(t.getStartDate.isAfter(end)))
 
 		// since we only picked the autumn terms from the termfactory,
 		// the endDate's year will be correct for the academicyear
-		autumnTerms.flatMap(term=>{
+		val weeksInRelevantYears = autumnTerms.flatMap(term=>{
 			val weeks = termFactory.getAcademicWeeksForYear(term.getEndDate).asScala
 			weeks.map(week=>(AcademicYear(term.getEndDate.getYear), week.getLeft.toInt, week.getRight))
 		})
+
+		def overlapsOrStartMatchesInstant(int:Interval)={
+			int.overlaps(targetInterval) || ((targetInterval.getStart == targetInterval.getEnd) && (targetInterval.getStart == int.getStart))
+		}
+
+		weeksInRelevantYears
+			.filter{case (year, weekNumber, weekInterval)=> overlapsOrStartMatchesInstant(weekInterval) }
+		  .filterNot(_._2 == 53) // don't include week 53, it's just a confusing alias for week 1
 	}
+
 	def getTermFromDateIncludingVacations(date: BaseDateTime) = {
 		val term = termFactory.getTermFromDate(date)
 		if (date.isBefore(term.getStartDate)) Vacation(termFactory.getPreviousTerm(term), term)

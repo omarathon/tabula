@@ -63,7 +63,7 @@ object Daoisms {
  * different data source you'll need to look elsewhere.
  */
 trait Daoisms extends ExtendedSessionComponent {
-	def is = org.hibernate.criterion.Restrictions.eq _
+	def is = org.hibernate.criterion.Restrictions.eqOrIsNull _
 
 	var dataSource = Wire[DataSource]("dataSource")
 	var sessionFactory = Wire.auto[SessionFactory]

@@ -3,6 +3,14 @@ html.iframe {
     background: none;
 }
 
+// Fix modals to be wider (e.g. for SITS import options)
+#container .modal {
+	@modal-width: 840px;
+	width: @modal-width;
+	margin-left: -(@modal-width/2);
+}
+
+
 @import "css3.less";
 .tabula-page, #container {
 	@import "bootstrap/responsive.less";
@@ -196,6 +204,10 @@ tr.error, tr.warning {
 	display: table-row;
 }
 
+td.error, td.warning {
+	display: table-cell;
+}
+
 .module-info, .striped-section {
 	.box-style;
 
@@ -247,7 +259,7 @@ h2.section {
 }
 
 #container {
-	h1 + .header-with-tooltip h2 {
+	.header-with-tooltip h2 {
 		margin-top: -8px;
 	}
 
@@ -375,6 +387,20 @@ ul {
 	}
 }
 
+.generic-feedback {
+
+	padding: 10px;
+ 	margin-bottom: 20px;
+
+	.edit-generic-container {
+		padding: 10px;
+	}
+
+ 	h6 {
+ 		cursor: pointer;
+ 	}
+}
+
 .filter fieldset.filter-options {
 	margin-top: 20px !important;
 }
@@ -383,13 +409,13 @@ fieldset.internal {
 	margin-left: 180px !important;
 }
 
-.workflow-container {
+.workflow-container, .feedback-container {
 	position: absolute;
 	width: 100%;
 	padding: 10px;
 	border-top: 1px solid @tableBorder;
 
-	.workflow {
+	.workflow, .feedback {
 		h3 {
 			font-size: 18px;
 			letter-spacing: -1px;
@@ -592,6 +618,10 @@ fieldset.internal {
 	padding: 1em 0;
 	margin: 1em 0;
 	border-top: 1px solid #EEE;
+}
+
+.submit-buttons.persist-footer {
+	margin-bottom: 0;
 }
 
 #batch-feedback-form {
@@ -1166,12 +1196,6 @@ h1.with-settings {
  margin: 0px 0px 16px 10px;
 }
 
-// Fix modals to be wider (e.g. for SITS import options)
-.modal {
-	@modal-width: 840px;
-	width: @modal-width;
-	margin-left: -(@modal-width/2);
-}
 
 #container {
 	// grey out disabled icons
@@ -1272,6 +1296,16 @@ h1.with-settings {
 	    > tr > th {
 	    	border-top: 1px solid @tableRowBorderTop;
 	      border-bottom: 1px solid @tableRowBorderBottom;
+	    }
+
+	    > tr.no-bottom-border > td,
+	    > tr.no-bottom-border > th {
+	    	border-bottom: 0;
+	    }
+
+	    > tr.no-top-border > td,
+	    > tr.no-top-border > th {
+	    	border-top: 0;
 	    }
 	  }
 
@@ -1381,6 +1415,13 @@ h1.with-settings {
 			// make room for layout-tools
 			padding-right: 70px;
 
+			.tabbable-placeholder {
+				width: 75px;
+				height: 30px;
+				background-color: white;
+				.box-shadow(~"inset 12px 0 30px -4px #ddd, inset -12px 0 30px -4px #ddd");
+			}
+
 			li {
 				margin-right: 4px;
 
@@ -1388,6 +1429,10 @@ h1.with-settings {
 					border: 1px solid #ddd;
 					border-bottom-color: transparent;
 					text-decoration: none;
+				}
+
+				.dropdown-menu li > a {
+					border: none;
 				}
 			}
 
@@ -1483,6 +1528,7 @@ h1.with-settings {
 } // #container
 
 } // .tabula-page
+
 
 // Mixin. Not for use directly - use the .size-* classes below,
 // which are used by the FTL macro so just use that!
@@ -1591,3 +1637,38 @@ input.flexi-picker {
 }
 
 //---- END Flexi Picker -----//
+
+// TABLE CELL BACKGROUNDS
+// -----------------
+// Exact selectors below required to override .table-striped
+
+.table tbody tr td {
+  &.success {
+    background-color: @successBackground;
+  }
+  &.error {
+    background-color: @errorBackground;
+  }
+  &.warning {
+    background-color: @warningBackground;
+  }
+  &.info {
+    background-color: @infoBackground;
+  }
+}
+
+// Hover states for .table-hover
+.table-hover tbody tr td {
+  &.success:hover {
+    background-color: darken(@successBackground, 5%);
+  }
+  &.error:hover {
+    background-color: darken(@errorBackground, 5%);
+  }
+  &.warning:hover {
+    background-color: darken(@warningBackground, 5%);
+  }
+  &.info:hover {
+    background-color: darken(@infoBackground, 5%);
+  }
+}

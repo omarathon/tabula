@@ -49,12 +49,16 @@ trait UpdateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 			errors.reject("monitoringPoint.hasCheckpoints.update")
 		}
 
-		validateWeek(errors, week, "week")
+		validateWeek(errors, validFromWeek, "validFromWeek")
+		validateWeek(errors, requiredFromWeek, "requiredFromWeek")
+		validateWeeks(errors, validFromWeek, requiredFromWeek, "validFromWeek")
 		validateName(errors, name, "name")
 
-		if (set.points.asScala.count(p => p.name == name && p.week == week && p.id != point.id) > 0) {
+		if (set.points.asScala.count(p =>
+			p.name == name && p.validFromWeek == validFromWeek && p.requiredFromWeek == requiredFromWeek && p.id != point.id
+		) > 0) {
 			errors.rejectValue("name", "monitoringPoint.name.exists")
-			errors.rejectValue("week", "monitoringPoint.name.exists")
+			errors.rejectValue("validFromWeek", "monitoringPoint.name.exists")
 		}
 	}
 }
@@ -84,20 +88,19 @@ trait UpdateMonitoringPointState extends GroupMonitoringPointsByTerm with CanPoi
 	val academicYear = set.academicYear
 	val dept = set.route.department
 	var name: String = _
-	var defaultValue: Boolean = true
-	var week: Int = 0
+	var validFromWeek: Int = 0
+	var requiredFromWeek: Int = 0
 	def monitoringPointsByTerm = groupByTerm(set.points.asScala, academicYear)
 
 	def copyTo(point: MonitoringPoint) {
 		point.name = this.name
-		point.defaultValue = this.defaultValue
-		point.week = this.week
+		point.validFromWeek = this.validFromWeek
+		point.requiredFromWeek = this.requiredFromWeek
 	}
 
 	def copyFrom(point: MonitoringPoint) {
 		this.name = point.name
-		this.defaultValue = point.defaultValue
-		this.week = point.week
+		this.validFromWeek = point.validFromWeek
+		this.requiredFromWeek = point.requiredFromWeek
 	}
 }
-

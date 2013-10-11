@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data.model.{Route, Department}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
+import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports.JHashMap
@@ -41,11 +41,11 @@ abstract class AddMonitoringPointSetCommand(val dept: Department, val academicYe
 				set.points = monitoringPoints.asScala.map{m =>
 					val point = new MonitoringPoint
 					point.createdDate = new DateTime()
-					point.defaultValue = m.defaultValue
 					point.name = m.name
 					point.pointSet = set
 					point.updatedDate = new DateTime()
-					point.week = m.week
+					point.validFromWeek = m.validFromWeek
+					point.requiredFromWeek = m.requiredFromWeek
 					point
 				}.asJava
 				set.route = route
@@ -90,17 +90,16 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 
 		monitoringPoints.asScala.zipWithIndex.foreach{case (point, index) => {
 			validateName(errors, point.name, s"monitoringPoints[$index].name")
-			validateWeek(errors, point.week, s"monitoringPoints[$index].week")
+			validateWeek(errors, point.validFromWeek, s"monitoringPoints[$index].validFromWeek")
+			validateWeek(errors, point.requiredFromWeek, s"monitoringPoints[$index].requiredFromWeek")
+			validateWeeks(errors, point.validFromWeek, point.requiredFromWeek, s"monitoringPoints[$index].validFromWeek")
 
-			if (monitoringPoints.asScala.count(p => p.name == point.name && p.week == point.week) > 1) {
+			if (monitoringPoints.asScala.count(p =>
+				p.name == point.name && p.validFromWeek == point.validFromWeek && p.requiredFromWeek == point.requiredFromWeek
+			) > 1) {
 				errors.rejectValue(s"monitoringPoints[$index].name", "monitoringPoint.name.exists")
 			}
 		}}
-
-		// when changing year fail validation so nothing is committed
-		if (changeYear) {
-			errors.reject("")
-		}
 	}
 }
 

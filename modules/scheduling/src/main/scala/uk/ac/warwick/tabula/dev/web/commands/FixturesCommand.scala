@@ -10,16 +10,16 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
-import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
+import uk.ac.warwick.tabula.roles.{UserAccessMgrRoleDefinition, DepartmentalAdministratorRoleDefinition, StudentRelationshipAgentRoleDefinition}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
 import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroup, UpstreamAssignment, Department, Route}
-import uk.ac.warwick.tabula.roles.StudentRelationshipAgentRoleDefinition
+import uk.ac.warwick.tabula.data.model.{AssessmentType, UpstreamAssessmentGroup, AssessmentComponent, Department, Route}
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import org.hibernate.criterion.Restrictions
+import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 
 /** This command is intentionally Public. It only exists on dev and is designed,
   * in essence, to blitz a department and set up some sample data in it.
@@ -33,6 +33,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	var relationshipService = Wire[RelationshipService]
 	var scdDao = Wire[StudentCourseDetailsDao]
 
+
 	def applyInternal() {
 		setupDepartmentAndModules()
 
@@ -40,10 +41,17 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		val subDept = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestSubDepartment.code).get
 		val subSubDept = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestSubSubDepartment.code).get
 
-		// Two department admins, first is also a senior tutor and senior supervisor
+		// Two department admins, first is a UserAccessManager
 		val cmd = new GrantRoleCommand(department)
+
+		cmd.roleDefinition = UserAccessMgrRoleDefinition
+		cmd.usercodes.add(Fixtures.TestAdmin1)
+		cmd.apply()
+
+
 		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
-		cmd.usercodes.addAll(Seq(Fixtures.TestAdmin1, Fixtures.TestAdmin2))
+		cmd.usercodes.clear()
+		cmd.usercodes.add(Fixtures.TestAdmin2)
 		cmd.apply()
 
 		// admin on the sub-department
@@ -58,22 +66,14 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		subSubDepartmentAdminCommand.usercodes.addAll(Seq(Fixtures.TestAdmin4))
 		subSubDepartmentAdminCommand.apply()
 
-		cmd.roleDefinition = StudentRelationshipAgentRoleDefinition(relationshipService.getStudentRelationshipTypeByUrlPart("tutor").get)
-		cmd.usercodes.clear()
-		cmd.usercodes.add(Fixtures.TestAdmin1)
-		cmd.apply()
 
-		cmd.roleDefinition = StudentRelationshipAgentRoleDefinition(relationshipService.getStudentRelationshipTypeByUrlPart("supervisor").get)
-		cmd.usercodes.clear()
-		cmd.usercodes.add(Fixtures.TestAdmin1)
-		cmd.apply()
-
-		val upstreamAssignment = new UpstreamAssignment
+		val upstreamAssignment = new AssessmentComponent
 		upstreamAssignment.assessmentGroup = "A"
 		upstreamAssignment.departmentCode = "XXX"
 		upstreamAssignment.sequence = "A"
 		upstreamAssignment.moduleCode = "XXX101-30"
 		upstreamAssignment.name = "Assignment from SITS"
+		upstreamAssignment.assessmentType = AssessmentType.Assignment
 		session.save(upstreamAssignment)
 
 		val upstreamAssessmentGroup = new UpstreamAssessmentGroup
@@ -120,8 +120,10 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 
 		val department = newDepartmentFrom(Fixtures.TestDepartment,departmentDao)
 
+		// make sure we can see names, as uni ids are not exposed in the fixtures
+		department.showStudentName = true
 		transactional() {
-			session.newCriteria[UpstreamAssignment]
+			session.newCriteria[AssessmentComponent]
 				.add(Restrictions.in("departmentCode", JList("xxx","XXX")))
 				.list
 				.foreach { ua => session.delete(ua); }

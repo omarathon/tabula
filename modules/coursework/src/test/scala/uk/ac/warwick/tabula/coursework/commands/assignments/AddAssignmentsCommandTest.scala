@@ -89,7 +89,7 @@ class AddAssignmentsCommandTest extends AppContextTestBase {
         session.save(module3)
 	}
 	
-	def item(assignment: UpstreamAssignment, include: Boolean, optionsId: String, openEnded: Boolean = false) = {
+	def item(assignment: AssessmentComponent, include: Boolean, optionsId: String, openEnded: Boolean = false) = {
 		val item = new AssignmentItem(include, "A", assignment)
 		item.optionsId = optionsId
 		item.openDate  = dateTime(2012, 9)

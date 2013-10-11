@@ -27,20 +27,25 @@ trait GroupsObjects[A >: Null, B >: Null] extends BindListener {
 	
 	def mappingById: Map[String, JList[A]]
 	
-	def extractDataFromFile(file: FileAttachment): Map[B, JList[A]]
+	def validateUploadedFile(result: BindingResult): Unit
+	def extractDataFromFile(file: FileAttachment, result: BindingResult): Map[B, JList[A]]
 	
 	override def onBind(result: BindingResult) {
-		transactional() {
-			file.onBind(result)
-			if (!file.attached.isEmpty()) {
-				processFiles(file.attached.asScala)
-			}
-
-			def processFiles(files: Seq[FileAttachment]) {
-				val data = files.filter(_.hasData).flatMap { extractDataFromFile(_) }.toMap
-				
-				mapping.clear()
-				mapping.putAll( data.asJava )
+		validateUploadedFile(result)
+		
+		if (!result.hasErrors) {
+			transactional() {
+				file.onBind(result)
+				if (!file.attached.isEmpty()) {
+					processFiles(file.attached.asScala)
+				}
+	
+				def processFiles(files: Seq[FileAttachment]) {
+					val data = files.filter(_.hasData).flatMap { extractDataFromFile(_, result) }.toMap
+					
+					mapping.clear()
+					mapping.putAll( data.asJava )
+				}
 			}
 		}
 	}

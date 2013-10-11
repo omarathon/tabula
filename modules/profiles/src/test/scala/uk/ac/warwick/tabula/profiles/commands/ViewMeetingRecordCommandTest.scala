@@ -18,7 +18,7 @@ class ViewMeetingRecordCommandTest extends TestBase with Mockito {
 			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
 			val meeting = new MeetingRecord
-			val command = new ViewMeetingRecordCommandInternal(studentCourseDetails, currentUser, relationshipType)
+			val command = new ViewMeetingRecordCommandInternal(studentCourseDetails, Some(requestor), relationshipType)
 				with RelationshipServiceComponent with ProfileServiceComponent with MeetingRecordDaoComponent{
 				var profileService = mock[ProfileService]
 				var relationshipService = mock[RelationshipService]
@@ -27,9 +27,7 @@ class ViewMeetingRecordCommandTest extends TestBase with Mockito {
 
 			// these are the calls we expect the applyInternal method to make
 			command.relationshipService.getRelationships(relationshipType, studentCourseDetails.sprCode) returns Seq(relationship)
-			command.profileService.getMemberByUniversityId(currentUser.universityId) returns Some(requestor)
 			command.meetingRecordDao.list(Set(relationship), requestor) returns  Seq(meeting)
-
 
 			command.applyInternal()  should be(Seq(meeting))
 		}

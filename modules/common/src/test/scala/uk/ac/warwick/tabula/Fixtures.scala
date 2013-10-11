@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringCheckpointState, MonitoringPoint}
 import org.joda.time.DateTime
 
 // scalastyle:off magic.number
@@ -91,21 +91,22 @@ object Fixtures {
 	}
 
 	def upstreamAssignment(departmentCode:String, number:Int) = {
-        val a = new UpstreamAssignment
-        a.name = "Assignment %d" format number
-        a.departmentCode = departmentCode.toUpperCase
-        a.moduleCode = "%s1%02d-30" format (departmentCode.toUpperCase, number)
-        a.assessmentGroup = "A"
-        a.sequence = "A%02d" format number
-        a
-    }
+		val a = new AssessmentComponent
+		a.name = "Assignment %d" format number
+		a.departmentCode = departmentCode.toUpperCase
+		a.moduleCode = "%s1%02d-30" format (departmentCode.toUpperCase, number)
+		a.assessmentGroup = "A"
+		a.sequence = "A%02d" format number
+		a.assessmentType = AssessmentType.Assignment
+		a
+	}
 
-	def assessmentGroup(assignment:UpstreamAssignment) = {
+	def assessmentGroup(academicYear: AcademicYear, code: String, module: String, occurrence: String) = {
 		val group = new UpstreamAssessmentGroup
-		group.academicYear = new AcademicYear(2012)
-		group.assessmentGroup = assignment.assessmentGroup
-		group.moduleCode = assignment.moduleCode
-		group.occurrence = "A"
+		group.academicYear = academicYear
+		group.assessmentGroup = code
+		group.moduleCode = module
+		group.occurrence = occurrence
 		group.members.staticIncludeUsers.addAll(Seq(
 			"0123456",
 			"0123457",
@@ -113,6 +114,14 @@ object Fixtures {
 		))
 		group
 	}
+
+	def assessmentGroup(assignment:AssessmentComponent): UpstreamAssessmentGroup =
+		assessmentGroup(
+			academicYear = new AcademicYear(2012),
+			code = assignment.assessmentGroup,
+			module = assignment.moduleCode + "-30",
+			occurrence = "A")
+
 
 	def markingWorkflow(name: String) = {
 		val workflow = new MarkingWorkflow
@@ -176,11 +185,34 @@ object Fixtures {
 		scyd
 	}
 
-	def monitoringPoint(name: String = "name", defaultValue: Boolean = false, week: Int = 0) = {
+	def monitoringPoint(name: String = "name", validFromWeek: Int = 0, requiredFromWeek: Int = 0) = {
 		val point = new MonitoringPoint
 		point.name = name
-		point.week = week
-		point.defaultValue = defaultValue
+		point.validFromWeek = validFromWeek
+		point.requiredFromWeek = requiredFromWeek
 		point
+	}
+
+	def memberNoteWithId(note: String, student: Member, id: String ) = {
+		val memberNote = new MemberNote
+		memberNote.note = note
+		memberNote.member = student
+		memberNote.id = id
+		memberNote
+	}
+
+	def memberNote(note: String, student: Member ) = {
+		val memberNote = new MemberNote
+		memberNote.note = note
+		memberNote.member = student
+		memberNote
+	}
+
+	def monitoringCheckpoint(point: MonitoringPoint, studentCourseDetails: StudentCourseDetails, state: MonitoringCheckpointState) = {
+		val checkpoint = new MonitoringCheckpoint
+		checkpoint.point = point
+		checkpoint.studentCourseDetail = studentCourseDetails
+		checkpoint.state = state
+		checkpoint
 	}
 }

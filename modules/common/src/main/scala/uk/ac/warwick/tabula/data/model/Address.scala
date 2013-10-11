@@ -7,11 +7,15 @@ import uk.ac.warwick.tabula.ToString
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
-sealed abstract class AddressType(val dbValue: String)
+sealed abstract class AddressType(val dbValue: String) extends Convertible[String] {
+	def value = dbValue
+}
 
 object AddressType {
 	case object Home extends AddressType("H")
 	case object TermTime extends AddressType("C")
+
+	implicit def factory = fromCode _
 
 	def fromCode(code: String) = code match {
 	  	case Home.dbValue => Home
@@ -49,16 +53,4 @@ class Address extends GeneratedId with ToString {
 
 }
 
-class AddressTypeUserType extends AbstractBasicUserType[AddressType, String] {
-
-	val basicType = StandardBasicTypes.STRING
-	override def sqlTypes = Array(Types.VARCHAR)
-
-	val nullValue = null
-	val nullObject = null
-
-	override def convertToObject(string: String) = AddressType.fromCode(string)
-	
-	override def convertToValue(addressType: AddressType) = addressType.dbValue
-
-}
+class AddressTypeUserType extends ConvertibleStringUserType[AddressType]

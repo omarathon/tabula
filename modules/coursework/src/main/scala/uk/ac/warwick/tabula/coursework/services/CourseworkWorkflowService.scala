@@ -243,7 +243,7 @@ object WorkflowStages {
 	case object AddFeedback extends WorkflowStage {
 		def actionCode = "workflow.AddFeedback.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedFeedback match {
-			case Some(item) if item.feedback.hasAttachments =>
+			case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback =>
 				StageProgress(AddFeedback, true, "workflow.AddFeedback.uploaded", Good, true)
 			case Some(_) => StageProgress(AddFeedback, true, "workflow.AddFeedback.notUploaded", Warning, false)
 			case _ => StageProgress(AddFeedback, false, "workflow.AddFeedback.notUploaded")
@@ -255,7 +255,7 @@ object WorkflowStages {
 		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedFeedback match {
 			case Some(item) if item.feedback.released =>
 				StageProgress(ReleaseFeedback, true, "workflow.ReleaseFeedback.released", Good, true)
-			case Some(item) if item.feedback.hasAttachments => 
+			case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback =>
 				StageProgress(ReleaseFeedback, true, "workflow.ReleaseFeedback.notReleased", Warning, false)
 			case _ => StageProgress(ReleaseFeedback, false, "workflow.ReleaseFeedback.notReleased")
 		}

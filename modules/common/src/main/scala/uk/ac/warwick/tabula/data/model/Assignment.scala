@@ -2,13 +2,13 @@ package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-
+import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
 import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 
 import org.hibernate.annotations.{ForeignKey, Filter, FilterDef, AccessType, BatchSize, Type, IndexColumn}
-import org.joda.time.DateTime
+import org.joda.time.{Days, LocalDate, DateTime}
 
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
@@ -24,17 +24,20 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 
 import scala.reflect._
+import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 
 object Assignment {
+	// don't use the same name in different contexts, as that will kill find methods
 	val defaultCommentFieldName = "pretext"
 	val defaultUploadName = "upload"
+	val defaultFeedbackTextFieldName = "feedbackText"
 	val defaultMarkerSelectorName = "marker"
 	val defaultWordCountName = "wordcount"
 	final val NotDeletedFilter = "notDeleted"
 	final val MaximumFileAttachments = 50
 	final val MaximumWordCount = 1000000
-	
+
 	object Settings {
 		object InfoViewType {
 			val Default = "default"
@@ -62,10 +65,10 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	@transient
 	var assignmentService = Wire[AssignmentService]("assignmentService")
-	
+
 	@transient
 	var assignmentMembershipService = Wire[AssignmentMembershipService]("assignmentMembershipService")
-	
+
 	@transient
 	var feedbackService = Wire[FeedbackService]("feedbackService")
 
@@ -114,11 +117,12 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	// allow students to request extensions via the app
 
 	var allowExtensionRequests: JBoolean = false
+	var genericFeedback: String = ""
 
 	@ManyToOne
 	@JoinColumn(name = "module_id")
 	var module: Module = _
-	
+
 	def permissionsParents = Option(module).toStream
 
 	@OneToMany(mappedBy = "assignment", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
@@ -145,18 +149,44 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	def hasFeedbackTemplate: Boolean = feedbackTemplate != null
 
-	/**
-	 * FIXME IndexColumn doesn't work, currently setting position manually. Investigate!
-	 */
+	@transient
+	lazy val workingDaysHelper = new WorkingDaysHelperImpl
+
+	def feedbackDeadline: Option[LocalDate] = if (openEnded) {
+		None
+	} else {
+		Option(workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays))
+	}
+
+	def feedbackDeadlineWorkingDaysAway: Option[Int] = if (openEnded) {
+		None
+	} else {
+		val now = LocalDate.now
+		val deadline = workingDaysHelper.datePlusWorkingDays(closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)
+
+		// need an offset, as the helper always includes both start and end date, off-by-one from what we want to show
+		val offset =
+			if (deadline.isBefore(now)) 1
+			else -1 // today or in the future
+
+		Option(workingDaysHelper.getNumWorkingDays(now, deadline) + offset)
+	}
+
+	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
 	@IndexColumn(name = "position")
 	@BatchSize(size=200)
 	var fields: JList[FormField] = JArrayList()
 
+	// IndexColumn is a busted flush for fields because of reuse of non-uniqueness.
+	// Use manual position management on add/removeFields, and in these getters
+	def submissionFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Submission).sortBy(_.position)
+	def feedbackFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
+
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
 	var members: UserGroup = UserGroup.ofUsercodes
-	
+
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name="markscheme_id")
 	var markingWorkflow: MarkingWorkflow = _
@@ -171,18 +201,38 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	}
 
 	/**
-	 * Before we allow customising of assignments, we just want the basic
+	 * Before we allow customising of assignment submission forms, we just want the basic
 	 * fields to allow you to attach a file and display some instructions.
 	 */
-	def addDefaultFields() {
+	def addDefaultSubmissionFields() {
 		val pretext = new CommentField
 		pretext.name = defaultCommentFieldName
 		pretext.value = ""
+		pretext.context = FormFieldContext.Submission
 
 		val file = new FileField
 		file.name = defaultUploadName
+		file.context = FormFieldContext.Submission
 
 		addFields(pretext, file)
+	}
+
+	/**
+	 * Before we allow customising of assignment feedback forms, we just want the basic
+	 * fields to allow you to enter a comment.
+	 */
+	def addDefaultFeedbackFields() {
+		val feedback = new TextField
+		feedback.name = defaultFeedbackTextFieldName
+		feedback.value = ""
+		feedback.context = FormFieldContext.Feedback
+
+		addField(feedback)
+	}
+
+	def addDefaultFields() {
+		addDefaultSubmissionFields()
+		addDefaultFeedbackFields()
 	}
 
 	/**
@@ -219,7 +269,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 */
 	def isLate(submission: Submission) =
 		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.userId, submission.submittedDate)
-		
+
 	/**
 	 * retrospectively checks if a submission was an 'authorised late'
 	 * called by submission.isAuthorisedLate to check against extensions
@@ -229,7 +279,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	// returns extension for a specified student
 	def findExtension(uniId: String) = extensions.find(_.universityId == uniId)
-	
+
 	def membershipInfo = assignmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
 
 	// converts the assessmentGroups to upstream assessment groups
@@ -238,18 +288,18 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 			Seq()
 		}
 		else {
-			val validGroups = assessmentGroups.filterNot(group=> group.upstreamAssignment == null || group.occurrence == null)
+			val validGroups = assessmentGroups.filterNot(group=> group.assessmentComponent == null || group.occurrence == null)
 			validGroups.flatMap{group =>
 				val template = new UpstreamAssessmentGroup
 				template.academicYear = academicYear
-				template.assessmentGroup = group.upstreamAssignment.assessmentGroup
-				template.moduleCode = group.upstreamAssignment.moduleCode
+				template.assessmentGroup = group.assessmentComponent.assessmentGroup
+				template.moduleCode = group.assessmentComponent.moduleCode
 				template.occurrence = group.occurrence
 				assignmentMembershipService.getUpstreamAssessmentGroup(template)
 			}
 		}
 	}
-	
+
 	/**
 	 * Whether the assignment is not archived or deleted.
 	 */
@@ -271,17 +321,18 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	}.uploadedDate
 
 	def addField(field: FormField) {
+		if (field.context == null) throw new IllegalArgumentException("Field with name " + field.name + " has no context specified")
 		if (fields.exists(_.name == field.name)) throw new IllegalArgumentException("Field with name " + field.name + " already exists")
 		field.assignment = this
-		field.position = fields.length
+		field.position = fields.filter(_.context == field.context).length
 		fields.add(field)
 	}
 
 	def removeField(field: FormField) {
 		fields.remove(field)
 		assignmentService.deleteFormField(field)
-		// manually update all fields to reflect their new positions
-		fields.zipWithIndex foreach {case (field, index) => field.position = index}
+		// manually update all fields in the context to reflect their new positions
+		fields.filter(_.context == field.context).zipWithIndex foreach {case (field, index) => field.position = index}
 	}
 
 	def attachmentField: Option[FileField] = findFieldOfType[FileField](Assignment.defaultUploadName)
@@ -292,6 +343,8 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 		findFieldOfType[MarkerSelectField](Assignment.defaultMarkerSelectorName)
 
 	def wordCountField: Option[WordCountField] = findFieldOfType[WordCountField](Assignment.defaultWordCountName)
+
+	def feedbackCommentsField: Option[TextField] = findFieldOfType[TextField](Assignment.defaultFeedbackTextFieldName)
 
 	/**
 	 * Find a FormField on the Assignment with the given name.
@@ -344,6 +397,9 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 		submission.assignment = this
 	}
 
+	// returns the submission for a specified student
+	def findSubmission(uniId: String) = submissions.find(_.universityId == uniId)
+
 	// returns feedback for a specified student
 	def findFeedback(uniId: String) = feedbacks.find(_.universityId == uniId)
 
@@ -358,7 +414,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	def canSubmit(user: User): Boolean = {
 		if (restrictSubmissions) {
-			// users can always submit to assignments if they have a submission or peice of feedback
+			// users can always submit to assignments if they have a submission or piece of feedback
 			submissions.asScala.exists(_.universityId == user.getWarwickId) ||
 			fullFeedback.exists(_.universityId == user.getWarwickId) ||
 			assignmentMembershipService.isStudentMember(user, upstreamAssessmentGroups, Option(members))
@@ -465,7 +521,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * where the lists of students don't match up.
 	 */
 	def submissionsReport = SubmissionsReport(this)
-	
+
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
 	@BatchSize(size=200)
@@ -480,13 +536,13 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
     def getUniIdsWithSubmissionOrFeedback = {
         var idsWithSubmissionOrFeedback: Set[String] = Set()
-        
+
         for (submission <- submissions) idsWithSubmissionOrFeedback += submission.universityId
         for (feedback <- fullFeedback) idsWithSubmissionOrFeedback += feedback.universityId
-        
+
         idsWithSubmissionOrFeedback
-    }   
-			
+    }
+
 }
 
 case class SubmissionsReport(val assignment: Assignment) {
@@ -524,10 +580,10 @@ case class SubmissionsReport(val assignment: Assignment) {
 		    problems
 		}
 	}
-    
+
 	// To make map() calls neater
     private def toUniId(f: Feedback) = f.universityId
     private def toUniId(s: Submission) = s.universityId
-    
-    
+
+
 }

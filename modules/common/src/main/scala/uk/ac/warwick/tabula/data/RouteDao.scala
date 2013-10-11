@@ -16,6 +16,7 @@ trait AutowiringRouteDaoComponent extends RouteDaoComponent {
 trait RouteDao {
 	def saveOrUpdate(route: Route)
 	def getByCode(code: String): Option[Route]
+	def getById(id: String): Option[Route]
 	def findByDepartment(department:Department):Seq[Route]
 }
 
@@ -27,7 +28,7 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 	def getByCode(code: String) =
 		session.newQuery[Route]("from Route r where code = :code").setString("code", code).uniqueResult
 
-
+	def getById(id: String) = getById[Route](id)
 
 	def findByDepartment(department:Department) =
 		session.newQuery[Route]("from Route r where department = :dept").setEntity("dept",department).seq

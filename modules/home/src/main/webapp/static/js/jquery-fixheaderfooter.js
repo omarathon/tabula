@@ -29,6 +29,7 @@
 				floatingHeader   = $(".floatingHeader", persistArea),
 				floatingFooter   = $(".floatingFooter", persistArea),
 				persistHeader    = $(".persist-header", persistArea),
+				persistFooter    = $(".persist-footer", persistArea),
 				primaryNavHeight = $("#primary-navigation").height();
 
 			if ((scrollTop > offset.top) && (scrollTop < offset.top + el.height())) {
@@ -37,7 +38,9 @@
 				floatingHeader.invisible();
 			}
 
-			if(scrollTop + $(window).height() - $(persistHeader).height() - primaryNavHeight > $(el).height()) {
+			// persistFooter will need to have a margin-bottom of zero
+			// otherwise you'll see the original footer (and bits of the webpage) underneath the fixed footer as you scroll
+			if(persistFooter.offset().top < $(window).scrollTop() + $(window).height() - primaryNavHeight - persistFooter.height()) {
 				floatingFooter.invisible();
 			} else {
 				floatingFooter.visible();
@@ -46,7 +49,7 @@
 		}
 
 		var cloneRow = function(row, className) {
-			row.before(row.clone())
+			row.before(row.clone(true))
 				.css("width", row.width())
 				.addClass(className);
 		};

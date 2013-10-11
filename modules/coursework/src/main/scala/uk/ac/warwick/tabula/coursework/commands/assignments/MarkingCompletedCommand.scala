@@ -25,6 +25,7 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 	var noFeedback: JList[MarkerFeedback] = JArrayList()
 	var releasedFeedback: JList[MarkerFeedback] = JArrayList()
 
+	var onlineMarking: Boolean = false
 	var confirm: Boolean = false
 
 	mustBeLinked(assignment, module)

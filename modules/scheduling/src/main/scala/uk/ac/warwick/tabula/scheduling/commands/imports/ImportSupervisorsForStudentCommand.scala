@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
+import org.joda.time.DateTime
 
 class ImportSupervisorsForStudentCommand()
 	extends Command[Unit] with Unaudited with Logging {
@@ -26,22 +27,27 @@ class ImportSupervisorsForStudentCommand()
 	def applyInternal() {
 		if (studentCourseDetails.route != null && studentCourseDetails.route.degreeType == Postgraduate) {
 			transactional() {
-				importSupervisors
+				importSupervisors()
 			}
 		}
 	}
 
 	override def describe(d: Description) = d.property("sprCode" -> studentCourseDetails.sprCode)
 
-	def importSupervisors {
+	def importSupervisors() {
 		relationshipService
 			.getStudentRelationshipTypeByUrlPart("supervisor") // TODO this is awful
 			.filter { relType => 
 				val source = Option(studentCourseDetails.department).map { _.getStudentRelationshipSource(relType) }.getOrElse(StudentRelationshipSource.SITS)
-				(source == StudentRelationshipSource.SITS)
+				source == StudentRelationshipSource.SITS
 			}
-			.foreach { relationshipType => 
-				val prsCodes = supervisorImporter.getSupervisorPrsCodes(studentCourseDetails.scjCode)
+			.foreach { relationshipType =>
+
+				val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode)
+				currentRelationships.foreach { rel =>
+					rel.endDate = DateTime.now
+					relationshipService.saveOrUpdate(rel)
+				}
 
 				supervisorImporter.getSupervisorPrsCodes(studentCourseDetails.scjCode).foreach {
 					supervisorPrsCode => {

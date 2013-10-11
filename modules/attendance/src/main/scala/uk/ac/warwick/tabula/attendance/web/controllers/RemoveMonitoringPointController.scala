@@ -9,7 +9,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.commands.RemoveMonitoringPointCommand
 
 @Controller
-@RequestMapping(Array("/manage/{dept}/sets/{set}/points/{point}/delete"))
+@RequestMapping(Array("/manage/{dept}/sets/{set}/edit/points/{point}/delete"))
 class RemoveMonitoringPointController extends AttendanceController {
 
 	validatesSelf[SelfValidating]

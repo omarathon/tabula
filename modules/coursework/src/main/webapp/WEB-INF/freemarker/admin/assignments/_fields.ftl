@@ -59,6 +59,17 @@ the comments textarea needs to maintain newlines.
 			<@f.options items=academicYearChoices itemLabel="label" itemValue="storeValue" />
 		</@f.select>
 	</@form.labelled_row>
+	
+	<script type="text/javascript">
+		jQuery(function($) {
+			$('#academicYear').on('change', function(e) {
+				var $form = $(this).closest('form');
+				$('#action-submit').val('refresh');
+				
+				$form.submit();
+			});
+		});
+	</script>
 
 <#else>
 
@@ -125,17 +136,35 @@ the comments textarea needs to maintain newlines.
 <#-- These fields are also used by the batch assignment importer so they are in a separate file. -->
 <#include "_common_fields.ftl" />
 
+<#import "*/membership_picker_macros.ftl" as membership_picker />
+
 <#-- Members picker is pretty hefty so it is in a separate file -->
 <#if features.assignmentMembership>
-	<#include "assignment_membership_picker.ftl" />
+
+<@form.row "members" "assignmentEnrolment">
+	<details id="students-details">
+		<summary id="students-summary" class="collapsible large-chevron">
+			<span class="legend" id="student-summary-legend">Students <small>Select which students should be in this assignment</small> </span>
+			<div class="alert alert-success" style="display: none;" data-display="fragment">
+				The membership list for this assignment has been updated
+			</div>
+			<@membership_picker.header command />
+		</summary>
+		<@membership_picker.fieldset command 'assignment' 'assignment'/>
+	</details>
+</@form.row>
+
 </#if>
 <#include "_submissions_common_fields.ftl" />
 
 <script>
 jQuery(function ($) {
+
+
 	$('#action-submit').closest('form').on('click', '.update-only', function() {
 		$('#action-submit').val('update');
 	});
+
 });
 </script>
 </#escape>

@@ -9,22 +9,21 @@ import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.attendance.web.Routes
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.model.Member
 
 @Controller
 @RequestMapping(value = Array("/profile"))
 class ProfileHomeController extends AttendanceController with AutowiringProfileServiceComponent {
 
 	@RequestMapping
-	def render() = {
-		val optionalCurrentMember = profileService.getMemberByUserId(user.apparentId, disableFilter = true)
-		val currentMember = optionalCurrentMember getOrElse new RuntimeMember(user)
-		if (currentMember.isStudent) {
-			currentMember.asInstanceOf[StudentMember].mostSignificantCourseDetails match {
+	def render() = profileService.getMemberByUserId(user.apparentId) match {
+		case Some(student: StudentMember) => 
+			student.mostSignificantCourseDetails match {
 				case Some(scd) => Redirect(Routes.profile(scd, AcademicYear.guessByDate(DateTime.now)))
 				case None => throw new ItemNotFoundException()
 			}
-		} else
-			Mav("home/profile_staff").noLayoutIf(ajax)
+		case _ if user.isStaff => Mav("home/profile_staff").noLayoutIf(ajax)
+		case _ => Mav("home/profile_unknown").noLayoutIf(ajax)
 	}
 }
 
@@ -39,6 +38,7 @@ class ProfileController extends AttendanceController {
 	@RequestMapping
 	def render(@ModelAttribute("command") cmd: Appliable[Unit]) = {
 		cmd.apply()
+
 		if (ajax)
 			Mav("home/_profile", "currentUser" -> user).noLayout()
 		else

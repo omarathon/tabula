@@ -31,12 +31,15 @@ object Routes {
 		
 		object module {
 			def apply(module: Module) = department(module.department) + "#module-" + encoded(module.code)
-			def create() = "/admin/module/add"
 		}
 
 		object assignment {
 			object markerFeedback {
 				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/list"
+			}
+
+			object onlineMarkerFeedback {
+				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online"
 			}
 
 

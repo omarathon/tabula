@@ -63,6 +63,7 @@
         });
     })(jQuery);
 </script>
+<#-- deliberately a global assign, so only the first macro includes script. -->
 <#assign student_table_script_included=true />
 </#if>
 

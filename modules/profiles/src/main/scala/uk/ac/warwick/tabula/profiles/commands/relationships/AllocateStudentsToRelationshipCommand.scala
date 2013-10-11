@@ -33,7 +33,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		with RelationshipChangingCommand
 		with NotifiesAffectedStudents {
 
-	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), department)
+	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), mandatory(department))
 
 	// throw this request out if this relationship can't be edited in Tabula for this department
 	if (relationshipType.readOnly(department)) {
@@ -153,8 +153,10 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 				val cmd = new EditStudentRelationshipCommand(
 					studentCourseDetails,
 					relationshipType,
-					service.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode
-				).headOption.flatMap { _.agentMember }, viewer, false)
+					service.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode).headOption.flatMap { _.agentMember }, 
+					viewer, 
+					false
+				)
 				cmd.agent = agent
 				cmd
 			}
@@ -185,30 +187,37 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 			cmd.apply().map { modifiedRelationship => StudentRelationshipChange(cmd.currentAgent, modifiedRelationship) }
 		}.flatten
 	}
+	
+	def validateUploadedFile(result: BindingResult) {
+		val fileNames = file.fileNames map (_.toLowerCase)
+		val invalidFiles = fileNames.filter(s => !RawStudentRelationshipExtractor.AcceptedFileExtensions.exists(s.endsWith))
 
-	def extractDataFromFile(file: FileAttachment) = {
-		val allocations = relationshipExtractor.readXSSFExcelFile(file.dataStream)
+		if (invalidFiles.size > 0) {
+			if (invalidFiles.size == 1) result.rejectValue("file", "file.wrongtype.one", Array(invalidFiles.mkString("")), "")
+			else result.rejectValue("", "file.wrongtype", Array(invalidFiles.mkString(", ")), "")
+		}
+	}
 
-		// Convert to (student -> Option(staff))
-		val map = allocations.asScala
-			.filter { _.targetUniversityId.hasText }
-			.flatMap { rel =>
-				val student = profileService.getMemberByUniversityId(rel.targetUniversityId)
-				val staff =
-					if (rel.agentUniversityId.hasText) profileService.getMemberByUniversityId(rel.agentUniversityId)
-					else None
-
-				student.map { (_ -> staff) }
+	def extractDataFromFile(file: FileAttachment, result: BindingResult) = {
+		val allocations = relationshipExtractor.readXSSFExcelFile(file.dataStream, relationshipType)
+		
+		// Put any errors into the BindingResult
+		allocations.foreach { case (row, _, errors) =>
+			errors.foreach { case (field, code) =>
+				result.rejectValue("", code, Array(field, row), "")
 			}
+		}
+		
+		val rawRelationships = allocations.flatMap { case (_, rel, _) => rel }
 
 		unallocated.clear()
 		unallocated.addAll(
-			map.filter { case (_, staff) => staff.isEmpty }
+			rawRelationships.filter { case (_, staff) => staff.isEmpty }
 			   .map { case (student, _) => student }
 			   .asJavaCollection
 		)
 
-		map
+		rawRelationships
 			.filter { case (_, staff) => staff.isDefined }
 		   	.map { case (student, staff) => (student, staff.get) }
 		   	.groupBy { case (_, staff) => staff }

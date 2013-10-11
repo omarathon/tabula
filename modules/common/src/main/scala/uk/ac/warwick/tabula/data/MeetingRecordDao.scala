@@ -30,8 +30,8 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 					// and only pick records where deleted = 0 or the current user id is the creator id
 					// - so that no-one can see records created and deleted by someone else
 					.add(Restrictions.disjunction()
-							.add(Restrictions.eq("deleted", false))
-							.add(Restrictions.eq("creator", currentUser))
+							.add(is("deleted", false))
+							.add(is("creator", currentUser))
 					)
 					.addOrder(Order.desc("meetingDate"))
 					.addOrder(Order.desc("lastUpdatedDate"))

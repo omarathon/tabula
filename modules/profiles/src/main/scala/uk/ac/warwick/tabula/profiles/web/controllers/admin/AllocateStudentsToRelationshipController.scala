@@ -12,6 +12,7 @@ import javax.validation.Valid
 import uk.ac.warwick.tabula.profiles.commands.relationships.AllocateStudentsToRelationshipCommand
 import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import scala.collection.JavaConverters._
 
 /**
  * Allocates students to relationships in a department.
@@ -40,7 +41,7 @@ class AllocateStudentsToRelationshipController extends ProfilesController {
 	
 	@RequestMapping(method = Array(POST), params = Array("isfile=true", "action!=refresh"))
 	def previewFileUpload(@PathVariable("department") department: Department, @Valid cmd: AllocateStudentsToRelationshipCommand, errors: Errors): Mav = {
-		if (errors.hasErrors && errors.getFieldError.getCode == "file.wrongtype.one") {
+		if (errors.hasErrors && errors.getFieldErrors.asScala.exists { _.getCode == "file.wrongtype.one" }) {
 			form(cmd)
 		} else {
 			Mav("relationships/upload_preview")

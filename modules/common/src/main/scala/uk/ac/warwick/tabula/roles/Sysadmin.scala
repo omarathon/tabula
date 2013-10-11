@@ -28,7 +28,7 @@ case object SysadminRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
 		MonitoringPointSetTemplates.Manage
 	)
-	
+
 	GrantsGlobalPermission(
 		Module.Create,
 		// We don't give Read here, god up for that
@@ -36,12 +36,7 @@ case object SysadminRoleDefinition extends UnassignableBuiltInRoleDefinition {
 		Module.Delete,
 		
 		Department.ArrangeModules,
-		
-		// To add department owners, but also global-read is for the permissions helper
-		RolesAndPermissions.Create,
-		RolesAndPermissions.Read,
-		RolesAndPermissions.Update,
-		RolesAndPermissions.Delete
+		Department.ArrangeRoutes
 	)
 	
 }

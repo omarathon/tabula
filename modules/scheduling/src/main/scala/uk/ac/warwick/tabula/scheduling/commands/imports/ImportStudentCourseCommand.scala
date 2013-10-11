@@ -51,7 +51,6 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	import ImportMemberHelpers._
 
 	implicit val rs = resultSet
-	implicit val metadata = rs.getMetaData
 
 	var memberDao = Wire.auto[MemberDao]
 	var relationshipService = Wire.auto[RelationshipService]
@@ -108,6 +107,11 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		if (isTransient || hasChanged) {
 			try {
 				logger.debug("Saving changes for " + studentCourseDetails)
+
+				if (this.mostSignificant == true) {
+						stuMem.mostSignificantCourse = studentCourseDetails
+						logger.debug("Updating member most significant course to "+ studentCourseDetails +" for " + stuMem)
+				}
 
 				studentCourseDetails.lastUpdatedDate = DateTime.now
 				studentCourseDetailsDao.saveOrUpdate(studentCourseDetails)

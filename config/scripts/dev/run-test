@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ANT="ant -logger org.apache.tools.ant.listener.AnsiColorLogger"
+MVN="mvn"
 
 if [[ "x" == "x$1" ]]; then
   echo "usage: run-test TestName"
@@ -16,10 +16,10 @@ else
   echo "Running $TESTNAME"
 fi
 
-DIR="$(dirname "${BASH_SOURCE[0]}")/../../"
+DIR="$(dirname "${BASH_SOURCE[0]}")/../../../"
 
 pushd $DIR > /dev/null
-$ANT test -Dtest.name="$TESTNAME"
+$MVN test --quiet -Dtest="$TESTNAME" -DfailIfNoTests=false
 popd > /dev/null
 
 

@@ -12,7 +12,9 @@ the comments textarea needs to maintain newlines.
 
 <@f.errors cssClass="error form-errors" />
 
-<#include "assignment_membership_picker.ftl" />
+<#import "*/membership_picker_macros.ftl" as membership_picker />
+<@membership_picker.header command />
+<@membership_picker.fieldset command 'assignment' 'assignment'/>
 
 </@f.form>
 </#escape>

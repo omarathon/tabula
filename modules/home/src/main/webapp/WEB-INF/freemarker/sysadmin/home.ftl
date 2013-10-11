@@ -32,9 +32,9 @@
 <@f.form method="post" action="${url('/sysadmin/god')}">
 	<#if user.god>
 		<input type="hidden" name="action" value="remove" />
-		<button class="btn btn-info"><i class="icon-eye-close"></i> Disable God mode</button>
+		<button id="disable-godmode-button" class="btn btn-info"><i class="icon-eye-close"></i> Disable God mode</button>
 	<#else>
-		<button class="btn btn-warning"><i class="icon-eye-open"></i> Enable God mode</button>
+		<button id="enable-godmode-button" class="btn btn-warning"><i class="icon-eye-open"></i> Enable God mode</button>
 	</#if>
 </@f.form>
 

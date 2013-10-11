@@ -8,6 +8,7 @@
 		<mapping>
 			<filter ref="forceLoginFilter" />
 			<url-pattern>/*</url-pattern>
+			<excluded-url-pattern>/</excluded-url-pattern>
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
 			<excluded-url-pattern>/test/up</excluded-url-pattern>
 		</mapping>

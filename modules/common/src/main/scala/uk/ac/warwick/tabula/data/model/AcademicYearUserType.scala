@@ -6,10 +6,4 @@ import uk.ac.warwick.tabula.JavaImports._
 /**
  * Stores an AcademicYear as an integer (which is the 4-digit start year)
  */
-final class AcademicYearUserType extends AbstractIntegerUserType[AcademicYear] {
-	def convertToObject(input: JInteger) = new AcademicYear(input)
-	def convertToValue(year: AcademicYear) = year.startYear
-
-	val nullValue = null: JInteger
-	val nullObject = null
-}
+final class AcademicYearUserType extends ConvertibleIntegerUserType[AcademicYear]

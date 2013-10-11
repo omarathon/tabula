@@ -7,6 +7,17 @@ import org.apache.poi.ss.util.WorkbookUtil
 import uk.ac.warwick.tabula.data.model.Department
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
+import java.io.InputStream
+import org.apache.poi.openxml4j.opc.OPCPackage
+import org.apache.poi.xssf.eventusermodel.XSSFReader
+import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable
+import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler
+import org.apache.poi.xssf.model.StylesTable
+import org.xml.sax.helpers.XMLReaderFactory
+import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler.SheetContentsHandler
+import org.apache.poi.hssf.util.CellReference
+import scala.collection.JavaConverters._
+import org.xml.sax.InputSource
 
 object SpreadsheetHelpers {
 	
@@ -95,5 +106,74 @@ object SpreadsheetHelpers {
 
 	def formatWorksheet(sheet: XSSFSheet, cols: Int) {
 		(0 to cols).map(sheet.autoSizeColumn(_))
+	}
+	
+	/**
+	 * If simpleHeaders is set to true, the parser will:
+	 * 
+	 * - lower-case all headers
+	 * - trim the header and remove all non-ascii characters
+	 */
+	def parseXSSFExcelFile(file: InputStream, simpleHeaders: Boolean = true) = {
+		val pkg = OPCPackage.open(file);
+		val sst = new ReadOnlySharedStringsTable(pkg)
+		val reader = new XSSFReader(pkg)
+		val styles = reader.getStylesTable
+		
+		reader.getSheetsData.asScala.toSeq.flatMap { sheet => 
+			val handler = new XslxParser(styles, sst, simpleHeaders)
+			val parser = handler.fetchSheetParser
+			
+			val sheetSource = new InputSource(sheet)
+			parser.parse(sheetSource)
+			sheet.close()
+			
+			handler.rows.toSeq
+		}
+	}
+}
+
+class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, val simpleHeaders: Boolean = true)
+	extends SheetContentsHandler with Logging {
+
+	var isParsingHeader = true // flag to parse the first row for column headers
+	var columnMap = scala.collection.mutable.Map[Short, String]()
+	val xssfHandler = new XSSFSheetXMLHandler(styles, sst, this, false)
+	
+	var rows: scala.collection.mutable.MutableList[Map[String, String]] = scala.collection.mutable.MutableList()
+	var currentRow = scala.collection.mutable.Map[String, String]()
+
+	def fetchSheetParser = {
+		val parser = XMLReaderFactory.createXMLReader("org.apache.xerces.parsers.SAXParser")
+		parser.setContentHandler(xssfHandler)
+		parser
+	}
+
+	// implement SheetContentsHandler
+	def headerFooter(text: String, isHeader: Boolean, tagName: String) = {
+		// don't care about handling this, but required for interface
+	}
+
+	def startRow(row: Int) = {
+		logger.debug("startRow: " + row.toString)
+		isParsingHeader = (row == 0)
+		currentRow = scala.collection.mutable.Map[String, String]()
+	}
+	
+	def formatHeader(rawValue: String) = {
+		if (simpleHeaders) rawValue.trim().toLowerCase().replaceAll("[^\\x00-\\x7F]", "")
+		else rawValue
+	}
+
+	def cell(cellReference: String, formattedValue: String) = {
+		val col = new CellReference(cellReference).getCol
+
+		if (isParsingHeader) columnMap(col) = formatHeader(formattedValue)
+		else if (columnMap.contains(col)) currentRow(columnMap(col)) = formattedValue
+	}
+
+	def endRow = {
+		if (!isParsingHeader && !currentRow.isEmpty) 
+			rows += currentRow.toMap
 	}
 }

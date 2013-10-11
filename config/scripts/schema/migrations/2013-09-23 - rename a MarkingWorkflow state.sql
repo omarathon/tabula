@@ -1,0 +1,2 @@
+-- uncomment this migration an run AFTER the deploy. unitl then code in MarkingStateUserType will catch these values
+--UPDATE markerfeedback SET state = 'InProgress' WHERE state = 'DownloadedByMarker';

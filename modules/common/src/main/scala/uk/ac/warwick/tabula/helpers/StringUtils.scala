@@ -11,6 +11,7 @@ trait StringUtils {
 	class SuperString(string: String) {
 		def hasText = Utils hasText string
 		def hasLength = Utils hasLength string
+		def safeTrim = Option(string).map { _.trim }.getOrElse("")
 		def safeSubstring(proposedStart: Int) = Utils safeSubstring(string, proposedStart)
 		def safeSubstring(proposedStart: Int, proposedEnd: Int) = Utils safeSubstring(string, proposedStart, proposedEnd)
 		def orEmpty: String = Option(string).getOrElse("")

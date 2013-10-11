@@ -13,9 +13,10 @@ import org.openqa.selenium.htmlunit.HtmlUnitWebElement
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.Keys
 import org.openqa.selenium.internal.seleniumemulation.FireEvent
-import uk.ac.warwick.tabula.home.FeaturesDriver
+import uk.ac.warwick.tabula.home.{FixturesDriver, FeaturesDriver}
+import org.openqa.selenium.firefox.FirefoxDriver
 
-trait CourseworkFixtures extends BrowserTest with FeaturesDriver{
+trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver {
 
 	before {
 		go to (Path("/scheduling/fixtures/setup"))
@@ -33,15 +34,60 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver{
 			moduleCode: String,
 			assignmentName: String,
 			settings: Seq[String] => Unit = allFeatures,
-			members: Seq[String] = Seq(P.Student1.usercode, P.Student2.usercode))(callback: String => Unit) = as(P.Admin1) {
+			members: Seq[String] = Seq(P.Student1.usercode, P.Student2.usercode),
+			managers: Seq[String] = Seq(),
+			assistants: Seq[String] = Seq())(callback: String => Unit) = as(P.Admin1) {
 		click on linkText("Go to the Test Services admin page")
+		verifyPageLoaded {
+			// wait for the page to load
+			find(cssSelector("div.dept-show")) should be('defined)
+		}
+
 		click on linkText("Show")
 
-		// Add a module manager for moduleCode
-		val info = getModuleInfo(moduleCode)
+		if ((assistants ++ managers).size > 0) {
+			// Optionally add module assistants/managers if requested
+			val info = getModuleInfo(moduleCode)
+			click on (info.findElement(By.className("module-manage-button")).findElement(By.partialLinkText("Manage")))
 
+			val editPerms = info.findElement(By.partialLinkText("Edit module permissions"))
+			eventually {
+				editPerms.isDisplayed should be (true)
+			}
+			click on (editPerms)
+
+			def pick(table: String, usercodes: Seq[String]) {
+				verifyPageLoaded{
+					find(cssSelector(s"${table} .pickedUser")) should be ('defined)
+				}
+				usercodes.foreach { u =>
+					click on cssSelector(s"${table} .pickedUser")
+					enter(u)
+					val typeahead = cssSelector(s"${table} .typeahead .active a")
+					eventuallyAjax {
+						find(typeahead) should not be (None)
+					}
+					click on typeahead
+					find(cssSelector(s"${table} form.add-permissions")).get.underlying.submit()
+				}
+			}
+
+			pick(".manager-table", managers)
+			pick(".assistant-table", assistants)
+
+			// as you were...
+			go to (Path("/coursework"))
+			click on linkText("Go to the Test Services admin page")
+			verifyPageLoaded{
+				// wait for the page to load
+				find(cssSelector("div.dept-show")) should be ('defined)
+			}
+			click on linkText("Show")
+		}
+
+		val info = getModuleInfo(moduleCode)
 		click on (info.findElement(By.className("module-manage-button")).findElement(By.partialLinkText("Manage")))
-		
+
 		val addAssignment = info.findElement(By.partialLinkText("Create new assignment"))
 		eventually {
 			addAssignment.isDisplayed should be (true)
@@ -89,20 +135,17 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver{
 		checkbox("plagiarismDeclaration").select()
 
 		submit()
-
-		pageSource contains "Thanks, we've received your submission." should be (true)
+		verifyPageLoaded(
+			pageSource contains "Thanks, we've received your submission." should be (true)
+		)
 	}
 
 	def allFeatures(members: Seq[String]) {
-		// Change the open date to yesterday, else this test will fail in the morning
-		executeScript(
-			"""window.document.getElementsByName('openDate')[0].setAttribute('value', arguments[0]);""",
-			DateTime.now.minusDays(1).toString("dd-MMM-yyyy HH:mm:ss")
-		)
+
 
 		// TODO Can't test link to SITS for our fixture department
 		// Don't bother messing around with assigning students, let's just assume students will magically find the submit page
-		executeScript("jQuery('#assignmentEnrolmentFields details > *:not(summary)').show();") // expand expander
+		click on id("student-summary-legend")
 		className("show-adder").findElement map { _.underlying.isDisplayed } should be (Some(true))
 
 		// Make sure JS is working
@@ -116,8 +159,9 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver{
 
 		// Eventually, a Jax!
 		eventuallyAjax { textArea("massAddUsers").isDisplayed should be (false) }
-
-		pageSource should include(members.size + " manually enrolled")
+		// there will be a delay between the dialog being dismissed and the source being updated by the
+		// ajax response. So wait some more
+		eventuallyAjax{pageSource should include(members.size + " manually enrolled")}
 
 		checkbox("collectSubmissions").select()
 
@@ -142,6 +186,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver{
 
 		textField("wordCountMin").value = "1"
 		textField("wordCountMax").value = "10000"
+
 	}
 
 	def getModuleInfo(moduleCode: String) =

@@ -22,7 +22,7 @@ class UserSettingsServiceImpl extends UserSettingsService with Daoisms with Logg
 	
 	def getByUserId(userId: String) : Option[UserSettings] = {
 		session.newCriteria[UserSettings]
-			.add(Restrictions.eq("userId", userId))
+			.add(is("userId", userId))
 			.uniqueResult
 	}
 	

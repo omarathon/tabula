@@ -187,7 +187,7 @@ class DeleteMonitoringPointController extends MonitoringPointSetTemplateControll
 }
 
 @Controller
-@RequestMapping(Array("/sysadmin/pointsettemplates/{template}/points/add"))
+@RequestMapping(Array("/sysadmin/pointsettemplates/{template}/edit/points/add"))
 class CreateMonitoringPointController extends MonitoringPointSetTemplateController {
 
 	@ModelAttribute("command")
@@ -211,7 +211,7 @@ class CreateMonitoringPointController extends MonitoringPointSetTemplateControll
 }
 
 @Controller
-@RequestMapping(Array("/sysadmin/pointsettemplates/{template}/points/{point}/edit"))
+@RequestMapping(Array("/sysadmin/pointsettemplates/{template}/edit/points/{point}/edit"))
 class UpdateMonitoringPointController extends MonitoringPointSetTemplateController {
 
 	@ModelAttribute("command")
@@ -239,7 +239,7 @@ class UpdateMonitoringPointController extends MonitoringPointSetTemplateControll
 }
 
 @Controller
-@RequestMapping(Array("/sysadmin/pointsettemplates/{template}/points/{point}/delete"))
+@RequestMapping(Array("/sysadmin/pointsettemplates/{template}/edit/points/{point}/delete"))
 class RemoveMonitoringPointController extends MonitoringPointSetTemplateController {
 
 	@ModelAttribute("command")

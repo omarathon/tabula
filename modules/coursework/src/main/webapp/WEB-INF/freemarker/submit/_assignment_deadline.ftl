@@ -29,7 +29,7 @@
 			<span class="time-remaining">${extension_time_remaining} <span class="label label-info">Extended</span></span>
 			Extension granted until <@fmt.date date=extension.expiryDate />
 		</p>
-		<@extensionButton extensionRequested isExtended assignment.closed />
+		<p><@extensionButton extensionRequested isExtended assignment.closed /></p>
 	<#elseif assignment.closed>
 		<p class="late deadline">
 			<#if hasExtension && isExtended>
@@ -40,12 +40,12 @@
 				Deadline was <@fmt.date date=assignment.closeDate />
 			</#if>
 		</p>
-		<@extensionButton extensionRequested isExtended assignment.closed />
+		<p><@extensionButton extensionRequested isExtended assignment.closed /></p>
 	<#else>
 		<p class="deadline">
 			<span class="time-remaining">${time_remaining}</span>
 			Deadline <@fmt.date date=assignment.closeDate />
 		</p>
-		<@extensionButton extensionRequested isExtended assignment.closed />
+		<p><@extensionButton extensionRequested isExtended assignment.closed /></p>
 	</#if>
 </#if>

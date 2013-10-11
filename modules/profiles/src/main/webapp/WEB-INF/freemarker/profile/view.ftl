@@ -8,6 +8,7 @@
 </#if>
 
 <article class="profile">
+
 	<section id="personal-details" class="clearfix">
 
 		<@fmt.member_photo profile />
@@ -85,14 +86,14 @@
 						<#if profile.email??>
 							<tr>
 								<th>Warwick email</th>
-								<td><i class="icon-envelope"></i> <a href="mailto:${profile.email}">${profile.email}</a></td>
+								<td><i class="icon-envelope-alt"></i> <a href="mailto:${profile.email}">${profile.email}</a></td>
 							</tr>
 						</#if>
 
 						<#if profile.homeEmail??>
 							<tr>
 								<th>Alternative email</th>
-								<td><i class="icon-envelope"></i> <a href="mailto:${profile.homeEmail}">${profile.homeEmail}</a></td>
+								<td><i class="icon-envelope-alt"></i> <a href="mailto:${profile.homeEmail}">${profile.homeEmail}</a></td>
 							</tr>
 						</#if>
 
@@ -174,6 +175,12 @@
 					<#include "_course_details.ftl" />
 				</li>
 
+				<#if (features.profilesMemberNotes && can.do('MemberNotes.Read', profile)) >
+					<li id="membernote-pane">
+						<#include "_member_notes.ftl" />
+					</li>
+				</#if>
+				
 				<#list (studentCourseDetails.department.displayedStudentRelationshipTypes)![] as relationshipType>
 					<#if studentCourseDetails.hasRelationship(relationshipType) || relationshipType.displayIfEmpty(studentCourseDetails)>
 						<li id="${relationshipType.id}-pane">
@@ -202,6 +209,18 @@
 				</#if>
 			</ol>
 
+			<div id="note-modal" class="modal hide fade">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h3><span></span> for ${profile.fullName}</h3>
+				</div>
+				<div class="modal-body"></div>
+
+				<div class="modal-footer">
+					<input id="member-note-save" type="submit" class="btn btn-primary" value="Save">
+				</div>
+			</div>
+
 			<div id="modal" class="modal hide fade" style="display:none;"></div>
 
 				<div id="modal-change-agent" class="modal hide fade"></div>
@@ -221,6 +240,7 @@
 					});
 				});
 				</script>
+
 		</div>
 
 
@@ -237,6 +257,10 @@
 			</#if>
 		</#list>
 	</#if>
+
+	<p class="rendered-timestamp">
+		Page generated ${.now}
+	</p>
 </article>
 
 <#if user.sysadmin>

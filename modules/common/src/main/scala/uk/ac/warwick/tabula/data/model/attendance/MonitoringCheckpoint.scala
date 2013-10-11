@@ -8,6 +8,7 @@ import javax.persistence.ManyToOne
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.data.model.GeneratedId
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import org.hibernate.annotations.Type
 
 @Entity
 class MonitoringCheckpoint extends GeneratedId {
@@ -20,11 +21,13 @@ class MonitoringCheckpoint extends GeneratedId {
 	@JoinColumn(name = "student_course_detail_id")
 	var studentCourseDetail: StudentCourseDetails = _
 	
-	var checked: Boolean = false
+	@NotNull
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.MonitoringCheckpointStateUserType")
+	var state: MonitoringCheckpointState = _
 	
-	var createdDate: DateTime = _
+	var updatedDate: DateTime = _
 	
 	@NotNull
-	var createdBy: String = _
+	var updatedBy: String = _
 
 }

@@ -77,14 +77,24 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 	}
 
 	def findLeaveButtonFor(groupName:String) = {
-		underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).headOption.map(
+		underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).headOption.flatMap(
 
 			groupNameHeading=>{
 				val parent = groupNameHeading.findElement(By.xpath(".."))
 				//groupNameHeading.findElement(By.xpath("../form/input[@type='submit']"))}
-				parent.findElement(By.cssSelector("form input.btn"))
+				val maybeButton = parent.findElements(By.cssSelector("form input.btn")) // zero or 1-element java.util.List
+				if (maybeButton.size()==0){
+					None
+				}else{
+					Some(maybeButton.get(0))
+				}
 			}
 		)
+	}
+
+	def showsGroupLockedIcon(): Boolean = {
+		(underlying.findElements(By.className("icon-lock")).asScala.headOption).isDefined
+
 	}
 
 	def showsGroup(groupName:String) = {
@@ -94,7 +104,7 @@ class GroupSetInfoSummarySection(val underlying: WebElement, val moduleCode: Str
 	def findSelectGroupCheckboxFor(groupName:String ) = {
 		val groupNameHeading = underlying.findElements(By.tagName("h4")).asScala.filter(e=>e.getText.trim.startsWith(groupName + " ")).head
     // ugh. Might be worth investigating ways of using JQuery selector/traversals in selenium instead of this horror:
-		groupNameHeading.findElement(By.xpath("../../div[contains(@class,'span1')]/input"))
+		groupNameHeading.findElement(By.xpath("../../div[contains(@class,'pull-left')]/input"))
 	}
 }
 

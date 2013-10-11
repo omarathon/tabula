@@ -43,13 +43,9 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	var weekRanges: Seq[WeekRange] = Nil
 	
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.groups.DayOfWeekUserType")
-	@NotNull
 	var day: DayOfWeek = _
 	
-	@NotNull
 	var startTime: LocalTime = _
-	
-	@NotNull
 	var endTime: LocalTime = _
 	
 	// TODO We're storing locations as Strings atm, but do we need a more complex type to generate map links?
@@ -57,6 +53,7 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	
 	var title: String = _
 	
+	def isUnscheduled = day == null || (startTime == null && endTime == null)
 	def isSingleEvent = weekRanges.size == 1 && weekRanges.head.isSingleWeek
 		
 	@OneToOne(cascade = Array(ALL))

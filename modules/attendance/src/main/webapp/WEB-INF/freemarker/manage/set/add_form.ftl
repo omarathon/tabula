@@ -2,7 +2,7 @@
 
 <h1>Create monitoring schemes</h1>
 
-<form id="addMonitoringPointSet" action="<@url page="/manage/${command.dept.code}/sets/add/${command.academicYear.startYear?c}"/>" method="POST" class="modify-monitoring-points">
+<form id="addMonitoringPointSet" action="<@routes.createSet command.dept command.academicYear />" method="POST" class="modify-monitoring-points">
 
 	<div class="routeAndYearPicker">
 		<div class="row-fluid">
@@ -21,7 +21,10 @@
 				<h3>Route and year of study</h3>
 			</div>
 			<div class="span10">
-				<p class="collapsible"><i class="icon-fixed-width icon-chevron-right"></i> There <span class="routes-count">are no routes</span> selected</p>
+				<p class="collapsible">
+					<i class="icon-fixed-width icon-chevron-right"></i>
+					There <span class="routes-count">are no routes</span> selected <span class="expand-button"><a class="btn btn-primary">Add routes</a></span>
+				</p>
 				<#assign yearList = ["1","2","3","4","5","6","7","8","All"] />
 				<div class="collapsible-target">
 					<table class="table table-bordered table-striped table-condensed table-hover header">
@@ -83,13 +86,13 @@
 			<h2>Monitoring points</h2>
 		</div>
 		<div class="span9">
-			<a href="<@url page="/manage/${command.dept.code}/sets/add/points/add?form=true" />" class="btn btn-primary new-point"><i class="icon-plus"></i> Create new point</a>
+			<a href="<@routes.addPoint command.dept />?form=true" class="btn btn-primary new-point"><i class="icon-plus"></i> Create new point</a>
 		</div>
 	</div>
 
 	<#include "_monitoringPoints.ftl" />
 
-	<input type="submit" value="Create" class="btn btn-primary"/> <a class="btn" href="<@url page="/manage/${command.dept.code}"/>">Cancel</a>
+	<input type="submit" value="Create" class="btn btn-primary"/> <a class="btn" href="<@routes.manageDepartment command.dept />">Cancel</a>
 
 </form>
 

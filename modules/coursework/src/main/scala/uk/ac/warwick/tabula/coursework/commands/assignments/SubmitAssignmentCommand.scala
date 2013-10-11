@@ -13,7 +13,7 @@ import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import java.beans.PropertyEditorSupport
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
-import uk.ac.warwick.tabula.data.model.forms.SubmissionValue
+import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, FormValue}
 import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.spring.Wire
@@ -25,21 +25,21 @@ import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.services.SubmissionService
 
 class SubmitAssignmentCommand(
-		val module: Module, 
-		val assignment: Assignment, 
-		val user: CurrentUser) 
+		val module: Module,
+		val assignment: Assignment,
+		val user: CurrentUser)
 		extends Command[Submission] with SelfValidating with BindListener {
-	
+
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Create, assignment)
-	
+
 	var service = Wire.auto[SubmissionService]
 	var zipService = Wire.auto[ZipService]
 
 	var fields = buildEmptyFields
 
 	var plagiarismDeclaration: Boolean = false
-	
+
 	// used as a hint to the view.
 	var justSubmitted: Boolean = false
 
@@ -48,14 +48,14 @@ class SubmitAssignmentCommand(
 	}
 
 	/**
-	 * Goes through the assignment's fields building a set of empty SubmissionValue
+	 * Goes through the assignment's fields building a set of empty FormValue
 	 * objects that can be attached to the form and used for binding form values.
 	 * The key is the form field's ID, so binding should be impervious to field reordering,
 	 * though it will fail if a field is removed between a user loading a submission form
 	 * and submitting it.
 	 */
-	private def buildEmptyFields: JMap[String, SubmissionValue] = {
-		val pairs = assignment.fields.map { field => field.id -> field.blankSubmissionValue.asInstanceOf[SubmissionValue] }
+	private def buildEmptyFields: JMap[String, FormValue] = {
+		val pairs = assignment.submissionFields.map { field => field.id -> field.blankFormValue.asInstanceOf[FormValue] }
 		Map(pairs: _*)
 	}
 
@@ -90,11 +90,11 @@ class SubmitAssignmentCommand(
 			errors.rejectValue("plagiarismDeclaration", "assignment.submit.plagiarism")
 		}
 
-		// TODO for multiple attachments, check filenames are unique 	
+		// TODO for multiple attachments, check filenames are unique
 
 		// Individually validate all the custom fields
 		// If a submitted ID is not found in assignment, it's ignored.
-		assignment.fields.foreach { field =>
+		assignment.submissionFields.foreach { field =>
 			errors.pushNestedPath("fields[%s]".format(field.id))
 			fields.asScala.get(field.id).map { field.validate(_, errors) }
 			errors.popNestedPath()
@@ -120,16 +120,16 @@ class SubmitAssignmentCommand(
 
 		submission.values = fields.map {
 			case (_, submissionValue) =>
-				val value = new SavedSubmissionValue()
+				val value = new SavedFormValue()
 				value.name = submissionValue.field.name
 				value.submission = submission
 				submissionValue.persist(value)
 				value
-		}.toSet[SavedSubmissionValue]
-		
+		}.toSet[SavedFormValue]
+
 		// TAB-413 assert that we have at least one attachment
 		Assert.isTrue(
-			submission.values.find(value => Option(value.attachments).isDefined && !value.attachments.isEmpty).isDefined, 
+			submission.values.find(value => Option(value.attachments).isDefined && !value.attachments.isEmpty).isDefined,
 			"Submission must have at least one attachment"
 		)
 

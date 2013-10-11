@@ -7,19 +7,19 @@
 	</@spring.bind>
 
 	<#assign pointCount = 0 />
-	<#assign pointFields = ["name", "defaultValue", "week"] />
+	<#assign pointFields = ["name", "validFromWeek", "requiredFromWeek"] />
 	<#macro pointsInATerm term>
 		<div class="striped-section">
 			<h2 class="section-title">${term}</h2>
 			<div class="striped-section-contents">
-				<#list command.monitoringPointsByTerm[term]?sort_by("week") as point>
+				<#list command.monitoringPointsByTerm[term]?sort_by("validFromWeek") as point>
 					<div class="item-info row-fluid point">
 						<div class="span12">
 							<div class="pull-right">
-								<a class="btn btn-primary edit-point" href="<@url page="/manage/${command.dept.code}/sets/add/points/edit/${pointCount}?form=true"/>">Edit</a>
-								<a class="btn btn-danger delete-point" title="Delete" href="<@url page="/manage/${command.dept.code}/sets/add/points/delete/${pointCount}?form=true"/>"><i class="icon-remove"></i></a>
+								<a class="btn btn-primary edit-point" href="<@routes.editPoint command.dept pointCount />?form=true">Update</a>
+								<a class="btn btn-danger delete-point" title="Delete" href="<@routes.deletePoint command.dept pointCount />?form=true"><i class="icon-remove"></i></a>
 							</div>
-							${point.name} (<@fmt.singleWeekFormat point.week command.academicYear command.dept />)
+							${point.name} (<@fmt.monitoringPointWeeksFormat point.validFromWeek point.requiredFromWeek command.academicYear command.dept />)
 
 							<#list pointFields as pointField>
 								<@spring.bind path="command.monitoringPoints[${pointCount}].${pointField}">
@@ -30,8 +30,8 @@
 							</#list>
 
 							<input type="hidden" name="monitoringPoints[${pointCount}].name" value="${point.name}" />
-							<input type="hidden" name="monitoringPoints[${pointCount}].defaultValue" value="<#if point.defaultValue>true<#else>false</#if>" />
-							<input type="hidden" name="monitoringPoints[${pointCount}].week" value="${point.week}" />
+							<input type="hidden" name="monitoringPoints[${pointCount}].validFromWeek" value="${point.validFromWeek}" />
+							<input type="hidden" name="monitoringPoints[${pointCount}].requiredFromWeek" value="${point.requiredFromWeek}" />
 						</div>
 					</div>
 					<#assign pointCount = pointCount + 1 />

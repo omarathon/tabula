@@ -17,7 +17,7 @@ class MarkingWorkflowDaoImpl extends MarkingWorkflowDao with Daoisms {
 	
 	def getAssignmentsUsingMarkingWorkflow(markingWorkflow: MarkingWorkflow): Seq[Assignment] =
 		session.newCriteria[Assignment]
-			.add(Restrictions.eq("markingWorkflow", markingWorkflow))
+			.add(is("markingWorkflow", markingWorkflow))
 			.seq
 
 }
