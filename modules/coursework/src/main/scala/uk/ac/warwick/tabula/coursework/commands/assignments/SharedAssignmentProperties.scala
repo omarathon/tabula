@@ -61,7 +61,7 @@ trait SharedAssignmentProperties extends FindAssignmentFields {
 	@Max(Assignment.MaximumFileAttachments)
 	var fileAttachmentLimit: Int = 1
 
-	val maxFileAttachments: Int = 10
+	val maxFileAttachments: Int = 20
 
 	val invalidAttachmentPattern = """.*[\*\\/:\?"<>\|\%].*"""
 
