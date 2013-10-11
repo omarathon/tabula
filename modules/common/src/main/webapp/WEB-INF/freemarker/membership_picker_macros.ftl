@@ -62,7 +62,7 @@
 </#macro><#-- end of "header" -->
 
 
-<#-- 
+<#--
 Generates the bulk of the picker HTML, inside a fieldset element
 
 	Params:
@@ -143,7 +143,10 @@ Generates the bulk of the picker HTML, inside a fieldset element
 
 						<tr class="membership-item item-type-${item.itemTypeString}"> <#-- item-type-(sits|include|exclude) -->
 							<td>
-								<#if item.userId??>
+								<#-- TAB-1240: use the right key -->
+								<#if command.members.universityIds && item.universityId?has_content>
+									<@form.selector_check_row "modifyEnrolment" item.universityId />
+								<#elseif item.userId?has_content>
 									<@form.selector_check_row "modifyEnrolment" item.userId />
 								<#else>
 									<i class="icon-ban-circle use-tooltip" title="We are missing this person's usercode, without which we cannot modify their enrolment."></i>
@@ -182,11 +185,9 @@ Generates the bulk of the picker HTML, inside a fieldset element
 								</#if>
 							</td>
 							<td>
-								<#if _u.foundUser>
-									${_u.userId}
-								<#elseif item.userId??>
+								<#if item.userId??>
 									${item.userId}
-								<#else><#-- Hmm this bit shouldn't ever happen -->
+								<#else>
 									<span class="muted">Unknown</span>
 								</#if>
 							</td>
@@ -194,12 +195,12 @@ Generates the bulk of the picker HTML, inside a fieldset element
 					</#list>
 				</tbody>
 
-				<#list command.members.includeUsers as usercode>
-					<input type="hidden" name="includeUsers" value="${usercode}">
+				<#list command.members.includeUsers as untypedId>
+					<input type="hidden" name="includeUsers" value="${untypedId}">
 				</#list>
 
-				<#list command.members.excludeUsers as usercode>
-					<input type="hidden" name="excludeUsers" value="${usercode}">
+				<#list command.members.excludeUsers as untypedId>
+					<input type="hidden" name="excludeUsers" value="${untypedId}">
 				</#list>
 			</table>
 		</div>
@@ -494,13 +495,13 @@ Generates the bulk of the picker HTML, inside a fieldset element
 		$enrolment.on('click', '.remove-users', function(e) {
 			e.preventDefault();
 			$('#enrolment-table').find('tr.item-type-include input:checked, tr.item-type-sits input:checked').each(function() {
-				var usercode = $(this).val();
+				var untypedId = $(this).val();
 				var $tr = $(this).closest('tr');
 
 				// update both hidden fields and table
-				$('#enrolment-table').find('input:hidden[name=includeUsers][value='+ usercode + ']').remove();
+				$('#enrolment-table').find('input:hidden[name=includeUsers][value='+ untypedId + ']').remove();
 
-				$('#enrolment-table').append($('<input type="hidden" name="excludeUsers" />').val(usercode));
+				$('#enrolment-table').append($('<input type="hidden" name="excludeUsers" />').val(untypedId));
 				if ($tr.is('.item-type-sits')) {
 					$tr.find('.source').html('<#noescape>${excludeIcon}</#noescape>');
 				} else {
@@ -519,12 +520,12 @@ Generates the bulk of the picker HTML, inside a fieldset element
 		$enrolment.on('click', '.restore-users', function(e) {
 			e.preventDefault();
 			$('#enrolment-table').find('tr.item-type-exclude input:checked').each(function() {
-				var usercode = $(this).val();
+				var untypedId = $(this).val();
 				var $tr = $(this).closest('tr');
 
 				// update both hidden fields and table
-				$('#enrolment-table').find('input:hidden[name=excludeUsers][value='+ usercode + ']').remove();
-				$('#enrolment-table').append($('<input type="hidden" name="includeUsers" />').val(usercode));
+				$('#enrolment-table').find('input:hidden[name=excludeUsers][value='+ untypedId + ']').remove();
+				$('#enrolment-table').append($('<input type="hidden" name="includeUsers" />').val(untypedId));
 				$tr.find('.source').html('<#noescape>${includeIcon}</#noescape>');
 
 				$tr.removeClass(function(i, css) {

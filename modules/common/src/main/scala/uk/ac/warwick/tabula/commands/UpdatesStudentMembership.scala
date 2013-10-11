@@ -79,23 +79,23 @@ trait UpdatesStudentMembership {
 		updateAssessmentGroups()
 	}
 
-	private def addUserFromUserId(userId: String, addTo: ListBuffer[User]) {
+	private def bufferUserFromUserId(userId: String, buffer: ListBuffer[User]) {
 		val user = userLookup.getUserByUserId(userId)
 		if (user.isFoundUser && null != user.getWarwickId) {
-			addTo += user
+			buffer += user
 		}
 	}
 
-	private def addIfValidUser(userString: String, addTo: ListBuffer[User]) {
+	private def bufferValidUser(userString: String, buffer: ListBuffer[User]) {
 		if (UniversityId.isValid(userString)) {
 			val user = userLookup.getUserByWarwickUniId(userString)
 			if (user.isFoundUser) {
-				addTo += user
+				buffer += user
 			} else {
-				addUserFromUserId(userString, addTo)
+				bufferUserFromUserId(userString, buffer)
 			}
 		} else {
-			addUserFromUserId(userString, addTo)
+			bufferUserFromUserId(userString, buffer)
 		}
 	}
 
@@ -104,43 +104,47 @@ trait UpdatesStudentMembership {
 	 */
 	private def updateMembership() {
 
-		// a list to hold the users we're adding
+		// buffers to hold the users we're adding/removing
 		val usersToAdd = ListBuffer[User]()
+		val usersToExclude = ListBuffer[User]()
 
 		// parse items from textarea into usersToAdd list
 		for (item <- massAddUsersEntries) {
-			addIfValidUser(item, usersToAdd)
+			bufferValidUser(item, usersToAdd)
 		}
 
 		// now add the users from includeUsers
-		for (includedUser <- includeUsers.asScala){
-			addIfValidUser(includedUser, usersToAdd)
+		for (includedUser <- includeUsers.asScala) {
+			bufferValidUser(includedUser, usersToAdd)
 		}
 
 		// now get implicit membership list from upstream
 		val upstreamMembers = existingGroups.map(membershipService.determineMembershipUsers(_, existingMembers)).getOrElse(Seq())
 
-		for (user<-usersToAdd.distinct){
-			if (members.excludes.contains(user)){
+		for (user <- usersToAdd.distinct) {
+			if (members.excludes.contains(user)) {
 				members.unexclude(user)
 			}
-			else if (!upstreamMembers.contains(user)){
+			else if (!upstreamMembers.contains(user)) {
 				// TAB-399 only add if not already a member of a linked UpstreamGroup
 				members.add(user)
 			}
 		}
 
-		// uninclude from previously-added users, or explicitly exclude
-		val usersToExclude = userLookup.getUsersByUserIds(JArrayList((excludeUsers.asScala map { _.trim } filterNot { _.isEmpty }).distinct)).asScala map(_._2)
-		for (exclude<-usersToExclude){
-			if (members.users contains exclude){
-				members.remove(exclude)
+		// uninclude from previously-added users, or explicitly exclude as appropriate
+		for (excludedUser <- excludeUsers.asScala) {
+			bufferValidUser(excludedUser, usersToExclude)
+		}
+
+		for (user <- usersToExclude.distinct) {
+			if (members.users contains user) {
+				members.remove(user)
 			}else{
-				members.exclude(exclude)
+				members.exclude(user)
 			}
 		}
 
-		// empty these out to make it clear that we've "moved" the data into members
+		// clear these local properties, as we've "moved" the data into members
 		massAddUsers = ""
 		includeUsers = JArrayList()
 		excludeUsers = JArrayList()
