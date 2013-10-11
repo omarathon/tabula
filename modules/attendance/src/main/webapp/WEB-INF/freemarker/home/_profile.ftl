@@ -33,7 +33,7 @@
 							<#local returnTo>
 								<@routes.profile command.studentCourseDetails.student />
 							</#local>
-							<a href="<@routes.recordStudent point command.studentCourseDetails.student returnTo />"
+							<a href="<@routes.recordStudent point command.studentCourseDetails returnTo />"
 								<#if point.sentToAcademicOffice>
 									class="btn btn-mini disabled" title="Monitoring information for this point has been submitted and can no longer be edited"
 								<#else>
