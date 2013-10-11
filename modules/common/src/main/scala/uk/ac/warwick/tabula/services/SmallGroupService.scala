@@ -91,18 +91,18 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			val user = userLookup.getUserByUserId(userId)
 
 			val groups = smallGroupDao.findByModuleAndYear(modReg.module, modReg.academicYear)
-			for (smallGroup <- groups) {
-				val userGroup = smallGroup.students
 
-				if (userGroup.includesUser(user)) {
-					userGroup match {
-						case uGroup: UserGroup => {
-							uGroup.remove(user)
-							userGroupDao.saveOrUpdate(uGroup)
-						}
-						case _ => logger.warn("Could not remove user from group - userGroup " + userGroup + " was not of type UserGroup as expected.")
-					}
-				}
+			for {
+			    smallGroup <- smallGroupDao.findByModuleAndYear(modReg.module, modReg.academicYear)
+			    if (smallGroup.students.includesUser(user))
+			} {
+			    smallGroup.students match {
+			       case uGroup: UserGroup => {
+			         uGroup.remove(user)
+			         userGroupDao.saveOrUpdate(uGroup)
+			       }
+			       case _ => logger.warn("Could not remove user from group - userGroup " + smallGroup.students + " was not of type UserGroup as expected.")
+			    }
 			}
 		}
 	}
