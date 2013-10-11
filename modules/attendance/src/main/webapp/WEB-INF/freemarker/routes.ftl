@@ -13,7 +13,7 @@
 	<#macro manageDepartment department><@url page="/manage/${department.code}/" /></#macro>
 	
 	<#macro record point returnTo><@url page="/${point.pointSet.route.department.code}/${point.id}/record?returnTo=${returnTo?url}"/></#macro>
-	<#macro recordStudent point student returnTo><@url page="/${point.pointSet.route.department.code}/${point.id}/record?returnTo=${returnTo?url}"/>#student-${student.universityId}</#macro>
+	<#macro recordStudent point studentCourseDetails returnTo><@url page="/${point.pointSet.route.department.code}/${point.id}/record/${studentCourseDetails.urlSafeId}?returnTo=${returnTo?url}"/></#macro>
 	
 	<#macro createSet department academicYear><@url page="/manage/${department.code}/sets/add/${academicYear.startYear?c}"/></#macro>
 	<#macro editSet pointSet><@url page="/manage/${pointSet.route.department.code}/sets/${pointSet.id}/edit"/></#macro>
@@ -29,3 +29,4 @@
 	<#macro removePoint point><@url page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/edit/points/${point.id}/delete" /></#macro>
 	
 	<#macro profile profile><@url page="/view/${profile.universityId}" context="/profiles"/></#macro>
+	<#macro photo profile><@url page="/view/photo/${profile.universityId}.jpg"/></#macro>
