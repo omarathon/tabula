@@ -113,7 +113,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	 * For each department, enumerate any sub-departments that the member matches
 	 */
 	def touchedDepartments = {
-		def moduleDepts = registeredModulesAnyYear.map(_.department).distinct.toStream
+		def moduleDepts = registeredModulesByYear(None).map(_.department).distinct.toStream
 
 		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct
 		topLevelDepts flatMap(_.subDepartmentsContaining(this))
@@ -126,11 +126,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	 * TODO consider caching based on getLastUpdatedDate
 	 */
 
-	def registeredModules(year: AcademicYear) = Seq[Module]()
-
-	def registeredModulesAnyYear = Seq[Module]()
-	def moduleRegistrationsByYear(year: AcademicYear) = Seq[ModuleRegistration]()
-	def moduleRegistrations = Seq[ModuleRegistration]()
+	def registeredModulesByYear(year: Option[AcademicYear]) = Seq[Module]()
+	def moduleRegistrationsByYear(year: Option[AcademicYear]) = Seq[ModuleRegistration]()
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
@@ -239,16 +236,10 @@ class StudentMember extends Member with StudentProperties {
 		studentCourseDetails.add(detailsToAdd)
 	}
 
-	override def registeredModules(year: AcademicYear): Seq[Module] =
-		studentCourseDetails.asScala.flatMap(_.registeredModules(year))
+	override def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] =
+		studentCourseDetails.asScala.flatMap(_.registeredModulesByYear(year))
 
-	override def registeredModulesAnyYear =
-		studentCourseDetails.asScala.flatMap(_.moduleRegistrations.asScala).map(_.module)
-
-	override def moduleRegistrations: Seq[ModuleRegistration] =
-		studentCourseDetails.asScala.flatMap(_.moduleRegistrations.asScala)
-
-	override def moduleRegistrationsByYear(year: AcademicYear): Seq[ModuleRegistration] =
+	override def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =
 		studentCourseDetails.asScala.flatMap(_.moduleRegistrationsByYear(year))
 }
 

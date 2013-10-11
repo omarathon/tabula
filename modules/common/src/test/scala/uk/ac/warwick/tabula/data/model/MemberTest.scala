@@ -45,8 +45,8 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		val mod2 = new Module
 		mod1.department = extDept
 		mod2.department = homeDept
-		val modReg1 = new ModuleRegistration(studentCourseDetails, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012))
-		val modReg2 = new ModuleRegistration(studentCourseDetails, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013))
+		val modReg1 = new ModuleRegistration(studentCourseDetails, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
+		val modReg2 = new ModuleRegistration(studentCourseDetails, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
 		studentCourseDetails.moduleRegistrations.add(modReg1)
 		studentCourseDetails.moduleRegistrations.add(modReg2)
 
@@ -84,13 +84,13 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		val mod1 = new Module
 		val mod2 = new Module
-		val modReg1 = new ModuleRegistration(scd1, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012))
-		val modReg2 = new ModuleRegistration(scd1, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013))
+		val modReg1 = new ModuleRegistration(scd1, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
+		val modReg2 = new ModuleRegistration(scd1, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
 		scd1.moduleRegistrations.add(modReg1)
 		scd1.moduleRegistrations.add(modReg2)
 
-		member.registeredModules(AcademicYear(2013)) should be (Stream(mod2))
-		member.registeredModulesAnyYear should be (Stream(mod1, mod2))
+		member.registeredModulesByYear(Some(AcademicYear(2013))) should be (Stream(mod2))
+		member.registeredModulesByYear(None) should be (Stream(mod1, mod2))
 
 		// create another student course details with module registrations
 		val scd2 = new StudentCourseDetails(member, "2222222/3")
@@ -98,16 +98,16 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		val mod3 = new Module
 		val mod4 = new Module
-		val modReg3 = new ModuleRegistration(scd2, mod3, new java.math.BigDecimal("12.0"), AcademicYear(2012))
-		val modReg4 = new ModuleRegistration(scd2, mod4, new java.math.BigDecimal("12.0"), AcademicYear(2013))
+		val modReg3 = new ModuleRegistration(scd2, mod3, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
+		val modReg4 = new ModuleRegistration(scd2, mod4, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
 		scd2.moduleRegistrations.add(modReg3)
 		scd2.moduleRegistrations.add(modReg4)
 
-		member.registeredModules(AcademicYear(2013)) should be (Stream(mod2, mod4))
-		member.registeredModulesAnyYear should be (Stream(mod1, mod2, mod3, mod4))
+		member.registeredModulesByYear(Some(AcademicYear(2013))) should be (Stream(mod2, mod4))
+		member.registeredModulesByYear(None) should be (Stream(mod1, mod2, mod3, mod4))
 
-		member.moduleRegistrations should be (Stream(modReg1, modReg2, modReg3, modReg4))
-		member.moduleRegistrationsByYear(AcademicYear(2012)) should be (Stream(modReg1, modReg3))
+		member.moduleRegistrationsByYear(None) should be (Stream(modReg1, modReg2, modReg3, modReg4))
+		member.moduleRegistrationsByYear(Some(AcademicYear(2012))) should be (Stream(modReg1, modReg3))
 	}
 
 	@Test def nullUsers {

@@ -56,17 +56,17 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
 		val mod1 = new Module
 		val mod2 = new Module
-		val modReg1 = new ModuleRegistration(scd1, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012))
-		val modReg2 = new ModuleRegistration(scd1, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013))
+		val modReg1 = new ModuleRegistration(scd1, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
+		val modReg2 = new ModuleRegistration(scd1, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
 
 		scd1.moduleRegistrations.add(modReg1)
 		scd1.moduleRegistrations.add(modReg2)
 
-		scd1.registeredModules(AcademicYear(2013)) should be (Stream(mod2))
-		scd1.registeredModulesAnyYear should be (Stream(mod1, mod2))
+		scd1.registeredModulesByYear(Some(AcademicYear(2013))) should be (Stream(mod2))
+		scd1.registeredModulesByYear(None) should be (Stream(mod1, mod2))
 
 		scd1.moduleRegistrations.asScala should be (Stream(modReg1, modReg2))
-		scd1.moduleRegistrationsByYear(AcademicYear(2012)) should be (Stream(modReg1))
+		scd1.moduleRegistrationsByYear(Some(AcademicYear(2012))) should be (Stream(modReg1))
 
 	}
 

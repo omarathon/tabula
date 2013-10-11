@@ -51,13 +51,17 @@ class StudentCourseDetails
 	@BatchSize(size=200)
 	var moduleRegistrations: JList[ModuleRegistration] = JArrayList()
 
-	def registeredModules(year: AcademicYear): Seq[Module] =
-		moduleRegistrations.asScala.filter(_.academicYear == year).map(_.module)
+	def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] =
+		moduleRegistrations.asScala.collect {
+			case modReg if year .isEmpty => modReg.module
+			case modReg if modReg.academicYear == year.getOrElse(null) => modReg.module
+	}
 
-	def registeredModulesAnyYear = moduleRegistrations.asScala.map(_.module)
-
-	def moduleRegistrationsByYear(year: AcademicYear) =
-		moduleRegistrations.asScala.filter(_.academicYear == year)
+	def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =
+		moduleRegistrations.asScala.collect {
+			case modReg if year.isEmpty => modReg
+			case modReg if modReg.academicYear == year.getOrElse(null) => modReg
+	}
 
 	def toStringProps = Seq(
 		"scjCode" -> scjCode,

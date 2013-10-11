@@ -31,7 +31,7 @@ class ModuleRegistrationFixtureCommand extends CommandInternal[Unit] with Loggin
 				memberDao.getByUniversityId(uniId) match {
 					case Some(stu: StudentMember) => {
 						for (scd <- stu.studentCourseDetails.asScala) {
-							val modReg = new ModuleRegistration(scd, module.get, cats, AcademicYear(2013))
+							val modReg = new ModuleRegistration(scd, module.get, cats, AcademicYear(2013), "A")
 							session.save(modReg)
 							scd.moduleRegistrations.add(modReg)
 							session.save(scd)
