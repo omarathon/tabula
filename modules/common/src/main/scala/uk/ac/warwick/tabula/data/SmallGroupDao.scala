@@ -4,6 +4,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, SmallGroupEvent, SmallGroup, SmallGroupSet}
 import org.hibernate.criterion.Restrictions
 import org.springframework.stereotype.Repository
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.Module
 
 trait SmallGroupDaoComponent {
 	val smallGroupDao: SmallGroupDao
@@ -22,6 +24,7 @@ trait SmallGroupDao {
 	def saveOrUpdate(smallGroup: SmallGroup)
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent)
 	def saveOrUpdate(occurrence: SmallGroupEventOccurrence)
+	def findByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroup]
 
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, week: Int): Option[SmallGroupEventOccurrence]
 }
@@ -42,4 +45,11 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.add(is("event", event))
 			.add(is("week", week))
 			.uniqueResult
+
+	def findByModuleAndYear(module: Module, year: AcademicYear) =
+		session.newCriteria[SmallGroup]
+			.createAlias("groupSet", "set")
+			.add(is("set.module", module))
+			.add(is("set.academicYear", year))
+			.seq
 }

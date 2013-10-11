@@ -16,6 +16,6 @@ object AttendanceBreadcrumbs {
 	 */
 	case class ManagingDepartment(department: model.Department) extends Abstract {
 		val title = "Manage monitoring schemes"
-		val url = Some(Routes.managingDepartment(department))
+		val url = Some(Routes.department.manage(department))
 	}
 }

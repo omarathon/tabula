@@ -27,6 +27,7 @@ import uk.ac.warwick.tabula.scheduling.services.SitsAcademicYearAware
 import uk.ac.warwick.tabula.data.model.ModuleRegistration
 import uk.ac.warwick.tabula.data.ModuleRegistrationDao
 import uk.ac.warwick.tabula.data.ModuleRegistrationDaoImpl
+import uk.ac.warwick.tabula.services.SmallGroupService
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware {
 
@@ -42,6 +43,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	var moduleRegistrationImporter = Wire.auto[ModuleRegistrationImporter]
 	var features = Wire.auto[Features]
 	var moduleRegistrationDao = Wire.auto[ModuleRegistrationDaoImpl]
+	var smallGroupService = Wire.auto[SmallGroupService]
 
 	val BatchSize = 250
 
@@ -147,6 +149,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		for (existingMR <- existingModuleRegistrations) {
 			if (!newModuleRegistrations.contains(existingMR)) {
 				session.delete(existingMR)
+				smallGroupService.removeFromSmallGroups(existingMR)
 			}
 		}
 	}

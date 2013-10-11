@@ -51,7 +51,7 @@
 						<button type="button" class="btn btn-unauthorised">
 							<i class="icon-remove icon-fixed-width" title="Set all to 'Missed (unauthorised)'"></i>
 						</button>
-            <button type="button" class="btn btn-authorised">
+            			<button type="button" class="btn btn-authorised">
 							<i class="icon-remove-circle icon-fixed-width" title="Set all to 'Missed (authorised)'"></i>
 						</button>
 						<button type="button" class="btn btn-attended">
