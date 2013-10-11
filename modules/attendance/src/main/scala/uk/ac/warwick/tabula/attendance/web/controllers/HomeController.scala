@@ -21,15 +21,16 @@ class HomeController extends AttendanceController {
 
 	@RequestMapping
 	def home(@ModelAttribute("command") cmd: Appliable[Map[String, Set[Department]]]) = {
-		if (user.isStaff) {
+		if (user.isStudent || user.isPGR) {
+			Redirect(Routes.profile())
+
+		} else if (user.isStaff ) {
 			val map = cmd.apply()
 			if (map("Manage").size == 0 && map("View").size == 1) {
 				Redirect(s"/${map("View").head.code}")
 			} else {
 				Mav("home/home", "permissionMap" -> map)
 			}
-		} else if (user.isStudent) {
-			Redirect(Routes.profile())
 		} else Mav("home/nopermission")
 	}
 
