@@ -21,7 +21,7 @@ class SetMonitoringCheckpointController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable monitoringPoint: MonitoringPoint, user: CurrentUser) = {
-		SetMonitoringCheckpointCommand(monitoringPoint, user)
+		SetMonitoringCheckpointCommand(mandatory(monitoringPoint), user)
 	}
 
 
