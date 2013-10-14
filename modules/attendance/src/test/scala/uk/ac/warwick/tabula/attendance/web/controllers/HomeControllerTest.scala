@@ -8,89 +8,89 @@ import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.JavaImports._
 
-class HomeControllerTest extends  TestBase with Mockito{
+class HomeControllerTest extends TestBase with Mockito{
 
 	class Fixture{
-		val command = mock[Appliable[Map[String, Set[Department]]]]
-
-		val student = new User().tap(_.setStudent(true))
-		val pgr = new User().tap(u=>{
-			u.setStaff(true)
-			u.setExtraProperties(JMap("warwickitsclass"->"PG(R)"))
-		})
-		val staff = new User().tap(_.setStaff(true))
-		val external = new User()
+		val command = mock[Appliable[(Boolean, Map[String, Set[Department]])]]
+		val departmentCode = "xx"
 	}
 
 
 	@Test
-	def studentsGetRedirectedToProfileView(){new Fixture{
-		withCurrentUser(new CurrentUser(student,student)){
-
-			val mav = new HomeController().home(command)
-			mav.viewName should be("redirect:/profile")
-
-			there were no(command).apply()
-		}
-	}}
-
-	@Test
-	def PGRsGetAdminViewWithHasOwnPointsFlag(){new Fixture{
-		withCurrentUser(new CurrentUser(pgr,pgr)){
-
-			command.apply() returns Map(
-				"View"->Set(new Department().tap(_.code="xx")),
-				"Manage"->Set(new Department().tap(_.code="xx"))
+	def onlyProfileRedirectedToProfileView(){new Fixture{
+		command.apply() returns Pair(
+			true,
+			Map(
+				"ViewPermissions" -> Set(),
+				"ManagePermissions" -> Set()
 			)
-			val mav = new HomeController().home(command)
-			mav.viewName should be("home/home")
-			mav.toModel("hasOwnMonitoringPoints") should be(JBoolean(Some(true)))
-		}
+		)
+
+		val mav = new HomeController().home(command)
+		mav.viewName should be("redirect:/profile")
+
 	}}
 
 	@Test
-  def staffWithSingleDepartmentViewAndNoDepartmentManageRightsGetsRedirectToDepartment(){new Fixture{
-		withCurrentUser(new CurrentUser(staff,staff)){
+	def onlyOneViewPermissionRedirectedToViewDepartment(){new Fixture{
 
-			command.apply() returns Map(
-			 	"View"->Set(new Department().tap(_.code="xx")),
-			  "Manage"->Set.empty
+		command.apply() returns Pair(
+			false,
+			Map(
+				"ViewPermissions" -> Set(new Department().tap(_.code=departmentCode)),
+				"ManagePermissions" -> Set()
 			)
-			val mav = new HomeController().home(command)
+		)
 
-			mav.viewName should be("redirect:/xx")
+		val mav = new HomeController().home(command)
+		mav.viewName should be(s"redirect:/$departmentCode")
 
-			there was one(command).apply()
-		}
 	}}
 
 	@Test
-  def staffWithMultiplePermissionsGetHomeView(){new Fixture{
-		withCurrentUser(new CurrentUser(staff,staff)){
-
-			val permisisons = Map(
-				"View"->Set(new Department().tap(_.code="xx")),
-				"Manage"->Set(new Department().tap(_.code="xx"))
+	def onlyOneManagePermissionRedirectedToManageDepartment(){new Fixture{
+		command.apply() returns Pair(
+			false,
+			Map(
+				"ViewPermissions" -> Set(),
+				"ManagePermissions" -> Set(new Department().tap(_.code=departmentCode))
 			)
-			command.apply() returns permisisons
-			val mav = new HomeController().home(command)
+		)
 
-			mav.viewName should be("home/home")
-			mav.toModel("permissionMap")  should be(permisisons)
+		val mav = new HomeController().home(command)
+		mav.viewName should be(s"redirect:/manage/$departmentCode")
 
-			there was one(command).apply()
-		}
 	}}
 
 	@Test
-	def nonStaffOrStudentGetsPermissionDenied(){new Fixture{
-		withCurrentUser(new CurrentUser(external,external)){
+	def noPermissions(){new Fixture{
+		command.apply() returns Pair(
+			false,
+			Map(
+				"ViewPermissions" -> Set(),
+				"ManagePermissions" -> Set()
+			)
+		)
 
-			val mav = new HomeController().home(command)
-			mav.viewName should be("home/nopermission")
+		val mav = new HomeController().home(command)
+		mav.viewName should be("home/nopermission")
 
-			there were no(command).apply()
-		}
 	}}
+
+	@Test
+	def viewAndManageAndProfileShoHome(){new Fixture{
+		command.apply() returns Pair(
+			true,
+			Map(
+				"ViewPermissions" -> Set(new Department().tap(_.code=departmentCode)),
+				"ManagePermissions" -> Set(new Department().tap(_.code=departmentCode))
+			)
+		)
+
+		val mav = new HomeController().home(command)
+		mav.viewName should be("home/home")
+
+	}}
+
 
 }

@@ -5,42 +5,43 @@
 	<#else>
 		<h1 class="with-settings">Hello</h1>
 	</#if>
-	
-	<#assign can_record = (permissionMap["View"]?size > 0) />
-	<#assign can_manage = (permissionMap["Manage"]?size > 0) />
+
+	<p class="lead muted">
+		This is a service for viewing and managing attendance monitoring points.
+	</p>
+
+	<#if hasProfile>
+		<h2>
+			<a href="<@routes.attendanceProfile />">My attendance profile</a>
+		</h2>
+	</#if>
+
+	<#assign can_record = (permissionMap["ViewPermissions"]?size > 0) />
+	<#assign can_manage = (permissionMap["ManagePermissions"]?size > 0) />
 
 	<#if can_record || can_manage>
-		<#if (permissionMap["View"]?size > 0)>
+		<#if (permissionMap["ViewPermissions"]?size > 0)>
 			<h2>View and record monitoring points</h2>
 			<ul class="links">
-				<#list permissionMap["View"] as department>
+				<#list permissionMap["ViewPermissions"] as department>
 					<li>
-						<a href="<@routes.viewDepartment department />">${department.name}</a>
+						<a id="view-department-${department.code}" href="<@routes.viewDepartment department />">${department.name}</a>
 					</li>
 				</#list>
 			</ul>
 		</#if>
 		
-		<#if (permissionMap["Manage"]?size > 0)>
+		<#if (permissionMap["ManagePermissions"]?size > 0)>
 			<h2>Create and edit monitoring schemes</h2>
 			<ul class="links">
-				<#list permissionMap["Manage"] as department>
+				<#list permissionMap["ManagePermissions"] as department>
 					<li>
-						<a href="<@routes.manageDepartment department />">${department.name}</a>
+						<a id="manage-department-${department.code}" href="<@routes.manageDepartment department />">${department.name}</a>
 					</li>
 				</#list>
 			</ul>
 		</#if>
 	<#else>
-		<p class="lead muted">
-			This is a service for managing attendance monitoring points.
-		</p>
-		<#if hasOwnMonitoringPoints >
-		<p>
-		   <a href="<@routes.attendanceProfile />">My attendance profile</a>
-		</p>
-		</#if>
-
 		<#if user.staff>
 			<p>
 				You do not currently have permission to manage any monitoring points. Please contact your

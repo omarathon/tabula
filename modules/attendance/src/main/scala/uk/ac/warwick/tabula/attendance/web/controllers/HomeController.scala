@@ -4,13 +4,17 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.attendance.commands.{HomeCommand, ManageHomeCommand}
+import uk.ac.warwick.tabula.attendance.commands.HomeCommand
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.attendance.web.Routes
 
 /**
- * Displays the Attendance home screen, allowing users to choose the department to view or manage.
- * If the user only has permissions over a single department, they are taken directly to it.
+ * Displays the Attendance home screen.
+ * Redirects to the the appropriate page if only one of the following is true:
+ * * The user has a profile
+ * * The user has view/record permissions on a single department
+ * * The user has manage permissions on a single department
+ * Otherwise they are shown the home page
  */
 @Controller
 @RequestMapping(Array("/"))
@@ -20,18 +24,20 @@ class HomeController extends AttendanceController {
 	def createCommand(user: CurrentUser) = HomeCommand(user)
 
 	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[Map[String, Set[Department]]]) = {
-		if (user.isStudent) {
-			Redirect(Routes.profile())
-
-		} else if (user.isStaff ) {
-			val map = cmd.apply()
-			if (map("Manage").size == 0 && map("View").size == 1) {
-				Redirect(s"/${map("View").head.code}")
-			} else {
-				Mav("home/home", "permissionMap" -> map, "hasOwnMonitoringPoints"->user.isPGR)
+	def home(@ModelAttribute("command") cmd: Appliable[(Boolean, Map[String, Set[Department]])]) = {
+		cmd.apply() match {
+			case (hasProfile, permissionsMap) => {
+				if (hasProfile && permissionsMap("ManagePermissions").size == 0 && permissionsMap("ViewPermissions").size == 0)
+					Redirect(Routes.profile())
+				else if (!hasProfile && permissionsMap("ManagePermissions").size == 0 && permissionsMap("ViewPermissions").size == 1)
+					Redirect(Routes.department.view(permissionsMap("ViewPermissions").head))
+				else if (!hasProfile && permissionsMap("ManagePermissions").size == 1 && permissionsMap("ViewPermissions").size == 0)
+					Redirect(Routes.department.manage(permissionsMap("ManagePermissions").head))
+				else if (hasProfile || permissionsMap("ManagePermissions").size > 0 || permissionsMap("ViewPermissions").size > 0)
+					Mav("home/home", "permissionMap" -> permissionsMap, "hasProfile" -> hasProfile)
+				else Mav("home/nopermission")
 			}
-		} else Mav("home/nopermission")
+		}
 	}
 
 }
