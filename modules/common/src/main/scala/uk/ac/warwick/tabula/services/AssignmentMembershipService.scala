@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.services
 
 import collection.JavaConverters._
-
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Autowired
-
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.AcademicYear
