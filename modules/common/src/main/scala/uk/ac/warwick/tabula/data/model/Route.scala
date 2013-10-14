@@ -49,8 +49,28 @@ trait HasRoute {
 object Route {
 	// For sorting a collection by route code. Either pass to the sort function,
 	// or expose as an implicit val.
-	val CodeOrdering = Ordering.by[Route, String] ( _.code )
-	val NameOrdering = Ordering.by[Route, String] ( _.name )
+	val CodeOrdering: Ordering[Route] = Ordering.by[Route, String] ( _.code )
+	val NameOrdering: Ordering[Route] = Ordering.by[Route, String] ( _.name )
+	val DegreeTypeOrdering: Ordering[Route] = new Ordering[Route] {
+		def compare(a: Route, b: Route): Int = {
+			if (a.degreeType == b.degreeType)
+				CodeOrdering.compare(a, b)
+			else if (a.degreeType == DegreeType.Undergraduate)
+				-1
+			else if (b.degreeType == DegreeType.Undergraduate)
+				1
+			else if (a.degreeType == DegreeType.Postgraduate)
+				-1
+			else if (b.degreeType == DegreeType.Postgraduate)
+				1
+			else if (a.degreeType == DegreeType.PGCE)
+				-1
+			else if (b.degreeType == DegreeType.PGCE)
+				1
+			else
+				0
+		}
+	}
 
 	// Companion object is one of the places searched for an implicit Ordering, so
 	// this will be the default when ordering a list of routes.

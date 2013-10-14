@@ -164,7 +164,7 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 
 	var changeYear = false
 
-	val availableRoutes = dept.routes.asScala.sortBy(r => r.code)
+	val availableRoutes = dept.routes.asScala.sorted(Route.DegreeTypeOrdering)
 
 	lazy val availableYears = getAvailableYears
 
