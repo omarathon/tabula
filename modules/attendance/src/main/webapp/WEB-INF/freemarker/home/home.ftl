@@ -10,20 +10,32 @@
 		This is a service for viewing and managing attendance monitoring points.
 	</p>
 
-	<#if hasProfile>
+	<#if command.hasProfile>
 		<h2>
 			<a href="<@routes.attendanceProfile />">My attendance profile</a>
 		</h2>
 	</#if>
 
-	<#assign can_record = (permissionMap["ViewPermissions"]?size > 0) />
-	<#assign can_manage = (permissionMap["ManagePermissions"]?size > 0) />
+	<#if hasAnyRelationships>
+		<h2>My students</h2>
+
+		<ul>
+			<#list command.relationshipTypesMap?keys as relationshipType>
+				<#if relationshipTypesMapById[relationshipType.id]>
+					<li><a id="relationship-${relationshipType.urlPart}" href="<@routes.relationship_students relationshipType />">${relationshipType.studentRole?cap_first}s</a></li>
+				</#if>
+			</#list>
+		</ul>
+	</#if>
+
+	<#assign can_record = (command.viewPermissions?size > 0) />
+	<#assign can_manage = (command.managePermissions?size > 0) />
 
 	<#if can_record || can_manage>
-		<#if (permissionMap["ViewPermissions"]?size > 0)>
+		<#if (command.viewPermissions?size > 0)>
 			<h2>View and record monitoring points</h2>
 			<ul class="links">
-				<#list permissionMap["ViewPermissions"] as department>
+				<#list command.viewPermissions as department>
 					<li>
 						<a id="view-department-${department.code}" href="<@routes.viewDepartment department />">${department.name}</a>
 					</li>
@@ -31,10 +43,10 @@
 			</ul>
 		</#if>
 		
-		<#if (permissionMap["ManagePermissions"]?size > 0)>
+		<#if (command.managePermissions?size > 0)>
 			<h2>Create and edit monitoring schemes</h2>
 			<ul class="links">
-				<#list permissionMap["ManagePermissions"] as department>
+				<#list command.managePermissions as department>
 					<li>
 						<a id="manage-department-${department.code}" href="<@routes.manageDepartment department />">${department.name}</a>
 					</li>
@@ -42,7 +54,7 @@
 			</ul>
 		</#if>
 	<#else>
-		<#if user.staff>
+		<#if user.staff && !hasAnyRelationships>
 			<p>
 				You do not currently have permission to view or manage any monitoring points. Please contact your
 				departmental access manager for Tabula, or email <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
