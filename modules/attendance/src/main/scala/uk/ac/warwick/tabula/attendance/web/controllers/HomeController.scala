@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.attendance.commands.{HomeCommandState, HomeCommand}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.attendance.commands.HomeInformation
 
 /**
  * Displays the Attendance home screen.
@@ -23,18 +24,19 @@ class HomeController extends AttendanceController {
 	def createCommand(user: CurrentUser) = HomeCommand(user)
 
 	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[Unit] with HomeCommandState) = {
-		cmd.apply()
-		val hasAnyRelationships = cmd.relationshipTypesMap.exists{ case (_, b) => b}
-		if (cmd.hasProfile && cmd.managePermissions.size == 0 && cmd.viewPermissions.size == 0 && !hasAnyRelationships)
+	def home(@ModelAttribute("command") cmd: Appliable[HomeInformation]) = {
+		val info = cmd.apply()
+		
+		val hasAnyRelationships = info.relationshipTypesMap.exists{ case (_, b) => b}
+		if (info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 0 && !hasAnyRelationships)
 			Redirect(Routes.profile())
-		else if (!cmd.hasProfile && cmd.managePermissions.size == 0 && cmd.viewPermissions.size == 1 && !hasAnyRelationships)
-			Redirect(Routes.department.view(cmd.viewPermissions.head))
-		else if (!cmd.hasProfile && cmd.managePermissions.size == 1 && cmd.viewPermissions.size == 0 && !hasAnyRelationships)
-			Redirect(Routes.department.manage(cmd.managePermissions.head))
+		else if (!info.hasProfile && info.managePermissions.size == 0 && info.viewPermissions.size == 1 && !hasAnyRelationships)
+			Redirect(Routes.department.view(info.viewPermissions.head))
+		else if (!info.hasProfile && info.managePermissions.size == 1 && info.viewPermissions.size == 0 && !hasAnyRelationships)
+			Redirect(Routes.department.manage(info.managePermissions.head))
 		else
 			Mav("home/home",
-				"relationshipTypesMapById" -> cmd.relationshipTypesMap.map { case (k, v) => (k.id, v) },
+				"relationshipTypesMapById" -> info.relationshipTypesMap.map { case (k, v) => (k.id, v) },
 				"hasAnyRelationships" -> hasAnyRelationships
 			)
 	}

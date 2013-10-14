@@ -55,7 +55,7 @@ class StudentCourseDetails
 		"scjCode" -> scjCode,
 		"sprCode" -> sprCode)
 
-	def permissionsParents = Option(student).toStream
+	def permissionsParents = Stream(Option(student), Option(route)).flatten
 
 	def hasCurrentEnrolment: Boolean = {
 		!latestStudentCourseYearDetails.enrolmentStatus.code.startsWith("P")
