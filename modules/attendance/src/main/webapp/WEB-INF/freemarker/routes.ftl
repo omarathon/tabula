@@ -30,4 +30,4 @@
 	
 	<#macro profile profile><@url page="/view/${profile.universityId}" context="/profiles"/></#macro>
 	<#macro attendanceProfile><@url page="/profile" /></#macro>
-	<#macro photo profile><@url page="/view/photo/${profile.universityId}.jpg"/></#macro>
+	<#macro photo profile><@url page="/view/photo/${profile.universityId}.jpg" context="/profiles"/></#macro>

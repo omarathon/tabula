@@ -73,7 +73,7 @@ class HomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav = new HomeController().home(command)
-		mav.viewName should be("home/nopermission")
+		mav.viewName should be("home/home")
 
 	}}
 

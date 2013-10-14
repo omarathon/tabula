@@ -33,9 +33,8 @@ class HomeController extends AttendanceController {
 					Redirect(Routes.department.view(permissionsMap("ViewPermissions").head))
 				else if (!hasProfile && permissionsMap("ManagePermissions").size == 1 && permissionsMap("ViewPermissions").size == 0)
 					Redirect(Routes.department.manage(permissionsMap("ManagePermissions").head))
-				else if (hasProfile || permissionsMap("ManagePermissions").size > 0 || permissionsMap("ViewPermissions").size > 0)
+				else
 					Mav("home/home", "permissionMap" -> permissionsMap, "hasProfile" -> hasProfile)
-				else Mav("home/nopermission")
 			}
 		}
 	}
