@@ -74,11 +74,11 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 
 }
 
-trait SetMonitoringCheckpointCommandPermissions extends RequiresPermissionsChecking {
+trait SetMonitoringCheckpointCommandPermissions extends RequiresPermissionsChecking with PermissionsChecking {
 	self: SetMonitoringCheckpointState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Record, monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route)
+		p.PermissionCheck(Permissions.MonitoringPoints.Record, mandatory(monitoringPoint).pointSet.asInstanceOf[MonitoringPointSet].route)
 	}
 }
 
