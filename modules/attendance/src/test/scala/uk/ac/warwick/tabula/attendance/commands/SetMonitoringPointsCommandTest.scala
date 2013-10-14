@@ -1,11 +1,12 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.{TestBase, Mockito}
+import uk.ac.warwick.tabula.{ItemNotFoundException, TestBase, Mockito}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringPoint, MonitoringPointSet}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.services.{MonitoringPointService, MonitoringPointServiceComponent, ProfileService, ProfileServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
 class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 
@@ -63,6 +64,16 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 			command.validate(errors)
 			errors.hasErrors should be (right = true)
 		}
+	}
+
+
+	@Test(expected=classOf[ItemNotFoundException]) def mandatoryMonitoringPoint {
+		val perms = new SetMonitoringCheckpointCommandPermissions with SetMonitoringCheckpointState {
+			 def monitoringPoint = null
+		}
+
+		val permissionsChecking = mock[PermissionsChecking]
+		perms.permissionsCheck(permissionsChecking)
 	}
 
 }
