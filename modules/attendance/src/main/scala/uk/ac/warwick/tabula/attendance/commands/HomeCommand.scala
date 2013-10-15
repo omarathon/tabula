@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.model.{RuntimeMember, StudentRelationshipType, 
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.CurrentUser
+import scala.collection.JavaConverters._
 
 case class HomeInformation(
 	hasProfile: Boolean,
@@ -46,6 +47,11 @@ abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeIn
 		val viewRoutes = moduleAndDepartmentService.routesWithPermission(user, Permissions.MonitoringPoints.View)
 		val manageRoutes = moduleAndDepartmentService.routesWithPermission(user, Permissions.MonitoringPoints.Manage)
 		
+		def withSubDepartments(d: Department) = (Set(d) ++ d.children.asScala.toSet).filter(_.routes.asScala.size > 0)
+		
+		val allViewDepartments = (viewDepartments ++ viewRoutes.map { _.department }).map(withSubDepartments).flatten
+		val allManageDepartments = (manageDepartments ++ manageRoutes.map { _.department }).map(withSubDepartments).flatten
+		
 		// TODO we might want to distinguish between a "Manage department" and a "Manage route" like we do in coursework with modules
 		// These return Sets so no need to distinct the result
 
@@ -57,8 +63,8 @@ abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeIn
 		
 		HomeInformation(
 			hasProfile,
-			(viewDepartments ++ viewRoutes.map { _.department }),
-			(manageDepartments ++ manageRoutes.map { _.department }),
+			allViewDepartments,
+			allManageDepartments,
 			allRelationshipTypes,
 			relationshipTypesMap
 		)
