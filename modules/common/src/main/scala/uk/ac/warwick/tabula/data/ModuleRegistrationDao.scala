@@ -30,9 +30,6 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 				.uniqueResult
 
 	def getByUsercodesAndYear(userCodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration] = {
-		//val usercodesInQuotes = usercodes.map { code => "'" + code + "'"}
-		//val usercodeString: String = usercodesInQuotes.mkString(", ")
-
 		session.newQuery[ModuleRegistration]("""
 				select distinct mr
 					from ModuleRegistration mr
