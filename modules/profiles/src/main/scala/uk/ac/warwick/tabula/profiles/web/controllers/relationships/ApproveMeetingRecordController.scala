@@ -21,13 +21,17 @@ class ApproveMeetingRecordController  extends ProfilesController {
 	validatesSelf[ApproveMeetingRecordCommand]
 
 	@ModelAttribute("approveMeetingRecordCommand")
-	def getCommand(@PathVariable("meetingRecord") meetingRecord: MeetingRecord) = {
-		val approvals = meetingRecord.approvals.asScala
-		val approval = approvals.find(_.approver == currentMember).getOrElse{
-			throw new ItemNotFoundException
+	def getCommand(@PathVariable("meetingRecord") meetingRecord: MeetingRecord) = meetingRecord match {
+		case meetingRecord: MeetingRecord =>  {
+			val approvals = meetingRecord.approvals.asScala
+			val approval = approvals.find(_.approver == currentMember).getOrElse{
+				throw new ItemNotFoundException
+			}
+			new ApproveMeetingRecordCommand(approval)
 		}
-		new ApproveMeetingRecordCommand(approval)
+		case _ => throw new ItemNotFoundException
 	}
+
 
 	@RequestMapping(method = Array(POST))
 	def approveMeetingRecord(@Valid @ModelAttribute("approveMeetingRecordCommand") command: ApproveMeetingRecordCommand,
