@@ -10,10 +10,10 @@
 							<div class="pull-right">
 								<#local noUpdate = !command.canPointBeUpdated(point)/>
 								<#local noRemove = !command.canPointBeRemoved(point)/>
-								<a class="btn btn-primary edit-point <#if noUpdate>disabled</#if>" <#if noUpdate>title="Unavailable"</#if> href="<@url page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/edit/points/${point.id}/edit"/>">
-									Edit
+								<a class="btn btn-primary edit-point <#if noUpdate>disabled</#if>" <#if noUpdate>title="Unavailable"</#if> href="<@routes.updatePoint point />">
+									Update
 								</a>
-								<a class="btn btn-danger delete-point <#if noRemove>disabled</#if>" title="Delete<#if noRemove> (unavailable)</#if>" href="<@url page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/edit/points/${point.id}/delete"/>">
+								<a class="btn btn-danger delete-point <#if noRemove>disabled</#if>" title="Delete<#if noRemove> (unavailable)</#if>" href="<@routes.removePoint point />">
 									<i class="icon-remove"></i>
 								</a>
 							</div>

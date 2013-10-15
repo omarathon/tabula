@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>46</version>
+	<version>47</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -137,6 +137,11 @@
 			</build>
 		</profile>
 
+		<!--
+		Disabling because this doesn't work properly -
+		it syncs each module's templates across individually,
+		but deletes any from common, breaking most page renders.
+
 		<profile>
 			<id>dev-deploy-views</id>
 
@@ -164,6 +169,7 @@
 				</plugins>
 			</build>
 		</profile>
+		-->
 
 		<!-- sync static -->
 		<profile>

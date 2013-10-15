@@ -48,6 +48,8 @@ trait PermissionsService {
 	def getAllPermissionDefinitionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser, targetPermission: Permission): Set[A]
 	
 	def ensureUserGroupFor[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): UserGroup
+
+	def getCustomRoleDefinitionsBasedOn(roleDefinition:BuiltInRoleDefinition):Seq[CustomRoleDefinition]
 }
 
 @Service(value = "permissionsService")
@@ -196,7 +198,10 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 			}
 		}
 	}
-	
+
+	def getCustomRoleDefinitionsBasedOn(roleDefinition: BuiltInRoleDefinition): Seq[CustomRoleDefinition] = {
+		permissionsDao.getCustomRoleDefinitionsBasedOn(roleDefinition)
+	}
 }
 
 class GrantedPermissionsByIdCache(dao: PermissionsDao) extends RequestLevelCaching[String, Option[GrantedPermission[_]]] {

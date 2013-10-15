@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.services
 
 import collection.JavaConverters._
-
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Autowired
-
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.AcademicYear
@@ -49,9 +47,10 @@ trait AssignmentMembershipService {
 
 	def getEnrolledAssignments(user: User): Seq[Assignment]
 
-	def countMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Int
-	def countMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Int
-	def countMembershipUsers(assignment: Assignment): Int
+	/**
+	 * This will throw an exception if the others are usercode groups, use determineMembership instead in that situation
+	 */
+	def countMembershipWithUniversityIdGroup(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Int
 
 	def determineMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): AssignmentMembershipInfo
 	def determineMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Seq[User]
@@ -148,7 +147,7 @@ class AssignmentMembershipInfo(val items: Seq[MembershipItem]) {
 
 }
 
-trait AssignmentMembershipMethods {
+trait AssignmentMembershipMethods extends Logging {
 
 	self: AssignmentMembershipService with UserLookupComponent =>
 
@@ -187,29 +186,22 @@ trait AssignmentMembershipMethods {
 		determineMembershipUsers(assignment.upstreamAssessmentGroups, Option(assignment.members))
 	}
 
-	/**
-	 * May overestimate
-	 */
-	def countMembership(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]) = {
-		val sitsUsers = upstream.flatMap { _.members.members }.distinct
+	def countMembershipWithUniversityIdGroup(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]) = {
+		others match {
+			case Some(group) if !group.universityIds => {
+				logger.warn("Attempted to use countMembershipWithUniversityIdGroup() with a usercode-type UserGroup. Falling back to determineMembership()")
+				determineMembershipUsers(upstream, others).size
+			}
+			case _ => {
+				val sitsUsers = upstream.flatMap { _.members.members }
 
-		val includes = others map { _.users} getOrElse Nil
-		val excludes = others map { _.excludes } getOrElse Nil
-
-		((sitsUsers ++ includes) diff excludes).size
+				val includes = others map { _.knownType.allIncludedIds } getOrElse Nil		
+				val excludes = others map { _.knownType.allExcludedIds } getOrElse Nil
+		
+				((sitsUsers ++ includes).distinct diff excludes).size
+			}
+		}
 	}
-
-	/**
-	 * Returns just a list of User objects who are on this assessment group.
-	 */
-	def countMembershipUsers(upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]) =
-		countMembership(upstream, others)
-
-	/**
-	 * Returns a simple count of students who are enrolled on this assignment
-	 */
-	def countMembershipUsers(assignment: Assignment): Int =
-		countMembershipUsers(assignment.upstreamAssessmentGroups, Option(assignment.members))
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean = {
 		if (others map {_.excludes contains user } getOrElse false) false

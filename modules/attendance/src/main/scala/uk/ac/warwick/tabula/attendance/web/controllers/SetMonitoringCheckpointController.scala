@@ -21,32 +21,33 @@ class SetMonitoringCheckpointController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(@PathVariable monitoringPoint: MonitoringPoint, user: CurrentUser) = {
-		SetMonitoringCheckpointCommand(monitoringPoint, user)
+		SetMonitoringCheckpointCommand(mandatory(monitoringPoint), user)
 	}
 
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def list(@ModelAttribute("command") command: SetMonitoringCheckpointCommand): Mav = {
+	def list(@ModelAttribute("command") command: SetMonitoringCheckpointCommand, @PathVariable department: Department): Mav = {
 		command.populate()
-		form(command)
+		form(command, department)
 	}
 
 
-	def form(@ModelAttribute command: SetMonitoringCheckpointCommand): Mav = {
+	def form(@ModelAttribute command: SetMonitoringCheckpointCommand, department: Department): Mav = {
 		Mav("home/record",
 				"command" -> command,
 				"monitoringPoint" -> command.monitoringPoint,
-				"returnTo" -> getReturnTo(Routes.monitoringPoints))
+				"returnTo" -> getReturnTo(Routes.department.view(department))
+		)
 	}
 
 
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute("command") command: SetMonitoringCheckpointCommand, @PathVariable department: Department, errors: Errors) = {
 		if(errors.hasErrors) {
-			form(command)
+			form(command, department)
 		} else {
 			command.apply()
-			Redirect(Routes.managingDepartment(department), "updatedMonitoringPoint" -> command.monitoringPoint.id)
+			Redirect(Routes.department.view(department), "updatedMonitoringPoint" -> command.monitoringPoint.id)
 		}
 	}
 

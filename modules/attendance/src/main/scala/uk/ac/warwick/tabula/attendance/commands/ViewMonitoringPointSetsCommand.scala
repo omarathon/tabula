@@ -47,7 +47,11 @@ abstract class ViewMonitoringPointSetsCommand(
 				}.map{ case(member, checkMap) =>
 					member -> checkMap.map{ case(point, option) => point -> (option match {
 						case Some(state) => state.dbValue
-						case _ => "late"
+						case _ =>
+							if (currentAcademicWeek >= point.requiredFromWeek)
+								"late"
+							else
+								""
 					})}
 				}
 			}
@@ -78,7 +82,7 @@ trait ViewMonitoringPointSetsState extends RouteServiceComponent with Monitoring
 
 	val setsByRouteByAcademicYear = {
 		val sets: mutable.HashMap[String, mutable.HashMap[Route, mutable.Buffer[MonitoringPointSet]]] = mutable.HashMap()
-		dept.routes.asScala.collect{
+		dept.routes.asScala.sorted(Route.DegreeTypeOrdering).collect{
 			case r: Route => r.monitoringPointSets.asScala.filter(s =>
 				s.academicYear.equals(thisAcademicYear.previous)
 				|| s.academicYear.equals(thisAcademicYear)
@@ -101,6 +105,9 @@ trait ViewMonitoringPointSetsState extends RouteServiceComponent with Monitoring
 	}
 	def setsByRouteCodeByAcademicYear(academicYear: String, route: Route) =
 		setsByRouteByAcademicYear(academicYear)(route)
+
+	def sortedRoutesByAcademicYear(academicYear: String) =
+		setsByRouteByAcademicYear(academicYear).keySet.toSeq.sorted(Route.DegreeTypeOrdering)
 
 	def monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, academicYear)
 

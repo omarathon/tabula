@@ -81,9 +81,51 @@
     }
 }
 
+.tabula-page, #container {
+	.active-colour(@activeColour, @textColour: #fff) {
+		// Remove the text shadow because it makes things look weird against dark backgrounds
+		text-shadow: none;
+	
+		// Hover/focus state
+	  &:hover,
+	  &:focus {
+	    text-decoration: none;
+	    background-position: 0 -36px;
+
+	    .transition(none);
+	  }
+	
+		// in these cases the gradient won't cover the background, so we override
+	  &:hover, &:focus, &:active, &.active, &.disabled, &[disabled] {
+	    color: @textColour;
+	    background-color: @activeColour;
+	    *background-color: darken(@activeColour, 5%);
+	  }
+	
+	  // IE 7 + 8 can't handle box-shadow to show active, so we darken a bit ourselves
+	  &:active,
+	  &.active {
+	    background-color: @activeColour e("\9");
+	  }
+	}
+
+	.btn-attended { 
+		color: @successText;
+		.active-colour(@successText); 
+	}
+	.btn-unauthorised { 
+		color: @errorText;
+		.active-colour(@errorText); 
+	}
+	.btn-authorised { 
+		color: @infoText; 
+		.active-colour(@infoText);
+	}
+}
+
 .icon-ok.attended { color: @successText; }
 .icon-remove.unauthorised { color: @errorText; }
-.icon-remove.authorised { color: @infoText; }
+.icon-remove-circle.authorised { color: @infoText; }
 .icon-warning-sign.late { color: @warningText; }
 
 .monitoring-points-profile {

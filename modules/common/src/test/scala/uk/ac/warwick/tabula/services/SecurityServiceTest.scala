@@ -1,12 +1,8 @@
 package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula._
-import org.scalatest.mock.MockitoSugar
-import org.mockito.Mockito._
-import org.mockito.Matchers._
-import org.hamcrest.Matchers._
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
+import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.{Department, Module, StaffMember, RuntimeMember}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.permissions.RoleService
@@ -14,9 +10,10 @@ import uk.ac.warwick.tabula.roles._
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
-import org.junit.Ignore
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import JavaImports._
+import uk.ac.warwick.tabula.helpers.Tap.tap
 
 class SecurityServiceTest extends TestBase with Mockito {
 	
@@ -43,6 +40,8 @@ class SecurityServiceTest extends TestBase with Mockito {
 		val currentUser = new CurrentUser(user, user)
 		
 		val roleService = mock[RoleService]
+		roleService.getRolesFor(currentUser,null) returns Stream.empty
+		roleService.getRolesFor(currentUser,department) returns Stream.empty
 		roleService.getExplicitPermissionsFor(currentUser, null) returns (Stream(
 				PermissionDefinition(Permissions.UserPicker, None, true),
 				PermissionDefinition(Permissions.ImportSystemData, None, true)
@@ -254,6 +253,12 @@ class SecurityServiceTest extends TestBase with Mockito {
 		val scdPerms = student1Perms
 		
 		val roleService = mock[RoleService]
+		roleService.getRolesFor(currentUser,null) returns Stream.empty
+		roleService.getRolesFor(currentUser,department) returns Stream.empty
+		roleService.getRolesFor(currentUser,studentCourseDetails) returns Stream.empty
+		roleService.getRolesFor(currentUser,student1) returns Stream.empty
+		roleService.getRolesFor(currentUser,student2) returns Stream.empty
+
 		roleService.getExplicitPermissionsFor(currentUser, null) returns (Stream.empty)
 		roleService.getExplicitPermissionsFor(currentUser, studentCourseDetails) returns (scdPerms)
 		roleService.getExplicitPermissionsFor(currentUser, student1) returns (student1Perms)
@@ -354,5 +359,49 @@ class SecurityServiceTest extends TestBase with Mockito {
 		(Permissions.Module.Create == Permissions.Feedback.Create) should be (false)
 		(Permissions.Module.Create == Permissions.Module.Create) should be (true)
 	}
-			
+
+	object TestRoleDef extends BuiltInRoleDefinition{
+		override def description="test"
+		GrantsScopedPermission(
+			Permissions.Department.ArrangeModules)
+		def canDelegateThisRolesPermissions:JBoolean = false
+	}
+	object TestDelegatableRoleDef extends BuiltInRoleDefinition{
+		override def description="test"
+		GrantsScopedPermission(
+			Permissions.Department.ArrangeModules)
+		def canDelegateThisRolesPermissions:JBoolean = true
+	}
+
+	@Test
+	def canDelegateReturnsFalseIfUserHasNoDelegatableRoles(){
+		val securityService = new SecurityService
+		val currentUser = new CurrentUser(user, user)
+		val module = new Module("xxx01")
+		securityService.roleService = mock[RoleService]
+		securityService.roleService.getRolesFor(currentUser,module) returns Seq(new BuiltInRole(TestRoleDef,Some(module)){}).toStream
+		securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules,module) should be (false)
+	}
+
+	@Test
+	def canDelegateReturnsTrueIfUserHasDelegatableRoles(){
+		val securityService = new SecurityService
+		val currentUser = new CurrentUser(user, user)
+		val module = new Module("xxx01")
+		securityService.roleService = mock[RoleService]
+		securityService.roleService.getRolesFor(currentUser,module) returns Seq(new BuiltInRole(TestDelegatableRoleDef,Some(module)){}).toStream
+		securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules,module) should be (true)
+	}
+
+	@Test
+	def canDelegateReturnsTrueIfUserIsGod(){
+		val securityService = new SecurityService
+		val currentUser = new CurrentUser(user, user, god=true)
+		val module = new Module("xxx01")
+		securityService.roleService = mock[RoleService]
+		// use a role without delegation, to prove godliness works.
+		securityService.roleService.getRolesFor(currentUser,module) returns Seq(new BuiltInRole(TestRoleDef,Some(module)){}).toStream
+		securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules,module) should be (true)
+	}
+
 }

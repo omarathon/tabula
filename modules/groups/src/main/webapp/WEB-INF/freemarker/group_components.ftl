@@ -181,19 +181,11 @@
 											</#if>
 										</h4>
 
-										<#if setItem.viewerIsStudent >
-											<#if !setItem.isStudentSignUp()
-												 || (setItem.isStudentSignUp() && !setItem.set.allowSelfGroupSwitching)
-												 || (setItem.isStudentSignUp() && !setItem.set.openForSignups)
-												 >
-											  <form style="display: none;"> <!-- targetless form here to make the DOM match the student-sign-up version, for ease of testing -->
-												 <input type="submit"
-														disabled
-														class="disabled btn btn-primary btn-medium pull-right use-tooltip"
-														value="Leave" />
-											  </form>
-											<#else >
-												<#if !setItem.viewerMustSignUp >
+										<#if setItem.viewerIsStudent
+												&& setItem.isStudentSignUp()
+												&& setItem.set.allowSelfGroupSwitching
+												&& setItem.set.openForSignups >
+											<#if !setItem.viewerMustSignUp >
 												<form id="leave-${setItem.set.id}" method="post" action="<@routes.leave_group setItem.set />" >
 													<input type="hidden" name="group" value="${group.id}" />
 													<input type="submit"
@@ -201,7 +193,6 @@
 														   title='Leave this group. You will need to sign up for a different group.'
 														   value="Leave"/>
 												 </form>
-												</#if>
 											</#if>
 										</#if>
 
@@ -219,9 +210,13 @@
 																	</#if>
 																	<input type="hidden" name="returnTo" value="${returnTo}" />
 																	<span class="form-horizontal">
-																		<@fmt.weekRangeSelect event />
-																		<button class="btn btn-small btn-primary register-button">Record</button>
-																	 </span>
+																		<#if weekRangeSelectFormatter(event)?has_content>
+																			<@fmt.weekRangeSelect event />
+																			<button type="submit" class="btn btn-small btn-primary register-button">Record</button>
+																		<#else>
+																			<button type="button" class="btn btn-small btn-primary register-button disabled use-tooltip" title="There are no events running in this term">Record</button>
+																		</#if>
+																	</span>
 																</form>
 															</div>
 														</#if>

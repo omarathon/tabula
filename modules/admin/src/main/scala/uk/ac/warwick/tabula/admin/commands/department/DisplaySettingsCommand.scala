@@ -22,11 +22,11 @@ trait DisplaySettingsCommand extends CommandInternal[Unit] with DisplaySettingsC
 
 object DisplaySettingsCommand {
 	def apply(department: Department) =
-		new DisplaySettingsCommandInternal(department) 
-			with ComposableCommand[Unit] 
+		new DisplaySettingsCommandInternal(department)
+			with ComposableCommand[Unit]
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringRelationshipServiceComponent
-			with DisplaySettingsCommandDescription 
+			with DisplaySettingsCommandDescription
 			with DisplaySettingsCommandPermissions
 }
 
@@ -48,13 +48,14 @@ class DisplaySettingsCommandInternal(val department: Department) extends Display
 	var turnitinSmallMatchPercentageLimit = department.turnitinSmallMatchPercentageLimit
 	var assignmentInfoView = department.assignmentInfoView
 	var weekNumberingSystem = department.weekNumberingSystem
+	var autoGroupDeregistration = department.autoGroupDeregistration
 	var defaultGroupAllocationMethod = department.defaultGroupAllocationMethod.dbValue
-	var studentRelationshipDisplayed: JMap[String, JBoolean] = 
-		JHashMap(department.studentRelationshipDisplayed.map { 
-			case (id, bString) => (id -> java.lang.Boolean.valueOf(bString)) 
+	var studentRelationshipDisplayed: JMap[String, JBoolean] =
+		JHashMap(department.studentRelationshipDisplayed.map {
+			case (id, bString) => (id -> java.lang.Boolean.valueOf(bString))
 		})
-		
-	def init() {	
+
+	def init() {
 		relationshipService.allStudentRelationshipTypes.foreach { relationshipType =>
 			if (!studentRelationshipDisplayed.containsKey(relationshipType.id))
 				studentRelationshipDisplayed.put(relationshipType.id, relationshipType.defaultDisplay)
@@ -69,8 +70,9 @@ class DisplaySettingsCommandInternal(val department: Department) extends Display
 		department.turnitinSmallMatchWordLimit = turnitinSmallMatchWordLimit
 		department.turnitinSmallMatchPercentageLimit = turnitinSmallMatchPercentageLimit
 		department.assignmentInfoView = assignmentInfoView
+		department.autoGroupDeregistration = autoGroupDeregistration
 		department.defaultGroupAllocationMethod = SmallGroupAllocationMethod(defaultGroupAllocationMethod)
-		department.weekNumberingSystem = weekNumberingSystem		
+		department.weekNumberingSystem = weekNumberingSystem
 		department.studentRelationshipDisplayed = studentRelationshipDisplayed.asScala.map { case (id, bool) => (id -> Option(bool).getOrElse(false).toString) }.toMap
 
 		moduleAndDepartmentService.save(department)
@@ -84,11 +86,11 @@ class DisplaySettingsCommandInternal(val department: Department) extends Display
 		if (turnitinSmallMatchWordLimit < 0) {
 			errors.rejectValue("turnitinSmallMatchWordLimit", "department.settings.turnitinSmallMatchWordLimit")
 		}
-		
+
 		if (turnitinSmallMatchPercentageLimit < 0 || turnitinSmallMatchPercentageLimit > 100) {
 			errors.rejectValue("turnitinSmallMatchPercentageLimit", "department.settings.turnitinSmallMatchPercentageLimit")
 		}
-		
+
 		if (turnitinSmallMatchWordLimit != 0 && turnitinSmallMatchPercentageLimit != 0) {
 			errors.rejectValue("turnitinExcludeSmallMatches", "department.settings.turnitinSmallMatchSingle")
 		}

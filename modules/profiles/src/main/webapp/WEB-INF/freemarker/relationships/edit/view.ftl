@@ -113,7 +113,7 @@
 					}
 
 					var currentUrl = [location.protocol, '//', location.host, location.pathname].join('');    // url without query string
-					window.location = currentUrl + "?action=agent" + action + "&agentId=" + agentId;
+					window.location = currentUrl + "?action=agent" + action + "&agentId=" + agentId + "&relationshipType=${relationshipType.id}";
 				});
 			});
 

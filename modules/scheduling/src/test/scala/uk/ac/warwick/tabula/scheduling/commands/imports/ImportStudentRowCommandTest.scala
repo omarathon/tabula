@@ -137,7 +137,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			phoneNumber				= null,
 			gender					= null,
 			alternativeEmailAddress	= null,
-			userType				= Student		)
+			userType				= Student)
 
 		val blobBytes = Array[Byte](1,2,3,4,5)
 		val mac = MembershipInformation(mm, () => Some(blobBytes))
@@ -161,6 +161,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		courseCommand.memberDao = memberDao
 		courseCommand.relationshipService = relationshipService
 		courseCommand.courseImporter = courseImporter
+		courseCommand.stuMem = smartMock[StudentMember]
 
 		val rowCommand = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, courseCommand)
 		rowCommand.memberDao = memberDao

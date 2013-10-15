@@ -3,6 +3,14 @@ html.iframe {
     background: none;
 }
 
+// Fix modals to be wider (e.g. for SITS import options)
+#container .modal {
+	@modal-width: 840px;
+	width: @modal-width;
+	margin-left: -(@modal-width/2);
+}
+
+
 @import "css3.less";
 .tabula-page, #container {
 	@import "bootstrap/responsive.less";
@@ -612,6 +620,10 @@ fieldset.internal {
 	border-top: 1px solid #EEE;
 }
 
+.submit-buttons.persist-footer {
+	margin-bottom: 0;
+}
+
 #batch-feedback-form {
 	#multifile-column {
 		padding-right: 1em;
@@ -1184,12 +1196,6 @@ h1.with-settings {
  margin: 0px 0px 16px 10px;
 }
 
-// Fix modals to be wider (e.g. for SITS import options)
-#container .modal {
-	@modal-width: 840px;
-	width: @modal-width;
-	margin-left: -(@modal-width/2);
-}
 
 #container {
 	// grey out disabled icons
@@ -1291,12 +1297,12 @@ h1.with-settings {
 	    	border-top: 1px solid @tableRowBorderTop;
 	      border-bottom: 1px solid @tableRowBorderBottom;
 	    }
-	    
+
 	    > tr.no-bottom-border > td,
 	    > tr.no-bottom-border > th {
 	    	border-bottom: 0;
 	    }
-	    
+
 	    > tr.no-top-border > td,
 	    > tr.no-top-border > th {
 	    	border-top: 0;
@@ -1409,6 +1415,13 @@ h1.with-settings {
 			// make room for layout-tools
 			padding-right: 70px;
 
+			.tabbable-placeholder {
+				width: 75px;
+				height: 30px;
+				background-color: white;
+				.box-shadow(~"inset 12px 0 30px -4px #ddd, inset -12px 0 30px -4px #ddd");
+			}
+
 			li {
 				margin-right: 4px;
 
@@ -1416,6 +1429,10 @@ h1.with-settings {
 					border: 1px solid #ddd;
 					border-bottom-color: transparent;
 					text-decoration: none;
+				}
+
+				.dropdown-menu li > a {
+					border: none;
 				}
 			}
 
@@ -1511,6 +1528,7 @@ h1.with-settings {
 } // #container
 
 } // .tabula-page
+
 
 // Mixin. Not for use directly - use the .size-* classes below,
 // which are used by the FTL macro so just use that!

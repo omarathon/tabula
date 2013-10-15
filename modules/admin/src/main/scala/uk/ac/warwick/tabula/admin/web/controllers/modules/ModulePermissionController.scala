@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.admin.web.controllers.module
+package uk.ac.warwick.tabula.admin.web.controllers.modules
 
 import scala.collection.JavaConverters._
 import javax.validation.Valid

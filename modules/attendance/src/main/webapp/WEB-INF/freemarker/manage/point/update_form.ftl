@@ -7,7 +7,7 @@
 
 <@modal.body>
 
-	<#assign action><@url page="/manage/${command.set.route.department.code}/sets/${command.set.id}/edit/points/${command.point.id}/edit" /></#assign>
+	<#assign action><@routes.updatePoint command.point /></#assign>
 
 	<@f.form id="updateMonitoringPoint" action="${action}" method="POST" commandName="command" class="form-horizontal">
 		<@spring.bind path="command">

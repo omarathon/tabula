@@ -16,8 +16,8 @@
 					<div class="item-info row-fluid point">
 						<div class="span12">
 							<div class="pull-right">
-								<a class="btn btn-primary edit-point" href="<@url page="/manage/${command.dept.code}/sets/add/points/edit/${pointCount}?form=true"/>">Edit</a>
-								<a class="btn btn-danger delete-point" title="Delete" href="<@url page="/manage/${command.dept.code}/sets/add/points/delete/${pointCount}?form=true"/>"><i class="icon-remove"></i></a>
+								<a class="btn btn-primary edit-point" href="<@routes.editPoint command.dept pointCount />?form=true">Update</a>
+								<a class="btn btn-danger delete-point" title="Delete" href="<@routes.deletePoint command.dept pointCount />?form=true"><i class="icon-remove"></i></a>
 							</div>
 							${point.name} (<@fmt.monitoringPointWeeksFormat point.validFromWeek point.requiredFromWeek command.academicYear command.dept />)
 

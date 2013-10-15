@@ -7,7 +7,7 @@
 
 <@modal.body>
 
-	<#assign action><@url page="/manage/${command.dept.code}/sets/add/points/delete/${command.pointIndex}" /></#assign>
+	<#assign action><@routes.deletePoint command.dept command.pointIndex /></#assign>
 
 	<@f.form id="deleteMonitoringPoint" action="${action}" method="POST" commandName="command" class="form-horizontal">
 		<#list command.monitoringPoints as point>

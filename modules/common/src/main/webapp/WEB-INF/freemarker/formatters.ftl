@@ -65,13 +65,16 @@
 
 
 <#macro weekRangeSelect event><#--
-	--><#noescape><#--
-		--><select name="week" class="weekSelector"><#--
-			--><#list weekRangeSelectFormatter(event) as week><#--
-				--><option value="${week.weekToDisplay}">week ${week.weekToStore}</option><#--
-			--></#list><#--
-		--></select><#--
-	--></#noescape><#--
+	--><#assign weeks=weekRangeSelectFormatter(event) /><#--
+	--><#if weeks?has_content><#--
+		--><#noescape><#--
+			--><select name="week" class="weekSelector"><#--
+				--><#list weekRangeSelectFormatter(event) as week><#--
+					--><option value="${week.weekToDisplay}">week ${week.weekToStore}</option><#--
+				--></#list><#--
+			--></select><#--
+		--></#noescape><#--
+	--></#if><#--
 --></#macro>
 
 <#macro p number singular plural="${singular}s" one="1" zero="0" shownumber=true><#--
@@ -173,7 +176,7 @@
 			<#list attachments as attachment>
 				<#local title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#local>
 				<div class="attachment">
-					<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
+					<@download_link filePath="${page}attachment/${attachment.name?url}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
 				</div>
 			</#list>
 		</details>

@@ -57,6 +57,9 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	}
 
 	var scope: A
+	// this ought not to be necessary, but for some reason the compiler fails to see the type bound on scope and won't
+	// assume it's a permissions target
+	def scopeAsPermissionsTarget:PermissionsTarget = scope
 
 	def build() = RoleBuilder.build(roleDefinition, Some(scope), roleDefinition.getName)
 	def mayGrant(target: Permission) = Option(roleDefinition) map { _.mayGrant(target) } getOrElse (false)
