@@ -91,7 +91,7 @@ trait ViewMonitoringPointSetsState extends RouteServiceComponent with Monitoring
 
 	val setsByRouteByAcademicYear = {
 		val sets: mutable.HashMap[String, mutable.HashMap[Route, mutable.Buffer[MonitoringPointSet]]] = mutable.HashMap()
-		routesForPermission(user, Permissions.MonitoringPoints.Manage, dept).toSeq.collect{
+		routesForPermission(user, Permissions.MonitoringPoints.Manage, dept).toSeq.sorted(Route.DegreeTypeOrdering).collect{
 			case r: Route => r.monitoringPointSets.asScala.filter(s =>
 				s.academicYear.equals(thisAcademicYear.previous)
 				|| s.academicYear.equals(thisAcademicYear)
@@ -114,6 +114,9 @@ trait ViewMonitoringPointSetsState extends RouteServiceComponent with Monitoring
 	}
 	def setsByRouteCodeByAcademicYear(academicYear: String, route: Route) =
 		setsByRouteByAcademicYear(academicYear)(route)
+
+	def sortedRoutesByAcademicYear(academicYear: String) =
+		setsByRouteByAcademicYear(academicYear).keySet.toSeq.sorted(Route.DegreeTypeOrdering)
 
 	def monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, academicYear)
 

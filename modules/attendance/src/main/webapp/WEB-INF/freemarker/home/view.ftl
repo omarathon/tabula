@@ -1,5 +1,27 @@
 <#escape x as x?html>
-<h1>View monitoring points for ${command.dept.name}</h1>
+<h1 class="with-settings">View monitoring points for ${command.dept.name}</h1>
+
+<div class="btn-toolbar dept-toolbar">
+	<#if command.dept.parent??>
+		<a class="btn btn-medium use-tooltip" href="<@routes.viewDepartment command.dept.parent />" data-container="body" title="${command.dept.parent.name}">
+			Parent department
+		</a>
+	</#if>
+	
+	<#if command.dept.children?has_content>
+		<div class="btn-group">
+			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+				Subdepartments
+				<span class="caret"></span>
+			</a>
+			<ul class="dropdown-menu pull-right">
+				<#list command.dept.children as child>
+					<li><a href="<@routes.viewDepartment child />">${child.name}</a></li>
+				</#list>
+			</ul>
+		</div>
+	</#if>
+</div>
 
 <#if updatedPoint??>
 	<div class="alert alert-success">
@@ -36,7 +58,7 @@
 
 		<select name="route" class="route input-xxlarge">
 			<option style="display:none;" disabled <#if !command.route??>selected</#if> value="">Route</option>
-			<#list command.setsByRouteByAcademicYear[command.academicYear.toString]?keys?sort_by("code") as route>
+			<#list command.sortedRoutesByAcademicYear(command.academicYear.toString) as route>
 				<option value="${route.code}" <#if command.route?? && command.route.code == route.code>selected</#if>>
 					<@fmt.route_name route />
 				</option>
