@@ -9,7 +9,7 @@ class RouteDaoTest extends PersistenceTestBase {
 
 	val dao = new RouteDaoImpl
 
-	val route = Fixtures.route("g503")
+	val route = Fixtures.route("g553")
 
 	@Before
 	def setup() {
@@ -19,7 +19,7 @@ class RouteDaoTest extends PersistenceTestBase {
 	@Test def getByCode = transactional { tx =>
 		dao.saveOrUpdate(route)
 
-		dao.getByCode("g503") should be (Some(route))
+		dao.getByCode("g553") should be (Some(route))
 		dao.getByCode("wibble") should be (None)
 	}
 }
