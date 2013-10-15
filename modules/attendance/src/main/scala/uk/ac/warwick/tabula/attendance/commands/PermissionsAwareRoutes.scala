@@ -8,15 +8,24 @@ import uk.ac.warwick.tabula.services.SecurityServiceComponent
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentServiceComponent
+import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.AutowiringSecurityServiceComponent
+import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
 
 trait PermissionsAwareRoutes {
 	def routesForPermission(user: CurrentUser, p: Permission, dept: Department): Set[Route]
 }
 
-trait SecurityServicePermissionsAwareRoutes extends PermissionsAwareRoutes with PermissionsCheckingMethods {
-	self: SecurityServiceComponent with ModuleAndDepartmentServiceComponent =>
+trait AutowiringSecurityServicePermissionsAwareRoutes 
+	extends PermissionsAwareRoutes 
+		with PermissionsCheckingMethods 
+		with AutowiringSecurityServiceComponent 
+		with AutowiringModuleAndDepartmentServiceComponent {
 	
-	def routesForPermission(user: CurrentUser, p: Permission, dept: Department): Set[Route] =
+	def routesForPermission(user: CurrentUser, p: Permission, dept: Department): Set[Route] = {
 		if (securityService.can(user, p, mandatory(dept))) dept.routes.asScala.toSet
 		else moduleAndDepartmentService.routesWithPermission(user, p, dept)
+	}
+	
 }

@@ -17,16 +17,14 @@ import uk.ac.warwick.tabula.CurrentUser
 object ViewMonitoringPointSetsCommand {
 	def apply(user: CurrentUser, dept: Department, academicYearOption: Option[AcademicYear], routeOption: Option[Route], pointSetOption: Option[MonitoringPointSet]) =
 		new ViewMonitoringPointSetsCommand(user, dept, academicYearOption, routeOption, pointSetOption)
-		with ComposableCommand[Unit]
-		with ViewMonitoringPointSetsPermissions
-		with AutowiringRouteServiceComponent
-		with AutowiringMonitoringPointServiceComponent
-		with AutowiringTermServiceComponent
-		with AutowiringProfileServiceComponent
-		with SecurityServicePermissionsAwareRoutes
-		with AutowiringSecurityServiceComponent
-		with AutowiringModuleAndDepartmentServiceComponent
-		with ReadOnly with Unaudited
+			with AutowiringSecurityServicePermissionsAwareRoutes
+			with ViewMonitoringPointSetsPermissions
+			with AutowiringRouteServiceComponent
+			with AutowiringMonitoringPointServiceComponent
+			with AutowiringTermServiceComponent
+			with AutowiringProfileServiceComponent
+			with ComposableCommand[Unit]
+			with ReadOnly with Unaudited
 }
 
 
@@ -35,7 +33,7 @@ abstract class ViewMonitoringPointSetsCommand(
 		val routeOption: Option[Route], val pointSetOption: Option[MonitoringPointSet]
 	)	extends CommandInternal[Unit] with ViewMonitoringPointSetsState with MembersForPointSet {
 
-	self: MonitoringPointServiceComponent with ProfileServiceComponent with TermServiceComponent =>
+	self: MonitoringPointServiceComponent with ProfileServiceComponent with TermServiceComponent with PermissionsAwareRoutes =>
 
 	override def applyInternal() = {
 		pointSetOption match {
@@ -65,18 +63,19 @@ abstract class ViewMonitoringPointSetsCommand(
 	}
 }
 
-trait ViewMonitoringPointSetsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods with PermissionsAwareRoutes {
-	self: ViewMonitoringPointSetsState =>
+trait ViewMonitoringPointSetsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: ViewMonitoringPointSetsState with PermissionsAwareRoutes =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheckAny(
-			Seq(CheckablePermission(Permissions.MonitoringPoints.Manage, mandatory(dept))) ++
-			routesForPermission(user, Permissions.MonitoringPoints.Manage, dept).map { route => CheckablePermission(Permissions.MonitoringPoints.Manage, route) }
+			Seq(CheckablePermission(Permissions.MonitoringPoints.View, mandatory(dept))) ++
+			routesForPermission(user, Permissions.MonitoringPoints.View, dept).map { route => CheckablePermission(Permissions.MonitoringPoints.View, route) }
 		)
 	}
 }
 
-trait ViewMonitoringPointSetsState extends RouteServiceComponent with MonitoringPointServiceComponent with GroupMonitoringPointsByTerm with PermissionsAwareRoutes {
+trait ViewMonitoringPointSetsState extends RouteServiceComponent with MonitoringPointServiceComponent with GroupMonitoringPointsByTerm {
+	self: PermissionsAwareRoutes =>
 
 	def dept: Department
 	def user: CurrentUser
@@ -89,9 +88,9 @@ trait ViewMonitoringPointSetsState extends RouteServiceComponent with Monitoring
 	val route = routeOption.getOrElse(null)
 	val pointSet = pointSetOption.getOrElse(null)
 
-	val setsByRouteByAcademicYear = {
+	lazy val setsByRouteByAcademicYear = {
 		val sets: mutable.HashMap[String, mutable.HashMap[Route, mutable.Buffer[MonitoringPointSet]]] = mutable.HashMap()
-		routesForPermission(user, Permissions.MonitoringPoints.Manage, dept).toSeq.sorted(Route.DegreeTypeOrdering).collect{
+		routesForPermission(user, Permissions.MonitoringPoints.View, dept).toSeq.sorted(Route.DegreeTypeOrdering).collect{
 			case r: Route => r.monitoringPointSets.asScala.filter(s =>
 				s.academicYear.equals(thisAcademicYear.previous)
 				|| s.academicYear.equals(thisAcademicYear)

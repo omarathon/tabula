@@ -53,7 +53,7 @@ trait ViewMonitoringPointSetPermissions extends RequiresPermissionsChecking with
 
 	def permissionsCheck(p: PermissionsChecking) {
 		mandatory(set) match {
-			case s: MonitoringPointSet => p.PermissionCheck(Permissions.MonitoringPoints.View, s.route)
+			case s: MonitoringPointSet => p.PermissionCheck(Permissions.MonitoringPoints.View, s)
 			case s: MonitoringPointSetTemplate => p.PermissionCheck(Permissions.MonitoringPointSetTemplates.View)
 		}
 	}

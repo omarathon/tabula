@@ -36,8 +36,12 @@ class HomeController extends AttendanceController {
 			Redirect(Routes.department.manage(info.managePermissions.head))
 		else
 			Mav("home/home",
+				"hasProfile" -> info.hasProfile,
+				"relationshipTypesMap" -> info.relationshipTypesMap,
 				"relationshipTypesMapById" -> info.relationshipTypesMap.map { case (k, v) => (k.id, v) },
-				"hasAnyRelationships" -> hasAnyRelationships
+				"hasAnyRelationships" -> hasAnyRelationships,
+				"viewPermissions" -> info.viewPermissions,
+				"managePermissions" -> info.managePermissions
 			)
 	}
 

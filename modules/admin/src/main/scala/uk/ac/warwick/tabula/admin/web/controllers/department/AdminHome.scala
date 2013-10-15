@@ -92,6 +92,6 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 			managedRoutes
 		}
 	
-	def applyInternal() = (modules, routes)
+	def applyInternal() = (modules.sorted, routes.sorted)
 		
 }

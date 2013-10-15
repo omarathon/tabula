@@ -28,7 +28,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 			extends CustomDataBinder(obj, name)
 			with PermissionsBinding
 
-	private def clearAnyChecks() { permissionsAnyChecks = permissionsAnyChecks.empty }
+	private def clearAnyChecks() { permissionsAnyChecks.clear() }
 
 	@Test def checks {
 		PermissionCheck(Permissions.Module.Create, dept)
