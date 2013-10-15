@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data.model.{RuntimeMember, StudentRelationshipType, 
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.CurrentUser
+import scala.collection.JavaConverters._
 
 object HomeCommand {
 	def apply(user: CurrentUser) =
@@ -32,7 +33,9 @@ abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[Unit] 
 			case _ => false
 		}
 		viewPermissions = moduleAndDepartmentService.departmentsWithPermission(user, Permissions.MonitoringPoints.View)
+			.map(d => Set(d) ++ d.children.asScala.toSet).flatten.filter(_.routes.asScala.size > 0)
 		managePermissions = moduleAndDepartmentService.departmentsWithPermission(user, Permissions.MonitoringPoints.Manage)
+			.map(d => Set(d) ++ d.children.asScala.toSet).flatten.filter(_.routes.asScala.size > 0)
 		allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 		val downwardRelationships = relationshipService.listAllStudentRelationshipsWithMember(currentMember)
 		relationshipTypesMap = allRelationshipTypes.map { t =>
