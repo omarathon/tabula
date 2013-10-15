@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.{Fixtures, TestBase, Mockito}
+import uk.ac.warwick.tabula.{TestBase, Mockito}
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.services.{UserLookupService, FileAttachmentService, MemberNoteService, ProfileService}
 import uk.ac.warwick.tabula.data.model.{StudentRelationship, StudentRelationshipType, MeetingRecordApproval, MeetingRecord}
 import org.hibernate.Session
-import org.junit.Before
 
 class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
