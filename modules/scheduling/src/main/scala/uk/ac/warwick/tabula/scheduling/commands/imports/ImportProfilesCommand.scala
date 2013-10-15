@@ -97,21 +97,27 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					session.flush
 					session.clear
 
-					logger.info("Fetching module registrations")
-					val importModRegCommands = moduleRegistrationImporter.getModuleRegistrationDetails(userIdsAndCategories, users)
-
-					logger.info("Saving or updating module registrations")
-					val newModuleRegistrations = (importModRegCommands map {_.apply }).flatten
-
-					val usercodesProcessed: Seq[String] = userIdsAndCategories map { _.member.usercode }
-
-					logger.info("Removing old module registrations")
-					deleteOldModuleRegistrations(usercodesProcessed, newModuleRegistrations)
-					session.flush
-					session.clear
+					updateModuleRegistrationsAndSmallGroups(userIdsAndCategories, users)
 				}
 			}
 		}
+	}
+
+	def updateModuleRegistrationsAndSmallGroups(membershipInfo: Seq[MembershipInformation], users: Map[String, User]): Seq[ModuleRegistration] = {
+		logger.info("Fetching module registrations")
+		val importModRegCommands = moduleRegistrationImporter.getModuleRegistrationDetails(membershipInfo, users)
+
+		logger.info("Saving or updating module registrations")
+		val newModuleRegistrations = (importModRegCommands map {_.apply }).flatten
+
+		val usercodesProcessed: Seq[String] = membershipInfo map { _.member.usercode }
+
+		logger.info("Removing old module registrations")
+		deleteOldModuleRegistrations(usercodesProcessed, newModuleRegistrations)
+		session.flush
+		session.clear
+
+		newModuleRegistrations
 	}
 
 	def refresh(member: Member) {
@@ -128,12 +134,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					val members = importMemberCommands map { _.apply }
 					session.flush
 
-					// get the user's module registrations
-					val importModRegCommands = moduleRegistrationImporter.getModuleRegistrationDetails(List(membInfo), Map(usercode -> user))
-					if (importModRegCommands.isEmpty) logger.warn("Looking for module registrations for student " + membInfo.member.universityId + " but found no data to import.")
-					val newModuleRegistrations = (importModRegCommands map { _.apply }).flatten
-					deleteOldModuleRegistrations(Seq(usercode), newModuleRegistrations)
-					session.flush
+					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(usercode -> user))
 
 					for (member <- members) session.evict(member)
 					for (modReg <- newModuleRegistrations) session.evict(modReg)
@@ -145,6 +146,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	}
 
 	def deleteOldModuleRegistrations(usercodes: Seq[String], newModuleRegistrations: Seq[ModuleRegistration]) {
+		val yr = getCurrentSitsAcademicYear
 		val existingModuleRegistrations = moduleRegistrationDao.getByUsercodesAndYear(usercodes, getCurrentSitsAcademicYear)
 		for (existingMR <- existingModuleRegistrations) {
 			if (!newModuleRegistrations.contains(existingMR)) {

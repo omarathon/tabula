@@ -29,15 +29,17 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 				.add(is("occurrence", occurrence))
 				.uniqueResult
 
-	def getByUsercodesAndYear(usercodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration] = {
-		val usercodeString: String = usercodes.mkString(", ")
+	def getByUsercodesAndYear(userCodes: Seq[String], academicYear: AcademicYear) : Seq[ModuleRegistration] = {
+		//val usercodesInQuotes = usercodes.map { code => "'" + code + "'"}
+		//val usercodeString: String = usercodesInQuotes.mkString(", ")
+
 		session.newQuery[ModuleRegistration]("""
 				select distinct mr
 					from ModuleRegistration mr
-					where studentCourseDetails.student.userId in (:usercodes)
-					and academicYear = :academicYear
+					where academicYear = :academicYear
+					and studentCourseDetails.student.userId in :usercodes
 				""")
-					.setString("usercodes", usercodeString)
+					.setParameterList("usercodes", userCodes)
 					.setString("academicYear", academicYear.getStoreValue.toString)
 					.seq
 	}
