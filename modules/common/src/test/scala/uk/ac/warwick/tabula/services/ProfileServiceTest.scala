@@ -106,49 +106,6 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.listMembersUpdatedSince(new DateTime(2013, DateTimeConstants.FEBRUARY, 5, 0, 0, 0, 0), 5) should be (Seq())
 	}
 
-	@Test def getRegisteredModules: Unit = transactional { tx =>
-
-		val mod1 = Fixtures.module("in101")
-		val mod2 = Fixtures.module("in102")
-		val mod3 = Fixtures.module("in103")
-
-		session.save(mod1)
-		session.save(mod2)
-		session.save(mod3)
-
-		val ua1 = Fixtures.upstreamAssignment("in", 1)
-		val ua2 = Fixtures.upstreamAssignment("in", 2)
-
-		// Check that we haven't changed the behaviour of Fixtures
-		ua1.moduleCode should startWith (mod1.code.toUpperCase())
-		ua2.moduleCode should startWith (mod2.code.toUpperCase())
-
-		session.save(ua1)
-		session.save(ua2)
-
-		val ag1 = Fixtures.assessmentGroup(ua1)
-		val ag2 = Fixtures.assessmentGroup(ua2)
-
-		session.save(ag1)
-		session.save(ag2)
-
-		ag1.members.staticIncludeUsers.add("0000001")
-		ag1.members.staticIncludeUsers.add("0000002")
-
-		ag2.members.staticIncludeUsers.add("0000002")
-		ag2.members.staticIncludeUsers.add("0000003")
-
-		session.update(ag1)
-		session.update(ag2)
-
-		session.flush
-
-		profileService.getRegisteredModules("0000001") should be (Seq(mod1))
-		profileService.getRegisteredModules("0000002").toSet should be (Seq(mod1, mod2).toSet)
-		profileService.getRegisteredModules("0000003") should be (Seq(mod2))
-		profileService.getRegisteredModules("0000004") should be (Seq())
-	}
-
 	@Test def getStudentsByRouteForAcademicYear = {
 		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
 			val memberDao = mock[MemberDao]

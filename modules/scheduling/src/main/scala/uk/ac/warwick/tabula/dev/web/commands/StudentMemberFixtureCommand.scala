@@ -60,7 +60,6 @@ class StudentMemberFixtureCommand extends CommandInternal[Unit] with Logging {
 			if (dept.isDefined)  scd.department = dept.get
 			val yd = new StudentCourseYearDetails(scd, 1, AcademicYear.guessByDate(DateTime.now))
 			yd.yearOfStudy = yearOfStudy
-
 			scd.attachStudentCourseYearDetails(yd)
 			newMember.studentCourseDetails.add(scd)
 
