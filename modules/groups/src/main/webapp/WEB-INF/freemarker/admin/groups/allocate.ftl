@@ -237,44 +237,12 @@
 				return $('#groupslist').outerHeight();
 			});
 
-			$('.persist-area').fixHeaderFooter();
+			var fixHeaderFooter = $('.persist-area').fixHeaderFooter();
 
 			$(window).scroll(function() {
-		    	fixDirectionIcon();
-				fixTargetList('#groupslist'); // eg. personal tutors column
+				fixHeaderFooter.fixDirectionIcon();
+				fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
 			});
-
-			function fixDirectionIcon() {
-		        var directionIcon = $('.direction-icon');
-				var fixContainer = $('.fix-on-scroll-container');
-				var persistAreaTop = $('.persist-header').height() + $('#primary-navigation').height();
-
-				if(fixContainer.offset().top - $(window).scrollTop() < $('.persist-header').height() + $('#primary-navigation').height()) {
-					directionIcon.css({ "top" : persistAreaTop, "position": "fixed", "width": directionIcon.width() });
-				} else {
-					directionIcon.css({"top": "auto", "position": "static", "width": directionIcon.width });
-				}
-			}
-
-			// if the list of agents is shorter than the (viewport+fixed screen areas)
-			// and we've scrolled past the top of the persist-area container, then fix it
-			// (otherwise don't, because the user won't be able to see all of the items in the well)
-			function fixTargetList(listToFix) {
-				var targetList = $(listToFix);
-				var persistAreaTop = $('.persist-header').height() + $('#primary-navigation').height();
-				var viewableArea = $(window).height() - ($('.persist-header').height() + $('#primary-navigation').height() + $('.persist-footer').height());
-
-				if (targetList.height() < viewableArea && ($(window).scrollTop() > $('.persist-area').offset().top)) {
-					targetList.css({"top": persistAreaTop + 14, "position": "fixed", "width": targetList.parent().width()});
-				} else {
-					targetList.css({"top": "auto", "position": "relative", "width": "auto"});
-				}
-			}
-
-
-
-
-
 
 
 			// When the return list has changed, make sure the filter is re-run			
