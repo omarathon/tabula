@@ -21,7 +21,7 @@ class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends 
 
 	def validate(errors: Errors) {
 		if (approval.meetingRecord.deleted){
-			errors.reject("meetingRecordApproval.approve.deleted")
+			errors.reject("meetingRecordApproval.meetingRecord.deleted")
 		}
 		if (approved == null) {
 			errors.rejectValue("approved", "meetingRecordApproval.approved.isNull")

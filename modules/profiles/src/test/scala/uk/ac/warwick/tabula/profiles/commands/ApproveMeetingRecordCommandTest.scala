@@ -79,7 +79,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 		cmd.validate(errors)
 		errors.hasErrors should be (true)
 		errors.getErrorCount should be (1)
-		errors.getGlobalError.getCode should be ("meetingRecordApproval.approve.deleted")
+		errors.getGlobalError.getCode should be ("meetingRecordApproval.meetingRecord.deleted")
 
 	}
 
