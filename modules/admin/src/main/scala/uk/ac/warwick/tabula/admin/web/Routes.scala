@@ -29,4 +29,10 @@ object Routes {
 		
 		def permissions(module: Module) = "/module/%s/permissions" format (encoded(module.code))
 	}
+		
+	object route {
+		def apply(route: Route) = department(route.department) + "#route-" + encoded(route.code)
+		
+		def permissions(route: Route) = "/route/%s/permissions" format (encoded(route.code))
+	}
 }

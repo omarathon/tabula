@@ -17,9 +17,9 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 	// adding them back into UserAccessManager at the same time.
 	//
 
-	// Implicitly grants module manager role for all modules in this department
+	// Implicitly grants module manager role for all modules in this department, and route manager for all routes in this department
 	GeneratesSubRole(ModuleManagerRoleDefinition)
-
+	GeneratesSubRole(RouteManagerRoleDefinition)
 
 	GrantsScopedPermission(
 		Department.ManageExtensionSettings,
@@ -37,10 +37,6 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		MarkingWorkflow.Read,
 		MarkingWorkflow.Update,
 		MarkingWorkflow.Delete,
-
-		MonitoringPoints.View,
-		MonitoringPoints.Record,
-		MonitoringPoints.Manage,
 
 		Department.ManageProfiles,
 

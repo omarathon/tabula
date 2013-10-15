@@ -20,7 +20,10 @@ abstract class ManageHomeCommand(val user: CurrentUser) extends CommandInternal[
 	self: ModuleAndDepartmentServiceComponent =>
 
 	override def applyInternal() = {
-		moduleAndDepartmentService.departmentsWithPermission(user, Permissions.MonitoringPoints.Manage)
+		val manageDepartments = moduleAndDepartmentService.departmentsWithPermission(user, Permissions.MonitoringPoints.Manage)		
+		val manageRoutes = moduleAndDepartmentService.routesWithPermission(user, Permissions.MonitoringPoints.Manage)
+		
+		manageDepartments ++ manageRoutes.map { _.department }
 	}
 }
 

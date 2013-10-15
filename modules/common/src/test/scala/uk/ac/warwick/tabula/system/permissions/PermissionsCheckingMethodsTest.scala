@@ -28,7 +28,7 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 			extends CustomDataBinder(obj, name)
 			with PermissionsBinding
 
-	private def clearAnyChecks() { permissionsAnyChecks = permissionsAnyChecks.empty }
+	private def clearAnyChecks() { permissionsAnyChecks.clear() }
 
 	@Test def checks {
 		PermissionCheck(Permissions.Module.Create, dept)
@@ -37,11 +37,10 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 		PermissionCheck(Permissions.UserPicker)
 
 		permissionsAllChecks should be (Map(
-			Permissions.Module.Create -> Some(dept),
-			Permissions.Module.Delete -> Some(dept),
-			Permissions.Module.ManageAssignments -> Some(mod1),
-			Permissions.Module.ManageAssignments -> Some(mod2),
-			Permissions.UserPicker -> None
+			Permissions.Module.Create -> Set(Some(dept)),
+			Permissions.Module.Delete -> Set(Some(dept)),
+			Permissions.Module.ManageAssignments -> Set(Some(mod1), Some(mod2)),
+			Permissions.UserPicker -> Set(None)
 		))
 	}
 
@@ -198,8 +197,8 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 		)
 
 		permissionsAnyChecks should be (Map(
-			Permissions.Assignment.Create -> Some(mod1),
-			Permissions.Assignment.Update -> Some(mod1)
+			Permissions.Assignment.Create -> Set(Some(mod1)),
+			Permissions.Assignment.Update -> Set(Some(mod1))
 		))
 
 		try { withCurrentUser(currentUser) {
@@ -216,8 +215,8 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 		)
 
 		permissionsAnyChecks should be (Map(
-			Permissions.Profiles.Search -> None,
-			Permissions.Assignment.Create -> Some(mod1)
+			Permissions.Profiles.Search -> Set(None),
+			Permissions.Assignment.Create -> Set(Some(mod1))
 		))
 
 		roleService.getRolesFor(currentUser, null) returns Stream.empty
@@ -235,8 +234,8 @@ class PermissionsCheckingMethodsTest extends TestBase with Mockito with Permissi
 		)
 
 		permissionsAnyChecks should be (Map(
-			Permissions.Profiles.Search -> None,
-			Permissions.Assignment.Read -> Some(mod1)
+			Permissions.Profiles.Search -> Set(None),
+			Permissions.Assignment.Read -> Set(Some(mod1))
 		))
 
 		try { withCurrentUser(currentUser) {

@@ -30,6 +30,16 @@ object AdminBreadcrumbs {
 	}
 
 	/**
+	 * Special case breadcrumb for a route admin page.
+	 * Text is the route code, showing the name as a tooltip on hover.
+	 */
+	case class Route(val route: model.Route) extends Abstract {
+		val title = route.code.toUpperCase
+		val url = Some(Routes.route(route))
+		override val tooltip = route.name
+	}
+
+	/**
 	 * A breadcrumb without a link, to represent the current page.
 	 * We don't currently include the current page in crumbs, but can use this for page titles
 	 */

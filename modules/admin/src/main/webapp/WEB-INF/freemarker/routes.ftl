@@ -12,6 +12,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro deptperms department><@url page="/department/${department.code}/permissions" /></#macro>
 <#macro moduleperms module><@url page="/module/${module.code}/permissions" /></#macro>
+<#macro routeperms route><@url page="/route/${route.code}/permissions" /></#macro>
 
 <#macro displaysettings department><@url page="/department/${department.code}/settings/display" /></#macro>
 

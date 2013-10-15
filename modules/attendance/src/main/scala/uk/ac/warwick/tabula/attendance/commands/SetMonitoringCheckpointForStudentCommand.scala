@@ -87,7 +87,7 @@ trait SetMonitoringCheckpointForStudentCommandPermissions extends RequiresPermis
 	self: SetMonitoringCheckpointForStudentState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Record, studentCourseDetails.student)
+		p.PermissionCheck(Permissions.MonitoringPoints.Record, studentCourseDetails)
 	}
 }
 

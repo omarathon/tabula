@@ -11,6 +11,7 @@ import scala.collection.JavaConverters._
 import org.springframework.util.AutoPopulatingList
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.CheckablePermission
 
 object DeleteMonitoringPointCommand {
 	def apply(dept: Department, pointIndex: Int) =
@@ -46,7 +47,10 @@ trait DeleteMonitoringPointPermissions extends RequiresPermissionsChecking with 
 	self: DeleteMonitoringPointState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(dept))
+		p.PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.MonitoringPoints.Manage, mandatory(dept))) ++
+			dept.routes.asScala.map { route => CheckablePermission(Permissions.MonitoringPoints.Manage, route) }
+		)
 	}
 }
 
