@@ -20,6 +20,9 @@ class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends 
 	var rejectionComments: String =_
 
 	def validate(errors: Errors) {
+		if (approval.meetingRecord.deleted){
+			errors.reject("meetingRecordApproval.approve.deleted")
+		}
 		if (approved == null) {
 			errors.rejectValue("approved", "meetingRecordApproval.approved.isNull")
 		} else if (!approved && !rejectionComments.hasText) {
