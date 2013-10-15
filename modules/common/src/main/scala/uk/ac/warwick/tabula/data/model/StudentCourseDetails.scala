@@ -53,7 +53,7 @@ class StudentCourseDetails
 
 	def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] =
 		moduleRegistrations.asScala.collect {
-			case modReg if year .isEmpty => modReg.module
+			case modReg if year.isEmpty => modReg.module
 			case modReg if modReg.academicYear == year.getOrElse(null) => modReg.module
 	}
 
