@@ -51,11 +51,7 @@ class StudentCourseDetails
 	@BatchSize(size=200)
 	var moduleRegistrations: JList[ModuleRegistration] = JArrayList()
 
-	def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] =
-		moduleRegistrations.asScala.collect {
-			case modReg if year.isEmpty => modReg.module
-			case modReg if modReg.academicYear == year.getOrElse(null) => modReg.module
-	}
+	def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] = moduleRegistrationsByYear(year).map(_.module)
 
 	def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =
 		moduleRegistrations.asScala.collect {
@@ -89,6 +85,13 @@ class StudentCourseDetails
 		statusString
 	}
 
+	// The reason this method isn't on SitsStatus is that P* can have a meaning other than
+	// permanently withdrawn in the context of applicants, but not in the context of
+	// the student's route status (sprStatus)
+	def permanentlyWithdrawn = {
+		sprStatus.code.startsWith("P")
+	}
+
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def latestStudentCourseYearDetails: StudentCourseYearDetails =
 		studentCourseYearDetails.asScala.max
@@ -119,6 +122,10 @@ class StudentCourseDetails
 }
 
 trait StudentCourseProperties {
+	// There can be multiple StudentCourseDetails rows for a single SPR code, even though a route is a sub-category of a course;
+	// this is just an artefact of the weird way SITS works.  If a student changes route within a course, they end up with a new
+	// course join (SCJ) row in SITS.  Equally perversely, they keep the same sprcode and SPR row even though this should be the
+	// student's record for their route (SPR = student programme route) - the route code is just edited.  Hence this is not unique.
 	var sprCode: String = _
 
 	@ManyToOne

@@ -129,6 +129,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def registeredModulesByYear(year: Option[AcademicYear]) = Seq[Module]()
 	def moduleRegistrationsByYear(year: Option[AcademicYear]) = Seq[ModuleRegistration]()
 
+	def permanentlyWithdrawn = false
+
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
 	@BatchSize(size=200)
@@ -220,6 +222,10 @@ class StudentMember extends Member with StudentProperties {
 	}
 
 	override def hasCurrentEnrolment: Boolean = studentCourseDetails.asScala.exists(_.hasCurrentEnrolment)
+
+	override def permanentlyWithdrawn: Boolean = studentCourseDetails.asScala
+			 .map(scd => scd.sprStatus)
+			 .exists(!_.code.startsWith("P"))
 
 	override def hasRelationship(relationshipType: StudentRelationshipType): Boolean =
 		studentCourseDetails.asScala.exists(_.hasRelationship(relationshipType))
