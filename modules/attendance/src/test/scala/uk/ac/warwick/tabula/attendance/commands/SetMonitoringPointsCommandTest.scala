@@ -65,4 +65,5 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		}
 	}
 
+
 }

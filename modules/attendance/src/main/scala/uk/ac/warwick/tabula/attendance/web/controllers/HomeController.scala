@@ -3,14 +3,17 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.attendance.commands.{HomeCommand, ManageHomeCommand}
+import uk.ac.warwick.tabula.attendance.commands.{HomeCommandState, HomeCommand}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.attendance.web.Routes
 
 /**
- * Displays the Attendance home screen, allowing users to choose the department to view or manage.
- * If the user only has permissions over a single department, they are taken directly to it.
+ * Displays the Attendance home screen.
+ * Redirects to the the appropriate page if only one of the following is true:
+ * * The user has a profile
+ * * The user has view/record permissions on a single department
+ * * The user has manage permissions on a single department
+ * Otherwise they are shown the home page
  */
 @Controller
 @RequestMapping(Array("/"))
@@ -20,17 +23,20 @@ class HomeController extends AttendanceController {
 	def createCommand(user: CurrentUser) = HomeCommand(user)
 
 	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[Map[String, Set[Department]]]) = {
-		if (user.isStaff) {
-			val map = cmd.apply()
-			if (map("Manage").size == 0 && map("View").size == 1) {
-				Redirect(s"/${map("View").head.code}")
-			} else {
-				Mav("home/home", "permissionMap" -> map)
-			}
-		} else if (user.isStudent) {
+	def home(@ModelAttribute("command") cmd: Appliable[Unit] with HomeCommandState) = {
+		cmd.apply()
+		val hasAnyRelationships = cmd.relationshipTypesMap.exists{ case (_, b) => b}
+		if (cmd.hasProfile && cmd.managePermissions.size == 0 && cmd.viewPermissions.size == 0 && !hasAnyRelationships)
 			Redirect(Routes.profile())
-		} else Mav("home/nopermission")
+		else if (!cmd.hasProfile && cmd.managePermissions.size == 0 && cmd.viewPermissions.size == 1 && !hasAnyRelationships)
+			Redirect(Routes.department.view(cmd.viewPermissions.head))
+		else if (!cmd.hasProfile && cmd.managePermissions.size == 1 && cmd.viewPermissions.size == 0 && !hasAnyRelationships)
+			Redirect(Routes.department.manage(cmd.managePermissions.head))
+		else
+			Mav("home/home",
+				"relationshipTypesMapById" -> cmd.relationshipTypesMap.map { case (k, v) => (k.id, v) },
+				"hasAnyRelationships" -> hasAnyRelationships
+			)
 	}
 
 }

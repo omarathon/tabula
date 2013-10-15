@@ -139,12 +139,12 @@ trait FixturesDriver {
 
 	}
 
-	def createStudentRelationship(student:LoginDetails, agent:LoginDetails, relationhipType:String = "tutor"){
+	def createStudentRelationship(student:LoginDetails, agent:LoginDetails, relationshipType:String = "tutor"){
 		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/relationship"
 		val req = url(uri).POST << Map(
 			"studentUniId" -> student.warwickId,
 			"agent"->agent.warwickId,
-		  "relationshipType"->relationhipType)
+		  "relationshipType"->relationshipType)
 		http.when(_==200)(req >|)
 
 	}

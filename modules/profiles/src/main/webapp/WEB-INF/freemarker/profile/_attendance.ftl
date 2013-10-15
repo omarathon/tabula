@@ -22,7 +22,7 @@
 		jQuery(function($){
 			var monitoringPointsLoader = function() {
 				$('#attendance .monitoring-points').empty();
-				$.get('/attendance/profile/${studentCourseDetails.urlSafeId}/' + $('#attendance select.academicYear :selected').val(), function(data) {
+				$.get('/attendance/profile/${studentCourseDetails.urlSafeId}/' + $('#attendance select.academicYear :selected').val() + '?dt=' + new Date().valueOf(), function(data) {
 					$('#attendance .monitoring-points').html(data);
 					var pane = $('#attendance-pane');
 					var title = pane.find('h4').html();
