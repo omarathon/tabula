@@ -36,8 +36,8 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 					where academicYear = :academicYear
 					and studentCourseDetails.student.userId in :usercodes
 				""")
-					.setParameterList("usercodes", userCodes)
 					.setString("academicYear", academicYear.getStoreValue.toString)
+					.setParameterList("usercodes", userCodes)
 					.seq
 	}
 }
