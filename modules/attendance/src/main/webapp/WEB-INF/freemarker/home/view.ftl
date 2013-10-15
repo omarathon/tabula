@@ -36,7 +36,7 @@
 
 		<select name="route" class="route input-xxlarge">
 			<option style="display:none;" disabled <#if !command.route??>selected</#if> value="">Route</option>
-			<#list command.setsByRouteByAcademicYear[command.academicYear.toString]?keys?sort_by("code") as route>
+			<#list command.sortedRoutesByAcademicYear(command.academicYear.toString) as route>
 				<option value="${route.code}" <#if command.route?? && command.route.code == route.code>selected</#if>>
 					<@fmt.route_name route />
 				</option>

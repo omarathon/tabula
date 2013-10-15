@@ -63,6 +63,9 @@ trait ManageMonitoringPointSetState extends RouteServiceComponent with Monitorin
 	def setsByRouteCodeByAcademicYear(academicYear: String, route: Route) =
 		setsByRouteByAcademicYear(academicYear)(route)
 
+	def sortedRoutesByAcademicYear(academicYear: String) =
+		setsByRouteByAcademicYear(academicYear).keySet.toSeq.sorted(Route.DegreeTypeOrdering)
+
 	var templates: Seq[MonitoringPointSetTemplate] = _
 
 }

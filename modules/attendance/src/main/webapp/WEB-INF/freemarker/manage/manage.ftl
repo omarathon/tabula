@@ -29,7 +29,7 @@
 	var setsByRouteByAcademicYear = {
 		<#list command.setsByRouteByAcademicYear?keys as academicYear>
 			"${academicYear}" : [
-				<#list command.setsByRouteByAcademicYear[academicYear]?keys?sort_by("code") as route>
+				<#list command.sortedRoutesByAcademicYear(academicYear) as route>
 					{
 						"code" : "${route.code}",
 						"name" : "${route.name}",
