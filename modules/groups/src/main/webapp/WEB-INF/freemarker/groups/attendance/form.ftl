@@ -30,7 +30,7 @@
 
 	<#if !command.members?has_content>
 
-		<p><em>There are no students registered on this group.</em></p>
+		<p><em>There are no students allocated to this group.</em></p>
 
 	<#else>
 
