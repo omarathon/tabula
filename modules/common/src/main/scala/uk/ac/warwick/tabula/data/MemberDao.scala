@@ -44,6 +44,7 @@ trait MemberDao {
 	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getAllRelationshipsByAgent(agentId: String): Seq[StudentRelationship]
+	def getAllRelationshipTypesByAgent(agentId: String): Seq[StudentRelationshipType]
 	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
@@ -55,6 +56,7 @@ trait MemberDao {
 class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	import Restrictions._
 	import Order._
+	import Projections._
 
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType] =
 		session.newCriteria[StudentRelationshipType]
@@ -232,6 +234,17 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				Restrictions.isNull("endDate"),
 				Restrictions.ge("endDate", new DateTime())
 			))
+			.seq
+
+
+	def getAllRelationshipTypesByAgent(agentId: String): Seq[StudentRelationshipType] =
+		session.newCriteria[StudentRelationship]
+			.add(is("agent", agentId))
+			.add( Restrictions.or(
+				Restrictions.isNull("endDate"),
+				Restrictions.ge("endDate", new DateTime())
+			))
+			.project[StudentRelationshipType](distinct(property("relationshipType")))
 			.seq
 
 	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship] =

@@ -220,6 +220,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.getRelationshipsByAgent(relationshipType, "1000004") should be (Seq())
 
 		memberDao.getAllRelationshipsByAgent("1000003").toSet should be (Seq(relBetweenStaff1AndStu1, relBetweenStaff1AndStu2).toSet)
+		memberDao.getAllRelationshipTypesByAgent("1000003") should be (Seq(relationshipType))
 	}
 
 	@Test

@@ -13,6 +13,13 @@ import uk.ac.warwick.util.queue.QueueListener
 import uk.ac.warwick.util.queue.conversion.ItemType
 import scala.beans.BeanProperty
 
+trait FeaturesComponent {
+	def features: Features
+}
+
+trait AutowiringFeaturesComponent extends FeaturesComponent {
+	var features = Wire[Features]
+}
 
 /**
  * Defines flags to turn features on and off.

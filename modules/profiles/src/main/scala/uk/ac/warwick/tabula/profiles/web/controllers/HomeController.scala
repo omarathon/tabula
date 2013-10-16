@@ -1,59 +1,36 @@
 package uk.ac.warwick.tabula.profiles.web.controllers
 
-import org.springframework.stereotype.Controller
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.{Features, CurrentUser}
-import uk.ac.warwick.userlookup.Group
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.services.{SmallGroupService, UserLookupService, ProfileService, ModuleAndDepartmentService, MemberNoteService}
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.web._
-import uk.ac.warwick.tabula.web.controllers._
-import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.tabula.profiles.commands.ProfilesHomeCommand
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
-import uk.ac.warwick.tabula.data.model.MemberUserType.Student
+import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.profiles.web.Routes
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.RelationshipService
+import org.springframework.stereotype.Controller
+import uk.ac.warwick.tabula.data.model.MemberUserType._
+import uk.ac.warwick.tabula.profiles.commands.ProfilesHomeInformation
 
 @Controller class HomeController extends ProfilesController {
-	
-	var moduleService = Wire[ModuleAndDepartmentService]
-	var smallGroupsService = Wire[SmallGroupService]
-	var features = Wire[Features]
 
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
+		
+	@ModelAttribute("command")
+	def createCommand(user: CurrentUser) = ProfilesHomeCommand(user, optionalCurrentMember)
 
-	@RequestMapping(Array("/")) def home() = {
+	@RequestMapping(Array("/")) def home(@ModelAttribute("command") cmd: Appliable[ProfilesHomeInformation]) = {
 		if (user.isStaff) {
-			val smallGroups =
-				if (features.smallGroupTeachingTutorView) smallGroupsService.findSmallGroupsByTutor(user.apparentUser)
-				else Nil
-				
-			// Get all the relationships that the current member is an agent of
-			val downwardRelationships = relationshipService.listAllStudentRelationshipsWithMember(currentMember)
-				
-			// Get all the enabled relationship types for a department
-			// Filtered by department visibility in view
-			val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
-			
-			// A map from each type to a boolean for whether the current member has downward relationships of that type
-			val relationshipTypesMap = allRelationshipTypes.map { t =>
-				(t, downwardRelationships.exists(_.relationshipType == t))
-			}.toMap
+			val info = cmd.apply()
 
 			Mav("home/view",
-				"relationshipTypesMap" -> relationshipTypesMap,
-				"relationshipTypesMapById" -> relationshipTypesMap.map { case (k, v) => (k.id, v) },
-				"universityId" -> currentMember.universityId,
+				"relationshipTypesMap" -> info.relationshipTypesMap,
+				"relationshipTypesMapById" -> info.relationshipTypesMap.map { case (k, v) => (k.id, v) },
+				"universityId" -> user.universityId,
 				"isPGR" -> user.isPGR,
-				"smallGroups" -> smallGroups,
-				"adminDepartments" -> moduleService.departmentsWithPermission(user, Permissions.Department.ManageProfiles)
+				"smallGroups" -> info.smallGroups,
+				"adminDepartments" -> info.adminDepartments
 			)
-		} else if (optionalCurrentMember.isDefined && currentMember.userType == Student) {
+		} else if (optionalCurrentMember.filter(_.userType == Student).isDefined) {
 			Redirect(Routes.profile.view(currentMember))
 		} else Mav("home/nopermission")
 	}
