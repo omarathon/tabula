@@ -1,5 +1,5 @@
 <#function sanitise text>
-	<#return text?lower_case?replace("[^a-z]", "", "r") />
+	<#return text?lower_case?replace("[^a-z0-9]", "", "r") />
 </#function>
 
 <#escape x as x?html>
@@ -20,7 +20,7 @@
 				<#list agentRelationships?keys as key>
 					<#assign students = mapGet(agentRelationships,key) />
 					<#assign agent = students?first.agentParsed />
-					<#assign studentKey = sanitise(key.sortkey) + "-students" />
+					<#assign studentKey = "rel-" + sanitise(key.sortkey) + "-students" />
 
 					<tbody>
 						<tr>
