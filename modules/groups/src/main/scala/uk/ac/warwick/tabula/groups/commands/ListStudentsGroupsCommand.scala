@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.commands.{Unaudited, ReadOnly, Command}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.SmallGroupService
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod
 
 
 trait ListStudentsGroupsCommand extends Applicable[Map[Module, Map[SmallGroupSet, Seq[SmallGroup]]]]
@@ -26,7 +27,7 @@ class ListStudentsGroupsCommandImpl(member: Member)
 
 	def applyInternal() =
 		smallGroupService.findSmallGroupsByStudent(member.asSsoUser)
-			.filter(_.groupSet.releasedToStudents)
+			.filter(_.groupSet.visibleToStudents)
 			.groupBy { group => group.groupSet }
 			.groupBy { case (set, groups) => set.module }
 

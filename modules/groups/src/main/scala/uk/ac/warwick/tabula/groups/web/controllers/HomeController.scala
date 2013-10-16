@@ -26,7 +26,7 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewModules
 			val ownedDepartments = moduleService.departmentsWithPermission(user, Permissions.Module.ManageSmallGroups)
 			val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageSmallGroups)
 			val taughtGroups = smallGroupService.findSmallGroupsByTutor(user.apparentUser)
-			val memberGroupSets = smallGroupService.findSmallGroupSetsByMember(user.apparentUser)
+			val memberGroupSets = smallGroupService.findSmallGroupSetsByMember(user.apparentUser)		
 			val releasedMemberGroupSets = getGroupSetsReleasedToStudents(memberGroupSets)
 			val nonEmptyMemberViewModules = getViewModulesForStudent(releasedMemberGroupSets,getGroupsToDisplay(_,user.apparentUser))
 	
@@ -81,6 +81,6 @@ object HomeController {
 		memberViewModules.filterNot(m=>m.setItems.isEmpty).toSeq
 	}
 
-	def getGroupSetsReleasedToStudents(memberGroupSets:Seq[SmallGroupSet]) = memberGroupSets.filter(s => (s.releasedToStudents || s.allocationMethod == StudentSignUp))
+	def getGroupSetsReleasedToStudents(memberGroupSets:Seq[SmallGroupSet]) = memberGroupSets.filter(_.visibleToStudents)
 
 }
