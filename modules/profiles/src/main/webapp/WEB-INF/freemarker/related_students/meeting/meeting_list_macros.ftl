@@ -12,11 +12,6 @@
 
 		<#if can_create_meetings>
 			<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Create a new record"><i class="icon-edit"></i> New record</a>
-			<#if isSelf!false>
-				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to you and your ${relationshipType.agentRole}(s).">Who can see this information?</small>
-			<#else>
-				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to the student and their ${relationshipType.agentRole}(s).">Who can see this information?</small>
-			</#if>
 		</#if>
 		<#if can_read_meetings>
 			<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
