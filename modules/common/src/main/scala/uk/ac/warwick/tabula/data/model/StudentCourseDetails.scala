@@ -12,9 +12,9 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import scala.collection.JavaConverters._
 import javax.persistence.Entity
 import javax.persistence.CascadeType
+import scala.collection.JavaConverters._
 
 @Entity
 class StudentCourseDetails
@@ -51,11 +51,23 @@ class StudentCourseDetails
 	@BatchSize(size=200)
 	var moduleRegistrations: JList[ModuleRegistration] = JArrayList()
 
+	def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] =
+		moduleRegistrations.asScala.collect {
+			case modReg if year.isEmpty => modReg.module
+			case modReg if modReg.academicYear == year.getOrElse(null) => modReg.module
+	}
+
+	def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =
+		moduleRegistrations.asScala.collect {
+			case modReg if year.isEmpty => modReg
+			case modReg if modReg.academicYear == year.getOrElse(null) => modReg
+	}
+
 	def toStringProps = Seq(
 		"scjCode" -> scjCode,
 		"sprCode" -> sprCode)
 
-	def permissionsParents = Option(student).toStream
+	def permissionsParents = Stream(Option(student), Option(route)).flatten
 
 	def hasCurrentEnrolment: Boolean = {
 		!latestStudentCourseYearDetails.enrolmentStatus.code.startsWith("P")

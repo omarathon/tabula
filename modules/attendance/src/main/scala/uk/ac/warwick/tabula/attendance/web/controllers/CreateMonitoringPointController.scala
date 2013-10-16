@@ -16,7 +16,7 @@ class CreateMonitoringPointController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def createCommand(@PathVariable set: MonitoringPointSet) =
-	 CreateMonitoringPointCommand(set)
+	 CreateMonitoringPointCommand(mandatory(set))
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPoint]) = {

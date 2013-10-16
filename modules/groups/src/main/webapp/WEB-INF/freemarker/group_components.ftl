@@ -119,7 +119,7 @@
 									 || (setItem.isStudentSignUp() && !setItem.set.allowSelfGroupSwitching)
 									 || (setItem.isStudentSignUp() && !setItem.set.openForSignups)
 								>
-									<span class="use-tooltip" title="You cannot change this group allocation via tabula. Please speak to your department if you need to change groups"><i class="icon-lock"></i></span>
+									<span class="use-tooltip" title="You cannot change this group allocation via Tabula. Please speak to your department if you need to change groups"><i class="icon-lock"></i></span>
 								<#else>
 									<span class="use-tooltip" title="This group is open for self sign-up"><i class="icon-unlock-alt"></i></span>
 								</#if>

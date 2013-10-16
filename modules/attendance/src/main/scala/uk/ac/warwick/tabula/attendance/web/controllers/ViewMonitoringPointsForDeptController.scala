@@ -22,7 +22,7 @@ class ViewMonitoringPointsForDeptController extends AttendanceController {
 		@RequestParam(value="route", required = false) route: Route,
 		@RequestParam(value="set", required = false) set: MonitoringPointSet
 	) =
-			ViewMonitoringPointSetsCommand(dept, Option(academicYear), Option(route), Option(set))
+			ViewMonitoringPointSetsCommand(user, dept, Option(academicYear), Option(route), Option(set))
 
 	@RequestMapping
 	def home(

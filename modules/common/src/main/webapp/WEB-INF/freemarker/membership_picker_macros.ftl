@@ -259,6 +259,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 							<th class="for-check-all" style="width: 20px; padding-right: 0;"></th>
 							<th class="sortable">Name</th>
 							<th class="sortable">Members</th>
+							<th class="sortable">Assessment group</th>
 							<th class="sortable">CATS</th>
 							<th class="sortable">Occurrence</th>
 							<th class="sortable">Sequence</th>
@@ -271,6 +272,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 							<td><input type="checkbox" id="chk-${available.id}" name="" value="${available.id}"></td>
 							<td><label for="chk-${available.id}">${available.name}<#if isLinked> <span class="label label-success">Linked</span></#if></label></td>
 							<td>${available.memberCount}</td><#-- FIXME: a.popover (overflow-y: scroll) with member list -->
+							<td>${available.group.assessmentGroup}</td>
 							<td>${available.cats!'-'}</td>
 							<td>${available.occurrence}</td>
 							<td>${available.sequence}</td>

@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.userlookup.User
 import org.hibernate.annotations.AccessType
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
  * Wherever a group of users is referenced in the app, it will be
@@ -63,7 +64,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 		addUser(getIdFromUser(user))
 	}
 	def addUser(user: String) = {
-		if (!includeUsers.contains(user)) {
+		if (!includeUsers.contains(user) && user.hasText) {
 			includeUsers.add(user)
 		} else false
 	}
@@ -74,7 +75,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 	}
 
 	def excludeUser(user: String) = {
-		if (!excludeUsers.contains(user)) {
+		if (!excludeUsers.contains(user) && user.hasText) {
 			excludeUsers.add(user)
 		} else false
 	}

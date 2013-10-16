@@ -22,6 +22,14 @@ import scala.annotation.tailrec
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.tabula.permissions.SelectorPermission
 
+trait SecurityServiceComponent {
+	def securityService: SecurityService
+}
+
+trait AutowiringSecurityServiceComponent extends SecurityServiceComponent {
+	var securityService = Wire[SecurityService]
+}
+
 /**
  * Checks permissions.
  */

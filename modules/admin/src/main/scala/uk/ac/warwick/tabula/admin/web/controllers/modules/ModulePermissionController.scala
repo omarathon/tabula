@@ -23,13 +23,13 @@ trait ModulePermissionControllerMethods extends AdminController {
 	var userLookup = Wire.auto[UserLookupService]
 
 	def form(module: Module): Mav = {
-		Mav("admin/module/permissions", "module" -> module)
+		Mav("admin/modules/permissions", "module" -> module)
 			.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 
 	def form(module: Module, usercodes: Seq[String], role: Option[RoleDefinition], action: String): Mav = {
 		val users = userLookup.getUsersByUserIds(usercodes.asJava)
-		Mav("admin/module/permissions",
+		Mav("admin/modules/permissions",
 				"module" -> module,
 				"users" -> users,
 				"role" -> role,

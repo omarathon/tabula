@@ -27,8 +27,12 @@
 	</a>
 </#macro>
 
-<#macro route_name route>
-	${route.code?upper_case} ${route.name}
+<#macro route_name route withFormatting=false>
+	<#if withFormatting>
+		<span class="route-code">${route.code?upper_case}</span> <span class="route-name">${route.name}</span>
+	<#else>
+		${route.code?upper_case} ${route.name}
+	</#if>
 </#macro>
 
 <#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true><#--
@@ -164,7 +168,7 @@
 	<#if attachment?has_content>
 		<#local title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#local>
 		<div class="attachment">
-			<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
+			<@download_link filePath="${page}attachment/${attachment.name?url}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
 		</div>
 	<#elseif attachments?size gt 1>
 		<details class="attachment">

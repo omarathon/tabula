@@ -22,7 +22,7 @@ class AddMonitoringPointSetController extends AttendanceController {
 		@PathVariable dept: Department,
 		@PathVariable academicYear: AcademicYear,
 		@RequestParam(value="existingSet",required=false) existingSet: AbstractMonitoringPointSet) =
-		AddMonitoringPointSetCommand(dept, academicYear, Option(existingSet))
+		AddMonitoringPointSetCommand(user, dept, academicYear, Option(existingSet))
 
 	@RequestMapping(method=Array(GET,HEAD))
 	def form(@PathVariable dept: Department, @ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointSet]]) = {

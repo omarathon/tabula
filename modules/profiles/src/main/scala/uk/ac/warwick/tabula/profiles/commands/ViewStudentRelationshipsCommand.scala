@@ -3,35 +3,28 @@ package uk.ac.warwick.tabula.profiles.commands
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.helpers.FoundUser
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.Permissions
-import scala.collection.SortedMap
 import scala.collection.immutable.TreeMap
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 // wrapper class for relationship data - just for less crufty method signature
-case class RelationshipGraph(val studentMap: TreeMap[SortableAgentIdentifier, Seq[StudentRelationship]], val studentCount: Int, val missingCount: Int)
-case class SortableAgentIdentifier(val agentId:String, val lastName:Option[String]){
-	 val sortkey = lastName map (_+agentId) getOrElse agentId
+case class RelationshipGraph(studentMap: TreeMap[SortableAgentIdentifier, Seq[StudentRelationship]], studentCount: Int, missingCount: Int)
+case class SortableAgentIdentifier(agentId:String, lastName:Option[String]){
+	 val sortkey = lastName.getOrElse("") + agentId
 	 override def toString() = sortkey
 }
 object SortableAgentIdentifier{
-	def apply(r:StudentRelationship) = {
-		new SortableAgentIdentifier(r.agent, r.agentMember.map(_.lastName))
-	}
+	def apply(r:StudentRelationship) = new SortableAgentIdentifier(r.agent, r.agentMember.map(_.lastName))
+
+	val KeyOrdering = Ordering.by { a:SortableAgentIdentifier => a.sortkey }
 }
-object AgentOrdering extends Ordering[SortableAgentIdentifier]{
-	def compare(x: SortableAgentIdentifier, y: SortableAgentIdentifier): Int = {
-		x.sortkey.compareTo(y.sortkey)
-	}
-}
+
 class ViewStudentRelationshipsCommand(val department: Department, val relationshipType: StudentRelationshipType) extends Command[RelationshipGraph] with Unaudited {
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), department)
@@ -56,7 +49,7 @@ class ViewStudentRelationshipsCommand(val department: Department, val relationsh
 		val groupedAgentRelationships = unsortedAgentRelationships.groupBy(r=>SortableAgentIdentifier(r))
 
 		//  alpha sort by constructing a TreeMap
-		val sortedAgentRelationships = TreeMap((groupedAgentRelationships).toSeq:_*)(AgentOrdering)
+		val sortedAgentRelationships = TreeMap((groupedAgentRelationships).toSeq:_*)(SortableAgentIdentifier.KeyOrdering)
 
 		// count students
 		val studentsInDepartmentCount = profileService.countStudentsByDepartment(department)

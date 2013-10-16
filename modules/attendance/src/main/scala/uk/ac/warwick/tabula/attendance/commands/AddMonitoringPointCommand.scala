@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.permissions.CheckablePermission
 
 
 object AddMonitoringPointCommand {
@@ -37,7 +38,10 @@ trait AddMonitoringPointPermissions extends RequiresPermissionsChecking with Per
 	self: MonitoringPointState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(dept))
+		p.PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.MonitoringPoints.Manage, mandatory(dept))) ++
+			dept.routes.asScala.map { route => CheckablePermission(Permissions.MonitoringPoints.Manage, route) }
+		)
 	}
 }
 

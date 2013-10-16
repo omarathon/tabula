@@ -10,7 +10,7 @@
 		This is a service for viewing and managing attendance monitoring points.
 	</p>
 
-	<#if command.hasProfile>
+	<#if hasProfile>
 		<h2>
 			<a href="<@routes.attendanceProfile />">My attendance profile</a>
 		</h2>
@@ -20,7 +20,7 @@
 		<h2>My students</h2>
 
 		<ul>
-			<#list command.relationshipTypesMap?keys as relationshipType>
+			<#list relationshipTypesMap?keys as relationshipType>
 				<#if relationshipTypesMapById[relationshipType.id]>
 					<li><a id="relationship-${relationshipType.urlPart}" href="<@routes.relationship_students relationshipType />">${relationshipType.studentRole?cap_first}s</a></li>
 				</#if>
@@ -28,14 +28,14 @@
 		</ul>
 	</#if>
 
-	<#assign can_record = (command.viewPermissions?size > 0) />
-	<#assign can_manage = (command.managePermissions?size > 0) />
+	<#assign can_record = (viewPermissions?size > 0) />
+	<#assign can_manage = (managePermissions?size > 0) />
 
 	<#if can_record || can_manage>
-		<#if (command.viewPermissions?size > 0)>
+		<#if (viewPermissions?size > 0)>
 			<h2>View and record monitoring points</h2>
 			<ul class="links">
-				<#list command.viewPermissions as department>
+				<#list viewPermissions as department>
 					<li>
 						<a id="view-department-${department.code}" href="<@routes.viewDepartment department />">${department.name}</a>
 					</li>
@@ -43,10 +43,10 @@
 			</ul>
 		</#if>
 		
-		<#if (command.managePermissions?size > 0)>
+		<#if (managePermissions?size > 0)>
 			<h2>Create and edit monitoring schemes</h2>
 			<ul class="links">
-				<#list command.managePermissions as department>
+				<#list managePermissions as department>
 					<li>
 						<a id="manage-department-${department.code}" href="<@routes.manageDepartment department />">${department.name}</a>
 					</li>

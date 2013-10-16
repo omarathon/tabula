@@ -60,6 +60,8 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	var releasedToStudents: JBoolean = false
   @Column(name="released_to_tutors")
   var releasedToTutors: JBoolean = false
+  
+  def visibleToStudents = releasedToStudents || allocationMethod == SmallGroupAllocationMethod.StudentSignUp
 
   def fullyReleased= releasedToStudents && releasedToTutors
 

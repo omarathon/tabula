@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.data.model.UserGroup
 import org.mockito.Mockito._
-import org.mockito.Matchers.anyObject
+import org.mockito.Matchers._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
 
@@ -111,7 +111,7 @@ class SmallGroupTest extends TestBase with Mockito {
 		val group = new SmallGroup()
 		group.groupSet = new SmallGroupSet()
 		group.groupSet.defaultMaxGroupSizeEnabled = true
-		group.students.add(new User("test"))
+		group.students.add(new User("test") {{ setWarwickId("00000001") }})
 
 
 		group.maxGroupSize = 2

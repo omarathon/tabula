@@ -14,21 +14,24 @@ import uk.ac.warwick.tabula.JavaImports.JHashMap
 import org.springframework.util.AutoPopulatingList
 import scala.Some
 import scala.collection.mutable
+import uk.ac.warwick.tabula.permissions.CheckablePermission
+import uk.ac.warwick.tabula.CurrentUser
 
 object AddMonitoringPointSetCommand {
-	def apply(dept: Department, academicYear: AcademicYear, existingSetOption: Option[AbstractMonitoringPointSet]) =
-		new AddMonitoringPointSetCommand(dept, academicYear, existingSetOption)
-		with ComposableCommand[Seq[MonitoringPointSet]]
-		with AutowiringRouteServiceComponent
-		with AutowiringTermServiceComponent
-		with AutowiringMonitoringPointServiceComponent
-		with AddMonitoringPointSetPermissions
-		with AddMonitoringPointSetDescription
-		with AddMonitoringPointSetValidation
+	def apply(user: CurrentUser, dept: Department, academicYear: AcademicYear, existingSetOption: Option[AbstractMonitoringPointSet]) =
+		new AddMonitoringPointSetCommand(user, dept, academicYear, existingSetOption)
+			with ComposableCommand[Seq[MonitoringPointSet]]
+			with AutowiringSecurityServicePermissionsAwareRoutes
+			with AutowiringRouteServiceComponent
+			with AutowiringTermServiceComponent
+			with AutowiringMonitoringPointServiceComponent
+			with AddMonitoringPointSetPermissions
+			with AddMonitoringPointSetDescription
+			with AddMonitoringPointSetValidation
 }
 
 
-abstract class AddMonitoringPointSetCommand(val dept: Department, val academicYear: AcademicYear, val existingSetOption: Option[AbstractMonitoringPointSet])
+abstract class AddMonitoringPointSetCommand(val user: CurrentUser, val dept: Department, val academicYear: AcademicYear, val existingSetOption: Option[AbstractMonitoringPointSet])
 	extends CommandInternal[Seq[MonitoringPointSet]] with AddMonitoringPointSetState {
 
 	self: MonitoringPointServiceComponent =>
@@ -123,7 +126,10 @@ trait AddMonitoringPointSetPermissions extends RequiresPermissionsChecking with 
 	self: AddMonitoringPointSetState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(dept))
+		p.PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.MonitoringPoints.Manage, mandatory(dept))) ++
+			dept.routes.asScala.map { route => CheckablePermission(Permissions.MonitoringPoints.Manage, route) }
+		)
 	}
 }
 
@@ -142,10 +148,10 @@ trait AddMonitoringPointSetDescription extends Describable[Seq[MonitoringPointSe
 
 
 
-trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteServiceComponent {
+trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteServiceComponent with PermissionsAwareRoutes {
 
 	private def getAvailableYears = {
-		val routeMap = dept.routes.asScala.map {
+		val routeMap = availableRoutes.map {
 			r => r.code -> collection.mutable.Map(
 				"1" -> true,
 				"2" -> true,
@@ -159,7 +165,7 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 			)
 		}.toMap
 		for {
-			r <- dept.routes.asScala
+			r <- availableRoutes
 			existingSet <- r.monitoringPointSets.asScala.filter(s => s.academicYear == academicYear)
 		}	yield {
 			if (existingSet.year ==  null) {
@@ -173,6 +179,7 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 	}
 
 	def dept: Department
+	def user: CurrentUser
 
 	def existingSetOption: Option[AbstractMonitoringPointSet]
 
@@ -180,7 +187,7 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 
 	var changeYear = false
 
-	val availableRoutes = dept.routes.asScala.sorted(Route.DegreeTypeOrdering)
+	lazy val availableRoutes = routesForPermission(user, Permissions.MonitoringPoints.Manage, dept).toSeq.sorted(Route.DegreeTypeOrdering)
 
 	lazy val availableYears = getAvailableYears
 
@@ -197,7 +204,7 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteS
 
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
 
-	val selectedRoutesAndYears: java.util.Map[Route, java.util.HashMap[String, java.lang.Boolean]] = dept.routes.asScala.map {
+	lazy val selectedRoutesAndYears: java.util.Map[Route, java.util.HashMap[String, java.lang.Boolean]] = availableRoutes.map {
 		r => r -> JHashMap(
 			"1" -> java.lang.Boolean.FALSE,
 			"2" -> java.lang.Boolean.FALSE,
