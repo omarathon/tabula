@@ -223,9 +223,14 @@ class StudentMember extends Member with StudentProperties {
 
 	override def hasCurrentEnrolment: Boolean = studentCourseDetails.asScala.exists(_.hasCurrentEnrolment)
 
-	override def permanentlyWithdrawn: Boolean = studentCourseDetails.asScala
+	override def permanentlyWithdrawn: Boolean = {
+		studentCourseDetails.asScala
 			 .map(scd => scd.sprStatus)
-			 .exists(!_.code.startsWith("P"))
+			 .filter(_ != null)
+			 .filter(_.code != null)
+			 .filter(_.code.startsWith("P"))
+			 .size == studentCourseDetails.size
+	}
 
 	override def hasRelationship(relationshipType: StudentRelationshipType): Boolean =
 		studentCourseDetails.asScala.exists(_.hasRelationship(relationshipType))
