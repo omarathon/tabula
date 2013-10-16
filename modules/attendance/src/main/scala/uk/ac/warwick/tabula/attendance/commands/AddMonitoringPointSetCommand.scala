@@ -106,7 +106,7 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 				case MonitoringPointType.Meeting =>
 					validateTypeMeeting(errors,
 						mutable.Set(point.meetingRelationships).flatten, s"monitoringPoints[$index].meetingRelationships",
-						mutable.Set(point.meetingFormats).flatten, "",
+						mutable.Set(point.meetingFormats).flatten, s"monitoringPoints[$index].meetingFormats",
 						point.meetingQuantity, s"monitoringPoints[$index].meetingQuantity",
 						dept
 					)

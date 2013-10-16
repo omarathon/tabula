@@ -7,7 +7,7 @@
 	</@spring.bind>
 
 	<#assign pointCount = 0 />
-	<#assign pointFields = ["name", "validFromWeek", "requiredFromWeek", "pointType", "meetingRelationships", "meetingQuantity"] />
+	<#assign pointFields = ["name", "validFromWeek", "requiredFromWeek", "pointType", "meetingRelationships", "meetingFormats", "meetingQuantity"] />
 	<#macro pointsInATerm term>
 		<div class="striped-section">
 			<h2 class="section-title">${term}</h2>

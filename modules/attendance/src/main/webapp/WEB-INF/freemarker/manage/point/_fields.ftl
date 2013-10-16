@@ -45,8 +45,7 @@
 	</div>
 
 	<div class="span6">
-		<#-- TAB-1409 spring binding on meetingFormats doesn't work in the 2-way comverter, so don't bind to it -->
-		<@form.labelled_row "" "Meeting formats">
+		<@form.labelled_row "meetingFormats" "Meeting formats">
 			<#assign meetingFormatsStrings = command.meetingFormatsStrings />
 			<#list command.allMeetingFormats as format>
 				<@form.label checkbox=true>
@@ -54,7 +53,6 @@
 					${format.description}
 				</@form.label>
 			</#list>
-			<@f.errors path="" cssClass="error" />
 		</@form.labelled_row>
 
 

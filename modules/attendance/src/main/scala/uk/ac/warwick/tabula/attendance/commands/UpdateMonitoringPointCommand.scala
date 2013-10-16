@@ -58,7 +58,7 @@ trait UpdateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 			case MonitoringPointType.Meeting =>
 				validateTypeMeeting(errors,
 					meetingRelationships.asScala, "meetingRelationships",
-					meetingFormats.asScala, "",
+					meetingFormats.asScala, "meetingFormats",
 					meetingQuantity, "meetingQuantity",
 					dept
 				)

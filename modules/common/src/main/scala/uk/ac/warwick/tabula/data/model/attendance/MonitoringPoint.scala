@@ -49,6 +49,7 @@ class MonitoringPoint extends GeneratedId with HasSettings {
 	def meetingRelationships = getStringSeqSetting(Settings.MeetingRelationships, Seq()).map(relationshipService.getStudentRelationshipTypeById(_).getOrElse(null))
 	def meetingRelationships_= (relationships: Seq[StudentRelationshipType]):Unit =
 		settings += (Settings.MeetingRelationships -> relationships.map(_.id))
+	// Ugh. This sucks. But Spring always wants to use the Seq version if they share a method name, and therefore won't bind
 	def meetingRelationshipsSpring_= (relationships: JSet[StudentRelationshipType]):Unit = {
 		meetingRelationships = relationships.asScala.toSeq
 	}
@@ -56,6 +57,7 @@ class MonitoringPoint extends GeneratedId with HasSettings {
 	def meetingFormats = getStringSeqSetting(Settings.MeetingFormats, Seq()).map(MeetingFormat.fromDescription(_))
 	def meetingFormats_= (formats: Seq[MeetingFormat]) =
 		settings += (Settings.MeetingFormats -> formats.map(_.description))
+	// See above
 	def meetingFormatsSpring_= (formats: JSet[MeetingFormat]) =
 		meetingFormats = formats.asScala.toSeq
 
