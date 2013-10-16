@@ -10,7 +10,7 @@ import org.springframework.util.AutoPopulatingList
 class AddMonitoringPointCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends TermServiceComponent
-			with AddMonitoringPointValidation with AddMonitoringPointState {
+			with AddMonitoringPointValidation with MonitoringPointState {
 		val termService = mock[TermService]
 	}
 

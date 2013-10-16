@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{AbstractMonitoringPointSet, MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, AbstractMonitoringPointSet, MonitoringPoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import org.springframework.validation.Errors
@@ -13,6 +13,7 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports.JHashMap
 import org.springframework.util.AutoPopulatingList
 import scala.Some
+import scala.collection.mutable
 
 object AddMonitoringPointSetCommand {
 	def apply(dept: Department, academicYear: AcademicYear, existingSetOption: Option[AbstractMonitoringPointSet]) =
@@ -46,6 +47,10 @@ abstract class AddMonitoringPointSetCommand(val dept: Department, val academicYe
 					point.updatedDate = new DateTime()
 					point.validFromWeek = m.validFromWeek
 					point.requiredFromWeek = m.requiredFromWeek
+					point.pointType = m.pointType
+					point.meetingRelationships = m.meetingRelationships
+					point.meetingFormats = m.meetingFormats
+					point.meetingQuantity = m.meetingQuantity
 					point
 				}.asJava
 				set.route = route
@@ -93,6 +98,17 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 			validateWeek(errors, point.validFromWeek, s"monitoringPoints[$index].validFromWeek")
 			validateWeek(errors, point.requiredFromWeek, s"monitoringPoints[$index].requiredFromWeek")
 			validateWeeks(errors, point.validFromWeek, point.requiredFromWeek, s"monitoringPoints[$index].validFromWeek")
+
+			point.pointType match {
+				case MonitoringPointType.Meeting =>
+					validateTypeMeeting(errors,
+						mutable.Set(point.meetingRelationships).flatten, s"monitoringPoints[$index].meetingRelationships",
+						mutable.Set(point.meetingFormats).flatten, "",
+						point.meetingQuantity, s"monitoringPoints[$index].meetingQuantity",
+						dept
+					)
+				case _ =>
+			}
 
 			if (monitoringPoints.asScala.count(p =>
 				p.name == point.name && p.validFromWeek == point.validFromWeek && p.requiredFromWeek == point.requiredFromWeek

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringPointSet, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import scala.collection.JavaConverters._
@@ -28,9 +28,7 @@ abstract class CreateMonitoringPointCommand(val set: MonitoringPointSet) extends
 
 	override def applyInternal() = {
 		val point = new MonitoringPoint
-		point.name = name
-		point.validFromWeek = validFromWeek
-		point.requiredFromWeek = requiredFromWeek
+		copyTo(point)
 		point.createdDate = new DateTime()
 		point.updatedDate = new DateTime()
 		set.add(point)
@@ -46,6 +44,17 @@ trait CreateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 		validateWeek(errors, requiredFromWeek, "requiredFromWeek")
 		validateWeeks(errors, validFromWeek, requiredFromWeek, "validFromWeek")
 		validateName(errors, name, "name")
+
+		pointType match {
+			case MonitoringPointType.Meeting =>
+				validateTypeMeeting(errors,
+					meetingRelationships.asScala, "meetingRelationships",
+					meetingFormats.asScala, "",
+					meetingQuantity, "meetingQuantity",
+					dept
+				)
+			case _ =>
+		}
 
 		if (set.points.asScala.count(p =>
 			p.name == name && p.validFromWeek == validFromWeek && p.requiredFromWeek == requiredFromWeek
@@ -74,17 +83,12 @@ trait CreateMonitoringPointDescription extends Describable[MonitoringPoint] {
 		d.property("name", name)
 		d.property("validFromWeek", validFromWeek)
 		d.property("requiredFromWeek", requiredFromWeek)
+		d.property("pointType", pointType)
 	}
 }
 
-trait CreateMonitoringPointState extends GroupMonitoringPointsByTerm with CanPointBeChanged {
+trait CreateMonitoringPointState extends MonitoringPointState with CanPointBeChanged {
 	def set: MonitoringPointSet
-	val academicYear = set.academicYear
 	val dept = set.route.department
-	var name: String = _
-	var validFromWeek: Int = 0
-	var requiredFromWeek: Int = 0
-
-	def monitoringPointsByTerm = groupByTerm(set.points.asScala, set.academicYear)
 }
 
