@@ -8,23 +8,31 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.CurrentUser
 import scala.collection.JavaConverters._
 
+case class HomeInformation(
+	hasProfile: Boolean,
+	viewPermissions: Set[Department],
+	managePermissions: Set[Department],
+	allRelationshipTypes: Seq[StudentRelationshipType],
+	relationshipTypesMap: Map[StudentRelationshipType, Boolean]
+)
+
 object HomeCommand {
 	def apply(user: CurrentUser) =
 		new HomeCommand(user)
-		with Command[Unit]
+		with Command[HomeInformation]
 		with AutowiringModuleAndDepartmentServiceComponent
 		with AutowiringProfileServiceComponent
 		with AutowiringRelationshipServiceComponent
 		with Public with ReadOnly with Unaudited
 }
 
-abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[Unit] with HomeCommandState {
+abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeInformation] with HomeCommandState {
 	self: ModuleAndDepartmentServiceComponent with ProfileServiceComponent with RelationshipServiceComponent =>
 
 	override def applyInternal() = {
 		val optionalCurrentMember = profileService.getMemberByUserId(user.apparentId, disableFilter = true)
 		val currentMember = optionalCurrentMember getOrElse new RuntimeMember(user)
-		hasProfile = currentMember match {
+		val hasProfile = currentMember match {
 			case student: StudentMember =>
 				student.mostSignificantCourseDetails match {
 					case Some(scd) => true
@@ -32,27 +40,37 @@ abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[Unit] 
 				}
 			case _ => false
 		}
-		viewPermissions = moduleAndDepartmentService.departmentsWithPermission(user, Permissions.MonitoringPoints.View)
-			.map(d => Set(d) ++ d.children.asScala.toSet).flatten.filter(_.routes.asScala.size > 0)
-		managePermissions = moduleAndDepartmentService.departmentsWithPermission(user, Permissions.MonitoringPoints.Manage)
-			.map(d => Set(d) ++ d.children.asScala.toSet).flatten.filter(_.routes.asScala.size > 0)
-		allRelationshipTypes = relationshipService.allStudentRelationshipTypes
+
+		val viewDepartments = moduleAndDepartmentService.departmentsWithPermission(user, Permissions.MonitoringPoints.View)
+		val manageDepartments = moduleAndDepartmentService.departmentsWithPermission(user, Permissions.MonitoringPoints.Manage)
+		
+		val viewRoutes = moduleAndDepartmentService.routesWithPermission(user, Permissions.MonitoringPoints.View)
+		val manageRoutes = moduleAndDepartmentService.routesWithPermission(user, Permissions.MonitoringPoints.Manage)
+		
+		def withSubDepartments(d: Department) = (Set(d) ++ d.children.asScala.toSet).filter(_.routes.asScala.size > 0)
+		
+		val allViewDepartments = (viewDepartments ++ viewRoutes.map { _.department }).map(withSubDepartments).flatten
+		val allManageDepartments = (manageDepartments ++ manageRoutes.map { _.department }).map(withSubDepartments).flatten
+		
+		// TODO we might want to distinguish between a "Manage department" and a "Manage route" like we do in coursework with modules
+		// These return Sets so no need to distinct the result
+
+		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 		val downwardRelationships = relationshipService.listAllStudentRelationshipsWithMember(currentMember)
-		relationshipTypesMap = allRelationshipTypes.map { t =>
+		val relationshipTypesMap = allRelationshipTypes.map { t =>
 			(t, downwardRelationships.exists(_.relationshipType == t))
 		}.toMap
-
+		
+		HomeInformation(
+			hasProfile,
+			allViewDepartments,
+			allManageDepartments,
+			allRelationshipTypes,
+			relationshipTypesMap
+		)
 	}
 }
 
 trait HomeCommandState {
-
 	def user: CurrentUser
-
-	var hasProfile: Boolean = _
-	var viewPermissions: Set[Department] = _
-	var managePermissions: Set[Department] = _
-	var allRelationshipTypes: Seq[StudentRelationshipType] = _
-	var relationshipTypesMap: Map[StudentRelationshipType, Boolean] = _
-
 }

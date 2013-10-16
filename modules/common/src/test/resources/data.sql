@@ -22,6 +22,10 @@ insert into module (id,department_id,code,name,active) values ('1','1','cs108','
 insert into module (id,department_id,code,name,active) values ('2','1','cs240','History of Computing',1);
 insert into module (id,department_id,code,name,active) values ('3','3','cs241','Mystery of Computing',1);
 
+insert into route (id,department_id,code,name,active,degreeType) values ('1','1','g500','BSc Computer Science',1,'UG');
+insert into route (id,department_id,code,name,active,degreeType) values ('2','1','g503','MEng Computer Science',1,'UG');
+insert into route (id,department_id,code,name,active,degreeType) values ('3','3','g900','Robotics',1,'PG');
+
 -- set up an assignment for the "Intro to Programming" module
 insert into assignment(id, name, module_id, academicyear, active, attachmentlimit, 
 	collectmarks,deleted,collectsubmissions,restrictsubmissions,

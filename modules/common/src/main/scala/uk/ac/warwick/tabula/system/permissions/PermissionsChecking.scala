@@ -9,16 +9,20 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.permissions.Permission
 import scala.reflect.ClassTag
 import uk.ac.warwick.tabula.services.SecurityService
-import scala.Some
+import scala.collection.mutable
 
 /**
  * Trait that allows classes to call ActionCheck() in their inline definitions
  * (i.e. on construction). These are then evaluated on bind.
  */
 trait PermissionsChecking extends PermissionsCheckingMethods  {
-
-	var permissionsAnyChecks: Map[Permission, Option[PermissionsTarget]] = Map()
-	var permissionsAllChecks: Map[Permission, Option[PermissionsTarget]] = Map()
+	
+	type PermissionsCheckMultiMap = mutable.HashMap[Permission, mutable.Set[Option[PermissionsTarget]]] with mutable.MultiMap[Permission, Option[PermissionsTarget]]
+	
+	private def newMap(): PermissionsCheckMultiMap = new mutable.HashMap[Permission, mutable.Set[Option[PermissionsTarget]]] with mutable.MultiMap[Permission, Option[PermissionsTarget]]
+	
+	var permissionsAnyChecks: PermissionsCheckMultiMap = newMap()
+	var permissionsAllChecks: PermissionsCheckMultiMap = newMap()
 
 	def PermissionCheckAny(checkablePermissions: => Iterable[CheckablePermission]) {
 		for (p <- checkablePermissions) checkAny(p.permission, p.scope)
@@ -37,11 +41,11 @@ trait PermissionsChecking extends PermissionsCheckingMethods  {
 	}
 
 	private def checkAny(permission: Permission, scope: Option[PermissionsTarget]) {
-		permissionsAnyChecks += (permission -> scope)
+		permissionsAnyChecks.addBinding(permission, scope)
 	}
 
 	private def checkAll(permission: Permission, scope: Option[PermissionsTarget]) {
-		permissionsAllChecks += (permission -> scope)
+		permissionsAllChecks.addBinding(permission, scope)
 	}
 }
 
@@ -129,7 +133,7 @@ trait PermissionsCheckingMethods extends Logging {
 		)
 
 		// securityService.check() throws on *any* missing permission
-		for (check <- target.permissionsAllChecks) check match {
+		for (check <- target.permissionsAllChecks; scope <- check._2) (check._1, scope) match {
 			case (permission: Permission, Some(scope)) => securityService.check(user, permission, scope)
 			case (permission: ScopelessPermission, _) => securityService.check(user, permission)
 			case _ =>
@@ -138,14 +142,14 @@ trait PermissionsCheckingMethods extends Logging {
 		}
 
 		// securityService.can() wrapped in exists() only throws if no perms match
-		if (!target.permissionsAnyChecks.isEmpty && !target.permissionsAnyChecks.exists ( _ match {
+		if (!target.permissionsAnyChecks.isEmpty && !target.permissionsAnyChecks.exists { check => check._2 exists { scope => (check._1, scope) match {
 			case (permission: Permission, Some(scope)) => securityService.can(user, permission, scope)
 			case (permission: ScopelessPermission, _) => securityService.can(user, permission)
 			case _ => {
 				logger.warn("Permissions check throwing item not found - this should be caught in command (" + target + ")")
 				throw new ItemNotFoundException()
 			}
-		})) throw new PermissionDeniedException(user, target.permissionsAnyChecks.head._1, target.permissionsAnyChecks.head._2)
+		}}}) throw new PermissionDeniedException(user, target.permissionsAnyChecks.head._1, target.permissionsAnyChecks.head._2)
 	}
 }
 trait RequiresPermissionsChecking{

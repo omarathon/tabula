@@ -12,7 +12,7 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 	val routeDao = new RouteDaoImpl
 	val memberDao = new MemberDaoImpl
 
-	val route = Fixtures.route("g503")
+	val route = Fixtures.route("g553")
 
 	val monitoringPoint = Fixtures.monitoringPoint()
 
