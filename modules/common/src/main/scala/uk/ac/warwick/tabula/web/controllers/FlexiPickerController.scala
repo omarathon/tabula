@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.web.controllers
 
-import FlexiPickerController.FlexiPickerCommand
+import FlexiPickerController._
 import java.io.UnsupportedEncodingException
 import java.io.Writer
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -18,19 +18,32 @@ import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
+import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
+import uk.ac.warwick.tabula.commands.ComposableCommand
+import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
+import uk.ac.warwick.tabula.commands.CommandInternal
+import uk.ac.warwick.tabula.services.UserLookupComponent
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.services.ProfileServiceComponent
+import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 
 
 @Controller
 class FlexiPickerController extends BaseController {
-	var json = Wire.auto[ObjectMapper]
+	var json = Wire[ObjectMapper]
 
 	@RequestMapping(value = Array("/api/flexipicker/form"))
 	def form: Mav = Mav("api/flexipicker/form").noLayout()
 
+	@ModelAttribute("command")
+	def createCommand() = FlexiPickerCommand()
 
 	@RequestMapping(value = Array("/api/flexipicker/query.json"))
-	def queryJson(form: FlexiPickerCommand, out: Writer) = {
-		var results: List[Map[String, String]] = null
+	def queryJson(@ModelAttribute("command") form: Appliable[FlexiPickerResult] with FlexiPickerState, out: Writer) = {
+		var results: FlexiPickerResult = null
 
 		if (form.hasQuery && form.query.trim.length > 2) {
 			results = form.apply
@@ -44,21 +57,21 @@ class FlexiPickerController extends BaseController {
 
 
 object FlexiPickerController {
-	class FlexiPickerCommand extends Command[List[Map[String, String]]] with ReadOnly with Unaudited {
-		PermissionCheck(Permissions.UserPicker)
-
-		private val EmailPattern = "^\\s*(?:([^<@]+?)\\s+)<?([^\\s]+?@[^\\s]+\\.[^\\s]+?)>?\\s*$".r
-		var userLookup = Wire.auto[UserLookupService]
-
-		val EnoughResults = 10
-		var includeUsers = true
-		var includeGroups = false
-		var includeEmail = false
-		var query: String = ""
-		var exact = false
-		var universityId = false    // when returning users, use university ID as value
-
-
+	type FlexiPickerResult = List[Map[String, String]]
+	
+	object FlexiPickerCommand {
+		def apply() = 
+			new FlexiPickerCommand() 
+				with ComposableCommand[FlexiPickerResult]
+				with AutowiringUserLookupComponent
+				with AutowiringProfileServiceComponent
+				with FlexiPickerPermissions
+				with ReadOnly with Unaudited
+	}
+	
+	class FlexiPickerCommand extends CommandInternal[FlexiPickerResult] with FlexiPickerState with Logging {
+		self: UserLookupComponent with ProfileServiceComponent =>
+		
 		def applyInternal() = {
 			var results = List[Map[String, String]]()
 
@@ -69,9 +82,10 @@ object FlexiPickerController {
 			results
 		}
 
+		private val EmailPattern = "^\\s*(?:([^<@]+?)\\s+)<?([^\\s]+?@[^\\s]+\\.[^\\s]+?)>?\\s*$".r
 
-		private def parseEmail: List[Map[String, String]] = {
-			var list: List[Map[String, String]] = List[Map[String, String]]()
+		private def parseEmail: FlexiPickerResult = {
+			var list: FlexiPickerResult = List[Map[String, String]]()
 			if (hasQuery) {
 				val matched = EmailPattern.findAllIn(query.trim).matchData.toList
 
@@ -92,17 +106,15 @@ object FlexiPickerController {
 			list
 		}
 
-
-
-		private def searchUsers : List[Map[String, String]] = {
+		private def searchUsers : FlexiPickerResult = {
 			var users = List[User]()
 
-			if(hasQuery) {
+			if (hasQuery) {
 				val terms: Array[String] = query.trim.replace(",", " ").replaceAll("\\s+", " ").split(" ")
 				users = doSearchUsers(terms)
 			}
 
-			users.map(createItemFor(_))
+			users.filter(isValidUser).map(createItemFor(_))
 		}
 
 		/**
@@ -147,10 +159,19 @@ object FlexiPickerController {
 			users
 		}
 
+		private def isValidUser(user: User) =
+			user.isFoundUser && {
+				val hasUniversityIdIfNecessary = (!universityId || user.getWarwickId.hasText)
+				val isTabulaMemberIfNecessary = hasUniversityIdIfNecessary && (!tabulaMembersOnly || {
+						if (universityId) profileService.getMemberByUniversityId(user.getWarwickId).isDefined
+						else profileService.getMemberByUserId(user.getUserId, true).isDefined
+				})
+				
+				hasUniversityIdIfNecessary && isTabulaMemberIfNecessary
+			}
 
-
-		private def searchGroups: List[Map[String, String]] = {
-			var list: List[Map[String, String]] = List[Map[String, String]]()
+		private def searchGroups: FlexiPickerResult = {
+			var list: FlexiPickerResult = List[Map[String, String]]()
 			if (hasQuery) {
 				try {
 					list = doGroupSearch()
@@ -170,8 +191,8 @@ object FlexiPickerController {
 			list
 		}
 
-		private def doGroupSearch(): List[Map[String, String]] =  {
-			var outList: List[Map[String, String]] = List[Map[String, String]]()
+		private def doGroupSearch(): FlexiPickerResult =  {
+			var outList: FlexiPickerResult = List[Map[String, String]]()
 			if (exact) {
 				if (!query.trim.contains(" ")) {
 					val group: Group = userLookup.getGroupService.getGroupByName(query.trim)
@@ -193,10 +214,6 @@ object FlexiPickerController {
 			Map("type" -> "user", "name" -> user.getFullName, "department" -> user.getDepartment, "value" -> getValue(user))
 		}
 
-		def hasQuery: Boolean = {
-			query.hasText
-		}
-
 		/** Return appropriate value for a user, either warwick ID or usercode. */
 		private def getValue(user: User): String = {
 			if (universityId) user.getWarwickId else user.getUserId
@@ -209,6 +226,25 @@ object FlexiPickerController {
 		private def item(name: String, value: String): Map[String, String] = value match {
 			case s: String if s.hasText => Map(name -> (value + "*"))
 			case _ => Map.empty
+		}
+	}
+	
+	trait FlexiPickerState {
+		val EnoughResults = 10
+		var includeUsers = true
+		var includeGroups = false
+		var includeEmail = false
+		var query: String = ""
+		var exact = false
+		var universityId = false    // when returning users, use university ID as value
+		var tabulaMembersOnly = false // filter out anyone who isn't in the Tabula members db
+		
+		def hasQuery: Boolean = query.hasText
+	}
+	
+	trait FlexiPickerPermissions extends RequiresPermissionsChecking {	
+		override def permissionsCheck(p: PermissionsChecking) {
+			p.PermissionCheck(Permissions.UserPicker)
 		}
 	}
 }

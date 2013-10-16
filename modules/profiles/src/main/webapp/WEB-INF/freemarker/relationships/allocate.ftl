@@ -175,7 +175,7 @@
 									</p>
 									
 									<@form.labelled_row "additionalAgents" "${relationshipType.agentRole?cap_first}s">
-										<@form.flexipicker path="additionalAgents" placeholder="User name" list=true multiple=true />
+										<@form.flexipicker path="additionalAgents" placeholder="User name" membersOnly="true" list=true multiple=true />
 									</@form.labelled_row>
 								</div>
 					
