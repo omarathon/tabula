@@ -58,5 +58,5 @@ abstract class TwoWayConverter[A <: String: ClassTag, B <: AnyRef: ClassTag] ext
 	}
 
 	private def matching(descriptor: TypeDescriptor, manifest: ClassTag[_]) =
-		descriptor.getType().isAssignableFrom(manifest.runtimeClass)
+		manifest.runtimeClass.isAssignableFrom(descriptor.getType)
 }

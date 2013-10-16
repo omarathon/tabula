@@ -5,6 +5,8 @@ import org.joda.time.Days
 import org.springframework.core.convert.TypeDescriptor
 import java.util.Locale
 import scala.reflect.ClassTag
+import uk.ac.warwick.tabula.data.convert.MeetingFormatConverter
+import uk.ac.warwick.tabula.data.model.MeetingFormat
 
 class TwoWayConverterTest extends TestBase {
 
@@ -20,8 +22,22 @@ class TwoWayConverterTest extends TestBase {
 		converter.print(Days.FIVE, Locale.getDefault()) should be ("5")
 	}
 
+	/** Not specifically testing case objects, but generally any object that
+		* is a subclass of the converter's declared class. Checking that the
+		* internal matching() method is doing the right thing.
+		*/
+	@Test def caseObjects {
+		val converter = new MeetingFormatConverter
+		val sourceValue = MeetingFormat.FaceToFace
+		val sourceType = TypeDescriptor.valueOf(MeetingFormat.FaceToFace.getClass)
+		val targetType = TypeDescriptor.valueOf(classOf[String])
+		val faceToFace = converter.convert(sourceValue, sourceType, targetType)
+		faceToFace should be ("Face to face meeting")
+	}
+
 	private def descriptor[A](implicit tag: ClassTag[A]) = TypeDescriptor.valueOf(tag.runtimeClass)
 }
+
 
 
 /*
