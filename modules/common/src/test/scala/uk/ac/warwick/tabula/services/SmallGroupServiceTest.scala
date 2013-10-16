@@ -16,6 +16,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 	val dept = new Department
 	val user = new User
 	user.setUserId("cusdx")
+	user.setWarwickId("0123456")
 
 	mockUserLookup.getUserByUserId("cusdx") returns user
 
