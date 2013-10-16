@@ -248,6 +248,7 @@
 		<#list profile.studentCourseDetails as studentCourseDetails>
 			<#if studentCourseDetails.scjCode != profile.mostSignificantCourseDetails.scjCode>
 				<#if !isSelf || !studentCourseDetails.permanentlyWithdrawn>
+
 					<#if profile.studentCourseDetails?size gt 1>
 						<hr>
 						<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
