@@ -1,12 +1,10 @@
 package uk.ac.warwick.tabula.admin.web.controllers.department
 
 import scala.collection.JavaConverters._
-
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.PermissionDeniedException
@@ -20,6 +18,7 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.SecurityService
+import uk.ac.warwick.tabula.data.model.Route
 
 
 /**
@@ -43,15 +42,16 @@ class AdminDepartmentHomeController extends AdminController {
 	
 	@RequestMapping(method=Array(GET, HEAD))
 	def adminDepartment(cmd: AdminDepartmentHomeCommand) = {
-		val modules = cmd.apply()
+		val (modules, routes) = cmd.apply()
 		
 		Mav("admin/department",
 			"department" -> cmd.department,
-			"modules" -> modules)
+			"modules" -> modules,
+			"departmentRoutes" -> routes) // Stupid workaround for "routes" being used already in Freemarker
 	}
 }
 
-class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[Seq[Module]] with ReadOnly with Unaudited {
+class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[(Seq[Module], Seq[Route])] with ReadOnly with Unaudited {
 	
 	var securityService = Wire[SecurityService]
 	var moduleService = Wire[ModuleAndDepartmentService]
@@ -74,6 +74,24 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 			managedModules
 		}
 	
-	def applyInternal() = modules
+	val routes: Seq[Route] = 
+		if (securityService.can(user, Permissions.RolesAndPermissions.Create, mandatory(department))) {
+			// This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
+			PermissionCheck(Permissions.RolesAndPermissions.Create, department)
+			
+			department.routes.asScala
+		} else {
+			val managedRoutes = moduleService.routesWithPermission(user, Permissions.RolesAndPermissions.Create, department).toList
+			
+			// This is implied by the above, but it's nice to check anyway
+			PermissionCheckAll(Permissions.RolesAndPermissions.Create, managedRoutes)
+			
+			if (managedRoutes.isEmpty)
+				throw new PermissionDeniedException(user, Permissions.RolesAndPermissions.Create, department)
+			
+			managedRoutes
+		}
+	
+	def applyInternal() = (modules.sorted, routes.sorted)
 		
 }

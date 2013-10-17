@@ -30,5 +30,5 @@
 	
 	<#macro profile profile><@url page="/view/${profile.universityId}" context="/profiles"/></#macro>
 	<#macro attendanceProfile><@url page="/profile" /></#macro>
-	<#macro photo profile><@url page="/view/photo/${profile.universityId}.jpg" context="/profiles"/></#macro>
+	<#macro photo profile><#if ((profile.universityId)!)?has_content><@url page="/view/photo/${profile.universityId}.jpg" context="/profiles"/><#else><@url resource="/static/images/no-photo.jpg" /></#if></#macro>
 	<#macro relationship_students relationshipType><@url page="/${relationshipType.urlPart}/students" context="/profiles" /></#macro>

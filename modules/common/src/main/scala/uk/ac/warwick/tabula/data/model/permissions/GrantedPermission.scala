@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.hibernate.annotations.ForeignKey
 import scala.reflect._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
+import uk.ac.warwick.tabula.data.model.Route
 
 @Entity
 @AccessType("field")
@@ -64,6 +65,7 @@ object GrantedPermission {
 		(scope match {
 			case dept: Department => new DepartmentGrantedPermission(dept, permission, overrideType)
 			case module: Module => new ModuleGrantedPermission(module, permission, overrideType)
+			case route: Route => new RouteGrantedPermission(route, permission, overrideType)
 			case member: Member => new MemberGrantedPermission(member, permission, overrideType)
 			case assignment: Assignment => new AssignmentGrantedPermission(assignment, permission, overrideType)
 			case group: SmallGroup => new SmallGroupGrantedPermission(group, permission, overrideType)
@@ -74,6 +76,7 @@ object GrantedPermission {
 	def canDefineFor[A <: PermissionsTarget](scope: A) = scope match {
 		case _: Department => true
 		case _: Module => true
+		case _: Route => true
 		case _: Member => true
 		case _: Assignment => true
 		case _: SmallGroup => true
@@ -84,6 +87,7 @@ object GrantedPermission {
 	def classObject[A <: PermissionsTarget : ClassTag] = classTag[A] match {
 		case t if isSubtype(t, classTag[Department]) => classOf[DepartmentGrantedPermission]
 		case t if isSubtype(t, classTag[Module]) => classOf[ModuleGrantedPermission]
+		case t if isSubtype(t, classTag[Route]) => classOf[RouteGrantedPermission]
 		case t if isSubtype(t, classTag[Member]) => classOf[MemberGrantedPermission]
 		case t if isSubtype(t, classTag[Assignment]) => classOf[AssignmentGrantedPermission]
 		case t if isSubtype(t, classTag[SmallGroup]) => classOf[SmallGroupGrantedPermission]
@@ -124,6 +128,19 @@ object GrantedPermission {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Module = _
+}
+@Entity @DiscriminatorValue("Route") class RouteGrantedPermission extends GrantedPermission[Route] {
+	def this(route: Route, permission: Permission, overrideType: GrantedPermission.OverrideType) = {
+		this()
+		this.scope = route
+		this.permission = permission
+		this.overrideType = overrideType
+	}
+	
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
+	@JoinColumn(name="scope_id")
+	@ForeignKey(name="none")
+	var scope: Route = _
 }
 @Entity @DiscriminatorValue("Member") class MemberGrantedPermission extends GrantedPermission[Member] {
 	def this(member: Member, permission: Permission, overrideType: GrantedPermission.OverrideType) = {

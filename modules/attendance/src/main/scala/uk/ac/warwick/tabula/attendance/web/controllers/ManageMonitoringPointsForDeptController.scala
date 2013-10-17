@@ -20,7 +20,7 @@ class ManageMonitoringPointsForDeptController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def createCommand(@PathVariable dept: Department, @RequestParam(value="academicYear", required = false) academicYear: AcademicYear) =
-			ManageMonitoringPointSetCommand(dept, Option(academicYear))
+			ManageMonitoringPointSetCommand(user, dept, Option(academicYear))
 
 	@RequestMapping
 	def home(@ModelAttribute("command") cmd: Appliable[Unit], @RequestParam(value="created", required = false) createdCount: Integer) = {

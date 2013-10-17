@@ -125,12 +125,11 @@ class FileDao extends Daoisms with InitializingBean with Logging {
 	def getAllFileIds(createdBefore: Option[DateTime] = None): Set[String] = transactional(readOnly = true) {
 		val criteria =
 			session.newCriteria[FileAttachment]
-				.setProjection(Projections.id())
 
 		createdBefore.map { date =>
 			criteria.add(Is.lt("dateUploaded", date))
 		}
-		criteria.listOf[String].toSet
+		criteria.project[String](Projections.id()).seq.toSet
 	}
 
 	def deleteAttachments(files: Seq[FileAttachment]) = files.foreach(session.delete(_))

@@ -17,7 +17,6 @@ import scala.Some
  */
 trait ProfileService {
 	def save(member: Member)
-	def getRegisteredModules(universityId: String): Seq[Module]
 	def getMemberByUniversityId(universityId: String): Option[Member]
 	def getAllMembersWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getMemberByPrsCode(prsCode: String): Option[Member]
@@ -31,6 +30,7 @@ trait ProfileService {
 	def getStudentsByRoute(route: Route): Seq[StudentMember]
 	def getStudentsByRoute(route: Route, academicYear: AcademicYear): Seq[StudentMember]
 	def getStudentCourseDetailsByScjCode(scjCode: String): Option[StudentCourseDetails]
+	def getStudentCourseDetailsBySprCode(sprCode: String): Seq[StudentCourseDetails]
 }
 
 abstract class AbstractProfileService extends ProfileService with Logging {
@@ -85,27 +85,27 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	def saveOrUpdate(relationship: StudentRelationship) = memberDao.saveOrUpdate(relationship)
 
-	def getRegisteredModules(universityId: String): Seq[Module] = transactional(readOnly = true) {
-		memberDao.getRegisteredModules(universityId)
-	}
-
   def countStudentsByDepartment(department: Department): Int = transactional(readOnly = true) {
 			memberDao.getStudentsByDepartment(department.rootDepartment).count(department.filterRule.matches)
 	}
 
 	def getStudentsByRoute(route: Route): Seq[StudentMember] = transactional(readOnly = true) {
-		studentCourseDetailsDao.getByRoute(route).filter{s => !s.sprStatus.code.startsWith("P")}.map(_.student)
+		studentCourseDetailsDao.getByRoute(route).filter{s => !s.sprStatus.code.startsWith("P")}.filter(s => s.mostSignificant == true).map(_.student)
 	}
 
 	def getStudentsByRoute(route: Route, academicYear: AcademicYear): Seq[StudentMember] = transactional(readOnly = true) {
 		studentCourseDetailsDao.getByRoute(route)
 			.filter{s => !s.sprStatus.code.startsWith("P")}
+			.filter(s => s.mostSignificant == true)
 			.filter(_.studentCourseYearDetails.asScala.exists(s => s.academicYear == academicYear))
 			.map(_.student)
 	}
 
 	def getStudentCourseDetailsByScjCode(scjCode: String): Option[StudentCourseDetails] =
 		studentCourseDetailsDao.getByScjCode(scjCode)
+
+	def getStudentCourseDetailsBySprCode(sprCode: String): Seq[StudentCourseDetails] =
+		studentCourseDetailsDao.getBySprCode(sprCode)
 
 }
 

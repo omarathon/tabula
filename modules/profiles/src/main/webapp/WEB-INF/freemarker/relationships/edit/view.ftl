@@ -13,83 +13,78 @@
 	</div>
 
 
-	<#if user.staff>
-		<#assign student = studentCourseDetails.student/>
-		<div id="edit-agent-modal" class="modal-body">
-		<@f.form method="post" commandName="editStudentRelationshipCommand" action="" cssClass="form-horizontal">
+	<#assign student = studentCourseDetails.student/>
+	<div id="edit-agent-modal" class="modal-body">
+	<@f.form method="post" commandName="editStudentRelationshipCommand" action="" cssClass="form-horizontal">
 
-				<h5 id="studentName">${relationshipType.studentRole?capitalize}: ${student.fullName}</h5>
-				<input id="student" name="student" type="hidden" value="${student.universityId}" />
+		<h5 id="studentName">${relationshipType.studentRole?capitalize}: ${student.fullName}</h5>
+		<input id="student" name="student" type="hidden" value="${student.universityId}" />
 
-				<div class="input-append">
-					<div class="control-group">
-						<label class="control-label" for="query"><b>${relationshipType.agentRole?cap_first}</b></label>
-						<div class="controls">
-							<span class="profile-search">
-								<#if agentToDisplay??>
-									<input type="text" name="query" value="${agentToDisplay.fullName}" id="query"/>
-									<input type="hidden" name="agent" value="${agentToDisplay.universityId}" />
-									<input type="hidden" name="currentAgent" value="${agentToDisplay.universityId}" />
-								<#else>
-									<input type="text" name="query" value="" id="query" />
-									<input type="hidden" name="agent" />
-								</#if>
-							</span>
-							<button class="inline-search-button btn" type="button"><i class="icon-search"></i></button>
-						</div>
-					</div>
+		<div class="input-append">
+			<div class="control-group">
+				<label class="control-label" for="query"><b>${relationshipType.agentRole?cap_first}</b></label>
+				<div class="controls">
+					<span class="profile-search">
+						<#if agentToDisplay??>
+							<input type="text" name="query" value="${agentToDisplay.fullName}" id="query"/>
+							<input type="hidden" name="agent" value="${agentToDisplay.universityId}" />
+							<input type="hidden" name="currentAgent" value="${agentToDisplay.universityId}" />
+						<#else>
+							<input type="text" name="query" value="" id="query" />
+							<input type="hidden" name="agent" />
+						</#if>
+					</span>
+					<button class="inline-search-button btn" type="button"><i class="icon-search"></i></button>
 				</div>
-
-				<input type="hidden" name="remove" value="false" />
-				<#if pageAction!="add">
-					<button id="remove-agent" class="btn btn-danger" type="button">Remove</button>
-				</#if>
-
-				<div id="agentSearchResults"></div>
-
-				<#if pageAction!="add">
-					<div id="removeAgentMessage" style="display: none" class="alert clearfix">
-						<p>Are you sure you want to remove <strong>${agentToDisplay.fullName}</strong> as ${student.firstName}'s ${relationshipType.agentRole}?</p>
-						<button id="cancel-remove-agent" class="btn pull-right" type="button">Cancel</button>
-						<button id="confirm-remove-agent" class="btn btn-primary pull-right" type="button">Confirm</button>
-					</div>
-				</#if>
-
-				<div id="notify-agent-change">
-				    <#if pageAction!="add">
-						<div id="notify-remove-agent" class="alert hide"><strong>${agentToDisplay.fullName}</strong> will no longer be ${student.firstName}'s ${relationshipType.agentRole}.</div>
-				  	</#if>
-					<p>Notify these people via email of this change</p>
-					<div class="control-group">
-						<div class="controls">
-							<label class="checkbox">
-								<input type="checkbox" name="notifyStudent" class="notifyStudent" checked />
-								${relationshipType.studentRole?cap_first}
-							</label>
-
-							<label class="checkbox <#if pageAction=="add">muted</#if>">
-								<input type="checkbox" name="notifyOldAgent" class="notifyOldAgent" <#if pageAction!="add">checked <#else> disabled </#if> />
-								Old ${relationshipType.agentRole}
-							</label>
-
-							<label class="checkbox">
-								<input type="checkbox" name="notifyNewAgent" class="notifyNewAgent" checked />
-								New ${relationshipType.agentRole}
-							</label>
-						</div>
-					</div>
-				</div>
-
-
-
-
-		</@f.form>
-		</div>
-		<div class="modal-footer">
-				<div type="button" class="btn disabled" id="save-agent">Save</div>
+			</div>
 		</div>
 
-	</#if>
+		<input type="hidden" name="remove" value="false" />
+		<#if pageAction!="add">
+			<button id="remove-agent" class="btn btn-danger" type="button">Remove</button>
+		</#if>
+
+		<div id="agentSearchResults"></div>
+
+		<#if pageAction!="add">
+			<div id="removeAgentMessage" style="display: none" class="alert clearfix">
+				<p>Are you sure you want to remove <strong>${agentToDisplay.fullName}</strong> as ${student.firstName}'s ${relationshipType.agentRole}?</p>
+				<button id="cancel-remove-agent" class="btn pull-right" type="button">Cancel</button>
+				<button id="confirm-remove-agent" class="btn btn-primary pull-right" type="button">Confirm</button>
+			</div>
+		</#if>
+
+		<div id="notify-agent-change">
+			<#if pageAction!="add">
+				<div id="notify-remove-agent" class="alert hide"><strong>${agentToDisplay.fullName}</strong> will no longer be ${student.firstName}'s ${relationshipType.agentRole}.</div>
+			</#if>
+			<p>Notify these people via email of this change</p>
+			<div class="control-group">
+				<div class="controls">
+					<label class="checkbox">
+						<input type="checkbox" name="notifyStudent" class="notifyStudent" checked />
+						${relationshipType.studentRole?cap_first}
+					</label>
+
+					<label class="checkbox <#if pageAction=="add">muted</#if>">
+						<input type="checkbox" name="notifyOldAgent" class="notifyOldAgent" <#if pageAction!="add">checked <#else> disabled </#if> />
+						Old ${relationshipType.agentRole}
+					</label>
+
+					<label class="checkbox">
+						<input type="checkbox" name="notifyNewAgent" class="notifyNewAgent" checked />
+						New ${relationshipType.agentRole}
+					</label>
+				</div>
+			</div>
+		</div>
+
+	</@f.form>
+	</div>
+	<div class="modal-footer">
+			<div type="button" class="btn disabled" id="save-agent">Save</div>
+	</div>
+
 
 	<script type="text/javascript">
 		jQuery(document).ready(function($) {

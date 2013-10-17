@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.data
 
 import org.springframework.stereotype.Repository
-
 import uk.ac.warwick.tabula.data.model.{Department, Route}
 import uk.ac.warwick.spring.Wire
+import org.hibernate.criterion.Order
 
 trait RouteDaoComponent {
 	val routeDao: RouteDao
@@ -14,6 +14,7 @@ trait AutowiringRouteDaoComponent extends RouteDaoComponent {
 }
 
 trait RouteDao {
+	def allRoutes: Seq[Route]
 	def saveOrUpdate(route: Route)
 	def getByCode(code: String): Option[Route]
 	def getById(id: String): Option[Route]
@@ -22,6 +23,11 @@ trait RouteDao {
 
 @Repository
 class RouteDaoImpl extends RouteDao with Daoisms {
+
+	def allRoutes: Seq[Route] =
+		session.newCriteria[Route]
+			.addOrder(Order.asc("code"))
+			.seq
 
 	def saveOrUpdate(route: Route) = session.saveOrUpdate(route)
 

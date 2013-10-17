@@ -7,18 +7,28 @@ import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Department}
 import uk.ac.warwick.tabula.attendance.commands.{HomeCommandState, HomeCommand}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, ModuleAndDepartmentService, RelationshipServiceComponent, ModuleAndDepartmentServiceComponent, ProfileServiceComponent}
+import uk.ac.warwick.tabula.attendance.commands.HomeInformation
+import uk.ac.warwick.tabula.attendance.commands.HomeInformation
 
 class HomeControllerTest extends TestBase with Mockito{
 
 	class Fixture{
-		val command = new HomeCommand(null) with Appliable[Unit] with HomeCommandState with ModuleAndDepartmentServiceComponent
+		var info = HomeInformation(
+			hasProfile = false,
+			viewPermissions = Set(),
+			managePermissions = Set(),
+			allRelationshipTypes = Seq(),
+			relationshipTypesMap = Map()
+		)
+		
+		val command = new HomeCommand(null) with Appliable[HomeInformation] with HomeCommandState with ModuleAndDepartmentServiceComponent
 			with ProfileServiceComponent with RelationshipServiceComponent {
 
 			var relationshipService: RelationshipService = _
 			var profileService: ProfileService = _
 			var moduleAndDepartmentService: ModuleAndDepartmentService = _
 
-			def apply() = {}
+			def apply() = info
 		}
 		val departmentCode = "xx"
 		val relationshipType = mock[StudentRelationshipType]
@@ -27,10 +37,13 @@ class HomeControllerTest extends TestBase with Mockito{
 
 	@Test
 	def onlyProfileRedirectedToProfileView(){new Fixture{
-		command.hasProfile = true
-		command.viewPermissions = Set()
-		command.managePermissions = Set()
-		command.relationshipTypesMap = Map()
+		info = HomeInformation(
+			hasProfile = true,
+			viewPermissions = Set(),
+			managePermissions = Set(),
+			allRelationshipTypes = Seq(),
+			relationshipTypesMap = Map()
+		)
 
 		val mav = new HomeController().home(command)
 		mav.viewName should be("redirect:/profile")
@@ -39,10 +52,13 @@ class HomeControllerTest extends TestBase with Mockito{
 
 	@Test
 	def onlyOneViewPermissionRedirectedToViewDepartment(){new Fixture{
-		command.hasProfile = false
-		command.viewPermissions = Set(new Department().tap(_.code=departmentCode))
-		command.managePermissions = Set()
-		command.relationshipTypesMap = Map()
+		info = HomeInformation(
+			hasProfile = false,
+			viewPermissions = Set(new Department().tap(_.code=departmentCode)),
+			managePermissions = Set(),
+			allRelationshipTypes = Seq(),
+			relationshipTypesMap = Map()
+		)
 
 		val mav = new HomeController().home(command)
 		mav.viewName should be(s"redirect:/$departmentCode")
@@ -51,10 +67,13 @@ class HomeControllerTest extends TestBase with Mockito{
 
 	@Test
 	def onlyOneManagePermissionRedirectedToManageDepartment(){new Fixture{
-		command.hasProfile = false
-		command.viewPermissions = Set()
-		command.managePermissions = Set(new Department().tap(_.code=departmentCode))
-		command.relationshipTypesMap = Map()
+		info = HomeInformation(
+			hasProfile = false,
+			viewPermissions = Set(),
+			managePermissions = Set(new Department().tap(_.code=departmentCode)),
+			allRelationshipTypes = Seq(),
+			relationshipTypesMap = Map()
+		)
 
 		val mav = new HomeController().home(command)
 		mav.viewName should be(s"redirect:/manage/$departmentCode")
@@ -63,10 +82,13 @@ class HomeControllerTest extends TestBase with Mockito{
 
 	@Test
 	def noPermissions(){new Fixture{
-		command.hasProfile = false
-		command.viewPermissions = Set()
-		command.managePermissions = Set()
-		command.relationshipTypesMap = Map()
+		info = HomeInformation(
+			hasProfile = false,
+			viewPermissions = Set(),
+			managePermissions = Set(),
+			allRelationshipTypes = Seq(),
+			relationshipTypesMap = Map()
+		)
 
 		val mav = new HomeController().home(command)
 		mav.viewName should be("home/home")
@@ -75,10 +97,13 @@ class HomeControllerTest extends TestBase with Mockito{
 
 	@Test
 	def viewPermissionsAndProfileShowHome(){new Fixture{
-		command.hasProfile = true
-		command.viewPermissions = Set(new Department().tap(_.code=departmentCode))
-		command.managePermissions = Set()
-		command.relationshipTypesMap = Map()
+		info = HomeInformation(
+			hasProfile = true,
+			viewPermissions = Set(new Department().tap(_.code=departmentCode)),
+			managePermissions = Set(),
+			allRelationshipTypes = Seq(),
+			relationshipTypesMap = Map()
+		)
 
 		val mav = new HomeController().home(command)
 		mav.viewName should be("home/home")
@@ -87,10 +112,13 @@ class HomeControllerTest extends TestBase with Mockito{
 
 	@Test
 	def managePermissionsAndProfileShowHome(){new Fixture{
-		command.hasProfile = true
-		command.viewPermissions = Set()
-		command.managePermissions = Set(new Department().tap(_.code=departmentCode))
-		command.relationshipTypesMap = Map()
+		info = HomeInformation(
+			hasProfile = true,
+			viewPermissions = Set(),
+			managePermissions = Set(new Department().tap(_.code=departmentCode)),
+			allRelationshipTypes = Seq(),
+			relationshipTypesMap = Map()
+		)
 
 		val mav = new HomeController().home(command)
 		mav.viewName should be("home/home")
@@ -99,10 +127,13 @@ class HomeControllerTest extends TestBase with Mockito{
 
 	@Test
 	def relationshipsAndProfileShowHome(){new Fixture{
-		command.hasProfile = true
-		command.viewPermissions = Set()
-		command.managePermissions = Set()
-		command.relationshipTypesMap = Map(relationshipType -> true)
+		info = HomeInformation(
+			hasProfile = true,
+			viewPermissions = Set(),
+			managePermissions = Set(),
+			allRelationshipTypes = Seq(),
+			relationshipTypesMap = Map(relationshipType -> true)
+		)
 
 		val mav = new HomeController().home(command)
 		mav.viewName should be("home/home")

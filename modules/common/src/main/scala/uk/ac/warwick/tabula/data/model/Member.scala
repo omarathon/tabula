@@ -1,14 +1,11 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConverters._
-
 import javax.persistence._
 import javax.persistence.CascadeType._
-
 import org.hibernate.annotations.{AccessType, ForeignKey, BatchSize, Filter, Filters, FilterDefs, FilterDef, Type}
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
@@ -20,6 +17,7 @@ import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.AcademicYear
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -115,7 +113,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	 * For each department, enumerate any sub-departments that the member matches
 	 */
 	def touchedDepartments = {
-		def moduleDepts = registeredModules.map(x => x.department).distinct.toStream
+		def moduleDepts = registeredModulesByYear(None).map(_.department).distinct.toStream
 
 		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct
 		topLevelDepts flatMap(_.subDepartmentsContaining(this))
@@ -127,9 +125,11 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	 * Get all modules this this student is registered on, including historically.
 	 * TODO consider caching based on getLastUpdatedDate
 	 */
-	def registeredModules = {
-		profileService.getRegisteredModules(universityId)
-	}
+
+	def registeredModulesByYear(year: Option[AcademicYear]) = Seq[Module]()
+	def moduleRegistrationsByYear(year: Option[AcademicYear]) = Seq[ModuleRegistration]()
+
+	def permanentlyWithdrawn = false
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
@@ -172,11 +172,10 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	def hasRelationship(relationshipType: StudentRelationshipType) = false
 
-	def hasModuleRegistrations = false
-
 	def mostSignificantCourseDetails: Option[StudentCourseDetails] = None
 
 	def hasCurrentEnrolment = false
+
 }
 
 @Entity
@@ -224,10 +223,17 @@ class StudentMember extends Member with StudentProperties {
 
 	override def hasCurrentEnrolment: Boolean = studentCourseDetails.asScala.exists(_.hasCurrentEnrolment)
 
+	override def permanentlyWithdrawn: Boolean = {
+		studentCourseDetails.asScala
+			 .map(scd => scd.sprStatus)
+			 .filter(_ != null)
+			 .filter(_.code != null)
+			 .filter(_.code.startsWith("P"))
+			 .size == studentCourseDetails.size
+	}
+
 	override def hasRelationship(relationshipType: StudentRelationshipType): Boolean =
 		studentCourseDetails.asScala.exists(_.hasRelationship(relationshipType))
-
-	override def hasModuleRegistrations = studentCourseDetails.asScala.exists(_.hasModuleRegistrations)
 
 	override def routeName: String = mostSignificantCourseDetails match {
 		case Some(details) =>
@@ -240,6 +246,12 @@ class StudentMember extends Member with StudentProperties {
 		studentCourseDetails.remove(detailsToAdd)
 		studentCourseDetails.add(detailsToAdd)
 	}
+
+	override def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] =
+		studentCourseDetails.asScala.flatMap(_.registeredModulesByYear(year))
+
+	override def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =
+		studentCourseDetails.asScala.flatMap(_.moduleRegistrationsByYear(year))
 }
 
 @Entity

@@ -1,15 +1,23 @@
 package uk.ac.warwick.tabula.data.model
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.PersistenceTestBase
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.services.RelationshipServiceImpl
+
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, PersistenceTestBase}
+import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, RelationshipServiceImpl}
+import uk.ac.warwick.tabula.data.MemberDaoImpl
+import org.junit.Before
+import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
+import uk.ac.warwick.tabula.data.StudentCourseDetailsDaoImpl
 
 class MemberTest extends PersistenceTestBase with Mockito {
 
 	val profileService = mock[ProfileService]
 	val relationshipService = mock[RelationshipService]
+	val memberDao = new MemberDaoImpl
+	val studentCourseDetailsDao = new StudentCourseDetailsDaoImpl
+
+	@Before def setup() {
+		memberDao.sessionFactory = sessionFactory
+		studentCourseDetailsDao.sessionFactory = sessionFactory
+	}
 
 	@Test def testAffiliatedDepartments {
 		val member = new StudentMember
@@ -23,18 +31,9 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		val extDept = new Department
 		extDept.code = "pi"
 
-		// mock profile service to fetch list of registered modules (from these depts)
-		val mod1 = new Module
-		val mod2 = new Module
-		mod1.department = extDept
-		mod2.department = homeDept
-		member.profileService = mock[ProfileService]
-		member.profileService.getRegisteredModules(member.universityId) returns (Seq(mod1, mod2))
-
 		// set home department and test
 		member.homeDepartment = homeDept
 		member.affiliatedDepartments should be (Stream(homeDept))
-		member.touchedDepartments should be (Stream(homeDept, extDept))
 
 		// set course department and test
 		// create their course department
@@ -48,8 +47,19 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		member.studentCourseDetails.add(studentCourseDetails)
 
+		// add module registrations
+		val mod1 = new Module
+		val mod2 = new Module
+		mod1.department = extDept
+		mod2.department = homeDept
+		val modReg1 = new ModuleRegistration(studentCourseDetails, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
+		val modReg2 = new ModuleRegistration(studentCourseDetails, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
+		studentCourseDetails.moduleRegistrations.add(modReg1)
+		studentCourseDetails.moduleRegistrations.add(modReg2)
 
 		member.mostSignificantCourseDetails.get.department = courseDept
+
+		// now test that the member is attached to the right departments
 		member.affiliatedDepartments should be (Stream(homeDept, courseDept))
 		member.touchedDepartments should be (Stream(homeDept, courseDept, extDept))
 
@@ -69,6 +79,42 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		member.affiliatedDepartments should be (Stream(homeDept, courseDept))
 		member.touchedDepartments should be (Stream(homeDept, courseDept, extDept))
+	}
+
+	@Test def testModuleRegistrations {
+		val member = new StudentMember
+		member.universityId = "01234567"
+
+		// create a student course details with module registrations
+		val scd1 = new StudentCourseDetails(member, "2222222/2")
+		member.studentCourseDetails.add(scd1)
+
+		val mod1 = new Module
+		val mod2 = new Module
+		val modReg1 = new ModuleRegistration(scd1, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
+		val modReg2 = new ModuleRegistration(scd1, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
+		scd1.moduleRegistrations.add(modReg1)
+		scd1.moduleRegistrations.add(modReg2)
+
+		member.registeredModulesByYear(Some(AcademicYear(2013))) should be (Stream(mod2))
+		member.registeredModulesByYear(None) should be (Stream(mod1, mod2))
+
+		// create another student course details with module registrations
+		val scd2 = new StudentCourseDetails(member, "2222222/3")
+		member.studentCourseDetails.add(scd2)
+
+		val mod3 = new Module
+		val mod4 = new Module
+		val modReg3 = new ModuleRegistration(scd2, mod3, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
+		val modReg4 = new ModuleRegistration(scd2, mod4, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
+		scd2.moduleRegistrations.add(modReg3)
+		scd2.moduleRegistrations.add(modReg4)
+
+		member.registeredModulesByYear(Some(AcademicYear(2013))) should be (Stream(mod2, mod4))
+		member.registeredModulesByYear(None) should be (Stream(mod1, mod2, mod3, mod4))
+
+		member.moduleRegistrationsByYear(None) should be (Stream(modReg1, modReg2, modReg3, modReg4))
+		member.moduleRegistrationsByYear(Some(AcademicYear(2012))) should be (Stream(modReg1, modReg3))
 	}
 
 	@Test def nullUsers {
@@ -144,7 +190,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		val staff = new StaffMember
 		staff.profileService = profileService
 		staff.relationshipService = relationshipService
-		
+
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
 		relationshipService.listStudentRelationshipsWithMember(relationshipType, staff) returns (Seq())
@@ -196,5 +242,64 @@ class MemberTest extends PersistenceTestBase with Mockito {
 			session.get(classOf[Member], member.id) should be (null)
 			session.get(classOf[FileAttachment], memberAttachment.id) should be (null)
 		}
+	}
+
+	@Test def testPermanentlyWithdrawn = transactional { tx =>
+
+		val dept1 = Fixtures.department("ms", "Motorsport")
+		session.save(dept1)
+		val dept2 = Fixtures.department("vr", "Vehicle Repair")
+		session.save(dept2)
+
+		val status1 = Fixtures.sitsStatus("P", "PWD", "Permanently Withdrawn")
+		session.save(status1)
+		val status2 = Fixtures.sitsStatus("P1", "Perm Wd", "Another slightly more esoteric kind of permanently withdrawn")
+		session.save(status2)
+		val status3 = Fixtures.sitsStatus("F", "Fully Enrolled", "Definitely not permanently withdrawn at all")
+		session.save(status3)
+
+		session.flush
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1, status1)
+		memberDao.saveOrUpdate(stu1)
+		session.flush
+
+		stu1.permanentlyWithdrawn should be (true)
+
+		val stu2 = Fixtures.student(universityId = "2000001", userId="student", department=dept1, courseDepartment=dept1, status2)
+		memberDao.saveOrUpdate(stu2)
+		session.flush
+
+		stu2.permanentlyWithdrawn should be (true)
+
+		val stu3 = Fixtures.student(universityId = "3000001", userId="student", department=dept1, courseDepartment=dept1, status3)
+		memberDao.saveOrUpdate(stu3)
+		session.flush
+
+		stu3.permanentlyWithdrawn should be (false)
+
+		// the student fixture comes with one free studentCourseDetails - add another to stu1:
+		val stu1_scd2 = Fixtures.studentCourseDetails(stu1, dept1, null, "1000001/2")
+		stu1_scd2.sprStatus = status2
+		memberDao.saveOrUpdate(stu1)
+		studentCourseDetailsDao.saveOrUpdate(stu1_scd2)
+		session.flush
+
+		stu1.permanentlyWithdrawn should be (true)
+
+		// add an SCD with a null status - shouldn't come back as permanently withdrawn:
+		val stu1_scd3 = Fixtures.studentCourseDetails(stu1, dept1, null, "1000001/3")
+		memberDao.saveOrUpdate(stu1)
+		studentCourseDetailsDao.saveOrUpdate(stu1_scd3)
+		session.flush
+
+		stu1.permanentlyWithdrawn should be (false)
+
+		// and now set the null status to fully enrolled:
+		stu1_scd3.sprStatus = status3
+		studentCourseDetailsDao.saveOrUpdate(stu1_scd3)
+		session.flush
+
+		stu1.permanentlyWithdrawn should be (false)
 	}
 }

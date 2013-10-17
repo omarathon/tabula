@@ -30,7 +30,7 @@ trait EditMonitoringPointSetPermissions extends RequiresPermissionsChecking with
 	self: EditMonitoringPointSetState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(set.route))
+		p.PermissionCheck(Permissions.MonitoringPoints.Manage, mandatory(set))
 	}
 }
 

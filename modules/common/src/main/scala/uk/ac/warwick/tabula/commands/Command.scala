@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSetTemplate, MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.helpers.Logging
 
 /**
  * Trait for a thing that can describe itself to a Description
@@ -65,8 +66,7 @@ trait Appliable[A]{
  * change name too. Careful now!
  */
 trait Command[A] extends Describable[A] with Appliable[A]
-
-with JavaImports with EventHandling with NotificationHandling with PermissionsChecking {
+		with JavaImports with EventHandling with NotificationHandling with PermissionsChecking with TaskBenchmarking {
 	var maintenanceMode = Wire[MaintenanceModeService]
 	
 	import uk.ac.warwick.tabula.system.NoBind
@@ -80,12 +80,8 @@ with JavaImports with EventHandling with NotificationHandling with PermissionsCh
 			notify(this) { benchmark() { applyInternal() } }
 		}
 	}
-
+	
 	private def benchmark()(fn: => A) = benchmarkTask(benchmarkDescription) { fn }
-
-	protected final def benchmarkTask[A](description: String)(fn: => A): A = Command.timed { timer =>
-		benchmark(description, level=Warn, minMillis=Command.MillisToSlowlog, stopWatch=timer, logger=Command.slowLogger)(fn)
-	}
 	
 	private def benchmarkDescription = {
 		val event = Event.fromDescribable(this)
@@ -379,4 +375,10 @@ trait ComposableCommand[A] extends Command[A] with PerformsPermissionsChecking{
  */
 trait UserAware {
 	val user:User
+}
+
+trait TaskBenchmarking extends Logging {
+	protected final def benchmarkTask[A](description: String)(fn: => A): A = Command.timed { timer =>
+		benchmark(description, level=Warn, minMillis=Command.MillisToSlowlog, stopWatch=timer, logger=Command.slowLogger)(fn)
+	}
 }

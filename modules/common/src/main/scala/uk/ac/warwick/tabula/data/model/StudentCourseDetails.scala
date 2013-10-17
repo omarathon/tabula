@@ -12,9 +12,9 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import scala.collection.JavaConverters._
 import javax.persistence.Entity
 import javax.persistence.CascadeType
+import scala.collection.JavaConverters._
 
 @Entity
 class StudentCourseDetails
@@ -51,11 +51,19 @@ class StudentCourseDetails
 	@BatchSize(size=200)
 	var moduleRegistrations: JList[ModuleRegistration] = JArrayList()
 
+	def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] = moduleRegistrationsByYear(year).map(_.module)
+
+	def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =
+		moduleRegistrations.asScala.collect {
+			case modReg if year.isEmpty => modReg
+			case modReg if modReg.academicYear == year.getOrElse(null) => modReg
+	}
+
 	def toStringProps = Seq(
 		"scjCode" -> scjCode,
 		"sprCode" -> sprCode)
 
-	def permissionsParents = Option(student).toStream
+	def permissionsParents = Stream(Option(student), Option(route)).flatten
 
 	def hasCurrentEnrolment: Boolean = {
 		!latestStudentCourseYearDetails.enrolmentStatus.code.startsWith("P")
@@ -75,6 +83,13 @@ class StudentCourseDetails
 					statusString += " (" + enrolmentStatus.fullName.toLowerCase() + ")"
 		}
 		statusString
+	}
+
+	// The reason this method isn't on SitsStatus is that P* can have a meaning other than
+	// permanently withdrawn in the context of applicants, but not in the context of
+	// the student's route status (sprStatus)
+	def permanentlyWithdrawn = {
+		sprStatus.code.startsWith("P")
 	}
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
@@ -107,6 +122,10 @@ class StudentCourseDetails
 }
 
 trait StudentCourseProperties {
+	// There can be multiple StudentCourseDetails rows for a single SPR code, even though a route is a sub-category of a course;
+	// this is just an artefact of the weird way SITS works.  If a student changes route within a course, they end up with a new
+	// course join (SCJ) row in SITS.  Equally perversely, they keep the same sprcode and SPR row even though this should be the
+	// student's record for their route (SPR = student programme route) - the route code is just edited.  Hence this is not unique.
 	var sprCode: String = _
 
 	@ManyToOne
