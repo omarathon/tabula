@@ -30,6 +30,7 @@ trait ProfileService {
 	def getStudentsByRoute(route: Route): Seq[StudentMember]
 	def getStudentsByRoute(route: Route, academicYear: AcademicYear): Seq[StudentMember]
 	def getStudentCourseDetailsByScjCode(scjCode: String): Option[StudentCourseDetails]
+	def getStudentCourseDetailsBySprCode(sprCode: String): Seq[StudentCourseDetails]
 }
 
 abstract class AbstractProfileService extends ProfileService with Logging {
@@ -102,6 +103,9 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	def getStudentCourseDetailsByScjCode(scjCode: String): Option[StudentCourseDetails] =
 		studentCourseDetailsDao.getByScjCode(scjCode)
+
+	def getStudentCourseDetailsBySprCode(sprCode: String): Seq[StudentCourseDetails] =
+		studentCourseDetailsDao.getBySprCode(sprCode)
 
 }
 

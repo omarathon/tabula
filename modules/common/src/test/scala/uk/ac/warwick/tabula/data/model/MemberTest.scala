@@ -1,16 +1,23 @@
 package uk.ac.warwick.tabula.data.model
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.PersistenceTestBase
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.services.RelationshipServiceImpl
-import uk.ac.warwick.tabula.AcademicYear
+
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, PersistenceTestBase}
+import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, RelationshipServiceImpl}
+import uk.ac.warwick.tabula.data.MemberDaoImpl
+import org.junit.Before
+import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
+import uk.ac.warwick.tabula.data.StudentCourseDetailsDaoImpl
 
 class MemberTest extends PersistenceTestBase with Mockito {
 
 	val profileService = mock[ProfileService]
 	val relationshipService = mock[RelationshipService]
+	val memberDao = new MemberDaoImpl
+	val studentCourseDetailsDao = new StudentCourseDetailsDaoImpl
+
+	@Before def setup() {
+		memberDao.sessionFactory = sessionFactory
+		studentCourseDetailsDao.sessionFactory = sessionFactory
+	}
 
 	@Test def testAffiliatedDepartments {
 		val member = new StudentMember
@@ -235,5 +242,64 @@ class MemberTest extends PersistenceTestBase with Mockito {
 			session.get(classOf[Member], member.id) should be (null)
 			session.get(classOf[FileAttachment], memberAttachment.id) should be (null)
 		}
+	}
+
+	@Test def testPermanentlyWithdrawn = transactional { tx =>
+
+		val dept1 = Fixtures.department("ms", "Motorsport")
+		session.save(dept1)
+		val dept2 = Fixtures.department("vr", "Vehicle Repair")
+		session.save(dept2)
+
+		val status1 = Fixtures.sitsStatus("P", "PWD", "Permanently Withdrawn")
+		session.save(status1)
+		val status2 = Fixtures.sitsStatus("P1", "Perm Wd", "Another slightly more esoteric kind of permanently withdrawn")
+		session.save(status2)
+		val status3 = Fixtures.sitsStatus("F", "Fully Enrolled", "Definitely not permanently withdrawn at all")
+		session.save(status3)
+
+		session.flush
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1, status1)
+		memberDao.saveOrUpdate(stu1)
+		session.flush
+
+		stu1.permanentlyWithdrawn should be (true)
+
+		val stu2 = Fixtures.student(universityId = "2000001", userId="student", department=dept1, courseDepartment=dept1, status2)
+		memberDao.saveOrUpdate(stu2)
+		session.flush
+
+		stu2.permanentlyWithdrawn should be (true)
+
+		val stu3 = Fixtures.student(universityId = "3000001", userId="student", department=dept1, courseDepartment=dept1, status3)
+		memberDao.saveOrUpdate(stu3)
+		session.flush
+
+		stu3.permanentlyWithdrawn should be (false)
+
+		// the student fixture comes with one free studentCourseDetails - add another to stu1:
+		val stu1_scd2 = Fixtures.studentCourseDetails(stu1, dept1, null, "1000001/2")
+		stu1_scd2.sprStatus = status2
+		memberDao.saveOrUpdate(stu1)
+		studentCourseDetailsDao.saveOrUpdate(stu1_scd2)
+		session.flush
+
+		stu1.permanentlyWithdrawn should be (true)
+
+		// add an SCD with a null status - shouldn't come back as permanently withdrawn:
+		val stu1_scd3 = Fixtures.studentCourseDetails(stu1, dept1, null, "1000001/3")
+		memberDao.saveOrUpdate(stu1)
+		studentCourseDetailsDao.saveOrUpdate(stu1_scd3)
+		session.flush
+
+		stu1.permanentlyWithdrawn should be (false)
+
+		// and now set the null status to fully enrolled:
+		stu1_scd3.sprStatus = status3
+		studentCourseDetailsDao.saveOrUpdate(stu1_scd3)
+		session.flush
+
+		stu1.permanentlyWithdrawn should be (false)
 	}
 }
