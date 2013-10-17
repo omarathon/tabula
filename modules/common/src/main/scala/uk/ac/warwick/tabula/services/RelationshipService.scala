@@ -27,7 +27,7 @@ trait RelationshipService {
 	def delete(relationshipType: StudentRelationshipType)
 	def getStudentRelationshipTypeById(id: String): Option[StudentRelationshipType]
 	def getStudentRelationshipTypeByUrlPart(urlPart: String): Option[StudentRelationshipType]
-	
+
 	def saveOrUpdate(relationship: StudentRelationship)
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationships(relationshipType: StudentRelationshipType, targetUniversityId: String): Seq[StudentRelationship]
@@ -56,7 +56,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def getStudentRelationshipTypeByUrlPart(urlPart: String) = memberDao.getStudentRelationshipTypeByUrlPart(urlPart)
 	def saveOrUpdate(relationshipType: StudentRelationshipType) = memberDao.saveOrUpdate(relationshipType)
 	def delete(relationshipType: StudentRelationshipType) = memberDao.delete(relationshipType)
-	
+
 	def saveOrUpdate(relationship: StudentRelationship) = memberDao.saveOrUpdate(relationship)
 
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional() {
@@ -90,19 +90,18 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 			}
 		}
 	}
-	
-	def relationshipDepartmentFilterMatches(department: Department)(rel: StudentRelationship) = 
+
+	def relationshipDepartmentFilterMatches(department: Department)(rel: StudentRelationship) =
 		rel.studentMember.exists(studentDepartmentFilterMatches(department))
-	
-	def relationshipNotPermanentlyWithdrawn(rel: StudentRelationship) =
-		rel.studentMember.exists(studentNotPermanentlyWithdrawn)
-	
+
+	def relationshipNotPermanentlyWithdrawn(rel: StudentRelationship): Boolean = {
+		profileService.getStudentCourseDetailsBySprCode(rel.targetSprCode)
+			.exists(scd => !scd.permanentlyWithdrawn)
+	}
+
 	def studentDepartmentFilterMatches(department: Department)(member: StudentMember) = department.filterRule.matches(member)
-	
-	def studentNotPermanentlyWithdrawn(member: StudentMember) =
-		member.mostSignificantCourseDetails
-			 .flatMap(scd => Option(scd.sprStatus))
-			 .exists(_.code != "P")
+
+	def studentNotPermanentlyWithdrawn(member: StudentMember) = !member.permanentlyWithdrawn
 
 	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department) = transactional(readOnly = true) {
 		memberDao.getRelationshipsByDepartment(relationshipType, department.rootDepartment)
@@ -111,12 +110,10 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	}
 
 	def listStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department) = transactional(readOnly = true) {
-
 		memberDao.getRelationshipsByStaffDepartment(relationshipType, department.rootDepartment)
 			.filter(relationshipDepartmentFilterMatches(department))
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}
-
 
 	def listAllStudentRelationshipsWithMember(agent: Member) = transactional(readOnly = true) {
 		memberDao.getAllRelationshipsByAgent(agent.universityId)
@@ -149,7 +146,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	}
 
   def countStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): (Int, Int) = transactional(readOnly = true) {
-		val matchingStudents = 
+		val matchingStudents =
 			memberDao.getStudentsByRelationshipAndDepartment(relationshipType, department.rootDepartment)
 				.filter(studentDepartmentFilterMatches(department))
 				.filter(studentNotPermanentlyWithdrawn)
@@ -159,6 +156,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
   def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int = transactional(readOnly = true) {
 		memberDao.countStudentsByRelationship(relationshipType).intValue
 	}
+
 }
 
 trait RelationshipServiceComponent {
