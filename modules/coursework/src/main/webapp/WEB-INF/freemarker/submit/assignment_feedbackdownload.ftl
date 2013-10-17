@@ -55,4 +55,4 @@
 	</#if>
 </p>
 
-<a href="${assignment.id}/feedback.pdf"> Download feedback as a PDF file</a>
+<a href="<@url page="/module/${module.code}/${assignment.id}/feedback.pdf"/>"> Download feedback as a PDF file</a>
