@@ -17,6 +17,7 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 	var pointType: MonitoringPointType = _
 	var meetingRelationships: JSet[StudentRelationshipType] = JHashSet()
 	var meetingFormats: JSet[MeetingFormat] = JHashSet()
+	meetingFormats.addAll(MeetingFormat.members.asJava)
 	var meetingQuantity: Int = 1
 	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
