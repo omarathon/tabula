@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>48-SNAPSHOT</version>
+	<version>48</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
