@@ -79,11 +79,13 @@
 				<td>${(studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.fullNameToDisplay)!}
 				</td>
 			</tr>
-			<tr>
-				<th>Status</th>
-				<td>${(studentCourseDetails.statusString)!}
-				</td>
-			</tr>
+			<#if !isSelf>
+				<tr>
+					<th>Status</th>
+					<td>${(studentCourseDetails.statusString)!}
+					</td>
+				</tr>
+			</#if>
 		</tbody>
 	</table>
 </section>

@@ -167,16 +167,27 @@ object Fixtures {
 	def student(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null, courseDepartment: Department = null, sprStatus: SitsStatus = null)	= {
 		val m = member(MemberUserType.Student, universityId, userId, department).asInstanceOf[StudentMember]
 
-		val studentCourseDetails = new StudentCourseDetails(m, m.universityId + "/1")
-		studentCourseDetails.student = m
-		studentCourseDetails.sprCode = m.universityId + "/1"
-		studentCourseDetails.department = courseDepartment
-		studentCourseDetails.mostSignificant = true
-
-		studentCourseDetails.sprStatus = sprStatus
-
-		m.studentCourseDetails.add(studentCourseDetails)
+		val scd = studentCourseDetails(m, courseDepartment, sprStatus)
 		m
+	}
+
+	def studentCourseDetails(member: StudentMember, courseDepartment: Department, sprStatus: SitsStatus = null, scjCode: String = null) = {
+		val scjCodeToUse = scjCode match {
+			case null => member.universityId + "/1"
+			case _ => scjCode
+		}
+
+		val scd = new StudentCourseDetails(member, scjCodeToUse)
+		scd.student = member
+		scd.sprCode = member.universityId + "/1"
+		scd.department = courseDepartment
+		scd.mostSignificant = true
+
+		scd.sprStatus = sprStatus
+
+		member.studentCourseDetails.add(scd)
+
+		scd
 	}
 
 	def studentCourseYearDetails(academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)) = {

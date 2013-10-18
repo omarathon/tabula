@@ -153,7 +153,7 @@
 
 		<div class="tabbable">
 			<#assign showTimetablePane=features.personalTimetables && can.do("Profiles.Read.Timetable", profile) />
-		
+
 			<#if showTimetablePane>
 				<script type="text/javascript">
 					var weeks = ${weekRangesDumper()}
@@ -180,7 +180,7 @@
 						<#include "_member_notes.ftl" />
 					</li>
 				</#if>
-				
+
 				<#list (studentCourseDetails.department.displayedStudentRelationshipTypes)![] as relationshipType>
 					<#if studentCourseDetails.hasRelationship(relationshipType) || relationshipType.displayIfEmpty(studentCourseDetails)>
 						<li id="${relationshipType.id}-pane">
@@ -231,7 +231,7 @@
 					$(".relationship-section").on("click", ".edit-agent-link, .add-agent-link", function(e) {
 						e.preventDefault();
 						var url = $(this).attr('href');
-						
+
 						// TAB-1111 we pass the second arg as a string, not an object, because if you use an object
 						// it makes it a POST request
 						$("#modal-change-agent").load(url, 'ts=' + new Date().getTime(),function(){
@@ -247,13 +247,14 @@
 		<!-- and then the others -->
 		<#list profile.studentCourseDetails as studentCourseDetails>
 			<#if studentCourseDetails.scjCode != profile.mostSignificantCourseDetails.scjCode>
-				<#if profile.studentCourseDetails?size gt 1>
-					<hr>
-					<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
+				<#if !isSelf || !studentCourseDetails.permanentlyWithdrawn>
+					<#if profile.studentCourseDetails?size gt 1>
+						<hr>
+						<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
+					</#if>
+
+					<#include "_course_details.ftl" />
 				</#if>
-
-				<#include "_course_details.ftl" />
-
 			</#if>
 		</#list>
 	</#if>

@@ -91,8 +91,10 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				val routes: Seq[Route] = routeDao.findByDepartment(dept)
 				val scds = scdDao.findByDepartment(dept)
 
-				for (scd <- scds; mr <- scd.moduleRegistrations) {
-					session.delete(mr)
+				for (scd <- scds) {
+					for (mr <- scd.moduleRegistrations) {
+						session.delete(mr)
+					}
 					scd.moduleRegistrations.clear()
 				}
 
