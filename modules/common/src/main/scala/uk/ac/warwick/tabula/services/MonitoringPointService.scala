@@ -5,10 +5,10 @@ package uk.ac.warwick.tabula.services
 import scala.collection.JavaConverters.asScalaBufferConverter
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.{AutowiringMonitoringPointDaoComponent, MonitoringPointDaoComponent }
+import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent, AutowiringMonitoringPointDaoComponent, MonitoringPointDaoComponent}
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
-import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, Route, StudentMember}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringCheckpointState, MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.{MeetingRecord, StudentCourseDetails, Route, StudentMember}
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import org.joda.time.DateTime
 
@@ -112,9 +112,104 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		monitoringPointDao.saveOrUpdate(checkpoint)
 		checkpoint
 	}
+
 }
 
 @Service("monitoringPointService")
 class MonitoringPointServiceImpl
 	extends AbstractMonitoringPointService
 	with AutowiringMonitoringPointDaoComponent
+
+
+
+
+
+trait MonitoringPointMeetingRelationshipTermServiceComponent {
+	def monitoringPointMeetingRelationshipTermService: MonitoringPointMeetingRelationshipTermService
+}
+
+trait AutowiringMonitoringPointMeetingRelationshipTermServiceComponent extends MonitoringPointMeetingRelationshipTermServiceComponent {
+	var monitoringPointMeetingRelationshipTermService = Wire[MonitoringPointMeetingRelationshipTermService]
+}
+
+trait MonitoringPointMeetingRelationshipTermService {
+	def updateCheckpointsForMeeting(meeting: MeetingRecord): Seq[MonitoringCheckpoint]
+}
+
+abstract class AbstractMonitoringPointMeetingRelationshipTermService extends MonitoringPointMeetingRelationshipTermService {
+	self: MonitoringPointDaoComponent with MeetingRecordDaoComponent with RelationshipServiceComponent with TermServiceComponent =>
+
+	def updateCheckpointsForMeeting(meeting: MeetingRecord): Seq[MonitoringCheckpoint] = {
+		if (!meeting.isApproved) {
+			// if the meeting isn't approved do nothing
+			return Seq()
+		}
+
+		meeting.relationship.studentMember match {
+			case Some(student: StudentMember) => {
+				student.mostSignificantCourseDetails match {
+					case Some(scd: StudentCourseDetails) => {
+						val relevantMeetingPoints = scd.studentCourseYearDetails.asScala.map(scyd => {
+							// for each year of study, get the relevant point sets
+							monitoringPointDao.findMonitoringPointSets(scd.route, scyd.academicYear).filter(pointSet =>
+								pointSet.year == null || pointSet.year == scyd.yearOfStudy
+							// get points
+							).flatMap(_.points.asScala).filter(point =>
+							// only points relevant to this meeting
+								point.pointType == MonitoringPointType.Meeting
+									&& point.meetingRelationships.contains(meeting.relationship.relationshipType)
+									&& point.meetingFormats.contains(meeting.format)
+									// disregard any points that already have a checkpoint
+									&& (monitoringPointDao.getCheckpoint(point, scd.scjCode) match {
+										case Some(_: MonitoringCheckpoint) => false
+										case None => true
+									})
+									// disregard any points in the future
+									&& point.validFromWeek <=
+										termService.getAcademicWeekForAcademicYear(new DateTime(), point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+							)
+						}).flatten
+						// check the required quantity and create a checkpoint if there are sufficient meetings
+						val checkpointOptions = for (point <- relevantMeetingPoints) yield {
+							if (countRelevantMeetings(student, point) >= point.meetingQuantity) {
+								val checkpoint = new MonitoringCheckpoint
+								checkpoint.point = point
+								checkpoint.studentCourseDetail = scd
+								checkpoint.state = MonitoringCheckpointState.Attended
+								checkpoint.updatedDate = DateTime.now
+								checkpoint.updatedBy = meeting.relationship.agent
+								monitoringPointDao.saveOrUpdate(checkpoint)
+								Option(checkpoint)
+							}
+							else
+								None
+						}
+						checkpointOptions.flatten.toSeq
+					}
+					case None => Seq()
+				}
+			}.toSeq
+			case None => Seq()
+		}
+	}
+
+	private def countRelevantMeetings(student: StudentMember, point: MonitoringPoint): Int = {
+		point.meetingRelationships.map(relationshipType => {
+			relationshipService.getRelationships(relationshipType, student.universityId)
+				.flatMap(meetingRecordDao.list(_).filter(meeting =>
+					meeting.isApproved
+					&& point.meetingFormats.contains(meeting.format)
+					&& termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+						>= point.validFromWeek
+				)).size
+		}).sum
+	}
+}
+
+@Service("monitoringPointMeetingRelationshipTerm")
+class MonitoringPointMeetingRelationshipTermServiceImpl
+	extends AbstractMonitoringPointMeetingRelationshipTermService
+	with AutowiringMonitoringPointDaoComponent
+	with AutowiringMeetingRecordDaoComponent
+	with AutowiringRelationshipServiceComponent
+	with AutowiringTermServiceComponent
