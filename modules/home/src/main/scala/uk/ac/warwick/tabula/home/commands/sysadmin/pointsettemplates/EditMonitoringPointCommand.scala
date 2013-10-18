@@ -9,7 +9,7 @@ import org.springframework.util.AutoPopulatingList
 object EditMonitoringPointCommand {
 	def apply(pointIndex: Int) =
 		new EditMonitoringPointCommand(pointIndex)
-		with ComposableCommand[Unit]
+		with ComposableCommand[MonitoringPoint]
 		with MonitoringPointSetTemplatesPermissions
 		with EditMonitoringPointValidation
 		with ReadOnly with Unaudited
@@ -20,7 +20,7 @@ object EditMonitoringPointCommand {
  * Does not persist the change (no monitoring point set yet exists)
  */
 abstract class EditMonitoringPointCommand(val pointIndex: Int)
-	extends CommandInternal[Unit] with EditMonitoringPointState {
+	extends CommandInternal[MonitoringPoint] with EditMonitoringPointState {
 
 	override def applyInternal() = {
 		copyTo(monitoringPoints.get(pointIndex))
@@ -53,10 +53,11 @@ trait EditMonitoringPointState {
 	var validFromWeek: Int = 0
 	var requiredFromWeek: Int = 0
 
-	def copyTo(point: MonitoringPoint) {
+	def copyTo(point: MonitoringPoint) = {
 		point.name = this.name
 		point.validFromWeek = this.validFromWeek
 		point.requiredFromWeek = this.requiredFromWeek
+		point
 	}
 
 	def copyFrom() {

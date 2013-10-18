@@ -10,6 +10,7 @@ import org.joda.time.DateTime
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.attendance.commands.ManageMonitoringPointSetCommand
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSetTemplate
 
 /**
  * Displays the screen for creating and editing monitoring point sets
@@ -23,9 +24,9 @@ class ManageMonitoringPointsForDeptController extends AttendanceController {
 			ManageMonitoringPointSetCommand(user, dept, Option(academicYear))
 
 	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[Unit], @RequestParam(value="created", required = false) createdCount: Integer) = {
-		cmd.apply()
-		Mav("manage/manage", "createdCount" -> createdCount)
+	def home(@ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointSetTemplate]], @RequestParam(value="created", required = false) createdCount: Integer) = {
+		val templates = cmd.apply()
+		Mav("manage/manage", "templates" -> templates, "createdCount" -> createdCount)
 	}
 
 }

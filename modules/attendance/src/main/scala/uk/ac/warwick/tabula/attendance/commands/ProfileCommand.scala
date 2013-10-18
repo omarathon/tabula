@@ -9,10 +9,16 @@ import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, Mo
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.permissions.Permissions
 
+case class AttendanceProfileInformation(
+	monitoringPointsByTerm: Map[String, Seq[MonitoringPoint]],
+	checkpointState: Map[String, String],
+	missedCountByTerm: Map[String, Int]
+)
+
 object ProfileCommand {
 	def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear) =
 		new ProfileCommand(studentCourseDetails, academicYear)
-		with ComposableCommand[Unit]
+		with ComposableCommand[Option[AttendanceProfileInformation]]
 		with ProfilePermissions
 		with ProfileCommandState
 		with AutowiringTermServiceComponent
@@ -22,34 +28,26 @@ object ProfileCommand {
 
 
 abstract class ProfileCommand(val studentCourseDetails: StudentCourseDetails, val academicYear: AcademicYear)
-	extends CommandInternal[Unit] with GroupMonitoringPointsByTerm with ProfileCommandState {
+	extends CommandInternal[Option[AttendanceProfileInformation]] with GroupMonitoringPointsByTerm with ProfileCommandState {
 
 	self: MonitoringPointServiceComponent =>
 
 	override def applyInternal() = {
-		studentCourseDetails.studentCourseYearDetails.asScala.find(_.academicYear == academicYear) match {
-			case None =>
-			case Some(studentCourseYearDetail) => {
+		studentCourseDetails.studentCourseYearDetails.asScala.find(_.academicYear == academicYear).flatMap {
+			studentCourseYearDetail =>
 				monitoringPointService.findMonitoringPointSet(
 					studentCourseDetails.route,
 					studentCourseYearDetail.academicYear,
 					Option(studentCourseYearDetail.yearOfStudy)
-				) match {
-					case None => {
-						monitoringPointService.findMonitoringPointSet(studentCourseDetails.route, studentCourseYearDetail.academicYear, None) match {
-							case None =>
-							case Some(pointSet) => applyForPointSet(pointSet)
-						}
-					}
-					case Some(pointSet) => applyForPointSet(pointSet)
-				}
-			}
+				).orElse(
+					monitoringPointService.findMonitoringPointSet(studentCourseDetails.route, studentCourseYearDetail.academicYear, None)
+				).map { applyForPointSet }
 		}
 	}
 
-	private def applyForPointSet(pointSet: MonitoringPointSet) = {
-		monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, pointSet.academicYear)
-		checkpointState = monitoringPointService
+	private def applyForPointSet(pointSet: MonitoringPointSet): AttendanceProfileInformation = {
+		val monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, pointSet.academicYear)
+		val checkpointState = monitoringPointService
 			.getChecked(Seq(studentCourseDetails.student), pointSet)(studentCourseDetails.student)
 			.map{	case (point, option) => point.id -> (option match {
 				case Some(state) => state.dbValue
@@ -57,13 +55,15 @@ abstract class ProfileCommand(val studentCourseDetails: StudentCourseDetails, va
 			})
 		}
 
-		missedCountByTerm = monitoringPointsByTerm.map{
+		val missedCountByTerm = monitoringPointsByTerm.map{
 			case (termName, points) => termName -> points.count(
 				p => checkpointState(p.id).equals(MonitoringCheckpointState.MissedUnauthorised.dbValue)
 			)
 		}.filter{
 			case (termName, count) => count > 0
 		}
+		
+		AttendanceProfileInformation(monitoringPointsByTerm, checkpointState, missedCountByTerm)
 	}
 }
 

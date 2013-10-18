@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
-class RouteCreationFixtureCommand extends CommandInternal[Unit] {
+class RouteCreationFixtureCommand extends CommandInternal[Route] {
 	this: ModuleAndDepartmentServiceComponent with SessionComponent with TransactionalComponent =>
 
 	var routeDao:RouteDao = Wire[RouteDao]
@@ -16,7 +16,7 @@ class RouteCreationFixtureCommand extends CommandInternal[Unit] {
 	var routeName: String = _
   var degreeType:String = "UG"
 
-	protected def applyInternal() {
+	protected def applyInternal() =
 		transactional() {
 			val existing = routeDao.getByCode(routeCode)
 			for(route<-existing){
@@ -34,14 +34,14 @@ class RouteCreationFixtureCommand extends CommandInternal[Unit] {
 			r.degreeType = DegreeType.fromCode(degreeType)
 			r.name = routeName
 			routeDao.saveOrUpdate(r)
+			r
 		}
-	}
 }
 
 object RouteCreationFixtureCommand{
 	def apply()={
 		new RouteCreationFixtureCommand
-		with ComposableCommand[Unit]
+		with ComposableCommand[Route]
 		with AutowiringModuleAndDepartmentServiceComponent
 		with Daoisms
 		with AutowiringTransactionalComponent
