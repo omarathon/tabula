@@ -51,24 +51,24 @@
 
 				<div class="name">
 					<h6>${student.fullName}</h6>
-					${student.shortDepartment}
+					${student.shortDepartment!""}
 				</div>
 			</div>
 		</li>
 	</#if>
 	</#list>
 	</ul>
-	
-	<#-- 
-		FIXME This doesn't really make sense. If I can take a register for a small group, 
-		I can email all the members in it? This is mostly to avoid showing the link to students 
+
+	<#--
+		FIXME This doesn't really make sense. If I can take a register for a small group,
+		I can email all the members in it? This is mostly to avoid showing the link to students
 	-->
 	<#if can.do("SmallGroupEvents.Register", group)>
 		<p>
 			<@fmt.bulk_email_students students=students />
 		</p>
 	</#if>
-	
+
 	<#else>
 
 	<p>No students have been allocated to this group.</p>
