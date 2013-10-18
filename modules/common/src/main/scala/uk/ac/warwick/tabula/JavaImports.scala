@@ -166,8 +166,10 @@ trait ScalaConcurrentMapHelpers[K, V] {
 		Option(get(key)) match {
 			case Some(v) => v
       case None => {
-    	  val d = op
-    	  Option(putIfAbsent(key, d)).getOrElse(d)
+    	  op match {
+    	 	  case null => null.asInstanceOf[V] // We can't put a null in here. Sigh
+    	 	  case d => Option(putIfAbsent(key, d)).getOrElse(d)
+    	  }
       }
 		}
 }
