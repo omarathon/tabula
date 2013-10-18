@@ -9,7 +9,7 @@ import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.data.Transactions._
 
-class SmallGroupEventFixtureCommand extends CommandInternal[Unit] with Logging {
+class SmallGroupEventFixtureCommand extends CommandInternal[SmallGroupEvent] with Logging {
 	this: SmallGroupDaoComponent =>
 	var setId: String = _
 	var groupNumber: Int = 1
@@ -21,7 +21,7 @@ class SmallGroupEventFixtureCommand extends CommandInternal[Unit] with Logging {
 	var location = "Test Place"
 	var title = "Test event"
 
-	protected def applyInternal() {
+	protected def applyInternal() =
 		transactional() {
 			val set = smallGroupDao.getSmallGroupSetById(setId).get
 			val group = set.groups.asScala(groupNumber - 1)
@@ -34,14 +34,17 @@ class SmallGroupEventFixtureCommand extends CommandInternal[Unit] with Logging {
 			event.endTime = event.startTime.plusHours(1)
 			event.location = location
 			event.title = title
+			
+			smallGroupDao.saveOrUpdate(group)
+			
+			event
 		}
-	}
 }
 
 object SmallGroupEventFixtureCommand {
-	def apply(): Appliable[Unit] = {
+	def apply() = {
 		new SmallGroupEventFixtureCommand
-			with ComposableCommand[Unit]
+			with ComposableCommand[SmallGroupEvent]
 			with AutowiringSmallGroupDaoComponent
 			with Unaudited
 			with PubliclyVisiblePermissions

@@ -10,7 +10,7 @@ import scala.collection.JavaConverters._
 object EditMonitoringPointSetCommand {
 	def apply(set: MonitoringPointSet) =
 		new EditMonitoringPointSetCommand(set)
-		with ComposableCommand[Unit]
+		with ComposableCommand[MonitoringPointSet]
 		with AutowiringTermServiceComponent
 		with AutowiringMonitoringPointServiceComponent
 		with EditMonitoringPointSetPermissions
@@ -18,11 +18,11 @@ object EditMonitoringPointSetCommand {
 }
 
 
-abstract class EditMonitoringPointSetCommand(val set: MonitoringPointSet) extends CommandInternal[Unit]
+abstract class EditMonitoringPointSetCommand(val set: MonitoringPointSet) extends CommandInternal[MonitoringPointSet]
 	with EditMonitoringPointSetState {
 
 	override def applyInternal() = {
-
+		set
 	}
 }
 

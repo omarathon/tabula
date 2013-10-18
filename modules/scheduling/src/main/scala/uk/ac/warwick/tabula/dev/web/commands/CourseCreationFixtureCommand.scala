@@ -7,14 +7,14 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
-class CourseCreationFixtureCommand extends CommandInternal[Unit] {
+class CourseCreationFixtureCommand extends CommandInternal[Course] {
 	this: ModuleAndDepartmentServiceComponent with SessionComponent with TransactionalComponent =>
 
 	var courseDao:CourseDao = Wire[CourseDao]
 	var courseCode: String = _
 	var courseName: String = _
 
-	protected def applyInternal() {
+	protected def applyInternal() = 
 		transactional() {
 			val c = courseDao.getByCode(courseCode).getOrElse(new Course)
 			c.code = courseCode
@@ -23,14 +23,14 @@ class CourseCreationFixtureCommand extends CommandInternal[Unit] {
 			c.title = courseName
 
 			courseDao.saveOrUpdate(c)
+			c
 		}
-	}
 }
 
 object CourseCreationFixtureCommand{
 	def apply()={
 		new CourseCreationFixtureCommand
-			with ComposableCommand[Unit]
+			with ComposableCommand[Course]
 			with AutowiringModuleAndDepartmentServiceComponent
 			with Daoisms
 			with AutowiringTransactionalComponent
