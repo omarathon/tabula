@@ -141,7 +141,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 		
 		val m = JConcurrentMap[Permission, Boolean]()
 		m.put(Permissions.Assignment.Read, true)
-		m.contains(Permissions.Assignment.Read) should be (true)
+		m.containsKey(Permissions.Assignment.Read) should be (true)
 		
 		wrapper.securityService = securityService
 		
@@ -193,7 +193,7 @@ class ScalaBeansWrapperTest extends TestBase with Mockito {
 
     val m = JConcurrentMap[Permission, Boolean]()
     m.put(Permissions.Assignment.Read, true)
-    m.contains(Permissions.Assignment.Read) should be (true)
+    m.containsKey(Permissions.Assignment.Read) should be (true)
 
     wrapper.securityService = securityService
     val target = new MyObject
