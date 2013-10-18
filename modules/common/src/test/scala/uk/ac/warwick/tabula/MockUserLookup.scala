@@ -6,11 +6,8 @@ import uk.ac.warwick.userlookup._
 import uk.ac.warwick.userlookup.webgroups.GroupInfo
 import uk.ac.warwick.userlookup.webgroups.GroupNotFoundException
 import uk.ac.warwick.tabula.JavaImports._
-import scala.Some
-import scala.util.Random
-import java.security.MessageDigest
-import sun.misc.BASE64Encoder
-import uk.ac.warwick.tabula.data.model.Gender.{Female, Male}
+import org.apache.commons.codec.digest.DigestUtils
+import org.apache.commons.codec.binary.Base64
 import uk.ac.warwick.tabula.UserFlavour.{Applicant, Anonymous, Unverified, Vanilla}
 
 class MockUserLookup(var defaultFoundUser: Boolean)
@@ -105,9 +102,6 @@ class MockCachingLookupService(var flavour: UserFlavour = Vanilla)
 	with UserByWarwickIdCache
 	with MockUser {
 
-	private val sha = MessageDigest.getInstance("SHA-1")
-	private val b64 = new BASE64Encoder()
-
 	override def getUserByWarwickUniIdUncached(warwickId: String): User = {
 		flavour match {
 			case Unverified => new UnverifiedUser(new UserLookupException)
@@ -119,7 +113,7 @@ class MockCachingLookupService(var flavour: UserFlavour = Vanilla)
 			}
 			case Vanilla => {
 				// hash WarwickId to a consistent 6 char 'usercode'. Tiny, but finite risk of collision/short usercodes.
-				val userId = b64.encode(sha.digest(warwickId.getBytes)).filter(_.isLower).take(6)
+				val userId = Base64.encodeBase64String(DigestUtils.sha256(warwickId.getBytes)).filter(_.isLower).take(6)
 				val user = mockUser(userId)
 				user.setWarwickId(warwickId)
 				user
