@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.CheckablePermission
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 
 object DeleteMonitoringPointCommand {
 	def apply(dept: Department, pointIndex: Int) =
