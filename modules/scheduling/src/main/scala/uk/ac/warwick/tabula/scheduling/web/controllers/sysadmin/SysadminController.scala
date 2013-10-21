@@ -159,7 +159,7 @@ class ImportSingleProfileController extends BaseSysadminController {
 
 		member match {
 			case stu: StudentMember => command.refresh(stu)
-			case _ => throw new IllegalStateException("Tried to refresh a non-student member - not implemented yet")
+			case _ => throw new IllegalArgumentException("Tried to refresh a non-student member - not implemented yet")
 		}
 
 		// Redirect cross-context
