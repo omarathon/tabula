@@ -213,12 +213,8 @@ class StudentMember extends Member with StudentProperties {
 	}
 
 	override def mostSignificantCourseDetails: Option[StudentCourseDetails] = {
-		if (studentCourseDetails == null || studentCourseDetails.isEmpty) None
-		else studentCourseDetails.asScala.find { details => details.mostSignificant != null && details.mostSignificant }
-
-		//Needs uncommenting once the data is present in the database - replacing the contents of this method
-		//if (mostSignificantCourse == null) None
-	  //else Some(mostSignificantCourse)
+		if (mostSignificantCourse == null) None
+	  else Some(mostSignificantCourse)
 	}
 
 	override def hasCurrentEnrolment: Boolean = studentCourseDetails.asScala.exists(_.hasCurrentEnrolment)
