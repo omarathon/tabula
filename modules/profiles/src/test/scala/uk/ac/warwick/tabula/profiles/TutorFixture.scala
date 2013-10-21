@@ -26,6 +26,7 @@ trait TutorFixture extends Mockito {
 	studentCourseDetails.sprCode = "0000001/1"
 	studentCourseDetails.mostSignificant = true
 	student.studentCourseDetails.add(studentCourseDetails)
+	student.mostSignificantCourse = studentCourseDetails
 
 //	val courseDetails = new StudentCourseDetails()
 //	courseDetails.sprCode = "spr-123"
