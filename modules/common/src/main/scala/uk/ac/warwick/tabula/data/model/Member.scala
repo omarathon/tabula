@@ -212,10 +212,7 @@ class StudentMember extends Member with StudentProperties {
 		).distinct
 	}
 
-	override def mostSignificantCourseDetails: Option[StudentCourseDetails] = {
-		if (mostSignificantCourse == null) None
-	  else Some(mostSignificantCourse)
-	}
+	override def mostSignificantCourseDetails: Option[StudentCourseDetails] = Option(mostSignificantCourse)
 
 	override def hasCurrentEnrolment: Boolean = studentCourseDetails.asScala.exists(_.hasCurrentEnrolment)
 
