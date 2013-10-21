@@ -182,7 +182,7 @@ class WordCountField extends FormField {
 		value match {
 			case i:IntegerFormValue => {
 				 if (i.value == null) errors.rejectValue("value", "assignment.submit.wordCount.missing")
-				 else if (i.value < min || i.value > max) errors.rejectValue("value", "assignment.submit.wordCount.outOfRange")
+				 else if ((min != null && i.value < min) || (max != null && i.value > max)) errors.rejectValue("value", "assignment.submit.wordCount.outOfRange")
 			}
 			case _ => errors.rejectValue("value", "assignment.submit.wordCount.missing") // value was null or wrong type
 		}
