@@ -136,10 +136,14 @@ class FileAttachment extends GeneratedId {
 object FileAttachment {
 
 	private val BadCharacters = new Regex("""[<\\"|;:*/>?]""")
+	private val Space = new Regex("(\\s|%20)+")
+	private val BadExtensions = new Regex("\\s*\\.\\s*(\\w+)$")
 
 	def sanitisedFilename(filename: String) = {
 		val trimmed = filename.trim
-		BadCharacters.replaceAllIn(trimmed, "")
+		val niceChars = BadCharacters.replaceAllIn(trimmed, "")
+		val deSpaced = Space.replaceAllIn(niceChars, " ")
+		BadExtensions.replaceAllIn(deSpaced, ".$1")
 	}
 
 }

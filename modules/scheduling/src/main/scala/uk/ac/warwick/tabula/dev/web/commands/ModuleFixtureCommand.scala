@@ -8,8 +8,9 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
+import uk.ac.warwick.tabula.data.model.Module
 
-class ModuleFixtureCommand extends CommandInternal[Unit] with Logging{
+class ModuleFixtureCommand extends CommandInternal[Module] with Logging{
 
 	this: ModuleAndDepartmentServiceComponent with SessionComponent=>
 	import ImportModulesCommand._
@@ -19,7 +20,7 @@ class ModuleFixtureCommand extends CommandInternal[Unit] with Logging{
 	var departmentCode:String = _
 
 	def moduleInfo = ModuleInfo(name, code,"")
-	def applyInternal(){
+	def applyInternal() = 
 		transactional() {
 			val department  = moduleAndDepartmentService.getDepartmentByCode(departmentCode).get
 			moduleAndDepartmentService.getModuleByCode(code).foreach { module =>
@@ -27,15 +28,16 @@ class ModuleFixtureCommand extends CommandInternal[Unit] with Logging{
 				session.delete(module)
 				logger.info(s"Deleted module ${code}")
 			}
-			session.save(newModuleFrom(moduleInfo, department))
+			val m = newModuleFrom(moduleInfo, department)
+			session.save(m)
 			logger.info(s"Created module ${code}")
+			m
 		}
-	}
 }
 object ModuleFixtureCommand{
 	def apply()={
 		new ModuleFixtureCommand()
-			with ComposableCommand[Unit]
+			with ComposableCommand[Module]
 			with AutowiringModuleAndDepartmentServiceComponent
 			with Daoisms
 			with Unaudited

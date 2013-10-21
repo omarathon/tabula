@@ -41,7 +41,7 @@ object WeekRangesFormatter {
 		formatterMap.retrieve(year) format (ranges, dayOfWeek, numberingSystem)
 
 	class WeekRangesFormatterCache {
-		private val map = mutable.HashMap[AcademicYear, WeekRangesFormatter]()
+		private val map = JConcurrentMap[AcademicYear, WeekRangesFormatter]()
 		def retrieve(year: AcademicYear) = map.getOrElseUpdate(year, new WeekRangesFormatter(year))
 	}
 }
@@ -185,7 +185,7 @@ object WeekRangeSelectFormatter {
 		formatterMap.retrieve(year) format (ranges, dayOfWeek, numberingSystem)
 
 	class WeekRangeSelectFormatterCache {
-		private val map = mutable.HashMap[AcademicYear, WeekRangeSelectFormatter]()
+		private val map = JConcurrentMap[AcademicYear, WeekRangeSelectFormatter]()
 		def retrieve(year: AcademicYear) = map.getOrElseUpdate(year, new WeekRangeSelectFormatter(year))
 	}
 }
@@ -412,7 +412,7 @@ object SingleWeekFormatter {
 		formatterMap.retrieve(year) format (weekNumber, dayOfWeek, numberingSystem)
 
 	class SingleWeekFormatterCache {
-		private val map = mutable.HashMap[AcademicYear, SingleWeekFormatter]()
+		private val map = JConcurrentMap[AcademicYear, SingleWeekFormatter]()
 		def retrieve(year: AcademicYear) = map.getOrElseUpdate(year, new SingleWeekFormatter(year))
 	}
 }

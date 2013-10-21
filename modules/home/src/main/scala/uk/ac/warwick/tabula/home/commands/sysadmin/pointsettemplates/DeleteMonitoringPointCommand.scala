@@ -8,7 +8,7 @@ import org.springframework.util.AutoPopulatingList
 object DeleteMonitoringPointCommand {
 	def apply(pointIndex: Int) =
 		new DeleteMonitoringPointCommand(pointIndex)
-		with ComposableCommand[Unit]
+		with ComposableCommand[MonitoringPoint]
 		with DeleteMonitoringPointValidation
 		with MonitoringPointSetTemplatesPermissions
 		with ReadOnly with Unaudited
@@ -19,7 +19,7 @@ object DeleteMonitoringPointCommand {
  * Does not persist the change (no monitoring point set yet exists)
  */
 abstract class DeleteMonitoringPointCommand(val pointIndex: Int)
-	extends CommandInternal[Unit] with DeleteMonitoringPointState {
+	extends CommandInternal[MonitoringPoint] with DeleteMonitoringPointState {
 
 	override def applyInternal() = {
 		monitoringPoints.remove(pointIndex)

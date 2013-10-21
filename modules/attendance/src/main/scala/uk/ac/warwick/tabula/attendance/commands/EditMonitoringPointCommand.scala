@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.permissions.CheckablePermission
 object EditMonitoringPointCommand {
 	def apply(dept: Department, pointIndex: Int) =
 		new EditMonitoringPointCommand(dept, pointIndex)
-			with ComposableCommand[Unit]
+			with ComposableCommand[MonitoringPoint]
 			with EditMonitoringPointPermissions
 			with AutowiringTermServiceComponent
 			with EditMonitoringPointValidation
@@ -28,7 +28,7 @@ object EditMonitoringPointCommand {
  * Does not persist the change (no monitoring point set yet exists)
  */
 abstract class EditMonitoringPointCommand(val dept: Department, val pointIndex: Int)
-	extends CommandInternal[Unit] with EditMonitoringPointState {
+	extends CommandInternal[MonitoringPoint] with EditMonitoringPointState {
 
 	override def applyInternal() = {
 		copyTo(monitoringPoints.get(pointIndex))
@@ -75,10 +75,11 @@ trait EditMonitoringPointState extends GroupMonitoringPointsByTerm {
 	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
 
-	def copyTo(point: MonitoringPoint) {
+	def copyTo(point: MonitoringPoint) = {
 		point.name = this.name
 		point.validFromWeek = this.validFromWeek
 		point.requiredFromWeek = this.requiredFromWeek
+		point
 	}
 
 	def copyFrom() {

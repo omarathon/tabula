@@ -4,8 +4,8 @@ import uk.ac.warwick.tabula.data.model.FileAttachment
 
 class FileAttachmentTest extends TestBase {
 
-	/** 
-	 * HFC-136 
+	/**
+	 * HFC-136
 	 * Filenames can be prefixed with whitespace, preventing download
 	 */
 	@Test
@@ -24,4 +24,16 @@ class FileAttachmentTest extends TestBase {
 		new FileAttachment("We've had our fun; now let's go home.xlsx").name should be ("We've had our fun now let's go home.xlsx")
 	}
 
+	@Test
+	def tidySpaces() {
+		new FileAttachment("Too     many spaces.pdf").name should be ("Too many spaces.pdf")
+		new FileAttachment("I\thate\ttabs.txt").name should be ("I hate tabs.txt")
+		new FileAttachment("Think%20you're%20a%20script%20kiddie, then?.js").name should be ("Think you're a script kiddie, then.js")
+	}
+
+	@Test
+	def tidyExtensions() {
+		new FileAttachment("No spaces after this. pdf").name should be ("No spaces after this.pdf")
+		new FileAttachment("No extension here.").name should be ("No extension here.")
+	}
 }

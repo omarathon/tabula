@@ -22,16 +22,16 @@ object ManageMonitoringPointSetCommand {
 			with ManageMonitoringPointSetPermissions
 			with AutowiringRouteServiceComponent
 			with AutowiringMonitoringPointServiceComponent
-			with ComposableCommand[Unit]
+			with ComposableCommand[Seq[MonitoringPointSetTemplate]]
 			with ReadOnly with Unaudited
 }
 
 
-abstract class ManageMonitoringPointSetCommand(val user: CurrentUser, val dept: Department, val academicYearOption: Option[AcademicYear]) extends CommandInternal[Unit]
+abstract class ManageMonitoringPointSetCommand(val user: CurrentUser, val dept: Department, val academicYearOption: Option[AcademicYear]) extends CommandInternal[Seq[MonitoringPointSetTemplate]]
 	with ManageMonitoringPointSetState {
 
 	override def applyInternal() = {
-		templates = monitoringPointService.listTemplates
+		monitoringPointService.listTemplates
 	}
 }
 
@@ -54,27 +54,18 @@ trait ManageMonitoringPointSetState extends RouteServiceComponent with Monitorin
 	val thisAcademicYear = AcademicYear.guessByDate(new DateTime())
 	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
 	lazy val setsByRouteByAcademicYear = {
-		val sets: mutable.HashMap[String, mutable.HashMap[Route, mutable.Buffer[MonitoringPointSet]]] = mutable.HashMap()
 		routesForPermission(user, Permissions.MonitoringPoints.Manage, dept).toSeq.collect{
 			case r: Route => r.monitoringPointSets.asScala.filter(s =>
 				s.academicYear.equals(thisAcademicYear.previous)
 				|| s.academicYear.equals(thisAcademicYear)
 				|| s.academicYear.equals(thisAcademicYear.next)
 			)
-		}.flatten.foreach{set =>
-			sets
-				.getOrElseUpdate(set.academicYear.toString, mutable.HashMap())
-				.getOrElseUpdate(set.route, mutable.Buffer())
-				.append(set)
-		}
-		sets
+		}.flatten.groupBy(_.academicYear.toString).mapValues(_.groupBy(_.route))
 	}
 	def setsByRouteCodeByAcademicYear(academicYear: String, route: Route) =
 		setsByRouteByAcademicYear(academicYear)(route)
 
 	def sortedRoutesByAcademicYear(academicYear: String) =
 		setsByRouteByAcademicYear(academicYear).keySet.toSeq.sorted(Route.DegreeTypeOrdering)
-
-	var templates: Seq[MonitoringPointSetTemplate] = _
 
 }
