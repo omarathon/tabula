@@ -83,7 +83,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito with Loggi
 		session.save(m)
 		session.flush
 
-		indexer.index
+		indexer.incrementalIndex
 		indexer.listRecent(0, 1000).size should be (1)
 
 		indexer.find("bob thornton", Seq(dept), Set(), false) should be ('empty)
@@ -127,11 +127,11 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito with Loggi
 		stopwatch.start("indexing")
 
 		// we only index 250 at a time, so index five times to get all the latest stuff.
-		indexer.index
-		indexer.index
-		indexer.index
-		indexer.index
-		indexer.index
+		indexer.incrementalIndex
+		indexer.incrementalIndex
+		indexer.incrementalIndex
+		indexer.incrementalIndex
+		indexer.incrementalIndex
 
 		stopwatch.stop()
 
@@ -164,7 +164,7 @@ class ProfileIndexServiceTest extends AppContextTestBase with Mockito with Loggi
 		}
 
 		// index again to check that it doesn't do any once-only stuff
-		indexer.index
+		indexer.incrementalIndex
 
 	}
 

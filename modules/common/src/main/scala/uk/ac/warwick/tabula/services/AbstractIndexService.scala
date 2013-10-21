@@ -49,10 +49,10 @@ trait CommonQueryMethods[A] { self: AbstractIndexService[A] =>
 			query = NumericRangeQuery.newLongRange(UpdatedDateField, min.getMillis, null, true, true),
 			sort = reverseDateSort,
 			offset = start,
-			max = count)			
+			max = count)
 		docs transform { toItem(_) }
 	}
-	
+
 }
 
 trait QueryHelpers[A] { self: AbstractIndexService[A] =>
@@ -73,7 +73,7 @@ trait QueryHelpers[A] { self: AbstractIndexService[A] =>
 }
 
 class RichSearchResults(seq: Seq[Document]) {
-	def first = seq.headOption	
+	def first = seq.headOption
 	def transform[A](f: Document => GenTraversableOnce[A]) = seq.flatMap(f)
 	def size = seq.size
 }
@@ -84,29 +84,29 @@ trait RichSearchResultsCreator {
 
 object RichSearchResultsCreator extends RichSearchResultsCreator
 
-abstract class AbstractIndexService[A] 
-		extends CommonQueryMethods[A] 
+abstract class AbstractIndexService[A]
+		extends CommonQueryMethods[A]
 			with QueryHelpers[A]
 			with SearchHelpers[A]
 			with FieldGenerators
 			with RichSearchResultsCreator
-			with InitializingBean 
-			with Logging 
+			with InitializingBean
+			with Logging
 			with DisposableBean {
-	
+
 	final val LuceneVersion = Version.LUCENE_40
-	
+
 	// largest batch of items we'll load in at once.
 	val MaxBatchSize: Int
-	
+
 	// largest batch of items we'll load in at once during scheduled incremental index.
 	val IncrementalBatchSize: Int
-		
+
 	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
-	
+
 	// Are we indexing now?
 	var indexing: Boolean = false
-	
+
 	var indexPath: File
 
 	var lastIndexTime: Option[DateTime] = None
@@ -127,10 +127,10 @@ abstract class AbstractIndexService[A]
 		else
 			try { indexing = true; work }
 			finally indexing = false
-			
+
 	val analyzer: Analyzer
 	lazy val indexAnalyzer = analyzer
-	
+
 	// QueryParser isn't thread safe, hence why this is a def
 	def parser = new QueryParser(LuceneVersion, "", analyzer)
 
@@ -139,7 +139,7 @@ abstract class AbstractIndexService[A]
 	 * so we know where to check from next time.
 	 */
 	var mostRecentIndexedItem: Option[DateTime] = None
-	
+
 	final val IndexReopenPeriodInSeconds = 20
 
 	override def afterPropertiesSet {
@@ -148,7 +148,7 @@ abstract class AbstractIndexService[A]
 			else throw new IllegalStateException("Index path missing", new FileNotFoundException(indexPath.getAbsolutePath))
 		}
 		if (!indexPath.isDirectory) throw new IllegalStateException("Index path not a directory: " + indexPath.getAbsolutePath)
-		
+
 		// don't want this. http://www.lifeinthefastlane.ca/wp-content/uploads/2008/12/santa_claus_13sfw.jpg
 		BooleanQuery.setMaxClauseCount(Integer.MAX_VALUE)
 
@@ -173,7 +173,7 @@ abstract class AbstractIndexService[A]
 	 * per minute in order for the index to lag behind, and even then it would catch
 	 * up as soon as it reached a quiet time.
 	 */
-	def index() = transactional() {
+	def incrementalIndex() = transactional() {
 		ifNotIndexing {
 			val stopWatch = StopWatch()
 			stopWatch.record("Incremental index") {
@@ -183,19 +183,19 @@ abstract class AbstractIndexService[A]
 					logger.debug("No new items to index.")
 				} else {
 					if (debugEnabled) logger.debug("Indexing items from " + startDate)
-					doIndexItems(newItems)
+					doIndexItems(newItems, true)
 				}
 			}
 			lastIndexDuration = Some(new Duration(stopWatch.getTotalTimeMillis))
 			lastIndexTime = Some(new DateTime())
 		}
 	}
-	
+
 	protected def listNewerThan(startDate: DateTime, batchSize: Int): Seq[A]
 
 	def indexFrom(startDate: DateTime) = transactional() {
 		ifNotIndexing {
-			doIndexItems(listNewerThan(startDate, MaxBatchSize))
+			doIndexItems(listNewerThan(startDate, MaxBatchSize), true)
 		}
 	}
 
@@ -203,15 +203,16 @@ abstract class AbstractIndexService[A]
 	 * Indexes a specific given list of items.
 	 */
 	def indexItems(items: Seq[A]) = transactional() {
-		ifNotIndexing { doIndexItems(items) }
+		ifNotIndexing { doIndexItems(items, false) }
 	}
 
-	private def doIndexItems(items: Seq[A]) {
+	private def doIndexItems(items: Seq[A], isIncremental: Boolean) {
 		logger.debug("Writing to the index at " + indexPath + " with analyzer " + indexAnalyzer)
 		val writerConfig = new IndexWriterConfig(LuceneVersion, indexAnalyzer)
 		closeThis(new IndexWriter(FSDirectory.open(indexPath), writerConfig)) { writer =>
 			for (item <- items) {
-				updateMostRecent(item)
+				if (isIncremental)
+					doUpdateMostRecent(item)
 				writer.updateDocument(uniqueTerm(item), toDocument(item))
 			}
 			if (debugEnabled) logger.debug("Indexed " + items.size + " items")
@@ -223,14 +224,14 @@ abstract class AbstractIndexService[A]
 	 * If this item is the newest item this service has seen, save the date
 	 * so we know where to start from next time.
 	 */
-	private def updateMostRecent(item: A) {
+	private def doUpdateMostRecent(item: A) {
 		val shouldUpdate = mostRecentIndexedItem.map { _ isBefore getUpdatedDate(item) }.getOrElse { true }
 		if (shouldUpdate)
 			mostRecentIndexedItem = Some(getUpdatedDate(item))
 	}
-	
+
 	protected def getUpdatedDate(item: A): DateTime
-	
+
 	val UpdatedDateField: String
 
 	/**
@@ -242,14 +243,12 @@ abstract class AbstractIndexService[A]
 		mostRecentIndexedItem.map { _.minusMinutes(1) }.getOrElse {
 			// extract possible list of UpdatedDateField values from possible newest item and get possible first value as a Long.
 			documentValue(newest(), UpdatedDateField)
-				.map { v => new DateTime(v.toLong) }
+				.map { v => new DateTime(v.toLong).minusMinutes(10) }
 				.getOrElse {
-					logger.info("No recent document found, indexing the past year")
-					new DateTime().minusYears(1)
+					logger.info("No recent document found, indexing since Tabula year zero")
+					val yearZero = Wire.property("${tabula.yearZero}")
+					new DateTime(yearZero.toInt,1,1)
 				}
-			// TODO change to just a few weeks after first deploy of this -
-			// this is just to get all historical data indexed, after which we won't ever
-			// be so out of date.
 		}
 	}
 
@@ -267,12 +266,12 @@ abstract class AbstractIndexService[A]
 	 */
 	private def uniqueTerm(item: A) = new Term(IdField, getId(item))
 	protected def getId(item: A): String
-	
+
 	/**
 	 * TODO reuse one Document and set of Fields for all items
 	 */
 	protected def toDocument(item: A): Document
-	
+
 	protected def toId(doc: Document) = documentValue(doc, IdField)
 	protected def toItem(id: String): Option[A]
 	protected def toItem(doc: Document): Option[A] = { toId(doc) flatMap (toItem) }
@@ -288,7 +287,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 	 * the index has changed (i.e. after an index)
 	 */
 	var searcherManager: SearcherManager = _
-	
+
 	/**
 	 * SearcherLifetimeManager allows a specific IndexSearcher state to be
 	 * retrieved later by passing a token. This allows stateful search context
@@ -318,7 +317,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		}
 	}
 
-	protected def initialiseSearching = {	
+	protected def initialiseSearching = {
 		if (searcherManager == null) {
 			try {
 				logger.debug("Opening a new searcher manager at " + indexPath)
@@ -343,7 +342,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 	 */
 	protected def reopen = {
 		//logger.debug("Reopening index")
-		
+
 		initialiseSearching
 		if (searcherManager != null) searcherManager.maybeRefresh
 	}
@@ -356,11 +355,11 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		initialiseSearching
 		if (searcherLifetimeManager != null) searcherLifetimeManager.prune(new PruneByAge(ageInSeconds))
 	}
-	
+
 	def search(query: Query, max: Int, sort: Sort = null, offset: Int = 0): RichSearchResults = doSearch(query, Some(max), sort, offset)
 	def search(query: Query): RichSearchResults = doSearch(query, None, null, 0)
 	def search(query: Query, sort: Sort): RichSearchResults = doSearch(query, None, sort, 0)
-	def search(query: Query, max: Int, sort: Sort, last: Option[ScoreDoc], token: Option[Long]): PagingSearchResult = 
+	def search(query: Query, max: Int, sort: Sort, last: Option[ScoreDoc], token: Option[Long]): PagingSearchResult =
 		doPagingSearch(query, Option(max), Option(sort), last, token)
 
 	private def doSearch(query: Query, max: Option[Int], sort: Sort, offset: Int): RichSearchResults = {
@@ -370,7 +369,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 			Seq.empty
 		} else acquireSearcher { searcher =>
 			logger.debug("Running search for query: " + query)
-			
+
 			val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
 			val results =
 				if (sort == null) searcher.search(query, null, searcher.getIndexReader.maxDoc)
@@ -390,19 +389,19 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		val hits = results.scoreDocs
 		hits.toStream.drop(offset).take(max).map { hit => searcher.doc(hit.doc) }.toList
 	}
-	
+
 	case class PagingSearchResult(val results: RichSearchResults, val last: Option[ScoreDoc], val token: Long, val total: Int)
-	
+
 	private def doPagingSearch(query: Query, max: Option[Int], sort: Option[Sort], lastDoc: Option[ScoreDoc], token: Option[Long]): PagingSearchResult = {
 		// guard
 		initialiseSearching
-		
+
 		val (newToken, searcher) = acquireSearcher(token)
-		if (searcher == null) 
+		if (searcher == null)
 			throw new IllegalStateException("Original IndexSearcher has expired.")
-		
+
 		logger.debug("Running paging search for query: " + query)
-			
+
 		try {
 			val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
 			val results = (lastDoc, sort) match {
@@ -411,7 +410,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 				case (after:Some[ScoreDoc], sort: Some[Sort]) => searcher.searchAfter(lastDoc.get, query, maxResults, sort.get)
 				case (None, sort: Some[Sort]) => searcher.search(query, maxResults, sort.get)
 			}
-			
+
 			val hits = results.scoreDocs
 			val totalHits = results.totalHits
 			hits match {
@@ -424,11 +423,11 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		}
 		finally searcherLifetimeManager.release(searcher)
 	}
-	
+
 	private def acquireSearcher(token: Option[Long]): (Long, IndexSearcher) = {
 		var searcher: IndexSearcher = null
 		var newToken: Long = 0
-		
+
 		token match {
 			case None => {
 				searcher = searcherManager.acquire
@@ -439,7 +438,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 				newToken = t
 			}
 		}
-		
+
 		(newToken, searcher)
 	}
 }
@@ -453,7 +452,7 @@ trait FieldGenerators {
 		val storage = if (isStored) Store.YES else Store.NO
 		new StringField(name, value, storage)
 	}
-	
+
 	protected def tokenisedStringField(name: String, value: String, isStored: Boolean = true) = {
 		val storage = if (isStored) Store.YES else Store.NO
 		new TextField(name, value, storage)
