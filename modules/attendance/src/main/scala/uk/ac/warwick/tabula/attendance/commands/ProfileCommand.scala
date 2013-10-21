@@ -80,8 +80,4 @@ trait ProfilePermissions extends RequiresPermissionsChecking with PermissionsChe
 trait ProfileCommandState {
 	def studentCourseDetails: StudentCourseDetails
 	def academicYear: AcademicYear
-
-	var monitoringPointsByTerm: Map[String, Seq[MonitoringPoint]] = _
-	var checkpointState: Map[String, String] = _
-	var missedCountByTerm: Map[String, Int] = _
 }
