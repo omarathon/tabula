@@ -44,14 +44,14 @@ abstract class ViewMonitoringPointSetsCommand(
 					case (member, checkMap) =>
 						checkMap.exists{
 							case (_, Some(MonitoringCheckpointState.MissedUnauthorised)) => true
-							case (point, None) => currentAcademicWeek >= point.requiredFromWeek
+							case (point, None) => point.isLate(currentAcademicWeek)
 							case _ => false
 						}
 				}.map{ case(member, checkMap) =>
 					member -> checkMap.map{ case(point, option) => point -> (option match {
 						case Some(state) => state.dbValue
 						case _ =>
-							if (currentAcademicWeek >= point.requiredFromWeek)
+							if (point.isLate(currentAcademicWeek))
 								"late"
 							else
 								""
