@@ -23,7 +23,7 @@ object ViewMonitoringPointSetsCommand {
 			with AutowiringMonitoringPointServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
-			with ComposableCommand[Unit]
+			with ComposableCommand[Map[StudentMember, Map[MonitoringPoint, String]]]
 			with ReadOnly with Unaudited
 }
 
@@ -31,7 +31,7 @@ object ViewMonitoringPointSetsCommand {
 abstract class ViewMonitoringPointSetsCommand(
 		val user: CurrentUser, val dept: Department, val academicYearOption: Option[AcademicYear],
 		val routeOption: Option[Route], val pointSetOption: Option[MonitoringPointSet]
-	)	extends CommandInternal[Unit] with ViewMonitoringPointSetsState with MembersForPointSet {
+	)	extends CommandInternal[Map[StudentMember, Map[MonitoringPoint, String]]] with ViewMonitoringPointSetsState with MembersForPointSet {
 
 	self: MonitoringPointServiceComponent with ProfileServiceComponent with TermServiceComponent with PermissionsAwareRoutes =>
 
@@ -40,25 +40,25 @@ abstract class ViewMonitoringPointSetsCommand(
 			case Some(p) => {
 				val members = getMembers(p)
 				val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
-				membersWithMissedOrLateCheckpoints = monitoringPointService.getChecked(members, p).filter{
+				monitoringPointService.getChecked(members, p).filter{
 					case (member, checkMap) =>
 						checkMap.exists{
 							case (_, Some(MonitoringCheckpointState.MissedUnauthorised)) => true
-							case (point, None) => currentAcademicWeek >= point.requiredFromWeek
+							case (point, None) => point.isLate(currentAcademicWeek)
 							case _ => false
 						}
 				}.map{ case(member, checkMap) =>
 					member -> checkMap.map{ case(point, option) => point -> (option match {
 						case Some(state) => state.dbValue
 						case _ =>
-							if (currentAcademicWeek >= point.requiredFromWeek)
+							if (point.isLate(currentAcademicWeek))
 								"late"
 							else
 								""
 					})}
 				}
 			}
-			case None =>
+			case None => Map()
 		}
 	}
 }
@@ -89,27 +89,13 @@ trait ViewMonitoringPointSetsState extends RouteServiceComponent with Monitoring
 	val pointSet = pointSetOption.getOrElse(null)
 
 	lazy val setsByRouteByAcademicYear = {
-		val sets: mutable.HashMap[String, mutable.HashMap[Route, mutable.Buffer[MonitoringPointSet]]] = mutable.HashMap()
 		routesForPermission(user, Permissions.MonitoringPoints.View, dept).toSeq.sorted(Route.DegreeTypeOrdering).collect{
 			case r: Route => r.monitoringPointSets.asScala.filter(s =>
 				s.academicYear.equals(thisAcademicYear.previous)
 				|| s.academicYear.equals(thisAcademicYear)
 				|| s.academicYear.equals(thisAcademicYear.next)
 			)
-		}.flatten.sortWith{(a, b) =>
-			if (a.year == null)
-				true
-			else if (b.year == null)
-				false
-			else
-				a.year < b.year
-		}.foreach{set =>
-			sets
-				.getOrElseUpdate(set.academicYear.toString, mutable.HashMap())
-				.getOrElseUpdate(set.route, mutable.Buffer())
-				.append(set)
-		}
-		sets
+		}.flatten.sortBy(set => Option(set.year)).groupBy(_.academicYear.toString).mapValues(_.groupBy(_.route))
 	}
 	def setsByRouteCodeByAcademicYear(academicYear: String, route: Route) =
 		setsByRouteByAcademicYear(academicYear)(route)
@@ -118,13 +104,5 @@ trait ViewMonitoringPointSetsState extends RouteServiceComponent with Monitoring
 		setsByRouteByAcademicYear(academicYear).keySet.toSeq.sorted(Route.DegreeTypeOrdering)
 
 	def monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, academicYear)
-
-	var membersWithMissedOrLateCheckpoints: Map[StudentMember, Map[MonitoringPoint, String]] = _
-
-	def missedCheckpointsByMember(member: StudentMember) =
-		membersWithMissedOrLateCheckpoints(member)
-
-	def missedCheckpointsByMemberByPoint(member: StudentMember, point: MonitoringPoint) =
-		membersWithMissedOrLateCheckpoints(member)(point)
 
 }

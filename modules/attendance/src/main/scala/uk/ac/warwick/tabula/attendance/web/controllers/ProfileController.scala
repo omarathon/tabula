@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.attendance.web.Routes
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.attendance.commands.AttendanceProfileInformation
 
 @Controller
 @RequestMapping(value = Array("/profile"))
@@ -36,12 +37,23 @@ class ProfileController extends AttendanceController {
 		= ProfileCommand(studentCourseDetails, academicYear)
 
 	@RequestMapping
-	def render(@ModelAttribute("command") cmd: Appliable[Unit]) = {
-		cmd.apply()
+	def render(@ModelAttribute("command") cmd: Appliable[Option[AttendanceProfileInformation]]) = {
+		val info = cmd.apply()
 
 		if (ajax)
-			Mav("home/_profile", "currentUser" -> user).noLayout()
+			Mav("home/_profile", 
+				"currentUser" -> user,
+				"monitoringPointsByTerm" -> info.map { _.monitoringPointsByTerm },
+				"checkpointState" -> info.map { _.checkpointState },
+				"missedCountByTerm" -> info.map { _.missedCountByTerm }
+			).noLayout()
 		else
-			Mav("home/profile", "currentUser" -> user, "defaultExpand" -> true)
+			Mav("home/profile", 
+				"currentUser" -> user, 
+				"defaultExpand" -> true,
+				"monitoringPointsByTerm" -> info.map { _.monitoringPointsByTerm },
+				"checkpointState" -> info.map { _.checkpointState },
+				"missedCountByTerm" -> info.map { _.missedCountByTerm }
+			)
 	}
 }

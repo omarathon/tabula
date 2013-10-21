@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 
 @Controller
 @RequestMapping(Array("/manage/{dept}/sets/add/points/add"))
@@ -18,12 +19,12 @@ class AddMonitoringPointController extends AttendanceController {
 	def createCommand(@PathVariable dept: Department) = AddMonitoringPointCommand(dept)
 
 	@RequestMapping(method=Array(POST), params = Array("form"))
-	def form(@ModelAttribute("command") cmd: Appliable[Unit]) = {
+	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPoint]) = {
 		Mav("manage/point/add_form").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method=Array(POST))
-	def submitModal(@Valid @ModelAttribute("command") cmd: Appliable[Unit], errors: Errors) = {
+	def submitModal(@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPoint], errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {

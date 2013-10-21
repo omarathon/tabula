@@ -56,6 +56,21 @@ class FormFieldTest extends TestBase with Mockito {
 		val errors = new BindException(number, "string")
 
 		field.validate(number, errors)
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("value")
+		errors.getFieldError.getCodes should contain ("assignment.submit.wordCount.missing")
+	}
+	
+	@Test def nullWordCountMinAndMax {
+		val field = new WordCountField
+
+		val number = new IntegerFormValue(field)
+		number.value = 372
+
+		val errors = new BindException(number, "string")
+
+		field.validate(number, errors)
+		errors.hasErrors should be (false)
 	}
 
 	@Test def wordCountField {

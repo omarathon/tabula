@@ -7,13 +7,13 @@ import uk.ac.warwick.tabula.data.model.Department
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointType
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointType}
 import uk.ac.warwick.tabula.permissions.CheckablePermission
 
 object EditMonitoringPointCommand {
 	def apply(dept: Department, pointIndex: Int) =
 		new EditMonitoringPointCommand(dept, pointIndex)
-			with ComposableCommand[Unit]
+			with ComposableCommand[MonitoringPoint]
 			with EditMonitoringPointPermissions
 			with AutowiringTermServiceComponent
 			with EditMonitoringPointValidation
@@ -25,7 +25,7 @@ object EditMonitoringPointCommand {
  * Does not persist the change (no monitoring point set yet exists)
  */
 abstract class EditMonitoringPointCommand(val dept: Department, val pointIndex: Int)
-	extends CommandInternal[Unit] with EditMonitoringPointState {
+	extends CommandInternal[MonitoringPoint] with EditMonitoringPointState {
 
 	override def applyInternal() = {
 		copyTo(monitoringPoints.get(pointIndex))

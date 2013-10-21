@@ -36,6 +36,10 @@ class MonitoringPoint extends GeneratedId with HasSettings {
 	@NotNull
 	var requiredFromWeek: Int = _
 
+	def isLate(currentAcademicWeek: Int): Boolean = {
+		currentAcademicWeek > requiredFromWeek
+	}
+
 	var sentToAcademicOffice: Boolean = false
 
 	@Column(name="point_type")

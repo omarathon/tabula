@@ -16,14 +16,14 @@ import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.services.RelationshipServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringRelationshipServiceComponent
 
-trait DisplaySettingsCommand extends CommandInternal[Unit] with DisplaySettingsCommandState {
+trait DisplaySettingsCommand extends CommandInternal[Department] with DisplaySettingsCommandState {
 	def init(): Unit
 }
 
 object DisplaySettingsCommand {
 	def apply(department: Department) =
 		new DisplaySettingsCommandInternal(department)
-			with ComposableCommand[Unit]
+			with ComposableCommand[Department]
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringRelationshipServiceComponent
 			with DisplaySettingsCommandDescription
@@ -34,7 +34,7 @@ trait DisplaySettingsCommandState {
 	val department: Department
 }
 
-class DisplaySettingsCommandInternal(val department: Department) extends DisplaySettingsCommand with CommandInternal[Unit]
+class DisplaySettingsCommandInternal(val department: Department) extends DisplaySettingsCommand with CommandInternal[Department]
 	with SelfValidating with BindListener with DisplaySettingsCommandState {
 
 	this: ModuleAndDepartmentServiceComponent with RelationshipServiceComponent =>
@@ -76,6 +76,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Display
 		department.studentRelationshipDisplayed = studentRelationshipDisplayed.asScala.map { case (id, bool) => (id -> Option(bool).getOrElse(false).toString) }.toMap
 
 		moduleAndDepartmentService.save(department)
+		department
 	}
 
 	override def onBind(result: BindingResult) {
@@ -104,7 +105,7 @@ trait DisplaySettingsCommandPermissions extends RequiresPermissionsChecking {
 	}
 }
 
-trait DisplaySettingsCommandDescription extends Describable[Unit] {
+trait DisplaySettingsCommandDescription extends Describable[Department] {
 	this: DisplaySettingsCommandState =>
 	// describe the thing that's happening.
 	override def describe(d: Description) =

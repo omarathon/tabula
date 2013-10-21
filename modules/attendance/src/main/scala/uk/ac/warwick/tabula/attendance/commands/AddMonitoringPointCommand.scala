@@ -14,23 +14,24 @@ import uk.ac.warwick.tabula.permissions.CheckablePermission
 object AddMonitoringPointCommand {
 	def apply(dept: Department) =
 		new AddMonitoringPointCommand(dept)
-			with ComposableCommand[Unit]
-			with AutowiringTermServiceComponent
-			with AddMonitoringPointValidation
-			with AddMonitoringPointPermissions
-			with ReadOnly with Unaudited
+		with ComposableCommand[MonitoringPoint]
+		with AutowiringTermServiceComponent
+		with AddMonitoringPointValidation
+		with AddMonitoringPointPermissions
+		with ReadOnly with Unaudited
 }
 
 /**
  * Adds a new monitoring point to the set of points in the command's state.
  * Does not persist the change (no monitoring point set yet exists)
  */
-abstract class AddMonitoringPointCommand(val dept: Department) extends CommandInternal[Unit] with MonitoringPointState {
+abstract class AddMonitoringPointCommand(val dept: Department) extends CommandInternal[MonitoringPoint] with MonitoringPointState {
 
 	override def applyInternal() = {
 		val point = new MonitoringPoint
 		copyTo(point)
 		monitoringPoints.add(point)
+		point
 	}
 }
 

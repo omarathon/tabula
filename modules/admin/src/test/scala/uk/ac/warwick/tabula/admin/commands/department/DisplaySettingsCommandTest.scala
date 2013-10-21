@@ -37,7 +37,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 		new Fixture {
 			val command = DisplaySettingsCommand(testDepartment)
 
-			command.isInstanceOf[Appliable[Unit]] should be(true)
+			command.isInstanceOf[Appliable[Department]] should be(true)
 			command.isInstanceOf[DisplaySettingsCommandState] should be(true)
 			command.asInstanceOf[DisplaySettingsCommandState].department should be(testDepartment)
 		}
