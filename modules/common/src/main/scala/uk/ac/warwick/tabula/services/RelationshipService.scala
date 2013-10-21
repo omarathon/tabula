@@ -155,8 +155,8 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 }
 
 trait RelationshipServiceComponent {
-	val relationshipService: RelationshipService
+	var relationshipService: RelationshipService
 }
 trait AutowiringRelationshipServiceComponent extends RelationshipServiceComponent{
-	val relationshipService = Wire[RelationshipService]
+	var relationshipService = Wire[RelationshipService]
 }

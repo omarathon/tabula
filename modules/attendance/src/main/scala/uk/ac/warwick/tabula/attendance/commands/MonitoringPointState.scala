@@ -25,7 +25,7 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 	val allMeetingFormats = MeetingFormat.members
 	def meetingFormatsStrings = meetingFormats.asScala.map(_.description)
 
-	def copyTo(point: MonitoringPoint) {
+	def copyTo(point: MonitoringPoint): MonitoringPoint = {
 		point.name = this.name
 		point.validFromWeek = this.validFromWeek
 		point.requiredFromWeek = this.requiredFromWeek
@@ -38,6 +38,7 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 			}
 			case _ =>
 		}
+		point
 	}
 
 	def copyFrom(pointIndex: Int) {

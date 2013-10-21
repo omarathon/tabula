@@ -14,7 +14,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 
 		val monitoringPointDao = mock[MonitoringPointDao]
 		val meetingRecordDao = mock[MeetingRecordDao]
-		val relationshipService = mock[RelationshipService]
+		var relationshipService = mock[RelationshipService]
 		val termService = mock[TermService]
 	}
 
