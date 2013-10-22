@@ -213,16 +213,8 @@
 	</ul>
 </#macro>
 
-<#macro course_description_for_heading studentCourseDetails>
-		${(studentCourseDetails.course.name)!} (${(studentCourseDetails.course.code?upper_case)!})
-</#macro>
-
-<#macro course_description studentCourseDetails>
-	<#if (studentCourseDetails.route.name) != (studentCourseDetails.course.name)>
-		${(studentCourseDetails.course.name)!} (${(studentCourseDetails.course.code?upper_case)!})
-	<#else>
-		${(studentCourseDetails.course.code?upper_case)!}
-	</#if>
+<#macro dropdown_name studentCourseDetails>
+		${(studentCourseDetails.course.code)!} (${(studentCourseDetails.scjCode)!})
 </#macro>
 
 <#macro lightbox_link enabled url>
@@ -302,7 +294,7 @@
 			<#local emails = emails + [student.email] />
 		</#if>
 	</#list>
-	
+
 	<@bulk_email emails title subject />
 </#macro>
 
@@ -313,7 +305,7 @@
 			<#local emails = emails + [rel.studentMember.email] />
 		</#if>
 	</#list>
-	
+
 	<@bulk_email emails title subject />
 </#macro>
 

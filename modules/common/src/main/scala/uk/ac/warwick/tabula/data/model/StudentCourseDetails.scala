@@ -119,6 +119,12 @@ class StudentCourseDetails
 	def hasModuleRegistrations = {
 		!moduleRegistrations.isEmpty()
 	}
+
+	def beginYear = beginDate.year.getAsString
+	def endYear = endDate match {
+		case endd: LocalDate if endd != null => endd.year.getAsString
+		case _ => expectedEndDate.year.getAsString
+	}
 }
 
 trait StudentCourseProperties {

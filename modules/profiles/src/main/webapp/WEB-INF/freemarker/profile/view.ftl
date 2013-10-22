@@ -16,7 +16,6 @@
 
 		<header>
 			<h1><@fmt.profile_name profile /></h1>
-			<h5><@fmt.profile_description profile /></h5>
 		</header>
 
 		<div class="data clearfix">
@@ -139,125 +138,12 @@
 		<#if isSelf>
 			<div style="margin-top: 12px;"><span class="use-tooltip" data-placement="bottom" title="Your profile is only visible to you, and to staff who have permission to see student records.">Who can see this information?</span></div>
 		</#if>
+
 	</section>
 
-	<#if (profile.studentCourseDetails)?? && (profile.mostSignificantCourseDetails)??>
-
-		<!-- most significant course first -->
-		<#assign studentCourseDetails=profile.mostSignificantCourseDetails>
-
-		<#if profile.studentCourseDetails?size gt 1>
-			<hr>
-			<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
-		</#if>
-
-		<div class="tabbable">
-			<#assign showTimetablePane=features.personalTimetables && can.do("Profiles.Read.Timetable", profile) />
-
-			<#if showTimetablePane>
-				<script type="text/javascript">
-					var weeks = ${weekRangesDumper()}
-				</script>
-			</#if>
-			<ol class="panes">
-
-				<#if showTimetablePane>
-					<li id="timetable-pane">
-						<section id="timetable-details" class="clearfix" >
-						<h4>Timetable</h4>
-						<div class='fullCalendar' data-viewname='agendaWeek' data-studentid='${studentCourseDetails.student.universityId}'>
-						</div>
-            </section>
-					</li>
-				</#if>
-
-				<li id="course-pane">
-					<#include "_course_details.ftl" />
-				</li>
-
-				<#if (features.profilesMemberNotes && can.do('MemberNotes.Read', profile)) >
-					<li id="membernote-pane">
-						<#include "_member_notes.ftl" />
-					</li>
-				</#if>
-
-				<#list (studentCourseDetails.department.displayedStudentRelationshipTypes)![] as relationshipType>
-					<#if studentCourseDetails.hasRelationship(relationshipType) || relationshipType.displayIfEmpty(studentCourseDetails)>
-						<li id="${relationshipType.id}-pane">
-							<#assign relMeetings=(meetingsById[relationshipType.id])![] />
-							<@profile_macros.relationship_section studentCourseDetails relationshipType relMeetings />
-						</li>
-					</#if>
-				</#list>
-
-				<#if numSmallGroups gt 0>
-					<li id="sg-pane" style="display:none;">
-						<#include "_small_groups.ftl" />
-					</li>
-				</#if>
-
-				<#if studentCourseDetails.hasModuleRegistrations>
-					<li id="module-registration-pane">
-						<#include "_module_registrations.ftl" />
-					</li>
-				</#if>
-
-				<#if features.attendanceMonitoring>
-					<li id="attendance-pane" style="display:none;">
-                    	<#include "_attendance.ftl" />
-                    </li>
-				</#if>
-			</ol>
-
-			<div id="note-modal" class="modal hide fade">
-				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h3><span></span> for ${profile.fullName}</h3>
-				</div>
-				<div class="modal-body"></div>
-
-				<div class="modal-footer">
-					<input id="member-note-save" type="submit" class="btn btn-primary" value="Save">
-				</div>
-			</div>
-
-			<div id="modal" class="modal hide fade" style="display:none;"></div>
-
-				<div id="modal-change-agent" class="modal hide fade"></div>
-
-				<script type="text/javascript">
-				jQuery(function($){
-					// load edit personal agent
-					$(".relationship-section").on("click", ".edit-agent-link, .add-agent-link", function(e) {
-						e.preventDefault();
-						var url = $(this).attr('href');
-
-						// TAB-1111 we pass the second arg as a string, not an object, because if you use an object
-						// it makes it a POST request
-						$("#modal-change-agent").load(url, 'ts=' + new Date().getTime(),function(){
-							$("#modal-change-agent").modal('show');
-						});
-					});
-				});
-				</script>
-
-		</div>
-
-
-		<!-- and then the others -->
-		<#list profile.studentCourseDetails as studentCourseDetails>
-			<#if studentCourseDetails.scjCode != profile.mostSignificantCourseDetails.scjCode>
-				<#if !isSelf || !studentCourseDetails.permanentlyWithdrawn>
-					<#if profile.studentCourseDetails?size gt 1>
-						<hr>
-						<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
-					</#if>
-
-					<#include "_course_details.ftl" />
-				</#if>
-			</#if>
-		</#list>
-	</#if>
+	<!-- show most significant course as default -->
+	<#assign studentCourseDetails=profile.mostSignificantCourseDetails>
+	<#include "_course.ftl" />
 
 	<p class="rendered-timestamp">
 		Page generated ${.now}
