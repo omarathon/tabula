@@ -5,21 +5,21 @@
 	<#assign can_create_meetings = can.do_with_selector("Profiles.MeetingRecord.Create", studentCourseDetails, relationshipType) />
 
 	<section class="meetings ${relationshipType.id}-meetings" data-target-container="${relationshipType.id}-meetings">
-	<div class="list-controls">
-		<#if can_read_meetings>
-			<h5>Record of meetings</h5>
-		</#if>
+		<div class="list-controls">
+			<#if can_read_meetings>
+				<h5>Record of meetings</h5>
+			</#if>
 
-		<#if can_create_meetings>
-			<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Create a new record"><i class="icon-edit"></i> New record</a>
-		</#if>
-		<#if can_read_meetings>
+			<#if can_create_meetings>
+				<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Create a new record"><i class="icon-edit"></i> New record</a>
+			</#if>
+			<#if can_read_meetings>
 
-			<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
-			<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
+				<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
+				<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
+			</#if>
+
 		</div>
-		</#if>
-
 		<#if can_read_meetings>
 			<#if meetings??>
 				<#list meetings as meeting>
