@@ -79,7 +79,7 @@
 	</label>
 	<select style="visibility:hidden"></select>
 	<br/>
-	<#if (command.templates?size > 0)>
+	<#if (templates?size > 0)>
 		<label>
 			<input class="create template" type="radio" name="createType" value="template"/>
 			Create from approved template
@@ -87,7 +87,7 @@
 		</label>
 		<span class="existingSetOptions">
 			<select name="existingSet" class="template">
-				<#list command.templates as template>
+				<#list templates as template>
 					<option value="${template.id}">${template.templateName}</option>
 				</#list>
 			</select>

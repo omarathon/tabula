@@ -145,7 +145,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 					updater
 				}
 			}
-			var cache = mutable.HashMap[String, TemplateModel]()
+			var cache = JConcurrentMap[String, TemplateModel]()
 			def clear() = cache.clear()
 		}
 
@@ -198,7 +198,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 	object ScalaHashModel {
 		type Getter = java.lang.reflect.Method
 		type PermissionsFetcher = Any=>Seq[Permission]
-		val gettersCache = new mutable.HashMap[Class[_], Map[String, (Getter, PermissionsFetcher)]]
+		val gettersCache = JConcurrentMap[Class[_], Map[String, (Getter, PermissionsFetcher)]]()
 	}
 
 }

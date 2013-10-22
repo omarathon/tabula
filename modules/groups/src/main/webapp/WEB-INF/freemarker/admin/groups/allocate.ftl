@@ -16,7 +16,7 @@
 			<@fmt.member_photo profile "tinythumbnail" false />
 			<div class="name">
 				<h6>${profile.fullName!student.fullName}</h6>
-				${(profile.mostSignificantCourseDetails.route.name)!student.shortDepartment}
+				${(profile.mostSignificantCourseDetails.route.name)!student.shortDepartment!""}
 			</div>
 		</div>
 		<input type="hidden" name="${bindpath}" value="${student.userId}" />
@@ -68,7 +68,6 @@
 			</@spring.hasBindErrors>
 
 			<#assign submitUrl><@routes.allocateset set /></#assign>
-
 			<div class="persist-area">
 				<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToGroupsCommand">
 				<div class="tabula-dnd"

@@ -27,7 +27,7 @@ class DisplaySettingsController extends AdminController {
 
 	@RequestMapping(method=Array(GET, HEAD))
 	def initialView(@PathVariable("dept") dept: Department, 
-		@ModelAttribute("displaySettingsCommand") cmd: DisplaySettingsCommand with Appliable[Unit], errors: Errors) = {
+		@ModelAttribute("displaySettingsCommand") cmd: DisplaySettingsCommand with Appliable[Department], errors: Errors) = {
 		cmd.init()
 		viewSettings(dept)
 	}
@@ -40,7 +40,7 @@ class DisplaySettingsController extends AdminController {
 			), dept)
 
 	@RequestMapping(method=Array(POST))
-	def saveSettings(@Valid @ModelAttribute("displaySettingsCommand") cmd: DisplaySettingsCommand with Appliable[Unit], errors:Errors) = {
+	def saveSettings(@Valid @ModelAttribute("displaySettingsCommand") cmd: DisplaySettingsCommand with Appliable[Department], errors:Errors) = {
 		if (errors.hasErrors){
 			viewSettings(cmd.department)
 		} else {

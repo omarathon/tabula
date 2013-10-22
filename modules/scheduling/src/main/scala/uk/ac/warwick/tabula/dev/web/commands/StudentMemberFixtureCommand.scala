@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 
-class StudentMemberFixtureCommand extends CommandInternal[Unit] with Logging {
+class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Logging {
 	this: UserLookupComponent =>
 
 
@@ -28,7 +28,7 @@ class StudentMemberFixtureCommand extends CommandInternal[Unit] with Logging {
   var deptDao = Wire[DepartmentDao]
 	var statusDao = Wire[SitsStatusDao]
 
-	def applyInternal() {
+	def applyInternal() = {
 		val userLookupUser = userLookup.getUserByUserId(userId)
 		assert(userLookupUser != null)
 		transactional() {
@@ -64,13 +64,15 @@ class StudentMemberFixtureCommand extends CommandInternal[Unit] with Logging {
 			newMember.studentCourseDetails.add(scd)
 
 			memberDao.saveOrUpdate(newMember)
+			
+			newMember
 		}
 	}
 }
 
 object StudentMemberFixtureCommand {
 	def apply() = {
-		new StudentMemberFixtureCommand with ComposableCommand[Unit]
+		new StudentMemberFixtureCommand with ComposableCommand[StudentMember]
 			with AutowiringUserLookupComponent
 			with Unaudited
 			with PubliclyVisiblePermissions

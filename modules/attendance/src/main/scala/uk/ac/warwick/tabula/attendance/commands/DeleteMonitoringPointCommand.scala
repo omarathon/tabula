@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.permissions.CheckablePermission
 object DeleteMonitoringPointCommand {
 	def apply(dept: Department, pointIndex: Int) =
 		new DeleteMonitoringPointCommand(dept, pointIndex)
-		with ComposableCommand[Unit]
+		with ComposableCommand[MonitoringPoint]
 		with AutowiringTermServiceComponent
 		with DeleteMonitoringPointValidation
 		with DeleteMonitoringPointPermissions
@@ -28,7 +28,7 @@ object DeleteMonitoringPointCommand {
  * Does not persist the change (no monitoring point set yet exists)
  */
 abstract class DeleteMonitoringPointCommand(val dept: Department, val pointIndex: Int)
-	extends CommandInternal[Unit] with DeleteMonitoringPointState {
+	extends CommandInternal[MonitoringPoint] with DeleteMonitoringPointState {
 
 	override def applyInternal() = {
 		monitoringPoints.remove(pointIndex)

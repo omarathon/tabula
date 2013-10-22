@@ -34,4 +34,8 @@ class MonitoringPoint extends GeneratedId {
 
 	var sentToAcademicOffice: Boolean = false
 
+	def isLate(currentAcademicWeek: Int): Boolean = {
+		currentAcademicWeek > requiredFromWeek
+	}
+
 }

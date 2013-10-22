@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.model.{ModuleRegistration, StudentMember}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
-class ModuleRegistrationFixtureCommand extends CommandInternal[Unit] with Logging {
+class ModuleRegistrationFixtureCommand extends CommandInternal[Seq[ModuleRegistration]] with Logging {
 	this: SessionComponent with TransactionalComponent  =>
 
 	var memberDao: MemberDao = Wire[MemberDaoImpl]
@@ -19,36 +19,33 @@ class ModuleRegistrationFixtureCommand extends CommandInternal[Unit] with Loggin
 	var moduleCode: String = _
 	var universityIds: String = _
 
-	protected def applyInternal() {
+	protected def applyInternal() =
 		transactional() {
-
-			val universityIdSeq = universityIds.split(",")
-
-			val module = moduleDao.getByCode(moduleCode)
+			val module = moduleDao.getByCode(moduleCode).get
 			val cats = new java.math.BigDecimal(12.0)
 
-			for (uniId <- universityIdSeq) {
-				memberDao.getByUniversityId(uniId) match {
-					case Some(stu: StudentMember) => {
-						for (scd <- stu.studentCourseDetails.asScala) {
-							val modReg = new ModuleRegistration(scd, module.get, cats, AcademicYear(2013), "A")
-							session.save(modReg)
-							scd.moduleRegistrations.add(modReg)
-							session.save(scd)
-							session.flush
-						}
-					}
-					case _ => None
+			val regs: Seq[ModuleRegistration] = 
+				for {
+					uniId <- universityIds.split(",")
+					student <- memberDao.getByUniversityId(uniId).filter { _.isInstanceOf[StudentMember] }.toSeq
+					scd <- student.asInstanceOf[StudentMember].studentCourseDetails.asScala
+				} yield {
+					val modReg = new ModuleRegistration(scd, module, cats, AcademicYear(2013), "A")
+					session.save(modReg)
+					scd.moduleRegistrations.add(modReg)
+					session.save(scd)
+					session.flush
+					
+					modReg
 				}
-
-			}
+				
+			regs
 		}
-	}
 }
 object ModuleRegistrationFixtureCommand{
 	def apply()={
 		new ModuleRegistrationFixtureCommand
-			with ComposableCommand[Unit]
+			with ComposableCommand[Seq[ModuleRegistration]]
 			with Daoisms
 		  with AutowiringTransactionalComponent
 			with Unaudited

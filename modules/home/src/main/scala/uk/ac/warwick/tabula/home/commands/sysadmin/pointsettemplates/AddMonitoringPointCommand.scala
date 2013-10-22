@@ -10,7 +10,7 @@ import org.springframework.util.AutoPopulatingList
 object AddMonitoringPointCommand {
 	def apply() =
 		new AddMonitoringPointCommand()
-		with ComposableCommand[Unit]
+		with ComposableCommand[MonitoringPoint]
 		with AddMonitoringPointValidation
 		with MonitoringPointSetTemplatesPermissions
 		with ReadOnly with Unaudited
@@ -20,7 +20,7 @@ object AddMonitoringPointCommand {
  * Adds a new monitoring point to the set of points in the command's state.
  * Does not persist the change (no monitoring point set yet exists)
  */
-abstract class AddMonitoringPointCommand() extends CommandInternal[Unit] with AddMonitoringPointState {
+abstract class AddMonitoringPointCommand() extends CommandInternal[MonitoringPoint] with AddMonitoringPointState {
 
 	override def applyInternal() = {
 		val point = new MonitoringPoint
@@ -28,6 +28,7 @@ abstract class AddMonitoringPointCommand() extends CommandInternal[Unit] with Ad
 		point.validFromWeek = validFromWeek
 		point.requiredFromWeek = requiredFromWeek
 		monitoringPoints.add(point)
+		point
 	}
 }
 

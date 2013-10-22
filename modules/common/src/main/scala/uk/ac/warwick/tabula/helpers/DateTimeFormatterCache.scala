@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.helpers
 
-import scala.collection.mutable
+import uk.ac.warwick.tabula.JavaImports._
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 
 private[helpers] class DateTimeFormatterCache {
-	private val map = mutable.HashMap[String, DateTimeFormatter]()
+	private val map = JConcurrentMap[String, DateTimeFormatter]()
 	def retrieve(pattern: String) = map.getOrElseUpdate(pattern, DateTimeFormat.forPattern(pattern))
 }

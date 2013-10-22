@@ -96,7 +96,7 @@
 <#if command.pointSet??>
 	<h2>Students who have missed monitoring points</h2>
 
-	<#if command.membersWithMissedOrLateCheckpoints?keys?size == 0>
+	<#if membersWithMissedOrLateCheckpoints?keys?size == 0>
 		<p>There are no students in <@fmt.route_name command.route /> who have missed monitoring points</p>
 	<#else>
 
@@ -114,7 +114,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<#list command.membersWithMissedOrLateCheckpoints?keys as member>
+				<#list membersWithMissedOrLateCheckpoints?keys as member>
 					<#assign missedCount = 0 />
 					<tr>
 						<td>${member.firstName}</td>
@@ -123,10 +123,10 @@
 							<#if command.monitoringPointsByTerm[term]??>
 								<td>
 									<#list command.monitoringPointsByTerm[term]?sort_by("validFromWeek") as point>
-										<#if !command.missedCheckpointsByMemberByPoint(member, point)??>
+										<#if !missedCheckpointsByMemberByPoint(member, point)??>
 											<i class="icon-minus icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
 										<#else>
-											<#assign checkpointState = command.missedCheckpointsByMemberByPoint(member, point) />
+											<#assign checkpointState = missedCheckpointsByMemberByPoint(member, point) />
 											<#if checkpointState == "attended">
 												<i class="icon-ok icon-fixed-width attended" title="Attended: ${point.name} (<@fmt.weekRanges point />)"></i>
 											<#elseif checkpointState == "authorised">

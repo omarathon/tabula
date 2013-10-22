@@ -11,8 +11,9 @@ trait FeaturesDriver extends BrowserTest{
 		val buttonText = state.toString
 		val button = featureForm.findElement(By.xpath(s"./input[@type='submit' and @value='$buttonText']"))
 		button.click()
-		// possibly we should wait a while here to ensure that all apps have received the message.
+		// wait a second here in the hope that all apps have received the message.
 		// even better would be to register our own JMS consumer and wait until *we* see the message
+		Thread.sleep(1000)
 	}
 	def enableFeature(name:String){
 		setFeatureState(name, true)

@@ -108,7 +108,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 			try {
 				logger.debug("Saving changes for " + studentCourseDetails)
 
-				if (this.mostSignificant == true) {
+				if (this.mostSignificant) {
 						stuMem.mostSignificantCourse = studentCourseDetails
 						logger.debug("Updating member most significant course to "+ studentCourseDetails +" for " + stuMem)
 				}
