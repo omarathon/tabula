@@ -205,16 +205,8 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 									currentRelationships.find(_.agent == tutorUniId) match {
 										case Some(existing) => existing
 										case _ => {
-											// End all existing relationships
-											currentRelationships.foreach { rel =>
-												rel.endDate = DateTime.now
-												relationshipService.saveOrUpdate(rel)
-											}
-
-											// Save the new one
-											val rel = relationshipService.saveStudentRelationship(relationshipType, sprCode, tutorUniId)
-
-											rel
+											// Save the relationship
+											relationshipService.replaceStudentRelationship(relationshipType, sprCode, tutorUniId)
 										}
 									}
 								}
