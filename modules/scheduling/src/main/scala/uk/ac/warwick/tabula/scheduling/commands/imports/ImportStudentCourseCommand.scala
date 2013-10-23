@@ -201,22 +201,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 
 									val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, sprCode)
 
-									// Does this relationship already exist?
-									currentRelationships.find(_.agent == tutorUniId) match {
-										case Some(existing) => existing
-										case _ => {
-											// End all existing relationships
-											currentRelationships.foreach { rel =>
-												rel.endDate = DateTime.now
-												relationshipService.saveOrUpdate(rel)
-											}
-
-											// Save the new one
-											val rel = relationshipService.saveStudentRelationship(relationshipType, sprCode, tutorUniId)
-
-											rel
-										}
-									}
+									relationshipService.replaceStudentRelationship(relationshipType, sprCode, tutorUniId)
 								}
 								case _ => {
 									logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + sprTutor1 + " - not importing this personal tutor from SITS")
