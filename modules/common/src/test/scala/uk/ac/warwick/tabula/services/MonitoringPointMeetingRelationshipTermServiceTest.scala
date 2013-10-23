@@ -38,6 +38,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		student.mostSignificantCourseDetails returns Option(studentCourseDetails)
 
 		val agent = "agent"
+		val agentMember = Fixtures.staff(agent, agent)
 
 		val tutorRelationshipType = StudentRelationshipType("personalTutor", "tutor", "personal tutor", "personal tutee")
 		val supervisorRelationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
@@ -45,10 +46,12 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		val meetingRelationship = StudentRelationship(agent, tutorRelationshipType, studentSprCode)
 		meetingRelationship.profileService = mock[ProfileService]
 		meetingRelationship.profileService.getStudentBySprCode(studentSprCode) returns Option(student)
+		meetingRelationship.profileService.getMemberByUniversityId(agent) returns Option(agentMember)
 
 		val meeting = new MeetingRecord
 		meeting.relationship = meetingRelationship
 		meeting.format = MeetingFormat.FaceToFace
+		meeting.creator = Fixtures.student("student", "student")
 	}
 
 	trait StudentYear1Fixture extends StudentFixture {
@@ -331,7 +334,46 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 			createdCheckpoints.head.state should be (MonitoringCheckpointState.Attended)
 			createdCheckpoints.head.studentCourseDetail should be (studentCourseDetails)
 			createdCheckpoints.head.point should be (meetingThisYearPoint)
-			createdCheckpoints.head.updatedBy should be (agent)
+			createdCheckpoints.head.updatedBy should be (agentMember.universityId)
+		}
+	}
+
+	@Test
+	def updateValidPointMeetingNotApprovedButCreatedByAgent() = withFakeTime(now) {
+		new ValidYear2PointFixture {
+
+			// needs 2 meetings
+			meetingThisYearPoint.meetingQuantity = 2
+			val beforeNow = dateTime(2013, 1, 7).minusDays(7)
+
+			service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, studentSprCode) returns None
+			service.termService.getAcademicWeekForAcademicYear(beforeNow, year2PointSet.academicYear) returns meetingThisYearPoint.validFromWeek - 1
+			service.termService.getAcademicWeekForAcademicYear(now, year2PointSet.academicYear) returns meetingThisYearPoint.validFromWeek
+			service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, student.universityId) returns Seq(meetingRelationship)
+
+			val otherMeeting = new MeetingRecord
+			otherMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Pending))
+			otherMeeting.format = MeetingFormat.FaceToFace
+			otherMeeting.relationship = meetingRelationship
+			otherMeeting.creator = agentMember
+
+			// 2 are valid
+			otherMeeting.meetingDate = now
+			meeting.meetingDate = now
+
+			service.meetingRecordDao.list(meetingRelationship) returns Seq(meeting, otherMeeting)
+
+			meeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Pending))
+			meeting.creator = agentMember
+			val createdCheckpoints = service.updateCheckpointsForMeeting(meeting)
+			there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, studentSprCode)
+			there was three (service.termService).getAcademicWeekForAcademicYear(now, year2PointSet.academicYear)
+			there was one (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
+			createdCheckpoints.size should be (1)
+			createdCheckpoints.head.state should be (MonitoringCheckpointState.Attended)
+			createdCheckpoints.head.studentCourseDetail should be (studentCourseDetails)
+			createdCheckpoints.head.point should be (meetingThisYearPoint)
+			createdCheckpoints.head.updatedBy should be (agentMember.universityId)
 		}
 	}
 

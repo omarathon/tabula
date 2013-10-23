@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.services
 
 
-
 import scala.collection.JavaConverters.asScalaBufferConverter
 
 import uk.ac.warwick.spring.Wire
@@ -140,7 +139,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 	self: MonitoringPointDaoComponent with MeetingRecordDaoComponent with RelationshipServiceComponent with TermServiceComponent =>
 
 	def updateCheckpointsForMeeting(meeting: MeetingRecord): Seq[MonitoringCheckpoint] = {
-		if (!meeting.isApproved) {
+		if (!meeting.isAttendanceAppored) {
 			// if the meeting isn't approved do nothing
 			return Seq()
 		}
@@ -177,7 +176,10 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 								checkpoint.studentCourseDetail = scd
 								checkpoint.state = MonitoringCheckpointState.Attended
 								checkpoint.updatedDate = DateTime.now
-								checkpoint.updatedBy = meeting.relationship.agent
+								checkpoint.updatedBy = meeting.relationship.agentMember match {
+									case Some(agent: uk.ac.warwick.tabula.data.model.Member) => agent.universityId
+									case _ => meeting.relationship.agent
+								}
 								monitoringPointDao.saveOrUpdate(checkpoint)
 								Option(checkpoint)
 							}
@@ -197,7 +199,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 		point.meetingRelationships.map(relationshipType => {
 			relationshipService.getRelationships(relationshipType, student.universityId)
 				.flatMap(meetingRecordDao.list(_).filter(meeting =>
-					meeting.isApproved
+					meeting.isAttendanceAppored
 					&& point.meetingFormats.contains(meeting.format)
 					&& termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
 						>= point.validFromWeek
