@@ -182,57 +182,59 @@
 			}
 		}
 
-		.membernote {
-
-			 .list-controls {
-			 	height: 2em;
-			 }
-
-			 details {
-
-			 	summary {
-
-			 		border-bottom: 1px dotted lighten(@grayLight, 35%);
-			 		padding-top: 15px;
-
-			 		&:hover {
-                    	background-color: @zebra-dark;
-                    	.transition-duration(0.3s);
-                    }
-
-					//Workaround to avoid styling details arrow
-			 		.detail-arrow-fix {
-			 			display: inline-block;
-			 			width: 94%;
-			 			margin-bottom: -7px;
-			 		}
-
-			 		.date-title {
-			 			 display: table-row;
-        			     .date { display: table-cell; vertical-align: bottom; width: 10em; font-weight: bold; }
-        			     .title { display: table-cell; font-weight: bold; padding-right: 5px; }
-			 		}
-			 	}
-			 	.description { padding: 15px; }
-			 	small { padding-top: 10px; }
-			 }
-
-
-			.toggle-all-details { float: right;	cursor: pointer; }
-
-			.create {
-				margin-left: 5px;
-				display: block;
-				float: right;
+		// Container for "Expand all" and other links
+		// above a list of meetings/notes/records.
+		// May contain a header which will be floated left.
+		.list-controls {
+			height: 1.8em;
+			a {
+				margin-left: 10px;
 				text-decoration: none;
+				float: right;
+				.cursor-pointer();
 			}
 
+			h4, h5 { float: left; }
+		}
 
+		.membernote {
+
+			details {
+
+				summary {
+
+					border-bottom: 1px dotted lighten(@grayLight, 35%);
+					padding-top: 15px;
+
+					&:hover {
+						background-color: @zebra-dark;
+						.transition-duration(0.3s);
+					}
+
+						//Workaround to avoid styling details arrow
+						.detail-arrow-fix {
+							display: inline-block;
+							width: 94%;
+							margin-bottom: -7px;
+						}
+
+						.date-title {
+							 display: table-row;
+							 .date { display: table-cell; vertical-align: bottom; width: 10em; font-weight: bold; }
+							 .title { display: table-cell; font-weight: bold; padding-right: 5px; }
+						}
+				}
+
+				.description { padding: 15px; }
+				small { padding-top: 10px; }
+			}
+
+			// edit/delete/purge icons next to each member note
 			.member-note-toolbar {
 
 				display: inline-block;
-			 	float: right;
-			 	width: 65px;
+				float: right;
+				width: 65px;
 
 				.icon-spinner {
 					display: none;
@@ -269,13 +271,6 @@
 
 			section.meetings {
 				margin: 12px 0;
-
-
-                .list-controls {
-                  height: 2.5em;
-                  padding-bottom: 1em;
-                  h5 { float: left; }
-                }
 
 				details.meeting {
 
@@ -317,14 +312,6 @@
 							padding: 0;
 						}
 					}
-				}
-
-
-				.new, .toggle-all-details {
-					margin: 0 0 0 10px;
-					float: right;
-					text-decoration: none;
-					.cursor-pointer();
 				}
 
 				span.date {
