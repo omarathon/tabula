@@ -199,7 +199,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 		point.meetingRelationships.map(relationshipType => {
 			relationshipService.getRelationships(relationshipType, scd.sprCode)
 				.flatMap(meetingRecordDao.list(_).filter(meeting =>
-				meeting.isApproved
+				meeting.isAttendanceAppored
 					&& point.meetingFormats.contains(meeting.format)
 					&& termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
 					>= point.validFromWeek
