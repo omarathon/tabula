@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.{TestBase, Mockito}
+import uk.ac.warwick.tabula.{FeaturesComponent, Features, TestBase, Mockito}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.{StudentRelationship, StudentRelationshipType, MeetingRecordApproval, MeetingRecord}
 import uk.ac.warwick.tabula.data.{MeetingRecordDaoComponent, MeetingRecordDao}
@@ -9,9 +9,10 @@ import uk.ac.warwick.tabula.services.{MonitoringPointMeetingRelationshipTermServ
 class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends ApproveMeetingRecordState with MeetingRecordDaoComponent with ApproveMeetingRecordValidation
-		with MonitoringPointMeetingRelationshipTermServiceComponent {
+		with MonitoringPointMeetingRelationshipTermServiceComponent with FeaturesComponent {
 		val meetingRecordDao = mock[MeetingRecordDao]
 		val monitoringPointMeetingRelationshipTermService = mock[MonitoringPointMeetingRelationshipTermService]
+		val features = mock[Features]
 	}
 
 	trait Fixture {
@@ -25,6 +26,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 		meetingRecord.approvals.add(proposedApproval)
 
 		val cmd = new ApproveMeetingRecordCommand(meetingRecord.approvals.get(0)) with CommandTestSupport
+		cmd.features.attendanceMonitoringMeetingPointType returns true
 	}
 
 	@Test

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.PersistenceTestBase
+import uk.ac.warwick.tabula.{Features, FeaturesComponent, PersistenceTestBase}
 import uk.ac.warwick.tabula.data.{MeetingRecordDao, MeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.services.{MonitoringPointMeetingRelationshipTermService, MonitoringPointMeetingRelationshipTermServiceComponent}
 
@@ -35,9 +35,10 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 		// A student sees a meeting record with an inaccurate description. She tries to reject but forgets to add a comment
 
 		var approvalCmd = new ApproveMeetingRecordCommand(meeting.approvals.get(0)) with ApproveMeetingRecordState with MeetingRecordDaoComponent
-			with ApproveMeetingRecordValidation with MonitoringPointMeetingRelationshipTermServiceComponent {
+			with ApproveMeetingRecordValidation with MonitoringPointMeetingRelationshipTermServiceComponent with FeaturesComponent {
 				val meetingRecordDao = mock[MeetingRecordDao]
 				val monitoringPointMeetingRelationshipTermService = mock[MonitoringPointMeetingRelationshipTermService]
+				val features = mock[Features]
 			}
 
 		approvalCmd.approved = false
@@ -74,9 +75,10 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 
 		// The student is now happy with the record and approves it
 		approvalCmd = new ApproveMeetingRecordCommand(meeting.approvals.get(0)) with ApproveMeetingRecordState with MeetingRecordDaoComponent
-			with ApproveMeetingRecordValidation with MonitoringPointMeetingRelationshipTermServiceComponent {
+			with ApproveMeetingRecordValidation with MonitoringPointMeetingRelationshipTermServiceComponent with FeaturesComponent {
 				val meetingRecordDao = mock[MeetingRecordDao]
 				val monitoringPointMeetingRelationshipTermService = mock[MonitoringPointMeetingRelationshipTermService]
+				val features = mock[Features]
 			}
 		approvalCmd.approved = true
 		approvalCmd.rejectionComments = null

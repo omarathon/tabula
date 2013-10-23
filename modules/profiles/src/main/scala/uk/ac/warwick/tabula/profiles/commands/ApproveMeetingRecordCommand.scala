@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.profiles.notifications.{MeetingRecordApprovedNotific
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointMeetingRelationshipTermServiceComponent, MonitoringPointMeetingRelationshipTermServiceComponent}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
 object ApproveMeetingRecordCommand {
 	def apply(approval: MeetingRecordApproval) =
@@ -24,12 +25,13 @@ object ApproveMeetingRecordCommand {
 		with ApproveMeetingRecordNotification
 		with AutowiringMeetingRecordDaoComponent
 		with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
+		with AutowiringFeaturesComponent
 
 }
 
 class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends CommandInternal[MeetingRecordApproval] with ApproveMeetingRecordState {
 
-	self: MeetingRecordDaoComponent with MonitoringPointMeetingRelationshipTermServiceComponent =>
+	self: MeetingRecordDaoComponent with MonitoringPointMeetingRelationshipTermServiceComponent with FeaturesComponent =>
 
 	def applyInternal() = transactional() {
 		if (approved) {
@@ -43,7 +45,8 @@ class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends 
 
 		meetingRecordDao.saveOrUpdate(approval)
 
-		monitoringPointMeetingRelationshipTermService.updateCheckpointsForMeeting(approval.meetingRecord)
+		if (features.attendanceMonitoringMeetingPointType)
+			monitoringPointMeetingRelationshipTermService.updateCheckpointsForMeeting(approval.meetingRecord)
 
 		approval
 	}
