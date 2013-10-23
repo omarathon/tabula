@@ -97,17 +97,18 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 		}
 
 		monitoringPoints.asScala.zipWithIndex.foreach{case (point, index) => {
-			validateName(errors, point.name, s"monitoringPoints[$index].name")
-			validateWeek(errors, point.validFromWeek, s"monitoringPoints[$index].validFromWeek")
-			validateWeek(errors, point.requiredFromWeek, s"monitoringPoints[$index].requiredFromWeek")
-			validateWeeks(errors, point.validFromWeek, point.requiredFromWeek, s"monitoringPoints[$index].validFromWeek")
+			errors.pushNestedPath(s"monitoringPoints[$index]")
+			validateName(errors, point.name, "name")
+			validateWeek(errors, point.validFromWeek, "validFromWeek")
+			validateWeek(errors, point.requiredFromWeek, "requiredFromWeek")
+			validateWeeks(errors, point.validFromWeek, point.requiredFromWeek, "validFromWeek")
 
 			point.pointType match {
 				case MonitoringPointType.Meeting =>
 					validateTypeMeeting(errors,
-						mutable.Set(point.meetingRelationships).flatten, s"monitoringPoints[$index].meetingRelationships",
-						mutable.Set(point.meetingFormats).flatten, s"monitoringPoints[$index].meetingFormats",
-						point.meetingQuantity, s"monitoringPoints[$index].meetingQuantity",
+						mutable.Set(point.meetingRelationships).flatten, "meetingRelationships",
+						mutable.Set(point.meetingFormats).flatten, "meetingFormats",
+						point.meetingQuantity, "meetingQuantity",
 						dept
 					)
 				case _ =>
@@ -116,8 +117,9 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 			if (monitoringPoints.asScala.count(p =>
 				p.name == point.name && p.validFromWeek == point.validFromWeek && p.requiredFromWeek == point.requiredFromWeek
 			) > 1) {
-				errors.rejectValue(s"monitoringPoints[$index].name", "monitoringPoint.name.exists")
+				errors.rejectValue("name", "monitoringPoint.name.exists")
 			}
+			errors.popNestedPath()
 		}}
 	}
 }

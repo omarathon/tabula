@@ -36,7 +36,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		studentCourseDetails.sprCode returns studentSprCode
 		studentCourseDetails.route returns studentRoute
 
-		student.mostSignificantCourseDetails returns Option(studentCourseDetails)
+		student.studentCourseDetails returns JArrayList(studentCourseDetails)
 
 		val agent = "agent"
 		val agentMember = Fixtures.staff(agent, agent)

@@ -82,7 +82,7 @@ class MeetingRecord extends GeneratedId with PermissionsTarget with ToString wit
 	def isApproved = !approvals.asScala.exists(approval => !(approval.state == Approved))
 
 	// for attendance purposes the meeting is approved if it was created by the agent, or is otherwise approved
-	def isAttendanceAppored = (creator != null && relationship != null && creator.universityId == relationship.agent) || isApproved
+	def isAttendanceApproved = (creator != null && relationship != null && creator.universityId == relationship.agent) || isApproved
 
 	def isPendingApproval = approvals.asScala.exists(approval => approval.state == Pending)
 	def pendingApprovals = approvals.asScala.filter(_.state == Pending)
