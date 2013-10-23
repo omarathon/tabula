@@ -142,8 +142,11 @@
 	</section>
 
 	<!-- show most significant course as default -->
-	<#assign studentCourseDetails=profile.mostSignificantCourseDetails>
-	<#include "_course.ftl" />
+	<#if (profile.mostSignificantCourseDetails)??>
+
+		<#assign studentCourseDetails=profile.mostSignificantCourseDetails>
+		<#include "_course.ftl" />
+	</#if>
 
 	<p class="rendered-timestamp">
 		Page generated ${.now}
