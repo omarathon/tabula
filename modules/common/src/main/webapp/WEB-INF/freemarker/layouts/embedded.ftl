@@ -3,7 +3,6 @@
 <!doctype html>
 <html lang="en-GB">
 	<head>		  
-		<#assign in_head = true />
 		  <title><#if component.subsite>Tabula - </#if>${component.title?default('Tabula')}</title>
 		
 		  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" >
@@ -27,7 +26,6 @@
 		  <![endif]-->
 		  	
 		  <#include "_scripts.ftl" />
-		<#assign in_head = false />
 	</head>
 	<body>
 		<div class="tabula-page ${component.bodyClass?default('component-page')}">
