@@ -8,7 +8,7 @@
 			<@f.option value="${week}"><@fmt.singleWeekFormat week command.academicYear command.dept /></@f.option>
 		</#list>
 	</@f.select>
-	<a class="use-popover" id="popover-validFromWeek" data-content="You cannot mark a point as attended or missed (unauthorised) before its start date"><i class="icon-question-sign"></i></a>
+	<@fmt.help_popover id="validFromWeek" content="You cannot mark a point as attended or missed (unauthorised) before its start date" />
 </@form.labelled_row>
 
 <@form.labelled_row "requiredFromWeek" "End">
@@ -17,7 +17,7 @@
 			<@f.option value="${week}"><@fmt.singleWeekFormat week command.academicYear command.dept /></@f.option>
 		</#list>
 	</@f.select>
-	<a class="use-popover" id="popover-requiredFromWeek" data-content="A warning will appear for unrecorded attendance after its end date"><i class="icon-question-sign"></i></a>
+	<@fmt.help_popover id="requiredFromWeek" content="A warning will appear for unrecorded attendance after its end date" />
 </@form.labelled_row>
 
 <@form.labelled_row "pointType" "Type">
@@ -28,7 +28,7 @@
 	<@form.label clazz="radio" checkbox=true>
 		<@f.radiobutton path="pointType" value="meeting" />
 		Meeting
-		<a class="use-popover" id="popover-pointType-meeting" data-content="This monitoring point will be marked as 'attended' if there is a record in Tabula of a meeting taking place between the start and end dates"><i class="icon-question-sign"></i></a>
+		<@fmt.help_popover id="pointType-meeting" content="This monitoring point will be marked as 'attended' if there is a record in Tabula of a meeting taking place between the start and end dates" />
 	</@form.label>
 </@form.labelled_row>
 
@@ -40,19 +40,19 @@
 				<@form.label checkbox=true>
 					<input type="checkbox" name="meetingRelationships" id="meetingRelationships-${relationship.urlPart}" value="${relationship.urlPart}" <#if meetingRelationshipsStrings?seq_contains(relationship.urlPart)>checked</#if> />
 					${relationship.agentRole?capitalize}
-					<a class="use-popover" id="popover-meetingRelationships-${relationship.urlPart}" data-content="This monitoring point will be marked as 'attended' when a meeting record is created or approved by the student's ${relationship.agentRole?capitalize}"><i class="icon-question-sign"></i></a>
+					<@fmt.help_popover id="meetingRelationships-${relationship.urlPart}" content="This monitoring point will be marked as 'attended' when a meeting record is created or approved by the student's ${relationship.agentRole?capitalize}" />
 				</@form.label>
 			</#list>
 		</@form.labelled_row>
 
 		<@form.labelled_row "meetingQuantity" "Number of meetings">
 			<@f.input path="meetingQuantity" cssClass="input-mini"/>
-			<a class="use-popover" id="popover-meetingQuantity" data-content="The student must have this many meetings between the start and end dates in order to meet this monitoring point"><i class="icon-question-sign"></i></a>
+			<@fmt.help_popover id="meetingQuantity" content="The student must have this many meetings between the start and end dates in order to meet this monitoring point" />
 		</@form.labelled_row>
 	</div>
 
 	<div class="span6">
-		<@form.labelled_row path="meetingFormats" label='Meeting formats <a class="use-popover" id="popover-meetingFormats" data-content="Only selected meeting formats will count towards this monitoring point"><i class="icon-question-sign"></i></a>' noescape=true>
+		<@form.labelled_row path="meetingFormats" label="Meeting formats" helpPopover="Only selected meeting formats will count towards this monitoring point">
 			<#assign meetingFormatsStrings = command.meetingFormatsStrings />
 			<#list command.allMeetingFormats as format>
 				<@form.label checkbox=true>
@@ -61,8 +61,6 @@
 				</@form.label>
 			</#list>
 		</@form.labelled_row>
-
-
 	</div>
 </div>
 
