@@ -49,6 +49,7 @@ case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
 		SmallGroups.Create,
 		SmallGroups.Read,
 		SmallGroups.ReadMembership,
+		SmallGroupEvents.Register,
 		SmallGroups.Update,
 		SmallGroups.Allocate
 	)

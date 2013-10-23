@@ -3,19 +3,20 @@
 <!doctype html>
 <html lang="en-GB">
 	<head>		  
+		<#assign in_head = true />
 		  <title><#if component.subsite>Tabula - </#if>${component.title?default('Tabula')}</title>
 		
 		  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1" >
 		  <meta charset="utf-8">
 		  <meta name="robots" content="noindex,nofollow">
 
-		  <link rel="stylesheet" href="/static/css/concat6.css" type="text/css">
+		  <@stylesheet "/static/css/concat6.css" />
 		  <#include "_styles.ftl" />
 		  <link rel="stylesheet" title="No Accessibility" href="/static/css/noaccessibility.css" type="text/css">
 		  <link rel="alternate stylesheet" title="Show Accessibility" href="/static/css/showaccessibility.css" type="text/css">
 		  
 		  <!--[if lt IE 8]>
-			  <link rel="stylesheet" href="/static/css/ielt8.css" type="text/css">
+			  <@stylesheet "/static/css/ielt8.css" />
 		  <![endif]-->
 		  <!--[if lt IE 9]>
 		  	<style type="text/css">
@@ -26,7 +27,7 @@
 		  <![endif]-->
 		  	
 		  <#include "_scripts.ftl" />
-
+		<#assign in_head = false />
 	</head>
 	<body>
 		<div class="tabula-page ${component.bodyClass?default('component-page')}">

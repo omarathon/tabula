@@ -418,8 +418,7 @@
 		<p>We have a jQuery plugin to support sortable columns. Append the following script, substituting an appropriate selector
 		for the table:</p>
 		
-		<pre>&lt;script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js">&lt;/script&gt;
-&lt;script type="text/javascript"&gt;
+		<pre>&lt;script type="text/javascript"&gt;
 	(function($) {
 		$("#my-table-for-sorting").sortableTable();
 	})(jQuery);

@@ -158,8 +158,8 @@ class ModuleAndDepartmentService extends Logging {
 
 }
 
-trait ModuleAndDepartmentServiceComponent{
-	var moduleAndDepartmentService:ModuleAndDepartmentService
+trait ModuleAndDepartmentServiceComponent {
+	def moduleAndDepartmentService: ModuleAndDepartmentService
 }
 
 trait AutowiringModuleAndDepartmentServiceComponent extends ModuleAndDepartmentServiceComponent {

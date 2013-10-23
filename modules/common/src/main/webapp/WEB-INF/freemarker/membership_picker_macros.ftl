@@ -297,7 +297,6 @@ Generates the bulk of the picker HTML, inside a fieldset element
 
 </fieldset>
 
-	<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
 	<script type="text/javascript">
 	jQuery(function($) {
 		var $enrolment = $('.${classifier}Enrolment');
