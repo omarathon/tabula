@@ -9,10 +9,6 @@
 			<!-- XML libs for OpenSAML -->
 			<module name="org.apache.xalan" />
 			<module name="org.apache.xerces" />
-			<module name="deployment.tabula-ds.xml" />
-			<module name="deployment.ads-ds.xml" />
-			<module name="deployment.sits-ds.xml" />
-			<module name="deployment.membership-ds.xml" />
 		</dependencies>
 		
 		<!-- JBoss will look for certain properties of a deployment to implicitly 
