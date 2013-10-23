@@ -151,12 +151,9 @@ trait UpdatesStudentMembership {
 	}
 
 	/**
-	 * Build a seq of available upstream groups for upstream assignments on this module
+	 * Build a seq of available upstream groups for assessment components on this module
 	 */
 	lazy val availableUpstreamGroups: Seq[UpstreamGroup] = {
-		// These methods just get assignments. You may want to change this to get
-		// other assessment components, but remember this is also used by places
-		// that won't want that.
 		for {
 			ua <- membershipService.getAssessmentComponents(module)
 			uag <- membershipService.getUpstreamAssessmentGroups(ua, academicYear)

@@ -32,6 +32,7 @@ trait RelationshipService {
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationships(relationshipType: StudentRelationshipType, targetUniversityId: String): Seq[StudentRelationship]
 	def saveStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship
+	def replaceStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship
 	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def listStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def listAllStudentRelationshipsWithMember(agent: Member): Seq[StudentRelationship]
@@ -76,9 +77,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def saveStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {
 		this.findCurrentRelationships(relationshipType, targetSprCode).find(_.agent == agent) match {
 			case Some(existingRelationship) => {
-				// the same relationship is already there in the db - don't create new one
-				existingRelationship.endDate = null
-				memberDao.saveOrUpdate(existingRelationship)
+				// the same relationship is already there in the db and current - don't create new one
 				existingRelationship
 			}
 			case _ => {
@@ -87,6 +86,26 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 				newRelationship.startDate = new DateTime
 				memberDao.saveOrUpdate(newRelationship)
 				newRelationship
+			}
+		}
+	}
+
+	// end any existing relationships of the same type for this student, then save the new one
+	def replaceStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {
+		var relOption = this.findCurrentRelationships(relationshipType, targetSprCode).find(_.agent == agent)
+
+		relOption match {
+			case Some(stuRel: StudentRelationship) => {
+				// there's already a relationship for this same agent - nothing to do
+				stuRel
+			}
+			case _ => {
+				// end all existing relationships of this type for this student
+				this.findCurrentRelationships(relationshipType, targetSprCode).map {
+					_.endDate = DateTime.now
+				}
+				// then save the new one
+				saveStudentRelationship(relationshipType, targetSprCode, agent)
 			}
 		}
 	}
@@ -119,7 +138,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		memberDao.getAllRelationshipsByAgent(agent.universityId)
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}
-	
+
 	def listAllStudentRelationshipTypesWithMember(agent: Member) = transactional(readOnly = true) {
 		memberDao.getAllRelationshipTypesByAgent(agent.universityId)
 	}
