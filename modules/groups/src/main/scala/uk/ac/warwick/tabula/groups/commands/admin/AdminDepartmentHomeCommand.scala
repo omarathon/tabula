@@ -40,7 +40,7 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 		if (securityService.can(user, requiredPermission, department)) {
 			department.modules.asScala
 		} else {
-			moduleAndDepartmentService.modulesWithPermission(user, requiredPermission, department).toList
+			modulesWithPermission.toList.sorted
 		}
 
 	def applyInternal() = modules.sortBy { (module) => (module.groupSets.isEmpty, module.code) }
@@ -55,7 +55,7 @@ trait AdminDepartmentHomePermissions extends RequiresPermissionsChecking with Pe
 			// This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
 			p.PermissionCheck(requiredPermission, department)
 		} else {
-			val managedModules = moduleAndDepartmentService.modulesWithPermission(user, requiredPermission, department).toList
+			val managedModules = modulesWithPermission.toList
 
 			// This is implied by the above, but it's nice to check anyway. Avoid exception if there are no managed modules
 			if (!managedModules.isEmpty) p.PermissionCheckAll(requiredPermission, managedModules)
@@ -65,8 +65,12 @@ trait AdminDepartmentHomePermissions extends RequiresPermissionsChecking with Pe
 }
 
 trait AdminDepartmentHomeState {
+	self: ModuleAndDepartmentServiceComponent with AdminDepartmentHomePermissionDefinition =>
+	
 	def department: Department
 	def user: CurrentUser
+	
+	lazy val modulesWithPermission = moduleAndDepartmentService.modulesWithPermission(user, requiredPermission, department)
 }
 
 trait AdminDepartmentHomePermissionDefinition {
