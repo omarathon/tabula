@@ -102,6 +102,11 @@
 			}
 		}
 
+		this.viewableArea = function() {
+			return $(window).height() - ($('.persist-header').height() + $('#primary-navigation').height() + $('.persist-footer').outerHeight());
+		}
+
+
 		return this.initialize();
 
 
