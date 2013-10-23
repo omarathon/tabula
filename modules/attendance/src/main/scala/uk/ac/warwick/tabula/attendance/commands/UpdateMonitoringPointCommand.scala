@@ -97,4 +97,5 @@ trait UpdateMonitoringPointState extends MonitoringPointState with CanPointBeCha
 	def set: MonitoringPointSet
 	def point: MonitoringPoint
 	val dept = set.route.department
+	monitoringPoints.addAll(set.points)
 }

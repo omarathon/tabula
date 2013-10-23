@@ -32,6 +32,7 @@ abstract class CreateMonitoringPointCommand(val set: MonitoringPointSet) extends
 		point.createdDate = new DateTime()
 		point.updatedDate = new DateTime()
 		set.add(point)
+		monitoringPoints.add(point)
 		point
 	}
 }
@@ -90,5 +91,6 @@ trait CreateMonitoringPointDescription extends Describable[MonitoringPoint] {
 trait CreateMonitoringPointState extends MonitoringPointState with CanPointBeChanged {
 	def set: MonitoringPointSet
 	val dept = set.route.department
+	monitoringPoints.addAll(set.points)
 }
 

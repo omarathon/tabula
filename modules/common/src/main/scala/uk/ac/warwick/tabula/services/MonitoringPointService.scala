@@ -170,7 +170,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 						}).flatten
 						// check the required quantity and create a checkpoint if there are sufficient meetings
 						val checkpointOptions = for (point <- relevantMeetingPoints) yield {
-							if (countRelevantMeetings(student, point) >= point.meetingQuantity) {
+							if (countRelevantMeetings(scd, point) >= point.meetingQuantity) {
 								val checkpoint = new MonitoringCheckpoint
 								checkpoint.point = point
 								checkpoint.studentCourseDetail = scd
@@ -195,15 +195,15 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 		}
 	}
 
-	private def countRelevantMeetings(student: StudentMember, point: MonitoringPoint): Int = {
+	private def countRelevantMeetings(scd: StudentCourseDetails, point: MonitoringPoint): Int = {
 		point.meetingRelationships.map(relationshipType => {
-			relationshipService.getRelationships(relationshipType, student.universityId)
+			relationshipService.getRelationships(relationshipType, scd.sprCode)
 				.flatMap(meetingRecordDao.list(_).filter(meeting =>
-					meeting.isAttendanceAppored
+				meeting.isApproved
 					&& point.meetingFormats.contains(meeting.format)
 					&& termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
-						>= point.validFromWeek
-				)).size
+					>= point.validFromWeek
+			)).size
 		}).sum
 	}
 }

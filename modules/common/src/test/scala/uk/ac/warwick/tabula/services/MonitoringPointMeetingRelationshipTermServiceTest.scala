@@ -231,7 +231,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 
 			service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, studentSprCode) returns None
 			service.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(year2PointSet.academicYear)) returns 2
-			service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, student.universityId) returns Seq(meetingRelationship)
+			service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, studentSprCode) returns Seq(meetingRelationship)
 
 			val otherMeeting = new MeetingRecord
 			otherMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Pending))
@@ -254,7 +254,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 
 			service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, studentSprCode) returns None
 			service.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(year2PointSet.academicYear)) returns 2
-			service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, student.universityId) returns Seq(meetingRelationship)
+			service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, studentSprCode) returns Seq(meetingRelationship)
 
 			val otherMeeting = new MeetingRecord
 			otherMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
@@ -281,7 +281,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 			service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, studentSprCode) returns None
 			service.termService.getAcademicWeekForAcademicYear(beforeNow, year2PointSet.academicYear) returns meetingThisYearPoint.validFromWeek - 1
 			service.termService.getAcademicWeekForAcademicYear(now, year2PointSet.academicYear) returns meetingThisYearPoint.validFromWeek
-			service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, student.universityId) returns Seq(meetingRelationship)
+			service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, studentSprCode) returns Seq(meetingRelationship)
 
 			val otherMeeting = new MeetingRecord
 			otherMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
@@ -313,7 +313,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 			service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, studentSprCode) returns None
 			service.termService.getAcademicWeekForAcademicYear(beforeNow, year2PointSet.academicYear) returns meetingThisYearPoint.validFromWeek - 1
 			service.termService.getAcademicWeekForAcademicYear(now, year2PointSet.academicYear) returns meetingThisYearPoint.validFromWeek
-			service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, student.universityId) returns Seq(meetingRelationship)
+			service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, studentSprCode) returns Seq(meetingRelationship)
 
 			val otherMeeting = new MeetingRecord
 			otherMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
@@ -349,7 +349,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 			service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, studentSprCode) returns None
 			service.termService.getAcademicWeekForAcademicYear(beforeNow, year2PointSet.academicYear) returns meetingThisYearPoint.validFromWeek - 1
 			service.termService.getAcademicWeekForAcademicYear(now, year2PointSet.academicYear) returns meetingThisYearPoint.validFromWeek
-			service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, student.universityId) returns Seq(meetingRelationship)
+			service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, studentSprCode) returns Seq(meetingRelationship)
 
 			val otherMeeting = new MeetingRecord
 			otherMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Pending))

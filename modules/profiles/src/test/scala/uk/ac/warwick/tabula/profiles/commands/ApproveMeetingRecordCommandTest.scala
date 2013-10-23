@@ -3,15 +3,18 @@ package uk.ac.warwick.tabula.profiles.commands
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.{StudentRelationship, StudentRelationshipType, MeetingRecordApproval, MeetingRecord}
-import org.hibernate.Session
+import uk.ac.warwick.tabula.data.{MeetingRecordDaoComponent, MeetingRecordDao}
+import uk.ac.warwick.tabula.services.{MonitoringPointMeetingRelationshipTermService, MonitoringPointMeetingRelationshipTermServiceComponent}
 
 class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
-	val mockSession = mock[Session]
+	trait CommandTestSupport extends ApproveMeetingRecordState with MeetingRecordDaoComponent with ApproveMeetingRecordValidation
+		with MonitoringPointMeetingRelationshipTermServiceComponent {
+		val meetingRecordDao = mock[MeetingRecordDao]
+		val monitoringPointMeetingRelationshipTermService = mock[MonitoringPointMeetingRelationshipTermService]
+	}
 
-	@Test
-	def testApply {
-
+	trait Fixture {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		val relationship = StudentRelationship("Professor A Tutor", relationshipType, "0123456/1")
 		val meetingRecord = new MeetingRecord
@@ -21,22 +24,33 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 		meetingRecord.approvals.add(proposedApproval)
 
-		val cmd = new ApproveMeetingRecordCommand(meetingRecord.approvals.get(0)){
-			override val session = mockSession
-		}
-
-		cmd.approved = true
-		var approval = cmd.applyInternal
-		approval.meetingRecord.isApproved should be(true)
-
-		cmd.approved = false
-		approval = cmd.applyInternal
-		approval.meetingRecord.isApproved should be(false)
-
+		val cmd = new ApproveMeetingRecordCommand(meetingRecord.approvals.get(0)) with CommandTestSupport
 	}
 
 	@Test
-	def validApproval {
+	def testApplyTrue() {
+		new Fixture {
+			cmd.approved = true
+			val approval = cmd.applyInternal()
+			approval.meetingRecord.isApproved should be(true)
+			there was one(cmd.meetingRecordDao).saveOrUpdate(approval)
+			there was one(cmd.monitoringPointMeetingRelationshipTermService).updateCheckpointsForMeeting(approval.meetingRecord)
+		}
+	}
+
+	@Test
+	def testApplyFalse() {
+		new Fixture {
+			cmd.approved = false
+			val approval = cmd.applyInternal()
+			approval.meetingRecord.isApproved should be(false)
+			there was one(cmd.meetingRecordDao).saveOrUpdate(approval)
+			there was one(cmd.monitoringPointMeetingRelationshipTermService).updateCheckpointsForMeeting(approval.meetingRecord)
+		}
+	}
+
+	@Test
+	def validApproval() {
 
 		val meetingRecord = new MeetingRecord
 
@@ -48,7 +62,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 
 		meetingRecord.approvals.add(proposedApproval)
 
-		val cmd = new ApproveMeetingRecordCommand(meetingRecord.approvals.get(0))
+		val cmd = new ApproveMeetingRecordCommand(meetingRecord.approvals.get(0)) with CommandTestSupport
 		cmd.approved = true
 
 		val errors = new BindException(cmd, "command")
@@ -59,7 +73,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def deletedMeetingRecord {
+	def deletedMeetingRecord() {
 
 		val meetingRecord = new MeetingRecord
 
@@ -72,7 +86,7 @@ class ApproveMeetingRecordCommandTest extends TestBase with Mockito {
 		meetingRecord.approvals.add(proposedApproval)
 		meetingRecord.markDeleted()
 
-		val cmd = new ApproveMeetingRecordCommand(meetingRecord.approvals.get(0))
+		val cmd = new ApproveMeetingRecordCommand(meetingRecord.approvals.get(0)) with CommandTestSupport
 		cmd.approved = true
 
 		val errors = new BindException(cmd, "command")
