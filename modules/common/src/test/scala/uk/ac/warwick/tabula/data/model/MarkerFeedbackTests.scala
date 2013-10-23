@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data.model
 import scala.util.Random
 
 import uk.ac.warwick.tabula.PersistenceTestBase
+import org.springframework.transaction.annotation.Transactional
 
 // scalastyle:off magic.number
 
@@ -32,29 +33,26 @@ class MarkerFeedbackTests extends PersistenceTestBase {
 		feedback.secondMarkerFeedback.id should be (secondMarkerFeedback.id)
 
 	}
-	
+
+	@Transactional
 	@Test def deleteFileAttachmentOnDelete {
 		// TAB-667
-		val orphanAttachment = transactional { tx =>
+		val orphanAttachment = flushing(session) {
 			val attachment = new FileAttachment
-			
 			session.save(attachment)
 			attachment
 		}
 		
-		val feedback = transactional { tx => 
+		val feedback = flushing(session) {
 			val feedback = new Feedback(universityId = idFormat(1))
-			
 			val assignment = new Assignment
-			session.save(assignment)
-			
 			feedback.assignment = assignment
-			
+			session.save(assignment)
 			session.save(feedback)
 			feedback
 		}
 		
-		val (markerFeedback, markerFeedbackAttachment) = transactional { tx =>
+		val (markerFeedback, markerFeedbackAttachment) = flushing(session) {
 			val mf = new MarkerFeedback(feedback)
 			
 			val attachment = new FileAttachment
@@ -71,22 +69,22 @@ class MarkerFeedbackTests extends PersistenceTestBase {
 		markerFeedbackAttachment.id should not be (null)
 		
 		// Can fetch everything from db
-		transactional { tx => 
-			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
-			session.get(classOf[Feedback], feedback.id) should be (feedback)
-			session.get(classOf[MarkerFeedback], markerFeedback.id) should be (markerFeedback)
-			session.get(classOf[FileAttachment], markerFeedbackAttachment.id) should be (markerFeedbackAttachment)
-		}
-		
-		transactional { tx => session.delete(markerFeedback) }
+		session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
+		session.get(classOf[Feedback], feedback.id) should be (feedback)
+		session.get(classOf[MarkerFeedback], markerFeedback.id) should be (markerFeedback)
+		session.get(classOf[FileAttachment], markerFeedbackAttachment.id) should be (markerFeedbackAttachment)
+
+
+		flushing(session) { session.delete(markerFeedback) }
+
+		session.clear()
 		
 		// Ensure we can't fetch the markerFeedback or attachment, but all the other objects are returned
-		transactional { tx => 
-			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
-			session.get(classOf[Feedback], feedback.id) should be (feedback)
-			session.get(classOf[MarkerFeedback], markerFeedback.id) should be (null)
-			session.get(classOf[FileAttachment], markerFeedbackAttachment.id) should be (null)
-		}
+		session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
+		session.get(classOf[Feedback], feedback.id) should be (feedback)
+		session.get(classOf[MarkerFeedback], markerFeedback.id) should be (null)
+		session.get(classOf[FileAttachment], markerFeedbackAttachment.id) should be (null)
+
 	}
 
 
