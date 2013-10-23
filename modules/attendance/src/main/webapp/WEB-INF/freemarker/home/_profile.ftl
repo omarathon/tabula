@@ -18,12 +18,12 @@
 					</div>
 					<div class="span2 state">
 						<#if checkpointState[point.id]??>
-							<#local checkpointState = checkpointState[point.id] />
-							<#if checkpointState == "attended">
+							<#local thisPointCheckpointState = checkpointState[point.id] />
+							<#if thisPointCheckpointState == "attended">
 								<span class="label label-success">Attended</span>
-							<#elseif checkpointState == "authorised">
+							<#elseif thisPointCheckpointState == "authorised">
 								<span class="label label-info" title="Missed (authorised)">Missed</span>
-							<#elseif checkpointState == "unauthorised">
+							<#elseif thisPointCheckpointState == "unauthorised">
 								<span class="label label-important" title="Missed (unauthorised)">Missed</span>
 							</#if>
 						</#if>

@@ -186,6 +186,7 @@ object Fixtures {
 		scd.sprStatus = sprStatus
 
 		member.studentCourseDetails.add(scd)
+		member.mostSignificantCourse = scd;
 
 		scd
 	}
