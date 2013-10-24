@@ -57,7 +57,7 @@ class SysadminController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/god"))
 class GodModeController extends BaseSysadminController {
 
-	@RequestMapping(method = Array(POST))
+	@RequestMapping
 	def submit(@Valid cmd: GodModeCommand, response: HttpServletResponse) = {
 		for (cookie <- cmd.apply()) response.addCookie(cookie)
 		redirectToHome
