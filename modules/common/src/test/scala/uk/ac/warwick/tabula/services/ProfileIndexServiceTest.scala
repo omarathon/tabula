@@ -10,36 +10,31 @@ import scala.concurrent.ExecutionContext
 import org.apache.commons.io.FileUtils
 import org.joda.time.DateTime
 import org.junit.{After, Before}
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD
 import org.springframework.transaction.annotation.Transactional
 import org.scalatest.concurrent.AsyncAssertions
 
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.data.MemberDao
+import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures, Mockito}
+import uk.ac.warwick.tabula.data.MemberDaoImpl
 import uk.ac.warwick.tabula.data.model.MemberUserType._
-import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
-import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.util.core.StopWatch
 import scala.concurrent.duration.Duration
 
 // scalastyle:off magic.number
-@DirtiesContext(classMode=AFTER_EACH_TEST_METHOD)
-class ProfileIndexServiceTest extends AppContextTestBase with Mockito with Logging with AsyncAssertions {
+class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logging with AsyncAssertions {
 
-	@Autowired var indexer:ProfileIndexService = _
-	@Autowired var dao:MemberDao = _
+	val indexer:ProfileIndexService = new ProfileIndexService
+	val dao = new MemberDaoImpl
 	var TEMP_DIR:File = _
 
 	@Before def setup {
 		TEMP_DIR = createTemporaryDirectory
+		dao.sessionFactory = sessionFactory
 		indexer.dao = dao
 		indexer.indexPath = TEMP_DIR
 		indexer.searcherManager = null
-		indexer.afterPropertiesSet
+		indexer.afterPropertiesSet()
 	}
 
 	@After def tearDown {
