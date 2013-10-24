@@ -149,7 +149,7 @@
 						</td>
 					</tr>
 				</#list>
-			<tbody>
+			</tbody>
 		</table>
 
 	</#if>
@@ -191,8 +191,7 @@
 	</#if>
 </#if>
 
-<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
-<script>
+<script type="text/javascript">
 	var setsByRouteByAcademicYear = {
 		<#list command.setsByRouteByAcademicYear?keys as academicYear>
 			"${academicYear}" : [
