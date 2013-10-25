@@ -690,7 +690,14 @@
 		  padding-left: 0;
 		  list-style: none;
 		  
-		  label.checkbox { padding-right: 10px; }
+		  label.checkbox { 
+		  	padding-right: 10px;
+		  	
+		  	max-width: 300px;
+				overflow: hidden;
+			  white-space: nowrap;
+			  text-overflow: ellipsis; 
+		  }
 		}
 		
 		max-height: 300px;
@@ -709,4 +716,13 @@
 	.transition(opacity 0.3s ease-in-out);
 	
 	&.loading { .opacity-one(0.3); }
+}
+
+.filter-short-values { 
+	display: inline-block;
+	max-width: 100px;
+	overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
 }

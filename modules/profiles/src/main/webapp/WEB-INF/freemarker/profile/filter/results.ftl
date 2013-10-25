@@ -129,7 +129,12 @@
 				
 				var page = $(this).data('page');
 				$('#page').val(page);
-				$('#filterStudentsCommand').submit();
+				
+				if (typeof(window.doRequest) === 'function') {
+					window.doRequest($('#filterStudentsCommand'), true);
+				} else {
+					$('#filterStudentsCommand').submit();
+				}
 			});
 		});
 	</script>

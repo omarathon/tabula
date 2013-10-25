@@ -27,6 +27,8 @@ import uk.ac.warwick.tabula.data.model.ModeOfAttendance
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.system.BindListener
+import org.springframework.validation.BindingResult
 
 case class FilterStudentsResults(
 	students: Seq[StudentMember],
@@ -45,13 +47,8 @@ object FilterStudentsCommand {
 	val DefaultStudentsPerPage = 50
 }
 
-class FilterStudentsCommand(val department: Department) extends CommandInternal[FilterStudentsResults] with FilterStudentsState {
+class FilterStudentsCommand(val department: Department) extends CommandInternal[FilterStudentsResults] with FilterStudentsState with BindListener {
 	self: ProfileServiceComponent =>
-		
-	// Add all non-withdrawn codes to SPR statuses by default
-	if (sprStatuses.isEmpty()) {
-		allSprStatuses.filter { status => !status.code.startsWith("P") && status.code != "T" }.foreach { sprStatuses.add }
-	}
 	
 	def applyInternal() = {
 		val totalResults = profileService.countStudentsByRestrictions(
@@ -68,6 +65,13 @@ class FilterStudentsCommand(val department: Department) extends CommandInternal[
 		)
 		
 		FilterStudentsResults(students, totalResults)
+	}
+	
+	def onBind(result: BindingResult) {
+		// Add all non-withdrawn codes to SPR statuses by default
+		if (sprStatuses.isEmpty()) {
+			allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach { sprStatuses.add }
+		}
 	}
 	
 	private def buildRestrictions(): Seq[ScalaRestriction] = 
@@ -126,12 +130,12 @@ class FilterStudentsCommand(val department: Department) extends CommandInternal[
 		(department.routes.asScala ++ department.children.asScala.flatMap { routesForDepartmentAndSubDepartments }).sorted
 	
 	// Do we need to consider out-of-department modules/routes or can we rely on users typing them in manually?
-	def allModules: Seq[Module] = modulesForDepartmentAndSubDepartments(department)
-	def allCourseTypes: Seq[CourseType] = CourseType.all
-	def allRoutes: Seq[Route] = routesForDepartmentAndSubDepartments(department)
-	def allYearsOfStudy: Seq[Int] = 1 to 8
-	def allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(department)
-	def allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(department)
+	lazy val allModules: Seq[Module] = modulesForDepartmentAndSubDepartments(department)
+	lazy val allCourseTypes: Seq[CourseType] = CourseType.all
+	lazy val allRoutes: Seq[Route] = routesForDepartmentAndSubDepartments(department)
+	lazy val allYearsOfStudy: Seq[Int] = 1 to 8
+	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(department)
+	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(department)
 }
 
 trait FilterStudentsState {
@@ -142,12 +146,12 @@ trait FilterStudentsState {
 	
 	val order = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
 	
-	var courseTypes: JSet[CourseType] = JHashSet()
-	var routes: JSet[Route] = JHashSet()
-	var modesOfAttendance: JSet[ModeOfAttendance] = JHashSet()
-	var yearsOfStudy: JSet[JInteger] = JHashSet()
-	var sprStatuses: JSet[SitsStatus] = JHashSet()
-	var modules: JSet[Module] = JHashSet()
+	var courseTypes: JList[CourseType] = JArrayList()
+	var routes: JList[Route] = JArrayList()
+	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
+	var yearsOfStudy: JList[JInteger] = JArrayList()
+	var sprStatuses: JList[SitsStatus] = JArrayList()
+	var modules: JList[Module] = JArrayList()
 }
 
 trait FilterStudentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
