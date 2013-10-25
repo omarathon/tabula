@@ -65,14 +65,16 @@ class ViewProfileController extends ProfilesController {
 		val profiledStudentMember = profileCmd.apply
 		val isSelf = (profiledStudentMember.universityId == user.universityId)
 
+		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
+
 		// Get all the enabled relationship types for a department
-		val allRelationshipTypes =
+		val enabledRelationshipTypes =
 			Option(member.homeDepartment)
 				.map { _.displayedStudentRelationshipTypes }
 				.getOrElse { relationshipService.allStudentRelationshipTypes }
 
 		val relationshipMeetings =
-			allRelationshipTypes.flatMap { relationshipType =>
+			enabledRelationshipTypes.flatMap { relationshipType =>
 				getViewMeetingRecordCommand(member, relationshipType).map { cmd =>
 					(relationshipType, cmd.apply())
 				}
@@ -104,7 +106,8 @@ class ViewProfileController extends ProfilesController {
 			"openMeeting" -> openMeeting,
 			"numSmallGroups" -> numSmallGroups,
 			"memberNotes" -> memberNotes,
-			"agent" -> agent)
+			"agent" -> agent,
+			"allRelationshipTypes" -> allRelationshipTypes)
 		.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}
 }
