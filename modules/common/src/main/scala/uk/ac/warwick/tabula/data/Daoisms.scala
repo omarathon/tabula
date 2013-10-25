@@ -39,7 +39,11 @@ trait ExtendedSessionComponent extends SessionComponent {
 	}
 }
 
-object Daoisms {
+trait HelperRestrictions {
+	def is = org.hibernate.criterion.Restrictions.eqOrIsNull _
+}
+
+object Daoisms extends HelperRestrictions {
 	/**
 	 * Adds a method to Session which returns a wrapped Criteria or Query that works
 	 * better with Scala's generics support.
@@ -62,9 +66,7 @@ object Daoisms {
  * session factory. If you want to do JDBC stuff or use a
  * different data source you'll need to look elsewhere.
  */
-trait Daoisms extends ExtendedSessionComponent {
-	def is = org.hibernate.criterion.Restrictions.eqOrIsNull _
-
+trait Daoisms extends ExtendedSessionComponent with HelperRestrictions {
 	var dataSource = Wire[DataSource]("dataSource")
 	var sessionFactory = Wire.auto[SessionFactory]
 

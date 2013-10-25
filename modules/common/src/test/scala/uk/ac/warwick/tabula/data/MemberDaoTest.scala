@@ -19,11 +19,18 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
 	val memberDao = new MemberDaoImpl
 	val sitsStatusDao = new SitsStatusDaoImpl
+	val modeOfAttendanceDao = new ModeOfAttendanceDaoImpl
+	
 	val sprFullyEnrolledStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
+	val sprPermanentlyWithdrawnStatus = Fixtures.sitsStatus("P", "Permanently Withdrawn", "Permanently Withdrawn")
+	
+	val moaFT = Fixtures.modeOfAttendance("F", "FT", "Full time")
+	val moaPT = Fixtures.modeOfAttendance("P", "PT", "Part time")
 
 	@Before def setup() {
 		memberDao.sessionFactory = sessionFactory
 		sitsStatusDao.sessionFactory = sessionFactory
+		modeOfAttendanceDao.sessionFactory = sessionFactory
 
 		transactional { tx =>
 			session.enableFilter(Member.ActiveOnlyFilter)
@@ -331,6 +338,85 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
 		memberDao.getStudentsByDepartment(dept1).size should be (1)
 		memberDao.getStudentsByRelationshipAndDepartment(relationshipType, dept1).size should be (1)
+	}
+	
+	@Test
+	def getAllSprStatuses = transactional { tx =>
+		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
+		sitsStatusDao.saveOrUpdate(sprPermanentlyWithdrawnStatus)
+
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
+
+		session.save(dept1)
+		session.save(dept2)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1, sprStatus=sprFullyEnrolledStatus)
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2, sprStatus=sprFullyEnrolledStatus)
+		val stu3 = Fixtures.student(universityId = "1000003", userId="student", department=dept2, courseDepartment=dept2, sprStatus=sprFullyEnrolledStatus)
+		val stu4 = Fixtures.student(universityId = "1000004", userId="student", department=dept2, courseDepartment=dept2, sprStatus=sprPermanentlyWithdrawnStatus)
+
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(stu2)
+		memberDao.saveOrUpdate(stu3)
+		memberDao.saveOrUpdate(stu4)
+		
+		memberDao.getAllSprStatuses(dept1) should be (Seq(sprFullyEnrolledStatus))
+		memberDao.getAllSprStatuses(dept2) should be (Seq(sprFullyEnrolledStatus, sprPermanentlyWithdrawnStatus))
+	}
+	
+	@Test
+	def getAllModesOfAttendance = transactional { tx =>
+		modeOfAttendanceDao.saveOrUpdate(moaFT)
+		modeOfAttendanceDao.saveOrUpdate(moaPT)
+
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
+
+		session.save(dept1)
+		session.save(dept2)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		val stu3 = Fixtures.student(universityId = "1000003", userId="student", department=dept2, courseDepartment=dept2)
+		val stu4 = Fixtures.student(universityId = "1000004", userId="student", department=dept2, courseDepartment=dept2)
+
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(stu2)
+		memberDao.saveOrUpdate(stu3)
+		memberDao.saveOrUpdate(stu4)
+		
+		{
+			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaFT)
+			scyd.studentCourseDetails = stu1.mostSignificantCourse
+			stu1.mostSignificantCourse.studentCourseYearDetails.add(scyd)
+		}
+		
+		{
+			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaFT)
+			scyd.studentCourseDetails = stu2.mostSignificantCourse
+			stu2.mostSignificantCourse.studentCourseYearDetails.add(scyd)
+		}
+		
+		{
+			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaFT)
+			scyd.studentCourseDetails = stu3.mostSignificantCourse
+			stu3.mostSignificantCourse.studentCourseYearDetails.add(scyd)
+		}
+		
+		{
+			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaPT)
+			scyd.studentCourseDetails = stu4.mostSignificantCourse
+			stu4.mostSignificantCourse.studentCourseYearDetails.add(scyd)
+		}
+		
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(stu2)
+		memberDao.saveOrUpdate(stu3)
+		memberDao.saveOrUpdate(stu4)
+		
+		memberDao.getAllModesOfAttendance(dept1) should be (Seq(moaFT))
+		memberDao.getAllModesOfAttendance(dept2) should be (Seq(moaFT, moaPT))
 	}
 
 }

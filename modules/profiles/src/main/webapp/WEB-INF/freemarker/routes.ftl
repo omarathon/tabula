@@ -17,6 +17,8 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro photo profile><#if ((profile.universityId)!)?has_content><@url page="/view/photo/${profile.universityId}.jpg"/><#else><@url resource="/static/images/no-photo.jpg" /></#if></#macro>
 <#macro relationshipPhoto profile relationship><@url page="/view/photo/${relationship.agent}.jpg"/></#macro>
 
+<#macro filter_students department><@url page="/department/${department.code}/students" /></#macro>
+
 <#macro relationship_students relationshipType><@url page="/${relationshipType.urlPart}/students" /></#macro>
 <#macro relationship_agents department relationshipType><@url page="/department/${department.code}/${relationshipType.urlPart}" /></#macro>
 <#macro relationship_missing department relationshipType><@url page="/department/${department.code}/${relationshipType.urlPart}/missing" /></#macro>

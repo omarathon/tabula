@@ -163,6 +163,11 @@ object Fixtures {
 		val status = new SitsStatus(code, shortName, fullName)
 		status
 	}
+	
+	def modeOfAttendance(code: String = "F", shortName: String = "FT", fullName: String = "Full time") = {
+		val moa = new ModeOfAttendance(code, shortName, fullName)
+		moa
+	}
 
 	def student(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null, courseDepartment: Department = null, sprStatus: SitsStatus = null)	= {
 		val m = member(MemberUserType.Student, universityId, userId, department).asInstanceOf[StudentMember]
@@ -191,9 +196,10 @@ object Fixtures {
 		scd
 	}
 
-	def studentCourseYearDetails(academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)) = {
+	def studentCourseYearDetails(academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now), modeOfAttendance: ModeOfAttendance = null) = {
 		val scyd = new StudentCourseYearDetails
 		scyd.academicYear = academicYear
+		scyd.modeOfAttendance = modeOfAttendance
 		scyd
 	}
 

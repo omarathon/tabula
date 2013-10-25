@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import javax.persistence.Entity
 import javax.persistence.CascadeType
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
 
 @Entity
 class StudentCourseDetails
@@ -174,14 +175,29 @@ trait StudentCourseProperties {
 	var mostSignificant: JBoolean = _
 }
 
-sealed abstract class CourseType(val code: String, val level: String, val description: String, val courseCodeChar: Char)
+sealed abstract class CourseType(val code: String, val level: String, val description: String, val courseCodeChar: Char) extends Convertible[String] {
+	def value = code
+}
 
 object CourseType {
+	implicit val factory = { code: String => CourseType(code) }
+	
 	case object PGR extends CourseType("PG(R)", "Postgraduate", "Postgraduate (Research)", 'R')
 	case object PGT extends CourseType("PG(T)", "Postgraduate", "Postgraduate (Taught)", 'T')
 	case object UG extends CourseType("UG", "Undergraduate", "Undergraduate", 'U')
 	case object Foundation extends CourseType("F", "Foundation", "Foundation course", 'F')
 	case object PreSessional extends CourseType("PS", "Pre-sessional", "Pre-sessional course", 'N')
+	
+	val all = Seq(UG, PGT, PGR, Foundation, PreSessional)
+	
+	def apply(code: String): CourseType = code match {
+		case UG.code => UG
+		case PGT.code => PGT
+		case PGR.code => PGR
+		case Foundation.code => Foundation
+		case PreSessional.code => PreSessional
+		case other => throw new IllegalArgumentException("Unexpected course code: %s".format(other))
+	}
 
 	def fromCourseCode(cc: String): CourseType = {
 		if (cc.isEmpty) null
@@ -195,3 +211,6 @@ object CourseType {
 		}
 	}
 }
+
+// converter for spring
+class CourseTypeConverter extends ConvertibleConverter[String, CourseType]
