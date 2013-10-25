@@ -9,19 +9,21 @@
 					<#list profile.studentCourseDetails as courseDetails>
 						<#if courseDetails.scjCode != studentCourseDetails.scjCode>
 							<li>
-								<@fmt.dropdown_name courseDetails  />
+								<a role="presentation"><a role="menuitem" tabindex="-1" href="/view/course/${courseDetails.scjCode}">
+									<@fmt.dropdown_name courseDetails  />
+								</a>
 							</li>
 						</#if>
 					</#list>
 				</ul>
 			</div>
-			<div style="float:left">
+			<div class="course-name">
 				<h2>
 					Course: ${(studentCourseDetails.course.name)!} (${(studentCourseDetails.course.code?upper_case)!})
 				</h2>
 			</div>
-			<div style="float:left">
-				<h2 class="muted">&nbsp;${(studentCourseDetails.beginYear)!} to ${(studentCourseDetails.endYear)!}</h2>
+			<div class="course-year">
+				<h2 class="muted">${studentCourseDetails.beginYear} to ${studentCourseDetails.endYear}</h2>
 			</div>
 		</div>
 	</div>

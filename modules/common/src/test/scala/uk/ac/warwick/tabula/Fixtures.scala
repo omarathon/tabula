@@ -227,4 +227,9 @@ object Fixtures {
 		checkpoint.state = state
 		checkpoint
 	}
+
+	def moduleRegistration(scd: StudentCourseDetails, mod: Module, cats: java.math.BigDecimal, year: AcademicYear, occurrence: String) = {
+		new ModuleRegistration(scd, mod, cats, year, occurrence)
+	}
+
 }

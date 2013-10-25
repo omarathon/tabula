@@ -28,7 +28,7 @@ class ViewStudentCourseDetailsCommand(user: CurrentUser, studentCourseDetails: S
 }
 
 @Controller
-@RequestMapping(Array("/view/course/{scjCode}"))
+@RequestMapping(Array("/view/course/{student}/{scjSuffix}"))
 class ViewStudentCourseDetailsController extends ProfilesController {
 
 	var userLookup = Wire[UserLookupService]

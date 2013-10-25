@@ -120,10 +120,10 @@ class StudentCourseDetails
 		!moduleRegistrations.isEmpty()
 	}
 
-	def beginYear = beginDate.year.getAsString
+	def beginYear = beginDate.year.getAsText
 	def endYear = endDate match {
-		case endd: LocalDate if endd != null => endd.year.getAsString
-		case _ => expectedEndDate.year.getAsString
+		case endd: LocalDate if endd != null => endd.year.getAsText
+		case _ => expectedEndDate.year.getAsText
 	}
 }
 
