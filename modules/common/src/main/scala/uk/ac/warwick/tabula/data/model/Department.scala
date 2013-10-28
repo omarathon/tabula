@@ -127,6 +127,8 @@ class Department extends GeneratedId
 	def displayedStudentRelationshipTypes =
 		relationshipService.allStudentRelationshipTypes.filter { getStudentRelationshipDisplayed(_) }
 
+	def isStudentRelationshipTypeForDisplay(relationshipType: StudentRelationshipType) = displayedStudentRelationshipTypes.contains(relationshipType)
+
 	def weekNumberingSystem = getStringSetting(Settings.WeekNumberingSystem) getOrElse(WeekRange.NumberingSystem.Default)
 	def weekNumberingSystem_= (wnSystem: String) = settings += (Settings.WeekNumberingSystem -> wnSystem)
 
