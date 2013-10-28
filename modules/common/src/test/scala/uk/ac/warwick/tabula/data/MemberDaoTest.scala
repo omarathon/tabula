@@ -390,24 +390,28 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaFT)
 			scyd.studentCourseDetails = stu1.mostSignificantCourse
 			stu1.mostSignificantCourse.studentCourseYearDetails.add(scyd)
+			stu1.mostSignificantCourse.latestStudentCourseYearDetails = scyd
 		}
 		
 		{
 			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaFT)
 			scyd.studentCourseDetails = stu2.mostSignificantCourse
 			stu2.mostSignificantCourse.studentCourseYearDetails.add(scyd)
+			stu2.mostSignificantCourse.latestStudentCourseYearDetails = scyd
 		}
 		
 		{
 			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaFT)
 			scyd.studentCourseDetails = stu3.mostSignificantCourse
 			stu3.mostSignificantCourse.studentCourseYearDetails.add(scyd)
+			stu3.mostSignificantCourse.latestStudentCourseYearDetails = scyd
 		}
 		
 		{
 			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaPT)
 			scyd.studentCourseDetails = stu4.mostSignificantCourse
 			stu4.mostSignificantCourse.studentCourseYearDetails.add(scyd)
+			stu4.mostSignificantCourse.latestStudentCourseYearDetails = scyd
 		}
 		
 		memberDao.saveOrUpdate(stu1)

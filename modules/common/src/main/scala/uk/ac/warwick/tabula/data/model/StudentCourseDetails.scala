@@ -118,6 +118,8 @@ class StudentCourseDetails
 	def attachStudentCourseYearDetails(yearDetailsToAdd: StudentCourseYearDetails) {
 		studentCourseYearDetails.remove(yearDetailsToAdd)
 		studentCourseYearDetails.add(yearDetailsToAdd)
+		
+		latestStudentCourseYearDetails = studentCourseYearDetails.asScala.max
 	}
 
 	def hasModuleRegistrations = {
