@@ -20,6 +20,10 @@ trait StringUtils {
 	}
 
 	implicit def StringToSuperString(string: String) = new SuperString(string)
+	
+	implicit class Regex(sc: StringContext) {
+		def r = new util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
+	}
 }
 
 object StringUtils extends StringUtils

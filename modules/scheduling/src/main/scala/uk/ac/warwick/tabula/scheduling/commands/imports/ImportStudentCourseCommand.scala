@@ -109,8 +109,8 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 				logger.debug("Saving changes for " + studentCourseDetails)
 
 				if (this.mostSignificant) {
-						stuMem.mostSignificantCourse = studentCourseDetails
-						logger.debug("Updating member most significant course to "+ studentCourseDetails +" for " + stuMem)
+					stuMem.mostSignificantCourse = studentCourseDetails
+					logger.debug("Updating member most significant course to "+ studentCourseDetails +" for " + stuMem)
 				}
 
 				studentCourseDetails.lastUpdatedDate = DateTime.now
