@@ -1,8 +1,4 @@
 <#escape x as x?html>
-
-	<style type="text/css">
-		.filter-type { margin-left: 0.8em; }
-	</style>
 	
 	<h1>Students in ${department.name}</h1>
 	
