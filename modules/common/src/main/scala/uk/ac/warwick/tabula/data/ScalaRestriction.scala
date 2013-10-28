@@ -9,25 +9,13 @@ import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.ToStringBuilder
 import org.apache.commons.lang3.builder.ToStringStyle
 
-class ScalaRestriction(val criterion: Criterion) {
-	val aliases: mutable.Map[String, String] = mutable.Map()
-	
-	def alias(property: String, alias: String) = {
-		aliases.put(property, alias) match {
-			case Some(other) if other != alias => 
-				// non-duplicate
-				throw new IllegalArgumentException("Tried to alias %s to %s, but it is already aliased to %s!".format(property, alias, other))
-			case _ =>
-		}
-		this
-	}
-	
+class ScalaRestriction(val underlying: Criterion) extends Aliasable {	
 	def apply[A](c: ScalaCriteria[A]) = c.add(this)
 	
 	override final def equals(other: Any) = other match {
 		case that: ScalaRestriction =>
 			new EqualsBuilder()
-				.append(criterion, that.criterion)
+				.append(underlying, that.underlying)
 				.append(aliases, that.aliases)
 				.build()
 		case _ => false
@@ -35,22 +23,19 @@ class ScalaRestriction(val criterion: Criterion) {
 	
 	override final def hashCode =
 		new HashCodeBuilder()
-			.append(criterion)
+			.append(underlying)
 			.append(aliases)
 			.build()
 			
 	override final def toString =
 		new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("criterion", criterion)
+			.append("underlying", underlying)
 			.append("aliases", aliases)
 			.build()
 }
 
 object ScalaRestriction {
-	private def addAliases(restriction: ScalaRestriction, aliases: (String, String)*) = {
-		aliases.foreach { case (property, alias) => restriction.alias(property, alias) }
-		restriction
-	}
+	import Aliasable._
 	
 	def is(property: String, value: Any, aliases: (String, String)*): Option[ScalaRestriction] = 
 		Some(addAliases(new ScalaRestriction(Daoisms.is(property, value)), aliases: _*))
@@ -69,4 +54,25 @@ object ScalaRestriction {
 			
 			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 		}
+}
+
+trait Aliasable {
+	final val aliases: mutable.Map[String, String] = mutable.Map()
+	
+	def alias(property: String, alias: String) = {
+		aliases.put(property, alias) match {
+			case Some(other) if other != alias => 
+				// non-duplicate
+				throw new IllegalArgumentException("Tried to alias %s to %s, but it is already aliased to %s!".format(property, alias, other))
+			case _ =>
+		}
+		this
+	}
+}
+
+object Aliasable {
+	def addAliases[A <: Aliasable](aliasable: A, aliases: (String, String)*): A = {
+		aliases.foreach { case (property, alias) => aliasable.alias(property, alias) }
+		aliasable
+	}
 }

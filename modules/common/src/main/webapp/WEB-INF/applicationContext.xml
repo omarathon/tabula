@@ -142,6 +142,7 @@
 				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringCheckpointStateConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.ModeOfAttendanceCodeConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.SitsStatusCodeConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.HibernateOrderConverter" />
 				<bean class="uk.ac.warwick.tabula.data.model.AssessmentTypeConverter" />
 				<bean class="uk.ac.warwick.tabula.data.model.CourseTypeConverter" />
 	        </list>

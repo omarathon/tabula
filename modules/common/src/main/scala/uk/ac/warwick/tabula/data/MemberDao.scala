@@ -52,7 +52,7 @@ trait MemberDao {
 	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
 	
-	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[Order], maxResults: Int, startResult: Int): Seq[StudentMember]
+	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember]
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]): Int
 	def getAllModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def getAllSprStatuses(department: Department): Seq[SitsStatus]
@@ -351,7 +351,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setEntity("relationshipType", relationshipType)
 			.uniqueResult.getOrElse(0)
 			
-	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[Order], maxResults: Int, startResult: Int) = {
+	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int) = {
 		val idCriteria = session.newCriteria[StudentMember]
 		restrictions.foreach { _.apply(idCriteria) }
 		

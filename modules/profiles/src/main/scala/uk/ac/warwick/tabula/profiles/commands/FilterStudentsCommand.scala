@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.commands.CommandInternal
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
@@ -29,6 +30,8 @@ import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.BindingResult
+import org.hibernate.criterion.Order
+import uk.ac.warwick.tabula.data.ScalaOrder
 
 case class FilterStudentsResults(
 	students: Seq[StudentMember],
@@ -45,6 +48,28 @@ object FilterStudentsCommand {
 			
 	val MaxStudentsPerPage = 100
 	val DefaultStudentsPerPage = 50
+	
+	val AliasPaths = Seq(
+		"studentCourseDetails" -> Seq(
+			"mostSignificantCourse" -> "studentCourseDetails"
+		),
+		"studentCourseYearDetails" -> Seq(
+			"mostSignificantCourse" -> "studentCourseDetails",
+			"studentCourseDetails.studentCourseYearDetails" -> "studentCourseYearDetails"
+		),
+		"moduleRegistration" -> Seq(
+			"mostSignificantCourse" -> "studentCourseDetails",
+			"studentCourseDetails.moduleRegistrations" -> "moduleRegistration"
+		),
+		"course" -> Seq(
+			"mostSignificantCourse" -> "studentCourseDetails",
+			"studentCourseDetails.course" -> "course"
+		),
+		"route" -> Seq(
+			"mostSignificantCourse" -> "studentCourseDetails",
+			"studentCourseDetails.route" -> "route"
+		)
+	).toMap
 }
 
 class FilterStudentsCommand(val department: Department) extends CommandInternal[FilterStudentsResults] with FilterStudentsState with BindListener {
@@ -59,7 +84,7 @@ class FilterStudentsCommand(val department: Department) extends CommandInternal[
 		val students = profileService.findStudentsByRestrictions(
 			department = department,
 			restrictions = buildRestrictions(),
-			orders = order, 
+			orders = buildOrders(), 
 			maxResults = studentsPerPage, 
 			startResult = (studentsPerPage * (page-1))
 		)
@@ -79,49 +104,52 @@ class FilterStudentsCommand(val department: Department) extends CommandInternal[
 			// Course type
 			startsWithIfNotEmpty(
 				"course.code", courseTypes.asScala.map { _.courseCodeChar.toString }, 
-				"mostSignificantCourse" -> "studentCourseDetails",
-				"studentCourseDetails.course" -> "course"
+				AliasPaths("course") : _*
 			),
 				
 			// Route
 			inIfNotEmpty(
 				"studentCourseDetails.route", routes.asScala, 
-				"mostSignificantCourse" -> "studentCourseDetails"
+				AliasPaths("studentCourseDetails") : _*
 			),
 			
 			// Mode of attendance
 			inIfNotEmpty(
 				"studentCourseYearDetails.modeOfAttendance", modesOfAttendance.asScala, 
-				"mostSignificantCourse" -> "studentCourseDetails",
-				"studentCourseDetails.studentCourseYearDetails" -> "studentCourseYearDetails"
+				AliasPaths("studentCourseYearDetails") : _*
 			),
 			
 			// Year of study
 			inIfNotEmpty(
 				"studentCourseYearDetails.yearOfStudy", yearsOfStudy.asScala, 
-				"mostSignificantCourse" -> "studentCourseDetails",
-				"studentCourseDetails.studentCourseYearDetails" -> "studentCourseYearDetails"
+				AliasPaths("studentCourseYearDetails") : _*
 			),
 			
 			// COMMON for both mode of attendance and year of study - only consider current academic year
 			is("studentCourseYearDetails.academicYear", AcademicYear.guessByDate(DateTime.now),
-				"mostSignificantCourse" -> "studentCourseDetails",
-				"studentCourseDetails.studentCourseYearDetails" -> "studentCourseYearDetails"
+				AliasPaths("studentCourseYearDetails") : _*
 			),
 			
 			// SPR status
 			inIfNotEmpty(
 				"studentCourseDetails.sprStatus", sprStatuses.asScala, 
-				"mostSignificantCourse" -> "studentCourseDetails"
+				AliasPaths("studentCourseDetails") : _*
 			),
 			
 			// Registered modules
 			inIfNotEmpty(
 				"moduleRegistration.module", modules.asScala, 
-				"mostSignificantCourse" -> "studentCourseDetails", 
-				"studentCourseDetails.moduleRegistrations" -> "moduleRegistration"
+				AliasPaths("moduleRegistration") : _*
 			)
 		).flatten
+		
+	private def buildOrders(): Seq[ScalaOrder] =
+		(sortOrder.asScala ++ defaultOrder).map { underlying =>
+			underlying.getPropertyName match {
+				case r"""([^\.]+)${aliasPath}\..*""" => ScalaOrder(underlying, AliasPaths(aliasPath) : _*)
+				case _ => ScalaOrder(underlying)
+			}
+		}
 		
 	private def modulesForDepartmentAndSubDepartments(department: Department): Seq[Module] =
 		(department.modules.asScala ++ department.children.asScala.flatMap { modulesForDepartmentAndSubDepartments }).sorted
@@ -144,7 +172,8 @@ trait FilterStudentsState {
 	var studentsPerPage = DefaultStudentsPerPage
 	var page = 1
 	
-	val order = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
+	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
+	var sortOrder: JList[Order] = JArrayList() 
 	
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()

@@ -15,6 +15,8 @@ import org.joda.time.DateTime
 import org.mockito.ArgumentMatcher
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Restrictions
+import uk.ac.warwick.tabula.data.ScalaOrder
+import org.hamcrest.Description
 
 class FilterStudentsCommandTest extends TestBase with Mockito {
 	
@@ -95,7 +97,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		there was one(command.profileService).findStudentsByRestrictions(
 			isEq(department), 
 			argThat(seqToStringMatches(expectedRestrictions)), 
-			argThat(seqToStringMatches(Seq(Order.asc("lastName"), Order.asc("firstName")))), 
+			argThat(seqToStringMatches(Seq(ScalaOrder.asc("lastName"), ScalaOrder.asc("firstName")))), 
 			isEq(50), 
 			isEq(0)
 		)
@@ -160,9 +162,43 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		there was one(command.profileService).findStudentsByRestrictions(
 			isEq(department), 
 			argThat(seqToStringMatches(expectedRestrictions)), 
-			argThat(seqToStringMatches(Seq(Order.asc("lastName"), Order.asc("firstName")))), 
+			argThat(seqToStringMatches(Seq(ScalaOrder.asc("lastName"), ScalaOrder.asc("firstName")))), 
 			isEq(10), 
 			isEq(20)
+		)
+	}}
+	
+	@Test
+	def commandApplyDefaultsWithAliasedSort() { new Fixture {
+		val command = new FilterStudentsCommand(department) with CommandTestSupport
+		command.sortOrder = JArrayList(Order.desc("studentCourseYearDetails.yearOfStudy"))
+		
+		command.applyInternal()
+		
+		val ayRestriction = new ScalaRestriction(Daoisms.is("studentCourseYearDetails.academicYear", AcademicYear.guessByDate(DateTime.now)))
+		ayRestriction.alias("mostSignificantCourse", "studentCourseDetails")
+		ayRestriction.alias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
+		
+		val expectedRestrictions = Seq(
+			ayRestriction
+		)
+		
+		val expectedOrders = Seq(
+			ScalaOrder(
+				Order.desc("studentCourseYearDetails.yearOfStudy"),
+				"mostSignificantCourse" -> "studentCourseDetails",
+				"studentCourseDetails.studentCourseYearDetails" -> "studentCourseYearDetails"	
+			),
+			ScalaOrder.asc("lastName"), 
+			ScalaOrder.asc("firstName")
+		)
+		
+		there was one(command.profileService).findStudentsByRestrictions(
+			isEq(department), 
+			argThat(seqToStringMatches(expectedRestrictions)), 
+			argThat(seqToStringMatches(expectedOrders)), 
+			isEq(50), 
+			isEq(0)
 		)
 	}}
 	
@@ -171,6 +207,8 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 			case s: Seq[_] => s.length == o.length && (o, s).zipped.forall { case (a, b) => a.toString == b.toString }
 			case _ => false
 		}
+		
+		override def describeTo(description: Description) = description.appendText(o.toString)
 	}
 
 }

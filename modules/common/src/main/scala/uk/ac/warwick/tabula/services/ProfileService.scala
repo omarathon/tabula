@@ -36,7 +36,7 @@ trait ProfileService {
 	def getStudentCourseDetailsByScjCode(scjCode: String): Option[StudentCourseDetails]
 	def getStudentCourseDetailsBySprCode(sprCode: String): Seq[StudentCourseDetails]
 	def countStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Int
-	def findStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[Order] = Seq(), maxResults: Int = 50, startResult: Int = 0): Seq[StudentMember]
+	def findStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq(), maxResults: Int = 50, startResult: Int = 0): Seq[StudentMember]
 	
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def allSprStatuses(department: Department): Seq[SitsStatus]
@@ -118,7 +118,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	private def studentDepartmentFilterMatches(department: Department)(member: StudentMember) = department.filterRule.matches(member)
 		
-	def findStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[Order] = Seq(), maxResults: Int = 50, startResult: Int = 0) = transactional(readOnly = true) {
+	def findStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq(), maxResults: Int = 50, startResult: Int = 0) = transactional(readOnly = true) {
 		// If we're a sub-department then we have to fetch everyone, rhubarb! Otherwise, we can use nice things
 		if (department.hasParent) {
 			val allRestrictions = ScalaRestriction.is(

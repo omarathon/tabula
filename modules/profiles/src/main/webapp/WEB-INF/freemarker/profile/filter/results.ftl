@@ -1,4 +1,17 @@
 <#escape x as x?html>
+
+	<#function sortClass field>
+		<#list filterStudentsCommand.sortOrder as order>
+			<#if order.propertyName == field>
+				<#if order.ascending>
+					<#return "headerSortDown" />
+				<#else>
+					<#return "headerSortUp" />
+				</#if>
+			</#if>
+		</#list>
+		<#return "" />
+	</#function>
 	
 	<#macro row student>
 		<tr class="student">
@@ -19,12 +32,12 @@
 			<thead>
 				<tr>
 					<th class="photo-col">Photo</th>
-					<th class="student-col">First name</th>
-					<th class="student-col">Last name</th>
-					<th class="id-col">ID</th>
-					<th class="type-col">Type</th>
-					<th class="year-col">Year</th>
-					<th class="course-but-photo-col">Course</th>
+					<th class="student-col ${sortClass("firstName")}" data-field="firstName">First name</th>
+					<th class="student-col ${sortClass("lastName")}" data-field="lastName">Last name</th>
+					<th class="id-col ${sortClass("universityId")}" data-field="universityId">ID</th>
+					<th class="type-col ${sortClass("groupName")}" data-field="groupName">Type</th>
+					<th class="year-col ${sortClass("studentCourseYearDetails.yearOfStudy")}" data-field="studentCourseYearDetails.yearOfStudy">Year</th>
+					<th class="course-but-photo-col ${sortClass("route.name")}" data-field="route.name">Course</th>
 				</tr>
 			</thead>
 		
@@ -43,8 +56,32 @@
 			        $(function() {
 			        	<#if totalResults lte filterStudentsCommand.studentsPerPage>
 			            $(".students").tablesorter({
-			                sortList: [[2,0], [4,0], [5,0]]
+			            	headers: { 0: { sorter: false } },
+			              sortList: [[2,0], [1,0]]
 			            });
+			          <#else>
+			          	// CUSTOM TABLE SORTING
+			          	$(".students").addClass('tablesorter')
+			          		.find('th:not(:first-child)').addClass('header')
+			          		.on('click', function(e) {
+			          			var $th = $(this);
+			          			
+			          			if ($th.hasClass('headerSortDown')) {
+			          				$('#sortOrder').val('desc(' + $th.data('field') + ')');
+			          				$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
+			          				$th.addClass('headerSortUp');
+			          			} else {
+			          				$('#sortOrder').val('asc(' + $th.data('field') + ')');
+			          				$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
+			          				$th.addClass('headerSortDown');
+			          			}
+			          			
+			          			if (typeof(window.doRequest) === 'function') {
+												window.doRequest($('#filterStudentsCommand'), true);
+											} else {
+												$('#filterStudentsCommand').submit();
+											}
+			          		});
 			          </#if>
 			
 			            $(".student").on("mouseover", function(e) {

@@ -13,6 +13,7 @@
 				<@f.errors cssClass="error form-errors" />
 				<@f.hidden path="page" />
 				<@f.hidden path="studentsPerPage" />
+				<@f.hidden path="sortOrder" />
 			
 				<div class="btn-group-group">
 					<i class="icon-filter"></i>

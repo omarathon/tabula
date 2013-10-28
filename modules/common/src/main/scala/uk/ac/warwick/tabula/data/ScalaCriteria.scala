@@ -18,9 +18,13 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 	def add(criterion: Criterion) = chainable { c.add(criterion) }
 	def add(restriction: ScalaRestriction) = chainable {
 		restriction.aliases.foreach { case (property, alias) => createAlias(property, alias) }
-		c.add(restriction.criterion)
+		c.add(restriction.underlying)
 	}
 	def addOrder(order: Order) = chainable { c.addOrder(order) }
+	def addOrder(order: ScalaOrder) = chainable {
+		order.aliases.foreach { case (property, alias) => createAlias(property, alias) }
+		c.addOrder(order.underlying)
+	}
 	def setMaxResults(i: Int) = chainable { c.setMaxResults(i) }
 	def setFirstResult(i: Int) = chainable { c.setFirstResult(i) }
 	def createAlias(property: String, alias: String) = chainable {
