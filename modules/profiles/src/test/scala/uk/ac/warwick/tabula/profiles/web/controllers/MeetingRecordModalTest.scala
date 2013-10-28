@@ -14,7 +14,8 @@ class MeetingRecordModalTest extends TestBase with Mockito {
 	with ControllerMethods
 	with ControllerImports
 	with CurrentMemberComponent
-	with ControllerViews{
+	with ControllerViews
+	with MonitoringPointMeetingRelationshipTermServiceComponent {
 		var requestInfo: Option[RequestInfo] = _
 		var user: CurrentUser = _
 		var securityService: SecurityService = mock[SecurityService]
@@ -22,6 +23,7 @@ class MeetingRecordModalTest extends TestBase with Mockito {
 		var currentMember: Member = _
 		var profileService: ProfileService = mock[ProfileService]
 		var relationshipService: RelationshipService = mock[RelationshipService]
+		var monitoringPointMeetingRelationshipTermService = mock[MonitoringPointMeetingRelationshipTermService]
 	}
 
 	val student = new StudentCourseDetails()

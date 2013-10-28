@@ -7,9 +7,10 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent, AutowiringMonitoringPointDaoComponent, MonitoringPointDaoComponent}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringCheckpointState, MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, StudentCourseDetails, Route, StudentMember}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import org.joda.time.DateTime
+import scala.Some
 
 trait MonitoringPointServiceComponent {
 	def monitoringPointService: MonitoringPointService
@@ -132,6 +133,7 @@ trait AutowiringMonitoringPointMeetingRelationshipTermServiceComponent extends M
 }
 
 trait MonitoringPointMeetingRelationshipTermService {
+	def formatsThatWillCreateCheckpoint(relationship: StudentRelationship): Seq[MeetingFormat]
 	def willCheckpointBeCreated(meeting: MeetingRecord): Boolean
 	def updateCheckpointsForMeeting(meeting: MeetingRecord): Seq[MonitoringCheckpoint]
 }
@@ -139,10 +141,29 @@ trait MonitoringPointMeetingRelationshipTermService {
 abstract class AbstractMonitoringPointMeetingRelationshipTermService extends MonitoringPointMeetingRelationshipTermService {
 	self: MonitoringPointDaoComponent with MeetingRecordDaoComponent with RelationshipServiceComponent with TermServiceComponent =>
 
+	def formatsThatWillCreateCheckpoint(relationship: StudentRelationship): Seq[MeetingFormat] = {
+		relationship.studentMember.map(student => {
+			student.studentCourseDetails.asScala.map{scd =>
+				getRelevantPoints(scd, relationship.relationshipType, None).map{point =>
+					if (point.meetingQuantity > 1)
+						// if enough meetings currently exist such that creating this one would meet the required quantity
+						if (countRelevantMeetings(scd, point, None) >= point.meetingQuantity - 1)
+							point.meetingFormats
+						else
+							Seq()
+					else
+						point.meetingFormats
+				}
+			}.flatten
+		}.flatten.distinct
+		).getOrElse(Seq())
+	}
+
 	def willCheckpointBeCreated(meeting: MeetingRecord): Boolean = {
 		meeting.relationship.studentMember.exists(student => {
 			student.studentCourseDetails.asScala.exists(scd => {
-				getRelevantPoints(meeting, scd).exists(point => countRelevantMeetings(scd, point, Option(meeting)) >= point.meetingQuantity)
+				getRelevantPoints(scd, meeting.relationship.relationshipType, Option(meeting.format))
+					.exists(point => countRelevantMeetings(scd, point, Option(meeting)) >= point.meetingQuantity)
 			})
 		})
 	}
@@ -161,7 +182,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 		}
 		meeting.relationship.studentMember.map(student => {
 			val createdCheckpoints = student.studentCourseDetails.asScala.flatMap(scd => {
-				val relevantMeetingPoints = getRelevantPoints(meeting, scd)
+				val relevantMeetingPoints = getRelevantPoints(scd, meeting.relationship.relationshipType, Option(meeting.format))
 				// check the required quantity and create a checkpoint if there are sufficient meetings
 				val checkpointOptions = for (point <- relevantMeetingPoints) yield {
 					if (countRelevantMeetings(scd, point, None) >= point.meetingQuantity) {
@@ -186,8 +207,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 		}).getOrElse(Seq())
 	}
 
-
-	private def getRelevantPoints(meeting: MeetingRecord, scd: StudentCourseDetails) = {
+	private def getRelevantPoints(scd: StudentCourseDetails, relationshipType: StudentRelationshipType, formatOption: Option[MeetingFormat]) = {
 		scd.studentCourseYearDetails.asScala.flatMap(scyd => {
 			val relevantPointSets = monitoringPointDao.findMonitoringPointSets(scd.route, scyd.academicYear).filter(pointSet =>
 				pointSet.year == null || pointSet.year == scyd.yearOfStudy
@@ -195,8 +215,9 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 			val relevantPoints = relevantPointSets.flatMap(_.points.asScala).filter(point =>
 				// only points relevant to this meeting
 				point.pointType == MonitoringPointType.Meeting
-					&& point.meetingRelationships.contains(meeting.relationship.relationshipType)
-					&& point.meetingFormats.contains(meeting.format)
+					&& point.meetingRelationships.contains(relationshipType)
+					// if we pass a format check it (otherwise assume true)
+					&& formatOption.map{format => point.meetingFormats.contains(format)}.getOrElse(true)
 					// disregard any points that already have a checkpoint
 					&& (monitoringPointDao.getCheckpoint(point, scd.scjCode) match {
 						case Some(_: MonitoringCheckpoint) => false
