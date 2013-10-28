@@ -132,11 +132,20 @@ trait AutowiringMonitoringPointMeetingRelationshipTermServiceComponent extends M
 }
 
 trait MonitoringPointMeetingRelationshipTermService {
+	def willCheckpointBeCreated(meeting: MeetingRecord): Boolean
 	def updateCheckpointsForMeeting(meeting: MeetingRecord): Seq[MonitoringCheckpoint]
 }
 
 abstract class AbstractMonitoringPointMeetingRelationshipTermService extends MonitoringPointMeetingRelationshipTermService {
 	self: MonitoringPointDaoComponent with MeetingRecordDaoComponent with RelationshipServiceComponent with TermServiceComponent =>
+
+	def willCheckpointBeCreated(meeting: MeetingRecord): Boolean = {
+		meeting.relationship.studentMember.exists(student => {
+			student.studentCourseDetails.asScala.exists(scd => {
+				getRelevantPoints(meeting, scd).exists(point => countRelevantMeetings(scd, point, Option(meeting)) >= point.meetingQuantity)
+			})
+		})
+	}
 
 	/**
 	 * Creates a monitoring checkpoint for the student associated with the given meeting if:
@@ -155,7 +164,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 				val relevantMeetingPoints = getRelevantPoints(meeting, scd)
 				// check the required quantity and create a checkpoint if there are sufficient meetings
 				val checkpointOptions = for (point <- relevantMeetingPoints) yield {
-					if (countRelevantMeetings(scd, point) >= point.meetingQuantity) {
+					if (countRelevantMeetings(scd, point, None) >= point.meetingQuantity) {
 						val checkpoint = new MonitoringCheckpoint
 						checkpoint.point = point
 						checkpoint.studentCourseDetail = scd
@@ -201,14 +210,19 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 		})
 	}
 
-	private def countRelevantMeetings(scd: StudentCourseDetails, point: MonitoringPoint): Int = {
+	/**
+	 * Counts the number of approved meetings relevant to the given point for the given student.
+	 * If meetingToSkipApproval is provided, that meeting is included regradless of its approved status,
+	 * which is used to check if approving that meeting would then create a checkpoint.
+	 */
+	private def countRelevantMeetings(scd: StudentCourseDetails, point: MonitoringPoint, meetingToSkipApproval: Option[MeetingRecord]): Int = {
 		point.meetingRelationships.map(relationshipType => {
 			relationshipService.getRelationships(relationshipType, scd.sprCode)
 				.flatMap(meetingRecordDao.list(_).filter(meeting =>
-				meeting.isAttendanceApproved
-					&& point.meetingFormats.contains(meeting.format)
-					&& termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
-					>= point.validFromWeek
+					(meeting.isAttendanceApproved || meetingToSkipApproval.exists(m => m == meeting))
+						&& point.meetingFormats.contains(meeting.format)
+						&& termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+						>= point.validFromWeek
 			)).size
 		}).sum
 	}
