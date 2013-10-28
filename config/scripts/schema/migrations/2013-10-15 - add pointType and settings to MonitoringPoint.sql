@@ -4,3 +4,8 @@ ADD (
 	point_type NVARCHAR2(50)
 );
 
+ALTER TABLE MONITORINGCHECKPOINT
+ADD (
+  autocreated NUMBER(1,0) default 0
+);
+

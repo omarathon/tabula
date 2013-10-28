@@ -109,6 +109,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		checkpoint.state = state
 		checkpoint.updatedBy = user.apparentId
 		checkpoint.updatedDate = DateTime.now
+		checkpoint.autoCreated = false
 		monitoringPointDao.saveOrUpdate(checkpoint)
 		checkpoint
 	}
@@ -190,6 +191,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 						checkpoint.point = point
 						checkpoint.studentCourseDetail = scd
 						checkpoint.state = MonitoringCheckpointState.Attended
+						checkpoint.autoCreated = true
 						checkpoint.updatedDate = DateTime.now
 						checkpoint.updatedBy = meeting.relationship.agentMember match {
 							case Some(agent: uk.ac.warwick.tabula.data.model.Member) => agent.universityId
