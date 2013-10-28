@@ -378,9 +378,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	def getAllModesOfAttendance(department: Department) =
 		session.newCriteria[StudentMember]
 				.createAlias("mostSignificantCourse", "scd")
-				.createAlias("scd.studentCourseYearDetails", "scyd")
+				.createAlias("scd.latestStudentCourseYearDetails", "scyd")
 				.add(is("scd.department", department))
-				.add(is("scyd.academicYear", AcademicYear.guessByDate(DateTime.now)))
 				.addOrder(desc("moaCount"))
 				.project[Array[Any]](
 					projectionList()

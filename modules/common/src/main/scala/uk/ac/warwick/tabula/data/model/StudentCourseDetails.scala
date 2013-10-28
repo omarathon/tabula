@@ -67,7 +67,9 @@ class StudentCourseDetails
 	def permissionsParents = Stream(Option(student), Option(route)).flatten
 
 	def hasCurrentEnrolment: Boolean = {
-		!latestStudentCourseYearDetails.enrolmentStatus.code.startsWith("P")
+		Option(latestStudentCourseYearDetails).map { scyd =>
+			!scyd.enrolmentStatus.code.startsWith("P")
+		}.getOrElse(false)
 	}
 
 	// FIXME this belongs as a Freemarker macro or helper
@@ -76,7 +78,7 @@ class StudentCourseDetails
 		if (sprStatus!= null) {
 			statusString = sprStatus.fullName.toLowerCase().capitalize
 
-			val enrolmentStatus = latestStudentCourseYearDetails.enrolmentStatus
+			val enrolmentStatus = Option(latestStudentCourseYearDetails).map { _.enrolmentStatus }.orNull
 
 			// if the enrolment status is not null and different to the SPR status, append it:
 			if (enrolmentStatus != null
@@ -93,9 +95,10 @@ class StudentCourseDetails
 		sprStatus.code.startsWith("P")
 	}
 
+	@OneToOne
+	@JoinColumn(name = "latestYearDetails")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	def latestStudentCourseYearDetails: StudentCourseYearDetails =
-		studentCourseYearDetails.asScala.max
+	var latestStudentCourseYearDetails: StudentCourseYearDetails = _
 
 	def courseType = CourseType.fromCourseCode(course.code)
 

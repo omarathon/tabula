@@ -86,13 +86,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		val command = new FilterStudentsCommand(department) with CommandTestSupport
 		command.applyInternal()
 		
-		val ayRestriction = new ScalaRestriction(Daoisms.is("studentCourseYearDetails.academicYear", AcademicYear.guessByDate(DateTime.now)))
-		ayRestriction.alias("mostSignificantCourse", "studentCourseDetails")
-		ayRestriction.alias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
-		
-		val expectedRestrictions = Seq(
-			ayRestriction
-		)
+		val expectedRestrictions = Seq()
 		
 		there was one(command.profileService).findStudentsByRestrictions(
 			isEq(department), 
@@ -119,10 +113,6 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		
 		command.applyInternal()
 		
-		val ayRestriction = new ScalaRestriction(Daoisms.is("studentCourseYearDetails.academicYear", AcademicYear.guessByDate(DateTime.now)))
-		ayRestriction.alias("mostSignificantCourse", "studentCourseDetails")
-		ayRestriction.alias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
-		
 		val courseTypeRestriction = new ScalaRestriction(
 			Restrictions.disjunction()
 				.add(Restrictions.like("course.code", "U%"))
@@ -136,11 +126,11 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		
 		val moaRestriction = new ScalaRestriction(Restrictions.in("studentCourseYearDetails.modeOfAttendance", JArrayList(moaFT)))
 		moaRestriction.alias("mostSignificantCourse", "studentCourseDetails")
-		moaRestriction.alias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
+		moaRestriction.alias("studentCourseDetails.latestStudentCourseYearDetails", "studentCourseYearDetails")
 		
 		val yosRestriction = new ScalaRestriction(Restrictions.in("studentCourseYearDetails.yearOfStudy", JArrayList(1, 5)))
 		yosRestriction.alias("mostSignificantCourse", "studentCourseDetails")
-		yosRestriction.alias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
+		yosRestriction.alias("studentCourseDetails.latestStudentCourseYearDetails", "studentCourseYearDetails")
 		
 		val sprRestriction = new ScalaRestriction(Restrictions.in("studentCourseDetails.sprStatus", JArrayList(sprP)))
 		sprRestriction.alias("mostSignificantCourse", "studentCourseDetails")
@@ -154,7 +144,6 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 			routeRestriction,
 			moaRestriction,
 			yosRestriction,
-			ayRestriction,
 			sprRestriction,
 			modRestriction
 		)
@@ -174,20 +163,14 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		command.sortOrder = JArrayList(Order.desc("studentCourseYearDetails.yearOfStudy"))
 		
 		command.applyInternal()
-		
-		val ayRestriction = new ScalaRestriction(Daoisms.is("studentCourseYearDetails.academicYear", AcademicYear.guessByDate(DateTime.now)))
-		ayRestriction.alias("mostSignificantCourse", "studentCourseDetails")
-		ayRestriction.alias("studentCourseDetails.studentCourseYearDetails", "studentCourseYearDetails")
-		
-		val expectedRestrictions = Seq(
-			ayRestriction
-		)
+			
+		val expectedRestrictions = Seq()
 		
 		val expectedOrders = Seq(
 			ScalaOrder(
 				Order.desc("studentCourseYearDetails.yearOfStudy"),
 				"mostSignificantCourse" -> "studentCourseDetails",
-				"studentCourseDetails.studentCourseYearDetails" -> "studentCourseYearDetails"	
+				"studentCourseDetails.latestStudentCourseYearDetails" -> "studentCourseYearDetails"	
 			),
 			ScalaOrder.asc("lastName"), 
 			ScalaOrder.asc("firstName")

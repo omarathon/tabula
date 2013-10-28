@@ -55,7 +55,7 @@ object FilterStudentsCommand {
 		),
 		"studentCourseYearDetails" -> Seq(
 			"mostSignificantCourse" -> "studentCourseDetails",
-			"studentCourseDetails.studentCourseYearDetails" -> "studentCourseYearDetails"
+			"studentCourseDetails.latestStudentCourseYearDetails" -> "studentCourseYearDetails"
 		),
 		"moduleRegistration" -> Seq(
 			"mostSignificantCourse" -> "studentCourseDetails",
@@ -122,11 +122,6 @@ class FilterStudentsCommand(val department: Department) extends CommandInternal[
 			// Year of study
 			inIfNotEmpty(
 				"studentCourseYearDetails.yearOfStudy", yearsOfStudy.asScala, 
-				AliasPaths("studentCourseYearDetails") : _*
-			),
-			
-			// COMMON for both mode of attendance and year of study - only consider current academic year
-			is("studentCourseYearDetails.academicYear", AcademicYear.guessByDate(DateTime.now),
 				AliasPaths("studentCourseYearDetails") : _*
 			),
 			

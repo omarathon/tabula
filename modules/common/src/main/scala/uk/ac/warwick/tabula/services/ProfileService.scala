@@ -153,10 +153,10 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	}
 	
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance] = transactional(readOnly = true) {
-		memberDao.getAllModesOfAttendance(department)
+		memberDao.getAllModesOfAttendance(department).filter(_ != null)
 	}
 	def allSprStatuses(department: Department): Seq[SitsStatus] = transactional(readOnly = true) {
-		memberDao.getAllSprStatuses(department)
+		memberDao.getAllSprStatuses(department).filter(_ != null)
 	}
 }
 
