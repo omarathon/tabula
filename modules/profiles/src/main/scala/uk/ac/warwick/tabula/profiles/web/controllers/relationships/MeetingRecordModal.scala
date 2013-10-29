@@ -105,6 +105,7 @@ trait MeetingRecordModal  {
         	"studentCourseDetails" -> studentCourseDetails,
  			    "role" -> relationshipType,
 				  "meetings" -> meetingList,
+					"meetingApprovalWillCreateCheckpoint" -> meetingList.map(m => m.id -> monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(m)).toMap,
 				  "viewer" -> currentMember,
 				  "openMeeting" -> modifiedMeeting).noLayout()
 		}
