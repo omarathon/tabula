@@ -98,6 +98,11 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 					scd.moduleRegistrations.clear()
 				}
 
+			  for (student <- scds.map{ _.student}.distinct) {
+					//should cascade delete SCDs too
+					session.delete(student)
+				}
+
 				for (module <- dept.modules) session.delete(module)
 				dept.modules.clear()
 
@@ -110,7 +115,6 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				for (route <- routes) session.delete(route)
 				dept.routes.clear()
 
-			  for (scd <- scds) session.delete(scd)
 			  for (sub <- recursivelyGetChildren(dept)) session.delete(sub)
 				session.delete(dept)
 			}

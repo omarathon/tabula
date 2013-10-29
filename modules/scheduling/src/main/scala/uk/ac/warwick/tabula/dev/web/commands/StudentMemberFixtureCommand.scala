@@ -27,20 +27,19 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 	var courseDao= Wire[CourseDao]
   var deptDao = Wire[DepartmentDao]
 	var statusDao = Wire[SitsStatusDao]
+	var studentCourseDetailsDao = Wire[StudentCourseDetailsDao]
 
 	def applyInternal() = {
 		val userLookupUser = userLookup.getUserByUserId(userId)
 		assert(userLookupUser != null)
-		transactional() {
+
 			val existing = memberDao.getByUniversityId(userLookupUser.getWarwickId)
 			val route = if (routeCode != "") routeDao.getByCode(routeCode) else None
 			val course = if (courseCode!= "") courseDao.getByCode(courseCode) else None
 			val dept = if (deptCode!= "") deptDao.getByCode(deptCode) else None
 			val currentStudentStatus = statusDao.getByCode("C").get
 
-			existing foreach {
-				memberDao.delete
-			}
+
 
 			val newMember = new StudentMember
 			newMember.universityId = userLookupUser.getWarwickId
@@ -61,12 +60,23 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 			val yd = new StudentCourseYearDetails(scd, 1, AcademicYear.guessByDate(DateTime.now))
 			yd.yearOfStudy = yearOfStudy
 			scd.attachStudentCourseYearDetails(yd)
-			newMember.studentCourseDetails.add(scd)
 
+		transactional() {
+
+			existing foreach {
+				memberDao.delete
+			}
+
+			newMember.studentCourseDetails.add(scd)
 			memberDao.saveOrUpdate(newMember)
-			
-			newMember
 		}
+
+		transactional() {
+			newMember.mostSignificantCourse = scd
+			memberDao.saveOrUpdate(newMember)
+		}
+
+		newMember
 	}
 }
 
