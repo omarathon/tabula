@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.roles.SelectorBuiltInRoleDefinition
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.Promises._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class BuiltInRoleDefinitionUserType extends AbstractBasicUserType[BuiltInRoleDefinition, String] {
 	
@@ -19,10 +20,6 @@ class BuiltInRoleDefinitionUserType extends AbstractBasicUserType[BuiltInRoleDef
 
 	val nullValue = null
 	val nullObject = null
-	
-	implicit class Regex(sc: StringContext) {
-		def r = new util.matching.Regex(sc.parts.mkString, sc.parts.tail.map(_ => "x"): _*)
-	}
 
 	override def convertToObject(legacy: String) = {
 		// Hardcoded legacy code. Ew

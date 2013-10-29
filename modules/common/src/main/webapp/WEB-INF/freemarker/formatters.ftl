@@ -288,8 +288,13 @@
 		<#assign separator = userSetting('bulkEmailSeparator') />
 	</#if>
 
-	<#if emails?size gt 0 && emails?size lte 50>
-		<a href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>" class="btn">
+	<#if emails?size gt 0>
+		<a class="btn <#if emails?size gt 50>use-tooltip disabled</#if>"
+			<#if emails?size gt 50>
+		   		title="Emailing is disabled for groups of more than fifty students"
+			<#else>
+				href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>"
+			</#if> >
 			<i class="icon-envelope-alt"></i> ${title}
 		</a>
 	</#if>

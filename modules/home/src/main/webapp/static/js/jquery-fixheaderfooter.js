@@ -40,10 +40,12 @@
 
 			// persistFooter will need to have a margin-bottom of zero
 			// otherwise you'll see the original footer (and bits of the webpage) underneath the fixed footer as you scroll
-			if(persistFooter.offset().top < $(window).scrollTop() + $(window).height() - primaryNavHeight - persistFooter.height()) {
-				floatingFooter.invisible();
-			} else {
-				floatingFooter.visible();
+			if (persistFooter && persistFooter.length) {
+				if(persistFooter.offset().top < $(window).scrollTop() + $(window).height() - primaryNavHeight - persistFooter.height()) {
+					floatingFooter.invisible();
+				} else {
+					floatingFooter.visible();
+				}
 			}
 
 		}
@@ -101,6 +103,11 @@
 				targetList.css({"top": "auto", "position": "relative", "width": "auto"});
 			}
 		}
+
+		this.viewableArea = function() {
+			return $(window).height() - ($('.persist-header').height() + $('#primary-navigation').height() + $('.persist-footer').outerHeight());
+		}
+
 
 		return this.initialize();
 

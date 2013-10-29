@@ -72,11 +72,14 @@ class UploadedFileTest extends TestBase with Mockito{
 	def customDisallowed {
 		val uploadedFile = new UploadedFile
 		uploadedFile.fileDao = smartMock[FileDao]
+		uploadedFile.disallowedPrefixes = List()
 		uploadedFile.disallowedFilenames = List("feedback.doc")
 		uploadedFile.upload = JArrayList(multiSystemFile, multiAppleDouble, multi1)
 		uploadedFile.onBind(new BindException(uploadedFile, "file"))
 
+		withClue(uploadedFile.attached) {
 		uploadedFile.attached.size should be (2)
+		}
 		uploadedFile.attached.get(0).name should be (multiSystemFile.getOriginalFilename)
 		uploadedFile.attached.get(1).name should be (multiAppleDouble.getOriginalFilename)
 	}

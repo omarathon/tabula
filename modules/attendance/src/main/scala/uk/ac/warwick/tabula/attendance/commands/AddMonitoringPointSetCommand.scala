@@ -22,7 +22,7 @@ object AddMonitoringPointSetCommand {
 		new AddMonitoringPointSetCommand(user, dept, academicYear, existingSetOption)
 			with ComposableCommand[Seq[MonitoringPointSet]]
 			with AutowiringSecurityServicePermissionsAwareRoutes
-			with AutowiringRouteServiceComponent
+			with AutowiringCourseAndRouteServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringMonitoringPointServiceComponent
 			with AddMonitoringPointSetPermissions
@@ -150,7 +150,7 @@ trait AddMonitoringPointSetDescription extends Describable[Seq[MonitoringPointSe
 
 
 
-trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with RouteServiceComponent with PermissionsAwareRoutes {
+trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with CourseAndRouteServiceComponent with PermissionsAwareRoutes {
 
 	private def getAvailableYears = {
 		val routeMap = availableRoutes.map {
