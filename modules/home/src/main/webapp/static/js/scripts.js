@@ -455,24 +455,102 @@
 				return $section.hasClass('expanded');
 			};
 
-			var $icon = $('<i class="icon-fixed-width"></i>');
-			if (open()) $icon.addClass('icon-chevron-down');
-			else $icon.addClass('icon-chevron-right');
+			var $icon = $('<i />');
+			if (open()) $icon.addClass('icon-fixed-width icon-chevron-down');
+			else $icon.addClass('icon-fixed-width icon-chevron-right');
 
 			var $title = $section.find('.section-title');
 			$title.prepend(' ').prepend($icon);
+			
+			var populateContent = function(onComplete) { onComplete(); }
+			if ($section.data('populate') && $section.data('href')) {
+				$section.data('loaded', false).data('loading', false);
+			
+				// Populate function
+				populateContent = function(onComplete) {
+					if ($section.data('loaded')) onComplete();
+					else if ($section.data('loading')) return; // prevent multiple invocation
+					else {
+						$section.data('loading', true);
+						$icon.removeClass().addClass('icon-fixed-width icon-refresh icon-spin');
+						
+						var $target = $section.find($section.data('populate')); 
+					
+						$target.load(
+							$section.data('href'),
+							{ ts: new Date().getTime() },
+							function() {
+								// FIXME This sucks, need to change id6scripts.js to expose this as a function!
+								$target.find('table').each(function() {
+									var t = $(this);
+									if (Math.floor(t.width()) > t.parent().width()) {
+										t.wrap($('<div><div class="sb-wide-table-wrapper"></div></div>'));
+									}
+								});
+								
+								if ($('body.is-smallscreen').length === 0 && $target.find('div.sb-wide-table-wrapper').length > 0) {
+									var popoutLinkHandler = function(event) {
+										event.stopPropagation();
+										event.preventDefault();
+										if (!Shadowbox.initialized) {
+											Shadowbox.initialized = true;
+											Shadowbox.init(shadowboxOptions);
+										}
+										var tableWrapper = $(this).closest('div').find('div.sb-wide-table-wrapper')
+										Shadowbox.open({
+											link : this,
+											content: '<div class="sb-wide-table-wrapper" style="background: white;">' 
+													+ tableWrapper.html()
+													+ '</div>',
+													player: 'html',
+													width: $(window).width(),
+													height: $(window).height()
+										})
+									};
+									
+									var generatePopoutLink = function(){
+										return $('<span/>')
+										.addClass('sb-table-wrapper-popout')
+										.append('(')
+										.append(
+											$('<a/>')
+												.attr('href', '#')
+												.html('Pop-out table')
+												.on('click', popoutLinkHandler)
+										).append(')');
+									};
+									
+									$target.find('div.sb-wide-table-wrapper > table').each(function(){
+										var $this = $(this);
+										if($this.is(':visible') && !$this.hasClass('sb-no-wrapper-table-popout') && Math.floor($this.width()) > $this.parent().width()){
+											$this.parent().parent('div').prepend(generatePopoutLink()).append(generatePopoutLink())
+										}
+									});	
+								}
+								
+								$target.find('a.ajax-modal').ajaxModalLink();
+								
+								onComplete();
+								$section.data('loading', false).data('loaded', true);
+							}
+						);
+					}
+				}
+			}
 
 			$title.css('cursor', 'pointer').on('click', function() {
 				if (open()) {
 					$section.removeClass('expanded');
-					$icon.removeClass('icon-chevron-down').addClass('icon-chevron-right');
+					$icon.removeClass().addClass('icon-fixed-width icon-chevron-right');
 				} else {
-					$section.addClass('expanded');
-					$icon.removeClass('icon-chevron-right').addClass('icon-chevron-down');
-
-					if ($section.data('name')) {
-						window.location.hash = $section.data('name');
-					}
+					populateContent(function() {
+						$section.addClass('expanded');
+						$icon.removeClass().addClass('icon-fixed-width icon-chevron-down');
+	
+						if ($section.data('name')) {
+							window.location.hash = $section.data('name');
+						}
+					});
 				}
 			});
 

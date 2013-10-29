@@ -22,7 +22,6 @@ import uk.ac.warwick.tabula.data.Transactions
 @RunWith(classOf[SpringJUnit4ClassRunner])
 @ContextConfiguration(locations=Array("/WEB-INF/applicationContext-lazyinit.xml"))
 @ActiveProfiles(Array("test"))
-@DirtiesContext
 abstract class AppContextTestBase extends TestBase with ContextSetup with TransactionalTesting {
 	
 	protected def allCommandsInSystem(packageBase: String) = {
@@ -48,7 +47,6 @@ trait FieldAccessByReflection{
 @RunWith(classOf[SpringJUnit4ClassRunner])
 @ContextConfiguration(locations=Array("/WEB-INF/properties-context.xml","/WEB-INF/persistence-context.xml"))
 @ActiveProfiles(Array("test"))
-@DirtiesContext
 abstract class PersistenceTestBase extends TestBase with ContextSetup with TransactionalTesting {
 	
 	

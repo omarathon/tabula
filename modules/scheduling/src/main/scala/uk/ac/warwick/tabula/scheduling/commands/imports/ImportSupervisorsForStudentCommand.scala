@@ -37,22 +37,15 @@ class ImportSupervisorsForStudentCommand()
 	def importSupervisors() {
 		relationshipService
 			.getStudentRelationshipTypeByUrlPart("supervisor") // TODO this is awful
-			.filter { relType => 
+			.filter { relType =>
 				val source = Option(studentCourseDetails.department).map { _.getStudentRelationshipSource(relType) }.getOrElse(StudentRelationshipSource.SITS)
 				source == StudentRelationshipSource.SITS
 			}
 			.foreach { relationshipType =>
-
-				val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode)
-				currentRelationships.foreach { rel =>
-					rel.endDate = DateTime.now
-					relationshipService.saveOrUpdate(rel)
-				}
-
 				supervisorImporter.getSupervisorPrsCodes(studentCourseDetails.scjCode).foreach {
 					supervisorPrsCode => {
 						profileService.getMemberByPrsCode(supervisorPrsCode) match {
-							case Some(sup: StaffMember) => relationshipService.saveStudentRelationship(relationshipType, studentCourseDetails.sprCode, sup.id)
+							case Some(sup: StaffMember) => relationshipService.replaceStudentRelationship(relationshipType, studentCourseDetails.sprCode, sup.id)
 							case _ => logger.warn("Can't save supervisor " + supervisorPrsCode + " for " + studentCourseDetails.sprCode + " - not a member in Tabula db")
 						}
 					}

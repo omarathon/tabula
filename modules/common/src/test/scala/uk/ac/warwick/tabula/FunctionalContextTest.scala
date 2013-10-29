@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.FunctionalContextTest._
+import org.springframework.beans.factory.NoSuchBeanDefinitionException
 
 /**
  * Just a test of the FunctionalContextTesting trait, which allows for
@@ -18,55 +19,60 @@ import uk.ac.warwick.tabula.FunctionalContextTest._
  */
 class FunctionalContextTest extends TestBase with FunctionalContextTesting with Mockito {
 
-  @Test
-  def contextAllowsWire() {
+	@Test
+	def contextAllowsWire() {
 
-    // Create a context based on the Ctx class defined below.
-    inContext[Ctx] {
-      val wired = new WiredBean
-      wired.mystring should be ("cool string")
-      wired.thisYear should be (new AcademicYear(2012))
+		// Create a context based on the Ctx class defined below.
+		inContext[Ctx] {
+			val wired = new WiredBean
+			wired.mystring should be("cool string")
+			wired.thisYear should be(new AcademicYear(2012))
 
-      val service = Wire[StringService]
-      service.resolve("egg") should be ("chicken")
-      there was one (service).resolve("egg")
-    }
+			val service = Wire[StringService]
+			service.resolve("egg") should be("chicken")
+			there was one(service).resolve("egg")
+		}
 
-    // Check that the context is all gone away after inContext.
-    val unwired = new WiredBean
-    unwired.mystring should be (null)
+		// Check that the context is all gone away after inContext.
+		try {
+			val unwired = new WiredBean
+			unwired.mystring should be(null)
+		} catch {
+			case _: NoSuchBeanDefinitionException =>
+				// fine, just means an existing Spring app ctx is in place now.
+		}
 
-  }
+	}
 
 }
 
 object FunctionalContextTest {
 
-  class WiredBean {
-    val mystring: String = Wire[String]("mystring")
-    val thisYear = Wire[AcademicYear]
-  }
+	class WiredBean {
+		val mystring: String = Wire[String]("mystring")
+		val thisYear = Wire[AcademicYear]
+	}
 
-  trait StringService {
-    def resolve(key: String): String
-  }
+	trait StringService {
+		def resolve(key: String): String
+	}
 
-  class Ctx extends FunctionalContext with Mockito {
-    bean("mystring") {
-      "cool string"
-    }
-    bean() {
-      new AcademicYear(olympicYear())
-    }
-    bean("mockStringService") {
-      val s = mock[StringService]
-      s.resolve("egg") returns ("chicken")
-      s
-    }
-    val olympicYear = bean() {
-      2012
-    }
-  }
+	class Ctx extends FunctionalContext with Mockito {
+		bean("mystring") {
+			"cool string"
+		}
+		bean() {
+			new AcademicYear(olympicYear())
+		}
+		bean("mockStringService") {
+			val s = mock[StringService]
+			s.resolve("egg") returns ("chicken")
+			s
+		}
+		val olympicYear = bean() {
+			2012
+		}
+	}
 
 
 }
