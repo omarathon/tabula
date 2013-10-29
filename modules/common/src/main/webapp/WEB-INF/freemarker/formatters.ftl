@@ -282,16 +282,16 @@
 	<${type} ${href} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
 </#macro>
 
-<#macro bulk_email emails title subject>
-	<#assign separator = ";" />
+<#macro bulk_email emails title subject limit=50>
+	<#local separator = ";" />
 	<#if user?? && userSetting('bulkEmailSeparator')?has_content>
 		<#assign separator = userSetting('bulkEmailSeparator') />
 	</#if>
 
 	<#if emails?size gt 0>
-		<a class="btn <#if emails?size gt 50>use-tooltip disabled</#if>"
-			<#if emails?size gt 50>
-		   		title="Emailing is disabled for groups of more than fifty students"
+		<a class="btn <#if emails?size gt limit>use-tooltip disabled</#if>"
+			<#if emails?size gt limit>
+		   		title="Emailing is disabled for groups of more than ${limit} students"
 			<#else>
 				href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>"
 			</#if> >
