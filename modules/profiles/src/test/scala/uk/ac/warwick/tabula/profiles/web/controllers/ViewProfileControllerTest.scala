@@ -19,6 +19,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 	val courseDetails = new StudentCourseDetails()
 	courseDetails.mostSignificant = true
 	member.studentCourseDetails.add(courseDetails)
+	member.mostSignificantCourse = courseDetails
 
 	@Test(expected=classOf[ItemNotFoundException])
 	def throwsNonStudent() {

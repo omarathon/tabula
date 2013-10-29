@@ -16,6 +16,7 @@ import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.MonitoringPointMeetingRelationshipTermService
 
 abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship, val considerAlternatives: Boolean = false)
 	extends Command[MeetingRecord] with Notifies[MeetingRecord, MeetingRecord] with SelfValidating with FormattedHtml
@@ -24,6 +25,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 	var features = Wire.auto[Features]
 	var meetingRecordDao = Wire.auto[MeetingRecordDao]
 	var fileDao = Wire.auto[FileDao]
+	var monitoringPointMeetingRelationshipTermService = Wire.auto[MonitoringPointMeetingRelationshipTermService]
 
 	var title: String = _
 	var description: String = _
@@ -73,6 +75,10 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 
 		if (features.meetingRecordApproval) {
 			updateMeetingApproval(meeting)
+		}
+
+		if (features.attendanceMonitoringMeetingPointType) {
+			monitoringPointMeetingRelationshipTermService.updateCheckpointsForMeeting(meeting)
 		}
 
 		meeting

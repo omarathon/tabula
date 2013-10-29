@@ -40,6 +40,7 @@ trait SmallGroupService {
 
 	def updateAttendance(smallGroupEvent: SmallGroupEvent, weekNumber: Int, universityIds: Seq[String]): SmallGroupEventOccurrence
 	def getAttendees(event: SmallGroupEvent, weekNumber: Int): JList[String]
+	def findAttendanceByGroup(smallGroup: SmallGroup): Seq[SmallGroupEventOccurrence]
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -84,6 +85,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 		occurrence.attendees.includeUsers.addAll(universityIds.asJava)
 		occurrence
 	}
+	
+	def findAttendanceByGroup(smallGroup: SmallGroup): Seq[SmallGroupEventOccurrence] = 
+		smallGroupDao.findSmallGroupOccurrencesByGroup(smallGroup)
 
 	def removeFromSmallGroups(modReg: ModuleRegistration) {
 		if (modReg.module.department.autoGroupDeregistration) {

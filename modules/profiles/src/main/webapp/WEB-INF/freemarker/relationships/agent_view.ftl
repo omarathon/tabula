@@ -96,7 +96,6 @@
 	</#if>
 </div>
 
-<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
 <script type="text/javascript">
 (function($) {
 	$(function() {

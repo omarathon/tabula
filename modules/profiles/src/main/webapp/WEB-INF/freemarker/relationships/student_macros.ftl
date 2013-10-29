@@ -45,7 +45,6 @@
 </table>
 
 <#if !student_table_script_included??>
-<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
 <script type="text/javascript">
     (function($) {
         $(function() {

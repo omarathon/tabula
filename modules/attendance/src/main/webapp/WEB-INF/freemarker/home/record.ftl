@@ -1,3 +1,5 @@
+<#import "*/modal_macros.ftl" as modal />
+
 <script>
 (function ($) {
 	$(function() {
@@ -58,6 +60,9 @@
 							<i class="icon-ok icon-fixed-width" title="Set all to 'Attended'"></i>
 						</button>
 					</div>
+					<#if monitoringPoint.pointType.dbValue == "meeting">
+						<i class="icon-fixed-width"></i>
+					</#if>
 				</div>
 			</div>
 		</div>
@@ -90,6 +95,9 @@
 											<option value="authorised" <#if hasState && command.studentsState[student.universityId].dbValue == "authorised">selected</#if>>Missed (authorised)</option>
 											<option value="attended" <#if hasState && command.studentsState[student.universityId].dbValue == "attended">selected</#if>>Attended</option>
 										</select>
+										<#if monitoringPoint.pointType.dbValue == "meeting">
+											<a class="meetings" title="Meetings information" href="<@routes.studentMeetings monitoringPoint student />"><i class="icon-info-sign"></i></a>
+										</#if>
 									</div>
 								</div>
 							</label>
@@ -108,4 +116,11 @@
 
 		</#if>
 	</div>
+</div>
+
+<div id="modal" class="modal hide fade" style="display:none;">
+	<@modal.header>
+		<h3>Meetings</h3>
+	</@modal.header>
+	<@modal.body></@modal.body>
 </div>

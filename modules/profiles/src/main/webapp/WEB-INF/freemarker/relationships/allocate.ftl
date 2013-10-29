@@ -158,32 +158,33 @@
 							<i class="icon-arrow-right"></i>
 						</div>
 					</div>
-					<div class="span5">
-						<div id="agentslist" class="agents fix-on-scroll">
 
-							
-							<#-- Modal to add students manually -->
-							<div class="modal fade hide" id="add-agents" tabindex="-1" role="dialog" aria-labelledby="add-agents-label" aria-hidden="true">
-								<div class="modal-header">
-									<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-									<h3 id="add-agents-label">Add ${relationshipType.agentRole}s</h3>
-								</div>
-					
-								<div class="modal-body">
-									<p>
-										Lookup ${relationshipType.agentRole}s by typing their names, usercodes or university IDs below, then click <code>Add</code>.
-									</p>
-									
-									<@form.labelled_row "additionalAgents" "${relationshipType.agentRole?cap_first}s">
-										<@form.flexipicker path="additionalAgents" placeholder="User name" membersOnly="true" list=true multiple=true />
-									</@form.labelled_row>
-								</div>
-					
-								<div class="modal-footer">
-									<button type="button" class="btn btn-primary refresh-form">Add</button>
-								</div>
-							</div>
-						
+					<#-- Modal to add students manually -->
+					<div class="modal fade hide" id="add-agents" tabindex="-1" role="dialog" aria-labelledby="add-agents-label" aria-hidden="true">
+						<div class="modal-header">
+							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+							<h3 id="add-agents-label">Add ${relationshipType.agentRole}s</h3>
+						</div>
+
+						<div class="modal-body">
+							<p>
+								Lookup ${relationshipType.agentRole}s by typing their names, usercodes or university IDs below, then click <code>Add</code>.
+							</p>
+
+							<@form.labelled_row "additionalAgents" "${relationshipType.agentRole?cap_first}s">
+								<@form.flexipicker path="additionalAgents" placeholder="User name" membersOnly="true" list=true multiple=true />
+							</@form.labelled_row>
+						</div>
+
+						<div class="modal-footer">
+							<button type="button" class="btn btn-primary refresh-form">Add</button>
+						</div>
+					</div>
+
+
+
+					<div class="span5">
+						<div id="agentslist" class="agents fix-on-scroll clearfix">
 
 							
 							<#macro agent_item university_id full_name existing_students=[]>
@@ -199,7 +200,7 @@
 											${full_name}
 										</h4>
 
-										<div>
+										<div class="well-count">
 											<#local count = existing_students?size />
 											<span class="drag-count">${count}</span> <span class="drag-counted" data-singular="student" data-plural="students">student<#if count != 1>s</#if></span>
 
@@ -256,11 +257,33 @@
 			});
 
 			var fixHeaderFooter = $('.persist-area').fixHeaderFooter();
+			var singleColumnDragTargetHeight =  $('#agentslist .drag-target').outerHeight(true);
 
 			$(window).scroll(function() {
 				fixHeaderFooter.fixDirectionIcon();
 				fixHeaderFooter.fixTargetList('#agentslist'); // eg. personal tutors column
 			});
+
+			// onload reformat agents layout
+			formatAgentsLayout();
+
+			// debounced on window resize, reformat agents layout...
+			on_resize(formatAgentsLayout());
+
+			// when new agents are added, reformat agents layout...
+			$('#add-agents').on('hidden', formatAgentsLayout());
+
+			function formatAgentsLayout() {
+				var agentslist = $('#agentslist');
+				var heightOfSingleColumnList = agentslist.find('.drag-target').length * singleColumnDragTargetHeight;
+
+				if(agentslist.height() > fixHeaderFooter.viewableArea()) {
+					agentslist.addClass('drag-list-two-col');
+				} else if(fixHeaderFooter.viewableArea() > heightOfSingleColumnList) {
+					agentslist.removeClass('drag-list-two-col');
+				}
+			}
+
 
 			$('.btn.refresh-form').on('click', function(e) {
 				var $form = $(e.target).closest('form');
@@ -284,6 +307,7 @@
 				}]);
 				
 				$container.remove();
+				formatAgentsLayout(); // after deleting item from list, re-format the grid layout for the agents
 			});
 
 			// When the return list has changed, make sure the filter is re-run			
@@ -294,6 +318,17 @@
 					filter.filter();
 				}
 			});
+
+
+			// debounced on_resize to avoid retriggering while resizing window
+			function on_resize(c,t) {
+				onresize = function() {
+					clearTimeout(t);
+					t = setTimeout(c,100)
+				};
+				return c;
+			}
+
 		})(jQuery);
 	</script>
 

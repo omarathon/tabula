@@ -6,6 +6,7 @@ import uk.ac.warwick.userlookup._
 import uk.ac.warwick.userlookup.webgroups.GroupInfo
 import uk.ac.warwick.userlookup.webgroups.GroupNotFoundException
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.codec.binary.Base64
 import uk.ac.warwick.tabula.UserFlavour.{Applicant, Anonymous, Unverified, Vanilla}
@@ -82,7 +83,7 @@ class MockUserLookup(var defaultFoundUser: Boolean)
      */
     def registerUsers(userIds: String*) {
         for (id <- userIds) {
-            val user = mockUser(id);
+            val user = mockUser(id)
             users += (id -> user)
         }
     }
@@ -138,6 +139,11 @@ trait MockUser {
 		user.setShortDepartment("Dept of " + capitalize(id));
 		user.setDepartmentCode("D" + capitalize(id.substring(0, 1)));
 		user.setEmail(id + "@example.com");
+		user.setWarwickId({
+			val universityId = Math.abs(id.hashCode()).toString
+			if (universityId.length > 7) universityId.substring(universityId.length - 7)
+			else UniversityId.zeroPad(universityId)
+		})		
 		user
 	}
 }

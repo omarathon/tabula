@@ -14,13 +14,11 @@ import java.lang.annotation.Annotation
 	new UniqueConstraint(columnNames = Array("event_id", "week"))
 ))
 class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with Serializable {
-	type WeekNumber = Int
-
 	@ManyToOne
 	@JoinColumn(name="event_id")
 	var event: SmallGroupEvent = _
 
-	var week: WeekNumber = _
+	var week: SmallGroupEventOccurrence.WeekNumber = _
 
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
@@ -28,4 +26,8 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 
 	def permissionsParents = Stream(event)
 
+}
+
+object SmallGroupEventOccurrence {
+	type WeekNumber = Int
 }

@@ -57,8 +57,7 @@
 
     </@f.form>
 </#escape>
-<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
-<script type="text/javascript" src="/static/js/sortable-table.js"></script>
+<@script "/static/js/sortable-table.js" />
 <script type="text/javascript">
     jQuery("#groups-table").bigList({});
 </script>

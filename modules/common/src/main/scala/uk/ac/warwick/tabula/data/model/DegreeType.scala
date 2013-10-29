@@ -8,7 +8,7 @@ object DegreeType {
 	case object Postgraduate extends DegreeType("PG", "Postgraduate", 2)
 	case object PGCE extends DegreeType("PGCE", "PGCE", 3)
 	case object InService extends DegreeType("IS", "In-Service", 4)
-
+	
 	def fromCode(code: String) = code match {
 	  	case Undergraduate.dbValue => Undergraduate
 	  	case Postgraduate.dbValue => Postgraduate

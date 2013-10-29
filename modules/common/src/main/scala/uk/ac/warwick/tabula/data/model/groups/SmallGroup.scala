@@ -19,6 +19,14 @@ object SmallGroup {
 	object Settings {
 		val MaxGroupSize = "MaxGroupSize"
 	}
+	
+	// For sorting a collection by group name. Either pass to the sort function,
+	// or expose as an implicit val.
+	val NameOrdering = Ordering.by[SmallGroup, String] ( _.name )
+
+	// Companion object is one of the places searched for an implicit Ordering, so
+	// this will be the default when ordering a list of small groups.
+	implicit val defaultOrdering = NameOrdering
 }
 
 /**
@@ -99,5 +107,7 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	def postLoad {
 		ensureSettings
 	}
+	
+	def hasScheduledEvents = events.asScala.exists(!_.isUnscheduled)
 
 }

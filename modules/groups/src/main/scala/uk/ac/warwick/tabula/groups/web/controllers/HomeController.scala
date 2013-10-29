@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewModule
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewModules
 
 @Controller class HomeController extends GroupsController {
-	import HomeController._
+	import GroupsDisplayHelper._
 	var moduleService = Wire[ModuleAndDepartmentService]
 	var smallGroupService = Wire[SmallGroupService]
 
@@ -43,7 +43,7 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewModules
 //
 // Stateless functions to munge groupsets and groups
 //
-object HomeController {
+object GroupsDisplayHelper {
 	// For each of the groupsets of which this user is a member, work out which of the constituent groups
 	// should be displayed (which could be None, All, or "All groups the student is allocated to"), based
 	// on the type and state of the groupset. Also return whether the student is allocated to the returned

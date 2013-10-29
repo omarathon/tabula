@@ -22,6 +22,7 @@ import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.ModuleRegistrationStatus
+import scala.collection.JavaConverters._
 
 class ImportStudentCourseYearCommand(resultSet: ResultSet)
 	extends Command[StudentCourseYearDetails] with Logging with Daoisms
@@ -75,6 +76,11 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + studentCourseYearDetails)
+			
+			if (studentCourseDetails.latestStudentCourseYearDetails == null || 
+				studentCourseDetails.studentCourseYearDetails.asScala.forall { _ <= studentCourseYearDetails }) {
+				studentCourseDetails.latestStudentCourseYearDetails = studentCourseYearDetails
+			}
 
 			studentCourseYearDetails.lastUpdatedDate = DateTime.now
 			studentCourseYearDetailsDao.saveOrUpdate(studentCourseYearDetails)

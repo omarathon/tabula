@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.services.{MonitoringPointServiceComponent, AutowiringMonitoringPointServiceComponent, RouteServiceComponent, AutowiringRouteServiceComponent}
+import uk.ac.warwick.tabula.services.{MonitoringPointServiceComponent, AutowiringMonitoringPointServiceComponent, CourseAndRouteServiceComponent, AutowiringCourseAndRouteServiceComponent}
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -20,7 +20,7 @@ object ManageMonitoringPointSetCommand {
 		new ManageMonitoringPointSetCommand(user, dept, academicYearOption)
 			with AutowiringSecurityServicePermissionsAwareRoutes
 			with ManageMonitoringPointSetPermissions
-			with AutowiringRouteServiceComponent
+			with AutowiringCourseAndRouteServiceComponent
 			with AutowiringMonitoringPointServiceComponent
 			with ComposableCommand[Seq[MonitoringPointSetTemplate]]
 			with ReadOnly with Unaudited
@@ -46,7 +46,7 @@ trait ManageMonitoringPointSetPermissions extends RequiresPermissionsChecking wi
 	}
 }
 
-trait ManageMonitoringPointSetState extends RouteServiceComponent with MonitoringPointServiceComponent with PermissionsAwareRoutes {
+trait ManageMonitoringPointSetState extends CourseAndRouteServiceComponent with MonitoringPointServiceComponent with PermissionsAwareRoutes {
 
 	def dept: Department
 	def user: CurrentUser

@@ -847,6 +847,14 @@ table {
 	.vertical-gradient(#ffff99, #ffcc66);
 }
 
+#ie8-notice {
+	font-size: 140%;
+	padding: 0.3em;
+	text-align: center;
+	color: white;
+	.vertical-gradient(@tabulaBlueLight, @tabulaBlueDark);
+}
+
 .permission-group {
    .box-style;
    padding: 0.5em;
@@ -1031,6 +1039,7 @@ span.press-ctrl-c {
 }
 
 .subtle { color: @subtle-text-color; }
+.subtler { color: @very-subtle-text-color; }
 .very-subtle { color: @very-subtle-text-color; font-size: @very-subtle-font-size; }
 
 .comment-field {
@@ -1672,3 +1681,11 @@ input.flexi-picker {
     background-color: darken(@infoBackground, 5%);
   }
 }
+
+// Icon colours for attendance-style data
+.icon-ok.attended { color: @successText; }
+.icon-remove.unauthorised { color: @errorText; }
+.icon-remove-circle.authorised { color: @infoText; }
+.icon-warning-sign.late { color: @warningText; }
+
+th.nowrap, td.nowrap { white-space: nowrap; }

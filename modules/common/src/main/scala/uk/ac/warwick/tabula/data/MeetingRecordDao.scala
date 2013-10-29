@@ -1,18 +1,16 @@
 package uk.ac.warwick.tabula.data
 
 import org.springframework.stereotype.Repository
-import org.hibernate.SessionFactory
-import org.hibernate.`type`._
-import uk.ac.warwick.tabula.data.model.MeetingRecord
-import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.tabula.data.model.{MeetingRecordApproval, MeetingRecord, StudentRelationship, Member}
 import org.hibernate.criterion.{Restrictions,Order}
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.spring.Wire
 
 trait MeetingRecordDao {
 	def saveOrUpdate(meeting: MeetingRecord)
+	def saveOrUpdate(approval: MeetingRecordApproval)
 	def list(rel: Set[StudentRelationship], currentUser: Member): Seq[MeetingRecord]
+	def list(rel: StudentRelationship): Seq[MeetingRecord]
 	def get(id: String): Option[MeetingRecord]
 }
 
@@ -20,6 +18,8 @@ trait MeetingRecordDao {
 class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 
 	def saveOrUpdate(meeting: MeetingRecord) = session.saveOrUpdate(meeting)
+
+	def saveOrUpdate(approval: MeetingRecordApproval) = session.saveOrUpdate(approval)
 
 	def list(rel: Set[StudentRelationship], currentUser: Member): Seq[MeetingRecord] = {
 		if (rel.isEmpty)
@@ -40,13 +40,22 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 
 	}
 
+	def list(rel: StudentRelationship): Seq[MeetingRecord] = {
+		session.newCriteria[MeetingRecord]
+			.add(Restrictions.eq("relationship", rel))
+			.add(is("deleted", false))
+			.addOrder(Order.desc("meetingDate"))
+			.addOrder(Order.desc("lastUpdatedDate"))
+			.seq
+	}
 
-	def get(id: String) = getById[MeetingRecord](id);
+
+	def get(id: String) = getById[MeetingRecord](id)
 }
 
-trait MeetingRecordDaoComponent{
-	var meetingRecordDao:MeetingRecordDao
+trait MeetingRecordDaoComponent {
+	val meetingRecordDao: MeetingRecordDao
 }
 trait AutowiringMeetingRecordDaoComponent extends MeetingRecordDaoComponent{
-	var meetingRecordDao = Wire.auto[MeetingRecordDao]
+	val meetingRecordDao = Wire.auto[MeetingRecordDao]
 }

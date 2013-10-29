@@ -282,14 +282,19 @@
 	<${type} ${href} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
 </#macro>
 
-<#macro bulk_email emails title subject>
-	<#assign separator = ";" />
+<#macro bulk_email emails title subject limit=50>
+	<#local separator = ";" />
 	<#if user?? && userSetting('bulkEmailSeparator')?has_content>
 		<#assign separator = userSetting('bulkEmailSeparator') />
 	</#if>
 
-	<#if emails?size gt 0 && emails?size lte 50>
-		<a href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>" class="btn">
+	<#if emails?size gt 0>
+		<a class="btn <#if emails?size gt limit>use-tooltip disabled</#if>"
+			<#if emails?size gt limit>
+		   		title="Emailing is disabled for groups of more than ${limit} students"
+			<#else>
+				href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>"
+			</#if> >
 			<i class="icon-envelope-alt"></i> ${title}
 		</a>
 	</#if>
@@ -315,6 +320,17 @@
 	</#list>
 	
 	<@bulk_email emails title subject />
+</#macro>
+
+<#macro help_popover id title="" content="">
+	<a class="use-popover"
+	   id="popover-${id}"
+	   <#if title?has_content>data-title="${title}"</#if>
+	   data-content="${content}"
+	>
+		<i class="icon-question-sign"></i>
+	</a>
+
 </#macro>
 
 </#escape>

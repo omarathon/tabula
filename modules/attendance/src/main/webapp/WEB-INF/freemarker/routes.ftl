@@ -14,6 +14,7 @@
 	
 	<#macro record point returnTo><@url page="/${point.pointSet.route.department.code}/${point.id}/record?returnTo=${returnTo?url}"/></#macro>
 	<#macro recordStudent point studentCourseDetails returnTo><@url page="/${point.pointSet.route.department.code}/${point.id}/record/${studentCourseDetails.urlSafeId}?returnTo=${returnTo?url}"/></#macro>
+	<#macro studentMeetings point member><@url page="/${point.pointSet.route.department.code}/${point.id}/meetings/${member.universityId}"/></#macro>
 	
 	<#macro createSet department academicYear><@url page="/manage/${department.code}/sets/add/${academicYear.startYear?c}"/></#macro>
 	<#macro editSet pointSet><@url page="/manage/${pointSet.route.department.code}/sets/${pointSet.id}/edit"/></#macro>

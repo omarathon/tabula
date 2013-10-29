@@ -15,7 +15,7 @@ $(function(){
 		var $this = $(this), selectedValue = $this.find('option:selected').val();
 		$('.recordCheckpointForm div.forCloning div.btn-group')
 			.clone(true)
-			.appendTo($this.parent())
+			.insertAfter($this)
 			.find('button').on('click', function(){
 				var _$this = $(this);
 				$this.find('option').filter(function(){
@@ -33,7 +33,17 @@ $(function(){
 				})
 			});
 		});
-	});
+	}).end().find('a.meetings').on('click', function(e){
+        e.preventDefault();
+        $.get($(this).attr('href'), function(data){
+            $('#modal .modal-body').html(data);
+            $('#modal').modal("show");
+            $('.use-popover').tabulaPopover({
+                trigger: 'click',
+                container: '#container'
+            });
+        });
+    });
 
 	// END SCRIPTS FOR RECORDING MONITORING POINTS
 

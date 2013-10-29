@@ -6,29 +6,32 @@ import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
 import uk.ac.warwick.tabula.data.model.{MeetingRecord, MeetingRecordApproval}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.profiles.notifications.{MeetingRecordApprovedNotification, MeetingRecordRejectedNotification}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointMeetingRelationshipTermServiceComponent, MonitoringPointMeetingRelationshipTermServiceComponent}
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
-class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends Command[MeetingRecordApproval]
-	with Notifies[MeetingRecordApproval, MeetingRecord] with SelfValidating with Daoisms {
+object ApproveMeetingRecordCommand {
+	def apply(approval: MeetingRecordApproval) =
+		new ApproveMeetingRecordCommand(approval)
+		with ComposableCommand[MeetingRecordApproval]
+		with ApproveMeetingRecordDescription
+		with ApproveMeetingRecordPermission
+		with ApproveMeetingRecordValidation
+		with ApproveMeetingRecordNotification
+		with AutowiringMeetingRecordDaoComponent
+		with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
+		with AutowiringFeaturesComponent
 
-	PermissionCheck(Permissions.Profiles.MeetingRecord.Update(approval.meetingRecord.relationship.relationshipType), approval.meetingRecord)
+}
 
-	var approved: JBoolean = _
-	var rejectionComments: String =_
+class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends CommandInternal[MeetingRecordApproval] with ApproveMeetingRecordState {
 
-	def validate(errors: Errors) {
-		if (approval.meetingRecord.deleted){
-			errors.reject("meetingRecordApproval.meetingRecord.deleted")
-		}
-		if (approved == null) {
-			errors.rejectValue("approved", "meetingRecordApproval.approved.isNull")
-		} else if (!approved && !rejectionComments.hasText) {
-			errors.rejectValue("rejectionComments", "meetingRecordApproval.rejectionComments.isEmpty")
-		}
-	}
+	self: MeetingRecordDaoComponent with MonitoringPointMeetingRelationshipTermServiceComponent with FeaturesComponent =>
 
 	def applyInternal() = transactional() {
 		if (approved) {
@@ -40,17 +43,55 @@ class ApproveMeetingRecordCommand (val approval: MeetingRecordApproval) extends 
 
 		approval.lastUpdatedDate = DateTime.now
 
-		session.saveOrUpdate(approval)
+		meetingRecordDao.saveOrUpdate(approval)
+
+		if (features.attendanceMonitoringMeetingPointType)
+			monitoringPointMeetingRelationshipTermService.updateCheckpointsForMeeting(approval.meetingRecord)
 
 		approval
 	}
+}
 
+trait ApproveMeetingRecordValidation extends SelfValidating {
+	self: ApproveMeetingRecordState =>
+
+	def validate(errors: Errors) {
+		if (approval.meetingRecord.deleted){
+			errors.reject("meetingRecordApproval.meetingRecord.deleted")
+		}
+		if (approved == null) {
+			errors.rejectValue("approved", "meetingRecordApproval.approved.isNull")
+		} else if (!approved && !rejectionComments.hasText) {
+			errors.rejectValue("rejectionComments", "meetingRecordApproval.rejectionComments.isEmpty")
+		}
+	}
+}
+
+trait ApproveMeetingRecordPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: ApproveMeetingRecordState =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.Profiles.MeetingRecord.Update(approval.meetingRecord.relationship.relationshipType), approval.meetingRecord)
+	}
+}
+
+trait ApproveMeetingRecordDescription extends Describable[MeetingRecordApproval] {
+	self: ApproveMeetingRecordState =>
 	def describe(d: Description) {
 		d.properties("meetingRecord" -> approval.meetingRecord.id)
 	}
+}
 
-	def emit(approval: MeetingRecordApproval) = 
+trait ApproveMeetingRecordNotification extends Notifies[MeetingRecordApproval, MeetingRecord] {
+	self: ApproveMeetingRecordState =>
+
+	def emit(approval: MeetingRecordApproval) =
 		if (approved) Seq(new MeetingRecordApprovedNotification(approval))
 		else Seq(new MeetingRecordRejectedNotification(approval))
+}
 
+trait ApproveMeetingRecordState {
+	def approval: MeetingRecordApproval
+	var approved: JBoolean = _
+	var rejectionComments: String =_
 }

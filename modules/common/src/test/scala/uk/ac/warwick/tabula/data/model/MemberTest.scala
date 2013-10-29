@@ -46,6 +46,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		studentCourseDetails.relationshipService = relationshipService
 
 		member.studentCourseDetails.add(studentCourseDetails)
+		member.mostSignificantCourse = studentCourseDetails
 
 		// add module registrations
 		val mod1 = new Module
@@ -181,6 +182,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		student.studentCourseDetails.add(studentCourseDetails)
 		student.homeDepartment = dept
+		student.mostSignificantCourse = studentCourseDetails
 
 		val desc = student.description
 		student.description should be ("Undergraduate student, MEng Computer Science, IT Services")

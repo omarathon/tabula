@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.system.permissions.Restricted
 @Entity
 class StudentCourseYearDetails extends StudentCourseYearProperties
 	with GeneratedId with ToString with HibernateVersioned with PermissionsTarget
-	with Ordered[StudentCourseYearDetails]{
+	with Ordered[StudentCourseYearDetails] {
 
 	def this(studentCourseDetails: StudentCourseDetails, sceSequenceNumber: JInteger,year:AcademicYear) {
 		this()
@@ -34,6 +34,9 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 
 	def permissionsParents = Option(studentCourseDetails).toStream
 
+	/**
+	 * This is used to calculate StudentCourseDetails.latestStudentCourseYearDetails
+	 */
 	def compare(that:StudentCourseYearDetails): Int = {
 		if (this.academicYear != that.academicYear) {
 			this.academicYear.compare(that.academicYear)

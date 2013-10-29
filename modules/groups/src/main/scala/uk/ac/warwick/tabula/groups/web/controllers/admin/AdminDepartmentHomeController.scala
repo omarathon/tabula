@@ -21,7 +21,7 @@ class AdminDepartmentHomeController extends GroupsController {
 	hideDeletedItems
 
 	@ModelAttribute("adminCommand") def command(@PathVariable("department") dept: Department, user: CurrentUser) =
-		new AdminDepartmentHomeCommand(dept, user)
+		AdminDepartmentHomeCommand(dept, user)
 
 	@ModelAttribute("allocated") def allocatedSet(@RequestParam(value="allocated", required=false) set: SmallGroupSet) = set
 
