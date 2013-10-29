@@ -29,9 +29,17 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 	groupSet.module = module
 	groupSet.academicYear = new AcademicYear(2013)
 
+	val groupSet2 = new SmallGroupSet
+	groupSet.module = module2
+	groupSet.academicYear = new AcademicYear(2013)
+
 	val group = new SmallGroup
 	group.groupSet = groupSet
 	group.students.add(user)
+
+	val group2 = new SmallGroup
+	group2.groupSet = groupSet2
+	group2.students.add(user)
 
 	val service = new AbstractSmallGroupService
 		with AutowiringAssignmentMembershipDaoComponent // don't need this component, so autowiring to null is fine
@@ -83,6 +91,8 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 		service.removeFromSmallGroups(modreg)
 		group.students.includesUser(user) should be (false)
 
+		// now check the user is still in group2:
+		group2.students.includesUser(user) should be (true)
 	}
 }
 
