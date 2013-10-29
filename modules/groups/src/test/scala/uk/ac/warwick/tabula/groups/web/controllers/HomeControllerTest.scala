@@ -12,7 +12,7 @@ import scala.collection.JavaConverters._
 
 class HomeControllerTest extends TestBase with Mockito{
 
-	import HomeController._
+	import GroupsDisplayHelper._
 
 	private trait Fixture{
 		val userLookup = mock[UserLookupService]
