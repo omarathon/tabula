@@ -33,9 +33,9 @@ trait WebsignonMethods extends ShouldMatchers  with Eventually{
         } else {
 
           if (pageSource contains ("Signed in as ")) {
-            // signed in as someone else; sign out first
-            click on linkText("Sign out")
-          }else if (pageTitle startsWith("Sign in - Access refused")){
+						// signed in as someone else; sign out first
+						click on linkText("Sign out")
+					}else if (pageTitle startsWith("Sign in - Access refused")){
 						//signed in as someone else who doesn't have permissions to view the page
 						//  - follow the "sign in as another user" link
 						click on linkText("Sign in with a different username.")
@@ -43,7 +43,13 @@ trait WebsignonMethods extends ShouldMatchers  with Eventually{
 
           // sign in if we've not already been taken to that page
           if (!pageTitle.contains("Sign in")) {
-						click on linkText("Sign in")
+						if (linkText("Sign in").findElement.isDefined) {
+							click on linkText("Sign in")
+						} else if (linkText("Sign out").findElement.isDefined) {
+							fail("Expected Sign in link but there was a Sign out link!"+pageSource)
+						} else {
+							fail("No Sign in or out links! URL:"+currentUrl)
+						}
           }
 					// wait for the page to load
 					eventually(timeout(10.seconds), interval(200.millis))(

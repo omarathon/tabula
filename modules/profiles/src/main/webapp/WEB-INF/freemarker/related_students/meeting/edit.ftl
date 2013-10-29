@@ -83,9 +83,33 @@
 				<@f.option disabled="true" selected="true" label="Please select one..." />
 				<@f.options items=formats />
 			</@f.select>
+			<#if !isStudent>
+				<span class="monitoring-point-note">
+					Submitting this record will mark a monitoring point as attended.
+				</span>
+			</#if>
 		</@form.labelled_row>
 
-
+		<#if !isStudent>
+			<script>
+				jQuery(function($){
+					$('.monitoring-point-note').hide();
+					var formats = [
+						<#list formatsThatWillCreateCheckpoint as format>
+							"${format.description?js_string}"<#if format_has_next>,</#if>
+						</#list>
+					];
+					$('#format').on('change', function(){
+						var selectedFormat = $(this).find('option:selected').val();
+						if($.grep(formats, function(f){ return f == selectedFormat }).length > 0) {
+							$('.monitoring-point-note').show();
+						} else {
+							$('.monitoring-point-note').hide();
+						}
+					})
+				});
+			</script>
+		</#if>
 
 		<#-- file upload (TAB-359) -->
 		<#assign fileTypes=command.attachmentTypes />

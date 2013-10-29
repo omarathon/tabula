@@ -9,6 +9,15 @@ import uk.ac.warwick.tabula.JavaImports._
 import model.Department
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.data.model.SitsStatus
+import uk.ac.warwick.spring.Wire
+
+trait SitsStatusDaoComponent {
+	val sitsStatusDao: SitsStatusDao
+}
+
+trait AutowiringSitsStatusDaoComponent extends SitsStatusDaoComponent {
+	val sitsStatusDao = Wire[SitsStatusDao]
+}
 
 trait SitsStatusDao {
 	def saveOrUpdate(sitsStatus: SitsStatus)

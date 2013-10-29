@@ -3,19 +3,14 @@ package uk.ac.warwick.tabula.services
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.MemberUserType
-import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.PrsCode
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 /**
@@ -30,7 +25,7 @@ trait RelationshipService {
 
 	def saveOrUpdate(relationship: StudentRelationship)
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
-	def getRelationships(relationshipType: StudentRelationshipType, targetUniversityId: String): Seq[StudentRelationship]
+	def getRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def saveStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship
 	def replaceStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship
 	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
@@ -179,7 +174,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 }
 
 trait RelationshipServiceComponent {
-	var relationshipService:RelationshipService
+	var relationshipService: RelationshipService
 }
 trait AutowiringRelationshipServiceComponent extends RelationshipServiceComponent{
 	var relationshipService = Wire[RelationshipService]

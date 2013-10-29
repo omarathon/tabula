@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.attendance.commands.{EditMonitoringPointState, EditMonitoringPointCommand, AddMonitoringPointCommand}
+import uk.ac.warwick.tabula.attendance.commands.{EditMonitoringPointState, EditMonitoringPointCommand}
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import javax.validation.Valid
 import org.springframework.validation.Errors
@@ -20,7 +20,7 @@ class EditMonitoringPointController extends AttendanceController {
 
 	@RequestMapping(method=Array(POST), params = Array("form"))
 	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPoint] with EditMonitoringPointState) = {
-		cmd.copyFrom
+		cmd.copyFrom(cmd.pointIndex)
 		Mav("manage/point/edit_form").noLayoutIf(ajax)
 	}
 

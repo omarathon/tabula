@@ -16,7 +16,7 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends TermServiceComponent with MonitoringPointServiceComponent
 			with AddMonitoringPointSetValidation with AddMonitoringPointSetState with PermissionsAwareRoutes {
-		val routeService = mock[RouteService]
+		val courseAndRouteService = mock[CourseAndRouteService]
 		val termService = mock[TermService]
 		val monitoringPointService = mock[MonitoringPointService]
 		def routesForPermission(user: CurrentUser, p: Permission, dept: Department) = dept.routes.asScala.toSet

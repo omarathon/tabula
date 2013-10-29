@@ -80,6 +80,9 @@ If you are doing any work on this, it would be good to do the above first.
 					<li ${data.hasUnreleasedGroupsets?string(''," class='disabled use-tooltip' title='All modules already notified' ")} >
 						<a href="<@routes.batchnotify department />"><i class="icon-envelope-alt icon-fixed-width"></i> Notify</a></li>
 
+					<li>
+						<a href="<@routes.departmentAttendance department />"><i class="icon-group icon-fixed-width"></i> Attendance</a>
+					</li>
 				</ul>
 			</div>
 

@@ -81,6 +81,10 @@
 								<i class="icon-user"></i> Edit departmental permissions
 							</a></li>
 							
+							<li><a href="<@routes.filter_students dept/>">
+								<i class="icon-group"></i> View students
+							</a></li>
+							
 							<#list dept.displayedStudentRelationshipTypes as relationshipType>
 								<li><a href="<@routes.relationship_agents dept relationshipType />">
 									<i class="icon-eye-open"></i> ${relationshipType.description}s

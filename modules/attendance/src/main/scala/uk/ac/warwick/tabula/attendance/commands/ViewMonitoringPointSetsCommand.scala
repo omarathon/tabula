@@ -19,7 +19,7 @@ object ViewMonitoringPointSetsCommand {
 		new ViewMonitoringPointSetsCommand(user, dept, academicYearOption, routeOption, pointSetOption)
 			with AutowiringSecurityServicePermissionsAwareRoutes
 			with ViewMonitoringPointSetsPermissions
-			with AutowiringRouteServiceComponent
+			with AutowiringCourseAndRouteServiceComponent
 			with AutowiringMonitoringPointServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
@@ -74,7 +74,7 @@ trait ViewMonitoringPointSetsPermissions extends RequiresPermissionsChecking wit
 	}
 }
 
-trait ViewMonitoringPointSetsState extends RouteServiceComponent with MonitoringPointServiceComponent with GroupMonitoringPointsByTerm {
+trait ViewMonitoringPointSetsState extends CourseAndRouteServiceComponent with MonitoringPointServiceComponent with GroupMonitoringPointsByTerm {
 	self: PermissionsAwareRoutes =>
 
 	def dept: Department

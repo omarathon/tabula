@@ -7,7 +7,7 @@
 	</@spring.bind>
 
 	<#assign pointCount = 0 />
-	<#assign pointFields = ["name", "validFromWeek", "requiredFromWeek"] />
+	<#assign pointFields = ["name", "validFromWeek", "requiredFromWeek", "pointType", "meetingRelationships", "meetingFormats", "meetingQuantity"] />
 	<#macro pointsInATerm term>
 		<div class="striped-section">
 			<h2 class="section-title">${term}</h2>
@@ -29,9 +29,7 @@
 								</@spring.bind>
 							</#list>
 
-							<input type="hidden" name="monitoringPoints[${pointCount}].name" value="${point.name}" />
-							<input type="hidden" name="monitoringPoints[${pointCount}].validFromWeek" value="${point.validFromWeek}" />
-							<input type="hidden" name="monitoringPoints[${pointCount}].requiredFromWeek" value="${point.requiredFromWeek}" />
+							<#include "../point/_hidden_fields.ftl" />
 						</div>
 					</div>
 					<#assign pointCount = pointCount + 1 />

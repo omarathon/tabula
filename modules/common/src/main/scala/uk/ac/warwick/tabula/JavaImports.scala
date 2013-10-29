@@ -3,6 +3,7 @@ import collection.JavaConverters._
 import collection.mutable
 import language.implicitConversions
 import scala.collection.GenTraversableOnce
+import scala.collection.SortedMap
 
 /**
  * Quick way to expose a bunch of Java type names under
@@ -54,6 +55,12 @@ trait JavaImports {
 	 * None as null.
 	 */
 	protected implicit def ToJLong(l: Option[Long]) = (l map (l => l: JLong)).orNull
+	
+	def toJLinkedHashMap[K, V](smap: SortedMap[K, V]) = {
+		val map = new java.util.LinkedHashMap[K, V]
+		map.putAll(smap.asJava)
+		map
+	}
 	
 	/**
 	 * Allows you to create an empty Java ArrayList, useful as an initial

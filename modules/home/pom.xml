@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>50-SNAPSHOT</version>
+		<version>51-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -239,6 +239,7 @@
 								<include>libs/jquery-caret/jquery.caret.1.02.js</include>
 								<include>libs/jquery-fixedheadertable/jquery.fixedheadertable.min.js</include>
 								<include>libs/jquery-rating/jquery.rating.pack.js</include>
+								<include>libs/jquery-tablesorter/jquery.tablesorter.min.js</include>
 								<include>libs/popup/popup.js</include>
 								<include>libs/bootstrap/js/bootstrap.js</include>
 								<include>libs/bootstrap-editable/js/bootstrap-editable.js</include>

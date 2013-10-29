@@ -4,6 +4,7 @@ import org.hibernate.criterion._
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.transform.DistinctRootEntityResultTransformer
+import collection.mutable
 
 /**
  * Nice wrapper for a Criteria object. You usually won't create
@@ -11,12 +12,28 @@ import org.hibernate.transform.DistinctRootEntityResultTransformer
  * to Session which will return one of these.
  */
 class ScalaCriteria[A](c: org.hibernate.Criteria) {
+	
+	private val aliases: mutable.Map[String, String] = mutable.Map()
 
 	def add(criterion: Criterion) = chainable { c.add(criterion) }
+	def add(restriction: ScalaRestriction) = chainable {
+		restriction.aliases.foreach { case (property, alias) => createAlias(property, alias) }
+		c.add(restriction.underlying)
+	}
 	def addOrder(order: Order) = chainable { c.addOrder(order) }
+	def addOrder(order: ScalaOrder) = chainable {
+		order.aliases.foreach { case (property, alias) => createAlias(property, alias) }
+		c.addOrder(order.underlying)
+	}
 	def setMaxResults(i: Int) = chainable { c.setMaxResults(i) }
 	def setFirstResult(i: Int) = chainable { c.setFirstResult(i) }
-	def createAlias(property: String, alias: String) = chainable { c.createAlias(property, alias) }
+	def createAlias(property: String, alias: String) = chainable {
+		aliases.put(property, alias) match {
+			case None => c.createAlias(property, alias)
+			case Some(existing) if existing == alias => // duplicate
+			case Some(other) => throw new IllegalArgumentException("Tried to alias %s to %s, but it is already aliased to %s!".format(property, alias, other))
+		} 
+	}
 	def distinct = chainable { c.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE) }
 
 	// Helper to neaten up the above chainable methods - returns this instead of plain Criteria

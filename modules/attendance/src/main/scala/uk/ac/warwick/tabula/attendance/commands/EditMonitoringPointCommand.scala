@@ -1,16 +1,13 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.data.model.Department
 import scala.collection.JavaConverters._
-import org.springframework.util.AutoPopulatingList
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointType}
 import uk.ac.warwick.tabula.permissions.CheckablePermission
 
 object EditMonitoringPointCommand {
@@ -44,6 +41,17 @@ trait EditMonitoringPointValidation extends SelfValidating with MonitoringPointV
 		validateWeeks(errors, validFromWeek, requiredFromWeek, "validFromWeek")
 		validateName(errors, name, "name")
 
+		pointType match {
+			case MonitoringPointType.Meeting =>
+				validateTypeMeeting(errors,
+					meetingRelationships.asScala, "meetingRelationships",
+					meetingFormats.asScala, "meetingFormats",
+					meetingQuantity, "meetingQuantity",
+					dept
+				)
+			case _ =>
+		}
+
 		val pointsWithCurrentRemoved = monitoringPoints.asScala.zipWithIndex.filter(_._2 != pointIndex).unzip._1
 		if (pointsWithCurrentRemoved.count(p =>
 			p.name == name && p.validFromWeek == validFromWeek && p.requiredFromWeek == requiredFromWeek
@@ -65,28 +73,7 @@ trait EditMonitoringPointPermissions extends RequiresPermissionsChecking with Pe
 	}
 }
 
-trait EditMonitoringPointState extends GroupMonitoringPointsByTerm {
-	val dept: Department
+trait EditMonitoringPointState extends MonitoringPointState {
 	val pointIndex: Int
-	var monitoringPoints = new AutoPopulatingList(classOf[MonitoringPoint])
-	var name: String = _
-	var validFromWeek: Int = 0
-	var requiredFromWeek: Int = 0
-	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
-	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
-
-	def copyTo(point: MonitoringPoint) = {
-		point.name = this.name
-		point.validFromWeek = this.validFromWeek
-		point.requiredFromWeek = this.requiredFromWeek
-		point
-	}
-
-	def copyFrom() {
-		val point = monitoringPoints.get(pointIndex)
-		this.name = point.name
-		this.validFromWeek = point.validFromWeek
-		this.requiredFromWeek = point.requiredFromWeek
-	}
 }
 

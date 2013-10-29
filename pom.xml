@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>50-SNAPSHOT</version>
+	<version>51-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -689,9 +689,10 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>${surefire.version}</version>
-          <configuration>
-            <argLine>-Xmx2048m -Xms256m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
+					<configuration>
+						<argLine>-Xmx2048m -Xms256m -XX:PermSize=128m -XX:MaxPermSize=512m</argLine>
 						<forkCount>0.75C</forkCount>
+			  			<!--<runOrder>random</runOrder>-->
 						<systemPropertyVariables>
 							<!-- Referenced in test tabula.properties data directory,
 								ensuring forks use separate data -->

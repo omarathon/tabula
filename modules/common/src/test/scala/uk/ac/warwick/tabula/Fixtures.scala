@@ -164,6 +164,11 @@ object Fixtures {
 		status
 	}
 
+	def modeOfAttendance(code: String = "F", shortName: String = "FT", fullName: String = "Full time") = {
+		val moa = new ModeOfAttendance(code, shortName, fullName)
+		moa
+	}
+
 	def student(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null, courseDepartment: Department = null, sprStatus: SitsStatus = null)	= {
 		val m = member(MemberUserType.Student, universityId, userId, department).asInstanceOf[StudentMember]
 
@@ -186,14 +191,15 @@ object Fixtures {
 		scd.sprStatus = sprStatus
 
 		member.studentCourseDetails.add(scd)
-		member.mostSignificantCourse = scd;
+		member.mostSignificantCourse = scd
 
 		scd
 	}
 
-	def studentCourseYearDetails(academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)) = {
+	def studentCourseYearDetails(academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now), modeOfAttendance: ModeOfAttendance = null) = {
 		val scyd = new StudentCourseYearDetails
 		scyd.academicYear = academicYear
+		scyd.modeOfAttendance = modeOfAttendance
 		scyd
 	}
 
@@ -230,6 +236,12 @@ object Fixtures {
 
 	def moduleRegistration(scd: StudentCourseDetails, mod: Module, cats: java.math.BigDecimal, year: AcademicYear, occurrence: String) = {
 		new ModuleRegistration(scd, mod, cats, year, occurrence)
+	}
+
+	def meetingRecordApproval(state: MeetingApprovalState) = {
+		val approval = new MeetingRecordApproval
+		approval.state = state
+		approval
 	}
 
 }
