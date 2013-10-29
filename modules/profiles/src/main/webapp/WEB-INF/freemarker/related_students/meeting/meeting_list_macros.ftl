@@ -80,6 +80,10 @@
 	<div class="pending-action alert alert-warning">
 		This record needs your approval. Please review, then approve or reject it.
 		If you reject it, please explain why.
+		<#if meetingApprovalWillCreateCheckpoint[meeting.id]>
+			<br />
+			Approving this meeting record will mark a monitoring point as attended.
+		</#if>
 	</div>
 	<!-- not a spring form as we don't want the issue of binding multiple sets of data to the same command -->
 	<form method="post" id="meeting-${meeting.id}" action="<@routes.save_meeting_approval meeting />" >

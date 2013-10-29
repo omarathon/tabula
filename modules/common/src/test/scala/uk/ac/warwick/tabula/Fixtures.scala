@@ -233,4 +233,10 @@ object Fixtures {
 		checkpoint.state = state
 		checkpoint
 	}
+
+	def meetingRecordApproval(state: MeetingApprovalState) = {
+		val approval = new MeetingRecordApproval
+		approval.state = state
+		approval
+	}
 }

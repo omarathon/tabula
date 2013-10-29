@@ -35,6 +35,7 @@ class ViewProfileController extends ProfilesController {
 	var userLookup = Wire[UserLookupService]
 	var smallGroupService = Wire[SmallGroupService]
 	var memberNoteService = Wire[MemberNoteService]
+	var monitoringPointMeetingRelationshipTermService = Wire[MonitoringPointMeetingRelationshipTermService]
 
 	@ModelAttribute("searchProfilesCommand")
 	def searchProfilesCommand =
@@ -103,6 +104,7 @@ class ViewProfileController extends ProfilesController {
 			"viewer" -> currentMember,
 			"isSelf" -> isSelf,
 			"meetingsById" -> relationshipMeetings.map { case (relType, meetings) => (relType.id, meetings) },
+			"meetingApprovalWillCreateCheckpoint" -> meetings.map(m => m.id -> monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(m)).toMap,
 			"openMeeting" -> openMeeting,
 			"numSmallGroups" -> numSmallGroups,
 			"memberNotes" -> memberNotes,

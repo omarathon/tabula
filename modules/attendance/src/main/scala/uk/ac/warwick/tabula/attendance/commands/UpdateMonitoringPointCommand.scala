@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringPointSet, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import scala.collection.JavaConverters._
@@ -54,6 +54,17 @@ trait UpdateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 		validateWeeks(errors, validFromWeek, requiredFromWeek, "validFromWeek")
 		validateName(errors, name, "name")
 
+		pointType match {
+			case MonitoringPointType.Meeting =>
+				validateTypeMeeting(errors,
+					meetingRelationships.asScala, "meetingRelationships",
+					meetingFormats.asScala, "meetingFormats",
+					meetingQuantity, "meetingQuantity",
+					dept
+				)
+			case _ =>
+		}
+
 		if (set.points.asScala.count(p =>
 			p.name == name && p.validFromWeek == validFromWeek && p.requiredFromWeek == requiredFromWeek && p.id != point.id
 		) > 0) {
@@ -82,25 +93,9 @@ trait UpdateMonitoringPointDescription extends Describable[MonitoringPoint] {
 	}
 }
 
-trait UpdateMonitoringPointState extends GroupMonitoringPointsByTerm with CanPointBeChanged {
+trait UpdateMonitoringPointState extends MonitoringPointState with CanPointBeChanged {
 	def set: MonitoringPointSet
 	def point: MonitoringPoint
-	val academicYear = set.academicYear
 	val dept = set.route.department
-	var name: String = _
-	var validFromWeek: Int = 0
-	var requiredFromWeek: Int = 0
-	def monitoringPointsByTerm = groupByTerm(set.points.asScala, academicYear)
-
-	def copyTo(point: MonitoringPoint) {
-		point.name = this.name
-		point.validFromWeek = this.validFromWeek
-		point.requiredFromWeek = this.requiredFromWeek
-	}
-
-	def copyFrom(point: MonitoringPoint) {
-		this.name = point.name
-		this.validFromWeek = point.validFromWeek
-		this.requiredFromWeek = point.requiredFromWeek
-	}
+	monitoringPoints.addAll(set.points)
 }

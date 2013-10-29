@@ -86,10 +86,13 @@ Include by default as "form", e.g.
 
 <#macro errors path><@f.errors path=path cssClass="error help-inline" /></#macro>
 
-<#macro labelled_row path label cssClass="" help="" fieldCssClass="" labelCss="">
+<#macro labelled_row path label cssClass="" help="" fieldCssClass="" labelCss="" helpPopover="">
 <@row path=path cssClass=cssClass>
 	<@_label path=path clazz=labelCss >
 		${label}
+		<#if helpPopover?has_content>
+			<@fmt.help_popover id="${path}" content="${helpPopover}" />
+		</#if>
 	</@_label>
 	<@field cssClass=fieldCssClass>
 		<#nested />

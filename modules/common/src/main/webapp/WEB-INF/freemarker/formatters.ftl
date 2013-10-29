@@ -322,5 +322,16 @@
 	<@bulk_email emails title subject />
 </#macro>
 
+<#macro help_popover id title="" content="">
+	<a class="use-popover"
+	   id="popover-${id}"
+	   <#if title?has_content>data-title="${title}"</#if>
+	   data-content="${content}"
+	>
+		<i class="icon-question-sign"></i>
+	</a>
+
+</#macro>
+
 </#escape>
 
