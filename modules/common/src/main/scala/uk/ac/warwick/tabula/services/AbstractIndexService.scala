@@ -233,6 +233,8 @@ abstract class AbstractIndexService[A]
 	protected def getUpdatedDate(item: A): DateTime
 
 	val UpdatedDateField: String
+	
+	@Value("${tabula.yearZero}") var yearZero: Int = _
 
 	/**
 	 * Either get the date of the most recent item we've process in this JVM
@@ -246,8 +248,7 @@ abstract class AbstractIndexService[A]
 				.map { v => new DateTime(v.toLong).minusMinutes(10) }
 				.getOrElse {
 					logger.info("No recent document found, indexing since Tabula year zero")
-					val yearZero = Wire.property("${tabula.yearZero}")
-					new DateTime(yearZero.toInt,1,1)
+					new DateTime(yearZero.toInt,1,1,0,0)
 				}
 		}
 	}
