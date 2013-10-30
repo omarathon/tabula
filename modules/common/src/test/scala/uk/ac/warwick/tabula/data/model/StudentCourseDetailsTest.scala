@@ -1,16 +1,11 @@
 package uk.ac.warwick.tabula.data.model
-
-import scala.collection.JavaConverters.asScalaBufferConverter
-
-import org.hibernate.annotations.AccessType
-import org.joda.time.LocalDate
-import org.junit.runner.RunWith
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.{ActiveProfiles, ContextConfiguration}
-
-import javax.persistence.{DiscriminatorValue, Entity, NamedQueries}
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, PersistenceTestBase}
-import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
+import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.PersistenceTestBase
+import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.services.RelationshipServiceImpl
+import uk.ac.warwick.tabula.AcademicYear
 import scala.collection.JavaConverters._
 
 class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
@@ -72,17 +67,6 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
 		scd1.moduleRegistrations.asScala should be (Stream(modReg1, modReg2))
 		scd1.moduleRegistrationsByYear(Some(AcademicYear(2012))) should be (Stream(modReg1))
-
-	}
-
-	@Test def testYearMethods {
-		val stu = Fixtures.student()
-		val scd = stu.mostSignificantCourse
-		scd.beginDate = LocalDate.parse("2013-07-13")
-		scd.endDate = scd.beginDate.plusYears(3)
-
-		scd.beginYear should be ("2013")
-		scd.endYear should be ("2016")
 
 	}
 

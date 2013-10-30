@@ -16,6 +16,7 @@
 
 		<header>
 			<h1><@fmt.profile_name profile /></h1>
+			<h5><@fmt.profile_description profile /></h5>
 		</header>
 
 		<div class="data clearfix">
@@ -138,12 +139,11 @@
 		<#if isSelf>
 			<div style="margin-top: 12px;"><span class="use-tooltip" data-placement="bottom" title="Your profile is only visible to you, and to staff who have permission to see student records.">Who can see this information?</span></div>
 		</#if>
-
 	</section>
 
-	<!-- show most significant course as default -->
-	<#if (profile.mostSignificantCourseDetails)??>
+	<#if (profile.studentCourseDetails)?? && (profile.mostSignificantCourseDetails)??>
 
+		<!-- most significant course first -->
 		<#assign studentCourseDetails=profile.mostSignificantCourseDetails>
 
 		<#if profile.studentCourseDetails?size gt 1>

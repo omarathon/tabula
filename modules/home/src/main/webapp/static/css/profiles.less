@@ -156,16 +156,6 @@
 			}
 		}
 
-		#course {
-			.course-year, .course-name {
-				float:left;
-			}
-			.course-year h2 {
-				position:relative;
-				left:10px;
-			}
-		}
-
 		#course-details {
 			table.course-info {
 				// Reset
@@ -699,22 +689,22 @@
 			margin: 0 10px;
 		  padding-left: 0;
 		  list-style: none;
-
-		  label.checkbox {
+		  
+		  label.checkbox { 
 		  	padding-right: 10px;
-
+		  	
 		  	max-width: 300px;
 				overflow: hidden;
 			  white-space: nowrap;
-			  text-overflow: ellipsis;
+			  text-overflow: ellipsis; 
 		  }
 		}
-
+		
 		max-height: 300px;
 		overflow-y: auto;
 		overflow-x: hidden;
 	}
-
+	
 	.pagination {
 		margin-top: -10px;
 		margin-bottom: 10px;
@@ -724,11 +714,11 @@
 #filter-results {
 	.opacity-one(1);
 	.transition(opacity 0.3s ease-in-out);
-
+	
 	&.loading { .opacity-one(0.3); }
 }
 
-.filter-short-values {
+.filter-short-values { 
 	display: inline-block;
 	max-width: 100px;
 	overflow: hidden;
@@ -736,7 +726,6 @@
   text-overflow: ellipsis;
   vertical-align: bottom;
 }
-.filter-type {
-	margin-left: 0.8em;
+.filter-type { 
+	margin-left: 0.8em; 
 }
-
