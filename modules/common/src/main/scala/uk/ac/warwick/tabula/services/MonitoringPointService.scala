@@ -45,6 +45,7 @@ trait MonitoringPointService {
 		state: MonitoringCheckpointState,
 		user: CurrentUser
 	) : MonitoringCheckpoint
+	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int
 }
 
 
@@ -112,6 +113,12 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		checkpoint.autoCreated = false
 		monitoringPointDao.saveOrUpdate(checkpoint)
 		checkpoint
+	}
+
+	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int = {
+		student.studentCourseDetails.asScala.map{scd =>
+			monitoringPointDao.missedCheckpoints(scd, academicYear)
+		}.sum
 	}
 
 }

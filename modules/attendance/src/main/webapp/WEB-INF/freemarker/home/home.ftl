@@ -22,7 +22,7 @@
 		<ul>
 			<#list relationshipTypesMap?keys as relationshipType>
 				<#if relationshipTypesMapById[relationshipType.id]>
-					<li><a id="relationship-${relationshipType.urlPart}" href="<@routes.relationship_students relationshipType />">${relationshipType.studentRole?cap_first}s</a></li>
+					<li><h3><a id="relationship-${relationshipType.urlPart}" href="<@routes.agentView relationshipType />">${relationshipType.studentRole?cap_first}s</a></h3></li>
 				</#if>
 			</#list>
 		</ul>

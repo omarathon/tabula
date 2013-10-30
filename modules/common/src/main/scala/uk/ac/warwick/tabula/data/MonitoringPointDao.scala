@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConverters._
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, Route, StudentMember}
 import org.hibernate.criterion.{Projections, Order}
@@ -39,6 +39,7 @@ trait MonitoringPointDao {
 	def deleteTemplate(template: MonitoringPointSetTemplate)
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
 	def deleteCheckpoint(checkpoint: MonitoringCheckpoint): Unit
+	def missedCheckpoints(scd: StudentCourseDetails, academicYear: AcademicYear): Int
 }
 
 
@@ -138,5 +139,16 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 	def deleteCheckpoint(checkpoint: MonitoringCheckpoint): Unit = {
 		session.delete(checkpoint)
+	}
+
+	def missedCheckpoints(scd: StudentCourseDetails, academicYear: AcademicYear): Int = {
+		session.newCriteria[MonitoringCheckpoint]
+			.add(is("studentCourseDetail", scd))
+			.add(is("state", MonitoringCheckpointState.MissedUnauthorised))
+			.createAlias("point", "point")
+			.createAlias("point.pointSet", "pointSet")
+			.add(is("pointSet.academicYear", academicYear))
+			.project[Number](Projections.rowCount())
+			.uniqueResult.get.intValue()
 	}
 }
