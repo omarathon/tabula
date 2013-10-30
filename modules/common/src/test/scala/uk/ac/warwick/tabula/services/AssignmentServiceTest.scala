@@ -753,5 +753,4 @@ class AssignmentServiceTest extends PersistenceTestBase {
 			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg1, upstreamAg2, upstreamAg3), Some(userIdGroup)) should be (7)
 		}
 	}}
-}}
-
+}
