@@ -60,7 +60,7 @@
 							<i class="icon-ok icon-fixed-width" title="Set all to 'Attended'"></i>
 						</button>
 					</div>
-					<#if monitoringPoint.pointType.dbValue == "meeting">
+					<#if monitoringPoint.pointType?? && monitoringPoint.pointType.dbValue == "meeting">
 						<i class="icon-fixed-width"></i>
 					</#if>
 				</div>
@@ -95,7 +95,7 @@
 											<option value="authorised" <#if hasState && command.studentsState[student.universityId].dbValue == "authorised">selected</#if>>Missed (authorised)</option>
 											<option value="attended" <#if hasState && command.studentsState[student.universityId].dbValue == "attended">selected</#if>>Attended</option>
 										</select>
-										<#if monitoringPoint.pointType.dbValue == "meeting">
+										<#if monitoringPoint.pointType?? && monitoringPoint.pointType.dbValue == "meeting">
 											<a class="meetings" title="Meetings information" href="<@routes.studentMeetings monitoringPoint student />"><i class="icon-info-sign"></i></a>
 										</#if>
 									</div>

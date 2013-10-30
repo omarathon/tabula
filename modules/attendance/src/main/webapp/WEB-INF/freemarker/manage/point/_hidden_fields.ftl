@@ -1,14 +1,14 @@
-<#if !pointCount?? >
-	<#assign pointCount = point_index />
+<#if !point_index?? >
+	<#assign point_index = pointCount />
 </#if>
-<input type="hidden" name="monitoringPoints[${pointCount}].name" value="${point.name}" />
-<input type="hidden" name="monitoringPoints[${pointCount}].validFromWeek" value="${point.validFromWeek}" />
-<input type="hidden" name="monitoringPoints[${pointCount}].requiredFromWeek" value="${point.requiredFromWeek}" />
-<input type="hidden" name="monitoringPoints[${pointCount}].pointType" value="${point.pointType.dbValue}" />
+<input type="hidden" name="monitoringPoints[${point_index}].name" value="${point.name}" />
+<input type="hidden" name="monitoringPoints[${point_index}].validFromWeek" value="${point.validFromWeek}" />
+<input type="hidden" name="monitoringPoints[${point_index}].requiredFromWeek" value="${point.requiredFromWeek}" />
+<input type="hidden" name="monitoringPoints[${point_index}].pointType" value="<#if point.pointType??>${point.pointType.dbValue}</#if>" />
 <#list point.meetingRelationships as relationship>
-	<input type="hidden" name="monitoringPoints[${pointCount}].meetingRelationshipsSpring" value="${relationship.urlPart}" />
+	<input type="hidden" name="monitoringPoints[${point_index}].meetingRelationshipsSpring" value="${relationship.urlPart}" />
 </#list>
 <#list point.meetingFormats as format>
-	<input type="hidden" name="monitoringPoints[${pointCount}].meetingFormatsSpring" value="${format.description}" />
+	<input type="hidden" name="monitoringPoints[${point_index}].meetingFormatsSpring" value="${format.description}" />
 </#list>
-<input type="hidden" name="monitoringPoints[${pointCount}].meetingQuantity" value="${point.meetingQuantity}" />
+<input type="hidden" name="monitoringPoints[${point_index}].meetingQuantity" value="${point.meetingQuantity}" />
