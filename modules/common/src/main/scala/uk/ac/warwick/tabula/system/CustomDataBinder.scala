@@ -11,8 +11,11 @@ import uk.ac.warwick.tabula.services.SecurityService
  */
 abstract class CustomDataBinder(val target: Any, val objectName: String)
 		extends ExtendedServletRequestDataBinder(target, objectName) {
+
+	val autoGrowCollectionLimit = 10000
+	super.setAutoGrowCollectionLimit(autoGrowCollectionLimit)
 	
 	// getPropertyAccessor is protected, this lets us access it from a trait.
 	def propertyAccessor = getPropertyAccessor()
-	
+
 }
