@@ -147,13 +147,11 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 	def deleteOldModuleRegistrations(usercodes: Seq[String], newModuleRegistrations: Seq[ModuleRegistration]) {
 		val existingModuleRegistrations = moduleRegistrationDao.getByUsercodesAndYear(usercodes, getCurrentSitsAcademicYear)
-		for (existingMR <- existingModuleRegistrations) {
-			if (!newModuleRegistrations.contains(existingMR)) {
-				existingMR.studentCourseDetails.moduleRegistrations.remove(existingMR)
-				session.delete(existingMR)
+		for (existingMR <- existingModuleRegistrations.filterNot(mr => newModuleRegistrations.contains(mr))) {
+			existingMR.studentCourseDetails.moduleRegistrations.remove(existingMR)
+			session.delete(existingMR)
 
-				smallGroupService.removeFromSmallGroups(existingMR)
-			}
+			smallGroupService.removeFromSmallGroups(existingMR)
 		}
 	}
 
