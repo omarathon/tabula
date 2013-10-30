@@ -7,14 +7,19 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.NoCurrentUser
+import scala.collection.JavaConverters._
 
 class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 
 	trait CommandTestSupport extends TermServiceComponent with MonitoringPointServiceComponent
-			with AddMonitoringPointSetValidation with AddMonitoringPointSetState {
-		val routeService = mock[RouteService]
+			with AddMonitoringPointSetValidation with AddMonitoringPointSetState with PermissionsAwareRoutes {
+		val courseAndRouteService = mock[CourseAndRouteService]
 		val termService = mock[TermService]
 		val monitoringPointService = mock[MonitoringPointService]
+		def routesForPermission(user: CurrentUser, p: Permission, dept: Department) = dept.routes.asScala.toSet
 	}
 
 	trait Fixture {
@@ -50,8 +55,8 @@ class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 		emptyRoute.code = emptyRouteCode
 
 		dept.routes = JArrayList(routeWithAllYears, routeWithOneYear, emptyRoute)
-		val thisYearCommand = new AddMonitoringPointSetCommand(dept, thisAcademicYear, None) with CommandTestSupport
-		val lastYearCommand = new AddMonitoringPointSetCommand(dept, lastAcademicYear, None) with CommandTestSupport
+		val thisYearCommand = new AddMonitoringPointSetCommand(NoCurrentUser(), dept, thisAcademicYear, None) with CommandTestSupport
+		val lastYearCommand = new AddMonitoringPointSetCommand(NoCurrentUser(), dept, lastAcademicYear, None) with CommandTestSupport
 	}
 
 	@Test

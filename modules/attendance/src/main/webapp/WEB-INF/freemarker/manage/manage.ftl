@@ -1,10 +1,35 @@
-<h1>Manage monitoring points for ${command.dept.name}</h1>
+<h1 class="with-settings">Manage monitoring points for ${command.dept.name}</h1>
 
-<script>
+<div class="btn-toolbar dept-toolbar">
+	<#if dept.parent??>
+		<a class="btn btn-medium use-tooltip" href="<@routes.manageDepartment dept.parent />" data-container="body" title="${dept.parent.name}">
+			Parent department
+		</a>
+	</#if>
+	
+	<#if dept.children?has_content>
+		<div class="btn-group">
+			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+				Subdepartments
+				<span class="caret"></span>
+			</a>
+			<ul class="dropdown-menu pull-right">
+				<#list dept.children as child>
+					<li><a href="<@routes.manageDepartment child />">${child.name}</a></li>
+				</#list>
+			</ul>
+		</div>
+	</#if>
+</div>
+
+<#if !dept.routes?has_content && dept.children?has_content>
+<p>This department doesn't directly contain any routes. Check subdepartments.</p>
+<#else>
+<script type="text/javascript">
 	var setsByRouteByAcademicYear = {
 		<#list command.setsByRouteByAcademicYear?keys as academicYear>
 			"${academicYear}" : [
-				<#list command.setsByRouteByAcademicYear[academicYear]?keys?sort_by("code") as route>
+				<#list command.sortedRoutesByAcademicYear(academicYear) as route>
 					{
 						"code" : "${route.code}",
 						"name" : "${route.name}",
@@ -23,7 +48,7 @@
 			]
 			<#if academicYear_has_next>,</#if>
 		</#list>
-	}
+	};
 </script>
 
 <#if createdCount?? >
@@ -33,7 +58,7 @@
 	</div>
 </#if>
 
-<form class="form-inline" action="<@url page="/manage/${command.dept.code}"/>">
+<form class="form-inline" action="<@routes.manageDepartment command.dept />">
 	<label>Academic year
 		<select name="academicYear">
 			<#assign academicYears = [command.thisAcademicYear.previous.toString, command.thisAcademicYear.toString, command.thisAcademicYear.next.toString] />
@@ -45,48 +70,48 @@
 	<button type="submit" class="btn btn-primary">Change</button>
 </form>
 
-<form id="chooseCreateType" class="form-inline" action="<@url page="/manage/${command.dept.code}/sets/add/${command.academicYear.startYear?c}"/>">
+<form id="chooseCreateType" class="form-inline" action="<@routes.createSet command.dept command.academicYear />">
 	<h2>Create monitoring schemes</h2>
 	<label>
 		<input class="create blank" type="radio" checked name="createType" value="blank"/>
 		Create blank scheme
 		<a class="use-popover" id="popover-create-blank" data-content="Create a new scheme from scratch"><i class="icon-question-sign"></i></a>
-		<select style="visibility:hidden"></select>
 	</label>
+	<select style="visibility:hidden"></select>
 	<br/>
-	<#if (command.templates?size > 0)>
+	<#if (templates?size > 0)>
 		<label>
 			<input class="create template" type="radio" name="createType" value="template"/>
-			Create from template
+			Create from approved template
 			<a class="use-popover" id="popover-create-template" data-content="Choose a template monitoring scheme developed for each year of study"><i class="icon-question-sign"></i></a>
-			<span class="existingSetOptions">
+		</label>
+		<span class="existingSetOptions">
 			<select name="existingSet" class="template">
-				<#list command.templates as template>
+				<#list templates as template>
 					<option value="${template.id}">${template.templateName}</option>
 				</#list>
 			</select>
 			<a class="btn monitoring-point-preview-button ajax-modal" data-target="#monitoring-point-preview-modal" href="#" data-hreftemplate="/attendance/monitoringpoints/preview/_TEMPLATE_ID_?department=${command.dept.code}&academicYear=${command.thisAcademicYear.storeValue?c}">
 				Preview&hellip; <#-- wired by class in js -->
 			</a>
-			</span>
-		</label>
+		</span>
 		<br />
 	</#if>
 	<#if (command.setsByRouteByAcademicYear?keys?size > 0)>
 		<label>
 			<input class="create copy" type="radio" name="createType" value="copy"/>
-			Copy an existing scheme
+			Copy an existing scheme in your department
 			<a class="use-popover" id="popover-create-copy" data-content="Choose an existing scheme to copy by academic year, route, and year of study"><i class="icon-question-sign"></i></a>
-			<select class="academicYear input-medium">
-				<option style="display:none;" disabled selected value="">Academic year</option>
-			</select>
-			<select class="route input-xlarge">
-				<option style="display:none;" disabled selected value="">Route</option>
-			</select>
-			<select name="existingSet" class="input-medium copy">
-				<option style="display:none;" disabled selected value="">Year of study</option>
-			</select>
 		</label>
+		<select class="academicYear input-medium">
+			<option style="display:none;" disabled selected value="">Academic year</option>
+		</select>
+		<select class="route input-xlarge">
+			<option style="display:none;" disabled selected value="">Route</option>
+		</select>
+		<select name="existingSet" class="input-medium copy">
+			<option style="display:none;" disabled selected value="">Year of study</option>
+		</select>
 	<#else>
 		<label>
 			<input class="create copy" type="radio" disabled name="createType"/>
@@ -139,7 +164,7 @@
 									${route.code?upper_case} All years
 								</div>
 								<div class="span2">
-									<a href="<@url page="/manage/${command.dept.code}/sets/${set.id}/edit"/>" class="btn btn-primary btn-mini">Edit</a>
+									<a href="<@routes.editSet set />" class="btn btn-primary btn-mini">Edit</a>
 								</div>
 							</div>
 						<#else>
@@ -149,7 +174,7 @@
 										${route.code?upper_case} Year ${set.year}
 									</div>
 									<div class="span2">
-										<a href="<@url page="/manage/${command.dept.code}/sets/${set.id}/edit"/>" class="btn btn-primary btn-mini">Edit</a>
+										<a href="<@routes.editSet set />" class="btn btn-primary btn-mini">Edit</a>
 									</div>
 								</div>
 							</#list>
@@ -163,3 +188,4 @@
 
 <div id="monitoring-point-preview-modal" class="modal hide">
 </div>
+</#if>

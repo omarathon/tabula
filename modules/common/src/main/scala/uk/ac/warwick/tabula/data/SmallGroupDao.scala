@@ -2,8 +2,10 @@ package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, SmallGroupEvent, SmallGroup, SmallGroupSet}
-import org.hibernate.criterion.Restrictions
+import org.hibernate.criterion.{ Restrictions, Order }
 import org.springframework.stereotype.Repository
+import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.Module
 
 trait SmallGroupDaoComponent {
 	val smallGroupDao: SmallGroupDao
@@ -22,12 +24,16 @@ trait SmallGroupDao {
 	def saveOrUpdate(smallGroup: SmallGroup)
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent)
 	def saveOrUpdate(occurrence: SmallGroupEventOccurrence)
+	def findByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroup]
 
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, week: Int): Option[SmallGroupEventOccurrence]
+	def findSmallGroupOccurrencesByGroup(group: SmallGroup): Seq[SmallGroupEventOccurrence]
 }
 
 @Repository
 class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
+	import Order._
+	
 	def getSmallGroupSetById(id: String) = getById[SmallGroupSet](id)
 	def getSmallGroupById(id: String) = getById[SmallGroup](id)
 	def getSmallGroupEventById(id: String) = getById[SmallGroupEvent](id)
@@ -42,4 +48,19 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.add(is("event", event))
 			.add(is("week", week))
 			.uniqueResult
+
+	def findByModuleAndYear(module: Module, year: AcademicYear) =
+		session.newCriteria[SmallGroup]
+			.createAlias("groupSet", "set")
+			.add(is("set.module", module))
+			.add(is("set.academicYear", year))
+			.seq
+			
+	def findSmallGroupOccurrencesByGroup(group: SmallGroup) = 
+		session.newCriteria[SmallGroupEventOccurrence]
+			.createAlias("event", "event")
+			.add(is("event.group", group))
+			.addOrder(asc("week"))
+			.addOrder(asc("event.day"))
+			.seq
 }

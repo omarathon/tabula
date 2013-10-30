@@ -6,7 +6,7 @@ import org.joda.time.DateTimeConstants
 import org.junit.Before
 
 import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase, Fixtures, Mockito}
-import uk.ac.warwick.tabula.data.model.{StudentMember, StudentCourseDetails, Route, Member}
+import uk.ac.warwick.tabula.data.model.{SitsStatus, StudentMember, StudentCourseDetails, Route, Member}
 import uk.ac.warwick.tabula.data._
 import scala.Some
 
@@ -106,49 +106,6 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.listMembersUpdatedSince(new DateTime(2013, DateTimeConstants.FEBRUARY, 5, 0, 0, 0, 0), 5) should be (Seq())
 	}
 
-	@Test def getRegisteredModules: Unit = transactional { tx =>
-
-		val mod1 = Fixtures.module("in101")
-		val mod2 = Fixtures.module("in102")
-		val mod3 = Fixtures.module("in103")
-
-		session.save(mod1)
-		session.save(mod2)
-		session.save(mod3)
-
-		val ua1 = Fixtures.upstreamAssignment("in", 1)
-		val ua2 = Fixtures.upstreamAssignment("in", 2)
-
-		// Check that we haven't changed the behaviour of Fixtures
-		ua1.moduleCode should startWith (mod1.code.toUpperCase())
-		ua2.moduleCode should startWith (mod2.code.toUpperCase())
-
-		session.save(ua1)
-		session.save(ua2)
-
-		val ag1 = Fixtures.assessmentGroup(ua1)
-		val ag2 = Fixtures.assessmentGroup(ua2)
-
-		session.save(ag1)
-		session.save(ag2)
-
-		ag1.members.staticIncludeUsers.add("0000001")
-		ag1.members.staticIncludeUsers.add("0000002")
-
-		ag2.members.staticIncludeUsers.add("0000002")
-		ag2.members.staticIncludeUsers.add("0000003")
-
-		session.update(ag1)
-		session.update(ag2)
-
-		session.flush
-
-		profileService.getRegisteredModules("0000001") should be (Seq(mod1))
-		profileService.getRegisteredModules("0000002").toSet should be (Seq(mod1, mod2).toSet)
-		profileService.getRegisteredModules("0000003") should be (Seq(mod2))
-		profileService.getRegisteredModules("0000004") should be (Seq())
-	}
-
 	@Test def getStudentsByRouteForAcademicYear = {
 		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
 			val memberDao = mock[MemberDao]
@@ -165,16 +122,23 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		studentInBothYears.studentCourseYearDetails.add(
 			Fixtures.studentCourseYearDetails(AcademicYear(2013))
 		)
+		studentInBothYears.sprStatus = new SitsStatus("C")
+		studentInBothYears.mostSignificant = true
 
 		val studentInFirstYear = new StudentCourseDetails(Fixtures.student(), "studentInFirstYear")
 		studentInFirstYear.studentCourseYearDetails.add(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
+		studentInFirstYear.sprStatus = new SitsStatus("C")
+		studentInFirstYear.mostSignificant = true
 
 		val studentInSecondYear = new StudentCourseDetails(Fixtures.student(), "studentInSecondYear")
 		studentInSecondYear.studentCourseYearDetails.add(
 			Fixtures.studentCourseYearDetails(AcademicYear(2013))
 		)
+		studentInSecondYear.sprStatus = new SitsStatus("C")
+		studentInSecondYear.mostSignificant = true
+
 
 		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(studentInBothYears, studentInFirstYear, studentInSecondYear)
 
@@ -190,5 +154,113 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 			s => s.studentCourseDetails.get(0).scjCode.equals(studentInFirstYear.scjCode)
 		) should be (false)
 	}
+
+	@Test def getStudentsByRouteWithdrawn = {
+		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+			val memberDao = mock[MemberDao]
+			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
+		}
+
+		val testRoute = new Route
+		testRoute.code = "test"
+
+		val studentNoShow = new StudentCourseDetails(Fixtures.student(), "studentNoShow")
+		studentNoShow.sprStatus = new SitsStatus("PNS")
+		studentNoShow.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+
+		val studentPermWithdrawn = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawn")
+		studentPermWithdrawn.sprStatus = new SitsStatus("P")
+		studentPermWithdrawn.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+
+		val studentPermWithdrawnDebt = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawnDebt")
+		studentPermWithdrawnDebt.sprStatus = new SitsStatus("PD")
+		studentPermWithdrawnDebt.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+
+		val studentPermWithdrawnWrittenOff = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawnWrittenOff")
+		studentPermWithdrawnWrittenOff.sprStatus = new SitsStatus("PR")
+		studentPermWithdrawnWrittenOff.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+
+		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(
+			studentNoShow, studentPermWithdrawn, studentPermWithdrawnDebt, studentPermWithdrawnWrittenOff
+		)
+
+		val studentsWithYear = service.getStudentsByRoute(testRoute, AcademicYear(2012))
+		studentsWithYear.size should be (0)
+
+		val students = service.getStudentsByRoute(testRoute)
+		students.size should be (0)
+	}
+
+
+
+	@Test def getStudentsByRouteMostSignificantCourse = {
+		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+			val memberDao = mock[MemberDao]
+			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
+		}
+
+		val testRoute = new Route
+		testRoute.code = "test"
+		val testYear = AcademicYear(2012)
+
+		val student = new StudentCourseDetails(Fixtures.student(), "student")
+
+		student.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+		student.sprStatus = new SitsStatus("C")
+		student.mostSignificant = true
+
+		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(student)
+
+		val students = service.getStudentsByRoute(testRoute, testYear)
+		students.size should be (1)
+
+		students.exists(
+			s => s.studentCourseDetails.get(0).mostSignificant.equals(true)
+		) should be (true)
+
+	}
+
+
+
+	@Test def getStudentsByRouteNotMostSignificantCourse = {
+		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+			val memberDao = mock[MemberDao]
+			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
+		}
+
+		val testRoute = new Route
+		testRoute.code = "test"
+		val testYear = AcademicYear(2012)
+
+		val student = new StudentCourseDetails(Fixtures.student(), "student")
+
+		student.studentCourseYearDetails.add(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		)
+		student.sprStatus = new SitsStatus("C")
+		student.mostSignificant = false
+
+		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(student)
+
+		val students = service.getStudentsByRoute(testRoute, testYear)
+		students.size should be (0)
+
+		students.exists(
+			s => s.studentCourseDetails.get(0).mostSignificant.equals(true)
+		) should be (false)
+
+	}
+
+
 
 }

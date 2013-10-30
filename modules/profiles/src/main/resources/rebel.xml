@@ -10,6 +10,9 @@
 			<dir name="${rebel.workspace.path}/tabula/modules/profiles/src/main/webapp/" />
 			<dir name="${rebel.workspace.path}/tabula/modules/profiles/src/main/resources/" />
 		</link>
+		<link target="/WEB-INF/freemarker">
+			<dir name="${rebel.workspace.path}/tabula/modules/common/src/main/webapp/WEB-INF/freemarker" />
+		</link>
 	</web>
 		
 </application>

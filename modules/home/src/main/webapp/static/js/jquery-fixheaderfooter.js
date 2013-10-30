@@ -29,6 +29,7 @@
 				floatingHeader   = $(".floatingHeader", persistArea),
 				floatingFooter   = $(".floatingFooter", persistArea),
 				persistHeader    = $(".persist-header", persistArea),
+				persistFooter    = $(".persist-footer", persistArea),
 				primaryNavHeight = $("#primary-navigation").height();
 
 			if ((scrollTop > offset.top) && (scrollTop < offset.top + el.height())) {
@@ -37,10 +38,14 @@
 				floatingHeader.invisible();
 			}
 
-			if(scrollTop + $(window).height() - $(persistHeader).height() - primaryNavHeight > $(el).height()) {
-				floatingFooter.invisible();
-			} else {
-				floatingFooter.visible();
+			// persistFooter will need to have a margin-bottom of zero
+			// otherwise you'll see the original footer (and bits of the webpage) underneath the fixed footer as you scroll
+			if (persistFooter && persistFooter.length) {
+				if(persistFooter.offset().top < $(window).scrollTop() + $(window).height() - primaryNavHeight - persistFooter.height()) {
+					floatingFooter.invisible();
+				} else {
+					floatingFooter.visible();
+				}
 			}
 
 		}
@@ -61,6 +66,51 @@
 		$(window).scroll(function() {
 			updateTableHeaders(areaToPersist);
 		});
+
+
+
+		// public methods
+		this.initialize = function() {
+			return this;
+		};
+
+
+ 		// method to fix the jumbo direction icon in place
+		this.fixDirectionIcon = function() {
+			var directionIcon = $('.direction-icon');
+			var fixContainer = $('.fix-on-scroll-container');
+			var persistAreaTop = $('.persist-header').height() + $('#primary-navigation').height();
+
+			if(fixContainer.offset().top - $(window).scrollTop() < $('.persist-header').height() + $('#primary-navigation').height()) {
+				directionIcon.css({ "top" : persistAreaTop, "position": "fixed", "width": directionIcon.width() });
+			} else {
+				directionIcon.css({"top": "auto", "position": "static", "width": directionIcon.width });
+			}
+		};
+
+		// if the list of agents is shorter than the (viewport+fixed screen areas)
+		// and we've scrolled past the top of the persist-area container, then fix it
+		// (otherwise don't, because the user won't be able to see all of the items in the well)
+		this.fixTargetList = function(listToFix) {
+			var targetList = $(listToFix);
+			var persistAreaTop = $('.persist-header').height() + $('#primary-navigation').height();
+			var viewableArea = $(window).height() - ($('.persist-header').height() + $('#primary-navigation').height() + $('.persist-footer').height());
+
+			// width is set on fixing because it was jumping to the minimum width of the content
+			if (targetList.height() < viewableArea && ($(window).scrollTop() > $('.persist-area').offset().top)) {
+				targetList.css({"top": persistAreaTop + 14, "position": "fixed", "width": targetList.parent().width()});
+			} else {
+				targetList.css({"top": "auto", "position": "relative", "width": "auto"});
+			}
+		}
+
+		this.viewableArea = function() {
+			return $(window).height() - ($('.persist-header').height() + $('#primary-navigation').height() + $('.persist-footer').outerHeight());
+		}
+
+
+		return this.initialize();
+
 
 	} // end fixHeaderFooter plugin
 

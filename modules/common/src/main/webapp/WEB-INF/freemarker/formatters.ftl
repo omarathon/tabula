@@ -27,8 +27,12 @@
 	</a>
 </#macro>
 
-<#macro route_name route>
-	${route.code?upper_case} ${route.name}
+<#macro route_name route withFormatting=false>
+	<#if withFormatting>
+		<span class="route-code">${route.code?upper_case}</span> <span class="route-name">${route.name}</span>
+	<#else>
+		${route.code?upper_case} ${route.name}
+	</#if>
 </#macro>
 
 <#macro date date at=false timezone=false seconds=false capitalise=true relative=true split=false shortMonth=false includeTime=true><#--
@@ -65,13 +69,16 @@
 
 
 <#macro weekRangeSelect event><#--
-	--><#noescape><#--
-		--><select name="week" class="weekSelector"><#--
-			--><#list weekRangeSelectFormatter(event) as week><#--
-				--><option value="${week.weekToDisplay}">week ${week.weekToStore}</option><#--
-			--></#list><#--
-		--></select><#--
-	--></#noescape><#--
+	--><#assign weeks=weekRangeSelectFormatter(event) /><#--
+	--><#if weeks?has_content><#--
+		--><#noescape><#--
+			--><select name="week" class="weekSelector"><#--
+				--><#list weekRangeSelectFormatter(event) as week><#--
+					--><option value="${week.weekToDisplay}">week ${week.weekToStore}</option><#--
+				--></#list><#--
+			--></select><#--
+		--></#noescape><#--
+	--></#if><#--
 --></#macro>
 
 <#macro p number singular plural="${singular}s" one="1" zero="0" shownumber=true><#--
@@ -161,7 +168,7 @@
 	<#if attachment?has_content>
 		<#local title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#local>
 		<div class="attachment">
-			<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
+			<@download_link filePath="${page}attachment/${attachment.name?url}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
 		</div>
 	<#elseif attachments?size gt 1>
 		<details class="attachment">
@@ -173,7 +180,7 @@
 			<#list attachments as attachment>
 				<#local title>Download file ${attachment.name}<#if context?has_content> ${context}</#if></#local>
 				<div class="attachment">
-					<@download_link filePath="${page}attachment/${attachment.name}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
+					<@download_link filePath="${page}attachment/${attachment.name?url}" mimeType=attachment.mimeType title="${title}" text="Download ${attachment.name}" />
 				</div>
 			</#list>
 		</details>
@@ -275,14 +282,19 @@
 	<${type} ${href} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
 </#macro>
 
-<#macro bulk_email emails title subject>
-	<#assign separator = ";" />
+<#macro bulk_email emails title subject limit=50>
+	<#local separator = ";" />
 	<#if user?? && userSetting('bulkEmailSeparator')?has_content>
 		<#assign separator = userSetting('bulkEmailSeparator') />
 	</#if>
 
-	<#if emails?size gt 0 && emails?size lte 50>
-		<a href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>" class="btn">
+	<#if emails?size gt 0>
+		<a class="btn <#if emails?size gt limit>use-tooltip disabled</#if>"
+			<#if emails?size gt limit>
+		   		title="Emailing is disabled for groups of more than ${limit} students"
+			<#else>
+				href="mailto:<#list emails as email>${email}<#if email_has_next>${separator}</#if></#list><#if subject?? && subject?length gt 0>?subject=${subject?url}</#if>"
+			</#if> >
 			<i class="icon-envelope-alt"></i> ${title}
 		</a>
 	</#if>
@@ -308,6 +320,17 @@
 	</#list>
 	
 	<@bulk_email emails title subject />
+</#macro>
+
+<#macro help_popover id title="" content="">
+	<a class="use-popover"
+	   id="popover-${id}"
+	   <#if title?has_content>data-title="${title}"</#if>
+	   data-content="${content}"
+	>
+		<i class="icon-question-sign"></i>
+	</a>
+
 </#macro>
 
 </#escape>

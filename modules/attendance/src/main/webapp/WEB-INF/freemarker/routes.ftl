@@ -8,30 +8,28 @@
 
 		-->
 	<#macro home><@url page="/" /></#macro>
-	<#macro departmenthome department><@url page="/admin/department/${department.code}/" /></#macro>
-	<#macro depthome module><@url page="/admin/department/${module.department.code}/#module-${module.code}" /></#macro>
-	<#macro moduleperms module><@url page="/module/${module.code}/permissions" context="/admin" /></#macro>
-
-	<#macro displaysettings department><@url page="/department/${department.code}/settings/display" context="/admin" /></#macro>
-	<#macro batchnotify department><@url page="/admin/department/${department.code}/groups/release"  /></#macro>
-	<#macro batchopen department><@url page="/admin/department/${department.code}/groups/selfsignup/open"  /></#macro>
-	<#macro batchclose department><@url page="/admin/department/${department.code}/groups/selfsignup/close"  /></#macro>
-
-	<#macro createset module><@url page="/admin/module/${module.code}/groups/new" /></#macro>
-	<#macro editset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/edit" /></#macro>
-	<#macro deleteset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/delete" /></#macro>
-	<#macro archiveset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/archive" /></#macro>
-	<#macro allocateset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/allocate" /></#macro>
-	<#macro releaseset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/release" /></#macro>
-	<#macro enrolment module><@url page="/admin/module/${module.code}/groups/enrolment"/></#macro>
-	<#macro openset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/open" /></#macro>
-	<#macro closeset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/close" /></#macro>
-
-
-	<#macro signup_to_group set><@url page="/module/${set.module.code}/groups/${set.id}/signup" /></#macro>
-	<#macro leave_group set><@url page="/module/${set.module.code}/groups/${set.id}/leave" /></#macro>
+	<#macro viewDepartment department><@url page="/${department.code}/" /></#macro>
+	<#macro viewDepartmentSpecific department academicYear route pointSet><@url page="/${department.code}/?academicYear=${academicYear.toString}&route=${route.code}&set=${pointSet.id}" /></#macro>
+	<#macro manageDepartment department><@url page="/manage/${department.code}/" /></#macro>
+	
+	<#macro record point returnTo><@url page="/${point.pointSet.route.department.code}/${point.id}/record?returnTo=${returnTo?url}"/></#macro>
+	<#macro recordStudent point studentCourseDetails returnTo><@url page="/${point.pointSet.route.department.code}/${point.id}/record/${studentCourseDetails.urlSafeId}?returnTo=${returnTo?url}"/></#macro>
+	<#macro studentMeetings point member><@url page="/${point.pointSet.route.department.code}/${point.id}/meetings/${member.universityId}"/></#macro>
+	
+	<#macro createSet department academicYear><@url page="/manage/${department.code}/sets/add/${academicYear.startYear?c}"/></#macro>
+	<#macro editSet pointSet><@url page="/manage/${pointSet.route.department.code}/sets/${pointSet.id}/edit"/></#macro>
+	
+	<#-- Non-persistent -->
+	<#macro addPoint department><@url page="/manage/${department.code}/sets/add/points/add" /></#macro>
+	<#macro editPoint department pointIndex><@url page="/manage/${department.code}/sets/add/points/edit/${pointIndex}" /></#macro>
+	<#macro deletePoint department pointIndex><@url page="/manage/${department.code}/sets/add/points/delete/${pointIndex}" /></#macro>
+	
+	<#-- Persistent -->
+	<#macro createPoint pointSet><@url page="/manage/${pointSet.route.department.code}/sets/${pointSet.id}/edit/points/add" /></#macro>
+	<#macro updatePoint point><@url page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/edit/points/${point.id}/edit" /></#macro>
+	<#macro removePoint point><@url page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/edit/points/${point.id}/delete" /></#macro>
+	
 	<#macro profile profile><@url page="/view/${profile.universityId}" context="/profiles"/></#macro>
-	<#macro photo profile><@url page="/view/photo/${profile.universityId}.jpg" context="/profiles" /></#macro>
-	<#macro relationshipPhoto profile relationship><@url page="/view/photo/${profile.universityId}/${relationship.relationshipType.dbValue}/${relationship.agent}.jpg" context="/profiles" /></#macro>
-
-	<#macro studentslist group><@url page="/group/${group.id}/studentspopup" /></#macro>
+	<#macro attendanceProfile><@url page="/profile" /></#macro>
+	<#macro photo profile><#if ((profile.universityId)!)?has_content><@url page="/view/photo/${profile.universityId}.jpg" context="/profiles"/><#else><@url resource="/static/images/no-photo.jpg" /></#if></#macro>
+	<#macro relationship_students relationshipType><@url page="/${relationshipType.urlPart}/students" context="/profiles" /></#macro>

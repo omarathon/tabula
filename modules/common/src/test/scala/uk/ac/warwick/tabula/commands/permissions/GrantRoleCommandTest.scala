@@ -5,25 +5,34 @@ import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
+import uk.ac.warwick.tabula.data.model.permissions.{CustomRoleDefinition, DepartmentGrantedRole, GrantedRole}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
-import org.mockito.Matchers._
+import uk.ac.warwick.tabula.roles.{UniversityMemberRoleDefinition, BuiltInRoleDefinition, DepartmentalAdministratorRoleDefinition}
 import uk.ac.warwick.tabula.permissions.Permission
 import scala.reflect.ClassTag
+import uk.ac.warwick.tabula.helpers.Tap.tap
+import uk.ac.warwick.tabula.permissions.Permissions.{ReplicaSyncing, ImportSystemData}
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.services.SecurityService
 
 class GrantRoleCommandTest extends TestBase with Mockito {
 	
 	val permissionsService = mock[PermissionsService]
 	val securityService = mock[SecurityService]
-	
+
+	// a role with a single permission to keep things simple
+	val singlePermissionsRoleDefinition = new BuiltInRoleDefinition(){
+		override def description="test"
+		GrantsScopedPermission(
+			Permissions.Department.ArrangeModules)
+		def canDelegateThisRolesPermissions:JBoolean = false
+	}
+
 	private def command[A <: PermissionsTarget: ClassTag](scope: A) = {
 		val cmd = new GrantRoleCommand(scope)
 		cmd.permissionsService = permissionsService
 		cmd.securityService = securityService
-		
 		cmd
 	}
 	
@@ -72,15 +81,16 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 	
 	@Test def validatePasses { withUser("cuscav", "0672089") {
 		val dept = Fixtures.department("in", "IT Services")
-		
+
 		val cmd = command(dept)
-		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
+		cmd.roleDefinition = singlePermissionsRoleDefinition
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cusebr")
-		
-		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (None)
-		securityService.can(isEq(currentUser), isA[Permission], isEq(dept)) returns (true)
-		
+
+		permissionsService.getGrantedRole(dept, singlePermissionsRoleDefinition) returns (None)
+		securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, dept) returns true
+
+
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 
@@ -91,11 +101,11 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in", "IT Services")
 		
 		val cmd = command(dept)
-		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
+		cmd.roleDefinition = singlePermissionsRoleDefinition
 		
 		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (None)
-		securityService.can(isEq(currentUser), isA[Permission], isEq(dept)) returns (true)
-		
+		securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, dept) returns true
+
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 
@@ -109,17 +119,17 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in", "IT Services")
 		
 		val cmd = command(dept)
-		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
+		cmd.roleDefinition = singlePermissionsRoleDefinition
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cusebr")
 		cmd.usercodes.add("cuscao")
 		
-		val existing = GrantedRole(dept, DepartmentalAdministratorRoleDefinition)
+		val existing = GrantedRole(dept, singlePermissionsRoleDefinition)
 		existing.users.addUser("cuscao")
 		
-		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (Some(existing))
-		securityService.can(isEq(currentUser), isA[Permission], isEq(dept)) returns (true)
-		
+		permissionsService.getGrantedRole(dept, singlePermissionsRoleDefinition) returns (Some(existing))
+		securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, dept) returns true
+
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 
@@ -156,8 +166,8 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cusebr")
 		
 		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (None)
-		securityService.can(isEq(currentUser), isA[Permission], isEq(dept)) returns (false)
-		
+		securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, dept) returns false
+
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
 

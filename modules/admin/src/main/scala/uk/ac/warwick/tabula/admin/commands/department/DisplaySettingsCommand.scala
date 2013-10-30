@@ -16,17 +16,17 @@ import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.services.RelationshipServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringRelationshipServiceComponent
 
-trait DisplaySettingsCommand extends CommandInternal[Unit] with DisplaySettingsCommandState {
+trait DisplaySettingsCommand extends CommandInternal[Department] with DisplaySettingsCommandState {
 	def init(): Unit
 }
 
 object DisplaySettingsCommand {
 	def apply(department: Department) =
-		new DisplaySettingsCommandInternal(department) 
-			with ComposableCommand[Unit] 
+		new DisplaySettingsCommandInternal(department)
+			with ComposableCommand[Department]
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringRelationshipServiceComponent
-			with DisplaySettingsCommandDescription 
+			with DisplaySettingsCommandDescription
 			with DisplaySettingsCommandPermissions
 }
 
@@ -34,7 +34,7 @@ trait DisplaySettingsCommandState {
 	val department: Department
 }
 
-class DisplaySettingsCommandInternal(val department: Department) extends DisplaySettingsCommand with CommandInternal[Unit]
+class DisplaySettingsCommandInternal(val department: Department) extends DisplaySettingsCommand with CommandInternal[Department]
 	with SelfValidating with BindListener with DisplaySettingsCommandState {
 
 	this: ModuleAndDepartmentServiceComponent with RelationshipServiceComponent =>
@@ -48,13 +48,14 @@ class DisplaySettingsCommandInternal(val department: Department) extends Display
 	var turnitinSmallMatchPercentageLimit = department.turnitinSmallMatchPercentageLimit
 	var assignmentInfoView = department.assignmentInfoView
 	var weekNumberingSystem = department.weekNumberingSystem
+	var autoGroupDeregistration = department.autoGroupDeregistration
 	var defaultGroupAllocationMethod = department.defaultGroupAllocationMethod.dbValue
-	var studentRelationshipDisplayed: JMap[String, JBoolean] = 
-		JHashMap(department.studentRelationshipDisplayed.map { 
-			case (id, bString) => (id -> java.lang.Boolean.valueOf(bString)) 
+	var studentRelationshipDisplayed: JMap[String, JBoolean] =
+		JHashMap(department.studentRelationshipDisplayed.map {
+			case (id, bString) => (id -> java.lang.Boolean.valueOf(bString))
 		})
-		
-	def init() {	
+
+	def init() {
 		relationshipService.allStudentRelationshipTypes.foreach { relationshipType =>
 			if (!studentRelationshipDisplayed.containsKey(relationshipType.id))
 				studentRelationshipDisplayed.put(relationshipType.id, relationshipType.defaultDisplay)
@@ -69,11 +70,13 @@ class DisplaySettingsCommandInternal(val department: Department) extends Display
 		department.turnitinSmallMatchWordLimit = turnitinSmallMatchWordLimit
 		department.turnitinSmallMatchPercentageLimit = turnitinSmallMatchPercentageLimit
 		department.assignmentInfoView = assignmentInfoView
+		department.autoGroupDeregistration = autoGroupDeregistration
 		department.defaultGroupAllocationMethod = SmallGroupAllocationMethod(defaultGroupAllocationMethod)
-		department.weekNumberingSystem = weekNumberingSystem		
+		department.weekNumberingSystem = weekNumberingSystem
 		department.studentRelationshipDisplayed = studentRelationshipDisplayed.asScala.map { case (id, bool) => (id -> Option(bool).getOrElse(false).toString) }.toMap
 
 		moduleAndDepartmentService.save(department)
+		department
 	}
 
 	override def onBind(result: BindingResult) {
@@ -84,11 +87,11 @@ class DisplaySettingsCommandInternal(val department: Department) extends Display
 		if (turnitinSmallMatchWordLimit < 0) {
 			errors.rejectValue("turnitinSmallMatchWordLimit", "department.settings.turnitinSmallMatchWordLimit")
 		}
-		
+
 		if (turnitinSmallMatchPercentageLimit < 0 || turnitinSmallMatchPercentageLimit > 100) {
 			errors.rejectValue("turnitinSmallMatchPercentageLimit", "department.settings.turnitinSmallMatchPercentageLimit")
 		}
-		
+
 		if (turnitinSmallMatchWordLimit != 0 && turnitinSmallMatchPercentageLimit != 0) {
 			errors.rejectValue("turnitinExcludeSmallMatches", "department.settings.turnitinSmallMatchSingle")
 		}
@@ -102,7 +105,7 @@ trait DisplaySettingsCommandPermissions extends RequiresPermissionsChecking {
 	}
 }
 
-trait DisplaySettingsCommandDescription extends Describable[Unit] {
+trait DisplaySettingsCommandDescription extends Describable[Department] {
 	this: DisplaySettingsCommandState =>
 	// describe the thing that's happening.
 	override def describe(d: Description) =

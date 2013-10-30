@@ -17,11 +17,22 @@ object Routes {
 		def apply(department: Department) = "/department/%s" format (encoded(department.code))
 		
 		def permissions(department: Department) = "/department/%s/permissions" format (encoded(department.code))
+		
+		def createModule(department: Department) = "/department/%s/module/new" format (encoded(department.code))
+		
+		def sortModules(department: Department) = "/department/%s/sort-modules" format (encoded(department.code))
+		def sortRoutes(department: Department) = "/department/%s/sort-routes" format (encoded(department.code))
 	}
 		
 	object module {
 		def apply(module: Module) = department(module.department) + "#module-" + encoded(module.code)
 		
 		def permissions(module: Module) = "/module/%s/permissions" format (encoded(module.code))
+	}
+		
+	object route {
+		def apply(route: Route) = department(route.department) + "#route-" + encoded(route.code)
+		
+		def permissions(route: Route) = "/route/%s/permissions" format (encoded(route.code))
 	}
 }

@@ -5,24 +5,21 @@
 	<#assign can_create_meetings = can.do_with_selector("Profiles.MeetingRecord.Create", studentCourseDetails, relationshipType) />
 
 	<section class="meetings ${relationshipType.id}-meetings" data-target-container="${relationshipType.id}-meetings">
-
-		<#if can_read_meetings>
-			<h5>Record of meetings</h5>
-		</#if>
-
-		<#if can_create_meetings>
-			<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Create a new record"><i class="icon-edit"></i> New record</a>
-			<#if isSelf!false>
-				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to you and your ${relationshipType.agentRole}(s).">Who can see this information?</small>
-			<#else>
-				<small class="use-tooltip muted" data-placement="bottom" title="Meeting records are currently visible only to the student and their ${relationshipType.agentRole}(s).">Who can see this information?</small>
+		<div class="list-controls">
+			<#if can_read_meetings>
+				<h5>Record of meetings</h5>
 			</#if>
-		</#if>
-		<#if can_read_meetings>
-			<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
-			<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
-		</#if>
 
+			<#if can_create_meetings>
+				<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Create a new record"><i class="icon-edit"></i> New record</a>
+			</#if>
+			<#if can_read_meetings>
+
+				<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
+				<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
+			</#if>
+
+		</div>
 		<#if can_read_meetings>
 			<#if meetings??>
 				<#list meetings as meeting>
@@ -83,6 +80,10 @@
 	<div class="pending-action alert alert-warning">
 		This record needs your approval. Please review, then approve or reject it.
 		If you reject it, please explain why.
+		<#if meetingApprovalWillCreateCheckpoint[meeting.id]>
+			<br />
+			Approving this meeting record will mark a monitoring point as attended.
+		</#if>
 	</div>
 	<!-- not a spring form as we don't want the issue of binding multiple sets of data to the same command -->
 	<form method="post" id="meeting-${meeting.id}" action="<@routes.save_meeting_approval meeting />" >

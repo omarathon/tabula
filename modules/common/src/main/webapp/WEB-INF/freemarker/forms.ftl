@@ -86,10 +86,13 @@ Include by default as "form", e.g.
 
 <#macro errors path><@f.errors path=path cssClass="error help-inline" /></#macro>
 
-<#macro labelled_row path label cssClass="" help="" fieldCssClass="" labelCss="">
+<#macro labelled_row path label cssClass="" help="" fieldCssClass="" labelCss="" helpPopover="">
 <@row path=path cssClass=cssClass>
 	<@_label path=path clazz=labelCss >
 		${label}
+		<#if helpPopover?has_content>
+			<@fmt.help_popover id="${path}" content="${helpPopover}" />
+		</#if>
 	</@_label>
 	<@field cssClass=fieldCssClass>
 		<#nested />
@@ -175,7 +178,7 @@ To not bind:
 	    if you are binding to and from Users.
 
 -->
-<#macro flexipicker path="" list=false object=false name="" htmlId="" cssClass="" placeholder="" includeEmail="false" includeGroups="false" includeUsers="true" multiple=false>
+<#macro flexipicker path="" list=false object=false name="" htmlId="" cssClass="" placeholder="" includeEmail="false" includeGroups="false" includeUsers="true" membersOnly="false" multiple=false>
 <#if name="">
 	<@spring.bind path=path>
 		<#-- This handles whether we're binding to a list or not but I think
@@ -190,14 +193,14 @@ To not bind:
 					<#local ids=[status.value] />
 				</#if>
 			</#if>
-		<@render_flexipicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers multiple=multiple />
+		<@render_flexipicker expression=status.expression value=ids cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly multiple=multiple />
 	</@spring.bind>
 <#else>
-	<@render_flexipicker expression=name value=[] cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers multiple=multiple />
+	<@render_flexipicker expression=name value=[] cssClass=cssClass htmlId=htmlId placeholder=placeholder includeEmail=includeEmail includeGroups=includeGroups includeUsers=includeUsers membersOnly=membersOnly multiple=multiple />
 </#if>
 </#macro>
 
-<#macro render_flexipicker expression cssClass value multiple placeholder includeEmail includeGroups includeUsers htmlId="">
+<#macro render_flexipicker expression cssClass value multiple placeholder includeEmail includeGroups includeUsers membersOnly htmlId="">
 	<#if multiple><div class="flexi-picker-collection"></#if>
 
 	<#-- List existing values -->
@@ -207,6 +210,7 @@ To not bind:
 			--><input type="text" class="text flexi-picker ${cssClass}"
 					   name="${expression}" id="${htmlId}" placeholder="${placeholder}"
 					   data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
+					   data-members-only="${membersOnly}"
 					   data-prefix-groups="webgroup:" value="${id}" data-type="" autocomplete="off"
 						/>
 				</div>
@@ -218,6 +222,7 @@ To not bind:
 		--><input   type="text" class="text flexi-picker ${cssClass}"
 					name="${expression}" id="${htmlId}" placeholder="${placeholder}"
 					data-include-users="${includeUsers}" data-include-email="${includeEmail}" data-include-groups="${includeGroups}"
+					data-members-only="${membersOnly}"
 					data-prefix-groups="webgroup:" data-type="" autocomplete="off"
 					/>
 			</div>

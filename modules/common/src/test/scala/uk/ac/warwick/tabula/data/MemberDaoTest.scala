@@ -19,11 +19,18 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
 	val memberDao = new MemberDaoImpl
 	val sitsStatusDao = new SitsStatusDaoImpl
+	val modeOfAttendanceDao = new ModeOfAttendanceDaoImpl
+	
 	val sprFullyEnrolledStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
+	val sprPermanentlyWithdrawnStatus = Fixtures.sitsStatus("P", "Permanently Withdrawn", "Permanently Withdrawn")
+	
+	val moaFT = Fixtures.modeOfAttendance("F", "FT", "Full time")
+	val moaPT = Fixtures.modeOfAttendance("P", "PT", "Part time")
 
 	@Before def setup() {
 		memberDao.sessionFactory = sessionFactory
 		sitsStatusDao.sessionFactory = sessionFactory
+		modeOfAttendanceDao.sessionFactory = sessionFactory
 
 		transactional { tx =>
 			session.enableFilter(Member.ActiveOnlyFilter)
@@ -121,47 +128,6 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-	def getRegisteredModules: Unit = transactional { tx =>
-		val mod1 = Fixtures.module("in101")
-		val mod2 = Fixtures.module("in102")
-		val mod3 = Fixtures.module("in103")
-
-		session.save(mod1)
-		session.save(mod2)
-		session.save(mod3)
-
-		val ua1 = Fixtures.upstreamAssignment("in", 1)
-		val ua2 = Fixtures.upstreamAssignment("in", 2)
-
-		// Check that we haven't changed the behaviour of Fixtures
-		ua1.moduleCode should startWith (mod1.code.toUpperCase())
-		ua2.moduleCode should startWith (mod2.code.toUpperCase())
-
-		session.save(ua1)
-		session.save(ua2)
-
-		val ag1 = Fixtures.assessmentGroup(ua1)
-		val ag2 = Fixtures.assessmentGroup(ua2)
-
-		session.save(ag1)
-		session.save(ag2)
-
-		ag1.members.staticIncludeUsers.add("0000001")
-		ag1.members.staticIncludeUsers.add("0000002")
-
-		ag2.members.staticIncludeUsers.add("0000002")
-		ag2.members.staticIncludeUsers.add("0000003")
-
-		session.update(ag1)
-		session.update(ag2)
-
-		memberDao.getRegisteredModules("0000001") should be (Seq(mod1))
-		memberDao.getRegisteredModules("0000002").toSet should be (Seq(mod1, mod2).toSet)
-		memberDao.getRegisteredModules("0000003") should be (Seq(mod2))
-		memberDao.getRegisteredModules("0000004") should be (Seq())
-	}
-
-	@Test
 	def studentRelationshipsCurrentAndByTarget = transactional { tx =>
 		val dept1 = Fixtures.department("sp", "Spanish")
 		val dept2 = Fixtures.department("en", "English")
@@ -187,7 +153,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.saveOrUpdate(stu2)
 		memberDao.saveOrUpdate(staff1)
 		memberDao.saveOrUpdate(staff2)
-		
+
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 
@@ -234,7 +200,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.saveOrUpdate(stu2)
 		memberDao.saveOrUpdate(staff1)
 		memberDao.saveOrUpdate(staff2)
-		
+
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 
@@ -259,8 +225,9 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
 		memberDao.getRelationshipsByAgent(relationshipType, "1000003").toSet should be (Seq(relBetweenStaff1AndStu1, relBetweenStaff1AndStu2).toSet)
 		memberDao.getRelationshipsByAgent(relationshipType, "1000004") should be (Seq())
-		
+
 		memberDao.getAllRelationshipsByAgent("1000003").toSet should be (Seq(relBetweenStaff1AndStu1, relBetweenStaff1AndStu2).toSet)
+		memberDao.getAllRelationshipTypesByAgent("1000003") should be (Seq(relationshipType))
 	}
 
 	@Test
@@ -272,7 +239,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		session.save(dept2)
 
 		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
-		
+
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 
@@ -359,7 +326,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.saveOrUpdate(stu2)
 		memberDao.saveOrUpdate(staff1)
 		memberDao.saveOrUpdate(staff2)
-		
+
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 
@@ -371,6 +338,89 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
 		memberDao.getStudentsByDepartment(dept1).size should be (1)
 		memberDao.getStudentsByRelationshipAndDepartment(relationshipType, dept1).size should be (1)
+	}
+	
+	@Test
+	def getAllSprStatuses = transactional { tx =>
+		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
+		sitsStatusDao.saveOrUpdate(sprPermanentlyWithdrawnStatus)
+
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
+
+		session.save(dept1)
+		session.save(dept2)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1, sprStatus=sprFullyEnrolledStatus)
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2, sprStatus=sprFullyEnrolledStatus)
+		val stu3 = Fixtures.student(universityId = "1000003", userId="student", department=dept2, courseDepartment=dept2, sprStatus=sprFullyEnrolledStatus)
+		val stu4 = Fixtures.student(universityId = "1000004", userId="student", department=dept2, courseDepartment=dept2, sprStatus=sprPermanentlyWithdrawnStatus)
+
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(stu2)
+		memberDao.saveOrUpdate(stu3)
+		memberDao.saveOrUpdate(stu4)
+		
+		memberDao.getAllSprStatuses(dept1) should be (Seq(sprFullyEnrolledStatus))
+		memberDao.getAllSprStatuses(dept2) should be (Seq(sprFullyEnrolledStatus, sprPermanentlyWithdrawnStatus))
+	}
+	
+	@Test
+	def getAllModesOfAttendance = transactional { tx =>
+		modeOfAttendanceDao.saveOrUpdate(moaFT)
+		modeOfAttendanceDao.saveOrUpdate(moaPT)
+
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
+
+		session.save(dept1)
+		session.save(dept2)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		val stu3 = Fixtures.student(universityId = "1000003", userId="student", department=dept2, courseDepartment=dept2)
+		val stu4 = Fixtures.student(universityId = "1000004", userId="student", department=dept2, courseDepartment=dept2)
+
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(stu2)
+		memberDao.saveOrUpdate(stu3)
+		memberDao.saveOrUpdate(stu4)
+		
+		{
+			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaFT)
+			scyd.studentCourseDetails = stu1.mostSignificantCourse
+			stu1.mostSignificantCourse.studentCourseYearDetails.add(scyd)
+			stu1.mostSignificantCourse.latestStudentCourseYearDetails = scyd
+		}
+		
+		{
+			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaFT)
+			scyd.studentCourseDetails = stu2.mostSignificantCourse
+			stu2.mostSignificantCourse.studentCourseYearDetails.add(scyd)
+			stu2.mostSignificantCourse.latestStudentCourseYearDetails = scyd
+		}
+		
+		{
+			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaFT)
+			scyd.studentCourseDetails = stu3.mostSignificantCourse
+			stu3.mostSignificantCourse.studentCourseYearDetails.add(scyd)
+			stu3.mostSignificantCourse.latestStudentCourseYearDetails = scyd
+		}
+		
+		{
+			val scyd = Fixtures.studentCourseYearDetails(modeOfAttendance=moaPT)
+			scyd.studentCourseDetails = stu4.mostSignificantCourse
+			stu4.mostSignificantCourse.studentCourseYearDetails.add(scyd)
+			stu4.mostSignificantCourse.latestStudentCourseYearDetails = scyd
+		}
+		
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(stu2)
+		memberDao.saveOrUpdate(stu3)
+		memberDao.saveOrUpdate(stu4)
+		
+		memberDao.getAllModesOfAttendance(dept1) should be (Seq(moaFT))
+		memberDao.getAllModesOfAttendance(dept2) should be (Seq(moaFT, moaPT))
 	}
 
 }

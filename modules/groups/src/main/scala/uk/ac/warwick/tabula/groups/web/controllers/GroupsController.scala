@@ -26,7 +26,7 @@ abstract class GroupsController extends BaseController with GroupsBreadcrumbs {
 			)
 		}
 
-		ViewModules( moduleItems.toSeq, canManageDepartment = false )
+		ViewModules( moduleItems.toSeq.sortBy(_.module.code), canManageDepartment = false )
 	}
 	
 }

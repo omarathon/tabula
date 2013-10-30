@@ -108,14 +108,20 @@ object SpreadsheetHelpers {
 		(0 to cols).map(sheet.autoSizeColumn(_))
 	}
 	
-	def parseXSSFExcelFile(file: InputStream) = {
+	/**
+	 * If simpleHeaders is set to true, the parser will:
+	 * 
+	 * - lower-case all headers
+	 * - trim the header and remove all non-ascii characters
+	 */
+	def parseXSSFExcelFile(file: InputStream, simpleHeaders: Boolean = true) = {
 		val pkg = OPCPackage.open(file);
 		val sst = new ReadOnlySharedStringsTable(pkg)
 		val reader = new XSSFReader(pkg)
 		val styles = reader.getStylesTable
 		
 		reader.getSheetsData.asScala.toSeq.flatMap { sheet => 
-			val handler = new XslxParser(styles, sst)
+			val handler = new XslxParser(styles, sst, simpleHeaders)
 			val parser = handler.fetchSheetParser
 			
 			val sheetSource = new InputSource(sheet)
@@ -127,7 +133,7 @@ object SpreadsheetHelpers {
 	}
 }
 
-class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable)
+class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable, val simpleHeaders: Boolean = true)
 	extends SheetContentsHandler with Logging {
 
 	var isParsingHeader = true // flag to parse the first row for column headers
@@ -153,11 +159,16 @@ class XslxParser(val styles: StylesTable, val sst: ReadOnlySharedStringsTable)
 		isParsingHeader = (row == 0)
 		currentRow = scala.collection.mutable.Map[String, String]()
 	}
+	
+	def formatHeader(rawValue: String) = {
+		if (simpleHeaders) rawValue.trim().toLowerCase().replaceAll("[^\\x00-\\x7F]", "")
+		else rawValue
+	}
 
 	def cell(cellReference: String, formattedValue: String) = {
 		val col = new CellReference(cellReference).getCol
 
-		if (isParsingHeader) columnMap(col) = formattedValue
+		if (isParsingHeader) columnMap(col) = formatHeader(formattedValue)
 		else if (columnMap.contains(col)) currentRow(columnMap(col)) = formattedValue
 	}
 

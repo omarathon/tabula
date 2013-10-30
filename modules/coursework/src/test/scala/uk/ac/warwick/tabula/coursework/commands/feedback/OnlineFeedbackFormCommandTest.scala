@@ -56,6 +56,23 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
+	def copyToWithBlankMarkAndGrade(){
+		new Fixture {
+
+			command.mark = ""
+			command.grade = ""
+			command.fields = JMap(Assignment.defaultFeedbackTextFieldName -> feedbackValue)
+
+			val feedback = command.apply()
+
+			feedback.actualMark should be(None)
+			feedback.actualGrade should be(None)
+			feedback.customFormValues.size should be(1)
+		}
+
+	}
+
+	@Test
 	def invalidateZipsWhenUpdatingFeedback() {
 		new Fixture {
 			val existingFeedback = new Feedback("student")
@@ -119,6 +136,12 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 			command.mark = "77"
 			command.validate(errors)
 			errors.hasErrors should be (false)
+
+			errors = new BindException(command, "command")
+			errors.hasErrors should be (false)
+			command.mark = "77.2"
+			command.validate(errors)
+			errors.hasErrors should be (true)
 
 		}
 	}

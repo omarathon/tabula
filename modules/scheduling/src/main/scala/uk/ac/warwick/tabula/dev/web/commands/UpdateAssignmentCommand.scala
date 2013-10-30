@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
 
 
-class UpdateAssignmentCommand extends CommandInternal[Unit] {
+class UpdateAssignmentCommand extends CommandInternal[Seq[Assignment]] {
 	this: TransactionalComponent =>
 
 	type AssignmentUpdate = Assignment => Unit
@@ -22,22 +22,20 @@ class UpdateAssignmentCommand extends CommandInternal[Unit] {
 	var openDate: DateTime = _
 	var closeDate: DateTime = _
 
-	protected def applyInternal() {
-
+	protected def applyInternal() = {
 		val updateOpenDate = Option(openDate).map(date => (a: Assignment) => a.openDate = date)
 		val updateCloseDate = Option(closeDate).map(date => (a: Assignment) => a.closeDate = date)
 		// add more optional update actions here
 
 		Seq(updateOpenDate, updateCloseDate).flatten match {
-			case Nil => {
-				// nothing to do
-			}
+			case Nil => Nil // nothing to do
 			case actions: Seq[AssignmentUpdate] => {
 				transactional() {
 					val dept = departmentDao.getByCode(deptCode).get
 					val assignment = assignmentSrv.getAssignmentsByName(assignmentName, dept).head
-					for (action <- actions) {
+					for (action <- actions) yield {
 						action(assignment)
+						assignment
 					}
 				}
 			}
@@ -49,7 +47,7 @@ class UpdateAssignmentCommand extends CommandInternal[Unit] {
 object UpdateAssignmentCommand {
 	def apply() ={
 		new UpdateAssignmentCommand
-			with ComposableCommand[Unit]
+			with ComposableCommand[Seq[Assignment]]
 			with AutowiringTransactionalComponent
 			with PubliclyVisiblePermissions
 			with Unaudited

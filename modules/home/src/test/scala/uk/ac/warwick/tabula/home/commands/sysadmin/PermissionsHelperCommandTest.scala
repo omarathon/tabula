@@ -1,29 +1,25 @@
 package uk.ac.warwick.tabula.home.commands.sysadmin
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.{JavaImports, TestBase, Mockito, CurrentUser, Fixtures}
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.services.permissions.RoleService
 import org.springframework.core.convert.ConversionService
 import uk.ac.warwick.userlookup.User
-import org.mockito.Matchers._
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.roles.RoleBuilder.GeneratedRole
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.Fixtures
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 
 class PermissionsHelperCommandTest extends TestBase with Mockito {
 	
 	case object EmptyBuiltInDefinition extends BuiltInRoleDefinition {
-		import Permissions._
-		
+
 		override def description = "Empty"
+		def canDelegateThisRolesPermissions: JavaImports.JBoolean = false
 	}
 	
 	val securityService = mock[SecurityService]

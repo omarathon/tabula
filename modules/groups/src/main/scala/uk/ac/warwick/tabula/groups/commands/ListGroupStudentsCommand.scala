@@ -5,12 +5,13 @@ import uk.ac.warwick.tabula.commands.{Unaudited, MemberOrUser, Command}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.commands.ReadOnly
 
 /**
  * Generates a list of students on small group, for displaying to
  * owners or tutors of that group.
  */
-class ListGroupStudentsCommand(val group: SmallGroup) extends Command[Seq[MemberOrUser]] with Unaudited {
+class ListGroupStudentsCommand(val group: SmallGroup) extends Command[Seq[MemberOrUser]] with Unaudited with ReadOnly {
 
 	var profileService = Wire[ProfileService]
 

@@ -27,10 +27,16 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro openset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/open" /></#macro>
 <#macro closeset set><@url page="/admin/module/${set.module.code}/groups/${set.id}/selfsignup/close" /></#macro>
 
+<#macro register event><@url page="/event/${event.id}/register" /></#macro>
+<#macro registerForWeek event week><@url page="/event/${event.id}/register?week=${week?c}" /></#macro>
+<#macro groupAttendance group><@url page="/group/${group.id}/attendance" /></#macro>
+<#macro setAttendance set><@url page="/admin/module/${set.module.code}/groups/${set.id}/attendance" /></#macro>
+<#macro moduleAttendance module><@url page="/admin/module/${module.code}/attendance" /></#macro>
+<#macro departmentAttendance department><@url page="/admin/department/${department.code}/attendance" /></#macro>
 
 <#macro signup_to_group set><@url page="/module/${set.module.code}/groups/${set.id}/signup" /></#macro>
 <#macro leave_group set><@url page="/module/${set.module.code}/groups/${set.id}/leave" /></#macro>
-<#macro photo profile><@url page="/view/photo/${profile.universityId}.jpg" context="/profiles" /></#macro>
+<#macro photo profile><#if ((profile.universityId)!)?has_content><@url page="/view/photo/${profile.universityId}.jpg" context="/profiles" /><#else><@url resource="/static/images/no-photo.jpg" /></#if></#macro>
 <#macro relationshipPhoto profile relationship><@url page="/view/photo/${profile.universityId}/${relationship.relationshipType.dbValue}/${relationship.agent}.jpg" context="/profiles" /></#macro>
 
 <#macro studentslist group><@url page="/group/${group.id}/studentspopup" /></#macro>

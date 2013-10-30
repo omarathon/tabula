@@ -145,28 +145,23 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 		// TODO Can't test link to SITS for our fixture department
 		// Don't bother messing around with assigning students, let's just assume students will magically find the submit page
-		executeScript("jQuery('#assignmentEnrolmentFields details > *:not(summary)').show();") // expand expander
+		click on id("student-summary-legend")
 		className("show-adder").findElement map { _.underlying.isDisplayed } should be (Some(true))
 
 		// Make sure JS is working
 		id("js-hint").findElement should be ('empty)
 
-		// this sometimes fails for no obvious reason; if it does, then we'll try it again.
-		var tries = 0
-		Stream.continually({
-			click on linkText("Add students manually")
-			eventually { textArea("massAddUsers").isDisplayed should be (true) }
+		click on linkText("Add students manually")
+		eventually { textArea("massAddUsers").isDisplayed should be (true) }
 
-			textArea("massAddUsers").value = members.mkString("\n")
-			click on className("add-students")
+		textArea("massAddUsers").value = members.mkString("\n")
+		click on className("add-students")
 
-			// Eventually, a Jax!
-			eventuallyAjax { textArea("massAddUsers").isDisplayed should be (false) }
-			tries = tries + 1
-		}).takeWhile(
-			(Unit)=> (! pageSource.contains(members.size + " manually enrolled") && tries < 3)
-		)
-			pageSource should include(members.size + " manually enrolled")
+		// Eventually, a Jax!
+		eventuallyAjax { textArea("massAddUsers").isDisplayed should be (false) }
+		// there will be a delay between the dialog being dismissed and the source being updated by the
+		// ajax response. So wait some more
+		eventuallyAjax{pageSource should include(members.size + " manually enrolled")}
 
 		checkbox("collectSubmissions").select()
 

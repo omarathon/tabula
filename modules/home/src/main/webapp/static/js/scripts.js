@@ -110,34 +110,33 @@
 		var $form = $this.closest('form');
 		var doNothing = function(){};
 
+		var show = function($div, data) {
+			if (data === 'init') $div.show(); // no animation on init
+			else $div.stop().slideDown('fast');
+			$div.trigger('tabula.slideMoreOptions.shown');
+		};
+
+		var hide = function($div, data) {
+			if (data === 'init') $div.hide(); // no animation on init
+			else $div.stop().slideUp('fast');
+			$div.trigger('tabula.slideMoreOptions.hidden');
+		}
+
 		// for checkboxes, there will just be one target - the current element (which will have the same name as itself).
 		// for radio buttons, each radio button will be a target.  They are identified as a group because they all have the same name.
 		var $changeTargets = $("input[name='" + name + "']", $form);
 		if (showWhenChecked) {
-			$changeTargets.change(function() {
-				if ($this.is(':checked')) {
-					$slidingDiv.stop().slideDown('fast');
-					$slidingDiv.trigger('tabula.slideMoreOptions.shown');
-				}
-				else {
-					$slidingDiv.stop().slideUp('fast');
-					$slidingDiv.trigger('tabula.slideMoreOptions.hidden');
-				}
+			$changeTargets.change(function(event, data) {
+				if ($this.is(':checked')) show($slidingDiv, data);
+				else hide($slidingDiv, data);
 			});
-			$this.trigger('change');
 		} else {
-			$changeTargets.change(function() {
-				if ($this.is(':checked')) {
-					$slidingDiv.stop().slideUp('fast');
-					$slidingDiv.trigger('tabula.slideMoreOptions.hidden');
-				}
-				else {
-					$slidingDiv.stop().slideDown('fast');
-					$slidingDiv.trigger('tabula.slideMoreOptions.shown');
-				}
+			$changeTargets.change(function(event, data) {
+				if ($this.is(':checked')) hide($slidingDiv, data);
+				else show($slidingDiv, data);
 			});
-			$this.trigger('change');
 		}
+		$this.trigger('change', 'init'); // pass 'init' to suppress animation on load.
 	};
 
 
@@ -307,7 +306,7 @@
 				$items.popover('hide');
 			}
 		});
-		
+
 		// TAB-945 support popovers within fix-on-scroll
 		$items.closest('.fix-on-scroll').on('fixed', function(e, isFixed, fixLocation) {
 			// Re-position any currently shown popover whenever we trigger a change in fix behaviour
@@ -361,6 +360,91 @@
 		});
 	});
 
+
+	/*
+	  Invoke on .nav-tabs to overflow items into a dropdown
+	  instead of onto another row.
+	*/
+	jQuery.fn.tabOverflow = function() {
+
+		var selector = '.nav-tabs', $target = $(this).find(selector).add($(this).filter(selector)), initClass = selector + '-overflow-inited';
+		// filter already initialized tabs
+		$target = $target.not(initClass);
+
+		// Packs the given list items into a dropdown.
+		var overflowThese = function($items) {
+			var $dropdown = $('<li>').addClass('dropdown').addClass('pull-right');
+			var $link = $('<a>').addClass('dropdown-toggle').html('More...');
+			var $caret = $('<b>').addClass('caret');
+			var $ul = $('<ul>', { 'class' : 'dropdown-menu' });
+			$dropdown
+			  .append($ul)
+			  .append($link.append($caret));
+			$items.first().before($dropdown);
+			$ul.append($items);
+			$link.dropdown();
+		};
+
+		function overflow($items) {
+			$items.each(function(i, e) {
+				var x = 0;
+				// find the first child that hits a new line by comparing leftness.
+				$(e).children().each(function(j, child) {
+					var left = $(child).position().left;
+					if (left < x) {
+						// The first prev() is so nextAll includes child;
+						// The second prev() is a silly hack to put an extra
+						// item into the menu to make way for the dropdown item;
+						// not very scientific. Could measure required width?
+						overflowThese($(child).prev().prev().nextAll());
+						return false;
+					} else {
+						x = left;
+					}
+				});
+			});
+		}
+
+		function dropflow($items) {
+			// remove the dropdown nature
+			$items.find('.dropdown-menu li').unwrap();
+			$items.find('.dropdown li').unwrap();
+			$items.find('.dropdown-toggle').remove();
+		}
+
+		function reflow($items) {
+			// convenience method
+			dropflow($items);
+			overflow($items);
+		}
+
+		// overflow on init
+		overflow($target);
+
+		// on click, move active tab to head, and reflow
+		this.on('click', '.dropdown-menu li', function() {
+			var $tabs = $(this).closest(selector);
+			$tabs.prepend($(this));
+			reflow($tabs);
+		});
+
+		// on tabbable sort or custom change, reflow
+		this.on('tabbablechanged sortstop', function() {
+			var $tabs = $(this).find(selector).add($(this).filter(selector));
+			reflow($tabs);
+			// if active item pushed into dropdown, try again
+			var hiddenActiveTab = $tabs.find('.dropdown-menu .active');
+			if (hiddenActiveTab.length) {
+				$tabs.prepend(hiddenActiveTab);
+				reflow($tabs);
+			}
+		});
+
+		// tidy up and return for chaining
+		$target.addClass(initClass);
+		return this;
+	};
+
 	// collapsible striped section
 	// exported so can be called on-demand e.g. after an ajax-load
 	// adds a class to prevent double-init
@@ -371,24 +455,102 @@
 				return $section.hasClass('expanded');
 			};
 
-			var $icon = $('<i class="icon-fixed-width"></i>');
-			if (open()) $icon.addClass('icon-chevron-down');
-			else $icon.addClass('icon-chevron-right');
+			var $icon = $('<i />');
+			if (open()) $icon.addClass('icon-fixed-width icon-chevron-down');
+			else $icon.addClass('icon-fixed-width icon-chevron-right');
 
 			var $title = $section.find('.section-title');
 			$title.prepend(' ').prepend($icon);
+			
+			var populateContent = function(onComplete) { onComplete(); }
+			if ($section.data('populate') && $section.data('href')) {
+				$section.data('loaded', false).data('loading', false);
+			
+				// Populate function
+				populateContent = function(onComplete) {
+					if ($section.data('loaded')) onComplete();
+					else if ($section.data('loading')) return; // prevent multiple invocation
+					else {
+						$section.data('loading', true);
+						$icon.removeClass().addClass('icon-fixed-width icon-refresh icon-spin');
+						
+						var $target = $section.find($section.data('populate')); 
+					
+						$target.load(
+							$section.data('href'),
+							{ ts: new Date().getTime() },
+							function() {
+								// FIXME This sucks, need to change id6scripts.js to expose this as a function!
+								$target.find('table').each(function() {
+									var t = $(this);
+									if (Math.floor(t.width()) > t.parent().width()) {
+										t.wrap($('<div><div class="sb-wide-table-wrapper"></div></div>'));
+									}
+								});
+								
+								if ($('body.is-smallscreen').length === 0 && $target.find('div.sb-wide-table-wrapper').length > 0) {
+									var popoutLinkHandler = function(event) {
+										event.stopPropagation();
+										event.preventDefault();
+										if (!Shadowbox.initialized) {
+											Shadowbox.initialized = true;
+											Shadowbox.init(shadowboxOptions);
+										}
+										var tableWrapper = $(this).closest('div').find('div.sb-wide-table-wrapper')
+										Shadowbox.open({
+											link : this,
+											content: '<div class="sb-wide-table-wrapper" style="background: white;">' 
+													+ tableWrapper.html()
+													+ '</div>',
+													player: 'html',
+													width: $(window).width(),
+													height: $(window).height()
+										})
+									};
+									
+									var generatePopoutLink = function(){
+										return $('<span/>')
+										.addClass('sb-table-wrapper-popout')
+										.append('(')
+										.append(
+											$('<a/>')
+												.attr('href', '#')
+												.html('Pop-out table')
+												.on('click', popoutLinkHandler)
+										).append(')');
+									};
+									
+									$target.find('div.sb-wide-table-wrapper > table').each(function(){
+										var $this = $(this);
+										if($this.is(':visible') && !$this.hasClass('sb-no-wrapper-table-popout') && Math.floor($this.width()) > $this.parent().width()){
+											$this.parent().parent('div').prepend(generatePopoutLink()).append(generatePopoutLink())
+										}
+									});	
+								}
+								
+								$target.find('a.ajax-modal').ajaxModalLink();
+								
+								onComplete();
+								$section.data('loading', false).data('loaded', true);
+							}
+						);
+					}
+				}
+			}
 
 			$title.css('cursor', 'pointer').on('click', function() {
 				if (open()) {
 					$section.removeClass('expanded');
-					$icon.removeClass('icon-chevron-down').addClass('icon-chevron-right');
+					$icon.removeClass().addClass('icon-fixed-width icon-chevron-right');
 				} else {
-					$section.addClass('expanded');
-					$icon.removeClass('icon-chevron-right').addClass('icon-chevron-down');
-
-					if ($section.data('name')) {
-						window.location.hash = $section.data('name');
-					}
+					populateContent(function() {
+						$section.addClass('expanded');
+						$icon.removeClass().addClass('icon-fixed-width icon-chevron-down');
+	
+						if ($section.data('name')) {
+							window.location.hash = $section.data('name');
+						}
+					});
 				}
 			});
 
@@ -400,8 +562,8 @@
 	};
 
 	exports.resizeModalIframes = function(height){
-		// 30px of padding... plus 6 more for reasons I can't work out
-		$('.modal-body > iframe').closest('.modal-body').height(height + 36);
+		//Adding extra height for 'browser knows iframe size' purposes
+		$('.modal-body > iframe').height(height + 36);
 	};
 
 	// on ready
@@ -603,9 +765,10 @@
 				$t.find('.gadget, .tab-content, .tab-pane, .active').removeClass('gadget tab-content tab-pane active');
 			}
 
-			$(document).on('tabbablechanged', function(e) {
+			$(document).on('tabbablechanged', function(e, callback) {
 				$('.tooltip').remove();
-				$t.show().find('.tab-container i, .layout-tools i').tooltip({ delay: { show: 750, hide: 100 } });
+				$t.show().find('.tab-container i, .layout-tools i').tooltip();
+				if (typeof(callback) == typeof(Function)) callback();
 			});
 
 			// layout options
@@ -621,8 +784,11 @@
 				});
 				$lt.after($tabContainer);
 				$panes.addClass('tab-content').children().addClass('tab-pane');
-				$t.find('.nav-tabs').sortable({ handle: '.icon-move' }).show().find('li:first a').tab('show');
-				$t.trigger('tabbablechanged');
+				$t.find('.nav-tabs').sortable({
+					handle: '.icon-move',
+					placeholder: 'tabbable-placeholder'
+				}).show().find('li:first a').tab('show');
+				$t.trigger('tabbablechanged', function() { $('.tabbable').tabOverflow(); });
 			});
 
 			$t.on('click', '.layout-tools .icon-th-large', function() { // gadgetify
@@ -703,7 +869,7 @@
 			// default to gadgets
 			$t.find('.layout-tools .icon-th-large').click();
 		}
-		
+
 		// drag and drop containers
 		$('.tabula-dnd').dragAndDrop();
 		$('.tabula-filtered-list').filteredList();

@@ -51,6 +51,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 			case None => null
 			case jcol: java.util.Collection[_] => superWrap(jcol)
 			case jmap: JMap[_, _] => superWrap(jmap)
+			case smap: scala.collection.SortedMap[_, _] => superWrap(toJLinkedHashMap(smap))
 			case smap: scala.collection.Map[_, _] => superWrap(mapAsJavaMapConverter(smap).asJava)
 			case sseq: scala.Seq[_] => superWrap(seqAsJavaListConverter(sseq).asJava)
 			case scol: scala.Iterable[_] => superWrap(asJavaCollectionConverter(scol).asJavaCollection)
@@ -145,7 +146,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 					updater
 				}
 			}
-			var cache = mutable.HashMap[String, TemplateModel]()
+			var cache = JConcurrentMap[String, TemplateModel]()
 			def clear() = cache.clear()
 		}
 
@@ -198,7 +199,7 @@ class ScalaBeansWrapper extends DefaultObjectWrapper with Logging {
 	object ScalaHashModel {
 		type Getter = java.lang.reflect.Method
 		type PermissionsFetcher = Any=>Seq[Permission]
-		val gettersCache = new mutable.HashMap[Class[_], Map[String, (Getter, PermissionsFetcher)]]
+		val gettersCache = JConcurrentMap[Class[_], Map[String, (Getter, PermissionsFetcher)]]()
 	}
 
 }

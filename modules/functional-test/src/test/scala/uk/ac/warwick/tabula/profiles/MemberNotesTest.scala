@@ -22,19 +22,4 @@ class MemberNotesTest extends BrowserTest with GivenWhenThen with FeaturesDriver
 
 	}
 
-	"A student" should "not be able to view member notes" in {
-
-		Given("The profilesMemberNotes feature is not enabled")
-		disableFeature("profilesMemberNotes")
-
-		When("Student1 views their profile")
-		signIn as(P.Student1) to (Path("/profiles"))
-		val profilePage = new ProfilePage()
-		profilePage should be('currentPage)
-
-		val memberNoteSection: Option[Element] = find(cssSelector("#membernote-details"))
-		memberNoteSection should not be ('defined)
-
-	}
-
 }

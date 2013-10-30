@@ -280,20 +280,6 @@
 			document.location.reload(true);
 
 		} else {
-			//Set the modal body height and disable overflow
-			var $frame = $(frame)
-			var frameHeight = frame.contentWindow.document.body.scrollHeight
-			var $modalBody = $("#note-modal .modal-body")
-
-			$modalBody.height(frameHeight);
-
-			if(frameHeight < 500) {
-				$modalBody.css("overflow-y", "hidden")
-			} else {
-				$modalBody.css("overflow-y", "auto")
-				$frame.height(frameHeight + 10)  //Work around for case of overflow where iframe html is 20px smaller than iframe window
-			}
-
 			//Bind iframe form submission to modal button
 			$("#member-note-save").on('click', function(e){
 				e.preventDefault();
@@ -442,4 +428,11 @@
     			createCalendar($(this),$(this).data('viewname'),$(this).data('studentid'));
     		});
     	});
+    	
+	$(function() {
+		// Prevent clicks on filtering dropdowns from closing window
+		$('.dropdown-menu.filter-list').on('click', function(e) {
+			e.stopPropagation();
+		});
+	});
 }(jQuery));

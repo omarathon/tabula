@@ -9,7 +9,7 @@
 	<ul class="links">
 		<#list departments as department>
 			<li>
-				<a href="<@url page="/manage/${department.code}"/>">${department.name}</a>
+				<a href="<@routes.manageDepartment department />">${department.name}</a>
 			</li>
 		</#list>
 	</ul>

@@ -1,5 +1,27 @@
 <#escape x as x?html>
-<h1>View monitoring points for ${command.dept.name}</h1>
+<h1 class="with-settings">View monitoring points for ${command.dept.name}</h1>
+
+<div class="btn-toolbar dept-toolbar">
+	<#if command.dept.parent??>
+		<a class="btn btn-medium use-tooltip" href="<@routes.viewDepartment command.dept.parent />" data-container="body" title="${command.dept.parent.name}">
+			Parent department
+		</a>
+	</#if>
+	
+	<#if command.dept.children?has_content>
+		<div class="btn-group">
+			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
+				Subdepartments
+				<span class="caret"></span>
+			</a>
+			<ul class="dropdown-menu pull-right">
+				<#list command.dept.children as child>
+					<li><a href="<@routes.viewDepartment child />">${child.name}</a></li>
+				</#list>
+			</ul>
+		</div>
+	</#if>
+</div>
 
 <#if updatedPoint??>
 	<div class="alert alert-success">
@@ -8,7 +30,7 @@
 	</div>
 </#if>
 
-<form class="form-inline" action="<@url page="/${command.dept.code}"/>">
+<form class="form-inline" action="<@routes.viewDepartment command.dept />">
 	<label>Academic year
 		<select name="academicYear">
 			<#assign academicYears = [command.thisAcademicYear.previous.toString, command.thisAcademicYear.toString, command.thisAcademicYear.next.toString] />
@@ -30,13 +52,13 @@
 
 <#else>
 
-	<form id="viewChooseSet" class="form-inline" action="<@url page="/${command.dept.code}"/>">
+	<form id="viewChooseSet" class="form-inline" action="<@routes.viewDepartment command.dept />">
 
 		<input type="hidden" value="${command.academicYear.toString}" name="academicYear" />
 
 		<select name="route" class="route input-xxlarge">
 			<option style="display:none;" disabled <#if !command.route??>selected</#if> value="">Route</option>
-			<#list command.setsByRouteByAcademicYear[command.academicYear.toString]?keys?sort_by("code") as route>
+			<#list command.sortedRoutesByAcademicYear(command.academicYear.toString) as route>
 				<option value="${route.code}" <#if command.route?? && command.route.code == route.code>selected</#if>>
 					<@fmt.route_name route />
 				</option>
@@ -74,7 +96,7 @@
 <#if command.pointSet??>
 	<h2>Students who have missed monitoring points</h2>
 
-	<#if command.membersWithMissedOrLateCheckpoints?keys?size == 0>
+	<#if membersWithMissedOrLateCheckpoints?keys?size == 0>
 		<p>There are no students in <@fmt.route_name command.route /> who have missed monitoring points</p>
 	<#else>
 
@@ -92,7 +114,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<#list command.membersWithMissedOrLateCheckpoints?keys as member>
+				<#list membersWithMissedOrLateCheckpoints?keys as member>
 					<#assign missedCount = 0 />
 					<tr>
 						<td>${member.firstName}</td>
@@ -101,19 +123,21 @@
 							<#if command.monitoringPointsByTerm[term]??>
 								<td>
 									<#list command.monitoringPointsByTerm[term]?sort_by("validFromWeek") as point>
-										<#if !command.missedCheckpointsByMemberByPoint(member, point)??>
+										<#if !missedCheckpointsByMemberByPoint(member, point)??>
 											<i class="icon-minus icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
 										<#else>
-											<#assign checkpointState = command.missedCheckpointsByMemberByPoint(member, point) />
+											<#assign checkpointState = missedCheckpointsByMemberByPoint(member, point) />
 											<#if checkpointState == "attended">
 												<i class="icon-ok icon-fixed-width attended" title="Attended: ${point.name} (<@fmt.weekRanges point />)"></i>
 											<#elseif checkpointState == "authorised">
-												<i class="icon-remove icon-fixed-width authorised" title="Missed (authorised): ${point.name} (<@fmt.weekRanges point />)"></i>
+												<i class="icon-remove-circle icon-fixed-width authorised" title="Missed (authorised): ${point.name} (<@fmt.weekRanges point />)"></i>
 											<#elseif checkpointState == "unauthorised">
 												<#assign missedCount = missedCount + 1 />
 												<i class="icon-remove icon-fixed-width unauthorised" title="Missed (unauthorised): ${point.name} (<@fmt.weekRanges point />)"></i>
-											<#else>
+											<#elseif checkpointState == "late">
 												<i class="icon-warning-sign icon-fixed-width late" title="No data: ${point.name} (<@fmt.weekRanges point />)"></i>
+											<#else>
+												<i class="icon-minus icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
 											</#if>
 										</#if>
 									</#list>
@@ -125,7 +149,7 @@
 						</td>
 					</tr>
 				</#list>
-			<tbody>
+			</tbody>
 		</table>
 
 	</#if>
@@ -137,7 +161,7 @@
 	<#if command.pointSet.points?size == 0>
 		<p><em>No points exist for the selected route and year of study</em></p>
 	<#else>
-		<#assign returnTo><@url page="/${command.dept.code}?academicYear=${command.academicYear.toString}&route=${command.route.code}&set=${command.pointSet.id}" /></#assign>
+		<#assign returnTo><@routes.viewDepartmentSpecific command.dept command.academicYear command.route command.pointSet /></#assign>
 		<div class="monitoring-points">
         	<#macro pointsInATerm term>
         		<div class="striped-section">
@@ -147,9 +171,7 @@
         					<div class="item-info row-fluid point">
         						<div class="span12">
         							<div class="pull-right">
-        								<a class="btn btn-primary" href="
-        									<@url page="/${command.dept.code}/${point.id}/record?returnTo=${returnTo?url}"/>
-        								">
+        								<a class="btn btn-primary" href="<@routes.record point returnTo />">
         									Record
         								</a>
         							</div>
@@ -169,8 +191,7 @@
 	</#if>
 </#if>
 
-<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
-<script>
+<script type="text/javascript">
 	var setsByRouteByAcademicYear = {
 		<#list command.setsByRouteByAcademicYear?keys as academicYear>
 			"${academicYear}" : [

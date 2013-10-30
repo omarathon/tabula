@@ -1,14 +1,14 @@
 package uk.ac.warwick.tabula.data.model
 
 
-sealed abstract class DegreeType(val dbValue: String, val description: String)
+sealed abstract class DegreeType(val dbValue: String, val description: String, val sortOrder: Int)
 
 object DegreeType {
-	case object Undergraduate extends DegreeType("UG", "Undergraduate")
-	case object Postgraduate extends DegreeType("PG", "Postgraduate")
-	case object InService extends DegreeType("IS", "In-Service")
-	case object PGCE extends DegreeType("PGCE", "PGCE")
-
+	case object Undergraduate extends DegreeType("UG", "Undergraduate", 1)
+	case object Postgraduate extends DegreeType("PG", "Postgraduate", 2)
+	case object PGCE extends DegreeType("PGCE", "PGCE", 3)
+	case object InService extends DegreeType("IS", "In-Service", 4)
+	
 	def fromCode(code: String) = code match {
 	  	case Undergraduate.dbValue => Undergraduate
 	  	case Postgraduate.dbValue => Postgraduate
@@ -17,6 +17,12 @@ object DegreeType {
 	  	case null => null
 	  	case _ => throw new IllegalArgumentException()
 	}
+	
+	val SortOrdering: Ordering[DegreeType] = Ordering.by[DegreeType, Int] ( _.sortOrder )
+	
+	// Companion object is one of the places searched for an implicit Ordering, so
+	// this will be the default when ordering a list of degree types.
+	implicit val defaultOrdering = SortOrdering
 }
 
 class DegreeTypeUserType extends AbstractStringUserType[DegreeType] {

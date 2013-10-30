@@ -3,6 +3,7 @@ import collection.JavaConverters._
 import collection.mutable
 import language.implicitConversions
 import scala.collection.GenTraversableOnce
+import scala.collection.SortedMap
 
 /**
  * Quick way to expose a bunch of Java type names under
@@ -24,6 +25,7 @@ trait JavaImports {
 	type JList[A] = java.util.List[A]
 	type JArrayList[A] = java.util.ArrayList[A]
 	type JMap[K, V] = java.util.Map[K, V]
+	type JConcurrentMap[K, V] = java.util.concurrent.ConcurrentMap[K, V] with ScalaConcurrentMapHelpers[K, V]
 	type JSet[A] = java.util.Set[A]
 	type JInteger = java.lang.Integer
 	type JLong = java.lang.Long
@@ -31,6 +33,7 @@ trait JavaImports {
 	def JBoolean(b: Option[Boolean]) = ToJBoolean(b)
 	def JList[A](items: A*) = mutable.Seq(items: _*).asJava
 	def JMap[K, V](elems: (K, V)*) = mutable.Map[K, V](elems: _*).asJava
+	def JConcurrentMap[K, V](elems: (K, V)*) = JConcurrentHashMap(elems: _*)
 	def JSet[A](items: A*) = mutable.Set(items: _*).asJava
 	def JInteger(i: Option[Int]) = ToJInteger(i)
 	def JLong(l: Option[Long]) = ToJLong(l)
@@ -52,6 +55,12 @@ trait JavaImports {
 	 * None as null.
 	 */
 	protected implicit def ToJLong(l: Option[Long]) = (l map (l => l: JLong)).orNull
+	
+	def toJLinkedHashMap[K, V](smap: SortedMap[K, V]) = {
+		val map = new java.util.LinkedHashMap[K, V]
+		map.putAll(smap.asJava)
+		map
+	}
 	
 	/**
 	 * Allows you to create an empty Java ArrayList, useful as an initial
@@ -113,24 +122,63 @@ trait JavaImports {
 	 * value for a variable that needs a mutable JMap.
 	 */
 	object JHashMap {
-		def apply[A, B](elements: (A, B)*): java.util.HashMap[A, B] = {
-			val map = new java.util.HashMap[A, B]()
+		def apply[K, V](elements: (K, V)*): java.util.HashMap[K, V] = {
+			val map = new java.util.HashMap[K, V]()
 			elements foreach { case (key, value) => map.put(key, value) }
 			map
 		}
 		
-		def apply[A, B](orig: Map[A, B]): java.util.HashMap[A, B] = {
-			val map = new java.util.HashMap[A, B]()
+		def apply[K, V](orig: Map[K, V]): java.util.HashMap[K, V] = {
+			val map = new java.util.HashMap[K, V]()
 			if (!orig.isEmpty) map.putAll(orig.toMap.asJava)
 			map
 		}
 		
-		def apply[A, B](orig: JMap[A, B]): java.util.HashMap[A, B] = {
-			val map = new java.util.HashMap[A, B]()
+		def apply[K, V](orig: JMap[K, V]): java.util.HashMap[K, V] = {
+			val map = new java.util.HashMap[K, V]()
 			if (!orig.isEmpty) map.putAll(orig)
 			map
 		}
 	}
+	
+	/**
+	 * Allows you to create an empty Java ConcurrentHashMap, useful as an initial
+	 * value for a variable that needs a mutable JConcurrentMap.
+	 */
+	object JConcurrentHashMap {
+		def apply[K, V](elements: (K, V)*): java.util.concurrent.ConcurrentHashMap[K, V] with ScalaConcurrentMapHelpers[K, V] = {
+			val map = new java.util.concurrent.ConcurrentHashMap[K, V]() with ScalaConcurrentMapHelpers[K, V]
+			elements foreach { case (key, value) => map.put(key, value) }
+			map
+		}
+		
+		def apply[K, V](orig: Map[K, V]): java.util.concurrent.ConcurrentHashMap[K, V] with ScalaConcurrentMapHelpers[K, V] = {
+			val map = new java.util.concurrent.ConcurrentHashMap[K, V]() with ScalaConcurrentMapHelpers[K, V]
+			if (!orig.isEmpty) map.putAll(orig.toMap.asJava)
+			map
+		}
+		
+		def apply[K, V](orig: JMap[K, V]): java.util.concurrent.ConcurrentHashMap[K, V] with ScalaConcurrentMapHelpers[K, V] = {
+			val map = new java.util.concurrent.ConcurrentHashMap[K, V]() with ScalaConcurrentMapHelpers[K, V]
+			if (!orig.isEmpty) map.putAll(orig)
+			map
+		}
+	}
+}
+
+trait ScalaConcurrentMapHelpers[K, V] {
+	self: JavaImports.JConcurrentMap[K, V] =>
+		
+	def getOrElseUpdate(key: K, op: => V): V =
+		Option(get(key)) match {
+			case Some(v) => v
+      case None => {
+    	  op match {
+    	 	  case null => null.asInstanceOf[V] // We can't put a null in here. Sigh
+    	 	  case d => Option(putIfAbsent(key, d)).getOrElse(d)
+    	  }
+      }
+		}
 }
 
 object JavaImports extends JavaImports

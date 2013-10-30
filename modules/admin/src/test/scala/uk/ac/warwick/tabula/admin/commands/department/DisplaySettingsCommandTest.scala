@@ -23,7 +23,8 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 		testDepartment.plagiarismDetectionEnabled = true
 		testDepartment.assignmentInfoView = Summary
 		testDepartment.weekNumberingSystem = Academic
-		
+		testDepartment.autoGroupDeregistration = true
+
 		val commandInternal = new DisplaySettingsCommandInternal(testDepartment) with ModuleAndDepartmentServiceComponent with RelationshipServiceComponent {
 			var moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 			var relationshipService = mock[RelationshipService]
@@ -36,7 +37,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 		new Fixture {
 			val command = DisplaySettingsCommand(testDepartment)
 
-			command.isInstanceOf[Appliable[Unit]] should be(true)
+			command.isInstanceOf[Appliable[Department]] should be(true)
 			command.isInstanceOf[DisplaySettingsCommandState] should be(true)
 			command.asInstanceOf[DisplaySettingsCommandState].department should be(testDepartment)
 		}
@@ -51,6 +52,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 			commandInternal.plagiarismDetection should be(true)
 			commandInternal.assignmentInfoView should be(Summary)
 			commandInternal.weekNumberingSystem should be(Academic)
+			commandInternal.autoGroupDeregistration should be (true)
 		}
 	}
 
@@ -67,6 +69,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 			commandInternal.turnitinSmallMatchWordLimit = 0
 			commandInternal.assignmentInfoView = Table
 			commandInternal.weekNumberingSystem = Term
+			commandInternal.autoGroupDeregistration = false
 
 			commandInternal.applyInternal()
 
@@ -79,6 +82,7 @@ class DisplaySettingsCommandTest extends TestBase with Mockito {
 			testDepartment.turnitinSmallMatchWordLimit should be (0)
 			testDepartment.assignmentInfoView should be(Table)
 			testDepartment.weekNumberingSystem should be(Term)
+			testDepartment.autoGroupDeregistration should be (false)
 
 		}
 	}

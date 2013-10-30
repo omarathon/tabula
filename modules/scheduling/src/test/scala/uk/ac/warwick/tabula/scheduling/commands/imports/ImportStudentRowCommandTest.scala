@@ -137,7 +137,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			phoneNumber				= null,
 			gender					= null,
 			alternativeEmailAddress	= null,
-			userType				= Student		)
+			userType				= Student)
 
 		val blobBytes = Array[Byte](1,2,3,4,5)
 		val mac = MembershipInformation(mm, () => Some(blobBytes))
@@ -161,6 +161,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		courseCommand.memberDao = memberDao
 		courseCommand.relationshipService = relationshipService
 		courseCommand.courseImporter = courseImporter
+		courseCommand.stuMem = smartMock[StudentMember]
 
 		val rowCommand = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, courseCommand)
 		rowCommand.memberDao = memberDao
@@ -300,7 +301,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.studentCourseDetails.size should not be (0)
 
-			there was no(relationshipService).saveStudentRelationship(tutorRelationshipType, "0672089/2","0070790");
+			there was no(relationshipService).replaceStudentRelationship(tutorRelationshipType, "0672089/2","0070790");
 		}
 	}
 
@@ -331,7 +332,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.mostSignificantCourseDetails should not be (null)
 
-			there was one(relationshipService).saveStudentRelationship(tutorRelationshipType, "0672089/2","0070790");
+			there was one(relationshipService).replaceStudentRelationship(tutorRelationshipType, "0672089/2","0070790");
 		}
 	}
 }

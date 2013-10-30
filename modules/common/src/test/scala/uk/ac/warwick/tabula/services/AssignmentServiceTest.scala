@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.{AssignmentMembershipDaoImpl, DepartmentDaoImpl}
-import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
 class AssignmentServiceTest extends PersistenceTestBase {
@@ -36,6 +36,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val amDao = new AssignmentMembershipDaoImpl
 		amDao.sessionFactory = sessionFactory
 		assignmentMembershipService.dao = amDao
+		assignmentMembershipService.userLookup = userLookup
 	}
 
 	@Transactional @Test def recentAssignment {
@@ -464,12 +465,28 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 		extensionService.getExtensionById(extension.id) should be ('empty)
 	}
-
-	@Test def getEnrolledAssignments = transactional { tx =>
+	
+	trait AssignmentMembershipFixture {
+		val student1 = new User("student1") { setWarwickId("0000001"); setFoundUser(true); setVerified(true); }
+		val student2 = new User("student2") { setWarwickId("0000002"); setFoundUser(true); setVerified(true); }
+		val student3 = new User("student3") { setWarwickId("0000003"); setFoundUser(true); setVerified(true); }
+		val student4 = new User("student4") { setWarwickId("0000004"); setFoundUser(true); setVerified(true); }
+		val student5 = new User("student5") { setWarwickId("0000005"); setFoundUser(true); setVerified(true); }
+		val manual1 = new User("manual1") { setWarwickId("0000006"); setFoundUser(true); setVerified(true); }
+		val manual2 = new User("manual2") { setWarwickId("0000007"); setFoundUser(true); setVerified(true); }
+		val manual3 = new User("manual3") { setWarwickId("0000008"); setFoundUser(true); setVerified(true); }
+		val manual4 = new User("manual4") { setWarwickId("0000009"); setFoundUser(true); setVerified(true); }
+		val manual5 = new User("manual5") { setWarwickId("0000010"); setFoundUser(true); setVerified(true); }
+		val manual10 = new User("manual10") { setWarwickId("0000015"); setFoundUser(true); setVerified(true); }
+		
+		userLookup.registerUserObjects(student1, student2, student3, student4, student5, manual1, manual2, manual3, manual4, manual5, manual10)
+		
 		val year = AcademicYear.guessByDate(DateTime.now)
 
 		val assignment1 = newDeepAssignment("ch101")
 		assignment1.academicYear = year
+		assignment1.assignmentMembershipService = assignmentMembershipService
+		assignment1.members.userLookup = userLookup
 
 		val department1 = assignment1.module.department
 
@@ -480,6 +497,8 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val assignment2 = newDeepAssignment("ch101")
 		assignment2.module = assignment1.module
 		assignment2.academicYear = year
+		assignment2.assignmentMembershipService = assignmentMembershipService
+		assignment2.members.userLookup = userLookup
 
 		val department2 = assignment2.module.department
 
@@ -591,20 +610,38 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentService.save(assignment2)
 
 		session.flush
-
-		val ams = assignmentMembershipService
-
-		withUser("manual1", "0000006") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1).toSet) }
-		withUser("manual2", "0000007") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
-		withUser("manual3", "0000008") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
-		withUser("manual4", "0000009") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
-
-		withUser("student1", "0000001") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
-		withUser("student2", "0000002") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
-		withUser("student3", "0000003") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq().toSet) }
-		withUser("student4", "0000004") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq().toSet) }
-		withUser("student5", "0000005") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+		
+		val universityIdGroup = UserGroup.ofUniversityIds
+		universityIdGroup.userLookup = userLookup
+		universityIdGroup.addUser("0000001")
+		universityIdGroup.addUser("0000010")
+		universityIdGroup.addUser("0000015")
+		universityIdGroup.excludeUser("0000009")
+		
+		val userIdGroup = UserGroup.ofUsercodes
+		userIdGroup.userLookup = userLookup
+		userIdGroup.addUser("student1")
+		userIdGroup.addUser("manual5")
+		userIdGroup.addUser("manual10")
+		userIdGroup.excludeUser("manual4")
 	}
+
+	@Test def getEnrolledAssignments { transactional { tx =>
+		new AssignmentMembershipFixture() {
+			val ams = assignmentMembershipService
+	
+			withUser("manual1", "0000006") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1).toSet) }
+			withUser("manual2", "0000007") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
+			withUser("manual3", "0000008") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+			withUser("manual4", "0000009") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+	
+			withUser("student1", "0000001") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment1, assignment2).toSet) }
+			withUser("student2", "0000002") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+			withUser("student3", "0000003") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq().toSet) }
+			withUser("student4", "0000004") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq().toSet) }
+			withUser("student5", "0000005") { ams.getEnrolledAssignments(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
+		}
+	}}
 
 	@Test def getAssignmentWhereMarker = transactional { tx =>
 		val department = new Department
@@ -653,5 +690,68 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		withUser("cusfal") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq(assignment2).toSet) }
 		withUser("cusmab") { assignmentService.getAssignmentWhereMarker(currentUser.apparentUser).toSet should be (Seq().toSet) }
 	}
-}
+	
+	@Test def determineMembership() { transactional { tx =>
+		new AssignmentMembershipFixture() {
+			// Assignment1:
+			// INC: manual1/0000006, manual2/0000007, manual3/0000008 (also excluded, so excluded takes priority)
+			// EXC: student2/0000002, student3/0000003, manual3/0000008
+			// Ass Groups: ag1 (0000001, 0000002), ag3 (0000001, 0000002, 0000003, 0000004, 0000005)
+			// Actual membership: manual1/0000006, manual2/0000007, 0000001, 0000004, 0000005
+			
+			assignmentMembershipService.determineMembershipUsers(assignment1).map { _.getWarwickId }.toSet should be (Set(
+					"0000001", "0000004", "0000005", "0000006", "0000007"
+			))
+			
+			// Assignment2:
+			// INC: manual2/0000007, manual3/0000008, manual4/0000009
+			// EXC: student4/0000004, student3/0000003
+			// Ass Groups: ag2 (0000002, 0000003)
+			// Actual membership: manual2/0000007, manual3/0000008, manual4/0000009, 0000002
+			
+			assignmentMembershipService.determineMembershipUsers(assignment2).map { _.getWarwickId }.toSet should be (Set(
+					"0000007", "0000008", "0000009", "0000002"
+			))
+			
+			assignmentMembershipService.determineMembershipUsers(Seq(upstreamAg1), None).map { _.getWarwickId }.toSet should be (Set(
+					"0000001", "0000002"
+			))
+			assignmentMembershipService.determineMembershipUsers(Seq(upstreamAg2), None).map { _.getWarwickId }.toSet should be (Set(
+					"0000002", "0000003"
+			))
+			assignmentMembershipService.determineMembershipUsers(Seq(upstreamAg3), None).map { _.getWarwickId }.toSet should be (Set(
+					"0000001", "0000002", "0000003", "0000004", "0000005"
+			))
+			assignmentMembershipService.determineMembershipUsers(Seq(upstreamAg1, upstreamAg2, upstreamAg3), None).map { _.getWarwickId }.toSet should be (Set(
+					"0000001", "0000002", "0000003", "0000004", "0000005"
+			))
+			
+			// UniversityID Group: 0000001, 0000010, 0000015
+			
+			assignmentMembershipService.determineMembershipUsers(Seq(upstreamAg1, upstreamAg2, upstreamAg3), Some(universityIdGroup)).map { _.getWarwickId }.toSet should be (Set(
+					"0000001", "0000002", "0000003", "0000004", "0000005", "0000010", "0000015"
+			))
+			
+			// UserID Group: student1/0000001, manual5/0000010, manual10/0000015
+			
+			assignmentMembershipService.determineMembershipUsers(Seq(upstreamAg1, upstreamAg2, upstreamAg3), Some(userIdGroup)).map { _.getWarwickId }.toSet should be (Set(
+					"0000001", "0000002", "0000003", "0000004", "0000005", "0000010", "0000015"
+			))
+		}
+	}}
+	
+	@Test def countMembershipWithUniversityIdGroup() { transactional { tx =>
+		new AssignmentMembershipFixture() {		
+			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg1), None) should be (2)
+			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg2), None) should be (2)
+			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg3), None) should be (5)
+			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg1, upstreamAg2, upstreamAg3), None) should be (5)
+			
+			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg1, upstreamAg2, upstreamAg3), Some(universityIdGroup)) should be (7)
+			
+			// UserID Group should fall back to using the other strategy, but get the same result
+			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg1, upstreamAg2, upstreamAg3), Some(userIdGroup)) should be (7)
+		}
+	}}
+}}
 

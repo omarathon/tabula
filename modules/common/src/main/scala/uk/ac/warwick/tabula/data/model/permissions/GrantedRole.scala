@@ -19,6 +19,7 @@ import org.hibernate.annotations.ForeignKey
 import scala.reflect._
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
+import uk.ac.warwick.tabula.data.model.Route
 
 @Entity
 @AccessType("field")
@@ -57,6 +58,9 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	}
 
 	var scope: A
+	// this ought not to be necessary, but for some reason the compiler fails to see the type bound on scope and won't
+	// assume it's a permissions target
+	def scopeAsPermissionsTarget:PermissionsTarget = scope
 
 	def build() = RoleBuilder.build(roleDefinition, Some(scope), roleDefinition.getName)
 	def mayGrant(target: Permission) = Option(roleDefinition) map { _.mayGrant(target) } getOrElse (false)
@@ -79,6 +83,7 @@ object GrantedRole {
 		(scope match {
 			case dept: Department => new DepartmentGrantedRole(dept, definition)
 			case module: Module => new ModuleGrantedRole(module, definition)
+			case route: Route => new RouteGrantedRole(route, definition)
 			case member: Member => new MemberGrantedRole(member, definition)
 			case assignment: Assignment => new AssignmentGrantedRole(assignment, definition)
 			case group: SmallGroup => new SmallGroupGrantedRole(group, definition)
@@ -89,6 +94,7 @@ object GrantedRole {
 	def canDefineFor[A <: PermissionsTarget](scope: A) = scope match {
 		case _: Department => true
 		case _: Module => true
+		case _: Route => true
 		case _: Member => true
 		case _: Assignment => true
 		case _: SmallGroup => true
@@ -99,6 +105,7 @@ object GrantedRole {
 	def classObject[A <: PermissionsTarget : ClassTag] = classTag[A] match {
 		case t if isSubtype(t, classTag[Department]) => classOf[DepartmentGrantedRole]
 		case t if isSubtype(t, classTag[Module]) => classOf[ModuleGrantedRole]
+		case t if isSubtype(t, classTag[Route]) => classOf[RouteGrantedRole]
 		case t if isSubtype(t, classTag[Member]) => classOf[MemberGrantedRole]
 		case t if isSubtype(t, classTag[Assignment]) => classOf[AssignmentGrantedRole]
 		case t if isSubtype(t, classTag[SmallGroup]) => classOf[SmallGroupGrantedRole]
@@ -137,6 +144,18 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Module = _
+}
+@Entity @DiscriminatorValue("Route") class RouteGrantedRole extends GrantedRole[Route] {
+	def this(route: Route, definition: RoleDefinition) = {
+		this()
+		this.scope = route
+		this.roleDefinition = definition
+	}
+
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
+	@JoinColumn(name="scope_id")
+	@ForeignKey(name="none")
+	var scope: Route = _
 }
 @Entity @DiscriminatorValue("Member") class MemberGrantedRole extends GrantedRole[Member] {
 	def this(member: Member, definition: RoleDefinition) = {

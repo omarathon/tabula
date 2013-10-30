@@ -16,9 +16,9 @@ import uk.ac.warwick.tabula.data.model.Department.CompositeFilterRule
 import scala.util.Failure
 
 class DepartmentTest extends TestBase with Mockito {
-	
+
 	val permissionsService = mock[PermissionsService]
-	
+
 	@Test def settings {
 		val department = new Department
 		department.collectFeedbackRatings should be (false)
@@ -34,6 +34,7 @@ class DepartmentTest extends TestBase with Mockito {
 		department.turnitinSmallMatchPercentageLimit should be (0)
 		department.turnitinSmallMatchWordLimit should be (0)
     department.defaultGroupAllocationMethod should be (Manual)
+		department.autoGroupDeregistration should be (true)
 
 		department.collectFeedbackRatings = true
 		department.allowExtensionRequests = true
@@ -46,7 +47,8 @@ class DepartmentTest extends TestBase with Mockito {
 		department.turnitinSmallMatchPercentageLimit = 0
 		department.turnitinSmallMatchWordLimit = 50
     department.defaultGroupAllocationMethod = StudentSignUp
-		
+    department.autoGroupDeregistration = false
+
 		department.collectFeedbackRatings should be (true)
 		department.allowExtensionRequests should be (true)
 		department.canRequestExtension should be (true)
@@ -60,32 +62,33 @@ class DepartmentTest extends TestBase with Mockito {
 		department.turnitinSmallMatchPercentageLimit should be (0)
 		department.turnitinSmallMatchWordLimit should be (50)
     department.defaultGroupAllocationMethod should be (StudentSignUp)
+		department.autoGroupDeregistration should be (false)
 	}
-	
+
 	@Test def groups {
 		val department = new Department
 		department.permissionsService = permissionsService
-		
+
 		val ownersGroup = UserGroup.ofUsercodes
 		val extmanGroup = UserGroup.ofUsercodes
-		
+
 		permissionsService.ensureUserGroupFor(department, DepartmentalAdministratorRoleDefinition) returns (ownersGroup)
 		permissionsService.ensureUserGroupFor(department, ExtensionManagerRoleDefinition) returns (extmanGroup)
-		
+
 		department.isOwnedBy("cuscav") should be (false)
-		
+
 		department.owners.addUser("cuscav")
 		department.owners.addUser("cusebr")
 		department.owners.addUser("curef")
-		
+
 		department.owners.removeUser("cusebr")
-		
+
 		department.isOwnedBy("cuscav") should be (true)
 		department.isOwnedBy("curef") should be (true)
 		department.isOwnedBy("cusebr") should be (false)
-		
+
 		ownersGroup.includeUsers.asScala.toSeq should be (Seq("cuscav", "curef"))
-		
+
 		department.isExtensionManager("cuscav") should be (false)
 		extmanGroup.addUser("cuscav")
 		department.isExtensionManager("cuscav") should be (true)
@@ -105,6 +108,7 @@ class DepartmentTest extends TestBase with Mockito {
 				s.route = new Route().tap(_.degreeType = DegreeType.Undergraduate)
 			})
 			m.studentCourseDetails = JArrayList(scd)
+			m.mostSignificantCourse = scd
 		})
 		val postgraduate= new StudentMember().tap(m=>{
 			val scd = new StudentCourseDetails().tap(s=>{
@@ -113,6 +117,7 @@ class DepartmentTest extends TestBase with Mockito {
 				s.route = new Route().tap(_.degreeType = DegreeType.Postgraduate)
 			})
 			m.studentCourseDetails = JArrayList(scd)
+			m.mostSignificantCourse = scd
 		})
 
 		val notStudentMemeber = new StaffMember()

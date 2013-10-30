@@ -20,21 +20,21 @@ import uk.ac.warwick.tabula.JavaImports._
  */
 @Service
 class ScheduledJobs {
-	
+
 	var fileSyncEnabled = Wire[JBoolean]("${environment.standby:false}")
 
 	var exceptionResolver = Wire.auto[ExceptionResolver]
-	
+
 	var maintenanceModeService = Wire.auto[MaintenanceModeService]
 
 	var auditIndexingService = Wire.auto[AuditEventIndexService]
-	
+
 	var profileIndexingService = Wire.auto[ProfileIndexService]
 
 	var jobService = Wire.auto[JobService]
-	
+
 	def maintenanceGuard[A](fn: => A) = if (!maintenanceModeService.enabled) fn
-	
+
 	def syncGuard[A](fn: => A) = if (fileSyncEnabled) fn
 
 	@Scheduled(cron = "0 0 7,14 * * *")
@@ -66,16 +66,16 @@ class ScheduledJobs {
 	}
 
 	@Scheduled(fixedRate = 60 * 1000) // every minute
-	def indexAuditEvents: Unit = exceptionResolver.reportExceptions { auditIndexingService.index }
-	
+	def indexAuditEvents: Unit = exceptionResolver.reportExceptions { auditIndexingService.incrementalIndex }
+
 	@Scheduled(fixedRate = 300 * 1000) // every 5 minutes
-	def indexProfiles: Unit = exceptionResolver.reportExceptions { profileIndexingService.index }
+	def indexProfiles: Unit = exceptionResolver.reportExceptions { profileIndexingService.incrementalIndex }
 
 	@Scheduled(fixedDelay = 10 * 1000) // every 10 seconds, non-concurrent
 	def jobs: Unit = maintenanceGuard {
 		exceptionResolver.reportExceptions { jobService.run }
 	}
-	
+
 	/* Filesystem syncing jobs, should only run on standby */
 	@Scheduled(fixedRate = 300 * 1000) // every 5 minutes
 	def fileSync: Unit = syncGuard {
@@ -85,7 +85,7 @@ class ScheduledJobs {
 	}
 
 	@Scheduled(cron = "0 0 19 * * *") // 7pm
-	def cleanupUnreferencedFilesAndSanityCheck: Unit = 
+	def cleanupUnreferencedFilesAndSanityCheck: Unit =
 		exceptionResolver.reportExceptions {
 			new CleanupUnreferencedFilesCommand().apply()
 			new SanityCheckFilesystemCommand().apply()

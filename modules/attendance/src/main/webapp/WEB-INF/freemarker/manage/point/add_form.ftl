@@ -7,13 +7,11 @@
 
 <@modal.body>
 
-	<#assign action><@url page="/manage/${command.dept.code}/sets/add/points/add" /></#assign>
+	<#assign action><@routes.addPoint command.dept /></#assign>
 
 	<@f.form id="newMonitoringPoint" action="${action}" method="POST" commandName="command" class="form-horizontal">
 		<#list command.monitoringPoints as point>
-			<input type="hidden" name="monitoringPoints[${point_index}].name" value="${point.name}" />
-			<input type="hidden" name="monitoringPoints[${point_index}].validFromWeek" value="${point.validFromWeek}" />
-			<input type="hidden" name="monitoringPoints[${point_index}].requiredFromWeek" value="${point.requiredFromWeek}" />
+			<#include "_hidden_fields.ftl" />
 		</#list>
 		<#include "_fields.ftl" />
 	</@f.form>

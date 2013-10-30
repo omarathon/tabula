@@ -3,19 +3,14 @@ package uk.ac.warwick.tabula.services
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.MemberUserType
-import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.PrsCode
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 /**
@@ -27,14 +22,16 @@ trait RelationshipService {
 	def delete(relationshipType: StudentRelationshipType)
 	def getStudentRelationshipTypeById(id: String): Option[StudentRelationshipType]
 	def getStudentRelationshipTypeByUrlPart(urlPart: String): Option[StudentRelationshipType]
-	
+
 	def saveOrUpdate(relationship: StudentRelationship)
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
-	def getRelationships(relationshipType: StudentRelationshipType, targetUniversityId: String): Seq[StudentRelationship]
+	def getRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def saveStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship
+	def replaceStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship
 	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def listStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def listAllStudentRelationshipsWithMember(agent: Member): Seq[StudentRelationship]
+	def listAllStudentRelationshipTypesWithMember(agent: Member): Seq[StudentRelationshipType]
 	def listStudentRelationshipsWithMember(relationshipType: StudentRelationshipType, agent: Member): Seq[StudentRelationship]
 	def listAllStudentRelationshipsWithUniversityId(agentId: String): Seq[StudentRelationship]
 	def listStudentRelationshipsWithUniversityId(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
@@ -55,7 +52,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def getStudentRelationshipTypeByUrlPart(urlPart: String) = memberDao.getStudentRelationshipTypeByUrlPart(urlPart)
 	def saveOrUpdate(relationshipType: StudentRelationshipType) = memberDao.saveOrUpdate(relationshipType)
 	def delete(relationshipType: StudentRelationshipType) = memberDao.delete(relationshipType)
-	
+
 	def saveOrUpdate(relationship: StudentRelationship) = memberDao.saveOrUpdate(relationship)
 
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional() {
@@ -75,12 +72,11 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def saveStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {
 		this.findCurrentRelationships(relationshipType, targetSprCode).find(_.agent == agent) match {
 			case Some(existingRelationship) => {
-				// the same relationship is already there in the db - don't save
+				// the same relationship is already there in the db and current - don't create new one
 				existingRelationship
 			}
 			case _ => {
-				// TODO handle existing relationships?
-				// and then create the new one
+				// create the new one
 				val newRelationship = StudentRelationship(agent, relationshipType, targetSprCode)
 				newRelationship.startDate = new DateTime
 				memberDao.saveOrUpdate(newRelationship)
@@ -88,19 +84,38 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 			}
 		}
 	}
-	
-	def relationshipDepartmentFilterMatches(department: Department)(rel: StudentRelationship) = 
+
+	// end any existing relationships of the same type for this student, then save the new one
+	def replaceStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {
+		var relOption = this.findCurrentRelationships(relationshipType, targetSprCode).find(_.agent == agent)
+
+		relOption match {
+			case Some(stuRel: StudentRelationship) => {
+				// there's already a relationship for this same agent - nothing to do
+				stuRel
+			}
+			case _ => {
+				// end all existing relationships of this type for this student
+				this.findCurrentRelationships(relationshipType, targetSprCode).map {
+					_.endDate = DateTime.now
+				}
+				// then save the new one
+				saveStudentRelationship(relationshipType, targetSprCode, agent)
+			}
+		}
+	}
+
+	def relationshipDepartmentFilterMatches(department: Department)(rel: StudentRelationship) =
 		rel.studentMember.exists(studentDepartmentFilterMatches(department))
-	
-	def relationshipNotPermanentlyWithdrawn(rel: StudentRelationship) =
-		rel.studentMember.exists(studentNotPermanentlyWithdrawn)
-	
+
+	def relationshipNotPermanentlyWithdrawn(rel: StudentRelationship): Boolean = {
+		profileService.getStudentCourseDetailsBySprCode(rel.targetSprCode)
+			.exists(scd => !scd.permanentlyWithdrawn)
+	}
+
 	def studentDepartmentFilterMatches(department: Department)(member: StudentMember) = department.filterRule.matches(member)
-	
-	def studentNotPermanentlyWithdrawn(member: StudentMember) =
-		member.mostSignificantCourseDetails
-			 .flatMap(scd => Option(scd.sprStatus))
-			 .exists(_.code != "P")
+
+	def studentNotPermanentlyWithdrawn(member: StudentMember) = !member.permanentlyWithdrawn
 
 	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department) = transactional(readOnly = true) {
 		memberDao.getRelationshipsByDepartment(relationshipType, department.rootDepartment)
@@ -109,16 +124,18 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	}
 
 	def listStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department) = transactional(readOnly = true) {
-
 		memberDao.getRelationshipsByStaffDepartment(relationshipType, department.rootDepartment)
 			.filter(relationshipDepartmentFilterMatches(department))
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}
 
-
 	def listAllStudentRelationshipsWithMember(agent: Member) = transactional(readOnly = true) {
 		memberDao.getAllRelationshipsByAgent(agent.universityId)
 			.filter(relationshipNotPermanentlyWithdrawn)
+	}
+
+	def listAllStudentRelationshipTypesWithMember(agent: Member) = transactional(readOnly = true) {
+		memberDao.getAllRelationshipTypesByAgent(agent.universityId)
 	}
 
 	def listStudentRelationshipsWithMember(relationshipType: StudentRelationshipType, agent: Member) = transactional(readOnly = true) {
@@ -143,7 +160,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	}
 
   def countStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): (Int, Int) = transactional(readOnly = true) {
-		val matchingStudents = 
+		val matchingStudents =
 			memberDao.getStudentsByRelationshipAndDepartment(relationshipType, department.rootDepartment)
 				.filter(studentDepartmentFilterMatches(department))
 				.filter(studentNotPermanentlyWithdrawn)
@@ -153,10 +170,11 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
   def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int = transactional(readOnly = true) {
 		memberDao.countStudentsByRelationship(relationshipType).intValue
 	}
+
 }
 
 trait RelationshipServiceComponent {
-	var relationshipService:RelationshipService
+	var relationshipService: RelationshipService
 }
 trait AutowiringRelationshipServiceComponent extends RelationshipServiceComponent{
 	var relationshipService = Wire[RelationshipService]

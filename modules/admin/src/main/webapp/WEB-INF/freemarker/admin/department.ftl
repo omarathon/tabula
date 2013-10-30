@@ -5,6 +5,10 @@
 	<#return "module-${module.code}" />
 </#function>
 
+<#function route_anchor route>
+	<#return "route-${route.code}" />
+</#function>
+
 <#if department??>
 	<#assign can_manage_dept=can.do("RolesAndPermissions.Create", department) />
 
@@ -34,65 +38,102 @@
 			</div>
 		</#if>
 
-		<#if !modules?has_content && department.children?has_content>
-			<a class="btn btn-medium dropdown-toggle disabled use-tooltip" title="This department doesn't directly contain any modules. Check subdepartments.">
+		<div class="btn-group dept-settings">
+			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
 				<i class="icon-wrench"></i>
 				Manage
+				<span class="caret"></span>
 			</a>
-		<#else>
-			<div class="btn-group dept-settings">
-				<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
-					<i class="icon-wrench"></i>
-					Manage
-					<span class="caret"></span>
-				</a>
-				<ul class="dropdown-menu pull-right">
-					<li><a href="<@routes.deptperms department/>">
-						<i class="icon-user"></i> Edit departmental permissions
-					</a></li>
+			<ul class="dropdown-menu pull-right">
+				<li><a href="<@routes.deptperms department/>">
+					<i class="icon-user"></i> Edit departmental permissions
+				</a></li>
+				
+				<#if modules?has_content || departmentRoutes?has_content || !department.children?has_content>
 					<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}">
 						<i class="icon-list-alt"></i> Settings</a>
 					</li>
-				</ul>
-			</div>
-		</#if>
-	</div>
-	
-<ul class="unstyled">
-	<li><h2><a href="<@url page="/admin/department/${department.code}" context="/coursework" />">Coursework Management</a></h2></li>
-		
-	<#if features.smallGroupTeaching>
-		<li><h2><a href="<@url page="/admin/department/${department.code}" context="/groups" />" />Small Group Teaching</h2></li>
-	</#if>
-	
-	<li><h2><a href="<@url page="/" context="/profiles" />">Student Profiles</a></h2></li>
-</ul>
-
-<#if !modules?has_content && department.children?has_content>
-<p>This department doesn't directly contain any modules. Check subdepartments.</p>
-</#if>
-
-<#list modules as module>
-	<#assign can_manage=can.do("RolesAndPermissions.Create", module) />
-
-<a id="${module_anchor(module)}"></a>
-<div class="striped-section" data-name="${module_anchor(module)}">
-	<div class="clearfix">
-		<div class="btn-group section-manage-button">
-		  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
-		  <ul class="dropdown-menu pull-right">
-		  	<#if can_manage>	
-					<li><a href="<@routes.moduleperms module />">
-						<i class="icon-user"></i> Edit module permissions
-					</a></li>
 				</#if>
-		  </ul>
+				
+				<#if can.do("Module.Create", department)>
+					<li><a href="<@routes.createmodule department />">
+						<i class="icon-plus"></i> Create module</a>
+					</li>
+				</#if>
+				<#if department.children?has_content && can.do("Department.ArrangeModules", department)>
+					<li><a href="<@routes.sortmodules department />">
+						<i class="icon-random"></i> Arrange modules</a>
+					</li>
+				</#if>
+				<#if department.children?has_content && can.do("Department.ArrangeRoutes", department)>
+					<li><a href="<@routes.sortroutes department />">
+						<i class="icon-random"></i> Arrange routes</a>
+					</li>
+				</#if>
+			</ul>
 		</div>
+	</div>
+
+<div class="row-fluid">
+	<div class="span6">
+		<h3>Modules</h3>
+	
+		<#if !modules?has_content && department.children?has_content>
+		<p>This department doesn't directly contain any modules. Check subdepartments.</p>
+		</#if>
 		
-		<h2 class="section-title with-button"><@fmt.module_name module /></h2>
-	</div>	
+		<#list modules as module>
+			<#assign can_manage=can.do("RolesAndPermissions.Create", module) />
+		
+			<a id="${module_anchor(module)}"></a>
+			<div class="striped-section" data-name="${module_anchor(module)}">
+				<div class="clearfix">
+					<div class="btn-group section-manage-button">
+					  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
+					  <ul class="dropdown-menu pull-right">
+					  	<#if can_manage>	
+								<li><a href="<@routes.moduleperms module />">
+									<i class="icon-user"></i> Edit module permissions
+								</a></li>
+							</#if>
+					  </ul>
+					</div>
+					
+					<h2 class="section-title with-button"><@fmt.module_name module /></h2>
+				</div>	
+			</div>
+		</#list>
+	</div>
+	<div class="span6">
+		<h3>Routes</h3>
+	
+		<#if !departmentRoutes?has_content && department.children?has_content>
+		<p>This department doesn't directly contain any routes. Check subdepartments.</p>
+		</#if>
+		
+		<#list departmentRoutes as route>
+			<#assign can_manage=can.do("RolesAndPermissions.Create", route) />
+		
+			<a id="${route_anchor(route)}"></a>
+			<div class="striped-section" data-name="${route_anchor(route)}">
+				<div class="clearfix">
+					<div class="btn-group section-manage-button">
+					  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
+					  <ul class="dropdown-menu pull-right">
+					  	<#if can_manage>	
+								<li><a href="<@routes.routeperms route />">
+									<i class="icon-user"></i> Edit route permissions
+								</a></li>
+							</#if>
+					  </ul>
+					</div>
+					
+					<h2 class="section-title with-button"><@fmt.route_name route true /></h2>
+				</div>	
+			</div>
+		</#list>
+	</div>
 </div>
-</#list>
 <#else>
 <p>No department.</p>
 </#if>

@@ -2,7 +2,7 @@
 
 <div class="modal-header">
 	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-	<h2>Edit monitoring point</h2>
+	<h2>Update monitoring point</h2>
 </div>
 
 <div class="modal-body">
@@ -21,8 +21,8 @@
 </div>
 
 <div class="modal-footer">
-	<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Editing&hellip;">
-		Edit
+	<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Updating&hellip;">
+		Update
 	</button>
 	<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
 </div>

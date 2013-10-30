@@ -72,7 +72,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 			val bq = new BooleanQuery
 
 			if (query.hasText) {
-				val q = parser.parse(stripTitles(query))
+				val q = parser.parse(sanitise(query))
 				bq.add(q, Occur.MUST)
 			}
 
@@ -94,7 +94,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 
 				bq.add(typeQuery, Occur.MUST)
 			}
-			
+
 			// Active only
 			val inUseQuery = new BooleanQuery
 			inUseQuery.add(new TermQuery(new Term("inUseFlag", "Active")), Occur.SHOULD)
@@ -119,6 +119,10 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 			Title.replaceAllIn(query, ""),
 		". $1")
 
+	def sanitise(query: String) = {
+		val deslashed = query.replace("/", "\\/") // TAB-1331
+		stripTitles(deslashed)
+	}
 }
 
 @Component
@@ -193,7 +197,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		indexSeq(doc, "touchedDepartments", item.touchedDepartments map { _.code })
 
 		indexPlain(doc, "userType", Option(item.userType) map {_.dbValue})
-		
+
 		// Treat permanently withdrawn students as inactive
 		item match {
 			case student: StudentMember if student.studentCourseDetails != null && student.mostSignificantCourseDetails.isDefined =>

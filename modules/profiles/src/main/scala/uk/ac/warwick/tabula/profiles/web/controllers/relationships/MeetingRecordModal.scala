@@ -10,18 +10,17 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.profiles.web.Routes
 import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
-import uk.ac.warwick.tabula.services.{RelationshipServiceComponent, RelationshipService}
+import uk.ac.warwick.tabula.services.{MonitoringPointMeetingRelationshipTermServiceComponent, RelationshipServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import scala.Some
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import uk.ac.warwick.tabula.web.controllers.{ControllerViews, ControllerImports, ControllerMethods}
 
 
 trait MeetingRecordModal  {
 
 	this:ProfileServiceComponent with RelationshipServiceComponent with ControllerMethods with ControllerImports
-		with CurrentMemberComponent with ControllerViews=>
+		with CurrentMemberComponent with ControllerViews with MonitoringPointMeetingRelationshipTermServiceComponent =>
 	/**
 	 * Contains all of the request mappings needed to drive meeting record modals (including iframe stuff)
 	 *
@@ -61,7 +60,9 @@ trait MeetingRecordModal  {
 			"agentName" -> (if (command.considerAlternatives) "" else command.relationship.agentName),
 			"studentCourseDetails" -> studentCourseDetails,
 			"isStudent" -> (studentCourseDetails.student == currentMember),
-			"relationshipType" -> relationshipType).noLayout()
+			"relationshipType" -> relationshipType,
+			"formatsThatWillCreateCheckpoint" -> monitoringPointMeetingRelationshipTermService.formatsThatWillCreateCheckpoint(command.relationship)
+		).noLayout()
 	}
 
 	// modal iframe form
@@ -79,7 +80,9 @@ trait MeetingRecordModal  {
 			"isStudent" -> (studentCourseDetails.student == currentMember),
 			"relationshipType"->relationshipType,
 			"creator" -> command.creator,
-			"formats" -> formats).noNavigation()
+			"formats" -> formats,
+			"formatsThatWillCreateCheckpoint" -> monitoringPointMeetingRelationshipTermService.formatsThatWillCreateCheckpoint(command.relationship)
+		).noNavigation()
 	}
 
 	// submit async
@@ -95,13 +98,14 @@ trait MeetingRecordModal  {
 			val modifiedMeeting = command.apply()
 			val meetingList = viewCommand match {
 				case None => Seq()
-				case Some(cmd) => cmd.apply
+				case Some(cmd) => cmd.apply()
 			}
 
 			Mav("related_students/meeting/list",
         	"studentCourseDetails" -> studentCourseDetails,
  			    "role" -> relationshipType,
 				  "meetings" -> meetingList,
+					"meetingApprovalWillCreateCheckpoint" -> meetingList.map(m => m.id -> monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(m)).toMap,
 				  "viewer" -> currentMember,
 				  "openMeeting" -> modifiedMeeting).noLayout()
 		}
@@ -122,7 +126,9 @@ trait MeetingRecordModal  {
 		  "relationshipType"->relationshipType,
 			"agentName" -> command.relationship.agentName,
 			"creator" -> command.creator,
-			"formats" -> formats)
+			"formats" -> formats,
+			"formatsThatWillCreateCheckpoint" -> monitoringPointMeetingRelationshipTermService.formatsThatWillCreateCheckpoint(command.relationship)
+		)
 	}
 
 	// cancel sync

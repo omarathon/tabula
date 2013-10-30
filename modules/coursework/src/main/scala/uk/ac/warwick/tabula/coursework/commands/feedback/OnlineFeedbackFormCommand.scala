@@ -171,8 +171,8 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 
 		// save mark and grade
 		if (assignment.collectMarks) {
-			Option(mark).foreach(mark => feedback.actualMark = Some(mark.toInt))
-			feedback.actualGrade = Some(grade)
+			feedback.actualMark = mark.maybeText.map(_.toInt)
+			feedback.actualGrade = grade.maybeText
 		}
 
 		// save attachments

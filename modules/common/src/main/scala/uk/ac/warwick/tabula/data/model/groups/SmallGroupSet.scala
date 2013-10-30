@@ -25,6 +25,14 @@ object SmallGroupSet {
 		val DefaultMaxGroupSizeEnabled = "DefaultMaxGroupSizeEnabled"
 		val DefaultMaxGroupSize = "DefaultMaxGroupSize"
 	}
+	
+	// For sorting a collection by set name. Either pass to the sort function,
+	// or expose as an implicit val.
+	val NameOrdering = Ordering.by[SmallGroupSet, String] ( _.name )
+
+	// Companion object is one of the places searched for an implicit Ordering, so
+	// this will be the default when ordering a list of small group sets.
+	implicit val defaultOrdering = NameOrdering
 }
 
 /**
@@ -60,6 +68,8 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	var releasedToStudents: JBoolean = false
   @Column(name="released_to_tutors")
   var releasedToTutors: JBoolean = false
+  
+  def visibleToStudents = releasedToStudents || allocationMethod == SmallGroupAllocationMethod.StudentSignUp
 
   def fullyReleased= releasedToStudents && releasedToTutors
 
@@ -131,7 +141,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	}
 
 	def allStudents = membershipService.determineMembershipUsers(upstreamAssessmentGroups, Some(members))
-	def allStudentsCount = membershipService.countMembershipUsers(upstreamAssessmentGroups, Some(members))
+	def allStudentsCount = membershipService.countMembershipWithUniversityIdGroup(upstreamAssessmentGroups, Some(members))
 	
 	def unallocatedStudents = {
 		val allocatedStudents = groups.asScala flatMap { _.students.users }

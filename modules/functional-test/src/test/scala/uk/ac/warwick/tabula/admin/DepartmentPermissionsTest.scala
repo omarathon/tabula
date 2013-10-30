@@ -4,9 +4,11 @@ import uk.ac.warwick.tabula.BrowserTest
 import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 
-class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with GivenWhenThen {
+// n.b. this test doesn't work with the FirefoxDriver  because the UI pops up modal dialogs which the
+// test isn't expecting. HTMLUnit ignores them.
+class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with GivenWhenThen {
 
-	def withRoleInElement[T](permittedUser: String, parentElement: String)(fn: => T) =
+	def withRoleInElement[T](permittedUser: String, parentElement: String, usersFromFixture:Seq[String]=Nil)(fn: => T) =
 		as(P.Admin1) {
 
 			def usercodes = findAll(cssSelector(s"${parentElement} .user .muted")).toList.map(_.underlying.getText.trim)
@@ -15,14 +17,16 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 				usercodes.size should be (1)
 				usercodes.apply(0) should be (P.Admin1.usercode)
 			}
+			def noNewUsersListed(){
+				usercodes.size should be (usersFromFixture.size)
+			}
 
 			def nowhereElse() = {
 				// doesn't like CSS :not() selector, so have to get all permission-lists and filter out the current one by scala text-mungery
-				val allLists = findAll(cssSelector(".permission-list")).toList.filterNot(_.underlying.getAttribute("class").contains(parentElement))
+				val allLists = findAll(cssSelector("#tutors-supervisors-row .permission-list")).toList.filterNot(_.underlying.getAttribute("class").contains(parentElement.replace(".","")))
 				// then delve further to get the usercodes included
-				val filteredUsercodes = allLists map (list => list.underlying.findElement(By.cssSelector(".user .muted")).getText.trim)
-				filteredUsercodes should contain (P.Admin1.usercode)
-				filteredUsercodes should not contain (permittedUser)
+				val filteredUsercodes = allLists map (list => list.underlying.findElements(By.cssSelector(".user .muted")))
+				filteredUsercodes.foreach(_.size should be(0))
 			}
 
 			When("I go the admin page")
@@ -44,8 +48,8 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 			Then("I should reach the permissions page")
 				currentUrl should include("/permissions")
 
-			And("I should see myself with the role")
-				onlyMe()
+			And("I should see no users with the role")
+			noNewUsersListed()
 
 			And("I should not see anyone else with any other roles")
 				nowhereElse()
@@ -77,10 +81,9 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 			When("I submit the form")
 				find(cssSelector(s"${parentElement} form.add-permissions")).get.underlying.submit()
 
-			Then("I should see myself and the new entry")
+			Then("I should see  the new entry")
 				({
-					usercodes.size should be (2)
-					usercodes should contain (P.Admin1.usercode)
+					usercodes.size should be (1 + usersFromFixture.size)
 					usercodes should contain (permittedUser)
 				})
 
@@ -92,8 +95,8 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 				removable should not be (None)
 				removable.get.underlying.submit()
 
-			Then("There should only be me left")
-				onlyMe()
+			Then("There should be no users listed")
+				noNewUsersListed()
 
 			And("I should not see anyone else with any other roles")
 				nowhereElse()
@@ -101,14 +104,20 @@ class DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Give
 			fn
 		}
 
-	"Department admin" should "be able to add and remove senior tutors" in {
+	"User Access Manager" should "be able to add and remove senior tutors" in {
 		withRoleInElement(P.Marker1.usercode, ".tutor-table") {
 			// Nothing more to do, the with...() tests enough
 		}
 	}
 
-	"Department admin" should "be able to add and remove senior supervisors" in {
+	"User Access Manager" should "be able to add and remove senior supervisors" in {
 		withRoleInElement(P.Marker1.usercode, ".supervisor-table") {
+			// Nothing more to do, the with...() tests enough
+		}
+	}
+
+	"User Access Manager" should "be able to add and remove departmental admins" in {
+		withRoleInElement(P.Marker1.usercode, ".admin-table", usersFromFixture = Seq(P.Admin2.usercode)) {
 			// Nothing more to do, the with...() tests enough
 		}
 	}

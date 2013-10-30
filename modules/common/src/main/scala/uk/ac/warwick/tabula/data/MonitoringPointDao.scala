@@ -133,8 +133,8 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def countCheckpointsForPoint(point: MonitoringPoint) =
 		session.newCriteria[MonitoringCheckpoint]
 			.add(is("point", point))
-			.setProjection(Projections.rowCount())
-			.uniqueResult.get.asInstanceOf[Number].intValue()
+			.project[Number](Projections.rowCount())
+			.uniqueResult.get.intValue()
 
 	def deleteCheckpoint(checkpoint: MonitoringCheckpoint): Unit = {
 		session.delete(checkpoint)

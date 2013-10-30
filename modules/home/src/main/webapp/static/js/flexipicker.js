@@ -64,6 +64,7 @@ var FlexiPicker = function (options) {
   this.includeUsers = options.includeUsers !== false;
   this.includeGroups = options.includeGroups || false;
   this.includeEmail = options.includeEmail || false;
+  this.tabulaMembersOnly = options.tabulaMembersOnly || false;
   this.prefixGroups = options.prefixGroups || '';
 
   this.richResultField = new RichResultField($element[0]);
@@ -235,6 +236,7 @@ FlexiPicker.prototype.search = function (query, options) {
       includeUsers: this.includeUsers,
       includeGroups: this.includeGroups,
       includeEmail: this.includeEmail,
+      tabulaMembersOnly: this.tabulaMembersOnly,
       query: query,
       exact: options.exact // if true, only returns 100% matches.
     },
@@ -270,6 +272,7 @@ $.fn.flexiPicker = function (options) {
       includeGroups: $this.data('include-groups'),
       includeEmail: $this.data('include-email'),
       includeUsers: $this.data('include-users') !== false,
+      tabulaMembersOnly: $this.data('members-only'),
       prefixGroups: $this.data('prefix-groups') || ''
     };
     $.extend(allOptions, options || {});

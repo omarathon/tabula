@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula.data
 import org.springframework.stereotype.Repository
-import scala.collection.JavaConversions._
 import org.hibernate.SessionFactory
 import model.Module
 import org.hibernate.`type`._
 import org.springframework.beans.factory.annotation.Autowired
-import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import model.Department
 import org.hibernate.criterion.Order
@@ -25,7 +23,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 	def allModules: Seq[Module] =
 		session.newCriteria[Module]
 			.addOrder(Order.asc("code"))
-			.list
+			.seq
 
 	def saveOrUpdate(module: Module) = session.saveOrUpdate(module)
 

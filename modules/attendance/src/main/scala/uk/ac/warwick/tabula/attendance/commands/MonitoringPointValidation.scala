@@ -2,6 +2,8 @@ package uk.ac.warwick.tabula.attendance.commands
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import scala.collection.mutable
+import uk.ac.warwick.tabula.data.model.{Department, MeetingFormat, StudentRelationshipType}
 
 trait MonitoringPointValidation {
 
@@ -24,6 +26,30 @@ trait MonitoringPointValidation {
 	def validateWeeks(errors: Errors, validFromWeek: Int, requiredFromWeek: Int, bindPoint: String) {
 		if (validFromWeek > requiredFromWeek) {
 			errors.rejectValue(bindPoint, "monitoringPoint.weeks")
+		}
+	}
+
+	def validateTypeMeeting(errors: Errors,
+		meetingRelationships: mutable.Set[StudentRelationshipType], meetingRelationshipsBindPoint: String,
+		meetingFormats: mutable.Set[MeetingFormat], meetingFormatsBindPoint: String,
+		meetingQuantity: Int, meetingQuantityBindPoint: String,
+		dept: Department
+	) {
+
+		if (meetingRelationships.size == 0) {
+			errors.rejectValue(meetingRelationshipsBindPoint, "monitoringPoint.meetingType.meetingRelationships.empty")
+		} else {
+			val invalidRelationships = meetingRelationships.filter(r => !dept.displayedStudentRelationshipTypes.contains(r))
+			if (invalidRelationships.size > 0)
+				errors.rejectValue(meetingRelationshipsBindPoint, "monitoringPoint.meetingType.meetingRelationships.invalid", invalidRelationships.mkString(", "))
+		}
+
+		if (meetingFormats.size == 0) {
+			errors.rejectValue(meetingFormatsBindPoint, "monitoringPoint.meetingType.meetingFormats.empty")
+		}
+
+		if (meetingQuantity == 0) {
+			errors.rejectValue(meetingQuantityBindPoint, "monitoringPoint.meetingType.meetingQuantity")
 		}
 	}
 }

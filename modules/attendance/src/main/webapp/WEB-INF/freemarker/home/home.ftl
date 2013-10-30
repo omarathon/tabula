@@ -5,40 +5,58 @@
 	<#else>
 		<h1 class="with-settings">Hello</h1>
 	</#if>
-	
-	<#assign can_record = (permissionMap["View"]?size > 0) />
-	<#assign can_manage = (permissionMap["Manage"]?size > 0) />
-	
+
+	<p class="lead muted">
+		This is a service for viewing and managing attendance monitoring points.
+	</p>
+
+	<#if hasProfile>
+		<h2>
+			<a href="<@routes.attendanceProfile />">My attendance profile</a>
+		</h2>
+	</#if>
+
+	<#if hasAnyRelationships>
+		<h2>My students</h2>
+
+		<ul>
+			<#list relationshipTypesMap?keys as relationshipType>
+				<#if relationshipTypesMapById[relationshipType.id]>
+					<li><a id="relationship-${relationshipType.urlPart}" href="<@routes.relationship_students relationshipType />">${relationshipType.studentRole?cap_first}s</a></li>
+				</#if>
+			</#list>
+		</ul>
+	</#if>
+
+	<#assign can_record = (viewPermissions?size > 0) />
+	<#assign can_manage = (managePermissions?size > 0) />
+
 	<#if can_record || can_manage>
-		<#if (permissionMap["View"]?size > 0)>
+		<#if (viewPermissions?size > 0)>
 			<h2>View and record monitoring points</h2>
 			<ul class="links">
-				<#list permissionMap["View"] as department>
+				<#list viewPermissions as department>
 					<li>
-						<a href="<@url page="/${department.code}"/>">${department.name}</a>
+						<a id="view-department-${department.code}" href="<@routes.viewDepartment department />">${department.name}</a>
 					</li>
 				</#list>
 			</ul>
 		</#if>
 		
-		<#if (permissionMap["Manage"]?size > 0)>
-			<h2>Manage monitoring points</h2>
+		<#if (managePermissions?size > 0)>
+			<h2>Create and edit monitoring schemes</h2>
 			<ul class="links">
-				<#list permissionMap["Manage"] as department>
+				<#list managePermissions as department>
 					<li>
-						<a href="<@url page="/manage/${department.code}"/>">${department.name}</a>
+						<a id="manage-department-${department.code}" href="<@routes.manageDepartment department />">${department.name}</a>
 					</li>
 				</#list>
 			</ul>
 		</#if>
 	<#else>
-		<p class="lead muted">
-			This is a service for managing attendance monitoring points.
-		</p>
-		
-		<#if user.staff>
+		<#if user.staff && !hasAnyRelationships>
 			<p>
-				You do not currently have permission to manage any monitoring points. Please contact your
+				You do not currently have permission to view or manage any monitoring points. Please contact your
 				departmental access manager for Tabula, or email <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
 			</p>
 					

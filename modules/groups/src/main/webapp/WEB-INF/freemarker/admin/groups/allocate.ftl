@@ -16,7 +16,7 @@
 			<@fmt.member_photo profile "tinythumbnail" false />
 			<div class="name">
 				<h6>${profile.fullName!student.fullName}</h6>
-				${(profile.mostSignificantCourseDetails.route.name)!student.shortDepartment}
+				${(profile.mostSignificantCourseDetails.route.name)!student.shortDepartment!""}
 			</div>
 		</div>
 		<input type="hidden" name="${bindpath}" value="${student.userId}" />
@@ -68,31 +68,43 @@
 			</@spring.hasBindErrors>
 
 			<#assign submitUrl><@routes.allocateset set /></#assign>
-			<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToGroupsCommand">
-			<div class="tabula-dnd" 
-					 data-item-name="student" 
-					 data-text-selector=".name h6"
-					 data-use-handle="false"
-					 data-selectables=".students .drag-target"
-					 data-scroll="true"
-					 data-remove-tooltip="Remove this student from this group">
-				<div class="btn-toolbar">
-					<a class="random btn" data-toggle="randomise" data-disabled-on="empty-list"
-					   href="#" >
-						<i class="icon-random"></i> Randomly allocate
-					</a>
-					<a class="return-items btn" data-toggle="return" data-disabled-on="no-allocation"
-					   href="#" >
-						<i class="icon-arrow-left"></i> Remove all
-					</a>
-				</div>
-				<div class="row-fluid fix-on-scroll-container">
-					<div class="span5">
-						<div id="studentslist" 
+			<div class="persist-area">
+				<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToGroupsCommand">
+				<div class="tabula-dnd"
+						 data-item-name="student"
+						 data-text-selector=".name h6"
+						 data-use-handle="false"
+						 data-selectables=".students .drag-target"
+						 data-scroll="true"
+						 data-remove-tooltip="Remove this student from this group">
+					<div class="persist-header">
+						<div class="btn-toolbar">
+							<a class="random btn" data-toggle="randomise" data-disabled-on="empty-list"
+							   href="#" >
+								<i class="icon-random"></i> Randomly allocate
+							</a>
+							<a class="return-items btn" data-toggle="return" data-disabled-on="no-allocation"
+							   href="#" >
+								<i class="icon-arrow-left"></i> Remove all
+							</a>
+						</div>
+						<div class="row-fluid">
+							<div class="span5">
+								<h3>Students</h3>
+							</div>
+							<div class="span2"></div>
+							<div class="span5">
+								<h3>Groups</h3>
+							</div>
+						</div>
+					</div><!-- end persist header -->
+
+					<div class="row-fluid fix-on-scroll-container">
+						<div class="span5">
+							<div id="studentslist"
 								 class="students tabula-filtered-list"
 								 data-item-selector=".student-list li">
-							<h3>Students</h3>
-							<div class="well ">
+								<div class="well ">
 									<h4>Not allocated to a group</h4>
 									<#if features.smallGroupAllocationFiltering>
 										<div class="filter" id="filter-by-gender-controls">
@@ -119,28 +131,27 @@
 											</select>
 										</div>
 									</#if>
-								<div class="student-list drag-target">
-									<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
-										<@spring.bind path="unallocated">
+									<div class="student-list drag-target">
+										<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
+											<@spring.bind path="unallocated">
 											<#list status.actualValue as student>
 												<@student_item student "${status.expression}[${student_index}]" />
 											</#list>
 										</@spring.bind>
-									</ul>
+										</ul>
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-					<div class="span2">
-						<#-- I, for one, welcome our new jumbo icon overlords -->
-						<div class="direction-icon fix-on-scroll">
-							<i class="icon-arrow-right"></i>
+						<div class="span2">
+							<#-- I, for one, welcome our new jumbo icon overlords -->
+							<div class="direction-icon fix-on-scroll">
+								<i class="icon-arrow-right"></i>
+							</div>
 						</div>
-					</div>
-					<div class="span5">
-						<div id="groupslist" class="groups fix-on-scroll">
-							<h3>Groups</h3>
-							<#list set.groups as group>
+						<div class="span5">
+							<div id="groupslist" class="groups fix-on-scroll">
+								<#list set.groups as group>
 								<#assign existingStudents = mappingById[group.id]![] />
 								<div class="drag-target well clearfix group-${group.id}">
 									<div class="group-header">
@@ -174,16 +185,19 @@
 									</ul>
 								</div>
 							</#list>
+							</div>
 						</div>
+
 					</div>
+
 				</div>
+
+					<div class="submit-buttons persist-footer">
+						<input type="submit" class="btn btn-primary" value="Save">
+						<a href="<@routes.depthome module />" class="btn">Cancel</a>
+					</div>
+				</@f.form>
 			</div>
-			
-				<div class="submit-buttons">
-					<input type="submit" class="btn btn-primary" value="Save">
-					<a href="<@routes.depthome module />" class="btn">Cancel</a>
-				</div>
-			</@f.form>
 			</div><!-- end 1st tab -->
 
 			<div class="tab-pane" id="allocategroups-tab2">
@@ -221,6 +235,14 @@
 			$('#studentslist').css('min-height', function() {
 				return $('#groupslist').outerHeight();
 			});
+
+			var fixHeaderFooter = $('.persist-area').fixHeaderFooter();
+
+			$(window).scroll(function() {
+				fixHeaderFooter.fixDirectionIcon();
+				fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
+			});
+
 
 			// When the return list has changed, make sure the filter is re-run			
 			$('.return-list').on('changed.tabula', function(e) {

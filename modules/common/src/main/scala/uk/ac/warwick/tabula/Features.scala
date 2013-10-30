@@ -13,6 +13,13 @@ import uk.ac.warwick.util.queue.QueueListener
 import uk.ac.warwick.util.queue.conversion.ItemType
 import scala.beans.BeanProperty
 
+trait FeaturesComponent {
+	def features: Features
+}
+
+trait AutowiringFeaturesComponent extends FeaturesComponent {
+	var features = Wire[Features]
+}
 
 /**
  * Defines flags to turn features on and off.
@@ -64,6 +71,7 @@ abstract class Features {
 	@Value("${features.personalTimetables:false}") var personalTimetables = defaults.personalTimetables
 	@Value("${features.profiles.memberNotes:true}") var profilesMemberNotes = defaults.profilesMemberNotes
 	@Value("${features.smallGroupTeaching.recordAttendance:true}") var smallGroupTeachingRecordAttendance = defaults.smallGroupTeachingRecordAttendance
+	@Value("${features.attendanceMonitoring.meetingPointType:true}") var attendanceMonitoringMeetingPointType = defaults.attendanceMonitoringMeetingPointType
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -123,6 +131,7 @@ class FeaturesMessage {
 	@BeanProperty var personalTimetables = false
 	@BeanProperty var profilesMemberNotes = true
 	@BeanProperty var smallGroupTeachingRecordAttendance = true
+	@BeanProperty var attendanceMonitoringMeetingPointType = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

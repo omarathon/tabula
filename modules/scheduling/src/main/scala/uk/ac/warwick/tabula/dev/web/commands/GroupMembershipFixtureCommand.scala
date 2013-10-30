@@ -7,28 +7,29 @@ import uk.ac.warwick.tabula.data.{Daoisms, AutowiringSmallGroupDaoComponent, Ses
 import uk.ac.warwick.tabula.data.Transactions._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
+import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 
-class GroupMembershipFixtureCommand extends CommandInternal[Unit] with Logging{
+class GroupMembershipFixtureCommand extends CommandInternal[SmallGroup] with Logging{
 	this: UserLookupComponent with SmallGroupDaoComponent with SessionComponent =>
 
 	var groupSetId: String = _
 	var groupName: String = _
 	var userId: String = _
 
-	protected def applyInternal() {
+	protected def applyInternal() =
 		transactional() {
 			val user = userLookup.getUserByUserId(userId)
 			val groupset = smallGroupDao.getSmallGroupSetById(groupSetId).get
 			val group = groupset.groups.asScala.find(_.name == groupName).get
 			group.students.add(user)
 			logger.info(s"Added user $userId to group $groupName  in groupset $groupSetId")
+			group
 		}
-	}
 }
 object GroupMembershipFixtureCommand {
 	def apply() = {
 		new GroupMembershipFixtureCommand
-			with ComposableCommand[Unit]
+			with ComposableCommand[SmallGroup]
 			with AutowiringUserLookupComponent
 			with AutowiringSmallGroupDaoComponent
 			with Daoisms

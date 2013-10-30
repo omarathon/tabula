@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.web._
 import uk.ac.warwick.tabula.web.controllers._
+import org.springframework.web.bind.annotation.RequestMapping
 
 @Controller class HomeController extends BaseController {
 

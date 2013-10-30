@@ -29,6 +29,7 @@ abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoi
 	self: SetMonitoringCheckpointState with ProfileServiceComponent with MonitoringPointServiceComponent =>
 
 	def populate() {
+		set = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
 		members = getMembers(set)
 		studentsState = monitoringPointService.getCheckpointsBySCD(monitoringPoint).map{
 			case (studentCourseDetails, checkpoint) => studentCourseDetails.student.universityId -> checkpoint.state
@@ -36,6 +37,7 @@ abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoi
 	}
 
 	def applyInternal(): Seq[MonitoringCheckpoint] = {
+		set = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
 		members = getMembers(set)
 		studentsState.asScala.map{ case (universityId, state) =>
 			val route = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route
@@ -74,11 +76,11 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 
 }
 
-trait SetMonitoringCheckpointCommandPermissions extends RequiresPermissionsChecking {
+trait SetMonitoringCheckpointCommandPermissions extends RequiresPermissionsChecking with PermissionsChecking {
 	self: SetMonitoringCheckpointState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Record, monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route)
+		p.PermissionCheck(Permissions.MonitoringPoints.Record, mandatory(monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]))
 	}
 }
 
@@ -107,5 +109,5 @@ trait SetMonitoringCheckpointState {
 
 	var members: Seq[StudentMember] = _
 	var studentsState: JMap[UniversityId, MonitoringCheckpointState] = JHashMap()
-	var set = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
+	var set : MonitoringPointSet = _
 }

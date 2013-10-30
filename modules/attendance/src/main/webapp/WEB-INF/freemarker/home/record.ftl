@@ -1,3 +1,5 @@
+<#import "*/modal_macros.ftl" as modal />
+
 <script>
 (function ($) {
 	$(function() {
@@ -19,14 +21,14 @@
 			<button type="button" class="btn" data-state="">
 				<i class="icon-minus icon-fixed-width" title="Set to 'Not recorded'"></i>
 			</button>
-			<button type="button" class="btn" data-state="unauthorised">
-				<i class="icon-remove icon-fixed-width unauthorised" title="Set to 'Missed (unauthorised)'"></i>
+			<button type="button" class="btn btn-unauthorised" data-state="unauthorised">
+				<i class="icon-remove icon-fixed-width" title="Set to 'Missed (unauthorised)'"></i>
 			</button>
-			<button type="button" class="btn" data-state="authorised">
-				<i class="icon-remove icon-fixed-width authorised" title="Set to 'Missed (authorised)'"></i>
+			<button type="button" class="btn btn-authorised" data-state="authorised">
+				<i class="icon-remove-circle icon-fixed-width" title="Set to 'Missed (authorised)'"></i>
 			</button>
-			<button type="button" class="btn" data-state="attended">
-				<i class="icon-ok icon-fixed-width attended" title="Set to 'Attended'"></i>
+			<button type="button" class="btn btn-attended" data-state="attended">
+				<i class="icon-ok icon-fixed-width" title="Set to 'Attended'"></i>
 			</button>
 		</div>
 	</div>
@@ -40,7 +42,7 @@
 				<div class="span9">
 					<span><i class="icon-minus icon-fixed-width"></i> Not recorded</span>
 					<span><i class="icon-remove icon-fixed-width unauthorised"></i> Missed (unauthorised)</span>
-					<span><i class="icon-remove icon-fixed-width authorised"></i> Missed (authorised)</span>
+					<span><i class="icon-remove-circle icon-fixed-width authorised"></i> Missed (authorised)</span>
 					<span><i class="icon-ok icon-fixed-width attended"></i> Attended</span>
 				</div>
 				<div class="span3 text-center">
@@ -48,16 +50,19 @@
 						<button type="button" class="btn">
 							<i class="icon-minus icon-fixed-width" title="Set all to 'Not recorded'"></i>
 						</button>
-						<button type="button" class="btn">
-							<i class="icon-remove icon-fixed-width unauthorised" title="Set all to 'Missed (unauthorised)'"></i>
+						<button type="button" class="btn btn-unauthorised">
+							<i class="icon-remove icon-fixed-width" title="Set all to 'Missed (unauthorised)'"></i>
 						</button>
-                        <button type="button" class="btn">
-							<i class="icon-remove icon-fixed-width authorised" title="Set all to 'Missed (authorised)'"></i>
+            			<button type="button" class="btn btn-authorised">
+							<i class="icon-remove-circle icon-fixed-width" title="Set all to 'Missed (authorised)'"></i>
 						</button>
-						<button type="button" class="btn">
-							<i class="icon-ok icon-fixed-width attended" title="Set all to 'Attended'"></i>
+						<button type="button" class="btn btn-attended">
+							<i class="icon-ok icon-fixed-width" title="Set all to 'Attended'"></i>
 						</button>
 					</div>
+					<#if monitoringPoint.pointType?? && monitoringPoint.pointType.dbValue == "meeting">
+						<i class="icon-fixed-width"></i>
+					</#if>
 				</div>
 			</div>
 		</div>
@@ -72,7 +77,7 @@
 
 				<form action="" method="post">
 					<input type="hidden" name="monitoringPoint" value="${monitoringPoint.id}" />
-					<input type="hidden" value="<@url page="${returnTo}" />" />
+					<input type="hidden" name="returnTo" value="<@url page="${returnTo}" />" />
 					<#list command.members?sort_by("lastName") as student>
 						<div class="row-fluid item-info clickable">
 							<label>
@@ -90,6 +95,9 @@
 											<option value="authorised" <#if hasState && command.studentsState[student.universityId].dbValue == "authorised">selected</#if>>Missed (authorised)</option>
 											<option value="attended" <#if hasState && command.studentsState[student.universityId].dbValue == "attended">selected</#if>>Attended</option>
 										</select>
+										<#if monitoringPoint.pointType?? && monitoringPoint.pointType.dbValue == "meeting">
+											<a class="meetings" title="Meetings information" href="<@routes.studentMeetings monitoringPoint student />"><i class="icon-info-sign"></i></a>
+										</#if>
 									</div>
 								</div>
 							</label>
@@ -108,4 +116,11 @@
 
 		</#if>
 	</div>
+</div>
+
+<div id="modal" class="modal hide fade" style="display:none;">
+	<@modal.header>
+		<h3>Meetings</h3>
+	</@modal.header>
+	<@modal.body></@modal.body>
 </div>

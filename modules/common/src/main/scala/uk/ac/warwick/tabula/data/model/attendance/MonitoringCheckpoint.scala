@@ -30,4 +30,6 @@ class MonitoringCheckpoint extends GeneratedId {
 	@NotNull
 	var updatedBy: String = _
 
+	var autoCreated: Boolean = false
+
 }
