@@ -163,7 +163,7 @@ object Fixtures {
 		val status = new SitsStatus(code, shortName, fullName)
 		status
 	}
-	
+
 	def modeOfAttendance(code: String = "F", shortName: String = "FT", fullName: String = "Full time") = {
 		val moa = new ModeOfAttendance(code, shortName, fullName)
 		moa
@@ -234,9 +234,14 @@ object Fixtures {
 		checkpoint
 	}
 
+	def moduleRegistration(scd: StudentCourseDetails, mod: Module, cats: java.math.BigDecimal, year: AcademicYear, occurrence: String) = {
+		new ModuleRegistration(scd, mod, cats, year, occurrence)
+	}
+
 	def meetingRecordApproval(state: MeetingApprovalState) = {
 		val approval = new MeetingRecordApproval
 		approval.state = state
 		approval
 	}
+
 }
