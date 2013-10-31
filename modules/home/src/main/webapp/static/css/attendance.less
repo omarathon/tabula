@@ -121,6 +121,10 @@
 		color: @infoText; 
 		.active-colour(@infoText);
 	}
+
+	.checkAllMessage {
+	  padding-right: 6px;
+	}
 }
 
 .monitoring-points-profile {
@@ -140,3 +144,40 @@
 }
 
 .btn-group button { margin-right: 0px; }
+
+.recordCheckpointForm .btn-group {
+  margin-right:13px;
+}
+
+.record-attendance-form-header {
+	.btn-group {
+		margin-right:0;
+	}
+
+	.span4 {
+		padding:3px 0 3px 18px;
+	}
+}
+
+.is-smallscreen #container {
+	.recordCheckpointForm h1 {
+		margin-bottom:8px;
+	}
+
+	.yearAndRoute, .record-attendance-form-header div.span8 {
+		display:none;
+	}
+
+	.record-attendance-form-header div.span4 {
+		padding:3px 0 3px 3px;
+	}
+
+	.recordCheckpointForm h1 {
+		font-size:22px;
+	}
+
+	.persist-footer {
+		padding-top:16px;
+		padding-bottom:16px;
+	}
+}

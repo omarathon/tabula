@@ -30,7 +30,7 @@
 				floatingFooter   = $(".floatingFooter", persistArea),
 				persistHeader    = $(".persist-header", persistArea),
 				persistFooter    = $(".persist-footer", persistArea),
-				primaryNavHeight = $("#primary-navigation").height();
+                primaryNavHeight = $('#primary-navigation').height();
 
 			if ((scrollTop > offset.top) && (scrollTop < offset.top + el.height())) {
 				floatingHeader.visible();
@@ -50,7 +50,7 @@
 
 		var cloneRow = function(row, className) {
 			row.before(row.clone(true))
-				.css("width", row.width())
+				.css("max-width", row.width())
 				.addClass(className);
 		};
 
@@ -66,6 +66,14 @@
 		});
 
 
+        // keeps the width of the floating header/footer as the parent on window resize
+		$( window ).resize(function() {
+			var floatingHeader = $(".floatingHeader");
+			floatingHeader.css("max-width", floatingHeader.parent().width() );
+            var floatingFooter = $(".floatingFooter");
+            floatingFooter.css("max-width", floatingFooter.parent().width() );
+		});
+
 
 		// public methods
 		this.initialize = function() {
@@ -80,9 +88,9 @@
 			var persistAreaTop = $('.persist-header').height() + $('#primary-navigation').height();
 
 			if(fixContainer.offset().top - $(window).scrollTop() < $('.persist-header').height() + $('#primary-navigation').height()) {
-				directionIcon.css({ "top" : persistAreaTop, "position": "fixed", "width": directionIcon.width() });
+				directionIcon.css({ "top" : persistAreaTop, "position": "fixed", "max-width": directionIcon.width() });
 			} else {
-				directionIcon.css({"top": "auto", "position": "static", "width": directionIcon.width });
+				directionIcon.css({"top": "auto", "position": "static", "max-width": directionIcon.width });
 			}
 		};
 
@@ -96,9 +104,9 @@
 
 			// width is set on fixing because it was jumping to the minimum width of the content
 			if (targetList.height() < viewableArea && ($(window).scrollTop() > $('.persist-area').offset().top)) {
-				targetList.css({"top": persistAreaTop + 14, "position": "fixed", "width": targetList.parent().width()});
+				targetList.css({"top": persistAreaTop + 14, "position": "fixed", "max-width": targetList.parent().width()});
 			} else {
-				targetList.css({"top": "auto", "position": "relative", "width": "auto"});
+				targetList.css({"top": "auto", "position": "relative", "max-width": "auto"});
 			}
 		}
 
