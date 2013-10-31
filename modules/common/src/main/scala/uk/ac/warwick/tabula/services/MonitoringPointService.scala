@@ -38,11 +38,17 @@ trait MonitoringPointService {
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
 	def getChecked(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[MonitoringCheckpointState]]]
 	def deleteCheckpoint(scjCode: String, point: MonitoringPoint): Unit
-	def saveOrUpdateCheckpoint(studentCourseDetails: StudentCourseDetails,
-		point: MonitoringPoint,	state: MonitoringCheckpointState,	user: CurrentUser
+	def saveOrUpdateCheckpoint(
+		studentCourseDetails: StudentCourseDetails,
+		point: MonitoringPoint,
+		state: MonitoringCheckpointState,
+		user: CurrentUser
 	) : MonitoringCheckpoint
-	def saveOrUpdateCheckpoint(studentCourseDetails: StudentCourseDetails,
-		point: MonitoringPoint, state: MonitoringCheckpointState,	member: Member
+	def saveOrUpdateCheckpoint(
+		studentCourseDetails: StudentCourseDetails,
+		point: MonitoringPoint,
+		state: MonitoringCheckpointState,
+		member: Member
 	) : MonitoringCheckpoint
 	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int
 }
@@ -93,12 +99,18 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		}
 	}
 
-	def saveOrUpdateCheckpoint(studentCourseDetails: StudentCourseDetails,
-		point: MonitoringPoint,	state: MonitoringCheckpointState,	user: CurrentUser
+	def saveOrUpdateCheckpoint(
+		studentCourseDetails: StudentCourseDetails,
+		point: MonitoringPoint,
+		state: MonitoringCheckpointState,
+		user: CurrentUser
 	) : MonitoringCheckpoint = saveOrUpdateCheckpointForUser(studentCourseDetails, point, state, user.apparentId)
 
-	def saveOrUpdateCheckpoint(studentCourseDetails: StudentCourseDetails,
-		point: MonitoringPoint, state: MonitoringCheckpointState,	member: Member
+	def saveOrUpdateCheckpoint(
+		studentCourseDetails: StudentCourseDetails,
+		point: MonitoringPoint,
+		state: MonitoringCheckpointState,
+		member: Member
 	) : MonitoringCheckpoint =
 		saveOrUpdateCheckpointForUser(studentCourseDetails, point, state, member.userId)
 

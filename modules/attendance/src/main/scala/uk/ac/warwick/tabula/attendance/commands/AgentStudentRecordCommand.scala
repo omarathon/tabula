@@ -37,14 +37,14 @@ abstract class AgentStudentRecordCommand(val agent: Member, val relationshipType
 	}
 
 	def applyInternal() = {
-		checkpointMap.asScala.map{case(point, state) =>
+		checkpointMap.asScala.flatMap{case(point, state) =>
 			if (state == null) {
 				monitoringPointService.deleteCheckpoint(scd.scjCode, point)
 				None
 			} else {
 				Option(monitoringPointService.saveOrUpdateCheckpoint(scd, point, state, agent))
 			}
-		}.flatten.toSeq
+		}.toSeq
 	}
 
 }

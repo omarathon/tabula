@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, Unaudited, Rea
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm
 import uk.ac.warwick.tabula.services.{TermServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent, AutowiringTermServiceComponent}
 import scala.collection.JavaConverters._
@@ -38,24 +38,26 @@ class AgentStudentViewCommand(
 				scd.studentCourseYearDetails.asScala.find(_.academicYear == academicYear).map(scyd => {
 					monitoringPointService.findMonitoringPointSet(scd.route, academicYear, Option(scyd.yearOfStudy)).orElse(
 						monitoringPointService.findMonitoringPointSet(scd.route, academicYear, None)
-					).map(pointSet => {
-						val checkedForStudent = monitoringPointService.getChecked(Seq(student), pointSet)(student)
-						groupByTerm(pointSet.points.asScala, academicYear).map{case (termName, points) =>
-							termName -> points.map(point =>
-								point -> (checkedForStudent(point) match {
-									case Some(state) => state.dbValue
-									case _ =>
-										if (point.isLate(currentAcademicWeek))
-											"late"
-										else
-											""
-								})
-							)
-						}
-					}).getOrElse(Map())
+					).map(checkpointStateStrings(_, currentAcademicWeek)).getOrElse(Map())
 				}).getOrElse(Map())
 			}
 		).toMap
+	}
+
+	private def checkpointStateStrings(pointSet: MonitoringPointSet, currentAcademicWeek: Int) = {
+		val checkedForStudent = monitoringPointService.getChecked(Seq(student), pointSet)(student)
+		groupByTerm(pointSet.points.asScala, academicYear).map{case (termName, points) =>
+			termName -> points.map(point =>
+				point -> (checkedForStudent(point) match {
+					case Some(state) => state.dbValue
+					case _ =>
+						if (point.isLate(currentAcademicWeek))
+							"late"
+						else
+							""
+				})
+			)
+		}
 	}
 
 }

@@ -9,7 +9,6 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.attendance.commands.manage.DeleteMonitoringPointCommand
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
-import scala.Array
 
 @Controller
 @RequestMapping(Array("/manage/{dept}/sets/add/points/delete/{pointIndex}"))
