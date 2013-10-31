@@ -21,6 +21,7 @@ trait StudentCourseDetailsDao {
 	def getStudentBySprCode(sprCode: String): Option[StudentMember]
 	def getByRoute(route: Route) : Seq[StudentCourseDetails]
 	def findByDepartment(department:Department):Seq[StudentCourseDetails]
+	def getAllPresentInSits: Seq[StudentCourseDetails]
 }
 
 @Repository
@@ -65,5 +66,10 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 			.add(is("route.code", route.code))
 			.seq
 	}
+
+	def getAllPresentInSits() =
+		session.newCriteria[StudentCourseDetails]
+			.add(is("missingFromImportSince", null))
+			.seq
 
 }

@@ -22,6 +22,7 @@ import uk.ac.warwick.tabula.AcademicYear
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
 	final val ActiveOnlyFilter = "activeOnly"
+	final val NotStaleFilter = "notStale"
 }
 
 /**
@@ -35,11 +36,13 @@ object Member {
  */
 @FilterDefs(Array(
 	new FilterDef(name = Member.StudentsOnlyFilter, defaultCondition = "usertype = 'S'"),
-	new FilterDef(name = Member.ActiveOnlyFilter, defaultCondition = "(inuseflag = 'Active' or inuseflag like 'Inactive - Starts %')")
+	new FilterDef(name = Member.ActiveOnlyFilter, defaultCondition = "(inuseflag = 'Active' or inuseflag like 'Inactive - Starts %')"),
+	new FilterDef(name = Member.NotStaleFilter, defaultCondition = "missingFromImportSince is null")
 ))
 @Filters(Array(
 	new Filter(name = Member.StudentsOnlyFilter),
-	new Filter(name = Member.ActiveOnlyFilter)
+	new Filter(name = Member.ActiveOnlyFilter),
+	new Filter(name = Member.NotStaleFilter)
 ))
 @Entity
 @AccessType("field")
@@ -76,6 +79,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	}
 
 	var lastUpdatedDate = DateTime.now
+
+	var missingFromImportSince: DateTime = _
 
 	def fullName: Option[String] = {
 		(Option(firstName) ++ Option(lastName)).toList match {

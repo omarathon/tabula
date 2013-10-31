@@ -3,26 +3,24 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 import java.sql.ResultSet
 
 import org.joda.time.DateTime
-import org.springframework.beans.BeanWrapper
-import org.springframework.beans.BeanWrapperImpl
+import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.commands.{Description, Unaudited}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.OtherMember
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.StudentProperties
+import uk.ac.warwick.tabula.data.model.{Member, OtherMember, StudentMember, StudentProperties}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
-import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
-import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
+import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopying}
+import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, ModeOfAttendanceImporter}
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
 
-class ImportStudentRowCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet, importStudentCourseCommand: ImportStudentCourseCommand)
+class ImportStudentRowCommand(member: MembershipInformation,
+		ssoUser: User,
+		resultSet: ResultSet,
+		importRowTracker: ImportRowTracker,
+		importStudentCourseCommand: ImportStudentCourseCommand)
 	extends ImportMemberCommand(member, ssoUser, Some(resultSet))
 	with Logging with Daoisms
 	with StudentProperties with Unaudited with PropertyCopying {
@@ -56,7 +54,7 @@ class ImportStudentRowCommand(member: MembershipInformation, ssoUser: User, resu
 		val commandBean = new BeanWrapperImpl(this)
 		val memberBean = new BeanWrapperImpl(member)
 
-		val hasChanged = copyMemberProperties(commandBean, memberBean) | copyStudentProperties(commandBean, memberBean)
+		val hasChanged = copyMemberProperties(commandBean, memberBean) | copyStudentProperties(commandBean, memberBean) | markAsSeenInSits(memberBean)
 
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + member)
@@ -70,6 +68,8 @@ class ImportStudentRowCommand(member: MembershipInformation, ssoUser: User, resu
 
 		// apply above will take care of the db.  This brings the in-memory data up to speed:
 		member.attachStudentCourseDetails(studentCourseDetails)
+
+		importRowTracker.studentsSeen.add(member)
 
 		member
 	}

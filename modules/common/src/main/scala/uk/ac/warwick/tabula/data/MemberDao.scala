@@ -51,11 +51,13 @@ trait MemberDao {
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
 	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
-	
+
 	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember]
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]): Int
 	def getAllModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def getAllSprStatuses(department: Department): Seq[SitsStatus]
+	def getStudentsPresentInSits: Seq[StudentMember]
+
 }
 
 @Repository
@@ -100,6 +102,11 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.add(is("universityId", universityId.safeTrim))
 			.uniqueResult
 
+	def getStudentsPresentInSits() =
+		session.newCriteria[StudentMember]
+			.add(is("missingFromImportSince", null))
+			.seq
+
 	def getAllWithUniversityIds(universityIds: Seq[String]) =
 		if (universityIds.isEmpty) Seq.empty
 		else session.newCriteria[Member]
@@ -135,7 +142,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setMaxResults(max)
 			.addOrder(asc("lastUpdatedDate"))
 			.list
-			
+
 		val courseMatches = session.newQuery[StudentMember]( """
 				select distinct student
         	from
@@ -350,31 +357,31 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			""")
 			.setEntity("relationshipType", relationshipType)
 			.uniqueResult.getOrElse(0)
-			
+
 	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int) = {
 		val idCriteria = session.newCriteria[StudentMember]
 		restrictions.foreach { _.apply(idCriteria) }
-		
+
 		val universityIds = idCriteria.project[String](distinct(property("universityId"))).seq
-		
+
 		val c = session.newCriteria[StudentMember]
-		
+
 		val or = disjunction()
 		universityIds.grouped(Daoisms.MaxInClauseCount).foreach { ids => or.add(in("universityId", ids)) }
 		c.add(or)
-					
+
 		orders.foreach { c.addOrder(_) }
-		
+
 		c.setMaxResults(maxResults).setFirstResult(startResult).seq
-	}	
-	
+	}
+
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]) = {
 		val c = session.newCriteria[StudentMember]
 		restrictions.foreach { _.apply(c) }
-		
+
 		c.project[Number](countDistinct("universityId")).uniqueResult.get.intValue()
 	}
-	
+
 	def getAllModesOfAttendance(department: Department) =
 		session.newCriteria[StudentMember]
 				.createAlias("mostSignificantCourse", "scd")
@@ -387,7 +394,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 						.add(rowCount(), "moaCount")
 				)
 				.seq.map { array => array(0).asInstanceOf[ModeOfAttendance] }
-		
+
 	def getAllSprStatuses(department: Department) =
 		session.newCriteria[StudentMember]
 				.createAlias("mostSignificantCourse", "scd")

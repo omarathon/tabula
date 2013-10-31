@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.data.model.Course
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.SitsStatus
+import org.joda.time.DateTime
 
 trait PropertyCopying extends Logging {
 	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
@@ -64,6 +65,16 @@ trait PropertyCopying extends Logging {
 				memberBean.setPropertyValue(property, obj)
 				true
 			}
+		}
+	}
+
+	def markAsSeenInSits(bean: BeanWrapper) = {
+		val propertyName = "missingFromSitsSince"
+		if (bean.getPropertyValue(propertyName) == null)
+			false
+		else {
+			bean.setPropertyValue(propertyName, null)
+			true
 		}
 	}
 

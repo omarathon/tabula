@@ -118,7 +118,7 @@ class StudentCourseDetails
 	def attachStudentCourseYearDetails(yearDetailsToAdd: StudentCourseYearDetails) {
 		studentCourseYearDetails.remove(yearDetailsToAdd)
 		studentCourseYearDetails.add(yearDetailsToAdd)
-		
+
 		latestStudentCourseYearDetails = studentCourseYearDetails.asScala.max
 	}
 
@@ -176,6 +176,8 @@ trait StudentCourseProperties {
 
 	var lastUpdatedDate = DateTime.now
 
+	var missingFromImportSince: DateTime = _
+
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var mostSignificant: JBoolean = _
 }
@@ -186,15 +188,15 @@ sealed abstract class CourseType(val code: String, val level: String, val descri
 
 object CourseType {
 	implicit val factory = { code: String => CourseType(code) }
-	
+
 	case object PGR extends CourseType("PG(R)", "Postgraduate", "Postgraduate (Research)", 'R')
 	case object PGT extends CourseType("PG(T)", "Postgraduate", "Postgraduate (Taught)", 'T')
 	case object UG extends CourseType("UG", "Undergraduate", "Undergraduate", 'U')
 	case object Foundation extends CourseType("F", "Foundation", "Foundation course", 'F')
 	case object PreSessional extends CourseType("PS", "Pre-sessional", "Pre-sessional course", 'N')
-	
+
 	val all = Seq(UG, PGT, PGR, Foundation, PreSessional)
-	
+
 	def apply(code: String): CourseType = code match {
 		case UG.code => UG
 		case PGT.code => PGT

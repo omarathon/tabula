@@ -42,6 +42,7 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
 import uk.ac.warwick.tabula.scheduling.services.CourseImporter
 import uk.ac.warwick.tabula.data.model.Course
+import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 
 
 // scalastyle:off magic.number
@@ -141,8 +142,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 		val blobBytes = Array[Byte](1,2,3,4,5)
 		val mac = MembershipInformation(mm, () => Some(blobBytes))
+		val importRowTracker = new ImportRowTracker
 
-		val yearCommand = new ImportStudentCourseYearCommand(rs)
+		val yearCommand = new ImportStudentCourseYearCommand(rs, importRowTracker)
 		yearCommand.modeOfAttendanceImporter = modeOfAttendanceImporter
 		yearCommand.profileService = profileService
 		yearCommand.sitsStatusesImporter = sitsStatusesImporter
@@ -152,7 +154,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		val supervisorCommand = new ImportSupervisorsForStudentCommand()
 		supervisorCommand.maintenanceMode = maintenanceModeService
 
-		val courseCommand = new ImportStudentCourseCommand(rs, yearCommand, supervisorCommand)
+		val courseCommand = new ImportStudentCourseCommand(rs, importRowTracker, yearCommand, supervisorCommand)
 		courseCommand.studentCourseDetailsDao = studentCourseDetailsDao
 		courseCommand.sitsStatusesImporter = sitsStatusesImporter
 		courseCommand.courseAndRouteService = courseAndRouteService
@@ -163,7 +165,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		courseCommand.courseImporter = courseImporter
 		courseCommand.stuMem = smartMock[StudentMember]
 
-		val rowCommand = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, courseCommand)
+		val rowCommand = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, new ImportRowTracker, courseCommand)
 		rowCommand.memberDao = memberDao
 		rowCommand.fileDao = fileDao
 		rowCommand.moduleAndDepartmentService = modAndDeptService

@@ -78,5 +78,7 @@ trait StudentCourseYearProperties {
 
 	var lastUpdatedDate = DateTime.now
 
+	var missingFromImportSince: DateTime = _
+
 }
 

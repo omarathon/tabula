@@ -1,30 +1,25 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.ResultSet
+
+import scala.collection.JavaConverters.asScalaBufferConverter
+
 import org.joda.time.DateTime
-import org.springframework.beans.BeanWrapper
-import org.springframework.beans.BeanWrapperImpl
+import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
+
 import ImportMemberHelpers.toAcademicYear
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
+import uk.ac.warwick.tabula.commands.{Command, Description, Unaudited}
+import uk.ac.warwick.tabula.data.{Daoisms, StudentCourseYearDetailsDao}
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
-import uk.ac.warwick.tabula.data.model.StudentCourseYearProperties
+import uk.ac.warwick.tabula.data.model.{ModeOfAttendance, ModuleRegistrationStatus, StudentCourseDetails, StudentCourseYearDetails, StudentCourseYearProperties}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
+import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopying}
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.data.model.ModuleRegistrationStatus
-import scala.collection.JavaConverters._
 
-class ImportStudentCourseYearCommand(resultSet: ResultSet)
+class ImportStudentCourseYearCommand(resultSet: ResultSet, importRowTracker: ImportRowTracker)
 	extends Command[StudentCourseYearDetails] with Logging with Daoisms
 	with StudentCourseYearProperties with Unaudited with PropertyCopying {
 	import ImportMemberHelpers._
@@ -72,12 +67,12 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 
 		moduleRegistrationStatus = ModuleRegistrationStatus.fromCode(moduleRegistrationStatusCode)
 
-		val hasChanged = copyStudentCourseYearProperties(commandBean, studentCourseYearDetailsBean)
+		val hasChanged = copyStudentCourseYearProperties(commandBean, studentCourseYearDetailsBean) | markAsSeenInSits(studentCourseYearDetailsBean)
 
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + studentCourseYearDetails)
-			
-			if (studentCourseDetails.latestStudentCourseYearDetails == null || 
+
+			if (studentCourseDetails.latestStudentCourseYearDetails == null ||
 				studentCourseDetails.studentCourseYearDetails.asScala.forall { _ <= studentCourseYearDetails }) {
 				studentCourseDetails.latestStudentCourseYearDetails = studentCourseYearDetails
 			}
@@ -86,6 +81,7 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 			studentCourseYearDetailsDao.saveOrUpdate(studentCourseYearDetails)
 		}
 
+		importRowTracker.studentCourseYearDetailsSeen.add(studentCourseYearDetails)
 		studentCourseYearDetails
 	}
 

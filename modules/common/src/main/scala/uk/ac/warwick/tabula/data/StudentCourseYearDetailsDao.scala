@@ -16,6 +16,7 @@ trait StudentCourseYearDetailsDao {
 	def delete(studentCourseYearDetails: StudentCourseYearDetails)
 	def getStudentCourseYearDetails(id: String): Option[StudentCourseYearDetails]
 	def getBySceKey(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
+	def getAllPresentInSits(): Seq[StudentCourseYearDetails]
 }
 
 @Repository
@@ -39,4 +40,10 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 			.add(is("studentCourseDetails", studentCourseDetails))
 			.add(is("sceSequenceNumber", seq))
 			.uniqueResult
+
+	def getAllPresentInSits() =
+		session.newCriteria[StudentCourseYearDetails]
+			.add(is("missingFromImportSince", null))
+			.seq
+
 }
