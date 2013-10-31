@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.web.controllers
+package uk.ac.warwick.tabula.attendance.web.controllers.manage
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
@@ -6,7 +6,9 @@ import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPo
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import javax.validation.Valid
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.attendance.commands.CreateMonitoringPointCommand
+import uk.ac.warwick.tabula.attendance.commands.manage.CreateMonitoringPointCommand
+import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import scala.Array
 
 @Controller
 @RequestMapping(Array("/manage/{dept}/sets/{set}/edit/points/add"))

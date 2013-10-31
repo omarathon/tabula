@@ -16,7 +16,7 @@ trait GroupMonitoringPointsByTerm extends TermServiceComponent {
 		monitoringPoints groupBy { point =>
 			val date = weeksForYear(point.validFromWeek).getStart.withDayOfWeek(day.jodaDayOfWeek)
 			termService.getTermFromDateIncludingVacations(date).getTermTypeAsString
-		}
+		} map { case (term, points) => term -> points.sortBy(_.validFromWeek) }
 	}
 
 }

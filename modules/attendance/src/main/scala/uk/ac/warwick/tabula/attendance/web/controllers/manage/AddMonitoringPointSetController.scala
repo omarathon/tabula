@@ -1,15 +1,17 @@
-package uk.ac.warwick.tabula.attendance.web.controllers
+package uk.ac.warwick.tabula.attendance.web.controllers.manage
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.data.model.attendance.{AbstractMonitoringPointSet, MonitoringPointSet}
-import uk.ac.warwick.tabula.attendance.commands.AddMonitoringPointSetCommand
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.attendance.commands.manage.AddMonitoringPointSetCommand
+import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import scala.Array
 
 @Controller
 @RequestMapping(value=Array("/manage/{dept}/sets/add/{academicYear}"))

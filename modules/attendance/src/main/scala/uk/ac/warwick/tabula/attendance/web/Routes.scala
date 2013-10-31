@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.attendance.web
 import uk.ac.warwick.tabula.data.model._
 import java.net.URLEncoder
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
@@ -28,5 +29,13 @@ object Routes {
 		
 		def apply(scd: StudentCourseDetails, academicYear: AcademicYear) =
 			"/profile/%s/%s" format(encoded(scd.urlSafeId), encoded(academicYear.startYear.toString))
+	}
+
+	object agent {
+		def view(relationshipType: StudentRelationshipType) = "/agent/%s" format encoded(relationshipType.urlPart)
+		def student(student: StudentMember, relationshipType: StudentRelationshipType) =
+			"/agent/%s/%s" format(encoded(relationshipType.urlPart), encoded(student.universityId))
+		def record(pointSet: MonitoringPointSet, studentCourseDetails: StudentCourseDetails, relationshipType: StudentRelationshipType) =
+			"/agent/%s/%s/%s" format(encoded(relationshipType.urlPart), encoded(studentCourseDetails.urlSafeId), encoded(pointSet.id))
 	}
 }

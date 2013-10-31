@@ -1,9 +1,5 @@
-package uk.ac.warwick.tabula.profiles.helpers
+package uk.ac.warwick.tabula.helpers
 
-import org.joda.time._
-import org.joda.time.format.DateTimeFormat
-import org.joda.time.format.DateTimeFormatter
-import collection.mutable
 import collection.JavaConversions._
 import freemarker.template.TemplateMethodModelEx
 import freemarker.template.utility.DeepUnwrap

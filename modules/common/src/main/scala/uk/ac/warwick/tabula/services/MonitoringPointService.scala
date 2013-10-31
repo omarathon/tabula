@@ -30,7 +30,6 @@ trait MonitoringPointService {
 	def getSetById(id : String) : Option[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet]
-	def findMonitoringPointSet(route: Route, year: Option[Int]): Option[MonitoringPointSet]
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]): Option[MonitoringPointSet]
 	def getCheckpointsBySCD(monitoringPoint : MonitoringPoint) : Seq[(StudentCourseDetails, MonitoringCheckpoint)]
 	def listTemplates : Seq[MonitoringPointSetTemplate]
@@ -45,6 +44,13 @@ trait MonitoringPointService {
 		state: MonitoringCheckpointState,
 		user: CurrentUser
 	) : MonitoringCheckpoint
+	def saveOrUpdateCheckpoint(
+		studentCourseDetails: StudentCourseDetails,
+		point: MonitoringPoint,
+		state: MonitoringCheckpointState,
+		member: Member
+	) : MonitoringCheckpoint
+	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int
 }
 
 
@@ -61,7 +67,6 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet] = monitoringPointDao.findMonitoringPointSets(route)
 	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet] =
 		monitoringPointDao.findMonitoringPointSets(route, academicYear)
-	def findMonitoringPointSet(route: Route, year: Option[Int]) = monitoringPointDao.findMonitoringPointSet(route, year)
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]) =
 		monitoringPointDao.findMonitoringPointSet(route, academicYear, year)
 	
@@ -99,6 +104,18 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		point: MonitoringPoint,
 		state: MonitoringCheckpointState,
 		user: CurrentUser
+	) : MonitoringCheckpoint = saveOrUpdateCheckpointForUser(studentCourseDetails, point, state, user.apparentId)
+
+	def saveOrUpdateCheckpoint(
+		studentCourseDetails: StudentCourseDetails,
+		point: MonitoringPoint,
+		state: MonitoringCheckpointState,
+		member: Member
+	) : MonitoringCheckpoint =
+		saveOrUpdateCheckpointForUser(studentCourseDetails, point, state, member.userId)
+
+	private def saveOrUpdateCheckpointForUser(studentCourseDetails: StudentCourseDetails,
+		point: MonitoringPoint,	state: MonitoringCheckpointState,	usercode: String
 	) : MonitoringCheckpoint = {
 		val checkpoint = monitoringPointDao.getCheckpoint(point, studentCourseDetails.student).getOrElse({
 			val newCheckpoint = new MonitoringCheckpoint
@@ -107,11 +124,17 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 			newCheckpoint
 		})
 		checkpoint.state = state
-		checkpoint.updatedBy = user.apparentId
+		checkpoint.updatedBy = usercode
 		checkpoint.updatedDate = DateTime.now
 		checkpoint.autoCreated = false
 		monitoringPointDao.saveOrUpdate(checkpoint)
 		checkpoint
+	}
+
+	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int = {
+		student.studentCourseDetails.asScala.map{scd =>
+			monitoringPointDao.missedCheckpoints(scd, academicYear)
+		}.sum
 	}
 
 }

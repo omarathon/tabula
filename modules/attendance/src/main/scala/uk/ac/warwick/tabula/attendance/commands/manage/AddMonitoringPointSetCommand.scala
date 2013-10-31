@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, AbstractMonitoringPointSet, MonitoringPoint, MonitoringPointSet}
@@ -16,6 +16,7 @@ import scala.Some
 import scala.collection.mutable
 import uk.ac.warwick.tabula.permissions.CheckablePermission
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.attendance.commands.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes, GroupMonitoringPointsByTerm}
 
 object AddMonitoringPointSetCommand {
 	def apply(user: CurrentUser, dept: Department, academicYear: AcademicYear, existingSetOption: Option[AbstractMonitoringPointSet]) =

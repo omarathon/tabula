@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._
@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, Permissions
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm
 
 object RemoveMonitoringPointCommand {
 	def apply(set: MonitoringPointSet, point: MonitoringPoint) =

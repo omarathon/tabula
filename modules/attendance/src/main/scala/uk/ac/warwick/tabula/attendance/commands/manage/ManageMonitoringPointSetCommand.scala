@@ -1,19 +1,17 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services.{MonitoringPointServiceComponent, AutowiringMonitoringPointServiceComponent, CourseAndRouteServiceComponent, AutowiringCourseAndRouteServiceComponent}
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import scala.collection.mutable
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
+import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSetTemplate, MonitoringPointSet}
-import uk.ac.warwick.tabula.services.AutowiringSecurityServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSetTemplate
 import uk.ac.warwick.tabula.permissions.CheckablePermission
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.attendance.commands.{PermissionsAwareRoutes, AutowiringSecurityServicePermissionsAwareRoutes}
 
 object ManageMonitoringPointSetCommand {
 	def apply(user: CurrentUser, dept: Department, academicYearOption: Option[AcademicYear]) =

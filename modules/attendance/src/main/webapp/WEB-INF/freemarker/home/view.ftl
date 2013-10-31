@@ -1,4 +1,7 @@
 <#escape x as x?html>
+<#import "../attendance_macros.ftl" as attendance_macros />
+<#import "../attendance_variables.ftl" as attendance_variables />
+
 <h1 class="with-settings">View monitoring points for ${command.dept.name}</h1>
 
 <div class="btn-toolbar dept-toolbar">
@@ -30,17 +33,8 @@
 	</div>
 </#if>
 
-<form class="form-inline" action="<@routes.viewDepartment command.dept />">
-	<label>Academic year
-		<select name="academicYear">
-			<#assign academicYears = [command.thisAcademicYear.previous.toString, command.thisAcademicYear.toString, command.thisAcademicYear.next.toString] />
-			<#list academicYears as year>
-				<option <#if command.academicYear.toString == year>selected</#if> value="${year}">${year}</option>
-			</#list>
-		</select>
-	</label>
-	<button type="submit" class="btn btn-primary">Change</button>
-</form>
+<#assign thisPath><@routes.viewDepartment command.dept /></#assign>
+<@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
 
 <#if command.setsByRouteByAcademicYear?keys?size == 0>
 
@@ -122,7 +116,7 @@
 						<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
 							<#if command.monitoringPointsByTerm[term]??>
 								<td>
-									<#list command.monitoringPointsByTerm[term]?sort_by("validFromWeek") as point>
+									<#list command.monitoringPointsByTerm[term] as point>
 										<#if !missedCheckpointsByMemberByPoint(member, point)??>
 											<i class="icon-minus icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
 										<#else>
@@ -167,7 +161,7 @@
         		<div class="striped-section">
         			<h2 class="section-title">${term}</h2>
         			<div class="striped-section-contents">
-        				<#list command.monitoringPointsByTerm[term]?sort_by("validFromWeek") as point>
+        				<#list command.monitoringPointsByTerm[term] as point>
         					<div class="item-info row-fluid point">
         						<div class="span12">
         							<div class="pull-right">
@@ -182,7 +176,7 @@
         			</div>
         		</div>
         	</#macro>
-			<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
+			<#list attendance_variables.monitoringPointTermNames as term>
 				<#if command.monitoringPointsByTerm[term]??>
 					<@pointsInATerm term/>
 				</#if>

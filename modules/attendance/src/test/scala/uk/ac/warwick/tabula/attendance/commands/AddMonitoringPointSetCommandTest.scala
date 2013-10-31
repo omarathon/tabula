@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.NoCurrentUser
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.attendance.commands.manage.{AddMonitoringPointSetState, AddMonitoringPointSetValidation, AddMonitoringPointSetCommand}
 
 class AddMonitoringPointSetCommandTest extends TestBase with Mockito {
 
