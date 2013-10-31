@@ -15,7 +15,7 @@ object AgentViewCommand {
 	def apply(agent: Member, relationshipType: StudentRelationshipType, academicYearOption: Option[AcademicYear]) =
 		new AgentViewCommand(agent, relationshipType, academicYearOption)
 		with ComposableCommand[Seq[(StudentMember, Int)]]
-		with AgentViewCommandPermissions
+		with AgentViewPermissions
 		with ReadOnly with Unaudited
 		with AutowiringRelationshipServiceComponent
 		with AutowiringMonitoringPointServiceComponent
@@ -34,7 +34,7 @@ class AgentViewCommand(val agent: Member, val relationshipType: StudentRelations
 	}
 }
 
-trait AgentViewCommandPermissions extends RequiresPermissionsChecking {
+trait AgentViewPermissions extends RequiresPermissionsChecking {
 	this: AgentViewCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {

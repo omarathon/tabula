@@ -30,7 +30,6 @@ trait MonitoringPointService {
 	def getSetById(id : String) : Option[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet]
-	def findMonitoringPointSet(route: Route, year: Option[Int]): Option[MonitoringPointSet]
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]): Option[MonitoringPointSet]
 	def getCheckpointsBySCD(monitoringPoint : MonitoringPoint) : Seq[(StudentCourseDetails, MonitoringCheckpoint)]
 	def listTemplates : Seq[MonitoringPointSetTemplate]
@@ -62,7 +61,6 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet] = monitoringPointDao.findMonitoringPointSets(route)
 	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet] =
 		monitoringPointDao.findMonitoringPointSets(route, academicYear)
-	def findMonitoringPointSet(route: Route, year: Option[Int]) = monitoringPointDao.findMonitoringPointSet(route, year)
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]) =
 		monitoringPointDao.findMonitoringPointSet(route, academicYear, year)
 	

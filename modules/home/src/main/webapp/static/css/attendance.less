@@ -21,6 +21,10 @@
 	color: #818285;
 }
 
+#container .label {
+  cursor: auto;
+}
+
 #container .routeAndYearPicker {
 	.expanded .expand-button {
 		visibility: hidden;
@@ -140,3 +144,52 @@
 }
 
 .btn-group button { margin-right: 0px; }
+
+/** Agent Student profile **/
+.profile  {
+  .col1 {
+    float: left;
+    width: 354px;
+    margin-right: 16px;
+  }
+  .col2 {
+    float: left;
+    width: 354px;
+    margin-right: 0;
+  }
+
+  #personal-details {
+    header {
+      h1, h5 {
+        display: inline;
+        line-height: 26px;
+      }
+
+      h1 {
+        margin-right: 10px;
+      }
+
+      margin-bottom: 16px;
+    }
+
+    table.profile-info {
+      // Reset
+      th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
+
+      width: 100%;
+
+      th {
+        text-align: right;
+        color: @grayLight;
+        white-space: nowrap;
+
+        &:after { content: ' '; margin-right: 3px; }
+      }
+
+      td {
+        color: #0c0c0c;
+        width: 99%;
+      }
+    }
+  }
+} // .profile container

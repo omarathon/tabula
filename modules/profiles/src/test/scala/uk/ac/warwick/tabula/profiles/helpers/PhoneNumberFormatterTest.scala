@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.profiles.helpers
 
 import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.helpers.PhoneNumberFormatter
 
 class PhoneNumberFormatterTest extends TestBase {
 	import PhoneNumberFormatter.format

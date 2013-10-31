@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.data.model.{MeetingFormat, StudentRelationshipType, Department}
 import org.springframework.util.AutoPopulatingList
@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm
 
 trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 	val dept: Department

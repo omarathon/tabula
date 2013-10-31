@@ -534,6 +534,20 @@
 			<version>0.1-warwick</version>
 		</dependency>
 
+		<!-- libphonenumber, for formatting phone numbers -->
+		<dependency>
+			<groupId>com.googlecode.libphonenumber</groupId>
+			<artifactId>libphonenumber</artifactId>
+			<version>5.2</version>
+		</dependency>
+
+		<!-- offline geocoder for libphonenumber -->
+		<dependency>
+			<groupId>com.googlecode.libphonenumber</groupId>
+			<artifactId>geocoder</artifactId>
+			<version>2.3</version>
+		</dependency>
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.springframework</groupId>

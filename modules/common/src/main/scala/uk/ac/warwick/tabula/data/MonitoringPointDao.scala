@@ -29,7 +29,6 @@ trait MonitoringPointDao {
 	def saveOrUpdate(set: MonitoringPointSet)
 	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
-	def findMonitoringPointSet(route: Route, year: Option[Int]): Option[MonitoringPointSet]
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]): Option[MonitoringPointSet]
 	def getCheckpoint(monitoringPoint: MonitoringPoint, member: StudentMember) : Option[MonitoringCheckpoint]
 	def getCheckpoint(monitoringPoint: MonitoringPoint, scjCode: String) : Option[MonitoringCheckpoint]
@@ -77,12 +76,6 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			.add(is("route", route))
 			.add(is("academicYear", academicYear))
 			.seq
-
-	def findMonitoringPointSet(route: Route, year: Option[Int]) =
-		session.newCriteria[MonitoringPointSet]
-			.add(is("route", route))
-			.add(yearRestriction(year))
-			.uniqueResult
 
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]) =
 		session.newCriteria[MonitoringPointSet]

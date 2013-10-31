@@ -1,11 +1,12 @@
-package uk.ac.warwick.tabula.attendance.web.controllers
+package uk.ac.warwick.tabula.attendance.web.controllers.manage
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.attendance.commands.ManageHomeCommand
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.attendance.commands.manage.ManageHomeCommand
+import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 
 /**
  * Displays the managing home screen, allowing users to choose the department to manage.

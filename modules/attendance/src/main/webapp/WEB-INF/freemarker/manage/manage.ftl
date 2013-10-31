@@ -1,3 +1,5 @@
+<#import "../attendance_macros.ftl" as attendance_macros />
+
 <h1 class="with-settings">Manage monitoring points for ${command.dept.name}</h1>
 
 <div class="btn-toolbar dept-toolbar">
@@ -58,17 +60,8 @@
 	</div>
 </#if>
 
-<form class="form-inline" action="<@routes.manageDepartment command.dept />">
-	<label>Academic year
-		<select name="academicYear">
-			<#assign academicYears = [command.thisAcademicYear.previous.toString, command.thisAcademicYear.toString, command.thisAcademicYear.next.toString] />
-			<#list academicYears as year>
-				<option <#if command.academicYear.toString == year>selected</#if> value="${year}">${year}</option>
-			</#list>
-		</select>
-	</label>
-	<button type="submit" class="btn btn-primary">Change</button>
-</form>
+<#assign thisPath><@routes.manageDepartment command.dept /></#assign>
+<@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
 
 <form id="chooseCreateType" class="form-inline" action="<@routes.createSet command.dept command.academicYear />">
 	<h2>Create monitoring schemes</h2>

@@ -1,5 +1,7 @@
 <#escape x as x?html>
 
+<#import "../attendance_macros.ftl" as attendance_macros />
+
 <#macro row student missedPoints>
 	<tr class="student">
 		<td>
@@ -18,21 +20,13 @@
 
 <h1>My ${command.relationshipType.studentRole}s</h1>
 
-<form class="form-inline" action="<@routes.agentView command.relationshipType />">
-	<label>Academic year
-		<select name="academicYear">
-			<#assign academicYears = [command.thisAcademicYear.previous.toString, command.thisAcademicYear.toString, command.thisAcademicYear.next.toString] />
-			<#list academicYears as year>
-				<option <#if command.academicYear.toString == year>selected</#if> value="${year}">${year}</option>
-			</#list>
-		</select>
-	</label>
-	<button type="submit" class="btn btn-primary">Change</button>
-</form>
-
 <#if students?size == 0>
-	<p><em>No students were found for this academic year.</em></p>
+	<p><em>No ${command.relationshipType.studentRole}s were found.</em></p>
 <#else>
+
+	<#assign thisPath><@routes.agentView command.relationshipType /></#assign>
+	<@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
+
 	<table class="students table table-bordered table-striped table-condensed">
 		<thead>
 		<tr>

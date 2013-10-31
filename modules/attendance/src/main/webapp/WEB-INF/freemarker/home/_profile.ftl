@@ -8,7 +8,7 @@
 <#assign is_the_student=currentUser.apparentUser.warwickId==command.studentCourseDetails.student.universityId />
 
 <#macro pointsInATerm term>
-	<#list monitoringPointsByTerm[term]?sort_by("validFromWeek") as point>
+	<#list monitoringPointsByTerm[term] as point>
 		<div class="item-info row-fluid term">
 			<div class="span12">
 				<h4>${term}</h4>
