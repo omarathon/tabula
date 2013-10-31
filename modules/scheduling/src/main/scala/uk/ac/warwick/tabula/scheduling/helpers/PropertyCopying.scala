@@ -69,7 +69,7 @@ trait PropertyCopying extends Logging {
 	}
 
 	def markAsSeenInSits(bean: BeanWrapper) = {
-		val propertyName = "missingFromSitsSince"
+		val propertyName = "missingFromImportSince"
 		if (bean.getPropertyValue(propertyName) == null)
 			false
 		else {
