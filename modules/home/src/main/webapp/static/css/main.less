@@ -220,6 +220,11 @@ ul.drag-list {
 .floatingHeader {
 	top: 28px; 	// height of the top primary-navigation
 	border-right:2px solid white;
+	padding-top:4px;
+}
+
+.is-smallscreen .floatingHeader {
+	top:0;  // no primary navigation on smallscreens
 }
 
 .floatingFooter {
@@ -233,7 +238,8 @@ ul.drag-list {
 }
 
 .persist-header {
-	padding:0 0.5em;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
 }
 
 .persist-footer {
