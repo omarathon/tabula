@@ -35,17 +35,13 @@
 
 	<div class="persist-area">
 		<div class="persist-header">
-			<h1>Record attendance for <#if (monitoringPoint.pointSet.year)??>Year ${monitoringPoint.pointSet.year}</#if> <@fmt.route_name monitoringPoint.pointSet.route /> : ${monitoringPoint.name}</h1>
+			<h1><span class="yearAndRoute">Record attendance for <#if (monitoringPoint.pointSet.year)??>Year ${monitoringPoint.pointSet.year}</#if> <@fmt.route_name monitoringPoint.pointSet.route /> : </span>${monitoringPoint.name}</h1>
 
 
 			<div class="row-fluid record-attendance-form-header">
-				<div class="span9">
-					<span><i class="icon-minus icon-fixed-width"></i> Not recorded</span>
-					<span><i class="icon-remove icon-fixed-width unauthorised"></i> Missed (unauthorised)</span>
-					<span><i class="icon-remove-circle icon-fixed-width authorised"></i> Missed (authorised)</span>
-					<span><i class="icon-ok icon-fixed-width attended"></i> Attended</span>
-				</div>
-				<div class="span3 text-center">
+				<div class="span8">&nbsp;</div>
+				<div class="span4 text-center">
+					<span class="checkAllMessage">Check all</span>
 					<div class="btn-group">
 						<button type="button" class="btn">
 							<i class="icon-minus icon-fixed-width" title="Set all to 'Not recorded'"></i>
@@ -63,6 +59,22 @@
 					<#if monitoringPoint.pointType?? && monitoringPoint.pointType.dbValue == "meeting">
 						<i class="icon-fixed-width"></i>
 					</#if>
+
+					<#assign popoverContent>
+						<p><i class="icon-minus icon-fixed-width"></i> Not recorded</p>
+						<p><i class="icon-remove icon-fixed-width unauthorised"></i> Missed (unauthorised)</p>
+						<p><i class="icon-remove-circle icon-fixed-width authorised"></i> Missed (authorised)</p>
+						<p><i class="icon-ok icon-fixed-width attended"></i> Attended</p>
+					</#assign>
+						<a class="use-popover" id="popover-choose-set"
+						   data-title="Key"
+						   data-placement="bottom"
+						   data-container="body"
+						   data-content='${popoverContent}'
+						   data-html="true">
+							<i class="icon-question-sign"></i>
+						</a>
+
 				</div>
 			</div>
 		</div>
@@ -117,6 +129,7 @@
 		</#if>
 	</div>
 </div>
+<<<<<<< HEAD
 
 <div id="modal" class="modal hide fade" style="display:none;">
 	<@modal.header>
@@ -124,3 +137,5 @@
 	</@modal.header>
 	<@modal.body></@modal.body>
 </div>
+=======
+>>>>>>> TAB-1418
