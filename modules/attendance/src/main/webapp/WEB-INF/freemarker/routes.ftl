@@ -17,7 +17,7 @@
 	<#macro studentMeetings point member><@url page="/${point.pointSet.route.department.code}/${point.id}/meetings/${member.universityId}"/></#macro>
 	<#macro agentView relationshipType><@url page="/agent/${relationshipType.urlPart}"/></#macro>
 	<#macro agentStudentView student relationshipType><@url page="/agent/${relationshipType.urlPart}/${student.universityId}"/></#macro>
-	<#macro agentStudentRecord pointSet student relationshipType><@url page="/agent/${relationshipType.urlPart}/${student.universityId}/record/${pointSet.id}"/></#macro>
+	<#macro agentStudentRecord pointSet studentCourseDetails relationshipType><@url page="/agent/${relationshipType.urlPart}/${studentCourseDetails.urlSafeId}/record/${pointSet.id}"/></#macro>
 	
 	<#macro createSet department academicYear><@url page="/manage/${department.code}/sets/add/${academicYear.startYear?c}"/></#macro>
 	<#macro editSet pointSet><@url page="/manage/${pointSet.route.department.code}/sets/${pointSet.id}/edit"/></#macro>

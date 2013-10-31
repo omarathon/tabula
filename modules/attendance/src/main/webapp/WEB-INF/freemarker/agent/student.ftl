@@ -175,7 +175,7 @@
 		<#assign points = mapGet(courseMap, student.mostSignificantCourse) />
 		<#if (points?keys?size > 0)>
 			<div class="pull-right">
-				<a class="btn btn-primary" href="<@routes.agentStudentRecord points[points?keys?first]?first._1().pointSet student command.relationshipType />">Record attendance</a>
+				<a class="btn btn-primary" href="<@routes.agentStudentRecord points[points?keys?first]?first._1().pointSet student.mostSignificantCourse command.relationshipType />">Record attendance</a>
 			</div>
 		</#if>
 		<#if (courseMap?keys?size > 1)>
@@ -187,15 +187,16 @@
 
 <#list courseMap?keys as course>
 	<#if course.scjCode != student.mostSignificantCourse.scjCode >
+		<#assign points = mapGet(courseMap, course) />
 		<hr />
 		<div class="monitoring-points">
 			<#if (points?keys?size > 0)>
 			<div class="pull-right">
-				<a class="btn btn-primary" href="<@routes.agentStudentRecord points[points?keys?first]?first._1().pointSet student command.relationshipType />">Record attendance</a>
+				<a class="btn btn-primary" href="<@routes.agentStudentRecord points[points?keys?first]?first._1().pointSet course command.relationshipType />">Record attendance</a>
 			</div>
 			</#if>
 			<h2>${course.route.name}, ${course.route.department.name}</h2>
-			<@pointsByTerm mapGet(courseMap, course) />
+			<@pointsByTerm points />
 		</div>
 	</#if>
 </#list>

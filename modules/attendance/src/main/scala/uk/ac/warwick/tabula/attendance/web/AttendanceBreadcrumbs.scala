@@ -18,4 +18,20 @@ object AttendanceBreadcrumbs {
 		val title = "Manage monitoring schemes"
 		val url = Some(Routes.department.manage(department))
 	}
+
+	/**
+	 * Special case breadcrumb for agent relationship page.
+	 */
+	case class Agent(relationshipType: model.StudentRelationshipType) extends Abstract {
+		val title = relationshipType.studentRole.capitalize + "s"
+		val url = Some(Routes.agent.view(relationshipType))
+	}
+
+	/**
+	 * Special case breadcrumb for agent student profile page.
+	 */
+	case class AgentStudent(student: model.StudentMember, relationshipType: model.StudentRelationshipType) extends Abstract {
+		val title = student.fullName.getOrElse("")
+		val url = Some(Routes.agent.student(student, relationshipType))
+	}
 }

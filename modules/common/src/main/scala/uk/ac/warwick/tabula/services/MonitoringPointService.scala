@@ -38,11 +38,11 @@ trait MonitoringPointService {
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
 	def getChecked(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[MonitoringCheckpointState]]]
 	def deleteCheckpoint(scjCode: String, point: MonitoringPoint): Unit
-	def saveOrUpdateCheckpoint(
-		studentCourseDetails: StudentCourseDetails,
-		point: MonitoringPoint,
-		state: MonitoringCheckpointState,
-		user: CurrentUser
+	def saveOrUpdateCheckpoint(studentCourseDetails: StudentCourseDetails,
+		point: MonitoringPoint,	state: MonitoringCheckpointState,	user: CurrentUser
+	) : MonitoringCheckpoint
+	def saveOrUpdateCheckpoint(studentCourseDetails: StudentCourseDetails,
+		point: MonitoringPoint, state: MonitoringCheckpointState,	member: Member
 	) : MonitoringCheckpoint
 	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int
 }
@@ -93,11 +93,17 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		}
 	}
 
-	def saveOrUpdateCheckpoint(
-		studentCourseDetails: StudentCourseDetails,
-		point: MonitoringPoint,
-		state: MonitoringCheckpointState,
-		user: CurrentUser
+	def saveOrUpdateCheckpoint(studentCourseDetails: StudentCourseDetails,
+		point: MonitoringPoint,	state: MonitoringCheckpointState,	user: CurrentUser
+	) : MonitoringCheckpoint = saveOrUpdateCheckpointForUser(studentCourseDetails, point, state, user.apparentId)
+
+	def saveOrUpdateCheckpoint(studentCourseDetails: StudentCourseDetails,
+		point: MonitoringPoint, state: MonitoringCheckpointState,	member: Member
+	) : MonitoringCheckpoint =
+		saveOrUpdateCheckpointForUser(studentCourseDetails, point, state, member.userId)
+
+	private def saveOrUpdateCheckpointForUser(studentCourseDetails: StudentCourseDetails,
+		point: MonitoringPoint,	state: MonitoringCheckpointState,	usercode: String
 	) : MonitoringCheckpoint = {
 		val checkpoint = monitoringPointDao.getCheckpoint(point, studentCourseDetails.student).getOrElse({
 			val newCheckpoint = new MonitoringCheckpoint
@@ -106,7 +112,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 			newCheckpoint
 		})
 		checkpoint.state = state
-		checkpoint.updatedBy = user.apparentId
+		checkpoint.updatedBy = usercode
 		checkpoint.updatedDate = DateTime.now
 		checkpoint.autoCreated = false
 		monitoringPointDao.saveOrUpdate(checkpoint)

@@ -129,7 +129,6 @@
 		</#if>
 	</div>
 </div>
-<<<<<<< HEAD
 
 <div id="modal" class="modal hide fade" style="display:none;">
 	<@modal.header>
@@ -137,5 +136,4 @@
 	</@modal.header>
 	<@modal.body></@modal.body>
 </div>
-=======
->>>>>>> TAB-1418
+

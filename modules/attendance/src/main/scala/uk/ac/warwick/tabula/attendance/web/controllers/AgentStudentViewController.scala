@@ -97,7 +97,7 @@ class AgentStudentViewController extends AttendanceController {
 	def home(
 		@ModelAttribute("command") cmd: Appliable[Map[StudentCourseDetails, Map[String, Seq[(MonitoringPoint, String)]]]] with AgentStudentViewCommandState
 	) = {
-		Mav("agent/student", "student" -> cmd.student, "courseMap" -> cmd.apply())
+		Mav("agent/student", "student" -> cmd.student, "courseMap" -> cmd.apply()).crumbs(Breadcrumbs.Agent(cmd.relationshipType))
 	}
 
 }

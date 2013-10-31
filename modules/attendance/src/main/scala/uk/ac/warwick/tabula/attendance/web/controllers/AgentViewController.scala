@@ -27,8 +27,7 @@ class AgentViewCommand(val agent: Member, val relationshipType: StudentRelations
 	this: RelationshipServiceComponent with MonitoringPointServiceComponent =>
 
 	def applyInternal() = {
-		val f = relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember)
-		f.map{student =>
+		relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember).map{student =>
 			student -> monitoringPointService.countMissedPoints(student, academicYear)
 		}
 	}
