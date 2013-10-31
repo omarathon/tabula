@@ -767,7 +767,7 @@
 
 			$(document).on('tabbablechanged', function(e, callback) {
 				$('.tooltip').remove();
-				$t.show().find('.tab-container i, .layout-tools i').tooltip({ delay: { show: 750, hide: 100 } });
+				$t.show().find('.tab-container i, .layout-tools i').tooltip();
 				if (typeof(callback) == typeof(Function)) callback();
 			});
 
