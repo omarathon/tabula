@@ -13,14 +13,14 @@ import uk.ac.warwick.userlookup.User
 // scalastyle:off magic.number
 class AssignmentServiceTest extends PersistenceTestBase {
 
-	val assignmentService:AssignmentServiceImpl = new AssignmentServiceImpl
-	val assignmentMembershipService:AssignmentMembershipServiceImpl =new AssignmentMembershipServiceImpl
-	val feedbackService:FeedbackServiceImpl =new FeedbackServiceImpl
-	val submissionService:SubmissionServiceImpl =new SubmissionServiceImpl
-	val originalityReportService:OriginalityReportServiceImpl =new OriginalityReportServiceImpl
-	val extensionService:ExtensionServiceImpl =new ExtensionServiceImpl
+	val assignmentService = new AssignmentServiceImpl
+	val assignmentMembershipService = new AssignmentMembershipServiceImpl
+	val feedbackService = new FeedbackServiceImpl
+	val submissionService = new SubmissionServiceImpl
+	val originalityReportService = new OriginalityReportServiceImpl
+	val extensionService = new ExtensionServiceImpl
 
-  val modAndDeptService:ModuleAndDepartmentService =new ModuleAndDepartmentService
+  val modAndDeptService = new ModuleAndDepartmentService
   var userLookup:MockUserLookup = _
 
   @Before def setup {
@@ -33,6 +33,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		deptDao.sessionFactory = sessionFactory
 		modAndDeptService.departmentDao = deptDao
 		feedbackService.userLookup = userLookup
+		feedbackService.sessionFactory = sessionFactory
 		val amDao = new AssignmentMembershipDaoImpl
 		amDao.sessionFactory = sessionFactory
 		assignmentMembershipService.dao = amDao
@@ -110,7 +111,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 	 *     2. have a submission associated with that assignment which is not suspected plagiarised.
 	 */
 	@Transactional @Test def getUsersForFeedbackTest {
-		val assignment = assignmentService.getAssignmentById("1");
+		val assignment = assignmentService.getAssignmentById("1")
 		assignment should be('defined)
 
 		assignment.foreach { assmt =>
@@ -752,4 +753,33 @@ class AssignmentServiceTest extends PersistenceTestBase {
 			assignmentMembershipService.countMembershipWithUniversityIdGroup(Seq(upstreamAg1, upstreamAg2, upstreamAg3), Some(userIdGroup)) should be (7)
 		}
 	}}
+
+	@Transactional
+	@Test def countFullFeedback() {
+		val assignment = assignmentService.getAssignmentById("1").get
+		assignment.id should not be(null)
+
+		def createFeedback(numberOfAttachments:Int=0, mark:Option[Int]=None, grade:Option[String]=None) = {
+			val feedback = new Feedback()
+			for (i <- Range(0,numberOfAttachments)) {
+				val attachment1 = new FileAttachment()
+				feedback.addAttachment(attachment1)
+			}
+			assignment.addFeedback(feedback)
+			feedback.actualMark = mark
+			feedback.actualGrade = grade
+			feedbackService.saveOrUpdate(feedback)
+			feedback
+		}
+
+		createFeedback(numberOfAttachments=7)
+		createFeedback(mark=Some(23))
+		createFeedback(mark=Some(23), grade=Some("A"))
+		createFeedback()
+
+		// Multiple attachments shouldn't increase the count, and
+		// feedback with no attachments should be included.
+		feedbackService.countFullFeedback(assignment) should be (3)
+	}
+
 }
