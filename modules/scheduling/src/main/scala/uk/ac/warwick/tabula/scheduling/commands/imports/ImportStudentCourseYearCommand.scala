@@ -55,7 +55,7 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 	this.academicYearString = rs.getString("sce_academic_year")
 	this.moduleRegistrationStatusCode = rs.getString("mod_reg_status")
 
-	override def applyInternal(): StudentCourseYearDetails = transactional() {
+	override def applyInternal(): StudentCourseYearDetails = {
 		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKey(
 			studentCourseDetails,
 			sceSequenceNumber)
@@ -76,8 +76,8 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + studentCourseYearDetails)
-			
-			if (studentCourseDetails.latestStudentCourseYearDetails == null || 
+
+			if (studentCourseDetails.latestStudentCourseYearDetails == null ||
 				studentCourseDetails.studentCourseYearDetails.asScala.forall { _ <= studentCourseYearDetails }) {
 				studentCourseDetails.latestStudentCourseYearDetails = studentCourseYearDetails
 			}
