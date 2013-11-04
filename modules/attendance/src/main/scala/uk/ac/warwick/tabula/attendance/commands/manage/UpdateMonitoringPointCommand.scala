@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringPointSet, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._

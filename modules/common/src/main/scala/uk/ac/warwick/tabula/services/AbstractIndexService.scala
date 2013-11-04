@@ -206,6 +206,10 @@ abstract class AbstractIndexService[A]
 		ifNotIndexing { doIndexItems(items, false) }
 	}
 
+	def indexItemsWithoutNewTransaction(items: Seq[A]) =  {
+		ifNotIndexing { doIndexItems(items, false) }
+	}
+
 	private def doIndexItems(items: Seq[A], isIncremental: Boolean) {
 		logger.debug("Writing to the index at " + indexPath + " with analyzer " + indexAnalyzer)
 		val writerConfig = new IndexWriterConfig(LuceneVersion, indexAnalyzer)
@@ -233,7 +237,7 @@ abstract class AbstractIndexService[A]
 	protected def getUpdatedDate(item: A): DateTime
 
 	val UpdatedDateField: String
-	
+
 	@Value("${tabula.yearZero}") var yearZero: Int = _
 
 	/**

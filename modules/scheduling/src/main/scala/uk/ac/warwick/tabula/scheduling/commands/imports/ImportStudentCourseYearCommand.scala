@@ -50,7 +50,7 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet, importRowTracker: Imp
 	this.academicYearString = rs.getString("sce_academic_year")
 	this.moduleRegistrationStatusCode = rs.getString("mod_reg_status")
 
-	override def applyInternal(): StudentCourseYearDetails = transactional() {
+	override def applyInternal(): StudentCourseYearDetails = {
 		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKey(
 			studentCourseDetails,
 			sceSequenceNumber)

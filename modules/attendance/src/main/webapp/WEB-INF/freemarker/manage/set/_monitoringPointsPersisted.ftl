@@ -4,7 +4,7 @@
 		<div class="striped-section">
 			<h2 class="section-title">${term}</h2>
 			<div class="striped-section-contents">
-				<#list command.monitoringPointsByTerm[term]?sort_by("validFromWeek") as point>
+				<#list command.monitoringPointsByTerm[term] as point>
 					<div class="item-info row-fluid point">
 						<div class="span12">
 							<div class="pull-right">

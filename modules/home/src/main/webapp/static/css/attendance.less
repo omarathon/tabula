@@ -21,6 +21,10 @@
 	color: #818285;
 }
 
+#container .label {
+  cursor: auto;
+}
+
 #container .routeAndYearPicker {
 	.expanded .expand-button {
 		visibility: hidden;
@@ -121,6 +125,10 @@
 		color: @infoText; 
 		.active-colour(@infoText);
 	}
+
+	.checkAllMessage {
+	  padding-right: 6px;
+	}
 }
 
 .monitoring-points-profile {
@@ -140,3 +148,89 @@
 }
 
 .btn-group button { margin-right: 0px; }
+
+.recordCheckpointForm .btn-group {
+  margin-right:13px;
+}
+
+.record-attendance-form-header {
+	.btn-group {
+		margin-right:0;
+	}
+
+	.span4 {
+		padding:3px 0 3px 18px;
+	}
+}
+
+.is-smallscreen #container {
+	.recordCheckpointForm h1 {
+		margin-bottom:8px;
+	}
+
+	.yearAndRoute, .record-attendance-form-header div.span8 {
+		display:none;
+	}
+
+	.record-attendance-form-header div.span4 {
+		padding:3px 0 3px 3px;
+	}
+
+	.recordCheckpointForm h1 {
+		font-size:22px;
+	}
+
+	.persist-footer {
+		padding-top:16px;
+		padding-bottom:16px;
+	}
+}
+
+/** Agent Student profile **/
+.profile  {
+  .col1 {
+    float: left;
+    width: 354px;
+    margin-right: 16px;
+  }
+  .col2 {
+    float: left;
+    width: 354px;
+    margin-right: 0;
+  }
+
+  #personal-details {
+    header {
+      h1, h5 {
+        display: inline;
+        line-height: 26px;
+      }
+
+      h1 {
+        margin-right: 10px;
+      }
+
+      margin-bottom: 16px;
+    }
+
+    table.profile-info {
+      // Reset
+      th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
+
+      width: 100%;
+
+      th {
+        text-align: right;
+        color: @grayLight;
+        white-space: nowrap;
+
+        &:after { content: ' '; margin-right: 3px; }
+      }
+
+      td {
+        color: #0c0c0c;
+        width: 99%;
+      }
+    }
+  }
+} // .profile container

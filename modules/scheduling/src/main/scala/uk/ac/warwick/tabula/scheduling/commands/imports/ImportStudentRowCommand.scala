@@ -35,7 +35,7 @@ class ImportStudentRowCommand(member: MembershipInformation,
 	this.nationality = rs.getString("nationality")
 	this.mobileNumber = rs.getString("mobile_number")
 
-	override def applyInternal(): Member = transactional() {
+	override def applyInternal(): Member = {
 		val memberExisting = memberDao.getByUniversityId(universityId)
 
 		logger.debug("Importing member " + universityId + " into " + memberExisting)

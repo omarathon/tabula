@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.attendance.commands
+package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.services._

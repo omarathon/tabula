@@ -48,6 +48,41 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 	}
 
 
+	@Test def validatNullDates = transactional { t =>
+	// TAB-236
+		val f = MyFixtures()
+
+		val cmd = new AddAssignmentCommand(f.module)
+		var errors = new BindException(cmd, "command")
+		cmd.openEnded = false
+
+		// Both null two errors
+		cmd.openDate = null
+		cmd.closeDate = null
+		cmd.validate(errors)
+		errors.getErrorCount() should be (2)
+
+		// open null one error
+		errors = new BindException(cmd, "command")
+		cmd.openDate = null
+		cmd.closeDate = new DateTime(2012, DateTimeConstants.JANUARY, 10, 0, 0)
+		cmd.validate(errors)
+		errors.getErrorCount() should be (1)
+
+		// Close null one error
+		errors = new BindException(cmd, "command")
+		cmd.openDate = new DateTime(2012, DateTimeConstants.JANUARY, 10, 0, 0)
+		cmd.closeDate = null
+		cmd.validate(errors)
+		errors.getErrorCount() should be (1)
+
+		// But if we're open ended then no error
+		errors = new BindException(cmd, "command")
+		cmd.openEnded = true
+		cmd.validate(errors)
+		errors.getErrorCount() should be (0)
+
+	}
 
 	@Test def validateCloseDate = transactional { t =>
 	// TAB-236

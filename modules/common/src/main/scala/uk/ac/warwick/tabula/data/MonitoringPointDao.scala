@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConverters._
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, Route, StudentMember}
 import org.hibernate.criterion.{Projections, Order}
@@ -29,7 +29,6 @@ trait MonitoringPointDao {
 	def saveOrUpdate(set: MonitoringPointSet)
 	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
-	def findMonitoringPointSet(route: Route, year: Option[Int]): Option[MonitoringPointSet]
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]): Option[MonitoringPointSet]
 	def getCheckpoint(monitoringPoint: MonitoringPoint, member: StudentMember) : Option[MonitoringCheckpoint]
 	def getCheckpoint(monitoringPoint: MonitoringPoint, scjCode: String) : Option[MonitoringCheckpoint]
@@ -39,6 +38,7 @@ trait MonitoringPointDao {
 	def deleteTemplate(template: MonitoringPointSetTemplate)
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
 	def deleteCheckpoint(checkpoint: MonitoringCheckpoint): Unit
+	def missedCheckpoints(scd: StudentCourseDetails, academicYear: AcademicYear): Int
 }
 
 
@@ -76,12 +76,6 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			.add(is("route", route))
 			.add(is("academicYear", academicYear))
 			.seq
-
-	def findMonitoringPointSet(route: Route, year: Option[Int]) =
-		session.newCriteria[MonitoringPointSet]
-			.add(is("route", route))
-			.add(yearRestriction(year))
-			.uniqueResult
 
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]) =
 		session.newCriteria[MonitoringPointSet]
@@ -138,5 +132,16 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 	def deleteCheckpoint(checkpoint: MonitoringCheckpoint): Unit = {
 		session.delete(checkpoint)
+	}
+
+	def missedCheckpoints(scd: StudentCourseDetails, academicYear: AcademicYear): Int = {
+		session.newCriteria[MonitoringCheckpoint]
+			.add(is("studentCourseDetail", scd))
+			.add(is("state", MonitoringCheckpointState.MissedUnauthorised))
+			.createAlias("point", "point")
+			.createAlias("point.pointSet", "pointSet")
+			.add(is("pointSet.academicYear", academicYear))
+			.project[Number](Projections.rowCount())
+			.uniqueResult.get.intValue()
 	}
 }
