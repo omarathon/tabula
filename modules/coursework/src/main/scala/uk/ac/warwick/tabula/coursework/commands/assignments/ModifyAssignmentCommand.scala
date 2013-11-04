@@ -54,8 +54,16 @@ import scala.Some
 			}
 		}
 
-		if (!openEnded && openDate.isAfter(closeDate)) {
-			errors.reject("closeDate.early")
+		if(openDate == null){
+			errors.rejectValue("openDate", "openDate.missing")
+		}
+
+		if(!openEnded){
+			if(closeDate == null){
+				errors.rejectValue("closeDate", "closeDate.missing")
+			} else if(openDate != null && openDate.isAfter(closeDate)){
+				errors.reject("closeDate.early")
+			}
 		}
 
 		validateShared(errors)
