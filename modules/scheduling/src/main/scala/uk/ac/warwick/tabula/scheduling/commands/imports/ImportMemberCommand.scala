@@ -205,7 +205,7 @@ object ImportMemberHelpers {
 
 	def optString(columnName: String)(implicit rs: Option[ResultSet]): Option[String] =
 		rs.flatMap { rs => 
-			if (hasColumn(rs, columnName)) Some(rs.getNString(columnName))
+			if (hasColumn(rs, columnName)) Some(rs.getString(columnName))
 			else None
 		}
 
@@ -217,9 +217,7 @@ object ImportMemberHelpers {
 
 	def hasColumn(rs: ResultSet, columnName: String) = {
 		val metadata = rs.getMetaData
-		val cols = for (col <- 1 to metadata.getColumnCount) yield {
-			columnName.toLowerCase == metadata.getColumnName(col).toLowerCase
-		}
+		val cols = for (col <- 1 to metadata.getColumnCount) yield columnName.toLowerCase == metadata.getColumnName(col).toLowerCase
 		cols.exists(b => b)
 	}
 
