@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.services.SmallGroupService
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.ViewModules
 import uk.ac.warwick.tabula.groups.web.controllers.GroupsDisplayHelper
-
+import uk.ac.warwick.tabula.CurrentUser
 
 trait ListStudentsGroupsCommand extends Applicable[ViewModules]
 
@@ -15,7 +15,7 @@ trait ListStudentsGroupsCommand extends Applicable[ViewModules]
  * Gets the data for a students view of all small groups they're a member of.
  */
 
-class ListStudentsGroupsCommandImpl(member: Member)
+class ListStudentsGroupsCommandImpl(member: Member, currentUser: CurrentUser)
 	extends Command[ViewModules]
 	with ReadOnly
 	with Unaudited {
@@ -31,7 +31,8 @@ class ListStudentsGroupsCommandImpl(member: Member)
 		val user = member.asSsoUser
 		val memberGroupSets = smallGroupService.findSmallGroupSetsByMember(user)
 		val releasedMemberGroupSets = getGroupSetsReleasedToStudents(memberGroupSets)
-		val nonEmptyMemberViewModules = getViewModulesForStudent(releasedMemberGroupSets, getGroupsToDisplay(_, user))
+		val isTutor = !(currentUser.apparentUser == user)
+		val nonEmptyMemberViewModules = getViewModulesForStudent(releasedMemberGroupSets, getGroupsToDisplay(_, user, isTutor))
 
 		ViewModules(nonEmptyMemberViewModules.sortBy(_.module.code), canManageDepartment = false)
 
