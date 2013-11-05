@@ -57,7 +57,7 @@
 </p>
 
 <#if feedback.hasOnlineFeedback || feedback.hasMarkOrGrade || feedback.defaultFeedbackComments?? || assignment.genericFeedback??>
-	<a href="<@routes.feedbackPdf assignment=assignment />"> Download feedback as a PDF file</a>
+	<a href="<@routes.feedbackPdf assignment=assignment />"> Download<#if feedback.attachments?has_content> additional</#if> feedback as a PDF file</a>
 </#if>
 
 
