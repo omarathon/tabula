@@ -2,6 +2,9 @@ package uk.ac.warwick.tabula.helpers
 
 import java.io.Closeable
 import org.hibernate.Session
+import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
 
 object Closeables {
 	def ensureClose[T, C <: Closeable](c: C)(fn: => T): T = try fn finally c.close
@@ -12,5 +15,8 @@ object Closeables {
 	def closeThis[T, C <: Closeable](c: C)(fn: (C) => T): T = try fn(c) finally c.close
 
 	def closeThis[T](s: Session)(fn: (Session) => T): T = try fn(s) finally s.close()
+	def closeThis[T](c: Connection)(fn: (Connection) => T): T = try fn(c) finally c.close()
+	def closeThis[T](s: PreparedStatement)(fn: (PreparedStatement) => T): T = try fn(s) finally s.close()
+	def closeThis[T](rs: ResultSet)(fn: (ResultSet) => T): T = try fn(rs) finally rs.close()
 
 }

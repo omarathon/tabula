@@ -70,9 +70,24 @@
 	
 	<beans profile="dev,sandbox,production,console">
 	
-		<bean class="uk.ac.warwick.tabula.system.DatabaseEncodingChecker"
+		<bean id="tabulaEncodingChecker" class="uk.ac.warwick.tabula.system.SessionFactoryDatabaseEncodingChecker"
 			c:sessionFactory-ref="sessionFactory"
 		 />
+		 
+		<!-- ADS doesn't support Unicode -->
+		<!-- <bean id="adsEncodingChecker" class="uk.ac.warwick.tabula.system.DataSourceDatabaseEncodingChecker"
+			c:dataSource-ref="academicDataStore"
+		 /> -->
+		 
+		<bean id="sitsEncodingChecker" class="uk.ac.warwick.tabula.system.DataSourceDatabaseEncodingChecker"
+			c:dataSource-ref="sitsDataSource"
+		 />
+		 
+		<!-- Membership doesn't support Unicode -->
+		<!-- <bean id="membershipEncodingChecker" class="uk.ac.warwick.tabula.system.DataSourceDatabaseEncodingChecker"
+			c:dataSource-ref="membershipDataSource"
+		 /> -->
+		 
 		<util:properties id="jdbcProperties">
 			<prop key="defaultNChar">true</prop>
 		</util:properties>
