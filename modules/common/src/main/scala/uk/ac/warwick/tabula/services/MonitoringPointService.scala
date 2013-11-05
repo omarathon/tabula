@@ -51,6 +51,7 @@ trait MonitoringPointService {
 		member: Member
 	) : MonitoringCheckpoint
 	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int
+	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet]
 }
 
 
@@ -135,6 +136,10 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		student.studentCourseDetails.asScala.map{scd =>
 			monitoringPointDao.missedCheckpoints(scd, academicYear)
 		}.sum
+	}
+
+	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet] = {
+		monitoringPointDao.findPointSetsForStudents(students, academicYear)
 	}
 
 }

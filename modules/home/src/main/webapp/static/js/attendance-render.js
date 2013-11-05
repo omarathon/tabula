@@ -47,35 +47,6 @@ $(function(){
 
 	// END SCRIPTS FOR RECORDING MONITORING POINTS
 
-	// SCRIPTS FOR VIEWING MONITORING POINTS
-	(function(){
-		var routeSelect = $('#viewChooseSet').find('select[name="route"]').on('change', function(){
-			var $this = $(this),
-				selectedRouteCode = $this.find(':selected').val(),
-				yearSelect = $this.parent()
-					.find('select[name="set"]').find('option:gt(0)').remove()
-					.end().find('option:first').prop('selected', true)
-					.end();
-
-			$.each(
-				$.grep(setsByRouteByAcademicYear[$('select[name="academicYear"] :selected').val()], function(r){
-					return selectedRouteCode === r.code;
-				})[0].sets,
-				function(i, set){
-					yearSelect.append(
-						$('<option/>').val(set.id).html(set.year)
-					);
-				}
-			)
-		});
-		// If a route us selected by not a year/set on load then populate the year of study drop-down
-		if (routeSelect.length > 0 && routeSelect.parent().find('select[name="set"]').find('option:selected').val().length == 0) {
-			routeSelect.change();
-		}
-	})();
-
-	// END SCRIPTS FOR VIEWING MONITORING POINTS
-
 	// SCRIPTS FOR MANAGING MONITORING POINTS
 
 	if ($('#chooseCreateType').length > 0 && setsByRouteByAcademicYear) {

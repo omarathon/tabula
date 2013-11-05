@@ -5,7 +5,7 @@ import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, Route, StudentMember}
-import org.hibernate.criterion.{Projections, Order}
+import org.hibernate.criterion.{Restrictions, Projections, Order}
 import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.criterion.Restrictions._
 import scala.Some
@@ -39,6 +39,7 @@ trait MonitoringPointDao {
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
 	def deleteCheckpoint(checkpoint: MonitoringCheckpoint): Unit
 	def missedCheckpoints(scd: StudentCourseDetails, academicYear: AcademicYear): Int
+	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet]
 }
 
 
@@ -143,5 +144,27 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			.add(is("pointSet.academicYear", academicYear))
 			.project[Number](Projections.rowCount())
 			.uniqueResult.get.intValue()
+	}
+
+	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet] = {
+		if (students.isEmpty)
+			return Seq()
+
+		session.newQuery[MonitoringPointSet]("""
+			select distinct mps
+			from MonitoringPointSet mps, Route r, StudentCourseDetails scd, StudentCourseYearDetails scyd
+			where r = mps.route
+			and scd.route = r.code
+			and scyd.studentCourseDetails = scd
+			and mps.academicYear = :academicYear
+			and (
+			  mps.year = scyd.yearOfStudy
+			  or mps.year is null
+			)
+			and scd.student.universityId in (:universityIds)
+																				 """)
+			.setParameter("academicYear", academicYear)
+			.setParameterList("universityIds", students.map{_.universityId})
+			.list.asScala
 	}
 }

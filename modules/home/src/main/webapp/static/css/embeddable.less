@@ -974,7 +974,7 @@ h6 .mod-code, h6 .route-code {
 	border-bottom: 1px dotted @grayLight;
 }
 
-.use-tooltip, .use-popover, .use-introductory {
+.use-tooltip, .use-popover, .use-wide-popover, .use-introductory {
 	cursor: help;
 }
 
@@ -1359,6 +1359,9 @@ h1.with-settings {
 				}
 			}
 		}
+        &.wide {
+            max-width: 600px;
+        }
 	}
 
 	// Remove this if we ever include type.less in our Bootstrap build (i.e. we build ID6 on top of Bootstrap)
@@ -1689,3 +1692,51 @@ input.flexi-picker {
 .icon-warning-sign.late { color: @warningText; }
 
 th.nowrap, td.nowrap { white-space: nowrap; }
+
+//Filter pages
+#container {
+  .dropdown-menu.filter-list {
+    ul {
+      margin: 0 10px;
+      padding-left: 0;
+      list-style: none;
+
+      label.checkbox {
+        padding-right: 10px;
+
+        max-width: 300px;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+      }
+    }
+
+    max-height: 300px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .pagination {
+    margin-top: -10px;
+    margin-bottom: 10px;
+  }
+}
+
+#filter-results {
+  .opacity-one(1);
+  .transition(opacity 0.3s ease-in-out);
+
+  &.loading { .opacity-one(0.3); }
+}
+
+.filter-short-values {
+  display: inline-block;
+  max-width: 100px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+.filter-type {
+  margin-left: 0.8em;
+}

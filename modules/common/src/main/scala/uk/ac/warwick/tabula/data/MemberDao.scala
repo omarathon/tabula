@@ -1,20 +1,13 @@
 package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConversions._
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.FilterDefs
-import org.hibernate.annotations.Filters
 import org.hibernate.criterion._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
-import javax.persistence.Entity
-import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.AcademicYear
 
 trait MemberDaoComponent {
 	val memberDao: MemberDao
@@ -351,12 +344,15 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setEntity("relationshipType", relationshipType)
 			.uniqueResult.getOrElse(0)
 			
-	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int) = {
+	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember] = {
 		val idCriteria = session.newCriteria[StudentMember]
 		restrictions.foreach { _.apply(idCriteria) }
 		
 		val universityIds = idCriteria.project[String](distinct(property("universityId"))).seq
-		
+
+		if (universityIds.isEmpty)
+			return Seq()
+
 		val c = session.newCriteria[StudentMember]
 		
 		val or = disjunction()
