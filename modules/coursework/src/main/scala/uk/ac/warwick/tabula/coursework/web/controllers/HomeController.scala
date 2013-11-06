@@ -163,12 +163,14 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 //
 object HomeControllerCollectionsHelper {
 
-	def getHistoricAssignmentsInfo(assignmentsWithFeedbackInfo: Seq[Map[String, Any]], assignmentsWithSubmissionInfo: Seq[Map[String, Any]], lateFormativeAssignmentsInfo: Seq[Map[String, Any]]): Seq[Map[String, Any]] = {
+	type AssignmentInfo = Map[String, Any]
+
+	def getHistoricAssignmentsInfo(assignmentsWithFeedbackInfo: Seq[AssignmentInfo], assignmentsWithSubmissionInfo: Seq[AssignmentInfo], lateFormativeAssignmentsInfo: Seq[AssignmentInfo]): Seq[AssignmentInfo] = {
 		assignmentsWithFeedbackInfo
 			.union(assignmentsWithSubmissionInfo)
 			.union(lateFormativeAssignmentsInfo)
 			.sortWith {	(info1, info2) =>
-			def toDate(info: Map[String, Any]) = {
+			def toDate(info: AssignmentInfo) = {
 				val assignment = info("assignment").asInstanceOf[Assignment]
 				val submission = info("submission").asInstanceOf[Option[Submission]]
 
