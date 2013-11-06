@@ -255,6 +255,7 @@ class ProfileAnalyzer(val indexing: Boolean) extends Analyzer {
 
 		result = new StandardFilter(LuceneVersion, result)
 		result = new LowerCaseFilter(LuceneVersion, result)
+		result = new ASCIIFoldingFilter(result)
 		result = new StopFilter(LuceneVersion, result, StopWords)
 
 		new TokenStreamComponents(source, result)

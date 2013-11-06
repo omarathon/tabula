@@ -102,7 +102,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 			MembershipInformation(member, photoFor(member.universityId))
 		}
 
-	def userIdAndCategory(member: Member): Option[MembershipInformation] = {
+	def userIdAndCategory(member: Member): Option[MembershipInformation] = {	
 		membershipByUsercodeQuery.executeByNamedParam(Map("usercodes" -> member.userId)).asScala.toList match {
 			case Nil => None
 			case mem: List[MembershipMember] => Some (

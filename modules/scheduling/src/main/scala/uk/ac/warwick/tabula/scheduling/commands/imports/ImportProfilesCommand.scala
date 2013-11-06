@@ -161,7 +161,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 					for (member <- members) session.evict(member)
 					for (modReg <- newModuleRegistrations) session.evict(modReg)
-
+					
 					// TAB-1435 refresh profile index
 					profileIndexService.indexItemsWithoutNewTransaction(members.flatMap { m => profileService.getMemberByUniversityId(m.universityId) })
 					logger.info("finished re-indexing")
