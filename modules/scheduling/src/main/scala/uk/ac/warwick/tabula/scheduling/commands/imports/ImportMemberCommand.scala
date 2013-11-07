@@ -205,13 +205,13 @@ object ImportMemberHelpers {
 
 	def optString(columnName: String)(implicit rs: Option[ResultSet]): Option[String] =
 		rs.flatMap { rs => 
-			if (hasColumn(rs, columnName)) Some(rs.getString(columnName))
+			if (hasColumn(rs, columnName)) Option(rs.getString(columnName))
 			else None
 		}
 
 	def optLocalDate(columnName: String)(implicit rs: Option[ResultSet]): Option[LocalDate] =
 		rs.flatMap { rs => 
-			if (hasColumn(rs, columnName)) Some(rs.getDate(columnName)).map { new LocalDate(_) }
+			if (hasColumn(rs, columnName)) Option(rs.getDate(columnName)).map { new LocalDate(_) }
 			else None
 		}
 
