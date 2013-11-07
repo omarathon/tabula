@@ -204,8 +204,8 @@
 
 				<#if features.attendanceMonitoring>
 					<li id="attendance-pane" style="display:none;">
-                    	<#include "_attendance.ftl" />
-                    </li>
+          	<#include "_attendance.ftl" />
+          </li>
 				</#if>
 			</ol>
 

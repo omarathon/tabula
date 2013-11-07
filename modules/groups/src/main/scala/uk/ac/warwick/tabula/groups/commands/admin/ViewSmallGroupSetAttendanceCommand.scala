@@ -41,7 +41,7 @@ trait ViewSmallGroupSetAttendancePermissions extends RequiresPermissionsChecking
 	self: ViewSmallGroupSetAttendanceState =>
 	
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.SmallGroupEvents.Register, set)
+		p.PermissionCheck(Permissions.SmallGroupEvents.ViewRegister, set)
 	}
 }
 

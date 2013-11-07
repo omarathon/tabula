@@ -39,6 +39,11 @@ class Mav() {
 		map ++= items
 		this
 	}
+	
+	def addObjects(items: Map[String, Any]) = {
+		map ++= items
+		this
+	}
 
 	// Set the CSS body classes to these strings.
 	def bodyClasses(c: String*) = {
@@ -150,8 +155,9 @@ object Mav {
 	 * list through as separate arguments rather than as a single list argument.
 	 */
 	def apply(view: String, objects: Pair[String, _]*) = new Mav(view).addObjects(objects: _*)
+	def apply(view: String, objects: Map[String, _]) = new Mav(view).addObjects(objects)
 
 	def apply(view: View, objects: Pair[String, _]*) = new Mav(view).addObjects(objects: _*)
-	//def apply(what:String) = null
+	def apply(view: View, objects: Map[String, _]) = new Mav(view).addObjects(objects)
 
 }

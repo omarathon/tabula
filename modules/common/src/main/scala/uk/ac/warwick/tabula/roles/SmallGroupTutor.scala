@@ -12,7 +12,8 @@ case object SmallGroupTutorRoleDefinition extends UnassignableBuiltInRoleDefinit
 	GrantsScopedPermission(
 		SmallGroups.Read,
 		SmallGroups.ReadMembership,
-		SmallGroupEvents.Register
+		SmallGroupEvents.Register,
+		SmallGroupEvents.ViewRegister
 	)
 
 }
