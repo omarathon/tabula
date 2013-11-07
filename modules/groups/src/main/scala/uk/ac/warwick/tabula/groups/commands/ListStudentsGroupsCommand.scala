@@ -13,10 +13,11 @@ import uk.ac.warwick.tabula.services.AutowiringSmallGroupServiceComponent
 import uk.ac.warwick.tabula.commands.CommandInternal
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.CurrentUser
 
 object ListStudentsGroupsCommand {
-	def apply(member: Member) =
-		new ListStudentsGroupsCommandInternal(member)
+	def apply(member: Member, user: CurrentUser) =
+		new ListStudentsGroupsCommandInternal(member, user)
 			with ComposableCommand[ViewModules]
 			with ListStudentsGroupsCommandPermissions
 			with AutowiringSmallGroupServiceComponent
@@ -26,8 +27,7 @@ object ListStudentsGroupsCommand {
 /**
  * Gets the data for a students view of all small groups they're a member of.
  */
-
-class ListStudentsGroupsCommandInternal(val member: Member) extends CommandInternal[ViewModules] with ListStudentsGroupsCommandState {
+class ListStudentsGroupsCommandInternal(val member: Member, val currentUser: CurrentUser) extends CommandInternal[ViewModules] with ListStudentsGroupsCommandState {
 	self: SmallGroupServiceComponent =>
 
 	import GroupsDisplayHelper._
@@ -36,7 +36,8 @@ class ListStudentsGroupsCommandInternal(val member: Member) extends CommandInter
 		val user = member.asSsoUser
 		val memberGroupSets = smallGroupService.findSmallGroupSetsByMember(user)
 		val releasedMemberGroupSets = getGroupSetsReleasedToStudents(memberGroupSets)
-		val nonEmptyMemberViewModules = getViewModulesForStudent(releasedMemberGroupSets, getGroupsToDisplay(_, user))
+		val isTutor = !(currentUser.apparentUser == user)
+		val nonEmptyMemberViewModules = getViewModulesForStudent(releasedMemberGroupSets, getGroupsToDisplay(_, user, isTutor))
 
 		ViewModules(nonEmptyMemberViewModules.sortBy(_.module.code), canManageDepartment = false)
 	}

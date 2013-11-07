@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.groups.commands.ListStudentsGroupsCommand
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
+import uk.ac.warwick.tabula.CurrentUser
 
 /**
  * Displays the groups that the current user is a member of.
@@ -16,8 +17,8 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 @RequestMapping(Array("/student/{member}"))
 class StudentGroupsController extends GroupsController {
 
-	@ModelAttribute("command") def command(@PathVariable member:Member) =
-		ListStudentsGroupsCommand(member)
+	@ModelAttribute("command") def command(@PathVariable member:Member, user:CurrentUser) =
+		ListStudentsGroupsCommand(member, user)
 
 	@RequestMapping(method = Array(POST, GET))
 	def listGroups(@ModelAttribute("command") command: Appliable[GroupsViewModel.ViewModules]): Mav = {
