@@ -14,8 +14,8 @@
 <#elseif pointsMap?keys?size == 0>
 <p><em>No points exist for the selected options</em></p>
 <#else>
-	<#assign returnTo><@routes.viewDepartmentWithAcademicYear command.department command.academicYear /></#assign>
-	<#assign filterQuery = command.serialize />
+	<#assign filterQuery = command.serializeFilter />
+	<#assign returnTo><@routes.viewDepartmentWithAcademicYear command.department command.academicYear filterQuery/></#assign>
 <div class="monitoring-points">
 	<#macro pointsInATerm term>
 		<div class="striped-section">

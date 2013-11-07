@@ -168,7 +168,7 @@ var createButtonGroup = function(id){
 					});
 				</script>
 				<input type="hidden" name="monitoringPoint" value="${command.templateMonitoringPoint.id}" />
-				<input type="hidden" name="returnTo" value="<@url page="${returnTo}" />" />
+				<input type="hidden" name="returnTo" value="${returnTo}"/>
 				<#list command.studentsState?keys?sort_by("lastName") as student>
 					<#assign points = mapGet(command.studentsState, student) />
 					<#if (points?keys?size > 1)>

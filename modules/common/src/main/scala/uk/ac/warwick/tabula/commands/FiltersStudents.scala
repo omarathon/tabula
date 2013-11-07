@@ -2,15 +2,13 @@ package uk.ac.warwick.tabula.commands
 
 import uk.ac.warwick.tabula.data.model.{Module, SitsStatus, ModeOfAttendance, Route, CourseType, Department}
 import uk.ac.warwick.tabula.JavaImports._
-import org.hibernate.criterion.{Restrictions, Order}
+import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.web.UriBuilder
-import org.hibernate.criterion.Restrictions._
-import scala.Some
 
 
 trait FiltersStudents extends ProfileServiceComponent {
@@ -111,7 +109,7 @@ trait FiltersStudents extends ProfileServiceComponent {
 	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(department)
 	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(department)
 
-	def serialize = {
+	def serializeFilter = {
 		val result = new UriBuilder()
 		courseTypes.asScala.foreach(p => result.addQueryParameter("courseTypes", p.code))
 		routes.asScala.foreach(p => result.addQueryParameter("routes", p.code))

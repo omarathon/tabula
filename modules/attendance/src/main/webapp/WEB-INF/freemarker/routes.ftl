@@ -9,7 +9,11 @@
 		-->
 	<#macro home><@url page="/" /></#macro>
 	<#macro viewDepartment department><@url page="/${department.code}/" /></#macro>
-	<#macro viewDepartmentWithAcademicYear department academicYear><@url page="/${department.code}/?academicYear=${academicYear.toString}" /></#macro>
+	<#macro viewDepartmentWithAcademicYear department academicYear queryString="">
+		<#if queryString?has_content>
+			<#local queryString = "&" + queryString />
+		</#if>
+		<@url page="/${department.code}/?academicYear=${academicYear.toString}${queryString}" /></#macro>
 	<#macro manageDepartment department><@url page="/manage/${department.code}/" /></#macro>
 	
 	<#macro record department pointId queryString returnTo><@url page="/${department.code}/${pointId}/record?returnTo=${returnTo?url}&${queryString}"/></#macro>
