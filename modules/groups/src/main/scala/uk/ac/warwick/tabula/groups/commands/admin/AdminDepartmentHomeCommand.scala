@@ -25,6 +25,7 @@ object AdminDepartmentHomeCommand {
 			with AdminDepartmentHomePermissions
 			with AutowiringSecurityServiceComponent
 			with AutowiringModuleAndDepartmentServiceComponent
+			with AllModuleFilter
 			with ComposableCommand[Seq[Module]]
 			with ReadOnly with Unaudited
 }
@@ -34,7 +35,7 @@ object AdminDepartmentHomeCommand {
  * Displays groups in a given department.
  */
 class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends CommandInternal[Seq[Module]] with AdminDepartmentHomeState {
-	self: SecurityServiceComponent with ModuleAndDepartmentServiceComponent with AdminDepartmentHomePermissionDefinition =>
+	self: SecurityServiceComponent with ModuleAndDepartmentServiceComponent with AdminDepartmentHomePermissionDefinition with ModuleFilter =>
 
 	lazy val modules: Seq[Module] =
 		if (securityService.can(user, requiredPermission, department)) {
@@ -43,7 +44,7 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 			modulesWithPermission.toList.sorted
 		}
 
-	def applyInternal() = modules.sortBy { (module) => (module.groupSets.isEmpty, module.code) }
+	def applyInternal() = modules.filter(moduleFilter).sortBy { (module) => (module.groupSets.isEmpty, module.code) }
 
 }
 
@@ -79,4 +80,12 @@ trait AdminDepartmentHomePermissionDefinition {
 
 trait ManageGroupsPermissionDefinition extends AdminDepartmentHomePermissionDefinition {
 	val requiredPermission = Permissions.Module.ManageSmallGroups
+}
+
+trait ModuleFilter {
+	def moduleFilter(module: Module): Boolean
+}
+
+trait AllModuleFilter extends ModuleFilter {
+	def moduleFilter(module: Module) = true
 }

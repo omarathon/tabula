@@ -2,10 +2,12 @@ package uk.ac.warwick.tabula.groups.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, RequestMapping, ModelAttribute}
-import uk.ac.warwick.tabula.groups.commands.ListStudentsGroupsCommandImpl
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat.Example
 import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.groups.commands.ListStudentsGroupsCommand
+import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 
 /**
  * Displays the groups that the current user is a member of.
@@ -15,10 +17,10 @@ import uk.ac.warwick.tabula.data.model.Member
 class StudentGroupsController extends GroupsController {
 
 	@ModelAttribute("command") def command(@PathVariable member:Member) =
-		new ListStudentsGroupsCommandImpl(member)
+		ListStudentsGroupsCommand(member)
 
 	@RequestMapping(method = Array(POST, GET))
-	def listGroups(@ModelAttribute("command") command: ListStudentsGroupsCommandImpl): Mav = {
+	def listGroups(@ModelAttribute("command") command: Appliable[GroupsViewModel.ViewModules]): Mav = {
 
 		val data = command.apply()
 

@@ -30,6 +30,7 @@ object ViewDepartmentAttendanceCommand {
 			with AdminDepartmentHomePermissions
 			with AutowiringSecurityServiceComponent
 			with AutowiringModuleAndDepartmentServiceComponent
+			with NonEmptyModuleFilter
 			with ComposableCommand[Seq[Module]]
 			with ReadOnly with Unaudited {
 		override lazy val eventName = "ViewDepartmentAttendance"
@@ -37,5 +38,11 @@ object ViewDepartmentAttendanceCommand {
 }
 
 trait ViewRegisterPermissionDefinition extends AdminDepartmentHomePermissionDefinition {
-	val requiredPermission = Permissions.SmallGroupEvents.Register
+	val requiredPermission = Permissions.SmallGroupEvents.ViewRegister
+}
+
+trait NonEmptyModuleFilter extends ModuleFilter {
+	def moduleFilter(module: Module) = module.groupSets.asScala.exists { set => 
+		!set.archived && !set.deleted
+	}
 }
