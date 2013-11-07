@@ -4,14 +4,15 @@
 <h1>Record attendance</h1>
 <h6><span class="muted">for</span> ${command.templateMonitoringPoint.name}</h6>
 </#assign>
+<#assign numberOfStudents = command.studentsState?keys?size />
 
-<#if command.studentsState?keys?size == 0>
+<#if numberOfStudents == 0>
 
 ${titleHeader}
 
 <p><em>There are no students registered to these points.</em></p>
 
-<#elseif (command.studentsState?keys?size > 600)>
+<#elseif (numberOfStudents > 600)>
 
 ${titleHeader}
 
@@ -69,6 +70,15 @@ var createButtonGroup = function(id){
 
 			<div class="row-fluid record-attendance-form-header">
 				<div class="span12">
+					<span class="studentsLoadingMessage" style="display: none;">
+							<i class="icon-spinner icon-spin"></i><em> Loading&hellip;</em>
+						</span>
+					<script>
+						jQuery('.studentsLoadingMessage').show();
+						jQuery(function($){
+							$('.studentsLoadingMessage').hide();
+						})
+					</script>
 					<div class="pull-right" style="display: none;">
 						<span class="checkAllMessage">
 							Check all
@@ -129,6 +139,9 @@ var createButtonGroup = function(id){
 							<i class="icon-fixed-width"></i>
 						</#if>
 					</div>
+					<#if numberOfStudents <= 50>
+						<@fmt.member_photo student "tinythumbnail" true />
+					</#if>
 					${student.fullName}
 					<#if hasMultiple><span class="muted">${point.pointSet.route.code?upper_case}</span></#if>
 					<@spring.bind path="command.studentsState[${student.universityId}][${point.id}]">

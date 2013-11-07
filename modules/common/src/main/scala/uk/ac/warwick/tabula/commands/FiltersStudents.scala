@@ -2,13 +2,15 @@ package uk.ac.warwick.tabula.commands
 
 import uk.ac.warwick.tabula.data.model.{Module, SitsStatus, ModeOfAttendance, Route, CourseType, Department}
 import uk.ac.warwick.tabula.JavaImports._
-import org.hibernate.criterion.Order
+import org.hibernate.criterion.{Restrictions, Order}
 import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.web.UriBuilder
+import org.hibernate.criterion.Restrictions._
+import scala.Some
 
 
 trait FiltersStudents extends ProfileServiceComponent {
@@ -47,7 +49,7 @@ trait FiltersStudents extends ProfileServiceComponent {
 	def defaultOrder: Seq[Order]
 	def sortOrder: JList[Order]
 
-	protected def buildRestrictions(): Seq[ScalaRestriction] =
+	protected def buildRestrictions(): Seq[ScalaRestriction] = {
 		Seq(
 			// Course type
 			startsWithIfNotEmpty(
@@ -57,7 +59,7 @@ trait FiltersStudents extends ProfileServiceComponent {
 
 			// Route
 			inIfNotEmpty(
-				"studentCourseDetails.route", routes.asScala,
+				"studentCourseDetails.route.code", routes.asScala.map {_.code},
 				AliasPaths("studentCourseDetails") : _*
 			),
 
@@ -85,6 +87,7 @@ trait FiltersStudents extends ProfileServiceComponent {
 				AliasPaths("moduleRegistration") : _*
 			)
 		).flatten
+	}
 
 	protected def buildOrders(): Seq[ScalaOrder] =
 		(sortOrder.asScala ++ defaultOrder).map { underlying =>
