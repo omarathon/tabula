@@ -15,7 +15,6 @@ import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.Daoisms
 
 object ViewMonitoringPointsCommand {
 	def apply(department: Department, academicYearOption: Option[AcademicYear], user: CurrentUser) =
@@ -36,11 +35,12 @@ abstract class ViewMonitoringPointsCommand(val department: Department, val acade
 	
 	def applyInternal() = {
 		val pointSets = monitoringPointService.findPointSetsForStudents(students, academicYear)
-		groupSimilarPointsByTerm(pointSets.flatMap(_.points.asScala), academicYear)
+		groupSimilarPointsByTerm(pointSets.flatMap(_.points.asScala), allRoutes, academicYear)
 	}
 	
 	def onBind(result: BindingResult) {
 		// Add all non-withdrawn codes to SPR statuses by default
+		// TODO: What if the user wants to select 'Any' status? The collection will be empty
 		if (sprStatuses.isEmpty) {
 			allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach { sprStatuses.add }
 		}
@@ -50,9 +50,6 @@ abstract class ViewMonitoringPointsCommand(val department: Department, val acade
 			restrictions = buildRestrictions(),
 			orders = buildOrders()
 		)
-		if (students.size > Daoisms.MaxInClauseCount) {
-			result.rejectValue("students", "monitoringPointSet.tooManyStudents")
-		}
 	}
 }
 
@@ -64,10 +61,10 @@ trait ViewMonitoringPointsState extends FiltersStudents with PermissionsAwareRou
 	val thisAcademicYear = AcademicYear.guessByDate(new DateTime())
 	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
 	var students: Seq[StudentMember] = _
-	
+
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
-	var sortOrder: JList[Order] = JArrayList() 
-	
+	var sortOrder: JList[Order] = JArrayList()
+
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()
 	lazy val visibleRoutes = routesForPermission(user, Permissions.MonitoringPoints.View, department)

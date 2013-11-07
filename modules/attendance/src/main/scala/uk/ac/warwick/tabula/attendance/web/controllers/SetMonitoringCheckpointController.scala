@@ -4,7 +4,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import scala.Array
 import uk.ac.warwick.tabula.attendance.commands.SetMonitoringCheckpointCommand
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPoint}
 import uk.ac.warwick.tabula.web.Mav
 import javax.validation.Valid
 import org.springframework.validation.Errors
@@ -20,8 +20,8 @@ class SetMonitoringCheckpointController extends AttendanceController {
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def command(@PathVariable monitoringPoint: MonitoringPoint, user: CurrentUser) = {
-		SetMonitoringCheckpointCommand(mandatory(monitoringPoint), user)
+	def command(@PathVariable department: Department, @PathVariable monitoringPoint: MonitoringPoint, user: CurrentUser) = {
+		SetMonitoringCheckpointCommand(department, monitoringPoint, user)
 	}
 
 
@@ -34,20 +34,20 @@ class SetMonitoringCheckpointController extends AttendanceController {
 
 	def form(@ModelAttribute command: SetMonitoringCheckpointCommand, department: Department): Mav = {
 		Mav("home/record",
-				"command" -> command,
-				"monitoringPoint" -> command.monitoringPoint,
-				"returnTo" -> getReturnTo(Routes.department.view(department))
+			"allCheckpointStates" -> MonitoringCheckpointState.values,
+			"returnTo" -> getReturnTo(Routes.department.view(department))
 		)
 	}
 
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") command: SetMonitoringCheckpointCommand, @PathVariable department: Department, errors: Errors) = {
+	def submit(@Valid @ModelAttribute("command") command: SetMonitoringCheckpointCommand, errors: Errors,
+						 @PathVariable department: Department, @PathVariable monitoringPoint: MonitoringPoint) = {
 		if(errors.hasErrors) {
 			form(command, department)
 		} else {
 			command.apply()
-			Redirect(Routes.department.view(department), "updatedMonitoringPoint" -> command.monitoringPoint.id)
+			Redirect(Routes.department.view(department), "updatedMonitoringPoint" -> monitoringPoint.id)
 		}
 	}
 

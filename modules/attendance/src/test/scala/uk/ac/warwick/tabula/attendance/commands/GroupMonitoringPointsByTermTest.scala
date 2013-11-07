@@ -100,7 +100,7 @@ class GroupMonitoringPointsByTermTest extends TestBase with Mockito {
 	@Test
 	def groupedPointsByTerm() {
 		new GroupedPointsFixture with GroupMonitoringPointsByTerm {
-			val groupedPointsByTerm = groupSimilarPointsByTerm(monitoringPoints, academicYear)
+			val groupedPointsByTerm = groupSimilarPointsByTerm(monitoringPoints, Seq(), academicYear)
 
 			val autumnPoints = groupedPointsByTerm("Autumn")
 			autumnPoints.size should be (2)

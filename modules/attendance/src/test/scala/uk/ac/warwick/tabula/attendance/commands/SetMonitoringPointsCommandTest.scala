@@ -3,16 +3,18 @@ package uk.ac.warwick.tabula.attendance.commands
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringPoint, MonitoringPointSet}
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.data.model.{Department, Route}
 import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.services.{MonitoringPointService, MonitoringPointServiceComponent, ProfileService, ProfileServiceComponent}
+import uk.ac.warwick.tabula.services._
 
 class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends ProfileServiceComponent with MonitoringPointServiceComponent
-		with SetMonitoringCheckpointCommandValidation with SetMonitoringCheckpointState {
+	trait CommandTestSupport extends ProfileServiceComponent with MonitoringPointServiceComponent with SecurityServiceComponent
+		with TermServiceComponent with SetMonitoringCheckpointCommandValidation with SetMonitoringCheckpointState {
 		val profileService = mock[ProfileService]
 		val monitoringPointService = mock[MonitoringPointService]
+		val securityService = mock[SecurityService]
+		val termService = mock[TermService]
 
 		def apply(): Seq[MonitoringCheckpoint] = {
 			null
@@ -20,6 +22,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 	}
 
 	trait Fixture {
+		val dept = new Department
 		val set = new MonitoringPointSet
 		set.route = mock[Route]
 		val monitoringPoint = new MonitoringPoint
@@ -44,7 +47,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 	def validateValid() = withUser("cuslat") {
 		new Fixture {
 			monitoringPoint.sentToAcademicOffice = false
-			val command = new SetMonitoringCheckpointCommand(monitoringPoint, currentUser) with CommandTestSupport
+			val command = new SetMonitoringCheckpointCommand(dept, monitoringPoint, currentUser) with CommandTestSupport
 
 			var errors = new BindException(command, "command")
 			command.validate(errors)
@@ -57,7 +60,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 	def validateSentToAcademicOfficeNoChanges() = withUser("cuslat") {
 		new Fixture {
 			monitoringPoint.sentToAcademicOffice = true
-			val command = new SetMonitoringCheckpointCommand(monitoringPoint, currentUser) with CommandTestSupport
+			val command = new SetMonitoringCheckpointCommand(dept, monitoringPoint, currentUser) with CommandTestSupport
 
 			var errors = new BindException(command, "command")
 			command.validate(errors)

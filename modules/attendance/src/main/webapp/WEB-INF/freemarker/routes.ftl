@@ -12,7 +12,7 @@
 	<#macro viewDepartmentWithAcademicYear department academicYear><@url page="/${department.code}/?academicYear=${academicYear.toString}" /></#macro>
 	<#macro manageDepartment department><@url page="/manage/${department.code}/" /></#macro>
 	
-	<#macro record department pointId returnTo><@url page="/${department.code}/${pointId}/record?returnTo=${returnTo?url}"/></#macro>
+	<#macro record department pointId queryString returnTo><@url page="/${department.code}/${pointId}/record?returnTo=${returnTo?url}&${queryString}"/></#macro>
 	<#macro recordStudent point studentCourseDetails returnTo><@url page="/${point.pointSet.route.department.code}/${point.id}/record/${studentCourseDetails.urlSafeId}?returnTo=${returnTo?url}"/></#macro>
 	<#macro studentMeetings point member><@url page="/${point.pointSet.route.department.code}/${point.id}/meetings/${member.universityId}"/></#macro>
 	<#macro agentView relationshipType><@url page="/agent/${relationshipType.urlPart}"/></#macro>

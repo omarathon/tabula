@@ -63,14 +63,14 @@ abstract class FilterStudentsCommand(val department: Department) extends Command
 }
 
 trait FilterStudentsState extends FiltersStudents {
-	def department: Department
+	override def department: Department
 	
 	var studentsPerPage = DefaultStudentsPerPage
 	var page = 1
-	
+
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
-	var sortOrder: JList[Order] = JArrayList() 
-	
+	var sortOrder: JList[Order] = JArrayList()
+
 	var courseTypes: JList[CourseType] = JArrayList()
 	var routes: JList[Route] = JArrayList()
 	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()

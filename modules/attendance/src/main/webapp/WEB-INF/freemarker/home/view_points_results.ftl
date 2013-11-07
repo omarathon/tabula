@@ -15,6 +15,7 @@
 <p><em>No points exist for the selected options</em></p>
 <#else>
 	<#assign returnTo><@routes.viewDepartmentWithAcademicYear command.department command.academicYear /></#assign>
+	<#assign filterQuery = command.serialize />
 <div class="monitoring-points">
 	<#macro pointsInATerm term>
 		<div class="striped-section">
@@ -24,7 +25,7 @@
 					<div class="item-info row-fluid point">
 						<div class="span12">
 							<div class="pull-right">
-								<a class="btn btn-primary" href="<@routes.record command.department groupedPoint.pointId returnTo/>">
+								<a class="btn btn-primary" href="<@routes.record command.department groupedPoint.pointId filterQuery returnTo/>">
 									Record
 								</a>
 							</div>
@@ -33,23 +34,26 @@
 							<#if groupedPoint.routes?size == command.allRoutes?size>
 								All routes
 							<#else>
-								<#assign popoverContent>
+								<#local popoverContent>
 									<ul class="unstyled">
 										<#list command.allRoutes as route>
-											<#assign isInPoint = false />
-											<#list groupedPoint.routes as pointRoute>
-												<#if pointRoute.code == route.code><#assign isInPoint = true /></#if>
+											<#local isInPoint = false />
+											<#list groupedPoint.routes as pointRoutePair>
+												<#if pointRoutePair._1().code == route.code><#local isInPoint = true /></#if>
 											</#list>
 											<li>
 												<#if isInPoint>
-													<strong><@fmt.route_name route /></strong>
-												<#else>
 													<@fmt.route_name route />
+												<#else>
+													<span class="muted"><@fmt.route_name route /></span>
 												</#if>
 											</li>
 										</#list>
+										<#list groupedPoint.routes as pointRoutePair>
+											<#if !pointRoutePair._2()><li><span title="${pointRoutePair._1().department.name}"><@fmt.route_name pointRoutePair._1() /></span></li></#if>
+										</#list>
 									</ul>
-								</#assign>
+								</#local>
 								<a class="use-wide-popover" data-title="Applicable routes" data-content="${popoverContent}" data-html="true" data-placement="bottom">
 									<@fmt.p groupedPoint.routes?size "route" />
 								</a>

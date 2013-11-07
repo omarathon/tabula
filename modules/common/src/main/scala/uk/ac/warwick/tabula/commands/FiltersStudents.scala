@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.ScalaRestriction._
 import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.util.web.UriBuilder
 
 
 trait FiltersStudents extends ProfileServiceComponent {
@@ -106,4 +107,15 @@ trait FiltersStudents extends ProfileServiceComponent {
 	lazy val allYearsOfStudy: Seq[Int] = 1 to 8
 	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(department)
 	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(department)
+
+	def serialize = {
+		val result = new UriBuilder()
+		courseTypes.asScala.foreach(p => result.addQueryParameter("courseTypes", p.code))
+		routes.asScala.foreach(p => result.addQueryParameter("routes", p.code))
+		modesOfAttendance.asScala.foreach(p => result.addQueryParameter("modesOfAttendance", p.code))
+		yearsOfStudy.asScala.foreach(p => result.addQueryParameter("yearsOfStudy", p.toString))
+		sprStatuses.asScala.foreach(p => result.addQueryParameter("sprStatuses", p.code))
+		modules.asScala.foreach(p => result.addQueryParameter("modules", p.code))
+		result.getQuery
+	}
 }

@@ -25,10 +25,10 @@
 	</#if>
 </div>
 
-<#if updatedPoint??>
+<#if updatedMonitoringPoint??>
 	<div class="alert alert-success">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
-		Attendance recorded for '${updatedPoint.name}'
+		Attendance recorded for '${updatedMonitoringPoint.name}'
 	</div>
 </#if>
 
@@ -203,6 +203,12 @@
 
 				$form.data('request', null);
 				$('#filter-results').removeClass('loading');
+
+				$('.use-wide-popover').tabulaPopover({
+					trigger: 'click',
+					container: '#container',
+					template: '<div class="popover wide"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+				});
 			}));
 		};
 		window.doRequest = doRequest;

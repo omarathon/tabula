@@ -11,21 +11,9 @@ $(function(){
 
 	// SCRIPTS FOR RECORDING MONITORING POINTS
 
-	$('.recordCheckpointForm').find('select').each(function(){
-		var $this = $(this), selectedValue = $this.find('option:selected').val();
-		$('.recordCheckpointForm div.forCloning div.btn-group')
-			.clone(true)
-			.insertAfter($this)
-			.find('button').on('click', function(){
-				var _$this = $(this);
-				$this.find('option').filter(function(){
-					return $(this).val() == _$this.data('state');
-				}).prop('selected', true);
-			}).filter(function(){
-				return $(this).data('state') == selectedValue;
-			}).trigger('click');
-		$this.hide();
-	}).end().find('.persist-header').each(function(){
+	$('.recordCheckpointForm').find('.persist-header')
+        .find('div.pull-right').show()
+        .end().each(function(){
 		$(this).find('.btn-group button').each(function(i){
 			$(this).on('click', function(){
 				$('.attendees .item-info').each(function(){
