@@ -15,7 +15,12 @@
 					<table id="group_attendance_${term.termTypeAsString}" class="table table-striped table-bordered table-condensed attendance-table">
 						<thead>
 							<tr>
-								<th class="sortable nowrap">Group</th>
+								<th class="sortable nowrap">
+									<#-- TAB-1124 don't show Group header on gadget view -->
+									<#if defaultExpand!false>
+										Group
+									</#if>
+								</th>
 								<#list (weekNumbers.minWeek)..(weekNumbers.maxWeek) as weekNumber>
 									<th class="instance-date-header">
 										<div class="instance-date">
