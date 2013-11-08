@@ -109,7 +109,7 @@ class FilterStudentsCommand(val department: Department) extends CommandInternal[
 				
 			// Route
 			inIfNotEmpty(
-				"studentCourseDetails.route", routes.asScala, 
+				"studentCourseDetails.route.code", routes.asScala.map {_.code},
 				AliasPaths("studentCourseDetails") : _*
 			),
 			
