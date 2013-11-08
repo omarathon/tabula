@@ -10,7 +10,7 @@ the comments textarea needs to maintain newlines.
 <#macro datefield path label cssClass="" inputCss="" endOffset="">
 	<@form.labelled_row path label cssClass>
 		<@f.input path=path cssClass="date-time-picker ${inputCss}" />
-		<#if endOffset?has_content><input class="endoffset" type="hidden" data-end-offset="1209600000" /></#if>
+		<#if endOffset?has_content><input class="endoffset" type="hidden" data-end-offset="${endOffset}" /></#if>
 	</@form.labelled_row>
 </#macro>
 
@@ -20,7 +20,7 @@ the comments textarea needs to maintain newlines.
 <@f.input path="name" cssClass="text" />
 </@form.labelled_row>
 
-<@datefield path="openDate" label="Open date" inputCss="startDateTime" endOffset="3600000" />
+<@datefield path="openDate" label="Open date" inputCss="startDateTime" endOffset="1209600000" />
 
 
 <@form.labelled_row "openEnded" "Open-ended">

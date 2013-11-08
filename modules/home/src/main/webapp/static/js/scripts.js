@@ -81,8 +81,6 @@
 
 	jQuery.fn.tabulaTimePicker = function() {
 
-        var $this = $(this);
-
         $(this).datetimepicker({
 			format: "hh:ii:ss",
 			weekStart: 1,
@@ -119,7 +117,6 @@
 
             $(this).on('click', function () {
                 var indexValue = $(this).children(':selected').prop('value');
-                $(this).next('.endoffset').data('end-offset');
                 $(this).closest('.dateTimePair').find('.endDateTime').prop('value', indexValue);
             });
 
