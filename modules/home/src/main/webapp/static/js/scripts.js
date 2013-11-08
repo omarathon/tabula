@@ -56,8 +56,12 @@
 
 					$(this).datetimepicker('update');
 				}
+
 			}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
 		}
+
+        $(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
+
 	};
 
 	jQuery.fn.tabulaDatePicker = function() {
@@ -71,16 +75,22 @@
 				autoclose: true
 			}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
 		}
+
+        $(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
 	};
 
 	jQuery.fn.tabulaTimePicker = function() {
-		$(this).datetimepicker({
+
+        var $this = $(this);
+
+        $(this).datetimepicker({
 			format: "hh:ii:ss",
 			weekStart: 1,
 			startView: 'day',
 			maxView: 'day',
 			autoclose: true
 		}).on('show', function(ev){
+
 			var d = new Date(ev.date.valueOf()),
 				  minutes = d.getUTCMinutes(),
 					seconds = d.getUTCSeconds(),
@@ -94,9 +104,60 @@
 				$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("hh:ii:ss", "standard"), "en", "standard"));
 
 				$(this).datetimepicker('update');
+
 			}
 		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
+
+        $(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
+
+
 	};
+
+    jQuery.fn.selectOffset = function () {
+
+        if ($(this).hasClass('startDateTime')) {
+
+            $(this).on('click', function () {
+                var indexValue = $(this).children(':selected').prop('value');
+                $(this).next('.endoffset').data('end-offset');
+                $(this).closest('.dateTimePair').find('.endDateTime').prop('value', indexValue);
+            });
+
+        }
+    };
+
+
+    function offsetEndDateTime($element, currentDateTime) {
+
+
+         if($element.hasClass('startDateTime')) {
+
+            var endDate = $element.data('datetimepicker').getDate().getTime() + parseInt($element.next('.endoffset').data('end-offset'));
+            var $endDateInput =  $element.closest('.dateTimePair').find('.endDateTime');
+            var endDatePicker = $endDateInput.data('datetimepicker');
+
+            if ($endDateInput.length > 0) {
+                endDatePicker.setDate(new Date(endDate));
+                endDatePicker.setValue();
+                $endDateInput.closest('.control-group').addClass('warning').removeClass('error');
+            }
+
+         } else if ($element.hasClass('endDateTime')){
+
+
+             $element.closest('.control-group').removeClass('warning');
+
+             var $startDateInput = $element.closest('.dateTimePair').find('.startDateTime');
+
+             //Check end time is later than start time
+             if ($element.data('datetimepicker').getDate().getTime() < $startDateInput.data('datetimepicker').getDate().getTime()) {
+                 $element.closest('.control-group').addClass('error');
+             } else {
+                 $element.closest('.control-group').removeClass('error');
+             }
+         }
+
+    };
 
 	/* apply to a checkbox or radio button. When the target is selected a div containing further related form elements
 	   is revealed.
@@ -170,6 +231,8 @@
 			});
 		});
 	}
+
+
 
 	/*
 	 * Prepare a spinner and store reference in data store.
@@ -573,6 +636,7 @@
 		$('input.date-picker').tabulaDatePicker();
 		$('input.time-picker').tabulaTimePicker();
 		$('form.double-submit-protection').tabulaSubmitOnce();
+        $('select.selectOffset').selectOffset();
 
 		// prepare spinnable elements
 		$('body').tabulaPrepareSpinners();
@@ -584,6 +648,7 @@
 			$m.find('input.date-picker').tabulaDatePicker();
 			$m.find('input.time-picker').tabulaTimePicker();
 			$m.find('form.double-submit-protection').tabulaSubmitOnce();
+            $('select.selectOffset').selectOffset();
 			$m.tabulaPrepareSpinners();
 		});
 

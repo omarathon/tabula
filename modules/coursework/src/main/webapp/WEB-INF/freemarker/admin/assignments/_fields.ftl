@@ -5,21 +5,23 @@ the comments textarea needs to maintain newlines.
 <#escape x as x?html>
 
 <#-- Field to support redirection post-submit -->
-<input type="hidden" name="action" value="submit" id="action-submit">
+<input type="hidden" name="action" value="submit" id="action-submit" >
 
-<#macro datefield path label cssClass="">
+<#macro datefield path label cssClass="" inputCss="" endOffset="">
 	<@form.labelled_row path label cssClass>
-		<@f.input path=path cssClass="date-time-picker" />
+		<@f.input path=path cssClass="date-time-picker ${inputCss}" />
+		<#if endOffset?has_content><input class="endoffset" type="hidden" data-end-offset="1209600000" /></#if>
 	</@form.labelled_row>
 </#macro>
 
 <div class="row-fluid">
-<div class="span6">
+<div class="span6 dateTimePair">
 <@form.labelled_row "name" "Assignment name">
 <@f.input path="name" cssClass="text" />
 </@form.labelled_row>
 
-<@datefield path="openDate" label="Open date" />
+<@datefield path="openDate" label="Open date" inputCss="startDateTime" endOffset="3600000" />
+
 
 <@form.labelled_row "openEnded" "Open-ended">
 	<label class="checkbox">
@@ -50,7 +52,7 @@ the comments textarea needs to maintain newlines.
 	</label>
 </@form.labelled_row>
 
-<@datefield path="closeDate" label="Close date" cssClass="has-close-date" />
+<@datefield path="closeDate" label="Close date" cssClass="has-close-date" inputCss="endDateTime" />
 
 <#if newRecord>
 
