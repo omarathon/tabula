@@ -34,7 +34,7 @@
 	<#if can_record || can_manage>
 		<#if (viewPermissions?size > 0)>
 			<h2>View and record monitoring points</h2>
-			<ul>
+			<ul class="unstyled">
 				<#list viewPermissions as department>
 					<li>
 						<h3><a id="view-department-${department.code}" href="<@routes.viewDepartment department />">${department.name}</a></h3>
@@ -45,7 +45,7 @@
 		
 		<#if (managePermissions?size > 0)>
 			<h2>Create and edit monitoring schemes</h2>
-			<ul>
+			<ul class="unstyled">
 				<#list managePermissions as department>
 					<li>
 						<h3><a id="manage-department-${department.code}" href="<@routes.manageDepartment department />">${department.name}</a></h3>

@@ -11,7 +11,7 @@
 		<div class="modal-header">
 			<h3 id="group${group_index}-event${event_index}-modal-label"><#nested/></h3>
 		</div>
-		<div class="modal-body">
+		<div class="modal-body dateTimePair">
 			<@form.labelled_row "tutors" "Tutors">
 				<@form.flexipicker path="tutors" placeholder="User name" htmlId="group${group_index}-event${event_index}-tutors" list=true multiple=true />
 			</@form.labelled_row>
@@ -57,11 +57,12 @@
 
 			<#-- The time-picker causes the entire page to become a submit button, can't work out why -->
 			<@form.labelled_row "startTime" "Start time">
-				<@f.input path="startTime" cssClass="time-picker" />
+				<@f.input path="startTime" cssClass="time-picker startDateTime" />
+				<input class="endoffset" type="hidden" data-end-offset="3600000" />
 			</@form.labelled_row>
 
 			<@form.labelled_row "endTime" "End time">
-				<@f.input path="endTime" cssClass="time-picker" />
+				<@f.input path="endTime" cssClass="time-picker endDateTime" />
 			</@form.labelled_row>
 
 			<@form.labelled_row "location" "Location">

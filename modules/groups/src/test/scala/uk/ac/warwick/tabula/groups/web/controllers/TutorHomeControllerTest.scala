@@ -1,9 +1,7 @@
-package uk.ac.warwick.tabula.groups
+package uk.ac.warwick.tabula.groups.web.controllers
 
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.groups.web.controllers.TutorHomeController
 import uk.ac.warwick.tabula.groups.commands.TutorHomeCommand
-import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel
 
 class TutorHomeControllerTest extends TestBase {

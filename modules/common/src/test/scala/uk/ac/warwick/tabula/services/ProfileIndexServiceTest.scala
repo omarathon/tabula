@@ -93,6 +93,36 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 		indexer.find("m m", Seq(Fixtures.department("OT", "Some other department")), Set(Student, Staff), false) should be ('empty)
 		indexer.find("m m", Seq(dept), Set(Staff), false) should be ('empty)
 	}
+	
+	@Transactional
+	@Test def asciiFolding = withFakeTime(dateTime(2000, 6)) {
+		val dept = Fixtures.department("CS", "Computer Science")
+		session.save(dept)
+		
+		val m = new StudentMember
+		m.universityId = "1300623"
+		m.userId = "smrlar"
+		m.firstName = "Aist\u0117"
+		m.fullFirstName = "Aist\u0117"
+		m.lastName = "Kiltinavi\u010Di\u016Ba"
+		m.homeDepartment = dept
+		m.lastUpdatedDate = new DateTime(2000,1,2,0,0,0)
+		m.userType = Student
+		m.inUseFlag = "Active"
+
+		session.save(m)
+		session.flush
+
+		indexer.incrementalIndex
+		indexer.listRecent(0, 1000).size should be (1)
+
+		indexer.find("bob thornton", Seq(dept), Set(), false) should be ('empty)
+		indexer.find("Aist\u0117", Seq(dept), Set(), false).head should be (m)
+		indexer.find("aist", Seq(dept), Set(), false).head should be (m)
+		indexer.find("a kiltinavi\u010Di\u016Ba", Seq(dept), Set(), false).head should be (m)
+		indexer.find("aiste kiltinavi\u010Di\u016Ba", Seq(dept), Set(), false).head should be (m)
+		indexer.find("aiste kiltinaviciua", Seq(dept), Set(), false).head should be (m)
+	}
 
 	@Transactional
 	@Test def index = withFakeTime(dateTime(2000, 6)) {

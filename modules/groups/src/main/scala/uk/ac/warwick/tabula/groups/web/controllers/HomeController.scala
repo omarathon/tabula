@@ -51,16 +51,24 @@ object GroupsDisplayHelper {
 	//
 	// c.f rules outlined in TAB-922
 	//
-	def getGroupsToDisplay(set:SmallGroupSet, user:User):(Seq[SmallGroup],ViewerRole) = {
+	// isTutor = true when viewing groups for another user
+
+	def getGroupsToDisplay(set:SmallGroupSet, user:User, isTutor:Boolean = false):(Seq[SmallGroup],ViewerRole) = {
 		val allGroupsInSet = set.groups.asScala.toSeq
 		val groupsStudentHasJoined = allGroupsInSet.filter(_.students.users.contains(user))
+
+		def viewerRoleOrTutor(role: ViewerRole) =
+			if(isTutor) Tutor
+			else role
+
 		groupsStudentHasJoined match {
-			case Nil if (set.allocationMethod == StudentSignUp && set.openForSignups == false) => (Nil,StudentNotAssignedToGroup)
-			case Nil if (set.allocationMethod == StudentSignUp)                                => (allGroupsInSet, StudentNotAssignedToGroup)
-			case Nil                                                                           => (Nil,StudentNotAssignedToGroup)
-			case x:Seq[SmallGroup]                                                             => (x, StudentAssignedToGroup)
+			case Nil if (set.allocationMethod == StudentSignUp && set.openForSignups == false) => (Nil,viewerRoleOrTutor(StudentNotAssignedToGroup))
+			case Nil if (set.allocationMethod == StudentSignUp)                                => (allGroupsInSet, viewerRoleOrTutor(StudentNotAssignedToGroup))
+			case Nil                                                                           => (Nil,viewerRoleOrTutor(StudentNotAssignedToGroup))
+			case x:Seq[SmallGroup]                                                             => (x, viewerRoleOrTutor(StudentAssignedToGroup))
 		}
 	}
+
 
 	// Given a list of groupsets (which a student is a member of), group them by module and then
 	// return all the modules with at least one groupset with at least one group that needs

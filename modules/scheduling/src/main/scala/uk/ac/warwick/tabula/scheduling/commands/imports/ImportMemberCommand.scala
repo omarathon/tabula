@@ -62,12 +62,12 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 
 		this.title = oneOf(member.title, optString("title")) map { WordUtils.capitalizeFully(_).trim() } getOrElse("")
 		this.firstName = oneOf(
-			member.preferredForenames,
 			optString("preferred_forename"),
+			member.preferredForenames,
 			ssoUser.getFirstName
 		) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
 		this.fullFirstName = oneOf(optString("forenames"), ssoUser.getFirstName) map { formatForename(_, ssoUser.getFirstName) } getOrElse("")
-		this.lastName = oneOf(member.preferredSurname, optString("family_name"), ssoUser.getLastName) map { formatSurname(_, ssoUser.getLastName) } getOrElse("")
+		this.lastName = oneOf(optString("family_name"), member.preferredSurname, ssoUser.getLastName) map { formatSurname(_, ssoUser.getLastName) } getOrElse("")
 
 		this.email = (oneOf(member.email, optString("email_address"), ssoUser.getEmail).orNull)
 		this.homeEmail = (oneOf(member.alternativeEmailAddress, optString("alternative_email_address")).orNull)
@@ -205,19 +205,19 @@ object ImportMemberHelpers {
 
 	def optString(columnName: String)(implicit rs: Option[ResultSet]): Option[String] =
 		rs.flatMap { rs => 
-			if (hasColumn(rs, columnName)) Some(rs.getString(columnName))
+			if (hasColumn(rs, columnName)) Option(rs.getString(columnName))
 			else None
 		}
 
 	def optLocalDate(columnName: String)(implicit rs: Option[ResultSet]): Option[LocalDate] =
 		rs.flatMap { rs => 
-			if (hasColumn(rs, columnName)) Some(rs.getDate(columnName)).map { new LocalDate(_) }
+			if (hasColumn(rs, columnName)) Option(rs.getDate(columnName)).map { new LocalDate(_) }
 			else None
 		}
 
 	def hasColumn(rs: ResultSet, columnName: String) = {
 		val metadata = rs.getMetaData
-		val cols = for (col <- 1 to metadata.getColumnCount) yield columnName == metadata.getColumnName(col)
+		val cols = for (col <- 1 to metadata.getColumnCount) yield columnName.toLowerCase == metadata.getColumnName(col).toLowerCase
 		cols.exists(b => b)
 	}
 

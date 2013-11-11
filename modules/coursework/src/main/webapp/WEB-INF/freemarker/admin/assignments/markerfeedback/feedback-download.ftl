@@ -34,7 +34,11 @@ ${feedback.defaultFeedbackComments!""}
 </div>
 </#if>
 
-
+<#if feedback.attachments?has_content>
+	<div class="feedback-notes">
+		<h4>Please note there <@fmt.p number=feedback.attachments?size singular="is" plural="are" shownumber=false /> also <@fmt.p number=feedback.attachments?size singular="feedback file" plural="feedback files" shownumber=true /> available for download.</h4>
+	</div>
+</#if>
 
 </body>
 </html>

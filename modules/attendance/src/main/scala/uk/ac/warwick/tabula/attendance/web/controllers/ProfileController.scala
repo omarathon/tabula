@@ -39,21 +39,16 @@ class ProfileController extends AttendanceController {
 	@RequestMapping
 	def render(@ModelAttribute("command") cmd: Appliable[Option[AttendanceProfileInformation]]) = {
 		val info = cmd.apply()
+		val baseMap = Map(
+			"currentUser" -> user,
+			"monitoringPointsByTerm" -> info.map { _.monitoringPointsByTerm },
+			"checkpointState" -> info.map { _.checkpointState },
+			"missedCountByTerm" -> info.map { _.missedCountByTerm }
+		)
 
 		if (ajax)
-			Mav("home/_profile", 
-				"currentUser" -> user,
-				"monitoringPointsByTerm" -> info.map { _.monitoringPointsByTerm },
-				"checkpointState" -> info.map { _.checkpointState },
-				"missedCountByTerm" -> info.map { _.missedCountByTerm }
-			).noLayout()
+			Mav("home/_profile", baseMap).noLayout()
 		else
-			Mav("home/profile", 
-				"currentUser" -> user, 
-				"defaultExpand" -> true,
-				"monitoringPointsByTerm" -> info.map { _.monitoringPointsByTerm },
-				"checkpointState" -> info.map { _.checkpointState },
-				"missedCountByTerm" -> info.map { _.missedCountByTerm }
-			)
+			Mav("home/profile", baseMap ++ Map("defaultExpand" -> true))
 	}
 }

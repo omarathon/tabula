@@ -6,10 +6,8 @@ import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Ty
 import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
-
 import org.hibernate.annotations.{ForeignKey, Filter, FilterDef, AccessType, BatchSize, Type, IndexColumn}
 import org.joda.time.{Days, LocalDate, DateTime}
-
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model.forms._
@@ -22,9 +20,9 @@ import uk.ac.warwick.tabula.data.model.forms.WordCountField
 import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
-
 import scala.reflect._
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
 
 
 object Assignment {
@@ -60,7 +58,7 @@ object Assignment {
 @Filter(name = Assignment.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class Assignment extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget {
+class Assignment extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with PostLoadBehaviour {
 	import Assignment._
 
 	@transient
@@ -186,6 +184,16 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
 	var members: UserGroup = UserGroup.ofUsercodes
+	
+	// TAB-1446 If hibernate sets members to null, make a new empty usergroup
+	override def postLoad {
+		ensureMembersGroup
+	}
+
+	def ensureMembersGroup = {
+		if (members == null) members = UserGroup.ofUsercodes
+		members
+	}
 
 	@ManyToOne(fetch = LAZY)
 	@JoinColumn(name="markscheme_id")

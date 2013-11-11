@@ -38,7 +38,8 @@ case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefini
     Profiles.MeetingRecord.Update(PermissionsSelector.Any[StudentRelationshipType]),
     Profiles.MeetingRecord.Delete(PermissionsSelector.Any[StudentRelationshipType]),
 
-		MonitoringPoints.View
+		MonitoringPoints.View,
+		SmallGroupEvents.ViewRegister
 	)
 
 	GrantsScopelessPermission(
