@@ -190,6 +190,10 @@ object Fixtures {
 
 		scd.sprStatus = sprStatus
 
+		val scyd = studentCourseYearDetails()
+		scyd.studentCourseDetails = scd
+		scd.studentCourseYearDetails.add(scyd)
+
 		member.studentCourseDetails.add(scd)
 		member.mostSignificantCourse = scd
 

@@ -3,9 +3,7 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 import scala.Option.option2Iterable
 import scala.collection.JavaConversions.{mapAsScalaMap, seqAsJavaList}
 import scala.collection.JavaConverters.asScalaBufferConverter
-
 import org.joda.time.DateTime
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.commands.{Command, Description}
@@ -18,6 +16,8 @@ import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 import uk.ac.warwick.tabula.scheduling.services.{CourseImporter, MembershipInformation, ModeOfAttendanceImporter, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware, SitsStatusesImporter}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileIndexService, ProfileService, SmallGroupService, UserLookupService}
 import uk.ac.warwick.userlookup.User
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.MemberDao
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware {
 
@@ -48,6 +48,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				importModeOfAttendances
 				courseImporter.importCourses
 				doMemberDetails
+				logger.info("Import completed")
 			}
 		}
 	}
@@ -78,37 +79,51 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 	def doMemberDetails {
 		benchmark("Import all member details") {
-
+			logger.info("Importing member details")
 			val importRowTracker = new ImportRowTracker
 			val importStart = DateTime.now
 
+			// everything before the for is for debugging
+			//val mem = memberDao.getByUniversityId("1014367").get
+			//val membOpt = profileImporter.membershipInfoForIndividual(mem)
+			//val memb = membOpt.get
+			//val membSeq = Seq(Seq(memb))
+
 			for {
+				// to revert debugging, uncomment next 2 lines and remove following
 				department <- madService.allDepartments;
-				userIdsAndCategories <- logSize(profileImporter.userIdsAndCategories(department)).grouped(BatchSize)
+				membershipInfos <- logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize)
+
+				//membershipInfos <- membSeq
 			} {
-				logger.info("Fetching user details for " + userIdsAndCategories.size + " usercodes from websignon")
-				val users: Map[String, User] = userLookup.getUsersByUserIds(userIdsAndCategories.map(x => x.member.usercode)).toMap
+				logger.info("Fetching user details for " + membershipInfos.size + " usercodes from websignon")
+				val users: Map[String, User] = userLookup.getUsersByUserIds(membershipInfos.map(x => x.member.usercode)).toMap
 
 				transactional() {
-					logger.info("Fetching member details for " + userIdsAndCategories.size + " members from Membership")
-					profileImporter.getMemberDetails(userIdsAndCategories, users, importRowTracker) map { _.apply }
+					logger.info("Fetching member details for " + membershipInfos.size + " members from Membership")
+					val commands = profileImporter.getMemberDetails(membershipInfos, users, importRowTracker)
+					commands map { _.apply }
 					session.flush
 					session.clear
 
-					updateModuleRegistrationsAndSmallGroups(userIdsAndCategories, users)
+
+					updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
 				}
 			}
 
 			stampMissingRows(importRowTracker, importStart)
-
 		}
 	}
 
 	def stampMissingRows(importRowTracker: ImportRowTracker, importStart: DateTime) {
-		// make sure any rows we've got for this student which we haven't seen are recorded as missing
-		for (stu: StudentMember <- memberDao.getStudentsPresentInSits
-				if !importRowTracker.studentsSeen.contains(stu))
-			stu.missingFromImportSince = importStart
+		// make sure any rows we've got for this student in the db which we haven't seen in this import are recorded as missing
+		logger.info("Timestamping missing rows")
+		val tracker = importRowTracker
+
+		for (stu: StudentMember <- memberDao.getStudentsPresentInSits) {
+			if (!importRowTracker.studentsSeen.contains(stu))
+				stu.missingFromImportSince = importStart
+		}
 
 		for (scd: StudentCourseDetails <- studentCourseDetailsDao.getAllPresentInSits
 				if !importRowTracker.studentCourseDetailsSeen.contains(scd)) {
@@ -148,29 +163,32 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 			val importRowTracker = new ImportRowTracker
 
-			profileImporter.userIdAndCategory(member) match {
+			profileImporter.membershipInfoForIndividual(member) match {
 				case Some(membInfo: MembershipInformation) => {
 
 					// retrieve details for this student from SITS and store the information in Tabula
 					val importMemberCommands = profileImporter.getMemberDetails(List(membInfo), Map(usercode -> user), importRowTracker)
 					if (importMemberCommands.isEmpty) logger.warn("Refreshing student " + membInfo.member.universityId + " but found no data to import.")
 					val members = importMemberCommands map { _.apply }
+
+					// update missingFromSitsSince field in this student's member and course records:
+					updateMissingForIndividual(member, importRowTracker)
+
 					session.flush
 
+					// re-import module registrations and delete old module and group registrations:
 					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(usercode -> user))
 
-					for (member <- members) session.evict(member)
-					for (modReg <- newModuleRegistrations) session.evict(modReg)
-					
 					// TAB-1435 refresh profile index
 					profileIndexService.indexItemsWithoutNewTransaction(members.flatMap { m => profileService.getMemberByUniversityId(m.universityId) })
-					logger.info("finished re-indexing")
+
+					for (thisMember <- members) session.evict(thisMember)
+					for (modReg <- newModuleRegistrations) session.evict(modReg)
+
+					logger.info("Data refreshed for " + member.universityId)
 				}
 				case None => logger.warn("Student is no longer in uow_current_members in membership - not updating")
 			}
-
-			updateMissingForIndividual(member, importRowTracker)
-
 		}
 	}
 
@@ -193,7 +211,10 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					memberDao.saveOrUpdate(stu)
 				}
 				else if (stu.missingFromImportSince == null && !importRowTracker.studentsSeen.contains(stu)) {
+					var missingSince = stu.missingFromImportSince
 					stu.missingFromImportSince = DateTime.now
+					missingSince = stu.missingFromImportSince
+
 					memberDao.saveOrUpdate(stu)
 				}
 

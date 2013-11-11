@@ -126,7 +126,6 @@ abstract class BaseController extends ControllerMethods
 		if (_hideDeletedItems) {
 			session.enableFilter("notDeleted")
 		}
-		session.enableFilter("notStale")
 		onPreRequest
 	}
 

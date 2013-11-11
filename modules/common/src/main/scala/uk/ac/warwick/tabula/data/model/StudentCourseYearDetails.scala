@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.Option.option2Iterable
-import org.hibernate.annotations.Type
+import org.hibernate.annotations._
 import org.joda.time.DateTime
 import javax.persistence.Basic
 import javax.persistence.Entity

@@ -15,6 +15,9 @@ import uk.ac.warwick.tabula.data.model.ModuleSelectionStatus
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
+import uk.ac.warwick.tabula.Fixtures
+import scala.collection.JavaConverters._
+import org.joda.time.DateTime
 
 class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 
@@ -55,6 +58,35 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 			retrievedScyd.studentCourseDetails.scjCode should be ("0123456/1")
 			retrievedScyd.studentCourseDetails.sprCode should be ("0123456/2")
 			retrievedScyd.academicYear should be (AcademicYear(2013))
+		}
+	}
+
+	@Test def testPresentInSits {
+		transactional { tx =>
+			val dept1 = Fixtures.department("hm", "History of Music")
+			val dept2 = Fixtures.department("ar", "Architecture")
+
+			session.saveOrUpdate(dept1)
+			session.saveOrUpdate(dept2)
+
+			val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+			val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+			val stu3 = Fixtures.student(universityId = "1000003", userId="student", department=dept2, courseDepartment=dept2)
+			val stu4 = Fixtures.student(universityId = "1000004", userId="student", department=dept2, courseDepartment=dept2)
+
+			session.saveOrUpdate(stu1)
+			session.saveOrUpdate(stu2)
+			session.saveOrUpdate(stu3)
+			session.saveOrUpdate(stu4)
+
+			scydDao.getAllPresentInSits.size should be (4)
+
+			val scyd = stu2.mostSignificantCourse.studentCourseYearDetails.asScala.head
+
+			scyd.missingFromImportSince = DateTime.now
+			session.saveOrUpdate(scyd)
+
+			scydDao.getAllPresentInSits.size should be (3)
 		}
 	}
 }

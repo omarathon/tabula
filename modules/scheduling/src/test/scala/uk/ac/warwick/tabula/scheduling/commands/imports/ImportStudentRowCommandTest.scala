@@ -43,6 +43,8 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
 import uk.ac.warwick.tabula.scheduling.services.CourseImporter
 import uk.ac.warwick.tabula.data.model.Course
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
+import org.springframework.beans.BeanWrapperImpl
+import org.joda.time.DateTime
 
 
 // scalastyle:off magic.number
@@ -219,6 +221,34 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			there was one(studentCourseDetailsDao).saveOrUpdate(any[StudentCourseDetails]);
 		}
 	}
+
+	@Test def testMarkAsSeenInSits {
+		new Environment {
+
+			// first set up the studentCourseYearDetails as above
+			var studentCourseDetails = new StudentCourseDetails
+			studentCourseDetails.scjCode = "0672089/2"
+			studentCourseDetails.sprCode = "0672089/2"
+
+			val studentCourseDetailsBean = new BeanWrapperImpl(studentCourseDetails)
+
+			studentCourseDetails.missingFromImportSince should be (null)
+
+			courseCommand.markAsSeenInSits(studentCourseDetailsBean) should be (false)
+
+			studentCourseDetails.missingFromImportSince should be (null)
+
+			studentCourseDetails.missingFromImportSince = DateTime.now
+
+			studentCourseDetails.missingFromImportSince should not be (null)
+
+			courseCommand.markAsSeenInSits(studentCourseDetailsBean) should be (true)
+
+			studentCourseDetails.missingFromImportSince should be (null)
+
+		}
+	}
+
 
 	@Test
 	def testImportStudentRowCommandWorksWithNew {

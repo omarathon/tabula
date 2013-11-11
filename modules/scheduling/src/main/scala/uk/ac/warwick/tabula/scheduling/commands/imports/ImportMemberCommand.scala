@@ -204,20 +204,21 @@ object ImportMemberHelpers {
 	def oneOf[A](options: Option[A]*) = options.flatten.headOption
 
 	def optString(columnName: String)(implicit rs: Option[ResultSet]): Option[String] =
-		rs.flatMap { rs => 
+		rs.flatMap { rs =>
 			if (hasColumn(rs, columnName)) Some(rs.getString(columnName))
 			else None
 		}
 
 	def optLocalDate(columnName: String)(implicit rs: Option[ResultSet]): Option[LocalDate] =
-		rs.flatMap { rs => 
+		rs.flatMap { rs =>
 			if (hasColumn(rs, columnName)) Some(rs.getDate(columnName)).map { new LocalDate(_) }
 			else None
 		}
 
 	def hasColumn(rs: ResultSet, columnName: String) = {
 		val metadata = rs.getMetaData
-		val cols = for (col <- 1 to metadata.getColumnCount) yield columnName.toLowerCase == metadata.getColumnName(col).toLowerCase
+		val cols = for (col <- 1 to metadata.getColumnCount) 
+			yield columnName.toLowerCase == metadata.getColumnName(col).toLowerCase
 		cols.exists(b => b)
 	}
 
@@ -236,13 +237,13 @@ object ImportMemberHelpers {
 			AcademicYear.parse(code)
 		}
 	}
-	
+
 	def getInUseFlag(flag: Option[String], member: MembershipMember) =
 		flag.getOrElse {
 			val (startDate, endDate) = (member.startDate, member.endDate)
-			if (startDate != null && startDate.toDateTimeAtStartOfDay.isAfter(DateTime.now)) 
+			if (startDate != null && startDate.toDateTimeAtStartOfDay.isAfter(DateTime.now))
 				"Inactive - Starts " + startDate.toString("dd/MM/yyyy")
-			else if (endDate != null && endDate.toDateTimeAtStartOfDay.isBefore(DateTime.now)) 
+			else if (endDate != null && endDate.toDateTimeAtStartOfDay.isBefore(DateTime.now))
 				"Inactive - Ended " + endDate.toString("dd/MM/yyyy")
 			else "Active"
 		}
@@ -250,7 +251,7 @@ object ImportMemberHelpers {
 	private val CapitaliseForenamePattern = """(?:(\p{Lu})(\p{L}*)([^\p{L}]?))""".r
 
 	def formatForename(name: String, suggested: String = null): String = {
-		if (name.equalsIgnoreCase(suggested)) {
+		if (name == null || name.equalsIgnoreCase(suggested)) {
 			// Our suggested capitalisation from SSO was correct
 			suggested
 		} else {

@@ -103,7 +103,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.uniqueResult
 
 	def getStudentsPresentInSits() =
-		session.newCriteria[StudentMember]
+			session.newCriteria[StudentMember]
 			.add(is("missingFromImportSince", null))
 			.seq
 

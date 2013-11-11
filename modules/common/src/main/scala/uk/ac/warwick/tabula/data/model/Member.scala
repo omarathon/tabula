@@ -18,11 +18,12 @@ import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.AcademicYear
+import org.apache.commons.lang3.builder.HashCodeBuilder
+import org.apache.commons.lang3.builder.EqualsBuilder
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
 	final val ActiveOnlyFilter = "activeOnly"
-	final val NotStaleFilter = "notStale"
 }
 
 /**
@@ -34,16 +35,7 @@ object Member {
  * some other secondary entity joined on. It's usually possible to flip the
  * query around to make this work.
  */
-@FilterDefs(Array(
-	new FilterDef(name = Member.StudentsOnlyFilter, defaultCondition = "usertype = 'S'"),
-	new FilterDef(name = Member.ActiveOnlyFilter, defaultCondition = "(inuseflag = 'Active' or inuseflag like 'Inactive - Starts %')"),
-	new FilterDef(name = Member.NotStaleFilter, defaultCondition = "missingFromImportSince is null")
-))
-@Filters(Array(
-	new Filter(name = Member.StudentsOnlyFilter),
-	new Filter(name = Member.ActiveOnlyFilter),
-	new Filter(name = Member.NotStaleFilter)
-))
+
 @Entity
 @AccessType("field")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
@@ -181,6 +173,18 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	def hasCurrentEnrolment = false
 
+	override final def equals(other: Any) = other match {
+		case that: Member =>
+			new EqualsBuilder()
+				.append(universityId, that.universityId)
+				.build()
+		case _ => false
+	}
+
+	override final def hashCode =
+		new HashCodeBuilder()
+			.append(universityId)
+			.build()
 }
 
 @Entity
