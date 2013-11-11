@@ -69,7 +69,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		monitoringPointDao.findMonitoringPointSets(route, academicYear)
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]) =
 		monitoringPointDao.findMonitoringPointSet(route, academicYear, year)
-	
+
 	def getCheckpointsBySCD(monitoringPoint: MonitoringPoint): Seq[(StudentCourseDetails, MonitoringCheckpoint)] =
 		monitoringPointDao.getCheckpointsBySCD(monitoringPoint)
 
@@ -132,7 +132,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	}
 
 	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int = {
-		student.studentCourseDetails.asScala.map{scd =>
+		student.freshStudentCourseDetails.map{scd =>
 			monitoringPointDao.missedCheckpoints(scd, academicYear)
 		}.sum
 	}
@@ -167,7 +167,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 
 	def formatsThatWillCreateCheckpoint(relationship: StudentRelationship): Seq[MeetingFormat] = {
 		relationship.studentMember.map(student => {
-			student.studentCourseDetails.asScala.map{scd =>
+			student.freshStudentCourseDetails.map{scd =>
 				getRelevantPoints(scd, relationship.relationshipType, None).map{point =>
 					if (point.meetingQuantity > 1)
 						// if enough meetings currently exist such that creating this one would meet the required quantity
@@ -185,7 +185,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 
 	def willCheckpointBeCreated(meeting: MeetingRecord): Boolean = {
 		meeting.relationship.studentMember.exists(student => {
-			student.studentCourseDetails.asScala.exists(scd => {
+			student.freshStudentCourseDetails.exists(scd => {
 				getRelevantPoints(scd, meeting.relationship.relationshipType, Option(meeting.format))
 					.exists(point => countRelevantMeetings(scd, point, Option(meeting)) >= point.meetingQuantity)
 			})
@@ -205,7 +205,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 			return Seq()
 		}
 		meeting.relationship.studentMember.map(student => {
-			val createdCheckpoints = student.studentCourseDetails.asScala.flatMap(scd => {
+			val createdCheckpoints = student.freshStudentCourseDetails.flatMap(scd => {
 				val relevantMeetingPoints = getRelevantPoints(scd, meeting.relationship.relationshipType, Option(meeting.format))
 				// check the required quantity and create a checkpoint if there are sufficient meetings
 				val checkpointOptions = for (point <- relevantMeetingPoints) yield {
@@ -233,7 +233,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 	}
 
 	private def getRelevantPoints(scd: StudentCourseDetails, relationshipType: StudentRelationshipType, formatOption: Option[MeetingFormat]) = {
-		scd.studentCourseYearDetails.asScala.flatMap(scyd => {
+		scd.freshStudentCourseYearDetails.flatMap(scyd => {
 			val relevantPointSets = monitoringPointDao.findMonitoringPointSets(scd.route, scyd.academicYear).filter(pointSet =>
 				pointSet.year == null || pointSet.year == scyd.yearOfStudy
 			)

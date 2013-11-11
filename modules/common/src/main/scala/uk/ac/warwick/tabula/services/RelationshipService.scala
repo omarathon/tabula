@@ -56,7 +56,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def saveOrUpdate(relationship: StudentRelationship) = memberDao.saveOrUpdate(relationship)
 
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional() {
-		student.studentCourseDetails.asScala.flatMap {
+		student.freshStudentCourseDetails.flatMap {
 			courseDetail => memberDao.getCurrentRelationships(relationshipType, courseDetail.sprCode)
 		}
 	}

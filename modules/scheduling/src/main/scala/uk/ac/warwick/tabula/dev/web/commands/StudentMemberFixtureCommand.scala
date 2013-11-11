@@ -67,7 +67,7 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 				memberDao.delete
 			}
 
-			newMember.studentCourseDetails.add(scd)
+			newMember.attachStudentCourseDetails(scd)
 			memberDao.saveOrUpdate(newMember)
 		}
 

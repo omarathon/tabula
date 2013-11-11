@@ -37,7 +37,7 @@ class ViewMeetingsForPointCommand(val student: StudentMember, val point: Monitor
 				.getOrElse { relationshipService.allStudentRelationshipTypes }
 
 		val allMeetings = allRelationshipTypes.flatMap{ relationshipType =>
-			student.studentCourseDetails.asScala.flatMap{ scd =>
+			student.freshStudentCourseDetails.flatMap{ scd =>
 				relationshipService.getRelationships(relationshipType, scd.sprCode).flatMap(meetingRecordDao.list(_))
 			}
 		}

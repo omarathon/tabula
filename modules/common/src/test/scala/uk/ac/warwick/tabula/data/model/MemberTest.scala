@@ -45,7 +45,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		studentCourseDetails.mostSignificant = true
 		studentCourseDetails.relationshipService = relationshipService
 
-		member.studentCourseDetails.add(studentCourseDetails)
+		member.attachStudentCourseDetails(studentCourseDetails)
 		member.mostSignificantCourse = studentCourseDetails
 
 		// add module registrations
@@ -88,7 +88,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		// create a student course details with module registrations
 		val scd1 = new StudentCourseDetails(member, "2222222/2")
-		member.studentCourseDetails.add(scd1)
+		member.attachStudentCourseDetails(scd1)
 
 		val mod1 = new Module
 		val mod2 = new Module
@@ -102,7 +102,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		// create another student course details with module registrations
 		val scd2 = new StudentCourseDetails(member, "2222222/3")
-		member.studentCourseDetails.add(scd2)
+		member.attachStudentCourseDetails(scd2)
 
 		val mod3 = new Module
 		val mod4 = new Module
@@ -180,7 +180,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		studentCourseDetails.route = route
 		studentCourseDetails.mostSignificant = true
 
-		student.studentCourseDetails.add(studentCourseDetails)
+		student.attachStudentCourseDetails(studentCourseDetails)
 		student.homeDepartment = dept
 		student.mostSignificantCourse = studentCourseDetails
 

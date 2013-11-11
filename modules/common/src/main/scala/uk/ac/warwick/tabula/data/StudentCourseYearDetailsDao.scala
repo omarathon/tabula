@@ -16,7 +16,8 @@ trait StudentCourseYearDetailsDao {
 	def delete(studentCourseYearDetails: StudentCourseYearDetails)
 	def getStudentCourseYearDetails(id: String): Option[StudentCourseYearDetails]
 	def getBySceKey(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
-	def getAllPresentInSits(): Seq[StudentCourseYearDetails]
+	def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
+	def getAllFreshInSits(): Seq[StudentCourseYearDetails]
 }
 
 @Repository
@@ -38,10 +39,17 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 	def getBySceKey(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails] =
 		session.newCriteria[StudentCourseYearDetails]
 			.add(is("studentCourseDetails", studentCourseDetails))
+			.add(is("missingFromImportSince", null))
 			.add(is("sceSequenceNumber", seq))
 			.uniqueResult
 
-	def getAllPresentInSits() =
+	def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails] =
+		session.newCriteria[StudentCourseYearDetails]
+			.add(is("studentCourseDetails", studentCourseDetails))
+			.add(is("sceSequenceNumber", seq))
+			.uniqueResult
+
+	def getAllFreshInSits() =
 		session.newCriteria[StudentCourseYearDetails]
 			.add(is("missingFromImportSince", null))
 			.seq

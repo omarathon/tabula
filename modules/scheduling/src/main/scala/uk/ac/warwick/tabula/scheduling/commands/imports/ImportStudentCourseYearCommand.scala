@@ -53,7 +53,7 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet, importRowTracker: Imp
 	this.moduleRegistrationStatusCode = rs.getString("mod_reg_status")
 
 	override def applyInternal(): StudentCourseYearDetails = {
-		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKey(
+		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKeyStaleOrFresh(
 			studentCourseDetails,
 			sceSequenceNumber)
 
@@ -75,7 +75,8 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet, importRowTracker: Imp
 			logger.debug("Saving changes for " + studentCourseYearDetails)
 
 			if (studentCourseDetails.latestStudentCourseYearDetails == null ||
-				studentCourseDetails.studentCourseYearDetails.asScala.forall { _ <= studentCourseYearDetails }) {
+				// need to include fresh or stale since this might be a row which was deleted but has been re-instated
+				studentCourseDetails.freshOrStaleStudentCourseYearDetails.forall { _ <= studentCourseYearDetails }) {
 				studentCourseDetails.latestStudentCourseYearDetails = studentCourseYearDetails
 			}
 

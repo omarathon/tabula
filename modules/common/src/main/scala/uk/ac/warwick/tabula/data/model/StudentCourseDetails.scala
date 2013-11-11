@@ -42,10 +42,14 @@ class StudentCourseDetails
 	@JoinColumn(name="universityId", referencedColumnName="universityId")
 	var student: StudentMember = _
 
+	// made this private as can't think of any instances in the app where you wouldn't prefer freshStudentCourseDetails
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
-	val studentCourseYearDetails: JList[StudentCourseYearDetails] = JArrayList()
+	private val studentCourseYearDetails: JList[StudentCourseYearDetails] = JArrayList()
+
+	def freshStudentCourseYearDetails = studentCourseYearDetails.asScala.filter(scyd => scyd.isFresh)
+	def freshOrStaleStudentCourseYearDetails = studentCourseYearDetails.asScala
 
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
@@ -119,12 +123,18 @@ class StudentCourseDetails
 		studentCourseYearDetails.remove(yearDetailsToAdd)
 		studentCourseYearDetails.add(yearDetailsToAdd)
 
-		latestStudentCourseYearDetails = studentCourseYearDetails.asScala.max
+		latestStudentCourseYearDetails = freshStudentCourseYearDetails.max
 	}
 
 	def hasModuleRegistrations = {
 		!moduleRegistrations.isEmpty()
 	}
+
+	def isFresh = (missingFromImportSince == null)
+
+	def addStudentCourseYearDetails(scyd: StudentCourseYearDetails) = studentCourseYearDetails.add(scyd)
+
+	def removeStudentCourseYearDetails(scyd: StudentCourseYearDetails) = studentCourseYearDetails.remove(scyd)
 }
 
 trait StudentCourseProperties {

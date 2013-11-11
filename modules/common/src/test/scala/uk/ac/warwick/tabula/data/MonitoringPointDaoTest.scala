@@ -33,9 +33,9 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 	@Test def getCheckpointByMember {
 		transactional { tx =>
 			val student1 = Fixtures.student("1234")
-			student1.studentCourseDetails.get(0).route = route
+			student1.freshStudentCourseDetails(0).route = route
 			val student2 = Fixtures.student("2345")
-			student2.studentCourseDetails.get(0).route = route
+			student2.freshStudentCourseDetails(0).route = route
 
 			routeDao.saveOrUpdate(route)
 			monitoringPointDao.saveOrUpdate(monitoringPointSet)
@@ -44,7 +44,7 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 
 			val checkpoint = new MonitoringCheckpoint
 			checkpoint.point = monitoringPoint
-			checkpoint.studentCourseDetail = student1.studentCourseDetails.get(0)
+			checkpoint.studentCourseDetail = student1.freshStudentCourseDetails(0)
 			checkpoint.updatedBy = "foo"
 			checkpoint.state = MonitoringCheckpointState.fromCode("attended")
 			monitoringPointDao.saveOrUpdate(checkpoint)
@@ -58,9 +58,9 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 	@Test def getCheckpointByScjCode {
 		transactional { tx =>
 			val student1 = Fixtures.student("1234")
-			student1.studentCourseDetails.get(0).route = route
+			student1.freshStudentCourseDetails(0).route = route
 			val student2 = Fixtures.student("2345")
-			student2.studentCourseDetails.get(0).route = route
+			student2.freshStudentCourseDetails(0).route = route
 
 			routeDao.saveOrUpdate(route)
 			monitoringPointDao.saveOrUpdate(monitoringPointSet)
@@ -69,7 +69,7 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 
 			val checkpoint = new MonitoringCheckpoint
 			checkpoint.point = monitoringPoint
-			checkpoint.studentCourseDetail = student1.studentCourseDetails.get(0)
+			checkpoint.studentCourseDetail = student1.freshStudentCourseDetails(0)
 			checkpoint.updatedBy = "foo"
 			checkpoint.state = MonitoringCheckpointState.fromCode("attended")
 			monitoringPointDao.saveOrUpdate(checkpoint)

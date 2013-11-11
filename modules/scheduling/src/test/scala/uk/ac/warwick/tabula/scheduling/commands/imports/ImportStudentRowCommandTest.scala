@@ -216,7 +216,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseDetails.endDate.toString should be ("2014-05-12")
 			studentCourseDetails.expectedEndDate.toString should be ("2015-05-12")
 
-			studentCourseDetails.studentCourseYearDetails.size should be (1)
+			studentCourseDetails.freshStudentCourseYearDetails.size should be (1)
 
 			there was one(studentCourseDetailsDao).saveOrUpdate(any[StudentCourseDetails]);
 		}
@@ -271,8 +271,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			member match {
 				case stu: StudentMember => {
-					stu.studentCourseDetails.size should be (1)
-					stu.studentCourseDetails.asScala.head.studentCourseYearDetails.size should be (1)
+					stu.freshStudentCourseDetails.size should be (1)
+					stu.freshStudentCourseDetails.head.freshStudentCourseYearDetails.size should be (1)
 				}
 				case _ => false should be (true)
 			}
@@ -295,8 +295,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			val member = rowCommand.applyInternal()
 			member match {
 				case stu: StudentMember => {
-					stu.studentCourseDetails.size should be (1)
-					stu.studentCourseDetails.asScala.head.studentCourseYearDetails.size should be (1)
+					stu.freshStudentCourseDetails.size should be (1)
+					stu.freshStudentCourseDetails.head.freshStudentCourseYearDetails.size should be (1)
 				}
 				case _ => false should be (true)
 			}
@@ -331,7 +331,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			val studentMember = member.get
 
-			studentMember.studentCourseDetails.size should not be (0)
+			studentMember.freshStudentCourseDetails.size should not be (0)
 
 			there was no(relationshipService).replaceStudentRelationship(tutorRelationshipType, "0672089/2","0070790");
 		}

@@ -87,7 +87,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	private def yearRestriction(opt: Option[Any]) = opt map { is("year", _) } getOrElse { isNull("year") }
 
 	def getCheckpoint(monitoringPoint: MonitoringPoint, member: StudentMember): Option[MonitoringCheckpoint] = {
-	  val studentCourseDetailOption = member.studentCourseDetails.asScala.find(
+	  val studentCourseDetailOption = member.freshStudentCourseDetails.find(
 			_.route == monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route
 		)
 

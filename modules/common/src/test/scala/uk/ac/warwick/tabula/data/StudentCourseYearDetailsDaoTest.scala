@@ -46,12 +46,12 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 
 			val scyd = new StudentCourseYearDetails(scd, 1,AcademicYear(2013))
 
-			scd.studentCourseYearDetails.add(scyd)
+			scd.addStudentCourseYearDetails(scyd)
 
 			scydDao.saveOrUpdate(scyd)
 			scdDao.saveOrUpdate(scd)
 
-			scd.studentCourseYearDetails.size should be (1)
+			scd.freshStudentCourseYearDetails.size should be (1)
 
 			val retrievedScyd = scydDao.getBySceKey(scd, 1).get
 			retrievedScyd.isInstanceOf[StudentCourseYearDetails] should be (true)
@@ -79,14 +79,14 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 			session.saveOrUpdate(stu3)
 			session.saveOrUpdate(stu4)
 
-			scydDao.getAllPresentInSits.size should be (4)
+			scydDao.getAllFreshInSits.size should be (4)
 
-			val scyd = stu2.mostSignificantCourse.studentCourseYearDetails.asScala.head
+			val scyd = stu2.mostSignificantCourse.freshStudentCourseYearDetails.head
 
 			scyd.missingFromImportSince = DateTime.now
 			session.saveOrUpdate(scyd)
 
-			scydDao.getAllPresentInSits.size should be (3)
+			scydDao.getAllFreshInSits.size should be (3)
 		}
 	}
 }

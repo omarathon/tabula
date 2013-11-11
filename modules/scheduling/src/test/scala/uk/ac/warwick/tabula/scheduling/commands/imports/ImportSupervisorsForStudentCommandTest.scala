@@ -22,11 +22,11 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		val uniId = "1111111"
 		val prsCode = "IN0070790"
 		val supervisorUniId = "0070790"
-			
+
 		val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
 		relationshipType.defaultSource = StudentRelationshipSource.SITS
 		session.saveOrUpdate(relationshipType)
-		
+
 		val department = new Department
 		session.saveOrUpdate(department)
 
@@ -39,8 +39,8 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		val studentCourseDetails = new StudentCourseDetails(supervisee, scjCode)
 		studentCourseDetails.sprCode = sprCode
 		studentCourseDetails.department = department
-		
-		supervisee.studentCourseDetails.add(studentCourseDetails)
+
+		supervisee.attachStudentCourseDetails(studentCourseDetails)
 
 		val route = new Route
 		route.degreeType = Postgraduate
@@ -75,7 +75,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			command.applyInternal
 
 			// check results
-			val supRels = supervisee.studentCourseDetails.get(0).relationships(relationshipType)
+			val supRels = supervisee.freshStudentCourseDetails(0).relationships(relationshipType)
 			supRels.size should be (1)
 			val rel = supRels.head
 
@@ -99,7 +99,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			command.applyInternal
 
 			// check results
-			val supRels = supervisee.studentCourseDetails.get(0).relationships(relationshipType)
+			val supRels = supervisee.freshStudentCourseDetails(0).relationships(relationshipType)
 			supRels.size should be (0)
 		}
 	}
@@ -129,7 +129,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			command.applyInternal
 
 			// check results
-			val supRels = supervisee.studentCourseDetails.get(0).relationships(relationshipType)
+			val supRels = supervisee.freshStudentCourseDetails(0).relationships(relationshipType)
 			supRels.size should be (1)
 			val rel = supRels.head
 

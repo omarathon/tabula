@@ -4,7 +4,7 @@
 			<label>
 				Academic year
 				<select class="academicYear input-small">
-					<#list studentCourseDetails.studentCourseYearDetails as studentCourseYearDetail>
+					<#list studentCourseDetails.freshStudentCourseYearDetails as studentCourseYearDetail>
 						<option
 							value="${studentCourseYearDetail.academicYear.startYear?c}"
 							<#if studentCourseDetails.latestStudentCourseYearDetails.id == studentCourseYearDetail.id>selected</#if>
@@ -24,7 +24,7 @@
 			var monitoringPointsLoader = function() {
 				$('#attendance .monitoring-points').empty();
 				$('#attendance .small-groups').empty();
-				
+
 				$.get('/attendance/profile/${studentCourseDetails.urlSafeId}/' + $('#attendance select.academicYear :selected').val() + '?dt=' + new Date().valueOf(), function(data) {
 					$('#attendance .monitoring-points').html(data);
 					var pane = $('#attendance-pane');
@@ -35,7 +35,7 @@
 						window.GlobalScripts.initCollapsible();
 					}
 				});
-				
+
 				$.get('/groups/student/${profile.universityId}/attendance/' + $('#attendance select.academicYear :selected').val() + '?dt=' + new Date().valueOf(), function(data) {
 					$('#attendance .small-groups').html(data);
 					var pane = $('#attendance-pane');

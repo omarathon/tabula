@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model._
 import org.joda.time.DateTime
 import org.mockito.Matchers
+import scala.collection.mutable.Buffer
 
 class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mockito {
 	trait ServiceTestSupport extends MonitoringPointDaoComponent with MeetingRecordDaoComponent
@@ -36,7 +37,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		studentCourseDetails.sprCode returns studentSprCode
 		studentCourseDetails.route returns studentRoute
 
-		student.studentCourseDetails returns JArrayList(studentCourseDetails)
+		student.freshStudentCourseDetails returns Buffer[StudentCourseDetails](studentCourseDetails)
 
 		val agent = "agent"
 		val agentMember = Fixtures.staff(agent, agent)
@@ -68,7 +69,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		val studentCourseYear2 = new StudentCourseYearDetails
 		studentCourseYear2.yearOfStudy = 2
 		studentCourseYear2.academicYear = academicYear2013
-		studentCourseDetails.studentCourseYearDetails returns JArrayList(studentCourseYear1, studentCourseYear2)
+		studentCourseDetails.freshStudentCourseYearDetails returns Buffer(studentCourseYear1, studentCourseYear2)
 	}
 
 	trait Year2PointSetFixture extends StudentYear2Fixture {

@@ -19,8 +19,8 @@ trait MembersForPointSet extends ProfileServiceComponent {
 				pointSet.route,
 				pointSet.academicYear
 			).filter{
-				student => student.studentCourseDetails.asScala.exists{
-					scd => scd.studentCourseYearDetails.asScala.exists{
+				student => student.freshStudentCourseDetails.exists{
+					scd => scd.freshStudentCourseYearDetails.exists{
 						scyd =>
 							scyd.yearOfStudy == pointSet.year && scyd.academicYear == pointSet.academicYear
 					}

@@ -140,12 +140,12 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		memberDao.saveOrUpdate(stu3)
 		memberDao.saveOrUpdate(stu4)
 
-		studentCourseDetailsDao.getAllPresentInSits.size should be (4)
+		studentCourseDetailsDao.getAllFreshInSits.size should be (4)
 
 		stu2.mostSignificantCourse.missingFromImportSince = DateTime.now
 		session.saveOrUpdate(stu2.mostSignificantCourse)
 
-		studentCourseDetailsDao.getAllPresentInSits.size should be (3)
+		studentCourseDetailsDao.getAllFreshInSits.size should be (3)
 	}
 
 }

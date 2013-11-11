@@ -148,6 +148,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
         	from
           	StudentCourseDetails scd
           where
+						scd.missingFromImportSince is null and
             scd.department = :department and
         		scd.student.lastUpdatedDate > :lastUpdated and
             scd.sprStatus.code not like 'P%'
@@ -196,6 +197,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				sr.relationshipType = :relationshipType
 			and
+				scd.missingFromImportSince is null
+			and
 				scd.department = :department
 			and
 				scd.mostSignificant = true
@@ -227,6 +230,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				sr.relationshipType = :relationshipType
 			and
 				staff.homeDepartment = :department
+			and
+				scd.missingFromImportSince is null
 			and
 				scd.sprStatus.code not like 'P%'
 			and
@@ -279,6 +284,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				StudentMember sm
 				inner join sm.studentCourseDetails as scd
 			where
+				scd.missingFromImportSince is null
+			and
 				scd.department = :department
 			and
 				scd.mostSignificant = true
@@ -313,6 +320,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			from
 				StudentCourseDetails scd
 			where
+				scd.missingFromImportSince is null
+			and
 				scd.department = :department
 			and
 				scd.mostSignificant = true
@@ -333,6 +342,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			from
 				StudentCourseDetails scd
 			where
+				scd.missingFromImportSince is null
+			and
 				scd.department = :department
 			and
 				scd.mostSignificant = true
@@ -353,6 +364,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			from
 				StudentCourseDetails scd
 			where
+				scd.missingFromImportSince is null
+			and
 				scd.sprCode in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
 			""")
 			.setEntity("relationshipType", relationshipType)

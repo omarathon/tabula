@@ -67,7 +67,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	this.levelCode = rs.getString("level_code")
 
 	override def applyInternal(): StudentCourseDetails = {
-		val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCode(scjCode)
+		val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCodeStaleOrFresh(scjCode)
 
 		logger.debug("Importing student course details for " + scjCode)
 

@@ -31,7 +31,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 		session.saveOrUpdate(scd)
 		session.flush
 
-		val scyd = scd.studentCourseYearDetails.asScala.head
+		val scyd = scd.freshStudentCourseYearDetails.head
 
 		// create a module
 		val existingMod = Fixtures.module("ax101", "Pointless Deliberations")
@@ -104,8 +104,8 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 	@Test def testStampMissingRows() {
 		new Environment {
 			memberDao.getStudentsPresentInSits returns Seq(stu)
-			scdDao.getAllPresentInSits returns Seq(scd)
-			scydDao.getAllPresentInSits returns Seq(scyd)
+			scdDao.getAllFreshInSits returns Seq(scd)
+			scydDao.getAllFreshInSits returns Seq(scyd)
 
 			val tracker = new ImportRowTracker
 			tracker.studentsSeen.add(stu)

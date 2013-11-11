@@ -33,9 +33,9 @@ class AgentStudentViewCommand(
 
 	def applyInternal() = {
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
-		student.studentCourseDetails.asScala.filter(_.hasCurrentEnrolment).map(scd =>
+		student.freshStudentCourseDetails.filter(_.hasCurrentEnrolment).map(scd =>
 			scd -> {
-				scd.studentCourseYearDetails.asScala.find(_.academicYear == academicYear).map(scyd => {
+				scd.freshStudentCourseYearDetails.find(_.academicYear == academicYear).map(scyd => {
 					monitoringPointService.findMonitoringPointSet(scd.route, academicYear, Option(scyd.yearOfStudy)).orElse(
 						monitoringPointService.findMonitoringPointSet(scd.route, academicYear, None)
 					).map(checkpointStateStrings(_, currentAcademicWeek)).getOrElse(Map())

@@ -34,6 +34,7 @@ class ModuleRegistrationDaoImpl extends ModuleRegistrationDao with Daoisms {
 				select distinct mr
 					from ModuleRegistration mr
 					where academicYear = :academicYear
+					and studentCourseDetails.missingFromImportSince is null
 					and studentCourseDetails.student.userId in :usercodes
 				""")
 					.setString("academicYear", academicYear.getStoreValue.toString)

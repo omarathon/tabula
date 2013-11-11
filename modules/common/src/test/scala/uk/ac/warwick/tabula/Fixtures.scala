@@ -192,9 +192,9 @@ object Fixtures {
 
 		val scyd = studentCourseYearDetails()
 		scyd.studentCourseDetails = scd
-		scd.studentCourseYearDetails.add(scyd)
+		scd.addStudentCourseYearDetails(scyd)
 
-		member.studentCourseDetails.add(scd)
+		member.attachStudentCourseDetails(scd)
 		member.mostSignificantCourse = scd
 
 		scd

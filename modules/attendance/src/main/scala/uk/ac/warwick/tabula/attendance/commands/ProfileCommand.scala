@@ -33,7 +33,7 @@ abstract class ProfileCommand(val studentCourseDetails: StudentCourseDetails, va
 	self: MonitoringPointServiceComponent =>
 
 	override def applyInternal() = {
-		studentCourseDetails.studentCourseYearDetails.asScala.find(_.academicYear == academicYear).flatMap {
+		studentCourseDetails.freshStudentCourseYearDetails.find(_.academicYear == academicYear).flatMap {
 			studentCourseYearDetail =>
 				monitoringPointService.findMonitoringPointSet(
 					studentCourseDetails.route,
@@ -62,7 +62,7 @@ abstract class ProfileCommand(val studentCourseDetails: StudentCourseDetails, va
 		}.filter{
 			case (termName, count) => count > 0
 		}
-		
+
 		AttendanceProfileInformation(monitoringPointsByTerm, checkpointState, missedCountByTerm)
 	}
 }

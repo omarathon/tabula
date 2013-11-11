@@ -43,7 +43,7 @@ abstract class SetMonitoringCheckpointCommand(val monitoringPoint: MonitoringPoi
 			val route = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route
 			val scjCode = members.find(member => member.universityId == universityId) match {
 				case None => throw new ItemNotFoundException()
-				case Some(member) => member.studentCourseDetails.asScala.find(scd => scd.route == route) match {
+				case Some(member) => member.freshStudentCourseDetails.find(scd => scd.route == route) match {
 					case None => throw new ItemNotFoundException()
 					case Some(scd) => scd.scjCode
 				}

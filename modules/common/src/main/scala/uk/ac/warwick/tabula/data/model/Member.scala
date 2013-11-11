@@ -34,8 +34,20 @@ object Member {
  * queries will only include it if it's the entity after "from" and not
  * some other secondary entity joined on. It's usually possible to flip the
  * query around to make this work.
+ *
+ * There is no filter returning only fresh records (i.e. those seen in the last SITS import), since that would
+ * prevent member.getByUniversityId from returning stale records - which would be an issue since the import
+ * uses that to check if a record is there already before re-importing it.  (So having the filter in place would
+ * prevent students who had been deleted from SITS from being re-imported.)
  */
-
+@FilterDefs(Array(
+		new FilterDef(name = Member.StudentsOnlyFilter, defaultCondition = "usertype = 'S'"),
+		new FilterDef(name = Member.ActiveOnlyFilter, defaultCondition = "(inuseflag = 'Active' or inuseflag like 'Inactive - Starts %')")
+	))
+	@Filters(Array(
+		new Filter(name = Member.StudentsOnlyFilter),
+		new Filter(name = Member.ActiveOnlyFilter)
+	))
 @Entity
 @AccessType("field")
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
@@ -173,6 +185,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	def hasCurrentEnrolment = false
 
+	def isFresh = (missingFromImportSince == null)
+
 	override final def equals(other: Any) = other match {
 		case that: Member =>
 			new EqualsBuilder()
@@ -192,10 +206,15 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 class StudentMember extends Member with StudentProperties {
 	this.userType = MemberUserType.Student
 
+	// made this private as can't think of any instances in the app where you wouldn't prefer freshStudentCourseDetails
 	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
-	var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
+	private var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
+
+	def freshStudentCourseDetails = studentCourseDetails.asScala.filter(scd => scd.isFresh)
+	def freshOrStaleStudentCourseDetails = studentCourseDetails.asScala
+
 
 	@OneToOne
 	@JoinColumn(name = "mostSignificantCourse")
@@ -207,14 +226,15 @@ class StudentMember extends Member with StudentProperties {
 		this.universityId = id
 	}
 
+
 	/**
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
 	 */
 	override def affiliatedDepartments: Stream[Department] = {
-		val sprDepartments = studentCourseDetails.asScala.flatMap(scd => Option(scd.department)).toStream
-		val sceDepartments = studentCourseDetails.asScala.flatMap(_.studentCourseYearDetails.asScala).flatMap(scyd => Option(scyd.enrolmentDepartment)).toStream
-		val routeDepartments = studentCourseDetails.asScala.flatMap(scd => Option(scd.route)).flatMap(route => Option(route.department)).toStream
+		val sprDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.department)).toStream
+		val sceDepartments = freshStudentCourseDetails.flatMap(_.freshStudentCourseYearDetails).flatMap(scyd => Option(scyd.enrolmentDepartment)).toStream
+		val routeDepartments = freshStudentCourseDetails.flatMap(scd => Option(scd.route)).flatMap(route => Option(route.department)).toStream
 
 		(Option(homeDepartment).toStream #:::
 				sprDepartments #:::
@@ -223,17 +243,22 @@ class StudentMember extends Member with StudentProperties {
 		).distinct
 	}
 
-	override def mostSignificantCourseDetails: Option[StudentCourseDetails] = Option(mostSignificantCourse)
+	override def mostSignificantCourseDetails: Option[StudentCourseDetails] = {
+		if (mostSignificantCourse.isFresh)
+			Option(mostSignificantCourse)
+		else
+			None
+	}
 
-	override def hasCurrentEnrolment: Boolean = studentCourseDetails.asScala.exists(_.hasCurrentEnrolment)
+	override def hasCurrentEnrolment: Boolean = freshStudentCourseDetails.exists(_.hasCurrentEnrolment)
 
 	override def permanentlyWithdrawn: Boolean = {
-		studentCourseDetails.asScala
+		freshStudentCourseDetails
 			 .map(scd => scd.sprStatus)
 			 .filter(_ != null)
 			 .filter(_.code != null)
 			 .filter(_.code.startsWith("P"))
-			 .size == studentCourseDetails.size
+			 .size == freshStudentCourseDetails.size
 	}
 
 	override def hasRelationship(relationshipType: StudentRelationshipType): Boolean =
@@ -252,10 +277,10 @@ class StudentMember extends Member with StudentProperties {
 	}
 
 	override def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] =
-		studentCourseDetails.asScala.flatMap(_.registeredModulesByYear(year))
+		freshStudentCourseDetails.flatMap(_.registeredModulesByYear(year))
 
 	override def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =
-		studentCourseDetails.asScala.flatMap(_.moduleRegistrationsByYear(year))
+		freshStudentCourseDetails.flatMap(_.moduleRegistrationsByYear(year))
 }
 
 @Entity

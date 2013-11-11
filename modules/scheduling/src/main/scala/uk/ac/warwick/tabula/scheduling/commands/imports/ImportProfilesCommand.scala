@@ -125,13 +125,13 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				stu.missingFromImportSince = importStart
 		}
 
-		for (scd: StudentCourseDetails <- studentCourseDetailsDao.getAllPresentInSits
+		for (scd: StudentCourseDetails <- studentCourseDetailsDao.getAllFreshInSits
 				if !importRowTracker.studentCourseDetailsSeen.contains(scd)) {
 			scd.missingFromImportSince = importStart
 			studentCourseDetailsDao.saveOrUpdate(scd)
 		}
 
-		for (scyd: StudentCourseYearDetails <- studentCourseYearDetailsDao.getAllPresentInSits
+		for (scyd: StudentCourseYearDetails <- studentCourseYearDetailsDao.getAllFreshInSits
 				if !importRowTracker.studentCourseYearDetailsSeen.contains(scyd)) {
 			scyd.missingFromImportSince = importStart
 			studentCourseYearDetailsDao.saveOrUpdate(scyd)
@@ -218,7 +218,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					memberDao.saveOrUpdate(stu)
 				}
 
-				for (scd <- stu.studentCourseDetails.asScala) {
+				for (scd <- stu.freshOrStaleStudentCourseDetails) {
 
 					// on studentCourseDetails
 					if (scd.missingFromImportSince != null
@@ -233,7 +233,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					}
 
 					// and on studentCourseYearDetails
-					for (scyd <- scd.studentCourseYearDetails.asScala) {
+					for (scyd <- scd.freshOrStaleStudentCourseYearDetails) {
 						if (scyd.missingFromImportSince != null
 								&& importRowTracker.studentCourseYearDetailsSeen.contains(scyd)) {
 							scyd.missingFromImportSince = null

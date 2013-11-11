@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.services.ProfileService
 import scala.Some
 
 trait TutorFixture extends Mockito {
-	
+
 	val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
 	val department = new Department
@@ -19,13 +19,13 @@ trait TutorFixture extends Mockito {
 
 	val student = new StudentMember
 	student.universityId = "student"
-		
+
 	val studentCourseDetails = new StudentCourseDetails
 	studentCourseDetails.student = student
 	studentCourseDetails.department = department
 	studentCourseDetails.sprCode = "0000001/1"
 	studentCourseDetails.mostSignificant = true
-	student.studentCourseDetails.add(studentCourseDetails)
+	student.attachStudentCourseDetails(studentCourseDetails)
 	student.mostSignificantCourse = studentCourseDetails
 
 //	val courseDetails = new StudentCourseDetails()
