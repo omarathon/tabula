@@ -81,3 +81,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro extensionRequest assignment><@url page="/module/${assignment.module.code}/${assignment.id}/extension"/></#macro>
 <#macro assignmentreceipt assignment><@url page="/module/${assignment.module.code}/${assignment.id}/resend-receipt"/></#macro>
 <#macro assignmentrequestaccess assignment><@url page="/module/${assignment.module.code}/${assignment.id}/request-access"/></#macro>
+<#macro feedbackPdf assignment><@url page="/module/${assignment.module.code}/${assignment.id}/feedback.pdf"/></#macro>

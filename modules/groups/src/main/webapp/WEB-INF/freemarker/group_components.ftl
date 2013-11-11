@@ -75,15 +75,17 @@
 					<li><a href="<@routes.createset module />"><i class="icon-group icon-fixed-width"></i> Add small groups</a></li>
 				</#if>
 				
-				<#assign module_attendance_url><@routes.moduleAttendance module /></#assign>
-				<li>
-					<@fmt.permission_button permission='SmallGroupEvents.Register' scope=module action_descr='view attendance' href=module_attendance_url
-				  						tooltip='View attendance at groups' data_attr='data-popup-target=.btn-group data-container=body'>
-				  	<i class="icon-group icon-fixed-width"></i> Attendance
-				  </@fmt.permission_button>
-				</li>
+				<#if can.do('SmallGroupEvents.Register', module)>
+					<#assign module_attendance_url><@routes.moduleAttendance module /></#assign>
+					<li>
+						<@fmt.permission_button permission='SmallGroupEvents.Register' scope=module action_descr='view attendance' href=module_attendance_url
+					  						tooltip='View attendance at groups' data_attr='data-popup-target=.btn-group data-container=body'>
+					  	<i class="icon-group icon-fixed-width"></i> Attendance
+					  </@fmt.permission_button>
+					</li>
+				</#if>
 				
-				<#if has_archived_groups>
+				<#if moduleItem.canManageGroups && has_archived_groups>
 					<li><a class="show-archived-small-groups" href="#">
 						<i class="icon-eye-open icon-fixed-width"></i> Show archived small groups
 					</a>
@@ -341,7 +343,38 @@
 	${event.day.shortName} <@fmt.time event.startTime />, <@fmt.singleWeekFormat week academicYear department />
 </#compress></#macro>
 
-<#macro singleGroupAttendance group instances studentAttendance>
+<#macro studentAttendanceRow student attendance instances group showStudent=true>
+	<#local set = group.groupSet />
+	<#local module = set.module />
+	<#local department = module.department />
+	<#local academicYear = set.academicYear />
+	<#local missedCount = 0 />
+
+	<tr>
+		<#if showStudent><td class="nowrap" data-sortBy="${student.lastName}, ${student.firstName}">${student.fullName}</td></#if>
+		<#list instances as instance>
+			<#local state = mapGet(attendance, instance) />
+		
+			<td>
+				<#if state.name == 'Attended'>
+					<i class="icon-ok icon-fixed-width attended" title="${student.fullName} attended: <@instanceFormat instance academicYear department />"></i>
+				<#elseif state.name == 'Missed'>
+					<#local missedCount = missedCount + 1 />
+					<i class="icon-remove icon-fixed-width unauthorised" title="${student.fullName} did not attend: <@instanceFormat instance academicYear department />"></i>
+				<#elseif state.name == 'Late'> <#-- Late -->
+					<i class="icon-warning-sign icon-fixed-width late" title="No data: <@instanceFormat instance academicYear department />"></i>
+				<#else> <#-- Not recorded -->
+					<i class="icon-minus icon-fixed-width" title="<@instanceFormat instance academicYear department />"></i>
+				</#if>
+			</td>
+		</#list>
+		<td>
+			<span class="badge badge-<#if (missedCount > 2)>important<#elseif (missedCount > 0)>warning<#else>success</#if>">${missedCount}</span>
+		</td>
+	</tr>
+</#macro>
+
+<#macro singleGroupAttendance group instances studentAttendance singleStudent={} showRecordButtons=true>
 	<#local set = group.groupSet />
 	<#local module = set.module />
 	<#local department = module.department />
@@ -350,7 +383,7 @@
 	<table id="group_attendance_${group.id}" class="table table-striped table-bordered table-condensed attendance-table">
 		<thead>
 			<tr>
-				<th class="sortable nowrap">Student</th>
+				<#if !singleStudent?has_content><th class="sortable nowrap">Student</th></#if>
 				<#list instances as instance>
 					<#local event = instance._1() />
 					<#local week = instance._2() />
@@ -360,7 +393,7 @@
 							<@instanceFormat instance academicYear department />
 						</div>
 						
-						<#if features.smallGroupTeachingRecordAttendance && !event.unscheduled>
+						<#if showRecordButtons && features.smallGroupTeachingRecordAttendance && !event.unscheduled>
 							<#if can.do("SmallGroupEvents.Register", event)>
 								<div class="eventRegister">
 									<a class="btn btn-mini" href="<@routes.registerForWeek event week />" title="Record attendance for <@instanceFormat instance academicYear department />">
@@ -375,35 +408,18 @@
 			</tr>
 		</thead>
 		<tbody>
-			<#list studentAttendance?keys as student>
-				<#local attendance = mapGet(studentAttendance, student) />
-				<#local missedCount = 0 />
-				<tr>
-					<td class="nowrap" data-sortBy="${student.lastName}, ${student.firstName}">${student.fullName}</td>
-					<#list instances as instance>
-						<#local state = mapGet(attendance, instance) />
-					
-						<td>
-							<#if state.name == 'Attended'>
-								<i class="icon-ok icon-fixed-width attended" title="${student.fullName} attended: <@instanceFormat instance academicYear department />"></i>
-							<#elseif state.name == 'Missed'>
-								<#local missedCount = missedCount + 1 />
-								<i class="icon-remove icon-fixed-width unauthorised" title="${student.fullName} did not attend: <@instanceFormat instance academicYear department />"></i>
-							<#elseif state.name == 'Late'> <#-- Late -->
-								<i class="icon-warning-sign icon-fixed-width late" title="No data: <@instanceFormat instance academicYear department />"></i>
-							<#else> <#-- Not recorded -->
-								<i class="icon-minus icon-fixed-width" title="<@instanceFormat instance academicYear department />"></i>
-							</#if>
-						</td>
-					</#list>
-					<td>
-						<span class="badge badge-<#if (missedCount > 2)>important<#elseif (missedCount > 0)>warning<#else>success</#if>">${missedCount}</span>
-					</td>
-				</tr>
-			</#list>
+			<#if singleStudent?has_content>
+				<@studentAttendanceRow student=singleStudent attendance=studentAttendance instances=instances group=group showStudent=false />
+			<#else>
+				<#list studentAttendance?keys as student>
+					<#local attendance = mapGet(studentAttendance, student) />
+					<@studentAttendanceRow student=student attendance=attendance instances=instances group=group showStudent=true />
+				</#list>
+			</#if>
 		</tbody>
 	</table>
 	
+	<#if !singleStudent?has_content>
 	<script type="text/javascript">
 		jQuery(function($){
 			$('#group_attendance_${group.id}')
@@ -420,6 +436,7 @@
 				});
 		});
 	</script>
+	</#if>
 </#macro>
 
 <#macro single_groupset_attendance groupSet groups>

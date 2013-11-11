@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.coursework.web.controllers
 
 import org.springframework.stereotype.Controller
+import uk.ac.warwick.tabula.coursework.web.controllers.HomeControllerCollectionsHelper._
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.CurrentUser
@@ -11,7 +12,6 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.Activity
 import uk.ac.warwick.tabula.services.ActivityService
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.web.bind.annotation._
@@ -20,7 +20,6 @@ import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import uk.ac.warwick.tabula.data.model.Department
 
 @Controller class HomeController extends CourseworkController {
 	var moduleService = Wire[ModuleAndDepartmentService]
@@ -139,25 +138,9 @@ import uk.ac.warwick.tabula.data.model.Department
 			val assignmentsWithSubmissionInfo = for (assignment <- assignmentsWithSubmission.diff(assignmentsWithFeedback)) yield enhanced(assignment)
 			val lateFormativeAssignmentsInfo = for (assignment <- lateFormativeAssignments) yield enhanced(assignment)
 
-			val historicAssignmentsInfo =
-				assignmentsWithFeedbackInfo
-				.union(assignmentsWithSubmissionInfo)
-				.union(lateFormativeAssignmentsInfo)
-				.sortWith { (info1, info2) =>
-					def toDate(info: Map[String, Any]) = {
-						val assignment = info("assignment").asInstanceOf[Assignment]
-						val submission = info("submission").asInstanceOf[Option[Submission]]
-
-						submission map { _.submittedDate } getOrElse { if (assignment.openEnded) assignment.openDate else assignment.closeDate }
-					}
-
-					toDate(info1) < toDate(info2)
-				}
-				.reverse
-
 			Mav("home/view",
 				"enrolledAssignments" -> enrolledAssignmentsInfo,
-				"historicAssignments" -> historicAssignmentsInfo,
+				"historicAssignments" -> getHistoricAssignmentsInfo(assignmentsWithFeedbackInfo, assignmentsWithSubmissionInfo, lateFormativeAssignmentsInfo),
 
 				"assignmentsForMarking" -> assignmentsForMarkingInfo,
 				"ownedDepartments" -> ownedDepartments,
@@ -167,9 +150,35 @@ import uk.ac.warwick.tabula.data.model.Department
 		} else {
 			Mav("home/view")
 		}
+
 	}
 
 	def webgroupsToMap(groups: Seq[Group]) = groups
 		.map { (g: Group) => (Module.nameFromWebgroupName(g.getName), g) }
 		.sortBy { _._1 }
+}
+
+//
+// Stateless functions for collection generation
+//
+object HomeControllerCollectionsHelper {
+
+	type AssignmentInfo = Map[String, Any]
+
+	def getHistoricAssignmentsInfo(assignmentsWithFeedbackInfo: Seq[AssignmentInfo], assignmentsWithSubmissionInfo: Seq[AssignmentInfo], lateFormativeAssignmentsInfo: Seq[AssignmentInfo]): Seq[AssignmentInfo] = {
+		assignmentsWithFeedbackInfo
+			.union(assignmentsWithSubmissionInfo)
+			.union(lateFormativeAssignmentsInfo)
+			.sortWith {	(info1, info2) =>
+			def toDate(info: AssignmentInfo) = {
+				val assignment = info("assignment").asInstanceOf[Assignment]
+				val submission = info("submission").asInstanceOf[Option[Submission]]
+
+				submission map { _.submittedDate } getOrElse { if (assignment.openEnded) assignment.openDate else assignment.closeDate }
+			}
+
+			toDate(info1) < toDate(info2)
+		}.distinct.reverse
+	}
+
 }
