@@ -98,16 +98,31 @@ class GroupMonitoringPointsByTermTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def groupedPointsByTerm() {
+	def groupedPointsByTermAllRoutesInDept() {
 		new GroupedPointsFixture with GroupMonitoringPointsByTerm {
-			val groupedPointsByTerm = groupSimilarPointsByTerm(monitoringPoints, Seq(), academicYear)
+			val groupedPointsByTerm = groupSimilarPointsByTerm(monitoringPoints, Seq(route1, route2, route3, route4), academicYear)
 
 			val autumnPoints = groupedPointsByTerm("Autumn")
 			autumnPoints.size should be (2)
 			val groupedPoint = autumnPoints(1)
 			groupedPoint should not be null
 			groupedPoint.routes.size should be (3)
+			groupedPoint.routes.head._2 should be (true)
+		}
+	}
 
+	@Test
+	def groupedPointsByTermOneRouteInDept() {
+		new GroupedPointsFixture with GroupMonitoringPointsByTerm {
+			val groupedPointsByTerm = groupSimilarPointsByTerm(monitoringPoints, Seq(route1), academicYear)
+
+			val autumnPoints = groupedPointsByTerm("Autumn")
+			autumnPoints.size should be (2)
+			val groupedPoint = autumnPoints(1)
+			groupedPoint should not be null
+			groupedPoint.routes.size should be (3)
+			val option = groupedPoint.routes.find{case(r, b) => r == route2}
+			option should be (Option(route2, false))
 		}
 	}
 
