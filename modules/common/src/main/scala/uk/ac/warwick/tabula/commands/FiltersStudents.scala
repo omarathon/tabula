@@ -104,7 +104,7 @@ trait FiltersStudents extends ProfileServiceComponent {
 	// Do we need to consider out-of-department modules/routes or can we rely on users typing them in manually?
 	lazy val allModules: Seq[Module] = modulesForDepartmentAndSubDepartments(department)
 	lazy val allCourseTypes: Seq[CourseType] = CourseType.all
-	lazy val allRoutes: Seq[Route] = routesForDepartmentAndSubDepartments(department)
+	lazy val allRoutes: Seq[Route] = routesForDepartmentAndSubDepartments(department).sorted(Route.DegreeTypeOrdering)
 	lazy val allYearsOfStudy: Seq[Int] = 1 to 8
 	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(department)
 	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(department)

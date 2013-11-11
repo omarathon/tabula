@@ -15,14 +15,14 @@ import org.hibernate.criterion.Order._
 import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.system.BindListener
 import org.joda.time.DateTime
-import scala.Some
 
 object SetMonitoringCheckpointCommand {
-	def apply(department: Department, templateMonitoringPoint: MonitoringPoint, user: CurrentUser) =
-		new SetMonitoringCheckpointCommand(department, templateMonitoringPoint, user)
+	def apply(department: Department, templateMonitoringPoint: MonitoringPoint, user: CurrentUser, routes: JList[Route]) =
+		new SetMonitoringCheckpointCommand(department, templateMonitoringPoint, user, routes)
 			with AutowiringProfileServiceComponent
-			with ComposableCommand[Seq[MonitoringCheckpoint]]
+			with AutowiringSecurityServicePermissionsAwareRoutes
 			with SetMonitoringCheckpointCommandPermissions
+			with ComposableCommand[Seq[MonitoringCheckpoint]]
 			with SetMonitoringCheckpointCommandValidation
 			with SetMonitoringPointDescription
 			with SetMonitoringCheckpointState
@@ -31,7 +31,7 @@ object SetMonitoringCheckpointCommand {
 			with AutowiringTermServiceComponent
 }
 
-abstract class SetMonitoringCheckpointCommand(val department: Department, val templateMonitoringPoint: MonitoringPoint, val user: CurrentUser)
+abstract class SetMonitoringCheckpointCommand(val department: Department, val templateMonitoringPoint: MonitoringPoint, val user: CurrentUser, val routes: JList[Route])
 	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with BindListener {
 
 	self: SetMonitoringCheckpointState with MonitoringPointServiceComponent with ProfileServiceComponent =>
@@ -118,7 +118,10 @@ trait SetMonitoringCheckpointCommandPermissions extends RequiresPermissionsCheck
 	self: SetMonitoringCheckpointState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Record, department)
+		if (routesForPermission(user, Permissions.MonitoringPoints.View, department).size == department.routes.asScala.size)
+			p.PermissionCheck(Permissions.MonitoringPoints.Record, department)
+		else
+			p.PermissionCheckAll(Permissions.MonitoringPoints.Record, routes.asScala)
 	}
 }
 
@@ -141,22 +144,23 @@ trait SetMonitoringPointDescription extends Describable[Seq[MonitoringCheckpoint
 }
 
 
-trait SetMonitoringCheckpointState extends FiltersStudents {
+trait SetMonitoringCheckpointState extends FiltersStudents with PermissionsAwareRoutes {
 	def templateMonitoringPoint: MonitoringPoint
 	def department: Department
 	def user: CurrentUser
+	def routes: JList[Route]
 
 	var studentsState: JMap[StudentMember, JMap[MonitoringPoint, MonitoringCheckpointState]] =
 		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, MonitoringCheckpointState] }.asJava
 	var studentsStateAsScala: Map[StudentMember, Map[MonitoringPoint, MonitoringCheckpointState]] = _
 
 	var courseTypes: JList[CourseType] = JArrayList()
-	var routes: JList[Route] = JArrayList()
 	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
 
+	// We don't actually allow any sorting, but these need to be defined
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
 	var sortOrder: JList[Order] = JArrayList()
 }

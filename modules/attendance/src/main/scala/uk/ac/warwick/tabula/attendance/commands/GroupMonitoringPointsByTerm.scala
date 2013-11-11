@@ -28,7 +28,11 @@ trait GroupMonitoringPointsByTerm extends TermServiceComponent {
 		} map { case (term, points) => term -> points.sortBy(p => (p.validFromWeek, p.requiredFromWeek)) }
 	}
 
-	def groupSimilarPointsByTerm(monitoringPoints: Seq[MonitoringPoint], deptRoutes: Seq[Route], academicYear: AcademicYear): Map[String, Seq[GroupedMonitoringPoint]] = {
+	def groupSimilarPointsByTerm(
+		monitoringPoints: Seq[MonitoringPoint],
+		deptRoutes: Seq[Route],
+		academicYear: AcademicYear
+	): Map[String, Seq[GroupedMonitoringPoint]] = {
 		groupByTerm(monitoringPoints, academicYear).map{
 			case (term, points) => term -> points.groupBy{
 				mp => GroupedMonitoringPoint(mp.name.toLowerCase, mp.validFromWeek, mp.requiredFromWeek, Seq(), "")
@@ -38,7 +42,9 @@ trait GroupMonitoringPointsByTerm extends TermServiceComponent {
 						groupedPoints.head.name,
 						point.validFromWeek,
 						point.requiredFromWeek,
-						groupedPoints.map(_.pointSet.asInstanceOf[MonitoringPointSet].route).distinct.map{r => (r, deptRoutes.contains(r))},
+						groupedPoints.map(_.pointSet.asInstanceOf[MonitoringPointSet].route).distinct.sorted(Route.DegreeTypeOrdering).map{
+							r => (r, deptRoutes.contains(r))
+						},
 						groupedPoints.head.id
 					)
 				}

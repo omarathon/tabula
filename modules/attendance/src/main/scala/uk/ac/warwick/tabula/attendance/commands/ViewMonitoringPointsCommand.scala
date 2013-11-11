@@ -44,11 +44,34 @@ abstract class ViewMonitoringPointsCommand(val department: Department, val acade
 		if (sprStatuses.isEmpty) {
 			allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach { sprStatuses.add }
 		}
+		// Filter chosen routes by those that the user has permission to see
 		routes = (routes.asScala.toSet & visibleRoutes).toSeq.asJava
+
+		/** The above only works if routes isn't empty
+			* (if routes IS empty there is NO route restriction, rather than 'show no routes').
+			* If the user can't see ALL the routes, they can't select 'none' (which means 'Any'),
+			* so if they pick none, change it to all the ones they can see.
+			*/
+		if (!canSeeAllRoutes && routes.size() == 0) {
+			routes = visibleRoutes.toSeq.asJava
+		}
+
+
 		students = profileService.findAllStudentsByRestrictions(
 			department = department,
 			restrictions = buildRestrictions(),
 			orders = buildOrders()
+		)
+	}
+}
+
+trait ViewMonitoringPointsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: ViewMonitoringPointsState with PermissionsAwareRoutes =>
+
+	def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheckAny(
+			Seq(CheckablePermission(Permissions.MonitoringPoints.View, mandatory(department))) ++
+				routesForPermission(user, Permissions.MonitoringPoints.View, department).map { route => CheckablePermission(Permissions.MonitoringPoints.View, route) }
 		)
 	}
 }
@@ -62,6 +85,7 @@ trait ViewMonitoringPointsState extends FiltersStudents with PermissionsAwareRou
 	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
 	var students: Seq[StudentMember] = _
 
+	// We don't actually allow any sorting, but these need to be defined
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
 	var sortOrder: JList[Order] = JArrayList()
 
@@ -72,15 +96,8 @@ trait ViewMonitoringPointsState extends FiltersStudents with PermissionsAwareRou
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
-}
 
-trait ViewMonitoringPointsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ViewMonitoringPointsState with PermissionsAwareRoutes =>
-	
-	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheckAny(
-			Seq(CheckablePermission(Permissions.MonitoringPoints.View, mandatory(department))) ++
-				routesForPermission(user, Permissions.MonitoringPoints.View, department).map { route => CheckablePermission(Permissions.MonitoringPoints.View, route) }
-		)
-	}
+	// For Attendance Monitoring, we shouldn't consider sub-departments
+	override lazy val allRoutes = department.routes.asScala.sorted(Route.DegreeTypeOrdering)
+	lazy val canSeeAllRoutes = visibleRoutes.size == allRoutes.size
 }

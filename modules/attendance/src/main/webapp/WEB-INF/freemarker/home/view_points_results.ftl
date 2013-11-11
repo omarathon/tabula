@@ -35,6 +35,7 @@
 								All routes
 							<#else>
 								<#local popoverContent>
+									<p class="muted"><small>Only routes that have students matching the filter are applicable.</small></p>
 									<ul class="unstyled">
 										<#list command.allRoutes as route>
 											<#local isInPoint = false />
