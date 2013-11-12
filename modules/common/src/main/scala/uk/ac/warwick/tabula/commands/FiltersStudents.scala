@@ -10,8 +10,7 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.web.UriBuilder
 
-
-trait FiltersStudents extends ProfileServiceComponent {
+object FiltersStudents {
 	val MaxStudentsPerPage = 100
 	val DefaultStudentsPerPage = 50
 
@@ -36,7 +35,11 @@ trait FiltersStudents extends ProfileServiceComponent {
 			"studentCourseDetails.route" -> "route"
 		)
 	).toMap
+}
 
+trait FiltersStudents extends ProfileServiceComponent {
+	import FiltersStudents._
+	
 	def department: Department
 	def courseTypes: JList[CourseType]
 	def routes: JList[Route]

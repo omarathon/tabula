@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
-import scala.Some
+import uk.ac.warwick.tabula.commands.FiltersStudents
 
 /**
  * Service providing access to members and profiles.
@@ -122,8 +122,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		// If we're a sub-department then we have to fetch everyone, rhubarb! Otherwise, we can use nice things
 		if (department.hasParent) {
 			val allRestrictions = ScalaRestriction.is(
-				"studentCourseDetails.department", department.rootDepartment, 
-				"mostSignificantCourse" -> "studentCourseDetails"
+				"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment, 
+				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
 			) ++ restrictions
 			
 			memberDao.findStudentsByRestrictions(allRestrictions, orders, Int.MaxValue, 0)
@@ -131,8 +131,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 				.filter(studentDepartmentFilterMatches(department))
 		}	else {
 			val allRestrictions = ScalaRestriction.is(
-				"studentCourseDetails.department", department, 
-				"mostSignificantCourse" -> "studentCourseDetails"
+				"studentCourseYearDetails.enrolmentDepartment", department, 
+				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
 			) ++ restrictions
 			
 			memberDao.findStudentsByRestrictions(allRestrictions, orders, maxResults, startResult)
@@ -143,13 +143,13 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		val allRestrictions = {
 			if (department.hasParent) {
 				ScalaRestriction.is(
-					"studentCourseDetails.department", department.rootDepartment,
-					"mostSignificantCourse" -> "studentCourseDetails"
+					"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment, 
+					FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
 				) ++ restrictions
 			}	else {
 				ScalaRestriction.is(
-					"studentCourseDetails.department", department,
-					"mostSignificantCourse" -> "studentCourseDetails"
+					"studentCourseYearDetails.enrolmentDepartment", department, 
+					FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
 				) ++ restrictions
 			}
 		}
@@ -161,8 +161,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		if (department.hasParent) findStudentsByRestrictions(department, restrictions, Seq(), 50, 0).size
 		else {
 			val allRestrictions = ScalaRestriction.is(
-				"studentCourseDetails.department", department, 
-				"mostSignificantCourse" -> "studentCourseDetails"
+				"studentCourseYearDetails.enrolmentDepartment", department, 
+				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
 			) ++ restrictions
 			
 			memberDao.countStudentsByRestrictions(allRestrictions)

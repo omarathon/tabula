@@ -65,7 +65,7 @@ abstract class FilterStudentsCommand(val department: Department) extends Command
 trait FilterStudentsState extends FiltersStudents {
 	override def department: Department
 	
-	var studentsPerPage = DefaultStudentsPerPage
+	var studentsPerPage = FiltersStudents.DefaultStudentsPerPage
 	var page = 1
 
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
