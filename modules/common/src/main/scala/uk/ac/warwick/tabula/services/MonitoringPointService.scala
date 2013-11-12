@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import org.joda.time.DateTime
 import scala.Some
+import uk.ac.warwick.util.termdates.Term
 
 trait MonitoringPointServiceComponent {
 	def monitoringPointService: MonitoringPointService
@@ -167,7 +168,13 @@ trait AutowiringMonitoringPointMeetingRelationshipTermServiceComponent extends M
 }
 
 trait MonitoringPointMeetingRelationshipTermService {
-	def formatsThatWillCreateCheckpoint(relationship: StudentRelationship): Seq[MeetingFormat]
+	def willCheckpointBeCreated(
+		student: StudentMember,
+		relationshipType: StudentRelationshipType,
+		meetingFormat: MeetingFormat,
+		meetingDate: DateTime,
+		meetingToSkipApproval: Option[MeetingRecord]
+	): Boolean
 	def willCheckpointBeCreated(meeting: MeetingRecord): Boolean
 	def updateCheckpointsForMeeting(meeting: MeetingRecord): Seq[MonitoringCheckpoint]
 }
@@ -175,31 +182,27 @@ trait MonitoringPointMeetingRelationshipTermService {
 abstract class AbstractMonitoringPointMeetingRelationshipTermService extends MonitoringPointMeetingRelationshipTermService {
 	self: MonitoringPointDaoComponent with MeetingRecordDaoComponent with RelationshipServiceComponent with TermServiceComponent =>
 
-	def formatsThatWillCreateCheckpoint(relationship: StudentRelationship): Seq[MeetingFormat] = {
-		relationship.studentMember.map(student => {
-			student.studentCourseDetails.asScala.map{scd =>
-				getRelevantPoints(scd, relationship.relationshipType, None).map{point =>
-					if (point.meetingQuantity > 1)
-						// if enough meetings currently exist such that creating this one would meet the required quantity
-						if (countRelevantMeetings(scd, point, None) >= point.meetingQuantity - 1)
-							point.meetingFormats
-						else
-							Seq()
-					else
-						point.meetingFormats
+	def willCheckpointBeCreated(
+		student: StudentMember,
+		relationshipType: StudentRelationshipType,
+		meetingFormat: MeetingFormat,
+		meetingDate: DateTime,
+		meetingToSkipApproval: Option[MeetingRecord]
+	): Boolean = {
+		student.studentCourseDetails.asScala.exists(scd => {
+			getRelevantPoints(scd, relationshipType, meetingFormat, meetingDate).exists(point => {
+				meetingToSkipApproval match {
+					case Some(meeting) => (countRelevantMeetings(scd, point, meetingToSkipApproval) >= point.meetingQuantity)
+					case None => (countRelevantMeetings(scd, point, None) >= point.meetingQuantity - 1)
 				}
-			}.flatten
-		}.flatten.distinct
-		).getOrElse(Seq())
+			})
+		})
 	}
 
 	def willCheckpointBeCreated(meeting: MeetingRecord): Boolean = {
-		meeting.relationship.studentMember.exists(student => {
-			student.studentCourseDetails.asScala.exists(scd => {
-				getRelevantPoints(scd, meeting.relationship.relationshipType, Option(meeting.format))
-					.exists(point => countRelevantMeetings(scd, point, Option(meeting)) >= point.meetingQuantity)
-			})
-		})
+		meeting.relationship.studentMember.exists{student => {
+			willCheckpointBeCreated(student, meeting.relationship.relationshipType, meeting.format, meeting.meetingDate, Option(meeting))
+		}}
 	}
 
 	/**
@@ -207,7 +210,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 	 * * the meeting's relationship type and format matches a student's monitoring point
 	 * * a checkpoint does not already exist
 	 * * enough meetings satisfy for the point's meeting quantity
-	 * Only approved meetings created on or after the point's 'valid from week' are considered.
+	 * Only approved meetings that occurred between the point's weeks are considered.
 	 */
 	def updateCheckpointsForMeeting(meeting: MeetingRecord): Seq[MonitoringCheckpoint] = {
 		if (!meeting.isAttendanceApproved) {
@@ -216,7 +219,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 		}
 		meeting.relationship.studentMember.map(student => {
 			val createdCheckpoints = student.studentCourseDetails.asScala.flatMap(scd => {
-				val relevantMeetingPoints = getRelevantPoints(scd, meeting.relationship.relationshipType, Option(meeting.format))
+				val relevantMeetingPoints = getRelevantPoints(scd, meeting.relationship.relationshipType, meeting.format, meeting.meetingDate)
 				// check the required quantity and create a checkpoint if there are sufficient meetings
 				val checkpointOptions = for (point <- relevantMeetingPoints) yield {
 					if (countRelevantMeetings(scd, point, None) >= point.meetingQuantity) {
@@ -242,7 +245,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 		}).getOrElse(Seq())
 	}
 
-	private def getRelevantPoints(scd: StudentCourseDetails, relationshipType: StudentRelationshipType, formatOption: Option[MeetingFormat]) = {
+	private def getRelevantPoints(scd: StudentCourseDetails, relationshipType: StudentRelationshipType, format: MeetingFormat, date: DateTime) = {
 		scd.studentCourseYearDetails.asScala.flatMap(scyd => {
 			val relevantPointSets = monitoringPointDao.findMonitoringPointSets(scd.route, scyd.academicYear).filter(pointSet =>
 				pointSet.year == null || pointSet.year == scyd.yearOfStudy
@@ -251,19 +254,27 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 				// only points relevant to this meeting
 				point.pointType == MonitoringPointType.Meeting
 					&& point.meetingRelationships.contains(relationshipType)
-					// if we pass a format check it (otherwise assume true)
-					&& formatOption.map{format => point.meetingFormats.contains(format)}.getOrElse(true)
+					&& point.meetingFormats.contains(format)
 					// disregard any points that already have a checkpoint
 					&& (monitoringPointDao.getCheckpoint(point, scd.scjCode) match {
 						case Some(_: MonitoringCheckpoint) => false
 						case None => true
 					})
-					// disregard any points in the future
-					&& point.validFromWeek <=
-						termService.getAcademicWeekForAcademicYear(new DateTime(), point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+					// check date between point weeks
+					&& isDateValidForPoint(point, date)
 			)
 			relevantPoints
 		})
+	}
+
+	private def isDateValidForPoint(point: MonitoringPoint, date: DateTime) = {
+		val dateWeek = termService.getAcademicWeekForAcademicYear(date, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+		if (dateWeek == Term.WEEK_NUMBER_BEFORE_START)
+			true
+		else if (dateWeek == Term.WEEK_NUMBER_AFTER_END)
+			false
+		else
+			dateWeek >= point.validFromWeek && dateWeek <= point.requiredFromWeek
 	}
 
 	/**
@@ -277,8 +288,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 				.flatMap(meetingRecordDao.list(_).filter(meeting =>
 					(meeting.isAttendanceApproved || meetingToSkipApproval.exists(m => m == meeting))
 						&& point.meetingFormats.contains(meeting.format)
-						&& termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
-						>= point.validFromWeek
+						&& isDateValidForPoint(point, meeting.meetingDate)
 			)).size
 		}).sum
 	}
