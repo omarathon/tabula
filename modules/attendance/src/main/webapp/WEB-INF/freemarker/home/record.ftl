@@ -78,7 +78,7 @@ ${titleHeader}
 								<p><i class="icon-remove-circle icon-fixed-width authorised"></i> Missed (authorised)</p>
 								<p><i class="icon-ok icon-fixed-width attended"></i> Attended</p>
 						</#assign>
-							<a class="use-popover" id="popover-choose-set"
+							<a class="use-popover"
 							   data-title="Key"
 							   data-placement="bottom"
 							   data-container="body"

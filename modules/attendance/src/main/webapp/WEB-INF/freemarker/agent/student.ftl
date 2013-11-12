@@ -150,7 +150,7 @@
 						<#elseif pointAndCheckpoint._2() == "unauthorised">
 							<span class="label label-important" title="Missed (unauthorised)">Missed</span>
 						<#elseif pointAndCheckpoint._2() == "late">
-							<span class="label label-warning" title="No data">No data</span>
+							<span class="label label-warning" title="Unrecorded">Unrecorded</span>
 						</#if>
 					</div>
 				</div>
