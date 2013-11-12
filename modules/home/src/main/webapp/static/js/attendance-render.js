@@ -11,21 +11,9 @@ $(function(){
 
 	// SCRIPTS FOR RECORDING MONITORING POINTS
 
-	$('.recordCheckpointForm').find('select').each(function(){
-		var $this = $(this), selectedValue = $this.find('option:selected').val();
-		$('.recordCheckpointForm div.forCloning div.btn-group')
-			.clone(true)
-			.insertAfter($this)
-			.find('button').on('click', function(){
-				var _$this = $(this);
-				$this.find('option').filter(function(){
-					return $(this).val() == _$this.data('state');
-				}).prop('selected', true);
-			}).filter(function(){
-				return $(this).data('state') == selectedValue;
-			}).trigger('click');
-		$this.hide();
-	}).end().find('.persist-header').each(function(){
+	$('.recordCheckpointForm').find('.persist-header')
+        .find('div.pull-right').show()
+        .end().each(function(){
 		$(this).find('.btn-group button').each(function(i){
 			$(this).on('click', function(){
 				$('.attendees .item-info').each(function(){
@@ -46,35 +34,6 @@ $(function(){
     });
 
 	// END SCRIPTS FOR RECORDING MONITORING POINTS
-
-	// SCRIPTS FOR VIEWING MONITORING POINTS
-	(function(){
-		var routeSelect = $('#viewChooseSet').find('select[name="route"]').on('change', function(){
-			var $this = $(this),
-				selectedRouteCode = $this.find(':selected').val(),
-				yearSelect = $this.parent()
-					.find('select[name="set"]').find('option:gt(0)').remove()
-					.end().find('option:first').prop('selected', true)
-					.end();
-
-			$.each(
-				$.grep(setsByRouteByAcademicYear[$('select[name="academicYear"] :selected').val()], function(r){
-					return selectedRouteCode === r.code;
-				})[0].sets,
-				function(i, set){
-					yearSelect.append(
-						$('<option/>').val(set.id).html(set.year)
-					);
-				}
-			)
-		});
-		// If a route us selected by not a year/set on load then populate the year of study drop-down
-		if (routeSelect.length > 0 && routeSelect.parent().find('select[name="set"]').find('option:selected').val().length == 0) {
-			routeSelect.change();
-		}
-	})();
-
-	// END SCRIPTS FOR VIEWING MONITORING POINTS
 
 	// SCRIPTS FOR MANAGING MONITORING POINTS
 

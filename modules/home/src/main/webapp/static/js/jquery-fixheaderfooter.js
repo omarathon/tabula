@@ -79,6 +79,7 @@
 
 		// public methods
 		this.initialize = function() {
+            updateTableHeaders(areaToPersist);
 			return this;
 		};
 

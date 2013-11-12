@@ -1,5 +1,27 @@
 <#import "*/modal_macros.ftl" as modal />
 
+<#assign titleHeader>
+<h1>Record attendance</h1>
+<h6><span class="muted">for</span> ${command.templateMonitoringPoint.name}</h6>
+</#assign>
+<#assign numberOfStudents = command.studentsState?keys?size />
+
+<#if numberOfStudents == 0>
+
+${titleHeader}
+
+<p><em>There are no students registered to these points.</em></p>
+
+<#elseif (numberOfStudents > 600)>
+
+${titleHeader}
+
+<div class="alert alert-warning">
+	There are too many students to display at once. Please go back and choose a more restrictive filter.
+</div>
+
+<#else>
+
 <script>
 (function ($) {
 	$(function() {
@@ -11,7 +33,16 @@
 
 	});
 } (jQuery));
-
+var createButtonGroup = function(id){
+	var $this = jQuery(id), selectedValue = $this.find('option:selected').val();
+	jQuery('.recordCheckpointForm div.forCloning div.btn-group')
+			.clone(true)
+			.insertAfter($this)
+			.find('button').filter(function(){
+				return jQuery(this).data('state') == selectedValue;
+			}).addClass('active');
+	$this.hide();
+};
 </script>
 
 <div class="recordCheckpointForm">
@@ -35,98 +66,129 @@
 
 	<div class="persist-area">
 		<div class="persist-header">
-			<h1><span class="yearAndRoute">Record attendance for <#if (monitoringPoint.pointSet.year)??>Year ${monitoringPoint.pointSet.year}</#if> <@fmt.route_name monitoringPoint.pointSet.route /> : </span>${monitoringPoint.name}</h1>
-
+			${titleHeader}
 
 			<div class="row-fluid record-attendance-form-header">
-				<div class="span8">&nbsp;</div>
-				<div class="span4 text-center">
-					<span class="checkAllMessage">Check all</span>
-					<div class="btn-group">
-						<button type="button" class="btn">
-							<i class="icon-minus icon-fixed-width" title="Set all to 'Not recorded'"></i>
-						</button>
-						<button type="button" class="btn btn-unauthorised">
-							<i class="icon-remove icon-fixed-width" title="Set all to 'Missed (unauthorised)'"></i>
-						</button>
-            			<button type="button" class="btn btn-authorised">
-							<i class="icon-remove-circle icon-fixed-width" title="Set all to 'Missed (authorised)'"></i>
-						</button>
-						<button type="button" class="btn btn-attended">
-							<i class="icon-ok icon-fixed-width" title="Set all to 'Attended'"></i>
-						</button>
-					</div>
-					<#if monitoringPoint.pointType?? && monitoringPoint.pointType.dbValue == "meeting">
+				<div class="span12">
+					<span class="studentsLoadingMessage" style="display: none;">
+							<i class="icon-spinner icon-spin"></i><em> Loading&hellip;</em>
+						</span>
+					<script>
+						jQuery('.studentsLoadingMessage').show();
+						jQuery(function($){
+							$('.studentsLoadingMessage').hide();
+						})
+					</script>
+					<div class="pull-right" style="display: none;">
+						<span class="checkAllMessage">
+							Check all
+						<#assign popoverContent>
+							<p><i class="icon-minus icon-fixed-width"></i> Not recorded</p>
+								<p><i class="icon-remove icon-fixed-width unauthorised"></i> Missed (unauthorised)</p>
+								<p><i class="icon-remove-circle icon-fixed-width authorised"></i> Missed (authorised)</p>
+								<p><i class="icon-ok icon-fixed-width attended"></i> Attended</p>
+						</#assign>
+							<a class="use-popover" id="popover-choose-set"
+							   data-title="Key"
+							   data-placement="bottom"
+							   data-container="body"
+							   data-content='${popoverContent}'
+							   data-html="true">
+								<i class="icon-question-sign"></i>
+							</a>
+						</span>
+						<div class="btn-group">
+							<button type="button" class="btn">
+								<i class="icon-minus icon-fixed-width" title="Set all to 'Not recorded'"></i>
+							</button>
+							<button type="button" class="btn btn-unauthorised">
+								<i class="icon-remove icon-fixed-width" title="Set all to 'Missed (unauthorised)'"></i>
+							</button>
+							<button type="button" class="btn btn-authorised">
+								<i class="icon-remove-circle icon-fixed-width" title="Set all to 'Missed (authorised)'"></i>
+							</button>
+							<button type="button" class="btn btn-attended">
+								<i class="icon-ok icon-fixed-width" title="Set all to 'Attended'"></i>
+							</button>
+						</div>
 						<i class="icon-fixed-width"></i>
-					</#if>
-
-					<#assign popoverContent>
-						<p><i class="icon-minus icon-fixed-width"></i> Not recorded</p>
-						<p><i class="icon-remove icon-fixed-width unauthorised"></i> Missed (unauthorised)</p>
-						<p><i class="icon-remove-circle icon-fixed-width authorised"></i> Missed (authorised)</p>
-						<p><i class="icon-ok icon-fixed-width attended"></i> Attended</p>
-					</#assign>
-						<a class="use-popover" id="popover-choose-set"
-						   data-title="Key"
-						   data-placement="bottom"
-						   data-container="body"
-						   data-content='${popoverContent}'
-						   data-html="true">
-							<i class="icon-question-sign"></i>
-						</a>
-
+					</div>
 				</div>
+
 			</div>
 		</div>
 
-		<#if command.members?size == 0>
 
-			<p><em>There are no students registered to this course for this year of study.</em></p>
-
-		<#else>
-
-			<div class="striped-section-contents attendees">
-
-				<form action="" method="post">
-					<input type="hidden" name="monitoringPoint" value="${monitoringPoint.id}" />
-					<input type="hidden" name="returnTo" value="<@url page="${returnTo}" />" />
-					<#list command.members?sort_by("lastName") as student>
-						<div class="row-fluid item-info clickable">
-							<label>
-								<div class="span9">
-									<a id="student-${student.universityId}" style="width: 0px; height: 0px; position: relative; top: -200px;"></a>
-									<@fmt.member_photo student "tinythumbnail" true />
-									<div class="full-height">${student.fullName}</div>
-								</div>
-								<div class="span3 text-center">
-									<div class="full-height">
-										<select name="studentsState[${student.universityId}]">
-											<#assign hasState = command.studentsState[student.universityId]?? />
-											<option value="" <#if !hasState >selected</#if>>Not recorded</option>
-											<option value="unauthorised" <#if hasState && command.studentsState[student.universityId].dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
-											<option value="authorised" <#if hasState && command.studentsState[student.universityId].dbValue == "authorised">selected</#if>>Missed (authorised)</option>
-											<option value="attended" <#if hasState && command.studentsState[student.universityId].dbValue == "attended">selected</#if>>Attended</option>
-										</select>
-										<#if monitoringPoint.pointType?? && monitoringPoint.pointType.dbValue == "meeting">
-											<a class="meetings" title="Meetings information" href="<@routes.studentMeetings monitoringPoint student />"><i class="icon-info-sign"></i></a>
-										</#if>
-									</div>
-								</div>
-							</label>
-						</div>
-					</#list>
-
-
-					<div class="persist-footer save-row">
-						<div class="pull-right">
-							<input type="submit" value="Save" class="btn btn-primary">
-							<a class="btn" href="${returnTo}">Cancel</a>
-						</div>
+		<#macro studentRow student point hasMultiple>
+			<div class="row-fluid item-info">
+				<div class="span12">
+					<div class="pull-right">
+						<#local hasState = mapGet(mapGet(command.studentsState, student), point)?? />
+						<#if hasState>
+							<#local checkpointState = mapGet(mapGet(command.studentsState, student), point) />
+						</#if>
+						<select id="studentsState-${student.universityId}-${point.id}" name="studentsState[${student.universityId}][${point.id}]">
+							<option value="" <#if !hasState >selected</#if>>Not recorded</option>
+							<#list allCheckpointStates as state>
+								<option value="${state.dbValue}" <#if hasState && checkpointState.dbValue == state.dbValue>selected</#if>>${state.description}</option>
+							</#list>
+						</select>
+						<#if point.pointType?? && point.pointType.dbValue == "meeting">
+							<a class="meetings" title="Meetings information" href="<@routes.studentMeetings point student />"><i class="icon-info-sign"></i></a>
+						<#else>
+							<i class="icon-fixed-width"></i>
+						</#if>
 					</div>
-				</form>
+					<#if numberOfStudents <= 50>
+						<@fmt.member_photo student "tinythumbnail" true />
+					</#if>
+					${student.fullName}
+					<#if hasMultiple><span class="muted">${point.pointSet.route.code?upper_case}</span></#if>
+					<@spring.bind path="command.studentsState[${student.universityId}][${point.id}]">
+						<#if status.error>
+							<div class="text-error"><@f.errors path="command.studentsState[${student.universityId}][${point.id}]" cssClass="error"/></div>
+						</#if>
+					</@spring.bind>
+				</div>
 			</div>
+		<script>
+			createButtonGroup('#studentsState-${student.universityId}-${point.id}');
+		</script>
+		</#macro>
 
-		</#if>
+		<div class="striped-section-contents attendees">
+
+			<form id="recordAttendance" action="" method="post">
+				<script>
+					jQuery('#recordAttendance').on('click', 'div.btn-group button', function(){
+						var $this = jQuery(this);
+						$this.closest('div.pull-right').find('option').filter(function(){
+							return jQuery(this).val() == $this.data('state');
+						}).prop('selected', true);
+					});
+				</script>
+				<input type="hidden" name="monitoringPoint" value="${command.templateMonitoringPoint.id}" />
+				<input type="hidden" name="returnTo" value="${returnTo}"/>
+				<#list command.studentsState?keys?sort_by("lastName") as student>
+					<#assign points = mapGet(command.studentsState, student) />
+					<#if (points?keys?size > 1)>
+						<#list points?keys as point><@studentRow student point true/></#list>
+					<#else>
+						<@studentRow student points?keys?first false/>
+					</#if>
+				</#list>
+
+
+				<div class="persist-footer save-row">
+					<div class="pull-right">
+						<input type="submit" value="Save" class="btn btn-primary">
+						<a class="btn" href="${returnTo}">Cancel</a>
+					</div>
+				</div>
+			</form>
+		</div>
+
+
 	</div>
 </div>
 
@@ -136,4 +198,6 @@
 	</@modal.header>
 	<@modal.body></@modal.body>
 </div>
+
+</#if>
 

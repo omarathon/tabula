@@ -31,7 +31,7 @@ trait MonitoringPointService {
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]): Option[MonitoringPointSet]
-	def getCheckpointsBySCD(monitoringPoint : MonitoringPoint) : Seq[(StudentCourseDetails, MonitoringCheckpoint)]
+	def getCheckpointsBySCD(monitoringPoints: Seq[MonitoringPoint]) : Seq[(StudentCourseDetails, MonitoringCheckpoint)]
 	def listTemplates : Seq[MonitoringPointSetTemplate]
 	def getTemplateById(id: String) : Option[MonitoringPointSetTemplate]
 	def deleteTemplate(template: MonitoringPointSetTemplate)
@@ -51,6 +51,8 @@ trait MonitoringPointService {
 		member: Member
 	) : MonitoringCheckpoint
 	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int
+	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet]
+	def findSimilarPointsForMembers(point: MonitoringPoint, students: Seq[StudentMember]): Map[StudentMember, Seq[MonitoringPoint]]
 }
 
 
@@ -70,8 +72,8 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]) =
 		monitoringPointDao.findMonitoringPointSet(route, academicYear, year)
 	
-	def getCheckpointsBySCD(monitoringPoint: MonitoringPoint): Seq[(StudentCourseDetails, MonitoringCheckpoint)] =
-		monitoringPointDao.getCheckpointsBySCD(monitoringPoint)
+	def getCheckpointsBySCD(monitoringPoints: Seq[MonitoringPoint]): Seq[(StudentCourseDetails, MonitoringCheckpoint)] =
+		monitoringPointDao.getCheckpointsBySCD(monitoringPoints)
 
 	def listTemplates = monitoringPointDao.listTemplates
 
@@ -135,6 +137,14 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		student.studentCourseDetails.asScala.map{scd =>
 			monitoringPointDao.missedCheckpoints(scd, academicYear)
 		}.sum
+	}
+
+	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet] = {
+		monitoringPointDao.findPointSetsForStudents(students, academicYear)
+	}
+
+	def findSimilarPointsForMembers(point: MonitoringPoint, students: Seq[StudentMember]): Map[StudentMember, Seq[MonitoringPoint]] = {
+		monitoringPointDao.findSimilarPointsForMembers(point, students)
 	}
 
 }

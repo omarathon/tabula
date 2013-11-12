@@ -18,6 +18,8 @@ object MonitoringCheckpointState {
 	  	case null => null
 	  	case _ => throw new IllegalArgumentException()
 	}
+
+	val values: Seq[MonitoringCheckpointState] = Seq(MissedUnauthorised, MissedAuthorised, Attended)
 }
 
 class MonitoringCheckpointStateUserType extends AbstractBasicUserType[MonitoringCheckpointState, String] {

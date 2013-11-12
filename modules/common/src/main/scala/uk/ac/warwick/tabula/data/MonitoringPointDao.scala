@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, Route, StudentMemb
 import org.hibernate.criterion.{Projections, Order}
 import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.criterion.Restrictions._
+import uk.ac.warwick.tabula.JavaImports._
 import scala.Some
 
 trait MonitoringPointDaoComponent {
@@ -21,7 +22,7 @@ trait AutowiringMonitoringPointDaoComponent extends MonitoringPointDaoComponent 
 trait MonitoringPointDao {
 	def getPointById(id: String): Option[MonitoringPoint]
 	def getSetById(id: String): Option[MonitoringPointSet]
-	def getCheckpointsBySCD(monitoringPoint: MonitoringPoint): Seq[(StudentCourseDetails, MonitoringCheckpoint)]
+	def getCheckpointsBySCD(monitoringPoints: Seq[MonitoringPoint]): Seq[(StudentCourseDetails, MonitoringCheckpoint)]
 	def saveOrUpdate(monitoringPoint: MonitoringPoint)
 	def delete(monitoringPoint: MonitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
@@ -39,6 +40,8 @@ trait MonitoringPointDao {
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
 	def deleteCheckpoint(checkpoint: MonitoringCheckpoint): Unit
 	def missedCheckpoints(scd: StudentCourseDetails, academicYear: AcademicYear): Int
+	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet]
+	def findSimilarPointsForMembers(point: MonitoringPoint, students: Seq[StudentMember]): Map[StudentMember, Seq[MonitoringPoint]]
 }
 
 
@@ -52,10 +55,15 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def getSetById(id: String) =
 		getById[MonitoringPointSet](id)
 
-	def getCheckpointsBySCD(monitoringPoint: MonitoringPoint): Seq[(StudentCourseDetails, MonitoringCheckpoint)] = {
-		val checkpoints = session.newQuery[MonitoringCheckpoint]("from MonitoringCheckpoint where point = :point_id")
-				.setString("point_id", monitoringPoint.id)
-				.seq
+	def getCheckpointsBySCD(monitoringPoints: Seq[MonitoringPoint]): Seq[(StudentCourseDetails, MonitoringCheckpoint)] = {
+		val criteria = session.newCriteria[MonitoringCheckpoint]
+			.createAlias("point", "point")
+
+		val or = disjunction()
+		monitoringPoints.grouped(Daoisms.MaxInClauseCount).foreach { mps => or.add(in("point", mps.asJava)) }
+		criteria.add(or)
+
+		val checkpoints = criteria.seq
 
 		checkpoints.map(checkpoint => (checkpoint.studentCourseDetail, checkpoint))
 	}
@@ -143,5 +151,79 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			.add(is("pointSet.academicYear", academicYear))
 			.project[Number](Projections.rowCount())
 			.uniqueResult.get.intValue()
+	}
+
+	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet] = {
+		if (students.isEmpty)
+			return Seq()
+
+		val partionedUniversityIdsWithIndex = students.map{_.universityId}.grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
+		val queryString = """
+			select distinct mps
+			from MonitoringPointSet mps, Route r, StudentCourseDetails scd, StudentCourseYearDetails scyd
+			where r = mps.route
+			and scd.route = r.code
+			and scyd.studentCourseDetails = scd
+			and mps.academicYear = :academicYear
+			and (
+			  mps.year = scyd.yearOfStudy
+			  or mps.year is null
+			) and (
+		""" +	partionedUniversityIdsWithIndex.map{
+				case (ids, index) => "scd.student.universityId in (:universityIds" + index.toString + ") "
+			}.mkString(" or ")	+ ")"
+
+		val query = session.newQuery[MonitoringPointSet](queryString)
+			.setParameter("academicYear", academicYear)
+		partionedUniversityIdsWithIndex.foreach{
+			case (ids, index) => {
+				query.setParameterList("universityIds" + index.toString, ids)
+			}
+		}
+
+		query.seq
+	}
+
+	def findSimilarPointsForMembers(point: MonitoringPoint, students: Seq[StudentMember]): Map[StudentMember, Seq[MonitoringPoint]] = {
+		if (students.isEmpty)
+			return Map()
+
+		val partionedScjCodesWithIndex = students.flatMap{_.studentCourseDetails.asScala.map{_.scjCode}}.grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
+
+		val queryString = """
+				select scd, mp
+				from StudentCourseDetails scd, StudentCourseYearDetails scyd, Route r, MonitoringPointSet mps, MonitoringPoint mp
+				where scd.route = r.code
+				and scd = scyd.studentCourseDetails
+				and mps.route = r
+				and mp.pointSet = mps
+				and scyd.academicYear = mps.academicYear
+				and (mps.year = scyd.yearOfStudy or mps.year is null)
+				and mps.academicYear = :academicYear
+				and lower(mp.name) = :name
+				and mp.validFromWeek = :validFromWeek
+				and mp.requiredFromWeek = :requiredFromWeek
+				and (
+			""" +	partionedScjCodesWithIndex.map{
+			case (_, index) => "scd.scjCode in (:scjCodes" + index.toString + ") "
+		}.mkString(" or ")	+ ")"
+
+		val query = session.newQuery[Array[java.lang.Object]](queryString)
+			.setParameter("academicYear", point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+			.setString("name", point.name.toLowerCase())
+			.setString("validFromWeek", point.validFromWeek.toString)
+			.setString("requiredFromWeek", point.requiredFromWeek.toString)
+		partionedScjCodesWithIndex.foreach{
+			case (scjCodes, index) => {
+				query.setParameterList("scjCodes" + index.toString, scjCodes)
+			}
+		}
+
+		val result = query.seq
+
+		val memberPointMap = result.map{objArray =>
+			objArray(0).asInstanceOf[StudentCourseDetails].student -> objArray(1).asInstanceOf[MonitoringPoint]
+		}
+		memberPointMap.groupBy(_._1).mapValues(_.map(_._2))
 	}
 }
