@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.services
 
 
 import scala.collection.JavaConverters.asScalaBufferConverter
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent, AutowiringMonitoringPointDaoComponent, MonitoringPointDaoComponent}
 import org.springframework.stereotype.Service
@@ -163,7 +162,10 @@ trait MonitoringPointMeetingRelationshipTermService {
 }
 
 abstract class AbstractMonitoringPointMeetingRelationshipTermService extends MonitoringPointMeetingRelationshipTermService {
-	self: MonitoringPointDaoComponent with MeetingRecordDaoComponent with RelationshipServiceComponent with TermServiceComponent =>
+	self: MonitoringPointDaoComponent
+	with MeetingRecordDaoComponent
+	with RelationshipServiceComponent
+	with TermServiceComponent =>
 
 	def formatsThatWillCreateCheckpoint(relationship: StudentRelationship): Seq[MeetingFormat] = {
 		relationship.studentMember.map(student => {
@@ -234,9 +236,8 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 
 	private def getRelevantPoints(scd: StudentCourseDetails, relationshipType: StudentRelationshipType, formatOption: Option[MeetingFormat]) = {
 		scd.freshStudentCourseYearDetails.flatMap(scyd => {
-			val relevantPointSets = monitoringPointDao.findMonitoringPointSets(scd.route, scyd.academicYear).filter(pointSet =>
-				pointSet.year == null || pointSet.year == scyd.yearOfStudy
-			)
+			val sets = monitoringPointDao.findMonitoringPointSets(scd.route, scyd.academicYear)
+			val relevantPointSets = sets.filter(pointSet => pointSet.year == null || pointSet.year == scyd.yearOfStudy)
 			val relevantPoints = relevantPointSets.flatMap(_.points.asScala).filter(point =>
 				// only points relevant to this meeting
 				point.pointType == MonitoringPointType.Meeting

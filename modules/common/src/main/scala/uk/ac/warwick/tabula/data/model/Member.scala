@@ -244,7 +244,7 @@ class StudentMember extends Member with StudentProperties {
 	}
 
 	override def mostSignificantCourseDetails: Option[StudentCourseDetails] = {
-		if (mostSignificantCourse.isFresh)
+		if (mostSignificantCourse != null && mostSignificantCourse.isFresh)
 			Option(mostSignificantCourse)
 		else
 			None

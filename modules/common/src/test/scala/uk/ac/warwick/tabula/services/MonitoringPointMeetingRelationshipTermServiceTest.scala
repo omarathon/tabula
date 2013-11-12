@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model._
 import org.joda.time.DateTime
 import org.mockito.Matchers
-import scala.collection.mutable.Buffer
 
 class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mockito {
 	trait ServiceTestSupport extends MonitoringPointDaoComponent with MeetingRecordDaoComponent
@@ -27,17 +26,10 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		val academicYear2012 = AcademicYear(2012)
 		val academicYear2013 = AcademicYear(2013)
 
-		val student = mock[StudentMember]
-		val studentSprCode = "1234/1"
-		student.universityId returns "1234"
+		val student = Fixtures.student("1234")
 		val studentRoute = Fixtures.route("a100")
-
-		val studentCourseDetails = mock[StudentCourseDetails]
-		studentCourseDetails.scjCode returns studentSprCode
-		studentCourseDetails.sprCode returns studentSprCode
-		studentCourseDetails.route returns studentRoute
-
-		student.freshStudentCourseDetails returns Buffer[StudentCourseDetails](studentCourseDetails)
+		val studentCourseDetails = student.freshStudentCourseDetails(0)
+		studentCourseDetails.route = studentRoute
 
 		val agent = "agent"
 		val agentMember = Fixtures.staff(agent, agent)
@@ -69,7 +61,8 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		val studentCourseYear2 = new StudentCourseYearDetails
 		studentCourseYear2.yearOfStudy = 2
 		studentCourseYear2.academicYear = academicYear2013
-		studentCourseDetails.freshStudentCourseYearDetails returns Buffer(studentCourseYear1, studentCourseYear2)
+		studentCourseDetails.addStudentCourseYearDetails(studentCourseYear1)
+		studentCourseDetails.addStudentCourseYearDetails(studentCourseYear2)
 	}
 
 	trait Year2PointSetFixture extends StudentYear2Fixture {
@@ -102,9 +95,14 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 
 	@Test
 	def willBeCreatedMeetingNotApproved() {
-		new StudentFixture {
-			meeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Pending))
-			service.willCheckpointBeCreated(meeting) should be (right = false)
+		new Year2PointSetFixture {
+			val thisMeeting = new MeetingRecord
+			thisMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Pending))
+			val thisMeetingRelationship = StudentRelationship(agent, tutorRelationshipType, studentCourseDetails.sprCode)
+			thisMeetingRelationship.profileService = mock[ProfileService]
+			thisMeetingRelationship.profileService.getStudentBySprCode(studentCourseDetails.sprCode) returns Some(student)
+			thisMeeting.relationship = thisMeetingRelationship
+			service.willCheckpointBeCreated(thisMeeting) should be (right = false)
 		}
 	}
 
@@ -126,7 +124,8 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 			thisMeetingRelationship.profileService = mock[ProfileService]
 			thisMeetingRelationship.profileService.getStudentBySprCode(studentCourseDetails.sprCode) returns None
 			thisMeeting.relationship = thisMeetingRelationship
-			service.willCheckpointBeCreated(meeting) should be (right = false)
+			service.willCheckpointBeCreated(thisMeeting) should be (right = false)
+
 		}
 	}
 
