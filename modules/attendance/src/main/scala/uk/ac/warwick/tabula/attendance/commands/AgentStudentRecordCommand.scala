@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.services.{TermServiceComponent, AutowiringMonitoring
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.validation.Errors
+import org.joda.time.DateTime
 
 object AgentStudentRecordCommand {
 	def apply(agent: Member, relationshipType: StudentRelationshipType,
@@ -53,15 +54,21 @@ trait AgentStudentRecordValidation extends SelfValidating {
 	self: AgentStudentRecordCommandState =>
 
 	override def validate(errors: Errors) = {
+		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), pointSet.academicYear)
 		val points = pointSet.points.asScala
-		for (point <- checkpointMap.asScala.keys) {
+		checkpointMap.asScala.foreach{case (point, state) => {
+			errors.pushNestedPath(s"checkpointMap[${point.id}]")
 			if (!points.contains(point)) {
-				errors.rejectValue(s"checkpointMap[${point.id}]", "monitoringPointSet.invalidPoint")
+				errors.rejectValue("", "monitoringPointSet.invalidPoint")
 			}
-			if(point.sentToAcademicOffice) {
-				errors.rejectValue(s"checkpointMap[${point.id}]", "monitoringCheckpoint.sentToAcademicOffice")
+			if (point.sentToAcademicOffice) {
+				errors.rejectValue("", "monitoringCheckpoint.sentToAcademicOffice")
 			}
-		}
+			if (currentAcademicWeek < point.validFromWeek && !(state == null || state == MonitoringCheckpointState.MissedAuthorised)) {
+				errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
+			}
+			errors.popNestedPath()
+		}}
 	}
 
 }

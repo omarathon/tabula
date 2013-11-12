@@ -53,12 +53,9 @@
 					<div class="striped-section-contents">
 						<#list command.monitoringPointsByTerm[term] as point>
 							<div class="item-info row-fluid point">
-								<label>
-									<div class="span9">
-									${point.name} (<@fmt.weekRanges point />)
-									</div>
-									<div class="span3 text-center">
-										<select name="checkpointMap[${point.id}]">
+								<div class="span12">
+									<div class="pull-right">
+										<select id="checkpointMap-${point.id}" name="checkpointMap[${point.id}]">
 											<#assign hasState = mapGet(command.checkpointMap, point)?? />
 											<option value="" <#if !hasState >selected</#if>>Not recorded</option>
 											<option value="unauthorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
@@ -66,17 +63,31 @@
 											<option value="attended" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "attended">selected</#if>>Attended</option>
 										</select>
 										<#if point.pointType?? && point.pointType.dbValue == "meeting">
-											<a class="meetings" title="Meetings information" href="<@routes.studentMeetings point command.scd.student />"><i class="icon-info-sign"></i></a>
+											<a class="meetings" title="Meetings with this student" href="<@routes.studentMeetings point command.scd.student />"><i class="icon-info-sign icon-fixed-width"></i></a>
+										<#else>
+											<i class="icon-fixed-width"></i>
 										</#if>
 									</div>
-								</label>
+									${point.name} (<@fmt.weekRanges point />)
+									<@spring.bind path="command.checkpointMap[${point.id}]">
+										<#if status.error>
+											<div class="text-error"><@f.errors path="command.checkpointMap[${point.id}]" cssClass="error"/></div>
+										</#if>
+									</@spring.bind>
+								</div>
+								<script>
+									Attendance.createButtonGroup('#checkpointMap-${point.id}');
+								</script>
 							</div>
 						</#list>
 					</div>
 				</div>
 			</#macro>
 
-			<form action="" method="post">
+			<form id="recordAttendance" action="" method="post">
+				<script>
+					Attendance.bindButtonGroupHandler();
+				</script>
 				<#list attendance_variables.monitoringPointTermNames as term>
 					<#if command.monitoringPointsByTerm[term]??>
 						<@monitoringPointsByTerm term />

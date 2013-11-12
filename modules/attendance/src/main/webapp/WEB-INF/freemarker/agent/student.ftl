@@ -134,7 +134,7 @@
 <@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
 
 <#macro pointsInATerm term pointAndCheckpointByTerm>
-	<div class="striped-section">
+	<div class="striped-section end-floats">
 		<h2 class="section-title">${term}</h2>
 		<div class="striped-section-contents">
 			<#list pointAndCheckpointByTerm[term] as pointAndCheckpoint>

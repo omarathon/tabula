@@ -33,16 +33,6 @@ ${titleHeader}
 
 	});
 } (jQuery));
-var createButtonGroup = function(id){
-	var $this = jQuery(id), selectedValue = $this.find('option:selected').val();
-	jQuery('.recordCheckpointForm div.forCloning div.btn-group')
-			.clone(true)
-			.insertAfter($this)
-			.find('button').filter(function(){
-				return jQuery(this).data('state') == selectedValue;
-			}).addClass('active');
-	$this.hide();
-};
 </script>
 
 <div class="recordCheckpointForm">
@@ -134,7 +124,7 @@ var createButtonGroup = function(id){
 							</#list>
 						</select>
 						<#if point.pointType?? && point.pointType.dbValue == "meeting">
-							<a class="meetings" title="Meetings information" href="<@routes.studentMeetings point student />"><i class="icon-info-sign"></i></a>
+							<a class="meetings" title="Meetings with this student" href="<@routes.studentMeetings point student />"><i class="icon-fixed-width icon-info-sign"></i></a>
 						<#else>
 							<i class="icon-fixed-width"></i>
 						</#if>
@@ -150,22 +140,17 @@ var createButtonGroup = function(id){
 						</#if>
 					</@spring.bind>
 				</div>
+				<script>
+					Attendance.createButtonGroup('#studentsState-${student.universityId}-${point.id}');
+				</script>
 			</div>
-		<script>
-			createButtonGroup('#studentsState-${student.universityId}-${point.id}');
-		</script>
 		</#macro>
 
 		<div class="striped-section-contents attendees">
 
 			<form id="recordAttendance" action="" method="post">
 				<script>
-					jQuery('#recordAttendance').on('click', 'div.btn-group button', function(){
-						var $this = jQuery(this);
-						$this.closest('div.pull-right').find('option').filter(function(){
-							return jQuery(this).val() == $this.data('state');
-						}).prop('selected', true);
-					});
+					Attendance.bindButtonGroupHandler();
 				</script>
 				<input type="hidden" name="monitoringPoint" value="${command.templateMonitoringPoint.id}" />
 				<input type="hidden" name="returnTo" value="${returnTo}"/>
