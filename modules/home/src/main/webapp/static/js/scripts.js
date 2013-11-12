@@ -338,7 +338,7 @@
 		Customised Popover wrapper. Implements click away to dismiss.
 	*/
 	$.fn.tabulaPopover = function(options) {
-		var $items = this, initClass = '.tabulaPopover-init';
+		var $items = this, initClass = 'tabulaPopover-init';
 
 		// filter already initialized popovers
 		$items = $items.not(initClass);
@@ -680,6 +680,12 @@
 			trigger: 'click',
 			container: '#container'
 		});
+
+        $('.use-wide-popover').tabulaPopover({
+            trigger: 'click',
+            container: '#container',
+            template: '<div class="popover wide"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+        });
 
 		// add .use-introductory for custom popover.
 		// https://github.com/twitter/bootstrap/issues/2234

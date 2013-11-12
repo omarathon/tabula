@@ -10,47 +10,36 @@ case class ModuleAssistant(module: model.Module) extends BuiltInRole(ModuleAssis
 case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
 	
 	override def description = "Module Assistant"
+	
+	GeneratesSubRole(ModuleAuditorRoleDefinition)
 
-	GrantsScopedPermission( 
-		Module.ManageAssignments,
-		Module.ManageSmallGroups,
-		
+	GrantsScopedPermission(		
 		RolesAndPermissions.Read,
 		
 		Assignment.Create,
-		Assignment.Read,
 		Assignment.Update,
 		
-		Submission.ViewPlagiarismStatus,
 		Submission.ManagePlagiarismStatus,
 		Submission.CheckForPlagiarism,
 		Submission.ReleaseForMarking,
 		// No Submission.Create() here for obvious reasons!		
-		Submission.Read,
 		Submission.Update,
 		
-		Marks.DownloadTemplate,
 		Marks.Create,
-		Marks.Read,
 		Marks.Update,
 		Marks.Delete,
 		
 		Extension.ReviewRequest,
 		Extension.Create,
-		Extension.Read,
 		Extension.Update,
 		Extension.Delete,
 		
 		Feedback.Create,
-		Feedback.Read,
 		Feedback.Update,
 		Feedback.Delete,
 		
 		SmallGroups.Create,
-		SmallGroups.Read,
-		SmallGroups.ReadMembership,
 		SmallGroupEvents.Register,
-		SmallGroupEvents.ViewRegister,
 		SmallGroups.Update,
 		SmallGroups.Allocate
 	)

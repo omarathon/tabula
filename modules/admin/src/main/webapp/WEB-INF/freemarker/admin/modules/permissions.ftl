@@ -36,6 +36,20 @@
 			<@pm.roleTable moduleperms_url "assistant-table" module "ModuleAssistantRoleDefinition" "module assistants" />
 		</div>
 	</div>
+	
+	<div class="row-fluid">
+		<div class="span6">
+			<#assign popover>
+				<p>A module auditor can view submissions, feedback and marks, but cannot change any information in Tabula.</p>
+			</#assign>
+
+			<h3 class="permissionTitle">Module Auditors</h3> <a class="use-popover" id="popover-moduleauditor" data-html="true"
+			   data-original-title="Module Auditors"
+			   data-content="${popover}"><i class="icon-question-sign"></i></a>
+
+			<@pm.roleTable moduleperms_url "auditor-table" module "ModuleAuditorRoleDefinition" "module auditors" />
+		</div>
+	</div>
 </div>
 
 <@pm.script />

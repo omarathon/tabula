@@ -35,7 +35,7 @@ abstract class SetMonitoringCheckpointForStudentCommand(
 		if (members.size == 0) {
 			throw new ItemNotFoundException()
 		}
-		studentsState = monitoringPointService.getCheckpointsBySCD(monitoringPoint).map{
+		studentsState = monitoringPointService.getCheckpointsBySCD(Seq(monitoringPoint)).map{
 			case (scd, checkpoint) => scd.student.universityId -> checkpoint.state
 		}.toMap.filter{case(uniId, _) => uniId == universityId}.asJava
 	}

@@ -200,10 +200,17 @@ object Fixtures {
 		scd
 	}
 
-	def studentCourseYearDetails(academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now), modeOfAttendance: ModeOfAttendance = null) = {
+	def studentCourseYearDetails(
+		academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now),
+		modeOfAttendance: ModeOfAttendance = null,
+		yearOfStudy: Int = 1,
+		studentCourseDetails: StudentCourseDetails = null
+	) = {
 		val scyd = new StudentCourseYearDetails
 		scyd.academicYear = academicYear
 		scyd.modeOfAttendance = modeOfAttendance
+		scyd.yearOfStudy = yearOfStudy
+		scyd.studentCourseDetails = studentCourseDetails
 		scyd
 	}
 

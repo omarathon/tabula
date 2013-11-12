@@ -100,7 +100,6 @@
 					</a>
 				</div>
 			</#if>
-			
 			<#if assignment.collectSubmissions && features.markingWorkflows>
 				<#if mustReleaseForMarking?default(false)>
 					<div class="btn-group">	
@@ -109,6 +108,13 @@
 							<span class="caret"></span>
 						</a>
 						<ul class="dropdown-menu">
+							<#if assignment.markingWorkflow?? && !assignment.markingWorkflow.studentsChooseMarker>
+								<li>
+									<a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/assign-markers" />"><i class="icon-user"></i> Assign markers </a>
+								</li>
+							<#else>
+								<li class="disabled"><a><i class="icon-user"></i> Assign markers </a></li>
+							</#if>
 							<li class="must-have-selected">
 								<a class="use-tooltip form-post" data-container="body" 
 								   title="Release the submissions for marking. First markers will be able to download their submissions from the app."

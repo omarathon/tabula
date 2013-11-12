@@ -11,10 +11,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
 import scala.Some
-import org.hibernate.criterion.Restrictions
-import org.hibernate.criterion.Criterion
-import org.hibernate.criterion.Order
-import uk.ac.warwick.tabula.data.SitsStatusDaoComponent
 
 /**
  * Service providing access to members and profiles.
@@ -37,6 +33,7 @@ trait ProfileService {
 	def getStudentCourseDetailsBySprCode(sprCode: String): Seq[StudentCourseDetails]
 	def countStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Int
 	def findStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq(), maxResults: Int = 50, startResult: Int = 0): Seq[StudentMember]
+	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
 
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def allSprStatuses(department: Department): Seq[SitsStatus]
@@ -139,9 +136,26 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		}
 	}
 
+	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()) = transactional(readOnly = true) {
+		val allRestrictions = {
+			if (department.hasParent) {
+				ScalaRestriction.is(
+					"studentCourseDetails.department", department.rootDepartment,
+					"mostSignificantCourse" -> "studentCourseDetails"
+				) ++ restrictions
+			}	else {
+				ScalaRestriction.is(
+					"studentCourseDetails.department", department,
+					"mostSignificantCourse" -> "studentCourseDetails"
+				) ++ restrictions
+			}
+		}
+		memberDao.findStudentsByRestrictions(allRestrictions, orders, Int.MaxValue, 0)
+	}
+
 	def countStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Int = transactional(readOnly = true) {
 		// Because of the implementation of sub-departments, unfortunately we can't get optimisations here.
-		if (department.hasParent) findStudentsByRestrictions(department, restrictions).size
+		if (department.hasParent) findStudentsByRestrictions(department, restrictions, Seq(), 50, 0).size
 		else {
 			val allRestrictions = ScalaRestriction.is(
 				"studentCourseDetails.department", department,

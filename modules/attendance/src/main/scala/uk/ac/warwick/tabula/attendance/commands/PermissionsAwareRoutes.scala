@@ -17,6 +17,10 @@ trait PermissionsAwareRoutes {
 	def routesForPermission(user: CurrentUser, p: Permission, dept: Department): Set[Route]
 }
 
+/**
+ * When including this trait, make sure it is with'd BEFORE ComposableCommand
+ * Otherwise all the Wire'd objects are null
+ */
 trait AutowiringSecurityServicePermissionsAwareRoutes 
 	extends PermissionsAwareRoutes 
 		with PermissionsCheckingMethods 
