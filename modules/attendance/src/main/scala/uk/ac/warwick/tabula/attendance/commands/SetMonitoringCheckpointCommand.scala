@@ -61,20 +61,10 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 	}
 
 	def applyInternal(): Seq[MonitoringCheckpoint] = {
-<<<<<<< HEAD
-		set = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
-		members = getMembers(set)
-		studentsState.asScala.map{ case (universityId, state) =>
-			val route = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route
-			val scjCode = members.find(member => member.universityId == universityId) match {
-				case None => throw new ItemNotFoundException()
-				case Some(member) => member.freshStudentCourseDetails.find(scd => scd.route == route) match {
-=======
 		studentsStateAsScala.flatMap{ case (student, pointMap) =>
 			pointMap.flatMap{ case (point, state) =>
 				val route = point.pointSet.asInstanceOf[MonitoringPointSet].route
 				val scd = student.freshStudentCourseDetails.find(scd => scd.route == route) match {
->>>>>>> develop
 					case None => throw new ItemNotFoundException()
 					case Some(studentCourseDetails) => studentCourseDetails
 				}
@@ -103,7 +93,7 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 				errors.pushNestedPath(s"studentsState[${student.universityId}][${point.id}]")
 				val pointRoute = point.pointSet.asInstanceOf[MonitoringPointSet].route
 				// Check point is valid for student
-				if (!student.studentCourseDetails.asScala.exists(scd => scd.route == pointRoute)) {
+				if (!student.freshStudentCourseDetails.exists(scd => scd.route == pointRoute)) {
 					errors.rejectValue("", "monitoringPoint.invalidStudent")
 				// Check has permission for each point
 				}	else if (!securityService.can(user, Permissions.MonitoringPoints.Record, pointRoute)) {

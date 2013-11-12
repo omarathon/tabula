@@ -211,6 +211,7 @@ object Fixtures {
 		scyd.modeOfAttendance = modeOfAttendance
 		scyd.yearOfStudy = yearOfStudy
 		scyd.studentCourseDetails = studentCourseDetails
+		scyd.sceSequenceNumber = 1
 		scyd
 	}
 

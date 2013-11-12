@@ -188,7 +188,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		if (students.isEmpty)
 			return Map()
 
-		val partionedScjCodesWithIndex = students.flatMap{_.studentCourseDetails.asScala.map{_.scjCode}}.grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
+		val partionedScjCodesWithIndex = students.flatMap{_.freshStudentCourseDetails.map{_.scjCode}}.grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
 
 		val queryString = """
 				select scd, mp

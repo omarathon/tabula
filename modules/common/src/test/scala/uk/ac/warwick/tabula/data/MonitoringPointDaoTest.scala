@@ -237,7 +237,7 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 				studentInDifferentAcademicYear
 			))
 
-			result.size should be (2)
+			result.size should be (4)
 		}
 	}
 }
