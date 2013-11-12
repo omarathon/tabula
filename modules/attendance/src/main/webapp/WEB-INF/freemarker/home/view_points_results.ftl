@@ -25,9 +25,15 @@
 					<div class="item-info row-fluid point">
 						<div class="span12">
 							<div class="pull-right">
-								<a class="btn btn-primary" href="<@routes.record command.department groupedPoint.pointId filterQuery returnTo/>">
+								<#local record_url><@routes.record command.department groupedPoint.pointId filterQuery returnTo/></#local>
+								<@fmt.permission_button
+									permission='MonitoringPoints.Record'
+									scope=(groupedPoint.routes?first)._1()
+									action_descr='record monitoring points'
+									classes='btn btn-primary'
+									href=record_url>
 									Record
-								</a>
+								</@fmt.permission_button>
 							</div>
 							${groupedPoint.name}
 							(<@fmt.monitoringPointWeeksFormat groupedPoint.validFromWeek groupedPoint.requiredFromWeek command.academicYear command.department />):

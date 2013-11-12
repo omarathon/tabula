@@ -259,7 +259,7 @@
 	</div>
 </#macro>
 
-<#macro permission_button permission scope action_descr href="" tooltip="" classes="" type="a" data_attr="data-container=body" >
+<#macro permission_button permission scope action_descr id="" href="" tooltip="" classes="" type="a" data_attr="data-container=body" >
 	<#local class></#local>
 	<#local title></#local>
 
@@ -276,10 +276,10 @@
 		<#local data_attr='${data_attr}'?replace("data-toggle=modal","") >
 	</#if>
 
-
-
+	<#local id_attr></#local>
+	<#if id?has_content><#local id_attr>id='${id}'</#local></#if>
 	<#if classes??><#local class>class='${classes}'</#local></#if>
-	<${type} ${href} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
+	<${type} ${href} ${id_attr} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
 </#macro>
 
 <#macro bulk_email emails title subject limit=50>

@@ -77,11 +77,17 @@
 					<ul class="dropdown-menu">
 						<#if features.turnitin>
 							<li>
-								<a href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' />"><i class="icon-book"></i> Check for plagiarism</a>
+								<#assign checkplagiarism_url><@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' /></#assign>
+								<@fmt.permission_button permission='Submission.CheckForPlagiarism' scope=assignment action_descr='check for plagiarism' href=checkplagiarism_url tooltip='Check for plagiarism'>
+									<i class="icon-book"></i> Check for plagiarism
+								</@fmt.permission_button>
 							</li>
 						</#if>
 						<li class="must-have-selected">
-							<a class="use-tooltip" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' />" id="mark-plagiarised-selected-button" title="Toggle whether the selected students' submissions are possibly plagiarised." data-container="body"><i class="icon-exclamation-sign"></i> Mark plagiarised</a>
+							<#assign markplagiarised_url><@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' /></#assign>
+							<@fmt.permission_button permission='Submission.ManagePlagiarismStatus' scope=assignment action_descr='mark plagiarised' href=markplagiarised_url id="mark-plagiarised-selected-button" tooltip="Toggle whether the selected students' submissions are possibly plagiarised." data_attr='data-container=body'>
+								<i class="icon-exclamation-sign"></i> Mark plagiarised
+							</@fmt.permission_button>
 						</li>
 					</ul>
 				</div>
@@ -110,16 +116,31 @@
 						<ul class="dropdown-menu">
 							<#if assignment.markingWorkflow?? && !assignment.markingWorkflow.studentsChooseMarker>
 								<li>
-									<a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/assign-markers" />"><i class="icon-user"></i> Assign markers </a>
+									<#assign markers_url><@routes.assignMarkers assignment /></#assign>
+									<@fmt.permission_button 
+										permission='Assignment.Update' 
+										scope=assignment 
+										action_descr='assign markers' 
+										href=markers_url>
+			            	<i class="icon-user"></i> Assign markers
+			            </@fmt.permission_button>
 								</li>
 							<#else>
 								<li class="disabled"><a><i class="icon-user"></i> Assign markers </a></li>
 							</#if>
 							<li class="must-have-selected">
-								<a class="use-tooltip form-post" data-container="body" 
-								   title="Release the submissions for marking. First markers will be able to download their submissions from the app."
-								   href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/release-submissions' />"
-								   id="release-submissions-button"><i class="icon-inbox"></i> Release for marking</a>
+								<#assign releaseForMarking_url><@routes.releaseForMarking assignment /></#assign>
+								<@fmt.permission_button 
+									permission='Submission.ReleaseForMarking' 
+									scope=assignment 
+									action_descr='release for marking' 
+									classes='form-post'
+									href=releaseForMarking_url 
+									id="release-submissions-button" 
+									tooltip="Release the submissions for marking. First markers will be able to download their submissions from the app."
+									data_attr='data-container=body'>
+									<i class="icon-inbox"></i> Release for marking
+								</@fmt.permission_button>
 							</li>
 						</ul>
 					</div>
@@ -150,14 +171,36 @@
 						<li class="divider"></li>
 					</#if>
 					<li>
-						<a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/marks" />"><i class="icon-check"></i> Add marks</a>
+						<#assign marks_url><@routes.addMarks assignment /></#assign>
+						<@fmt.permission_button 
+							permission='Marks.Create' 
+							scope=assignment 
+							action_descr='add marks' 
+							href=marks_url>
+            	<i class="icon-check"></i> Add marks
+            </@fmt.permission_button>
 					</li>
 					<li class="divider"></li>
 					<li>
-						<a href="<@routes.onlinefeedback assignment />"><i class="icon-edit"></i> Online feedback</a>
+						<#assign onlinefeedback_url><@routes.onlinefeedback assignment /></#assign>
+						<@fmt.permission_button 
+							permission='Feedback.Read' 
+							scope=assignment 
+							action_descr='manage online feedback' 
+							href=onlinefeedback_url>
+            	<i class="icon-edit"></i> Online feedback
+            </@fmt.permission_button>
 					</li>
 					<li>
-						<a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />"><i class="icon-upload"></i> Upload feedback</a>
+						<#assign feedback_url><@routes.addFeedback assignment /></#assign>
+						<@fmt.permission_button 
+							permission='Feedback.Create' 
+							scope=assignment 
+							action_descr='upload feedback' 
+							classes='feedback-link'
+							href=feedback_url>
+            	<i class="icon-upload"></i> Upload feedback
+            </@fmt.permission_button>
 					</li>
 					<li class="must-have-selected">
 						<a class="long-running use-tooltip form-post" 
@@ -173,7 +216,10 @@
 						</@fmt.permission_button>
 					</li>
 					<li class="must-have-selected">
-						<a class="form-post" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' />"><i class="icon-remove"></i> Delete feedback</a>
+						<#assign deletefeedback_url><@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
+						<@fmt.permission_button permission='Feedback.Delete' scope=assignment action_descr='delete feedback' classes="form-post" href=deletefeedback_url tooltip='Delete feedback'>
+							<i class="icon-remove"></i> Delete feedback
+						</@fmt.permission_button>
 					</li>
 				</ul>
 			</div>
