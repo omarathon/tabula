@@ -1,76 +1,206 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.{CurrentUser, TestBase, Mockito}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringPoint, MonitoringPointSet}
-import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, CurrentUser, TestBase, Mockito}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringCheckpoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.data.model.{Department, Route}
-import uk.ac.warwick.tabula.JavaImports.JArrayList
+import uk.ac.warwick.tabula.JavaImports.{JHashMap, JArrayList}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.permissions.{Permissions, Permission}
+import org.joda.time.DateTime
+import org.mockito.Matchers
+import uk.ac.warwick.tabula.data.convert.{MonitoringPointIdConverter, MemberUniversityIdConverter}
+import org.springframework.web.bind.WebDataBinder
+import org.springframework.core.convert.support.GenericConversionService
+import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
 
 class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends ProfileServiceComponent with MonitoringPointServiceComponent with SecurityServiceComponent
-		with TermServiceComponent with SetMonitoringCheckpointCommandValidation with SetMonitoringCheckpointState with PermissionsAwareRoutes {
-		val profileService = mock[ProfileService]
-		val monitoringPointService = mock[MonitoringPointService]
+	val thisProfileService = mock[ProfileService]
+	val thisMonitoringPointService = mock[MonitoringPointService]
+
+	trait CommandTestSupport extends SetMonitoringCheckpointState with SetMonitoringCheckpointCommandValidation
+		with MonitoringPointServiceComponent with ProfileServiceComponent with SecurityServiceComponent with TermServiceComponent {
+		val monitoringPointService = thisMonitoringPointService
+		val profileService = thisProfileService
 		val securityService = mock[SecurityService]
 		val termService = mock[TermService]
 		def routesForPermission(user: CurrentUser, p: Permission, dept: Department): Set[Route] = {
 			Set()
 		}
-
-		def apply(): Seq[MonitoringCheckpoint] = {
-			null
+		def apply: Seq[MonitoringCheckpoint] = {
+			Seq()
 		}
 	}
 
 	trait Fixture {
-		val dept = new Department
-		val set = new MonitoringPointSet
-		set.route = mock[Route]
-		val monitoringPoint = new MonitoringPoint
-		monitoringPoint.id = "1"
-		val existingName = "Point 1"
-		val existingWeek = 1
-		monitoringPoint.name = existingName
-		monitoringPoint.validFromWeek = existingWeek
-		monitoringPoint.requiredFromWeek = existingWeek
-		val otherMonitoringPoint = new MonitoringPoint
-		otherMonitoringPoint.id = "2"
-		val otherExistingName = "Point 2"
-		val otherExistingWeek = 2
-		otherMonitoringPoint.name = otherExistingName
-		otherMonitoringPoint.validFromWeek = otherExistingWeek
-		otherMonitoringPoint.requiredFromWeek = otherExistingWeek
-		set.points = JArrayList(monitoringPoint, otherMonitoringPoint)
-	}
+		val memberConvertor = new MemberUniversityIdConverter
+		memberConvertor.service = thisProfileService
+		val monitoringPointConvertor = new MonitoringPointIdConverter
+		monitoringPointConvertor.service = thisMonitoringPointService
+		val conversionService = new GenericConversionService()
+		conversionService.addConverter(memberConvertor)
+		conversionService.addConverter(monitoringPointConvertor)
 
+		val user = mock[CurrentUser]
+		val dept = Fixtures.department("arc", "School of Architecture")
+		val thisAcademicYear = AcademicYear(2013)
+		val templatePoint = Fixtures.monitoringPoint("name", 1, 1)
+		val templatePointSet = new MonitoringPointSet
+		templatePointSet.academicYear = thisAcademicYear
+		templatePoint.pointSet = templatePointSet
+
+		val route = Fixtures.route("a100")
+		val otherRoute = Fixtures.route("b100")
+
+		val student1 = Fixtures.student("student1")
+		student1.studentCourseDetails.get(0).route = route
+		thisProfileService.getMemberByUniversityId("student1") returns Option(student1)
+
+		val monitoringPointSet1 = new MonitoringPointSet
+		monitoringPointSet1.route = route
+		monitoringPointSet1.academicYear = thisAcademicYear
+
+		val pointSet1Point1 = Fixtures.monitoringPoint("name", 1, 1)
+		pointSet1Point1.id = "11"
+		pointSet1Point1.pointSet = monitoringPointSet1
+		monitoringPointSet1.points.add(pointSet1Point1)
+		thisMonitoringPointService.getPointById("11") returns Option(pointSet1Point1)
+
+		val monitoringPointSet2 = new MonitoringPointSet
+		monitoringPointSet2.route = otherRoute
+		monitoringPointSet2.academicYear = thisAcademicYear
+
+		val pointSet2Point1 = Fixtures.monitoringPoint("name", 1, 1)
+		pointSet2Point1.id = "21"
+		pointSet2Point1.pointSet = monitoringPointSet2
+		monitoringPointSet2.points.add(pointSet2Point1)
+		thisMonitoringPointService.getPointById("21") returns Option(pointSet2Point1)
+
+	}
 
 	@Test
-	def validateValid() = withUser("cuslat") {
-		new Fixture {
-			monitoringPoint.sentToAcademicOffice = false
-			val command = new SetMonitoringCheckpointCommand(dept, monitoringPoint, currentUser, JArrayList()) with CommandTestSupport
+	def onBindStudentsPopulated() { new Fixture {
+		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
+		command.onBind(null)
+		command.studentsStateAsScala should not be null
+	}}
 
-			var errors = new BindException(command, "command")
-			command.validate(errors)
-			errors.hasErrors should be (right = false)
-		}
-	}
+	@Test def validateNoSuchPointForStudent() { new Fixture {
+		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
+		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
+		command.studentsState = JHashMap(
+			student1 -> JHashMap(pointSet2Point1 -> MonitoringCheckpointState.Attended.asInstanceOf[MonitoringCheckpointState])
+		)
+		var binder = new WebDataBinder(command, "command")
+		binder.setConversionService(conversionService)
+		command.onBind(null)
+		var errors = binder.getBindingResult
+		command.validate(errors)
+		errors.hasFieldErrors should be (true)
+		errors.getFieldError(s"studentsState[${student1.universityId}][${pointSet2Point1.id}]") should not be null
+	}}
 
+	@Test def validateNoRoutePermission() { new Fixture {
+		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
+		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
+		command.studentsState = JHashMap(
+			student1 -> JHashMap(pointSet1Point1 -> MonitoringCheckpointState.Attended.asInstanceOf[MonitoringCheckpointState])
+		)
+		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns false
+		var binder = new WebDataBinder(command, "command")
+		binder.setConversionService(conversionService)
+		command.onBind(null)
+		var errors = binder.getBindingResult
+		command.validate(errors)
+		errors.hasFieldErrors should be (true)
+		errors.getFieldError(s"studentsState[${student1.universityId}][${pointSet1Point1.id}]") should not be null
+	}}
 
-	@Test
-	def validateSentToAcademicOfficeNoChanges() = withUser("cuslat") {
-		new Fixture {
-			monitoringPoint.sentToAcademicOffice = true
-			val command = new SetMonitoringCheckpointCommand(dept, monitoringPoint, currentUser, JArrayList()) with CommandTestSupport
+	@Test def validateSentToAcademicOffice() { new Fixture {
+		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
+		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
+		command.studentsState = JHashMap(
+			student1 -> JHashMap(pointSet1Point1 -> MonitoringCheckpointState.Attended.asInstanceOf[MonitoringCheckpointState])
+		)
+		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns true
+		pointSet1Point1.sentToAcademicOffice = true
 
-			var errors = new BindException(command, "command")
-			command.validate(errors)
-			errors.hasErrors should be (right = true)
-		}
-	}
+		var binder = new WebDataBinder(command, "command")
+		binder.setConversionService(conversionService)
+		command.onBind(null)
+		var errors = binder.getBindingResult
+		command.validate(errors)
+		errors.hasFieldErrors should be (true)
+		errors.getFieldError(s"studentsState[${student1.universityId}][${pointSet1Point1.id}]") should not be null
+	}}
 
+	@Test def validateBeforeValidFromAttended() { new Fixture {
+		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
+		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
+		command.studentsState = JHashMap(
+			student1 -> JHashMap(pointSet1Point1 -> MonitoringCheckpointState.Attended.asInstanceOf[MonitoringCheckpointState])
+		)
+		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns true
+		pointSet1Point1.validFromWeek = 10
 
+		var binder = new WebDataBinder(command, "command")
+		binder.setConversionService(conversionService)
+		command.onBind(null)
+		var errors = binder.getBindingResult
+		command.validate(errors)
+		errors.hasFieldErrors should be (true)
+		errors.getFieldError(s"studentsState[${student1.universityId}][${pointSet1Point1.id}]") should not be null
+	}}
+
+	@Test def validateBeforeValidFromMissedUnauthorised() { new Fixture {
+		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
+		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
+		command.studentsState = JHashMap(
+			student1 -> JHashMap(pointSet1Point1 -> MonitoringCheckpointState.MissedUnauthorised.asInstanceOf[MonitoringCheckpointState])
+		)
+		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns true
+		pointSet1Point1.validFromWeek = 10
+
+		var binder = new WebDataBinder(command, "command")
+		binder.setConversionService(conversionService)
+		command.onBind(null)
+		var errors = binder.getBindingResult
+		command.validate(errors)
+		errors.hasFieldErrors should be (true)
+		errors.getFieldError(s"studentsState[${student1.universityId}][${pointSet1Point1.id}]") should not be null
+	}}
+
+	@Test def validateBeforeValidFromMissedAuthorised() { new Fixture {
+		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
+		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
+		command.studentsState = JHashMap(
+			student1 -> JHashMap(pointSet1Point1 -> MonitoringCheckpointState.MissedAuthorised.asInstanceOf[MonitoringCheckpointState])
+		)
+		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns true
+		pointSet1Point1.validFromWeek = 10
+
+		var binder = new WebDataBinder(command, "command")
+		binder.setConversionService(conversionService)
+		command.onBind(null)
+		var errors = binder.getBindingResult
+		command.validate(errors)
+		errors.hasFieldErrors should be (false)
+	}}
+
+	@Test def validateBeforeValidFromNull() { new Fixture {
+		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
+		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
+		command.studentsState = JHashMap(
+			student1 -> JHashMap(pointSet1Point1 -> null.asInstanceOf[MonitoringCheckpointState])
+		)
+		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns true
+		pointSet1Point1.validFromWeek = 10
+
+		var binder = new WebDataBinder(command, "command")
+		binder.setConversionService(conversionService)
+		command.onBind(null)
+		var errors = binder.getBindingResult
+		command.validate(errors)
+		errors.hasFieldErrors should be (false)
+	}}
 }

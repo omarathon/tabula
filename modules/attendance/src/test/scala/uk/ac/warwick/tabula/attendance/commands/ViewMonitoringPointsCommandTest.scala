@@ -1,7 +1,6 @@
-package uk.ac.warwick.tabula.attendance
+package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, Fixtures, Mockito, TestBase}
-import uk.ac.warwick.tabula.attendance.commands.{ViewMonitoringPointsState, ViewMonitoringPointsCommand}
 import uk.ac.warwick.tabula.services.{MonitoringPointService, ProfileService, TermService, MonitoringPointServiceComponent, ProfileServiceComponent, TermServiceComponent}
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.data.model.{Route, Department}

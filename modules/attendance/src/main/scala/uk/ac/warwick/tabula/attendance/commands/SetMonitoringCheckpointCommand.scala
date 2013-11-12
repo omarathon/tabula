@@ -87,7 +87,7 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 	self: SetMonitoringCheckpointState with SecurityServiceComponent with TermServiceComponent =>
 
 	def validate(errors: Errors) {
-		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
 		studentsStateAsScala.foreach{ case(student, pointMap) => {
 			pointMap.foreach{ case(point, state) => {
 				errors.pushNestedPath(s"studentsState[${student.universityId}][${point.id}]")
