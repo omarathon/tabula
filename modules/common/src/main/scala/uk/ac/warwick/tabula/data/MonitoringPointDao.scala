@@ -152,7 +152,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			where r = mps.route
 			and scd.route = r.code
 			and scyd.studentCourseDetails = scd
-			and student.mostSignificantCourseDetails = scd
+			and student.mostSignificantCourse = scd
 			and mps.academicYear = :academicYear
 			and (
 			  mps.year = scyd.yearOfStudy
@@ -182,7 +182,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		val queryString = """
 				select student, mp
 				from StudentMember student, StudentCourseDetails scd, StudentCourseYearDetails scyd, Route r, MonitoringPointSet mps, MonitoringPoint mp
-				where student.mostSignificantCourseDetails = scd
+				where student.mostSignificantCourse = scd
 				and scd.route = r.code
 				and scd = scyd.studentCourseDetails
 				and mps.route = r
