@@ -350,15 +350,15 @@
 				  <ul class="dropdown-menu pull-right">
 					<li>
 						<#assign edit_url><@routes.assignmentedit assignment /></#assign>
-						<@fmt.permission_button 
-							permission='Assignment.Update' 
-							scope=assignment 
-							action_descr='edit assignment properties' 
+						<@fmt.permission_button
+							permission='Assignment.Update'
+							scope=assignment
+							action_descr='edit assignment properties'
 							href=edit_url>
             	<i class="icon-wrench"></i> Edit properties
             </@fmt.permission_button>
 					</li>
-					
+
 					<li>
 						<#assign archive_url><@url page="/admin/module/${module.code}/assignments/${assignment.id}/archive" /></#assign>
 						<#if assignment.archived>
@@ -383,16 +383,16 @@
 								<#assign ext_caption='View extensions' />
 							</#if>
 							<#assign ext_url><@routes.extensions assignment /></#assign>
-							<@fmt.permission_button 
-								permission='Extension.Read' 
-								scope=assignment 
+							<@fmt.permission_button
+								permission='Extension.Read'
+								scope=assignment
 								action_descr=ext_caption?lower_case
 								href=ext_url>
 	            	<i class="icon-calendar"></i> ${ext_caption}
 	            </@fmt.permission_button>
 						</li>
 					<#else>
-						<li class="disabled"><a><i class="icon-calendar"></i> Grant extensions </a></li>
+						<li class="disabled"><a class="use-tooltip" title="Extensions are not allowed on this assignment."><i class="icon-calendar"></i> Grant extensions </a></li>
 					</#if>
 
 					<li class="divider"></li>
@@ -401,39 +401,39 @@
 					<#if assignment.markingWorkflow?? && !assignment.markingWorkflow.studentsChooseMarker>
 						<li>
 							<#assign markers_url><@routes.assignMarkers assignment /></#assign>
-							<@fmt.permission_button 
-								permission='Assignment.Update' 
-								scope=assignment 
-								action_descr='assign markers' 
+							<@fmt.permission_button
+								permission='Assignment.Update'
+								scope=assignment
+								action_descr='assign markers'
 								href=markers_url>
 	            	<i class="icon-user"></i> Assign markers
 	            </@fmt.permission_button>
 	          </li>
 					<#else>
-						<li class="disabled"><a><i class="icon-user"></i> Assign markers </a></li>
+						<li class="disabled"><a class="use-tooltip" title="Marking workflow is not enabled for this assignment."><i class="icon-user"></i> Assign markers </a></li>
 					</#if>
 
 					<#if assignment.collectMarks>
 						<li>
 							<#assign marks_url><@routes.addMarks assignment /></#assign>
-							<@fmt.permission_button 
-								permission='Marks.Create' 
-								scope=assignment 
-								action_descr='add marks' 
+							<@fmt.permission_button
+								permission='Marks.Create'
+								scope=assignment
+								action_descr='add marks'
 								href=marks_url>
 	            	<i class="icon-check"></i> Add marks
 	            </@fmt.permission_button>
 	          </li>
 					<#else>
-						<li class="disabled"><a><i class="icon-check"></i> Add marks</a></li>
+						<li class="disabled"><a class="use-tooltip" title="Mark collection is not enabled for this assignment."><i class="icon-check"></i> Add marks</a></li>
 					</#if>
-					
+
 					<li>
 						<#assign feedback_url><@routes.addFeedback assignment /></#assign>
-						<@fmt.permission_button 
-							permission='Feedback.Create' 
-							scope=assignment 
-							action_descr='upload feedback' 
+						<@fmt.permission_button
+							permission='Feedback.Create'
+							scope=assignment
+							action_descr='upload feedback'
 							classes='feedback-link'
 							href=feedback_url>
             	<i class="icon-upload"></i> Upload feedback

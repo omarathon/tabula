@@ -1,17 +1,18 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import scala.collection.mutable.ListBuffer
 import org.joda.time.DateTimeConstants
 import org.joda.time.DateTime
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.{CurrentUser, Fixtures, AppContextTestBase, Mockito}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{NotificationService, UserLookupService}
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.{Notification, UserGroup}
+import uk.ac.warwick.tabula.data.model.forms.Extension
 import org.junit.Before
+import uk.ac.warwick.tabula.coursework.web.Routes.admin.assignment.extension
 
 // scalastyle:off magic.number
 class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
@@ -48,7 +49,7 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 	}
 
 
-	@Test def validatNullDates = transactional { t =>
+	@Test def validateNullDates = transactional { t =>
 	// TAB-236
 		val f = MyFixtures()
 
@@ -142,7 +143,7 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 	@Test def includeAndExcludeUsers = transactional {
 		t =>
 			val f = MyFixtures()
-			val cmd = new EditAssignmentCommand(f.module, f.assignment)
+			val cmd = new EditAssignmentCommand(f.module, f.assignment, f.currentUser)
 			cmd.userLookup = userLookup
 			cmd.members match {
 				case ug: UserGroup => ug.userLookup = userLookup
@@ -175,14 +176,66 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 			cmd.members.excludes.size should be(0)
 	}
 
+	@Test def purgeExtensionRequests = transactional {
+		t =>
+			val f = MyFixtures()
+			f.assignment.extensions.size should be (2)
+			f.assignment.countUnapprovedExtensions should be (1)
+
+			val cmd = new EditAssignmentCommand(f.module, f.assignment, f.currentUser)
+			cmd.allowExtensions = false
+			cmd.notificationService = new MockNotificationService()
+			val ns = cmd.notificationService.asInstanceOf[MockNotificationService]
+			val ass = cmd.apply()
+			session.flush // for the ExtensionService to get correctly updated count
+			ass.countUnapprovedExtensions should be (0)
+			ns.notifications.size should be (2)
+			ns.notifications.map(_.verb).toSeq.sorted should be (Seq("reject", "respond").sorted)
+	}
 
 	case class MyFixtures() {
+		val user = new User("cusxad")
+		val currentUser = new CurrentUser(user, user)
 		val module = Fixtures.module(code="ls101")
 		val assignment = Fixtures.assignment("test")
+		val extension1 = new Extension
+		val extension2 = new Extension
+		val sometime = new DateTime().minusWeeks(1)
+
+		extension1.universityId = "1234567"
+		extension1.userId = "custard"
+		extension1.requestedOn = sometime
+		extension1.requestedExpiryDate = sometime.plusWeeks(8)
+		extension1.reason = "Truculence."
+		extension1.assignment = assignment
+
+		extension2.universityId = "7654321"
+		extension2.userId = "swotty"
+		extension2.requestedOn = sometime
+		extension2.requestedExpiryDate = sometime.plusWeeks(8)
+		extension2.assignment = assignment
+		extension2.approved = true
+		extension2.approvedOn = sometime.plusDays(5)
+
+		assignment.allowExtensions = true
+		assignment.extensions.add(extension1)
+		assignment.extensions.add(extension2)
 		assignment.module = module
+
 		module.assignments.add(assignment)
 		session.save(module)
 		session.save(assignment)
+		session.save(extension1)
+		session.save(extension2)
+		session.flush // need to flush so ExtensionService can see the result
+	}
+
+	class MockNotificationService extends NotificationService {
+		var notifications: ListBuffer[Notification[_]] = new ListBuffer[Notification[_]]()
+
+		override def push(n: Notification[_]) {
+			notifications += n
+		}
 	}
 
 }

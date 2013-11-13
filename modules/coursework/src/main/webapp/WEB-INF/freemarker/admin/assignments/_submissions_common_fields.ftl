@@ -1,4 +1,4 @@
-<#-- 
+<#--
 
 This section contains the form fields that can apply to a group of
 assignments, as well as to an individual one.
@@ -101,6 +101,21 @@ so that they can be passed around between requests.
 							</@form.field>
 						</@form.row>
 					</div-->
+
+					<#if (assignment.countUnapprovedExtensions gt 0)!false>
+						<script>
+							$('#allowExtensions').change(function() {
+								if ($(this).is(':checked')) {
+									$('form.edit-assignment').confirmModal({
+										message: '<@fmt.p assignment.countUnapprovedExtensions "extension request is" "extension requests are" /> pending for this assignment. If you turn off extensions, all pending extension requests will be rejected. Any extensions already granted will remain in place.',
+										confirm: 'Continue, disallow extensions'
+									});
+								} else {
+									$('form.edit-assignment').confirmModal(false);
+								}
+							});
+						</script>
+					</#if>
 				</#if>
 
 				<@form.row>

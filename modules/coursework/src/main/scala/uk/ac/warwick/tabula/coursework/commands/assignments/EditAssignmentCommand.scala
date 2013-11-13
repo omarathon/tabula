@@ -7,11 +7,18 @@ import uk.ac.warwick.tabula.commands.Description
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notifications.{ExtensionRequestRespondedNotification, ExtensionRequestRejectedNotification}
+import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.events.NotificationHandling
+import uk.ac.warwick.tabula.data.model.forms.Extension
 
 
-class EditAssignmentCommand(module: Module = null, val assignment: Assignment = null)
-	extends ModifyAssignmentCommand(module) {
-	
+class EditAssignmentCommand(module: Module = null, val assignment: Assignment = null, user: CurrentUser)
+	extends ModifyAssignmentCommand(module) with NotificationHandling {
+
+	private var unapprovedExtensions: Seq[Extension] = Seq()
+
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Assignment.Update, assignment)
 
@@ -25,10 +32,10 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 			case None => true
 		}
 	}
-	
+
 	override def validate(errors: Errors) {
 		super.validate(errors)
-		
+
 		if (academicYear != assignment.academicYear) {
 			errors.rejectValue("academicYear", "academicYear.immutable")
 		}
@@ -43,13 +50,36 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 
 	override def applyInternal(): Assignment = transactional() {
 		copyTo(assignment)
+
+		if (!allowExtensions && assignment.countUnapprovedExtensions > 0) {
+			// reject unapproved extensions (in normal circumstances, this should be unlikely)
+			unapprovedExtensions = assignment.extensionService.getUnapprovedExtensions(assignment)
+			val admin = user.apparentUser
+			unapprovedExtensions.foreach { e =>
+				e.rejected = true
+
+				// let's notify manually for completeness
+				val student = userLookup.getUserByWarwickUniId(e.universityId)
+				val studentNotification = new ExtensionRequestRejectedNotification(e, student, admin) with FreemarkerTextRenderer
+				val adminNotification = new ExtensionRequestRespondedNotification(e, student, admin) with FreemarkerTextRenderer
+				notify[Option[Extension]](Seq(studentNotification, adminNotification))
+			}
+		}
+
 		assignment
 	}
 
-	override def describe(d: Description) { d.assignment(assignment).properties(
-		"name" -> name,
-		"openDate" -> openDate,
-		"closeDate" -> closeDate)
+	override def describe(d: Description) {
+		d.assignment(assignment).properties(
+			"name" -> name,
+			"openDate" -> openDate,
+			"closeDate" -> closeDate
+		)
+		if (!unapprovedExtensions.isEmpty) {
+			d.assignment(assignment).property(
+				"studentExtensionRequestsAutoRejected" -> unapprovedExtensions.map(_.universityId)
+			)
+		}
 	}
 
 }

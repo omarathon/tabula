@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.UpstreamGroup
 import uk.ac.warwick.tabula.commands.UpstreamGroupPropertyEditor
+import uk.ac.warwick.tabula.CurrentUser
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/edit"))
@@ -21,8 +22,8 @@ class EditAssignmentController extends CourseworkController {
 
 	validatesSelf[EditAssignmentCommand]
 
-	@ModelAttribute def formObject(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment) = {
-		new EditAssignmentCommand(module, mandatory(assignment))
+	@ModelAttribute def formObject(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
+		new EditAssignmentCommand(module, mandatory(assignment), user)
 	}
 
 	@RequestMapping

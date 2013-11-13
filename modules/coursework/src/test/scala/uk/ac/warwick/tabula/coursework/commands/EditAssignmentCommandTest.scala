@@ -14,7 +14,7 @@ class EditAssignmentCommandTest extends TestBase {
     assignment.name = "Big Essay"
     assignment.commentField.get.value = "Instructions"
 
-    val command = new EditAssignmentCommand(assignment.module, assignment)
+    val command = new EditAssignmentCommand(assignment.module, assignment, currentUser)
     command.name should be ("Big Essay")
     command.members should be ('empty)
     command.comment should be ("Instructions")
