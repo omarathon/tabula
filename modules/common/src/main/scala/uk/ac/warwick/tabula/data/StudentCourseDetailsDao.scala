@@ -5,6 +5,9 @@ import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.spring.Wire
 import org.hibernate.criterion.Restrictions
+import org.hibernate.criterion.Projections
+import org.joda.time.DateTime
+import scala.collection.mutable.HashSet
 
 trait StudentCourseDetailsDaoComponent {
 	val studentCourseDetailsDao: StudentCourseDetailsDao
@@ -23,7 +26,9 @@ trait StudentCourseDetailsDao {
 	def getStudentBySprCode(sprCode: String): Option[StudentMember]
 	def getByRoute(route: Route) : Seq[StudentCourseDetails]
 	def findByDepartment(department:Department):Seq[StudentCourseDetails]
-	def getAllFreshInSits: Seq[StudentCourseDetails]
+	def getFreshScjCodes: Seq[String]
+	def stampMissingFromImport(seenScjCodes: HashSet[String], importStart: DateTime)
+
 }
 
 @Repository
@@ -80,8 +85,17 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 			.seq
 	}
 
-	def getAllFreshInSits() =
+	def getFreshScjCodes() =
 		session.newCriteria[StudentCourseDetails]
 			.add(is("missingFromImportSince", null))
+			.project[String](Projections.property("scjCode"))
 			.seq
+
+	def stampMissingFromImport(seenScjCodes: HashSet[String], importStart: DateTime) =
+		session.createQuery("""
+				update StudentCourseDetails set missingFromImportSince = :importStart where scjCode not in (:seenScjCodes)
+				""")
+			.setParameter("importStart", importStart)
+			.setParameterList("seenScjCodes", seenScjCodes)
+			.executeUpdate
 }

@@ -1,12 +1,9 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.ResultSet
-
 import scala.collection.JavaConverters.asScalaBufferConverter
-
 import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
-
 import ImportMemberHelpers.toAcademicYear
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -18,6 +15,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopying}
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
 
 class ImportStudentCourseYearCommand(resultSet: ResultSet, importRowTracker: ImportRowTracker)
 	extends Command[StudentCourseYearDetails] with Logging with Daoisms
@@ -84,7 +82,8 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet, importRowTracker: Imp
 			studentCourseYearDetailsDao.saveOrUpdate(studentCourseYearDetails)
 		}
 
-		importRowTracker.studentCourseYearDetailsSeen.add(studentCourseYearDetails)
+		val key = new StudentCourseYearKey(studentCourseYearDetails.studentCourseDetails.scjCode, studentCourseYearDetails.sceSequenceNumber)
+		importRowTracker.studentCourseYearDetailsSeen.add(key)
 		studentCourseYearDetails
 	}
 

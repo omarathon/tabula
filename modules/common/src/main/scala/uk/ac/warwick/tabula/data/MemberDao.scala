@@ -1,13 +1,24 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.JavaConversions._
-import org.hibernate.criterion._
+import scala.collection.JavaConversions.{asScalaBuffer, mutableSetAsJavaSet, seqAsJavaList}
+import scala.collection.mutable.HashSet
+
+import org.hibernate.annotations.{AccessType, FilterDefs, Filters}
+import org.hibernate.criterion.Order
+import org.hibernate.criterion.Order.{asc, desc}
+import org.hibernate.criterion.Projections
+import org.hibernate.criterion.Projections.{countDistinct, distinct, groupProperty, projectionList, property, rowCount}
+import org.hibernate.criterion.Restrictions
+import org.hibernate.criterion.Restrictions.{disjunction, gt, in, like}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.helpers.StringUtils._
+
+import javax.persistence.{DiscriminatorColumn, DiscriminatorValue, Entity, Inheritance, NamedQueries}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.{Department, Member, ModeOfAttendance, RuntimeMember, SitsStatus, StudentMember, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 
 trait MemberDaoComponent {
 	val memberDao: MemberDao
@@ -49,8 +60,8 @@ trait MemberDao {
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]): Int
 	def getAllModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def getAllSprStatuses(department: Department): Seq[SitsStatus]
-	def getStudentsPresentInSits: Seq[StudentMember]
-
+	def getFreshUniversityIds: Seq[String]
+	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime)
 }
 
 @Repository
@@ -95,9 +106,10 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.add(is("universityId", universityId.safeTrim))
 			.uniqueResult
 
-	def getStudentsPresentInSits() =
+	def getFreshUniversityIds() =
 			session.newCriteria[StudentMember]
 			.add(is("missingFromImportSince", null))
+			.project[String](Projections.property("universityId"))
 			.seq
 
 	def getAllWithUniversityIds(universityIds: Seq[String]) =
@@ -415,6 +427,14 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 						.add(rowCount(), "statusCount")
 				)
 				.seq.map { array => array(0).asInstanceOf[SitsStatus] }
+
+	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime) =
+		session.createQuery("""
+				update Member set missingFromImportSince = :importStart where universityId not in (:seenIds)
+				""")
+			.setParameter("importStart", importStart)
+			.setParameterList("seenIds", seenIds)
+			.executeUpdate
 
 }
 

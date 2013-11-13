@@ -69,7 +69,7 @@ class ImportStudentRowCommand(member: MembershipInformation,
 		// apply above will take care of the db.  This brings the in-memory data up to speed:
 		member.attachStudentCourseDetails(studentCourseDetails)
 
-		importRowTracker.studentsSeen.add(member)
+		importRowTracker.universityIdsSeen.add(member.universityId)
 
 		member
 	}

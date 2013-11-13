@@ -2,22 +2,24 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import scala.Option.option2Iterable
 import scala.collection.JavaConversions.{mapAsScalaMap, seqAsJavaList}
-import scala.collection.JavaConverters.asScalaBufferConverter
+import scala.collection.JavaConverters.{asScalaBufferConverter, _}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.commands.{Command, Description}
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, ModuleRegistrationDaoImpl, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.{Member, ModuleRegistration, StudentCourseDetails, StudentCourseYearDetails, StudentMember}
+import uk.ac.warwick.tabula.data.model.{Member, ModuleRegistration, StudentCourseDetails, StudentCourseYearDetails, StudentCourseYearKey, StudentMember}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 import uk.ac.warwick.tabula.scheduling.services.{CourseImporter, MembershipInformation, ModeOfAttendanceImporter, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware, SitsStatusesImporter}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileIndexService, ProfileService, SmallGroupService, UserLookupService}
 import uk.ac.warwick.userlookup.User
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.MemberDao
+import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
+import scala.collection.mutable.HashSet
+import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
+import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware {
 
@@ -116,28 +118,34 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	}
 
 	def stampMissingRows(importRowTracker: ImportRowTracker, importStart: DateTime) {
-		// make sure any rows we've got for this student in the db which we haven't seen in this import are recorded as missing
-		logger.info("Timestamping missing rows")
-		val tracker = importRowTracker
+		transactional() {
+			logger.info("Timestamping missing rows.  Found "
+					+ importRowTracker.universityIdsSeen.size + " students, "
+					+ importRowTracker.scjCodesSeen.size + " studentCourseDetails, "
+					+ importRowTracker.studentCourseYearDetailsSeen.size + " studentCourseYearDetails.");
 
-		for (stu: StudentMember <- memberDao.getStudentsPresentInSits) {
-			if (!importRowTracker.studentsSeen.contains(stu))
-				stu.missingFromImportSince = importStart
-		}
+			// make sure any rows we've got for this student in the db which we haven't seen in this import are recorded as missing
+			logger.info("Timestamping missing students")
+			memberDao.stampMissingFromImport(importRowTracker.universityIdsSeen, importStart)
 
-		for (scd: StudentCourseDetails <- studentCourseDetailsDao.getAllFreshInSits
-				if !importRowTracker.studentCourseDetailsSeen.contains(scd)) {
-			scd.missingFromImportSince = importStart
-			studentCourseDetailsDao.saveOrUpdate(scd)
-		}
+			logger.info("Timestamping missing studentCourseDetails")
+			studentCourseDetailsDao.stampMissingFromImport(importRowTracker.scjCodesSeen, importStart)
 
-		for (scyd: StudentCourseYearDetails <- studentCourseYearDetailsDao.getAllFreshInSits
-				if !importRowTracker.studentCourseYearDetailsSeen.contains(scyd)) {
-			scyd.missingFromImportSince = importStart
-			studentCourseYearDetailsDao.saveOrUpdate(scyd)
+			logger.info("Converting enrolment keys to ids ...")
+			val idsSeen = convertKeysToIds(importRowTracker.studentCourseYearDetailsSeen)
+
+			logger.info("Timestamping missing studentCourseYearDetails")
+			studentCourseYearDetailsDao.stampMissingFromImport(idsSeen, importStart)
 		}
 	}
 
+	def convertKeysToIds(keys: HashSet[StudentCourseYearKey]): HashSet[String] = {
+		for (key <- keys) yield {
+			studentCourseYearDetailsDao.getIdFromKey(key) match {
+				case Some(id: String) => id
+			}
+		}
+	}
 
 	def updateModuleRegistrationsAndSmallGroups(membershipInfo: Seq[MembershipInformation], users: Map[String, User]): Seq[ModuleRegistration] = {
 		logger.info("Fetching module registrations")
@@ -206,11 +214,11 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 			case stu: StudentMember => {
 
 				// update missingFromImportSince on member
-				if (stu.missingFromImportSince != null && importRowTracker.studentsSeen.contains(stu)) {
+				if (stu.missingFromImportSince != null && importRowTracker.universityIdsSeen.contains(stu.universityId)) {
 					stu.missingFromImportSince = null
 					memberDao.saveOrUpdate(stu)
 				}
-				else if (stu.missingFromImportSince == null && !importRowTracker.studentsSeen.contains(stu)) {
+				else if (stu.missingFromImportSince == null && !importRowTracker.universityIdsSeen.contains(stu.universityId)) {
 					var missingSince = stu.missingFromImportSince
 					stu.missingFromImportSince = DateTime.now
 					missingSince = stu.missingFromImportSince
@@ -222,25 +230,26 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 					// on studentCourseDetails
 					if (scd.missingFromImportSince != null
-							&& importRowTracker.studentCourseDetailsSeen.contains(scd)) {
+							&& importRowTracker.scjCodesSeen.contains(scd.scjCode)) {
 						scd.missingFromImportSince = null
 						studentCourseDetailsDao.saveOrUpdate(scd)
 					}
 					else if (scd.missingFromImportSince == null
-							&& !importRowTracker.studentCourseDetailsSeen.contains(scd)) {
+							&& !importRowTracker.scjCodesSeen.contains(scd.scjCode)) {
 						scd.missingFromImportSince = DateTime.now
 						studentCourseDetailsDao.saveOrUpdate(scd)
 					}
 
 					// and on studentCourseYearDetails
 					for (scyd <- scd.freshOrStaleStudentCourseYearDetails) {
+						val key = new StudentCourseYearKey(scd.scjCode, scyd.sceSequenceNumber)
 						if (scyd.missingFromImportSince != null
-								&& importRowTracker.studentCourseYearDetailsSeen.contains(scyd)) {
+								&& importRowTracker.studentCourseYearDetailsSeen.contains(key)) {
 							scyd.missingFromImportSince = null
 							studentCourseYearDetailsDao.saveOrUpdate(scyd)
 						}
 						else if (scyd.missingFromImportSince == null
-								&& !importRowTracker.studentCourseYearDetailsSeen.contains(scyd)) {
+								&& !importRowTracker.studentCourseYearDetailsSeen.contains(key)) {
 							scyd.missingFromImportSince = DateTime.now
 							studentCourseYearDetailsDao.saveOrUpdate(scyd)
 						}

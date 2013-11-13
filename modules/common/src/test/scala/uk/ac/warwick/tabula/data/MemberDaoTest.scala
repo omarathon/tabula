@@ -427,7 +427,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-	def testGetStudentsPresentInSits = transactional { tx =>
+	def testGetFreshStudents = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 
@@ -444,13 +444,13 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.saveOrUpdate(stu3)
 		memberDao.saveOrUpdate(stu4)
 
-		memberDao.getStudentsPresentInSits.size should be (4)
+		memberDao.getFreshUniversityIds.size should be (4)
 
 		stu3.missingFromImportSince = DateTime.now
 		memberDao.saveOrUpdate(stu3)
 		session.flush
 
-		memberDao.getStudentsPresentInSits.size should be (3)
+		memberDao.getFreshUniversityIds.size should be (3)
 
 	}
 

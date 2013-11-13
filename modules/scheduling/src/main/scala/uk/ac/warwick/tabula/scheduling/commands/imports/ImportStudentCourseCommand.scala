@@ -115,7 +115,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		importSupervisorsForStudentCommand.studentCourseDetails = studentCourseDetails
 		importSupervisorsForStudentCommand.apply
 
-		importRowTracker.studentCourseDetailsSeen.add(studentCourseDetails)
+		importRowTracker.scjCodesSeen.add(studentCourseDetails.scjCode)
 		studentCourseDetails
 	}
 

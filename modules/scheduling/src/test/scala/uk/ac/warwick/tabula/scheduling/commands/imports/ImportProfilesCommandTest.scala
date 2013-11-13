@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, Membersh
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService, SmallGroupService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import java.sql.ResultSetMetaData
+import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
 
 class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Logging with SitsAcademicYearAware {
 	trait Environment {
@@ -103,14 +104,16 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 	@Transactional
 	@Test def testStampMissingRows() {
 		new Environment {
-			memberDao.getStudentsPresentInSits returns Seq(stu)
-			scdDao.getAllFreshInSits returns Seq(scd)
-			scydDao.getAllFreshInSits returns Seq(scyd)
+			memberDao.getFreshUniversityIds returns Seq(stu.universityId)
+			scdDao.getFreshScjCodes returns Seq(scd.scjCode)
+			scydDao.getFreshKeys returns Seq(new StudentCourseYearKey(scyd.studentCourseDetails.scjCode, scyd.sceSequenceNumber))
 
 			val tracker = new ImportRowTracker
-			tracker.studentsSeen.add(stu)
-			tracker.studentCourseDetailsSeen.add(scd)
-			tracker.studentCourseYearDetailsSeen.add(scyd)
+			tracker.universityIdsSeen.add(stu.universityId)
+			tracker.scjCodesSeen.add(scd.scjCode)
+
+			val key = new StudentCourseYearKey(scyd.studentCourseDetails.scjCode, scyd.sceSequenceNumber)
+			tracker.studentCourseYearDetailsSeen.add(key)
 
 			command.stampMissingRows(tracker, DateTime.now)
 
@@ -118,7 +121,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scd.missingFromImportSince should be (null)
 			scyd.missingFromImportSince should be (null)
 
-			tracker.studentsSeen.remove(stu)
+			tracker.universityIdsSeen.remove(stu.universityId)
 
 			command.stampMissingRows(tracker, DateTime.now)
 
@@ -126,14 +129,14 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scd.missingFromImportSince should be (null)
 			scyd.missingFromImportSince should be (null)
 
-			tracker.studentCourseDetailsSeen.remove(scd)
+			tracker.scjCodesSeen.remove(scd.scjCode)
 			command.stampMissingRows(tracker, DateTime.now)
 
 			stu.missingFromImportSince should not be (null)
 			scd.missingFromImportSince should not be (null)
 			scyd.missingFromImportSince should be (null)
 
-			tracker.studentCourseYearDetailsSeen.remove(scyd)
+			tracker.studentCourseYearDetailsSeen.remove(key)
 			command.stampMissingRows(tracker, DateTime.now)
 
 			stu.missingFromImportSince should not be (null)
@@ -147,9 +150,11 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 	@Test def testUpdateMissingForIndividual() {
 		new Environment {
 			val tracker = new ImportRowTracker
-			tracker.studentsSeen.add(stu)
-			tracker.studentCourseDetailsSeen.add(scd)
-			tracker.studentCourseYearDetailsSeen.add(scyd)
+			tracker.universityIdsSeen.add(stu.universityId)
+			tracker.scjCodesSeen.add(scd.scjCode)
+
+			val key = new StudentCourseYearKey(scyd.studentCourseDetails.scjCode, scyd.sceSequenceNumber)
+			tracker.studentCourseYearDetailsSeen.add(key)
 
 			command.updateMissingForIndividual(stu, tracker)
 
@@ -157,7 +162,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scd.missingFromImportSince should be (null)
 			scyd.missingFromImportSince should be (null)
 
-			tracker.studentsSeen.remove(stu)
+			tracker.universityIdsSeen.remove(stu.universityId)
 
 			command.updateMissingForIndividual(stu, tracker)
 
@@ -165,14 +170,14 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scd.missingFromImportSince should be (null)
 			scyd.missingFromImportSince should be (null)
 
-			tracker.studentCourseDetailsSeen.remove(scd)
+			tracker.scjCodesSeen.remove(scd.scjCode)
 			command.updateMissingForIndividual(stu, tracker)
 
 			stu.missingFromImportSince should not be (null)
 			scd.missingFromImportSince should not be (null)
 			scyd.missingFromImportSince should be (null)
 
-			tracker.studentCourseYearDetailsSeen.remove(scyd)
+			tracker.studentCourseYearDetailsSeen.remove(key)
 			command.updateMissingForIndividual(stu, tracker)
 
 			stu.missingFromImportSince should not be (null)

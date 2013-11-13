@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.JavaImports.JInteger
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.system.permissions.Restricted
+import reflect.BeanProperty
 
 @Entity
 class StudentCourseYearDetails extends StudentCourseYearProperties
@@ -92,3 +93,5 @@ trait StudentCourseYearProperties {
 
 }
 
+class StudentCourseYearKey(@BeanProperty val scjCode: String, @BeanProperty val sceSequenceNumber: JInteger) {
+}

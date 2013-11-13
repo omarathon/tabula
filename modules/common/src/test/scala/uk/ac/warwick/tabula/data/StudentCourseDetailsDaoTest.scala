@@ -123,7 +123,7 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 	}
 
 	@Test
-	def testGetStudentCourseDetailsPresentInSits = transactional { tx =>
+	def testGetAllFresh = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 
@@ -140,12 +140,12 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		memberDao.saveOrUpdate(stu3)
 		memberDao.saveOrUpdate(stu4)
 
-		studentCourseDetailsDao.getAllFreshInSits.size should be (4)
+		studentCourseDetailsDao.getFreshScjCodes.size should be (4)
 
 		stu2.mostSignificantCourse.missingFromImportSince = DateTime.now
 		session.saveOrUpdate(stu2.mostSignificantCourse)
 
-		studentCourseDetailsDao.getAllFreshInSits.size should be (3)
+		studentCourseDetailsDao.getFreshScjCodes.size should be (3)
 	}
 
 }

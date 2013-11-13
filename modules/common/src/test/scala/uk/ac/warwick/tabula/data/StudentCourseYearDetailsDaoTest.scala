@@ -61,7 +61,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 		}
 	}
 
-	@Test def testPresentInSits {
+	@Test def testGetAllFresh {
 		transactional { tx =>
 			val dept1 = Fixtures.department("hm", "History of Music")
 			val dept2 = Fixtures.department("ar", "Architecture")
@@ -79,14 +79,14 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 			session.saveOrUpdate(stu3)
 			session.saveOrUpdate(stu4)
 
-			scydDao.getAllFreshInSits.size should be (4)
+			scydDao.getFreshKeys.size should be (4)
 
 			val scyd = stu2.mostSignificantCourse.freshStudentCourseYearDetails.head
 
 			scyd.missingFromImportSince = DateTime.now
 			session.saveOrUpdate(scyd)
 
-			scydDao.getAllFreshInSits.size should be (3)
+			scydDao.getFreshKeys.size should be (3)
 		}
 	}
 }
