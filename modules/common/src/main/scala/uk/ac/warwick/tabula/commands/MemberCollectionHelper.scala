@@ -16,8 +16,8 @@ trait MemberCollectionHelper {
 	def allMembersYears(members: Iterable[Member]) = {
 		val years = for (
 			member <- members;
-			course <- member.mostSignificantCourseDetails)
-			yield course.latestStudentCourseYearDetails.yearOfStudy
+			course <- member.mostSignificantCourseDetails
+		) yield course.latestStudentCourseYearDetails.yearOfStudy
 		years.toSeq.distinct.sorted
 	}
 }

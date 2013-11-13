@@ -29,7 +29,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 		with SelfValidating
 		with BindListener
 		with SmallGroupSetCommand
-	  with MemberCollectionHelper
+		with MemberCollectionHelper
 		with NotifiesAffectedGroupMembers {
 
 	mustBeLinked(set, module)

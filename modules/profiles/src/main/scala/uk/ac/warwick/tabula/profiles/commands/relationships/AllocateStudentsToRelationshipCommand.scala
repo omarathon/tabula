@@ -27,7 +27,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		with SelfValidating
 		with BindListener
 		with RelationshipChangingCommand
-	  with MemberCollectionHelper
+		with MemberCollectionHelper
 		with NotifiesAffectedStudents {
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), mandatory(department))
