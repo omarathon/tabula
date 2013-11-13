@@ -50,7 +50,7 @@
 	</#list>
 </#macro>
 
-<div class="monitoring-points-profile striped-section collapsible <#if defaultExpand??>expanded</#if>">
+<div class="monitoring-points-profile striped-section collapsible <#if defaultExpand?? && defaultExpand>expanded</#if>">
 	<h3 class="section-title">Monitoring points</h3>
 	<div class="missed-info">
 		<#if missedCountByTerm?keys?size == 0 && (monitoringPointsByTerm?keys?size > 0) >

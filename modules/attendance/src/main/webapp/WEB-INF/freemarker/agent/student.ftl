@@ -130,14 +130,14 @@
 	</section>
 </article>
 
-<#assign thisPath><@routes.agentStudentView student command.relationshipType /></#assign>
+<#assign thisPath><@routes.agentStudentView student command.relationshipType command.academicYear /></#assign>
 <@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
 
-<#macro pointsInATerm term pointAndCheckpointByTerm>
+<#macro pointsInATerm term>
 	<div class="striped-section end-floats">
 		<h2 class="section-title">${term}</h2>
 		<div class="striped-section-contents">
-			<#list pointAndCheckpointByTerm[term] as pointAndCheckpoint>
+			<#list pointsByTerm[term] as pointAndCheckpoint>
 				<div class="item-info row-fluid point">
 					<div class="span10">
 						${pointAndCheckpoint._1().name} (<@fmt.weekRanges pointAndCheckpoint._1() />)
@@ -162,16 +162,13 @@
 
 
 <div class="monitoring-points">
-	<#if (pointsByTerm?keys?size > 0)>
-
-	</#if>
-	<#if points?keys?size == 0>
+	<#if pointsByTerm?keys?size == 0>
 		<p><em>No monitoring points found for this academic year.</em></p>
 	<#else>
-		<a class="btn btn-primary" href="<@routes.agentStudentRecord points[points?keys?first]?first._1().pointSet student command.relationshipType />">Record attendance</a>
+		<a class="btn btn-primary" href="<@routes.agentStudentRecord student command.relationshipType command.academicYear thisPath/>">Record attendance</a>
 		<#list attendance_variables.monitoringPointTermNames as term>
-			<#if points[term]??>
-				<@pointsInATerm term points />
+			<#if pointsByTerm[term]??>
+				<@pointsInATerm term />
 			</#if>
 		</#list>
 	</#if>

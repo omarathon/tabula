@@ -12,7 +12,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.web.Routes
 
 @Controller
-@RequestMapping(Array("/agent/{relationshipType}/{student}/record/{pointSet}"))
+@RequestMapping(Array("/agent/{relationshipType}/{student}/record"))
 class AgentStudentRecordController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
@@ -21,9 +21,8 @@ class AgentStudentRecordController extends AttendanceController {
 	def command(
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable student: StudentMember,
-		@PathVariable pointSet: MonitoringPointSet,
 		@RequestParam(value="academicYear", required = false) academicYear: AcademicYear
-	) = AgentStudentRecordCommand(currentMember, relationshipType, student, pointSet, Option(academicYear))
+	) = AgentStudentRecordCommand(currentMember, relationshipType, student, Option(academicYear))
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def list(@ModelAttribute("command") cmd: AgentStudentRecordCommand) = {
@@ -32,7 +31,9 @@ class AgentStudentRecordController extends AttendanceController {
 	}
 
 	def form(cmd: Appliable[Seq[MonitoringCheckpoint]] with AgentStudentRecordCommandState) = {
-		Mav("agent/record").crumbs(Breadcrumbs.Agent(cmd.relationshipType), Breadcrumbs.AgentStudent(cmd.student, cmd.relationshipType))
+		Mav("agent/record",
+			"returnTo" -> getReturnTo(Routes.agent.student(cmd.student, cmd.relationshipType))
+		).crumbs(Breadcrumbs.Agent(cmd.relationshipType), Breadcrumbs.AgentStudent(cmd.student, cmd.relationshipType))
 	}
 
 	@RequestMapping(method = Array(POST))

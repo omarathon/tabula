@@ -4,8 +4,8 @@ import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType, 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringCheckpoint, MonitoringPointSet, MonitoringPoint}
+import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.services.{TermServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent, AutowiringTermServiceComponent}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
@@ -13,9 +13,8 @@ import org.springframework.validation.Errors
 import org.joda.time.DateTime
 
 object AgentStudentRecordCommand {
-	def apply(agent: Member, relationshipType: StudentRelationshipType,
-		student: StudentMember, pointSet: MonitoringPointSet, academicYearOption: Option[AcademicYear]
-	) =	new AgentStudentRecordCommand(agent, relationshipType, student, pointSet, academicYearOption)
+	def apply(agent: Member, relationshipType: StudentRelationshipType, student: StudentMember, academicYearOption: Option[AcademicYear]) =
+		new AgentStudentRecordCommand(agent, relationshipType, student, academicYearOption)
 		with ComposableCommand[Seq[MonitoringCheckpoint]]
 		with AgentStudentRecordPermissions
 		with AgentStudentRecordDescription
@@ -26,7 +25,7 @@ object AgentStudentRecordCommand {
 }
 
 abstract class AgentStudentRecordCommand(val agent: Member, val relationshipType: StudentRelationshipType,
-	val student: StudentMember, val pointSet: MonitoringPointSet, val academicYearOption: Option[AcademicYear]
+	val student: StudentMember, val academicYearOption: Option[AcademicYear]
 ) extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with AgentStudentRecordCommandState {
 
 	this: TermServiceComponent with MonitoringPointServiceComponent with GroupMonitoringPointsByTerm =>
@@ -98,12 +97,14 @@ trait AgentStudentRecordDescription extends Describable[Seq[MonitoringCheckpoint
 	}
 }
 
-trait AgentStudentRecordCommandState extends GroupMonitoringPointsByTerm{
+trait AgentStudentRecordCommandState extends GroupMonitoringPointsByTerm with MonitoringPointServiceComponent {
 	def agent: Member
 	def relationshipType: StudentRelationshipType
 	def student: StudentMember
-	def pointSet: MonitoringPointSet
 	def academicYearOption: Option[AcademicYear]
+	val thisAcademicYear = AcademicYear.guessByDate(new DateTime())
+	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
+	lazy val pointSet = monitoringPointService.getPointSetForStudent(student, academicYear).getOrElse(throw new ItemNotFoundException)
 
 	var checkpointMap: JMap[MonitoringPoint, MonitoringCheckpointState] =  JHashMap()
 
