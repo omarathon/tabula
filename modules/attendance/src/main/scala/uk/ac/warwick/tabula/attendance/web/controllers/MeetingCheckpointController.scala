@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{Member, StudentMember, MeetingFormat, StudentRelationshipType, StudentCourseDetails}
+import uk.ac.warwick.tabula.data.model.{Member, StudentMember, MeetingFormat, StudentRelationshipType}
 import org.joda.time.{LocalDate, DateTime}
 import uk.ac.warwick.tabula.commands.{Appliable, Unaudited, ReadOnly, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
@@ -49,18 +49,18 @@ trait MeetingCheckpointCommandState {
 }
 
 @Controller
-@RequestMapping(Array("/profile/{studentCourseDetails}/meetingcheckpoint"))
+@RequestMapping(Array("/profile/{student}/meetingcheckpoint"))
 class MeetingCheckpointController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(
-		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable student: StudentMember,
 		@RequestParam(value="relationshipType", required = false) relationshipType: StudentRelationshipType,
 		@RequestParam(value="meetingFormat", required = false) meetingFormat: MeetingFormat,
 		@RequestParam(value="meetingDate", required = false) meetingDate: LocalDate
 	) =
 		MeetingCheckpointCommand(
-			studentCourseDetails.student,
+			student,
 			mandatory(relationshipType),
 			mandatory(meetingFormat),
 			mandatory(meetingDate).toDateTimeAtStartOfDay,

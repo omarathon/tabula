@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, StudentRelationshipType, Member}
+import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType, Member}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -14,8 +14,8 @@ import org.joda.time.DateTime
 
 object AgentStudentRecordCommand {
 	def apply(agent: Member, relationshipType: StudentRelationshipType,
-		scd: StudentCourseDetails, pointSet: MonitoringPointSet, academicYearOption: Option[AcademicYear]
-	) =	new AgentStudentRecordCommand(agent, relationshipType, scd, pointSet, academicYearOption)
+		student: StudentMember, pointSet: MonitoringPointSet, academicYearOption: Option[AcademicYear]
+	) =	new AgentStudentRecordCommand(agent, relationshipType, student, pointSet, academicYearOption)
 		with ComposableCommand[Seq[MonitoringCheckpoint]]
 		with AgentStudentRecordPermissions
 		with AgentStudentRecordDescription
@@ -26,13 +26,13 @@ object AgentStudentRecordCommand {
 }
 
 abstract class AgentStudentRecordCommand(val agent: Member, val relationshipType: StudentRelationshipType,
-	val scd: StudentCourseDetails, val pointSet: MonitoringPointSet, val academicYearOption: Option[AcademicYear]
+	val student: StudentMember, val pointSet: MonitoringPointSet, val academicYearOption: Option[AcademicYear]
 ) extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with AgentStudentRecordCommandState {
 
 	this: TermServiceComponent with MonitoringPointServiceComponent with GroupMonitoringPointsByTerm =>
 
 	def populate() = {
-		checkpointMap = monitoringPointService.getChecked(Seq(scd.student), pointSet)(scd.student).map{ case(point, stateOption) =>
+		checkpointMap = monitoringPointService.getChecked(Seq(student), pointSet)(student).map{ case(point, stateOption) =>
 			point -> stateOption.getOrElse(null)
 		}.asJava
 	}
@@ -40,10 +40,10 @@ abstract class AgentStudentRecordCommand(val agent: Member, val relationshipType
 	def applyInternal() = {
 		checkpointMap.asScala.flatMap{case(point, state) =>
 			if (state == null) {
-				monitoringPointService.deleteCheckpoint(scd.scjCode, point)
+				monitoringPointService.deleteCheckpoint(student, point)
 				None
 			} else {
-				Option(monitoringPointService.saveOrUpdateCheckpoint(scd, point, state, agent))
+				Option(monitoringPointService.saveOrUpdateCheckpoint(student, point, state, agent))
 			}
 		}.toSeq
 	}
@@ -77,7 +77,7 @@ trait AgentStudentRecordPermissions extends RequiresPermissionsChecking with Per
 	this: AgentStudentRecordCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.Record, scd)
+		p.PermissionCheck(Permissions.MonitoringPoints.Record, student)
 	}
 }
 
@@ -88,7 +88,7 @@ trait AgentStudentRecordDescription extends Describable[Seq[MonitoringCheckpoint
 
 	def describe(d: Description) {
 		d.monitoringPointSet(pointSet)
-		d.studentIds(Seq(scd.student.universityId))
+		d.studentIds(Seq(student.universityId))
 		d.property("checkpoints", checkpointMap.asScala.map{ case (point, state) =>
 			if (state == null)
 				point.id -> "null"
@@ -101,7 +101,7 @@ trait AgentStudentRecordDescription extends Describable[Seq[MonitoringCheckpoint
 trait AgentStudentRecordCommandState extends GroupMonitoringPointsByTerm{
 	def agent: Member
 	def relationshipType: StudentRelationshipType
-	def scd: StudentCourseDetails
+	def student: StudentMember
 	def pointSet: MonitoringPointSet
 	def academicYearOption: Option[AcademicYear]
 

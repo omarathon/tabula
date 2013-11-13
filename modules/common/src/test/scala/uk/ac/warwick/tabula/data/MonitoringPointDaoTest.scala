@@ -113,8 +113,8 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 			checkpoint.state = MonitoringCheckpointState.fromCode("attended")
 			monitoringPointDao.saveOrUpdate(checkpoint)
 
-			monitoringPointDao.getCheckpoint(monitoringPoint1, student1.mostSignificantCourseDetails.get.scjCode) should be (Option(checkpoint))
-			monitoringPointDao.getCheckpoint(monitoringPoint1, student2.mostSignificantCourseDetails.get.scjCode) should be (None)
+			monitoringPointDao.getCheckpoint(monitoringPoint1, student1) should be (Option(checkpoint))
+			monitoringPointDao.getCheckpoint(monitoringPoint1, student2) should be (None)
 
 		}
 	}

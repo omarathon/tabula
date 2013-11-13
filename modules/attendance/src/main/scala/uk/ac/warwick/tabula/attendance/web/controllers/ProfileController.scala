@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{StudentMember, RuntimeMember, StudentCourseDetails}
+import uk.ac.warwick.tabula.data.model.{StudentMember, RuntimeMember}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.attendance.commands.ProfileCommand
 import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
@@ -29,12 +29,12 @@ class ProfileHomeController extends AttendanceController with AutowiringProfileS
 }
 
 @Controller
-@RequestMapping(value = Array("/profile/{studentCourseDetails}/{academicYear}"))
+@RequestMapping(value = Array("/profile/{student}/{academicYear}"))
 class ProfileController extends AttendanceController {
 
 	@ModelAttribute("command")
-	def createCommand(@PathVariable studentCourseDetails: StudentCourseDetails, @PathVariable academicYear: AcademicYear)
-		= ProfileCommand(studentCourseDetails, academicYear)
+	def createCommand(@PathVariable student: StudentMember, @PathVariable academicYear: AcademicYear)
+		= ProfileCommand(student, academicYear)
 
 	@RequestMapping
 	def render(@ModelAttribute("command") cmd: Appliable[Option[AttendanceProfileInformation]]) = {

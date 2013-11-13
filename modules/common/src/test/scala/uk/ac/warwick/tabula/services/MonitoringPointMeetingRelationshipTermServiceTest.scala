@@ -7,15 +7,21 @@ import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model._
 import org.joda.time.DateTime
 import org.mockito.Matchers
+import uk.ac.warwick.util.termdates.TermImpl
+import uk.ac.warwick.util.termdates.Term.TermType
+import org.mockito.Mockito._
 
 class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mockito {
 	trait ServiceTestSupport extends MonitoringPointDaoComponent with MeetingRecordDaoComponent
-	with RelationshipServiceComponent with TermServiceComponent {
+	with RelationshipServiceComponent with TermServiceComponent with MonitoringPointServiceComponent {
 
 		val monitoringPointDao = mock[MonitoringPointDao]
 		val meetingRecordDao = mock[MeetingRecordDao]
 		var relationshipService = mock[RelationshipService]
 		val termService = mock[TermService]
+		val monitoringPointService = mock[MonitoringPointService]
+		// return 2013 for any date
+		termService.getTermFromDateIncludingVacations(any[DateTime]) returns new TermImpl(null, dateTime(2013, 1, 1), dateTime(2013, 12, 1), TermType.autumn)
 	}
 
 	trait StudentFixture {
@@ -34,7 +40,8 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		studentCourseDetails.sprCode returns studentSprCode
 		studentCourseDetails.route returns studentRoute
 
-		student.studentCourseDetails returns JArrayList(studentCourseDetails)
+		verify(student, never).studentCourseDetails
+		student.mostSignificantCourseDetails returns Option(studentCourseDetails)
 
 		val agent = "agent"
 		val agentMember = Fixtures.staff(agent, agent)
@@ -51,12 +58,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		meeting.relationship = meetingRelationship
 		meeting.format = MeetingFormat.FaceToFace
 		meeting.creator = Fixtures.student("student", "student")
-	}
-
-	trait StudentYear1Fixture extends StudentFixture {
-		val studentCourseYear1 = new StudentCourseYearDetails
-		studentCourseYear1.yearOfStudy = 1
-		studentCourseYear1.academicYear = academicYear2012
+		meeting.meetingDate = dateTime(2013, 1, 7)
 	}
 
 	trait StudentYear2Fixture extends StudentFixture {
@@ -70,18 +72,12 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	}
 
 	trait Year2PointSetFixture extends StudentYear2Fixture {
-		val year1PointSet = new MonitoringPointSet
-		year1PointSet.academicYear = studentCourseYear1.academicYear
-		year1PointSet.route = studentRoute
-		year1PointSet.year = 1
-
 		val year2PointSet = new MonitoringPointSet
 		year2PointSet.academicYear = studentCourseYear2.academicYear
 		year2PointSet.route = studentRoute
 		year2PointSet.year = 2
 
-		service.monitoringPointDao.findMonitoringPointSets(studentRoute, academicYear2012) returns Seq(year1PointSet)
-		service.monitoringPointDao.findMonitoringPointSets(studentRoute, academicYear2013) returns Seq(year2PointSet)
+		service.monitoringPointService.getPointSetForStudent(student, academicYear2013) returns Option(year2PointSet)
 	}
 
 	trait ValidYear2PointFixture extends Year2PointSetFixture {
@@ -99,12 +95,6 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	}
 
 	@Test
-	def willBeCreatedMeetingNotApproved() { new StudentFixture {
-		meeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Pending))
-		service.willCheckpointBeCreated(meeting) should be (right = false)
-	}}
-
-	@Test
 	def updateMeetingNotApproved() { new StudentFixture {
 		meeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Pending))
 		service.updateCheckpointsForMeeting(meeting)
@@ -114,7 +104,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	trait NoSuchStudent extends StudentFixture {
 		val thisMeeting = new MeetingRecord
 		thisMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
-		val thisMeetingRelationship = StudentRelationship(agent, tutorRelationshipType, studentCourseDetails.sprCode)
+		val thisMeetingRelationship = StudentRelationship(agent, supervisorRelationshipType, studentCourseDetails.sprCode)
 		thisMeetingRelationship.profileService = mock[ProfileService]
 		thisMeetingRelationship.profileService.getStudentBySprCode(studentCourseDetails.sprCode) returns None
 		thisMeeting.relationship = thisMeetingRelationship
@@ -122,7 +112,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 
 	@Test
 	def willBeCreatedNoSuchStudent() { new NoSuchStudent {
-		service.willCheckpointBeCreated(meeting) should be (right = false)
+		service.willCheckpointBeCreated(thisMeeting) should be (right = false)
 	}}
 
 	@Test
@@ -147,7 +137,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	@Test
 	def updateNonMeetingPoint() { new NonMeetingPoint {
 		service.updateCheckpointsForMeeting(meeting)
-		there was no (service.monitoringPointDao).getCheckpoint(any[MonitoringPoint], any[String])
+		there was no (service.monitoringPointDao).getCheckpoint(any[MonitoringPoint], any[StudentMember])
 		there was no (service.termService).getAcademicWeekForAcademicYear(any[DateTime], any[AcademicYear])
 		there was no (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 	}}
@@ -172,7 +162,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	@Test
 	def updateMeetingPointWrongRelationship() { new MeetingPointWrongRelationship {
 		service.updateCheckpointsForMeeting(meeting)
-		there was no (service.monitoringPointDao).getCheckpoint(any[MonitoringPoint], any[String])
+		there was no (service.monitoringPointDao).getCheckpoint(any[MonitoringPoint], any[StudentMember])
 		there was no (service.termService).getAcademicWeekForAcademicYear(any[DateTime], any[AcademicYear])
 		there was no (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 	}}
@@ -199,7 +189,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	@Test
 	def updateMeetingPointWrongFormat() { new MeetingPointWrongFormat {
 		service.updateCheckpointsForMeeting(meeting)
-		there was no (service.monitoringPointDao).getCheckpoint(any[MonitoringPoint], any[String])
+		there was no (service.monitoringPointDao).getCheckpoint(any[MonitoringPoint], any[StudentMember])
 		there was no (service.termService).getAcademicWeekForAcademicYear(any[DateTime], any[AcademicYear])
 		there was no (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 	}}
@@ -214,7 +204,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		meetingThisYearPoint.relationshipService
 			.getStudentRelationshipTypeById(meeting.relationship.relationshipType.id) returns Option(meeting.relationship.relationshipType)
 		meetingThisYearPoint.meetingFormats = Seq(meeting.format)
-		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode) returns Option(new MonitoringCheckpoint)
+		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, student) returns Option(new MonitoringCheckpoint)
 
 		meeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
 	}
@@ -227,7 +217,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	@Test
 	def updateMeetingExistingCheckpoint() { new MeetingExistingCheckpoint {
 		service.updateCheckpointsForMeeting(meeting)
-		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode)
+		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, student)
 		there was no (service.termService).getAcademicWeekForAcademicYear(any[DateTime], any[AcademicYear])
 		there was no (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 	}}
@@ -244,7 +234,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		meetingThisYearPoint.relationshipService
 			.getStudentRelationshipTypeById(meeting.relationship.relationshipType.id) returns Option(meeting.relationship.relationshipType)
 		meetingThisYearPoint.meetingFormats = Seq(meeting.format)
-		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode) returns None
+		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, student) returns None
 
 		val meetingDate = dateTime(2013, 1, 7)
 		service.termService.getAcademicWeekForAcademicYear(meetingDate, year2PointSet.academicYear) returns 2
@@ -261,7 +251,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	@Test
 	def updateMeetingBeforePoint() { new MeetingBeforePoint {
 		service.updateCheckpointsForMeeting(meeting)
-		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode)
+		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, student)
 		there was one (service.termService).getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(year2PointSet.academicYear))
 		there was no (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 	}}
@@ -278,7 +268,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		meetingThisYearPoint.relationshipService
 			.getStudentRelationshipTypeById(meeting.relationship.relationshipType.id) returns Option(meeting.relationship.relationshipType)
 		meetingThisYearPoint.meetingFormats = Seq(meeting.format)
-		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode) returns None
+		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, student) returns None
 
 		val meetingDate = dateTime(2013, 1, 7)
 		service.termService.getAcademicWeekForAcademicYear(meetingDate, year2PointSet.academicYear) returns 6
@@ -295,7 +285,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	@Test
 	def updateMeetingAfterPoint() { new MeetingAfterPoint {
 		service.updateCheckpointsForMeeting(meeting)
-		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode)
+		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, student)
 		there was one (service.termService).getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(year2PointSet.academicYear))
 		there was no (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 	}}
@@ -303,7 +293,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	trait ValidPointNotEnoughMeetingsApproved extends ValidYear2PointFixture {
 		meetingThisYearPoint.meetingQuantity = 2
 
-		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode) returns None
+		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, student) returns None
 		service.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(year2PointSet.academicYear)) returns 2
 		service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, studentCourseDetails.sprCode) returns Seq(meetingRelationship)
 
@@ -324,7 +314,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	@Test
 	def updateValidPointNotEnoughMeetingsApproved() { new ValidPointNotEnoughMeetingsApproved {
 		service.updateCheckpointsForMeeting(meeting)
-		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode)
+		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, student)
 		there was one (service.termService).getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(year2PointSet.academicYear))
 		there was no (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 	}}
@@ -332,7 +322,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	trait ValidPointNotEnoughMeetingsCorrectFormat extends ValidYear2PointFixture {
 		meetingThisYearPoint.meetingQuantity = 2
 
-		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode) returns None
+		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, student) returns None
 		service.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(year2PointSet.academicYear)) returns 2
 		service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, studentCourseDetails.sprCode) returns Seq(meetingRelationship)
 
@@ -354,7 +344,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	@Test
 	def updateValidPointNotEnoughMeetingsCorrectFormat() { new ValidPointNotEnoughMeetingsCorrectFormat {
 		service.updateCheckpointsForMeeting(meeting)
-		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode)
+		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, student)
 		there was one (service.termService).getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(year2PointSet.academicYear))
 		there was no (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 	}}
@@ -365,7 +355,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		val beforeDate = dateTime(2013, 1, 7).minusDays(7)
 		val meetingDate = dateTime(2013, 1, 7)
 
-		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode) returns None
+		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, student) returns None
 		service.termService.getAcademicWeekForAcademicYear(beforeDate, year2PointSet.academicYear) returns meetingThisYearPoint.validFromWeek - 1
 		service.termService.getAcademicWeekForAcademicYear(meetingDate, year2PointSet.academicYear) returns meetingThisYearPoint.validFromWeek
 		service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, studentCourseDetails.sprCode) returns Seq(meetingRelationship)
@@ -391,7 +381,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	@Test
 	def updateValidPointNotEnoughMeetingsValidWeek() { new ValidPointNotEnoughMeetingsValidWeek {
 		service.updateCheckpointsForMeeting(meeting)
-		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode)
+		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, student)
 		there was two (service.termService).getAcademicWeekForAcademicYear(meetingDate, year2PointSet.academicYear)
 		there was one (service.termService).getAcademicWeekForAcademicYear(beforeDate, year2PointSet.academicYear)
 		there was no (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
@@ -403,7 +393,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		val beforeDate = dateTime(2013, 1, 7).minusDays(7)
 		val meetingDate = dateTime(2013, 1, 7).minusDays(7)
 
-		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode) returns None
+		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, student) returns None
 		service.termService.getAcademicWeekForAcademicYear(beforeDate, year2PointSet.academicYear) returns meetingThisYearPoint.validFromWeek - 1
 		service.termService.getAcademicWeekForAcademicYear(meetingDate, year2PointSet.academicYear) returns meetingThisYearPoint.validFromWeek
 		service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, studentCourseDetails.sprCode) returns Seq(meetingRelationship)
@@ -430,7 +420,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	def updateValidPointValidMeetings() { new ValidPointValidMeetings {
 		meeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
 		val createdCheckpoints = service.updateCheckpointsForMeeting(meeting)
-		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode)
+		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, student)
 		there was three (service.termService).getAcademicWeekForAcademicYear(meetingDate, year2PointSet.academicYear)
 		there was one (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 		createdCheckpoints.size should be (1)
@@ -446,7 +436,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		val beforeDate = dateTime(2013, 1, 7).minusDays(7)
 		val meetingDate = dateTime(2013, 1, 7)
 
-		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode) returns None
+		service.monitoringPointDao.getCheckpoint(meetingThisYearPoint, student) returns None
 		service.termService.getAcademicWeekForAcademicYear(beforeDate, year2PointSet.academicYear) returns meetingThisYearPoint.validFromWeek - 1
 		service.termService.getAcademicWeekForAcademicYear(meetingDate, year2PointSet.academicYear) returns meetingThisYearPoint.validFromWeek
 		service.relationshipService.getRelationships(meetingThisYearPoint.meetingRelationships.head, studentCourseDetails.sprCode) returns Seq(meetingRelationship)
@@ -474,7 +464,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	@Test
 	def updateValidPointMeetingNotApprovedButCreatedByAgent() { new ValidPointMeetingNotApprovedButCreatedByAgent {
 		val createdCheckpoints = service.updateCheckpointsForMeeting(meeting)
-		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, studentCourseDetails.sprCode)
+		there was one (service.monitoringPointDao).getCheckpoint(meetingThisYearPoint, student)
 		there was three (service.termService).getAcademicWeekForAcademicYear(meetingDate, year2PointSet.academicYear)
 		there was one (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 		createdCheckpoints.size should be (1)

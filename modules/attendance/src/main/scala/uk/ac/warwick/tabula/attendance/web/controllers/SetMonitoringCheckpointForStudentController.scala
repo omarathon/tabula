@@ -10,18 +10,18 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.attendance.web.Routes
 import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, Department}
+import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
 import uk.ac.warwick.tabula.attendance.commands.SetMonitoringCheckpointForStudentCommand
 
-@RequestMapping(Array("/{department}/{monitoringPoint}/record/{studentCourseDetails}"))
+@RequestMapping(Array("/{department}/{monitoringPoint}/record/{student}"))
 @Controller
 class SetMonitoringCheckpointForStudentController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def command(@PathVariable monitoringPoint: MonitoringPoint, @PathVariable studentCourseDetails: StudentCourseDetails, user: CurrentUser) = {
-		SetMonitoringCheckpointForStudentCommand(monitoringPoint, mandatory(studentCourseDetails), user)
+	def command(@PathVariable monitoringPoint: MonitoringPoint, @PathVariable student: StudentMember, user: CurrentUser) = {
+		SetMonitoringCheckpointForStudentCommand(monitoringPoint, mandatory(student), user)
 	}
 
 

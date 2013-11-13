@@ -40,8 +40,8 @@ class MonitoringPointServiceTest extends TestBase with Mockito {
 	@Test
 	def testDeleteCheckpointExists() {
 		new CheckpointFixture {
-			service.monitoringPointDao.getCheckpoint(point1, member1.mostSignificantCourseDetails.get.scjCode) returns Option(passedCheckpoint)
-			service.deleteCheckpoint(member1.mostSignificantCourseDetails.get.scjCode, point1)
+			service.monitoringPointDao.getCheckpoint(point1, member1) returns Option(passedCheckpoint)
+			service.deleteCheckpoint(member1, point1)
 			there was one (service.monitoringPointDao).deleteCheckpoint(passedCheckpoint)
 			there was no (service.monitoringPointDao).deleteCheckpoint(missedCheckpoint)
 		}
@@ -50,8 +50,8 @@ class MonitoringPointServiceTest extends TestBase with Mockito {
 	@Test
 	def testDeleteCheckpointNone() {
 		new CheckpointFixture {
-			service.monitoringPointDao.getCheckpoint(point1, member2.mostSignificantCourseDetails.get.scjCode) returns None
-			service.deleteCheckpoint(member2.mostSignificantCourseDetails.get.scjCode, point1)
+			service.monitoringPointDao.getCheckpoint(point1, member2) returns None
+			service.deleteCheckpoint(member2, point1)
 			there was no (service.monitoringPointDao).deleteCheckpoint(passedCheckpoint)
 			there was no (service.monitoringPointDao).deleteCheckpoint(missedCheckpoint)
 		}
