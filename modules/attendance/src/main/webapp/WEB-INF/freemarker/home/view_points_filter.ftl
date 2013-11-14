@@ -41,6 +41,7 @@
 		<@f.form commandName="command" action="${submit_url}" method="GET" cssClass="form-inline">
 			<@f.errors cssClass="error form-errors" />
 			<@f.hidden path="academicYear"/>
+			<@f.hidden path="hasBeenFiltered" value="true"/>
 
 			<div class="btn-group-group">
 				<i class="icon-filter"></i>

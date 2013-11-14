@@ -2,6 +2,8 @@
 
 <#import "../attendance_macros.ftl" as attendance_macros />
 
+<#assign thisPath><@routes.agentView command.relationshipType /></#assign>
+
 <#macro row student missedPoints>
 	<tr class="student">
 		<td>
@@ -13,8 +15,8 @@
 		<td>${student.groupName}</td>
 		<td>${(student.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!""}</td>
 		<td>${(student.mostSignificantCourseDetails.route.name)!""}</td>
-		<td><span class="badge badge-<#if (missedPoints > 2)>important<#elseif (missedPoints > 0)>warning<#else>success</#if>">${missedPoints}</span></td>
-		<td><a class="btn btn-small btn-primary" href="<@routes.agentStudentView student command.relationshipType />">View &amp; record</a></td>
+		<td><a style="display: block;" href="<@routes.agentStudentView student command.relationshipType command.academicYear />"><span class="badge badge-<#if (missedPoints > 2)>important<#elseif (missedPoints > 0)>warning<#else>success</#if>">${missedPoints}</span></a></td>
+		<td><a class="btn btn-small btn-primary" href="<@routes.agentStudentRecord student command.relationshipType command.academicYear thisPath />">Record</a></td>
 	</tr>
 </#macro>
 
@@ -24,7 +26,6 @@
 	<p><em>No ${command.relationshipType.studentRole}s were found.</em></p>
 <#else>
 
-	<#assign thisPath><@routes.agentView command.relationshipType /></#assign>
 	<@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
 
 	<table class="students table table-bordered table-striped table-condensed">
@@ -37,7 +38,7 @@
 			<th class="type-col">Type</th>
 			<th class="year-col">Year</th>
 			<th class="course-but-photo-col">Course</th>
-			<th class="missed-points-col" title="Missed monitoring points">Missed</th>
+			<th class="missed-points-col" title="Missed monitoring points"><i class="icon-remove icon-fixed-width unauthorised"></i></th>
 			<th></th>
 		</tr>
 		</thead>

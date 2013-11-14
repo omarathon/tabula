@@ -56,12 +56,16 @@ abstract class ViewMonitoringPointsCommand(val department: Department, val acade
 			routes = visibleRoutes.toSeq.asJava
 		}
 
-
-		students = profileService.findAllStudentsByRestrictions(
-			department = department,
-			restrictions = buildRestrictions(),
-			orders = buildOrders()
-		)
+		if (Set(courseTypes.size(), routes.size(), modesOfAttendance.size(), yearsOfStudy.size(), modules.size()).sum == 0) {
+			filterTooVague = true
+			students = Seq()
+		} else {
+			students = profileService.findAllStudentsByRestrictions(
+				department = department,
+				restrictions = buildRestrictions(),
+				orders = buildOrders()
+			)
+		}
 	}
 }
 
@@ -96,6 +100,9 @@ trait ViewMonitoringPointsState extends FiltersStudents with PermissionsAwareRou
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
+
+	var filterTooVague = false
+	var hasBeenFiltered = false
 
 	// For Attendance Monitoring, we shouldn't consider sub-departments
 	override lazy val allRoutes = department.routes.asScala.sorted(Route.DegreeTypeOrdering)

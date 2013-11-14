@@ -11,8 +11,12 @@
 
 <#if validationError?has_content>
 	<#noescape>${validationError}</#noescape>
+<#elseif !command.hasBeenFiltered && command.filterTooVague>
+	<div class="alert alert-info">Find points for students using the filter options above.</div>
+<#elseif command.hasBeenFiltered && command.filterTooVague>
+	<div class="alert alert-warn">The filter you have chosen includes too many students.</div>
 <#elseif pointsMap?keys?size == 0>
-<p><em>No points exist for the selected options</em></p>
+	<p><em>No points exist for the selected options</em></p>
 <#else>
 	<#assign filterQuery = command.serializeFilter />
 	<#assign returnTo><@routes.viewDepartmentWithAcademicYear command.department command.academicYear filterQuery/></#assign>
