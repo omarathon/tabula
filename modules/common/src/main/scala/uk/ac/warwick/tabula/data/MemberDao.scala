@@ -428,13 +428,19 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				)
 				.seq.map { array => array(0).asInstanceOf[SitsStatus] }
 
-	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime) =
+	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime) = {
+		logger.warn("in stampMissingFromImport")
 		session.createQuery("""
-				update Member set missingFromImportSince = :importStart where universityId not in (:seenIds)
+				update
+					member
+				set
+					missingFromImportSince = :importStart
+				where
+					universityId not in (:seenIds)
 				""")
 			.setParameter("importStart", importStart)
 			.setParameterList("seenIds", seenIds)
 			.executeUpdate
-
+	}
 }
 

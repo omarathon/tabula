@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService
 import uk.ac.warwick.userlookup.User
 import java.sql.ResultSetMetaData
 import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
+import scala.collection.mutable.HashSet
 
 class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Logging with SitsAcademicYearAware {
 	trait Environment {
@@ -33,6 +34,16 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 		session.flush
 
 		val scyd = scd.freshStudentCourseYearDetails.head
+
+		// set up another student
+		val stu2 = Fixtures.student(universityId = "0000002", userId="student2")
+		session.saveOrUpdate(stu2)
+
+		val scd2 = stu2.mostSignificantCourseDetails.get
+		session.saveOrUpdate(scd2)
+		session.flush
+
+		val scyd2 = scd2.freshStudentCourseYearDetails.head
 
 		// create a module
 		val existingMod = Fixtures.module("ax101", "Pointless Deliberations")
@@ -64,6 +75,12 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 
 		val scydDao = smartMock[StudentCourseYearDetailsDaoImpl]
 		scydDao.sessionFactory = sessionFactory
+
+		val key1 = new StudentCourseYearKey(scyd.studentCourseDetails.scjCode, scyd.sceSequenceNumber)
+		scydDao.getIdFromKey(key1) returns Some("1")
+
+		val key2 = new StudentCourseYearKey(scyd2.studentCourseDetails.scjCode, scyd2.sceSequenceNumber)
+		scydDao.getIdFromKey(key2) returns Some("2")
 
 		val sitsAcademicYearService = smartMock[SitsAcademicYearService]
 		sitsAcademicYearService.getCurrentSitsAcademicYearString returns "13/14"
@@ -112,10 +129,10 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			tracker.universityIdsSeen.add(stu.universityId)
 			tracker.scjCodesSeen.add(scd.scjCode)
 
-			val key = new StudentCourseYearKey(scyd.studentCourseDetails.scjCode, scyd.sceSequenceNumber)
-			tracker.studentCourseYearDetailsSeen.add(key)
+			tracker.studentCourseYearDetailsSeen.add(key1)
 
 			command.stampMissingRows(tracker, DateTime.now)
+			session.flush
 
 			stu.missingFromImportSince should be (null)
 			scd.missingFromImportSince should be (null)
@@ -124,10 +141,12 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			tracker.universityIdsSeen.remove(stu.universityId)
 
 			command.stampMissingRows(tracker, DateTime.now)
+			session.flush
 
-			stu.missingFromImportSince should not be (null)
 			scd.missingFromImportSince should be (null)
 			scyd.missingFromImportSince should be (null)
+			logger.warn("about to see whether stu has been stamped")
+			stu.missingFromImportSince should not be (null)
 
 			tracker.scjCodesSeen.remove(scd.scjCode)
 			command.stampMissingRows(tracker, DateTime.now)
@@ -136,7 +155,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			scd.missingFromImportSince should not be (null)
 			scyd.missingFromImportSince should be (null)
 
-			tracker.studentCourseYearDetailsSeen.remove(key)
+			tracker.studentCourseYearDetailsSeen.remove(key1)
 			command.stampMissingRows(tracker, DateTime.now)
 
 			stu.missingFromImportSince should not be (null)
@@ -183,6 +202,31 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			stu.missingFromImportSince should not be (null)
 			scd.missingFromImportSince should not be (null)
 			scyd.missingFromImportSince should not be (null)
+
+		}
+	}
+
+	@Test
+	def testConvertKeysToIds {
+		new Environment {
+
+			val scydFromDb = scydDao.getBySceKey(scyd.studentCourseDetails, scyd.sceSequenceNumber)
+			val idForScyd = scydFromDb.get.id
+
+			val scyd2FromDb = scydDao.getBySceKey(scyd2.studentCourseDetails, scyd2.sceSequenceNumber)
+			val idForScyd2 = scyd2FromDb.get.id
+
+			val keys = new HashSet[StudentCourseYearKey]
+
+			keys.add(key1)
+			keys.add(key2)
+
+			val ids = command.convertKeysToIds(keys)
+
+			ids.size should be (2)
+
+			ids.contains(idForScyd) should be (true)
+			ids.contains(idForScyd2) should be (true)
 
 		}
 	}

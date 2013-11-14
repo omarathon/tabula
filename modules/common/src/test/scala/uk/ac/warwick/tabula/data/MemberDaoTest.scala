@@ -1,14 +1,12 @@
 package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConverters.asScalaBufferConverter
-
 import org.hibernate.annotations.{AccessType, FilterDefs, Filters}
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.junit.{After, Before}
 import org.junit.runner.RunWith
 import org.springframework.stereotype.Repository
 import org.springframework.test.context.{ActiveProfiles, ContextConfiguration}
-
 import javax.persistence.{DiscriminatorColumn, DiscriminatorValue, Entity, Inheritance, NamedQueries}
 import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
 import uk.ac.warwick.tabula.Fixtures
@@ -16,6 +14,7 @@ import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.{Member, StudentCourseYearDetails, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.ProfileService
+import scala.collection.mutable.HashSet
 
 // scalastyle:off magic.number
 class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
@@ -427,7 +426,7 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 	}
 
 	@Test
-	def testGetFreshStudents = transactional { tx =>
+	def testGetFreshUniversityIds = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 
@@ -451,7 +450,43 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		session.flush
 
 		memberDao.getFreshUniversityIds.size should be (3)
+	}
 
+	@Test
+	def testStampMissingFromImport = transactional { tx =>
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
+
+		session.saveOrUpdate(dept1)
+		session.saveOrUpdate(dept2)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		val stu3 = Fixtures.student(universityId = "1000003", userId="student", department=dept2, courseDepartment=dept2)
+		val stu4 = Fixtures.student(universityId = "1000004", userId="student", department=dept2, courseDepartment=dept2)
+
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(stu2)
+		memberDao.saveOrUpdate(stu3)
+		memberDao.saveOrUpdate(stu4)
+
+		memberDao.getByUniversityId("1000001").get.missingFromImportSince should be (null)
+		memberDao.getByUniversityId("1000002").get.missingFromImportSince should be (null)
+		memberDao.getByUniversityId("1000003").get.missingFromImportSince should be (null)
+		memberDao.getByUniversityId("1000004").get.missingFromImportSince should be (null)
+
+		val seenIds = new HashSet[String]
+		seenIds.add("1000001")
+		seenIds.add("1000003")
+
+		val importStart = DateTime.now
+		memberDao.stampMissingFromImport(seenIds, importStart)
+
+		memberDao.getByUniversityId("1000001").get.missingFromImportSince should be (null)
+		memberDao.getByUniversityId("1000003").get.missingFromImportSince should be (null)
+
+		memberDao.getByUniversityId("1000002").get.missingFromImportSince should not be (null)
+		memberDao.getByUniversityId("1000004").get.missingFromImportSince should not be (null)
 	}
 
 }

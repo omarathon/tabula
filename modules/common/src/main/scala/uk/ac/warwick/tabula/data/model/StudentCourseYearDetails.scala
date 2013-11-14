@@ -99,7 +99,11 @@ class StudentCourseYearKey {
 
 	@BeanProperty
 	var sceSequenceNumber: JInteger = _
+
+	def this(scjCode: String, sceSequenceNumber: JInteger) = {
+		this()
+		this.scjCode = scjCode
+		this.sceSequenceNumber = sceSequenceNumber
+	}
 }
-
-
 

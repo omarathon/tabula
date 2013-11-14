@@ -119,22 +119,23 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 	def stampMissingRows(importRowTracker: ImportRowTracker, importStart: DateTime) {
 		transactional() {
-			logger.info("Timestamping missing rows.  Found "
+			logger.warn("Timestamping missing rows.  Found "
 					+ importRowTracker.universityIdsSeen.size + " students, "
 					+ importRowTracker.scjCodesSeen.size + " studentCourseDetails, "
 					+ importRowTracker.studentCourseYearDetailsSeen.size + " studentCourseYearDetails.");
 
-			// make sure any rows we've got for this student in the db which we haven't seen in this import are recorded as missing
-			logger.info("Timestamping missing students")
-			memberDao.stampMissingFromImport(importRowTracker.universityIdsSeen, importStart)
-
-			logger.info("Timestamping missing studentCourseDetails")
-			studentCourseDetailsDao.stampMissingFromImport(importRowTracker.scjCodesSeen, importStart)
-
-			logger.info("Converting enrolment keys to ids ...")
+			logger.warn("Converting enrolment keys to ids ...")
 			val idsSeen = convertKeysToIds(importRowTracker.studentCourseYearDetailsSeen)
 
-			logger.info("Timestamping missing studentCourseYearDetails")
+
+			// make sure any rows we've got for this student in the db which we haven't seen in this import are recorded as missing
+			logger.warn("Timestamping missing students")
+			memberDao.stampMissingFromImport(importRowTracker.universityIdsSeen, importStart)
+
+			logger.warn("Timestamping missing studentCourseDetails")
+			studentCourseDetailsDao.stampMissingFromImport(importRowTracker.scjCodesSeen, importStart)
+
+			logger.warn("Timestamping missing studentCourseYearDetails")
 			studentCourseYearDetailsDao.stampMissingFromImport(idsSeen, importStart)
 		}
 	}
