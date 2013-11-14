@@ -286,5 +286,30 @@
       border-radius: 0px !important;
     }
     td, th { border-radius: 0px !important; }
+
+    div.scrollable {
+      position:relative;
+      overflow:hidden;
+    }
+    div.scrollable.leftShadow:before {
+      position:absolute;
+      top:0;
+      right:100%;
+      width:50px;
+      height:100%;
+      border-radius:0 10px 10px 0 / 0 50% 50% 0;
+      box-shadow:5px 0 10px rgba(0, 0, 0, 0.25);
+      content:'';
+    }
+    div.scrollable.rightShadow:after {
+      position:absolute;
+      top:0;
+      left:100%;
+      width:50px;
+      height:100%;
+      border-radius:10px 0 0 10px / 50% 0 0 50%;
+      box-shadow:-5px 0 10px rgba(0, 0, 0, 0.25);
+      content:'';
+    }
   }
 }

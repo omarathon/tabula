@@ -42,6 +42,8 @@
 	</#macro>
 
 	<#if totalResults?? && students??>
+		<#assign filterQuery = command.serializeFilter />
+		<#assign returnTo><@routes.viewDepartmentStudentsWithAcademicYear command.department command.academicYear filterQuery/></#assign>
 		<#if (totalResults > 0)>
 			<div class="clearfix">
 				<#if (totalResults > command.studentsPerPage)>
@@ -129,7 +131,7 @@
 						<table class="table table-bordered table-striped table-condensed">
 							<thead>
 							<tr>
-								<th class="unrecorded-col ${sortClass("unrecorded")} sortable" data-field="unrecorded"><i title="Unrecorded" class="icon-warning-sign icon-fixed-width late"></i></th>
+								<th class="unrecorded-col" data-field="unrecorded"><i title="Unrecorded" class="icon-warning-sign icon-fixed-width late"></i></th>
 								<th class="missed-col ${sortClass("missedMonitoringPoints")} sortable" data-field="missedMonitoringPoints"><i title="Missed monitoring points" class="icon-remove icon-fixed-width unauthorised"></i></th>
 								<th class="record-col"></th>
 							</tr>
@@ -148,7 +150,22 @@
 											${studentData.missed}
 										</span>
 									</td>
-									<td class="record"><a href="" title="Record" class="btn btn-primary btn-mini"><i class="icon-pencil icon-fixed-width late"></i></a></td>
+									<td class="record">
+										<#if studentData.pointsByTerm?keys?size == 0>
+											<a title="This student has no monitoring points" class="btn btn-primary btn-mini disabled"><i class="icon-pencil icon-fixed-width"></i></a>
+										<#else>
+											<#assign record_url><@routes.recordStudent command.department studentData.student command.academicYear returnTo /></#assign>
+											<@fmt.permission_button
+												permission='MonitoringPoints.Record'
+												scope=studentData.student.mostSignificantCourseDetails.route
+												action_descr='record monitoring points'
+												classes='btn btn-primary btn-mini'
+												href=record_url
+											>
+												<i class="icon-pencil icon-fixed-width late"></i>
+											</@fmt.permission_button>
+										</#if>
+									</td>
 								</tr>
 								</#list>
 							</tbody>
@@ -182,6 +199,9 @@
 										$('#command').submit();
 									}
 								});
+						});
+						$(window).on('load', function(){
+							Attendance.scrollablePointsTableSetup();
 						});
 					})(jQuery);
 				</script>

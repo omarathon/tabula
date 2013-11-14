@@ -26,7 +26,8 @@
 	<#macro manageDepartment department><@url page="/manage/${department.code}/" /></#macro>
 	
 	<#macro record department pointId queryString returnTo><@url page="/${department.code}/${pointId}/record?returnTo=${returnTo?url}&${queryString}"/></#macro>
-	<#macro recordStudent point student returnTo><@url page="/${point.pointSet.route.department.code}/${point.id}/record/${student.universityId}?returnTo=${returnTo?url}"/></#macro>
+	<#macro recordStudent department student academicYear returnTo><@url page="/${department.code}/students/record/${student.universityId}?academicYear=${academicYear.toString}&returnTo=${returnTo?url}" /></#macro>
+	<#macro recordStudentPoint point student returnTo><@url page="/${point.pointSet.route.department.code}/${point.id}/record/${student.universityId}?returnTo=${returnTo?url}"/></#macro>
 	<#macro studentMeetings point member><@url page="/${point.pointSet.route.department.code}/${point.id}/meetings/${member.universityId}"/></#macro>
 	<#macro agentView relationshipType><@url page="/agent/${relationshipType.urlPart}"/></#macro>
 	<#macro agentStudentView student relationshipType academicYear><@url page="/agent/${relationshipType.urlPart}/${student.universityId}/?academicYear=${academicYear.toString}"/></#macro>
