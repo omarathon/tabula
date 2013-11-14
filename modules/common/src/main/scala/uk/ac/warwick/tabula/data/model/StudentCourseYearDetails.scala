@@ -93,5 +93,13 @@ trait StudentCourseYearProperties {
 
 }
 
-class StudentCourseYearKey(@BeanProperty val scjCode: String, @BeanProperty val sceSequenceNumber: JInteger) {
+class StudentCourseYearKey {
+	@BeanProperty
+	var scjCode: String = _
+
+	@BeanProperty
+	var sceSequenceNumber: JInteger = _
 }
+
+
+

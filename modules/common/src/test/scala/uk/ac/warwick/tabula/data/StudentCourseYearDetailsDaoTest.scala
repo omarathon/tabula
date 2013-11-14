@@ -61,7 +61,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 		}
 	}
 
-	@Test def testGetAllFresh {
+	@Test def testGetFreshKeys {
 		transactional { tx =>
 			val dept1 = Fixtures.department("hm", "History of Music")
 			val dept2 = Fixtures.department("ar", "Architecture")
@@ -80,6 +80,15 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 			session.saveOrUpdate(stu4)
 
 			scydDao.getFreshKeys.size should be (4)
+
+			scydDao.getFreshKeys.head.scjCode.length() should be (9)
+			val scjCodes = scydDao.getFreshKeys map { key => key.getScjCode}
+			scjCodes.contains("1000001/1") should be (true)
+			scjCodes.contains("1000002/1") should be (true)
+			scjCodes.contains("1000003/1") should be (true)
+			scjCodes.contains("1000004/1") should be (true)
+
+			scydDao.getFreshKeys.head.sceSequenceNumber should be (1)
 
 			val scyd = stu2.mostSignificantCourse.freshStudentCourseYearDetails.head
 
