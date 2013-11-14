@@ -21,7 +21,7 @@ import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 
 case class StudentPointsData(
 	student: StudentMember,
@@ -88,8 +88,7 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 					}.toMap
 				}
 				val unrecorded = pointsByTermWithCheckpointString.values.flatMap(_.values).count(_ == "late")
-				val missed = pointsByTermWithCheckpointString.values.flatMap(_.values).count(_ == MonitoringCheckpointState.MissedUnauthorised.dbValue)
-				StudentPointsData(student, pointsByTermWithCheckpointString, unrecorded, missed)
+				StudentPointsData(student, pointsByTermWithCheckpointString, unrecorded, student.missedMonitoringPoints)
 			}.getOrElse(
 				StudentPointsData(student, Map(), 0, 0)
 			)

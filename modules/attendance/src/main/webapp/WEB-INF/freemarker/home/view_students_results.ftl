@@ -130,7 +130,7 @@
 							<thead>
 							<tr>
 								<th class="unrecorded-col ${sortClass("unrecorded")} sortable" data-field="unrecorded"><i title="Unrecorded" class="icon-warning-sign icon-fixed-width late"></i></th>
-								<th class="missed-col ${sortClass("unrecorded")} sortable" data-field="missed"><i title="Missed" class="icon-remove icon-fixed-width unauthorised"></i></th>
+								<th class="missed-col ${sortClass("missedMonitoringPoints")} sortable" data-field="missedMonitoringPoints"><i title="Missed monitoring points" class="icon-remove icon-fixed-width unauthorised"></i></th>
 								<th class="record-col"></th>
 							</tr>
 							</thead>
