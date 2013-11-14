@@ -6,7 +6,7 @@ import org.junit.Before
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{CommentField, FormFieldContext, WordCountField, Extension}
 import uk.ac.warwick.tabula.data.{AssignmentMembershipDaoImpl, DepartmentDaoImpl}
 import uk.ac.warwick.userlookup.User
 
@@ -72,6 +72,46 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentService.getAssignmentById(assignment.id) should be (None)
 
 		assignmentService.getAssignmentByNameYearModule(assignment.name, assignment.academicYear, assignment.module) should be ('empty)
+	}
+
+	/** Checks that assignment field positions don't intefere across FormFieldContexts. */
+	@Transactional @Test def overlappingFieldPositions {
+		val assignment = newDeepAssignment()
+
+		val wordCountField = new WordCountField()
+		wordCountField.name = "wordcount"
+		wordCountField.position = 0
+		wordCountField.context = FormFieldContext.Submission
+
+		val feedbackTextField = new CommentField()
+		feedbackTextField.name = "feedbackText"
+		feedbackTextField.position = 0
+		feedbackTextField.context = FormFieldContext.Feedback
+
+		session.save(assignment.module.department)
+		session.save(assignment.module)
+		session.save(assignment)
+
+		assignment.addField(feedbackTextField)
+		assignment.addField(wordCountField)
+
+		// are added both with position 0 as they are different contexts.
+		assignment.fields.asScala foreach { field =>
+			field.position should be (0)
+		}
+
+		session.save(feedbackTextField)
+		session.save(wordCountField)
+
+		session.flush()
+		session.clear()
+
+		val fetched = assignmentService.getAssignmentById(assignment.id).get
+		fetched.fields.size should be (2)
+
+		fetched.fields.asScala foreach { field =>
+			field.position should be (0)
+		}
 	}
 
 	@Transactional @Test def findDuplicateAssignmentNames {
