@@ -12,7 +12,7 @@
 			   data-original-title="Route Managers"
 			   data-content="${popover}"><i class="icon-question-sign"></i></a>
 
-			<@pm.roleTable perms_url "manager-table" scope "RouteManagerRoleDefinition" "route managers" />
+			<@pm.roleTable perms_url "routemanager-table" scope "RouteManagerRoleDefinition" "route managers" />
 		</div>
 
 		<div class="span6">
@@ -24,7 +24,7 @@
 			   data-original-title="Route Assistants"
 			   data-content="${popover}"><i class="icon-question-sign"></i></a>
 
-			<@pm.roleTable perms_url "assistant-table" scope "RouteAssistantRoleDefinition" "route assistants" />
+			<@pm.roleTable perms_url "routeassistant-table" scope "RouteAssistantRoleDefinition" "route assistants" />
 		</div>
 	</div>
 	
@@ -38,7 +38,7 @@
 			   data-original-title="Route Auditors"
 			   data-content="${popover}"><i class="icon-question-sign"></i></a>
 
-			<@pm.roleTable perms_url "auditor-table" scope "RouteAuditorRoleDefinition" "route auditors" />
+			<@pm.roleTable perms_url "routeauditor-table" scope "RouteAuditorRoleDefinition" "route auditors" />
 		</div>
 	</div>
 </#escape>
