@@ -234,3 +234,57 @@
     }
   }
 } // .profile container
+
+#container .scrollable-points-table {
+  display: table;
+  width: 100%;
+  margin-bottom: 20px;
+
+  .row {
+    display: table-row;
+    .left, .middle, .right {
+      display: table-cell;
+      table { margin-bottom: 0px; }
+    }
+  }
+
+  th, td {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 22px;
+  }
+
+  th.header { cursor: pointer; }
+
+  .left {
+    width: 300px;
+    table {
+      border-right: none;
+      border-top-right-radius: 0px;
+      border-bottom-right-radius: 0px;
+    }
+    td.fname { max-width: 100px; }
+    td.lname { max-width: 100px; }
+    th.id-col, td.id { border-radius: 0px !important; }
+  }
+  .right {
+    width: 120px;
+    table {
+      border-top-left-radius: 0px;
+      border-bottom-left-radius: 0px;
+    }
+    td { text-align: center; }
+    th.unrecorded-col, td.unrecorded { border-radius: 0px !important; }
+  }
+  .middle {
+    width: 500px;
+    max-width: 500px;
+    .sb-wide-table-wrapper { width: 500px; padding: 0px; }
+    table {
+      border-right: none;
+      border-radius: 0px !important;
+    }
+    td, th { border-radius: 0px !important; }
+  }
+}

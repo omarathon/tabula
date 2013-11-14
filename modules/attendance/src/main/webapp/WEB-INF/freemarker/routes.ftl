@@ -9,11 +9,20 @@
 		-->
 	<#macro home><@url page="/" /></#macro>
 	<#macro viewDepartment department><@url page="/${department.code}/" /></#macro>
-	<#macro viewDepartmentWithAcademicYear department academicYear queryString="">
+	<#macro viewDepartmentPoints department><@url page="/view/${department.code}/points/" /></#macro>
+	<#macro viewDepartmentPointsWithAcademicYear department academicYear queryString="">
 		<#if queryString?has_content>
 			<#local queryString = "&" + queryString />
 		</#if>
-		<@url page="/${department.code}/?academicYear=${academicYear.toString}${queryString}" /></#macro>
+		<@url page="/view/${department.code}/points/?academicYear=${academicYear.toString}${queryString}" />
+	</#macro>
+	<#macro viewDepartmentStudents department><@url page="/view/${department.code}/students/" /></#macro>
+	<#macro viewDepartmentStudentsWithAcademicYear department academicYear queryString="">
+		<#if queryString?has_content>
+			<#local queryString = "&" + queryString />
+		</#if>
+		<@url page="/${department.code}/students/?academicYear=${academicYear.toString}${queryString}" />
+	</#macro>
 	<#macro manageDepartment department><@url page="/manage/${department.code}/" /></#macro>
 	
 	<#macro record department pointId queryString returnTo><@url page="/${department.code}/${pointId}/record?returnTo=${returnTo?url}&${queryString}"/></#macro>

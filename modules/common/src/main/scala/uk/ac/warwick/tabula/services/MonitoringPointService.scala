@@ -54,6 +54,7 @@ trait MonitoringPointService {
 	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int
 	def getPointSetForStudent(student: StudentMember, academicYear: AcademicYear): Option[MonitoringPointSet]
 	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet]
+	def findPointSetsForStudentsByStudent(students: Seq[StudentMember], academicYear: AcademicYear): Map[StudentMember, MonitoringPointSet]
 	def findSimilarPointsForMembers(point: MonitoringPoint, students: Seq[StudentMember]): Map[StudentMember, Seq[MonitoringPoint]]
 }
 
@@ -151,6 +152,10 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 
 	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet] = {
 		monitoringPointDao.findPointSetsForStudents(students, academicYear)
+	}
+
+	def findPointSetsForStudentsByStudent(students: Seq[StudentMember], academicYear: AcademicYear): Map[StudentMember, MonitoringPointSet] = {
+		monitoringPointDao.findPointSetsForStudentsByStudent(students, academicYear)
 	}
 
 	def findSimilarPointsForMembers(point: MonitoringPoint, students: Seq[StudentMember]): Map[StudentMember, Seq[MonitoringPoint]] = {

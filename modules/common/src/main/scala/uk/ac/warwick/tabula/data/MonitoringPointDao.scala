@@ -39,6 +39,7 @@ trait MonitoringPointDao {
 	def deleteCheckpoint(checkpoint: MonitoringCheckpoint): Unit
 	def missedCheckpoints(student: StudentMember, academicYear: AcademicYear): Int
 	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet]
+	def findPointSetsForStudentsByStudent(students: Seq[StudentMember], academicYear: AcademicYear): Map[StudentMember, MonitoringPointSet]
 	def findSimilarPointsForMembers(point: MonitoringPoint, students: Seq[StudentMember]): Map[StudentMember, Seq[MonitoringPoint]]
 }
 
@@ -141,13 +142,13 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			.uniqueResult.get.intValue()
 	}
 
-	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet] = {
+	def findPointSetsForStudentsByStudent(students: Seq[StudentMember], academicYear: AcademicYear): Map[StudentMember, MonitoringPointSet] = {
 		if (students.isEmpty)
-			return Seq()
+			return Map()
 
 		val partionedUniversityIdsWithIndex = students.map{_.universityId}.grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
 		val queryString = """
-			select distinct mps
+			select distinct student, mps
 			from MonitoringPointSet mps, Route r, StudentCourseDetails scd, StudentCourseYearDetails scyd, StudentMember student
 			where r = mps.route
 			and scd.route = r.code
@@ -162,7 +163,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			case (ids, index) => "student.universityId in (:universityIds" + index.toString + ") "
 		}.mkString(" or ")	+ ")"
 
-		val query = session.newQuery[MonitoringPointSet](queryString)
+		val query = session.newQuery[Array[java.lang.Object]](queryString)
 			.setParameter("academicYear", academicYear)
 		partionedUniversityIdsWithIndex.foreach{
 			case (ids, index) => {
@@ -170,7 +171,13 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			}
 		}
 
-		query.seq
+		query.seq.map{ objArray =>
+			objArray(0).asInstanceOf[StudentMember] -> objArray(1).asInstanceOf[MonitoringPointSet]
+		}.toMap
+	}
+
+	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet] = {
+		findPointSetsForStudentsByStudent(students, academicYear).values.toSeq
 	}
 
 	def findSimilarPointsForMembers(point: MonitoringPoint, students: Seq[StudentMember]): Map[StudentMember, Seq[MonitoringPoint]] = {

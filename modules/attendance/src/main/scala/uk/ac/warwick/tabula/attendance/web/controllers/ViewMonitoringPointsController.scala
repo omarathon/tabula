@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 
 @Controller
-@RequestMapping(value=Array("/{department}"))
+@RequestMapping(value=Array("/view/{department}/points"))
 class ViewMonitoringPointsController extends AttendanceController {
 
 	validatesSelf[SelfValidating]

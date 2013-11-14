@@ -19,7 +19,7 @@
 	<p><em>No points exist for the selected options</em></p>
 <#else>
 	<#assign filterQuery = command.serializeFilter />
-	<#assign returnTo><@routes.viewDepartmentWithAcademicYear command.department command.academicYear filterQuery/></#assign>
+	<#assign returnTo><@routes.viewDepartmentPointsWithAcademicYear command.department command.academicYear filterQuery/></#assign>
 <div class="monitoring-points">
 	<#macro pointsInATerm term>
 		<div class="striped-section">

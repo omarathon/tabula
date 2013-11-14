@@ -17,6 +17,8 @@ object Routes {
 
 	object department {
 		def view(department: Department) = "/%s" format encoded(department.code)
+		def viewPoints(department: Department) = "/view/%s/points" format encoded(department.code)
+		def viewStudents(department: Department) = "/view/%s/student" format encoded(department.code)
 		def manage(department: Department) = "/manage/%s" format encoded(department.code)
 	}
 

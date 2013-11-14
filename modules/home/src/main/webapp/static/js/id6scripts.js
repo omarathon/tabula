@@ -2476,7 +2476,7 @@ Shadowbox.open({link:this,content:'<div class="sb-wide-table-wrapper" style="bac
 var q=function(){return h("<span/>").addClass("sb-table-wrapper-popout").append("(").append(h("<a/>").attr("href","#").html("Pop-out table").on("click",p)).append(")")
 };
 h("div.sb-wide-table-wrapper > table").each(function(){var r=h(this);
-if(Math.floor(r.width())>r.parent().width()){r.parent().parent("div").prepend(q()).append(q())
+if(!r.hasClass('sb-no-wrapper-table-popout')&&Math.floor(r.width())>r.parent().width()){r.parent().parent("div").prepend(q()).append(q())
 }})
 }})
 })(jQuery);
