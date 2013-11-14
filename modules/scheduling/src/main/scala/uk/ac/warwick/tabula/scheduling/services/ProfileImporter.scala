@@ -169,7 +169,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			"expected_end_date" -> member.endDate.toDateTimeAtStartOfDay(),
 			"most_signif_indicator" -> "Y",
 			"funding_source" -> null,
-			"enrolment_status_code" -> "F",
+			"enrolment_status_code" -> "C",
 			"year_of_study" -> ((member.universityId.toLong % 3) + 1).toInt,
 			"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
 			"sce_academic_year" -> AcademicYear.guessByDate(DateTime.now).toString,

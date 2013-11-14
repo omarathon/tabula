@@ -100,7 +100,7 @@ $(function(){
                 return false;
             });
 
-            $('#mark-plagiarised-selected-button').click(function(event){
+            $('#mark-plagiarised-selected-button:not(.disabled)').click(function(event){
                 event.preventDefault();
 
                 var $checkedBoxes = $(".collection-checkbox:checked", $container);

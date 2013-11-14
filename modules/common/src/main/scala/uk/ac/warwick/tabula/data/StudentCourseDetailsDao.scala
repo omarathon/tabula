@@ -91,11 +91,39 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 			.project[String](Projections.property("scjCode"))
 			.seq
 
-	def stampMissingFromImport(seenScjCodes: HashSet[String], importStart: DateTime) =
-		session.createQuery("""
-				update StudentCourseDetails set missingFromImportSince = :importStart where scjCode not in (:seenScjCodes)
-				""")
+	def stampMissingFromImport(seenScjCodes: HashSet[String], importStart: DateTime) = {
+		val BatchSize = 500
+		val numBatches = (seenScjCodes.size / BatchSize) + 1
+
+		var sqlString = """
+				update
+					StudentCourseDetails
+				set
+					missingFromImportSince = :importStart
+				where
+			"""
+
+		for (batch <- seenScjCodes.grouped(BatchSize); count <- 1 to numBatches) {
+			sqlString = sqlString + " scjCode not in (:scjCodeGroup" + count + ") and "
+		}
+
+		sqlString = sqlString.substring(0, sqlString.length - 5) // lose the final and
+
+		var query = session.createQuery(sqlString)
 			.setParameter("importStart", importStart)
-			.setParameterList("seenScjCodes", seenScjCodes)
-			.executeUpdate
+
+		for (batch <- seenScjCodes.grouped(BatchSize); count <- 1 to numBatches) {
+			query = query.setParameterList("scjCodeGroup" + count, batch)
+		}
+		query.executeUpdate
+	}
+
+
+
+
+
+
+
+
+
 }

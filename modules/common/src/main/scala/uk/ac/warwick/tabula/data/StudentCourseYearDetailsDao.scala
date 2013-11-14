@@ -66,18 +66,32 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 		.seq
 	}
 
-	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime) =
-		session.createQuery("""
+	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime) = {
+		val BatchSize = 500
+		val numBatches = (seenIds.size / BatchSize) + 1
+
+		var sqlString = """
 				update
-					StudentCourseDetails
+					StudentCourseYearDetails
 				set
 					missingFromImportSince = :importStart
 				where
-					id not in (:seenIds)
-				""")
+			"""
+
+		for (batch <- seenIds.grouped(BatchSize); count <- 1 to numBatches) {
+			sqlString = sqlString + " universityId not in (:idGroup" + count + ") and "
+		}
+
+		sqlString = sqlString.substring(0, sqlString.length - 5) // lose the final and
+
+		var query = session.createQuery(sqlString)
 			.setParameter("importStart", importStart)
-			.setParameterList("seenIds", seenIds)
-			.executeUpdate
+
+		for (batch <- seenIds.grouped(BatchSize); count <- 1 to numBatches) {
+			query = query.setParameterList("idGroup" + count, batch)
+		}
+		query.executeUpdate
+	}
 
 	def getIdFromKey(key: StudentCourseYearKey) = {
 		session.newCriteria[StudentCourseYearDetails]

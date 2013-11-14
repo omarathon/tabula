@@ -76,6 +76,8 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		monitoringPointSet2.points.add(pointSet2Point1)
 		thisMonitoringPointService.getPointById("21") returns Option(pointSet2Point1)
 
+		thisMonitoringPointService.getPointSetForStudent(student1, thisAcademicYear) returns Option(monitoringPointSet1)
+
 	}
 
 	@Test

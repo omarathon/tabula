@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.web.controllers
 
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, StudentMember}
+import uk.ac.warwick.tabula.data.model.{MeetingFormat, MeetingRecord, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 import org.springframework.web.bind.annotation.{PathVariable, RequestMapping, ModelAttribute}
 import uk.ac.warwick.tabula.commands.{Unaudited, ReadOnly, CommandInternal, ComposableCommand, Appliable}
@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServic
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
 import scala.collection.mutable
 import org.springframework.stereotype.Controller
-import scala.collection.JavaConverters._
 
 object ViewMeetingsForPointCommand {
 	def apply(student: StudentMember, point: MonitoringPoint) =
@@ -31,26 +30,34 @@ class ViewMeetingsForPointCommand(val student: StudentMember, val point: Monitor
 
 	override def applyInternal() = {
 		// Get all the enabled relationship types for a department
-		val allRelationshipTypes =
-			Option(student.homeDepartment)
-				.map { _.displayedStudentRelationshipTypes }
-				.getOrElse { relationshipService.allStudentRelationshipTypes }
+		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 
 		val allMeetings = allRelationshipTypes.flatMap{ relationshipType =>
-			student.freshStudentCourseDetails.flatMap{ scd =>
+			student.mostSignificantCourseDetails.map{ scd =>
 				relationshipService.getRelationships(relationshipType, scd.sprCode).flatMap(meetingRecordDao.list(_))
 			}
-		}
+		}.flatten
+
 		allMeetings.map{meeting => meeting -> {
+			val meetingTermWeek = termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
 			val reasons: mutable.Buffer[String] = mutable.Buffer()
 			if (!point.meetingRelationships.contains(meeting.relationship.relationshipType))
-				reasons += "Incorrect relationship"
+				reasons += s"Meeting was not with ${point.meetingRelationships.map{_.agentRole}.mkString(" or ")}"
+
 			if (!point.meetingFormats.contains(meeting.format))
-				reasons += "Incorrect format"
-			if (!meeting.isAttendanceApproved)
-				reasons += "Not approved"
-			if (termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear) < point.validFromWeek)
-				reasons += "Before start date"
+				reasons += s"Meeting was not a ${point.meetingFormats.map{_.description}.mkString(" or ")}"
+
+			if (meeting.isRejected)
+				reasons += s"Rejected by ${meeting.relationship.relationshipType.agentRole}"
+			else if (!meeting.isAttendanceApproved)
+				reasons += s"Awaiting approval by ${meeting.relationship.relationshipType.agentRole}"
+
+			if (meetingTermWeek < point.validFromWeek)
+				reasons += "Took place before"
+
+			if (meetingTermWeek > point.requiredFromWeek)
+				reasons += "Took place after"
+
 			reasons
 		}}
 	}
@@ -71,16 +78,19 @@ trait ViewMeetingsForPointCommandState {
 }
 
 @Controller
-@RequestMapping(Array("/{department}/{monitoringPoint}/meetings/{studentCourseDetails}"))
+@RequestMapping(Array("/{department}/{monitoringPoint}/meetings/{student}"))
 class ViewMeetingsForPointController extends AttendanceController {
 
 	@ModelAttribute("command")
-	def createCommand(@PathVariable studentCourseDetails: StudentMember,	@PathVariable monitoringPoint: MonitoringPoint) =
-		ViewMeetingsForPointCommand(studentCourseDetails, monitoringPoint)
+	def createCommand(@PathVariable student: StudentMember,	@PathVariable monitoringPoint: MonitoringPoint) =
+		ViewMeetingsForPointCommand(student, monitoringPoint)
 
 	@RequestMapping
 	def home(@ModelAttribute("command") cmd: Appliable[Seq[Pair[MeetingRecord, Seq[String]]]]) = {
 		val meetingsStatuses = cmd.apply()
-		Mav("home/meetings", "meetingsStatuses" -> meetingsStatuses).noLayoutIf(ajax)
+		Mav("home/meetings",
+			"meetingsStatuses" -> meetingsStatuses,
+			"allMeetingFormats" -> MeetingFormat.members
+		).noLayoutIf(ajax)
 	}
 }

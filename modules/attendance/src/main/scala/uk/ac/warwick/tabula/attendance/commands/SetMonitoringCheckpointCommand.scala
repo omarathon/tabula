@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser}
+import uk.ac.warwick.tabula.CurrentUser
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyMaps
@@ -46,15 +46,15 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 		// Get monitoring points by student for the list of students matching the template point
 		val studentPointMap = monitoringPointService.findSimilarPointsForMembers(templateMonitoringPoint, students)
 		val allPoints = studentPointMap.values.flatten.toSeq
-		val checkpoints = monitoringPointService.getCheckpointsBySCD(allPoints)
+		val checkpoints = monitoringPointService.getCheckpointsByStudent(allPoints)
 		// Map the checkpoint state to each point for each student
 		studentsState = studentPointMap.map{ case (student, points) =>
 			student -> points.map{ point =>
 				point -> {
 					val checkpointOption = checkpoints.find{
-						case (scd, checkpoint) => scd.student == student && checkpoint.point == point
+						case (s, checkpoint) => s == student && checkpoint.point == point
 					}
-					checkpointOption.map{case (scd, checkpoint) => checkpoint.state}.getOrElse(null)
+					checkpointOption.map{case (_, checkpoint) => checkpoint.state}.getOrElse(null)
 				}
 			}.toMap.asJava
 		}.toMap.asJava
@@ -63,16 +63,11 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 	def applyInternal(): Seq[MonitoringCheckpoint] = {
 		studentsStateAsScala.flatMap{ case (student, pointMap) =>
 			pointMap.flatMap{ case (point, state) =>
-				val route = point.pointSet.asInstanceOf[MonitoringPointSet].route
-				val scd = student.freshStudentCourseDetails.find(scd => scd.route == route) match {
-					case None => throw new ItemNotFoundException()
-					case Some(studentCourseDetails) => studentCourseDetails
-				}
 				if (state == null) {
-					monitoringPointService.deleteCheckpoint(scd.scjCode, point)
+					monitoringPointService.deleteCheckpoint(student, point)
 					None
 				} else {
-					Option(monitoringPointService.saveOrUpdateCheckpoint(scd, point, state, user))
+					Option(monitoringPointService.saveOrUpdateCheckpoint(student, point, state, user))
 				}
 			}
 		}.toSeq
@@ -84,16 +79,18 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 }
 
 trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
-	self: SetMonitoringCheckpointState with SecurityServiceComponent with TermServiceComponent =>
+	self: SetMonitoringCheckpointState with SecurityServiceComponent with TermServiceComponent with MonitoringPointServiceComponent =>
 
 	def validate(errors: Errors) {
-		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+		val academicYear = templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear
+		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
 		studentsStateAsScala.foreach{ case(student, pointMap) => {
+			val studentPointSet = monitoringPointService.getPointSetForStudent(student, academicYear)
 			pointMap.foreach{ case(point, state) => {
 				errors.pushNestedPath(s"studentsState[${student.universityId}][${point.id}]")
 				val pointRoute = point.pointSet.asInstanceOf[MonitoringPointSet].route
 				// Check point is valid for student
-				if (!student.freshStudentCourseDetails.exists(scd => scd.route == pointRoute)) {
+				if (!studentPointSet.exists(s => s.points.asScala.contains(point))) {
 					errors.rejectValue("", "monitoringPoint.invalidStudent")
 				// Check has permission for each point
 				}	else if (!securityService.can(user, Permissions.MonitoringPoints.Record, pointRoute)) {

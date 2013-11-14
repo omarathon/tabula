@@ -129,7 +129,7 @@
 												<#assign missedCount = missedCount + 1 />
 												<i class="icon-remove icon-fixed-width unauthorised" title="Missed (unauthorised): ${point.name} (<@fmt.weekRanges point />)"></i>
 											<#elseif checkpointState == "late">
-												<i class="icon-warning-sign icon-fixed-width late" title="No data: ${point.name} (<@fmt.weekRanges point />)"></i>
+												<i class="icon-warning-sign icon-fixed-width late" title="Unrecorded: ${point.name} (<@fmt.weekRanges point />)"></i>
 											<#else>
 												<i class="icon-minus icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
 											</#if>

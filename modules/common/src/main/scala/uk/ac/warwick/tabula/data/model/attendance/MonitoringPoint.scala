@@ -10,9 +10,10 @@ import org.hibernate.annotations.{Type, BatchSize}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.RelationshipService
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.PostLoadBehaviour
 
 @Entity
-class MonitoringPoint extends GeneratedId with HasSettings {
+class MonitoringPoint extends GeneratedId with HasSettings with PostLoadBehaviour {
 	import MonitoringPoint._
 
 	@ManyToOne
@@ -48,6 +49,10 @@ class MonitoringPoint extends GeneratedId with HasSettings {
 
 	@transient
 	var relationshipService = Wire[RelationshipService]
+
+	override def postLoad() {
+		ensureSettings
+	}
 
 	// Setting for MonitoringPointType.Meeting
 	def meetingRelationships = getStringSeqSetting(Settings.MeetingRelationships, Seq()).map(relationshipService.getStudentRelationshipTypeById(_).getOrElse(null))

@@ -4,8 +4,8 @@
 	<p><em>There are no monitoring points defined for this academic year.</em></p>
 <#else>
 
-<#assign can_record=can.do("MonitoringPoints.Record", command.studentCourseDetails) />
-<#assign is_the_student=currentUser.apparentUser.warwickId==command.studentCourseDetails.student.universityId />
+<#assign can_record=can.do("MonitoringPoints.Record", command.student) />
+<#assign is_the_student=currentUser.apparentUser.warwickId==command.student.universityId />
 
 <#macro pointsInATerm term>
 	<#list monitoringPointsByTerm[term] as point>
@@ -31,9 +31,9 @@
 					<div class="span2">
 						<#if can_record>
 							<#local returnTo>
-								<@routes.profile command.studentCourseDetails.student />
+								<@routes.profile command.student />
 							</#local>
-							<a href="<@routes.recordStudent point command.studentCourseDetails returnTo />"
+							<a href="<@routes.recordStudent point command.student returnTo />"
 								<#if point.sentToAcademicOffice>
 									class="btn btn-mini disabled" title="Monitoring information for this point has been submitted and can no longer be edited"
 								<#else>
@@ -50,14 +50,14 @@
 	</#list>
 </#macro>
 
-<div class="monitoring-points-profile striped-section collapsible <#if defaultExpand??>expanded</#if>">
+<div class="monitoring-points-profile striped-section collapsible <#if defaultExpand?? && defaultExpand>expanded</#if>">
 	<h3 class="section-title">Monitoring points</h3>
 	<div class="missed-info">
 		<#if missedCountByTerm?keys?size == 0 && (monitoringPointsByTerm?keys?size > 0) >
 			<#if is_the_student>
 				You have missed 0 monitoring points.
 			<#else>
-				${command.studentCourseDetails.student.firstName} has missed 0 monitoring points.
+				${command.student.firstName} has missed 0 monitoring points.
 			</#if>
 		<#else>
 			<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
@@ -67,7 +67,7 @@
 						<#if is_the_student>
 							You have
 						<#else>
-							${command.studentCourseDetails.student.firstName} has
+							${command.student.firstName} has
 						</#if>
 						 missed
 						<#if missedCountByTerm[term] == 1>

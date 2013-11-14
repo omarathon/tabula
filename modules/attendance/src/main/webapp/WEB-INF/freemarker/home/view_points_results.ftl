@@ -11,8 +11,12 @@
 
 <#if validationError?has_content>
 	<#noescape>${validationError}</#noescape>
+<#elseif !command.hasBeenFiltered && command.filterTooVague>
+	<div class="alert alert-info">Find points for students using the filter options above.</div>
+<#elseif command.hasBeenFiltered && command.filterTooVague>
+	<div class="alert alert-warn">The filter you have chosen includes too many students.</div>
 <#elseif pointsMap?keys?size == 0>
-<p><em>No points exist for the selected options</em></p>
+	<p><em>No points exist for the selected options</em></p>
 <#else>
 	<#assign filterQuery = command.serializeFilter />
 	<#assign returnTo><@routes.viewDepartmentWithAcademicYear command.department command.academicYear filterQuery/></#assign>
@@ -25,9 +29,15 @@
 					<div class="item-info row-fluid point">
 						<div class="span12">
 							<div class="pull-right">
-								<a class="btn btn-primary" href="<@routes.record command.department groupedPoint.pointId filterQuery returnTo/>">
+								<#local record_url><@routes.record command.department groupedPoint.pointId filterQuery returnTo/></#local>
+								<@fmt.permission_button
+									permission='MonitoringPoints.Record'
+									scope=(groupedPoint.routes?first)._1()
+									action_descr='record monitoring points'
+									classes='btn btn-primary'
+									href=record_url>
 									Record
-								</a>
+								</@fmt.permission_button>
 							</div>
 							${groupedPoint.name}
 							(<@fmt.monitoringPointWeeksFormat groupedPoint.validFromWeek groupedPoint.requiredFromWeek command.academicYear command.department />):

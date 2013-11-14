@@ -70,16 +70,48 @@ If you are doing any work on this, it would be good to do the above first.
 					<span class="caret"></span>
 				</a>
 				<ul class="dropdown-menu pull-right">
-					<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt icon-fixed-width"></i> Display settings</a></li>
+					<li>
+						<#assign settings_url><@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}</#assign>
+						<@fmt.permission_button
+							permission='Department.ManageDisplaySettings'
+							scope=department
+							action_descr='manage department settings'
+							href=settings_url>
+							<i class="icon-list-alt icon-fixed-width"></i> Settings
+						</@fmt.permission_button>
+					</li>
+				
 					<#if features.smallGroupTeachingStudentSignUp>
-					<li ${data.hasOpenableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to open' ")} >
-						<a href="<@routes.batchopen department />"><i class="icon-unlock-alt icon-fixed-width"></i> Open</a></li>
-					<li ${data.hasCloseableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to close' ")} >
-						<a href="<@routes.batchclose department />"><i class="icon-lock icon-fixed-width"></i> Close</a></li>
-					 </#if>
+						<li ${data.hasOpenableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to open' ")}>
+							<#assign open_url><@routes.batchopen department /></#assign>
+							<@fmt.permission_button 
+								permission='SmallGroups.Update' 
+								scope=department 
+								action_descr='open small groups' 
+								href=open_url>
+	            	<i class="icon-unlock-alt icon-fixed-width"></i> Open
+	            </@fmt.permission_button>
+						</li>
+						<li ${data.hasCloseableGroupsets?string(''," class='disabled use-tooltip' title='There are no self-signup groups to close' ")}>
+							<#assign close_url><@routes.batchclose department /></#assign>
+							<@fmt.permission_button 
+								permission='SmallGroups.Update' 
+								scope=department 
+								action_descr='close small groups' 
+								href=close_url>
+	            	<i class="icon-lock icon-fixed-width"></i> Close
+	            </@fmt.permission_button>
+						</li>
+					</#if>
 					<li ${data.hasUnreleasedGroupsets?string(''," class='disabled use-tooltip' title='All modules already notified' ")} >
-						<a href="<@routes.batchnotify department />"><i class="icon-envelope-alt icon-fixed-width"></i> Notify</a></li>
-
+						<#assign notify_url><@routes.batchnotify department /></#assign>
+						<@fmt.permission_button 
+							permission='SmallGroups.Update' 
+							scope=department 
+							action_descr='notify students and staff' 
+							href=notify_url>
+            	<i class="icon-envelope-alt icon-fixed-width"></i> Notify
+            </@fmt.permission_button>
 					<li>
 						<a href="<@routes.departmentAttendance department />"><i class="icon-group icon-fixed-width"></i> Attendance</a>
 					</li>

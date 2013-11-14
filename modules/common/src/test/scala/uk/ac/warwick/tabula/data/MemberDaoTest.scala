@@ -478,15 +478,17 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		val seenIds = new HashSet[String]
 		seenIds.add("1000001")
 		seenIds.add("1000003")
+		seenIds.add("1000004")
 
 		val importStart = DateTime.now
 		memberDao.stampMissingFromImport(seenIds, importStart)
+		session.flush
+		session.clear
 
 		memberDao.getByUniversityId("1000001").get.missingFromImportSince should be (null)
-		memberDao.getByUniversityId("1000003").get.missingFromImportSince should be (null)
-
 		memberDao.getByUniversityId("1000002").get.missingFromImportSince should not be (null)
-		memberDao.getByUniversityId("1000004").get.missingFromImportSince should not be (null)
+		memberDao.getByUniversityId("1000003").get.missingFromImportSince should be (null)
+		memberDao.getByUniversityId("1000004").get.missingFromImportSince should be (null)
 	}
 
 }

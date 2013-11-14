@@ -429,18 +429,30 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				.seq.map { array => array(0).asInstanceOf[SitsStatus] }
 
 	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime) = {
-		logger.warn("in stampMissingFromImport")
-		session.createQuery("""
+		val BatchSize = 500
+		val numBatches = (seenIds.size / BatchSize) + 1
+
+		var sqlString = """
 				update
-					member
+					Member
 				set
 					missingFromImportSince = :importStart
 				where
-					universityId not in (:seenIds)
-				""")
+			"""
+
+		for (batch <- seenIds.grouped(BatchSize); count <- 1 to numBatches) {
+			sqlString = sqlString + " universityId not in (:idGroup" + count + ") and "
+		}
+
+		sqlString = sqlString.substring(0, sqlString.length - 5) // lose the final and
+
+		var query = session.createQuery(sqlString)
 			.setParameter("importStart", importStart)
-			.setParameterList("seenIds", seenIds)
-			.executeUpdate
+
+		for (batch <- seenIds.grouped(BatchSize); count <- 1 to numBatches) {
+			query = query.setParameterList("idGroup" + count, batch)
+		}
+		query.executeUpdate
 	}
 }
 

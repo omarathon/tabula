@@ -7,14 +7,26 @@
 
 		<p>
 			Monitoring point requires ${command.point.meetingQuantity}
-			<#list command.point.meetingFormats as format>
-				${format.description}<#if format_has_next> or </#if>
-			</#list>
+			<#if command.point.meetingFormats?size == allMeetingFormats?size>
+				meeting of any format
+			<#else>
+				<#list command.point.meetingFormats as format>
+					${format.description}<#if format_has_next> or </#if>
+				</#list>
+			</#if>
 			with the student's
 			<#list command.point.meetingRelationships as relationship>
 			${relationship.description}<#if relationship_has_next> or </#if>
 			</#list>
-			on or after <@fmt.singleWeekFormat command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+			<#if command.point.validFromWeek == command.point.requiredFromWeek>
+				in <@fmt.singleWeekFormat command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+			<#else>
+				between
+				<@fmt.singleWeekFormat command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+				and
+				<@fmt.singleWeekFormat command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+			</#if>
+
 		</p>
 
 		<#if meetingsStatuses?size == 0>
@@ -36,13 +48,26 @@
 							<td>
 								${(meeting.format.description)!"Unknown format"} with
 								${meeting.relationship.relationshipType.agentRole}
+								on <@fmt.date date=meeting.meetingDate includeTime=false/>
 								created <@fmt.date meeting.lastUpdatedDate />
 							</td>
 							<td>
 								<#if reasons?size == 0>
 									<i class="icon-fixed-width icon-ok"></i>
 								<#else>
-									<a class="use-popover" id="popover-meeting-status-${meetingStatus_index}" data-html="true" data-content="<#list reasons as reason>${reason}<#if reason_has_next><br /></#if></#list>">
+									<#assign popoverContent>
+										<#list reasons as reason>
+											<#if reason == "Took place before">
+												Took place before <@fmt.singleWeekFormat command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+											<#elseif reason == "Took place after">
+												Took place after <@fmt.singleWeekFormat command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+											<#else>
+												${reason}
+											</#if>
+											<#if reason_has_next><br /></#if>
+										</#list>
+									</#assign>
+									<a class="use-popover" id="popover-meeting-status-${meetingStatus_index}" data-placement="left" data-html="true" data-content="${popoverContent}">
 										<i class="icon-fixed-width icon-remove"></i>
 									</a>
 								</#if>

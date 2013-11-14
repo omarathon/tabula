@@ -5,7 +5,27 @@
 
 var exports = {};
 
-exports.Manage = {}
+exports.Manage = {};
+
+exports.createButtonGroup = function(id){
+    var $this = $(id), selectedValue = $this.find('option:selected').val();
+    $('.recordCheckpointForm div.forCloning div.btn-group')
+        .clone(true)
+        .insertAfter($this)
+        .find('button').filter(function(){
+            return $(this).data('state') == selectedValue;
+        }).addClass('active');
+    $this.hide();
+};
+
+exports.bindButtonGroupHandler = function() {
+    $('#recordAttendance').on('click', 'div.btn-group button', function(){
+        var $this = $(this);
+        $this.closest('div.pull-right').find('option').filter(function(){
+            return $(this).val() == $this.data('state');
+        }).prop('selected', true);
+    });
+}
 
 $(function(){
 

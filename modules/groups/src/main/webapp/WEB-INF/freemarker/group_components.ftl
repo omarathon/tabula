@@ -72,7 +72,16 @@
 					<li><a href="<@routes.moduleperms module />">
 						<i class="icon-user icon-fixed-width"></i> Edit module permissions
 					</a></li>
-					<li><a href="<@routes.createset module />"><i class="icon-group icon-fixed-width"></i> Add small groups</a></li>
+					<li>
+						<#assign create_url><@routes.createset module /></#assign>
+						<@fmt.permission_button
+							permission='SmallGroups.Create'
+							scope=module
+							action_descr='add small groups'
+							href=create_url>
+							<i class="icon-group icon-fixed-width"></i> Add small groups</a>
+						</@fmt.permission_button>
+					</li>
 				</#if>
 				
 				<#if can.do('SmallGroupEvents.Register', module)>
@@ -277,29 +286,71 @@
                             <div class="btn-group">
 
                                 <@dropdown_menu "Actions" "cog">
-                                    <li><a href="<@routes.editset groupSet />"><i class="icon-wrench icon-fixed-width"></i> Edit properties</a></li>
+                                    <li>
+                                    	<#assign edit_url><@routes.editset groupSet /></#assign>
+																			<@fmt.permission_button 
+																				permission='SmallGroups.Update' 
+																				scope=groupSet 
+																				action_descr='edit small group properties' 
+																				href=edit_url>
+													            	<i class="icon-wrench icon-fixed-width"></i> Edit properties
+													            </@fmt.permission_button>
+                                    </li>
                                      <#if features.smallGroupTeachingStudentSignUp>
 																			 <#if groupSet.openForSignups>
-																			 <li  ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
-									                                         		   (''," class='disabled use-tooltip' title='Not a self-signup group' ")
-									                                         }>
-									                                         <a  class="close-group-link" data-toggle="modal" data-target="#modal-container"
-									                                         href="<@routes.closeset groupSet />"><i class="icon-lock icon-fixed-width"></i> Close</a></li>
-									
+																			 	<li ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
+									                              (''," class='disabled use-tooltip' title='Not a self-signup group' ")
+									                      }>
+									                      	<#assign closeset_url><@routes.closeset groupSet /></#assign>
+																					<@fmt.permission_button 
+																						permission='SmallGroups.Update' 
+																						scope=groupSet 
+																						classes='close-group-link'
+																						action_descr='close small group' 
+																						href=closeset_url
+																						data_attr='data-toggle=modal data-target=#modal-container'>
+															            	<i class="icon-lock icon-fixed-width"></i> Close
+															            </@fmt.permission_button>
+									                     	</li>
 																			 <#else>
-																			<li  ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
-																					   (''," class='disabled use-tooltip' title='Not a self-signup group' ")
-																			}>
-																			<a  class="open-group-link" data-toggle="modal" data-target="#modal-container"
-																			href="<@routes.openset groupSet />"><i class="icon-unlock-alt icon-fixed-width"></i> Open</a></li>
+																			 	<li ${(groupSet.allocationMethod.dbValue == "StudentSignUp")?string
+									                              (''," class='disabled use-tooltip' title='Not a self-signup group' ")
+									                      }>
+									                      	<#assign openset_url><@routes.openset groupSet /></#assign>
+																					<@fmt.permission_button 
+																						permission='SmallGroups.Update' 
+																						scope=groupSet 
+																						classes='open-group-link'
+																						action_descr='open small group' 
+																						href=openset_url
+																						data_attr='data-toggle=modal data-target=#modal-container data-container=body'>
+															            	<i class="icon-unlock-alt icon-fixed-width"></i> Open
+															            </@fmt.permission_button>
+									                     	</li>
 																			</#if>
 																		</#if>
-                                    <li><a href="<@routes.allocateset groupSet />"><i class="icon-random icon-fixed-width"></i> Allocate students</a></li>
+                                    <li>
+                                    	<#assign allocateset_url><@routes.allocateset groupSet /></#assign>
+																			<@fmt.permission_button 
+																				permission='SmallGroups.Allocate' 
+																				scope=groupSet 
+																				action_descr='allocate students' 
+																				href=allocateset_url>
+																				<i class="icon-random icon-fixed-width"></i> Allocate students
+													            </@fmt.permission_button>
+                                    </li>
                                     <li ${groupSet.fullyReleased?string(" class='disabled use-tooltip' title='Already notified' ",'')} >
-                                            <a class="notify-group-link" data-toggle="modal" data-target="#modal-container" href="<@routes.releaseset groupSet />">
-                                            <i class="icon-envelope-alt icon-fixed-width"></i>
-                                            Notify
-                                        </a></li>
+                                    	<#assign notifyset_url><@routes.releaseset groupSet /></#assign>
+																			<@fmt.permission_button 
+																				permission='SmallGroups.Update' 
+																				scope=groupSet 
+																				action_descr='notify students and staff' 
+																				href=allocateset_url
+																				classes='notify-group-link'
+																				data_attr='data-toggle=modal data-target=#modal-container data-container=body'>
+																				<i class="icon-envelope-alt icon-fixed-width"></i> Notify
+													            </@fmt.permission_button>
+													          </li>
                                         
                                     <#assign set_attendance_url><@routes.setAttendance groupSet /></#assign>
 																		<li>
