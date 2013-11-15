@@ -91,11 +91,9 @@ trait FixturesDriver {
 		  "deptCode"->deptCode
 		)
 		http.when(_==200)(req >|)
-
 	}
 
 	def updateAssignment(deptCode:String, assignmentName:String, openDate:Option[DateTime] = None, closeDate:Option[DateTime] = None){
-
 		val datesToUpdate:Seq[(String,String)] = Seq("openDate"->openDate,"closeDate"->closeDate).map(t=>t._2 match {
 			case None=>None
 			case Some(d)=>Some(t._1, d.toString("dd-MMM-yyyy HH:mm:ss"))
@@ -106,7 +104,15 @@ trait FixturesDriver {
 			params :_*
 		)
 		http.when(_==200)(req >|)
+	}
 
+	def createExtension(userId: String, assignmentId: String, approved: Boolean) {
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/extension"
+		val req = url(uri).POST << Map(
+			"userId" -> userId,
+			"assignmentId" -> assignmentId,
+			"approved" -> approved.toString)
+		http.when(_==200)(req >|)
 	}
 
 	def createRoute(routeCode:String, departmentCode:String, routeName:String, degreeType:String="UG" ){
@@ -117,7 +123,6 @@ trait FixturesDriver {
 		  "routeName"->routeName,
 		  "degreeType"->degreeType)
 		http.when(_==200)(req >|)
-
 	}
 
 
@@ -136,7 +141,6 @@ trait FixturesDriver {
 			"universityIds" -> uniIds,
 			"moduleCode" -> moduleCode)
 		http.when(_==200)(req >|)
-
 	}
 
 	def createStudentRelationship(student:LoginDetails, agent:LoginDetails, relationshipType:String = "tutor"){
@@ -146,7 +150,6 @@ trait FixturesDriver {
 			"agent"->agent.warwickId,
 		  "relationshipType"->relationshipType)
 		http.when(_==200)(req >|)
-
 	}
 
 }

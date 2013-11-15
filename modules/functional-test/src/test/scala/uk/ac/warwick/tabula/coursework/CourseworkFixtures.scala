@@ -114,6 +114,7 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		callback(assignmentId)
 	}
 
+
 	def submitAssignment(user: LoginDetails, moduleCode: String, assignmentName: String, assignmentId: String, file: String, mustBeEnrolled: Boolean = true) = as(user) {
 		if (mustBeEnrolled) {
 			linkText(assignmentName).findElement should be ('defined)
@@ -140,9 +141,35 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		)
 	}
 
+
+	def requestExtension(user: LoginDetails, moduleCode: String, assignmentName: String, assignmentId: String, requestedDate: DateTime, mustBeEnrolled: Boolean = true) = as(user) {
+		if (mustBeEnrolled) {
+			linkText(assignmentName).findElement should be ('defined)
+
+			click on linkText(assignmentName)
+
+			currentUrl should endWith(assignmentId + "/")
+		} else {
+			// Just go straight to the submission URL
+			go to Path("/coursework/module/" + moduleCode.toLowerCase + "/" + assignmentId + "/")
+		}
+
+		click on partialLinkText("Request an extension")
+
+		// complete the form
+		textArea("reason").value = "I have a desperate need for an extension."
+		textField("requestedExpiryDate").value = requestedDate.toString("dd-MMM-yyyy HH:mm:ss")
+		checkbox("readGuidelines").select()
+
+		submit()
+
+		verifyPageLoaded(
+			pageSource contains "You have requested an extension" should be (true)
+		)
+	}
+
+
 	def allFeatures(members: Seq[String]) {
-
-
 		// TODO Can't test link to SITS for our fixture department
 		// Don't bother messing around with assigning students, let's just assume students will magically find the submit page
 		click on id("student-summary-legend")
