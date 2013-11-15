@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data
 import scala.collection.JavaConversions.{asScalaBuffer, mutableSetAsJavaSet, seqAsJavaList}
 import scala.collection.mutable.HashSet
 
-import org.hibernate.annotations.{AccessType, FilterDefs, Filters}
 import org.hibernate.criterion.Order
 import org.hibernate.criterion.Order.{asc, desc}
 import org.hibernate.criterion.Projections
@@ -13,7 +12,7 @@ import org.hibernate.criterion.Restrictions.{disjunction, gt, in, like}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 
-import javax.persistence.{DiscriminatorColumn, DiscriminatorValue, Entity, Inheritance, NamedQueries}
+import javax.persistence.{Entity, NamedQueries}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Department, Member, ModeOfAttendance, RuntimeMember, SitsStatus, StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
@@ -65,7 +64,7 @@ trait MemberDao {
 }
 
 @Repository
-class MemberDaoImpl extends MemberDao with Daoisms with Logging {
+class MemberDaoImpl extends MemberDao with StampMissing with Logging {
 	import Restrictions._
 	import Order._
 	import Projections._
@@ -108,7 +107,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def getFreshUniversityIds() =
 			session.newCriteria[StudentMember]
-			.add(is("missingFromImportSince", null))
+			.add(isNull("missingFromImportSince"))
 			.project[String](Projections.property("universityId"))
 			.seq
 
@@ -429,30 +428,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				.seq.map { array => array(0).asInstanceOf[SitsStatus] }
 
 	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime) = {
-		val BatchSize = 500
-		val numBatches = (seenIds.size / BatchSize) + 1
-
-		var sqlString = """
-				update
-					Member
-				set
-					missingFromImportSince = :importStart
-				where
-			"""
-
-		for (batch <- seenIds.grouped(BatchSize); count <- 1 to numBatches) {
-			sqlString = sqlString + " universityId not in (:idGroup" + count + ") and "
-		}
-
-		sqlString = sqlString.substring(0, sqlString.length - 5) // lose the final and
-
-		var query = session.createQuery(sqlString)
-			.setParameter("importStart", importStart)
-
-		for (batch <- seenIds.grouped(BatchSize); count <- 1 to numBatches) {
-			query = query.setParameterList("idGroup" + count, batch)
-		}
-		query.executeUpdate
+		stampMissingFromImport(seenIds, importStart, "Member", "universityId")
 	}
 }
 

@@ -26,7 +26,7 @@ trait StudentCourseYearDetailsDao {
 }
 
 @Repository
-class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with Daoisms {
+class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with StampMissing {
 	import Restrictions._
 	import Order._
 
@@ -67,30 +67,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 	}
 
 	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime) = {
-		val BatchSize = 500
-		val numBatches = (seenIds.size / BatchSize) + 1
-
-		var sqlString = """
-				update
-					StudentCourseYearDetails
-				set
-					missingFromImportSince = :importStart
-				where
-			"""
-
-		for (batch <- seenIds.grouped(BatchSize); count <- 1 to numBatches) {
-			sqlString = sqlString + " universityId not in (:idGroup" + count + ") and "
-		}
-
-		sqlString = sqlString.substring(0, sqlString.length - 5) // lose the final and
-
-		var query = session.createQuery(sqlString)
-			.setParameter("importStart", importStart)
-
-		for (batch <- seenIds.grouped(BatchSize); count <- 1 to numBatches) {
-			query = query.setParameterList("idGroup" + count, batch)
-		}
-		query.executeUpdate
+		stampMissingFromImport(seenIds, importStart, "StudentCourseYearDetails", "studentCourseDetails.scjCode")
 	}
 
 	def getIdFromKey(key: StudentCourseYearKey) = {

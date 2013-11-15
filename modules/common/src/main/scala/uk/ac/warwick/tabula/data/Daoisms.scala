@@ -41,6 +41,7 @@ trait ExtendedSessionComponent extends SessionComponent {
 
 trait HelperRestrictions {
 	def is = org.hibernate.criterion.Restrictions.eqOrIsNull _
+	def isNull(propertyName: String) = org.hibernate.criterion.Restrictions.isNull(propertyName)
 }
 
 object Daoisms extends HelperRestrictions {

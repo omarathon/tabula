@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.JavaConversions._
-import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.spring.Wire
-import org.hibernate.criterion.Restrictions
-import org.hibernate.criterion.Projections
-import org.joda.time.DateTime
 import scala.collection.mutable.HashSet
+import org.hibernate.annotations.AccessType
+import org.joda.time.DateTime
+import org.springframework.stereotype.Repository
+import javax.persistence.{DiscriminatorValue, Entity, NamedQueries}
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.{Department, Route, StudentCourseDetails, StudentMember}
+import org.hibernate.criterion.Projections
 
 trait StudentCourseDetailsDaoComponent {
 	val studentCourseDetailsDao: StudentCourseDetailsDao
@@ -32,7 +32,7 @@ trait StudentCourseDetailsDao {
 }
 
 @Repository
-class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
+class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with StampMissing {
 
 	def saveOrUpdate(studentCourseDetails: StudentCourseDetails) = {
 		session.saveOrUpdate(studentCourseDetails)
@@ -47,7 +47,7 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 	def getByScjCode(scjCode: String) =
 		session.newCriteria[StudentCourseDetails]
 				.add(is("scjCode", scjCode.trim))
-				.add(is("missingFromImportSince", null))
+				.add(isNull("missingFromImportSince"))
 				.uniqueResult
 
 	def getByScjCodeStaleOrFresh(scjCode: String) =
@@ -58,21 +58,21 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 	def getBySprCode(sprCode: String) =
 		session.newCriteria[StudentCourseDetails]
 				.add(is("sprCode", sprCode.trim))
-				.add(is("missingFromImportSince", null))
+				.add(isNull("missingFromImportSince"))
 				.seq
 
 	def findByDepartment(department:Department):Seq[StudentCourseDetails] = {
 		session.newCriteria[StudentCourseDetails]
 			.add(is("department", department))
-			.add(is("missingFromImportSince", null))
-			.list
+			.add(isNull("missingFromImportSince"))
+			.seq
 	}
 
 	def getStudentBySprCode(sprCode: String) = {
 		val scdList: Seq[StudentCourseDetails] = session.newCriteria[StudentCourseDetails]
 				.add(is("sprCode", sprCode.trim))
-				.add(is("missingFromImportSince", null))
-				.list
+				.add(isNull("missingFromImportSince"))
+				.seq
 
 		if (scdList.size > 0) Some(scdList.head.student)
 		else None
@@ -81,49 +81,17 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 	def getByRoute(route: Route) = {
 		session.newCriteria[StudentCourseDetails]
 			.add(is("route.code", route.code))
-			.add(is("missingFromImportSince", null))
+			.add(isNull("missingFromImportSince"))
 			.seq
 	}
 
 	def getFreshScjCodes() =
 		session.newCriteria[StudentCourseDetails]
-			.add(is("missingFromImportSince", null))
+			.add(isNull("missingFromImportSince"))
 			.project[String](Projections.property("scjCode"))
 			.seq
 
-	def stampMissingFromImport(seenScjCodes: HashSet[String], importStart: DateTime) = {
-		val BatchSize = 500
-		val numBatches = (seenScjCodes.size / BatchSize) + 1
-
-		var sqlString = """
-				update
-					StudentCourseDetails
-				set
-					missingFromImportSince = :importStart
-				where
-			"""
-
-		for (batch <- seenScjCodes.grouped(BatchSize); count <- 1 to numBatches) {
-			sqlString = sqlString + " scjCode not in (:scjCodeGroup" + count + ") and "
-		}
-
-		sqlString = sqlString.substring(0, sqlString.length - 5) // lose the final and
-
-		var query = session.createQuery(sqlString)
-			.setParameter("importStart", importStart)
-
-		for (batch <- seenScjCodes.grouped(BatchSize); count <- 1 to numBatches) {
-			query = query.setParameterList("scjCodeGroup" + count, batch)
-		}
-		query.executeUpdate
+	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime) = {
+		stampMissingFromImport(seenIds, importStart, "StudentCourseDetails", "scjCode")
 	}
-
-
-
-
-
-
-
-
-
 }

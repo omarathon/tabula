@@ -1,16 +1,15 @@
 package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConverters.asScalaBufferConverter
-
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import org.junit.After
 import org.junit.Before
-
 import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase, Fixtures}
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.Logging
+import scala.collection.mutable.HashSet
 
 class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with Mockito {
 
@@ -146,6 +145,45 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		session.saveOrUpdate(stu2.mostSignificantCourse)
 
 		studentCourseDetailsDao.getFreshScjCodes.size should be (3)
+	}
+
+	@Test
+	def testStampMissingFromImport = transactional { tx =>
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
+
+		session.saveOrUpdate(dept1)
+		session.saveOrUpdate(dept2)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		val stu3 = Fixtures.student(universityId = "1000003", userId="student", department=dept2, courseDepartment=dept2)
+		val stu4 = Fixtures.student(universityId = "1000004", userId="student", department=dept2, courseDepartment=dept2)
+
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(stu2)
+		memberDao.saveOrUpdate(stu3)
+		memberDao.saveOrUpdate(stu4)
+
+		memberDao.getByUniversityId("1000001").get.missingFromImportSince should be (null)
+		memberDao.getByUniversityId("1000002").get.missingFromImportSince should be (null)
+		memberDao.getByUniversityId("1000003").get.missingFromImportSince should be (null)
+		memberDao.getByUniversityId("1000004").get.missingFromImportSince should be (null)
+
+		val seenScjCodes = new HashSet[String]
+		seenScjCodes.add("1000001/1")
+		seenScjCodes.add("1000003/1")
+		seenScjCodes.add("1000004/1")
+
+		val importStart = DateTime.now
+		studentCourseDetailsDao.stampMissingFromImport(seenScjCodes, importStart)
+		session.flush
+		session.clear
+
+		studentCourseDetailsDao.getByScjCode("1000001/1").get.missingFromImportSince should be (null)
+		studentCourseDetailsDao.getByScjCode("1000002/1").get.missingFromImportSince should not be (null)
+		studentCourseDetailsDao.getByScjCode("1000003/1").get.missingFromImportSince should be (null)
+		studentCourseDetailsDao.getByScjCode("1000004/1").get.missingFromImportSince should be (null)
 	}
 
 }

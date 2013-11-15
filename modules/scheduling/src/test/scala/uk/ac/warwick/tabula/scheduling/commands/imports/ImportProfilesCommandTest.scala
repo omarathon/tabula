@@ -1,22 +1,18 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import java.sql.ResultSet
-import scala.collection.JavaConverters.{asScalaBufferConverter, _}
+import scala.collection.mutable.HashSet
 import scala.language.implicitConversions
+
 import org.joda.time.DateTime
 import org.springframework.transaction.annotation.Transactional
+
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, PersistenceTestBase}
 import uk.ac.warwick.tabula.data.{MemberDaoImpl, ModuleRegistrationDaoImpl, StudentCourseDetailsDaoImpl, StudentCourseYearDetailsDaoImpl}
-import uk.ac.warwick.tabula.data.model.{ModuleRegistration, StudentCourseDetails}
+import uk.ac.warwick.tabula.data.model.{ModuleRegistration, StudentCourseYearKey}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentRowCommand
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
-import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, MembershipMember, ProfileImporter, SitsAcademicYearAware, SitsAcademicYearService}
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileService, SmallGroupService, UserLookupService}
-import uk.ac.warwick.userlookup.User
-import java.sql.ResultSetMetaData
-import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
-import scala.collection.mutable.HashSet
+import uk.ac.warwick.tabula.scheduling.services.{SitsAcademicYearAware, SitsAcademicYearService}
+import uk.ac.warwick.tabula.services.SmallGroupService
 
 class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Logging with SitsAcademicYearAware {
 	trait Environment {

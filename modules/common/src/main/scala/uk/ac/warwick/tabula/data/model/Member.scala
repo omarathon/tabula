@@ -243,12 +243,7 @@ class StudentMember extends Member with StudentProperties {
 		).distinct
 	}
 
-	override def mostSignificantCourseDetails: Option[StudentCourseDetails] = {
-		if (mostSignificantCourse != null && mostSignificantCourse.isFresh)
-			Option(mostSignificantCourse)
-		else
-			None
-	}
+	override def mostSignificantCourseDetails: Option[StudentCourseDetails] = Option(mostSignificantCourse).filter(course => course.isFresh)
 
 	override def hasCurrentEnrolment: Boolean = freshStudentCourseDetails.exists(_.hasCurrentEnrolment)
 

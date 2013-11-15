@@ -140,13 +140,10 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		}
 	}
 
-	def convertKeysToIds(keys: HashSet[StudentCourseYearKey]): HashSet[String] = {
-		for (key <- keys) yield {
-			studentCourseYearDetailsDao.getIdFromKey(key) match {
-				case Some(id: String) => id
+	def convertKeysToIds(keys: HashSet[StudentCourseYearKey]): HashSet[String] =
+			keys.flatMap {
+				key => studentCourseYearDetailsDao.getIdFromKey(key)
 			}
-		}
-	}
 
 	def updateModuleRegistrationsAndSmallGroups(membershipInfo: Seq[MembershipInformation], users: Map[String, User]): Seq[ModuleRegistration] = {
 		logger.info("Fetching module registrations")
