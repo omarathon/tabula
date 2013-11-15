@@ -376,23 +376,27 @@
 					<li class="divider"></li>
 
 					<#if assignment.allowExtensions>
-						<li>
-							<#if can.do('Extension.ReviewRequest', assignment)>
-								<#assign ext_caption='Grant extensions' />
-							<#else>
-								<#assign ext_caption='View extensions' />
-							</#if>
-							<#assign ext_url><@routes.extensions assignment /></#assign>
-							<@fmt.permission_button
+						<#if assignment.hasExtensions>
+							<li>
+								<#if can.do('Extension.ReviewRequest', assignment)>
+									<#assign ext_caption='Grant extensions' />
+								<#else>
+									<#assign ext_caption='View extensions' />
+								</#if>
+								<#assign ext_url><@routes.extensions assignment /></#assign>
+								<@fmt.permission_button
 								permission='Extension.Read'
 								scope=assignment
 								action_descr=ext_caption?lower_case
 								href=ext_url>
-	            	<i class="icon-calendar"></i> ${ext_caption}
-	            </@fmt.permission_button>
-						</li>
+									<i class="icon-calendar"></i> ${ext_caption}
+								</@fmt.permission_button>
+							</li>
+						<#else>
+							<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="There have been no extensions requested for this assignment."><i class="icon-calendar"></i> Grant extensions </a></li>
+						</#if>
 					<#else>
-						<li class="disabled"><a class="use-tooltip" title="Extensions are not allowed on this assignment."><i class="icon-calendar"></i> Grant extensions </a></li>
+						<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Extensions are not allowed on this assignment."><i class="icon-calendar"></i> Grant extensions </a></li>
 					</#if>
 
 					<li class="divider"></li>
@@ -410,7 +414,7 @@
 	            </@fmt.permission_button>
 	          </li>
 					<#else>
-						<li class="disabled"><a class="use-tooltip" title="Marking workflow is not enabled for this assignment."><i class="icon-user"></i> Assign markers </a></li>
+						<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Marking workflow is not enabled for this assignment."><i class="icon-user"></i> Assign markers </a></li>
 					</#if>
 
 					<#if assignment.collectMarks>
@@ -425,7 +429,7 @@
 	            </@fmt.permission_button>
 	          </li>
 					<#else>
-						<li class="disabled"><a class="use-tooltip" title="Mark collection is not enabled for this assignment."><i class="icon-check"></i> Add marks</a></li>
+						<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Mark collection is not enabled for this assignment."><i class="icon-check"></i> Add marks</a></li>
 					</#if>
 
 					<li>
@@ -448,7 +452,7 @@
 							</@fmt.permission_button>
 						</li>
 					<#else>
-						<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish."><i class="icon-envelope-alt"></i> Publish feedback </a></li>
+						<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" data-container="body" title="No current feedback to publish."><i class="icon-envelope-alt"></i> Publish feedback </a></li>
 					</#if>
 
 
