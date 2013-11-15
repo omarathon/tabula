@@ -23,7 +23,7 @@
 		margin-bottom: 1em;
 		padding: 1em;
 		background-color: @tableBackgroundNonAccent;
-		width: 350px;
+
 		.name {
 			font-size: 22px;
 		}
@@ -38,6 +38,27 @@
 		padding: 3px 5px;
 		color: white;
 	}
+
+	.agentslist {
+		overflow:auto;    /* fix for zero height div when containing floats */
+	}
+
+	.agentslist.drag-list-three-col .drag-target {
+		width: 157px;
+		float: left;
+		margin-right: 10px;
+	}
+
+	.agentslist.drag-list-three-col .drag-target .name {
+		min-height: 3em;
+		display:block;
+		line-height: 1.3em;
+	}
+
+	.drag-list-three-col .name {
+		font-size:18px;
+	}
+
 }
 
 .requestedExtension {
