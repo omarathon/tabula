@@ -71,18 +71,18 @@
 
 							<tbody>
 								<#list students as studentData>
-								<tr class="student">
-									<td class="fname" title="${studentData.student.firstName}">${studentData.student.firstName}</td>
-									<td class="lname" title="${studentData.student.lastName}">${studentData.student.lastName}</td>
-									<td class="id"><a class="profile-link" href="<@routes.profile studentData.student />">${studentData.student.universityId}</a></td>
-								</tr>
+									<tr class="student">
+										<td class="fname" title="${studentData.student.firstName}">${studentData.student.firstName}</td>
+										<td class="lname" title="${studentData.student.lastName}">${studentData.student.lastName}</td>
+										<td class="id"><a class="profile-link" href="<@routes.profile studentData.student />">${studentData.student.universityId}</a></td>
+									</tr>
 								</#list>
 							</tbody>
 						</table>
 					</div>
 
 					<div class="middle">
-						<table class="table table-bordered table-striped table-condensed sb-no-wrapper-table-popout">
+						<table class="table tablesorter table-bordered table-striped table-condensed sb-no-wrapper-table-popout">
 							<thead>
 							<tr>
 								<#list attendance_variables.monitoringPointTermNames as term>
@@ -90,38 +90,45 @@
 										<th class="${term}-col">${term}</th>
 									</#if>
 								</#list>
+								<#if necessaryTerms?size == 0>
+									<th>&nbsp;</th>
+								</#if>
 							</tr>
 							</thead>
 
 							<tbody>
 								<#list students as studentData>
-								<tr class="student">
-									<#list attendance_variables.monitoringPointTermNames as term>
-										<#if necessaryTerms?seq_contains(term)>
-											<td>
-												<#if studentData.pointsByTerm[term]??>
-													<#assign pointMap = studentData.pointsByTerm[term] />
-													<#list pointMap?keys as point>
-														<#assign checkpointState = mapGet(pointMap, point) />
-														<#if checkpointState == "attended">
-															<i class="icon-ok icon-fixed-width attended" title="Attended: ${point.name} (<@fmt.weekRanges point />)"></i>
-														<#elseif checkpointState == "authorised">
-															<i class="icon-remove-circle icon-fixed-width authorised" title="Missed (authorised): ${point.name} (<@fmt.weekRanges point />)"></i>
-														<#elseif checkpointState == "unauthorised">
-															<i class="icon-remove icon-fixed-width unauthorised" title="Missed (unauthorised): ${point.name} (<@fmt.weekRanges point />)"></i>
-														<#elseif checkpointState == "late">
-															<i class="icon-warning-sign icon-fixed-width late" title="Unrecorded: ${point.name} (<@fmt.weekRanges point />)"></i>
+									<tr class="student">
+										<#if studentData.pointsByTerm?keys?size == 0>
+											<td colspan="${necessaryTerms?size}"><span class="muted"><em>No monitoring points found</em></span></td>
+										<#else>
+											<#list attendance_variables.monitoringPointTermNames as term>
+												<#if necessaryTerms?seq_contains(term)>
+													<td>
+														<#if studentData.pointsByTerm[term]??>
+															<#assign pointMap = studentData.pointsByTerm[term] />
+															<#list pointMap?keys as point>
+																<#assign checkpointState = mapGet(pointMap, point) />
+																<#if checkpointState == "attended">
+																	<i class="icon-ok icon-fixed-width attended" title="Attended: ${point.name} (<@fmt.weekRanges point />)"></i>
+																<#elseif checkpointState == "authorised">
+																	<i class="icon-remove-circle icon-fixed-width authorised" title="Missed (authorised): ${point.name} (<@fmt.weekRanges point />)"></i>
+																<#elseif checkpointState == "unauthorised">
+																	<i class="icon-remove icon-fixed-width unauthorised" title="Missed (unauthorised): ${point.name} (<@fmt.weekRanges point />)"></i>
+																<#elseif checkpointState == "late">
+																	<i class="icon-warning-sign icon-fixed-width late" title="Unrecorded: ${point.name} (<@fmt.weekRanges point />)"></i>
+																<#else>
+																	<i class="icon-minus icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
+																</#if>
+															</#list>
 														<#else>
-															<i class="icon-minus icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
+															<i class="icon-fixed-width"></i>
 														</#if>
-													</#list>
-												<#else>
-													<i class="icon-fixed-width"></i>
+													</td>
 												</#if>
-											</td>
+											</#list>
 										</#if>
-									</#list>
-								</tr>
+									</tr>
 								</#list>
 							</tbody>
 						</table>
@@ -139,34 +146,38 @@
 
 							<tbody>
 								<#list students as studentData>
-								<tr class="student">
-									<td class="unrecorded">
-										<span class="badge badge-<#if (studentData.unrecorded > 2)>important<#elseif (studentData.unrecorded > 0)>warning<#else>success</#if>">
-											${studentData.unrecorded}
-										</span>
-									</td>
-									<td class="missed">
-										<span class="badge badge-<#if (studentData.missed > 2)>important<#elseif (studentData.missed > 0)>warning<#else>success</#if>">
-											${studentData.missed}
-										</span>
-									</td>
-									<td class="record">
-										<#if studentData.pointsByTerm?keys?size == 0>
-											<a title="This student has no monitoring points" class="btn btn-primary btn-mini disabled"><i class="icon-pencil icon-fixed-width"></i></a>
-										<#else>
-											<#assign record_url><@routes.recordStudent command.department studentData.student command.academicYear returnTo /></#assign>
-											<@fmt.permission_button
-												permission='MonitoringPoints.Record'
-												scope=studentData.student.mostSignificantCourseDetails.route
-												action_descr='record monitoring points'
-												classes='btn btn-primary btn-mini'
-												href=record_url
-											>
-												<i class="icon-pencil icon-fixed-width late"></i>
-											</@fmt.permission_button>
-										</#if>
-									</td>
-								</tr>
+									<tr class="student">
+										<td class="unrecorded">
+											<a href="<@routes.viewStudent command.department studentData.student command.academicYear returnTo />">
+												<span class="badge badge-<#if (studentData.unrecorded > 2)>important<#elseif (studentData.unrecorded > 0)>warning<#else>success</#if>">
+													${studentData.unrecorded}
+												</span>
+											</a>
+										</td>
+										<td class="missed">
+											<a href="<@routes.viewStudent command.department studentData.student command.academicYear returnTo />">
+												<span class="badge badge-<#if (studentData.missed > 2)>important<#elseif (studentData.missed > 0)>warning<#else>success</#if>">
+													${studentData.missed}
+												</span>
+											</a>
+										</td>
+										<td class="record">
+											<#if studentData.pointsByTerm?keys?size == 0>
+												<a title="This student has no monitoring points" class="btn btn-primary btn-mini disabled"><i class="icon-pencil icon-fixed-width"></i></a>
+											<#else>
+												<#assign record_url><@routes.recordStudent command.department studentData.student command.academicYear returnTo /></#assign>
+												<@fmt.permission_button
+													permission='MonitoringPoints.Record'
+													scope=studentData.student.mostSignificantCourseDetails.route
+													action_descr='record monitoring points'
+													classes='btn btn-primary btn-mini'
+													href=record_url
+												>
+													<i class="icon-pencil icon-fixed-width late"></i>
+												</@fmt.permission_button>
+											</#if>
+										</td>
+									</tr>
 								</#list>
 							</tbody>
 						</table>

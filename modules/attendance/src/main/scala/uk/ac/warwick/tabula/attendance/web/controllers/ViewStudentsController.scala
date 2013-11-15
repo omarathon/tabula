@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
-import uk.ac.warwick.tabula.attendance.commands.{ViewStudentsResults, ViewStudentsCommand}
+import uk.ac.warwick.tabula.attendance.commands.{ViewStudentsState, ViewStudentsResults, ViewStudentsCommand}
 import uk.ac.warwick.tabula.AcademicYear
 
 @Controller
@@ -22,7 +22,7 @@ class ViewStudentsController extends AttendanceController {
 
 	@RequestMapping
 	def filter(
-		@Valid @ModelAttribute("command") cmd: Appliable[ViewStudentsResults],
+		@Valid @ModelAttribute("command") cmd: Appliable[ViewStudentsResults] with ViewStudentsState,
 		errors: Errors,
 		@RequestParam(value="updatedStudent", required = false) updatedStudent: StudentMember
 	) = {
@@ -30,7 +30,7 @@ class ViewStudentsController extends AttendanceController {
 			if (ajax)
 				Mav("home/view_students_results").noLayout()
 			else
-				Mav("home/view_students_filter", "updatedStudent" -> updatedStudent)
+				Mav("home/view_students_filter", "updatedStudent" -> updatedStudent).crumbs(Breadcrumbs.ViewDepartment(cmd.department))
 		} else {
 			val results = cmd.apply()
 
@@ -47,7 +47,7 @@ class ViewStudentsController extends AttendanceController {
 					"totalResults" -> results.totalResults,
 					"updatedStudent" -> updatedStudent,
 					"necessaryTerms" -> results.students.flatMap{ data => data.pointsByTerm.keySet }.distinct
-				)
+				).crumbs(Breadcrumbs.ViewDepartment(cmd.department))
 		}
 	}
 

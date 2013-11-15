@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.commands.Appliable
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.attendance.commands.{GroupedMonitoringPoint, ViewMonitoringPointsCommand}
+import uk.ac.warwick.tabula.attendance.commands.{ViewMonitoringPointsState, GroupedMonitoringPoint, ViewMonitoringPointsCommand}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 
@@ -23,22 +23,25 @@ class ViewMonitoringPointsController extends AttendanceController {
 
 	@RequestMapping
 	def filter(
-		@Valid @ModelAttribute("command") cmd: Appliable[Map[String, Seq[GroupedMonitoringPoint]]],
+		@Valid @ModelAttribute("command") cmd: Appliable[Map[String, Seq[GroupedMonitoringPoint]]] with ViewMonitoringPointsState,
 		errors: Errors,
 		@RequestParam(value="updatedMonitoringPoint", required = false) updatedMonitoringPoint: MonitoringPoint
 	) = {
-		if (errors.hasErrors()) {
+		if (errors.hasErrors) {
 			if (ajax)
 				Mav("home/view_points_results").noLayout()
 			else
-				Mav("home/view_points_filter", "updatedMonitoringPoint" -> updatedMonitoringPoint)
+				Mav("home/view_points_filter", "updatedMonitoringPoint" -> updatedMonitoringPoint).crumbs(Breadcrumbs.ViewDepartment(cmd.department))
 		} else {
 			val results = cmd.apply()
 
 			if (ajax)
 				Mav("home/view_points_results", "pointsMap" -> results).noLayout()
 			else
-				Mav("home/view_points_filter", "pointsMap" -> results, "updatedMonitoringPoint" -> updatedMonitoringPoint)
+				Mav("home/view_points_filter",
+					"pointsMap" -> results,
+					"updatedMonitoringPoint" -> updatedMonitoringPoint
+				).crumbs(Breadcrumbs.ViewDepartment(cmd.department))
 		}
 	}
 
