@@ -217,7 +217,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			keys.add(key1)
 			keys.add(key2)
 
-			val ids = command.convertKeysToIds(keys)
+			val ids = command.studentCourseYearDetailsDao.convertKeysToIds(keys)
 
 			ids.size should be (2)
 

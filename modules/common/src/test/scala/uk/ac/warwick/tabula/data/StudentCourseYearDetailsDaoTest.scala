@@ -18,6 +18,9 @@ import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
 import uk.ac.warwick.tabula.Fixtures
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
+import scala.collection.mutable.HashSet
+import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
+import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
 
 class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 
@@ -98,4 +101,66 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 			scydDao.getFreshKeys.size should be (3)
 		}
 	}
+
+	@Test
+	def testStampMissingFromImport = transactional { tx =>
+		val dept1 = Fixtures.department("hm", "History of Music")
+		val dept2 = Fixtures.department("ar", "Architecture")
+
+		session.saveOrUpdate(dept1)
+		session.saveOrUpdate(dept2)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1)
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2)
+		val stu3 = Fixtures.student(universityId = "1000003", userId="student", department=dept2, courseDepartment=dept2)
+		val stu4 = Fixtures.student(universityId = "1000004", userId="student", department=dept2, courseDepartment=dept2)
+
+		memDao.saveOrUpdate(stu1)
+		memDao.saveOrUpdate(stu2)
+		memDao.saveOrUpdate(stu3)
+		memDao.saveOrUpdate(stu4)
+		session.flush
+		session.clear
+
+		val key1 = new StudentCourseYearKey(stu1.mostSignificantCourse.scjCode, 1)
+		val key2 = new StudentCourseYearKey(stu2.mostSignificantCourse.scjCode, 1)
+		val key3 = new StudentCourseYearKey(stu3.mostSignificantCourse.scjCode, 1)
+		val key4 = new StudentCourseYearKey(stu4.mostSignificantCourse.scjCode, 1)
+
+		val scyd1 = scydDao.getBySceKey(stu1.mostSignificantCourse, 1).get
+		val scyd2 = scydDao.getBySceKey(stu2.mostSignificantCourse, 1).get
+		val scyd3 = scydDao.getBySceKey(stu3.mostSignificantCourse, 1).get
+		val scyd4 = scydDao.getBySceKey(stu4.mostSignificantCourse, 1).get
+
+		scydDao.getBySceKey(stu1.mostSignificantCourse, 1) should be (Some(scyd1))
+		scydDao.getBySceKey(stu2.mostSignificantCourse, 1) should be (Some(scyd2))
+		scydDao.getBySceKey(stu3.mostSignificantCourse, 1) should be (Some(scyd3))
+		scydDao.getBySceKey(stu4.mostSignificantCourse, 1) should be (Some(scyd4))
+
+		scyd1.missingFromImportSince should be (null)
+		scyd2.missingFromImportSince should be (null)
+		scyd3.missingFromImportSince should be (null)
+		scyd4.missingFromImportSince should be (null)
+
+		val seenSceKeys = new HashSet[StudentCourseYearKey]
+		seenSceKeys.add(key1)
+		seenSceKeys.add(key3)
+
+		val seenIds = scydDao.convertKeysToIds(seenSceKeys)
+
+		val importStart = DateTime.now
+		scydDao.stampMissingFromImport(seenIds, importStart)
+
+		for (id <- seenIds) logger.warn("seen ID: " + id)
+
+		session.flush
+		session.clear
+
+		scydDao.getBySceKey(stu1.mostSignificantCourse, 1) should be (Some(scyd1))
+		scydDao.getBySceKey(stu2.mostSignificantCourse, 1) should be (None)
+		scydDao.getBySceKey(stu3.mostSignificantCourse, 1) should be (Some(scyd3))
+		scydDao.getBySceKey(stu4.mostSignificantCourse, 1) should be (None)
+
+	}
+
 }

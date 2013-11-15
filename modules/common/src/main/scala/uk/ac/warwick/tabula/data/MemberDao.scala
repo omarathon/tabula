@@ -103,6 +103,7 @@ class MemberDaoImpl extends MemberDao with StampMissing with Logging {
 	def getByUniversityId(universityId: String) =
 		session.newCriteria[Member]
 			.add(is("universityId", universityId.safeTrim))
+			.add(isNull("missingFromImportSince"))
 			.uniqueResult
 
 	def getFreshUniversityIds() =
@@ -115,6 +116,7 @@ class MemberDaoImpl extends MemberDao with StampMissing with Logging {
 		if (universityIds.isEmpty) Seq.empty
 		else session.newCriteria[Member]
 			.add(in("universityId", universityIds map { _.safeTrim }))
+			.add(isNull("missingFromImportSince"))
 			.seq
 
 	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {
@@ -125,6 +127,7 @@ class MemberDaoImpl extends MemberDao with StampMissing with Logging {
 
 			session.newCriteria[Member]
 					.add(is("userId", userId.safeTrim.toLowerCase))
+					.add(isNull("missingFromImportSince"))
 					.add(disjunction()
 						.add(is("inUseFlag", "Active"))
 						.add(like("inUseFlag", "Inactive - Starts %"))
@@ -137,7 +140,8 @@ class MemberDaoImpl extends MemberDao with StampMissing with Logging {
 		}
 	}
 
-	def getByUserId(userId: String, disableFilter: Boolean = false) = getAllByUserId(userId, disableFilter).headOption
+	def getByUserId(userId: String, disableFilter: Boolean = false) =
+		getAllByUserId(userId, disableFilter).headOption
 
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int) = {
 		val homeDepartmentMatches = session.newCriteria[Member]

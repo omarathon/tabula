@@ -125,7 +125,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					+ importRowTracker.studentCourseYearDetailsSeen.size + " studentCourseYearDetails.");
 
 			logger.warn("Converting enrolment keys to ids ...")
-			val idsSeen = convertKeysToIds(importRowTracker.studentCourseYearDetailsSeen)
+			val idsSeen = studentCourseYearDetailsDao.convertKeysToIds(importRowTracker.studentCourseYearDetailsSeen)
 
 
 			// make sure any rows we've got for this student in the db which we haven't seen in this import are recorded as missing
@@ -139,11 +139,6 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 			studentCourseYearDetailsDao.stampMissingFromImport(idsSeen, importStart)
 		}
 	}
-
-	def convertKeysToIds(keys: HashSet[StudentCourseYearKey]): HashSet[String] =
-			keys.flatMap {
-				key => studentCourseYearDetailsDao.getIdFromKey(key)
-			}
 
 	def updateModuleRegistrationsAndSmallGroups(membershipInfo: Seq[MembershipInformation], users: Map[String, User]): Seq[ModuleRegistration] = {
 		logger.info("Fetching module registrations")

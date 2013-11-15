@@ -51,7 +51,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 		(this.studentCourseDetails == that.studentCourseDetails) && (this.sceSequenceNumber == that.sceSequenceNumber)
 	}
 
-		def isFresh = (missingFromImportSince == null)
+	def isFresh = (missingFromImportSince == null)
 }
 
 trait StudentCourseYearProperties {

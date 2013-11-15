@@ -21,6 +21,7 @@ trait StudentCourseYearDetailsDao {
 	def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
 	def getFreshKeys(): Seq[StudentCourseYearKey]
 	def getIdFromKey(key: StudentCourseYearKey): Option[String]
+	def convertKeysToIds(keys: HashSet[StudentCourseYearKey]): HashSet[String]
 	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime)
 
 }
@@ -66,16 +67,21 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with S
 		.seq
 	}
 
+	// TODO - put these two methods in a service
+	def convertKeysToIds(keys: HashSet[StudentCourseYearKey]): HashSet[String] =
+			keys.flatMap {
+				key => getIdFromKey(key)
+			}
+
 	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime) = {
-		stampMissingFromImport(seenIds, importStart, "StudentCourseYearDetails", "studentCourseDetails.scjCode")
+		stampMissingFromImport(seenIds, importStart, "StudentCourseYearDetails", "id")
 	}
 
 	def getIdFromKey(key: StudentCourseYearKey) = {
 		session.newCriteria[StudentCourseYearDetails]
 		.add(is("studentCourseDetails.scjCode", key.scjCode))
 		.add(is("sceSequenceNumber", key.sceSequenceNumber))
-		.project[String](Projections.property("scjCode"))
+		.project[String](Projections.property("id"))
 		.uniqueResult
-
 	}
 }

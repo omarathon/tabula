@@ -167,16 +167,15 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		session.flush
 		session.clear
 
-		memberDao.getByUniversityId("1000001").get.missingFromImportSince should be (null)
-		memberDao.getByUniversityId("1000002").get.missingFromImportSince should be (null)
-		memberDao.getByUniversityId("1000003").get.missingFromImportSince should be (null)
-		memberDao.getByUniversityId("1000004").get.missingFromImportSince should be (null)
+		studentCourseDetailsDao.getByScjCode("1000001/1").get.missingFromImportSince should be (null)
+		studentCourseDetailsDao.getByScjCode("1000002/1").get.missingFromImportSince should be (null)
+		studentCourseDetailsDao.getByScjCode("1000003/1").get.missingFromImportSince should be (null)
+		studentCourseDetailsDao.getByScjCode("1000004/1").get.missingFromImportSince should be (null)
 
 		val seenScjCodes = new HashSet[String]
 		seenScjCodes.add("1000001/1")
 		seenScjCodes.add("1000003/1")
 		seenScjCodes.add("1000004/1")
-
 
 		val importStart = DateTime.now
 		studentCourseDetailsDao.stampMissingFromImport(seenScjCodes, importStart)
@@ -184,9 +183,10 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 		session.clear
 
 		studentCourseDetailsDao.getByScjCode("1000001/1").get.missingFromImportSince should be (null)
-		studentCourseDetailsDao.getByScjCode("1000002/1").get.missingFromImportSince should not be (null)
 		studentCourseDetailsDao.getByScjCode("1000003/1").get.missingFromImportSince should be (null)
 		studentCourseDetailsDao.getByScjCode("1000004/1").get.missingFromImportSince should be (null)
+
+		studentCourseDetailsDao.getByScjCode("1000002/1") should be (None)
 	}
 
 }
