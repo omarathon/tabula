@@ -21,9 +21,7 @@ trait StampMissing extends Daoisms with Logging {
 				where
 			"""
 
-		val groupedIdentifiers = seenIdentifiers.grouped(Daoisms.MaxInClauseCount).zipWithIndex
-
-		val notInClauses = groupedIdentifiers.map {
+		val notInClauses = seenIdentifiers.grouped(Daoisms.MaxInClauseCount).zipWithIndex.map {
 				case (batch, index) => {
 					s"$identifyingField not in (:identifierGroup$index)"
 				}
@@ -35,7 +33,7 @@ trait StampMissing extends Daoisms with Logging {
 		var query = session.createQuery(sqlString)
 			.setParameter("importStart", importStart)
 
-		groupedIdentifiers.foreach {
+		seenIdentifiers.grouped(Daoisms.MaxInClauseCount).zipWithIndex.foreach {
 			case (batch, index) => query.setParameterList(s"identifierGroup$index", batch)
 		}
 
