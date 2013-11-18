@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.commands.{FiltersStudents, CommandInternal, ReadOnly, Unaudited, ComposableCommand}
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
@@ -21,14 +20,6 @@ import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear}
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
-
-case class StudentPointsData(
-	student: StudentMember,
-	pointsByTerm: Map[String, Map[MonitoringPoint, String]],
-	unrecorded: Int,
-	missed: Int
-)
 
 case class ViewStudentsResults(
 	students: Seq[StudentPointsData],
@@ -49,7 +40,7 @@ object ViewStudentsCommand {
 }
 
 abstract class ViewStudentsCommand(val department: Department, val academicYearOption: Option[AcademicYear], val user: CurrentUser)
-	extends CommandInternal[ViewStudentsResults] with ViewStudentsState with BindListener  with GroupMonitoringPointsByTerm {
+	extends CommandInternal[ViewStudentsResults] with ViewStudentsState with BindListener with BuildStudentPointsData {
 	self: ProfileServiceComponent with MonitoringPointServiceComponent =>
 
 	def applyInternal() = {
@@ -64,7 +55,7 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 				studentsPerPage,
 				studentsPerPage * (page-1)
 			)
-			buildData(sortedStudents, filteredUniversityIds.size)
+			ViewStudentsResults(buildData(sortedStudents, academicYear), filteredUniversityIds.size)
 		} else if (sortOrder.asScala.exists(o => o.getPropertyName == "unrecordedMonitoringPoints")) {
 			val filteredUniversityIds = profileService.findAllUniversityIdsByRestrictions(department, buildRestrictions())
 			val sortedStudents = monitoringPointService.studentsByUnrecordedCount(
@@ -75,7 +66,7 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 				studentsPerPage,
 				studentsPerPage * (page-1)
 			)
-			buildData(sortedStudents, filteredUniversityIds.size)
+			ViewStudentsResults(buildData(sortedStudents, academicYear), filteredUniversityIds.size)
 		} else {
 			val totalResults = profileService.countStudentsByRestrictions(
 				department = department,
@@ -90,43 +81,9 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 				startResult = studentsPerPage * (page-1)
 			)
 
-			buildData(students, totalResults)
+			ViewStudentsResults(buildData(students, academicYear), totalResults)
 		}
 
-
-
-	}
-
-	private def buildData(students: Seq[StudentMember], totalResults: Int) = {
-		val pointSetsByStudent = monitoringPointService.findPointSetsForStudentsByStudent(students, academicYear)
-		val allPoints = pointSetsByStudent.flatMap(_._2.points.asScala).toSeq
-		val checkpoints = monitoringPointService.getCheckpointsByStudent(allPoints)
-		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
-
-		val studentsWithPoints = students.map{ student => {
-			pointSetsByStudent.get(student).map{ pointSet =>
-				val pointsByTerm = groupByTerm(pointSetsByStudent(student).points.asScala, academicYear)
-				val pointsByTermWithCheckpointString = pointsByTerm.map{ case(term, points) =>
-					term -> points.map{ point =>
-						point -> {
-							val checkpointOption = checkpoints.find{
-								case (s, checkpoint) => s == student && checkpoint.point == point
-							}
-							checkpointOption.map{	case (_, checkpoint) => checkpoint.state.dbValue }.getOrElse({
-								if (currentAcademicWeek > point.requiredFromWeek)	"late"
-								else ""
-							})
-						}
-					}.toMap
-				}
-				val unrecorded = pointsByTermWithCheckpointString.values.flatMap(_.values).count(_ == "late")
-				StudentPointsData(student, pointsByTermWithCheckpointString, unrecorded, student.missedMonitoringPoints)
-			}.getOrElse(
-				StudentPointsData(student, Map(), 0, 0)
-			)
-		}}
-
-		ViewStudentsResults(studentsWithPoints, totalResults)
 	}
 
 	def onBind(result: BindingResult) {

@@ -44,6 +44,31 @@ exports.scrollablePointsTableSetup = function() {
     });
 };
 
+exports.tableSortMatching = function(tableArray) {
+    var matchSorting = function($sourceTable, targetTables){
+        var $sourceRows = $sourceTable.find('tbody tr');
+        $.each(targetTables, function(i, $table){
+            var $tbody = $table.find('tbody');
+            var oldRows = $tbody.find('tr').detach();
+            $.each($sourceRows, function(j, row){
+                var $sourceRow = $(row);
+                oldRows.filter(function(){ return $(this).data('sortId') == $sourceRow.data('sortId'); }).appendTo($tbody);
+            });
+        });
+    };
+
+    if (tableArray.length < 2)
+        return;
+
+    $.each(tableArray, function(i){
+        var otherTables = tableArray.slice();
+        otherTables.splice(i, 1);
+        this.on('sortEnd', function(){
+            matchSorting($(this), otherTables);
+        }).find('tbody tr').each(function(i){ $(this).data('sortId', i); });
+    });
+};
+
 $(function(){
 
 	// SCRIPTS FOR RECORDING MONITORING POINTS
