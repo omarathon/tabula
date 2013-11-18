@@ -59,7 +59,7 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 	def applyInternal = {
 		if (!currentAgent.isDefined) {
 			// Brand new agent
-			val newRelationship = relationshipService.saveStudentRelationship(relationshipType, studentCourseDetails.sprCode, Seq(agent.universityId)).head
+			val newRelationship = relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails.sprCode, Seq(agent.universityId)).head
 
 			Seq(newRelationship)
 		} else if (currentAgent.get != agent) {
@@ -78,7 +78,7 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 					endAgentRelationship(currentRelationships)
 
 					// Save the new relationship
-					val newRelationship = relationshipService.saveStudentRelationship(relationshipType, studentCourseDetails.sprCode, Seq(agent.universityId)).head
+					val newRelationship = relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails.sprCode, Seq(agent.universityId)).head
 
 					Seq(newRelationship)
 				}

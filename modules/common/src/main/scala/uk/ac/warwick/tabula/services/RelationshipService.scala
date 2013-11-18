@@ -26,8 +26,8 @@ trait RelationshipService {
 	def saveOrUpdate(relationship: StudentRelationship)
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
-	def saveStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship]
-	def replaceStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship]
+	def saveStudentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship]
+	def replaceStudentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship]
 	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def listStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def listAllStudentRelationshipsWithMember(agent: Member): Seq[StudentRelationship]
@@ -69,7 +69,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		memberDao.getRelationshipsByTarget(relationshipType, targetSprCode)
 	}
 
-	def saveStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship] = transactional() {
+	def saveStudentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship] = transactional() {
 		val currentRelationships = findCurrentRelationships(relationshipType, targetSprCode)
 		val existingRelationships = currentRelationships.filter { rel => agents.contains(rel.agent) }
 		val agentsToCreate = agents.filterNot { agent => currentRelationships.exists { _.agent == agent } }
@@ -84,7 +84,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	}
 
 	// end any existing relationships of the same type for this student, then save the new one
-	def replaceStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship] = transactional() {
+	def replaceStudentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship] = transactional() {
 		val currentRelationships = findCurrentRelationships(relationshipType, targetSprCode)
 		val (existingRelationships, relationshipsToEnd) = currentRelationships.partition { rel => agents.contains(rel.agent) }
 		
@@ -96,7 +96,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		relationshipsToEnd.foreach { _.endDate = DateTime.now }
 		
 		// Save new relationships for agents that don't already exist
-		saveStudentRelationship(relationshipType, targetSprCode, agentsToAdd)
+		saveStudentRelationships(relationshipType, targetSprCode, agentsToAdd)
 	}
 
 	def relationshipDepartmentFilterMatches(department: Department)(rel: StudentRelationship) =

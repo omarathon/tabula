@@ -51,7 +51,7 @@ class ImportSupervisorsForStudentCommand()
 					m
 				}
 				
-				relationshipService.replaceStudentRelationship(relationshipType, studentCourseDetails.sprCode, supervisors.map { _.universityId })
+				relationshipService.replaceStudentRelationships(relationshipType, studentCourseDetails.sprCode, supervisors.map { _.universityId })
 			}
 	}
 }
