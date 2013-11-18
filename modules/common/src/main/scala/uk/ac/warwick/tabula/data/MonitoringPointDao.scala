@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.data.model.{Route, StudentMember}
 import org.hibernate.criterion.{Projections, Order}
 import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.criterion.Restrictions._
-import scala.Some
 
 trait MonitoringPointDaoComponent {
 	val monitoringPointDao: MonitoringPointDao
@@ -41,6 +40,13 @@ trait MonitoringPointDao {
 	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findPointSetsForStudentsByStudent(students: Seq[StudentMember], academicYear: AcademicYear): Map[StudentMember, MonitoringPointSet]
 	def findSimilarPointsForMembers(point: MonitoringPoint, students: Seq[StudentMember]): Map[StudentMember, Seq[MonitoringPoint]]
+	def studentsByMissedCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember]
 }
 
 
@@ -220,5 +226,66 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			objArray(0).asInstanceOf[StudentMember] -> objArray(1).asInstanceOf[MonitoringPoint]
 		}
 		memberPointMap.groupBy(_._1).mapValues(_.map(_._2))
+	}
+
+	def studentsByMissedCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember] = {
+		if (universityIds.isEmpty)
+			return Seq()
+
+		val partionedUniversityIdsWithIndex = universityIds.grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
+
+		val queryString = """
+			select s.universityId, count(*) as missed from Member s, StudentCourseDetails scd, StudentCourseYearDetails scyd,
+			Route r, MonitoringPointSet mps, MonitoringPoint mp, MonitoringCheckpoint mc
+			where s.mostSignificantCourse = scd
+			and scyd.studentCourseDetails = scd
+			and scd.route = r.code
+			and mps.route = r
+			and (mps.year is null or mps.year = scyd.yearOfStudy)
+			and mp.pointSet = mps
+			and mc.point = mp
+			and mc.studentCourseDetail = s.mostSignificantCourse
+			and mps.academicYear = :academicYear
+			and scyd.academicYear = :academicYear
+			and mc.state = 'unauthorised'
+			and (
+		""" + partionedUniversityIdsWithIndex.map{
+			case (ids, index) => "s.universityId in (:universityIds" + index.toString + ") "
+		}.mkString(" or ") + """
+			)
+			group by s.universityId
+		"""
+
+		val query = session.newQuery[Array[java.lang.Object]](queryString)
+			.setParameter("academicYear", academicYear)
+
+		partionedUniversityIdsWithIndex.foreach{
+			case (ids, index) => {
+				query.setParameterList("universityIds" + index.toString, ids)
+			}
+		}
+
+		val universityIdMissedMap = query.seq.map{objArray =>
+			objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
+		}.toMap
+		val ordering = if (isAscending) Ordering[Int] else Ordering[Int].reverse
+
+		val universityIdsToFetch = universityIds.map{u =>
+			u -> universityIdMissedMap.getOrElse(u, 0)
+		}.sortBy(_._2)(ordering).slice(startResult, startResult + maxResults + 1).map(_._1)
+
+		val c = session.newCriteria[StudentMember]
+		val or = disjunction()
+		universityIdsToFetch.grouped(Daoisms.MaxInClauseCount).foreach { ids => or.add(in("universityId", ids.asJavaCollection)) }
+		c.add(or)
+		val students = c.seq
+
+		universityIdsToFetch.flatMap{u => students.find(_.universityId == u)}.toSeq
 	}
 }

@@ -53,19 +53,38 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 	self: ProfileServiceComponent with MonitoringPointServiceComponent =>
 
 	def applyInternal() = {
-		val totalResults = profileService.countStudentsByRestrictions(
-			department = department,
-			restrictions = buildRestrictions()
-		)
+		if (sortOrder.asScala.exists(o => o.getPropertyName == "missedMonitoringPoints")) {
+			val filteredUniversityIds = profileService.findAllUniversityIdsByRestrictions(department, buildRestrictions())
+			val sortedStudents = monitoringPointService.studentsByMissedCount(
+				filteredUniversityIds,
+				academicYear,
+				sortOrder.asScala.filter(o => o.getPropertyName == "missedMonitoringPoints").head.isAscending,
+				studentsPerPage,
+				studentsPerPage * (page-1)
+			)
+			buildData(sortedStudents, filteredUniversityIds.size)
+		} else {
+			val totalResults = profileService.countStudentsByRestrictions(
+				department = department,
+				restrictions = buildRestrictions()
+			)
 
-		val students = profileService.findStudentsByRestrictions(
-			department = department,
-			restrictions = buildRestrictions(),
-			orders = buildOrders(),
-			maxResults = studentsPerPage,
-			startResult = studentsPerPage * (page-1)
-		)
+			val students = profileService.findStudentsByRestrictions(
+				department = department,
+				restrictions = buildRestrictions(),
+				orders = buildOrders(),
+				maxResults = studentsPerPage,
+				startResult = studentsPerPage * (page-1)
+			)
 
+			buildData(students, totalResults)
+		}
+
+
+
+	}
+
+	private def buildData(students: Seq[StudentMember], totalResults: Int) = {
 		val pointSetsByStudent = monitoringPointService.findPointSetsForStudentsByStudent(students, academicYear)
 		val allPoints = pointSetsByStudent.flatMap(_._2.points.asScala).toSeq
 		val checkpoints = monitoringPointService.getCheckpointsByStudent(allPoints)
