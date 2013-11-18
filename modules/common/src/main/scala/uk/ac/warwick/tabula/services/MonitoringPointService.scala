@@ -54,7 +54,23 @@ trait MonitoringPointService {
 	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int
 	def getPointSetForStudent(student: StudentMember, academicYear: AcademicYear): Option[MonitoringPointSet]
 	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet]
+	def findPointSetsForStudentsByStudent(students: Seq[StudentMember], academicYear: AcademicYear): Map[StudentMember, MonitoringPointSet]
 	def findSimilarPointsForMembers(point: MonitoringPoint, students: Seq[StudentMember]): Map[StudentMember, Seq[MonitoringPoint]]
+	def studentsByMissedCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember]
+	def studentsByUnrecordedCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		currentAcademicWeek: Int,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember]
 }
 
 
@@ -153,8 +169,33 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		monitoringPointDao.findPointSetsForStudents(students, academicYear)
 	}
 
+	def findPointSetsForStudentsByStudent(students: Seq[StudentMember], academicYear: AcademicYear): Map[StudentMember, MonitoringPointSet] = {
+		monitoringPointDao.findPointSetsForStudentsByStudent(students, academicYear)
+	}
+
 	def findSimilarPointsForMembers(point: MonitoringPoint, students: Seq[StudentMember]): Map[StudentMember, Seq[MonitoringPoint]] = {
 		monitoringPointDao.findSimilarPointsForMembers(point, students)
+	}
+
+	def studentsByMissedCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember] = {
+		monitoringPointDao.studentsByMissedCount(universityIds, academicYear, isAscending, maxResults, startResult)
+	}
+
+	def studentsByUnrecordedCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		currentAcademicWeek: Int,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember] = {
+		monitoringPointDao.studentsByUnrecordedCount(universityIds, academicYear, currentAcademicWeek, isAscending, maxResults, startResult)
 	}
 
 }

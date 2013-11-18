@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringCheckpoint
 import uk.ac.warwick.tabula.attendance.commands.{AgentStudentRecordCommandState, AgentStudentRecordCommand}
 import javax.validation.Valid
 import org.springframework.validation.Errors
@@ -31,7 +31,7 @@ class AgentStudentRecordController extends AttendanceController {
 	}
 
 	def form(cmd: Appliable[Seq[MonitoringCheckpoint]] with AgentStudentRecordCommandState) = {
-		Mav("agent/record",
+		Mav("home/record_student",
 			"returnTo" -> getReturnTo(Routes.agent.student(cmd.student, cmd.relationshipType))
 		).crumbs(Breadcrumbs.Agent(cmd.relationshipType), Breadcrumbs.AgentStudent(cmd.student, cmd.relationshipType))
 	}
