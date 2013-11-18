@@ -24,7 +24,7 @@
 	</#if>
 </div>
 
-<h3><a href="<@routes.viewDepartmentStudents department />">Students</a></h3>
-<h3><a href="<@routes.viewDepartmentPoints department />">Points</h3></a></h3>
+<h3><a href="<@routes.viewDepartmentStudents department />">View by student</a></h3>
+<h3><a href="<@routes.viewDepartmentPoints department />">View by point</h3></a></h3>
 
 </#escape>
