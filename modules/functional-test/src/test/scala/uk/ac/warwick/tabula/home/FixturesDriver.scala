@@ -18,6 +18,12 @@ trait FixturesDriver {
 		}
 	}
 
+	def updateExtensionSettings(departmentCode: String, allow: Boolean = true, managerUserId: String = "") = {
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/update/extensionSettings"
+		val req = url(uri).POST << Map("departmentCode" -> departmentCode, "allow" -> allow.toString, "userId" -> managerUserId)
+		http.when(_==200)(req >| )
+	}
+
 	def createModule(departmentCode: String, code: String, name: String) {
 		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/module"
 		val req = url(uri).POST << Map("departmentCode" -> departmentCode, "code" -> code, "name" -> name)

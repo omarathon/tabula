@@ -8,15 +8,9 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import org.springframework.web.servlet.View
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.web.views.JSONView
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
-import uk.ac.warwick.tabula.data.model.ModuleRegistration
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.data.model.Course
-import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.forms.Extension
 
 @Controller
@@ -192,12 +186,27 @@ class UpdateAssignmentFixturesController {
 class CreateExtensionFixturesController {
 
 	@ModelAttribute("createExtensionCommand")
-	def getCreateExtensionCommand(): Appliable[Seq[Extension]] = {
-		CreateExtensionCommand()
+	def getCreateExtensionCommand(): Appliable[Extension] = {
+		CreateExtensionFixtureCommand()
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("createExtensionCommand") cmd: Appliable[Seq[Extension]]) {
+	def submit(@ModelAttribute("createExtensionCommand") cmd: Appliable[Extension]) {
+		cmd.apply()
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/update/extensionSettings"))
+class UpdateExtensionSettingsFixturesController {
+
+	@ModelAttribute("updateExtensionSettingsFixtureCommand")
+	def getUpdateExtensionSettingsFixtureCommand(): Appliable[Department] = {
+		UpdateExtensionSettingsFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("updateExtensionSettingsFixtureCommand") cmd: Appliable[Department]) {
 		cmd.apply()
 	}
 }

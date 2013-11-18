@@ -156,9 +156,27 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 		click on partialLinkText("Request an extension")
 
+		/**
+			* Check that HTMLUnit has coped with the date picker JS correctly.
+			* As of v2.0 it doesn't like calls to $(el).data() without arguments, so:
+			*
+			* 	if ('val' in $(el).data()) {...}
+			*
+			*	corrupts $(el) in the DOM! Instead, we locally change to:
+			*
+			* 	if ($(el).data('val') != undefined) {...}
+			*
+			* instead. Noted here in case of unexpected reversion.
+			*
+			*/
+		textField("requestedExpiryDate").isDisplayed should be (true)
+
 		// complete the form
 		textArea("reason").value = "I have a desperate need for an extension."
-		textField("requestedExpiryDate").value = requestedDate.toString("dd-MMM-yyyy HH:mm:ss")
+
+		dateTimePicker("requestedExpiryDate").value = requestedDate
+		System.out.println(pageSource)
+
 		checkbox("readGuidelines").select()
 
 		submit()

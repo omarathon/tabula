@@ -43,6 +43,9 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 
 	"Department admin" should "be able to disallow extensions with warning for pending requests" in {
 		withAssignment("xxx102", "Assignment with extension requests") { id =>
+			// ensure extensions are allowed at department level
+			updateExtensionSettings("xxx", true, P.ExtensionManager1.usercode)
+
 			// student1 is enrolled by default
 			requestExtension(P.Student1, "xxx102", "Assignment with extension requests", id, new DateTime().plusMonths(1), true)
 			// student3 is not, but should be able to ask for an extension anyway
@@ -51,6 +54,7 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 			createExtension(P.Student4.usercode, id, true)
 
 			// check page looks correct (with 2 outstanding extensions)
+			System.out.println("-" * 72 + pageSource)
 			???
 
 			val info = getAssignmentInfo("xxx102", "Assignment with extension requests")
@@ -68,6 +72,7 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 			click on linkText("Save")
 
 			// check modal has correct count (2) unapproved extensions
+			System.out.println("-" * 72 + pageSource)
 			???
 
 			// click cancel doesn't do anything (can we check this?)
@@ -78,6 +83,9 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 
 			// check page looks correct (with no outstanding extensions)
 			???
+
+			// reset department level extension settings
+			updateExtensionSettings("xxx", false, P.ExtensionManager1.usercode)
 		}
 	}
 
