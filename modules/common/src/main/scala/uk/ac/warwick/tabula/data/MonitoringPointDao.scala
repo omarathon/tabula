@@ -169,11 +169,12 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			and scyd.studentCourseDetails = scd
 			and student.mostSignificantCourse = scd
 			and mps.academicYear = :academicYear
+			and scyd.academicYear = mps.academicYear
 			and (
 			  mps.year = scyd.yearOfStudy
 			  or mps.year is null
 			) and (
-		""" +	partionedUniversityIdsWithIndex.map{
+											""" +	partionedUniversityIdsWithIndex.map{
 			case (ids, index) => "student.universityId in (:universityIds" + index.toString + ") "
 		}.mkString(" or ")	+ ")"
 
@@ -260,7 +261,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			and mc.point = mp
 			and mc.studentCourseDetail = s.mostSignificantCourse
 			and mps.academicYear = :academicYear
-			and scyd.academicYear = :academicYear
+			and scyd.academicYear = mps.academicYear
 			and mc.state = 'unauthorised'
 			and (
 		""" + partionedUniversityIdsWithIndex.map{
@@ -305,7 +306,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			and (mps.year is null or mps.year = scyd.yearOfStudy)
 			and mp.pointSet = mps
 			and mps.academicYear = :academicYear
-			and scyd.academicYear = :academicYear
+			and scyd.academicYear = mps.academicYear
 			and mp.requiredFromWeek < :requiredFromWeek
 			and mp.id not in (
 				select mc.point from MonitoringCheckpoint mc where mc.studentCourseDetail = s.mostSignificantCourse
