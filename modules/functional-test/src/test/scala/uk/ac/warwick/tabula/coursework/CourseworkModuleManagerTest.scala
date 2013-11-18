@@ -102,13 +102,13 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 	}
 
 	"Department admin" should "be able to add module managers" in {
-		withRoleInElement("xxx101", ".manager-table", Seq(P.ModuleManager1.usercode, P.ModuleManager2.usercode)) {
+		withRoleInElement("xxx101", ".modulemanager-table", Seq(P.ModuleManager1.usercode, P.ModuleManager2.usercode)) {
 			// Nothing to do, the with() tests enough
 		}
 	}
 
 	"Department admin" should "be able to remove a module manager" in {
-		implicit val currentElement = ".manager-table"
+		implicit val currentElement = ".modulemanager-table"
 		withRoleInElement("xxx101", currentElement, Seq(P.ModuleManager1.usercode, P.ModuleManager2.usercode)) {
 
 			When("I should see at least one user that I can remove")
@@ -117,7 +117,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 
 			When("I remove the first entry")
 			({
-				val removable = find(cssSelector(s".manager-table .remove-permissions [name=usercodes][value=${P.ModuleManager1.usercode}]"))
+				val removable = find(cssSelector(s".modulemanager-table .remove-permissions [name=usercodes][value=${P.ModuleManager1.usercode}]"))
 				removable should not be (None)
 				removable.get.underlying.submit()
 			})
@@ -131,7 +131,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 	}
 
 	"Module manager" should "be able to see only modules they can manage" in {
-		withRoleInElement("xxx101", ".manager-table", Seq(P.ModuleManager1.usercode, P.ModuleManager2.usercode)) {
+		withRoleInElement("xxx101", ".modulemanager-table", Seq(P.ModuleManager1.usercode, P.ModuleManager2.usercode)) {
 			as(P.ModuleManager1) {
 				When("I go to the admin page")
 				click on linkText("Go to the Test Services admin page")
@@ -154,13 +154,13 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 
 
 	"Module manager" should "be able to add module assistants" in {
-		withRoleInElement("xxx101", ".assistant-table", Seq(P.Marker1.usercode, P.Marker2.usercode)) {
+		withRoleInElement("xxx101", ".moduleassistant-table", Seq(P.Marker1.usercode, P.Marker2.usercode)) {
 			// Nothing to do, the with() tests enough
 		}
 	}
 
 	"Module manager" should "be able to remove a module assistant" in {
-		implicit val currentElement = ".assistant-table"
+		implicit val currentElement = ".moduleassistant-table"
 		withRoleInElement("xxx101", currentElement, Seq(P.Marker1.usercode, P.Marker2.usercode)) {
 
 			When("I should see at least one user that I can remove")
@@ -169,7 +169,7 @@ class CourseworkModuleManagerTest extends BrowserTest with CourseworkFixtures wi
 
 			When("I remove the first entry")
 			({
-				val removable = find(cssSelector(s".assistant-table .remove-permissions [name=usercodes][value=${P.Marker1.usercode}]"))
+				val removable = find(cssSelector(s".moduleassistant-table .remove-permissions [name=usercodes][value=${P.Marker1.usercode}]"))
 				removable should not be (None)
 				removable.get.underlying.submit()
 			})

@@ -22,7 +22,7 @@ object SmallGroup {
 	
 	// For sorting a collection by group name. Either pass to the sort function,
 	// or expose as an implicit val.
-	val NameOrdering = Ordering.by[SmallGroup, String] ( _.name )
+	val NameOrdering = Ordering.by { group: SmallGroup => (group.name, group.id) }
 
 	// Companion object is one of the places searched for an implicit Ordering, so
 	// this will be the default when ordering a list of small groups.

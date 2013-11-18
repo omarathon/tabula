@@ -52,16 +52,16 @@ object ViewSmallGroupAttendanceCommand {
 	}
 		
 	// Sort users by last name, first name
-	implicit val defaultOrderingForUser = Ordering.by[User, String] ( user => user.getLastName + ", " + user.getFirstName )
+	implicit val defaultOrderingForUser = Ordering.by { user: User => (user.getLastName, user.getFirstName, user.getUserId) }
 	
-	implicit val defaultOrderingForEventInstance = Ordering.by[EventInstance, Int] { 
+	implicit val defaultOrderingForEventInstance = Ordering.by { instance: EventInstance => instance match {
 		case (event, week) => 
 			val weekValue = week * 7 * 24
 			val dayValue = (event.day.getAsInt - 1) * 24
 			val hourValue = event.startTime.getHourOfDay
 			
-			weekValue + dayValue + hourValue
-	}
+			(weekValue + dayValue + hourValue, week, event.id)
+	}}
 	
 	def allEventInstances(group: SmallGroup, occurrences: Seq[SmallGroupEventOccurrence]) =
 		group.events.asScala.filter { !_.isUnscheduled }.flatMap { event =>
