@@ -26,8 +26,8 @@ trait RelationshipService {
 	def saveOrUpdate(relationship: StudentRelationship)
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
-	def saveStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship
-	def replaceStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship
+	def saveStudentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship]
+	def replaceStudentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship]
 	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def listStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def listAllStudentRelationshipsWithMember(agent: Member): Seq[StudentRelationship]
@@ -69,40 +69,34 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		memberDao.getRelationshipsByTarget(relationshipType, targetSprCode)
 	}
 
-	def saveStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {
-		this.findCurrentRelationships(relationshipType, targetSprCode).find(_.agent == agent) match {
-			case Some(existingRelationship) => {
-				// the same relationship is already there in the db and current - don't create new one
-				existingRelationship
-			}
-			case _ => {
-				// create the new one
-				val newRelationship = StudentRelationship(agent, relationshipType, targetSprCode)
-				newRelationship.startDate = new DateTime
-				memberDao.saveOrUpdate(newRelationship)
-				newRelationship
-			}
-		}
+	def saveStudentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship] = transactional() {
+		val currentRelationships = findCurrentRelationships(relationshipType, targetSprCode)
+		val existingRelationships = currentRelationships.filter { rel => agents.contains(rel.agent) }
+		val agentsToCreate = agents.filterNot { agent => currentRelationships.exists { _.agent == agent } }
+		
+		agentsToCreate.map { agent => 
+			// create the new one
+			val newRelationship = StudentRelationship(agent, relationshipType, targetSprCode)
+			newRelationship.startDate = new DateTime
+			memberDao.saveOrUpdate(newRelationship)
+			newRelationship
+		} ++ existingRelationships
 	}
 
 	// end any existing relationships of the same type for this student, then save the new one
-	def replaceStudentRelationship(relationshipType: StudentRelationshipType, targetSprCode: String, agent: String): StudentRelationship = transactional() {
-		var relOption = this.findCurrentRelationships(relationshipType, targetSprCode).find(_.agent == agent)
-
-		relOption match {
-			case Some(stuRel: StudentRelationship) => {
-				// there's already a relationship for this same agent - nothing to do
-				stuRel
-			}
-			case _ => {
-				// end all existing relationships of this type for this student
-				this.findCurrentRelationships(relationshipType, targetSprCode).map {
-					_.endDate = DateTime.now
-				}
-				// then save the new one
-				saveStudentRelationship(relationshipType, targetSprCode, agent)
-			}
-		}
+	def replaceStudentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship] = transactional() {
+		val currentRelationships = findCurrentRelationships(relationshipType, targetSprCode)
+		val (existingRelationships, relationshipsToEnd) = currentRelationships.partition { rel => agents.contains(rel.agent) }
+		
+		val agentsToAdd = agents.filterNot { agent => existingRelationships.exists { _.agent == agent } }
+		
+		// Don't need to do anything with existingRelationships, but need to handle the others
+		
+		// End all relationships for agents not passed in
+		relationshipsToEnd.foreach { _.endDate = DateTime.now }
+		
+		// Save new relationships for agents that don't already exist
+		saveStudentRelationships(relationshipType, targetSprCode, agentsToAdd)
 	}
 
 	def relationshipDepartmentFilterMatches(department: Department)(rel: StudentRelationship) =
