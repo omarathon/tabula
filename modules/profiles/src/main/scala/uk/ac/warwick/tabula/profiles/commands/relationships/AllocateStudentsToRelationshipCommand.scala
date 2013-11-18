@@ -42,7 +42,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	}
 
 	// Sort members by last name, first name
-	implicit val defaultOrderingForMember = Ordering.by[Member, String] ( user => user.lastName + ", " + user.firstName )
+	implicit val defaultOrderingForMember = Ordering.by { m: Member => (m.lastName, m.firstName, m.universityId) }
 
 	val apparentUser = viewer.apparentUser
 
