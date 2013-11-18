@@ -47,6 +47,14 @@ trait MonitoringPointDao {
 		maxResults: Int,
 		startResult: Int
 	): Seq[StudentMember]
+	def studentsByUnrecordedCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		currentAcademicWeek: Int,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember]
 }
 
 
@@ -271,13 +279,74 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			}
 		}
 
-		val universityIdMissedMap = query.seq.map{objArray =>
+		studentsByCount(universityIds, academicYear, isAscending, maxResults, startResult, query)
+	}
+
+	def studentsByUnrecordedCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		currentAcademicWeek: Int,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember] = {
+		if (universityIds.isEmpty)
+			return Seq()
+
+		val partionedUniversityIdsWithIndex = universityIds.grouped(Daoisms.MaxInClauseCount).zipWithIndex.toSeq
+
+		val queryString = """
+			select s.universityId, count(*) as missed from Member s, StudentCourseDetails scd, StudentCourseYearDetails scyd,
+			Route r, MonitoringPointSet mps, MonitoringPoint mp
+			where s.mostSignificantCourse = scd
+			and scyd.studentCourseDetails = scd
+			and scd.route = r.code
+			and mps.route = r
+			and (mps.year is null or mps.year = scyd.yearOfStudy)
+			and mp.pointSet = mps
+			and mps.academicYear = :academicYear
+			and scyd.academicYear = :academicYear
+			and mp.requiredFromWeek < :requiredFromWeek
+			and mp.id not in (
+				select mc.point from MonitoringCheckpoint mc where mc.studentCourseDetail = s.mostSignificantCourse
+			)
+			and (
+											""" + partionedUniversityIdsWithIndex.map{
+			case (ids, index) => "s.universityId in (:universityIds" + index.toString + ") "
+		}.mkString(" or ") + """
+			)
+			group by s.universityId
+		"""
+
+		val query = session.newQuery[Array[java.lang.Object]](queryString)
+			.setParameter("academicYear", academicYear)
+			.setParameter("requiredFromWeek", currentAcademicWeek)
+
+		partionedUniversityIdsWithIndex.foreach{
+			case (ids, index) => {
+				query.setParameterList("universityIds" + index.toString, ids)
+			}
+		}
+
+		studentsByCount(universityIds, academicYear, isAscending, maxResults, startResult, query)
+	}
+	
+	private def studentsByCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int,
+		query: ScalaQuery[Array[java.lang.Object]]
+	) = {
+
+		val universityIdCountMap = query.seq.map{objArray =>
 			objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
 		}.toMap
 		val ordering = if (isAscending) Ordering[Int] else Ordering[Int].reverse
 
 		val universityIdsToFetch = universityIds.map{u =>
-			u -> universityIdMissedMap.getOrElse(u, 0)
+			u -> universityIdCountMap.getOrElse(u, 0)
 		}.sortBy(_._2)(ordering).slice(startResult, startResult + maxResults + 1).map(_._1)
 
 		val c = session.newCriteria[StudentMember]

@@ -63,6 +63,14 @@ trait MonitoringPointService {
 		maxResults: Int,
 		startResult: Int
 	): Seq[StudentMember]
+	def studentsByUnrecordedCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		currentAcademicWeek: Int,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember]
 }
 
 
@@ -177,6 +185,17 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		startResult: Int
 	): Seq[StudentMember] = {
 		monitoringPointDao.studentsByMissedCount(universityIds, academicYear, isAscending, maxResults, startResult)
+	}
+
+	def studentsByUnrecordedCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		currentAcademicWeek: Int,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember] = {
+		monitoringPointDao.studentsByUnrecordedCount(universityIds, academicYear, currentAcademicWeek, isAscending, maxResults, startResult)
 	}
 
 }

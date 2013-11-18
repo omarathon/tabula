@@ -107,7 +107,7 @@
 													<td>
 														<#if studentData.pointsByTerm[term]??>
 															<#assign pointMap = studentData.pointsByTerm[term] />
-															<#list pointMap?keys as point>
+															<#list pointMap?keys?sort_by("validFromWeek") as point>
 																<#assign checkpointState = mapGet(pointMap, point) />
 																<#if checkpointState == "attended">
 																	<i class="icon-ok icon-fixed-width attended" title="Attended: ${point.name} (<@fmt.weekRanges point />)"></i>
@@ -138,7 +138,7 @@
 						<table class="table table-bordered table-striped table-condensed">
 							<thead>
 							<tr>
-								<th class="unrecorded-col" data-field="unrecorded"><i title="Unrecorded" class="icon-warning-sign icon-fixed-width late"></i></th>
+								<th class="unrecorded-col ${sortClass("unrecordedMonitoringPoints")} sortable" data-field="unrecordedMonitoringPoints"><i title="Unrecorded" class="icon-warning-sign icon-fixed-width late"></i></th>
 								<th class="missed-col ${sortClass("missedMonitoringPoints")} sortable" data-field="missedMonitoringPoints"><i title="Missed monitoring points" class="icon-remove icon-fixed-width unauthorised"></i></th>
 								<th class="record-col"></th>
 							</tr>

@@ -53,12 +53,25 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 	self: ProfileServiceComponent with MonitoringPointServiceComponent =>
 
 	def applyInternal() = {
+		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
+
 		if (sortOrder.asScala.exists(o => o.getPropertyName == "missedMonitoringPoints")) {
 			val filteredUniversityIds = profileService.findAllUniversityIdsByRestrictions(department, buildRestrictions())
 			val sortedStudents = monitoringPointService.studentsByMissedCount(
 				filteredUniversityIds,
 				academicYear,
 				sortOrder.asScala.filter(o => o.getPropertyName == "missedMonitoringPoints").head.isAscending,
+				studentsPerPage,
+				studentsPerPage * (page-1)
+			)
+			buildData(sortedStudents, filteredUniversityIds.size)
+		} else if (sortOrder.asScala.exists(o => o.getPropertyName == "unrecordedMonitoringPoints")) {
+			val filteredUniversityIds = profileService.findAllUniversityIdsByRestrictions(department, buildRestrictions())
+			val sortedStudents = monitoringPointService.studentsByUnrecordedCount(
+				filteredUniversityIds,
+				academicYear,
+				currentAcademicWeek,
+				sortOrder.asScala.filter(o => o.getPropertyName == "unrecordedMonitoringPoints").head.isAscending,
 				studentsPerPage,
 				studentsPerPage * (page-1)
 			)
