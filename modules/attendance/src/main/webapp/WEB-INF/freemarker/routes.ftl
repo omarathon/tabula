@@ -21,7 +21,7 @@
 		<#if queryString?has_content>
 			<#local queryString = "&" + queryString />
 		</#if>
-		<@url page="/${department.code}/students/?academicYear=${academicYear.toString}${queryString}" />
+		<@url page="/view/${department.code}/students/?academicYear=${academicYear.toString}${queryString}" />
 	</#macro>
 	<#macro viewStudent department student academicYear returnTo><@url page="/view/${department.code}/students/${student.universityId}?academicYear=${academicYear.toString}&returnTo=${returnTo?url}" /></#macro>
 	<#macro manageDepartment department><@url page="/manage/${department.code}/" /></#macro>
