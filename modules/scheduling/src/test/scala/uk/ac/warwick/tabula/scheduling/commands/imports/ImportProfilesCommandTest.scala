@@ -22,14 +22,14 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 		val dept = Fixtures.department("EN", "English")
 
 		// set up a student
-		val stu = Fixtures.student(universityId = "0000001", userId="student")
+		var stu = Fixtures.student(universityId = "0000001", userId="student")
 		session.saveOrUpdate(stu)
 
-		val scd = stu.mostSignificantCourseDetails.get
+		var scd = stu.mostSignificantCourseDetails.get
 		session.saveOrUpdate(scd)
 		session.flush
 
-		val scyd = scd.freshStudentCourseYearDetails.head
+		var scyd = scd.freshStudentCourseYearDetails.head
 
 		// set up another student
 		val stu2 = Fixtures.student(universityId = "0000002", userId="student2")
@@ -41,7 +41,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 		session.flush
 		session.clear
 
-		val scyd2 = scd2.freshStudentCourseYearDetails.head
+		var scyd2 = scd2.freshStudentCourseYearDetails.head
 
 		// create a module
 		val existingMod = Fixtures.module("ax101", "Pointless Deliberations")
@@ -143,37 +143,37 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			session.flush
 			session.clear
 
-			val stuRefetched = memberDao.getByUniversityIdStaleOrFresh("0000001").get
+			var stuMem = memberDao.getByUniversityIdStaleOrFresh("0000001").get
 
 			scd.missingFromImportSince should be (null)
 			scyd.missingFromImportSince should be (null)
-			stuRefetched.missingFromImportSince should not be (null)
+			stuMem.missingFromImportSince should not be (null)
 
 			tracker.scjCodesSeen.remove(scd.scjCode)
 			command.stampMissingRows(tracker, DateTime.now)
 			session.flush
 			session.clear
 
-			val stuFetched1 = memberDao.getByUniversityIdStaleOrFresh("0000001").get
-			val scdFetched1 = scdDao.getByScjCodeStaleOrFresh("0000001/1").get
-			val scydFetched1 = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
+			stuMem = memberDao.getByUniversityIdStaleOrFresh("0000001").get
+			scd = scdDao.getByScjCodeStaleOrFresh("0000001/1").get
+			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
 
-			stuFetched1.missingFromImportSince should not be (null)
-			scdFetched1.missingFromImportSince should not be (null)
-			scydFetched1.missingFromImportSince should be (null)
+			stuMem.missingFromImportSince should not be (null)
+			scd.missingFromImportSince should not be (null)
+			scyd.missingFromImportSince should be (null)
 
 			tracker.studentCourseYearDetailsSeen.remove(key1)
 			command.stampMissingRows(tracker, DateTime.now)
 			session.flush
 			session.clear
 
-			val stuFetched2 = memberDao.getByUniversityIdStaleOrFresh("0000001").get
-			val scdFetched2 = scdDao.getByScjCodeStaleOrFresh("0000001/1").get
-			val scydFetched2 = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
+			stuMem = memberDao.getByUniversityIdStaleOrFresh("0000001").get
+			scd = scdDao.getByScjCodeStaleOrFresh("0000001/1").get
+			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
 
-			stuFetched2.missingFromImportSince should not be (null)
-			scdFetched2.missingFromImportSince should not be (null)
-			scydFetched2.missingFromImportSince should not be (null)
+			stuMem.missingFromImportSince should not be (null)
+			scd.missingFromImportSince should not be (null)
+			scyd.missingFromImportSince should not be (null)
 
 		}
 	}
@@ -185,54 +185,54 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			tracker.universityIdsSeen.add(stu.universityId)
 			tracker.scjCodesSeen.add(scd.scjCode)
 
-			val key = new StudentCourseYearKey(scyd.studentCourseDetails.scjCode, scyd.sceSequenceNumber)
+			val key = new StudentCourseYearKey(scd.scjCode, scyd.sceSequenceNumber)
 			tracker.studentCourseYearDetailsSeen.add(key)
 
 			command.updateMissingForIndividual(stu, tracker)
 			session.flush
 			session.clear
 
-			val stuRefreshed0 = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
-			val scdRefreshed0 = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
-			val scydRefreshed0 = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
+			var stuMem = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
+			scd = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
+			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
 
-			stuRefreshed0.missingFromImportSince should be (null)
-			scdRefreshed0.missingFromImportSince should be (null)
-			scydRefreshed0.missingFromImportSince should be (null)
+			stuMem.missingFromImportSince should be (null)
+			scd.missingFromImportSince should be (null)
+			scyd.missingFromImportSince should be (null)
 
 			tracker.universityIdsSeen.remove(stu.universityId)
 
-			command.updateMissingForIndividual(stu, tracker)
+			command.updateMissingForIndividual(stuMem, tracker)
 
-			val stuRefreshed = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
-			val scdRefreshed = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
-			val scydRefreshed = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
+			stuMem = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
+			scd = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
+			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
 
-			stuRefreshed.missingFromImportSince should not be (null)
-			scdRefreshed.missingFromImportSince should be (null)
-			scydRefreshed.missingFromImportSince should be (null)
+			stuMem.missingFromImportSince should not be (null)
+			scd.missingFromImportSince should be (null)
+			scyd.missingFromImportSince should be (null)
 
 			tracker.scjCodesSeen.remove(scd.scjCode)
-			command.updateMissingForIndividual(stu, tracker)
+			command.updateMissingForIndividual(stuMem, tracker)
 
-			val stuRefreshed2 = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
-			val scdRefreshed2 = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
-			val scydRefreshed2 = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
+			stuMem = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
+			scd = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
+			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
 
-			stuRefreshed2.missingFromImportSince should not be (null)
-			scdRefreshed2.missingFromImportSince should not be (null)
-			scydRefreshed2.missingFromImportSince should be (null)
+			stuMem.missingFromImportSince should not be (null)
+			scd.missingFromImportSince should not be (null)
+			scyd.missingFromImportSince should be (null)
 
 			tracker.studentCourseYearDetailsSeen.remove(key)
-			command.updateMissingForIndividual(stu, tracker)
+			command.updateMissingForIndividual(stuMem, tracker)
 
-			val stuRefreshed3 = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
-			val scdRefreshed3 = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
-			val scydRefreshed3 = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
+			stuMem = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
+			scd = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
+			scyd = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
 
-			stuRefreshed3.missingFromImportSince should not be (null)
-			scdRefreshed3.missingFromImportSince should not be (null)
-			scydRefreshed3.missingFromImportSince should not be (null)
+			stuMem.missingFromImportSince should not be (null)
+			scd.missingFromImportSince should not be (null)
+			scyd.missingFromImportSince should not be (null)
 
 		}
 	}
@@ -242,11 +242,11 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 	def testConvertKeysToIds {
 		new Environment {
 
-			val scydFromDb = scydDao.getBySceKey(scyd.studentCourseDetails, scyd.sceSequenceNumber)
-			val idForScyd = scydFromDb.get.id
+			scyd = scydDao.getBySceKey(scyd.studentCourseDetails, scyd.sceSequenceNumber).get
+			val idForScyd = scyd.id
 
-			val scyd2FromDb = scydDao.getBySceKey(scyd2.studentCourseDetails, scyd2.sceSequenceNumber)
-			val idForScyd2 = scyd2FromDb.get.id
+			scyd2 = scydDao.getBySceKey(scyd2.studentCourseDetails, scyd2.sceSequenceNumber).get
+			val idForScyd2 = scyd2.id
 
 			val keys = new HashSet[StudentCourseYearKey]
 

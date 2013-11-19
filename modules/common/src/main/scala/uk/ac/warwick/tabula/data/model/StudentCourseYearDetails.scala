@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.Option.option2Iterable
-import org.hibernate.annotations._
 import org.joda.time.DateTime
 import javax.persistence.Basic
 import javax.persistence.Entity
@@ -14,6 +13,9 @@ import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import reflect.BeanProperty
+import org.apache.commons.lang3.builder.HashCodeBuilder
+import org.apache.commons.lang3.builder.EqualsBuilder
+import org.hibernate.annotations.Type
 
 @Entity
 class StudentCourseYearDetails extends StudentCourseYearProperties
@@ -105,5 +107,20 @@ class StudentCourseYearKey {
 		this.scjCode = scjCode
 		this.sceSequenceNumber = sceSequenceNumber
 	}
+
+	override final def equals(other: Any): Boolean = other match {
+		case that: StudentCourseYearKey =>
+			new EqualsBuilder()
+				.append(scjCode, that.scjCode)
+				.append(sceSequenceNumber, that.sceSequenceNumber)
+				.build()
+		case _ => false
+	}
+
+	override final def hashCode =
+		new HashCodeBuilder()
+				.append(scjCode)
+				.append(sceSequenceNumber)
+			.build()
 }
 
