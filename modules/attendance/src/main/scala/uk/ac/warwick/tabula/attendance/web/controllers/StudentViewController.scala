@@ -72,7 +72,7 @@ trait StudentViewCommandState {
 }
 
 @Controller
-@RequestMapping(Array("/view/{department}/student/{student}"))
+@RequestMapping(Array("/view/{department}/students/{student}"))
 class StudentViewController extends AttendanceController {
 
 	@ModelAttribute("command")
