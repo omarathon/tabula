@@ -83,18 +83,9 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 			val importRowTracker = new ImportRowTracker
 			val importStart = DateTime.now
 
-			// everything before the for is for debugging
-			//val mem = memberDao.getByUniversityId("1014367").get
-			//val membOpt = profileImporter.membershipInfoForIndividual(mem)
-			//val memb = membOpt.get
-			//val membSeq = Seq(Seq(memb))
-
 			for {
-				// to revert debugging, uncomment next 2 lines and remove following
 				department <- madService.allDepartments;
 				membershipInfos <- logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize)
-
-				//membershipInfos <- membSeq
 			} {
 				logger.info("Fetching user details for " + membershipInfos.size + " usercodes from websignon")
 				val users: Map[String, User] = userLookup.getUsersByUserIds(membershipInfos.map(x => x.member.usercode)).toMap

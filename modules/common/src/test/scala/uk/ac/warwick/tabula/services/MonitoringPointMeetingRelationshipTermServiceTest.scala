@@ -87,26 +87,12 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		meetingThisYearPoint.meetingFormats = Seq(meeting.format)
 	}
 
-/*<<<<<<< HEAD
-	def willBeCreatedMeetingNotApproved() {
-		new Year2PointSetFixture {
-			val thisMeeting = new MeetingRecord
-			thisMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Pending))
-			val thisMeetingRelationship = StudentRelationship(agent, tutorRelationshipType, studentCourseDetails.sprCode)
-			thisMeetingRelationship.profileService = mock[ProfileService]
-			thisMeetingRelationship.profileService.getStudentBySprCode(studentCourseDetails.sprCode) returns Some(student)
-			thisMeeting.relationship = thisMeetingRelationship
-			service.willCheckpointBeCreated(thisMeeting) should be (right = false)
-		}
-	}
-=======*/
 	@Test
 	def updateMeetingNotApproved() { new StudentFixture {
 		meeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Pending))
 		service.updateCheckpointsForMeeting(meeting)
 		there was no (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 	}}
-/*>>>>>>> develop*/
 
 	trait NoSuchStudent extends StudentFixture {
 		val thisMeeting = new MeetingRecord
@@ -117,25 +103,10 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		thisMeeting.relationship = thisMeetingRelationship
 	}
 
-/*<<<<<<< HEAD
-	def willBeCreatedNoSuchStudent() {
-		new StudentFixture {
-			val thisMeeting = new MeetingRecord
-			thisMeeting.approvals = JArrayList(Fixtures.meetingRecordApproval(MeetingApprovalState.Approved))
-			val thisMeetingRelationship = StudentRelationship(agent, tutorRelationshipType, studentCourseDetails.sprCode)
-			thisMeetingRelationship.profileService = mock[ProfileService]
-			thisMeetingRelationship.profileService.getStudentBySprCode(studentCourseDetails.sprCode) returns None
-			thisMeeting.relationship = thisMeetingRelationship
-			service.willCheckpointBeCreated(thisMeeting) should be (right = false)
-
-		}
-	}
-=======*/
 	@Test
 	def willBeCreatedNoSuchStudent() { new NoSuchStudent {
 		service.willCheckpointBeCreated(thisMeeting) should be (right = false)
 	}}
-/*>>>>>>> develop*/
 
 	@Test
 	def updateNoSuchStudent() { new NoSuchStudent {
