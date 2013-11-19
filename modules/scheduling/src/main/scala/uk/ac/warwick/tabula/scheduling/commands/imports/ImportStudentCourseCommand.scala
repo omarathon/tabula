@@ -177,9 +177,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 								case Some(mem: Member) => {
 									logger.info("Got a personal tutor from SITS! SprCode: " + sprCode + ", tutorUniId: " + tutorUniId)
 
-									val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, sprCode)
-
-									relationshipService.replaceStudentRelationship(relationshipType, sprCode, tutorUniId)
+									relationshipService.replaceStudentRelationships(relationshipType, sprCode, Seq(tutorUniId))
 								}
 								case _ => {
 									logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + sprTutor1 + " - not importing this personal tutor from SITS")

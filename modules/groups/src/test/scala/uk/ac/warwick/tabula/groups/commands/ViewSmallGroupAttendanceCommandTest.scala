@@ -182,5 +182,57 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 			))
 		))
 	}}
+	
+	@Test
+	def tab1534() {
+		// An intricacy of the way that SortedMap works means that if you have two 
+		// keys with an identical sort order, they'll get merged into a single key.
+		// This means that we risk students with the same name getting merged into one.
+		// Bad!
+		val userLookup = new MockUserLookup
+		
+		val set = new SmallGroupSet
+		set.academicYear = AcademicYear.guessByDate(DateTime.now)
+		
+		val group = new SmallGroup(set)
+		group._studentsGroup.userLookup = userLookup
+		
+		val event = new SmallGroupEvent(group)
+		event.day = DayOfWeek.Monday
+		event.startTime = new LocalTime(11, 0)
+		event.weekRanges = Seq(WeekRange(2, 4))
+		
+		group.events.add(event)
+		
+		userLookup.registerUsers("user1", "user2", "user3")
+		
+		val user1 = userLookup.getUserByUserId("user1")
+		val user2 = userLookup.getUserByUserId("user2")
+		val user3 = userLookup.getUserByUserId("user3")
+		
+		// Give user2 and user3 the same name
+		user2.setFirstName("Billy")
+		user2.setLastName("Sameson")
+		user2.setFullName("Billy Sameson")
+		
+		user3.setFirstName("Billy")
+		user3.setLastName("Sameson")
+		user3.setFullName("Billy Sameson")
+		
+		val occurrence = new SmallGroupEventOccurrence
+		occurrence.attendees.userLookup = userLookup
+		occurrence.event = event
+		occurrence.week = 1
+		occurrence.attendees.add(user1)
+		occurrence.attendees.add(user2)
+		occurrence.attendees.add(user3)
+		
+		val command = new ViewSmallGroupAttendanceCommand(group) with CommandTestSupport
+		command.smallGroupService.findAttendanceByGroup(group) returns (Seq(occurrence))
+		command.termService.getAcademicWeekForAcademicYear(any[DateTime], any[AcademicYear]) returns (4)
+		
+		val info = command.applyInternal()
+		info.attendance.keySet.size should be (3) // If it's 2, we're bad
+	}
 
 }

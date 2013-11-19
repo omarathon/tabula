@@ -192,35 +192,52 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			session.flush
 			session.clear
 
-			stu.missingFromImportSince should be (null)
-			scd.missingFromImportSince should be (null)
-			scyd.missingFromImportSince should be (null)
+			val stuRefreshed0 = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
+			val scdRefreshed0 = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
+			val scydRefreshed0 = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
+
+			stuRefreshed0.missingFromImportSince should be (null)
+			scdRefreshed0.missingFromImportSince should be (null)
+			scydRefreshed0.missingFromImportSince should be (null)
 
 			tracker.universityIdsSeen.remove(stu.universityId)
 
 			command.updateMissingForIndividual(stu, tracker)
 
-			stu.missingFromImportSince should not be (null)
-			scd.missingFromImportSince should be (null)
-			scyd.missingFromImportSince should be (null)
+			val stuRefreshed = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
+			val scdRefreshed = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
+			val scydRefreshed = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
+
+			stuRefreshed.missingFromImportSince should not be (null)
+			scdRefreshed.missingFromImportSince should be (null)
+			scydRefreshed.missingFromImportSince should be (null)
 
 			tracker.scjCodesSeen.remove(scd.scjCode)
 			command.updateMissingForIndividual(stu, tracker)
 
-			stu.missingFromImportSince should not be (null)
-			scd.missingFromImportSince should not be (null)
-			scyd.missingFromImportSince should be (null)
+			val stuRefreshed2 = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
+			val scdRefreshed2 = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
+			val scydRefreshed2 = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
+
+			stuRefreshed2.missingFromImportSince should not be (null)
+			scdRefreshed2.missingFromImportSince should not be (null)
+			scydRefreshed2.missingFromImportSince should be (null)
 
 			tracker.studentCourseYearDetailsSeen.remove(key)
 			command.updateMissingForIndividual(stu, tracker)
 
-			stu.missingFromImportSince should not be (null)
-			scd.missingFromImportSince should not be (null)
-			scyd.missingFromImportSince should not be (null)
+			val stuRefreshed3 = memberDao.getByUniversityIdStaleOrFresh(stu.universityId).get
+			val scdRefreshed3 = scdDao.getByScjCodeStaleOrFresh(scd.scjCode).get
+			val scydRefreshed3 = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
+
+			stuRefreshed3.missingFromImportSince should not be (null)
+			scdRefreshed3.missingFromImportSince should not be (null)
+			scydRefreshed3.missingFromImportSince should not be (null)
 
 		}
 	}
 
+	@Transactional
 	@Test
 	def testConvertKeysToIds {
 		new Environment {

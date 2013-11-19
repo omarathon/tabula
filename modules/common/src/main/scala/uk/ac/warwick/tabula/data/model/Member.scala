@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.data.model
 import scala.collection.JavaConverters._
 import javax.persistence._
 import javax.persistence.CascadeType._
-import org.hibernate.annotations.{AccessType, ForeignKey, BatchSize, Filter, Filters, FilterDefs, FilterDef, Type}
 import org.joda.time.DateTime
 import org.joda.time.LocalDate
 import uk.ac.warwick.spring.Wire
@@ -11,15 +10,29 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{TermService, ProfileService, RelationshipService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
 import uk.ac.warwick.tabula.system.permissions.Restricted
-import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.AcademicYear
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.EqualsBuilder
+import scala.Some
+import javax.persistence.CascadeType
+import javax.persistence.Entity
+// importing the various hibernate annotations individually since otherwise it's picking up
+// the unwanted org.hibernate.annotations.Any which interferes with the Any that is the root
+// of the Scala class hierarchy, used by the equals override.
+import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.FilterDefs
+import org.hibernate.annotations.Filters
+import org.hibernate.annotations.BatchSize
+import org.hibernate.annotations.ForeignKey
+import org.hibernate.annotations.Formula
+import org.hibernate.annotations.Type
+import org.hibernate.annotations.FilterDef
+import org.hibernate.annotations.Filter
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -187,7 +200,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 
 	def isFresh = (missingFromImportSince == null)
 
-	override final def equals(other: Any) = other match {
+	override final def equals(other: Any): Boolean = other match {
 		case that: Member =>
 			new EqualsBuilder()
 				.append(universityId, that.universityId)
@@ -226,6 +239,12 @@ class StudentMember extends Member with StudentProperties {
 		this.universityId = id
 	}
 
+	@Formula("""
+		(select count(*) from MonitoringCheckpoint c
+		where c.student_course_detail_id = mostSignificantCourse
+		and c.state = 'unauthorised')
+	""")
+	var missedMonitoringPoints = 0
 
 	/**
 	 * Get all departments that this student is affiliated with at a departmental level.

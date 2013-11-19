@@ -36,7 +36,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	PermissionCheck(Permissions.SmallGroups.Allocate, set)
 
 	// Sort users by last name, first name
-	implicit val defaultOrderingForUser = Ordering.by[User, String] ( user => user.getLastName + ", " + user.getFirstName )
+	implicit val defaultOrderingForUser = Ordering.by { user: User => (user.getLastName, user.getFirstName, user.getUserId) }
 
 	var userLookup = Wire[UserLookupService]
 	val apparentUser = viewer.apparentUser

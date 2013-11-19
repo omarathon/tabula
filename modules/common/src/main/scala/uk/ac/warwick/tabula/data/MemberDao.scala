@@ -54,7 +54,7 @@ trait MemberDao {
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
 	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
-
+	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[String]
 	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember]
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]): Int
 	def getAllModesOfAttendance(department: Department): Seq[ModeOfAttendance]
@@ -385,11 +385,15 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setEntity("relationshipType", relationshipType)
 			.uniqueResult.getOrElse(0)
 
-	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember] = {
+	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[String] = {
 		val idCriteria = session.newCriteria[StudentMember]
 		restrictions.foreach { _.apply(idCriteria) }
 
-		val universityIds = idCriteria.project[String](distinct(property("universityId"))).seq
+		idCriteria.project[String](distinct(property("universityId"))).seq
+	}
+
+	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember] = {
+		val universityIds = findUniversityIdsByRestrictions(restrictions)
 
 		if (universityIds.isEmpty)
 			return Seq()

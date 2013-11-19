@@ -25,7 +25,49 @@ exports.bindButtonGroupHandler = function() {
             return $(this).val() == $this.data('state');
         }).prop('selected', true);
     });
-}
+};
+
+exports.scrollablePointsTableSetup = function() {
+    $('.scrollable-points-table .middle .sb-wide-table-wrapper').parent().addClass('scrollable');
+    $('.scrollable-points-table .middle .scrollable').addClass('rightShadow').find('.sb-wide-table-wrapper').on('scroll', function(){
+       var $this = $(this);
+       if($this.scrollLeft() > 0) {
+           $this.parent(':not(.leftShadow)').addClass('leftShadow');
+       } else {
+           $this.parent().removeClass('leftShadow');
+       }
+       if($this.scrollLeft() == 0 || $this.get(0).scrollWidth - $this.scrollLeft() != $this.outerWidth()) {
+           $this.parent(':not(.rightShadow)').addClass('rightShadow');
+       } else {
+           $this.parent().removeClass('rightShadow');
+       }
+    });
+};
+
+exports.tableSortMatching = function(tableArray) {
+    var matchSorting = function($sourceTable, targetTables){
+        var $sourceRows = $sourceTable.find('tbody tr');
+        $.each(targetTables, function(i, $table){
+            var $tbody = $table.find('tbody');
+            var oldRows = $tbody.find('tr').detach();
+            $.each($sourceRows, function(j, row){
+                var $sourceRow = $(row);
+                oldRows.filter(function(){ return $(this).data('sortId') == $sourceRow.data('sortId'); }).appendTo($tbody);
+            });
+        });
+    };
+
+    if (tableArray.length < 2)
+        return;
+
+    $.each(tableArray, function(i){
+        var otherTables = tableArray.slice();
+        otherTables.splice(i, 1);
+        this.on('sortEnd', function(){
+            matchSorting($(this), otherTables);
+        }).find('tbody tr').each(function(i){ $(this).data('sortId', i); });
+    });
+};
 
 $(function(){
 

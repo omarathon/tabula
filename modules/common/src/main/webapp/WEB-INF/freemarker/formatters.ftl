@@ -267,8 +267,7 @@
 		<#local title>title='${tooltip}.'</#local>
 		<#local classes='${classes} use-tooltip'?trim >
 	</#if>
-
-    <#if href??><#local href>href=${href}</#local></#if>
+    <#if href??><#local href><#noescape>href=${href}</#noescape></#local></#if>
 
 	<#if !can.do(permission,scope)>
 		<#local classes='${classes} disabled use-tooltip'?trim >

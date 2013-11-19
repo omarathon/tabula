@@ -109,7 +109,7 @@ ${titleHeader}
 		</div>
 
 
-		<#macro studentRow student point hasMultiple>
+		<#macro studentRow student point>
 			<div class="row-fluid item-info">
 				<div class="span12">
 					<div class="pull-right">
@@ -133,7 +133,6 @@ ${titleHeader}
 						<@fmt.member_photo student "tinythumbnail" true />
 					</#if>
 					${student.fullName}
-					<#if hasMultiple><span class="muted">${point.pointSet.route.code?upper_case}</span></#if>
 					<@spring.bind path="command.studentsState[${student.universityId}][${point.id}]">
 						<#if status.error>
 							<div class="text-error"><@f.errors path="command.studentsState[${student.universityId}][${point.id}]" cssClass="error"/></div>
@@ -155,12 +154,7 @@ ${titleHeader}
 				<input type="hidden" name="monitoringPoint" value="${command.templateMonitoringPoint.id}" />
 				<input type="hidden" name="returnTo" value="${returnTo}"/>
 				<#list command.studentsState?keys?sort_by("lastName") as student>
-					<#assign points = mapGet(command.studentsState, student) />
-					<#if (points?keys?size > 1)>
-						<#list points?keys as point><@studentRow student point true/></#list>
-					<#else>
-						<@studentRow student points?keys?first false/>
-					</#if>
+					<@studentRow student mapGet(command.studentsState, student)?keys?first />
 				</#list>
 
 

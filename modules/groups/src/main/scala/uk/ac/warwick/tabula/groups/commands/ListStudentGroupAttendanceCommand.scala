@@ -53,7 +53,7 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 		
 	import ViewSmallGroupAttendanceCommand._
 	
-	implicit val defaultOrderingForGroup = Ordering.by { group: SmallGroup => (group.groupSet.module.code, group.groupSet.name, group.name) }
+	implicit val defaultOrderingForGroup = Ordering.by { group: SmallGroup => (group.groupSet.module.code, group.groupSet.name, group.name, group.id) }
 	implicit val defaultOrderingForDateTime = Ordering.by[DateTime, Long] ( _.getMillis )
 	implicit val defaultOrderingForTerm = Ordering.by[Term, DateTime] ( _.getStartDate )
 	

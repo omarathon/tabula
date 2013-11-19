@@ -172,7 +172,6 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	// sort order is unpredictable on retrieval from Hibernate; use indexed defs below for access
 	@OneToMany(mappedBy = "assignment", fetch = LAZY, cascade = Array(ALL))
-	@IndexColumn(name = "position")
 	@BatchSize(size=200)
 	var fields: JList[FormField] = JArrayList()
 

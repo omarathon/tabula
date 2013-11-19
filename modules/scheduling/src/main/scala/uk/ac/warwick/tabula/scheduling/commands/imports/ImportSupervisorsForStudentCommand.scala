@@ -42,14 +42,16 @@ class ImportSupervisorsForStudentCommand()
 				source == StudentRelationshipSource.SITS
 			}
 			.foreach { relationshipType =>
-				supervisorImporter.getSupervisorPrsCodes(studentCourseDetails.scjCode).foreach {
-					supervisorPrsCode => {
-						profileService.getMemberByPrsCode(supervisorPrsCode) match {
-							case Some(sup: StaffMember) => relationshipService.replaceStudentRelationship(relationshipType, studentCourseDetails.sprCode, sup.id)
-							case _ => logger.warn("Can't save supervisor " + supervisorPrsCode + " for " + studentCourseDetails.sprCode + " - not a member in Tabula db")
-						}
+				val supervisorPrsCodes = supervisorImporter.getSupervisorPrsCodes(studentCourseDetails.scjCode)
+				val supervisors = supervisorPrsCodes.flatMap { prsCode =>
+					val m = profileService.getMemberByPrsCode(prsCode)
+					if (m.isEmpty) {
+						logger.warn("Can't save supervisor " + prsCode + " for " + studentCourseDetails.sprCode + " - not a member in Tabula db")
 					}
+					m
 				}
+				
+				relationshipService.replaceStudentRelationships(relationshipType, studentCourseDetails.sprCode, supervisors.map { _.universityId })
 			}
 	}
 }

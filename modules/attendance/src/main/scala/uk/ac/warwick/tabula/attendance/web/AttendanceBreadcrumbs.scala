@@ -12,6 +12,30 @@ object AttendanceBreadcrumbs {
 	case class Standard(title: String, url: Option[String], override val tooltip: String) extends Abstract
 
 	/**
+	 * Special case breadcrumb for the department view page.
+	 */
+	case class ViewDepartment(department: model.Department) extends Abstract {
+		val title = department.name
+		val url = Some(Routes.department.view(department))
+	}
+
+	/**
+	 * Special case breadcrumb for the department view points page.
+	 */
+	case class ViewDepartmentPoints(department: model.Department) extends Abstract {
+		val title = "Monitoring points"
+		val url = Some(Routes.department.viewPoints(department))
+	}
+
+	/**
+	 * Special case breadcrumb for the department view points page.
+	 */
+	case class ViewDepartmentStudents(department: model.Department) extends Abstract {
+		val title = "Students"
+		val url = Some(Routes.department.viewStudents(department))
+	}
+
+	/**
 	 * Special case breadcrumb for the department admin page.
 	 */
 	case class ManagingDepartment(department: model.Department) extends Abstract {

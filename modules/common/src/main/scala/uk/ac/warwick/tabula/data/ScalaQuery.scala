@@ -19,6 +19,8 @@ class ScalaQuery[A](c: org.hibernate.Query) {
 	def setEntity(name: String, entity: Any) = chainable { c.setEntity(name, entity) }
 	def setParameter(name: String, value: Any) = chainable { c.setParameter(name, value) }
 	def setParameterList(name: String, list: Seq[_]) = chainable { c.setParameterList(name, list.toList.asJava) }
+	def setMaxResults(maxResults: Int) = chainable { c.setMaxResults(maxResults) }
+	def setFirstResult(firstResult: Int) = chainable { c.setFirstResult(firstResult) }
 	// TODO add other methods on demand
 
 	// Helper to neaten up the above chainable methods - returns this instead of plain Query

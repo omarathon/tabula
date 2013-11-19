@@ -54,7 +54,7 @@ object Turnitin {
     }
     
     def assignmentNameFor(assignment: Assignment) = {
-        AssignmentName(assignment.name)
+        AssignmentName(assignment.name + " (" + assignment.academicYear.toString + ")")
     } 
 }
 

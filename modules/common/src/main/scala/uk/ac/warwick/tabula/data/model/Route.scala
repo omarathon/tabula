@@ -50,7 +50,7 @@ object Route {
 	// For sorting a collection by route code. Either pass to the sort function,
 	// or expose as an implicit val.
 	val CodeOrdering: Ordering[Route] = Ordering.by[Route, String] ( _.code )
-	val NameOrdering: Ordering[Route] = Ordering.by[Route, String] ( _.name )
+	val NameOrdering: Ordering[Route] = Ordering.by { route: Route => (route.name, route.code) }
 	val DegreeTypeOrdering: Ordering[Route] = Ordering.by { route: Route => (Option(route.degreeType), route.code) }
 
 	// Companion object is one of the places searched for an implicit Ordering, so

@@ -38,7 +38,8 @@
 
 	<div class="persist-area">
 		<div class="persist-header">
-			<h1>Record attendance for ${command.student.fullName}, ${command.pointSet.route.name}</h1>
+			<h1>Record attendance</h1>
+			<h6><span class="muted">for</span> ${command.student.fullName}, ${command.pointSet.route.name}</h6>
 		</div>
 
 		<#if command.checkpointMap?keys?size == 0>

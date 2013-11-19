@@ -9,15 +9,26 @@
 		-->
 	<#macro home><@url page="/" /></#macro>
 	<#macro viewDepartment department><@url page="/${department.code}/" /></#macro>
-	<#macro viewDepartmentWithAcademicYear department academicYear queryString="">
+	<#macro viewDepartmentPoints department><@url page="/view/${department.code}/points/" /></#macro>
+	<#macro viewDepartmentPointsWithAcademicYear department academicYear queryString="">
 		<#if queryString?has_content>
 			<#local queryString = "&" + queryString />
 		</#if>
-		<@url page="/${department.code}/?academicYear=${academicYear.toString}${queryString}" /></#macro>
+		<@url page="/view/${department.code}/points/?academicYear=${academicYear.toString}${queryString}" />
+	</#macro>
+	<#macro viewDepartmentStudents department><@url page="/view/${department.code}/students/" /></#macro>
+	<#macro viewDepartmentStudentsWithAcademicYear department academicYear queryString="">
+		<#if queryString?has_content>
+			<#local queryString = "&" + queryString />
+		</#if>
+		<@url page="/${department.code}/students/?academicYear=${academicYear.toString}${queryString}" />
+	</#macro>
+	<#macro viewStudent department student academicYear returnTo><@url page="/view/${department.code}/students/${student.universityId}?academicYear=${academicYear.toString}&returnTo=${returnTo?url}" /></#macro>
 	<#macro manageDepartment department><@url page="/manage/${department.code}/" /></#macro>
 	
-	<#macro record department pointId queryString returnTo><@url page="/${department.code}/${pointId}/record?returnTo=${returnTo?url}&${queryString}"/></#macro>
-	<#macro recordStudent point student returnTo><@url page="/${point.pointSet.route.department.code}/${point.id}/record/${student.universityId}?returnTo=${returnTo?url}"/></#macro>
+	<#macro record department pointId queryString returnTo><@url page="/view/${department.code}/${pointId}/record?returnTo=${returnTo?url}&${queryString}"/></#macro>
+	<#macro recordStudent department student academicYear returnTo><@url page="/view/${department.code}/students/${student.universityId}/record?academicYear=${academicYear.toString}&returnTo=${returnTo?url}" /></#macro>
+	<#macro recordStudentPoint point student returnTo><@url page="/${point.pointSet.route.department.code}/${point.id}/record/${student.universityId}?returnTo=${returnTo?url}"/></#macro>
 	<#macro studentMeetings point member><@url page="/${point.pointSet.route.department.code}/${point.id}/meetings/${member.universityId}"/></#macro>
 	<#macro agentView relationshipType><@url page="/agent/${relationshipType.urlPart}"/></#macro>
 	<#macro agentStudentView student relationshipType academicYear><@url page="/agent/${relationshipType.urlPart}/${student.universityId}/?academicYear=${academicYear.toString}"/></#macro>
