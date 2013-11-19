@@ -13,7 +13,11 @@
 @TypeDefs({
 	@TypeDef(name = "dateTime",
 			typeClass = org.jadira.usertype.dateandtime.joda.PersistentDateTime.class,
-			defaultForType = org.joda.time.DateTime.class),
+			defaultForType = org.joda.time.DateTime.class,
+			parameters = {
+				@Parameter(name = "databaseZone", value = "Europe/London"),
+				@Parameter(name = "javaZone", value = "Europe/London")
+			}),
 	@TypeDef(name = "localDate",
 			typeClass = org.jadira.usertype.dateandtime.joda.PersistentLocalDate.class,
 			defaultForType = org.joda.time.LocalDate.class),
@@ -25,3 +29,4 @@ package uk.ac.warwick.tabula.data.model.typedefs;
 
 import org.hibernate.annotations.TypeDef;
 import org.hibernate.annotations.TypeDefs;
+import org.hibernate.annotations.Parameter;

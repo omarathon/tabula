@@ -348,7 +348,7 @@
 						<td class="student-col toggle-cell"><h6 class="toggle-icon" data-profile="${student.user.warwickId}">${student.user.firstName}</h6></td>
 						<td class="student-col toggle-cell"><h6 data-profile="${student.user.warwickId}">${student.user.lastName}</h6></td>
 					<#else>
-						<td class="student-col toggle-icon toggle-cell"><h6 class="toggle-icon" data-profile="${student.user.warwickId}">${student.user.warwickId}</h6></td>
+						<td class="student-col toggle-cell"><h6 class="toggle-icon" data-profile="${student.user.warwickId}">${student.user.warwickId}</h6></td>
 					</#if>
 					<td class="progress-col content-cell toggle-cell">
 						<#if student.stages?keys?seq_contains('Submission') && student.nextStage?? && student.nextStage.toString != 'Submission' && student.stages['Submission'].messageCode != student.progress.messageCode>
