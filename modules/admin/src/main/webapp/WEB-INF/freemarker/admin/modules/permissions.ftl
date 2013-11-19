@@ -2,7 +2,7 @@
 
 <#import "/WEB-INF/freemarker/permissions_macros.ftl" as pm />
 <#import "/WEB-INF/freemarker/formatters.ftl" as fmt />
-<#assign moduleperms_url><@routes.moduleperms module /></#assign>
+<#assign perms_url><@routes.moduleperms module /></#assign>
 <#assign module_name><@fmt.module_name module /></#assign>
 
 <div id="module-permissions-page">
@@ -11,31 +11,8 @@
 
 	<@pm.alerts "addCommand" module_name users role />
 
-	<div class="row-fluid">
-		<div class="span6">
-			<#assign popover>
-				<p>A module manager can create and delete assignments, download submissions and publish feedback.</p>
-			</#assign>
-
-			<h3 class="permissionTitle">Module Managers</h3> <a class="use-popover" id="popover-modulemanager" data-html="true"
-			   data-original-title="Module Managers"
-			   data-content="${popover}"><i class="icon-question-sign"></i></a>
-
-			<@pm.roleTable moduleperms_url "manager-table" module "ModuleManagerRoleDefinition" "module managers" />
-		</div>
-
-		<div class="span6">
-			<#assign popover>
-				<p>A module assistant can create assignments and download submissions, but cannot delete assignments or submissions, or publish feedback.</p>
-			</#assign>
-
-			<h3 class="permissionTitle">Module Assistants</h3> <a class="use-popover" id="popover-moduleassistant" data-html="true"
-			   data-original-title="Module Assistants"
-			   data-content="${popover}"><i class="icon-question-sign"></i></a>
-
-			<@pm.roleTable moduleperms_url "assistant-table" module "ModuleAssistantRoleDefinition" "module assistants" />
-		</div>
-	</div>
+	<#assign scope=module />
+	<#include "_roles.ftl" />
 </div>
 
 <@pm.script />

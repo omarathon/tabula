@@ -16,6 +16,8 @@ object Routes {
 
 	object department {
 		def view(department: Department) = "/%s" format encoded(department.code)
+		def viewPoints(department: Department) = "/view/%s/points" format encoded(department.code)
+		def viewStudents(department: Department) = "/view/%s/students" format encoded(department.code)
 		def manage(department: Department) = "/manage/%s" format encoded(department.code)
 	}
 
@@ -26,7 +28,13 @@ object Routes {
 	object profile {
 		def apply() = "/profile"
 		
-		def apply(scd: StudentCourseDetails, academicYear: AcademicYear) =
-			"/profile/%s/%s" format(encoded(scd.urlSafeId), encoded(academicYear.startYear.toString))
+		def apply(student: StudentMember, academicYear: AcademicYear) =
+			"/profile/%s/%s" format(encoded(student.universityId), encoded(academicYear.startYear.toString))
+	}
+
+	object agent {
+		def view(relationshipType: StudentRelationshipType) = "/agent/%s" format encoded(relationshipType.urlPart)
+		def student(student: StudentMember, relationshipType: StudentRelationshipType) =
+			"/agent/%s/%s" format(encoded(relationshipType.urlPart), encoded(student.universityId))
 	}
 }

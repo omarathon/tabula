@@ -98,7 +98,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 			MembershipInformation(member, photoFor(member.universityId))
 		}
 
-	def userIdAndCategory(member: Member): Option[MembershipInformation] = {
+	def userIdAndCategory(member: Member): Option[MembershipInformation] = {	
 		membershipByUsercodeQuery.executeByNamedParam(Map("usercodes" -> member.userId)).asScala.toList match {
 			case Nil => None
 			case mem: List[MembershipMember] => Some (
@@ -164,11 +164,12 @@ class SandboxProfileImporter extends ProfileImporter {
 			"expected_end_date" -> member.endDate.toDateTimeAtStartOfDay(),
 			"most_signif_indicator" -> "Y",
 			"funding_source" -> null,
-			"enrolment_status_code" -> "F",
+			"enrolment_status_code" -> "C",
 			"year_of_study" -> ((member.universityId.toLong % 3) + 1).toInt,
 			"mode_of_attendance_code" -> (if (member.universityId.toLong % 5 == 0) "P" else "F"),
 			"sce_academic_year" -> AcademicYear.guessByDate(DateTime.now).toString,
 			"sce_sequence_number" -> 1,
+			"enrolment_department_code" -> member.departmentCode.toUpperCase,
 			"mod_reg_status" -> "CON"
 		))
 		new ImportStudentRowCommand(
@@ -348,6 +349,7 @@ object ProfileImporter {
 			sce.sce_moac as mode_of_attendance_code,
 			sce.sce_ayrc as sce_academic_year,
 			sce.sce_seq2 as sce_sequence_number,
+			sce.sce_dptc as enrolment_department_code,
 
 			ssn.ssn_mrgs as mod_reg_status
 

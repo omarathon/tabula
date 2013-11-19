@@ -59,6 +59,14 @@ trait StudentCourseYearProperties {
 	@JoinColumn(name="enrolmentStatusCode", referencedColumnName="code")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var enrolmentStatus: SitsStatus = _
+	
+	// this is the department from the SCE table in SITS (Student Course Enrolment). It is likely to be the
+	// same as the department on the Route table, and on the StudentCourseDetails, but in some cases, e.g. where routes 
+	// change ownership in different years, this might contain a different department. This indicates the
+	// department responsible for administration for the student for this year.
+	@ManyToOne
+	@JoinColumn(name = "enrolment_department_id")
+	var enrolmentDepartment: Department = _
 
 	@ManyToOne
 	@JoinColumn(name="modeOfAttendanceCode", referencedColumnName="code")

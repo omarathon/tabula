@@ -60,8 +60,7 @@ trait MeetingRecordModal  {
 			"agentName" -> (if (command.considerAlternatives) "" else command.relationship.agentName),
 			"studentCourseDetails" -> studentCourseDetails,
 			"isStudent" -> (studentCourseDetails.student == currentMember),
-			"relationshipType" -> relationshipType,
-			"formatsThatWillCreateCheckpoint" -> monitoringPointMeetingRelationshipTermService.formatsThatWillCreateCheckpoint(command.relationship)
+			"relationshipType" -> relationshipType
 		).noLayout()
 	}
 
@@ -80,8 +79,7 @@ trait MeetingRecordModal  {
 			"isStudent" -> (studentCourseDetails.student == currentMember),
 			"relationshipType"->relationshipType,
 			"creator" -> command.creator,
-			"formats" -> formats,
-			"formatsThatWillCreateCheckpoint" -> monitoringPointMeetingRelationshipTermService.formatsThatWillCreateCheckpoint(command.relationship)
+			"formats" -> formats
 		).noNavigation()
 	}
 
@@ -126,8 +124,7 @@ trait MeetingRecordModal  {
 		  "relationshipType"->relationshipType,
 			"agentName" -> command.relationship.agentName,
 			"creator" -> command.creator,
-			"formats" -> formats,
-			"formatsThatWillCreateCheckpoint" -> monitoringPointMeetingRelationshipTermService.formatsThatWillCreateCheckpoint(command.relationship)
+			"formats" -> formats
 		)
 	}
 

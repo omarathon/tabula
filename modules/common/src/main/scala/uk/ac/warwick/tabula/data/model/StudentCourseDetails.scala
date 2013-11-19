@@ -92,7 +92,7 @@ class StudentCourseDetails
 	// permanently withdrawn in the context of applicants, but not in the context of
 	// the student's route status (sprStatus)
 	def permanentlyWithdrawn = {
-		sprStatus.code.startsWith("P")
+		sprStatus != null && sprStatus.code.startsWith("P")
 	}
 
 	@OneToOne

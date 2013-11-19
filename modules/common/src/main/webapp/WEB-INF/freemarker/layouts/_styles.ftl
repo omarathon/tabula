@@ -12,7 +12,7 @@
 	<@stylesheet "/static/css/render.css" />
 </#if>
 
-<link href='//fonts.googleapis.com/css?family=Bitter:400,700,400italic' rel='stylesheet' type='text/css'>
+<link href='//fonts.googleapis.com/css?family=Bitter:400,700,400italic&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
 
 <#--
 	Uncomment these lines to use our Typekit font set for Tabula, which has museo-slab:700

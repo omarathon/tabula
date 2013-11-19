@@ -1,9 +1,9 @@
 <@form.labelled_row "name" "Name">
 	<@f.input path="name" cssClass="input-block-level"/>
 </@form.labelled_row>
-
+<div class="dateTimePair">
 <@form.labelled_row "validFromWeek" "Start">
-	<@f.select path="validFromWeek">
+	<@f.select path="validFromWeek" cssClass="startDateTime selectOffset">
 		<#list 1..52 as week>
 			<@f.option value="${week}"><@fmt.singleWeekFormat week command.academicYear command.dept /></@f.option>
 		</#list>
@@ -12,14 +12,14 @@
 </@form.labelled_row>
 
 <@form.labelled_row "requiredFromWeek" "End">
-	<@f.select path="requiredFromWeek">
+	<@f.select path="requiredFromWeek" cssClass="endDateTime selectOffset">
 		<#list 1..52 as week>
 			<@f.option value="${week}"><@fmt.singleWeekFormat week command.academicYear command.dept /></@f.option>
 		</#list>
 	</@f.select>
 	<@fmt.help_popover id="requiredFromWeek" content="A warning will appear for unrecorded attendance after its end date" />
 </@form.labelled_row>
-
+</div>
 <@form.labelled_row "pointType" "Type">
 	<@form.label clazz="radio" checkbox=true>
 		<input id="pointType1" name="pointType" type="radio" value="" <#if !command.pointType??>checked</#if>>

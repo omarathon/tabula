@@ -61,9 +61,9 @@
 	--></#noescape><#--
 --></#macro>
 
-<#macro singleWeekFormat week academicYear dept><#--
+<#macro singleWeekFormat week academicYear dept short=false><#--
 	--><#noescape><#--
-		-->${singleWeekFormatter(week, academicYear, dept)}<#--
+		-->${singleWeekFormatter(week, academicYear, dept, short)}<#--
 	--></#noescape><#--
 --></#macro>
 
@@ -259,7 +259,7 @@
 	</div>
 </#macro>
 
-<#macro permission_button permission scope action_descr href="" tooltip="" classes="" type="a" data_attr="data-container=body" >
+<#macro permission_button permission scope action_descr id="" href="" tooltip="" classes="" type="a" data_attr="data-container=body" >
 	<#local class></#local>
 	<#local title></#local>
 
@@ -267,8 +267,7 @@
 		<#local title>title='${tooltip}.'</#local>
 		<#local classes='${classes} use-tooltip'?trim >
 	</#if>
-
-    <#if href??><#local href>href=${href}</#local></#if>
+    <#if href??><#local href><#noescape>href=${href}</#noescape></#local></#if>
 
 	<#if !can.do(permission,scope)>
 		<#local classes='${classes} disabled use-tooltip'?trim >
@@ -276,10 +275,10 @@
 		<#local data_attr='${data_attr}'?replace("data-toggle=modal","") >
 	</#if>
 
-
-
+	<#local id_attr></#local>
+	<#if id?has_content><#local id_attr>id='${id}'</#local></#if>
 	<#if classes??><#local class>class='${classes}'</#local></#if>
-	<${type} ${href} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
+	<${type} ${href} ${id_attr} ${class} ${title} ${data_attr}><#noescape><#nested></#noescape></${type}>
 </#macro>
 
 <#macro bulk_email emails title subject limit=50>

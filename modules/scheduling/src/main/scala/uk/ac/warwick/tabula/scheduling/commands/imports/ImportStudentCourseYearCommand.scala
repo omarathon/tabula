@@ -36,6 +36,7 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 	var studentCourseYearDetailsDao = Wire.auto[StudentCourseYearDetailsDao]
 
 	// A few intermediate properties that will be transformed later
+	var enrolmentDepartmentCode: String = _
 	var enrolmentStatusCode: String = _
 	var modeOfAttendanceCode: String = _
 	var academicYearString: String = _
@@ -50,12 +51,13 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 	//this.fundingSource = rs.getString("funding_source")
 	this.sceSequenceNumber = rs.getInt("sce_sequence_number")
 
+	this.enrolmentDepartmentCode = rs.getString("enrolment_department_code")
 	this.enrolmentStatusCode = rs.getString("enrolment_status_code")
 	this.modeOfAttendanceCode = rs.getString("mode_of_attendance_code")
 	this.academicYearString = rs.getString("sce_academic_year")
 	this.moduleRegistrationStatusCode = rs.getString("mod_reg_status")
 
-	override def applyInternal(): StudentCourseYearDetails = transactional() {
+	override def applyInternal(): StudentCourseYearDetails = {
 		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKey(
 			studentCourseDetails,
 			sceSequenceNumber)
@@ -76,8 +78,8 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + studentCourseYearDetails)
-			
-			if (studentCourseDetails.latestStudentCourseYearDetails == null || 
+
+			if (studentCourseDetails.latestStudentCourseYearDetails == null ||
 				studentCourseDetails.studentCourseYearDetails.asScala.forall { _ <= studentCourseYearDetails }) {
 				studentCourseDetails.latestStudentCourseYearDetails = studentCourseYearDetails
 			}
@@ -95,6 +97,7 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet)
 
 	private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studentCourseYearBean: BeanWrapper) = {
 		copyBasicProperties(basicStudentCourseYearProperties, commandBean, studentCourseYearBean) |
+		copyObjectProperty("enrolmentDepartment", enrolmentDepartmentCode, studentCourseYearBean, toDepartment(enrolmentDepartmentCode)) |
 		copyObjectProperty("enrolmentStatus", enrolmentStatusCode, studentCourseYearBean, toSitsStatus(enrolmentStatusCode)) |
 		copyModeOfAttendance(modeOfAttendanceCode, studentCourseYearBean) |
 		copyModuleRegistrationStatus(moduleRegistrationStatusCode, studentCourseYearBean)|

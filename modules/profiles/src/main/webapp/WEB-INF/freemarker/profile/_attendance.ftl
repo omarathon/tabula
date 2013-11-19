@@ -18,11 +18,18 @@
 	</div>
 	<h4>Attendance</h4>
 	<div class="monitoring-points"></div>
+	<div class="small-groups"></div>
 	<script type="text/javascript">
 		jQuery(function($){
 			var monitoringPointsLoader = function() {
 				$('#attendance .monitoring-points').empty();
-				$.get('/attendance/profile/${studentCourseDetails.urlSafeId}/' + $('#attendance select.academicYear :selected').val() + '?dt=' + new Date().valueOf(), function(data) {
+				$('#attendance .small-groups').empty();
+				
+				$.get('/attendance/profile/${profile.universityId}/'
+						+ $('#attendance select.academicYear :selected').val()
+						+ '?dt=' + new Date().valueOf()
+						+ '&expand=' + (window.location.search.indexOf('updatedMonitoringPoint') >= 0)
+				, function(data) {
 					$('#attendance .monitoring-points').html(data);
 					var pane = $('#attendance-pane');
 					var title = pane.find('h4').html();
@@ -31,6 +38,13 @@
 						$('#attendance-pane').show();
 						window.GlobalScripts.initCollapsible();
 					}
+				});
+				
+				$.get('/groups/student/${profile.universityId}/attendance/' + $('#attendance select.academicYear :selected').val() + '?dt=' + new Date().valueOf(), function(data) {
+					$('#attendance .small-groups').html(data);
+					var pane = $('#attendance-pane');
+					$('#attendance-pane').show();
+					window.GlobalScripts.initCollapsible();
 				});
 			}
 			$('#attendance select.academicYear').on('change', monitoringPointsLoader);

@@ -10,11 +10,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
-import scala.Some
-import org.hibernate.criterion.Restrictions
-import org.hibernate.criterion.Criterion
-import org.hibernate.criterion.Order
-import uk.ac.warwick.tabula.data.SitsStatusDaoComponent
+import uk.ac.warwick.tabula.commands.FiltersStudents
 
 /**
  * Service providing access to members and profiles.
@@ -37,6 +33,8 @@ trait ProfileService {
 	def getStudentCourseDetailsBySprCode(sprCode: String): Seq[StudentCourseDetails]
 	def countStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Int
 	def findStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq(), maxResults: Int = 50, startResult: Int = 0): Seq[StudentMember]
+	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
+	def findAllUniversityIdsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Seq[String]
 	
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def allSprStatuses(department: Department): Seq[SitsStatus]
@@ -99,12 +97,15 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	}
 
 	def getStudentsByRoute(route: Route): Seq[StudentMember] = transactional(readOnly = true) {
-		studentCourseDetailsDao.getByRoute(route).filter{s => !s.sprStatus.code.startsWith("P")}.filter(s => s.mostSignificant == true).map(_.student)
+		studentCourseDetailsDao.getByRoute(route)
+			.filter{s => s.sprStatus!= null && !s.sprStatus.code.startsWith("P")}
+			.filter(s => s.mostSignificant == true)
+			.map(_.student)
 	}
 
 	def getStudentsByRoute(route: Route, academicYear: AcademicYear): Seq[StudentMember] = transactional(readOnly = true) {
 		studentCourseDetailsDao.getByRoute(route)
-			.filter{s => !s.sprStatus.code.startsWith("P")}
+			.filter{s => s.sprStatus!= null && !s.sprStatus.code.startsWith("P")}
 			.filter(s => s.mostSignificant == true)
 			.filter(_.studentCourseYearDetails.asScala.exists(s => s.academicYear == academicYear))
 			.map(_.student)
@@ -122,8 +123,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		// If we're a sub-department then we have to fetch everyone, rhubarb! Otherwise, we can use nice things
 		if (department.hasParent) {
 			val allRestrictions = ScalaRestriction.is(
-				"studentCourseDetails.department", department.rootDepartment, 
-				"mostSignificantCourse" -> "studentCourseDetails"
+				"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment, 
+				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
 			) ++ restrictions
 			
 			memberDao.findStudentsByRestrictions(allRestrictions, orders, Int.MaxValue, 0)
@@ -131,21 +132,55 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 				.filter(studentDepartmentFilterMatches(department))
 		}	else {
 			val allRestrictions = ScalaRestriction.is(
-				"studentCourseDetails.department", department, 
-				"mostSignificantCourse" -> "studentCourseDetails"
+				"studentCourseYearDetails.enrolmentDepartment", department, 
+				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
 			) ++ restrictions
 			
 			memberDao.findStudentsByRestrictions(allRestrictions, orders, maxResults, startResult)
 		}
 	}
+
+	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()) = transactional(readOnly = true) {
+		val allRestrictions = {
+			if (department.hasParent) {
+				ScalaRestriction.is(
+					"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment, 
+					FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
+				) ++ restrictions
+			}	else {
+				ScalaRestriction.is(
+					"studentCourseYearDetails.enrolmentDepartment", department, 
+					FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
+				) ++ restrictions
+			}
+		}
+		memberDao.findStudentsByRestrictions(allRestrictions, orders, Int.MaxValue, 0)
+	}
+
+	def findAllUniversityIdsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]) = transactional(readOnly = true) {
+		val allRestrictions = {
+			if (department.hasParent) {
+				ScalaRestriction.is(
+					"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
+					FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
+				) ++ restrictions
+			}	else {
+				ScalaRestriction.is(
+					"studentCourseYearDetails.enrolmentDepartment", department,
+					FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
+				) ++ restrictions
+			}
+		}
+		memberDao.findUniversityIdsByRestrictions(allRestrictions)
+	}
 	
 	def countStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Int = transactional(readOnly = true) {
 		// Because of the implementation of sub-departments, unfortunately we can't get optimisations here.
-		if (department.hasParent) findStudentsByRestrictions(department, restrictions).size
+		if (department.hasParent) findStudentsByRestrictions(department, restrictions, Seq(), 50, 0).size
 		else {
 			val allRestrictions = ScalaRestriction.is(
-				"studentCourseDetails.department", department, 
-				"mostSignificantCourse" -> "studentCourseDetails"
+				"studentCourseYearDetails.enrolmentDepartment", department, 
+				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
 			) ++ restrictions
 			
 			memberDao.countStudentsByRestrictions(allRestrictions)

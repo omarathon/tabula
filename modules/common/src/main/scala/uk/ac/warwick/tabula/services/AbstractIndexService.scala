@@ -173,7 +173,7 @@ abstract class AbstractIndexService[A]
 	 * per minute in order for the index to lag behind, and even then it would catch
 	 * up as soon as it reached a quiet time.
 	 */
-	def incrementalIndex() = transactional() {
+	def incrementalIndex() = transactional(readOnly = true) {
 		ifNotIndexing {
 			val stopWatch = StopWatch()
 			stopWatch.record("Incremental index") {
@@ -193,7 +193,7 @@ abstract class AbstractIndexService[A]
 
 	protected def listNewerThan(startDate: DateTime, batchSize: Int): Seq[A]
 
-	def indexFrom(startDate: DateTime) = transactional() {
+	def indexFrom(startDate: DateTime) = transactional(readOnly = true) {
 		ifNotIndexing {
 			doIndexItems(listNewerThan(startDate, MaxBatchSize), true)
 		}
@@ -202,7 +202,11 @@ abstract class AbstractIndexService[A]
 	/**
 	 * Indexes a specific given list of items.
 	 */
-	def indexItems(items: Seq[A]) = transactional() {
+	def indexItems(items: Seq[A]) = transactional(readOnly = true) {
+		ifNotIndexing { doIndexItems(items, false) }
+	}
+
+	def indexItemsWithoutNewTransaction(items: Seq[A]) =  {
 		ifNotIndexing { doIndexItems(items, false) }
 	}
 
@@ -233,7 +237,7 @@ abstract class AbstractIndexService[A]
 	protected def getUpdatedDate(item: A): DateTime
 
 	val UpdatedDateField: String
-	
+
 	@Value("${tabula.yearZero}") var yearZero: Int = _
 
 	/**

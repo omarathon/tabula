@@ -54,21 +54,6 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 	}
 	
 	@Test
-	def initState() { new Fixture {
-		val command = new FilterStudentsCommand(department) with CommandTestSupport
-		
-		command.profileService.allSprStatuses(department) returns (Seq(sprF, sprP))
-		command.profileService.allModesOfAttendance(department) returns (Seq(moaFT, moaPT))
-		
-		command.allCourseTypes should be (CourseType.all)
-		command.allModesOfAttendance should be (Seq(moaFT, moaPT))
-		command.allModules should be (Seq(mod1, mod2, mod3)) // Order should be right through implicit ordering
-		command.allRoutes should be (Seq(route1, route2, route3)) // Order should be right through implicit ordering
-		command.allSprStatuses should be (Seq(sprF, sprP))
-		command.allYearsOfStudy should be (1 to 8)
-	}}
-	
-	@Test
 	def bindLoadsNonWithdrawnStatuses() { new Fixture {
 		val command = new FilterStudentsCommand(department) with CommandTestSupport
 		
@@ -121,7 +106,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		courseTypeRestriction.alias("mostSignificantCourse", "studentCourseDetails")
 		courseTypeRestriction.alias("studentCourseDetails.course", "course")
 		
-		val routeRestriction = new ScalaRestriction(Restrictions.in("studentCourseDetails.route", JArrayList(route1, route3)))
+		val routeRestriction = new ScalaRestriction(Restrictions.in("studentCourseDetails.route.code", JArrayList(route1.code, route3.code)))
 		routeRestriction.alias("mostSignificantCourse", "studentCourseDetails")
 		
 		val moaRestriction = new ScalaRestriction(Restrictions.in("studentCourseYearDetails.modeOfAttendance", JArrayList(moaFT)))

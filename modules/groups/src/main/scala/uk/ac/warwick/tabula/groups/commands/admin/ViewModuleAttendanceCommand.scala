@@ -43,7 +43,7 @@ trait ViewModuleAttendancePermissions extends RequiresPermissionsChecking with P
 	self: ViewModuleAttendanceState =>
 	
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.SmallGroupEvents.Register, module)
+		p.PermissionCheck(Permissions.SmallGroupEvents.ViewRegister, module)
 	}
 }
 
