@@ -41,7 +41,7 @@ class SetMonitoringCheckpointForStudentController extends AttendanceController {
 
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") command: SetMonitoringCheckpointForStudentCommand, @PathVariable department: Department, errors: Errors) = {
+	def submit(@Valid @ModelAttribute("command") command: SetMonitoringCheckpointForStudentCommand, errors: Errors, @PathVariable department: Department) = {
 		if(errors.hasErrors) {
 			form(command, department)
 		} else {
