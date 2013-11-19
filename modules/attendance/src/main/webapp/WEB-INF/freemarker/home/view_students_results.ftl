@@ -148,14 +148,14 @@
 								<#list students as studentData>
 									<tr class="student">
 										<td class="unrecorded">
-											<a href="<@routes.viewStudent command.department studentData.student command.academicYear returnTo />">
+											<a href="<@routes.viewStudent command.department studentData.student command.academicYear />">
 												<span class="badge badge-<#if (studentData.unrecorded > 2)>important<#elseif (studentData.unrecorded > 0)>warning<#else>success</#if>">
 													${studentData.unrecorded}
 												</span>
 											</a>
 										</td>
 										<td class="missed">
-											<a href="<@routes.viewStudent command.department studentData.student command.academicYear returnTo />">
+											<a href="<@routes.viewStudent command.department studentData.student command.academicYear />">
 												<span class="badge badge-<#if (studentData.missed > 2)>important<#elseif (studentData.missed > 0)>warning<#else>success</#if>">
 													${studentData.missed}
 												</span>
@@ -168,7 +168,7 @@
 												<#assign record_url><@routes.recordStudent command.department studentData.student command.academicYear returnTo /></#assign>
 												<@fmt.permission_button
 													permission='MonitoringPoints.Record'
-													scope=studentData.student.mostSignificantCourseDetails.route
+													scope=studentData.student
 													action_descr='record monitoring points'
 													classes='btn btn-primary btn-mini'
 													href=record_url
