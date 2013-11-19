@@ -201,13 +201,6 @@ class StudentMember extends Member with StudentProperties {
 		this.universityId = id
 	}
 
-	@Formula("""
-		(select count(*) from MonitoringCheckpoint c
-		where c.student_course_detail_id = mostSignificantCourse
-		and c.state = 'unauthorised')
-	""")
-	var missedMonitoringPoints = 0
-
 	/**
 	 * Get all departments that this student is affiliated with at a departmental level.
 	 * This includes their home department, and the department running their course.
