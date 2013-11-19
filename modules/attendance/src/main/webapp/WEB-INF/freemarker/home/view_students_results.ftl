@@ -168,7 +168,7 @@
 												<#assign record_url><@routes.recordStudent command.department studentData.student command.academicYear returnTo /></#assign>
 												<@fmt.permission_button
 													permission='MonitoringPoints.Record'
-													scope=studentData.student.mostSignificantCourseDetails.route
+													scope=studentData.student
 													action_descr='record monitoring points'
 													classes='btn btn-primary btn-mini'
 													href=record_url
