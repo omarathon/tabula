@@ -24,14 +24,14 @@
 	<tbody>
 		<#list agents as agentData>
 			<#assign studentPopoverContent>
-				<#list agentData.students as student>
-					<ul>
+				<ul>
+					<#list agentData.students as student>
 						<li>${student.fullName}</li>
-					</ul>
-				</#list>
+					</#list>
+				</ul>
 			</#assign>
 			<tr>
-				<td data-sortby="<#if agentData.agentMember??>${agentData.agentMember.lastName}, ${agentData.agentMember.firstName}<#else>${agentData.agent}</#if>">
+				<td class="agent" data-sortby="<#if agentData.agentMember??>${agentData.agentMember.lastName}, ${agentData.agentMember.firstName}<#else>${agentData.agent}</#if>">
 					<h6><#if agentData.agentMember??>${agentData.agentMember.fullName}<#else>${agentData.agent}</#if></h6>
 				</td>
 				<td class="students">

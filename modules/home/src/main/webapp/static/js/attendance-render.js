@@ -95,6 +95,40 @@ $(function(){
         });
     });
 
+    var highlightListItem = function(html, query){
+        var container = $(html), query = query.toLowerCase();
+        container.find('li').each(function(){
+            var $this = $(this);
+            if($this.text().toLowerCase().indexOf(query) >= 0) {
+                $this.html('<strong>' + $this.html() + '</strong>');
+            }
+        });
+        return container.wrap('<div></div>').parent().html();
+    };
+
+    $('.agent-search').find('input').on('keyup', function(){
+        var rows = $('table.agents tbody tr'), query = $(this).val().toLowerCase();
+        if (query.length === 0) {
+            rows.show();
+        } else {
+            rows.each(function(){
+                var $row = $(this), $agentCell = $row.find('td.agent'), $studentsLink = $row.find('td.students a.use-popover');
+                if ($agentCell.text().toLowerCase().indexOf(query) >= 0) {
+                    $row.show();
+                    $studentsLink.popover('hide');
+                } else if ($($studentsLink.data('content')).text().toLowerCase().indexOf(query) >= 0) {
+                    $row.show();
+                    $studentsLink.popover('show').data('popover').tip().find('.popover-content').html(
+                        highlightListItem($studentsLink.data('content'), query)
+                    );
+                } else {
+                    $studentsLink.popover('hide');
+                    $row.hide();
+                }
+            });
+        }
+    }).end().show();
+
 	// END SCRIPTS FOR RECORDING MONITORING POINTS
 
 	// SCRIPTS FOR MANAGING MONITORING POINTS
