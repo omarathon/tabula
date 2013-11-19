@@ -23,7 +23,7 @@
 		</#if>
 		<@url page="/view/${department.code}/students/?academicYear=${academicYear.toString}${queryString}" />
 	</#macro>
-	<#macro viewStudent department student academicYear returnTo><@url page="/view/${department.code}/students/${student.universityId}?academicYear=${academicYear.toString}&returnTo=${returnTo?url}" /></#macro>
+	<#macro viewStudent department student academicYear><@url page="/view/${department.code}/students/${student.universityId}?academicYear=${academicYear.toString}" /></#macro>
 	<#macro manageDepartment department><@url page="/manage/${department.code}/" /></#macro>
 	
 	<#macro record department pointId queryString returnTo><@url page="/view/${department.code}/${pointId}/record?returnTo=${returnTo?url}&${queryString}"/></#macro>
