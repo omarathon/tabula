@@ -27,12 +27,11 @@ trait StudentCourseDetailsDao {
 	def getByRoute(route: Route) : Seq[StudentCourseDetails]
 	def findByDepartment(department:Department):Seq[StudentCourseDetails]
 	def getFreshScjCodes: Seq[String]
-	def stampMissingFromImport(seenScjCodes: HashSet[String], importStart: DateTime)
-
+	def stampMissingFromImport(newStaleScjCodes: Seq[String], importStart: DateTime)
 }
 
 @Repository
-class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with StampMissing {
+class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 
 	def saveOrUpdate(studentCourseDetails: StudentCourseDetails) = {
 		session.saveOrUpdate(studentCourseDetails)
@@ -91,7 +90,22 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with StampMiss
 			.project[String](Projections.property("scjCode"))
 			.seq
 
-	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime) = {
-		stampMissingFromImport(seenIds, importStart, "StudentCourseDetails", "scjCode")
+	def stampMissingFromImport(newStaleScjCodes: Seq[String], importStart: DateTime) = {
+		if (!newStaleScjCodes.isEmpty) {
+			var sqlString = """
+				update
+					StudentCourseDetails
+				set
+					missingFromImportSince = :importStart
+				where
+					scjCode in (:newStaleScjCodes)
+				"""
+
+				session.newQuery(sqlString)
+					.setParameter("importStart", importStart)
+					.setParameterList("newStaleScjCodes", newStaleScjCodes)
+					.executeUpdate
+			}
 	}
+
 }

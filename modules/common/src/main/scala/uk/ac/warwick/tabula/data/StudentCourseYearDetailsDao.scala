@@ -19,15 +19,15 @@ trait StudentCourseYearDetailsDao {
 	def getStudentCourseYearDetails(id: String): Option[StudentCourseYearDetails]
 	def getBySceKey(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
 	def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails]
-	def getFreshKeys(): Seq[StudentCourseYearKey]
+	def getFreshIds: Seq[String]
+	def getFreshKeys: Seq[StudentCourseYearKey]
 	def getIdFromKey(key: StudentCourseYearKey): Option[String]
 	def convertKeysToIds(keys: HashSet[StudentCourseYearKey]): HashSet[String]
-	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime)
-
+	def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime)
 }
 
 @Repository
-class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with StampMissing {
+class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with Daoisms {
 	import Restrictions._
 	import Order._
 
@@ -55,7 +55,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with S
 			.add(is("sceSequenceNumber", seq))
 			.uniqueResult
 
-	def getFreshKeys(): Seq[StudentCourseYearKey] = {
+	def getFreshKeys: Seq[StudentCourseYearKey] = {
 		session.newCriteria[StudentCourseYearDetails]
 			.add(is("missingFromImportSince", null))
 				.project[Array[Any]](
@@ -67,15 +67,18 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with S
 		.seq
 	}
 
+	def getFreshIds = {
+		session.newCriteria[StudentCourseYearDetails]
+			.add(isNull("missingFromImportSince"))
+			.project[String](Projections.property("id"))
+		.seq
+	}
+
 	// TODO - put these two methods in a service
 	def convertKeysToIds(keys: HashSet[StudentCourseYearKey]): HashSet[String] =
 			keys.flatMap {
 				key => getIdFromKey(key)
 			}
-
-	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime) = {
-		stampMissingFromImport(seenIds, importStart, "StudentCourseYearDetails", "id")
-	}
 
 	def getIdFromKey(key: StudentCourseYearKey) = {
 		session.newCriteria[StudentCourseYearDetails]
@@ -84,4 +87,23 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with S
 		.project[String](Projections.property("id"))
 		.uniqueResult
 	}
+
+		def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime) = {
+			if (!newStaleScydIds.isEmpty) {
+				var sqlString = """
+					update
+						StudentCourseYearDetails
+					set
+						missingFromImportSince = :importStart
+					where
+						id in (:newStaleScydIds)
+					"""
+
+					session.newQuery(sqlString)
+						.setParameter("importStart", importStart)
+						.setParameterList("newStaleScydIds", newStaleScydIds)
+						.executeUpdate
+				}
+		}
+
 }

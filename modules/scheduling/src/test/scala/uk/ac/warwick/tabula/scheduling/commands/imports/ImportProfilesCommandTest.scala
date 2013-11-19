@@ -37,7 +37,9 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 
 		val scd2 = stu2.mostSignificantCourseDetails.get
 		session.saveOrUpdate(scd2)
+
 		session.flush
+		session.clear
 
 		val scyd2 = scd2.freshStudentCourseYearDetails.head
 
@@ -63,20 +65,19 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 		mrDao.sessionFactory = sessionFactory
 		mrDao.getByUsercodesAndYear(Seq("abcde"), year) returns Seq(existingMr)
 
-		val memberDao = smartMock[MemberDaoImpl]
+		val memberDao = new MemberDaoImpl
 		memberDao.sessionFactory = sessionFactory
 
-		val scdDao = smartMock[StudentCourseDetailsDaoImpl]
+		val scdDao = new StudentCourseDetailsDaoImpl
 		scdDao.sessionFactory = sessionFactory
 
-		val scydDao = smartMock[StudentCourseYearDetailsDaoImpl]
+		val scydDao = new StudentCourseYearDetailsDaoImpl
 		scydDao.sessionFactory = sessionFactory
 
+
 		val key1 = new StudentCourseYearKey(scyd.studentCourseDetails.scjCode, scyd.sceSequenceNumber)
-		scydDao.getIdFromKey(key1) returns Some("1")
 
 		val key2 = new StudentCourseYearKey(scyd2.studentCourseDetails.scjCode, scyd2.sceSequenceNumber)
-		scydDao.getIdFromKey(key2) returns Some("2")
 
 		val sitsAcademicYearService = smartMock[SitsAcademicYearService]
 		sitsAcademicYearService.getCurrentSitsAcademicYearString returns "13/14"
@@ -117,11 +118,12 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 	@Transactional
 	@Test def testStampMissingRows() {
 		new Environment {
-			memberDao.getFreshUniversityIds returns Seq(stu.universityId)
-			scdDao.getFreshScjCodes returns Seq(scd.scjCode)
-			scydDao.getFreshKeys returns Seq(new StudentCourseYearKey(scyd.studentCourseDetails.scjCode, scyd.sceSequenceNumber))
-
 			val tracker = new ImportRowTracker
+
+			tracker.memberDao = memberDao
+			tracker.studentCourseDetailsDao = scdDao
+			tracker.studentCourseYearDetailsDao = scydDao
+
 			tracker.universityIdsSeen.add(stu.universityId)
 			tracker.scjCodesSeen.add(scd.scjCode)
 
@@ -129,6 +131,7 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 
 			command.stampMissingRows(tracker, DateTime.now)
 			session.flush
+			session.clear
 
 			stu.missingFromImportSince should be (null)
 			scd.missingFromImportSince should be (null)
@@ -138,25 +141,39 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 
 			command.stampMissingRows(tracker, DateTime.now)
 			session.flush
+			session.clear
+
+			val stuRefetched = memberDao.getByUniversityIdStaleOrFresh("0000001").get
 
 			scd.missingFromImportSince should be (null)
 			scyd.missingFromImportSince should be (null)
-			logger.warn("about to see whether stu has been stamped")
-			stu.missingFromImportSince should not be (null)
+			stuRefetched.missingFromImportSince should not be (null)
 
 			tracker.scjCodesSeen.remove(scd.scjCode)
 			command.stampMissingRows(tracker, DateTime.now)
+			session.flush
+			session.clear
 
-			stu.missingFromImportSince should not be (null)
-			scd.missingFromImportSince should not be (null)
-			scyd.missingFromImportSince should be (null)
+			val stuFetched1 = memberDao.getByUniversityIdStaleOrFresh("0000001").get
+			val scdFetched1 = scdDao.getByScjCodeStaleOrFresh("0000001/1").get
+			val scydFetched1 = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
+
+			stuFetched1.missingFromImportSince should not be (null)
+			scdFetched1.missingFromImportSince should not be (null)
+			scydFetched1.missingFromImportSince should be (null)
 
 			tracker.studentCourseYearDetailsSeen.remove(key1)
 			command.stampMissingRows(tracker, DateTime.now)
+			session.flush
+			session.clear
 
-			stu.missingFromImportSince should not be (null)
-			scd.missingFromImportSince should not be (null)
-			scyd.missingFromImportSince should not be (null)
+			val stuFetched2 = memberDao.getByUniversityIdStaleOrFresh("0000001").get
+			val scdFetched2 = scdDao.getByScjCodeStaleOrFresh("0000001/1").get
+			val scydFetched2 = scydDao.getBySceKeyStaleOrFresh(scd, scyd.sceSequenceNumber).get
+
+			stuFetched2.missingFromImportSince should not be (null)
+			scdFetched2.missingFromImportSince should not be (null)
+			scydFetched2.missingFromImportSince should not be (null)
 
 		}
 	}
@@ -172,6 +189,8 @@ class ImportProfilesCommandTest extends PersistenceTestBase with Mockito with Lo
 			tracker.studentCourseYearDetailsSeen.add(key)
 
 			command.updateMissingForIndividual(stu, tracker)
+			session.flush
+			session.clear
 
 			stu.missingFromImportSince should be (null)
 			scd.missingFromImportSince should be (null)

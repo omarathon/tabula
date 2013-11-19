@@ -22,6 +22,7 @@ import scala.collection.mutable.HashSet
 import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
 import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
 
+
 class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 
 	val scydDao = new StudentCourseYearDetailsDaoImpl
@@ -148,8 +149,13 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 
 		val seenIds = scydDao.convertKeysToIds(seenSceKeys)
 
+		// these 3 lines are in fact ImportRowTracker.newStaleScydIdeas but that's in scheduling so can't be accessed:
+		val scydIdsSeen = scydDao.convertKeysToIds(seenSceKeys)
+		val allFreshIds = scydDao.getFreshIds.toSet
+		val newStaleScydIds = (allFreshIds -- scydIdsSeen).toSeq
+
 		val importStart = DateTime.now
-		scydDao.stampMissingFromImport(seenIds, importStart)
+		scydDao.stampMissingFromImport(newStaleScydIds, importStart)
 
 		for (id <- seenIds) logger.warn("seen ID: " + id)
 

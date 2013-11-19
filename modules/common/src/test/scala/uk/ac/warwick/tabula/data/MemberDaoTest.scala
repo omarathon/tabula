@@ -1,20 +1,15 @@
 package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConverters.asScalaBufferConverter
-import org.hibernate.annotations.{AccessType, FilterDefs, Filters}
+
 import org.joda.time.{DateTime, DateTimeConstants}
 import org.junit.{After, Before}
-import org.junit.runner.RunWith
-import org.springframework.stereotype.Repository
-import org.springframework.test.context.{ActiveProfiles, ContextConfiguration}
-import javax.persistence.{DiscriminatorColumn, DiscriminatorValue, Entity, Inheritance, NamedQueries}
-import uk.ac.warwick.tabula.{Mockito, PersistenceTestBase}
-import uk.ac.warwick.tabula.Fixtures
+
+import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.{Member, StudentCourseYearDetails, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.ProfileService
-import scala.collection.mutable.HashSet
 
 // scalastyle:off magic.number
 class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
@@ -475,13 +470,10 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.getByUniversityId("1000003").get.missingFromImportSince should be (null)
 		memberDao.getByUniversityId("1000004").get.missingFromImportSince should be (null)
 
-		val seenIds = new HashSet[String]
-		seenIds.add("1000001")
-		seenIds.add("1000003")
-		seenIds.add("1000004")
+		val newStaleIds = Seq[String]("1000002")
 
 		val importStart = DateTime.now
-		memberDao.stampMissingFromImport(seenIds, importStart)
+		memberDao.stampMissingFromImport(newStaleIds, importStart)
 		session.flush
 		session.clear
 

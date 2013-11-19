@@ -60,11 +60,12 @@ trait MemberDao {
 	def getAllModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def getAllSprStatuses(department: Department): Seq[SitsStatus]
 	def getFreshUniversityIds: Seq[String]
-	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime)
+	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime)
+
 }
 
 @Repository
-class MemberDaoImpl extends MemberDao with StampMissing with Logging {
+class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	import Restrictions._
 	import Order._
 	import Projections._
@@ -104,6 +105,11 @@ class MemberDaoImpl extends MemberDao with StampMissing with Logging {
 		session.newCriteria[Member]
 			.add(is("universityId", universityId.safeTrim))
 			.add(isNull("missingFromImportSince"))
+			.uniqueResult
+
+	def getByUniversityIdStaleOrFresh(universityId: String) =
+		session.newCriteria[Member]
+			.add(is("universityId", universityId.safeTrim))
 			.uniqueResult
 
 	def getFreshUniversityIds() =
@@ -431,8 +437,22 @@ class MemberDaoImpl extends MemberDao with StampMissing with Logging {
 				)
 				.seq.map { array => array(0).asInstanceOf[SitsStatus] }
 
-	def stampMissingFromImport(seenIds: HashSet[String], importStart: DateTime) = {
-		stampMissingFromImport(seenIds, importStart, "Member", "universityId")
-	}
+	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime) = {
+		if (!newStaleUniversityIds.isEmpty) {
+			var sqlString = """
+				update
+					Member
+				set
+					missingFromImportSince = :importStart
+				where
+					universityId in (:newStaleUniversityIds)
+				"""
+
+				session.newQuery(sqlString)
+					.setParameter("importStart", importStart)
+					.setParameterList("newStaleUniversityIds", newStaleUniversityIds)
+					.executeUpdate
+			}
+		}
 }
 

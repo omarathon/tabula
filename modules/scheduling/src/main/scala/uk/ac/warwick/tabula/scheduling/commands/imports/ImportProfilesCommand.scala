@@ -18,8 +18,6 @@ import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileIndexSe
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
 import scala.collection.mutable.HashSet
-import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
-import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware {
 
@@ -124,19 +122,15 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					+ importRowTracker.scjCodesSeen.size + " studentCourseDetails, "
 					+ importRowTracker.studentCourseYearDetailsSeen.size + " studentCourseYearDetails.");
 
-			logger.warn("Converting enrolment keys to ids ...")
-			val idsSeen = studentCourseYearDetailsDao.convertKeysToIds(importRowTracker.studentCourseYearDetailsSeen)
-
-
 			// make sure any rows we've got for this student in the db which we haven't seen in this import are recorded as missing
 			logger.warn("Timestamping missing students")
-			memberDao.stampMissingFromImport(importRowTracker.universityIdsSeen, importStart)
+			memberDao.stampMissingFromImport(importRowTracker.newStaleUniversityIds, importStart)
 
 			logger.warn("Timestamping missing studentCourseDetails")
-			studentCourseDetailsDao.stampMissingFromImport(importRowTracker.scjCodesSeen, importStart)
+			studentCourseDetailsDao.stampMissingFromImport(importRowTracker.newStaleScjCodes, importStart)
 
 			logger.warn("Timestamping missing studentCourseYearDetails")
-			studentCourseYearDetailsDao.stampMissingFromImport(idsSeen, importStart)
+			studentCourseYearDetailsDao.stampMissingFromImport(importRowTracker.newStaleScydIds, importStart)
 		}
 	}
 
