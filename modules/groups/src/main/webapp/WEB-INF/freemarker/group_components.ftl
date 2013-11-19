@@ -345,7 +345,7 @@
 																				permission='SmallGroups.Update' 
 																				scope=groupSet 
 																				action_descr='notify students and staff' 
-																				href=allocateset_url
+																				href=notifyset_url
 																				classes='notify-group-link'
 																				data_attr='data-toggle=modal data-target=#modal-container data-container=body'>
 																				<i class="icon-envelope-alt icon-fixed-width"></i> Notify
