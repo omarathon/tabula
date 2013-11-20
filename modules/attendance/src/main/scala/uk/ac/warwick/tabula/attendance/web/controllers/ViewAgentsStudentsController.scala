@@ -30,7 +30,7 @@ class ViewAgentsStudentsController extends AttendanceController {
 		Mav("home/agents_students",
 			"students" -> students,
 			"necessaryTerms" -> students.flatMap{ data => data.pointsByTerm.keySet }.distinct
-		).crumbs(Breadcrumbs.ViewDepartmentAgents(department, relationshipType))
+		).crumbs(Breadcrumbs.ViewDepartment(department), Breadcrumbs.ViewDepartmentAgents(department, relationshipType))
 	}
 
 }

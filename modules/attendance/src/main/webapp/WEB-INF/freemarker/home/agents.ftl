@@ -6,9 +6,12 @@
 <#assign thisPath><@routes.viewDepartmentAgents command.department command.relationshipType /></#assign>
 <@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
 
-<div class="input-append agent-search" style="display: none;">
-	<input class="input-xlarge" type="text" placeholder="Search for a student or ${command.relationshipType.agentRole}&hellip;"/>
-	<button class="btn"><i class="icon-search"></i></button>
+<div class="agent-search" style="display: none;">
+	<div class="input-append">
+		<input class="input-xlarge" type="text" placeholder="Search for a student or ${command.relationshipType.agentRole}&hellip;"/>
+		<button class="btn"><i class="icon-search"></i></button>
+	</div>
+	<span class="muted" style="display: none;">Please enter at least 3 characters</span>
 </div>
 
 <table class="agents table table-bordered table-striped">
@@ -33,6 +36,12 @@
 			<tr>
 				<td class="agent" data-sortby="<#if agentData.agentMember??>${agentData.agentMember.lastName}, ${agentData.agentMember.firstName}<#else>${agentData.agent}</#if>">
 					<h6><#if agentData.agentMember??>${agentData.agentMember.fullName}<#else>${agentData.agent}</#if></h6>
+					<p class="student-list" style="display: none;">
+						${command.relationshipType.studentRole?capitalize}s:
+						<#list agentData.students as student>
+							<span class="name">${student.fullName}<span class="comma">, </span></span>
+						</#list>
+					</p>
 				</td>
 				<td class="students">
 					<a class="use-popover" data-title="${command.relationshipType.studentRole?capitalize}s" data-content="${studentPopoverContent}" data-html="true">

@@ -86,7 +86,11 @@ class AgentStudentViewController extends AttendanceController {
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable student: StudentMember
 	) = {
-		Mav("agent/student", "student" -> student, "pointsByTerm" -> cmd.apply()).crumbs(Breadcrumbs.Agent(relationshipType))
+		Mav("agent/student",
+			"student" -> student,
+			"relationshipType" -> relationshipType,
+			"pointsByTerm" -> cmd.apply()
+		).crumbs(Breadcrumbs.Agent(relationshipType))
 	}
 
 }

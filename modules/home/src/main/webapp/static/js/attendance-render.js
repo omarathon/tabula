@@ -95,34 +95,38 @@ $(function(){
         });
     });
 
-    var highlightListItem = function(html, query){
-        var container = $(html), query = query.toLowerCase();
-        container.find('li').each(function(){
-            var $this = $(this);
-            if($this.text().toLowerCase().indexOf(query) >= 0) {
-                $this.html('<strong>' + $this.html() + '</strong>');
-            }
-        });
-        return container.wrap('<div></div>').parent().html();
-    };
-
     $('.agent-search').find('input').on('keyup', function(){
         var rows = $('table.agents tbody tr'), query = $(this).val().toLowerCase();
         if (query.length === 0) {
             rows.show();
+            rows.find('p.student-list').hide();
+            $('.agent-search span.muted').hide();
+        } else if (query.length < 3) {
+            $('.agent-search span.muted').show();
         } else {
+            $('.agent-search span.muted').hide();
             rows.each(function(){
-                var $row = $(this), $agentCell = $row.find('td.agent'), $studentsLink = $row.find('td.students a.use-popover');
-                if ($agentCell.text().toLowerCase().indexOf(query) >= 0) {
-                    $row.show();
-                    $studentsLink.popover('hide');
-                } else if ($($studentsLink.data('content')).text().toLowerCase().indexOf(query) >= 0) {
-                    $row.show();
-                    $studentsLink.popover('show').data('popover').tip().find('.popover-content').html(
-                        highlightListItem($studentsLink.data('content'), query)
-                    );
+                var $row = $(this)
+                    , $agentCell = $row.find('td.agent')
+                    , $agentName = $agentCell.find('h6')
+                    , $students = $agentCell.find('p.student-list')
+                    , showRow = false;
+                if ($agentName.text().toLowerCase().indexOf(query) >= 0) {
+                    showRow = true;
+                }
+                if ($students.text().toLowerCase().indexOf(query) >= 0) {
+                    showRow = true;
+                    $students.find('span').show().filter('.name').filter(function(){
+                        return $(this).text().toLowerCase().indexOf(query) === -1
+                    }).hide();
+                    $students.show();
+                    $students.find('span.name:visible').last().find('span.comma').hide();
                 } else {
-                    $studentsLink.popover('hide');
+                    $students.hide();
+                }
+                if (showRow) {
+                    $row.show();
+                } else {
                     $row.hide();
                 }
             });
