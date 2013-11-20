@@ -3,9 +3,9 @@
 <#import "../attendance_macros.ftl" as attendance_macros />
 <#import "../attendance_variables.ftl" as attendance_variables />
 
-<#assign thisPath><@routes.agentView command.relationshipType /></#assign>
+<#assign thisPath><@routes.viewDepartmentAgentsStudents command.department command.relationshipType command.agent /></#assign>
 
-<h1>My ${command.relationshipType.studentRole}s</h1>
+<h1>${command.agent.fullName}'s ${command.relationshipType.studentRole}s</h1>
 
 <#if students?size == 0>
 	<p><em>No ${command.relationshipType.studentRole}s were found.</em></p>
@@ -13,19 +13,19 @@
 
 	<#function view_url student>
 		<#local return>
-			<@routes.agentStudentView student command.relationshipType command.academicYear />
+			<@routes.viewStudent command.department student command.academicYear />
 		</#local>
 		<#return return/>
 	</#function>
 
 	<#function record_url student>
 		<#local return>
-			<@routes.agentStudentRecord student command.relationshipType command.academicYear thisPath />
+			<@routes.recordStudent command.department student command.academicYear thisPath />
 		</#local>
 		<#return return/>
 	</#function>
 
-	<#include "../home/_points_table_js_sort.ftl" />
+	<#include "_points_table_js_sort.ftl" />
 
 </#if>
 </#escape>
