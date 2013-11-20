@@ -50,7 +50,7 @@
 					</span>
 				</td>
 				<td class="button">
-					<a href="" class="btn btn-primary">Attendance</a>
+					<a href="<@routes.viewDepartmentAgentsStudents command.department command.relationshipType agentData.agentMember />" class="btn btn-primary">Attendance</a>
 				</td>
 			</tr>
 		</#list>

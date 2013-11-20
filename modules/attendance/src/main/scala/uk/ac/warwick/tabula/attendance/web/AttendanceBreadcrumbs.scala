@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.attendance.web
 
 import uk.ac.warwick.tabula.web.BreadCrumb
 import uk.ac.warwick.tabula.data.model
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 trait AttendanceBreadcrumbs {
 	val Breadcrumbs = AttendanceBreadcrumbs
@@ -33,6 +34,14 @@ object AttendanceBreadcrumbs {
 	case class ViewDepartmentStudents(department: model.Department) extends Abstract {
 		val title = "Students"
 		val url = Some(Routes.department.viewStudents(department))
+	}
+
+	/**
+	 * Special case breadcrumb for the department view agents page.
+	 */
+	case class ViewDepartmentAgents(department: model.Department, relationshipType: StudentRelationshipType) extends Abstract {
+		val title = relationshipType.agentRole.capitalize + "s"
+		val url = Some(Routes.department.viewAgents(department, relationshipType))
 	}
 
 	/**

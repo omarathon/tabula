@@ -11,8 +11,8 @@ import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointMeetingRelationsh
 import uk.ac.warwick.tabula.web.views.JSONView
 
 object MeetingCheckpointCommand {
-	def apply(student: StudentMember, relationshipType: StudentRelationshipType, meetingFormat: MeetingFormat, meetingDate: DateTime, currentMember: Member) =
-		new MeetingCheckpointCommand(student, relationshipType, meetingFormat, meetingDate, currentMember)
+	def apply(student: StudentMember, relationshipType: StudentRelationshipType, meetingFormat: MeetingFormat, meetingDate: DateTime) =
+		new MeetingCheckpointCommand(student, relationshipType, meetingFormat, meetingDate)
 		with ComposableCommand[Boolean]
 		with MeetingCheckpointCommandPermissions
 		with MeetingCheckpointCommandState
@@ -21,7 +21,7 @@ object MeetingCheckpointCommand {
 }
 
 class MeetingCheckpointCommand(
-	val student: StudentMember, val relationshipType: StudentRelationshipType, val meetingFormat: MeetingFormat, val meetingDate: DateTime, val currentMember: Member
+	val student: StudentMember, val relationshipType: StudentRelationshipType, val meetingFormat: MeetingFormat, val meetingDate: DateTime
 ) extends CommandInternal[Boolean] {
 
 	self: MonitoringPointMeetingRelationshipTermServiceComponent =>
@@ -36,7 +36,7 @@ trait MeetingCheckpointCommandPermissions extends RequiresPermissionsChecking {
 	this: MeetingCheckpointCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(p.mandatory(relationshipType)), currentMember)
+		p.PermissionCheck(Permissions.Profiles.MeetingRecord.Read(p.mandatory(relationshipType)), student)
 	}
 }
 
@@ -45,7 +45,6 @@ trait MeetingCheckpointCommandState {
 	def relationshipType: StudentRelationshipType
 	def meetingFormat: MeetingFormat
 	def meetingDate: DateTime
-	def currentMember: Member
 }
 
 @Controller
@@ -63,8 +62,7 @@ class MeetingCheckpointController extends AttendanceController {
 			student,
 			mandatory(relationshipType),
 			mandatory(meetingFormat),
-			mandatory(meetingDate).toDateTimeAtStartOfDay,
-			currentMember
+			mandatory(meetingDate).toDateTimeAtStartOfDay
 		)
 
 	@RequestMapping
