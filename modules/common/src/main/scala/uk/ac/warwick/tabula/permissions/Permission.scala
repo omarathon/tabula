@@ -152,6 +152,7 @@ object Permissions {
 		case object ManageDisplaySettings extends Permission("Manage display settings")
 		case object DownloadFeedbackReport extends Permission("Generate a feedback report")
 		case object ManageProfiles extends Permission("Manage student profiles")
+		case object Create extends Permission("Add a sub-department")
 	}
 
 	object Module {

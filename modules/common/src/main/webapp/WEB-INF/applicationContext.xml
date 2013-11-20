@@ -146,6 +146,7 @@
 				<bean class="uk.ac.warwick.tabula.data.model.AssessmentTypeConverter" />
 				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointTypeConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.model.CourseTypeConverter" />
+				<bean class="uk.ac.warwick.tabula.data.model.DepartmentFilterRuleConverter" />
 	        </list>
 	    </property>
 	    <property name="formatters">

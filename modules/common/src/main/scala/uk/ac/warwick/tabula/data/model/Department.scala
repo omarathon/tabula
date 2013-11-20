@@ -3,11 +3,8 @@ package uk.ac.warwick.tabula.data.model
 import scala.annotation.tailrec
 import scala.collection.JavaConversions._
 import scala.xml.NodeSeq
-
 import javax.persistence._
-
 import org.hibernate.annotations.{Type, BatchSize, AccessType, ForeignKey}
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
@@ -19,6 +16,7 @@ import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
 
 @Entity @AccessType("field")
 class Department extends GeneratedId
@@ -162,6 +160,11 @@ class Department extends GeneratedId
 	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.includes(user)
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
+	
+	def copySettingsFrom(other: Department) = {
+		ensureSettings
+		settings ++= other.settings
+	}
 
 	// If hibernate sets owners to null, make a new empty usergroup
 	override def postLoad {
@@ -212,16 +215,23 @@ class Department extends GeneratedId
 object Department {
 
 	object FilterRule {
+		implicit val factory = { name: String => withName(name) }
+		
+		val allFilterRules: Seq[FilterRule] = {
+			val inYearRules = (1 until 9).map(InYearFilterRule(_))
+			(Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule) ++ inYearRules)
+		}
+		
 		def withName(name: String): FilterRule = {
-				val inYearRules = (1 until 9).map(InYearFilterRule(_))
-			(Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule) ++ inYearRules).find(_.name == name).get
-
+			allFilterRules.find(_.name == name).get
 		}
 	}
 
-	sealed trait FilterRule {
+	sealed trait FilterRule extends Convertible[String] {
 		val name: String
 		def matches(member: Member): Boolean
+		def getName = name // for Spring
+		def value = name
 	}
 
 	case object UndergraduateFilterRule extends FilterRule {
@@ -297,3 +307,6 @@ object Department {
     val AutoGroupDeregistration = "autoGroupDeregistration"
 	}
 }
+
+// converter for spring
+class DepartmentFilterRuleConverter extends ConvertibleConverter[String, Department.FilterRule]
