@@ -49,40 +49,56 @@ trait AddSubDepartmentCommandValidation extends SelfValidating {
 
 	def validate(errors: Errors) {
 		// Code must be non-empty and start with parent code
-		if (!code.hasText) errors.rejectValue("code", "department.code.empty")
-		else {
-			if (!code.startsWith(parent.code + "-")) errors.rejectValue("code", "department.code.mustStartWithParent", Array(parent.code), "")
+		if (!code.hasText) { 
+			errors.rejectValue("code", "department.code.empty")
+		} else {
+			if (!code.startsWith(parent.code + "-")) { 
+				errors.rejectValue("code", "department.code.mustStartWithParent", Array(parent.code), "")
+			}
 			
 			// Code must not exceed 20 characters
-			if (code.length > 20) errors.rejectValue("code", "department.code.tooLong", Array(20: java.lang.Integer), "")
+			if (code.length > 20) {
+				errors.rejectValue("code", "department.code.tooLong", Array(20: java.lang.Integer), "")
+			}
 			
 			// Code must only include lowercase and hyphen
-			if (!code.matches("""[a-z0-9\-]+""")) errors.rejectValue("code", "department.code.badFormat")
+			if (!code.matches("""[a-z0-9\-]+""")) {
+				errors.rejectValue("code", "department.code.badFormat")
+			}
 			
 			// Code must not already exist
-			if (moduleAndDepartmentService.getDepartmentByCode(code).isDefined) 
+			if (moduleAndDepartmentService.getDepartmentByCode(code).isDefined) {
 				errors.rejectValue("code", "department.code.exists")
+			} 
 		}
 		
 		// Name must be non-empty and start with parent name
-		if (!name.hasText) errors.rejectValue("name", "department.name.empty")
-		else {
-			if (!name.startsWith(parent.name + " ")) errors.rejectValue("name", "department.name.mustStartWithParent", Array(parent.name), "")
+		if (!name.hasText) {
+			errors.rejectValue("name", "department.name.empty")
+		} else {
+			if (!name.startsWith(parent.name + " ")) {
+				errors.rejectValue("name", "department.name.mustStartWithParent", Array(parent.name), "")
+			}
 		
 			// Name must not exceed 100 characters
-			if (name.length > 100) errors.rejectValue("name", "department.name.tooLong", Array(100: java.lang.Integer), "")
+			if (name.length > 100) {
+				errors.rejectValue("name", "department.name.tooLong", Array(100: java.lang.Integer), "")
+			}
 		}
 		
 		// Filter rule must not be null
-		if (filterRule == null) errors.rejectValue("filterRule", "department.filterRule.empty")
-		else if (parent.filterRule != null) {
+		if (filterRule == null) {
+			errors.rejectValue("filterRule", "department.filterRule.empty")
+		} else if (parent.filterRule != null) {
 			// Filter rule must not contradict parent rule
-			if (filterRule == AllMembersFilterRule && parent.filterRule != AllMembersFilterRule)
+			if (filterRule == AllMembersFilterRule && parent.filterRule != AllMembersFilterRule) {
 				errors.rejectValue("filterRule", "department.filterRule.contradictory")
+			}
 				
 			if ((filterRule == UndergraduateFilterRule && parent.filterRule == PostgraduateFilterRule) ||
-				(filterRule == PostgraduateFilterRule && parent.filterRule == UndergraduateFilterRule))
+				(filterRule == PostgraduateFilterRule && parent.filterRule == UndergraduateFilterRule)) {
 				errors.rejectValue("filterRule", "department.filterRule.contradictory")
+			}
 		}
 	}
 }
