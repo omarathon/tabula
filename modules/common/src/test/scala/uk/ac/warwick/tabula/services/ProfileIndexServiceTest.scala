@@ -196,7 +196,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 	// TAB-296
 	@Test def threading {
 		val ThreadCount = 100
-		val timeout = Duration(1, SECONDS)
+		val timeout = Duration(10, SECONDS)
 		val dept = Fixtures.department("CS", "Computer Science")
 
 		implicit val executionService = ExecutionContext.fromExecutor( Executors.newFixedThreadPool(5) )
