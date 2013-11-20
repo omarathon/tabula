@@ -4,8 +4,8 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.TextRenderer
 
-class ExtensionRequestCreatedNotification(extension:Extension, student:User)
-	extends ExtensionRequestNotification(extension, student) {
+class ExtensionRequestCreatedNotification(extension:Extension, student:User, extraInfo: Map[String, Object])
+	extends ExtensionRequestNotification(extension, student, extraInfo) {
 
 	this: TextRenderer =>
 

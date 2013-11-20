@@ -5,8 +5,8 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.TextRenderer
 import uk.ac.warwick.tabula.coursework.web.Routes
 
-class ExtensionRequestModifiedNotification(extension:Extension, student:User)
-	extends ExtensionRequestNotification(extension, student) {
+class ExtensionRequestModifiedNotification(extension:Extension, student:User, extraInfo: Map[String, Object])
+	extends ExtensionRequestNotification(extension, student, extraInfo) {
 
 	this: TextRenderer =>
 

@@ -13,7 +13,8 @@ class ExtensionRequestCreatedNotificationTest extends TestBase with Mockito {
 	val TEST_CONTENT = "test"
 
 	def createNotification(extension: Extension, student: User) = {
-		 val n = new ExtensionRequestCreatedNotification(extension, student) with MockRenderer
+		 val extraInfo = Map("studentMember" -> student)
+		 val n = new ExtensionRequestCreatedNotification(extension, student, extraInfo) with MockRenderer
 		 when(n.mockRenderer.renderTemplate(any[String],any[Any])).thenReturn(TEST_CONTENT)
 		 n
 	}

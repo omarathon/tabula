@@ -5,7 +5,7 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.data.model.{ Assignment, Module }
+import uk.ac.warwick.tabula.data.model.{StudentMember, Assignment, Module}
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
@@ -19,10 +19,14 @@ import uk.ac.warwick.tabula.helpers.DateBuilder
 import javax.validation.Valid
 import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.spring.Wire
+
 
 abstract class ExtensionController extends CourseworkController {
 	@Autowired var json:ObjectMapper =_
 	@Autowired var userLookup: UserLookupService = _
+	var relationshipService = Wire.auto[RelationshipService]
 	
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, module:Module)
@@ -183,9 +187,9 @@ class ReviewExtensionRequestController extends ExtensionController {
 	def editCommand(
 			@PathVariable("module") module:Module, 
 			@PathVariable("assignment") assignment:Assignment, 
-			@PathVariable("universityId") universityId:String, 
+			@PathVariable("universityId") student: StudentMember,
 			user:CurrentUser) = 
-		new ReviewExtensionRequestCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user)
+		new ReviewExtensionRequestCommand(module, assignment, mandatory(assignment.findExtension(student.universityId)), user, student)
 	
 	validatesSelf[ReviewExtensionRequestCommand]
 	
@@ -196,9 +200,14 @@ class ReviewExtensionRequestController extends ExtensionController {
 			"command" -> cmd,
 			"extension" ->  cmd.extension,
 			"module" -> cmd.module,
+			"moduleManagers" -> cmd.module.managers.users,
 			"assignment" -> cmd.assignment,
 			"universityId" -> cmd.extension.universityId,
-			"userFullName" -> userLookup.getUserByWarwickUniId(cmd.extension.universityId).getFullName
+			"userFullName" ->  cmd.student.fullName,
+			"student" -> cmd.student,
+		  "studentCourseDetails" -> cmd.student.mostSignificantCourseDetails.getOrElse(null),
+			"supervisors" -> relationshipService.findCurrentRelationships(
+				relationshipService.getStudentRelationshipTypeById("supervisor").getOrElse(null), cmd.student.mostSignificantCourseDetails.getOrElse(null).sprCode)
 		).noLayout()
 		model
 	}
