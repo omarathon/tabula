@@ -43,6 +43,8 @@ class AddSubDepartmentCommandTest extends TestBase with Mockito {
 		dept.parent should be (parent)
 		dept.allowExtensionRequests should be (true)
 		dept.autoGroupDeregistration should be (false)
+		
+		there was one(command.moduleAndDepartmentService).save(dept)
 	}}
 	
 	@Test def validateNoErrors() { new Fixture {
