@@ -60,7 +60,7 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 	}
 
 	def countFullFeedback(assignment: Assignment): Int = {
-		session.createQuery("""select count(*) from Feedback f join f.attachments a
+		session.createQuery("""select count(distinct f.id) from Feedback f left join f.attachments a
 			where f.assignment = :assignment
 			and not (actualMark is null and actualGrade is null and f.attachments is empty)""")
 			.setEntity("assignment", assignment)
