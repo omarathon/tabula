@@ -215,6 +215,7 @@ class Department extends GeneratedId
 object Department {
 
 	object FilterRule {
+		// Define a way to get from a String to a FilterRule, for use in a ConvertibleConverter
 		implicit val factory = { name: String => withName(name) }
 		
 		val allFilterRules: Seq[FilterRule] = {
