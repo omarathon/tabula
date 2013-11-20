@@ -30,7 +30,7 @@
 				floatingFooter   = $(".floatingFooter", persistArea),
 				persistHeader    = $(".persist-header", persistArea),
 				persistFooter    = $(".persist-footer", persistArea),
-				primaryNavHeight = $("#primary-navigation").height();
+                primaryNavHeight = $('#primary-navigation').height();
 
 			if ((scrollTop > offset.top) && (scrollTop < offset.top + el.height())) {
 				floatingHeader.visible();
@@ -52,14 +52,16 @@
 
 		var cloneRow = function(row, className) {
 			row.before(row.clone(true))
-				.css("width", row.width())
+				.css("max-width", row.width())
 				.addClass(className);
 		};
 
 
-		$(this).each(function() {
-			if($(".persist-header").length) cloneRow($(".persist-header", this), "floatingHeader");
-			if($(".persist-footer").length) cloneRow($(".persist-footer", this), "floatingFooter");
+		$(areaToPersist).each(function() {
+			if($(".persist-header").length) $(".persist-header").each(function() {
+				cloneRow($(this, areaToPersist), "floatingHeader");
+			});
+			if($(".persist-footer").length) cloneRow($(".persist-footer", areaToPersist), "floatingFooter");
 		});
 
 
@@ -68,9 +70,18 @@
 		});
 
 
+        // keeps the width of the floating header/footer as the parent on window resize
+		$( window ).resize(function() {
+            $(".floatingHeader:visible").css("max-width", $(this).parent().width() );
+
+            var floatingFooter = $(".floatingFooter");
+            floatingFooter.css("max-width", floatingFooter.parent().width() );
+		});
+
 
 		// public methods
 		this.initialize = function() {
+            updateTableHeaders(areaToPersist);
 			return this;
 		};
 
@@ -82,22 +93,21 @@
 			var persistAreaTop = $('.persist-header').height() + $('#primary-navigation').height();
 
 			if(fixContainer.offset().top - $(window).scrollTop() < $('.persist-header').height() + $('#primary-navigation').height()) {
-				directionIcon.css({ "top" : persistAreaTop, "position": "fixed", "width": directionIcon.width() });
+				directionIcon.css({ "top" : persistAreaTop, "position": "fixed", "max-width": directionIcon.width() });
 			} else {
-				directionIcon.css({"top": "auto", "position": "static", "width": directionIcon.width });
+				directionIcon.css({"top": "auto", "position": "static", "max-width": directionIcon.width });
 			}
 		};
 
-		// if the list of agents is shorter than the (viewport+fixed screen areas)
+        // if the list of agents is shorter than the (viewport+fixed screen areas)
 		// and we've scrolled past the top of the persist-area container, then fix it
 		// (otherwise don't, because the user won't be able to see all of the items in the well)
 		this.fixTargetList = function(listToFix) {
 			var targetList = $(listToFix);
-			var persistAreaTop = $('.persist-header').height() + $('#primary-navigation').height();
-			var viewableArea = $(window).height() - ($('.persist-header').height() + $('#primary-navigation').height() + $('.persist-footer').height());
+			var persistAreaTop = $('.floatingHeader:visible').height() + $('#primary-navigation').height();
 
 			// width is set on fixing because it was jumping to the minimum width of the content
-			if (targetList.height() < viewableArea && ($(window).scrollTop() > $('.persist-area').offset().top)) {
+			if (targetList.height() < this.viewableArea() && ($(window).scrollTop() > $('.persist-area').offset().top)) {
 				targetList.css({"top": persistAreaTop + 14, "position": "fixed", "width": targetList.parent().width()});
 			} else {
 				targetList.css({"top": "auto", "position": "relative", "width": "auto"});
@@ -105,7 +115,7 @@
 		}
 
 		this.viewableArea = function() {
-			return $(window).height() - ($('.persist-header').height() + $('#primary-navigation').height() + $('.persist-footer').outerHeight());
+			return $(window).height() - ($('.persist-header:visible').height() + $('#primary-navigation').height() + $('.persist-footer').outerHeight());
 		}
 
 
@@ -113,5 +123,6 @@
 
 
 	} // end fixHeaderFooter plugin
+
 
 })(jQuery);

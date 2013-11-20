@@ -7,6 +7,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Department}
 import org.springframework.util.AutoPopulatingList
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.attendance.commands.manage.{MonitoringPointState, AddMonitoringPointValidation, AddMonitoringPointCommand}
 
 class AddMonitoringPointCommandTest extends TestBase with Mockito {
 

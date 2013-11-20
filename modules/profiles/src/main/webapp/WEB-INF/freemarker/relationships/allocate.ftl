@@ -85,9 +85,14 @@
 						   href="#" >
 							<i class="icon-random"></i> Randomly allocate
 						</a>
-						<a class="return-items btn" data-toggle="return" data-disabled-on="no-allocation"
-						   href="#" >
+						<a href="#" title="" class="btn use-popover .tabulaPopover-init" data-disabled-on="no-allocation" data-title="Remove All Allocations" data-html="true" data-trigger="hover"
+						   data-content=
+							'<div class="alert" >Are you sure you want to remove all existing allocations
+							including ${department.name} students allocated by other departments?</div>
+							<button id="confirm-remove-all" type="button" class="btn btn-primary">Confirm</button>'
+						   data-original-title="Remove All Allocations">
 							<i class="icon-arrow-left"></i> Remove all
+							<div id="remove-all-tutors" data-toggle="return"></div>
 						</a>
 					</div>
 
@@ -181,8 +186,6 @@
 						</div>
 					</div>
 
-
-
 					<div class="span5">
 						<div id="agentslist" class="agents fix-on-scroll clearfix">
 
@@ -251,6 +254,13 @@
 
 	<script type="text/javascript">
 		(function($) {
+
+			<!-- TAB-1266 - warning popup for 'Remove All' button -->
+			$('body').on('click','.popover #confirm-remove-all', function() {
+				$('#remove-all-tutors').trigger('click');
+				$(this).closest('.popover').find('.close').trigger('click');
+			});
+
 			<!--TAB-1008 - fix scrolling bug when student list is shorter than the group list-->
 			$('#studentslist').css('min-height', function() {
 				return $('#agentslist').outerHeight();

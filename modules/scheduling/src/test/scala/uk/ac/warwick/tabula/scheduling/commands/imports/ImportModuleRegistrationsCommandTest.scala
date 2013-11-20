@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
 import uk.ac.warwick.tabula.data.ModuleRegistrationDao
 
-class ImportModuleRegistrationCommandTest extends PersistenceTestBase with Mockito with Logging {
+class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mockito with Logging {
 
 	trait Environment {
 		val stu = Fixtures.student(universityId = "0000001", userId="student")

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands.relationships
 
 import scala.collection.JavaConverters._
 import org.springframework.validation.BindingResult
-import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.commands.{MemberCollectionHelper, SelfValidating, Command, Description, GroupsObjects}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.ItemNotFoundException
@@ -14,13 +14,9 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.commands.GroupsObjects
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.profiles.services.docconversion.RawStudentRelationshipExtractor
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
@@ -31,6 +27,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		with SelfValidating
 		with BindListener
 		with RelationshipChangingCommand
+		with MemberCollectionHelper
 		with NotifiesAffectedStudents {
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Update(mandatory(relationshipType)), mandatory(department))
@@ -45,7 +42,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	}
 
 	// Sort members by last name, first name
-	implicit val defaultOrderingForMember = Ordering.by[Member, String] ( user => user.lastName + ", " + user.firstName )
+	implicit val defaultOrderingForMember = Ordering.by { m: Member => (Option(m.lastName), Option(m.firstName), Option(m.universityId)) }
 
 	val apparentUser = viewer.apparentUser
 
@@ -120,20 +117,11 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	}
 
 	def allMembersRoutes = {
-		val routes = for {
-			member <- membersById.values
-			course <- member.mostSignificantCourseDetails
-			if Option(course.route).isDefined
-		} yield course.route
-		routes.toSeq.sortBy(_.code).distinct
+		allMembersRoutesSorted(membersById.values)
 	}
 
 	def allMembersYears: Seq[JInteger] = {
-		val years = for (
-			member <- membersById.values;
-			course <- member.mostSignificantCourseDetails)
-				yield course.latestStudentCourseYearDetails.yearOfStudy
-		years.toSeq.distinct.sorted
+		allMembersYears(membersById.values)
 	}
 
 	// Sort all the lists of users by surname, firstname.

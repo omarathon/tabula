@@ -72,8 +72,8 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 				}
 			}
 
-			pick(".manager-table", managers)
-			pick(".assistant-table", assistants)
+			pick(".modulemanager-table", managers)
+			pick(".moduleassistant-table", assistants)
 
 			// as you were...
 			go to (Path("/coursework"))

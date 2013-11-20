@@ -66,6 +66,9 @@
 					departmental access manager for Tabula, or email <a id="email-support-link" href="mailto:tabula@warwick.ac.uk">tabula@warwick.ac.uk</a>.
 				</p>
 			</#if>
+			
+			<#assign dept = {"code":user.departmentCode?lower_case}>
+			<h2><a href="<@routes.filter_students dept />">All students in ${user.departmentName}</a></h2>
 		</div>
 		
 		<#if adminDepartments?has_content>

@@ -19,6 +19,8 @@ import uk.ac.warwick.tabula.data.{SessionComponent, ExtendedSessionComponent, Da
 import uk.ac.warwick.tabula.events.Event
 import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.tabula.JsonObjectMapperFactory
+import org.jadira.usertype.dateandtime.joda.columnmapper.TimestampColumnDateTimeMapper
+import org.joda.time.DateTimeZone
 
 trait AuditEventService {
 	def getById(id: Long): Option[AuditEvent]
@@ -68,6 +70,13 @@ class AuditEventServiceImpl extends AuditEventService {
 	private val indexListSql = baseSelect + """ 
 					where eventdate > :eventdate and eventstage = 'before'
 					order by eventdate asc """
+	
+	private val timestampColumnMapper = {
+		val mapper = new TimestampColumnDateTimeMapper
+		mapper.setDatabaseZone(DateTimeZone.forID("Europe/London"))
+		mapper.setJavaZone(DateTimeZone.forID("Europe/London"))
+		mapper
+	}
 
 	/**
 	 * Get all AuditEvents with this eventId, i.e. all before/after stages
@@ -84,7 +93,7 @@ class AuditEventServiceImpl extends AuditEventService {
 			null
 		} else {
 			val a = new AuditEvent
-			a.eventDate = new DateTime(array(DateIndex))
+			a.eventDate = timestampColumnMapper.fromNonNullValue(array(DateIndex).asInstanceOf[java.sql.Timestamp])
 			a.eventStage = array(StageIndex).toString
 			a.eventType = array(TypeIndex).toString
 			a.masqueradeUserId = array(MasqueradeIdIndex).asInstanceOf[String]
@@ -145,7 +154,7 @@ class AuditEventServiceImpl extends AuditEventService {
 				"(id,eventid,eventdate,eventtype,eventstage,real_user_id,masquerade_user_id,data) " +
 				"values(" + nextSeq + ", :eventid, :date,:name,:stage,:user_id,:masquerade_user_id,:data)")
 			query.setString("eventid", event.id)
-			query.setTimestamp("date", event.date.toDate)
+			query.setTimestamp("date", timestampColumnMapper.toNonNullValue(event.date))
 			query.setString("name", event.name)
 			query.setString("stage", stage)
 			query.setString("user_id", event.realUserId)
@@ -161,7 +170,7 @@ class AuditEventServiceImpl extends AuditEventService {
 
 	def listNewerThan(date: DateTime, max: Int): Seq[AuditEvent] = {
 		val query = session.createSQLQuery(indexListSql)
-		query.setTimestamp("eventdate", date.toDate)
+		query.setTimestamp("eventdate", timestampColumnMapper.toNonNullValue(date))
 		query.setMaxResults(max)
 		query.list()
 			.asInstanceOf[JList[Array[Object]]]

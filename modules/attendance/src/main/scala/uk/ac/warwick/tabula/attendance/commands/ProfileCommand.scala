@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.commands.{ReadOnly, Unaudited, ComposableCommand, CommandInternal}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPointSet, MonitoringPoint}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -16,8 +16,8 @@ case class AttendanceProfileInformation(
 )
 
 object ProfileCommand {
-	def apply(studentCourseDetails: StudentCourseDetails, academicYear: AcademicYear) =
-		new ProfileCommand(studentCourseDetails, academicYear)
+	def apply(student: StudentMember, academicYear: AcademicYear) =
+		new ProfileCommand(student, academicYear)
 		with ComposableCommand[Option[AttendanceProfileInformation]]
 		with ProfilePermissions
 		with ProfileCommandState
@@ -27,28 +27,19 @@ object ProfileCommand {
 }
 
 
-abstract class ProfileCommand(val studentCourseDetails: StudentCourseDetails, val academicYear: AcademicYear)
+abstract class ProfileCommand(val student: StudentMember, val academicYear: AcademicYear)
 	extends CommandInternal[Option[AttendanceProfileInformation]] with GroupMonitoringPointsByTerm with ProfileCommandState {
 
 	self: MonitoringPointServiceComponent =>
 
 	override def applyInternal() = {
-		studentCourseDetails.studentCourseYearDetails.asScala.find(_.academicYear == academicYear).flatMap {
-			studentCourseYearDetail =>
-				monitoringPointService.findMonitoringPointSet(
-					studentCourseDetails.route,
-					studentCourseYearDetail.academicYear,
-					Option(studentCourseYearDetail.yearOfStudy)
-				).orElse(
-					monitoringPointService.findMonitoringPointSet(studentCourseDetails.route, studentCourseYearDetail.academicYear, None)
-				).map { applyForPointSet }
-		}
+		monitoringPointService.getPointSetForStudent(student, academicYear).map { applyForPointSet }
 	}
 
 	private def applyForPointSet(pointSet: MonitoringPointSet): AttendanceProfileInformation = {
 		val monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, pointSet.academicYear)
 		val checkpointState = monitoringPointService
-			.getChecked(Seq(studentCourseDetails.student), pointSet)(studentCourseDetails.student)
+			.getChecked(Seq(student), pointSet)(student)
 			.map{	case (point, option) => point.id -> (option match {
 				case Some(state) => state.dbValue
 				case _ => "late"
@@ -72,12 +63,12 @@ trait ProfilePermissions extends RequiresPermissionsChecking with PermissionsChe
 	self: ProfileCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) = {
-		p.PermissionCheck(Permissions.MonitoringPoints.View, mandatory(studentCourseDetails))
+		p.PermissionCheck(Permissions.MonitoringPoints.View, mandatory(student))
 	}
 
 }
 
 trait ProfileCommandState {
-	def studentCourseDetails: StudentCourseDetails
+	def student: StudentMember
 	def academicYear: AcademicYear
 }

@@ -92,8 +92,25 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 				val pdfDownload = Download(Path(s"/coursework/module/${moduleCode.toLowerCase}/${assignmentId}/feedback.pdf")).as(P.Student1)
 				pdfDownload should be ('successful)
 				pdfDownload.contentAsString should include("PDF")
+
+				as(P.Admin1) {
+					Then("The assignment is archived")
+					go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/archive")
+					pageSource should include("Archive this assignment")
+					find(cssSelector("input[type='submit'][value=Archive]")).get.underlying.click()
+					eventually {
+						pageSource should include("Successful")
+					}
+					go to Path("/coursework/admin/module/" + moduleCode.toLowerCase + "/assignments/" + assignmentId + "/archive")
+					pageSource should include("Unarchive this assignment")
+				}
+
+				When("I log back in as student1 and go to the feedback page")
+				as(P.Student1){
+					go to Path(s"/coursework/module/${moduleCode.toLowerCase}/${assignmentId}")
+					Then("I still see the feedback, even though the assignmnet has now been archived")
+					pageSource should include("That was RUBBISH")
+				}
 		}
 	}
-
-
 }

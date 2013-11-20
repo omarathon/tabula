@@ -68,14 +68,10 @@ class ViewProfileController extends ProfilesController {
 
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 
-		// Get all the enabled relationship types for a department
-		val enabledRelationshipTypes =
-			Option(member.homeDepartment)
-				.map { _.displayedStudentRelationshipTypes }
-				.getOrElse { relationshipService.allStudentRelationshipTypes }
-
+		// Get meetings for all relationship types (not just the enabled ones for that dept)
+		// because we show a relationship on the profile page if there is one
 		val relationshipMeetings =
-			enabledRelationshipTypes.flatMap { relationshipType =>
+			allRelationshipTypes.flatMap { relationshipType =>
 				getViewMeetingRecordCommand(member, relationshipType).map { cmd =>
 					(relationshipType, cmd.apply())
 				}

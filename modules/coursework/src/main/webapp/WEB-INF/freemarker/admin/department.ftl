@@ -114,27 +114,16 @@
 						<i class="icon-folder-close"></i> Archive assignments
 					</@fmt.permission_button>
 				</li>
-
-				<#--
-					<#if features.extensions>
-						<li><a href="<@routes.extensionsettings department />"><i class="icon-calendar"></i> Extensions</a></li>
-					</#if>
-					<#if features.feedbackTemplates>
-						<li><a href="<@routes.feedbacktemplates department />"><i class="icon-comment"></i> Feedback templates</a></li>
-					</#if>
-					<#if features.markingWorkflows>
-						<li><a href="<@routes.markingworkflowlist department />"><i class="icon-check"></i> Marking workflows</a></li>
-					</#if>
-					<li id="feedback-report-button"><a href="<@routes.feedbackreport department />"  data-toggle="modal"  data-target="#feedback-report-modal"><i class="icon-book"></i> Feedback report</a></li>
-
-
-					-->
-
-					<#if can_manage_dept>
-						<li><a href="<@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}"><i class="icon-list-alt"></i> Settings</a></li>
-					</#if>
-
-
+				<li>
+					<#assign settings_url><@routes.displaysettings department />?returnTo=${(info.requestedUri!"")?url}</#assign>
+					<@fmt.permission_button
+						permission='Department.ManageDisplaySettings'
+						scope=department
+						action_descr='manage department settings'
+						href=settings_url>
+						<i class="icon-list-alt"></i> Settings
+					</@fmt.permission_button>
+				</li>
 				</ul>
 			</div>
 		</#if>
@@ -179,9 +168,16 @@
 					</a></li>
 				</#if>
 
-				<li><a href="<@url page="/admin/module/${module.code}/assignments/new" />"><i class="icon-plus"></i> Create new assignment</a></li>
-
-
+				<li>
+					<#assign create_url><@routes.createAssignment module /></#assign>
+					<@fmt.permission_button
+						permission='Assignment.Create'
+						scope=module
+						action_descr='create a new assignment'
+						href=create_url>
+						<i class="icon-plus"></i> Create new assignment
+					</@fmt.permission_button>
+				</li>
 				<li>
 					<#assign copy_url><@routes.copyModuleAssignments module /></#assign>
 					<@fmt.permission_button
@@ -352,7 +348,17 @@
 				<div class="btn-group">
 				  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-cog"></i> Actions <span class="caret"></span></a>
 				  <ul class="dropdown-menu pull-right">
-					<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/edit" />"><i class="icon-wrench"></i> Edit properties</a></li>
+					<li>
+						<#assign edit_url><@routes.assignmentedit assignment /></#assign>
+						<@fmt.permission_button 
+							permission='Assignment.Update' 
+							scope=assignment 
+							action_descr='edit assignment properties' 
+							href=edit_url>
+            	<i class="icon-wrench"></i> Edit properties
+            </@fmt.permission_button>
+					</li>
+					
 					<li>
 						<#assign archive_url><@url page="/admin/module/${module.code}/assignments/${assignment.id}/archive" /></#assign>
 						<#if assignment.archived>
@@ -360,7 +366,7 @@
 						<#else>
 							<#assign archive_caption>Archive assignment</#assign>
 						</#if>
-                        <@fmt.permission_button permission='SmallGroups.Archive' scope=module action_descr='${archive_caption}'?lower_case classes='archive-assignment-link ajax-popup' href=archive_url
+                        <@fmt.permission_button permission='Assignment.Archive' scope=assignment action_descr='${archive_caption}'?lower_case classes='archive-assignment-link ajax-popup' href=archive_url
                                         		data_attr='data-popup-target=.btn-group data-container=body'>
                         	<i class="icon-folder-close"></i> ${archive_caption}
                         </@fmt.permission_button>
@@ -370,7 +376,21 @@
 					<li class="divider"></li>
 
 					<#if assignment.allowExtensions>
-						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/extensions/" />"><i class="icon-calendar"></i> Grant extensions </a></li>
+						<li>
+							<#if can.do('Extension.ReviewRequest', assignment)>
+								<#assign ext_caption='Grant extensions' />
+							<#else>
+								<#assign ext_caption='View extensions' />
+							</#if>
+							<#assign ext_url><@routes.extensions assignment /></#assign>
+							<@fmt.permission_button 
+								permission='Extension.Read' 
+								scope=assignment 
+								action_descr=ext_caption?lower_case
+								href=ext_url>
+	            	<i class="icon-calendar"></i> ${ext_caption}
+	            </@fmt.permission_button>
+						</li>
 					<#else>
 						<li class="disabled"><a><i class="icon-calendar"></i> Grant extensions </a></li>
 					</#if>
@@ -379,19 +399,46 @@
 
 
 					<#if assignment.markingWorkflow?? && !assignment.markingWorkflow.studentsChooseMarker>
-						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/assign-markers" />"><i class="icon-user"></i> Assign markers </a></li>
+						<li>
+							<#assign markers_url><@routes.assignMarkers assignment /></#assign>
+							<@fmt.permission_button 
+								permission='Assignment.Update' 
+								scope=assignment 
+								action_descr='assign markers' 
+								href=markers_url>
+	            	<i class="icon-user"></i> Assign markers
+	            </@fmt.permission_button>
+	          </li>
 					<#else>
 						<li class="disabled"><a><i class="icon-user"></i> Assign markers </a></li>
 					</#if>
 
-					<#if assignment.collectMarks >
-						<li><a href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/marks" />"><i class="icon-check"></i> Add marks</a></li>
+					<#if assignment.collectMarks>
+						<li>
+							<#assign marks_url><@routes.addMarks assignment /></#assign>
+							<@fmt.permission_button 
+								permission='Marks.Create' 
+								scope=assignment 
+								action_descr='add marks' 
+								href=marks_url>
+	            	<i class="icon-check"></i> Add marks
+	            </@fmt.permission_button>
+	          </li>
 					<#else>
 						<li class="disabled"><a><i class="icon-check"></i> Add marks</a></li>
 					</#if>
-
-					<li><a class="feedback-link" href="<@url page="/admin/module/${module.code}/assignments/${assignment.id}/feedback/batch" />"><i class="icon-upload"></i> Upload feedback</a>
-
+					
+					<li>
+						<#assign feedback_url><@routes.addFeedback assignment /></#assign>
+						<@fmt.permission_button 
+							permission='Feedback.Create' 
+							scope=assignment 
+							action_descr='upload feedback' 
+							classes='feedback-link'
+							href=feedback_url>
+            	<i class="icon-upload"></i> Upload feedback
+            </@fmt.permission_button>
+          </li>
 
 					<#if assignment.canPublishFeedback>
 						<li>

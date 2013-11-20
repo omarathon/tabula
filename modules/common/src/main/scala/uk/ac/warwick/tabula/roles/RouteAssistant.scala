@@ -9,10 +9,11 @@ case class RouteAssistant(route: model.Route) extends BuiltInRole(RouteAssistant
 
 case object RouteAssistantRoleDefinition extends BuiltInRoleDefinition {
 	
-	override def description = "RouteAssistant"
+	override def description = "Route Assistant"
+	
+	GeneratesSubRole(RouteAuditorRoleDefinition)
 
-	GrantsScopedPermission( 
-		MonitoringPoints.View,
+	GrantsScopedPermission(
 		MonitoringPoints.Record
 	)
 

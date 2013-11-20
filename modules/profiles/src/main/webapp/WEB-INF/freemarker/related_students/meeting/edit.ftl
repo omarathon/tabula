@@ -83,29 +83,26 @@
 				<@f.option disabled="true" selected="true" label="Please select one..." />
 				<@f.options items=formats />
 			</@f.select>
-			<#if !isStudent>
-				<span class="monitoring-point-note">
-					Submitting this record will mark a monitoring point as attended.
-				</span>
-			</#if>
 		</@form.labelled_row>
 
 		<#if !isStudent>
+			<div id="willCheckpointBeCreatedMessage" class="alert alert-info" style="display: none;">
+				Submitting this record will mark a monitoring point as attended
+			</div>
 			<script>
 				jQuery(function($){
-					$('.monitoring-point-note').hide();
-					var formats = [
-						<#list formatsThatWillCreateCheckpoint as format>
-							"${format.description?js_string}"<#if format_has_next>,</#if>
-						</#list>
-					];
-					$('#format').on('change', function(){
-						var selectedFormat = $(this).find('option:selected').val();
-						if($.grep(formats, function(f){ return f == selectedFormat }).length > 0) {
-							$('.monitoring-point-note').show();
-						} else {
-							$('.monitoring-point-note').hide();
-						}
+					$('#meetingDate, #format').on('change', function(){
+						$.get('<@routes.meeting_will_create_checkpoint studentCourseDetails />', {
+							'relationshipType' : '${relationshipType.urlPart}',
+							'meetingFormat' : $('#format').val(),
+							'meetingDate' : $('#meetingDate').val()
+						}, function(data){
+							if(data.willCheckpointBeCreated) {
+								$('#willCheckpointBeCreatedMessage').show();
+							} else {
+								$('#willCheckpointBeCreatedMessage').hide();
+							}
+						})
 					})
 				});
 			</script>

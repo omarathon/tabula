@@ -56,8 +56,12 @@
 
 					$(this).datetimepicker('update');
 				}
+
 			}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
 		}
+
+        $(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
+
 	};
 
 	jQuery.fn.tabulaDatePicker = function() {
@@ -71,16 +75,20 @@
 				autoclose: true
 			}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
 		}
+
+        $(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
 	};
 
 	jQuery.fn.tabulaTimePicker = function() {
-		$(this).datetimepicker({
+
+        $(this).datetimepicker({
 			format: "hh:ii:ss",
 			weekStart: 1,
 			startView: 'day',
 			maxView: 'day',
 			autoclose: true
 		}).on('show', function(ev){
+
 			var d = new Date(ev.date.valueOf()),
 				  minutes = d.getUTCMinutes(),
 					seconds = d.getUTCSeconds(),
@@ -94,9 +102,59 @@
 				$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("hh:ii:ss", "standard"), "en", "standard"));
 
 				$(this).datetimepicker('update');
+
 			}
 		}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() { $(this).prev("input").focus(); });
+
+        $(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
+
+
 	};
+
+    jQuery.fn.selectOffset = function () {
+
+        if ($(this).hasClass('startDateTime')) {
+
+            $(this).on('click', function () {
+                var indexValue = $(this).children(':selected').prop('value');
+                $(this).closest('.dateTimePair').find('.endDateTime').prop('value', indexValue);
+            });
+
+        }
+    };
+
+
+    function offsetEndDateTime($element, currentDateTime) {
+
+
+         if($element.hasClass('startDateTime')) {
+
+            var endDate = $element.data('datetimepicker').getDate().getTime() + parseInt($element.next('.endoffset').data('end-offset'));
+            var $endDateInput =  $element.closest('.dateTimePair').find('.endDateTime');
+            var endDatePicker = $endDateInput.data('datetimepicker');
+
+            if ($endDateInput.length > 0) {
+                endDatePicker.setDate(new Date(endDate));
+                endDatePicker.setValue();
+                $endDateInput.closest('.control-group').addClass('warning').removeClass('error');
+            }
+
+         } else if ($element.hasClass('endDateTime')){
+
+
+             $element.closest('.control-group').removeClass('warning');
+
+             var $startDateInput = $element.closest('.dateTimePair').find('.startDateTime');
+
+             //Check end time is later than start time
+             if ($element.data('datetimepicker').getDate().getTime() < $startDateInput.data('datetimepicker').getDate().getTime()) {
+                 $element.closest('.control-group').addClass('error');
+             } else {
+                 $element.closest('.control-group').removeClass('error');
+             }
+         }
+
+    };
 
 	/* apply to a checkbox or radio button. When the target is selected a div containing further related form elements
 	   is revealed.
@@ -170,6 +228,8 @@
 			});
 		});
 	}
+
+
 
 	/*
 	 * Prepare a spinner and store reference in data store.
@@ -278,7 +338,7 @@
 		Customised Popover wrapper. Implements click away to dismiss.
 	*/
 	$.fn.tabulaPopover = function(options) {
-		var $items = this, initClass = '.tabulaPopover-init';
+		var $items = this, initClass = 'tabulaPopover-init';
 
 		// filter already initialized popovers
 		$items = $items.not(initClass);
@@ -573,6 +633,7 @@
 		$('input.date-picker').tabulaDatePicker();
 		$('input.time-picker').tabulaTimePicker();
 		$('form.double-submit-protection').tabulaSubmitOnce();
+        $('select.selectOffset').selectOffset();
 
 		// prepare spinnable elements
 		$('body').tabulaPrepareSpinners();
@@ -584,6 +645,7 @@
 			$m.find('input.date-picker').tabulaDatePicker();
 			$m.find('input.time-picker').tabulaTimePicker();
 			$m.find('form.double-submit-protection').tabulaSubmitOnce();
+            $('select.selectOffset').selectOffset();
 			$m.tabulaPrepareSpinners();
 		});
 
@@ -618,6 +680,12 @@
 			trigger: 'click',
 			container: '#container'
 		});
+
+        $('.use-wide-popover').tabulaPopover({
+            trigger: 'click',
+            container: '#container',
+            template: '<div class="popover wide"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
+        });
 
 		// add .use-introductory for custom popover.
 		// https://github.com/twitter/bootstrap/issues/2234
@@ -767,7 +835,7 @@
 
 			$(document).on('tabbablechanged', function(e, callback) {
 				$('.tooltip').remove();
-				$t.show().find('.tab-container i, .layout-tools i').tooltip({ delay: { show: 750, hide: 100 } });
+				$t.show().find('.tab-container i, .layout-tools i').tooltip();
 				if (typeof(callback) == typeof(Function)) callback();
 			});
 

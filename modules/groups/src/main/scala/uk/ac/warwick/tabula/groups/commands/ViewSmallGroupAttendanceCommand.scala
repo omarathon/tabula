@@ -50,6 +50,46 @@ object ViewSmallGroupAttendanceCommand {
 			with ReadOnly with Unaudited {
 		override lazy val eventName = "ViewSmallGroupAttendance"
 	}
+		
+	// Sort users by last name, first name
+	implicit val defaultOrderingForUser = Ordering.by { user: User => (user.getLastName, user.getFirstName, user.getUserId) }
+	
+	implicit val defaultOrderingForEventInstance = Ordering.by { instance: EventInstance => instance match {
+		case (event, week) => 
+			val weekValue = week * 7 * 24
+			val dayValue = (event.day.getAsInt - 1) * 24
+			val hourValue = event.startTime.getHourOfDay
+			
+			(weekValue + dayValue + hourValue, week, event.id)
+	}}
+	
+	def allEventInstances(group: SmallGroup, occurrences: Seq[SmallGroupEventOccurrence]) =
+		group.events.asScala.filter { !_.isUnscheduled }.flatMap { event =>
+			val allWeeks = event.weekRanges.flatMap { _.toWeeks }
+			allWeeks.map { week => 
+				val occurrence = occurrences.find { o =>
+					o.event == event && o.week == week
+				}
+				
+				((event, week), occurrence)
+			}
+		}
+		
+	def attendanceForStudent(allEventInstances: Seq[(EventInstance, Option[SmallGroupEventOccurrence])], isLate: EventInstance => Boolean)(user: User) = {
+		val userAttendance = allEventInstances.map { case ((event, week), occurrence) =>
+			val instance = (event, week)
+			val state = occurrence match {
+				case Some(occurrence) if occurrence.attendees.includesUser(user) => SmallGroupAttendanceState.Attended
+				case Some(occurrence) => SmallGroupAttendanceState.Missed
+				case None if isLate(event, week) => SmallGroupAttendanceState.Late
+				case _ => SmallGroupAttendanceState.NotRecorded
+			}
+			
+			(instance -> state)
+		} 
+		
+		SortedMap(userAttendance.toSeq:_*)
+	}
 }
 
 class ViewSmallGroupAttendanceCommand(val group: SmallGroup) 
@@ -57,21 +97,12 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 	self: SmallGroupServiceComponent with TermServiceComponent =>
 		
 	import ViewSmallGroupAttendanceCommand._
-		
-	// Sort users by last name, first name
-	implicit val defaultOrderingForUser = Ordering.by[User, String] ( user => user.getLastName + ", " + user.getFirstName )
-	
-	implicit val defaultOrderingForEventInstance = Ordering.by[EventInstance, Int] { 
-		case (event, week) => 
-			val weekValue = week * 7 * 24
-			val dayValue = (event.day.getAsInt - 1) * 24
-			val hourValue = event.startTime.getHourOfDay
-			
-			weekValue + dayValue + hourValue
-	}
 	
 	override def applyInternal() = {
 		val occurrences = benchmarkTask("Get all small group event occurrences for the group") { smallGroupService.findAttendanceByGroup(group) }
+			
+		// Build a list of all the events and week information, with an optional register
+		val instances = benchmarkTask("Translate small group events into instances") { allEventInstances(group, occurrences) }
 		
 		// Build the list of all users who are in the group, or have attended one or more occurrences of the group
 		val allStudents = benchmarkTask("Get a list of all registered or attended users") {
@@ -79,51 +110,25 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 			occurrences.flatMap { _.attendees.users }
 			.distinct
 		}
-			
-		// Build a list of all the events and week information, with an optional register
-		val allEventInstances = benchmarkTask("Translate small group events into instances") {
-			group.events.asScala.filter { !_.isUnscheduled }.flatMap { event =>
-				val allWeeks = event.weekRanges.flatMap { _.toWeeks }
-				allWeeks.map { week => 
-					val occurrence = occurrences.find { o =>
-						o.event == event && o.week == week
-					}
-					
-					((event, week), occurrence)
-				}
-			}
-		}
 		
 		val attendance = benchmarkTask("For each student, build an attended list for each instance") { 
-			val attendance = allStudents.map { user =>
-				val userAttendance = allEventInstances.map { case ((event, week), occurrence) =>
-					val instance = (event, week)
-					val state = occurrence match {
-						case Some(occurrence) if occurrence.attendees.includesUser(user) => SmallGroupAttendanceState.Attended
-						case Some(occurrence) => SmallGroupAttendanceState.Missed
-						case None if isLate(event, week) => SmallGroupAttendanceState.Late
-						case _ => SmallGroupAttendanceState.NotRecorded
-					}
-					
-					(instance -> state)
-				} 
-				
-				(user -> SortedMap(userAttendance.toSeq:_*))
-			}
+			val attendance = allStudents.map { user => (user -> attendanceForStudent(instances, isLate)(user)) }
 			
 			SortedMap(attendance.toSeq:_*)
 		}
 		
 		SmallGroupAttendanceInformation(
-			instances = allEventInstances.map { case ((event, week), occurrence) => (event, week) }.sorted,
+			instances = instances.map { case ((event, week), occurrence) => (event, week) }.sorted,
 			attendance = attendance
 		)
 	}
 	
 	lazy val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, group.groupSet.academicYear)
 	
-	private def isLate(event: SmallGroupEvent, week: SmallGroupEventOccurrence.WeekNumber): Boolean = 
-		week < currentAcademicWeek // only late if week is in the past
+	private def isLate(instance: EventInstance): Boolean = instance match {
+		case (_, week: SmallGroupEventOccurrence.WeekNumber) =>
+			week < currentAcademicWeek // only late if week is in the past
+	}
 	
 }
 
@@ -131,7 +136,7 @@ trait ViewSmallGroupAttendancePermissions extends RequiresPermissionsChecking wi
 	self: ViewSmallGroupAttendanceState =>
 	
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.SmallGroupEvents.Register, group)
+		p.PermissionCheck(Permissions.SmallGroupEvents.ViewRegister, group)
 	}
 }
 

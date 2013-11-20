@@ -296,6 +296,7 @@ object Permissions {
 
 	object SmallGroupEvents {
 		case object Register extends Permission("Record attendance on small group events")
+		case object ViewRegister extends Permission("View attendance at small group events")
 	}
 
 	object UserSettings {

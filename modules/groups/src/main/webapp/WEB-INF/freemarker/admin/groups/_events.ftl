@@ -23,7 +23,7 @@
 							<h3 class="name inline-block">
 								${group.name!""}
 								<#if !newRecord>
-									<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
+									<small><@fmt.p (group.group.students.includeUsers?size)!0 "student" "students" /></small>
 								</#if>
 							</h3>
 							<#assign unlimited = !((smallGroupSet.defaultMaxGroupSizeEnabled)!false) />

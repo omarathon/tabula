@@ -5,27 +5,77 @@
 
 var exports = {};
 
-exports.Manage = {}
+exports.Manage = {};
+
+exports.createButtonGroup = function(id){
+    var $this = $(id), selectedValue = $this.find('option:selected').val();
+    $('.recordCheckpointForm div.forCloning div.btn-group')
+        .clone(true)
+        .insertAfter($this)
+        .find('button').filter(function(){
+            return $(this).data('state') == selectedValue;
+        }).addClass('active');
+    $this.hide();
+};
+
+exports.bindButtonGroupHandler = function() {
+    $('#recordAttendance').on('click', 'div.btn-group button', function(){
+        var $this = $(this);
+        $this.closest('div.pull-right').find('option').filter(function(){
+            return $(this).val() == $this.data('state');
+        }).prop('selected', true);
+    });
+};
+
+exports.scrollablePointsTableSetup = function() {
+    $('.scrollable-points-table .middle .sb-wide-table-wrapper').parent().addClass('scrollable');
+    $('.scrollable-points-table .middle .scrollable').addClass('rightShadow').find('.sb-wide-table-wrapper').on('scroll', function(){
+       var $this = $(this);
+       if($this.scrollLeft() > 0) {
+           $this.parent(':not(.leftShadow)').addClass('leftShadow');
+       } else {
+           $this.parent().removeClass('leftShadow');
+       }
+       if($this.scrollLeft() == 0 || $this.get(0).scrollWidth - $this.scrollLeft() != $this.outerWidth()) {
+           $this.parent(':not(.rightShadow)').addClass('rightShadow');
+       } else {
+           $this.parent().removeClass('rightShadow');
+       }
+    });
+};
+
+exports.tableSortMatching = function(tableArray) {
+    var matchSorting = function($sourceTable, targetTables){
+        var $sourceRows = $sourceTable.find('tbody tr');
+        $.each(targetTables, function(i, $table){
+            var $tbody = $table.find('tbody');
+            var oldRows = $tbody.find('tr').detach();
+            $.each($sourceRows, function(j, row){
+                var $sourceRow = $(row);
+                oldRows.filter(function(){ return $(this).data('sortId') == $sourceRow.data('sortId'); }).appendTo($tbody);
+            });
+        });
+    };
+
+    if (tableArray.length < 2)
+        return;
+
+    $.each(tableArray, function(i){
+        var otherTables = tableArray.slice();
+        otherTables.splice(i, 1);
+        this.on('sortEnd', function(){
+            matchSorting($(this), otherTables);
+        }).find('tbody tr').each(function(i){ $(this).data('sortId', i); });
+    });
+};
 
 $(function(){
 
 	// SCRIPTS FOR RECORDING MONITORING POINTS
 
-	$('.recordCheckpointForm').find('select').each(function(){
-		var $this = $(this), selectedValue = $this.find('option:selected').val();
-		$('.recordCheckpointForm div.forCloning div.btn-group')
-			.clone(true)
-			.insertAfter($this)
-			.find('button').on('click', function(){
-				var _$this = $(this);
-				$this.find('option').filter(function(){
-					return $(this).val() == _$this.data('state');
-				}).prop('selected', true);
-			}).filter(function(){
-				return $(this).data('state') == selectedValue;
-			}).trigger('click');
-		$this.hide();
-	}).end().find('.persist-header').each(function(){
+	$('.recordCheckpointForm').find('.persist-header')
+        .find('div.pull-right').show()
+        .end().each(function(){
 		$(this).find('.btn-group button').each(function(i){
 			$(this).on('click', function(){
 				$('.attendees .item-info').each(function(){
@@ -46,35 +96,6 @@ $(function(){
     });
 
 	// END SCRIPTS FOR RECORDING MONITORING POINTS
-
-	// SCRIPTS FOR VIEWING MONITORING POINTS
-	(function(){
-		var routeSelect = $('#viewChooseSet').find('select[name="route"]').on('change', function(){
-			var $this = $(this),
-				selectedRouteCode = $this.find(':selected').val(),
-				yearSelect = $this.parent()
-					.find('select[name="set"]').find('option:gt(0)').remove()
-					.end().find('option:first').prop('selected', true)
-					.end();
-
-			$.each(
-				$.grep(setsByRouteByAcademicYear[$('select[name="academicYear"] :selected').val()], function(r){
-					return selectedRouteCode === r.code;
-				})[0].sets,
-				function(i, set){
-					yearSelect.append(
-						$('<option/>').val(set.id).html(set.year)
-					);
-				}
-			)
-		});
-		// If a route us selected by not a year/set on load then populate the year of study drop-down
-		if (routeSelect.length > 0 && routeSelect.parent().find('select[name="set"]').find('option:selected').val().length == 0) {
-			routeSelect.change();
-		}
-	})();
-
-	// END SCRIPTS FOR VIEWING MONITORING POINTS
 
 	// SCRIPTS FOR MANAGING MONITORING POINTS
 

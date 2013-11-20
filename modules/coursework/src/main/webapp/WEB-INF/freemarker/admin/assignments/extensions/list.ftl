@@ -67,9 +67,17 @@
 								</#if>
 							</td>
 							<td><#if isExtensionManager>
-								<a class="review-extension btn btn-mini btn-primary" href="<@routes.extensionreviewrequest assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
+								<#assign review_url><@routes.extensionreviewrequest assignment=assignment uniId=extension.universityId /></#assign>
+								
+								<@fmt.permission_button
+									permission='Extension.ReviewRequest'
+									scope=extension
+									action_descr='review an extension'
+									classes='review-extension btn btn-mini btn-primary'
+									data_attr='data-toggle=modal data-target=#extension-model'
+									href=review_url>
 									<i class="icon-edit icon-white"></i> Review
-								</a>
+								</@fmt.permission_button>
 							</#if></td>
 						</tr>
 					</#list>
@@ -93,16 +101,28 @@
 
 
 							<td>
-								<a class="new-extension btn btn-mini btn-success" href="<@routes.extensionadd assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model" style="display:none;">
-									<i class="icon-ok icon-white"></i> Grant
-								</a>
-								<a class="modify-extension btn btn-mini btn-primary" href="<@routes.extensionedit assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
+								<#assign modify_url><@routes.extensionedit assignment=assignment uniId=extension.universityId /></#assign>
+								<#assign revoke_url><@routes.extensiondelete assignment=assignment uniId=extension.universityId /></#assign>
+								
+								<@fmt.permission_button
+									permission='Extension.Update'
+									scope=extension
+									action_descr='modify an extension'
+									classes='modify-extension btn btn-mini btn-primary'
+									data_attr='data-toggle=modal data-target=#extension-model'
+									href=grant_url>
 									<i class="icon-edit icon-white"></i> Modify
-								</a>
-								&nbsp;
-								<a class="revoke-extension btn btn-mini btn-danger" href="<@routes.extensiondelete assignment=assignment uniId=extension.universityId />" data-toggle="modal" data-target="#extension-model">
+								</@fmt.permission_button>
+
+								<@fmt.permission_button
+									permission='Extension.Delete'
+									scope=extension
+									action_descr='revoke an extension'
+									classes='revoke-extension btn btn-mini btn-danger'
+									data_attr='data-toggle=modal data-target=#extension-model'
+									href=grant_url>
 									<i class="icon-remove icon-white"></i> Revoke
-								</a>
+								</@fmt.permission_button>
 							</td>
 						</tr>
 					</#list>
@@ -116,16 +136,17 @@
 							<td class="expiryDate"></td>
 							<td  class="status"></td>
 							<td>
-								<a class="new-extension btn btn-mini btn-success" href="<@routes.extensionadd assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model">
+								<#assign grant_url><@routes.extensionadd assignment=assignment uniId=universityId /></#assign>
+								
+								<@fmt.permission_button
+									permission='Extension.Create'
+									scope=assignment
+									action_descr='grant an extension'
+									classes='new-extension btn btn-mini btn-success'
+									data_attr='data-toggle=modal data-target=#extension-model'
+									href=grant_url>
 									<i class="icon-ok icon-white"></i> Grant
-								</a>
-								<a class="modify-extension btn btn-mini btn-primary" href="<@routes.extensionedit assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model" style="display:none;">
-									<i class="icon-edit icon-white"></i> Modify
-								</a>
-								&nbsp;
-								<a class="revoke-extension btn btn-mini btn-danger" href="<@routes.extensiondelete assignment=assignment uniId=universityId />" data-toggle="modal" data-target="#extension-model" style="display:none;">
-									<i class="icon-remove icon-white"></i> Revoke
-								</a>
+								</@fmt.permission_button>
 							</td>
 						</tr>
 					</#list>
