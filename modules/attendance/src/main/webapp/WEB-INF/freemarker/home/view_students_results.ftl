@@ -148,14 +148,14 @@
 								<#list students as studentData>
 									<tr class="student">
 										<td class="unrecorded">
-											<a href="<@routes.viewStudent command.department studentData.student command.academicYear returnTo />">
+											<a href="<@routes.viewStudent command.department studentData.student command.academicYear />">
 												<span class="badge badge-<#if (studentData.unrecorded > 2)>important<#elseif (studentData.unrecorded > 0)>warning<#else>success</#if>">
 													${studentData.unrecorded}
 												</span>
 											</a>
 										</td>
 										<td class="missed">
-											<a href="<@routes.viewStudent command.department studentData.student command.academicYear returnTo />">
+											<a href="<@routes.viewStudent command.department studentData.student command.academicYear />">
 												<span class="badge badge-<#if (studentData.missed > 2)>important<#elseif (studentData.missed > 0)>warning<#else>success</#if>">
 													${studentData.missed}
 												</span>
