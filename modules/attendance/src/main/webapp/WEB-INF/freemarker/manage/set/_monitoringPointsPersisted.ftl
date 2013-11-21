@@ -17,7 +17,7 @@
 									<i class="icon-remove"></i>
 								</a>
 							</div>
-							${point.name} (<@fmt.monitoringPointWeeksFormat point.validFromWeek point.requiredFromWeek point.pointSet.academicYear point.pointSet.route.department />)
+							${point.name} (<a class="use-tooltip" data-html="true" title="<@fmt.wholeWeekDateFormat point.validFromWeek point.requiredFromWeek point.pointSet.academicYear />"><@fmt.monitoringPointWeeksFormat point.validFromWeek point.requiredFromWeek point.pointSet.academicYear point.pointSet.route.department /></a>)
 						</div>
 					</div>
 				</#list>
@@ -39,3 +39,8 @@
 		</#list>
 	</#if>
 </div>
+<script>
+	jQuery(function($){
+		$('.use-tooltip').tooltip();
+	})
+</script>

@@ -19,12 +19,19 @@
 			${relationship.description}<#if relationship_has_next> or </#if>
 			</#list>
 			<#if command.point.validFromWeek == command.point.requiredFromWeek>
-				in <@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+				in
+				<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.validFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear />">
+					<@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+				</a>
 			<#else>
 				between
-				<@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+				<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.validFromWeek command.point.validFromWeek command.point.pointSet.academicYear />">
+					<@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+				</a>
 				and
-				<@fmt.monitoringPointWeeksFormat command.point.requiredFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+				<a class="use-tooltip" data-html="true" data-placement="bottom" title="<@fmt.wholeWeekDateFormat command.point.requiredFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear />">
+					<@fmt.monitoringPointWeeksFormat command.point.requiredFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+				</a>
 			</#if>
 
 		</p>
@@ -79,4 +86,9 @@
 
 		</#if>
 	</#if>
+	<script>
+		jQuery(function($){
+			$('.use-tooltip').tooltip();
+		})
+	</script>
 </#escape>

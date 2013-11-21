@@ -61,6 +61,12 @@
 	--></#noescape><#--
 --></#macro>
 
+<#macro wholeWeekDateFormat startWeek endWeek academicYear short=false><#--
+	--><#noescape><#--
+		-->${wholeWeekFormatter(startWeek, endWeek, academicYear, short)}<#--
+	--></#noescape><#--
+--></#macro>
+
 <#macro singleWeekFormat week academicYear dept short=false><#--
 	--><#noescape><#--
 		-->${wholeWeekFormatter(week, academicYear, dept, short)}<#--
@@ -74,9 +80,16 @@
 	--></#noescape><#--
 --></#macro>
 
-	<#macro monitoringPointFormat point stripHtml=false><#--
+<#macro monitoringPointFormat point stripHtml=false><#--
 	--><#noescape><#--
 		--><#local result = wholeWeekFormatter(point.validFromWeek, point.requiredFromWeek, point.pointSet.academicYear, point.pointSet.route.department, false) /><#--
+		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
+	--></#noescape><#--
+--></#macro>
+
+<#macro monitoringPointDateFormat point stripHtml=false><#--
+	--><#noescape><#--
+		--><#local result = wholeWeekFormatter(point.validFromWeek, point.requiredFromWeek, point.pointSet.academicYear, false) /><#--
 		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
 	--></#noescape><#--
 --></#macro>

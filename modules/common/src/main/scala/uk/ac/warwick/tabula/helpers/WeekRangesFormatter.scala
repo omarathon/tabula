@@ -466,6 +466,10 @@ class WholeWeekFormatterTag extends TemplateMethodModelEx with KnowsUserNumberin
 				format(Seq(WeekRange(startWeekNumber, endWeekNumber)), DayOfWeek.Thursday, academicYear, numberingSystem(user, () => Option(dept)), short)
 			}
 
+			case Seq(startWeekNumber: JInteger, endWeekNumber: JInteger, academicYear: AcademicYear, short: JBoolean) => {
+				format(Seq(WeekRange(startWeekNumber, endWeekNumber)), DayOfWeek.Thursday, academicYear, WeekRange.NumberingSystem.None, short)
+			}
+
 			case _ => throw new IllegalArgumentException("Bad args: " + args)
 		}
 	}
