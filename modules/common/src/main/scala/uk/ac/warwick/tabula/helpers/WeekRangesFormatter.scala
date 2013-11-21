@@ -1,17 +1,14 @@
 package uk.ac.warwick.tabula.helpers
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable
 import scala.language.implicitConversions
 import uk.ac.warwick.tabula.data.model.groups.WeekRange
-import uk.ac.warwick.util.termdates.TermFactory
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.util.termdates.Term
 import org.joda.time.DateTime
-import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.JavaImports._
@@ -19,13 +16,12 @@ import freemarker.template.{ TemplateModel, TemplateMethodModelEx }
 import freemarker.template.utility.DeepUnwrap
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, Vacation, TermService, UserSettingsService}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 
 
 /** Format week ranges, using a formatting preference for term week numbers, cumulative week numbers or academic week numbers.
-  *
-  * WeekRange objects are always _stored_ with academic week numbers. These may span multiple terms, holidays etc.
-  */
+	*
+	* WeekRange objects are always _stored_ with academic week numbers. These may span multiple terms, holidays etc.
+	*/
 object WeekRangesFormatter {
 
 	val separator = "; "
@@ -33,9 +29,9 @@ object WeekRangesFormatter {
 	private val formatterMap = new WeekRangesFormatterCache
 
 	/** The reason we need the academic year and day of the week here is that it might affect
-	  * which term a date falls under. Often, the Spring term starts on a Wednesday after New
-	  * Year's Day, so Monday of that week is in the vacation, but Thursday is week 1 of term 2.
-	  */
+		* which term a date falls under. Often, the Spring term starts on a Wednesday after New
+		* Year's Day, so Monday of that week is in the vacation, but Thursday is week 1 of term 2.
+		*/
 	def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, year: AcademicYear, numberingSystem: String) =
 		formatterMap.retrieve(year) format (ranges, dayOfWeek, numberingSystem)
 
@@ -47,7 +43,7 @@ object WeekRangesFormatter {
 
 
 /** Companion class for Freemarker.
-  */
+	*/
 class WeekRangesFormatterTag extends TemplateMethodModelEx {
 
 	import WeekRangesFormatter.format
@@ -63,30 +59,17 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 				.flatMap { settings => Option(settings.weekNumberingSystem) }
 				.getOrElse(department.weekNumberingSystem)
 		}
-		
+
 		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
-			case Seq(ranges: Seq[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) => 
+			case Seq(ranges: Seq[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) =>
 				format(ranges.asInstanceOf[Seq[WeekRange]], dayOfWeek, year, numberingSystem(dept))
-			
-			case Seq(ranges: JList[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) => 
+
+			case Seq(ranges: JList[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) =>
 				format(ranges.asScala.toSeq.asInstanceOf[Seq[WeekRange]], dayOfWeek, year, numberingSystem(dept))
-				
-			case Seq(event: SmallGroupEvent) => 
+
+			case Seq(event: SmallGroupEvent) =>
 				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(event.group.groupSet.module.department))
-
-			case Seq(monitoringPoint: MonitoringPoint) => {
-				format(
-					Seq(WeekRange(monitoringPoint.validFromWeek,monitoringPoint.requiredFromWeek)),
-					DayOfWeek.Thursday,
-					monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear,
-					numberingSystem(monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].route.department)
-				)
-			}
-
-			case Seq(validFromWeek: Integer, requiredFromWeek: Integer, academicYear: AcademicYear, dept: Department) => {
-				format(Seq(WeekRange(validFromWeek, requiredFromWeek)), DayOfWeek.Thursday, academicYear, numberingSystem(dept))
-			}
 
 			case _ => throw new IllegalArgumentException("Bad args: " + args)
 		}
@@ -236,7 +219,7 @@ class WeekRangeSelectFormatter(year: AcademicYear) extends WeekRanges(year: Acad
 		val currentTermRanges = allTermWeekRanges.toList(currentTerm).toWeeks
 		val weeks = currentTermRanges.intersect(eventRanges)
 
-	  numberingSystem match {
+		numberingSystem match {
 			case WeekRange.NumberingSystem.Term => weeks.map( x => EventWeek( x - (currentTermRanges(0) - 1 ), x ) )
 			case WeekRange.NumberingSystem.Cumulative => weeks.map({x =>
 				val date = weekNumberToDate(x, dayOfWeek)
@@ -263,18 +246,18 @@ class WeekRangeSelectFormatterTag extends TemplateMethodModelEx with KnowsUserNu
 
 	@Autowired var userSettings: UserSettingsService = _
 
-		/** Pass through all the arguments, or just a SmallGroupEvent if you're lazy */
-		override def exec(list: JList[_]) = {
-			val user = RequestInfo.fromThread.get.user
+	/** Pass through all the arguments, or just a SmallGroupEvent if you're lazy */
+	override def exec(list: JList[_]) = {
+		val user = RequestInfo.fromThread.get.user
 
-			val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
-			args match {
-				case Seq(event: SmallGroupEvent) =>
-					format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(user,()=>Option(event.group.groupSet.module.department)))
+		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
+		args match {
+			case Seq(event: SmallGroupEvent) =>
+				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(user,()=>Option(event.group.groupSet.module.department)))
 
-				case _ => throw new IllegalArgumentException("Bad args: " + args)
-			}
+			case _ => throw new IllegalArgumentException("Bad args: " + args)
 		}
+	}
 }
 trait KnowsUserNumberingSystem{
 	var userSettings: UserSettingsService
@@ -319,7 +302,7 @@ trait WeekRangesDumper extends KnowsUserNumberingSystem {
 					IntervalFormatter.format(weekInterval.getStart, weekInterval.getEnd, includeTime = false, includeDays = false)
 				}
 
-			(weekInterval.getStart.getMillis, weekInterval.getEnd.getMillis, description)
+				(weekInterval.getStart.getMillis, weekInterval.getEnd.getMillis, description)
 			}
 		}
 
@@ -344,21 +327,40 @@ class WeekRangesDumperTag extends TemplateMethodModelEx with WeekRangesDumper wi
 	}
 
 	def exec(unused: JList[_]): AnyRef = {
-		  getWeekRangesAsJSON(formatWeekName)
+		getWeekRangesAsJSON(formatWeekName)
 	}
 }
 
 
-class SingleWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYear)  {
+class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYear)  {
 
 	implicit class PimpedTerm(term: Term) {
-		def print(weekNumber: Int, weekStartDate: DateTime, dayOfWeek: DayOfWeek, numberingSystem: String, short: Boolean) = {
+		def print(weekRange: WeekRange, dayOfWeek: DayOfWeek, numberingSystem: String, short: Boolean) = {
+			val startDate = weekNumberToDate(weekRange.minWeek, dayOfWeek)
+			val endDate = weekNumberToDate(weekRange.maxWeek, dayOfWeek)
+			val Monday = DayOfWeek.Monday.getAsInt
+
 			term match {
 				case vac: Vacation => {
-					if (short) weekStartDate.withDayOfWeek(1).toString("dd/MM")
-					else {
+					if (weekRange.isSingleWeek) {
+						if (short) startDate.withDayOfWeek(Monday).toString("dd/MM")
+						else "%s, w/c %s" format (
+							vac.getTermTypeAsString,
+							IntervalFormatter.format(startDate.withDayOfWeek(Monday), includeTime = false)
+							)
+					} else {
 						// Date range
-						"%s, w/c %s" format (vac.getTermTypeAsString, IntervalFormatter.format(weekStartDate.withDayOfWeek(1), includeTime = false))
+						if (short)
+							"%s, %s-%s" format (
+								vac.getTermTypeAsString,
+								startDate.withDayOfWeek(Monday).toString("dd/MM"),
+								endDate.withDayOfWeek(Monday).toString("dd/MM")
+								)
+						else
+							"%s, %s" format (
+								vac.getTermTypeAsString,
+								IntervalFormatter.format(startDate.withDayOfWeek(Monday), endDate.withDayOfWeek(Monday), includeTime = false).replaceAll("Mon", "w/c Mon")
+								)
 					}
 				}
 				case term => {
@@ -375,56 +377,82 @@ class SingleWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 							case WeekRange.NumberingSystem.Cumulative => term.getCumulativeWeekNumber(date)
 						}
 
-					if (short) weekNumber(weekStartDate).toString
-					else "Term %d, week %d" format (termNumber, weekNumber(weekStartDate))
+					if (short) {
+						if (weekRange.isSingleWeek) weekNumber(startDate).toString
+						else "Term %d, %d-%d" format (termNumber, weekNumber(startDate), weekNumber(endDate))
+					} else {
+						if (weekRange.isSingleWeek) "Term %d, week %d" format (termNumber, weekNumber(startDate))
+						else "Term %d, weeks %d-%d" format (termNumber, weekNumber(startDate), weekNumber(endDate))
+					}
 				}
 			}
 		}
 	}
 
 
-	def format(weekNumber: Int, dayOfWeek: DayOfWeek, numberingSystem: String, short: Boolean) = numberingSystem match {
-		case WeekRange.NumberingSystem.Academic => {
-			if (short) weekNumber.toString else "Week " + weekNumber
-		}
-		case WeekRange.NumberingSystem.None => {
-			val weekDate = weekNumberToDate(weekNumber, dayOfWeek)
-			if (short) weekDate.withDayOfWeek(1).toString("dd/MM") 
-			else "w/c " + IntervalFormatter.format(weekDate.withDayOfWeek(1), includeTime = false)
-		}
-		case _ => {
-			val weekStartDate = weekNumberToDate(weekNumber, dayOfWeek)
-			val term = termService.getTermFromDateIncludingVacations(weekStartDate)
-			term.print(weekNumber, weekStartDate, dayOfWeek, numberingSystem, short)
+	def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, numberingSystem: String, short: Boolean) = {
+		import WeekRangesFormatter._
+
+		numberingSystem match {
+			case WeekRange.NumberingSystem.Academic => {
+				val prefix =
+					if (short) {
+						""
+					} else {
+						if (ranges.size == 1 && ranges.head.isSingleWeek)	"Week "
+						else "Weeks "
+					}
+				prefix + ranges.mkString(separator)
+			}
+			case WeekRange.NumberingSystem.None => {
+				ranges.map { weekRange =>
+					val Monday = DayOfWeek.Monday
+					val startDate = weekNumberToDate(weekRange.minWeek, Monday)
+					val endDate = weekNumberToDate(weekRange.maxWeek, Monday)
+
+					if (short) {
+						if (weekRange.isSingleWeek) startDate.toString("dd/MM")
+						else startDate.toString("dd/MM") + " - " + endDate.toString("dd/MM")
+					} else {
+						IntervalFormatter.format(startDate, endDate, includeTime = false).replaceAll("Mon", "w/c Mon")
+					}
+				}.mkString(separator)
+			}
+			case _ => {
+				groupWeekRangesByTerm(ranges, dayOfWeek).map {
+					case (weekRange, term) =>
+						term.print(weekRange, dayOfWeek, numberingSystem, short)
+				}.mkString(separator)
+			}
 		}
 	}
 }
 
 
 
-object SingleWeekFormatter {
+object WholeWeekFormatter {
 
 	val separator = "; "
 
-	private val formatterMap = new SingleWeekFormatterCache
+	private val formatterMap = new WholeWeekFormatterCache
 
 	/** The reason we need the academic year and day of the week here is that it might affect
-	  * which term a date falls under. Often, the Spring term starts on a Wednesday after New
-	  * Year's Day, so Monday of that week is in the vacation, but Thursday is week 1 of term 2.
-	  */
-	def format(weekNumber: Int, dayOfWeek: DayOfWeek, year: AcademicYear, numberingSystem: String, short: Boolean) =
-		formatterMap.retrieve(year) format (weekNumber, dayOfWeek, numberingSystem, short)
+		* which term a date falls under. Often, the Spring term starts on a Wednesday after New
+		* Year's Day, so Monday of that week is in the vacation, but Thursday is week 1 of term 2.
+		*/
+	def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, year: AcademicYear, numberingSystem: String, short: Boolean) =
+		formatterMap.retrieve(year) format (ranges, dayOfWeek, numberingSystem, short)
 
-	class SingleWeekFormatterCache {
-		private val map = JConcurrentMap[AcademicYear, SingleWeekFormatter]()
-		def retrieve(year: AcademicYear) = map.getOrElseUpdate(year, new SingleWeekFormatter(year))
+	class WholeWeekFormatterCache {
+		private val map = JConcurrentMap[AcademicYear, WholeWeekFormatter]()
+		def retrieve(year: AcademicYear) = map.getOrElseUpdate(year, new WholeWeekFormatter(year))
 	}
 }
 
-/* Freemarker companion for the SingleWeekFormatter */
+/* Freemarker companion for the WholeWeekFormatter */
 
-class SingleWeekFormatterTag extends TemplateMethodModelEx with KnowsUserNumberingSystem  {
-	import SingleWeekFormatter.format
+class WholeWeekFormatterTag extends TemplateMethodModelEx with KnowsUserNumberingSystem  {
+	import WholeWeekFormatter.format
 
 	@Autowired var userSettings: UserSettingsService = _
 
@@ -434,8 +462,8 @@ class SingleWeekFormatterTag extends TemplateMethodModelEx with KnowsUserNumberi
 
 		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
-			case Seq(weekNumber: JInteger, academicYear: AcademicYear, dept: Department, short: JBoolean) => {
-				format(weekNumber, DayOfWeek.Thursday, academicYear, numberingSystem(user, () => Option(dept)), short)
+			case Seq(startWeekNumber: JInteger, endWeekNumber: JInteger, academicYear: AcademicYear, dept: Department, short: JBoolean) => {
+				format(Seq(WeekRange(startWeekNumber, endWeekNumber)), DayOfWeek.Thursday, academicYear, numberingSystem(user, () => Option(dept)), short)
 			}
 
 			case _ => throw new IllegalArgumentException("Bad args: " + args)

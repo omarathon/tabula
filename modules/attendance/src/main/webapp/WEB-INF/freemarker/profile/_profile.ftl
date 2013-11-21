@@ -13,8 +13,8 @@
 			<div class="span12">
 				<h4>${term}</h4>
 				<div class="row-fluid point">
-					<div class="span8 ellipsis" title="${point.name} (<@fmt.weekRanges point />)">
-						${point.name} (<@fmt.weekRanges point />)
+					<div class="span8 ellipsis" title="${point.name} (<@fmt.monitoringPointFormat point />)">
+						${point.name} (<@fmt.monitoringPointFormat point />)
 					</div>
 					<div class="span2 state">
 						<#if checkpointState[point.id]??>

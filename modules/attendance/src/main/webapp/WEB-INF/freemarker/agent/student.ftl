@@ -140,7 +140,7 @@
 			<#list pointsByTerm[term] as pointAndCheckpoint>
 				<div class="item-info row-fluid point">
 					<div class="span10">
-						${pointAndCheckpoint._1().name} (<@fmt.weekRanges pointAndCheckpoint._1() />)
+						${pointAndCheckpoint._1().name} (<@fmt.monitoringPointFormat pointAndCheckpoint._1() />)
 					</div>
 					<div class="span2">
 						<#if pointAndCheckpoint._2() == "attended">
