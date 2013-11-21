@@ -91,7 +91,7 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 			.seq
 
 	def stampMissingFromImport(newStaleScjCodes: Seq[String], importStart: DateTime) = {
-		if (!newStaleScjCodes.isEmpty) {
+		if (!newStaleScjCodes.isEmpty && newStaleScjCodes.size < Daoisms.MaxInClauseCount) {
 			var sqlString = """
 				update
 					StudentCourseDetails

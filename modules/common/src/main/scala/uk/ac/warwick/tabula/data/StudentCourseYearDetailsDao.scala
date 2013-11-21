@@ -89,7 +89,7 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 	}
 
 		def stampMissingFromImport(newStaleScydIds: Seq[String], importStart: DateTime) = {
-			if (!newStaleScydIds.isEmpty) {
+		if (!newStaleScydIds.isEmpty && newStaleScydIds.size < Daoisms.MaxInClauseCount) {
 				var sqlString = """
 					update
 						StudentCourseYearDetails
