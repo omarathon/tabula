@@ -21,9 +21,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder
 import scala.Some
 import javax.persistence.CascadeType
 import javax.persistence.Entity
-// importing the various hibernate annotations individually since otherwise it's picking up
-// the unwanted org.hibernate.annotations.Any which interferes with the Any that is the root
-// of the Scala class hierarchy, used by the equals override.
 import org.hibernate.annotations.AccessType
 import org.hibernate.annotations.FilterDefs
 import org.hibernate.annotations.Filters
@@ -33,6 +30,8 @@ import org.hibernate.annotations.Formula
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Filter
+import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -223,10 +222,13 @@ class StudentMember extends Member with StudentProperties {
 	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
-	//private var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
-	var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
+	private var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
 
-	def freshStudentCourseDetails = studentCourseDetails.asScala.filter(scd => scd.isFresh)
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	def freshStudentCourseDetails = {
+		studentCourseDetails.asScala.filter(scd => scd.isFresh)
+	}
+
 	def freshOrStaleStudentCourseDetails = studentCourseDetails.asScala
 
 
