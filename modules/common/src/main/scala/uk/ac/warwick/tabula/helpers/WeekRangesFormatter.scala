@@ -19,9 +19,9 @@ import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, Vacation, Term
 
 
 /** Format week ranges, using a formatting preference for term week numbers, cumulative week numbers or academic week numbers.
-  *
-  * WeekRange objects are always _stored_ with academic week numbers. These may span multiple terms, holidays etc.
-  */
+	*
+	* WeekRange objects are always _stored_ with academic week numbers. These may span multiple terms, holidays etc.
+	*/
 object WeekRangesFormatter {
 
 	val separator = "; "
@@ -29,9 +29,9 @@ object WeekRangesFormatter {
 	private val formatterMap = new WeekRangesFormatterCache
 
 	/** The reason we need the academic year and day of the week here is that it might affect
-	  * which term a date falls under. Often, the Spring term starts on a Wednesday after New
-	  * Year's Day, so Monday of that week is in the vacation, but Thursday is week 1 of term 2.
-	  */
+		* which term a date falls under. Often, the Spring term starts on a Wednesday after New
+		* Year's Day, so Monday of that week is in the vacation, but Thursday is week 1 of term 2.
+		*/
 	def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, year: AcademicYear, numberingSystem: String) =
 		formatterMap.retrieve(year) format (ranges, dayOfWeek, numberingSystem)
 
@@ -43,7 +43,7 @@ object WeekRangesFormatter {
 
 
 /** Companion class for Freemarker.
-  */
+	*/
 class WeekRangesFormatterTag extends TemplateMethodModelEx {
 
 	import WeekRangesFormatter.format
@@ -59,16 +59,16 @@ class WeekRangesFormatterTag extends TemplateMethodModelEx {
 				.flatMap { settings => Option(settings.weekNumberingSystem) }
 				.getOrElse(department.weekNumberingSystem)
 		}
-		
+
 		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
 		args match {
-			case Seq(ranges: Seq[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) => 
+			case Seq(ranges: Seq[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) =>
 				format(ranges.asInstanceOf[Seq[WeekRange]], dayOfWeek, year, numberingSystem(dept))
-			
-			case Seq(ranges: JList[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) => 
+
+			case Seq(ranges: JList[_], dayOfWeek: DayOfWeek, year: AcademicYear, dept: Department) =>
 				format(ranges.asScala.toSeq.asInstanceOf[Seq[WeekRange]], dayOfWeek, year, numberingSystem(dept))
-				
-			case Seq(event: SmallGroupEvent) => 
+
+			case Seq(event: SmallGroupEvent) =>
 				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(event.group.groupSet.module.department))
 
 			case _ => throw new IllegalArgumentException("Bad args: " + args)
@@ -219,7 +219,7 @@ class WeekRangeSelectFormatter(year: AcademicYear) extends WeekRanges(year: Acad
 		val currentTermRanges = allTermWeekRanges.toList(currentTerm).toWeeks
 		val weeks = currentTermRanges.intersect(eventRanges)
 
-	  numberingSystem match {
+		numberingSystem match {
 			case WeekRange.NumberingSystem.Term => weeks.map( x => EventWeek( x - (currentTermRanges(0) - 1 ), x ) )
 			case WeekRange.NumberingSystem.Cumulative => weeks.map({x =>
 				val date = weekNumberToDate(x, dayOfWeek)
@@ -246,18 +246,18 @@ class WeekRangeSelectFormatterTag extends TemplateMethodModelEx with KnowsUserNu
 
 	@Autowired var userSettings: UserSettingsService = _
 
-		/** Pass through all the arguments, or just a SmallGroupEvent if you're lazy */
-		override def exec(list: JList[_]) = {
-			val user = RequestInfo.fromThread.get.user
+	/** Pass through all the arguments, or just a SmallGroupEvent if you're lazy */
+	override def exec(list: JList[_]) = {
+		val user = RequestInfo.fromThread.get.user
 
-			val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
-			args match {
-				case Seq(event: SmallGroupEvent) =>
-					format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(user,()=>Option(event.group.groupSet.module.department)))
+		val args = list.asScala.toSeq.map { model => DeepUnwrap.unwrap(model.asInstanceOf[TemplateModel]) }
+		args match {
+			case Seq(event: SmallGroupEvent) =>
+				format(event.weekRanges, event.day, event.group.groupSet.academicYear, numberingSystem(user,()=>Option(event.group.groupSet.module.department)))
 
-				case _ => throw new IllegalArgumentException("Bad args: " + args)
-			}
+			case _ => throw new IllegalArgumentException("Bad args: " + args)
 		}
+	}
 }
 trait KnowsUserNumberingSystem{
 	var userSettings: UserSettingsService
@@ -302,7 +302,7 @@ trait WeekRangesDumper extends KnowsUserNumberingSystem {
 					IntervalFormatter.format(weekInterval.getStart, weekInterval.getEnd, includeTime = false, includeDays = false)
 				}
 
-			(weekInterval.getStart.getMillis, weekInterval.getEnd.getMillis, description)
+				(weekInterval.getStart.getMillis, weekInterval.getEnd.getMillis, description)
 			}
 		}
 
@@ -327,7 +327,7 @@ class WeekRangesDumperTag extends TemplateMethodModelEx with WeekRangesDumper wi
 	}
 
 	def exec(unused: JList[_]): AnyRef = {
-		  getWeekRangesAsJSON(formatWeekName)
+		getWeekRangesAsJSON(formatWeekName)
 	}
 }
 
@@ -347,7 +347,7 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
 						else "%s, w/c %s" format (
 							vac.getTermTypeAsString,
 							IntervalFormatter.format(startDate.withDayOfWeek(Monday), includeTime = false)
-						)
+							)
 					} else {
 						// Date range
 						if (short)
@@ -355,12 +355,12 @@ class WholeWeekFormatter(year: AcademicYear) extends WeekRanges(year: AcademicYe
 								vac.getTermTypeAsString,
 								startDate.withDayOfWeek(Monday).toString("dd/MM"),
 								endDate.withDayOfWeek(Monday).toString("dd/MM")
-							)
+								)
 						else
 							"%s, %s" format (
 								vac.getTermTypeAsString,
 								IntervalFormatter.format(startDate.withDayOfWeek(Monday), endDate.withDayOfWeek(Monday), includeTime = false).replaceAll("Mon", "w/c Mon")
-							)
+								)
 					}
 				}
 				case term => {
@@ -437,9 +437,9 @@ object WholeWeekFormatter {
 	private val formatterMap = new WholeWeekFormatterCache
 
 	/** The reason we need the academic year and day of the week here is that it might affect
-	  * which term a date falls under. Often, the Spring term starts on a Wednesday after New
-	  * Year's Day, so Monday of that week is in the vacation, but Thursday is week 1 of term 2.
-	  */
+		* which term a date falls under. Often, the Spring term starts on a Wednesday after New
+		* Year's Day, so Monday of that week is in the vacation, but Thursday is week 1 of term 2.
+		*/
 	def format(ranges: Seq[WeekRange], dayOfWeek: DayOfWeek, year: AcademicYear, numberingSystem: String, short: Boolean) =
 		formatterMap.retrieve(year) format (ranges, dayOfWeek, numberingSystem, short)
 
