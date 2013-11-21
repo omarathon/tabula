@@ -67,10 +67,7 @@ class ImportStudentRowCommand(member: MembershipInformation,
 			importStudentCourseCommand.stuMem = member
 			val studentCourseDetails = importStudentCourseCommand.apply()
 
-			// apply above will take care of the db.  This brings the in-memory data up to speed:
-			memberDao.getByUniversityId(universityId) match {
-				case Some(mem: StudentMember) => mem.attachStudentCourseDetails(studentCourseDetails)
-			}
+			member.attachStudentCourseDetails(studentCourseDetails)
 
 			importRowTracker.universityIdsSeen.add(member.universityId)
 
