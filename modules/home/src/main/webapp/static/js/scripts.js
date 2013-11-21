@@ -979,6 +979,15 @@
 				window.parent.GlobalScripts.resizeModalIframes(bodyHeight);
 			})()
 		}
+
+        // Prevent clicks on filtering dropdowns from closing window
+        // and enable a close button
+        $('.dropdown-menu.filter-list').on('click', function(e) {
+            e.stopImmediatePropagation();
+        }).find('button[data-dismiss=dropdown]').on('click', function(e){
+            e.stopPropagation();
+            $(this).closest('.dropdown-menu').dropdown('toggle');
+        });
 	}); // on ready
 
 	// take anything we've attached to "exports" and add it to the global "Profiles"
