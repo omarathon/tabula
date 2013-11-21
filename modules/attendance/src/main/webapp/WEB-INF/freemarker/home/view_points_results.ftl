@@ -40,7 +40,10 @@
 								</@fmt.permission_button>
 							</div>
 							${groupedPoint.name}
-							(<@fmt.monitoringPointWeeksFormat groupedPoint.validFromWeek groupedPoint.requiredFromWeek command.academicYear command.department />):
+							(<a class="use-tooltip" data-html="true" title="<@fmt.wholeWeekDateFormat groupedPoint.validFromWeek groupedPoint.requiredFromWeek command.academicYear />">
+								<@fmt.monitoringPointWeeksFormat groupedPoint.validFromWeek groupedPoint.requiredFromWeek command.academicYear command.department />
+							</a>
+							):
 							<#if groupedPoint.routes?size == command.allRoutes?size>
 								All routes
 							<#else>

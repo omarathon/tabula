@@ -69,7 +69,7 @@
 											<i class="icon-fixed-width"></i>
 										</#if>
 									</div>
-									${point.name} (<@fmt.weekRanges point />)
+									${point.name} (<a class="use-tooltip" data-html="true" title="<@fmt.monitoringPointDateFormat point />"><@fmt.monitoringPointFormat point /></a>)
 									<@spring.bind path="command.checkpointMap[${point.id}]">
 										<#if status.error>
 											<div class="text-error"><@f.errors path="command.checkpointMap[${point.id}]" cssClass="error"/></div>

@@ -349,7 +349,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 		val universityIdsToFetch = universityIds.map{u =>
 			u -> universityIdCountMap.getOrElse(u, 0)
-		}.sortBy(_._2)(ordering).slice(startResult, startResult + maxResults + 1).map(_._1)
+		}.sortBy(_._2)(ordering).slice(startResult, startResult + maxResults).map(_._1)
 
 		val c = session.newCriteria[StudentMember]
 		val or = disjunction()

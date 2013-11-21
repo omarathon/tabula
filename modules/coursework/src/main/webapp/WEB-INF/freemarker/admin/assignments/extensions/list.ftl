@@ -110,7 +110,7 @@
 									action_descr='modify an extension'
 									classes='modify-extension btn btn-mini btn-primary'
 									data_attr='data-toggle=modal data-target=#extension-model'
-									href=grant_url>
+									href=modify_url>
 									<i class="icon-edit icon-white"></i> Modify
 								</@fmt.permission_button>
 
@@ -120,7 +120,7 @@
 									action_descr='revoke an extension'
 									classes='revoke-extension btn btn-mini btn-danger'
 									data_attr='data-toggle=modal data-target=#extension-model'
-									href=grant_url>
+									href=revoke_url>
 									<i class="icon-remove icon-white"></i> Revoke
 								</@fmt.permission_button>
 							</td>
