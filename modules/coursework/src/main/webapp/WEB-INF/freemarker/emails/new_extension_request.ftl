@@ -26,16 +26,6 @@ ${supervisor.agentMember.fullName} (${supervisor.agentMember.universityId}), ${s
 </#if>
 
 ${studentCourseString}
-<#--
-<#if studentCourseDetails.route?? >
-Student Course Details
-Route: ${(studentCourseDetails.route.name)!} (${(studentCourseDetails.route.code?upper_case)!})
-Course: <@fmt.course_description studentCourseDetails />
-Intended award and type: ${(studentCourseDetails.awardCode)!} (${(studentCourseDetails.route.degreeType.toString)!})
-Attendance: ${(studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.fullNameToDisplay)!}
-</#if>
--->
-
 
 To review this extension request and any supporting documentation, please click the link below.
 
