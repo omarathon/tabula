@@ -67,15 +67,17 @@
 	--></#noescape><#--
 --></#macro>
 
-<#macro monitoringPointWeeksFormat validFromWeek requiredFromWeek academicYear dept><#--
+<#macro monitoringPointWeeksFormat validFromWeek requiredFromWeek academicYear dept stripHtml=false><#--
 	--><#noescape><#--
-		-->${wholeWeekFormatter(validFromWeek, requiredFromWeek, academicYear, dept, false)}<#--
+		--><#local result = wholeWeekFormatter(validFromWeek, requiredFromWeek, academicYear, dept, false) /><#--
+		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
 	--></#noescape><#--
 --></#macro>
 
-	<#macro monitoringPointFormat point><#--
+	<#macro monitoringPointFormat point stripHtml=false><#--
 	--><#noescape><#--
-		-->${wholeWeekFormatter(point.validFromWeek, point.requiredFromWeek, point.pointSet.academicYear, point.pointSet.route.department, false)}<#--
+		--><#local result = wholeWeekFormatter(point.validFromWeek, point.requiredFromWeek, point.pointSet.academicYear, point.pointSet.route.department, false) /><#--
+		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
 	--></#noescape><#--
 --></#macro>
 
