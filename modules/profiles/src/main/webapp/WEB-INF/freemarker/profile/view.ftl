@@ -196,7 +196,7 @@
 					</li>
 				</#if>
 
-				<#if studentCourseDetails.hasModuleRegistrations>
+				<#if studentCourseDetails.hasModuleRegistrations && studentCourseDetails.latestStudentCourseYearDetails??>
 					<li id="module-registration-pane">
 						<#include "_module_registrations.ftl" />
 					</li>

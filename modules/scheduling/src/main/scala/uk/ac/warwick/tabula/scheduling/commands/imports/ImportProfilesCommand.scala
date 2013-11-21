@@ -90,14 +90,16 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				logger.info("Fetching user details for " + membershipInfos.size + " usercodes from websignon")
 				val users: Map[String, User] = userLookup.getUsersByUserIds(membershipInfos.map(x => x.member.usercode)).toMap
 
+				logger.info("Fetching member details for " + membershipInfos.size + " members from Membership")
+
+				val studentRowCommands = transactional() {
+					profileImporter.getMemberDetails(membershipInfos, users, importRowTracker)
+				}
+
+				// each apply has its own transaction
+				studentRowCommands map { _.apply }
+
 				transactional() {
-					logger.info("Fetching member details for " + membershipInfos.size + " members from Membership")
-					val commands = profileImporter.getMemberDetails(membershipInfos, users, importRowTracker)
-					commands map { _.apply }
-					session.flush
-					session.clear
-
-
 					updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
 				}
 			}

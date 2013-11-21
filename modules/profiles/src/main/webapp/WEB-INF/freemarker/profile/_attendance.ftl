@@ -4,6 +4,7 @@
 			<label>
 				Academic year
 				<select class="academicYear input-small">
+					<#if studentCourseDetails.freshStudentCourseYearDetails?? >
 					<#list studentCourseDetails.freshStudentCourseYearDetails as studentCourseYearDetail>
 						<option
 							value="${studentCourseYearDetail.academicYear.startYear?c}"
@@ -12,6 +13,7 @@
 							${studentCourseYearDetail.academicYear.toString}
 						</option>
 					</#list>
+					</#if>
 				</select>
 			</label>
 		</form>

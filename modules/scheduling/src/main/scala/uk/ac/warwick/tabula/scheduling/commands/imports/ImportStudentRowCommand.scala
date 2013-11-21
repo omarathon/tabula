@@ -36,42 +36,46 @@ class ImportStudentRowCommand(member: MembershipInformation,
 	this.mobileNumber = rs.getString("mobile_number")
 
 	override def applyInternal(): Member = {
-		val memberExisting = memberDao.getByUniversityId(universityId)
+		transactional() {
+			val memberExisting = memberDao.getByUniversityId(universityId)
 
-		logger.debug("Importing member " + universityId + " into " + memberExisting)
+			logger.debug("Importing member " + universityId + " into " + memberExisting)
 
-		val (isTransient, member) = memberExisting match {
-			case Some(member: StudentMember) => (false, member)
-			case Some(member: OtherMember) => {
-				// TAB-692 delete the existing member, then return a brand new one
-				memberDao.delete(member)
-				(true, new StudentMember(universityId))
+			val (isTransient, member) = memberExisting match {
+				case Some(member: StudentMember) => (false, member)
+				case Some(member: OtherMember) => {
+					// TAB-692 delete the existing member, then return a brand new one
+					memberDao.delete(member)
+					(true, new StudentMember(universityId))
+				}
+				case Some(member) => throw new IllegalStateException("Tried to convert " + member + " into a student!")
+				case _ => (true, new StudentMember(universityId))
 			}
-			case Some(member) => throw new IllegalStateException("Tried to convert " + member + " into a student!")
-			case _ => (true, new StudentMember(universityId))
+
+			val commandBean = new BeanWrapperImpl(this)
+			val memberBean = new BeanWrapperImpl(member)
+
+			val hasChanged = copyMemberProperties(commandBean, memberBean) | copyStudentProperties(commandBean, memberBean) | markAsSeenInSits(memberBean)
+
+			if (isTransient || hasChanged) {
+				logger.debug("Saving changes for " + member)
+
+				member.lastUpdatedDate = DateTime.now
+				memberDao.saveOrUpdate(member)
+			}
+
+			importStudentCourseCommand.stuMem = member
+			val studentCourseDetails = importStudentCourseCommand.apply()
+
+			// apply above will take care of the db.  This brings the in-memory data up to speed:
+			memberDao.getByUniversityId(universityId) match {
+				case Some(mem: StudentMember) => mem.attachStudentCourseDetails(studentCourseDetails)
+			}
+
+			importRowTracker.universityIdsSeen.add(member.universityId)
+
+			member
 		}
-
-		val commandBean = new BeanWrapperImpl(this)
-		val memberBean = new BeanWrapperImpl(member)
-
-		val hasChanged = copyMemberProperties(commandBean, memberBean) | copyStudentProperties(commandBean, memberBean) | markAsSeenInSits(memberBean)
-
-		if (isTransient || hasChanged) {
-			logger.debug("Saving changes for " + member)
-
-			member.lastUpdatedDate = DateTime.now
-			memberDao.saveOrUpdate(member)
-		}
-
-		importStudentCourseCommand.stuMem = member
-		val studentCourseDetails = importStudentCourseCommand.apply()
-
-		// apply above will take care of the db.  This brings the in-memory data up to speed:
-		member.attachStudentCourseDetails(studentCourseDetails)
-
-		importRowTracker.universityIdsSeen.add(member.universityId)
-
-		member
 	}
 
 	private val basicStudentProperties = Set(

@@ -223,7 +223,8 @@ class StudentMember extends Member with StudentProperties {
 	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
-	private var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
+	//private var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
+	var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
 
 	def freshStudentCourseDetails = studentCourseDetails.asScala.filter(scd => scd.isFresh)
 	def freshOrStaleStudentCourseDetails = studentCourseDetails.asScala
