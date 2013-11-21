@@ -19,12 +19,12 @@
 			${relationship.description}<#if relationship_has_next> or </#if>
 			</#list>
 			<#if command.point.validFromWeek == command.point.requiredFromWeek>
-				in <@fmt.singleWeekFormat command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+				in <@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
 			<#else>
 				between
-				<@fmt.singleWeekFormat command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+				<@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
 				and
-				<@fmt.singleWeekFormat command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+				<@fmt.monitoringPointWeeksFormat command.point.requiredFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
 			</#if>
 
 		</p>
@@ -58,9 +58,9 @@
 									<#assign popoverContent>
 										<#list reasons as reason>
 											<#if reason == "Took place before">
-												Took place before <@fmt.singleWeekFormat command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+												Took place before <@fmt.monitoringPointWeeksFormat command.point.validFromWeek command.point.validFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
 											<#elseif reason == "Took place after">
-												Took place after <@fmt.singleWeekFormat command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
+												Took place after <@fmt.monitoringPointWeeksFormat command.point.requiredFromWeek command.point.requiredFromWeek command.point.pointSet.academicYear command.point.pointSet.route.department />
 											<#else>
 												${reason}
 											</#if>

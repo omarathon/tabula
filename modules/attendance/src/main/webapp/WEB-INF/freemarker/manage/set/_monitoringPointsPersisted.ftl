@@ -17,7 +17,7 @@
 									<i class="icon-remove"></i>
 								</a>
 							</div>
-							${point.name} (<@fmt.weekRanges point />)
+							${point.name} (<@fmt.monitoringPointWeeksFormat point.validFromWeek point.requiredFromWeek point.pointSet.academicYear point.pointSet.route.department />)
 						</div>
 					</div>
 				</#list>

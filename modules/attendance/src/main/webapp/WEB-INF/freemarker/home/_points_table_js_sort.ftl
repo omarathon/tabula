@@ -53,15 +53,15 @@
 										<#list pointMap?keys?sort_by("validFromWeek") as point>
 											<#assign checkpointState = mapGet(pointMap, point) />
 											<#if checkpointState == "attended">
-												<i class="icon-ok icon-fixed-width attended" title="Attended: ${point.name} (<@fmt.weekRanges point />)"></i>
+												<i class="icon-ok icon-fixed-width attended" title="Attended: ${point.name} (<@fmt.monitoringPointFormat point />)"></i>
 											<#elseif checkpointState == "authorised">
-												<i class="icon-remove-circle icon-fixed-width authorised" title="Missed (authorised): ${point.name} (<@fmt.weekRanges point />)"></i>
+												<i class="icon-remove-circle icon-fixed-width authorised" title="Missed (authorised): ${point.name} (<@fmt.monitoringPointFormat point />)"></i>
 											<#elseif checkpointState == "unauthorised">
-												<i class="icon-remove icon-fixed-width unauthorised" title="Missed (unauthorised): ${point.name} (<@fmt.weekRanges point />)"></i>
+												<i class="icon-remove icon-fixed-width unauthorised" title="Missed (unauthorised): ${point.name} (<@fmt.monitoringPointFormat point />)"></i>
 											<#elseif checkpointState == "late">
-												<i class="icon-warning-sign icon-fixed-width late" title="Unrecorded: ${point.name} (<@fmt.weekRanges point />)"></i>
+												<i class="icon-warning-sign icon-fixed-width late" title="Unrecorded: ${point.name} (<@fmt.monitoringPointFormat point />)"></i>
 											<#else>
-												<i class="icon-minus icon-fixed-width" title="${point.name} (<@fmt.weekRanges point />)"></i>
+												<i class="icon-minus icon-fixed-width" title="${point.name} (<@fmt.monitoringPointFormat point />)"></i>
 											</#if>
 										</#list>
 									<#else>
@@ -90,24 +90,26 @@
 				<tbody>
 				<#list students as studentData>
 				<tr class="student">
-					<td class="unrecorded">
-						<a href="${view_url(studentData.student)}">
-							<span class="badge badge-<#if (studentData.unrecorded > 2)>important<#elseif (studentData.unrecorded > 0)>warning<#else>success</#if>">
-								${studentData.unrecorded}
-							</span>
-						</a>
-					</td>
-					<td class="missed">
-						<a href="${view_url(studentData.student)}">
-							<span class="badge badge-<#if (studentData.missed > 2)>important<#elseif (studentData.missed > 0)>warning<#else>success</#if>">
-								${studentData.missed}
-							</span>
-						</a>
-					</td>
-					<td class="record">
-						<#if studentData.pointsByTerm?keys?size == 0>
-							<a title="This student has no monitoring points" class="btn btn-primary btn-mini disabled"><i class="icon-pencil icon-fixed-width"></i></a>
-						<#else>
+					<#if studentData.pointsByTerm?keys?size == 0>
+						<td data-sortby="-1">&nbsp;</td>
+						<td data-sortby="-1">&nbsp;</td>
+						<td>&nbsp;</td>
+					<#else>
+						<td class="unrecorded" data-sortby="${studentData.unrecorded}">
+							<a href="${view_url(studentData.student)}">
+								<span class="badge badge-<#if (studentData.unrecorded > 2)>important<#elseif (studentData.unrecorded > 0)>warning<#else>success</#if>">
+									${studentData.unrecorded}
+								</span>
+							</a>
+						</td>
+						<td class="missed" data-sortby="${studentData.missed}">
+							<a href="${view_url(studentData.student)}">
+								<span class="badge badge-<#if (studentData.missed > 2)>important<#elseif (studentData.missed > 0)>warning<#else>success</#if>">
+									${studentData.missed}
+								</span>
+							</a>
+						</td>
+						<td class="record">
 							<@fmt.permission_button
 							permission='MonitoringPoints.Record'
 							scope=studentData.student
@@ -117,8 +119,9 @@
 							>
 								<i class="icon-pencil icon-fixed-width late"></i>
 							</@fmt.permission_button>
-						</#if>
-					</td>
+
+						</td>
+					</#if>
 				</tr>
 				</#list>
 				</tbody>
@@ -151,7 +154,15 @@
 			}
 		});
 		$(".scrollable-points-table .counts").tablesorter({
-			headers: {2:{sorter:false}}
+			headers: {2:{sorter:false}},
+			textExtraction: function(node) {
+				var $el = $(node);
+				if ($el.data('sortby')) {
+					return $el.data('sortby');
+				} else {
+					return $el.text().trim();
+				}
+			}
 		});
 	});
 </script>

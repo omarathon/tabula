@@ -48,25 +48,36 @@
 	--></#noescape><#--
 --></#macro>
 
-<#-- Format week ranges for a SmallGroupEvent or MonitoringPoint -->
+<#-- Format week ranges for a SmallGroupEvent -->
 <#macro weekRanges object><#--
 	--><#noescape><#--
 		-->${weekRangesFormatter(object)}<#--
 	--></#noescape><#--
 --></#macro>
 
-<#macro monitoringPointWeeksFormat validFromWeek requiredFromWeek academicYear dept><#--
+<#macro wholeWeekFormat startWeek endWeek academicYear dept short=false><#--
 	--><#noescape><#--
-		-->${weekRangesFormatter(validFromWeek, requiredFromWeek, academicYear, dept)}<#--
+		-->${wholeWeekFormatter(startWeek, endWeek, academicYear, dept, short)}<#--
 	--></#noescape><#--
 --></#macro>
 
 <#macro singleWeekFormat week academicYear dept short=false><#--
 	--><#noescape><#--
-		-->${singleWeekFormatter(week, academicYear, dept, short)}<#--
+		-->${wholeWeekFormatter(week, academicYear, dept, short)}<#--
 	--></#noescape><#--
 --></#macro>
 
+<#macro monitoringPointWeeksFormat validFromWeek requiredFromWeek academicYear dept><#--
+	--><#noescape><#--
+		-->${wholeWeekFormatter(validFromWeek, requiredFromWeek, academicYear, dept, false)}<#--
+	--></#noescape><#--
+--></#macro>
+
+	<#macro monitoringPointFormat point><#--
+	--><#noescape><#--
+		-->${wholeWeekFormatter(point.validFromWeek, point.requiredFromWeek, point.pointSet.academicYear, point.pointSet.route.department, false)}<#--
+	--></#noescape><#--
+--></#macro>
 
 <#macro weekRangeSelect event><#--
 	--><#assign weeks=weekRangeSelectFormatter(event) /><#--
