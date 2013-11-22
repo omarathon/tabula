@@ -988,6 +988,10 @@
             e.stopPropagation();
             $(this).closest('.dropdown-menu').dropdown('toggle');
         });
+
+        $('[data-loading-text]').on('click', function(){
+            $(this).button('loading');
+        })
 	}); // on ready
 
 	// take anything we've attached to "exports" and add it to the global "Profiles"
