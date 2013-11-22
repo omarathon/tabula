@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.Transactions._
 
 trait ExtensionServiceComponent {
 	def extensionService: ExtensionService
@@ -26,12 +27,13 @@ trait ExtensionService {
 abstract class AbstractExtensionService extends ExtensionService {
 	self: ExtensionDaoComponent =>
 
-	def getExtensionById(id: String) = extensionDao.getExtensionById(id)
-	def countExtensions(assignment: Assignment): Int = extensionDao.countExtensions(assignment)
+	def getExtensionById(id: String) = transactional(readOnly = true) { extensionDao.getExtensionById(id) }
+	def countExtensions(assignment: Assignment): Int = transactional(readOnly = true) { extensionDao.countExtensions(assignment) }
+	def countUnapprovedExtensions(assignment: Assignment): Int = transactional(readOnly = true) { extensionDao.countUnapprovedExtensions(assignment) }
+	def getUnapprovedExtensions(assignment: Assignment): Seq[Extension] = transactional(readOnly = true) { extensionDao.getUnapprovedExtensions(assignment) }
+
 	def hasExtensions(assignment: Assignment): Boolean = countExtensions(assignment) > 0
-	def countUnapprovedExtensions(assignment: Assignment): Int = extensionDao.countUnapprovedExtensions(assignment)
 	def hasUnapprovedExtensions(assignment: Assignment): Boolean = countUnapprovedExtensions(assignment) > 0
-	def getUnapprovedExtensions(assignment: Assignment): Seq[Extension] = extensionDao.getUnapprovedExtensions(assignment)
 }
 
 @Service(value = "extensionService")

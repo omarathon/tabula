@@ -53,7 +53,7 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 
 		if (!allowExtensions && assignment.countUnapprovedExtensions > 0) {
 			// reject unapproved extensions (in normal circumstances, this should be unlikely)
-			unapprovedExtensions = assignment.extensionService.getUnapprovedExtensions(assignment)
+			unapprovedExtensions = assignment.getUnapprovedExtensions
 			val admin = user.apparentUser
 			unapprovedExtensions.foreach { e =>
 				e.rejected = true
@@ -70,13 +70,14 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 	}
 
 	override def describe(d: Description) {
-		d.assignment(assignment).properties(
+		val desc = d.assignment(assignment)
+		desc.properties(
 			"name" -> name,
 			"openDate" -> openDate,
 			"closeDate" -> closeDate
 		)
 		if (!unapprovedExtensions.isEmpty) {
-			d.assignment(assignment).property(
+			desc.property(
 				"studentExtensionRequestsAutoRejected" -> unapprovedExtensions.map(_.universityId)
 			)
 		}

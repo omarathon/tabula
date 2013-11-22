@@ -393,7 +393,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	def hasExtensions = extensionService.hasExtensions(this)
 	def countUnapprovedExtensions = extensionService.countUnapprovedExtensions(this)
 	def hasUnapprovedExtensions = extensionService.hasUnapprovedExtensions(this)
-
+	def getUnapprovedExtensions = extensionService.getUnapprovedExtensions(this)
 
 	def addFields(fieldz: FormField*) = for (field <- fieldz) addField(field)
 

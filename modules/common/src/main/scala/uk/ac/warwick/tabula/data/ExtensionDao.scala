@@ -4,7 +4,8 @@ import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Assignment
-import org.hibernate.criterion.{Restrictions, Projections}
+import org.hibernate.criterion.Restrictions._
+import org.hibernate.criterion.Projections._
 
 trait ExtensionDaoComponent {
 	val extensionDao: ExtensionDao
@@ -31,23 +32,23 @@ class ExtensionDaoImpl extends ExtensionDao with Daoisms {
 	def countExtensions(assignment: Assignment): Int = {
 		session.newCriteria[Extension]
 			.add(is("assignment", assignment))
-			.project[Number](Projections.rowCount())
+			.project[Number](rowCount())
 			.uniqueResult.get.intValue()
 	}
 
 	private def unapprovedExtensionsCriteria(assignment: Assignment) = session.newCriteria[Extension]
 		.add(is("assignment", assignment))
 		.add(
-		Restrictions.and(
-			Restrictions.isNotNull("requestedOn"),
-			Restrictions.eq("approved", false),
-			Restrictions.eq("rejected", false)
+			and(
+				isNotNull("requestedOn"),
+				is("approved", false),
+				is("rejected", false)
+			)
 		)
-	)
 
 	def countUnapprovedExtensions(assignment: Assignment): Int = {
 		unapprovedExtensionsCriteria(assignment)
-			.project[Number](Projections.rowCount())
+			.project[Number](rowCount())
 			.uniqueResult.get.intValue()
 	}
 
