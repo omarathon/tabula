@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, FormFieldContext, WordCountField, Extension}
-import uk.ac.warwick.tabula.data.{AssignmentMembershipDaoImpl, DepartmentDaoImpl}
+import uk.ac.warwick.tabula.data.{ExtensionDaoComponent, ExtensionDaoImpl, AssignmentMembershipDaoImpl, DepartmentDaoImpl}
 import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
@@ -18,10 +18,9 @@ class AssignmentServiceTest extends PersistenceTestBase {
 	val feedbackService = new FeedbackServiceImpl
 	val submissionService = new SubmissionServiceImpl
 	val originalityReportService = new OriginalityReportServiceImpl
-	val extensionService = new ExtensionServiceImpl
-
   val modAndDeptService = new ModuleAndDepartmentService
   var userLookup:MockUserLookup = _
+	var extensionService: ExtensionService = _
 
   @Before def setup {
 		userLookup = new MockUserLookup()
@@ -37,6 +36,11 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		amDao.sessionFactory = sessionFactory
 		assignmentMembershipService.dao = amDao
 		assignmentMembershipService.userLookup = userLookup
+		val extDao = new ExtensionDaoImpl
+		extDao.sessionFactory = sessionFactory
+		extensionService = new AbstractExtensionService with ExtensionDaoComponent {
+			val extensionDao = extDao
+		}
 	}
 
 	@Transactional @Test def recentAssignment {
