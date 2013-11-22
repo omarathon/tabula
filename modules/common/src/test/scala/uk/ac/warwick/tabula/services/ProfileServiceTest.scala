@@ -6,9 +6,10 @@ import org.joda.time.DateTimeConstants
 import org.junit.Before
 
 import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase, Fixtures, Mockito}
-import uk.ac.warwick.tabula.data.model.{SitsStatus, StudentMember, StudentCourseDetails, Route, Member}
+import uk.ac.warwick.tabula.data.model.{DegreeType, Department, SitsStatus, StudentCourseDetails, Route, Member}
 import uk.ac.warwick.tabula.data._
-import scala.Some
+import uk.ac.warwick.tabula.JavaImports._
+import org.mockito.Matchers
 
 // scalastyle:off magic.number
 class ProfileServiceTest extends PersistenceTestBase with Mockito {
@@ -57,20 +58,20 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.getMemberByUniversityId("0000003") should be (None)
 		profileService.getMemberByUniversityId("0000004") should be (None)
 
-		profileService.getAllMembersWithUserId("student", false) should be (Seq(m1, m2))
-		profileService.getMemberByUserId("student", false) should be (Some(m1))
-		profileService.getAllMembersWithUserId("student", true) should be (Seq(m1, m2))
-		profileService.getAllMembersWithUserId("staff1", false) should be (Seq())
-		profileService.getMemberByUserId("staff1", false) should be (None)
-		profileService.getAllMembersWithUserId("staff1", true) should be (Seq(m3))
-		profileService.getMemberByUserId("staff1", true) should be (Some(m3))
-		profileService.getAllMembersWithUserId("unknown", false) should be (Seq())
-		profileService.getAllMembersWithUserId("unknown", true) should be (Seq())
+		profileService.getAllMembersWithUserId("student", disableFilter = false) should be (Seq(m1, m2))
+		profileService.getMemberByUserId("student", disableFilter = false) should be (Some(m1))
+		profileService.getAllMembersWithUserId("student", disableFilter = true) should be (Seq(m1, m2))
+		profileService.getAllMembersWithUserId("staff1", disableFilter = false) should be (Seq())
+		profileService.getMemberByUserId("staff1", disableFilter = false) should be (None)
+		profileService.getAllMembersWithUserId("staff1", disableFilter = true) should be (Seq(m3))
+		profileService.getMemberByUserId("staff1", disableFilter = true) should be (Some(m3))
+		profileService.getAllMembersWithUserId("unknown", disableFilter = false) should be (Seq())
+		profileService.getAllMembersWithUserId("unknown", disableFilter = true) should be (Seq())
 
 		session.disableFilter(Member.StudentsOnlyFilter)
 
-		profileService.getAllMembersWithUserId("staff1", false) should be (Seq(m3))
-		profileService.getMemberByUserId("staff1", false) should be (Some(m3))
+		profileService.getAllMembersWithUserId("staff1", disableFilter = false) should be (Seq(m3))
+		profileService.getMemberByUserId("staff1", disableFilter = false) should be (Some(m3))
 	}
 
 	@Test def listMembersUpdatedSince = transactional { tx =>
@@ -217,7 +218,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 		student.sprStatus = new SitsStatus("C")
-		student.mostSignificant = true
+		student.mostSignificant =  true
 
 		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(student)
 
@@ -261,6 +262,54 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 	}
 
+	trait MockFixture {
+		val profileServiceWithMocks = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+			val memberDao = mock[MemberDao]
+			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
+		}
+	}
 
+	trait SubDepartmentsFixture extends MockFixture {
+		val subDepartment = new Department
+		subDepartment.filterRule = Department.UndergraduateFilterRule
+		val otherSubDepartment = new Department
+		otherSubDepartment.filterRule = Department.PostgraduateFilterRule
+		val parentDepartment = new Department
+		parentDepartment.children = JArrayList(subDepartment, otherSubDepartment)
+		subDepartment.parent = parentDepartment
+		otherSubDepartment.parent = parentDepartment
+		val ugRoute = Fixtures.route("ug")
+		ugRoute.degreeType = DegreeType.Undergraduate
+		val pgRoute = Fixtures.route("pg")
+		pgRoute.degreeType = DegreeType.Postgraduate
+
+		val studentInSubDepartment = Fixtures.student(department=subDepartment)
+		studentInSubDepartment.mostSignificantCourseDetails.get.route = ugRoute
+		val studentInOtherSubDepartment = Fixtures.student(department=otherSubDepartment)
+		studentInOtherSubDepartment.mostSignificantCourseDetails.get.route = pgRoute
+	}
+
+	@Test def findStudentsInSubDepartment {
+		new SubDepartmentsFixture {
+			profileServiceWithMocks.memberDao.findStudentsByRestrictions(
+				any[Iterable[ScalaRestriction]], any[Iterable[ScalaOrder]], any[JInteger], any[JInteger]
+			) returns Seq(studentInSubDepartment, studentInOtherSubDepartment)
+
+			val students = profileServiceWithMocks.findStudentsByRestrictions(subDepartment, Seq(), Seq(), Int.MaxValue, 0)
+			students.size should be (1)
+			students.head should be (studentInSubDepartment)
+		}
+	}
+
+	@Test def countStudentsInSubDepartment {
+		new SubDepartmentsFixture {
+			profileServiceWithMocks.memberDao.findStudentsByRestrictions(
+				any[Iterable[ScalaRestriction]], any[Iterable[ScalaOrder]], any[JInteger], any[JInteger]
+			) returns Seq(studentInSubDepartment, studentInOtherSubDepartment)
+
+			val count = profileServiceWithMocks.countStudentsByRestrictions(subDepartment, Seq())
+			count should be (1)
+		}
+	}
 
 }
