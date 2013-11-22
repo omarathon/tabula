@@ -16,7 +16,10 @@ class ComposableStateServiceImpl extends StateService {
 
 	def updateState(markerFeedback: MarkerFeedback, state: MarkingState) {
 		if (markerFeedback.state != null && !markerFeedback.state.canTransitionTo(state))
-			throw new IllegalStateException("Cannot transition from " + markerFeedback.state + " to " + state)
+			throw new IllegalStateException(
+				s"Cannot transition from ${markerFeedback.state} to $state. " +
+				s"Valid transition states are ${markerFeedback.state.transitionStates}"
+			)
 		markerFeedback.state = state
 		session.saveOrUpdate(markerFeedback)
 	}
