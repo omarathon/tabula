@@ -130,17 +130,17 @@
 	</section>
 </article>
 
-<#assign thisPath><@routes.agentStudentView student command.relationshipType /></#assign>
+<#assign thisPath><@routes.agentStudentView student relationshipType command.academicYear /></#assign>
 <@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
 
-<#macro pointsInATerm term pointAndCheckpointByTerm>
+<#macro pointsInATerm term>
 	<div class="striped-section end-floats">
 		<h2 class="section-title">${term}</h2>
 		<div class="striped-section-contents">
-			<#list pointAndCheckpointByTerm[term] as pointAndCheckpoint>
+			<#list pointsByTerm[term] as pointAndCheckpoint>
 				<div class="item-info row-fluid point">
 					<div class="span10">
-						${pointAndCheckpoint._1().name} (<@fmt.weekRanges pointAndCheckpoint._1() />)
+						${pointAndCheckpoint._1().name} (<a class="use-tooltip" data-html="true" title="<@fmt.monitoringPointDateFormat pointAndCheckpoint._1() />"><@fmt.monitoringPointFormat pointAndCheckpoint._1() /></a>)
 					</div>
 					<div class="span2">
 						<#if pointAndCheckpoint._2() == "attended">
@@ -159,46 +159,19 @@
 	</div>
 </#macro>
 
-<#macro pointsByTerm points >
-	<#if points?keys?size == 0>
+
+
+<div class="monitoring-points">
+	<#if pointsByTerm?keys?size == 0>
 		<p><em>No monitoring points found for this academic year.</em></p>
-	</#if>
-	<#list attendance_variables.monitoringPointTermNames as term>
-		<#if points[term]??>
-			<@pointsInATerm term points />
-		</#if>
-	</#list>
-</#macro>
-
-<#if mapGet(courseMap, student.mostSignificantCourse)?? >
-	<div class="monitoring-points">
-		<#assign points = mapGet(courseMap, student.mostSignificantCourse) />
-		<#if (points?keys?size > 0)>
-			<div class="pull-right">
-				<a class="btn btn-primary" href="<@routes.agentStudentRecord points[points?keys?first]?first._1().pointSet student.mostSignificantCourse command.relationshipType />">Record attendance</a>
-			</div>
-		</#if>
-		<#if (courseMap?keys?size > 1)>
-			<h2>${student.mostSignificantCourse.route.name}, ${student.mostSignificantCourse.route.department.name}</h2>
-		</#if>
-		<@pointsByTerm points />
-	</div>
-</#if>
-
-<#list courseMap?keys as course>
-	<#if course.scjCode != student.mostSignificantCourse.scjCode >
-		<#assign points = mapGet(courseMap, course) />
-		<hr />
-		<div class="monitoring-points">
-			<#if (points?keys?size > 0)>
-			<div class="pull-right">
-				<a class="btn btn-primary" href="<@routes.agentStudentRecord points[points?keys?first]?first._1().pointSet course command.relationshipType />">Record attendance</a>
-			</div>
+	<#else>
+		<a class="btn btn-primary" href="<@routes.agentStudentRecord student relationshipType command.academicYear thisPath/>">Record attendance</a>
+		<#list attendance_variables.monitoringPointTermNames as term>
+			<#if pointsByTerm[term]??>
+				<@pointsInATerm term />
 			</#if>
-			<h2>${course.route.name}, ${course.route.department.name}</h2>
-			<@pointsByTerm points />
-		</div>
+		</#list>
 	</#if>
-</#list>
+</div>
 
 </#escape>

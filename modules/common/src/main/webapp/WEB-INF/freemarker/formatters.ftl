@@ -48,25 +48,51 @@
 	--></#noescape><#--
 --></#macro>
 
-<#-- Format week ranges for a SmallGroupEvent or MonitoringPoint -->
+<#-- Format week ranges for a SmallGroupEvent -->
 <#macro weekRanges object><#--
 	--><#noescape><#--
 		-->${weekRangesFormatter(object)}<#--
 	--></#noescape><#--
 --></#macro>
 
-<#macro monitoringPointWeeksFormat validFromWeek requiredFromWeek academicYear dept><#--
+<#macro wholeWeekFormat startWeek endWeek academicYear dept short=false><#--
 	--><#noescape><#--
-		-->${weekRangesFormatter(validFromWeek, requiredFromWeek, academicYear, dept)}<#--
+		-->${wholeWeekFormatter(startWeek, endWeek, academicYear, dept, short)}<#--
+	--></#noescape><#--
+--></#macro>
+
+<#macro wholeWeekDateFormat startWeek endWeek academicYear short=false><#--
+	--><#noescape><#--
+		-->${wholeWeekFormatter(startWeek, endWeek, academicYear, short)}<#--
 	--></#noescape><#--
 --></#macro>
 
 <#macro singleWeekFormat week academicYear dept short=false><#--
 	--><#noescape><#--
-		-->${singleWeekFormatter(week, academicYear, dept, short)}<#--
+		-->${wholeWeekFormatter(week, academicYear, dept, short)}<#--
 	--></#noescape><#--
 --></#macro>
 
+<#macro monitoringPointWeeksFormat validFromWeek requiredFromWeek academicYear dept stripHtml=false><#--
+	--><#noescape><#--
+		--><#local result = wholeWeekFormatter(validFromWeek, requiredFromWeek, academicYear, dept, false) /><#--
+		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
+	--></#noescape><#--
+--></#macro>
+
+<#macro monitoringPointFormat point stripHtml=false><#--
+	--><#noescape><#--
+		--><#local result = wholeWeekFormatter(point.validFromWeek, point.requiredFromWeek, point.pointSet.academicYear, point.pointSet.route.department, false) /><#--
+		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
+	--></#noescape><#--
+--></#macro>
+
+<#macro monitoringPointDateFormat point stripHtml=false><#--
+	--><#noescape><#--
+		--><#local result = wholeWeekFormatter(point.validFromWeek, point.requiredFromWeek, point.pointSet.academicYear, false) /><#--
+		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
+	--></#noescape><#--
+--></#macro>
 
 <#macro weekRangeSelect event><#--
 	--><#assign weeks=weekRangeSelectFormatter(event) /><#--
@@ -267,8 +293,7 @@
 		<#local title>title='${tooltip}.'</#local>
 		<#local classes='${classes} use-tooltip'?trim >
 	</#if>
-
-    <#if href??><#local href>href=${href}</#local></#if>
+    <#if href??><#local href><#noescape>href=${href}</#noescape></#local></#if>
 
 	<#if !can.do(permission,scope)>
 		<#local classes='${classes} disabled use-tooltip'?trim >

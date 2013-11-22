@@ -28,7 +28,7 @@ object SmallGroupSet {
 	
 	// For sorting a collection by set name. Either pass to the sort function,
 	// or expose as an implicit val.
-	val NameOrdering = Ordering.by[SmallGroupSet, String] ( _.name )
+	val NameOrdering = Ordering.by { set: SmallGroupSet => (set.name, set.id) }
 
 	// Companion object is one of the places searched for an implicit Ordering, so
 	// this will be the default when ordering a list of small group sets.

@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import uk.ac.warwick.tabula.JavaImports._
 
-@RequestMapping(Array("/{department}/{monitoringPoint}/record"))
+@RequestMapping(Array("/view/{department}/{monitoringPoint}/record"))
 @Controller
 class SetMonitoringCheckpointController extends AttendanceController {
 
@@ -42,10 +42,10 @@ class SetMonitoringCheckpointController extends AttendanceController {
 
 
 	def form(@ModelAttribute command: SetMonitoringCheckpointCommand, department: Department): Mav = {
-		Mav("home/record",
+		Mav("home/record_point",
 			"allCheckpointStates" -> MonitoringCheckpointState.values,
 			"returnTo" -> getReturnTo(Routes.department.view(department))
-		)
+		).crumbs(Breadcrumbs.ViewDepartment(department), Breadcrumbs.ViewDepartmentPoints(department))
 	}
 
 

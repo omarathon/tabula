@@ -25,7 +25,11 @@
 				$('#attendance .monitoring-points').empty();
 				$('#attendance .small-groups').empty();
 				
-				$.get('/attendance/profile/${studentCourseDetails.urlSafeId}/' + $('#attendance select.academicYear :selected').val() + '?dt=' + new Date().valueOf(), function(data) {
+				$.get('/attendance/profile/${profile.universityId}/'
+						+ $('#attendance select.academicYear :selected').val()
+						+ '?dt=' + new Date().valueOf()
+						+ '&expand=' + (window.location.search.indexOf('updatedMonitoringPoint') >= 0)
+				, function(data) {
 					$('#attendance .monitoring-points').html(data);
 					var pane = $('#attendance-pane');
 					var title = pane.find('h4').html();

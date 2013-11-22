@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, StudentMember, StudentRelationshipType, Member}
+import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType}
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, Unaudited, ReadOnly, ComposableCommand}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -14,9 +14,9 @@ import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 
 object AgentStudentViewCommand {
-	def apply(agent: Member, relationshipType: StudentRelationshipType, student: StudentMember, academicYearOption: Option[AcademicYear]) =
-		new AgentStudentViewCommand(agent, relationshipType, student, academicYearOption)
-		with ComposableCommand[Map[StudentCourseDetails, Map[String, Seq[(MonitoringPoint, String)]]]]
+	def apply(student: StudentMember, academicYearOption: Option[AcademicYear]) =
+		new AgentStudentViewCommand(student, academicYearOption)
+		with ComposableCommand[Map[String, Seq[(MonitoringPoint, String)]]]
 		with AgentStudentViewPermissions
 		with ReadOnly with Unaudited
 		with AutowiringTermServiceComponent
@@ -24,24 +24,17 @@ object AgentStudentViewCommand {
 		with GroupMonitoringPointsByTerm
 }
 
-class AgentStudentViewCommand(
-	val agent: Member, val relationshipType: StudentRelationshipType, val student: StudentMember, val academicYearOption: Option[AcademicYear]
-) extends CommandInternal[Map[StudentCourseDetails, Map[String, Seq[(MonitoringPoint, String)]]]]
-	with AgentStudentViewCommandState {
+class AgentStudentViewCommand(val student: StudentMember, val academicYearOption: Option[AcademicYear])
+	extends CommandInternal[Map[String, Seq[(MonitoringPoint, String)]]] with AgentStudentViewCommandState {
 
 	this: TermServiceComponent with MonitoringPointServiceComponent with GroupMonitoringPointsByTerm =>
 
 	def applyInternal() = {
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
-		student.studentCourseDetails.asScala.filter(_.hasCurrentEnrolment).map(scd =>
-			scd -> {
-				scd.studentCourseYearDetails.asScala.find(_.academicYear == academicYear).map(scyd => {
-					monitoringPointService.findMonitoringPointSet(scd.route, academicYear, Option(scyd.yearOfStudy)).orElse(
-						monitoringPointService.findMonitoringPointSet(scd.route, academicYear, None)
-					).map(checkpointStateStrings(_, currentAcademicWeek)).getOrElse(Map())
-				}).getOrElse(Map())
-			}
-		).toMap
+		monitoringPointService.getPointSetForStudent(student, academicYear) match {
+			case Some(set) => checkpointStateStrings(set, currentAcademicWeek)
+			case None => Map()
+		}
 	}
 
 	private def checkpointStateStrings(pointSet: MonitoringPointSet, currentAcademicWeek: Int) = {
@@ -66,13 +59,11 @@ trait AgentStudentViewPermissions extends RequiresPermissionsChecking {
 	this: AgentStudentViewCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(p.mandatory(relationshipType)), agent)
+		p.PermissionCheck(Permissions.MonitoringPoints.View, student)
 	}
 }
 
 trait AgentStudentViewCommandState {
-	def agent: Member
-	def relationshipType: StudentRelationshipType
 	def student: StudentMember
 	def academicYearOption: Option[AcademicYear]
 	val thisAcademicYear = AcademicYear.guessByDate(DateTime.now())
@@ -80,26 +71,26 @@ trait AgentStudentViewCommandState {
 }
 
 @Controller
-@RequestMapping(Array("/agent/{relationshipType}/{member}"))
+@RequestMapping(Array("/agent/{relationshipType}/{student}"))
 class AgentStudentViewController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(
-		@PathVariable relationshipType: StudentRelationshipType,
-		@PathVariable member: Member,
+		@PathVariable student: StudentMember,
 		@RequestParam(value="academicYear", required = false) academicYear: AcademicYear
-	) = {
-		member match {
-			case (student: StudentMember) => AgentStudentViewCommand(currentMember, relationshipType, student, Option(academicYear))
-			case _ => throw new IllegalArgumentException()
-		}
-	}
+	) = AgentStudentViewCommand(student, Option(academicYear))
 
 	@RequestMapping
 	def home(
-		@ModelAttribute("command") cmd: Appliable[Map[StudentCourseDetails, Map[String, Seq[(MonitoringPoint, String)]]]] with AgentStudentViewCommandState
+		@ModelAttribute("command") cmd: Appliable[Map[String, Seq[(MonitoringPoint, String)]]],
+		@PathVariable relationshipType: StudentRelationshipType,
+		@PathVariable student: StudentMember
 	) = {
-		Mav("agent/student", "student" -> cmd.student, "courseMap" -> cmd.apply()).crumbs(Breadcrumbs.Agent(cmd.relationshipType))
+		Mav("agent/student",
+			"student" -> student,
+			"relationshipType" -> relationshipType,
+			"pointsByTerm" -> cmd.apply()
+		).crumbs(Breadcrumbs.Agent(relationshipType))
 	}
 
 }

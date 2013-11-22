@@ -345,7 +345,7 @@
 																				permission='SmallGroups.Update' 
 																				scope=groupSet 
 																				action_descr='notify students and staff' 
-																				href=allocateset_url
+																				href=notifyset_url
 																				classes='notify-group-link'
 																				data_attr='data-toggle=modal data-target=#modal-container data-container=body'>
 																				<i class="icon-envelope-alt icon-fixed-width"></i> Notify
@@ -447,7 +447,7 @@
 						<#if showRecordButtons && features.smallGroupTeachingRecordAttendance && !event.unscheduled>
 							<#if can.do("SmallGroupEvents.Register", event)>
 								<div class="eventRegister">
-									<a class="btn btn-mini" href="<@routes.registerForWeek event week />" title="Record attendance for <@instanceFormat instance academicYear department />">
+									<a class="btn btn-mini" href="<@routes.registerForWeek event week/>&returnTo=${(info.requestedUri!"")?url}" title="Record attendance for <@instanceFormat instance academicYear department />">
 										Record
 									</a>
 								</div>

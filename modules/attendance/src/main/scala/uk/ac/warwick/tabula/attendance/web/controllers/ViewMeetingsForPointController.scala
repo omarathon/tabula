@@ -10,8 +10,6 @@ import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServic
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
 import scala.collection.mutable
 import org.springframework.stereotype.Controller
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.helpers.WeekRangesFormatter
 
 object ViewMeetingsForPointCommand {
 	def apply(student: StudentMember, point: MonitoringPoint) =
@@ -35,10 +33,11 @@ class ViewMeetingsForPointCommand(val student: StudentMember, val point: Monitor
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 
 		val allMeetings = allRelationshipTypes.flatMap{ relationshipType =>
-			student.studentCourseDetails.asScala.flatMap{ scd =>
+			student.mostSignificantCourseDetails.map{ scd =>
 				relationshipService.getRelationships(relationshipType, scd.sprCode).flatMap(meetingRecordDao.list(_))
 			}
-		}
+		}.flatten
+
 		allMeetings.map{meeting => meeting -> {
 			val meetingTermWeek = termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
 			val reasons: mutable.Buffer[String] = mutable.Buffer()
@@ -79,12 +78,12 @@ trait ViewMeetingsForPointCommandState {
 }
 
 @Controller
-@RequestMapping(Array("/{department}/{monitoringPoint}/meetings/{studentCourseDetails}"))
+@RequestMapping(Array("/{department}/{monitoringPoint}/meetings/{student}"))
 class ViewMeetingsForPointController extends AttendanceController {
 
 	@ModelAttribute("command")
-	def createCommand(@PathVariable studentCourseDetails: StudentMember,	@PathVariable monitoringPoint: MonitoringPoint) =
-		ViewMeetingsForPointCommand(studentCourseDetails, monitoringPoint)
+	def createCommand(@PathVariable student: StudentMember,	@PathVariable monitoringPoint: MonitoringPoint) =
+		ViewMeetingsForPointCommand(student, monitoringPoint)
 
 	@RequestMapping
 	def home(@ModelAttribute("command") cmd: Appliable[Seq[Pair[MeetingRecord, Seq[String]]]]) = {

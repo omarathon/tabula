@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 
 class AttendanceHomePageTest extends AttendanceFixture with GivenWhenThen{
 
-	val sprCode = P.Student1.warwickId+"_1"
 	val year = FunctionalTestAcademicYear.current.startYear
 
 	"A student" should "see monitoring points for the current year" in {
@@ -16,8 +15,8 @@ class AttendanceHomePageTest extends AttendanceFixture with GivenWhenThen{
 		When("I go to /attendance")
 		go to Path("/attendance")
 
-		Then("I am redirected to /attendance/{spr-code}/{current-year}")
-		eventually(currentUrl should include(s"/attendance/profile/$sprCode/$year"))
+		Then("I am redirected to /attendance/{P.Student1.warwickId}/{current-year}")
+		eventually(currentUrl should include(s"/attendance/profile/${P.Student1.warwickId}/$year"))
 		pageSource should include("My Attendance Monitoring")
 	}
 
@@ -52,8 +51,8 @@ class AttendanceHomePageTest extends AttendanceFixture with GivenWhenThen{
 
 		findAll(id("relationship-tutor")).toList.size should be (1)
 
-		pageSource should not include("View and record monitoring points")
-		pageSource should not include("Create and edit monitoring schemes")
+		pageSource should not include "View and record monitoring points"
+		pageSource should not include "Create and edit monitoring schemes"
 
 		findAll(id(s"view-department-$TEST_DEPARTMENT_CODE")).toList.size should be (0)
 		findAll(id(s"manage-department-$TEST_DEPARTMENT_CODE")).toList.size should be (0)

@@ -71,7 +71,7 @@ abstract class BrowserTest
 	 * just calls that with some sensible default timeouts.
 	 */
 	def eventuallyAjax(fun: =>Unit) {
-		eventually(timeout(10.seconds), interval(200.millis)) (fun)
+		eventually(timeout(30.seconds), interval(200.millis)) (fun)
 	}
 	// Sometimes you need to wait for a page to load after clicking on a link
 	def verifyPageLoaded(fun: => Unit) = eventuallyAjax(fun)

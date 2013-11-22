@@ -32,28 +32,45 @@ trait MonitoringPointService {
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]): Option[MonitoringPointSet]
-	def getCheckpointsBySCD(monitoringPoints: Seq[MonitoringPoint]) : Seq[(StudentCourseDetails, MonitoringCheckpoint)]
+	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint]) : Seq[(StudentMember, MonitoringCheckpoint)]
 	def listTemplates : Seq[MonitoringPointSetTemplate]
 	def getTemplateById(id: String) : Option[MonitoringPointSetTemplate]
 	def deleteTemplate(template: MonitoringPointSetTemplate)
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
 	def getChecked(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[MonitoringCheckpointState]]]
-	def deleteCheckpoint(scjCode: String, point: MonitoringPoint): Unit
+	def deleteCheckpoint(student: StudentMember, point: MonitoringPoint): Unit
 	def saveOrUpdateCheckpoint(
-		studentCourseDetails: StudentCourseDetails,
+		student: StudentMember,
 		point: MonitoringPoint,
 		state: MonitoringCheckpointState,
 		user: CurrentUser
 	) : MonitoringCheckpoint
 	def saveOrUpdateCheckpoint(
-		studentCourseDetails: StudentCourseDetails,
+		student: StudentMember,
 		point: MonitoringPoint,
 		state: MonitoringCheckpointState,
 		member: Member
 	) : MonitoringCheckpoint
 	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int
+	def getPointSetForStudent(student: StudentMember, academicYear: AcademicYear): Option[MonitoringPointSet]
 	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet]
+	def findPointSetsForStudentsByStudent(students: Seq[StudentMember], academicYear: AcademicYear): Map[StudentMember, MonitoringPointSet]
 	def findSimilarPointsForMembers(point: MonitoringPoint, students: Seq[StudentMember]): Map[StudentMember, Seq[MonitoringPoint]]
+	def studentsByMissedCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember]
+	def studentsByUnrecordedCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		currentAcademicWeek: Int,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember]
 }
 
 
@@ -73,8 +90,8 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]) =
 		monitoringPointDao.findMonitoringPointSet(route, academicYear, year)
 	
-	def getCheckpointsBySCD(monitoringPoints: Seq[MonitoringPoint]): Seq[(StudentCourseDetails, MonitoringCheckpoint)] =
-		monitoringPointDao.getCheckpointsBySCD(monitoringPoints)
+	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint]): Seq[(StudentMember, MonitoringCheckpoint)] =
+		monitoringPointDao.getCheckpointsByStudent(monitoringPoints)
 
 	def listTemplates = monitoringPointDao.listTemplates
 
@@ -95,35 +112,35 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 			).toMap
 		).toMap
 
-	def deleteCheckpoint(scjCode: String, point: MonitoringPoint): Unit = {
-		monitoringPointDao.getCheckpoint(point, scjCode) match {
+	def deleteCheckpoint(student: StudentMember, point: MonitoringPoint): Unit = {
+		monitoringPointDao.getCheckpoint(point, student) match {
 			case None => // already gone
 			case Some(checkpoint) => monitoringPointDao.deleteCheckpoint(checkpoint)
 		}
 	}
 
 	def saveOrUpdateCheckpoint(
-		studentCourseDetails: StudentCourseDetails,
+		student: StudentMember,
 		point: MonitoringPoint,
 		state: MonitoringCheckpointState,
 		user: CurrentUser
-	) : MonitoringCheckpoint = saveOrUpdateCheckpointForUser(studentCourseDetails, point, state, user.apparentId)
+	) : MonitoringCheckpoint = saveOrUpdateCheckpointForUser(student, point, state, user.apparentId)
 
 	def saveOrUpdateCheckpoint(
-		studentCourseDetails: StudentCourseDetails,
+		student: StudentMember,
 		point: MonitoringPoint,
 		state: MonitoringCheckpointState,
 		member: Member
 	) : MonitoringCheckpoint =
-		saveOrUpdateCheckpointForUser(studentCourseDetails, point, state, member.userId)
+		saveOrUpdateCheckpointForUser(student, point, state, member.userId)
 
-	private def saveOrUpdateCheckpointForUser(studentCourseDetails: StudentCourseDetails,
+	private def saveOrUpdateCheckpointForUser(student: StudentMember,
 		point: MonitoringPoint,	state: MonitoringCheckpointState,	usercode: String
 	) : MonitoringCheckpoint = {
-		val checkpoint = monitoringPointDao.getCheckpoint(point, studentCourseDetails.student).getOrElse({
+		val checkpoint = monitoringPointDao.getCheckpoint(point, student).getOrElse({
 			val newCheckpoint = new MonitoringCheckpoint
 			newCheckpoint.point = point
-			newCheckpoint.studentCourseDetail = studentCourseDetails
+			newCheckpoint.studentCourseDetail = student.mostSignificantCourseDetails.getOrElse(throw new IllegalArgumentException)
 			newCheckpoint
 		})
 		checkpoint.state = state
@@ -135,17 +152,50 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	}
 
 	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int = {
-		student.studentCourseDetails.asScala.map{scd =>
-			monitoringPointDao.missedCheckpoints(scd, academicYear)
-		}.sum
+		monitoringPointDao.missedCheckpoints(student, academicYear)
+	}
+
+	def getPointSetForStudent(student: StudentMember, academicYear: AcademicYear): Option[MonitoringPointSet] = {
+		student.mostSignificantCourseDetails.flatMap{ scd =>
+			scd.studentCourseYearDetails.asScala.find(scyd =>
+				scyd.academicYear == academicYear
+			).flatMap{ scyd =>
+				findMonitoringPointSet(scd.route, academicYear, Option(scyd.yearOfStudy)) orElse findMonitoringPointSet(scd.route, academicYear, None)
+			}
+		}
 	}
 
 	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet] = {
 		monitoringPointDao.findPointSetsForStudents(students, academicYear)
 	}
 
+	def findPointSetsForStudentsByStudent(students: Seq[StudentMember], academicYear: AcademicYear): Map[StudentMember, MonitoringPointSet] = {
+		monitoringPointDao.findPointSetsForStudentsByStudent(students, academicYear)
+	}
+
 	def findSimilarPointsForMembers(point: MonitoringPoint, students: Seq[StudentMember]): Map[StudentMember, Seq[MonitoringPoint]] = {
 		monitoringPointDao.findSimilarPointsForMembers(point, students)
+	}
+
+	def studentsByMissedCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember] = {
+		monitoringPointDao.studentsByMissedCount(universityIds, academicYear, isAscending, maxResults, startResult)
+	}
+
+	def studentsByUnrecordedCount(
+		universityIds: Seq[String],
+		academicYear: AcademicYear,
+		currentAcademicWeek: Int,
+		isAscending: Boolean,
+		maxResults: Int,
+		startResult: Int
+	): Seq[StudentMember] = {
+		monitoringPointDao.studentsByUnrecordedCount(universityIds, academicYear, currentAcademicWeek, isAscending, maxResults, startResult)
 	}
 
 }
@@ -180,7 +230,8 @@ trait MonitoringPointMeetingRelationshipTermService {
 }
 
 abstract class AbstractMonitoringPointMeetingRelationshipTermService extends MonitoringPointMeetingRelationshipTermService {
-	self: MonitoringPointDaoComponent with MeetingRecordDaoComponent with RelationshipServiceComponent with TermServiceComponent =>
+	self: MonitoringPointServiceComponent with MonitoringPointDaoComponent with MeetingRecordDaoComponent
+		with RelationshipServiceComponent with TermServiceComponent=>
 
 	def willCheckpointBeCreated(
 		student: StudentMember,
@@ -189,13 +240,11 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 		meetingDate: DateTime,
 		meetingToSkipApproval: Option[MeetingRecord]
 	): Boolean = {
-		student.studentCourseDetails.asScala.exists(scd => {
-			getRelevantPoints(scd, relationshipType, meetingFormat, meetingDate).exists(point => {
-				meetingToSkipApproval match {
-					case Some(meeting) => (countRelevantMeetings(scd, point, meetingToSkipApproval) >= point.meetingQuantity)
-					case None => (countRelevantMeetings(scd, point, None) >= point.meetingQuantity - 1)
-				}
-			})
+		getRelevantPoints(student, relationshipType, meetingFormat, meetingDate).exists(point => {
+			meetingToSkipApproval match {
+				case Some(meeting) => countRelevantMeetings(student, point, meetingToSkipApproval) >= point.meetingQuantity
+				case None => countRelevantMeetings(student, point, None) >= point.meetingQuantity - 1
+			}
 		})
 	}
 
@@ -218,14 +267,13 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 			return Seq()
 		}
 		meeting.relationship.studentMember.map(student => {
-			val createdCheckpoints = student.studentCourseDetails.asScala.flatMap(scd => {
-				val relevantMeetingPoints = getRelevantPoints(scd, meeting.relationship.relationshipType, meeting.format, meeting.meetingDate)
+				val relevantMeetingPoints = getRelevantPoints(student, meeting.relationship.relationshipType, meeting.format, meeting.meetingDate)
 				// check the required quantity and create a checkpoint if there are sufficient meetings
 				val checkpointOptions = for (point <- relevantMeetingPoints) yield {
-					if (countRelevantMeetings(scd, point, None) >= point.meetingQuantity) {
+					if (countRelevantMeetings(student, point, None) >= point.meetingQuantity) {
 						val checkpoint = new MonitoringCheckpoint
 						checkpoint.point = point
-						checkpoint.studentCourseDetail = scd
+						checkpoint.studentCourseDetail = student.mostSignificantCourseDetails.getOrElse(throw new IllegalArgumentException)
 						checkpoint.state = MonitoringCheckpointState.Attended
 						checkpoint.autoCreated = true
 						checkpoint.updatedDate = DateTime.now
@@ -240,31 +288,26 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 						None
 				}
 				checkpointOptions.flatten.toSeq
-			})
-			createdCheckpoints
-		}).getOrElse(Seq())
+			}).getOrElse(Seq())
 	}
 
-	private def getRelevantPoints(scd: StudentCourseDetails, relationshipType: StudentRelationshipType, format: MeetingFormat, date: DateTime) = {
-		scd.studentCourseYearDetails.asScala.flatMap(scyd => {
-			val relevantPointSets = monitoringPointDao.findMonitoringPointSets(scd.route, scyd.academicYear).filter(pointSet =>
-				pointSet.year == null || pointSet.year == scyd.yearOfStudy
-			)
-			val relevantPoints = relevantPointSets.flatMap(_.points.asScala).filter(point =>
+	private def getRelevantPoints(student: StudentMember, relationshipType: StudentRelationshipType, format: MeetingFormat, date: DateTime) = {
+		val academicYear = AcademicYear.findAcademicYearContainingDate(date, termService)
+		monitoringPointService.getPointSetForStudent(student, academicYear).map(set =>
+			set.points.asScala.filter(point =>
 				// only points relevant to this meeting
 				point.pointType == MonitoringPointType.Meeting
 					&& point.meetingRelationships.contains(relationshipType)
 					&& point.meetingFormats.contains(format)
 					// disregard any points that already have a checkpoint
-					&& (monitoringPointDao.getCheckpoint(point, scd.scjCode) match {
+					&& (monitoringPointDao.getCheckpoint(point, student) match {
 						case Some(_: MonitoringCheckpoint) => false
 						case None => true
 					})
 					// check date between point weeks
 					&& isDateValidForPoint(point, date)
-			)
-			relevantPoints
-		})
+			).toSeq
+		).getOrElse(Seq())
 	}
 
 	private def isDateValidForPoint(point: MonitoringPoint, date: DateTime) = {
@@ -282,7 +325,8 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 	 * If meetingToSkipApproval is provided, that meeting is included regradless of its approved status,
 	 * which is used to check if approving that meeting would then create a checkpoint.
 	 */
-	private def countRelevantMeetings(scd: StudentCourseDetails, point: MonitoringPoint, meetingToSkipApproval: Option[MeetingRecord]): Int = {
+	private def countRelevantMeetings(student: StudentMember, point: MonitoringPoint, meetingToSkipApproval: Option[MeetingRecord]): Int = {
+		val scd = student.mostSignificantCourseDetails.getOrElse(throw new IllegalArgumentException)
 		point.meetingRelationships.map(relationshipType => {
 			relationshipService.getRelationships(relationshipType, scd.sprCode)
 				.flatMap(meetingRecordDao.list(_).filter(meeting =>
@@ -297,6 +341,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 @Service("monitoringPointMeetingRelationshipTerm")
 class MonitoringPointMeetingRelationshipTermServiceImpl
 	extends AbstractMonitoringPointMeetingRelationshipTermService
+	with AutowiringMonitoringPointServiceComponent
 	with AutowiringMonitoringPointDaoComponent
 	with AutowiringMeetingRecordDaoComponent
 	with AutowiringRelationshipServiceComponent

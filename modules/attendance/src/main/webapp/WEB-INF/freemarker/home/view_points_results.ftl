@@ -11,11 +11,15 @@
 
 <#if validationError?has_content>
 	<#noescape>${validationError}</#noescape>
+<#elseif !command.hasBeenFiltered && command.filterTooVague>
+	<div class="alert alert-info">Find points for students using the filter options above.</div>
+<#elseif command.hasBeenFiltered && command.filterTooVague>
+	<div class="alert alert-warn">The filter you have chosen includes too many students.</div>
 <#elseif pointsMap?keys?size == 0>
-<p><em>No points exist for the selected options</em></p>
+	<p><em>No points exist for the selected options</em></p>
 <#else>
 	<#assign filterQuery = command.serializeFilter />
-	<#assign returnTo><@routes.viewDepartmentWithAcademicYear command.department command.academicYear filterQuery/></#assign>
+	<#assign returnTo><@routes.viewDepartmentPointsWithAcademicYear command.department command.academicYear filterQuery/></#assign>
 <div class="monitoring-points">
 	<#macro pointsInATerm term>
 		<div class="striped-section">
@@ -36,7 +40,10 @@
 								</@fmt.permission_button>
 							</div>
 							${groupedPoint.name}
-							(<@fmt.monitoringPointWeeksFormat groupedPoint.validFromWeek groupedPoint.requiredFromWeek command.academicYear command.department />):
+							(<a class="use-tooltip" data-html="true" title="<@fmt.wholeWeekDateFormat groupedPoint.validFromWeek groupedPoint.requiredFromWeek command.academicYear />">
+								<@fmt.monitoringPointWeeksFormat groupedPoint.validFromWeek groupedPoint.requiredFromWeek command.academicYear command.department />
+							</a>
+							):
 							<#if groupedPoint.routes?size == command.allRoutes?size>
 								All routes
 							<#else>

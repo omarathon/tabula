@@ -99,4 +99,27 @@ class FiltersStudentsTest extends TestBase with Mockito {
 		serialized.contains("routes=" + route3.code) should be (false)
 	}}
 
+	@Test
+	def serializeFilterEmpty() { new Fixture {
+		thisProfileService.allSprStatuses(dept) returns Seq(sprF, sprP)
+		thisProfileService.allModesOfAttendance(dept) returns Seq(moaFT, moaPT)
+
+		val filter = new FiltersStudents {
+			val department: Department = dept
+			val courseTypes: JavaImports.JList[CourseType] = JArrayList()
+			val modesOfAttendance: JavaImports.JList[ModeOfAttendance] = JArrayList()
+			val defaultOrder: Seq[Order] = Seq()
+			val sprStatuses: JavaImports.JList[SitsStatus] = JArrayList()
+			val sortOrder: JavaImports.JList[Order] = JArrayList()
+			val profileService: ProfileService = thisProfileService
+			val yearsOfStudy: JavaImports.JList[JavaImports.JInteger] = JArrayList()
+			val modules: JavaImports.JList[Module] = JArrayList()
+			val routes: JavaImports.JList[Route] = JArrayList()
+		}
+
+		val serialized = filter.serializeFilter
+		serialized should not be null
+		serialized should be ("")
+	}}
+
 }
