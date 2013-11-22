@@ -38,6 +38,7 @@ trait MemberDao {
 	def delete(member: Member)
 	def saveOrUpdate(rel: StudentRelationship)
 	def getByUniversityId(universityId: String): Option[Member]
+	def getByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getAllByUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]

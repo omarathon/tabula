@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.commands.FiltersStudents
 trait ProfileService {
 	def save(member: Member)
 	def getMemberByUniversityId(universityId: String): Option[Member]
+	def getMemberByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllMembersWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getMemberByPrsCode(prsCode: String): Option[Member]
 	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
@@ -47,6 +48,10 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	def getMemberByUniversityId(universityId: String) = transactional(readOnly = true) {
 		memberDao.getByUniversityId(universityId)
+	}
+
+	def getMemberByUniversityIdStaleOrFresh(universityId: String) = transactional(readOnly = true) {
+		memberDao.getByUniversityIdStaleOrFresh(universityId)
 	}
 
 	def getAllMembersWithUniversityIds(universityIds: Seq[String]) = transactional(readOnly = true) {

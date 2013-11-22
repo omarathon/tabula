@@ -51,44 +51,41 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet, importRowTracker: Imp
 	this.moduleRegistrationStatusCode = rs.getString("mod_reg_status")
 
 	override def applyInternal(): StudentCourseYearDetails = {
-		//transactional() {
+		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKeyStaleOrFresh(
+			studentCourseDetails,
+			sceSequenceNumber)
 
-			val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKeyStaleOrFresh(
-				studentCourseDetails,
-				sceSequenceNumber)
+		logger.debug("Importing student course details for " + studentCourseDetails.scjCode + ", " + sceSequenceNumber)
 
-			logger.debug("Importing student course details for " + studentCourseDetails.scjCode + ", " + sceSequenceNumber)
+		val commandBean = new BeanWrapperImpl(this)
 
-			val commandBean = new BeanWrapperImpl(this)
+		val (isTransient, studentCourseYearDetails) = studentCourseYearDetailsExisting match {
+			case Some(studentCourseYearDetails: StudentCourseYearDetails) => (false, studentCourseYearDetails)
+			case _ => (true, new StudentCourseYearDetails(studentCourseDetails, sceSequenceNumber,AcademicYear.parse(academicYearString)))
+		}
+		val studentCourseYearDetailsBean = new BeanWrapperImpl(studentCourseYearDetails)
 
-			val (isTransient, studentCourseYearDetails) = studentCourseYearDetailsExisting match {
-				case Some(studentCourseYearDetails: StudentCourseYearDetails) => (false, studentCourseYearDetails)
-				case _ => (true, new StudentCourseYearDetails(studentCourseDetails, sceSequenceNumber,AcademicYear.parse(academicYearString)))
-			}
-			val studentCourseYearDetailsBean = new BeanWrapperImpl(studentCourseYearDetails)
+		moduleRegistrationStatus = ModuleRegistrationStatus.fromCode(moduleRegistrationStatusCode)
 
-			moduleRegistrationStatus = ModuleRegistrationStatus.fromCode(moduleRegistrationStatusCode)
+		val hasChanged = copyStudentCourseYearProperties(commandBean, studentCourseYearDetailsBean) | markAsSeenInSits(studentCourseYearDetailsBean)
 
-			val hasChanged = copyStudentCourseYearProperties(commandBean, studentCourseYearDetailsBean) | markAsSeenInSits(studentCourseYearDetailsBean)
+		if (isTransient || hasChanged) {
+			logger.debug("Saving changes for " + studentCourseYearDetails)
 
-			if (isTransient || hasChanged) {
-				logger.debug("Saving changes for " + studentCourseYearDetails)
-
-				if (studentCourseDetails.latestStudentCourseYearDetails == null ||
-					// need to include fresh or stale since this might be a row which was deleted but has been re-instated
-					studentCourseDetails.freshOrStaleStudentCourseYearDetails.forall { _ <= studentCourseYearDetails }) {
-					studentCourseDetails.latestStudentCourseYearDetails = studentCourseYearDetails
-				}
-
-				studentCourseYearDetails.lastUpdatedDate = DateTime.now
-				studentCourseYearDetailsDao.saveOrUpdate(studentCourseYearDetails)
+			if (studentCourseDetails.latestStudentCourseYearDetails == null ||
+				// need to include fresh or stale since this might be a row which was deleted but has been re-instated
+				studentCourseDetails.freshOrStaleStudentCourseYearDetails.forall { _ <= studentCourseYearDetails }) {
+				studentCourseDetails.latestStudentCourseYearDetails = studentCourseYearDetails
 			}
 
-			val key = new StudentCourseYearKey(studentCourseYearDetails.studentCourseDetails.scjCode, studentCourseYearDetails.sceSequenceNumber)
-			importRowTracker.studentCourseYearDetailsSeen.add(key)
+			studentCourseYearDetails.lastUpdatedDate = DateTime.now
+			studentCourseYearDetailsDao.saveOrUpdate(studentCourseYearDetails)
+		}
 
-			studentCourseYearDetails
-		//}
+		val key = new StudentCourseYearKey(studentCourseYearDetails.studentCourseDetails.scjCode, studentCourseYearDetails.sceSequenceNumber)
+		importRowTracker.studentCourseYearDetailsSeen.add(key)
+
+		studentCourseYearDetails
 	}
 
 	private val basicStudentCourseYearProperties = Set(

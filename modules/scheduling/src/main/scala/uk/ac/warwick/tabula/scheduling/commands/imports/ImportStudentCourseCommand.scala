@@ -67,59 +67,57 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	this.levelCode = rs.getString("level_code")
 
 	override def applyInternal(): StudentCourseDetails = {
-		//transactional() {
-			val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCodeStaleOrFresh(scjCode)
+		val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCodeStaleOrFresh(scjCode)
 
-			logger.debug("Importing student course details for " + scjCode)
+		logger.debug("Importing student course details for " + scjCode)
 
-			val (isTransient, studentCourseDetails) = studentCourseDetailsExisting match {
-				case Some(studentCourseDetails: StudentCourseDetails) => (false, studentCourseDetails)
-				case _ => (true, new StudentCourseDetails(stuMem, scjCode))
-			}
+		val (isTransient, studentCourseDetails) = studentCourseDetailsExisting match {
+			case Some(studentCourseDetails: StudentCourseDetails) => (false, studentCourseDetails)
+			case _ => (true, new StudentCourseDetails(stuMem, scjCode))
+		}
 
-			val commandBean = new BeanWrapperImpl(this)
-			val studentCourseDetailsBean = new BeanWrapperImpl(studentCourseDetails)
+		val commandBean = new BeanWrapperImpl(this)
+		val studentCourseDetailsBean = new BeanWrapperImpl(studentCourseDetails)
 
-			val hasChanged = copyStudentCourseProperties(commandBean, studentCourseDetailsBean) | markAsSeenInSits(studentCourseDetailsBean)
+		val hasChanged = copyStudentCourseProperties(commandBean, studentCourseDetailsBean) | markAsSeenInSits(studentCourseDetailsBean)
 
-			if (isTransient || hasChanged) {
-				try {
-					logger.debug("Saving changes for " + studentCourseDetails)
+		if (isTransient || hasChanged) {
+			try {
+				logger.debug("Saving changes for " + studentCourseDetails)
 
-					if (this.mostSignificant) {
-						stuMem.mostSignificantCourse = studentCourseDetails
-						logger.debug("Updating member most significant course to "+ studentCourseDetails +" for " + stuMem)
-					}
-
-					studentCourseDetails.lastUpdatedDate = DateTime.now
-					studentCourseDetailsDao.saveOrUpdate(studentCourseDetails)
+				if (this.mostSignificant) {
+					stuMem.mostSignificantCourse = studentCourseDetails
+					logger.debug("Updating member most significant course to "+ studentCourseDetails +" for " + stuMem)
 				}
-				catch  {
-					case exception: ConstraintViolationException => {
-						logger.warn("Couldn't update course details for SCJ "
-								+ studentCourseDetails.scjCode + ", SPR " + studentCourseDetails.sprCode
-								+ ".  Might be invalid data in SITS - working on the assumption "
-								+ "there shouldn't be multiple SPR codes for one current SCJ code")
-						exception.printStackTrace
-					}
+
+				studentCourseDetails.lastUpdatedDate = DateTime.now
+				studentCourseDetailsDao.saveOrUpdate(studentCourseDetails)
+			}
+			catch  {
+				case exception: ConstraintViolationException => {
+					logger.warn("Couldn't update course details for SCJ "
+							+ studentCourseDetails.scjCode + ", SPR " + studentCourseDetails.sprCode
+							+ ".  Might be invalid data in SITS - working on the assumption "
+							+ "there shouldn't be multiple SPR codes for one current SCJ code")
+					exception.printStackTrace
 				}
 			}
+		}
 
-			importStudentCourseYearCommand.studentCourseDetails = studentCourseDetails
-			val studentCourseYearDetails = importStudentCourseYearCommand.apply()
+		importStudentCourseYearCommand.studentCourseDetails = studentCourseDetails
+		val studentCourseYearDetails = importStudentCourseYearCommand.apply()
 
-			// Apply above will take care of the db.  This brings the in-memory data up to speed:
-			studentCourseDetails.attachStudentCourseYearDetails(studentCourseYearDetails)
+		// Apply above will take care of the db.  This brings the in-memory data up to speed:
+		studentCourseDetails.attachStudentCourseYearDetails(studentCourseYearDetails)
 
-			captureTutor(studentCourseDetails.department)
+		captureTutor(studentCourseDetails.department)
 
-			importSupervisorsForStudentCommand.studentCourseDetails = studentCourseDetails
-			importSupervisorsForStudentCommand.apply
+		importSupervisorsForStudentCommand.studentCourseDetails = studentCourseDetails
+		importSupervisorsForStudentCommand.apply
 
-			importRowTracker.scjCodesSeen.add(studentCourseDetails.scjCode)
+		importRowTracker.scjCodesSeen.add(studentCourseDetails.scjCode)
 
-			studentCourseDetails
-		//}
+		studentCourseDetails
 	}
 
 	private val basicStudentCourseProperties = Set(
