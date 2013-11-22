@@ -4,7 +4,7 @@
 
 <div class="btn-toolbar dept-toolbar">
 	<#if department.parent??>
-		<a class="btn btn-medium use-tooltip" href="<@routes.viewDepartmentPoints department.parent />" data-container="body" title="${command.department.parent.name}">
+		<a class="btn btn-medium use-tooltip" href="<@routes.viewDepartmentPoints department.parent />" data-container="body" title="${department.parent.name}">
 			Parent department
 		</a>
 	</#if>
