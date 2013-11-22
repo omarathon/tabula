@@ -428,11 +428,4 @@
     			createCalendar($(this),$(this).data('viewname'),$(this).data('studentid'));
     		});
     	});
-    	
-	$(function() {
-		// Prevent clicks on filtering dropdowns from closing window
-		$('.dropdown-menu.filter-list').on('click', function(e) {
-			e.stopPropagation();
-		});
-	});
 }(jQuery));

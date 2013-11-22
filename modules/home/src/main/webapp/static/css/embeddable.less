@@ -602,6 +602,10 @@ fieldset.internal {
 	&.not-open { color: #606060; }
 }
 
+#container p.extension-button {
+  margin: -0.5em 0 2em 3.7em;
+}
+
 .end-assignment-info { clear: both; }
 .end-floats { clear: both; }
 
@@ -1708,12 +1712,20 @@ th.nowrap, td.nowrap { white-space: nowrap; }
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
+        display: block;
+        cursor: pointer;
       }
     }
 
     max-height: 300px;
     overflow-y: auto;
     overflow-x: hidden;
+
+    .clear-this-filter button.btn-link {
+      padding-left: 0px;
+      border-left: 0px;
+      margin-left: 0px;
+    }
   }
 
   .pagination {

@@ -295,7 +295,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	override def listNewerThan(startDate: DateTime, batchSize: Int) =
 		service.listNewerThan(startDate, batchSize).filter { _.eventStage == "before" }
 
-	protected def toItem(id: String) = service.getById(id.toLong)
+	protected def toItem(id: String) = service.getById(id.toLong).orElse(Some(AuditEvent()))
 
 	protected def toParsedAuditEvent(doc: Document): Option[AuditEvent] = toItem(doc).map { event =>
 		event.parsedData = service.parseData(event.data)

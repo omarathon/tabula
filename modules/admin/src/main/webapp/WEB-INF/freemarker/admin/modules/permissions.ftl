@@ -7,7 +7,7 @@
 
 <div id="module-permissions-page">
 	<h1>Module permissions</h1>
-	<h5>for <#noescape>${module_name}</#noescape></h5>
+	<h5><span class="muted">for</span> <#noescape>${module_name}</#noescape></h5>
 
 	<@pm.alerts "addCommand" module_name users role />
 
