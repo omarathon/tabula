@@ -8,15 +8,10 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import org.springframework.web.servlet.View
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.web.views.JSONView
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
-import uk.ac.warwick.tabula.data.model.ModuleRegistration
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.data.model.Course
-import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.forms.Extension
 
 @Controller
 @RequestMapping(Array("/fixtures/create/module"))
@@ -170,6 +165,7 @@ class ModuleRegistrationFixturesController {
 		cmd.apply()
 	}
 }
+
 @Controller
 @RequestMapping(Array("/fixtures/update/assignment"))
 class UpdateAssignmentFixturesController {
@@ -181,6 +177,36 @@ class UpdateAssignmentFixturesController {
 
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("updateAssignmentCommand") cmd: Appliable[Seq[Assignment]]) {
+		cmd.apply()
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/create/extension"))
+class CreateExtensionFixturesController {
+
+	@ModelAttribute("createExtensionCommand")
+	def getCreateExtensionCommand(): Appliable[Extension] = {
+		CreateExtensionFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createExtensionCommand") cmd: Appliable[Extension]) {
+		cmd.apply()
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/update/extensionSettings"))
+class UpdateExtensionSettingsFixturesController {
+
+	@ModelAttribute("updateExtensionSettingsFixtureCommand")
+	def getUpdateExtensionSettingsFixtureCommand(): Appliable[Department] = {
+		UpdateExtensionSettingsFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("updateExtensionSettingsFixtureCommand") cmd: Appliable[Department]) {
 		cmd.apply()
 	}
 }

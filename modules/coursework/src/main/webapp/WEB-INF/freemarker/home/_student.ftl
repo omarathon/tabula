@@ -23,7 +23,7 @@
 
 					<div class="item-info clearfix<#if !info.isExtended && info.closed> late<#elseif info.isExtended!false> extended</#if>">
 						<div class="row-fluid">
-							<div class="span4">
+							<div class="span5">
 								<div class="module-title"><@fmt.module_name assignment.module /></div>
 								<h4 class="name">
 									<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
@@ -31,7 +31,7 @@
 									</a>
 								</h4>
 							</div>
-							<div class="span5">
+							<div class="span4">
 								<#if !assignment.opened>
 									<div class="not-open deadline">
 										Opens <@fmt.date date=assignment.openDate /><br>
@@ -50,7 +50,7 @@
 											</#if>
 										</div>
 									<#elseif info.submittable>
-										<#local showButtons = false />
+										<#local textOnly = true />
 										<#include "/WEB-INF/freemarker/submit/_assignment_deadline.ftl" />
 									</#if>
 								</#if>
