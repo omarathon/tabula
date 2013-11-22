@@ -78,14 +78,25 @@ abstract class BrowserTest
 
 	// Don't set textField.value for a datetimepicker, as IT WILL HURT YOU
 	class DateTimePickerField(val underlying: org.openqa.selenium.WebElement, selector: String) {
+		if(!(underlying.getTagName.toLowerCase == "input" && underlying.getAttribute("type").toLowerCase == "text"))
+			throw new TestFailedException(
+				Some("Element " + underlying + ", specified as a dateTimePicker, is not a text field."),
+				None,
+				0
+			)
+
 		def value = underlying.getAttribute("value")
-		def value_=(value : DateTime) = {
-			val happyDate = value.toString("dd-MMM-yyyy HH:00:00")
-			underlying.clear()
-			underlying.sendKeys(happyDate)
+
+		def value_=(newValue: DateTime) = {
+			val nearestHourAsString = newValue.toString("dd-MMM-yyyy HH:00:00")
+			do {
+				underlying.clear()
+				underlying.sendKeys(nearestHourAsString)
+			} while (value != nearestHourAsString) // loop to fix weird Selenium failure mode where string is repeated
 			val script = s"var dtp = jQuery('${selector}').data('datetimepicker'); if (dtp!=undefined) dtp.update();"
 			executeScript(script)
 		}
+
 		def clear() = underlying.clear()
 	}
 

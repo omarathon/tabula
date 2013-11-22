@@ -3,18 +3,10 @@ package uk.ac.warwick.tabula.coursework
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import org.openqa.selenium.By
-import org.openqa.selenium.WebDriver
-import org.openqa.selenium.WebElement
-import org.scalatest.selenium.WebBrowser.Element
 import uk.ac.warwick.tabula.BrowserTest
 import uk.ac.warwick.tabula.LoginDetails
-import org.joda.time.format.DateTimeFormat
-import org.openqa.selenium.htmlunit.HtmlUnitWebElement
-import org.openqa.selenium.JavascriptExecutor
-import org.openqa.selenium.Keys
-import org.openqa.selenium.internal.seleniumemulation.FireEvent
 import uk.ac.warwick.tabula.home.{FixturesDriver, FeaturesDriver}
-import org.openqa.selenium.firefox.FirefoxDriver
+import org.scalatest.exceptions.TestFailedException
 
 trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDriver {
 
@@ -175,7 +167,6 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		textArea("reason").value = "I have a desperate need for an extension."
 
 		dateTimePicker("requestedExpiryDate").value = requestedDate
-		System.out.println(pageSource)
 
 		checkbox("readGuidelines").select()
 
@@ -234,11 +225,33 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 
 	}
 
-	def getModuleInfo(moduleCode: String) =
-		findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == moduleCode.toUpperCase).next.underlying
+	def getModuleInfo(moduleCode: String) = {
+		val moduleInfoBlocks = findAll(className("module-info"))
 
-	def getAssignmentInfo(moduleCode: String, assignmentName: String) =
-		getModuleInfo(moduleCode).findElements(By.className("assignment-info")).asScala.filter(_.findElement(By.className("name")).getText.trim == assignmentName).head
+		if (moduleInfoBlocks.isEmpty)
+			throw new TestFailedException("No module-info blocks found on this page. Check it's the right page and that the user has permission.", 0)
+
+		val matchingModule = moduleInfoBlocks.filter(_.underlying.findElement(By.className("mod-code")).getText == moduleCode.toUpperCase)
+
+		if (matchingModule.isEmpty)
+			throw new TestFailedException(s"No module-info found for ${moduleCode.toUpperCase}", 0)
+
+		matchingModule.next.underlying
+	}
+
+	def getAssignmentInfo(moduleCode: String, assignmentName: String) = {
+		val assignmentBlocks = getModuleInfo(moduleCode).findElements(By.className("assignment-info")).asScala
+
+		if (assignmentBlocks.isEmpty)
+			throw new TestFailedException("No assignment-info blocks found on this page. Check it's the right page and that the user has permission.", 0)
+
+		val matchingAssignment = assignmentBlocks.filter(_.findElement(By.className("name")).getText.trim == assignmentName)
+
+		if (matchingAssignment.isEmpty)
+			throw new TestFailedException(s"No module-info found for ${assignmentName}", 0)
+
+		matchingAssignment.head
+	}
 
 	def getInputByLabel(label: String) =
 		findAll(tagName("label")).find(_.underlying.getText.trim == label) map { _.underlying.getAttribute("for") } map { id(_).webElement }

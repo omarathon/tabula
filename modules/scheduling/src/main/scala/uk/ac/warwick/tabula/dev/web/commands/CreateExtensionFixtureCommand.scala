@@ -34,6 +34,9 @@ class CreateExtensionFixtureCommand extends CommandInternal[Extension] {
 				e.approvedOn = now.plusMillis(5) // superquick
 			}
 
+			// make sure to manually create the inverse relationship
+			e.assignment.extensions.add(e)
+
 			e
 		}
 	}
