@@ -229,8 +229,8 @@ class StudentMember extends Member with StudentProperties {
 		studentCourseDetails.asScala.filter(scd => scd.isFresh)
 	}
 
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshOrStaleStudentCourseDetails = studentCourseDetails.asScala
-
 
 	@OneToOne
 	@JoinColumn(name = "mostSignificantCourse")
@@ -258,6 +258,7 @@ class StudentMember extends Member with StudentProperties {
 		).distinct
 	}
 
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	override def mostSignificantCourseDetails: Option[StudentCourseDetails] = Option(mostSignificantCourse).filter(course => course.isFresh)
 
 	override def hasCurrentEnrolment: Boolean = freshStudentCourseDetails.exists(_.hasCurrentEnrolment)

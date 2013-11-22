@@ -67,7 +67,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	this.levelCode = rs.getString("level_code")
 
 	override def applyInternal(): StudentCourseDetails = {
-		transactional() {
+		//transactional() {
 			val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCodeStaleOrFresh(scjCode)
 
 			logger.debug("Importing student course details for " + scjCode)
@@ -119,7 +119,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 			importRowTracker.scjCodesSeen.add(studentCourseDetails.scjCode)
 
 			studentCourseDetails
-		}
+		//}
 	}
 
 	private val basicStudentCourseProperties = Set(

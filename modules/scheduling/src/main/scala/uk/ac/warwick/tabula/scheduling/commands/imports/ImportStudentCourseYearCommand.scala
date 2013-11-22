@@ -51,7 +51,7 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet, importRowTracker: Imp
 	this.moduleRegistrationStatusCode = rs.getString("mod_reg_status")
 
 	override def applyInternal(): StudentCourseYearDetails = {
-		transactional() {
+		//transactional() {
 
 			val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKeyStaleOrFresh(
 				studentCourseDetails,
@@ -88,7 +88,7 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet, importRowTracker: Imp
 			importRowTracker.studentCourseYearDetailsSeen.add(key)
 
 			studentCourseYearDetails
-		}
+		//}
 	}
 
 	private val basicStudentCourseYearProperties = Set(
