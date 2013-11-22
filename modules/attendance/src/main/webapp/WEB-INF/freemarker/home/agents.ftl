@@ -59,7 +59,11 @@
 					</span>
 				</td>
 				<td class="button">
-					<a href="<@routes.viewDepartmentAgentsStudents command.department command.relationshipType agentData.agentMember />" class="btn btn-primary">Attendance</a>
+					<#if agentData.agentMember?? >
+						<a href="<@routes.viewDepartmentAgentsStudents command.department command.relationshipType agentData.agentMember />" class="btn btn-primary">Attendance</a>
+					<#else>
+						&nbsp;
+					</#if>
 				</td>
 			</tr>
 		</#list>
