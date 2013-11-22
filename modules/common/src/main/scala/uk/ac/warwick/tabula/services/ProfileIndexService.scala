@@ -177,7 +177,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 
 	override def listNewerThan(startDate: DateTime, batchSize: Int) = dao.listUpdatedSince(startDate, batchSize)
 
-	protected def toItem(id: String) = dao.getByUniversityId(id)
+	protected def toItem(doc: Document) = documentValue(doc, IdField).flatMap { id => dao.getByUniversityId(id) }
 
 	/**
 	 * TODO reuse one Document and set of Fields for all items

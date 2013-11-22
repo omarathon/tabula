@@ -278,8 +278,7 @@ abstract class AbstractIndexService[A]
 	protected def toDocument(item: A): Document
 
 	protected def toId(doc: Document) = documentValue(doc, IdField)
-	protected def toItem(id: String): Option[A]
-	protected def toItem(doc: Document): Option[A] = { toId(doc) flatMap (toItem) }
+	protected def toItem(doc: Document): Option[A]
 
 }
 
