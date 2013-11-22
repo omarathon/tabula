@@ -7,11 +7,11 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import org.hibernate.criterion.{Restrictions, Projections}
 
 trait ExtensionDaoComponent {
-	val ExtensionDao: ExtensionDao
+	val extensionDao: ExtensionDao
 }
 
 trait AutowiringExtensionDaoComponent extends ExtensionDaoComponent {
-	val ExtensionDao = Wire[ExtensionDao]
+	val extensionDao = Wire[ExtensionDao]
 }
 
 trait ExtensionDao {
