@@ -69,7 +69,7 @@
 
 <#macro singleWeekFormat week academicYear dept short=false><#--
 	--><#noescape><#--
-		-->${wholeWeekFormatter(week, academicYear, dept, short)}<#--
+		-->${wholeWeekFormatter(week, week, academicYear, dept, short)}<#--
 	--></#noescape><#--
 --></#macro>
 
