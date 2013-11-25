@@ -55,6 +55,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		val student1 = Fixtures.student("student1")
 		student1.freshStudentCourseDetails(0).route = route
 		thisProfileService.getMemberByUniversityId("student1") returns Option(student1)
+		thisProfileService.getMemberByUniversityIdStaleOrFresh("student1") returns Option(student1)
 
 		val monitoringPointSet1 = new MonitoringPointSet
 		monitoringPointSet1.route = route
