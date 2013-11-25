@@ -2,11 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.{Description, SelfValidating, Command}
-import uk.ac.warwick.tabula.data.Daoisms
-import reflect.BeanProperty
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.spring.Wire
@@ -54,13 +50,11 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 			}
 		}
 
-		// TODO - Work out how not to grow this without putting loads of command stuff in the model
-		assignment.markingWorkflow.markingMethod match {
-			case StudentsChooseMarker => finaliseFeedback()
-			case SeenSecondMarking if firstMarker => createSecondMarkerFeedback()
-			case SeenSecondMarking if !firstMarker => finaliseFeedback()
-			case _ => // do nothing
-		}
+		if (assignment.markingWorkflow.hasSecondMarker && firstMarker)
+			createSecondMarkerFeedback()
+		else
+			finaliseFeedback()
+
 	}
 
 	override def describe(d: Description){

@@ -423,6 +423,24 @@ $(function() {
 			$(this).data('initialvalue', $(this).val());
 		});
 
+		// rejection fields shown when reject is selected
+		$('input.reject', $container).each( function() {
+			var $this = $(this);
+			var $form = $this.closest('form');
+			var $table = $('#online-marking-table');
+			var $rejectionFields = $form.find('.rejection-fields');
+			$this.slideMoreOptions($rejectionFields, true);
+
+			$rejectionFields.on('tabula.slideMoreOptions.shown', function() {
+				$table.trigger('tabula.expandingTable.repositionContent');
+			});
+
+			$rejectionFields.on('tabula.slideMoreOptions.hidden', function() {
+				$table.trigger('tabula.expandingTable.repositionContent');
+			});
+
+		});
+
 		$('.cancel-feedback', $form).on('click', function(e) {
 			e.preventDefault();
 			e.stopPropagation();

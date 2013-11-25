@@ -85,6 +85,10 @@ jQuery.fn.expandingTable = function(options) {
 		});
 	}
 
+	$table.on('tabula.expandingTable.repositionContent', function() {
+		 repositionContentBoxes();
+	});
+
 	function hideContent($content, $row, $icon) {
 		var $contentCell = $('.content-cell', $row);
 

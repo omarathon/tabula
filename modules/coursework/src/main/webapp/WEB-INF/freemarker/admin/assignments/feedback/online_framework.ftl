@@ -116,7 +116,7 @@
 			};
 
 			$('#online-marking-table').expandingTable({
-				contentUrl: '${info.requestedUri!""}',
+				contentUrl: '${url(markingUrl!"")}',
 				useIframe: true,
 				tableSorterOptions: tsOptions
 			});

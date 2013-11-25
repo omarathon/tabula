@@ -24,6 +24,8 @@ class StudentsChooseMarkerWorkflow extends MarkingWorkflow {
 
 	def hasSecondMarker = false
 
+	def onlineMarkingUrl(assignment: Assignment, marker: User) = MarkingRoutes.onlineMarkerFeedback(assignment)
+
 	def getStudentsFirstMarker(assignment: Assignment, universityId: String) = assignment.markerSelectField match {
 		case Some(field) => {
 			val submission = submissionService.getSubmissionByUniId(assignment, universityId)

@@ -3,13 +3,15 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{Member, Assignment, Module}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineMarkerFeedbackFormCommand, OnlineMarkerFeedbackCommand, OnlineFeedbackFormCommand, OnlineFeedbackCommand}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.CurrentUser
 import javax.validation.Valid
-import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
+import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
+import uk.ac.warwick.tabula.coursework.web.Routes
+import scala.Some
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/online"))
@@ -26,6 +28,7 @@ class OnlineFeedbackController extends CourseworkController {
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
 		Mav("admin/assignments/feedback/online_framework",
+			"markingUrl" -> Routes.admin.assignment.onlineFeedback(assignment),
 			"isMarkerView" -> false,
 			"assignment" -> assignment,
 			"command" -> command,
@@ -49,6 +52,7 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
 		Mav("admin/assignments/feedback/online_framework",
+			"markingUrl" -> assignment.markingWorkflow.onlineMarkingUrl(assignment, command.marker),
 			"isMarkerView" -> true,
 			"assignment" -> assignment,
 			"command" -> command,
@@ -100,16 +104,20 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineMarkerFeedbackFormCommand, errors: Errors): Mav = {
 
-		val (isCompleted, firstMarkerFeedback) = command.markerFeedback match {
-			case Some(mf) => (mf.state == MarkingCompleted, mf.feedback.firstMarkerFeedback)
-			case None => (false, None)
-		}
+		val isCompleted = command.markerFeedback.map(_.state == MarkingCompleted).getOrElse(false)
+		val parentFeedback = command.markerFeedback.map(_.feedback)
+		val firstMarkerFeedback = parentFeedback.flatMap(feedback => Option(feedback.firstMarkerFeedback))
+		val secondMarkerFeedback =  parentFeedback.flatMap(feedback => Option(feedback.secondMarkerFeedback))
+		val isRejected = secondMarkerFeedback.map(_.state == Rejected).getOrElse(false)
+		val isFirstMarker = command.assignment.isFirstMarker(command.currentUser.apparentUser)
 
-		Mav("admin/assignments/feedback/marker_online_feedback",
+		Mav("admin/assignments/feedback/marker_online_feedback" ,
 			"command" -> command,
 			"isCompleted" -> isCompleted,
-			"isFirstMarker" -> command.assignment.isFirstMarker(command.currentUser.apparentUser),
-			"firstMarkerFeedback" -> firstMarkerFeedback
+			"isFirstMarker" -> isFirstMarker,
+			"firstMarkerFeedback" -> firstMarkerFeedback,
+			"isRejected" -> isRejected,
+			"secondMarkerFeedback" -> secondMarkerFeedback
 		).noLayout()
 	}
 

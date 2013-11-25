@@ -6,9 +6,12 @@
 		<#assign submission = command.submission />
 		<#include "_submission_summary.ftl">
 	</#if>
+	<#if (isMarking!false) && (isRejected!false)>
+		<#include "_rejection_summary.ftl">
+	</#if>
 	<div class="form onlineFeedback">
 	    <#assign submit_url>
-			<#if isMarker!false>
+			<#if isMarking!false>
 				<@routes.markerOnlinefeedbackform assignment command.student.universityId />
 			<#else>
 				<@routes.onlinefeedbackform assignment command.student.universityId />

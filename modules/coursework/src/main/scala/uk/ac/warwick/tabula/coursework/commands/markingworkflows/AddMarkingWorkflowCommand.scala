@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.data.model.MarkingMethod.{StudentsChooseMarker, SeenSecondMarking}
+import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, StudentsChooseMarker, SeenSecondMarking}
 
 class AddMarkingWorkflowCommand(department: Department) extends ModifyMarkingWorkflowCommand(department) {
 
@@ -17,6 +17,7 @@ class AddMarkingWorkflowCommand(department: Department) extends ModifyMarkingWor
 			val markingWorkflow = markingMethod match {
 				case SeenSecondMarking => new SeenSecondMarkingWorkflow(department)
 				case StudentsChooseMarker => new StudentsChooseMarkerWorkflow(department)
+				case ModeratedMarking => new ModeratedMarkingWorkflow(department)
 				case _ => throw new UnsupportedOperationException(markingMethod + " not specified")
 			}
 			this.copyTo(markingWorkflow)

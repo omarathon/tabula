@@ -11,6 +11,7 @@ import org.springframework.core.convert.converter.Converter
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
+import java.net.URLEncoder
 
 /** A MarkingWorkflow defines how an assignment will be marked, including who
   * will be the markers and what rules should be used to decide how submissions
@@ -38,6 +39,8 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	var department: Department = null
 
 	def permissionsParents = Option(department).toStream
+
+	def onlineMarkingUrl(assignment:Assignment, marker: User) : String
 
 	/** The group of first markers. */
 	@OneToOne(cascade = Array(CascadeType.ALL))
@@ -72,6 +75,55 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 
 }
 
+trait AssignmentMarkerMap {
+
+	this : MarkingWorkflow =>
+
+	// gets the usercode of the students current marker from the given markers UserGroup
+	private def getMarkerFromAssignmentMap(assignment: Assignment, universityId: String, markers: UserGroup) = {
+		val student = userLookup.getUserByWarwickUniId(universityId)
+		val mapEntry = Option(assignment.markerMap) flatMap {_.find{p:(String,UserGroup) =>
+			p._2.includes(student.getUserId) && markers.includes(p._1)
+		}}
+		mapEntry match {
+			case Some((markerId, students)) => Some(markerId)
+			case _ => None
+		}
+	}
+
+	def getStudentsFirstMarker(assignment: Assignment, universityId: String) =
+		getMarkerFromAssignmentMap(assignment, universityId, assignment.markingWorkflow.firstMarkers)
+
+	def getStudentsSecondMarker(assignment: Assignment, universityId: String) =
+		getMarkerFromAssignmentMap(assignment, universityId, assignment.markingWorkflow.secondMarkers)
+
+	def getSubmissions(assignment: Assignment, user: User) = {
+		val allSubmissions = getSubmissionsFromMap(assignment, user)
+
+		val isFirstMarker = assignment.isFirstMarker(user)
+		val isSecondMarker = assignment.isSecondMarker(user)
+
+		if(isFirstMarker)
+			allSubmissions.filter(_.isReleasedForMarking)
+		else if(isSecondMarker)
+			allSubmissions.filter(_.isReleasedToSecondMarker)
+		else Seq()
+	}
+
+	// returns all submissions made by students assigned to this marker
+	private def getSubmissionsFromMap(assignment: Assignment, marker: User): Seq[Submission] = {
+		val students = Option(assignment.markerMap.get(marker.getUserId))
+		students match {
+			case Some(ug) => {
+				val submissionIds = ug.includeUsers
+				assignment.submissions.filter(s => submissionIds.exists(_ == s.userId))
+			}
+			case None => Seq()
+		}
+	}
+
+}
+
 
 /**
  * Available marking methods and code to persist them
@@ -84,8 +136,9 @@ sealed abstract class MarkingMethod(val name: String){
 object MarkingMethod {
 	case object StudentsChooseMarker extends MarkingMethod("StudentsChooseMarker")
 	case object SeenSecondMarking extends MarkingMethod("SeenSecondMarking")
+	case object ModeratedMarking extends MarkingMethod("ModeratedMarking")
 
-	val values: Set[MarkingMethod] = Set(StudentsChooseMarker, SeenSecondMarking)
+	val values: Set[MarkingMethod] = Set(StudentsChooseMarker, SeenSecondMarking, ModeratedMarking)
 
 	def fromCode(code: String): MarkingMethod =
 		if (code == null) null
@@ -102,4 +155,21 @@ class MarkingMethodUserType extends AbstractStringUserType[MarkingMethod]{
 
 class StringToMarkingMethod extends Converter[String, MarkingMethod]{
 	def convert(string:String):MarkingMethod = MarkingMethod.fromCode(string)
+}
+
+object MarkingRoutes {
+
+	private def encoded(string: String) = URLEncoder.encode(string, "UTF-8")
+
+	private def assignmentroot(assignment: Assignment) =
+		"/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), assignment.id)
+
+	object onlineMarkerFeedback {
+		def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online"
+	}
+
+	object onlineModeration {
+		def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online/moderation"
+	}
+
 }

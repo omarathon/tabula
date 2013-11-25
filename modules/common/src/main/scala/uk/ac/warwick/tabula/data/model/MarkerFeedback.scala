@@ -34,6 +34,8 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingStateUserType")
 	var state : MarkingState = _
 
+	var rejectionComments: String = _
+
 	@OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY, cascade=Array(ALL))
 	@BatchSize(size=200)
 	@Fetch(FetchMode.JOIN)

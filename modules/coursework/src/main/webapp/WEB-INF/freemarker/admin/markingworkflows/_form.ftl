@@ -37,6 +37,7 @@ Common form fields.
 		<@f.option />
 		<@f.option value="StudentsChooseMarker" label="Students choose marker" />
 		<@f.option class="uses-second-markers" value="SeenSecondMarking" label="Seen second marking" />
+		<@f.option class="uses-second-markers" value="ModeratedMarking" label="Moderated marking" />
 	</@f.select>
 	<#if view_type=="edit">
 		<div class="help-block">
