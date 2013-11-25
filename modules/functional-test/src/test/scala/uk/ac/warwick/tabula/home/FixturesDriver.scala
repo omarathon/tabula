@@ -14,7 +14,7 @@ trait FixturesDriver {
 	lazy val http: Http = new Http with thread.Safety with NoLogging {
 
 		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
+			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
 		}
 	}
 
@@ -95,6 +95,16 @@ trait FixturesDriver {
 		  "routeCode"->routeCode,
 		  "courseCode"->courseCode,
 		  "deptCode"->deptCode
+		)
+		http.when(_==200)(req >|)
+	}
+
+	def createStaffMember(userId:String, genderCode:String = "M", deptCode:String=""){
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/staffMember"
+		val req = url(uri).POST << Map(
+			"userId" -> userId,
+			"genderCode"->genderCode,
+			"deptCode"->deptCode
 		)
 		http.when(_==200)(req >|)
 	}

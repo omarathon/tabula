@@ -92,6 +92,21 @@ class SmallGroupMembershipCreationFixturesController {
 }
 
 @Controller
+@RequestMapping(Array("/fixtures/create/staffMember"))
+class StaffMemberCreationFixturesController {
+
+	@ModelAttribute("createMemberCommand")
+	def getCreateModuleCommand(): Appliable[StaffMember] = {
+		StaffMemberFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createMemberCommand") cmd: Appliable[StaffMember]) {
+		cmd.apply()
+	}
+}
+
+@Controller
 @RequestMapping(Array("/fixtures/create/studentMember"))
 class StudentMemberCreationFixturesController {
 

@@ -6,7 +6,7 @@ import org.openqa.selenium.By
 
 class AttendanceViewStudentsPageTest extends AttendanceFixture with GivenWhenThen{
 
-	"A Member of staff" should "see the monitoring points home page" in {
+	"A Member of staff" should "see the View Students page" in {
 		Given("I am logged in as Admin1")
 		signIn as P.Admin1 to Path("/")
 

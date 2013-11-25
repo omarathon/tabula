@@ -42,6 +42,7 @@ trait MemberDao {
 	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
+	def getStaffByDepartment(department: Department): Seq[StaffMember]
 	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
 	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[String]
@@ -308,6 +309,15 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setEntity("department", department).seq
 			s
 		}
+
+	def getStaffByDepartment(department: Department): Seq[StaffMember] =
+		if (department == null) Nil
+		else {
+			session.newCriteria[StaffMember]
+				.add(is("homeDepartment", department))
+				.seq
+		}
+
 	/**
 	 * n.b. this will only return students with a direct relationship to a department. For sub-department memberships,
 	 * see ProfileService/RelationshipService
