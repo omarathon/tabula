@@ -17,7 +17,7 @@ import uk.ac.warwick.util.core.StringUtils
 
 trait CourseImporter extends Logging {
 	var courseDao = Wire[CourseDao]
-	
+
 	private var courseMap: Map[String, Course] = _
 
 	def getCourseForCode(code: String) = {
@@ -42,13 +42,13 @@ trait CourseImporter extends Logging {
 	}
 
 	def importCourses() {
-		logger.info("Importing Courses")
+		logger.info("Importing courses")
 
 		getImportCommands foreach { _.apply() }
 
 		updateCourseMap()
 	}
-	
+
 	def getImportCommands: Seq[ImportCourseCommand]
 }
 
@@ -73,7 +73,7 @@ object SitsCourseImporter {
 
 	class CoursesQuery(ds: DataSource) extends MappingSqlQuery[ImportCourseCommand](ds, GetCourse) {
 		compile()
-		override def mapRow(resultSet: ResultSet, rowNumber: Int) = 
+		override def mapRow(resultSet: ResultSet, rowNumber: Int) =
 			new ImportCourseCommand(
 				CourseInfo(
 					code=resultSet.getString("crs_code"),
@@ -93,7 +93,7 @@ class SandboxCourseImporter extends CourseImporter {
 
 	def getImportCommands: Seq[ImportCourseCommand] =
 		SandboxData.Departments
-			.flatMap { case (departmentCode, department) =>  
+			.flatMap { case (departmentCode, department) =>
 				department.routes.map { case (routeCode, route) =>
 					new ImportCourseCommand(
 						CourseInfo(
@@ -106,5 +106,5 @@ class SandboxCourseImporter extends CourseImporter {
 				}
 			}
 			.toSeq
-	
+
 }

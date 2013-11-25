@@ -200,7 +200,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 
 		// Treat permanently withdrawn students as inactive
 		item match {
-			case student: StudentMember if student.studentCourseDetails != null && student.mostSignificantCourseDetails.isDefined =>
+			case student: StudentMember if student.freshStudentCourseDetails != null && student.mostSignificantCourseDetails.isDefined =>
 				val status = student.mostSignificantCourseDetails.map { _.sprStatus }.orNull
 				if (status != null && status.code == "P") indexPlain(doc, "inUseFlag", Some("Inactive"))
 				else indexPlain(doc, "inUseFlag", Option(item.inUseFlag))

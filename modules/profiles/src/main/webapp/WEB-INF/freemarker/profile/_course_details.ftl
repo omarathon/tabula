@@ -9,7 +9,7 @@
 					</td>
 				</tr>
 			</#if>
-			<#if profile.studentCourseDetails?size lt 2 && (studentCourseDetails.route)?? && (studentCourseDetails.course)??>
+			<#if profile.freshStudentCourseDetails?size lt 2 && (studentCourseDetails.route)?? && (studentCourseDetails.course)??>
 				<tr>
 					<th>Course</th>
 					<td><@fmt.course_description studentCourseDetails /></td>

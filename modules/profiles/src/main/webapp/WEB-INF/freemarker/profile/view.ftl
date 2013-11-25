@@ -141,12 +141,12 @@
 		</#if>
 	</section>
 
-	<#if (profile.studentCourseDetails)?? && (profile.mostSignificantCourseDetails)??>
+	<#if (profile.freshStudentCourseDetails)?? && (profile.mostSignificantCourseDetails)??>
 
 		<!-- most significant course first -->
 		<#assign studentCourseDetails=profile.mostSignificantCourseDetails>
 
-		<#if profile.studentCourseDetails?size gt 1>
+		<#if profile.freshStudentCourseDetails?size gt 1>
 			<hr>
 			<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
 		</#if>
@@ -196,7 +196,7 @@
 					</li>
 				</#if>
 
-				<#if studentCourseDetails.hasModuleRegistrations>
+				<#if studentCourseDetails.hasModuleRegistrations && studentCourseDetails.latestStudentCourseYearDetails??>
 					<li id="module-registration-pane">
 						<#include "_module_registrations.ftl" />
 					</li>
@@ -245,10 +245,10 @@
 
 
 		<!-- and then the others -->
-		<#list profile.studentCourseDetails as studentCourseDetails>
+		<#list profile.freshStudentCourseDetails as studentCourseDetails>
 			<#if studentCourseDetails.scjCode != profile.mostSignificantCourseDetails.scjCode>
 				<#if !isSelf || !studentCourseDetails.permanentlyWithdrawn>
-					<#if profile.studentCourseDetails?size gt 1>
+					<#if profile.freshStudentCourseDetails?size gt 1>
 						<hr>
 						<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
 					</#if>

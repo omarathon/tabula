@@ -117,24 +117,24 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		testRoute.code = "test"
 
 		val studentInBothYears = new StudentCourseDetails(Fixtures.student(), "studentInBothYears")
-		studentInBothYears.studentCourseYearDetails.add(
+		studentInBothYears.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
-		studentInBothYears.studentCourseYearDetails.add(
+		studentInBothYears.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2013))
 		)
 		studentInBothYears.sprStatus = new SitsStatus("C")
 		studentInBothYears.mostSignificant = true
 
 		val studentInFirstYear = new StudentCourseDetails(Fixtures.student(), "studentInFirstYear")
-		studentInFirstYear.studentCourseYearDetails.add(
+		studentInFirstYear.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 		studentInFirstYear.sprStatus = new SitsStatus("C")
 		studentInFirstYear.mostSignificant = true
 
 		val studentInSecondYear = new StudentCourseDetails(Fixtures.student(), "studentInSecondYear")
-		studentInSecondYear.studentCourseYearDetails.add(
+		studentInSecondYear.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2013))
 		)
 		studentInSecondYear.sprStatus = new SitsStatus("C")
@@ -146,13 +146,13 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		val studentsInFirstYear = service.getStudentsByRoute(testRoute, AcademicYear(2012))
 		studentsInFirstYear.size should be (2)
 		studentsInFirstYear.exists(
-			s => s.studentCourseDetails.get(0).scjCode.equals(studentInSecondYear.scjCode)
+			s => s.freshStudentCourseDetails(0).scjCode.equals(studentInSecondYear.scjCode)
 		) should be (false)
 
 		val studentsInSecondYear = service.getStudentsByRoute(testRoute, AcademicYear(2013))
 		studentsInSecondYear.size should be (2)
 		studentsInSecondYear.exists(
-			s => s.studentCourseDetails.get(0).scjCode.equals(studentInFirstYear.scjCode)
+			s => s.freshStudentCourseDetails(0).scjCode.equals(studentInFirstYear.scjCode)
 		) should be (false)
 	}
 
@@ -167,25 +167,25 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 		val studentNoShow = new StudentCourseDetails(Fixtures.student(), "studentNoShow")
 		studentNoShow.sprStatus = new SitsStatus("PNS")
-		studentNoShow.studentCourseYearDetails.add(
+		studentNoShow.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 
 		val studentPermWithdrawn = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawn")
 		studentPermWithdrawn.sprStatus = new SitsStatus("P")
-		studentPermWithdrawn.studentCourseYearDetails.add(
+		studentPermWithdrawn.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 
 		val studentPermWithdrawnDebt = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawnDebt")
 		studentPermWithdrawnDebt.sprStatus = new SitsStatus("PD")
-		studentPermWithdrawnDebt.studentCourseYearDetails.add(
+		studentPermWithdrawnDebt.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 
 		val studentPermWithdrawnWrittenOff = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawnWrittenOff")
 		studentPermWithdrawnWrittenOff.sprStatus = new SitsStatus("PR")
-		studentPermWithdrawnWrittenOff.studentCourseYearDetails.add(
+		studentPermWithdrawnWrittenOff.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 
@@ -214,7 +214,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 		val student = new StudentCourseDetails(Fixtures.student(), "student")
 
-		student.studentCourseYearDetails.add(
+		student.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 		student.sprStatus = new SitsStatus("C")
@@ -226,7 +226,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		students.size should be (1)
 
 		students.exists(
-			s => s.studentCourseDetails.get(0).mostSignificant.equals(true)
+			s => s.freshStudentCourseDetails(0).mostSignificant.equals(true)
 		) should be (true)
 
 	}
@@ -245,7 +245,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 		val student = new StudentCourseDetails(Fixtures.student(), "student")
 
-		student.studentCourseYearDetails.add(
+		student.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 		student.sprStatus = new SitsStatus("C")
@@ -257,11 +257,10 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		students.size should be (0)
 
 		students.exists(
-			s => s.studentCourseDetails.get(0).mostSignificant.equals(true)
+			s => s.freshStudentCourseDetails(0).mostSignificant.equals(true)
 		) should be (false)
 
 	}
-
 	trait MockFixture {
 		val profileServiceWithMocks = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
 			val memberDao = mock[MemberDao]

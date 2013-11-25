@@ -30,18 +30,10 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		val academicYear2012 = AcademicYear(2012)
 		val academicYear2013 = AcademicYear(2013)
 
-		val student = mock[StudentMember]
-		val studentSprCode = "1234/1"
-		student.universityId returns "1234"
+		val student = Fixtures.student("1234")
 		val studentRoute = Fixtures.route("a100")
-
-		val studentCourseDetails = mock[StudentCourseDetails]
-		studentCourseDetails.scjCode returns studentSprCode
-		studentCourseDetails.sprCode returns studentSprCode
-		studentCourseDetails.route returns studentRoute
-
-		verify(student, never).studentCourseDetails
-		student.mostSignificantCourseDetails returns Option(studentCourseDetails)
+		val studentCourseDetails = student.mostSignificantCourseDetails.get
+		studentCourseDetails.route = studentRoute
 
 		val agent = "agent"
 		val agentMember = Fixtures.staff(agent, agent)
@@ -62,13 +54,14 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 	}
 
 	trait StudentYear2Fixture extends StudentFixture {
-		val studentCourseYear1 = new StudentCourseYearDetails
+		val studentCourseYear1 = studentCourseDetails.latestStudentCourseYearDetails
 		studentCourseYear1.yearOfStudy = 1
 		studentCourseYear1.academicYear = academicYear2012
-		val studentCourseYear2 = new StudentCourseYearDetails
+
+		val studentCourseYear2 = Fixtures.studentCourseYearDetails(academicYear2013)
 		studentCourseYear2.yearOfStudy = 2
-		studentCourseYear2.academicYear = academicYear2013
-		studentCourseDetails.studentCourseYearDetails returns JArrayList(studentCourseYear1, studentCourseYear2)
+		studentCourseDetails.addStudentCourseYearDetails(studentCourseYear1)
+		studentCourseDetails.addStudentCourseYearDetails(studentCourseYear2)
 	}
 
 	trait Year2PointSetFixture extends StudentYear2Fixture {

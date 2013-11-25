@@ -2,7 +2,6 @@ package uk.ac.warwick.tabula.services
 
 
 import scala.collection.JavaConverters.asScalaBufferConverter
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent, AutowiringMonitoringPointDaoComponent, MonitoringPointDaoComponent}
 import org.springframework.stereotype.Service
@@ -89,7 +88,6 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		monitoringPointDao.findMonitoringPointSets(route, academicYear)
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]) =
 		monitoringPointDao.findMonitoringPointSet(route, academicYear, year)
-	
 	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint]): Seq[(StudentMember, MonitoringCheckpoint)] =
 		monitoringPointDao.getCheckpointsByStudent(monitoringPoints)
 
@@ -157,7 +155,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 
 	def getPointSetForStudent(student: StudentMember, academicYear: AcademicYear): Option[MonitoringPointSet] = {
 		student.mostSignificantCourseDetails.flatMap{ scd =>
-			scd.studentCourseYearDetails.asScala.find(scyd =>
+			scd.freshStudentCourseYearDetails.find(scyd =>
 				scyd.academicYear == academicYear
 			).flatMap{ scyd =>
 				findMonitoringPointSet(scd.route, academicYear, Option(scyd.yearOfStudy)) orElse findMonitoringPointSet(scd.route, academicYear, None)
