@@ -5,7 +5,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.TextRenderer
 import uk.ac.warwick.tabula.coursework.web.Routes
 
-abstract class ExtensionRequestNotification(val extension:Extension, val student:User)
+abstract class ExtensionRequestNotification(val extension:Extension, val student:User, val extraInfo: Map[String, Object])
 	extends ExtensionNotification(Some(extension), extension.assignment, student) {
 
 	this: TextRenderer =>
@@ -21,7 +21,7 @@ abstract class ExtensionRequestNotification(val extension:Extension, val student
 		"assignment" -> assignment,
 		"student" -> student,
 		"path" -> url
-	))
+	) ++ extraInfo)
 
 	def recipients = extension.assignment.module.department.extensionManagers.users
 
