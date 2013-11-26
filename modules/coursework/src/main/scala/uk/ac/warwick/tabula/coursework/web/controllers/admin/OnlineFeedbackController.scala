@@ -12,6 +12,7 @@ import javax.validation.Valid
 import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import scala.Some
+import uk.ac.warwick.tabula.data.model.MarkingMethod.ModeratedMarking
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/online"))
@@ -29,7 +30,8 @@ class OnlineFeedbackController extends CourseworkController {
 
 		Mav("admin/assignments/feedback/online_framework",
 			"markingUrl" -> Routes.admin.assignment.onlineFeedback(assignment),
-			"isMarkerView" -> false,
+			"showMarkingCompleted" -> false,
+			"showGenericFeedback" -> true,
 			"assignment" -> assignment,
 			"command" -> command,
 			"studentFeedbackGraphs" -> feedbackGraphs)
@@ -51,9 +53,13 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 		val feedbackGraphs = command.apply()
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
+		val showMarkingCompleted =
+			assignment.markingWorkflow.markingMethod != ModeratedMarking || assignment.isFirstMarker(command.marker)
+
 		Mav("admin/assignments/feedback/online_framework",
 			"markingUrl" -> assignment.markingWorkflow.onlineMarkingUrl(assignment, command.marker),
-			"isMarkerView" -> true,
+			"showMarkingCompleted" -> showMarkingCompleted,
+			"showGenericFeedback" -> false,
 			"assignment" -> assignment,
 			"command" -> command,
 			"studentFeedbackGraphs" -> feedbackGraphs)

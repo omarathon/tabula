@@ -48,7 +48,8 @@ class OnlineModerationController extends CourseworkController {
 			showForm(command, errors)
 		} else {
 			command.apply()
-			Mav("ajax_success").noLayout()
+			val markerFeedbackState: String = command.markerFeedback.map(_.state.toString).getOrElse("")
+			Mav("ajax_success", "data" -> markerFeedbackState).noLayout()
 		}
 	}
 

@@ -1,10 +1,11 @@
 <#assign module = assignment.module />
 <#assign department = module.department />
 <#assign feedbackGraphs = studentFeedbackGraphs />
+
 <#macro row graph>
 	<#assign u = graph.student />
 	<tr class="itemContainer" data-contentid="${u.warwickId}">
-		<#if isMarkerView>
+		<#if showMarkingCompleted>
 			<td class="check-col">
 				<input type="checkbox" class="collection-checkbox" name="students" value="${u.warwickId}">
 			</td>
@@ -29,6 +30,8 @@
 						<div class="label label-success">Marking completed</div>
 					<#elseif graph.hasFeedback>
 						<div class="label label-warning marked">Marked</div>
+					<#elseif graph.hasRejectedFeedback>
+						<div class="label label-important">Rejected</div>
 					</#if>
 				</dt>
 				<dd style="display: none;" class="table-content-container" data-contentid="${u.warwickId}">
@@ -47,9 +50,7 @@
 	<#import "../turnitin/_report_macro.ftl" as tin />
 	<#import "../submissionsandfeedback/_submission_details.ftl" as sd />
 
-	<#-- TODO 20 day turnaround deadline status alert thing rendering -->
-
-	<#if isMarkerView>
+	<#if showMarkingCompleted>
 		<div class="btn-toolbar">
 			<div class="btn-group-group">
 				<div class="btn-group">
@@ -63,7 +64,7 @@
 				</div>
 			</div>
 		</div>
-	<#else>
+	<#elseif showGenericFeedback>
 		<div class="generic-feedback">
 			<h6 class="toggle-icon edit-generic">
 				<i class="row-icon icon-chevron-right icon-fixed-width" style="margin-top: 2px;"></i>
@@ -77,7 +78,7 @@
 	<table id="online-marking-table" class="students table table-bordered table-striped tabula-greenLight sticky-table-headers">
 		<thead<#if feedbackGraphs?size == 0> style="display: none;"</#if>>
 			<tr>
-				<#if isMarkerView>
+				<#if showMarkingCompleted>
 					<th class="check-col" style="padding-right: 0px;">
 						<input class="collection-check-all" type="checkbox">
 						<input class="post-field" name="onlineMarking" type="hidden" value="true">
@@ -107,7 +108,7 @@
 		<script type="text/javascript">
 		(function($) {
 			var tsOptions = {
-				<#if isMarkerView>
+				<#if showMarkingCompleted>
 					sortList: [<#if department.showStudentName>[3, 0], </#if>[2, 0], [1,0]],
 					headers: { 0: { sorter: false} }
 				<#else>
