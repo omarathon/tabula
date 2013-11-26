@@ -83,22 +83,24 @@
 						</ul>
 
 					</details>
-
-					<#if supervisors?has_content >
-					<details>
-
-						<summary><h5>Student Supervisor Details</h5></summary>
-						<ul class="unstyled">
-						<#list supervisors as supervisor>
-						<li>
-							<h6>${supervisor.agentMember.fullName} (${supervisor.agentMember.universityId})</h6>
-							${supervisor.agentMember.description}
-						</li>
-						</ul>
-						</#list>
-					</details>
+					<#if relationships?has_content >
+						<details>
+							<summary><h5>Student Relationships</h5></summary>
+							<#list relationships?keys as key>
+							<#if relationships[key]?has_content>
+								<h6>${key}<#if (relationships[key]?size > 1)>s</#if></h6>
+								<ul class="unstyled">
+									<#list relationships[key] as agent>
+										<li>
+											<strong>${agent.agentMember.fullName} (${agent.agentMember.universityId})</strong>
+											${agent.agentMember.description}
+										</li>
+									</#list>
+								</ul>
+							</#if>
+							</#list>
+						</details>
 					</#if>
-
 
 					<#if studentCourseDetails.route?? >
 					<details>

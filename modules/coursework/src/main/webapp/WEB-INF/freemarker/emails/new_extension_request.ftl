@@ -4,28 +4,7 @@ They have requested until ${requestedExpiryDate} to complete the assignment. The
 
 ${reasonForRequest}
 
-Futher details related to this request:
-
-<#if moduleManagers?has_content >
-Module Managers
-<#list moduleManagers as manager>
-${manager.getFullName()} (${manager.getWarwickId()}) (${manager.getEmail()})
-</#list>
-</#if>
-
-Student Contact Details
-Mobile Number: ${(student.mobileNumber)!"Not available"}
-Telephone Number: ${(student.phoneNumber)!"Not available"}
-Email Address: ${(student.email)!"Not available"}
-
-<#if supervisors?has_content >
-Student Supervisor Details
-<#list supervisors as supervisor>
-${supervisor.agentMember.fullName} (${supervisor.agentMember.universityId}), ${supervisor.agentMember.description}
-</#list>
-</#if>
-
-${studentCourseString}
+<#include "_extension_request_further_details.ftl" />
 
 To review this extension request and any supporting documentation, please click the link below.
 

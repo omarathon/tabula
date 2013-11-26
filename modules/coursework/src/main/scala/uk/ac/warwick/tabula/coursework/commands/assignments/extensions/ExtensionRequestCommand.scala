@@ -6,8 +6,7 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment, Module}
 import uk.ac.warwick.tabula.data.Transactions._
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser, DateFormats}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.Daoisms
@@ -31,19 +30,25 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 	PermissionCheck(Permissions.Extension.MakeRequest, assignment)
 
 
-	val student = submitter.profile.getOrElse(null)
-	val scd = student.mostSignificantCourseDetails.getOrElse(null)
+	val student = submitter.profile.getOrElse(throw new ItemNotFoundException)
+	val scd = student.mostSignificantCourseDetails.getOrElse(throw new ItemNotFoundException)
 
+	val studentRelationships = relationshipService.allStudentRelationshipTypes
+	val relationships =
+		studentRelationships.map(
+			x => (x.description, relationshipService
+				.findCurrentRelationships(x,scd.sprCode))
+		).toMap
+
+	//Pick only the parts of scd required since passing the whole object fails due to the session no being available to load lazy objects
 	val extraInfo = Map(
 		"moduleManagers" -> module.managers.users,
 		"studentMember" -> student,
-		"studentCourseString" -> ("Course details: " + scd.course.name + " (" + scd.course.code + ")" + " Route(" + scd.route.name +" "+ scd.route.code +") " + scd.courseType +" "+ scd.latestStudentCourseYearDetails.modeOfAttendance.shortName),
-		"supervisors" -> relationshipService.findCurrentRelationships(
-			relationshipService.getStudentRelationshipTypeById("supervisor").getOrElse(null), scd.sprCode)
+		"relationships" -> relationships.filter({case (relationshipType,relations) => relations.length != 0}),
+		"scdCourse" -> scd.course,
+		"scdRoute" -> scd.route,
+	  "scdAwardCode" -> scd.awardCode
 	)
-
-
-
 
 	var reason:String =_
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)

@@ -5,13 +5,12 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.data.model.{StudentMember, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{StudentRelationship, StudentMember, Assignment, Module}
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
-import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser}
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import javax.servlet.http.HttpServletResponse
@@ -24,9 +23,9 @@ import uk.ac.warwick.spring.Wire
 
 
 abstract class ExtensionController extends CourseworkController {
-	@Autowired var json:ObjectMapper =_
-	@Autowired var userLookup: UserLookupService = _
-	var relationshipService = Wire.auto[RelationshipService]
+	var json = Wire[ObjectMapper]
+	var userLookup = Wire[UserLookupService]
+	var relationshipService = Wire[RelationshipService]
 	
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, module:Module)
@@ -196,6 +195,14 @@ class ReviewExtensionRequestController extends ExtensionController {
 	// review an extension request
 	@RequestMapping(method=Array(GET))
 	def reviewExtensionRequest(@ModelAttribute("modifyExtensionCommand") cmd:ReviewExtensionRequestCommand, errors:Errors):Mav = {
+
+		val studentRelationships = relationshipService.allStudentRelationshipTypes
+		val relationships =
+			studentRelationships.map(
+				x => (x.description, relationshipService
+					.findCurrentRelationships(x,cmd.student.mostSignificantCourseDetails.getOrElse(throw new ItemNotFoundException).sprCode))
+			).toMap
+
 		val model = Mav("admin/assignments/extensions/review_request",
 			"command" -> cmd,
 			"extension" ->  cmd.extension,
@@ -205,9 +212,8 @@ class ReviewExtensionRequestController extends ExtensionController {
 			"universityId" -> cmd.extension.universityId,
 			"userFullName" ->  cmd.student.fullName,
 			"student" -> cmd.student,
-		  "studentCourseDetails" -> cmd.student.mostSignificantCourseDetails.getOrElse(null),
-			"supervisors" -> relationshipService.findCurrentRelationships(
-				relationshipService.getStudentRelationshipTypeById("supervisor").getOrElse(null), cmd.student.mostSignificantCourseDetails.getOrElse(null).sprCode)
+		  "studentCourseDetails" -> cmd.student.mostSignificantCourseDetails.getOrElse(throw new ItemNotFoundException),
+			"relationships" -> relationships.filter({case (relationshipType,relations) => relations.length != 0})
 		).noLayout()
 		model
 	}
