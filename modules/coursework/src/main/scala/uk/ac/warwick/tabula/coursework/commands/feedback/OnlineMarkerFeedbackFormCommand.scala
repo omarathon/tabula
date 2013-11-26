@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.services.{ZipServiceComponent, FileAttachmentCompone
 import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
 import uk.ac.warwick.tabula.data.model.MarkingState.InProgress
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object OnlineMarkerFeedbackFormCommand {
 	def apply(module: Module, assignment: Assignment, student: Member, currentUser: CurrentUser) =
@@ -110,9 +111,9 @@ trait MarkerFeedbackStateCopy {
 		saveFormFields(markerFeedback)
 
 		// save mark and grade
-		if (assignment.collectMarks){
-			markerFeedback.mark = Some(mark.toInt)
-			markerFeedback.grade = Some(grade)
+		if (assignment.collectMarks) {
+			if (mark.hasText) markerFeedback.mark = Some(mark.toInt)
+			if (grade.hasText) markerFeedback.grade = Some(grade)
 		}
 
 		// save attachments
