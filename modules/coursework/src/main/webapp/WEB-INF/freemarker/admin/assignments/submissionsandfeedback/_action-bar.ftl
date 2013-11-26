@@ -13,41 +13,41 @@
 				</label>
 			</form>
 		</div>
-		
+
 		<script type="text/javascript">
 			jQuery(function($) {
 				$('.view-selector input[name="view"]').on('change', function() {
 					var $this = $(this);
-				
+
 					if ($this.is(':checked')) {
 						var $form = $('<form></form>').attr({method:'POST',action:$this.data('href')}).hide();
-                                       
+
         		var $inputs = $(':input', '.filter-form');
         		$form.append($inputs.clone());
-            
+
             $(document.body).append($form);
             $form.submit();
 					}
 				});
 			});
 		</script>
-	
+
 		<div class="btn-group-group">
 			<div class="btn-group">
 				<a class="btn hover"><i class="icon-cog"></i> Actions:</a>
 			</div>
-			
+
 			<#if assignment.collectSubmissions>
-				<div class="btn-group">	
+				<div class="btn-group">
 					<a class="btn dropdown-toggle" data-toggle="dropdown">
 						Submission
 						<span class="caret"></span>
 					</a>
 					<ul class="dropdown-menu">
 						<li class="must-have-selected">
-							<a class="long-running use-tooltip form-post" 
-								 href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>" 
-								 title="Download the submission files for the selected students as a ZIP file." 
+							<a class="long-running use-tooltip form-post"
+								 href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>"
+								 title="Download the submission files for the selected students as a ZIP file."
 								 data-container="body"><i class="icon-download"></i> Download submission
 							</a>
 						</li>
@@ -60,16 +60,16 @@
 					</ul>
 				</div>
 			<#else>
-				<div class="btn-group">	
+				<div class="btn-group">
 					<a class="btn dropdown-toggle disabled use-tooltip" title="This assignment does not collect submissions" data-container="body">
 						Submission
 						<span class="caret"></span>
 					</a>
 				</div>
 			</#if>
-			
+
 			<#if department.plagiarismDetectionEnabled && assignment.collectSubmissions>
-				<div class="btn-group">	
+				<div class="btn-group">
 					<a class="btn dropdown-toggle" data-toggle="dropdown">
 						Plagiarism
 						<span class="caret"></span>
@@ -84,22 +84,22 @@
 							</li>
 						</#if>
 						<li class="must-have-selected">
-							<#assign markplagiarised_url><@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' /></#assign>
-							<@fmt.permission_button permission='Submission.ManagePlagiarismStatus' scope=assignment action_descr='mark plagiarised' href=markplagiarised_url id="mark-plagiarised-selected-button" tooltip="Toggle whether the selected students' submissions are possibly plagiarised." data_attr='data-container=body'>
+							<#assign markplagiarised_url><@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' /></#assign>
+							<@fmt.permission_button permission='Submission.ManagePlagiarismStatus' scope=assignment action_descr='mark plagiarised' href=markplagiarised_url id="mark-plagiarised-selected-button" tooltip="Toggle whether the selected student submissions are possibly plagiarised" data_attr='data-container=body'>
 								<i class="icon-exclamation-sign"></i> Mark plagiarised
 							</@fmt.permission_button>
 						</li>
 					</ul>
 				</div>
 			<#elseif assignment.collectSubmissions>
-				<div class="btn-group">	
+				<div class="btn-group">
 					<a class="btn dropdown-toggle disabled use-tooltip" title="Your department does not use plagiarism detection in Tabula" data-container="body">
 						Plagiarism
 						<span class="caret"></span>
 					</a>
 				</div>
 			<#else>
-				<div class="btn-group">	
+				<div class="btn-group">
 					<a class="btn dropdown-toggle disabled use-tooltip" title="This assignment does not collect submissions" data-container="body">
 						Plagiarism
 						<span class="caret"></span>
@@ -108,7 +108,7 @@
 			</#if>
 			<#if assignment.collectSubmissions && features.markingWorkflows>
 				<#if mustReleaseForMarking?default(false)>
-					<div class="btn-group">	
+					<div class="btn-group">
 						<a class="btn dropdown-toggle" data-toggle="dropdown">
 							Marking
 							<span class="caret"></span>
@@ -117,10 +117,10 @@
 							<#if assignment.markingWorkflow?? && !assignment.markingWorkflow.studentsChooseMarker>
 								<li>
 									<#assign markers_url><@routes.assignMarkers assignment /></#assign>
-									<@fmt.permission_button 
-										permission='Assignment.Update' 
-										scope=assignment 
-										action_descr='assign markers' 
+									<@fmt.permission_button
+										permission='Assignment.Update'
+										scope=assignment
+										action_descr='assign markers'
 										href=markers_url>
 			            	<i class="icon-user"></i> Assign markers
 			            </@fmt.permission_button>
@@ -130,13 +130,13 @@
 							</#if>
 							<li class="must-have-selected">
 								<#assign releaseForMarking_url><@routes.releaseForMarking assignment /></#assign>
-								<@fmt.permission_button 
-									permission='Submission.ReleaseForMarking' 
-									scope=assignment 
-									action_descr='release for marking' 
+								<@fmt.permission_button
+									permission='Submission.ReleaseForMarking'
+									scope=assignment
+									action_descr='release for marking'
 									classes='form-post'
-									href=releaseForMarking_url 
-									id="release-submissions-button" 
+									href=releaseForMarking_url
+									id="release-submissions-button"
 									tooltip="Release the submissions for marking. First markers will be able to download their submissions from the app."
 									data_attr='data-container=body'>
 									<i class="icon-inbox"></i> Release for marking
@@ -145,7 +145,7 @@
 						</ul>
 					</div>
 				<#else>
-					<div class="btn-group">	
+					<div class="btn-group">
 						<a class="btn dropdown-toggle disabled use-tooltip" title="This assignment does not use a marking workflow that requires assignments to be released for marking" data-container="body">
 							Marking
 							<span class="caret"></span>
@@ -153,8 +153,8 @@
 					</div>
 				</#if>
 			</#if>
-			
-			<div class="btn-group">	
+
+			<div class="btn-group">
 				<a class="btn dropdown-toggle" data-toggle="dropdown">
 					Feedback
 					<span class="caret"></span>
@@ -162,9 +162,9 @@
 				<ul class="dropdown-menu">
 					<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 						<li>
-							<a class="long-running use-tooltip" 
-								 href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>" 
-								 title="Download feedback templates for all students as a ZIP file." 
+							<a class="long-running use-tooltip"
+								 href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>"
+								 title="Download feedback templates for all students as a ZIP file."
 								 data-container="body"><i class="icon-download"></i> Download templates
 							</a>
 						</li>
@@ -172,10 +172,10 @@
 					</#if>
 					<li>
 						<#assign marks_url><@routes.addMarks assignment /></#assign>
-						<@fmt.permission_button 
-							permission='Marks.Create' 
-							scope=assignment 
-							action_descr='add marks' 
+						<@fmt.permission_button
+							permission='Marks.Create'
+							scope=assignment
+							action_descr='add marks'
 							href=marks_url>
             	<i class="icon-check"></i> Add marks
             </@fmt.permission_button>
@@ -183,29 +183,29 @@
 					<li class="divider"></li>
 					<li>
 						<#assign onlinefeedback_url><@routes.onlinefeedback assignment /></#assign>
-						<@fmt.permission_button 
-							permission='Feedback.Read' 
-							scope=assignment 
-							action_descr='manage online feedback' 
+						<@fmt.permission_button
+							permission='Feedback.Read'
+							scope=assignment
+							action_descr='manage online feedback'
 							href=onlinefeedback_url>
             	<i class="icon-edit"></i> Online feedback
             </@fmt.permission_button>
 					</li>
 					<li>
 						<#assign feedback_url><@routes.addFeedback assignment /></#assign>
-						<@fmt.permission_button 
-							permission='Feedback.Create' 
-							scope=assignment 
-							action_descr='upload feedback' 
+						<@fmt.permission_button
+							permission='Feedback.Create'
+							scope=assignment
+							action_descr='upload feedback'
 							classes='feedback-link'
 							href=feedback_url>
             	<i class="icon-upload"></i> Upload feedback
             </@fmt.permission_button>
 					</li>
 					<li class="must-have-selected">
-						<a class="long-running use-tooltip form-post" 
-							 href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>" 
-							 title="Download the feedback files for the selected students as a ZIP file." 
+						<a class="long-running use-tooltip form-post"
+							 href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>"
+							 title="Download the feedback files for the selected students as a ZIP file."
 							 data-container="body"><i class="icon-download"></i> Download feedback
 						</a>
 					</li>
@@ -224,7 +224,7 @@
 				</ul>
 			</div>
 		</div>
-		
+
 		<div class="btn-group">
 			<a class="btn dropdown-toggle" data-toggle="dropdown">
 				Save As
