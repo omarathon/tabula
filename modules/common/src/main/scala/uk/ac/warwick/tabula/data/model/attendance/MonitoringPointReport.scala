@@ -10,13 +10,16 @@ import javax.validation.constraints.{Min, NotNull}
 @Entity
 class MonitoringPointReport extends GeneratedId {
 
-	@NotNull
+	@ManyToOne
+	@JoinColumn(name="student", referencedColumnName="universityId")
 	var student: StudentMember = _
 
-	@NotNull
+	@ManyToOne
+	@JoinColumn(name = "student_course_details_id")
 	var studentCourseDetails: StudentCourseDetails = _
 
-	@NotNull
+	@ManyToOne
+	@JoinColumn(name = "student_course_year_details_id")
 	var studentCourseYearDetails: StudentCourseYearDetails = _
 
 	@NotNull
