@@ -22,6 +22,7 @@ class ListMarkerFeedbackController  extends CourseworkController {
 		Mav("admin/assignments/markerfeedback/list",
 			"items" -> markerFeedbackItems,
 			"completedFeedback" -> command.completedFeedback,
+			"rejectedFeedback" -> command.rejectedFeedback,
 			"isFirstMarker" -> command.firstMarker)
 	}
 

@@ -54,6 +54,8 @@
 						<span class="label label-info">Downloaded</span>
 					<#elseif item.markerFeedback.state.toString == "MarkingCompleted">
 						<span class="label label-success">Marking completed</span>
+					<#elseif item.markerFeedback.state.toString == "Rejected">
+						<span class="label label-important">Rejected</span>
 					</#if>
 				</td>
 			</#if>
@@ -84,11 +86,25 @@
 			</a>
 		</#if>
 		<#if features.markerFeedback>
-			<a class="btn ${disabledClass}" href="<@routes.uploadmarkerfeedback assignment=assignment />">
-				<i class="icon-upload"></i> Upload feedback
-			</a>
-			<a class="btn ${disabledClass}" href="<@routes.markeraddmarks assignment=assignment />">
-				<i class="icon-plus"></i> Add Marks
+
+			<div class="btn-group">
+				<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+					<i class="icon-upload"></i> Upload feedback
+					<span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu">
+					<li>
+						<a class="${disabledClass}" href="<@routes.uploadmarkerfeedback assignment=assignment />">
+							<i class="icon-upload"></i> Upload attachments
+						</a>
+						<a class="${disabledClass}" href="<@routes.markeraddmarks assignment=assignment />">
+							<i class="icon-plus"></i> Add Marks
+						</a>
+					</li>
+				</ul>
+			</div>
+			<a class="btn ${disabledClass}" href="<@routes.markerOnlinefeedback assignment />">
+				<i class="icon-edit"></i> Online feedback
 			</a>
 			<div class="btn-group">
 				<a id="modify-selected" class="btn dropdown-toggle" data-toggle="dropdown" href="#">
@@ -132,7 +148,8 @@
 				</#if>
 			</tr></thead>
 			<tbody>
-				<@listMarkerFeedback completedFeedback/>
+				<@listMarkerFeedback completedFeedback />
+				<@listMarkerFeedback rejectedFeedback />
 				<@listMarkerFeedback items/>
 			</tbody>
 		</table>

@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import reflect.BeanProperty
 import scala.Some
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
 
 
 class ListMarkerFeedbackCommand(val assignment:Assignment, module: Module, val user:CurrentUser,  val firstMarker:Boolean)
@@ -20,6 +21,7 @@ class ListMarkerFeedbackCommand(val assignment:Assignment, module: Module, val u
 
 	var userLookup = Wire.auto[UserLookupService]
 	var completedFeedback:Seq[MarkerFeedbackItem] = _
+	var rejectedFeedback:Seq[MarkerFeedbackItem] = _
 
 	def applyInternal():Seq[MarkerFeedbackItem] = {
 		val submissions = assignment.getMarkersSubmissions(user.apparentUser)
@@ -37,8 +39,11 @@ class ListMarkerFeedbackCommand(val assignment:Assignment, module: Module, val u
 			MarkerFeedbackItem(student, submission, markerFeedback.getOrElse(null), firstMarkerFeedback)
 		}
 
-		completedFeedback = markerFeedbacks.filter(_.markerFeedback.state == MarkingState.MarkingCompleted)
-		markerFeedbacks.filterNot(_.markerFeedback.state == MarkingState.MarkingCompleted)
+		completedFeedback = markerFeedbacks.filter(_.markerFeedback.state == MarkingCompleted)
+		rejectedFeedback = markerFeedbacks.filter(_.markerFeedback.state == Rejected)
+
+		markerFeedbacks.filterNot(mfi =>
+			mfi.markerFeedback.state == MarkingCompleted || mfi.markerFeedback.state == MarkingCompleted)
 
 	}
 }
