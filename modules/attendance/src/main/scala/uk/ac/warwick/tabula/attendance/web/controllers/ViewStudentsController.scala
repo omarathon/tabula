@@ -9,6 +9,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
 import uk.ac.warwick.tabula.attendance.commands.{ViewStudentsState, ViewStudentsResults, ViewStudentsCommand}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
 
 @Controller
 @RequestMapping(value=Array("/view/{department}/students"))
@@ -25,7 +26,7 @@ class ViewStudentsController extends AttendanceController {
 		@Valid @ModelAttribute("command") cmd: Appliable[ViewStudentsResults] with ViewStudentsState,
 		errors: Errors,
 		@RequestParam(value="updatedStudent", required = false) updatedStudent: StudentMember,
-		@RequestParam(value="reports", required = false) reports: Int,
+		@RequestParam(value="reports", required = false) reports: JInteger,
 		@RequestParam(value="monitoringPeriod", required = false) monitoringPeriod: String
 	) = {
 		if (errors.hasErrors) {
