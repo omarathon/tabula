@@ -2,12 +2,14 @@ package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConverters._
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointReport, MonitoringCheckpointState, MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Route, StudentMember}
 import org.hibernate.criterion.{Projections, Order}
 import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.criterion.Restrictions._
+import scala.Some
+import uk.ac.warwick.tabula.services.TermService
 
 trait MonitoringPointDaoComponent {
 	val monitoringPointDao: MonitoringPointDao
@@ -26,6 +28,7 @@ trait MonitoringPointDao {
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
 	def saveOrUpdate(template: MonitoringPointSetTemplate)
 	def saveOrUpdate(set: MonitoringPointSet)
+	def saveOrUpdate(report: MonitoringPointReport)
 	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]): Option[MonitoringPointSet]
@@ -46,7 +49,7 @@ trait MonitoringPointDao {
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
-	): Seq[StudentMember]
+	): Seq[(StudentMember, Int)]
 	def studentsByUnrecordedCount(
 		universityIds: Seq[String],
 		academicYear: AcademicYear,
@@ -54,7 +57,9 @@ trait MonitoringPointDao {
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
-	): Seq[StudentMember]
+	): Seq[(StudentMember, Int)]
+	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
+	def findNonReported(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[StudentMember]
 }
 
 
@@ -86,6 +91,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint) = session.saveOrUpdate(monitoringCheckpoint)
 	def saveOrUpdate(set: MonitoringPointSet) = session.saveOrUpdate(set)
 	def saveOrUpdate(template: MonitoringPointSetTemplate) = session.saveOrUpdate(template)
+	def saveOrUpdate(report: MonitoringPointReport) = session.saveOrUpdate(report)
 
 	def findMonitoringPointSets(route: Route) =
 		session.newCriteria[MonitoringPointSet]
@@ -244,7 +250,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
-	): Seq[StudentMember] = {
+	): Seq[(StudentMember, Int)] = {
 		if (universityIds.isEmpty)
 			return Seq()
 
@@ -291,7 +297,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
-	): Seq[StudentMember] = {
+	): Seq[(StudentMember, Int)] = {
 		if (universityIds.isEmpty)
 			return Seq()
 
@@ -342,14 +348,18 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		query: ScalaQuery[Array[java.lang.Object]]
 	) = {
 
+		val ordering = if (isAscending) Ordering[Int] else Ordering[Int].reverse
+
 		val universityIdCountMap = query.seq.map{objArray =>
 			objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
 		}.toMap
-		val ordering = if (isAscending) Ordering[Int] else Ordering[Int].reverse
 
-		val universityIdsToFetch = universityIds.map{u =>
+		val sortedAllUniversityIdCount = universityIds.map{u =>
 			u -> universityIdCountMap.getOrElse(u, 0)
-		}.sortBy(_._2)(ordering).slice(startResult, startResult + maxResults).map(_._1)
+		}.sortBy(_._2)(ordering)
+
+
+		val universityIdsToFetch = sortedAllUniversityIdCount.slice(startResult, startResult + maxResults).map(_._1)
 
 		val c = session.newCriteria[StudentMember]
 		val or = disjunction()
@@ -357,6 +367,52 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		c.add(or)
 		val students = c.seq
 
-		universityIdsToFetch.flatMap{u => students.find(_.universityId == u)}.toSeq
+		universityIdsToFetch.flatMap{
+			u => students.find(_.universityId == u)
+		}.map{
+			s => s -> sortedAllUniversityIdCount.toMap.get(s.universityId).getOrElse(0)
+		}.toSeq
+	}
+
+	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String] = {
+		if (students.isEmpty)
+			return Seq()
+
+		val c = session.newCriteria[MonitoringPointReport]
+			.add(is("academicYear", academicYear))
+
+		val or = disjunction()
+		students.map(_.universityId)
+			.grouped(Daoisms.MaxInClauseCount)
+			.foreach { ids => or.add(in("student.universityId", ids.asJavaCollection)) }
+		c.add(or)
+
+		val query = c.project[Array[java.lang.Object]](Projections.projectionList()
+			.add(Projections.groupProperty("monitoringPeriod"))
+			.add(Projections.count("monitoringPeriod"))
+		)
+		val termCounts = query.seq.map{objArray =>
+			objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
+		}
+		TermService.orderedTermNames.diff(termCounts.filter{case(term, count) => count.intValue() == students.size})
+	}
+
+	def findNonReported(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[StudentMember] = {
+		if (students.isEmpty)
+			return Seq()
+
+		val c = session.newCriteria[MonitoringPointReport]
+			.add(is("academicYear", academicYear))
+			.add(is("monitoringPeriod", period))
+
+		val or = disjunction()
+		students.map(_.universityId)
+			.grouped(Daoisms.MaxInClauseCount)
+			.foreach { ids => or.add(in("student.universityId", ids.asJavaCollection)) }
+		c.add(or)
+
+		val reportedStudents = c.seq.map(_.student)
+
+		students.diff(reportedStudents)
 	}
 }

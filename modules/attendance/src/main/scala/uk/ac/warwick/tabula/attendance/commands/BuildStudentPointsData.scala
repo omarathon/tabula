@@ -17,7 +17,12 @@ case class StudentPointsData(
 
 trait BuildStudentPointsData extends MonitoringPointServiceComponent with TermServiceComponent with GroupMonitoringPointsByTerm {
 
-	def buildData(students: Seq[StudentMember], academicYear: AcademicYear) = {
+	def buildData(
+		students: Seq[StudentMember],
+		academicYear: AcademicYear,
+		missedCounts: Seq[(StudentMember, Int)] = Seq(),
+		unrecordedCounts: Seq[(StudentMember, Int)] = Seq()
+	) = {
 		val pointSetsByStudent = monitoringPointService.findPointSetsForStudentsByStudent(students, academicYear)
 		val allPoints = pointSetsByStudent.flatMap(_._2.points.asScala).toSeq
 		val checkpoints = monitoringPointService.getCheckpointsByStudent(allPoints)
@@ -39,8 +44,18 @@ trait BuildStudentPointsData extends MonitoringPointServiceComponent with TermSe
 						}
 					}.toMap
 				}
-				val unrecorded = pointsByTermWithCheckpointString.values.flatMap(_.values).count(_ == "late")
-				val missed = pointsByTermWithCheckpointString.values.flatMap(_.values).count(_ == MonitoringCheckpointState.MissedUnauthorised.dbValue)
+				val unrecorded = {
+					if (unrecordedCounts.size > 0)
+						unrecordedCounts.find{case(s, count) => student == s}.getOrElse((student, 0))._2
+					else
+						pointsByTermWithCheckpointString.values.flatMap(_.values).count(_ == "late")
+				}
+				val missed = {
+					if (missedCounts.size > 0)
+						missedCounts.find{case(s, count) => student == s}.getOrElse((student, 0))._2
+					else
+						pointsByTermWithCheckpointString.values.flatMap(_.values).count(_ == MonitoringCheckpointState.MissedUnauthorised.dbValue)
+				}
 				StudentPointsData(student, pointsByTermWithCheckpointString, unrecorded, missed)
 			}.getOrElse(
 				StudentPointsData(student, Map(), 0, 0)

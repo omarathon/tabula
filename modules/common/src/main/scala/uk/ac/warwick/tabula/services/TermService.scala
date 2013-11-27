@@ -21,6 +21,17 @@ trait TermService {
 	def getAcademicWeekForAcademicYear(date: BaseDateTime, academicYear: AcademicYear): Int
 }
 
+object TermService {
+	val orderedTermNames: Seq[String] = Seq(
+		"Autumn",
+		"Christmas vacation",
+		"Spring",
+		"Easter vacation",
+		"Summer",
+		"Summer vacation"
+	)
+}
+
 /**
  * Wraps TermFactory and adds more features.
  */
@@ -47,7 +58,7 @@ class TermServiceImpl extends TermService {
 		val autumnTerms:Seq[Term]= termFactory.getTermDates.asScala
 			.filter(t => t.getTermType == TermType.autumn)
 			.filter(t=>t.getStartDate.isAfter(start.minusYears(1))) //go back a year to get the current year's autumn term
-			.filter(t=> !(t.getStartDate.isAfter(end)))
+			.filter(t=> !t.getStartDate.isAfter(end))
 
 		// since we only picked the autumn terms from the termfactory,
 		// the endDate's year will be correct for the academicyear

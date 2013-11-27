@@ -5,12 +5,12 @@ import scala.collection.JavaConverters.asScalaBufferConverter
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent, AutowiringMonitoringPointDaoComponent, MonitoringPointDaoComponent}
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringCheckpointState, MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import org.joda.time.DateTime
-import scala.Some
 import uk.ac.warwick.util.termdates.Term
+import scala.Some
 
 trait MonitoringPointServiceComponent {
 	def monitoringPointService: MonitoringPointService
@@ -26,6 +26,7 @@ trait MonitoringPointService {
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
 	def saveOrUpdate(set: MonitoringPointSet)
 	def saveOrUpdate(template: MonitoringPointSetTemplate)
+	def saveOrUpdate(report : MonitoringPointReport)
 	def getPointById(id : String) : Option[MonitoringPoint]
 	def getSetById(id : String) : Option[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
@@ -61,7 +62,7 @@ trait MonitoringPointService {
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
-	): Seq[StudentMember]
+	): Seq[(StudentMember, Int)]
 	def studentsByUnrecordedCount(
 		universityIds: Seq[String],
 		academicYear: AcademicYear,
@@ -69,7 +70,9 @@ trait MonitoringPointService {
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
-	): Seq[StudentMember]
+	): Seq[(StudentMember, Int)]
+	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
+	def findNonReported(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[StudentMember]
 }
 
 
@@ -81,6 +84,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint) = monitoringPointDao.saveOrUpdate(monitoringCheckpoint)
 	def saveOrUpdate(set: MonitoringPointSet) = monitoringPointDao.saveOrUpdate(set)
 	def saveOrUpdate(template: MonitoringPointSetTemplate) = monitoringPointDao.saveOrUpdate(template)
+	def saveOrUpdate(report : MonitoringPointReport) = monitoringPointDao.saveOrUpdate(report)
 	def getPointById(id: String): Option[MonitoringPoint] = monitoringPointDao.getPointById(id)
 	def getSetById(id: String): Option[MonitoringPointSet] = monitoringPointDao.getSetById(id)
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet] = monitoringPointDao.findMonitoringPointSets(route)
@@ -181,7 +185,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
-	): Seq[StudentMember] = {
+	): Seq[(StudentMember, Int)] = {
 		monitoringPointDao.studentsByMissedCount(universityIds, academicYear, isAscending, maxResults, startResult)
 	}
 
@@ -192,8 +196,16 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
-	): Seq[StudentMember] = {
+	): Seq[(StudentMember, Int)] = {
 		monitoringPointDao.studentsByUnrecordedCount(universityIds, academicYear, currentAcademicWeek, isAscending, maxResults, startResult)
+	}
+
+	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String] = {
+		monitoringPointDao.findNonReportedTerms(students, academicYear)
+	}
+
+	def findNonReported(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[StudentMember] = {
+		monitoringPointDao.findNonReported(students, academicYear, period)
 	}
 
 }

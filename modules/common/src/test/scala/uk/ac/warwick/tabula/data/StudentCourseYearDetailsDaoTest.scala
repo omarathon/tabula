@@ -1,26 +1,15 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.annotations.AccessType
 import org.junit.Before
-import org.junit.runner.RunWith
-import org.springframework.test.annotation.DirtiesContext
-import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.ContextConfiguration
-import javax.persistence.Entity
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.PersistenceTestBase
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.ModuleRegistration
-import uk.ac.warwick.tabula.data.model.ModuleSelectionStatus
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
 import uk.ac.warwick.tabula.Fixtures
-import scala.collection.JavaConverters._
 import org.joda.time.DateTime
-import scala.collection.mutable.HashSet
+import scala.collection.mutable
 import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
-import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
 
 
 class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
@@ -36,7 +25,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 		memDao.sessionFactory = sessionFactory
 	}
 
-	@Test def testGetBySceKey {
+	@Test def testGetBySceKey() {
 		transactional { tx =>
 			val stuMem = new StudentMember("0123456")
 			stuMem.userId = "abcde"
@@ -65,7 +54,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 		}
 	}
 
-	@Test def testGetFreshKeys {
+	@Test def testGetFreshKeys() {
 		transactional { tx =>
 			val dept1 = Fixtures.department("hm", "History of Music")
 			val dept2 = Fixtures.department("ar", "Architecture")
@@ -104,7 +93,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 	}
 
 	@Test
-	def testStampMissingFromImport = transactional { tx =>
+	def testStampMissingFromImport() = transactional { tx =>
 		val dept1 = Fixtures.department("hm", "History of Music")
 		val dept2 = Fixtures.department("ar", "Architecture")
 
@@ -120,13 +109,11 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 		memDao.saveOrUpdate(stu2)
 		memDao.saveOrUpdate(stu3)
 		memDao.saveOrUpdate(stu4)
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 
 		val key1 = new StudentCourseYearKey(stu1.mostSignificantCourse.scjCode, 1)
-		val key2 = new StudentCourseYearKey(stu2.mostSignificantCourse.scjCode, 1)
 		val key3 = new StudentCourseYearKey(stu3.mostSignificantCourse.scjCode, 1)
-		val key4 = new StudentCourseYearKey(stu4.mostSignificantCourse.scjCode, 1)
 
 		val scyd1 = scydDao.getBySceKey(stu1.mostSignificantCourse, 1).get
 		val scyd2 = scydDao.getBySceKey(stu2.mostSignificantCourse, 1).get
@@ -143,7 +130,7 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 		scyd3.missingFromImportSince should be (null)
 		scyd4.missingFromImportSince should be (null)
 
-		val seenSceKeys = new HashSet[StudentCourseYearKey]
+		val seenSceKeys = new mutable.HashSet[StudentCourseYearKey]
 		seenSceKeys.add(key1)
 		seenSceKeys.add(key3)
 
@@ -159,8 +146,8 @@ class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 
 		for (id <- seenIds) logger.warn("seen ID: " + id)
 
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 
 		scydDao.getBySceKey(stu1.mostSignificantCourse, 1) should be (Some(scyd1))
 		scydDao.getBySceKey(stu2.mostSignificantCourse, 1) should be (None)

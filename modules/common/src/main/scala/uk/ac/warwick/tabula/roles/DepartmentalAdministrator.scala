@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
-import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsSelector}
+import uk.ac.warwick.tabula.permissions.PermissionsSelector
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.JavaImports._
 
@@ -62,7 +62,9 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		MemberNotes.Read,
 		MemberNotes.Create,
 		MemberNotes.Update,
-		MemberNotes.Delete
+		MemberNotes.Delete,
+
+		MonitoringPoints.Report
 
 	)
 	def canDelegateThisRolesPermissions:JBoolean = true
