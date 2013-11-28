@@ -7,8 +7,10 @@ import javax.sql.DataSource
 import org.springframework.jdbc.`object`.SqlUpdate
 import java.sql.Types
 import org.springframework.jdbc.core.SqlParameter
-import uk.ac.warwick.tabula.scheduling.services.ExportAttendanceToSitsService.ExportAttendanceToSitsUpdateQuery
-import java.util.HashMap
+import uk.ac.warwick.tabula.scheduling.services.ExportAttendanceToSitsService.{ExportAttendanceToSitsCountQuery, ExportAttendanceToSitsUpdateQuery}
+import uk.ac.warwick.tabula.JavaImports.JHashMap
+import org.joda.time.DateTime
+import org.springframework.jdbc.`object`.SqlQuery
 
 trait ExportAttendanceToSitsServiceComponent {
 	def exportAttendanceToSitsService: ExportAttendanceToSitsService
@@ -22,33 +24,53 @@ trait ExportAttendanceToSitsService {
 	def exportToSits(report: MonitoringPointReport): Boolean
 }
 
-class AbstractExportAttendanceToSitsService {
+class AbstractExportAttendanceToSitsService extends ExportAttendanceToSitsService {
 
 	self: SitsDataSourceComponent =>
 	def exportToSits(report: MonitoringPointReport): Boolean = {
-//		    sitsDataSource.
+		val countQuery = new ExportAttendanceToSitsCountQuery(sitsDataSource)
+		val count = countQuery.executeByNamedParam(JHashMap(("studentId", report.student.id)))
 
-		val count = 0
-
-		var parameterMap = new HashMap[String, Object]
-		parameterMap.put("id", report.student.id);
-		parameterMap.put("counter", count);
-	// etc...
-
+		val monitoringPeriod = {
+			if (report.monitoringPeriod.indexOf("vacation") >= 0)
+				s"${report.monitoringPeriod} ${report.academicYear.startYear}/${report.academicYear.endYear.toString.substring(2)}"
+			else
+				s"${report.monitoringPeriod} term ${report.academicYear.startYear}/${report.academicYear.endYear.toString.substring(2)}"
+		}
+		val parameterMap = JHashMap(
+			("studentId", report.student.id),
+			("counter", "%03d".format(count)),
+			("now", DateTime.now),
+			("academicYear", report.academicYear.toString),
+			("deptCode", report.studentCourseYearDetails.enrolmentDepartment.code.toUpperCase),
+			("courseCode", report.studentCourseDetails.course.code),
+			("recorder", report.reporter),
+			("missedPoints", report.missed),
+			("monitoringPeriod", monitoringPeriod)
+		)
 
 		val updateQuery = new ExportAttendanceToSitsUpdateQuery(sitsDataSource)
-		updateQuery.
-		false
+		updateQuery.updateByNamedParam(parameterMap) == 1
 	}
 }
 
 object ExportAttendanceToSitsService {
-	final val pushToSITSSql = """
-	insert into intuit.srs_sab
-	(SAB_STUC,SAB_SEQ2,SAB_RAAC,SAB_ENDD,SAB_AYRC,SAB_UDF2,SAB_UDF3,SAB_UDF4,SAB_UDF5,SAB_UDFJ)
-	values (:studentId, :counter,'UNAUTH', :now, :academicYear, :deptCode, :courseCode, :recorder, :missedPoints, :monitoringPeriod );"""
+	final val GetExistingRowsSql = """
+		 select sab_stuc from intuit.srs_sab
+		 where sab_stuc = :studentId;
+	"""
 
-	class ExportAttendanceToSitsUpdateQuery(ds: DataSource) extends SqlUpdate(ds, pushToSITSSql) {
+	final val PushToSITSSql = """
+		insert into intuit.srs_sab
+		(SAB_STUC,SAB_SEQ2,SAB_RAAC,SAB_ENDD,SAB_AYRC,SAB_UDF2,SAB_UDF3,SAB_UDF4,SAB_UDF5,SAB_UDFJ)
+		values (:studentId, :counter,'UNAUTH', :now, :academicYear, :deptCode, :courseCode, :recorder, :missedPoints, :monitoringPeriod );
+	"""
+
+	class ExportAttendanceToSitsCountQuery(ds: DataSource) extends SqlQuery(ds, GetExistingRowsSql) {
+		declareParameter(new SqlParameter("studentId", Types.VARCHAR))
+	}
+
+	class ExportAttendanceToSitsUpdateQuery(ds: DataSource) extends SqlUpdate(ds, PushToSITSSql) {
 
 		declareParameter(new SqlParameter("studentId", Types.VARCHAR))
 		declareParameter(new SqlParameter("counter", Types.VARCHAR))

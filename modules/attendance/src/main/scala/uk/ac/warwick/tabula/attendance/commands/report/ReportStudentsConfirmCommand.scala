@@ -36,7 +36,7 @@ abstract class ReportStudentsConfirmCommand(val department: Department, val curr
 			report.createdDate = DateTime.now
 			report.missed = missedCount
 			report.monitoringPeriod = period
-			report.reporter = currentUser.apparentId
+			report.reporter = currentUser.departmentCode.toUpperCase + currentUser.apparentId
 			report.student = student
 			report.studentCourseDetails = scd
 			report.studentCourseYearDetails = scd.freshStudentCourseYearDetails.find(_.academicYear == academicYear).getOrElse(throw new ItemNotFoundException())
