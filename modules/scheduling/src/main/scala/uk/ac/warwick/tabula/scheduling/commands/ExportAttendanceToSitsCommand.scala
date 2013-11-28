@@ -11,46 +11,51 @@ import uk.ac.warwick.tabula.helpers.Logging
 
 object ExportAttendanceToSitsCommand {
 	def apply() = new ExportAttendanceToSitsCommand
-		with ComposableCommand[Unit]
+		with ComposableCommand[Seq[MonitoringPointReport]]
 		with ExportAttendanceToSitsCommandPermissions
 		with ExportAttendanceToSitsCommandDescription
 		with AutowiringMonitoringPointServiceComponent
 		with AutowiringExportAttendanceToSitsServiceComponent
 }
 
-class ExportAttendanceToSitsCommand extends CommandInternal[Unit] with Logging {
+class ExportAttendanceToSitsCommand extends CommandInternal[Seq[MonitoringPointReport]] with Logging {
 
 	self: MonitoringPointServiceComponent with ExportAttendanceToSitsServiceComponent =>
 
-	override def applyInternal() = {
+	override def applyInternal() = transactional() {
+
+		// check reporting to sits feature is on -- with Features...
+
 		// get the reports from MPService
 		val unreportedReports = monitoringPointService.findUnreportedReports
 
 		// for each student
-		unreportedReports.groupBy(_.student).foreach{case(student, reportList) =>
+		unreportedReports.groupBy(_.student).flatMap{case(student, reportList) =>
 			// group reports by academic year
 			val reportsByAcademicYear = reportList.groupBy(_.academicYear)
 			// for each academic year in order
-			reportsByAcademicYear.keys.toSeq.sortBy(_.startYear).foreach{academicYear =>
+			reportsByAcademicYear.keys.toSeq.sortBy(_.startYear).flatMap{academicYear =>
 				val reportsInAcademicYear = reportsByAcademicYear(academicYear)
 				// push a report for each term in order (if a report exists)
-				TermService.orderedTermNames.foreach(term => {
+				TermService.orderedTermNames.flatMap(term => {
 					reportsInAcademicYear.find(_.monitoringPeriod == term) match {
-						case None =>
+						case None => None
 						case Some(report: MonitoringPointReport) => {
 							val result = exportAttendanceToSitsService.exportToSits(report)
-							if (result)
-								transactional() {
+							if (result) {
 									monitoringPointService.markReportAsPushed(report)
-									logger.info(s"Reported ${report.missed} missed points for ${report.student.universityId} for ${report.monitoringPeriod}")
+									logger.info(s"Reported ${report.missed} missed points for ${report.student.universityId} for ${report.monitoringPeriod} ${report.academicYear.toString}")
+									Option(report)
 								}
-							else
+							else {
 								logger.error(s"Could not push monitoring report to SITS for ${report.student.universityId}")
+								None
+							}
 						}
 					}
 				})
 			}
-		}
+		}.toSeq
 	}
 
 }
@@ -61,6 +66,9 @@ trait ExportAttendanceToSitsCommandPermissions extends RequiresPermissionsChecki
 	}
 }
 
-trait ExportAttendanceToSitsCommandDescription extends Describable[Unit] {
+trait ExportAttendanceToSitsCommandDescription extends Describable[Seq[MonitoringPointReport]] {
 	override def describe(d: Description) {}
+	override def describeResult(d: Description, result: Seq[MonitoringPointReport]) {
+		d.property("reports exported", result.size)
+	}
 }
