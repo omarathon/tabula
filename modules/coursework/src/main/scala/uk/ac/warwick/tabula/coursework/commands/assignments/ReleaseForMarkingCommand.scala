@@ -10,9 +10,8 @@ import uk.ac.warwick.tabula.data.model.Module
 import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{ReleaseToMarkerNotifcation, ReleasedState, FeedbackReleasedNotifier}
+import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{ReleasedState, FeedbackReleasedNotifier}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 
 object ReleaseForMarkingCommand {
 	def apply(module: Module, assignment: Assignment, user: User) =
@@ -118,11 +117,6 @@ trait ReleaseForMarkingCommandDescription extends Describable[List[Feedback]] {
 }
 
 trait FirstMarkerReleaseNotifier extends FeedbackReleasedNotifier[List[Feedback]] {
-
 	this: ReleaseForMarkingState with ReleasedState with UserAware with UserLookupComponent with Logging =>
-
 	def isFirstMarker = true
-	def makeNewFeedback(user: User, recepient:User, markerFeedbacks: Seq[MarkerFeedback], assignment: Assignment) =
-		new ReleaseToMarkerNotifcation(user, recepient, markerFeedbacks, assignment, isFirstMarker) with FreemarkerTextRenderer
-
 }
