@@ -12,7 +12,7 @@
 
 		<#if attachments?size gt 0>
 			<#if attachments?size == 1>
-				<#local filename = "${submission.universityId} - ${attachments[0].name}">
+				<#local filename = "${attachments[0].name}">
 			<#else>
 				<#local filename = "submission-${submission.universityId}.zip">
 			</#if>
