@@ -111,6 +111,7 @@
 			width: 354px;
 			margin-right: 16px;
 		}
+
 		.col2 {
 			float: left;
 			width: 354px;
@@ -134,52 +135,42 @@
 
 				margin-bottom: 16px;
 			}
+		}
 
-			table.profile-info {
-				// Reset
-				th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
+		table.profile-or-course-info {
+			// Reset
+			th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
 
-				width: 100%;
+			width: 100%;
 
-				th {
-					text-align: right;
-					color: @grayLight;
-					white-space: nowrap;
+			th {
+				text-align: right;
+				color: @grayLight;
+				white-space: nowrap;
 
-					&:after { content: ' '; margin-right: 3px; }
-				}
+				&:after { content: ' '; margin-right: 3px; }
+			}
 
-				td {
-					color: #0c0c0c;
-					width: 99%;
-				}
+			td {
+				color: #0c0c0c;
+				width: 99%;
 			}
 		}
 
 		#course-details {
-			table.course-info {
-				// Reset
-				th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
-
-				width: 100%;
-
-				th {
-					text-align: right;
-					color: @grayLight;
-					white-space: nowrap;
-
-					&:after { content: ' '; margin-right: 3px; }
-				}
-
-				td {
-					color: #0c0c0c;
-					width: 99%;
-				}
-
-				tbody {
-					border-bottom: 15px solid transparent;
-				}
+			hr {
+				margin-top: 15px;
 			}
+
+			.col1 {
+				margin-left: 204px;
+			}
+
+			.course-title {
+				margin-top:  15px;
+				margin-bottom: 15px;
+			}
+
 		}
 
 		// Container for "Expand all" and other links

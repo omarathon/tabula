@@ -7,7 +7,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
 	/**
 	 * These tests all assume that:
 	 *
-	 *  - you need to have explicit permissions (Permissions.Profiles.Read.StudentCourseDetails.Core) for the course-pane content
+	 *  - you need to have explicit permissions (Permissions.Profiles.Read.StudentCourseDetails.Core) for the course details content
 	 *  to be displayed when you view another user's profile
 	 *
 	 *  - the DepartmentAdmin role grants the holder that permission on any student who touches the department
@@ -27,7 +27,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
 
 		Then("Admin1 can view Student1's course details")
 		signIn as (P.Admin1) to (Path(s"/profiles/view/${P.Student1.warwickId}"))
-		find(cssSelector("li#course-pane")) should be ('defined)
+		find(cssSelector(".course-title")) should be ('defined)
 	}
 
 	"A departmental administrator" should "have admin rights on students on modules in their sub-departments" in {
@@ -37,7 +37,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
 
 		Then("Admin1 can view Student2's profile")
 		signIn as (P.Admin1) to (Path(s"/profiles/view/${P.Student2.warwickId}"))
-		find(cssSelector("li#course-pane")) should be ('defined)
+		find(cssSelector(".course-title")) should be ('defined)
 	}
 
 
@@ -48,7 +48,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
 
 		Then("Admin3 can't view Student3's profile")
 		signIn as (P.Admin3) to (Path(s"/profiles/view/${P.Student3.warwickId}"))
-		find(cssSelector("li#course-pane")) should not be ('defined)
+		find(cssSelector(".course-title")) should not be ('defined)
 	}
 
 	"A sub-departmental administrator" should "have admin rights on students who match their sub-departments" in {
@@ -59,7 +59,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
 
 		Then("Admin3 can view Student1's profile")
 		signIn as (P.Admin3) to (Path(s"/profiles/view/${P.Student1.warwickId}"))
-		find(cssSelector("li#course-pane")) should be ('defined)
+		find(cssSelector(".course-title")) should be ('defined)
 	}
 
 	"A sub-departmental administrator" should "have admin rights on students on modules in their sub-department" in {
@@ -70,7 +70,7 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
 
 		Then("Admin3 can view Student2's profile")
 		signIn as (P.Admin3) to (Path(s"/profiles/view/${P.Student2.warwickId}"))
-		find(cssSelector("li#course-pane")) should be ('defined)
+		find(cssSelector(".course-title")) should be ('defined)
 	}
 
 	"A sub-sub-departmental administrator" should "have admin rights on students who match their sub-sub-department" in{
@@ -85,12 +85,12 @@ class SubDepartmentPermissionsTest  extends SubDepartmentFixture{
 
 		Then("Admin4 can view Student1's profile")
 		signIn as (P.Admin4) to (Path(s"/profiles/view/${P.Student1.warwickId}"))
-		find(cssSelector("li#course-pane")) should be ('defined)
+		find(cssSelector(".course-title")) should be ('defined)
 
 		And("Admin4 cannot view student2's profile")
 
 		go to(Path(s"/profiles/view/${P.Student2.warwickId}"))
-		find(cssSelector("li#course-pane")) should not be ('defined)
+		find(cssSelector(".course-title")) should not be ('defined)
 	}
 
 }
