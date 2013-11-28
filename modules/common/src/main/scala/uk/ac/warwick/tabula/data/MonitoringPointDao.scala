@@ -62,6 +62,7 @@ trait MonitoringPointDao {
 	): Seq[(StudentMember, Int)]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
 	def findNonReported(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[StudentMember]
+	def findUnreportedReports: Seq[MonitoringPointReport]
 }
 
 
@@ -422,5 +423,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		val reportedStudents = c.seq.map(_.student)
 
 		students.diff(reportedStudents)
+	}
+
+	def findUnreportedReports: Seq[MonitoringPointReport] = {
+		session.newCriteria[MonitoringPointReport].add(isNull("pushedDate")).seq
 	}
 }

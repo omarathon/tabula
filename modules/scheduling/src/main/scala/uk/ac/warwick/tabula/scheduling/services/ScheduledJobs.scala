@@ -76,6 +76,11 @@ class ScheduledJobs {
 		exceptionResolver.reportExceptions { jobService.run }
 	}
 
+	@Scheduled(fixedDelay = 5 * 60 * 1000) // every 5 minutes, non-concurrent
+	def exportAttendanceToSits: Unit = maintenanceGuard {
+		exceptionResolver.reportExceptions { ExportAttendanceToSitsCommand().apply() }
+	}
+
 	/* Filesystem syncing jobs, should only run on standby */
 	@Scheduled(fixedRate = 300 * 1000) // every 5 minutes
 	def fileSync: Unit = syncGuard {

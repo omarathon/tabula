@@ -75,6 +75,7 @@ trait MonitoringPointService {
 	): Seq[(StudentMember, Int)]
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
 	def findNonReported(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[StudentMember]
+	def findUnreportedReports(): Seq[MonitoringPointReport]
 }
 
 
@@ -210,6 +211,10 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 
 	def findNonReported(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[StudentMember] = {
 		monitoringPointDao.findNonReported(students, academicYear, period)
+	}
+
+	def findUnreportedReports(): Seq[MonitoringPointReport] = {
+		monitoringPointDao.findUnreportedReports
 	}
 
 }

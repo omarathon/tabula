@@ -309,6 +309,7 @@ object Permissions {
 		case object View extends Permission("View monitoring points")
 		case object Record extends Permission("Record monitoring points")
 		case object Report extends Permission("Report monitoring points")
+		case object Export extends ScopelessPermission("Export monitoring points to SITS")
 	}
 
 	object MonitoringPointSetTemplates {
