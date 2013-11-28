@@ -66,7 +66,10 @@ trait StudentRecordValidation extends SelfValidating {
 			if (point.sentToAcademicOffice) {
 				errors.rejectValue("", "monitoringCheckpoint.sentToAcademicOffice")
 			}
-			if (currentAcademicWeek < point.validFromWeek && !(state == null || state == MonitoringCheckpointState.MissedAuthorised)) {
+			if (thisAcademicYear.startYear <= pointSet.academicYear.startYear
+				&& currentAcademicWeek < point.validFromWeek
+				&& !(state == null || state == MonitoringCheckpointState.MissedAuthorised)
+			) {
 				errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
 			}
 			errors.popNestedPath()

@@ -15,14 +15,19 @@ trait AvailablePeriods extends MonitoringPointServiceComponent with GroupMonitor
 		// Get all the term names for those point sets
 		val termsWithPoints = groupByTerm(pointSets.flatMap(_.points.asScala), academicYear).keys.toSeq
 		// Get the index in the list of all terms of the current term
-		val thisTerm = termService.getTermFromDateIncludingVacations(DateTime.now).getTermTypeAsString
+		val thisTerm = {
+			if (academicYear.startYear < AcademicYear.guessByDate(DateTime.now).startYear)
+				TermService.orderedTermNames.last
+			else
+				termService.getTermFromDateIncludingVacations(DateTime.now).getTermTypeAsString
+		}
 		val thisTermIndex = TermService.orderedTermNames.zipWithIndex
 			.find(_._1 == thisTerm).getOrElse(throw new ItemNotFoundException())._2
 		// Get the terms that have happened so far in the current academic year, including the current term
 		val termsSoFarThisYear = TermService.orderedTermNames.slice(0, thisTermIndex + 1)
 		// The terms to show to the user are those that have happened this year (including the current term)
 		// AND that have some points happening during them
-		val termsToShow = termsWithPoints.intersect(termsSoFarThisYear)
+		val termsToShow = termsSoFarThisYear.intersect(termsWithPoints)
 		// Of the terms to show, the ones that the user can choose as those where at least some of the given students have not reported
 		val nonReportedTerms = monitoringPointService.findNonReportedTerms(allStudents, academicYear)
 		termsToShow.map(term => term -> nonReportedTerms.contains(term))

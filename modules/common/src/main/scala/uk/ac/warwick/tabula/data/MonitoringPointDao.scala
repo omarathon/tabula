@@ -48,7 +48,9 @@ trait MonitoringPointDao {
 		academicYear: AcademicYear,
 		isAscending: Boolean,
 		maxResults: Int,
-		startResult: Int
+		startResult: Int,
+		startWeek: Int,
+		endWeek: Int
 	): Seq[(StudentMember, Int)]
 	def studentsByUnrecordedCount(
 		universityIds: Seq[String],
@@ -249,7 +251,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		academicYear: AcademicYear,
 		isAscending: Boolean,
 		maxResults: Int,
-		startResult: Int
+		startResult: Int,
+		startWeek: Int = 1,
+		endWeek: Int = 52
 	): Seq[(StudentMember, Int)] = {
 		if (universityIds.isEmpty)
 			return Seq()
@@ -270,8 +274,10 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			and mps.academicYear = :academicYear
 			and scyd.academicYear = mps.academicYear
 			and mc.state = 'unauthorised'
+			and mp.validFromWeek >= :startWeek
+			and mp.requiredFromWeek <= :endWeek
 			and (
-		""" + partionedUniversityIdsWithIndex.map{
+											""" + partionedUniversityIdsWithIndex.map{
 			case (ids, index) => "s.universityId in (:universityIds" + index.toString + ") "
 		}.mkString(" or ") + """
 			)
@@ -280,6 +286,8 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 		val query = session.newQuery[Array[java.lang.Object]](queryString)
 			.setParameter("academicYear", academicYear)
+			.setParameter("startWeek", startWeek)
+			.setParameter("endWeek", endWeek)
 
 		partionedUniversityIdsWithIndex.foreach{
 			case (ids, index) => {

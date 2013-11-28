@@ -59,8 +59,8 @@ abstract class ReportStudentsConfirmCommand(val department: Department, val curr
 			allStudents.map(_.universityId),
 			academicYear,
 			isAscending = false,
-			Int.MaxValue,
-			0
+			maxResults = Int.MaxValue,
+			startResult = 0
 		).filter(_._2 > 0)
 		val nonReported = monitoringPointService.findNonReported(studentsWithMissed.map(_._1), academicYear, period)
 		unreportedStudentsWithMissed = studentsWithMissed.filter{case(student, count) => nonReported.contains(student)}

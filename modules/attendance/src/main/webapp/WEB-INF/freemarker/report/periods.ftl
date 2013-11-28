@@ -4,10 +4,6 @@
 
 <@f.form commandName="command" action="" method="POST" cssClass="form-horizontal">
 
-	<#list ["academicYear", "courseTypes", "routes", "modesOfAttendance", "yearsOfStudy", "sprStatuses", "modules"] as field>
-		<@f.hidden path="${field}" />
-	</#list>
-
 	<#if command.availablePeriods?size == 0>
 		<div class="alert alert-info">
 			There are no monitoring periods available for the students you have chosen.
@@ -36,7 +32,7 @@
 				<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Loading&hellip;">
 					Next
 				</button>
-				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+				<a class="btn" href="<@routes.viewDepartmentStudentsWithAcademicYear command.department command.academicYear command.serializeFilter />">Cancel</a>
 			</div>
 		</div>
 	</#if>

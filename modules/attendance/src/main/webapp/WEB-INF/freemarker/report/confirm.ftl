@@ -29,7 +29,7 @@
 			<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Loading&hellip;">
 				Send report
 			</button>
-			<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
+			<a class="btn" href="<@routes.viewDepartmentStudentsWithAcademicYear command.department command.academicYear command.serializeFilter />">Cancel</a>
 		</div>
 	</div>
 

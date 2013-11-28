@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyMaps
@@ -83,6 +83,7 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 
 	def validate(errors: Errors) {
 		val academicYear = templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear
+		val thisAcademicYear = AcademicYear.guessByDate(DateTime.now)
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
 		studentsStateAsScala.foreach{ case(student, pointMap) => {
 			val studentPointSet = monitoringPointService.getPointSetForStudent(student, academicYear)
@@ -100,7 +101,10 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 					if (point.sentToAcademicOffice) {
 						errors.rejectValue("", "monitoringCheckpoint.sentToAcademicOffice")
 					}
-					if (currentAcademicWeek < point.validFromWeek && !(state == null || state == MonitoringCheckpointState.MissedAuthorised)) {
+					if (thisAcademicYear.startYear <= academicYear.startYear
+						&& currentAcademicWeek < point.validFromWeek
+						&& !(state == null || state == MonitoringCheckpointState.MissedAuthorised)
+					) {
 						errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
 					}
 				}

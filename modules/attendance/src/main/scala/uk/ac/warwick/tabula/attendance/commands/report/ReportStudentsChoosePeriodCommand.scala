@@ -12,6 +12,8 @@ import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent,
 import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm
 import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.{Errors, BindingResult}
+import org.joda.time.DateTime
+import uk.ac.warwick.util.termdates.Term
 
 object ReportStudentsChoosePeriodCommand {
 	def apply(department: Department, academicYear: AcademicYear) =
@@ -32,12 +34,24 @@ abstract class ReportStudentsChoosePeriodCommand(val department: Department, val
 	self: ProfileServiceComponent with MonitoringPointServiceComponent =>
 
 	def applyInternal() = {
+		def findTermForPeriod(dateToCheck: DateTime): Term = {
+			val term = termService.getTermFromDateIncludingVacations(dateToCheck)
+			if (term.getTermTypeAsString == period)
+				term
+			else
+				findTermForPeriod(dateToCheck.plusWeeks(1))
+		}
+		val termForPeriod = findTermForPeriod(academicYear.dateInTermOne.toDateTime)
+		val periodStartWeek = termForPeriod.getAcademicWeekNumber(termForPeriod.getStartDate)
+		val periodEndWeek = termForPeriod.getAcademicWeekNumber(termForPeriod.getEndDate)
 		val studentsWithMissed = monitoringPointService.studentsByMissedCount(
 			allStudents.map(_.universityId),
 			academicYear,
 			isAscending = false,
 			Int.MaxValue,
-			0
+			0,
+			periodStartWeek,
+			periodEndWeek
 		).filter(_._2 > 0)
 		val nonReported = monitoringPointService.findNonReported(studentsWithMissed.map(_._1), academicYear, period)
 		studentsWithMissed.filter{case(student, count) => nonReported.contains(student)}
