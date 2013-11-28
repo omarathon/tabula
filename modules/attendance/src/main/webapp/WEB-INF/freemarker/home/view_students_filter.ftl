@@ -43,7 +43,7 @@
 </#if>
 
 <#assign filterQuery = command.serializeFilter />
-<#if can.do("MonitoringPoints.Report", command.department) >
+<#if features.attendanceMonitoringReport && can.do("MonitoringPoints.Report", command.department) >
 	<div class="pull-right">
 		<a href="<@routes.report command.department command.academicYear filterQuery />" class="btn btn-primary">Report attendance for these students</a>
 	</div>
