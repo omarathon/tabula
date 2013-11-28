@@ -28,6 +28,7 @@ import java.net.URLEncoder
 abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 
 	type Usercode = String
+	type UniversityId = String
 
 	@transient
 	var userLookup = Wire[UserLookupService]("userLookup")
@@ -72,9 +73,9 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	def studentHasMarker(assignment:Assignment, universityId: String): Boolean =
 		getStudentsFirstMarker(assignment, universityId).isDefined || getStudentsSecondMarker(assignment, universityId).isDefined
 
-	def getStudentsFirstMarker(assignment:Assignment, universityId: String): Option[Usercode]
+	def getStudentsFirstMarker(assignment:Assignment, universityId: UniversityId): Option[Usercode]
 
-	def getStudentsSecondMarker(assignment:Assignment, universityId: String): Option[Usercode]
+	def getStudentsSecondMarker(assignment:Assignment, universityId: UniversityId): Option[Usercode]
 
 	def getSubmissions(assignment: Assignment, user: User): Seq[Submission]
 
@@ -87,7 +88,7 @@ trait AssignmentMarkerMap {
 	this : MarkingWorkflow =>
 
 	// gets the usercode of the students current marker from the given markers UserGroup
-	private def getMarkerFromAssignmentMap(assignment: Assignment, universityId: String, markers: UserGroup) = {
+	private def getMarkerFromAssignmentMap(assignment: Assignment, universityId: UniversityId, markers: UserGroup) = {
 		val student = userLookup.getUserByWarwickUniId(universityId)
 		val mapEntry = Option(assignment.markerMap) flatMap {_.find{p:(String,UserGroup) =>
 			p._2.includes(student.getUserId) && markers.includes(p._1)
@@ -98,10 +99,10 @@ trait AssignmentMarkerMap {
 		}
 	}
 
-	def getStudentsFirstMarker(assignment: Assignment, universityId: String) =
+	def getStudentsFirstMarker(assignment: Assignment, universityId: UniversityId) =
 		getMarkerFromAssignmentMap(assignment, universityId, assignment.markingWorkflow.firstMarkers)
 
-	def getStudentsSecondMarker(assignment: Assignment, universityId: String) =
+	def getStudentsSecondMarker(assignment: Assignment, universityId: UniversityId) =
 		getMarkerFromAssignmentMap(assignment, universityId, assignment.markingWorkflow.secondMarkers)
 
 	def getSubmissions(assignment: Assignment, marker: User) = {

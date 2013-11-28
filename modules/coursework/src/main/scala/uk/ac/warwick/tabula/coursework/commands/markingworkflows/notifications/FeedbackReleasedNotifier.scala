@@ -17,10 +17,7 @@ trait FeedbackReleasedNotifier[A] extends Notifies[A, Seq[MarkerFeedback]] {
 
 		// emit notifications to each second marker that has new feedback
 		val markerMap : Map[String, Seq[MarkerFeedback]] = newReleasedFeedback.asScala.groupBy(mf => {
-			val marker = isFirstMarker match {
-				case true => assignment.markingWorkflow.getStudentsFirstMarker(assignment, mf.feedback.universityId)
-				case false => assignment.markingWorkflow.getStudentsSecondMarker(assignment, mf.feedback.universityId)
-			}
+			val marker = mf.getMarkerUsercode
 			marker.getOrElse("unassigned")
 		})
 

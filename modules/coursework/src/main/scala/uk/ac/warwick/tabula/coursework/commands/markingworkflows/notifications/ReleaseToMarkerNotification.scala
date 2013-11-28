@@ -31,7 +31,7 @@ class ReleaseToMarkerNotifcation(val agent: User, val recipient: User, val _obje
 	def content: String = renderTemplate(templateLocation,
 		Map(
 			"markingUrl" -> url,
-			"assignmentName" -> assignment.name,
+			"assignment" -> assignment,
 			"numReleasedFeedbacks" -> _object.size,
 			"verb" -> templateVerb
 		))
