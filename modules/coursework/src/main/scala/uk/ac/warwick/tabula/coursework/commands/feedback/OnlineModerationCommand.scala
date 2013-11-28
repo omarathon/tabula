@@ -30,12 +30,9 @@ object OnlineModerationCommand {
 
 abstract class OnlineModerationCommand(module: Module, assignment: Assignment, student: Member, currentUser: CurrentUser)
 	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, currentUser)
-	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] {
+	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] with ModerationState{
 
 	self: FeedbackServiceComponent with FileAttachmentComponent with ZipServiceComponent with MarkerFeedbackStateCopy =>
-
-	var approved: Boolean = true
-	var rejectionComments: String = _
 
 	def markerFeedback = assignment.getMarkerFeedback(student.universityId, currentUser.apparentUser)
 
@@ -99,7 +96,14 @@ abstract class OnlineModerationCommand(module: Module, assignment: Assignment, s
 		super.validate(errors)
 
 		if (!Option(approved).isDefined)
-			errors.rejectValue("approved", "approved.notDefined")
+			errors.rejectValue("approved", "markers.moderation.approved.notDefined")
+		else if(!approved && !rejectionComments.hasText)
+			errors.rejectValue("rejectionComments", "markers.moderation.rejectionComments.empty")
 	}
 
+}
+
+trait ModerationState {
+	var approved: Boolean = true
+	var rejectionComments: String = _
 }
