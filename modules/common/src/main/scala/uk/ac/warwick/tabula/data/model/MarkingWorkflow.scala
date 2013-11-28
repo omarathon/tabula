@@ -27,6 +27,8 @@ import java.net.URLEncoder
 @AccessType("field")
 abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 
+	type Usercode = String
+
 	@transient
 	var userLookup = Wire[UserLookupService]("userLookup")
 
@@ -59,15 +61,20 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	/** If true, the submitter chooses their first marker from a dropdown */
 	def studentsChooseMarker = false
 
+	def firstMarkerRoleName: String = "Marker"
+	def firstMarkerVerb: String = "mark"
+
 	// True if this marking workflow uses a second marker
 	def hasSecondMarker: Boolean
+	def secondMarkerRoleName: Option[String]
+	def secondMarkerVerb: Option[String]
 
 	def studentHasMarker(assignment:Assignment, universityId: String): Boolean =
 		getStudentsFirstMarker(assignment, universityId).isDefined || getStudentsSecondMarker(assignment, universityId).isDefined
 
-	def getStudentsFirstMarker(assignment:Assignment, universityId: String): Option[String]
+	def getStudentsFirstMarker(assignment:Assignment, universityId: String): Option[Usercode]
 
-	def getStudentsSecondMarker(assignment:Assignment, universityId: String): Option[String]
+	def getStudentsSecondMarker(assignment:Assignment, universityId: String): Option[Usercode]
 
 	def getSubmissions(assignment: Assignment, user: User): Seq[Submission]
 
@@ -97,11 +104,11 @@ trait AssignmentMarkerMap {
 	def getStudentsSecondMarker(assignment: Assignment, universityId: String) =
 		getMarkerFromAssignmentMap(assignment, universityId, assignment.markingWorkflow.secondMarkers)
 
-	def getSubmissions(assignment: Assignment, user: User) = {
-		val allSubmissions = getSubmissionsFromMap(assignment, user)
+	def getSubmissions(assignment: Assignment, marker: User) = {
+		val allSubmissions = getSubmissionsFromMap(assignment, marker)
 
-		val isFirstMarker = assignment.isFirstMarker(user)
-		val isSecondMarker = assignment.isSecondMarker(user)
+		val isFirstMarker = assignment.isFirstMarker(marker)
+		val isSecondMarker = assignment.isSecondMarker(marker)
 
 		if(isFirstMarker)
 			allSubmissions.filter(_.isReleasedForMarking)
@@ -124,11 +131,16 @@ trait AssignmentMarkerMap {
 
 }
 
+trait NoSecondMarker {
+	def hasSecondMarker = false
+	def secondMarkerRoleName = None
+	def secondMarkerVerb = None
+}
+
 
 /**
  * Available marking methods and code to persist them
  */
-
 sealed abstract class MarkingMethod(val name: String){
 	override def toString = name
 }

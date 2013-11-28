@@ -22,5 +22,6 @@ class ModeratedMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap 
 
 	// True if this marking workflow uses a second marker
 	def hasSecondMarker = true
-
+	def secondMarkerRoleName = Some("Moderator")
+	def secondMarkerVerb = Some("moderate")
 }

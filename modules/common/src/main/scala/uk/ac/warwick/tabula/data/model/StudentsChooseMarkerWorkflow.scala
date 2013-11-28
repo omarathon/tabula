@@ -3,13 +3,13 @@ package uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
 import javax.persistence.{Entity, DiscriminatorValue}
-import uk.ac.warwick.tabula.data.model.MarkingMethod.{StudentsChooseMarker, SeenSecondMarking}
-import uk.ac.warwick.tabula.services.{SubmissionService, AutowiringSubmissionServiceComponent, SubmissionServiceComponent}
+import uk.ac.warwick.tabula.data.model.MarkingMethod.StudentsChooseMarker
+import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.spring.Wire
 
 @Entity
 @DiscriminatorValue(value="StudentsChooseMarker")
-class StudentsChooseMarkerWorkflow extends MarkingWorkflow {
+class StudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarker {
 
 	def this(dept: Department) = {
 		this()
@@ -21,8 +21,6 @@ class StudentsChooseMarkerWorkflow extends MarkingWorkflow {
 	def markingMethod = StudentsChooseMarker
 
 	override def studentsChooseMarker = true
-
-	def hasSecondMarker = false
 
 	def onlineMarkingUrl(assignment: Assignment, marker: User) = MarkingRoutes.onlineMarkerFeedback(assignment)
 

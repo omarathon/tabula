@@ -17,6 +17,8 @@ class SeenSecondMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap
 
 	def onlineMarkingUrl(assignment: Assignment, marker: User) = MarkingRoutes.onlineMarkerFeedback(assignment)
 
+	override def firstMarkerRoleName: String = "First marker"
 	def hasSecondMarker = true
-
+	def secondMarkerRoleName = Some("Second marker")
+	def secondMarkerVerb = Some("mark")
 }

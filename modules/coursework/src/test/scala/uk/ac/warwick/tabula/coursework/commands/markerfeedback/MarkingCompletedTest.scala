@@ -53,7 +53,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	def firstMarkerFinished() {
 		withUser("cuslaj") {
 			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
-			val command = new MarkingCompletedCommand(assignment.module, assignment, currentUser, isFirstMarker)
+			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, isFirstMarker)
 			command.stateService = stateService
 			command.students = List("9876004", "0270954", "9170726")
 			command.onBind()
@@ -73,7 +73,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		inContext[MarkingCompletedTest.Ctx] {
 		withUser("cuday"){
 			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
-			val command = new MarkingCompletedCommand(assignment.module, assignment, currentUser, isFirstMarker)
+			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, isFirstMarker)
 			command.stateService = stateService
 			command.students = List("0672088", "0672089")
 			command.onBind()
