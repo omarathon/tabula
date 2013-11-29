@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
 import uk.ac.warwick.tabula.scheduling.services.{AutowiringExportAttendanceToSitsServiceComponent, ExportAttendanceToSitsServiceComponent}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
 
 object ExportAttendanceToSitsCommand {
 	def apply() = new ExportAttendanceToSitsCommand
@@ -16,46 +17,52 @@ object ExportAttendanceToSitsCommand {
 		with ExportAttendanceToSitsCommandDescription
 		with AutowiringMonitoringPointServiceComponent
 		with AutowiringExportAttendanceToSitsServiceComponent
+		with AutowiringFeaturesComponent
 }
 
 class ExportAttendanceToSitsCommand extends CommandInternal[Seq[MonitoringPointReport]] with Logging {
 
-	self: MonitoringPointServiceComponent with ExportAttendanceToSitsServiceComponent =>
+	self: MonitoringPointServiceComponent with ExportAttendanceToSitsServiceComponent with FeaturesComponent =>
 
 	override def applyInternal() = transactional() {
 
 		// check reporting to sits feature is on -- with Features...
+		if (features.attendanceMonitoringReport) {
 
-		// get the reports from MPService
-		val unreportedReports = monitoringPointService.findUnreportedReports
+			// get the reports from MPService
+			val unreportedReports = monitoringPointService.findUnreportedReports
 
-		// for each student
-		unreportedReports.groupBy(_.student).flatMap{case(student, reportList) =>
-			// group reports by academic year
-			val reportsByAcademicYear = reportList.groupBy(_.academicYear)
-			// for each academic year in order
-			reportsByAcademicYear.keys.toSeq.sortBy(_.startYear).flatMap{academicYear =>
-				val reportsInAcademicYear = reportsByAcademicYear(academicYear)
-				// push a report for each term in order (if a report exists)
-				TermService.orderedTermNames.flatMap(term => {
-					reportsInAcademicYear.find(_.monitoringPeriod == term) match {
-						case None => None
-						case Some(report: MonitoringPointReport) => {
-							val result = exportAttendanceToSitsService.exportToSits(report)
-							if (result) {
-									monitoringPointService.markReportAsPushed(report)
-									logger.info(s"Reported ${report.missed} missed points for ${report.student.universityId} for ${report.monitoringPeriod} ${report.academicYear.toString}")
-									Option(report)
+			// for each student
+			unreportedReports.groupBy(_.student).flatMap{case(student, reportList) =>
+				// group reports by academic year
+				val reportsByAcademicYear = reportList.groupBy(_.academicYear)
+				// for each academic year in order
+				reportsByAcademicYear.keys.toSeq.sortBy(_.startYear).flatMap{academicYear =>
+					val reportsInAcademicYear = reportsByAcademicYear(academicYear)
+					// push a report for each term in order (if a report exists)
+					TermService.orderedTermNames.flatMap(term => {
+						reportsInAcademicYear.find(_.monitoringPeriod == term) match {
+							case None => None
+							case Some(report: MonitoringPointReport) => {
+								val result = exportAttendanceToSitsService.exportToSits(report)
+								if (result) {
+										monitoringPointService.markReportAsPushed(report)
+										logger.info(s"Reported ${report.missed} missed points for ${report.student.universityId} for ${report.monitoringPeriod} ${report.academicYear.toString}")
+										Option(report)
+									}
+								else {
+									logger.error(s"Could not push monitoring report to SITS for ${report.student.universityId}")
+									None
 								}
-							else {
-								logger.error(s"Could not push monitoring report to SITS for ${report.student.universityId}")
-								None
 							}
 						}
-					}
-				})
-			}
-		}.toSeq
+					})
+				}
+			}.toSeq
+
+		} else {
+			Seq()
+		}
 	}
 
 }
