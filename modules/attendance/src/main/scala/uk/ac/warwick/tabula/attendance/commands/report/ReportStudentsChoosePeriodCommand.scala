@@ -29,21 +29,13 @@ object ReportStudentsChoosePeriodCommand {
 }
 
 abstract class ReportStudentsChoosePeriodCommand(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[Seq[(StudentMember, Int)]] with ReportStudentsState with GroupMonitoringPointsByTerm with BindListener with AvailablePeriods {
+	extends CommandInternal[Seq[(StudentMember, Int)]] with ReportStudentsState with GroupMonitoringPointsByTerm
+	with BindListener with AvailablePeriods with FindTermForPeriod {
 
 	self: ProfileServiceComponent with MonitoringPointServiceComponent =>
 
 	def applyInternal() = {
-		def findTermForPeriod(dateToCheck: DateTime): Term = {
-			val term = termService.getTermFromDateIncludingVacations(dateToCheck)
-			if (term.getTermTypeAsString == period)
-				term
-			else
-				findTermForPeriod(dateToCheck.plusWeeks(1))
-		}
-		val termForPeriod = findTermForPeriod(academicYear.dateInTermOne.toDateTime)
-		val periodStartWeek = termForPeriod.getAcademicWeekNumber(termForPeriod.getStartDate)
-		val periodEndWeek = termForPeriod.getAcademicWeekNumber(termForPeriod.getEndDate)
+		val (_, periodStartWeek, periodEndWeek) = findTermAndWeeksForPeriod(period, academicYear)
 		val studentsWithMissed = monitoringPointService.studentsByMissedCount(
 			allStudents.map(_.universityId),
 			academicYear,

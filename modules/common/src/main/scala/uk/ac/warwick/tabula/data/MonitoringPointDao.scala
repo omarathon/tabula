@@ -276,7 +276,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			and scyd.academicYear = mps.academicYear
 			and mc.state = 'unauthorised'
 			and mp.validFromWeek >= :startWeek
-			and mp.requiredFromWeek <= :endWeek
+			and mp.validFromWeek <= :endWeek
 			and (
 											""" + partionedUniversityIdsWithIndex.map{
 			case (ids, index) => "s.universityId in (:universityIds" + index.toString + ") "

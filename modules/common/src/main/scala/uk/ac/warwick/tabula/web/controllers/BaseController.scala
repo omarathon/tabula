@@ -51,6 +51,7 @@ trait ControllerViews {
 	}
 
 	def Redirect(path: String, objects: Pair[String, _]*) = Mav("redirect:" + getReturnTo(path), objects: _*)
+	def Redirect(path: String, objects: Map[String, _]) = Mav("redirect:" + getReturnTo(path), objects)
 
 	def RedirectToSignin(target: String = loginUrl): Mav = Redirect(target)
 

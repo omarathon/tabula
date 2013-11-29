@@ -24,7 +24,7 @@ object ReportStudentsConfirmCommand {
 
 
 abstract class ReportStudentsConfirmCommand(val department: Department, val currentUser: CurrentUser)
-	extends CommandInternal[Seq[MonitoringPointReport]] with BindListener with AvailablePeriods with ReportStudentsConfirmState{
+	extends CommandInternal[Seq[MonitoringPointReport]] with BindListener with AvailablePeriods with ReportStudentsConfirmState with FindTermForPeriod {
 
 	self: ProfileServiceComponent =>
 
@@ -55,12 +55,15 @@ abstract class ReportStudentsConfirmCommand(val department: Department, val curr
 		// Find the available monitoring periods for those students
 		availablePeriods = getAvailablePeriods(allStudents, academicYear)
 		// Filter the students to those that are unreported for this period and have missed points
+		val (_, periodStartWeek, periodEndWeek) = findTermAndWeeksForPeriod(period, academicYear)
 		val studentsWithMissed = monitoringPointService.studentsByMissedCount(
 			allStudents.map(_.universityId),
 			academicYear,
 			isAscending = false,
 			maxResults = Int.MaxValue,
-			startResult = 0
+			startResult = 0,
+			periodStartWeek,
+			periodEndWeek
 		).filter(_._2 > 0)
 		val nonReported = monitoringPointService.findNonReported(studentsWithMissed.map(_._1), academicYear, period)
 		unreportedStudentsWithMissed = studentsWithMissed.filter{case(student, count) => nonReported.contains(student)}
@@ -94,7 +97,7 @@ trait ReportStudentsConfirmCommandDescription extends Describable[Seq[Monitoring
 
 	def describe(d: Description) {
 		d.property("monitoringPeriod", period)
-		d.property("students", unreportedStudentsWithMissed.map{case(student, count) => student.universityId -> count})
+		d.property("students", unreportedStudentsWithMissed.map{case(student, count) => student.universityId -> count}.toMap)
 	}
 }
 
