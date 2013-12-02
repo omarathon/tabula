@@ -162,19 +162,41 @@
 				margin-top: 15px;
 			}
 
+			// the margins on columns here are to get the central lines to line up
+			// with the profile columns above
 			.col1 {
-				margin-left: 204px;
+				margin-left: 150px;
+			}
+
+			.col1 .upper {
+				margin-left: 49px;
+			}
+
+			.col2 {
+				margin-left: 54px;
+			}
+
+			.col2 .upper {
+				margin-left: 0;
 			}
 
 			.course-title {
 				margin-top:  15px;
 				margin-bottom: 15px;
+				letter-spacing: -1.8px;
 			}
 
+			.dropdown-toggle {
+				margin-top: -45px;
+			}
+
+			.dropdown-menu {
+				margin-top: -25px;
+			}
 		}
 
 		// Container for "Expand all" and other links
-		// above a list of meetings/notes/records.
+		// above a list of meetings/records.
 		// May contain a header which will be floated left.
 		.list-controls {
 			height: 1.8em;
@@ -189,6 +211,11 @@
 		}
 
 		.membernote {
+
+			// member notes aren't in a tab so don't float links to the left or they are a bit distant
+			.list-controls a {
+				float: left;
+			}
 
 			details {
 

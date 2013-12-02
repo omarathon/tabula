@@ -226,7 +226,8 @@ class StudentMember extends Member with StudentProperties {
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshStudentCourseDetails = {
-		studentCourseDetails.asScala.filter(scd => scd.isFresh)
+		val fresh = studentCourseDetails.asScala.filter(scd => scd.isFresh)
+		fresh
 	}
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
