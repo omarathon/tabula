@@ -67,7 +67,7 @@
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 	<h1>Feedback for ${assignment.name}</h1>
-	<p>You are the <#if isFirstMarker>first marker<#else>second marker</#if> for the following submissions</p>
+	<p>You are the <#if isFirstMarker>${firstMarkerRoleName}<#else>${secondMarkerRoleName}</#if> for the following submissions</p>
 	<div class="btn-toolbar">
 		<#assign disabledClass><#if items?size == 0>disabled</#if></#assign>
 		<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
@@ -82,7 +82,7 @@
 		</a>
 		<#if !isFirstMarker>
 			<a class="btn" href="<@routes.downloadfirstmarkerfeedback assignment=assignment />">
-				<i class="icon-download"></i> Download first marker feedback
+				<i class="icon-download"></i> Download ${firstMarkerRoleName} feedback
 			</a>
 		</#if>
 		<#if features.markerFeedback>

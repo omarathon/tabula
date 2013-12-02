@@ -19,11 +19,17 @@ class ListMarkerFeedbackController  extends CourseworkController {
 	@RequestMapping(method = Array(HEAD, GET))
 	def list(@ModelAttribute command: ListMarkerFeedbackCommand): Mav = {
 		val markerFeedbackItems = command.apply()
+
+		val firstMarkerRoleName = command.assignment.markingWorkflow.firstMarkerRoleName
+		val secondMarkerRoleName = command.assignment.markingWorkflow.secondMarkerRoleName
+
 		Mav("admin/assignments/markerfeedback/list",
 			"items" -> markerFeedbackItems,
 			"completedFeedback" -> command.completedFeedback,
 			"rejectedFeedback" -> command.rejectedFeedback,
-			"isFirstMarker" -> command.firstMarker)
+			"isFirstMarker" -> command.firstMarker,
+			"firstMarkerRoleName" -> firstMarkerRoleName,
+			"secondMarkerRoleName" -> secondMarkerRoleName)
 	}
 
 }
