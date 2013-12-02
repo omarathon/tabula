@@ -55,6 +55,7 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Profiles.StudentRelationship.Delete(PermissionsSelector.Any[StudentRelationshipType]),
 
 		Profiles.MeetingRecord.Read(PermissionsSelector.Any[StudentRelationshipType]),
+		Profiles.MeetingRecord.ReadDetails(PermissionsSelector.Any[StudentRelationshipType]),
 
 		SmallGroups.Read,
 		Profiles.Read.SmallGroups,
