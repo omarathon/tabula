@@ -183,7 +183,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "membersgroup_id")
 	var members: UserGroup = UserGroup.ofUsercodes
-	
+
 	// TAB-1446 If hibernate sets members to null, make a new empty usergroup
 	override def postLoad {
 		ensureMembersGroup
@@ -389,8 +389,11 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	def countUnreleasedFeedback  = countFullFeedback - countReleasedFeedback
 	def hasReleasedFeedback = countReleasedFeedback > 0
 	def hasUnreleasedFeedback = countReleasedFeedback < countFullFeedback
+	def countExtensions = extensionService.countExtensions(this)
+	def hasExtensions = extensionService.hasExtensions(this)
 	def countUnapprovedExtensions = extensionService.countUnapprovedExtensions(this)
-
+	def hasUnapprovedExtensions = extensionService.hasUnapprovedExtensions(this)
+	def getUnapprovedExtensions = extensionService.getUnapprovedExtensions(this)
 
 	def addFields(fieldz: FormField*) = for (field <- fieldz) addField(field)
 

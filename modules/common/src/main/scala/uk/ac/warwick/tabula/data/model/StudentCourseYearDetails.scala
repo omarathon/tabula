@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.Option.option2Iterable
-import org.hibernate.annotations.Type
 import org.joda.time.DateTime
 import javax.persistence.Basic
 import javax.persistence.Entity
@@ -13,6 +12,10 @@ import uk.ac.warwick.tabula.JavaImports.JInteger
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.system.permissions.Restricted
+import reflect.BeanProperty
+import org.apache.commons.lang3.builder.HashCodeBuilder
+import org.apache.commons.lang3.builder.EqualsBuilder
+import org.hibernate.annotations.Type
 
 @Entity
 class StudentCourseYearDetails extends StudentCourseYearProperties
@@ -49,6 +52,8 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	def equals(that: StudentCourseYearDetails) = {
 		(this.studentCourseDetails == that.studentCourseDetails) && (this.sceSequenceNumber == that.sceSequenceNumber)
 	}
+
+	def isFresh = (missingFromImportSince == null)
 }
 
 trait StudentCourseYearProperties {
@@ -59,9 +64,9 @@ trait StudentCourseYearProperties {
 	@JoinColumn(name="enrolmentStatusCode", referencedColumnName="code")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var enrolmentStatus: SitsStatus = _
-	
+
 	// this is the department from the SCE table in SITS (Student Course Enrolment). It is likely to be the
-	// same as the department on the Route table, and on the StudentCourseDetails, but in some cases, e.g. where routes 
+	// same as the department on the Route table, and on the StudentCourseDetails, but in some cases, e.g. where routes
 	// change ownership in different years, this might contain a different department. This indicates the
 	// department responsible for administration for the student for this year.
 	@ManyToOne
@@ -86,5 +91,36 @@ trait StudentCourseYearProperties {
 
 	var lastUpdatedDate = DateTime.now
 
+	var missingFromImportSince: DateTime = _
+
+}
+
+class StudentCourseYearKey {
+	@BeanProperty
+	var scjCode: String = _
+
+	@BeanProperty
+	var sceSequenceNumber: JInteger = _
+
+	def this(scjCode: String, sceSequenceNumber: JInteger) = {
+		this()
+		this.scjCode = scjCode
+		this.sceSequenceNumber = sceSequenceNumber
+	}
+
+	override final def equals(other: Any): Boolean = other match {
+		case that: StudentCourseYearKey =>
+			new EqualsBuilder()
+				.append(scjCode, that.scjCode)
+				.append(sceSequenceNumber, that.sceSequenceNumber)
+				.build()
+		case _ => false
+	}
+
+	override final def hashCode =
+		new HashCodeBuilder()
+				.append(scjCode)
+				.append(sceSequenceNumber)
+			.build()
 }
 

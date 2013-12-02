@@ -13,8 +13,8 @@
 			<div class="span12">
 				<h4>${term}</h4>
 				<div class="row-fluid point">
-					<div class="span8 ellipsis" title="${point.name} (<@fmt.weekRanges point />)">
-						${point.name} (<@fmt.weekRanges point />)
+					<div class="span8 ellipsis" title="${point.name} (<@fmt.monitoringPointFormat point true />)">
+						${point.name} (<a class="use-tooltip" data-html="true" title="<@fmt.monitoringPointDateFormat point />"><@fmt.monitoringPointFormat point /></a>)
 					</div>
 					<div class="span2 state">
 						<#if checkpointState[point.id]??>
@@ -98,5 +98,9 @@
 </div>
 
 </#if>
-
+<script>
+	jQuery(function($){
+		$('.use-tooltip').tooltip();
+	});
+</script>
 </#escape>

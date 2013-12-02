@@ -4,7 +4,8 @@
 			<label>
 				Academic year
 				<select class="academicYear input-small">
-					<#list studentCourseDetails.studentCourseYearDetails as studentCourseYearDetail>
+					<#if studentCourseDetails.freshStudentCourseYearDetails?? >
+					<#list studentCourseDetails.freshStudentCourseYearDetails as studentCourseYearDetail>
 						<option
 							value="${studentCourseYearDetail.academicYear.startYear?c}"
 							<#if studentCourseDetails.latestStudentCourseYearDetails.id == studentCourseYearDetail.id>selected</#if>
@@ -12,6 +13,7 @@
 							${studentCourseYearDetail.academicYear.toString}
 						</option>
 					</#list>
+					</#if>
 				</select>
 			</label>
 		</form>
@@ -24,7 +26,7 @@
 			var monitoringPointsLoader = function() {
 				$('#attendance .monitoring-points').empty();
 				$('#attendance .small-groups').empty();
-				
+
 				$.get('/attendance/profile/${profile.universityId}/'
 						+ $('#attendance select.academicYear :selected').val()
 						+ '?dt=' + new Date().valueOf()
@@ -39,7 +41,7 @@
 						window.GlobalScripts.initCollapsible();
 					}
 				});
-				
+
 				$.get('/groups/student/${profile.universityId}/attendance/' + $('#attendance select.academicYear :selected').val() + '?dt=' + new Date().valueOf(), function(data) {
 					$('#attendance .small-groups').html(data);
 					var pane = $('#attendance-pane');

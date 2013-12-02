@@ -28,6 +28,7 @@
 								<span class="caret"></span>
 							</a>
 							<div class="dropdown-menu filter-list">
+								<button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
 								<ul>
 									<#list allItems as item>
 										<#assign isValid = (allItems?size == validItems?size)!true />

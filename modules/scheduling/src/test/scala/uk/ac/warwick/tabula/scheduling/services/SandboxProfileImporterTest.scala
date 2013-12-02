@@ -7,19 +7,20 @@ import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import uk.ac.warwick.tabula.data.model.Gender
 import uk.ac.warwick.tabula.data.model.MemberUserType
+import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 
 class SandboxProfileImporterTest extends TestBase {
-	
+
 	val importer = new SandboxProfileImporter
-	
+
 	@Test def itWorks() = withFakeTime(new DateTime(2013, DateTimeConstants.JULY, 4, 11, 27, 54, 0)) {
 		val department = Fixtures.department("hom", "History of Music")
-		val macs = importer.userIdsAndCategories(department)
+		val macs = importer.membershipInfoByDepartment(department)
 		macs.size should be (310)
-		
+
 		val mac = macs(0)
 		mac.photo() should be ('empty)
-		
+
 		val member = mac.member
 		member.universityId should be ("4300001")
 		member.departmentCode should be ("hom")
@@ -38,10 +39,10 @@ class SandboxProfileImporterTest extends TestBase {
 		member.gender should be (Gender.Female)
 		member.alternativeEmailAddress should be (null)
 		member.userType should be (MemberUserType.Student)
-		
-		val cmds = importer.getMemberDetails(Seq(mac), Map())
+
+		val cmds = importer.getMemberDetails(Seq(mac), Map(), new ImportRowTracker)
 		cmds.size should be (1)
-		
+
 		val cmd = cmds(0)
 	}
 

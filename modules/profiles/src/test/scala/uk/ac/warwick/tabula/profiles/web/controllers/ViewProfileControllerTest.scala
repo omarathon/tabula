@@ -18,7 +18,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 	val member = new StudentMember()
 	val courseDetails = new StudentCourseDetails()
 	courseDetails.mostSignificant = true
-	member.studentCourseDetails.add(courseDetails)
+	member.attachStudentCourseDetails(courseDetails)
 	member.mostSignificantCourse = courseDetails
 
 	@Test(expected=classOf[ItemNotFoundException])
@@ -42,8 +42,8 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 	@Test def getMeetingRecordCommand() {
 		withUser("test") {
 			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-			
-			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)			
+
+			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
 			val cmd = controller.getViewMeetingRecordCommand(member, relationshipType)
 			cmd should not be(None)
 

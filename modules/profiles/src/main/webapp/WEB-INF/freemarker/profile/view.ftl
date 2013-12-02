@@ -16,12 +16,11 @@
 
 		<header>
 			<h1><@fmt.profile_name profile /></h1>
-			<h5><@fmt.profile_description profile /></h5>
 		</header>
 
 		<div class="data clearfix">
 			<div class="col1">
-				<table class="profile-info">
+				<table class="profile-or-course-info">
 					<tbody>
 						<tr>
 							<th>Official name</th>
@@ -76,12 +75,10 @@
 						</#if>
 					</tbody>
 				</table>
-
-				<br class="clearfix">
 			</div>
 
 			<div class="col2">
-				<table class="profile-info">
+				<table class="profile-or-course-info">
 					<tbody>
 						<#if profile.email??>
 							<tr>
@@ -141,15 +138,12 @@
 		</#if>
 	</section>
 
-	<#if (profile.studentCourseDetails)?? && (profile.mostSignificantCourseDetails)??>
+	<#if (profile.freshStudentCourseDetails)?? && (profile.mostSignificantCourseDetails)??>
 
 		<!-- most significant course first -->
 		<#assign studentCourseDetails=profile.mostSignificantCourseDetails>
 
-		<#if profile.studentCourseDetails?size gt 1>
-			<hr>
-			<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
-		</#if>
+		<#include "_course_details.ftl" />
 
 		<div class="tabbable">
 			<#assign showTimetablePane=features.personalTimetables && can.do("Profiles.Read.Timetable", profile) />
@@ -170,10 +164,6 @@
             </section>
 					</li>
 				</#if>
-
-				<li id="course-pane">
-					<#include "_course_details.ftl" />
-				</li>
 
 				<#if (features.profilesMemberNotes && can.do('MemberNotes.Read', profile)) >
 					<li id="membernote-pane">
@@ -196,7 +186,7 @@
 					</li>
 				</#if>
 
-				<#if studentCourseDetails.hasModuleRegistrations>
+				<#if studentCourseDetails.hasModuleRegistrations && studentCourseDetails.latestStudentCourseYearDetails??>
 					<li id="module-registration-pane">
 						<#include "_module_registrations.ftl" />
 					</li>
@@ -245,14 +235,9 @@
 
 
 		<!-- and then the others -->
-		<#list profile.studentCourseDetails as studentCourseDetails>
+		<#list profile.freshStudentCourseDetails as studentCourseDetails>
 			<#if studentCourseDetails.scjCode != profile.mostSignificantCourseDetails.scjCode>
 				<#if !isSelf || !studentCourseDetails.permanentlyWithdrawn>
-					<#if profile.studentCourseDetails?size gt 1>
-						<hr>
-						<h3>Course: <@fmt.course_description_for_heading studentCourseDetails /></h3>
-					</#if>
-
 					<#include "_course_details.ftl" />
 				</#if>
 			</#if>

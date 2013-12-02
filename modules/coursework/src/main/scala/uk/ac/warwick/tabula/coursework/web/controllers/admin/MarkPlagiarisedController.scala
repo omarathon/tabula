@@ -6,7 +6,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.coursework.commands.assignments.DeleteSubmissionCommand
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Module
@@ -36,10 +35,10 @@ class MarkPlagiarisedController extends CourseworkController {
 
 	@RequestMapping(method = Array(POST), params = Array("!confirmScreen"))
 	def showForm(
-			@PathVariable("module") module: Module, 
+			@PathVariable("module") module: Module,
 			@PathVariable("assignment") assignment: Assignment,
 			form: MarkPlagiarisedCommand, errors: Errors) = {
-		formView(assignment) 
+		formView(assignment)
 	}
 
 	@RequestMapping(method = Array(POST), params = Array("confirmScreen"))

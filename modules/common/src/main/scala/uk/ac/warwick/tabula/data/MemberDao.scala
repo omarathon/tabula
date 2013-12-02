@@ -1,13 +1,22 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.JavaConversions._
-import org.hibernate.criterion._
+import scala.collection.JavaConversions.{asScalaBuffer, mutableSetAsJavaSet, seqAsJavaList}
+import scala.collection.mutable.HashSet
+import org.hibernate.criterion.Order
+import org.hibernate.criterion.Order.{asc, desc}
+import org.hibernate.criterion.Projections
+import org.hibernate.criterion.Projections.{countDistinct, distinct, groupProperty, projectionList, property, rowCount}
+import org.hibernate.criterion.Restrictions
+import org.hibernate.criterion.Restrictions.{disjunction, gt, in, like}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.helpers.StringUtils._
+import javax.persistence.{Entity, NamedQueries}
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.data.model.{Department, Member, ModeOfAttendance, RuntimeMember, SitsStatus, StudentMember, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
+import uk.ac.warwick.tabula.data.model.StaffMember
 
 trait MemberDaoComponent {
 	val memberDao: MemberDao
@@ -28,6 +37,7 @@ trait MemberDao {
 	def delete(member: Member)
 	def saveOrUpdate(rel: StudentRelationship)
 	def getByUniversityId(universityId: String): Option[Member]
+	def getByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getAllByUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
@@ -42,6 +52,7 @@ trait MemberDao {
 	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
+	def getStaffByDepartment(department: Department): Seq[StaffMember]
 	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
 	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[String]
@@ -49,6 +60,9 @@ trait MemberDao {
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]): Int
 	def getAllModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def getAllSprStatuses(department: Department): Seq[SitsStatus]
+	def getFreshUniversityIds: Seq[String]
+	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime)
+
 }
 
 @Repository
@@ -91,12 +105,25 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	def getByUniversityId(universityId: String) =
 		session.newCriteria[Member]
 			.add(is("universityId", universityId.safeTrim))
+			.add(isNull("missingFromImportSince"))
 			.uniqueResult
+
+	def getByUniversityIdStaleOrFresh(universityId: String) =
+		session.newCriteria[Member]
+			.add(is("universityId", universityId.safeTrim))
+			.uniqueResult
+
+	def getFreshUniversityIds() =
+			session.newCriteria[StudentMember]
+			.add(isNull("missingFromImportSince"))
+			.project[String](Projections.property("universityId"))
+			.seq
 
 	def getAllWithUniversityIds(universityIds: Seq[String]) =
 		if (universityIds.isEmpty) Seq.empty
 		else session.newCriteria[Member]
 			.add(in("universityId", universityIds map { _.safeTrim }))
+			.add(isNull("missingFromImportSince"))
 			.seq
 
 	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {
@@ -107,6 +134,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 			session.newCriteria[Member]
 					.add(is("userId", userId.safeTrim.toLowerCase))
+					.add(isNull("missingFromImportSince"))
 					.add(disjunction()
 						.add(is("inUseFlag", "Active"))
 						.add(like("inUseFlag", "Inactive - Starts %"))
@@ -119,7 +147,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		}
 	}
 
-	def getByUserId(userId: String, disableFilter: Boolean = false) = getAllByUserId(userId, disableFilter).headOption
+	def getByUserId(userId: String, disableFilter: Boolean = false) =
+		getAllByUserId(userId, disableFilter).headOption
 
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int) = {
 		val homeDepartmentMatches = session.newCriteria[Member]
@@ -128,12 +157,13 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setMaxResults(max)
 			.addOrder(asc("lastUpdatedDate"))
 			.list
-			
+
 		val courseMatches = session.newQuery[StudentMember]( """
 				select distinct student
         	from
           	StudentCourseDetails scd
           where
+						scd.missingFromImportSince is null and
             scd.department = :department and
         		scd.student.lastUpdatedDate > :lastUpdated and
             scd.sprStatus.code not like 'P%'
@@ -182,6 +212,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				sr.relationshipType = :relationshipType
 			and
+				scd.missingFromImportSince is null
+			and
 				scd.department = :department
 			and
 				scd.mostSignificant = true
@@ -213,6 +245,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				sr.relationshipType = :relationshipType
 			and
 				staff.homeDepartment = :department
+			and
+				scd.missingFromImportSince is null
 			and
 				scd.sprStatus.code not like 'P%'
 			and
@@ -265,6 +299,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				StudentMember sm
 				inner join sm.studentCourseDetails as scd
 			where
+				scd.missingFromImportSince is null
+			and
 				scd.department = :department
 			and
 				scd.mostSignificant = true
@@ -299,6 +335,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			from
 				StudentCourseDetails scd
 			where
+				scd.missingFromImportSince is null
+			and
 				scd.department = :department
 			and
 				scd.mostSignificant = true
@@ -308,6 +346,15 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setEntity("department", department).seq
 			s
 		}
+
+	def getStaffByDepartment(department: Department): Seq[StaffMember] =
+		if (department == null) Nil
+		else {
+			session.newCriteria[StaffMember]
+				.add(is("homeDepartment", department))
+				.seq
+		}
+
 	/**
 	 * n.b. this will only return students with a direct relationship to a department. For sub-department memberships,
 	 * see ProfileService/RelationshipService
@@ -319,6 +366,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			from
 				StudentCourseDetails scd
 			where
+				scd.missingFromImportSince is null
+			and
 				scd.department = :department
 			and
 				scd.mostSignificant = true
@@ -339,6 +388,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			from
 				StudentCourseDetails scd
 			where
+				scd.missingFromImportSince is null
+			and
 				scd.sprCode in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
 			""")
 			.setEntity("relationshipType", relationshipType)
@@ -358,23 +409,23 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			return Seq()
 
 		val c = session.newCriteria[StudentMember]
-		
+
 		val or = disjunction()
 		universityIds.grouped(Daoisms.MaxInClauseCount).foreach { ids => or.add(in("universityId", ids)) }
 		c.add(or)
-					
+
 		orders.foreach { c.addOrder(_) }
-		
+
 		c.setMaxResults(maxResults).setFirstResult(startResult).seq
-	}	
-	
+	}
+
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]) = {
 		val c = session.newCriteria[StudentMember]
 		restrictions.foreach { _.apply(c) }
-		
+
 		c.project[Number](countDistinct("universityId")).uniqueResult.get.intValue()
 	}
-	
+
 	def getAllModesOfAttendance(department: Department) =
 		session.newCriteria[StudentMember]
 				.createAlias("mostSignificantCourse", "scd")
@@ -387,7 +438,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 						.add(rowCount(), "moaCount")
 				)
 				.seq.map { array => array(0).asInstanceOf[ModeOfAttendance] }
-		
+
 	def getAllSprStatuses(department: Department) =
 		session.newCriteria[StudentMember]
 				.createAlias("mostSignificantCourse", "scd")
@@ -400,5 +451,22 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				)
 				.seq.map { array => array(0).asInstanceOf[SitsStatus] }
 
+	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime) = {
+		if (!newStaleUniversityIds.isEmpty && newStaleUniversityIds.size < Daoisms.MaxInClauseCount) {
+			var sqlString = """
+				update
+					Member
+				set
+					missingFromImportSince = :importStart
+				where
+					universityId in (:newStaleUniversityIds)
+				"""
+
+				session.newQuery(sqlString)
+					.setParameter("importStart", importStart)
+					.setParameterList("newStaleUniversityIds", newStaleUniversityIds)
+					.executeUpdate
+			}
+		}
 }
 

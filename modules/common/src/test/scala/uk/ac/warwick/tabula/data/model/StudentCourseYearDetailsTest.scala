@@ -26,23 +26,28 @@ class StudentCourseYearDetailsTest extends TestBase with Mockito {
 
 
 		// latest academic year should come back first
-		scd.studentCourseYearDetails.add(scyd_2013_1)
-		scd.studentCourseYearDetails.add(scyd_2012_2)
+		scd.addStudentCourseYearDetails(scyd_2013_1)
+		scd.addStudentCourseYearDetails(scyd_2012_2)
 
-		scd.studentCourseYearDetails.asScala.max should be (scyd_2013_1)
+		scd.freshStudentCourseYearDetails.max should be (scyd_2013_1)
 
 		// latest sequence number should come back first
-		scd.studentCourseYearDetails.clear
-		scd.studentCourseYearDetails.add(scyd_2012_2)
-		scd.studentCourseYearDetails.add(scyd_2012_1)
 
-		scd.studentCourseYearDetails.asScala.max should be (scyd_2012_2)
+		scd.removeStudentCourseYearDetails(scyd_2013_1)
+		scd.removeStudentCourseYearDetails(scyd_2012_2)
+
+		scd.addStudentCourseYearDetails(scyd_2012_2)
+		scd.addStudentCourseYearDetails(scyd_2012_1)
+
+		scd.freshStudentCourseYearDetails.max should be (scyd_2012_2)
 
 		// year should win over sequence number
-		scd.studentCourseYearDetails.clear
-		scd.studentCourseYearDetails.add(scyd_2013_1)
-		scd.studentCourseYearDetails.add(scyd_2012_2)
+		scd.removeStudentCourseYearDetails(scyd_2012_2)
+		scd.removeStudentCourseYearDetails(scyd_2012_1)
 
-		scd.studentCourseYearDetails.asScala.max should be (scyd_2013_1)
+		scd.addStudentCourseYearDetails(scyd_2013_1)
+		scd.addStudentCourseYearDetails(scyd_2012_2)
+
+		scd.freshStudentCourseYearDetails.max should be (scyd_2013_1)
 	}
 }

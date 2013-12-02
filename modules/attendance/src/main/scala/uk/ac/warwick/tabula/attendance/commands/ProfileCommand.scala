@@ -53,7 +53,7 @@ abstract class ProfileCommand(val student: StudentMember, val academicYear: Acad
 		}.filter{
 			case (termName, count) => count > 0
 		}
-		
+
 		AttendanceProfileInformation(monitoringPointsByTerm, checkpointState, missedCountByTerm)
 	}
 }

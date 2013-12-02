@@ -3,26 +3,24 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 import java.sql.ResultSet
 
 import org.joda.time.DateTime
-import org.springframework.beans.BeanWrapper
-import org.springframework.beans.BeanWrapperImpl
+import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.commands.{Description, Unaudited}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.OtherMember
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.StudentProperties
+import uk.ac.warwick.tabula.data.model.{Member, OtherMember, StudentMember, StudentProperties}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
-import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
-import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
+import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopying}
+import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, ModeOfAttendanceImporter}
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
 
-class ImportStudentRowCommand(member: MembershipInformation, ssoUser: User, resultSet: ResultSet, importStudentCourseCommand: ImportStudentCourseCommand)
+class ImportStudentRowCommand(member: MembershipInformation,
+		ssoUser: User,
+		resultSet: ResultSet,
+		importRowTracker: ImportRowTracker,
+		importStudentCourseCommand: ImportStudentCourseCommand)
 	extends ImportMemberCommand(member, ssoUser, Some(resultSet))
 	with Logging with Daoisms
 	with StudentProperties with Unaudited with PropertyCopying {
@@ -38,40 +36,43 @@ class ImportStudentRowCommand(member: MembershipInformation, ssoUser: User, resu
 	this.mobileNumber = rs.getString("mobile_number")
 
 	override def applyInternal(): Member = {
-		val memberExisting = memberDao.getByUniversityId(universityId)
+		transactional() {
+			val memberExisting = memberDao.getByUniversityIdStaleOrFresh(universityId)
 
-		logger.debug("Importing member " + universityId + " into " + memberExisting)
+			logger.debug("Importing member " + universityId + " into " + memberExisting)
 
-		val (isTransient, member) = memberExisting match {
-			case Some(member: StudentMember) => (false, member)
-			case Some(member: OtherMember) => {
-				// TAB-692 delete the existing member, then return a brand new one
-				memberDao.delete(member)
-				(true, new StudentMember(universityId))
+			val (isTransient, member) = memberExisting match {
+				case Some(member: StudentMember) => (false, member)
+				case Some(member: OtherMember) => {
+					// TAB-692 delete the existing member, then return a brand new one
+					memberDao.delete(member)
+					(true, new StudentMember(universityId))
+				}
+				case Some(member) => throw new IllegalStateException("Tried to convert " + member + " into a student!")
+				case _ => (true, new StudentMember(universityId))
 			}
-			case Some(member) => throw new IllegalStateException("Tried to convert " + member + " into a student!")
-			case _ => (true, new StudentMember(universityId))
+
+			val commandBean = new BeanWrapperImpl(this)
+			val memberBean = new BeanWrapperImpl(member)
+
+			val hasChanged = copyMemberProperties(commandBean, memberBean) | copyStudentProperties(commandBean, memberBean) | markAsSeenInSits(memberBean)
+
+			if (isTransient || hasChanged) {
+				logger.debug("Saving changes for " + member)
+
+				member.lastUpdatedDate = DateTime.now
+				memberDao.saveOrUpdate(member)
+			}
+
+			importStudentCourseCommand.stuMem = member
+			val studentCourseDetails = importStudentCourseCommand.apply()
+
+			member.attachStudentCourseDetails(studentCourseDetails)
+
+			importRowTracker.universityIdsSeen.add(member.universityId)
+
+			member
 		}
-
-		val commandBean = new BeanWrapperImpl(this)
-		val memberBean = new BeanWrapperImpl(member)
-
-		val hasChanged = copyMemberProperties(commandBean, memberBean) | copyStudentProperties(commandBean, memberBean)
-
-		if (isTransient || hasChanged) {
-			logger.debug("Saving changes for " + member)
-
-			member.lastUpdatedDate = DateTime.now
-			memberDao.saveOrUpdate(member)
-		}
-
-		importStudentCourseCommand.stuMem = member
-		val studentCourseDetails = importStudentCourseCommand.apply()
-
-		// apply above will take care of the db.  This brings the in-memory data up to speed:
-		member.attachStudentCourseDetails(studentCourseDetails)
-
-		member
 	}
 
 	private val basicStudentProperties = Set(

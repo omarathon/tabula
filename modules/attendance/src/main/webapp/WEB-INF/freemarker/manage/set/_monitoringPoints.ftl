@@ -19,7 +19,7 @@
 								<a class="btn btn-primary edit-point" href="<@routes.editPoint command.dept pointCount />?form=true">Update</a>
 								<a class="btn btn-danger delete-point" title="Delete" href="<@routes.deletePoint command.dept pointCount />?form=true"><i class="icon-remove"></i></a>
 							</div>
-							${point.name} (<@fmt.monitoringPointWeeksFormat point.validFromWeek point.requiredFromWeek command.academicYear command.dept />)
+							${point.name} (<a class="use-tooltip" data-html="true" title="<@fmt.wholeWeekDateFormat point.validFromWeek point.requiredFromWeek command.academicYear />"><@fmt.monitoringPointWeeksFormat point.validFromWeek point.requiredFromWeek command.academicYear command.dept /></a>)
 
 							<#list pointFields as pointField>
 								<@spring.bind path="command.monitoringPoints[${pointCount}].${pointField}">
@@ -52,3 +52,8 @@
 		</#list>
 	</#if>
 </div>
+<script>
+	jQuery(function($){
+		$('.use-tooltip').tooltip();
+	})
+</script>

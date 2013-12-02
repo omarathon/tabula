@@ -146,6 +146,7 @@
 				<bean class="uk.ac.warwick.tabula.data.model.AssessmentTypeConverter" />
 				<bean class="uk.ac.warwick.tabula.data.convert.MonitoringPointTypeConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.model.CourseTypeConverter" />
+				<bean class="uk.ac.warwick.tabula.data.model.DepartmentFilterRuleConverter" />
 	        </list>
 	    </property>
 	    <property name="formatters">
@@ -348,7 +349,7 @@
 				<entry key="weekRangesDumper"><bean class="uk.ac.warwick.tabula.helpers.WeekRangesDumperTag" /></entry>
 				<entry key="weekRangeSelectFormatter"><bean class="uk.ac.warwick.tabula.helpers.WeekRangeSelectFormatterTag" /></entry>
 				<entry key="mapGet"><bean class="uk.ac.warwick.tabula.helpers.FreemarkerMapHelper" /></entry>
-				<entry key="singleWeekFormatter"><bean class="uk.ac.warwick.tabula.helpers.SingleWeekFormatterTag" /></entry>
+				<entry key="wholeWeekFormatter"><bean class="uk.ac.warwick.tabula.helpers.WholeWeekFormatterTag" /></entry>
 				<entry key="userSetting"><bean class="uk.ac.warwick.tabula.web.views.UserSettingFunction" /></entry>
 				<entry key="googleAnalyticsCode" value="${tabula.analytics.code}" />
 			</map>

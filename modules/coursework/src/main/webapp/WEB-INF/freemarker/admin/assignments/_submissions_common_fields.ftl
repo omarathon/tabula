@@ -1,4 +1,4 @@
-<#-- 
+<#--
 
 This section contains the form fields that can apply to a group of
 assignments, as well as to an individual one.
@@ -101,6 +101,23 @@ so that they can be passed around between requests.
 							</@form.field>
 						</@form.row>
 					</div-->
+
+					<#if (assignment.countUnapprovedExtensions gt 0)!false>
+						<script>
+						jQuery(function($){
+							$('#allowExtensions').change(function() {
+								if ($(this).is(':checked')) {
+									$('form.edit-assignment').confirmModal(false);
+								} else {
+									$('form.edit-assignment').confirmModal({
+										message: '<@fmt.p assignment.countUnapprovedExtensions "extension request is" "extension requests are" /> pending for this assignment. If you turn off extensions, all pending extension requests will be rejected. Any extensions already granted will remain in place.',
+										confirm: 'Continue, reject pending extension requests'
+									});
+								}
+							});
+						});
+						</script>
+					</#if>
 				</#if>
 
 				<@form.row>
@@ -122,7 +139,7 @@ so that they can be passed around between requests.
 						<@f.input path="fileAttachmentTypes"  type="hidden" />
 						<script type="text/javascript" src="/static/js/textList.js"></script>
 						<script type="text/javascript">
-							jQuery(document).ready(function(){
+							jQuery(function($){
 								var textListController = new TextListController('#fileExtensionList', '#fileAttachmentTypes');
 								textListController.transformInput = function(text){
 									var result = text.replace(new RegExp('\\.', 'g') , '');

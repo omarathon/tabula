@@ -204,7 +204,12 @@ object Fixtures {
 
 		scd.sprStatus = sprStatus
 
-		member.studentCourseDetails.add(scd)
+		val scyd = studentCourseYearDetails()
+		scyd.studentCourseDetails = scd
+		scd.addStudentCourseYearDetails(scyd)
+		scd.latestStudentCourseYearDetails = scyd
+
+		member.attachStudentCourseDetails(scd)
 		member.mostSignificantCourse = scd
 
 		scd
@@ -221,6 +226,7 @@ object Fixtures {
 		scyd.modeOfAttendance = modeOfAttendance
 		scyd.yearOfStudy = yearOfStudy
 		scyd.studentCourseDetails = studentCourseDetails
+		scyd.sceSequenceNumber = 1
 		scyd
 	}
 

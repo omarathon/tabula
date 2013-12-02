@@ -186,9 +186,10 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			}
 		}
 
-		query.seq.map{ objArray =>
+		val ret = query.seq.map{ objArray =>
 			objArray(0).asInstanceOf[StudentMember] -> objArray(1).asInstanceOf[MonitoringPointSet]
 		}.toMap
+		ret
 	}
 
 	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet] = {
@@ -331,7 +332,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 		studentsByCount(universityIds, academicYear, isAscending, maxResults, startResult, query)
 	}
-	
+
 	private def studentsByCount(
 		universityIds: Seq[String],
 		academicYear: AcademicYear,
@@ -348,7 +349,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 		val universityIdsToFetch = universityIds.map{u =>
 			u -> universityIdCountMap.getOrElse(u, 0)
-		}.sortBy(_._2)(ordering).slice(startResult, startResult + maxResults + 1).map(_._1)
+		}.sortBy(_._2)(ordering).slice(startResult, startResult + maxResults).map(_._1)
 
 		val c = session.newCriteria[StudentMember]
 		val or = disjunction()

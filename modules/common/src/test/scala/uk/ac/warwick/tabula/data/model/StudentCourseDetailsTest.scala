@@ -20,7 +20,7 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 		studentCourseDetails.sprCode = "0205225/1"
 		studentCourseDetails.relationshipService = relationshipService
 
-		student.studentCourseDetails.add(studentCourseDetails)
+		student.attachStudentCourseDetails(studentCourseDetails)
 		student.profileService = profileService
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
@@ -28,14 +28,14 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 		profileService.getStudentBySprCode("0205225/1") returns (Some(student))
 
 		relationshipService.findCurrentRelationships(relationshipType, "0205225/1") returns (Nil)
-		student.studentCourseDetails.get(0).relationships(relationshipType) should be ('empty)
+		student.freshStudentCourseDetails(0).relationships(relationshipType) should be ('empty)
 
 		val rel = StudentRelationship("0672089", relationshipType, "0205225/1")
 		rel.profileService = profileService
 
 		relationshipService.findCurrentRelationships(relationshipType, "0205225/1") returns (Seq(rel))
 		profileService.getMemberByUniversityId("0672089") returns (None)
-		student.studentCourseDetails.get(0).relationships(relationshipType) map { _.agentParsed } should be (Seq("0672089"))
+		student.freshStudentCourseDetails(0).relationships(relationshipType) map { _.agentParsed } should be (Seq("0672089"))
 
 		val staff = Fixtures.staff(universityId="0672089")
 		staff.firstName = "Steve"
@@ -43,7 +43,7 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
 		profileService.getMemberByUniversityId("0672089") returns (Some(staff))
 
-		student.studentCourseDetails.get(0).relationships(relationshipType) map { _.agentParsed } should be (Seq(staff))
+		student.freshStudentCourseDetails(0).relationships(relationshipType) map { _.agentParsed } should be (Seq(staff))
 	}
 
 	@Test def testModuleRegistrations {
@@ -52,7 +52,7 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
 		// create a student course details with module registrations
 		val scd1 = new StudentCourseDetails(member, "2222222/2")
-		member.studentCourseDetails.add(scd1)
+		member.attachStudentCourseDetails(scd1)
 
 		val mod1 = new Module
 		val mod2 = new Module

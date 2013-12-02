@@ -4,9 +4,7 @@ import org.scalatest._
 import org.scalatest.junit._
 import org.scalatest.selenium.WebBrowser
 import org.junit.runner.RunWith
-import com.thoughtworks.selenium.Selenium
 import org.openqa.selenium.htmlunit.HtmlUnitDriver
-import org.openqa.selenium.WebDriverBackedSelenium
 import org.openqa.selenium.WebDriver
 import java.util.Properties
 import org.openqa.selenium.chrome.ChromeDriver
@@ -18,7 +16,9 @@ import org.scalatest.concurrent.Eventually
 import org.scalatest.time.SpanSugar
 import com.gargoylesoftware.htmlunit.BrowserVersion
 import uk.ac.warwick.userlookup.UserLookup
-import scala.util.{Success, Try}
+import scala.util.Try
+import scala.util.Success
+import org.joda.time.DateTime
 
 /** Abstract base class for Selenium tests.
   *
@@ -64,18 +64,53 @@ abstract class BrowserTest
 			case _=> // do nothing
 		}
 	}
-	
+
 	/**
 	 * eventually{} is a generic ScalaTest method to repeatedly
 	 * try a block of code until it works or we give up. eventuallyAjax {}
 	 * just calls that with some sensible default timeouts.
 	 */
 	def eventuallyAjax(fun: =>Unit) {
-		eventually(timeout(10.seconds), interval(200.millis)) (fun)
+		eventually(timeout(30.seconds), interval(200.millis)) (fun)
 	}
 	// Sometimes you need to wait for a page to load after clicking on a link
 	def verifyPageLoaded(fun: => Unit) = eventuallyAjax(fun)
 
+	// Don't set textField.value for a datetimepicker, as IT WILL HURT YOU
+	class DateTimePickerField(val underlying: org.openqa.selenium.WebElement, selector: String) {
+		if(!(underlying.getTagName.toLowerCase == "input" && underlying.getAttribute("type").toLowerCase == "text"))
+			throw new TestFailedException(
+				Some("Element " + underlying + ", specified as a dateTimePicker, is not a text field."),
+				None,
+				0
+			)
+
+		def value = underlying.getAttribute("value")
+
+		def value_=(newValue: DateTime) = {
+			val nearestHourAsString = newValue.toString("dd-MMM-yyyy HH:00:00")
+			do {
+				underlying.clear()
+				underlying.sendKeys(nearestHourAsString)
+			} while (value != nearestHourAsString) // loop to fix weird Selenium failure mode where string is repeated
+			val script = s"var dtp = jQuery('${selector}').data('datetimepicker'); if (dtp!=undefined) dtp.update();"
+			executeScript(script)
+		}
+
+		def clear() = underlying.clear()
+	}
+
+	def dateTimePicker(queryString: String): DateTimePickerField = {
+		val (el, selector) = try {
+			val el = IdQuery(queryString).webElement
+			(el, s"#${el.getAttribute("id")}")
+		} catch {
+			case _: Throwable =>
+				val el = NameQuery(queryString).webElement
+				(el, s"[name=${el.getAttribute("name")}]")
+		}
+		new DateTimePickerField(el, selector)
+	}
 }
 
 case class LoginDetails(val usercode: String, val password: String, description: String, warwickId:String)

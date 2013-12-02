@@ -107,7 +107,7 @@ class DepartmentTest extends TestBase with Mockito {
 				s.attachStudentCourseYearDetails(new StudentCourseYearDetails().tap(_.yearOfStudy =1))
 				s.route = new Route().tap(_.degreeType = DegreeType.Undergraduate)
 			})
-			m.studentCourseDetails = JArrayList(scd)
+			m.attachStudentCourseDetails(scd)
 			m.mostSignificantCourse = scd
 		})
 		val postgraduate= new StudentMember().tap(m=>{
@@ -116,7 +116,7 @@ class DepartmentTest extends TestBase with Mockito {
 				s.attachStudentCourseYearDetails(new StudentCourseYearDetails().tap(_.yearOfStudy =7))
 				s.route = new Route().tap(_.degreeType = DegreeType.Postgraduate)
 			})
-			m.studentCourseDetails = JArrayList(scd)
+			m.attachStudentCourseDetails(scd)
 			m.mostSignificantCourse = scd
 		})
 

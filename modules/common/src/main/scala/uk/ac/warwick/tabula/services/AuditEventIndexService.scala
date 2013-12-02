@@ -295,7 +295,23 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	override def listNewerThan(startDate: DateTime, batchSize: Int) =
 		service.listNewerThan(startDate, batchSize).filter { _.eventStage == "before" }
 
-	protected def toItem(id: String) = service.getById(id.toLong)
+	protected def toItem(doc: Document) = 
+		documentValue(doc, IdField)
+			.flatMap { id => service.getById(id.toLong) }
+			.orElse {
+				val event = AuditEvent()
+				event.eventStage = "before"
+				event.data = "{}" // We can't restore this if it's not from the db
+				
+				documentValue(doc, IdField).foreach { id => event.id = id.toLong }
+				documentValue(doc, "eventId").foreach { id => event.eventId = id }
+				documentValue(doc, "userId").foreach { id => event.userId = id }
+				documentValue(doc, "masqueradeUserId").foreach { id => event.masqueradeUserId = id }
+				documentValue(doc, "eventType").foreach { typ => event.eventType = typ }
+				documentValue(doc, UpdatedDateField).foreach { ts => event.eventDate = new DateTime(ts.toLong) }
+				
+				Some(event)
+			}
 
 	protected def toParsedAuditEvent(doc: Document): Option[AuditEvent] = toItem(doc).map { event =>
 		event.parsedData = service.parseData(event.data)
@@ -347,7 +363,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 			sort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true)),
 			offset = start,
 			max = count)
-		docs transform toId map (_.toLong) flatMap service.getById
+		docs transform toItem
 	}
 	
 	private def addFieldToDoc(field: String, data: Map[String, Any], doc: Document) = data.get(field) match  {
@@ -367,12 +383,15 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		case other: AnyRef => logger.warn("Collection field " + field + " was unexpected type: " + other.getClass.getName)
 		case _ =>
 	}
+	
+	val SingleDataFields = Seq("submission", "feedback", "assignment", "module", "department", "studentId", "submissionIsNoteworthy")
+	val SequenceDataFields = Seq("students")
 
 	// pick items out of the auditevent JSON and add them as document fields.
 	private def addDataToDoc(data: Map[String, Any], doc: Document) = {
-		Seq("submission", "feedback", "assignment", "module", "department", "studentId", "submissionIsNoteworthy").foreach(addFieldToDoc(_, data, doc))
+		SingleDataFields.foreach(addFieldToDoc(_, data, doc))
 		
 		// sequence-type fields
-		Seq("students").foreach(addSequenceToDoc(_, data, doc))
+		SequenceDataFields.foreach(addSequenceToDoc(_, data, doc))
 	}
 }

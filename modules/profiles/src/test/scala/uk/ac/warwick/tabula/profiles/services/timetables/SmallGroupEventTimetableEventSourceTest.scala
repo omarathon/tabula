@@ -7,6 +7,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import org.joda.time.LocalTime
+import uk.ac.warwick.tabula.Fixtures
 
 class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 
@@ -18,8 +19,7 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 		def userLookup: UserLookupService = mockUserLookup
 	}.studentGroupEventSource
 
-	val student = mock[StudentMember]
-	student.userId returns "studentUserId"
+	val student = Fixtures.student(universityId="0000001", userId="studentUserId")
 	val studentUser = new User
 	mockUserLookup.getUserByUserId(any[String]) returns studentUser
 

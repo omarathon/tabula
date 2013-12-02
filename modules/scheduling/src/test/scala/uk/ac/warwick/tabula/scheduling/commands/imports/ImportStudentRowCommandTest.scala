@@ -42,6 +42,9 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
 import uk.ac.warwick.tabula.scheduling.services.CourseImporter
 import uk.ac.warwick.tabula.data.model.Course
+import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
+import org.springframework.beans.BeanWrapperImpl
+import org.joda.time.DateTime
 
 
 // scalastyle:off magic.number
@@ -141,8 +144,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 		val blobBytes = Array[Byte](1,2,3,4,5)
 		val mac = MembershipInformation(mm, () => Some(blobBytes))
+		val importRowTracker = new ImportRowTracker
 
-		val yearCommand = new ImportStudentCourseYearCommand(rs)
+		val yearCommand = new ImportStudentCourseYearCommand(rs, importRowTracker)
 		yearCommand.modeOfAttendanceImporter = modeOfAttendanceImporter
 		yearCommand.profileService = profileService
 		yearCommand.sitsStatusesImporter = sitsStatusesImporter
@@ -152,7 +156,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		val supervisorCommand = new ImportSupervisorsForStudentCommand()
 		supervisorCommand.maintenanceMode = maintenanceModeService
 
-		val courseCommand = new ImportStudentCourseCommand(rs, yearCommand, supervisorCommand)
+		val courseCommand = new ImportStudentCourseCommand(rs, importRowTracker, yearCommand, supervisorCommand)
 		courseCommand.studentCourseDetailsDao = studentCourseDetailsDao
 		courseCommand.sitsStatusesImporter = sitsStatusesImporter
 		courseCommand.courseAndRouteService = courseAndRouteService
@@ -163,7 +167,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		courseCommand.courseImporter = courseImporter
 		courseCommand.stuMem = smartMock[StudentMember]
 
-		val rowCommand = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, courseCommand)
+		val rowCommand = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, new ImportRowTracker, courseCommand)
 		rowCommand.memberDao = memberDao
 		rowCommand.fileDao = fileDao
 		rowCommand.moduleAndDepartmentService = modAndDeptService
@@ -212,11 +216,39 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseDetails.endDate.toString should be ("2014-05-12")
 			studentCourseDetails.expectedEndDate.toString should be ("2015-05-12")
 
-			studentCourseDetails.studentCourseYearDetails.size should be (1)
+			studentCourseDetails.freshStudentCourseYearDetails.size should be (1)
 
 			there was one(studentCourseDetailsDao).saveOrUpdate(any[StudentCourseDetails]);
 		}
 	}
+
+	@Test def testMarkAsSeenInSits {
+		new Environment {
+
+			// first set up the studentCourseYearDetails as above
+			var studentCourseDetails = new StudentCourseDetails
+			studentCourseDetails.scjCode = "0672089/2"
+			studentCourseDetails.sprCode = "0672089/2"
+
+			val studentCourseDetailsBean = new BeanWrapperImpl(studentCourseDetails)
+
+			studentCourseDetails.missingFromImportSince should be (null)
+
+			courseCommand.markAsSeenInSits(studentCourseDetailsBean) should be (false)
+
+			studentCourseDetails.missingFromImportSince should be (null)
+
+			studentCourseDetails.missingFromImportSince = DateTime.now
+
+			studentCourseDetails.missingFromImportSince should not be (null)
+
+			courseCommand.markAsSeenInSits(studentCourseDetailsBean) should be (true)
+
+			studentCourseDetails.missingFromImportSince should be (null)
+
+		}
+	}
+
 
 	@Test
 	def testImportStudentRowCommandWorksWithNew {
@@ -239,8 +271,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			member match {
 				case stu: StudentMember => {
-					stu.studentCourseDetails.size should be (1)
-					stu.studentCourseDetails.asScala.head.studentCourseYearDetails.size should be (1)
+					stu.freshStudentCourseDetails.size should be (1)
+					stu.freshStudentCourseDetails.head.freshStudentCourseYearDetails.size should be (1)
 				}
 				case _ => false should be (true)
 			}
@@ -263,8 +295,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			val member = rowCommand.applyInternal()
 			member match {
 				case stu: StudentMember => {
-					stu.studentCourseDetails.size should be (1)
-					stu.studentCourseDetails.asScala.head.studentCourseYearDetails.size should be (1)
+					stu.freshStudentCourseDetails.size should be (1)
+					stu.freshStudentCourseDetails.head.freshStudentCourseYearDetails.size should be (1)
 				}
 				case _ => false should be (true)
 			}
@@ -299,7 +331,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			val studentMember = member.get
 
-			studentMember.studentCourseDetails.size should not be (0)
+			studentMember.freshStudentCourseDetails.size should not be (0)
 
 			there was no(relationshipService).replaceStudentRelationships(tutorRelationshipType, "0672089/2", Seq("0070790"))
 		}

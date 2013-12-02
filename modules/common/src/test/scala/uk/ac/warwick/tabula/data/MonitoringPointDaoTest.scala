@@ -5,6 +5,9 @@ import org.junit.Before
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringCheckpoint, MonitoringPointSet}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.Route
 
 class MonitoringPointDaoTest extends PersistenceTestBase {
 	val thisAcademicYear = AcademicYear(2013)
@@ -72,9 +75,9 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 	@Test def getCheckpointByMember() {
 		transactional { tx =>
 			val student1 = Fixtures.student("1234")
-			student1.studentCourseDetails.get(0).route = route1
+			student1.freshStudentCourseDetails(0).route = route1
 			val student2 = Fixtures.student("2345")
-			student2.studentCourseDetails.get(0).route = route1
+			student2.freshStudentCourseDetails(0).route = route1
 
 			routeDao.saveOrUpdate(route1)
 			monitoringPointDao.saveOrUpdate(monitoringPointSet1)
@@ -83,7 +86,8 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 
 			val checkpoint = new MonitoringCheckpoint
 			checkpoint.point = monitoringPoint1
-			checkpoint.studentCourseDetail = student1.studentCourseDetails.get(0)
+			checkpoint.studentCourseDetail = student1.freshStudentCourseDetails(0)
+
 			checkpoint.updatedBy = "foo"
 			checkpoint.state = MonitoringCheckpointState.fromCode("attended")
 			monitoringPointDao.saveOrUpdate(checkpoint)
@@ -97,9 +101,10 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 	@Test def getCheckpointByScjCode() {
 		transactional { tx =>
 			val student1 = Fixtures.student("1234")
-			student1.studentCourseDetails.get(0).route = route1
+
+			student1.freshStudentCourseDetails(0).route = route1
 			val student2 = Fixtures.student("2345")
-			student2.studentCourseDetails.get(0).route = route1
+			student2.freshStudentCourseDetails(0).route = route1
 
 			routeDao.saveOrUpdate(route1)
 			monitoringPointDao.saveOrUpdate(monitoringPointSet1)
@@ -107,8 +112,10 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 			memberDao.saveOrUpdate(student2)
 
 			val checkpoint = new MonitoringCheckpoint
+
 			checkpoint.point = monitoringPoint1
-			checkpoint.studentCourseDetail = student1.studentCourseDetails.get(0)
+			checkpoint.studentCourseDetail = student1.freshStudentCourseDetails(0)
+
 			checkpoint.updatedBy = "foo"
 			checkpoint.state = MonitoringCheckpointState.fromCode("attended")
 			monitoringPointDao.saveOrUpdate(checkpoint)
@@ -131,45 +138,14 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 			monitoringPointDao.saveOrUpdate(monitoringPointSet4)
 			monitoringPointDao.saveOrUpdate(monitoringPointSet5)
 
-			val studentInRoute1Year1 = Fixtures.student("student1")
-			studentInRoute1Year1.mostSignificantCourse = studentInRoute1Year1.studentCourseDetails.get(0)
-			studentInRoute1Year1.studentCourseDetails.get(0).route = route1
-			studentInRoute1Year1.studentCourseDetails.get(0).attachStudentCourseYearDetails(
-				Fixtures.studentCourseYearDetails(thisAcademicYear, null, 1, studentInRoute1Year1.studentCourseDetails.get(0))
-			)
-			memberDao.saveOrUpdate(studentInRoute1Year1)
+			val studentInRoute1Year1 = makeStudent("student1", route1, thisAcademicYear, 1)
+			val studentInRoute1Year2 = makeStudent("student2", route1, thisAcademicYear, 2)
+			val studentInRoute2Year1 = makeStudent("student3", route2, thisAcademicYear, 1)
+			val studentInRoute3Year1 = makeStudent("student4", route3, thisAcademicYear, 1)
+			val studentInDifferentAcademicYear = makeStudent("student5", route1, thisAcademicYear.previous, 1)
 
-			val studentInRoute1Year2 = Fixtures.student("student2")
-			studentInRoute1Year2.mostSignificantCourse = studentInRoute1Year2.studentCourseDetails.get(0)
-			studentInRoute1Year2.studentCourseDetails.get(0).route = route1
-			studentInRoute1Year2.studentCourseDetails.get(0).attachStudentCourseYearDetails(
-				Fixtures.studentCourseYearDetails(thisAcademicYear, null, 2, studentInRoute1Year2.studentCourseDetails.get(0))
-			)
-			memberDao.saveOrUpdate(studentInRoute1Year2)
-
-			val studentInRoute2Year1 = Fixtures.student("student3")
-			studentInRoute2Year1.mostSignificantCourse = studentInRoute2Year1.studentCourseDetails.get(0)
-			studentInRoute2Year1.studentCourseDetails.get(0).route = route2
-			studentInRoute2Year1.studentCourseDetails.get(0).attachStudentCourseYearDetails(
-				Fixtures.studentCourseYearDetails(thisAcademicYear, null, 1, studentInRoute2Year1.studentCourseDetails.get(0))
-			)
-			memberDao.saveOrUpdate(studentInRoute2Year1)
-
-			val studentInRoute3Year1 = Fixtures.student("student4")
-			studentInRoute3Year1.mostSignificantCourse = studentInRoute3Year1.studentCourseDetails.get(0)
-			studentInRoute3Year1.studentCourseDetails.get(0).route = route3
-			studentInRoute3Year1.studentCourseDetails.get(0).attachStudentCourseYearDetails(
-				Fixtures.studentCourseYearDetails(thisAcademicYear, null, 1, studentInRoute3Year1.studentCourseDetails.get(0))
-			)
-			memberDao.saveOrUpdate(studentInRoute3Year1)
-
-			val studentInDifferentAcademicYear = Fixtures.student("student5")
-			studentInDifferentAcademicYear.mostSignificantCourse = studentInDifferentAcademicYear.studentCourseDetails.get(0)
-			studentInDifferentAcademicYear.studentCourseDetails.get(0).route = route1
-			studentInDifferentAcademicYear.studentCourseDetails.get(0).attachStudentCourseYearDetails(
-				Fixtures.studentCourseYearDetails(thisAcademicYear.previous, null, 1, studentInDifferentAcademicYear.studentCourseDetails.get(0))
-			)
-			memberDao.saveOrUpdate(studentInDifferentAcademicYear)
+			session.flush
+			session.clear
 
 			val result = monitoringPointDao.findPointSetsForStudents(Seq(
 				studentInRoute1Year1,
@@ -195,45 +171,11 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 			monitoringPointDao.saveOrUpdate(monitoringPointSet4)
 			monitoringPointDao.saveOrUpdate(monitoringPointSet5)
 
-			val studentInRoute1Year1 = Fixtures.student("student1")
-			studentInRoute1Year1.mostSignificantCourse = studentInRoute1Year1.studentCourseDetails.get(0)
-			studentInRoute1Year1.studentCourseDetails.get(0).route = route1
-			studentInRoute1Year1.studentCourseDetails.get(0).attachStudentCourseYearDetails(
-				Fixtures.studentCourseYearDetails(thisAcademicYear, null, 1, studentInRoute1Year1.studentCourseDetails.get(0))
-			)
-			memberDao.saveOrUpdate(studentInRoute1Year1)
-
-			val studentInRoute1Year2 = Fixtures.student("student2")
-			studentInRoute1Year2.mostSignificantCourse = studentInRoute1Year2.studentCourseDetails.get(0)
-			studentInRoute1Year2.studentCourseDetails.get(0).route = route1
-			studentInRoute1Year2.studentCourseDetails.get(0).attachStudentCourseYearDetails(
-				Fixtures.studentCourseYearDetails(thisAcademicYear, null, 2, studentInRoute1Year2.studentCourseDetails.get(0))
-			)
-			memberDao.saveOrUpdate(studentInRoute1Year2)
-
-			val studentInRoute2Year1 = Fixtures.student("student3")
-			studentInRoute2Year1.mostSignificantCourse = studentInRoute2Year1.studentCourseDetails.get(0)
-			studentInRoute2Year1.studentCourseDetails.get(0).route = route2
-			studentInRoute2Year1.studentCourseDetails.get(0).attachStudentCourseYearDetails(
-				Fixtures.studentCourseYearDetails(thisAcademicYear, null, 1, studentInRoute2Year1.studentCourseDetails.get(0))
-			)
-			memberDao.saveOrUpdate(studentInRoute2Year1)
-
-			val studentInRoute3Year1 = Fixtures.student("student4")
-			studentInRoute3Year1.mostSignificantCourse = studentInRoute3Year1.studentCourseDetails.get(0)
-			studentInRoute3Year1.studentCourseDetails.get(0).route = route3
-			studentInRoute3Year1.studentCourseDetails.get(0).attachStudentCourseYearDetails(
-				Fixtures.studentCourseYearDetails(thisAcademicYear, null, 1, studentInRoute3Year1.studentCourseDetails.get(0))
-			)
-			memberDao.saveOrUpdate(studentInRoute3Year1)
-
-			val studentInDifferentAcademicYear = Fixtures.student("student5")
-			studentInDifferentAcademicYear.mostSignificantCourse = studentInDifferentAcademicYear.studentCourseDetails.get(0)
-			studentInDifferentAcademicYear.studentCourseDetails.get(0).route = route1
-			studentInDifferentAcademicYear.studentCourseDetails.get(0).attachStudentCourseYearDetails(
-				Fixtures.studentCourseYearDetails(thisAcademicYear.previous, null, 1, studentInDifferentAcademicYear.studentCourseDetails.get(0))
-			)
-			memberDao.saveOrUpdate(studentInDifferentAcademicYear)
+			val studentInRoute1Year1 = makeStudent("student1", route1, thisAcademicYear, 1)
+			val studentInRoute1Year2 = makeStudent("student2", route1, thisAcademicYear, 2)
+			val studentInRoute2Year1 = makeStudent("student3", route2, thisAcademicYear, 1)
+			val studentInRoute3Year1 = makeStudent("student4", route3, thisAcademicYear, 1)
+			val studentInDifferentAcademicYear = makeStudent("student5", route1, thisAcademicYear.previous, 1)
 
 			val result = monitoringPointDao.findSimilarPointsForMembers(monitoringPoint1, Seq(
 				studentInRoute1Year1,
@@ -245,5 +187,18 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 
 			result.size should be (2)
 		}
+	}
+
+	def makeStudent(userId: String, route: Route, academicYear: AcademicYear, year: Int): StudentMember = {
+		val student = Fixtures.student(userId)
+		var scd = student.freshStudentCourseDetails(0)
+		student.mostSignificantCourse = scd
+		scd.route = route
+		var scyd = scd.latestStudentCourseYearDetails
+		scd.removeStudentCourseYearDetails(scyd)
+		var newScyd: StudentCourseYearDetails = Fixtures.studentCourseYearDetails(academicYear, null, year, scd)
+		scd.attachStudentCourseYearDetails(newScyd)
+		memberDao.saveOrUpdate(student)
+		student
 	}
 }

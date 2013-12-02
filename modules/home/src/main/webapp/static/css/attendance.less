@@ -248,11 +248,15 @@
     }
   }
 
+  tr {
+    height: 34px;
+  }
+
   th, td {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    height: 22px;
+    vertical-align: middle;
   }
 
   th.header { cursor: pointer; }
@@ -310,6 +314,24 @@
       border-radius:10px 0 0 10px / 50% 0 0 50%;
       box-shadow:-5px 0 10px rgba(0, 0, 0, 0.25);
       content:'';
+    }
+  }
+}
+
+.agent-search {
+  input, .btn {
+    line-height: 24px;
+    margin-top: 0px;
+  }
+}
+
+#container table.agents {
+  th { white-space: nowrap; }
+  td {
+    vertical-align: middle;
+    &.students, &.unrecorded, &.missed, &.button {
+      text-align: center;
+      width: 1px; // fit to content
     }
   }
 }

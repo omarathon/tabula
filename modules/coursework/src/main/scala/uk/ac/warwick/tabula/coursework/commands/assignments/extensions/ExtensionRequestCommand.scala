@@ -3,28 +3,52 @@ package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
+import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment, Module}
 import uk.ac.warwick.tabula.data.Transactions._
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.DateFormats
+import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser, DateFormats}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.Daoisms
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notifications.{ExtensionRequestModifiedNotification, ExtensionRequestCreatedNotification}
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.{RelationshipService}
+
 
 
 class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val submitter: CurrentUser)
 	extends Command[Extension]  with Notifies[Extension, Option[Extension]] with Daoisms with BindListener with SelfValidating {
-	
+
+	var relationshipService = Wire.auto[RelationshipService]
+
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Extension.MakeRequest, assignment)
+
+
+	val student = submitter.profile.getOrElse(throw new ItemNotFoundException)
+	val scd = student.mostSignificantCourseDetails.getOrElse(throw new ItemNotFoundException)
+
+	val studentRelationships = relationshipService.allStudentRelationshipTypes
+	val relationships =
+		studentRelationships.map(
+			x => (x.description, relationshipService
+				.findCurrentRelationships(x,scd.sprCode))
+		).toMap
+
+	//Pick only the parts of scd required since passing the whole object fails due to the session no being available to load lazy objects
+	val extraInfo = Map(
+		"moduleManagers" -> module.managers.users,
+		"studentMember" -> student,
+		"relationships" -> relationships.filter({case (relationshipType,relations) => relations.length != 0}),
+		"scdCourse" -> scd.course,
+		"scdRoute" -> scd.route,
+	  "scdAwardCode" -> scd.awardCode
+	)
 
 	var reason:String =_
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
@@ -100,9 +124,9 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 
 	def emit(extension: Extension) = {
 		if (modified){
-			Seq(new ExtensionRequestModifiedNotification(extension, submitter.apparentUser) with FreemarkerTextRenderer)
+			Seq(new ExtensionRequestModifiedNotification(extension, submitter.apparentUser, extraInfo) with FreemarkerTextRenderer)
 		} else {
-			Seq(new ExtensionRequestCreatedNotification(extension, submitter.apparentUser) with FreemarkerTextRenderer)
+			Seq(new ExtensionRequestCreatedNotification(extension, submitter.apparentUser, extraInfo) with FreemarkerTextRenderer)
 		}
 	}
 }
