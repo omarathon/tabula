@@ -228,6 +228,8 @@ $(function(){
 		secondMarkers.show();
 	$('#markingMethod').on('change', function(){
 		var option = $('option:selected', $(this));
+
+
 		if(option.hasClass('uses-second-markers'))
 			secondMarkers.show();
 		else

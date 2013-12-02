@@ -33,12 +33,32 @@ Common form fields.
 <@form.labelled_row "markingMethod" "Marking Method">
 
 	<#assign isDisabled><#if view_type=="edit">true<#else>false</#if></#assign>
+
 	<@f.select disabled="${isDisabled}" path="markingMethod">
-		<@f.option />
-		<@f.option value="StudentsChooseMarker" label="Students choose marker" />
-		<@f.option class="uses-second-markers" value="SeenSecondMarking" label="Seen second marking" />
-		<@f.option class="uses-second-markers" value="ModeratedMarking" label="Moderated marking" />
+		<option <#if !command.markingMethod?has_content>selected="selected"</#if> value=""></option>
+		<option value="StudentsChooseMarker"
+				<#if ((command.markingMethod.toString)!"") = "StudentsChooseMarker">selected="selected"</#if>
+				data-firstrolename="Marker"
+				data-firstrolename=""
+				>
+			Students choose marker
+		</option>
+		<option value="SeenSecondMarking" class="uses-second-markers"
+				<#if ((command.markingMethod.toString)!"") = "SeenSecondMarking">selected="selected"</#if>
+				data-firstrolename="First marker"
+				data-secondrolename="Second marker"
+				>
+			Seen second marking
+		</option>
+		<option value="ModeratedMarking" class="uses-second-markers"
+				<#if ((command.markingMethod.toString)!"") = "ModeratedMarking">selected="selected"</#if>
+				data-firstrolename="Marker"
+				data-secondrolename="Moderator"
+				>Moderated marking
+		</option>
 	</@f.select>
+
+
 	<#if view_type=="edit">
 		<div class="help-block">
 			It is not possible to modify the marking method once a marking workflow has been created.
@@ -46,12 +66,12 @@ Common form fields.
 	</#if>
 </@form.labelled_row>
 
-<@form.labelled_row "firstMarkers" "First markers">
+<@form.labelled_row "firstMarkers" "${command.firstMarkerRoleName!'Marker'}">
 	<@form.flexipicker path="firstMarkers" list=true multiple=true />
 </@form.labelled_row>
 
 <div class="second-markers-container hide">
-<@form.labelled_row "secondMarkers" "Second markers">
+<@form.labelled_row "secondMarkers" "${command.secondMarkerRoleName!'Second Marker'}">
 	<@form.flexipicker path="secondMarkers" list=true multiple=true />
 </@form.labelled_row>
 </div>

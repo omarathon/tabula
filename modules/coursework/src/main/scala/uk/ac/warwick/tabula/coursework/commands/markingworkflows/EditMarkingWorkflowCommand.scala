@@ -35,7 +35,7 @@ class EditMarkingWorkflowCommand(department: Department, val markingWorkflow: Ma
 				val existingSecondMarkers = markingWorkflow.secondMarkers.includeUsers.toSet
 				val newSecondMarkers = secondMarkers.toSet
 				// if newMarkers is not a super set of existingMarker, markers have been removed.
-				if (!(existingFirstMarkers -- newFirstMarkers).isEmpty || !(existingSecondMarkers -- newSecondMarkers).isEmpty){
+				if (!(existingFirstMarkers -- newFirstMarkers).isEmpty || !(existingSecondMarkers -- newSecondMarkers).isEmpty) {
 					errors.rejectValue("firstMarkers", "markingWorkflow.firstMarkers.cannotRemoveMarkers")
 				}
 			}
