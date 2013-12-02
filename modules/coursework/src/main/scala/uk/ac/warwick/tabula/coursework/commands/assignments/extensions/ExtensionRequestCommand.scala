@@ -31,21 +31,7 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 
 	val basicInfo = Map("moduleManagers" -> module.managers.users)
 
-	val extraInfo = submitter.profile match {
-		case Some(profile) =>  basicInfo ++ getExtraInfo(profile)
-		case None => basicInfo
-	}
-
-	def getExtraInfo(profile: Member): Map[String,Object] = {
-		val profileInfo = Map("studentMember" -> profile)
-
-		profile.mostSignificantCourseDetails match {
-			case Some(mostSignificantCourseDetails) => profileInfo ++ getExtraCourseInfo(mostSignificantCourseDetails)
-			case None => profileInfo
-		}
-	}
-
-	def getExtraCourseInfo(scd: StudentCourseDetails): Map[String,Object] = {
+	val extraInfo = basicInfo ++ (submitter.profile.flatMap { _.mostSignificantCourseDetails.map { scd =>
 		val studentRelationships = relationshipService.allStudentRelationshipTypes
 		val relationships = studentRelationships.map(x => (x.description, relationshipService.findCurrentRelationships(x,scd.sprCode))).toMap
 
@@ -56,7 +42,7 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 			"scdRoute" -> scd.route,
 			"scdAwardCode" -> scd.awardCode
 		)
-	}
+	}}).getOrElse(Map())
 
 	var reason:String =_
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
