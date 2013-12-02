@@ -1,31 +1,35 @@
 <section id="course-details" class="clearfix">
 	<hr class="full-width"></hr>
+
+	<!-- course heading -->
 	<h3 class="course-title">
 		Course: ${(studentCourseDetails.course.name)!}, ${(studentCourseDetails.course.code)!}
 		<@fmt.course_year_span studentCourseDetails />
 
 	</h3>
 
+	<!-- drop-down to choose other courses: -->
 	<#if (profile.freshStudentCourseDetails)?? && (profile.freshStudentCourseDetails?size > 1)>
-	<div class="dropdown">
-		<a id="course-dropdown" class="dropdown-toggle pull-right" data-toggle="dropdown" role="button" href="#">
-			Other courses
-			<b class="caret"></b>
-		</a>
-		<ul class="dropdown-menu pull-right" aria-labelledby="course-dropdown" role="menu">
-			<#list profile.freshStudentCourseDetails as scd>
-				<#if scd.scjCode != studentCourseDetails.scjCode>
-					<li role="presentation">
-						<a href="/profiles/view/course/${scd.urlSafeId}" role="menuitem">
-							${(scd.course.code)!} <@fmt.course_year_span studentCourseDetails /> ${scd.scjCode}
-						</a>
-					</li>
-				</#if>
-			</#list>
-		</ul>
-	</div>
+		<div class="dropdown">
+			<a id="course-dropdown" class="dropdown-toggle pull-right" data-toggle="dropdown" role="button" href="#">
+				Other courses
+				<b class="caret"></b>
+			</a>
+			<ul class="dropdown-menu pull-right" aria-labelledby="course-dropdown" role="menu">
+				<#list profile.freshStudentCourseDetails as scd>
+					<#if scd.scjCode != studentCourseDetails.scjCode>
+						<li role="presentation">
+							<a href="/profiles/view/course/${scd.urlSafeId}" role="menuitem">
+								${(scd.course.code)!} <@fmt.course_year_span studentCourseDetails /> ${scd.scjCode}
+							</a>
+						</li>
+					</#if>
+				</#list>
+			</ul>
+		</div>
 	</#if>
 
+	<!-- course details -->
 	<div class="data clearfix">
 		<div class="col1">
 			<table class="profile-or-course-info upper">

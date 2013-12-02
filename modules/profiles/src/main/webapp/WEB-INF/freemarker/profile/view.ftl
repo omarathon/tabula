@@ -14,7 +14,8 @@
 			<#include "_member_notes.ftl" />
 	</#if>
 
-	<#if (studentCourseDetails)??>
+	<!-- the check on profile.freshStudentCourseDetails is just a way of nailing down the permissions -->
+	<#if (studentCourseDetails)?? && (profile.freshStudentCourseDetails)??>
 		<#include "_courses.ftl" />
 	</#if>
 
