@@ -239,8 +239,12 @@
 	</ul>
 </#macro>
 
-<#macro course_description_for_heading studentCourseDetails>
-		${(studentCourseDetails.course.name)!} (${(studentCourseDetails.beginYear?string("0000"))!} - ${(studentCourseDetails.endYear?string("0000"))!})
+<#macro course_year_span studentCourseDetails>
+		(${(studentCourseDetails.beginYear?string("0000"))!} - ${(studentCourseDetails.endYear?string("0000"))!})
+</#macro>
+
+<#macro course_description studentCourseDetails>
+		${(studentCourseDetails.course.name)!} (${(studentCourseDetails.course.code?upper_case)!})
 </#macro>
 
 <#macro spr_status studentCourseDetails>

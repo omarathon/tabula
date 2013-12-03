@@ -23,7 +23,7 @@ ${agent.agentMember.fullName} (${agent.agentMember.universityId}), ${agent.agent
 </#if>
 </#list>
 </#if>
-<#if scdRoute?? >
+<#if scdRoute?has_content >
 Student Course Details
 Route:	${(scdRoute.name)!} (${(scdRoute.code?upper_case)!})
 Course:	<#if (scdRoute.name) != (scdCourse.name)>${(scdCourse.name)!} (${(scdCourse.code?upper_case)!})<#else>${(scdCourse.code?upper_case)!}</#if>

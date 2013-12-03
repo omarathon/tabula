@@ -6,12 +6,14 @@
 				<select class="academicYear input-small">
 					<#if studentCourseDetails.freshStudentCourseYearDetails?? >
 					<#list studentCourseDetails.freshStudentCourseYearDetails as studentCourseYearDetail>
-						<option
-							value="${studentCourseYearDetail.academicYear.startYear?c}"
-							<#if studentCourseDetails.latestStudentCourseYearDetails.id == studentCourseYearDetail.id>selected</#if>
-						>
-							${studentCourseYearDetail.academicYear.toString}
-						</option>
+						<#if (studentCourseYearDetail.academicYear.startYear?c)??>
+							<option
+								value="${studentCourseYearDetail.academicYear.startYear?c}"
+								<#if studentCourseDetails.latestStudentCourseYearDetails.id == studentCourseYearDetail.id>selected</#if>
+							>
+								${studentCourseYearDetail.academicYear.toString}
+							</option>
+						</#if>
 					</#list>
 					</#if>
 				</select>

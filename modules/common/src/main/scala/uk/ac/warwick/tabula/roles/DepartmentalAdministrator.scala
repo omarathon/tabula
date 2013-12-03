@@ -40,30 +40,9 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 
 		Department.ManageProfiles,
 
-		Profiles.Read.Core,
-		Profiles.Read.NextOfKin,
-	  Profiles.Read.Timetable,
-		Profiles.Read.StudentCourseDetails.Core,
-		Profiles.Read.StudentCourseDetails.Status,
-		Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
+		Profiles.MeetingRecord.ReadDetails(PermissionsSelector.Any[StudentRelationshipType]),
 
-		Profiles.Search,
-
-		Profiles.StudentRelationship.Create(PermissionsSelector.Any[StudentRelationshipType]),
-		Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]),
-		Profiles.StudentRelationship.Update(PermissionsSelector.Any[StudentRelationshipType]),
-		Profiles.StudentRelationship.Delete(PermissionsSelector.Any[StudentRelationshipType]),
-
-		Profiles.MeetingRecord.Read(PermissionsSelector.Any[StudentRelationshipType]),
-
-		SmallGroups.Read,
-		Profiles.Read.SmallGroups,
-
-		MemberNotes.Read,
-		MemberNotes.Create,
-		MemberNotes.Update,
-		MemberNotes.Delete
-
+		SmallGroups.Read
 	)
 	def canDelegateThisRolesPermissions:JBoolean = true
 

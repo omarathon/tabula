@@ -11,14 +11,16 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, Member, StudentMember}
+import uk.ac.warwick.tabula.data.model.{ MeetingRecord, Member, StudentMember }
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
-import uk.ac.warwick.tabula.commands.{Appliable, ViewViewableCommand}
+import uk.ac.warwick.tabula.commands.{ Appliable, ViewViewableCommand }
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.commands.Command
 import scala.Some
+import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.tabula.web.Mav
 
 class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
 
@@ -29,8 +31,7 @@ class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends View
 }
 
 @Controller
-@RequestMapping(Array("/view/{member}"))
-class ViewProfileController extends ProfilesController {
+abstract class ViewProfileController extends ProfilesController {
 
 	var userLookup = Wire[UserLookupService]
 	var smallGroupService = Wire[SmallGroupService]
@@ -41,29 +42,18 @@ class ViewProfileController extends ProfilesController {
 	def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 
-	def getViewMeetingRecordCommand(member: Member, relationshipType: StudentRelationshipType): Option[Command[Seq[MeetingRecord]]] = {
-		member.mostSignificantCourseDetails match {
-			case Some(scd) => restricted(ViewMeetingRecordCommand(scd, optionalCurrentMember, relationshipType))
-			case _ => {
-				logger.warn("Member " + member.universityId + " has no most significant course details")
-				None
-			}
+	def getViewMeetingRecordCommand(studentCourseDetails: Option[StudentCourseDetails], relationshipType: StudentRelationshipType): Option[Command[Seq[MeetingRecord]]] = {
+		studentCourseDetails match {
+			case Some(scd: StudentCourseDetails) => restricted(ViewMeetingRecordCommand(scd, optionalCurrentMember, relationshipType))
+			case None => None
 		}
 	}
 
-	@ModelAttribute("viewProfileCommand")
-	def viewProfileCommand(@PathVariable("member") member: Member) = member match {
-		case student: StudentMember => new ViewProfileCommand(user, student)
-		case _ => throw new ItemNotFoundException
-	}
-
-	@RequestMapping
-	def viewProfile(
-			@PathVariable("member") member: Member,
-			@ModelAttribute("viewProfileCommand") profileCmd: Appliable[StudentMember],
-			@RequestParam(value="meeting", required=false) openMeetingId: String,
-			@RequestParam(defaultValue="", required=false) agentId: String) = {
-		val profiledStudentMember = profileCmd.apply
+	def viewProfileForCourse(
+		studentCourseDetails: Option[StudentCourseDetails],
+		openMeetingId: String,
+		agentId: String,
+		profiledStudentMember: StudentMember): Mav = {
 		val isSelf = (profiledStudentMember.universityId == user.universityId)
 
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
@@ -72,7 +62,7 @@ class ViewProfileController extends ProfilesController {
 		// because we show a relationship on the profile page if there is one
 		val relationshipMeetings =
 			allRelationshipTypes.flatMap { relationshipType =>
-				getViewMeetingRecordCommand(member, relationshipType).map { cmd =>
+				getViewMeetingRecordCommand(studentCourseDetails, relationshipType).map { cmd =>
 					(relationshipType, cmd.apply())
 				}
 			}.toMap
@@ -83,16 +73,15 @@ class ViewProfileController extends ProfilesController {
 		val agent = userLookup.getUserByWarwickUniId(agentId)
 
 		// the number of small groups that the student is a member of
-		val numSmallGroups = 
+		val numSmallGroups =
 			if (securityService.can(user, Permissions.Profiles.Read.SmallGroups, profiledStudentMember))
 				smallGroupService.findSmallGroupsByStudent(profiledStudentMember.asSsoUser).size
 			else 0
 
 		//Get all membernotes for student
-
 		val memberNotes =
-			if (securityService.can(user, Permissions.MemberNotes.Update, member)) memberNoteService.list(member)
-			else if (securityService.can(user, Permissions.MemberNotes.Read, member)) memberNoteService.listNonDeleted(member)
+			if (securityService.can(user, Permissions.MemberNotes.Update, profiledStudentMember)) memberNoteService.list(profiledStudentMember)
+			else if (securityService.can(user, Permissions.MemberNotes.Read, profiledStudentMember)) memberNoteService.listNonDeleted(profiledStudentMember)
 			else null
 
 		Mav("profile/view",
@@ -105,7 +94,8 @@ class ViewProfileController extends ProfilesController {
 			"numSmallGroups" -> numSmallGroups,
 			"memberNotes" -> memberNotes,
 			"agent" -> agent,
-			"allRelationshipTypes" -> allRelationshipTypes)
-		.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
+			"allRelationshipTypes" -> allRelationshipTypes,
+			"studentCourseDetails" -> studentCourseDetails)
+			.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}
 }
