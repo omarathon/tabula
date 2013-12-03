@@ -243,6 +243,10 @@
 		(${(studentCourseDetails.beginYear?string("0000"))!} - ${(studentCourseDetails.endYear?string("0000"))!})
 </#macro>
 
+<#macro course_description studentCourseDetails>
+		${(studentCourseDetails.course.name)!} (${(studentCourseDetails.course.code?upper_case)!})
+</#macro>
+
 <#macro spr_status studentCourseDetails>
 		${(studentCourseDetails.sprStatus.fullName?lower_case?cap_first)!}
 </#macro>
