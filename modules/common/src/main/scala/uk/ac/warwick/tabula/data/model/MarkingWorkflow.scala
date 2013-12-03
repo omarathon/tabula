@@ -90,13 +90,14 @@ trait AssignmentMarkerMap {
 	// gets the usercode of the students current marker from the given markers UserGroup
 	private def getMarkerFromAssignmentMap(assignment: Assignment, universityId: UniversityId, markers: UserGroup) = {
 		val student = userLookup.getUserByWarwickUniId(universityId)
-		val mapEntry = Option(assignment.markerMap) flatMap {_.find{p:(String,UserGroup) =>
-			p._2.includes(student.getUserId) && markers.includes(p._1)
-		}}
-		mapEntry match {
-			case Some((markerId, students)) => Some(markerId)
-			case _ => None
+
+		val mapEntry = Option(assignment.markerMap) flatMap { _.find {
+			p:(String,UserGroup) =>
+				p._2.includes(student.getUserId) && markers.includes(p._1)
+			}
 		}
+
+		mapEntry.map(_._1)
 	}
 
 	def getStudentsFirstMarker(assignment: Assignment, universityId: UniversityId) =

@@ -25,6 +25,7 @@ object OnlineModerationCommand {
 			with CopyFromFormFields
 			with WriteToFormFields
 			with ModerationRejectedNotifier
+			with FinaliseFeedbackComponentImpl
 			with AutowiringFeedbackServiceComponent
 			with AutowiringFileAttachmentServiceComponent
 			with AutowiringZipServiceComponent
@@ -39,7 +40,8 @@ abstract class OnlineModerationCommand(module: Module, assignment: Assignment, s
 	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, currentUser)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] with ModerationState with UserAware {
 
-	self: FeedbackServiceComponent with FileAttachmentComponent with ZipServiceComponent with MarkerFeedbackStateCopy =>
+	self: FeedbackServiceComponent with FileAttachmentComponent with ZipServiceComponent with MarkerFeedbackStateCopy
+		with FinaliseFeedbackComponent =>
 
 	val user = currentUser.apparentUser
 
@@ -66,9 +68,7 @@ abstract class OnlineModerationCommand(module: Module, assignment: Assignment, s
 		// if the second-marker feedback is already rejected then do nothing - UI should prevent this
 		if(secondMarkerFeedback.state != Rejected){
 			if (approved) {
-				val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, Seq(firstMarkerFeedback).asJava)
-				finaliseFeedbackCommand.apply()
-
+				finaliseFeedback(assignment, firstMarkerFeedback)
 				secondMarkerFeedback.state = MarkingCompleted
 			} else {
 				markerFeedback.foreach(_.state = Rejected)
@@ -110,6 +110,17 @@ abstract class OnlineModerationCommand(module: Module, assignment: Assignment, s
 			errors.rejectValue("rejectionComments", "markers.moderation.rejectionComments.empty")
 	}
 
+}
+
+trait FinaliseFeedbackComponent {
+	def finaliseFeedback(assignment: Assignment, markerFeedback: MarkerFeedback)
+}
+
+trait FinaliseFeedbackComponentImpl extends FinaliseFeedbackComponent {
+	def finaliseFeedback(assignment: Assignment, firstMarkerFeedback: MarkerFeedback) {
+		val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, Seq(firstMarkerFeedback).asJava)
+		finaliseFeedbackCommand.apply()
+	}
 }
 
 trait ModerationState {

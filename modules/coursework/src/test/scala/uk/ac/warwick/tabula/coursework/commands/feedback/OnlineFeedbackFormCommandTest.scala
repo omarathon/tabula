@@ -20,7 +20,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 		assignment.addDefaultFeedbackFields()
 		val module = new Module
 
-		val student = new StudentMember("student")
+		val student = new User("student")
 		val marker = new User("marker")
 		val currentUser = new CurrentUser(marker, marker)
 
