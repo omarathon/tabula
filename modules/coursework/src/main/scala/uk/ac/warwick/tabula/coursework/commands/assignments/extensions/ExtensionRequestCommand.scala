@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{StudentRelationship, StudentCourseDetails, FileAttachment, Assignment, Module, Member}
 import uk.ac.warwick.tabula.data.Transactions._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser, DateFormats}
@@ -29,26 +29,20 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Extension.MakeRequest, assignment)
 
+	val basicInfo = Map("moduleManagers" -> module.managers.users)
 
-	val student = submitter.profile.getOrElse(throw new ItemNotFoundException)
-	val scd = student.mostSignificantCourseDetails.getOrElse(throw new ItemNotFoundException)
+	val extraInfo = basicInfo ++ (submitter.profile.flatMap { _.mostSignificantCourseDetails.map { scd =>
+		val studentRelationships = relationshipService.allStudentRelationshipTypes
+		val relationships = studentRelationships.map(x => (x.description, relationshipService.findCurrentRelationships(x,scd.sprCode))).toMap
 
-	val studentRelationships = relationshipService.allStudentRelationshipTypes
-	val relationships =
-		studentRelationships.map(
-			x => (x.description, relationshipService
-				.findCurrentRelationships(x,scd.sprCode))
-		).toMap
-
-	//Pick only the parts of scd required since passing the whole object fails due to the session no being available to load lazy objects
-	val extraInfo = Map(
-		"moduleManagers" -> module.managers.users,
-		"studentMember" -> student,
-		"relationships" -> relationships.filter({case (relationshipType,relations) => relations.length != 0}),
-		"scdCourse" -> scd.course,
-		"scdRoute" -> scd.route,
-	  "scdAwardCode" -> scd.awardCode
-	)
+		//Pick only the parts of scd required since passing the whole object fails due to the session not being available to load lazy objects
+		Map(
+			"relationships" -> relationships.filter({case (relationshipType,relations) => relations.length != 0}),
+			"scdCourse" -> scd.course,
+			"scdRoute" -> scd.route,
+			"scdAwardCode" -> scd.awardCode
+		)
+	}}).getOrElse(Map())
 
 	var reason:String =_
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)

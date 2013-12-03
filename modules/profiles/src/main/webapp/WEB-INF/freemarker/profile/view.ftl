@@ -139,11 +139,11 @@
 	</section>
 
 	<#if (profile.freshStudentCourseDetails)?? && (profile.mostSignificantCourseDetails)??>
-
 		<!-- most significant course first -->
 		<#assign studentCourseDetails=profile.mostSignificantCourseDetails>
 
 		<#include "_course_details.ftl" />
+	</#if>
 
 		<div class="tabbable">
 			<#assign showTimetablePane=features.personalTimetables && can.do("Profiles.Read.Timetable", profile) />
@@ -159,7 +159,7 @@
 					<li id="timetable-pane">
 						<section id="timetable-details" class="clearfix" >
 						<h4>Timetable</h4>
-						<div class='fullCalendar' data-viewname='agendaWeek' data-studentid='${studentCourseDetails.student.universityId}'>
+						<div class='fullCalendar' data-viewname='agendaWeek' data-studentid='${profile.universityId}'>
 						</div>
             </section>
 					</li>
@@ -171,6 +171,7 @@
 					</li>
 				</#if>
 
+			<#if (profile.freshStudentCourseDetails)?? && (profile.mostSignificantCourseDetails)??>
 				<#list (allRelationshipTypes)![] as relationshipType>
 					<#if studentCourseDetails.hasRelationship(relationshipType) || relationshipType.displayIfEmpty(studentCourseDetails) && studentCourseDetails.department.isStudentRelationshipTypeForDisplay(relationshipType)>
 						<li id="${relationshipType.id}-pane">
@@ -179,6 +180,7 @@
 						</li>
 					</#if>
 				</#list>
+			</#if>
 
 				<#if numSmallGroups gt 0>
 					<li id="sg-pane" style="display:none;">
@@ -186,6 +188,7 @@
 					</li>
 				</#if>
 
+			<#if (profile.freshStudentCourseDetails)?? && (profile.mostSignificantCourseDetails)??>
 				<#if studentCourseDetails.hasModuleRegistrations && studentCourseDetails.latestStudentCourseYearDetails??>
 					<li id="module-registration-pane">
 						<#include "_module_registrations.ftl" />
@@ -197,6 +200,7 @@
           	<#include "_attendance.ftl" />
           </li>
 				</#if>
+			</#if>
 			</ol>
 
 			<div id="note-modal" class="modal hide fade">
@@ -234,6 +238,7 @@
 		</div>
 
 
+	<#if (profile.freshStudentCourseDetails)?? && (profile.mostSignificantCourseDetails)??>
 		<!-- and then the others -->
 		<#list profile.freshStudentCourseDetails as studentCourseDetails>
 			<#if studentCourseDetails.scjCode != profile.mostSignificantCourseDetails.scjCode>
