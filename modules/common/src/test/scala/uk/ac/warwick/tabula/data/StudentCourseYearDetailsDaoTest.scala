@@ -20,8 +20,6 @@ import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import scala.collection.mutable.HashSet
 import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
-import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
-
 
 class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 
