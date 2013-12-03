@@ -4,7 +4,7 @@ import org.mockito.Mockito._
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.{CurrentUser, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.{SavedFormValueDao, SavedFormValueDaoComponent}
-import uk.ac.warwick.tabula.data.model.{StudentMember, Module, Assignment, Feedback}
+import uk.ac.warwick.tabula.data.model.{Module, Assignment, Feedback}
 import uk.ac.warwick.userlookup.User
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.JavaImports._
@@ -20,7 +20,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 		assignment.addDefaultFeedbackFields()
 		val module = new Module
 
-		val student = new User("student")
+		val student = new User("student"){setWarwickId("student")}
 		val marker = new User("marker")
 		val currentUser = new CurrentUser(marker, marker)
 
@@ -77,7 +77,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 		new Fixture {
 			val existingFeedback = new Feedback("student")
 			existingFeedback.id = "existingFeedback"
-			assignment.feedbacks = Seq(existingFeedback)
+			assignment.feedbacks.add(existingFeedback)
 
 			when(command.savedFormValueDao.get(feedbackField, existingFeedback)) thenReturn None
 
