@@ -45,10 +45,7 @@ abstract class ViewProfileController extends ProfilesController {
 	def getViewMeetingRecordCommand(studentCourseDetails: Option[StudentCourseDetails], relationshipType: StudentRelationshipType): Option[Command[Seq[MeetingRecord]]] = {
 		studentCourseDetails match {
 			case Some(scd: StudentCourseDetails) => restricted(ViewMeetingRecordCommand(scd, optionalCurrentMember, relationshipType))
-			case None => {
-				logger.warn("No studentCourseDetails found")
-				None
-			}
+			case None => None
 		}
 	}
 
@@ -56,7 +53,7 @@ abstract class ViewProfileController extends ProfilesController {
 		studentCourseDetails: Option[StudentCourseDetails],
 		openMeetingId: String,
 		agentId: String,
-		profiledStudentMember: uk.ac.warwick.tabula.data.model.StudentMember): uk.ac.warwick.tabula.web.Mav = {
+		profiledStudentMember: StudentMember): Mav = {
 		val isSelf = (profiledStudentMember.universityId == user.universityId)
 
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes

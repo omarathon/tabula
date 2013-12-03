@@ -28,13 +28,8 @@ class ViewProfileByCourseDetailsController extends ViewProfileController {
 	@ModelAttribute("viewProfileCommandForStudentCourseDetails")
 	def viewProfileCommandForStudentCourseDetails(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails)
 		=  {
-			studentCourseDetails match {
-				case scd: StudentCourseDetails => {
-					scd.student match {
-						case student: StudentMember => new ViewProfileCommand(user, student)
-						case _ => throw new ItemNotFoundException
-					}
-				}
+			mandatory(studentCourseDetails).student match {
+				case student: StudentMember => new ViewProfileCommand(user, student)
 				case _ => throw new ItemNotFoundException
 			}
 	}
@@ -46,7 +41,7 @@ class ViewProfileByCourseDetailsController extends ViewProfileController {
 		@RequestParam(value = "meeting", required = false) openMeetingId: String,
 		@RequestParam(defaultValue = "", required = false) agentId: String): Mav = {
 
-		val profiledStudentMember = profileCmd.apply
+		val profiledStudentMember = profileCmd.apply()
 		viewProfileForCourse(Some(studentCourseDetails), openMeetingId, agentId, profiledStudentMember)
 	}
 }
