@@ -11,6 +11,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
 import javax.validation.Valid
 import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
+import uk.ac.warwick.userlookup.User
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/marker/feedback/online/moderation/{student}"))
@@ -19,7 +20,7 @@ class OnlineModerationController extends CourseworkController {
 	validatesSelf[OnlineModerationCommand]
 
 	@ModelAttribute("command")
-	def command(@PathVariable student: Member, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
+	def command(@PathVariable student: User, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
 		OnlineModerationCommand(module, assignment, student, currentUser)
 
 	@RequestMapping(method = Array(GET, HEAD))

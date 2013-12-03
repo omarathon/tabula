@@ -14,9 +14,10 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.FinaliseFeedbackComm
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.ModeratorRejectedNotification
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
+import uk.ac.warwick.userlookup.User
 
 object OnlineModerationCommand {
-	def apply(module: Module, assignment: Assignment, student: Member, currentUser: CurrentUser) =
+	def apply(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser) =
 		new OnlineModerationCommand(module, assignment, student, currentUser)
 			with ComposableCommand[MarkerFeedback]
 			with OnlineFeedbackFormPermissions
@@ -34,7 +35,7 @@ object OnlineModerationCommand {
 			}
 }
 
-abstract class OnlineModerationCommand(module: Module, assignment: Assignment, student: Member, currentUser: CurrentUser)
+abstract class OnlineModerationCommand(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser)
 	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, currentUser)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] with ModerationState with UserAware {
 
@@ -42,18 +43,18 @@ abstract class OnlineModerationCommand(module: Module, assignment: Assignment, s
 
 	val user = currentUser.apparentUser
 
-	def markerFeedback = assignment.getMarkerFeedback(student.universityId, user)
+	def markerFeedback = assignment.getMarkerFeedback(student.getWarwickId, user)
 
 	copyState(markerFeedback, copyModerationFieldsFrom)
 
 	def applyInternal(): MarkerFeedback = {
 
 		// find the parent feedback or make a new one
-		val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == student.universityId).getOrElse({
+		val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == student.getWarwickId).getOrElse({
 			val newFeedback = new Feedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = user.getWarwickId
-			newFeedback.universityId = student.universityId
+			newFeedback.universityId = student.getWarwickId
 			newFeedback.released = false
 			newFeedback
 		})

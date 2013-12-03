@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Feedback, MarkerFeedback, Member, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{FileAttachment, Feedback, MarkerFeedback, Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.services.{ZipServiceComponent, FileAttachmentComponent, FeedbackServiceComponent, AutowiringZipServiceComponent, AutowiringFileAttachmentServiceComponent, AutowiringFeedbackServiceComponent}
@@ -9,9 +9,10 @@ import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
 import uk.ac.warwick.tabula.data.model.MarkingState.InProgress
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.userlookup.User
 
 object OnlineMarkerFeedbackFormCommand {
-	def apply(module: Module, assignment: Assignment, student: Member, currentUser: CurrentUser) =
+	def apply(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser) =
 		new OnlineMarkerFeedbackFormCommand(module, assignment, student, currentUser)
 			with ComposableCommand[MarkerFeedback]
 			with MarkerFeedbackStateCopy
@@ -27,24 +28,24 @@ object OnlineMarkerFeedbackFormCommand {
 		}
 }
 
-abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assignment, student: Member, currentUser: CurrentUser)
+abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser)
 	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, currentUser)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] {
 
 	self: FeedbackServiceComponent with ZipServiceComponent 	with MarkerFeedbackStateCopy =>
 
-	def markerFeedback = assignment.getMarkerFeedback(student.universityId, currentUser.apparentUser)
+	def markerFeedback = assignment.getMarkerFeedback(student.getWarwickId, currentUser.apparentUser)
 
 	copyState(markerFeedback)
 
 	def applyInternal(): MarkerFeedback = {
 
 		// find the parent feedback or make a new one
-		val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == student.universityId).getOrElse({
+		val parentFeedback = assignment.feedbacks.asScala.find(_.universityId == student.getWarwickId).getOrElse({
 			val newFeedback = new Feedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = currentUser.apparentId
-			newFeedback.universityId = student.universityId
+			newFeedback.universityId = student.getWarwickId
 			newFeedback.released = false
 			newFeedback
 		})

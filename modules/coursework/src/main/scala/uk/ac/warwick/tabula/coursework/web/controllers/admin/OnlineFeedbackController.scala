@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import scala.Some
 import uk.ac.warwick.tabula.data.model.MarkingMethod.ModeratedMarking
+import uk.ac.warwick.userlookup.User
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/online"))
@@ -75,7 +76,7 @@ class OnlineFeedbackFormController extends CourseworkController {
 	validatesSelf[OnlineFeedbackFormCommand]
 
 	@ModelAttribute("command")
-	def command(@PathVariable student: Member, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
+	def command(@PathVariable student: User, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
 		OnlineFeedbackFormCommand(module, assignment, student, currentUser)
 
 	@RequestMapping(method = Array(GET, HEAD))
@@ -104,7 +105,7 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 	validatesSelf[OnlineMarkerFeedbackFormCommand]
 
 	@ModelAttribute("command")
-	def command(@PathVariable student: Member, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
+	def command(@PathVariable student: User, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
 		OnlineMarkerFeedbackFormCommand(module, assignment, student, currentUser)
 
 	@RequestMapping(method = Array(GET, HEAD))

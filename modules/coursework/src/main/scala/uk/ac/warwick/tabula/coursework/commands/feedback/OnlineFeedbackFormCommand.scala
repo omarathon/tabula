@@ -12,10 +12,11 @@ import uk.ac.warwick.tabula.data.{AutowiringSavedFormValueDaoComponent, SavedFor
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.userlookup.User
 
 
 object OnlineFeedbackFormCommand {
-	def apply(module: Module, assignment: Assignment, student: Member, currentUser: CurrentUser) =
+	def apply(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser) =
 		new OnlineFeedbackFormCommand(module, assignment, student, currentUser)
 			with ComposableCommand[Feedback]
 			with OnlineFeedbackFormPermissions
@@ -28,13 +29,13 @@ object OnlineFeedbackFormCommand {
 		}
 }
 
-abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment, student: Member, currentUser: CurrentUser)
+abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser)
 	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, currentUser)
 	with CommandInternal[Feedback] with Appliable[Feedback] {
 
 	self: FeedbackServiceComponent with SavedFormValueDaoComponent with FileAttachmentComponent with ZipServiceComponent =>
 
-	def feedback = assignment.findFullFeedback(student.universityId)
+	def feedback = assignment.findFullFeedback(student.getWarwickId)
 
 	feedback match {
 		case Some(f) => copyFrom(f)
@@ -48,11 +49,11 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 
 	def applyInternal(): Feedback = {
 
-		val feedback = assignment.findFeedback(student.universityId).getOrElse({
+		val feedback = assignment.findFeedback(student.getWarwickId).getOrElse({
 			val newFeedback = new Feedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = currentUser.apparentId
-			newFeedback.universityId = student.universityId
+			newFeedback.universityId = student.getWarwickId
 			newFeedback.released = false
 			newFeedback
 		})
@@ -204,7 +205,7 @@ trait OnlineFeedbackFormPermissions extends RequiresPermissionsChecking {
 }
 
 trait OnlineFeedbackStudentState {
-	val student: Member
+	val student: User
 	val assignment: Assignment
 	var mark: String = _
 	var grade: String = _
@@ -218,7 +219,7 @@ trait OnlineFeedbackFormDescription[A] extends Describable[A] {
 	this: OnlineFeedbackState with OnlineFeedbackStudentState =>
 
 	def describe(d: Description) {
-		d.studentIds(Seq(student.universityId))
+		d.studentIds(Seq(student.getWarwickId))
 		d.assignment(assignment)
 	}
 }

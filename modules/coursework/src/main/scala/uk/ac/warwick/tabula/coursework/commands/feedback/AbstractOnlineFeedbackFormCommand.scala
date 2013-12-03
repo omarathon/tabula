@@ -2,16 +2,17 @@ package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.data.model.{Member, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.commands.SelfValidating
 import org.springframework.validation.{Errors, BindingResult}
+import uk.ac.warwick.userlookup.User
 
-abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignment: Assignment, val student: Member, val currentUser: CurrentUser)
+abstract class AbstractOnlineFeedbackFormCommand(val module: Module, val assignment: Assignment, val student: User, val currentUser: CurrentUser)
 	extends OnlineFeedbackState with OnlineFeedbackStudentState with BindListener with SelfValidating {
 
-	def submission = assignment.findSubmission(student.universityId)
+	def submission = assignment.findSubmission(student.getWarwickId)
 
 	def submissionState = {
 		submission match {
