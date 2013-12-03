@@ -46,7 +46,7 @@
 
 	<#if ((studentCourseDetails.relationships(relationshipType))![])?size gt 0>
 		<#local relationships = studentCourseDetails.relationships(relationshipType) />
-	
+
 		<h4>${relationshipType.agentRole?cap_first}<#if relationships?size gt 1>s</#if></h4>
 
 		<#if relationships?size gt 0 && can.do_with_selector("Profiles.StudentRelationship.Create", profile, relationshipType) && acceptsChanges>
@@ -75,7 +75,7 @@
 				<#else>
 					<#local agent = relationship.agentMember />
 
-					<@fmt.relation_photo member relationship "tinythumbnail" />
+					<@fmt.relation_photo profile relationship "tinythumbnail" />
 
 					<h5>
 						${agent.fullName!relationshipType.agentRole?cap_first}
@@ -112,7 +112,7 @@
 			</a>
 		</#if>
 	</#if>
-	
+
 	<@meeting_macros.list studentCourseDetails meetings relationshipType />
 </section>
 </#macro>

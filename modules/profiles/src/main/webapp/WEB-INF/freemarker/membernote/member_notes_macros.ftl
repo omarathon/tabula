@@ -1,13 +1,21 @@
 <#escape x as x?html>
 	<#macro member_note_list memberNotes>
-
 		<#local canDeletePurgeMemberNote = can.do("MemberNotes.Delete", profile) />
 		<#local canEditMemberNote = can.do("MemberNotes.Update", profile) />
 		<#local canCreateMemberNote = can.do("MemberNotes.Create", profile) />
 
 		<div class="list-controls">
 			<#if canCreateMemberNote>
-				<a class="btn-like create" data-toggle="modal" data-target="#note-modal" href="#note-modal" data-url="<@routes.create_member_note profile/>" title="Create new note"><i class="icon-edit"></i> New administrative note</a>
+				<a class="btn-like create"
+					data-toggle="modal"
+					data-target="#note-modal"
+					href="#note-modal"
+					data-url="<@routes.create_member_note profile/>"
+					title="Create new note"
+				>
+						<i class="icon-edit"></i>
+						New administrative note
+				</a>
 			</#if>
 			<a class="toggle-all-details btn-like open-all-details" title="Expand all notes"><i class="icon-plus"></i> Expand all</a>
 			<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all notes"><i class="icon-minus"></i> Collapse all</a>
