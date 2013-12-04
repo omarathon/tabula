@@ -5,15 +5,15 @@ import uk.ac.warwick.tabula.data.model.{Assignment, MarkerFeedback, SingleRecipi
 import uk.ac.warwick.tabula.web.views.TextRenderer
 import uk.ac.warwick.tabula.coursework.web.Routes
 
-object ReleaseToMarkerNotifcation {
+object ReleaseToMarkerNotification {
 	val templateLocation = "/WEB-INF/freemarker/emails/released_to_marker_notification.ftl"
 }
-class ReleaseToMarkerNotifcation(val agent: User, val recipient: User, val _object: Seq[MarkerFeedback], assignment: Assignment, isFirstMarker: Boolean)
+class ReleaseToMarkerNotification(val agent: User, val recipient: User, val _object: Seq[MarkerFeedback], assignment: Assignment, isFirstMarker: Boolean)
 	extends Notification[Seq[MarkerFeedback]] with SingleRecipientNotification {
 
 	this: TextRenderer =>
 
-	import ReleaseToMarkerNotifcation._
+	import ReleaseToMarkerNotification._
 
 	val templateVerb: Option[String] = {
 		if(isFirstMarker) {

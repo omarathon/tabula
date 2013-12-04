@@ -4,6 +4,7 @@ import uk.ac.warwick.tabula.commands.{UserAware, Notifies}
 import uk.ac.warwick.tabula.data.model.{Notification, Assignment, MarkerFeedback}
 import uk.ac.warwick.tabula.services.UserLookupComponent
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 
@@ -28,15 +29,12 @@ trait FeedbackReleasedNotifier[A] extends Notifies[A, Seq[MarkerFeedback]] {
 
 		markerMap.filterNot(_._1 == "unassigned").map{ case (usercode, markerFeedbacks) =>
 			val recepient = userLookup.getUserByUserId(usercode)
-			new ReleaseToMarkerNotifcation(user, recepient, markerFeedbacks, assignment, isFirstMarker) with FreemarkerTextRenderer
+			new ReleaseToMarkerNotification(user, recepient, markerFeedbacks, assignment, isFirstMarker) with FreemarkerTextRenderer
 		}.toSeq
 	}
 }
 
 trait ReleasedState {
-
-	import uk.ac.warwick.tabula.JavaImports._
-
 	val assignment: Assignment
 	var newReleasedFeedback: JList[MarkerFeedback] = JArrayList()
 }

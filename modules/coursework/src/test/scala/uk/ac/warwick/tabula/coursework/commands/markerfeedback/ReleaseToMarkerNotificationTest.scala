@@ -5,7 +5,7 @@ import uk.ac.warwick.userlookup.User
 import org.mockito.Mockito._
 import org.mockito.{ArgumentCaptor, Matchers}
 import uk.ac.warwick.tabula.data.model.{ModeratedMarkingWorkflow, Feedback, Assignment, MarkerFeedback}
-import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.ReleaseToMarkerNotifcation
+import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.ReleaseToMarkerNotification
 import uk.ac.warwick.tabula.coursework.MockRenderer
 
 class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
@@ -13,7 +13,7 @@ class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
 	val TEST_CONTENT = "test"
 
 	def createNotification(agent: User, recipient: User, _object: Seq[MarkerFeedback], assignment: Assignment, isFirstMarker: Boolean) = {
-		val n = new ReleaseToMarkerNotifcation(agent, recipient, _object, assignment, isFirstMarker) with MockRenderer
+		val n = new ReleaseToMarkerNotification(agent, recipient, _object, assignment, isFirstMarker) with MockRenderer
 		when(n.mockRenderer.renderTemplate(any[String],any[Any])).thenReturn(TEST_CONTENT)
 		n
 	}
