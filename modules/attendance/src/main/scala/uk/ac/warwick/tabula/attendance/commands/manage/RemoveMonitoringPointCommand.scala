@@ -54,11 +54,9 @@ trait RemoveMonitoringPointValidation extends SelfValidating {
 		val checkpoints = monitoringPointService.getCheckpointsByStudent(mp.pointSet.points.asScala)
 		if (checkpoints.isEmpty) false
 		else {
-			val studentsWithCheckpoints = checkpoints.map{
-			case (student , checkpoint) => (student)
-		}
-		monitoringPointService.findReports(studentsWithCheckpoints, mp.pointSet.asInstanceOf[MonitoringPointSet].academicYear,
-			termService.getTermFromAcademicWeek(mp.validFromWeek, mp.pointSet.asInstanceOf[MonitoringPointSet].academicYear).getTermTypeAsString).size > 0
+			val studentsWithCheckpoints = checkpoints.map { case (student , checkpoint) => student}
+			monitoringPointService.findReports(studentsWithCheckpoints, mp.pointSet.asInstanceOf[MonitoringPointSet].academicYear,
+					termService.getTermFromAcademicWeek(mp.validFromWeek, mp.pointSet.asInstanceOf[MonitoringPointSet].academicYear).getTermTypeAsString).size > 0
 		}
 	}
 }

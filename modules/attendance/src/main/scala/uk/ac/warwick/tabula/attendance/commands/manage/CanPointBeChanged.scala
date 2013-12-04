@@ -21,7 +21,7 @@ trait CanPointBeChanged extends MonitoringPointServiceComponent {
 	// TAB-752 have any students already been submitted for this term
 	private def anyStudentsHaveBeenReported(point: MonitoringPoint, year: AcademicYear, period: String): Boolean = {
 		val checkpoints = monitoringPointService.getCheckpointsByStudent(point.pointSet.points.asScala)
-		val studentsWithCheckpoints = checkpoints.map{case(student , checkpoint) => (student)}
+		val studentsWithCheckpoints = checkpoints.map { case (student , checkpoint) => student}
 		monitoringPointService.findReports(studentsWithCheckpoints, year, period).size > 0
 	}
 

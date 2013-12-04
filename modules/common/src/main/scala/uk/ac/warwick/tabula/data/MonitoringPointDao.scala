@@ -20,7 +20,6 @@ trait AutowiringMonitoringPointDaoComponent extends MonitoringPointDaoComponent 
 }
 
 trait MonitoringPointDao {
-
 	def getPointById(id: String): Option[MonitoringPoint]
 	def getSetById(id: String): Option[MonitoringPointSet]
 	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint]): Seq[(StudentMember, MonitoringCheckpoint)]

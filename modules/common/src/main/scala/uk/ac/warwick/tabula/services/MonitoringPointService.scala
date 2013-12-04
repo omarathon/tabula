@@ -21,7 +21,6 @@ trait AutowiringMonitoringPointServiceComponent extends MonitoringPointServiceCo
 }
 
 trait MonitoringPointService {
-
 	def saveOrUpdate(monitoringPoint : MonitoringPoint)
 	def delete(monitoringPoint : MonitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
@@ -79,8 +78,6 @@ trait MonitoringPointService {
 	def findUnreportedReports: Seq[MonitoringPointReport]
 	def markReportAsPushed(report: MonitoringPointReport): Unit
 	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport]
-
-
 }
 
 
