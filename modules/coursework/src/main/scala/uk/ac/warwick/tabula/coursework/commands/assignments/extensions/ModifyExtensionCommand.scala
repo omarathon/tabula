@@ -59,10 +59,8 @@ class EditExtensionCommand(module: Module, assignment: Assignment, val extension
 	})
 }
 
-class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, extension: Extension, submitter: CurrentUser, studentMember: StudentMember)
+class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, extension: Extension, submitter: CurrentUser)
 	extends EditExtensionCommand(module, assignment, extension, submitter) {
-
-	val student: StudentMember = studentMember
 
 	PermissionCheck(Permissions.Extension.ReviewRequest, extension)
 }

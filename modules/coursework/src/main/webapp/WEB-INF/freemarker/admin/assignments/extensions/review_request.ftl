@@ -64,7 +64,7 @@
 						</details>
 					</#if>
 
-
+					<#if student?has_content >
 					<details>
 						<summary><h5>Student Contact Details</h5></summary>
 						<ul class="unstyled">
@@ -83,6 +83,19 @@
 						</ul>
 
 					</details>
+					<#else>
+						<details>
+							<summary><h5>Contact Details</h5></summary>
+							<ul class="unstyled">
+								<li>
+									<h6>Email Address</h6>
+								${(email)!"Not available"}
+								</li>
+							</ul>
+
+						</details>
+					</#if>
+
 					<#if relationships?has_content >
 						<details>
 							<summary><h5>Student Relationships</h5></summary>
@@ -102,7 +115,7 @@
 						</details>
 					</#if>
 
-					<#if studentCourseDetails.route?? >
+					<#if studentCourseDetails?has_content >
 					<details>
 						<summary><h5>Student Course Details</h5></summary>
 						<ul class="unstyled">
