@@ -198,9 +198,9 @@ class ReviewExtensionRequestController extends ExtensionController {
 
 		val user = userLookup.getUserByWarwickUniId(cmd.extension.universityId)
 		val student = profileService.getMemberByUniversityId(cmd.extension.universityId)
+		val studentRelationships = relationshipService.allStudentRelationshipTypes
 
 		val extraInfo = student.flatMap { _.mostSignificantCourseDetails.map { scd =>
-			val studentRelationships = relationshipService.allStudentRelationshipTypes
 			val relationships = studentRelationships.map(x => (x.description, relationshipService.findCurrentRelationships(x,scd.sprCode))).toMap
 
 			Map(

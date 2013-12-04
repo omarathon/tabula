@@ -30,9 +30,10 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 	PermissionCheck(Permissions.Extension.MakeRequest, assignment)
 
 	val basicInfo = Map("moduleManagers" -> module.managers.users)
+	val studentRelationships = relationshipService.allStudentRelationshipTypes
 
 	val extraInfo = basicInfo ++ (submitter.profile.flatMap { _.mostSignificantCourseDetails.map { scd =>
-		val studentRelationships = relationshipService.allStudentRelationshipTypes
+
 		val relationships = studentRelationships.map(x => (x.description, relationshipService.findCurrentRelationships(x,scd.sprCode))).toMap
 
 		//Pick only the parts of scd required since passing the whole object fails due to the session not being available to load lazy objects
