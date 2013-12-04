@@ -76,6 +76,14 @@
 	// we use extend() to add to any existing variable rather than clobber it
 	window.Profiles = jQuery.extend(window.Profiles, exports);
 
+	// make chevron rotate when "More details" clicked
+    $(function() {
+		$(".expandable-course-details").on("click", "h6", function() {
+			$(this).find("i").toggleClass("icon-chevron-right").toggleClass("icon-chevron-down").toggleClass("expanded");
+		});
+	});
+
+
 	// MEETING RECORD STUFF
 	$(function() {
 		function scrollToOpenDetails() {

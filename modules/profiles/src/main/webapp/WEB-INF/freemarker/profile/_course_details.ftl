@@ -37,8 +37,8 @@
 				<tbody>
 					<#if (studentCourseDetails.route)??>
 						<tr>
-							<th>Route code</th>
-							<td>${(studentCourseDetails.route.code?upper_case)!}
+							<th>Route</th>
+							<td>${(studentCourseDetails.route.name)!} (${(studentCourseDetails.route.code?upper_case)!})
 							</td>
 						</tr>
 					</#if>
@@ -49,18 +49,6 @@
 							</td>
 						</tr>
 					</#if>
-					<#if (studentCourseDetails.route)??>
-						<tr>
-							<th>UG/PG</th>
-							<td>${(studentCourseDetails.route.degreeType.toString)!}
-							</td>
-						</tr>
-					</#if>
-					<tr>
-						<th>Attendance</th>
-						<td>${(studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.fullNameToDisplay?cap_first)!}
-						</td>
-					</tr>
 					<#if !isSelf>
 						<tr>
 							<th>Status</th>
@@ -69,21 +57,27 @@
 						</tr>
 					</#if>
 					<tr>
-						<th>Year of study</th>
-						<td>${(studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}
-						</td>
+						<th>Description</th>
+						<td>
+							${(studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.fullNameToDisplay?replace(" ", "-")?cap_first)!}
+							${((studentCourseDetails.route.degreeType.toString)!)?lower_case},
+							year ${(studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}
 					</tr>
 				</tbody>
 			</table>
 		</div>
 	</div>
+
 	<br />
-	<div class="panel-group" id="expandable-course-details">
+
+	<!-- expandable course details -->
+
+	<div class="panel-group expandable-course-details">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h6 class="panel-title">
 					<i class="icon-chevron-right icon-fixed-width"></i>
-					<a data-toggle="collapse" data-parent="#expandable-course-details" href="#more-course-details">
+					<a data-toggle="collapse" data-parent=".expandable-course-details" href="#more-course-details">
 						More Details
 					</a>
 				</h6>
@@ -95,21 +89,9 @@
 						<div class="col1">
 							<table class="profile-or-course-info">
 								<tbody>
-									<#if (studentCourseDetails.route)??>
-										<tr>
-											<th>Route name</th>
-											<td>${(studentCourseDetails.route.name)!}
-											</td>
-										</tr>
-									</#if>
 									<tr>
 										<th>Intended award</th>
 											<td>${(studentCourseDetails.awardCode)!}</td>
-									</tr>
-									<tr>
-										<th>Course join code (SITS)</th>
-										<td>${studentCourseDetails.scjCode}
-										</td>
 									</tr>
 									<#if !isSelf>
 										<tr>
@@ -118,11 +100,6 @@
 											</td>
 										</tr>
 									</#if>
-									<tr>
-										<th>Year of study</th>
-										<td>${(studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}
-										</td>
-									</tr>
 							 		<tr>
 										<th>Length of course</th>
 										<td>
@@ -153,6 +130,11 @@
 											<#elseif studentCourseDetails.expectedEndDate??>
 												<@fmt.date date=studentCourseDetails.expectedEndDate includeTime=false/> (expected)
 											</#if>
+										</td>
+									</tr>
+									<tr>
+										<th>Course join code</th>
+										<td>${studentCourseDetails.scjCode}
 										</td>
 									</tr>
 								</tbody>
