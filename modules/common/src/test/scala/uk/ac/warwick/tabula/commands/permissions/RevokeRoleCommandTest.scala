@@ -9,18 +9,30 @@ import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.SecurityService
-import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import org.mockito.Matchers._
 import uk.ac.warwick.tabula.permissions.Permission
 import scala.reflect.ClassTag
+import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 
 class RevokeRoleCommandTest extends TestBase with Mockito {
 	
 	val permissionsService = mock[PermissionsService]
+	val securityService = mock[SecurityService]
+
+	// a role with a single permission to keep things simple
+	val singlePermissionsRoleDefinition = new BuiltInRoleDefinition(){
+		override def description="test"
+		GrantsScopedPermission(
+			Permissions.Department.ArrangeModules)
+		def canDelegateThisRolesPermissions: JBoolean = false
+	}
 	
 	private def command[A <: PermissionsTarget: ClassTag](scope: A) = {
 		val cmd = new RevokeRoleCommand(scope)
 		cmd.permissionsService = permissionsService
+		cmd.securityService = securityService
 		
 		cmd
 	}
@@ -29,11 +41,11 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in", "IT Services")
 		
 		val cmd = command(dept)
-		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
+		cmd.roleDefinition = singlePermissionsRoleDefinition
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cusebr")
 		
-		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (None)
+		permissionsService.getGrantedRole(dept, singlePermissionsRoleDefinition) returns (None)
 				
 		// Doesn't blow up, just a no-op
 		cmd.applyInternal() should be (null)
@@ -43,21 +55,21 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in", "IT Services")
 		
 		val cmd = command(dept)
-		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
+		cmd.roleDefinition = singlePermissionsRoleDefinition
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cusebr")
 		
-		val existing = GrantedRole(dept, DepartmentalAdministratorRoleDefinition)
+		val existing = GrantedRole(dept, singlePermissionsRoleDefinition)
 		existing.users.addUser("cuscao")
 		existing.users.addUser("cuscav")
 		existing.users.addUser("cusebr")
 		
-		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (Some(existing))
+		permissionsService.getGrantedRole(dept, singlePermissionsRoleDefinition) returns (Some(existing))
 				
 		val grantedPerm = cmd.applyInternal()
 		(grantedPerm.eq(existing)) should be (true)
 		
-		grantedPerm.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
+		grantedPerm.roleDefinition should be (singlePermissionsRoleDefinition)
 		grantedPerm.users.includeUsers.size() should be (1)
 		grantedPerm.users.includes("cuscav") should be (false)
 		grantedPerm.users.includes("cusebr") should be (false)
@@ -69,16 +81,17 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in", "IT Services")
 		
 		val cmd = command(dept)
-		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
+		cmd.roleDefinition = singlePermissionsRoleDefinition
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cusebr")
 		
-		val existing = GrantedRole(dept, DepartmentalAdministratorRoleDefinition)
+		val existing = GrantedRole(dept, singlePermissionsRoleDefinition)
 		existing.users.addUser("cuscao")
 		existing.users.addUser("cusebr")
 		existing.users.addUser("cuscav")
 		
-		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (Some(existing))
+		permissionsService.getGrantedRole(dept, singlePermissionsRoleDefinition) returns (Some(existing))
+		securityService.canDelegate(currentUser, Permissions.Department.ArrangeModules, dept) returns true
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -90,13 +103,14 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in", "IT Services")
 		
 		val cmd = command(dept)
-		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
+		cmd.roleDefinition = singlePermissionsRoleDefinition
 		
-		val existing = GrantedRole(dept, DepartmentalAdministratorRoleDefinition)
+		val existing = GrantedRole(dept, singlePermissionsRoleDefinition)
 		existing.users.addUser("cuscao")
 		existing.users.addUser("cusebr")
 		
-		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (Some(existing))
+		permissionsService.getGrantedRole(dept, singlePermissionsRoleDefinition) returns (Some(existing))
+		securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, dept) returns true
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -111,15 +125,16 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in", "IT Services")
 		
 		val cmd = command(dept)
-		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
+		cmd.roleDefinition = singlePermissionsRoleDefinition
 		cmd.usercodes.add("cuscav")
 		cmd.usercodes.add("cuscao")
 		
-		val existing = GrantedRole(dept, DepartmentalAdministratorRoleDefinition)
+		val existing = GrantedRole(dept, singlePermissionsRoleDefinition)
 		existing.users.addUser("cuscao")
 		existing.users.addUser("cusebr")
 		
-		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (Some(existing))
+		permissionsService.getGrantedRole(dept, singlePermissionsRoleDefinition) returns (Some(existing))
+		securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, dept) returns true
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -146,6 +161,29 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("roleDefinition")
 		errors.getFieldError.getCode should be ("NotEmpty")
+	}}
+	
+	@Test def cantRevokeWhatYouDontHave { withUser("cuscav", "0672089") {
+		val dept = Fixtures.department("in", "IT Services")
+		
+		val cmd = command(dept)
+		cmd.roleDefinition = singlePermissionsRoleDefinition
+		cmd.usercodes.add("cusebr")
+		
+		val existing = GrantedRole(dept, singlePermissionsRoleDefinition)
+		existing.users.addUser("cuscao")
+		existing.users.addUser("cusebr")
+		
+		permissionsService.getGrantedRole(dept, singlePermissionsRoleDefinition) returns (Some(existing))
+		securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, dept) returns false
+
+		val errors = new BindException(cmd, "command")
+		cmd.validate(errors)
+
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("roleDefinition")
+		errors.getFieldError.getCode should be ("permissions.cantRevokeWhatYouDontHave")
 	}}
 
 }

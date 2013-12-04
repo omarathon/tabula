@@ -15,5 +15,5 @@ case object RouteAuditorRoleDefinition extends BuiltInRoleDefinition {
 		MonitoringPoints.View
 	)
 
-	def canDelegateThisRolesPermissions: JavaImports.JBoolean = true
+	def canDelegateThisRolesPermissions: JavaImports.JBoolean = false
 }
