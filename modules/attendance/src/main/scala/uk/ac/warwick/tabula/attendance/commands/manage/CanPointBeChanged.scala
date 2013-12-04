@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.attendance.commands.manage
 import uk.ac.warwick.tabula.services.{TermServiceComponent, MonitoringPointServiceComponent}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.AcademicYear
 
 trait CanPointBeChanged extends MonitoringPointServiceComponent with TermServiceComponent {
 
@@ -18,13 +19,19 @@ trait CanPointBeChanged extends MonitoringPointServiceComponent with TermService
 			!anyStudentsReportedForRelatedPointsThisTerm(point)
 	}
 
+	def canPointBeAdded(point: MonitoringPoint) = !anyStudentsReportedForRelatedPointsThisTerm(point)
+
 	// TAB-752 have any students already been submitted for this term
 	def anyStudentsReportedForRelatedPointsThisTerm (point: MonitoringPoint): Boolean = {
-		val checkpoints = monitoringPointService.getCheckpointsByStudent(point.pointSet.points.asScala)
+		anyStudentsReportedForThisTerm(point.pointSet.asInstanceOf[MonitoringPointSet], point.validFromWeek, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+	}
+
+	def anyStudentsReportedForThisTerm (set: MonitoringPointSet, validFromWeek: Int, academicYear: AcademicYear): Boolean = {
+		val checkpoints = monitoringPointService.getCheckpointsByStudent(set.points.asScala)
 		if (checkpoints.isEmpty) return false
 		val studentsWithCheckpoints = checkpoints.map { case (student , checkpoint) => student}
-		monitoringPointService.findReports(studentsWithCheckpoints, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear,
-			termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear).getTermTypeAsString).size > 0
+		monitoringPointService.findReports(studentsWithCheckpoints, academicYear,
+			termService.getTermFromAcademicWeek(validFromWeek, academicYear).getTermTypeAsString).size > 0
 	}
 
 }
