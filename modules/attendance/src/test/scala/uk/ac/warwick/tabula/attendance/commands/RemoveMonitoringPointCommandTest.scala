@@ -7,6 +7,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.attendance.commands.manage.{RemoveMonitoringPointState, RemoveMonitoringPointValidation, RemoveMonitoringPointCommand}
+import scala.collection.JavaConverters._
 
 class RemoveMonitoringPointCommandTest extends TestBase with Mockito {
 
@@ -25,6 +26,7 @@ class RemoveMonitoringPointCommandTest extends TestBase with Mockito {
 		monitoringPoint.name = existingName
 		monitoringPoint.validFromWeek = existingWeek
 		monitoringPoint.requiredFromWeek = existingWeek
+		monitoringPoint.pointSet = set
 		val otherMonitoringPoint = new MonitoringPoint
 		val otherExistingName = "Point 2"
 		val otherExistingWeek = 2
@@ -33,6 +35,7 @@ class RemoveMonitoringPointCommandTest extends TestBase with Mockito {
 		otherMonitoringPoint.requiredFromWeek = otherExistingWeek
 		set.points = JArrayList(monitoringPoint, otherMonitoringPoint)
 		val command = new RemoveMonitoringPointCommand(set, monitoringPoint) with CommandTestSupport
+		command.monitoringPointService.getCheckpointsByStudent(set.points.asScala) returns Seq.empty
 	}
 
 	@Test
@@ -60,6 +63,8 @@ class RemoveMonitoringPointCommandTest extends TestBase with Mockito {
 	def validateHasCheckpointsNoChanges() {
 		new Fixture {
 			command.monitoringPointService.countCheckpointsForPoint(monitoringPoint) returns 2
+
+
 			command.confirm = true
 			var errors = new BindException(command, "command")
 			command.validate(errors)

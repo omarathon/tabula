@@ -21,6 +21,7 @@ trait AutowiringMonitoringPointServiceComponent extends MonitoringPointServiceCo
 }
 
 trait MonitoringPointService {
+
 	def saveOrUpdate(monitoringPoint : MonitoringPoint)
 	def delete(monitoringPoint : MonitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
@@ -77,6 +78,9 @@ trait MonitoringPointService {
 	def findNonReported(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[StudentMember]
 	def findUnreportedReports: Seq[MonitoringPointReport]
 	def markReportAsPushed(report: MonitoringPointReport): Unit
+	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport]
+
+
 }
 
 
@@ -221,6 +225,10 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def markReportAsPushed(report: MonitoringPointReport): Unit = {
 		report.pushedDate = DateTime.now
 		monitoringPointDao.saveOrUpdate(report)
+	}
+
+	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport] = {
+		monitoringPointDao.findReports(students, year, period)
 	}
 
 }

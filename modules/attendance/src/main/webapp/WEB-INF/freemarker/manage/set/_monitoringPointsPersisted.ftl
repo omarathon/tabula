@@ -9,7 +9,7 @@
 						<div class="span12">
 							<div class="pull-right">
 								<#local noUpdate = !command.canPointBeUpdated(point)/>
-								<#local noRemove = !command.canPointBeRemoved(point)/>
+								<#local noRemove = !command.canPointBeRemoved(point, point.pointSet.academicYear, term)/>
 								<a class="btn btn-primary edit-point <#if noUpdate>disabled</#if>" <#if noUpdate>title="Unavailable"</#if> href="<@routes.updatePoint point />">
 									Update
 								</a>

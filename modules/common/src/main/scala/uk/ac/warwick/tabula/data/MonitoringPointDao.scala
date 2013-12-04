@@ -20,6 +20,7 @@ trait AutowiringMonitoringPointDaoComponent extends MonitoringPointDaoComponent 
 }
 
 trait MonitoringPointDao {
+
 	def getPointById(id: String): Option[MonitoringPoint]
 	def getSetById(id: String): Option[MonitoringPointSet]
 	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint]): Seq[(StudentMember, MonitoringCheckpoint)]
@@ -63,6 +64,7 @@ trait MonitoringPointDao {
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
 	def findNonReported(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[StudentMember]
 	def findUnreportedReports: Seq[MonitoringPointReport]
+	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport]
 }
 
 
@@ -428,4 +430,21 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def findUnreportedReports: Seq[MonitoringPointReport] = {
 		session.newCriteria[MonitoringPointReport].add(isNull("pushedDate")).seq
 	}
+
+	def findReports(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[MonitoringPointReport] = {
+		if (students.isEmpty)
+			return Seq()
+
+		val c = session.newCriteria[MonitoringPointReport]
+			.add(is("academicYear", academicYear))
+			.add(is("monitoringPeriod", period))
+
+		val or = disjunction()
+		students.map(_.universityId)
+			.grouped(Daoisms.MaxInClauseCount)
+			.foreach { ids => or.add(in("student.universityId", ids.asJavaCollection)) }
+		c.add(or)
+		c.seq
+	}
+
 }

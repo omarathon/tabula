@@ -6,8 +6,9 @@ import org.joda.time.base.BaseDateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.util.termdates.Term.TermType
 import scala.collection.JavaConverters._
-import org.joda.time.{Interval, DateTime}
+import org.joda.time.{DateTimeConstants, DateMidnight, Interval, DateTime}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 
 trait TermService {
 	def getTermFromDate(date: BaseDateTime): Term
@@ -19,6 +20,7 @@ trait TermService {
 	def getTermFromDateIncludingVacations(date: BaseDateTime): Term
 	def getTermsBetween(start: BaseDateTime, end: BaseDateTime): Seq[Term]
 	def getAcademicWeekForAcademicYear(date: BaseDateTime, academicYear: AcademicYear): Int
+	def getTermFromAcademicWeek(weekNumber: Int, academicYear: AcademicYear): Term
 }
 
 object TermService {
@@ -104,6 +106,13 @@ class TermServiceImpl extends TermService {
 			Term.WEEK_NUMBER_AFTER_END
 		else
 			termContainingYearStart.getAcademicWeekNumber(date)
+	}
+
+	def getTermFromAcademicWeek(weekNumber: Int, academicYear: AcademicYear): Term = {
+		val approxStartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
+		val day = DayOfWeek.Thursday
+		val weeksForYear = getAcademicWeeksForYear(approxStartDate).toMap
+		getTermFromDate(weeksForYear(weekNumber).getStart.withDayOfWeek(day.jodaDayOfWeek))
 	}
 
 }
