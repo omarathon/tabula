@@ -167,8 +167,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		val dept = Fixtures.department("in", "IT Services")
 		
 		val cmd = command(dept)
-		cmd.roleDefinition = DepartmentalAdministratorRoleDefinition
-		cmd.usercodes.add("cuscav")
+		cmd.roleDefinition = singlePermissionsRoleDefinition
 		cmd.usercodes.add("cusebr")
 		
 		val existing = GrantedRole(dept, singlePermissionsRoleDefinition)
@@ -182,7 +181,7 @@ class RevokeRoleCommandTest extends TestBase with Mockito {
 		cmd.validate(errors)
 
 		errors.hasErrors should be (true)
-		(errors.getErrorCount >= 1) should be (true)
+		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("roleDefinition")
 		errors.getFieldError.getCode should be ("permissions.cantRevokeWhatYouDontHave")
 	}}
