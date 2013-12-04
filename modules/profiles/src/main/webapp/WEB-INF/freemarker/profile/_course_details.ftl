@@ -57,11 +57,19 @@
 						</tr>
 					</#if>
 					<tr>
-						<th>Description</th>
-						<td>
-							${(studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.fullNameToDisplay?replace(" ", "-")?cap_first)!}
-							${((studentCourseDetails.route.degreeType.toString)!)?lower_case},
-							year ${(studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}
+						<th>Attendance</th>
+						<td>${(studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.fullNameAliased)!}
+						</td>
+					</tr>
+					<tr>
+						<th>UG/PG</th>
+						<td>${(studentCourseDetails.route.degreeType.toString)!}
+						</td>
+					</tr>
+					<tr>
+						<th>Year of study</th>
+						<td>${(studentCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}
+						</td>
 					</tr>
 				</tbody>
 			</table>

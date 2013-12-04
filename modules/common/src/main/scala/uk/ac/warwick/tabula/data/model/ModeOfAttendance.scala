@@ -27,9 +27,9 @@ class ModeOfAttendance {
 
 	override def toString = fullName.toLowerCase()
 
-	def fullNameToDisplay = {
+	def fullNameAliased = {
 		if (code.equals("F"))
-			"full time"
+			"Full-time"
 		else fullName
 	}
 
