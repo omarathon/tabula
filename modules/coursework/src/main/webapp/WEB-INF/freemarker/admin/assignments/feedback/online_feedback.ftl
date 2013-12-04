@@ -12,9 +12,9 @@
 	<div class="form onlineFeedback">
 	    <#assign submit_url>
 			<#if isMarking!false>
-				<@routes.markerOnlinefeedbackform assignment command.student.universityId />
+				<@routes.markerOnlinefeedbackform assignment command.student.warwickId />
 			<#else>
-				<@routes.onlinefeedbackform assignment command.student.universityId />
+				<@routes.onlinefeedbackform assignment command.student.warwickId />
 			</#if>
 		</#assign>
 		<@f.form cssClass="form-horizontal double-submit-protection"

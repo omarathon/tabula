@@ -19,7 +19,7 @@
 			<#include "_moderation_summary.ftl">
 		<#else>
 			<#assign submit_url>
-				<@routes.markerModerationform assignment command.student.universityId />
+				<@routes.markerModerationform assignment command.student.warwickId />
 			</#assign>
 			<@f.form cssClass="form-horizontal double-submit-protection" method="post" enctype="multipart/form-data"
 				commandName="command" action="${submit_url}">
