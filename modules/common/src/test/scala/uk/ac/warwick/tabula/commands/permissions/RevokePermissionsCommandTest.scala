@@ -14,10 +14,12 @@ import scala.reflect.ClassTag
 class RevokePermissionsCommandTest extends TestBase with Mockito {
 	
 	val permissionsService = mock[PermissionsService]
+	val securityService = mock[SecurityService]
 	
 	private def command[A <: PermissionsTarget: ClassTag](scope: A) = {
 		val cmd = new RevokePermissionsCommand(scope)
 		cmd.permissionsService = permissionsService
+		cmd.securityService = securityService
 		
 		cmd
 	}
@@ -80,6 +82,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		existing.users.addUser("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
+		securityService.can(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -100,6 +103,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		existing.users.addUser("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
+		securityService.can(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -126,6 +130,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		existing.users.addUser("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
+		securityService.can(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -153,6 +158,32 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		errors.getErrorCount should be (1)
 		errors.getFieldError.getField should be ("permission")
 		errors.getFieldError.getCode should be ("NotEmpty")
+	}}
+	
+	@Test def cantRevokeWhatYouDontHave { withUser("cuscav", "0672089") {
+		val dept = Fixtures.department("in", "IT Services")
+		
+		val cmd = command(dept)
+		cmd.permission = Permissions.Department.ManageExtensionSettings
+		cmd.usercodes.add("cuscav")
+		cmd.usercodes.add("cusebr")
+		cmd.overrideType = GrantedPermission.Allow
+		
+		val existing = GrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true)
+		existing.users.addUser("cuscav")
+		existing.users.addUser("cusebr")
+		existing.users.addUser("cuscao")
+		
+		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
+		securityService.can(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (false)
+		
+		val errors = new BindException(cmd, "command")
+		cmd.validate(errors)
+
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldError.getField should be ("permission")
+		errors.getFieldError.getCode should be ("permissions.cantRevokeWhatYouDontHave")
 	}}
 	
 }

@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.commands.permissions
 
 import scala.collection.JavaConversions._
-
 import org.springframework.validation.Errors
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
@@ -17,12 +15,15 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import scala.reflect.ClassTag
+import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.services.SecurityService
 
 class RevokePermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) extends Command[GrantedPermission[A]] with SelfValidating {
 
 	PermissionCheck(Permissions.RolesAndPermissions.Delete, scope)
 	
-	var permissionsService = Wire.auto[PermissionsService]
+	var permissionsService = Wire[PermissionsService]
+	var securityService = Wire[SecurityService]
 	
 	var permission: Permission = _
 	var usercodes: JList[String] = JArrayList()
@@ -41,17 +42,25 @@ class RevokePermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) exten
 	}
 	
 	def validate(errors: Errors) {
-		if (usercodes.find { _.hasText }.isEmpty) {
+		if (usercodes.forall { _.isEmptyOrWhitespace }) {
 			errors.rejectValue("usercodes", "NotEmpty")
-		} else grantedPermission map { _.users } map { users => 
-			for (code <- usercodes) {
-				if (!users.includes(code)) {
-					errors.rejectValue("usercodes", "userId.notingroup", Array(code), "")
+		} else {
+			grantedPermission.map { _.users }.foreach { users => 
+				for (code <- usercodes) {
+					if (!users.includes(code)) {
+						errors.rejectValue("usercodes", "userId.notingroup", Array(code), "")
+					}
 				}
 			}
 		}
 		
+		// Ensure that the current user can do everything that they're trying to grant permissions for
+		val user = RequestInfo.fromThread.get.user
+		
 		if (permission == null) errors.rejectValue("permission", "NotEmpty")
+		else if (!user.sysadmin && !securityService.can(user, permission, scope)) {
+			errors.rejectValue("permission", "permissions.cantRevokeWhatYouDontHave", Array(permission, scope), "")
+		}
 	}
 
 	def describe(d: Description) = d.properties(

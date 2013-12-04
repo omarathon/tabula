@@ -32,5 +32,5 @@ case object RouteAuditorRoleDefinition extends BuiltInRoleDefinition {
 		Profiles.Read.SmallGroups
 	)
 
-	def canDelegateThisRolesPermissions: JavaImports.JBoolean = true
+	def canDelegateThisRolesPermissions: JavaImports.JBoolean = false
 }

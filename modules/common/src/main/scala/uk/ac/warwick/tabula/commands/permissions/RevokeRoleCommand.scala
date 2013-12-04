@@ -1,9 +1,7 @@
 package uk.ac.warwick.tabula.commands.permissions
 
 import scala.collection.JavaConversions._
-
 import org.springframework.validation.Errors
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
@@ -17,6 +15,8 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import scala.reflect.ClassTag
+import uk.ac.warwick.tabula.RequestInfo
+import uk.ac.warwick.tabula.services.SecurityService
 
 class RevokeRoleCommand[A <: PermissionsTarget: ClassTag](val scope: A) extends Command[GrantedRole[A]] with SelfValidating {
 	
@@ -27,7 +27,8 @@ class RevokeRoleCommand[A <: PermissionsTarget: ClassTag](val scope: A) extends 
 
 	PermissionCheck(Permissions.RolesAndPermissions.Delete, scope)
 	
-	var permissionsService = Wire.auto[PermissionsService]
+	var permissionsService = Wire[PermissionsService]
+	var securityService = Wire[SecurityService]
 	
 	var roleDefinition: RoleDefinition = _
 	var usercodes: JList[String] = JArrayList()
@@ -45,17 +46,31 @@ class RevokeRoleCommand[A <: PermissionsTarget: ClassTag](val scope: A) extends 
 	}
 	
 	def validate(errors: Errors) {
-		if (usercodes.find { _.hasText }.isEmpty) {
+		if (usercodes.forall { _.isEmptyOrWhitespace }) {
 			errors.rejectValue("usercodes", "NotEmpty")
-		} else grantedRole map { _.users } map { users => 
-			for (code <- usercodes) {
-				if (!users.includes(code)) {
-					errors.rejectValue("usercodes", "userId.notingroup", Array(code), "")
+		} else {
+			grantedRole.map { _.users }.foreach { users => 
+				for (code <- usercodes) {
+					if (!users.includes(code)) {
+						errors.rejectValue("usercodes", "userId.notingroup", Array(code), "")
+					}
 				}
 			}
 		}
 		
-		if (roleDefinition == null) errors.rejectValue("roleDefinition", "NotEmpty")
+		// Ensure that the current user can delegate everything that they're trying to revoke permissions for
+		if (roleDefinition == null) {
+			errors.rejectValue("roleDefinition", "NotEmpty")
+		} else {
+			if (!roleDefinition.isAssignable) errors.rejectValue("roleDefinition", "permissions.roleDefinition.notAssignable")
+			val user = RequestInfo.fromThread.get.user
+
+			val permissionsToRevoke = roleDefinition.allPermissions(Some(scope)).keys
+			val deniedPermissions = permissionsToRevoke.filterNot(securityService.canDelegate(user,_,scope))
+			if ((!deniedPermissions.isEmpty) && (!user.god)) {
+				errors.rejectValue("roleDefinition", "permissions.cantRevokeWhatYouDontHave", Array(deniedPermissions.mkString("\n"), scope),"")
+			}
+		}
 	}
 
 	def describe(d: Description) = d.properties(
