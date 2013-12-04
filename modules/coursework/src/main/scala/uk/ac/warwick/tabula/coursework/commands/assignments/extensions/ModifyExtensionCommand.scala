@@ -111,7 +111,7 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 			val item = new ExtensionItem
 			item.universityId =  extension.universityId
 			item.approvalComments = extension.approvalComments
-			item.expiryDate = extension.expiryDate
+			item.expiryDate = Option(extension.expiryDate).getOrElse(extension.requestedExpiryDate)
 			item
 		}
 
