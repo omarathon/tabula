@@ -26,8 +26,8 @@ class GrantRoleCommand[A <: PermissionsTarget : ClassTag](val scope: A) extends 
 
 	PermissionCheck(Permissions.RolesAndPermissions.Create, scope)
 
-	var permissionsService = Wire.auto[PermissionsService]
-	var securityService = Wire.auto[SecurityService]
+	var permissionsService = Wire[PermissionsService]
+	var securityService = Wire[SecurityService]
 	var roleDefinition: RoleDefinition = _
 	var usercodes: JList[String] = JArrayList()
 
@@ -44,36 +44,30 @@ class GrantRoleCommand[A <: PermissionsTarget : ClassTag](val scope: A) extends 
 	}
 
 	def validate(errors: Errors) {
-		if (usercodes.find {
-			_.hasText
-		}.isEmpty) {
+		if (usercodes.forall { _.isEmptyOrWhitespace }) {
 			errors.rejectValue("usercodes", "NotEmpty")
-		} else grantedRole map {
-			_.users
-		} map {
-			users =>
+		} else {
+			grantedRole.map { _.users }.foreach { users =>
 				val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
-					override def alreadyHasCode = usercodes.find {
-						users.includes(_)
-					}.isDefined
+					override def alreadyHasCode = usercodes.exists { users.includes(_) }
 				}
-
+				
 				usercodeValidator.validate(errors)
+			}
 		}
 
 		// Ensure that the current user can delegate everything that they're trying to grant permissions for
-		if (roleDefinition == null) errors.rejectValue("roleDefinition", "NotEmpty")
-		else {
+		if (roleDefinition == null) {
+			errors.rejectValue("roleDefinition", "NotEmpty")
+		} else {
 			if (!roleDefinition.isAssignable) errors.rejectValue("roleDefinition", "permissions.roleDefinition.notAssignable")
 			val user = RequestInfo.fromThread.get.user
-
 
 			val permissionsToAdd = roleDefinition.allPermissions(Some(scope)).keys
 			val deniedPermissions = permissionsToAdd.filterNot(securityService.canDelegate(user,_,scope))
 			if ((!deniedPermissions.isEmpty) && (!user.god)) {
 				errors.rejectValue("roleDefinition", "permissions.cantGiveWhatYouDontHave", Array(deniedPermissions.mkString("\n"), scope),"")
 			}
-
 		}
 	}
 
