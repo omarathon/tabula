@@ -7,6 +7,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Department, Route}
 import uk.ac.warwick.tabula.JavaImports.{JHashSet, JArrayList}
 import uk.ac.warwick.tabula.attendance.commands.manage.{UpdateMonitoringPointState, UpdateMonitoringPointValidation, UpdateMonitoringPointCommand}
+import scala.collection.JavaConverters._
 
 class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 
@@ -29,6 +30,7 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 		monitoringPoint.name = existingName
 		monitoringPoint.validFromWeek = existingWeek
 		monitoringPoint.requiredFromWeek = existingWeek
+		monitoringPoint.pointSet = set
 		val otherMonitoringPoint = new MonitoringPoint
 		otherMonitoringPoint.id = "2"
 		val otherExistingName = "Point 2"
@@ -38,6 +40,7 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 		otherMonitoringPoint.requiredFromWeek = otherExistingWeek
 		set.points = JArrayList(monitoringPoint, otherMonitoringPoint)
 		val command = new UpdateMonitoringPointCommand(set, monitoringPoint) with CommandTestSupport
+		command.monitoringPointService.getCheckpointsByStudent(set.points.asScala) returns Seq.empty
 	}
 
 	@Test

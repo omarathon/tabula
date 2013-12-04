@@ -39,7 +39,7 @@ trait RemoveMonitoringPointValidation extends SelfValidating {
 
 	override def validate(errors: Errors) {
 
-		if (anyStudentsAlreadyReported(point)) {
+		if (anyStudentsReportedForRelatedPointsThisTerm(point)) {
 			errors.reject("monitoringPoint.hasReportedCheckpoints.remove")
 		} else if (point.sentToAcademicOffice) {
 			errors.reject("monitoringPoint.sentToAcademicOffice.points.remove")
@@ -50,15 +50,6 @@ trait RemoveMonitoringPointValidation extends SelfValidating {
 		if (!confirm) errors.rejectValue("confirm", "monitoringPoint.delete.confirm")
 	}
 
-	private def anyStudentsAlreadyReported(mp: MonitoringPoint) = {
-		val checkpoints = monitoringPointService.getCheckpointsByStudent(mp.pointSet.points.asScala)
-		if (checkpoints.isEmpty) false
-		else {
-			val studentsWithCheckpoints = checkpoints.map { case (student , checkpoint) => student}
-			monitoringPointService.findReports(studentsWithCheckpoints, mp.pointSet.asInstanceOf[MonitoringPointSet].academicYear,
-					termService.getTermFromAcademicWeek(mp.validFromWeek, mp.pointSet.asInstanceOf[MonitoringPointSet].academicYear).getTermTypeAsString).size > 0
-		}
-	}
 }
 
 trait RemoveMonitoringPointPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
