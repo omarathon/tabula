@@ -11,7 +11,6 @@ import org.springframework.core.convert.converter.Converter
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import java.net.URLEncoder
 
 /** A MarkingWorkflow defines how an assignment will be marked, including who
   * will be the markers and what rules should be used to decide how submissions
@@ -122,13 +121,10 @@ trait AssignmentMarkerMap {
 	// returns all submissions made by students assigned to this marker
 	private def getSubmissionsFromMap(assignment: Assignment, marker: User): Seq[Submission] = {
 		val students = Option(assignment.markerMap.get(marker.getUserId))
-		students match {
-			case Some(ug) => {
-				val submissionIds = ug.includeUsers
-				assignment.submissions.filter(s => submissionIds.exists(_ == s.userId))
-			}
-			case None => Seq()
-		}
+		students.map { ug =>
+			val submissionIds = ug.includeUsers
+			assignment.submissions.filter(s => submissionIds.exists(_ == s.userId))
+		}.getOrElse(Seq())
 	}
 
 }
@@ -169,21 +165,4 @@ class MarkingMethodUserType extends AbstractStringUserType[MarkingMethod]{
 
 class StringToMarkingMethod extends Converter[String, MarkingMethod]{
 	def convert(string:String):MarkingMethod = MarkingMethod.fromCode(string)
-}
-
-object MarkingRoutes {
-
-	private def encoded(string: String) = URLEncoder.encode(string, "UTF-8")
-
-	private def assignmentroot(assignment: Assignment) =
-		"/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), assignment.id)
-
-	object onlineMarkerFeedback {
-		def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online"
-	}
-
-	object onlineModeration {
-		def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online/moderation"
-	}
-
 }

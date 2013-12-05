@@ -6,6 +6,7 @@ import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.tabula.data.model.MarkingMethod.StudentsChooseMarker
 import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.web.Routes
 
 @Entity
 @DiscriminatorValue(value="StudentsChooseMarker")
@@ -22,28 +23,25 @@ class StudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarker {
 
 	override def studentsChooseMarker = true
 
-	def onlineMarkingUrl(assignment: Assignment, marker: User) = MarkingRoutes.onlineMarkerFeedback(assignment)
+	def onlineMarkingUrl(assignment: Assignment, marker: User) = Routes.onlineMarkerFeedback(assignment)
 
-	def getStudentsFirstMarker(assignment: Assignment, universityId: String) = assignment.markerSelectField match {
-		case Some(field) => {
+	def getStudentsFirstMarker(assignment: Assignment, universityId: String): Option[String] =
+		assignment.markerSelectField.flatMap { field =>
 			val submission = submissionService.getSubmissionByUniId(assignment, universityId)
 			submission.flatMap(_.getValue(field).map(_.value))
 		}
-		case _ => None
-	}
+
 
 	def getStudentsSecondMarker(assignment: Assignment, universityId: String) = None
 
-	def getSubmissions(assignment: Assignment, user: User) = assignment.markerSelectField match {
-		case Some(markerField) => {
-			val releasedSubmission = assignment.submissions.asScala.filter(_.isReleasedForMarking)
-			releasedSubmission.filter(submission => {
-				submission.getValue(markerField) match {
-					case Some(subValue) => user.getUserId == subValue.value
-					case None => false
-				}
-			})
-		}
-		case None => Seq()
-	}
+	def getSubmissions(assignment: Assignment, user: User) = assignment.markerSelectField.map { markerField =>
+		val releasedSubmission = assignment.submissions.asScala.filter(_.isReleasedForMarking)
+		releasedSubmission.filter(submission => {
+			submission.getValue(markerField) match {
+				case Some(subValue) => user.getUserId == subValue.value
+				case None => false
+			}
+		})
+	}.getOrElse(Nil)
+
 }
