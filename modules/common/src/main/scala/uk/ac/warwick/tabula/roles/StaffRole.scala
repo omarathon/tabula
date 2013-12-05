@@ -18,12 +18,19 @@ case object StaffRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
 	GrantsGlobalPermission(
 		Profiles.Search,
-		Profiles.Read.Core // As per discussion in TAB-753, anyone at the University can see anyone else's core information
+		Profiles.Read.Core, // As per discussion in TAB-753, anyone at the University can see anyone else's core information
+		
+		// TAB-1619
+		Profiles.Read.Usercode,
+		Profiles.Read.StudentCourseDetails.Core,
+		Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType])
 	)
 
 	GrantsScopedPermission(
-		Profiles.Read.StudentCourseDetails.Core,
 		Profiles.Read.StudentCourseDetails.Status,
-		Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType])
+		
+		// TAB-1619
+		Profiles.Read.Timetable,
+		Profiles.Read.SmallGroups
 	)
 }
