@@ -1036,3 +1036,30 @@ jQuery(function($){
 	});
 
 });
+
+// component switcher at the top of every screen (other than homepage)
+jQuery(function($){
+	var loadContent = function() {
+		var $el = $(this);
+		if ($el.data('loaded')) {
+			return $el.data('popover').$tip.find('.popover-content').html();
+		} else {
+			$.get('/', function (data) {
+				$el.data('popover').$tip.find('.popover-content').html(data);
+				$el.data('loaded', true);
+				$el.data('popover').show();
+	    }, 'html');
+
+			return 'Loading&hellip;';
+		}
+	};
+
+	$('#site-header .more-link > i').tabulaPopover({
+    html: true,
+    container: '#main-content',
+    trigger: 'click',
+    template: '<div class="popover wide"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>',
+    content: loadContent,
+    placement: 'bottom'
+  });
+});

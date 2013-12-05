@@ -16,12 +16,16 @@ import uk.ac.warwick.tabula.data.ModuleDao
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.web.controllers.BaseController
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/settings"))
-class UserSettingsController extends HomeController {
+class UserSettingsController extends BaseController {
 
 	validatesSelf[UserSettingsCommand]
+	
+	hideDeletedItems
 	
 	var userSettingsService = Wire.auto[UserSettingsService]
 	var moduleService = Wire[ModuleAndDepartmentService]

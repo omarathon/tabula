@@ -14,6 +14,8 @@ case object RouteAuditorRoleDefinition extends BuiltInRoleDefinition {
 	override def description = "Route Auditor"
 
 	GrantsScopedPermission( 
+		Route.Administer,
+			
 		MonitoringPoints.View,
 		
 		Profiles.Read.Core,
