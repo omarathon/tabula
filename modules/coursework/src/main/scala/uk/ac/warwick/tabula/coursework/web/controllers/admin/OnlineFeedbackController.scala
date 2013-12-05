@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.CurrentUser
 import javax.validation.Valid
 import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
 import uk.ac.warwick.tabula.coursework.web.Routes
-import scala.Some
 import uk.ac.warwick.tabula.data.model.MarkingMethod.ModeratedMarking
 import uk.ac.warwick.userlookup.User
 

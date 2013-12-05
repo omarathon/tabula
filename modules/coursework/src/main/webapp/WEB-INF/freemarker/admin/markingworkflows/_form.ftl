@@ -32,7 +32,7 @@ Common form fields.
 
 <@form.labelled_row "markingMethod" "Marking Method">
 
-	<#assign isDisabled><#if view_type=="edit">true<#else>false</#if></#assign>
+	<#assign isDisabled = (view_type == "edit") />
 
 	<@f.select disabled="${isDisabled}" path="markingMethod">
 		<option <#if !command.markingMethod?has_content>selected="selected"</#if> value=""></option>

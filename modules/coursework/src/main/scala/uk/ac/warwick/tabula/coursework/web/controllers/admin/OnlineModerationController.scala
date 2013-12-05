@@ -4,9 +4,8 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.coursework.commands.feedback.OnlineModerationCommand
-import uk.ac.warwick.tabula.data.model.{Assignment, Module, Member}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
-import scala.Array
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
 import javax.validation.Valid

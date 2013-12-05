@@ -19,12 +19,15 @@ class UserConverter extends TwoWayConverter[String, User] {
 	var userLookup = Wire.auto[UserLookupService]
 
 	override def convertRight(userId: String) = {
-		val userFromCode = userLookup.getUserByUserId(userId)
-		if (userFromCode == null && UniversityId.isValid(userId))
-			userLookup.getUserByWarwickUniId(userId)
-		else
-			userFromCode
+		if (UniversityId.isValid(userId)) {
+			Option(userLookup.getUserByWarwickUniId(userId))
+				.filter { _.isFoundUser } // We don't consider not-found users
+				.getOrElse(userLookup.getUserByUserId(userId))
+		} else {
+			userLookup.getUserByUserId(userId)
+		}
 	}
+
 	override def convertLeft(user: User) = (Option(user) map { _.getUserId }).orNull 
 
 }
