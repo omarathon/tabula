@@ -42,7 +42,9 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 
 		Profiles.MeetingRecord.ReadDetails(PermissionsSelector.Any[StudentRelationshipType]),
 
-		SmallGroups.Read
+		SmallGroups.Read,
+		SmallGroupEvents.Register,
+		SmallGroupEvents.ViewRegister
 	)
 	def canDelegateThisRolesPermissions:JBoolean = true
 

@@ -173,6 +173,10 @@
 
 	(function($) {
 
+	$('#extension-model').on('ajaxComplete', function(){
+		$(this).find('details').details();
+	})
+
 	$('.extensionListTable').tablesorter({
 		sortList: [[1,0]],
 		headers: { 4: { sorter: false } },
