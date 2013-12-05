@@ -18,8 +18,7 @@ trait MarkingWorkflowWorld extends TestFixtures {
 	generateSubmission(assignment, "0672089", "cuscav")
 	addFeedback(assignment)
 
-	val markingWorkflow = new MarkingWorkflow()
-	markingWorkflow.markingMethod = MarkingMethod.SeenSecondMarking
+	val markingWorkflow = new SeenSecondMarkingWorkflow()
 	markingWorkflow.department = assignment.module.department
 	markingWorkflow.firstMarkers = makeUserGroup("cuslaj", "cuscav")
 	markingWorkflow.secondMarkers = makeUserGroup("cuslat", "cuday")

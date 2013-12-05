@@ -170,14 +170,16 @@
 
 		var show = function($div, data) {
 			if (data === 'init') $div.show(); // no animation on init
-			else $div.stop().slideDown('fast');
-			$div.trigger('tabula.slideMoreOptions.shown');
+			else $div.stop().slideDown('fast', function(){
+				$div.trigger('tabula.slideMoreOptions.shown');
+			});
 		};
 
 		var hide = function($div, data) {
 			if (data === 'init') $div.hide(); // no animation on init
-			else $div.stop().slideUp('fast');
-			$div.trigger('tabula.slideMoreOptions.hidden');
+			else $div.stop().slideUp('fast' , function(){
+				$div.trigger('tabula.slideMoreOptions.hidden');
+			});
 		}
 
 		// for checkboxes, there will just be one target - the current element (which will have the same name as itself).

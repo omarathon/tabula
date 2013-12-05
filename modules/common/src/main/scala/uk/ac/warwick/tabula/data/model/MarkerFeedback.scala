@@ -18,6 +18,19 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments {
 		feedback = parent
 	}
 
+	def getFeedbackPosition = feedback.getFeedbackPosition(this)
+
+	def getMarkerUsercode: Option[String] = {
+		val student = feedback.universityId
+		val assignment = feedback.assignment
+		val workflow = assignment.markingWorkflow
+		getFeedbackPosition match {
+			case Some(FirstFeedback) => workflow.getStudentsFirstMarker(assignment, student)
+			case Some(SecondFeedback) => workflow.getStudentsSecondMarker(assignment, student)
+			case _ => None
+		}
+	}
+
 	@OneToOne(fetch = FetchType.LAZY, optional = false, cascade=Array())
 	@JoinColumn(name = "feedback_id")
 	var feedback: Feedback = _
@@ -33,6 +46,8 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments {
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingStateUserType")
 	var state : MarkingState = _
+
+	var rejectionComments: String = _
 
 	@OneToMany(mappedBy = "markerFeedback", fetch = FetchType.LAZY, cascade=Array(ALL))
 	@BatchSize(size=200)

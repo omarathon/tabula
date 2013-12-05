@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, Re
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.coursework.commands.assignments.MarkingCompletedCommand
 import uk.ac.warwick.tabula.coursework.web.Routes
 import org.springframework.validation.Errors
 import javax.validation.Valid
 import uk.ac.warwick.tabula.data.Transactions._
+import uk.ac.warwick.tabula.coursework.commands.assignments.MarkingCompletedCommand
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/marker/marking-completed"))
@@ -20,7 +20,7 @@ class MarkingCompletedController extends CourseworkController {
 	            @PathVariable("assignment")
 	            assignment: Assignment,
 	            user: CurrentUser) =
-		new MarkingCompletedCommand(module, assignment, user, assignment.isFirstMarker(user.apparentUser))
+		MarkingCompletedCommand(module, assignment, user.apparentUser, assignment.isFirstMarker(user.apparentUser))
 
 	validatesSelf[MarkingCompletedCommand]
 

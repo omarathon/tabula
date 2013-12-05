@@ -5,29 +5,33 @@ import scala.Array
 import java.sql.Types
 
 
-sealed abstract class MarkingState(val name: String, val transitionStates: Set[MarkingState]){
-	def canTransitionTo(state: MarkingState): Boolean = state == this || transitionStates.contains(state)
+sealed abstract class MarkingState(val name: String) {
+
+	def transitionStates: Set[MarkingState]
+
+	def canTransitionTo(state: MarkingState): Boolean = {
+		state == this || transitionStates.contains(state)
+	}
+
 	override def toString = name
 }
 
 object MarkingState {
-	// TODO - remove state from submission and delete the received state as it is now redundant
-	case object Received extends MarkingState("Received", Set ())
-	
+
 	// initial state - ready to be distributed to markers
-	case object ReleasedForMarking extends MarkingState("ReleasedForMarking", Set(InProgress, MarkingCompleted))
+	case object ReleasedForMarking extends MarkingState("ReleasedForMarking"){ def transitionStates = Set(InProgress, MarkingCompleted) }
 	// has been downloaded by the marker and is being marked
-	case object InProgress extends MarkingState("InProgress", Set(MarkingCompleted))
+	case object InProgress extends MarkingState("InProgress"){ def transitionStates =  Set(MarkingCompleted) }
+	// the uploaded feedback was rejected by a moderator and must be reviewed
+	case object Rejected extends MarkingState("Rejected"){ def transitionStates = Set(ReleasedForMarking, MarkingCompleted) }
 	// submission has been marked and feedback has been uploaded
-	case object MarkingCompleted extends MarkingState("MarkingCompleted", Set())
-	
-	
-	val values: Set[MarkingState] = Set(Received, ReleasedForMarking, InProgress, MarkingCompleted)
+	case object MarkingCompleted extends MarkingState("MarkingCompleted"){ def transitionStates = Set(Rejected) }
+
+	val values: Set[MarkingState] = Set(ReleasedForMarking, InProgress, MarkingCompleted, Rejected)
+
 
 	def fromCode(code: String): MarkingState =
 		if (code == null) null
-		// Temporary catch old values until we can run the migration to remove these from the DB
-		else if(code == "DownloadedByMarker") InProgress
 		else values.find{_.name == code} match {
 			case Some(state) => state
 			case None => throw new IllegalArgumentException()

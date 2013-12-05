@@ -35,7 +35,7 @@ class CourseworkWorkflowService {
 			if (features.markingWorkflows && assignment.markingWorkflow != null) {
 				stages = stages ++ Seq(ReleaseForMarking, FirstMarking)
 				
-				if (assignment.markingWorkflow.markingMethod == MarkingMethod.SeenSecondMarking) {
+				if (assignment.markingWorkflow.hasSecondMarker) {
 					stages = stages ++ Seq(SecondMarking)
 				}
 			}

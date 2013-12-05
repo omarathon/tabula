@@ -5,7 +5,7 @@
 				<label class="control-label">Feedback</label>
 				<div class="controls">
 					<#list feedback.customFormValues as formValue>
-						<textarea class="big-textarea" disabled="disabled">${formValue.value}</textarea>
+						<textarea class="big-textarea" disabled="disabled">${formValue.value!""}</textarea>
 					</#list>
 				</div>
 			</div>
@@ -15,7 +15,7 @@
 			<label class="control-label">Mark</label>
 			<div class="controls">
 				<div class="input-append">
-					<input type="text" disabled="disabled" value="${feedback.mark}" class="input-small">
+					<input type="text" disabled="disabled" value="${feedback.mark!""}" class="input-small">
 					<span class="add-on">%</span>
 				</div>
 			</div>
@@ -24,7 +24,7 @@
 		<div class="control-group">
 			<label class="control-label">Grade</label>
 			<div class="controls">
-				<input type="text" disabled="disabled" value="${feedback.grade}" class="input-small">
+				<input type="text" disabled="disabled" value="${feedback.grade!""}" class="input-small">
 			</div>
 		</div>
 

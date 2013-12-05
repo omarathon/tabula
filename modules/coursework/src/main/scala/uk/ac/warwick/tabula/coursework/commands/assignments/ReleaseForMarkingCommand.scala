@@ -2,32 +2,39 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.commands.{SelfValidating, Description, Command}
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{FeedbackService, StateService, AssignmentService}
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.services._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.CurrentUser
 import scala.collection.JavaConverters._
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{ReleasedState, FeedbackReleasedNotifier}
+import uk.ac.warwick.tabula.helpers.Logging
 
-class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser) 
-	extends Command[List[Feedback]] with SelfValidating  {
+object ReleaseForMarkingCommand {
+	def apply(module: Module, assignment: Assignment, user: User) =
+		new ReleaseForMarkingCommand(module, assignment, user)
+			with ComposableCommand[List[Feedback]]
+			with ReleaseForMarkingCommandPermissions
+			with ReleaseForMarkingCommandDescription
+			with FirstMarkerReleaseNotifier
+			with AutowiringAssignmentServiceComponent
+			with AutowiringStateServiceComponent
+			with AutowiringFeedbackServiceComponent
+			with AutowiringUserLookupComponent
+}
 
-	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Submission.ReleaseForMarking, assignment)
-	
-	var assignmentService = Wire.auto[AssignmentService]
-	var stateService = Wire.auto[StateService]
-	var feedbackService = Wire[FeedbackService]
 
-	var students: JList[String] = JArrayList()
-	var confirm: Boolean = false
-	var invalidFeedback: JList[Feedback] = JArrayList()
+abstract class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, val user: User)
+	extends CommandInternal[List[Feedback]] with Appliable[List[Feedback]] with ReleaseForMarkingState with ReleasedState
+	with SelfValidating with UserAware {
 
-	var feedbacksUpdated = 0
+	this: AssignmentServiceComponent with StateServiceComponent with FeedbackServiceComponent =>
 
-	def studentsWithKnownMarkers:Seq[String] = students.intersect(assignment.markerMap.values.map(_.users).flatten.map(_.getWarwickId).toSeq)
+	// we must go via the marking workflow directly to determine if the student has a marker - not all workflows use the markerMap on assignment
+	def studentsWithKnownMarkers:Seq[String] = students.filter(assignment.markingWorkflow.studentHasMarker(assignment, _))
 	def unreleasableSubmissions:Seq[String] = (studentsWithoutKnownMarkers ++ studentsAlreadyReleased).distinct
 
 	def studentsWithoutKnownMarkers:Seq[String] = students -- studentsWithKnownMarkers
@@ -39,7 +46,7 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 			val parentFeedback = assignment.feedbacks.find(_.universityId == uniId).getOrElse({
 				val newFeedback = new Feedback
 				newFeedback.assignment = assignment
-				newFeedback.uploaderId = currentUser.apparentId
+				newFeedback.uploaderId = user.getUserId
 				newFeedback.universityId = uniId
 				newFeedback.released = false
 				feedbackService.saveOrUpdate(newFeedback)
@@ -49,19 +56,15 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 		}
 
 		val feedbackToUpdate:Seq[Feedback] = feedbacks -- invalidFeedback
-		feedbackToUpdate foreach (f => stateService.updateState(f.retrieveFirstMarkerFeedback, MarkingState.ReleasedForMarking))
+
+		newReleasedFeedback = feedbackToUpdate map(f => {
+			val markerFeedback = f.retrieveFirstMarkerFeedback
+			stateService.updateState(markerFeedback, MarkingState.ReleasedForMarking)
+			markerFeedback
+		})
+
 		feedbacksUpdated = feedbackToUpdate.size
 		feedbackToUpdate.toList
-	}
-
-	override def describe(d: Description){
-		d.assignment(assignment)
-		.property("students" -> students)
-	}
-
-	override def describeResult(d: Description){
-		d.assignment(assignment)
-		.property("submissionCount" -> feedbacksUpdated)
 	}
 
 	def preSubmitValidation() {
@@ -78,8 +81,42 @@ class ReleaseForMarkingCommand(val module: Module, val assignment: Assignment, c
 
 }
 
-object ReleaseForMarkingCommand{
-	def apply(module: Module, assignment: Assignment, currentUser: CurrentUser):ReleaseForMarkingCommand = {
-		new ReleaseForMarkingCommand(module,assignment, currentUser) 
+trait ReleaseForMarkingState {
+	import uk.ac.warwick.tabula.JavaImports._
+
+	val assignment: Assignment
+	val module: Module
+
+	var students: JList[String] = JArrayList()
+	var confirm: Boolean = false
+	var invalidFeedback: JList[Feedback] = JArrayList()
+
+	var feedbacksUpdated = 0
+}
+
+trait ReleaseForMarkingCommandPermissions extends RequiresPermissionsChecking {
+	self: ReleaseForMarkingState =>
+	def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.Submission.ReleaseForMarking, assignment)
 	}
+}
+
+trait ReleaseForMarkingCommandDescription extends Describable[List[Feedback]] {
+
+	self: ReleaseForMarkingState =>
+
+	override def describe(d: Description){
+		d.assignment(assignment)
+			.property("students" -> students)
+	}
+
+	override def describeResult(d: Description){
+		d.assignment(assignment)
+			.property("submissionCount" -> feedbacksUpdated)
+	}
+}
+
+trait FirstMarkerReleaseNotifier extends FeedbackReleasedNotifier[List[Feedback]] {
+	this: ReleaseForMarkingState with ReleasedState with UserAware with UserLookupComponent with Logging =>
+	def isFirstMarker = true
 }

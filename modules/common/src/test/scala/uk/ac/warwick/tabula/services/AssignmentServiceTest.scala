@@ -693,11 +693,12 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 		session.save(department)
 
-		val workflow1 = new MarkingWorkflow
+		val workflow1 = new StudentsChooseMarkerWorkflow
+
 		workflow1.name = "mw1"
 		workflow1.department = department
 
-		val workflow2 = new MarkingWorkflow
+		val workflow2 = new SeenSecondMarkingWorkflow
 		workflow2.name = "mw2"
 		workflow2.department = department
 

@@ -6,12 +6,15 @@
 		<#assign submission = command.submission />
 		<#include "_submission_summary.ftl">
 	</#if>
+	<#if (isMarking!false) && (isRejected!false)>
+		<#include "_rejection_summary.ftl">
+	</#if>
 	<div class="form onlineFeedback">
 	    <#assign submit_url>
-			<#if isMarker!false>
-				<@routes.markerOnlinefeedbackform assignment command.student.universityId />
+			<#if isMarking!false>
+				<@routes.markerOnlinefeedbackform assignment command.student.warwickId />
 			<#else>
-				<@routes.onlinefeedbackform assignment command.student.universityId />
+				<@routes.onlinefeedbackform assignment command.student.warwickId />
 			</#if>
 		</#assign>
 		<@f.form cssClass="form-horizontal double-submit-protection"

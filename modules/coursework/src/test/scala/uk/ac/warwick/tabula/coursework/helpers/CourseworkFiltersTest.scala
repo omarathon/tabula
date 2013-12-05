@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.coursework.helpers
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
 import uk.ac.warwick.tabula.coursework.commands.assignments.ExtensionListItem
 import uk.ac.warwick.tabula.coursework.commands.assignments.Student
 import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
@@ -22,9 +21,12 @@ import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
 import org.joda.time.DateTimeConstants
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.userlookup.UserLookup
+import org.mockito.Mockito._
+import uk.ac.warwick.tabula.services.{SubmissionService, UserLookupService}
 
 // scalastyle:off magic.number
-class CourseworkFiltersTest extends TestBase {
+class CourseworkFiltersTest extends TestBase with Mockito {
 
 	val department = Fixtures.department("in", "IT Services")
 	val module = Fixtures.module("in101", "Introduction to Web Development")
@@ -431,7 +433,7 @@ class CourseworkFiltersTest extends TestBase {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be (false)
 
-		assignment.markingWorkflow = Fixtures.markingWorkflow("my marking workflow")
+		assignment.markingWorkflow = Fixtures.seenSecondMarkingWorkflow("my marking workflow")
 
 		assignment.collectSubmissions = false
 		filter.applies(assignment) should be (false)
@@ -470,7 +472,9 @@ class CourseworkFiltersTest extends TestBase {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be (false)
 
-		assignment.markingWorkflow = Fixtures.markingWorkflow("my marking workflow")
+		val workflow = Fixtures.studentsChooseMarkerWorkflow("my marking workflow")
+		workflow.submissionService = mock[SubmissionService]
+		assignment.markingWorkflow = workflow
 
 		assignment.collectSubmissions = false
 		filter.applies(assignment) should be (false)
@@ -483,6 +487,7 @@ class CourseworkFiltersTest extends TestBase {
 
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
+		when(workflow.submissionService.getSubmissionByUniId(assignment, "0672089"))thenReturn(Some(submission))
 
 		submission.isReleasedForMarking should be (false)
 
@@ -494,7 +499,6 @@ class CourseworkFiltersTest extends TestBase {
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
 		submission.isReleasedForMarking should be (true)
 
-		assignment.markingWorkflow.markingMethod = MarkingMethod.StudentsChooseMarker
 		val f = new MarkerSelectField
 		f.name = Assignment.defaultMarkerSelectorName
 		assignment.addField(f)
@@ -519,7 +523,7 @@ class CourseworkFiltersTest extends TestBase {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be (false)
 
-		assignment.markingWorkflow = Fixtures.markingWorkflow("my marking workflow")
+		assignment.markingWorkflow = Fixtures.seenSecondMarkingWorkflow("my marking workflow")
 
 		assignment.collectSubmissions = false
 		filter.applies(assignment) should be (false)
@@ -564,15 +568,12 @@ class CourseworkFiltersTest extends TestBase {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be (false)
 
-		assignment.markingWorkflow = Fixtures.markingWorkflow("my marking workflow")
+		assignment.markingWorkflow = Fixtures.seenSecondMarkingWorkflow("my marking workflow")
 
 		assignment.collectSubmissions = false
 		filter.applies(assignment) should be (false)
 
 		assignment.collectSubmissions = true
-		filter.applies(assignment) should be (false)
-
-		assignment.markingWorkflow.markingMethod = MarkingMethod.SeenSecondMarking
 		filter.applies(assignment) should be (true)
 
 		// Valid only if marking is completed
