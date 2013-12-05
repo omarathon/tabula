@@ -13,7 +13,7 @@ class UserConverterTest extends TestBase with Mockito {
 	converter.userLookup = userLookup
 	
 	@Test def validInput {
-		val user = new User { setUserId("cuscav") }
+		val user = new User { setUserId("cuscav"); setFoundUser(true) }
 
 		userLookup.getUserByUserId("cuscav") returns (user)
 
@@ -21,7 +21,7 @@ class UserConverterTest extends TestBase with Mockito {
 	}
 
 	@Test def validFallback {
-		val user = new User { setWarwickId("1170836") }
+		val user = new User { setWarwickId("1170836"); setFoundUser(true) }
 
 		userLookup.getUserByWarwickUniId("1170836") returns (user)
 
