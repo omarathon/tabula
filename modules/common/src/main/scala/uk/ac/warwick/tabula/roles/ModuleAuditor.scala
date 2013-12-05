@@ -12,6 +12,7 @@ case object ModuleAuditorRoleDefinition extends BuiltInRoleDefinition {
 	override def description = "Module Auditor"
 
 	GrantsScopedPermission( 
+		Module.Administer,
 		Module.ManageAssignments,
 		Module.ManageSmallGroups,
 		

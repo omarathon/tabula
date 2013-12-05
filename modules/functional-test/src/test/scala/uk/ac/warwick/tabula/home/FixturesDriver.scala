@@ -8,15 +8,7 @@ import scala.util.parsing.json.JSON
 import scala.language.postfixOps
 import org.joda.time.DateTime
 
-
-trait FixturesDriver {
-
-	lazy val http: Http = new Http with thread.Safety with NoLogging {
-
-		override def make_client = new ThreadSafeHttpClient(new Http.CurrentCredentials(None), maxConnections, maxConnectionsPerRoute) {
-			getParams.setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.IGNORE_COOKIES)
-		}
-	}
+trait FixturesDriver extends SimpleHttpFetching {
 
 	def updateExtensionSettings(departmentCode: String, allow: Boolean = true, managerUserId: String = "") = {
 		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/update/extensionSettings"

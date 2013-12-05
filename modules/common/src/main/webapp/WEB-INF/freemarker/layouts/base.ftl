@@ -84,10 +84,11 @@
 										<span>${component.siteHeader?default('Tabula')}</span>
 									</#if>
 								</#compress></span>
+								<#if !(jumbotron!false)><span class="more-link"><i class="icon-caret-down"></i></span></#if>
 							</h1>
 
 							<h2 id="strapline">
-								<#if jumbotron?? && jumbotron>
+								<#if jumbotron!false>
 									Student management and administration system
 								</#if>
 							</h2>
