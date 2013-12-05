@@ -282,7 +282,7 @@
 			<excluded-url-pattern>/static/*</excluded-url-pattern>
 			<excluded-url-pattern>/favicon.ico</excluded-url-pattern>
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
-			<excluded-url-pattern>/test/up</excluded-url-pattern>
+			<excluded-url-pattern>/test/*</excluded-url-pattern>
 		</mapping>
 		<mapping name="forceSysadmin">
 			<filter ref="forceLoginFilter" />
