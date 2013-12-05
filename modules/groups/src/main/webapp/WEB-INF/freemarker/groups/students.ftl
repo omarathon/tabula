@@ -69,7 +69,7 @@
 		FIXME This doesn't really make sense. If I can take a register for a small group,
 		I can email all the members in it? This is mostly to avoid showing the link to students
 	-->
-	<#if can.do("SmallGroupEvents.Register", group)>
+	<#if command.group?? && can.do("SmallGroupEvents.Register", command.group)>
 		<p>
 			<@fmt.bulk_email_students students=students />
 		</p>
