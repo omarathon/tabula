@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.{ToString, SprCode}
 import org.springframework.dao.DataRetrievalFailureException
+import uk.ac.warwick.tabula.JavaImports._
 
 @Entity
 @AccessType("field")
@@ -41,6 +42,8 @@ class StudentRelationship extends GeneratedId {
 
 	@Column(name = "end_date")
 	var endDate: DateTime = _
+	
+	var percentage: JBigDecimal = null
 
 	// assume that all-numeric value is a member (not proven though)
 	def isAgentMember: Boolean = agent match {

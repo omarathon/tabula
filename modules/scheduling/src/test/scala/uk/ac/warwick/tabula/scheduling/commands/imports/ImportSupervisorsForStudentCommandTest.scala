@@ -64,7 +64,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 	@Test def testCaptureValidSupervisor() {
 		new Environment {
 			// set up importer to return supervisor
-			val codes = Seq(prsCode)
+			val codes = Seq((prsCode, new java.math.BigDecimal("100")))
 			val importer = smartMock[SupervisorImporter]
 			importer.getSupervisorPrsCodes(scjCode) returns codes
 
@@ -82,6 +82,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			rel.agent should be (supervisorUniId)
 			rel.targetSprCode should be (sprCode)
 			rel.relationshipType should be (relationshipType)
+			(rel.percentage: BigDecimal) should be (100)
 		}
 	}
 
@@ -118,7 +119,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			session.saveOrUpdate(existingRelationhip)
 
 			// set up importer to return supervisor
-			val codes = Seq(prsCode)
+			val codes = Seq((prsCode, null))
 			val importer = smartMock[SupervisorImporter]
 			importer.getSupervisorPrsCodes(scjCode) returns codes
 
@@ -136,6 +137,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			rel.agent should be (supervisorUniId)
 			rel.targetSprCode should be (sprCode)
 			rel.relationshipType should be (relationshipType)
+			rel.percentage should be (null)
 		}
 	}
 }
