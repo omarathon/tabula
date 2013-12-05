@@ -3,6 +3,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.UniversityId
 
 /**
  *
@@ -19,7 +20,7 @@ class UserConverter extends TwoWayConverter[String, User] {
 
 	override def convertRight(userId: String) = {
 		val userFromCode = userLookup.getUserByUserId(userId)
-		if (userFromCode == null)
+		if (userFromCode == null && UniversityId.isValid(userId))
 			userLookup.getUserByWarwickUniId(userId)
 		else
 			userFromCode
