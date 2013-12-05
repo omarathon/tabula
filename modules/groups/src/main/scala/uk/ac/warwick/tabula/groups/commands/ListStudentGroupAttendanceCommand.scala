@@ -33,10 +33,10 @@ case class StudentGroupAttendance(
 
 object ListStudentGroupAttendanceCommand {
 	import ViewSmallGroupAttendanceCommand._
-	
+
 	type PerGroupAttendance = SortedMap[SmallGroup, SortedMap[SmallGroupEventOccurrence.WeekNumber, SortedMap[EventInstance, SmallGroupAttendanceState]]]
 	type PerTermAttendance = SortedMap[Term, PerGroupAttendance]
-	
+
 	def apply(member: Member, academicYear: AcademicYear) =
 		new ListStudentGroupAttendanceCommandInternal(member, academicYear)
 			with ComposableCommand[StudentGroupAttendance]
@@ -46,30 +46,32 @@ object ListStudentGroupAttendanceCommand {
 			with ReadOnly with Unaudited
 }
 
-class ListStudentGroupAttendanceCommandInternal(val member: Member, val academicYear: AcademicYear) 
-	extends CommandInternal[StudentGroupAttendance] 
+class ListStudentGroupAttendanceCommandInternal(val member: Member, val academicYear: AcademicYear)
+	extends CommandInternal[StudentGroupAttendance]
 		with ListStudentGroupAttendanceCommandState {
 	self: SmallGroupServiceComponent with TermServiceComponent =>
-		
+
 	import ViewSmallGroupAttendanceCommand._
-	
+
 	implicit val defaultOrderingForGroup = Ordering.by { group: SmallGroup => (group.groupSet.module.code, group.groupSet.name, group.name, group.id) }
 	implicit val defaultOrderingForDateTime = Ordering.by[DateTime, Long] ( _.getMillis )
 	implicit val defaultOrderingForTerm = Ordering.by[Term, DateTime] ( _.getStartDate )
-	
+
 	def applyInternal() = {
 		val user = member.asSsoUser
-		
-		val groups = smallGroupService.findSmallGroupsByStudent(user).filter { group =>
-			!group.groupSet.deleted &&
-			group.groupSet.releasedToStudents &&
-			group.groupSet.academicYear == academicYear &&
-			!group.events.asScala.isEmpty
+
+		val groups = smallGroupService.findSmallGroupsByStudent(user).filter {
+			val x = group =>
+				!group.groupSet.deleted &&
+				group.groupSet.visibleToStudents &&
+				group.groupSet.academicYear == academicYear &&
+				!group.events.asScala.isEmpty
+			x
 		}
-		
+
 		val allInstances = groups.flatMap { group => allEventInstances(group, smallGroupService.findAttendanceByGroup(group)) }
-			
-		val attendance = groupByTerm(allInstances).mapValues { instances => 
+
+		val attendance = groupByTerm(allInstances).mapValues { instances =>
 			val groups = SortedMap((instances.groupBy { case ((event, _), _) => event.group }).toSeq:_*)
 			groups.mapValues { instances =>
 				SortedMap(instances.groupBy { case ((_, week), _) => week }.toSeq:_*).mapValues { instances =>
@@ -77,22 +79,22 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 				}
 			}
 		}
-		
+
 		val missedCountByTerm = attendance.mapValues { groups =>
 			val count = groups.map { case (_, attendanceByInstance) =>
 				attendanceByInstance.values.flatMap(_.values).filter(_ == SmallGroupAttendanceState.Missed).size
 			}
-			
+
 			count.foldLeft(0) { (acc, missedCount) => acc + missedCount }
 		}
-		
-		val termWeeks = SortedMap(attendance.keySet.map { term => 
+
+		val termWeeks = SortedMap(attendance.keySet.map { term =>
 			(term -> WeekRange(
-				termService.getAcademicWeekForAcademicYear(term.getStartDate(), academicYear), 
+				termService.getAcademicWeekForAcademicYear(term.getStartDate(), academicYear),
 				termService.getAcademicWeekForAcademicYear(term.getEndDate(), academicYear)
 			))
 		}.toSeq:_*)
-		
+
 		StudentGroupAttendance(
 			termWeeks,
 			attendance,
@@ -100,20 +102,20 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 			missedCountByTerm
 		)
 	}
-	
+
 	def groupByTerm(instances: Seq[(EventInstance, Option[SmallGroupEventOccurrence])]): SortedMap[Term, Seq[(EventInstance, Option[SmallGroupEventOccurrence])]] = {
 		val approxStartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
 		val day = DayOfWeek.Thursday
 		lazy val weeksForYear = termService.getAcademicWeeksForYear(approxStartDate).toMap
-		
+
 		SortedMap((instances.groupBy { case ((_, week), _) =>
 			val date = weeksForYear(week).getStart.withDayOfWeek(day.jodaDayOfWeek)
 			termService.getTermFromDateIncludingVacations(date)
 		}).toSeq:_*)
 	}
-	
+
 	lazy val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)
-	
+
 	private def isLate(instance: EventInstance): Boolean = instance match {
 		case (_, week: SmallGroupEventOccurrence.WeekNumber) =>
 			week < currentAcademicWeek // only late if week is in the past
