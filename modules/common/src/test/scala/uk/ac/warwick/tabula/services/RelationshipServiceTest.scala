@@ -1,12 +1,10 @@
 package uk.ac.warwick.tabula.services
 
 import scala.collection.JavaConverters.asScalaBufferConverter
-
 import org.joda.time.{DateTime, DateTimeConstants, DateTimeUtils}
 import org.junit.{After, Before}
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
-
 import uk.ac.warwick.tabula.{AppContextTestBase, Fixtures}
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.Mockito
@@ -247,10 +245,42 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 		val m5 = Fixtures.student(universityId = "1000005", userId="student", department=dept1, courseDepartment=dept1, sprStatus=sprFullyEnrolledStatus)
 		val m6 = Fixtures.student(universityId = "1000006", userId="student", department=dept2, courseDepartment=dept2, sprStatus=sprFullyEnrolledStatus)
 
-		profileService.save(m5)
-		profileService.save(m6)
+		session.saveOrUpdate(m5)
+		session.saveOrUpdate(m6)
+
+		val ugCourse = Fixtures.course("UBLAH", "Some UG course")
+		session.save(ugCourse)
+
+		val route1 = Fixtures.route("UXXX", "Some route")
+		route1.department = dept1
+		session.save(route1)
+
+		val route2 = Fixtures.route("UYYY", "Some other route")
+		route2.department = dept2
+		session.save(route2)
+
+		session.flush()
+		session.clear()
+
+		val scd5 = m5.mostSignificantCourse
+		scd5.course = ugCourse
+		scd5.route = route1
+		session.saveOrUpdate(scd5)
+		session.flush()
+		session.clear()
+
+		val scd6 = m6.mostSignificantCourse
+		scd6.course = ugCourse
+		scd6.route = route2
+		session.saveOrUpdate(scd6)
+		session.flush()
+		session.clear()
+
+		session.saveOrUpdate(m5)
+		session.saveOrUpdate(m6)
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		relationshipType.expectedUG = true
 		relationshipService.saveOrUpdate(relationshipType)
 
 		relationshipService.listStudentsWithoutRelationship(relationshipType, dept1) should be (Seq(m5))
@@ -295,6 +325,60 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 
 		relationshipService.relationshipNotPermanentlyWithdrawn(rel1) should be (true)
 		relationshipService.relationshipNotPermanentlyWithdrawn(rel2) should be (false)
+	}
+
+	@Test def testExpectedToHaveRelationship = transactional { tx =>
+		val dept1 = Fixtures.department("pe", "Polar Exploration")
+		val dept2 = Fixtures.department("mi", "Micrology")
+
+		session.saveOrUpdate(dept1)
+		session.saveOrUpdate(dept2)
+
+		val ugCourse = Fixtures.course("UBLAH", "Some UG course")
+		val pgtCourse = Fixtures.course("TBLAH", "Some PGT course")
+		val pgrCourse = Fixtures.course("RBLAH", "Some PGR course")
+
+		session.saveOrUpdate(ugCourse)
+		session.saveOrUpdate(pgtCourse)
+		session.saveOrUpdate(pgrCourse)
+
+		val route1 = Fixtures.route("UXXX", "Some route")
+		route1.department = dept1
+		session.save(route1)
+
+		val route2 = Fixtures.route("UYYY", "Some other route")
+		route2.department = dept2
+		session.save(route2)
+
+		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
+		sitsStatusDao.saveOrUpdate(sprWithdrawnStatus)
+
+		val m1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1, sprStatus=sprFullyEnrolledStatus)
+		m1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
+
+		val scd1 = m1.mostSignificantCourse
+		scd1.course = ugCourse
+		scd1.route = route1
+
+		profileService.save(m1)
+
+		val ptRelType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		ptRelType.expectedUG = true
+		relationshipService.saveOrUpdate(ptRelType)
+
+		relationshipService.expectedToHaveRelationship(ptRelType, dept1)(m1) should be (true)
+
+		val m2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2, sprStatus=sprWithdrawnStatus)
+		m2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
+		profileService.save(m2)
+
+		val scd2 = m2.mostSignificantCourse
+		scd2.course = pgtCourse
+		scd2.route = route2
+
+		session.saveOrUpdate(scd2)
+
+		relationshipService.expectedToHaveRelationship(ptRelType, dept2)(m2) should be (false)
 
 	}
 }

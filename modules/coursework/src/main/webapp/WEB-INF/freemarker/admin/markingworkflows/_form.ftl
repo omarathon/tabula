@@ -34,7 +34,7 @@ Common form fields.
 
 	<#assign isDisabled = (view_type == "edit") />
 
-	<@f.select disabled="${isDisabled}" path="markingMethod">
+	<@f.select disabled="${isDisabled?string('disabled','')}" path="markingMethod">
 		<option <#if !command.markingMethod?has_content>selected="selected"</#if> value=""></option>
 		<option value="StudentsChooseMarker"
 				<#if ((command.markingMethod.toString)!"") = "StudentsChooseMarker">selected="selected"</#if>

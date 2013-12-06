@@ -5,13 +5,9 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.model.StudentRelationship
+import uk.ac.warwick.tabula.data.model.{DegreeType, CourseType, Department, Member, StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.JavaImports._
 
 /**
@@ -153,9 +149,17 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 			.exists(scd => !scd.permanentlyWithdrawn)
 	}
 
-	def studentDepartmentFilterMatches(department: Department)(member: StudentMember) = department.filterRule.matches(member)
+	def studentDepartmentFilterMatches(department: Department)(member: StudentMember)	= department.filterRule.matches(member)
 
 	def studentNotPermanentlyWithdrawn(member: StudentMember) = !member.permanentlyWithdrawn
+
+	def expectedToHaveRelationship(relationshipType: StudentRelationshipType, department: Department)(member: StudentMember) = {
+		member.freshStudentCourseDetails
+		.filter(_.route.department == department) // there needs to be an SCD for the right department ...
+		.filter(!_.permanentlyWithdrawn) // that's not permanently withdrawn ...
+		.filter(relationshipType.isExpected) // and has a course of the type that is expected to have this kind of relationship
+		.nonEmpty
+	}
 
 	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department) = transactional(readOnly = true) {
 		memberDao.getRelationshipsByDepartment(relationshipType, department.rootDepartment)
@@ -196,8 +200,8 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
   def listStudentsWithoutRelationship(relationshipType: StudentRelationshipType, department: Department) = transactional(readOnly = true) {
 		memberDao.getStudentsWithoutRelationshipByDepartment(relationshipType, department.rootDepartment)
 			.filter(studentDepartmentFilterMatches(department))
-			.filter(studentNotPermanentlyWithdrawn)
-	}
+			.filter(expectedToHaveRelationship(relationshipType, department))
+  }
 
   def countStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): (Int, Int) = transactional(readOnly = true) {
 		val matchingStudents =

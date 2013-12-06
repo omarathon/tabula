@@ -64,8 +64,7 @@ abstract class OnlineMarkerFeedbackCommand(val module: Module, val assignment: A
 			case _ => Seq()
 		}
 
-		submissions.filter(_.isReleasedForMarking).map { submission =>
-
+		submissions.filter(_.isReleasedForMarking).map { submission =>			
 			val student = userLookup.getUserByWarwickUniId(submission.universityId)
 			val hasSubmission = true
 			val feedback = feedbackService.getFeedbackByUniId(assignment, submission.universityId)
