@@ -149,16 +149,11 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def studentNotPermanentlyWithdrawn(member: StudentMember) = !member.permanentlyWithdrawn
 
 	def expectedToHaveRelationship(relationshipType: StudentRelationshipType, department: Department)(member: StudentMember) = {
-		!member.freshStudentCourseDetails
+		member.freshStudentCourseDetails
 		.filter(_.route.department == department) // there needs to be an SCD for the right department ...
 		.filter(!_.permanentlyWithdrawn) // that's not permanently withdrawn ...
-		.filter ( // and is of an expected course type
-				scd => {
-					(scd.courseType == CourseType.UG && relationshipType.expectedUG) ||
-					(scd.courseType == CourseType.PGR && relationshipType.expectedPGR) ||
-					(scd.courseType == CourseType.PGT && relationshipType.expectedPGT)
-				}
-		).isEmpty
+		.filter(relationshipType.isExpected) // and has a course of the type that is expected to have this kind of relationship
+		.nonEmpty
 	}
 
 	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department) = transactional(readOnly = true) {

@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.data.SitsStatusDaoImpl
 import uk.ac.warwick.tabula.data.model.{Member, StudentRelationshipType}
-import org.junit.Ignore
 
 // scalastyle:off magic.number
 class RelationshipServiceTest extends AppContextTestBase with Mockito {
