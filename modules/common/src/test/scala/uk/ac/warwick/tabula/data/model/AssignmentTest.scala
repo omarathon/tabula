@@ -1,15 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.TestBase
-import org.junit.Test
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants._
-import javax.persistence.Entity
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
-import org.junit.Test
 import org.joda.time.DateTimeConstants
-import uk.ac.warwick.tabula.data.model.forms.{FormFieldContext, TextField, FormField, Extension}
+import uk.ac.warwick.tabula.data.model.forms.{FormFieldContext, TextField, Extension}
 
 // scalastyle:off magic.number
 class AssignmentTest extends TestBase {
@@ -76,6 +70,8 @@ class AssignmentTest extends TestBase {
 
 	@Test def submissionsReport {
 		val assignment = new Assignment
+		assignment.collectSubmissions = false
+		assignment.collectMarks = false
 		assignment.submissionsReport should not be ('hasProblems) // not be has problems?
 
 		for (i <- 1 to 10) {// 0000001 .. 0000010
@@ -99,17 +95,14 @@ class AssignmentTest extends TestBase {
 
 	@Test def openEnded {
 		val assignment = new Assignment
-		// assign to a val so that 'should' can cope with JBoolean
-		val isOpenEnded: Boolean = assignment.openEnded
-		// test default
-		isOpenEnded should be (false)
+		assignment.openEnded = false
 
 		// past assignment should be closed
 		assignment.openDate = new DateTime().minusDays(3)
 		assignment.closeDate = new DateTime().minusDays(2)
 		assignment.isClosed should be (true)
 
-		// Open Gangnam Style
+		// Open Gangnam Style was so 2012
 		assignment.openEnded = true
 		assignment.isClosed should be (false)
 	}

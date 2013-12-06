@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
+import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.beans.factory.annotation.Autowired
@@ -17,14 +18,39 @@ class SubmitAssignmentCommandTest extends TestBase {
 
 	@Autowired var dao: FileDao = _
 
+	@Test def plagiarism = withUser(code = "cusebr", universityId = "0678022") {
+		val assignment = newActiveAssignment
+		val user = RequestInfo.fromThread.get.user
+		val cmd = new SubmitAssignmentCommand(assignment.module, assignment, user)
+
+		// no plagiarism box ticked
+		var errors = new BindException(cmd, "command")
+		cmd.validate(errors)
+		errors.hasErrors should be (true)
+		errors.getErrorCount should be (1)
+		errors.getFieldErrors.asScala(0).getField should be ("plagiarismDeclaration")
+		errors.getFieldErrors.asScala(0).getCodes() should contain ("assignment.submit.plagiarism")
+
+		// oops, sorry, yes, it's totally mine
+		cmd.plagiarismDeclaration = true
+
+		errors = new BindException(cmd, "command")
+		cmd.validate(errors)
+		errors.hasErrors should be (false)
+	}
+
 	@Test def multipleSubmissions = withUser(code = "cusebr", universityId = "0678022") {
 		val assignment = newActiveAssignment
 		val user = RequestInfo.fromThread.get.user
 		val cmd = new SubmitAssignmentCommand(assignment.module, assignment, user)
 
+		// scenario
+		assignment.allowResubmission = false
+		cmd.plagiarismDeclaration = true
+
 		var errors = new BindException(cmd, "command")
 		cmd.validate(errors)
-		errors.hasErrors should be(false)
+		errors.hasErrors should be (false)
 
 		val submission = new Submission()
 		submission.assignment = assignment
@@ -55,10 +81,11 @@ class SubmitAssignmentCommandTest extends TestBase {
 		file.attachmentTypes = Seq("doc", "docx", "pdf")
 		assignment.addField(file)
 
-
 		// common reusable setup
 		trait Setup {
 			val cmd = new SubmitAssignmentCommand(assignment.module, assignment, user)
+			// pre-tick the box
+			cmd.plagiarismDeclaration = true
 			var errors = new BindException(cmd, "command")
 			val submissionValue = cmd.fields.get("upload").asInstanceOf[FileFormValue]
 		}
@@ -104,6 +131,7 @@ class SubmitAssignmentCommandTest extends TestBase {
 
 	def newActiveAssignment = {
 		val assignment = new Assignment
+		assignment.setDefaultBooleanProperties()
 		assignment.openDate = new DateTime().minusWeeks(1)
 		assignment.closeDate = new DateTime().plusWeeks(1)
 		assignment.collectSubmissions = true
