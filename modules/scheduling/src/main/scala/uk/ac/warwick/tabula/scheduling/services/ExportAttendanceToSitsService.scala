@@ -31,7 +31,7 @@ class AbstractExportAttendanceToSitsService extends ExportAttendanceToSitsServic
 	self: SitsDataSourceComponent =>
 	def exportToSits(report: MonitoringPointReport): Boolean = {
 		val countQuery = new ExportAttendanceToSitsCountQuery(sitsDataSource)
-		val count = countQuery.getCount(JHashMap(("studentId", report.student.id))) + 1
+		val count = countQuery.getHighestCount(JHashMap(("studentId", report.student.id))) + 1
 
 		val monitoringPeriod = {
 			if (report.monitoringPeriod.indexOf("vacation") >= 0)
@@ -57,9 +57,9 @@ class AbstractExportAttendanceToSitsService extends ExportAttendanceToSitsServic
 }
 
 object ExportAttendanceToSitsService {
-	final val GetExistingRowsSql = """
-		 select count(sab_stuc) from intuit.srs_sab
-		 where sab_stuc = :studentId
+	final val GetHighestExistingSequence = """
+		select max(sab_seq2) from intuit.srs_sab
+		where sab_stuc = :studentId
 	"""
 
 	final val PushToSITSSql = """
@@ -69,8 +69,8 @@ object ExportAttendanceToSitsService {
 	"""
 
 	class ExportAttendanceToSitsCountQuery(ds: DataSource) extends NamedParameterJdbcTemplate(ds) {
-		def getCount(params: util.HashMap[String, Object]): Int = {
-			this.queryForObject(GetExistingRowsSql, params, classOf[JInteger]).asInstanceOf[Int]
+		def getHighestCount(params: util.HashMap[String, Object]): Int = {
+			this.queryForObject(GetHighestExistingSequence, params, classOf[JInteger]).asInstanceOf[Int]
 		}
 	}
 
