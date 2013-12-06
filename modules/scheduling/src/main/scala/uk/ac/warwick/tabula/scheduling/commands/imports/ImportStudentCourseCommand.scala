@@ -163,10 +163,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	}
 
 	def captureTutor(dept: Department) = {
-		if (sprStatusCode.startsWith("P")) {
-			// don't do anything - no point capturing tutors for students who are permanently withdrawn
-		}
-		else if (dept == null)
+		if (dept == null)
 			logger.warn("Trying to capture tutor for " + sprCode + " but department is null.")
 
 		// Mark Hadley in Physics says "I don't think the University uses the term 'tutor' for PGRs"
