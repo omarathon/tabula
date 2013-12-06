@@ -40,6 +40,7 @@ trait RelationshipService {
 	def listStudentsWithoutRelationship(relationshipType: StudentRelationshipType, department: Department): Seq[Member]
 	def countStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): (Int, Int)
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int
+	def getAllCurrentRelationships(targetSprCode: String): Seq[StudentRelationship]
 }
 
 @Service(value = "relationshipService")
@@ -67,6 +68,10 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		memberDao.getCurrentRelationships(relationshipType, targetSprCode)
 	}
 
+	def getAllCurrentRelationships(targetSprCode: String): Seq[StudentRelationship] = transactional(readOnly = true) {
+		memberDao.getAllCurrentRelationships(targetSprCode)
+	}
+
 	def getRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship] = transactional(readOnly = true) {
 		memberDao.getRelationshipsByTarget(relationshipType, targetSprCode)
 	}
@@ -75,8 +80,8 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		val currentRelationships = findCurrentRelationships(relationshipType, targetSprCode)
 		val existingRelationships = currentRelationships.filter { rel => agents.contains(rel.agent) }
 		val agentsToCreate = agents.filterNot { agent => currentRelationships.exists { _.agent == agent } }
-		
-		agentsToCreate.map { agent => 
+
+		agentsToCreate.map { agent =>
 			// create the new one
 			val newRelationship = StudentRelationship(agent, relationshipType, targetSprCode)
 			newRelationship.startDate = new DateTime
@@ -89,8 +94,8 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		val currentRelationships = findCurrentRelationships(relationshipType, targetSprCode)
 		val existingRelationships = currentRelationships.filter { rel => agents.map { _._1 }.contains(rel.agent) }
 		val agentsToCreate = agents.filterNot { case (agent, _) => currentRelationships.exists { _.agent == agent } }
-		
-		agentsToCreate.map { case (agent, percentage) => 
+
+		agentsToCreate.map { case (agent, percentage) =>
 			// create the new one
 			val newRelationship = StudentRelationship(agent, relationshipType, targetSprCode)
 			newRelationship.percentage = percentage
@@ -104,24 +109,24 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def replaceStudentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship] = transactional() {
 		val currentRelationships = findCurrentRelationships(relationshipType, targetSprCode)
 		val (existingRelationships, relationshipsToEnd) = currentRelationships.partition { rel => agents.contains(rel.agent) }
-		
+
 		val agentsToAdd = agents.filterNot { agent => existingRelationships.exists { _.agent == agent } }
-		
+
 		// Don't need to do anything with existingRelationships, but need to handle the others
-		
+
 		// End all relationships for agents not passed in
 		relationshipsToEnd.foreach { _.endDate = DateTime.now }
-		
+
 		// Save new relationships for agents that don't already exist
 		saveStudentRelationships(relationshipType, targetSprCode, agentsToAdd)
 	}
-	
+
 	def replaceStudentRelationshipsWithPercentages(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[(String, JBigDecimal)]): Seq[StudentRelationship] = transactional() {
 		val currentRelationships = findCurrentRelationships(relationshipType, targetSprCode)
 		val (existingRelationships, relationshipsToEnd) = currentRelationships.partition { rel => agents.map { _._1 }.contains(rel.agent) }
-		
+
 		val agentsToAdd = agents.filterNot { case (agent, percentage) => existingRelationships.exists { _.agent == agent } }
-		
+
 		// Find existing relationships with the wrong percentage
 		existingRelationships.foreach { rel =>
 			val (agent, percentage) = agents.find { case (agent, _) => agent == rel.agent }.get
@@ -130,12 +135,12 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 				memberDao.saveOrUpdate(rel)
 			}
 		}
-		
+
 		// Don't need to do anything with existingRelationships, but need to handle the others
-		
+
 		// End all relationships for agents not passed in
 		relationshipsToEnd.foreach { _.endDate = DateTime.now }
-		
+
 		// Save new relationships for agents that don't already exist
 		saveStudentRelationshipsWithPercentages(relationshipType, targetSprCode, agentsToAdd)
 	}
