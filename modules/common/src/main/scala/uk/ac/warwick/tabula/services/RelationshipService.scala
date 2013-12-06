@@ -1,16 +1,14 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConverters._
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{DegreeType, Department, Member, StudentMember, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{DegreeType, CourseType, Department, Member, StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.CourseType
 
 /**
  * Service providing access to members and profiles.
@@ -146,14 +144,12 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 			.exists(scd => !scd.permanentlyWithdrawn)
 	}
 
-	def studentDepartmentFilterMatches(department: Department)(member: StudentMember)
-	= department.filterRule.matches(member)
+	def studentDepartmentFilterMatches(department: Department)(member: StudentMember)	= department.filterRule.matches(member)
 
 	def studentNotPermanentlyWithdrawn(member: StudentMember) = !member.permanentlyWithdrawn
 
 	def expectedToHaveRelationship(relationshipType: StudentRelationshipType, department: Department)(member: StudentMember) = {
-		!member
-		.freshStudentCourseDetails
+		!member.freshStudentCourseDetails
 		.filter(_.route.department == department) // there needs to be an SCD for the right department ...
 		.filter(!_.permanentlyWithdrawn) // that's not permanently withdrawn ...
 		.filter ( // and is of an expected course type
