@@ -68,6 +68,8 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments {
 		customFormValues.find( _.name == field.name )
 	}
 
+	def hasContent = hasMarkOrGrade || hasFeedback
+
 	def hasMarkOrGrade = hasMark || hasGrade
 
 	def hasMark: Boolean = mark.isDefined

@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.{DownloadFeedbackShe
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
+import uk.ac.warwick.tabula.services.UserLookupService
 import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.data.model.{Module, Assignment}
@@ -59,10 +59,7 @@ class DownloadMarkerSubmissionsController extends CourseworkController {
 		// do not download submissions where the marker has completed marking
 		val filteredSubmissions = submissions.filter{ submission =>
 			val markerFeedback =  assignment.getMarkerFeedback(submission.universityId, user.apparentUser)
-			markerFeedback match {
-				case Some(f) if f.state != MarkingCompleted => true
-				case _ => false
-			}
+			markerFeedback.exists(mf => mf.state != MarkingCompleted)
 		}
 		
 		command.submissions = filteredSubmissions.toList
@@ -124,7 +121,7 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 
 	var fileServer = Wire.auto[FileServer]
 	var submissionService = Wire.auto[SubmissionService]
-	
+
 	@ModelAttribute def getSingleSubmissionCommand(
 			@PathVariable("module") module: Module, 
 			@PathVariable("assignment") assignment: Assignment, 
@@ -140,7 +137,7 @@ class DownloadSingleSubmissionFileController extends CourseworkController {
 		cmd.callback = { (renderable) => fileServer.serve(renderable)(request, response) }
 		cmd.apply().orElse { throw new ItemNotFoundException() }
 	}
-	
+
 }
 
 
@@ -158,7 +155,6 @@ class DownloadFeedbackSheetsController extends CourseworkController {
 
 	@RequestMapping(value = Array("/feedback-templates.zip"))
 	def downloadFeedbackTemplatesOnly(command: DownloadFeedbackSheetsCommand)(implicit request: HttpServletRequest, response: HttpServletResponse) {
-		val assignment = command.assignment
 		command.apply { renderable =>
 			fileServer.serve(renderable)
 		}

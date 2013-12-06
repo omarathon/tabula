@@ -11,8 +11,6 @@ import uk.ac.warwick.tabula.data.model.{Submission, Assignment, Module}
 import uk.ac.warwick.tabula.services.{StateService, AssignmentService, ZipService}
 import uk.ac.warwick.tabula.services.fileserver.RenderableZip
 import uk.ac.warwick.tabula.CurrentUser
-import reflect.BeanProperty
-import uk.ac.warwick.tabula.JavaImports._
 
 
 /**
@@ -39,13 +37,15 @@ class DownloadMarkersSubmissionsCommand(
 		if (submissions.isEmpty) throw new ItemNotFoundException
 
 		// update the state to downloaded for any marker feedback that exists.
-		submissions.foreach{s =>
-			assignment.feedbacks.find(_.universityId == s.universityId) match {
-				case Some(f) if f.firstMarkerFeedback != null =>
-					stateService.updateState(f.firstMarkerFeedback, InProgress)
-				case _ => // do nothing
-			}
-		}
+		submissions.foreach( s =>
+			assignment.feedbacks
+			.find(f => f.universityId == s.universityId)
+			.map(f => f.firstMarkerFeedback)
+			.foreach(mf =>
+				if(mf != null && mf.state == ReleasedForMarking)
+					stateService.updateState(mf, InProgress)
+			)
+		)
 
 		val zip = zipService.getSomeSubmissionsZip(submissions)
 		val renderable = new RenderableZip(zip)
