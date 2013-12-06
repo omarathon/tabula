@@ -404,7 +404,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		val termCounts = query.seq.map{objArray =>
 			objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
 		}
-		TermService.orderedTermNames.diff(termCounts.filter{case(term, count) => count.intValue() == students.size})
+
+		TermService.orderedTermNames.diff(termCounts.filter{case(term, count) => count.intValue() == students.size}.map { _._1})
+
 	}
 
 	def findNonReported(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[StudentMember] = {
