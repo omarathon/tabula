@@ -199,7 +199,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	}
 
 
-	def endRelationships {
+	def endRelationships() {
 		if (endDate != null) {
 			val endDateFromSits = endDate.toDateTimeAtCurrentTime()
 			val threeMonthsAgo = DateTime.now().minusMonths(3)
