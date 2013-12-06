@@ -5,18 +5,18 @@ import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, ProfileService}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.commands.ReadOnly
-import scala.collection.JavaConverters._
-
 import uk.ac.warwick.tabula.commands.CommandInternal
 import uk.ac.warwick.tabula.commands.ComposableCommand
-import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.userlookup.User
 
 
 case class UnallocatedStudentsInformation (
 	smallGroupSet: SmallGroupSet,
-	studentsNotInGroups: Seq[MemberOrUser]
+	studentsNotInGroups: Seq[User],
+	userIsMember: Boolean,
+  showTutors: Boolean
 )
 
 object ListGroupUnallocatedStudentsCommand {
@@ -35,13 +35,11 @@ class ListGroupUnallocatedStudentsCommandInternal(val smallGroupSet: SmallGroupS
 	  self:ProfileServiceComponent =>
 
 			override def applyInternal() = {
-				val studentsInGroups = smallGroupSet.groups.asScala.flatMap(_.students.users)
-				val studentsNotInGroups = (smallGroupSet.allStudents diff studentsInGroups) map { user =>
-					val member = profileService.getMemberByUniversityId(user.getWarwickId)
-					MemberOrUser(member, user)
-				}
+				val studentsNotInGroups = smallGroupSet.unallocatedStudents
+				val userIsMember = studentsNotInGroups.exists(_.getWarwickId == user.universityId)
+				val showTutors = smallGroupSet.studentsCanSeeTutorName
 
-				UnallocatedStudentsInformation(smallGroupSet, studentsNotInGroups)
+				UnallocatedStudentsInformation(smallGroupSet, studentsNotInGroups, userIsMember, showTutors)
 			}
 }
 

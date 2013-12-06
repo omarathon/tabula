@@ -22,14 +22,11 @@ class ListGroupUnallocatedStudentsController extends GroupsController {
 
 		val info = command.apply()
 
-		val userIsMember = info.studentsNotInGroups.exists(_.universityId == user.universityId)
-		val showTutors = info.smallGroupSet.studentsCanSeeTutorName
-
 		Mav("groups/students",
 			"students" -> info.studentsNotInGroups,
 			"userUniId" -> user.universityId,
-			"userIsMember" -> userIsMember,
-			"studentsCanSeeTutorName" -> showTutors
+			"userIsMember" -> info.userIsMember,
+			"studentsCanSeeTutorName" -> info.showTutors
 		).noLayout()
 	}
 }
