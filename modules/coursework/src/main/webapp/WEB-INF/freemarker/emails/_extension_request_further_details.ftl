@@ -17,7 +17,7 @@ Email Address: ${(student.email)!"Not available"}
 <#if relationships[key]?has_content>
 ${key}<#if (relationships[key]?size > 1)>s</#if>
 <#list relationships[key] as agent>
-${agent.agentMember.fullName} (${agent.agentMember.universityId}), ${agent.agentMember.description}
+${agent.agentName} (${agent.agent})<#if agent.agentMember??>, ${agent.agentMember.description}</#if>
 </#list>
 
 </#if>
