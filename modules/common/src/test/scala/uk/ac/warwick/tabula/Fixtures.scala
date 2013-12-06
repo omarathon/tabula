@@ -76,6 +76,7 @@ object Fixtures {
 	def assignment(name:String) = {
 		val a = new Assignment
 		a.name = name
+		a.setDefaultBooleanProperties()
 		a
 	}
 

@@ -50,7 +50,7 @@ import uk.ac.warwick.tabula.data.Transactions
 abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with TestHelpers with TestFixtures with Logging{
 	// bring in type so we can be lazy and not have to import @Test
 	type Test = org.junit.Test
-	
+
 	// No test should take longer than a minute
 	val minuteTimeout = new Timeout(60000)
 	@Rule def timeoutRule = minuteTimeout
@@ -91,7 +91,9 @@ trait TestFixtures {
 	def newDeepAssignment(moduleCode: String="IN101") = {
 		val department = new Department
 		val module = new Module(moduleCode, department)
-		new Assignment(module)
+		val assignment = new Assignment(module)
+		assignment.setDefaultBooleanProperties()
+		assignment
 	}
 
 	def testResponse = new MockHttpServletResponse
