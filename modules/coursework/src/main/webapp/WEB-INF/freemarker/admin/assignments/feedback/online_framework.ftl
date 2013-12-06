@@ -2,12 +2,20 @@
 <#assign department = module.department />
 <#assign feedbackGraphs = studentFeedbackGraphs />
 
+<#function markingId user>
+	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource") == 'WarwickExtUsers'>
+		<#return user.userId />
+	<#else>
+		<#return user.warwickId />
+	</#if> 
+</#function>
+
 <#macro row graph>
 	<#assign u = graph.student />
-	<tr class="itemContainer" data-contentid="${u.warwickId}">
+	<tr class="itemContainer" data-contentid="${markingId(u)}">
 		<#if showMarkingCompleted>
 			<td class="check-col">
-				<input type="checkbox" class="collection-checkbox" name="students" value="${u.warwickId}">
+				<input type="checkbox" class="collection-checkbox" name="students" value="${markingId(u)}">
 			</td>
 		</#if>
 		<#if department.showStudentName>
@@ -34,8 +42,8 @@
 						<div class="label label-important">Rejected</div>
 					</#if>
 				</dt>
-				<dd style="display: none;" class="table-content-container" data-contentid="${u.warwickId}">
-					<div id="content-${u.warwickId}" class="feedback-container content-container" data-contentid="${u.warwickId}">
+				<dd style="display: none;" class="table-content-container" data-contentid="${markingId(u)}">
+					<div id="content-${markingId(u)}" class="feedback-container content-container" data-contentid="${markingId(u)}">
 						<p>No data is currently available.</p>
 					</div>
 				</dd>
