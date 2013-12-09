@@ -28,20 +28,18 @@ class ListGroupUnallocatedStudentsCommandInternal(val smallGroupSet: SmallGroupS
 	extends CommandInternal[UnallocatedStudentsInformation] with ListGroupUnallocatedStudentsCommandState  {
 	self:ProfileServiceComponent =>
 
+		override def applyInternal() = {
+				val studentsNotInGroups = smallGroupSet.unallocatedStudents
+				val userIsMember = studentsNotInGroups.exists(_.getWarwickId == user.universityId)
+				val showTutors = smallGroupSet.studentsCanSeeTutorName
 
+				val membersNotInGroups = studentsNotInGroups map { user =>
+						val member = profileService.getMemberByUniversityId(user.getWarwickId)
+						MemberOrUser(member, user)
+				}
 
-	override def applyInternal() = {
-			val studentsNotInGroups = smallGroupSet.unallocatedStudents
-			val userIsMember = studentsNotInGroups.exists(_.getWarwickId == user.universityId)
-			val showTutors = smallGroupSet.studentsCanSeeTutorName
-
-			val membersNotInGroups = studentsNotInGroups map { user =>
-					val member = profileService.getMemberByUniversityId(user.getWarwickId)
-					MemberOrUser(member, user)
+				UnallocatedStudentsInformation(smallGroupSet, membersNotInGroups, userIsMember, showTutors)
 			}
-
-			UnallocatedStudentsInformation(smallGroupSet, membersNotInGroups, userIsMember, showTutors)
-		}
 }
 
 trait ListGroupUnallocatedStudentsCommandState {
