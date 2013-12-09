@@ -1,15 +1,16 @@
 package uk.ac.warwick.tabula.services
 
-import collection.JavaConverters._
-import org.springframework.stereotype.Service
+import scala.collection.JavaConverters._
+
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model._
+import org.springframework.stereotype.Service
+
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.{AssignmentMembershipDao, Daoisms}
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.AssignmentMembershipDao
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.userlookup.User
-import org.hibernate.criterion.{Order, Restrictions}
 
 
 trait AssignmentMembershipService {
@@ -131,7 +132,7 @@ class AssignmentMembershipServiceImpl
 
 	def getUpstreamAssessmentGroups(component: AssessmentComponent, academicYear: AcademicYear): Seq[UpstreamAssessmentGroup] =
 		dao.getUpstreamAssessmentGroups(component, academicYear)
-	
+
 }
 
 
@@ -169,7 +170,10 @@ trait AssignmentMembershipMethods extends Logging {
 		val excludeItems = makeExcludeItems(excludes, sitsUsers)
 		val sitsItems = makeSitsItems(includes, excludes, sitsUsers)
 
-		new AssignmentMembershipInfo(includeItems ++ excludeItems ++ sitsItems)
+		val sorted = (includeItems ++ excludeItems ++ sitsItems)
+			.sortBy(membershipItem => (membershipItem.user.getLastName, membershipItem.user.getFirstName))
+
+		new AssignmentMembershipInfo(sorted)
 	}
 
 	/**
@@ -195,9 +199,9 @@ trait AssignmentMembershipMethods extends Logging {
 			case _ => {
 				val sitsUsers = upstream.flatMap { _.members.members }
 
-				val includes = others map { _.knownType.allIncludedIds } getOrElse Nil		
+				val includes = others map { _.knownType.allIncludedIds } getOrElse Nil
 				val excludes = others map { _.knownType.allExcludedIds } getOrElse Nil
-		
+
 				((sitsUsers ++ includes).distinct diff excludes).size
 			}
 		}
@@ -279,6 +283,7 @@ case class MembershipItem(
 		* If exclude type, this item excludes a user who isn't in the list anyway.
 		*/
 	 extraneous: Boolean) {
+
 	def itemTypeString = itemType.value
 }
 
