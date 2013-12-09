@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, FormFieldContext, WordCountField, Extension}
 import uk.ac.warwick.tabula.data.{ExtensionDaoComponent, ExtensionDaoImpl, AssignmentMembershipDaoImpl, DepartmentDaoImpl}
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
 
 // scalastyle:off magic.number
 class AssignmentServiceTest extends PersistenceTestBase {
@@ -171,7 +172,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 			submission.universityId = "0070790"
 			submission.userId = "abcdef"
-			submission.suspectPlagiarised = false
+			submission.plagiarismInvestigation = SuspectPlagiarised
 			assmt.addSubmission(submission)
 			submissionService.saveSubmission(submission)
 
@@ -199,7 +200,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 			userPairs3.size should be (1)
 
 			// the only person was suspected of plagiarism - expect 0
-			submission.suspectPlagiarised = true
+			submission.plagiarismInvestigation = SuspectPlagiarised
 			val userPairs4 = feedbackService.getUsersForFeedback(assmt)
 			userPairs4.size should be (0)
 		}
@@ -460,7 +461,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val submission = new Submission
 		submission.universityId = "0070790"
 		submission.userId = "abcdef"
-		submission.suspectPlagiarised = false
+		submission.plagiarismInvestigation = SuspectPlagiarised
 		assignment.addSubmission(submission)
 		submissionService.saveSubmission(submission)
 

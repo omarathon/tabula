@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.data.model
 
-import java.util.HashSet
-
 import scala.collection.JavaConversions._
 
-import org.hibernate.annotations.{BatchSize, AccessType, Type}
+import org.hibernate.annotations.{Type, BatchSize, AccessType}
 import org.joda.time.DateTime
 
 import javax.persistence._
@@ -17,6 +15,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
 
 @Entity @AccessType("field")
 class Submission extends GeneratedId with PermissionsTarget {
@@ -46,7 +45,10 @@ class Submission extends GeneratedId with PermissionsTarget {
 	@NotNull
 	var userId: String = _
 
-	var suspectPlagiarised: JBoolean = false
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.PlagiarismInvestigationUserType")
+	var plagiarismInvestigation: PlagiarismInvestigation = PlagiarismInvestigation.Default
+
+	def suspectPlagiarised = plagiarismInvestigation == SuspectPlagiarised
 
 	/**
 	 * It isn't essential to record University ID as their user ID
@@ -61,15 +63,15 @@ class Submission extends GeneratedId with PermissionsTarget {
 
 	@OneToMany(mappedBy = "submission", cascade = Array(ALL))
 	@BatchSize(size=200)
-	var values: JSet[SavedFormValue] = new HashSet
+	var values: JSet[SavedFormValue] = new java.util.HashSet
 
 	def getValue(field: FormField): Option[SavedFormValue] = {
 		values.find( _.name == field.name )
 	}
 
-	def firstMarker:Option[User] = assignment.getStudentsFirstMarker(this).map(userLookup.getUserByUserId(_))
+	def firstMarker:Option[User] = assignment.getStudentsFirstMarker(this).map(id => userLookup.getUserByUserId(id))
 
-	def secondMarker:Option[User] = assignment.getStudentsSecondMarker(this).map(userLookup.getUserByUserId(_))
+	def secondMarker:Option[User] = assignment.getStudentsSecondMarker(this).map(id => userLookup.getUserByUserId(id))
 
 	def valuesByFieldName = (values map { v => (v.name, v.value) }).toMap
 

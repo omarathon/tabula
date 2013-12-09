@@ -24,6 +24,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.UserLookup
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.services.{SubmissionService, UserLookupService}
+import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
 
 // scalastyle:off magic.number
 class CourseworkFiltersTest extends TestBase with Mockito {
@@ -794,11 +795,11 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
 
-		submission.suspectPlagiarised = false
+		submission.plagiarismInvestigation = SuspectPlagiarised
 
 		filter.predicate(student(submission=Some(submission))) should be (false)
 
-		submission.suspectPlagiarised = true
+		submission.plagiarismInvestigation = SuspectPlagiarised
 
 		filter.predicate(student(submission=Some(submission))) should be (true)
 	}
