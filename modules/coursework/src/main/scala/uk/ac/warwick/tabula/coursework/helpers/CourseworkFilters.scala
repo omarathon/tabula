@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.MarkingMethod
 import uk.ac.warwick.tabula.data.model.MarkingState
 import uk.ac.warwick.tabula.system.TwoWayConverter
+import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
 
 /**
  * Filters a set of "Student" case objects (which are a representation of the current 
@@ -230,11 +231,9 @@ object CourseworkFilters {
 	case object MarkedByFirst extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions marked by first marker"
 		def predicate(item: Student) = {
-			(item.coursework.enhancedSubmission map { item => 
-				val releasedToSecondMarker = item.submission.isReleasedToSecondMarker
-				val markingCompleted = item.submission.state == MarkingState.MarkingCompleted
-				releasedToSecondMarker || markingCompleted
-			}) getOrElse(false)
+			(item.coursework.enhancedFeedback map {
+				_.feedback.retrieveFirstMarkerFeedback.state == MarkingCompleted
+			}).getOrElse(false)
 		}
 		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.markingWorkflow != null
 	}
@@ -243,9 +242,9 @@ object CourseworkFilters {
 		def getDescription = "submissions marked by second marker"
 			
 		def predicate(item: Student) = {
-			(item.coursework.enhancedSubmission map { item => 
-				item.submission.state == MarkingState.MarkingCompleted
-			}) getOrElse(false)
+			(item.coursework.enhancedFeedback map { item =>
+				item.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted
+			}).getOrElse(false)
 		}
 		
 		// Only applies to seen second marking
@@ -337,7 +336,7 @@ object CourseworkFilters {
 	case object NoFeedback extends ParameterlessCourseworkFilter {
 		def getDescription = "submissions with no feedback"
 		def predicate(item: Student) = {
-			!item.coursework.enhancedFeedback.isDefined
+			!item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).isDefined
 		}
 		def applies(assignment: Assignment) = true
 	}
@@ -345,7 +344,7 @@ object CourseworkFilters {
 	case object FeedbackNotReleased extends ParameterlessCourseworkFilter {
 		def getDescription = "feedbacks not published"
 		def predicate(item: Student) = { 
-			(item.coursework.enhancedFeedback map { item => 
+			(item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) map { item =>
 				!item.feedback.released
 			}) getOrElse(false)
 		}
@@ -355,7 +354,7 @@ object CourseworkFilters {
 	case object FeedbackNotDownloaded extends ParameterlessCourseworkFilter {
 		def getDescription = "feedbacks not downloaded by students"
 		def predicate(item: Student) = { 
-			(item.coursework.enhancedFeedback map { item => 
+			(item.coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) map { item =>
 				!item.downloaded
 			}) getOrElse(false)
 		}

@@ -537,23 +537,20 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
 
-		submission.isReleasedToSecondMarker should be (false)
-		submission.state should not be (MarkingState.MarkingCompleted)
-
-		filter.predicate(student(submission=Some(submission))) should be (false)
-
-		submission.state = MarkingState.MarkingCompleted
-		filter.predicate(student(submission=Some(submission))) should be (true)
-
-		submission.state = MarkingState.ReleasedForMarking
-
 		val feedback = Fixtures.feedback("0672089")
 		assignment.feedbacks.add(feedback)
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
-		feedback.secondMarkerFeedback = Fixtures.markerFeedback(feedback)
+		submission.isReleasedToSecondMarker should be (false)
 
+		filter.predicate(student(feedback=Some(feedback))) should be (false)
+
+		feedback.firstMarkerFeedback.state = MarkingState.MarkingCompleted
+		filter.predicate(student(feedback=Some(feedback))) should be (true)
+
+		feedback.secondMarkerFeedback = Fixtures.markerFeedback(feedback)
 		submission.isReleasedToSecondMarker should be (true)
-		filter.predicate(student(submission=Some(submission))) should be (true)
+
+		filter.predicate(student(feedback=Some(feedback))) should be (true)
 	}
 
 	@Test def MarkedBySecond {
@@ -577,18 +574,21 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.applies(assignment) should be (true)
 
 		// Valid only if marking is completed
-		filter.predicate(student(submission=None)) should be (false)
+		filter.predicate(student(feedback=None)) should be (false)
 
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
 
-		submission.state should not be (MarkingState.MarkingCompleted)
+		val feedback = Fixtures.feedback("0672089")
+		assignment.feedbacks.add(feedback)
+		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
+		feedback.secondMarkerFeedback = Fixtures.markerFeedback(feedback)
 
-		filter.predicate(student(submission=Some(submission))) should be (false)
+		filter.predicate(student(feedback=Some(feedback))) should be (false)
 
-		submission.state = MarkingState.MarkingCompleted
+		feedback.secondMarkerFeedback.state = MarkingState.MarkingCompleted
 
-		filter.predicate(student(submission=Some(submission))) should be (true)
+		filter.predicate(student(feedback=Some(feedback))) should be (true)
 	}
 
 	@Test def CheckedForPlagiarism {
@@ -811,7 +811,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 
 		// Valid where there's no feedback
 		filter.predicate(student(feedback=None)) should be (true)
-		filter.predicate(student(feedback=Some(Fixtures.feedback()))) should be (false)
+		filter.predicate(student(feedback=Some(new Feedback{ actualMark=Some(41) }))) should be (false)
 	}
 
 	@Test def FeedbackNotReleased {
@@ -824,6 +824,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(feedback=None)) should be (false)
 
 		val feedback = Fixtures.feedback("0672089")
+		feedback.actualMark = Some(41)
 		feedback.released = false
 
 		filter.predicate(student(feedback=Some(feedback))) should be (true)
@@ -839,10 +840,13 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		// Should pass any assignment, so just check with null
 		filter.applies(null) should be (true)
 
+		val testFeedback = Fixtures.feedback()
+		testFeedback.actualMark = Some(41)
+
 		// Valid where there's feedback, but it hasn't been downloaded
 		filter.predicate(student(feedback=None)) should be (false)
-		filter.predicate(student(feedback=Some(Fixtures.feedback()), feedbackDownloaded=false)) should be (true)
-		filter.predicate(student(feedback=Some(Fixtures.feedback()), feedbackDownloaded=true)) should be (false)
+		filter.predicate(student(feedback=Some(testFeedback), feedbackDownloaded=false)) should be (true)
+		filter.predicate(student(feedback=Some(testFeedback), feedbackDownloaded=true)) should be (false)
 	}
 
 
