@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileIndexSe
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
 import scala.collection.mutable.HashSet
+import uk.ac.warwick.tabula.scheduling.services.AwardImporter
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware {
 
@@ -38,6 +39,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	var memberDao = Wire.auto[MemberDao]
 	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
 	var studentCourseYearDetailsDao = Wire.auto[StudentCourseYearDetailsDao]
+	var awardImporter = Wire.auto[AwardImporter]
 
 	val BatchSize = 250
 
@@ -47,6 +49,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				importSitsStatuses
 				importModeOfAttendances
 				courseImporter.importCourses
+				awardImporter.importAwards
 				doMemberDetails
 				logger.info("Import completed")
 			}
