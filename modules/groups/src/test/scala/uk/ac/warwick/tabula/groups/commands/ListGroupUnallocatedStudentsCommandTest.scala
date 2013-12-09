@@ -1,15 +1,10 @@
 package uk.ac.warwick.tabula.groups.commands
 
-import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, MockUserLookup, TestBase, Mockito}
+import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.{CurrentUser, MockUserLookup, TestBase, Mockito}
 import uk.ac.warwick.tabula.services.{AssignmentMembershipService, ProfileServiceComponent, ProfileService}
-import uk.ac.warwick.tabula.groups.{SmallGroupSetBuilder, SmallGroupBuilder}
-import uk.ac.warwick.tabula.data.model.{StudentMember, UserGroup, Member}
-import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.helpers.Tap
-import Tap.tap
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup}
-import org.joda.time.DateTime
 
 class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 
@@ -28,6 +23,7 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 	}
 
 	trait Fixture {
+		val department = Fixtures.department("in", "IT Services")
 		val userLookup = new MockUserLookup
 		val membershipService = mock[AssignmentMembershipService]
 		val set = new SmallGroupSet
@@ -57,36 +53,36 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 		val group3 = new SmallGroup
 		val group4 = new SmallGroup
 
-		group1.name = "Group 1"
-		group1.id = "abcdefgh1"
-		group2.name = "Group 2"
-		group2.id = "abcdefgh2"
-		group3.name = "Group 3"
-		group3.id = "abcdefgh3"
-		group4.name = "Group 4"
-		group4.id = "abcdefgh4"
+		Seq(group1, group2, group3, group4).zipWithIndex.foreach {
+			case(group, index) =>
+				group.name = "Group " + index
+		  	group.id = "abcdefgh" + index
+				set.groups.add(group)
+				group.groupSet = set
+				group._studentsGroup.userLookup = userLookup
+		}
 
-		set.groups.add(group1)
-		set.groups.add(group2)
-		set.groups.add(group3)
-		set.groups.add(group4)
-		group1.groupSet = set
-		group2.groupSet = set
-		group3.groupSet = set
-		group4.groupSet = set
-		group1._studentsGroup.userLookup = userLookup
-		group2._studentsGroup.userLookup = userLookup
-		group3._studentsGroup.userLookup = userLookup
-		group4._studentsGroup.userLookup = userLookup
+		val student1 = Fixtures.student(user1.getWarwickId, user1.getUserId, department)
+		val student2 = Fixtures.student(user2.getWarwickId, user2.getUserId, department)
+		val student3 = Fixtures.student(user3.getWarwickId, user3.getUserId, department)
+		val student4 = Fixtures.student(user4.getWarwickId, user4.getUserId, department)
+		val student5 = Fixtures.student(user5.getWarwickId, user5.getUserId, department)
+		val student6 = Fixtures.student(user6.getWarwickId, user6.getUserId, department)
+		val student7 = Fixtures.student(user7.getWarwickId, user7.getUserId, department)
+		val student8 = Fixtures.student(user8.getWarwickId, user8.getUserId, department)
 
-		set.members.add(user1)
-		set.members.add(user2)
-		set.members.add(user3)
-		set.members.add(user4)
-		set.members.add(user5)
-		set.members.add(user6)
-		set.members.add(user7)
-		set.members.add(user8)
+		val allUsers = Seq(user1, user2, user3, user4, user5, user6, user7, user8)
+		allUsers.foreach(set.members.add(_))
+
+		val userToStudent =	Map(user1.getWarwickId -> student1,
+														user2.getWarwickId -> student2,
+														user3.getWarwickId -> student3,
+														user4.getWarwickId -> student4,
+														user5.getWarwickId -> student5,
+														user6.getWarwickId -> student6,
+														user7.getWarwickId -> student7,
+														user8.getWarwickId -> student8
+												)
 
 		set.membershipService = membershipService
 		set._membersGroup.userLookup = userLookup
@@ -94,13 +90,20 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 		membershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Some(set._membersGroup)) returns (set._membersGroup.users)
 	}
 
+
+
 	@Test
 	def emptyGroups() = withUser("snow") { new Fixture() {
 		val command = new ListGroupUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
+
+		set.members.users.foreach {
+			user => command.profileService.getMemberByUniversityId(user.getWarwickId) returns Some(userToStudent(user.getWarwickId))
+		}
+
 		val info = command.applyInternal()
 
 		info.smallGroupSet should be (set)
-		info.studentsNotInGroups.length should be (8)
+		info.membersNotInGroups.length should be (8)
 		group1.students.add(user1)
 		}
 	}
@@ -109,20 +112,28 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 	def oneStudentInAGroup() = withUser("cutrue") { new Fixture() {
 		group1.students.add(user1)
 
-		var fakeCurrentUser = new CurrentUser(user8, user8)
 		val command = new ListGroupUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
+
+		set.members.users.foreach {
+			user => command.profileService.getMemberByUniversityId(user.getWarwickId) returns Some(userToStudent(user.getWarwickId))
+		}
+
 		val info = command.applyInternal()
 
 		info.smallGroupSet should be (set)
-		info.studentsNotInGroups.length should be (7)
-		info.studentsNotInGroups.exists(_.getWarwickId == user1.getWarwickId) should be (false)
+		info.membersNotInGroups.length should be (7)
+		info.membersNotInGroups.exists(_.universityId == user1.getWarwickId) should be (false)
 		}
 	}
 
 	@Test
 	def checkCurrentUserIsInGroup() = withUser("cutrue") { new Fixture() {
-		var fakeCurrentUser = new CurrentUser(user8, user8)
+		val fakeCurrentUser = new CurrentUser(user8, user8)
 		val command = new ListGroupUnallocatedStudentsCommandInternal(set, fakeCurrentUser) with CommandTestSupport
+
+		set.members.users.foreach {
+			user => command.profileService.getMemberByUniversityId(user.getWarwickId) returns Some(userToStudent(user.getWarwickId))
+		}
 
 		val info = command.applyInternal()
 		info.userIsMember should be (true)
@@ -142,11 +153,16 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 			group1.students.add(user7)
 
 			val command = new ListGroupUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
+
+			set.members.users.foreach {
+				user => command.profileService.getMemberByUniversityId(user.getWarwickId) returns Some(userToStudent(user.getWarwickId))
+			}
+
 			val info = command.applyInternal()
 
-			info.studentsNotInGroups.length should be (1)
-			info.studentsNotInGroups.exists(_.getWarwickId == user8.getWarwickId) should be (true)
-			info.studentsNotInGroups.exists(_.getWarwickId == user4.getWarwickId) should be (false)
+			info.membersNotInGroups.length should be (1)
+			info.membersNotInGroups.exists(_.universityId == user8.getWarwickId) should be (true)
+			info.membersNotInGroups.exists(_.universityId == user4.getWarwickId) should be (false)
 		}
 	}
 
@@ -163,15 +179,17 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 			group2.students.add(user6)
 
 			val command = new ListGroupUnallocatedStudentsCommandInternal(set, currentUser) with CommandTestSupport
+
+			set.members.users.foreach {
+				user => command.profileService.getMemberByUniversityId(user.getWarwickId) returns Some(userToStudent(user.getWarwickId))
+			}
+
 			val info = command.applyInternal()
 
-			info.studentsNotInGroups.length should be (2)
-			info.studentsNotInGroups.exists(_.getWarwickId == user8.getWarwickId) should be (true)
-			info.studentsNotInGroups.exists(_.getWarwickId == user7.getWarwickId) should be (true)
-			info.studentsNotInGroups.exists(_.getWarwickId == user1.getWarwickId) should be (false)
+			info.membersNotInGroups.length should be (2)
+			info.membersNotInGroups.exists(_.universityId == user8.getWarwickId) should be (true)
+			info.membersNotInGroups.exists(_.universityId == user7.getWarwickId) should be (true)
+			info.membersNotInGroups.exists(_.universityId == user1.getWarwickId) should be (false)
 		}
 	}
-
-
-
 }

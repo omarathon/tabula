@@ -23,7 +23,7 @@ class ListGroupUnallocatedStudentsController extends GroupsController {
 		val info = command.apply()
 
 		Mav("groups/students",
-			"students" -> info.studentsNotInGroups,
+			"students" -> info.membersNotInGroups,
 			"userUniId" -> user.universityId,
 			"userIsMember" -> info.userIsMember,
 			"studentsCanSeeTutorName" -> info.showTutors
