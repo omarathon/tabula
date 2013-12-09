@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula.services
 
-import scala.annotation.elidable
-import scala.annotation.elidable.ASSERTION
 import scala.collection.JavaConverters.seqAsJavaListConverter
 
 import org.hibernate.annotations.{AccessType, Filter, FilterDef}
