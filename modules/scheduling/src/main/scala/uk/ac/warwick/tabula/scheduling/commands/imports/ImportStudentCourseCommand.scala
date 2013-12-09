@@ -110,7 +110,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		// Apply above will take care of the db.  This brings the in-memory data up to speed:
 		studentCourseDetails.attachStudentCourseYearDetails(studentCourseYearDetails)
 
-		if (sprStatusCode.startsWith("P")) {
+		if (sprStatusCode != null && sprStatusCode.startsWith("P")) {
 			// they are permanently withdrawn
 			endRelationships()
 		}
