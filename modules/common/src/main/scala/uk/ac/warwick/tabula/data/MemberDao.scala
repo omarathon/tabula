@@ -43,6 +43,7 @@ trait MemberDao {
 	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
+	def getAllCurrentRelationships(targetSprCode: String): Seq[StudentRelationship]
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
 	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
@@ -179,6 +180,16 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def listUpdatedSince(startDate: DateTime, max: Int) =
 		session.newCriteria[Member].add(gt("lastUpdatedDate", startDate)).setMaxResults(max).addOrder(asc("lastUpdatedDate")).list
+
+	def getAllCurrentRelationships(targetSprCode: String): Seq[StudentRelationship] = {
+			session.newCriteria[StudentRelationship]
+					.add(is("targetSprCode", targetSprCode))
+					.add( Restrictions.or(
+							Restrictions.isNull("endDate"),
+							Restrictions.ge("endDate", new DateTime())
+							))
+					.seq
+	}
 
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]

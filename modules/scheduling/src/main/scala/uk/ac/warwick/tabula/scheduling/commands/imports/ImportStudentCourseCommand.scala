@@ -110,10 +110,16 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		// Apply above will take care of the db.  This brings the in-memory data up to speed:
 		studentCourseDetails.attachStudentCourseYearDetails(studentCourseYearDetails)
 
-		captureTutor(studentCourseDetails.department)
+		if (sprStatusCode != null && sprStatusCode.startsWith("P")) {
+			// they are permanently withdrawn
+			endRelationships()
+		}
+		else {
+			captureTutor(studentCourseDetails.department)
 
-		importSupervisorsForStudentCommand.studentCourseDetails = studentCourseDetails
-		importSupervisorsForStudentCommand.apply
+			importSupervisorsForStudentCommand.studentCourseDetails = studentCourseDetails
+			importSupervisorsForStudentCommand.apply
+		}
 
 		importRowTracker.scjCodesSeen.add(studentCourseDetails.scjCode)
 
@@ -157,7 +163,6 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	}
 
 	def captureTutor(dept: Department) = {
-
 		if (dept == null)
 			logger.warn("Trying to capture tutor for " + sprCode + " but department is null.")
 
@@ -188,6 +193,22 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 						case _ => logger.warn("Can't parse PRS code " + sprTutor1 + " for student " + sprCode)
 					}
 				}
+	}
+
+
+	def endRelationships() {
+		if (endDate != null) {
+			val endDateFromSits = endDate.toDateTimeAtCurrentTime()
+			val threeMonthsAgo = DateTime.now().minusMonths(3)
+			if (endDateFromSits.isBefore(threeMonthsAgo)) {
+				relationshipService.getAllCurrentRelationships(sprCode)
+					.foreach { relationship =>
+							relationship.endDate = endDateFromSits
+							relationshipService.saveOrUpdate(relationship)
+						}
+			}
 		}
 	}
+}
+
 
