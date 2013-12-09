@@ -1,17 +1,13 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConverters.seqAsJavaListConverter
-
-import org.hibernate.annotations.{AccessType, Filter, FilterDef}
+import scala.collection.JavaConverters._
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.stereotype.Service
-
-import javax.persistence.{Entity, NamedQueries}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.AssignmentMembershipDao
 import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentGroup, Assignment, Department, Module, UnspecifiedTypeUserGroup, UpstreamAssessmentGroup}
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.userlookup.User
+import org.springframework.stereotype.Service
 
 
 trait AssignmentMembershipService {
