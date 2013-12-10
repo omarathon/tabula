@@ -8,9 +8,10 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringCheckpointState, MonitoringPoint}
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.services.MonitoringPointService
 
 // scalastyle:off magic.number
-object Fixtures {
+object Fixtures extends Mockito {
 
 	def submission(universityId: String = "0123456", userId: String = "cuspxp") = {
 		val s = new Submission
@@ -241,6 +242,9 @@ object Fixtures {
 
 	def monitoringCheckpoint(point: MonitoringPoint, studentCourseDetails: StudentCourseDetails, state: MonitoringCheckpointState) = {
 		val checkpoint = new MonitoringCheckpoint
+		val monitoringPointService = smartMock[MonitoringPointService]
+		monitoringPointService.studentAlreadyReportedThisTerm(studentCourseDetails.student, point) returns (false)
+		checkpoint.monitoringPointService = monitoringPointService
 		checkpoint.point = point
 		checkpoint.studentCourseDetail = studentCourseDetails
 		checkpoint.state = state

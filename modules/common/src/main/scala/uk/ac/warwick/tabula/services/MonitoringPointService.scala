@@ -78,11 +78,12 @@ trait MonitoringPointService {
 	def findUnreportedReports: Seq[MonitoringPointReport]
 	def markReportAsPushed(report: MonitoringPointReport): Unit
 	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport]
+	def studentAlreadyReportedThisTerm(student:StudentMember, point:MonitoringPoint): Boolean
 }
 
 
 abstract class AbstractMonitoringPointService extends MonitoringPointService {
-	self: MonitoringPointDaoComponent =>
+	self: MonitoringPointDaoComponent with TermServiceComponent =>
 
 	def saveOrUpdate(monitoringPoint: MonitoringPoint) = monitoringPointDao.saveOrUpdate(monitoringPoint)
 	def delete(monitoringPoint: MonitoringPoint) = monitoringPointDao.delete(monitoringPoint)
@@ -228,12 +229,18 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		monitoringPointDao.findReports(students, year, period)
 	}
 
+	def studentAlreadyReportedThisTerm(student:StudentMember, point:MonitoringPoint): Boolean = {
+		val nonReportedTerms = findNonReportedTerms(Seq(student), point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+		!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear).getTermTypeAsString)
+	}
+
 }
 
 @Service("monitoringPointService")
 class MonitoringPointServiceImpl
 	extends AbstractMonitoringPointService
 	with AutowiringMonitoringPointDaoComponent
+	with AutowiringTermServiceComponent
 
 
 
@@ -303,6 +310,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 					if (countRelevantMeetings(student, point, None) >= point.meetingQuantity) {
 						val checkpoint = new MonitoringCheckpoint
 						checkpoint.point = point
+						checkpoint.monitoringPointService = monitoringPointService
 						checkpoint.studentCourseDetail = student.mostSignificantCourseDetails.getOrElse(throw new IllegalArgumentException)
 						checkpoint.state = MonitoringCheckpointState.Attended
 						checkpoint.autoCreated = true
