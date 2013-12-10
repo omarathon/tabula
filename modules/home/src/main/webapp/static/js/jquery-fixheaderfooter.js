@@ -7,6 +7,13 @@
 	 * it'll fix the header at the top when scrolled
 	 * and it'll fix the footer at the bottom.
 	 * (CSS in main.less)
+	 *
+	 * it has one option for the minimum screen height to fix on
+	 * you can call it like this
+	 *
+	 * $('.fixed-container').fixHeaderFooter({minimumScreenHeightFix: 800});
+	 *
+	 *
 	 */
 
 	$.fn.visible = function() {
@@ -17,8 +24,12 @@
 		return this.css('visibility', 'hidden');
 	};
 
-	$.fn.fixHeaderFooter = function() {
+	$.fn.fixHeaderFooter = function(options) {
+        var defaults = {
+            minimumScreenHeightFix : 0 // if 0 - fix areas at all screen sizes, if > 0 - only
+        };
 
+        var options = $.extend(defaults, options);
 		var areaToPersist = this;
 
 		var updateTableHeaders = function(persistArea) {
@@ -58,15 +69,22 @@
 
 
 		$(areaToPersist).each(function() {
-			if($(".persist-header").length) $(".persist-header").each(function() {
-				cloneRow($(this, areaToPersist), "floatingHeader");
-			});
+			if($(".persist-header").length) {
+                $(".persist-header").each(function() {
+				    cloneRow($(this, areaToPersist), "floatingHeader");
+			    });
+            };
 			if($(".persist-footer").length) cloneRow($(".persist-footer", areaToPersist), "floatingFooter");
 		});
 
 
 		$(window).scroll(function() {
-			updateTableHeaders(areaToPersist);
+            if(isScreenToBeFixed()) {
+                updateTableHeaders(areaToPersist)
+            } else {
+                $(".floatingHeader", areaToPersist).invisible();
+                $(".floatingFooter", areaToPersist).invisible();
+            }
 		});
 
 
@@ -81,9 +99,15 @@
 
 		// public methods
 		this.initialize = function() {
-            updateTableHeaders(areaToPersist);
-			return this;
+			if(this.isScreenToBeFixed) {
+				updateTableHeaders(areaToPersist);
+				return this;
+			}
 		};
+
+        var isScreenToBeFixed = function() {
+           return (options.minimumScreenHeightFix == 0 || $(window).height() > options.minimumScreenHeightFix);
+        }
 
 
  		// method to fix the jumbo direction icon in place

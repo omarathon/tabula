@@ -1,38 +1,40 @@
 <#escape x as x?html>
-<div class="fixed-on-scroll">
-	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
-	
-	<#if assignment.openEnded>
-		<p class="dates">
-			<@fmt.interval assignment.openDate />, never closes
-			(open-ended)
-			<#if !assignment.opened>
-				<span class="label label-warning">Not yet open</span>
-			</#if>
-		</p>
-	<#else>
-		<p class="dates">
-			<@fmt.interval assignment.openDate assignment.closeDate />
-			<#if assignment.closed>
-				<span class="label label-warning">Closed</span>
-			</#if>
-			<#if !assignment.opened>
-				<span class="label label-warning">Not yet open</span>
-			</#if>
-								
-		</p>
-	</#if>
-	
-	<#assign module=assignment.module />
-	<#assign department=module.department />
-	
-	<#include "_filter.ftl" />
-	
-	<#assign currentView = "table" />
-	<#include "_action-bar.ftl" />
+<div class="fixed-container">
+	<div class="persist-header">
+		<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
 
-	<#if students??>
-</div>
+		<#if assignment.openEnded>
+			<p class="dates">
+				<@fmt.interval assignment.openDate />, never closes
+				(open-ended)
+				<#if !assignment.opened>
+					<span class="label label-warning">Not yet open</span>
+				</#if>
+			</p>
+		<#else>
+			<p class="dates">
+				<@fmt.interval assignment.openDate assignment.closeDate />
+				<#if assignment.closed>
+					<span class="label label-warning">Closed</span>
+				</#if>
+				<#if !assignment.opened>
+					<span class="label label-warning">Not yet open</span>
+				</#if>
+
+			</p>
+		</#if>
+
+		<#assign module=assignment.module />
+		<#assign department=module.department />
+
+		<#include "_filter.ftl" />
+
+		<#assign currentView = "table" />
+		<#include "_action-bar.ftl" />
+
+		<#if students??>
+	</div>
+
 
 <#macro originalityReport attachment>
 <#local r=attachment.originalityReport />
@@ -118,6 +120,8 @@
 			</#if>
 			<col class="status" />
 		</colgroup>
+
+		<div class="persist-header">
 		<thead>
 			<tr>
 				<th class="check-col"><div class="check-all checkbox"><input type="checkbox" class="collection-check-all"></div></th>
@@ -162,6 +166,8 @@
 				<th class="sortable">Status</th>
 			</tr>
 		</thead>
+		</div><!-- end persist header -->
+
 		<tbody>
 			<#macro row student>
 				<#if student.coursework.enhancedSubmission??>
@@ -333,6 +339,9 @@
 	</table>
 	<script type="text/javascript">
 		(function($) {
+			var fixHeaderFooter = $('.fixed-container').fixHeaderFooter({minimumScreenHeightFix: 800});
+
+
 			$("#submission-table").sortableTable({
 				textExtraction: function(node) { 
 					var $el = $(node);
@@ -358,4 +367,5 @@
 </div>
 </#if>
 
+</div><!-- end fixed container -->
 </#escape>
