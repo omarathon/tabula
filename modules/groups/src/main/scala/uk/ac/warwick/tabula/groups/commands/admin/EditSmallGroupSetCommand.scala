@@ -14,6 +14,8 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.data.model.UnspecifiedTypeUserGroup
 
 class EditSmallGroupSetCommand(val set: SmallGroupSet, val apparentUser:User)
 	extends ModifySmallGroupSetCommand(set.module) with SmallGroupSetCommand  with NotifiesAffectedGroupMembers {
@@ -47,7 +49,7 @@ class EditSmallGroupSetCommand(val set: SmallGroupSet, val apparentUser:User)
 				set.groups.asScala.foreach { group => 
 					if (group.students.includesUser(user)) {
 						// Wrap this in a sub-command so that we can do auditing
-						new RemoveUserFromSmallGroupCommand(user, group).apply()
+						removeFromGroupCommand(user, group).apply()
 					}
 				}
 			}
@@ -55,6 +57,10 @@ class EditSmallGroupSetCommand(val set: SmallGroupSet, val apparentUser:User)
 
 		service.saveOrUpdate(set)
 		set
+	}
+	
+	def removeFromGroupCommand(user: User, smallGroup: SmallGroup): Appliable[UnspecifiedTypeUserGroup] = {
+		new RemoveUserFromSmallGroupCommand(user, smallGroup)
 	}
 
 	override def describe(d: Description) = d.smallGroupSet(set).properties(

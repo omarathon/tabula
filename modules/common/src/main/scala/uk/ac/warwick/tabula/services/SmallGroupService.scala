@@ -12,6 +12,8 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, Smal
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
+import uk.ac.warwick.tabula.data.model.UnspecifiedTypeUserGroup
+import uk.ac.warwick.tabula.commands.Appliable
 
 trait SmallGroupServiceComponent {
 	def smallGroupService: SmallGroupService
@@ -100,10 +102,13 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			    if (smallGroup.students.includesUser(user))
 			} {
 				// Wrap this in a sub-command so that we can do auditing
-				new RemoveUserFromSmallGroupCommand(user, smallGroup).apply()
-				userGroupDao.saveOrUpdate(smallGroup.students.asInstanceOf[UserGroup])
+				userGroupDao.saveOrUpdate(removeFromGroupCommand(user, smallGroup).apply().asInstanceOf[UserGroup])
 			}
 		}
+	}
+	
+	private def removeFromGroupCommand(user: User, smallGroup: SmallGroup): Appliable[UnspecifiedTypeUserGroup] = {
+		new RemoveUserFromSmallGroupCommand(user, smallGroup)
 	}
 }
 

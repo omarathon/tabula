@@ -5,13 +5,16 @@ import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.data.model.UnspecifiedTypeUserGroup
 
-class RemoveUserFromSmallGroupCommand(val user: User, val group: SmallGroup) extends Command[Unit] {
+class RemoveUserFromSmallGroupCommand(val user: User, val group: SmallGroup) extends Command[UnspecifiedTypeUserGroup] {
 	
 	PermissionCheck(Permissions.SmallGroups.Update, group)
 	
-	def applyInternal() {
-		group.students.remove(user)
+	def applyInternal() = {
+		val ug = group.students
+		ug.remove(user)
+		ug
 	}
 
 	override def describe(d: Description) = 
