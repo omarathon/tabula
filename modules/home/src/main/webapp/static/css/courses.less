@@ -65,6 +65,39 @@
 	color: @tabulaOrangeDark;
 }
 
+#container .reviewExtensionModal {
+
+  .requestDateInfo {
+    padding: 10px;
+    margin-bottom: 10px;
+    div { float: left; }
+    label { font-size: 1.2em; font-weight: bold; }
+    i { float: left; font-size: 2em; padding: 1% 1em 0 1em  }
+  }
+
+  .extension-details {
+    border-bottom: 1px dotted silver;
+    margin-bottom: 1em;
+    padding-bottom: 10px;
+    overflow-y: auto;
+    max-height: 178px;
+    ul { padding-left: 5px; }
+    details h5 { display: inline-block; }
+
+    .extensionReason { float: left; width: 65%; }
+    .extensionFurtherDetail { float: right; width: 32%; }
+  }
+
+  .extensionComments {
+    float: left;
+    width: 60%;
+    .controls textarea { height: 4em; width: 100%; display: block; }
+  }
+
+  .extensionNewDate { float: left; width: 36%; }
+
+}
+
 // department sort-modules (modules/arrange/form.ftl)
 
 #sortModulesCommand {

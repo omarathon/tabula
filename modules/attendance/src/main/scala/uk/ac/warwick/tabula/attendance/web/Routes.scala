@@ -18,6 +18,8 @@ object Routes {
 		def view(department: Department) = "/%s" format encoded(department.code)
 		def viewPoints(department: Department) = "/view/%s/points" format encoded(department.code)
 		def viewStudents(department: Department) = "/view/%s/students" format encoded(department.code)
+		def viewAgents(department: Department, relationshipType: StudentRelationshipType) =
+			"/view/%s/agents/%s" format(encoded(department.code), encoded(relationshipType.urlPart))
 		def manage(department: Department) = "/manage/%s" format encoded(department.code)
 	}
 

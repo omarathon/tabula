@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.MarkingState.{InProgress, MarkingCompleted}
+import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
 
 object OnlineFeedbackCommand {
 	def apply(module: Module, assignment: Assignment) =
@@ -34,7 +34,7 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 				case Some(f) => (true, f.released.booleanValue)
 				case _ => (false, false)
 			}
-			new StudentFeedbackGraph(student, hasSubmission, hasFeedback, hasPublishedFeedback, false)
+			new StudentFeedbackGraph(student, hasSubmission, hasFeedback, hasPublishedFeedback, false, false)
 		}
 	}
 }
@@ -64,25 +64,24 @@ abstract class OnlineMarkerFeedbackCommand(val module: Module, val assignment: A
 			case _ => Seq()
 		}
 
-		submissions.filter(_.isReleasedForMarking).map { submission =>
-
+		submissions.filter(_.isReleasedForMarking).map { submission =>			
 			val student = userLookup.getUserByWarwickUniId(submission.universityId)
 			val hasSubmission = true
 			val feedback = feedbackService.getFeedbackByUniId(assignment, submission.universityId)
 			val markerFeedback = assignment.getMarkerFeedback(submission.universityId, marker)
 
-			val (hasFeedback, hasCompletedFeedback) = markerFeedback match {
+			val (hasFeedback, hasCompletedFeedback, hasRejectedFeedback) = markerFeedback match {
 				case Some(mf) => {
-					(mf.state == InProgress, mf.state == MarkingCompleted)
+					(mf.hasContent, mf.state == MarkingCompleted,  mf.state == Rejected)
 				}
-				case None => (false, false)
+				case None => (false, false, false)
 			}
 
 			val hasPublishedFeedback = feedback match {
 				case Some(f) => f.released.booleanValue
 				case None => false
 			}
-			new StudentFeedbackGraph(student, hasSubmission, hasFeedback, hasPublishedFeedback, hasCompletedFeedback)
+			new StudentFeedbackGraph(student, hasSubmission, hasFeedback, hasPublishedFeedback, hasCompletedFeedback, hasRejectedFeedback)
 		}
 	}
 }
@@ -109,5 +108,6 @@ case class StudentFeedbackGraph(
 	hasSubmission: Boolean,
 	hasFeedback: Boolean,
 	hasPublishedFeedback: Boolean,
-	hasCompletedFeedback: Boolean
+	hasCompletedFeedback: Boolean,
+	hasRejectedFeedback: Boolean
 )

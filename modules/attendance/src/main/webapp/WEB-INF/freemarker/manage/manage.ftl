@@ -179,6 +179,6 @@
 	</div>
 </#if>
 
-<div id="monitoring-point-preview-modal" class="modal hide">
+<div id="monitoring-point-preview-modal" class="modal hide fade" style="display:none;">
 </div>
 </#if>

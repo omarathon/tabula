@@ -38,7 +38,7 @@ class AdminDepartmentHomeController extends CourseworkController {
 	@ModelAttribute def command(@PathVariable("dept") dept: Department, user: CurrentUser) =
 		new AdminDepartmentHomeCommand(dept, user)
 	
-	@RequestMapping(method=Array(GET, HEAD))
+	@RequestMapping
 	def adminDepartment(cmd: AdminDepartmentHomeCommand) = {
 		val info = cmd.apply()
 		
@@ -46,6 +46,13 @@ class AdminDepartmentHomeController extends CourseworkController {
 			"department" -> cmd.department,
 			"modules" -> info.modules,
 			"notices" -> info.notices)
+	}
+	
+	@RequestMapping(Array("/assignments.xml"))
+	def xml(cmd: AdminDepartmentHomeCommand, @PathVariable("dept") dept: Department) = {
+		val info = cmd.apply()
+		
+		new AdminHomeExports.XMLBuilder(dept, info).toXML
 	}
 }
 

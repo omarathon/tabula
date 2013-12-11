@@ -1,48 +1,25 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
+
 import java.sql.ResultSet
+
+import org.hibernate.exception.ConstraintViolationException
 import org.joda.time.DateTime
-import org.springframework.beans.BeanWrapper
-import org.springframework.beans.BeanWrapperImpl
+import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
+
+import ImportMemberHelpers.{opt, toLocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.PrsCode
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.MemberDao
-import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import uk.ac.warwick.tabula.data.model.StudentCourseProperties
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.helpers.Closeables._
+import uk.ac.warwick.tabula.commands.{Command, Unaudited}
+import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao}
+import uk.ac.warwick.tabula.data.Transactions.transactional
+import uk.ac.warwick.tabula.data.model.{CourseType, Department, Member, StudentCourseDetails, StudentCourseProperties, StudentMember, StudentRelationshipSource}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.data.model.Course
-import uk.ac.warwick.tabula.services.CourseAndRouteService
-import uk.ac.warwick.tabula.data.MemberDao
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.PrsCode
-import uk.ac.warwick.tabula.data.model.StudentCourseProperties
-import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.services.CourseAndRouteService
-import java.sql.BatchUpdateException
-import org.hibernate.exception.ConstraintViolationException
+import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopying}
 import uk.ac.warwick.tabula.scheduling.services.CourseImporter
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
-import uk.ac.warwick.tabula.data.model.CourseType
+import uk.ac.warwick.tabula.services.{CourseAndRouteService, RelationshipService}
 
 class ImportStudentCourseCommand(resultSet: ResultSet,
+		importRowTracker: ImportRowTracker,
 		importStudentCourseYearCommand: ImportStudentCourseYearCommand,
 		importSupervisorsForStudentCommand: ImportSupervisorsForStudentCommand)
 	extends Command[StudentCourseDetails] with Logging with Daoisms
@@ -90,7 +67,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	this.levelCode = rs.getString("level_code")
 
 	override def applyInternal(): StudentCourseDetails = {
-		val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCode(scjCode)
+		val studentCourseDetailsExisting = studentCourseDetailsDao.getByScjCodeStaleOrFresh(scjCode)
 
 		logger.debug("Importing student course details for " + scjCode)
 
@@ -102,7 +79,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		val commandBean = new BeanWrapperImpl(this)
 		val studentCourseDetailsBean = new BeanWrapperImpl(studentCourseDetails)
 
-		val hasChanged = copyStudentCourseProperties(commandBean, studentCourseDetailsBean)
+		val hasChanged = copyStudentCourseProperties(commandBean, studentCourseDetailsBean) | markAsSeenInSits(studentCourseDetailsBean)
 
 		if (isTransient || hasChanged) {
 			try {
@@ -133,10 +110,18 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		// Apply above will take care of the db.  This brings the in-memory data up to speed:
 		studentCourseDetails.attachStudentCourseYearDetails(studentCourseYearDetails)
 
-		captureTutor(studentCourseDetails.department)
+		if (sprStatusCode != null && sprStatusCode.startsWith("P")) {
+			// they are permanently withdrawn
+			endRelationships()
+		}
+		else {
+			captureTutor(studentCourseDetails.department)
 
-		importSupervisorsForStudentCommand.studentCourseDetails = studentCourseDetails
-		importSupervisorsForStudentCommand.apply
+			importSupervisorsForStudentCommand.studentCourseDetails = studentCourseDetails
+			importSupervisorsForStudentCommand.apply
+		}
+
+		importRowTracker.scjCodesSeen.add(studentCourseDetails.scjCode)
 
 		studentCourseDetails
 	}
@@ -178,7 +163,6 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	}
 
 	def captureTutor(dept: Department) = {
-
 		if (dept == null)
 			logger.warn("Trying to capture tutor for " + sprCode + " but department is null.")
 
@@ -209,6 +193,22 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 						case _ => logger.warn("Can't parse PRS code " + sprTutor1 + " for student " + sprCode)
 					}
 				}
+	}
+
+
+	def endRelationships() {
+		if (endDate != null) {
+			val endDateFromSits = endDate.toDateTimeAtCurrentTime()
+			val threeMonthsAgo = DateTime.now().minusMonths(3)
+			if (endDateFromSits.isBefore(threeMonthsAgo)) {
+				relationshipService.getAllCurrentRelationships(sprCode)
+					.foreach { relationship =>
+							relationship.endDate = endDateFromSits
+							relationshipService.saveOrUpdate(relationship)
+						}
+			}
 		}
 	}
+}
+
 

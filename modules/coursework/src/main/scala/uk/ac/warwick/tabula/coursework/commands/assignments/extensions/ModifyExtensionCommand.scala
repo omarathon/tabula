@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands.{Notifies, Description, Command, SelfValida
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{StudentMember, Assignment, Module}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.helpers.{LazyLists, Logging}
 import uk.ac.warwick.tabula.data.Transactions._
@@ -61,7 +61,7 @@ class EditExtensionCommand(module: Module, assignment: Assignment, val extension
 
 class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, extension: Extension, submitter: CurrentUser)
 	extends EditExtensionCommand(module, assignment, extension, submitter) {
-	
+
 	PermissionCheck(Permissions.Extension.ReviewRequest, extension)
 }
 
@@ -69,7 +69,7 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 		extends Command[Seq[Extension]] with Daoisms with Logging with SelfValidating {
 	
 	mustBeLinked(assignment,module)
-		
+
 	var userLookup = Wire.auto[UserLookupService]
 	
 	var extensionItems:JList[ExtensionItem] = LazyLists.create()
@@ -111,7 +111,7 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 			val item = new ExtensionItem
 			item.universityId =  extension.universityId
 			item.approvalComments = extension.approvalComments
-			item.expiryDate = extension.expiryDate
+			item.expiryDate = Option(extension.expiryDate).getOrElse(extension.requestedExpiryDate)
 			item
 		}
 

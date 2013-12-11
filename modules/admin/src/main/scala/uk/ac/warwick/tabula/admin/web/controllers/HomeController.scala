@@ -11,9 +11,11 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 	var moduleService = Wire[ModuleAndDepartmentService]
 	
 	@RequestMapping(Array("/")) def home(user: CurrentUser) = {
-		val ownedDepartments = moduleService.departmentsWithPermission(user, Permissions.Module.ManageSmallGroups)
-		val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.ManageSmallGroups)
-		val ownedRoutes = moduleService.routesWithPermission(user, Permissions.MonitoringPoints.Manage)
+		val ownedDepartments = 
+			moduleService.departmentsWithPermission(user, Permissions.Module.Administer) ++
+			moduleService.departmentsWithPermission(user, Permissions.Route.Administer)
+		val ownedModules = moduleService.modulesWithPermission(user, Permissions.Module.Administer)
+		val ownedRoutes = moduleService.routesWithPermission(user, Permissions.Route.Administer)
 		
 		Mav("home/view",
 			"ownedDepartments" -> ownedDepartments,

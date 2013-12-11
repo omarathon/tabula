@@ -7,186 +7,186 @@ var exports = {};
 
 $(function(){
 
-    // hide stuff that makes no sense when open-ended
-    $('input#openEnded').slideMoreOptions($('.has-close-date'), false);
-    $('input#modal-open-ended').slideMoreOptions($('.has-close-date'), false);
+	// hide stuff that makes no sense when open-ended
+	$('input#openEnded').slideMoreOptions($('.has-close-date'), false);
+	$('input#modal-open-ended').slideMoreOptions($('.has-close-date'), false);
 
-    // check that the extension UI elements are present
-    if($('input#allowExtensionRequests').length > 0){
-        $('input#allowExtensionRequests').slideMoreOptions($('#request-extension-fields'), true);
-    }
+	// check that the extension UI elements are present
+	if($('input#allowExtensionRequests').length > 0){
+		$('input#allowExtensionRequests').slideMoreOptions($('#request-extension-fields'), true);
+	}
 
-    // Zebra striping on lists of modules/assignments
-    $('.module-info').each(function(i, module) {
-        $(module).find('.assignment-info').filter(':visible:even').addClass('alt-row');
-    });
+	// Zebra striping on lists of modules/assignments
+	$('.module-info').each(function(i, module) {
+		$(module).find('.assignment-info').filter(':visible:even').addClass('alt-row');
+	});
 
-    $('.module-info.empty').css('opacity',0.66)
-        .find('.module-info-contents').hide().end()
-        .click(function(){
-            $(this).css('opacity',1)
-                .find('.module-info-contents').show().end();
-        })
-        .hide();
+	$('.module-info.empty').css('opacity',0.66)
+		.find('.module-info-contents').hide().end()
+		.click(function(){
+			$(this).css('opacity',1)
+				.find('.module-info-contents').show().end();
+		})
+		.hide();
 
-    $('.dept-show').click(function(event){
-    	event.preventDefault();
-    	var hideButton = $(this).find("a");
+	$('.dept-show').click(function(event){
+		event.preventDefault();
+		var hideButton = $(this).find("a");
 
-        $('.module-info.empty').toggle('fast', function() {
-        	if($('.module-info.empty').is(":visible")) {
-        		hideButton.html('<i class="icon-eye-close"></i> Hide');
-        		hideButton.attr("data-original-title", hideButton.attr("data-title-hide"));
+		$('.module-info.empty').toggle('fast', function() {
+			if($('.module-info.empty').is(":visible")) {
+				hideButton.html('<i class="icon-eye-close"></i> Hide');
+				hideButton.attr("data-original-title", hideButton.attr("data-title-hide"));
 
-        	} else {
-        		hideButton.html('<i class="icon-eye-open"></i> Show');
-        		hideButton.attr("data-original-title", hideButton.attr("data-title-show"));
-        	}
-        });
+			} else {
+				hideButton.html('<i class="icon-eye-open"></i> Show');
+				hideButton.attr("data-original-title", hideButton.attr("data-title-show"));
+			}
+		});
 
-    });
+	});
 
 
-    // code for tabs
-    $('.nav.nav-tabs a').click(function (e) {
-        e.preventDefault();
-        $(this).tab('show');
-    });
+	// code for tabs
+	$('.nav.nav-tabs a').click(function (e) {
+		e.preventDefault();
+		$(this).tab('show');
+	});
 
-    // code for the marks web forms
-    $('#marks-web-form').tableForm({
-        addButtonClass: 'add-additional-marks',
-        headerClass: 'mark-header',
-        rowClass: 'mark-row',
-        tableClass: 'marksUploadTable',
-        listVariable: 'marks',
-        onAdd: function(){
-            $('input.universityId', this).each(function(i, picker){
-                initUserPicker(picker, true);
-            });
-        }
-    });
+	// code for the marks web forms
+	$('#marks-web-form').tableForm({
+		addButtonClass: 'add-additional-marks',
+		headerClass: 'mark-header',
+		rowClass: 'mark-row',
+		tableClass: 'marksUploadTable',
+		listVariable: 'marks',
+		onAdd: function(){
+			$('input.universityId', this).each(function(i, picker){
+				initUserPicker(picker, true);
+			});
+		}
+	});
 
-    $('.show-archived-assignments').click(function(e){
-        e.preventDefault();
-        $(e.target).hide().closest('.module-info').find('.assignment-info.archived').show();
-    });
+	$('.show-archived-assignments').click(function(e){
+		e.preventDefault();
+		$(e.target).hide().closest('.module-info').find('.assignment-info.archived').show();
+	});
 
 	$('.hide-awaiting-submission').on('click', function(){
-        $('.awaiting-submission, .hide-label, .show-label').toggle();
-    });
+		$('.awaiting-submission, .hide-label, .show-label').toggle();
+	});
 	// hide this button if it would do nothing
 	if ($('.awaiting-submission').length == 0) {
 		$('.hide-awaiting-submission').hide();
 	}
 
-    // enable shift-click on multiple checkboxes in tables
-    $('table').find('input[type="checkbox"]').shiftSelectable();
+	// enable shift-click on multiple checkboxes in tables
+	$('table').find('input[type="checkbox"]').shiftSelectable();
 
-    $('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list, #coursework-progress-table, #online-marking-table').bigList({
-        setup : function() {
-            var $container = this;
-            // #delete-selected-button won't work for >1 set of checkboxes on a page.
-            $('#download-selected-button, #delete-selected-button').click(function(event){
-                event.preventDefault();
+	$('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list, #coursework-progress-table, #online-marking-table').bigList({
+		setup : function() {
+			var $container = this;
+			// #delete-selected-button won't work for >1 set of checkboxes on a page.
+			$('#download-selected-button, #delete-selected-button').click(function(event){
+				event.preventDefault();
 
-                var $checkedBoxes = $(".collection-checkbox:checked", $container);
-                if ($container.data('checked') != 'none') {
-                    var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
-                    $form.append($checkedBoxes.clone());
-                    $(document.body).append($form);
-                    $form.submit();
-                }
-                return false;
-            });
+				var $checkedBoxes = $(".collection-checkbox:checked", $container);
+				if ($container.data('checked') != 'none') {
+					var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
+					$form.append($checkedBoxes.clone());
+					$(document.body).append($form);
+					$form.submit();
+				}
+				return false;
+			});
 
-            $('#mark-plagiarised-selected-button:not(.disabled)').click(function(event){
-                event.preventDefault();
+			$('#mark-plagiarised-selected-button:not(.disabled)').click(function(event){
+				event.preventDefault();
 
-                var $checkedBoxes = $(".collection-checkbox:checked", $container);
+				var $checkedBoxes = $(".collection-checkbox:checked", $container);
 
-                if ($container.data('checked') != 'none') {
+				if ($container.data('checked') != 'none') {
 
-                    var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
-                    $form.append($checkedBoxes.clone());
+					var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
+					$form.append($checkedBoxes.clone());
 
-                    if ($container.data("all-plagiarised") === true) {
-                        $form.append("<input type='hidden' name='markPlagiarised' value='false'>");
-                    }
+					if ($container.data("all-plagiarised") === true) {
+						$form.append("<input type='hidden' name='markPlagiarised' value='false'>");
+					}
 
-                    $(document.body).append($form);
-                    $form.submit();
-                }
-                return false;
-            });
+					$(document.body).append($form);
+					$form.submit();
+				}
+				return false;
+			});
 
-            $('.form-post').click(function(event){
-                event.preventDefault();
+			$('.form-post').click(function(event){
+				event.preventDefault();
 
-                var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
-                var doFormSubmit = false;
+				var $form = $('<form></form>').attr({method:'POST',action:this.href}).hide();
+				var doFormSubmit = false;
 
-                if ($container.data('checked') != 'none') {
-                    var $checkedBoxes = $(".collection-checkbox:checked", $container);
-                    $form.append($checkedBoxes.clone());
+				if ($container.data('checked') != 'none') {
+					var $checkedBoxes = $(".collection-checkbox:checked", $container);
+					$form.append($checkedBoxes.clone());
 
-                    var $extraInputs = $(".post-field", $container);
-                    $form.append($extraInputs.clone());
+					var $extraInputs = $(".post-field", $container);
+					$form.append($extraInputs.clone());
 
-                    doFormSubmit = true;
-                }
+					doFormSubmit = true;
+				}
 
-                if ($(this).hasClass('include-filter') && ($('.filter-form').length > 0)) {
-                		var $inputs = $(':input', '.filter-form');
-                		$form.append($inputs.clone());
+				if ($(this).hasClass('include-filter') && ($('.filter-form').length > 0)) {
+						var $inputs = $(':input', '.filter-form');
+						$form.append($inputs.clone());
 
-                		doFormSubmit = true;
-                }
+						doFormSubmit = true;
+				}
 
-                if (doFormSubmit) {
-                	$(document.body).append($form);
-                  $form.submit();
-                } else {
-                	return false;
-                }
-            });
+				if (doFormSubmit) {
+					$(document.body).append($form);
+				  $form.submit();
+				} else {
+					return false;
+				}
+			});
 
-        },
+		},
 
-        // rather than just toggling the class check the state of the checkbox to avoid silly errors
-        onChange : function() {
-            this.closest(".itemContainer").toggleClass("selected", this.is(":checked"));
-            var $checkedBoxes = $(".collection-checkbox:checked");
+		// rather than just toggling the class check the state of the checkbox to avoid silly errors
+		onChange : function() {
+			this.closest(".itemContainer").toggleClass("selected", this.is(":checked"));
+			var $checkedBoxes = $(".collection-checkbox:checked");
 
-            var allPlagiarised = false;
+			var allPlagiarised = false;
 
-            if ($checkedBoxes.length > 0) {
-                allPlagiarised = true;
-                $checkedBoxes.each(function(index){
-                    var $checkBox = $(this);
-                    if ($checkBox.closest('tr').data('plagiarised') != true) {
-                        allPlagiarised = false;
-                    }
-                });
-            }
-            $('.submission-feedback-list,.submission-list,#coursework-progress-table').data("all-plagiarised", allPlagiarised);
-            if (allPlagiarised) {
-                $('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign"></i> Unmark plagiarised');
-            }
-            else {
-                $('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign"></i> Mark plagiarised');
-            }
-        },
+			if ($checkedBoxes.length > 0) {
+				allPlagiarised = true;
+				$checkedBoxes.each(function(index){
+					var $checkBox = $(this);
+					if ($checkBox.closest('tr').data('plagiarised') != true) {
+						allPlagiarised = false;
+					}
+				});
+			}
+			$('.submission-feedback-list,.submission-list,#coursework-progress-table').data("all-plagiarised", allPlagiarised);
+			if (allPlagiarised) {
+				$('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign"></i> Unmark plagiarised');
+			}
+			else {
+				$('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign"></i> Mark plagiarised');
+			}
+		},
 
-        onSomeChecked : function() {
-            $('.must-have-selected').removeClass('disabled');
-        },
+		onSomeChecked : function() {
+			$('.must-have-selected').removeClass('disabled');
+		},
 
-        onNoneChecked : function() {
-            $('.must-have-selected').addClass('disabled');
-        }
+		onNoneChecked : function() {
+			$('.must-have-selected').addClass('disabled');
+		}
 
-    });
+	});
 
 
 
@@ -199,25 +199,25 @@ window.Courses = jQuery.extend(window.Courses, exports);
 
 // shift selectable checkboxes
 $.fn.shiftSelectable = function() {
-    var lastChecked,
-        $boxes = this;
+	var lastChecked,
+		$boxes = this;
 
-    $boxes.click(function(evt) {
-        if(!lastChecked) {
-            lastChecked = this;
-            return;
-        }
+	$boxes.click(function(evt) {
+		if(!lastChecked) {
+			lastChecked = this;
+			return;
+		}
 
-        if(evt.shiftKey) {
-            var start = $boxes.index(this),
-                end = $boxes.index(lastChecked);
-            $boxes.slice(Math.min(start, end), Math.max(start, end) + 1)
-                .attr('checked', lastChecked.checked)
-                .trigger('change');
-        }
+		if(evt.shiftKey) {
+			var start = $boxes.index(this),
+				end = $boxes.index(lastChecked);
+			$boxes.slice(Math.min(start, end), Math.max(start, end) + 1)
+				.attr('checked', lastChecked.checked)
+				.trigger('change');
+		}
 
-        lastChecked = this;
-    });
+		lastChecked = this;
+	});
 };
 
 // code for markingWorkflow add/edit
@@ -228,6 +228,8 @@ $(function(){
 		secondMarkers.show();
 	$('#markingMethod').on('change', function(){
 		var option = $('option:selected', $(this));
+
+
 		if(option.hasClass('uses-second-markers'))
 			secondMarkers.show();
 		else
@@ -268,10 +270,10 @@ $(function(){
 
 
 var frameLoad = function(frame){
-    if(jQuery(frame).contents().find("form").length == 0){
-        jQuery("#feedback-report-modal").modal('hide');
-        document.location.reload(true);
-    }
+	if(jQuery(frame).contents().find("form").length == 0){
+		jQuery("#feedback-report-modal").modal('hide');
+		document.location.reload(true);
+	}
 }
 
 $(function(){
@@ -282,118 +284,118 @@ $(function(){
 // Ajax specific modal start
 
 // modals use ajax to retrieve their contents
-    $('#feedback-report-button, #extension-list').on('click', 'a[data-toggle=modal]', function(e){
-        e.preventDefault();
-        var $this = $(this);
-        var target = $this.attr('data-target');
-        var url = $this.attr('href');
-        $(target).load(url);
-    });
+	$('#feedback-report-button, #extension-list').on('click', 'a[data-toggle=modal]', function(e){
+		e.preventDefault();
+		var $this = $(this);
+		var target = $this.attr('data-target');
+		var url = $this.attr('href');
+		$(target).load(url);
+	});
 
 
 
 // any date fields returned by ajax will have datetime pickers bound to them as required
-    $('#feedback-report-modal, #extension-list').on('focus', 'input.date-time-picker', function(e){
-        e.preventDefault();
-        var isPickerHidden = (typeof $('.datetimepicker').filter(':visible')[0] === "undefined") ? true : false;
+	$('#feedback-report-modal, #extension-list').on('focus', 'input.date-time-picker', function(e){
+		e.preventDefault();
+		var isPickerHidden = (typeof $('.datetimepicker').filter(':visible')[0] === "undefined") ? true : false;
 
-        if(isPickerHidden) {
-            $(this).datetimepicker('remove').datetimepicker({
-                format: "dd-M-yyyy hh:ii:ss",
-                weekStart: 1,
-                minView: 'day',
-                autoclose: true
-            }).on('show', function(ev){
-                var d = new Date(ev.date.valueOf()),
-                      minutes = d.getUTCMinutes(),
-                        seconds = d.getUTCSeconds(),
-                        millis = d.getUTCMilliseconds();
+		if(isPickerHidden) {
+			$(this).datetimepicker('remove').datetimepicker({
+				format: "dd-M-yyyy hh:ii:ss",
+				weekStart: 1,
+				minView: 'day',
+				autoclose: true
+			}).on('show', function(ev){
+				var d = new Date(ev.date.valueOf()),
+					  minutes = d.getUTCMinutes(),
+						seconds = d.getUTCSeconds(),
+						millis = d.getUTCMilliseconds();
 
-                if (minutes > 0 || seconds > 0 || millis > 0) {
-                    d.setUTCMinutes(0);
-                    d.setUTCSeconds(0);
-                    d.setUTCMilliseconds(0);
+				if (minutes > 0 || seconds > 0 || millis > 0) {
+					d.setUTCMinutes(0);
+					d.setUTCSeconds(0);
+					d.setUTCMilliseconds(0);
 
-                    var DPGlobal = $.fn.datetimepicker.DPGlobal;
-                    $(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
+					var DPGlobal = $.fn.datetimepicker.DPGlobal;
+					$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
 
-                    $(this).datetimepicker('update');
-                }
-            });
-        }
-    });
+					$(this).datetimepicker('update');
+				}
+			});
+		}
+	});
 
-    // feedback report
+	// feedback report
 	$("#feedback-report-modal").tabulaAjaxSubmit(function(data) {
-    	window.location = data.result;
-    });
+		window.location = data.result;
+	});
 
    // extensions admin
 	$("#extension-list").tabulaAjaxSubmit(function(data) {
-        var action = data.action;
-        $.each(data.result, function() {
-            modifyRow(this, action);
-        });
+		var action = data.action;
+		$.each(data.result, function() {
+			modifyRow(this, action);
+		});
 		// hide the model
 		jQuery("#extension-model").modal('hide');
-    });
+	});
 
 	// Ajax specific modal end
 
 	// CM removed this line; it would never have worked (looks like CnP from a freemarker tempate)
-    // var highlightId = "${highlightId}";
-    var highlightId = "";
-    if (highlightId != "") {
-        var container = $("#extension-list");
-        var highlightRow = $("#row"+highlightId);
-        if(highlightRow.length > 0){
-            container.animate({
-                scrollTop: highlightRow.offset().top - container.offset().top + container.scrollTop()
-            }, 1000);
-        }
-    }
+	// var highlightId = "${highlightId}";
+	var highlightId = "";
+	if (highlightId != "") {
+		var container = $("#extension-list");
+		var highlightRow = $("#row"+highlightId);
+		if(highlightRow.length > 0){
+			container.animate({
+				scrollTop: highlightRow.offset().top - container.offset().top + container.scrollTop()
+			}, 1000);
+		}
+	}
 
-    // set reject and approved flags
-    $("#extension-model").on('click', '#approveButton', function(){
-        $(".approveField").val("1");
-        $(".rejectField").val("0");
-    });
+	// set reject and approved flags
+	$("#extension-model").on('click', '#approveButton', function(){
+		$(".approveField").val("1");
+		$(".rejectField").val("0");
+	});
 
-    $("#extension-model").on('click', '#rejectButton', function(){
-        $(".approveField").val("0");
-        $(".rejectField").val("1");
-    });
+	$("#extension-model").on('click', '#rejectButton', function(){
+		$(".approveField").val("0");
+		$(".rejectField").val("1");
+	});
 
-    var modifyRow = function(results, action){
-        var $row =  $("#extension-list").find("#row"+results.id);
-        if(action === "add"){
-            updateRowUI(results, $row);
-            $(".new-extension", $row).hide();
-            $(".modify-extension", $row).show();
-            $(".revoke-extension", $row).show();
-        } else if (action === "edit"){
-            updateRowUI(results, $row);
-        } else if (action === "delete"){
-            $("td.expiryDate", $row).html("");
-            $("td.status", $row).html("");
-            $(".new-extension", $row).show();
-            $(".modify-extension", $row).hide();
-            $(".revoke-extension", $row).hide();
-        }
-    };
+	var modifyRow = function(results, action){
+		var $row =  $("#extension-list").find("#row"+results.id);
+		if(action === "add"){
+			updateRowUI(results, $row);
+			$(".new-extension", $row).hide();
+			$(".modify-extension", $row).show();
+			$(".revoke-extension", $row).show();
+		} else if (action === "edit"){
+			updateRowUI(results, $row);
+		} else if (action === "delete"){
+			$("td.expiryDate", $row).html("");
+			$("td.status", $row).html("");
+			$(".new-extension", $row).show();
+			$(".modify-extension", $row).hide();
+			$(".revoke-extension", $row).hide();
+		}
+	};
 
-    var updateRowUI = function(json, $row){
-    	var prop;
-        for(prop in json){
-            $row.find('.'+prop).html(json[prop]);
-        }
-        $('.status').each(function(){
-            if ($(this).html() === "Approved")
-                $(this).html('<span>Granted</span>');
-            else if ($(this).html() === "Rejected")
-                $(this).html('<span>Rejected</span>');
-        });
-    };
+	var updateRowUI = function(json, $row){
+		var prop;
+		for(prop in json){
+			$row.find('.'+prop).html(json[prop]);
+		}
+		$('.status').each(function(){
+			if ($(this).html() === "Approved")
+				$(this).html('<span>Granted</span>');
+			else if ($(this).html() === "Rejected")
+				$(this).html('<span>Rejected</span>');
+		});
+	};
 
 
 	// makes dropdown menus dropup rather than down if they're so
@@ -421,6 +423,24 @@ $(function() {
 		// record the initial values of the fields
 		$('input, textarea', $form).each(function() {
 			$(this).data('initialvalue', $(this).val());
+		});
+
+		// rejection fields shown when reject is selected
+		$('input.reject', $container).each( function() {
+			var $this = $(this);
+			var $form = $this.closest('form');
+			var $table = $('#online-marking-table');
+			var $rejectionFields = $form.find('.rejection-fields');
+			$this.slideMoreOptions($rejectionFields, true);
+
+			$rejectionFields.on('tabula.slideMoreOptions.shown', function() {
+				$table.trigger('tabula.expandingTable.repositionContent');
+			});
+
+			$rejectionFields.on('tabula.slideMoreOptions.hidden', function() {
+				$table.trigger('tabula.expandingTable.repositionContent');
+			});
+
 		});
 
 		$('.cancel-feedback', $form).on('click', function(e) {
@@ -458,11 +478,19 @@ $(function() {
 				} else {
 					// there is an ajax-response class somewhere in the response text
 					var $response = $resp.find('.ajax-response').andSelf().filter('.ajax-response');
-
+					var rejected = $response.length && $response.data('data') == 'Rejected';
+					var markingCompleted = $response.length && $response.data('data') == 'MarkingCompleted';
 					var success = $response.length && $response.data('status') == 'success';
+
 					if (success) {
 						var $statusContainer = $row.find('.status-col dt');
-						if(!$statusContainer.find('.marked').length){
+						if(rejected) {
+							$statusContainer.append($('<div class="label label-important">Rejected</div>'));
+						}
+						else if(markingCompleted) {
+							$statusContainer.append($('<div class="label label-success">Marking completed</div>'));
+						}
+						else if(!$statusContainer.find('.marked').length) {
 							$statusContainer.append($('<div class="label label-warning marked">Marked</div>'));
 						}
 
@@ -558,7 +586,7 @@ $(function() {
 		} else {
 			if($container.find('form').length) {
 				$icon.removeClass('icon-chevron-right')
-               	$icon.addClass('icon-chevron-down');
+				$icon.addClass('icon-chevron-down');
 				$container.show();
 			} else {
 				$icon.removeClass('icon-chevron-right');

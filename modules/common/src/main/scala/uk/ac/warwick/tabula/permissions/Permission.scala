@@ -152,16 +152,26 @@ object Permissions {
 		case object ManageDisplaySettings extends Permission("Manage display settings")
 		case object DownloadFeedbackReport extends Permission("Generate a feedback report")
 		case object ManageProfiles extends Permission("Manage student profiles")
+		case object Create extends Permission("Add a sub-department")
 	}
 
 	object Module {
 		// We don't Read a module, we ManageAssignments on it
+		case object Administer extends Permission("Administer")
 		case object ManageAssignments extends Permission("Manage assignments")
 		case object ManageSmallGroups extends Permission("Manage small groups")
 
 		case object Create extends Permission("Add a module")
 		case object Update extends Permission("Edit a module")
 		case object Delete extends Permission("Remove a module")
+	}
+	
+	object Route {
+		case object Administer extends Permission("Administer")
+		
+		case object Create extends Permission("Add a route")
+		case object Update extends Permission("Edit a route")
+		case object Delete extends Permission("Remove a route")
 	}
 
 	object Assignment {

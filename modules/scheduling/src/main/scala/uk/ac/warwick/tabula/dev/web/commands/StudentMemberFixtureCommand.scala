@@ -59,6 +59,7 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 			if (dept.isDefined)  scd.department = dept.get
 			val yd = new StudentCourseYearDetails(scd, 1, AcademicYear.guessByDate(DateTime.now))
 			yd.yearOfStudy = yearOfStudy
+			if (dept.isDefined) yd.enrolmentDepartment = dept.get
 			scd.attachStudentCourseYearDetails(yd)
 
 		transactional() {
@@ -67,7 +68,7 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 				memberDao.delete
 			}
 
-			newMember.studentCourseDetails.add(scd)
+			newMember.attachStudentCourseDetails(scd)
 			memberDao.saveOrUpdate(newMember)
 		}
 

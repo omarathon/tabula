@@ -12,7 +12,6 @@ import uk.ac.warwick.spring.Wire
 import org.codehaus.jackson.annotate.JsonAutoDetect
 import uk.ac.warwick.util.queue.conversion.ItemType
 import uk.ac.warwick.util.queue.Queue
-import org.springframework.beans.BeanWrapperImpl
 import uk.ac.warwick.tabula.commands.Describable
 import uk.ac.warwick.tabula.commands.DescriptionImpl
 import uk.ac.warwick.tabula.events.Event
@@ -51,10 +50,7 @@ trait MaintenanceModeService extends MaintenanceStatus {
 	var until: Option[DateTime]
 	var message: Option[String]
 	
-	private val bean = new BeanWrapperImpl(this)
-	def update(message: MaintenanceModeMessage) = {
-		val values = new BeanWrapperImpl(message)
-		
+	def update(message: MaintenanceModeMessage) = {		
 		this.message = Option(message.message)
 		this.until = message.until match {
 			case -1 => None

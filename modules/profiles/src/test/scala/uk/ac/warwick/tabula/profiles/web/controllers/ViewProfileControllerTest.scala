@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.services.RelationshipService
 
 class ViewProfileControllerTest extends TestBase with Mockito{
 
-	val controller = new ViewProfileController
+	val controller = new ViewProfileByStudentController
 	// need to have a security service defined or we'll get a NPE in PermissionsCheckingMethods.restricted()
 	controller.securityService = mock[SecurityService]
 	controller.smallGroupService = mock[SmallGroupService]
@@ -18,7 +18,7 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 	val member = new StudentMember()
 	val courseDetails = new StudentCourseDetails()
 	courseDetails.mostSignificant = true
-	member.studentCourseDetails.add(courseDetails)
+	member.attachStudentCourseDetails(courseDetails)
 	member.mostSignificantCourse = courseDetails
 
 	@Test(expected=classOf[ItemNotFoundException])
@@ -42,13 +42,13 @@ class ViewProfileControllerTest extends TestBase with Mockito{
 	@Test def getMeetingRecordCommand() {
 		withUser("test") {
 			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-			
-			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)			
-			val cmd = controller.getViewMeetingRecordCommand(member, relationshipType)
+
+			controller.smallGroupService.findSmallGroupsByStudent(currentUser.apparentUser) returns (Nil)
+			val cmd = controller.getViewMeetingRecordCommand(Some(courseDetails), relationshipType)
 			cmd should not be(None)
 
 			val staffMember = new StaffMember
-			val notACmd = controller.getViewMeetingRecordCommand(staffMember, relationshipType)
+			val notACmd = controller.getViewMeetingRecordCommand(None, relationshipType)
 			notACmd should be(None)
 		}
 	}

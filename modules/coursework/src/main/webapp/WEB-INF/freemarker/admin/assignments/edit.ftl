@@ -10,7 +10,7 @@ the comments textarea needs to maintain newlines.
 <#assign canUpdateMarkingWorkflow=command.canUpdateMarkingWorkflow/>
 <#assign route><@routes.assignmentedit assignment /></#assign>
 
-<@f.form method="post" action=route commandName=commandName cssClass="form-horizontal">
+<@f.form method="post" action=route commandName=commandName cssClass="form-horizontal edit-assignment">
 
 <#--
 <div id="form-editor-sidebar">

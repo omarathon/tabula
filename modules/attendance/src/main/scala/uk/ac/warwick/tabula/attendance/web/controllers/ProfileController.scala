@@ -18,8 +18,8 @@ class ProfileHomeController extends AttendanceController with AutowiringProfileS
 	@RequestMapping
 	def render() = profileService.getMemberByUserId(user.apparentId) match {
 		case Some(student: StudentMember) => Redirect(Routes.profile(student, AcademicYear.guessByDate(DateTime.now)))
-		case _ if user.isStaff => Mav("home/profile_staff").noLayoutIf(ajax)
-		case _ => Mav("home/profile_unknown").noLayoutIf(ajax)
+		case _ if user.isStaff => Mav("profile/profile_staff").noLayoutIf(ajax)
+		case _ => Mav("profile/profile_unknown").noLayoutIf(ajax)
 	}
 }
 
@@ -45,8 +45,8 @@ class ProfileController extends AttendanceController {
 		)
 
 		if (ajax)
-			Mav("home/_profile", baseMap ++ Map("defaultExpand" -> expand)).noLayout()
+			Mav("profile/_profile", baseMap ++ Map("defaultExpand" -> expand)).noLayout()
 		else
-			Mav("home/profile", baseMap ++ Map("defaultExpand" -> true))
+			Mav("profile/profile", baseMap ++ Map("defaultExpand" -> true))
 	}
 }

@@ -102,6 +102,10 @@
 									</li>
 								</#if>
 							</#list>
+							
+							<li><a href="<@routes.displaysettings dept />?returnTo=${(info.requestedUri!"")?url}">
+								<i class="icon-list-alt"></i> Settings</a>
+							</li>
 					  </ul>
 					</div>
 					

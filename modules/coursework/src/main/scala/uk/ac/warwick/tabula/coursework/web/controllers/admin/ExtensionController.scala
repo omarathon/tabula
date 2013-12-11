@@ -5,13 +5,12 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.data.model.{ Assignment, Module }
+import uk.ac.warwick.tabula.data.model.{StudentRelationship, StudentMember, Assignment, Module}
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService, RelationshipService}
+import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser}
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import javax.servlet.http.HttpServletResponse
@@ -19,10 +18,14 @@ import uk.ac.warwick.tabula.helpers.DateBuilder
 import javax.validation.Valid
 import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.DateTime
+import uk.ac.warwick.spring.Wire
+
 
 abstract class ExtensionController extends CourseworkController {
-	@Autowired var json:ObjectMapper =_
-	@Autowired var userLookup: UserLookupService = _
+	var json = Wire[ObjectMapper]
+	var userLookup = Wire[UserLookupService]
+	var relationshipService = Wire[RelationshipService]
+	var profileService = Wire[ProfileService]
 	
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, module:Module)
@@ -182,8 +185,8 @@ class ReviewExtensionRequestController extends ExtensionController {
 	@ModelAttribute("modifyExtensionCommand")
 	def editCommand(
 			@PathVariable("module") module:Module, 
-			@PathVariable("assignment") assignment:Assignment, 
-			@PathVariable("universityId") universityId:String, 
+			@PathVariable("assignment") assignment:Assignment,
+			@PathVariable("universityId") universityId:String,
 			user:CurrentUser) = 
 		new ReviewExtensionRequestCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user)
 	
@@ -192,13 +195,29 @@ class ReviewExtensionRequestController extends ExtensionController {
 	// review an extension request
 	@RequestMapping(method=Array(GET))
 	def reviewExtensionRequest(@ModelAttribute("modifyExtensionCommand") cmd:ReviewExtensionRequestCommand, errors:Errors):Mav = {
-		val model = Mav("admin/assignments/extensions/review_request",
+
+		val user = userLookup.getUserByWarwickUniId(cmd.extension.universityId)
+		val student = profileService.getMemberByUniversityId(cmd.extension.universityId)
+		val studentRelationships = relationshipService.allStudentRelationshipTypes
+
+		val extraInfo = student.flatMap { _.mostSignificantCourseDetails.map { scd =>
+			val relationships = studentRelationships.map(x => (x.description, relationshipService.findCurrentRelationships(x,scd.sprCode))).toMap
+
+			Map(
+				"relationships" -> relationships.filter({case (relationshipType,relations) => relations.length != 0}),
+				"studentCourseDetails" -> scd,
+				"student" -> student
+			)
+		}}.getOrElse(Map())
+
+		val model = Mav("admin/assignments/extensions/review_request", Map(
 			"command" -> cmd,
 			"extension" ->  cmd.extension,
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,
 			"universityId" -> cmd.extension.universityId,
-			"userFullName" -> userLookup.getUserByWarwickUniId(cmd.extension.universityId).getFullName
+			"email" -> user.getEmail(),
+			"userFullName" -> user.getFullName()) ++ extraInfo
 		).noLayout()
 		model
 	}

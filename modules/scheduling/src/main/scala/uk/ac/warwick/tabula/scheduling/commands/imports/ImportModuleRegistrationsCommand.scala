@@ -106,9 +106,4 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 		"assessmentGroup", "occurrence"
 	)
 
-	override def describe(d: Description) = d.properties(
-		"scjCode" -> scjCode,
-		"moduleCode" -> modRegRow.sitsModuleCode,
-		"academicYear" -> academicYear
-	)
 }

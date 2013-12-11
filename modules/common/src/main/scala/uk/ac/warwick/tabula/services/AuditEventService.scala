@@ -188,7 +188,7 @@ class AuditEventServiceImpl extends AuditEventService {
 
 	// parse the data portion of the AuditEvent
 	def parseData(data: String): Option[Map[String, Any]] = try {
-		Option(json.readValue(data, classOf[Map[String, Any]]))
+		Option(data).map { json.readValue(_, classOf[Map[String, Any]]) }
 	} catch {
 		case e @ (_: JsonParseException | _: JsonMappingException) => None
 	}

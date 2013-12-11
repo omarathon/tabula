@@ -177,7 +177,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 
 	override def listNewerThan(startDate: DateTime, batchSize: Int) = dao.listUpdatedSince(startDate, batchSize)
 
-	protected def toItem(id: String) = dao.getByUniversityId(id)
+	protected def toItem(doc: Document) = documentValue(doc, IdField).flatMap { id => dao.getByUniversityId(id) }
 
 	/**
 	 * TODO reuse one Document and set of Fields for all items
@@ -200,7 +200,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 
 		// Treat permanently withdrawn students as inactive
 		item match {
-			case student: StudentMember if student.studentCourseDetails != null && student.mostSignificantCourseDetails.isDefined =>
+			case student: StudentMember if student.freshStudentCourseDetails != null && student.mostSignificantCourseDetails.isDefined =>
 				val status = student.mostSignificantCourseDetails.map { _.sprStatus }.orNull
 				if (status != null && status.code == "P") indexPlain(doc, "inUseFlag", Some("Inactive"))
 				else indexPlain(doc, "inUseFlag", Option(item.inUseFlag))

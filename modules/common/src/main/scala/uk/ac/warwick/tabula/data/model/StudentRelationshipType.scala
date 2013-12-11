@@ -18,81 +18,85 @@ import uk.ac.warwick.spring.Wire
 
 @Entity @AccessType("field")
 class StudentRelationshipType extends PermissionsTarget with PermissionsSelector[StudentRelationshipType] {
-	
+
 	@Id
 	var id: String = _
-	
+
 	/**
 	 * The URL identifier for this type. Valid URL path chars only please!!
 	 */
 	@NotNull
 	var urlPart: String = _
-	
+
 	/**
 	 * What you'd call a single actor in this relationship's context, e.g. "personal tutor".
-	 * 
+	 *
 	 * This should be lowercase, as it will be used in a sentence. If it's used in other places,
 	 * the template is expected to capitalise accordingly.
 	 */
 	@NotNull
 	var agentRole: String = _
-	
+
 	/**
 	 * What you'd call a single student in this relationship's context, e.g. "personal tutee"
-	 * 
+	 *
 	 * This should be lowercase, as it will be used in a sentence. If it's used in other places,
 	 * the template is expected to capitalise accordingly.
 	 */
 	@NotNull
 	var studentRole: String = _
-	
+
 	/**
 	 * A description of this relationship type
 	 */
 	var description: String = _
-	
+
 	/**
 	 * The default source for this relationship's information
 	 */
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.StudentRelationshipSourceUserType")
 	var defaultSource: StudentRelationshipSource = StudentRelationshipSource.Local
-	
+
 	var defaultDisplay: JBoolean = true
-	
+
 	@Column(name="expected_ug")
 	var expectedUG: JBoolean = false
-	
+
 	@Column(name="expected_pgt")
 	var expectedPGT: JBoolean = false
-	
+
 	@Column(name="expected_pgr")
 	var expectedPGR: JBoolean = false
-	
+
 	@Column(name="sort_order")
 	var sortOrder: Int = 2
-	
+
 	/**
-	 * Do we expect this member to have a relationship of this type? Controls 
+	 * Do we expect this member to have a relationship of this type? Controls
 	 * whether it is hidden when empty, or displayed with a prompt to add.
 	 */
-	def displayIfEmpty(studentCourseDetails: StudentCourseDetails) = studentCourseDetails.courseType match {
-		case CourseType.UG => expectedUG
-		case CourseType.PGT => expectedPGT
-		case CourseType.PGR => expectedPGR
-		case _ => false
+	def displayIfEmpty(studentCourseDetails: StudentCourseDetails): Boolean = {
+			studentCourseDetails.courseType match {
+			case CourseType.UG => expectedUG
+			case CourseType.PGT => expectedPGT
+			case CourseType.PGR => expectedPGR
+			case _ => false
+		}
 	}
-	
+
+	def isExpected(studentCourseDetails: StudentCourseDetails): Boolean = displayIfEmpty(studentCourseDetails)
+
 	/**
 	 * If the source is anything other than local, then this relationship type is read-only
 	 */
-	def readOnly(department: Department) = 
+	def readOnly(department: Department) =
 		(department.getStudentRelationshipSource(this) != StudentRelationshipSource.Local)
-		
+
 	@transient
 	var relationshipService = Wire[RelationshipService]
-		
+
 	def empty = relationshipService.countStudentsByRelationship(this) == 0
-	
+
 	def permissionsParents = Stream.empty
 
 	override def toString = "StudentRelationshipType(%s)".format(id)

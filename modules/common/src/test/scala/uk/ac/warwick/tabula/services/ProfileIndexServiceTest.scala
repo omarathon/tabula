@@ -93,12 +93,44 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 		indexer.find("m m", Seq(Fixtures.department("OT", "Some other department")), Set(Student, Staff), false) should be ('empty)
 		indexer.find("m m", Seq(dept), Set(Staff), false) should be ('empty)
 	}
-	
+
+	@Transactional
+	@Test def findCopesWithApostrophes = withFakeTime(dateTime(2000, 6)) {
+		val dept = Fixtures.department("CS", "Computer Science")
+		session.save(dept)
+
+		val m = new StudentMember
+		m.universityId = "0000001"
+		m.userId = "helpme"
+		m.firstName = "Johnny"
+		m.fullFirstName = "Jonathan"
+		m.lastName = "O'Connell"
+		m.homeDepartment = dept
+		m.lastUpdatedDate = new DateTime(2000,1,2,0,0,0)
+		m.userType = Student
+		m.inUseFlag = "Active"
+
+		session.save(m)
+		session.flush
+
+		indexer.incrementalIndex
+		indexer.listRecent(0, 1000).size should be (1)
+
+		indexer.find("bob thornton", Seq(dept), Set(), false) should be ('empty)
+		indexer.find("joconnell", Seq(dept), Set(), false) should be ('empty)
+		indexer.find("johnny connell", Seq(dept), Set(), false).head should be (m)
+		indexer.find("johnny o'connell", Seq(dept), Set(), false).head should be (m)
+		indexer.find("j o connell", Seq(dept), Set(), false).head should be (m)
+		indexer.find("j oconnell", Seq(dept), Set(), false).head should be (m)
+		indexer.find("j o'c", Seq(dept), Set(), false).head should be (m)
+		indexer.find("j o c", Seq(dept), Set(), false).head should be (m)
+	}
+
 	@Transactional
 	@Test def asciiFolding = withFakeTime(dateTime(2000, 6)) {
 		val dept = Fixtures.department("CS", "Computer Science")
 		session.save(dept)
-		
+
 		val m = new StudentMember
 		m.universityId = "1300623"
 		m.userId = "smrlar"
@@ -196,7 +228,7 @@ class ProfileIndexServiceTest extends PersistenceTestBase with Mockito with Logg
 	// TAB-296
 	@Test def threading {
 		val ThreadCount = 100
-		val timeout = Duration(1, SECONDS)
+		val timeout = Duration(10, SECONDS)
 		val dept = Fixtures.department("CS", "Computer Science")
 
 		implicit val executionService = ExecutionContext.fromExecutor( Executors.newFixedThreadPool(5) )

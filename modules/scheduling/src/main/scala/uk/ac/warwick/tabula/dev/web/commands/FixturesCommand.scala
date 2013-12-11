@@ -6,14 +6,13 @@ import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.services.{ProfileService, ModuleAndDepartmentService, RelationshipService}
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.roles.{UserAccessMgrRoleDefinition, DepartmentalAdministratorRoleDefinition, StudentRelationshipAgentRoleDefinition}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.data.model.{AssessmentType, UpstreamAssessmentGroup, AssessmentComponent, Department, Route}
+import uk.ac.warwick.tabula.data.model.{MemberUserType, AssessmentType, UpstreamAssessmentGroup, AssessmentComponent, Department, Route}
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
 import uk.ac.warwick.tabula.AcademicYear
@@ -32,6 +31,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	var departmentDao = Wire[DepartmentDao]
 	var relationshipService = Wire[RelationshipService]
 	var scdDao = Wire[StudentCourseDetailsDao]
+	var memberDao = Wire[MemberDao]
 
 
 	def applyInternal() {
@@ -101,6 +101,10 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 			  for (student <- scds.map{ _.student}.distinct) {
 					//should cascade delete SCDs too
 					session.delete(student)
+				}
+
+				for (staff <- memberDao.getStaffByDepartment(dept)) {
+					session.delete(staff)
 				}
 
 				for (module <- dept.modules) session.delete(module)

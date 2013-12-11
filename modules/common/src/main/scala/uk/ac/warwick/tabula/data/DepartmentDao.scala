@@ -1,15 +1,8 @@
 package uk.ac.warwick.tabula.data
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
-import org.hibernate.SessionFactory
 import uk.ac.warwick.tabula.data.model.Department
-import org.hibernate.criterion.Restrictions
 import org.hibernate.criterion.Order
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.JavaImports._
-import collection.JavaConverters._
-import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
-import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 
 trait DepartmentDao {
 	def allDepartments: Seq[Department]

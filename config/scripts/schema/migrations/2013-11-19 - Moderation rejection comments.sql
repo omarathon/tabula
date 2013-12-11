@@ -1,0 +1,1 @@
+alter table markerfeedback add rejectioncomments nclob;

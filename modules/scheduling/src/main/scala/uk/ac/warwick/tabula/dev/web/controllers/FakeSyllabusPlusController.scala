@@ -25,7 +25,7 @@ class FakeSyllabusPlusController extends Logging {
 
 	val userLookup:UserLookupService = Wire[UserLookupService]
 	val studentTimetables: mutable.Map[StudentYearKey, String] = mutable.Map.empty
-	val baseUri = "https://test-timetablingmanagement.warwick.ac.uk/xml"
+	val baseUri = "https://timetablingmanagement.warwick.ac.uk/xml"
 	def studentUri(year:String) = baseUri + year + "/?StudentXML"
 
 

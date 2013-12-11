@@ -38,6 +38,10 @@ object Routes {
 				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/list"
 			}
 
+			object onlineFeedback {
+				def apply(assignment: Assignment) = assignmentroot(assignment) + "/feedback/online"
+			}
+
 			object onlineMarkerFeedback {
 				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online"
 			}

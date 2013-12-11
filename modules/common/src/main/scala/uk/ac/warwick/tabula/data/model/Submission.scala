@@ -59,9 +59,6 @@ class Submission extends GeneratedId with PermissionsTarget {
 	@NotNull
 	var universityId: String = _
 
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingStateUserType")
-	var state : MarkingState = _
-
 	@OneToMany(mappedBy = "submission", cascade = Array(ALL))
 	@BatchSize(size=200)
 	var values: JSet[SavedFormValue] = new HashSet

@@ -32,7 +32,8 @@ SetEnvIf Request_URI "^/static/(.+\.(jpg|jpeg|jpe|png|gif|bmp|zip|gz|mp4|m4v|flv
 
 # Tell proxies to store separate cached copies per user-agent, 
 # so we don't send gzipped stuff to someone 
-Header append Vary User-Agent env=!dont-vary
+Header append Vary "User-Agent, X-Requested-With" env=!dont-vary
+Header append Vary X-Requested-With env=dont-vary
 
 </IfModule>
 

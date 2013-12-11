@@ -4,14 +4,18 @@
 			<label>
 				Academic year
 				<select class="academicYear input-small">
-					<#list studentCourseDetails.studentCourseYearDetails as studentCourseYearDetail>
-						<option
-							value="${studentCourseYearDetail.academicYear.startYear?c}"
-							<#if studentCourseDetails.latestStudentCourseYearDetails.id == studentCourseYearDetail.id>selected</#if>
-						>
-							${studentCourseYearDetail.academicYear.toString}
-						</option>
+					<#if studentCourseDetails.freshStudentCourseYearDetails?? >
+					<#list studentCourseDetails.freshStudentCourseYearDetails as studentCourseYearDetail>
+						<#if (studentCourseYearDetail.academicYear.startYear?c)??>
+							<option
+								value="${studentCourseYearDetail.academicYear.startYear?c}"
+								<#if studentCourseDetails.latestStudentCourseYearDetails.id == studentCourseYearDetail.id>selected</#if>
+							>
+								${studentCourseYearDetail.academicYear.toString}
+							</option>
+						</#if>
 					</#list>
+					</#if>
 				</select>
 			</label>
 		</form>
@@ -24,7 +28,7 @@
 			var monitoringPointsLoader = function() {
 				$('#attendance .monitoring-points').empty();
 				$('#attendance .small-groups').empty();
-				
+
 				$.get('/attendance/profile/${profile.universityId}/'
 						+ $('#attendance select.academicYear :selected').val()
 						+ '?dt=' + new Date().valueOf()
@@ -39,12 +43,15 @@
 						window.GlobalScripts.initCollapsible();
 					}
 				});
-				
+
 				$.get('/groups/student/${profile.universityId}/attendance/' + $('#attendance select.academicYear :selected').val() + '?dt=' + new Date().valueOf(), function(data) {
-					$('#attendance .small-groups').html(data);
+					$('#attendance .small-groups').hide().html(data);
 					var pane = $('#attendance-pane');
-					$('#attendance-pane').show();
-					window.GlobalScripts.initCollapsible();
+					if ($('#attendance .small-groups').find('.seminar-attendance-profile').length > 0) {
+						$('#attendance .small-groups').show();
+						pane.show();
+						window.GlobalScripts.initCollapsible();
+					}
 				});
 			}
 			$('#attendance select.academicYear').on('change', monitoringPointsLoader);

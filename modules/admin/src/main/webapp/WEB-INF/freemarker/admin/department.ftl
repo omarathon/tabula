@@ -55,6 +55,11 @@
 					</li>
 				</#if>
 				
+				<#if can.do("Department.Create", department)>
+					<li><a href="<@routes.createsubdepartment department />">
+						<i class="icon-plus"></i> Create sub-department</a>
+					</li>
+				</#if>
 				<#if can.do("Module.Create", department)>
 					<li><a href="<@routes.createmodule department />">
 						<i class="icon-plus"></i> Create module</a>

@@ -1,0 +1,1 @@
+alter table StudentRelationship add percentage number(6,2);

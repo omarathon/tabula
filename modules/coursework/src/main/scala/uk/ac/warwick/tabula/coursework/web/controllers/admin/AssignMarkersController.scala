@@ -18,9 +18,16 @@ class AssignMarkersController extends CourseworkController {
 
 	@RequestMapping()
 	def form(user: CurrentUser, @PathVariable assignment: Assignment, cmd: AssignMarkersCommand, errors: Errors) = {
+
 		cmd.onBind()
-		Mav("admin/assignments/assignmarkers/form")
-			.crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
+
+		val firstMarkerRoleName = assignment.markingWorkflow.firstMarkerRoleName
+		val secondMarkerRoleName = assignment.markingWorkflow.secondMarkerRoleName
+
+		Mav("admin/assignments/assignmarkers/form",
+			"firstMarkerRoleName" -> firstMarkerRoleName,
+			"secondMarkerRoleName" -> secondMarkerRoleName
+		).crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))
 	}
 
 	@RequestMapping(method = Array(POST))

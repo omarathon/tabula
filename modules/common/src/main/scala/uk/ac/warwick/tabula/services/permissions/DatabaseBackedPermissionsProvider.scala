@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.userlookup.GroupService
+import uk.ac.warwick.tabula.data.model.permissions.GloballyGrantedPermission
 
 @Component
 class DatabaseBackedPermissionsProvider extends ScopelessPermissionsProvider {
@@ -17,7 +18,11 @@ class DatabaseBackedPermissionsProvider extends ScopelessPermissionsProvider {
 		
 	def getPermissionsFor(user: CurrentUser): Stream[PermissionDefinition] =	
 		service.getGrantedPermissionsFor[PermissionsTarget](user) map { 
-			grantedPermission => PermissionDefinition(grantedPermission.permission, Some(grantedPermission.scope), grantedPermission.overrideType)
+			case global: GloballyGrantedPermission => 
+				PermissionDefinition(global.permission, None, global.overrideType)
+				
+			case grantedPermission => 
+				PermissionDefinition(grantedPermission.permission, Some(grantedPermission.scope), grantedPermission.overrideType)
 		}
 	
 	// This isn't exhaustive because we use the cache now - it used to be though.

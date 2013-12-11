@@ -88,7 +88,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 		}}
 		val submitted = benchmarkTask("Get submitted users") { for (uniId <- uniIdsWithSubmissionOrFeedback) yield {
 			val usersSubmissions = enhancedSubmissions.filter(submissionListItem => submissionListItem.submission.universityId == uniId)
-			val usersFeedback = assignment.fullFeedback.filter(feedback => feedback.universityId == uniId)
+			val usersFeedback = assignment.feedbacks.asScala.filter(feedback => feedback.universityId == uniId)
 			val usersExtension = assignment.extensions.asScala.filter(extension => extension.universityId == uniId)
 
 			val userFilter = moduleMembers.filter(member => member.getWarwickId == uniId)

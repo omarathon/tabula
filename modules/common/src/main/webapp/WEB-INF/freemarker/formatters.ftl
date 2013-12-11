@@ -48,25 +48,51 @@
 	--></#noescape><#--
 --></#macro>
 
-<#-- Format week ranges for a SmallGroupEvent or MonitoringPoint -->
+<#-- Format week ranges for a SmallGroupEvent -->
 <#macro weekRanges object><#--
 	--><#noescape><#--
 		-->${weekRangesFormatter(object)}<#--
 	--></#noescape><#--
 --></#macro>
 
-<#macro monitoringPointWeeksFormat validFromWeek requiredFromWeek academicYear dept><#--
+<#macro wholeWeekFormat startWeek endWeek academicYear dept short=false><#--
 	--><#noescape><#--
-		-->${weekRangesFormatter(validFromWeek, requiredFromWeek, academicYear, dept)}<#--
+		-->${wholeWeekFormatter(startWeek, endWeek, academicYear, dept, short)}<#--
+	--></#noescape><#--
+--></#macro>
+
+<#macro wholeWeekDateFormat startWeek endWeek academicYear short=false><#--
+	--><#noescape><#--
+		-->${wholeWeekFormatter(startWeek, endWeek, academicYear, short)}<#--
 	--></#noescape><#--
 --></#macro>
 
 <#macro singleWeekFormat week academicYear dept short=false><#--
 	--><#noescape><#--
-		-->${singleWeekFormatter(week, academicYear, dept, short)}<#--
+		-->${wholeWeekFormatter(week, week, academicYear, dept, short)}<#--
 	--></#noescape><#--
 --></#macro>
 
+<#macro monitoringPointWeeksFormat validFromWeek requiredFromWeek academicYear dept stripHtml=false><#--
+	--><#noescape><#--
+		--><#local result = wholeWeekFormatter(validFromWeek, requiredFromWeek, academicYear, dept, false) /><#--
+		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
+	--></#noescape><#--
+--></#macro>
+
+<#macro monitoringPointFormat point stripHtml=false><#--
+	--><#noescape><#--
+		--><#local result = wholeWeekFormatter(point.validFromWeek, point.requiredFromWeek, point.pointSet.academicYear, point.pointSet.route.department, false) /><#--
+		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
+	--></#noescape><#--
+--></#macro>
+
+<#macro monitoringPointDateFormat point stripHtml=false><#--
+	--><#noescape><#--
+		--><#local result = wholeWeekFormatter(point.validFromWeek, point.requiredFromWeek, point.pointSet.academicYear, false) /><#--
+		--><#if stripHtml>${result?replace('<sup>','')?replace('</sup>','')}<#else>${result}</#if><#--
+	--></#noescape><#--
+--></#macro>
 
 <#macro weekRangeSelect event><#--
 	--><#assign weeks=weekRangeSelectFormatter(event) /><#--
@@ -213,16 +239,20 @@
 	</ul>
 </#macro>
 
-<#macro course_description_for_heading studentCourseDetails>
-		${(studentCourseDetails.course.name)!} (${(studentCourseDetails.course.code?upper_case)!})
+<#macro course_year_span studentCourseDetails>
+		(${(studentCourseDetails.beginYear?string("0000"))!} - ${(studentCourseDetails.endYear?string("0000"))!})
 </#macro>
 
 <#macro course_description studentCourseDetails>
-	<#if (studentCourseDetails.route.name) != (studentCourseDetails.course.name)>
 		${(studentCourseDetails.course.name)!} (${(studentCourseDetails.course.code?upper_case)!})
-	<#else>
-		${(studentCourseDetails.course.code?upper_case)!}
-	</#if>
+</#macro>
+
+<#macro spr_status studentCourseDetails>
+		${(studentCourseDetails.sprStatus.fullName?lower_case?cap_first)!}
+</#macro>
+
+<#macro enrolment_status studentCourseDetails>
+		${(studentCourseDetails.latestStudentCourseYearDetails.enrolmentStatus.fullName?lower_case?cap_first)!}
 </#macro>
 
 <#macro lightbox_link enabled url>
@@ -306,7 +336,7 @@
 			<#local emails = emails + [student.email] />
 		</#if>
 	</#list>
-	
+
 	<@bulk_email emails title subject />
 </#macro>
 
@@ -317,7 +347,7 @@
 			<#local emails = emails + [rel.studentMember.email] />
 		</#if>
 	</#list>
-	
+
 	<@bulk_email emails title subject />
 </#macro>
 

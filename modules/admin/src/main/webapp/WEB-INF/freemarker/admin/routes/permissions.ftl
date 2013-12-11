@@ -7,10 +7,10 @@
 
 <div id="route-permissions-page">
 	<h1>Route permissions</h1>
-	<h5>for <#noescape>${route_name}</#noescape></h5>
+	<h5><span class="muted">for</span> <#noescape>${route_name}</#noescape></h5>
 
 	<@pm.alerts "addCommand" route_name users role />
-	
+
 	<#assign scope=route />
 	<#include "_roles.ftl" />
 </div>

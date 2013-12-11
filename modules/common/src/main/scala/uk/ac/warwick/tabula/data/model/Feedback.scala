@@ -97,6 +97,12 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	@JoinColumn(name = "second_marker_feedback")
 	var secondMarkerFeedback: MarkerFeedback = _
 
+	def getFeedbackPosition(markerFeedback: MarkerFeedback) : Option[FeedbackPosition] = {
+		if(markerFeedback == firstMarkerFeedback) Some(FirstFeedback)
+		else if (markerFeedback == secondMarkerFeedback) Some(SecondFeedback)
+		else None
+	}
+
 	@Column(name = "released_date")
 	var releasedDate: DateTime = _
 
@@ -181,3 +187,7 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 object Feedback {
 	val PublishDeadlineInWorkingDays = 20
 }
+
+sealed trait FeedbackPosition
+case object  FirstFeedback extends FeedbackPosition
+case object  SecondFeedback extends FeedbackPosition

@@ -10,7 +10,7 @@ class ViewController extends AttendanceController {
 
 	@RequestMapping
 	def home(@PathVariable department: Department) = {
-		Mav("home/view", "department" -> department)
+		Mav("home/view", "department" -> mandatory(department))
 	}
 
 }

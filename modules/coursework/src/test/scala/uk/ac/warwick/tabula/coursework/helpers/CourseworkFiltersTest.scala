@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.coursework.helpers
 import scala.collection.JavaConverters._
 import scala.collection.immutable.ListMap
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
 import uk.ac.warwick.tabula.coursework.commands.assignments.ExtensionListItem
 import uk.ac.warwick.tabula.coursework.commands.assignments.Student
 import uk.ac.warwick.tabula.coursework.commands.assignments.SubmissionListItem
@@ -22,9 +21,12 @@ import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
 import org.joda.time.DateTimeConstants
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.userlookup.UserLookup
+import org.mockito.Mockito._
+import uk.ac.warwick.tabula.services.{SubmissionService, UserLookupService}
 
 // scalastyle:off magic.number
-class CourseworkFiltersTest extends TestBase {
+class CourseworkFiltersTest extends TestBase with Mockito {
 
 	val department = Fixtures.department("in", "IT Services")
 	val module = Fixtures.module("in101", "Introduction to Web Development")
@@ -431,7 +433,7 @@ class CourseworkFiltersTest extends TestBase {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be (false)
 
-		assignment.markingWorkflow = Fixtures.markingWorkflow("my marking workflow")
+		assignment.markingWorkflow = Fixtures.seenSecondMarkingWorkflow("my marking workflow")
 
 		assignment.collectSubmissions = false
 		filter.applies(assignment) should be (false)
@@ -470,7 +472,9 @@ class CourseworkFiltersTest extends TestBase {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be (false)
 
-		assignment.markingWorkflow = Fixtures.markingWorkflow("my marking workflow")
+		val workflow = Fixtures.studentsChooseMarkerWorkflow("my marking workflow")
+		workflow.submissionService = mock[SubmissionService]
+		assignment.markingWorkflow = workflow
 
 		assignment.collectSubmissions = false
 		filter.applies(assignment) should be (false)
@@ -483,6 +487,7 @@ class CourseworkFiltersTest extends TestBase {
 
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
+		when(workflow.submissionService.getSubmissionByUniId(assignment, "0672089"))thenReturn(Some(submission))
 
 		submission.isReleasedForMarking should be (false)
 
@@ -494,7 +499,6 @@ class CourseworkFiltersTest extends TestBase {
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
 		submission.isReleasedForMarking should be (true)
 
-		assignment.markingWorkflow.markingMethod = MarkingMethod.StudentsChooseMarker
 		val f = new MarkerSelectField
 		f.name = Assignment.defaultMarkerSelectorName
 		assignment.addField(f)
@@ -519,7 +523,7 @@ class CourseworkFiltersTest extends TestBase {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be (false)
 
-		assignment.markingWorkflow = Fixtures.markingWorkflow("my marking workflow")
+		assignment.markingWorkflow = Fixtures.seenSecondMarkingWorkflow("my marking workflow")
 
 		assignment.collectSubmissions = false
 		filter.applies(assignment) should be (false)
@@ -533,23 +537,20 @@ class CourseworkFiltersTest extends TestBase {
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
 
-		submission.isReleasedToSecondMarker should be (false)
-		submission.state should not be (MarkingState.MarkingCompleted)
-
-		filter.predicate(student(submission=Some(submission))) should be (false)
-
-		submission.state = MarkingState.MarkingCompleted
-		filter.predicate(student(submission=Some(submission))) should be (true)
-
-		submission.state = MarkingState.ReleasedForMarking
-
 		val feedback = Fixtures.feedback("0672089")
 		assignment.feedbacks.add(feedback)
 		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
-		feedback.secondMarkerFeedback = Fixtures.markerFeedback(feedback)
+		submission.isReleasedToSecondMarker should be (false)
 
+		filter.predicate(student(feedback=Some(feedback))) should be (false)
+
+		feedback.firstMarkerFeedback.state = MarkingState.MarkingCompleted
+		filter.predicate(student(feedback=Some(feedback))) should be (true)
+
+		feedback.secondMarkerFeedback = Fixtures.markerFeedback(feedback)
 		submission.isReleasedToSecondMarker should be (true)
-		filter.predicate(student(submission=Some(submission))) should be (true)
+
+		filter.predicate(student(feedback=Some(feedback))) should be (true)
 	}
 
 	@Test def MarkedBySecond {
@@ -564,30 +565,30 @@ class CourseworkFiltersTest extends TestBase {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be (false)
 
-		assignment.markingWorkflow = Fixtures.markingWorkflow("my marking workflow")
+		assignment.markingWorkflow = Fixtures.seenSecondMarkingWorkflow("my marking workflow")
 
 		assignment.collectSubmissions = false
 		filter.applies(assignment) should be (false)
 
 		assignment.collectSubmissions = true
-		filter.applies(assignment) should be (false)
-
-		assignment.markingWorkflow.markingMethod = MarkingMethod.SeenSecondMarking
 		filter.applies(assignment) should be (true)
 
 		// Valid only if marking is completed
-		filter.predicate(student(submission=None)) should be (false)
+		filter.predicate(student(feedback=None)) should be (false)
 
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
 
-		submission.state should not be (MarkingState.MarkingCompleted)
+		val feedback = Fixtures.feedback("0672089")
+		assignment.feedbacks.add(feedback)
+		feedback.firstMarkerFeedback = Fixtures.markerFeedback(feedback)
+		feedback.secondMarkerFeedback = Fixtures.markerFeedback(feedback)
 
-		filter.predicate(student(submission=Some(submission))) should be (false)
+		filter.predicate(student(feedback=Some(feedback))) should be (false)
 
-		submission.state = MarkingState.MarkingCompleted
+		feedback.secondMarkerFeedback.state = MarkingState.MarkingCompleted
 
-		filter.predicate(student(submission=Some(submission))) should be (true)
+		filter.predicate(student(feedback=Some(feedback))) should be (true)
 	}
 
 	@Test def CheckedForPlagiarism {
@@ -810,7 +811,7 @@ class CourseworkFiltersTest extends TestBase {
 
 		// Valid where there's no feedback
 		filter.predicate(student(feedback=None)) should be (true)
-		filter.predicate(student(feedback=Some(Fixtures.feedback()))) should be (false)
+		filter.predicate(student(feedback=Some(new Feedback{ actualMark=Some(41) }))) should be (false)
 	}
 
 	@Test def FeedbackNotReleased {
@@ -823,6 +824,7 @@ class CourseworkFiltersTest extends TestBase {
 		filter.predicate(student(feedback=None)) should be (false)
 
 		val feedback = Fixtures.feedback("0672089")
+		feedback.actualMark = Some(41)
 		feedback.released = false
 
 		filter.predicate(student(feedback=Some(feedback))) should be (true)
@@ -838,10 +840,13 @@ class CourseworkFiltersTest extends TestBase {
 		// Should pass any assignment, so just check with null
 		filter.applies(null) should be (true)
 
+		val testFeedback = Fixtures.feedback()
+		testFeedback.actualMark = Some(41)
+
 		// Valid where there's feedback, but it hasn't been downloaded
 		filter.predicate(student(feedback=None)) should be (false)
-		filter.predicate(student(feedback=Some(Fixtures.feedback()), feedbackDownloaded=false)) should be (true)
-		filter.predicate(student(feedback=Some(Fixtures.feedback()), feedbackDownloaded=true)) should be (false)
+		filter.predicate(student(feedback=Some(testFeedback), feedbackDownloaded=false)) should be (true)
+		filter.predicate(student(feedback=Some(testFeedback), feedbackDownloaded=true)) should be (false)
 	}
 
 

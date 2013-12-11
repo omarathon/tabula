@@ -44,14 +44,14 @@ class ScheduledJobs {
 		}
 	}
 
-	@Scheduled(cron = "0 30 7 * * *")
+	@Scheduled(cron = "0 30 0 * * *")
 	def importMembers: Unit = maintenanceGuard {
 		exceptionResolver.reportExceptions {
 			new ImportProfilesCommand().apply()
 		}
 	}
 
-	@Scheduled(cron = "0 30 8 * * *")
+	@Scheduled(cron = "0 0 7 * * *")
 	def importAssignments: Unit = maintenanceGuard {
 		exceptionResolver.reportExceptions {
 			ImportAssignmentsCommand().apply()

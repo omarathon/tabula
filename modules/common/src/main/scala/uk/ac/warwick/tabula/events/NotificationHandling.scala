@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.services.NotificationService
 import uk.ac.warwick.tabula.commands.{Notifies, Command}
 import uk.ac.warwick.tabula.jobs.{Job, NotifyingJob}
 import uk.ac.warwick.tabula.services.jobs.JobInstance
+import uk.ac.warwick.tabula.data.model.Notification
 
 trait NotificationHandling {
 
@@ -19,6 +20,14 @@ trait NotificationHandling {
 			result
 		}
 		case _ => f
+	}
+
+	/**
+	 * For edge cases where manual notifications need to be made outside commands.
+	 * Use the command-triggered mixin above where possible for better type safety.
+	 */
+	def notify[A](notifications: Seq[Notification[A]]) {
+		notifications.foreach { n => notificationService.push(n) }
 	}
 }
 

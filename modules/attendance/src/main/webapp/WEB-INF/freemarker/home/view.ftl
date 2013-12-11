@@ -4,7 +4,7 @@
 
 <div class="btn-toolbar dept-toolbar">
 	<#if department.parent??>
-		<a class="btn btn-medium use-tooltip" href="<@routes.viewDepartmentPoints department.parent />" data-container="body" title="${command.department.parent.name}">
+		<a class="btn btn-medium use-tooltip" href="<@routes.viewDepartmentPoints department.parent />" data-container="body" title="${department.parent.name}">
 			Parent department
 		</a>
 	</#if>
@@ -26,5 +26,10 @@
 
 <h3><a href="<@routes.viewDepartmentStudents department />">View by student</a></h3>
 <h3><a href="<@routes.viewDepartmentPoints department />">View by point</h3></a></h3>
+<#if can.do("MonitoringPoints.View", department)>
+	<#list department.displayedStudentRelationshipTypes as relationshipType>
+	<h3><a href="<@routes.viewDepartmentAgents department relationshipType/>">View by ${relationshipType.agentRole}</a></h3>
+	</#list>
+</#if>
 
 </#escape>

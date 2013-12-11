@@ -5,7 +5,7 @@
 
 <div id="department-permissions-page">
 	<h1>Departmental permissions</h1>
-	<h5>for ${department.name}</h5>
+	<h5><span class="muted">for</span> ${department.name}</h5>
 
 	<@pm.alerts "addCommand" department.name users role />
 
@@ -36,15 +36,15 @@
 		</div>
 
 	</div>
-	
+
 	<#assign scope=department />
-	
+
 	<h2>Module roles (for all modules in the department)</h2>
-	
+
 	<#include "../modules/_roles.ftl" />
-	
+
 	<h2>Route roles (for all routes in the department)</h2>
-	
+
 	<#include "../routes/_roles.ftl" />
 </div>
 

@@ -24,18 +24,18 @@ class EditMarkingWorkflowCommand(department: Department, val markingWorkflow: Ma
 	copyFrom(markingWorkflow)
 
 	def contextSpecificValidation(errors:Errors){
+
+		if (markingWorkflow.markingMethod != markingMethod)
+			errors.rejectValue("markingMethod", "markingWorkflow.markingMethod.cannotUpdate")
+
 		if (hasExistingSubmissions){
-
-			if (markingWorkflow.markingMethod != markingMethod)
-				errors.rejectValue("markingMethod", "markingWorkflow.markingMethod.submissionsExist")
-
 			if (markingWorkflow.studentsChooseMarker){
 				val existingFirstMarkers = markingWorkflow.firstMarkers.includeUsers.toSet
 				val newFirstMarkers = firstMarkers.toSet
 				val existingSecondMarkers = markingWorkflow.secondMarkers.includeUsers.toSet
 				val newSecondMarkers = secondMarkers.toSet
 				// if newMarkers is not a super set of existingMarker, markers have been removed.
-				if (!(existingFirstMarkers -- newFirstMarkers).isEmpty || !(existingSecondMarkers -- newSecondMarkers).isEmpty){
+				if (!(existingFirstMarkers -- newFirstMarkers).isEmpty || !(existingSecondMarkers -- newSecondMarkers).isEmpty) {
 					errors.rejectValue("firstMarkers", "markingWorkflow.firstMarkers.cannotRemoveMarkers")
 				}
 			}

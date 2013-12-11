@@ -16,7 +16,7 @@
 			</#if>
 		</@spring.bind>
 
-		<p>You are deleting the monitoring point: ${command.point.name} (<@fmt.weekRanges point />).</p>
+		<p>You are deleting the monitoring point: ${command.point.name} (<@fmt.monitoringPointFormat point />).</p>
 
 		<p>
 			<@form.label checkbox=true>

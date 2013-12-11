@@ -3,9 +3,11 @@
 <#escape x as x?html>
 
 <#assign time_remaining=durationFormatter(assignment.closeDate) />
+<#assign deptName=(module.department.name)!"this deparment" />
 
 <div>
-    <h1>Grant extensions for ${assignment.name}</h1>
+    <h1>Grant extensions</h1>
+	<h5><span class="muted">for</span> ${assignment.name}</h5>
     <p>
 		This assignment <@fmt.tense assignment.closeDate "closes" "closed" />
 		on <strong><@fmt.date date=assignment.closeDate at=true timezone=true /> (${time_remaining})</strong>.
@@ -20,6 +22,7 @@
                     <th>First name</th>
                     <th>Last name</th>
                     <th>New deadline</th>
+					<th>Feedback deadline</th>
                     <th>Extension status</th>
                     <th>
 	                    Actions
@@ -56,7 +59,20 @@
 							<#assign student = studentNameLookup[extension.universityId]>
 							<td><h6>${student.firstName}</h6></td>
 							<td><h6>${student.lastName}</h6></td>
-							<td class="expiryDate"><#if extension.expiryDate??> <@fmt.date date=extension.expiryDate at=true/></#if></td>
+							<td class="expiryDate">
+								<#if extension.expiryDate??>
+									<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
+								<#else>
+									<span class="muted">no change</span>
+								</#if>
+							</td>
+							<td>
+								<#if extension.expiryDate??>
+									<@fmt.date date=extension.feedbackDeadline capitalise=true shortMonth=true />
+								<#else>
+									<span class="muted">no change</span>
+								</#if>
+							</td>
 							<td class="status">
 								<#if extension.approved>
 									Granted
@@ -66,19 +82,23 @@
 									<span class="requestedExtension">Requested <@fmt.date date=extension.requestedOn at=true /></span>
 								</#if>
 							</td>
-							<td><#if isExtensionManager>
-								<#assign review_url><@routes.extensionreviewrequest assignment=assignment uniId=extension.universityId /></#assign>
-								
-								<@fmt.permission_button
-									permission='Extension.ReviewRequest'
-									scope=extension
-									action_descr='review an extension'
-									classes='review-extension btn btn-mini btn-primary'
-									data_attr='data-toggle=modal data-target=#extension-model'
-									href=review_url>
-									<i class="icon-edit icon-white"></i> Review
-								</@fmt.permission_button>
-							</#if></td>
+							<td>
+								<#if isExtensionManager>
+									<#assign review_url><@routes.extensionreviewrequest assignment=assignment uniId=extension.universityId /></#assign>
+
+									<@fmt.permission_button
+										permission='Extension.ReviewRequest'
+										scope=extension
+										action_descr='review an extension'
+										classes='review-extension btn btn-mini btn-primary'
+										data_attr='data-toggle=modal data-target=#extension-model'
+										href=review_url>
+										<i class="icon-edit icon-white"></i> Review
+									</@fmt.permission_button>
+								<#else>
+									<i class="icon-ban-circle use-tooltip error" title="You are not an extension manager for ${deptName}"></i>
+								</#if>
+							</td>
 						</tr>
 					</#list>
 				</#if>
@@ -90,7 +110,20 @@
 							<#assign student = studentNameLookup[extension.universityId]>
 							<td><h6>${student.firstName}</h6></td>
 							<td><h6>${student.lastName}</h6></td>
-							<td class="expiryDate"><#if extension.expiryDate??> <@fmt.date date=extension.expiryDate capitalise=true shortMonth=true /></#if></td>
+							<td class="expiryDate">
+								<#if extension.expiryDate??>
+									<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
+								<#else>
+									<span class="muted">no change</span>
+								</#if>
+							</td>
+							<td>
+								<#if extension.expiryDate??>
+									<@fmt.date date=extension.feedbackDeadline capitalise=true shortMonth=true />
+								<#else>
+									<span class="muted">no change</span>
+								</#if>
+							</td>
 							<td class="status">
 								<#if extension.approved>
 									Granted
@@ -98,12 +131,10 @@
 									Rejected
 								</#if>
 							</td>
-
-
 							<td>
 								<#assign modify_url><@routes.extensionedit assignment=assignment uniId=extension.universityId /></#assign>
 								<#assign revoke_url><@routes.extensiondelete assignment=assignment uniId=extension.universityId /></#assign>
-								
+
 								<@fmt.permission_button
 									permission='Extension.Update'
 									scope=extension
@@ -134,10 +165,11 @@
 							<td><h6>${student.firstName}</h6></td>
 							<td><h6>${student.lastName}</h6></td>
 							<td class="expiryDate"></td>
-							<td  class="status"></td>
+							<td></td>
+							<td class="status"></td>
 							<td>
 								<#assign grant_url><@routes.extensionadd assignment=assignment uniId=universityId /></#assign>
-								
+
 								<@fmt.permission_button
 									permission='Extension.Create'
 									scope=assignment
@@ -160,6 +192,10 @@
 <script type="text/javascript">
 
 	(function($) {
+
+	$('#extension-model').on('ajaxComplete', function(){
+		$(this).find('details').details();
+	})
 
 	$('.extensionListTable').tablesorter({
 		sortList: [[1,0]],

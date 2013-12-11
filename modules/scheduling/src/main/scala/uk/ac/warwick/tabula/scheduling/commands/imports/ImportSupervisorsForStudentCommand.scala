@@ -43,15 +43,15 @@ class ImportSupervisorsForStudentCommand()
 			}
 			.foreach { relationshipType =>
 				val supervisorPrsCodes = supervisorImporter.getSupervisorPrsCodes(studentCourseDetails.scjCode)
-				val supervisors = supervisorPrsCodes.flatMap { prsCode =>
+				val supervisors = supervisorPrsCodes.flatMap { case (prsCode, percentage) =>
 					val m = profileService.getMemberByPrsCode(prsCode)
 					if (m.isEmpty) {
 						logger.warn("Can't save supervisor " + prsCode + " for " + studentCourseDetails.sprCode + " - not a member in Tabula db")
 					}
-					m
+					m.map { m => (m, percentage) }
 				}
 				
-				relationshipService.replaceStudentRelationships(relationshipType, studentCourseDetails.sprCode, supervisors.map { _.universityId })
+				relationshipService.replaceStudentRelationshipsWithPercentages(relationshipType, studentCourseDetails.sprCode, supervisors.map { case (member, percentage) => (member.universityId, percentage) })
 			}
 	}
 }

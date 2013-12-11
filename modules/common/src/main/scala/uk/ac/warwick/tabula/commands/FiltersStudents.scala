@@ -109,7 +109,7 @@ trait FiltersStudents extends ProfileServiceComponent {
 	lazy val allCourseTypes: Seq[CourseType] = CourseType.all
 	lazy val allRoutes: Seq[Route] = routesForDepartmentAndSubDepartments(department).sorted(Route.DegreeTypeOrdering)
 	lazy val allYearsOfStudy: Seq[Int] = 1 to 8
-	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(department)
+	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(department.rootDepartment)
 	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(department)
 
 	def serializeFilter = {
@@ -120,6 +120,9 @@ trait FiltersStudents extends ProfileServiceComponent {
 		yearsOfStudy.asScala.foreach(p => result.addQueryParameter("yearsOfStudy", p.toString))
 		sprStatuses.asScala.foreach(p => result.addQueryParameter("sprStatuses", p.code))
 		modules.asScala.foreach(p => result.addQueryParameter("modules", p.code))
-		result.getQuery
+		if (result.getQuery == null)
+			""
+		else
+			result.getQuery
 	}
 }

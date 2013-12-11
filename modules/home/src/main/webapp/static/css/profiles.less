@@ -111,6 +111,7 @@
 			width: 354px;
 			margin-right: 16px;
 		}
+
 		.col2 {
 			float: left;
 			width: 354px;
@@ -134,56 +135,54 @@
 
 				margin-bottom: 16px;
 			}
+		}
 
-			table.profile-info {
-				// Reset
-				th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
+		table.profile-or-course-info {
+			// Reset
+			th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
 
-				width: 100%;
+			width: 100%;
 
-				th {
-					text-align: right;
-					color: @grayLight;
-					white-space: nowrap;
+			th {
+				text-align: right;
+				color: @grayLight;
+				white-space: nowrap;
 
-					&:after { content: ' '; margin-right: 3px; }
-				}
+				&:after { content: ' '; margin-right: 3px; }
+			}
 
-				td {
-					color: #0c0c0c;
-					width: 99%;
-				}
+			td {
+				color: #0c0c0c;
+				width: 99%;
 			}
 		}
 
 		#course-details {
-			table.course-info {
-				// Reset
-				th, td { padding: 0; margin: 0; font-weight: normal; text-align: left; vertical-align: top; display: table-cell; white-space: normal; }
+			hr {
+				margin-top: 15px;
+			}
 
-				width: 100%;
+			.col1.basic-course-details {
+				margin-left: 32px;
+			}
 
-				th {
-					text-align: right;
-					color: @grayLight;
-					white-space: nowrap;
+			.course-title {
+				margin-top:  15px;
+				margin-bottom: 15px;
+				letter-spacing: -1.8px;
+			}
 
-					&:after { content: ' '; margin-right: 3px; }
-				}
+			.dropdown-toggle {
+				margin-top: -45px;
+			}
 
-				td {
-					color: #0c0c0c;
-					width: 99%;
-				}
-
-				tbody {
-					border-bottom: 15px solid transparent;
-				}
+			.dropdown-menu {
+				margin-top: -25px;
 			}
 		}
 
 		// Container for "Expand all" and other links
-		// above a list of meetings/notes/records.
+		// above a list of meetings/records.
 		// May contain a header which will be floated left.
 		.list-controls {
 			height: 1.8em;
@@ -198,6 +197,11 @@
 		}
 
 		.membernote {
+
+			// member notes aren't in a tab so don't float links to the left or they are a bit distant
+			.list-controls a {
+				float: left;
+			}
 
 			details {
 
@@ -603,6 +607,10 @@
 			}
 
 	} // .agent-edit
+	
+	.muted.percentage {
+		font-size: 80%;
+	}
 
 } // .profiles-page
 
