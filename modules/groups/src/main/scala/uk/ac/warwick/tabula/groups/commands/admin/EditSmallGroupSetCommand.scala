@@ -43,16 +43,12 @@ class EditSmallGroupSetCommand(val set: SmallGroupSet, val apparentUser:User)
 			
 		// TAB-1561
 		if (autoDeregister) {
-			val removed = oldUsers -- newUsers
-			
-			removed.foreach { user => 
-				set.groups.asScala.foreach { group => 
-					if (group.students.includesUser(user)) {
-						// Wrap this in a sub-command so that we can do auditing
-						removeFromGroupCommand(user, group).apply()
-					}
-				}
-			}
+			// Wrap removal in a sub-command so that we can do auditing			
+			for {
+				user <- oldUsers -- newUsers
+				group <- set.groups.asScala
+				if (group.students.includesUser(user))
+			} removeFromGroupCommand(user, group).apply()
 		}
 
 		service.saveOrUpdate(set)
