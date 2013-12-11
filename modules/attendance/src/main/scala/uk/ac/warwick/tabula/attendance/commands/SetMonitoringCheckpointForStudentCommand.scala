@@ -86,6 +86,11 @@ trait SetMonitoringCheckpointForStudentCommandValidation extends SelfValidating 
 					if (point.sentToAcademicOffice) {
 						errors.rejectValue("", "monitoringCheckpoint.sentToAcademicOffice")
 					}
+
+					if (!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear).getTermTypeAsString)){
+						errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
+					}
+
 					if (thisAcademicYear.startYear <= academicYear.startYear
 						&& currentAcademicWeek < point.validFromWeek
 						&& !(state == null || state == MonitoringCheckpointState.MissedAuthorised)
@@ -127,7 +132,7 @@ trait SetMonitoringPointForStudentDescription extends Describable[Seq[Monitoring
 }
 
 
-trait SetMonitoringCheckpointForStudentState {
+trait SetMonitoringCheckpointForStudentState  extends GroupMonitoringPointsByTerm with MonitoringPointServiceComponent {
 	def monitoringPoint: MonitoringPoint
 	def student: StudentMember
 	lazy val templateMonitoringPoint = monitoringPoint
@@ -136,4 +141,5 @@ trait SetMonitoringCheckpointForStudentState {
 	var studentsState: JMap[StudentMember, JMap[MonitoringPoint, MonitoringCheckpointState]] =
 		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, MonitoringCheckpointState] }.asJava
 	var set = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
+	def nonReportedTerms = monitoringPointService.findNonReportedTerms(Seq(student), monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
 }

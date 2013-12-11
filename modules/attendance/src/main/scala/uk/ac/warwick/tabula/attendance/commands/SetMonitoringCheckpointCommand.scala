@@ -46,8 +46,11 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 		// Get monitoring points by student for the list of students matching the template point
 		val studentPointMap = monitoringPointService.findSimilarPointsForMembers(templateMonitoringPoint, students)
 		val allPoints = studentPointMap.values.flatten.toSeq
+		val pointSet = templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
+		val period = termService.getTermFromAcademicWeek(templateMonitoringPoint.validFromWeek, pointSet.academicYear).getTermTypeAsString
+		val nonReported = monitoringPointService.findNonReported(students, pointSet.academicYear, period)
 		val checkpoints = monitoringPointService.getCheckpointsByStudent(allPoints)
-		// Map the checkpoint state to each point for each student
+		// Map the checkpoint state to each point for each student, and filter out any students already reported for this term
 		studentsState = studentPointMap.map{ case (student, points) =>
 			student -> points.map{ point =>
 				point -> {
@@ -57,7 +60,7 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 					checkpointOption.map{case (_, checkpoint) => checkpoint.state}.getOrElse(null)
 				}
 			}.toMap.asJava
-		}.toMap.asJava
+		}.filter{case(student, map) => nonReported.contains(student)}.toMap.asJava
 	}
 
 	def applyInternal(): Seq[MonitoringCheckpoint] = {
@@ -89,7 +92,8 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 			val studentPointSet = monitoringPointService.getPointSetForStudent(student, academicYear)
 			pointMap.foreach{ case(point, state) => {
 				errors.pushNestedPath(s"studentsState[${student.universityId}][${point.id}]")
-				val pointRoute = point.pointSet.asInstanceOf[MonitoringPointSet].route
+				val pointSet = point.pointSet.asInstanceOf[MonitoringPointSet]
+				val pointRoute = pointSet.route
 				// Check point is valid for student
 				if (!studentPointSet.exists(s => s.points.asScala.contains(point))) {
 					errors.rejectValue("", "monitoringPoint.invalidStudent")
@@ -100,6 +104,12 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 					// Check state change valid
 					if (point.sentToAcademicOffice) {
 						errors.rejectValue("", "monitoringCheckpoint.sentToAcademicOffice")
+					}
+
+					if (!monitoringPointService.findNonReportedTerms(Seq(student),
+						pointSet.academicYear).contains(
+						(termService.getTermFromAcademicWeek(point.validFromWeek, pointSet.academicYear).getTermTypeAsString))){
+						errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 					}
 					if (thisAcademicYear.startYear <= academicYear.startYear
 						&& currentAcademicWeek < point.validFromWeek
@@ -145,7 +155,7 @@ trait SetMonitoringPointDescription extends Describable[Seq[MonitoringCheckpoint
 }
 
 
-trait SetMonitoringCheckpointState extends FiltersStudents with PermissionsAwareRoutes {
+trait SetMonitoringCheckpointState extends FiltersStudents with PermissionsAwareRoutes with GroupMonitoringPointsByTerm with MonitoringPointServiceComponent{
 	def templateMonitoringPoint: MonitoringPoint
 	def department: Department
 	def user: CurrentUser
@@ -164,4 +174,5 @@ trait SetMonitoringCheckpointState extends FiltersStudents with PermissionsAware
 	// We don't actually allow any sorting, but these need to be defined
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
 	var sortOrder: JList[Order] = JArrayList()
+
 }
