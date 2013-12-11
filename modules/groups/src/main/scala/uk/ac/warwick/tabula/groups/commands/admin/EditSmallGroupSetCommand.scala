@@ -12,9 +12,11 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.groups.notifications.SmallGroupSetChangedNotification
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
+import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
 
 class EditSmallGroupSetCommand(val set: SmallGroupSet, val apparentUser:User)
-	extends  ModifySmallGroupSetCommand(set.module) with SmallGroupSetCommand  with NotifiesAffectedGroupMembers {
+	extends ModifySmallGroupSetCommand(set.module) with SmallGroupSetCommand  with NotifiesAffectedGroupMembers {
 
 	PermissionCheck(Permissions.SmallGroups.Update, set)
 	
@@ -22,11 +24,34 @@ class EditSmallGroupSetCommand(val set: SmallGroupSet, val apparentUser:User)
 	promisedValue = set
 	val setOption = Some(set)
 
-  var service = Wire[SmallGroupService]
+	var service = Wire[SmallGroupService]
 
 	def applyInternal() = transactional() {
-
+		val autoDeregister = set.module.department.autoGroupDeregistration
+		
+		val oldUsers = 
+			if (autoDeregister) membershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Option(set.members)).toSet 
+			else Set[User]()
+		
+		val newUsers = 
+			if (autoDeregister) membershipService.determineMembershipUsers(linkedUpstreamAssessmentGroups, Option(members)).toSet
+			else Set[User]()
+		
 		copyTo(set)
+			
+		// TAB-1561
+		if (autoDeregister) {
+			val removed = oldUsers -- newUsers
+			
+			removed.foreach { user => 
+				set.groups.asScala.foreach { group => 
+					if (group.students.includesUser(user)) {
+						// Wrap this in a sub-command so that we can do auditing
+						new RemoveUserFromSmallGroupCommand(user, group).apply()
+					}
+				}
+			}
+		}
 
 		service.saveOrUpdate(set)
 		set

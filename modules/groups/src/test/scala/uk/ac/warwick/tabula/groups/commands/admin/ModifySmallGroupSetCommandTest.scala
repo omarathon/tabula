@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, Small
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.userlookup.User
 
 
 class ModifySmallGroupSetCommandTest extends TestBase{
