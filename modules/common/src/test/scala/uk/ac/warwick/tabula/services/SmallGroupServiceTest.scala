@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.services
 
 import org.hibernate.annotations.{AccessType, Filter, FilterDef}
-
 import javax.persistence.{DiscriminatorValue, Entity, NamedQueries}
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.data.{AutowiringAssignmentMembershipDaoComponent, SmallGroupDao, SmallGroupDaoComponent, UserGroupDao, UserGroupDaoComponent}
@@ -9,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.{Department, Module, ModuleRegistration}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupSet}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.events.EventHandling
 
 class SmallGroupServiceTest extends TestBase with Mockito {
 	trait Environment {
@@ -79,6 +79,7 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 	@Test
 	def testRemoveFromSmallGroups() {
 		new Environment {
+			EventHandling.enabled = false
 			mockUserLookup.getUserByUserId("cusdx") returns user
 
 			// try removing the user from the group, but pass in a different module from that associated with the group - this should fail:
