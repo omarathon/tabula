@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringCheckpointState, MonitoringPoint}
 import org.joda.time.DateTime
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.MonitoringPointService
 
 // scalastyle:off magic.number
