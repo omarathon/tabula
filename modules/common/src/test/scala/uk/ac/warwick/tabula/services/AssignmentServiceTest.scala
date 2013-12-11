@@ -435,6 +435,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentService.save(assignment)
 
 		val group = new AssessmentGroup
+		group.membershipService = assignmentMembershipService
 		group.assignment = assignment
 		group.assessmentComponent = upstreamAssignment
 		group.occurrence = "A"
@@ -631,16 +632,19 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignment2.members.excludeUser("student3")
 
 		val ag1 = new AssessmentGroup
+		ag1.membershipService = assignmentMembershipService
 		ag1.assignment = assignment1
 		ag1.assessmentComponent = upstream1
 		ag1.occurrence = "A"
 
 		val ag2 = new AssessmentGroup
+		ag2.membershipService = assignmentMembershipService
 		ag2.assignment = assignment1
 		ag2.assessmentComponent = upstream2
 		ag2.occurrence = "B"
 
 		val ag3 = new AssessmentGroup
+		ag3.membershipService = assignmentMembershipService
 		ag3.assignment = assignment2
 		ag3.assessmentComponent = upstream3
 		ag3.occurrence = "C"

@@ -18,13 +18,14 @@ import uk.ac.warwick.spring.Wire
 @Entity
 class AssessmentGroup extends GeneratedId {
 
+	@transient var membershipService = Wire[AssignmentMembershipService]
+
 	/*
 	Either assignment _or_ smallGroupSet will be non-null
 	depending on which type of entity we're linking an
 	AssessmentComponent to...
 	 */
-	@transient var membershipService = Wire[AssignmentMembershipService]
-
+	
 	@ManyToOne
 	@JoinColumn(name = "assignment_id")
 	var assignment: Assignment = _
@@ -39,7 +40,7 @@ class AssessmentGroup extends GeneratedId {
 
 	var occurrence: String = _
 	
-	def toUpstreamAssessmentGroup(academicYear: AcademicYear): Option[UpstreamAssessmentGroup] =
+	def toUpstreamAssessmentGroup(academicYear: AcademicYear): Option[UpstreamAssessmentGroup] = {
 		if (academicYear == null || assessmentComponent == null || occurrence == null) {
 			None
 		} else {
@@ -50,6 +51,7 @@ class AssessmentGroup extends GeneratedId {
 			template.occurrence = occurrence
 			membershipService.getUpstreamAssessmentGroup(template)
 		}
+	}
 
 	override def toString = {
 		if ((assignment != null || smallGroupSet != null) && assessmentComponent != null && occurrence != null) {
