@@ -19,7 +19,7 @@ class ReleaseForMarkingController extends CourseworkController {
 	def command(@PathVariable("module") module: Module,
 				@PathVariable("assignment") assignment: Assignment,
 				user: CurrentUser
-				) = ReleaseForMarkingCommand(module, assignment, user)
+				) = ReleaseForMarkingCommand(module, assignment, user.apparentUser)
 
 	validatesSelf[ReleaseForMarkingCommand]
 

@@ -1,39 +1,36 @@
 package uk.ac.warwick.tabula.coursework.commands.assignments
 
-import collection.JavaConversions._
-import uk.ac.warwick.tabula.commands.{Description, SelfValidating, Command}
-import uk.ac.warwick.tabula.data.Daoisms
-import reflect.BeanProperty
-import uk.ac.warwick.tabula.JavaImports._
+
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.StateService
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, AutowiringStateServiceComponent, StateServiceComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.userlookup.User
+import scala.collection.JavaConversions._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{ReleasedState, FeedbackReleasedNotifier}
+import uk.ac.warwick.tabula.helpers.Logging
 
-class MarkingCompletedCommand(val module: Module, val assignment: Assignment, currentUser: CurrentUser, val firstMarker:Boolean)
-	extends Command[Unit] with SelfValidating {
+object MarkingCompletedCommand {
+	def apply(module: Module, assignment: Assignment, user: User, firstMarker:Boolean) =
+		new MarkingCompletedCommand(module, assignment, user, firstMarker)
+			with ComposableCommand[Unit]
+			with MarkingCompletedCommandPermissions
+			with MarkingCompletedDescription
+			with SecondMarkerReleaseNotifier
+			with AutowiringUserLookupComponent
+			with AutowiringStateServiceComponent
+}
 
-	var stateService = Wire.auto[StateService]
+abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val firstMarker:Boolean)
+	extends CommandInternal[Unit] with Appliable[Unit] with SelfValidating with UserAware with MarkingCompletedState
+	with ReleasedState {
 
-	var students: JList[String] = JArrayList()
-	var markerFeedbacks: JList[MarkerFeedback] = JArrayList()
-
-	var noMarks: JList[MarkerFeedback] = JArrayList()
-	var noFeedback: JList[MarkerFeedback] = JArrayList()
-	var releasedFeedback: JList[MarkerFeedback] = JArrayList()
-
-	var onlineMarking: Boolean = false
-	var confirm: Boolean = false
-
-	mustBeLinked(assignment, module)
-	PermissionCheck(Permissions.Feedback.Create, assignment)
-
+	this: StateServiceComponent =>
 
 	def onBind() {
-		markerFeedbacks = students.flatMap(assignment.getMarkerFeedback(_, currentUser.apparentUser))
+		markerFeedbacks = students.flatMap(assignment.getMarkerFeedback(_, user))
 	}
 
 	def applyInternal() {
@@ -47,29 +44,19 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 		}
 
 		def createSecondMarkerFeedback(){
-			feedbackForRelease.foreach{ mf =>
+			newReleasedFeedback = feedbackForRelease.map{ mf =>
 				val parentFeedback = mf.feedback
 				val secondMarkerFeedback = parentFeedback.retrieveSecondMarkerFeedback
 				stateService.updateState(secondMarkerFeedback, MarkingState.ReleasedForMarking)
+				secondMarkerFeedback
 			}
 		}
 
-		assignment.markingWorkflow.markingMethod match {
-			case StudentsChooseMarker => finaliseFeedback()
-			case SeenSecondMarking if firstMarker => createSecondMarkerFeedback()
-			case SeenSecondMarking if !firstMarker => finaliseFeedback()
-			case _ => // do nothing
-		}
-	}
+		if (assignment.markingWorkflow.hasSecondMarker && firstMarker)
+			createSecondMarkerFeedback()
+		else
+			finaliseFeedback()
 
-	override def describe(d: Description){
-		d.assignment(assignment)
-			.property("students" -> students)
-	}
-
-	override def describeResult(d: Description){
-		d.assignment(assignment)
-			.property("numFeedbackUpdated" -> markerFeedbacks.size())
 	}
 
 	def preSubmitValidation() {
@@ -81,5 +68,49 @@ class MarkingCompletedCommand(val module: Module, val assignment: Assignment, cu
 	def validate(errors: Errors) {
 		if (!confirm) errors.rejectValue("confirm", "markers.finishMarking.confirm")
 	}
+}
 
+trait MarkingCompletedCommandPermissions extends RequiresPermissionsChecking {
+	self: MarkingCompletedState =>
+	def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.Feedback.Create, assignment)
+	}
+}
+
+trait MarkingCompletedDescription extends Describable[Unit] {
+
+	self: MarkingCompletedState =>
+
+	override def describe(d: Description){
+		d.assignment(assignment)
+			.property("students" -> students)
+	}
+
+	override def describeResult(d: Description){
+		d.assignment(assignment)
+			.property("numFeedbackUpdated" -> markerFeedbacks.size())
+	}
+}
+
+trait MarkingCompletedState {
+
+	import uk.ac.warwick.tabula.JavaImports._
+
+	val assignment: Assignment
+	val module: Module
+
+	var students: JList[String] = JArrayList()
+	var markerFeedbacks: JList[MarkerFeedback] = JArrayList()
+
+	var noMarks: JList[MarkerFeedback] = JArrayList()
+	var noFeedback: JList[MarkerFeedback] = JArrayList()
+	var releasedFeedback: JList[MarkerFeedback] = JArrayList()
+
+	var onlineMarking: Boolean = false
+	var confirm: Boolean = false
+}
+
+trait SecondMarkerReleaseNotifier extends FeedbackReleasedNotifier[Unit] {
+	this: MarkingCompletedState with ReleasedState with UserAware with UserLookupComponent with Logging =>
+	def isFirstMarker = false
 }

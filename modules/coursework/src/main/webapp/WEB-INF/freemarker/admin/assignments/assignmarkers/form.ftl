@@ -79,12 +79,12 @@
 				<ul class="nav nav-tabs">
 					<li class="active">
 						<a href="#first-markers">
-							First markers
+							${firstMarkerRoleName}s
 						</a>
 					</li>
 					<li>
 						<a href="#second-markers">
-							Second markers
+							${secondMarkerRoleName}s
 						</a>
 					</li>
 				</ul>
@@ -95,7 +95,7 @@
 							assignMarkersCommand.firstMarkerUnassignedStudents
 							assignMarkersCommand.firstMarkers
 							"first-markers"
-							"First Markers"
+							firstMarkerRoleName
 						/>
 					</div>
 					<div class="tab-pane" id="second-markers">
@@ -103,7 +103,7 @@
 							assignMarkersCommand.secondMarkerUnassignedStudents
 							assignMarkersCommand.secondMarkers
 							"second-markers"
-							"Second Markers"
+							secondMarkerRoleName
 						/>
 					</div>
 				</div>

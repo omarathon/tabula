@@ -24,6 +24,8 @@ class StudentGroupAttendanceController extends GroupsController {
 	def showAttendance(@ModelAttribute("command") cmd: Appliable[StudentGroupAttendance]): Mav = {
 		val info = cmd.apply()
 		
+		val hasGroups = info.attendance.values.nonEmpty
+		
 		val title = {
 			val smallGroupSets = info.attendance.values.toSeq.flatMap(_.keys.map(_.groupSet))
 
@@ -37,6 +39,7 @@ class StudentGroupAttendanceController extends GroupsController {
 		}
 		
 		Mav("groups/students_group_attendance",
+			"hasGroups" -> hasGroups,
 			"title" -> title,
 			"terms" -> info.attendance,
 			"missedCount" -> info.missedCount,

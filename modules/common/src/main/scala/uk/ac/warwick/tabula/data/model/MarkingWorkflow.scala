@@ -21,17 +21,16 @@ import uk.ac.warwick.tabula.permissions.PermissionsTarget
   */
 @Entity
 @Table(name="MarkScheme")
+@Inheritance(strategy=InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name="MarkingMethod", discriminatorType = DiscriminatorType.STRING, length=255)
 @AccessType("field")
-class MarkingWorkflow extends GeneratedId with PermissionsTarget {
-	import MarkingMethod._
-	
+abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
+
+	type Usercode = String
+	type UniversityId = String
+
 	@transient
 	var userLookup = Wire[UserLookupService]("userLookup")
-
-	def this(dept: Department) = {
-		this()
-		this.department = dept
-	}
 
 	/** A descriptive name for the users' reference. */
 	@Basic(optional = false)
@@ -40,8 +39,10 @@ class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "department_id")
 	var department: Department = null
-	
+
 	def permissionsParents = Option(department).toStream
+
+	def onlineMarkingUrl(assignment:Assignment, marker: User) : String
 
 	/** The group of first markers. */
 	@OneToOne(cascade = Array(CascadeType.ALL))
@@ -55,55 +56,89 @@ class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	@JoinColumn(name = "secondmarkers_id")
 	var secondMarkers = UserGroup.ofUsercodes
 
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.MarkingMethodUserType")
-	var markingMethod: MarkingMethod = _
+	def markingMethod: MarkingMethod
 
 	/** If true, the submitter chooses their first marker from a dropdown */
-	def studentsChooseMarker = markingMethod == StudentsChooseMarker
+	def studentsChooseMarker = false
 
+	def firstMarkerRoleName: String = "Marker"
+	def firstMarkerVerb: String = "mark"
 
-	def getSubmissions(assignment: Assignment, user: User): Seq[Submission] = markingMethod match {
-		case StudentsChooseMarker =>  assignment.markerSelectField match {
-			case Some(markerField) => {
-				val releasedSubmission = assignment.submissions.filter(_.isReleasedForMarking)
-				releasedSubmission.filter(submission => {
-					submission.getValue(markerField) match {
-						case Some(subValue) => user.getUserId == subValue.value
-						case None => false
-					}
-				})
-			}
-			case None => Seq()
-		}
-		case SeenSecondMarking => {
-			val isFirstMarker = assignment.isFirstMarker(user)
-			val isSecondMarker = assignment.isSecondMarker(user)		
-			val studentUg = Option(assignment.markerMap.get(user.getUserId))
-			studentUg match {
-				case Some(ug) => {
-					val submissionIds = ug.includeUsers
-					if(isFirstMarker)
-						assignment.submissions.filter(s => submissionIds.exists(_ == s.userId) && s.isReleasedForMarking)
-					else if(isSecondMarker)
-						assignment.submissions.filter(s => submissionIds.exists(_ == s.userId) && s.isReleasedToSecondMarker)
-					else
-						Seq()
-				}
-				case None => Seq()
-			}
-		}
-		case _ => Seq()
-	}
-	
+	// True if this marking workflow uses a second marker
+	def hasSecondMarker: Boolean
+	def secondMarkerRoleName: Option[String]
+	def secondMarkerVerb: Option[String]
+
+	def studentHasMarker(assignment:Assignment, universityId: String): Boolean =
+		getStudentsFirstMarker(assignment, universityId).isDefined || getStudentsSecondMarker(assignment, universityId).isDefined
+
+	def getStudentsFirstMarker(assignment:Assignment, universityId: UniversityId): Option[Usercode]
+
+	def getStudentsSecondMarker(assignment:Assignment, universityId: UniversityId): Option[Usercode]
+
+	def getSubmissions(assignment: Assignment, user: User): Seq[Submission]
+
 	override def toString = "MarkingWorkflow(" + id + ")"
 
+}
+
+trait AssignmentMarkerMap {
+
+	this : MarkingWorkflow =>
+
+	// gets the usercode of the students current marker from the given markers UserGroup
+	private def getMarkerFromAssignmentMap(assignment: Assignment, universityId: UniversityId, markers: UserGroup) = {
+		val student = userLookup.getUserByWarwickUniId(universityId)
+
+		val mapEntry = Option(assignment.markerMap) flatMap { _.find {
+			p:(String,UserGroup) =>
+				p._2.includes(student.getUserId) && markers.includes(p._1)
+			}
+		}
+
+		mapEntry.map(_._1)
+	}
+
+	def getStudentsFirstMarker(assignment: Assignment, universityId: UniversityId) =
+		getMarkerFromAssignmentMap(assignment, universityId, assignment.markingWorkflow.firstMarkers)
+
+	def getStudentsSecondMarker(assignment: Assignment, universityId: UniversityId) =
+		getMarkerFromAssignmentMap(assignment, universityId, assignment.markingWorkflow.secondMarkers)
+
+	def getSubmissions(assignment: Assignment, marker: User) = {
+		val allSubmissions = getSubmissionsFromMap(assignment, marker)
+
+		val isFirstMarker = assignment.isFirstMarker(marker)
+		val isSecondMarker = assignment.isSecondMarker(marker)
+
+		if(isFirstMarker)
+			allSubmissions.filter(_.isReleasedForMarking)
+		else if(isSecondMarker)
+			allSubmissions.filter(_.isReleasedToSecondMarker)
+		else Seq()
+	}
+
+	// returns all submissions made by students assigned to this marker
+	private def getSubmissionsFromMap(assignment: Assignment, marker: User): Seq[Submission] = {
+		val students = Option(assignment.markerMap.get(marker.getUserId))
+		students.map { ug =>
+			val submissionIds = ug.includeUsers
+			assignment.submissions.filter(s => submissionIds.exists(_ == s.userId))
+		}.getOrElse(Seq())
+	}
+
+}
+
+trait NoSecondMarker {
+	def hasSecondMarker = false
+	def secondMarkerRoleName = None
+	def secondMarkerVerb = None
 }
 
 
 /**
  * Available marking methods and code to persist them
  */
-
 sealed abstract class MarkingMethod(val name: String){
 	override def toString = name
 }
@@ -111,8 +146,9 @@ sealed abstract class MarkingMethod(val name: String){
 object MarkingMethod {
 	case object StudentsChooseMarker extends MarkingMethod("StudentsChooseMarker")
 	case object SeenSecondMarking extends MarkingMethod("SeenSecondMarking")
+	case object ModeratedMarking extends MarkingMethod("ModeratedMarking")
 
-	val values: Set[MarkingMethod] = Set(StudentsChooseMarker, SeenSecondMarking)
+	val values: Set[MarkingMethod] = Set(StudentsChooseMarker, SeenSecondMarking, ModeratedMarking)
 
 	def fromCode(code: String): MarkingMethod =
 		if (code == null) null

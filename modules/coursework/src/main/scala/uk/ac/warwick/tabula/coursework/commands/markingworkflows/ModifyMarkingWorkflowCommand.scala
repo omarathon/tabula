@@ -6,12 +6,10 @@ import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.data.model.{MarkingMethod, Department, MarkingWorkflow}
 import uk.ac.warwick.tabula.data.model.MarkingMethod._
-import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
-import uk.ac.warwick.tabula.permissions._
 
 /** Abstract base command for either creating or editing a MarkingWorkflow */
 abstract class ModifyMarkingWorkflowCommand(
@@ -21,6 +19,9 @@ abstract class ModifyMarkingWorkflowCommand(
 	var firstMarkers: JList[String] = JArrayList()
 	var secondMarkers: JList[String] = JArrayList()
 	var markingMethod: MarkingMethod = _
+
+	var firstMarkerRoleName: String = _
+	var secondMarkerRoleName: String = _
 
 	// Subclasses can provide the "current" markingWorkflow if one applies, for validation.
 	def currentMarkingWorkflow: Option[MarkingWorkflow]
@@ -83,7 +84,6 @@ abstract class ModifyMarkingWorkflowCommand(
 		scheme.name = name
 		scheme.firstMarkers.includeUsers = firstMarkers
 		scheme.secondMarkers.includeUsers = secondMarkers
-		scheme.markingMethod = markingMethod
 	}
 
 	def copyFrom(scheme: MarkingWorkflow) {
@@ -93,6 +93,9 @@ abstract class ModifyMarkingWorkflowCommand(
 		secondMarkers.clear()
 		secondMarkers.addAll(scheme.secondMarkers.includeUsers)
 		markingMethod = scheme.markingMethod
+
+		firstMarkerRoleName = scheme.firstMarkerRoleName
+		secondMarkerRoleName = scheme.secondMarkerRoleName.getOrElse("Second marker")
 	}
 
 }

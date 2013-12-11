@@ -24,9 +24,7 @@ class AddMarkingWorkflowController extends CourseworkController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: AddMarkingWorkflowCommand): Mav = {
 		doBind(cmd)
-		Mav("admin/markingworkflows/add",
-			"hasSubmissions" -> false)
-			.crumbs(Breadcrumbs.Department(cmd.department))
+		Mav("admin/markingworkflows/add").crumbs(Breadcrumbs.Department(cmd.department))
 	}
 
 	

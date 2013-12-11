@@ -103,6 +103,16 @@ object GrantedPermission {
 }
 
 /* Ok, this is icky, but I can't find any other way. If you need new targets for GrantedPermissions, create them below with a new discriminator */
+@Entity @DiscriminatorValue("___GLOBAL___") class GloballyGrantedPermission extends GrantedPermission[PermissionsTarget] {
+	def this(permission: Permission, overrideType: GrantedPermission.OverrideType) = {
+		this()
+		this.permission = permission
+		this.overrideType = overrideType
+	}
+
+	@transient var scope: PermissionsTarget = null
+}
+
 @Entity @DiscriminatorValue("Department") class DepartmentGrantedPermission extends GrantedPermission[Department] {
 	def this(department: Department, permission: Permission, overrideType: GrantedPermission.OverrideType) = {
 		this()

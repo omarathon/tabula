@@ -2,38 +2,44 @@
 
 <div class="modal-header">
 	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-	<h3>Students in ${command.group.name}</h3>
+	<#if command.group??>
+		<h3>Students in ${command.group.name}</h3>
+	<#else>
+		<h3>Students not in ${command.smallGroupSet.name}</h3>
+	</#if>
+
 </div>
 
 <div class="modal-body">
 
+	<#if command.group??>
+		<ul>
+		<#list command.group.events as event>
+		<#assign tutorUsers=event.tutors.users />
+		<li>
+			<div>
+				<@components.event_schedule_info event />
+			</div>
 
-	<ul>
-	<#list command.group.events as event>
-	<#assign tutorUsers=event.tutors.users />
-	<li>
-		<div>
-			<@components.event_schedule_info event />
-		</div>
-
-		<#if studentsCanSeeTutorName>
-		<div>
-			<@fmt.p number=tutorUsers?size singular="Tutor" shownumber=false />:
-			<#if !tutorUsers?has_content>
-				<em>None</em>
+			<#if studentsCanSeeTutorName>
+			<div>
+				<@fmt.p number=tutorUsers?size singular="Tutor" shownumber=false />:
+				<#if !tutorUsers?has_content>
+					<em>None</em>
+				</#if>
+				<#list tutorUsers as tutorUser>
+					${tutorUser.fullName}<#if tutorUser_has_next>,</#if>
+				</#list>
+			</div>
 			</#if>
-			<#list tutorUsers as tutorUser>
-				${tutorUser.fullName}<#if tutorUser_has_next>,</#if>
-			</#list>
-		</div>
-		</#if>
 
-		<div>
-			<@fmt.p number=students?size singular="student" plural="students" /><#if userIsMember> including you</#if>.
-		</div>
-	</li>
-	</#list>
-	</ul>
+			<div>
+				<@fmt.p number=students?size singular="student" plural="students" /><#if userIsMember> including you</#if>.
+			</div>
+		</li>
+		</#list>
+		</ul>
+	</#if>
 
 	<#if students?has_content>
 	<ul class="profile-user-list">
@@ -63,7 +69,7 @@
 		FIXME This doesn't really make sense. If I can take a register for a small group,
 		I can email all the members in it? This is mostly to avoid showing the link to students
 	-->
-	<#if can.do("SmallGroupEvents.Register", group)>
+	<#if command.group?? && can.do("SmallGroupEvents.Register", command.group)>
 		<p>
 			<@fmt.bulk_email_students students=students />
 		</p>

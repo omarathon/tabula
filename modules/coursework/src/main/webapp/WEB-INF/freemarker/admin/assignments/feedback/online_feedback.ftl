@@ -1,17 +1,28 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 
+<#function markingId user>
+	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource") == 'WarwickExtUsers'>
+		<#return user.userId />
+	<#else>
+		<#return user.warwickId />
+	</#if> 
+</#function>
+
 <div class="feedback">
 	<#if command.submission??>
 		<#assign submission = command.submission />
 		<#include "_submission_summary.ftl">
 	</#if>
+	<#if (isMarking!false) && (isRejected!false)>
+		<#include "_rejection_summary.ftl">
+	</#if>
 	<div class="form onlineFeedback">
 	    <#assign submit_url>
-			<#if isMarker!false>
-				<@routes.markerOnlinefeedbackform assignment command.student.universityId />
+			<#if isMarking!false>
+				<@routes.markerOnlinefeedbackform assignment markingId(command.student) />
 			<#else>
-				<@routes.onlinefeedbackform assignment command.student.universityId />
+				<@routes.onlinefeedbackform assignment markingId(command.student) />
 			</#if>
 		</#assign>
 		<@f.form cssClass="form-horizontal double-submit-protection"

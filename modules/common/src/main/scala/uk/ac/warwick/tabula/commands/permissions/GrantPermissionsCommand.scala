@@ -26,8 +26,8 @@ class GrantPermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) extend
 	
 	PermissionCheck(Permissions.RolesAndPermissions.Create, scope)
 	
-	var permissionsService = Wire.auto[PermissionsService]
-	var securityService = Wire.auto[SecurityService]
+	var permissionsService = Wire[PermissionsService]
+	var securityService = Wire[SecurityService]
 	
 	var permission: Permission = _
 	var usercodes: JList[String] = JArrayList()
@@ -46,14 +46,16 @@ class GrantPermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) extend
 	}
 	
 	def validate(errors: Errors) {
-		if (usercodes.find { _.hasText }.isEmpty) {
+		if (usercodes.forall { _.isEmptyOrWhitespace }) {
 			errors.rejectValue("usercodes", "NotEmpty")
-		} else grantedPermission map { _.users } map { users => 
-			val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
-				override def alreadyHasCode = usercodes.find { users.includes(_) }.isDefined
+		} else {
+			grantedPermission.map { _.users }.foreach { users => 
+				val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
+					override def alreadyHasCode = usercodes.exists { users.includes(_) }
+				}
+				
+				usercodeValidator.validate(errors)
 			}
-			
-			usercodeValidator.validate(errors)
 		}
 		
 		// Ensure that the current user can do everything that they're trying to grant permissions for

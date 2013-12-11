@@ -4,6 +4,7 @@ import collection.mutable
 import language.implicitConversions
 import scala.collection.GenTraversableOnce
 import scala.collection.SortedMap
+import java.math.MathContext
 
 /**
  * Quick way to expose a bunch of Java type names under
@@ -29,6 +30,7 @@ trait JavaImports {
 	type JSet[A] = java.util.Set[A]
 	type JInteger = java.lang.Integer
 	type JLong = java.lang.Long
+	type JBigDecimal = java.math.BigDecimal
 	
 	def JBoolean(b: Option[Boolean]) = ToJBoolean(b)
 	def JList[A](items: A*) = mutable.Seq(items: _*).asJava
@@ -37,6 +39,7 @@ trait JavaImports {
 	def JSet[A](items: A*) = mutable.Set(items: _*).asJava
 	def JInteger(i: Option[Int]) = ToJInteger(i)
 	def JLong(l: Option[Long]) = ToJLong(l)
+	def JBigDecimal(bd: Option[BigDecimal]) = ToJBigDecimal(bd)
 
 	/**
 	 * Converts an Option[Boolean] to a Java Boolean, by interpreting
@@ -55,6 +58,12 @@ trait JavaImports {
 	 * None as null.
 	 */
 	protected implicit def ToJLong(l: Option[Long]) = (l map (l => l: JLong)).orNull
+
+	/**
+	 * Converts an Option[BigDecimal] to a Java BigDecimal, by interpreting
+	 * None as null.
+	 */
+	protected implicit def ToJBigDecimal(bd: Option[BigDecimal]) = (bd map (bd => new java.math.BigDecimal(bd.toDouble, MathContext.DECIMAL128))).orNull
 	
 	def toJLinkedHashMap[K, V](smap: SortedMap[K, V]) = {
 		val map = new java.util.LinkedHashMap[K, V]

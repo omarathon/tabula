@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula
 
 import org.scalatest._
+import org.scalatest.exceptions.TestFailedException
 import org.scalatest.junit._
 import org.scalatest.selenium.WebBrowser
 import org.junit.runner.RunWith

@@ -25,31 +25,20 @@ class SharedAssignmentPropertiesForm extends SharedAssignmentProperties {
 	restrictSubmissions = true
 }
 
+
 /**
- * Contains all the fields that could be collectively assigned to a group of assignments, so that
- * we can set options for a group of assignments all in one go.
+ * Contains all the fields that could be collectively assigned to a group of assignments,
+ * so that we can set options in one go.
  */
-trait SharedAssignmentProperties extends FindAssignmentFields {
+trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAssignmentFields {
 
-
-	var openEnded: JBoolean = false
-	var collectMarks: JBoolean = false
-	var collectSubmissions: JBoolean = true
-	var restrictSubmissions: JBoolean = false
-	var allowLateSubmissions: JBoolean = true
-	var allowResubmission: JBoolean = false
-	var displayPlagiarismNotice: JBoolean = false
-	var allowExtensions: JBoolean = false
-	var allowExtensionRequests: JBoolean = false
-	var summative: JBoolean = true
-	
 	@Min(0)
 	var wordCountMin: JInteger = _
 	@Max(Assignment.MaximumWordCount)
 	var wordCountMax: JInteger = _
 	@Length(max = 600)
 	var wordCountConventions: String = "Exclude any bibliography or appendices."
-	
+
 	// linked feedback template (optional)
 	var feedbackTemplate: FeedbackTemplate = _
 	// if we change a feedback template we may need to invalidate existing zips
@@ -74,12 +63,12 @@ trait SharedAssignmentProperties extends FindAssignmentFields {
 	 */
 	@Length(max = 2000)
 	var comment: String = _
-	
+
 	def validateShared(errors: Errors) {
 		if(fileAttachmentTypes.mkString("").matches(invalidAttachmentPattern)){
 			errors.rejectValue("fileAttachmentTypes", "attachment.invalidChars")
 		}
-		
+
 		// implicitly fix missing bounds
 		Pair(Option(wordCountMin), Option(wordCountMax)) match {
 			case (Some(min), Some(max)) if (max <= min) => errors.rejectValue("wordCountMax", "assignment.wordCount.outOfRange")
@@ -90,17 +79,8 @@ trait SharedAssignmentProperties extends FindAssignmentFields {
 	}
 
 	def copySharedTo(assignment: Assignment) {
-		assignment.openEnded = openEnded
-		assignment.collectMarks = collectMarks
-		assignment.collectSubmissions = collectSubmissions
-		assignment.restrictSubmissions = restrictSubmissions
-		assignment.allowLateSubmissions = allowLateSubmissions
-		assignment.allowResubmission = allowResubmission
-		assignment.displayPlagiarismNotice = displayPlagiarismNotice
-		assignment.allowExtensions = allowExtensions
-		assignment.allowExtensionRequests = allowExtensionRequests
-		assignment.summative = summative
-		
+		copyBooleansTo(assignment)
+
 		assignment.feedbackTemplate = feedbackTemplate
 		if (assignment.id != null) // this is an edit
 			zipService.invalidateSubmissionZip(assignment)
@@ -112,7 +92,7 @@ trait SharedAssignmentProperties extends FindAssignmentFields {
 			file.attachmentLimit = fileAttachmentLimit
 			file.attachmentTypes = fileAttachmentTypes
 		}
-		
+
 		val wordCount = findWordCountField(assignment)
 		if (wordCountMax != null) {
 			wordCount.min = wordCountMin
@@ -137,19 +117,19 @@ trait SharedAssignmentProperties extends FindAssignmentFields {
 		summative = assignment.summative
 		feedbackTemplate = assignment.feedbackTemplate
 		markingWorkflow = assignment.markingWorkflow
-		
+
 		for (field <- findCommentField(assignment)) comment = field.value
 		for (file <- findFileField(assignment)) {
 			fileAttachmentLimit = file.attachmentLimit
 			fileAttachmentTypes = file.attachmentTypes
 		}
-		
+
 		val wordCount = findWordCountField(assignment)
 		wordCountMin = wordCount.min
 		wordCountMax = wordCount.max
 		wordCountConventions = wordCount.conventions
 	}
-	
+
 	/**
 	 * add/remove marker field as appropriate
  	 */
@@ -171,6 +151,7 @@ trait SharedAssignmentProperties extends FindAssignmentFields {
 	}
 }
 
+
 trait FindAssignmentFields {
 
 	protected def findFileField(assignment: Assignment) =
@@ -191,5 +172,4 @@ trait FindAssignmentFields {
 			newField
 		})
 	}
-
 }

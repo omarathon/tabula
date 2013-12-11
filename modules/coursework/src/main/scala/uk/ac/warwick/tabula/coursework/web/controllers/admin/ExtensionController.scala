@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.{StudentRelationship, StudentMember, Assi
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
-import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService, RelationshipService}
 import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser}
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.data.model.forms.Extension
@@ -18,7 +18,6 @@ import uk.ac.warwick.tabula.helpers.DateBuilder
 import javax.validation.Valid
 import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.spring.Wire
 
 
@@ -26,6 +25,7 @@ abstract class ExtensionController extends CourseworkController {
 	var json = Wire[ObjectMapper]
 	var userLookup = Wire[UserLookupService]
 	var relationshipService = Wire[RelationshipService]
+	var profileService = Wire[ProfileService]
 	
 	// Add the common breadcrumbs to the model.
 	def crumbed(mav:Mav, module:Module)
@@ -185,10 +185,10 @@ class ReviewExtensionRequestController extends ExtensionController {
 	@ModelAttribute("modifyExtensionCommand")
 	def editCommand(
 			@PathVariable("module") module:Module, 
-			@PathVariable("assignment") assignment:Assignment, 
-			@PathVariable("universityId") student: StudentMember,
+			@PathVariable("assignment") assignment:Assignment,
+			@PathVariable("universityId") universityId:String,
 			user:CurrentUser) = 
-		new ReviewExtensionRequestCommand(module, assignment, mandatory(assignment.findExtension(student.universityId)), user, student)
+		new ReviewExtensionRequestCommand(module, assignment, mandatory(assignment.findExtension(universityId)), user)
 	
 	validatesSelf[ReviewExtensionRequestCommand]
 	
@@ -196,24 +196,28 @@ class ReviewExtensionRequestController extends ExtensionController {
 	@RequestMapping(method=Array(GET))
 	def reviewExtensionRequest(@ModelAttribute("modifyExtensionCommand") cmd:ReviewExtensionRequestCommand, errors:Errors):Mav = {
 
+		val user = userLookup.getUserByWarwickUniId(cmd.extension.universityId)
+		val student = profileService.getMemberByUniversityId(cmd.extension.universityId)
 		val studentRelationships = relationshipService.allStudentRelationshipTypes
-		val relationships =
-			studentRelationships.map(
-				x => (x.description, relationshipService
-					.findCurrentRelationships(x,cmd.student.mostSignificantCourseDetails.getOrElse(throw new ItemNotFoundException).sprCode))
-			).toMap
 
-		val model = Mav("admin/assignments/extensions/review_request",
+		val extraInfo = student.flatMap { _.mostSignificantCourseDetails.map { scd =>
+			val relationships = studentRelationships.map(x => (x.description, relationshipService.findCurrentRelationships(x,scd.sprCode))).toMap
+
+			Map(
+				"relationships" -> relationships.filter({case (relationshipType,relations) => relations.length != 0}),
+				"studentCourseDetails" -> scd,
+				"student" -> student
+			)
+		}}.getOrElse(Map())
+
+		val model = Mav("admin/assignments/extensions/review_request", Map(
 			"command" -> cmd,
 			"extension" ->  cmd.extension,
 			"module" -> cmd.module,
-			"moduleManagers" -> cmd.module.managers.users,
 			"assignment" -> cmd.assignment,
 			"universityId" -> cmd.extension.universityId,
-			"userFullName" ->  cmd.student.fullName,
-			"student" -> cmd.student,
-		  "studentCourseDetails" -> cmd.student.mostSignificantCourseDetails.getOrElse(throw new ItemNotFoundException),
-			"relationships" -> relationships.filter({case (relationshipType,relations) => relations.length != 0})
+			"email" -> user.getEmail(),
+			"userFullName" -> user.getFullName()) ++ extraInfo
 		).noLayout()
 		model
 	}

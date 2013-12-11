@@ -1,8 +1,8 @@
 <#escape x as x?html>
 
-<#if user.loggedIn && user.firstName??>
+<#if !ajax && user.loggedIn && user.firstName??>
 	<h5>Hello, ${user.firstName}</h5>
-<#else>
+<#elseif !ajax>
 	<h5>Hello</h5>
 </#if>	
 
@@ -23,7 +23,7 @@
 		</li>
 		
 		<#if features.smallGroupTeaching>
-			<li><h2><a href="<@url page="/" context="/groups" />" />Small Group Teaching</a></h2>
+			<li><h2><a href="<@url page="/" context="/groups" />">Small Group Teaching</a></h2>
 				<#if user.staff>
 					<span class="hint">Create seminars, tutorials and lab groups</span>
 				<#else>
@@ -45,21 +45,27 @@
 		<#if features.attendanceMonitoring>
 			<#if user.staff>
 				<li>
-					<h2><a href="<@url page="/" context="/attendance" />" />Attendance Monitoring</a></h2>
+					<h2><a href="<@url page="/" context="/attendance" />">Attendance Monitoring</a></h2>
 					<span class="hint">View and record attendance at specified monitoring points</span>
 				</li>
 			<#elseif user.student>
 				<li>
-					<h2><a href="<@url page="/profile" context="/attendance" />" />My Attendance</a></h2>
+					<h2><a href="<@url page="/profile" context="/attendance" />">My Attendance</a></h2>
 					<span class="hint">View your attendance at specified monitoring points</span>
 				</li>
 			</#if>
-
+		</#if>
+		
+		<#if canAdmin>
+			<li>
+				<h2><a href="<@url page="/" context="/admin" />">Administration and Permissions</a></h2>
+				<span class="hint">Manage department, module and route settings and permissions</span>
+			</li>
 		</#if>
 	</ul>
 </#if>
 
-<#if (activeSpringProfiles!"") == "sandbox">
+<#if !ajax && (activeSpringProfiles!"") == "sandbox">
 	<div class="alert alert-block">
 		<h4><i class="icon-sun"></i> Tabula Sandbox</h4>
 		
@@ -93,8 +99,10 @@
 	</div>
 </#if>
 
-<p id="what-is-tabula">
-	<i class="icon-info-sign"></i> <span title="Tabula was originated as 'My Department'.">Tabula</span> supports the administration of teaching and learning in academic departments at Warwick.
-</p>
+<#if !ajax>
+	<p id="what-is-tabula">
+		<i class="icon-info-sign"></i> <span title="Tabula was originated as 'My Department'.">Tabula</span> supports the administration of teaching and learning in academic departments at Warwick.
+	</p>
+</#if>
 
 </#escape>

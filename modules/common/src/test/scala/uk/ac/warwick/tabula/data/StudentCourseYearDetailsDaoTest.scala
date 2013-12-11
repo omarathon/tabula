@@ -11,7 +11,6 @@ import org.joda.time.DateTime
 import scala.collection.mutable
 import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
 
-
 class StudentCourseYearDetailsDaoTest extends PersistenceTestBase {
 
 	val scydDao = new StudentCourseYearDetailsDaoImpl

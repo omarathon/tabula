@@ -3,13 +3,16 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.{Member, Assignment, Module}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.coursework.commands.feedback.{OnlineMarkerFeedbackFormCommand, OnlineMarkerFeedbackCommand, OnlineFeedbackFormCommand, OnlineFeedbackCommand}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.CurrentUser
 import javax.validation.Valid
-import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
+import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
+import uk.ac.warwick.tabula.coursework.web.Routes
+import uk.ac.warwick.tabula.data.model.MarkingMethod.ModeratedMarking
+import uk.ac.warwick.userlookup.User
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/online"))
@@ -26,7 +29,9 @@ class OnlineFeedbackController extends CourseworkController {
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
 		Mav("admin/assignments/feedback/online_framework",
-			"isMarkerView" -> false,
+			"markingUrl" -> Routes.admin.assignment.onlineFeedback(assignment),
+			"showMarkingCompleted" -> false,
+			"showGenericFeedback" -> true,
 			"assignment" -> assignment,
 			"command" -> command,
 			"studentFeedbackGraphs" -> feedbackGraphs)
@@ -48,8 +53,13 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 		val feedbackGraphs = command.apply()
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
+		val showMarkingCompleted =
+			assignment.markingWorkflow.markingMethod != ModeratedMarking || assignment.isFirstMarker(command.marker)
+
 		Mav("admin/assignments/feedback/online_framework",
-			"isMarkerView" -> true,
+			"markingUrl" -> assignment.markingWorkflow.onlineMarkingUrl(assignment, command.marker),
+			"showMarkingCompleted" -> showMarkingCompleted,
+			"showGenericFeedback" -> false,
 			"assignment" -> assignment,
 			"command" -> command,
 			"studentFeedbackGraphs" -> feedbackGraphs)
@@ -65,7 +75,7 @@ class OnlineFeedbackFormController extends CourseworkController {
 	validatesSelf[OnlineFeedbackFormCommand]
 
 	@ModelAttribute("command")
-	def command(@PathVariable student: Member, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
+	def command(@PathVariable student: User, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
 		OnlineFeedbackFormCommand(module, assignment, student, currentUser)
 
 	@RequestMapping(method = Array(GET, HEAD))
@@ -94,22 +104,26 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 	validatesSelf[OnlineMarkerFeedbackFormCommand]
 
 	@ModelAttribute("command")
-	def command(@PathVariable student: Member, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
+	def command(@PathVariable student: User, @PathVariable module: Module, @PathVariable assignment: Assignment, currentUser: CurrentUser) =
 		OnlineMarkerFeedbackFormCommand(module, assignment, student, currentUser)
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: OnlineMarkerFeedbackFormCommand, errors: Errors): Mav = {
 
-		val (isCompleted, firstMarkerFeedback) = command.markerFeedback match {
-			case Some(mf) => (mf.state == MarkingCompleted, mf.feedback.firstMarkerFeedback)
-			case None => (false, None)
-		}
+		val isCompleted = command.markerFeedback.map(_.state == MarkingCompleted).getOrElse(false)
+		val parentFeedback = command.markerFeedback.map(_.feedback)
+		val firstMarkerFeedback = parentFeedback.flatMap(feedback => Option(feedback.firstMarkerFeedback))
+		val secondMarkerFeedback =  parentFeedback.flatMap(feedback => Option(feedback.secondMarkerFeedback))
+		val isRejected = secondMarkerFeedback.map(_.state == Rejected).getOrElse(false)
+		val isFirstMarker = command.assignment.isFirstMarker(command.currentUser.apparentUser)
 
-		Mav("admin/assignments/feedback/marker_online_feedback",
+		Mav("admin/assignments/feedback/marker_online_feedback" ,
 			"command" -> command,
 			"isCompleted" -> isCompleted,
-			"isFirstMarker" -> command.assignment.isFirstMarker(command.currentUser.apparentUser),
-			"firstMarkerFeedback" -> firstMarkerFeedback
+			"isFirstMarker" -> isFirstMarker,
+			"firstMarkerFeedback" -> firstMarkerFeedback,
+			"isRejected" -> isRejected,
+			"secondMarkerFeedback" -> secondMarkerFeedback
 		).noLayout()
 	}
 

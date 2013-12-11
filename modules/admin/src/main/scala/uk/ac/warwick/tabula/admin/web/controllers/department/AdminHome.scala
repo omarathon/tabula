@@ -57,37 +57,37 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 	var moduleService = Wire[ModuleAndDepartmentService]
 	
 	val modules: Seq[Module] = 
-		if (securityService.can(user, Permissions.RolesAndPermissions.Create, mandatory(department))) {
+		if (securityService.can(user, Permissions.Module.Administer, mandatory(department))) {
 			// This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
-			PermissionCheck(Permissions.RolesAndPermissions.Create, department)
+			PermissionCheck(Permissions.Module.Administer, department)
 			
 			department.modules.asScala
 		} else {
-			val managedModules = moduleService.modulesWithPermission(user, Permissions.RolesAndPermissions.Create, department).toList
+			val managedModules = moduleService.modulesWithPermission(user, Permissions.Module.Administer, department).toList
 			
 			// This is implied by the above, but it's nice to check anyway
-			PermissionCheckAll(Permissions.RolesAndPermissions.Create, managedModules)
+			PermissionCheckAll(Permissions.Module.Administer, managedModules)
 			
 			if (managedModules.isEmpty)
-				throw new PermissionDeniedException(user, Permissions.RolesAndPermissions.Create, department)
+				throw new PermissionDeniedException(user, Permissions.Module.Administer, department)
 			
 			managedModules
 		}
 	
 	val routes: Seq[Route] = 
-		if (securityService.can(user, Permissions.RolesAndPermissions.Create, mandatory(department))) {
+		if (securityService.can(user, Permissions.Route.Administer, mandatory(department))) {
 			// This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
-			PermissionCheck(Permissions.RolesAndPermissions.Create, department)
+			PermissionCheck(Permissions.Route.Administer, department)
 			
 			department.routes.asScala
 		} else {
-			val managedRoutes = moduleService.routesWithPermission(user, Permissions.RolesAndPermissions.Create, department).toList
+			val managedRoutes = moduleService.routesWithPermission(user, Permissions.Route.Administer, department).toList
 			
 			// This is implied by the above, but it's nice to check anyway
-			PermissionCheckAll(Permissions.RolesAndPermissions.Create, managedRoutes)
+			PermissionCheckAll(Permissions.Route.Administer, managedRoutes)
 			
 			if (managedRoutes.isEmpty)
-				throw new PermissionDeniedException(user, Permissions.RolesAndPermissions.Create, department)
+				throw new PermissionDeniedException(user, Permissions.Route.Administer, department)
 			
 			managedRoutes
 		}

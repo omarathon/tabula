@@ -90,8 +90,9 @@ class CreateSmallGroupSetController extends SmallGroupSetsController {
 		else {
 			val set = cmd.apply()
 			
-			// Redirect straight to allocation
-			Redirect(Routes.admin.allocate(set))
+			// Redirect straight to allocation only for manual allocation groups 
+			if (set.allocationMethod == SmallGroupAllocationMethod.Manual) Redirect(Routes.admin.allocate(set))
+			else Redirect(Routes.admin.module(cmd.module))
 		}
 	}
 

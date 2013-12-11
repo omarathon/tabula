@@ -10,6 +10,7 @@ import language.implicitConversions
 trait StringUtils {
 	class SuperString(string: String) {
 		def hasText = Utils hasText string
+		def isEmptyOrWhitespace = !hasText
 		def hasLength = Utils hasLength string
 		def safeTrim = Option(string).map { _.trim }.getOrElse("")
 		def safeSubstring(proposedStart: Int) = Utils safeSubstring(string, proposedStart)

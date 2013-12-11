@@ -2,12 +2,11 @@ package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import org.hibernate.annotations.{AccessType, Filter, FilterDef, IndexColumn, Type}
 import javax.persistence._
 import javax.persistence.FetchType._
 import javax.persistence.CascadeType._
 import org.hibernate.annotations.{ForeignKey, Filter, FilterDef, AccessType, BatchSize, Type, IndexColumn}
-import org.joda.time.{Days, LocalDate, DateTime}
+import org.joda.time.{LocalDate, DateTime}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.data.model.forms._
@@ -17,7 +16,6 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.forms.WordCountField
-import uk.ac.warwick.tabula.data.model.MarkingMethod._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 import scala.reflect._
@@ -93,28 +91,23 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 
 	var name: String = _
 	var active: JBoolean = true
-
 	var archived: JBoolean = false
 
 	var openDate: DateTime = _
-
 	var closeDate: DateTime = _
-
 	var createdDate = DateTime.now()
 
-	var openEnded: JBoolean = false
-	var collectMarks: JBoolean = false
-	var collectSubmissions: JBoolean = false
-	var restrictSubmissions: JBoolean = false
-	var allowLateSubmissions: JBoolean = true
-	var allowResubmission: JBoolean = false
-	var displayPlagiarismNotice: JBoolean = false
-	var summative: JBoolean = true
-
-	var allowExtensions: JBoolean = false
-	// allow students to request extensions via the app
-
-	var allowExtensionRequests: JBoolean = false
+	// left unset as defaults are set by BooleanAssignmentProperties
+	var openEnded: JBoolean = _
+	var collectMarks: JBoolean = _
+	var collectSubmissions: JBoolean = _
+	var restrictSubmissions: JBoolean = _
+	var allowLateSubmissions: JBoolean = _
+	var allowResubmission: JBoolean = _
+	var displayPlagiarismNotice: JBoolean = _
+	var summative: JBoolean = _
+	var allowExtensions: JBoolean = _
+	var allowExtensionRequests: JBoolean = _ // by students
 	var genericFeedback: String = ""
 
 	@ManyToOne
@@ -242,6 +235,10 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 		addDefaultFeedbackFields()
 	}
 
+	def setDefaultBooleanProperties() {
+		BooleanAssignmentProperties(this)
+	}
+
 	/**
 	 * Returns whether we're between the opening and closing dates
 	 */
@@ -290,22 +287,8 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	def membershipInfo = assignmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
 
 	// converts the assessmentGroups to upstream assessment groups
-	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = {
-		if(academicYear == null){
-			Seq()
-		}
-		else {
-			val validGroups = assessmentGroups.filterNot(group=> group.assessmentComponent == null || group.occurrence == null)
-			validGroups.flatMap{group =>
-				val template = new UpstreamAssessmentGroup
-				template.academicYear = academicYear
-				template.assessmentGroup = group.assessmentComponent.assessmentGroup
-				template.moduleCode = group.assessmentComponent.moduleCode
-				template.occurrence = group.occurrence
-				assignmentMembershipService.getUpstreamAssessmentGroup(template)
-			}
-		}
-	}
+	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = 
+		assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroup(academicYear) }
 
 	/**
 	 * Whether the assignment is not archived or deleted.
@@ -482,40 +465,11 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * Optionally returns the first marker for the given submission
 	 * Returns none if this assignment doesn't have a valid marking workflow attached
 	 */
-	def getStudentsFirstMarker(submission: Submission): Option[String] = Option(markingWorkflow) flatMap {_.markingMethod match {
-		case SeenSecondMarking =>  {
-			val mapEntry = Option(markerMap) flatMap {_.find{p:(String,UserGroup) =>
-				p._2.includes(submission.userId) && markingWorkflow.firstMarkers.includes(p._1)
-			}}
-			mapEntry match {
-				case Some((markerId, students)) => Some(markerId)
-				case _ => None
-			}
-		}
-		case StudentsChooseMarker => markerSelectField match {
-			case Some(field) => {
-				submission.getValue(field) match {
-					case Some(sv) => Some(sv.value)
-					case None => None
-				}
-			}
-			case None => None
-		}
-		case _ => None
-	}}
+	def getStudentsFirstMarker(submission: Submission): Option[String] =
+		Option(markingWorkflow) flatMap {_.getStudentsFirstMarker(this, submission.universityId)}
 
-	def getStudentsSecondMarker(submission: Submission): Option[String] = Option(markingWorkflow) flatMap {_.markingMethod match {
-		case SeenSecondMarking =>  {
-			val mapEntry = markerMap.find{p:(String,UserGroup) =>
-				p._2.includes(submission.userId) && markingWorkflow.secondMarkers.includes(p._1)
-			}
-			mapEntry match {
-				case Some((markerId, students)) => Some(markerId)
-				case _ => None
-			}
-		}
-		case _ => None
-	}}
+	def getStudentsSecondMarker(submission: Submission): Option[String] =
+		Option(markingWorkflow) flatMap {_.getStudentsSecondMarker(this, submission.universityId)}
 
 		/**
 	 * Optionally returns the submissions that are to be marked by the given user
@@ -596,4 +550,38 @@ case class SubmissionsReport(val assignment: Assignment) {
     private def toUniId(s: Submission) = s.universityId
 
 
+}
+
+/**
+ * One stop shop for setting default boolean values for assignment properties
+ */
+trait BooleanAssignmentProperties {
+	var openEnded: JBoolean = false
+	var collectMarks: JBoolean = true
+	var collectSubmissions: JBoolean = true
+	var restrictSubmissions: JBoolean = false
+	var allowLateSubmissions: JBoolean = true
+	var allowResubmission: JBoolean = true
+	var displayPlagiarismNotice: JBoolean = true
+	var allowExtensions: JBoolean = true
+	var allowExtensionRequests: JBoolean = false
+	var summative: JBoolean = true
+
+	def copyBooleansTo(assignment: Assignment) {
+		assignment.openEnded = openEnded
+		assignment.collectMarks = collectMarks
+		assignment.collectSubmissions = collectSubmissions
+		assignment.restrictSubmissions = restrictSubmissions
+		assignment.allowLateSubmissions = allowLateSubmissions
+		assignment.allowResubmission = allowResubmission
+		assignment.displayPlagiarismNotice = displayPlagiarismNotice
+		assignment.allowExtensions = allowExtensions
+		assignment.allowExtensionRequests = allowExtensionRequests
+		assignment.summative = summative
+	}
+}
+
+
+object BooleanAssignmentProperties extends BooleanAssignmentProperties {
+	def apply(assignment: Assignment) = copyBooleansTo(assignment)
 }

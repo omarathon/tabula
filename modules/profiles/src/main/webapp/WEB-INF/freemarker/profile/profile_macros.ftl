@@ -46,7 +46,7 @@
 
 	<#if ((studentCourseDetails.relationships(relationshipType))![])?size gt 0>
 		<#local relationships = studentCourseDetails.relationships(relationshipType) />
-	
+
 		<h4>${relationshipType.agentRole?cap_first}<#if relationships?size gt 1>s</#if></h4>
 
 		<#if relationships?size gt 0 && can.do_with_selector("Profiles.StudentRelationship.Create", profile, relationshipType) && acceptsChanges>
@@ -63,7 +63,11 @@
 
 			<div class="agent clearfix span4">
 				<#if !relationship.agentMember??>
-					${relationship.agentName} <span class="muted">External to Warwick</span>
+					${relationship.agentName}
+					<#if relationship.percentage?has_content>
+						<span class="percentage muted">(${relationship.percentage}%)</span>
+					</#if>
+					<span class="muted">External to Warwick</span>
 					<#if can.do_with_selector("Profiles.StudentRelationship.Update", profile, relationshipType) && acceptsChanges>
 						<a class="edit-agent-link" href="<@routes.relationship_edit_no_agent scjCode=studentCourseDetails.urlSafeId relationshipType=relationshipType />"
 						data-target="#modal-change-agent"
@@ -75,10 +79,13 @@
 				<#else>
 					<#local agent = relationship.agentMember />
 
-					<@fmt.relation_photo member relationship "tinythumbnail" />
+					<@fmt.relation_photo profile relationship "tinythumbnail" />
 
 					<h5>
 						${agent.fullName!relationshipType.agentRole?cap_first}
+						<#if relationship.percentage?has_content>
+							<span class="percentage muted">(${relationship.percentage}%)</span>
+						</#if>
 						<#if can.do_with_selector("Profiles.StudentRelationship.Update", profile, relationshipType) && acceptsChanges>
 							<a class="edit-agent-link" href="<@routes.relationship_edit scjCode=studentCourseDetails.urlSafeId currentAgent=agent relationshipType=relationshipType />"
 							data-target="#modal-change-agent"
@@ -112,7 +119,7 @@
 			</a>
 		</#if>
 	</#if>
-	
+
 	<@meeting_macros.list studentCourseDetails meetings relationshipType />
 </section>
 </#macro>

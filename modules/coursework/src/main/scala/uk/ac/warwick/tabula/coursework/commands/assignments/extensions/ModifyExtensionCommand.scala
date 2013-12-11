@@ -59,10 +59,8 @@ class EditExtensionCommand(module: Module, assignment: Assignment, val extension
 	})
 }
 
-class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, extension: Extension, submitter: CurrentUser, studentMember: StudentMember)
+class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, extension: Extension, submitter: CurrentUser)
 	extends EditExtensionCommand(module, assignment, extension, submitter) {
-
-	val student: StudentMember = studentMember
 
 	PermissionCheck(Permissions.Extension.ReviewRequest, extension)
 }
@@ -113,7 +111,7 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 			val item = new ExtensionItem
 			item.universityId =  extension.universityId
 			item.approvalComments = extension.approvalComments
-			item.expiryDate = extension.expiryDate
+			item.expiryDate = Option(extension.expiryDate).getOrElse(extension.requestedExpiryDate)
 			item
 		}
 

@@ -76,22 +76,6 @@ class StudentCourseDetails
 		}.getOrElse(false)
 	}
 
-	// FIXME this belongs as a Freemarker macro or helper
-	def statusString: String = {
-		var statusString = ""
-		if (sprStatus!= null) {
-			statusString = sprStatus.fullName.toLowerCase().capitalize
-
-			val enrolmentStatus = Option(latestStudentCourseYearDetails).map { _.enrolmentStatus }.orNull
-
-			// if the enrolment status is not null and different to the SPR status, append it:
-			if (enrolmentStatus != null
-				&& enrolmentStatus.fullName != sprStatus.fullName)
-					statusString += " (" + enrolmentStatus.fullName.toLowerCase() + ")"
-		}
-		statusString
-	}
-
 	// The reason this method isn't on SitsStatus is that P* can have a meaning other than
 	// permanently withdrawn in the context of applicants, but not in the context of
 	// the student's route status (sprStatus)
@@ -135,6 +119,20 @@ class StudentCourseDetails
 	def addStudentCourseYearDetails(scyd: StudentCourseYearDetails) = studentCourseYearDetails.add(scyd)
 
 	def removeStudentCourseYearDetails(scyd: StudentCourseYearDetails) = studentCourseYearDetails.remove(scyd)
+
+	def beginYear = beginDate match {
+		case begin: LocalDate => new Integer(beginDate.year().getAsText)
+		case null => new Integer(0)
+	}
+
+	def endYear = endDate match {
+		case null =>
+			expectedEndDate match {
+				case expectedEnd: LocalDate => new Integer(expectedEndDate.year().getAsText)
+				case null => new Integer(0)
+			}
+		case end: LocalDate => new Integer(end.year().getAsText)
+	}
 }
 
 trait StudentCourseProperties {

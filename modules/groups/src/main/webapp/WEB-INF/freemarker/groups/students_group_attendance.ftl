@@ -85,9 +85,11 @@
 		</div>
 	</#macro>
 
-	<#if !terms??>
+	<#if !terms?? || !hasGroups>
+		<h4><#if title?has_content>${title}<#else>Small groups</#if></h4>
+	
 		<p><em>There are no small group events defined for this academic year.</em></p>
-	<#else>
+	<#else>	
 		<div class="seminar-attendance-profile striped-section collapsible <#if defaultExpand!false>expanded</#if>">
 			<h3 class="section-title"><#if title?has_content>${title}<#else>Small groups</#if></h3>
 			<div class="missed-info">

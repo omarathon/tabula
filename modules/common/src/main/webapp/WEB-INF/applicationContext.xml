@@ -118,7 +118,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.MemberNoteIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.PermissionConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ClassConverter"/>
-	            <bean class="uk.ac.warwick.tabula.data.convert.UserCodeConverter"/>
+	            <bean class="uk.ac.warwick.tabula.data.convert.UserConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ExtensionIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AcademicYearConverter"/>
                 <bean class="uk.ac.warwick.tabula.data.convert.RoleDefinitionConverter"/>
@@ -282,7 +282,7 @@
 			<excluded-url-pattern>/static/*</excluded-url-pattern>
 			<excluded-url-pattern>/favicon.ico</excluded-url-pattern>
 			<excluded-url-pattern>*.ftl</excluded-url-pattern>
-			<excluded-url-pattern>/test/up</excluded-url-pattern>
+			<excluded-url-pattern>/test/*</excluded-url-pattern>
 		</mapping>
 		<mapping name="forceSysadmin">
 			<filter ref="forceLoginFilter" />

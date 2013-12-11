@@ -17,10 +17,10 @@ class MarkingWorkflowDaoTest extends PersistenceTestBase {
 		session.save(dept)
 		session.flush
 		
-		val mw1 = Fixtures.markingWorkflow("mw1")
+		val mw1 = Fixtures.seenSecondMarkingWorkflow("mw1")
 		mw1.department = dept
 		
-		val mw2 = Fixtures.markingWorkflow("mw2")
+		val mw2 = Fixtures.studentsChooseMarkerWorkflow("mw2")
 		mw2.department = dept
 		
 		val ass1 = Fixtures.assignment("ass1")

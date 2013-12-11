@@ -25,9 +25,7 @@ class EditMarkingWorkflowController extends CourseworkController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def form(@ModelAttribute("command") cmd: EditMarkingWorkflowCommand): Mav = {
 		doBind(cmd)
-		Mav("admin/markingworkflows/edit",
-			"hasSubmissions" -> cmd.hasExistingSubmissions)
-			.crumbs(Breadcrumbs.Department(cmd.department))
+		Mav("admin/markingworkflows/edit").crumbs(Breadcrumbs.Department(cmd.department))
 	}
 	
 	@RequestMapping(method=Array(POST))

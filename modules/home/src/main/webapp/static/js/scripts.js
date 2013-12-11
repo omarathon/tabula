@@ -170,14 +170,16 @@
 
 		var show = function($div, data) {
 			if (data === 'init') $div.show(); // no animation on init
-			else $div.stop().slideDown('fast');
-			$div.trigger('tabula.slideMoreOptions.shown');
+			else $div.stop().slideDown('fast', function(){
+				$div.trigger('tabula.slideMoreOptions.shown');
+			});
 		};
 
 		var hide = function($div, data) {
 			if (data === 'init') $div.hide(); // no animation on init
-			else $div.stop().slideUp('fast');
-			$div.trigger('tabula.slideMoreOptions.hidden');
+			else $div.stop().slideUp('fast' , function(){
+				$div.trigger('tabula.slideMoreOptions.hidden');
+			});
 		}
 
 		// for checkboxes, there will just be one target - the current element (which will have the same name as itself).
@@ -285,8 +287,10 @@
 					if ($this.is('.spinner-auto')) {
 						// spin only after 500ms
 						$this.click(function(e) {
-							var $container = $this.data('spinContainer');
-							window.pendingSpinner = setTimeout(function() { $container.spin('small'); }, 500);
+							if (!$this.is('.disabled')) {
+								var $container = $this.data('spinContainer');
+								window.pendingSpinner = setTimeout(function() { $container.spin('small'); }, 500);
+							}
 						});
 					}
 				}
@@ -521,11 +525,11 @@
 
 			var $title = $section.find('.section-title');
 			$title.prepend(' ').prepend($icon);
-			
+
 			var populateContent = function(onComplete) { onComplete(); }
 			if ($section.data('populate') && $section.data('href')) {
 				$section.data('loaded', false).data('loading', false);
-			
+
 				// Populate function
 				populateContent = function(onComplete) {
 					if ($section.data('loaded')) onComplete();
@@ -533,9 +537,9 @@
 					else {
 						$section.data('loading', true);
 						$icon.removeClass().addClass('icon-fixed-width icon-refresh icon-spin');
-						
-						var $target = $section.find($section.data('populate')); 
-					
+
+						var $target = $section.find($section.data('populate'));
+
 						$target.load(
 							$section.data('href'),
 							{ ts: new Date().getTime() },
@@ -547,7 +551,7 @@
 										t.wrap($('<div><div class="sb-wide-table-wrapper"></div></div>'));
 									}
 								});
-								
+
 								if ($('body.is-smallscreen').length === 0 && $target.find('div.sb-wide-table-wrapper').length > 0) {
 									var popoutLinkHandler = function(event) {
 										event.stopPropagation();
@@ -559,7 +563,7 @@
 										var tableWrapper = $(this).closest('div').find('div.sb-wide-table-wrapper')
 										Shadowbox.open({
 											link : this,
-											content: '<div class="sb-wide-table-wrapper" style="background: white;">' 
+											content: '<div class="sb-wide-table-wrapper" style="background: white;">'
 													+ tableWrapper.html()
 													+ '</div>',
 													player: 'html',
@@ -567,7 +571,7 @@
 													height: $(window).height()
 										})
 									};
-									
+
 									var generatePopoutLink = function(){
 										return $('<span/>')
 										.addClass('sb-table-wrapper-popout')
@@ -579,17 +583,17 @@
 												.on('click', popoutLinkHandler)
 										).append(')');
 									};
-									
+
 									$target.find('div.sb-wide-table-wrapper > table').each(function(){
 										var $this = $(this);
 										if($this.is(':visible') && !$this.hasClass('sb-no-wrapper-table-popout') && Math.floor($this.width()) > $this.parent().width()){
 											$this.parent().parent('div').prepend(generatePopoutLink()).append(generatePopoutLink())
 										}
-									});	
+									});
 								}
-								
+
 								$target.find('a.ajax-modal').ajaxModalLink();
-								
+
 								onComplete();
 								$section.data('loading', false).data('loaded', true);
 							}
@@ -606,7 +610,7 @@
 					populateContent(function() {
 						$section.addClass('expanded');
 						$icon.removeClass().addClass('icon-fixed-width icon-chevron-down');
-	
+
 						if ($section.data('name')) {
 							window.location.hash = $section.data('name');
 						}
@@ -1035,4 +1039,31 @@ jQuery(function($){
 		mode: 'readonly'
 	});
 
+});
+
+// component switcher at the top of every screen (other than homepage)
+jQuery(function($){
+	var loadContent = function() {
+		var $el = $(this);
+		if ($el.data('loaded')) {
+			return $el.data('popover').$tip.find('.popover-content').html();
+		} else {
+			$.get('/', function (data) {
+				$el.data('popover').$tip.find('.popover-content').html(data);
+				$el.data('loaded', true);
+				$el.data('popover').show();
+	    }, 'html');
+
+			return 'Loading&hellip;';
+		}
+	};
+
+	$('#site-header .more-link > i').tabulaPopover({
+    html: true,
+    container: '#main-content',
+    trigger: 'click',
+    template: '<div class="popover wide"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>',
+    content: loadContent,
+    placement: 'bottom'
+  });
 });
