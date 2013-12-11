@@ -101,10 +101,6 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 				}	else if (!securityService.can(user, Permissions.MonitoringPoints.Record, pointRoute)) {
 					errors.rejectValue("", "monitoringPoint.noRecordPermission")
 				} else {
-					// Check state change valid
-					if (point.sentToAcademicOffice) {
-						errors.rejectValue("", "monitoringCheckpoint.sentToAcademicOffice")
-					}
 
 					if (!monitoringPointService.findNonReportedTerms(Seq(student),
 						pointSet.academicYear).contains(

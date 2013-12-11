@@ -45,8 +45,6 @@ trait UpdateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 	override def validate(errors: Errors) {
 		if (anyStudentsReportedForRelatedPointsThisTerm(point)) {
 			errors.reject("monitoringPoint.hasReportedCheckpoints.update")
-		} else if (point.sentToAcademicOffice) {
-			errors.reject("monitoringPoint.sentToAcademicOffice.points.update")
 		} else if (monitoringPointService.countCheckpointsForPoint(point) > 0) {
 			errors.reject("monitoringPoint.hasCheckpoints.update")
 		}

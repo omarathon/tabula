@@ -49,17 +49,6 @@ class RemoveMonitoringPointCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def validateSentToAcademicOfficeNoChanges() {
-		new Fixture {
-			monitoringPoint.sentToAcademicOffice = true
-			command.confirm = true
-			var errors = new BindException(command, "command")
-			command.validate(errors)
-			errors.hasErrors should be (right = true)
-		}
-	}
-
-	@Test
 	def validateHasCheckpointsNoChanges() {
 		new Fixture {
 			command.monitoringPointService.countCheckpointsForPoint(monitoringPoint) returns 2

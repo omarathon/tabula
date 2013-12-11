@@ -41,8 +41,6 @@ trait RemoveMonitoringPointValidation extends SelfValidating {
 
 		if (anyStudentsReportedForRelatedPointsThisTerm(point)) {
 			errors.reject("monitoringPoint.hasReportedCheckpoints.remove")
-		} else if (point.sentToAcademicOffice) {
-			errors.reject("monitoringPoint.sentToAcademicOffice.points.remove")
 		} else if (monitoringPointService.countCheckpointsForPoint(point) > 0) {
 			errors.reject("monitoringPoint.hasCheckpoints.remove")
 		}

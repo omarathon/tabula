@@ -82,10 +82,6 @@ trait SetMonitoringCheckpointForStudentCommandValidation extends SelfValidating 
 				if (!studentPointSet.exists(s => s.points.asScala.contains(point))) {
 					errors.rejectValue("", "monitoringPoint.invalidStudent")
 				}	else {
-					// Check state change valid
-					if (point.sentToAcademicOffice) {
-						errors.rejectValue("", "monitoringCheckpoint.sentToAcademicOffice")
-					}
 
 					if (!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear).getTermTypeAsString)){
 						errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")

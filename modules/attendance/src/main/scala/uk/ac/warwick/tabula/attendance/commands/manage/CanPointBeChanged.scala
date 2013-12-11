@@ -9,14 +9,12 @@ trait CanPointBeChanged extends MonitoringPointServiceComponent with TermService
 
 	// TAB-1079
 	def canPointBeUpdated(point: MonitoringPoint) = {
-		!point.sentToAcademicOffice && monitoringPointService.countCheckpointsForPoint(point) == 0 &&
-			!anyStudentsReportedForRelatedPointsThisTerm(point)
+		monitoringPointService.countCheckpointsForPoint(point) == 0 && !anyStudentsReportedForRelatedPointsThisTerm(point)
 	}
 
 	// TAB-1079
 	def canPointBeRemoved(point: MonitoringPoint) = {
-		!point.sentToAcademicOffice && monitoringPointService.countCheckpointsForPoint(point) == 0 &&
-			!anyStudentsReportedForRelatedPointsThisTerm(point)
+		monitoringPointService.countCheckpointsForPoint(point) == 0 && !anyStudentsReportedForRelatedPointsThisTerm(point)
 	}
 
 	def canPointBeAdded(point: MonitoringPoint) = !anyStudentsReportedForRelatedPointsThisTerm(point)
