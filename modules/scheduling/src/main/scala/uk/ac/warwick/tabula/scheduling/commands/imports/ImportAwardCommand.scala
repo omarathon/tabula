@@ -32,10 +32,7 @@ class ImportAwardCommand(info: AwardInfo)
 
 		val isTransient = !awardExisting.isDefined
 
-		val award = awardExisting match {
-			case Some(awd: Award) => awd
-			case _ => new Award()
-		}
+		val award = awardExisting.getOrElse(new Award)
 
 		val commandBean = new BeanWrapperImpl(this)
 		val awardBean = new BeanWrapperImpl(award)

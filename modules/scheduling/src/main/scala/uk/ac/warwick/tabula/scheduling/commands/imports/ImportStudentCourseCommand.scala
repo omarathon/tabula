@@ -1,9 +1,11 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.ResultSet
+
 import org.hibernate.exception.ConstraintViolationException
 import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
+
 import ImportMemberHelpers.{opt, toLocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.PrsCode
@@ -13,9 +15,9 @@ import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.{CourseType, Department, Member, StudentCourseDetails, StudentCourseProperties, StudentMember, StudentRelationshipSource}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopying}
-import uk.ac.warwick.tabula.scheduling.services.CourseImporter
+import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter}
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, RelationshipService}
-import uk.ac.warwick.tabula.scheduling.services.AwardImporter
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class ImportStudentCourseCommand(resultSet: ResultSet,
 		importRowTracker: ImportRowTracker,
@@ -146,29 +148,9 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		copyObjectProperty("sprStatus", sprStatusCode, studentCourseDetailsBean, toSitsStatus(sprStatusCode))
 	}
 
-	private def toRoute(routeCode: String) = {
-		if (routeCode == null || routeCode == "") {
-			null
-		} else {
-			courseAndRouteService.getRouteByCode(routeCode.toLowerCase).getOrElse(null)
-		}
-	}
-
-	def toCourse(code: String) = {
-		if (code == null || code == "") {
-			null
-		} else {
-			courseImporter.getCourseForCode(code).getOrElse(null)
-		}
-	}
-
-	def toAward(code: String) = {
-		if (code == null || code == "") {
-			null
-		} else {
-			awardImporter.getAwardForCode(code).getOrElse(null)
-		}
-	}
+	def toRoute(code: String) = code.maybeText.flatMap { courseAndRouteService.getRouteByCode }.getOrElse(null)
+	def toCourse(code: String) = code.maybeText.flatMap { courseImporter.getCourseForCode }.getOrElse(null)
+	def toAward(code: String) = code.maybeText.flatMap { awardImporter.getAwardForCode }.getOrElse(null)
 
 	def captureTutor(dept: Department) = {
 		if (dept == null)

@@ -7,8 +7,6 @@ import javax.persistence.NamedQueries
 import javax.persistence.NamedQuery
 
 @Entity
-@NamedQueries(Array(
-	new NamedQuery(name = "award.code", query = "select award from Award award where code = :code")))
 class Award {
 
 	def this(code: String = null, name: String = null) {
