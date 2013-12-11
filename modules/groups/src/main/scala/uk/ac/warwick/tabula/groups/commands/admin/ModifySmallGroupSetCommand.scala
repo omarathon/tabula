@@ -37,11 +37,6 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 	with SelfValidating
 	with BindListener {
 
-	// get these from UpdatesStudentMembership
-	//var userLookup = Wire[UserLookupService]
-	//var membershipService = Wire[AssignmentMembershipService]
-	//var academicYear: AcademicYear = AcademicYear.guessByDate(DateTime.now)
-
 	val setOption : Option[SmallGroupSet]
 	
 	// start complicated membership stuff
@@ -96,7 +91,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 		allocationMethod = set.allocationMethod
 		allowSelfGroupSwitching = set.allowSelfGroupSwitching
 		studentsCanSeeTutorName = set.studentsCanSeeTutorName
-	  studentsCanSeeOtherMembers = set.studentsCanSeeOtherMembers
+		studentsCanSeeOtherMembers = set.studentsCanSeeOtherMembers
 		defaultMaxGroupSizeEnabled = set.defaultMaxGroupSizeEnabled
 		defaultMaxGroupSize = set.defaultMaxGroupSize
 
