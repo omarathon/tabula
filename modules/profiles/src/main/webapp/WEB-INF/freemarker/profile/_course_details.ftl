@@ -99,7 +99,7 @@
 								<tbody>
 									<tr>
 										<th>Intended award</th>
-											<td>${(studentCourseDetails.awardCode)!}</td>
+											<td>${(studentCourseDetails.award.name)!}</td>
 									</tr>
 									<#if !isSelf>
 										<tr>

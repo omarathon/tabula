@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.ResultSet
-
 import org.hibernate.exception.ConstraintViolationException
 import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
-
 import ImportMemberHelpers.{opt, toLocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.PrsCode
@@ -17,6 +15,7 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopying}
 import uk.ac.warwick.tabula.scheduling.services.CourseImporter
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, RelationshipService}
+import uk.ac.warwick.tabula.scheduling.services.AwardImporter
 
 class ImportStudentCourseCommand(resultSet: ResultSet,
 		importRowTracker: ImportRowTracker,
@@ -34,12 +33,14 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
 	var courseAndRouteService = Wire.auto[CourseAndRouteService]
 	var courseImporter = Wire.auto[CourseImporter]
+	var awardImporter = Wire.auto[AwardImporter]
 
 	// Grab various codes from the result set into local variables ready to persist as objects
 	var routeCode = rs.getString("route_code")
 	var courseCode = rs.getString("course_code")
 	var sprStatusCode = rs.getString("spr_status_code")
 	var departmentCode = rs.getString("department_code")
+	var awardCode = rs.getString("award_code")
 
 	// tutor data also needs some work before it can be persisted, so store it in local variables for now:
 	var sprTutor1 = rs.getString("spr_tutor1")
@@ -59,7 +60,6 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	}
 
 	this.sprCode = rs.getString("spr_code")
-	this.awardCode = rs.getString("award_code")
 	this.beginDate = toLocalDate(rs.getDate("begin_date"))
 	this.endDate = toLocalDate(rs.getDate("end_date"))
 	this.expectedEndDate = toLocalDate(rs.getDate("expected_end_date"))
@@ -129,7 +129,6 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	private val basicStudentCourseProperties = Set(
 		"sprCode",
 		"scjCode",
-		"awardCode",
 		"beginDate",
 		"endDate",
 		"expectedEndDate",
@@ -143,6 +142,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		copyObjectProperty("department", departmentCode, studentCourseDetailsBean, toDepartment(departmentCode)) |
 		copyObjectProperty("route", routeCode, studentCourseDetailsBean, toRoute(routeCode)) |
 		copyObjectProperty("course", courseCode, studentCourseDetailsBean, toCourse(courseCode)) |
+		copyObjectProperty("award", awardCode, studentCourseDetailsBean, toAward(awardCode)) |
 		copyObjectProperty("sprStatus", sprStatusCode, studentCourseDetailsBean, toSitsStatus(sprStatusCode))
 	}
 
@@ -159,6 +159,14 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 			null
 		} else {
 			courseImporter.getCourseForCode(code).getOrElse(null)
+		}
+	}
+
+	def toAward(code: String) = {
+		if (code == null || code == "") {
+			null
+		} else {
+			awardImporter.getAwardForCode(code).getOrElse(null)
 		}
 	}
 

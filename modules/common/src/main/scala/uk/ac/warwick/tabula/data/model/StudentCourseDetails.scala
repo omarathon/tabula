@@ -159,8 +159,10 @@ trait StudentCourseProperties {
 	@JoinColumn(name = "department_id")
 	var department: Department = _
 
+	@ManyToOne
+	@JoinColumn(name = "awardCode", referencedColumnName="code")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var awardCode: String = _
+	var award: Award = _;
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var levelCode: String = _
