@@ -210,17 +210,22 @@ ul.drag-list {
 
 // fixHeaderFooter plugin CSS
 
-.floatingHeader, .floatingFooter {
+#floatedHeaderContainer {
 	position: fixed;
+	visibility: hidden;
+  	z-index: 4;
+  	position:fixed;
+	background-color:white;
+}
+
+.floatingHeader, .floatingFooter {
 	visibility: hidden;
 	background-color:white;
 	width: 100%;
  }
 
 .floatingHeader {
-	top: 28px; 	// height of the top primary-navigation
-	border-right:2px solid white;
-	padding-top:4px;
+
 }
 
 .is-smallscreen .floatingHeader {
@@ -228,13 +233,14 @@ ul.drag-list {
 }
 
 .floatingFooter {
+	position:fixed;
 	bottom: 0;
 	padding:2em 0.5em;
 }
 
 .persist-header, .persist-footer {
 	margin:0 -0.5em;
-	z-index: 3;
+	z-index: 5;
 }
 
 .persist-header {
@@ -267,6 +273,20 @@ ul.drag-list {
 .floatingHeader .record-attendance-form-header {
 	border-bottom: 1px solid #aaa;
 }
+
+.tabula-page #container .floatingHeader {
+	border-right:2px solid white;
+	padding-top:4px;
+
+	.floatingHeadTable {
+		margin-bottom: 0;
+
+		th {
+		  padding: 8px;
+		}
+  }
+}
+
 
 /* Component switcher */
 #site-header .more-link > i {

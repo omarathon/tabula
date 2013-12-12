@@ -33,53 +33,53 @@
 		<#include "_action-bar.ftl" />
 
 		<#if students??>
-	</div>
 
+	<#macro originalityReport attachment>
+	<#local r=attachment.originalityReport />
 
-<#macro originalityReport attachment>
-<#local r=attachment.originalityReport />
+				<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
+		  <div id="tip-content-${attachment.id}" class="hide">
+					<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
+					<p class="similarity-subcategories-tooltip">
+						Web: ${r.webOverlap}%<br>
+						Student papers: ${r.studentOverlap}%<br>
+						Publications: ${r.publicationOverlap}%
+					</p>
+					<p>
+						<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
+					</p>
+		  </div>
+		  <script type="text/javascript">
+			jQuery(function($){
+			  $("#tool-tip-${attachment.id}").popover({
+				placement: 'right',
+				html: true,
+				content: function(){return $('#tip-content-${attachment.id}').html();},
+				title: 'Turnitin report summary'
+			  });
+			});
+		  </script>
 
-			<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
-      <div id="tip-content-${attachment.id}" class="hide">
-				<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
-				<p class="similarity-subcategories-tooltip">
-					Web: ${r.webOverlap}%<br>
-					Student papers: ${r.studentOverlap}%<br>
-					Publications: ${r.publicationOverlap}%
-				</p>
-				<p>
-					<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
-				</p>
-      </div>
-      <script type="text/javascript">
-        jQuery(function($){
-          $("#tool-tip-${attachment.id}").popover({
-            placement: 'right',
-            html: true,
-            content: function(){return $('#tip-content-${attachment.id}').html();},
-            title: 'Turnitin report summary'
-          });
-        });
-      </script>
+	</#macro>
 
-</#macro>
+	<#function hasSubmissionOrFeedback students>
+		<#local result = [] />
+		<#list students as student>
+			<#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??>
+				<#local result = result + [student] />
+			</#if>
+		</#list>
+		<#return result />
+	</#function>
 
-<#function hasSubmissionOrFeedback students>
-	<#local result = [] />
-	<#list students as student>
-		<#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??>
-			<#local result = result + [student] />
-		</#if>
-	</#list>
-	<#return result />
-</#function>
+	<#if hasSubmissionOrFeedback(students)?size = 0>
+		<p>There are no submissions or feedbacks yet for this assignment.</p>
+	</#if>
 
-<#if hasSubmissionOrFeedback(students)?size = 0>
-	<p>There are no submissions or feedbacks yet for this assignment.</p>
-</#if>
+</div>
 
 <div class="submission-feedback-list">
-	<table id="submission-table" class="table table-bordered table-striped">
+	<table class="table table-bordered table-striped submission-table">
 		<colgroup class="student">
 			<col class="checkbox" />
 			<col class="student-info" />
@@ -121,8 +121,8 @@
 			<col class="status" />
 		</colgroup>
 
-		<div class="persist-header">
-		<thead>
+
+		<thead class="persist-header">
 			<tr>
 				<th class="check-col"><div class="check-all checkbox"><input type="checkbox" class="collection-check-all"></div></th>
 				<th class="sortable">Student</th>
@@ -166,7 +166,6 @@
 				<th class="sortable">Status</th>
 			</tr>
 		</thead>
-		</div><!-- end persist header -->
 
 		<tbody>
 			<#macro row student>
@@ -342,7 +341,7 @@
 			var fixHeaderFooter = $('.fixed-container').fixHeaderFooter({minimumScreenHeightFix: 800});
 
 
-			$("#submission-table").sortableTable({
+			$(".submission-table").sortableTable({
 				textExtraction: function(node) { 
 					var $el = $(node);
 					if ($el.hasClass('originality-report')) {

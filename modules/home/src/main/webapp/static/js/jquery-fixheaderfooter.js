@@ -3,8 +3,8 @@
 /* fixHeaderFooter plugin
 	 *
 	 * apply this to a container div
-	 * which should contain a .persist-header and/or a .persist-footer
-	 * it'll fix the header at the top when scrolled
+	 * which should contain one or more divs called .persist-header and/or a single .persist-footer
+	 * it'll fix the headers (in order) at the top when scrolled
 	 * and it'll fix the footer at the bottom.
 	 * (CSS in main.less)
 	 *
@@ -25,12 +25,19 @@
 	};
 
 	$.fn.fixHeaderFooter = function(options) {
-        var defaults = {
-            minimumScreenHeightFix : 0 // if 0 - fix areas at all screen sizes, if > 0 - only
-        };
+		var defaults = {
+			minimumScreenHeightFix : 0 // if 0 - fix areas at all screen sizes, if > 0 - only
+		};
 
-        var options = $.extend(defaults, options);
+		var options = $.extend(defaults, options);
 		var areaToPersist = this;
+
+		// create container for all the floated headers
+		var floatedHeaderContainer = $("<div id=\"floatedHeaderContainer\"></div>")
+											.width(areaToPersist.width())
+											.css("top", $('#primary-navigation').height());
+		areaToPersist.prepend(floatedHeaderContainer);
+
 
 		var updateTableHeaders = function(persistArea) {
 
@@ -39,14 +46,18 @@
 				scrollTop        = $(window).scrollTop(),
 				floatingHeader   = $(".floatingHeader", persistArea),
 				floatingFooter   = $(".floatingFooter", persistArea),
-				persistHeader    = $(".persist-header", persistArea),
 				persistFooter    = $(".persist-footer", persistArea),
-                primaryNavHeight = $('#primary-navigation').height();
+				primaryNavHeight = $('#primary-navigation').height(),
+				floatedHeaderContainer = $('#floatedHeaderContainer');
 
 			if ((scrollTop > offset.top) && (scrollTop < offset.top + el.height())) {
-				floatingHeader.visible();
+                floatedHeaderContainer.visible();
+                floatingHeader.visible();
+
 			} else {
+                floatedHeaderContainer.invisible();
 				floatingHeader.invisible();
+
 			}
 
 			// persistFooter will need to have a margin-bottom of zero
@@ -67,33 +78,87 @@
 				.addClass(className);
 		};
 
+		var cloneTableHead = function(tableHead, className) {
+			tableHead.addClass("originalTableHead");
+
+			// get the parent table to wrap our cloned thead in
+			var tableWrap = "<table class=\"floatingHeadTable " + tableHead.parent().attr("class") + "\"></table>";
+			tableHead.parent().before(tableWrap);
+
+			// get the column groups out of the table and clone them
+			var colgroups = tableHead.parent().find("colgroup").clone();
+
+			// create the floatingHeader wrapper
+			var headerWrap = $("<div class=\"persist-header " + className + "\"></div>")
+				.css("max-width", tableHead.parent().width());
+
+			// clone our thead and add it into the new floating table with the cloned colgroups,
+			// and wrap all that in our floating wrapper div
+			var newTableHead =
+				tableHead.before(tableHead.clone(true))
+					.appendTo(".floatingHeadTable")
+					.removeClass("persist-header originalTableHead")
+					.parent().prepend(colgroups)
+					.append("<tbody></tbody>")
+					.wrap(headerWrap);
+
+			// force th widths to the same as the original table
+			setTableHeadWidths($(".originalTableHead"), newTableHead);
+		}
+
+		// add all headers to the floated header container
+		var stackHeaders = function(areaToPersist) {
+			$(areaToPersist).find(".floatingHeader").each(function() {
+				$(this).appendTo($('#floatedHeaderContainer'));
+			});
+		}
+
+
+		var setTableHeadWidths = function(originalTable, newTable) {
+			var newTableHeadings = $(newTable).find("th");
+			$(originalTable).find("th").each(function(index) {
+				$(newTableHeadings[index]).width($(this).width());
+			});
+			originalTable.removeClass(".originalTableHead");
+		}
+
 
 		$(areaToPersist).each(function() {
 			if($(".persist-header").length) {
-                $(".persist-header").each(function() {
-				    cloneRow($(this, areaToPersist), "floatingHeader");
-			    });
-            };
+				$(".persist-header").each(function() {
+					if($(this).is("thead")) {
+						cloneTableHead($(this, areaToPersist), "floatingHeader");
+					} else {
+						cloneRow($(this, areaToPersist), "floatingHeader");
+					}
+				});
+
+				stackHeaders(areaToPersist);
+			};
 			if($(".persist-footer").length) cloneRow($(".persist-footer", areaToPersist), "floatingFooter");
 		});
 
 
+
+
+
+
 		$(window).scroll(function() {
-            if(isScreenToBeFixed()) {
-                updateTableHeaders(areaToPersist)
-            } else {
-                $(".floatingHeader", areaToPersist).invisible();
-                $(".floatingFooter", areaToPersist).invisible();
-            }
+			if(isScreenToBeFixed()) {
+				updateTableHeaders(areaToPersist)
+			} else {
+				$(".floatingHeader", areaToPersist).invisible();
+				$(".floatingFooter", areaToPersist).invisible();
+			}
 		});
 
 
-        // keeps the width of the floating header/footer as the parent on window resize
+		// keeps the width of the floating header/footer as the parent on window resize
 		$( window ).resize(function() {
-            $(".floatingHeader:visible").css("max-width", $(this).parent().width() );
+			$(".floatingHeader:visible").css("max-width", $(this).parent().width() );
 
-            var floatingFooter = $(".floatingFooter");
-            floatingFooter.css("max-width", floatingFooter.parent().width() );
+			var floatingFooter = $(".floatingFooter");
+			floatingFooter.css("max-width", floatingFooter.parent().width() );
 		});
 
 
@@ -105,9 +170,9 @@
 			}
 		};
 
-        var isScreenToBeFixed = function() {
-           return (options.minimumScreenHeightFix == 0 || $(window).height() > options.minimumScreenHeightFix);
-        }
+		var isScreenToBeFixed = function() {
+		   return (options.minimumScreenHeightFix == 0 || $(window).height() > options.minimumScreenHeightFix);
+		}
 
 
  		// method to fix the jumbo direction icon in place
@@ -123,7 +188,7 @@
 			}
 		};
 
-        // if the list of agents is shorter than the (viewport+fixed screen areas)
+		// if the list of agents is shorter than the (viewport+fixed screen areas)
 		// and we've scrolled past the top of the persist-area container, then fix it
 		// (otherwise don't, because the user won't be able to see all of the items in the well)
 		this.fixTargetList = function(listToFix) {
