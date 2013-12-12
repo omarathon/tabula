@@ -14,7 +14,7 @@
 			There are no students with missed monitoring points that have not been reported for the chosen period.
 		</div>
 	<#else>
-		<p>The following missed monitoring points will be reported to the Academic Office for the ${command.period} monitoring period:</p>
+		<p>The following missed monitoring points will be recorded in SITS for the ${command.period} monitoring period:</p>
 
 		<table class="table table-bordered table-striped table-condensed">
 			<thead>
