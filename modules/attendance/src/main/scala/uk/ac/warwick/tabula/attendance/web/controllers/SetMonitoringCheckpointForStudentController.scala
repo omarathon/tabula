@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import scala.Array
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPoint}
 import uk.ac.warwick.tabula.web.Mav
 import javax.validation.Valid
 import org.springframework.validation.Errors
@@ -35,7 +35,7 @@ class SetMonitoringCheckpointForStudentController extends AttendanceController {
 	def form(@ModelAttribute command: SetMonitoringCheckpointForStudentCommand, department: Department): Mav = {
 		Mav("home/record_point",
 				"command" -> command,
-				"allCheckpointStates" -> MonitoringCheckpointState.values,
+				"allCheckpointStates" -> AttendanceState.values,
 				"returnTo" -> getReturnTo(Routes.department.view(department)))
 	}
 

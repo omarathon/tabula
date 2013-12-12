@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.{TermServiceComponent, MonitoringPointServiceComponent}
 import uk.ac.warwick.tabula.AcademicYear
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPoint}
 
 case class StudentPointsData(
 	student: StudentMember,
@@ -40,7 +40,7 @@ trait BuildStudentPointsData extends MonitoringPointServiceComponent with TermSe
 					}.toMap
 				}
 				val unrecorded = pointsByTermWithCheckpointString.values.flatMap(_.values).count(_ == "late")
-				val missed = pointsByTermWithCheckpointString.values.flatMap(_.values).count(_ == MonitoringCheckpointState.MissedUnauthorised.dbValue)
+				val missed = pointsByTermWithCheckpointString.values.flatMap(_.values).count(_ == AttendanceState.MissedUnauthorised.dbValue)
 				StudentPointsData(student, pointsByTermWithCheckpointString, unrecorded, missed)
 			}.getOrElse(
 				StudentPointsData(student, Map(), 0, 0)

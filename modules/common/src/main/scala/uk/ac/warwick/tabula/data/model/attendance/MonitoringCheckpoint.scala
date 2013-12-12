@@ -22,8 +22,8 @@ class MonitoringCheckpoint extends GeneratedId {
 	var studentCourseDetail: StudentCourseDetails = _
 	
 	@NotNull
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.MonitoringCheckpointStateUserType")
-	var state: MonitoringCheckpointState = _
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.AttendanceStateUserType")
+	var state: AttendanceState = _
 	
 	var updatedDate: DateTime = _
 	

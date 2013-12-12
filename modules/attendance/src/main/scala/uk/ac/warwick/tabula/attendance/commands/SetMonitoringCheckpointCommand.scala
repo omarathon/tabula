@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPointSet, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPointSet, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -25,7 +25,7 @@ object SetMonitoringCheckpointCommand {
 			with ComposableCommand[Seq[MonitoringCheckpoint]]
 			with SetMonitoringCheckpointCommandValidation
 			with SetMonitoringPointDescription
-			with SetMonitoringCheckpointState
+			with SetAttendanceState
 			with AutowiringMonitoringPointServiceComponent
 			with AutowiringSecurityServiceComponent
 			with AutowiringTermServiceComponent
@@ -34,7 +34,7 @@ object SetMonitoringCheckpointCommand {
 abstract class SetMonitoringCheckpointCommand(val department: Department, val templateMonitoringPoint: MonitoringPoint, val user: CurrentUser, val routes: JList[Route])
 	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with BindListener {
 
-	self: SetMonitoringCheckpointState with MonitoringPointServiceComponent with ProfileServiceComponent =>
+	self: SetAttendanceState with MonitoringPointServiceComponent with ProfileServiceComponent =>
 
 	def populate() {
 		// Get students matching the filter
@@ -79,7 +79,7 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 }
 
 trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
-	self: SetMonitoringCheckpointState with SecurityServiceComponent with TermServiceComponent with MonitoringPointServiceComponent =>
+	self: SetAttendanceState with SecurityServiceComponent with TermServiceComponent with MonitoringPointServiceComponent =>
 
 	def validate(errors: Errors) {
 		val academicYear = templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear
@@ -100,7 +100,7 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 					if (point.sentToAcademicOffice) {
 						errors.rejectValue("", "monitoringCheckpoint.sentToAcademicOffice")
 					}
-					if (currentAcademicWeek < point.validFromWeek && !(state == null || state == MonitoringCheckpointState.MissedAuthorised)) {
+					if (currentAcademicWeek < point.validFromWeek && !(state == null || state == AttendanceState.MissedAuthorised)) {
 						errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
 					}
 				}
@@ -112,7 +112,7 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 }
 
 trait SetMonitoringCheckpointCommandPermissions extends RequiresPermissionsChecking with PermissionsChecking {
-	self: SetMonitoringCheckpointState =>
+	self: SetAttendanceState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
 		if (routesForPermission(user, Permissions.MonitoringPoints.View, department).size == department.routes.asScala.size)
@@ -124,7 +124,7 @@ trait SetMonitoringCheckpointCommandPermissions extends RequiresPermissionsCheck
 
 
 trait SetMonitoringPointDescription extends Describable[Seq[MonitoringCheckpoint]] {
-	self: SetMonitoringCheckpointState =>
+	self: SetAttendanceState =>
 
 	override lazy val eventName = "SetMonitoringCheckpoint"
 
@@ -141,15 +141,15 @@ trait SetMonitoringPointDescription extends Describable[Seq[MonitoringCheckpoint
 }
 
 
-trait SetMonitoringCheckpointState extends FiltersStudents with PermissionsAwareRoutes {
+trait SetAttendanceState extends FiltersStudents with PermissionsAwareRoutes {
 	def templateMonitoringPoint: MonitoringPoint
 	def department: Department
 	def user: CurrentUser
 	def routes: JList[Route]
 
-	var studentsState: JMap[StudentMember, JMap[MonitoringPoint, MonitoringCheckpointState]] =
-		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, MonitoringCheckpointState] }.asJava
-	var studentsStateAsScala: Map[StudentMember, Map[MonitoringPoint, MonitoringCheckpointState]] = _
+	var studentsState: JMap[StudentMember, JMap[MonitoringPoint, AttendanceState]] =
+		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, AttendanceState] }.asJava
+	var studentsStateAsScala: Map[StudentMember, Map[MonitoringPoint, AttendanceState]] = _
 
 	var courseTypes: JList[CourseType] = JArrayList()
 	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()

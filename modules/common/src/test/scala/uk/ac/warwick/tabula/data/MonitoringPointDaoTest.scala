@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase, Fixtures}
 import org.junit.Before
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringCheckpoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPointSet}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
@@ -89,7 +89,7 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 			checkpoint.studentCourseDetail = student1.freshStudentCourseDetails(0)
 
 			checkpoint.updatedBy = "foo"
-			checkpoint.state = MonitoringCheckpointState.fromCode("attended")
+			checkpoint.state = AttendanceState.fromCode("attended")
 			monitoringPointDao.saveOrUpdate(checkpoint)
 
 			monitoringPointDao.getCheckpoint(monitoringPoint1, student1) should be (Option(checkpoint))
@@ -117,7 +117,7 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 			checkpoint.studentCourseDetail = student1.freshStudentCourseDetails(0)
 
 			checkpoint.updatedBy = "foo"
-			checkpoint.state = MonitoringCheckpointState.fromCode("attended")
+			checkpoint.state = AttendanceState.fromCode("attended")
 			monitoringPointDao.saveOrUpdate(checkpoint)
 
 			monitoringPointDao.getCheckpoint(monitoringPoint1, student1) should be (Option(checkpoint))

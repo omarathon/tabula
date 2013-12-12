@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, CurrentUser, TestBase, Mockito}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringCheckpoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.data.model.{Department, Route}
 import uk.ac.warwick.tabula.JavaImports.{JHashMap, JArrayList}
 import uk.ac.warwick.tabula.services._
@@ -18,7 +18,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 	val thisProfileService = mock[ProfileService]
 	val thisMonitoringPointService = mock[MonitoringPointService]
 
-	trait CommandTestSupport extends SetMonitoringCheckpointState with SetMonitoringCheckpointCommandValidation
+	trait CommandTestSupport extends SetAttendanceState with SetMonitoringCheckpointCommandValidation
 		with MonitoringPointServiceComponent with ProfileServiceComponent with SecurityServiceComponent with TermServiceComponent {
 		val monitoringPointService = thisMonitoringPointService
 		val profileService = thisProfileService
@@ -92,7 +92,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
 		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
 		command.studentsState = JHashMap(
-			student1 -> JHashMap(pointSet2Point1 -> MonitoringCheckpointState.Attended.asInstanceOf[MonitoringCheckpointState])
+			student1 -> JHashMap(pointSet2Point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
 		)
 		var binder = new WebDataBinder(command, "command")
 		binder.setConversionService(conversionService)
@@ -107,7 +107,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
 		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
 		command.studentsState = JHashMap(
-			student1 -> JHashMap(pointSet1Point1 -> MonitoringCheckpointState.Attended.asInstanceOf[MonitoringCheckpointState])
+			student1 -> JHashMap(pointSet1Point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
 		)
 		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns false
 		var binder = new WebDataBinder(command, "command")
@@ -123,7 +123,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
 		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
 		command.studentsState = JHashMap(
-			student1 -> JHashMap(pointSet1Point1 -> MonitoringCheckpointState.Attended.asInstanceOf[MonitoringCheckpointState])
+			student1 -> JHashMap(pointSet1Point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
 		)
 		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns true
 		pointSet1Point1.sentToAcademicOffice = true
@@ -141,7 +141,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
 		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
 		command.studentsState = JHashMap(
-			student1 -> JHashMap(pointSet1Point1 -> MonitoringCheckpointState.Attended.asInstanceOf[MonitoringCheckpointState])
+			student1 -> JHashMap(pointSet1Point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
 		)
 		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns true
 		pointSet1Point1.validFromWeek = 10
@@ -159,7 +159,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
 		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
 		command.studentsState = JHashMap(
-			student1 -> JHashMap(pointSet1Point1 -> MonitoringCheckpointState.MissedUnauthorised.asInstanceOf[MonitoringCheckpointState])
+			student1 -> JHashMap(pointSet1Point1 -> AttendanceState.MissedUnauthorised.asInstanceOf[AttendanceState])
 		)
 		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns true
 		pointSet1Point1.validFromWeek = 10
@@ -177,7 +177,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
 		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
 		command.studentsState = JHashMap(
-			student1 -> JHashMap(pointSet1Point1 -> MonitoringCheckpointState.MissedAuthorised.asInstanceOf[MonitoringCheckpointState])
+			student1 -> JHashMap(pointSet1Point1 -> AttendanceState.MissedAuthorised.asInstanceOf[AttendanceState])
 		)
 		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns true
 		pointSet1Point1.validFromWeek = 10
@@ -194,7 +194,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
 		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
 		command.studentsState = JHashMap(
-			student1 -> JHashMap(pointSet1Point1 -> null.asInstanceOf[MonitoringCheckpointState])
+			student1 -> JHashMap(pointSet1Point1 -> null.asInstanceOf[AttendanceState])
 		)
 		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns true
 		pointSet1Point1.validFromWeek = 10

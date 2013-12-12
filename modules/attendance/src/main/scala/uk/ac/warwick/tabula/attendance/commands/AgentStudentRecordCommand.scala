@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.services.{TermServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent, AutowiringTermServiceComponent}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
@@ -63,7 +63,7 @@ trait AgentStudentRecordValidation extends SelfValidating {
 			if (point.sentToAcademicOffice) {
 				errors.rejectValue("", "monitoringCheckpoint.sentToAcademicOffice")
 			}
-			if (currentAcademicWeek < point.validFromWeek && !(state == null || state == MonitoringCheckpointState.MissedAuthorised)) {
+			if (currentAcademicWeek < point.validFromWeek && !(state == null || state == AttendanceState.MissedAuthorised)) {
 				errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
 			}
 			errors.popNestedPath()
@@ -106,7 +106,7 @@ trait AgentStudentRecordCommandState extends GroupMonitoringPointsByTerm with Mo
 	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
 	lazy val pointSet = monitoringPointService.getPointSetForStudent(student, academicYear).getOrElse(throw new ItemNotFoundException)
 
-	var checkpointMap: JMap[MonitoringPoint, MonitoringCheckpointState] =  JHashMap()
+	var checkpointMap: JMap[MonitoringPoint, AttendanceState] =  JHashMap()
 
 	def monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, pointSet.academicYear)
 }

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{CommandInternal, Unaudited, ReadOnly, ComposableCommand}
 import uk.ac.warwick.tabula.services.{TermServiceComponent, MonitoringPointServiceComponent, RelationshipServiceComponent, AutowiringTermServiceComponent, AutowiringMonitoringPointServiceComponent, AutowiringRelationshipServiceComponent}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringCheckpointState
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import scala.collection.JavaConverters._
@@ -56,7 +56,7 @@ class ViewAgentsCommand(val department: Department, val relationshipType: Studen
 						})
 					}}
 					val unrecorded = studentCheckpoints.count(_ == "late")
-					val missed = studentCheckpoints.count(_ == MonitoringCheckpointState.MissedUnauthorised.dbValue)
+					val missed = studentCheckpoints.count(_ == AttendanceState.MissedUnauthorised.dbValue)
 					(unrecorded, missed)
 				}.getOrElse((0,0))
 			}

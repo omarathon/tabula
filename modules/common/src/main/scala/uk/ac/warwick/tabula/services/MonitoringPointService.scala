@@ -5,7 +5,7 @@ import scala.collection.JavaConverters.asScalaBufferConverter
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent, AutowiringMonitoringPointDaoComponent, MonitoringPointDaoComponent}
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringCheckpointState, MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, AttendanceState, MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import org.joda.time.DateTime
@@ -36,18 +36,18 @@ trait MonitoringPointService {
 	def getTemplateById(id: String) : Option[MonitoringPointSetTemplate]
 	def deleteTemplate(template: MonitoringPointSetTemplate)
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
-	def getChecked(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[MonitoringCheckpointState]]]
+	def getChecked(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[AttendanceState]]]
 	def deleteCheckpoint(student: StudentMember, point: MonitoringPoint): Unit
 	def saveOrUpdateCheckpoint(
 		student: StudentMember,
 		point: MonitoringPoint,
-		state: MonitoringCheckpointState,
+		state: AttendanceState,
 		user: CurrentUser
 	) : MonitoringCheckpoint
 	def saveOrUpdateCheckpoint(
 		student: StudentMember,
 		point: MonitoringPoint,
-		state: MonitoringCheckpointState,
+		state: AttendanceState,
 		member: Member
 	) : MonitoringCheckpoint
 	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int
@@ -99,7 +99,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 
 	def countCheckpointsForPoint(point: MonitoringPoint) = monitoringPointDao.countCheckpointsForPoint(point)
 
-	def getChecked(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[MonitoringCheckpointState]]] =
+	def getChecked(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[AttendanceState]]] =
 		members.map(member =>
 			member ->
 			set.points.asScala.map(point =>
@@ -120,20 +120,20 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def saveOrUpdateCheckpoint(
 		student: StudentMember,
 		point: MonitoringPoint,
-		state: MonitoringCheckpointState,
+		state: AttendanceState,
 		user: CurrentUser
 	) : MonitoringCheckpoint = saveOrUpdateCheckpointForUser(student, point, state, user.apparentId)
 
 	def saveOrUpdateCheckpoint(
 		student: StudentMember,
 		point: MonitoringPoint,
-		state: MonitoringCheckpointState,
+		state: AttendanceState,
 		member: Member
 	) : MonitoringCheckpoint =
 		saveOrUpdateCheckpointForUser(student, point, state, member.userId)
 
 	private def saveOrUpdateCheckpointForUser(student: StudentMember,
-		point: MonitoringPoint,	state: MonitoringCheckpointState,	usercode: String
+		point: MonitoringPoint,	state: AttendanceState,	usercode: String
 	) : MonitoringCheckpoint = {
 		val checkpoint = monitoringPointDao.getCheckpoint(point, student).getOrElse({
 			val newCheckpoint = new MonitoringCheckpoint
@@ -272,7 +272,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 						val checkpoint = new MonitoringCheckpoint
 						checkpoint.point = point
 						checkpoint.studentCourseDetail = student.mostSignificantCourseDetails.getOrElse(throw new IllegalArgumentException)
-						checkpoint.state = MonitoringCheckpointState.Attended
+						checkpoint.state = AttendanceState.Attended
 						checkpoint.autoCreated = true
 						checkpoint.updatedDate = DateTime.now
 						checkpoint.updatedBy = meeting.relationship.agentMember match {

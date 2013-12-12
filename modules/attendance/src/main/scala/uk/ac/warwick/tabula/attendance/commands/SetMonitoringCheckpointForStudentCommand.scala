@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPointSet, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPointSet, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, MonitoringPointServiceComponent, AutowiringMonitoringPointServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent}
@@ -85,7 +85,7 @@ trait SetMonitoringCheckpointForStudentCommandValidation extends SelfValidating 
 					if (point.sentToAcademicOffice) {
 						errors.rejectValue("", "monitoringCheckpoint.sentToAcademicOffice")
 					}
-					if (currentAcademicWeek < point.validFromWeek && !(state == null || state == MonitoringCheckpointState.MissedAuthorised)) {
+					if (currentAcademicWeek < point.validFromWeek && !(state == null || state == AttendanceState.MissedAuthorised)) {
 						errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
 					}
 				}
@@ -129,7 +129,7 @@ trait SetMonitoringCheckpointForStudentState {
 	lazy val templateMonitoringPoint = monitoringPoint
 
 	var members: Seq[StudentMember] = _
-	var studentsState: JMap[StudentMember, JMap[MonitoringPoint, MonitoringCheckpointState]] =
-		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, MonitoringCheckpointState] }.asJava
+	var studentsState: JMap[StudentMember, JMap[MonitoringPoint, AttendanceState]] =
+		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, AttendanceState] }.asJava
 	var set = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
 }
