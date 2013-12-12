@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConverters.seqAsJavaListConverter
-
+import scala.collection.JavaConverters._
 import org.hibernate.annotations.{AccessType, Filter, FilterDef}
 import org.springframework.stereotype.Service
-
 import javax.persistence.{Entity, Table}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, JList}
@@ -13,6 +11,9 @@ import uk.ac.warwick.tabula.data.model.{ModuleRegistration, UserGroup}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupSet}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
+import uk.ac.warwick.tabula.data.model.UnspecifiedTypeUserGroup
+import uk.ac.warwick.tabula.commands.Appliable
 
 trait SmallGroupServiceComponent {
 	def smallGroupService: SmallGroupService
@@ -100,15 +101,14 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			    smallGroup <- smallGroupDao.findByModuleAndYear(modReg.module, modReg.academicYear)
 			    if (smallGroup.students.includesUser(user))
 			} {
-			    smallGroup.students match {
-			       case uGroup: UserGroup => {
-			         uGroup.remove(user)
-			         userGroupDao.saveOrUpdate(uGroup)
-			       }
-			       case _ => logger.warn("Could not remove user from group - userGroup " + smallGroup.students + " was not of type UserGroup as expected.")
-			    }
+				// Wrap this in a sub-command so that we can do auditing
+				userGroupDao.saveOrUpdate(removeFromGroupCommand(user, smallGroup).apply().asInstanceOf[UserGroup])
 			}
 		}
+	}
+	
+	private def removeFromGroupCommand(user: User, smallGroup: SmallGroup): Appliable[UnspecifiedTypeUserGroup] = {
+		new RemoveUserFromSmallGroupCommand(user, smallGroup)
 	}
 }
 

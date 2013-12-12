@@ -129,7 +129,7 @@
 							</li>
 							<li>
 								<h6>Intended award and type</h6>
-								${(studentCourseDetails.awardCode)!} (${(studentCourseDetails.route.degreeType.toString)!})
+								${(studentCourseDetails.award.name)!} (${(studentCourseDetails.route.degreeType.toString)!})
 							</li>
 							<li>
 								<h6>Attendance</h6>

@@ -167,7 +167,7 @@
 				</@form.label>
 				<@f.errors path="autoGroupDeregistration" cssClass="error" />
 				<div class="help-block">
-					Students will be removed from the group when they deregister from the associated module.
+					Students will be removed from a group when they deregister from the associated module, or are manually removed from the set of groups.
 				</div>
 			</@form.field>
 		</@form.row>
