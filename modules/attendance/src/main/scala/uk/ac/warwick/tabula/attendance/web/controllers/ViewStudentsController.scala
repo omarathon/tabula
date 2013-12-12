@@ -9,6 +9,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
 import uk.ac.warwick.tabula.attendance.commands.{ViewStudentsState, ViewStudentsResults, ViewStudentsCommand}
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.JavaImports._
 
 @Controller
 @RequestMapping(value=Array("/view/{department}/students"))
@@ -24,13 +25,19 @@ class ViewStudentsController extends AttendanceController {
 	def filter(
 		@Valid @ModelAttribute("command") cmd: Appliable[ViewStudentsResults] with ViewStudentsState,
 		errors: Errors,
-		@RequestParam(value="updatedStudent", required = false) updatedStudent: StudentMember
+		@RequestParam(value="updatedStudent", required = false) updatedStudent: StudentMember,
+		@RequestParam(value="reports", required = false) reports: JInteger,
+		@RequestParam(value="monitoringPeriod", required = false) monitoringPeriod: String
 	) = {
 		if (errors.hasErrors) {
 			if (ajax)
 				Mav("home/view_students_results").noLayout()
 			else
-				Mav("home/view_students_filter", "updatedStudent" -> updatedStudent).crumbs(Breadcrumbs.ViewDepartment(cmd.department))
+				Mav("home/view_students_filter",
+					"updatedStudent" -> updatedStudent,
+					"reports" -> reports,
+					"monitoringPeriod" -> monitoringPeriod
+				).crumbs(Breadcrumbs.ViewDepartment(cmd.department))
 		} else {
 			val results = cmd.apply()
 
@@ -38,7 +45,6 @@ class ViewStudentsController extends AttendanceController {
 				Mav("home/view_students_results",
 					"students" -> results.students,
 					"totalResults" -> results.totalResults,
-					"updatedStudent" -> updatedStudent,
 					"necessaryTerms" -> results.students.flatMap{ data => data.pointsByTerm.keySet }.distinct
 				).noLayout()
 			else
@@ -46,6 +52,8 @@ class ViewStudentsController extends AttendanceController {
 					"students" -> results.students,
 					"totalResults" -> results.totalResults,
 					"updatedStudent" -> updatedStudent,
+					"reports" -> reports,
+					"monitoringPeriod" -> monitoringPeriod,
 					"necessaryTerms" -> results.students.flatMap{ data => data.pointsByTerm.keySet }.distinct
 				).crumbs(Breadcrumbs.ViewDepartment(cmd.department))
 		}

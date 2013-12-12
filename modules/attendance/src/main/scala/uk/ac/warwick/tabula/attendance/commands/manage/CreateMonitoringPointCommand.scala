@@ -57,13 +57,16 @@ trait CreateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 			case _ =>
 		}
 
-		if (set.points.asScala.count(p =>
+		if (anyStudentsReportedForThisTerm(set, validFromWeek, academicYear)) {
+			errors.rejectValue("validFromWeek", "monitoringPoint.hasReportedCheckpoints.add")
+		} else if (set.points.asScala.count(p =>
 			p.name == name && p.validFromWeek == validFromWeek && p.requiredFromWeek == requiredFromWeek
 		) > 0) {
 			errors.rejectValue("name", "monitoringPoint.name.exists")
 			errors.rejectValue("validFromWeek", "monitoringPoint.name.exists")
 		}
 	}
+
 }
 
 trait CreateMonitoringPointPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
