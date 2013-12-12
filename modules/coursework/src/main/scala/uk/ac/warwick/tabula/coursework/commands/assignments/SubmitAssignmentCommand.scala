@@ -138,11 +138,22 @@ class SubmitAssignmentCommand(
 		submission
 	}
 
-	override def describe(d: Description) = d.assignment(assignment).properties()
+	override def describe(d: Description) =	d.assignment(assignment).properties()
 
 	override def describeResult(d: Description, s: Submission) = {
 		d.assignment(assignment).properties().property("submission" -> s.id)
 		if (s.isNoteworthy)
 			d.assignment(assignment).properties().property("submissionIsNoteworthy" -> true)
 	}
+
+
+
+}
+
+class ViewOnlineFeedbackCommand(val assignment: Assignment) extends Command[Feedback] {
+
+	override def describe(d: Description) =	d.assignment(assignment).properties()
+
+	override def applyInternal(): Feedback = null
+
 }

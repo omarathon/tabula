@@ -7,8 +7,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import javax.validation.Valid
-import uk.ac.warwick.tabula.coursework.commands.assignments.SendSubmissionReceiptCommand
-import uk.ac.warwick.tabula.coursework.commands.assignments.SubmitAssignmentCommand
+import uk.ac.warwick.tabula.coursework.commands.assignments.{ViewOnlineFeedbackCommand, SendSubmissionReceiptCommand, SubmitAssignmentCommand, SendSubmissionNotifyCommand}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.coursework.web.Routes
@@ -18,7 +17,6 @@ import uk.ac.warwick.tabula.SubmitPermissionDeniedException
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.FeedbackDao
-import uk.ac.warwick.tabula.coursework.commands.assignments.SendSubmissionNotifyCommand
 import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, FreemarkerTextRenderer, PDFView}
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
@@ -30,8 +28,8 @@ import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
 @RequestMapping(Array("/module/{module}/{assignment}"))
 class AssignmentController extends CourseworkController {
 
-	var submissionService = Wire.auto[SubmissionService]
-	var feedbackDao = Wire.auto[FeedbackDao]
+	var submissionService = Wire[SubmissionService]
+	var feedbackDao = Wire[FeedbackDao]
 
 	hideDeletedItems
 
@@ -40,10 +38,17 @@ class AssignmentController extends CourseworkController {
 	private def getFeedback(assignment: Assignment, user: CurrentUser) =
 		feedbackDao.getFeedbackByUniId(assignment, user.universityId).filter(_.released)
 
-	@ModelAttribute def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) =
+	@ModelAttribute def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
+
+		val feedback = getFeedback(assignment, user)
+
+		new ViewOnlineFeedbackCommand(assignment).apply()
+
 		restrictedBy {
-			getFeedback(assignment, user).isDefined
+			feedback.isDefined
 		} (new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)).orNull
+
+	}
 
 	/**
 	 * Sitebuilder-embeddable view.
