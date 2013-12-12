@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase, Fixtures}
+import uk.ac.warwick.tabula.{Mockito, AcademicYear, PersistenceTestBase, Fixtures}
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringCheckpoint, MonitoringPointSet}
 import org.joda.time.DateTime
@@ -8,8 +8,9 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.services.MonitoringPointService
 
-class MonitoringPointDaoTest extends PersistenceTestBase {
+class MonitoringPointDaoTest extends PersistenceTestBase with Mockito {
 	val thisAcademicYear = AcademicYear(2013)
 
 	val monitoringPointDao = new MonitoringPointDaoImpl
@@ -65,6 +66,9 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 	monitoringPointSet5.year = 1
 	monitoringPointSet5.createdDate = DateTime.now()
 
+	val monitoringPointService = smartMock[MonitoringPointService]
+
+
 	@Before
 	def setup() {
 		monitoringPointDao.sessionFactory = sessionFactory
@@ -84,7 +88,12 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 			memberDao.saveOrUpdate(student1)
 			memberDao.saveOrUpdate(student2)
 
+
 			val checkpoint = new MonitoringCheckpoint
+
+			monitoringPointService.studentAlreadyReportedThisTerm(student1, monitoringPoint1) returns (false)
+
+			checkpoint.monitoringPointService = monitoringPointService
 			checkpoint.point = monitoringPoint1
 			checkpoint.studentCourseDetail = student1.freshStudentCourseDetails(0)
 
@@ -112,6 +121,9 @@ class MonitoringPointDaoTest extends PersistenceTestBase {
 			memberDao.saveOrUpdate(student2)
 
 			val checkpoint = new MonitoringCheckpoint
+
+			monitoringPointService.studentAlreadyReportedThisTerm(student1, monitoringPoint1) returns (false)
+			checkpoint.monitoringPointService = monitoringPointService
 
 			checkpoint.point = monitoringPoint1
 			checkpoint.studentCourseDetail = student1.freshStudentCourseDetails(0)

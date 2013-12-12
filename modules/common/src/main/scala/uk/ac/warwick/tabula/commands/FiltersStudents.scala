@@ -125,4 +125,14 @@ trait FiltersStudents extends ProfileServiceComponent {
 		else
 			result.getQuery
 	}
+	def filterMap = {
+		Map(
+			"courseTypes" -> courseTypes.asScala.map{_.code}.mkString(","),
+			"routes" -> routes.asScala.map{_.code}.mkString(","),
+			"modesOfAttendance" -> modesOfAttendance.asScala.map{_.code}.mkString(","),
+			"yearsOfStudy" -> yearsOfStudy.asScala.mkString(","),
+			"sprStatuses" -> sprStatuses.asScala.map{_.code}.mkString(","),
+			"modules" -> modules.asScala.map{_.code}.mkString(",")
+		)
+	}
 }

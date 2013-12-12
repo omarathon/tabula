@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.permissions.Permissions._
-import uk.ac.warwick.tabula.permissions.{Permissions, PermissionsSelector}
+import uk.ac.warwick.tabula.permissions.PermissionsSelector
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.JavaImports._
 
@@ -28,7 +28,7 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 
 		Assignment.ImportFromExternalSystem,
 
-		FeedbackTemplate.Create,
+		FeedbackTemplate.		Create,
 		FeedbackTemplate.Read,
 		FeedbackTemplate.Update,
 		FeedbackTemplate.Delete,
@@ -39,6 +39,8 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		MarkingWorkflow.Delete,
 
 		Department.ManageProfiles,
+
+		MonitoringPoints.Report,
 
 		Profiles.MeetingRecord.ReadDetails(PermissionsSelector.Any[StudentRelationshipType]),
 

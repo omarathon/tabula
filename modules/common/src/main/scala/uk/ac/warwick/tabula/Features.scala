@@ -72,6 +72,7 @@ abstract class Features {
 	@Value("${features.profiles.memberNotes:true}") var profilesMemberNotes = defaults.profilesMemberNotes
 	@Value("${features.smallGroupTeaching.recordAttendance:true}") var smallGroupTeachingRecordAttendance = defaults.smallGroupTeachingRecordAttendance
 	@Value("${features.attendanceMonitoring.meetingPointType:true}") var attendanceMonitoringMeetingPointType = defaults.attendanceMonitoringMeetingPointType
+	@Value("${features.attendanceMonitoring.report:false}") var attendanceMonitoringReport = defaults.attendanceMonitoringReport
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -132,6 +133,7 @@ class FeaturesMessage {
 	@BeanProperty var profilesMemberNotes = true
 	@BeanProperty var smallGroupTeachingRecordAttendance = true
 	@BeanProperty var attendanceMonitoringMeetingPointType = false
+	@BeanProperty var attendanceMonitoringReport = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
