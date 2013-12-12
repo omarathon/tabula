@@ -15,8 +15,9 @@ import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.{CourseType, Department, Member, StudentCourseDetails, StudentCourseProperties, StudentMember, StudentRelationshipSource}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopying}
-import uk.ac.warwick.tabula.scheduling.services.CourseImporter
+import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter}
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, RelationshipService}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 class ImportStudentCourseCommand(resultSet: ResultSet,
 		importRowTracker: ImportRowTracker,
@@ -34,12 +35,14 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
 	var courseAndRouteService = Wire.auto[CourseAndRouteService]
 	var courseImporter = Wire.auto[CourseImporter]
+	var awardImporter = Wire.auto[AwardImporter]
 
 	// Grab various codes from the result set into local variables ready to persist as objects
 	var routeCode = rs.getString("route_code")
 	var courseCode = rs.getString("course_code")
 	var sprStatusCode = rs.getString("spr_status_code")
 	var departmentCode = rs.getString("department_code")
+	var awardCode = rs.getString("award_code")
 
 	// tutor data also needs some work before it can be persisted, so store it in local variables for now:
 	var sprTutor1 = rs.getString("spr_tutor1")
@@ -59,7 +62,6 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	}
 
 	this.sprCode = rs.getString("spr_code")
-	this.awardCode = rs.getString("award_code")
 	this.beginDate = toLocalDate(rs.getDate("begin_date"))
 	this.endDate = toLocalDate(rs.getDate("end_date"))
 	this.expectedEndDate = toLocalDate(rs.getDate("expected_end_date"))
@@ -129,7 +131,6 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	private val basicStudentCourseProperties = Set(
 		"sprCode",
 		"scjCode",
-		"awardCode",
 		"beginDate",
 		"endDate",
 		"expectedEndDate",
@@ -143,24 +144,13 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		copyObjectProperty("department", departmentCode, studentCourseDetailsBean, toDepartment(departmentCode)) |
 		copyObjectProperty("route", routeCode, studentCourseDetailsBean, toRoute(routeCode)) |
 		copyObjectProperty("course", courseCode, studentCourseDetailsBean, toCourse(courseCode)) |
+		copyObjectProperty("award", awardCode, studentCourseDetailsBean, toAward(awardCode)) |
 		copyObjectProperty("sprStatus", sprStatusCode, studentCourseDetailsBean, toSitsStatus(sprStatusCode))
 	}
 
-	private def toRoute(routeCode: String) = {
-		if (routeCode == null || routeCode == "") {
-			null
-		} else {
-			courseAndRouteService.getRouteByCode(routeCode.toLowerCase).getOrElse(null)
-		}
-	}
-
-	def toCourse(code: String) = {
-		if (code == null || code == "") {
-			null
-		} else {
-			courseImporter.getCourseForCode(code).getOrElse(null)
-		}
-	}
+	def toRoute(code: String) = code.toLowerCase.maybeText.flatMap { courseAndRouteService.getRouteByCode }.getOrElse(null)
+	def toCourse(code: String) = code.maybeText.flatMap { courseImporter.getCourseForCode }.getOrElse(null)
+	def toAward(code: String) = code.maybeText.flatMap { awardImporter.getAwardForCode }.getOrElse(null)
 
 	def captureTutor(dept: Department) = {
 		if (dept == null)
