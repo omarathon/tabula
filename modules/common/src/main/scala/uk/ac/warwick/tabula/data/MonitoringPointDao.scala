@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.data.model.{Route, StudentMember}
 import org.hibernate.criterion.{Projections, Order}
 import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.criterion.Restrictions._
-import scala.Some
 import uk.ac.warwick.tabula.services.TermService
 
 trait MonitoringPointDaoComponent {
@@ -275,7 +274,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			and mc.studentCourseDetail = s.mostSignificantCourse
 			and mps.academicYear = :academicYear
 			and scyd.academicYear = mps.academicYear
-			and mc.state = 'unauthorised'
+			and mc._state = 'unauthorised'
 			and mp.validFromWeek >= :startWeek
 			and mp.validFromWeek <= :endWeek
 			and (

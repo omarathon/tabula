@@ -26,10 +26,13 @@ trait CanPointBeChanged extends MonitoringPointServiceComponent with TermService
 
 	def anyStudentsReportedForThisTerm (set: MonitoringPointSet, validFromWeek: Int, academicYear: AcademicYear): Boolean = {
 		val checkpoints = monitoringPointService.getCheckpointsByStudent(set.points.asScala)
-		if (checkpoints.isEmpty) return false
-		val studentsWithCheckpoints = checkpoints.map { case (student , checkpoint) => student}
-		monitoringPointService.findReports(studentsWithCheckpoints, academicYear,
-			termService.getTermFromAcademicWeek(validFromWeek, academicYear).getTermTypeAsString).size > 0
+		if (checkpoints.isEmpty) false
+		else {
+			val studentsWithCheckpoints = checkpoints.map { case (student , checkpoint) => student}
+			monitoringPointService.findReports(studentsWithCheckpoints, academicYear,
+				termService.getTermFromAcademicWeek(validFromWeek, academicYear).getTermTypeAsString).size > 0
+		}
+
 	}
 
 }

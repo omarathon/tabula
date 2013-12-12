@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import org.joda.time.DateTime
 import uk.ac.warwick.util.termdates.Term
-import scala.Some
 
 trait MonitoringPointServiceComponent {
 	def monitoringPointService: MonitoringPointService
