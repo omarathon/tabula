@@ -65,7 +65,7 @@ object ExportAttendanceToSitsService {
 	final val PushToSITSSql = """
 		insert into intuit.srs_sab
 		(SAB_STUC,SAB_SEQ2,SAB_RAAC,SAB_ENDD,SAB_AYRC,SAB_UDF2,SAB_UDF3,SAB_UDF4,SAB_UDF5,SAB_UDFJ)
-		values (:studentId, :counter,'UNAUTH', :now, :academicYear, :deptCode, :courseCode, :recorder, :missedPoints, :monitoringPeriod )
+		values (:studentId, :counter, 'UNAUTH', :now, :academicYear, :deptCode, :courseCode, :recorder, :missedPoints, :monitoringPeriod )
 	"""
 
 	class ExportAttendanceToSitsCountQuery(ds: DataSource) extends NamedParameterJdbcTemplate(ds) {
