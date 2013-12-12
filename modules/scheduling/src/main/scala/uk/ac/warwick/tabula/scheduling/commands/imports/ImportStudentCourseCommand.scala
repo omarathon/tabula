@@ -148,7 +148,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		copyObjectProperty("sprStatus", sprStatusCode, studentCourseDetailsBean, toSitsStatus(sprStatusCode))
 	}
 
-	def toRoute(code: String) = code.maybeText.flatMap { courseAndRouteService.getRouteByCode }.getOrElse(null)
+	def toRoute(code: String) = code.toLowerCase.maybeText.flatMap { courseAndRouteService.getRouteByCode }.getOrElse(null)
 	def toCourse(code: String) = code.maybeText.flatMap { courseImporter.getCourseForCode }.getOrElse(null)
 	def toAward(code: String) = code.maybeText.flatMap { awardImporter.getAwardForCode }.getOrElse(null)
 
