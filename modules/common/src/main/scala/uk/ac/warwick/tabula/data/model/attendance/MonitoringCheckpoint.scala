@@ -24,12 +24,12 @@ class MonitoringCheckpoint extends GeneratedId {
 	var studentCourseDetail: StudentCourseDetails = _
 
 	@NotNull
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.MonitoringCheckpointStateUserType")
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.AttendanceStateUserType")
 	@Column(name = "state")
-	private var _state: MonitoringCheckpointState = _
+	private var _state: AttendanceState = _
 
 	def state = _state
-	def state_=(state: MonitoringCheckpointState) {
+	def state_=(state: AttendanceState) {
 		if (monitoringPointService.studentAlreadyReportedThisTerm(studentCourseDetail.student, point)){
 			throw new IllegalArgumentException
 		}

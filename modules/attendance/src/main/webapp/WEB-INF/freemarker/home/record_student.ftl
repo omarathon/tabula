@@ -78,21 +78,21 @@
 										</@spring.bind>
 									</div>
 									<script>
-										Attendance.createButtonGroup('#checkpointMap-${point.id}');
+										AttendanceRecording.createButtonGroup('#checkpointMap-${point.id}');
 									</script>
 								</div>
-							</#list>
-						</div>
-					<#else>
-						This student's attendance has already been reported for this term.
-					</#if>
+              </#list>
+            </div>
+          <#else>
+            This student's attendance has already been reported for this term.
+          </#if>
 				</div>
 			</#macro>
 
 			<form id="recordAttendance" action="" method="post">
 				<input type="hidden" name="returnTo" value="${returnTo}"/>
 				<script>
-					Attendance.bindButtonGroupHandler();
+					AttendanceRecording.bindButtonGroupHandler();
 				</script>
 				<#list attendance_variables.monitoringPointTermNames as term>
 					<#if command.monitoringPointsByTerm[term]??>

@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.services.{TermServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent, AutowiringTermServiceComponent}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
@@ -26,7 +26,7 @@ object AgentStudentRecordCommand {
 
 abstract class AgentStudentRecordCommand(val agent: Member, val relationshipType: StudentRelationshipType,
 	val student: StudentMember, val academicYearOption: Option[AcademicYear]
-) extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with AgentStudentRecordCommandState {
+) extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with AgentStudentRecordCommandState with PopulateOnForm {
 
 	this: TermServiceComponent with MonitoringPointServiceComponent with GroupMonitoringPointsByTerm =>
 
@@ -63,9 +63,10 @@ trait AgentStudentRecordValidation extends SelfValidating {
 			if (!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, pointSet.academicYear).getTermTypeAsString)){
 				errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 			}
+
 			if (thisAcademicYear.startYear <= pointSet.academicYear.startYear
 				&& currentAcademicWeek < point.validFromWeek
-				&& !(state == null || state == MonitoringCheckpointState.MissedAuthorised)
+				&& !(state == null || state == AttendanceState.MissedAuthorised)
 			) {
 				errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
 			}
@@ -109,7 +110,7 @@ trait AgentStudentRecordCommandState extends GroupMonitoringPointsByTerm with Mo
 	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
 	lazy val pointSet = monitoringPointService.getPointSetForStudent(student, academicYear).getOrElse(throw new ItemNotFoundException)
 
-	var checkpointMap: JMap[MonitoringPoint, MonitoringCheckpointState] =  JHashMap()
+	var checkpointMap: JMap[MonitoringPoint, AttendanceState] =  JHashMap()
 
 	def monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, pointSet.academicYear)
 	def nonReportedTerms = monitoringPointService.findNonReportedTerms(Seq(student), pointSet.academicYear)
