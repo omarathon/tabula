@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, FreemarkerTextRenderer, PDFView}
 import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
+import uk.ac.warwick.tabula.services.FeedbackService
 
 /** This is the main student-facing controller for handling esubmission and return of feedback.
  *
@@ -29,20 +30,21 @@ import uk.ac.warwick.tabula.pdf.FreemarkerXHTMLPDFGeneratorComponent
 class AssignmentController extends CourseworkController {
 
 	var submissionService = Wire[SubmissionService]
-	var feedbackDao = Wire[FeedbackDao]
+	var feedbackService = Wire[FeedbackService]
 
 	hideDeletedItems
 
 	validatesSelf[SubmitAssignmentCommand]
 
 	private def getFeedback(assignment: Assignment, user: CurrentUser) =
-		feedbackDao.getFeedbackByUniId(assignment, user.universityId).filter(_.released)
+		feedbackService.getFeedbackByUniId(assignment, user.universityId).filter(_.released)
 
 	@ModelAttribute def formOrNull(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser) = {
-
-		val feedback = getFeedback(assignment, user)
-
-		new ViewOnlineFeedbackCommand(assignment).apply()
+		val cmd = new ViewOnlineFeedbackCommand(assignment, user)
+		
+		val feedback =
+			if (cmd.hasFeedback) cmd.apply() // Log audit event
+			else None
 
 		restrictedBy {
 			feedback.isDefined

@@ -23,6 +23,8 @@ import uk.ac.warwick.tabula.permissions._
 import org.springframework.util.Assert
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.services.SubmissionService
+import uk.ac.warwick.tabula.data.FeedbackDao
+import uk.ac.warwick.tabula.services.FeedbackService
 
 class SubmitAssignmentCommand(
 		val module: Module,
@@ -150,10 +152,16 @@ class SubmitAssignmentCommand(
 
 }
 
-class ViewOnlineFeedbackCommand(val assignment: Assignment) extends Command[Feedback] {
+class ViewOnlineFeedbackCommand(val assignment: Assignment, val user: CurrentUser) extends Command[Option[Feedback]] {
+	
+	var service = Wire[FeedbackService]
+	
+	private val feedback = service.getFeedbackByUniId(assignment, user.universityId).filter(_.released)
+	
+	def hasFeedback = feedback.isDefined
 
-	override def describe(d: Description) =	d.assignment(assignment).properties()
+	override def applyInternal() = feedback
 
-	override def applyInternal(): Feedback = null
+	override def describe(d: Description) =	d.assignment(assignment).properties("student" -> user.universityId)
 
 }
