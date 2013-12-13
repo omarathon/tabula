@@ -65,11 +65,12 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			submissionDownloaded: Boolean=false,
 			feedback: Option[Feedback]=None,
 			feedbackDownloaded: Boolean=false,
+			onlineFeedbackViewed: Boolean=false,
 			extension: Option[Extension]=None,
 			withinExtension: Boolean=false) =
 		WorkflowItems(
 			enhancedSubmission=submission map { s => SubmissionListItem(s, submissionDownloaded) },
-			enhancedFeedback=feedback map { f => FeedbackListItem(f, feedbackDownloaded) },
+			enhancedFeedback=feedback map { f => FeedbackListItem(f, feedbackDownloaded, onlineFeedbackViewed) },
 			enhancedExtension=extension map { e => ExtensionListItem(e, withinExtension) }
 		)
 
@@ -78,6 +79,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			submissionDownloaded: Boolean=false,
 			feedback: Option[Feedback]=None,
 			feedbackDownloaded: Boolean=false,
+			onlineFeedbackViewed: Boolean=false,
 			extension: Option[Extension]=None,
 			withinExtension: Boolean=false) =
 		Student(
@@ -85,7 +87,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			progress=null,
 			nextStage=None,
 			stages=ListMap.empty,
-			coursework=workflowItems(submission, submissionDownloaded, feedback, feedbackDownloaded, extension, withinExtension)
+			coursework=workflowItems(submission, submissionDownloaded, feedback, feedbackDownloaded, onlineFeedbackViewed, extension, withinExtension)
 		)
 
 	class SampleFilteringCommand(elems: (String, String)*) {

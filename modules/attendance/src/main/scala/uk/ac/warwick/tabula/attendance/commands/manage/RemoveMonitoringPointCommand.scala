@@ -1,13 +1,15 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
-import uk.ac.warwick.tabula.commands._
-import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm
+
+import uk.ac.warwick.tabula.commands._
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import org.springframework.validation.Errors
+import scala.collection.JavaConverters._
 
 object RemoveMonitoringPointCommand {
 	def apply(set: MonitoringPointSet, point: MonitoringPoint) =
@@ -36,14 +38,16 @@ trait RemoveMonitoringPointValidation extends SelfValidating {
 	self: RemoveMonitoringPointState with MonitoringPointServiceComponent =>
 
 	override def validate(errors: Errors) {
-		if (point.sentToAcademicOffice) {
-			errors.reject("monitoringPoint.sentToAcademicOffice.points.remove")
+
+		if (anyStudentsReportedForRelatedPointsThisTerm(point)) {
+			errors.reject("monitoringPoint.hasReportedCheckpoints.remove")
 		} else if (monitoringPointService.countCheckpointsForPoint(point) > 0) {
 			errors.reject("monitoringPoint.hasCheckpoints.remove")
 		}
 
 		if (!confirm) errors.rejectValue("confirm", "monitoringPoint.delete.confirm")
 	}
+
 }
 
 trait RemoveMonitoringPointPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {

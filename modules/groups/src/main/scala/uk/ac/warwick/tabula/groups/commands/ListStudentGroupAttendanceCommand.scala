@@ -81,7 +81,7 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 
 		val missedCountByTerm = attendance.mapValues { groups =>
 			val count = groups.map { case (_, attendanceByInstance) =>
-				attendanceByInstance.values.flatMap(_.values).filter(_ == SmallGroupAttendanceState.Missed).size
+				attendanceByInstance.values.flatMap(_.values).filter(_ == SmallGroupAttendanceState.MissedUnauthorised).size
 			}
 
 			count.foldLeft(0) { (acc, missedCount) => acc + missedCount }

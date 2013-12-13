@@ -287,22 +287,8 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	def membershipInfo = assignmentMembershipService.determineMembership(upstreamAssessmentGroups, Option(members))
 
 	// converts the assessmentGroups to upstream assessment groups
-	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = {
-		if(academicYear == null){
-			Seq()
-		}
-		else {
-			val validGroups = assessmentGroups.filterNot(group=> group.assessmentComponent == null || group.occurrence == null)
-			validGroups.flatMap{group =>
-				val template = new UpstreamAssessmentGroup
-				template.academicYear = academicYear
-				template.assessmentGroup = group.assessmentComponent.assessmentGroup
-				template.moduleCode = group.assessmentComponent.moduleCode
-				template.occurrence = group.occurrence
-				assignmentMembershipService.getUpstreamAssessmentGroup(template)
-			}
-		}
-	}
+	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = 
+		assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroup(academicYear) }
 
 	/**
 	 * Whether the assignment is not archived or deleted.

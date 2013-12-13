@@ -55,7 +55,7 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 				studentsPerPage,
 				studentsPerPage * (page-1)
 			)
-			ViewStudentsResults(buildData(sortedStudents, academicYear), filteredUniversityIds.size)
+			ViewStudentsResults(buildData(sortedStudents.map(_._1), academicYear, missedCounts = sortedStudents), filteredUniversityIds.size)
 		} else if (sortOrder.asScala.exists(o => o.getPropertyName == "unrecordedMonitoringPoints")) {
 			val filteredUniversityIds = profileService.findAllUniversityIdsByRestrictions(department, buildRestrictions())
 			val sortedStudents = monitoringPointService.studentsByUnrecordedCount(
@@ -66,7 +66,7 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 				studentsPerPage,
 				studentsPerPage * (page-1)
 			)
-			ViewStudentsResults(buildData(sortedStudents, academicYear), filteredUniversityIds.size)
+			ViewStudentsResults(buildData(sortedStudents.map(_._1), academicYear, unrecordedCounts = sortedStudents), filteredUniversityIds.size)
 		} else {
 			val totalResults = profileService.countStudentsByRestrictions(
 				department = department,

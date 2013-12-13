@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPointSet, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPointSet, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, MonitoringPointServiceComponent, AutowiringMonitoringPointServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.{ItemNotFoundException, CurrentUser}
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException, CurrentUser}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyMaps
@@ -28,7 +28,7 @@ object SetMonitoringCheckpointForStudentCommand {
 
 abstract class SetMonitoringCheckpointForStudentCommand(
 	val monitoringPoint: MonitoringPoint, val student: StudentMember, user: CurrentUser
-)	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] {
+)	extends CommandInternal[Seq[MonitoringCheckpoint]] with PopulateOnForm {
 
 	self: SetMonitoringCheckpointForStudentState with ProfileServiceComponent with MonitoringPointServiceComponent =>
 
@@ -72,6 +72,7 @@ trait SetMonitoringCheckpointForStudentCommandValidation extends SelfValidating 
 	def validate(errors: Errors) {
 
 		val academicYear = templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear
+		val thisAcademicYear = AcademicYear.guessByDate(DateTime.now)
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
 		studentsState.asScala.foreach{ case(_, pointMap) => {
 			val studentPointSet = monitoringPointService.getPointSetForStudent(student, academicYear)
@@ -81,11 +82,15 @@ trait SetMonitoringCheckpointForStudentCommandValidation extends SelfValidating 
 				if (!studentPointSet.exists(s => s.points.asScala.contains(point))) {
 					errors.rejectValue("", "monitoringPoint.invalidStudent")
 				}	else {
-					// Check state change valid
-					if (point.sentToAcademicOffice) {
-						errors.rejectValue("", "monitoringCheckpoint.sentToAcademicOffice")
+
+					if (!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear).getTermTypeAsString)){
+						errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 					}
-					if (currentAcademicWeek < point.validFromWeek && !(state == null || state == MonitoringCheckpointState.MissedAuthorised)) {
+
+					if (thisAcademicYear.startYear <= academicYear.startYear
+						&& currentAcademicWeek < point.validFromWeek
+						&& !(state == null || state == AttendanceState.MissedAuthorised)
+					) {
 						errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
 					}
 				}
@@ -123,13 +128,14 @@ trait SetMonitoringPointForStudentDescription extends Describable[Seq[Monitoring
 }
 
 
-trait SetMonitoringCheckpointForStudentState {
+trait SetMonitoringCheckpointForStudentState  extends GroupMonitoringPointsByTerm with MonitoringPointServiceComponent {
 	def monitoringPoint: MonitoringPoint
 	def student: StudentMember
 	lazy val templateMonitoringPoint = monitoringPoint
 
 	var members: Seq[StudentMember] = _
-	var studentsState: JMap[StudentMember, JMap[MonitoringPoint, MonitoringCheckpointState]] =
-		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, MonitoringCheckpointState] }.asJava
+	var studentsState: JMap[StudentMember, JMap[MonitoringPoint, AttendanceState]] =
+		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, AttendanceState] }.asJava
 	var set = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
+	def nonReportedTerms = monitoringPointService.findNonReportedTerms(Seq(student), monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
 }

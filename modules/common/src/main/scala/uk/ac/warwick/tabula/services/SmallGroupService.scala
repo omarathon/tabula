@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConverters.seqAsJavaListConverter
-
+import scala.collection.JavaConverters._
 import org.hibernate.annotations.{AccessType, Filter, FilterDef}
 import org.springframework.stereotype.Service
-
 import javax.persistence.{Entity, Table}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.{JArrayList, JList}
@@ -13,6 +11,13 @@ import uk.ac.warwick.tabula.data.model.{ModuleRegistration, UserGroup}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupSet}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
+import uk.ac.warwick.tabula.data.model.UnspecifiedTypeUserGroup
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import org.joda.time.DateTime
 
 trait SmallGroupServiceComponent {
 	def smallGroupService: SmallGroupService
@@ -28,6 +33,8 @@ trait SmallGroupService {
 	def getSmallGroupById(id: String): Option[SmallGroup]
 	def getSmallGroupEventById(id: String): Option[SmallGroupEvent]
 	def getSmallGroupEventOccurrenceById(id: String): Option[SmallGroupEventOccurrence]
+	def getSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int): Option[SmallGroupEventOccurrence]
+	def getOrCreateSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int): SmallGroupEventOccurrence
 	def saveOrUpdate(smallGroupSet: SmallGroupSet)
 	def saveOrUpdate(smallGroup: SmallGroup)
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent)
@@ -38,8 +45,8 @@ trait SmallGroupService {
 	def findSmallGroupsByStudent(student: User): Seq[SmallGroup]
 	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet]
 
-	def updateAttendance(smallGroupEvent: SmallGroupEvent, weekNumber: Int, universityIds: Seq[String]): SmallGroupEventOccurrence
-	def getAttendees(event: SmallGroupEvent, weekNumber: Int): JList[String]
+	def saveOrUpdateAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, state: AttendanceState, user: CurrentUser): SmallGroupEventAttendance
+	def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int): Unit
 	def findAttendanceByGroup(smallGroup: SmallGroup): Seq[SmallGroupEventOccurrence]
 }
 
@@ -55,6 +62,15 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def getSmallGroupById(id: String) = smallGroupDao.getSmallGroupById(id)
 	def getSmallGroupEventById(id: String) = smallGroupDao.getSmallGroupEventById(id)
 	def getSmallGroupEventOccurrenceById(id: String) = smallGroupDao.getSmallGroupEventOccurrenceById(id)
+	def getSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int) = smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber)
+	def getOrCreateSmallGroupEventOccurrence(event: SmallGroupEvent, weekNumber: Int) = 
+		smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber).getOrElse {
+			val newOccurrence = new SmallGroupEventOccurrence()
+			newOccurrence.event = event
+			newOccurrence.week = weekNumber
+			smallGroupDao.saveOrUpdate(newOccurrence)
+			newOccurrence
+		}
 
 	def saveOrUpdate(smallGroupSet: SmallGroupSet) = smallGroupDao.saveOrUpdate(smallGroupSet)
 	def saveOrUpdate(smallGroup: SmallGroup) = smallGroupDao.saveOrUpdate(smallGroup)
@@ -66,24 +82,30 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet] = membershipDao.getEnrolledSmallGroupSets(user)
 	def findSmallGroupsByStudent(user: User): Seq[SmallGroup] = studentGroupHelper.findBy(user)
 
-	def getAttendees(event: SmallGroupEvent, weekNumber: Int): JList[String] =
-		smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber) match {
-			case Some(occurrence) => occurrence.attendees.includeUsers
-			case _ => JArrayList()
+	def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int) {
+		for {
+			occurrence <- smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber)
+			attendance <- smallGroupDao.getAttendance(studentId, occurrence)
+		} {
+			smallGroupDao.deleteAttendance(attendance)
 		}
-
-	def updateAttendance(event: SmallGroupEvent, weekNumber: Int, universityIds: Seq[String]): SmallGroupEventOccurrence = {
-		val occurrence = smallGroupDao.getSmallGroupEventOccurrence(event, weekNumber) getOrElse {
-			val newOccurrence = new SmallGroupEventOccurrence()
-			newOccurrence.event = event
-			newOccurrence.week = weekNumber
-			smallGroupDao.saveOrUpdate(newOccurrence)
-			newOccurrence
-		}
-
-		occurrence.attendees.includeUsers.clear()
-		occurrence.attendees.includeUsers.addAll(universityIds.asJava)
-		occurrence
+	}
+	
+	def saveOrUpdateAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, state: AttendanceState, user: CurrentUser): SmallGroupEventAttendance = {
+		val occurrence = getOrCreateSmallGroupEventOccurrence(event, weekNumber)
+		
+		val attendance = smallGroupDao.getAttendance(studentId, occurrence).getOrElse({
+			val newAttendance = new SmallGroupEventAttendance
+			newAttendance.occurrence = occurrence
+			newAttendance.universityId = studentId
+			newAttendance
+		})
+		
+		attendance.state = state
+		attendance.updatedBy = user.userId
+		attendance.updatedDate = DateTime.now
+		smallGroupDao.saveOrUpdate(attendance)
+		attendance
 	}
 	
 	def findAttendanceByGroup(smallGroup: SmallGroup): Seq[SmallGroupEventOccurrence] = 
@@ -100,15 +122,14 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			    smallGroup <- smallGroupDao.findByModuleAndYear(modReg.module, modReg.academicYear)
 			    if (smallGroup.students.includesUser(user))
 			} {
-			    smallGroup.students match {
-			       case uGroup: UserGroup => {
-			         uGroup.remove(user)
-			         userGroupDao.saveOrUpdate(uGroup)
-			       }
-			       case _ => logger.warn("Could not remove user from group - userGroup " + smallGroup.students + " was not of type UserGroup as expected.")
-			    }
+				// Wrap this in a sub-command so that we can do auditing
+				userGroupDao.saveOrUpdate(removeFromGroupCommand(user, smallGroup).apply().asInstanceOf[UserGroup])
 			}
 		}
+	}
+	
+	private def removeFromGroupCommand(user: User, smallGroup: SmallGroup): Appliable[UnspecifiedTypeUserGroup] = {
+		new RemoveUserFromSmallGroupCommand(user, smallGroup)
 	}
 }
 

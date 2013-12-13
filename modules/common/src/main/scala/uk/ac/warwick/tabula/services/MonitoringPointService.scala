@@ -1,15 +1,13 @@
 package uk.ac.warwick.tabula.services
 
-
-import scala.collection.JavaConverters.asScalaBufferConverter
+import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent, AutowiringMonitoringPointDaoComponent, MonitoringPointDaoComponent}
 import org.springframework.stereotype.Service
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringCheckpointState, MonitoringPointSet, MonitoringPointSetTemplate, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import org.joda.time.DateTime
-import scala.Some
 import uk.ac.warwick.util.termdates.Term
 
 trait MonitoringPointServiceComponent {
@@ -26,6 +24,7 @@ trait MonitoringPointService {
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
 	def saveOrUpdate(set: MonitoringPointSet)
 	def saveOrUpdate(template: MonitoringPointSetTemplate)
+	def saveOrUpdate(report : MonitoringPointReport)
 	def getPointById(id : String) : Option[MonitoringPoint]
 	def getSetById(id : String) : Option[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
@@ -36,18 +35,18 @@ trait MonitoringPointService {
 	def getTemplateById(id: String) : Option[MonitoringPointSetTemplate]
 	def deleteTemplate(template: MonitoringPointSetTemplate)
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
-	def getChecked(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[MonitoringCheckpointState]]]
+	def getChecked(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[AttendanceState]]]
 	def deleteCheckpoint(student: StudentMember, point: MonitoringPoint): Unit
 	def saveOrUpdateCheckpoint(
 		student: StudentMember,
 		point: MonitoringPoint,
-		state: MonitoringCheckpointState,
+		state: AttendanceState,
 		user: CurrentUser
 	) : MonitoringCheckpoint
 	def saveOrUpdateCheckpoint(
 		student: StudentMember,
 		point: MonitoringPoint,
-		state: MonitoringCheckpointState,
+		state: AttendanceState,
 		member: Member
 	) : MonitoringCheckpoint
 	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int
@@ -60,8 +59,10 @@ trait MonitoringPointService {
 		academicYear: AcademicYear,
 		isAscending: Boolean,
 		maxResults: Int,
-		startResult: Int
-	): Seq[StudentMember]
+		startResult: Int,
+		startWeek: Int = 1,
+		endWeek: Int = 52
+	): Seq[(StudentMember, Int)]
 	def studentsByUnrecordedCount(
 		universityIds: Seq[String],
 		academicYear: AcademicYear,
@@ -69,18 +70,25 @@ trait MonitoringPointService {
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
-	): Seq[StudentMember]
+	): Seq[(StudentMember, Int)]
+	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String]
+	def findNonReported(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[StudentMember]
+	def findUnreportedReports: Seq[MonitoringPointReport]
+	def markReportAsPushed(report: MonitoringPointReport): Unit
+	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport]
+	def studentAlreadyReportedThisTerm(student:StudentMember, point:MonitoringPoint): Boolean
 }
 
 
 abstract class AbstractMonitoringPointService extends MonitoringPointService {
-	self: MonitoringPointDaoComponent =>
+	self: MonitoringPointDaoComponent with TermServiceComponent =>
 
 	def saveOrUpdate(monitoringPoint: MonitoringPoint) = monitoringPointDao.saveOrUpdate(monitoringPoint)
 	def delete(monitoringPoint: MonitoringPoint) = monitoringPointDao.delete(monitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint) = monitoringPointDao.saveOrUpdate(monitoringCheckpoint)
 	def saveOrUpdate(set: MonitoringPointSet) = monitoringPointDao.saveOrUpdate(set)
 	def saveOrUpdate(template: MonitoringPointSetTemplate) = monitoringPointDao.saveOrUpdate(template)
+	def saveOrUpdate(report : MonitoringPointReport) = monitoringPointDao.saveOrUpdate(report)
 	def getPointById(id: String): Option[MonitoringPoint] = monitoringPointDao.getPointById(id)
 	def getSetById(id: String): Option[MonitoringPointSet] = monitoringPointDao.getSetById(id)
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet] = monitoringPointDao.findMonitoringPointSets(route)
@@ -99,7 +107,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 
 	def countCheckpointsForPoint(point: MonitoringPoint) = monitoringPointDao.countCheckpointsForPoint(point)
 
-	def getChecked(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[MonitoringCheckpointState]]] =
+	def getChecked(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[AttendanceState]]] =
 		members.map(member =>
 			member ->
 			set.points.asScala.map(point =>
@@ -120,20 +128,20 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def saveOrUpdateCheckpoint(
 		student: StudentMember,
 		point: MonitoringPoint,
-		state: MonitoringCheckpointState,
+		state: AttendanceState,
 		user: CurrentUser
 	) : MonitoringCheckpoint = saveOrUpdateCheckpointForUser(student, point, state, user.apparentId)
 
 	def saveOrUpdateCheckpoint(
 		student: StudentMember,
 		point: MonitoringPoint,
-		state: MonitoringCheckpointState,
+		state: AttendanceState,
 		member: Member
 	) : MonitoringCheckpoint =
 		saveOrUpdateCheckpointForUser(student, point, state, member.userId)
 
 	private def saveOrUpdateCheckpointForUser(student: StudentMember,
-		point: MonitoringPoint,	state: MonitoringCheckpointState,	usercode: String
+		point: MonitoringPoint,	state: AttendanceState,	usercode: String
 	) : MonitoringCheckpoint = {
 		val checkpoint = monitoringPointDao.getCheckpoint(point, student).getOrElse({
 			val newCheckpoint = new MonitoringCheckpoint
@@ -180,9 +188,11 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		academicYear: AcademicYear,
 		isAscending: Boolean,
 		maxResults: Int,
-		startResult: Int
-	): Seq[StudentMember] = {
-		monitoringPointDao.studentsByMissedCount(universityIds, academicYear, isAscending, maxResults, startResult)
+		startResult: Int,
+		startWeek: Int = 1,
+		endWeek: Int = 52
+	): Seq[(StudentMember, Int)] = {
+		monitoringPointDao.studentsByMissedCount(universityIds, academicYear, isAscending, maxResults, startResult, startWeek, endWeek)
 	}
 
 	def studentsByUnrecordedCount(
@@ -192,8 +202,34 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
-	): Seq[StudentMember] = {
+	): Seq[(StudentMember, Int)] = {
 		monitoringPointDao.studentsByUnrecordedCount(universityIds, academicYear, currentAcademicWeek, isAscending, maxResults, startResult)
+	}
+
+	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String] = {
+		monitoringPointDao.findNonReportedTerms(students, academicYear)
+	}
+
+	def findNonReported(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[StudentMember] = {
+		monitoringPointDao.findNonReported(students, academicYear, period)
+	}
+
+	def findUnreportedReports: Seq[MonitoringPointReport] = {
+		monitoringPointDao.findUnreportedReports
+	}
+
+	def markReportAsPushed(report: MonitoringPointReport): Unit = {
+		report.pushedDate = DateTime.now
+		monitoringPointDao.saveOrUpdate(report)
+	}
+
+	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport] = {
+		monitoringPointDao.findReports(students, year, period)
+	}
+
+	def studentAlreadyReportedThisTerm(student:StudentMember, point:MonitoringPoint): Boolean = {
+		val nonReportedTerms = findNonReportedTerms(Seq(student), point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+		!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear).getTermTypeAsString)
 	}
 
 }
@@ -202,6 +238,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 class MonitoringPointServiceImpl
 	extends AbstractMonitoringPointService
 	with AutowiringMonitoringPointDaoComponent
+	with AutowiringTermServiceComponent
 
 
 
@@ -271,8 +308,9 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 					if (countRelevantMeetings(student, point, None) >= point.meetingQuantity) {
 						val checkpoint = new MonitoringCheckpoint
 						checkpoint.point = point
+						checkpoint.monitoringPointService = monitoringPointService
 						checkpoint.studentCourseDetail = student.mostSignificantCourseDetails.getOrElse(throw new IllegalArgumentException)
-						checkpoint.state = MonitoringCheckpointState.Attended
+						checkpoint.state = AttendanceState.Attended
 						checkpoint.autoCreated = true
 						checkpoint.updatedDate = DateTime.now
 						checkpoint.updatedBy = meeting.relationship.agentMember match {

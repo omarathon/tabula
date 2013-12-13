@@ -78,7 +78,24 @@ object SandboxData {
 				Route("History of Music (Taught)", "hm8p1", DegreeType.Postgraduate, CourseType.PGT, false,
 					Seq("hom222", "hom3a1", "hom330"), 
 				4300301, 4300350)
-		), 5300001, 5300030)
+		), 5300001, 5300030),
+		"psp" -> Department("Public Speaking", "psp", "I", Map(
+			"psp101" -> Module("Pronunciation and Enunciation", "psp101"),
+			"psp102" -> Module("Professional Speaking", "psp102")
+		), Map(
+			"xp301" -> 
+				Route("Public Speaking", "xp301", DegreeType.Undergraduate, CourseType.UG, false,
+					Seq("psp101", "psp102"), 
+				4400001, 4400100),
+			"xp302" -> 
+				Route("Public Speaking with Intercalated Year", "xp302", DegreeType.Undergraduate, CourseType.UG, false,
+					Seq("psp101", "psp102"), 
+				4400101, 4400130),
+			"xp3p0" -> 
+				Route("Public Speaking (Research)", "xp3p0", DegreeType.Postgraduate, CourseType.PGR, true, Seq(), 4400201, 4400300),
+			"xp3p1" -> 
+				Route("Public Speaking (Taught)", "xp3p1", DegreeType.Postgraduate, CourseType.PGT, false, Seq(), 4400301, 4400350)
+		), 5400001, 5400030)
 	)
 	
 	def randomName(id: Long, gender: Gender) = {

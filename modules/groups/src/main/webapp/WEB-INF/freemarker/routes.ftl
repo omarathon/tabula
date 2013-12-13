@@ -40,3 +40,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro relationshipPhoto profile relationship><@url page="/view/photo/${profile.universityId}/${relationship.relationshipType.dbValue}/${relationship.agent}.jpg" context="/profiles" /></#macro>
 
 <#macro studentslist group><@url page="/group/${group.id}/studentspopup" /></#macro>
+<#macro unallocatedstudentslist groupset><@url page="/${groupset.id}/unallocatedstudentspopup" /></#macro>

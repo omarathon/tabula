@@ -162,23 +162,9 @@ trait UpdatesStudentMembership {
 
 
 	/** get UAGs, populated with membership, from the currently stored assessmentGroups */
-	def linkedUpstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = {
-		if(academicYear == null || assessmentGroups == null){
-			Seq()
-		}
-		else {
-			val validGroups = assessmentGroups.asScala.filterNot(group => group.assessmentComponent == null || group.occurrence == null).toList
-
-			validGroups.flatMap{group =>
-				val template = new UpstreamAssessmentGroup
-				template.academicYear = academicYear
-				template.assessmentGroup = group.assessmentComponent.assessmentGroup
-				template.moduleCode = group.assessmentComponent.moduleCode
-				template.occurrence = group.occurrence
-				membershipService.getUpstreamAssessmentGroup(template)
-			}
-		}
-	}
+	def linkedUpstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] =
+		if (assessmentGroups == null) Seq()
+		else assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroup(academicYear) }
 
 	/**
 	 * Returns a sequence of MembershipItems
