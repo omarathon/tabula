@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence
+import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringSmallGroupServiceComponent
@@ -84,7 +85,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 	}
 
 	def applyInternal() = {
-		val occurrence = smallGroupService.getOrCreateSmallGroupEventOccurrence(event, week)
+		val occurrence = transactional() { smallGroupService.getOrCreateSmallGroupEventOccurrence(event, week) }
 		
 		val attendances = studentsState.asScala.flatMap { case (studentId, state) =>
 			if (state == null) {

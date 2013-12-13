@@ -12,6 +12,7 @@ create index idx_sgattendance_occurrence on SmallGroupEventAttendance(occurrence
 create index idx_sgattendance_uni_id on SmallGroupEventAttendance(universityId);
 create unique index idx_sgattendance_ck on SmallGroupEventAttendance(occurrence_id, universityId);
 alter table smallgroupeventoccurrence drop constraint sgeo_group_fk;
+alter table smallgroupeventoccurrence modify membersgroup_id null;
 
 -- migrate existing attended
 insert into smallgroupeventattendance (id, occurrence_id, universityid, state, updatedby, updateddate)
