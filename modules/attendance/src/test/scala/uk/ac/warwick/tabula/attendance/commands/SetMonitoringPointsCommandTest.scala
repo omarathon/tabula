@@ -18,7 +18,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 	val thisProfileService = mock[ProfileService]
 	val thisMonitoringPointService = mock[MonitoringPointService]
 
-	trait CommandTestSupport extends SetAttendanceState with SetMonitoringCheckpointCommandValidation
+	trait CommandTestSupport extends SetMonitoringCheckpointState with SetMonitoringCheckpointCommandValidation
 		with MonitoringPointServiceComponent with ProfileServiceComponent with SecurityServiceComponent with TermServiceComponent {
 		val monitoringPointService = thisMonitoringPointService
 		val profileService = thisProfileService

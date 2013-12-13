@@ -34,7 +34,7 @@ object SetMonitoringCheckpointCommand {
 abstract class SetMonitoringCheckpointCommand(val department: Department, val templateMonitoringPoint: MonitoringPoint, val user: CurrentUser, val routes: JList[Route])
 	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with BindListener with PopulateOnForm {
 
-	self: SetAttendanceState with MonitoringPointServiceComponent with ProfileServiceComponent =>
+	self: SetMonitoringCheckpointState with MonitoringPointServiceComponent with ProfileServiceComponent =>
 
 	def populate() {
 		// Get students matching the filter
@@ -82,7 +82,7 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 }
 
 trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
-	self: SetAttendanceState with SecurityServiceComponent with TermServiceComponent with MonitoringPointServiceComponent =>
+	self: SetMonitoringCheckpointState with SecurityServiceComponent with TermServiceComponent with MonitoringPointServiceComponent =>
 
 	def validate(errors: Errors) {
 		val academicYear = templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear
@@ -123,7 +123,7 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 }
 
 trait SetMonitoringCheckpointCommandPermissions extends RequiresPermissionsChecking with PermissionsChecking {
-	self: SetAttendanceState =>
+	self: SetMonitoringCheckpointState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
 		if (routesForPermission(user, Permissions.MonitoringPoints.View, department).size == department.routes.asScala.size)
@@ -135,7 +135,7 @@ trait SetMonitoringCheckpointCommandPermissions extends RequiresPermissionsCheck
 
 
 trait SetMonitoringPointDescription extends Describable[Seq[MonitoringCheckpoint]] {
-	self: SetAttendanceState =>
+	self: SetMonitoringCheckpointState =>
 
 	override lazy val eventName = "SetMonitoringCheckpoint"
 
