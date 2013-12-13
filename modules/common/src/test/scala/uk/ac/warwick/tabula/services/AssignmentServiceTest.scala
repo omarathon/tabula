@@ -172,7 +172,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 			submission.universityId = "0070790"
 			submission.userId = "abcdef"
-			submission.plagiarismInvestigation = SuspectPlagiarised
+			submission.plagiarismInvestigation = PlagiarismInvestigation.NotInvestigated
 			assmt.addSubmission(submission)
 			submissionService.saveSubmission(submission)
 
