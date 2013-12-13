@@ -172,13 +172,20 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 			submission.universityId = "0070790"
 			submission.userId = "abcdef"
-			submission.plagiarismInvestigation = PlagiarismInvestigation.NotInvestigated
+			submission.plagiarismInvestigation = PlagiarismInvestigation.SuspectPlagiarised
 			assmt.addSubmission(submission)
 			submissionService.saveSubmission(submission)
 
-			// now check one user who needs to get feedback for this assignment is returned
+			// submissions suspected of plagiarism should be ignored
 			val userPairs = feedbackService.getUsersForFeedback(assmt)
-			userPairs.size should be (1)
+			userPairs.size should be (0)
+
+			submission.plagiarismInvestigation = PlagiarismInvestigation.InvestigationCompleted
+
+			// now check one user who needs to get feedback for this assignment is returned
+			// as the PlagiarismInvestigation has completed the user should be returned
+			val userPairs1 = feedbackService.getUsersForFeedback(assmt)
+			userPairs1.size should be (1)
 
 			// and check it's the right one
 			for (userPair <- userPairs) {
