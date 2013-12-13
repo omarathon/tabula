@@ -24,11 +24,6 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 	@BatchSize(size=200)
 	var attendance: JList[SmallGroupEventAttendance] = JArrayList()
 
-	// No longer in use.
-//	@OneToOne(cascade = Array(ALL))
-//	@JoinColumn(name = "membersgroup_id")
-//	var attendees: UserGroup = UserGroup.ofUniversityIds
-
 	def permissionsParents = Stream(event)
 
 }
