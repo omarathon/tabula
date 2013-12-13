@@ -57,9 +57,11 @@
 													
 													<#if state.name == 'Attended'>
 														<i class="icon-ok icon-fixed-width attended" title="${student.fullName} attended: <@components.instanceFormat instance academicYear department />"></i>
-													<#elseif state.name == 'Missed'>
+													<#elseif state.name == 'MissedAuthorised'>
+														<i class="icon-remove-circle icon-fixed-width authorised" title="${student.fullName} did not attend (authorised absence): <@components.instanceFormat instance academicYear department />"></i>
+													<#elseif state.name == 'MissedUnauthorised'>
 														<#local missedCount = missedCount + 1 />
-														<i class="icon-remove icon-fixed-width unauthorised" title="${student.fullName} did not attend: <@components.instanceFormat instance academicYear department />"></i>
+														<i class="icon-remove icon-fixed-width unauthorised" title="${student.fullName} did not attend (unauthorised): <@components.instanceFormat instance academicYear department />"></i>
 													<#elseif state.name == 'Late'> <#-- Late -->
 														<i class="icon-warning-sign icon-fixed-width late" title="No data: <@components.instanceFormat instance academicYear department />"></i>
 													<#else> <#-- Not recorded -->

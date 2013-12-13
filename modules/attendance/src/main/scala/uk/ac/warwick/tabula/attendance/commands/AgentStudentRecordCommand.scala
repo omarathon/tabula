@@ -26,7 +26,7 @@ object AgentStudentRecordCommand {
 
 abstract class AgentStudentRecordCommand(val agent: Member, val relationshipType: StudentRelationshipType,
 	val student: StudentMember, val academicYearOption: Option[AcademicYear]
-) extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with AgentStudentRecordCommandState {
+) extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with AgentStudentRecordCommandState with PopulateOnForm {
 
 	this: TermServiceComponent with MonitoringPointServiceComponent with GroupMonitoringPointsByTerm =>
 

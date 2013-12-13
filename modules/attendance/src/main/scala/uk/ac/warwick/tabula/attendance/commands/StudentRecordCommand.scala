@@ -29,7 +29,7 @@ abstract class StudentRecordCommand(
 	val student: StudentMember,
 	val user: CurrentUser,
 	val academicYearOption: Option[AcademicYear]
-) extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with StudentRecordCommandState {
+) extends CommandInternal[Seq[MonitoringCheckpoint]] with StudentRecordCommandState with PopulateOnForm {
 
 	this: GroupMonitoringPointsByTerm with MonitoringPointServiceComponent =>
 

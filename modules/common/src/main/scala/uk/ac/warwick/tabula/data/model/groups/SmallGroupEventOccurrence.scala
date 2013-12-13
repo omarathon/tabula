@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.data.model.groups
 
 import javax.persistence._
-import org.hibernate.annotations.AccessType
+import org.hibernate.annotations.{AccessType, BatchSize}
 import uk.ac.warwick.tabula.data.model.{UserGroup, GeneratedId}
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import scala.Array
+import uk.ac.warwick.tabula.JavaImports._
 import javax.persistence.CascadeType._
 import java.lang.annotation.Annotation
 
@@ -19,10 +19,15 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 	var event: SmallGroupEvent = _
 
 	var week: SmallGroupEventOccurrence.WeekNumber = _
+	
+	@OneToMany(mappedBy = "occurrence", cascade=Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=200)
+	var attendance: JList[SmallGroupEventAttendance] = JArrayList()
 
-	@OneToOne(cascade = Array(ALL))
-	@JoinColumn(name = "membersgroup_id")
-	var attendees: UserGroup = UserGroup.ofUniversityIds
+	// No longer in use.
+//	@OneToOne(cascade = Array(ALL))
+//	@JoinColumn(name = "membersgroup_id")
+//	var attendees: UserGroup = UserGroup.ofUniversityIds
 
 	def permissionsParents = Stream(event)
 

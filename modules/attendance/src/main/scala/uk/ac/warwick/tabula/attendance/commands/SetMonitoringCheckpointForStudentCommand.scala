@@ -28,7 +28,7 @@ object SetMonitoringCheckpointForStudentCommand {
 
 abstract class SetMonitoringCheckpointForStudentCommand(
 	val monitoringPoint: MonitoringPoint, val student: StudentMember, user: CurrentUser
-)	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] {
+)	extends CommandInternal[Seq[MonitoringCheckpoint]] with PopulateOnForm {
 
 	self: SetMonitoringCheckpointForStudentState with ProfileServiceComponent with MonitoringPointServiceComponent =>
 

@@ -20,14 +20,25 @@ object MemberOrUser {
 sealed trait MemberOrUser{
 	def isMember: Boolean
 	def fullName: Option[String]
+	def firstName: String
+	def lastName: String
 	def universityId: String
 	def shortDepartment: String
 	def email: String
+	
+	override def hashCode = universityId.hashCode
+	
+	override def equals(other: Any) = other match {
+		case other: MemberOrUser => other.universityId == universityId
+		case _ => false
+	}
 }
 
 private case class WrappedUser(user: User) extends MemberOrUser {
 	def isMember = false
 	def fullName = Some(user.getFullName)
+	def firstName = user.getFirstName
+	def lastName = user.getLastName
 	def universityId = user.getWarwickId
 	def shortDepartment = user.getShortDepartment
 	def email = user.getEmail
@@ -36,6 +47,8 @@ private case class WrappedUser(user: User) extends MemberOrUser {
 private case class WrappedMember(member: Member) extends MemberOrUser {
 	def isMember = true
 	def fullName = member.fullName
+	def firstName = member.firstName
+	def lastName = member.lastName
 	def universityId = member.universityId
 	def shortDepartment = member.homeDepartment.name
 	def email = member.email

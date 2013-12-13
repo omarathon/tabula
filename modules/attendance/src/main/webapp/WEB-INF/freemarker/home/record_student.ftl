@@ -77,7 +77,7 @@
 									</@spring.bind>
 								</div>
 								<script>
-									Attendance.createButtonGroup('#checkpointMap-${point.id}');
+									AttendanceRecording.createButtonGroup('#checkpointMap-${point.id}');
 								</script>
 							</div>
 						</#list>
@@ -88,7 +88,7 @@
 			<form id="recordAttendance" action="" method="post">
 				<input type="hidden" name="returnTo" value="${returnTo}"/>
 				<script>
-					Attendance.bindButtonGroupHandler();
+					AttendanceRecording.bindButtonGroupHandler();
 				</script>
 				<#list attendance_variables.monitoringPointTermNames as term>
 					<#if command.monitoringPointsByTerm[term]??>
