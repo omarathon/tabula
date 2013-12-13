@@ -100,3 +100,11 @@
 		padding-bottom:16px;
 	}
 }
+
+@media print {
+	.tabula-page, #container {
+		.recordCheckpointForm {
+			.checkAllMessage, .btn-group, .save-row, .record-attendance-form-header { display: none; }
+		}
+	}
+}

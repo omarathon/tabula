@@ -32,9 +32,10 @@
 	<div class="persist-area">
 		<div class="persist-header">
 			<h1>Record attendance</h1>
-			<h6><span class="muted">for</span>
+			<h4><span class="muted">for</span>
 				${command.event.group.groupSet.name},
-				${command.event.group.name}:
+				${command.event.group.name}</h4>
+			<h6>
 				${command.event.day.name} <@fmt.time event.startTime /> - <@fmt.time event.endTime />, Week ${command.week}
 			</h6>
 	
