@@ -51,37 +51,41 @@
 			<#macro monitoringPointsByTerm term>
 				<div class="striped-section">
 					<h2 class="section-title">${term}</h2>
-					<div class="striped-section-contents">
-						<#list command.monitoringPointsByTerm[term] as point>
-							<div class="item-info row-fluid point">
-								<div class="span12">
-									<div class="pull-right">
-										<select id="checkpointMap-${point.id}" name="checkpointMap[${point.id}]">
-											<#assign hasState = mapGet(command.checkpointMap, point)?? />
-											<option value="" <#if !hasState >selected</#if>>Not recorded</option>
-											<option value="unauthorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
-											<option value="authorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "authorised">selected</#if>>Missed (authorised)</option>
-											<option value="attended" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "attended">selected</#if>>Attended</option>
-										</select>
-										<#if point.pointType?? && point.pointType.dbValue == "meeting">
-											<a class="meetings" title="Meetings with this student" href="<@routes.studentMeetings point command.student />"><i class="icon-info-sign icon-fixed-width"></i></a>
-										<#else>
-											<i class="icon-fixed-width"></i>
-										</#if>
-									</div>
+					<#if command.nonReportedTerms?seq_contains(term) >
+						<div class="striped-section-contents">
+							<#list command.monitoringPointsByTerm[term] as point>
+								<div class="item-info row-fluid point">
+									<div class="span12">
+										<div class="pull-right">
+											<select id="checkpointMap-${point.id}" name="checkpointMap[${point.id}]">
+												<#assign hasState = mapGet(command.checkpointMap, point)?? />
+												<option value="" <#if !hasState >selected</#if>>Not recorded</option>
+												<option value="unauthorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
+												<option value="authorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "authorised">selected</#if>>Missed (authorised)</option>
+												<option value="attended" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "attended">selected</#if>>Attended</option>
+											</select>
+											<#if point.pointType?? && point.pointType.dbValue == "meeting">
+												<a class="meetings" title="Meetings with this student" href="<@routes.studentMeetings point command.student />"><i class="icon-info-sign icon-fixed-width"></i></a>
+											<#else>
+												<i class="icon-fixed-width"></i>
+											</#if>
+										</div>
 									${point.name} (<a class="use-tooltip" data-html="true" title="<@fmt.monitoringPointDateFormat point />"><@fmt.monitoringPointFormat point /></a>)
-									<@spring.bind path="command.checkpointMap[${point.id}]">
-										<#if status.error>
-											<div class="text-error"><@f.errors path="command.checkpointMap[${point.id}]" cssClass="error"/></div>
-										</#if>
-									</@spring.bind>
+										<@spring.bind path="command.checkpointMap[${point.id}]">
+											<#if status.error>
+												<div class="text-error"><@f.errors path="command.checkpointMap[${point.id}]" cssClass="error"/></div>
+											</#if>
+										</@spring.bind>
+									</div>
+									<script>
+										AttendanceRecording.createButtonGroup('#checkpointMap-${point.id}');
+									</script>
 								</div>
-								<script>
-									AttendanceRecording.createButtonGroup('#checkpointMap-${point.id}');
-								</script>
-							</div>
-						</#list>
-					</div>
+              </#list>
+            </div>
+          <#else>
+            This student's attendance has already been reported for this term.
+          </#if>
 				</div>
 			</#macro>
 

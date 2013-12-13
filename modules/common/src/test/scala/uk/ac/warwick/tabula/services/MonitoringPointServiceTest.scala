@@ -6,12 +6,15 @@ import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPo
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 
 class MonitoringPointServiceTest extends TestBase with Mockito {
-	trait ServiceTestSupport extends MonitoringPointDaoComponent {
+
+	trait ServiceTestSupport extends MonitoringPointDaoComponent with TermServiceComponent{
 		val monitoringPointDao = mock[MonitoringPointDao]
+		val termService = mock[TermService]
 	}
 
 	trait CheckpointFixture {
 		val service = new AbstractMonitoringPointService with ServiceTestSupport
+
 		val uniId1 = "1234"
 		val member1 = Fixtures.student(uniId1)
 		val uniId2 = "2345"

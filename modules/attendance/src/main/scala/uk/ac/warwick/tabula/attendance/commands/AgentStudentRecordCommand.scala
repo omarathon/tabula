@@ -60,10 +60,14 @@ trait AgentStudentRecordValidation extends SelfValidating {
 			if (!points.contains(point)) {
 				errors.rejectValue("", "monitoringPointSet.invalidPoint")
 			}
-			if (point.sentToAcademicOffice) {
-				errors.rejectValue("", "monitoringCheckpoint.sentToAcademicOffice")
+			if (!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, pointSet.academicYear).getTermTypeAsString)){
+				errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 			}
-			if (currentAcademicWeek < point.validFromWeek && !(state == null || state == AttendanceState.MissedAuthorised)) {
+
+			if (thisAcademicYear.startYear <= pointSet.academicYear.startYear
+				&& currentAcademicWeek < point.validFromWeek
+				&& !(state == null || state == AttendanceState.MissedAuthorised)
+			) {
 				errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
 			}
 			errors.popNestedPath()
@@ -109,4 +113,6 @@ trait AgentStudentRecordCommandState extends GroupMonitoringPointsByTerm with Mo
 	var checkpointMap: JMap[MonitoringPoint, AttendanceState] =  JHashMap()
 
 	def monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, pointSet.academicYear)
+	def nonReportedTerms = monitoringPointService.findNonReportedTerms(Seq(student), pointSet.academicYear)
+
 }

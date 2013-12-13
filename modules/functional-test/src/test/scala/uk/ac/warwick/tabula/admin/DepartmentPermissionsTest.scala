@@ -1,123 +1,157 @@
 package uk.ac.warwick.tabula.admin
 
-import uk.ac.warwick.tabula.BrowserTest
+import uk.ac.warwick.tabula.{LoginDetails, BrowserTest}
 import org.openqa.selenium.By
 import org.scalatest.GivenWhenThen
 
-// n.b. this test doesn't work with the FirefoxDriver  because the UI pops up modal dialogs which the
+// n.b. this test doesn't work with the FirefoxDriver because the UI pops up modal dialogs which the
 // test isn't expecting. HTMLUnit ignores them.
 class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with GivenWhenThen {
 
-	def withRoleInElement[T](permittedUser: String, parentElement: String, usersFromFixture:Seq[String]=Nil)(fn: => T) =
-		as(P.Admin1) {
+	private def usercodes(parentElement: String) = findAll(cssSelector(s"${parentElement} .user .muted")).toList.map(_.underlying.getText.trim)
 
-			def usercodes = findAll(cssSelector(s"${parentElement} .user .muted")).toList.map(_.underlying.getText.trim)
+	private def noNewUsersListed(parentElement: String, expectedCount: Int) {
+		usercodes(parentElement).size should be (expectedCount)
+	}
 
-			def onlyMe() = {
-				usercodes.size should be (1)
-				usercodes.apply(0) should be (P.Admin1.usercode)
-			}
-			def noNewUsersListed(){
-				usercodes.size should be (usersFromFixture.size)
-			}
+	private def nowhereElse(parentElement: String) = {
+		// doesn't like CSS :not() selector, so have to get all permission-lists and filter out the current one by scala text-mungery
+		val allLists = findAll(cssSelector("#tutors-supervisors-row .permission-list")).toList.filterNot(_.underlying.getAttribute("class").contains(parentElement.replace(".","")))
+		// then delve further to get the usercodes included
+		val filteredUsercodes = allLists map (list => list.underlying.findElements(By.cssSelector(".user .muted")))
+		filteredUsercodes.foreach(_.size should be(0))
+	}
 
-			def nowhereElse() = {
-				// doesn't like CSS :not() selector, so have to get all permission-lists and filter out the current one by scala text-mungery
-				val allLists = findAll(cssSelector("#tutors-supervisors-row .permission-list")).toList.filterNot(_.underlying.getAttribute("class").contains(parentElement.replace(".","")))
-				// then delve further to get the usercodes included
-				val filteredUsercodes = allLists map (list => list.underlying.findElements(By.cssSelector(".user .muted")))
-				filteredUsercodes.foreach(_.size should be(0))
-			}
+	private def gotoPermissionsScreenAndPickUser(parentElement: String, permittedUser: LoginDetails, preExistingCount: Int) {
+		When("I go the admin page")
+		click on linkText("Go to the Test Services admin page")
 
-			When("I go the admin page")
-				click on linkText("Go to the Test Services admin page")
+		Then("I should be able to click on the Manage button")
+		val toolbar = findAll(className("dept-toolbar")).next.underlying
+		click on (toolbar.findElement(By.partialLinkText("Manage")))
 
-			Then("I should be able to click on the Manage button")
-				val toolbar = findAll(className("dept-toolbar")).next.underlying
-				click on (toolbar.findElement(By.partialLinkText("Manage")))
+		And("I should see the permissions menu option")
+		val managersLink = toolbar.findElement(By.partialLinkText("Edit departmental permissions"))
+		eventually {
+			managersLink.isDisplayed should be (true)
+		}
 
-			And("I should see the permissions menu option")
-				val managersLink = toolbar.findElement(By.partialLinkText("Edit departmental permissions"))
-				eventually {
-					managersLink.isDisplayed should be (true)
-				}
+		When("I click the permissions link")
+		click on managersLink
 
-			When("I click the permissions link")
-				click on managersLink
+		Then("I should reach the permissions page")
+		currentUrl should include("/permissions")
 
-			Then("I should reach the permissions page")
-				currentUrl should include("/permissions")
+		And("I should see no users with the role")
+		noNewUsersListed(parentElement, preExistingCount)
 
-			And("I should see no users with the role")
-			noNewUsersListed()
+		And("I should not see anyone else with any other roles")
+		nowhereElse(parentElement)
 
-			And("I should not see anyone else with any other roles")
-				nowhereElse()
+		When("I enter a usercode in the picker")
+		click on cssSelector(s"${parentElement} .pickedUser")
+		enter(permittedUser.usercode)
 
-			When("I enter a usercode in the tutor picker")
-				click on cssSelector(s"${parentElement} .pickedUser")
-				enter(permittedUser)
+		Then("I should get a result back")
+		val typeahead = cssSelector(s"${parentElement} .typeahead .active a")
+		eventuallyAjax {
+			find(typeahead) should not be (None)
+		}
 
-			Then("I should get a result back")
-				val typeahead = cssSelector(s"${parentElement} .typeahead .active a")
-				eventuallyAjax {
-					find(typeahead) should not be (None)
-				}
+		And("The picker result should match the entry")
+		textField(cssSelector(s"${parentElement} .pickedUser")).value should be (permittedUser.usercode)
 
-			And("The picker result should match the entry")
-				textField(cssSelector(s"${parentElement} .pickedUser")).value should be (permittedUser)
+		When("I pick the matching user")
+		click on typeahead
 
-			When("I pick the matching user")
-				click on typeahead
+		Then("It should stay in the picker (confirming HTMLUnit hasn't introduced a regression)")
+		textField(cssSelector(s"${parentElement} .pickedUser")).value should be (permittedUser.usercode)
 
-			Then("It should stay in the picker (confirming HTMLUnit hasn't introduced a regression)")
-				textField(cssSelector(s"${parentElement} .pickedUser")).value should be (permittedUser)
+		And("The usercode should be injected into the form correctly")
+		val injected = find(cssSelector(s"${parentElement} .add-permissions [name=usercodes]"))
+		injected should not be (None)
+		injected.get.underlying.getAttribute("value").trim should be (permittedUser.usercode)
+	}
 
-			And("The usercode should be injected into the form correctly")
-				val injected = find(cssSelector(s"${parentElement} .add-permissions [name=usercodes]"))
-				injected should not be (None)
-				injected.get.underlying.getAttribute("value").trim should be (permittedUser)
+	def addAndRemoveWithRoleInElement[T](performingUser: LoginDetails, permittedUser: LoginDetails, parentElement: String, preExistingCount: Int = 0)(fn: => T) =
+		as(performingUser) {
+			gotoPermissionsScreenAndPickUser(parentElement, permittedUser, preExistingCount)
 
 			When("I submit the form")
-				find(cssSelector(s"${parentElement} form.add-permissions")).get.underlying.submit()
+			find(cssSelector(s"${parentElement} form.add-permissions")).get.underlying.submit()
 
-			Then("I should see  the new entry")
-				({
-					usercodes.size should be (1 + usersFromFixture.size)
-					usercodes should contain (permittedUser)
-				})
+			Then("I should see the new entry")
+			({
+				usercodes(parentElement).size should be (preExistingCount+1)
+				usercodes(parentElement) should contain (permittedUser.usercode)
+			})
 
 			And("I should not see anyone else with any other roles")
-				nowhereElse()
+			nowhereElse(parentElement)
 
 			When("I remove the new entry")
-				val removable = find(cssSelector(s"${parentElement} .remove-permissions [name=usercodes][value=${permittedUser}]"))
-				removable should not be (None)
-				removable.get.underlying.submit()
+			val removable = find(cssSelector(s"${parentElement} .remove-permissions [name=usercodes][value=${permittedUser.usercode}]"))
+			removable should not be (None)
+			removable.get.underlying.submit()
 
 			Then("There should be no users listed")
-				noNewUsersListed()
+			noNewUsersListed(parentElement, preExistingCount)
 
 			And("I should not see anyone else with any other roles")
-				nowhereElse()
+			nowhereElse(parentElement)
 
 			fn
 		}
 
+	def permissionDeniedWithRoleInElement[T](performingUser: LoginDetails, permittedUser: LoginDetails, parentElement: String, preExistingCount:Int = 0)(fn: => T) =
+		as(performingUser) {
+			gotoPermissionsScreenAndPickUser(parentElement, permittedUser, preExistingCount)
+
+			When("I submit the form")
+			find(cssSelector(s"${parentElement} form.add-permissions")).get.underlying.submit()
+
+			Then("I should get an error")
+			({
+				pageSource contains "You cannot assign this role" should be (true)
+				usercodes(parentElement).size should be (preExistingCount)
+				usercodes(parentElement) should not contain (permittedUser.usercode)
+			})
+
+			fn
+		}
+
+	"User Access Manager" should "be able to add and remove departmental admins" in {
+		addAndRemoveWithRoleInElement(P.Admin1, P.Marker1, ".admin-table", 1) {
+			// Nothing more to do, the with...() tests enough
+		}
+	}
+
 	"User Access Manager" should "be able to add and remove senior tutors" in {
-		withRoleInElement(P.Marker1.usercode, ".tutor-table") {
+		addAndRemoveWithRoleInElement(P.Admin1, P.Marker1, ".tutor-table") {
 			// Nothing more to do, the with...() tests enough
 		}
 	}
 
 	"User Access Manager" should "be able to add and remove senior supervisors" in {
-		withRoleInElement(P.Marker1.usercode, ".supervisor-table") {
+		addAndRemoveWithRoleInElement(P.Admin1, P.Marker1, ".supervisor-table") {
 			// Nothing more to do, the with...() tests enough
 		}
 	}
 
-	"User Access Manager" should "be able to add and remove departmental admins" in {
-		withRoleInElement(P.Marker1.usercode, ".admin-table", usersFromFixture = Seq(P.Admin2.usercode)) {
+	"Departmental Admin" should "be able to add and remove departmental admins" in {
+		addAndRemoveWithRoleInElement(P.Admin2, P.Marker1, ".admin-table", 1) {
+			// Nothing more to do, the with...() tests enough
+		}
+	}
+
+	"Departmental Admin" should "not be able to add and remove senior tutors" in {
+		permissionDeniedWithRoleInElement(P.Admin2, P.Marker1, ".tutor-table") {
+			// Nothing more to do, the with...() tests enough
+		}
+	}
+
+	"Departmental Admin" should "not be able to add and remove senior supervisors" in {
+		permissionDeniedWithRoleInElement(P.Admin2, P.Marker1, ".supervisor-table") {
 			// Nothing more to do, the with...() tests enough
 		}
 	}
