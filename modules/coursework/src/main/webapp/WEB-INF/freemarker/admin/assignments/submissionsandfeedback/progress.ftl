@@ -276,7 +276,7 @@
 							</div>
 
 							<#-- If the current action is in this section, then add the next action blowout here -->
-							<#if student.nextStage?? && ['AddMarks','AddFeedback','ReleaseFeedback','DownloadFeedback']?seq_contains(student.nextStage.toString)>
+							<#if student.nextStage?? && ['AddMarks','AddFeedback','ReleaseFeedback','DownloadFeedback', 'ViewOnlineFeedback']?seq_contains(student.nextStage.toString)>
 								<div class="alert pull-right">
 									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
 								</div>
