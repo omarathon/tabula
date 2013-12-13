@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
+import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, SuspectPlagiarised}
 
 @Entity @AccessType("field")
 class Submission extends GeneratedId with PermissionsTarget {
@@ -49,6 +49,7 @@ class Submission extends GeneratedId with PermissionsTarget {
 	var plagiarismInvestigation: PlagiarismInvestigation = PlagiarismInvestigation.Default
 
 	def suspectPlagiarised = plagiarismInvestigation == SuspectPlagiarised
+	def investigationCompleted = plagiarismInvestigation == InvestigationCompleted
 
 	/**
 	 * It isn't essential to record University ID as their user ID
