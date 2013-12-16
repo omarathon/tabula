@@ -82,7 +82,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		existing.users.addUser("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
-		securityService.can(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
+		securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -103,7 +103,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		existing.users.addUser("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
-		securityService.can(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
+		securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -130,7 +130,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		existing.users.addUser("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
-		securityService.can(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
+		securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
@@ -175,7 +175,7 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		existing.users.addUser("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
-		securityService.can(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (false)
+		securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (false)
 		
 		val errors = new BindException(cmd, "command")
 		cmd.validate(errors)
