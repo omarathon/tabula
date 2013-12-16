@@ -21,8 +21,8 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 		val filteredUsercodes = allLists map (list => list.underlying.findElements(By.cssSelector(".user .muted")))
 		filteredUsercodes.foreach(_.size should be(0))
 	}
-
-	private def gotoPermissionsScreenAndPickUser(parentElement: String, permittedUser: LoginDetails, preExistingCount: Int) {
+	
+	private def gotoPermissionsScreen(parentElement: String, preExistingCount: Int) {
 		When("I go the admin page")
 		click on linkText("Go to the Test Services admin page")
 
@@ -47,7 +47,11 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 
 		And("I should not see anyone else with any other roles")
 		nowhereElse(parentElement)
+	}
 
+	private def gotoPermissionsScreenAndPickUser(parentElement: String, permittedUser: LoginDetails, preExistingCount: Int) {
+		gotoPermissionsScreen(parentElement, preExistingCount)
+		
 		When("I enter a usercode in the picker")
 		click on cssSelector(s"${parentElement} .pickedUser")
 		enter(permittedUser.usercode)
@@ -103,19 +107,12 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 			fn
 		}
 
-	def permissionDeniedWithRoleInElement[T](performingUser: LoginDetails, permittedUser: LoginDetails, parentElement: String, preExistingCount:Int = 0)(fn: => T) =
+	def permissionDeniedWithRoleInElement[T](performingUser: LoginDetails, parentElement: String, preExistingCount:Int = 0)(fn: => T) =
 		as(performingUser) {
-			gotoPermissionsScreenAndPickUser(parentElement, permittedUser, preExistingCount)
+			gotoPermissionsScreen(parentElement, preExistingCount)
 
-			When("I submit the form")
-			find(cssSelector(s"${parentElement} form.add-permissions")).get.underlying.submit()
-
-			Then("I should get an error")
-			({
-				pageSource contains "You cannot assign this role" should be (true)
-				usercodes(parentElement).size should be (preExistingCount)
-				usercodes(parentElement) should not contain (permittedUser.usercode)
-			})
+			Then("The button should be disabled")
+			find(cssSelector(s"${parentElement} .actions button")).get.underlying.getAttribute("class").indexOf("disabled") should not be (-1)
 
 			fn
 		}
@@ -145,13 +142,13 @@ class  DepartmentPermissionsTest extends BrowserTest with AdminFixtures with Giv
 	}
 
 	"Departmental Admin" should "not be able to add and remove senior tutors" in {
-		permissionDeniedWithRoleInElement(P.Admin2, P.Marker1, ".tutor-table") {
+		permissionDeniedWithRoleInElement(P.Admin2, ".tutor-table") {
 			// Nothing more to do, the with...() tests enough
 		}
 	}
 
 	"Departmental Admin" should "not be able to add and remove senior supervisors" in {
-		permissionDeniedWithRoleInElement(P.Admin2, P.Marker1, ".supervisor-table") {
+		permissionDeniedWithRoleInElement(P.Admin2, ".supervisor-table") {
 			// Nothing more to do, the with...() tests enough
 		}
 	}

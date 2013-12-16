@@ -475,10 +475,14 @@ Generates the bulk of the picker HTML, inside a fieldset element
 
 
 		<#-- show modals -->
-		$enrolment.on('click', '.show-sits-picker', function() {
+		$enrolment.on('click', '.show-sits-picker', function(e) {
+			e.preventDefault();
+		
 			$('.sits-picker').modal('show');
 		});
-		$enrolment.on('click', '.show-adder', function() {
+		$enrolment.on('click', '.show-adder', function(e) {
+			e.preventDefault();
+			
 			$('.adder').on('shown', function() {
 				$(this).find('textarea').focus();
 			}).modal('show');
