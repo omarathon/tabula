@@ -524,9 +524,6 @@ case class SubmissionsReport(val assignment: Assignment) {
 	/**
 	 * We want to show a warning if some feedback items are missing either marks or attachments
 	 * If however, all feedback items have only marks or attachments then we don't send a warning.
-	 *
-	 * We can never have a situation where no feedbacks have marks or attachments as they need to
-	 * have one or the other to exist in the first place.
 	 */
 	val withoutAttachments = feedbacks.filter(f => !f.hasAttachments && f.defaultFeedbackComments.filter { _.hasText }.isEmpty).map(toUniId).toSet
 	val withoutMarks = feedbacks.filter(!_.hasMarkOrGrade).map(toUniId).toSet
