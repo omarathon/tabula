@@ -338,11 +338,8 @@
 	</table>
 	<script type="text/javascript">
 		(function($) {
-			var fixHeaderFooter = $('.fixed-container').fixHeaderFooter({minimumScreenHeightFix: 800});
-
-
-			$(".submission-table").sortableTable({
-				textExtraction: function(node) { 
+			$('.submission-table:not(.floatingHeadTable)').sortableTable({
+				textExtraction: function(node) {
 					var $el = $(node);
 					if ($el.hasClass('originality-report')) {
 						var $tooltip = $el.find('.similarity-tooltip').first();
@@ -353,11 +350,13 @@
 						}
 					} else if ($el.hasClass('word-count')) {
 						return parseInt($el.text().trim().replace(',',''));
-					} else {				
+					} else {
 						return $el.text().trim();
-					} 
+					}
 				}
 			});
+
+			$('.fixed-container').fixHeaderFooter({minimumScreenHeightFix: 800});
 		})(jQuery);
 	</script>
 </div>
