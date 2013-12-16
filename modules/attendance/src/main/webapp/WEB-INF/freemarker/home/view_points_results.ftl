@@ -48,27 +48,24 @@
 								All routes
 							<#else>
 								<#local popoverContent>
-									<p class="muted"><small>Only routes that have students matching the filter are applicable.</small></p>
 									<ul class="unstyled">
 										<#list command.allRoutes as route>
 											<#local isInPoint = false />
 											<#list groupedPoint.routes as pointRoutePair>
-												<#if pointRoutePair._1().code == route.code><#local isInPoint = true /></#if>
-											</#list>
-											<li>
-												<#if isInPoint>
-													<@fmt.route_name route />
-												<#else>
-													<span class="muted"><@fmt.route_name route /></span>
+												<#if pointRoutePair._1().code == route.code>
+													<li>
+														<@fmt.route_name route />
+
+													</li>
 												</#if>
-											</li>
+											</#list>
 										</#list>
 										<#list groupedPoint.routes as pointRoutePair>
 											<#if !pointRoutePair._2()><li><span title="${pointRoutePair._1().department.name}"><@fmt.route_name pointRoutePair._1() /></span></li></#if>
 										</#list>
 									</ul>
 								</#local>
-								<a class="use-wide-popover" data-title="Applicable routes" data-content="${popoverContent}" data-html="true" data-placement="bottom">
+								<a class="use-wide-popover" data-content="${popoverContent}" data-html="true" data-placement="bottom">
 									<@fmt.p groupedPoint.routes?size "route" />
 								</a>
 							</#if>
