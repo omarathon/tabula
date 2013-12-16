@@ -92,7 +92,7 @@
 			<script>
 				jQuery(function($){
 					$('#meetingDate, #format').on('change', function(){
-						$.get('<@routes.meeting_will_create_checkpoint studentCourseDetails />', {
+						$.get('<@routes.meeting_will_create_checkpoint studentCourseDetails.student />', {
 							'relationshipType' : '${relationshipType.urlPart}',
 							'meetingFormat' : $('#format').val(),
 							'meetingDate' : $('#meetingDate').val()
