@@ -42,6 +42,9 @@ class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module
 	
 	def toXML = {
 		<assignment>
+			<generic-feedback>
+				{ assignment.genericFeedback }
+			</generic-feedback>
 			<students>
 				{ items map studentElement }
 			</students>
@@ -58,7 +61,11 @@ class XMLBuilder(val items: Seq[Student], val assignment: Assignment, val module
 				</submission> % submissionData(item) % submissionStatusData(item)
 			}
 			{ <marking /> % markerData(item, assignment) % plagiarismData(item) }
-			{ <feedback /> % feedbackData(item) }
+			{ 
+				<feedback>
+					{ item.coursework.enhancedFeedback.flatMap { _.feedback.defaultFeedbackComments }.getOrElse(null) }
+				</feedback> % feedbackData(item) 
+			}
 		</student> % identityData(item)
 	}
 
@@ -343,6 +350,8 @@ trait SubmissionAndFeedbackExport {
 			"id" -> item.feedback.id, 
 			"uploaded" -> item.feedback.uploadedDate, 
 			"released" -> item.feedback.released, 
+			"mark" -> item.feedback.actualMark,
+			"grade" -> item.feedback.actualGrade,
 			"downloaded" -> item.downloaded
 		) 
 		case None => Map()
