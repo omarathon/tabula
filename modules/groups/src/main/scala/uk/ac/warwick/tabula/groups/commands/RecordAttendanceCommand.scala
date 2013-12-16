@@ -44,6 +44,7 @@ object RecordAttendanceCommand {
 	def apply(event: SmallGroupEvent, week: Int, user: CurrentUser) =
 		new RecordAttendanceCommand(event, week, user)
 			with ComposableCommand[(SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])]
+			with SmallGroupEventInFutureCheck
 			with RecordAttendanceCommandPermissions
 			with RecordAttendanceDescription
 			with RecordAttendanceCommandValidation
@@ -60,11 +61,14 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 		with RecordAttendanceState 
 		with PopulateOnForm {
 	self: SmallGroupServiceComponent with UserLookupComponent with ProfileServiceComponent =>
-	
-	def populate() {
-		val occurrence = smallGroupService.getSmallGroupEventOccurrence(event, week)
 		
-		members = (event.group.students.users.map { user =>
+	lazy val occurrence = smallGroupService.getSmallGroupEventOccurrence(event, week)
+	
+	var studentsState: JMap[UniversityId, AttendanceState] = 
+		LazyMaps.create { member: UniversityId => null: AttendanceState }.asJava
+	
+	lazy val members: Seq[MemberOrUser] = {
+		(event.group.students.users.map { user =>
 			val member = profileService.getMemberByUniversityId(user.getWarwickId)
 			MemberOrUser(member, user)
 		} ++ (occurrence.map { _.attendance.asScala.toSeq.map { a =>
@@ -72,7 +76,9 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 			val user = userLookup.getUserByWarwickUniId(a.universityId)
 			MemberOrUser(member, user)
 		}}.getOrElse(Seq()))).distinct.sortBy(mou => (mou.lastName, mou.firstName, mou.universityId))
-		
+	}
+	
+	def populate() {		
 		studentsState = members.map { member =>
 			member.universityId -> 
 				occurrence
@@ -101,7 +107,7 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 }
 
 trait RecordAttendanceCommandValidation extends SelfValidating {
-	self: RecordAttendanceState with UserLookupComponent with TermServiceComponent =>
+	self: RecordAttendanceState with UserLookupComponent with SmallGroupEventInFutureCheck =>
 	
 	def validate(errors: Errors) {
 		val invalidUsers: Seq[UniversityId] = studentsState.asScala.map { case (studentId, _) => studentId }.filter(s => !userLookup.getUserByWarwickUniId(s).isFoundUser()).toSeq
@@ -114,13 +120,10 @@ trait RecordAttendanceCommandValidation extends SelfValidating {
 			}
 		}
 		
-		val academicYear = event.group.groupSet.academicYear
-		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)
-		
 		studentsState.asScala.foreach { case (studentId, state) => 
 			errors.pushNestedPath(s"studentsState[${studentId}]")
 			
-			if (currentAcademicWeek < week && !(state == null || state == AttendanceState.MissedAuthorised)) {
+			if (isFutureEvent && !(state == null || state == AttendanceState.MissedAuthorised)) {
 				errors.rejectValue("", "smallGroup.attendance.beforeEvent")
 			}
 			
@@ -141,10 +144,19 @@ trait RecordAttendanceState {
 	val event: SmallGroupEvent
 	val week: Int
 	
-	var studentsState: JMap[UniversityId, AttendanceState] = 
-		LazyMaps.create { member: UniversityId => null: AttendanceState }.asJava
+	def studentsState: JMap[UniversityId, AttendanceState]
+	def members: Seq[MemberOrUser]
+}
+
+trait SmallGroupEventInFutureCheck {
+	self: RecordAttendanceState with TermServiceComponent =>
 	
-	var members: Seq[MemberOrUser] = _
+	lazy val isFutureEvent = {
+		val academicYear = event.group.groupSet.academicYear
+		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)
+		
+		currentAcademicWeek < week
+	}
 }
 
 trait RecordAttendanceDescription extends Describable[(SmallGroupEventOccurrence, Seq[SmallGroupEventAttendance])] {

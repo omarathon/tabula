@@ -17,13 +17,13 @@
 			<button type="button" class="btn" data-state="">
 				<i class="icon-minus icon-fixed-width" title="Set to 'Not recorded'"></i>
 			</button>
-			<button type="button" class="btn btn-unauthorised" data-state="unauthorised">
+			<button type="button" class="btn btn-unauthorised<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>" data-state="unauthorised">
 				<i class="icon-remove icon-fixed-width" title="Set to 'Missed (unauthorised)'"></i>
 			</button>
 			<button type="button" class="btn btn-authorised" data-state="authorised">
 				<i class="icon-remove-circle icon-fixed-width" title="Set to 'Missed (authorised)'"></i>
 			</button>
-			<button type="button" class="btn btn-attended" data-state="attended">
+			<button type="button" class="btn btn-attended<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>" data-state="attended">
 				<i class="icon-ok icon-fixed-width" title="Set to 'Attended'"></i>
 			</button>
 		</div>
@@ -72,13 +72,13 @@
 								<button type="button" class="btn">
 									<i class="icon-minus icon-fixed-width" title="Set all to 'Not recorded'"></i>
 								</button>
-								<button type="button" class="btn btn-unauthorised">
+								<button type="button" class="btn btn-unauthorised<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>">
 									<i class="icon-remove icon-fixed-width" title="Set all to 'Missed (unauthorised)'"></i>
 								</button>
 								<button type="button" class="btn btn-authorised">
 									<i class="icon-remove-circle icon-fixed-width" title="Set all to 'Missed (authorised)'"></i>
 								</button>
-								<button type="button" class="btn btn-attended">
+								<button type="button" class="btn btn-attended<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>">
 									<i class="icon-ok icon-fixed-width" title="Set all to 'Attended'"></i>
 								</button>
 							</div>
@@ -104,7 +104,7 @@
 								<#local currentState = mapGet(command.studentsState, student.universityId) />
 							</#if>
 							<select id="studentsState-${student.universityId}" name="studentsState[${student.universityId}]">
-								<option value="" <#if !hasState >selected</#if>>Not recorded</option>
+								<option value="" <#if !hasState>selected</#if>>Not recorded</option>
 								<#list allCheckpointStates as state>
 									<option value="${state.dbValue}" <#if hasState && currentState.dbValue == state.dbValue>selected</#if>>${state.description}</option>
 								</#list>
@@ -114,10 +114,10 @@
 						
 						<@fmt.member_photo student "tinythumbnail" true />
 						${student.fullName}
+						
 						<@spring.bind path="command.studentsState[${student.universityId}]">
-							<#if status.error>
-								<div class="text-error"><@f.errors path="command.studentsState[${student.universityId}]" cssClass="error"/></div>
-							</#if>
+							<#list status.errorMessages as err>${err}</#list>
+							<div class="text-error"><@f.errors path="studentsState[${student.universityId}]" cssClass="error"/></div>
 						</@spring.bind>
 					</div>
 					<script>

@@ -17,11 +17,17 @@ exports.createButtonGroup = function(id){
 };
 
 exports.bindButtonGroupHandler = function() {
-    $('#recordAttendance').on('click', 'div.btn-group button', function(){
+    $('#recordAttendance').on('click', 'div.btn-group button', function(e){
         var $this = $(this);
-        $this.closest('div.pull-right').find('option').filter(function(){
-            return $(this).val() == $this.data('state');
-        }).prop('selected', true);
+        if ($this.is('.disabled')) {
+        	e.stopPropagation();
+        	e.preventDefault();
+        	return false;
+        } else {
+	        $this.closest('div.pull-right').find('option').filter(function(){
+	            return $(this).val() == $this.data('state');
+	        }).prop('selected', true);
+	      }
     });
 };
 
