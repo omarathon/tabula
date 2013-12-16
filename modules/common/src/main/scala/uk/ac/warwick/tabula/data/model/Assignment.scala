@@ -499,12 +499,10 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 		"module" -> module)
 
     def getUniIdsWithSubmissionOrFeedback = {
-        var idsWithSubmissionOrFeedback: Set[String] = Set()
-
-        for (submission <- submissions) idsWithSubmissionOrFeedback += submission.universityId
-        for (feedback <- fullFeedback) idsWithSubmissionOrFeedback += feedback.universityId
-
-        idsWithSubmissionOrFeedback
+				val submissionIds = submissions.asScala.map { _.universityId }.toSet
+				val feedbackIds = fullFeedback.map { _.universityId }.toSet
+				
+				submissionIds ++ feedbackIds
     }
 
 }

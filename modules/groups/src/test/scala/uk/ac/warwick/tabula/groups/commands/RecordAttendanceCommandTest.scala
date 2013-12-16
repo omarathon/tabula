@@ -81,7 +81,7 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		
 		val week = 1
 
-		val command = new RecordAttendanceCommand(event, week, currentUser) with CommandTestSupport with RecordAttendanceCommandValidation
+		val command = new RecordAttendanceCommand(event, week, currentUser) with CommandTestSupport with RecordAttendanceCommandValidation with SmallGroupEventInFutureCheck 
 		
 		// Current week is 1, so allowed to record
 		command.termService.getAcademicWeekForAcademicYear(isA[DateTime], isEq(set.academicYear)) returns (1)
