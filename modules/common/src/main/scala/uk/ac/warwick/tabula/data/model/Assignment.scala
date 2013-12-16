@@ -21,6 +21,7 @@ import uk.ac.warwick.tabula.data.model.permissions.AssignmentGrantedRole
 import scala.reflect._
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 
 object Assignment {
@@ -499,12 +500,10 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 		"module" -> module)
 
     def getUniIdsWithSubmissionOrFeedback = {
-        var idsWithSubmissionOrFeedback: Set[String] = Set()
-
-        for (submission <- submissions) idsWithSubmissionOrFeedback += submission.universityId
-        for (feedback <- fullFeedback) idsWithSubmissionOrFeedback += feedback.universityId
-
-        idsWithSubmissionOrFeedback
+				val submissionIds = submissions.asScala.map { _.universityId }.toSet
+				val feedbackIds = fullFeedback.map { _.universityId }.toSet
+				
+				submissionIds ++ feedbackIds
     }
 
 }
@@ -529,7 +528,7 @@ case class SubmissionsReport(val assignment: Assignment) {
 	 * We can never have a situation where no feedbacks have marks or attachments as they need to
 	 * have one or the other to exist in the first place.
 	 */
-	val withoutAttachments = feedbacks.filter(!_.hasAttachments).map(toUniId).toSet
+	val withoutAttachments = feedbacks.filter(f => !f.hasAttachments && f.defaultFeedbackComments.filter { _.hasText }.isEmpty).map(toUniId).toSet
 	val withoutMarks = feedbacks.filter(!_.hasMarkOrGrade).map(toUniId).toSet
 	val plagiarised = submissions.filter(_.suspectPlagiarised).map(toUniId).toSet
 

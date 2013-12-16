@@ -90,11 +90,11 @@
 				<#if student.coursework.enhancedSubmission??>
 					<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission?? && student.coursework.enhancedSubmission.submission.assignment??>
 						<#if student.coursework.enhancedSubmission.submission.firstMarker?has_content>
-							<#local firstMarker><span data-profile="${student.coursework.enhancedSubmission.submission.firstMarker.warwickId}">${student.coursework.enhancedSubmission.submission.firstMarker.fullName}</span></#local>
+							<#local firstMarker><span data-profile="${student.coursework.enhancedSubmission.submission.firstMarker.warwickId!}">${student.coursework.enhancedSubmission.submission.firstMarker.fullName}</span></#local>
 						</#if>
 
 						<#if student.coursework.enhancedSubmission.submission.secondMarker?has_content>
-							<#local secondMarker><span data-profile="${student.coursework.enhancedSubmission.submission.secondMarker.warwickId}">${student.coursework.enhancedSubmission.submission.secondMarker.fullName}</span></#local>
+							<#local secondMarker><span data-profile="${student.coursework.enhancedSubmission.submission.secondMarker.warwickId!}">${student.coursework.enhancedSubmission.submission.secondMarker.fullName}</span></#local>
 						</#if>
 					</#if>
 				</#if>
@@ -190,8 +190,12 @@
 							<h3>Plagiarism</h3>
 
 							<div class="labels">
-								<#if submission?? && submission.suspectPlagiarised>
-									<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised" data-container="body"></i>
+								<#if submission??>
+									<#if submission.suspectPlagiarised>
+										<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised" data-container="body"></i>
+									<#elseif submission.investigationCompleted>
+										<i class="icon-ok-sign use-tooltip" title="Plagiarism investigation completed" data-container="body"></i>
+									</#if>
 								</#if>
 							</div>
 
@@ -276,7 +280,7 @@
 							</div>
 
 							<#-- If the current action is in this section, then add the next action blowout here -->
-							<#if student.nextStage?? && ['AddMarks','AddFeedback','ReleaseFeedback','DownloadFeedback']?seq_contains(student.nextStage.toString)>
+							<#if student.nextStage?? && ['AddMarks','AddFeedback','ReleaseFeedback','DownloadFeedback', 'ViewOnlineFeedback']?seq_contains(student.nextStage.toString)>
 								<div class="alert pull-right">
 									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
 								</div>

@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.{Feedback, Submission, Assignment, Module
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.MembershipItem
 import scala.Some
+import uk.ac.warwick.tabula.MockUserLookup
 
 class OnlineFeedbackCommandTest extends TestBase with Mockito {
 
@@ -75,7 +76,8 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 }
 
 // Implements the dependencies declared by the command
-trait OnlineFeedbackCommandTestSupport extends SubmissionServiceComponent with FeedbackServiceComponent with Mockito {
+trait OnlineFeedbackCommandTestSupport extends SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent with Mockito {
+	val userLookup = new MockUserLookup
 	val submissionService = mock[SubmissionService]
 	val feedbackService = mock[FeedbackService]
 	def apply(): Seq[StudentFeedbackGraph] = Seq()

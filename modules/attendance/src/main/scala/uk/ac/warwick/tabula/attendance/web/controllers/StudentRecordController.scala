@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.attendance.commands.{StudentRecordCommandState, Stud
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.attendance.commands.StudentRecordCommandState
+import uk.ac.warwick.tabula.commands.PopulateOnForm
 
 @Controller
 @RequestMapping(Array("/view/{department}/students/{student}/record"))
@@ -23,12 +25,11 @@ class StudentRecordController extends AttendanceController {
 		@PathVariable student: StudentMember,
 		user: CurrentUser,
 		@RequestParam(value="academicYear", required = false) academicYear: AcademicYear
-	) = {
-		StudentRecordCommand(department, student, user, Option(academicYear))
-	}
+	): Appliable[Seq[MonitoringCheckpoint]] with PopulateOnForm with StudentRecordCommandState
+		= StudentRecordCommand(department, student, user, Option(academicYear))
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def list(@ModelAttribute("command") cmd: StudentRecordCommand) = {
+	def list(@ModelAttribute("command") cmd: Appliable[Seq[MonitoringCheckpoint]] with StudentRecordCommandState with PopulateOnForm) = {
 		cmd.populate()
 		form(cmd)
 	}

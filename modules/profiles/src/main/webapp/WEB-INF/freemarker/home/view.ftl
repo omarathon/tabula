@@ -67,8 +67,9 @@
 				</p>
 			</#if>
 			
-			<#assign dept = {"code":user.departmentCode?lower_case}>
-			<h2><a href="<@routes.filter_students dept />">All students in ${user.departmentName}</a></h2>
+			<#if currentUserDepartment??>
+				<h2><a href="<@routes.filter_students currentUserDepartment />">All students in ${currentUserDepartment.name}</a></h2>
+			</#if>
 		</div>
 		
 		<#if adminDepartments?has_content>

@@ -1,12 +1,14 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringPointSet, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointReport, MonitoringCheckpoint, MonitoringPointType, MonitoringPointSet, MonitoringPoint}
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Department, Route}
 import uk.ac.warwick.tabula.JavaImports.{JHashSet, JArrayList}
 import uk.ac.warwick.tabula.attendance.commands.manage.{UpdateMonitoringPointState, UpdateMonitoringPointValidation, UpdateMonitoringPointCommand}
+import scala.collection.JavaConverters._
+import uk.ac.warwick.util.termdates.Term
 
 class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 
@@ -29,6 +31,7 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 		monitoringPoint.name = existingName
 		monitoringPoint.validFromWeek = existingWeek
 		monitoringPoint.requiredFromWeek = existingWeek
+		monitoringPoint.pointSet = set
 		val otherMonitoringPoint = new MonitoringPoint
 		otherMonitoringPoint.id = "2"
 		val otherExistingName = "Point 2"
@@ -38,6 +41,9 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 		otherMonitoringPoint.requiredFromWeek = otherExistingWeek
 		set.points = JArrayList(monitoringPoint, otherMonitoringPoint)
 		val command = new UpdateMonitoringPointCommand(set, monitoringPoint) with CommandTestSupport
+		command.monitoringPointService.getCheckpointsByStudent(set.points.asScala) returns Seq.empty
+		val term = mock[Term]
+		term.getTermTypeAsString() returns ("Autumn")
 	}
 
 	@Test
@@ -142,19 +148,6 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def validateSentToAcademicOfficeNoChanges() {
-		new Fixture {
-			monitoringPoint.sentToAcademicOffice = true
-			command.name = "New name"
-			command.validFromWeek = existingWeek
-			command.requiredFromWeek = existingWeek
-			var errors = new BindException(command, "command")
-			command.validate(errors)
-			errors.hasErrors should be (right = true)
-		}
-	}
-
-	@Test
 	def validateHasCheckpointsNoChanges() {
 		new Fixture {
 			command.monitoringPointService.countCheckpointsForPoint(monitoringPoint) returns 2
@@ -226,6 +219,27 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 			command.validate(errors)
 			errors.hasFieldErrors should be (right = true)
 			errors.getFieldError("meetingQuantity") should not be null
+		}
+	}
+
+	@Test
+	def validateAlreadyReportedThisTerm() {
+		new Fixture {
+			command.name = "New name"
+			command.validFromWeek = existingWeek
+			command.requiredFromWeek = existingWeek
+
+			val student = Fixtures.student("12345")
+
+			command.termService.getTermFromAcademicWeek(monitoringPoint.validFromWeek, set.academicYear) returns (term)
+			command.termService.getTermFromAcademicWeek(otherMonitoringPoint.validFromWeek, set.academicYear) returns (term)
+			command.monitoringPointService.getCheckpointsByStudent(set.points.asScala) returns Seq((student, mock[MonitoringCheckpoint]))
+			// there is already a report sent for this term, so we cannot edit this Monitoring Point
+			command.monitoringPointService.findReports(Seq(student), set.academicYear, term.getTermTypeAsString ) returns Seq(new MonitoringPointReport)
+
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasErrors should be (right = true)
 		}
 	}
 

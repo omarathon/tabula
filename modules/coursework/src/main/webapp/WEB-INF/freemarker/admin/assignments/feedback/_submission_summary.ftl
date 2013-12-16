@@ -10,7 +10,9 @@
 		</#if>
 
 		<#if submission.suspectPlagiarised>
-			<span class="label label-important use-tooltip" title="Suspected of being plagiarised" data-container="body">Plagiarism Suspected</span>
+			<span class="label label-important use-tooltip" title="Suspected of being plagiarised" data-container="body">Plagiarism suspected</span>
+		<#elseif submission.investigationCompleted>
+			<span class="label label-info use-tooltip" title="No evidence of plagiarism was found" data-container="body">Plagiarism investigation completed</span>
 		</#if>
 	</div>
 

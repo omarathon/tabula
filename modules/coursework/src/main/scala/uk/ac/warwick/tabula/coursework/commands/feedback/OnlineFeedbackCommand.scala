@@ -15,6 +15,7 @@ object OnlineFeedbackCommand {
 			with OnlineFeedbackPermissions
 			with AutowiringSubmissionServiceComponent
 			with AutowiringFeedbackServiceComponent
+			with AutowiringUserLookupComponent
 			with Unaudited
 			with ReadOnly
 }
@@ -23,10 +24,14 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 	extends CommandInternal[Seq[StudentFeedbackGraph]]
 	with Appliable[Seq[StudentFeedbackGraph]] with OnlineFeedbackState {
 
-	self: SubmissionServiceComponent with FeedbackServiceComponent =>
+	self: SubmissionServiceComponent with FeedbackServiceComponent with UserLookupComponent =>
 
 	def applyInternal() = {
-		val students = assignment.membershipInfo.items.map(_.user)
+		val studentsWithSubmissionOrFeedback = 
+			assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted.map { userLookup.getUserByWarwickUniId }
+		val unsubmittedStudents = assignment.membershipInfo.items.map(_.user).filterNot { studentsWithSubmissionOrFeedback.contains }
+			
+		val students = studentsWithSubmissionOrFeedback ++ unsubmittedStudents
 		students.map { student =>
 			val hasSubmission = submissionService.getSubmissionByUniId(assignment, student.getWarwickId).isDefined
 			val feedback = feedbackService.getFeedbackByUniId(assignment, student.getWarwickId)

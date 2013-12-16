@@ -1,0 +1,116 @@
+@import "bootstrap/variables.less";
+@import "bootstrap/mixins.less";
+
+.recordCheckpointForm .save-row {
+	width:100%;
+	.pull-right {
+		padding-right:2.5em;
+	}
+}
+
+.record-attendance-form-header {
+	div.span9 {
+        padding: 15px 0px;
+        span {
+			margin-right: 10px
+		}
+    }
+    div.span3 {
+        padding-top: 9px;
+    }
+}
+
+.tabula-page, #container {
+	.active-colour(@activeColour, @textColour: #fff) {
+		// Remove the text shadow because it makes things look weird against dark backgrounds
+		text-shadow: none;
+	
+		// Hover/focus state
+	  &:hover,
+	  &:focus {
+	    text-decoration: none;
+	    background-position: 0 -36px;
+
+	    .transition(none);
+	  }
+	
+		// in these cases the gradient won't cover the background, so we override
+	  &:hover, &:focus, &:active, &.active {
+	    color: @textColour;
+	    background-color: @activeColour;
+	    *background-color: darken(@activeColour, 5%);
+	  }
+	  
+	  &:disabled, &.disabled {
+	  	color: @activeColour;
+	  	background-color: #e6e6e6;
+	    *background-color: darken(#e6e6e6, 5%);
+	  }
+	
+	  // IE 7 + 8 can't handle box-shadow to show active, so we darken a bit ourselves
+	  &:active,
+	  &.active {
+	    background-color: @activeColour e("\9");
+	  }
+	}
+
+	.btn-attended { 
+		color: @successText;
+		.active-colour(@successText); 
+	}
+	.btn-unauthorised { 
+		color: @errorText;
+		.active-colour(@errorText); 
+	}
+	.btn-authorised { 
+		color: @infoText; 
+		.active-colour(@infoText);
+	}
+
+	.checkAllMessage {
+	  padding-right: 6px;
+	}
+}
+
+.recordCheckpointForm .btn-group {
+  margin-right:13px;
+  
+  button { margin-right: 0px; }
+}
+
+.record-attendance-form-header {
+	.span12 {
+		padding:3px 0 3px 0;
+	}
+}
+
+.is-smallscreen #container {
+	.recordCheckpointForm h1 {
+		margin-bottom:8px;
+	}
+
+	.yearAndRoute, .record-attendance-form-header div.span8 {
+		display:none;
+	}
+
+	.record-attendance-form-header div.span4 {
+		padding:3px 0 3px 3px;
+	}
+
+	.recordCheckpointForm h1 {
+		font-size:22px;
+	}
+
+	.persist-footer {
+		padding-top:16px;
+		padding-bottom:16px;
+	}
+}
+
+@media print {
+	.tabula-page, #container {
+		.recordCheckpointForm {
+			.checkAllMessage, .btn-group, .save-row, .record-attendance-form-header { display: none; }
+		}
+	}
+}

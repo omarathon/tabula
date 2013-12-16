@@ -20,6 +20,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentdelete assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/delete"/></#macro>
 <#macro assignmentedit assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/edit"/></#macro>
 
+<#macro plagiarismInvestigation assignment><@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised'/></#macro>
 <#macro onlinefeedback assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/online"/></#macro>
 <#macro markerOnlinefeedback assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/online"/></#macro>
 <#macro onlinefeedbackform assignment studentid><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/online/${studentid}"/></#macro>

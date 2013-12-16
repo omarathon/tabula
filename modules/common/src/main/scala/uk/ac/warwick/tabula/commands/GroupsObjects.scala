@@ -10,7 +10,7 @@ import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.FileAttachment
 
-trait GroupsObjects[A >: Null, B >: Null] extends BindListener {
+trait GroupsObjects[A >: Null, B >: Null] extends BindListener with PopulateOnForm {
 	
 	/** Mapping from B to an ArrayList of As. */	
 	var mapping: JMap[B, JList[A]] =

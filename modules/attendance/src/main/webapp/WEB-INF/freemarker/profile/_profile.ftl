@@ -9,42 +9,33 @@
 
 <#macro pointsInATerm term>
 	<#list monitoringPointsByTerm[term] as point>
-		<div class="item-info row-fluid term">
-			<div class="span12">
-				<h4>${term}</h4>
-				<div class="row-fluid point">
-					<div class="span8 ellipsis" title="${point.name} (<@fmt.monitoringPointFormat point true />)">
-						${point.name} (<a class="use-tooltip" data-html="true" title="<@fmt.monitoringPointDateFormat point />"><@fmt.monitoringPointFormat point /></a>)
-					</div>
-					<div class="span2 state">
-						<#if checkpointState[point.id]??>
-							<#local thisPointCheckpointState = checkpointState[point.id] />
-							<#if thisPointCheckpointState == "attended">
-								<span class="label label-success">Attended</span>
-							<#elseif thisPointCheckpointState == "authorised">
-								<span class="label label-info" title="Missed (authorised)">Missed</span>
-							<#elseif thisPointCheckpointState == "unauthorised">
-								<span class="label label-important" title="Missed (unauthorised)">Missed</span>
-							</#if>
-						</#if>
-					</div>
-					<div class="span2">
-						<#if can_record>
-							<#local returnTo>
-								<@routes.profile command.student />
-							</#local>
-							<a href="<@routes.recordStudentPoint point command.student returnTo />"
-								<#if point.sentToAcademicOffice>
-									class="btn btn-mini disabled" title="Monitoring information for this point has been submitted and can no longer be edited"
-								<#else>
-									class="btn btn-mini btn-primary"
-								</#if>
-							>
-								Record
-							</a>
-						</#if>
-					</div>
-				</div>
+		<div class="row-fluid point">
+			<div class="span8 ellipsis" title="${point.name} (<@fmt.monitoringPointFormat point true />)">
+				${point.name} (<a class="use-tooltip" data-html="true" title="<@fmt.monitoringPointDateFormat point />"><@fmt.monitoringPointFormat point /></a>)
+			</div>
+			<div class="span2 state">
+				<#if checkpointState[point.id]??>
+					<#local thisPointCheckpointState = checkpointState[point.id] />
+					<#if thisPointCheckpointState == "attended">
+						<span class="label label-success">Attended</span>
+					<#elseif thisPointCheckpointState == "authorised">
+						<span class="label label-info" title="Missed (authorised)">Missed</span>
+					<#elseif thisPointCheckpointState == "unauthorised">
+						<span class="label label-important" title="Missed (unauthorised)">Missed</span>
+					</#if>
+				</#if>
+			</div>
+			<div class="span2">
+				<#if can_record>
+					<#local returnTo>
+						<@routes.profile command.student />
+					</#local>
+					<a href="<@routes.recordStudentPoint point command.student returnTo />"
+							class="btn btn-mini btn-primary"
+					>
+						Record
+					</a>
+				</#if>
 			</div>
 		</div>
 	</#list>
@@ -90,7 +81,12 @@
 		<#else>
 			<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
         		<#if monitoringPointsByTerm[term]??>
-        			<@pointsInATerm term/>
+					<div class="item-info row-fluid term">
+						<div class="span12">
+							<h4>${term}</h4>
+		        			<@pointsInATerm term/>
+						</div>
+					</div>
         		</#if>
         	</#list>
 		</#if>

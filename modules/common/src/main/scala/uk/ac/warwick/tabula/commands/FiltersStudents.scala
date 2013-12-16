@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.util.web.UriBuilder
+import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 
 object FiltersStudents {
 	val MaxStudentsPerPage = 100
@@ -37,7 +38,7 @@ object FiltersStudents {
 	).toMap
 }
 
-trait FiltersStudents extends ProfileServiceComponent {
+trait FiltersStudents extends ProfileServiceComponent with PermissionsCheckingMethods {
 	import FiltersStudents._
 	
 	def department: Department
@@ -105,12 +106,12 @@ trait FiltersStudents extends ProfileServiceComponent {
 		(department.routes.asScala ++ department.children.asScala.flatMap { routesForDepartmentAndSubDepartments }).sorted
 
 	// Do we need to consider out-of-department modules/routes or can we rely on users typing them in manually?
-	lazy val allModules: Seq[Module] = modulesForDepartmentAndSubDepartments(department)
+	lazy val allModules: Seq[Module] = modulesForDepartmentAndSubDepartments(mandatory(department))
 	lazy val allCourseTypes: Seq[CourseType] = CourseType.all
-	lazy val allRoutes: Seq[Route] = routesForDepartmentAndSubDepartments(department).sorted(Route.DegreeTypeOrdering)
+	lazy val allRoutes: Seq[Route] = routesForDepartmentAndSubDepartments(mandatory(department)).sorted(Route.DegreeTypeOrdering)
 	lazy val allYearsOfStudy: Seq[Int] = 1 to 8
-	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(department.rootDepartment)
-	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(department)
+	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(mandatory(department).rootDepartment)
+	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(mandatory(department))
 
 	def serializeFilter = {
 		val result = new UriBuilder()
@@ -124,5 +125,15 @@ trait FiltersStudents extends ProfileServiceComponent {
 			""
 		else
 			result.getQuery
+	}
+	def filterMap = {
+		Map(
+			"courseTypes" -> courseTypes.asScala.map{_.code}.mkString(","),
+			"routes" -> routes.asScala.map{_.code}.mkString(","),
+			"modesOfAttendance" -> modesOfAttendance.asScala.map{_.code}.mkString(","),
+			"yearsOfStudy" -> yearsOfStudy.asScala.mkString(","),
+			"sprStatuses" -> sprStatuses.asScala.map{_.code}.mkString(","),
+			"modules" -> modules.asScala.map{_.code}.mkString(",")
+		)
 	}
 }

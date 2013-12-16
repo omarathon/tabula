@@ -3,7 +3,7 @@
 <#assign feedbackGraphs = studentFeedbackGraphs />
 
 <#function markingId user>
-	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource") == 'WarwickExtUsers'>
+	<#if !user.warwickId?has_content || user.getExtraProperty("urn:websignon:usersource")! == 'WarwickExtUsers'>
 		<#return user.userId />
 	<#else>
 		<#return user.warwickId />

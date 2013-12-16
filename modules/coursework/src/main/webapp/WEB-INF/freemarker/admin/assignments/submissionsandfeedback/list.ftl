@@ -226,6 +226,8 @@
 							</#if>
 							<#if submission.suspectPlagiarised>
 								<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised"></i>
+							<#elseif submission.investigationCompleted>
+								<i class="icon-ok-sign use-tooltip" title="Plagiarism investigation completed"></i>
 							</#if>
 						<#elseif !student.coursework.enhancedFeedback??>
 							<#if student.coursework.enhancedExtension?has_content>
