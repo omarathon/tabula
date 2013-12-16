@@ -338,6 +338,8 @@
 	</table>
 	<script type="text/javascript">
 		(function($) {
+			$('.fixed-container').fixHeaderFooter({minimumScreenHeightFix: 800});
+
 			$('.submission-table:not(.floatingHeadTable)').sortableTable({
 				textExtraction: function(node) {
 					var $el = $(node);
@@ -356,7 +358,6 @@
 				}
 			});
 
-			$('.fixed-container').fixHeaderFooter({minimumScreenHeightFix: 800});
 		})(jQuery);
 	</script>
 </div>

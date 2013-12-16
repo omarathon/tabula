@@ -26,7 +26,9 @@
 
 	$.fn.fixHeaderFooter = function(options) {
 		var defaults = {
-			minimumScreenHeightFix : 0 // if 0 - fix areas at all screen sizes, if > 0 - only
+			// if 0 - fix areas at all screen sizes
+			// if > 0 - only fix when height is more than that figure
+			minimumScreenHeightFix : 0
 		};
 
 		var options = $.extend(defaults, options);
@@ -51,13 +53,11 @@
 				floatedHeaderContainer = $('#floatedHeaderContainer');
 
 			if ((scrollTop > offset.top) && (scrollTop < offset.top + el.height())) {
-                floatedHeaderContainer.visible();
-                floatingHeader.visible();
-
+				floatedHeaderContainer.visible();
+				floatingHeader.visible();
 			} else {
-                floatedHeaderContainer.invisible();
+				floatedHeaderContainer.invisible();
 				floatingHeader.invisible();
-
 			}
 
 			// persistFooter will need to have a margin-bottom of zero
@@ -69,7 +69,6 @@
 					floatingFooter.visible();
 				}
 			}
-
 		}
 
 		var cloneRow = function(row, className) {
@@ -94,7 +93,7 @@
 
 			// clone our thead and add it into the new floating table with the cloned colgroups,
 			// and wrap all that in our floating wrapper div
-			var newTableHead =
+			var newFloatingTable =
 				tableHead.before(tableHead.clone(true))
 					.appendTo(".floatingHeadTable")
 					.removeClass("persist-header originalTableHead")
@@ -102,14 +101,7 @@
 					.append("<tbody></tbody>")
 					.wrap(headerWrap);
 
-			// have two tables... table.floatingTableHead and thead.originalTableHead
-			// need to trigger something so that every time one is triggered the other gets clicked on too.
-			// arrrrrgh
-
-			// force th widths to the same as the original table
-			var originalTableHead = $(".originalTableHead");
-            makeHeadersClickable(originalTableHead, newTableHead);
-			setTableHeadWidths(originalTableHead, newTableHead);
+			return newFloatingTable;
 		}
 
 		// add all headers to the floated header container
@@ -123,7 +115,7 @@
 			var originalTableHeadings = originalTable.find("th");
 
 			newTable.find("th").each(function(index) {
-                var newTableHeading = $(this);
+				var newTableHeading = $(this);
 
 				// bind click on fixed header to original
 				newTableHeading.bind("mouseup", function(event) {
@@ -132,9 +124,9 @@
 
 				// when a sort finishes event copy state (held in th classes) from original
 				$(originalTable.parent("table")).on("sortEnd", function() {
-                    newTableHeading.attr("class", $(originalTableHeadings[index]).attr("class"));
+					newTableHeading.attr("class", $(originalTableHeadings[index]).attr("class"));
 				});
-                setTableHeadWidths(originalTable, newTable);
+				setTableHeadWidths(originalTable, newTable);
 			});
 		}
 
@@ -143,57 +135,23 @@
 		var setTableHeadWidths = function(originalTable, newTable) {
 			var newTableHeadings = $(newTable).find("th");
 			$(originalTable).find("th").each(function(index) {
-                var tableCellPadding = $(this).css("padding-left") + $(this).css("padding-right");
-                tableCellPadding = 0;
-				$(newTableHeadings[index]).width($(this).width() - tableCellPadding);
+				$(newTableHeadings[index]).width($(this).width());
 			});
 			originalTable.removeClass(".originalTableHead");
 		}
-
-         /*
-        function setTableHeadWidths(originalTable, newTable) {
-            var spacing = 0;
-            var nonwkie = $table.css('border-collapse') !== 'collapse' && !/(webkit|msie)/i.test(navigator.userAgent);
-            // yes, I dislike browser sniffing, but it really is needed here :(
-            // webkit automatically compensates for border spacing
-            var $header = originalTable.find("th");
-            var $stickyCells = newTable.find("th");
-            if (nonwkie) {
-                // Firefox & Opera use the border-spacing
-                // update border-spacing here because of demos that switch themes
-                spacing = parseInt($header.eq(0).css('border-left-width'), 10) * 2;
-            }
-            /*
-            $stickyTable.css({
-                left : $attach.length ? parseInt($table.css('padding-left'), 10) +
-                    parseInt($table.css('margin-left'), 10) + parseInt($table.css('border-left-width'), 10) :
-                    $thead.offset().left - $win.scrollLeft() - spacing,
-                width: $table.width()
-            });*/
-
-        /*
-            $stickyCells.filter(':visible').each(function(i) {
-                var $cell = $header.filter(':visible').eq(i),
-                // some wibbly-wobbly... timey-wimey... stuff, to make columns line up in Firefox
-                    offset = nonwkie && $(this).attr('data-column') === ( '' + parseInt(c.columns/2, 10) ) ? 1 : 0;
-                $(this)
-                    .css({
-                        width: $cell.width() - spacing,
-                        height: $cell.height()
-                    })
-                    .find(innerHeader).width( $cell.find(innerHeader).width() - offset );
-            });
-        }
-    */
-
-
 
 
 		$(areaToPersist).each(function() {
 			if($(".persist-header").length) {
 				$(".persist-header").each(function() {
 					if($(this).is("thead")) {
-						cloneTableHead($(this, areaToPersist), "floatingHeader");
+						var newFloatingTable = cloneTableHead($(this, areaToPersist), "floatingHeader");
+
+						// force th widths to be the same as the original table and set clickable
+						var originalTableHead = $(".originalTableHead");
+						makeHeadersClickable(originalTableHead, newFloatingTable);
+						setTableHeadWidths(originalTableHead, newFloatingTable);
+
 					} else {
 						cloneRow($(this, areaToPersist), "floatingHeader");
 					}
@@ -229,7 +187,7 @@
 			if(this.isScreenToBeFixed) {
 				updateTableHeaders(areaToPersist);
 			}
-            return this;
+			return this;
 		};
 
 		var isScreenToBeFixed = function() {
@@ -237,12 +195,7 @@
 		}
 
 
-        this.resetTableHeadWidths = function() {
-            setTableHeadWidths($(".originalTableHead"), $(".floatingHeadTable"));
-        };
-
-
- 		// method to fix the jumbo direction icon in place
+		// method to fix the jumbo direction icon in place
 		this.fixDirectionIcon = function() {
 			var directionIcon = $('.direction-icon');
 			var fixContainer = $('.fix-on-scroll-container');
