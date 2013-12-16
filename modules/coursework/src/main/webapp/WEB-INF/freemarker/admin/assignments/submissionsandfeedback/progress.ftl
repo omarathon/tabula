@@ -190,8 +190,12 @@
 							<h3>Plagiarism</h3>
 
 							<div class="labels">
-								<#if submission?? && submission.suspectPlagiarised>
-									<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised" data-container="body"></i>
+								<#if submission??>
+									<#if submission.suspectPlagiarised>
+										<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised" data-container="body"></i>
+									<#elseif submission.investigationCompleted>
+										<i class="icon-ok-sign use-tooltip" title="Plagiarism investigation completed" data-container="body"></i>
+									</#if>
 								</#if>
 							</div>
 

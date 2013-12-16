@@ -9,23 +9,23 @@ import uk.ac.warwick.tabula.data.model.Assignment
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Module
-import collection.JavaConversions._
 import uk.ac.warwick.tabula.coursework.web.Routes
-import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.coursework.commands.assignments.MarkPlagiarisedCommand
+import uk.ac.warwick.tabula.coursework.commands.assignments.{PlagiarismInvestigationCommandValidation, PlagiarismInvestigationCommand}
+import uk.ac.warwick.tabula.commands.Appliable
 
 @Controller
 @RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/submissionsandfeedback/mark-plagiarised"))
-class MarkPlagiarisedController extends CourseworkController {
-	@ModelAttribute
-	def command(@PathVariable("module") module: Module,
-				@PathVariable("assignment") assignment: Assignment) = new MarkPlagiarisedCommand(module, assignment)
+class PlagiarismInvestigationController extends CourseworkController {
 
-	validatesSelf[MarkPlagiarisedCommand]
+	@ModelAttribute("command")
+	def command(@PathVariable("assignment") assignment: Assignment) = PlagiarismInvestigationCommand(assignment)
 
-	def formView(assignment: Assignment) = Mav("admin/assignments/submissionsandfeedback/mark-plagiarised",
-		"assignment" -> assignment)
-		.crumbs(Breadcrumbs.Department(assignment.module.department), Breadcrumbs.Module(assignment.module))
+	validatesSelf[PlagiarismInvestigationCommandValidation]
+
+	def formView(assignment: Assignment) =
+		Mav("admin/assignments/submissionsandfeedback/mark-plagiarised",
+				"assignment" -> assignment
+		).crumbs(Breadcrumbs.Department(assignment.module.department), Breadcrumbs.Module(assignment.module))
 
 	def RedirectBack(assignment: Assignment) = Redirect(Routes.admin.assignment.submissionsandfeedback(assignment))
 
@@ -37,7 +37,7 @@ class MarkPlagiarisedController extends CourseworkController {
 	def showForm(
 			@PathVariable("module") module: Module,
 			@PathVariable("assignment") assignment: Assignment,
-			form: MarkPlagiarisedCommand, errors: Errors) = {
+			@ModelAttribute("command") form: Appliable[Unit], errors: Errors) = {
 		formView(assignment)
 	}
 
@@ -45,14 +45,12 @@ class MarkPlagiarisedController extends CourseworkController {
 	def submit(
 			@PathVariable("module") module: Module,
 			@PathVariable("assignment") assignment: Assignment,
-			@Valid form: MarkPlagiarisedCommand, errors: Errors) = {
-		transactional() {
-			if (errors.hasErrors) {
-				formView(assignment)
-			} else {
-				form.apply()
-				RedirectBack(assignment)
-			}
+			@Valid @ModelAttribute("command") form: Appliable[Unit], errors: Errors) = {
+		if (errors.hasErrors) {
+			formView(assignment)
+		} else {
+			form.apply()
+			RedirectBack(assignment)
 		}
 	}
 }
