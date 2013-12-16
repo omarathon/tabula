@@ -375,27 +375,29 @@
 
 					<li class="divider"></li>
 
-					<#if assignment.allowExtensions || assignment.hasExtensions>
-						<li>
-							<#if can.do('Extension.ReviewRequest', assignment)>
-								<#assign ext_caption='Grant extensions' />
-							<#else>
-								<#assign ext_caption='View extensions' />
-							</#if>
-							<#assign ext_url><@routes.extensions assignment /></#assign>
-							<@fmt.permission_button
-							permission='Extension.Read'
-							scope=assignment
-							action_descr=ext_caption?lower_case
-							href=ext_url>
-								<i class="icon-calendar"></i> ${ext_caption}
-							</@fmt.permission_button>
-						</li>
-					<#else>
-						<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Extensions are not allowed on this assignment."><i class="icon-calendar"></i> Grant extensions </a></li>
+					<#if !assignment.openEnded>
+						<#if assignment.allowExtensions || assignment.hasExtensions>
+							<li>
+								<#if can.do('Extension.ReviewRequest', assignment)>
+									<#assign ext_caption='Grant extensions' />
+								<#else>
+									<#assign ext_caption='View extensions' />
+								</#if>
+								<#assign ext_url><@routes.extensions assignment /></#assign>
+								<@fmt.permission_button
+								permission='Extension.Read'
+								scope=assignment
+								action_descr=ext_caption?lower_case
+								href=ext_url>
+									<i class="icon-calendar"></i> ${ext_caption}
+								</@fmt.permission_button>
+							</li>
+						<#else>
+							<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Extensions are not allowed on this assignment."><i class="icon-calendar"></i> Grant extensions </a></li>
+						</#if>
+	
+						<li class="divider"></li>
 					</#if>
-
-					<li class="divider"></li>
 
 
 					<#if assignment.markingWorkflow?? && !assignment.markingWorkflow.studentsChooseMarker>
