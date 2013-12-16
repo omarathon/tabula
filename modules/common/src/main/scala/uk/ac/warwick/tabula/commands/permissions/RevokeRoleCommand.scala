@@ -68,7 +68,7 @@ class RevokeRoleCommand[A <: PermissionsTarget: ClassTag](val scope: A) extends 
 			val permissionsToRevoke = roleDefinition.allPermissions(Some(scope)).keys
 			val deniedPermissions = permissionsToRevoke.filterNot(securityService.canDelegate(user,_,scope))
 			if ((!deniedPermissions.isEmpty) && (!user.god)) {
-				errors.rejectValue("roleDefinition", "permissions.cantRevokeWhatYouDontHave", Array(deniedPermissions.mkString("\n"), scope),"")
+				errors.rejectValue("roleDefinition", "permissions.cantRevokeWhatYouDontHave", Array(deniedPermissions.map { _.description }.mkString("\n"), scope),"")
 			}
 		}
 	}

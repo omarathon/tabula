@@ -58,8 +58,8 @@ class RevokePermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) exten
 		val user = RequestInfo.fromThread.get.user
 		
 		if (permission == null) errors.rejectValue("permission", "NotEmpty")
-		else if (!user.sysadmin && !securityService.can(user, permission, scope)) {
-			errors.rejectValue("permission", "permissions.cantRevokeWhatYouDontHave", Array(permission, scope), "")
+		else if (!user.sysadmin && !securityService.canDelegate(user, permission, scope)) {
+			errors.rejectValue("permission", "permissions.cantRevokeWhatYouDontHave", Array(permission.description, scope), "")
 		}
 	}
 

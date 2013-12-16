@@ -16,6 +16,8 @@ trait PermissionsDao {
 	def saveOrUpdate(permission: GrantedPermission[_])
 	def saveOrUpdate(role: GrantedRole[_])
 	
+	def getCustomRoleDefinitionById(id: String): Option[CustomRoleDefinition]
+	
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](id: String): Option[GrantedRole[A]]
 	def getGrantedPermission[A <: PermissionsTarget: ClassTag](id: String): Option[GrantedPermission[A]]
 	
@@ -47,6 +49,8 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition) = session.saveOrUpdate(roleDefinition)
 	def saveOrUpdate(permission: GrantedPermission[_]) = session.saveOrUpdate(permission)
 	def saveOrUpdate(role: GrantedRole[_]) = session.saveOrUpdate(role)
+	
+	def getCustomRoleDefinitionById(id: String) = getById[CustomRoleDefinition](id)
 	
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](id: String) = getById[GrantedRole[A]](id)
 	def getGrantedPermission[A <: PermissionsTarget: ClassTag](id: String) = getById[GrantedPermission[A]](id)

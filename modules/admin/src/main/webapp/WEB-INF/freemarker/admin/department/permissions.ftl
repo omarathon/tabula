@@ -4,7 +4,7 @@
 <#assign perms_url><@routes.deptperms department/></#assign>
 
 <div id="department-permissions-page">
-	<h1>Departmental permissions</h1>
+	<h1>Departmental permissions</h1> 
 	<h5><span class="muted">for</span> ${department.name}</h5>
 
 	<@pm.alerts "addCommand" department.name users role />
