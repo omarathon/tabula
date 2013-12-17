@@ -348,13 +348,13 @@
 					if ($el.hasClass('originality-report')) {
 						var $tooltip = $el.find('.similarity-tooltip').first();
 						if ($tooltip.length) {
-							return parseInt($tooltip.text().substring(0, $tooltip.text().indexOf('%')));
+							return $tooltip.text().substring(0, $tooltip.text().indexOf('%'));
 						} else {
-							return 0;
+							return '0';
 						}
 					} else if ($el.hasClass('word-count')) {
-						return parseInt($el.text().trim().replace(',',''));
-					} else {
+						return $el.text().trim().replace(',','');
+					} else {				
 						return $el.text().trim();
 					}
 				}
