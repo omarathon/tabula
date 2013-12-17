@@ -29,12 +29,10 @@ class ReleaseForMarkingNotifiesTest extends TestBase with Mockito {
 			"marker2" -> m2UserGroup
 		)
 
-		val linkFunction: (Feedback, MarkerFeedback) => Unit = {(f, mf) => f.firstMarkerFeedback = mf}
-
-		val (f1, mf1) = makeMarkerFeedback(student1)(linkFunction)
-		val (f2, mf2) = makeMarkerFeedback(student2)(linkFunction)
-		val (f3, mf3) = makeMarkerFeedback(student3)(linkFunction)
-		val (f4, mf4) = makeMarkerFeedback(student4)(linkFunction)
+		val (f1, mf1) = makeMarkerFeedback(student1)(MarkingNotificationFixture.FirstMarkerLink)
+		val (f2, mf2) = makeMarkerFeedback(student2)(MarkingNotificationFixture.FirstMarkerLink)
+		val (f3, mf3) = makeMarkerFeedback(student3)(MarkingNotificationFixture.FirstMarkerLink)
+		val (f4, mf4) = makeMarkerFeedback(student4)(MarkingNotificationFixture.FirstMarkerLink)
 
 		val notifier = new FirstMarkerReleaseNotifier with ReleaseForMarkingState with ReleasedState with UserAware
 			with UserLookupComponent with Logging {
