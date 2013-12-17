@@ -8,10 +8,10 @@
 	 * and it'll fix the footer at the bottom.
 	 * (CSS in main.less)
 	 *
-	 * it has one option for the minimum screen height to fix on
+	 * it has one option for the minimum viewable window height to fix on
 	 * you can call it like this
 	 *
-	 * $('.fixed-container').fixHeaderFooter({minimumScreenHeightFix: 800});
+	 * $('.fixed-container').fixHeaderFooter({minimumWindowHeightFix: 800});
 	 *
 	 *
 	 */
@@ -28,7 +28,7 @@
 		var defaults = {
 			// if 0 - fix areas at all screen sizes
 			// if > 0 - only fix when height is more than that figure
-			minimumScreenHeightFix : 0
+			minimumWindowHeightFix : 0
 		};
 
 		var options = $.extend(defaults, options);
@@ -191,7 +191,7 @@
 		};
 
 		var isScreenToBeFixed = function() {
-		   return (options.minimumScreenHeightFix == 0 || $(window).height() > options.minimumScreenHeightFix);
+		   return (options.minimumWindowHeightFix == 0 || $(window).height() > options.minimumWindowHeightFix);
 		}
 
 

@@ -338,7 +338,7 @@
 	</table>
 	<script type="text/javascript">
 		(function($) {
-			$('.fixed-container').fixHeaderFooter({minimumScreenHeightFix: 800});
+			$('.fixed-container').fixHeaderFooter({minimumWindowHeightFix: 630});
 
 			$('.submission-table:not(.floatingHeadTable)').sortableTable({
 				textExtraction: function(node) {

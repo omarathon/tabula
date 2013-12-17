@@ -391,7 +391,7 @@
 	<#if students?size gt 0>
 	<script type="text/javascript">
 	(function($) {
-		$('.fixed-container').fixHeaderFooter({minimumScreenHeightFix: 800});
+		$('.fixed-container').fixHeaderFooter({minimumWindowHeightFix: 630});
 
 		var options = {
 			sortList: [[<#if department.showStudentName>3<#else>2</#if>,0]],
