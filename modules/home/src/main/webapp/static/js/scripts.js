@@ -418,13 +418,6 @@
 		return $items;
 	};
 
-	$(function() {
-		$('a.disabled').on('click', function(e) {
-			e.preventDefault();
-		});
-	});
-
-
 	/*
 	  Invoke on .nav-tabs to overflow items into a dropdown
 	  instead of onto another row.
@@ -1066,4 +1059,10 @@ jQuery(function($){
     content: loadContent,
     placement: 'bottom'
   });
+});
+
+jQuery(function($) {
+	$(document.body).on('click', 'a.disabled', function(e) {
+		e.preventDefault();
+	});
 });

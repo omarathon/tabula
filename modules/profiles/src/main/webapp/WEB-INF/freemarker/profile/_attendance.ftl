@@ -47,7 +47,7 @@
 				$.get('/groups/student/${profile.universityId}/attendance/' + $('#attendance select.academicYear :selected').val() + '?dt=' + new Date().valueOf(), function(data) {
 					$('#attendance .small-groups').hide().html(data);
 					var pane = $('#attendance-pane');
-					if ($('#attendance .small-groups').find('h4').length == 0) {
+					if ($('#attendance .small-groups').find('.seminar-attendance-profile').length > 0) {
 						$('#attendance .small-groups').show();
 						pane.show();
 						window.GlobalScripts.initCollapsible();

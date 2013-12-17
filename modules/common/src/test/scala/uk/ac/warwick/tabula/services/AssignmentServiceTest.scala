@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, FormFieldContext, WordCountField, Extension}
 import uk.ac.warwick.tabula.data.{ExtensionDaoComponent, ExtensionDaoImpl, AssignmentMembershipDaoImpl, DepartmentDaoImpl}
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
 
 // scalastyle:off magic.number
 class AssignmentServiceTest extends PersistenceTestBase {
@@ -171,13 +172,20 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 			submission.universityId = "0070790"
 			submission.userId = "abcdef"
-			submission.suspectPlagiarised = false
+			submission.plagiarismInvestigation = PlagiarismInvestigation.SuspectPlagiarised
 			assmt.addSubmission(submission)
 			submissionService.saveSubmission(submission)
 
-			// now check one user who needs to get feedback for this assignment is returned
+			// submissions suspected of plagiarism should be ignored
 			val userPairs = feedbackService.getUsersForFeedback(assmt)
-			userPairs.size should be (1)
+			userPairs.size should be (0)
+
+			submission.plagiarismInvestigation = PlagiarismInvestigation.InvestigationCompleted
+
+			// now check one user who needs to get feedback for this assignment is returned
+			// as the PlagiarismInvestigation has completed the user should be returned
+			val userPairs1 = feedbackService.getUsersForFeedback(assmt)
+			userPairs1.size should be (1)
 
 			// and check it's the right one
 			for (userPair <- userPairs) {
@@ -199,7 +207,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 			userPairs3.size should be (1)
 
 			// the only person was suspected of plagiarism - expect 0
-			submission.suspectPlagiarised = true
+			submission.plagiarismInvestigation = SuspectPlagiarised
 			val userPairs4 = feedbackService.getUsersForFeedback(assmt)
 			userPairs4.size should be (0)
 		}
@@ -435,6 +443,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentService.save(assignment)
 
 		val group = new AssessmentGroup
+		group.membershipService = assignmentMembershipService
 		group.assignment = assignment
 		group.assessmentComponent = upstreamAssignment
 		group.occurrence = "A"
@@ -460,7 +469,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val submission = new Submission
 		submission.universityId = "0070790"
 		submission.userId = "abcdef"
-		submission.suspectPlagiarised = false
+		submission.plagiarismInvestigation = SuspectPlagiarised
 		assignment.addSubmission(submission)
 		submissionService.saveSubmission(submission)
 
@@ -631,16 +640,19 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignment2.members.excludeUser("student3")
 
 		val ag1 = new AssessmentGroup
+		ag1.membershipService = assignmentMembershipService
 		ag1.assignment = assignment1
 		ag1.assessmentComponent = upstream1
 		ag1.occurrence = "A"
 
 		val ag2 = new AssessmentGroup
+		ag2.membershipService = assignmentMembershipService
 		ag2.assignment = assignment1
 		ag2.assessmentComponent = upstream2
 		ag2.occurrence = "B"
 
 		val ag3 = new AssessmentGroup
+		ag3.membershipService = assignmentMembershipService
 		ag3.assignment = assignment2
 		ag3.assessmentComponent = upstream3
 		ag3.occurrence = "C"

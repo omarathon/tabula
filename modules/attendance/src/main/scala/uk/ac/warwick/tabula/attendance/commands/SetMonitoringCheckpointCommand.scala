@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPointSet, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPointSet, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyMaps
@@ -32,7 +32,7 @@ object SetMonitoringCheckpointCommand {
 }
 
 abstract class SetMonitoringCheckpointCommand(val department: Department, val templateMonitoringPoint: MonitoringPoint, val user: CurrentUser, val routes: JList[Route])
-	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with BindListener {
+	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with BindListener with PopulateOnForm {
 
 	self: SetMonitoringCheckpointState with MonitoringPointServiceComponent with ProfileServiceComponent =>
 
@@ -46,8 +46,11 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 		// Get monitoring points by student for the list of students matching the template point
 		val studentPointMap = monitoringPointService.findSimilarPointsForMembers(templateMonitoringPoint, students)
 		val allPoints = studentPointMap.values.flatten.toSeq
+		val pointSet = templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
+		val period = termService.getTermFromAcademicWeek(templateMonitoringPoint.validFromWeek, pointSet.academicYear).getTermTypeAsString
+		val nonReported = monitoringPointService.findNonReported(students, pointSet.academicYear, period)
 		val checkpoints = monitoringPointService.getCheckpointsByStudent(allPoints)
-		// Map the checkpoint state to each point for each student
+		// Map the checkpoint state to each point for each student, and filter out any students already reported for this term
 		studentsState = studentPointMap.map{ case (student, points) =>
 			student -> points.map{ point =>
 				point -> {
@@ -57,7 +60,7 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 					checkpointOption.map{case (_, checkpoint) => checkpoint.state}.getOrElse(null)
 				}
 			}.toMap.asJava
-		}.toMap.asJava
+		}.filter{case(student, map) => nonReported.contains(student)}.toMap.asJava
 	}
 
 	def applyInternal(): Seq[MonitoringCheckpoint] = {
@@ -83,12 +86,14 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 
 	def validate(errors: Errors) {
 		val academicYear = templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear
+		val thisAcademicYear = AcademicYear.guessByDate(DateTime.now)
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
 		studentsStateAsScala.foreach{ case(student, pointMap) => {
 			val studentPointSet = monitoringPointService.getPointSetForStudent(student, academicYear)
 			pointMap.foreach{ case(point, state) => {
 				errors.pushNestedPath(s"studentsState[${student.universityId}][${point.id}]")
-				val pointRoute = point.pointSet.asInstanceOf[MonitoringPointSet].route
+				val pointSet = point.pointSet.asInstanceOf[MonitoringPointSet]
+				val pointRoute = pointSet.route
 				// Check point is valid for student
 				if (!studentPointSet.exists(s => s.points.asScala.contains(point))) {
 					errors.rejectValue("", "monitoringPoint.invalidStudent")
@@ -96,11 +101,17 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 				}	else if (!securityService.can(user, Permissions.MonitoringPoints.Record, pointRoute)) {
 					errors.rejectValue("", "monitoringPoint.noRecordPermission")
 				} else {
-					// Check state change valid
-					if (point.sentToAcademicOffice) {
-						errors.rejectValue("", "monitoringCheckpoint.sentToAcademicOffice")
+
+					if (!monitoringPointService.findNonReportedTerms(Seq(student),
+						pointSet.academicYear).contains(
+						(termService.getTermFromAcademicWeek(point.validFromWeek, pointSet.academicYear).getTermTypeAsString))){
+						errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 					}
-					if (currentAcademicWeek < point.validFromWeek && !(state == null || state == MonitoringCheckpointState.MissedAuthorised)) {
+
+					if (thisAcademicYear.startYear <= academicYear.startYear
+						&& currentAcademicWeek < point.validFromWeek
+						&& !(state == null || state == AttendanceState.MissedAuthorised)
+					) {
 						errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
 					}
 				}
@@ -141,15 +152,15 @@ trait SetMonitoringPointDescription extends Describable[Seq[MonitoringCheckpoint
 }
 
 
-trait SetMonitoringCheckpointState extends FiltersStudents with PermissionsAwareRoutes {
+trait SetMonitoringCheckpointState extends FiltersStudents with PermissionsAwareRoutes with GroupMonitoringPointsByTerm with MonitoringPointServiceComponent{
 	def templateMonitoringPoint: MonitoringPoint
 	def department: Department
 	def user: CurrentUser
 	def routes: JList[Route]
 
-	var studentsState: JMap[StudentMember, JMap[MonitoringPoint, MonitoringCheckpointState]] =
-		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, MonitoringCheckpointState] }.asJava
-	var studentsStateAsScala: Map[StudentMember, Map[MonitoringPoint, MonitoringCheckpointState]] = _
+	var studentsState: JMap[StudentMember, JMap[MonitoringPoint, AttendanceState]] =
+		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, AttendanceState] }.asJava
+	var studentsStateAsScala: Map[StudentMember, Map[MonitoringPoint, AttendanceState]] = _
 
 	var courseTypes: JList[CourseType] = JArrayList()
 	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()
@@ -160,4 +171,5 @@ trait SetMonitoringCheckpointState extends FiltersStudents with PermissionsAware
 	// We don't actually allow any sorting, but these need to be defined
 	val defaultOrder = Seq(asc("lastName"), asc("firstName")) // Don't allow this to be changed atm
 	var sortOrder: JList[Order] = JArrayList()
+
 }

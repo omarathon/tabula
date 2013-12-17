@@ -27,6 +27,9 @@
 	<#macro viewDepartmentAgents department relationshipType><@url page="/view/${department.code}/agents/${relationshipType.urlPart}" /></#macro>
 	<#macro viewDepartmentAgentsStudents department relationshipType agent><@url page="/view/${department.code}/agents/${relationshipType.urlPart}/${agent.universityId}" /></#macro>
 
+	<#macro report department academicYear queryString><@url page="/report/${department.code}?academicYear=${academicYear.toString}&${queryString}"/></#macro>
+	<#macro reportConfirm department><@url page="/report/${department.code}/confirm"/></#macro>
+
 	<#macro manageDepartment department><@url page="/manage/${department.code}/" /></#macro>
 	
 	<#macro record department pointId queryString returnTo><@url page="/view/${department.code}/${pointId}/record?returnTo=${returnTo?url}&${queryString}"/></#macro>

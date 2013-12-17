@@ -17,22 +17,29 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import SmallGroupAttendanceState._
+import uk.ac.warwick.tabula.services.UserLookupComponent
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 
 class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 	
-	trait CommandTestSupport extends SmallGroupServiceComponent with TermServiceComponent {
-		val smallGroupService = mock[SmallGroupService]
-		val termService = mock[TermService]
+	trait BaseFixture {
+		val mockUserLookup = new MockUserLookup
+		
+		trait CommandTestSupport extends SmallGroupServiceComponent with TermServiceComponent with UserLookupComponent {
+			val smallGroupService = mock[SmallGroupService]
+			val termService = mock[TermService]
+			val userLookup = mockUserLookup
+		}
 	}
 	
-	trait Fixture {
-		val userLookup = new MockUserLookup
-		
+	trait Fixture extends BaseFixture {
 		val set = new SmallGroupSet
 		set.academicYear = AcademicYear.guessByDate(DateTime.now)
 		
 		val group = new SmallGroup(set)
-		group._studentsGroup.userLookup = userLookup
+		group._studentsGroup.userLookup = mockUserLookup
 		
 		// The group has two events. Event 1 runs at Monday 11am on week 2, 3 and 4; Event 2 runs at Monday 3pm on weeks 1, 3 and 7
 		val event1 = new SmallGroupEvent(group)
@@ -70,13 +77,13 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 	
 	@Test
 	def commandApply() { new Fixture() {
-		userLookup.registerUsers("user1", "user2", "user3", "user4", "user5")
+		mockUserLookup.registerUsers("user1", "user2", "user3", "user4", "user5")
 		
-		val user1 = userLookup.getUserByUserId("user1")
-		val user2 = userLookup.getUserByUserId("user2")
-		val user3 = userLookup.getUserByUserId("user3")
-		val user4 = userLookup.getUserByUserId("user4")
-		val user5 = userLookup.getUserByUserId("user5")
+		val user1 = mockUserLookup.getUserByUserId("user1")
+		val user2 = mockUserLookup.getUserByUserId("user2")
+		val user3 = mockUserLookup.getUserByUserId("user3")
+		val user4 = mockUserLookup.getUserByUserId("user4")
+		val user5 = mockUserLookup.getUserByUserId("user5")
 		
 		group._studentsGroup.add(user1)
 		group._studentsGroup.add(user2)
@@ -89,31 +96,32 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		
 		// Everyone turned up for week 1
 		val occurrence1 = new SmallGroupEventOccurrence
-		occurrence1.attendees.userLookup = userLookup
 		occurrence1.event = event2
 		occurrence1.week = 1
-		occurrence1.attendees.add(user1)
-		occurrence1.attendees.add(user2)
-		occurrence1.attendees.add(user3)
-		occurrence1.attendees.add(user4)
-		occurrence1.attendees.add(user5)
+		attendance(occurrence1, user1, AttendanceState.Attended)
+		attendance(occurrence1, user2, AttendanceState.Attended)
+		attendance(occurrence1, user3, AttendanceState.Attended)
+		attendance(occurrence1, user4, AttendanceState.Attended)
+		attendance(occurrence1, user5, AttendanceState.Attended)
 		
 		// User3 missed the first seminar in week 3, user4 missed the second
 		val occurrence2 = new SmallGroupEventOccurrence
-		occurrence2.attendees.userLookup = userLookup
 		occurrence2.event = event1
 		occurrence2.week = 3
-		occurrence2.attendees.add(user1)
-		occurrence2.attendees.add(user2)
-		occurrence2.attendees.add(user4)
+		attendance(occurrence2, user1, AttendanceState.Attended)
+		attendance(occurrence2, user2, AttendanceState.Attended)
+		attendance(occurrence2, user3, AttendanceState.MissedUnauthorised)
+		attendance(occurrence2, user4, AttendanceState.Attended)
+		attendance(occurrence2, user5, AttendanceState.MissedAuthorised)
 		
 		val occurrence3 = new SmallGroupEventOccurrence
-		occurrence3.attendees.userLookup = userLookup
 		occurrence3.event = event2
 		occurrence3.week = 3
-		occurrence3.attendees.add(user1)
-		occurrence3.attendees.add(user2)
-		occurrence3.attendees.add(user3)
+		attendance(occurrence3, user1, AttendanceState.Attended)
+		attendance(occurrence3, user2, AttendanceState.Attended)
+		attendance(occurrence3, user3, AttendanceState.Attended)
+		attendance(occurrence3, user4, AttendanceState.MissedUnauthorised)
+		attendance(occurrence3, user5, AttendanceState.MissedUnauthorised)
 		
 		val command = new ViewSmallGroupAttendanceCommand(group) with CommandTestSupport
 		command.smallGroupService.findAttendanceByGroup(group) returns (Seq(occurrence1, occurrence2, occurrence3))
@@ -157,7 +165,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 			(user3, Seq(
 				((event2, 1), Attended),
 				((event1, 2), Late),
-				((event1, 3), Missed),
+				((event1, 3), MissedUnauthorised),
 				((event2, 3), Attended),
 				((event1, 4), NotRecorded),
 				((event2, 7), NotRecorded)
@@ -167,7 +175,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 				((event2, 1), Attended),
 				((event1, 2), Late),
 				((event1, 3), Attended),
-				((event2, 3), Missed),
+				((event2, 3), MissedUnauthorised),
 				((event1, 4), NotRecorded),
 				((event2, 7), NotRecorded)
 			)),
@@ -175,8 +183,8 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 			(user5, Seq(
 				((event2, 1), Attended),
 				((event1, 2), Late),
-				((event1, 3), Missed), // TODO because the user isn't in the group, is this really missed? Hard to tell.
-				((event2, 3), Missed), // TODO because the user isn't in the group, is this really missed? Hard to tell.
+				((event1, 3), MissedAuthorised),
+				((event2, 3), MissedUnauthorised),
 				((event1, 4), NotRecorded),
 				((event2, 7), NotRecorded)
 			))
@@ -184,18 +192,16 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 	}}
 	
 	@Test
-	def tab1534() {
+	def tab1534() { new BaseFixture {
 		// An intricacy of the way that SortedMap works means that if you have two 
 		// keys with an identical sort order, they'll get merged into a single key.
 		// This means that we risk students with the same name getting merged into one.
-		// Bad!
-		val userLookup = new MockUserLookup
-		
+		// Bad!	
 		val set = new SmallGroupSet
 		set.academicYear = AcademicYear.guessByDate(DateTime.now)
 		
 		val group = new SmallGroup(set)
-		group._studentsGroup.userLookup = userLookup
+		group._studentsGroup.userLookup = mockUserLookup
 		
 		val event = new SmallGroupEvent(group)
 		event.day = DayOfWeek.Monday
@@ -204,11 +210,11 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		
 		group.events.add(event)
 		
-		userLookup.registerUsers("user1", "user2", "user3")
+		mockUserLookup.registerUsers("user1", "user2", "user3")
 		
-		val user1 = userLookup.getUserByUserId("user1")
-		val user2 = userLookup.getUserByUserId("user2")
-		val user3 = userLookup.getUserByUserId("user3")
+		val user1 = mockUserLookup.getUserByUserId("user1")
+		val user2 = mockUserLookup.getUserByUserId("user2")
+		val user3 = mockUserLookup.getUserByUserId("user3")
 		
 		// Give user2 and user3 the same name
 		user2.setFirstName("Billy")
@@ -220,12 +226,11 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		user3.setFullName("Billy Sameson")
 		
 		val occurrence = new SmallGroupEventOccurrence
-		occurrence.attendees.userLookup = userLookup
 		occurrence.event = event
 		occurrence.week = 1
-		occurrence.attendees.add(user1)
-		occurrence.attendees.add(user2)
-		occurrence.attendees.add(user3)
+		attendance(occurrence, user1, AttendanceState.Attended)
+		attendance(occurrence, user2, AttendanceState.Attended)
+		attendance(occurrence, user3, AttendanceState.Attended)
 		
 		val command = new ViewSmallGroupAttendanceCommand(group) with CommandTestSupport
 		command.smallGroupService.findAttendanceByGroup(group) returns (Seq(occurrence))
@@ -233,6 +238,14 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		
 		val info = command.applyInternal()
 		info.attendance.keySet.size should be (3) // If it's 2, we're bad
+	}}
+		
+	private def attendance(occurrence: SmallGroupEventOccurrence, user: User, state: AttendanceState) {
+		val attendance = new SmallGroupEventAttendance
+		attendance.occurrence = occurrence
+		attendance.universityId = user.getWarwickId
+		attendance.state = state
+		occurrence.attendance.add(attendance)
 	}
 
 }

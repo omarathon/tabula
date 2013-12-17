@@ -20,6 +20,9 @@ import scala.collection.immutable.SortedMap
 import uk.ac.warwick.tabula.services.TermServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.services.UserLookupComponent
+import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 sealed abstract class SmallGroupAttendanceState {
 	def getName = toString()
@@ -27,9 +30,17 @@ sealed abstract class SmallGroupAttendanceState {
 
 object SmallGroupAttendanceState {
 	case object Attended extends SmallGroupAttendanceState
-	case object Missed extends SmallGroupAttendanceState
+	case object MissedAuthorised extends SmallGroupAttendanceState
+	case object MissedUnauthorised extends SmallGroupAttendanceState
 	case object NotRecorded extends SmallGroupAttendanceState
 	case object Late extends SmallGroupAttendanceState
+	
+	def from(state: Option[AttendanceState]) = state match {
+		case Some(AttendanceState.Attended) => Attended
+		case Some(AttendanceState.MissedAuthorised) => MissedAuthorised
+		case Some(AttendanceState.MissedUnauthorised) => MissedUnauthorised
+		case _ => NotRecorded // null
+	}
 }
 
 object ViewSmallGroupAttendanceCommand {
@@ -47,6 +58,7 @@ object ViewSmallGroupAttendanceCommand {
 			with ViewSmallGroupAttendancePermissions
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringTermServiceComponent
+			with AutowiringUserLookupComponent
 			with ReadOnly with Unaudited {
 		override lazy val eventName = "ViewSmallGroupAttendance"
 	}
@@ -78,12 +90,16 @@ object ViewSmallGroupAttendanceCommand {
 	def attendanceForStudent(allEventInstances: Seq[(EventInstance, Option[SmallGroupEventOccurrence])], isLate: EventInstance => Boolean)(user: User) = {
 		val userAttendance = allEventInstances.map { case ((event, week), occurrence) =>
 			val instance = (event, week)
-			val state = occurrence match {
-				case Some(occurrence) if occurrence.attendees.includesUser(user) => SmallGroupAttendanceState.Attended
-				case Some(occurrence) => SmallGroupAttendanceState.Missed
-				case None if isLate(event, week) => SmallGroupAttendanceState.Late
-				case _ => SmallGroupAttendanceState.NotRecorded
-			}
+			val attendance = 
+				SmallGroupAttendanceState.from(
+					occurrence.flatMap { 
+						_.attendance.asScala.find { _.universityId == user.getWarwickId }
+					}.flatMap { a => Option(a.state) }
+				)
+			
+			val state = 
+				if (attendance == SmallGroupAttendanceState.NotRecorded && isLate(event, week)) SmallGroupAttendanceState.Late
+				else attendance
 			
 			(instance -> state)
 		} 
@@ -94,7 +110,7 @@ object ViewSmallGroupAttendanceCommand {
 
 class ViewSmallGroupAttendanceCommand(val group: SmallGroup) 
 	extends CommandInternal[ViewSmallGroupAttendanceCommand.SmallGroupAttendanceInformation] with ViewSmallGroupAttendanceState with TaskBenchmarking {
-	self: SmallGroupServiceComponent with TermServiceComponent =>
+	self: SmallGroupServiceComponent with TermServiceComponent with UserLookupComponent =>
 		
 	import ViewSmallGroupAttendanceCommand._
 	
@@ -107,7 +123,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 		// Build the list of all users who are in the group, or have attended one or more occurrences of the group
 		val allStudents = benchmarkTask("Get a list of all registered or attended users") {
 			group.students.users ++
-			occurrences.flatMap { _.attendees.users }
+			occurrences.flatMap { _.attendance.asScala }.map { a => userLookup.getUserByWarwickUniId(a.universityId) }
 			.distinct
 		}
 		

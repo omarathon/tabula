@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands.{ReadOnly, Unaudited, ComposableCommand, Co
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPointSet, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPointSet, MonitoringPoint}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.permissions.Permissions
 
@@ -48,7 +48,7 @@ abstract class ProfileCommand(val student: StudentMember, val academicYear: Acad
 
 		val missedCountByTerm = monitoringPointsByTerm.map{
 			case (termName, points) => termName -> points.count(
-				p => checkpointState(p.id).equals(MonitoringCheckpointState.MissedUnauthorised.dbValue)
+				p => checkpointState(p.id).equals(AttendanceState.MissedUnauthorised.dbValue)
 			)
 		}.filter{
 			case (termName, count) => count > 0

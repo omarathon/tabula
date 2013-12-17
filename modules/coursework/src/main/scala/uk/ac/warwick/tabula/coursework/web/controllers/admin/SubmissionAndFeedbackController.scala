@@ -37,10 +37,10 @@ import org.springframework.validation.Errors
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}"))
 class SubmissionAndFeedbackController extends CourseworkController {
 
-	var auditIndexService = Wire.auto[AuditEventIndexService]
-	var assignmentService = Wire.auto[AssignmentService]
-	var userLookup = Wire.auto[UserLookupService]
-	var features = Wire.auto[Features]
+	var auditIndexService = Wire[AuditEventIndexService]
+	var assignmentService = Wire[AssignmentService]
+	var userLookup = Wire[UserLookupService]
+	var features = Wire[Features]
 
 	validatesSelf[SubmissionAndFeedbackCommand]
 
@@ -85,12 +85,7 @@ class SubmissionAndFeedbackController extends CourseworkController {
 				val results = command.apply()
 
 				Mav("admin/assignments/submissionsandfeedback/progress",
-					"students" -> results.students,
-					"whoDownloaded" -> results.whoDownloaded,
-					"stillToDownload" -> results.stillToDownload,
-					"hasPublishedFeedback" -> results.hasPublishedFeedback,
-					"hasOriginalityReport" -> results.hasOriginalityReport,
-					"mustReleaseForMarking" -> results.mustReleaseForMarking
+					resultMap(results)
 				).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment progress for ${assignment.name}"))
 			}
 		}
@@ -107,14 +102,18 @@ class SubmissionAndFeedbackController extends CourseworkController {
 			val results = command.apply()
 
 			Mav("admin/assignments/submissionsandfeedback/list",
-				"students" -> results.students,
+				resultMap(results)
+			).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
+		}
+	}
+
+	def resultMap(results: SubmissionAndFeedbackResults): Map[String, Any] = {
+		Map("students" -> results.students,
 				"whoDownloaded" -> results.whoDownloaded,
 				"stillToDownload" -> results.stillToDownload,
 				"hasPublishedFeedback" -> results.hasPublishedFeedback,
 				"hasOriginalityReport" -> results.hasOriginalityReport,
-				"mustReleaseForMarking" -> results.mustReleaseForMarking
-			).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module), Breadcrumbs.Current(s"Assignment table for ${assignment.name}"))
-		}
+				"mustReleaseForMarking" -> results.mustReleaseForMarking)
 	}
 
 	@RequestMapping(Array("/export.csv"))

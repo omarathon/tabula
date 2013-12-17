@@ -2,14 +2,14 @@ package uk.ac.warwick.tabula.data.convert
 
 import uk.ac.warwick.tabula.system.TwoWayConverter
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringCheckpointState
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 
-class MonitoringCheckpointStateConverter extends TwoWayConverter[String, MonitoringCheckpointState] {
+class AttendanceStateConverter extends TwoWayConverter[String, AttendanceState] {
 	
 	override def convertRight(value: String) = 
-		if (value.hasText) MonitoringCheckpointState.fromCode(value)
+		if (value.hasText) AttendanceState.fromCode(value)
 		else null
 
-	override def convertLeft(state: MonitoringCheckpointState) = Option(state).map { _.dbValue }.orNull
+	override def convertLeft(state: AttendanceState) = Option(state).map { _.dbValue }.orNull
 
 }

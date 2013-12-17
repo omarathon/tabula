@@ -149,6 +149,8 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 
 	def hasOnlineFeedback: Boolean = onlineFeedbackComments.isDefined
 
+	def hasGenericFeedback: Boolean = Option(assignment.genericFeedback).isDefined
+
 	/**
 	 * Returns the released flag of this feedback,
 	 * OR false if unset.

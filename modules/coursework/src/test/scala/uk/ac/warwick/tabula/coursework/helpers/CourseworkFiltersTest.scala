@@ -24,6 +24,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.UserLookup
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.services.{SubmissionService, UserLookupService}
+import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, NotInvestigated, SuspectPlagiarised}
 
 // scalastyle:off magic.number
 class CourseworkFiltersTest extends TestBase with Mockito {
@@ -64,11 +65,12 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			submissionDownloaded: Boolean=false,
 			feedback: Option[Feedback]=None,
 			feedbackDownloaded: Boolean=false,
+			onlineFeedbackViewed: Boolean=false,
 			extension: Option[Extension]=None,
 			withinExtension: Boolean=false) =
 		WorkflowItems(
 			enhancedSubmission=submission map { s => SubmissionListItem(s, submissionDownloaded) },
-			enhancedFeedback=feedback map { f => FeedbackListItem(f, feedbackDownloaded) },
+			enhancedFeedback=feedback map { f => FeedbackListItem(f, feedbackDownloaded, onlineFeedbackViewed) },
 			enhancedExtension=extension map { e => ExtensionListItem(e, withinExtension) }
 		)
 
@@ -77,6 +79,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			submissionDownloaded: Boolean=false,
 			feedback: Option[Feedback]=None,
 			feedbackDownloaded: Boolean=false,
+			onlineFeedbackViewed: Boolean=false,
 			extension: Option[Extension]=None,
 			withinExtension: Boolean=false) =
 		Student(
@@ -84,7 +87,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 			progress=null,
 			nextStage=None,
 			stages=ListMap.empty,
-			coursework=workflowItems(submission, submissionDownloaded, feedback, feedbackDownloaded, extension, withinExtension)
+			coursework=workflowItems(submission, submissionDownloaded, feedback, feedbackDownloaded, onlineFeedbackViewed, extension, withinExtension)
 		)
 
 	class SampleFilteringCommand(elems: (String, String)*) {
@@ -778,7 +781,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Some(submission))) should be (false)
 	}
 
-	@Test def MarkedPlagiarised {
+	@Test def markedPlagiarised {
 		val filter = CourseworkFilters.MarkedPlagiarised
 
 		// Only applies to assignments that collect submissions
@@ -794,13 +797,17 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		val submission = Fixtures.submission("0672089", "cuscav")
 		submission.assignment = assignment
 
-		submission.suspectPlagiarised = false
+		submission.plagiarismInvestigation = NotInvestigated
 
 		filter.predicate(student(submission=Some(submission))) should be (false)
 
-		submission.suspectPlagiarised = true
+		submission.plagiarismInvestigation = SuspectPlagiarised
 
 		filter.predicate(student(submission=Some(submission))) should be (true)
+
+		submission.plagiarismInvestigation = InvestigationCompleted
+
+		filter.predicate(student(submission=Some(submission))) should be (false)
 	}
 
 	@Test def NoFeedback {

@@ -22,6 +22,7 @@
                     <th>First name</th>
                     <th>Last name</th>
                     <th>New deadline</th>
+					<th>Feedback deadline</th>
                     <th>Extension status</th>
                     <th>
 	                    Actions
@@ -60,7 +61,14 @@
 							<td><h6>${student.lastName}</h6></td>
 							<td class="expiryDate">
 								<#if extension.expiryDate??>
-									<@fmt.date date=extension.expiryDate at=true/>
+									<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
+								<#else>
+									<span class="muted">no change</span>
+								</#if>
+							</td>
+							<td>
+								<#if extension.expiryDate??>
+									<@fmt.date date=extension.feedbackDeadline capitalise=true shortMonth=true />
 								<#else>
 									<span class="muted">no change</span>
 								</#if>
@@ -102,7 +110,20 @@
 							<#assign student = studentNameLookup[extension.universityId]>
 							<td><h6>${student.firstName}</h6></td>
 							<td><h6>${student.lastName}</h6></td>
-							<td class="expiryDate"><#if extension.expiryDate??> <@fmt.date date=extension.expiryDate capitalise=true shortMonth=true /></#if></td>
+							<td class="expiryDate">
+								<#if extension.expiryDate??>
+									<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
+								<#else>
+									<span class="muted">no change</span>
+								</#if>
+							</td>
+							<td>
+								<#if extension.expiryDate??>
+									<@fmt.date date=extension.feedbackDeadline capitalise=true shortMonth=true />
+								<#else>
+									<span class="muted">no change</span>
+								</#if>
+							</td>
 							<td class="status">
 								<#if extension.approved>
 									Granted
@@ -110,8 +131,6 @@
 									Rejected
 								</#if>
 							</td>
-
-
 							<td>
 								<#assign modify_url><@routes.extensionedit assignment=assignment uniId=extension.universityId /></#assign>
 								<#assign revoke_url><@routes.extensiondelete assignment=assignment uniId=extension.universityId /></#assign>
@@ -146,7 +165,8 @@
 							<td><h6>${student.firstName}</h6></td>
 							<td><h6>${student.lastName}</h6></td>
 							<td class="expiryDate"></td>
-							<td  class="status"></td>
+							<td></td>
+							<td class="status"></td>
 							<td>
 								<#assign grant_url><@routes.extensionadd assignment=assignment uniId=universityId /></#assign>
 

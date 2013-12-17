@@ -41,7 +41,7 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 			"relationships" -> relationships.filter({case (relationshipType,relations) => relations.length != 0}),
 			"scdCourse" -> scd.course,
 			"scdRoute" -> scd.route,
-			"scdAwardCode" -> scd.awardCode
+			"scdAward" -> scd.award
 		)
 	}}).getOrElse(Map())
 

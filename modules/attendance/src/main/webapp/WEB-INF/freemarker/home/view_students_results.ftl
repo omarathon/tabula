@@ -42,7 +42,6 @@
 	</#macro>
 
 	<#if totalResults?? && students??>
-		<#assign filterQuery = command.serializeFilter />
 		<#assign returnTo><@routes.viewDepartmentStudentsWithAcademicYear command.department command.academicYear filterQuery/></#assign>
 		<#if (totalResults > 0)>
 			<div class="clearfix">
@@ -192,16 +191,28 @@
 							$(".scrollable-points-table .left table, .scrollable-points-table .right table").addClass('tablesorter')
 								.find('th.sortable').addClass('header')
 								.on('click', function(e) {
-									var $th = $(this);
+									var $th = $(this)
+										, sortDescending = function(){
+											$('#sortOrder').val('desc(' + $th.data('field') + ')');
+											$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
+											$th.addClass('headerSortUp');
+										}, sortAscending = function(){
+											$('#sortOrder').val('asc(' + $th.data('field') + ')');
+											$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
+											$th.addClass('headerSortDown');
+										};
 
 									if ($th.hasClass('headerSortDown')) {
-										$('#sortOrder').val('desc(' + $th.data('field') + ')');
-										$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
-										$th.addClass('headerSortUp');
+										sortAscending();
+									} else if ($th.hasClass('headerSortUp')) {
+										sortDescending();
 									} else {
-										$('#sortOrder').val('asc(' + $th.data('field') + ')');
-										$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
-										$th.addClass('headerSortDown');
+										// not currently sorted on this column, default sort depends on column
+										if ($th.hasClass('unrecorded-col') || $th.hasClass('missed-col')) {
+											sortDescending();
+										} else {
+											sortAscending();
+										}
 									}
 
 									if (typeof(window.doRequest) === 'function') {

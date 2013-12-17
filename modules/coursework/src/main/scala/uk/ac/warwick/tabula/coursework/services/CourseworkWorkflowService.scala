@@ -46,7 +46,7 @@ class CourseworkWorkflowService {
 			stages = stages ++ Seq(AddMarks)
 		}
 		
-		stages = stages ++ Seq(AddFeedback, ReleaseFeedback, DownloadFeedback)
+		stages = stages ++ Seq(AddFeedback, ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback)
 		
 		stages
 	}
@@ -263,17 +263,32 @@ object WorkflowStages {
 			}
 		override def preconditions = Seq(Seq(AddMarks), Seq(AddFeedback))
 	}
+
+	case object ViewOnlineFeedback extends WorkflowStage {
+		def actionCode = "workflow.ViewOnlineFeedback.action"
+		def progress(assignment: Assignment)(coursework: WorkflowItems) =
+			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
+				case Some(item) if item.onlineViewed || !(item.feedback.hasGenericFeedback || item.feedback.hasOnlineFeedback) =>
+					StageProgress(ViewOnlineFeedback, true, "workflow.ViewOnlineFeedback.viewed", Good, true)
+				case Some(item) if item.feedback.released =>
+					StageProgress(ViewOnlineFeedback, true, "workflow.ViewOnlineFeedback.notViewed", Warning, false)
+				case _ => StageProgress(ViewOnlineFeedback, false, "workflow.ViewOnlineFeedback.notViewed")
+		}
+		override def preconditions = Seq(Seq(ReleaseFeedback))
+	}
 	
 	case object DownloadFeedback extends WorkflowStage {
 		def actionCode = "workflow.DownloadFeedback.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
-				case Some(item) if item.downloaded =>
+				case Some(item) if !(item.onlineViewed && (item.feedback.hasGenericFeedback || item.feedback.hasOnlineFeedback)) =>
+					StageProgress(DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded")
+				case Some(item) if item.downloaded || !item.feedback.hasAttachments =>
 					StageProgress(DownloadFeedback, true, "workflow.DownloadFeedback.downloaded", Good, true)
 				case Some(item) if item.feedback.released =>
 					StageProgress(DownloadFeedback, true, "workflow.DownloadFeedback.notDownloaded", Warning, false)
 				case _ => StageProgress(DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded")
 			}
-		override def preconditions = Seq(Seq(ReleaseFeedback))
+		override def preconditions = Seq(Seq(ViewOnlineFeedback))
 	}
 }

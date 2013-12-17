@@ -463,8 +463,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				.seq.map { array => array(0).asInstanceOf[SitsStatus] }
 
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime) = {
-		if (!newStaleUniversityIds.isEmpty && newStaleUniversityIds.size < Daoisms.MaxInClauseCount) {
-			var sqlString = """
+		newStaleUniversityIds.grouped(Daoisms.MaxInClauseCount).foreach { staleIds => 
+			val sqlString = """
 				update
 					Member
 				set
@@ -475,7 +475,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 				session.newQuery(sqlString)
 					.setParameter("importStart", importStart)
-					.setParameterList("newStaleUniversityIds", newStaleUniversityIds)
+					.setParameterList("newStaleUniversityIds", staleIds)
 					.executeUpdate
 			}
 		}

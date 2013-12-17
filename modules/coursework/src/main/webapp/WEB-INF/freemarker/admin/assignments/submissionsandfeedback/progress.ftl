@@ -81,29 +81,29 @@
 			</tr>
 		</thead>
 
-		<#if students?size gt 0>
-			<tbody>
-				<#macro action actionCode student>
-					<#local studentDetails><span data-profile="${student.user.warwickId}"><#if department.showStudentName>${student.user.fullName}<#else>${student.user.warwickId}</#if></span></#local>
-					<#local firstMarker="first marker" />
-					<#local secondMarker="second marker" />
+	<#if students?size gt 0>
+		<tbody>
+			<#macro action actionCode student>
+				<#local studentDetails><span data-profile="${student.user.warwickId}"><#if department.showStudentName>${student.user.fullName}<#else>${student.user.warwickId}</#if></span></#local>
+				<#local firstMarker="first marker" />
+				<#local secondMarker="second marker" />
 
-					<#if student.coursework.enhancedSubmission??>
-						<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission?? && student.coursework.enhancedSubmission.submission.assignment??>
-							<#if student.coursework.enhancedSubmission.submission.firstMarker?has_content>
-								<#local firstMarker><span data-profile="${student.coursework.enhancedSubmission.submission.firstMarker.warwickId}">${student.coursework.enhancedSubmission.submission.firstMarker.fullName}</span></#local>
-							</#if>
+				<#if student.coursework.enhancedSubmission??>
+					<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission?? && student.coursework.enhancedSubmission.submission.assignment??>
+						<#if student.coursework.enhancedSubmission.submission.firstMarker?has_content>
+							<#local firstMarker><span data-profile="${student.coursework.enhancedSubmission.submission.firstMarker.warwickId!}">${student.coursework.enhancedSubmission.submission.firstMarker.fullName}</span></#local>
+						</#if>
 
-							<#if student.coursework.enhancedSubmission.submission.secondMarker?has_content>
-								<#local secondMarker><span data-profile="${student.coursework.enhancedSubmission.submission.secondMarker.warwickId}">${student.coursework.enhancedSubmission.submission.secondMarker.fullName}</span></#local>
-							</#if>
+						<#if student.coursework.enhancedSubmission.submission.secondMarker?has_content>
+							<#local secondMarker><span data-profile="${student.coursework.enhancedSubmission.submission.secondMarker.warwickId!}">${student.coursework.enhancedSubmission.submission.secondMarker.fullName}</span></#local>
 						</#if>
 					</#if>
+				</#if>
 
-					<#local text><@spring.message code=actionCode /></#local>
+				<#local text><@spring.message code=actionCode /></#local>
 
-					<#noescape>${(text!"")?replace("[STUDENT]", studentDetails)?replace("[FIRST_MARKER]", firstMarker)?replace("[SECOND_MARKER]", secondMarker)}</#noescape>
-				</#macro>
+				<#noescape>${(text!"")?replace("[STUDENT]", studentDetails)?replace("[FIRST_MARKER]", firstMarker)?replace("[SECOND_MARKER]", secondMarker)}</#noescape>
+			</#macro>
 
 				<#macro stage stage>
 					<#if stage.messageCode?default("")?length gt 0>

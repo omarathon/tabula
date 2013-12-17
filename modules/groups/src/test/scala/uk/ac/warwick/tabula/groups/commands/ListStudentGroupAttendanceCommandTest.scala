@@ -24,6 +24,9 @@ import org.joda.time.DateTimeConstants
 import org.joda.time.Interval
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
 
 class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 	
@@ -75,34 +78,42 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		// user5 turned up to the first occurrence and then left
 		
 		// Recorded attendance for week 1 and both in 3 - rest haven't happened yet, 2 is missing
+		def attendance(occurrence: SmallGroupEventOccurrence, user: User, state: AttendanceState) {
+			val attendance = new SmallGroupEventAttendance
+			attendance.occurrence = occurrence
+			attendance.universityId = user.getWarwickId
+			attendance.state = state
+			occurrence.attendance.add(attendance)
+		}
 		
 		// Everyone turned up for week 1
 		val occurrence1 = new SmallGroupEventOccurrence
-		occurrence1.attendees.userLookup = userLookup
 		occurrence1.event = event2
 		occurrence1.week = 1
-		occurrence1.attendees.add(user1)
-		occurrence1.attendees.add(user2)
-		occurrence1.attendees.add(user3)
-		occurrence1.attendees.add(user4)
-		occurrence1.attendees.add(user5)
+		attendance(occurrence1, user1, AttendanceState.Attended)
+		attendance(occurrence1, user2, AttendanceState.Attended)
+		attendance(occurrence1, user3, AttendanceState.Attended)
+		attendance(occurrence1, user4, AttendanceState.Attended)
+		attendance(occurrence1, user5, AttendanceState.Attended)
 		
 		// User3 missed the first seminar in week 3, user4 missed the second
 		val occurrence2 = new SmallGroupEventOccurrence
-		occurrence2.attendees.userLookup = userLookup
 		occurrence2.event = event1
 		occurrence2.week = 3
-		occurrence2.attendees.add(user1)
-		occurrence2.attendees.add(user2)
-		occurrence2.attendees.add(user4)
+		attendance(occurrence2, user1, AttendanceState.Attended)
+		attendance(occurrence2, user2, AttendanceState.Attended)
+		attendance(occurrence2, user3, AttendanceState.MissedUnauthorised)
+		attendance(occurrence2, user4, AttendanceState.Attended)
+		attendance(occurrence2, user5, AttendanceState.MissedUnauthorised)
 		
 		val occurrence3 = new SmallGroupEventOccurrence
-		occurrence3.attendees.userLookup = userLookup
 		occurrence3.event = event2
 		occurrence3.week = 3
-		occurrence3.attendees.add(user1)
-		occurrence3.attendees.add(user2)
-		occurrence3.attendees.add(user3)
+		attendance(occurrence3, user1, AttendanceState.Attended)
+		attendance(occurrence3, user2, AttendanceState.Attended)
+		attendance(occurrence3, user3, AttendanceState.Attended)
+		attendance(occurrence3, user4, AttendanceState.MissedUnauthorised)
+		attendance(occurrence3, user5, AttendanceState.MissedUnauthorised)
 	}
 	
 	@Test
@@ -229,7 +240,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 				(group, Seq(
 					(1, Seq(((event2, 1), Attended))),
 					(2, Seq(((event1, 2), Late))),
-					(3, Seq(((event1, 3), Missed), ((event2, 3), Attended))),
+					(3, Seq(((event1, 3), MissedUnauthorised), ((event2, 3), Attended))),
 					(4, Seq(((event1, 4), NotRecorded))),
 					(7, Seq(((event2, 7), NotRecorded)))
 				))
@@ -288,7 +299,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 				(group, Seq(
 					(1, Seq(((event2, 1), Attended))),
 					(2, Seq(((event1, 2), Late))),
-					(3, Seq(((event1, 3), Missed), ((event2, 3), Missed))), // TODO because the user isn't in the group, is this really missed? Hard to tell.
+					(3, Seq(((event1, 3), MissedUnauthorised), ((event2, 3), MissedUnauthorised))),
 					(4, Seq(((event1, 4), NotRecorded))),
 					(7, Seq(((event2, 7), NotRecorded)))
 				))

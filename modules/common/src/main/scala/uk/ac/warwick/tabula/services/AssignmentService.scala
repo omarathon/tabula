@@ -25,7 +25,7 @@ import uk.ac.warwick.spring.Wire
  */
 trait AssignmentService {
 	def getAssignmentById(id: String): Option[Assignment]
-	def save(assignment: Assignment)
+	def save(assignment: Assignment): Unit
 
 	def deleteFormField(field: FormField) : Unit
 

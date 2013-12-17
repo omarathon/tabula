@@ -66,7 +66,7 @@ class GrantRoleCommand[A <: PermissionsTarget : ClassTag](val scope: A) extends 
 			val permissionsToAdd = roleDefinition.allPermissions(Some(scope)).keys
 			val deniedPermissions = permissionsToAdd.filterNot(securityService.canDelegate(user,_,scope))
 			if ((!deniedPermissions.isEmpty) && (!user.god)) {
-				errors.rejectValue("roleDefinition", "permissions.cantGiveWhatYouDontHave", Array(deniedPermissions.mkString("\n"), scope),"")
+				errors.rejectValue("roleDefinition", "permissions.cantGiveWhatYouDontHave", Array(deniedPermissions.map { _.description }.mkString("\n"), scope),"")
 			}
 		}
 	}

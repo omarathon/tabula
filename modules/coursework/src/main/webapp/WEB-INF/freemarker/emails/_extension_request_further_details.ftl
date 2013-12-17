@@ -27,5 +27,5 @@ ${agent.agentName} (${agent.agent})<#if agent.agentMember??>, ${agent.agentMembe
 Student Course Details
 Route:	${(scdRoute.name)!} (${(scdRoute.code?upper_case)!})
 Course:	<#if (scdRoute.name) != (scdCourse.name)>${(scdCourse.name)!} (${(scdCourse.code?upper_case)!})<#else>${(scdCourse.code?upper_case)!}</#if>
-Intended award and type: ${(scdAwardCode)!} (${(scdRoute.degreeType.toString)!})
+Intended award and type: ${(scdAward.name)!} (${(scdRoute.degreeType.toString)!})
 </#if>

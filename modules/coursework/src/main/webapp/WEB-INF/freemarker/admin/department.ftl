@@ -375,8 +375,8 @@
 
 					<li class="divider"></li>
 
-					<#if assignment.allowExtensions>
-						<#if assignment.hasExtensions>
+					<#if !assignment.openEnded>
+						<#if assignment.allowExtensions || assignment.hasExtensions>
 							<li>
 								<#if can.do('Extension.ReviewRequest', assignment)>
 									<#assign ext_caption='Grant extensions' />
@@ -393,13 +393,11 @@
 								</@fmt.permission_button>
 							</li>
 						<#else>
-							<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="There have been no extensions requested for this assignment."><i class="icon-calendar"></i> Grant extensions </a></li>
+							<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Extensions are not allowed on this assignment."><i class="icon-calendar"></i> Grant extensions </a></li>
 						</#if>
-					<#else>
-						<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Extensions are not allowed on this assignment."><i class="icon-calendar"></i> Grant extensions </a></li>
+	
+						<li class="divider"></li>
 					</#if>
-
-					<li class="divider"></li>
 
 
 					<#if assignment.markingWorkflow?? && !assignment.markingWorkflow.studentsChooseMarker>

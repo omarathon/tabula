@@ -31,10 +31,12 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			law.name = "Cool Essay"
 
 			val assessmentGroup2010 = new AssessmentGroup
+			assessmentGroup2010.membershipService = assignmentMembershipService
 			assessmentGroup2010.assessmentComponent = law
 			assessmentGroup2010.occurrence = "A"
 
 			val assessmentGroup2011 = new AssessmentGroup
+			assessmentGroup2011.membershipService = assignmentMembershipService
 			assessmentGroup2011.assessmentComponent = law
 			assessmentGroup2011.occurrence = "A"
 

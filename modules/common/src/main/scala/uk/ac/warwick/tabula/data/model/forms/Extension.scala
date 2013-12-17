@@ -10,9 +10,9 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Assignment}
-import uk.ac.warwick.tabula.data.model.GeneratedId
+import uk.ac.warwick.tabula.data.model.{Feedback, FileAttachment, Assignment, GeneratedId}
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 
 @Entity @AccessType("field")
 class Extension extends GeneratedId with PermissionsTarget {
@@ -70,5 +70,14 @@ class Extension extends GeneratedId with PermissionsTarget {
 	// this was not requested by a student. i.e. was manually created by an administrator
 	def isManual = requestedOn == null
 	def isAwaitingApproval = !isManual && !approved && !rejected
+
+	@transient
+	lazy val workingDaysHelper = new WorkingDaysHelperImpl
+
+	// feedback deadline taking the extension into account
+	def feedbackDeadline = {
+		val localDate = workingDaysHelper.datePlusWorkingDays(expiryDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)
+		localDate.toDateTime(expiryDate)
+	}
 
 }

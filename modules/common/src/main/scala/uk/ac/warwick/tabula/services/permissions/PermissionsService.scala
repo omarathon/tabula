@@ -32,6 +32,7 @@ trait PermissionsService {
 	def saveOrUpdate(permission: GrantedPermission[_])
 	def saveOrUpdate(role: GrantedRole[_])
 
+	def getCustomRoleDefinitionById(id: String): Option[CustomRoleDefinition]
 	
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): Option[GrantedRole[A]]
 	def getGrantedPermission[A <: PermissionsTarget: ClassTag](scope: A, permission: Permission, overrideType: Boolean): Option[GrantedPermission[A]]
@@ -100,6 +101,8 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 		clearCaches()
 		queue.send(new PermissionsCacheBusterMessage)
 	}
+	
+	def getCustomRoleDefinitionById(id: String) = permissionsDao.getCustomRoleDefinitionById(id)
 	
 	def getGrantedRole[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): Option[GrantedRole[A]] = 
 		transactional(readOnly = true) {

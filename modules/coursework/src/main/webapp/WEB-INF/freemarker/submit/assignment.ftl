@@ -9,7 +9,7 @@
   <button type="button" class="close" data-dismiss="alert">×</button>
 	<h4>Information for module managers</h4>
 
-	<p>This box is only show to module managers. Click the &times; button to see the page as a student sees it.</p>
+	<p>This box is only shown to module managers. Click the &times; button to see the page as a student sees it.</p>
 
 	<p>You can give students a link to this page to
 	<#if assignment.collectSubmissions>submit their work and to</#if>

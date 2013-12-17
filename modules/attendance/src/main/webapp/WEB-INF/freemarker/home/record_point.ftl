@@ -140,7 +140,7 @@ ${titleHeader}
 					</@spring.bind>
 				</div>
 				<script>
-					Attendance.createButtonGroup('#studentsState-${student.universityId}-${point.id}');
+					AttendanceRecording.createButtonGroup('#studentsState-${student.universityId}-${point.id}');
 				</script>
 			</div>
 		</#macro>
@@ -149,7 +149,7 @@ ${titleHeader}
 
 			<form id="recordAttendance" action="" method="post">
 				<script>
-					Attendance.bindButtonGroupHandler();
+					AttendanceRecording.bindButtonGroupHandler();
 				</script>
 				<input type="hidden" name="monitoringPoint" value="${command.templateMonitoringPoint.id}" />
 				<input type="hidden" name="returnTo" value="${returnTo}"/>

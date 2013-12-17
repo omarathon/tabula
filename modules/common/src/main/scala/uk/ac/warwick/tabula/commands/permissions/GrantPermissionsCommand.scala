@@ -62,8 +62,8 @@ class GrantPermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) extend
 		val user = RequestInfo.fromThread.get.user
 		
 		if (permission == null) errors.rejectValue("permission", "NotEmpty")
-		else if (!user.sysadmin && !securityService.can(user, permission, scope)) {
-			errors.rejectValue("permission", "permissions.cantGiveWhatYouDontHave", Array(permission, scope), "")
+		else if (!user.sysadmin && !securityService.canDelegate(user, permission, scope)) {
+			errors.rejectValue("permission", "permissions.cantGiveWhatYouDontHave", Array(permission.description, scope), "")
 		}
 	}
 
