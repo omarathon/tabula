@@ -27,7 +27,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
  * Redirects to handle these otherwise nonexistent parent paths.
  */
 @Controller
-@RequestMapping(Array("/admin", "/admin/department"))
+@RequestMapping(Array("/admin", "/admin/department", "/admin/module"))
 class AdminHomeController extends GroupsController {
 
 	@RequestMapping(method=Array(GET, HEAD))

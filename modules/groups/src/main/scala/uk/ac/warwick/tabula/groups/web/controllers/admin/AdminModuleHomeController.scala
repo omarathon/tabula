@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.groups.web.controllers.admin
 
 import scala.collection.JavaConverters._
-
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.groups.web.controllers.GroupsController
@@ -12,38 +11,36 @@ import uk.ac.warwick.tabula.groups.commands.admin.AdminDepartmentHomeCommand
 import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{Tutor, ViewModules, ViewSet, ViewModule}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.commands.ViewViewableCommand
 
 @Controller
-@RequestMapping(value=Array("/admin/department/{department}"))
-class AdminDepartmentHomeController extends GroupsController {
+@RequestMapping(value=Array("/admin/module/{module}"))
+class AdminModuleHomeController extends GroupsController {
 
 	hideDeletedItems
 
-	@ModelAttribute("adminCommand") def command(@PathVariable("department") dept: Department, user: CurrentUser) =
-		AdminDepartmentHomeCommand(dept, user)
-
-	@ModelAttribute("allocated") def allocatedSet(@RequestParam(value="allocated", required=false) set: SmallGroupSet) = set
+	@ModelAttribute("adminCommand") def command(@PathVariable("module") module: Module) =
+		new ViewViewableCommand(Permissions.Module.ManageSmallGroups, module)
 
 	@RequestMapping
-	def adminDepartment(@ModelAttribute("adminCommand") cmd: Appliable[Seq[Module]], @PathVariable("department") department:Department, user: CurrentUser) = {
-		val modules = cmd.apply()
+	def adminModule(@ModelAttribute("adminCommand") cmd: Appliable[Module], user: CurrentUser) = {
+		val module = cmd.apply()
 
 		// Build the view model
 		val moduleItems =
-			for (module <- modules) yield {
+			Seq(
 				ViewModule(module,
 					module.groupSets.asScala map { set => ViewSet(set, set.groups.asScala, Tutor) },
 					canManageGroups=securityService.can(user, Permissions.Module.ManageSmallGroups, module)
 				)
-			}
+			)
 
 		val data = ViewModules(
-			moduleItems.toSeq,
-			canManageDepartment=securityService.can(user, Permissions.Module.ManageSmallGroups, department)
+			moduleItems,
+			canManageDepartment=securityService.can(user, Permissions.Module.ManageSmallGroups, module.department)
 		)
 
-		Mav("admin/department",
-			"department" -> department,
-			"data" -> data )
+		if (ajax) Mav("admin/module/sets_partial", "data" -> data ).noLayout()
+		else Mav("admin/module/sets", "data" -> data )
 	}
 }

@@ -5,6 +5,14 @@
 
 var exports = {};
 
+exports.zebraStripeAssignments = function($module) {
+	$module.find('.assignment-info').filter(':visible:even').addClass('alt-row');
+};
+
+// take anything we've attached to "exports" and add it to the global "Courses"
+// we use extend() to add to any existing variable rather than clobber it
+window.Courses = jQuery.extend(window.Courses, exports);
+
 $(function(){
 
 	// hide stuff that makes no sense when open-ended
@@ -18,7 +26,7 @@ $(function(){
 
 	// Zebra striping on lists of modules/assignments
 	$('.module-info').each(function(i, module) {
-		$(module).find('.assignment-info').filter(':visible:even').addClass('alt-row');
+		exports.zebraStripeAssignments($(module));
 	});
 
 	$('.module-info.empty').css('opacity',0.66)
@@ -191,11 +199,6 @@ $(function(){
 
 
 });
-
-// take anything we've attached to "exports" and add it to the global "Courses"
-// we use extend() to add to any existing variable rather than clobber it
-window.Courses = jQuery.extend(window.Courses, exports);
-
 
 // shift selectable checkboxes
 $.fn.shiftSelectable = function() {
