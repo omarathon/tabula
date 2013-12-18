@@ -380,5 +380,9 @@ class RelationshipServiceTest extends AppContextTestBase with Mockito {
 
 		relationshipService.expectedToHaveRelationship(ptRelType, dept2)(m2) should be (false)
 
+		// TAB-1712
+		scd2.route = null
+		session.saveOrUpdate(scd2)
+		relationshipService.expectedToHaveRelationship(ptRelType, dept2)(m2) should be (false)
 	}
 }
