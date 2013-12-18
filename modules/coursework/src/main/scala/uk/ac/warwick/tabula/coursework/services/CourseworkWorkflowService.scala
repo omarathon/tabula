@@ -142,7 +142,7 @@ object WorkflowStages {
 			// If the student hasn't submitted, but we have uploaded feedback for them, don't record their submission status
 			case None if coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).isDefined => StageProgress(Submission, false, "workflow.Submission.unsubmitted.withFeedback")
 			
-			case Some(submission) if submission.submission.isLate => StageProgress(Submission, true, "workflow.Submission.authorisedLate", Warning, true)
+			case Some(submission) if submission.submission.isLate => StageProgress(Submission, true, "workflow.Submission.late", Warning, true)
 			
 			case Some(submission) if submission.submission.isAuthorisedLate => StageProgress(Submission, true, "workflow.Submission.authorisedLate", Good, true)
 			

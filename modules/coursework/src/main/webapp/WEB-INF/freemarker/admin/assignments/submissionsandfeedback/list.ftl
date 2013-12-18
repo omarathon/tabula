@@ -1,3 +1,4 @@
+<#import "_submission_details.ftl" as sd />
 <#escape x as x?html>
 
 <div id="feedback-modal" class="modal fade"></div>
@@ -222,47 +223,24 @@
 					</td>
 					<td class="submission-status">
 						<#if submission??>
-							<#if submission.late>
-								<span class="label label-important use-tooltip" title="${lateness!''}">Late</span>
-							<#elseif  submission.authorisedLate>
-								<span class="label label-info use-tooltip" title="${lateness!''}">Within Extension</span>
-							</#if>
+							<#-- Downloaded -->
 							<#if enhancedSubmission.downloaded>
 								<span class="label label-success">Downloaded</span>
 							</#if>
-							<!-- ignore placeholder submissions -->
+
+							<#-- Markable - ignore placeholder submissions -->
 							<#if submission.assignment?? && submission.releasedForMarking>
 								<span class="label label-success">Markable</span>
 							</#if>
+
+							<#-- Plagiarised -->
 							<#if submission.suspectPlagiarised>
 								<i class="icon-exclamation-sign use-tooltip" title="Suspected of being plagiarised"></i>
 							<#elseif submission.investigationCompleted>
 								<i class="icon-ok-sign use-tooltip" title="Plagiarism investigation completed"></i>
 							</#if>
-						<#elseif !student.coursework.enhancedFeedback??>
-							<#if student.coursework.enhancedExtension?has_content>
-								<#local enhancedExtension=student.coursework.enhancedExtension>
-								<#local extension=enhancedExtension.extension>
-							
-								<span class="label label-info">Unsubmitted</span>
-								<#if extension.approved && !extension.rejected>
-									<#local date>
-										<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
-									</#local>
-								</#if>
-								<#if enhancedExtension.within>
-									<span class="label label-info use-tooltip" title="${date}">Within Extension</span>
-								<#elseif extension.rejected>
-									<span class="label label-info use-tooltip" >Extension Rejected</span>
-								<#elseif !extension.approved>
-									<span class="label label-info use-tooltip" >Extension Requested</span>
-								<#else>
-									<span class="label label-info use-tooltip" title="${date}">Extension Expired</span>
-								</#if>
-							<#else>
-								<span class="label label-info">Unsubmitted</span>
-							</#if>
 						</#if>
+						<@sd.submission_status submission student.coursework.enhancedExtension student.coursework.enhancedFeedback />
 					</td>
 					<#if assignment.wordCountField??>
 						<td class="word-count">

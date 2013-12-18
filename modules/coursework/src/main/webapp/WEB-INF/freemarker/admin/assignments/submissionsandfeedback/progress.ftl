@@ -143,33 +143,7 @@
 								<h3>Submission</h3>
 
 								<div class="labels">
-									<#if submission??>
-										<#if submission.late>
-											<span class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span>
-										<#elseif  submission.authorisedLate>
-											<span class="label label-info use-tooltip" data-html="true" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
-										</#if>
-									<#elseif !enhancedFeedback??>
-										<#if enhancedExtension?has_content>
-											<span class="label label-info">Unsubmitted</span>
-											<#if extension.approved && !extension.rejected>
-												<#local date>
-													<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
-												</#local>
-											</#if>
-											<#if enhancedExtension.within>
-												<span class="label label-info use-tooltip" data-html="true" title="${date}" data-container="body">Within Extension</span>
-											<#elseif extension.rejected>
-												<span class="label label-info">Extension Rejected</span>
-											<#elseif !extension.approved>
-												<span class="label label-info">Extension Requested</span>
-											<#else>
-												<span class="label label-info use-tooltip" title="${date}" data-container="body">Extension Expired</span>
-											</#if>
-										<#else>
-											<span class="label label-info">Unsubmitted</span>
-										</#if>
-									</#if>
+									<@sd.submission_status submission enhancedExtension enhancedFeedback />
 								</div>
 
 								<#-- If the current action is in this section, then add the next action blowout here -->
