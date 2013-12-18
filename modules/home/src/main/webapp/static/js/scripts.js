@@ -209,6 +209,11 @@
 				var scopeSelector = (data.formId != undefined) ? "#" + data.formId + " " : "";
 
 				if(data.status == "error"){
+					if ($form.is('.double-submit-protection')) {
+						$form.find('.submit-buttons .btn').removeClass('disabled');
+						$form.removeData('submitOnceSubmitted');
+					}
+				
 					// delete any old errors
 					$(scopeSelector + "span.error").remove();
 					$(scopeSelector + '.error').removeClass('error');
