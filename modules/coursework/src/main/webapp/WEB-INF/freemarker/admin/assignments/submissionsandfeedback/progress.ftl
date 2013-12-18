@@ -34,6 +34,7 @@
 		<#assign currentView = "summary" />
 		<#include "_action-bar.ftl" />
 
+		<div id="feedback-modal" class="modal fade"></div>
 		<#if students??>
 	</div>
 
@@ -274,7 +275,19 @@
 										<#else><span class="label label-warning">Not yet published</span>
 										</#if>
 									</#if>
+									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
 								</div>
+							</#if>
+
+							<#-- not really a stage but the best place to put a link to the feedback summary -->
+							<#if feedback?? && !(feedback.placeholder)>
+								<div class="stage">
+									<i class="icon-eye-open"></i>
+									<a href="<@routes.feedbackSummary assignment student.user.warwickId!''/>"
+									   class="ajax-modal"
+									   data-target="#feedback-modal">
+										View feedback
+									</a>
 
 								<#-- If the current action is in this section, then add the next action blowout here -->
 								<#if student.nextStage?? && ['AddMarks','AddFeedback','ReleaseFeedback','DownloadFeedback']?seq_contains(student.nextStage.toString)>

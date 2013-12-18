@@ -1,4 +1,7 @@
 <#escape x as x?html>
+
+<div id="feedback-modal" class="modal fade"></div>
+
 <div class="fixed-container">
 	<div class="persist-header">
 		<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
@@ -109,7 +112,7 @@
 		</#if>
 
 		<colgroup class="feedback">
-			<#assign feedbackColspan=3 />
+			<#assign feedbackColspan=4 />
 
 			<col class="files" />
 			<col class="uploaded" />
@@ -118,6 +121,7 @@
 				<col class="mark" />
 				<col class="grade" />
 			</#if>
+			<col class="viewFeedback" />
 			<col class="status" />
 		</colgroup>
 
@@ -163,6 +167,7 @@
 					<th>Mark</th>
 					<th>Grade</th>
 				</#if>
+				<th>Summary</th>
 				<th class="sortable">Status</th>
 			</tr>
 		</thead>
@@ -310,7 +315,11 @@
 							</#if>
 						</#if>
 					</td>
-					<td class="uploaded"><#if student.coursework.enhancedFeedback??><@fmt.date date=student.coursework.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true shortMonth=true split=true /></#if></td>
+					<td class="uploaded">
+						<#if student.coursework.enhancedFeedback?? && !student.coursework.enhancedFeedback.feedback.placeholder>
+							<@fmt.date date=student.coursework.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true shortMonth=true split=true />
+						</#if>
+					</td>
 					
 					 <#if assignment.collectMarks>
 						<td class="mark">
@@ -320,6 +329,17 @@
 							${(student.coursework.enhancedFeedback.feedback.actualGrade)!''}
 						</td>
 					</#if>
+
+					<td>
+						<#if student.coursework.enhancedFeedback??>
+							<a href="<@routes.feedbackSummary assignment student.user.warwickId!''/>"
+							   class="ajax-modal"
+							   data-target="#feedback-modal">
+								View
+							</a>
+						</#if>
+					</td>
+
 					<td class="feedbackReleased">
 						<#if student.coursework.enhancedFeedback??>
 							<#if student.coursework.enhancedFeedback.feedback.released>
