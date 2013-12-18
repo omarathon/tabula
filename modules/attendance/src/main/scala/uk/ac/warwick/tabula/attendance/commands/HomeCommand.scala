@@ -21,16 +21,15 @@ object HomeCommand {
 		new HomeCommand(user)
 		with Command[HomeInformation]
 		with AutowiringModuleAndDepartmentServiceComponent
-		with AutowiringProfileServiceComponent
 		with AutowiringRelationshipServiceComponent
 		with Public with ReadOnly with Unaudited
 }
 
 abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeInformation] with HomeCommandState {
-	self: ModuleAndDepartmentServiceComponent with ProfileServiceComponent with RelationshipServiceComponent =>
+	self: ModuleAndDepartmentServiceComponent with RelationshipServiceComponent =>
 
 	override def applyInternal() = {
-		val optionalCurrentMember = profileService.getMemberByUserId(user.apparentId, disableFilter = true)
+		val optionalCurrentMember = user.profile
 		val currentMember = optionalCurrentMember getOrElse new RuntimeMember(user)
 		val hasProfile = currentMember match {
 			case student: StudentMember =>

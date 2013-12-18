@@ -38,7 +38,7 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 		
 		Seq(staff1, staff2, staff3).foreach { staff => 
 			profileService.getMemberByUniversityId(staff.universityId) returns (Some(staff))
-			profileService.getMemberByUserId(staff.userId) returns (Some(staff))
+			profileService.getAllMembersWithUserId(staff.userId) returns (Seq(staff))
 		}
 		
 		Seq(student1, student2, student3, student4, student5, student6, student7).foreach { student => 

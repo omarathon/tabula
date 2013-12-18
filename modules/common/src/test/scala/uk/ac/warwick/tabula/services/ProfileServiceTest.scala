@@ -4,12 +4,12 @@ package uk.ac.warwick.tabula.services
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import org.junit.Before
-
 import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase, Fixtures, Mockito}
 import uk.ac.warwick.tabula.data.model.{DegreeType, Department, SitsStatus, StudentCourseDetails, Route, Member}
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.JavaImports._
 import org.mockito.Matchers
+import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
 class ProfileServiceTest extends PersistenceTestBase with Mockito {
@@ -59,19 +59,19 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.getMemberByUniversityId("0000004") should be (None)
 
 		profileService.getAllMembersWithUserId("student", disableFilter = false) should be (Seq(m1, m2))
-		profileService.getMemberByUserId("student", disableFilter = false) should be (Some(m1))
+		profileService.getMemberByUser(new User("student"), disableFilter = false) should be (Some(m1))
 		profileService.getAllMembersWithUserId("student", disableFilter = true) should be (Seq(m1, m2))
 		profileService.getAllMembersWithUserId("staff1", disableFilter = false) should be (Seq())
-		profileService.getMemberByUserId("staff1", disableFilter = false) should be (None)
+		profileService.getMemberByUser(new User("staff1"), disableFilter = false) should be (None)
 		profileService.getAllMembersWithUserId("staff1", disableFilter = true) should be (Seq(m3))
-		profileService.getMemberByUserId("staff1", disableFilter = true) should be (Some(m3))
+		profileService.getMemberByUser(new User("staff1"), disableFilter = true) should be (Some(m3))
 		profileService.getAllMembersWithUserId("unknown", disableFilter = false) should be (Seq())
 		profileService.getAllMembersWithUserId("unknown", disableFilter = true) should be (Seq())
 
 		session.disableFilter(Member.StudentsOnlyFilter)
 
 		profileService.getAllMembersWithUserId("staff1", disableFilter = false) should be (Seq(m3))
-		profileService.getMemberByUserId("staff1", disableFilter = false) should be (Some(m3))
+		profileService.getMemberByUser(new User("staff1"), disableFilter = false) should be (Some(m3))
 	}
 
 	@Test def listMembersUpdatedSince = transactional { tx =>

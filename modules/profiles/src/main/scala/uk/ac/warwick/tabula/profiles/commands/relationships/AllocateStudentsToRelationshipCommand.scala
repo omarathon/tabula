@@ -67,7 +67,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 		indexesToRemove.reverse.foreach { additionalAgents.remove(_) }
 
 		additionalAgents.asScala
-			.flatMap { profileService.getMemberByUserId(_) }
+			.flatMap { profileService.getAllMembersWithUserId(_) }
 			.foreach { member =>
 				if (!mapping.containsKey(member)) mapping.put(member, JArrayList())
 			}
