@@ -275,7 +275,7 @@
 										<#else><span class="label label-warning">Not yet published</span>
 										</#if>
 									</#if>
-									<strong>Next action:</strong> <@action student.nextStage.actionCode student />
+								<#if student.nextStage??><strong>Next action:</strong> <@action student.nextStage.actionCode student /></#if>
 								</div>
 							</#if>
 
