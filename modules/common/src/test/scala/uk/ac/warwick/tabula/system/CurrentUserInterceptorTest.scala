@@ -111,7 +111,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		roleService.hasRole(isA[CurrentUser], isEq(Masquerader())) returns (true)
 		userLookup.users += ("cusebr" -> masque)
 		
-		profileService.getMemberByUser(user, true) returns (None)
+		profileService.getMemberByUser(masque, true) returns (None)
 		
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
