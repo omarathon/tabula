@@ -11,6 +11,9 @@ import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import javax.servlet.http.HttpServletRequest
+import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.web.Mav
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/feedback/download/{feedbackId}/{filename}.zip"))
@@ -135,4 +138,21 @@ class DownloadAllFeedback extends CourseworkController {
 			@PathVariable("filename") filename: String)(implicit request: HttpServletRequest, response: HttpServletResponse) {
 		fileServer.serve(cmd.apply())
 	}
+}
+
+// A read only view of all feedback fields and attachments
+@Controller
+@RequestMapping(value = Array("/admin/module/{module}/assignments/{assignment}/feedback/summary/{student}"))
+class FeedbackSummaryController extends CourseworkController {
+
+	@ModelAttribute("command")
+	def command(@PathVariable("module") module: Module, @PathVariable assignment: Assignment, @PathVariable student: User)
+		= FeedbackSummaryCommand(assignment, student)
+
+	@RequestMapping(method = Array(GET, HEAD))
+	def showForm(@ModelAttribute("command") command: Appliable[Option[Feedback]]): Mav = {
+		val feedback = command.apply()
+		Mav("admin/assignments/feedback/read_only", "feedback" -> feedback).noNavigation()
+	}
+
 }

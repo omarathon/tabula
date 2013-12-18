@@ -1,83 +1,88 @@
 <#escape x as x?html>
-<div class="fixed-on-scroll">
-	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
-	
-	<#if assignment.openEnded>
-		<p class="dates">
-			<@fmt.interval assignment.openDate />, never closes
-			(open-ended)
-			<#if !assignment.opened>
-				<span class="label label-warning">Not yet open</span>
-			</#if>
-		</p>
-	<#else>
-		<p class="dates">
-			<@fmt.interval assignment.openDate assignment.closeDate />
-			<#if assignment.closed>
-				<span class="label label-warning">Closed</span>
-			</#if>
-			<#if !assignment.opened>
-				<span class="label label-warning">Not yet open</span>
-			</#if>
-								
-		</p>
-	</#if>
-	
-	<#assign module=assignment.module />
-	<#assign department=module.department />
-	
-	<#include "_filter.ftl" />
-	
-	<#assign currentView = "table" />
-	<#include "_action-bar.ftl" />
 
-	<#if students??>
+<div id="feedback-modal" class="modal fade"></div>
+
+<div class="fixed-container">
+	<div class="persist-header">
+		<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
+
+		<#if assignment.openEnded>
+			<p class="dates">
+				<@fmt.interval assignment.openDate />, never closes
+				(open-ended)
+				<#if !assignment.opened>
+					<span class="label label-warning">Not yet open</span>
+				</#if>
+			</p>
+		<#else>
+			<p class="dates">
+				<@fmt.interval assignment.openDate assignment.closeDate />
+				<#if assignment.closed>
+					<span class="label label-warning">Closed</span>
+				</#if>
+				<#if !assignment.opened>
+					<span class="label label-warning">Not yet open</span>
+				</#if>
+
+			</p>
+		</#if>
+
+		<#assign module=assignment.module />
+		<#assign department=module.department />
+
+		<#include "_filter.ftl" />
+
+		<#assign currentView = "table" />
+		<#include "_action-bar.ftl" />
+
+		<#if students??>
+
+	<#macro originalityReport attachment>
+	<#local r=attachment.originalityReport />
+
+				<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
+		  <div id="tip-content-${attachment.id}" class="hide">
+					<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
+					<p class="similarity-subcategories-tooltip">
+						Web: ${r.webOverlap}%<br>
+						Student papers: ${r.studentOverlap}%<br>
+						Publications: ${r.publicationOverlap}%
+					</p>
+					<p>
+						<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
+					</p>
+		  </div>
+		  <script type="text/javascript">
+			jQuery(function($){
+			  $("#tool-tip-${attachment.id}").popover({
+				placement: 'right',
+				html: true,
+				content: function(){return $('#tip-content-${attachment.id}').html();},
+				title: 'Turnitin report summary'
+			  });
+			});
+		  </script>
+
+	</#macro>
+
+	<#function hasSubmissionOrFeedback students>
+		<#local result = [] />
+		<#list students as student>
+			<#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??>
+				<#local result = result + [student] />
+			</#if>
+		</#list>
+		<#return result />
+	</#function>
+
+	<#if hasSubmissionOrFeedback(students)?size = 0>
+		<p>There are no submissions or feedbacks yet for this assignment.</p>
+	</#if>
+
 </div>
 
-<#macro originalityReport attachment>
-<#local r=attachment.originalityReport />
-
-			<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
-      <div id="tip-content-${attachment.id}" class="hide">
-				<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
-				<p class="similarity-subcategories-tooltip">
-					Web: ${r.webOverlap}%<br>
-					Student papers: ${r.studentOverlap}%<br>
-					Publications: ${r.publicationOverlap}%
-				</p>
-				<p>
-					<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
-				</p>
-      </div>
-      <script type="text/javascript">
-        jQuery(function($){
-          $("#tool-tip-${attachment.id}").popover({
-            placement: 'right',
-            html: true,
-            content: function(){return $('#tip-content-${attachment.id}').html();},
-            title: 'Turnitin report summary'
-          });
-        });
-      </script>
-
-</#macro>
-
-<#function hasSubmissionOrFeedback students>
-	<#local result = [] />
-	<#list students as student>
-		<#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??>
-			<#local result = result + [student] />
-		</#if>
-	</#list>
-	<#return result />
-</#function>
-
-<#if hasSubmissionOrFeedback(students)?size = 0>
-	<p>There are no submissions or feedbacks yet for this assignment.</p>
-</#if>
-
 <div class="submission-feedback-list">
-	<table id="submission-table" class="table table-bordered table-striped">
+	<table class="table table-bordered table-striped submission-table">
 		<colgroup class="student">
 			<col class="checkbox" />
 			<col class="student-info" />
@@ -107,7 +112,7 @@
 		</#if>
 
 		<colgroup class="feedback">
-			<#assign feedbackColspan=3 />
+			<#assign feedbackColspan=4 />
 
 			<col class="files" />
 			<col class="uploaded" />
@@ -116,9 +121,12 @@
 				<col class="mark" />
 				<col class="grade" />
 			</#if>
+			<col class="viewFeedback" />
 			<col class="status" />
 		</colgroup>
-		<thead>
+
+
+		<thead class="persist-header">
 			<tr>
 				<th class="check-col"><div class="check-all checkbox"><input type="checkbox" class="collection-check-all"></div></th>
 				<th class="sortable">Student</th>
@@ -159,9 +167,11 @@
 					<th>Mark</th>
 					<th>Grade</th>
 				</#if>
+				<th>Summary</th>
 				<th class="sortable">Status</th>
 			</tr>
 		</thead>
+
 		<tbody>
 			<#macro row student>
 				<#if student.coursework.enhancedSubmission??>
@@ -305,7 +315,11 @@
 							</#if>
 						</#if>
 					</td>
-					<td class="uploaded"><#if student.coursework.enhancedFeedback??><@fmt.date date=student.coursework.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true shortMonth=true split=true /></#if></td>
+					<td class="uploaded">
+						<#if student.coursework.enhancedFeedback?? && !student.coursework.enhancedFeedback.feedback.placeholder>
+							<@fmt.date date=student.coursework.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true shortMonth=true split=true />
+						</#if>
+					</td>
 					
 					 <#if assignment.collectMarks>
 						<td class="mark">
@@ -315,6 +329,17 @@
 							${(student.coursework.enhancedFeedback.feedback.actualGrade)!''}
 						</td>
 					</#if>
+
+					<td>
+						<#if student.coursework.enhancedFeedback??>
+							<a href="<@routes.feedbackSummary assignment student.user.warwickId!''/>"
+							   class="ajax-modal"
+							   data-target="#feedback-modal">
+								View
+							</a>
+						</#if>
+					</td>
+
 					<td class="feedbackReleased">
 						<#if student.coursework.enhancedFeedback??>
 							<#if student.coursework.enhancedFeedback.feedback.released>
@@ -335,23 +360,26 @@
 	</table>
 	<script type="text/javascript">
 		(function($) {
-			$("#submission-table").sortableTable({
-				textExtraction: function(node) { 
+			$('.fixed-container').fixHeaderFooter({minimumWindowHeightFix: 630});
+
+			$('.submission-table:not(.floatingHeadTable)').sortableTable({
+				textExtraction: function(node) {
 					var $el = $(node);
 					if ($el.hasClass('originality-report')) {
 						var $tooltip = $el.find('.similarity-tooltip').first();
 						if ($tooltip.length) {
-							return parseInt($tooltip.text().substring(0, $tooltip.text().indexOf('%')));
+							return $tooltip.text().substring(0, $tooltip.text().indexOf('%'));
 						} else {
-							return 0;
+							return '0';
 						}
 					} else if ($el.hasClass('word-count')) {
-						return parseInt($el.text().trim().replace(',',''));
+						return $el.text().trim().replace(',','');
 					} else {				
 						return $el.text().trim();
-					} 
+					}
 				}
 			});
+
 		})(jQuery);
 	</script>
 </div>
@@ -360,4 +388,5 @@
 </div>
 </#if>
 
+</div><!-- end fixed container -->
 </#escape>

@@ -7,6 +7,11 @@ import org.mockito.Mockito._
 import uk.ac.warwick.tabula.data.model.{Department, Module, MarkerFeedback, Assignment, Feedback, UserGroup}
 import uk.ac.warwick.userlookup.User
 
+object MarkingNotificationFixture {
+	val FirstMarkerLink: (Feedback, MarkerFeedback) => Unit = {(f, mf) => f.firstMarkerFeedback = mf}
+	val SecondMarkerLink: (Feedback, MarkerFeedback) => Unit = {(f, mf) => f.secondMarkerFeedback = mf}
+}
+
 trait MarkingNotificationFixture extends Mockito {
 
 	val department = new Department()
@@ -15,6 +20,7 @@ trait MarkingNotificationFixture extends Mockito {
 
 	val marker1 = Fixtures.user("marker1", "marker1")
 	val marker2 = Fixtures.user("marker2", "marker2")
+	marker2.setFullName("Snorkeldink Wafflesmack")
 	val marker3 = Fixtures.user("marker3", "marker3")
 	val student1 = Fixtures.user("student1", "student1")
 	val student2 = Fixtures.user("student2", "student2")
@@ -30,6 +36,7 @@ trait MarkingNotificationFixture extends Mockito {
 	when(mockUserLookup.getUserByWarwickUniId("student3")) thenReturn student3
 	when(mockUserLookup.getUserByWarwickUniId("student4")) thenReturn student4
 
+
 	def userGroup(usercodes: String *) = {
 		val userGroup = UserGroup.ofUsercodes
 		userGroup.includeUsers = usercodes
@@ -41,11 +48,17 @@ trait MarkingNotificationFixture extends Mockito {
 		feedback.universityId = student.getWarwickId
 		val mf = new MarkerFeedback()
 		mf.feedback = feedback
-		feedback.secondMarkerFeedback = mf
 		feedback.assignment = testAssignment
 		testAssignment.feedbacks.add(feedback)
 		// link the markerFeedback to the appropriate field of the feedback
 		linkFunction(feedback, mf)
 		(feedback, mf)
+	}
+
+	def makeBothMarkerFeedback(student: User) : (Feedback, MarkerFeedback, MarkerFeedback) = {
+		val (f, mf1) = makeMarkerFeedback(student)(MarkingNotificationFixture.FirstMarkerLink)
+		val mf2 = new MarkerFeedback()
+		f.secondMarkerFeedback = mf2
+		(f, mf1, mf2)
 	}
 }

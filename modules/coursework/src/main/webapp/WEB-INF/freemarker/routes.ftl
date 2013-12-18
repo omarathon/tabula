@@ -21,6 +21,7 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro assignmentdelete assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/delete"/></#macro>
 <#macro assignmentedit assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/edit"/></#macro>
 
+<#macro feedbackSummary assignment studentid><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/summary/${studentid}"/></#macro>
 <#macro plagiarismInvestigation assignment><@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised'/></#macro>
 <#macro onlinefeedback assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/online"/></#macro>
 <#macro markerOnlinefeedback assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/online"/></#macro>
@@ -30,6 +31,9 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 
 <#macro genericfeedback assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/generic"/></#macro>
 <#macro markerFeedbackFiles assignment markerFeedback><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${markerFeedback.id}/feedback-${markerFeedback.feedback.universityId}.zip"/></#macro>
+
+<#macro feedbackZip assignment feedback attachmentExtension><@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback/download/${feedback.id}/feedback-${feedback.universityId}.${attachmentExtension}'/></#macro>
+
 <#macro markingCompleted assignment><@url page="/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/marking-completed" /></#macro>
 
 <#macro enrolment module><@url page="/admin/module/${module.code}/assignments/enrolment"/></#macro>

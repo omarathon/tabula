@@ -22,9 +22,8 @@ class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
 
 		testAssignment.markingWorkflow = new ModeratedMarkingWorkflow
 
-		val linkFunction: (Feedback, MarkerFeedback) => Unit = (f,mf) => () // do nothing
-		val (f1, mf1) = makeMarkerFeedback(student1)(linkFunction)
-		val (f2, mf2) = makeMarkerFeedback(student2)(linkFunction)
+		val (f1, mf1) = makeMarkerFeedback(student1)(MarkingNotificationFixture.FirstMarkerLink)
+		val (f2, mf2) = makeMarkerFeedback(student2)(MarkingNotificationFixture.FirstMarkerLink)
 	}
 
 	@Test

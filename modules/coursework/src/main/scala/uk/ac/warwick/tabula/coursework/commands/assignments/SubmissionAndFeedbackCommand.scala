@@ -114,7 +114,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 
 				val viewed = (feedback.hasOnlineFeedback || feedback.hasGenericFeedback) && (whoViewed exists { x =>
 					val universityId = x._1.getWarwickId
-					val latestOnlineUpdate = Option(latestModifiedOnlineFeedback.filter( x => x._1.getWarwickId == universityId).head._2).getOrElse(new DateTime(0))
+					val latestOnlineUpdate = latestModifiedOnlineFeedback.filter( x => x._1.getWarwickId == universityId).headOption.map { _._2 }.getOrElse(new DateTime(0))
 					val latestUpdate = latestGenericFeedbackUpdate.filter(_.isAfter(latestOnlineUpdate)).getOrElse(latestOnlineUpdate)
 
 					(universityId == feedback.universityId  && 	x._2.isAfter(latestUpdate))})

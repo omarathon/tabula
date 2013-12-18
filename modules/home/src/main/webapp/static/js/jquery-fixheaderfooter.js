@@ -3,10 +3,17 @@
 /* fixHeaderFooter plugin
 	 *
 	 * apply this to a container div
-	 * which should contain a .persist-header and/or a .persist-footer
-	 * it'll fix the header at the top when scrolled
+	 * which should contain one or more divs called .persist-header and/or a single .persist-footer
+	 * it'll fix the headers (in order) at the top when scrolled
 	 * and it'll fix the footer at the bottom.
 	 * (CSS in main.less)
+	 *
+	 * it has one option for the minimum viewable window height to fix on
+	 * you can call it like this
+	 *
+	 * $('.fixed-container').fixHeaderFooter({minimumWindowHeightFix: 800});
+	 *
+	 *
 	 */
 
 	$.fn.visible = function() {
@@ -17,9 +24,22 @@
 		return this.css('visibility', 'hidden');
 	};
 
-	$.fn.fixHeaderFooter = function() {
+	$.fn.fixHeaderFooter = function(options) {
+		var defaults = {
+			// if 0 - fix areas at all screen sizes
+			// if > 0 - only fix when height is more than that figure
+			minimumWindowHeightFix : 0
+		};
 
+		var options = $.extend(defaults, options);
 		var areaToPersist = this;
+
+		// create container for all the floated headers
+		var floatedHeaderContainer = $("<div id=\"floatedHeaderContainer\"></div>")
+											.width(areaToPersist.width())
+											.css("top", $('#primary-navigation').height());
+		areaToPersist.prepend(floatedHeaderContainer);
+
 
 		var updateTableHeaders = function(persistArea) {
 
@@ -28,13 +48,15 @@
 				scrollTop        = $(window).scrollTop(),
 				floatingHeader   = $(".floatingHeader", persistArea),
 				floatingFooter   = $(".floatingFooter", persistArea),
-				persistHeader    = $(".persist-header", persistArea),
 				persistFooter    = $(".persist-footer", persistArea),
-                primaryNavHeight = $('#primary-navigation').height();
+				primaryNavHeight = $('#primary-navigation').height(),
+				floatedHeaderContainer = $('#floatedHeaderContainer');
 
 			if ((scrollTop > offset.top) && (scrollTop < offset.top + el.height())) {
+				floatedHeaderContainer.visible();
 				floatingHeader.visible();
 			} else {
+				floatedHeaderContainer.invisible();
 				floatingHeader.invisible();
 			}
 
@@ -47,7 +69,6 @@
 					floatingFooter.visible();
 				}
 			}
-
 		}
 
 		var cloneRow = function(row, className) {
@@ -56,37 +77,125 @@
 				.addClass(className);
 		};
 
+		var cloneTableHead = function(tableHead, className) {
+			tableHead.addClass("originalTableHead");
+
+			// get the parent table to wrap our cloned thead in
+			var tableWrap = "<table class=\"floatingHeadTable " + tableHead.parent().attr("class") + "\"></table>";
+			tableHead.parent().before(tableWrap);
+
+			// get the column groups out of the table and clone them
+			var colgroups = tableHead.parent().find("colgroup").clone();
+
+			// create the floatingHeader wrapper
+			var headerWrap = $("<div class=\"persist-header " + className + "\"></div>")
+				.css("max-width", tableHead.parent().outerWidth());
+
+			// clone our thead and add it into the new floating table with the cloned colgroups,
+			// and wrap all that in our floating wrapper div
+			var newFloatingTable =
+				tableHead.before(tableHead.clone(true))
+					.appendTo(".floatingHeadTable")
+					.removeClass("persist-header originalTableHead")
+					.parent().prepend(colgroups)
+					.append("<tbody></tbody>")
+					.wrap(headerWrap);
+
+			return newFloatingTable;
+		}
+
+		// add all headers to the floated header container
+		var stackHeaders = function(areaToPersist) {
+			$(areaToPersist).find(".floatingHeader").each(function() {
+				$(this).appendTo($('#floatedHeaderContainer'));
+			});
+		}
+
+		var makeHeadersClickable = function(originalTable, newTable) {
+			var originalTableHeadings = originalTable.find("th");
+
+			newTable.find("th").each(function(index) {
+				var newTableHeading = $(this);
+
+				// bind click on fixed header to original
+				newTableHeading.bind("mouseup", function(event) {
+					$(originalTableHeadings[index]).trigger("click", true);
+				});
+
+				// when a sort finishes event copy state (held in th classes) from original
+				$(originalTable.parent("table")).on("sortEnd", function() {
+					newTableHeading.attr("class", $(originalTableHeadings[index]).attr("class"));
+				});
+				setTableHeadWidths(originalTable, newTable);
+			});
+		}
+
+
+
+		var setTableHeadWidths = function(originalTable, newTable) {
+			var newTableHeadings = $(newTable).find("th");
+			$(originalTable).find("th").each(function(index) {
+				$(newTableHeadings[index]).width($(this).width());
+			});
+			originalTable.removeClass(".originalTableHead");
+		}
+
 
 		$(areaToPersist).each(function() {
-			if($(".persist-header").length) $(".persist-header").each(function() {
-				cloneRow($(this, areaToPersist), "floatingHeader");
-			});
+			if($(".persist-header").length) {
+				$(".persist-header").each(function() {
+					if($(this).is("thead")) {
+						var newFloatingTable = cloneTableHead($(this, areaToPersist), "floatingHeader");
+
+						// force th widths to be the same as the original table and set clickable
+						var originalTableHead = $(".originalTableHead");
+						makeHeadersClickable(originalTableHead, newFloatingTable);
+						setTableHeadWidths(originalTableHead, newFloatingTable);
+
+					} else {
+						cloneRow($(this, areaToPersist), "floatingHeader");
+					}
+				});
+
+				stackHeaders(areaToPersist);
+			};
 			if($(".persist-footer").length) cloneRow($(".persist-footer", areaToPersist), "floatingFooter");
 		});
 
 
 		$(window).scroll(function() {
-			updateTableHeaders(areaToPersist);
+			if(isScreenToBeFixed()) {
+				updateTableHeaders(areaToPersist)
+			} else {
+				$(".floatingHeader", areaToPersist).invisible();
+				$(".floatingFooter", areaToPersist).invisible();
+			}
 		});
 
 
-        // keeps the width of the floating header/footer as the parent on window resize
+		// keeps the width of the floating header/footer as the parent on window resize
 		$( window ).resize(function() {
-            $(".floatingHeader:visible").css("max-width", $(this).parent().width() );
+			$(".floatingHeader:visible").css("max-width", $(this).parent().width() );
 
-            var floatingFooter = $(".floatingFooter");
-            floatingFooter.css("max-width", floatingFooter.parent().width() );
+			var floatingFooter = $(".floatingFooter");
+			floatingFooter.css("max-width", floatingFooter.parent().width() );
 		});
 
 
 		// public methods
 		this.initialize = function() {
-            updateTableHeaders(areaToPersist);
+			if(this.isScreenToBeFixed) {
+				updateTableHeaders(areaToPersist);
+			}
 			return this;
 		};
 
+		var isScreenToBeFixed = function() {
+		   return (options.minimumWindowHeightFix == 0 || $(window).height() > options.minimumWindowHeightFix);
+		}
 
- 		// method to fix the jumbo direction icon in place
+
+		// method to fix the jumbo direction icon in place
 		this.fixDirectionIcon = function() {
 			var directionIcon = $('.direction-icon');
 			var fixContainer = $('.fix-on-scroll-container');
@@ -99,7 +208,7 @@
 			}
 		};
 
-        // if the list of agents is shorter than the (viewport+fixed screen areas)
+		// if the list of agents is shorter than the (viewport+fixed screen areas)
 		// and we've scrolled past the top of the persist-area container, then fix it
 		// (otherwise don't, because the user won't be able to see all of the items in the well)
 		this.fixTargetList = function(listToFix) {

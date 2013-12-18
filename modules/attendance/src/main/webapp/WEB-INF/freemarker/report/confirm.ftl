@@ -11,13 +11,13 @@
 		<div class="alert alert-info">
 	</#if>
 
-		<p>Once you send this report you will be unable to send another report for the chosen monitoring period for the selected students.</p>
+	<p>Once you report these points to the Academic Office you won't be able to change this information via Tabula.</p>
 
-		<p>Are you sure you wish to send the report?</p>
+	<p>Are you sure you wish to report these missed points?</p>
 
 		<p>
 			<@form.label checkbox=true>
-				<@f.checkbox path="confirm" /> I confirm that I want to send this report.
+				<@f.checkbox path="confirm" /> I confirm that I want to report these missed points.
 			</@form.label>
 			<@form.errors path="confirm"/>
 		</p>
@@ -27,7 +27,7 @@
 	<div class="submit-buttons">
 		<div class="pull-right">
 			<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Loading&hellip;">
-				Send report
+				Report
 			</button>
 			<a class="btn" href="<@routes.viewDepartmentStudentsWithAcademicYear command.department command.academicYear command.serializeFilter />">Cancel</a>
 		</div>
