@@ -146,7 +146,7 @@
 										<#if submission.late>
 											<span class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span>
 										<#elseif  submission.authorisedLate>
-											<span class="label label-info use-tooltip" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
+											<span class="label label-info use-tooltip" data-html="true" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
 										</#if>
 									<#elseif !enhancedFeedback??>
 										<#if enhancedExtension?has_content>
@@ -157,7 +157,7 @@
 												</#local>
 											</#if>
 											<#if enhancedExtension.within>
-												<span class="label label-info use-tooltip" title="${date}" data-container="body">Within Extension</span>
+												<span class="label label-info use-tooltip" data-html="true" title="${date}" data-container="body">Within Extension</span>
 											<#elseif extension.rejected>
 												<span class="label label-info">Extension Rejected</span>
 											<#elseif !extension.approved>
