@@ -17,6 +17,6 @@ class FeedbackControllersTest extends TestBase with Mockito {
 		controller.showForm(command) should be (Mav("admin/assignments/feedback/read_only",
 			"embedded" -> true,
 			"renderLayout" -> "nonav",
-			"feedback" -> feedback))
+			"feedback" -> Some(feedback)))
 	}
 }
