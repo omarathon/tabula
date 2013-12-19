@@ -1,13 +1,11 @@
 package uk.ac.warwick.tabula.home.web.controllers.sysadmin
 
 import scala.collection.JavaConversions._
-
 import org.joda.time.DateTime
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
-
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.DateFormats
@@ -19,6 +17,7 @@ import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.home.SysadminBreadcrumbs
 import javax.validation.Valid
+import uk.ac.warwick.tabula.validators.WithinYears
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -35,7 +34,7 @@ abstract class BaseSysadminController extends BaseController with SysadminBreadc
 
 /* Just a pojo to bind to for blank form; actually used in scheduling */
 class BlankForm {
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var from: DateTime = _
 	var deptCode: String = _
 }

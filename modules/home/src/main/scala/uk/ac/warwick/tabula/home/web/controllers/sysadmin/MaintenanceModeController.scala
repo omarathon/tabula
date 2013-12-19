@@ -31,6 +31,7 @@ import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.commands.Unaudited
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.validators.WithinYears
 
 class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Unit] with ReadOnly with Unaudited with SelfValidating {
 
@@ -42,7 +43,7 @@ class MaintenanceModeCommand(service: MaintenanceModeService) extends Command[Un
 
 	var enable: Boolean = service.enabled
 
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxFuture = 1, maxPast = 1) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var until: DateTime = service.until getOrElse DateTime.now.plusMinutes(DefaultMaintenanceMinutes)
 
 	var message: String = service.message.orNull

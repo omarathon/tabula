@@ -29,6 +29,7 @@ import uk.ac.warwick.tabula.web.views.UrlMethodModel
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.validators.WithinYears
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -57,7 +58,7 @@ class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
 
 	var indexer = Wire.auto[AuditEventIndexService]
 
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var from: DateTime = _
 
 	def applyInternal() = {
@@ -73,7 +74,7 @@ class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
 	var indexer = Wire.auto[ProfileIndexService]
 	var mdService = Wire.auto[ModuleAndDepartmentService]
 
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var from: DateTime = _
 	var deptCode: String = _
 

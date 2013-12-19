@@ -62,6 +62,7 @@ class ExtensionRequestController extends CourseworkController{
 		val (assignment, module) = (cmd.assignment, cmd.module)
 		
 		if(errors.hasErrors){
+			println(errors)
 			showForm(cmd)
 		} else {
 			val extension = cmd.apply()
