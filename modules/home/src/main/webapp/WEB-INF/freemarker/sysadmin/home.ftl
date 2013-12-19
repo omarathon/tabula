@@ -55,7 +55,7 @@
 <p>
 <@f.form method="post" action="${url('/sysadmin/import-profiles', '/scheduling')}" commandName="blankForm">
 	<div class="input-append">
-		<@f.input id="profiles-dept" path="deptCode" cssClass="span8" placeholder="deptCode (optional)" /><input class="btn btn-danger" type="submit" value="Profiles" onclick="return confirm('Really? Could take a minute.')">
+		<@f.input id="import-profiles-dept" path="deptCode" cssClass="span8" placeholder="deptCode (optional)" /><input class="btn btn-danger" type="submit" value="Profiles" onclick="return confirm('Really? Could take a minute.')">
 	</div>
 </@f.form>
 </p>
@@ -66,7 +66,7 @@
 <@f.form method="post" action="${url('/sysadmin/index/run-audit', '/scheduling')}" commandName="blankForm">
 Rebuild audit event index from
 <div class="input-append">
-<@f.input id="xaudit-from" path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
+<@f.input id="index-audit-from" path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
 </div>
 </@f.form>
 </p>
@@ -75,9 +75,9 @@ Rebuild audit event index from
 <@f.form method="post" action="${url('/sysadmin/index/run-profiles', '/scheduling')}" commandName="blankForm">
 Rebuild profiles index for
 <br />
-<@f.input id="xprofiles-dept" path="deptCode" cssClass="span6" placeholder="deptCode (optional)" /> from
+<@f.input id="index-profiles-dept" path="deptCode" cssClass="span6" placeholder="deptCode (optional)" /> from
 <div class="input-append">
-<@f.input id="xprofiles-from" path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
+<@f.input id="index-profiles-from" path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
 </div>
 </@f.form>
 </p>
