@@ -48,12 +48,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				importModeOfAttendances
 				courseImporter.importCourses
 				awardImporter.importAwards
-
-				madService.getDepartmentByCode(deptCode) match {
-					case None => doMemberDetails(madService.allDepartments)
-					case Some(dept) => doMemberDetails(Seq(dept))
-				}
-
+				doMemberDetails(madService.getDepartmentByCode(deptCode))
 				logger.info("Import completed")
 			}
 		}
@@ -83,11 +78,16 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 	/** Import basic info about all members in Membership, batched 250 at a time (small batch size is mostly for web sign-on's benefit) */
 
-	def doMemberDetails(departments : Seq[Department]) {
+	def doMemberDetails(department : Option[Department]) {
 		benchmark("Importing member details") {
 			logger.info("Importing member details")
 			val importRowTracker = new ImportRowTracker
 			val importStart = DateTime.now
+
+			val departments = department match {
+				case Some(d) => Seq(d)
+				case None => madService.allDepartments
+			}
 
 			for {
 				department <- departments;
@@ -110,7 +110,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				}
 			}
 
-			stampMissingRows(importRowTracker, importStart)
+			if (department.isEmpty) stampMissingRows(importRowTracker, importStart)
 		}
 	}
 
