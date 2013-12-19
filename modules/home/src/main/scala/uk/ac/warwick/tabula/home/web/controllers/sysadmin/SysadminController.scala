@@ -33,8 +33,8 @@ abstract class BaseSysadminController extends BaseController with SysadminBreadc
 	def redirectToHome = Redirect("/sysadmin/")
 }
 
-/* Just a pojo to bind to; actually used in scheduling */
-class ReindexForm {
+/* Just a pojo to bind to for blank form; actually used in scheduling */
+class BlankForm {
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var from: DateTime = _
 	var deptCode: String = _
@@ -46,7 +46,7 @@ class SysadminController extends BaseSysadminController {
 
 	var maintenanceService = Wire.auto[MaintenanceModeService]
 
-	@ModelAttribute("reindexForm") def reindexForm = new ReindexForm
+	@ModelAttribute("blankForm") def blankForm = new BlankForm
 
 	@RequestMapping
 	def home = Mav("sysadmin/home").crumbs(Breadcrumbs.Current("Sysadmin")).addObjects("maintenanceModeService" -> maintenanceService)

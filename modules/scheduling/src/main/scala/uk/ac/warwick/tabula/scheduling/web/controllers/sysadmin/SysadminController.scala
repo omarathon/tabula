@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.scheduling.commands.CleanupUnreferencedFilesCommand
@@ -127,8 +126,6 @@ class SysadminController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/import-sits"))
 class ImportSitsController extends BaseSysadminController {
-	var importer = Wire.auto[AssignmentImporter]
-
 	@RequestMapping(method = Array(POST))
 	def reindex() = {
 		val command = ImportAssignmentsCommand()
@@ -140,11 +137,10 @@ class ImportSitsController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/import-profiles"))
 class ImportProfilesController extends BaseSysadminController {
-	var importer = Wire.auto[ProfileImporter]
+	@ModelAttribute("importProfilesCommand") def importProfilesCommand = new ImportProfilesCommand
 
 	@RequestMapping(method = Array(POST))
-	def reindex() = {
-		val command = new ImportProfilesCommand
+	def importProfiles(@ModelAttribute("importProfilesCommand") command: ImportProfilesCommand) = {
 		command.apply()
 		redirectToHome
 	}
@@ -154,7 +150,7 @@ class ImportProfilesController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/import-profiles/{member}"))
 class ImportSingleProfileController extends BaseSysadminController {
 	@RequestMapping(method = Array(POST))
-	def reindex(@PathVariable("member") member: Member) = {
+	def importProfile(@PathVariable("member") member: Member) = {
 		val command = new ImportProfilesCommand
 
 		member match {
