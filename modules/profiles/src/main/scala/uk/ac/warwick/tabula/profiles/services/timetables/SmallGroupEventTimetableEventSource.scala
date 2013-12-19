@@ -18,7 +18,12 @@ trait SmallGroupEventTimetableEventSourceComponentImpl extends SmallGroupEventTi
 
 		def eventsFor(student: StudentMember): Seq[TimetableEvent] = {
 			val user = userLookup.getUserByUserId(student.userId)
-			val studentsGroups = smallGroupService.findSmallGroupsByStudent(user)
+			val studentsGroups = smallGroupService.findSmallGroupsByStudent(user).filter {
+				group =>
+					!group.groupSet.deleted &&
+					group.groupSet.visibleToStudents &&
+					!group.events.asScala.isEmpty
+			}
 			val allEvents = studentsGroups.flatMap(group => group.events.asScala)
 			allEvents map smallGroupEventToTimetableEvent
 		}

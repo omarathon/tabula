@@ -34,6 +34,7 @@ class SmallGroupEventTimetableEventSourceTest extends TestBase with Mockito{
 	group.name = "group name"
 	group.groupSet = new SmallGroupSet
 	group.groupSet.format = SmallGroupFormat.Lab
+	group.groupSet.releasedToStudents = true
 	group.groupSet.module = new Module
 	group.groupSet.module.code = "modcode"
 	group.groupSet.name =  "groupset name"
