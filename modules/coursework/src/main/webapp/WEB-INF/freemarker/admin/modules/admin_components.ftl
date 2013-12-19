@@ -4,7 +4,7 @@
 	<#return "module-${module.code}" />
 </#function>
 
-<#macro admin_section module expand_by_default>
+<#macro admin_section module expand_by_default=true>
 	<#assign can_manage=can.do("Module.ManageAssignments", module) />
 	<#assign has_assignments=module.hasLiveAssignments />
 	<#assign has_archived_assignments=false />

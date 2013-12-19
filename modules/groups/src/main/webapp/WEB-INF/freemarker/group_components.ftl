@@ -35,7 +35,7 @@
  	How the data is organised (which modules/sets/groups) is up to
  	the command generating the view model. No user checks in here!
  -->
-<#macro module_info data expand_by_default>
+<#macro module_info data expand_by_default=true>
 <div class="small-group-modules-list">
 	<#-- List of students modal -->
 	<div id="students-list-modal" class="modal fade"></div>
@@ -70,7 +70,7 @@
 </#macro>
 
 
-<#macro single_module moduleItem canManageDepartment expand_by_default>
+<#macro single_module moduleItem canManageDepartment expand_by_default=true>
 
 <#assign module=moduleItem.module />
 <span id="${module_anchor(module)}-container">
