@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.commands.{Command, Description}
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, ModuleRegistrationDaoImpl, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.{Member, ModuleRegistration, StudentCourseDetails, StudentCourseYearDetails, StudentCourseYearKey, StudentMember}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
@@ -19,6 +19,8 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
 import scala.collection.mutable.HashSet
 import uk.ac.warwick.tabula.scheduling.services.AwardImporter
+import scala.Some
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware {
 
@@ -41,6 +43,8 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	var studentCourseYearDetailsDao = Wire.auto[StudentCourseYearDetailsDao]
 	var awardImporter = Wire.auto[AwardImporter]
 
+	var deptCode: String = _
+
 	val BatchSize = 250
 
 	def applyInternal() {
@@ -50,7 +54,12 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				importModeOfAttendances
 				courseImporter.importCourses
 				awardImporter.importAwards
-				doMemberDetails
+
+				madService.getDepartmentByCode(deptCode) match {
+					case None => doMemberDetails(madService.allDepartments)
+					case Some(dept) => doMemberDetails(Seq(dept))
+				}
+
 				logger.info("Import completed")
 			}
 		}
@@ -80,20 +89,20 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 	/** Import basic info about all members in Membership, batched 250 at a time (small batch size is mostly for web sign-on's benefit) */
 
-	def doMemberDetails {
-		benchmark("Import all member details") {
+	def doMemberDetails(departments : Seq[Department]) {
+		benchmark("Importing member details") {
 			logger.info("Importing member details")
 			val importRowTracker = new ImportRowTracker
 			val importStart = DateTime.now
 
 			for {
-				department <- madService.allDepartments;
+				department <- departments;
 				membershipInfos <- logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize)
 			} {
-				logger.info("Fetching user details for " + membershipInfos.size + " usercodes from websignon")
+				logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon")
 				val users: Map[String, User] = userLookup.getUsersByUserIds(membershipInfos.map(x => x.member.usercode)).toMap
 
-				logger.info("Fetching member details for " + membershipInfos.size + " members from Membership")
+				logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members from Membership")
 
 				val studentRowCommands = transactional() {
 					profileImporter.getMemberDetails(membershipInfos, users, importRowTracker)
@@ -253,11 +262,5 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		}
 	}
 
-	def equal(s1: Seq[String], s2: Seq[String]) =
-		s1.length == s2.length && s1.sorted == s2.sorted
-
-	def describe(d: Description) {
-
-	}
-
+	def describe(d: Description) = d.property("deptCode" -> deptCode)
 }
