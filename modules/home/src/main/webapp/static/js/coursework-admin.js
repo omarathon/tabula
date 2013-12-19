@@ -355,14 +355,16 @@ $(function(){
 
 	// Ajax specific modal end
 
-	var highlightId = window.location.hash;
-	if (highlightId != "") {
-		var container = $("#extension-list");
-		var highlightRow = $(highlightId);
-		if(highlightRow.length > 0){
-			container.animate({
-				scrollTop: highlightRow.offset().top - container.offset().top + container.scrollTop()
-			}, 1000);
+	if ($("#extension-list").length > 0) {
+		var highlightId = window.location.hash;
+		if (highlightId != "") {
+			var container = $("#extension-list");
+			var highlightRow = $(highlightId);
+			if(highlightRow.length > 0){
+				container.animate({
+					scrollTop: highlightRow.offset().top - container.offset().top + container.scrollTop()
+				}, 1000);
+			}
 		}
 	}
 
