@@ -40,6 +40,7 @@
 	<#-- List of students modal -->
 	<div id="students-list-modal" class="modal fade"></div>
 
+	<#-- Immediately start waiting for collapsibles to load - don't wait to wire this handler in, because we initialise collapsibles before the DOM has loaded below -->
 	<script type="text/javascript">
 		jQuery(document.body).on('loaded.collapsible', '.module-info', function() {
 			var $module = jQuery(this);
@@ -58,6 +59,7 @@
 		<@single_module moduleItem=moduleItem canManageDepartment=data.canManageDepartment expand_by_default=expand_by_default />
 		
 		<#if !expand_by_default>
+			<#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
 			<script type="text/javascript">
 				GlobalScripts.initCollapsible(jQuery('#module-${module.code}').filter(':not(.empty)'));
 			</script>
