@@ -232,7 +232,7 @@ abstract class UploadFeedbackCommand[A](val module: Module, val assignment: Assi
 					entry <- iterator
 					if !entry.isDirectory
 					if !(disallowedFilenames contains entry.getName)
-					if !(disallowedPrefixes.exists(entry.getName.startsWith))
+					if !(disallowedPrefixes.exists(filenameOf(entry.getName).startsWith))
 				) yield {
 					val f = new FileAttachment
 					// Funny char from Windows? We can't work out what it is so
