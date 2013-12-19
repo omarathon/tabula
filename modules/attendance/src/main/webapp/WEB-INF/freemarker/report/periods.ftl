@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<h1>Report missed monitoring points to the Academic Office</h1>
+<h1>Record missed monitoring points in eVision (SITS)</h1>
 
 <@f.form commandName="command" action="" method="POST" cssClass="form-horizontal">
 

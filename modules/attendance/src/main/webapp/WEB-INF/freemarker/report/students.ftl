@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<h1>Report missed monitoring points to the Academic Office</h1>
+<h1>Record missed monitoring points in eVision (SITS)</h1>
 
 <#assign confirmPath><@routes.reportConfirm command.department /></#assign>
 <@f.form commandName="command" action="${confirmPath}" method="GET" cssClass="form-horizontal">
@@ -11,10 +11,10 @@
 
 	<#if students?size == 0>
 		<div class="alert alert-info">
-			There are no students with missed monitoring points who have not been reported for the chosen period.
+			There are no students with missed monitoring points who have not been recorded for the chosen period.
 		</div>
 	<#else>
-		<p>Report missed points in the ${command.period} monitoring period for the following students:</p>
+		<p>Record missed points in the ${command.period} monitoring period for the following students:</p>
 
 		<table class="table table-bordered table-striped table-condensed">
 			<thead>
@@ -42,7 +42,7 @@
 		<div class="submit-buttons">
 			<div class="pull-right">
 				<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Loading&hellip;">
-					Report
+					Record
 				</button>
 				<a class="btn" href="<@routes.viewDepartmentStudentsWithAcademicYear command.department command.academicYear command.serializeFilter />">Cancel</a>
 			</div>
