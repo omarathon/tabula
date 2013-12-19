@@ -139,7 +139,7 @@ class SandboxUserLookup(d: UserLookupInterface) extends UserLookupAdapter(d) {
 		ids.asScala.map { userId => (userId, getUserByUserId(userId)) }.toMap.asJava
 
 	override def getUserByUserId(id: String) =
-		profileService.getMemberByUserId(id, true).map { sandboxUser(_) }.getOrElse { super.getUserByUserId(id) }
+		profileService.getAllMembersWithUserId(id, true).headOption.map { sandboxUser(_) }.getOrElse { super.getUserByUserId(id) }
 
 	override def getUserByWarwickUniId(id: String) =
 		profileService.getMemberByUniversityId(id).map { sandboxUser(_) }.getOrElse { super.getUserByUserId(id) }

@@ -164,7 +164,7 @@ object FlexiPickerController {
 				val hasUniversityIdIfNecessary = (!universityId || user.getWarwickId.hasText)
 				val isTabulaMemberIfNecessary = hasUniversityIdIfNecessary && (!tabulaMembersOnly || {
 						if (universityId) profileService.getMemberByUniversityId(user.getWarwickId).isDefined
-						else profileService.getMemberByUserId(user.getUserId, true).isDefined
+						else profileService.getMemberByUser(user, true).isDefined
 				})
 				
 				hasUniversityIdIfNecessary && isTabulaMemberIfNecessary

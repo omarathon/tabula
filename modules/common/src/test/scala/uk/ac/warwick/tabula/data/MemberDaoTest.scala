@@ -69,19 +69,15 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 			memberDao.getByUniversityId("0000004") should be (None)
 
 			memberDao.getAllByUserId("student", false) should be (Seq(m1, m2))
-			memberDao.getByUserId("student", false) should be (Some(m1))
 			memberDao.getAllByUserId("student", true) should be (Seq(m1, m2))
 			memberDao.getAllByUserId("staff1", false) should be (Seq())
-			memberDao.getByUserId("staff1", false) should be (None)
 			memberDao.getAllByUserId("staff1", true) should be (Seq(m3))
-			memberDao.getByUserId("staff1", true) should be (Some(m3))
 			memberDao.getAllByUserId("unknown", false) should be (Seq())
 			memberDao.getAllByUserId("unknown", true) should be (Seq())
 
 			session.disableFilter(Member.StudentsOnlyFilter)
 
 			memberDao.getAllByUserId("staff1", false) should be (Seq(m3))
-			memberDao.getByUserId("staff1", false) should be (Some(m3))
 	}
 }
 

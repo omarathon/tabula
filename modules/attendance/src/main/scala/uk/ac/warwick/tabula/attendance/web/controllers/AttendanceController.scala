@@ -9,9 +9,9 @@ import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
  * Base class for controllers in Attendance Monitoring.
  */
 abstract class AttendanceController extends BaseController with AttendanceBreadcrumbs
-	with CurrentMemberComponent with AutowiringProfileServiceComponent {
+	with CurrentMemberComponent {
 
-	final def optionalCurrentMember = profileService.getMemberByUserId(user.apparentId, disableFilter = true)
+	final def optionalCurrentMember = user.profile
 	final def currentMember = optionalCurrentMember getOrElse new RuntimeMember(user)
 
 }
