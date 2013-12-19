@@ -35,20 +35,40 @@
  	How the data is organised (which modules/sets/groups) is up to
  	the command generating the view model. No user checks in here!
  -->
-<#macro module_info data>
+<#macro module_info data expand_by_default>
 <div class="small-group-modules-list">
-<#list data.moduleItems as moduleItem>
-<@single_module moduleItem data.canManageDepartment/>
-</#list>
+	<#-- List of students modal -->
+	<div id="students-list-modal" class="modal fade"></div>
+
+	<script type="text/javascript">
+		jQuery(document.body).on('loaded.collapsible', '.module-info', function() {
+			var $module = jQuery(this);
+			Groups.zebraStripeGroups($module);
+			Groups.wireModalButtons($module);
+			AjaxPopup.wireAjaxPopupLinks($module);
+			$module.find('.use-tooltip').tooltip();
+			$module.find('.use-popover').tabulaPopover({
+				trigger: 'click',
+				container: '#container'
+			});
+		});
+	</script>
+
+	<#list data.moduleItems as moduleItem>
+		<@single_module moduleItem=moduleItem canManageDepartment=data.canManageDepartment expand_by_default=expand_by_default />
+		
+		<#if !expand_by_default>
+			<script type="text/javascript">
+				GlobalScripts.initCollapsible(jQuery('#module-${module.code}').filter(':not(.empty)'));
+			</script>
+		</#if>
+	</#list>
 </div> <!-- small-group-modules-list-->
-<#-- List of students modal -->
-<div id="students-list-modal" class="modal fade">
-</div>
 
 </#macro>
 
 
-<#macro single_module moduleItem canManageDepartment>
+<#macro single_module moduleItem canManageDepartment expand_by_default>
 
 <#assign module=moduleItem.module />
 <span id="${module_anchor(module)}-container">
@@ -61,8 +81,11 @@
 	</#if>
 </#list>
 
-<a id="${module_anchor(module)}"></a>
-<div class="module-info striped-section<#if has_groups> collapsible expanded</#if><#if canManageDepartment && !has_groups> empty</#if>"
+<div id="${module_anchor(module)}" class="module-info striped-section<#if has_groups> collapsible<#if expand_by_default> expanded</#if></#if><#if canManageDepartment && !has_groups> empty</#if>"
+	<#if has_groups && !expand_by_default>
+		data-populate=".striped-section-contents"
+		data-href="<@routes.modulehome module />"
+	</#if>
 	 data-name="${module_anchor(module)}">
 	<div class="clearfix">
 
@@ -105,20 +128,25 @@
 
 		<h2 class="section-title with-button"><@fmt.module_name module /></h2>
 
-		<#if moduleItem.setItems?has_content>
-		<div class="striped-section-contents">
-		<#list moduleItem.setItems as setItem>
-		<span id="groupset-container-${setItem.set.id}">
-          <@single_groupset setItem moduleItem/>
-          </span>
-        </#list>
-        </div>
-        </#if>
-    </div>
+		<#if has_groups>
+			<div class="striped-section-contents">
+				<#if expand_by_default>
+					<@groupsets_info moduleItem />
+	      </#if>
+      </div>
+    </#if>
+  </div>
 </div> <!-- module-info striped-section-->
 </span>
 </#macro>
 
+<#macro groupsets_info moduleItem>
+	<#list moduleItem.setItems as setItem>
+		<span id="groupset-container-${setItem.set.id}">
+      <@single_groupset setItem moduleItem/>
+    </span>
+  </#list>
+</#macro>
 
 <#macro single_groupset setItem moduleItem>
 			<#assign groupSet=setItem.set />

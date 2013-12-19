@@ -23,7 +23,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
  */
 
 @Controller
-@RequestMapping(Array("/admin", "/admin/department"))
+@RequestMapping(Array("/admin", "/admin/department", "/admin/module"))
 class AdminHomeController extends CourseworkController {
 	@RequestMapping(method=Array(GET, HEAD))
 	def homeScreen(user: CurrentUser) = Redirect(Routes.home)
@@ -56,7 +56,26 @@ class AdminDepartmentHomeController extends CourseworkController {
 	}
 }
 
-class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[DepartmentHomeInformation] with ReadOnly with Unaudited {
+@Controller
+@RequestMapping(value=Array("/admin/module/{module}"))
+class AdminModuleHomeController extends CourseworkController {
+
+	hideDeletedItems
+	
+	@ModelAttribute("command") def command(@PathVariable("module") module: Module, user: CurrentUser) =
+		new ViewViewableCommand(Permissions.Module.ManageAssignments, module)
+	
+	@RequestMapping
+	def adminModule(@ModelAttribute("command") cmd: Appliable[Module]) = {
+		val module = cmd.apply()
+		
+		if (ajax) Mav("admin/modules/admin_partial").noLayout()
+		else Mav("admin/modules/admin").crumbs(Breadcrumbs.Department(module.department))
+	}
+}
+
+class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUser) extends Command[DepartmentHomeInformation] 
+		with ReadOnly with Unaudited {
 	
 	var securityService = Wire.auto[SecurityService]
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
@@ -80,8 +99,8 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 		}
 	
 	def applyInternal() = {
-		val sortedModules = modules.sortBy { (module) => (module.assignments.isEmpty, module.code) }
-		val notices = gatherNotices(modules)
+		val sortedModules = benchmarkTask("Sort modules") { modules.sortBy { (module) => (module.assignments.isEmpty, module.code) } }
+		val notices = benchmarkTask("Gather notices") { gatherNotices(modules) }
 		
 		new DepartmentHomeInformation(sortedModules, notices)
 	}

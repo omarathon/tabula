@@ -3,11 +3,31 @@
  */
 (function ($) { "use strict";
 
+var exports = {};
+
+exports.zebraStripeGroups = function($module) {
+	$module.find('.group-info').filter(':visible:even').addClass('alt-row');
+};
+
+exports.wireModalButtons = function($container) {
+	$container.find('.btn-group').on('click', 'a[data-toggle=modal]', function(e){
+      e.preventDefault();
+      var $this = $(this);
+      var target = $this.attr('data-target');
+      var url = $this.attr('href');
+      $(target).load(url);
+  });
+};
+
+// take anything we've attached to "exports" and add it to the global "Groups"
+// we use extend() to add to any existing variable rather than clobber it
+window.Groups = jQuery.extend(window.Groups, exports);
+
 $(function(){
     
     // Zebra striping on lists of modules/groups
     $('.module-info').each(function(i, module) { 
-        $(module).find('.group-info').filter(':visible:even').addClass('alt-row');
+        exports.zebraStripeGroups($(module));
     });
     
     $('.module-info.empty').css('opacity',0.66)
@@ -50,15 +70,9 @@ $(function(){
 
 // modals use ajax to retrieve their contents
 $(function() {
-    $('.btn-group').on('click', 'a[data-toggle=modal]', function(e){
-        e.preventDefault();
-        var $this = $(this);
-        var target = $this.attr('data-target');
-        var url = $this.attr('href');
-        $(target).load(url);
-    });
+	exports.wireModalButtons($('#container'));
 
-    $("#modal-container ").on("click","input[type='submit']", function(e){
+    $("#modal-container").on("click","input[type='submit']", function(e){
         e.preventDefault();
         var $this = $(this);
         var $form = $this.closest("form");
