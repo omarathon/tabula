@@ -163,8 +163,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 						scd.missingFromImportSince is null and
             scd.department = :department and
         		scd.student.lastUpdatedDate > :lastUpdated and
-            scd.sprStatus.code not like 'P%'
-          order by lastUpdatedDate asc """)
+            scd.sprStatus.code not like 'P%' """)
 			.setEntity("department", department)
 			.setParameter("lastUpdated", startDate).seq
 
@@ -459,7 +458,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				.seq.map { array => array(0).asInstanceOf[SitsStatus] }
 
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime) = {
-		newStaleUniversityIds.grouped(Daoisms.MaxInClauseCount).foreach { staleIds => 
+		newStaleUniversityIds.grouped(Daoisms.MaxInClauseCount).foreach { staleIds =>
 			val sqlString = """
 				update
 					Member
