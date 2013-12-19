@@ -253,7 +253,7 @@ trait SubmissionAndFeedbackExport {
 	val submissionStatusFields = Seq("late", "within-extension", "markable")
 	val markerFields = Seq("first-marker", "second-marker")
 	val plagiarismFields = Seq("suspected-plagiarised", "similarity-percentage")
-	val feedbackFields = Seq("id", "uploaded", "released", "downloaded")
+	val feedbackFields = Seq("id", "uploaded", "released","mark", "grade", "downloaded")
 	
 	protected def assignmentData: Map[String, Any] = Map(
 		"module-code" -> module.code,
