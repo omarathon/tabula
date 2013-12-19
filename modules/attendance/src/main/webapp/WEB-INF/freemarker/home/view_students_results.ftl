@@ -202,9 +202,9 @@
 											$th.addClass('headerSortDown');
 										};
 
-									if ($th.hasClass('headerSortDown')) {
+									if ($th.hasClass('headerSortUp')) {
 										sortAscending();
-									} else if ($th.hasClass('headerSortUp')) {
+									} else if ($th.hasClass('headerSortDown')) {
 										sortDescending();
 									} else {
 										// not currently sorted on this column, default sort depends on column
