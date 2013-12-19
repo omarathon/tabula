@@ -2,25 +2,19 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import scala.Option.option2Iterable
 import scala.collection.JavaConversions.{mapAsScalaMap, seqAsJavaList}
-import scala.collection.JavaConverters.{asScalaBufferConverter, _}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.commands.{Command, Description}
-import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, ModuleRegistrationDaoImpl, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
+import uk.ac.warwick.tabula.data.{StudentCourseYearDetailsDao, Daoisms, MemberDao, ModuleRegistrationDaoImpl, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
-import uk.ac.warwick.tabula.scheduling.services.{CourseImporter, MembershipInformation, ModeOfAttendanceImporter, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware, SitsStatusesImporter}
+import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter, MembershipInformation, ModeOfAttendanceImporter, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware, SitsStatusesImporter}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileIndexService, ProfileService, SmallGroupService, UserLookupService}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
-import scala.collection.mutable.HashSet
-import uk.ac.warwick.tabula.scheduling.services.AwardImporter
-import scala.Some
-import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware {
 
