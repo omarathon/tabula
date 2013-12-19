@@ -14,8 +14,8 @@
 		</#if>
 	</#list>
 
-	<div id="${module_anchor(module)}" class="module-info striped-section<#if has_assignments> collapsible<#if expand_by_default> expanded</#if></#if><#if !expand_by_default && !has_assignments> empty</#if>"
-		<#if has_assignments && !expand_by_default>
+	<div id="${module_anchor(module)}" class="module-info striped-section<#if has_assignments || has_archived_assignments> collapsible<#if expand_by_default> expanded</#if></#if><#if !expand_by_default && !has_assignments> empty</#if>"
+		<#if (has_assignments || has_archived_assignments) && !expand_by_default>
 			data-populate=".striped-section-contents"
 			data-href="<@routes.modulehome module />"
 			data-name="${module_anchor(module)}"

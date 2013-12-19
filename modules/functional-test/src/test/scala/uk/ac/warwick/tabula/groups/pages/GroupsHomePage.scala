@@ -5,8 +5,9 @@ import org.scalatest.selenium.WebBrowser
 import uk.ac.warwick.tabula.FunctionalTestProperties
 import org.scalatest.concurrent.Eventually
 import org.scalatest.matchers.ShouldMatchers
+import uk.ac.warwick.tabula.EventuallyAjax
 
-class GroupsHomePage (implicit val webDriver:WebDriver) extends WebBrowser with Eventually with ShouldMatchers with ModuleAndGroupSetList{
+class GroupsHomePage (implicit val webDriver:WebDriver) extends WebBrowser with EventuallyAjax with ShouldMatchers with ModuleAndGroupSetList {
 	val url = FunctionalTestProperties.SiteRoot + "/groups/"
 
 	def isCurrentPage(): Boolean =  {
