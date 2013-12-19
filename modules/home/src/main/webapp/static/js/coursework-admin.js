@@ -145,7 +145,7 @@ $(function(){
 				}
 
 				if ($(this).hasClass('include-filter') && ($('.filter-form').length > 0)) {
-						var $inputs = $(':input', '.filter-form');
+						var $inputs = $(':input', '.filter-form:not(#floatedHeaderContainer *)');
 						$form.append($inputs.clone());
 
 						doFormSubmit = true;
