@@ -335,22 +335,30 @@ $(function(){
 
    // extensions admin
 	$("#extension-list").tabulaAjaxSubmit(function(data) {
-		var action = data.action;
-		$.each(data.result, function() {
-			modifyRow(this, action);
-		});
+		// TAB-1704 don't do anything clever, just reload the page
+		/*
+			var action = data.action;
+			$.each(data.result, function() {
+				modifyRow(this, action);
+			});
+		*/
 		// hide the model
 		jQuery("#extension-model").modal('hide');
+		
+		// TAB-1704 change the hash and reload the page
+		$.each(data.result, function() {
+			window.location.hash = 'row' + this.id;
+		});
+		
+		window.location.reload(true);
 	});
 
 	// Ajax specific modal end
 
-	// CM removed this line; it would never have worked (looks like CnP from a freemarker tempate)
-	// var highlightId = "${highlightId}";
-	var highlightId = "";
+	var highlightId = window.location.hash;
 	if (highlightId != "") {
 		var container = $("#extension-list");
-		var highlightRow = $("#row"+highlightId);
+		var highlightRow = $(highlightId);
 		if(highlightRow.length > 0){
 			container.animate({
 				scrollTop: highlightRow.offset().top - container.offset().top + container.scrollTop()
