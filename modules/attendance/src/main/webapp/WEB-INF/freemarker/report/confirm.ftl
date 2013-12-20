@@ -3,12 +3,9 @@
 <h1>Record missed monitoring points</h1>
 
 <@f.form commandName="command" action="" method="POST" cssClass="form-horizontal">
-
+	<div class="alert alert-warn">
 	<#if command.thisPeriod == command.period && command.thisAcademicYear.toString == command.academicYear.toString>
-		<div class="alert alert-warn">
 			<p>You have chosen to send a report for the current monitoring period, which has not yet finished.</p>
-	<#else>
-		<div class="alert alert-warn">
 	</#if>
 
 	<p>Once these points are recorded in SITS:eVision you won't be able to change this information via Tabula.</p>
