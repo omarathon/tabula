@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<h1>Create small groups for <@fmt.module_name module /></h1>
+<h1>Edit small groups for <@fmt.module_name module /></h1>
 
 <#if set??><div class="alert">These groups are currently <strong>${set.openForSignups?string("open","closed")}</strong> for self sign-up</div></#if>
 
