@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>53-SNAPSHOT</version>
+		<version>55-SNAPSHOT</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -318,6 +318,7 @@
 							<includes>
 								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
 								<include>groups-admin.js</include>
+								<include>attendance-recording.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>
@@ -335,6 +336,7 @@
 							<includes>
 								<include>${project.build.directory}/${project.build.finalName}/static/js/common.js</include>
 								<include>attendance-render.js</include>
+								<include>attendance-recording.js</include>
 							</includes>
 						</aggregation>
 					</aggregations>

@@ -12,7 +12,7 @@ If you are doing any work on this, it would be good to do the above first.
 
 
 -->
-<#import "../group_components.ftl" as components />
+<#import "*/group_components.ftl" as components />
 <#escape x as x?html>
 
 <#macro longDateRange start end>
@@ -130,7 +130,7 @@ If you are doing any work on this, it would be good to do the above first.
 	</div>
 
 <#-- This is the big list of modules -->
-<@components.module_info data />
+<@components.module_info data=data expand_by_default=!can_manage_dept />
 
 <div id="modal-container" class="modal fade"></div>
 <#else>

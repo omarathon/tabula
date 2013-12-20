@@ -9,22 +9,52 @@ import reflect.BeanProperty
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MarkingWorkflowDao
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.AssignmentServiceComponent
+import uk.ac.warwick.tabula.services.MarkingWorkflowServiceComponent
+import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
+import uk.ac.warwick.tabula.services.AutowiringMarkingWorkflowServiceComponent
+import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
+
+object EditMarkingWorkflowCommand {
+	def apply(department: Department, markingWorkflow: MarkingWorkflow) =
+		new EditMarkingWorkflowCommandInternal(department, markingWorkflow)
+			with ComposableCommand[MarkingWorkflow]
+			with EditMarkingWorkflowCommandPermissions
+			with EditMarkingWorkflowCommandValidation
+			with EditMarkingWorkflowCommandDescription
+			with AutowiringMarkingWorkflowServiceComponent
+}
 
 /** Edit an existing markingWorkflow. */
-class EditMarkingWorkflowCommand(department: Department, val markingWorkflow: MarkingWorkflow) extends ModifyMarkingWorkflowCommand(department) {
-
-	mustBeLinked(markingWorkflow, department)
-	PermissionCheck(Permissions.MarkingWorkflow.Update, markingWorkflow)
-
-	var dao = Wire.auto[MarkingWorkflowDao]
-
-	def hasExistingSubmissions: Boolean = dao.getAssignmentsUsingMarkingWorkflow(markingWorkflow).exists(!_.submissions.isEmpty)
+class EditMarkingWorkflowCommandInternal(department: Department, val markingWorkflow: MarkingWorkflow) 
+	extends ModifyMarkingWorkflowCommand(department) with EditMarkingWorkflowCommandState {
+	self: MarkingWorkflowServiceComponent =>	
 
 	// fill in the properties on construction
 	copyFrom(markingWorkflow)
 
-	def contextSpecificValidation(errors:Errors){
+	def applyInternal() = {
+		transactional() {
+			this.copyTo(markingWorkflow)
+			markingWorkflowService.save(markingWorkflow)
+			markingWorkflow
+		}
+	}
+}
 
+trait EditMarkingWorkflowCommandState extends MarkingWorkflowCommandState {
+	def markingWorkflow: MarkingWorkflow
+}
+
+trait EditMarkingWorkflowCommandValidation extends MarkingWorkflowCommandValidation {
+	self: EditMarkingWorkflowCommandState with MarkingWorkflowServiceComponent =>
+		
+	def currentMarkingWorkflow = Some(markingWorkflow)
+	
+	def hasExistingSubmissions: Boolean = markingWorkflowService.getAssignmentsUsingMarkingWorkflow(markingWorkflow).exists(!_.submissions.isEmpty)
+
+	def contextSpecificValidation(errors:Errors){
 		if (markingWorkflow.markingMethod != markingMethod)
 			errors.rejectValue("markingMethod", "markingWorkflow.markingMethod.cannotUpdate")
 
@@ -41,20 +71,21 @@ class EditMarkingWorkflowCommand(department: Department, val markingWorkflow: Ma
 			}
 		}
 	}
+}
 
-	def applyInternal() = {
-		transactional() {
-			this.copyTo(markingWorkflow)
-			session.update(markingWorkflow)
-			markingWorkflow
-		}
+trait EditMarkingWorkflowCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: EditMarkingWorkflowCommandState =>
+		
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.mustBeLinked(mandatory(markingWorkflow), mandatory(department))
+		p.PermissionCheck(Permissions.MarkingWorkflow.Update, markingWorkflow)
 	}
+}
 
-	def currentMarkingWorkflow = Some(markingWorkflow)
-
-	override def validate(errors: Errors) {
-		super.validate(errors)
+trait EditMarkingWorkflowCommandDescription extends Describable[MarkingWorkflow] {
+	self: EditMarkingWorkflowCommandState =>
+		
+	def describe(d: Description) {
+		d.department(department).markingWorkflow(markingWorkflow)
 	}
-
-	def describe(d: Description) = d.department(department).markingWorkflow(markingWorkflow)
 }

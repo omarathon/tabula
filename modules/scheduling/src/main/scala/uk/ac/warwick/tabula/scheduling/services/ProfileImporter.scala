@@ -116,15 +116,13 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 @Profile(Array("sandbox")) @Service
 class SandboxProfileImporter extends ProfileImporter {
-	val importRowTracker = new ImportRowTracker
-
 	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[String, User], importRowTracker: ImportRowTracker): Seq[ImportMemberCommand] =
 		memberInfo map { info => info.member.userType match {
-			case Student => studentMemberDetails(info)
+			case Student => studentMemberDetails(importRowTracker)(info)
 			case _ => staffMemberDetails(info)
 		}}
 
-	def studentMemberDetails(mac: MembershipInformation) = {
+	def studentMemberDetails(importRowTracker: ImportRowTracker)(mac: MembershipInformation) = {
 		val member = mac.member
 		val ssoUser = new User(member.usercode)
 		ssoUser.setFoundUser(true)

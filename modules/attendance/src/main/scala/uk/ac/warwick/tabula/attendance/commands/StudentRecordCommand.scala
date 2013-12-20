@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, AcademicYear}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringCheckpointState, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent, AutowiringTermServiceComponent}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
@@ -29,7 +29,7 @@ abstract class StudentRecordCommand(
 	val student: StudentMember,
 	val user: CurrentUser,
 	val academicYearOption: Option[AcademicYear]
-) extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with StudentRecordCommandState {
+) extends CommandInternal[Seq[MonitoringCheckpoint]] with StudentRecordCommandState with PopulateOnForm {
 
 	this: GroupMonitoringPointsByTerm with MonitoringPointServiceComponent =>
 
@@ -70,7 +70,7 @@ trait StudentRecordValidation extends SelfValidating {
 
 			if (thisAcademicYear.startYear <= pointSet.academicYear.startYear
 				&& currentAcademicWeek < point.validFromWeek
-				&& !(state == null || state == MonitoringCheckpointState.MissedAuthorised)
+				&& !(state == null || state == AttendanceState.MissedAuthorised)
 			) {
 				errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
 			}
@@ -114,7 +114,7 @@ trait StudentRecordCommandState extends GroupMonitoringPointsByTerm with Monitor
 	val academicYear = academicYearOption.getOrElse(thisAcademicYear)
 	lazy val pointSet = monitoringPointService.getPointSetForStudent(student, academicYear).getOrElse(throw new ItemNotFoundException)
 
-	var checkpointMap: JMap[MonitoringPoint, MonitoringCheckpointState] =  JHashMap()
+	var checkpointMap: JMap[MonitoringPoint, AttendanceState] =  JHashMap()
 
 	def monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, pointSet.academicYear)
 	def nonReportedTerms = monitoringPointService.findNonReportedTerms(Seq(student), pointSet.academicYear)

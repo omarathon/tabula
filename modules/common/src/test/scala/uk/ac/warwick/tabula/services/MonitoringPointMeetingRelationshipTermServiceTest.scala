@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.data.{MeetingRecordDao, MeetingRecordDaoComponent, MonitoringPointDaoComponent, MonitoringPointDao}
 import uk.ac.warwick.tabula.{AcademicYear, TestBase, Fixtures, Mockito}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPointType, MonitoringPoint, MonitoringPointSet, MonitoringCheckpoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPointType, MonitoringPoint, MonitoringPointSet, MonitoringCheckpoint}
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model._
 import org.joda.time.DateTime
@@ -417,7 +417,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		there was three (service.termService).getAcademicWeekForAcademicYear(meetingDate, year2PointSet.academicYear)
 		there was one (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 		createdCheckpoints.size should be (1)
-		createdCheckpoints.head.state should be (MonitoringCheckpointState.Attended)
+		createdCheckpoints.head.state should be (AttendanceState.Attended)
 		createdCheckpoints.head.studentCourseDetail should be (studentCourseDetails)
 		createdCheckpoints.head.point should be (meetingThisYearPoint)
 		createdCheckpoints.head.updatedBy should be (agentMember.universityId)
@@ -461,7 +461,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		there was three (service.termService).getAcademicWeekForAcademicYear(meetingDate, year2PointSet.academicYear)
 		there was one (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 		createdCheckpoints.size should be (1)
-		createdCheckpoints.head.state should be (MonitoringCheckpointState.Attended)
+		createdCheckpoints.head.state should be (AttendanceState.Attended)
 		createdCheckpoints.head.studentCourseDetail should be (studentCourseDetails)
 		createdCheckpoints.head.point should be (meetingThisYearPoint)
 		createdCheckpoints.head.updatedBy should be (agentMember.universityId)

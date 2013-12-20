@@ -22,11 +22,11 @@
 					if ($this.is(':checked')) {
 						var $form = $('<form></form>').attr({method:'POST',action:$this.data('href')}).hide();
 
-        		var $inputs = $(':input', '.filter-form');
-        		$form.append($inputs.clone());
+						var $inputs = $this.closest(".btn-toolbar").parent().find(".filter-form :input");
+						$form.append($inputs.clone());
 
-            $(document.body).append($form);
-            $form.submit();
+						$(document.body).append($form);
+						$form.submit();
 					}
 				});
 			});

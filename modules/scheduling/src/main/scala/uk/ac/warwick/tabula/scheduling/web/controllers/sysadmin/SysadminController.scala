@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.scheduling.commands.CleanupUnreferencedFilesCommand
@@ -30,6 +29,7 @@ import uk.ac.warwick.tabula.web.views.UrlMethodModel
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.validators.WithinYears
 
 /**
  * Screens for application sysadmins, i.e. the web development and content teams.
@@ -58,7 +58,7 @@ class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
 
 	var indexer = Wire.auto[AuditEventIndexService]
 
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var from: DateTime = _
 
 	def applyInternal() = {
@@ -74,7 +74,7 @@ class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
 	var indexer = Wire.auto[ProfileIndexService]
 	var mdService = Wire.auto[ModuleAndDepartmentService]
 
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var from: DateTime = _
 	var deptCode: String = _
 
@@ -127,8 +127,6 @@ class SysadminController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/import-sits"))
 class ImportSitsController extends BaseSysadminController {
-	var importer = Wire.auto[AssignmentImporter]
-
 	@RequestMapping(method = Array(POST))
 	def reindex() = {
 		val command = ImportAssignmentsCommand()
@@ -140,11 +138,10 @@ class ImportSitsController extends BaseSysadminController {
 @Controller
 @RequestMapping(Array("/sysadmin/import-profiles"))
 class ImportProfilesController extends BaseSysadminController {
-	var importer = Wire.auto[ProfileImporter]
+	@ModelAttribute("importProfilesCommand") def importProfilesCommand = new ImportProfilesCommand
 
 	@RequestMapping(method = Array(POST))
-	def reindex() = {
-		val command = new ImportProfilesCommand
+	def importProfiles(@ModelAttribute("importProfilesCommand") command: ImportProfilesCommand) = {
 		command.apply()
 		redirectToHome
 	}
@@ -154,7 +151,7 @@ class ImportProfilesController extends BaseSysadminController {
 @RequestMapping(Array("/sysadmin/import-profiles/{member}"))
 class ImportSingleProfileController extends BaseSysadminController {
 	@RequestMapping(method = Array(POST))
-	def reindex(@PathVariable("member") member: Member) = {
+	def importProfile(@PathVariable("member") member: Member) = {
 		val command = new ImportProfilesCommand
 
 		member match {

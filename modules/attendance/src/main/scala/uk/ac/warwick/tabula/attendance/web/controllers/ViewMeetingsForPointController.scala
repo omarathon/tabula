@@ -68,7 +68,7 @@ trait ViewMeetingsForPointPermission extends RequiresPermissionsChecking with Pe
 	self: ViewMeetingsForPointCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.MonitoringPoints.View, point.pointSet.asInstanceOf[MonitoringPointSet])
+		p.PermissionCheck(Permissions.MonitoringPoints.View, student)
 	}
 }
 

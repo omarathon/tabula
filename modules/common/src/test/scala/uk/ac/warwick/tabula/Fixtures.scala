@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringCheckpointState, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, AttendanceState, MonitoringPoint}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.MonitoringPointService
 import uk.ac.warwick.userlookup.User
@@ -255,7 +255,7 @@ object Fixtures extends Mockito {
 		memberNote
 	}
 
-	def monitoringCheckpoint(point: MonitoringPoint, studentCourseDetails: StudentCourseDetails, state: MonitoringCheckpointState) = {
+	def monitoringCheckpoint(point: MonitoringPoint, studentCourseDetails: StudentCourseDetails, state: AttendanceState) = {
 		val checkpoint = new MonitoringCheckpoint
 		val monitoringPointService = smartMock[MonitoringPointService]
 		monitoringPointService.studentAlreadyReportedThisTerm(studentCourseDetails.student, point) returns (false)

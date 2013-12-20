@@ -31,7 +31,7 @@ abstract class BrowserTest
 	extends ShouldMatchers
 	with FlatSpec
 	with BeforeAndAfter
-	with Eventually
+	with EventuallyAjax
 	with SpanSugar
 	with WebBrowser
 	with WebsignonMethods
@@ -66,14 +66,6 @@ abstract class BrowserTest
 		}
 	}
 
-	/**
-	 * eventually{} is a generic ScalaTest method to repeatedly
-	 * try a block of code until it works or we give up. eventuallyAjax {}
-	 * just calls that with some sensible default timeouts.
-	 */
-	def eventuallyAjax(fun: =>Unit) {
-		eventually(timeout(30.seconds), interval(200.millis)) (fun)
-	}
 	// Sometimes you need to wait for a page to load after clicking on a link
 	def verifyPageLoaded(fun: => Unit) = eventuallyAjax(fun)
 
@@ -115,6 +107,17 @@ abstract class BrowserTest
 }
 
 case class LoginDetails(val usercode: String, val password: String, description: String, warwickId:String)
+
+trait EventuallyAjax extends Eventually with SpanSugar {
+	/**
+	 * eventually{} is a generic ScalaTest method to repeatedly
+	 * try a block of code until it works or we give up. eventuallyAjax {}
+	 * just calls that with some sensible default timeouts.
+	 */
+	def eventuallyAjax(fun: =>Unit) {
+		eventually(timeout(30.seconds), interval(200.millis)) (fun)
+	}
+}
 
 /** Properties that can be overridden by a functionaltest.properties file in the classpath.
   *

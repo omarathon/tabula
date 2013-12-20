@@ -36,12 +36,12 @@
 	
 	<script type="text/javascript">
 		jQuery(function($) {
-			$('#filter').on('keyup change', function() {
+			$('.filter-form select[name=filter]').on('keyup change', function() {
 				var $select = $(this);
 				var val = $select.val();
 				
-				var $options = $select.closest('.filter').find('fieldset[data-filter="' + val + '"]');
-				var $openOptions = $select.closest('.filter').find('.filter-options:visible');
+				var $options = $select.closest('form').find('.filter fieldset[data-filter="' + val + '"]');
+				var $openOptions = $select.closest('form').find('.filter .filter-options:visible');
 				
 				var cb = function() {
 					if ($options.length) {

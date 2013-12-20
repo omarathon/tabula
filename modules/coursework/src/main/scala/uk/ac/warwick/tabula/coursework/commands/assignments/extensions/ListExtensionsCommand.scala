@@ -10,12 +10,15 @@ import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.ItemNotFoundException
 
 class ListExtensionsCommand(val module: Module, val assignment: Assignment, val user: CurrentUser)
 	extends Command[ExtensionInformation] with ReadOnly with Unaudited {
 
-	mustBeLinked(assignment,module)
+	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Extension.Read, assignment)
+	
+	if (assignment.openEnded) throw new ItemNotFoundException
 
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
 	var userLookup = Wire.auto[UserLookupService]

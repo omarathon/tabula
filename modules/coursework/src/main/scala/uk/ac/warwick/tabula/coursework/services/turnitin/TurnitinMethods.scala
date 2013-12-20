@@ -25,32 +25,33 @@ case class GotSubmissions(list: Seq[TurnitinSubmissionInfo]) extends SuccessResp
 case class AlreadyExists() extends FailureResponse("Object already exists")
 case class DuplicateClass() extends FailureResponse("Class already exists")
 case class ClassNotFound() extends FailureResponse("Class not found")
+case class ClassDeleted() extends FailureResponse("Class deleted")
 case class AssignmentNotFound() extends FailureResponse("Assignment not found")
 case class SubmissionNotFound() extends FailureResponse("Submission not found")
 case class Failed(code: Int, reason: String) extends FailureResponse(reason)
 
 /**
  * Contains the main API methods that can be called from Session.
- * 
+ *
  * About IDs
  * ---------
- * 
+ *
  * In Turnitin, classes and assignments can have two kinds of ID. They always have an internally
  * generated ID which is returned in a response, but it's also possible to pass your own external ID
  * when creating the object. The API will never expose this back to you, but it is stored with the object
  * so you can later refer to it by that ID.
- * 
+ *
  * I think when we use a ClassId or AssignmentId, we should use our own values.
- * 
+ *
  * About creating objects
  * ----------------------
- * 
+ *
  * For many of the APIs, if you make a request as a user who doesn't already exist, they will be created
  * (though the login step will do this anyway). If you create an assignment referring to a class ID that
  * doesn't exist, the class will be created implicitly. the same goes for the paper submission, which can
  * implicitly create both a class and an assignment for you. So you can avoid a few API calls by skipping
  * the step of making those things explicitly.
- * 
+ *
  */
 trait TurnitinMethods { self: Session =>
 
@@ -83,7 +84,7 @@ trait TurnitinMethods { self: Session =>
 	}
 
 	/**
-	 * Returns a URL to the Turnitin home page hat initiates a session as this user.
+	 * Returns a URL to the Turnitin home page that initiates a session as this user.
 	 *
 	 * The Session ID is contained within the URL so it is unique to the user and shouldn't
 	 * be shared.
@@ -100,11 +101,11 @@ trait TurnitinMethods { self: Session =>
 			"session-id" -> null, // don't provide session-id; force a new session, as it seems to fail otherwise.
 			"uln" -> userLastName)
 			.redirectUrl.map { path =>
-			 
+
 			UriBuilder.parse(apiEndpoint).setPath(path).toUri
 		 }
 	}
-	
+
 	/**
 	 * There is an API call fid=6 to get a report link, but at the moment it doesn't
 	 * work, so this generates a link to the originality report viewer for a document.
@@ -147,7 +148,7 @@ trait TurnitinMethods { self: Session =>
 			"uln" -> userLastName)
 			.userId
 	}
-	
+
 	/**
 	 * Ensures that the session has a userid for the user who is logged in.
 	 */
@@ -162,7 +163,7 @@ trait TurnitinMethods { self: Session =>
 	 *
 	 * If the person is already enrolled on this class, it still returns success,
 	 * so it's fine to call this eagerly.
-	 * 
+	 *
 	 * If the class doesn't exist, it is created with the given external ID.
 	 *
 	 * The className is not used to find the class, but it is required in the
@@ -185,7 +186,7 @@ trait TurnitinMethods { self: Session =>
 	 * Created() with the internal ID of the class (which will be different to the external ID you provided,
 	 * but you can later refer to the class using either as ClassId). The classId returned from responses
 	 * is always the internally-generated ID, even if you specified your own ID (though that is stored, invisibly).
-	 * 
+	 *
 	 * If the given ClassId already exists, that class is returned and no new class is created.
 	 *
 	 * Classes are set to expire in 5 years.
@@ -199,13 +200,13 @@ trait TurnitinMethods { self: Session =>
 		if (response.success && response.classId.isDefined) Created(response.classId.get)
 		else Failed(response.code, response.message)
 	}
-	
+
 	/**
 	 * Create a new Assignment in this class, using the given AssignmentId as the externally-provided ID.
-	 * 
+	 *
 	 * You can pass in a ClassId that doesn't exist, and it will create the class (and add the current user
-	 * as a class instructor). 
-	 * 
+	 * as a class instructor).
+	 *
 	 * If the requested AssignmentId already exists, AlreadyExists() is returned.
 	 */
 	def createAssignment(classId: ClassId, className: ClassName, assignmentId: AssignmentId, assignmentName: AssignmentName, department: Department): Response = {
@@ -215,7 +216,7 @@ trait TurnitinMethods { self: Session =>
 		val response = doRequest(CreateAssignmentFunction, None, params: _*)
 		resolveAssignmentResponse(response)
 	}
-	
+
 	/**
 	 * Update an existing assignment in this class.
 	 */
@@ -280,21 +281,21 @@ trait TurnitinMethods { self: Session =>
 
 	/**
 	 * Submit a paper to this ClassId and AssignmentId.
-	 * 
+	 *
 	 * If this AssignmentId doesn't exist, the assignment is created using the
-	 * given name. 
+	 * given name.
 	 */
 	def submitPaper(
 			classId: ClassId, // what
 			className: ClassName, // a
-			assignmentId: AssignmentId, // lot 
+			assignmentId: AssignmentId, // lot
 			assignmentName:AssignmentName, // of
 			paperTitle: String, // arguments.
 			filename: String,
-			file: File, 
-			authorFirstName: String, 
+			file: File,
+			authorFirstName: String,
 			authorLastName: String): Response = {
-		
+
 		val response = doRequest(SubmitPaperFunction, Some(FileData(file, filename)),
 			"cid" -> classId.value,
 			"ctl" -> className.value,
@@ -311,7 +312,7 @@ trait TurnitinMethods { self: Session =>
 
 	/**
 	 * Delete a submission document from Turnitin.
-	 * 
+	 *
 	 * Doesn't remove it from any central repository, so you will still get plagiarism matches from deleted documents.
 	 */
 	def deleteSubmission(classId: ClassId, assignmentId: AssignmentId, oid: DocumentId): Response = {
@@ -328,7 +329,7 @@ trait TurnitinMethods { self: Session =>
 	 * this document. At the moment it throws an error so am using a hacky method (see getDocumentViewerLink)
 	 */
 	def getReport(paperId: DocumentId) = {
-		val response = doRequest(GenerateReportFunction, None, 
+		val response = doRequest(GenerateReportFunction, None,
 			"oid" -> paperId.value,
 			"fcmd" -> "1")
 		response
@@ -341,7 +342,7 @@ trait TurnitinMethods { self: Session =>
 
 	/**
 	 * List the submissions made to this assignment in this class.
-	 * 
+	 *
 	 * This command <em>may</em> throw ClassNotFound or AssignmentNotFound in some circumstances,
 	 * but the intended behaviour is that it will create the class or assignment implicitly.
 	 */
@@ -362,6 +363,7 @@ trait TurnitinMethods { self: Session =>
 		case 419 => AlreadyExists()
 		case 204 => ClassNotFound()
 		case 206 => AssignmentNotFound()
+		case 248 => ClassDeleted()
 		case _ => Failed(response.code, response.message)
 	}
 	// scalastyle:on magic.number
@@ -369,7 +371,7 @@ trait TurnitinMethods { self: Session =>
 }
 
 object TurnitinMethods {
-	// Values for the "fid" parameter of an API call 
+	// Values for the "fid" parameter of an API call
 	private val LoginFunction = "1"
 	private val CreateClassFunction = "2"
 	private val CreateAssignmentFunction = "4"

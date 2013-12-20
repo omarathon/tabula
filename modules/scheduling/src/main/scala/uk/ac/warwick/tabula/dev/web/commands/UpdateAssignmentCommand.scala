@@ -7,6 +7,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, Daoisms, TransactionalComponent, DepartmentDao}
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
+import uk.ac.warwick.tabula.validators.WithinYears
 
 
 class UpdateAssignmentCommand extends CommandInternal[Seq[Assignment]] {
@@ -19,7 +20,11 @@ class UpdateAssignmentCommand extends CommandInternal[Seq[Assignment]] {
 
 	var assignmentName: String = _
 	var deptCode: String = _
+	
+	@WithinYears(maxPast = 3, maxFuture = 3)
 	var openDate: DateTime = _
+	
+	@WithinYears(maxPast = 3, maxFuture = 3)
 	var closeDate: DateTime = _
 
 	protected def applyInternal() = {

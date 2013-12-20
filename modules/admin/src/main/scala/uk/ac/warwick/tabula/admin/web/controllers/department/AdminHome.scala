@@ -56,8 +56,9 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 	var securityService = Wire[SecurityService]
 	var moduleService = Wire[ModuleAndDepartmentService]
 	
+	val canAdminAllModules = securityService.can(user, Permissions.Module.Administer, mandatory(department))
 	val modules: Seq[Module] = 
-		if (securityService.can(user, Permissions.Module.Administer, mandatory(department))) {
+		if (canAdminAllModules) {
 			// This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
 			PermissionCheck(Permissions.Module.Administer, department)
 			
@@ -68,14 +69,12 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 			// This is implied by the above, but it's nice to check anyway
 			PermissionCheckAll(Permissions.Module.Administer, managedModules)
 			
-			if (managedModules.isEmpty)
-				throw new PermissionDeniedException(user, Permissions.Module.Administer, department)
-			
 			managedModules
 		}
 	
+	val canAdminAllRoutes = securityService.can(user, Permissions.Route.Administer, mandatory(department))
 	val routes: Seq[Route] = 
-		if (securityService.can(user, Permissions.Route.Administer, mandatory(department))) {
+		if (canAdminAllRoutes) {
 			// This may seem silly because it's rehashing the above; but it avoids an assertion error where we don't have any explicit permission definitions
 			PermissionCheck(Permissions.Route.Administer, department)
 			
@@ -86,11 +85,11 @@ class AdminDepartmentHomeCommand(val department: Department, val user: CurrentUs
 			// This is implied by the above, but it's nice to check anyway
 			PermissionCheckAll(Permissions.Route.Administer, managedRoutes)
 			
-			if (managedRoutes.isEmpty)
-				throw new PermissionDeniedException(user, Permissions.Route.Administer, department)
-			
 			managedRoutes
 		}
+	
+	if (modules.isEmpty && !canAdminAllModules && routes.isEmpty && !canAdminAllRoutes)
+		throw new PermissionDeniedException(user, Permissions.Module.Administer, department)
 	
 	def applyInternal() = (modules.sorted, routes.sorted)
 		

@@ -9,8 +9,12 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.profiles.commands.ProfilesHomeInformation
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.spring.Wire
 
 @Controller class HomeController extends ProfilesController {
+	
+	var departmentService = Wire[ModuleAndDepartmentService]
 
 	@ModelAttribute("searchProfilesCommand") def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
@@ -28,10 +32,13 @@ import uk.ac.warwick.tabula.profiles.commands.ProfilesHomeInformation
 				"universityId" -> user.universityId,
 				"isPGR" -> user.isPGR,
 				"smallGroups" -> info.smallGroups,
-				"adminDepartments" -> info.adminDepartments
+				"adminDepartments" -> info.adminDepartments,
+				"currentUserDepartment" -> departmentService.getDepartmentByCode(user.departmentCode.toLowerCase)
 			)
 		} else if (optionalCurrentMember.filter(_.userType == Student).isDefined) {
 			Redirect(Routes.profile.view(currentMember))
 		} else Mav("home/nopermission")
 	}
+	
+	@RequestMapping(Array("/view")) def redirectHome() = Redirect(Routes.home)
 }

@@ -11,6 +11,8 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.commands.FiltersStudents
+import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.userlookup.User
 
 /**
  * Service providing access to members and profiles.
@@ -22,7 +24,7 @@ trait ProfileService {
 	def getAllMembersWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getMemberByPrsCode(prsCode: String): Option[Member]
 	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
-	def getMemberByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
+	def getMemberByUser(user: User, disableFilter: Boolean = false): Option[Member]
 	def getStudentBySprCode(sprCode: String): Option[StudentMember]
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member]
 	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member]
@@ -62,8 +64,11 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		memberDao.getAllByUserId(userId, disableFilter)
 	}
 
-	def getMemberByUserId(userId: String, disableFilter: Boolean = false) = transactional(readOnly = true) {
-		memberDao.getByUserId(userId, disableFilter)
+	def getMemberByUser(user: User, disableFilter: Boolean = false) = {
+		val allMembers = getAllMembersWithUserId(user.getUserId, disableFilter)
+		allMembers
+			.filter(_.universityId == user.getWarwickId).headOption // TAB-1716
+			.orElse(allMembers.headOption)
 	}
 
 	def getStudentBySprCode(sprCode: String) = transactional(readOnly = true) {

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpointState, MonitoringPointSet, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPointSet, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
@@ -32,7 +32,7 @@ object SetMonitoringCheckpointCommand {
 }
 
 abstract class SetMonitoringCheckpointCommand(val department: Department, val templateMonitoringPoint: MonitoringPoint, val user: CurrentUser, val routes: JList[Route])
-	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with BindListener {
+	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with BindListener with PopulateOnForm {
 
 	self: SetMonitoringCheckpointState with MonitoringPointServiceComponent with ProfileServiceComponent =>
 
@@ -107,9 +107,10 @@ trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
 						(termService.getTermFromAcademicWeek(point.validFromWeek, pointSet.academicYear).getTermTypeAsString))){
 						errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 					}
+
 					if (thisAcademicYear.startYear <= academicYear.startYear
 						&& currentAcademicWeek < point.validFromWeek
-						&& !(state == null || state == MonitoringCheckpointState.MissedAuthorised)
+						&& !(state == null || state == AttendanceState.MissedAuthorised)
 					) {
 						errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
 					}
@@ -157,9 +158,9 @@ trait SetMonitoringCheckpointState extends FiltersStudents with PermissionsAware
 	def user: CurrentUser
 	def routes: JList[Route]
 
-	var studentsState: JMap[StudentMember, JMap[MonitoringPoint, MonitoringCheckpointState]] =
-		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, MonitoringCheckpointState] }.asJava
-	var studentsStateAsScala: Map[StudentMember, Map[MonitoringPoint, MonitoringCheckpointState]] = _
+	var studentsState: JMap[StudentMember, JMap[MonitoringPoint, AttendanceState]] =
+		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, AttendanceState] }.asJava
+	var studentsStateAsScala: Map[StudentMember, Map[MonitoringPoint, AttendanceState]] = _
 
 	var courseTypes: JList[CourseType] = JArrayList()
 	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()

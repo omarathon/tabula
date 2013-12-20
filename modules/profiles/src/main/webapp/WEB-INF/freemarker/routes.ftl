@@ -65,4 +65,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro restore_member_note memberNote ><@url page="/${memberNote.member.universityId}/note/${memberNote.id}/restore" /></#macro>
 <#macro purge_member_note memberNote ><@url page="/${memberNote.member.universityId}/note/${memberNote.id}/purge" /></#macro>
 
-<#macro meeting_will_create_checkpoint studentCourseDetails><@url page="/profile/${studentCourseDetails.urlSafeId}/meetingcheckpoint" context="/attendance" /></#macro>
+<#macro meeting_will_create_checkpoint student><@url page="/profile/${student.universityId}/meetingcheckpoint" context="/attendance" /></#macro>

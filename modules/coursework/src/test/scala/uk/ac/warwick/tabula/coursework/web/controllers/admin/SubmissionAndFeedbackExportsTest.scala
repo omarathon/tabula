@@ -78,6 +78,7 @@ class SubmissionAndFeedbackExportsTest extends TestBase with Mockito {
 								open-date="2012-04-01T00:00:00+01:00"
 								close-date="2012-06-01T00:00:00+01:00" id="123" module-code="IN101"
 								submissions-zip-url={"https://example.com/coursework" + Routes.admin.assignment.submissionsZip(assignment)}>
+			<generic-feedback/>
 			<students>
 				<student university-id="1234566">
 					<submission submitted="true" markable="false" within-extension="false" late="false" downloaded="false" time="2012-03-01T00:00:00Z" id="10001">

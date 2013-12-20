@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.groups.web.views.GroupsViewModel.{Tutor, ViewModules
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.commands.Appliable
 
-
 @Controller
 @RequestMapping(value=Array("/admin/department/{department}"))
 class AdminDepartmentHomeController extends GroupsController {
@@ -25,7 +24,7 @@ class AdminDepartmentHomeController extends GroupsController {
 
 	@ModelAttribute("allocated") def allocatedSet(@RequestParam(value="allocated", required=false) set: SmallGroupSet) = set
 
-	@RequestMapping(method=Array(GET, HEAD))
+	@RequestMapping
 	def adminDepartment(@ModelAttribute("adminCommand") cmd: Appliable[Seq[Module]], @PathVariable("department") department:Department, user: CurrentUser) = {
 		val modules = cmd.apply()
 

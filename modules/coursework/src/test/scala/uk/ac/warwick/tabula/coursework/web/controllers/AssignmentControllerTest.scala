@@ -9,8 +9,8 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{CurrentUser, RequestInfo}
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.web.controllers.TestControllerOverrides
-
 import org.junit.Ignore
+import uk.ac.warwick.tabula.services.FeedbackService
 
 class AssignmentControllerTest extends TestBase with Mockito {
 
@@ -23,11 +23,11 @@ class AssignmentControllerTest extends TestBase with Mockito {
 		val form = new SubmitAssignmentCommand(module, assignment, currentUser)
 		val errors = new BindException(form, "command")
 		
-		val feedbackDao = smartMock[FeedbackDao]
+		val feedbackService = smartMock[FeedbackService]
 		val feedback = new Feedback()
 		val m = new org.mockito.MockitoMocker
-		feedbackDao.getFeedbackByUniId(assignment, "0123456") returns Some(feedback) thenThrows new Error("I TOLD YOU ABOUT STAIRS BRO")
-		controller.feedbackDao = feedbackDao
+		feedbackService.getFeedbackByUniId(assignment, "0123456") returns Some(feedback) thenThrows new Error("I TOLD YOU ABOUT STAIRS BRO")
+		controller.feedbackService = feedbackService
 	}
 	
 	@Ignore

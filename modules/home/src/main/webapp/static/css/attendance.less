@@ -69,72 +69,6 @@
 	}
 }
 
-.recordCheckpointForm .save-row {
-	width:100%;
-	.pull-right {
-		padding-right:2.5em;
-	}
-}
-
-.record-attendance-form-header {
-	background-color: lighten(@tabulaRed, 35%);
-	div.span9 {
-        padding: 15px 0px;
-        span {
-			margin-right: 10px
-		}
-    }
-    div.span3 {
-        padding-top: 9px;
-    }
-}
-
-.tabula-page, #container {
-	.active-colour(@activeColour, @textColour: #fff) {
-		// Remove the text shadow because it makes things look weird against dark backgrounds
-		text-shadow: none;
-	
-		// Hover/focus state
-	  &:hover,
-	  &:focus {
-	    text-decoration: none;
-	    background-position: 0 -36px;
-
-	    .transition(none);
-	  }
-	
-		// in these cases the gradient won't cover the background, so we override
-	  &:hover, &:focus, &:active, &.active, &.disabled, &[disabled] {
-	    color: @textColour;
-	    background-color: @activeColour;
-	    *background-color: darken(@activeColour, 5%);
-	  }
-	
-	  // IE 7 + 8 can't handle box-shadow to show active, so we darken a bit ourselves
-	  &:active,
-	  &.active {
-	    background-color: @activeColour e("\9");
-	  }
-	}
-
-	.btn-attended { 
-		color: @successText;
-		.active-colour(@successText); 
-	}
-	.btn-unauthorised { 
-		color: @errorText;
-		.active-colour(@errorText); 
-	}
-	.btn-authorised { 
-		color: @infoText; 
-		.active-colour(@infoText);
-	}
-
-	.checkAllMessage {
-	  padding-right: 6px;
-	}
-}
-
 .monitoring-points-profile {
 	.pull-right .form-inline { margin-bottom: 0px; }
 	h3, .missed-info { display: inline-block; }
@@ -148,41 +82,6 @@
 	}
 	.row-fluid.point:hover {
 		background-color: @tableBackgroundHover
-	}
-}
-
-.btn-group button { margin-right: 0px; }
-
-.recordCheckpointForm .btn-group {
-  margin-right:13px;
-}
-
-.record-attendance-form-header {
-	.span12 {
-		padding:3px 0 3px 0;
-	}
-}
-
-.is-smallscreen #container {
-	.recordCheckpointForm h1 {
-		margin-bottom:8px;
-	}
-
-	.yearAndRoute, .record-attendance-form-header div.span8 {
-		display:none;
-	}
-
-	.record-attendance-form-header div.span4 {
-		padding:3px 0 3px 3px;
-	}
-
-	.recordCheckpointForm h1 {
-		font-size:22px;
-	}
-
-	.persist-footer {
-		padding-top:16px;
-		padding-bottom:16px;
 	}
 }
 
@@ -334,4 +233,10 @@
       width: 1px; // fit to content
     }
   }
+}
+
+@import "record-attendance.less";
+
+.record-attendance-form-header {
+	background-color: lighten(@tabulaRed, 35%);
 }

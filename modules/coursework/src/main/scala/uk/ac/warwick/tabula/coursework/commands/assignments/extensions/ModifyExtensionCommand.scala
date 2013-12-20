@@ -18,6 +18,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notifications._
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
+import uk.ac.warwick.tabula.validators.WithinYears
 
 /*
  * Built the command as a bulk operation. Single additions can be achieved by adding only one extension to the list.
@@ -167,7 +168,8 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 class ExtensionItem{
 
 	var universityId:String =_
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	
+	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var expiryDate:DateTime =_
 	var approvalComments:String =_
 

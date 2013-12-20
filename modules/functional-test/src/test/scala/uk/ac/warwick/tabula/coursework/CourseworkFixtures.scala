@@ -240,7 +240,16 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 	}
 
 	def getAssignmentInfo(moduleCode: String, assignmentName: String) = {
-		val assignmentBlocks = getModuleInfo(moduleCode).findElements(By.className("assignment-info")).asScala
+		val module = getModuleInfo(moduleCode)
+		if (module.getAttribute("class").indexOf("collapsible") != -1 && module.getAttribute("class").indexOf("expanded") == -1) {
+			click on module.findElement(By.className("section-title"))
+			
+			eventuallyAjax {
+				module.getAttribute("class").indexOf("expanded") should not be (-1)
+			}
+		}
+		
+		val assignmentBlocks = module.findElements(By.className("assignment-info")).asScala
 
 		if (assignmentBlocks.isEmpty)
 			throw new TestFailedException("No assignment-info blocks found on this page. Check it's the right page and that the user has permission.", 0)

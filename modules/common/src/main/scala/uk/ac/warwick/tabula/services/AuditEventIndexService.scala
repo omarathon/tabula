@@ -183,6 +183,40 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 				(whoDownloaded.masqueradeUserId, whoDownloaded.eventDate)
 			})
 	}
+
+	def latestOnlineFeedbackViews(assignment: Assignment) = {
+		search(all(
+			termQuery("eventType", "ViewOnlineFeedback"),
+			termQuery("assignment", assignment.id)))
+			.transform { toItem(_) }
+			.filterNot { _.hadError }
+			.map( whoViewed => {
+			(whoViewed.masqueradeUserId, whoViewed.eventDate)})
+			.groupBy( _._1)
+			.map(x => (x._2.maxBy(_._2)))
+			.toSeq
+	}
+
+	def latestGenericFeedbackAdded(assignment: Assignment): Option[DateTime] = {
+		search( all(
+			termQuery("eventType", "GenericFeedback"),
+			termQuery("assignment", assignment.id)),
+			max = 1, sort = reverseDateSort)
+			.transform{ toItem(_) }
+			.map(latestTime => latestTime.eventDate)
+			.headOption
+	}
+
+	def latestOnlineFeedbackAdded(assignment: Assignment) =
+		search(all(
+			termQuery("eventType", "OnlineFeedback"),
+			termQuery("assignment", assignment.id)))
+			.transform { toParsedAuditEvent(_) }
+			.filterNot { _.hadError }
+			.flatMap(auditEvent => auditEvent.students.map( student => (student, auditEvent.eventDate)))
+			.groupBy( _._1)
+			.map(x => (x._2.maxBy(_._2)))
+			.toSeq
 			
 	def whoDownloadedFeedback(assignment: Assignment) =
 		search(all(

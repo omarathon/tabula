@@ -40,7 +40,6 @@ trait MemberDao {
 	def getByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getAllByUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
-	def getByUserId(userId: String, disableFilter: Boolean = false): Option[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
 	def getAllCurrentRelationships(targetSprCode: String): Seq[StudentRelationship]
@@ -148,9 +147,6 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		}
 	}
 
-	def getByUserId(userId: String, disableFilter: Boolean = false) =
-		getAllByUserId(userId, disableFilter).headOption
-
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int) = {
 		val homeDepartmentMatches = session.newCriteria[Member]
 			.add(gt("lastUpdatedDate", startDate))
@@ -167,8 +163,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 						scd.missingFromImportSince is null and
             scd.department = :department and
         		scd.student.lastUpdatedDate > :lastUpdated and
-            scd.sprStatus.code not like 'P%'
-          order by lastUpdatedDate asc """)
+            scd.sprStatus.code not like 'P%' """)
 			.setEntity("department", department)
 			.setParameter("lastUpdated", startDate).seq
 
@@ -463,8 +458,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				.seq.map { array => array(0).asInstanceOf[SitsStatus] }
 
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime) = {
-		if (!newStaleUniversityIds.isEmpty && newStaleUniversityIds.size < Daoisms.MaxInClauseCount) {
-			var sqlString = """
+		newStaleUniversityIds.grouped(Daoisms.MaxInClauseCount).foreach { staleIds =>
+			val sqlString = """
 				update
 					Member
 				set
@@ -475,7 +470,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 				session.newQuery(sqlString)
 					.setParameter("importStart", importStart)
-					.setParameterList("newStaleUniversityIds", newStaleUniversityIds)
+					.setParameterList("newStaleUniversityIds", staleIds)
 					.executeUpdate
 			}
 		}

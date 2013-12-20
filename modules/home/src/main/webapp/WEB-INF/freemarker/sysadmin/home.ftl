@@ -38,50 +38,54 @@
 	</#if>
 </@f.form>
 
-<h2>Scary special stuff</h2>
+<h2>Imports</h2>
 
 <p>
 <@f.form method="post" action="${url('/sysadmin/import', '/scheduling')}">
-  <input class="btn btn-danger" type="submit" value="Run department/module import" onclick="return confirm('Really? Could take a minute.')">
+  <input class="btn btn-danger" type="submit" value="Departments & modules" onclick="return confirm('Really? Could take a minute.')">
 </@f.form>
 </p>
 
 <p>
 <@f.form method="post" action="${url('/sysadmin/import-sits', '/scheduling')}">
-  <input class="btn btn-danger" type="submit" value="Run assignment data import" onclick="return confirm('Really? Could take a minute.')">
+  <input class="btn btn-danger" type="submit" value="SITS assignments" onclick="return confirm('Really? Could take a minute.')">
 </@f.form>
 </p>
 
 <p>
-<@f.form method="post" action="${url('/sysadmin/import-profiles', '/scheduling')}">
-  <input class="btn btn-danger" type="submit" value="Run profiles data import" onclick="return confirm('Really? Could take a minute.')">
+<@f.form method="post" action="${url('/sysadmin/import-profiles', '/scheduling')}" commandName="blankForm">
+	<div class="input-append">
+		<@f.input id="import-profiles-dept" path="deptCode" cssClass="span8" placeholder="deptCode (optional)" /><input class="btn btn-danger" type="submit" value="Profiles" onclick="return confirm('Really? Could take a minute.')">
+	</div>
 </@f.form>
 </p>
 
-<p>
-<a href="<@url page="/sysadmin/repl" />">Evaluator</a>
-</p>
-
-<hr>
+<h2>Indexing</h2>
 
 <p>
-<@f.form method="post" action="${url('/sysadmin/index/run-audit', '/scheduling')}" commandName="reindexForm">
+<@f.form method="post" action="${url('/sysadmin/index/run-audit', '/scheduling')}" commandName="blankForm">
 Rebuild audit event index from
-<div class="input-append"> 
-<@f.input id="audit-from" path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
+<div class="input-append">
+<@f.input id="index-audit-from" path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
 </div>
 </@f.form>
 </p>
 
 <p>
-<@f.form method="post" action="${url('/sysadmin/index/run-profiles', '/scheduling')}" commandName="reindexForm">
+<@f.form method="post" action="${url('/sysadmin/index/run-profiles', '/scheduling')}" commandName="blankForm">
 Rebuild profiles index for
 <br />
-<@f.input id="profiles-dept" path="deptCode" cssClass="span6" placeholder="deptCode (optional)" /> from
-<div class="input-append"> 
-<@f.input id="profiles-from" path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
+<@f.input id="index-profiles-dept" path="deptCode" cssClass="span6" placeholder="deptCode (optional)" /> from
+<div class="input-append">
+<@f.input id="index-profiles-from" path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
 </div>
 </@f.form>
+</p>
+
+<h2>Scary special stuff</h2>
+
+<p>
+	<a href="<@url page="/sysadmin/repl" />">Evaluator</a>
 </p>
 
 <h4>Maintenance mode</h4>

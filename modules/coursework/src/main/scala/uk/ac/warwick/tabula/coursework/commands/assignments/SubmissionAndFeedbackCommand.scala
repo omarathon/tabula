@@ -46,7 +46,11 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 	def applyInternal() = {
 		// an "enhanced submission" is simply a submission with a Boolean flag to say whether it has been downloaded
 		val enhancedSubmissions = enhancedSubmissionsCommand.apply()
-		val whoDownloaded = enhancedFeedbacksCommand.apply()
+		val enhancedFeedbacks = enhancedFeedbacksCommand.apply()
+		val latestModifiedOnlineFeedback = enhancedFeedbacks.latestOnlineAdded
+		val whoDownloaded = enhancedFeedbacks.downloads
+		val whoViewed = enhancedFeedbacks.latestOnlineViews
+		val latestGenericFeedbackUpdate = enhancedFeedbacks.latestGenericFeedback
 		
 		val hasOriginalityReport = benchmarkTask("Check for originality reports") { enhancedSubmissions.exists(_.submission.hasOriginalityReport) }
 		val uniIdsWithSubmissionOrFeedback = benchmarkTask("Get uni IDs with submissions or feedback") { assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted }
@@ -105,9 +109,17 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			val enhancedSubmissionForUniId = usersSubmissions.headOption
 
 			val enhancedFeedbackForUniId = usersFeedback.headOption map { feedback =>
-				new FeedbackListItem(feedback, 
-					!feedback.attachments.isEmpty && (whoDownloaded exists { x=> (x._1.getWarwickId == feedback.universityId  &&
-						x._2.isAfter(feedback.mostRecentAttachmentUpload))}))
+				val downloaded = !feedback.attachments.isEmpty && (whoDownloaded exists { x=> (x._1.getWarwickId == feedback.universityId  &&
+					x._2.isAfter(feedback.mostRecentAttachmentUpload))})
+
+				val viewed = (feedback.hasOnlineFeedback || feedback.hasGenericFeedback) && (whoViewed exists { x =>
+					val universityId = x._1.getWarwickId
+					val latestOnlineUpdate = latestModifiedOnlineFeedback.filter( x => x._1.getWarwickId == universityId).headOption.map { _._2 }.getOrElse(new DateTime(0))
+					val latestUpdate = latestGenericFeedbackUpdate.filter(_.isAfter(latestOnlineUpdate)).getOrElse(latestOnlineUpdate)
+
+					(universityId == feedback.universityId  && 	x._2.isAfter(latestUpdate))})
+
+				new FeedbackListItem(feedback, downloaded, viewed)
 			}
 			
 			val enhancedExtensionForUniId = usersExtension.headOption map { extension =>

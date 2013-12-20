@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.jobs._
 import java.util.HashMap
 import uk.ac.warwick.tabula.services.OriginalityReportService
 import language.implicitConversions
-import uk.ac.warwick.tabula.coursework.jobs.notifications.{TurnitinJobSuccessNotification, TurnitinJobErrorNotification}
+import uk.ac.warwick.tabula.coursework.jobs.notifications.{TurnitinClassDeletedNotification, TurnitinJobSuccessNotification, TurnitinJobErrorNotification}
 
 object SubmitToTurnitinJob {
 	val identifier = "turnitin-submit"
@@ -74,13 +74,23 @@ class SubmitToTurnitinJob extends Job
 
 		lazy val session = api.login(job.user).getOrElse(throw loginFailure)
 
-		// Get existing submissions. 
+		// Get existing submissions.
+		debug(s"Checking for existing submissions in ${classId.value}, ${assignmentId.value}")
+
 		val existingSubmissions = session.listSubmissions(classId, className, assignmentId, assignmentName) match {
 			case ClassNotFound() | AssignmentNotFound() => { // class or assignment don't exist
-				// ensure assignment and course are created, as submitPaper doesn't always do that for you
+				// ensure assignment and class (Tabula module) are created, as submitPaper doesn't always do that for you
 				debug("Missing class or assignment, creating...")
 				session.createAssignment(classId, className, assignmentId, assignmentName, department)
 				Nil // clearly there are no submissions yet.
+			}
+			case ClassDeleted() => { // class deleted on Turnitin (outside Tabula)
+				debug(s"${classId.value} is deleted on Turnitin...")
+				if (sendNotifications) {
+					debug("Sending an email to " + job.user.email)
+					pushNotification(job, new TurnitinClassDeletedNotification(assignment, job.user.apparentUser, className, classId) with FreemarkerTextRenderer)
+				}
+				throw new FailedJobException(s"Failed. The class corresponding to the module ${assignment.module.code.toUpperCase} has been deleted by someone on Turnitin.")
 			}
 			case GotSubmissions(list) => {
 				debug("Got list of " + list.size + " existing submissions: " + list.map(_.title))
@@ -96,7 +106,7 @@ class SubmitToTurnitinJob extends Job
 		}
 
 		def run() {
-			updateStatus("Submitting to Turnitin")
+			updateStatus("Submitting to Turnitin...")
 			updateProgress(10) // update the progress bar
 
 			removeDefunctSubmissions()
@@ -142,16 +152,16 @@ class SubmitToTurnitinJob extends Job
 					} else {
 						debug(s"Uploading attachment: ${attachment.name} (by ${submission.universityId}). Paper title: ${attachment.id}")
 						val submitResponse = session.submitPaper(
-								classId, 
-								className, 
-								assignmentId, 
-								assignmentName, 
-								attachment.id, 
-								attachment.name, 
-								attachment.file, 
-								submission.universityId, 
+								classId,
+								className,
+								assignmentId,
+								assignmentName,
+								attachment.id,
+								attachment.name,
+								attachment.file,
+								submission.universityId,
 								"Student")
-								
+
 						debug("submitResponse: " + submitResponse)
 						if (!submitResponse.successful) {
 							//throw new FailedJobException("Failed to upload '" + attachment.name +"' - " + submitResponse.message)
@@ -169,8 +179,8 @@ class SubmitToTurnitinJob extends Job
 			debug("Done uploads (" + uploadsDone + ")")
 			(failedUploads, uploadsTotal)
 		}
-		
-		
+
+
 
 		def retrieveReport(failedUploads: HashMap[String, String], uploadsTotal: Int) {
 			// Uploaded all the submissions probably, now we wait til they're all checked
@@ -189,7 +199,7 @@ class SubmitToTurnitinJob extends Job
 			} else {
 
 				val attachments = assignment.submissions.flatMap(_.allAttachments)
-				
+
 				for (report <- reports) {
 
 					val matchingAttachment = attachments.find(attachment => report.matches(attachment))
@@ -214,7 +224,7 @@ class SubmitToTurnitinJob extends Job
 						}
 						case None => logger.warn("Got plagiarism report for %s but no corresponding Submission item" format (report.universityId))
 					}
-		
+
 				}
 
 				if (sendNotifications) {
@@ -252,15 +262,15 @@ class SubmitToTurnitinJob extends Job
 							None
 						}
 					}
-					case a => {
-						debug("listSubmissions returned " + a)
+					case somethingElse => {
+						debug("listSubmissions returned " + somethingElse)
 						None
 					}
 				}
 			}
 
 			if (retries == 0) None
-			else getSubmissions() match {
+			else getSubmissions() match { // pattern match as orElse isn't tail-recursive
 				case Some(list) => Some(list)
 				case None => runCheck(retries - 1)
 			}
