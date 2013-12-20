@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 object OnlineFeedbackCommand {
 	def apply(module: Module, assignment: Assignment) =
@@ -28,7 +29,7 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 
 	def applyInternal() = {
 		val studentsWithSubmissionOrFeedback = 
-			assignment.getUniIdsWithSubmissionOrFeedback.toSeq.sorted.map { userLookup.getUserByWarwickUniId }
+			assignment.getUniIdsWithSubmissionOrFeedback.filter { _.hasText }.toSeq.sorted.map { userLookup.getUserByWarwickUniId }.filter { _.isFoundUser }		
 		val unsubmittedStudents = assignment.membershipInfo.items.map(_.user).filterNot { studentsWithSubmissionOrFeedback.contains }
 			
 		val students = studentsWithSubmissionOrFeedback ++ unsubmittedStudents

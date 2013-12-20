@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.validators.WithinYears
 
 
 /**
@@ -45,8 +46,10 @@ class AssignmentItem(
 	// can share the same set of options without having to post many copies separately.
 	var optionsId: String = _
 
+	@WithinYears(maxPast = 3, maxFuture = 3)
 	var openDate: DateTime = _
 
+	@WithinYears(maxPast = 3, maxFuture = 3)
 	var closeDate: DateTime = _
 
 	var openEnded: JBoolean = false
@@ -87,11 +90,11 @@ class AddAssignmentsCommand(val department: Department, user: CurrentUser) exten
 		LazyMaps.create { key: String => new SharedAssignmentPropertiesForm }
 
 	// just for prepopulating the date form fields.
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxPast = 3, maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty
 	val defaultOpenDate = new DateTime().withTime(DEFAULT_OPEN_HOUR, 0, 0, 0)
 
-	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	@BeanProperty
 	val defaultCloseDate = defaultOpenDate.plusWeeks(DEFAULT_WEEKS_LENGTH)
 

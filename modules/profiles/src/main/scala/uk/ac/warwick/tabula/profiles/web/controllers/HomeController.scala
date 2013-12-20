@@ -39,4 +39,6 @@ import uk.ac.warwick.spring.Wire
 			Redirect(Routes.profile.view(currentMember))
 		} else Mav("home/nopermission")
 	}
+	
+	@RequestMapping(Array("/view")) def redirectHome() = Redirect(Routes.home)
 }

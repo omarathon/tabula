@@ -13,10 +13,10 @@ import uk.ac.warwick.tabula.attendance.commands.AttendanceProfileInformation
 
 @Controller
 @RequestMapping(value = Array("/profile"))
-class ProfileHomeController extends AttendanceController with AutowiringProfileServiceComponent {
+class ProfileHomeController extends AttendanceController {
 
 	@RequestMapping
-	def render() = profileService.getMemberByUserId(user.apparentId) match {
+	def render() = user.profile match {
 		case Some(student: StudentMember) => Redirect(Routes.profile(student, AcademicYear.guessByDate(DateTime.now)))
 		case _ if user.isStaff => Mav("profile/profile_staff").noLayoutIf(ajax)
 		case _ => Mav("profile/profile_unknown").noLayoutIf(ajax)

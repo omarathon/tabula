@@ -111,12 +111,10 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			"marker3" -> m3UserGroup
 		)
 
-		// new markerFeedback items are secondMarkerFeedback
-		val linkFunction: (Feedback, MarkerFeedback) => Unit = {(f, mf) => f.secondMarkerFeedback = mf}
-		val (f1, mf1) = makeMarkerFeedback(student1)(linkFunction)
-		val (f2, mf2) = makeMarkerFeedback(student2)(linkFunction)
-		val (f3, mf3) = makeMarkerFeedback(student3)(linkFunction)
-		val (f4, mf4) = makeMarkerFeedback(student4)(linkFunction)
+		val (f1, mf1) = makeMarkerFeedback(student1)(MarkingNotificationFixture.SecondMarkerLink)
+		val (f2, mf2) = makeMarkerFeedback(student2)(MarkingNotificationFixture.SecondMarkerLink)
+		val (f3, mf3) = makeMarkerFeedback(student3)(MarkingNotificationFixture.SecondMarkerLink)
+		val (f4, mf4) = makeMarkerFeedback(student4)(MarkingNotificationFixture.SecondMarkerLink)
 
 		val notifier = new SecondMarkerReleaseNotifier with MarkingCompletedState with ReleasedState with UserAware with UserLookupComponent with Logging {
 			val user = marker1

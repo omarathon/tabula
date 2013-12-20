@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
  */
 
 object ModeratorRejectedNotification {
-	val templateLocation = "/WEB-INF/freemarker/emails/moderator_rejected_noification.ftl"
+	val templateLocation = "/WEB-INF/freemarker/emails/moderator_rejected_notification.ftl"
 }
 
 class ModeratorRejectedNotification(val agent: User, val recipient: User, val _object: MarkerFeedback, val rejectionFeeback: MarkerFeedback)

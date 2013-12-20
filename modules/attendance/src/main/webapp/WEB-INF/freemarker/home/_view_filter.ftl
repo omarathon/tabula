@@ -184,6 +184,8 @@
 					container: '#container',
 					template: '<div class="popover wide"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
 				});
+				
+				$('.use-tooltip').tooltip();
 
 				$('.scrollable-points-table').find('table').each(function() {
 					var t = $(this);

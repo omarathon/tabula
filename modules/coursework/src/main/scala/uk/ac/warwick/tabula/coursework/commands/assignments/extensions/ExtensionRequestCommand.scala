@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notificat
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{RelationshipService}
+import uk.ac.warwick.tabula.validators.WithinYears
 
 
 
@@ -46,8 +47,11 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 	}}).getOrElse(Map())
 
 	var reason:String =_
+	
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	@WithinYears(maxFuture = 3)
 	var requestedExpiryDate:DateTime =_
+	
 	var file:UploadedFile = new UploadedFile
 	var attachedFiles:JSet[FileAttachment] =_
 	var readGuidelines:JBoolean =_

@@ -193,6 +193,8 @@
 
 	(function($) {
 
+	// FIXME 'ajaxComplete' is a global event, this will fire on _any_ AJAX completion.
+	// FIXME should be handled in our shared modal code.
 	$('#extension-model').on('ajaxComplete', function(){
 		$(this).find('details').details();
 	})

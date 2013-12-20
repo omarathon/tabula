@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
 import uk.ac.warwick.tabula.data.model.MarkingState
 import scala.collection.immutable.ListMap
-import uk.ac.warwick.tabula.data.model.MarkingState.MarkingCompleted
+import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
 
 @Service
 class CourseworkWorkflowService {
@@ -142,7 +142,7 @@ object WorkflowStages {
 			// If the student hasn't submitted, but we have uploaded feedback for them, don't record their submission status
 			case None if coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder).isDefined => StageProgress(Submission, false, "workflow.Submission.unsubmitted.withFeedback")
 			
-			case Some(submission) if submission.submission.isLate => StageProgress(Submission, true, "workflow.Submission.authorisedLate", Warning, true)
+			case Some(submission) if submission.submission.isLate => StageProgress(Submission, true, "workflow.Submission.late", Warning, true)
 			
 			case Some(submission) if submission.submission.isAuthorisedLate => StageProgress(Submission, true, "workflow.Submission.authorisedLate", Good, true)
 			
@@ -214,14 +214,17 @@ object WorkflowStages {
 	
 	case object SecondMarking extends WorkflowStage {
 		def actionCode = "workflow.SecondMarking.action"
-		def progress(assignment: Assignment)(coursework: WorkflowItems) = coursework.enhancedFeedback match {
-			case Some(item) if coursework.enhancedSubmission.exists(_.submission.isReleasedToSecondMarker) => {
-				if (item.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted)
-					StageProgress(SecondMarking, true, "workflow.SecondMarking.marked", Good, true)
-				else
-					StageProgress(SecondMarking, true, "workflow.SecondMarking.notMarked", Warning, false)
+		def progress(assignment: Assignment)(coursework: WorkflowItems) = {
+			val hasSubmission = coursework.enhancedSubmission.exists(_.submission.isReleasedToSecondMarker)
+			coursework.enhancedFeedback match {
+				case Some(item) if hasSubmission &&  item.feedback.retrieveSecondMarkerFeedback.state != Rejected => {
+					if (item.feedback.retrieveSecondMarkerFeedback.state == MarkingCompleted)
+						StageProgress(SecondMarking, true, "workflow.SecondMarking.marked", Good, true)
+					else
+						StageProgress(SecondMarking, true, "workflow.SecondMarking.notMarked", Warning, false)
+				}
+				case _ => StageProgress(SecondMarking, false, "workflow.SecondMarking.notMarked")
 			}
-			case _ => StageProgress(SecondMarking, false, "workflow.SecondMarking.notMarked")
 		}
 		override def preconditions = Seq(Seq(Submission, ReleaseForMarking, FirstMarking))
 	}

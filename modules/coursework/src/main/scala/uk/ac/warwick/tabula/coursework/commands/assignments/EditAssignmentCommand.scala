@@ -42,7 +42,10 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 	}
 
 	override def contextSpecificValidation(errors:Errors){
-		val workflowChanged = assignment.markingWorkflow != markingWorkflow
+
+		// compare ids directly as this.markingWorkflow always comes back with the type MarkingWorkflow which breaks .equals
+		
+		val workflowChanged = Option(assignment.markingWorkflow).map(_.id) != Option(markingWorkflow).map(_.id)
 		if (!canUpdateMarkingWorkflow && workflowChanged){
 			errors.rejectValue("markingWorkflow", "markingWorkflow.cannotChange")
 		}

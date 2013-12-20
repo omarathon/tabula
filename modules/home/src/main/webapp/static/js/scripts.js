@@ -209,6 +209,11 @@
 				var scopeSelector = (data.formId != undefined) ? "#" + data.formId + " " : "";
 
 				if(data.status == "error"){
+					if ($form.is('.double-submit-protection')) {
+						$form.find('.submit-buttons .btn').removeClass('disabled');
+						$form.removeData('submitOnceSubmitted');
+					}
+				
 					// delete any old errors
 					$(scopeSelector + "span.error").remove();
 					$(scopeSelector + '.error').removeClass('error');
@@ -505,8 +510,12 @@
 	// collapsible striped section
 	// exported so can be called on-demand e.g. after an ajax-load
 	// adds a class to prevent double-init
-	exports.initCollapsible = function() {
-		$('.striped-section.collapsible:not(.collapsible-init)').each(function() {
+	exports.initCollapsible = function($el) {
+		if (typeof($el) === 'undefined') {
+			$el = $('.striped-section.collapsible');
+		}
+		
+		$el.filter(':not(.collapsible-init)').each(function() {
 			var $section = $(this).addClass('collapsible-init');
 			var open = function() {
 				return $section.hasClass('expanded');
@@ -588,14 +597,19 @@
 								$target.find('a.ajax-modal').ajaxModalLink();
 
 								onComplete();
-								$section.data('loading', false).data('loaded', true);
+								$section.data('loading', false).data('loaded', true).trigger('loaded.collapsible');
 							}
 						);
 					}
 				}
 			}
 
-			$title.css('cursor', 'pointer').on('click', function() {
+			$title.css('cursor', 'pointer').on('click', function(e) {
+				// Ignore clicks where we are clearing a dropdown
+				if ($(this).parent().find('.dropdown-menu').is(':visible')) {
+					return;
+				}
+			
 				if (open()) {
 					$section.removeClass('expanded');
 					$icon.removeClass().addClass('icon-fixed-width icon-chevron-right');
@@ -605,7 +619,12 @@
 						$icon.removeClass().addClass('icon-fixed-width icon-chevron-down');
 
 						if ($section.data('name')) {
-							window.location.hash = $section.data('name');
+							// Use history.pushState here if supported as it stops the page jumping
+							if (window.history && window.history.pushState && window.location.hash !== ('#' + $section.data('name'))) {
+								window.history.pushState({}, document.title, window.location.pathname + '#' + $section.data('name'));
+							} else {						
+								window.location.hash = $section.data('name');
+							}
 						}
 					});
 				}

@@ -47,7 +47,7 @@ abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserTyp
 
 	def usercodeMatches =
 		if (!isMaybeUsercode(query)) Seq()
-		else singletonByUserType(profileService.getMemberByUserId(query)) filter canRead
+		else profileService.getAllMembersWithUserId(query).filter {m => userTypes.contains(m.userType)}.filter(canRead)
 
 	def universityIdMatches =
 		if (!isMaybeUniversityId(query)) Seq()

@@ -23,8 +23,8 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 	
 	val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
-	when(profileService.getMemberByUserId("tutor", true)).thenReturn(None)
-	when(profileService.getMemberByUserId("supervisor", true)).thenReturn(None)
+	when(profileService.getAllMembersWithUserId("tutor", true)).thenReturn(Seq())
+	when(profileService.getAllMembersWithUserId("supervisor", true)).thenReturn(Seq())
 	when(profileService.getStudentBySprCode(studentCourseDetails.sprCode)).thenReturn(Some(student))
 
 	@Test(expected=classOf[ItemNotFoundException])

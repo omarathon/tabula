@@ -5,6 +5,14 @@
 
 var exports = {};
 
+exports.zebraStripeAssignments = function($module) {
+	$module.find('.assignment-info').filter(':visible:even').addClass('alt-row');
+};
+
+// take anything we've attached to "exports" and add it to the global "Courses"
+// we use extend() to add to any existing variable rather than clobber it
+window.Courses = jQuery.extend(window.Courses, exports);
+
 $(function(){
 
 	// hide stuff that makes no sense when open-ended
@@ -18,7 +26,7 @@ $(function(){
 
 	// Zebra striping on lists of modules/assignments
 	$('.module-info').each(function(i, module) {
-		$(module).find('.assignment-info').filter(':visible:even').addClass('alt-row');
+		exports.zebraStripeAssignments($(module));
 	});
 
 	$('.module-info.empty').css('opacity',0.66)
@@ -83,7 +91,7 @@ $(function(){
 	// enable shift-click on multiple checkboxes in tables
 	$('table').find('input[type="checkbox"]').shiftSelectable();
 
-	$('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list, #coursework-progress-table, #online-marking-table').bigList({
+	$('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list, .coursework-progress-table, #online-marking-table').bigList({
 		setup : function() {
 			var $container = this;
 			// #delete-selected-button won't work for >1 set of checkboxes on a page.
@@ -137,7 +145,7 @@ $(function(){
 				}
 
 				if ($(this).hasClass('include-filter') && ($('.filter-form').length > 0)) {
-						var $inputs = $(':input', '.filter-form');
+						var $inputs = $(':input', '.filter-form:not(#floatedHeaderContainer *)');
 						$form.append($inputs.clone());
 
 						doFormSubmit = true;
@@ -169,7 +177,7 @@ $(function(){
 					}
 				});
 			}
-			$('.submission-feedback-list,.submission-list,#coursework-progress-table').data("all-plagiarised", allPlagiarised);
+			$('.submission-feedback-list,.submission-list,.coursework-progress-table').data("all-plagiarised", allPlagiarised);
 			if (allPlagiarised) {
 				$('#mark-plagiarised-selected-button').html('<i class="icon-exclamation-sign"></i> Unmark plagiarised');
 			}
@@ -191,11 +199,6 @@ $(function(){
 
 
 });
-
-// take anything we've attached to "exports" and add it to the global "Courses"
-// we use extend() to add to any existing variable rather than clobber it
-window.Courses = jQuery.extend(window.Courses, exports);
-
 
 // shift selectable checkboxes
 $.fn.shiftSelectable = function() {
@@ -332,26 +335,36 @@ $(function(){
 
    // extensions admin
 	$("#extension-list").tabulaAjaxSubmit(function(data) {
-		var action = data.action;
-		$.each(data.result, function() {
-			modifyRow(this, action);
-		});
+		// TAB-1704 don't do anything clever, just reload the page
+		/*
+			var action = data.action;
+			$.each(data.result, function() {
+				modifyRow(this, action);
+			});
+		*/
 		// hide the model
 		jQuery("#extension-model").modal('hide');
+		
+		// TAB-1704 change the hash and reload the page
+		$.each(data.result, function() {
+			window.location.hash = 'row' + this.id;
+		});
+		
+		window.location.reload(true);
 	});
 
 	// Ajax specific modal end
 
-	// CM removed this line; it would never have worked (looks like CnP from a freemarker tempate)
-	// var highlightId = "${highlightId}";
-	var highlightId = "";
-	if (highlightId != "") {
-		var container = $("#extension-list");
-		var highlightRow = $("#row"+highlightId);
-		if(highlightRow.length > 0){
-			container.animate({
-				scrollTop: highlightRow.offset().top - container.offset().top + container.scrollTop()
-			}, 1000);
+	if ($("#extension-list").length > 0) {
+		var highlightId = window.location.hash;
+		if (highlightId != "") {
+			var container = $("#extension-list");
+			var highlightRow = $(highlightId);
+			if(highlightRow.length > 0){
+				container.animate({
+					scrollTop: highlightRow.offset().top - container.offset().top + container.scrollTop()
+				}, 1000);
+			}
 		}
 	}
 

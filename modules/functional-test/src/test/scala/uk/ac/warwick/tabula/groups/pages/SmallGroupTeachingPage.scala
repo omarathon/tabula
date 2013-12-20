@@ -7,9 +7,10 @@ import org.scalatest.selenium.WebBrowser
 import scala.collection.JavaConverters._
 import org.scalatest.concurrent.Eventually
 import org.scalatest.matchers.ShouldMatchers
+import uk.ac.warwick.tabula.EventuallyAjax
 
 
-class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:WebDriver) extends Page with WebBrowser with	BreadcrumbsMatcher with Eventually with ShouldMatchers  with ModuleAndGroupSetList {
+class SmallGroupTeachingPage(val departmentCode:String)(implicit val webDriver:WebDriver) extends Page with WebBrowser with	BreadcrumbsMatcher with EventuallyAjax with ShouldMatchers  with ModuleAndGroupSetList {
 
 	val url = FunctionalTestProperties.SiteRoot + "/groups/admin/department/" + departmentCode
 
@@ -126,7 +127,7 @@ class BatchOpenPage(val departmentCode: String)(implicit webDriver: WebDriver) e
 }
 
 trait ModuleAndGroupSetList {
-	this: WebBrowser =>
+	this: WebBrowser with EventuallyAjax with ShouldMatchers =>
 	private def getModuleInfo(moduleCode: String)(implicit webdriver:WebDriver): Option[WebElement] = {
 		val moduleInfoElements = findAll(className("module-info")).filter(_.underlying.findElement(By.className("mod-code")).getText == moduleCode.toUpperCase)
 		if (moduleInfoElements.isEmpty) {
@@ -137,8 +138,17 @@ trait ModuleAndGroupSetList {
 	}
 
 	def getGroupsetInfo(moduleCode: String, groupsetName: String)(implicit webdriver:WebDriver): Option[GroupSetInfoSummarySection] = {
-		for (module <- getModuleInfo(moduleCode);
-				 groupSet <- module.findElements(By.className("item-info")).asScala.find(_.findElement(By.className("name")).getText.trim == groupsetName))
-		yield new GroupSetInfoSummarySection(groupSet, moduleCode)
+		getModuleInfo(moduleCode).flatMap { module => 
+			if (module.getAttribute("class").indexOf("collapsible") != -1 && module.getAttribute("class").indexOf("expanded") == -1) {
+				click on module.findElement(By.className("section-title"))
+				
+				eventuallyAjax {
+					module.getAttribute("class").indexOf("expanded") should not be (-1)
+				}
+			}
+			
+			val groupSet = module.findElements(By.className("item-info")).asScala.find(_.findElement(By.className("name")).getText.trim == groupsetName)
+			groupSet.map { new GroupSetInfoSummarySection(_, moduleCode) }
+		}
 	}
 }

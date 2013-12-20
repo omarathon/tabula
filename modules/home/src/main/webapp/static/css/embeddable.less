@@ -329,7 +329,7 @@ ul {
 }
 
 
-#feedback-table, #submission-table {
+.feedback-table, .submission-table {
 	border-collapse: collapse;
 
 		colgroup {
@@ -370,7 +370,7 @@ ul {
     }
 }
 
-#coursework-progress-table {
+#container .coursework-progress-table {
 	margin-top: 20px;
 
 	th, td {
@@ -934,6 +934,17 @@ h6 .mod-code, h6 .route-code {
 		position: relative;
 		bottom: 1px;
 		color: #AAA;
+	}
+}
+
+h2 {
+	.mod-name, .route-name { 
+		letter-spacing: -1px;
+		
+		&:before { 
+			letter-spacing: -3px;
+			margin-right: 4px; 
+		} 
 	}
 }
 
