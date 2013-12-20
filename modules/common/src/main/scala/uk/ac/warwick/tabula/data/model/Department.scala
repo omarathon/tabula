@@ -28,7 +28,7 @@ class Department extends GeneratedId
 
 	var name:String = null
 
-	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy="parent", fetch = FetchType.EAGER)
 	@BatchSize(size=200)
 	var children:JList[Department] = JArrayList()
 
