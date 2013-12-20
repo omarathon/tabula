@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<h1>Record missed monitoring points in eVision (SITS)</h1>
+<h1>Record missed monitoring points in SITS:eVision</h1>
 
 <@f.form commandName="command" action="" method="POST" cssClass="form-horizontal">
 
@@ -9,7 +9,7 @@
 			There are no monitoring periods available for the students you have chosen.
 		</div>
 	<#else>
-		<p>Choose the monitoring period to report:</p>
+		<p>Choose the monitoring period to record:</p>
 		<@form.labelled_row "period" "">
 
 			<#list command.availablePeriods as period>
