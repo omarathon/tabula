@@ -403,6 +403,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[String] = {
 		val idCriteria = session.newCriteria[StudentMember]
+		idCriteria.add(isNull("missingFromImportSince"))
 		restrictions.foreach { _.apply(idCriteria) }
 
 		idCriteria.project[String](distinct(property("universityId"))).seq
@@ -427,6 +428,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]) = {
 		val c = session.newCriteria[StudentMember]
+		c.add(isNull("missingFromImportSince"))
+
 		restrictions.foreach { _.apply(c) }
 
 		c.project[Number](countDistinct("universityId")).uniqueResult.get.intValue()
