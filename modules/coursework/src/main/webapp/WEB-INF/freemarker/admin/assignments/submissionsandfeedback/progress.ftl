@@ -213,7 +213,7 @@
 								<#if student.stages?keys?seq_contains('FirstMarking')>
 									<#if submission?? && submission.assignment??>
 										<#if submission.firstMarker?has_content>
-											<#local firstMarker><span data-profile="${submission.firstMarker.warwickId}">${submission.firstMarker.fullName}</span></#local>
+											<#local firstMarker><span data-profile="${submission.firstMarker.warwickId!}">${submission.firstMarker.fullName}</span></#local>
 										</#if>
 									</#if>
 
@@ -225,7 +225,7 @@
 								<#if student.stages?keys?seq_contains('SecondMarking')>
 									<#if submission?? && submission.assignment??>
 										<#if submission.secondMarker?has_content>
-											<#local secondMarker><span data-profile="${submission.secondMarker.warwickId}">${submission.secondMarker.fullName}</span></#local>
+											<#local secondMarker><span data-profile="${submission.secondMarker.warwickId!}">${submission.secondMarker.fullName}</span></#local>
 										</#if>
 									</#if>
 
