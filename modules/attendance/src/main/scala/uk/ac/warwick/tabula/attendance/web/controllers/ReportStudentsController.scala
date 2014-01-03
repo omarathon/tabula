@@ -22,16 +22,17 @@ class ReportStudentsChoosePeriodController extends AttendanceController {
 		ReportStudentsChoosePeriodCommand(department, mandatory(academicYear))
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[Seq[(StudentMember, Int)]]) = {
+	def form(@ModelAttribute("command") cmd: Appliable[Seq[(StudentMember, Int, Int)]]) = {
 		Mav("report/periods")
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: Appliable[Seq[(StudentMember, Int)]], errors: Errors) = {
+	def submit(@Valid @ModelAttribute("command") cmd: Appliable[Seq[(StudentMember, Int, Int)]], errors: Errors) = {
 		if(errors.hasErrors) {
 			form(cmd)
 		} else {
-			Mav("report/students", "students" -> cmd.apply())
+			val students = cmd.apply()
+			Mav("report/students", "students" -> students, "unrecordedStudentsCount" -> students.filter(_._3 > 0).size)
 		}
 	}
 

@@ -14,6 +14,11 @@
 			There are no students with missed monitoring points who have not been recorded for the chosen period.
 		</div>
 	<#else>
+		<#if (unrecordedStudentsCount > 0)>
+			<div class="alert alert-warn">
+				There <@fmt.p number=count singular="is" plural="are" shownumber=false />  <@fmt.p number=count singular="student" shownumber=true />  with unrecorded points. Once these have been sent to SITS, it will no longer possible to record these points
+			</div>
+		</#if>
 		<p>Record missed points in the ${command.period} monitoring period for the following students:</p>
 
 		<table class="table table-bordered table-striped table-condensed">
