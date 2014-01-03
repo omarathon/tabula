@@ -59,8 +59,9 @@ abstract class ReportStudentsChoosePeriodCommand(val department: Department, val
 
 		val nonReported = monitoringPointService.findNonReported(studentsWithMissed.map(_._1), academicYear, period)
 
-		studentsWithMissed.filter{case(student, count) => nonReported.contains(student)}
-		.map{case(student, count) => (student, count, studentsWithSomeUnrecorded.toMap.getOrElse(student, 0))}
+		studentsWithMissed.filter{case(student, count) => nonReported.contains(student)}.map {
+			case(student, count) => (student, count, studentsWithSomeUnrecorded.toMap.getOrElse(student, 0))
+		}
 
 	}
 
