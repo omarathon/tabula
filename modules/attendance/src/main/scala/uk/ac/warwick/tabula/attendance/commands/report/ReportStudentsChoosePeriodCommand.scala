@@ -18,7 +18,7 @@ import uk.ac.warwick.util.termdates.Term
 object ReportStudentsChoosePeriodCommand {
 	def apply(department: Department, academicYear: AcademicYear) =
 		new ReportStudentsChoosePeriodCommand(department, academicYear)
-			with ComposableCommand[Seq[(StudentMember, Int)]]
+			with ComposableCommand[Seq[(StudentMember, Int, Int)]]
 			with ReportStudentsPermissions
 			with ReportStudentsState
 			with ReportStudentsChoosePeriodCommandValidation
@@ -29,7 +29,7 @@ object ReportStudentsChoosePeriodCommand {
 }
 
 abstract class ReportStudentsChoosePeriodCommand(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[Seq[(StudentMember, Int)]] with ReportStudentsState with GroupMonitoringPointsByTerm
+	extends CommandInternal[Seq[(StudentMember, Int, Int)]] with ReportStudentsState with GroupMonitoringPointsByTerm
 	with BindListener with AvailablePeriods with FindTermForPeriod {
 
 	self: ProfileServiceComponent with MonitoringPointServiceComponent =>
@@ -45,8 +45,23 @@ abstract class ReportStudentsChoosePeriodCommand(val department: Department, val
 			periodStartWeek,
 			periodEndWeek
 		).filter(_._2 > 0)
+
+		val studentsWithSomeUnrecorded = monitoringPointService.studentsByUnrecordedCount(
+			studentsWithMissed.map(s => s._1.universityId),
+			academicYear,
+			52,
+			periodStartWeek,
+			periodEndWeek,
+			isAscending = false,
+			Int.MaxValue,
+			0
+		)
+
 		val nonReported = monitoringPointService.findNonReported(studentsWithMissed.map(_._1), academicYear, period)
+
 		studentsWithMissed.filter{case(student, count) => nonReported.contains(student)}
+		.map{case(student, count) => (student, count, studentsWithSomeUnrecorded.toMap.getOrElse(student, 0))}
+
 	}
 
 	def onBind(result: BindingResult) = {

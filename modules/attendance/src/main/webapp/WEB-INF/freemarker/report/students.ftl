@@ -26,14 +26,15 @@
 				</tr>
 			</thead>
 			<tbody>
-				<#list students as student_pair>
-					<#assign student = student_pair._1() />
-					<#assign missed = student_pair._2() />
+				<#list students as student_triple>
+					<#assign student = student_triple._1() />
+					<#assign missed = student_triple._2() />
+					<#assign unrecorded = student_triple._3() />
 					<tr>
 						<td>${student.firstName}</td>
 						<td>${student.lastName}</td>
 						<td>${student.universityId}</td>
-						<td>${missed}</td>
+						<td>${missed}<#if (unrecorded > 0)> <i class="icon-warning-sign icon-fixed-width" title="There <@fmt.p number=unrecorded singular="is" plural="are" shownumber=false /> ${unrecorded} unrecorded <@fmt.p number=unrecorded singular="checkpoint" shownumber=false /> for this student"></i></#if> </td>
 					</tr>
 				</#list>
 			</tbody>

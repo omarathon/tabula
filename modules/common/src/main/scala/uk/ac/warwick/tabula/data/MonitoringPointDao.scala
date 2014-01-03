@@ -54,7 +54,9 @@ trait MonitoringPointDao {
 	def studentsByUnrecordedCount(
 		universityIds: Seq[String],
 		academicYear: AcademicYear,
-		currentAcademicWeek: Int,
+		requiredFromWeek: Int,
+		startWeek: Int,
+		endWeek: Int,
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
@@ -302,7 +304,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def studentsByUnrecordedCount(
 		universityIds: Seq[String],
 		academicYear: AcademicYear,
-		currentAcademicWeek: Int,
+		requiredFromWeek: Int = 52,
+		startWeek: Int = 1,
+		endWeek: Int = 52,
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
@@ -323,6 +327,8 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			and mp.pointSet = mps
 			and mps.academicYear = :academicYear
 			and scyd.academicYear = mps.academicYear
+			and mp.validFromWeek >= :startWeek
+			and mp.validFromWeek <= :endWeek
 			and mp.requiredFromWeek < :requiredFromWeek
 			and mp.id not in (
 				select mc.point from MonitoringCheckpoint mc where mc.studentCourseDetail = s.mostSignificantCourse
@@ -337,7 +343,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 		val query = session.newQuery[Array[java.lang.Object]](queryString)
 			.setParameter("academicYear", academicYear)
-			.setParameter("requiredFromWeek", currentAcademicWeek)
+			.setParameter("requiredFromWeek", requiredFromWeek)
+			.setParameter("startWeek", startWeek)
+			.setParameter("endWeek", endWeek)
 
 		partionedUniversityIdsWithIndex.foreach{
 			case (ids, index) => {
