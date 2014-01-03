@@ -45,25 +45,23 @@ class UserLookupServiceTests extends TestBase with Mockito {
 		cache.getStatistics.getCacheSize should be (1)
 		cache.contains(warwickId) should be (true)
 
-		// an applicant user should also be cached with a real key
-		// (for a shorter period, but we can't tell that from outside)
+		// an applicant user should NOT be cached (TAB-1734)
 		muls.flavour = Applicant
 		warwickId = "1819201"
 		val applicantUser = muls.getUserByWarwickUniId(warwickId)
 		applicantUser.isVerified should be (true)
 		applicantUser.isFoundUser should be (false)
-		cache.getStatistics.getCacheSize should be (2)
-		cache.contains(warwickId) should be (true)
+		cache.getStatistics.getCacheSize should be (1)
+		cache.contains(warwickId) should be (false)
 
-		// an anonymous user should be cached with empty string as key
-		// (for a shorter period, but we can't tell that from outside)
+		// an anonymous user should NOT be cached (TAB-1734)
 		muls.flavour = Anonymous
 		warwickId = "0987654"
 		val anonUser = muls.getUserByWarwickUniId(warwickId)
 		anonUser.isVerified should be (true)
 		anonUser.isFoundUser should be (false)
-		cache.getStatistics.getCacheSize should be (3)
-		cache.contains(warwickId) should be (true)
+		cache.getStatistics.getCacheSize should be (1)
+		cache.contains(warwickId) should be (false)
 	}
 }
 
