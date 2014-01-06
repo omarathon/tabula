@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.annotation.tailrec
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.xml.NodeSeq
 import javax.persistence._
 import org.hibernate.annotations.{Type, BatchSize, AccessType, ForeignKey}
@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
+import uk.ac.warwick.tabula.roles.RoleDefinition
 
 @Entity @AccessType("field")
 class Department extends GeneratedId
@@ -190,10 +191,16 @@ class Department extends GeneratedId
 		if (!includesMember(member)) {
 			Stream.empty // no point looking further down the tree if this level doesn't contain the required member
 		} else {
-			this #:: children.flatMap(child => child.subDepartmentsContaining(member)).toStream
+			this #:: children.asScala.flatMap(child => child.subDepartmentsContaining(member)).toStream
 		}
 	}
-
+	
+	def replacedRoleDefinitionFor(roleDefinition: RoleDefinition) =
+		customRoleDefinitions.asScala
+			.filter { _.replacesBaseDefinition }
+			.find { _.baseRoleDefinition == roleDefinition }
+			.headOption
+		
 	def permissionsParents = Option(parent).toStream
 
 	/** The 'top' ancestor of this department, or itself if

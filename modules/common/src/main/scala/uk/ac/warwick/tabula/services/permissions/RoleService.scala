@@ -10,6 +10,9 @@ import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.immutable.ListMap
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.roles.RoleDefinition
+import uk.ac.warwick.tabula.roles.RoleBuilder
 
 trait RoleProvider {
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role]
@@ -20,6 +23,16 @@ trait RoleProvider {
 	 * Override and return true if this service is exhaustive - i.e. you should continue to interrogate it even after it has returned results
 	 */
 	def isExhaustive = false
+	
+	protected def customRoleFor[A <: PermissionsTarget](department: Option[Department])(definition: RoleDefinition, scope: A): Option[Role] =
+		department.flatMap { d => 
+			customRoleFor(d)(definition, scope)
+		}
+	
+	protected def customRoleFor[A <: PermissionsTarget](department: Department)(definition: RoleDefinition, scope: A): Option[Role] = 
+		department.replacedRoleDefinitionFor(definition).map { definition =>
+			RoleBuilder.build(definition, Some(scope), definition.getName)
+		}
 }
 
 trait ScopelessRoleProvider extends RoleProvider with RequestLevelCaching[CurrentUser, Stream[Role]] {

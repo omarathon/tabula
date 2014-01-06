@@ -61,6 +61,9 @@ class CustomRoleDefinition extends RoleDefinition with HibernateVersioned with G
 	@OneToMany(mappedBy="customRoleDefinition", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
 	var overrides:JList[RoleOverride] = JArrayList()
+	
+	@Column(name = "REPLACES_PARENT")
+	var replacesBaseDefinition: JBoolean = false
 
 	def permissionsParents =
 		Option(department).toStream

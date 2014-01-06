@@ -20,6 +20,7 @@ import scala.reflect._
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
 import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.data.model.StudentMember
 
 @Entity
 @AccessType("field")
@@ -62,8 +63,13 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	// assume it's a permissions target
 	def scopeAsPermissionsTarget:PermissionsTarget = scope
 
-	def build() = RoleBuilder.build(roleDefinition, Some(scope), roleDefinition.getName)
-	def mayGrant(target: Permission) = Option(roleDefinition) map { _.mayGrant(target) } getOrElse (false)
+	def build() = RoleBuilder.build(replaceableRoleDefinition, Some(scope), roleDefinition.getName)
+	def mayGrant(target: Permission) = Option(replaceableRoleDefinition) map { _.mayGrant(target) } getOrElse (false)
+	
+	// Provides a route to Department from the scope, so that we can look for custom definitions
+	def scopeDepartment: Department
+	
+	def replaceableRoleDefinition = scopeDepartment.replacedRoleDefinitionFor(roleDefinition).getOrElse(roleDefinition)
 
 	// If hibernate sets users to null, make a new empty usergroup
 	override def postLoad {
@@ -132,6 +138,8 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Department = _
+	
+	def scopeDepartment = scope
 }
 @Entity @DiscriminatorValue("Module") class ModuleGrantedRole extends GrantedRole[Module] {
 	def this(module: Module, definition: RoleDefinition) = {
@@ -144,6 +152,8 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Module = _
+	
+	def scopeDepartment = scope.department
 }
 @Entity @DiscriminatorValue("Route") class RouteGrantedRole extends GrantedRole[Route] {
 	def this(route: Route, definition: RoleDefinition) = {
@@ -156,6 +166,8 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Route = _
+	
+	def scopeDepartment = scope.department
 }
 @Entity @DiscriminatorValue("Member") class MemberGrantedRole extends GrantedRole[Member] {
 	def this(member: Member, definition: RoleDefinition) = {
@@ -168,6 +180,12 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Member = _
+	
+	def scopeDepartment = scope match {
+		case student: StudentMember => 
+			student.mostSignificantCourseDetails.map { _.latestStudentCourseYearDetails.enrolmentDepartment }.getOrElse(student.homeDepartment)
+		case _ => scope.homeDepartment
+	}
 }
 @Entity @DiscriminatorValue("Assignment") class AssignmentGrantedRole extends GrantedRole[Assignment] {
 	def this(assignment: Assignment, definition: RoleDefinition) = {
@@ -180,6 +198,8 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Assignment = _
+	
+	def scopeDepartment = scope.module.department
 }
 @Entity @DiscriminatorValue("SmallGroup") class SmallGroupGrantedRole extends GrantedRole[SmallGroup] {
 	def this(group: SmallGroup, definition: RoleDefinition) = {
@@ -192,6 +212,8 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: SmallGroup = _
+	
+	def scopeDepartment = scope.groupSet.module.department
 }
 @Entity @DiscriminatorValue("SmallGroupEvent") class SmallGroupEventGrantedRole extends GrantedRole[SmallGroupEvent] {
 	def this(event: SmallGroupEvent, definition: RoleDefinition) = {
@@ -204,4 +226,6 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: SmallGroupEvent = _
+	
+	def scopeDepartment = scope.group.groupSet.module.department
 }
