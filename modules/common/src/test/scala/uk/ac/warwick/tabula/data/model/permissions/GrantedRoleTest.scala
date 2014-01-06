@@ -76,7 +76,7 @@ class GrantedRoleTest extends TestBase {
 		dept.customRoleDefinitions.add(custom)
 		
 		val role = gr.build()
-		role.getName should be ("AssignmentSubmitterRoleDefinition")
+		role.getName should be ("Custom definition")
 		role.explicitPermissionsAsList.contains((Permissions.Submission.Create, Some(module))) should be (false)
 	}
 

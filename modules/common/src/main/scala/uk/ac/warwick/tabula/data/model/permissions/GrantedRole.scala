@@ -63,7 +63,7 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	// assume it's a permissions target
 	def scopeAsPermissionsTarget:PermissionsTarget = scope
 
-	def build() = RoleBuilder.build(replaceableRoleDefinition, Option(scope), roleDefinition.getName)
+	def build() = RoleBuilder.build(replaceableRoleDefinition, Option(scope), replaceableRoleDefinition.getName)
 	def mayGrant(target: Permission) = Option(replaceableRoleDefinition) map { _.mayGrant(target) } getOrElse (false)
 	
 	// Provides a route to Department from the scope, so that we can look for custom definitions
@@ -136,6 +136,27 @@ object GrantedRole {
 	@transient var scope: PermissionsTarget = null
 	
 	def scopeDepartment = None
+	
+	override def build() = RoleBuilder.build(GlobalRoleDefinition(replaceableRoleDefinition), None, replaceableRoleDefinition.getName)
+}
+
+/**
+ * Wrap a normal RoleDefinition to allow us to make permissions that aren't allowed to be global, global.
+ */
+case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition {
+	def permissions(scope: Option[PermissionsTarget]) =
+		delegate.permissions(Some(null)).map { 
+			case (perm, Some(null)) => (perm, None)
+			case (perm, scope) => (perm, scope)
+		}
+
+	def subRoles(scope: Option[PermissionsTarget]) = delegate.subRoles(scope)
+	def mayGrant(permission: Permission) = delegate.mayGrant(permission)
+	def allPermissions(scope: Option[PermissionsTarget]) = delegate.allPermissions(scope)
+	def canDelegateThisRolesPermissions = delegate.canDelegateThisRolesPermissions
+	def getName = delegate.getName
+	def description = delegate.description
+	def isAssignable = delegate.isAssignable
 }
 
 @Entity @DiscriminatorValue("Department") class DepartmentGrantedRole extends GrantedRole[Department] {

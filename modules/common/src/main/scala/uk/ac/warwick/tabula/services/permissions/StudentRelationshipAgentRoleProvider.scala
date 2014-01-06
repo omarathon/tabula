@@ -28,7 +28,7 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider {
 							 .flatMap { _.mostSignificantCourseDetails }
 							 .map { _.latestStudentCourseYearDetails.enrolmentDepartment }
 					
-					customRoleFor(studentDepartment.orElse(Option(member.homeDepartment)))(StudentRelationshipAgentRoleDefinition(rel.relationshipType), member).getOrElse {
+					customRoleFor(studentDepartment)(StudentRelationshipAgentRoleDefinition(rel.relationshipType), member).getOrElse {
 						StudentRelationshipAgent(member, rel.relationshipType)
 					}
 				}
