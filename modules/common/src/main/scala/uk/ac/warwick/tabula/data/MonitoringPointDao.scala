@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Route, StudentMember}
+import uk.ac.warwick.tabula.data.model.{Department, Route, StudentMember}
 import org.hibernate.criterion.{Projections, Order}
 import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.criterion.Restrictions._
@@ -54,7 +54,9 @@ trait MonitoringPointDao {
 	def studentsByUnrecordedCount(
 		universityIds: Seq[String],
 		academicYear: AcademicYear,
-		currentAcademicWeek: Int,
+		requiredFromWeek: Int,
+		startWeek: Int,
+		endWeek: Int,
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
@@ -63,6 +65,7 @@ trait MonitoringPointDao {
 	def findNonReported(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[StudentMember]
 	def findUnreportedReports: Seq[MonitoringPointReport]
 	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport]
+	def hasAnyPointSets(department: Department): Boolean
 }
 
 
@@ -302,7 +305,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def studentsByUnrecordedCount(
 		universityIds: Seq[String],
 		academicYear: AcademicYear,
-		currentAcademicWeek: Int,
+		requiredFromWeek: Int = 52,
+		startWeek: Int = 1,
+		endWeek: Int = 52,
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
@@ -323,6 +328,8 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			and mp.pointSet = mps
 			and mps.academicYear = :academicYear
 			and scyd.academicYear = mps.academicYear
+			and mp.validFromWeek >= :startWeek
+			and mp.validFromWeek <= :endWeek
 			and mp.requiredFromWeek < :requiredFromWeek
 			and mp.id not in (
 				select mc.point from MonitoringCheckpoint mc where mc.studentCourseDetail = s.mostSignificantCourse
@@ -337,7 +344,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 		val query = session.newQuery[Array[java.lang.Object]](queryString)
 			.setParameter("academicYear", academicYear)
-			.setParameter("requiredFromWeek", currentAcademicWeek)
+			.setParameter("requiredFromWeek", requiredFromWeek)
+			.setParameter("startWeek", startWeek)
+			.setParameter("endWeek", endWeek)
 
 		partionedUniversityIdsWithIndex.foreach{
 			case (ids, index) => {
@@ -445,6 +454,14 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			.foreach { ids => or.add(in("student.universityId", ids.asJavaCollection)) }
 		c.add(or)
 		c.seq
+	}
+
+	def hasAnyPointSets(department: Department): Boolean = {
+		session.newCriteria[MonitoringPointSet]
+			.createAlias("route", "r")
+			.add(is("r.department", department))
+			.project[Number](Projections.rowCount())
+			.uniqueResult.get.intValue() > 0
 	}
 
 }

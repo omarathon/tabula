@@ -10,6 +10,7 @@ import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointReport
 import uk.ac.warwick.tabula.attendance.web.Routes
+import uk.ac.warwick.tabula.attendance.commands.report.ReportStudentsChoosePeriodCommand.StudentReportStatus
 
 @Controller
 @RequestMapping(Array("/report/{department}"))
@@ -22,16 +23,17 @@ class ReportStudentsChoosePeriodController extends AttendanceController {
 		ReportStudentsChoosePeriodCommand(department, mandatory(academicYear))
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[Seq[(StudentMember, Int)]]) = {
+	def form(@ModelAttribute("command") cmd: Appliable[Seq[StudentReportStatus]]) = {
 		Mav("report/periods")
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@Valid @ModelAttribute("command") cmd: Appliable[Seq[(StudentMember, Int)]], errors: Errors) = {
+	def submit(@Valid @ModelAttribute("command") cmd: Appliable[Seq[StudentReportStatus]], errors: Errors) = {
 		if(errors.hasErrors) {
 			form(cmd)
 		} else {
-			Mav("report/students", "students" -> cmd.apply())
+			val studentReportStatuses = cmd.apply()
+			Mav("report/students", "studentReportStatuses" -> studentReportStatuses, "unrecordedStudentsCount" -> studentReportStatuses.filter(_.unrecorded > 0).size)
 		}
 	}
 
