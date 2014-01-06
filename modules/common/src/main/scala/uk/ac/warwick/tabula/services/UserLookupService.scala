@@ -49,22 +49,12 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 trait UserByWarwickIdCache extends CacheEntryFactory[String, User] { self: UserLookupAdapter =>
 	final val UserByWarwickIdCacheName = "UserByWarwickIdCache"
 	final val UserByWarwickIdCacheMaxAgeSecs = 60 * 60 * 24 // 1 day
-	final val UserByWarwickIdCacheMissingAgeSecs = 60 * 60 * 2 // 2 hours
 	final val UserByWarwickIdCacheMaxSize = 100000
 
 	final val UserByWarwickIdCache = Caches.newCache(UserByWarwickIdCacheName, this, UserByWarwickIdCacheMaxAgeSecs)
 	UserByWarwickIdCache.setAsynchronousUpdateEnabled(true)
 	UserByWarwickIdCache.setMaxSize(UserByWarwickIdCacheMaxSize)
-	UserByWarwickIdCache.setExpiryStrategy(new CacheExpiryStrategy[String, User]() {
-		def isExpired(entry: CacheEntry[String, User]) = {
-			val expires =
-				if (entry.getValue.isFoundUser) entry.getTimestamp + (UserByWarwickIdCacheMaxAgeSecs * 1000)
-				else entry.getTimestamp + (UserByWarwickIdCacheMissingAgeSecs * 1000)
-
-			new DateTime(expires).isBeforeNow
-		}
-	})
-
+	
 	def getUserByWarwickUniIdUncached(id: String): User
 
 	def create(warwickId: String) = {
@@ -75,7 +65,7 @@ trait UserByWarwickIdCache extends CacheEntryFactory[String, User] { self: UserL
 		}
 	}
 
-	def shouldBeCached(user: User) = user.isVerified
+	def shouldBeCached(user: User) = user.isVerified && user.isFoundUser // TAB-1734 don't cache not found users
 
 	def create(warwickIds: JList[String]): JMap[String, User] = {
 		throw new UnsupportedOperationException("Multi lookups not supported")

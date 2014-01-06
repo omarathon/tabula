@@ -52,7 +52,7 @@
 			<span class="label label-info use-tooltip" data-html="true" title="Extended until <@fmt.date date=enhancedExtension.extension.expiryDate capitalise=false shortMonth=true />" data-container="body">Within Extension</span>
 		</#if>
 	<#elseif !enhancedFeedback?has_content>
-		<span class="label label-important use-tooltip" title="<@lateness submission />" data-container="body">Late</span>
+		<span class="label label-info">Unsubmitted</span>
 		<#if enhancedExtension?has_content>
 			<#local extension=enhancedExtension.extension>
 			<#if extension.approved && !extension.rejected>

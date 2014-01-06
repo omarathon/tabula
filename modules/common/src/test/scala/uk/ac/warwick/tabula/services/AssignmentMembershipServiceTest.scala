@@ -59,7 +59,6 @@ class AssignmentMembershipServiceTest extends PersistenceTestBase {
 		info.items(0).userId should be (Some("aaaaa"))
 		info.items(1).userId should be (Some("bbbbb"))
 		info.items(2).userId should be (Some("ccccc"))
-		info.items
 	}
 
 }

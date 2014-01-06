@@ -65,6 +65,8 @@ class CurrentUser(
 	
 	/** Is of type Staff? (includes PGR) */
 	def isStaff = apparentUser.isStaff
+
+	def isAlumni = apparentUser.isAlumni
 	
 	def isMember = isStudent || isStaff
 

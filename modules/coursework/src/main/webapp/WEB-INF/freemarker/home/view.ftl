@@ -28,11 +28,13 @@
 <#include "_admin.ftl" />
 
 <#if user.loggedIn>
+
 	<#assign is_student=user.student /> <#-- Non-students may also have assignments, but we still show them the intro text -->
+	<#assign is_alumni=user.alumni />
 	<#assign is_marker=nonempty(assignmentsForMarking) />
 	<#assign is_admin=(nonempty(ownedDepartments) || nonempty(ownedModuleDepartments)) />
 	
-	<#if !is_student && !is_marker && !is_admin> <#-- Don't just show an empty page -->
+	<#if !is_alumni && !is_student && !is_marker && !is_admin> <#-- Don't just show an empty page -->
 		<p class="lead muted">
 			This is a service for managing coursework assignments and feedback
 		</p>
