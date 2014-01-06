@@ -14,6 +14,12 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.roles.RoleBuilder
 
+/**
+ * Provides a stream of roles that apply for a particular user on a particular scope. The role service
+ * will go through parents of a scope (unless the provider returns results and isExhaustive is true),
+ * so you don't need to do that manually in the RoleProvider - it will be called repeatedly as we go up
+ * the parents of the scope.
+ */
 trait RoleProvider {
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role]
 	
@@ -35,6 +41,10 @@ trait RoleProvider {
 		}
 }
 
+/**
+ * A specialisation of RoleProvider that doesn't care about scope. This allows us to cache it per-request
+ * because it's unaffected by scope, and do other optimisations.
+ */
 trait ScopelessRoleProvider extends RoleProvider with RequestLevelCaching[CurrentUser, Stream[Role]] {
 	final def getRolesFor(user: CurrentUser, scope: PermissionsTarget) = cachedBy(user) { getRolesFor(user) }
 	
@@ -43,6 +53,12 @@ trait ScopelessRoleProvider extends RoleProvider with RequestLevelCaching[Curren
 
 case class PermissionDefinition(permission: Permission, scope: Option[PermissionsTarget], permissionType: GrantedPermission.OverrideType)
 
+/**
+ * Provides a stream of individual permissions that apply for a particular user on a particular scope. The service
+ * will go through parents of a scope (unless the provider returns results and isExhaustive is true),
+ * so you don't need to do that manually in the PermissionsProvider - it will be called repeatedly as we go up
+ * the parents of the scope.
+ */
 trait PermissionsProvider {
 	def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition]
 	
@@ -52,6 +68,10 @@ trait PermissionsProvider {
 	def isExhaustive = false
 }
 
+/**
+ * Specialisation of PermissionsProvider that ignores scope. Use this if possible as it has
+ * performance enhancements.
+ */
 trait ScopelessPermissionsProvider extends PermissionsProvider with RequestLevelCaching[CurrentUser, Stream[PermissionDefinition]] {
 	final def getPermissionsFor(user: CurrentUser, scope: PermissionsTarget) = cachedBy(user) { getPermissionsFor(user) }
 	
@@ -73,6 +93,11 @@ class RoleServiceImpl extends RoleService with Logging {
 	/** Spring should wire in all beans that extend PermissionsProvider */
 	@Autowired var permissionsProviders: Array[PermissionsProvider] = Array()
 	
+	/**
+	 * Go through all the permissions providers iteratively for the scope and then any
+	 * parents of the scope, collecting a stream of all the explicitly granted permissions
+	 * for the user and the scope.
+	 */
 	def getExplicitPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Stream[PermissionDefinition] = {
 		def streamScoped(providers: Stream[PermissionsProvider], scope: PermissionsTarget): Stream[PermissionDefinition] = {
 			if (scope == null) Stream.empty
@@ -81,6 +106,8 @@ class RoleServiceImpl extends RoleService with Logging {
 				val (hasResults, noResults) = results.partition { !_._2.isEmpty }
 
 				val stream = hasResults flatMap { _._2 }
+				
+				// For each of the parents, call the stack again, excluding any exhaustive providers that have returned results
 				val next = scope.permissionsParents flatMap { streamScoped((noResults #::: (hasResults filter { _._1.isExhaustive })) map {_._1}, _) }
 
 				stream #::: next
@@ -102,7 +129,7 @@ class RoleServiceImpl extends RoleService with Logging {
 		/* We don't want to needlessly continue to interrogate scoped providers even after they 
 		 * have returned something that isn't an empty Seq. Anything that isn't an empty Seq 
 		 * can be treated as the final action of this provider EXCEPT in the case of the custom
-		 * role provider, so we special-case that */  
+		 * role provider, so we special-case that */
 		def streamScoped(providers: Stream[RoleProvider], scope: PermissionsTarget): Stream[Role] = {
 			if (scope == null) Stream.empty
 			else {

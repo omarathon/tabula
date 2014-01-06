@@ -23,6 +23,10 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider {
 				.toStream
 				.filter { _.studentId == member.universityId }
 				.map { rel => 
+					/*
+					 * Check the student department for custom roles only, not the agent department,
+					 * as that's what we're performing operations on.
+					 */
 					val studentDepartment = 
 						rel.studentMember
 							 .flatMap { _.mostSignificantCourseDetails }
