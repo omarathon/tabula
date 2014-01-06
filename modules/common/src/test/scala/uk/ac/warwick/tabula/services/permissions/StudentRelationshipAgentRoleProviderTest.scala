@@ -15,6 +15,8 @@ class StudentRelationshipAgentRoleProviderTest extends TestBase with Mockito {
 
 	val relationshipService = mock[RelationshipService]
 	provider.relationshipService = relationshipService
+	
+	val profileService = mock[ProfileService]
 
 	val member = Fixtures.student(universityId = "111111")
 
@@ -22,7 +24,13 @@ class StudentRelationshipAgentRoleProviderTest extends TestBase with Mockito {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		
 		val rel1 = StudentRelationship("0123456", relationshipType, "111111/1")
+		rel1.profileService = profileService
+		
 		val rel2 = StudentRelationship("0123456", relationshipType, "888888/1")
+		rel2.profileService = profileService
+		
+		profileService.getStudentBySprCode("111111/1") returns None
+		profileService.getStudentBySprCode("888888/1") returns None
 
 		relationshipService.listAllStudentRelationshipsWithUniversityId("0123456") returns (Seq(rel1, rel2))
 
