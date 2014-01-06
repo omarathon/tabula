@@ -3,11 +3,15 @@
 <h1>Record missed monitoring points</h1>
 
 <@f.form commandName="command" action="" method="POST" cssClass="form-horizontal">
-	<div class="alert alert-info">
+
+
 	<#if command.thisPeriod == command.period && command.thisAcademicYear.toString == command.academicYear.toString>
-			<p>You have chosen to send a report for the current monitoring period, which has not yet finished.</p>
+		<div class="alert alert-warn">
+			<p>You have chosen to record points for the current monitoring period, which has not yet finished.</p>
+		</div>
 	</#if>
 
+	<div class="alert alert-info">
 	<p>Once these points are recorded in SITS:eVision you won't be able to change this information via Tabula.</p>
 	<p>If information does need to be amended later, please contact the Administrative Officer for <a href="http://www2.warwick.ac.uk/studentrecords"> Student Records</a>.</p>
 
