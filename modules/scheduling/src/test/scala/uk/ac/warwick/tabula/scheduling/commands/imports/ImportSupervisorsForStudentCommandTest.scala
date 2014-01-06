@@ -20,7 +20,6 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		val scjCode = "1111111/1"
 		val sprCode = "1111111/1"
 		val uniId = "1111111"
-		val prsCode = "IN0070790"
 		val supervisorUniId = "0070790"
 
 		val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
@@ -33,8 +32,6 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		// set up and persist student
 		val supervisee = new StudentMember(uniId)
 		supervisee.userId = "xxxxx"
-		//supervisee.studyDetails.scjCode = scjCode
-		//supervisee.studyDetails.sprCode = sprCode
 
 		val studentCourseDetails = new StudentCourseDetails(supervisee, scjCode)
 		studentCourseDetails.sprCode = sprCode
@@ -64,9 +61,9 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 	@Test def testCaptureValidSupervisor() {
 		new Environment {
 			// set up importer to return supervisor
-			val codes = Seq((prsCode, new java.math.BigDecimal("100")))
+			val codes = Seq((supervisorUniId, new java.math.BigDecimal("100")))
 			val importer = smartMock[SupervisorImporter]
-			importer.getSupervisorPrsCodes(scjCode) returns codes
+			importer.getSupervisorUniversityIds(scjCode) returns codes
 
 			// test command
 			val command = new ImportSupervisorsForStudentCommand()
@@ -91,7 +88,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		new Environment {
 			// set up importer to return supervisor
 			val importer = smartMock[SupervisorImporter]
-			importer.getSupervisorPrsCodes(scjCode) returns Seq()
+			importer.getSupervisorUniversityIds(scjCode) returns Seq()
 
 			// test command
 			val command = new ImportSupervisorsForStudentCommand()
@@ -114,14 +111,14 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			session.saveOrUpdate(existingSupervisorMember)
 
 			// create and persist existing relationship
-			val existingRelationhip = StudentRelationship("1234", relationshipType, prsCode)
-			existingRelationhip.startDate = new DateTime
-			session.saveOrUpdate(existingRelationhip)
+			val existingRelationship = StudentRelationship("1234", relationshipType, sprCode)
+			existingRelationship.startDate = new DateTime
+			session.saveOrUpdate(existingRelationship)
 
 			// set up importer to return supervisor
-			val codes = Seq((prsCode, null))
+			val codes = Seq((supervisorUniId, null))
 			val importer = smartMock[SupervisorImporter]
-			importer.getSupervisorPrsCodes(scjCode) returns codes
+			importer.getSupervisorUniversityIds(scjCode) returns codes
 
 			// test command
 			val command = new ImportSupervisorsForStudentCommand()

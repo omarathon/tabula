@@ -8,7 +8,6 @@ import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
 
 import ImportMemberHelpers.{opt, toLocalDate}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.PrsCode
 import uk.ac.warwick.tabula.commands.{Command, Unaudited}
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.data.Transactions.transactional
@@ -45,7 +44,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	var awardCode = rs.getString("award_code")
 
 	// tutor data also needs some work before it can be persisted, so store it in local variables for now:
-	var sprTutor1 = rs.getString("spr_tutor1")
+	var tutorUniId = rs.getString("spr_tutor1")
 
 	// This needs to be assigned before apply is called.
 	// (can't be in the constructor because it's not yet created then)
@@ -164,23 +163,16 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 				.getStudentRelationshipTypeByUrlPart("tutor") // TODO this is awful
 				.filter { relType => dept.getStudentRelationshipSource(relType) == StudentRelationshipSource.SITS }
 				.foreach { relationshipType =>
-					val tutorUniIdOption = PrsCode.getUniversityId(sprTutor1)
+					// only save the personal tutor if we can match the ID with a staff member in Tabula
+					val member = memberDao.getByUniversityId(tutorUniId) match {
+						case Some(mem: Member) => {
+							logger.info("Got a personal tutor from SITS! SprCode: " + sprCode + ", tutorUniId: " + tutorUniId)
 
-					tutorUniIdOption match {
-						case Some(tutorUniId: String) => {
-							// only save the personal tutor if we can match the ID with a staff member in Tabula
-							val member = memberDao.getByUniversityId(tutorUniId) match {
-								case Some(mem: Member) => {
-									logger.info("Got a personal tutor from SITS! SprCode: " + sprCode + ", tutorUniId: " + tutorUniId)
-
-									relationshipService.replaceStudentRelationships(relationshipType, sprCode, Seq(tutorUniId))
-								}
-								case _ => {
-									logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + sprTutor1 + " - not importing this personal tutor from SITS")
-								}
-							}
+							relationshipService.replaceStudentRelationships(relationshipType, sprCode, Seq(tutorUniId))
 						}
-						case _ => logger.warn("Can't parse PRS code " + sprTutor1 + " for student " + sprCode)
+						case _ => {
+							logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + tutorUniId + " - not importing this personal tutor from SITS")
+						}
 					}
 				}
 	}

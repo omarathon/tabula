@@ -336,16 +336,13 @@ object ProfileImporter {
 			spr.awd_code as award_code,
 			spr.sts_code as spr_status_code,
 			spr.spr_levc as level_code,
-			spr.prs_code as spr_tutor1,
-			--spr.spr_prs2 as spr_tutor2,
+			prs.prs_udf1 as spr_tutor1,
 
 			scj.scj_code as scj_code,
 			scj.scj_begd as begin_date,
 			scj.scj_endd as end_date,
 			scj.scj_eend as expected_end_date,
 			scj.scj_udfa as most_signif_indicator,
-			--scj.scj_prsc as scj_tutor1,
-			--scj.scj_prs2 as scj_tutor2,
 
 			sce.sce_sfcc as funding_source,
 			sce.sce_stac as enrolment_status_code,
@@ -388,6 +385,9 @@ object ProfileImporter {
 			left outer join intuit.cam_ssn ssn
 				on spr.spr_code = ssn.ssn_sprc
 				and sce.sce_ayrc = ssn.ssn_ayrc
+
+			left outer join intuit.ins_prs prs
+				on spr.prs_code = prs.prs_code
 
 		where stu.stu_code = :universityId
 		order by stu.stu_code
