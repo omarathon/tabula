@@ -24,12 +24,15 @@
 	</#if>
 </div>
 
-<h3><a href="<@routes.viewDepartmentStudents department />">View by student</a></h3>
-<h3><a href="<@routes.viewDepartmentPoints department />">View by point</h3></a></h3>
-<#if can.do("MonitoringPoints.View", department)>
-	<#list department.displayedStudentRelationshipTypes as relationshipType>
-	<h3><a href="<@routes.viewDepartmentAgents department relationshipType/>">View by ${relationshipType.agentRole}</a></h3>
-	</#list>
+<#if hasSets>
+	<h3><a href="<@routes.viewDepartmentStudents department />">View by student</a></h3>
+	<h3><a href="<@routes.viewDepartmentPoints department />">View by point</a></h3>
+	<#if can.do("MonitoringPoints.View", department)>
+		<#list department.displayedStudentRelationshipTypes as relationshipType>
+		<h3><a href="<@routes.viewDepartmentAgents department relationshipType/>">View by ${relationshipType.agentRole}</a></h3>
+		</#list>
+	</#if>
+<#else>
+	<p><em>There are no monitoring point schemes for this department</em></p>
 </#if>
-
 </#escape>

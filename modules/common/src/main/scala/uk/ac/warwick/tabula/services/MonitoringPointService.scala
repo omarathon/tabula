@@ -77,6 +77,7 @@ trait MonitoringPointService {
 	def markReportAsPushed(report: MonitoringPointReport): Unit
 	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport]
 	def studentAlreadyReportedThisTerm(student:StudentMember, point:MonitoringPoint): Boolean
+	def hasAnyPointSets(department: Department): Boolean
 }
 
 
@@ -230,6 +231,10 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def studentAlreadyReportedThisTerm(student:StudentMember, point:MonitoringPoint): Boolean = {
 		val nonReportedTerms = findNonReportedTerms(Seq(student), point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
 		!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear).getTermTypeAsString)
+	}
+
+	def hasAnyPointSets(department: Department): Boolean = {
+		monitoringPointDao.hasAnyPointSets(department: Department)
 	}
 
 }
