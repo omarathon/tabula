@@ -66,7 +66,9 @@ trait MonitoringPointService {
 	def studentsByUnrecordedCount(
 		universityIds: Seq[String],
 		academicYear: AcademicYear,
-		currentAcademicWeek: Int,
+		requiredFromWeek: Int = 52,
+		startWeek: Int = 1,
+		endWeek: Int = 52,
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
@@ -199,12 +201,14 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def studentsByUnrecordedCount(
 		universityIds: Seq[String],
 		academicYear: AcademicYear,
-		currentAcademicWeek: Int,
+		requiredFromWeek: Int = 52,
+		startWeek: Int = 1,
+		endWeek: Int = 52,
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
 	): Seq[(StudentMember, Int)] = {
-		monitoringPointDao.studentsByUnrecordedCount(universityIds, academicYear, currentAcademicWeek, isAscending, maxResults, startResult)
+		monitoringPointDao.studentsByUnrecordedCount(universityIds, academicYear, requiredFromWeek, startWeek, endWeek, isAscending, maxResults, startResult)
 	}
 
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String] = {

@@ -9,11 +9,16 @@
 		<@f.hidden path="${field}" />
 	</#list>
 
-	<#if students?size == 0>
+	<#if studentReportStatuses?size == 0>
 		<div class="alert alert-info">
 			There are no students with missed monitoring points who have not been recorded for the chosen period.
 		</div>
 	<#else>
+		<#if (unrecordedStudentsCount > 0)>
+			<div class="alert alert-warn">
+				There <@fmt.p number=unrecordedStudentsCount singular="is" plural="are" shownumber=false />  <@fmt.p number=unrecordedStudentsCount singular="student" shownumber=true />  with unrecorded points. Once these have been sent to SITS, it will no longer be possible to record these points.
+			</div>
+		</#if>
 		<p>Record missed points in the ${command.period} monitoring period for the following students:</p>
 
 		<table class="table table-bordered table-striped table-condensed">
@@ -26,14 +31,15 @@
 				</tr>
 			</thead>
 			<tbody>
-				<#list students as student_pair>
-					<#assign student = student_pair._1() />
-					<#assign missed = student_pair._2() />
+				<#list studentReportStatuses as studentReportStatus>
+					<#assign student = studentReportStatus.student />
+					<#assign missed = studentReportStatus.unreported />
+					<#assign unrecorded = studentReportStatus.unrecorded />
 					<tr>
 						<td>${student.firstName}</td>
 						<td>${student.lastName}</td>
 						<td>${student.universityId}</td>
-						<td>${missed}</td>
+						<td>${missed}<#if (unrecorded > 0)> <i class="icon-warning-sign icon-fixed-width" title="There <@fmt.p number=unrecorded singular="is" plural="are" shownumber=false /> ${unrecorded} unrecorded <@fmt.p number=unrecorded singular="checkpoint" shownumber=false /> for this student"></i></#if> </td>
 					</tr>
 				</#list>
 			</tbody>

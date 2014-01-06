@@ -3,7 +3,7 @@
 <h1>Record missed monitoring points</h1>
 
 <@f.form commandName="command" action="" method="POST" cssClass="form-horizontal">
-	<div class="alert alert-warn">
+	<div class="alert alert-info">
 	<#if command.thisPeriod == command.period && command.thisAcademicYear.toString == command.academicYear.toString>
 			<p>You have chosen to send a report for the current monitoring period, which has not yet finished.</p>
 	</#if>

@@ -58,10 +58,12 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 			ViewStudentsResults(buildData(sortedStudents.map(_._1), academicYear, missedCounts = sortedStudents), filteredUniversityIds.size)
 		} else if (sortOrder.asScala.exists(o => o.getPropertyName == "unrecordedMonitoringPoints")) {
 			val filteredUniversityIds = profileService.findAllUniversityIdsByRestrictions(department, buildRestrictions())
-			val sortedStudents = monitoringPointService.studentsByUnrecordedCount(
+			val sortedStudents = monitoringPointService.studentsByUnrecordedCount (
 				filteredUniversityIds,
 				academicYear,
 				currentAcademicWeek,
+				1,
+				52,
 				sortOrder.asScala.filter(o => o.getPropertyName == "unrecordedMonitoringPoints").head.isAscending,
 				studentsPerPage,
 				studentsPerPage * (page-1)
