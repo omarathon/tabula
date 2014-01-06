@@ -91,7 +91,7 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 			.seq
 
 	def stampMissingFromImport(newStaleScjCodes: Seq[String], importStart: DateTime) = {
-		if (!newStaleScjCodes.isEmpty && newStaleScjCodes.size < Daoisms.MaxInClauseCount) {
+		newStaleScjCodes.grouped(Daoisms.MaxInClauseCount).foreach { newStaleCodes =>
 			var sqlString = """
 				update
 					StudentCourseDetails
@@ -103,9 +103,8 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 
 				session.newQuery(sqlString)
 					.setParameter("importStart", importStart)
-					.setParameterList("newStaleScjCodes", newStaleScjCodes)
+					.setParameterList("newStaleScjCodes", newStaleCodes)
 					.executeUpdate
 			}
 	}
-
 }

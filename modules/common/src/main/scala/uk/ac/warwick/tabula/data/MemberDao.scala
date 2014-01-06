@@ -475,6 +475,6 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					.setParameterList("newStaleUniversityIds", staleIds)
 					.executeUpdate
 			}
-		}
+	}
 }
 
