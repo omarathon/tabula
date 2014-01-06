@@ -16,7 +16,7 @@
 	<#else>
 		<#if (unrecordedStudentsCount > 0)>
 			<div class="alert alert-warn">
-				There <@fmt.p number=unrecordedStudentsCount singular="is" plural="are" shownumber=false />  <@fmt.p number=unrecordedStudentsCount singular="student" shownumber=true />  with unrecorded points. Once these have been sent to SITS, it will no longer possible to record these points
+				There <@fmt.p number=unrecordedStudentsCount singular="is" plural="are" shownumber=false />  <@fmt.p number=unrecordedStudentsCount singular="student" shownumber=true />  with unrecorded points. Once these have been sent to SITS, it will no longer be possible to record these points.
 			</div>
 		</#if>
 		<p>Record missed points in the ${command.period} monitoring period for the following students:</p>
