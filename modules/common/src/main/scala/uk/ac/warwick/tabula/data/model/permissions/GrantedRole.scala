@@ -63,13 +63,13 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	// assume it's a permissions target
 	def scopeAsPermissionsTarget:PermissionsTarget = scope
 
-	def build() = RoleBuilder.build(replaceableRoleDefinition, Some(scope), roleDefinition.getName)
+	def build() = RoleBuilder.build(replaceableRoleDefinition, Option(scope), roleDefinition.getName)
 	def mayGrant(target: Permission) = Option(replaceableRoleDefinition) map { _.mayGrant(target) } getOrElse (false)
 	
 	// Provides a route to Department from the scope, so that we can look for custom definitions
-	def scopeDepartment: Department
+	def scopeDepartment: Option[Department]
 	
-	def replaceableRoleDefinition = scopeDepartment.replacedRoleDefinitionFor(roleDefinition).getOrElse(roleDefinition)
+	def replaceableRoleDefinition = scopeDepartment.flatMap { _.replacedRoleDefinitionFor(roleDefinition) }.getOrElse(roleDefinition)
 
 	// If hibernate sets users to null, make a new empty usergroup
 	override def postLoad {
@@ -127,6 +127,17 @@ object GrantedRole {
 }
 
 /* Ok, this is icky, but I can't find any other way. If you need new targets for GrantedRoles, create them below with a new discriminator */
+@Entity @DiscriminatorValue("___GLOBAL___") class GloballyGrantedRole extends GrantedRole[PermissionsTarget] {
+	def this(definition: RoleDefinition) = {
+		this()
+		this.roleDefinition = definition
+	}
+
+	@transient var scope: PermissionsTarget = null
+	
+	def scopeDepartment = None
+}
+
 @Entity @DiscriminatorValue("Department") class DepartmentGrantedRole extends GrantedRole[Department] {
 	def this(department: Department, definition: RoleDefinition) = {
 		this()
@@ -139,7 +150,7 @@ object GrantedRole {
 	@ForeignKey(name="none")
 	var scope: Department = _
 	
-	def scopeDepartment = scope
+	def scopeDepartment = Some(scope)
 }
 @Entity @DiscriminatorValue("Module") class ModuleGrantedRole extends GrantedRole[Module] {
 	def this(module: Module, definition: RoleDefinition) = {
@@ -153,7 +164,7 @@ object GrantedRole {
 	@ForeignKey(name="none")
 	var scope: Module = _
 	
-	def scopeDepartment = scope.department
+	def scopeDepartment = Some(scope.department)
 }
 @Entity @DiscriminatorValue("Route") class RouteGrantedRole extends GrantedRole[Route] {
 	def this(route: Route, definition: RoleDefinition) = {
@@ -167,7 +178,7 @@ object GrantedRole {
 	@ForeignKey(name="none")
 	var scope: Route = _
 	
-	def scopeDepartment = scope.department
+	def scopeDepartment = Some(scope.department)
 }
 @Entity @DiscriminatorValue("Member") class MemberGrantedRole extends GrantedRole[Member] {
 	def this(member: Member, definition: RoleDefinition) = {
@@ -183,8 +194,8 @@ object GrantedRole {
 	
 	def scopeDepartment = scope match {
 		case student: StudentMember => 
-			student.mostSignificantCourseDetails.map { _.latestStudentCourseYearDetails.enrolmentDepartment }.getOrElse(student.homeDepartment)
-		case _ => scope.homeDepartment
+			student.mostSignificantCourseDetails.map { _.latestStudentCourseYearDetails.enrolmentDepartment }.orElse(Option(student.homeDepartment))
+		case _ => Option(scope.homeDepartment)
 	}
 }
 @Entity @DiscriminatorValue("Assignment") class AssignmentGrantedRole extends GrantedRole[Assignment] {
@@ -199,7 +210,7 @@ object GrantedRole {
 	@ForeignKey(name="none")
 	var scope: Assignment = _
 	
-	def scopeDepartment = scope.module.department
+	def scopeDepartment = Some(scope.module.department)
 }
 @Entity @DiscriminatorValue("SmallGroup") class SmallGroupGrantedRole extends GrantedRole[SmallGroup] {
 	def this(group: SmallGroup, definition: RoleDefinition) = {
@@ -213,7 +224,7 @@ object GrantedRole {
 	@ForeignKey(name="none")
 	var scope: SmallGroup = _
 	
-	def scopeDepartment = scope.groupSet.module.department
+	def scopeDepartment = Some(scope.groupSet.module.department)
 }
 @Entity @DiscriminatorValue("SmallGroupEvent") class SmallGroupEventGrantedRole extends GrantedRole[SmallGroupEvent] {
 	def this(event: SmallGroupEvent, definition: RoleDefinition) = {
@@ -227,5 +238,5 @@ object GrantedRole {
 	@ForeignKey(name="none")
 	var scope: SmallGroupEvent = _
 	
-	def scopeDepartment = scope.group.groupSet.module.department
+	def scopeDepartment = Some(scope.group.groupSet.module.department)
 }
