@@ -9,7 +9,7 @@
 		<@f.hidden path="${field}" />
 	</#list>
 
-	<#if students?size == 0>
+	<#if studentReportStatuses?size == 0>
 		<div class="alert alert-info">
 			There are no students with missed monitoring points who have not been recorded for the chosen period.
 		</div>
@@ -31,10 +31,10 @@
 				</tr>
 			</thead>
 			<tbody>
-				<#list students as student_triple>
-					<#assign student = student_triple._1() />
-					<#assign missed = student_triple._2() />
-					<#assign unrecorded = student_triple._3() />
+				<#list studentReportStatuses as studentReportStatus>
+					<#assign student = studentReportStatus.student />
+					<#assign missed = studentReportStatus.unreported />
+					<#assign unrecorded = studentReportStatus.unrecorded />
 					<tr>
 						<td>${student.firstName}</td>
 						<td>${student.lastName}</td>

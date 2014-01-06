@@ -14,11 +14,12 @@ import uk.ac.warwick.tabula.system.BindListener
 import org.springframework.validation.{Errors, BindingResult}
 import org.joda.time.DateTime
 import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.tabula.attendance.commands.report.ReportStudentsChoosePeriodCommand.StudentReportStatus
 
 object ReportStudentsChoosePeriodCommand {
 	def apply(department: Department, academicYear: AcademicYear) =
 		new ReportStudentsChoosePeriodCommand(department, academicYear)
-			with ComposableCommand[Seq[(StudentMember, Int, Int)]]
+			with ComposableCommand[Seq[StudentReportStatus]]
 			with ReportStudentsPermissions
 			with ReportStudentsState
 			with ReportStudentsChoosePeriodCommandValidation
@@ -26,10 +27,12 @@ object ReportStudentsChoosePeriodCommand {
 			with AutowiringTermServiceComponent
 			with AutowiringMonitoringPointServiceComponent
 			with ReadOnly with Unaudited
+
+	case class StudentReportStatus(val student: StudentMember, val unreported: Int, val unrecorded: Int)
 }
 
 abstract class ReportStudentsChoosePeriodCommand(val department: Department, val academicYear: AcademicYear)
-	extends CommandInternal[Seq[(StudentMember, Int, Int)]] with ReportStudentsState with GroupMonitoringPointsByTerm
+	extends CommandInternal[Seq[StudentReportStatus]] with ReportStudentsState with GroupMonitoringPointsByTerm
 	with BindListener with AvailablePeriods with FindTermForPeriod {
 
 	self: ProfileServiceComponent with MonitoringPointServiceComponent =>
@@ -60,7 +63,7 @@ abstract class ReportStudentsChoosePeriodCommand(val department: Department, val
 		val nonReported = monitoringPointService.findNonReported(studentsWithMissed.map(_._1), academicYear, period)
 
 		studentsWithMissed.filter{case(student, count) => nonReported.contains(student)}.map {
-			case(student, count) => (student, count, studentsWithUnrecorded.toMap.getOrElse(student, 0))
+			case(student, count) => StudentReportStatus(student, count, studentsWithUnrecorded.toMap.getOrElse(student, 0))
 		}
 
 	}
