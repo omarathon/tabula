@@ -199,7 +199,6 @@ class Department extends GeneratedId
 		customRoleDefinitions.asScala
 			.filter { _.replacesBaseDefinition }
 			.find { _.baseRoleDefinition == roleDefinition }
-			.headOption
 		
 	def permissionsParents = Option(parent).toStream
 
