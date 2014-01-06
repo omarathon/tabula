@@ -10,10 +10,18 @@
 							<div class="pull-right">
 								<#local noUpdate = !command.canPointBeUpdated(point)/>
 								<#local noRemove = !command.canPointBeRemoved(point)/>
-								<a class="btn btn-primary edit-point <#if noUpdate>disabled</#if>" <#if noUpdate>title="Unavailable"</#if> href="<@routes.updatePoint point />">
-									Update
+								<a class="btn btn-primary edit-point use-tooltip <#if noUpdate>disabled</#if>"
+								   data-container="body"
+								   <#if noUpdate>title="You cannot edit a monitoring point once it has attendance recorded against it"</#if>
+								   href="<@routes.updatePoint point />"
+								>
+									Edit
 								</a>
-								<a class="btn btn-danger delete-point <#if noRemove>disabled</#if>" title="Delete<#if noRemove> (unavailable)</#if>" href="<@routes.removePoint point />">
+								<a class="btn btn-danger delete-point use-tooltip <#if noRemove>disabled</#if>"
+								   data-container="body"
+								   title="<#if noRemove>You cannot delete a monitoring point once it has attendance recorded against it<#else>Delete</#if>"
+								   href="<@routes.removePoint point />"
+								>
 									<i class="icon-remove"></i>
 								</a>
 							</div>
