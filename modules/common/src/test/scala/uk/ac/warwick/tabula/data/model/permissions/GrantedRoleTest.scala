@@ -2,11 +2,14 @@ package uk.ac.warwick.tabula.data.model.permissions
 
 import uk.ac.warwick.tabula.{TestBase, Fixtures}
 import uk.ac.warwick.tabula.roles.AssignmentSubmitterRoleDefinition
+import uk.ac.warwick.tabula.permissions.Permissions
 
 class GrantedRoleTest extends TestBase {
 	
 	val dept = Fixtures.department("in")
 	val module = Fixtures.module("in101")
+	module.department = dept
+	
 	val assignment = Fixtures.assignment("assignment")
 	val member = Fixtures.staff()
 	
@@ -45,6 +48,36 @@ class GrantedRoleTest extends TestBase {
 	@Test(expected = classOf[IllegalArgumentException]) def initInvalid {
 		GrantedRole.canDefineFor(feedback) should be (false)
 		GrantedRole(feedback, roleDefinition)
+	}
+	
+	@Test def build {
+		val gr = GrantedRole(module, roleDefinition)
+		val role = gr.build()
+		role.getName should be ("AssignmentSubmitterRoleDefinition")
+		role.explicitPermissionsAsList.contains((Permissions.Submission.Create, Some(module))) should be (true)
+	}
+	
+	@Test def buildWithOverride {
+		val gr = GrantedRole(module, roleDefinition)
+		
+		val custom = new CustomRoleDefinition
+		custom.department = dept
+		custom.baseRoleDefinition = roleDefinition
+		custom.replacesBaseDefinition = true
+		custom.name = "Custom definition"
+			
+		val noSubmit = new RoleOverride
+		noSubmit.overrideType = false
+		noSubmit.permission = Permissions.Submission.Create
+		noSubmit.customRoleDefinition = custom
+			
+		custom.overrides.add(noSubmit)
+		
+		dept.customRoleDefinitions.add(custom)
+		
+		val role = gr.build()
+		role.getName should be ("AssignmentSubmitterRoleDefinition")
+		role.explicitPermissionsAsList.contains((Permissions.Submission.Create, Some(module))) should be (false)
 	}
 
 }
