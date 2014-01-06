@@ -178,7 +178,7 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 			reloadPage
 
 			// Wait for the page reload...
-			eventually {
+			eventuallyAjax {
 				linkText("Show").findElement should be ('defined)
 				click on linkText("Show") // Modules with no non-archived assignments are hidden
 

@@ -104,6 +104,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 				// each apply has its own transaction
 				studentRowCommands map { _.apply }
+				session.flush()
 
 				transactional() {
 					updateModuleRegistrationsAndSmallGroups(membershipInfos, users)

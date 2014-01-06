@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<h1>Record missed monitoring points in eVision (SITS)</h1>
+<h1>Record missed monitoring points in SITS:eVision</h1>
 
 <#assign confirmPath><@routes.reportConfirm command.department /></#assign>
 <@f.form commandName="command" action="${confirmPath}" method="GET" cssClass="form-horizontal">

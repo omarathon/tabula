@@ -12,11 +12,13 @@ import javax.servlet.ServletConfig
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.RequestInfo
 import freemarker.template.utility.DeepUnwrap
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import java.io.FileNotFoundException
 
 /**
  * FreemarkerServlet which adds some useful model stuff to every request.
  */
-class CustomFreemarkerServlet extends FreemarkerServlet() with Logging {
+class CustomFreemarkerServlet extends FreemarkerServlet() with Logging with TaskBenchmarking {
 
 	var config: Configuration = _
 
@@ -25,6 +27,22 @@ class CustomFreemarkerServlet extends FreemarkerServlet() with Logging {
 	val MISSING_CONFIG_MESSAGE = 
 		"Couldn't find config in servlet attribute 'freemarkerConfiguration' - " +
 		"should have been exported by ServletContextAttributeExporter"
+			
+	def templateName(request: HttpServletRequest, response: HttpServletResponse) = {
+		val path = requestUrlToTemplatePath(request)
+		
+		try {
+			Some(config.getTemplate(path, deduceLocale(path, request, response)).getName)
+		} catch {
+			case e: FileNotFoundException => None
+		}
+	}
+		
+	override def doGet(request: HttpServletRequest, response: HttpServletResponse) = 
+		benchmarkTask(templateName(request, response).getOrElse("[not found template]")) { super.doGet(request, response) }
+	
+	override def doPost(request: HttpServletRequest, response: HttpServletResponse) = 
+		benchmarkTask(templateName(request, response).getOrElse("[not found template]")) { super.doPost(request, response) }
 
 	/**
 	 * Add items to the model that should be available to every Freemarker view.

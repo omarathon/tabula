@@ -11,7 +11,7 @@ class EditSmallGroupSetPropertiesPage (implicit val webDriver:WebDriver) extends
 	def isCurrentPage(moduleName:String){
 		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
 		var heading =find(cssSelector("#main-content h1")).get
-		heading.text should startWith ("Create small groups for")
+		heading.text should startWith ("Edit small groups for")
 
 	}
 
