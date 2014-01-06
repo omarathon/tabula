@@ -58,15 +58,28 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 		}
 	}
 
+	/**
+	 * The scope of the GrantedRole is what the permissions contained within are granted against, 
+	 * which is a PermissionsTarget.
+	 */
 	var scope: A
+	
 	// this ought not to be necessary, but for some reason the compiler fails to see the type bound on scope and won't
 	// assume it's a permissions target
 	def scopeAsPermissionsTarget:PermissionsTarget = scope
 
+	/**
+	 * Build a Role from this definition 
+	 */
 	def build() = RoleBuilder.build(replaceableRoleDefinition, Option(scope), replaceableRoleDefinition.getName)
 	def mayGrant(target: Permission) = Option(replaceableRoleDefinition) map { _.mayGrant(target) } getOrElse (false)
 	
-	// Provides a route to Department from the scope, so that we can look for custom definitions
+	/**
+	 * Provides a route to Department from the scope, so that we can look for custom definitions.
+	 * 
+	 * In almost all cases, Department will be one of the permissionsParents of the scope (maybe multiple
+	 * levels up), but providing a direct link here means we don't have to iterate up the tree.
+	 */
 	def scopeDepartment: Option[Department]
 	
 	def replaceableRoleDefinition = scopeDepartment.flatMap { _.replacedRoleDefinitionFor(roleDefinition) }.getOrElse(roleDefinition)
