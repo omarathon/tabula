@@ -1,5 +1,6 @@
 package uk.ac.warwick.tabula
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import org.apache.commons.lang3.StringUtils._
 import uk.ac.warwick.tabula.services.{UserByWarwickIdCache, UserLookupService}
 import uk.ac.warwick.userlookup._
@@ -58,8 +59,15 @@ class MockUserLookup(var defaultFoundUser: Boolean)
     			new AnonymousUser
     		}
 		}
+    
+    override def getUserByWarwickUniIdUncached(warwickId: String) = getUserByWarwickUniId(warwickId)
 
     override def getUserByWarwickUniId(warwickId: String, includeDisabledLogins: Boolean) = getUserByWarwickUniId(warwickId)
+    
+    override def getUsersByWarwickUniIds(warwickIds: Seq[String]) = warwickIds.map { id => id -> getUserByWarwickUniId(id) }.toMap
+	
+		override def getUsersByWarwickUniIdsUncached(warwickIds: Seq[String]): Map[String, User] = 
+			getUsersByWarwickUniIds(warwickIds)
 
     override def findUsersWithFilter(filterValues: JMap[String, String]) = {
         if (findUsersEnabled) {
@@ -125,6 +133,11 @@ class MockCachingLookupService(var flavour: UserFlavour = Vanilla)
 	override def getUserByWarwickUniId(id: String) = getUserByWarwickUniId(id, true)
 
 	override def getUserByWarwickUniId(id: String, ignored: Boolean) = UserByWarwickIdCache.get(id)
+	
+	override def getUsersByWarwickUniIds(warwickIds: Seq[String]) = UserByWarwickIdCache.get(warwickIds).asScala.toMap
+	
+	override def getUsersByWarwickUniIdsUncached(warwickIds: Seq[String]): Map[String, User] = 
+		warwickIds.map { id => id -> getUserByWarwickUniIdUncached(id) }.toMap
 }
 
 

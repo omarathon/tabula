@@ -52,9 +52,8 @@ class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val
 	}
 
 	def emit(universityIds: Seq[String]) = {
-		universityIds.map(studentId => {
-			val student = userLookup.getUserByWarwickUniId(studentId)
+		userLookup.getUsersByWarwickUniIds(universityIds).toSeq.map { case (studentId, student) =>
 			new ExtensionRevokedNotification(assignment, student, submitter.apparentUser) with FreemarkerTextRenderer
-		})
+		}
 	}
 }

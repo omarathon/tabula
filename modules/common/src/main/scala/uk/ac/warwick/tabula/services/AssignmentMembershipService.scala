@@ -154,10 +154,7 @@ trait AssignmentMembershipMethods extends Logging {
 		for (group <- upstream) assert(group.members.universityIds)
 
 		val sitsUsers =
-			upstream.flatMap { _.members.members }
-				.distinct
-				.par.map { id => id -> userLookup.getUserByWarwickUniId(id)
-			}.seq
+			userLookup.getUsersByWarwickUniIds(upstream.flatMap { _.members.members }.distinct).toSeq
 
 		val includes = others.map(_.users.map(u => u.getUserId -> u)).getOrElse(Nil)
 		val excludes = others.map(_.excludes.map(u => u.getUserId -> u)).getOrElse(Nil)

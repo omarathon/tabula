@@ -38,8 +38,10 @@ import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 
 case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
 
-trait ProfileImporter {
-	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[String, User], importRowTracker: ImportRowTracker)
+trait ProfileImporter {	
+	import ProfileImporter._
+	
+	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importRowTracker: ImportRowTracker)
 		: Seq[ImportMemberCommand]
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation]
 	def membershipInfoForIndividual(member: Member): Option[MembershipInformation]
@@ -62,7 +64,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 		new StudentInformationQuery(sits, member, ssoUser, importRowTracker)
 	}
 
-	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[String, User], importRowTracker: ImportRowTracker)
+	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importRowTracker: ImportRowTracker)
 		: Seq[ImportMemberCommand] = {
 		// TODO we could probably chunk this into 20 or 30 users at a time for the query, or even split by category and query all at once
 
@@ -70,8 +72,8 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 		memberInfo flatMap { info =>
 			val usercode = info.member.usercode
-			val ssoUser = users(usercode)
 			val universityId = info.member.universityId
+			val ssoUser = users(universityId)
 
 			info.member.userType match {
 				case Staff | Emeritus => Seq(new ImportStaffMemberCommand(info, ssoUser))
@@ -309,6 +311,8 @@ class SandboxProfileImporter extends ProfileImporter {
 }
 
 object ProfileImporter {
+	type UniversityId = String
+	
 	val GetStudentInformation = """
 		select
 			stu.stu_code as university_id,

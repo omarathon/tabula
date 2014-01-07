@@ -56,7 +56,7 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		this.membershipLastUpdated = member.modified
 
 		this.universityId = oneOf(member.universityId, optString("university_id")).get
-		this.userId = member.usercode
+		this.userId = oneOf(ssoUser.getUserId, member.usercode).get
 
 		this.userType = member.userType
 

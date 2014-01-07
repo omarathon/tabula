@@ -89,10 +89,12 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 		.assignment(assignment)
 		.studentIds(items.map { _.uniNumber })
 
-	def emit(updatedFeedback: Seq[Feedback]): Seq[Notification[Feedback]] = updatedFeedback.filter(_.released).map( feedback => {
-		val student = userLookup.getUserByWarwickUniId(feedback.universityId)
-		new FeedbackChangeNotification(feedback, submitter.apparentUser, student) with FreemarkerTextRenderer
-	})
+	def emit(updatedFeedback: Seq[Feedback]): Seq[Notification[Feedback]] = {
+		updatedFeedback.filter(_.released).map(feedback => {
+			val student = userLookup.getUserByWarwickUniId(feedback.universityId)
+			new FeedbackChangeNotification(feedback, submitter.apparentUser, student) with FreemarkerTextRenderer
+		})
+	}
 
 
 }
