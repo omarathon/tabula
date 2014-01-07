@@ -132,7 +132,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 		val allocations = groupsExtractor.readXSSFExcelFile(file.dataStream)
 
 		// work out users to add to set (all users mentioned in spreadsheet - users currently in set)
-		val allocateUsers = allocations.asScala.filter { _.universityId.hasText }.map(x => userLookup.getUserByWarwickUniId(x.universityId)).toSet
+		val allocateUsers = userLookup.getUsersByWarwickUniIds(allocations.asScala.map { _.universityId }.filter { _.hasText }).values.toSet
 		val usersToAddToSet = allocateUsers.filterNot(set.allStudents.toSet)
 		for(user <- usersToAddToSet) set.members.add(user)
 

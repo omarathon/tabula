@@ -123,7 +123,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 		// Build the list of all users who are in the group, or have attended one or more occurrences of the group
 		val allStudents = benchmarkTask("Get a list of all registered or attended users") {
 			group.students.users ++
-			occurrences.flatMap { _.attendance.asScala }.map { a => userLookup.getUserByWarwickUniId(a.universityId) }
+			userLookup.getUsersByWarwickUniIds(occurrences.flatMap { _.attendance.asScala }.map { _.universityId }).values.toSeq
 			.distinct
 		}
 		

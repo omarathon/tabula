@@ -115,11 +115,15 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		student2.setWarwickId("student2")
 		val student3 = new User("student3")
 		student3.setWarwickId("student3")
-    val students = Seq(student1,student2,student3)
+		val students = Seq(student1,student2,student3)
 
 		val userLookup = mock[UserLookupService]
 		userLookup.getUserByWarwickUniId(any[String]) answers{id=>
 			students.find(_.getWarwickId == id).getOrElse(new AnonymousUser)
+		}
+		
+		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] =>
+			ids.map(id => (id, students.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
 		}
 	}
 

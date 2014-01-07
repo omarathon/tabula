@@ -22,6 +22,7 @@ trait ProfileService {
 	def getMemberByUniversityId(universityId: String): Option[Member]
 	def getMemberByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllMembersWithUniversityIds(universityIds: Seq[String]): Seq[Member]
+	def getAllMembersWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member]
 	def getMemberByPrsCode(prsCode: String): Option[Member]
 	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def getMemberByUser(user: User, disableFilter: Boolean = false): Option[Member]
@@ -58,6 +59,10 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	def getAllMembersWithUniversityIds(universityIds: Seq[String]) = transactional(readOnly = true) {
 		memberDao.getAllWithUniversityIds(universityIds)
+	}
+
+	def getAllMembersWithUniversityIdsStaleOrFresh(universityIds: Seq[String]) = transactional(readOnly = true) {
+		memberDao.getAllWithUniversityIdsStaleOrFresh(universityIds)
 	}
 
 	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false) = transactional(readOnly = true) {

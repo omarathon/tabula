@@ -70,7 +70,7 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 	def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] =
 		membersAndCategories flatMap { mac =>
 			val usercode = mac.member.usercode
-			val ssoUser = users(usercode)
+			val ssoUser = users(mac.member.universityId)
 
 			mac.member.userType match {
 				case Student => studentModuleRegistrationDetails(usercode, ssoUser)

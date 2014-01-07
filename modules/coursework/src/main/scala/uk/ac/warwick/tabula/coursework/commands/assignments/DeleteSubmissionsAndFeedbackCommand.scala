@@ -87,7 +87,7 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	
 	
 	def getStudentsAsUsers(): JList[User] =
-		students.par.map { userLookup.getUserByWarwickUniId(_) }.seq
+		userLookup.getUsersByWarwickUniIds(students).values.toSeq
 
 	override def describe(d: Description) = d
 		.assignment(assignment)

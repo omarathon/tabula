@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.{Mockito}
 import uk.ac.warwick.tabula.services.UserLookupService
 import org.mockito.Mockito.when
 import java.util.UUID
+import uk.ac.warwick.userlookup.AnonymousUser
 
 trait SmallGroupFixture extends Mockito {
 
@@ -37,6 +38,11 @@ trait SmallGroupFixture extends Mockito {
   when(userLookup.getUserByUserId(tutor2.getUserId)).thenReturn(tutor2)
   // UserGroup does batched lookups for users when resolving by UserId...
   when(userLookup.getUsersByUserIds(Seq(tutor1.getUserId,tutor2.getUserId).asJava)).thenReturn(Map("tutor1"->tutor1, "tutor2"->tutor2).asJava)
+  
+  val students = Seq(student1, student2)
+  userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] =>
+	ids.map(id => (id, students.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
+  }
 
   val actor = new User
   val recipient = new User

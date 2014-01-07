@@ -11,6 +11,11 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.data.model.MemberUserType
+import uk.ac.warwick.tabula.services.UserLookupService._
+
+object UserLookupService {
+	type UniversityId = String
+}
 
 trait UserLookupComponent {
 	def userLookup: UserLookupService
@@ -20,20 +25,52 @@ trait AutowiringUserLookupComponent extends UserLookupComponent {
 	var userLookup = Wire[UserLookupService]
 }
 
-trait UserLookupService extends UserLookupInterface
+trait UserLookupService extends UserLookupInterface {
+	def getUserByWarwickUniIdUncached(id: UniversityId): User
+	
+	/**
+	 * Takes a List of universityIds, and returns a Map that maps universityIds to Users. Users found
+	 * in the local cache will be taken from there (and not searched for), and all other
+	 * users will be searched for and entered into the cache.
+	 * 
+	 * All universityIds will be returned in the Map, but ones that weren't found will map to
+	 * AnonymousUser objects.
+	 * 
+	 * @param ids Seq[UniversityId]
+	 * @return Map[UniversityId, User]
+	 */
+	def getUsersByWarwickUniIds(ids: Seq[UniversityId]): Map[UniversityId, User]
+	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId]): Map[UniversityId, User]
+}
 
 class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService with UserByWarwickIdCache {
-
+	
+	var profileService = Wire[ProfileService]
 
 	override def getUserByUserId(id: String) = filterApplicantUsers(super.getUserByUserId(id))
 
-	override def getUserByWarwickUniId(id: String) =
+	override def getUserByWarwickUniId(id: UniversityId) =
 		getUserByWarwickUniId(id, true)
 
-	override def getUserByWarwickUniId(id: String, ignored: Boolean) =
+	override def getUserByWarwickUniId(id: UniversityId, ignored: Boolean) =
 		UserByWarwickIdCache.get(id)
+		
+	override def getUsersByWarwickUniIds(ids: Seq[UniversityId]) =
+		UserByWarwickIdCache.get(ids.asJava).asScala.toMap
 
-	def getUserByWarwickUniIdUncached(id: String) = filterApplicantUsers(super.getUserByWarwickUniId(id))
+	def getUserByWarwickUniIdUncached(id: UniversityId) = 
+		profileService.getMemberByUniversityIdStaleOrFresh(id)
+			.map { _.asSsoUser }
+			.getOrElse { filterApplicantUsers(super.getUserByWarwickUniId(id)) }
+	
+	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId]) = {
+		val dbUsers = profileService.getAllMembersWithUniversityIdsStaleOrFresh(ids).map { m => m.universityId -> m.asSsoUser }.toMap
+		val others = (ids.diff(dbUsers.keys.toSeq)).par.map { id => 
+			id -> filterApplicantUsers(super.getUserByWarwickUniId(id))
+		}.toMap
+		
+		dbUsers ++ others
+	}
 
 	private def filterApplicantUsers(user: User) = user.getExtraProperty("urn:websignon:usertype") match {
 		case "Applicant" => {
@@ -46,7 +83,7 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 
 }
 
-trait UserByWarwickIdCache extends CacheEntryFactory[String, User] { self: UserLookupAdapter =>
+trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self: UserLookupAdapter =>
 	final val UserByWarwickIdCacheName = "UserByWarwickIdCache"
 	final val UserByWarwickIdCacheMaxAgeSecs = 60 * 60 * 24 // 1 day
 	final val UserByWarwickIdCacheMaxSize = 100000
@@ -55,9 +92,10 @@ trait UserByWarwickIdCache extends CacheEntryFactory[String, User] { self: UserL
 	UserByWarwickIdCache.setAsynchronousUpdateEnabled(true)
 	UserByWarwickIdCache.setMaxSize(UserByWarwickIdCacheMaxSize)
 	
-	def getUserByWarwickUniIdUncached(id: String): User
+	def getUserByWarwickUniIdUncached(id: UniversityId): User
+	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId]): Map[UniversityId, User]
 
-	def create(warwickId: String) = {
+	def create(warwickId: UniversityId) = {
 		try {
 			getUserByWarwickUniIdUncached(warwickId)
 		} catch {
@@ -67,10 +105,14 @@ trait UserByWarwickIdCache extends CacheEntryFactory[String, User] { self: UserL
 
 	def shouldBeCached(user: User) = user.isVerified && user.isFoundUser // TAB-1734 don't cache not found users
 
-	def create(warwickIds: JList[String]): JMap[String, User] = {
-		throw new UnsupportedOperationException("Multi lookups not supported")
+	def create(warwickIds: JList[UniversityId]): JMap[UniversityId, User] = {
+		try {
+			getUsersByWarwickUniIdsUncached(warwickIds.asScala).asJava
+		} catch {
+			case e: Exception => throw new CacheEntryUpdateException(e)
+		}
 	}
-	override def isSupportsMultiLookups() = false
+	override def isSupportsMultiLookups() = true
 
 	@PreDestroy
 	def shutdownCache() {
@@ -146,8 +188,11 @@ abstract class UserLookupServiceAdapter(var delegate: UserLookupService) extends
 	def getUsersInDepartmentCode(c: String) = delegate.getUsersInDepartmentCode(c)
 	def getUserByToken(t: String) = delegate.getUserByToken(t)
 	def getUsersByUserIds(ids: JList[String]) = delegate.getUsersByUserIds(ids)
-	def getUserByWarwickUniId(id: String) = delegate.getUserByWarwickUniId(id)
-	def getUserByWarwickUniId(id: String, ignored: Boolean) = delegate.getUserByWarwickUniId(id, ignored)
+	def getUserByWarwickUniId(id: UniversityId) = delegate.getUserByWarwickUniId(id)
+	def getUserByWarwickUniId(id: UniversityId, ignored: Boolean) = delegate.getUserByWarwickUniId(id, ignored)
+	def getUserByWarwickUniIdUncached(id: UniversityId) = delegate.getUserByWarwickUniIdUncached(id)
+	def getUsersByWarwickUniIds(ids: Seq[UniversityId]) = delegate.getUsersByWarwickUniIds(ids)
+	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId]) = delegate.getUsersByWarwickUniIdsUncached(ids)
 	def findUsersWithFilter(map: JMap[String, String]) = delegate.findUsersWithFilter(map)
 	def findUsersWithFilter(map: JMap[String, String], includeInactive: Boolean) = delegate.findUsersWithFilter(map, includeInactive)
 	def getGroupService() = delegate.getGroupService

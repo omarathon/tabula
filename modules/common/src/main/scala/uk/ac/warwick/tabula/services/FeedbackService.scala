@@ -45,7 +45,7 @@ class FeedbackServiceImpl extends FeedbackService with Daoisms with Logging {
 		val plagiarisedIds = plagiarisedSubmissions.map { _.universityId }
 		val unreleasedIds = assignment.unreleasedFeedback.map { _.universityId }
 		val unplagiarisedUnreleasedIds = unreleasedIds.filter { uniId => !plagiarisedIds.contains(uniId) }
-		unplagiarisedUnreleasedIds.par.map { (id) => (id, userLookup.getUserByWarwickUniId(id, false)) }.seq
+		userLookup.getUsersByWarwickUniIds(unplagiarisedUnreleasedIds).toSeq
 	}
 
 	def getStudentFeedback(assignment: Assignment, uniId: String) = {

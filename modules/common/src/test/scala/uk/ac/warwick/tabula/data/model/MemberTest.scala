@@ -161,6 +161,13 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		user.getDepartment should be (null)
 		user.getDepartmentCode should be (null)
 		user.isFoundUser should be (true)
+		user.isVerified should be (true)
+		user.getUserType should be ("Staff")
+		user.isStaff should be (true)
+		user.isStudent should be (false)
+		user.getExtraProperty("urn:websignon:usertype") should be ("Staff")
+		Option(user.getExtraProperty("urn:websignon:timestamp")) should be ('defined)
+		user.getExtraProperty("urn:websignon:usersource") should be ("Tabula")
 	}
 
 	@Test def description = {
