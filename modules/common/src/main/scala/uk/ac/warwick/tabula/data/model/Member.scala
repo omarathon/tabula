@@ -15,10 +15,10 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.AcademicYear
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.EqualsBuilder
-import scala.Some
 import javax.persistence.CascadeType
 import javax.persistence.Entity
 import org.hibernate.annotations.AccessType
@@ -173,7 +173,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 			u.setDepartmentCode(dept.code.toUpperCase)
 		}
 		
-		u.setLoginDisabled(!(inUseFlag == "Active" || inUseFlag.startsWith("Inactive - Starts ")))
+		u.setLoginDisabled(!(inUseFlag.hasText && (inUseFlag == "Active" || inUseFlag.startsWith("Inactive - Starts "))))
 		userType match {
 			case MemberUserType.Staff => {
 				u.setStaff(true)

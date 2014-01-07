@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberProperties
 import java.sql.ResultSet
@@ -56,7 +57,7 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		this.membershipLastUpdated = member.modified
 
 		this.universityId = oneOf(member.universityId, optString("university_id")).get
-		this.userId = oneOf(ssoUser.getUserId, member.usercode).get
+		this.userId = oneOf(ssoUser.getUserId.maybeText, member.usercode).get
 
 		this.userType = member.userType
 
