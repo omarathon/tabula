@@ -12,7 +12,7 @@
 		</#list>
 		<#return "" />
 	</#function>
-	
+
 	<#macro row student>
 		<tr class="student">
 			<td>
@@ -26,7 +26,7 @@
 			<td>${(student.mostSignificantCourseDetails.route.name)!""}</td>
 		</tr>
 	</#macro>
-	
+
 	<#macro table students>
 		<table class="students table table-bordered table-striped table-condensed tabula-purple">
 			<thead>
@@ -40,17 +40,15 @@
 					<th class="course-but-photo-col ${sortClass("route.name")}" data-field="route.name">Course</th>
 				</tr>
 			</thead>
-		
+
 			<tbody>
 				<#list students as item>
 					<@row item />
 				</#list>
 			</tbody>
 		</table>
-		
+
 		<#if !student_table_script_included??>
-			<#-- TODO Remove this once this is merged: https://repo.elab.warwick.ac.uk/projects/TAB/repos/tabula/pull-requests/257/overview -->
-			<script type="text/javascript" src="/static/libs/jquery-tablesorter/jquery.tablesorter.min.js"></script>
 			<script type="text/javascript">
 			    (function($) {
 			        $(function() {
@@ -65,7 +63,7 @@
 			          		.find('th:not(:first-child)').addClass('header')
 			          		.on('click', function(e) {
 			          			var $th = $(this);
-			          			
+
 			          			if ($th.hasClass('headerSortDown')) {
 			          				$('#sortOrder').val('desc(' + $th.data('field') + ')');
 			          				$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
@@ -75,7 +73,7 @@
 			          				$th.closest('thead').find('th').removeClass('headerSortUp').removeClass('headerSortDown');
 			          				$th.addClass('headerSortDown');
 			          			}
-			          			
+
 			          			if (typeof(window.doRequest) === 'function') {
 												window.doRequest($('#filterStudentsCommand'), true);
 											} else {
@@ -83,7 +81,7 @@
 											}
 			          		});
 			          </#if>
-			
+
 			            $(".student").on("mouseover", function(e) {
 			                $(this).find("td").addClass("hover");
 			            }).on("mouseout", function(e) {
@@ -97,7 +95,7 @@
 			<#assign student_table_script_included=true />
 		</#if>
 	</#macro>
-	
+
 	<#macro pagination currentPage totalResults resultsPerPage extra_classes="">
 		<#local totalPages = (totalResults / resultsPerPage)?ceiling />
 		<div class="pagination pagination-right ${extra_classes}">
@@ -107,7 +105,7 @@
 				<#else>
 					<li><a href="?page=${currentPage - 1}" data-page="${currentPage - 1}">&laquo;</a></li>
 				</#if>
-				
+
 				<#list 1..totalPages as page>
 					<#if page == currentPage>
 						<li class="active"><span>${page}</span></li>
@@ -115,7 +113,7 @@
 			    	<li><a href="?page=${page}" data-page="${page}">${page}</a></li>
 			    </#if>
 		    </#list>
-		    
+
 		    <#if currentPage gte totalPages>
 					<li class="disabled"><span>&raquo;</span></li>
 				<#else>
@@ -124,26 +122,26 @@
 			</ul>
 		</div>
 	</#macro>
-	
+
 	<#if totalResults?? && students??>
 		<#if totalResults gt 0>
 			<div class="clearfix">
 				<#if totalResults gt filterStudentsCommand.studentsPerPage>
 					<div class="pull-right">
 						<@pagination filterStudentsCommand.page totalResults filterStudentsCommand.studentsPerPage "pagination-small" />
-					</div>	
+					</div>
 				</#if>
-			
+
 				<p>
 					<#assign startIndex = ((filterStudentsCommand.page - 1) * filterStudentsCommand.studentsPerPage) />
 					<#assign endIndex = startIndex + students?size />
-				
+
 					Results ${startIndex + 1} - ${endIndex} of ${totalResults}
 				</p>
 			</div>
-		
+
 			<@table students />
-			
+
 			<div class="clearfix">
 				<#if totalResults lte filterStudentsCommand.studentsPerPage>
 					<div class="pull-left">
@@ -157,16 +155,16 @@
 			<p>No students were found.</p>
 		</#if>
 	</#if>
-	
+
 	<script type="text/javascript">
 		jQuery(function($) {
 			$('.pagination a').on('click', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
-				
+
 				var page = $(this).data('page');
 				$('#page').val(page);
-				
+
 				if (typeof(window.doRequest) === 'function') {
 					window.doRequest($('#filterStudentsCommand'), true);
 				} else {
@@ -175,5 +173,5 @@
 			});
 		});
 	</script>
-	
+
 </#escape>

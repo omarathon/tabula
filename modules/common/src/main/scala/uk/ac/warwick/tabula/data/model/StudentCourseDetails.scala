@@ -202,10 +202,13 @@ object CourseType {
 	case object PGR extends CourseType("PG(R)", "Postgraduate", "Postgraduate (Research)", 'R')
 	case object PGT extends CourseType("PG(T)", "Postgraduate", "Postgraduate (Taught)", 'T')
 	case object UG extends CourseType("UG", "Undergraduate", "Undergraduate", 'U')
-	case object Foundation extends CourseType("F", "Foundation", "Foundation course", 'F')
-	case object PreSessional extends CourseType("PS", "Pre-sessional", "Pre-sessional course", 'N')
+	case object Foundation extends CourseType("F", "Foundation", "Foundation course", 'F') // pre-UG
+	case object PreSessional extends CourseType("PS", "Pre-sessional", "Pre-sessional course", 'N') // pre-PG
 
+	// these are used in narrowing departmental filters via Department.filterRule
 	val all = Seq(UG, PGT, PGR, Foundation, PreSessional)
+	val ugCourseTypes = Seq(UG, Foundation)
+	val pgCourseTypes = Seq(PGT, PGR, PreSessional)
 
 	def apply(code: String): CourseType = code match {
 		case UG.code => UG
