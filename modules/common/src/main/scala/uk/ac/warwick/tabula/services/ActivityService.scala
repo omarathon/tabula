@@ -13,6 +13,19 @@ import uk.ac.warwick.tabula.data.model.Module
 import org.apache.lucene.search.FieldDoc
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
+
+object ActivityService {
+	/** wrapper class to turn ScoreDoc plus searcher id token into a
+	 *  tuple of simple values ready to pass as parameters
+	 */  
+	class PagedActivities(val activities: Seq[Activity[Any]], val doc: Option[FieldDoc], val token: Long, val total: Int) {
+		def getTokens: String = doc match {
+			case None => "empty"
+			case _ => doc.get.doc + "/" + doc.get.fields(0) + "/" + token
+		}
+	}
+}
 
 /** At the moment, this uses AuditEvents as a proxy for things of interest,
  *  and specifically is only noticing new submission events.
@@ -28,16 +41,6 @@ class ActivityService {
 	var moduleService = Wire.auto[ModuleAndDepartmentService]
 	var assignmentService = Wire.auto[AssignmentService]
 	var auditIndexService = Wire.auto[AuditEventNoteworthySubmissionsService]
-
-	/** wrapper class to turn ScoreDoc plus searcher id token into a
-	 *  tuple of simple values ready to pass as parameters
-	 */  
-	class PagedActivities(val activities: Seq[Activity[Any]], val doc: Option[FieldDoc], val token: Long, val total: Int) {
-		def getTokens: String = doc match {
-			case None => "empty"
-			case _ => doc.get.doc + "/" + doc.get.fields(0) + "/" + token
-		}
-	}
 
 	// first page
 	def getNoteworthySubmissions(user: CurrentUser): PagedActivities = {
@@ -61,4 +64,12 @@ class ActivityService {
 		
 		(ownedModules ++ adminModules).toSeq
 	}
+}
+
+trait ActivityServiceComponent {
+	def activityService: ActivityService
+}
+
+trait AutowiringActivityServiceComponent extends ActivityServiceComponent {
+	var activityService = Wire[ActivityService]
 }
