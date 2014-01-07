@@ -14,3 +14,5 @@ ALTER TABLE MONITORINGCHECKPOINT
 MODIFY (
   STUDENT_COURSE_DETAIL_ID NVARCHAR2(250) null
 );
+
+create index idx_mcheckpoint_student_id on monitoringcheckpoint(student_id);
