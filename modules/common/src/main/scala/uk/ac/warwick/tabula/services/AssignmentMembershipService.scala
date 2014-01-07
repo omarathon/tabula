@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.data.model.{AssessmentComponent, AssessmentGroup, As
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.userlookup.User
 import org.springframework.stereotype.Service
+import uk.ac.warwick.spring.Wire
 
 
 trait AssignmentMembershipService {
@@ -284,3 +285,10 @@ case class MembershipItem(
 	def itemTypeString = itemType.value
 }
 
+trait AssignmentMembershipServiceComponent {
+	def assignmentMembershipService: AssignmentMembershipService
+}
+
+trait AutowiringAssignmentMembershipServiceComponent extends AssignmentMembershipServiceComponent {
+	var assignmentMembershipService = Wire[AssignmentMembershipService]
+}

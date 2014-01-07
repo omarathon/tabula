@@ -42,6 +42,7 @@
 	</#macro>
 
 	<#if totalResults?? && students??>
+		<#assign filterQuery = command.serializeFilter />
 		<#assign returnTo><@routes.viewDepartmentStudentsWithAcademicYear command.department command.academicYear filterQuery/></#assign>
 		<#if (totalResults > 0)>
 			<div class="clearfix">

@@ -210,7 +210,7 @@ $(function(){
 
 	var bindPointButtons = function(){
     	$('.modify-monitoring-points a.new-point, .modify-monitoring-points a.edit-point, .modify-monitoring-points a.delete-point')
-    		.off().not('.disabled').on('click', function(e){
+    		.off('click').not('.disabled').on('click', function(e){
 
     		e.preventDefault();
     		var formLoad = function(data){

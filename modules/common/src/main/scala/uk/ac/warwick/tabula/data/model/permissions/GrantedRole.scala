@@ -20,6 +20,7 @@ import scala.reflect._
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
 import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.data.model.StudentMember
 
 @Entity
 @AccessType("field")
@@ -57,13 +58,31 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 		}
 	}
 
+	/**
+	 * The scope of the GrantedRole is what the permissions contained within are granted against, 
+	 * which is a PermissionsTarget.
+	 */
 	var scope: A
+	
 	// this ought not to be necessary, but for some reason the compiler fails to see the type bound on scope and won't
 	// assume it's a permissions target
 	def scopeAsPermissionsTarget:PermissionsTarget = scope
 
-	def build() = RoleBuilder.build(roleDefinition, Some(scope), roleDefinition.getName)
-	def mayGrant(target: Permission) = Option(roleDefinition) map { _.mayGrant(target) } getOrElse (false)
+	/**
+	 * Build a Role from this definition 
+	 */
+	def build() = RoleBuilder.build(replaceableRoleDefinition, Option(scope), replaceableRoleDefinition.getName)
+	def mayGrant(target: Permission) = Option(replaceableRoleDefinition) map { _.mayGrant(target) } getOrElse (false)
+	
+	/**
+	 * Provides a route to Department from the scope, so that we can look for custom definitions.
+	 * 
+	 * In almost all cases, Department will be one of the permissionsParents of the scope (maybe multiple
+	 * levels up), but providing a direct link here means we don't have to iterate up the tree.
+	 */
+	def scopeDepartment: Option[Department]
+	
+	def replaceableRoleDefinition = scopeDepartment.flatMap { _.replacedRoleDefinitionFor(roleDefinition) }.getOrElse(roleDefinition)
 
 	// If hibernate sets users to null, make a new empty usergroup
 	override def postLoad {
@@ -121,6 +140,38 @@ object GrantedRole {
 }
 
 /* Ok, this is icky, but I can't find any other way. If you need new targets for GrantedRoles, create them below with a new discriminator */
+@Entity @DiscriminatorValue("___GLOBAL___") class GloballyGrantedRole extends GrantedRole[PermissionsTarget] {
+	def this(definition: RoleDefinition) = {
+		this()
+		this.roleDefinition = definition
+	}
+
+	@transient var scope: PermissionsTarget = null
+	
+	def scopeDepartment = None
+	
+	override def build() = RoleBuilder.build(GlobalRoleDefinition(replaceableRoleDefinition), None, replaceableRoleDefinition.getName)
+}
+
+/**
+ * Wrap a normal RoleDefinition to allow us to make permissions that aren't allowed to be global, global.
+ */
+case class GlobalRoleDefinition(delegate: RoleDefinition) extends RoleDefinition {
+	def permissions(scope: Option[PermissionsTarget]) =
+		delegate.permissions(Some(null)).map { 
+			case (perm, Some(null)) => (perm, None)
+			case (perm, scope) => (perm, scope)
+		}
+
+	def subRoles(scope: Option[PermissionsTarget]) = delegate.subRoles(scope)
+	def mayGrant(permission: Permission) = delegate.mayGrant(permission)
+	def allPermissions(scope: Option[PermissionsTarget]) = delegate.allPermissions(scope)
+	def canDelegateThisRolesPermissions = delegate.canDelegateThisRolesPermissions
+	def getName = delegate.getName
+	def description = delegate.description
+	def isAssignable = delegate.isAssignable
+}
+
 @Entity @DiscriminatorValue("Department") class DepartmentGrantedRole extends GrantedRole[Department] {
 	def this(department: Department, definition: RoleDefinition) = {
 		this()
@@ -132,6 +183,8 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Department = _
+	
+	def scopeDepartment = Some(scope)
 }
 @Entity @DiscriminatorValue("Module") class ModuleGrantedRole extends GrantedRole[Module] {
 	def this(module: Module, definition: RoleDefinition) = {
@@ -144,6 +197,8 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Module = _
+	
+	def scopeDepartment = Some(scope.department)
 }
 @Entity @DiscriminatorValue("Route") class RouteGrantedRole extends GrantedRole[Route] {
 	def this(route: Route, definition: RoleDefinition) = {
@@ -156,6 +211,8 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Route = _
+	
+	def scopeDepartment = Some(scope.department)
 }
 @Entity @DiscriminatorValue("Member") class MemberGrantedRole extends GrantedRole[Member] {
 	def this(member: Member, definition: RoleDefinition) = {
@@ -168,6 +225,12 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Member = _
+	
+	def scopeDepartment = scope match {
+		case student: StudentMember => 
+			student.mostSignificantCourseDetails.map { _.latestStudentCourseYearDetails.enrolmentDepartment }.orElse(Option(student.homeDepartment))
+		case _ => Option(scope.homeDepartment)
+	}
 }
 @Entity @DiscriminatorValue("Assignment") class AssignmentGrantedRole extends GrantedRole[Assignment] {
 	def this(assignment: Assignment, definition: RoleDefinition) = {
@@ -180,6 +243,8 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: Assignment = _
+	
+	def scopeDepartment = Some(scope.module.department)
 }
 @Entity @DiscriminatorValue("SmallGroup") class SmallGroupGrantedRole extends GrantedRole[SmallGroup] {
 	def this(group: SmallGroup, definition: RoleDefinition) = {
@@ -192,6 +257,8 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: SmallGroup = _
+	
+	def scopeDepartment = Some(scope.groupSet.module.department)
 }
 @Entity @DiscriminatorValue("SmallGroupEvent") class SmallGroupEventGrantedRole extends GrantedRole[SmallGroupEvent] {
 	def this(event: SmallGroupEvent, definition: RoleDefinition) = {
@@ -204,4 +271,6 @@ object GrantedRole {
 	@JoinColumn(name="scope_id")
 	@ForeignKey(name="none")
 	var scope: SmallGroupEvent = _
+	
+	def scopeDepartment = Some(scope.group.groupSet.module.department)
 }
