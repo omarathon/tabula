@@ -23,8 +23,8 @@ class MonitoringPointServiceTest extends TestBase with Mockito {
 		val point2 = Fixtures.monitoringPoint("point2", 4, 4)
 		val pointSet = new MonitoringPointSet
 		pointSet.points = JArrayList(point1, point2)
-		val passedCheckpoint = Fixtures.monitoringCheckpoint(point1, member1.mostSignificantCourseDetails.get, AttendanceState.fromCode("attended"))
-		val missedCheckpoint = Fixtures.monitoringCheckpoint(point2, member1.mostSignificantCourseDetails.get, AttendanceState.fromCode("unauthorised"))
+		val passedCheckpoint = Fixtures.monitoringCheckpoint(point1, member1, AttendanceState.fromCode("attended"))
+		val missedCheckpoint = Fixtures.monitoringCheckpoint(point2, member1, AttendanceState.fromCode("unauthorised"))
 	}
 
 	@Test

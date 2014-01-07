@@ -95,7 +95,7 @@ class MonitoringPointDaoTest extends PersistenceTestBase with Mockito {
 
 			checkpoint.monitoringPointService = monitoringPointService
 			checkpoint.point = monitoringPoint1
-			checkpoint.studentCourseDetail = student1.freshStudentCourseDetails(0)
+			checkpoint.student = student1
 
 			checkpoint.updatedBy = "foo"
 			checkpoint.state = AttendanceState.fromCode("attended")
@@ -126,7 +126,7 @@ class MonitoringPointDaoTest extends PersistenceTestBase with Mockito {
 			checkpoint.monitoringPointService = monitoringPointService
 
 			checkpoint.point = monitoringPoint1
-			checkpoint.studentCourseDetail = student1.freshStudentCourseDetails(0)
+			checkpoint.student = student1
 
 			checkpoint.updatedBy = "foo"
 			checkpoint.state = AttendanceState.fromCode("attended")
