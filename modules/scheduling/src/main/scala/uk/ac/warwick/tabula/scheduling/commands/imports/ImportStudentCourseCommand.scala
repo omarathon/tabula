@@ -157,8 +157,10 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 
 		// Mark Hadley in Physics says "I don't think the University uses the term 'tutor' for PGRs"
 		// so by default excluding PGRs from the personal tutor import:
-		else if (courseCode != null && courseCode.length() > 0 && CourseType.fromCourseCode(courseCode) != CourseType.PGR)
+		else if (courseCode != null && courseCode.length() > 0 && CourseType.fromCourseCode(courseCode) != CourseType.PGR) {
 			// is this student in a department that is set to import tutor data from SITS?
+
+
 			relationshipService
 				.getStudentRelationshipTypeByUrlPart("tutor") // TODO this is awful
 				.filter { relType => dept.getStudentRelationshipSource(relType) == StudentRelationshipSource.SITS }
@@ -171,10 +173,11 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 							relationshipService.replaceStudentRelationships(relationshipType, sprCode, Seq(tutorUniId))
 						}
 						case _ => {
-							logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + tutorUniId + " - not importing this personal tutor from SITS")
+							logger.warn("SPR code: " + sprCode + ": no staff member found for uni ID " + tutorUniId + " - not importing this personal tutor from SITS")
 						}
 					}
 				}
+		}
 	}
 
 

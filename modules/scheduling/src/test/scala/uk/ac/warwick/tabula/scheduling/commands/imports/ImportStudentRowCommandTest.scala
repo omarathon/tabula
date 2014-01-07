@@ -108,7 +108,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rs.getInt("year_of_study") returns(3)
 		rs.getString("spr_code") returns("0672089/2")
 		rs.getString("route_code") returns("C100")
-		rs.getString("spr_tutor1") returns ("IN0070790")
+		rs.getString("spr_tutor1") returns ("0070790")
 		rs.getString("homeDepartmentCode") returns ("PH")
 		rs.getString("department_code") returns ("PH")
 		rs.getString("scj_code") returns ("0672089/2")
@@ -347,6 +347,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
 			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (Some(tutorRelationshipType))
+			courseCommand.relationshipService = relationshipService
+			rowCommand.importStudentCourseCommand = courseCommand
 
 			// if personalTutorSource is "SITS", there *should* an update
 			department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.SITS)

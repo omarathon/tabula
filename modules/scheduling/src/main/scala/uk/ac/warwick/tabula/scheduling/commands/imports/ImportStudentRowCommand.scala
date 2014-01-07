@@ -16,11 +16,11 @@ import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, ModeOfAt
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
 
-class ImportStudentRowCommand(member: MembershipInformation,
-		ssoUser: User,
-		resultSet: ResultSet,
-		importRowTracker: ImportRowTracker,
-		importStudentCourseCommand: ImportStudentCourseCommand)
+class ImportStudentRowCommand(val member: MembershipInformation,
+		val ssoUser: User,
+		val resultSet: ResultSet,
+		val importRowTracker: ImportRowTracker,
+		var importStudentCourseCommand: ImportStudentCourseCommand)
 	extends ImportMemberCommand(member, ssoUser, Some(resultSet))
 	with Logging with Daoisms
 	with StudentProperties with Unaudited with PropertyCopying {
