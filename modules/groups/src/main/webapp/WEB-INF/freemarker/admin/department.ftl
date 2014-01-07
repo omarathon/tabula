@@ -130,7 +130,7 @@ If you are doing any work on this, it would be good to do the above first.
 	</div>
 
 <#-- This is the big list of modules -->
-<@components.module_info data=data expand_by_default=!can_manage_dept />
+<@components.module_info data=data expand_by_default=(!can_manage_dept && data.moduleItems?size lte 5) />
 
 <div id="modal-container" class="modal fade"></div>
 <#else>
