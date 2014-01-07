@@ -418,7 +418,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		there was one (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 		createdCheckpoints.size should be (1)
 		createdCheckpoints.head.state should be (AttendanceState.Attended)
-		createdCheckpoints.head.studentCourseDetail should be (studentCourseDetails)
+		createdCheckpoints.head.student should be (student)
 		createdCheckpoints.head.point should be (meetingThisYearPoint)
 		createdCheckpoints.head.updatedBy should be (agentMember.universityId)
 	}}
@@ -462,7 +462,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		there was one (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
 		createdCheckpoints.size should be (1)
 		createdCheckpoints.head.state should be (AttendanceState.Attended)
-		createdCheckpoints.head.studentCourseDetail should be (studentCourseDetails)
+		createdCheckpoints.head.student should be (student)
 		createdCheckpoints.head.point should be (meetingThisYearPoint)
 		createdCheckpoints.head.updatedBy should be (agentMember.universityId)
 	}}
