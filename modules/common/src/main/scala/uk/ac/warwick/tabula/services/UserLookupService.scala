@@ -4,6 +4,7 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup._
 import uk.ac.warwick.util.cache._
+import uk.ac.warwick.util.cache.Caches.CacheStrategy
 import org.joda.time.DateTime
 import javax.annotation.PreDestroy
 import uk.ac.warwick.userlookup.User
@@ -88,7 +89,7 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 	final val UserByWarwickIdCacheMaxAgeSecs = 60 * 60 * 24 // 1 day
 	final val UserByWarwickIdCacheMaxSize = 100000
 
-	final val UserByWarwickIdCache = Caches.newCache(UserByWarwickIdCacheName, this, UserByWarwickIdCacheMaxAgeSecs)
+	final val UserByWarwickIdCache = Caches.newCache(UserByWarwickIdCacheName, this, UserByWarwickIdCacheMaxAgeSecs, CacheStrategy.EhCacheRequired)
 	UserByWarwickIdCache.setAsynchronousUpdateEnabled(true)
 	UserByWarwickIdCache.setMaxSize(UserByWarwickIdCacheMaxSize)
 	
