@@ -36,10 +36,14 @@ class AddSubDepartmentCommandInternal(val parent: Department) extends CommandInt
 		d.name = name
 		d.filterRule = filterRule
 		d.parent = parent
+
+		// save settings first
 		d.copySettingsFrom(parent)
-		
 		moduleAndDepartmentService.save(d)
-		
+
+		// now that the new department has been persisted add the extension managers built in role
+		d.copyExtensionManagersFrom(parent)
+		moduleAndDepartmentService.save(d)
 		d
 	}
 }

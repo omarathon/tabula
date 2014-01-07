@@ -167,6 +167,10 @@ class Department extends GeneratedId
 		settings ++= other.settings
 	}
 
+	def copyExtensionManagersFrom(other: Department) = {
+		other.extensionManagers.includeUsers.asScala.foreach(extensionManagers.addUser(_))
+	}
+
 	// If hibernate sets owners to null, make a new empty usergroup
 	override def postLoad {
 		ensureSettings
