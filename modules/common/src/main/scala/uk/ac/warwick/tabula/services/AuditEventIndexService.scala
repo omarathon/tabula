@@ -301,7 +301,8 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	val tokenListFields = Set(
 		"students",
 		"feedbacks",
-		"submissions")
+		"submissions",
+		"attachments")
 
 	@Autowired var service: AuditEventService = _
 	@Autowired var assignmentService: AssignmentService = _
@@ -419,7 +420,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	}
 	
 	val SingleDataFields = Seq("submission", "feedback", "assignment", "module", "department", "studentId", "submissionIsNoteworthy")
-	val SequenceDataFields = Seq("students")
+	val SequenceDataFields = Seq("students", "attachments")
 
 	// pick items out of the auditevent JSON and add them as document fields.
 	private def addDataToDoc(data: Map[String, Any], doc: Document) = {

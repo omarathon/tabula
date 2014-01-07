@@ -140,12 +140,21 @@ class SubmitAssignmentCommand(
 		submission
 	}
 
-	override def describe(d: Description) =	d.assignment(assignment).properties()
+	override def describe(d: Description) =	{
+		d.assignment(assignment)
+		
+		assignment.submissions.find(_.universityId == user.universityId).map { existingSubmission =>
+			d.properties(
+				"existingSubmission" -> existingSubmission.id,
+				"existingAttachments" -> existingSubmission.allAttachments.map { _.id }
+			)
+		}
+	}
 
 	override def describeResult(d: Description, s: Submission) = {
-		d.assignment(assignment).properties().property("submission" -> s.id)
+		d.assignment(assignment).properties("submission" -> s.id).fileAttachments(s.allAttachments)
 		if (s.isNoteworthy)
-			d.assignment(assignment).properties().property("submissionIsNoteworthy" -> true)
+			d.properties("submissionIsNoteworthy" -> true)
 	}
 
 

@@ -110,4 +110,11 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 		d.assignment(assignment)
 		 .studentIds(items.map { _.uniNumber })
 	}
+	
+	override def describeResult(d: Description, feedbacks: List[MarkerFeedback]) = {
+		d.assignment(assignment)
+		 .studentIds(items.map { _.uniNumber })
+		 .fileAttachments(feedbacks.flatMap { _.attachments })
+		 .properties("feedback" -> feedbacks.map { _.id })
+	}
 }
