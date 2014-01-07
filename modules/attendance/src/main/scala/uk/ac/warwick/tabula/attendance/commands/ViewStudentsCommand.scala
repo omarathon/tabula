@@ -75,13 +75,15 @@ abstract class ViewStudentsCommand(val department: Department, val academicYearO
 				restrictions = buildRestrictions()
 			)
 
-			val students = profileService.findStudentsByRestrictions(
+			val (offset, students) = profileService.findStudentsByRestrictions(
 				department = department,
 				restrictions = buildRestrictions(),
 				orders = buildOrders(),
 				maxResults = studentsPerPage,
 				startResult = studentsPerPage * (page-1)
 			)
+
+			if (offset == 0) page = 1
 
 			ViewStudentsResults(buildData(students, academicYear), totalResults)
 		}
