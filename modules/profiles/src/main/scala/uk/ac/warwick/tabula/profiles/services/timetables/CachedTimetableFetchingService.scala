@@ -60,7 +60,7 @@ class CachedTimetableFetchingService(delegate:TimetableFetchingService) extends 
 		def shouldBeCached(response: EventList): Boolean = true
 	}
 	// rather than using 5 little caches, use one big one with a composite key
-	val timetableCache = Caches.newCache("SyllabusPlusTimetables", cacheEntryFactory, CacheExpiryTime, CacheStrategy.EhCacheRequired)
+	val timetableCache = Caches.newCache("SyllabusPlusTimetables", cacheEntryFactory, CacheExpiryTime, CacheStrategy.EhCacheIfAvailable)
 
 	def getTimetableForStudent(universityId: String): Seq[TimetableEvent] = timetableCache.get(StudentKey(universityId))
 	def getTimetableForModule(moduleCode: String): Seq[TimetableEvent] = timetableCache.get(ModuleKey(moduleCode))

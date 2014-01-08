@@ -27,7 +27,7 @@ import org.junit.BeforeClass
 import org.junit.AfterClass
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
-@ContextConfiguration(locations=Array("/WEB-INF/test-ehcache-properties.xml", "/WEB-INF/applicationContext-lazyinit.xml"))
+@ContextConfiguration(locations=Array("/WEB-INF/applicationContext-lazyinit.xml"))
 @ActiveProfiles(Array("test"))
 abstract class AppContextTestBase extends TestBase with ContextSetup with TransactionalTesting {
 	
@@ -51,7 +51,7 @@ trait FieldAccessByReflection{
 	}
 }
 @RunWith(classOf[SpringJUnit4ClassRunner])
-@ContextConfiguration(locations=Array("/WEB-INF/test-ehcache-properties.xml", "/WEB-INF/properties-context.xml","/WEB-INF/persistence-context.xml"))
+@ContextConfiguration(locations=Array("/WEB-INF/properties-context.xml","/WEB-INF/persistence-context.xml"))
 @ActiveProfiles(Array("test"))
 abstract class PersistenceTestBase extends TestBase with ContextSetup with TransactionalTesting {
 	
