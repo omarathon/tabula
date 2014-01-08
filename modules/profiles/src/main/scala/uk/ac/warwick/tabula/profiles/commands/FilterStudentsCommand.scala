@@ -37,17 +37,19 @@ abstract class FilterStudentsCommand(val department: Department) extends Command
 	self: ProfileServiceComponent =>
 
 	def applyInternal() = {
+		val restrictions = buildRestrictions()
+
 		val totalResults = profileService.countStudentsByRestrictions(
 			department = department,
-			restrictions = buildRestrictions()
+			restrictions = restrictions
 		)
 
 		val (offset, students) = profileService.findStudentsByRestrictions(
 			department = department,
-		restrictions = buildRestrictions(),
-		orders = buildOrders(),
-		maxResults = studentsPerPage,
-		startResult = studentsPerPage * (page-1)
+			restrictions = restrictions,
+			orders = buildOrders(),
+			maxResults = studentsPerPage,
+			startResult = studentsPerPage * (page-1)
 		)
 
 		if (offset == 0) page = 1
