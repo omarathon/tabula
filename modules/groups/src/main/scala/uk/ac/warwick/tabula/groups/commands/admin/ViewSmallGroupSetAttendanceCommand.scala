@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.groups.commands.ViewSmallGroupAttendanceCommand
 import uk.ac.warwick.tabula.groups.commands.ViewSmallGroupAttendanceCommand._
+import uk.ac.warwick.tabula.ItemNotFoundException
 
 object ViewSmallGroupSetAttendanceCommand {
 	def apply(set: SmallGroupSet) =
@@ -28,6 +29,8 @@ object ViewSmallGroupSetAttendanceCommand {
 
 class ViewSmallGroupSetAttendanceCommand(val set: SmallGroupSet)
 	extends CommandInternal[SortedMap[SmallGroup, SmallGroupAttendanceInformation]] with ViewSmallGroupSetAttendanceState {
+	
+	if (!set.collectAttendance) throw new ItemNotFoundException
 	
 	override def applyInternal() = {
 		SortedMap(set.groups.asScala.map { group =>

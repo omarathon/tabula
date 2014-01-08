@@ -116,6 +116,11 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	@OneToMany(mappedBy = "smallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
 	var assessmentGroups: JList[AssessmentGroup] = JArrayList()
+	
+	@Column(name="collect_attendance")
+	var collectAttendance: Boolean = true
+	
+	def showAttendanceReports = !archived && !deleted && collectAttendance
 
 	// converts the assessmentGroups to upstream assessment groups
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroup(academicYear) }
@@ -170,6 +175,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
     newSet.allowSelfGroupSwitching = allowSelfGroupSwitching
     newSet.archived = archived
     newSet.assessmentGroups = assessmentGroups
+    newSet.collectAttendance = collectAttendance
     newSet.format = format
     newSet.groups = groups.asScala.map(_.duplicateTo(newSet)).asJava
     newSet._membersGroup = _membersGroup.duplicate()

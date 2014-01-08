@@ -232,7 +232,7 @@
 											</#if>
 										</h4>
 										
-										<#if features.smallGroupTeachingRecordAttendance && can.do('SmallGroupEvents.Register', group) && group.hasScheduledEvents>
+										<#if features.smallGroupTeachingRecordAttendance && can.do('SmallGroupEvents.Register', group) && group.hasScheduledEvents && group.groupSet.collectAttendance>
                     	<div class="pull-right">
                     		<a href="<@routes.groupAttendance group />" class="btn btn-primary btn-small">
                     			Attendance
@@ -382,13 +382,15 @@
 													            </@fmt.permission_button>
 													          </li>
                                         
-                                    <#assign set_attendance_url><@routes.setAttendance groupSet /></#assign>
-																		<li>
-																			<@fmt.permission_button permission='SmallGroupEvents.Register' scope=groupSet action_descr='view attendance' href=set_attendance_url
-																		  						tooltip='View attendance at groups' data_attr='data-popup-target=.btn-group data-container=body'>
-																		  	<i class="icon-group icon-fixed-width"></i> Attendance
-																		  </@fmt.permission_button>
-																		</li>    
+                                    <#if groupSet.collectAttendance>
+	                                    <#assign set_attendance_url><@routes.setAttendance groupSet /></#assign>
+																			<li>
+																				<@fmt.permission_button permission='SmallGroupEvents.Register' scope=groupSet action_descr='view attendance' href=set_attendance_url
+																			  						tooltip='View attendance at groups' data_attr='data-popup-target=.btn-group data-container=body'>
+																			  	<i class="icon-group icon-fixed-width"></i> Attendance
+																			  </@fmt.permission_button>
+																			</li>
+																		</#if>    
                                         
                                         
                                     <li>
@@ -502,7 +504,7 @@
 		</tbody>
 	</table>
 	
-	<#if !singleStudent?has_content>
+	<#if !singleStudent?has_content && studentAttendance?keys?size gt 0>
 	<script type="text/javascript">
 		jQuery(function($){
 			$('#group_attendance_${group.id}')
