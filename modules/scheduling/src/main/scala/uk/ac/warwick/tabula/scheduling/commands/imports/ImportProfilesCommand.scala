@@ -95,43 +95,21 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				department <- departments;
 				membershipInfos <- logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize)
 			} {
-				// if the SQL "object no longer exist" error occurs, it's probably because this is dev or test and
-				// the db update is running - wait 10 minutes and then try again.  After 7 tries, give up on the batch.
-				//(Import usually takes around 30 minutes.)
-				// If it fails updating module registrations it starts again by re-getting the member details but that's OK.
-				var success: Boolean = false
-				var count = 0
-				while (!success && count < 7) {
-					count += 1
-					try {
-						logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon")
-						val users: Map[String, User] = userLookup.getUsersByUserIds(membershipInfos.map(x => x.member.usercode)).toMap
+				logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon")
+				val users: Map[String, User] = userLookup.getUsersByUserIds(membershipInfos.map(x => x.member.usercode)).toMap
 
-						logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members from Membership")
+				logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members from Membership")
 
-						val studentRowCommands = transactional() {
-							profileImporter.getMemberDetails(membershipInfos, users, importRowTracker)
-						}
+				val studentRowCommands = transactional() {
+					profileImporter.getMemberDetails(membershipInfos, users, importRowTracker)
+				}
 
-						// each apply has its own transaction
-						studentRowCommands map { _.apply }
-						session.flush()
+				// each apply has its own transaction
+				studentRowCommands map { _.apply }
+				session.flush()
 
-						transactional() {
-							updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
-						}
-						success = true
-					}
-					catch {
-						case sqlException @ (_: java.sql.SQLException | _: org.springframework.jdbc.UncategorizedSQLException) =>
-							if (sqlException.getMessage().contains("object no longer exists")) {
-									Thread.sleep(600000) // sleep for 10 minutes
-							}
-							else throw sqlException
-						case e: Exception => {
-							throw e
-						}
-					}
+				transactional() {
+					updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
 				}
 			}
 
