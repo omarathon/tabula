@@ -381,7 +381,7 @@
 		$('.fixed-container').fixHeaderFooter({minimumWindowHeightFix: 630});
 
 		var options = {
-			sortList: [[<#if department.showStudentName>3<#else>2</#if>,0]],
+			sortList: [<#if department.showStudentName>[3, 0], [2, 0]<#else>[2, 0], [1, 0]</#if>],
 			headers: { 0: { sorter: false } },
 			textExtraction: function(node) {
 				var $el = $(node);
