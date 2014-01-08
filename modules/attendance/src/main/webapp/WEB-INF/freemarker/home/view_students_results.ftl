@@ -110,15 +110,15 @@
 															<#list pointMap?keys?sort_by("validFromWeek") as point>
 																<#assign checkpointState = mapGet(pointMap, point) />
 																<#if checkpointState == "attended">
-																	<i class="use-tooltip icon-ok icon-fixed-width attended" title="Attended: ${point.name} (<@fmt.monitoringPointFormat point true />)"></i>
+																	<i class="use-tooltip icon-ok icon-fixed-width attended" title="Attended: ${point.name} (<@fmt.monitoringPointFormat point true />)" data-container="body"></i>
 																<#elseif checkpointState == "authorised">
-																	<i class="use-tooltip icon-remove-circle icon-fixed-width authorised" title="Missed (authorised): ${point.name} (<@fmt.monitoringPointFormat point true />)"></i>
+																	<i class="use-tooltip icon-remove-circle icon-fixed-width authorised" title="Missed (authorised): ${point.name} (<@fmt.monitoringPointFormat point true />)" data-container="body"></i>
 																<#elseif checkpointState == "unauthorised">
-																	<i class="use-tooltip icon-remove icon-fixed-width unauthorised" title="Missed (unauthorised): ${point.name} (<@fmt.monitoringPointFormat point true />)"></i>
+																	<i class="use-tooltip icon-remove icon-fixed-width unauthorised" title="Missed (unauthorised): ${point.name} (<@fmt.monitoringPointFormat point true />)" data-container="body"></i>
 																<#elseif checkpointState == "late">
-																	<i class="use-tooltip icon-warning-sign icon-fixed-width late" title="Unrecorded: ${point.name} (<@fmt.monitoringPointFormat point true />)"></i>
+																	<i class="use-tooltip icon-warning-sign icon-fixed-width late" title="Unrecorded: ${point.name} (<@fmt.monitoringPointFormat point true />)" data-container="body"></i>
 																<#else>
-																	<i class="use-tooltip icon-minus icon-fixed-width" title="${point.name} (<@fmt.monitoringPointFormat point true />)"></i>
+																	<i class="use-tooltip icon-minus icon-fixed-width" title="${point.name} (<@fmt.monitoringPointFormat point true />)" data-container="body"></i>
 																</#if>
 															</#list>
 														<#else>

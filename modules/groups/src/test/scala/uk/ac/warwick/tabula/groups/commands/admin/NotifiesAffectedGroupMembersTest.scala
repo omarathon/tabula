@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.JavaImports.JArrayList
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.groups.notifications.SmallGroupSetChangedNotification
 import scala.collection.JavaConverters._
+import uk.ac.warwick.userlookup.AnonymousUser
 
 
 class NotifiesAffectedGroupMembersTest extends TestBase {
@@ -18,13 +19,21 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
 
   private trait Fixture extends SmallGroupFixture {
     val user1 = new User("user1")
+    user1.setWarwickId("user1")
+    
     val user2 = new User("user2")
+    user2.setWarwickId("user2")
+    
     val user3 = new User("user3")
+    user3.setWarwickId("user3")
+    
     val user4 = new User("user4")
-    when(userLookup.getUserByWarwickUniId("user1")).thenReturn(user1)
-    when(userLookup.getUserByWarwickUniId("user2")).thenReturn(user2)
-    when(userLookup.getUserByWarwickUniId("user3")).thenReturn(user3)
-    when(userLookup.getUserByWarwickUniId("user4")).thenReturn(user4)
+    user4.setWarwickId("user4")
+    
+    val userDatabase = Seq(user1, user2, user3, user4)
+	userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] =>
+		ids.map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
+	}
 
     val eventA = new SmallGroupEventBuilder().withTutors(createUserGroup(Seq("tutor1","tutor2"),identifierIsUniNumber = false)).build
     val groupA = new SmallGroupBuilder()

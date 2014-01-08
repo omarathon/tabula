@@ -46,7 +46,7 @@ object FullCalendarEvent {
 			location = source.location.getOrElse(""),
 			description = source.description,
 			shorterTitle = source.moduleCode.toUpperCase + " " + source.eventType.displayName,
-			tutorNames = source.staffUniversityIds.map(id => userLookup.getUserByWarwickUniId(id).getFullName).mkString(", "),
+			tutorNames = userLookup.getUsersByWarwickUniIds(source.staffUniversityIds).values.map(_.getFullName).mkString(", "),
 		  moduleCode = source.moduleCode
 		)
 	}

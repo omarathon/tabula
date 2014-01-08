@@ -12,7 +12,7 @@
 	</#if>
 
 	<div class="alert alert-info">
-	<p>Once these points are recorded in SITS:eVision you won't be able to change this information via Tabula.</p>
+	<p>Once these points are recorded in SITS you won't be able to change this information via Tabula.</p>
 	<p>If information does need to be amended later, please contact the Administrative Officer for <a href="http://www2.warwick.ac.uk/studentrecords"> Student Records</a>.</p>
 
 	<p>Are you sure you wish to record these missed points?</p>

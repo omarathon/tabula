@@ -39,6 +39,7 @@ trait MemberDao {
 	def getByUniversityId(universityId: String): Option[Member]
 	def getByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
+	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member]
 	def getAllByUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
@@ -124,6 +125,12 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		else session.newCriteria[Member]
 			.add(in("universityId", universityIds map { _.safeTrim }))
 			.add(isNull("missingFromImportSince"))
+			.seq
+			
+	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]) =
+		if (universityIds.isEmpty) Seq.empty
+		else session.newCriteria[Member]
+			.add(in("universityId", universityIds map { _.safeTrim }))
 			.seq
 
 	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {

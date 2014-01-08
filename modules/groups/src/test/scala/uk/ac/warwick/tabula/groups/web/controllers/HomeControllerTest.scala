@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import scala.collection.JavaConverters._
+import uk.ac.warwick.userlookup.AnonymousUser
 
 class HomeControllerTest extends TestBase with Mockito{
 
@@ -20,13 +21,15 @@ class HomeControllerTest extends TestBase with Mockito{
 		val unallocatedUser = new User
 		unallocatedUser.setWarwickId("unallocated")
 		unallocatedUser.setUserId("unallocated")
-		userLookup.getUserByWarwickUniId("unallocated") returns unallocatedUser
 
 		val allocatedUser = new User
 		allocatedUser.setWarwickId("allocated")
 		allocatedUser.setUserId("allocated")
-		userLookup.getUserByWarwickUniId("allocated") returns allocatedUser
-
+		
+		val userDatabase = Seq(unallocatedUser, allocatedUser)
+		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] =>
+			ids.map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
+		}
 
 		val group1 = new SmallGroupBuilder()
 			.withStudents(createUserGroup(Seq(allocatedUser)))

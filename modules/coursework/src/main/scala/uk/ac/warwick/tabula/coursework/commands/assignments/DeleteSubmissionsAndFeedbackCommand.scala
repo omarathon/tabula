@@ -17,12 +17,14 @@ import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.FeedbackService
 import uk.ac.warwick.tabula.services.SubmissionService
+import uk.ac.warwick.tabula.data.model.Feedback
+import uk.ac.warwick.tabula.data.model.Submission
 
 /**
  * Takes a list of student university IDs and deletes either all their submissions, or all their feedback, or both,
  * depending on the value of submissionOrFeedback
  */
-class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[Unit] with SelfValidating {
+class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: Assignment) extends Command[(Seq[Submission], Seq[Feedback])] with SelfValidating {
 	
 	mustBeLinked(assignment, module)
 	PermissionCheck(Permissions.Feedback.Delete, assignment)
@@ -37,9 +39,6 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
     var students: JList[String] = JArrayList()
     var submissionOrFeedback: String = ""
 	var confirm: Boolean = false
-
-	var submissionsDeleted = 0
-	var feedbacksDeleted = 0
 	
 	val SubmissionOnly = "submissionOnly"
 	val FeedbackOnly = "feedbackOnly"
@@ -49,21 +48,25 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	def shouldDeleteFeedback = ( submissionOrFeedback == SubmissionAndFeedback || submissionOrFeedback == FeedbackOnly )
 
 	def applyInternal() = {			
-		if (shouldDeleteSubmissions) {
-			for (uniId <- students; submission <- submissionService.getSubmissionByUniId(assignment, uniId)) {
-				submissionService.delete(mandatory(submission))
-				submissionsDeleted = submissionsDeleted + 1
+		val submissions = if (shouldDeleteSubmissions) {
+			val submissions = for (uniId <- students; submission <- submissionService.getSubmissionByUniId(assignment, uniId)) yield {
+				submissionService.delete(mandatory(submission))				
+				submission
 			}
 			zipService.invalidateSubmissionZip(assignment)
-		}
+			submissions
+		} else Nil
 
-		if (shouldDeleteFeedback) {
-			for (uniId <- students; feedback <- feedbackService.getFeedbackByUniId(assignment, uniId)) {
+		val feedbacks = if (shouldDeleteFeedback) {
+			val feedbacks = for (uniId <- students; feedback <- feedbackService.getFeedbackByUniId(assignment, uniId)) yield {
 				feedbackService.delete(mandatory(feedback))
-				feedbacksDeleted = feedbacksDeleted + 1
+				feedback
 			}
 			zipService.invalidateFeedbackZip(assignment)
-		}
+			feedbacks
+		} else Nil
+		
+		(submissions, feedbacks)
 	}
 
 	def prevalidate(errors: Errors) {
@@ -87,14 +90,19 @@ class DeleteSubmissionsAndFeedbackCommand(val module: Module, val assignment: As
 	
 	
 	def getStudentsAsUsers(): JList[User] =
-		students.par.map { userLookup.getUserByWarwickUniId(_) }.seq
+		userLookup.getUsersByWarwickUniIds(students).values.toSeq
 
 	override def describe(d: Description) = d
 		.assignment(assignment)
 		.property("students" -> students)
 
-	override def describeResult(d: Description) = d
-		.assignment(assignment)
-		.property("submissionsDeleted" -> submissionsDeleted)
-		.property("feedbacksDeleted" -> feedbacksDeleted)
+	override def describeResult(d: Description, result: (Seq[Submission], Seq[Feedback])) = {
+		val (submissions, feedbacks) = result
+		val attachments = submissions.flatMap { _.allAttachments } ++ feedbacks.flatMap { _.attachments }
+		
+		d.assignment(assignment)
+			.property("submissionsDeleted" -> submissions.length)
+			.property("feedbacksDeleted" -> feedbacks.length)
+			.fileAttachments(attachments)
+	}
 }

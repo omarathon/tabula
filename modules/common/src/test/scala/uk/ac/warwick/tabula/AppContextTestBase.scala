@@ -1,4 +1,5 @@
 package uk.ac.warwick.tabula
+
 import org.junit.runner.RunWith
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.ActiveProfiles
@@ -17,10 +18,16 @@ import java.lang.reflect.Modifier
 import org.springframework.test.annotation.DirtiesContext
 import scala.language.implicitConversions
 import uk.ac.warwick.tabula.data.Transactions
-
+import uk.ac.warwick.util.cache.Caches
+import java.io.File
+import org.junit.After
+import org.junit.Assert._
+import org.apache.commons.io.FileUtils
+import org.junit.BeforeClass
+import org.junit.AfterClass
 
 @RunWith(classOf[SpringJUnit4ClassRunner])
-@ContextConfiguration(locations=Array("/WEB-INF/applicationContext-lazyinit.xml"))
+@ContextConfiguration(locations=Array("/WEB-INF/test-ehcache-properties.xml", "/WEB-INF/applicationContext-lazyinit.xml"))
 @ActiveProfiles(Array("test"))
 abstract class AppContextTestBase extends TestBase with ContextSetup with TransactionalTesting {
 	
@@ -34,7 +41,6 @@ abstract class AppContextTestBase extends TestBase with ContextSetup with Transa
 			.sortBy { _.getPackage.getName }
 	}
 
-
 }
 
 trait FieldAccessByReflection{
@@ -45,7 +51,7 @@ trait FieldAccessByReflection{
 	}
 }
 @RunWith(classOf[SpringJUnit4ClassRunner])
-@ContextConfiguration(locations=Array("/WEB-INF/properties-context.xml","/WEB-INF/persistence-context.xml"))
+@ContextConfiguration(locations=Array("/WEB-INF/test-ehcache-properties.xml", "/WEB-INF/properties-context.xml","/WEB-INF/persistence-context.xml"))
 @ActiveProfiles(Array("test"))
 abstract class PersistenceTestBase extends TestBase with ContextSetup with TransactionalTesting {
 	

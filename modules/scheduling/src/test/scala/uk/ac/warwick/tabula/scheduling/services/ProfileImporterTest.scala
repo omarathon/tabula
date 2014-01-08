@@ -71,6 +71,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			for (name <- names) {
 				val mac = MembershipInformation(MembershipMember(
 					universityId = "0672089",
+					usercode = "cuscav",
 					preferredForenames = name.toUpperCase,
 					userType = Staff
 				), () => None)
@@ -100,6 +101,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 			for (name <- names) {
 				val mac = MembershipInformation(MembershipMember(
 					universityId = "0672089",
+					usercode = "cuscav",
 					preferredSurname = name.toUpperCase,
 					userType = Staff
 				), () => None)

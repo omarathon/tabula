@@ -120,6 +120,12 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 		d.assignment(assignment)
 		d.module(assignment.module)
 	}
+	
+	override def describeResult(d: Description, extension: Extension) {
+		d.assignment(assignment)
+		 .property("extension" -> extension.id)
+		 .fileAttachments(extension.attachments.toSeq)
+	}
 
 	def emit(extension: Extension) = {
 		if (modified){

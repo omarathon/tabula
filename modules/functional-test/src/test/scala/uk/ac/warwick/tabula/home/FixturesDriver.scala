@@ -1,8 +1,6 @@
 package uk.ac.warwick.tabula.home
 
 import dispatch.classic._
-import org.apache.http.client.params.{CookiePolicy, ClientPNames}
-import dispatch.classic.thread.ThreadSafeHttpClient
 import uk.ac.warwick.tabula.{LoginDetails, FunctionalTestProperties}
 import scala.util.parsing.json.JSON
 import scala.language.postfixOps
@@ -160,5 +158,18 @@ trait FixturesDriver extends SimpleHttpFetching {
 		http.when(_==200)(req >|)
 	}
 
-}
+	def createMonitoringPointSet(routeCode:String, pointCount:Int, academicYear:String, yearOption:Option[Int]){
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/monitoringPointSet"
+		var args = Map(
+			"routeCode" -> routeCode,
+			"pointCount"-> pointCount.toString,
+			"academicYear" -> academicYear
+		)
+		if (yearOption.isDefined)
+			args = args ++ Map("year" -> yearOption.get.toString)
 
+		val req = url(uri).POST << args
+		http.when(_==200)(req >|)
+	}
+
+}

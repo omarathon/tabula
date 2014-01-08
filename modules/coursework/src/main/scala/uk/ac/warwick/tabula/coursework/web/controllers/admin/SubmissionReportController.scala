@@ -6,7 +6,6 @@ import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.commands.ReadOnly
@@ -15,6 +14,7 @@ import uk.ac.warwick.tabula.commands.Command
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import uk.ac.warwick.tabula.permissions._
+import uk.ac.warwick.tabula.services.UserLookupService
 
 class SubmissionReportCommand(val module: Module, val assignment: Assignment) extends Command[SubmissionsReport] with ReadOnly with Unaudited {
 	
@@ -30,7 +30,7 @@ class SubmissionReportCommand(val module: Module, val assignment: Assignment) ex
 class SubmissionReportController extends CourseworkController {
 
 	@Autowired var features: Features = _
-	@Autowired var userLookup: UserLookupInterface = _
+	@Autowired var userLookup: UserLookupService = _
 	
 	@ModelAttribute def command(@PathVariable("module") module:Module, @PathVariable("assignment") assignment: Assignment) =
 		new SubmissionReportCommand(module, assignment)
@@ -39,11 +39,11 @@ class SubmissionReportController extends CourseworkController {
 	def get(command: SubmissionReportCommand): Mav = {
 		val report = command.apply()
 		
-		val submissionOnly = report.submissionOnly.toList.sorted.map { userByWarwickId }
-		val feedbackOnly = report.feedbackOnly.toList.sorted.map { userByWarwickId }
-		val hasNoAttachments = report.withoutAttachments.toList.sorted.map { userByWarwickId }
-		val hasNoMarks = report.withoutMarks.toList.sorted.map { userByWarwickId }
-		val plagiarised = report.plagiarised.toList.sorted.map { userByWarwickId }
+		val submissionOnly = usersByWarwickIds(report.submissionOnly.toList)
+		val feedbackOnly = usersByWarwickIds(report.feedbackOnly.toList)
+		val hasNoAttachments = usersByWarwickIds(report.withoutAttachments.toList)
+		val hasNoMarks = usersByWarwickIds(report.withoutMarks.toList)
+		val plagiarised = usersByWarwickIds(report.plagiarised.toList)
 
 		Mav("admin/assignments/submissionsreport",
 			"assignment" -> command.assignment,
@@ -55,7 +55,7 @@ class SubmissionReportController extends CourseworkController {
 			"report" -> report).noLayoutIf(ajax)
 	}
 
-	def userByWarwickId(id: String) = userLookup.getUserByWarwickUniId(id)
+	def usersByWarwickIds(ids: Seq[String]) = userLookup.getUsersByWarwickUniIds(ids).values.toSeq.sortBy { _.getWarwickId }
 
 	def surname(user: User) = user.getLastName
 

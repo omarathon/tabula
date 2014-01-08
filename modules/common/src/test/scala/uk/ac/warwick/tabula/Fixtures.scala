@@ -188,7 +188,7 @@ object Fixtures extends Mockito {
 	def student(universityId: String = "0123456", userId: String = "cuspxp", department: Department = null, courseDepartment: Department = null, sprStatus: SitsStatus = null)	= {
 		val m = member(MemberUserType.Student, universityId, userId, department).asInstanceOf[StudentMember]
 
-		val scd = studentCourseDetails(m, courseDepartment, sprStatus)
+		studentCourseDetails(m, courseDepartment, sprStatus)
 		m
 	}
 
@@ -255,13 +255,13 @@ object Fixtures extends Mockito {
 		memberNote
 	}
 
-	def monitoringCheckpoint(point: MonitoringPoint, studentCourseDetails: StudentCourseDetails, state: AttendanceState) = {
+	def monitoringCheckpoint(point: MonitoringPoint, student: StudentMember, state: AttendanceState) = {
 		val checkpoint = new MonitoringCheckpoint
 		val monitoringPointService = smartMock[MonitoringPointService]
-		monitoringPointService.studentAlreadyReportedThisTerm(studentCourseDetails.student, point) returns (false)
+		monitoringPointService.studentAlreadyReportedThisTerm(student, point) returns (false)
 		checkpoint.monitoringPointService = monitoringPointService
 		checkpoint.point = point
-		checkpoint.studentCourseDetail = studentCourseDetails
+		checkpoint.student = student
 		checkpoint.state = state
 		checkpoint
 	}

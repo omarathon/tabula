@@ -255,6 +255,8 @@ abstract class Description {
 	 * List of Submissions IDs
 	 */
 	def submissions(submissions: Seq[Submission]) = property("submissions" -> submissions.map(_.id))
+	
+	def fileAttachments(attachments: Seq[FileAttachment]) = property("attachments" -> attachments.map(_.id))
 
 	/**
 	 * Record assignment, plus its module and department if available.
