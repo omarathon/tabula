@@ -15,6 +15,6 @@ class ExtensionChangedNotification(extension:Extension, student: User, actor: Us
 	val template = "/WEB-INF/freemarker/emails/modified_manual_extension.ftl"
 	val contentModel:Map[String, Any] = contentBaseModel ++ Map(
 		"extension" -> extension,
-		"newExpiryDate" -> dateFormatter.print(extension.expiryDate)
+		"newExpiryDate" -> dateTimeFormatter.print(extension.expiryDate)
 	)
 }
