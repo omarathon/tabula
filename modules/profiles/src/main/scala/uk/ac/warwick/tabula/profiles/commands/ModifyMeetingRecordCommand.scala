@@ -128,9 +128,20 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 	}
 
 	def describe(d: Description) {
+		relationship.studentMember.map { d.member(_) }
 		d.properties(
-			"creator" -> meeting.creator.universityId,
-			"relationship" -> meeting.relationship.relationshipType.toString()
+			"creator" -> creator.universityId,
+			"relationship" -> relationship.relationshipType.toString()
 		)
+	}
+	
+	override def describeResult(d: Description, meeting: MeetingRecord) {
+		relationship.studentMember.map { d.member(_) }
+		d.properties(
+			"creator" -> creator.universityId,
+			"relationship" -> relationship.relationshipType.toString(),
+			"meeting" -> meeting.id
+		)
+		d.fileAttachments(meeting.attachments.asScala)
 	}
 }

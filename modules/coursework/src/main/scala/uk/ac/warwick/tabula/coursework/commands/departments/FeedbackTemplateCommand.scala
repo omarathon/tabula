@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.BindingResult
 
 abstract class FeedbackTemplateCommand(val department:Department)
-	extends Command[Unit] with Daoisms with BindListener {
+	extends Command[Seq[FeedbackTemplate]] with Daoisms with BindListener {
 
 	var file:UploadedFile = new UploadedFile
 
@@ -30,7 +30,13 @@ abstract class FeedbackTemplateCommand(val department:Department)
 
 	// describe the thing that's happening.
 	override def describe(d:Description) {
-		d.properties("department" -> department.code)
+		d.department(department)
+	}
+	
+	override def describeResult(d: Description, templates: Seq[FeedbackTemplate]) {
+		d.department(department)
+		 .property("feedbackTemplate" -> templates.map { _.id })
+		 .fileAttachments(templates.map { _.attachment })
 	}
 }
 
@@ -38,19 +44,23 @@ class BulkFeedbackTemplateCommand(department:Department) extends FeedbackTemplat
 	
 	PermissionCheck(Permissions.FeedbackTemplate.Create, department)
 
-	override def applyInternal() {
+	override def applyInternal() = {
 		transactional() {
-			if (!file.attached.isEmpty) {
-				for (attachment <- file.attached) {
+			val feedbackTemplates = if (!file.attached.isEmpty) {
+				for (attachment <- file.attached) yield {
 					val feedbackForm = new FeedbackTemplate
 					feedbackForm.name = attachment.name
 					feedbackForm.department = department
 					feedbackForm.attachFile(attachment)
 					department.feedbackTemplates.add(feedbackForm)
 					session.saveOrUpdate(feedbackForm)
+					
+					feedbackForm
 				}
-			}
+			} else Nil
 			session.saveOrUpdate(department)
+			
+			feedbackTemplates
 		}
 	}
 }
@@ -66,9 +76,9 @@ class EditFeedbackTemplateCommand(department:Department, val template: FeedbackT
 	var name:String = _
 	var description:String = _
 
-	override def applyInternal() {
+	override def applyInternal() = {
 		transactional() {
-			val feedbackTemplate= department.feedbackTemplates.find(_.id == id).get
+			val feedbackTemplate = department.feedbackTemplates.find(_.id == id).get
 			feedbackTemplate.name = name
 			feedbackTemplate.description = description
 			feedbackTemplate.department = department
@@ -80,6 +90,8 @@ class EditFeedbackTemplateCommand(department:Department, val template: FeedbackT
 			session.update(feedbackTemplate)
 			// invalidate any zip files for linked assignments
 			feedbackTemplate.assignments.foreach(zipService.invalidateSubmissionZip(_))
+			
+			Seq(feedbackTemplate)
 		}
 	}
 }
@@ -91,13 +103,16 @@ class DeleteFeedbackTemplateCommand(department:Department, val template: Feedbac
 
 	var id:String = _
 
-	override def applyInternal() {
+	override def applyInternal() = {
 		transactional() {
 			val feedbackTemplate= department.feedbackTemplates.find(_.id == id).get
-			if (feedbackTemplate.hasAssignments)
-				logger.error("Cannot delete feedbackt template " + feedbackTemplate.id + " - it is still linked to assignments")
-			else
+			if (feedbackTemplate.hasAssignments) {
+				logger.error("Cannot delete feedback template " + feedbackTemplate.id + " - it is still linked to assignments")
+				Nil
+			} else {
 				department.feedbackTemplates.remove(feedbackTemplate)
+				Seq(feedbackTemplate)
+			}
 		}
 	}
 }

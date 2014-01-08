@@ -269,9 +269,9 @@ class DeleteExtensionController extends ExtensionController {
 	
 	@RequestMapping(method=Array(POST))
 	@ResponseBody
-	def deleteExtension(@ModelAttribute cmd:DeleteExtensionCommand, response:HttpServletResponse,
+	def deleteExtension(@ModelAttribute cmd: DeleteExtensionCommand, response:HttpServletResponse,
 						errors: Errors):Mav = {
-		val universityIds = cmd.apply()
+		val universityIds = cmd.apply().map { _.universityId }
 
 		// rather verbose json structure for a list of ids but mirrors the result structure used by add and edit
 		val result = Map() ++ universityIds.map(id => id -> Map("id" -> id))
