@@ -42,6 +42,9 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 	@Test
 	def commandApply() = withCurrentUser(mockCurrentUser) {
 		val event = new SmallGroupEvent
+		event.group = new SmallGroup
+		event.group.groupSet = new SmallGroupSet
+		
 		val week = 1
 		val user = new User("abcde")
 		user.setWarwickId("1234567")
