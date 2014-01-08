@@ -90,7 +90,7 @@ object ModuleRegistrationImporter {
 
 	val GetModuleRegistration = """
 			select scj_code, sms.mod_code, sms.sms_mcrd, sms.sms_agrp, sms.ses_code, sms.ayr_code, sms_occl as occurrence
-				from intuit.cam_sms sms, intuit.ins_stu stu, intuit.ins_spr spr, intuit.srs_scj scj, intuit.srs_vco, intuit.cam_ssn ssn
+				from cam_sms sms, ins_stu stu, ins_spr spr, srs_scj scj, srs_vco, cam_ssn ssn
 				where sms.spr_code = spr.spr_code
 					and spr.spr_stuc = stu.stu_code
 					and sms.ayr_code = :year
@@ -104,7 +104,7 @@ object ModuleRegistrationImporter {
 					and scj_udfa in ('Y','y')
 		union
 			select scj_code, smo.mod_code, smo.smo_mcrd, smo.smo_agrp, smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence
-				from intuit.cam_smo smo, intuit.ins_stu stu, intuit.ins_spr spr, intuit.srs_scj scj, intuit.srs_vco, intuit.cam_ssn ssn
+				from cam_smo smo, ins_stu stu, ins_spr spr, srs_scj scj, srs_vco, cam_ssn ssn
 				where smo.spr_code = spr.spr_code
 					and spr.spr_stuc = stu.stu_code
 					and smo.ayr_code = :year
@@ -116,7 +116,7 @@ object ModuleRegistrationImporter {
 					and scj_udfa in ('Y','y')
 		union
 			select scj_code, smo.mod_code, smo.smo_mcrd, smo.smo_agrp, smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence
-				from intuit.cam_smo smo, intuit.ins_stu stu, intuit.ins_spr spr, intuit.srs_scj scj, intuit.srs_vco
+				from cam_smo smo, ins_stu stu, ins_spr spr, srs_scj scj, srs_vco
 				where smo.spr_code = spr.spr_code
 				and spr.spr_stuc = stu.stu_code
 				and smo.ayr_code = :year
@@ -125,7 +125,7 @@ object ModuleRegistrationImporter {
 				and scj_udfa in ('Y','y')
 				and vco_crsc = scj.scj_crsc
 				and vco_rouc = spr.rou_code
-				and not exists (select * from intuit.cam_ssn
+				and not exists (select * from cam_ssn
 					where ssn_sprc = smo.spr_code
 					and ssn_ayrc = smo.ayr_code)
 			"""

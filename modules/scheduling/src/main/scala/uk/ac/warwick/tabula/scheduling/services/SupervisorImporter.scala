@@ -45,7 +45,7 @@ object SupervisorImporter {
 		select
 			prs_udf1,
 			rdx_perc
-		from intuit.srs_rdx rdx, intuit.ins_prs prs
+		from srs_rdx rdx, ins_prs prs
 		where rdx_scjc = :scj_code
 		and rdx_extc = 'SUP'
 		and rdx.rdx_prsc = prs.prs_code

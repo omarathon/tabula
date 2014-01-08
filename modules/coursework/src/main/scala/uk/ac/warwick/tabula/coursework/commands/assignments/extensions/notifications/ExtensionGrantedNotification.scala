@@ -17,6 +17,6 @@ class ExtensionGrantedNotification(extension:Extension, student: User, actor: Us
 
 	val contentModel:Map[String, Any] = contentBaseModel ++ Map(
 		"extension" -> extension,
-		"newExpiryDate" -> dateFormatter.print(extension.expiryDate)
+		"newExpiryDate" -> dateTimeFormatter.print(extension.expiryDate)
 	)
 }

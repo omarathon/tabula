@@ -15,7 +15,7 @@ abstract class ExtensionRequestNotification(val extension:Extension, val student
 	def url = Routes.admin.assignment.extension.review(assignment, extension.universityId)
 
 	def content = renderTemplate(template, Map(
-		"requestedExpiryDate" -> dateFormatter.print(extension.requestedExpiryDate),
+		"requestedExpiryDate" -> dateTimeFormatter.print(extension.requestedExpiryDate),
 		"reasonForRequest" -> extension.reason,
 		"attachments" -> extension.attachments,
 		"assignment" -> assignment,

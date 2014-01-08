@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.attendance.commands.report
 
 import uk.ac.warwick.tabula.{AcademicYear, Mockito, TestBase}
-import uk.ac.warwick.tabula.services._
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.services.{ProfileService, MonitoringPointService, TermService}
 
 class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends TermServiceComponent with AvailablePeriods
-			with FindTermForPeriod with ReportStudentsChoosePeriodCommandValidation with ReportStudentsState {
+	trait CommandTestSupport extends ReportStudentsChoosePeriodCommandValidation with ReportStudentsState {
 		val termService = mock[TermService]
 		val monitoringPointService = mock[MonitoringPointService]
 		val profileService = mock[ProfileService]
@@ -49,7 +48,7 @@ class ReportStudentsChoosePeriodCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def periodNotInAvailablePeriods () {
+	def periodNotInAvailablePeriods() {
 		new Fixture {
 			var errors = new BindException(cmd, "command")
 			cmd.period = unspecifiedPeriod

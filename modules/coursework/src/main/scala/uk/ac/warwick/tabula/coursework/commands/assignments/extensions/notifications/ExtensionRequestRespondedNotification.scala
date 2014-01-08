@@ -21,7 +21,7 @@ class ExtensionRequestRespondedNotification(extension: Extension, student: User,
 		"studentName" -> student.getFullName,
 		"agentName" -> agent.getFullName,
 		"verbed" -> verbed,
-		"newExpiryDate" -> dateFormatter.print(extension.expiryDate),
+		"newExpiryDate" -> dateTimeFormatter.print(extension.expiryDate),
 		"assignment" -> assignment,
 		"path" ->  url
 	))

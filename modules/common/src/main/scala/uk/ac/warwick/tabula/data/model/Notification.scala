@@ -22,7 +22,8 @@ import uk.ac.warwick.tabula.DateFormats
  */
 trait Notification[A] {
 
-	final val dateFormatter = DateFormats.NotificationDate
+	final val dateOnlyFormatter = DateFormats.NotificationDateOnly
+	final val dateTimeFormatter = DateFormats.NotificationDateTime
 
 	val agent: User // the actor in open social activity speak
 	val verb: String

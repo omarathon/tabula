@@ -70,7 +70,7 @@ class SitsAwardImporter extends AwardImporter {
 object SitsAwardImporter {
 
 	val GetAward = """
-		select awd_code, awd_snam, awd_name from intuit.ins_awd
+		select awd_code, awd_snam, awd_name from ins_awd
 		"""
 
 	class AwardsQuery(ds: DataSource) extends MappingSqlQuery[ImportAwardCommand](ds, GetAward) {

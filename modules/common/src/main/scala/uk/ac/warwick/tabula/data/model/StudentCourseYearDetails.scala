@@ -87,7 +87,7 @@ trait StudentCourseYearProperties {
 	var yearOfStudy: JInteger = _
 
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleRegistrationStatusUserType")
-	var moduleRegistrationStatus: ModuleRegistrationStatus = _ // intuit.cam_ssn.ssn_mrgs
+	var moduleRegistrationStatus: ModuleRegistrationStatus = _ // cam_ssn.ssn_mrgs
 
 	var lastUpdatedDate = DateTime.now
 

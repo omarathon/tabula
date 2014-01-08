@@ -30,21 +30,25 @@
 							<div class="dropdown-menu filter-list">
 								<button type="button" class="close" data-dismiss="dropdown" aria-hidden="true" title="Close">×</button>
 								<ul>
-									<#list allItems as item>
-										<#assign isValid = (allItems?size == validItems?size)!true />
-										<#if !isValid>
-											<#list validItems as validItem>
-												<#if ((validItem.id)!0) == ((item.id)!0)>
-													<#assign isValid = true />
-												</#if>
-											</#list>
-										</#if>
-										<li class="check-list-item" data-natural-sort="${item_index}">
-											<label class="checkbox <#if !isValid>disabled</#if>">
-												<#nested item isValid/>
-											</label>
-										</li>
-									</#list>
+									<#if allItems?has_content>
+										<#list allItems as item>
+											<#assign isValid = (allItems?size == validItems?size)!true />
+											<#if !isValid>
+												<#list validItems as validItem>
+													<#if ((validItem.id)!0) == ((item.id)!0)>
+														<#assign isValid = true />
+													</#if>
+												</#list>
+											</#if>
+											<li class="check-list-item" data-natural-sort="${item_index}">
+												<label class="checkbox <#if !isValid>disabled</#if>">
+													<#nested item isValid/>
+												</label>
+											</li>
+										</#list>
+									<#else>
+										<li><small class="muted" style="padding-left: 5px;">N/A for this department</small></li>
+									</#if>
 								</ul>
 							</div>
 						</div>
@@ -184,7 +188,7 @@
 					container: '#container',
 					template: '<div class="popover wide"><div class="arrow"></div><div class="popover-inner"><button type="button" class="close" aria-hidden="true">&#215;</button><h3 class="popover-title"></h3><div class="popover-content"><p></p></div></div></div>'
 				});
-				
+
 				$('.use-tooltip').tooltip();
 
 				$('.scrollable-points-table').find('table').each(function() {

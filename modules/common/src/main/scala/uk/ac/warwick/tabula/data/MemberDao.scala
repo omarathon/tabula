@@ -1,16 +1,11 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.JavaConversions.{asScalaBuffer, mutableSetAsJavaSet, seqAsJavaList}
-import scala.collection.mutable.HashSet
+import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
 import org.hibernate.criterion.Order
-import org.hibernate.criterion.Order.{asc, desc}
 import org.hibernate.criterion.Projections
-import org.hibernate.criterion.Projections.{countDistinct, distinct, groupProperty, projectionList, property, rowCount}
 import org.hibernate.criterion.Restrictions
-import org.hibernate.criterion.Restrictions.{disjunction, gt, in, like}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
-import javax.persistence.{Entity, NamedQueries}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Department, Member, ModeOfAttendance, RuntimeMember, SitsStatus, StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime

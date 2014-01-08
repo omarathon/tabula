@@ -84,7 +84,7 @@ case class ModeOfAttendanceInfo(code: String, shortName: String, fullName: Strin
 object ModeOfAttendanceImporter {
 
 	val GetModeOfAttendance = """
-		select moa_code, moa_snam, moa_name from intuit.ins_moa
+		select moa_code, moa_snam, moa_name from ins_moa
 		"""
 
 	class ModeOfAttendanceQuery(ds: DataSource) extends MappingSqlQuery[ImportModeOfAttendanceCommand](ds, GetModeOfAttendance) {

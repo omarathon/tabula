@@ -68,7 +68,7 @@ class SitsCourseImporter extends CourseImporter {
 object SitsCourseImporter {
 
 	val GetCourse = """
-		select crs_code, crs_snam, crs_name, crs_titl from intuit.srs_crs
+		select crs_code, crs_snam, crs_name, crs_titl from srs_crs
 		"""
 
 	class CoursesQuery(ds: DataSource) extends MappingSqlQuery[ImportCourseCommand](ds, GetCourse) {

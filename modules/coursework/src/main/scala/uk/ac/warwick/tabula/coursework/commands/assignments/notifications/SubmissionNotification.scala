@@ -24,7 +24,7 @@ abstract class SubmissionNotification(submission:Submission, student:User)
 
 	def content = renderTemplate(templateLocation, Map(
 		"submission" -> submission,
-		"submissionDate" -> dateFormatter.print(submission.submittedDate),
+		"submissionDate" -> dateTimeFormatter.print(submission.submittedDate),
 		"assignment" -> assignment,
 		"module" -> module,
 		"user" -> student,

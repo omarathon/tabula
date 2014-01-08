@@ -31,7 +31,7 @@ class SitsAcademicYearServiceImpl extends SitsAcademicYearService {
 	var sits = Wire[DataSource]("sitsDataSource")
 
 	val GetCurrentAcademicYear = """
-		select UWTABS.GET_AYR() ayr from dual
+		select GET_AYR() ayr from dual
 		"""
 
 	def getCurrentSitsAcademicYearString: String = {
@@ -46,12 +46,12 @@ class SitsAcademicYearServiceImpl extends SitsAcademicYearService {
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int) = rs.getString("ayr")
 	}
-} 
+}
 
-@Profile(Array("sandbox")) 
+@Profile(Array("sandbox"))
 @Service
 class SandboxSitsAcademicYearService extends SitsAcademicYearService {
-	
-	def getCurrentSitsAcademicYearString: String = 
+
+	def getCurrentSitsAcademicYearString: String =
 		AcademicYear.guessByDate(DateTime.now).toString()
 }

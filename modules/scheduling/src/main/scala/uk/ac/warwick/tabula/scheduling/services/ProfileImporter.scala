@@ -38,9 +38,9 @@ import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 
 case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
 
-trait ProfileImporter {	
+trait ProfileImporter {
 	import ProfileImporter._
-	
+
 	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importRowTracker: ImportRowTracker)
 		: Seq[ImportMemberCommand]
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation]
@@ -312,7 +312,7 @@ class SandboxProfileImporter extends ProfileImporter {
 
 object ProfileImporter {
 	type UniversityId = String
-	
+
 	val GetStudentInformation = """
 		select
 			stu.stu_code as university_id,
@@ -358,15 +358,15 @@ object ProfileImporter {
 
 			ssn.ssn_mrgs as mod_reg_status
 
-		from intuit.ins_stu stu
+		from ins_stu stu
 
-			join intuit.ins_spr spr
+			join ins_spr spr
 				on stu.stu_code = spr_stuc
 
-			join intuit.srs_scj scj
+			join srs_scj scj
 				on spr.spr_code = scj.scj_sprc
 
-			join intuit.srs_sce sce
+			join srs_sce sce
 				on scj.scj_code = sce.sce_scjc
 				and sce.sce_ayrc in (:year)
 				and sce.sce_seq2 =
@@ -377,20 +377,20 @@ object ProfileImporter {
 								and sce2.sce_ayrc = sce.sce_ayrc
 					)
 
-			left outer join intuit.srs_crs crs
+			left outer join srs_crs crs
 				on sce.sce_crsc = crs.crs_code
 
-			left outer join intuit.srs_nat nat
+			left outer join srs_nat nat
 				on stu.stu_natc = nat.nat_code
 
-			left outer join intuit.srs_sta sts
+			left outer join srs_sta sts
 				on spr.sts_code = sts.sta_code
 
-			left outer join intuit.cam_ssn ssn
+			left outer join cam_ssn ssn
 				on spr.spr_code = ssn.ssn_sprc
 				and sce.sce_ayrc = ssn.ssn_ayrc
 
-			left outer join intuit.ins_prs prs
+			left outer join ins_prs prs
 				on spr.prs_code = prs.prs_code
 
 		where stu.stu_code = :universityId

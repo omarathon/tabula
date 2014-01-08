@@ -89,7 +89,7 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 	final val UserByWarwickIdCacheMaxAgeSecs = 60 * 60 * 24 // 1 day
 	final val UserByWarwickIdCacheMaxSize = 100000
 
-	final val UserByWarwickIdCache = Caches.newCache(UserByWarwickIdCacheName, this, UserByWarwickIdCacheMaxAgeSecs, CacheStrategy.EhCacheRequired)
+	final val UserByWarwickIdCache = Caches.newCache(UserByWarwickIdCacheName, this, UserByWarwickIdCacheMaxAgeSecs, CacheStrategy.EhCacheIfAvailable)
 	UserByWarwickIdCache.setAsynchronousUpdateEnabled(true)
 	UserByWarwickIdCache.setMaxSize(UserByWarwickIdCacheMaxSize)
 	
