@@ -93,7 +93,7 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
   }
 
   def duplicateTo( groupSet:SmallGroupSet):SmallGroup = {
-    val newGroup=new SmallGroup()
+    val newGroup = new SmallGroup()
     newGroup.id = id
     newGroup.events = events.asScala.map(_.duplicateTo(newGroup)).asJava
     newGroup.groupSet = groupSet

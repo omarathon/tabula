@@ -37,6 +37,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import uk.ac.warwick.tabula.commands.PopulateOnForm
 import RecordAttendanceCommand._
+import uk.ac.warwick.tabula.ItemNotFoundException
 
 object RecordAttendanceCommand {
 	type UniversityId = String
@@ -61,6 +62,8 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 		with RecordAttendanceState 
 		with PopulateOnForm {
 	self: SmallGroupServiceComponent with UserLookupComponent with ProfileServiceComponent =>
+		
+	if (!event.group.groupSet.collectAttendance) throw new ItemNotFoundException
 		
 	lazy val occurrence = smallGroupService.getSmallGroupEventOccurrence(event, week)
 	
