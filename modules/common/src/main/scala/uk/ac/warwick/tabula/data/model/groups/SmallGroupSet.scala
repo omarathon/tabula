@@ -119,6 +119,8 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	
 	@Column(name="collect_attendance")
 	var collectAttendance: Boolean = true
+	
+	def showAttendanceReports = !archived && !deleted && collectAttendance
 
 	// converts the assessmentGroups to upstream assessment groups
 	def upstreamAssessmentGroups: Seq[UpstreamAssessmentGroup] = assessmentGroups.asScala.flatMap { _.toUpstreamAssessmentGroup(academicYear) }

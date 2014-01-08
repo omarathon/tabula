@@ -32,7 +32,7 @@ class ViewModuleAttendanceCommand(val module: Module)
 	extends CommandInternal[SortedMap[SmallGroupSet, SortedMap[SmallGroup, SmallGroupAttendanceInformation]]] with ViewModuleAttendanceState {
 	
 	override def applyInternal() = {
-		SortedMap(module.groupSets.asScala.filter { set => !set.archived && !set.deleted && set.collectAttendance }.map { set =>
+		SortedMap(module.groupSets.asScala.filter { _.showAttendanceReports }.map { set =>
 			(set -> ViewSmallGroupSetAttendanceCommand(set).apply())
 		}.toSeq:_*)
 	}
