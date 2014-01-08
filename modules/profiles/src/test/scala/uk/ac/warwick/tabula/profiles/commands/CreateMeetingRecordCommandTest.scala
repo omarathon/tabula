@@ -46,6 +46,7 @@ class CreateMeetingRecordCommandTest extends PersistenceTestBase with MeetingRec
 		cmd.title = ""
 		cmd.features = emptyFeatures
 		cmd.features.meetingRecordApproval = true
+		cmd.features.attendanceMonitoringMeetingPointType = false
 
 		// check invalid empty title
 		errors = new BindException(cmd, "command")
