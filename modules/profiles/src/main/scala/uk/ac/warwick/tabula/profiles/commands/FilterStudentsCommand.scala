@@ -6,8 +6,7 @@ import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.ProfileServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
+import uk.ac.warwick.tabula.services.{ProfileServiceComponent, AutowiringProfileServiceComponent}
 import org.hibernate.criterion.Order._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Route
@@ -36,24 +35,28 @@ object FilterStudentsCommand {
 
 abstract class FilterStudentsCommand(val department: Department) extends CommandInternal[FilterStudentsResults] with FilterStudentsState with BindListener {
 	self: ProfileServiceComponent =>
-	
+
 	def applyInternal() = {
+		val restrictions = buildRestrictions()
+
 		val totalResults = profileService.countStudentsByRestrictions(
 			department = department,
-			restrictions = buildRestrictions()
+			restrictions = restrictions
 		)
-		
-		val students = profileService.findStudentsByRestrictions(
+
+		val (offset, students) = profileService.findStudentsByRestrictions(
 			department = department,
-			restrictions = buildRestrictions(),
-			orders = buildOrders(), 
-			maxResults = studentsPerPage, 
+			restrictions = restrictions,
+			orders = buildOrders(),
+			maxResults = studentsPerPage,
 			startResult = studentsPerPage * (page-1)
 		)
-		
+
+		if (offset == 0) page = 1
+
 		FilterStudentsResults(students, totalResults)
 	}
-	
+
 	def onBind(result: BindingResult) {
 		// Add all non-withdrawn codes to SPR statuses by default
 		if (sprStatuses.isEmpty) {
@@ -64,7 +67,7 @@ abstract class FilterStudentsCommand(val department: Department) extends Command
 
 trait FilterStudentsState extends FiltersStudents {
 	override def department: Department
-	
+
 	var studentsPerPage = FiltersStudents.DefaultStudentsPerPage
 	var page = 1
 
@@ -81,7 +84,7 @@ trait FilterStudentsState extends FiltersStudents {
 
 trait FilterStudentsPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: FilterStudentsState =>
-	
+
 	def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.Profiles.Search, department)
 	}

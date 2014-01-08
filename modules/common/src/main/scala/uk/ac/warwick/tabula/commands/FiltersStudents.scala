@@ -40,7 +40,7 @@ object FiltersStudents {
 
 trait FiltersStudents extends ProfileServiceComponent with PermissionsCheckingMethods {
 	import FiltersStudents._
-	
+
 	def department: Department
 	def courseTypes: JList[CourseType]
 	def routes: JList[Route]
@@ -107,7 +107,7 @@ trait FiltersStudents extends ProfileServiceComponent with PermissionsCheckingMe
 
 	// Do we need to consider out-of-department modules/routes or can we rely on users typing them in manually?
 	lazy val allModules: Seq[Module] = modulesForDepartmentAndSubDepartments(mandatory(department))
-	lazy val allCourseTypes: Seq[CourseType] = CourseType.all
+	lazy val allCourseTypes: Seq[CourseType] = mandatory(department).filterRule.courseTypes
 	lazy val allRoutes: Seq[Route] = routesForDepartmentAndSubDepartments(mandatory(department)).sorted(Route.DegreeTypeOrdering)
 	lazy val allYearsOfStudy: Seq[Int] = 1 to 8
 	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(mandatory(department).rootDepartment)

@@ -294,7 +294,8 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 				any[Iterable[ScalaRestriction]], any[Iterable[ScalaOrder]], any[JInteger], any[JInteger]
 			) returns Seq(studentInSubDepartment, studentInOtherSubDepartment)
 
-			val students = profileServiceWithMocks.findStudentsByRestrictions(subDepartment, Seq(), Seq(), Int.MaxValue, 0)
+			val (offset, students) = profileServiceWithMocks.findStudentsByRestrictions(subDepartment, Seq(), Seq(), Int.MaxValue, 0)
+			offset should be (0)
 			students.size should be (1)
 			students.head should be (studentInSubDepartment)
 		}
