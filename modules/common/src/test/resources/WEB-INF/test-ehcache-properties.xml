@@ -24,7 +24,7 @@
         name="arguments">
         <!-- The new Properties -->
         <util:properties>
-            <prop key="warwick.ehcache.disk.store.dir">${java.io.tmpdir}/junit-ehcache</prop>
+            <prop key="warwick.ehcache.disk.store.dir">${user.dir}/target/junit-ehcache</prop>
             <prop key="warwick.ehcache.config">/ehcache-config.xml</prop>
         </util:properties>
     </property>
