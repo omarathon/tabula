@@ -183,6 +183,10 @@
 				$form.data('request', null);
 				$('#filter-results').removeClass('loading');
 
+				var sitsUrl = $('div.studentResults').data('sits-url')
+				$('.send-to-sits a').attr('href', sitsUrl);
+				$('.send-to-sits a').removeClass('disabled');
+
 				$('.use-wide-popover').tabulaPopover({
 					trigger: 'click',
 					container: '#container',
@@ -203,6 +207,8 @@
 		window.doRequest = doRequest;
 
 		$('#command input').on('change', function(e) {
+			$('.send-to-sits a').addClass('disabled');
+
 			// Load the new results
 			var $checkbox = $(this);
 			var $form = $checkbox.closest('form');
