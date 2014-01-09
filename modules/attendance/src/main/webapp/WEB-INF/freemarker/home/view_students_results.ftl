@@ -251,7 +251,6 @@
 
 	<script type="text/javascript">
 		jQuery(function($) {
-
 			$('.pagination a').on('click', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
