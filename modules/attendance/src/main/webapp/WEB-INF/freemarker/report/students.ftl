@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<h1>Record missed monitoring points in SITS:eVision</h1>
+<h1>Upload missed monitoring points to SITS:eVision</h1>
 
 <#assign confirmPath><@routes.reportConfirm command.department /></#assign>
 <@f.form commandName="command" action="${confirmPath}" method="GET" cssClass="form-horizontal">
@@ -11,15 +11,15 @@
 
 	<#if studentReportStatuses?size == 0>
 		<div class="alert alert-info">
-			There are no students with missed monitoring points who have not been recorded for the chosen period.
+			All students with missed monitoring points during this period have already been uploaded to SITS:eVision.
 		</div>
 	<#else>
 		<#if (unrecordedStudentsCount > 0)>
 			<div class="alert alert-warn">
-				There <@fmt.p number=unrecordedStudentsCount singular="is" plural="are" shownumber=false />  <@fmt.p number=unrecordedStudentsCount singular="student" shownumber=true />  with unrecorded points. Once these have been sent to SITS, it will no longer be possible to record these points.
+				There <@fmt.p number=unrecordedStudentsCount singular="is" plural="are" shownumber=false />  <@fmt.p number=unrecordedStudentsCount singular="student" shownumber=true />  with unrecorded points during this period. Once these have been uploaded to SITS, it will no longer be possible to record attendance at these points.
 			</div>
 		</#if>
-		<p>Record missed points in the ${command.period} monitoring period for the following students:</p>
+		<p>Upload missed points in the ${command.period} monitoring period for the following students:</p>
 
 		<table class="table table-bordered table-striped table-condensed">
 			<thead>
@@ -48,7 +48,7 @@
 		<div class="submit-buttons">
 			<div class="pull-right">
 				<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Loading&hellip;">
-					Record
+					Upload
 				</button>
 				<a class="btn" href="<@routes.viewDepartmentStudentsWithAcademicYear command.department command.academicYear command.serializeFilter />">Cancel</a>
 			</div>

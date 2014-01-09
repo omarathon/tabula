@@ -36,14 +36,14 @@
 <#if reports?? && monitoringPeriod??>
 	<div class="alert alert-success">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
-		Missed points for <@fmt.p reports "student" /> in the ${monitoringPeriod} monitoring period have been recorded in SITS:eVision.
+		Missed points for <@fmt.p reports "student" /> in the ${monitoringPeriod} monitoring period have been uploaded to SITS:eVision.
 	</div>
 </#if>
 
 <#assign filterQuery = command.serializeFilter />
 <#if features.attendanceMonitoringReport && can.do("MonitoringPoints.Report", command.department) >
 	<div class="pull-right send-to-sits">
-		<a href="<@routes.report command.department command.academicYear filterQuery />" class="btn btn-primary">Record in SITS:eVision</a>
+		<a href="<@routes.report command.department command.academicYear filterQuery />" class="btn btn-primary">Upload to SITS:eVision</a>
 	</div>
 </#if>
 
