@@ -82,7 +82,7 @@ class AssignmentController extends CourseworkController {
 
 			val submission = submissionService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
 
-			val extension = assignment.extensions.find(e => e.universityId == user.universityId || e.userId == user.userId)
+			val extension = assignment.extensions.find(_.isForUser(user.apparentUser))
 			val isExtended = assignment.isWithinExtension(user.apparentUser)
 			val extensionRequested = extension.isDefined && !extension.get.isManual
 
