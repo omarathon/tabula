@@ -26,6 +26,7 @@ case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefini
 		Profiles.Read.StudentCourseDetails.Core,
 		Profiles.Read.StudentCourseDetails.Status,
 		Profiles.Read.SmallGroups,
+		Profiles.Read.Coursework,
     Profiles.Read.Timetable,
 
     Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
@@ -39,7 +40,12 @@ case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefini
     Profiles.MeetingRecord.Delete(PermissionsSelector.Any[StudentRelationshipType]),
 
 		MonitoringPoints.View,
-		SmallGroupEvents.ViewRegister
+		SmallGroupEvents.ViewRegister,
+		
+		// Can read own coursework info
+		Submission.Read,
+		Feedback.Read,
+		Extension.Read
 	)
 
 	GrantsScopelessPermission(

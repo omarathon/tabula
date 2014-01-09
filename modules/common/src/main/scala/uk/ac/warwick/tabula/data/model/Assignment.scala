@@ -261,26 +261,28 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	/**
 	 * True if the specified user has been granted an extension and that extension has not expired on the specified date
 	 */
-	def isWithinExtension(userId: String, time: DateTime) =
-		extensions.exists(e => e.userId == userId && e.approved && e.expiryDate.isAfter(time))
+	def isWithinExtension(user: User, time: DateTime): Boolean = isWithinExtension(user.getWarwickId, user.getUserId, time) 
+	def isWithinExtension(universityId: String, usercode: String, time: DateTime) =
+		extensions.exists(e => e.isForUser(universityId, usercode) && e.approved && e.expiryDate.isAfter(time))
 
 	/**
 	 * True if the specified user has been granted an extension and that extension has not expired now
 	 */
-	def isWithinExtension(userId: String): Boolean = isWithinExtension(userId, new DateTime)
+	def isWithinExtension(user: User): Boolean = isWithinExtension(user, new DateTime)
+	def isWithinExtension(universityId: String, usercode: String): Boolean = isWithinExtension(universityId, usercode, new DateTime)
 
 	/**
 	 * retrospectively checks if a submission was late. called by submission.isLate to check against extensions
 	 */
 	def isLate(submission: Submission) =
-		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.userId, submission.submittedDate)
+		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.universityId, submission.userId, submission.submittedDate)
 
 	/**
 	 * retrospectively checks if a submission was an 'authorised late'
 	 * called by submission.isAuthorisedLate to check against extensions
 	 */
 	def isAuthorisedLate(submission: Submission) =
-		!openEnded && closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.userId, submission.submittedDate)
+		!openEnded && closeDate.isBefore(submission.submittedDate) && isWithinExtension(submission.universityId, submission.userId, submission.submittedDate)
 
 	// returns extension for a specified student
 	def findExtension(uniId: String) = extensions.find(_.universityId == uniId)
@@ -299,13 +301,13 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	/**
 	 * Calculates whether we could submit to this assignment.
 	 */
-	def submittable(uniId: String) = isAlive && collectSubmissions && isOpened() && (allowLateSubmissions || !isClosed() || isWithinExtension(uniId))
+	def submittable(user: User) = isAlive && collectSubmissions && isOpened() && (allowLateSubmissions || !isClosed() || isWithinExtension(user))
 
 	/**
 	 * Calculates whether we could re-submit to this assignment (assuming that the current
 	 * student has already submitted).
 	 */
-	def resubmittable(uniId: String) = submittable(uniId) && allowResubmission && (!isClosed() || isWithinExtension(uniId))
+	def resubmittable(user: User) = submittable(user) && allowResubmission && (!isClosed() || isWithinExtension(user))
 
 	def mostRecentFeedbackUpload = feedbacks.maxBy {
 		_.uploadedDate

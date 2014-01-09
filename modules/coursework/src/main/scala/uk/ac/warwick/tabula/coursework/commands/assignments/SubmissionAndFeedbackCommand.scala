@@ -70,7 +70,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
 				new ExtensionListItem(
 					extension=extension,
-					within=assignment.isWithinExtension(user.getUserId)
+					within=assignment.isWithinExtension(user)
 				)
 			}
 						
@@ -125,7 +125,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 			val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
 				new ExtensionListItem(
 					extension=extension,
-					within=assignment.isWithinExtension(user.getUserId)
+					within=assignment.isWithinExtension(user)
 				)
 			}
 			

@@ -72,7 +72,7 @@ class SubmitAssignmentCommand(
 			errors.reject("assignment.submit.disabled")
 		}
 
-		val hasExtension = assignment.isWithinExtension(user.apparentUser.getUserId)
+		val hasExtension = assignment.isWithinExtension(user.apparentUser)
 
 		if (!assignment.allowLateSubmissions && (assignment.isClosed() && !hasExtension)) {
 			errors.reject("assignment.submit.closed")
@@ -105,8 +105,8 @@ class SubmitAssignmentCommand(
 	}
 
 	override def applyInternal() = transactional() {
-		assignment.submissions.find(_.universityId == user.universityId).map { existingSubmission =>
-			if (assignment.resubmittable(user.apparentId)) {
+		assignment.submissions.find(_.isForUser(user.apparentUser)).map { existingSubmission =>
+			if (assignment.resubmittable(user.apparentUser)) {
 				service.delete(existingSubmission)
 			} else { // Validation should prevent ever reaching here.
 				throw new IllegalArgumentException("Submission already exists and can't overwrite it")

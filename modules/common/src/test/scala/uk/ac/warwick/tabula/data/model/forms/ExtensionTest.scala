@@ -3,6 +3,7 @@ import scala.collection.JavaConversions._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.data.model.{BooleanAssignmentProperties, Submission, Assignment, FileAttachment}
+import uk.ac.warwick.userlookup.User
 
 // scalastyle:off magic.number
 
@@ -25,10 +26,16 @@ class ExtensionTest extends PersistenceTestBase {
     extension.approvedOn = new DateTime(2012, 7, 22, 14, 42)
 
     assignment.extensions add extension
+    
+    val cuslaj = new User("cuslaj")
+    cuslaj.setWarwickId("1170836")
+    
+    val cuscao = new User("cuscao")
+    cuscao.setWarwickId("1122334")
 
     withFakeTime(dateTime(2012, 8)) {
-      assignment.isWithinExtension("cuslaj") should be (true)  // has an extension so can submit
-      assignment.isWithinExtension("cuscao") should be (false) // cannot submit
+      assignment.isWithinExtension(cuslaj) should be (true)  // has an extension so can submit
+      assignment.isWithinExtension(cuscao) should be (false) // cannot submit
     }
 
     withFakeTime(dateTime(2012, 7)) {
