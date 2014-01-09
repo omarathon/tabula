@@ -194,6 +194,7 @@ object TimetableEvent{
 			case Tutorial => TimetableEventType.Other("Tutorial")
 			case Project => TimetableEventType.Other("Project")
 			case Example => TimetableEventType.Other("Example")
+			case Lecture => TimetableEventType.Lecture
 		}
 	}
 }

@@ -26,6 +26,7 @@ import uk.ac.warwick.util.queue.QueueListener
 import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
+import uk.ac.warwick.util.cache.Caches.CacheStrategy
 
 trait PermissionsService {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
@@ -238,7 +239,7 @@ trait GrantedRolesForUserCache { self: PermissionsDaoComponent =>
 	final val GrantedRolesForUserCacheMaxSize = 1000
 	
 	final val GrantedRolesForUserCache = 
-		Caches.newCache(GrantedRolesForUserCacheName, new GrantedRolesForUserCacheFactory, GrantedRolesForUserCacheMaxAgeSecs)
+		Caches.newCache(GrantedRolesForUserCacheName, new GrantedRolesForUserCacheFactory, GrantedRolesForUserCacheMaxAgeSecs, CacheStrategy.EhCacheIfAvailable)
 	GrantedRolesForUserCache.setMaxSize(GrantedRolesForUserCacheMaxSize)
 	
 	class GrantedRolesForUserCacheFactory extends CacheEntryFactory[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
@@ -260,7 +261,7 @@ trait GrantedRolesForGroupCache { self: PermissionsDaoComponent =>
 	final val GrantedRolesForGroupCacheMaxSize = 1000
 	
 	final val GrantedRolesForGroupCache = 
-		Caches.newCache(GrantedRolesForGroupCacheName, new GrantedRolesForGroupCacheFactory, GrantedRolesForGroupCacheMaxAgeSecs)
+		Caches.newCache(GrantedRolesForGroupCacheName, new GrantedRolesForGroupCacheFactory, GrantedRolesForGroupCacheMaxAgeSecs, CacheStrategy.EhCacheIfAvailable)
 	GrantedRolesForGroupCache.setMaxSize(GrantedRolesForGroupCacheMaxSize)
 	
 	class GrantedRolesForGroupCacheFactory extends SingularCacheEntryFactory[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
@@ -277,7 +278,7 @@ trait GrantedPermissionsForUserCache { self: PermissionsDaoComponent =>
 	final val GrantedPermissionsForUserCacheMaxSize = 1000
 	
 	final val GrantedPermissionsForUserCache = 
-		Caches.newCache(GrantedPermissionsForUserCacheName, new GrantedPermissionsForUserCacheFactory, GrantedPermissionsForUserCacheMaxAgeSecs)
+		Caches.newCache(GrantedPermissionsForUserCacheName, new GrantedPermissionsForUserCacheFactory, GrantedPermissionsForUserCacheMaxAgeSecs, CacheStrategy.EhCacheIfAvailable)
 	GrantedPermissionsForUserCache.setMaxSize(GrantedPermissionsForUserCacheMaxSize)
 	
 	class GrantedPermissionsForUserCacheFactory extends SingularCacheEntryFactory[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
@@ -294,7 +295,7 @@ trait GrantedPermissionsForGroupCache { self: PermissionsDaoComponent =>
 	final val GrantedPermissionsForGroupCacheMaxSize = 1000
 	
 	final val GrantedPermissionsForGroupCache = 
-		Caches.newCache(GrantedPermissionsForGroupCacheName, new GrantedPermissionsForGroupCacheFactory, GrantedPermissionsForGroupCacheMaxAgeSecs)
+		Caches.newCache(GrantedPermissionsForGroupCacheName, new GrantedPermissionsForGroupCacheFactory, GrantedPermissionsForGroupCacheMaxAgeSecs, CacheStrategy.EhCacheIfAvailable)
 	GrantedPermissionsForGroupCache.setMaxSize(GrantedPermissionsForGroupCacheMaxSize)
 	
 	class GrantedPermissionsForGroupCacheFactory extends SingularCacheEntryFactory[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {

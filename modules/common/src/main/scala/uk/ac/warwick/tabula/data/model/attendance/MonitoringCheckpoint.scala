@@ -4,8 +4,7 @@ import javax.persistence.{Column, Entity, JoinColumn, ManyToOne}
 import org.joda.time.DateTime
 
 import javax.validation.constraints.NotNull
-import uk.ac.warwick.tabula.data.model.GeneratedId
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.tabula.data.model.{StudentMember, GeneratedId}
 import org.hibernate.annotations.Type
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.MonitoringPointService
@@ -20,8 +19,8 @@ class MonitoringCheckpoint extends GeneratedId {
 	var point: MonitoringPoint = _
 
 	@ManyToOne
-	@JoinColumn(name = "student_course_detail_id")
-	var studentCourseDetail: StudentCourseDetails = _
+	@JoinColumn(name = "student_id")
+	var student: StudentMember = _
 
 	@NotNull
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.AttendanceStateUserType")
@@ -30,7 +29,7 @@ class MonitoringCheckpoint extends GeneratedId {
 
 	def state = _state
 	def state_=(state: AttendanceState) {
-		if (monitoringPointService.studentAlreadyReportedThisTerm(studentCourseDetail.student, point)){
+		if (monitoringPointService.studentAlreadyReportedThisTerm(student, point)){
 			throw new IllegalArgumentException
 		}
 		_state = state

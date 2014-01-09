@@ -42,7 +42,5 @@ trait ViewRegisterPermissionDefinition extends AdminDepartmentHomePermissionDefi
 }
 
 trait NonEmptyModuleFilter extends ModuleFilter {
-	def moduleFilter(module: Module) = module.groupSets.asScala.exists { set => 
-		!set.archived && !set.deleted
-	}
+	def moduleFilter(module: Module) = module.groupSets.asScala.exists { _.showAttendanceReports }
 }

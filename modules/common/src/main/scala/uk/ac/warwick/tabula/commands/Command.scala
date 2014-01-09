@@ -133,6 +133,18 @@ object Command {
 		override def initialValue = None
 	}
 	
+	def getOrInitStopwatch =
+		threadLocal.get match {
+			case Some(sw) => sw
+			case None => {
+				val sw = StopWatch()
+				threadLocal.set(Some(sw))
+				sw		
+			}
+		}
+	
+	def endStopwatching { threadLocal.remove }
+	
 	def timed[A](fn: uk.ac.warwick.util.core.StopWatch => A): A = {
 		val currentStopwatch = threadLocal.get
 		if (!currentStopwatch.isDefined) {
@@ -243,6 +255,8 @@ abstract class Description {
 	 * List of Submissions IDs
 	 */
 	def submissions(submissions: Seq[Submission]) = property("submissions" -> submissions.map(_.id))
+	
+	def fileAttachments(attachments: Seq[FileAttachment]) = property("attachments" -> attachments.map(_.id))
 
 	/**
 	 * Record assignment, plus its module and department if available.

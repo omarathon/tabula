@@ -6,19 +6,18 @@ import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.services.{ProfileService, ModuleAndDepartmentService, RelationshipService}
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, RelationshipService}
 import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
-import uk.ac.warwick.tabula.roles.{UserAccessMgrRoleDefinition, DepartmentalAdministratorRoleDefinition, StudentRelationshipAgentRoleDefinition}
+import uk.ac.warwick.tabula.roles.{UserAccessMgrRoleDefinition, DepartmentalAdministratorRoleDefinition}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.{MemberUserType, AssessmentType, UpstreamAssessmentGroup, AssessmentComponent, Department, Route}
+import uk.ac.warwick.tabula.data.model.{AssessmentType, UpstreamAssessmentGroup, AssessmentComponent, Department, Route}
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import org.hibernate.criterion.Restrictions
-import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
 
 /** This command is intentionally Public. It only exists on dev and is designed,
   * in essence, to blitz a department and set up some sample data in it.
@@ -32,6 +31,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	var relationshipService = Wire[RelationshipService]
 	var scdDao = Wire[StudentCourseDetailsDao]
 	var memberDao = Wire[MemberDao]
+	var monitoringPointDao = Wire[MonitoringPointDao]
 
 
 	def applyInternal() {
@@ -116,7 +116,17 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				for (markingWorkflow <- dept.markingWorkflows) session.delete(markingWorkflow)
 				dept.markingWorkflows.clear()
 
-				for (route <- routes) session.delete(route)
+				for (route <- routes) {
+					val sets = monitoringPointDao.findMonitoringPointSets(route)
+					for (set <- sets) {
+						for (point <- set.points) {
+							for (checkpoint <- point.checkpoints) session.delete(checkpoint)
+							session.delete(point)
+						}
+						session.delete(set)
+					}
+					session.delete(route)
+				}
 				dept.routes.clear()
 
 			  for (sub <- recursivelyGetChildren(dept)) session.delete(sub)

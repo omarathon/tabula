@@ -112,10 +112,10 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 		val group = UserGroup.ofUniversityIds
 		group.addUser("test")
 		group.userLookup = mock[UserLookupService]
-		group.userLookup.getUserByWarwickUniId("test") returns test
+		group.userLookup.getUsersByWarwickUniIds(Seq("test")) returns Map("test" -> test)
 
 		group.users should be(Seq(test))
-		there was one(group.userLookup).getUserByWarwickUniId(any[String])
+		there was one(group.userLookup).getUsersByWarwickUniIds(any[Seq[String]])
 	}
 
 	@Test
@@ -136,9 +136,9 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 		val group = UserGroup.ofUniversityIds
 		group.excludeUser("test")
 		group.userLookup = mock[UserLookupService]
-		group.userLookup.getUserByWarwickUniId("test") returns test
+		group.userLookup.getUsersByWarwickUniIds(Seq("test")) returns Map("test" -> test)
 
 		group.excludes should be(Seq(test))
-		there was one(group.userLookup).getUserByWarwickUniId(any[String])
+		there was one(group.userLookup).getUsersByWarwickUniIds(any[Seq[String]])
 	}
 }

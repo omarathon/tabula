@@ -11,7 +11,7 @@ class MeetingRecordApprovalNotification(meeting: MeetingRecord, val verb: String
 	def content = renderToString(FreemarkerTemplate, Map(
 		"actor" -> agent,
 		"role"->agentRole,
-		"dateFormatter" -> dateFormatter,
+		"dateFormatter" -> dateOnlyFormatter,
 		"verbed" ->  (if (verb == "create") "created" else "edited"),
 		"nextActionDescription" -> "approve or reject it",
 		"meetingRecord" -> meeting,

@@ -16,7 +16,7 @@
 		<button class="btn review">Review report</button>
 	</p>
 	<div class="monitroing-points-report-preview">
-		<p>The following missed monitroing points will be sent to the Academic Office:</p>
+		<p>The following missed monitroing points will be recorded in SITS:eVision:</p>
 		<table class="table table-condensed table-bordered table-striped">
 			<thead>
 				<tr>

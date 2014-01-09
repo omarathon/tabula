@@ -21,6 +21,8 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 		cmd.meetingRecordDao = meetingRecordDao
 		cmd.features = emptyFeatures
 		cmd.features.meetingRecordApproval = true
+		cmd.features.attendanceMonitoringMeetingPointType = false
+		
 		meeting = transactional { tx => cmd.apply() }
 		meeting.title should be ("Updated title fools")
 
@@ -64,6 +66,7 @@ class EditMeetingRecordCommandTest extends PersistenceTestBase with MeetingRecor
 		}
 		editCmd.features = emptyFeatures
 		editCmd.features.meetingRecordApproval = true
+		editCmd.features.attendanceMonitoringMeetingPointType = false
 
 		editCmd.meetingRecordDao = meetingRecordDao
 		editCmd.notificationService = notificationService

@@ -1,15 +1,20 @@
 package uk.ac.warwick.tabula.admin.commands.department
 
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentServiceComponent
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.services.{RelationshipService, UserLookupService, ModuleAndDepartmentServiceComponent, ModuleAndDepartmentService}
+import uk.ac.warwick.tabula.{FunctionalContextTesting, FunctionalContext, TestBase, Mockito, Fixtures}
+import uk.ac.warwick.tabula.data.model.{UserGroup, Department}
 import org.springframework.validation.BindException
+import uk.ac.warwick.tabula.services.permissions.PermissionsService
+import org.mockito.Mockito._
+import org.hamcrest.Matchers._
+import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
+import scala.Some
 
-class AddSubDepartmentCommandTest extends TestBase with Mockito {
-	
+
+class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTesting with Mockito {
+
+	import AddSubDepartmentCommandTest.MinimalCommandContext
+
 	trait CommandTestSupport extends AddSubDepartmentCommandState with ModuleAndDepartmentServiceComponent {
 		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 		
@@ -18,12 +23,22 @@ class AddSubDepartmentCommandTest extends TestBase with Mockito {
 	}
 	
 	trait Fixture {
+
 		val parent = Fixtures.department("in", "IT Services")
+		parent.id = "in-test"
 		parent.allowExtensionRequests = true
 		parent.autoGroupDeregistration = false
-		
+
+		val ug = UserGroup.ofUsercodes
+		ug.addUser("cuslaj")
+
+		val permissionsService = mock[PermissionsService]
+		permissionsService.ensureUserGroupFor(parent, ExtensionManagerRoleDefinition) returns ug
+		parent.permissionsService = permissionsService
+
 		val command = new AddSubDepartmentCommandInternal(parent) with CommandTestSupport with AddSubDepartmentCommandValidation
 	}
+
 	
 	@Test def init() { new Fixture {
 		command.code should startWith("in-")
@@ -31,7 +46,7 @@ class AddSubDepartmentCommandTest extends TestBase with Mockito {
 		command.filterRule should be(Department.AllMembersFilterRule)
 	}}
 	
-	@Test def apply() { new Fixture {
+	@Test def apply() { inContext[MinimalCommandContext] { new Fixture {
 		command.code = "in-ug"
 		command.name = "IT Services Undergraduate"
 		command.filterRule = Department.UndergraduateFilterRule
@@ -43,9 +58,10 @@ class AddSubDepartmentCommandTest extends TestBase with Mockito {
 		dept.parent should be (parent)
 		dept.allowExtensionRequests should be (true)
 		dept.autoGroupDeregistration should be (false)
+		dept.extensionManagers.includeUsers should contain("cuslaj")
 		
-		there was one(command.moduleAndDepartmentService).save(dept)
-	}}
+		there was two(command.moduleAndDepartmentService).save(dept)
+	}}}
 	
 	@Test def validateNoErrors() { new Fixture {
 		command.code = "in-ug"
@@ -216,4 +232,18 @@ class AddSubDepartmentCommandTest extends TestBase with Mockito {
 		errors.getFieldError.getCodes should contain ("department.filterRule.contradictory")
 	}}
 
+}
+
+object AddSubDepartmentCommandTest {
+	class MinimalCommandContext extends FunctionalContext with Mockito {
+
+		bean() {
+			val permissionsService = mock[PermissionsService]
+			permissionsService.ensureUserGroupFor(argThat(anything), argThat(anything))(argThat(anything)) returns UserGroup.ofUsercodes
+			permissionsService
+		}
+
+		bean(){mock[UserLookupService]}
+		bean(){mock[RelationshipService]}
+	}
 }

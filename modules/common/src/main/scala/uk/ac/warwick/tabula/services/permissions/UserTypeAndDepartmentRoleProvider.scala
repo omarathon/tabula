@@ -13,6 +13,9 @@ import uk.ac.warwick.tabula.roles.StudentRole
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.Promises._
+import uk.ac.warwick.tabula.roles.StudentRoleDefinition
+import uk.ac.warwick.tabula.roles.StaffRoleDefinition
+import uk.ac.warwick.tabula.roles.UniversityMemberRoleDefinition
 
 @Component
 class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
@@ -20,11 +23,19 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 	var profileService = Wire.auto[ProfileService]
 	val departmentService = promise { Wire[ModuleAndDepartmentService] }
 	
-	private def getRolesForMembers(members: Seq[Member]) = members.toStream flatMap { member =>
-		UniversityMemberRole(member) #:: (member.userType match {
-			case Student => member.touchedDepartments map { StudentRole(_) }
-			case Staff => member.affiliatedDepartments map { StaffRole(_) }
-			case Emeritus => member.affiliatedDepartments map { StaffRole(_) }
+	private def getRolesForMembers(members: Seq[Member]): Stream[Role] = members.toStream.flatMap { member =>
+		val memberRole = customRoleFor(Option(member.homeDepartment))(UniversityMemberRoleDefinition, member).getOrElse(UniversityMemberRole(member))
+		
+		memberRole #:: (member.userType match {
+			case Student => member.touchedDepartments.map { department => 
+				customRoleFor(department)(StudentRoleDefinition, department).getOrElse(StudentRole(department)) 
+			}
+			case Staff => member.affiliatedDepartments.map { department => 
+				customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department)) 
+			}
+			case Emeritus => member.affiliatedDepartments.map { department => 
+				customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department)) 
+			}
 			case _ => Stream.empty
 		})
 	}
@@ -33,8 +44,8 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 		if (user.departmentCode.hasText) {
 			departmentService.get.getDepartmentByCode(user.departmentCode.toLowerCase) match {
 				case Some(department) =>
-					if (user.isStaff) Stream(StaffRole(department))
-					else if (user.isStudent) Stream(StudentRole(department))
+					if (user.isStaff) Stream(customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department)))
+					else if (user.isStudent) Stream(customRoleFor(department)(StudentRoleDefinition, department).getOrElse(StudentRole(department)))
 					else Stream.empty
 				case None => Stream.empty
 			}

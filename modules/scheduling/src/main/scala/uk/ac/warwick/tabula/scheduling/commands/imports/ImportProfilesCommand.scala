@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.commands.{Command, Description}
 import uk.ac.warwick.tabula.data.{StudentCourseYearDetailsDao, Daoisms, MemberDao, ModuleRegistrationDaoImpl, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter, MembershipInformation, ModeOfAttendanceImporter, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware, SitsStatusesImporter}
@@ -17,6 +17,8 @@ import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileIndexSe
 import uk.ac.warwick.userlookup.User
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware {
+	
+	type UniversityId = String
 
 	PermissionCheck(Permissions.ImportSystemData)
 
@@ -94,7 +96,17 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				membershipInfos <- logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize)
 			} {
 				logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon")
-				val users: Map[String, User] = userLookup.getUsersByUserIds(membershipInfos.map(x => x.member.usercode)).toMap
+				val users: Map[UniversityId, User] =
+					membershipInfos.map { m =>
+						val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
+						
+						val user = userLookup.getUserByWarwickUniIdUncached(warwickId) match {
+							case FoundUser(u) => u
+							case _ => userLookup.getUserByUserId(usercode)
+						}
+						
+						m.member.universityId -> user 
+					}.toMap
 
 				logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members from Membership")
 
@@ -103,7 +115,10 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				}
 
 				// each apply has its own transaction
-				studentRowCommands map { _.apply }
+				transactional() {
+					studentRowCommands map { _.apply }
+					session.flush()
+				}
 
 				transactional() {
 					updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
@@ -133,7 +148,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		}
 	}
 
-	def updateModuleRegistrationsAndSmallGroups(membershipInfo: Seq[MembershipInformation], users: Map[String, User]): Seq[ModuleRegistration] = {
+	def updateModuleRegistrationsAndSmallGroups(membershipInfo: Seq[MembershipInformation], users: Map[UniversityId, User]): Seq[ModuleRegistration] = {
 		logger.info("Fetching module registrations")
 		val importModRegCommands = moduleRegistrationImporter.getModuleRegistrationDetails(membershipInfo, users)
 
@@ -152,8 +167,11 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 	def refresh(member: Member) {
 		transactional() {
-			val usercode = member.userId
-			val user = userLookup.getUserByUserId(usercode)
+			val warwickId = member.universityId
+			val user = userLookup.getUserByWarwickUniIdUncached(member.universityId) match {
+				case FoundUser(u) => u
+				case _ => userLookup.getUserByUserId(member.userId)
+			}
 
 			val importRowTracker = new ImportRowTracker
 
@@ -161,7 +179,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				case Some(membInfo: MembershipInformation) => {
 
 					// retrieve details for this student from SITS and store the information in Tabula
-					val importMemberCommands = profileImporter.getMemberDetails(List(membInfo), Map(usercode -> user), importRowTracker)
+					val importMemberCommands = profileImporter.getMemberDetails(List(membInfo), Map(warwickId -> user), importRowTracker)
 					if (importMemberCommands.isEmpty) logger.warn("Refreshing student " + membInfo.member.universityId + " but found no data to import.")
 					val members = importMemberCommands map { _.apply }
 
@@ -171,7 +189,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					session.flush
 
 					// re-import module registrations and delete old module and group registrations:
-					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(usercode -> user))
+					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(warwickId -> user))
 
 					// TAB-1435 refresh profile index
 					profileIndexService.indexItemsWithoutNewTransaction(members.flatMap { m => profileService.getMemberByUniversityId(m.universityId) })

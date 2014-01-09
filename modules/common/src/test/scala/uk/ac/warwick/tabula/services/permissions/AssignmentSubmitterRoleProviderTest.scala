@@ -18,6 +18,9 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 	
 	@Test def unrestrictedAssignment = withUser("cuscav") {
 		val assignment = Fixtures.assignment("my assignment")
+		assignment.module = Fixtures.module("in101")
+		assignment.module.department = Fixtures.department("in")
+		
 		assignment.restrictSubmissions = false
 		
 		provider.getRolesFor(currentUser, assignment) should be (Seq(AssignmentSubmitter(assignment)))
@@ -25,6 +28,9 @@ class AssignmentSubmitterRoleProviderTest extends TestBase with Mockito {
 	
 	@Test def canSubmit = withUser("cuscav") {
 		val assignment = Fixtures.assignment("my assignment")
+		assignment.module = Fixtures.module("in101")
+		assignment.module.department = Fixtures.department("in")
+		
 		assignment.assignmentMembershipService = assignmentMembershipService
 		assignment.restrictSubmissions = true
 		

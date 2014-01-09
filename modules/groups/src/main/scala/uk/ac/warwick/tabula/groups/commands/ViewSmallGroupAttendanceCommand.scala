@@ -23,6 +23,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.services.UserLookupComponent
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
+import uk.ac.warwick.tabula.ItemNotFoundException
 
 sealed abstract class SmallGroupAttendanceState {
 	def getName = toString()
@@ -114,6 +115,8 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 		
 	import ViewSmallGroupAttendanceCommand._
 	
+	if (!group.groupSet.collectAttendance) throw new ItemNotFoundException
+	
 	override def applyInternal() = {
 		val occurrences = benchmarkTask("Get all small group event occurrences for the group") { smallGroupService.findAttendanceByGroup(group) }
 			
@@ -123,7 +126,7 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 		// Build the list of all users who are in the group, or have attended one or more occurrences of the group
 		val allStudents = benchmarkTask("Get a list of all registered or attended users") {
 			group.students.users ++
-			occurrences.flatMap { _.attendance.asScala }.map { a => userLookup.getUserByWarwickUniId(a.universityId) }
+			userLookup.getUsersByWarwickUniIds(occurrences.flatMap { _.attendance.asScala }.map { _.universityId }).values.toSeq
 			.distinct
 		}
 		

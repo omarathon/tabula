@@ -31,7 +31,7 @@ class SitsAcademicYearServiceImpl extends SitsAcademicYearService {
 	var sits = Wire[DataSource]("sitsDataSource")
 
 	val GetCurrentAcademicYear = """
-		select UWTABS.GET_AYR() ayr from dual
+		select GET_AYR() ayr from dual
 		"""
 
 	def getCurrentSitsAcademicYearString: String = {

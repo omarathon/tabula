@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Route, StudentMember}
+import uk.ac.warwick.tabula.data.model.{Department, Route, StudentMember}
 import org.hibernate.criterion.{Projections, Order}
 import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.criterion.Restrictions._
@@ -21,7 +21,7 @@ trait AutowiringMonitoringPointDaoComponent extends MonitoringPointDaoComponent 
 trait MonitoringPointDao {
 	def getPointById(id: String): Option[MonitoringPoint]
 	def getSetById(id: String): Option[MonitoringPointSet]
-	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint]): Seq[(StudentMember, MonitoringCheckpoint)]
+	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint], mostSiginificantOnly: Boolean = true): Seq[(StudentMember, MonitoringCheckpoint)]
 	def saveOrUpdate(monitoringPoint: MonitoringPoint)
 	def delete(monitoringPoint: MonitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
@@ -38,7 +38,6 @@ trait MonitoringPointDao {
 	def deleteTemplate(template: MonitoringPointSetTemplate)
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
 	def deleteCheckpoint(checkpoint: MonitoringCheckpoint): Unit
-	def missedCheckpoints(student: StudentMember, academicYear: AcademicYear): Int
 	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findPointSetsForStudentsByStudent(students: Seq[StudentMember], academicYear: AcademicYear): Map[StudentMember, MonitoringPointSet]
 	def findSimilarPointsForMembers(point: MonitoringPoint, students: Seq[StudentMember]): Map[StudentMember, Seq[MonitoringPoint]]
@@ -54,7 +53,9 @@ trait MonitoringPointDao {
 	def studentsByUnrecordedCount(
 		universityIds: Seq[String],
 		academicYear: AcademicYear,
-		currentAcademicWeek: Int,
+		requiredFromWeek: Int,
+		startWeek: Int,
+		endWeek: Int,
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
@@ -63,6 +64,7 @@ trait MonitoringPointDao {
 	def findNonReported(students: Seq[StudentMember], academicYear: AcademicYear, period: String): Seq[StudentMember]
 	def findUnreportedReports: Seq[MonitoringPointReport]
 	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport]
+	def hasAnyPointSets(department: Department): Boolean
 }
 
 
@@ -76,7 +78,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def getSetById(id: String) =
 		getById[MonitoringPointSet](id)
 
-	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint]): Seq[(StudentMember, MonitoringCheckpoint)] = {
+	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint], mostSiginificantOnly: Boolean = true): Seq[(StudentMember, MonitoringCheckpoint)] = {
 		val criteria = session.newCriteria[MonitoringCheckpoint]
 			.createAlias("point", "point")
 
@@ -86,7 +88,19 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 		val checkpoints = criteria.seq
 
-		checkpoints.map(checkpoint => (checkpoint.studentCourseDetail.student, checkpoint))
+		val result = checkpoints
+			.map(checkpoint => (checkpoint.student, checkpoint))
+
+		if (mostSiginificantOnly)
+			result.filter{ case(student, checkpoint) => student.mostSignificantCourseDetails.exists(scd => {
+				val pointSet = checkpoint.point.pointSet.asInstanceOf[MonitoringPointSet]
+				val scydOption = scd.freshStudentCourseYearDetails.find(scyd =>
+					scyd.academicYear == pointSet.academicYear && scyd.yearOfStudy == pointSet.year
+				)
+				pointSet.route == scd.route && scydOption.isDefined
+			})}
+		else
+			result
 	}
 
 	def saveOrUpdate(monitoringPoint: MonitoringPoint) = session.saveOrUpdate(monitoringPoint)
@@ -117,13 +131,10 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	private def yearRestriction(opt: Option[Any]) = opt map { is("year", _) } getOrElse { isNull("year") }
 
 	def getCheckpoint(monitoringPoint: MonitoringPoint, student: StudentMember): Option[MonitoringCheckpoint] = {
-		student.mostSignificantCourseDetails match {
-			case Some(studentCourseDetail) => session.newCriteria[MonitoringCheckpoint]
-				.add(is("studentCourseDetail", studentCourseDetail))
-				.add(is("point", monitoringPoint))
-				.uniqueResult
-			case _ => None
-		}
+		session.newCriteria[MonitoringCheckpoint]
+			.add(is("student", student))
+			.add(is("point", monitoringPoint))
+			.uniqueResult
 	}
 
 	def getCheckpoints(monitoringPoint: MonitoringPoint) : Seq[MonitoringCheckpoint] = {
@@ -151,18 +162,6 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 	def deleteCheckpoint(checkpoint: MonitoringCheckpoint): Unit = {
 		session.delete(checkpoint)
-	}
-
-	def missedCheckpoints(student: StudentMember, academicYear: AcademicYear): Int = {
-		val scd = student.mostSignificantCourseDetails.getOrElse(throw new IllegalArgumentException)
-		session.newCriteria[MonitoringCheckpoint]
-			.add(is("studentCourseDetail", scd))
-			.add(is("state", AttendanceState.MissedUnauthorised))
-			.createAlias("point", "point")
-			.createAlias("point.pointSet", "pointSet")
-			.add(is("pointSet.academicYear", academicYear))
-			.project[Number](Projections.rowCount())
-			.uniqueResult.get.intValue()
 	}
 
 	def findPointSetsForStudentsByStudent(students: Seq[StudentMember], academicYear: AcademicYear): Map[StudentMember, MonitoringPointSet] = {
@@ -271,7 +270,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			and (mps.year is null or mps.year = scyd.yearOfStudy)
 			and mp.pointSet = mps
 			and mc.point = mp
-			and mc.studentCourseDetail = s.mostSignificantCourse
+			and mc.student = s
 			and mps.academicYear = :academicYear
 			and scyd.academicYear = mps.academicYear
 			and mc._state = 'unauthorised'
@@ -302,7 +301,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def studentsByUnrecordedCount(
 		universityIds: Seq[String],
 		academicYear: AcademicYear,
-		currentAcademicWeek: Int,
+		requiredFromWeek: Int = 52,
+		startWeek: Int = 1,
+		endWeek: Int = 52,
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
@@ -323,9 +324,13 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			and mp.pointSet = mps
 			and mps.academicYear = :academicYear
 			and scyd.academicYear = mps.academicYear
+			and mp.validFromWeek >= :startWeek
+			and mp.validFromWeek <= :endWeek
 			and mp.requiredFromWeek < :requiredFromWeek
 			and mp.id not in (
-				select mc.point from MonitoringCheckpoint mc where mc.studentCourseDetail = s.mostSignificantCourse
+				select mc.point from MonitoringCheckpoint mc
+				where mc.student = s
+				and mc.point = mp
 			)
 			and (
 											""" + partionedUniversityIdsWithIndex.map{
@@ -337,7 +342,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 		val query = session.newQuery[Array[java.lang.Object]](queryString)
 			.setParameter("academicYear", academicYear)
-			.setParameter("requiredFromWeek", currentAcademicWeek)
+			.setParameter("requiredFromWeek", requiredFromWeek)
+			.setParameter("startWeek", startWeek)
+			.setParameter("endWeek", endWeek)
 
 		partionedUniversityIdsWithIndex.foreach{
 			case (ids, index) => {
@@ -445,6 +452,14 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			.foreach { ids => or.add(in("student.universityId", ids.asJavaCollection)) }
 		c.add(or)
 		c.seq
+	}
+
+	def hasAnyPointSets(department: Department): Boolean = {
+		session.newCriteria[MonitoringPointSet]
+			.createAlias("route", "r")
+			.add(is("r.department", department))
+			.project[Number](Projections.rowCount())
+			.uniqueResult.get.intValue() > 0
 	}
 
 }

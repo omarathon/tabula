@@ -49,7 +49,6 @@ trait MonitoringPointService {
 		state: AttendanceState,
 		member: Member
 	) : MonitoringCheckpoint
-	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int
 	def getPointSetForStudent(student: StudentMember, academicYear: AcademicYear): Option[MonitoringPointSet]
 	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findPointSetsForStudentsByStudent(students: Seq[StudentMember], academicYear: AcademicYear): Map[StudentMember, MonitoringPointSet]
@@ -66,7 +65,9 @@ trait MonitoringPointService {
 	def studentsByUnrecordedCount(
 		universityIds: Seq[String],
 		academicYear: AcademicYear,
-		currentAcademicWeek: Int,
+		requiredFromWeek: Int = 52,
+		startWeek: Int = 1,
+		endWeek: Int = 52,
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
@@ -77,6 +78,7 @@ trait MonitoringPointService {
 	def markReportAsPushed(report: MonitoringPointReport): Unit
 	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport]
 	def studentAlreadyReportedThisTerm(student:StudentMember, point:MonitoringPoint): Boolean
+	def hasAnyPointSets(department: Department): Boolean
 }
 
 
@@ -146,7 +148,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		val checkpoint = monitoringPointDao.getCheckpoint(point, student).getOrElse({
 			val newCheckpoint = new MonitoringCheckpoint
 			newCheckpoint.point = point
-			newCheckpoint.studentCourseDetail = student.mostSignificantCourseDetails.getOrElse(throw new IllegalArgumentException)
+			newCheckpoint.student = student
 			newCheckpoint
 		})
 		checkpoint.state = state
@@ -155,10 +157,6 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		checkpoint.autoCreated = false
 		monitoringPointDao.saveOrUpdate(checkpoint)
 		checkpoint
-	}
-
-	def countMissedPoints(student: StudentMember, academicYear: AcademicYear): Int = {
-		monitoringPointDao.missedCheckpoints(student, academicYear)
 	}
 
 	def getPointSetForStudent(student: StudentMember, academicYear: AcademicYear): Option[MonitoringPointSet] = {
@@ -198,12 +196,14 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def studentsByUnrecordedCount(
 		universityIds: Seq[String],
 		academicYear: AcademicYear,
-		currentAcademicWeek: Int,
+		requiredFromWeek: Int = 52,
+		startWeek: Int = 1,
+		endWeek: Int = 52,
 		isAscending: Boolean,
 		maxResults: Int,
 		startResult: Int
 	): Seq[(StudentMember, Int)] = {
-		monitoringPointDao.studentsByUnrecordedCount(universityIds, academicYear, currentAcademicWeek, isAscending, maxResults, startResult)
+		monitoringPointDao.studentsByUnrecordedCount(universityIds, academicYear, requiredFromWeek, startWeek, endWeek, isAscending, maxResults, startResult)
 	}
 
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String] = {
@@ -230,6 +230,10 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def studentAlreadyReportedThisTerm(student:StudentMember, point:MonitoringPoint): Boolean = {
 		val nonReportedTerms = findNonReportedTerms(Seq(student), point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
 		!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear).getTermTypeAsString)
+	}
+
+	def hasAnyPointSets(department: Department): Boolean = {
+		monitoringPointDao.hasAnyPointSets(department: Department)
 	}
 
 }
@@ -309,7 +313,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 						val checkpoint = new MonitoringCheckpoint
 						checkpoint.point = point
 						checkpoint.monitoringPointService = monitoringPointService
-						checkpoint.studentCourseDetail = student.mostSignificantCourseDetails.getOrElse(throw new IllegalArgumentException)
+						checkpoint.student = student
 						checkpoint.state = AttendanceState.Attended
 						checkpoint.autoCreated = true
 						checkpoint.updatedDate = DateTime.now

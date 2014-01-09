@@ -1,16 +1,11 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.JavaConversions.{asScalaBuffer, mutableSetAsJavaSet, seqAsJavaList}
-import scala.collection.mutable.HashSet
+import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
 import org.hibernate.criterion.Order
-import org.hibernate.criterion.Order.{asc, desc}
 import org.hibernate.criterion.Projections
-import org.hibernate.criterion.Projections.{countDistinct, distinct, groupProperty, projectionList, property, rowCount}
 import org.hibernate.criterion.Restrictions
-import org.hibernate.criterion.Restrictions.{disjunction, gt, in, like}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
-import javax.persistence.{Entity, NamedQueries}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Department, Member, ModeOfAttendance, RuntimeMember, SitsStatus, StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
@@ -39,6 +34,7 @@ trait MemberDao {
 	def getByUniversityId(universityId: String): Option[Member]
 	def getByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
+	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member]
 	def getAllByUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
@@ -124,6 +120,12 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		else session.newCriteria[Member]
 			.add(in("universityId", universityIds map { _.safeTrim }))
 			.add(isNull("missingFromImportSince"))
+			.seq
+			
+	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]) =
+		if (universityIds.isEmpty) Seq.empty
+		else session.newCriteria[Member]
+			.add(in("universityId", universityIds map { _.safeTrim }))
 			.seq
 
 	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {
@@ -403,6 +405,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[String] = {
 		val idCriteria = session.newCriteria[StudentMember]
+		idCriteria.add(isNull("missingFromImportSince"))
 		restrictions.foreach { _.apply(idCriteria) }
 
 		idCriteria.project[String](distinct(property("universityId"))).seq
@@ -427,6 +430,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]) = {
 		val c = session.newCriteria[StudentMember]
+		c.add(isNull("missingFromImportSince"))
 		restrictions.foreach { _.apply(c) }
 
 		c.project[Number](countDistinct("universityId")).uniqueResult.get.intValue()

@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupSet}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.{StudentSignUp, Manual}
 import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.userlookup.AnonymousUser
 
 class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 
@@ -17,7 +18,11 @@ class AllocateSelfToGroupCommandTest extends TestBase with Mockito{
 		val testGroup = new SmallGroupBuilder().withUserLookup(userLookup).build
 		val user = new User("abcde")
 		user.setWarwickId("01234")
-	  userLookup.getUserByWarwickUniId("01234") returns user
+		
+		val userDatabase = Seq(user)
+		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] =>
+			ids.map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
+		}
 
 		val testGroupSet = new SmallGroupSetBuilder().withId("set1").withGroups(Seq(testGroup)).build
 		val allocateCommand = new AllocateSelfToGroupCommand(user, testGroupSet)

@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import scala.annotation.tailrec
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.xml.NodeSeq
 import javax.persistence._
 import org.hibernate.annotations.{Type, BatchSize, AccessType, ForeignKey}
@@ -17,6 +17,7 @@ import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
+import uk.ac.warwick.tabula.roles.RoleDefinition
 
 @Entity @AccessType("field")
 class Department extends GeneratedId
@@ -160,10 +161,14 @@ class Department extends GeneratedId
 	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.includes(user)
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
-	
+
 	def copySettingsFrom(other: Department) = {
 		ensureSettings
 		settings ++= other.settings
+	}
+
+	def copyExtensionManagersFrom(other: Department) = {
+		other.extensionManagers.includeUsers.asScala.foreach(extensionManagers.addUser(_))
 	}
 
 	// If hibernate sets owners to null, make a new empty usergroup
@@ -190,9 +195,14 @@ class Department extends GeneratedId
 		if (!includesMember(member)) {
 			Stream.empty // no point looking further down the tree if this level doesn't contain the required member
 		} else {
-			this #:: children.flatMap(child => child.subDepartmentsContaining(member)).toStream
+			this #:: children.asScala.flatMap(child => child.subDepartmentsContaining(member)).toStream
 		}
 	}
+
+	def replacedRoleDefinitionFor(roleDefinition: RoleDefinition) =
+		customRoleDefinitions.asScala
+			.filter { _.replacesBaseDefinition }
+			.find { _.baseRoleDefinition == roleDefinition }
 
 	def permissionsParents = Option(parent).toStream
 
@@ -217,12 +227,12 @@ object Department {
 	object FilterRule {
 		// Define a way to get from a String to a FilterRule, for use in a ConvertibleConverter
 		implicit val factory = { name: String => withName(name) }
-		
+
 		val allFilterRules: Seq[FilterRule] = {
 			val inYearRules = (1 until 9).map(InYearFilterRule(_))
 			(Seq(AllMembersFilterRule, UndergraduateFilterRule, PostgraduateFilterRule) ++ inYearRules)
 		}
-		
+
 		def withName(name: String): FilterRule = {
 			allFilterRules.find(_.name == name).get
 		}
@@ -230,6 +240,7 @@ object Department {
 
 	sealed trait FilterRule extends Convertible[String] {
 		val name: String
+		val courseTypes: Seq[CourseType]
 		def matches(member: Member): Boolean
 		def getName = name // for Spring
 		def value = name
@@ -237,7 +248,7 @@ object Department {
 
 	case object UndergraduateFilterRule extends FilterRule {
 		val name = "UG"
-
+		val courseTypes = CourseType.ugCourseTypes
 		def matches(member: Member) = member match {
 			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.flatMap { route => Option(route.degreeType) } match {
 				case Some(DegreeType.Undergraduate) => true
@@ -249,7 +260,7 @@ object Department {
 
 	case object PostgraduateFilterRule extends FilterRule {
 		val name = "PG"
-
+		val courseTypes = CourseType.pgCourseTypes
 		def matches(member: Member) = member match {
 			case s: StudentMember => s.mostSignificantCourseDetails.flatMap { cd => Option(cd.route) }.flatMap { route => Option(route.degreeType) } match {
 				case Some(DegreeType.Undergraduate) => false
@@ -261,13 +272,14 @@ object Department {
 
 	case object AllMembersFilterRule extends FilterRule {
 		val name = "All"
-
+		val courseTypes = CourseType.all
 		def matches(member: Member) = true
 	}
 
 
 	case class InYearFilterRule(year:Int) extends FilterRule {
 		val name=s"Y$year"
+		val courseTypes = CourseType.all
 		def matches(member: Member) = member match{
 			case s:StudentMember => s.mostSignificantCourseDetails.map(
 				_.latestStudentCourseYearDetails.yearOfStudy == year)
@@ -278,6 +290,7 @@ object Department {
 
 	case class CompositeFilterRule(rules:Seq[FilterRule]) extends FilterRule{
 		val name = rules.map(_.name).mkString(",")
+		val courseTypes = CourseType.all
 		def matches(member:Member) = rules.forall(_.matches(member))
 	}
 

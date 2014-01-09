@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.roles.Role
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.roles.StudentRelationshipAgent
+import uk.ac.warwick.tabula.roles.StudentRelationshipAgentRoleDefinition
 
 @Component
 class StudentRelationshipAgentRoleProvider extends RoleProvider {
@@ -22,7 +23,18 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider {
 				.toStream
 				.filter { _.studentId == member.universityId }
 				.map { rel => 
-					StudentRelationshipAgent(member, rel.relationshipType)
+					/*
+					 * Check the student department for custom roles only, not the agent department,
+					 * as that's what we're performing operations on.
+					 */
+					val studentDepartment = 
+						rel.studentMember
+							 .flatMap { _.mostSignificantCourseDetails }
+							 .map { _.latestStudentCourseYearDetails.enrolmentDepartment }
+					
+					customRoleFor(studentDepartment)(StudentRelationshipAgentRoleDefinition(rel.relationshipType), member).getOrElse {
+						StudentRelationshipAgent(member, rel.relationshipType)
+					}
 				}
 		}
 

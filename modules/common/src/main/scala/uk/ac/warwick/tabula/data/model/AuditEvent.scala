@@ -62,7 +62,7 @@ case class AuditEvent(
 	def submissionIds = stringListProperty("submissions")
 	def feedbackIds = stringListProperty("feedbacks")
 	def students = stringListProperty("students")
-
+	def attachments = stringListProperty("attachments")
 
 	/** Was there an "error" stage, indicating an exception was thrown? */
 	def hadError = findStage("error").isDefined

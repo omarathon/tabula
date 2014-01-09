@@ -16,5 +16,19 @@
 
 </@f.form>
 
+<script type="text/javascript">
+	jQuery(function($) {
+		$('#format').on('change', function() {
+			var value = $(this).val();
+			if (value === 'lecture') {
+				var $checkbox = $('input[name="collectAttendance"]');
+				if ($checkbox.is(':checked')) {
+					$checkbox.prop('checked', false);
+				}				
+			}
+		});
+	});
+</script>
+
 
 </#escape>

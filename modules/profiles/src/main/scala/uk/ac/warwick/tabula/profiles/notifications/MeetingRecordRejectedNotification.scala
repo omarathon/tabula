@@ -12,7 +12,7 @@ class MeetingRecordRejectedNotification(approval: MeetingRecordApproval)
 	def content = renderToString(FreemarkerTemplate, Map(
 		"actor" -> agent,
 		"role"->agentRole,
-		"dateFormatter" -> dateFormatter,
+		"dateFormatter" -> dateOnlyFormatter,
 		"meetingRecord" -> approval.meetingRecord,
 		"verbed" -> "rejected",
 		"nextActionDescription" -> "edit the record and submit it for approval again",

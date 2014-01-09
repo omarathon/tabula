@@ -29,7 +29,7 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 
 	def applyInternal() = {
 		val studentsWithSubmissionOrFeedback = 
-			assignment.getUniIdsWithSubmissionOrFeedback.filter { _.hasText }.toSeq.sorted.map { userLookup.getUserByWarwickUniId }.filter { _.isFoundUser }		
+			userLookup.getUsersByWarwickUniIds(assignment.getUniIdsWithSubmissionOrFeedback.filter { _.hasText }.toSeq).values.filter { _.isFoundUser }.toSeq.sortBy { _.getWarwickId }
 		val unsubmittedStudents = assignment.membershipInfo.items.map(_.user).filterNot { studentsWithSubmissionOrFeedback.contains }
 			
 		val students = studentsWithSubmissionOrFeedback ++ unsubmittedStudents

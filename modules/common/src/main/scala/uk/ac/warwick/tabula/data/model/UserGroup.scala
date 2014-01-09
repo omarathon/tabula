@@ -117,17 +117,10 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 		else
 			user.getUserId
 	}
-	private def getUsersFromIds(ids:Seq[String]):Seq[User] = {
-		if (universityIds){
-			ids.map(userLookup.getUserByWarwickUniId)
-		}
-		else {
-			if (ids.isEmpty) {
-				Nil
-			} else {
-				userLookup.getUsersByUserIds(ids.asJava).values.asScala.toSeq
-			}
-		}
+	private def getUsersFromIds(ids: Seq[String]): Seq[User] = ids match {
+		case Nil => Nil
+		case ids if universityIds => userLookup.getUsersByWarwickUniIds(ids).values.toSeq
+		case ids => userLookup.getUsersByUserIds(ids.asJava).values.asScala.toSeq
 	}
 
 	def users: Seq[User] = getUsersFromIds(members)

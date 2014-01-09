@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.services.permissions
 import scala.collection.JavaConversions._
-
-
-
 import org.springframework.stereotype.Component
-
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.Marker
 import uk.ac.warwick.tabula.roles.Role
+import uk.ac.warwick.tabula.roles.MarkerRoleDefinition
 
 @Component
 class MarkerRoleProvider extends RoleProvider {
 	
 	def getRolesFor(user: CurrentUser, scope: PermissionsTarget): Stream[Role] = {
-		def getRoles(assignments: Seq[Assignment]) = assignments.toStream filter { _.isMarker(user.apparentUser) } map {Marker(_)} 
+		def getRoles(assignments: Seq[Assignment]) = assignments.toStream.filter { _.isMarker(user.apparentUser) }.map { assignment =>
+			customRoleFor(assignment.module.department)(MarkerRoleDefinition, assignment).getOrElse(Marker(assignment))
+		} 
 		
 		scope match {
 			case department: Department => 

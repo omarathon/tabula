@@ -169,10 +169,11 @@
 	});
 </script>
 
+<#assign expand_by_default = (!can_manage_dept && modules?size lte 5) />
 <#list modules as module>
-	<@components.admin_section module=module expand_by_default=!can_manage_dept />
+	<@components.admin_section module=module expand_by_default=expand_by_default />
 	
-	<#if can_manage_dept>
+	<#if !expand_by_default>
 		<#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
 		<script type="text/javascript">
 			GlobalScripts.initCollapsible(jQuery('#module-${module.code}').filter(':not(.empty)'));

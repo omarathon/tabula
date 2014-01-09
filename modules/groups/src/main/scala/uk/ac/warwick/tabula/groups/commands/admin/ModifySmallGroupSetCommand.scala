@@ -94,6 +94,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 		studentsCanSeeOtherMembers = set.studentsCanSeeOtherMembers
 		defaultMaxGroupSizeEnabled = set.defaultMaxGroupSizeEnabled
 		defaultMaxGroupSize = set.defaultMaxGroupSize
+		collectAttendance = set.collectAttendance
 
 		// linked assessmentGroups
 		assessmentGroups = set.assessmentGroups
@@ -109,6 +110,8 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 		set.academicYear = academicYear
 		set.format = format
 		set.allocationMethod = allocationMethod
+		
+		set.collectAttendance = collectAttendance
 
 		set.assessmentGroups.clear
 		set.assessmentGroups.addAll(assessmentGroups)
@@ -161,4 +164,6 @@ trait SmallGroupSetProperties extends CurrentAcademicYear {
 	var studentsCanSeeOtherMembers:Boolean = false
 	var defaultMaxGroupSizeEnabled:Boolean = false
 	var defaultMaxGroupSize:Int = SmallGroup.DefaultGroupSize
+	
+	var collectAttendance: Boolean = true
 }

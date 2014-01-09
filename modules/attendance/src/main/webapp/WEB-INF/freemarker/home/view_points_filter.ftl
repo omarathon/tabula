@@ -32,9 +32,11 @@
 	</div>
 </#if>
 
-<#assign thisPath><@routes.viewDepartmentPoints command.department /></#assign>
-<@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
+<#assign submitUrl><@routes.viewDepartmentPoints command.department /></#assign>
+<@attendance_macros.academicYearSwitcher submitUrl command.academicYear command.thisAcademicYear />
 
-<#assign filter_results_path="view_points_results.ftl" />
-<#include "_view_filter.ftl" />
+<#assign filterCommand = command />
+<#assign filterCommandName = "command" />
+<#assign filterResultsPath = "/WEB-INF/freemarker/home/view_points_results.ftl" />
+<#include "/WEB-INF/freemarker/filter_bar.ftl" />
 </#escape>

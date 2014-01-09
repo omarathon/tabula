@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.services.MaintenanceModeEnabledException
 import uk.ac.warwick.tabula.services.MaintenanceModeServiceImpl
 import uk.ac.warwick.tabula.events.Log4JEventListener
 import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.events.EventHandling
 
 
 class CommandTest extends TestBase {
@@ -28,6 +29,8 @@ class CommandTest extends TestBase {
 	}
 	
 	@Test(expected=classOf[MaintenanceModeEnabledException]) def maintenanceModeEnabled {
+		EventHandling.enabled = true
+		
 		val mmService = new MaintenanceModeServiceImpl()
 		mmService.enable
 		

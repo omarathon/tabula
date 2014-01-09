@@ -41,7 +41,7 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] 
 	val simpleEntityName = classTag[A].runtimeClass.getSimpleName
 
 	val cacheName = simpleEntityName + "-" + path.replace(".","-")
-	//val cache = Caches.newCache(cacheName, new UserGroupMembershipCacheFactory(), Days.ONE.toStandardSeconds.getSeconds)
+	//val cache = Caches.newCache(cacheName, new UserGroupMembershipCacheFactory(), Days.ONE.toStandardSeconds.getSeconds, CacheStrategy.EhCacheIfAvailable)
 
   // A series of confusing variables for building joined queries across paths split by.dots
 	private val pathParts = path.split("\\.").toList.reverse

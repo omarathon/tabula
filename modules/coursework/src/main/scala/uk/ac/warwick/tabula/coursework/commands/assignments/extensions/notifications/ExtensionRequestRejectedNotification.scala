@@ -15,6 +15,6 @@ class ExtensionRequestRejectedNotification (extension:Extension, student: User, 
 	val template = "/WEB-INF/freemarker/emails/extension_request_rejected.ftl"
 	val contentModel:Map[String, Any] = contentBaseModel ++ Map(
 		"extension" -> extension,
-		"originalAssignmentDate" -> dateFormatter.print(assignment.closeDate)
+		"originalAssignmentDate" -> dateTimeFormatter.print(assignment.closeDate)
 	)
 }
