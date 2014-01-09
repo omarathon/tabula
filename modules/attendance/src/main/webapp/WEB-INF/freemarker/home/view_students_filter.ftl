@@ -41,7 +41,7 @@
 
 <#assign filterQuery = command.serializeFilter />
 <#if features.attendanceMonitoringReport && can.do("MonitoringPoints.Report", command.department) >
-	<div class="pull-right">
+	<div class="pull-right send-to-sits">
 		<a href="<@routes.report command.department command.academicYear filterQuery />" class="btn btn-primary">Record in SITS:eVision</a>
 	</div>
 </#if>
