@@ -1,7 +1,8 @@
 <#escape x as x?html>
 <#import "../attendance_macros.ftl" as attendance_macros />
 
-<h1>View students in ${command.department.name}</h1>
+<h1>View students</h1>
+<h4><span class="muted">in</span> ${command.department.name}</h4>
 
 <div class="btn-toolbar dept-toolbar">
 	<#if command.department.parent??>
@@ -46,8 +47,33 @@
 	</div>
 </#if>
 
-<#assign thisPath><@routes.viewDepartmentStudents command.department /></#assign>
-<@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
-<#assign filter_results_path="view_students_results.ftl" />
-<#include "_view_filter.ftl" />
+<#assign submitUrl><@routes.viewDepartmentStudents command.department /></#assign>
+<@attendance_macros.academicYearSwitcher submitUrl command.academicYear command.thisAcademicYear />
+
+<#assign filterCommand = command />
+<#assign filterCommandName = "command" />
+<#assign filterResultsPath = "/WEB-INF/freemarker/home/view_students_results.ftl" />
+<#include "/WEB-INF/freemarker/filter_bar.ftl" />
+
+<script type="text/javascript">
+	jQuery(function($) {
+		$('#command input').on('change', function(e) {
+			$('.send-to-sits a').addClass('disabled');
+		});
+
+		$(document).on("tabula.filterResultsChanged", function() {
+			var sitsUrl = $('div.studentResults').data('sits-url');
+			$('.send-to-sits a').attr('href', sitsUrl);
+			$('.send-to-sits a').removeClass('disabled');
+
+			$('.scrollable-points-table').find('table').each(function() {
+				var $this = $(this);
+				if (Math.floor($this.width()) > $this.parent().width()) {
+					$this.wrap($('<div><div class="sb-wide-table-wrapper"></div></div>'));
+					Attendance.scrollablePointsTableSetup();
+				}
+			});
+		});
+	});
+</script>
 </#escape>
