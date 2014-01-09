@@ -103,7 +103,7 @@ class ZipServiceTest extends TestBase with Mockito {
 		assignment.module = module
 		val items = service.getSubmissionZipItems(submission)
 		items.size should be (1)
-		items.head.name should be ("ph105 - Roger Aaaah - garble.doc")
+		items.head.name should be ("ph105 - Roger Aaaah - 0000007 - garble.doc")
 	}
 
 
