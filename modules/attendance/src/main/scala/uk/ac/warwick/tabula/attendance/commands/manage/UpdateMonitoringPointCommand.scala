@@ -45,8 +45,9 @@ trait UpdateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 	override def validate(errors: Errors) {
 		if (anyStudentsReportedForRelatedPointsThisTerm(point)) {
 			errors.reject("monitoringPoint.hasReportedCheckpoints.update")
-		} else if (monitoringPointService.countCheckpointsForPoint(point) > 0) {
-			errors.reject("monitoringPoint.hasCheckpoints.update")
+		} else if (monitoringPointService.countCheckpointsForPoint(point) > 0 && validFromWeek > point.validFromWeek) {
+			// TAB-1537
+			errors.rejectValue("validFromWeek", "monitoringPoint.hasCheckpoints.update.validFromLater")
 		}
 
 		validateWeek(errors, validFromWeek, "validFromWeek")
@@ -100,4 +101,6 @@ trait UpdateMonitoringPointState extends MonitoringPointState with CanPointBeCha
 	def point: MonitoringPoint
 	val dept = set.route.department
 	monitoringPoints.addAll(set.points)
+
+	def hasCheckpoints = monitoringPointService.countCheckpointsForPoint(point) > 0
 }

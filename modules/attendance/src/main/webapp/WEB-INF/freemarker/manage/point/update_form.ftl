@@ -7,6 +7,13 @@
 
 <@modal.body>
 
+	<#if command.hasCheckpoints>
+	<div class="alert alert-info">
+		<p>This point has attendance recorded against it and no changes will be made to this attendance if the point is updated.</p>
+		<p>Ensure that this attendance will still be valid once the point is updated.</p>
+	</div>
+	</#if>
+
 	<#assign action><@routes.updatePoint command.point /></#assign>
 
 	<@f.form id="updateMonitoringPoint" action="${action}" method="POST" commandName="command" class="form-horizontal">
