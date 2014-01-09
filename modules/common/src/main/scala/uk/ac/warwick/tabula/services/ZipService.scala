@@ -97,8 +97,9 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 		val submissionZipItems: Seq[ZipItem] = for (attachment <- allAttachments) yield {
 			val userIdentifier = if(!showStudentName(assignment) || (user==null || user.isInstanceOf[AnonymousUser])) {
 				submission.universityId
-			} else
-				user.getFullName()
+			} else {
+				s"${user.getFullName} - ${submission.universityId}"
+			}
 
 			new ZipFileItem(code + " - " + userIdentifier + " - " + attachment.name, attachment.dataStream)
 		}
