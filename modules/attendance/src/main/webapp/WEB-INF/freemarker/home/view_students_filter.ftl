@@ -42,7 +42,7 @@
 
 <#assign filterQuery = command.serializeFilter />
 <#if features.attendanceMonitoringReport && can.do("MonitoringPoints.Report", command.department) >
-	<div class="pull-right">
+	<div class="pull-right send-to-sits">
 		<a href="<@routes.report command.department command.academicYear filterQuery />" class="btn btn-primary">Record in SITS:eVision</a>
 	</div>
 </#if>
@@ -57,7 +57,15 @@
 
 <script type="text/javascript">
 	jQuery(function($) {
+		$('#command input').on('change', function(e) {
+			$('.send-to-sits a').addClass('disabled');
+		}
+
 		$(document).on("tabula.filterResultsChanged", function() {
+			var sitsUrl = $('div.studentResults').data('sits-url')
+			$('.send-to-sits a').attr('href', sitsUrl);
+			$('.send-to-sits a').removeClass('disabled');
+
 			$('.scrollable-points-table').find('table').each(function() {
 				var $this = $(this);
 				if (Math.floor($this.width()) > $this.parent().width()) {
