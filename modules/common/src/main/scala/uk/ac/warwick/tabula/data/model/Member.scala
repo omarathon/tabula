@@ -190,7 +190,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 			case _ => u.setUserType("External")
 		}
 		
-		u.setExtraProperties(JMap(
+		u.setExtraProperties(JHashMap(
 				"urn:websignon:usertype" -> u.getUserType,
 				"urn:websignon:timestamp" -> DateTime.now.toString,
 				"urn:websignon:usersource" -> "Tabula"
