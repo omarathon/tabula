@@ -114,6 +114,7 @@ html .fc,
 
 /* Cell Styles
 ------------------------------------------------------------------------*/
+.fc-widget-header { white-space: nowrap; }
 
 .fc-widget-header,    /* <th>, usually */
 .fc-widget-content {  /* <td>, usually */
