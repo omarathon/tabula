@@ -62,11 +62,11 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 		scd1.moduleRegistrations.add(modReg1)
 		scd1.moduleRegistrations.add(modReg2)
 
-		scd1.registeredModulesByYear(Some(AcademicYear(2013))) should be (Stream(mod2))
-		scd1.registeredModulesByYear(None) should be (Stream(mod1, mod2))
+		scd1.registeredModulesByYear(Some(AcademicYear(2013))) should be (Set(mod2))
+		scd1.registeredModulesByYear(None) should be (Set(mod1, mod2))
 
-		scd1.moduleRegistrations.asScala should be (Stream(modReg1, modReg2))
-		scd1.moduleRegistrationsByYear(Some(AcademicYear(2012))) should be (Stream(modReg1))
+		scd1.moduleRegistrations.asScala should be (Set(modReg1, modReg2))
+		scd1.moduleRegistrationsByYear(Some(AcademicYear(2012))) should be (Set(modReg1))
 
 	}
 
