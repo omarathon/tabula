@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 object AgentViewCommand {
 	def apply(agent: Member, relationshipType: StudentRelationshipType, academicYearOption: Option[AcademicYear]) =
@@ -23,12 +24,12 @@ object AgentViewCommand {
 }
 
 abstract class AgentViewCommand(val agent: Member, val relationshipType: StudentRelationshipType, val academicYearOption: Option[AcademicYear])
-	extends CommandInternal[Seq[StudentPointsData]] with AgentViewState with BuildStudentPointsData {
+	extends CommandInternal[Seq[StudentPointsData]] with AgentViewState with BuildStudentPointsData with TaskBenchmarking {
 	self: RelationshipServiceComponent =>
 
 	def applyInternal() = {
-		val students = relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember)
-		buildData(students, academicYear)
+		val students = benchmarkTask("Get relationships with current user") { relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember) }
+		benchmarkTask("Build data") { buildData(students, academicYear) }
 	}
 }
 

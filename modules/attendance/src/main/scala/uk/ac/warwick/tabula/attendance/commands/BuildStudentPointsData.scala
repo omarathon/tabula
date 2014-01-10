@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.services.{TermServiceComponent, MonitoringPointServi
 import uk.ac.warwick.tabula.AcademicYear
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPoint}
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 case class StudentPointsData(
 	student: StudentMember,
@@ -15,7 +16,7 @@ case class StudentPointsData(
 )
 
 
-trait BuildStudentPointsData extends MonitoringPointServiceComponent with TermServiceComponent with GroupMonitoringPointsByTerm {
+trait BuildStudentPointsData extends MonitoringPointServiceComponent with TermServiceComponent with GroupMonitoringPointsByTerm with TaskBenchmarking {
 
 	def buildData(
 		students: Seq[StudentMember],
@@ -23,10 +24,10 @@ trait BuildStudentPointsData extends MonitoringPointServiceComponent with TermSe
 		missedCounts: Seq[(StudentMember, Int)] = Seq(),
 		unrecordedCounts: Seq[(StudentMember, Int)] = Seq()
 	) = {
-		val pointSetsByStudent = monitoringPointService.findPointSetsForStudentsByStudent(students, academicYear)
+		val pointSetsByStudent = benchmarkTask("Find point sets for students, by student") { monitoringPointService.findPointSetsForStudentsByStudent(students, academicYear) }
 		val allPoints = pointSetsByStudent.flatMap(_._2.points.asScala).toSeq
-		val checkpoints = monitoringPointService.getCheckpointsByStudent(allPoints)
-		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
+		val checkpoints = benchmarkTask("Get checkpoints for all students") { monitoringPointService.getCheckpointsByStudent(allPoints) }
+		val currentAcademicWeek = benchmarkTask("Get current academic week") { termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear) }
 
 		students.map{ student => {
 			pointSetsByStudent.get(student).map{ pointSet =>
