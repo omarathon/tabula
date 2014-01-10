@@ -344,7 +344,9 @@
 							</td>
 						<#else>
 							<td class="student-col toggle-cell">
-								<h6 class="toggle-icon" data-profile="${student.user.warwickId}"></h6>
+								<h6 class="toggle-icon" data-profile="${student.user.warwickId}">
+									${student.user.warwickId}
+								</h6>
 							</td>
 						</#if>
 						<td class="progress-col content-cell toggle-cell">
