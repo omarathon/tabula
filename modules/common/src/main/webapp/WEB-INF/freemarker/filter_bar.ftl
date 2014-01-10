@@ -1,5 +1,5 @@
 <div class="persist-area">
-	<div class="persist-header">
+	<div class="temporarily-not-a-persist-header">
 		<@f.form commandName=filterCommandName action=submitUrl method="GET" cssClass="form-inline">
 			<@f.errors cssClass="error form-errors" />
 			<#if filterCommand.academicYear??>
