@@ -290,8 +290,8 @@ class StudentMember extends Member with StudentProperties {
 
 	override def permanentlyWithdrawn: Boolean = {
 		freshStudentCourseDetails
-			 .map(scd => scd.sprStatus)
-			 .filter(_ != null)
+			 .filter(_.sprStatus != null)
+			 .map(_.sprStatus)
 			 .filter(_.code != null)
 			 .filter(_.code.startsWith("P"))
 			 .size == freshStudentCourseDetails.size
