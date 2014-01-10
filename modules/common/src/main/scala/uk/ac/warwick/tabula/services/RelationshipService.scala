@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.{DegreeType, CourseType, Department, Memb
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 
 /**
  * Service providing access to members and profiles.
@@ -55,9 +56,9 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def saveOrUpdate(relationship: StudentRelationship) = memberDao.saveOrUpdate(relationship)
 
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional() {
-		student.freshStudentCourseDetails.flatMap {
+		student.freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap {
 			courseDetail => memberDao.getCurrentRelationships(relationshipType, courseDetail.sprCode)
-		}
+		}.toSeq
 	}
 
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship] = transactional() {

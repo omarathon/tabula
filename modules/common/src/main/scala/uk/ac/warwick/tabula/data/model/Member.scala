@@ -134,7 +134,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	 * For each department, enumerate any sub-departments that the member matches
 	 */
 	def touchedDepartments = {
-		def moduleDepts = registeredModulesByYear(None).map(_.department).distinct.toStream
+		def moduleDepts = registeredModulesByYear(None).map(_.department).toStream
 
 		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct
 		topLevelDepts flatMap(_.subDepartmentsContaining(this))
@@ -147,8 +147,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	 * TODO consider caching based on getLastUpdatedDate
 	 */
 
-	def registeredModulesByYear(year: Option[AcademicYear]) = Seq[Module]()
-	def moduleRegistrationsByYear(year: Option[AcademicYear]) = Seq[ModuleRegistration]()
+	def registeredModulesByYear(year: Option[AcademicYear]) = Set[Module]()
+	def moduleRegistrationsByYear(year: Option[AcademicYear]) = Set[ModuleRegistration]()
 
 	def permanentlyWithdrawn = false
 
@@ -247,7 +247,7 @@ class StudentMember extends Member with StudentProperties {
 	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
-	private var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
+	private var studentCourseDetails: JSet[StudentCourseDetails] = JHashSet()
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshStudentCourseDetails = {
@@ -312,11 +312,11 @@ class StudentMember extends Member with StudentProperties {
 		studentCourseDetails.add(detailsToAdd)
 	}
 
-	override def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] =
-		freshStudentCourseDetails.flatMap(_.registeredModulesByYear(year))
+	override def registeredModulesByYear(year: Option[AcademicYear]): Set[Module] =
+		freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap(_.registeredModulesByYear(year))
 
-	override def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =
-		freshStudentCourseDetails.flatMap(_.moduleRegistrationsByYear(year))
+	override def moduleRegistrationsByYear(year: Option[AcademicYear]): Set[ModuleRegistration] =
+		freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap(_.moduleRegistrationsByYear(year))
 }
 
 @Entity

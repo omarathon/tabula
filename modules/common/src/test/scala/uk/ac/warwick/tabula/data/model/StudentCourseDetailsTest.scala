@@ -28,14 +28,14 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 		profileService.getStudentBySprCode("0205225/1") returns (Some(student))
 
 		relationshipService.findCurrentRelationships(relationshipType, "0205225/1") returns (Nil)
-		student.freshStudentCourseDetails(0).relationships(relationshipType) should be ('empty)
+		student.freshStudentCourseDetails.head.relationships(relationshipType) should be ('empty)
 
 		val rel = StudentRelationship("0672089", relationshipType, "0205225/1")
 		rel.profileService = profileService
 
 		relationshipService.findCurrentRelationships(relationshipType, "0205225/1") returns (Seq(rel))
 		profileService.getMemberByUniversityId("0672089") returns (None)
-		student.freshStudentCourseDetails(0).relationships(relationshipType) map { _.agentParsed } should be (Seq("0672089"))
+		student.freshStudentCourseDetails.head.relationships(relationshipType) map { _.agentParsed } should be (Seq("0672089"))
 
 		val staff = Fixtures.staff(universityId="0672089")
 		staff.firstName = "Steve"
@@ -43,7 +43,7 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
 		profileService.getMemberByUniversityId("0672089") returns (Some(staff))
 
-		student.freshStudentCourseDetails(0).relationships(relationshipType) map { _.agentParsed } should be (Seq(staff))
+		student.freshStudentCourseDetails.head.relationships(relationshipType) map { _.agentParsed } should be (Seq(staff))
 	}
 
 	@Test def testModuleRegistrations {
