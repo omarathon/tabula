@@ -435,7 +435,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 		orders.foreach { c.addOrder(_) }
 
-		c.setMaxResults(maxResults).setFirstResult(startResult).seq
+		c.setMaxResults(maxResults).setFirstResult(startResult).distinct.seq
 	}
 
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]) = {

@@ -134,12 +134,20 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	 * this returns a tuple of the startResult (offset into query) actually returned, with the resultset itself
 	 */
 	def findStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq(), maxResults: Int = 50, startResult: Int = 0): (Int, Seq[StudentMember]) = transactional(readOnly = true) {
-		// If we're a sub-department then we have to fetch everyone, rhubarb! Otherwise, we can use nice things
-		if (department.hasParent) {
-			val allRestrictions = ScalaRestriction.is(
-				"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
-				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
-			) ++ restrictions
+
+		val allRestrictions = {
+			if (department.hasParent) {
+				ScalaRestriction.is(
+					"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
+					FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
+				) ++ restrictions
+			}	else {
+				ScalaRestriction.is(
+					"studentCourseYearDetails.enrolmentDepartment", department,
+					FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
+				) ++ restrictions
+			}
+		}
 
 			val filteredStudents = memberDao.findStudentsByRestrictions(allRestrictions, orders, Int.MaxValue, 0)
 				.filter(studentDepartmentFilterMatches(department))
@@ -152,26 +160,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 				// return the first page of results, notifying zero offset
 				(0, filteredStudents.take(maxResults))
 			}
-		}	else {
-			val allRestrictions = ScalaRestriction.is(
-				"studentCourseYearDetails.enrolmentDepartment", department,
-				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
-			) ++ restrictions
 
-			val offsetStudents = memberDao.findStudentsByRestrictions(allRestrictions, orders, maxResults, startResult)
-
-			if (offsetStudents.nonEmpty) {
-				(startResult, offsetStudents)
-			} else {
-				// meh, have to hit DAO twice if no results for this offset, but at least this should be a rare occurrence
-				val unoffsetStudents = memberDao.findStudentsByRestrictions(allRestrictions, orders, maxResults, 0)
-				if (unoffsetStudents.isEmpty) {
-					(0, Seq())
-				} else {
-					(0, unoffsetStudents)
-				}
-			}
-		}
 	}
 
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()) = transactional(readOnly = true) {
