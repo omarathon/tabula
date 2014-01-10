@@ -82,12 +82,12 @@ class AssignmentController extends CourseworkController {
 
 			val submission = submissionService.getSubmissionByUniId(assignment, user.universityId).filter { _.submitted }
 
-			val extension = assignment.extensions.find(_.userId == user.apparentId)
-			val isExtended = assignment.isWithinExtension(user.apparentId)
+			val extension = assignment.extensions.find(_.isForUser(user.apparentUser))
+			val isExtended = assignment.isWithinExtension(user.apparentUser)
 			val extensionRequested = extension.isDefined && !extension.get.isManual
 
-			val canSubmit = assignment.submittable(user.apparentId)
-			val canReSubmit = assignment.resubmittable(user.apparentId)
+			val canSubmit = assignment.submittable(user.apparentUser)
+			val canReSubmit = assignment.resubmittable(user.apparentUser)
 
 			/*
 			 * Submission values are an unordered set without any proper name, so

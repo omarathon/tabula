@@ -43,7 +43,7 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 		val command = new UpdateMonitoringPointCommand(set, monitoringPoint) with CommandTestSupport
 		command.monitoringPointService.getCheckpointsByStudent(set.points.asScala) returns Seq.empty
 		val term = mock[Term]
-		term.getTermTypeAsString() returns ("Autumn")
+		term.getTermTypeAsString returns "Autumn"
 	}
 
 	@Test
@@ -148,11 +148,24 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 	}
 
 	@Test
-	def validateHasCheckpointsNoChanges() {
+	def validateHasCheckpointsAllowChanges() {
 		new Fixture {
 			command.monitoringPointService.countCheckpointsForPoint(monitoringPoint) returns 2
 			command.name = "New name"
 			command.validFromWeek = existingWeek
+			command.requiredFromWeek = existingWeek
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasErrors should be (right = false)
+		}
+	}
+
+	@Test
+	def validateHasCheckpointsValidFromLater() {
+		new Fixture {
+			command.monitoringPointService.countCheckpointsForPoint(monitoringPoint) returns 2
+			command.name = "New name"
+			command.validFromWeek = existingWeek + 1
 			command.requiredFromWeek = existingWeek
 			var errors = new BindException(command, "command")
 			command.validate(errors)
@@ -231,8 +244,8 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 
 			val student = Fixtures.student("12345")
 
-			command.termService.getTermFromAcademicWeek(monitoringPoint.validFromWeek, set.academicYear) returns (term)
-			command.termService.getTermFromAcademicWeek(otherMonitoringPoint.validFromWeek, set.academicYear) returns (term)
+			command.termService.getTermFromAcademicWeek(monitoringPoint.validFromWeek, set.academicYear) returns term
+			command.termService.getTermFromAcademicWeek(otherMonitoringPoint.validFromWeek, set.academicYear) returns term
 			command.monitoringPointService.getCheckpointsByStudent(set.points.asScala) returns Seq((student, mock[MonitoringCheckpoint]))
 			// there is already a report sent for this term, so we cannot edit this Monitoring Point
 			command.monitoringPointService.findReports(Seq(student), set.academicYear, term.getTermTypeAsString ) returns Seq(new MonitoringPointReport)

@@ -8,37 +8,41 @@
 <#assign is_the_student=currentUser.apparentUser.warwickId==command.student.universityId />
 
 <#macro pointsInATerm term>
-	<#list monitoringPointsByTerm[term] as point>
-		<div class="row-fluid point">
-			<div class="span8 ellipsis" title="${point.name} (<@fmt.monitoringPointFormat point true />)">
-				${point.name} (<a class="use-tooltip" data-html="true" title="<@fmt.monitoringPointDateFormat point />"><@fmt.monitoringPointFormat point /></a>)
-			</div>
-			<div class="span2 state">
-				<#if checkpointState[point.id]??>
-					<#local thisPointCheckpointState = checkpointState[point.id] />
-					<#if thisPointCheckpointState == "attended">
-						<span class="label label-success">Attended</span>
-					<#elseif thisPointCheckpointState == "authorised">
-						<span class="label label-info" title="Missed (authorised)">Missed</span>
-					<#elseif thisPointCheckpointState == "unauthorised">
-						<span class="label label-important" title="Missed (unauthorised)">Missed</span>
+	<table class="table">
+		<tbody>
+			<#list monitoringPointsByTerm[term] as point>
+				<tr class="point">
+					<td title="${point.name} (<@fmt.monitoringPointFormat point true />)">
+						${point.name} (<a class="use-tooltip" data-html="true" title="<@fmt.monitoringPointDateFormat point />"><@fmt.monitoringPointFormat point /></a>)
+					</td>
+					<td class="state">
+						<#if checkpointState[point.id]??>
+							<#local thisPointCheckpointState = checkpointState[point.id] />
+							<#if thisPointCheckpointState == "attended">
+								<span class="label label-success">Attended</span>
+							<#elseif thisPointCheckpointState == "authorised">
+								<span class="label label-info" title="Missed (authorised)">Missed</span>
+							<#elseif thisPointCheckpointState == "unauthorised">
+								<span class="label label-important" title="Missed (unauthorised)">Missed</span>
+							</#if>
+						</#if>
+					</td>
+					<#if can_record>
+						<td>
+							<#local returnTo>
+								<@routes.profile command.student />
+							</#local>
+							<a href="<@routes.recordStudentPoint point command.student returnTo />"
+									class="btn btn-mini btn-primary"
+							>
+								Record
+							</a>
+						</td>
 					</#if>
-				</#if>
-			</div>
-			<div class="span2">
-				<#if can_record>
-					<#local returnTo>
-						<@routes.profile command.student />
-					</#local>
-					<a href="<@routes.recordStudentPoint point command.student returnTo />"
-							class="btn btn-mini btn-primary"
-					>
-						Record
-					</a>
-				</#if>
-			</div>
-		</div>
-	</#list>
+				</tr>
+			</#list>
+		</tbody>
+	</table>
 </#macro>
 
 <div class="monitoring-points-profile striped-section collapsible <#if defaultExpand?? && defaultExpand>expanded</#if>">

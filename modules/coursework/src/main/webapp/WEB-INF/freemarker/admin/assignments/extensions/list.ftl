@@ -1,3 +1,4 @@
+<#import "/WEB-INF/freemarker/admin/_profile_link.ftl" as pl />
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
@@ -58,7 +59,7 @@
 						<tr id="row${extension.universityId}" class="extension-row ${highlightClass}">
 							<#assign student = studentNameLookup[extension.universityId]>
 							<td><h6>${student.firstName}</h6></td>
-							<td><h6>${student.lastName}</h6></td>
+							<td><h6>${student.lastName}&nbsp;<@pl.profile_link student /></h6></td>
 							<td class="expiryDate">
 								<#if extension.expiryDate??>
 									<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
@@ -109,7 +110,7 @@
 						<tr id="row${extension.universityId}" class="extension-row">
 							<#assign student = studentNameLookup[extension.universityId]>
 							<td><h6>${student.firstName}</h6></td>
-							<td><h6>${student.lastName}</h6></td>
+							<td><h6>${student.lastName}&nbsp;<@pl.profile_link student /></h6></td>
 							<td class="expiryDate">
 								<#if extension.expiryDate??>
 									<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
@@ -163,7 +164,7 @@
 						<tr id="row${universityId}" class="extension-row">
 							<#assign student = studentNameLookup[universityId]>
 							<td><h6>${student.firstName}</h6></td>
-							<td><h6>${student.lastName}</h6></td>
+							<td><h6>${student.lastName}&nbsp;<@pl.profile_link student /></h6></td>
 							<td class="expiryDate"></td>
 							<td></td>
 							<td class="status"></td>

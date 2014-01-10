@@ -14,7 +14,9 @@ import uk.ac.warwick.userlookup.User
  * TODO maybe Member could directly implement the trait
  */
 object MemberOrUser {
-	def apply(member: Option[Member], user: User) = member map { WrappedMember(_) } getOrElse WrappedUser(user)
+	def apply(member: Member): MemberOrUser = WrappedMember(member)
+	def apply(user: User): MemberOrUser = WrappedUser(user)
+	def apply(member: Option[Member], user: User): MemberOrUser = member map { WrappedMember(_) } getOrElse WrappedUser(user)
 }
 
 sealed trait MemberOrUser{
@@ -23,8 +25,11 @@ sealed trait MemberOrUser{
 	def firstName: String
 	def lastName: String
 	def universityId: String
+	def usercode: String
 	def shortDepartment: String
 	def email: String
+	def asUser: User
+	def asMember: Option[Member]
 	
 	override def hashCode = universityId.hashCode
 	
@@ -40,8 +45,11 @@ private case class WrappedUser(user: User) extends MemberOrUser {
 	def firstName = user.getFirstName
 	def lastName = user.getLastName
 	def universityId = user.getWarwickId
+	def usercode = user.getUserId
 	def shortDepartment = user.getShortDepartment
 	def email = user.getEmail
+	def asUser = user
+	def asMember = None
 }
 
 private case class WrappedMember(member: Member) extends MemberOrUser {
@@ -50,6 +58,9 @@ private case class WrappedMember(member: Member) extends MemberOrUser {
 	def firstName = member.firstName
 	def lastName = member.lastName
 	def universityId = member.universityId
+	def usercode = member.userId
 	def shortDepartment = member.homeDepartment.name
 	def email = member.email
+	def asUser = member.asSsoUser
+	def asMember = Some(member)
 }
