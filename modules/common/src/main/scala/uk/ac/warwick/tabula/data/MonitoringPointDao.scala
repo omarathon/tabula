@@ -95,7 +95,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			result.filter{ case(student, checkpoint) => student.mostSignificantCourseDetails.exists(scd => {
 				val pointSet = checkpoint.point.pointSet.asInstanceOf[MonitoringPointSet]
 				val scydOption = scd.freshStudentCourseYearDetails.find(scyd =>
-					scyd.academicYear == pointSet.academicYear && scyd.yearOfStudy == pointSet.year
+					scyd.academicYear == pointSet.academicYear && (
+						pointSet.year == null || scyd.yearOfStudy == pointSet.year
+					)
 				)
 				pointSet.route == scd.route && scydOption.isDefined
 			})}
