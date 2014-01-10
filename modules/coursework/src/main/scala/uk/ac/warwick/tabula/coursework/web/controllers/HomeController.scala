@@ -44,6 +44,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.commands.MemberOrUser
 
 @Controller class HomeController extends CourseworkController {
 	
@@ -51,10 +52,11 @@ import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 	@ModelAttribute("command") def command(user: CurrentUser) = CourseworkHomepageCommand(user)
 
-	@RequestMapping(Array("/")) def home(@ModelAttribute("command") cmd: Appliable[Option[CourseworkHomepageInformation]]) =
+	@RequestMapping(Array("/")) def home(@ModelAttribute("command") cmd: Appliable[Option[CourseworkHomepageInformation]], user: CurrentUser) =
 		cmd.apply() match {
 			case Some(info) => 
 				Mav("home/view",
+					"student" -> MemberOrUser(user.profile, user.apparentUser),
 					"enrolledAssignments" -> info.enrolledAssignments,
 					"historicAssignments" -> info.historicAssignments,
 					"assignmentsForMarking" -> info.assignmentsForMarking,
@@ -82,37 +84,17 @@ object CourseworkHomepageCommand {
 		new CourseworkHomepageCommandInternal(user)
 			with ComposableCommand[Option[CourseworkHomepageInformation]]
 			with AutowiringModuleAndDepartmentServiceComponent
-			with AutowiringActivityServiceComponent
 			with AutowiringAssignmentServiceComponent
-			with AutowiringAssignmentMembershipServiceComponent
+			with AutowiringActivityServiceComponent
 			with AutowiringSecurityServiceComponent
-			with AutowiringFeaturesComponent
 			with PubliclyVisiblePermissions with ReadOnly with Unaudited
-			
-	def getHistoricAssignmentsInfo(assignmentsWithFeedbackInfo: Seq[AssignmentInfo], assignmentsWithSubmissionInfo: Seq[AssignmentInfo], lateFormativeAssignmentsInfo: Seq[AssignmentInfo]): Seq[AssignmentInfo] = {
-		assignmentsWithFeedbackInfo
-			.union(assignmentsWithSubmissionInfo)
-			.union(lateFormativeAssignmentsInfo)
-			.sortWith {	(info1, info2) =>
-			def toDate(info: AssignmentInfo) = {
-				val assignment = info("assignment").asInstanceOf[Assignment]
-				val submission = info("submission").asInstanceOf[Option[Submission]]
-
-				submission map { _.submittedDate } getOrElse { if (assignment.openEnded) assignment.openDate else assignment.closeDate }
-			}
-
-			toDate(info1) < toDate(info2)
-		}.distinct.reverse
-	}
 }
 
 class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandInternal[Option[CourseworkHomepageInformation]] with TaskBenchmarking {
 	self: ModuleAndDepartmentServiceComponent with 
-		  ActivityServiceComponent with 
 		  AssignmentServiceComponent with 
-		  AssignmentMembershipServiceComponent with
-		  SecurityServiceComponent with
-		  FeaturesComponent =>
+		  ActivityServiceComponent with 
+		  SecurityServiceComponent =>
 	
 	def applyInternal() = {
 		if (user.loggedIn) {
@@ -133,79 +115,12 @@ class CourseworkHomepageCommandInternal(user: CurrentUser) extends CommandIntern
 					)
 				}
 			}
-
-			val assignmentsWithFeedback = benchmarkTask("Get assignments with feedback") { assignmentService.getAssignmentsWithFeedback(user.universityId) }
-
-			val enrolledAssignments = benchmarkTask("Get enrolled assignments") {
-				if (features.assignmentMembership) assignmentMembershipService.getEnrolledAssignments(user.apparentUser)
-				else Seq.empty
-			}
 			
-			val assignmentsWithSubmission = benchmarkTask("Get assignments with submission") {
-				if (features.submissions) assignmentService.getAssignmentsWithSubmission(user.universityId)
-				else Seq.empty
-			}
-			
-			val lateFormativeAssignments = enrolledAssignments.filter { ass => !ass.summative && ass.isClosed } // TAB-706
-
-			// exclude assignments already included in other lists.
-			val enrolledAssignmentsTrimmed =
-				enrolledAssignments
-					.diff(assignmentsWithFeedback)
-					.diff(assignmentsWithSubmission)
-					.filter {_.collectSubmissions} // TAB-475
-					.filterNot(lateFormativeAssignments.contains(_))
-					.sortWith { (ass1, ass2) =>
-						// TAB-569 personal time to deadline - if ass1 is "due" before ass2 for the current user
-						// Show open ended assignments after
-						if (ass2.openEnded && !ass1.openEnded) true
-						else if (ass1.openEnded && !ass2.openEnded) false
-						else {
-							def timeToDeadline(ass: Assignment) = {
-								val extension = ass.extensions.find(_.userId == user.apparentId)
-								val isExtended = ass.isWithinExtension(user.apparentId)
-
-								if (ass.openEnded) ass.openDate
-								else if (isExtended) (extension map { _.expiryDate }).get
-								else ass.closeDate
-							}
-
-							timeToDeadline(ass1) < timeToDeadline(ass2)
-						}
-					}
-
-			def enhanced(assignment: Assignment) = {
-				val extension = assignment.extensions.find(_.userId == user.apparentId)
-				val isExtended = assignment.isWithinExtension(user.apparentId)
-				val extensionRequested = extension.isDefined && !extension.get.isManual
-				val submission = assignment.submissions.find(_.universityId == user.universityId)
-				val feedback = assignment.feedbacks.filter(_.released).find(_.universityId == user.universityId)
-				Map(
-					"assignment" -> assignment,
-					"submission" -> submission,
-					"hasSubmission" -> submission.isDefined,
-					"feedback" -> feedback,
-					"hasFeedback" -> feedback.isDefined,
-					"hasExtension" -> extension.isDefined,
-					"extension" -> extension,
-					"isExtended" -> isExtended,
-					"extensionRequested" -> extensionRequested,
-					"submittable" -> assignment.submittable(user.apparentId),
-					"resubmittable" -> assignment.resubmittable(user.apparentId),
-					"closed" -> assignment.isClosed,
-					"summative" -> assignment.summative.booleanValue
-				)
-			}
-
-			// adorn the enrolled assignments with extra data.
-			val enrolledAssignmentsInfo = for (assignment <- enrolledAssignmentsTrimmed) yield enhanced(assignment)
-			val assignmentsWithFeedbackInfo = for (assignment <- assignmentsWithFeedback) yield enhanced(assignment)
-			val assignmentsWithSubmissionInfo = for (assignment <- assignmentsWithSubmission.diff(assignmentsWithFeedback)) yield enhanced(assignment)
-			val lateFormativeAssignmentsInfo = for (assignment <- lateFormativeAssignments) yield enhanced(assignment)
+			val courseworkInformation = StudentCourseworkCommand(MemberOrUser(None, user.apparentUser)).apply()
 
 			Some(CourseworkHomepageInformation(
-				enrolledAssignments = enrolledAssignmentsInfo,
-				historicAssignments = getHistoricAssignmentsInfo(assignmentsWithFeedbackInfo, assignmentsWithSubmissionInfo, lateFormativeAssignmentsInfo),
+				enrolledAssignments = courseworkInformation.enrolledAssignments,
+				historicAssignments = courseworkInformation.historicAssignments,
 
 				assignmentsForMarking = assignmentsForMarkingInfo,
 				ownedDepartments = ownedDepartments,

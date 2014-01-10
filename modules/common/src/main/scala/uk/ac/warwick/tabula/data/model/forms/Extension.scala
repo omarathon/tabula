@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.data.model.forms
 
 import scala.collection.JavaConversions._
-
 import org.hibernate.annotations.{BatchSize, Type, AccessType}
 import org.joda.time.DateTime
-
 import javax.persistence._
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
@@ -13,6 +11,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{Feedback, FileAttachment, Assignment, GeneratedId}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
+import uk.ac.warwick.userlookup.User
 
 @Entity @AccessType("field")
 class Extension extends GeneratedId with PermissionsTarget {
@@ -33,6 +32,9 @@ class Extension extends GeneratedId with PermissionsTarget {
 
 	@NotNull
 	var universityId:String =_
+	
+	def isForUser(user: User): Boolean = isForUser(user.getWarwickId, user.getUserId)
+	def isForUser(theUniversityId: String, theUsercode: String): Boolean = universityId == theUniversityId || userId == theUsercode
 
 	// TODO should there be a single def that returns the expiry date for approved/manual extensions, and requested expiry date otherwise?
 	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")

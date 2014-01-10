@@ -255,6 +255,7 @@ object Permissions {
 			case object HomeEmail extends Permission("View a member's alternative email address")
 			case object Usercode extends Permission("View a member's usercode")
 			case object SmallGroups extends Permission("View a member's small groups")
+			case object Coursework extends Permission("View a member's coursework")
 			case object Timetable extends Permission("View a member's personal timetable")
 
 			object StudentCourseDetails {

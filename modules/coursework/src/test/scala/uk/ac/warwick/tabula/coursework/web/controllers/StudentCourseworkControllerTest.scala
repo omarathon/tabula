@@ -2,13 +2,11 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 
 import uk.ac.warwick.tabula.{Fixtures, TestBase, Mockito}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkHomepageCommand._
+import uk.ac.warwick.tabula.coursework.web.controllers.StudentCourseworkCommand._
 
-class HomeControllerTest extends TestBase with Mockito {
+class StudentCourseworkControllerTest extends TestBase with Mockito {
 
 	private trait Fixture {
-
-		val homeController = new HomeController
 		val assignment = newDeepAssignment("LA101")
 		assignment.closeDate = new DateTime()
 
