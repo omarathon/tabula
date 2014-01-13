@@ -27,6 +27,11 @@ import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
+import uk.ac.warwick.tabula.services.UserGroupMembershipHelper
+import uk.ac.warwick.tabula.data.model.StaffMember
+import uk.ac.warwick.tabula.services.GroupServiceComponent
+import uk.ac.warwick.tabula.services.AutowiringGroupServiceComponent
+import uk.ac.warwick.util.cache.Cache
 
 trait PermissionsService {
 	def saveOrUpdate(roleDefinition: CustomRoleDefinition)
@@ -55,19 +60,25 @@ trait PermissionsService {
 }
 
 @Service(value = "permissionsService")
-class AutowiringPermissionsServiceImpl extends PermissionsServiceImpl with AutowiringPermissionsDaoComponent with PermissionsServiceCachesImpl
+class AutowiringPermissionsServiceImpl 
+	extends AbstractPermissionsService 
+		with AutowiringPermissionsDaoComponent 
+		with PermissionsServiceCachesImpl
+		with AutowiringGroupServiceComponent
+		with StaffAssistantsHelpersImpl
+		with QueueListener 
+		with InitializingBean
+		with Logging
 
-
-class PermissionsServiceImpl extends PermissionsService with Logging
-	with QueueListener with InitializingBean
-	with GrantedRolesForUserCache
-	with GrantedRolesForGroupCache
-	with GrantedPermissionsForUserCache
-	with GrantedPermissionsForGroupCache {
-	this:PermissionsDaoComponent with PermissionsServiceCaches=>
-
-
-	var groupService = Wire[GroupService]
+abstract class AbstractPermissionsService extends PermissionsService {
+	self: PermissionsDaoComponent 
+		with PermissionsServiceCaches
+		with GroupServiceComponent
+		with StaffAssistantsHelpers
+		with QueueListener 
+		with InitializingBean
+		with Logging => 
+			
 	var queue = Wire.named[Queue]("settingsSyncTopic")
 	
 
@@ -208,6 +219,14 @@ class PermissionsServiceImpl extends PermissionsService with Logging
 	}
 }
 
+trait StaffAssistantsHelpers {
+	val staffAssistantsHelper: UserGroupMembershipHelper[StaffMember]
+}
+
+trait StaffAssistantsHelpersImpl extends StaffAssistantsHelpers {
+	val staffAssistantsHelper = new UserGroupMembershipHelper[StaffMember]("_assistantsGroup")
+}
+
 class GrantedPermissionsByIdCache(dao: PermissionsDao) extends RequestLevelCaching[String, Option[GrantedPermission[_]]] {
 	
 	def getGrantedPermissionsByIds[A <: PermissionsTarget : ClassTag](ids: Seq[String]) =
@@ -306,15 +325,18 @@ trait GrantedPermissionsForGroupCache { self: PermissionsDaoComponent =>
 	}
 }
 trait PermissionsServiceCaches {
-	val rolesByIdCache:GrantedRoleByIdCache
-	val permissionsByIdCache:GrantedPermissionsByIdCache
+	val rolesByIdCache: GrantedRoleByIdCache
+	val permissionsByIdCache: GrantedPermissionsByIdCache
+	val GrantedRolesForUserCache: Cache[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
+	val GrantedRolesForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
+	val GrantedPermissionsForUserCache: Cache[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
+	val GrantedPermissionsForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
 }
-trait PermissionsServiceCachesImpl extends PermissionsServiceCaches {
+trait PermissionsServiceCachesImpl extends PermissionsServiceCaches with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache {
 	this:PermissionsDaoComponent=>
 	val rolesByIdCache:GrantedRoleByIdCache = new GrantedRoleByIdCache(permissionsDao)
 	val permissionsByIdCache = new GrantedPermissionsByIdCache(permissionsDao)
 }
-
 
 @ItemType("PermissionsCacheBuster")
 @JsonAutoDetect

@@ -14,15 +14,20 @@ import uk.ac.warwick.tabula.data.{PermissionsDao, PermissionsDaoComponent, Permi
 import scala.Some
 import uk.ac.warwick.util.queue.Queue
 import org.junit.Before
+import uk.ac.warwick.util.queue.QueueListener
+import org.springframework.beans.factory.InitializingBean
+import uk.ac.warwick.tabula.helpers.Logging
 
 class PermissionsServiceTest extends PersistenceTestBase with Mockito {
 
 	val permsDao = new PermissionsDaoImpl
 
-	val service = new PermissionsServiceImpl with PermissionsDaoComponent with PermissionsServiceCaches {
+	val service = new AbstractPermissionsService with PermissionsDaoComponent with PermissionsServiceCaches with GroupServiceComponent with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache with StaffAssistantsHelpers with QueueListener with InitializingBean with Logging {
 		var permissionsDao:PermissionsDao = permsDao
 		val rolesByIdCache:GrantedRoleByIdCache = new GrantedRoleByIdCache(permsDao)
 		val permissionsByIdCache = new GrantedPermissionsByIdCache(permsDao)
+		val groupService = null
+		val staffAssistantsHelper = null
 	}
 	service.queue = mock[Queue]
 
