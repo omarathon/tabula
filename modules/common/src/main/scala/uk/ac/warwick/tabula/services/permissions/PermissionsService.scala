@@ -29,8 +29,6 @@ import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
 import uk.ac.warwick.tabula.services.UserGroupMembershipHelper
 import uk.ac.warwick.tabula.data.model.StaffMember
-import uk.ac.warwick.tabula.services.GroupServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringGroupServiceComponent
 import uk.ac.warwick.util.cache.Cache
 
 trait PermissionsService {
@@ -64,8 +62,6 @@ class AutowiringPermissionsServiceImpl
 	extends AbstractPermissionsService 
 		with AutowiringPermissionsDaoComponent 
 		with PermissionsServiceCachesImpl
-		with AutowiringGroupServiceComponent
-		with StaffAssistantsHelpersImpl
 		with QueueListener 
 		with InitializingBean
 		with Logging
@@ -73,12 +69,11 @@ class AutowiringPermissionsServiceImpl
 abstract class AbstractPermissionsService extends PermissionsService {
 	self: PermissionsDaoComponent 
 		with PermissionsServiceCaches
-		with GroupServiceComponent
-		with StaffAssistantsHelpers
 		with QueueListener 
 		with InitializingBean
 		with Logging => 
-			
+	
+	var groupService = Wire[GroupService]
 	var queue = Wire.named[Queue]("settingsSyncTopic")
 	
 
@@ -217,14 +212,6 @@ abstract class AbstractPermissionsService extends PermissionsService {
 	def getCustomRoleDefinitionsBasedOn(roleDefinition: BuiltInRoleDefinition): Seq[CustomRoleDefinition] = {
 		permissionsDao.getCustomRoleDefinitionsBasedOn(roleDefinition)
 	}
-}
-
-trait StaffAssistantsHelpers {
-	val staffAssistantsHelper: UserGroupMembershipHelper[StaffMember]
-}
-
-trait StaffAssistantsHelpersImpl extends StaffAssistantsHelpers {
-	val staffAssistantsHelper = new UserGroupMembershipHelper[StaffMember]("_assistantsGroup")
 }
 
 class GrantedPermissionsByIdCache(dao: PermissionsDao) extends RequestLevelCaching[String, Option[GrantedPermission[_]]] {
