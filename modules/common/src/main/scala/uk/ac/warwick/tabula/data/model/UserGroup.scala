@@ -208,7 +208,7 @@ trait UnspecifiedTypeUserGroup {
 	def knownType: KnownTypeUserGroup
 }
 
-trait KnownTypeUserGroup {
+trait KnownTypeUserGroup extends UnspecifiedTypeUserGroup {
 	def allIncludedIds: Seq[String]
 	def allExcludedIds: Seq[String]
 }

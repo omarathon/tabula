@@ -7,6 +7,9 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.services.permissions._
 import scala.Some
 import uk.ac.warwick.util.queue.Queue
+import uk.ac.warwick.util.queue.QueueListener
+import org.springframework.beans.factory.InitializingBean
+import uk.ac.warwick.tabula.helpers.Logging
 
 class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 	
@@ -32,13 +35,14 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 		val permsDao = new PermissionsDaoImpl
 		permsDao.sessionFactory = sessionFactory
 
-		val permissionsService = new PermissionsServiceImpl with PermissionsDaoComponent with PermissionsServiceCaches {
+		val permissionsService = new AbstractPermissionsService with PermissionsDaoComponent with PermissionsServiceCaches with GroupServiceComponent with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache with StaffAssistantsHelpers with QueueListener with InitializingBean with Logging {
 			var permissionsDao:PermissionsDao = permsDao
 			val rolesByIdCache:GrantedRoleByIdCache = new GrantedRoleByIdCache(permsDao)
 			val permissionsByIdCache = new GrantedPermissionsByIdCache(permsDao)
+			val groupService = userLookup.getGroupService()
+			val staffAssistantsHelper = null
 		}
 		permissionsService.queue = mock[Queue]
-		permissionsService.groupService = userLookup.getGroupService()
 		service.permissionsService = permissionsService
 
 		val securityService = mock[SecurityService]
