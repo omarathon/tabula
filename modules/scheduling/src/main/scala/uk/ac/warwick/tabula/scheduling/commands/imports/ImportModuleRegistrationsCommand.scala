@@ -31,7 +31,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow, academi
 	var studentCourseDetailsDao = Wire[StudentCourseDetailsDao]
 
 	val scjCode = modRegRow.scjCode
-	val tabulaModule = moduleAndDepartmentService.getModuleBySitsCode(modRegRow.sitsModuleCode)
+	lazy val tabulaModule = moduleAndDepartmentService.getModuleBySitsCode(modRegRow.sitsModuleCode)
 	val cats: java.math.BigDecimal = modRegRow.cats
 	val assessmentGroup = modRegRow.assessmentGroup
 	val selectionStatusCode = modRegRow.selectionStatusCode
