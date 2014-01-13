@@ -290,7 +290,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		// the student fixture comes with one free studentCourseDetails - add another to stu1:
 		val stu1_scd2 = Fixtures.studentCourseDetails(stu1, dept1, null, "1000001/2")
-		stu1_scd2.sprStatus = status2
+		stu1_scd2.statusOnRoute = status2
 		memberDao.saveOrUpdate(stu1)
 		studentCourseDetailsDao.saveOrUpdate(stu1_scd2)
 		session.flush
@@ -306,7 +306,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		stu1.permanentlyWithdrawn should be (false)
 
 		// and now set the null status to fully enrolled:
-		stu1_scd3.sprStatus = status3
+		stu1_scd3.statusOnRoute = status3
 		studentCourseDetailsDao.saveOrUpdate(stu1_scd3)
 		session.flush
 

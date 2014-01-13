@@ -39,6 +39,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	var routeCode = rs.getString("route_code")
 	var courseCode = rs.getString("course_code")
 	var sprStatusCode = rs.getString("spr_status_code")
+	var scjStatusCode = rs.getString("scj_status_code")
 	var departmentCode = rs.getString("department_code")
 	var awardCode = rs.getString("award_code")
 
@@ -110,6 +111,10 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		// Apply above will take care of the db.  This brings the in-memory data up to speed:
 		studentCourseDetails.attachStudentCourseYearDetails(studentCourseYearDetails)
 
+		// just check the SPR (status on route) code.  The SCJ code may indicate that they are
+		// permanently withdrawn from the course, but it may have the same route code as their
+		// current course (surprisingly).  In that case we don't want to go ahead and end all
+		// relationships for the route code.
 		if (sprStatusCode != null && sprStatusCode.startsWith("P")) {
 			// they are permanently withdrawn
 			endRelationships()
@@ -117,8 +122,11 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		else {
 			captureTutor(studentCourseDetails.department)
 
-			importSupervisorsForStudentCommand.studentCourseDetails = studentCourseDetails
-			importSupervisorsForStudentCommand.apply
+			if (scjCode != null && !scjStatusCode.startsWith("P")) {
+				// supervisors are coded against SCJ codes; only import them if the SCJ is not withdrawn
+				importSupervisorsForStudentCommand.studentCourseDetails = studentCourseDetails
+				importSupervisorsForStudentCommand.apply
+			}
 		}
 
 		importRowTracker.scjCodesSeen.add(studentCourseDetails.scjCode)
@@ -143,7 +151,8 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		copyObjectProperty("route", routeCode, studentCourseDetailsBean, toRoute(routeCode)) |
 		copyObjectProperty("course", courseCode, studentCourseDetailsBean, toCourse(courseCode)) |
 		copyObjectProperty("award", awardCode, studentCourseDetailsBean, toAward(awardCode)) |
-		copyObjectProperty("sprStatus", sprStatusCode, studentCourseDetailsBean, toSitsStatus(sprStatusCode))
+		copyObjectProperty("statusOnRoute", sprStatusCode, studentCourseDetailsBean, toSitsStatus(sprStatusCode))
+		copyObjectProperty("statusOnCourse", scjStatusCode, studentCourseDetailsBean, toSitsStatus(scjStatusCode))
 	}
 
 	def toRoute(code: String) = code.toLowerCase.maybeText.flatMap { courseAndRouteService.getRouteByCode }.getOrElse(null)

@@ -123,21 +123,21 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		studentInBothYears.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2013))
 		)
-		studentInBothYears.sprStatus = new SitsStatus("C")
+		studentInBothYears.statusOnRoute = new SitsStatus("C")
 		studentInBothYears.mostSignificant = true
 
 		val studentInFirstYear = new StudentCourseDetails(Fixtures.student(), "studentInFirstYear")
 		studentInFirstYear.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
-		studentInFirstYear.sprStatus = new SitsStatus("C")
+		studentInFirstYear.statusOnRoute = new SitsStatus("C")
 		studentInFirstYear.mostSignificant = true
 
 		val studentInSecondYear = new StudentCourseDetails(Fixtures.student(), "studentInSecondYear")
 		studentInSecondYear.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2013))
 		)
-		studentInSecondYear.sprStatus = new SitsStatus("C")
+		studentInSecondYear.statusOnRoute = new SitsStatus("C")
 		studentInSecondYear.mostSignificant = true
 
 
@@ -166,25 +166,25 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		testRoute.code = "test"
 
 		val studentNoShow = new StudentCourseDetails(Fixtures.student(), "studentNoShow")
-		studentNoShow.sprStatus = new SitsStatus("PNS")
+		studentNoShow.statusOnRoute = new SitsStatus("PNS")
 		studentNoShow.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 
 		val studentPermWithdrawn = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawn")
-		studentPermWithdrawn.sprStatus = new SitsStatus("P")
+		studentPermWithdrawn.statusOnRoute = new SitsStatus("P")
 		studentPermWithdrawn.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 
 		val studentPermWithdrawnDebt = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawnDebt")
-		studentPermWithdrawnDebt.sprStatus = new SitsStatus("PD")
+		studentPermWithdrawnDebt.statusOnRoute = new SitsStatus("PD")
 		studentPermWithdrawnDebt.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 
 		val studentPermWithdrawnWrittenOff = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawnWrittenOff")
-		studentPermWithdrawnWrittenOff.sprStatus = new SitsStatus("PR")
+		studentPermWithdrawnWrittenOff.statusOnRoute = new SitsStatus("PR")
 		studentPermWithdrawnWrittenOff.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
@@ -217,7 +217,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		student.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
-		student.sprStatus = new SitsStatus("C")
+		student.statusOnRoute = new SitsStatus("C")
 		student.mostSignificant =  true
 
 		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(student)
@@ -248,7 +248,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		student.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
-		student.sprStatus = new SitsStatus("C")
+		student.statusOnRoute = new SitsStatus("C")
 		student.mostSignificant = false
 
 		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(student)

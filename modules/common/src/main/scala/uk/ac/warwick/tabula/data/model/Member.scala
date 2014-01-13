@@ -172,7 +172,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 			u.setDepartment(dept.name)
 			u.setDepartmentCode(dept.code.toUpperCase)
 		}
-		
+
 		u.setLoginDisabled(!(inUseFlag.hasText && (inUseFlag == "Active" || inUseFlag.startsWith("Inactive - Starts "))))
 		userType match {
 			case MemberUserType.Staff => {
@@ -189,13 +189,13 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 			}
 			case _ => u.setUserType("External")
 		}
-		
+
 		u.setExtraProperties(JHashMap(
 				"urn:websignon:usertype" -> u.getUserType,
 				"urn:websignon:timestamp" -> DateTime.now.toString,
 				"urn:websignon:usersource" -> "Tabula"
 		))
-		
+
 		u.setVerified(true)
 		u.setFoundUser(true)
 		u
@@ -290,8 +290,8 @@ class StudentMember extends Member with StudentProperties {
 
 	override def permanentlyWithdrawn: Boolean = {
 		freshStudentCourseDetails
-			 .filter(_.sprStatus != null)
-			 .map(_.sprStatus)
+			 .filter(_.statusOnRoute != null)
+			 .map(_.statusOnRoute)
 			 .filter(_.code != null)
 			 .filter(_.code.startsWith("P"))
 			 .size == freshStudentCourseDetails.size
