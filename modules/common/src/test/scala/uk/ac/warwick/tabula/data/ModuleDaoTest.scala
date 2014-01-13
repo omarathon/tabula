@@ -17,16 +17,17 @@ class ModuleDaoTest extends PersistenceTestBase {
 		val cs108 = dao.getByCode("cs108").get
 		val cs240 = dao.getByCode("cs240").get
 		val cs241 = dao.getByCode("cs241").get
+		val cs242 = dao.getByCode("cs242").get
 	}
 	
 	@Test def crud { transactional { tx =>
 		new Context {
-			dao.allModules should be (Seq(cs108, cs240, cs241))
+			dao.allModules should be (Seq(cs108, cs240, cs241, cs242))
 
 			val cs333 = Fixtures.module("cs333")
 			dao.saveOrUpdate(cs333)
 
-			dao.allModules should be (Seq(cs108, cs240, cs241, cs333))
+			dao.allModules should be (Seq(cs108, cs240, cs241, cs242, cs333))
 
 			dao.getByCode("cs333") should be (Some(cs333))
 			dao.getByCode("wibble") should be (None)

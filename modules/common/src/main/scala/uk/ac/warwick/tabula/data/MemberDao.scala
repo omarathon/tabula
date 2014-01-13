@@ -8,7 +8,6 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Department, Member, ModeOfAttendance, RuntimeMember, SitsStatus, StudentMember, StudentRelationship, StudentRelationshipType}
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 import uk.ac.warwick.tabula.data.model.StaffMember
@@ -184,9 +183,13 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		(homeDepartmentMatches ++ courseMatches).distinct.sortBy(_.lastUpdatedDate)
 	}
 
-
 	def listUpdatedSince(startDate: DateTime, max: Int) =
-		session.newCriteria[Member].add(gt("lastUpdatedDate", startDate)).setMaxResults(max).addOrder(asc("lastUpdatedDate")).list
+		session.newQuery[Member]( """select distinct staffOrStudent from Member staffOrStudent
+			where staffOrStudent.lastUpdatedDate > :lastUpdated
+			order by lastUpdatedDate asc
+		""")
+			.setParameter("lastUpdated", startDate)
+			.setMaxResults(max).seq
 
 	def getAllCurrentRelationships(targetSprCode: String): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]

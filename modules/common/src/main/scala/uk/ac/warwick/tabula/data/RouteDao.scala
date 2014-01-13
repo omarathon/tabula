@@ -28,6 +28,7 @@ class RouteDaoImpl extends RouteDao with Daoisms {
 		session.newCriteria[Route]
 			.addOrder(Order.asc("code"))
 			.seq
+			.distinct
 
 	def saveOrUpdate(route: Route) = session.saveOrUpdate(route)
 

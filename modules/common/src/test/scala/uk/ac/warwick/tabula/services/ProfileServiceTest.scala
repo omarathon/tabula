@@ -77,7 +77,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 	@Test def listMembersUpdatedSince = transactional { tx =>
 
 		val dept1 = Fixtures.departmentWithId("in", "IT Services", "1")
-		val dept2 = Fixtures.departmentWithId("cs", "Computing Science", "2")
+		val dept2 = Fixtures.departmentWithId("po", "Politics", "2")
 		session.saveOrUpdate(dept1)
 		session.saveOrUpdate(dept2)
 		session.flush
