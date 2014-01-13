@@ -51,8 +51,8 @@
 					</#if>
 					<#if !isSelf>
 						<tr>
-							<th>Status</th>
-							<td><@fmt.spr_status studentCourseDetails />
+							<th>Status on Route</th>
+							<td><@fmt.status_on_route studentCourseDetails />
 							</td>
 						</tr>
 					</#if>
@@ -121,6 +121,13 @@
 											</#if>
 										</td>
 									</tr>
+									<#if !isSelf>
+										<tr>
+											<th>Status on Course</th>
+											<td><@fmt.status_on_course studentCourseDetails />
+											</td>
+										</tr>
+									</#if>
 									<tr>
 										<th>Start date</th>
 										<td>

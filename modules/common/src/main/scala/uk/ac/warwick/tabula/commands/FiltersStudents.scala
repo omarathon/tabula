@@ -79,7 +79,7 @@ trait FiltersStudents extends ProfileServiceComponent with PermissionsCheckingMe
 
 			// SPR status
 			inIfNotEmpty(
-				"studentCourseDetails.sprStatus", sprStatuses.asScala,
+				"studentCourseDetails.statusOnRoute", sprStatuses.asScala,
 				AliasPaths("studentCourseDetails") : _*
 			),
 

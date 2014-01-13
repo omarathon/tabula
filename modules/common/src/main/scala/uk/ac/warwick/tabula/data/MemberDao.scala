@@ -122,7 +122,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.add(in("universityId", universityIds map { _.safeTrim }))
 			.add(isNull("missingFromImportSince"))
 			.seq
-			
+
 	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]) =
 		if (universityIds.isEmpty) Seq.empty
 		else session.newCriteria[Member]
@@ -135,7 +135,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			if (disableFilter)
 				session.disableFilter(Member.StudentsOnlyFilter)
 
-			val criteria = 
+			val criteria =
 				session.newCriteria[Member]
 					.add(is("userId", userId.safeTrim.toLowerCase))
 					.add(isNull("missingFromImportSince"))
@@ -144,14 +144,14 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 						.add(like("inUseFlag", "Inactive - Starts %"))
 					)
 					.addOrder(asc("universityId"))
-					
+
 			if (eagerLoad)
 				criteria
 					.setFetchMode("studentCourseDetails", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
 					.distinct
-					
+
 			criteria.seq
 		} finally {
 			if (disableFilter && filterEnabled)
@@ -175,7 +175,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 						scd.missingFromImportSince is null and
             scd.department = :department and
         		scd.student.lastUpdatedDate > :lastUpdated and
-            scd.sprStatus.code not like 'P%' """)
+            scd.statusOnRoute.code not like 'P%' """)
 			.setEntity("department", department)
 			.setParameter("lastUpdated", startDate).seq
 
@@ -236,7 +236,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.mostSignificant = true
 			and
-				scd.sprStatus.code not like 'P%'
+				scd.statusOnRoute.code not like 'P%'
 			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
 			order by
@@ -266,7 +266,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.missingFromImportSince is null
 			and
-				scd.sprStatus.code not like 'P%'
+				scd.statusOnRoute.code not like 'P%'
 			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
 			order by
@@ -323,7 +323,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.mostSignificant = true
 			and
-				scd.sprStatus.code not like 'P%'
+				scd.statusOnRoute.code not like 'P%'
 			and
 				scd.sprCode not in (
 					select
@@ -359,7 +359,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.mostSignificant = true
 			and
-				scd.sprStatus.code not like 'P%'
+				scd.statusOnRoute.code not like 'P%'
 			""")
 			.setEntity("department", department).seq
 			s
@@ -390,7 +390,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.mostSignificant = true
 			and
-				scd.sprStatus.code not like 'P%'
+				scd.statusOnRoute.code not like 'P%'
 			and
 				scd.sprCode in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
 			""")
@@ -466,7 +466,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				.addOrder(desc("statusCount"))
 				.project[Array[Any]](
 					projectionList()
-						.add(groupProperty("scd.sprStatus"))
+						.add(groupProperty("scd.statusOnRoute"))
 						.add(rowCount(), "statusCount")
 				)
 				.seq.map { array => array(0).asInstanceOf[SitsStatus] }

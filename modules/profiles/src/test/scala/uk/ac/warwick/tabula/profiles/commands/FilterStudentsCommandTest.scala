@@ -119,7 +119,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 		yosRestriction.alias("mostSignificantCourse", "studentCourseDetails")
 		yosRestriction.alias("studentCourseDetails.latestStudentCourseYearDetails", "studentCourseYearDetails")
 
-		val sprRestriction = new ScalaRestriction(Restrictions.in("studentCourseDetails.sprStatus", JArrayList(sprP)))
+		val sprRestriction = new ScalaRestriction(Restrictions.in("studentCourseDetails.statusOnRoute", JArrayList(sprP)))
 		sprRestriction.alias("mostSignificantCourse", "studentCourseDetails")
 
 		val modRestriction = new ScalaRestriction(Restrictions.in("moduleRegistration.module", JArrayList(mod2, mod3)))

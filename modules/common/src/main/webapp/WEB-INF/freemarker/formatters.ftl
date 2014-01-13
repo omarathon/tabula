@@ -247,8 +247,12 @@
 		${(studentCourseDetails.course.name)!} (${(studentCourseDetails.course.code?upper_case)!})
 </#macro>
 
-<#macro spr_status studentCourseDetails>
-		${(studentCourseDetails.sprStatus.fullName?lower_case?cap_first)!}
+<#macro status_on_route studentCourseDetails>
+		${(studentCourseDetails.statusOnRoute.fullName?lower_case?cap_first)!}
+</#macro>
+
+<#macro status_on_course studentCourseDetails>
+		${(studentCourseDetails.statusOnCourse.fullName?lower_case?cap_first)!}
 </#macro>
 
 <#macro enrolment_status studentCourseDetails>
