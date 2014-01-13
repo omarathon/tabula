@@ -9,7 +9,6 @@ import org.joda.time.DateTime
 import org.mockito.Matchers
 import uk.ac.warwick.util.termdates.TermImpl
 import uk.ac.warwick.util.termdates.Term.TermType
-import org.mockito.Mockito._
 
 class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mockito {
 	trait ServiceTestSupport extends MonitoringPointDaoComponent with MeetingRecordDaoComponent
@@ -420,7 +419,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		createdCheckpoints.head.state should be (AttendanceState.Attended)
 		createdCheckpoints.head.student should be (student)
 		createdCheckpoints.head.point should be (meetingThisYearPoint)
-		createdCheckpoints.head.updatedBy should be (agentMember.universityId)
+		createdCheckpoints.head.updatedBy should be (agentMember.userId)
 	}}
 
 	trait ValidPointMeetingNotApprovedButCreatedByAgent extends ValidYear2PointFixture {
@@ -464,7 +463,7 @@ class MonitoringPointMeetingRelationshipTermServiceTest extends TestBase with Mo
 		createdCheckpoints.head.state should be (AttendanceState.Attended)
 		createdCheckpoints.head.student should be (student)
 		createdCheckpoints.head.point should be (meetingThisYearPoint)
-		createdCheckpoints.head.updatedBy should be (agentMember.universityId)
+		createdCheckpoints.head.updatedBy should be (agentMember.userId)
 	}}
 
 }

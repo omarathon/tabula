@@ -80,8 +80,14 @@
 			color: @errorText;
 		}
 	}
-	.row-fluid.point:hover {
+	table {
+		td { width: 1px; }
+		td.point {
+			width: 100%;
+		}
+	  tr.point:hover {
 		background-color: @tableBackgroundHover
+	  }
 	}
 }
 

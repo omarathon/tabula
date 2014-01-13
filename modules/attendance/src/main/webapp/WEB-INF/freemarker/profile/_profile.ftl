@@ -1,6 +1,7 @@
 <#escape x as x?html>
+<#import "../attendance_macros.ftl" as attendance_macros />
 
-<#if !monitoringPointsByTerm??>
+<#if !pointsByTerm??>
 	<p><em>There are no monitoring points defined for this academic year.</em></p>
 <#else>
 
@@ -10,22 +11,14 @@
 <#macro pointsInATerm term>
 	<table class="table">
 		<tbody>
-			<#list monitoringPointsByTerm[term] as point>
+			<#local pointMap = pointsByTerm[term] />
+			<#list pointMap?keys?sort_by("validFromWeek") as point>
 				<tr class="point">
-					<td title="${point.name} (<@fmt.monitoringPointFormat point true />)">
+					<td class="point" title="${point.name} (<@fmt.monitoringPointFormat point true />)">
 						${point.name} (<a class="use-tooltip" data-html="true" title="<@fmt.monitoringPointDateFormat point />"><@fmt.monitoringPointFormat point /></a>)
 					</td>
 					<td class="state">
-						<#if checkpointState[point.id]??>
-							<#local thisPointCheckpointState = checkpointState[point.id] />
-							<#if thisPointCheckpointState == "attended">
-								<span class="label label-success">Attended</span>
-							<#elseif thisPointCheckpointState == "authorised">
-								<span class="label label-info" title="Missed (authorised)">Missed</span>
-							<#elseif thisPointCheckpointState == "unauthorised">
-								<span class="label label-important" title="Missed (unauthorised)">Missed</span>
-							</#if>
-						</#if>
+						<@attendance_macros.attendanceLabel pointMap point />
 					</td>
 					<#if can_record>
 						<td>
@@ -48,7 +41,7 @@
 <div class="monitoring-points-profile striped-section collapsible <#if defaultExpand?? && defaultExpand>expanded</#if>">
 	<h3 class="section-title">Monitoring points</h3>
 	<div class="missed-info">
-		<#if missedCountByTerm?keys?size == 0 && (monitoringPointsByTerm?keys?size > 0) >
+		<#if missedCountByTerm?keys?size == 0 && (pointsByTerm?keys?size > 0) >
 			<#if is_the_student>
 				You have missed 0 monitoring points.
 			<#else>
@@ -78,13 +71,13 @@
 	</div>
 
 	<div class="striped-section-contents">
-		<#if monitoringPointsByTerm?keys?size == 0>
+		<#if pointsByTerm?keys?size == 0>
 			<div class="item-row row-fluid">
 				<div class="span12"><em>There are no monitoring points for this route and year of study.</em></div>
 			</div>
 		<#else>
 			<#list ["Autumn", "Christmas vacation", "Spring", "Easter vacation", "Summer", "Summer vacation"] as term>
-        		<#if monitoringPointsByTerm[term]??>
+        		<#if pointsByTerm[term]??>
 					<div class="item-info row-fluid term">
 						<div class="span12">
 							<h4>${term}</h4>

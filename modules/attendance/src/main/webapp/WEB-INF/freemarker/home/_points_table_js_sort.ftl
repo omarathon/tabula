@@ -51,18 +51,7 @@
 									<#if studentData.pointsByTerm[term]??>
 										<#assign pointMap = studentData.pointsByTerm[term] />
 										<#list pointMap?keys?sort_by("validFromWeek") as point>
-											<#assign checkpointState = mapGet(pointMap, point) />
-											<#if checkpointState == "attended">
-												<i class="icon-ok icon-fixed-width attended" title="Attended: ${point.name} (<@fmt.monitoringPointFormat point true />)"></i>
-											<#elseif checkpointState == "authorised">
-												<i class="icon-remove-circle icon-fixed-width authorised" title="Missed (authorised): ${point.name} (<@fmt.monitoringPointFormat point true />)"></i>
-											<#elseif checkpointState == "unauthorised">
-												<i class="icon-remove icon-fixed-width unauthorised" title="Missed (unauthorised): ${point.name} (<@fmt.monitoringPointFormat point true />)"></i>
-											<#elseif checkpointState == "late">
-												<i class="icon-warning-sign icon-fixed-width late" title="Unrecorded: ${point.name} (<@fmt.monitoringPointFormat point true />)"></i>
-											<#else>
-												<i class="icon-minus icon-fixed-width" title="${point.name} (<@fmt.monitoringPointFormat point true />)"></i>
-											</#if>
+											<@attendance_macros.attendanceIcon pointMap point />
 										</#list>
 									<#else>
 										<i class="icon-fixed-width"></i>

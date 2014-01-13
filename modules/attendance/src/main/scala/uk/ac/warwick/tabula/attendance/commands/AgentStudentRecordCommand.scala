@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
-import uk.ac.warwick.tabula.services.{TermServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent, AutowiringTermServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent, AutowiringTermServiceComponent}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.validation.Errors
@@ -19,21 +19,26 @@ object AgentStudentRecordCommand {
 		with AgentStudentRecordPermissions
 		with AgentStudentRecordDescription
 		with AgentStudentRecordValidation
-		with AutowiringTermServiceComponent
 		with AutowiringMonitoringPointServiceComponent
+		with AutowiringProfileServiceComponent
+		with AutowiringTermServiceComponent
 		with GroupMonitoringPointsByTerm
 }
 
 abstract class AgentStudentRecordCommand(val agent: Member, val relationshipType: StudentRelationshipType,
 	val student: StudentMember, val academicYearOption: Option[AcademicYear]
-) extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with AgentStudentRecordCommandState with PopulateOnForm {
+) extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with AgentStudentRecordCommandState with PopulateOnForm with CheckpointUpdatedDescription {
 
-	this: TermServiceComponent with MonitoringPointServiceComponent with GroupMonitoringPointsByTerm =>
+	this: MonitoringPointServiceComponent with ProfileServiceComponent =>
 
 	def populate() = {
-		checkpointMap = monitoringPointService.getChecked(Seq(student), pointSet)(student).map{ case(point, stateOption) =>
-			point -> stateOption.getOrElse(null)
+		val checkpoints = monitoringPointService.getCheckpoints(Seq(student), pointSet)(student)
+		checkpointMap = checkpoints.map{ case(point, checkpointOption) =>
+			point -> checkpointOption.map(c => c.state).getOrElse(null)
 		}.asJava
+		checkpointDescriptions = checkpoints.map{case (point, checkpointOption) =>
+			point -> checkpointOption.map{c => describeCheckpoint(c)}.getOrElse("")
+		}
 	}
 
 	def applyInternal() = {
@@ -55,7 +60,7 @@ trait AgentStudentRecordValidation extends SelfValidating {
 	override def validate(errors: Errors) = {
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), pointSet.academicYear)
 		val points = pointSet.points.asScala
-		checkpointMap.asScala.foreach{case (point, state) => {
+		checkpointMap.asScala.foreach{case (point, state) =>
 			errors.pushNestedPath(s"checkpointMap[${point.id}]")
 			if (!points.contains(point)) {
 				errors.rejectValue("", "monitoringPointSet.invalidPoint")
@@ -72,8 +77,6 @@ trait AgentStudentRecordValidation extends SelfValidating {
 			}
 			errors.popNestedPath()
 		}}
-	}
-
 }
 
 trait AgentStudentRecordPermissions extends RequiresPermissionsChecking with PermissionsChecking {
@@ -111,6 +114,7 @@ trait AgentStudentRecordCommandState extends GroupMonitoringPointsByTerm with Mo
 	lazy val pointSet = monitoringPointService.getPointSetForStudent(student, academicYear).getOrElse(throw new ItemNotFoundException)
 
 	var checkpointMap: JMap[MonitoringPoint, AttendanceState] =  JHashMap()
+	var checkpointDescriptions: Map[MonitoringPoint, String] = _
 
 	def monitoringPointsByTerm = groupByTerm(pointSet.points.asScala, pointSet.academicYear)
 	def nonReportedTerms = monitoringPointService.findNonReportedTerms(Seq(student), pointSet.academicYear)
