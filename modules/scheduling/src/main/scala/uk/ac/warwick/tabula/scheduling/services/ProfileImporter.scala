@@ -349,6 +349,7 @@ object ProfileImporter {
 			scj.scj_endd as end_date,
 			scj.scj_eend as expected_end_date,
 			scj.scj_udfa as most_signif_indicator,
+			scj.scj_stac as scj_status_code,
 
 			sce.sce_sfcc as funding_source,
 			sce.sce_stac as enrolment_status_code,

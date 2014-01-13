@@ -80,7 +80,7 @@ class StudentCourseDetails
 	// permanently withdrawn in the context of applicants, but not in the context of
 	// the student's route status (sprStatus)
 	def permanentlyWithdrawn = {
-		sprStatus != null && sprStatus.code.startsWith("P")
+		statusOnRoute != null && statusOnRoute.code.startsWith("P")
 	}
 
 	@OneToOne
@@ -182,7 +182,12 @@ trait StudentCourseProperties {
 	@ManyToOne
 	@JoinColumn(name="sprStatusCode")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
-	var sprStatus: SitsStatus = _
+	var statusOnRoute: SitsStatus = _
+
+	@ManyToOne
+	@JoinColumn(name="scjStatusCode")
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
+	var statusOnCourse: SitsStatus = _
 
 	var lastUpdatedDate = DateTime.now
 

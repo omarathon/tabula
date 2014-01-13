@@ -52,7 +52,7 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 			val scd = new StudentCourseDetails(newMember, userLookupUser.getWarwickId + "/" + yearOfStudy)
 			scd.mostSignificant = true
 			scd.sprCode = scd.scjCode
-			scd.sprStatus = currentStudentStatus
+			scd.statusOnRoute = currentStudentStatus
 
 			if (route.isDefined) scd.route = route.get
 			if (course.isDefined) scd.course = course.get
