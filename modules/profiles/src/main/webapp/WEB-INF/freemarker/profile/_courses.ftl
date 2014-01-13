@@ -28,6 +28,12 @@
 				</li>
 			</#if>
 		</#list>
+		
+		<#if features.courseworkInStudentProfile && can.do("Profiles.Read.Coursework", profile)>
+			<li id="coursework-pane" style="display:none;">
+				<#include "_coursework.ftl" />
+			</li>
+		</#if>
 
 		<#if numSmallGroups gt 0>
 			<li id="sg-pane" style="display:none;">

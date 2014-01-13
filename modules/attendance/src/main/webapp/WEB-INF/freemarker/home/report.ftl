@@ -2,12 +2,12 @@
 <#import "*/modal_macros.ftl" as modal />
 
 <@modal.header>
-	<h2>Review missed monitroing points</h2>
+	<h2>Review missed monitoring points</h2>
 </@modal.header>
 
 <@modal.body>
 	<p>
-		Send a report to the Academic Office showing all students in ${command.monitoringPointSet.route.code?upper_case} ${command.monitoringPointSet.route.name} who have missed monitroing points.
+		Send a report to the Academic Office showing all students in ${command.monitoringPointSet.route.code?upper_case} ${command.monitoringPointSet.route.name} who have missed monitoring points.
 	</p>
 	<p>
 		Once you have sent this report you will no longer be able to edit attendance at any monitoring points that have already taken place.
@@ -15,8 +15,8 @@
 	<p>
 		<button class="btn review">Review report</button>
 	</p>
-	<div class="monitroing-points-report-preview">
-		<p>The following missed monitroing points will be recorded in SITS:eVision:</p>
+	<div class="monitoring-points-report-preview">
+		<p>The following missed monitoring points will be uploaded to SITS:eVision:</p>
 		<table class="table table-condensed table-bordered table-striped">
 			<thead>
 				<tr>
@@ -39,10 +39,10 @@
 	<script>
 		jQuery(function($){
 			$('button.review').on('click', function(){
-				$('.monitroing-points-report-preview').show();
+				$('.monitoring-points-report-preview').show();
 				$(this).hide();
 			});
-			$('.monitroing-points-report-preview').hide();
+			$('.monitoring-points-report-preview').hide();
 		});
 	</script>
 </@modal.body>

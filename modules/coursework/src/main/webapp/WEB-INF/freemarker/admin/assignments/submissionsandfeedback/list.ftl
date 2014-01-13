@@ -1,4 +1,5 @@
 <#import "_submission_details.ftl" as sd />
+<#import "/WEB-INF/freemarker/admin/_profile_link.ftl" as pl />
 <#escape x as x?html>
 
 <div id="feedback-modal" class="modal fade"></div>
@@ -190,7 +191,7 @@
 					<td><#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??><@form.selector_check_row "students" student.user.warwickId /></#if></td>
 					<td class="id">
 					<#if module.department.showStudentName>
-						${student.user.fullName}
+						${student.user.fullName} <@pl.profile_link student.user />
 					<#else>
 						${student.user.warwickId}
 					</#if>

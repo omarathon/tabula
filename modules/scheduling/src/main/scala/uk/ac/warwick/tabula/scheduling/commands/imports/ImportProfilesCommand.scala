@@ -126,12 +126,14 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 				}
 			}
 
-			// each apply has its own transaction
 			logger.info("Updating students")
 			benchmarkTask("-- Update students") {
-				studentRowCommands map { _.apply }
+			// each apply has its own transaction
+				transactional() {
+					studentRowCommands map { _.apply }
+					session.flush()
+				}
 			}
-			session.flush()
 
 			benchmarkTask("-- Update module registrations and small groups") {
 				transactional() {

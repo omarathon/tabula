@@ -3,8 +3,10 @@
 
 <#if has_assignments || has_historical_items || user.student || (!user.staff && user.alumni)>
 	<div class="header-with-tooltip" id="your-assignments">
-		<h2 class="section">My assignments</h2>
-		<span class="use-tooltip" data-toggle="tooltip" data-html="true" data-placement="bottom" data-title="Talk to your module convenor if you think an assignment is missing - maybe it isn't set up yet, or they aren't using Tabula.">Missing an assignment?</span>
+		<h2 class="section"><#if isSelf>My<#else>${student.firstName}'s</#if> assignments</h2>
+		<#if isSelf>
+			<span class="use-tooltip" data-toggle="tooltip" data-html="true" data-placement="bottom" data-title="Talk to your module convenor if you think an assignment is missing - maybe it isn't set up yet, or they aren't using Tabula.">Missing an assignment?</span>
+		</#if>
 	</div>
 
 	<#if has_assignments>
@@ -26,9 +28,9 @@
 							<div class="span5">
 								<div class="module-title"><@fmt.module_name assignment.module /></div>
 								<h4 class="name">
-									<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+									<#if isSelf><a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />"></#if>
 										<span class="ass-name">${assignment.name}</span>
-									</a>
+									<#if isSelf></a></#if>
 								</h4>
 							</div>
 							<div class="span4">
@@ -56,20 +58,22 @@
 								</#if>
 							</div>
 							<div class="span3 button-list">
-								<#if info.submittable>
-									<a class="btn btn-block btn-primary" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
-										<i class="icon-folder-close icon-white"></i> Submit
-									</a>
-
-									<#if !assignment.openEnded>
-										<#if extensionRequested>
-											<a href="<@routes.extensionRequest assignment=assignment />?returnTo=/coursework" class="btn btn-block">
-												<i class="icon-calendar"></i> Review extension request
-											</a>
-										<#elseif !isExtended && !assignment.closed && assignment.module.department.allowExtensionRequests!false && assignment.allowExtensions!false>
-											<a href="<@routes.extensionRequest assignment=assignment />?returnTo=/coursework" class="btn btn-block">
-												<i class="icon-calendar"></i> Request extension
-											</a>
+								<#if isSelf>
+									<#if info.submittable>
+										<a class="btn btn-block btn-primary" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+											<i class="icon-folder-close icon-white"></i> Submit
+										</a>
+	
+										<#if !assignment.openEnded>
+											<#if extensionRequested>
+												<a href="<@routes.extensionRequest assignment=assignment />?returnTo=/coursework" class="btn btn-block">
+													<i class="icon-calendar"></i> Review extension request
+												</a>
+											<#elseif !isExtended && !assignment.closed && assignment.module.department.allowExtensionRequests!false && assignment.allowExtensions!false>
+												<a href="<@routes.extensionRequest assignment=assignment />?returnTo=/coursework" class="btn btn-block">
+													<i class="icon-calendar"></i> Request extension
+												</a>
+											</#if>
 										</#if>
 									</#if>
 								</#if>
@@ -86,7 +90,7 @@
 	<#else>
 		<div class="alert alert-block alert-info">
 			<h3>Pending</h3>
-			There are no pending assignments to show you right now
+			There are no pending assignments to show <#if isSelf>you </#if>right now
 		</div>
 	</#if>
 
@@ -113,9 +117,9 @@
 							<div class="span4">
 								<div class="module-title"><@fmt.module_name assignment.module /></div>
 								<h4 class="name">
-									<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+									<#if isSelf><a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />"></#if>
 										<span class="ass-name">${assignment.name}</span>
-									</a>
+									<#if isSelf></a></#if>
 								</h4>
 							</div>
 							<div class="span5">
@@ -127,35 +131,37 @@
 										<span class="label label-info">Within Extension</span>
 									</#if>
 								<#elseif isFormative>
-									<span class="label use-tooltip" title="Formative assignments do not contribute to your module grade or mark. They provide an opportunity to feedback and/or evaluate your learning.">Formative, no submission</span>
+									<span class="label use-tooltip" title="Formative assignments do not contribute to <#if isSelf>your<#else>a student's</#if> module grade or mark. They provide an opportunity to feedback and/or evaluate <#if isSelf>your<#else>a student's</#if> learning.">Formative, no submission</span>
 								</#if>
 							</div>
 							<div class="span3 button-list">
-								<#if hasFeedback>
-									<#-- View feedback -->
-									<a class="btn btn-block btn-success" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
-										<i class="icon-check icon-white"></i> View feedback
-									</a>
-								<#elseif info.resubmittable>
-									<#-- Resubmission allowed -->
-									<a class="btn btn-block btn-primary" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
-										<i class="icon-folder-close icon-white"></i> Resubmit
-									</a>
-								<#elseif hasSubmission>
-									<#-- View receipt -->
-									<a class="btn btn-block" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
-										<i class="icon-list-alt"></i> View receipt
-									</a>
-								<#elseif info.submittable>
-									<#-- First submission still allowed -->
-									<a class="btn btn-block btn-primary" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
-										<i class="icon-folder-close icon-white"></i> Submit
-									</a>
-								<#else>
-									<#-- Assume formative, so just show info -->
-									<a class="btn btn-block" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
-										<i class="icon-list-alt"></i> View details
-									</a>
+								<#if isSelf>
+									<#if hasFeedback>
+										<#-- View feedback -->
+										<a class="btn btn-block btn-success" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+											<i class="icon-check icon-white"></i> View feedback
+										</a>
+									<#elseif info.resubmittable>
+										<#-- Resubmission allowed -->
+										<a class="btn btn-block btn-primary" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+											<i class="icon-folder-close icon-white"></i> Resubmit
+										</a>
+									<#elseif hasSubmission>
+										<#-- View receipt -->
+										<a class="btn btn-block" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+											<i class="icon-list-alt"></i> View receipt
+										</a>
+									<#elseif info.submittable>
+										<#-- First submission still allowed -->
+										<a class="btn btn-block btn-primary" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+											<i class="icon-folder-close icon-white"></i> Submit
+										</a>
+									<#else>
+										<#-- Assume formative, so just show info -->
+										<a class="btn btn-block" href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+											<i class="icon-list-alt"></i> View details
+										</a>
+									</#if>
 								</#if>
 							</div>
 						</div>
@@ -170,7 +176,7 @@
 	<#else>
 		<div class="alert alert-block alert-info">
 			<h3>Past</h3>
-			There are no past assignments to show you right now
+			There are no past assignments to show <#if isSelf>you </#if>right now
 		</div>
 	</#if>
 </#if>

@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 import uk.ac.warwick.tabula.data.model.StaffMember
+import org.hibernate.FetchMode
 
 trait MemberDaoComponent {
 	val memberDao: MemberDao
@@ -35,7 +36,7 @@ trait MemberDao {
 	def getByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member]
-	def getAllByUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
+	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
 	def getAllCurrentRelationships(targetSprCode: String): Seq[StudentRelationship]
@@ -128,13 +129,14 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.add(in("universityId", universityIds map { _.safeTrim }))
 			.seq
 
-	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {
+	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false) = {
 		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
 		try {
 			if (disableFilter)
 				session.disableFilter(Member.StudentsOnlyFilter)
 
-			session.newCriteria[Member]
+			val criteria = 
+				session.newCriteria[Member]
 					.add(is("userId", userId.safeTrim.toLowerCase))
 					.add(isNull("missingFromImportSince"))
 					.add(disjunction()
@@ -142,7 +144,15 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 						.add(like("inUseFlag", "Inactive - Starts %"))
 					)
 					.addOrder(asc("universityId"))
-					.seq
+					
+			if (eagerLoad)
+				criteria
+					.setFetchMode("studentCourseDetails", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
+					.distinct
+					
+			criteria.seq
 		} finally {
 			if (disableFilter && filterEnabled)
 				session.enableFilter(Member.StudentsOnlyFilter)
@@ -425,7 +435,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 		orders.foreach { c.addOrder(_) }
 
-		c.setMaxResults(maxResults).setFirstResult(startResult).seq
+		c.setMaxResults(maxResults).setFirstResult(startResult).distinct.seq
 	}
 
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]) = {

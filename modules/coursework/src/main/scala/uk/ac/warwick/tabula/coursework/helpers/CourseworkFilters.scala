@@ -41,7 +41,7 @@ abstract class ParameterlessCourseworkFilter extends CourseworkFilter {
 object CourseworkFilters {
 	private val ObjectClassPrefix = CourseworkFilters.getClass.getName
 	lazy val AllFilters = Seq(
-		AllStudents, SubmittedBetweenDates, OnTime, WithExtension, WithinExtension, WithWordCount,SubmissionNotDownloaded, Unsubmitted,
+		AllStudents, Submitted, SubmittedBetweenDates, OnTime, Late, WithExtension, WithinExtension, WithWordCount,SubmissionNotDownloaded, Unsubmitted,
 		NotReleasedForMarking, NotMarked, MarkedByFirst, MarkedBySecond,
 		CheckedForPlagiarism, NotCheckedForPlagiarism, MarkedPlagiarised, WithOverlapPercentage,
 		NoFeedback, FeedbackNotReleased, FeedbackNotDownloaded
@@ -132,6 +132,14 @@ object CourseworkFilters {
 		def applies(assignment: Assignment) = assignment.collectSubmissions
 	}
 	
+	case object Late extends ParameterlessCourseworkFilter {
+		def getDescription = "students who submitted late"
+		def predicate(item: Student) = {
+			(item.coursework.enhancedSubmission map { item => item.submission.isLate && !item.submission.isAuthorisedLate }) getOrElse(false)
+		}
+		def applies(assignment: Assignment) = assignment.collectSubmissions
+	}
+	
 	case object WithExtension extends ParameterlessCourseworkFilter {
 		def getDescription = "students with extensions"
 		def predicate(item: Student) = {
@@ -198,6 +206,14 @@ object CourseworkFilters {
 			}
 		}
 		def applies(assignment: Assignment) = assignment.collectSubmissions && assignment.wordCountField.isDefined
+	}
+	
+	case object Submitted extends ParameterlessCourseworkFilter {
+		def getDescription = "students who have submitted an assignment"
+		def predicate(item: Student) = {
+			item.coursework.enhancedSubmission.isDefined
+		}
+		def applies(assignment: Assignment) = assignment.collectSubmissions
 	}
 	
 	case object Unsubmitted extends ParameterlessCourseworkFilter {

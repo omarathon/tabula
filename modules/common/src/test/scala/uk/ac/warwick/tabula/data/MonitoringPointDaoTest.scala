@@ -79,9 +79,9 @@ class MonitoringPointDaoTest extends PersistenceTestBase with Mockito {
 	@Test def getCheckpointByMember() {
 		transactional { tx =>
 			val student1 = Fixtures.student("1234")
-			student1.freshStudentCourseDetails(0).route = route1
+			student1.freshStudentCourseDetails.head.route = route1
 			val student2 = Fixtures.student("2345")
-			student2.freshStudentCourseDetails(0).route = route1
+			student2.freshStudentCourseDetails.head.route = route1
 
 			routeDao.saveOrUpdate(route1)
 			monitoringPointDao.saveOrUpdate(monitoringPointSet1)
@@ -111,9 +111,9 @@ class MonitoringPointDaoTest extends PersistenceTestBase with Mockito {
 		transactional { tx =>
 			val student1 = Fixtures.student("1234")
 
-			student1.freshStudentCourseDetails(0).route = route1
+			student1.freshStudentCourseDetails.head.route = route1
 			val student2 = Fixtures.student("2345")
-			student2.freshStudentCourseDetails(0).route = route1
+			student2.freshStudentCourseDetails.head.route = route1
 
 			routeDao.saveOrUpdate(route1)
 			monitoringPointDao.saveOrUpdate(monitoringPointSet1)
@@ -203,7 +203,7 @@ class MonitoringPointDaoTest extends PersistenceTestBase with Mockito {
 
 	def makeStudent(userId: String, route: Route, academicYear: AcademicYear, year: Int): StudentMember = {
 		val student = Fixtures.student(userId)
-		var scd = student.freshStudentCourseDetails(0)
+		var scd = student.freshStudentCourseDetails.head
 		student.mostSignificantCourse = scd
 		scd.route = route
 		var scyd = scd.latestStudentCourseYearDetails

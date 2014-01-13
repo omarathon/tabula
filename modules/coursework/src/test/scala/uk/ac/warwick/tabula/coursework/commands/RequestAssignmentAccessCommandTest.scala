@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import freemarker.template.Configuration
 import uk.ac.warwick.tabula.events.EventListener
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.coursework.commands.RequestAssignmentAccessCommandTest.MinimalCommandContext
 
 
@@ -18,10 +19,7 @@ class RequestAssignmentAccessCommandTest extends TestBase with FunctionalContext
 
 	@Test def sendsNotification() {
 		inContext[MinimalCommandContext] {
-			val cmd = new RequestAssignmentAccessCommand(new CurrentUser(student, student))
-			cmd.userLookup = userLookup
-			cmd.assignment = assignment
-			cmd.module = assignment.module
+			val cmd = new RequestAssignmentAccessCommand(assignment.module, assignment, new CurrentUser(student, student))
 			val admins = cmd.apply()
 			val notifications = cmd.emit(admins)
 			notifications.size should be (1)
@@ -46,16 +44,17 @@ object RequestAssignmentAccessCommandTest {
 trait AssignmentFixture extends Mockito{
 
 	val userLookup = mock[UserLookupService]
-	when(userLookup.getUserByUserId("admin1")).thenReturn(admin1)
-	when(userLookup.getUserByUserId("admin2")).thenReturn(admin2)
 
 	val ownersGroup = UserGroup.ofUsercodes
 	ownersGroup.includeUsers = List("admin1", "admin2").asJava
+	ownersGroup.userLookup = userLookup
 
 	val student = newTestUser("student")
 	val admin1 = newTestUser("admin1")
 	val admin2 = newTestUser("admin2")
-
+	
+	userLookup.getUsersByUserIds(ownersGroup.includeUsers) returns JMap("admin1" -> admin1, "admin2" -> admin2)
+	
 	val department = new Department
 	val permissionsService = mock[PermissionsService]
 	permissionsService.ensureUserGroupFor(department, DepartmentalAdministratorRoleDefinition) returns ownersGroup

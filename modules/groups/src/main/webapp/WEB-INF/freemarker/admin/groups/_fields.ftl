@@ -126,6 +126,17 @@
 			</@form.field>
 		</@form.row>
 	</#if>
+	
+	<#if features.smallGroupTeachingLectures>
+		<@form.row path="collectAttendance">
+			<@form.field>
+				<@form.label checkbox=true>
+					<@f.checkbox path="collectAttendance" />
+					Collect attendance at events
+				</@form.label>
+			</@form.field>
+		</@form.row>
+	</#if>
 
 </fieldset>
 

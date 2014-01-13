@@ -72,7 +72,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			command.applyInternal
 
 			// check results
-			val supRels = supervisee.freshStudentCourseDetails(0).relationships(relationshipType)
+			val supRels = supervisee.freshStudentCourseDetails.head.relationships(relationshipType)
 			supRels.size should be (1)
 			val rel = supRels.head
 
@@ -97,7 +97,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			command.applyInternal
 
 			// check results
-			val supRels = supervisee.freshStudentCourseDetails(0).relationships(relationshipType)
+			val supRels = supervisee.freshStudentCourseDetails.head.relationships(relationshipType)
 			supRels.size should be (0)
 		}
 	}
@@ -127,7 +127,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			command.applyInternal
 
 			// check results
-			val supRels = supervisee.freshStudentCourseDetails(0).relationships(relationshipType)
+			val supRels = supervisee.freshStudentCourseDetails.head.relationships(relationshipType)
 			supRels.size should be (1)
 			val rel = supRels.head
 

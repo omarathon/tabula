@@ -81,11 +81,11 @@
 										AttendanceRecording.createButtonGroup('#checkpointMap-${point.id}');
 									</script>
 								</div>
-              </#list>
-            </div>
-          <#else>
-            This student's attendance has already been reported for this term.
-          </#if>
+             				</#list>
+             			</div>
+             		<#else>
+             			This student's attendance for this term has already been uploaded to SITS:eVision.
+             		</#if>
 				</div>
 			</#macro>
 

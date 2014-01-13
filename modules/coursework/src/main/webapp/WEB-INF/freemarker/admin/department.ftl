@@ -12,8 +12,8 @@
 
 <#if department??>
 
-
 <#assign can_manage_dept=can.do("Department.ManageExtensionSettings", department) />
+<#assign expand_by_default = (!can_manage_dept && modules?size lte 5) />
 <#if (features.extensions || features.feedbackTemplates)>
 	<h1 class="with-settings">
 		${department.name}
@@ -137,7 +137,7 @@
 			</div>
 		</#if>
 
-		<#if can_manage_dept && modules?has_content>
+		<#if modules?has_content && !expand_by_default>
 		<div class="btn-group dept-show">
 			<a class="btn btn-medium use-tooltip" href="#" data-container="body" title="Modules with no assignments are hidden. Click to show all modules." data-title-show="Modules with no assignments are hidden. Click to show all modules." data-title-hide="Modules with no assignments are shown. Click to hide them">
 				<i class="icon-eye-open"></i>
@@ -169,7 +169,6 @@
 	});
 </script>
 
-<#assign expand_by_default = (!can_manage_dept && modules?size lte 5) />
 <#list modules as module>
 	<@components.admin_section module=module expand_by_default=expand_by_default />
 	

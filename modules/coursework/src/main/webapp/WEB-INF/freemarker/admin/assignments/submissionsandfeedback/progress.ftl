@@ -1,4 +1,5 @@
 <#import "_submission_details.ftl" as sd />
+<#import "/WEB-INF/freemarker/admin/_profile_link.ftl" as pl />
 
 <#escape x as x?html>
 <div class="fixed-container">
@@ -333,10 +334,20 @@
 					<tr data-contentid="${student.user.warwickId}" class="itemContainer<#if !student.coursework.enhancedSubmission??> awaiting-submission</#if>"<#if student.coursework.enhancedSubmission?? && student.coursework.enhancedSubmission.submission.suspectPlagiarised> data-plagiarised="true"</#if>>
 						<td class="check-col"><#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??><input type="checkbox" class="collection-checkbox" name="students" value="${student.user.warwickId}"></#if></td>
 						<#if department.showStudentName>
-							<td class="student-col toggle-cell"><h6 class="toggle-icon" data-profile="${student.user.warwickId}">${student.user.firstName}</h6></td>
-							<td class="student-col toggle-cell"><h6 data-profile="${student.user.warwickId}">${student.user.lastName}</h6></td>
+							<td class="student-col toggle-cell">
+								<h6 class="toggle-icon" data-profile="${student.user.warwickId}">${student.user.firstName}</h6>
+							</td>
+							<td class="student-col toggle-cell">
+								<h6 data-profile="${student.user.warwickId}">
+									${student.user.lastName}&nbsp;<@pl.profile_link student.user />
+								</h6>
+							</td>
 						<#else>
-							<td class="student-col toggle-cell"><h6 class="toggle-icon" data-profile="${student.user.warwickId}">${student.user.warwickId}</h6></td>
+							<td class="student-col toggle-cell">
+								<h6 class="toggle-icon" data-profile="${student.user.warwickId}">
+									${student.user.warwickId}
+								</h6>
+							</td>
 						</#if>
 						<td class="progress-col content-cell toggle-cell">
 							<#if student.stages?keys?seq_contains('Submission') && student.nextStage?? && student.nextStage.toString != 'Submission' && student.stages['Submission'].messageCode != student.progress.messageCode>
@@ -381,7 +392,7 @@
 		$('.fixed-container').fixHeaderFooter({minimumWindowHeightFix: 630});
 
 		var options = {
-			sortList: [[<#if department.showStudentName>3<#else>2</#if>,0]],
+			sortList: [<#if department.showStudentName>[3, 0], [2, 0]<#else>[2, 0], [1, 0]</#if>],
 			headers: { 0: { sorter: false } },
 			textExtraction: function(node) {
 				var $el = $(node);

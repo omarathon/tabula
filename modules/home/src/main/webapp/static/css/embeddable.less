@@ -164,7 +164,7 @@ summary {
 .popover #home-list {
 	padding-left: 0 !important;
 	margin: 0 !important;
-	
+
 	.hint { display: block;	}
 }
 
@@ -938,13 +938,13 @@ h6 .mod-code, h6 .route-code {
 }
 
 h2 {
-	.mod-name, .route-name { 
+	.mod-name, .route-name {
 		letter-spacing: -1px;
-		
-		&:before { 
+
+		&:before {
 			letter-spacing: -3px;
-			margin-right: 4px; 
-		} 
+			margin-right: 4px;
+		}
 	}
 }
 
@@ -998,6 +998,12 @@ h2 {
 
 .use-tooltip, .use-popover, .use-wide-popover, .use-introductory {
 	cursor: help;
+}
+
+
+.profile-link {
+  color: @tabulaGray;
+  font-size: 14px;
 }
 
 #app-comment-message {
@@ -1717,32 +1723,67 @@ th.nowrap, td.nowrap { white-space: nowrap; }
 
 //Filter pages
 #container {
-  .dropdown-menu.filter-list {
-    ul {
-      margin: 0 10px;
-      padding-left: 0;
-      list-style: none;
+  .student-filter {
+    .filter-list {
+      max-height: 300px;
+      overflow-y: auto;
+      overflow-x: hidden;
 
-      label.checkbox {
-        padding-right: 10px;
+      .close {
+        margin: 5px 10px;
+      }
 
-        max-width: 300px;
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
-        display: block;
-        cursor: pointer;
+      .clear-this-filter .btn {
+        margin: 2px 8px 2px 0;
+        padding-left: 0;
+      }
+
+      ul {
+        margin: 0 10px;
+        padding-left: 0;
+        list-style: none;
+
+        label.checkbox {
+          padding-right: 10px;
+
+          max-width: 300px;
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+          display: block;
+          cursor: pointer;
+        }
       }
     }
 
-    max-height: 300px;
-    overflow-y: auto;
-    overflow-x: hidden;
+    .filter-short-values {
+      display: inline-block;
+      width: 105px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      vertical-align: bottom;
+    }
 
-    .clear-this-filter button.btn-link {
-      padding-left: 0px;
-      border-left: 0px;
-      margin-left: 0px;
+    .clear-all-filters {
+      margin: 0;
+      color: @tabulaGray;
+
+      &:hover, &:focus {
+        text-decoration: none;
+      }
+
+      &[disabled] .icon-stack-base {
+        visibility: hidden;
+      }
+
+      .icon-stack-base {
+        color: rgba(255,128,128,0.25);
+
+        &:hover, &:focus {
+          color: rgba(255,128,128,1);
+        }
+      }
     }
   }
 
@@ -1757,18 +1798,6 @@ th.nowrap, td.nowrap { white-space: nowrap; }
   .transition(opacity 0.3s ease-in-out);
 
   &.loading { .opacity-one(0.3); }
-}
-
-.filter-short-values {
-  display: inline-block;
-  max-width: 100px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  vertical-align: bottom;
-}
-.filter-type {
-  margin-left: 0.8em;
 }
 
 #maintenance-message {

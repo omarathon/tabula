@@ -146,13 +146,13 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		val studentsInFirstYear = service.getStudentsByRoute(testRoute, AcademicYear(2012))
 		studentsInFirstYear.size should be (2)
 		studentsInFirstYear.exists(
-			s => s.freshStudentCourseDetails(0).scjCode.equals(studentInSecondYear.scjCode)
+			s => s.freshStudentCourseDetails.head.scjCode.equals(studentInSecondYear.scjCode)
 		) should be (false)
 
 		val studentsInSecondYear = service.getStudentsByRoute(testRoute, AcademicYear(2013))
 		studentsInSecondYear.size should be (2)
 		studentsInSecondYear.exists(
-			s => s.freshStudentCourseDetails(0).scjCode.equals(studentInFirstYear.scjCode)
+			s => s.freshStudentCourseDetails.head.scjCode.equals(studentInFirstYear.scjCode)
 		) should be (false)
 	}
 
@@ -226,7 +226,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		students.size should be (1)
 
 		students.exists(
-			s => s.freshStudentCourseDetails(0).mostSignificant.equals(true)
+			s => s.freshStudentCourseDetails.head.mostSignificant.equals(true)
 		) should be (true)
 
 	}
@@ -257,7 +257,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		students.size should be (0)
 
 		students.exists(
-			s => s.freshStudentCourseDetails(0).mostSignificant.equals(true)
+			s => s.freshStudentCourseDetails.head.mostSignificant.equals(true)
 		) should be (false)
 
 	}

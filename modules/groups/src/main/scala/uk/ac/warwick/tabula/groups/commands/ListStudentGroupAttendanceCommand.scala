@@ -62,7 +62,7 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 
 		val groups = smallGroupService.findSmallGroupsByStudent(user).filter {
 			group =>
-				!group.groupSet.deleted &&
+				group.groupSet.showAttendanceReports &&
 				group.groupSet.visibleToStudents &&
 				group.groupSet.academicYear == academicYear &&
 				!group.events.asScala.isEmpty

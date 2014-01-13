@@ -43,6 +43,8 @@
 
 	<#if totalResults?? && students??>
 		<#assign filterQuery = command.serializeFilter />
+		<#assign sendToSitsUrl><@routes.report command.department command.academicYear filterQuery /></#assign>
+		<div class="studentResults" data-sits-url="${sendToSitsUrl}">
 		<#assign returnTo><@routes.viewDepartmentStudentsWithAcademicYear command.department command.academicYear filterQuery/></#assign>
 		<#if (totalResults > 0)>
 			<div class="clearfix">
@@ -244,6 +246,7 @@
 		<#else>
 			<p>No students were found.</p>
 		</#if>
+		</div>
 	</#if>
 
 	<script type="text/javascript">

@@ -15,6 +15,16 @@
 	   
 	<p><a class="btn" href="<@routes.depthome module/>">Module management - ${assignment.module.code}</a></p>
 <#else>
+	<#function has_admin module>
+		<#list module.department.owners.users as user>
+			<#if user.foundUser && user.email?has_content>
+				<#return true />
+			</#if>
+		</#list>
+		
+		<#return false />
+	</#function>
+
 		<#assign has_requested_access=RequestParameters.requestedAccess??/>
 		<#if has_requested_access>
 			<div class="alert alert-success">
@@ -29,17 +39,23 @@
 		<p>
 			This assignment is set up only to allow students who are enrolled on the relevant module.
 			If you are reading this and you believe you should have access to this assignment,
-			click the button below to send an automated message to an administrator for the department.
+			<#if has_admin(module)>
+				click the button below to send an automated message to an administrator for the department.
+			<#else>
+				contact your module convener or department.
+			</#if>
 		</p>
 
-		<#assign button_text>Request access for <strong>${user.fullName}</strong> (you)</#assign>
-
-		<#if has_requested_access>
-			<a href="#" class="btn disabled"><#noescape>${button_text}</#noescape></a>
-		<#else>
-			<form action="<@routes.assignmentrequestaccess assignment />" method="POST">
-				<button class="btn" type="submit"><#noescape>${button_text}</#noescape></button>
-			</form>
+		<#if has_admin(module)>
+			<#assign button_text>Request access for <strong>${user.fullName}</strong> (you)</#assign>
+	
+			<#if has_requested_access>
+				<a href="#" class="btn disabled"><#noescape>${button_text}</#noescape></a>
+			<#else>
+				<form action="<@routes.assignmentrequestaccess assignment />" method="POST">
+					<button class="btn" type="submit"><#noescape>${button_text}</#noescape></button>
+				</form>
+			</#if>
 		</#if>
 </#if>
 

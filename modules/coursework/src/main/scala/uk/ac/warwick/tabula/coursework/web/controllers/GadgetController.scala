@@ -21,7 +21,7 @@ class GadgetController extends CourseworkController {
 
 	@RequestMapping(value = Array("/api/gadget.html"))
 	def render(user: CurrentUser) = {
-		homeController.home(CourseworkHomepageCommand(user)).embedded
+		homeController.home(CourseworkHomepageCommand(user), user).embedded
 	}
 		
 }

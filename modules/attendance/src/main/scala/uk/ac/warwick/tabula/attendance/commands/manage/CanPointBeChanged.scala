@@ -7,9 +7,9 @@ import uk.ac.warwick.tabula.AcademicYear
 
 trait CanPointBeChanged extends MonitoringPointServiceComponent with TermServiceComponent {
 
-	// TAB-1079
+	// TAB-1537
 	def canPointBeUpdated(point: MonitoringPoint) = {
-		monitoringPointService.countCheckpointsForPoint(point) == 0 && !anyStudentsReportedForRelatedPointsThisTerm(point)
+		!anyStudentsReportedForRelatedPointsThisTerm(point)
 	}
 
 	// TAB-1079

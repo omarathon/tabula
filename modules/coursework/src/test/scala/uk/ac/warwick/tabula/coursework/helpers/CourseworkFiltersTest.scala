@@ -228,6 +228,48 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		filter.predicate(student(submission=Some(submission), extension=Some(extension), withinExtension=true)) should be (false)
 	}
 
+	@Test def Late {
+		val filter = CourseworkFilters.Late
+
+		// Only applies to assignments that collect submissions
+		assignment.collectSubmissions = false
+		filter.applies(assignment) should be (false)
+
+		assignment.collectSubmissions = true
+		filter.applies(assignment) should be (true)
+
+		// Valid where there is a submission, that submission is late, and that submission is not authorised late
+		filter.predicate(student(submission=None)) should be (false)
+
+		val submission = Fixtures.submission("0672089", "cuscav")
+		submission.assignment = assignment
+
+		submission.isLate should be (false)
+		submission.isAuthorisedLate should be (false)
+
+		filter.predicate(student(submission=Some(submission))) should be (false)
+
+		// Where submission is late, they don't fit
+		assignment.closeDate = DateTime.now.minusDays(1)
+		submission.submittedDate = DateTime.now
+
+		submission.isLate should be (true)
+		submission.isAuthorisedLate should be (false)
+		filter.predicate(student(submission=Some(submission))) should be (true)
+
+		// Authorised late isn't allowed here
+
+		val extension = Fixtures.extension("0672089", "cuscav")
+		extension.approved = true
+		extension.expiryDate = DateTime.now.plusDays(1)
+		extension.assignment = assignment
+		assignment.extensions.add(extension)
+
+		submission.isLate should be (false)
+		submission.isAuthorisedLate should be (true)
+		filter.predicate(student(submission=Some(submission), extension=Some(extension), withinExtension=true)) should be (false)
+	}
+
 	@Test def WithExtension {
 		val filter = CourseworkFilters.WithExtension
 
@@ -407,6 +449,21 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 
 		v.value = "60"
 		filter.predicate(params)(student(submission=Some(submission))) should be (true)
+	}
+
+	@Test def Submitted {
+		val filter = CourseworkFilters.Submitted
+
+		// Only applies to assignments that collect submissions
+		assignment.collectSubmissions = false
+		filter.applies(assignment) should be (false)
+
+		assignment.collectSubmissions = true
+		filter.applies(assignment) should be (true)
+
+		// Valid when there is a submission
+		filter.predicate(student(submission=None)) should be (false)
+		filter.predicate(student(submission=Some(Fixtures.submission()))) should be (true)
 	}
 
 	@Test def Unsubmitted {
