@@ -1,4 +1,5 @@
 <#import "*/modal_macros.ftl" as modal />
+<#import "../attendance_macros.ftl" as attendance_macros />
 
 <#assign titleHeader>
 <h1>Record attendance</h1>
@@ -37,22 +38,7 @@ ${titleHeader}
 
 <div class="recordCheckpointForm">
 
-	<div style="display:none;" class="forCloning">
-		<div class="btn-group" data-toggle="buttons-radio">
-			<button type="button" class="btn" data-state="">
-				<i class="icon-minus icon-fixed-width" title="Set to 'Not recorded'"></i>
-			</button>
-			<button type="button" class="btn btn-unauthorised" data-state="unauthorised">
-				<i class="icon-remove icon-fixed-width" title="Set to 'Missed (unauthorised)'"></i>
-			</button>
-			<button type="button" class="btn btn-authorised" data-state="authorised">
-				<i class="icon-remove-circle icon-fixed-width" title="Set to 'Missed (authorised)'"></i>
-			</button>
-			<button type="button" class="btn btn-attended" data-state="attended">
-				<i class="icon-ok icon-fixed-width" title="Set to 'Attended'"></i>
-			</button>
-		</div>
-	</div>
+	<@attendance_macros.attendanceButtons />
 
 	<div class="persist-area">
 		<div class="persist-header">
@@ -88,17 +74,41 @@ ${titleHeader}
 							</a>
 						</span>
 						<div class="btn-group">
-							<button type="button" class="btn">
-								<i class="icon-minus icon-fixed-width" title="Set all to 'Not recorded'"></i>
+							<button
+								type="button"
+								class="btn use-tooltip"
+								title="Set all to 'Not recorded'"
+								data-html="true"
+								data-container="body"
+							>
+								<i class="icon-minus icon-fixed-width"></i>
 							</button>
-							<button type="button" class="btn btn-unauthorised">
-								<i class="icon-remove icon-fixed-width" title="Set all to 'Missed (unauthorised)'"></i>
+							<button
+								type="button"
+								class="btn btn-unauthorised use-tooltip"
+								title="Set all to 'Missed (unauthorised)'"
+								data-html="true"
+								data-container="body"
+							>
+								<i class="icon-remove icon-fixed-width"></i>
 							</button>
-							<button type="button" class="btn btn-authorised">
-								<i class="icon-remove-circle icon-fixed-width" title="Set all to 'Missed (authorised)'"></i>
+							<button
+								type="button"
+								class="btn btn-authorised use-tooltip"
+								title="Set all to 'Missed (authorised)'"
+								data-html="true"
+								data-container="body"
+							>
+								<i class="icon-remove-circle icon-fixed-width"></i>
 							</button>
-							<button type="button" class="btn btn-attended">
-								<i class="icon-ok icon-fixed-width" title="Set all to 'Attended'"></i>
+							<button
+								type="button"
+								class="btn btn-attended use-tooltip"
+								title="Set all to 'Attended'"
+								data-html="true"
+								data-container="body"
+							>
+								<i class="icon-ok icon-fixed-width"></i>
 							</button>
 						</div>
 						<i class="icon-fixed-width"></i>
@@ -117,7 +127,11 @@ ${titleHeader}
 						<#if hasState>
 							<#local checkpointState = mapGet(mapGet(command.studentsState, student), point) />
 						</#if>
-						<select id="studentsState-${student.universityId}-${point.id}" name="studentsState[${student.universityId}][${point.id}]">
+						<select
+							id="studentsState-${student.universityId}-${point.id}"
+							name="studentsState[${student.universityId}][${point.id}]"
+							title="${mapGet(mapGet(command.checkpointDescriptions, student), point)?default("")}"
+						>
 							<option value="" <#if !hasState >selected</#if>>Not recorded</option>
 							<#list allCheckpointStates as state>
 								<option value="${state.dbValue}" <#if hasState && checkpointState.dbValue == state.dbValue>selected</#if>>${state.description}</option>

@@ -18,6 +18,7 @@ object AgentViewCommand {
 			with AutowiringMonitoringPointServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringRelationshipServiceComponent
+			with AutowiringProfileServiceComponent
 			with ComposableCommand[Seq[StudentPointsData]]
 			with AgentViewState
 			with ReadOnly with Unaudited
@@ -25,6 +26,7 @@ object AgentViewCommand {
 
 abstract class AgentViewCommand(val agent: Member, val relationshipType: StudentRelationshipType, val academicYearOption: Option[AcademicYear])
 	extends CommandInternal[Seq[StudentPointsData]] with AgentViewState with BuildStudentPointsData with TaskBenchmarking {
+
 	self: RelationshipServiceComponent =>
 
 	def applyInternal() = {

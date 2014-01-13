@@ -35,7 +35,7 @@ trait MonitoringPointService {
 	def getTemplateById(id: String) : Option[MonitoringPointSetTemplate]
 	def deleteTemplate(template: MonitoringPointSetTemplate)
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
-	def getChecked(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[AttendanceState]]]
+	def getCheckpoints(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[MonitoringCheckpoint]]]
 	def deleteCheckpoint(student: StudentMember, point: MonitoringPoint): Unit
 	def saveOrUpdateCheckpoint(
 		student: StudentMember,
@@ -109,14 +109,10 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 
 	def countCheckpointsForPoint(point: MonitoringPoint) = monitoringPointDao.countCheckpointsForPoint(point)
 
-	def getChecked(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[AttendanceState]]] =
-		members.map(member =>
-			member ->
-			set.points.asScala.map(point =>
-				(point, monitoringPointDao.getCheckpoint(point, member) match {
-					case Some(c: MonitoringCheckpoint) => Option(c.state)
-					case None => None
-				})
+	def getCheckpoints(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[MonitoringCheckpoint]]] =
+		members.map(member =>	member ->
+			set.points.asScala.map(point =>	point ->
+				monitoringPointDao.getCheckpoint(point, member)
 			).toMap
 		).toMap
 

@@ -7,12 +7,15 @@ var exports = {};
 
 exports.createButtonGroup = function(id){
     var $this = $(id), selectedValue = $this.find('option:selected').val();
-    $('.recordCheckpointForm div.forCloning div.btn-group')
+    var activeButton = $('.recordCheckpointForm div.forCloning div.btn-group')
         .clone(true)
         .insertAfter($this)
         .find('button').filter(function(){
             return $(this).data('state') == selectedValue;
         }).addClass('active');
+    if ($this.attr('title') && $this.attr('title').length > 0) {
+        activeButton.attr('title', '<p>' + activeButton.attr('title') +'</p><p>' + $this.attr('title') + '</p>');
+    }
     $this.hide();
 };
 

@@ -17,6 +17,7 @@ object ViewAgentsStudentsCommand {
 			with AutowiringMonitoringPointServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringRelationshipServiceComponent
+			with AutowiringProfileServiceComponent
 			with ComposableCommand[Seq[StudentPointsData]]
 			with ViewAgentsStudentsState
 			with ReadOnly with Unaudited

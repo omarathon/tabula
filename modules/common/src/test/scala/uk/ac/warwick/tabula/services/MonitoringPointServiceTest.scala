@@ -34,7 +34,7 @@ class MonitoringPointServiceTest extends TestBase with Mockito {
 			service.monitoringPointDao.getCheckpoint(point2, member1) returns Option(missedCheckpoint)
 			service.monitoringPointDao.getCheckpoint(point1, member2) returns None
 			service.monitoringPointDao.getCheckpoint(point2, member2) returns None
-			val result = service.getChecked(Seq(member1, member2), pointSet)
+			val result = service.getCheckpoints(Seq(member1, member2), pointSet)
 			result(member1).keys.size should be (2)
 			result(member2).keys.size should be (2)
 		}

@@ -3,54 +3,31 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType}
-import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, Unaudited, ReadOnly, ComposableCommand}
+import uk.ac.warwick.tabula.commands.{TaskBenchmarking, Appliable, CommandInternal, Unaudited, ReadOnly, ComposableCommand}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
-import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm
-import uk.ac.warwick.tabula.services.{TermServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent, AutowiringTermServiceComponent}
-import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.attendance.commands.{StudentPointsData, BuildStudentPointsData, GroupMonitoringPointsByTerm}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringMonitoringPointServiceComponent, AutowiringTermServiceComponent}
 import org.joda.time.DateTime
 
 object AgentStudentViewCommand {
 	def apply(student: StudentMember, academicYearOption: Option[AcademicYear]) =
 		new AgentStudentViewCommand(student, academicYearOption)
-		with ComposableCommand[Map[String, Seq[(MonitoringPoint, String)]]]
+		with ComposableCommand[StudentPointsData]
 		with AgentStudentViewPermissions
 		with ReadOnly with Unaudited
 		with AutowiringTermServiceComponent
 		with AutowiringMonitoringPointServiceComponent
+		with AutowiringProfileServiceComponent
 		with GroupMonitoringPointsByTerm
 }
 
-class AgentStudentViewCommand(val student: StudentMember, val academicYearOption: Option[AcademicYear])
-	extends CommandInternal[Map[String, Seq[(MonitoringPoint, String)]]] with AgentStudentViewCommandState {
-
-	this: TermServiceComponent with MonitoringPointServiceComponent with GroupMonitoringPointsByTerm =>
+abstract class AgentStudentViewCommand(val student: StudentMember, val academicYearOption: Option[AcademicYear])
+	extends CommandInternal[StudentPointsData] with AgentStudentViewCommandState with TaskBenchmarking with BuildStudentPointsData {
 
 	def applyInternal() = {
-		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(new DateTime(), academicYear)
-		monitoringPointService.getPointSetForStudent(student, academicYear) match {
-			case Some(set) => checkpointStateStrings(set, currentAcademicWeek)
-			case None => Map()
-		}
-	}
-
-	private def checkpointStateStrings(pointSet: MonitoringPointSet, currentAcademicWeek: Int) = {
-		val checkedForStudent = monitoringPointService.getChecked(Seq(student), pointSet)(student)
-		groupByTerm(pointSet.points.asScala, academicYear).map{case (termName, points) =>
-			termName -> points.map(point =>
-				point -> (checkedForStudent(point) match {
-					case Some(state) => state.dbValue
-					case _ =>
-						if (point.isLate(currentAcademicWeek))
-							"late"
-						else
-							""
-				})
-			)
-		}
+		benchmarkTask("Build data") { buildData(Seq(student), academicYear).head }
 	}
 
 }
@@ -82,14 +59,14 @@ class AgentStudentViewController extends AttendanceController {
 
 	@RequestMapping
 	def home(
-		@ModelAttribute("command") cmd: Appliable[Map[String, Seq[(MonitoringPoint, String)]]],
+		@ModelAttribute("command") cmd: Appliable[StudentPointsData],
 		@PathVariable relationshipType: StudentRelationshipType,
 		@PathVariable student: StudentMember
 	) = {
 		Mav("agent/student",
 			"student" -> student,
 			"relationshipType" -> relationshipType,
-			"pointsByTerm" -> cmd.apply()
+			"pointsByTerm" -> cmd.apply().pointsByTerm
 		).crumbs(Breadcrumbs.Agent(relationshipType))
 	}
 

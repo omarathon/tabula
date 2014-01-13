@@ -386,8 +386,14 @@
 			.ellipsis {
 				.text-overflow()
 			}
-			.row-fluid.point:hover {
-				background-color: @tableBackgroundHover
+			table {
+				td { width: 1px; }
+				td.point {
+					width: 100%;
+				}
+				tr.point:hover {
+					background-color: @tableBackgroundHover
+				}
 			}
 		}
 	} // .profile container
