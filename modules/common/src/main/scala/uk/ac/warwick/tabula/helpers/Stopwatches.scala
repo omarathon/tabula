@@ -11,7 +11,7 @@ object Stopwatches {
 				stopwatch.start(taskName)
 				work
 			} finally {
-				stopwatch.stop();
+				stopwatch.stop()
 			}
 		}
 		

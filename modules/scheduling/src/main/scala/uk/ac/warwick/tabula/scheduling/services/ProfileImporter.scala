@@ -70,21 +70,23 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 		val sitsCurrentAcademicYear = getCurrentSitsAcademicYearString
 
-		memberInfo flatMap { info =>
-			val usercode = info.member.usercode
-			val universityId = info.member.universityId
-			val ssoUser = users(universityId)
-
-			info.member.userType match {
-				case Staff | Emeritus => Seq(new ImportStaffMemberCommand(info, ssoUser))
-				case Student | Other => {
+		memberInfo.groupBy(_.member.userType).flatMap { case (userType, members) =>
+			userType match {
+				case Staff | Emeritus => members.map { info => 
+					val ssoUser = users(info.member.universityId)
+					new ImportStaffMemberCommand(info, ssoUser)
+				}
+				case Student | Other => members.par.flatMap { info => 
+					val universityId = info.member.universityId
+					val ssoUser = users(universityId)
+					
 					studentInformationQuery(info, ssoUser, importRowTracker).executeByNamedParam(
-											Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
-										  ).toSeq
-					}
+						Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
+					).toSeq
+				}.seq
 				case _ => Seq()
 			}
-		}
+		}.toSeq
 	}
 
 	def photoFor(universityId: String): () => Option[Array[Byte]] = {
