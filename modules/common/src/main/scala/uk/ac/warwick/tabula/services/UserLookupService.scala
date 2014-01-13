@@ -26,14 +26,6 @@ trait AutowiringUserLookupComponent extends UserLookupComponent {
 	var userLookup = Wire[UserLookupService]
 }
 
-trait GroupServiceComponent {
-	def groupService: GroupService
-}
-
-trait AutowiringGroupServiceComponent extends GroupServiceComponent {
-	var groupService = Wire[GroupService]
-}
-
 trait UserLookupService extends UserLookupInterface {
 	def getUserByWarwickUniIdUncached(id: UniversityId): User
 	

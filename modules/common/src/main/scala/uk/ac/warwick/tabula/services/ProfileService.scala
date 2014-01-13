@@ -35,13 +35,16 @@ trait ProfileService {
 	def findStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq(), maxResults: Int = 50, startResult: Int = 0): (Int, Seq[StudentMember])
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
 	def findAllUniversityIdsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Seq[String]
+	def findStaffMembersWithAssistant(user: User): Seq[StaffMember]
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def allSprStatuses(department: Department): Seq[SitsStatus]
 }
 
 abstract class AbstractProfileService extends ProfileService with Logging {
 
-	self: MemberDaoComponent with StudentCourseDetailsDaoComponent =>
+	self: MemberDaoComponent 
+		with StudentCourseDetailsDaoComponent
+		with StaffAssistantsHelpers =>
 
 	var profileIndexService = Wire.auto[ProfileIndexService]
 
@@ -200,6 +203,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 			memberDao.countStudentsByRestrictions(allRestrictions)
 		}
 	}
+	
+	def findStaffMembersWithAssistant(user: User) = staffAssistantsHelper.findBy(user)
 
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance] = transactional(readOnly = true) {
 		memberDao.getAllModesOfAttendance(department).filter(_ != null)
@@ -207,6 +212,14 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	def allSprStatuses(department: Department): Seq[SitsStatus] = transactional(readOnly = true) {
 		memberDao.getAllSprStatuses(department).filter(_ != null)
 	}
+}
+
+trait StaffAssistantsHelpers {
+	val staffAssistantsHelper: UserGroupMembershipHelperMethods[StaffMember]
+}
+
+trait StaffAssistantsHelpersImpl extends StaffAssistantsHelpers {
+	lazy val staffAssistantsHelper = new UserGroupMembershipHelper[StaffMember]("_assistantsGroup")
 }
 
 trait ProfileServiceComponent {
@@ -222,3 +235,4 @@ class ProfileServiceImpl
 	extends AbstractProfileService
 	with AutowiringMemberDaoComponent
 	with AutowiringStudentCourseDetailsDaoComponent
+	with StaffAssistantsHelpersImpl
