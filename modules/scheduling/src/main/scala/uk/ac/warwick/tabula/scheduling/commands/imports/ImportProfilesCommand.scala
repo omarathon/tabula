@@ -27,9 +27,6 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	var profileImporter = Wire.auto[ProfileImporter]
 	var profileService = Wire.auto[ProfileService]
 	var userLookup = Wire.auto[UserLookupService]
-	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
-	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
-	var courseImporter = Wire.auto[CourseImporter]
 	var moduleRegistrationImporter = Wire.auto[ModuleRegistrationImporter]
 	var features = Wire.auto[Features]
 	var moduleRegistrationDao = Wire.auto[ModuleRegistrationDaoImpl]
@@ -38,52 +35,17 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	var memberDao = Wire.auto[MemberDao]
 	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
 	var studentCourseYearDetailsDao = Wire.auto[StudentCourseYearDetailsDao]
-	var awardImporter = Wire.auto[AwardImporter]
 
 	var deptCode: String = _
 
-	val BatchSize = 250
+	val BatchSize = 100
 
 	def applyInternal() {
 		if (features.profiles) {
-			benchmarkTask("Import SITS statuses") {
-				importSitsStatuses
-			}
-			benchmarkTask("Import mode of attendances") {
-				importModeOfAttendances
-			}
-			benchmarkTask("Import courses") {
-				courseImporter.importCourses
-			}
-			benchmarkTask("Import awards") {
-				awardImporter.importAwards
-			}
 			benchmarkTask("Import members") {
 				doMemberDetails(madService.getDepartmentByCode(deptCode))
 			}
 			logger.info("Import completed")
-		}
-	}
-
-	def importSitsStatuses {
-		logger.info("Importing SITS statuses")
-
-		transactional() {
-			sitsStatusesImporter.getSitsStatuses map { _.apply }
-
-			session.flush
-			session.clear
-		}
-	}
-
-	def importModeOfAttendances {
-		logger.info("Importing modes of attendance")
-
-		transactional() {
-			modeOfAttendanceImporter.getImportCommands foreach { _.apply() }
-
-			session.flush
-			session.clear
 		}
 	}
 
@@ -98,46 +60,47 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 			case Some(d) => Seq(d)
 			case None => madService.allDepartments
 		}
-
-		for {
-			department <- departments;
-			membershipInfos <- logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize)
-		} {
-			logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon")
-
-			val users: Map[UniversityId, User] =
-				benchmarkTask("-- Fetch user details") {
-					membershipInfos.map { m =>
-						val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
-
-						val user = userLookup.getUserByWarwickUniIdUncached(warwickId) match {
-							case FoundUser(u) => u
-							case _ => userLookup.getUserByUserId(usercode)
+		
+		departments.foreach { department =>
+			logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize).zipWithIndex.toSeq.par.foreach { case (membershipInfos, batchNumber) =>
+				benchmarkTask(s"Import member details for department=${department.code}, batch=#${batchNumber + 1}") {
+					logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon")
+		
+					val users: Map[UniversityId, User] =
+						benchmarkTask("Fetch user details") {
+							membershipInfos.map { m =>
+								val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
+		
+								val user = userLookup.getUserByWarwickUniIdUncached(warwickId) match {
+									case FoundUser(u) => u
+									case _ => userLookup.getUserByUserId(usercode)
+								}
+		
+								m.member.universityId -> user
+							}.toMap
 						}
-
-						m.member.universityId -> user
-					}.toMap
-				}
-
-			logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members from Membership")
-			val studentRowCommands = benchmarkTask("-- Fetch member details") {
-				transactional() {
-					profileImporter.getMemberDetails(membershipInfos, users, importRowTracker)
-				}
-			}
-
-			logger.info("Updating students")
-			benchmarkTask("-- Update students") {
-			// each apply has its own transaction
-				transactional() {
-					studentRowCommands map { _.apply }
-					session.flush()
-				}
-			}
-
-			benchmarkTask("-- Update module registrations and small groups") {
-				transactional() {
-					updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
+		
+					logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members from Membership")
+					val studentRowCommands = benchmarkTask("Fetch member details") {
+						transactional() {
+							profileImporter.getMemberDetails(membershipInfos, users, importRowTracker)
+						}
+					}
+		
+					logger.info("Updating students")
+					benchmarkTask("Update students") {
+					// each apply has its own transaction
+						transactional() {
+							studentRowCommands map { _.apply }
+							session.flush()
+						}
+					}
+		
+					benchmarkTask("Update module registrations and small groups") {
+						transactional() {
+							updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
+						}
+					}
 				}
 			}
 		}
@@ -170,13 +133,13 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	def updateModuleRegistrationsAndSmallGroups(membershipInfo: Seq[MembershipInformation], users: Map[UniversityId, User]): Seq[ModuleRegistration] = {
 		logger.info("Fetching module registrations")
 
-		val importModRegCommands = benchmarkTask("-- -- Get module registrations details for users") {
+		val importModRegCommands = benchmarkTask("Get module registrations details for users") {
 			moduleRegistrationImporter.getModuleRegistrationDetails(membershipInfo, users)
 		}
 
 		logger.info("Saving or updating module registrations")
 
-		val newModuleRegistrations = benchmarkTask("-- -- Save or update module registrations") {
+		val newModuleRegistrations = benchmarkTask("Save or update module registrations") {
 			(importModRegCommands map {_.apply }).flatten
 		}
 
@@ -184,7 +147,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 		logger.info("Removing old module registrations")
 
-		benchmarkTask("-- -- Delete old module registrations") {
+		benchmarkTask("Delete old module registrations") {
 			deleteOldModuleRegistrations(usercodesProcessed, newModuleRegistrations)
 		}
 

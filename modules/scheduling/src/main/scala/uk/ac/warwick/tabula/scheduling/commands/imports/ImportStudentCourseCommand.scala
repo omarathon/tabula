@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopyin
 import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter}
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, RelationshipService}
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.commands.Description
 
 class ImportStudentCourseCommand(resultSet: ResultSet,
 		importRowTracker: ImportRowTracker,
@@ -192,6 +193,8 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 			}
 		}
 	}
+	
+	override def describe(d: Description) = d.property("scjCode" -> scjCode)
 }
 
 
