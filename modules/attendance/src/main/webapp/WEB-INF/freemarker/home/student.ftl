@@ -137,21 +137,14 @@
 	<div class="striped-section end-floats">
 		<h2 class="section-title">${term}</h2>
 		<div class="striped-section-contents">
-			<#list pointsByTerm[term] as pointAndCheckpoint>
+			<#local pointMap = pointsByTerm[term] />
+			<#list pointMap?keys?sort_by("validFromWeek") as point>
 				<div class="item-info row-fluid point">
 					<div class="span10">
-						${pointAndCheckpoint._1().name} (<a class="use-tooltip" data-html="true" title="<@fmt.monitoringPointDateFormat pointAndCheckpoint._1() />"><@fmt.monitoringPointFormat pointAndCheckpoint._1() /></a>)
+					${point.name} (<a class="use-tooltip" data-html="true" title="<@fmt.monitoringPointDateFormat point />"><@fmt.monitoringPointFormat point /></a>)
 					</div>
 					<div class="span2">
-						<#if pointAndCheckpoint._2() == "attended">
-							<span class="label label-success">Attended</span>
-						<#elseif pointAndCheckpoint._2() == "authorised">
-							<span class="label label-info" title="Missed (authorised)">Missed</span>
-						<#elseif pointAndCheckpoint._2() == "unauthorised">
-							<span class="label label-important" title="Missed (unauthorised)">Missed</span>
-						<#elseif pointAndCheckpoint._2() == "late">
-							<span class="label label-warning" title="Unrecorded">Unrecorded</span>
-						</#if>
+						<@attendance_macros.attendanceLabel pointMap point />
 					</div>
 				</div>
 			</#list>

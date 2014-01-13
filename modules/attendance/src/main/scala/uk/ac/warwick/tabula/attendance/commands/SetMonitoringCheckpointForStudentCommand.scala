@@ -28,7 +28,7 @@ object SetMonitoringCheckpointForStudentCommand {
 
 abstract class SetMonitoringCheckpointForStudentCommand(
 	val monitoringPoint: MonitoringPoint, val student: StudentMember, user: CurrentUser
-)	extends CommandInternal[Seq[MonitoringCheckpoint]] with PopulateOnForm {
+)	extends CommandInternal[Seq[MonitoringCheckpoint]] with PopulateOnForm with CheckpointUpdatedDescription {
 
 	self: SetMonitoringCheckpointForStudentState with ProfileServiceComponent with MonitoringPointServiceComponent =>
 
@@ -45,6 +45,14 @@ abstract class SetMonitoringCheckpointForStudentCommand(
 			}
 			checkpointOption.map{case (_, checkpoint) => checkpoint.state}.getOrElse(null)
 		}).asJava).asJava
+		checkpointDescriptions = studentsState.asScala.map{
+			case (s, pointMap) => s -> pointMap.asScala.map{
+				case(point, state) => point -> {
+					checkpoints.find{
+						case (s1, checkpoint) => s1 == s && checkpoint.point == point
+					}.map{case (_, checkpoint) => describeCheckpoint(checkpoint)}.getOrElse("")
+				}
+			}.toMap}.toMap
 	}
 
 	def applyInternal(): Seq[MonitoringCheckpoint] = {
@@ -74,9 +82,9 @@ trait SetMonitoringCheckpointForStudentCommandValidation extends SelfValidating 
 		val academicYear = templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear
 		val thisAcademicYear = AcademicYear.guessByDate(DateTime.now)
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
-		studentsState.asScala.foreach{ case(_, pointMap) => {
+		studentsState.asScala.foreach{ case(_, pointMap) =>
 			val studentPointSet = monitoringPointService.getPointSetForStudent(student, academicYear)
-			pointMap.asScala.foreach{ case(point, state) => {
+			pointMap.asScala.foreach{ case(point, state) =>
 				errors.pushNestedPath(s"studentsState[${student.universityId}][${point.id}]")
 				// Check point is valid for student
 				if (!studentPointSet.exists(s => s.points.asScala.contains(point))) {
@@ -96,7 +104,6 @@ trait SetMonitoringCheckpointForStudentCommandValidation extends SelfValidating 
 				}
 				errors.popNestedPath()
 			}}
-		}}
 	}
 
 }
@@ -136,6 +143,7 @@ trait SetMonitoringCheckpointForStudentState  extends GroupMonitoringPointsByTer
 	var members: Seq[StudentMember] = _
 	var studentsState: JMap[StudentMember, JMap[MonitoringPoint, AttendanceState]] =
 		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, AttendanceState] }.asJava
+	var checkpointDescriptions: Map[StudentMember, Map[MonitoringPoint, String]] = _
 	var set = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
 	def nonReportedTerms = monitoringPointService.findNonReportedTerms(Seq(student), monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
 }

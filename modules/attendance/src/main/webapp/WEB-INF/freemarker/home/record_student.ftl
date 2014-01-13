@@ -19,22 +19,7 @@
 
 <div class="recordCheckpointForm">
 
-	<div style="display:none;" class="forCloning">
-		<div class="btn-group" data-toggle="buttons-radio">
-			<button type="button" class="btn" data-state="">
-				<i class="icon-minus icon-fixed-width" title="Set to 'Not recorded'"></i>
-			</button>
-			<button type="button" class="btn btn-unauthorised" data-state="unauthorised">
-				<i class="icon-remove icon-fixed-width" title="Set to 'Missed (unauthorised)'"></i>
-			</button>
-			<button type="button" class="btn btn-authorised" data-state="authorised">
-				<i class="icon-remove-circle icon-fixed-width" title="Set to 'Missed (authorised)'"></i>
-			</button>
-			<button type="button" class="btn btn-attended" data-state="attended">
-				<i class="icon-ok icon-fixed-width" title="Set to 'Attended'"></i>
-			</button>
-		</div>
-	</div>
+	<@attendance_macros.attendanceButtons />
 
 	<div class="persist-area">
 		<div class="persist-header">
@@ -57,7 +42,11 @@
 								<div class="item-info row-fluid point">
 									<div class="span12">
 										<div class="pull-right">
-											<select id="checkpointMap-${point.id}" name="checkpointMap[${point.id}]">
+											<select
+												id="checkpointMap-${point.id}"
+												name="checkpointMap[${point.id}]"
+												title="${mapGet(command.checkpointDescriptions, point)?default("")}"
+											>
 												<#assign hasState = mapGet(command.checkpointMap, point)?? />
 												<option value="" <#if !hasState >selected</#if>>Not recorded</option>
 												<option value="unauthorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
