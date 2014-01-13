@@ -6,7 +6,7 @@ import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.commands.{Command, Description}
-import uk.ac.warwick.tabula.data.{StudentCourseYearDetailsDao, Daoisms, MemberDao, ModuleRegistrationDaoImpl, StudentCourseDetailsDao}
+import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, ModuleRegistrationDaoImpl, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
@@ -15,9 +15,10 @@ import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter, MembershipInformation, ModeOfAttendanceImporter, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware, SitsStatusesImporter}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileIndexService, ProfileService, SmallGroupService, UserLookupService}
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
-class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware {
-	
+class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware with TaskBenchmarking {
+
 	type UniversityId = String
 
 	PermissionCheck(Permissions.ImportSystemData)
@@ -45,14 +46,22 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 	def applyInternal() {
 		if (features.profiles) {
-			benchmark("ImportMembers") {
+			benchmarkTask("Import SITS statuses") {
 				importSitsStatuses
-				importModeOfAttendances
-				courseImporter.importCourses
-				awardImporter.importAwards
-				doMemberDetails(madService.getDepartmentByCode(deptCode))
-				logger.info("Import completed")
 			}
+			benchmarkTask("Import mode of attendances") {
+				importModeOfAttendances
+			}
+			benchmarkTask("Import courses") {
+				courseImporter.importCourses
+			}
+			benchmarkTask("Import awards") {
+				awardImporter.importAwards
+			}
+			benchmarkTask("Import members") {
+				doMemberDetails(madService.getDepartmentByCode(deptCode))
+			}
+			logger.info("Import completed")
 		}
 	}
 
@@ -81,51 +90,61 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	/** Import basic info about all members in Membership, batched 250 at a time (small batch size is mostly for web sign-on's benefit) */
 
 	def doMemberDetails(department : Option[Department]) {
-		benchmark("Importing member details") {
-			logger.info("Importing member details")
-			val importRowTracker = new ImportRowTracker
-			val importStart = DateTime.now
+		logger.info("Importing member details")
+		val importRowTracker = new ImportRowTracker
+		val importStart = DateTime.now
 
-			val departments = department match {
-				case Some(d) => Seq(d)
-				case None => madService.allDepartments
-			}
+		val departments = department match {
+			case Some(d) => Seq(d)
+			case None => madService.allDepartments
+		}
 
-			for {
-				department <- departments;
-				membershipInfos <- logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize)
-			} {
-				logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon")
-				val users: Map[UniversityId, User] =
+		for {
+			department <- departments;
+			membershipInfos <- logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize)
+		} {
+			logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon")
+
+			val users: Map[UniversityId, User] =
+				benchmarkTask("-- Fetch user details") {
 					membershipInfos.map { m =>
 						val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
-						
+
 						val user = userLookup.getUserByWarwickUniIdUncached(warwickId) match {
 							case FoundUser(u) => u
 							case _ => userLookup.getUserByUserId(usercode)
 						}
-						
-						m.member.universityId -> user 
+
+						m.member.universityId -> user
 					}.toMap
-
-				logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members from Membership")
-
-				val studentRowCommands = transactional() {
-					profileImporter.getMemberDetails(membershipInfos, users, importRowTracker)
 				}
 
-				// each apply has its own transaction
+			logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members from Membership")
+			val studentRowCommands = benchmarkTask("-- Fetch member details") {
+				transactional() {
+					profileImporter.getMemberDetails(membershipInfos, users, importRowTracker)
+				}
+			}
+
+			logger.info("Updating students")
+			benchmarkTask("-- Update students") {
+			// each apply has its own transaction
 				transactional() {
 					studentRowCommands map { _.apply }
 					session.flush()
 				}
+			}
 
+			benchmarkTask("-- Update module registrations and small groups") {
 				transactional() {
 					updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
 				}
 			}
+		}
 
-			if (department.isEmpty) stampMissingRows(importRowTracker, importStart)
+		if (department.isEmpty)
+			benchmarkTask("Stamp missing rows") {
+				stampMissingRows(importRowTracker, importStart)
 		}
 	}
 
@@ -150,15 +169,25 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 	def updateModuleRegistrationsAndSmallGroups(membershipInfo: Seq[MembershipInformation], users: Map[UniversityId, User]): Seq[ModuleRegistration] = {
 		logger.info("Fetching module registrations")
-		val importModRegCommands = moduleRegistrationImporter.getModuleRegistrationDetails(membershipInfo, users)
+
+		val importModRegCommands = benchmarkTask("-- -- Get module registrations details for users") {
+			moduleRegistrationImporter.getModuleRegistrationDetails(membershipInfo, users)
+		}
 
 		logger.info("Saving or updating module registrations")
-		val newModuleRegistrations = (importModRegCommands map {_.apply }).flatten
+
+		val newModuleRegistrations = benchmarkTask("-- -- Save or update module registrations") {
+			(importModRegCommands map {_.apply }).flatten
+		}
 
 		val usercodesProcessed: Seq[String] = membershipInfo map { _.member.usercode }
 
 		logger.info("Removing old module registrations")
-		deleteOldModuleRegistrations(usercodesProcessed, newModuleRegistrations)
+
+		benchmarkTask("-- -- Delete old module registrations") {
+			deleteOldModuleRegistrations(usercodesProcessed, newModuleRegistrations)
+		}
+
 		session.flush
 		session.clear
 

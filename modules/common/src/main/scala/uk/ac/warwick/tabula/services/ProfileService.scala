@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{AcademicYear, PrsCode}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
@@ -20,7 +20,6 @@ trait ProfileService {
 	def getMemberByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllMembersWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getAllMembersWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member]
-	def getMemberByPrsCode(prsCode: String): Option[Member]
 	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Seq[Member]
 	def getMemberByUser(user: User, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member]
 	def getStudentBySprCode(sprCode: String): Option[StudentMember]
@@ -75,16 +74,6 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	def getStudentBySprCode(sprCode: String) = transactional(readOnly = true) {
 		studentCourseDetailsDao.getStudentBySprCode(sprCode)
-	}
-
-	def getMemberByPrsCode(prsCode: String) = transactional(readOnly = true) {
-		if (prsCode != null && prsCode.length() > 2) {
-			PrsCode.getUniversityId(prsCode) match {
-				case Some(uniId: String) => memberDao.getByUniversityId(uniId)
-				case None => None
-			}
-		}
-		else None
 	}
 
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean) = transactional(readOnly = true) {

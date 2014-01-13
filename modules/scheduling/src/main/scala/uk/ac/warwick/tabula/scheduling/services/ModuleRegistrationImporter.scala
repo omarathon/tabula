@@ -2,15 +2,12 @@ package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
 import java.sql.Types
-
 import scala.collection.JavaConversions._
 import scala.collection.immutable.HashMap
-
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.stereotype.Service
-
 import javax.sql.DataSource
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
@@ -87,10 +84,20 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 }
 
 object ModuleRegistrationImporter {
+	val sitsSchema: String = Wire.property("${schema.sits}")
 
-	val GetModuleRegistration = """
+	// union 3 things -
+	// 1. unconfirmed module registrations from the SMS table
+	// 2. confirmed module registrations from the SMO table where there is a module registration status of confirmed
+	// 3. confirmed module registrations from the SMO table where no status is recorded, i.e. where MRs have been imported
+	val GetModuleRegistration = f"""
 			select scj_code, sms.mod_code, sms.sms_mcrd, sms.sms_agrp, sms.ses_code, sms.ayr_code, sms_occl as occurrence
-				from intuit.cam_sms sms, intuit.ins_stu stu, intuit.ins_spr spr, intuit.srs_scj scj, intuit.srs_vco, intuit.cam_ssn ssn
+				from $sitsSchema.cam_sms sms,
+					$sitsSchema.ins_stu stu,
+					$sitsSchema.ins_spr spr,
+					$sitsSchema.srs_scj scj,
+					$sitsSchema.srs_vco,
+					$sitsSchema.cam_ssn ssn
 				where sms.spr_code = spr.spr_code
 					and spr.spr_stuc = stu.stu_code
 					and sms.ayr_code = :year
@@ -104,7 +111,12 @@ object ModuleRegistrationImporter {
 					and scj_udfa in ('Y','y')
 		union
 			select scj_code, smo.mod_code, smo.smo_mcrd, smo.smo_agrp, smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence
-				from intuit.cam_smo smo, intuit.ins_stu stu, intuit.ins_spr spr, intuit.srs_scj scj, intuit.srs_vco, intuit.cam_ssn ssn
+				from $sitsSchema.cam_smo smo,
+					$sitsSchema.ins_stu stu,
+					$sitsSchema.ins_spr spr,
+					$sitsSchema.srs_scj scj,
+					$sitsSchema.srs_vco,
+					$sitsSchema.cam_ssn ssn
 				where smo.spr_code = spr.spr_code
 					and spr.spr_stuc = stu.stu_code
 					and smo.ayr_code = :year
@@ -116,7 +128,11 @@ object ModuleRegistrationImporter {
 					and scj_udfa in ('Y','y')
 		union
 			select scj_code, smo.mod_code, smo.smo_mcrd, smo.smo_agrp, smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence
-				from intuit.cam_smo smo, intuit.ins_stu stu, intuit.ins_spr spr, intuit.srs_scj scj, intuit.srs_vco
+				from $sitsSchema.cam_smo smo,
+					$sitsSchema.ins_stu stu,
+					$sitsSchema.ins_spr spr,
+					$sitsSchema.srs_scj scj,
+					$sitsSchema.srs_vco
 				where smo.spr_code = spr.spr_code
 				and spr.spr_stuc = stu.stu_code
 				and smo.ayr_code = :year
@@ -125,7 +141,7 @@ object ModuleRegistrationImporter {
 				and scj_udfa in ('Y','y')
 				and vco_crsc = scj.scj_crsc
 				and vco_rouc = spr.rou_code
-				and not exists (select * from intuit.cam_ssn
+				and not exists (select * from $sitsSchema.cam_ssn
 					where ssn_sprc = smo.spr_code
 					and ssn_ayrc = smo.ayr_code)
 			"""
