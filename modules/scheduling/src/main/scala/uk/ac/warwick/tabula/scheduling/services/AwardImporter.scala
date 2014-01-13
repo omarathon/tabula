@@ -68,10 +68,9 @@ class SitsAwardImporter extends AwardImporter {
 }
 
 object SitsAwardImporter {
+	val sitsSchema: String = Wire.property("${schema.sits}")
 
-	val GetAward = """
-		select awd_code, awd_snam, awd_name from intuit.ins_awd
-		"""
+	val GetAward = f"select awd_code, awd_snam, awd_name from $sitsSchema.ins_awd"
 
 	class AwardsQuery(ds: DataSource) extends MappingSqlQuery[ImportAwardCommand](ds, GetAward) {
 		compile()

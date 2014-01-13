@@ -16,7 +16,7 @@ trait SupervisorImporter {
 	/**
 	 * Returns a sequence of pairs of PRS codes and the percentage load
 	 */
-	def getSupervisorPrsCodes(scjCode: String): Seq[(String, JBigDecimal)]
+	def getSupervisorUniversityIds(scjCode: String): Seq[(String, JBigDecimal)]
 }
 
 @Profile(Array("dev", "test", "production")) @Service
@@ -27,8 +27,8 @@ class SupervisorImporterImpl extends SupervisorImporter {
 
 	lazy val supervisorMappingQuery = new SupervisorMappingQuery(sits)
 
-	def getSupervisorPrsCodes(scjCode: String): Seq[(String, JBigDecimal)] = {
-		val supervisorPrsCodes = supervisorMappingQuery.executeByNamedParam(Map("scj_code" -> scjCode))
+	def getSupervisorUniversityIds(scjCode: String): Seq[(String, JBigDecimal)] = {
+		val supervisorUniIds = supervisorMappingQuery.executeByNamedParam(Map("scj_code" -> scjCode))
 
 		supervisorMappingQuery.executeByNamedParam(Map("scj_code" -> scjCode))
 	}
@@ -36,18 +36,27 @@ class SupervisorImporterImpl extends SupervisorImporter {
 
 @Profile(Array("sandbox")) @Service
 class SandboxSupervisorImporter extends SupervisorImporter {
-	def getSupervisorPrsCodes(scjCode: String): Seq[(String, JBigDecimal)] = Seq.empty // TODO
+	def getSupervisorUniversityIds(scjCode: String): Seq[(String, JBigDecimal)] = Seq.empty // TODO
 }
 
 object SupervisorImporter {
+	var sitsSchema: String = Wire.property("${schema.sits}")
 
-	val GetSupervisorsSql = "select rdx_prsc, rdx_perc from intuit.srs_rdx where rdx_scjc = :scj_code and rdx_extc = 'SUP'"
+	val GetSupervisorsSql = f"""
+		select
+			prs_udf1,
+			rdx_perc
+		from $sitsSchema.srs_rdx rdx, $sitsSchema.ins_prs prs
+		where rdx_scjc = :scj_code
+		and rdx_extc = 'SUP'
+		and rdx.rdx_prsc = prs.prs_code
+		"""
 
 	class SupervisorMappingQuery(ds: DataSource) extends MappingSqlQueryWithParameters[(String, JBigDecimal)](ds, GetSupervisorsSql) {
 		this.declareParameter(new SqlParameter("scj_code", Types.VARCHAR))
 		this.compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
-			(rs.getString("rdx_prsc"), rs.getBigDecimal("rdx_perc"))
+			(rs.getString("prs_udf1"), rs.getBigDecimal("rdx_perc"))
 		}
 	}
 }
