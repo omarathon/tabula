@@ -69,9 +69,10 @@ class SandboxSitsStatusesImporter extends SitsStatusesImporter {
 case class SitsStatusInfo(code: String, shortName: String, fullName: String)
 
 object SitsStatusesImporter {
+	var sitsSchema: String = Wire.property("${schema.sits}")
 
-	val GetSitsStatus = """
-		select sta_code, sta_snam, sta_name from srs_sta
+	val GetSitsStatus = f"""
+		select sta_code, sta_snam, sta_name from $sitsSchema.srs_sta
 		"""
 
 	class SitsStatusesQuery(ds: DataSource) extends MappingSqlQuery[ImportSitsStatusCommand](ds, GetSitsStatus) {

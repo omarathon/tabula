@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.ResultSet
-
 import org.hibernate.exception.ConstraintViolationException
 import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
-
 import ImportMemberHelpers.{opt, toLocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.{Command, Unaudited}

@@ -313,7 +313,9 @@ class SandboxProfileImporter extends ProfileImporter {
 object ProfileImporter {
 	type UniversityId = String
 
-	val GetStudentInformation = """
+	val sitsSchema: String = Wire.property("${schema.sits}")
+
+	val GetStudentInformation = f"""
 		select
 			stu.stu_code as university_id,
 			stu.stu_titl as title,
@@ -358,39 +360,39 @@ object ProfileImporter {
 
 			ssn.ssn_mrgs as mod_reg_status
 
-		from ins_stu stu
+		from $sitsSchema.ins_stu stu
 
-			join ins_spr spr
+			join $sitsSchema.ins_spr spr
 				on stu.stu_code = spr_stuc
 
-			join srs_scj scj
+			join $sitsSchema.srs_scj scj
 				on spr.spr_code = scj.scj_sprc
 
-			join srs_sce sce
+			join $sitsSchema.srs_sce sce
 				on scj.scj_code = sce.sce_scjc
 				and sce.sce_ayrc in (:year)
 				and sce.sce_seq2 =
 					(
 						select max(sce2.sce_seq2)
-							from srs_sce sce2
+							from $sitsSchema.srs_sce sce2
 								where sce.sce_scjc = sce2.sce_scjc
 								and sce2.sce_ayrc = sce.sce_ayrc
 					)
 
-			left outer join srs_crs crs
+			left outer join $sitsSchema.srs_crs crs
 				on sce.sce_crsc = crs.crs_code
 
-			left outer join srs_nat nat
+			left outer join $sitsSchema.srs_nat nat
 				on stu.stu_natc = nat.nat_code
 
-			left outer join srs_sta sts
+			left outer join $sitsSchema.srs_sta sts
 				on spr.sts_code = sts.sta_code
 
-			left outer join cam_ssn ssn
+			left outer join $sitsSchema.cam_ssn ssn
 				on spr.spr_code = ssn.ssn_sprc
 				and sce.sce_ayrc = ssn.ssn_ayrc
 
-			left outer join ins_prs prs
+			left outer join $sitsSchema.ins_prs prs
 				on spr.prs_code = prs.prs_code
 
 		where stu.stu_code = :universityId

@@ -66,9 +66,10 @@ class SitsCourseImporter extends CourseImporter {
 }
 
 object SitsCourseImporter {
+	val sitsSchema: String = Wire.property("${schema.sits}")
 
-	val GetCourse = """
-		select crs_code, crs_snam, crs_name, crs_titl from srs_crs
+	val GetCourse = f"""
+		select crs_code, crs_snam, crs_name, crs_titl from $sitsSchema.srs_crs
 		"""
 
 	class CoursesQuery(ds: DataSource) extends MappingSqlQuery[ImportCourseCommand](ds, GetCourse) {

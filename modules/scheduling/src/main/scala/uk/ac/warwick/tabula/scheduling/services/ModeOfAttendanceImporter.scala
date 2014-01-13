@@ -82,9 +82,10 @@ class SandboxModeOfAttendanceImporter extends ModeOfAttendanceImporter {
 case class ModeOfAttendanceInfo(code: String, shortName: String, fullName: String)
 
 object ModeOfAttendanceImporter {
+	val sitsSchema: String = Wire.property("${schema.sits}")
 
-	val GetModeOfAttendance = """
-		select moa_code, moa_snam, moa_name from ins_moa
+	val GetModeOfAttendance = f"""
+		select moa_code, moa_snam, moa_name from $sitsSchema.ins_moa
 		"""
 
 	class ModeOfAttendanceQuery(ds: DataSource) extends MappingSqlQuery[ImportModeOfAttendanceCommand](ds, GetModeOfAttendance) {

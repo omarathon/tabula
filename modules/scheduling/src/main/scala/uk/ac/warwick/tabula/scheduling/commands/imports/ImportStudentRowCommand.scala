@@ -1,10 +1,8 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.ResultSet
-
 import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
-
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.{Description, Unaudited}
 import uk.ac.warwick.tabula.data.Daoisms

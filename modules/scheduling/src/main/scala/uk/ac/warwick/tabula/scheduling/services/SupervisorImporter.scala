@@ -40,12 +40,13 @@ class SandboxSupervisorImporter extends SupervisorImporter {
 }
 
 object SupervisorImporter {
+	var sitsSchema: String = Wire.property("${schema.sits}")
 
-	val GetSupervisorsSql = """
+	val GetSupervisorsSql = f"""
 		select
 			prs_udf1,
 			rdx_perc
-		from srs_rdx rdx, ins_prs prs
+		from $sitsSchema.srs_rdx rdx, $sitsSchema.ins_prs prs
 		where rdx_scjc = :scj_code
 		and rdx_extc = 'SUP'
 		and rdx.rdx_prsc = prs.prs_code
