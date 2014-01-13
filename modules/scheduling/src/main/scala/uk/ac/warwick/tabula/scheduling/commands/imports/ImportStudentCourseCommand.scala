@@ -1,14 +1,11 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.ResultSet
-
 import org.hibernate.exception.ConstraintViolationException
 import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
-
 import ImportMemberHelpers.{opt, toLocalDate}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.PrsCode
 import uk.ac.warwick.tabula.commands.{Command, Unaudited}
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.data.Transactions.transactional
@@ -41,11 +38,12 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	var routeCode = rs.getString("route_code")
 	var courseCode = rs.getString("course_code")
 	var sprStatusCode = rs.getString("spr_status_code")
+	var scjStatusCode = rs.getString("scj_status_code")
 	var departmentCode = rs.getString("department_code")
 	var awardCode = rs.getString("award_code")
 
 	// tutor data also needs some work before it can be persisted, so store it in local variables for now:
-	var sprTutor1 = rs.getString("spr_tutor1")
+	var tutorUniId = rs.getString("spr_tutor1")
 
 	// This needs to be assigned before apply is called.
 	// (can't be in the constructor because it's not yet created then)
@@ -112,6 +110,10 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		// Apply above will take care of the db.  This brings the in-memory data up to speed:
 		studentCourseDetails.attachStudentCourseYearDetails(studentCourseYearDetails)
 
+		// just check the SPR (status on route) code.  The SCJ code may indicate that they are
+		// permanently withdrawn from the course, but it may have the same route code as their
+		// current course (surprisingly).  In that case we don't want to go ahead and end all
+		// relationships for the route code.
 		if (sprStatusCode != null && sprStatusCode.startsWith("P")) {
 			// they are permanently withdrawn
 			endRelationships()
@@ -119,8 +121,11 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		else {
 			captureTutor(studentCourseDetails.department)
 
-			importSupervisorsForStudentCommand.studentCourseDetails = studentCourseDetails
-			importSupervisorsForStudentCommand.apply
+			if (scjCode != null && !scjStatusCode.startsWith("P")) {
+				// supervisors are coded against SCJ codes; only import them if the SCJ is not withdrawn
+				importSupervisorsForStudentCommand.studentCourseDetails = studentCourseDetails
+				importSupervisorsForStudentCommand.apply
+			}
 		}
 
 		importRowTracker.scjCodesSeen.add(studentCourseDetails.scjCode)
@@ -145,7 +150,8 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		copyObjectProperty("route", routeCode, studentCourseDetailsBean, toRoute(routeCode)) |
 		copyObjectProperty("course", courseCode, studentCourseDetailsBean, toCourse(courseCode)) |
 		copyObjectProperty("award", awardCode, studentCourseDetailsBean, toAward(awardCode)) |
-		copyObjectProperty("sprStatus", sprStatusCode, studentCourseDetailsBean, toSitsStatus(sprStatusCode))
+		copyObjectProperty("statusOnRoute", sprStatusCode, studentCourseDetailsBean, toSitsStatus(sprStatusCode))
+		copyObjectProperty("statusOnCourse", scjStatusCode, studentCourseDetailsBean, toSitsStatus(scjStatusCode))
 	}
 
 	def toRoute(code: String) = code.toLowerCase.maybeText.flatMap { courseAndRouteService.getRouteByCode }.getOrElse(null)
@@ -158,31 +164,27 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 
 		// Mark Hadley in Physics says "I don't think the University uses the term 'tutor' for PGRs"
 		// so by default excluding PGRs from the personal tutor import:
-		else if (courseCode != null && courseCode.length() > 0 && CourseType.fromCourseCode(courseCode) != CourseType.PGR)
+		else if (courseCode != null && courseCode.length() > 0 && CourseType.fromCourseCode(courseCode) != CourseType.PGR) {
 			// is this student in a department that is set to import tutor data from SITS?
+
+
 			relationshipService
 				.getStudentRelationshipTypeByUrlPart("tutor") // TODO this is awful
 				.filter { relType => dept.getStudentRelationshipSource(relType) == StudentRelationshipSource.SITS }
 				.foreach { relationshipType =>
-					val tutorUniIdOption = PrsCode.getUniversityId(sprTutor1)
+					// only save the personal tutor if we can match the ID with a staff member in Tabula
+					val member = memberDao.getByUniversityId(tutorUniId) match {
+						case Some(mem: Member) => {
+							logger.info("Got a personal tutor from SITS! SprCode: " + sprCode + ", tutorUniId: " + tutorUniId)
 
-					tutorUniIdOption match {
-						case Some(tutorUniId: String) => {
-							// only save the personal tutor if we can match the ID with a staff member in Tabula
-							val member = memberDao.getByUniversityId(tutorUniId) match {
-								case Some(mem: Member) => {
-									logger.info("Got a personal tutor from SITS! SprCode: " + sprCode + ", tutorUniId: " + tutorUniId)
-
-									relationshipService.replaceStudentRelationships(relationshipType, sprCode, Seq(tutorUniId))
-								}
-								case _ => {
-									logger.warn("SPR code: " + sprCode + ": no staff member found for PRS code " + sprTutor1 + " - not importing this personal tutor from SITS")
-								}
-							}
+							relationshipService.replaceStudentRelationships(relationshipType, sprCode, Seq(tutorUniId))
 						}
-						case _ => logger.warn("Can't parse PRS code " + sprTutor1 + " for student " + sprCode)
+						case _ => {
+							logger.warn("SPR code: " + sprCode + ": no staff member found for uni ID " + tutorUniId + " - not importing this personal tutor from SITS")
+						}
 					}
 				}
+		}
 	}
 
 

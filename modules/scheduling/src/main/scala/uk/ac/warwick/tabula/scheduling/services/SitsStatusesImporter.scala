@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSitsStatusCommand
 
 trait SitsStatusesImporter extends Logging {
 	var sitsStatusDao = Wire.auto[SitsStatusDao]
-	
+
 	var sitsStatusMap:Map[String,SitsStatus] = null
 
 	def getSitsStatusForCode(code:String) = {
@@ -30,7 +30,7 @@ trait SitsStatusesImporter extends Logging {
 
 
 	def getSitsStatuses: Seq[ImportSitsStatusCommand]
-	
+
 	def slurpSitsStatuses(): Map[String, SitsStatus] = {
 		transactional(readOnly = true) {
 			logger.debug("refreshing SITS status map")
@@ -39,27 +39,27 @@ trait SitsStatusesImporter extends Logging {
 				(statusCode, status)
 			}).toMap
 		}
-	}	
+	}
 }
 
 @Profile(Array("dev", "test", "production")) @Service
 class SitsStatusesImporterImpl extends SitsStatusesImporter {
 	import SitsStatusesImporter._
-	
+
 	var sits = Wire[DataSource]("sitsDataSource")
-	
+
 	lazy val sitsStatusesQuery = new SitsStatusesQuery(sits)
 
 	def getSitsStatuses: Seq[ImportSitsStatusCommand] = {
 		val statuses = sitsStatusesQuery.execute.toSeq
 		sitsStatusMap = slurpSitsStatuses()
 		statuses
-	}	
+	}
 }
 
 @Profile(Array("sandbox")) @Service
 class SandboxSitsStatusesImporter extends SitsStatusesImporter {
-	def getSitsStatuses: Seq[ImportSitsStatusCommand] = 
+	def getSitsStatuses: Seq[ImportSitsStatusCommand] =
 		Seq(
 			new ImportSitsStatusCommand(SitsStatusInfo("C", "CURRENT STUDENT", "Current Student")),
 			new ImportSitsStatusCommand(SitsStatusInfo("P", "PERMANENTLY W/D", "Permanently Withdrawn"))
@@ -69,17 +69,18 @@ class SandboxSitsStatusesImporter extends SitsStatusesImporter {
 case class SitsStatusInfo(code: String, shortName: String, fullName: String)
 
 object SitsStatusesImporter {
-		
-	val GetSitsStatus = """
-		select sta_code, sta_snam, sta_name from intuit.srs_sta
+	var sitsSchema: String = Wire.property("${schema.sits}")
+
+	val GetSitsStatus = f"""
+		select sta_code, sta_snam, sta_name from $sitsSchema.srs_sta
 		"""
-	
+
 	class SitsStatusesQuery(ds: DataSource) extends MappingSqlQuery[ImportSitsStatusCommand](ds, GetSitsStatus) {
 		compile()
-		override def mapRow(resultSet: ResultSet, rowNumber: Int) = 
+		override def mapRow(resultSet: ResultSet, rowNumber: Int) =
 			new ImportSitsStatusCommand(
 				SitsStatusInfo(resultSet.getString("sta_code"), resultSet.getString("sta_snam"), resultSet.getString("sta_name"))
 			)
 	}
-	
+
 }

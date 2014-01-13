@@ -20,11 +20,11 @@ class DepartmentDaoImpl extends DepartmentDao with Daoisms {
 			.list
 
 	// Fetches modules eagerly
-	def getByCode(code: String) = 
+	def getByCode(code: String) =
 		session.newQuery[Department]("from Department d left join fetch d.modules where d.code = :code")
-			.setString("code", code)
+			.setString("code", code.toLowerCase())
 			.uniqueResult
-		
+
 	def getById(id: String) = getById[Department](id)
 
 	def save(department: Department) = session.saveOrUpdate(department)

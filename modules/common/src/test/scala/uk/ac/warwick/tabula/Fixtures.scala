@@ -204,7 +204,7 @@ object Fixtures extends Mockito {
 		scd.department = courseDepartment
 		scd.mostSignificant = true
 
-		scd.sprStatus = sprStatus
+		scd.statusOnRoute = sprStatus
 
 		val scyd = studentCourseYearDetails()
 		scyd.studentCourseDetails = scd

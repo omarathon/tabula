@@ -57,13 +57,15 @@ class AbstractExportAttendanceToSitsService extends ExportAttendanceToSitsServic
 }
 
 object ExportAttendanceToSitsService {
-	final val GetHighestExistingSequence = """
-		select max(sab_seq2) from intuit.srs_sab
+	val sitsSchema: String = Wire.property("${schema.sits}")
+
+	final val GetHighestExistingSequence = f"""
+		select max(sab_seq2) from $sitsSchema.srs_sab
 		where sab_stuc = :studentId
 	"""
 
-	final val PushToSITSSql = """
-		insert into intuit.srs_sab
+	final val PushToSITSSql = f"""
+		insert into $sitsSchema.srs_sab
 		(SAB_STUC,SAB_SEQ2,SAB_RAAC,SAB_ENDD,SAB_AYRC,SAB_UDF2,SAB_UDF3,SAB_UDF4,SAB_UDF5,SAB_UDF9,SAB_UDFJ)
 		values (:studentId, :counter, 'UNAUTH', :now, :academicYear, :deptCode, :courseCode, :recorder, :missedPoints, 'Tabula', :monitoringPeriod )
 	"""
