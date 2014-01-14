@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.{ScalaRestriction, MemberDao}
+import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.{DegreeType, CourseType, Department, Member, StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.Logging

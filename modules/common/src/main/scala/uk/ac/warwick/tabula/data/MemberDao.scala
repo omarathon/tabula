@@ -413,9 +413,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 								Restrictions.ge("endDate", new DateTime())
 				))
 
-
 			val c = session.newCriteria[StudentCourseDetails]
-			//c.project(Projections.property("student"))
+
 			restrictions.foreach { _.apply(c) }
 			c.add(Property.forName("sprCode").in(d))
 

@@ -1,19 +1,17 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-
 import uk.ac.warwick.tabula.commands.{FiltersRelationships, CommandInternal, ReadOnly, Unaudited, ComposableCommand}
-
 import uk.ac.warwick.tabula.permissions.Permissions
-
 import org.hibernate.criterion.Order._
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.data.ScalaRestriction
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+
 
 // Don't need this, unless there is specific state on the command which the controller needs access to.
 //
@@ -58,9 +56,7 @@ abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val
 		def applyInternal(): Seq[StudentMember] =  {
 
 			val blankRestriction : Seq[ScalaRestriction] = Seq()
-			val allCourses = benchmarkTask("Get all courses for the students") {
-					profileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, currentMember, blankRestriction).map(_.mostSignificantCourse)
-			}
+			val allCourses = profileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, currentMember, blankRestriction).map(_.mostSignificantCourse)
 
 			allDepartments = allCourses.map(_.department)
 			allRoutes = allCourses.map(_.route)
