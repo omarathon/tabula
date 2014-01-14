@@ -1,45 +1,38 @@
 package uk.ac.warwick.tabula.commands
 
-import uk.ac.warwick.tabula.data.model.{Module, SitsStatus, ModeOfAttendance, Route, CourseType, Department}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.{ScalaOrder, ScalaRestriction}
 import uk.ac.warwick.tabula.data.ScalaRestriction._
 import uk.ac.warwick.tabula.services.ProfileServiceComponent
-
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 
-object FiltersStudents {
+object FiltersRelationships {
 	val MaxStudentsPerPage = 100
 	val DefaultStudentsPerPage = 50
 
 	val AliasPaths = Seq(
-		"studentCourseDetails" -> Seq(
-			"mostSignificantCourse" -> "studentCourseDetails"
-		),
 		"studentCourseYearDetails" -> Seq(
-			"mostSignificantCourse" -> "studentCourseDetails",
-			"studentCourseDetails.latestStudentCourseYearDetails" -> "studentCourseYearDetails"
+			"latestStudentCourseYearDetails" -> "studentCourseYearDetails"
 		),
 		"moduleRegistration" -> Seq(
-			"mostSignificantCourse" -> "studentCourseDetails",
-			"studentCourseDetails.moduleRegistrations" -> "moduleRegistration"
+			"moduleRegistrations" -> "moduleRegistration"
 		),
 		"course" -> Seq(
-			"mostSignificantCourse" -> "studentCourseDetails",
-			"studentCourseDetails.course" -> "course"
+			"course" -> "course"
 		),
 		"route" -> Seq(
-			"mostSignificantCourse" -> "studentCourseDetails",
-			"studentCourseDetails.route" -> "route"
+			"route" -> "route"
+		),
+		"sprStatus" -> Seq(
+			"sprStatus" -> "sprStatus"
 		)
 	).toMap
 }
 
-trait FiltersStudents extends FiltersStudentsBase with ProfileServiceComponent with PermissionsCheckingMethods {
-	import FiltersStudents._
-
-	def department: Department
+trait FiltersRelationships extends FiltersStudentsBase with ProfileServiceComponent with PermissionsCheckingMethods {
+	import FiltersRelationships._
 
 	protected def buildOrders(): Seq[ScalaOrder] =
 		(sortOrder.asScala ++ defaultOrder).map { underlying =>
@@ -48,6 +41,7 @@ trait FiltersStudents extends FiltersStudentsBase with ProfileServiceComponent w
 				case _ => ScalaOrder(underlying)
 			}
 		}
+
 
 	protected def buildRestrictions(): Seq[ScalaRestriction] = {
 		Seq(
@@ -59,8 +53,8 @@ trait FiltersStudents extends FiltersStudentsBase with ProfileServiceComponent w
 
 			// Route
 			inIfNotEmpty(
-				"studentCourseDetails.route.code", routes.asScala.map {_.code},
-				AliasPaths("studentCourseDetails") : _*
+				"route.code", routes.asScala.map {_.code},
+				AliasPaths("route") : _*
 			),
 
 			// Mode of attendance
@@ -77,8 +71,8 @@ trait FiltersStudents extends FiltersStudentsBase with ProfileServiceComponent w
 
 			// SPR status
 			inIfNotEmpty(
-				"studentCourseDetails.statusOnRoute", sprStatuses.asScala,
-				AliasPaths("studentCourseDetails") : _*
+				"sprStatus", sprStatuses.asScala,
+				AliasPaths("sprStatus") : _*
 			),
 
 			// Registered modules
@@ -89,14 +83,15 @@ trait FiltersStudents extends FiltersStudentsBase with ProfileServiceComponent w
 		).flatten
 	}
 
+	var allDepartments : Seq[Department] = _
+	var allRoutes : Seq[Route] = _
 
 	// Do we need to consider out-of-department modules/routes or can we rely on users typing them in manually?
-	lazy val allModules: Seq[Module] = modulesForDepartmentAndSubDepartments(mandatory(department))
-	lazy val allCourseTypes: Seq[CourseType] = mandatory(department).filterRule.courseTypes
-	lazy val allRoutes: Seq[Route] = routesForDepartmentAndSubDepartments(mandatory(department)).sorted(Route.DegreeTypeOrdering)
+	lazy val allModules: Seq[Module] = allDepartments.map(modulesForDepartmentAndSubDepartments(_)).flatten
+	lazy val allCourseTypes: Seq[CourseType] = CourseType.all
 	lazy val allYearsOfStudy: Seq[Int] = 1 to 8
-	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(mandatory(department).rootDepartment)
-	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(mandatory(department))
+	lazy val allSprStatuses: Seq[SitsStatus] = allDepartments.map(dept => profileService.allSprStatuses(dept.rootDepartment)).flatten.distinct
+	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = allDepartments.map(profileService.allModesOfAttendance(_)).flatten.distinct
 
 
 }

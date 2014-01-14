@@ -34,6 +34,7 @@ trait ProfileService {
 	def countStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Int
 	def findStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq(), maxResults: Int = 50, startResult: Int = 0): (Int, Seq[StudentMember])
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
+	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agent: Member, restrictions: Seq[ScalaRestriction]): Seq[StudentMember]
 	def findAllUniversityIdsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Seq[String]
 	def findStaffMembersWithAssistant(user: User): Seq[StaffMember]
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance]
@@ -122,6 +123,13 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	private def studentDepartmentFilterMatches(department: Department)(member: StudentMember) = department.filterRule.matches(member)
 
+	def countStudentsCrossDeptByRestrictions(restrictions: Seq[ScalaRestriction]): Int = transactional(readOnly = true) {
+			memberDao.countStudentsByRestrictions(restrictions)
+	}
+
+	def findStudentsCrossDeptByRestrictions(restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq(), maxResults: Int = 50, startResult: Int = 0) = transactional(readOnly = true) {
+		memberDao.findStudentsByRestrictions(restrictions, orders, maxResults, startResult)
+	}
 	/**
 	 * this returns a tuple of the startResult (offset into query) actually returned, with the resultset itself
 	 */
@@ -173,6 +181,12 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 			memberDao.findStudentsByRestrictions(allRestrictions, orders, Int.MaxValue, 0)
 		}
 	}
+
+
+	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agent: Member, restrictions: Seq[ScalaRestriction]): Seq[StudentMember] = transactional(readOnly = true) {
+		memberDao.getStudentsByAgentRelationshipAndRestrictions(relationshipType, agent.id, restrictions)
+	}
+
 
 	def findAllUniversityIdsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]) = transactional(readOnly = true) {
 		val allRestrictions = {
