@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.data.model.UserGroup
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, WordCountField}
 import uk.ac.warwick.userlookup.User
 
-class AssignmentMembershipServiceTest extends PersistenceTestBase {
+class AssignmentMembershipServiceTest extends TestBase {
 
 	@Transactional @Test def testDetermineMembership {
 		val userLookup = new MockUserLookup
@@ -30,8 +30,6 @@ class AssignmentMembershipServiceTest extends PersistenceTestBase {
 		user5.setLastName("Eeeee")
 		val user6 = userLookup.getUserByUserId("fffff")
 		user6.setLastName("Fffff")
-
-		session.flush
 
 		val assignmentMembershipService = new AssignmentMembershipServiceImpl
 		assignmentMembershipService.userLookup = userLookup
