@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula._
 import org.junit.Ignore
 import scala.language.reflectiveCalls
 import scala.language.implicitConversions
+import org.hibernate.transform.DistinctRootEntityResultTransformer
 
 // scalastyle:off magic.number
 class ApplicationTest extends AppContextTestBase with FieldAccessByReflection{
@@ -79,7 +80,7 @@ class ApplicationTest extends AppContextTestBase with FieldAccessByReflection{
     }
 
     @Transactional @Test def getModules = {
-      val modules = session.createCriteria(classOf[Module]).list.distinct
+      val modules = session.createCriteria(classOf[Module]).setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE).list
       modules.size should be (4)
       modules(0).asInstanceOf[Module].department.name should be ("Computer Science")
     }
