@@ -18,6 +18,7 @@ class DepartmentDaoImpl extends DepartmentDao with Daoisms {
 		session.newCriteria[Department]
 			.addOrder(Order.asc("code"))
 			.list
+			.distinct
 
 	// Fetches modules eagerly
 	def getByCode(code: String) =

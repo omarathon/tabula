@@ -24,6 +24,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 		session.newCriteria[Module]
 			.addOrder(Order.asc("code"))
 			.seq
+			.distinct
 
 	def saveOrUpdate(module: Module) = session.saveOrUpdate(module)
 
