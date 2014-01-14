@@ -30,7 +30,7 @@
   <component name="ProjectResources">
     <resource url="http://ehcache.org/ehcache.xsd" location="$PROJECT_DIR$/modules/common/src/main/resources/ehcache.xsd" />
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true" project-jdk-name="1.7" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true" project-jdk-name="Java" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

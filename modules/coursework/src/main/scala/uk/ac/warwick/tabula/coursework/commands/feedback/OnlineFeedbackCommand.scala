@@ -30,8 +30,11 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 	def applyInternal() = {
 		val studentsWithSubmissionOrFeedback = 
 			userLookup.getUsersByWarwickUniIds(assignment.getUniIdsWithSubmissionOrFeedback.filter { _.hasText }.toSeq).values.filter { _.isFoundUser }.toSeq.sortBy { _.getWarwickId }
-		val unsubmittedStudents = assignment.membershipInfo.items.map(_.user).filterNot { studentsWithSubmissionOrFeedback.contains }
-			
+
+	  val studentsWithSubmissionOrFeedbackUniversityIds = studentsWithSubmissionOrFeedback.map(_.getWarwickId)
+
+		val unsubmittedStudents = assignment.membershipInfo.items.map(_.user).filterNot { x => studentsWithSubmissionOrFeedbackUniversityIds.contains(x.getWarwickId) }
+
 		val students = studentsWithSubmissionOrFeedback ++ unsubmittedStudents
 		students.map { student =>
 			val hasSubmission = submissionService.getSubmissionByUniId(assignment, student.getWarwickId).isDefined
@@ -44,6 +47,7 @@ abstract class OnlineFeedbackCommand(val module: Module, val assignment: Assignm
 		}
 	}
 }
+
 
 object OnlineMarkerFeedbackCommand {
 	def apply(module: Module, assignment: Assignment, marker: User) =
