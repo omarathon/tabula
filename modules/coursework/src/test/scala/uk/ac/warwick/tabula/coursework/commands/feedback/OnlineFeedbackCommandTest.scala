@@ -8,7 +8,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.MembershipItem
 import scala.Some
 import uk.ac.warwick.tabula.MockUserLookup
-import javax.swing.JList
+
 
 class OnlineFeedbackCommandTest extends TestBase with Mockito {
 
