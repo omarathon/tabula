@@ -17,11 +17,11 @@ class AgentViewController extends AttendanceController {
 
 	@RequestMapping
 	def home(@ModelAttribute("command") cmd: Appliable[(Seq[StudentPointsData], Map[String, Seq[GroupedMonitoringPoint]])]) = {
-		val data = cmd.apply()
+		val (students, groupedPoints) = cmd.apply()
 		Mav("agent/home",
-			"students" -> data._1,
-			"necessaryTerms" -> data._1.flatMap{ data => data.pointsByTerm.keySet }.distinct,
-			"groupedPoints" -> data._2,
+			"students" -> students,
+			"necessaryTerms" -> students.flatMap{ data => data.pointsByTerm.keySet }.distinct,
+			"groupedPoints" -> groupedPoints,
 			"department" -> currentMember.homeDepartment
 		)
 	}
