@@ -30,10 +30,6 @@ If you are doing any work on this, it would be good to do the above first.
 
 <#if department??>
 	<#assign can_manage_dept=data.canManageDepartment />
-
-	<h1 class="with-settings">
-		${department.name}
-	</h1>
 	
 	<div class="btn-toolbar dept-toolbar">
 	
@@ -128,6 +124,10 @@ If you are doing any work on this, it would be good to do the above first.
 
 		</#if>
 	</div>
+	
+	<h1 class="with-settings">
+		${department.name}
+	</h1>
 
 <#-- This is the big list of modules -->
 <@components.module_info data=data expand_by_default=(!can_manage_dept && data.moduleItems?size lte 5) />
