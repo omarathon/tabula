@@ -122,3 +122,52 @@
 		</div>
 	</div>
 </#macro>
+
+<#macro groupedPointsInATerm pointsMap term department permission_button_function>
+	<div class="striped-section">
+		<h2 class="section-title">${term}</h2>
+		<div class="striped-section-contents">
+			<#list pointsMap[term] as groupedPoint>
+				<div class="item-info row-fluid point">
+					<div class="span12">
+						<div class="pull-right">
+							${permission_button_function(groupedPoint)}
+						</div>
+					${groupedPoint.name}
+						(<a class="use-tooltip" data-html="true" title="<@fmt.wholeWeekDateFormat groupedPoint.validFromWeek groupedPoint.requiredFromWeek command.academicYear />">
+						<@fmt.monitoringPointWeeksFormat groupedPoint.validFromWeek groupedPoint.requiredFromWeek command.academicYear department />
+					</a>
+						):
+						<#if command.allRoutes?? && groupedPoint.routes?size == command.allRoutes?size>
+							All routes
+						<#else>
+							<#local popoverContent>
+								<ul class="unstyled">
+									<#if command.allRoutes??>
+										<#list command.allRoutes as route>
+											<#local isInPoint = false />
+											<#list groupedPoint.routes as pointRoutePair>
+												<#if pointRoutePair._1().code == route.code>
+													<li>
+														<@fmt.route_name route />
+
+													</li>
+												</#if>
+											</#list>
+										</#list>
+									</#if>
+									<#list groupedPoint.routes as pointRoutePair>
+										<#if !pointRoutePair._2()><li><span title="${pointRoutePair._1().department.name}"><@fmt.route_name pointRoutePair._1() /></span></li></#if>
+									</#list>
+								</ul>
+							</#local>
+							<a class="use-wide-popover" data-content="${popoverContent?html}" data-html="true" data-placement="bottom">
+								<@fmt.p groupedPoint.routes?size "route" />
+							</a>
+						</#if>
+					</div>
+				</div>
+			</#list>
+		</div>
+	</div>
+</#macro>
