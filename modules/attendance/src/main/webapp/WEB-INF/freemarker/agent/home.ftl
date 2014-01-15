@@ -27,5 +27,20 @@
 
 	<#include "../home/_points_table_js_sort.ftl" />
 
+	<#function permission_button_function groupedPoint>
+		<#local record_url><@routes.agentPointRecord groupedPoint.pointId command.relationshipType thisPath /></#local>
+		<#local result>
+			<a href="${record_url}" class="btn btn-primary">Record</a>
+		</#local>
+		<#return result>
+	</#function>
+	<div class="monitoring-points">
+		<#list attendance_variables.monitoringPointTermNames as term>
+			<#if groupedPoints[term]??>
+				<@attendance_macros.groupedPointsInATerm groupedPoints term department permission_button_function />
+			</#if>
+		</#list>
+	</div>
+
 </#if>
 </#escape>

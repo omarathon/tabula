@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, Re
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.attendance.commands.{StudentPointsData, AgentViewCommand}
+import uk.ac.warwick.tabula.attendance.commands.{GroupedMonitoringPoint, StudentPointsData, AgentViewCommand}
 
 @Controller
 @RequestMapping(Array("/agent/{relationshipType}"))
@@ -16,9 +16,14 @@ class AgentViewController extends AttendanceController {
 		AgentViewCommand(currentMember, relationshipType, Option(academicYear))
 
 	@RequestMapping
-	def home(@ModelAttribute("command") cmd: Appliable[Seq[StudentPointsData]]) = {
-		val students = cmd.apply()
-		Mav("agent/home", "students" -> students, "necessaryTerms" -> students.flatMap{ data => data.pointsByTerm.keySet }.distinct)
+	def home(@ModelAttribute("command") cmd: Appliable[(Seq[StudentPointsData], Map[String, Seq[GroupedMonitoringPoint]])]) = {
+		val (students, groupedPoints) = cmd.apply()
+		Mav("agent/home",
+			"students" -> students,
+			"necessaryTerms" -> students.flatMap{ data => data.pointsByTerm.keySet }.distinct,
+			"groupedPoints" -> groupedPoints,
+			"department" -> currentMember.homeDepartment
+		)
 	}
 
 }
