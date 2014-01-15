@@ -7,6 +7,7 @@ import uk.ac.warwick.userlookup.{User, GroupService}
 import uk.ac.warwick.spring.Wire
 import org.hibernate.criterion.Restrictions._
 import uk.ac.warwick.util.cache.SingularCacheEntryFactory
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait UserGroupMembershipHelperMethods[A <: Serializable] {
 	def findBy(user: User): Seq[A]
@@ -82,7 +83,7 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] 
 
   // To override in tests
 	protected def getUser(usercode: String) = userlookup.getUserByUserId(usercode)
-	protected def getWebgroups(usercode: String): Seq[String] = groupService.getGroupsNamesForUser(usercode).asScala
+	protected def getWebgroups(usercode: String): Seq[String] = usercode.maybeText.map { usercode => groupService.getGroupsNamesForUser(usercode).asScala }.getOrElse(Nil)
 
 	def findBy(user: User): Seq[A] = {		
 		// Caching disabled for the moment until we have a proper cache dirtying strategy
