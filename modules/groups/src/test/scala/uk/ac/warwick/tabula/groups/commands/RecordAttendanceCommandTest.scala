@@ -121,8 +121,7 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 			
 			val errors = new BindException(command, "command")
 			command.validate(errors)
-			errors.hasFieldErrors() should be (true)
-			errors.getFieldError("studentsState").getArguments() should have size (1) 
+			errors.hasFieldErrors() should be (false) // TAB-1791 
 		}
 	}
 	
