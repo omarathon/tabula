@@ -1,20 +1,19 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPointSet, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import org.springframework.validation.{BindingResult, Errors}
-import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
+import uk.ac.warwick.tabula.CurrentUser
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import org.hibernate.criterion.Order._
 import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.system.BindListener
-import org.joda.time.DateTime
 
 object SetMonitoringCheckpointCommand {
 	def apply(department: Department, templateMonitoringPoint: MonitoringPoint, user: CurrentUser, routes: JList[Route]) =
@@ -32,44 +31,26 @@ object SetMonitoringCheckpointCommand {
 }
 
 abstract class SetMonitoringCheckpointCommand(val department: Department, val templateMonitoringPoint: MonitoringPoint, val user: CurrentUser, val routes: JList[Route])
-	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with BindListener with PopulateOnForm with CheckpointUpdatedDescription {
+	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with SetMonitoringCheckpointState
+	with BindListener with PopulateOnForm with PopulateGroupedPoints with TaskBenchmarking {
 
-	self: SetMonitoringCheckpointState with MonitoringPointServiceComponent with ProfileServiceComponent =>
+	self: MonitoringPointServiceComponent with ProfileServiceComponent =>
 
 	def populate() {
-		// Get students matching the filter
-		val students = profileService.findAllStudentsByRestrictions(
-			department = department,
-			restrictions = buildRestrictions(),
-			orders = buildOrders()
-		)
-		// Get monitoring points by student for the list of students matching the template point
-		val studentPointMap = monitoringPointService.findSimilarPointsForMembers(templateMonitoringPoint, students)
-		val allPoints = studentPointMap.values.flatten.toSeq
-		val pointSet = templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
-		val period = termService.getTermFromAcademicWeek(templateMonitoringPoint.validFromWeek, pointSet.academicYear).getTermTypeAsString
-		val nonReported = monitoringPointService.findNonReported(students, pointSet.academicYear, period)
-		val checkpoints = monitoringPointService.getCheckpointsByStudent(allPoints)
-		// Map the checkpoint state to each point for each student, and filter out any students already reported for this term
-		studentsState = studentPointMap.map{ case (student, points) =>
-			student -> points.map{ point =>
-				point -> {
-					val checkpointOption = checkpoints.find{
-						case (s, checkpoint) => s == student && checkpoint.point == point
-					}
-					checkpointOption.map{case (_, checkpoint) => checkpoint.state}.getOrElse(null)
-				}
-			}.toMap.asJava
-		}.filter{case(student, map) => nonReported.contains(student)}.toMap.asJava
-
-		checkpointDescriptions = studentsState.asScala.map{
-			case (student, pointMap) => student -> pointMap.asScala.map{
-				case(point, state) => point -> {
-					checkpoints.find{
-						case (s, checkpoint) => s == student && checkpoint.point == point
-					}.map{case (_, checkpoint) => describeCheckpoint(checkpoint)}.getOrElse("")
-				}
-		}.toMap}.toMap
+		val students = benchmarkTask("Get students matching the filter") {
+			profileService.findAllStudentsByRestrictions(
+				department = department,
+				restrictions = buildRestrictions(),
+				orders = buildOrders()
+			)
+		}
+		benchmarkTask("Populate grouped points") {
+			populateGroupedPoints(students, templateMonitoringPoint) match {
+				case (state, descriptions) =>
+					studentsState = state
+					checkpointDescriptions = descriptions
+			}
+		}
 	}
 
 	def applyInternal(): Seq[MonitoringCheckpoint] = {
@@ -90,43 +71,14 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 	}
 }
 
-trait SetMonitoringCheckpointCommandValidation extends SelfValidating {
+trait SetMonitoringCheckpointCommandValidation extends SelfValidating with GroupedPointValidation {
 	self: SetMonitoringCheckpointState with SecurityServiceComponent with TermServiceComponent with MonitoringPointServiceComponent =>
 
 	def validate(errors: Errors) {
-		val academicYear = templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear
-		val thisAcademicYear = AcademicYear.guessByDate(DateTime.now)
-		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
-		studentsStateAsScala.foreach{ case(student, pointMap) =>
-			val studentPointSet = monitoringPointService.getPointSetForStudent(student, academicYear)
-			pointMap.foreach{ case(point, state) =>
-				errors.pushNestedPath(s"studentsState[${student.universityId}][${point.id}]")
-				val pointSet = point.pointSet.asInstanceOf[MonitoringPointSet]
-				val pointRoute = pointSet.route
-				// Check point is valid for student
-				if (!studentPointSet.exists(s => s.points.asScala.contains(point))) {
-					errors.rejectValue("", "monitoringPoint.invalidStudent")
-				// Check has permission for each point
-				}	else if (!securityService.can(user, Permissions.MonitoringPoints.Record, pointRoute)) {
-					errors.rejectValue("", "monitoringPoint.noRecordPermission")
-				} else {
-
-					if (!monitoringPointService.findNonReportedTerms(Seq(student),
-						pointSet.academicYear).contains(
-							termService.getTermFromAcademicWeek(point.validFromWeek, pointSet.academicYear).getTermTypeAsString)
-					){
-						errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
-					}
-
-					if (thisAcademicYear.startYear <= academicYear.startYear
-						&& currentAcademicWeek < point.validFromWeek
-						&& !(state == null || state == AttendanceState.MissedAuthorised)
-					) {
-						errors.rejectValue("", "monitoringCheckpoint.beforeValidFromWeek")
-					}
-				}
-				errors.popNestedPath()
-			}}
+		def permissionValidation(student: StudentMember, route: Route) = {
+			!securityService.can(user, Permissions.MonitoringPoints.Record, route)
+		}
+		validateGroupedPoint(errors,templateMonitoringPoint, studentsStateAsScala, permissionValidation)
 	}
 
 }

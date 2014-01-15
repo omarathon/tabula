@@ -100,11 +100,12 @@
 						</td>
 						<td class="record">
 							<@fmt.permission_button
-							permission='MonitoringPoints.Record'
-							scope=studentData.student
-							action_descr='record monitoring points'
-							classes='btn btn-primary btn-mini'
-							href=record_url(studentData.student)
+								permission='MonitoringPoints.Record'
+								scope=studentData.student
+								action_descr='record monitoring points'
+								classes='btn btn-primary btn-mini'
+								href=record_url(studentData.student)
+								tooltip='Record'
 							>
 								<i class="icon-pencil icon-fixed-width late"></i>
 							</@fmt.permission_button>

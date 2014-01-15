@@ -41,6 +41,7 @@
 	<#macro agentView relationshipType><@url page="/agent/${relationshipType.urlPart}"/></#macro>
 	<#macro agentStudentView student relationshipType academicYear><@url page="/agent/${relationshipType.urlPart}/${student.universityId}/?academicYear=${academicYear.toString}"/></#macro>
 	<#macro agentStudentRecord student relationshipType academicYear returnTo><@url page="/agent/${relationshipType.urlPart}/${student.universityId}/record?academicYear=${academicYear.toString}&returnTo=${returnTo?url}"/></#macro>
+	<#macro agentPointRecord pointId relationshipType returnTo><@url page="/agent/${relationshipType.urlPart}/point/${pointId}/record?returnTo=${returnTo?url}"/></#macro>
 	
 	<#macro createSet department academicYear><@url page="/manage/${department.code}/sets/add/${academicYear.startYear?c}"/></#macro>
 	<#macro editSet pointSet><@url page="/manage/${pointSet.route.department.code}/sets/${pointSet.id}/edit"/></#macro>
