@@ -7,19 +7,22 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.services.permissions._
 import scala.Some
 import uk.ac.warwick.util.queue.Queue
+import uk.ac.warwick.util.queue.QueueListener
+import org.springframework.beans.factory.InitializingBean
+import uk.ac.warwick.tabula.helpers.Logging
 
 class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 	
 	val service: ModuleAndDepartmentService = new ModuleAndDepartmentService
 
-	val userLookup = new MockUserLookup
+	val userLookupService = new MockUserLookup
 	
 	@Before def wire {
 		val departmentDao = new DepartmentDaoImpl
 		departmentDao.sessionFactory = sessionFactory
 		service.departmentDao = departmentDao
 
-		service.userLookup = userLookup
+		service.userLookup = userLookupService
 
 		val moduleDao = new ModuleDaoImpl
 		moduleDao.sessionFactory = sessionFactory
@@ -32,13 +35,13 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 		val permsDao = new PermissionsDaoImpl
 		permsDao.sessionFactory = sessionFactory
 
-		val permissionsService = new PermissionsServiceImpl with PermissionsDaoComponent with PermissionsServiceCaches {
+		val permissionsService = new AbstractPermissionsService with PermissionsDaoComponent with PermissionsServiceCaches with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache with QueueListener with InitializingBean with Logging {
 			var permissionsDao:PermissionsDao = permsDao
 			val rolesByIdCache:GrantedRoleByIdCache = new GrantedRoleByIdCache(permsDao)
 			val permissionsByIdCache = new GrantedPermissionsByIdCache(permsDao)
 		}
 		permissionsService.queue = mock[Queue]
-		permissionsService.groupService = userLookup.getGroupService()
+		permissionsService.groupService = userLookupService.getGroupService()
 		service.permissionsService = permissionsService
 
 		val securityService = mock[SecurityService]
@@ -53,25 +56,29 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 		
 		val ch = service.getDepartmentByCode("ch").get
 		val cs = service.getDepartmentByCode("cs").get
-		val cssub = service.getDepartmentByCode("cs-subsidiary").get
+		val cssub1 = service.getDepartmentByCode("cs-subsidiary").get
+		val cssub2 = service.getDepartmentByCode("cs-subsidiary-2").get
 		
 		val cs108 = service.getModuleByCode("cs108").get
 		val cs240 = service.getModuleByCode("cs240").get
 		val cs241 = service.getModuleByCode("cs241").get
+		val cs242 = service.getModuleByCode("cs242").get
 		
 		val g500 = service.getRouteByCode("g500").get
 		val g503 = service.getRouteByCode("g503").get
 		val g900 = service.getRouteByCode("g900").get
+		val g901 = service.getRouteByCode("g901").get
 		
-		service.allDepartments should be (Seq(ch, cs, cssub))
-		service.allModules should be (Seq(cs108, cs240, cs241))
-		service.allRoutes should be (Seq(g500, g503, g900))
+		service.allDepartments should be (Seq(ch, cs, cssub1, cssub2))
+		service.allModules should be (Seq(cs108, cs240, cs241, cs242))
+		service.allRoutes should be (Seq(g500, g503, g900, g901))
 		
 		// behaviour of child/parent departments
-		cs.children.toArray should be (Array(cssub))
-		cssub.parent should be (cs)
+		cs.children.toArray should be (Array(cssub1, cssub2))
+		cssub1.parent should be (cs)
+		cssub2.parent should be (cs)
 		ch.children.isEmpty should be (true)
-		cs241.department should be (cssub)
+		cs241.department should be (cssub1)
 		
 		service.getDepartmentByCode("ch") should be (Some(ch))
 		service.getDepartmentById(ch.id) should be (Some(ch))

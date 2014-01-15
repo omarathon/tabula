@@ -7,6 +7,7 @@ import org.hibernate.transform.DistinctRootEntityResultTransformer
 import collection.mutable
 import org.hibernate.transform.ResultTransformer
 import org.hibernate.Criteria
+import org.hibernate.FetchMode
 
 /**
  * Nice wrapper for a Criteria object. You usually won't create
@@ -29,6 +30,7 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 	}
 	def setMaxResults(i: Int) = chainable { c.setMaxResults(i) }
 	def setFirstResult(i: Int) = chainable { c.setFirstResult(i) }
+	def setFetchMode(associationPath: String, mode: FetchMode) = chainable { c.setFetchMode(associationPath, mode) }
 	def createAlias(property: String, alias: String) = chainable {
 		aliases.put(property, alias) match {
 			case None => c.createAlias(property, alias)

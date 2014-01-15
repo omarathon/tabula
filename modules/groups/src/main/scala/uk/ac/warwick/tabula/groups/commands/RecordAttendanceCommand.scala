@@ -116,12 +116,15 @@ trait RecordAttendanceCommandValidation extends SelfValidating {
 		val invalidUsers: Seq[UniversityId] = studentsState.asScala.map { case (studentId, _) => studentId }.filter(s => !userLookup.getUserByWarwickUniId(s).isFoundUser()).toSeq
 		if (invalidUsers.length > 0) {
 			errors.rejectValue("studentsState", "smallGroup.attendees.invalid", Array(invalidUsers), "")
-		} else {
+		}
+		
+		// TAB-1791 Allow attendance to be recorded for users not in the group, they were in the group in the past or submitting would be a pain
+		/*else {
 			val missingUsers: Seq[UniversityId] = studentsState.asScala.map { case (studentId, _) => studentId }.filter(s => event.group.students.users.filter(u => u.getWarwickId() == s).length == 0).toSeq
 			if (missingUsers.length > 0) {
 				errors.rejectValue("studentsState", "smallGroup.attendees.missing", Array(missingUsers), "")
 			}
-		}
+		}*/
 		
 		studentsState.asScala.foreach { case (studentId, state) => 
 			errors.pushNestedPath(s"studentsState[${studentId}]")

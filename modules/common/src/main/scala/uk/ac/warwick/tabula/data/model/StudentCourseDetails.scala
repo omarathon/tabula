@@ -46,7 +46,7 @@ class StudentCourseDetails
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
-	private val studentCourseYearDetails: JList[StudentCourseYearDetails] = JArrayList()
+	private val studentCourseYearDetails: JSet[StudentCourseYearDetails] = JHashSet()
 
 	def freshStudentCourseYearDetails = studentCourseYearDetails.asScala.filter(scyd => scyd.isFresh)
 	def freshOrStaleStudentCourseYearDetails = studentCourseYearDetails.asScala
@@ -54,12 +54,12 @@ class StudentCourseDetails
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
-	var moduleRegistrations: JList[ModuleRegistration] = JArrayList()
+	var moduleRegistrations: JSet[ModuleRegistration] = JHashSet()
 
-	def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] = moduleRegistrationsByYear(year).map(_.module)
+	def registeredModulesByYear(year: Option[AcademicYear]): Set[Module] = moduleRegistrationsByYear(year).map(_.module)
 
-	def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =
-		moduleRegistrations.asScala.collect {
+	def moduleRegistrationsByYear(year: Option[AcademicYear]): Set[ModuleRegistration] =
+		moduleRegistrations.asScala.toSet[ModuleRegistration].collect {
 			case modReg if year.isEmpty => modReg
 			case modReg if modReg.academicYear == year.getOrElse(null) => modReg
 	}
@@ -80,7 +80,7 @@ class StudentCourseDetails
 	// permanently withdrawn in the context of applicants, but not in the context of
 	// the student's route status (sprStatus)
 	def permanentlyWithdrawn = {
-		sprStatus != null && sprStatus.code.startsWith("P")
+		statusOnRoute != null && statusOnRoute.code.startsWith("P")
 	}
 
 	@OneToOne
@@ -182,7 +182,12 @@ trait StudentCourseProperties {
 	@ManyToOne
 	@JoinColumn(name="sprStatusCode")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
-	var sprStatus: SitsStatus = _
+	var statusOnRoute: SitsStatus = _
+
+	@ManyToOne
+	@JoinColumn(name="scjStatusCode")
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
+	var statusOnCourse: SitsStatus = _
 
 	var lastUpdatedDate = DateTime.now
 

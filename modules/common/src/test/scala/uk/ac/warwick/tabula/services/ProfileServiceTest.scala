@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.JavaImports._
 import org.mockito.Matchers
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.StaffMember
 
 // scalastyle:off magic.number
 class ProfileServiceTest extends PersistenceTestBase with Mockito {
@@ -21,9 +22,10 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		thisMemberDao.sessionFactory = sessionFactory
 		val thisStudentCourseDetailsDao = new StudentCourseDetailsDaoImpl
 		thisStudentCourseDetailsDao.sessionFactory = sessionFactory
-		profileService = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+		profileService = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
 			val memberDao = thisMemberDao
 			val studentCourseDetailsDao = thisStudentCourseDetailsDao
+			val staffAssistantsHelper = mock[UserGroupMembershipHelperMethods[StaffMember]]
 		}
 	}
 
@@ -77,7 +79,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 	@Test def listMembersUpdatedSince = transactional { tx =>
 
 		val dept1 = Fixtures.departmentWithId("in", "IT Services", "1")
-		val dept2 = Fixtures.departmentWithId("cs", "Computing Science", "2")
+		val dept2 = Fixtures.departmentWithId("po", "Politics", "2")
 		session.saveOrUpdate(dept1)
 		session.saveOrUpdate(dept2)
 		session.flush
@@ -108,9 +110,10 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 	}
 
 	@Test def getStudentsByRouteForAcademicYear = {
-		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
 			val memberDao = mock[MemberDao]
 			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
+			val staffAssistantsHelper = mock[UserGroupMembershipHelperMethods[StaffMember]]
 		}
 
 		val testRoute = new Route
@@ -123,21 +126,21 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		studentInBothYears.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2013))
 		)
-		studentInBothYears.sprStatus = new SitsStatus("C")
+		studentInBothYears.statusOnRoute = new SitsStatus("C")
 		studentInBothYears.mostSignificant = true
 
 		val studentInFirstYear = new StudentCourseDetails(Fixtures.student(), "studentInFirstYear")
 		studentInFirstYear.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
-		studentInFirstYear.sprStatus = new SitsStatus("C")
+		studentInFirstYear.statusOnRoute = new SitsStatus("C")
 		studentInFirstYear.mostSignificant = true
 
 		val studentInSecondYear = new StudentCourseDetails(Fixtures.student(), "studentInSecondYear")
 		studentInSecondYear.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2013))
 		)
-		studentInSecondYear.sprStatus = new SitsStatus("C")
+		studentInSecondYear.statusOnRoute = new SitsStatus("C")
 		studentInSecondYear.mostSignificant = true
 
 
@@ -146,45 +149,46 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		val studentsInFirstYear = service.getStudentsByRoute(testRoute, AcademicYear(2012))
 		studentsInFirstYear.size should be (2)
 		studentsInFirstYear.exists(
-			s => s.freshStudentCourseDetails(0).scjCode.equals(studentInSecondYear.scjCode)
+			s => s.freshStudentCourseDetails.head.scjCode.equals(studentInSecondYear.scjCode)
 		) should be (false)
 
 		val studentsInSecondYear = service.getStudentsByRoute(testRoute, AcademicYear(2013))
 		studentsInSecondYear.size should be (2)
 		studentsInSecondYear.exists(
-			s => s.freshStudentCourseDetails(0).scjCode.equals(studentInFirstYear.scjCode)
+			s => s.freshStudentCourseDetails.head.scjCode.equals(studentInFirstYear.scjCode)
 		) should be (false)
 	}
 
 	@Test def getStudentsByRouteWithdrawn = {
-		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
 			val memberDao = mock[MemberDao]
 			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
+			val staffAssistantsHelper = mock[UserGroupMembershipHelperMethods[StaffMember]]
 		}
 
 		val testRoute = new Route
 		testRoute.code = "test"
 
 		val studentNoShow = new StudentCourseDetails(Fixtures.student(), "studentNoShow")
-		studentNoShow.sprStatus = new SitsStatus("PNS")
+		studentNoShow.statusOnRoute = new SitsStatus("PNS")
 		studentNoShow.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 
 		val studentPermWithdrawn = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawn")
-		studentPermWithdrawn.sprStatus = new SitsStatus("P")
+		studentPermWithdrawn.statusOnRoute = new SitsStatus("P")
 		studentPermWithdrawn.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 
 		val studentPermWithdrawnDebt = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawnDebt")
-		studentPermWithdrawnDebt.sprStatus = new SitsStatus("PD")
+		studentPermWithdrawnDebt.statusOnRoute = new SitsStatus("PD")
 		studentPermWithdrawnDebt.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
 
 		val studentPermWithdrawnWrittenOff = new StudentCourseDetails(Fixtures.student(), "studentPermWithdrawnWrittenOff")
-		studentPermWithdrawnWrittenOff.sprStatus = new SitsStatus("PR")
+		studentPermWithdrawnWrittenOff.statusOnRoute = new SitsStatus("PR")
 		studentPermWithdrawnWrittenOff.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
@@ -203,9 +207,10 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 
 	@Test def getStudentsByRouteMostSignificantCourse = {
-		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
 			val memberDao = mock[MemberDao]
 			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
+			val staffAssistantsHelper = mock[UserGroupMembershipHelperMethods[StaffMember]]
 		}
 
 		val testRoute = new Route
@@ -217,7 +222,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		student.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
-		student.sprStatus = new SitsStatus("C")
+		student.statusOnRoute = new SitsStatus("C")
 		student.mostSignificant =  true
 
 		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(student)
@@ -226,7 +231,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		students.size should be (1)
 
 		students.exists(
-			s => s.freshStudentCourseDetails(0).mostSignificant.equals(true)
+			s => s.freshStudentCourseDetails.head.mostSignificant.equals(true)
 		) should be (true)
 
 	}
@@ -234,9 +239,10 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 
 	@Test def getStudentsByRouteNotMostSignificantCourse = {
-		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+		val service = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
 			val memberDao = mock[MemberDao]
 			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
+			val staffAssistantsHelper = mock[UserGroupMembershipHelperMethods[StaffMember]]
 		}
 
 		val testRoute = new Route
@@ -248,7 +254,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		student.addStudentCourseYearDetails(
 			Fixtures.studentCourseYearDetails(AcademicYear(2012))
 		)
-		student.sprStatus = new SitsStatus("C")
+		student.statusOnRoute = new SitsStatus("C")
 		student.mostSignificant = false
 
 		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(student)
@@ -257,14 +263,15 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		students.size should be (0)
 
 		students.exists(
-			s => s.freshStudentCourseDetails(0).mostSignificant.equals(true)
+			s => s.freshStudentCourseDetails.head.mostSignificant.equals(true)
 		) should be (false)
 
 	}
 	trait MockFixture {
-		val profileServiceWithMocks = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent {
+		val profileServiceWithMocks = new AbstractProfileService with MemberDaoComponent with StudentCourseDetailsDaoComponent with StaffAssistantsHelpers {
 			val memberDao = mock[MemberDao]
 			val studentCourseDetailsDao = mock[StudentCourseDetailsDao]
+			val staffAssistantsHelper = mock[UserGroupMembershipHelperMethods[StaffMember]]
 		}
 	}
 

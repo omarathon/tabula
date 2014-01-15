@@ -1,17 +1,15 @@
 package uk.ac.warwick.tabula.data
 
+
 import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
-import org.hibernate.criterion.Order
-import org.hibernate.criterion.Projections
-import org.hibernate.criterion.Restrictions
+import org.hibernate.criterion.{Property, DetachedCriteria, Order, Projections, Restrictions}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Department, Member, ModeOfAttendance, RuntimeMember, SitsStatus, StudentMember, StudentRelationship, StudentRelationshipType}
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
-import uk.ac.warwick.tabula.data.model.StaffMember
+import org.hibernate.FetchMode
 
 trait MemberDaoComponent {
 	val memberDao: MemberDao
@@ -35,7 +33,7 @@ trait MemberDao {
 	def getByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member]
-	def getAllByUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
+	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
 	def getAllCurrentRelationships(targetSprCode: String): Seq[StudentRelationship]
@@ -50,6 +48,7 @@ trait MemberDao {
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
 	def getStaffByDepartment(department: Department): Seq[StaffMember]
 	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
+	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agentId: String, restrictions: Seq[ScalaRestriction]): Seq[StudentMember]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
 	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[String]
 	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember]
@@ -121,20 +120,21 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.add(in("universityId", universityIds map { _.safeTrim }))
 			.add(isNull("missingFromImportSince"))
 			.seq
-			
+
 	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]) =
 		if (universityIds.isEmpty) Seq.empty
 		else session.newCriteria[Member]
 			.add(in("universityId", universityIds map { _.safeTrim }))
 			.seq
 
-	def getAllByUserId(userId: String, disableFilter: Boolean = false) = {
+	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false) = {
 		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
 		try {
 			if (disableFilter)
 				session.disableFilter(Member.StudentsOnlyFilter)
 
-			session.newCriteria[Member]
+			val criteria =
+				session.newCriteria[Member]
 					.add(is("userId", userId.safeTrim.toLowerCase))
 					.add(isNull("missingFromImportSince"))
 					.add(disjunction()
@@ -142,7 +142,15 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 						.add(like("inUseFlag", "Inactive - Starts %"))
 					)
 					.addOrder(asc("universityId"))
-					.seq
+
+			if (eagerLoad)
+				criteria
+					.setFetchMode("studentCourseDetails", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
+					.distinct
+
+			criteria.seq
 		} finally {
 			if (disableFilter && filterEnabled)
 				session.enableFilter(Member.StudentsOnlyFilter)
@@ -165,7 +173,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 						scd.missingFromImportSince is null and
             scd.department = :department and
         		scd.student.lastUpdatedDate > :lastUpdated and
-            scd.sprStatus.code not like 'P%' """)
+            scd.statusOnRoute.code not like 'P%' """)
 			.setEntity("department", department)
 			.setParameter("lastUpdated", startDate).seq
 
@@ -174,9 +182,13 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		(homeDepartmentMatches ++ courseMatches).distinct.sortBy(_.lastUpdatedDate)
 	}
 
-
 	def listUpdatedSince(startDate: DateTime, max: Int) =
-		session.newCriteria[Member].add(gt("lastUpdatedDate", startDate)).setMaxResults(max).addOrder(asc("lastUpdatedDate")).list
+		session.newQuery[Member]( """select distinct staffOrStudent from Member staffOrStudent
+			where staffOrStudent.lastUpdatedDate > :lastUpdated
+			order by lastUpdatedDate asc
+		""")
+			.setParameter("lastUpdated", startDate)
+			.setMaxResults(max).seq
 
 	def getAllCurrentRelationships(targetSprCode: String): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
@@ -226,7 +238,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.mostSignificant = true
 			and
-				scd.sprStatus.code not like 'P%'
+				scd.statusOnRoute.code not like 'P%'
 			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
 			order by
@@ -256,7 +268,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.missingFromImportSince is null
 			and
-				scd.sprStatus.code not like 'P%'
+				scd.statusOnRoute.code not like 'P%'
 			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
 			order by
@@ -313,7 +325,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.mostSignificant = true
 			and
-				scd.sprStatus.code not like 'P%'
+				scd.statusOnRoute.code not like 'P%'
 			and
 				scd.sprCode not in (
 					select
@@ -349,7 +361,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.mostSignificant = true
 			and
-				scd.sprStatus.code not like 'P%'
+				scd.statusOnRoute.code not like 'P%'
 			""")
 			.setEntity("department", department).seq
 			s
@@ -380,13 +392,36 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.mostSignificant = true
 			and
-				scd.sprStatus.code not like 'P%'
+				scd.statusOnRoute.code not like 'P%'
 			and
 				scd.sprCode in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
 			""")
 			.setEntity("department", department)
 			.setEntity("relationshipType", relationshipType)
 			.seq
+
+
+	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agentId: String, restrictions: Seq[ScalaRestriction]): Seq[StudentMember] = {
+		if (relationshipType == null) Nil
+		else {
+			val d = DetachedCriteria.forClass(classOf[StudentRelationship])
+				.setProjection(Property.forName("targetSprCode"))
+				.add(Restrictions.eq("agent", agentId))
+				.add(Restrictions.eq("relationshipType", relationshipType))
+				.add( Restrictions.or(
+								Restrictions.isNull("endDate"),
+								Restrictions.ge("endDate", new DateTime())
+				))
+
+			val c = session.newCriteria[StudentCourseDetails]
+
+			restrictions.foreach { _.apply(c) }
+			c.add(Property.forName("sprCode").in(d))
+
+			c.seq.map(_.student)
+		}
+	}
+
 
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number =
 		if (relationshipType == null) 0
@@ -425,7 +460,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 		orders.foreach { c.addOrder(_) }
 
-		c.setMaxResults(maxResults).setFirstResult(startResult).seq
+		c.setMaxResults(maxResults).setFirstResult(startResult).distinct.seq
 	}
 
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]) = {
@@ -456,7 +491,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				.addOrder(desc("statusCount"))
 				.project[Array[Any]](
 					projectionList()
-						.add(groupProperty("scd.sprStatus"))
+						.add(groupProperty("scd.statusOnRoute"))
 						.add(rowCount(), "statusCount")
 				)
 				.seq.map { array => array(0).asInstanceOf[SitsStatus] }
@@ -477,6 +512,6 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					.setParameterList("newStaleUniversityIds", staleIds)
 					.executeUpdate
 			}
-		}
+	}
 }
 

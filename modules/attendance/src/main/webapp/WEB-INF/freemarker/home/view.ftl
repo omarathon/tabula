@@ -25,7 +25,7 @@
 </div>
 
 <#if hasSets>
-	<h3><a href="<@routes.viewDepartmentStudents department />">View by student</a></h3>
+	<h3><a href="<@routes.viewDepartmentStudents department />">View by student and report to SITS:eVision</a></h3>
 	<h3><a href="<@routes.viewDepartmentPoints department />">View by point</a></h3>
 	<#if can.do("MonitoringPoints.View", department)>
 		<#list department.displayedStudentRelationshipTypes as relationshipType>

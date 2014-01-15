@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 object AgentViewCommand {
 	def apply(agent: Member, relationshipType: StudentRelationshipType, academicYearOption: Option[AcademicYear]) =
@@ -17,18 +18,28 @@ object AgentViewCommand {
 			with AutowiringMonitoringPointServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringRelationshipServiceComponent
-			with ComposableCommand[Seq[StudentPointsData]]
+			with AutowiringProfileServiceComponent
+			with ComposableCommand[(Seq[StudentPointsData], Map[String, Seq[GroupedMonitoringPoint]])]
 			with AgentViewState
 			with ReadOnly with Unaudited
 }
 
 abstract class AgentViewCommand(val agent: Member, val relationshipType: StudentRelationshipType, val academicYearOption: Option[AcademicYear])
-	extends CommandInternal[Seq[StudentPointsData]] with AgentViewState with BuildStudentPointsData {
+	extends CommandInternal[(Seq[StudentPointsData], Map[String, Seq[GroupedMonitoringPoint]])] with AgentViewState
+	with BuildStudentPointsData with GroupMonitoringPointsByTerm with TaskBenchmarking {
+
 	self: RelationshipServiceComponent =>
 
 	def applyInternal() = {
-		val students = relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember)
-		buildData(students, academicYear)
+		val students = benchmarkTask("Get relationships with current user") { relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember) }
+		val studentPointsData = benchmarkTask("Build student data") { buildData(students, academicYear) }
+		val groupedPoints = benchmarkTask("Group similar points") { groupSimilarPointsByTerm(
+			studentPointsData.flatMap(s =>
+				s.pointsByTerm.values.flatMap{map => map.keys}),
+			Seq(),
+			academicYear
+		)}
+		(studentPointsData, groupedPoints)
 	}
 }
 

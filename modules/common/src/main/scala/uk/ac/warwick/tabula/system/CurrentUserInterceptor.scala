@@ -34,7 +34,7 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 		new CurrentUser(
 			realUser = user,
 			apparentUser = apparentUser,
-			profile = profileService.getMemberByUser(apparentUser, true),
+			profile = profileService.getMemberByUser(user = apparentUser, disableFilter = true, eagerLoad = true),
 			sysadmin = sysadmin,
 			masquerader = masquerader,
 			god = god)

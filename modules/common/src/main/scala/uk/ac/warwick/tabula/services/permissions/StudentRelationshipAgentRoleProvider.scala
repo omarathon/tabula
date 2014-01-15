@@ -30,7 +30,7 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider {
 					val studentDepartment = 
 						rel.studentMember
 							 .flatMap { _.mostSignificantCourseDetails }
-							 .map { _.latestStudentCourseYearDetails.enrolmentDepartment }
+							 .flatMap { scd => Option(scd.latestStudentCourseYearDetails.enrolmentDepartment) }
 					
 					customRoleFor(studentDepartment)(StudentRelationshipAgentRoleDefinition(rel.relationshipType), member).getOrElse {
 						StudentRelationshipAgent(member, rel.relationshipType)

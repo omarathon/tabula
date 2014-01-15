@@ -35,7 +35,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
 		
-		profileService.getMemberByUser(user, true) returns (None)
+		profileService.getMemberByUser(user, true, true) returns (None)
 		
 		val resp = new MockHttpServletResponse
 		
@@ -60,7 +60,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
 		
 		val member = mock[Member]
-		profileService.getMemberByUser(user, true) returns (Some(member))
+		profileService.getMemberByUser(user, true, true) returns (Some(member))
 		
 		val resp = new MockHttpServletResponse
 		
@@ -84,7 +84,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
 		
-		profileService.getMemberByUser(user, true) returns (None)
+		profileService.getMemberByUser(user, true, true) returns (None)
 		
 		val resp = new MockHttpServletResponse
 		
@@ -111,7 +111,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		roleService.hasRole(isA[CurrentUser], isEq(Masquerader())) returns (true)
 		userLookup.users += ("cusebr" -> masque)
 		
-		profileService.getMemberByUser(masque, true) returns (None)
+		profileService.getMemberByUser(masque, true, true) returns (None)
 		
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
@@ -142,7 +142,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		roleService.hasRole(isA[CurrentUser], isEq(Masquerader())) returns (false)
 		userLookup.users += ("cusebr" -> masque)
 		
-		profileService.getMemberByUser(user, true) returns (None)
+		profileService.getMemberByUser(user, true, true) returns (None)
 		
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
@@ -172,7 +172,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		val req = new MockHttpServletRequest
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
 		
-		profileService.getMemberByUser(user, true) returns (None)
+		profileService.getMemberByUser(user, true, true) returns (None)
 		
 		val resp = new MockHttpServletResponse
 		
@@ -199,7 +199,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
 		req.setCookies(new http.Cookie(CurrentUser.godModeCookie, "true"))
 		
-		profileService.getMemberByUser(user, true) returns (None)
+		profileService.getMemberByUser(user, true, true) returns (None)
 		
 		val resp = new MockHttpServletResponse
 		
@@ -226,7 +226,7 @@ class CurrentUserInterceptorTest extends TestBase with Mockito {
 		req.setAttribute(SSOClientFilter.USER_KEY, user)
 		req.setCookies(new http.Cookie(CurrentUser.godModeCookie, "true"))
 		
-		profileService.getMemberByUser(user, true) returns (None)
+		profileService.getMemberByUser(user, true, true) returns (None)
 		
 		val resp = new MockHttpServletResponse
 		

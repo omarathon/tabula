@@ -14,22 +14,34 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.CourseAndRouteService
 import uk.ac.warwick.tabula.data.model.Department.FilterRule
+import uk.ac.warwick.tabula.scheduling.services.AwardImporter
+import uk.ac.warwick.tabula.scheduling.services.CourseImporter
+import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
+import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
 
 class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 	import ImportModulesCommand._
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var moduleImporter = Wire.auto[ModuleImporter]
-	var moduleService = Wire.auto[ModuleAndDepartmentService]
-	var courseAndRouteService = Wire.auto[CourseAndRouteService]
+	var moduleImporter = Wire[ModuleImporter]
+	var moduleService = Wire[ModuleAndDepartmentService]
+	var courseAndRouteService = Wire[CourseAndRouteService]
 	var departmentDao = Wire[DepartmentDao]
+	var sitsStatusesImporter = Wire[SitsStatusesImporter]
+	var modeOfAttendanceImporter = Wire[ModeOfAttendanceImporter]
+	var courseImporter = Wire[CourseImporter]
+	var awardImporter = Wire[AwardImporter]
 
 	def applyInternal() {
 		transactional() {
 			importDepartments
 			importModules
 			importRoutes
+			importSitsStatuses
+			importModeOfAttendances
+			importCourses
+			importAwards
 		}
 	}
 
@@ -97,6 +109,36 @@ class ImportModulesCommand extends Command[Unit] with Logging with Daoisms {
 				case Some(dept) => {debug("Skipping %s as it is already in the database", dept.code) }
 			}
 		}
+	}
+	
+	def importSitsStatuses {
+		logger.info("Importing SITS statuses")
+
+		transactional() {
+			sitsStatusesImporter.getSitsStatuses map { _.apply }
+
+			session.flush
+			session.clear
+		}
+	}
+
+	def importModeOfAttendances {
+		logger.info("Importing modes of attendance")
+
+		transactional() {
+			modeOfAttendanceImporter.getImportCommands foreach { _.apply() }
+
+			session.flush
+			session.clear
+		}
+	}
+	
+	def importCourses {
+		courseImporter.importCourses
+	}
+	
+	def importAwards {
+		awardImporter.importAwards
 	}
 
 }

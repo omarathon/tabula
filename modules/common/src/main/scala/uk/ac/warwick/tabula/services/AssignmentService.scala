@@ -1,23 +1,14 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
-import org.hibernate.annotations.AccessType
-import org.hibernate.annotations.Filter
-import org.hibernate.annotations.FilterDef
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import javax.persistence.Entity
-import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms._
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.userlookup.User
-import org.hibernate.criterion.{Projections, Restrictions, Order}
-import uk.ac.warwick.tabula.helpers.{ FoundUser, Logging }
-import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.AssessmentGroup
+import org.hibernate.criterion.{Restrictions, Order}
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
 
 /**
@@ -106,13 +97,15 @@ class AssignmentServiceImpl
 	val MaxAssignmentsByName = 15
 
 	def getAssignmentsByName(partialName: String, department: Department) = {
-		session.newCriteria[Assignment]
-			.createAlias("module", "mod")
-			.add(is("mod.department", department))
-			.add(Restrictions.ilike("name", "%" + partialName + "%"))
-			.addOrder(Order.desc("createdDate"))
-			.setMaxResults(MaxAssignmentsByName)
-			.list
+
+		session.newQuery[Assignment]("""select a from Assignment a
+				where a.module.department = :dept
+				and a.name like :nameLike
+				order by createdDate desc
+		""")
+			.setParameter("dept", department)
+			.setString("nameLike", "%" + partialName + "%")
+			.setMaxResults(MaxAssignmentsByName).seq
 	}
 }
 

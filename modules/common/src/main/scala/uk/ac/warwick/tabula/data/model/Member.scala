@@ -67,7 +67,7 @@ object Member {
 		name="userType",
 		discriminatorType=DiscriminatorType.STRING
 )
-abstract class Member extends MemberProperties with ToString with HibernateVersioned with PermissionsTarget with Logging {
+abstract class Member extends MemberProperties with ToString with HibernateVersioned with PermissionsTarget with Logging with Serializable {
 
 	@transient
 	var profileService = Wire.auto[ProfileService]
@@ -134,7 +134,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	 * For each department, enumerate any sub-departments that the member matches
 	 */
 	def touchedDepartments = {
-		def moduleDepts = registeredModulesByYear(None).map(_.department).distinct.toStream
+		def moduleDepts = registeredModulesByYear(None).map(_.department).toStream
 
 		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct
 		topLevelDepts flatMap(_.subDepartmentsContaining(this))
@@ -147,8 +147,8 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	 * TODO consider caching based on getLastUpdatedDate
 	 */
 
-	def registeredModulesByYear(year: Option[AcademicYear]) = Seq[Module]()
-	def moduleRegistrationsByYear(year: Option[AcademicYear]) = Seq[ModuleRegistration]()
+	def registeredModulesByYear(year: Option[AcademicYear]) = Set[Module]()
+	def moduleRegistrationsByYear(year: Option[AcademicYear]) = Set[ModuleRegistration]()
 
 	def permanentlyWithdrawn = false
 
@@ -172,7 +172,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 			u.setDepartment(dept.name)
 			u.setDepartmentCode(dept.code.toUpperCase)
 		}
-		
+
 		u.setLoginDisabled(!(inUseFlag.hasText && (inUseFlag == "Active" || inUseFlag.startsWith("Inactive - Starts "))))
 		userType match {
 			case MemberUserType.Staff => {
@@ -189,13 +189,13 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 			}
 			case _ => u.setUserType("External")
 		}
-		
-		u.setExtraProperties(JMap(
+
+		u.setExtraProperties(JHashMap(
 				"urn:websignon:usertype" -> u.getUserType,
 				"urn:websignon:timestamp" -> DateTime.now.toString,
 				"urn:websignon:usersource" -> "Tabula"
 		))
-		
+
 		u.setVerified(true)
 		u.setFoundUser(true)
 		u
@@ -247,7 +247,7 @@ class StudentMember extends Member with StudentProperties {
 	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
-	private var studentCourseDetails: JList[StudentCourseDetails] = JArrayList()
+	private var studentCourseDetails: JSet[StudentCourseDetails] = JHashSet()
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshStudentCourseDetails = {
@@ -290,8 +290,8 @@ class StudentMember extends Member with StudentProperties {
 
 	override def permanentlyWithdrawn: Boolean = {
 		freshStudentCourseDetails
-			 .map(scd => scd.sprStatus)
-			 .filter(_ != null)
+			 .filter(_.statusOnRoute != null)
+			 .map(_.statusOnRoute)
 			 .filter(_.code != null)
 			 .filter(_.code.startsWith("P"))
 			 .size == freshStudentCourseDetails.size
@@ -312,11 +312,11 @@ class StudentMember extends Member with StudentProperties {
 		studentCourseDetails.add(detailsToAdd)
 	}
 
-	override def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] =
-		freshStudentCourseDetails.flatMap(_.registeredModulesByYear(year))
+	override def registeredModulesByYear(year: Option[AcademicYear]): Set[Module] =
+		freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap(_.registeredModulesByYear(year))
 
-	override def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =
-		freshStudentCourseDetails.flatMap(_.moduleRegistrationsByYear(year))
+	override def moduleRegistrationsByYear(year: Option[AcademicYear]): Set[ModuleRegistration] =
+		freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap(_.moduleRegistrationsByYear(year))
 }
 
 @Entity
@@ -328,6 +328,11 @@ class StaffMember extends Member with StaffProperties {
 		this()
 		this.universityId = id
 	}
+	
+	@OneToOne(cascade = Array(ALL))
+	@JoinColumn(name = "assistantsgroup_id")
+	var _assistantsGroup: UserGroup = UserGroup.ofUsercodes
+	def assistants: Option[UnspecifiedTypeUserGroup] = Option(_assistantsGroup)
 }
 
 @Entity

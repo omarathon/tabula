@@ -38,9 +38,9 @@ import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 
 case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
 
-trait ProfileImporter {	
+trait ProfileImporter {
 	import ProfileImporter._
-	
+
 	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importRowTracker: ImportRowTracker)
 		: Seq[ImportMemberCommand]
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation]
@@ -70,21 +70,23 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 		val sitsCurrentAcademicYear = getCurrentSitsAcademicYearString
 
-		memberInfo flatMap { info =>
-			val usercode = info.member.usercode
-			val universityId = info.member.universityId
-			val ssoUser = users(universityId)
-
-			info.member.userType match {
-				case Staff | Emeritus => Seq(new ImportStaffMemberCommand(info, ssoUser))
-				case Student | Other => {
+		memberInfo.groupBy(_.member.userType).flatMap { case (userType, members) =>
+			userType match {
+				case Staff | Emeritus => members.map { info => 
+					val ssoUser = users(info.member.universityId)
+					new ImportStaffMemberCommand(info, ssoUser)
+				}
+				case Student | Other => members.par.flatMap { info => 
+					val universityId = info.member.universityId
+					val ssoUser = users(universityId)
+					
 					studentInformationQuery(info, ssoUser, importRowTracker).executeByNamedParam(
-											Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
-										  ).toSeq
-					}
+						Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
+					).toSeq
+				}.seq
 				case _ => Seq()
 			}
-		}
+		}.toSeq
 	}
 
 	def photoFor(universityId: String): () => Option[Array[Byte]] = {
@@ -161,6 +163,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			"department_code" -> member.departmentCode.toUpperCase,
 			"award_code" -> (if (route.degreeType == DegreeType.Undergraduate) "BA" else "MA"),
 			"spr_status_code" -> "C",
+			"scj_status_code" -> "C",
 			"level_code" -> ((member.universityId.toLong % 3) + 1).toString,
 			"spr_tutor1" -> null,
 			"scj_code" -> "%s/1".format(member.universityId),
@@ -312,8 +315,10 @@ class SandboxProfileImporter extends ProfileImporter {
 
 object ProfileImporter {
 	type UniversityId = String
-	
-	val GetStudentInformation = """
+
+	val sitsSchema: String = Wire.property("${schema.sits}")
+
+	val GetStudentInformation = f"""
 		select
 			stu.stu_code as university_id,
 			stu.stu_titl as title,
@@ -340,16 +345,14 @@ object ProfileImporter {
 			spr.awd_code as award_code,
 			spr.sts_code as spr_status_code,
 			spr.spr_levc as level_code,
-			spr.prs_code as spr_tutor1,
-			--spr.spr_prs2 as spr_tutor2,
+			prs.prs_udf1 as spr_tutor1,
 
 			scj.scj_code as scj_code,
 			scj.scj_begd as begin_date,
 			scj.scj_endd as end_date,
 			scj.scj_eend as expected_end_date,
 			scj.scj_udfa as most_signif_indicator,
-			--scj.scj_prsc as scj_tutor1,
-			--scj.scj_prs2 as scj_tutor2,
+			scj.scj_stac as scj_status_code,
 
 			sce.sce_sfcc as funding_source,
 			sce.sce_stac as enrolment_status_code,
@@ -361,37 +364,40 @@ object ProfileImporter {
 
 			ssn.ssn_mrgs as mod_reg_status
 
-		from intuit.ins_stu stu
+		from $sitsSchema.ins_stu stu
 
-			join intuit.ins_spr spr
+			join $sitsSchema.ins_spr spr
 				on stu.stu_code = spr_stuc
 
-			join intuit.srs_scj scj
+			join $sitsSchema.srs_scj scj
 				on spr.spr_code = scj.scj_sprc
 
-			join intuit.srs_sce sce
+			join $sitsSchema.srs_sce sce
 				on scj.scj_code = sce.sce_scjc
 				and sce.sce_ayrc in (:year)
 				and sce.sce_seq2 =
 					(
 						select max(sce2.sce_seq2)
-							from srs_sce sce2
+							from $sitsSchema.srs_sce sce2
 								where sce.sce_scjc = sce2.sce_scjc
 								and sce2.sce_ayrc = sce.sce_ayrc
 					)
 
-			left outer join intuit.srs_crs crs
+			left outer join $sitsSchema.srs_crs crs
 				on sce.sce_crsc = crs.crs_code
 
-			left outer join intuit.srs_nat nat
+			left outer join $sitsSchema.srs_nat nat
 				on stu.stu_natc = nat.nat_code
 
-			left outer join intuit.srs_sta sts
+			left outer join $sitsSchema.srs_sta sts
 				on spr.sts_code = sts.sta_code
 
-			left outer join intuit.cam_ssn ssn
+			left outer join $sitsSchema.cam_ssn ssn
 				on spr.spr_code = ssn.ssn_sprc
 				and sce.sce_ayrc = ssn.ssn_ayrc
+
+			left outer join $sitsSchema.ins_prs prs
+				on spr.prs_code = prs.prs_code
 
 		where stu.stu_code = :universityId
 		order by stu.stu_code

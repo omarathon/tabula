@@ -79,30 +79,33 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		getById[MonitoringPointSet](id)
 
 	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint], mostSiginificantOnly: Boolean = true): Seq[(StudentMember, MonitoringCheckpoint)] = {
-		val criteria = session.newCriteria[MonitoringCheckpoint]
-			.createAlias("point", "point")
-
-		val or = disjunction()
-		monitoringPoints.grouped(Daoisms.MaxInClauseCount).foreach { mps => or.add(in("point", mps.asJava)) }
-		criteria.add(or)
-
-		val checkpoints = criteria.seq
-
-		val result = checkpoints
-			.map(checkpoint => (checkpoint.student, checkpoint))
-
-		if (mostSiginificantOnly)
-			result.filter{ case(student, checkpoint) => student.mostSignificantCourseDetails.exists(scd => {
-				val pointSet = checkpoint.point.pointSet.asInstanceOf[MonitoringPointSet]
-				val scydOption = scd.freshStudentCourseYearDetails.find(scyd =>
-					scyd.academicYear == pointSet.academicYear && (
-						pointSet.year == null || scyd.yearOfStudy == pointSet.year
+		if (monitoringPoints.isEmpty) Nil
+		else {
+			val criteria = session.newCriteria[MonitoringCheckpoint]
+				.createAlias("point", "point")
+	
+			val or = disjunction()
+			monitoringPoints.grouped(Daoisms.MaxInClauseCount).foreach { mps => or.add(in("point", mps.asJava)) }
+			criteria.add(or)
+	
+			val checkpoints = criteria.seq
+	
+			val result = checkpoints
+				.map(checkpoint => (checkpoint.student, checkpoint))
+	
+			if (mostSiginificantOnly)
+				result.filter{ case(student, checkpoint) => student.mostSignificantCourseDetails.exists(scd => {
+					val pointSet = checkpoint.point.pointSet.asInstanceOf[MonitoringPointSet]
+					val scydOption = scd.freshStudentCourseYearDetails.find(scyd =>
+						scyd.academicYear == pointSet.academicYear && (
+							pointSet.year == null || scyd.yearOfStudy == pointSet.year
+						)
 					)
-				)
-				pointSet.route == scd.route && scydOption.isDefined
-			})}
-		else
-			result
+					pointSet.route == scd.route && scydOption.isDefined
+				})}
+			else
+				result
+		}
 	}
 
 	def saveOrUpdate(monitoringPoint: MonitoringPoint) = session.saveOrUpdate(monitoringPoint)

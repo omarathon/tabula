@@ -70,7 +70,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		val route = new Route
 		route.department = routeDept
 		member.mostSignificantCourseDetails.get.route = route
-		member.freshStudentCourseDetails(0) = studentCourseDetails
+		member.freshStudentCourseDetails += studentCourseDetails
 
 		member.affiliatedDepartments should be (Stream(homeDept, courseDept, routeDept))
 		member.touchedDepartments should be (Stream(homeDept, courseDept, routeDept, extDept))
@@ -98,8 +98,8 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		scd1.moduleRegistrations.add(modReg1)
 		scd1.moduleRegistrations.add(modReg2)
 
-		member.registeredModulesByYear(Some(AcademicYear(2013))) should be (Stream(mod2))
-		member.registeredModulesByYear(None) should be (Stream(mod1, mod2))
+		member.registeredModulesByYear(Some(AcademicYear(2013))) should be (Set(mod2))
+		member.registeredModulesByYear(None) should be (Set(mod1, mod2))
 
 		// create another student course details with module registrations
 		val scd2 = new StudentCourseDetails(member, "2222222/3")
@@ -112,11 +112,11 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		scd2.moduleRegistrations.add(modReg3)
 		scd2.moduleRegistrations.add(modReg4)
 
-		member.registeredModulesByYear(Some(AcademicYear(2013))) should be (Stream(mod2, mod4))
-		member.registeredModulesByYear(None) should be (Stream(mod1, mod2, mod3, mod4))
+		member.registeredModulesByYear(Some(AcademicYear(2013))) should be (Set(mod2, mod4))
+		member.registeredModulesByYear(None) should be (Set(mod1, mod2, mod3, mod4))
 
-		member.moduleRegistrationsByYear(None) should be (Stream(modReg1, modReg2, modReg3, modReg4))
-		member.moduleRegistrationsByYear(Some(AcademicYear(2012))) should be (Stream(modReg1, modReg3))
+		member.moduleRegistrationsByYear(None) should be (Set(modReg1, modReg2, modReg3, modReg4))
+		member.moduleRegistrationsByYear(Some(AcademicYear(2012))) should be (Set(modReg1, modReg3))
 	}
 
 	@Test def nullUsers {
@@ -290,7 +290,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		// the student fixture comes with one free studentCourseDetails - add another to stu1:
 		val stu1_scd2 = Fixtures.studentCourseDetails(stu1, dept1, null, "1000001/2")
-		stu1_scd2.sprStatus = status2
+		stu1_scd2.statusOnRoute = status2
 		memberDao.saveOrUpdate(stu1)
 		studentCourseDetailsDao.saveOrUpdate(stu1_scd2)
 		session.flush
@@ -306,7 +306,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		stu1.permanentlyWithdrawn should be (false)
 
 		// and now set the null status to fully enrolled:
-		stu1_scd3.sprStatus = status3
+		stu1_scd3.statusOnRoute = status3
 		studentCourseDetailsDao.saveOrUpdate(stu1_scd3)
 		session.flush
 

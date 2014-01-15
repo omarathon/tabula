@@ -18,24 +18,25 @@ import uk.ac.warwick.tabula.scheduling.services.ModuleRegistrationRow
 import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
 import org.springframework.beans.BeanWrapper
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.AcademicYear
 
 
-class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends Command[Option[ModuleRegistration]]
+class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow, academicYear: AcademicYear) extends Command[Option[ModuleRegistration]]
 	with Logging with Unaudited with PropertyCopying {
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var moduleRegistrationDao = Wire.auto[ModuleRegistrationDao]
-	var studentCourseDetailsDao = Wire.auto[StudentCourseDetailsDao]
+	var moduleRegistrationDao = Wire[ModuleRegistrationDao]
+	var studentCourseDetailsDao = Wire[StudentCourseDetailsDao]
 
-	var scjCode = modRegRow.scjCode
-	var tabulaModule = modRegRow.tabulaModule
-	var academicYear = modRegRow.academicYear
-	var cats: java.math.BigDecimal = modRegRow.cats
-	var assessmentGroup = modRegRow.assessmentGroup
-	var selectionStatusCode = modRegRow.selectionStatusCode
-	var occurrence = modRegRow.occurrence
-	var selectionStatus: ModuleSelectionStatus = null
+	val scjCode = modRegRow.scjCode
+	lazy val tabulaModule = moduleAndDepartmentService.getModuleBySitsCode(modRegRow.sitsModuleCode)
+	val cats: java.math.BigDecimal = modRegRow.cats
+	val assessmentGroup = modRegRow.assessmentGroup
+	val selectionStatusCode = modRegRow.selectionStatusCode
+	val occurrence = modRegRow.occurrence
+	val selectionStatus: ModuleSelectionStatus = null
 
 	override def applyInternal(): Option[ModuleRegistration] = transactional() ({
 		tabulaModule match {
@@ -105,5 +106,7 @@ class ImportModuleRegistrationsCommand(modRegRow: ModuleRegistrationRow) extends
 	private val properties = Set(
 		"assessmentGroup", "occurrence"
 	)
+	
+	override def describe(d: Description) = d.properties("scjCode" -> scjCode, "academicYear" -> academicYear.toString)
 
 }

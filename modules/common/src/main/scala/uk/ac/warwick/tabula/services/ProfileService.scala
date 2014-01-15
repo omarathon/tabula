@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import org.joda.time.DateTime
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.{AcademicYear, PrsCode}
+import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
@@ -20,9 +20,8 @@ trait ProfileService {
 	def getMemberByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllMembersWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getAllMembersWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member]
-	def getMemberByPrsCode(prsCode: String): Option[Member]
-	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false): Seq[Member]
-	def getMemberByUser(user: User, disableFilter: Boolean = false): Option[Member]
+	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Seq[Member]
+	def getMemberByUser(user: User, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member]
 	def getStudentBySprCode(sprCode: String): Option[StudentMember]
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean): Seq[Member]
 	def findMembersByDepartment(department: Department, includeTouched: Boolean, userTypes: Set[MemberUserType]): Seq[Member]
@@ -35,14 +34,18 @@ trait ProfileService {
 	def countStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Int
 	def findStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq(), maxResults: Int = 50, startResult: Int = 0): (Int, Seq[StudentMember])
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()): Seq[StudentMember]
+	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agent: Member, restrictions: Seq[ScalaRestriction]): Seq[StudentMember]
 	def findAllUniversityIdsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]): Seq[String]
+	def findStaffMembersWithAssistant(user: User): Seq[StaffMember]
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def allSprStatuses(department: Department): Seq[SitsStatus]
 }
 
 abstract class AbstractProfileService extends ProfileService with Logging {
 
-	self: MemberDaoComponent with StudentCourseDetailsDaoComponent =>
+	self: MemberDaoComponent 
+		with StudentCourseDetailsDaoComponent
+		with StaffAssistantsHelpers =>
 
 	var profileIndexService = Wire.auto[ProfileIndexService]
 
@@ -62,12 +65,12 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 		memberDao.getAllWithUniversityIdsStaleOrFresh(universityIds)
 	}
 
-	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false) = transactional(readOnly = true) {
-		memberDao.getAllByUserId(userId, disableFilter)
+	def getAllMembersWithUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false) = transactional(readOnly = true) {
+		memberDao.getAllByUserId(userId, disableFilter, eagerLoad)
 	}
 
-	def getMemberByUser(user: User, disableFilter: Boolean = false) = {
-		val allMembers = getAllMembersWithUserId(user.getUserId, disableFilter)
+	def getMemberByUser(user: User, disableFilter: Boolean = false, eagerLoad: Boolean = false) = {
+		val allMembers = getAllMembersWithUserId(user.getUserId, disableFilter, eagerLoad)
 		allMembers
 			.filter(_.universityId == user.getWarwickId).headOption // TAB-1716
 			.orElse(allMembers.headOption)
@@ -75,16 +78,6 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	def getStudentBySprCode(sprCode: String) = transactional(readOnly = true) {
 		studentCourseDetailsDao.getStudentBySprCode(sprCode)
-	}
-
-	def getMemberByPrsCode(prsCode: String) = transactional(readOnly = true) {
-		if (prsCode != null && prsCode.length() > 2) {
-			PrsCode.getUniversityId(prsCode) match {
-				case Some(uniId: String) => memberDao.getByUniversityId(uniId)
-				case None => None
-			}
-		}
-		else None
 	}
 
 	def findMembersByQuery(query: String, departments: Seq[Department], userTypes: Set[MemberUserType], isGod: Boolean) = transactional(readOnly = true) {
@@ -109,14 +102,14 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	def getStudentsByRoute(route: Route): Seq[StudentMember] = transactional(readOnly = true) {
 		studentCourseDetailsDao.getByRoute(route)
-			.filter{s => s.sprStatus!= null && !s.sprStatus.code.startsWith("P")}
+			.filter{s => s.statusOnRoute!= null && !s.statusOnRoute.code.startsWith("P")}
 			.filter(s => s.mostSignificant == true)
 			.map(_.student)
 	}
 
 	def getStudentsByRoute(route: Route, academicYear: AcademicYear): Seq[StudentMember] = transactional(readOnly = true) {
 		studentCourseDetailsDao.getByRoute(route)
-			.filter{s => s.sprStatus!= null && !s.sprStatus.code.startsWith("P")}
+			.filter{s => s.statusOnRoute!= null && !s.statusOnRoute.code.startsWith("P")}
 			.filter(s => s.mostSignificant == true)
 			.filter(_.freshStudentCourseYearDetails.exists(s => s.academicYear == academicYear))
 			.map(_.student)
@@ -134,12 +127,20 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	 * this returns a tuple of the startResult (offset into query) actually returned, with the resultset itself
 	 */
 	def findStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq(), maxResults: Int = 50, startResult: Int = 0): (Int, Seq[StudentMember]) = transactional(readOnly = true) {
-		// If we're a sub-department then we have to fetch everyone, rhubarb! Otherwise, we can use nice things
-		if (department.hasParent) {
-			val allRestrictions = ScalaRestriction.is(
-				"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
-				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
-			) ++ restrictions
+
+		val allRestrictions = {
+			if (department.hasParent) {
+				ScalaRestriction.is(
+					"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
+					FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
+				) ++ restrictions
+			}	else {
+				ScalaRestriction.is(
+					"studentCourseYearDetails.enrolmentDepartment", department,
+					FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
+				) ++ restrictions
+			}
+		}
 
 			val filteredStudents = memberDao.findStudentsByRestrictions(allRestrictions, orders, Int.MaxValue, 0)
 				.filter(studentDepartmentFilterMatches(department))
@@ -152,26 +153,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 				// return the first page of results, notifying zero offset
 				(0, filteredStudents.take(maxResults))
 			}
-		}	else {
-			val allRestrictions = ScalaRestriction.is(
-				"studentCourseYearDetails.enrolmentDepartment", department,
-				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
-			) ++ restrictions
 
-			val offsetStudents = memberDao.findStudentsByRestrictions(allRestrictions, orders, maxResults, startResult)
-
-			if (offsetStudents.nonEmpty) {
-				(startResult, offsetStudents)
-			} else {
-				// meh, have to hit DAO twice if no results for this offset, but at least this should be a rare occurrence
-				val unoffsetStudents = memberDao.findStudentsByRestrictions(allRestrictions, orders, maxResults, 0)
-				if (unoffsetStudents.isEmpty) {
-					(0, Seq())
-				} else {
-					(0, unoffsetStudents)
-				}
-			}
-		}
 	}
 
 	def findAllStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq()) = transactional(readOnly = true) {
@@ -192,6 +174,12 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 			memberDao.findStudentsByRestrictions(allRestrictions, orders, Int.MaxValue, 0)
 		}
 	}
+
+
+	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agent: Member, restrictions: Seq[ScalaRestriction]): Seq[StudentMember] = transactional(readOnly = true) {
+		memberDao.getStudentsByAgentRelationshipAndRestrictions(relationshipType, agent.id, restrictions)
+	}
+
 
 	def findAllUniversityIdsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction]) = transactional(readOnly = true) {
 		val allRestrictions = {
@@ -222,6 +210,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 			memberDao.countStudentsByRestrictions(allRestrictions)
 		}
 	}
+	
+	def findStaffMembersWithAssistant(user: User) = staffAssistantsHelper.findBy(user)
 
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance] = transactional(readOnly = true) {
 		memberDao.getAllModesOfAttendance(department).filter(_ != null)
@@ -229,6 +219,14 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	def allSprStatuses(department: Department): Seq[SitsStatus] = transactional(readOnly = true) {
 		memberDao.getAllSprStatuses(department).filter(_ != null)
 	}
+}
+
+trait StaffAssistantsHelpers {
+	val staffAssistantsHelper: UserGroupMembershipHelperMethods[StaffMember]
+}
+
+trait StaffAssistantsHelpersImpl extends StaffAssistantsHelpers {
+	lazy val staffAssistantsHelper = new UserGroupMembershipHelper[StaffMember]("_assistantsGroup")
 }
 
 trait ProfileServiceComponent {
@@ -244,3 +242,4 @@ class ProfileServiceImpl
 	extends AbstractProfileService
 	with AutowiringMemberDaoComponent
 	with AutowiringStudentCourseDetailsDaoComponent
+	with StaffAssistantsHelpersImpl
