@@ -14,9 +14,8 @@
 </tr>
 </#macro>
 
-<#-- Print out a table of students/agents.
- is_relationship=true means each item is a StudentRelationship rather than a member-->
-<#macro table students is_relationship>
+<#-- Print out a table of students/agents.-->
+<#macro table students>
 <table class="related_students table table-bordered table-striped table-condensed tabula-purple">
 	<thead>
 	<tr>
@@ -32,14 +31,7 @@
 
 	<tbody>
 		<#list students as item>
-			<#if is_relationship>
-				<#if item.studentMember?has_content>
-					<#assign student = item.studentMember />
-					<@row student />
-				</#if>
-			<#else>
 				<@row item />
-			</#if>
 		</#list>
 	</tbody>
 </table>

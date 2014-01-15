@@ -1,16 +1,14 @@
 package uk.ac.warwick.tabula.data
 
+
 import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
-import org.hibernate.criterion.Order
-import org.hibernate.criterion.Projections
-import org.hibernate.criterion.Restrictions
+import org.hibernate.criterion.{Property, DetachedCriteria, Order, Projections, Restrictions}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Department, Member, ModeOfAttendance, RuntimeMember, SitsStatus, StudentMember, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
-import uk.ac.warwick.tabula.data.model.StaffMember
 import org.hibernate.FetchMode
 
 trait MemberDaoComponent {
@@ -50,6 +48,7 @@ trait MemberDao {
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
 	def getStaffByDepartment(department: Department): Seq[StaffMember]
 	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
+	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agentId: String, restrictions: Seq[ScalaRestriction]): Seq[StudentMember]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
 	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[String]
 	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember]
@@ -400,6 +399,29 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setEntity("department", department)
 			.setEntity("relationshipType", relationshipType)
 			.seq
+
+
+	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agentId: String, restrictions: Seq[ScalaRestriction]): Seq[StudentMember] = {
+		if (relationshipType == null) Nil
+		else {
+			val d = DetachedCriteria.forClass(classOf[StudentRelationship])
+				.setProjection(Property.forName("targetSprCode"))
+				.add(Restrictions.eq("agent", agentId))
+				.add(Restrictions.eq("relationshipType", relationshipType))
+				.add( Restrictions.or(
+								Restrictions.isNull("endDate"),
+								Restrictions.ge("endDate", new DateTime())
+				))
+
+			val c = session.newCriteria[StudentCourseDetails]
+
+			restrictions.foreach { _.apply(c) }
+			c.add(Property.forName("sprCode").in(d))
+
+			c.seq.map(_.student)
+		}
+	}
+
 
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number =
 		if (relationshipType == null) 0

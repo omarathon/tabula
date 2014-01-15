@@ -4,12 +4,11 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.data.model.{StudentRelationship, Department}
+import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationship, Department, StudentRelationshipType}
 import uk.ac.warwick.tabula.profiles.commands.{ViewRelatedStudentsCommand, MissingStudentRelationshipCommand, ViewStudentRelationshipsCommand}
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 @Controller
 @RequestMapping(value = Array("/department/{department}/{relationshipType}"))
@@ -49,11 +48,12 @@ class MissingStudentRelationshipController extends ProfilesController {
 @Controller
 @RequestMapping(value = Array("/{relationshipType}/students"))
 class ViewStudentRelationshipStudentsController extends ProfilesController {
-	@ModelAttribute("cmd") def command(@PathVariable("relationshipType") relationshipType: StudentRelationshipType) = 
+	@ModelAttribute("viewRelatedStudentsCommand") def command(@PathVariable("relationshipType") relationshipType: StudentRelationshipType) =
 		ViewRelatedStudentsCommand(currentMember, relationshipType)
 
-	@RequestMapping(method = Array(HEAD, GET))
-	def view(@ModelAttribute("cmd") cmd: Appliable[Seq[StudentRelationship]]): Mav = {
-		Mav("relationships/student_view", "students" -> cmd.apply)
+	@RequestMapping
+	def view(@ModelAttribute("viewRelatedStudentsCommand") viewRelatedStudentsCommand: Appliable[Seq[StudentMember]]): Mav = {
+		if(ajax) Mav("relationships/student_view_results", "students" -> viewRelatedStudentsCommand.apply).noLayout()
+		else Mav("relationships/student_view", "students" -> viewRelatedStudentsCommand.apply)
 	}
 }
