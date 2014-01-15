@@ -1,6 +1,5 @@
 <#escape x as x?html>
 <#import "../attendance_variables.ftl" as attendance_variables />
-<#import "../attendance_macros.ftl" as attendance_macros />
 
 <#assign validationError>
 	<@spring.bind path="command.students">
@@ -25,12 +24,14 @@
 		<#local record_url><@routes.record command.department groupedPoint.pointId filterQuery returnTo/></#local>
 		<#local result>
 			<@fmt.permission_button
-			permission='MonitoringPoints.Record'
-			scope=(groupedPoint.routes?first)._1()
-			action_descr='record monitoring points'
-			classes='btn btn-primary'
-			href=record_url>
-			Record
+				permission='MonitoringPoints.Record'
+				scope=(groupedPoint.routes?first)._1()
+				action_descr='record monitoring points'
+				classes='btn btn-primary'
+				href=record_url
+				tooltip='Record'
+			>
+				Record
 			</@fmt.permission_button>
 		</#local>
 		<#return result>

@@ -64,17 +64,20 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 	def getEnrolledAssignments(user: User): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a
 			from Assignment a
-			left join fetch a.assessmentGroups ag
+			left join a.assessmentGroups ag
+			join a.members manualMembership
 			where
 				(1 = (
 					select 1 from uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup uag
+					join uag.members autoMembership
+					join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId = :universityId
 					where uag.moduleCode = ag.assessmentComponent.moduleCode
 						and uag.assessmentGroup = ag.assessmentComponent.assessmentGroup
 						and uag.academicYear = a.academicYear
 						and uag.occurrence = ag.occurrence
-						and :universityId in elements(uag.members.staticIncludeUsers)
-				) or :userId in elements(a.members.includeUsers))
-				and :userId not in elements(a.members.excludeUsers)
+					)
+				  or :userId in elements(manualMembership.includeUsers))
+				and :userId not in elements(manualMembership.excludeUsers)
 				and a.deleted = false and a.archived = false""")
 			.setString("universityId", user.getWarwickId)
 			.setString("userId", user.getUserId)
@@ -83,22 +86,24 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 	def getEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet] =
 		session.newQuery[SmallGroupSet]("""select sgs
 			from SmallGroupSet sgs
-			left join fetch sgs.assessmentGroups ag
+			left join sgs.assessmentGroups ag
+			join sgs._membersGroup manualMembership
 			where
 				(1 = (
 					select 1 from uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup uag
+					join uag.members autoMembership
+					join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId = :universityId
 					where uag.moduleCode = ag.assessmentComponent.moduleCode
 						and uag.assessmentGroup = ag.assessmentComponent.assessmentGroup
 						and uag.academicYear = sgs.academicYear
 						and uag.occurrence = ag.occurrence
-						and :universityId in elements(uag.members.staticIncludeUsers)
 				) or (
-					(sgs._membersGroup.universityIds = false and :userId in elements(sgs._membersGroup.includeUsers)) or
-					(sgs._membersGroup.universityIds = true and :universityId in elements(sgs._membersGroup.includeUsers))
+					(manualMembership.universityIds = false and :userId in elements(manualMembership.includeUsers)) or
+					(manualMembership.universityIds = true and :universityId in elements(manualMembership.includeUsers))
 				))
 				and (
-					(sgs._membersGroup.universityIds = false and :userId not in elements(sgs._membersGroup.excludeUsers)) or
-					(sgs._membersGroup.universityIds = true and :universityId not in elements(sgs._membersGroup.excludeUsers))
+					(manualMembership.universityIds = false and :userId not in elements(manualMembership.excludeUsers)) or
+					(manualMembership.universityIds = true and :universityId not in elements(manualMembership.excludeUsers))
 				)
 				and sgs.deleted = false and sgs.archived = false""")
 			.setString("universityId", user.getWarwickId)

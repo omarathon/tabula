@@ -164,6 +164,7 @@
 												action_descr='record monitoring points'
 												classes='btn btn-primary btn-mini'
 												href=record_url
+												tooltip='Record'
 											>
 												<i class="icon-pencil icon-fixed-width late"></i>
 											</@fmt.permission_button>

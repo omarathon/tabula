@@ -433,6 +433,8 @@ $(function() {
 		var contentId = $container.attr('data-contentid');
 		var $row = $('tr.itemContainer[data-contentid='+contentId+']');
 
+        $form.tabulaSubmitOnce();
+
 		// record the initial values of the fields
 		$('input, textarea', $form).each(function() {
 			$(this).data('initialvalue', $(this).val());
