@@ -35,7 +35,9 @@
 									scope=(groupedPoint.routes?first)._1()
 									action_descr='record monitoring points'
 									classes='btn btn-primary'
-									href=record_url>
+									href=record_url
+									tooltip='Record'
+								>
 									Record
 								</@fmt.permission_button>
 							</div>
