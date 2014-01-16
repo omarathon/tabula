@@ -223,6 +223,12 @@ class DepartmentTest extends TestBase with Mockito {
 		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(selector)) should be (Some(customDefinition))
 		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(new StudentRelationshipType)) should be ('empty)
 		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any)) should be ('empty)
+		
+		customDefinition.baseRoleDefinition = StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any)
+		
+		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(selector)) should be (Some(customDefinition))
+		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(new StudentRelationshipType)) should be (Some(customDefinition))
+		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any)) should be (Some(customDefinition))
 	}
 
 }

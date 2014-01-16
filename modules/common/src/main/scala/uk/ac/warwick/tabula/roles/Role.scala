@@ -88,6 +88,10 @@ trait BuiltInRoleDefinition extends CaseObjectEqualityFixes[BuiltInRoleDefinitio
 
 abstract class SelectorBuiltInRoleDefinition[A <: PermissionsSelector[A]](val selector: PermissionsSelector[A]) extends BuiltInRoleDefinition {
 	override val getName = SelectorBuiltInRoleDefinition.shortName(getClass.asInstanceOf[Class[_ <: SelectorBuiltInRoleDefinition[_]]])
+	def <= [B <: PermissionsSelector[B]](other: SelectorBuiltInRoleDefinition[B]) = other match {
+		case that: SelectorBuiltInRoleDefinition[A] => selector <= that.selector.asInstanceOf[PermissionsSelector[A]]
+		case _ => false
+	}
 	
 	override def equals(other: Any) = other match {
 		case that: SelectorBuiltInRoleDefinition[A] => {
@@ -111,7 +115,7 @@ abstract class SelectorBuiltInRoleDefinition[A <: PermissionsSelector[A]](val se
 object SelectorBuiltInRoleDefinition {
 	private val ObjectClassPrefix = RoleDefinition.getClass.getPackage.getName + "."
 	
-	def of[A <: PermissionsSelector[A]](name: String, selector: A): SelectorBuiltInRoleDefinition[A] = {
+	def of[A <: PermissionsSelector[A]](name: String, selector: Object): SelectorBuiltInRoleDefinition[A] = {
 		try {
 			// Go through the magical hierarchy
 			val clz = Class.forName(ObjectClassPrefix + name)
