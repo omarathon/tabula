@@ -20,7 +20,7 @@ sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val select
 		case that: SelectorPermission[A] => selector <= that.selector.asInstanceOf[PermissionsSelector[A]]
 		case _ => false
 	}
-	
+
 	override def equals(other: Any) = other match {
 		case that: SelectorPermission[A] => {
 			new EqualsBuilder()
@@ -30,14 +30,14 @@ sealed abstract class SelectorPermission[A <: PermissionsSelector[A]](val select
 		}
 		case _ => false
 	}
-	
-	override def hashCode() = 
+
+	override def hashCode() =
 		new HashCodeBuilder()
 		.append(getName)
 		.append(selector)
 		.build()
-		
-	override def toString() = "%s(%s)".format(super.toString, selector) 
+
+	override def toString() = "%s(%s)".format(super.toString, selector)
 }
 
 trait PermissionsSelector[A <: PermissionsSelector[A]] {
@@ -88,7 +88,7 @@ object CheckablePermission {
 
 object SelectorPermission {
 	private val ObjectClassPrefix = Permissions.getClass.getName
-	
+
 	def of[A <: PermissionsSelector[A]](name: String, selector: A): SelectorPermission[A] = {
 		try {
 			// Go through the magical hierarchy
@@ -98,7 +98,7 @@ object SelectorPermission {
 			case e: ClassNotFoundException => throw new IllegalArgumentException("Selector permission " + name + " not recognised")
 		}
 	}
-	
+
 	def shortName(clazz: Class[_ <: SelectorPermission[_]])
 		= clazz.getName.substring(ObjectClassPrefix.length, clazz.getName.length).replace('$', '.')
 }
@@ -165,10 +165,10 @@ object Permissions {
 		case object Update extends Permission("Edit a module")
 		case object Delete extends Permission("Remove a module")
 	}
-	
+
 	object Route {
 		case object Administer extends Permission("Administer")
-		
+
 		case object Create extends Permission("Add a route")
 		case object Update extends Permission("Edit a route")
 		case object Delete extends Permission("Remove a route")
@@ -257,37 +257,38 @@ object Permissions {
 			case object SmallGroups extends Permission("View a member's small groups")
 			case object Coursework extends Permission("View a member's coursework")
 			case object Timetable extends Permission("View a member's personal timetable")
+			case object Tier4VisaRequirement extends Permission("View a member's tier 4 visa requirement")
 
 			object StudentCourseDetails {
 				case object Core extends Permission("View a student's basic course, route and department details")
 				case object Status extends Permission("View a student's enrolment and study status")
 			}
-			
-			case class RelationshipStudents(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+
+			case class RelationshipStudents(relationshipType: PermissionsSelector[StudentRelationshipType])
 				extends SelectorPermission(relationshipType, "View a member's students")
 		}
-		
-		object StudentRelationship {		
-			case class Create(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+
+		object StudentRelationship {
+			case class Create(relationshipType: PermissionsSelector[StudentRelationshipType])
 				extends SelectorPermission(relationshipType, "Add a student relationship")
-			case class Read(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+			case class Read(relationshipType: PermissionsSelector[StudentRelationshipType])
 				extends SelectorPermission(relationshipType, "View a student relationship")
-			case class Update(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+			case class Update(relationshipType: PermissionsSelector[StudentRelationshipType])
 				extends SelectorPermission(relationshipType, "Edit a student relationship")
-			case class Delete(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+			case class Delete(relationshipType: PermissionsSelector[StudentRelationshipType])
 				extends SelectorPermission(relationshipType, "Remove a student relationship")
 		}
-		
+
 		object MeetingRecord {
-      case class Create(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      case class Create(relationshipType: PermissionsSelector[StudentRelationshipType])
       	extends SelectorPermission(relationshipType, "Add a meeting record")
-      case class Read(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      case class Read(relationshipType: PermissionsSelector[StudentRelationshipType])
       	extends SelectorPermission(relationshipType, "View a meeting record")
-      case class ReadDetails(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      case class ReadDetails(relationshipType: PermissionsSelector[StudentRelationshipType])
       	extends SelectorPermission(relationshipType, "View the contents of a meeting record")
-      case class Update(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      case class Update(relationshipType: PermissionsSelector[StudentRelationshipType])
       	extends SelectorPermission(relationshipType, "Edit a meeting record")
-      case class Delete(relationshipType: PermissionsSelector[StudentRelationshipType]) 
+      case class Delete(relationshipType: PermissionsSelector[StudentRelationshipType])
       	extends SelectorPermission(relationshipType, "Remove a meeting record")
     }
 	}
@@ -313,7 +314,7 @@ object Permissions {
 	object UserSettings {
 		case object Update extends Permission("Edit user settings")
 	}
-	
+
 	object MonitoringPoints {
 		case object Manage extends Permission("Manage monitoring points")
 		case object View extends Permission("View monitoring points")
@@ -326,7 +327,7 @@ object Permissions {
 		case object View extends ScopelessPermission("View monitoring point set templates")
 		case object Manage extends ScopelessPermission("Manage monitoring point set templates")
 	}
-	
+
 	object StudentRelationshipType {
 		case object Create extends ScopelessPermission("Create student relationship types")
 		case object Read extends ScopelessPermission("View student relationship types")

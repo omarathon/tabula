@@ -72,14 +72,14 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 		memberInfo.groupBy(_.member.userType).flatMap { case (userType, members) =>
 			userType match {
-				case Staff | Emeritus => members.map { info => 
+				case Staff | Emeritus => members.map { info =>
 					val ssoUser = users(info.member.universityId)
 					new ImportStaffMemberCommand(info, ssoUser)
 				}
-				case Student | Other => members.par.flatMap { info => 
+				case Student | Other => members.par.flatMap { info =>
 					val universityId = info.member.universityId
 					val ssoUser = users(universityId)
-					
+
 					studentInformationQuery(info, ssoUser, importRowTracker).executeByNamedParam(
 						Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
 					).toSeq
@@ -335,6 +335,7 @@ object ProfileImporter {
 			stu.stu_cat3 as mobile_number,
 
 			nat.nat_name as nationality,
+			nat.nat_edid as tier4requirement,
 
 			crs.crs_code as course_code,
 			crs.crs_ylen as course_year_length,

@@ -27,8 +27,8 @@ class ImportStudentRowCommand(val member: MembershipInformation,
 
 	implicit val rs = resultSet
 
-	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
-	var profileService = Wire.auto[ProfileService]
+	var modeOfAttendanceImporter = Wire[ModeOfAttendanceImporter]
+	var profileService = Wire[ProfileService]
 
 	this.nationality = rs.getString("nationality")
 	this.mobileNumber = rs.getString("mobile_number")
@@ -50,16 +50,8 @@ class ImportStudentRowCommand(val member: MembershipInformation,
 				case _ => (true, new StudentMember(universityId))
 			}
 
-			val commandBean = new BeanWrapperImpl(this)
-			val memberBean = new BeanWrapperImpl(member)
-
-			val hasChanged = copyMemberProperties(commandBean, memberBean) | copyStudentProperties(commandBean, memberBean) | markAsSeenInSits(memberBean)
-
-			if (isTransient || hasChanged) {
-				logger.debug("Saving changes for " + member)
-
-				member.lastUpdatedDate = DateTime.now
-				memberDao.saveOrUpdate(member)
+			if (!importRowTracker.universityIdsSeen.contains(member.universityId)) {
+				garnerStudentDetails(isTransient, member)
 			}
 
 			importStudentCourseCommand.stuMem = member
@@ -73,11 +65,32 @@ class ImportStudentRowCommand(val member: MembershipInformation,
 		}
 	}
 
+	private def garnerStudentDetails(isTransient: Boolean, member: StudentMember) {
+		// There are multiple rows returned by the SQL per student; only import non-course details if we haven't already
+		val commandBean = new BeanWrapperImpl(this)
+		val memberBean = new BeanWrapperImpl(member)
+
+
+		val importTier4ForStudentCommand = new ImportTier4ForStudentCommand(member)
+
+		// We intentionally use single pipes rather than double here - we want all statements to be evaluated
+		val hasChanged = (copyMemberProperties(commandBean, memberBean)
+			| copyStudentProperties(commandBean, memberBean)
+			| importTier4ForStudentCommand.apply
+			| markAsSeenInSits(memberBean))
+
+		if (isTransient || hasChanged) {
+			logger.debug("Saving changes for " + member)
+
+			member.lastUpdatedDate = DateTime.now
+			memberDao.saveOrUpdate(member)
+		}
+	}
+
 	private val basicStudentProperties = Set(
 		"nationality", "mobileNumber"
 	)
 
-	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
 	private def copyStudentProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
 		copyBasicProperties(basicStudentProperties, commandBean, memberBean)
 

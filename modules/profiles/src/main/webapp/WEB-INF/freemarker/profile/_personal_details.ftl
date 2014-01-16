@@ -116,6 +116,11 @@
 							<td><@profile_macros.address profile.homeAddress /></td>
 						</tr>
 					</#if>
+
+					<#if profile.tier4VisaRequirement >
+						<th>Nationality</th>
+						<td>Tier 4 visa requirement</td>
+					</#if>
 				</tbody>
 			</table>
 		</div>

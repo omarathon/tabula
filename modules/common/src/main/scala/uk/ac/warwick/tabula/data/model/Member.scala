@@ -262,6 +262,10 @@ class StudentMember extends Member with StudentProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var mostSignificantCourse: StudentCourseDetails = _
 
+	@Column(name="tier4_visa_requirement")
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
+	var tier4VisaRequirement: JBoolean = _;
+
 	def this(id: String) = {
 		this()
 		this.universityId = id
