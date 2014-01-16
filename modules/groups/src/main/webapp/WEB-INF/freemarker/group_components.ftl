@@ -109,10 +109,10 @@
 					</li>
 				</#if>
 				
-				<#if can.do('SmallGroupEvents.Register', module)>
+				<#if can.do('SmallGroupEvents.ViewRegister', module)>
 					<#assign module_attendance_url><@routes.moduleAttendance module /></#assign>
 					<li>
-						<@fmt.permission_button permission='SmallGroupEvents.Register' scope=module action_descr='view attendance' href=module_attendance_url
+						<@fmt.permission_button permission='SmallGroupEvents.ViewRegister' scope=module action_descr='view attendance' href=module_attendance_url
 					  						tooltip='View attendance at groups' data_attr='data-popup-target=.btn-group data-container=body'>
 					  	<i class="icon-group icon-fixed-width"></i> Attendance
 					  </@fmt.permission_button>
@@ -232,7 +232,7 @@
 											</#if>
 										</h4>
 										
-										<#if features.smallGroupTeachingRecordAttendance && can.do('SmallGroupEvents.Register', group) && group.hasScheduledEvents && group.groupSet.collectAttendance>
+										<#if features.smallGroupTeachingRecordAttendance && can.do('SmallGroupEvents.ViewRegister', group) && group.hasScheduledEvents && group.groupSet.collectAttendance>
                     	<div class="pull-right">
                     		<a href="<@routes.groupAttendance group />" class="btn btn-primary btn-small">
                     			Attendance
@@ -385,7 +385,7 @@
                                     <#if groupSet.collectAttendance>
 	                                    <#assign set_attendance_url><@routes.setAttendance groupSet /></#assign>
 																			<li>
-																				<@fmt.permission_button permission='SmallGroupEvents.Register' scope=groupSet action_descr='view attendance' href=set_attendance_url
+																				<@fmt.permission_button permission='SmallGroupEvents.ViewRegister' scope=groupSet action_descr='view attendance' href=set_attendance_url
 																			  						tooltip='View attendance at groups' data_attr='data-popup-target=.btn-group data-container=body'>
 																			  	<i class="icon-group icon-fixed-width"></i> Attendance
 																			  </@fmt.permission_button>
@@ -479,7 +479,7 @@
 						</div>
 						
 						<#if showRecordButtons && features.smallGroupTeachingRecordAttendance && !event.unscheduled>
-							<#if can.do("SmallGroupEvents.Register", event)>
+							<#if can.do("SmallGroupEvents.ViewRegister", event)>
 								<div class="eventRegister">
 									<a class="btn btn-mini" href="<@routes.registerForWeek event week/>&returnTo=${(info.requestedUri!"")?url}" title="Record attendance for <@instanceFormat instance academicYear department />">
 										Record
@@ -546,11 +546,11 @@
 							</#if>
 						</h4>
 						
-						<span id="group-attendance-container-${group.id}">
+						<div id="group-attendance-container-${group.id}">
 							<#local attendanceInfo = mapGet(groups, group) />
 			
 							<@singleGroupAttendance group attendanceInfo.instances attendanceInfo.attendance />
-			      </span>
+			      </div>
 		      </div>
 	      </#list>
 	    </div>
@@ -604,11 +604,11 @@
 						</#if>
 					</h4>
 					
-					<span id="group-attendance-container-${group.id}">
+					<div id="group-attendance-container-${group.id}">
 						<#local attendanceInfo = mapGet(groups, group) />
 		
 						<@singleGroupAttendance group attendanceInfo.instances attendanceInfo.attendance />
-		      </span>
+		      </div>
 		    </#list>
 	    </div>
     </div>

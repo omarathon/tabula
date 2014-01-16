@@ -15,10 +15,6 @@
 <#assign can_manage_dept=can.do("Department.ManageExtensionSettings", department) />
 <#assign expand_by_default = (!can_manage_dept && modules?size lte 5) />
 <#if (features.extensions || features.feedbackTemplates)>
-	<h1 class="with-settings">
-		${department.name}
-	</h1>
-
 	<div class="btn-toolbar dept-toolbar">
 
 		<#if department.parent??>
@@ -146,9 +142,9 @@
 		</div>
 		</#if>
 	</div>
-<#else>
-	<h1>${department.name}</h1>
 </#if>
+
+<h1 class="with-settings">${department.name}</h1>
 
 <#if !modules?has_content && department.children?has_content>
 <p>This department doesn't directly contain any modules. Check subdepartments.</p>

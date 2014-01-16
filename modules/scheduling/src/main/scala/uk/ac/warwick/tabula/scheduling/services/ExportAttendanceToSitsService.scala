@@ -13,6 +13,7 @@ import org.joda.time.DateTime
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate
 import java.util
 import uk.ac.warwick.tabula.JavaImports._
+import org.springframework.context.annotation.Profile
 
 trait ExportAttendanceToSitsServiceComponent {
 	def exportAttendanceToSitsService: ExportAttendanceToSitsService
@@ -92,9 +93,17 @@ object ExportAttendanceToSitsService {
 	}
 }
 
+@Profile(Array("dev", "test", "production"))
 @Service
 class ExportAttendanceToSitsServiceImpl
 	extends AbstractExportAttendanceToSitsService with AutowiringSitsDataSourceComponent
+	
+@Profile(Array("sandbox"))
+@Service
+class ExportAttendanceToSitsSandboxService extends ExportAttendanceToSitsService {
+	def exportToSits(report: MonitoringPointReport) = false
+}
+	
 
 trait SitsDataSourceComponent {
 	def sitsDataSource: DataSource

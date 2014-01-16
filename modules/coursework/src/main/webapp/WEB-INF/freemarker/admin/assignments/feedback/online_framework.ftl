@@ -65,7 +65,7 @@
 					<a class="btn hover"><i class="icon-cog"></i> Actions:</a>
 				</div>
 				<div class="btn-group">
-					<a id="marking-complete-button" class="must-have-selected btn use-tooltip form-post" href="<@routes.markingCompleted assignment />" title="" data-original-title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point.">
+					<a id="marking-complete-button" data-container="body" class="must-have-selected btn use-tooltip form-post" href="<@routes.markingCompleted assignment />" title="" data-original-title="Finalise marks and feedback. Changes cannot be made to marks or feedback files after this point.">
 						<i class="icon-ok"></i>
 						Marking completed
 					</a>

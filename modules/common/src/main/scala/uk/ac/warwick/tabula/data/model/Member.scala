@@ -67,7 +67,7 @@ object Member {
 		name="userType",
 		discriminatorType=DiscriminatorType.STRING
 )
-abstract class Member extends MemberProperties with ToString with HibernateVersioned with PermissionsTarget with Logging {
+abstract class Member extends MemberProperties with ToString with HibernateVersioned with PermissionsTarget with Logging with Serializable {
 
 	@transient
 	var profileService = Wire.auto[ProfileService]
@@ -332,6 +332,11 @@ class StaffMember extends Member with StaffProperties {
 		this()
 		this.universityId = id
 	}
+	
+	@OneToOne(cascade = Array(ALL))
+	@JoinColumn(name = "assistantsgroup_id")
+	var _assistantsGroup: UserGroup = UserGroup.ofUsercodes
+	def assistants: Option[UnspecifiedTypeUserGroup] = Option(_assistantsGroup)
 }
 
 @Entity

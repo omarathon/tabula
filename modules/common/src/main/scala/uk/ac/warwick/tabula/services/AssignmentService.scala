@@ -98,7 +98,7 @@ class AssignmentServiceImpl
 
 	def getAssignmentsByName(partialName: String, department: Department) = {
 
-		session.newQuery[Assignment]("""select distinct a from Assignment a
+		session.newQuery[Assignment]("""select a from Assignment a
 				where a.module.department = :dept
 				and a.name like :nameLike
 				order by createdDate desc

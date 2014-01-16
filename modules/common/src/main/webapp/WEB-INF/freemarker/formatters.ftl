@@ -298,7 +298,7 @@
 	<#local title></#local>
 
 	<#if tooltip?has_content>
-		<#local title>title='${tooltip}.'</#local>
+		<#local title>title='${tooltip}'</#local>
 		<#local classes='${classes} use-tooltip'?trim >
 	</#if>
     <#if href??><#local href><#noescape>href=${href}</#noescape></#local></#if>
