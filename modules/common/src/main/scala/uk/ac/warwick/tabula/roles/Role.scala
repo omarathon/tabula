@@ -93,7 +93,7 @@ abstract class SelectorBuiltInRoleDefinition[A <: PermissionsSelector[A]](val se
 		case that: SelectorBuiltInRoleDefinition[A] => {
 			new EqualsBuilder()
 			.append(getName, that.getName)
-			.append(selector, that.getName)
+			.append(selector, that.selector)
 			.build()
 		}
 		case _ => false

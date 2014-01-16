@@ -14,6 +14,9 @@ import Tap.tap
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model.Department.CompositeFilterRule
 import scala.util.Failure
+import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
+import uk.ac.warwick.tabula.roles.StudentRelationshipAgentRoleDefinition
+import uk.ac.warwick.tabula.permissions.PermissionsSelector
 
 class DepartmentTest extends TestBase with Mockito {
 
@@ -178,9 +181,48 @@ class DepartmentTest extends TestBase with Mockito {
 		undergraduate.mostSignificantCourseDetails.get.latestStudentCourseYearDetails.yearOfStudy = 2
 		secondYearRule.matches(undergraduate) should be(true)
 		firstYearRule.matches(undergraduate) should be (false)
-
-
-
 	}}
+	
+	@Test
+	def replacedRoleDefinitionFor {
+		val department = new Department
+		
+		val roleDefinition = DepartmentalAdministratorRoleDefinition
+		
+		department.replacedRoleDefinitionFor(roleDefinition) should be ('empty)
+		
+		val customDefinition = new CustomRoleDefinition
+		customDefinition.baseRoleDefinition = roleDefinition
+		
+		department.customRoleDefinitions.add(customDefinition)
+		
+		customDefinition.replacesBaseDefinition = false
+		
+		department.replacedRoleDefinitionFor(roleDefinition) should be ('empty)
+		
+		customDefinition.replacesBaseDefinition = true
+		
+		department.replacedRoleDefinitionFor(roleDefinition) should be (Some(customDefinition))
+	}
+	
+	@Test
+	def replacedRoleDefinitionForSelector {
+		val department = new Department
+		
+		val selector = new StudentRelationshipType
+		
+		val customDefinition = new CustomRoleDefinition
+		customDefinition.baseRoleDefinition = StudentRelationshipAgentRoleDefinition(selector)
+		
+		assert(StudentRelationshipAgentRoleDefinition(selector) === StudentRelationshipAgentRoleDefinition(selector))
+		
+		department.customRoleDefinitions.add(customDefinition)
+		
+		customDefinition.replacesBaseDefinition = true
+		
+		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(selector)) should be (Some(customDefinition))
+		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(new StudentRelationshipType)) should be ('empty)
+		department.replacedRoleDefinitionFor(StudentRelationshipAgentRoleDefinition(PermissionsSelector.Any)) should be ('empty)
+	}
 
 }
