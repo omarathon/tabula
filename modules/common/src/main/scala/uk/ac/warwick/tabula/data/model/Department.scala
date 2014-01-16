@@ -216,6 +216,8 @@ class Department extends GeneratedId
 
 	def hasParent = (parent != null)
 
+	def hasChildren = !children.isEmpty
+
 	def isUpstream = !hasParent
 
 	override def toString = "Department(" + code + ")"
