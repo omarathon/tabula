@@ -128,7 +128,7 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	 */
 	def findStudentsByRestrictions(department: Department, restrictions: Seq[ScalaRestriction], orders: Seq[ScalaOrder] = Seq(), maxResults: Int = 50, startResult: Int = 0): (Int, Seq[StudentMember]) = transactional(readOnly = true) {
 		// If we're a sub/parent department then we have to fetch everyone, boo! Otherwise, we can use nice things
-		if (department.hasParent || !department.hasChildren) {
+		if (department.hasParent || department.hasChildren) {
 			val allRestrictions = ScalaRestriction.is(
 				"studentCourseYearDetails.enrolmentDepartment", department.rootDepartment,
 				FiltersStudents.AliasPaths("studentCourseYearDetails") : _*
