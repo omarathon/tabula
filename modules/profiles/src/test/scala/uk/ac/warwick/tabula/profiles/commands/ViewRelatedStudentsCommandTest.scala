@@ -39,53 +39,67 @@ class ViewRelatedStudentsCommandTest extends TestBase with Mockito {
 		courseDetails2.route = testRoute2
 		courseDetails2.course = course
 
-		val member1, member2, member3  = new StudentMember()
+		val member1, member2, member3, member4  = new StudentMember()
 
 		member1.mostSignificantCourse = courseDetails1
 		member2.mostSignificantCourse = courseDetails1
 		member3.mostSignificantCourse = courseDetails2
+		// member4 has no most significant course
 
-		val members = Seq(member1, member2, member3)
+		val members = Seq(member1, member2, member3, member4)
 	}
 
 	@Test
 	def listsAllStudentsWithTutorRelationship() { new Fixture {
+		val mockProfileService = mock[ProfileService]
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		val restrictions : Seq[ScalaRestriction] = Seq()
 
- 			val mockProfileService = mock[ProfileService]
-			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-			val restrictions : Seq[ScalaRestriction] = Seq()
+		mockProfileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, member, restrictions) returns members
 
-			mockProfileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, member, restrictions) returns members
-
-			val command = new ViewRelatedStudentsCommandInternal(member, relationshipType) with ProfileServiceComponent {
-				var profileService = mockProfileService
-			}
-
-			val result = command.applyInternal()
-
-			result should be (members)
+		val command = new ViewRelatedStudentsCommandInternal(member, relationshipType) with ProfileServiceComponent {
+			var profileService = mockProfileService
 		}
-	}
+
+		val result = command.applyInternal()
+
+		result should be (members)
+	}}
 
 	@Test
 	def listsAllStudentsWithSupervisorRelationship() { new Fixture {
+		val mockProfileService = mock[ProfileService]
 
-			val mockProfileService = mock[ProfileService]
+		val restrictions : Seq[ScalaRestriction] = Seq()
+		val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
 
-			val restrictions : Seq[ScalaRestriction] = Seq()
-			val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
+		mockProfileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, member, restrictions) returns members
 
-			mockProfileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, member, restrictions) returns members
-
-			val command = new ViewRelatedStudentsCommandInternal(member, relationshipType) with ProfileServiceComponent {
-				var profileService = mockProfileService
-			}
+		val command = new ViewRelatedStudentsCommandInternal(member, relationshipType) with ProfileServiceComponent {
+			var profileService = mockProfileService
+		}
 
 		val result = command.applyInternal()
 
 		result should be (members)
 
-	}
-}
+	}}
+	
+	@Test
+	def helperFunctions() { new Fixture {
+		val mockProfileService = mock[ProfileService]
+		
+		val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
+		
+		mockProfileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, member, Nil) returns members
+		
+		val command = new ViewRelatedStudentsCommandInternal(member, relationshipType) with ProfileServiceComponent {
+			var profileService = mockProfileService
+		}
+		
+		command.allCourses should be (Seq(courseDetails1, courseDetails1, courseDetails2))
+		command.allDepartments should be (Seq(testDepartment))
+		command.allRoutes should be (Seq(testRoute1, testRoute2))
+	}}
 
 }
