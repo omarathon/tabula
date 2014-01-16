@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.helpers.StringUtils._
+import uk.ac.warwick.tabula.permissions.PermissionsSelector
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 class BuiltInRoleDefinitionUserType extends AbstractBasicUserType[BuiltInRoleDefinition, String] {
 	
@@ -30,13 +32,16 @@ class BuiltInRoleDefinitionUserType extends AbstractBasicUserType[BuiltInRoleDef
 		}
 		
 		string match {
+			case r"([A-Za-z]+)${roleName}\(\*\)" => {
+				SelectorBuiltInRoleDefinition.of(roleName, PermissionsSelector.Any[StudentRelationshipType]) // FIXME hard-wired
+			}
 			case r"([A-Za-z]+)${roleName}\(([^\)]+)${id}\)" => {
-				val selector = relationshipService.get.getStudentRelationshipTypeByUrlPart(id) match {
+				val selector = relationshipService.get.getStudentRelationshipTypeByUrlPart(id) match { // FIXME hard-wired
 					case Some(selector) => selector
 					case _ => relationshipService.get.getStudentRelationshipTypeById(id).get // Fall back to ID, just in case
 				}
 				
-				SelectorBuiltInRoleDefinition.of(roleName, selector) // FIXME hard-wired
+				SelectorBuiltInRoleDefinition.of(roleName, selector)
 			}
 			case _ => RoleDefinition.of(string)
 		}

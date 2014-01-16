@@ -293,6 +293,61 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
 	}
 
+	@Test def studentsByAgentRelationship = transactional { tx =>
+		val dept1 = Fixtures.department("ml", "Modern Languages")
+		val dept2 = Fixtures.department("fr", "French")
+		val dept3 = Fixtures.department("es", "Spanish")
+
+		// add 2 sub-departments and ensure no dupes TAB-1811
+		dept2.parent = dept1
+		dept3.parent = dept1
+		dept1.children.add(dept2)
+		dept1.children.add(dept3)
+
+		session.save(dept1)
+		session.save(dept2)
+		session.save(dept3)
+
+		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
+
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1, sprStatus=sprFullyEnrolledStatus)
+		stu1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
+
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2, sprStatus=sprFullyEnrolledStatus)
+		stu2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
+
+		val staff1 = Fixtures.staff(universityId = "1000003", userId="staff1", department=dept1)
+		staff1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 3, 1, 0, 0, 0)
+
+		val staff2 = Fixtures.staff(universityId = "1000004", userId="staff2", department=dept2)
+		staff2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 1, 0, 0, 0)
+
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(stu2)
+		memberDao.saveOrUpdate(staff1)
+		memberDao.saveOrUpdate(staff2)
+
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		memberDao.saveOrUpdate(relationshipType)
+
+		val relBetweenStaff1AndStu1 = StudentRelationship("1000003", relationshipType, "1000001/1")
+		val relBetweenStaff1AndStu2 = StudentRelationship("1000003", relationshipType, "1000002/1")
+
+		val relBetweenStaff2AndStu1 = StudentRelationship("1000004", relationshipType, "1000001/1")
+
+		memberDao.saveOrUpdate(relBetweenStaff1AndStu1)
+		memberDao.saveOrUpdate(relBetweenStaff1AndStu2)
+		memberDao.saveOrUpdate(relBetweenStaff2AndStu1)
+
+		memberDao.getStudentsByDepartment(dept1).size should be (1)
+		memberDao.getStudentsByDepartment(dept2).size should be (1)
+		memberDao.getStudentsByRelationshipAndDepartment(relationshipType, dept1).size should be (1)
+
+		memberDao.getStudentsByAgentRelationshipAndRestrictions(relationshipType, staff1.universityId, Seq()).size should be (2)
+		memberDao.getStudentsByAgentRelationshipAndRestrictions(relationshipType, staff2.universityId, Seq()).size should be (1)
+	}
+
+
 
 	@Test def studentsCounting = transactional { tx =>
 		val dept1 = Fixtures.department("ms", "Motorsport")

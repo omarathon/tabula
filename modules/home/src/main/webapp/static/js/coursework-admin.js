@@ -610,9 +610,11 @@ $(function() {
 					$icon.removeClass('icon-spinner icon-spin');
 					$icon.addClass('icon-chevron-down');
 					$(this).show();
+                    $("#online-marking-table").trigger('tabula.expandingTable.repositionContent');
 				});
 			}
 		}
+        $("#online-marking-table").trigger('tabula.expandingTable.repositionContent');
 	});
 
 	$(".generic-feedback").on('click', 'input[type=submit]', function(e){

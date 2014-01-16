@@ -546,11 +546,11 @@
 							</#if>
 						</h4>
 						
-						<span id="group-attendance-container-${group.id}">
+						<div id="group-attendance-container-${group.id}">
 							<#local attendanceInfo = mapGet(groups, group) />
 			
 							<@singleGroupAttendance group attendanceInfo.instances attendanceInfo.attendance />
-			      </span>
+			      </div>
 		      </div>
 	      </#list>
 	    </div>
@@ -604,11 +604,11 @@
 						</#if>
 					</h4>
 					
-					<span id="group-attendance-container-${group.id}">
+					<div id="group-attendance-container-${group.id}">
 						<#local attendanceInfo = mapGet(groups, group) />
 		
 						<@singleGroupAttendance group attendanceInfo.instances attendanceInfo.attendance />
-		      </span>
+		      </div>
 		    </#list>
 	    </div>
     </div>

@@ -418,7 +418,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			restrictions.foreach { _.apply(c) }
 			c.add(Property.forName("sprCode").in(d))
 
-			c.seq.map(_.student)
+			c.distinct.seq.map(_.student)
 		}
 	}
 

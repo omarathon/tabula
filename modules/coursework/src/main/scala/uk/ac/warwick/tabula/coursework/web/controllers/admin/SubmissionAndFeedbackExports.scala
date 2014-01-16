@@ -315,13 +315,21 @@ trait SubmissionAndFeedbackExport {
 		
 		item.coursework.enhancedSubmission match {
 			case Some(item) => item.submission.values.asScala foreach ( value =>
-				if (value.hasAttachments)
-					value.attachments.asScala foreach {file => {
-						fieldDataMap += (value.name + "-name") -> file.name
-						fieldDataMap += (value.name + "-zip-path") -> item.submission.zipFileName(file)
-					}}
-				else if (value.value != null)
+				if (value.hasAttachments) {
+					val attachmentNames = value.attachments.asScala.map { file =>
+						(file.name, item.submission.zipFileName(file))
+					}
+					
+					if (!attachmentNames.isEmpty) {
+						val fileNames = attachmentNames.map { case (fileName, _) => fileName }.mkString(",")
+						val zipPaths = attachmentNames.map { case (_, zipPath) => zipPath }.mkString(",")
+						
+						fieldDataMap += (value.name + "-name") -> fileNames
+						fieldDataMap += (value.name + "-zip-path") -> zipPaths
+					}
+				} else if (value.value != null) {
 					fieldDataMap += value.name -> value.value
+				}
 			)
 			case None =>
 		}

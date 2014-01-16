@@ -11,10 +11,6 @@
 
 <#if department??>
 	<#assign can_manage_dept=can.do("RolesAndPermissions.Create", department) />
-
-	<h1 class="with-settings">
-		${department.name}
-	</h1>
 	
 	<div class="btn-toolbar dept-toolbar">
 	
@@ -78,6 +74,10 @@
 			</ul>
 		</div>
 	</div>
+
+	<h1 class="with-settings">
+		${department.name}
+	</h1>
 
 <div class="row-fluid">
 	<div class="span6">

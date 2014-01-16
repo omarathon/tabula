@@ -30,6 +30,8 @@ object ViewRelatedStudentsCommand{
 
 
 trait ViewRelatedStudentsCommandState extends FiltersRelationships {
+	self: ProfileServiceComponent =>
+	
 	val currentMember: Member
 	val relationshipType: StudentRelationshipType
 
@@ -46,24 +48,19 @@ trait ViewRelatedStudentsCommandState extends FiltersRelationships {
 	var yearsOfStudy: JList[JInteger] = JArrayList()
 	var sprStatuses: JList[SitsStatus] = JArrayList()
 	var modules: JList[Module] = JArrayList()
+	
+	lazy val allCourses = profileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, currentMember, Nil).flatMap(student => Option(student.mostSignificantCourse))
+	def allDepartments = allCourses.map(_.department).distinct
+	def allRoutes = allCourses.map(_.route).distinct
 }
 
 abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val relationshipType: StudentRelationshipType)
 	extends CommandInternal[Seq[StudentMember]] with TaskBenchmarking with ViewRelatedStudentsCommandState {
+	self: ProfileServiceComponent =>
 
-	self:ProfileServiceComponent =>
-
-		def applyInternal(): Seq[StudentMember] =  {
-
-			val blankRestriction : Seq[ScalaRestriction] = Seq()
-			val allCourses = profileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, currentMember, blankRestriction).map(_.mostSignificantCourse)
-
-			allDepartments = allCourses.map(_.department)
-			allRoutes = allCourses.map(_.route)
-
-			val students = profileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, currentMember, buildRestrictions())
-			students
-		}
+	def applyInternal(): Seq[StudentMember] =  {
+		profileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, currentMember, buildRestrictions())
+	}
 }
 
 trait ViewRelatedStudentsCommandPermissions extends RequiresPermissionsChecking {

@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
 import uk.ac.warwick.tabula.roles.RoleDefinition
+import uk.ac.warwick.tabula.roles.SelectorBuiltInRoleDefinition
 
 @Entity @AccessType("field")
 class Department extends GeneratedId
@@ -199,10 +200,25 @@ class Department extends GeneratedId
 		}
 	}
 
-	def replacedRoleDefinitionFor(roleDefinition: RoleDefinition) =
+	def replacedRoleDefinitionFor(roleDefinition: RoleDefinition) = {
+		def matches(customRoleDefinition: CustomRoleDefinition) = {
+			roleDefinition match {
+				case roleDefinition: SelectorBuiltInRoleDefinition[_] => {
+					customRoleDefinition.baseRoleDefinition match {
+						case customRoleDefinition: SelectorBuiltInRoleDefinition[_]
+							if (customRoleDefinition.getClass == roleDefinition.getClass) && 
+								(roleDefinition <= customRoleDefinition) => true
+						case _ => false
+					}
+				}
+				case _ => roleDefinition == customRoleDefinition.baseRoleDefinition
+			}
+		}		
+		
 		customRoleDefinitions.asScala
 			.filter { _.replacesBaseDefinition }
-			.find { _.baseRoleDefinition == roleDefinition }
+			.find { matches }
+	}
 
 	def permissionsParents = Option(parent).toStream
 
@@ -215,6 +231,8 @@ class Department extends GeneratedId
 		else parent.rootDepartment
 
 	def hasParent = (parent != null)
+
+	def hasChildren = !children.isEmpty
 
 	def isUpstream = !hasParent
 
