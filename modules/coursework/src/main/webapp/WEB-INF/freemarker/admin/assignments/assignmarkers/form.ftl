@@ -120,8 +120,7 @@
 <script type="text/javascript">
 (function($) {
 	var fixHeaderFooter = $('.persist-area').fixHeaderFooter();
-	$(".floatingHeader:hidden").css("max-width", $(".floatingHeader:visible").width());
-	var singleColumnDragTargetHeight =  $('.agentslist .drag-target').outerHeight(true);
+	var singleColumnDragTargetHeight = $('.agentslist .drag-target').outerHeight(true);
 
 	$(window).scroll(function() {
 		fixHeaderFooter.fixTargetList('.agentslist:visible');

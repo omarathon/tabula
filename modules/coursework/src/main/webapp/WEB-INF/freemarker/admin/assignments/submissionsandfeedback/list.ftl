@@ -140,14 +140,14 @@
 				<#if hasOriginalityReport>
 					<th>Plagiarism</th>
 				</#if>
-				
+
 				<th colspan="${feedbackColspan?c}">
 					Feedback
 				</th>
 			</tr>
 			<tr>
 				<th colspan="2"></th>
-				
+
 				<th>Files</th>
 				<th>Submitted</th>
 				<th class="sortable">Status</th>
@@ -158,11 +158,11 @@
 					<th class="sortable">First Marker</th>
 					<th class="sortable">Second Marker</th>
 				</#if>
-				
+
 				<#if hasOriginalityReport>
 					<th class="sortable">Report</th>
 				</#if>
-				
+
 				<th>Files</th>
 				<th>Uploaded</th>
 				<#if assignment.collectMarks>
@@ -196,12 +196,12 @@
 						${student.user.warwickId}
 					</#if>
 					</td>
-					
+
 					<td class="files">
 						<#if submission??>
 							<#local attachments=submission.allAttachments />
 							<#if attachments?size gt 0>
-								<#if attachments?size == 1> 
+								<#if attachments?size == 1>
 									<#local filename = "${attachments[0].name}">
 								<#else>
 									<#local filename = "submission-${submission.universityId}.zip">
@@ -275,12 +275,12 @@
 							</#if>
 						</td>
 					</#if>
-					
+
 					<td class="download">
 						<#if student.coursework.enhancedFeedback??>
 							<#local attachments=student.coursework.enhancedFeedback.feedback.attachments />
 							<#if attachments?size gt 0>
-							<#if attachments?size == 1> 
+							<#if attachments?size == 1>
 								<#local attachmentExtension = student.coursework.enhancedFeedback.feedback.attachments[0].fileExt>
 							<#else>
 								<#local attachmentExtension = "zip">
@@ -299,7 +299,7 @@
 							<@fmt.date date=student.coursework.enhancedFeedback.feedback.uploadedDate seconds=true capitalise=true shortMonth=true split=true />
 						</#if>
 					</td>
-					
+
 					 <#if assignment.collectMarks>
 						<td class="mark">
 							${(student.coursework.enhancedFeedback.feedback.actualMark)!''}
@@ -331,7 +331,7 @@
 					</td>
 				</tr>
 			</#macro>
-		
+
 			<#list students as student>
 				<@row student />
 			</#list>
@@ -339,9 +339,9 @@
 	</table>
 	<script type="text/javascript">
 		(function($) {
-			$('.fixed-container').fixHeaderFooter({minimumWindowHeightFix: 630});
+			$('.fixed-container').fixHeaderFooter();
 
-			$('.submission-table:not(.floatingHeadTable)').sortableTable({
+			$('.submission-table').sortableTable({
 				textExtraction: function(node) {
 					var $el = $(node);
 					if ($el.hasClass('originality-report')) {
@@ -353,7 +353,7 @@
 						}
 					} else if ($el.hasClass('word-count')) {
 						return $el.text().trim().replace(',','');
-					} else {				
+					} else {
 						return $el.text().trim();
 					}
 				}

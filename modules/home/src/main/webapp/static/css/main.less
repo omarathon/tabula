@@ -209,86 +209,59 @@ ul.drag-list {
 }
 
 // fixHeaderFooter plugin CSS
+.scroll-to-fixed-fixed {
+  background-color: white; // hide anything under the fixed element
 
-#floatedHeaderContainer {
-	position: fixed;
-	visibility: hidden;
-  	z-index: 4;
-  	position:fixed;
-	background-color:white;
-}
+  * {
+    position: relative;
+    z-index: 11;
+  }
 
-.floatingHeader, .floatingFooter {
-	visibility: hidden;
-	background-color:white;
-	width: 100%;
- }
+  .btn-toolbar {
+    margin-top: 2px !important; // ugh, stuck with important for bootstrap compatibility
+  }
 
-.floatingHeader {
+  hr.header-shadow,
+  hr.footer-shadow {
+    position: absolute;
+    z-index: auto;
+    width: 100%;
+    bottom: 0px;
+    height: 20px;
+    background-color: white !important;
+    margin: 0;
+    overflow: visible;
+  }
 
-}
+  hr.footer-shadow {
+    top: 0px;
+    bottom: auto;
+  }
 
-.is-smallscreen .floatingHeader {
-	top:0;  // no primary navigation on smallscreens
-}
+  hr.header-shadow:before,
+  hr.footer-shadow:before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    box-shadow:0 0 12px rgba(100,130,100,0.8);
+    top: 10px;
+    bottom: 0;
+    left: 10px;
+    right: 10px;
+    height: 10px;
+    border-bottom-right-radius: 100px 10px;
+    border-bottom-left-radius: 100px 10px;
+  }
 
-.floatingFooter {
-	position:fixed;
-	bottom: 0;
-	padding:2em 0.5em;
-}
-
-.persist-header, .persist-footer {
-	margin:0 -0.5em;
-	z-index: 5;
-}
-
-.persist-header {
-	padding-left: 0.5em;
-	padding-right: 0.5em;
-}
-
-.persist-footer {
-	padding: 2em 0.5em;
-	border-top: 1px solid #aaa
-}
-
-.record-attendance-form-header {
-	margin-left:-0.5em;
-	margin-right:-0.5em;
-	padding:2px 0.5em 1px;
-	border-left: 1px solid #ddd;
-	border-right: 1px solid #ddd;
-	border-top: 1px solid #ddd;
-	.border-radius (4px 4px 0 0);
-}
-
-.striped-section-contents.attendees {
-	.item-info {
-		border-left:1px solid #ddd;
-		border-right:1px solid #ddd;
-	}
-}
-
-.floatingHeader .record-attendance-form-header {
-	border-bottom: 1px solid #aaa;
-}
-
-.tabula-page #container .floatingHeader {
-	border-right:2px solid white;
-	padding-top:4px;
-
-	.floatingHeadTable {
-		margin-bottom: 0;
-
-		th {
-		  padding: 8px;
-		}
-	}
-
-	.floatingHeadTable.tablesorter th {
-		padding: 8px 20px 8px 8px;
-	}
+  hr.footer-shadow:before {
+    box-shadow:0 0 -12px rgba(100,130,100,0.8);
+    top: 0;
+    bottom: 10px;
+    border-top-right-radius: 100px 10px;
+    border-top-left-radius: 100px 10px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+  }
 }
 
 
@@ -308,10 +281,10 @@ ul.drag-list {
 	padding-bottom: 2px;
 	margin-left: 6px;
 	cursor: pointer;
-	
+
 	.transition-property(e("color, background-color"));
   .transition-duration(0.3s);
-	
+
 	&:hover {
 		color: #eee;
 		background-color: rgba(255, 255, 255, 0.2);
@@ -320,7 +293,7 @@ ul.drag-list {
 
 /* TAB-1637 Fix tooltip font inside headings */
 .tooltip {
-	font-size: @body-font-size;	
+	font-size: @body-font-size;
 	font-family: @body-font-stack;
 	letter-spacing: @body-letter-spacing;
 	word-spacing: @body-word-spacing;

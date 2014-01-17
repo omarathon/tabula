@@ -48,7 +48,7 @@
 		<div class="studentResults" data-sits-url="${sendToSitsUrl}">
 		<#assign returnTo><@routes.viewDepartmentStudentsWithAcademicYear command.department command.academicYear filterQuery/></#assign>
 		<#if (totalResults > 0)>
-			<div class="clearfix">
+			<div class="clearfix persist-header">
 				<#if (totalResults > command.studentsPerPage)>
 					<div class="pull-right">
 						<@pagination command.page totalResults command.studentsPerPage "pagination-small" />
