@@ -80,11 +80,15 @@ class ScalaCriteria[A](c: org.hibernate.Criteria) {
 }
 
 class ProjectedScalaCriteria[A, B](c: ScalaCriteria[A]) {
+	// Helper to neaten up the above chainable methods - returns this instead of plain Criteria
+	@inline private def chainable(fn: => Unit) = { fn; this }
+	
 	/** Returns a typed Seq of the results. */
 	def seq: Seq[B] = c.listOf[B].asScala
 
 	def uniqueResult: Option[B] = c.uniqueResultOf[B]
 
+	def distinct = chainable { c.setResultTransformer(DistinctRootEntityResultTransformer.INSTANCE) }
 	def setResultTransformer(resultTransformer: ResultTransformer) = c.setResultTransformer(resultTransformer)
 }
 
