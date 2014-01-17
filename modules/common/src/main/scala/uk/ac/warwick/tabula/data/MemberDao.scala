@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 import org.hibernate.FetchMode
+import org.hibernate.transform.DistinctRootEntityResultTransformer
 
 trait MemberDaoComponent {
 	val memberDao: MemberDao
@@ -148,6 +149,10 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					.setFetchMode("studentCourseDetails", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
+					.setFetchMode("homeDepartment", FetchMode.JOIN)
+					.setFetchMode("homeDepartment.children", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment.children", FetchMode.JOIN)
 					.distinct
 
 			criteria.seq
@@ -401,28 +406,6 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.seq
 
 
-	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agentId: String, restrictions: Seq[ScalaRestriction]): Seq[StudentMember] = {
-		if (relationshipType == null) Nil
-		else {
-			val d = DetachedCriteria.forClass(classOf[StudentRelationship])
-				.setProjection(Property.forName("targetSprCode"))
-				.add(Restrictions.eq("agent", agentId))
-				.add(Restrictions.eq("relationshipType", relationshipType))
-				.add( Restrictions.or(
-								Restrictions.isNull("endDate"),
-								Restrictions.ge("endDate", new DateTime())
-				))
-
-			val c = session.newCriteria[StudentCourseDetails]
-
-			restrictions.foreach { _.apply(c) }
-			c.add(Property.forName("sprCode").in(d))
-
-			c.seq.map(_.student)
-		}
-	}
-
-
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number =
 		if (relationshipType == null) 0
 		else session.newQuery[Number]("""
@@ -461,6 +444,26 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		orders.foreach { c.addOrder(_) }
 
 		c.setMaxResults(maxResults).setFirstResult(startResult).distinct.seq
+	}
+
+
+	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agentId: String, restrictions: Seq[ScalaRestriction]): Seq[StudentMember] = {
+		if (relationshipType == null) Nil
+		else {
+			val d = DetachedCriteria.forClass(classOf[StudentRelationship])
+				.setProjection(Property.forName("targetSprCode"))
+				.add(Restrictions.eq("agent", agentId))
+				.add(Restrictions.eq("relationshipType", relationshipType))
+				.add( Restrictions.or(
+								Restrictions.isNull("endDate"),
+								Restrictions.ge("endDate", new DateTime())
+				))
+
+			val c = session.newCriteria[StudentCourseDetails]
+			restrictions.foreach { _.apply(c) }
+			c.add(Property.forName("sprCode").in(d))
+			c.project[StudentMember](Projections.groupProperty("student")).seq
+		}
 	}
 
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]) = {

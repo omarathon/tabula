@@ -67,7 +67,7 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 			left join a.assessmentGroups ag
 			join a.members manualMembership
 			where
-				(1 = (
+				(1 in (
 					select 1 from uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup uag
 					join uag.members autoMembership
 					join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId = :universityId
@@ -89,7 +89,7 @@ class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
 			left join sgs.assessmentGroups ag
 			join sgs._membersGroup manualMembership
 			where
-				(1 = (
+				(1 in (
 					select 1 from uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup uag
 					join uag.members autoMembership
 					join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId = :universityId

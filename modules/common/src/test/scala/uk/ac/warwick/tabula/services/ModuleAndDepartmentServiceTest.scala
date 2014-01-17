@@ -5,11 +5,11 @@ import org.junit.Before
 import uk.ac.warwick.tabula.permissions.{Permission, PermissionsTarget, Permissions}
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.services.permissions._
-import scala.Some
 import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.util.queue.QueueListener
 import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.tabula.helpers.Logging
+import scala.collection.JavaConverters._
 
 class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 	
@@ -74,7 +74,7 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 		service.allRoutes should be (Seq(g500, g503, g900, g901))
 		
 		// behaviour of child/parent departments
-		cs.children.toArray should be (Array(cssub1, cssub2))
+		cs.children.asScala.toSet should be (Set(cssub1, cssub2))
 		cssub1.parent should be (cs)
 		cssub2.parent should be (cs)
 		ch.children.isEmpty should be (true)

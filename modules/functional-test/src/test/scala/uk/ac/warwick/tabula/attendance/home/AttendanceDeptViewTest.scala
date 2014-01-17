@@ -1,8 +1,10 @@
-package uk.ac.warwick.tabula.attendance
+package uk.ac.warwick.tabula.attendance.home
 
 import org.scalatest.GivenWhenThen
+import uk.ac.warwick.tabula.attendance.AttendanceFixture
+import org.scalatest.selenium.WebBrowser.go
 
-class AttendanceDeptViewPageTest extends AttendanceFixture with GivenWhenThen{
+class AttendanceDeptViewTest extends AttendanceFixture with GivenWhenThen{
 
 	"A Member of staff" should "see the department View page with no links" in {
 		Given("I am logged in as Admin1")
@@ -23,9 +25,6 @@ class AttendanceDeptViewPageTest extends AttendanceFixture with GivenWhenThen{
 	"A Member of staff" should "see the department View page" in {
 		Given("I am logged in as Admin1")
 		signIn as P.Admin1 to Path("/")
-
-		And("There is 1 monitoring point set")
-		createMonitoringPointSet(TEST_UG_ROUTE_CODE, 3, "2013", Option(1))
 
 		When("I go to /attendance/xxx")
 		go to Path("/attendance/xxx")

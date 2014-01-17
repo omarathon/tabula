@@ -62,22 +62,23 @@ class StudentMemberFixtureCommand extends CommandInternal[StudentMember] with Lo
 			if (dept.isDefined) yd.enrolmentDepartment = dept.get
 			scd.attachStudentCourseYearDetails(yd)
 
-		transactional() {
-
-			existing foreach {
-				memberDao.delete
+			transactional() {
+				existing foreach {
+					memberDao.delete
+				}
 			}
-
-			newMember.attachStudentCourseDetails(scd)
-			memberDao.saveOrUpdate(newMember)
-		}
-
-		transactional() {
-			newMember.mostSignificantCourse = scd
-			memberDao.saveOrUpdate(newMember)
-		}
-
-		newMember
+	
+			transactional() {
+				newMember.attachStudentCourseDetails(scd)
+				memberDao.saveOrUpdate(newMember)
+			}
+	
+			transactional() {
+				newMember.mostSignificantCourse = scd
+				memberDao.saveOrUpdate(newMember)
+			}
+	
+			newMember
 	}
 }
 

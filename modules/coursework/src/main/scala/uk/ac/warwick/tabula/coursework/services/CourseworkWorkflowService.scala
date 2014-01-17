@@ -284,7 +284,7 @@ object WorkflowStages {
 		def actionCode = "workflow.DownloadFeedback.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
-				case Some(item) if !(item.onlineViewed && (item.feedback.hasGenericFeedback || item.feedback.hasOnlineFeedback)) =>
+				case Some(item) if !(item.onlineViewed && (item.feedback.hasGenericFeedback || item.feedback.hasOnlineFeedback)) && !item.downloaded  =>
 					StageProgress(DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded")
 				case Some(item) if item.downloaded || !item.feedback.hasAttachments =>
 					StageProgress(DownloadFeedback, true, "workflow.DownloadFeedback.downloaded", Good, true)

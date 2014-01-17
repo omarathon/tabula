@@ -83,8 +83,8 @@ trait FiltersRelationships extends FiltersStudentsBase with ProfileServiceCompon
 		).flatten
 	}
 
-	var allDepartments : Seq[Department] = _
-	var allRoutes : Seq[Route] = _
+	def allDepartments: Seq[Department]
+	def allRoutes: Seq[Route]
 
 	// Do we need to consider out-of-department modules/routes or can we rely on users typing them in manually?
 	lazy val allModules: Seq[Module] = allDepartments.map(modulesForDepartmentAndSubDepartments(_)).flatten

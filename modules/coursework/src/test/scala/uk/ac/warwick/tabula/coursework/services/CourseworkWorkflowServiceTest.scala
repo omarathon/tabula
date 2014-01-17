@@ -121,6 +121,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 		val feedback = Fixtures.feedback("0672089")
 		feedback.assignment = assignment
 		feedback.attachments.add(new FileAttachment)
+		assignment.genericFeedback = "Thanks for not including herons"
 		
 		{
 			val p = service.progress(assignment)(workflowItems(feedback=Some(feedback)))
@@ -140,7 +141,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 
 
 		{
-			val p = service.progress(assignment)(workflowItems(feedback=Some(feedback), feedbackDownloaded=true, onlineFeedbackViewed=false))
+			val p = service.progress(assignment)(workflowItems(feedback=Some(feedback), feedbackDownloaded=false, onlineFeedbackViewed=false))
 			p.stages should be (ListMap(
 				"AddFeedback" -> StageProgress(AddFeedback, true, "workflow.AddFeedback.uploaded", Good, true, true),
 				"ReleaseFeedback" -> StageProgress(ReleaseFeedback, true, "workflow.ReleaseFeedback.released", Good, true, true),

@@ -1,9 +1,11 @@
-package uk.ac.warwick.tabula.attendance
+package uk.ac.warwick.tabula.attendance.home
 
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.FunctionalTestAcademicYear
+import uk.ac.warwick.tabula.attendance.AttendanceFixture
+import org.scalatest.selenium.WebBrowser.go
 
-class AttendanceHomePageTest extends AttendanceFixture with GivenWhenThen{
+class AttendanceHomeTest extends AttendanceFixture with GivenWhenThen{
 
 	val year = FunctionalTestAcademicYear.current.startYear
 

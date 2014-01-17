@@ -46,7 +46,7 @@
 			<div class="agentslist ${class} fix-on-scroll">
 				<#list markerList as marker>
 					<#local existingStudents = marker.students />
-					<div class="marker drag-target">
+					<div class="marker drag-target agent-${marker.userCode}">
 						<span class="name">${marker.fullName}</span>
 						<span class="drag-count badge badge-info">${existingStudents?size}</span>
 
@@ -56,7 +56,7 @@
 							</#list>
 						</ul>
 
-						<a href="#" class="btn show-list" data-container="#container" data-title="Students to be marked by ${marker.fullName}"><i class="icon-list"></i> List</a>
+						<a href="#" class="btn show-list" data-container=".agent-${marker.userCode}" data-title="Students to be marked by ${marker.fullName}"><i class="icon-list"></i> List</a>
 
 					</div>
 				</#list>

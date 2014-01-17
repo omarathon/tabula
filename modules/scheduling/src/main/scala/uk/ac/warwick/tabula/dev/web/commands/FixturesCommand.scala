@@ -98,6 +98,18 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 					scd.moduleRegistrations.clear()
 				}
 
+				// Checkpoints must be deleted before the associated student
+				for (route <- routes) {
+					val sets = monitoringPointDao.findMonitoringPointSets(route)
+					for (set <- sets) {
+						for (point <- set.points) {
+							for (checkpoint <- point.checkpoints) session.delete(checkpoint)
+							session.delete(point)
+						}
+						session.delete(set)
+					}
+				}
+
 			  for (student <- scds.map{ _.student}.distinct) {
 					//should cascade delete SCDs too
 					session.delete(student)
@@ -133,9 +145,9 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				session.delete(dept)
 			}
 		}
-		def recursivelyGetChildren(department:Department): Seq[Department] = {
+		def recursivelyGetChildren(department:Department): Set[Department] = {
 			val descendents = department.children flatMap { recursivelyGetChildren(_) }
-			descendents ++ department.children
+			descendents.toSet ++ department.children
 		}
 
 		val department = newDepartmentFrom(Fixtures.TestDepartment,departmentDao)
