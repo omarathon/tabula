@@ -30,4 +30,10 @@ class ImportRowTracker {
 		val allFreshIds = studentCourseYearDetailsDao.getFreshIds.toSet
 		(allFreshIds -- scydIdsSeen).toSeq
 	}
+
+	def studentsSeen: Seq[StudentMember] = {
+		scjCodesSeen.map {
+			studentCourseDetailsDao.getByScjCode(_).get.student
+		}.toSeq
+	}
 }

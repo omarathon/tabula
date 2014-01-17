@@ -16,6 +16,7 @@ import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter, 
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileIndexService, ProfileService, SmallGroupService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.data.model.StudentMember
 
 class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with SitsAcademicYearAware with TaskBenchmarking {
 
@@ -60,33 +61,33 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 			case Some(d) => Seq(d)
 			case None => madService.allDepartments
 		}
-		
+
 		departments.foreach { department =>
 			logSize(profileImporter.membershipInfoByDepartment(department)).grouped(BatchSize).zipWithIndex.toSeq.par.foreach { case (membershipInfos, batchNumber) =>
 				benchmarkTask(s"Import member details for department=${department.code}, batch=#${batchNumber + 1}") {
 					logger.info(s"Fetching user details for ${membershipInfos.size} ${department.code} usercodes from websignon")
-		
+
 					val users: Map[UniversityId, User] =
 						benchmarkTask("Fetch user details") {
 							membershipInfos.map { m =>
 								val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
-		
+
 								val user = userLookup.getUserByWarwickUniIdUncached(warwickId) match {
 									case FoundUser(u) => u
 									case _ => userLookup.getUserByUserId(usercode)
 								}
-		
+
 								m.member.universityId -> user
 							}.toMap
 						}
-		
+
 					logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members from Membership")
 					val studentRowCommands = benchmarkTask("Fetch member details") {
 						transactional() {
 							profileImporter.getMemberDetails(membershipInfos, users, importRowTracker)
 						}
 					}
-		
+
 					logger.info("Updating students")
 					benchmarkTask("Update students") {
 					// each apply has its own transaction
@@ -95,7 +96,13 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 							session.flush()
 						}
 					}
-		
+
+					benchmarkTask("Update casUsed field on StudentCourseYearDetails records") {
+						transactional() {
+							updateCasUsed(studentRowCommands)
+						}
+					}
+
 					benchmarkTask("Update module registrations and small groups") {
 						transactional() {
 							updateModuleRegistrationsAndSmallGroups(membershipInfos, users)
@@ -157,6 +164,31 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		newModuleRegistrations
 	}
 
+	// For each student in the batch, find out if they have used a
+	// Confirmation of Acceptance to Study letter to obtain a visa.
+	//
+	// This is called after a batch of rows are processed because each SCYD record for a
+	// student is updated with the same data, so it only needs to be done on a per-student
+	// basis, not a per-row basis - but it can only be done once the SCYD records are
+	// in place
+	def updateCasUsed(rowCommands: Seq[ImportMemberCommand]){
+		logger.info("Updating cas used statuses")
+
+		// first need to get a list of members from the list of commands
+		val members = rowCommands.flatMap(command => memberDao.getByUniversityId(command.universityId))
+
+		members match {
+			case student: StudentMember => {
+				val importCasUsageForStudentCommand = new ImportCasUsageForStudentCommand(student, getCurrentSitsAcademicYear)
+				importCasUsageForStudentCommand.apply
+			}
+			case _ =>
+		}
+
+		session.flush
+		session.clear
+	}
+
 	def refresh(member: Member) {
 		transactional() {
 			val warwickId = member.universityId
@@ -179,6 +211,8 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					updateMissingForIndividual(member, importRowTracker)
 
 					session.flush
+
+					updateCasUsed(importMemberCommands)
 
 					// re-import module registrations and delete old module and group registrations:
 					val newModuleRegistrations = updateModuleRegistrationsAndSmallGroups(List(membInfo), Map(warwickId -> user))

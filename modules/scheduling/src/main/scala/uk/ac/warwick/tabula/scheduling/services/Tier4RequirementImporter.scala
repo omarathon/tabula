@@ -61,5 +61,4 @@ object Tier4RequirementImporter {
 			(rs.getBigDecimal("count"))
 		}
 	}
-
 }

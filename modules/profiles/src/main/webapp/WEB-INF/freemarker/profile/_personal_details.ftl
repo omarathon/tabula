@@ -61,6 +61,29 @@
 							</td>
 						</tr>
 					</#if>
+
+					<#if profile.tier4VisaRequirement??>
+						<tr>
+							<th>Nationality requires visa?</th>
+							<#if profile.tier4VisaRequirement>
+								<td>Yes</td>
+								</tr>
+								<#if profile.casUsed??>
+									<tr>
+										<th>CAS used for visa?</th>
+										<#if profile.casUsed>
+											<td>Yes</td>
+										<#else>
+											<td>No</td>
+										</#if>
+									</tr>
+								</#if>
+							<#else>
+								<td>No</td>
+								</tr>
+							</#if>
+						</tr>
+					</#if>
 				</tbody>
 			</table>
 		</div>
@@ -117,10 +140,6 @@
 						</tr>
 					</#if>
 
-					<#if profile.tier4VisaRequirement >
-						<th>Nationality</th>
-						<td>Tier 4 visa requirement</td>
-					</#if>
 				</tbody>
 			</table>
 		</div>

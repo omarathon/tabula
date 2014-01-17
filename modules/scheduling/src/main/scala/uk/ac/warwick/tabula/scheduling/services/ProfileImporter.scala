@@ -396,8 +396,8 @@ object ProfileImporter {
 			left outer join $sitsSchema.cam_ssn ssn
 				on spr.spr_code = ssn.ssn_sprc
 				and sce.sce_ayrc = ssn.ssn_ayrc
-		
-			left outer join intuit.srs_vcr vcr
+
+			left outer join $sitsSchema.srs_vcr vcr
 				on vcr.vcr_stuc = stu.stu_code
 				and vcr.vcr_ayrc = sce.sce_ayrc
 				and vcr.vcr_iuse = 'Y'
