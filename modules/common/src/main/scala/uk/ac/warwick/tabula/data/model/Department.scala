@@ -30,9 +30,9 @@ class Department extends GeneratedId
 
 	var name:String = null
 
-	@OneToMany(mappedBy="parent", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy="parent", fetch = FetchType.LAZY)
 	@BatchSize(size=200)
-	var children:JList[Department] = JArrayList()
+	var children:JSet[Department] = JHashSet()
 
 	@ManyToOne(fetch = FetchType.LAZY, optional=true)
 	var parent:Department = null

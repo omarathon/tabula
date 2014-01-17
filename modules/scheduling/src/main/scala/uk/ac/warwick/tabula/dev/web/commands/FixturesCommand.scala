@@ -133,9 +133,9 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				session.delete(dept)
 			}
 		}
-		def recursivelyGetChildren(department:Department): Seq[Department] = {
+		def recursivelyGetChildren(department:Department): Set[Department] = {
 			val descendents = department.children flatMap { recursivelyGetChildren(_) }
-			descendents ++ department.children
+			descendents.toSet ++ department.children
 		}
 
 		val department = newDepartmentFrom(Fixtures.TestDepartment,departmentDao)

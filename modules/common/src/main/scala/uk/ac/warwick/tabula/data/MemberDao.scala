@@ -149,6 +149,10 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					.setFetchMode("studentCourseDetails", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
+					.setFetchMode("homeDepartment", FetchMode.JOIN)
+					.setFetchMode("homeDepartment.children", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment.children", FetchMode.JOIN)
 					.distinct
 
 			criteria.seq
