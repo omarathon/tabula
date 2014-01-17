@@ -1,9 +1,11 @@
-package uk.ac.warwick.tabula.attendance
+package uk.ac.warwick.tabula.attendance.manage
 
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 import org.openqa.selenium.By
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.attendance.AttendanceFixture
+import org.scalatest.selenium.WebBrowser.{click, go}
 
 class AttendanceCreateSetTest extends AttendanceFixture with GivenWhenThen{
 

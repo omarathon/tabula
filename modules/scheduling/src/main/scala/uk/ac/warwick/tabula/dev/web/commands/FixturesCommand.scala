@@ -98,6 +98,18 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 					scd.moduleRegistrations.clear()
 				}
 
+				// Checkpoints must be deleted before the associated student
+				for (route <- routes) {
+					val sets = monitoringPointDao.findMonitoringPointSets(route)
+					for (set <- sets) {
+						for (point <- set.points) {
+							for (checkpoint <- point.checkpoints) session.delete(checkpoint)
+							session.delete(point)
+						}
+						session.delete(set)
+					}
+				}
+
 			  for (student <- scds.map{ _.student}.distinct) {
 					//should cascade delete SCDs too
 					session.delete(student)
