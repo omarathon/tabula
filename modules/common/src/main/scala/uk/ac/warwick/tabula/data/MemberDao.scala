@@ -458,8 +458,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			val c = session.newCriteria[StudentCourseDetails]
 			restrictions.foreach { _.apply(c) }
 			c.add(Property.forName("sprCode").in(d))
-			c.project[StudentMember](Projections.property("student"))
-			 .distinct.seq
+			c.project[StudentMember](Projections.groupProperty("student")).seq
 		}
 	}
 
