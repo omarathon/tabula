@@ -53,6 +53,11 @@
 												<option value="authorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "authorised">selected</#if>>Missed (authorised)</option>
 												<option value="attended" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "attended">selected</#if>>Attended</option>
 											</select>
+
+											<#if features.attendanceMonitoringNote>
+												<a class="btn use-tooltip" title="Edit attendance note" href="<@routes.note student=command.student point=point returnTo=((info.requestedUri!"")?url) />"><i class="icon-edit"></i></a>
+											</#if>
+
 											<#if point.pointType?? && point.pointType.dbValue == "meeting">
 												<a class="meetings" title="Meetings with this student" href="<@routes.studentMeetings point command.student />"><i class="icon-info-sign icon-fixed-width"></i></a>
 											<#else>

@@ -36,6 +36,8 @@
 	<#macro recordStudent department student academicYear returnTo><@url page="/view/${department.code}/students/${student.universityId}/record?academicYear=${academicYear.toString}&returnTo=${returnTo?url}" /></#macro>
 	<#macro recordStudentPoint point student returnTo><@url page="/${point.pointSet.route.department.code}/${point.id}/record/${student.universityId}?returnTo=${returnTo?url}"/></#macro>
 
+	<#macro note student point returnTo=""><@url page="/note/${student.universityId}/${point.id}/?returnTo=${returnTo}" /></#macro>
+
 	<#macro studentMeetings point member><@url page="/${point.pointSet.route.department.code}/${point.id}/meetings/${member.universityId}"/></#macro>
 
 	<#macro agentView relationshipType><@url page="/agent/${relationshipType.urlPart}"/></#macro>

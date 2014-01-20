@@ -111,6 +111,9 @@ ${titleHeader}
 								<i class="icon-ok icon-fixed-width"></i>
 							</button>
 						</div>
+						<#if features.attendanceMonitoringNote>
+							<a style="visibility: hidden" class="btn"><i class="icon-edit"></i></a>
+						</#if>
 						<i class="icon-fixed-width"></i>
 					</div>
 				</div>
@@ -137,6 +140,11 @@ ${titleHeader}
 								<option value="${state.dbValue}" <#if hasState && checkpointState.dbValue == state.dbValue>selected</#if>>${state.description}</option>
 							</#list>
 						</select>
+
+						<#if features.attendanceMonitoringNote>
+							<a class="btn use-tooltip" title="Edit attendance note" href="<@routes.note student=student point=point returnTo=((info.requestedUri!"")?url) />"><i class="icon-edit"></i></a>
+						</#if>
+
 						<#if point.pointType?? && point.pointType.dbValue == "meeting">
 							<a class="meetings" title="Meetings with this student" href="<@routes.studentMeetings point student />"><i class="icon-fixed-width icon-info-sign"></i></a>
 						<#else>

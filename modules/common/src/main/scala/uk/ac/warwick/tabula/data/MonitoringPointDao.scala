@@ -28,6 +28,7 @@ trait MonitoringPointDao {
 	def saveOrUpdate(template: MonitoringPointSetTemplate)
 	def saveOrUpdate(set: MonitoringPointSet)
 	def saveOrUpdate(report: MonitoringPointReport)
+	def saveOrUpdate(note: MonitoringPointAttendanceNote)
 	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]): Option[MonitoringPointSet]
@@ -65,6 +66,7 @@ trait MonitoringPointDao {
 	def findUnreportedReports: Seq[MonitoringPointReport]
 	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport]
 	def hasAnyPointSets(department: Department): Boolean
+	def getAttendanceNote(student: StudentMember, monitoringPoint: MonitoringPoint): Option[MonitoringPointAttendanceNote]
 }
 
 
@@ -114,6 +116,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def saveOrUpdate(set: MonitoringPointSet) = session.saveOrUpdate(set)
 	def saveOrUpdate(template: MonitoringPointSetTemplate) = session.saveOrUpdate(template)
 	def saveOrUpdate(report: MonitoringPointReport) = session.saveOrUpdate(report)
+	def saveOrUpdate(note: MonitoringPointAttendanceNote) = session.saveOrUpdate(note)
 
 	def findMonitoringPointSets(route: Route) =
 		session.newCriteria[MonitoringPointSet]
@@ -465,6 +468,13 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			.add(is("r.department", department))
 			.project[Number](Projections.rowCount())
 			.uniqueResult.get.intValue() > 0
+	}
+
+	def getAttendanceNote(student: StudentMember, monitoringPoint: MonitoringPoint): Option[MonitoringPointAttendanceNote] = {
+		session.newCriteria[MonitoringPointAttendanceNote]
+			.add(is("student", student))
+			.add(is("point", monitoringPoint))
+			.uniqueResult
 	}
 
 }
