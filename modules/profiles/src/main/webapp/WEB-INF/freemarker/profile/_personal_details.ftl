@@ -64,13 +64,13 @@
 
 					<#if profile.tier4VisaRequirement??>
 						<tr>
-							<th>Nationality requires visa?</th>
+							<th>Nationality requires visa</th>
 							<#if profile.tier4VisaRequirement>
 								<td>Yes</td>
 								</tr>
 								<#if profile.casUsed??>
 									<tr>
-										<th>CAS used for visa?</th>
+										<th>CAS used to obtain visa</th>
 										<#if profile.casUsed>
 											<td>Yes</td>
 										<#else>

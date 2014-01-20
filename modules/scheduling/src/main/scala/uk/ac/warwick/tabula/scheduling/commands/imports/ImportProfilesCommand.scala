@@ -177,12 +177,13 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 		// first need to get a list of members from the list of commands
 		val members = rowCommands.flatMap(command => memberDao.getByUniversityId(command.universityId))
 
-		members match {
-			case student: StudentMember => {
-				val importCasUsageForStudentCommand = new ImportCasUsageForStudentCommand(student, getCurrentSitsAcademicYear)
-				importCasUsageForStudentCommand.apply
+		members.map { member => member match {
+				case student: StudentMember => {
+					val importCasUsageForStudentCommand = new ImportCasUsageForStudentCommand(student, getCurrentSitsAcademicYear)
+					importCasUsageForStudentCommand.apply
+				}
+				case _ =>
 			}
-			case _ =>
 		}
 
 		session.flush
