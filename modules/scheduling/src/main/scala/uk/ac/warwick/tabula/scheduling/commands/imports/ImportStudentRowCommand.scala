@@ -14,11 +14,18 @@ import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, ModeOfAt
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
 
+
+/*
+ * ImportStudentRowCommand takes a number of other commands as argument which perform sub-tasks.
+ * These need to be passed in, rather than newed up within the command, to enable testing
+ * without auto-wiring.
+ */
 class ImportStudentRowCommand(val member: MembershipInformation,
 		val ssoUser: User,
 		val resultSet: ResultSet,
 		val importRowTracker: ImportRowTracker,
-		var importStudentCourseCommand: ImportStudentCourseCommand)
+		var importStudentCourseCommand: ImportStudentCourseCommand,
+		var importTier4ForStudentCommand: ImportTier4ForStudentCommand)
 	extends ImportMemberCommand(member, ssoUser, Some(resultSet))
 	with Logging with Daoisms
 	with StudentProperties with Unaudited with PropertyCopying {
@@ -27,8 +34,8 @@ class ImportStudentRowCommand(val member: MembershipInformation,
 
 	implicit val rs = resultSet
 
-	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
-	var profileService = Wire.auto[ProfileService]
+	var modeOfAttendanceImporter = Wire[ModeOfAttendanceImporter]
+	var profileService = Wire[ProfileService]
 
 	this.nationality = rs.getString("nationality")
 	this.mobileNumber = rs.getString("mobile_number")
@@ -50,16 +57,8 @@ class ImportStudentRowCommand(val member: MembershipInformation,
 				case _ => (true, new StudentMember(universityId))
 			}
 
-			val commandBean = new BeanWrapperImpl(this)
-			val memberBean = new BeanWrapperImpl(member)
-
-			val hasChanged = copyMemberProperties(commandBean, memberBean) | copyStudentProperties(commandBean, memberBean) | markAsSeenInSits(memberBean)
-
-			if (isTransient || hasChanged) {
-				logger.debug("Saving changes for " + member)
-
-				member.lastUpdatedDate = DateTime.now
-				memberDao.saveOrUpdate(member)
+			if (!importRowTracker.universityIdsSeen.contains(member.universityId)) {
+				garnerStudentDetails(isTransient, member)
 			}
 
 			importStudentCourseCommand.stuMem = member
@@ -73,11 +72,31 @@ class ImportStudentRowCommand(val member: MembershipInformation,
 		}
 	}
 
+	private def garnerStudentDetails(isTransient: Boolean, member: StudentMember) {
+		// There are multiple rows returned by the SQL per student; only import non-course details if we haven't already
+		val commandBean = new BeanWrapperImpl(this)
+		val memberBean = new BeanWrapperImpl(member)
+
+		importTier4ForStudentCommand.student = member
+
+		// We intentionally use single pipes rather than double here - we want all statements to be evaluated
+		val hasChanged = (copyMemberProperties(commandBean, memberBean)
+			| copyStudentProperties(commandBean, memberBean)
+			| importTier4ForStudentCommand.apply
+			| markAsSeenInSits(memberBean))
+
+		if (isTransient || hasChanged) {
+			logger.debug("Saving changes for " + member)
+
+			member.lastUpdatedDate = DateTime.now
+			memberDao.saveOrUpdate(member)
+		}
+	}
+
 	private val basicStudentProperties = Set(
 		"nationality", "mobileNumber"
 	)
 
-	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
 	private def copyStudentProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
 		copyBasicProperties(basicStudentProperties, commandBean, memberBean)
 

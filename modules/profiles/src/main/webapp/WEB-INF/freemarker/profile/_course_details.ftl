@@ -148,6 +148,11 @@
 										</td>
 									</tr>
 									<tr>
+										<th>Programme route code</th>
+										<td>${studentCourseDetails.sprCode}
+										</td>
+									</tr>
+									<tr>
 										<th>Course join code</th>
 										<td>${studentCourseDetails.scjCode}
 										</td>
