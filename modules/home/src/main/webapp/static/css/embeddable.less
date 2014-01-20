@@ -1,7 +1,7 @@
 // iframes have no green background
 html.iframe {
     background: none;
-    
+
     #container {
     	width: auto;
     }
@@ -23,6 +23,16 @@ html.iframe {
 @import "bootstrap_fixes.inc.less";
 @import "bootstrap/variables.less";
 @import "bootstrap/mixins.less";
+
+body {
+  .smallscreen-only {
+	display: none;
+  }
+
+  &.is-smallscreen .smallscreen-only {
+	display: inherit;
+  }
+}
 
 .mac-cmd {
 	font-size: 140%;

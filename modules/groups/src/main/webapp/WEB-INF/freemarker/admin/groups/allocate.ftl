@@ -88,7 +88,7 @@
 								<i class="icon-arrow-left"></i> Remove all
 							</a>
 						</div>
-						<div class="row-fluid">
+						<div class="row-fluid hide-smallscreen">
 							<div class="span5">
 								<h3>Students</h3>
 							</div>
@@ -145,11 +145,12 @@
 						</div>
 						<div class="span2">
 							<#-- I, for one, welcome our new jumbo icon overlords -->
-							<div class="direction-icon fix-on-scroll">
+							<div class="direction-icon fix-on-scroll hide-smallscreen">
 								<i class="icon-arrow-right"></i>
 							</div>
 						</div>
 						<div class="span5">
+							<h3 class="smallscreen-only">Groups</h3>
 							<div id="groupslist" class="groups fix-on-scroll">
 								<#list set.groups as group>
 								<#assign existingStudents = mappingById[group.id]![] />
@@ -243,8 +244,7 @@
 				fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
 			});
 
-
-			// When the return list has changed, make sure the filter is re-run			
+			// When the return list has changed, make sure the filter is re-run
 			$('.return-list').on('changed.tabula', function(e) {
 				// Make sure it exists before doing it
 				var filter = $('.tabula-filtered-list').data('tabula-filtered-list');

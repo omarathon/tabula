@@ -10,9 +10,6 @@
 	 *
 	 */
     $.fn.fixHeaderFooter = function() {
-        // short-circuit
-        if ($('body.is-smallscreen').length) return this;
-
         var selHeader = '.persist-header';
         var selClonedHeader = '.cloned-header';
         var selHeaderShadow = '.header-shadow';
@@ -27,6 +24,7 @@
             'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width',
             'border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style'
         ];
+        var isSmallscreen = false;
 
         var $headers = $container.find(selHeader);
 
@@ -141,16 +139,27 @@
             }
         });
 
-        // method to fix the jumbo direction icon in place
+        $('body').on('smallscreen', function(e) {
+            isSmallscreen = !!$('body.is-smallscreen').length;
+            var $sel = $headers.add($f);
+            $sel.trigger(isSmallscreen ? 'disable.ScrollToFixed' : 'enable.ScrollToFixed');
+        });
+
+        // rest of the plugin contains helper method, primarily for drag-and-drop allocation
+        this.viewableArea = function() {
+            return $(window).height() - ($('.persist-header:visible').height() + $('#primary-navigation-wrapper').outerHeight() + $('.persist-footer').outerHeight());
+        }
+
+        // fix the jumbo direction icon in place
         this.fixDirectionIcon = function() {
-            var directionIcon = $('.direction-icon');
+            var $directionIcon = $('.direction-icon');
             var fixContainer = $('.fix-on-scroll-container');
             var persistAreaTop = $('.persist-header').height() + $('#primary-navigation-wrapper').outerHeight();
 
-            if(fixContainer.offset().top - $(window).scrollTop() < persistAreaTop) {
-                directionIcon.css({ "top" : persistAreaTop, "position": "fixed", "max-width": directionIcon.width() });
+            if(!isSmallscreen && fixContainer.offset().top - $(window).scrollTop() < persistAreaTop) {
+                $directionIcon.css({ "top" : persistAreaTop, "position": "fixed", "max-width": $directionIcon.width() });
             } else {
-                directionIcon.css({"top": "auto", "position": "static", "max-width": directionIcon.width });
+                $directionIcon.css({"top": "auto", "position": "static", "max-width": $directionIcon.width });
             }
         };
 
@@ -162,15 +171,11 @@
             var persistAreaTop = $('.persist-header').height() + $('#primary-navigation-wrapper').outerHeight();
 
             // width is set on fixing because it was jumping to the minimum width of the content
-            if (targetList.height() < this.viewableArea() && ($(window).scrollTop() > $('.persist-area').offset().top)) {
+            if (!isSmallscreen && targetList.height() < this.viewableArea() && ($(window).scrollTop() > $('.persist-area').offset().top)) {
                 targetList.css({"top": persistAreaTop + 14, "position": "fixed", "width": targetList.parent().width()});
             } else {
                 targetList.css({"top": "auto", "position": "relative", "width": "auto"});
             }
-        }
-
-        this.viewableArea = function() {
-            return $(window).height() - ($('.persist-header:visible').height() + $('#primary-navigation-wrapper').outerHeight() + $('.persist-footer').outerHeight());
         }
 
         return this;
