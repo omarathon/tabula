@@ -14,11 +14,18 @@ import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, ModeOfAt
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
 
+
+/*
+ * ImportStudentRowCommand takes a number of other commands as argument which perform sub-tasks.
+ * These need to be passed in, rather than newed up within the command, to enable testing
+ * without auto-wiring.
+ */
 class ImportStudentRowCommand(val member: MembershipInformation,
 		val ssoUser: User,
 		val resultSet: ResultSet,
 		val importRowTracker: ImportRowTracker,
-		var importStudentCourseCommand: ImportStudentCourseCommand)
+		var importStudentCourseCommand: ImportStudentCourseCommand,
+		var importTier4ForStudentCommand: ImportTier4ForStudentCommand)
 	extends ImportMemberCommand(member, ssoUser, Some(resultSet))
 	with Logging with Daoisms
 	with StudentProperties with Unaudited with PropertyCopying {
@@ -70,8 +77,7 @@ class ImportStudentRowCommand(val member: MembershipInformation,
 		val commandBean = new BeanWrapperImpl(this)
 		val memberBean = new BeanWrapperImpl(member)
 
-
-		val importTier4ForStudentCommand = new ImportTier4ForStudentCommand(member)
+		importTier4ForStudentCommand.student = member
 
 		// We intentionally use single pipes rather than double here - we want all statements to be evaluated
 		val hasChanged = (copyMemberProperties(commandBean, memberBean)

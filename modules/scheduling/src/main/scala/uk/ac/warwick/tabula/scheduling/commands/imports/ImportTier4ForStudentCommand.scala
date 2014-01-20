@@ -10,12 +10,13 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.services.Tier4RequirementImporter
 
-class ImportTier4ForStudentCommand(student: StudentMember)
+class ImportTier4ForStudentCommand()
 	extends Command[Boolean] with Unaudited with Logging {
 	PermissionCheck(Permissions.ImportSystemData)
 
 	var requirementImporter = Wire[Tier4RequirementImporter]
 	var memberDao = Wire[MemberDao]
+	var student: StudentMember = _
 
 	def applyInternal(): Boolean = {
 		val newRequirement = requirementImporter.hasTier4Requirement(student.universityId)

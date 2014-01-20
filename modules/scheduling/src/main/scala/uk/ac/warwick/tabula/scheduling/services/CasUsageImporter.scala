@@ -30,8 +30,8 @@ class CasUsageImporterImpl extends CasUsageImporter with SitsAcademicYearAware{
 	lazy val casUsedMappingQuery = new CasUsedMappingQuery(sits)
 
 	def isCasUsed(universityId: String): Boolean = {
-		val rowNum = casUsedMappingQuery.executeByNamedParam(Map("universityId" -> universityId, "year" -> getCurrentSitsAcademicYearString)).head
-		if (rowNum > 0) true else false
+		val rowCount = casUsedMappingQuery.executeByNamedParam(Map("universityId" -> universityId, "year" -> getCurrentSitsAcademicYearString)).head
+		if (rowCount > 0) true else false
 	}
 }
 

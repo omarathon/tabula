@@ -35,6 +35,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseYearC
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSupervisorsForStudentCommand
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportTier4ForStudentCommand
 
 case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
 
@@ -185,7 +186,11 @@ class SandboxProfileImporter extends ProfileImporter {
 			ssoUser,
 			rs,
 			importRowTracker,
-			new ImportStudentCourseCommand(rs, importRowTracker, new ImportStudentCourseYearCommand(rs, importRowTracker), new ImportSupervisorsForStudentCommand())
+			new ImportStudentCourseCommand(rs,
+					importRowTracker,
+					new ImportStudentCourseYearCommand(rs, importRowTracker),
+					new ImportSupervisorsForStudentCommand()),
+			new ImportTier4ForStudentCommand
 		)
 	}
 
@@ -335,7 +340,6 @@ object ProfileImporter {
 			stu.stu_cat3 as mobile_number,
 
 			nat.nat_name as nationality,
-			nat.nat_edid as tier4requirement,
 
 			crs.crs_code as course_code,
 			crs.crs_ylen as course_year_length,
@@ -397,13 +401,6 @@ object ProfileImporter {
 				on spr.spr_code = ssn.ssn_sprc
 				and sce.sce_ayrc = ssn.ssn_ayrc
 
-			left outer join $sitsSchema.srs_vcr vcr
-				on vcr.vcr_stuc = stu.stu_code
-				and vcr.vcr_ayrc = sce.sce_ayrc
-				and vcr.vcr_iuse = 'Y'
-				and vcr.vcr_exst != 'X'
-				and vcr.vcr_crsc = crs.crs_code
-
 			left outer join $sitsSchema.ins_prs prs
 				on spr.prs_code = prs.prs_code
 
@@ -416,13 +413,18 @@ object ProfileImporter {
 		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 		declareParameter(new SqlParameter("year", Types.VARCHAR))
 		compile()
+
 		override def mapRow(rs: ResultSet, rowNumber: Int)
 			= new ImportStudentRowCommand(
 				member,
 				ssoUser,
 				rs,
 				importRowTracker,
-				new ImportStudentCourseCommand(rs, importRowTracker, new ImportStudentCourseYearCommand(rs, importRowTracker), new ImportSupervisorsForStudentCommand())
+				new ImportStudentCourseCommand(rs,
+						importRowTracker,
+						new ImportStudentCourseYearCommand(rs, importRowTracker),
+						new ImportSupervisorsForStudentCommand),
+				new ImportTier4ForStudentCommand
 			)
 	}
 
