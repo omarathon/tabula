@@ -7,7 +7,7 @@ import org.junit.{After, Before}
 
 import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
 import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.data.model.{Member, StudentCourseYearDetails, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, Member, StudentCourseYearDetails, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.ProfileService
 
@@ -347,6 +347,53 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		memberDao.getStudentsByAgentRelationshipAndRestrictions(relationshipType, staff2.universityId, Seq()).size should be (1)
 	}
 
+
+	@Test def studentsByAgentRelationshipMultiScds = transactional { tx =>
+
+		val dept = Fixtures.department("ml", "Modern Languages")
+		session.save(dept)
+
+		sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
+
+		val studentWithMultipleScdsSameSpr = Fixtures.student(universityId = "1000001", userId="student", department=dept, courseDepartment=dept, sprStatus=sprFullyEnrolledStatus)
+		studentWithMultipleScdsSameSpr.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
+
+		val sprCode = "0123456/2"
+
+		// Student with multiple StudentCourseDetails with same SPR code - ensure no dupes TAB-1825
+		val scd = new StudentCourseDetails(studentWithMultipleScdsSameSpr, "0123456/1")
+		scd.sprCode = sprCode
+		val scd2 = new StudentCourseDetails(studentWithMultipleScdsSameSpr, "0123456/3")
+		scd2.sprCode = sprCode
+
+		studentWithMultipleScdsSameSpr.attachStudentCourseDetails(scd)
+		studentWithMultipleScdsSameSpr.attachStudentCourseDetails(scd2)
+
+		val anotherStudent = Fixtures.student(universityId = "1000002", userId="student", department=dept, courseDepartment=dept, sprStatus=sprFullyEnrolledStatus)
+		anotherStudent.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
+
+		val staff = Fixtures.staff(universityId = "1000003", userId="staff1", department=dept)
+		staff.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 3, 1, 0, 0, 0)
+
+		memberDao.saveOrUpdate(studentWithMultipleScdsSameSpr)
+		memberDao.saveOrUpdate(anotherStudent)
+		memberDao.saveOrUpdate(staff)
+
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+		memberDao.saveOrUpdate(relationshipType)
+
+		val relBetweenStaff1AndMultiSCDStudent = StudentRelationship(staff.universityId, relationshipType, "1000001/1")
+		val relBetweenStaff1AndOtherStudent = StudentRelationship(staff.universityId, relationshipType, "1000002/1")
+
+		relBetweenStaff1AndMultiSCDStudent.targetSprCode = sprCode
+
+		memberDao.saveOrUpdate(relBetweenStaff1AndMultiSCDStudent)
+		memberDao.saveOrUpdate(relBetweenStaff1AndOtherStudent)
+
+		memberDao.getStudentsByDepartment(dept).size should be (2)
+
+		memberDao.getStudentsByAgentRelationshipAndRestrictions(relationshipType, staff.universityId, Seq()).size should be (2)
+	}
 
 
 	@Test def studentsCounting = transactional { tx =>
