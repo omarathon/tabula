@@ -28,8 +28,12 @@
 
         var $headers = $container.find(selHeader);
 
-        // use .each() as we allow more than one header to fix and we need a $(this) reference
+        // use .each() as we allow more than one header to fix and we need to handle them individually
         $headers.each(function(idx) {
+            // cache the original header index to cope with reordering for stacking context later
+            $(this).data('index', idx);
+
+            // can we fix it? yes we can
             $(this).scrollToFixed({
                 zIndex: 10,
                 marginTop: function() {
@@ -78,6 +82,7 @@
                     // on fixing, if this is the last header to stack, add a shadow if absent
                     if ($this.is($headers.filter(':last')) && !$this.children(':last-child').is(selHeaderShadow)) $this.append('<hr class="' + selHeaderShadow.substring(1) + '">');
 
+                    // <thead>s are special
                     if ($this.is('thead')) {
                         // this is awful, but I've got no better after best part of day hacking/googling
                         var firefoxFudgeFactor = 1/$this.find('th,td').length;
@@ -97,14 +102,38 @@
                             $this.find('th').eq(i).width(w);
                         });
                     }
+
+                    /* z-index is dead, long live z-index
+                     *
+                     * Fixing creates a new stacking context for that element and its children.
+                     * http://www.w3.org/TR/CSS2/zindex.html#painting-order so that if we have multiple fixed
+                     * headers without a common parent, then any z-index set within them will be irrelevant.
+                     * (I'm looking at you, Bootstrap dropdown menus.) We need to reorder the fixed elements
+                     * to specify the order of those discrete stacking contexts. Then, on unfix, we need to restore
+                     * the original order.
+                     *
+                     * For now in Tabula, only handling elements with dropdown menus,
+                     * as little else will cause an underlap.
+                     */
+                    if ($this.find('.dropdown-menu').length) {
+                        $this.before('<div class="header-displaced_' + $this.data('index') + '"></div>').appendTo('#main-content').data('displaced', true);
+                    }
                 },
                 preUnfixed: function() {
-                    if ($(this).is($headers.filter(':first'))) {
-                        $(this).css({
+                    var $this = $(this);
+
+                    // remove breathing room
+                    if ($this.is($headers.filter(':first'))) {
+                        $this.css({
                             'padding-top': 'inherit',
                             'transition': 'none'
                         });
                     };
+
+                    // restore if displaced
+                    if ($this.data('displaced')) {
+                        $this.appendTo('.header-displaced_' + $this.data('index')).unwrap().data('displaced', undefined);
+                    }
                 },
                 unfixed: function() {
                     var $this = $(this);
