@@ -20,6 +20,7 @@ trait RelationshipService {
 	def delete(relationshipType: StudentRelationshipType)
 	def getStudentRelationshipTypeById(id: String): Option[StudentRelationshipType]
 	def getStudentRelationshipTypeByUrlPart(urlPart: String): Option[StudentRelationshipType]
+	def getStudentRelationshipTypesByUrlParts(urlParts: Seq[String]): Seq[StudentRelationshipType]
 
 	def saveOrUpdate(relationship: StudentRelationship)
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
@@ -49,7 +50,11 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType] = memberDao.allStudentRelationshipTypes
 	def getStudentRelationshipTypeById(id: String) = memberDao.getStudentRelationshipTypeById(id)
-	def getStudentRelationshipTypeByUrlPart(urlPart: String) = memberDao.getStudentRelationshipTypeByUrlPart(urlPart)
+
+	def getStudentRelationshipTypeByUrlPart(urlPart: String) = getStudentRelationshipTypesByUrlParts(Seq(urlPart)).headOption
+
+	def getStudentRelationshipTypesByUrlParts(urlParts: Seq[String])
+		= memberDao.getStudentRelationshipTypesByUrlParts(urlParts)
 	def saveOrUpdate(relationshipType: StudentRelationshipType) = memberDao.saveOrUpdate(relationshipType)
 	def delete(relationshipType: StudentRelationshipType) = memberDao.delete(relationshipType)
 

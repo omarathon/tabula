@@ -63,7 +63,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			// set up importer to return supervisor
 			val codes = Seq((supervisorUniId, new java.math.BigDecimal("100")))
 			val importer = smartMock[SupervisorImporter]
-			importer.getSupervisorUniversityIds(scjCode) returns codes
+			importer.getSupervisorUniversityIds(scjCode, "supervisor") returns codes
 
 			// test command
 			val command = new ImportSupervisorsForStudentCommand()
@@ -88,7 +88,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		new Environment {
 			// set up importer to return supervisor
 			val importer = smartMock[SupervisorImporter]
-			importer.getSupervisorUniversityIds(scjCode) returns Seq()
+			importer.getSupervisorUniversityIds(scjCode, "supervisor") returns Seq()
 
 			// test command
 			val command = new ImportSupervisorsForStudentCommand()
@@ -118,7 +118,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			// set up importer to return supervisor
 			val codes = Seq((supervisorUniId, null))
 			val importer = smartMock[SupervisorImporter]
-			importer.getSupervisorUniversityIds(scjCode) returns codes
+			importer.getSupervisorUniversityIds(scjCode, "supervisor") returns codes
 
 			// test command
 			val command = new ImportSupervisorsForStudentCommand()

@@ -16,7 +16,16 @@ trait SupervisorImporter {
 	/**
 	 * Returns a sequence of pairs of PRS codes and the percentage load
 	 */
-	def getSupervisorUniversityIds(scjCode: String): Seq[(String, JBigDecimal)]
+
+	val ResearchSupervisorSitsExaminerType = "SUP"
+	val DissertationSupervisorSitsExaminerType = "WASUP"
+
+	val UrlPartToSitsExaminerTypeMap = Map(
+			"supervisor" -> ResearchSupervisorSitsExaminerType,
+			"dissertation-supervisor" -> DissertationSupervisorSitsExaminerType
+	);
+
+	def getSupervisorUniversityIds(scjCode: String, sitsExaminerType: String): Seq[(String, JBigDecimal)]
 }
 
 @Profile(Array("dev", "test", "production")) @Service
@@ -27,14 +36,14 @@ class SupervisorImporterImpl extends SupervisorImporter {
 
 	lazy val supervisorMappingQuery = new SupervisorMappingQuery(sits)
 
-	def getSupervisorUniversityIds(scjCode: String): Seq[(String, JBigDecimal)] = {
-		supervisorMappingQuery.executeByNamedParam(Map("scj_code" -> scjCode))
+	def getSupervisorUniversityIds(scjCode: String, urlPart: String): Seq[(String, JBigDecimal)] = {
+		supervisorMappingQuery.executeByNamedParam(Map("scj_code" -> scjCode, "sits_examiner_type" -> UrlPartToSitsExaminerTypeMap(urlPart)))
 	}
 }
 
 @Profile(Array("sandbox")) @Service
 class SandboxSupervisorImporter extends SupervisorImporter {
-	def getSupervisorUniversityIds(scjCode: String): Seq[(String, JBigDecimal)] = Seq.empty // TODO
+	def getSupervisorUniversityIds(scjCode: String, sitsExaminerType: String): Seq[(String, JBigDecimal)] = Seq.empty // TODO
 }
 
 object SupervisorImporter {
@@ -46,12 +55,13 @@ object SupervisorImporter {
 			rdx_perc
 		from $sitsSchema.srs_rdx rdx, $sitsSchema.ins_prs prs
 		where rdx_scjc = :scj_code
-		and rdx_extc = 'SUP'
+		and rdx_extc = :sits_examiner_type
 		and rdx.rdx_prsc = prs.prs_code
 		"""
 
 	class SupervisorMappingQuery(ds: DataSource) extends MappingSqlQueryWithParameters[(String, JBigDecimal)](ds, GetSupervisorsSql) {
 		this.declareParameter(new SqlParameter("scj_code", Types.VARCHAR))
+		this.declareParameter(new SqlParameter("sits_examiner_type", Types.VARCHAR))
 		this.compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
 			(rs.getString("prs_udf1"), rs.getBigDecimal("rdx_perc"))

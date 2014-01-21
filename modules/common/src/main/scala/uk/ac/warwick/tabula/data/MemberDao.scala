@@ -1,16 +1,24 @@
 package uk.ac.warwick.tabula.data
 
-
 import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
-import org.hibernate.criterion.{Property, DetachedCriteria, Order, Projections, Restrictions}
+
+import org.hibernate.FetchMode
+import org.hibernate.annotations.{AccessType, FilterDefs, Filters}
+import org.hibernate.criterion.{DetachedCriteria, Order}
+import org.hibernate.criterion.{Property, Restrictions}
+import org.hibernate.criterion.Order.{asc, desc}
+import org.hibernate.criterion.Projections
+import org.hibernate.criterion.Projections.{countDistinct, distinct, groupProperty, projectionList, property, rowCount}
+import org.hibernate.criterion.Restrictions.{disjunction, gt, in, like}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
+
+import javax.persistence.{DiscriminatorColumn, DiscriminatorValue, Entity, Inheritance, NamedQueries}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.tabula.data.model.{Department, Member, ModeOfAttendance, RuntimeMember, SitsStatus, StaffMember, StudentCourseDetails, StudentMember, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
-import org.hibernate.FetchMode
-import org.hibernate.transform.DistinctRootEntityResultTransformer
 
 trait MemberDaoComponent {
 	val memberDao: MemberDao
@@ -23,7 +31,7 @@ trait AutowiringMemberDaoComponent extends MemberDaoComponent {
 trait MemberDao {
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType]
 	def getStudentRelationshipTypeById(id: String): Option[StudentRelationshipType]
-	def getStudentRelationshipTypeByUrlPart(urlPart: String): Option[StudentRelationshipType]
+	def getStudentRelationshipTypesByUrlParts(urlParts: Seq[String]): Seq[StudentRelationshipType]
 	def saveOrUpdate(relationshipType: StudentRelationshipType)
 	def delete(relationshipType: StudentRelationshipType)
 
@@ -74,10 +82,11 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.seq
 
 	def getStudentRelationshipTypeById(id: String) = getById[StudentRelationshipType](id)
-	def getStudentRelationshipTypeByUrlPart(urlPart: String) =
+
+	def getStudentRelationshipTypesByUrlParts(urlParts: Seq[String]) =
 		session.newCriteria[StudentRelationshipType]
-			.add(is("urlPart", urlPart))
-			.uniqueResult
+			.add(in("urlPart", urlParts map { _.safeTrim }))
+			.seq
 
 	def saveOrUpdate(relationshipType: StudentRelationshipType) = session.saveOrUpdate(relationshipType)
 	def delete(relationshipType: StudentRelationshipType) = session.delete(relationshipType)

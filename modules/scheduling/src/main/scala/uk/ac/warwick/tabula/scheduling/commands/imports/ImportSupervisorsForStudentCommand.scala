@@ -36,13 +36,13 @@ class ImportSupervisorsForStudentCommand()
 
 	def importSupervisors() {
 		relationshipService
-			.getStudentRelationshipTypeByUrlPart("supervisor") // TODO this is awful
+			.getStudentRelationshipTypesByUrlParts(Seq("supervisor", "dissertation-supervisor")) // TODO this is awful
 			.filter { relType =>
 				val source = Option(studentCourseDetails.department).map { _.getStudentRelationshipSource(relType) }.getOrElse(StudentRelationshipSource.SITS)
 				source == StudentRelationshipSource.SITS
 			}
 			.foreach { relationshipType =>
-				val supervisorUniIds = supervisorImporter.getSupervisorUniversityIds(studentCourseDetails.scjCode)
+				val supervisorUniIds = supervisorImporter.getSupervisorUniversityIds(studentCourseDetails.scjCode, relationshipType.urlPart)
 				val supervisors = supervisorUniIds.flatMap { case (supervisorUniId, percentage) =>
 					val m = profileService.getMemberByUniversityId(supervisorUniId)
 					if (m.isEmpty) {
