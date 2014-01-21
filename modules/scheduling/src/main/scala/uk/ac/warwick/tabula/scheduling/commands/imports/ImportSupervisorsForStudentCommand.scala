@@ -36,13 +36,13 @@ class ImportSupervisorsForStudentCommand()
 
 	def importSupervisors() {
 		relationshipService
-			.getStudentRelationshipTypesByUrlParts(Seq("supervisor", "dissertation-supervisor")) // TODO this is awful
-			.filter { relType =>
-				val source = Option(studentCourseDetails.department).map { _.getStudentRelationshipSource(relType) }.getOrElse(StudentRelationshipSource.SITS)
+			.getStudentRelationshipTypesWithRdxType // only look for relationship types that are in RDX
+			.filter { relType => // where the department settings specify that SITS should be the source
+				val source = Option(studentCourseDetails.department).map { _.getStudentRelationshipSource(relType) }.getOrElse(relType.defaultSource)
 				source == StudentRelationshipSource.SITS
 			}
 			.foreach { relationshipType =>
-				val supervisorUniIds = supervisorImporter.getSupervisorUniversityIds(studentCourseDetails.scjCode, relationshipType.urlPart)
+				val supervisorUniIds = supervisorImporter.getSupervisorUniversityIds(studentCourseDetails.scjCode, relationshipType)
 				val supervisors = supervisorUniIds.flatMap { case (supervisorUniId, percentage) =>
 					val m = profileService.getMemberByUniversityId(supervisorUniId)
 					if (m.isEmpty) {

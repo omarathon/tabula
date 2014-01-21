@@ -31,7 +31,7 @@ trait AutowiringMemberDaoComponent extends MemberDaoComponent {
 trait MemberDao {
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType]
 	def getStudentRelationshipTypeById(id: String): Option[StudentRelationshipType]
-	def getStudentRelationshipTypesByUrlParts(urlParts: Seq[String]): Seq[StudentRelationshipType]
+	def getStudentRelationshipTypeByUrlPart(urlPart: String): Option[StudentRelationshipType]
 	def saveOrUpdate(relationshipType: StudentRelationshipType)
 	def delete(relationshipType: StudentRelationshipType)
 
@@ -83,10 +83,10 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 	def getStudentRelationshipTypeById(id: String) = getById[StudentRelationshipType](id)
 
-	def getStudentRelationshipTypesByUrlParts(urlParts: Seq[String]) =
+	def getStudentRelationshipTypeByUrlPart(urlPart: String) =
 		session.newCriteria[StudentRelationshipType]
-			.add(in("urlPart", urlParts map { _.safeTrim }))
-			.seq
+			.add(is("urlPart", urlPart))
+			.uniqueResult
 
 	def saveOrUpdate(relationshipType: StudentRelationshipType) = session.saveOrUpdate(relationshipType)
 	def delete(relationshipType: StudentRelationshipType) = session.delete(relationshipType)

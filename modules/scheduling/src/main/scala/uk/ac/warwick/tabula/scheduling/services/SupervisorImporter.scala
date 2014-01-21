@@ -11,21 +11,14 @@ import javax.sql.DataSource
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.context.annotation.Profile
+import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 trait SupervisorImporter {
 	/**
 	 * Returns a sequence of pairs of PRS codes and the percentage load
 	 */
 
-	val ResearchSupervisorSitsExaminerType = "SUP"
-	val DissertationSupervisorSitsExaminerType = "WASUP"
-
-	val UrlPartToSitsExaminerTypeMap = Map(
-			"supervisor" -> ResearchSupervisorSitsExaminerType,
-			"dissertation-supervisor" -> DissertationSupervisorSitsExaminerType
-	);
-
-	def getSupervisorUniversityIds(scjCode: String, sitsExaminerType: String): Seq[(String, JBigDecimal)]
+	def getSupervisorUniversityIds(scjCode: String, relationshipType: StudentRelationshipType): Seq[(String, JBigDecimal)]
 }
 
 @Profile(Array("dev", "test", "production")) @Service
@@ -36,14 +29,16 @@ class SupervisorImporterImpl extends SupervisorImporter {
 
 	lazy val supervisorMappingQuery = new SupervisorMappingQuery(sits)
 
-	def getSupervisorUniversityIds(scjCode: String, urlPart: String): Seq[(String, JBigDecimal)] = {
-		supervisorMappingQuery.executeByNamedParam(Map("scj_code" -> scjCode, "sits_examiner_type" -> UrlPartToSitsExaminerTypeMap(urlPart)))
+	def getSupervisorUniversityIds(scjCode: String, relationshipType: StudentRelationshipType): Seq[(String, JBigDecimal)] = {
+		val debug = supervisorMappingQuery.executeByNamedParam(Map("scj_code" -> scjCode, "sits_examiner_type" -> relationshipType.defaultRdxType))
+
+		supervisorMappingQuery.executeByNamedParam(Map("scj_code" -> scjCode, "sits_examiner_type" -> relationshipType.defaultRdxType))
 	}
 }
 
 @Profile(Array("sandbox")) @Service
 class SandboxSupervisorImporter extends SupervisorImporter {
-	def getSupervisorUniversityIds(scjCode: String, sitsExaminerType: String): Seq[(String, JBigDecimal)] = Seq.empty // TODO
+	def getSupervisorUniversityIds(scjCode: String, relationshipType: StudentRelationshipType): Seq[(String, JBigDecimal)] = Seq.empty // TODO
 }
 
 object SupervisorImporter {
