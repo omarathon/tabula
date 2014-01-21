@@ -6,6 +6,11 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import org.hibernate.annotations.Type
+import javax.persistence.FetchType
+import uk.ac.warwick.tabula.JavaImports._
+import javax.persistence.JoinColumns
+import javax.persistence.JoinColumn
+import javax.persistence.OneToMany
 
 
 /**
@@ -54,6 +59,16 @@ class AssessmentComponent extends GeneratedId with PreSaveBehaviour {
 	@Type(`type`="uk.ac.warwick.tabula.data.model.AssessmentTypeUserType")
 	@Column(nullable=false)
 	var assessmentType: AssessmentType = _
+	
+	/**
+	 * Read-only mapping of upstream groups. Used by AssignmentMembershipDao to inform Hibernate of how to join properly
+	 */
+	@OneToMany(fetch = FetchType.LAZY)
+	@JoinColumns(Array(
+    new JoinColumn(name = "moduleCode", referencedColumnName = "moduleCode", insertable = false, updatable = false),
+    new JoinColumn(name = "assessmentGroup", referencedColumnName = "assessmentGroup", insertable = false, updatable = false)
+  ))
+	var upstreamAssessmentGroups: JSet[UpstreamAssessmentGroup] = _
 
 	/**
 	 * Returns moduleCode without CATS. e.g. in304
