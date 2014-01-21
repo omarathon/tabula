@@ -36,6 +36,8 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val amDao = new AssignmentMembershipDaoImpl
 		amDao.sessionFactory = sessionFactory
 		assignmentMembershipService.dao = amDao
+		assignmentMembershipService.assignmentManualMembershipHelper.sessionFactory = sessionFactory
+		assignmentMembershipService.assignmentManualMembershipHelper.groupService = new MockGroupService
 		assignmentMembershipService.userLookup = userLookup
 		val extDao = new ExtensionDaoImpl
 		extDao.sessionFactory = sessionFactory
@@ -391,7 +393,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		ua4.departmentCode = "LA"
 		ua4.moduleCode = "LA101-10"
 		ua4.sequence = "A02"
-		ua4.assessmentGroup = "A"
+		ua4.assessmentGroup = "B"
 		ua4.assessmentType = AssessmentType.Assignment
 		ua4.name = "Egg plants NOT IN USE"
 
