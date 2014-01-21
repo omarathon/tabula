@@ -4,7 +4,7 @@ import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{FileAttachment, Feedback, MarkerFeedback, Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand}
-import uk.ac.warwick.tabula.services.{ZipServiceComponent, FileAttachmentComponent, FeedbackServiceComponent, AutowiringZipServiceComponent, AutowiringFileAttachmentServiceComponent, AutowiringFeedbackServiceComponent}
+import uk.ac.warwick.tabula.services.{ZipServiceComponent, FileAttachmentServiceComponent, FeedbackServiceComponent, AutowiringZipServiceComponent, AutowiringFileAttachmentServiceComponent, AutowiringFeedbackServiceComponent}
 import uk.ac.warwick.tabula.data.AutowiringSavedFormValueDaoComponent
 import uk.ac.warwick.tabula.data.model.MarkingState.InProgress
 import uk.ac.warwick.tabula.JavaImports._
@@ -71,7 +71,7 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 trait MarkerFeedbackStateCopy {
 
 	self: OnlineFeedbackState with OnlineFeedbackStudentState with CopyFromFormFields with WriteToFormFields
-		with FileAttachmentComponent =>
+		with FileAttachmentServiceComponent =>
 
 	/*
 		If there is a marker feedback then use the specified copy function to copy it's state to the form object

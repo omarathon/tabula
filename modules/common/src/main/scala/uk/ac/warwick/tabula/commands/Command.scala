@@ -161,6 +161,11 @@ object Command {
 	}
 }
 
+/** See ApplyWithCallback[A] */
+trait HasCallback[A] {
+	var callback: (A) => Unit = _
+}
+
 /**
  * Defines a function property to be used as a callback, plus a convenience
  * version of `apply` that provides the callback and runs the command
@@ -168,8 +173,7 @@ object Command {
  *
  * It doesn't actually call the callback - you do that in your `apply` implementation.
  */
-trait ApplyWithCallback[A] extends Command[A] {
-	var callback: (A) => Unit = _
+trait ApplyWithCallback[A] extends Command[A] with HasCallback[A] {
 	def apply(fn: (A) => Unit): A = {
 		callback = fn
 		apply()

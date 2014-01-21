@@ -32,6 +32,36 @@
 				<@f.textarea path="note" cssClass="input-block-level" rows="5" cssStyle="height: 150px;" />
 			</@form.labelled_row>
 
+			<#if command.attachedFile?has_content>
+				<@form.labelled_row "attachedFile" "Attached file">
+					<i class="icon-file-alt"></i>
+					<@fmt.download_link
+						filePath="/note/${command.student.universityId}/${command.monitoringPoint.id}/attachment/${command.attachedFile.name}"
+						mimeType=command.attachedFile.mimeType
+						title="Download file ${command.attachedFile.name}"
+						text="Download ${command.attachedFile.name}"
+					/>
+					&nbsp;
+					<@f.hidden path="attachedFile" value="${command.attachedFile.id}" />
+					<i class="icon-remove-sign remove-attachment"></i>
+
+					<script>
+						jQuery(function($){
+							$(".remove-attachment").on("click", function(e){
+								$(this).closest(".control-group").remove();
+								return false;
+							});
+						});
+					</script>
+					<small class="subtle help-block">
+						This is the file attachmented to this administrative note.
+						Click the remove link next to a document to delete it.
+					</small>
+				</@form.labelled_row>
+			</#if>
+
+			<@form.filewidget basename="file" types=[] multiple=false />
+
 			<#if isIframe>
 				<input type="hidden" name="isModal" value="true" />
 			<#else>
