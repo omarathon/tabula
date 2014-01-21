@@ -36,8 +36,8 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] 
 		checkUniversityIds:Boolean = true)
 	extends UserGroupMembershipHelperMethods[A] with Daoisms {
 
-	val groupService = Wire[GroupService]
-	val userlookup = Wire[UserLookupService]
+	var groupService = Wire[GroupService]
+	var userlookup = Wire[UserLookupService]
 
 	val simpleEntityName = classTag[A].runtimeClass.getSimpleName
 
