@@ -56,36 +56,50 @@
 </#macro>
 
 <#macro attendanceLabel pointMap point>
-	<#assign checkpointData = mapGet(pointMap, point) />
+	<#local checkpointData = mapGet(pointMap, point) />
+
+	<#local title>${point.name} (<@fmt.monitoringPointFormat point true />)</#local>
+
 	<#if checkpointData.state == "attended">
-		<span
-			class="label label-success use-tooltip"
-			title="<p>Attended</p><p>${checkpointData.recorded}</p>"
-			data-container="body"
-			data-html="true"
-		>
-			Attended
-		</span>
+		<#local class = "label-success" />
+		<#local title = "Attended: " + title />
+		<#local label = "Attended" />
 	<#elseif checkpointData.state == "authorised">
-		<span
-			class="label label-info use-tooltip"
-			title="<p>Missed (authorised)</p><p>${checkpointData.recorded}</p>"
-			data-container="body"
-			data-html="true"
-		>
-			Missed
-		</span>
+		<#local class = "label-info" />
+		<#local title = "Missed (authorised): " + title />
+		<#local label = "Missed (authorised)" />
 	<#elseif checkpointData.state == "unauthorised">
-		<span
-			class="label label-important use-tooltip"
-			title="<p>Missed (unauthorised)</p><p>${checkpointData.recorded}</p>"
-			data-container="body"
-			data-html="true"
-		>
-			Missed
-		</span>
+		<#local class = "label-important" />
+		<#local title = "Missed (unauthorised): " + title />
+		<#local label = "Missed (unauthorised)" />
 	<#elseif checkpointData.state == "late">
-		<span class="label label-warning use-tooltip" title="Unrecorded" data-container="body">Unrecorded</span>
+		<#local class = "label-warning" />
+		<#local title = "Unrecorded: " + title />
+		<#local label = "Unrecorded" />
+	</#if>
+
+	<#local titles = [title] />
+
+	<#if checkpointData.recorded?has_content>
+		<#local titles = titles + [checkpointData.recorded] />
+	</#if>
+
+	<#if checkpointData.hasNote>
+		<#local titles = titles + [checkpointData.note] />
+	</#if>
+
+	<#local renderedTitle>
+		<#list titles as t>
+			<#if (titles?size > 1)>
+				<p>${t}</p>
+			<#else>
+				${t}
+			</#if>
+		</#list>
+	</#local>
+
+	<#if (checkpointData.state?length > 0)>
+		<span class="use-tooltip label ${class}" title="${renderedTitle}" data-container="body" data-html="true">${label}</span>
 	</#if>
 </#macro>
 
