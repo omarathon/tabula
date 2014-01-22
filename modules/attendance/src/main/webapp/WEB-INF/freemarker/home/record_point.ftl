@@ -36,11 +36,11 @@
 	<div class="recordCheckpointForm">
 		<@attendance_macros.attendanceButtons />
 
-		<div class="fix-area">
-			${titleHeader}
+		${titleHeader}
 
+		<div class="fix-area">
 			<div class="fix-header pad-when-fixed">
-				<div class="row-fluid record-attendance-form-header">
+				<div class="row-fluid check-all">
 					<div class="span12">
 						<span class="studentsLoadingMessage" style="display: none;">
 							<i class="icon-spinner icon-spin"></i><em> Loading&hellip;</em>
