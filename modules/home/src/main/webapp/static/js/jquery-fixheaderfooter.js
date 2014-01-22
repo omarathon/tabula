@@ -3,17 +3,18 @@
 /* fixHeaderFooter plugin
 	 *
 	 * apply this to a container div
-	 * which should contain one or more divs called .persist-header and/or a single .persist-footer
+	 * which should contain one or more divs called .fix-header and/or a single .fix-footer
 	 * it'll fix the headers (in order) at the top when scrolled
 	 * and it'll fix the footer at the bottom.
 	 * (CSS in main.less)
 	 *
 	 */
     $.fn.fixHeaderFooter = function() {
-        var selHeader = '.persist-header';
+        var selHeader = '.fix-header';
+        var selPaddedHeader = '.pad-when-fixed';
         var selClonedHeader = '.cloned-header';
         var selHeaderShadow = '.header-shadow';
-        var selFooter = '.persist-footer';
+        var selFooter = '.fix-footer';
         var selFooterShadow = '.footer-shadow';
         var $container = this;
         var $pnw = $('#primary-navigation-wrapper');
@@ -42,7 +43,7 @@
 
                     // calculate based on previous headers
                     var fixedHeight = navOffset;
-                    var $fixedSoFar = $(selHeader + '.scroll-to-fixed-fixed').not($(this));
+                    var $fixedSoFar = $(selHeader + '.scroll-to-fixed-fixed:visible').not($(this));
                     $fixedSoFar.each(function() {
                         fixedHeight += $(this).outerHeight();
                     });
@@ -71,8 +72,8 @@
                 fixed: function() {
                     var $this = $(this);
 
-                    // add breathing room to first header
-                    if ($this.is($headers.filter(':first'))) {
+                    // add breathing room to headers where we ask for it
+                    if ($this.is(selPaddedHeader)) {
                         $this.css({
                             'padding-top': '8px',
                             'transition': 'padding-top 750ms'
@@ -80,7 +81,7 @@
                     };
 
                     // on fixing, if this is the last header to stack, add a shadow if absent
-                    if ($this.is($headers.filter(':last')) && !$this.children(':last-child').is(selHeaderShadow)) $this.append('<hr class="' + selHeaderShadow.substring(1) + '">');
+                    if ($this.is($headers.filter(':visible:last')) && !$this.children(':last-child').is(selHeaderShadow)) $this.append('<hr class="' + selHeaderShadow.substring(1) + '">');
 
                     // <thead>s are special
                     if ($this.is('thead')) {
@@ -123,7 +124,7 @@
                     var $this = $(this);
 
                     // remove breathing room
-                    if ($this.is($headers.filter(':first'))) {
+                    if ($this.is(selPaddedHeader)) {
                         $this.css({
                             'padding-top': 'inherit',
                             'transition': 'none'
@@ -139,7 +140,7 @@
                     var $this = $(this);
 
                     // remove shadows
-                    if ($this.is($headers.filter(':last'))) $headers.children(':last-child').remove(selHeaderShadow);
+                    $headers.children(':last-child').remove(selHeaderShadow);
 
                     // restore <thead> properties, remove cloned header
                     if ($this.is('thead')) {
@@ -176,34 +177,34 @@
 
         // rest of the plugin contains helper method, primarily for drag-and-drop allocation
         this.viewableArea = function() {
-            return $(window).height() - ($('.persist-header:visible').height() + $('#primary-navigation-wrapper').outerHeight() + $('.persist-footer').outerHeight());
+            return $(window).height() - ($(selHeader + ':visible').height() + $pnw.outerHeight() + $(selFooter).outerHeight());
         }
 
         // fix the jumbo direction icon in place
         this.fixDirectionIcon = function() {
             var $directionIcon = $('.direction-icon');
-            var fixContainer = $('.fix-on-scroll-container');
-            var persistAreaTop = $('.persist-header').height() + $('#primary-navigation-wrapper').outerHeight();
+            var $fixContainer = $('.fix-on-scroll-container');
+            var fixHeaderTop = $(selHeader).height() + $pnw.outerHeight();
 
-            if(!isSmallscreen && fixContainer.offset().top - $(window).scrollTop() < persistAreaTop) {
-                $directionIcon.css({ "top" : persistAreaTop, "position": "fixed", "max-width": $directionIcon.width() });
+            if(!isSmallscreen && $fixContainer.offset().top - $(window).scrollTop() < fixHeaderTop) {
+                $directionIcon.css({ 'top' : fixHeaderTop, 'position': 'fixed', 'max-width': $directionIcon.width() });
             } else {
-                $directionIcon.css({"top": "auto", "position": "static", "max-width": $directionIcon.width });
+                $directionIcon.css({'top': 'auto', 'position': 'static', 'max-width': $directionIcon.width });
             }
         };
 
         // if the list of agents is shorter than the (viewport+fixed screen areas)
-        // and we've scrolled past the top of the persist-area container, then fix it
+        // and we've scrolled past the top of the container, then fix it
         // (otherwise don't, because the user won't be able to see all of the items in the well)
         this.fixTargetList = function(listToFix) {
             var targetList = $(listToFix);
-            var persistAreaTop = $('.persist-header').height() + $('#primary-navigation-wrapper').outerHeight();
+            var fixHeaderTop = $(selHeader).height() + $pnw.outerHeight();
 
             // width is set on fixing because it was jumping to the minimum width of the content
-            if (!isSmallscreen && targetList.height() < this.viewableArea() && ($(window).scrollTop() > $('.persist-area').offset().top)) {
-                targetList.css({"top": persistAreaTop + 14, "position": "fixed", "width": targetList.parent().width()});
+            if (!isSmallscreen && targetList.height() < this.viewableArea() && ($(window).scrollTop() > $container.offset().top)) {
+                targetList.css({'top': fixHeaderTop + 14, 'position': 'fixed', 'width': targetList.parent().width()});
             } else {
-                targetList.css({"top": "auto", "position": "relative", "width": "auto"});
+                targetList.css({'top': 'auto', 'position': 'relative', 'width': 'auto'});
             }
         }
 

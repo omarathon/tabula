@@ -10,7 +10,7 @@
 
 <#macro assignStudents studentList markerList class name>
 <div class="tabula-dnd" data-scroll="true">
-	<div class="persist-header">
+	<div class="fix-header pad-when-fixed">
 		<div class="btn-toolbar">
 			<a class="random btn btn-mini" data-toggle="randomise" data-disabled-on="empty-list"
 			   href="#" >
@@ -69,12 +69,14 @@
 
 <#escape x as x?html>
 
-		<h1>Assign markers for ${assignment.name}</h1>
+	<h1>Assign markers</h1>
+	<h4><span class="muted">for</span>
+	${assignment.name}</h4>
 
-		<p>Drag students by their <i class="icon-reorder"></i> onto a marker.</p>
+	<p>Drag students by their <i class="icon-reorder"></i> onto a marker.</p>
 
 		<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/assign-markers')}" commandName="assignMarkersCommand">
-		<div class="persist-area">
+		<div class="fix-area">
 			<div id="assign-markers">
 				<ul class="nav nav-tabs">
 					<li class="active">
@@ -109,21 +111,30 @@
 				</div>
 			</div>
 
-			<div class="persist-footer submit-buttons">
+			<div class="fix-footer submit-buttons">
 				<input type="submit" class="btn btn-primary" value="Save">
 				<a href="<@routes.depthome module />" class="btn">Cancel</a>
 			</div>
-
-		</div><!-- end persist-area -->
+		</div><!-- end fix-area -->
 	</@f.form>
 
 <script type="text/javascript">
 (function($) {
-	var fixHeaderFooter = $('.persist-area').fixHeaderFooter();
+	var fixHeaderFooter = $('.fix-area').fixHeaderFooter();
 	var singleColumnDragTargetHeight = $('.agentslist .drag-target').outerHeight(true);
 
 	$(window).scroll(function() {
 		fixHeaderFooter.fixTargetList('.agentslist:visible');
+	});
+
+	// when tabs and fixed headers collide
+	var $tabs = $('.nav');
+	var $tabFixedHeaders = $tabs.siblings('.tab-content').find('.fix-header');
+
+	$tabs.on('shown', function() {
+		$tabFixedHeaders.trigger('disabled.ScrollToFixed');
+		$tabFixedHeaders.filter(':visible').trigger('enable.ScrollToFixed');
+		$(window).resize();
 	});
 
 	// onload reformat agents layout

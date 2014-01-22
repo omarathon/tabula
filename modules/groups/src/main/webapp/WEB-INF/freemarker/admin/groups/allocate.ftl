@@ -24,7 +24,9 @@
 </#macro>
 
 <#escape x as x?html>
-	<h1>Allocate students to ${set.name}</h1>
+	<h1>Allocate students</h1>
+	<h4><span class="muted">to</span> ${set.name}</h4>
+
 	<#if (allocateStudentsToGroupsCommand.isStudentSignup())>
 		<div class="alert">These groups are currently <strong>${set.openForSignups?string("open","closed")}</strong> for self sign-up</div>
 	</#if>
@@ -68,7 +70,7 @@
 			</@spring.hasBindErrors>
 
 			<#assign submitUrl><@routes.allocateset set /></#assign>
-			<div class="persist-area">
+			<div class="fix-area">
 				<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToGroupsCommand">
 				<div class="tabula-dnd"
 						 data-item-name="student"
@@ -77,13 +79,13 @@
 						 data-selectables=".students .drag-target"
 						 data-scroll="true"
 						 data-remove-tooltip="Remove this student from this group">
-					<div class="persist-header">
+					<div class="fix-header pad-when-fixed">
 						<div class="btn-toolbar">
-							<a class="random btn" data-toggle="randomise" data-disabled-on="empty-list"
+							<a class="random btn btn-mini" data-toggle="randomise" data-disabled-on="empty-list"
 							   href="#" >
 								<i class="icon-random"></i> Randomly allocate
 							</a>
-							<a class="return-items btn" data-toggle="return" data-disabled-on="no-allocation"
+							<a class="return-items btn btn-mini" data-toggle="return" data-disabled-on="no-allocation"
 							   href="#" >
 								<i class="icon-arrow-left"></i> Remove all
 							</a>
@@ -193,7 +195,7 @@
 
 				</div>
 
-					<div class="submit-buttons persist-footer">
+					<div class="submit-buttons fix-footer">
 						<input type="submit" class="btn btn-primary" value="Save">
 						<a href="<@routes.depthome module />" class="btn">Cancel</a>
 					</div>
@@ -237,7 +239,7 @@
 				return $('#groupslist').outerHeight();
 			});
 
-			var fixHeaderFooter = $('.persist-area').fixHeaderFooter();
+			var fixHeaderFooter = $('.fix-area').fixHeaderFooter();
 
 			$(window).scroll(function() {
 				fixHeaderFooter.fixDirectionIcon();

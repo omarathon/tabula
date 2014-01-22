@@ -29,7 +29,7 @@
 	<#assign module=assignment.module />
 	<#assign department=module.department />
 
-	<div class="persist-header">
+	<div class="fix-header pad-when-fixed">
 		<#include "_filter.ftl" />
 
 		<#assign currentView = "summary" />
@@ -67,7 +67,7 @@
 	</#macro>
 
 	<table class="coursework-progress-table students table table-bordered table-striped tabula-greenLight sticky-table-headers ">
-		<thead<#if students?size == 0> style="display: none;"</#if> class="persist-header">
+		<thead<#if students?size == 0> style="display: none;"</#if> class="fix-header">
 			<tr>
 				<th class="check-col" style="padding-right: 0px;"><input type="checkbox" class="collection-check-all"></th>
 				<#if department.showStudentName>

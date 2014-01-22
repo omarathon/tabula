@@ -24,7 +24,7 @@
 	.active-colour(@activeColour, @textColour: #fff) {
 		// Remove the text shadow because it makes things look weird against dark backgrounds
 		text-shadow: none;
-	
+
 		// Hover/focus state
 	  &:hover,
 	  &:focus {
@@ -33,20 +33,20 @@
 
 	    .transition(none);
 	  }
-	
+
 		// in these cases the gradient won't cover the background, so we override
 	  &:hover, &:focus, &:active, &.active {
 	    color: @textColour;
 	    background-color: @activeColour;
 	    *background-color: darken(@activeColour, 5%);
 	  }
-	  
+
 	  &:disabled, &.disabled {
 	  	color: @activeColour;
 	  	background-color: #e6e6e6;
 	    *background-color: darken(#e6e6e6, 5%);
 	  }
-	
+
 	  // IE 7 + 8 can't handle box-shadow to show active, so we darken a bit ourselves
 	  &:active,
 	  &.active {
@@ -54,16 +54,16 @@
 	  }
 	}
 
-	.btn-attended { 
+	.btn-attended {
 		color: @successText;
-		.active-colour(@successText); 
+		.active-colour(@successText);
 	}
-	.btn-unauthorised { 
+	.btn-unauthorised {
 		color: @errorText;
-		.active-colour(@errorText); 
+		.active-colour(@errorText);
 	}
-	.btn-authorised { 
-		color: @infoText; 
+	.btn-authorised {
+		color: @infoText;
 		.active-colour(@infoText);
 	}
 
@@ -74,7 +74,7 @@
 
 .recordCheckpointForm .btn-group {
   margin-right:13px;
-  
+
   button { margin-right: 0px; }
 }
 
@@ -101,7 +101,7 @@
 		font-size:22px;
 	}
 
-	.persist-footer {
+	.fix-footer {
 		padding-top:16px;
 		padding-bottom:16px;
 	}
