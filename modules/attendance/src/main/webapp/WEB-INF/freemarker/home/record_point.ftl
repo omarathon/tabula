@@ -39,7 +39,7 @@
 		<div class="fix-area">
 			${titleHeader}
 
-			<div class="fix-header">
+			<div class="fix-header pad-when-fixed">
 				<div class="row-fluid record-attendance-form-header">
 					<div class="span12">
 						<span class="studentsLoadingMessage" style="display: none;">
@@ -156,8 +156,8 @@
 				</div>
 			</#macro>
 
-			<div class="striped-section-contents attendees">
-				<form id="recordAttendance" action="" method="post">
+			<form id="recordAttendance" action="" method="post">
+				<div class="striped-section-contents attendees">
 					<script>
 						AttendanceRecording.bindButtonGroupHandler();
 					</script>
@@ -166,16 +166,15 @@
 					<#list command.studentsState?keys?sort_by("lastName") as student>
 						<@studentRow student mapGet(command.studentsState, student)?keys?first />
 					</#list>
+				</div>
 
-
-					<div class="fix-footer save-row">
-						<div class="pull-right">
-							<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
-							<a class="btn" href="${returnTo}">Cancel</a>
-						</div>
+				<div class="fix-footer submit-buttons">
+					<div class="pull-right">
+						<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
+						<a class="btn" href="${returnTo}">Cancel</a>
 					</div>
-				</form>
-			</div>
+				</div>
+			</form>
 		</div>
 	</div>
 
