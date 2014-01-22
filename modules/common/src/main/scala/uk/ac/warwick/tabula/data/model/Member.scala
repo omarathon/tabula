@@ -259,9 +259,9 @@ class StudentMember extends Member with StudentProperties {
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshOrStaleStudentCourseYearDetails(year: AcademicYear) =
-		freshOrStaleStudentCourseDetails.
-			flatMap(_.freshOrStaleStudentCourseYearDetails).
-			filter(_.academicYear == year)
+		freshOrStaleStudentCourseDetails
+			.flatMap(_.freshOrStaleStudentCourseYearDetails)
+			.filter(_.academicYear == year)
 
 	@OneToOne
 	@JoinColumn(name = "mostSignificantCourse")
@@ -270,13 +270,13 @@ class StudentMember extends Member with StudentProperties {
 
 	@Column(name="tier4_visa_requirement")
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
-	var tier4VisaRequirement: JBoolean = _;
+	var tier4VisaRequirement: JBoolean = _
 
 	@Restricted(Array("Profiles.Read.CasUsed"))
-	def casUsed: JBoolean = {
+	def casUsed: Option[Boolean] = {
 			mostSignificantCourseDetails match {
-				case Some(scd: StudentCourseDetails) => scd.latestStudentCourseYearDetails.casUsed
-				case _ => null // better not to even display this field if there are no student course details
+				case Some(scd: StudentCourseDetails) => Some(scd.latestStudentCourseYearDetails.casUsed)
+				case _ => None // better not to even display this field if there are no student course details
 			}
 	}
 

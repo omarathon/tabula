@@ -1,38 +1,45 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import uk.ac.warwick.tabula.data.MemberDao
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.scheduling.services.Tier4RequirementImporter
-import uk.ac.warwick.tabula.scheduling.services.CasUsageImporter
-import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
-import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
 import uk.ac.warwick.tabula.AcademicYear
+import uk.ac.warwick.tabula.commands.{CommandInternal, ComposableCommand, Unaudited}
+import uk.ac.warwick.tabula.data.{AutowiringStudentCourseYearDetailsDaoComponent, StudentCourseYearDetailsDaoComponent}
+import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.scheduling.services.{AutowiringCasUsageImporterComponent, CasUsageImporterComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-class ImportCasUsageForStudentCommand(student: StudentMember, year: AcademicYear)
-	extends Command[Boolean] with Unaudited with Logging {
-	PermissionCheck(Permissions.ImportSystemData)
+object ImportCasUsageForStudentCommand {
+	def apply(student: StudentMember, year: AcademicYear) =
+		new ImportCasUsageForStudentCommandInternal(student, year)
+			with ComposableCommand[Unit]
+			with ImportCasUsageForStudentCommandPermissions
+			with AutowiringCasUsageImporterComponent
+			with AutowiringStudentCourseYearDetailsDaoComponent
+			with Unaudited
+}
 
-	var casUsageImporter = Wire[CasUsageImporter]
-	var scydDao = Wire[StudentCourseYearDetailsDao]
+class ImportCasUsageForStudentCommandInternal(student: StudentMember, year: AcademicYear) extends CommandInternal[Unit] {
 
-	def applyInternal(): Boolean = {
-		var found = false
+	self: CasUsageImporterComponent with StudentCourseYearDetailsDaoComponent =>
+
+	def applyInternal() = {
+		var changed = false
 		val newCasUsed = casUsageImporter.isCasUsed(student.universityId)
 		student.freshOrStaleStudentCourseYearDetails(year).map {
 			scyd => {
 				if (scyd.casUsed != newCasUsed) {
 					scyd.casUsed = newCasUsed
-					scydDao.saveOrUpdate(scyd)
-					found = true
+					studentCourseYearDetailsDao.saveOrUpdate(scyd)
+					changed = true
 				}
 			}
 		}
-		found
+		changed
+	}
+}
+
+trait ImportCasUsageForStudentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.ImportSystemData)
 	}
 }

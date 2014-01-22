@@ -323,11 +323,11 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		studentCourseYearDetails should be (latestCourseYearDetails)
 
 	}
-	
+
 	@Test def casUsedTest =  {
 
 		val studentMember = Fixtures.student()
-		studentMember.casUsed.booleanValue() should be (true)
+		studentMember.casUsed.get should be (true)
 
 	}
 

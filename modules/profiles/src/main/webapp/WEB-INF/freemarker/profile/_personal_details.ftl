@@ -82,7 +82,6 @@
 								<td>No</td>
 								</tr>
 							</#if>
-						</tr>
 					</#if>
 				</tbody>
 			</table>

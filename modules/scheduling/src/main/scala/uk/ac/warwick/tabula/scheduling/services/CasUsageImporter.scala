@@ -2,8 +2,8 @@ package uk.ac.warwick.tabula.scheduling.services;
 
 import java.sql.{ResultSet, Types}
 
-import scala.collection.JavaConversions.{asScalaBuffer, mapAsJavaMap}
-import scala.math.BigDecimal.{int2bigDecimal, javaBigDecimal2bigDecimal}
+import scala.collection.JavaConversions._
+import scala.math.BigDecimal.int2bigDecimal
 
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
@@ -12,13 +12,13 @@ import org.springframework.stereotype.Service
 
 import javax.sql.DataSource
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports.JMap
+import uk.ac.warwick.tabula.JavaImports._
 
 trait CasUsageImporter {
 	/**
 	 * Returns a sequence of pairs of PRS codes and the percentage load
 	 */
-	def isCasUsed(universityId: String): Boolean // // cas is a confirmation of acceptance to study - this determines whether such was used to apply for a visa
+	def isCasUsed(universityId: String): Boolean // cas is a confirmation of acceptance to study - this determines whether such was used to apply for a visa
 }
 
 @Profile(Array("dev", "test", "production")) @Service
@@ -31,7 +31,7 @@ class CasUsageImporterImpl extends CasUsageImporter with SitsAcademicYearAware{
 
 	def isCasUsed(universityId: String): Boolean = {
 		val rowCount = casUsedMappingQuery.executeByNamedParam(Map("universityId" -> universityId, "year" -> getCurrentSitsAcademicYearString)).head
-		if (rowCount > 0) true else false
+		(rowCount.intValue() > 0)
 	}
 }
 
@@ -53,12 +53,21 @@ object CasUsageImporter {
 
 
 	class CasUsedMappingQuery(ds: DataSource)
-		extends MappingSqlQueryWithParameters[(BigDecimal)](ds, CasUsedSql) {
+		extends MappingSqlQueryWithParameters[(Number)](ds, CasUsedSql) {
 		this.declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 		this.declareParameter(new SqlParameter("year", Types.VARCHAR))
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = {
-			(rs.getBigDecimal("count"))
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _])= {
+			(rs.getLong("count"))
 		}
 	}
 }
+
+trait CasUsageImporterComponent {
+	def casUsageImporter: CasUsageImporter
+}
+
+trait AutowiringCasUsageImporterComponent extends CasUsageImporterComponent{
+	var casUsageImporter = Wire[CasUsageImporter]
+}
+
