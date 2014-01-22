@@ -13,33 +13,46 @@
 </#macro>
 
 <#macro attendanceIcon pointMap point>
-	<#assign checkpointData = mapGet(pointMap, point) />
+	<#local checkpointData = mapGet(pointMap, point) />
+
+	<#local title>${point.name} (<@fmt.monitoringPointFormat point true />)</#local>
+
 	<#if checkpointData.state == "attended">
-		<i
-			class="use-tooltip icon-ok icon-fixed-width attended"
-			title="<p>Attended: ${point.name} (<@fmt.monitoringPointFormat point true />)</p><p>${checkpointData.recorded}</p>"
-			data-container="body"
-			data-html="true"
-			></i>
+		<#local class = "icon-ok attended" />
+		<#local title = "Attended: " + title />
 	<#elseif checkpointData.state == "authorised">
-		<i
-			class="use-tooltip icon-remove-circle icon-fixed-width authorised"
-			title="<p>Missed (authorised): ${point.name} (<@fmt.monitoringPointFormat point true />)</p><p>${checkpointData.recorded}</p>"
-			data-container="body"
-			data-html="true"
-			></i>
+		<#local class = "icon-remove-circle authorised" />
+		<#local title = "Missed (authorised): " + title />
 	<#elseif checkpointData.state == "unauthorised">
-		<i
-			class="use-tooltip icon-remove icon-fixed-width unauthorised"
-			title="<p>Missed (unauthorised): ${point.name} (<@fmt.monitoringPointFormat point true />)</p><p>${checkpointData.recorded}</p>"
-			data-container="body"
-			data-html="true"
-			></i>
+		<#local class = "icon-remove unauthorised" />
+		<#local title = "Missed (unauthorised): " + title />
 	<#elseif checkpointData.state == "late">
-		<i class="use-tooltip icon-warning-sign icon-fixed-width late" title="Unrecorded: ${point.name} (<@fmt.monitoringPointFormat point true />)" data-container="body"></i>
+		<#local class = "icon-warning-sign late" />
+		<#local title = "Unrecorded: " + title />
 	<#else>
-		<i class="use-tooltip icon-minus icon-fixed-width" title="${point.name} (<@fmt.monitoringPointFormat point true />)" data-container="body"></i>
+		<#local class = "icon-minus" />
 	</#if>
+
+	<#local titles = [title] />
+
+	<#if checkpointData.recorded?has_content>
+		<#local titles = titles + [checkpointData.recorded] />
+	</#if>
+
+	<#if checkpointData.hasNote>
+		<#local titles = titles + [checkpointData.note] />
+	</#if>
+
+	<#local renderedTitle>
+		<#list titles as t>
+			<#if (titles?size > 1)>
+				<p>${t}</p>
+			<#else>
+				${t}
+			</#if>
+		</#list>
+	</#local>
+	<i class="use-tooltip icon-fixed-width ${class}" title="${renderedTitle}" data-container="body" data-html="true"></i>
 </#macro>
 
 <#macro attendanceLabel pointMap point>

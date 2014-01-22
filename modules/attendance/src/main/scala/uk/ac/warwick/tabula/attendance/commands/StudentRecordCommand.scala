@@ -46,7 +46,7 @@ abstract class StudentRecordCommand(
 		checkpointDescriptions = checkpoints.map{case (point, checkpointOption) =>
 			point -> checkpointOption.map{c => describeCheckpoint(c)}.getOrElse("")
 		}
-		attendanceNotes = monitoringPointService.findAttendanceNotes(student, pointSet.points.asScala)
+		attendanceNotes = monitoringPointService.findAttendanceNotes(Seq(student), pointSet.points.asScala)
 			.map{ note =>	note.point -> note }.toMap
 	}
 

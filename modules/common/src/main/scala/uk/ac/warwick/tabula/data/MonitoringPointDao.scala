@@ -67,7 +67,7 @@ trait MonitoringPointDao {
 	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport]
 	def hasAnyPointSets(department: Department): Boolean
 	def getAttendanceNote(student: StudentMember, monitoringPoint: MonitoringPoint): Option[MonitoringPointAttendanceNote]
-	def findAttendanceNotes(student: StudentMember, points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote]
+	def findAttendanceNotes(students: Seq[StudentMember], points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote]
 }
 
 
@@ -478,9 +478,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			.uniqueResult
 	}
 
-	def findAttendanceNotes(student: StudentMember, points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote] = {
+	def findAttendanceNotes(students: Seq[StudentMember], points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote] = {
 		session.newCriteria[MonitoringPointAttendanceNote]
-			.add(is("student", student))
+			.add(in("student", students.asJava))
 			.add(in("point", points.asJava))
 			.seq
 	}

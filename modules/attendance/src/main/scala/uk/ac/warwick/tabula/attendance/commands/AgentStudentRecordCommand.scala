@@ -42,7 +42,7 @@ abstract class AgentStudentRecordCommand(val agent: Member, val relationshipType
 
 	def onBind(result: BindingResult) = {
 		val checkpoints = monitoringPointService.getCheckpoints(Seq(student), pointSet)(student)
-		attendanceNotes = monitoringPointService.findAttendanceNotes(student, pointSet.points.asScala)
+		attendanceNotes = monitoringPointService.findAttendanceNotes(Seq(student), pointSet.points.asScala)
 			.map{ note =>	note.point -> note }.toMap
 		checkpointDescriptions = checkpoints.map{case (point, checkpointOption) =>
 			point -> checkpointOption.map{c => describeCheckpoint(c)}.getOrElse("")
