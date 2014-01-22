@@ -79,7 +79,17 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = groupTutorsHelper.findBy(user)
 
-	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet] = membershipDao.getEnrolledSmallGroupSets(user)
+	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet] = {
+		val autoEnrolled = 
+			membershipDao.getSITSEnrolledSmallGroupSets(user)
+				 .filterNot { _.members.excludesUser(user) }
+
+		val manuallyEnrolled = 
+			groupSetManualMembersHelper.findBy(user)
+				.filterNot { sgs => sgs.deleted || sgs.archived }
+		
+		(autoEnrolled ++ manuallyEnrolled).distinct
+	}
 	def findSmallGroupsByStudent(user: User): Seq[SmallGroup] = studentGroupHelper.findBy(user)
 
 	def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int) {
@@ -138,6 +148,7 @@ trait SmallGroupMembershipHelpers {
   //TODO can this be removed? findSmallGroupsByTutor could just call findSmallGroupEventsByTutor and then group by group
 	val groupTutorsHelper: UserGroupMembershipHelper[SmallGroup]
 	val studentGroupHelper: UserGroupMembershipHelper[SmallGroup]
+	val groupSetManualMembersHelper: UserGroupMembershipHelper[SmallGroupSet]
 	val membershipDao: AssignmentMembershipDao
 }
 
@@ -147,7 +158,7 @@ trait SmallGroupMembershipHelpersImpl extends SmallGroupMembershipHelpers {
 	val groupTutorsHelper = new UserGroupMembershipHelper[SmallGroup]("events.tutors")
 
 	// Don't use this, it's misleading - it won't use linked assessment components
-//	val groupSetMembersHelper = new UserGroupMembershipHelper[SmallGroupSet]("_membersGroup")
+	val groupSetManualMembersHelper = new UserGroupMembershipHelper[SmallGroupSet]("_membersGroup")
 
 	val studentGroupHelper = new UserGroupMembershipHelper[SmallGroup]("_studentsGroup")
 }

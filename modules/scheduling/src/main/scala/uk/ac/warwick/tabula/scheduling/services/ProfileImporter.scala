@@ -35,6 +35,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseYearC
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSupervisorsForStudentCommand
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportTier4ForStudentCommand
 
 case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
 
@@ -72,14 +73,14 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 		memberInfo.groupBy(_.member.userType).flatMap { case (userType, members) =>
 			userType match {
-				case Staff | Emeritus => members.map { info => 
+				case Staff | Emeritus => members.map { info =>
 					val ssoUser = users(info.member.universityId)
 					new ImportStaffMemberCommand(info, ssoUser)
 				}
-				case Student | Other => members.par.flatMap { info => 
+				case Student | Other => members.par.flatMap { info =>
 					val universityId = info.member.universityId
 					val ssoUser = users(universityId)
-					
+
 					studentInformationQuery(info, ssoUser, importRowTracker).executeByNamedParam(
 						Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
 					).toSeq
@@ -185,7 +186,11 @@ class SandboxProfileImporter extends ProfileImporter {
 			ssoUser,
 			rs,
 			importRowTracker,
-			new ImportStudentCourseCommand(rs, importRowTracker, new ImportStudentCourseYearCommand(rs, importRowTracker), new ImportSupervisorsForStudentCommand())
+			new ImportStudentCourseCommand(rs,
+					importRowTracker,
+					new ImportStudentCourseYearCommand(rs, importRowTracker),
+					new ImportSupervisorsForStudentCommand()),
+			new ImportTier4ForStudentCommand
 		)
 	}
 
@@ -408,13 +413,18 @@ object ProfileImporter {
 		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 		declareParameter(new SqlParameter("year", Types.VARCHAR))
 		compile()
+
 		override def mapRow(rs: ResultSet, rowNumber: Int)
 			= new ImportStudentRowCommand(
 				member,
 				ssoUser,
 				rs,
 				importRowTracker,
-				new ImportStudentCourseCommand(rs, importRowTracker, new ImportStudentCourseYearCommand(rs, importRowTracker), new ImportSupervisorsForStudentCommand())
+				new ImportStudentCourseCommand(rs,
+						importRowTracker,
+						new ImportStudentCourseYearCommand(rs, importRowTracker),
+						new ImportSupervisorsForStudentCommand),
+				new ImportTier4ForStudentCommand
 			)
 	}
 

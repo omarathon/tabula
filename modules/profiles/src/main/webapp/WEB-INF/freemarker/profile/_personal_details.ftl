@@ -61,6 +61,29 @@
 							</td>
 						</tr>
 					</#if>
+
+					<#if profile.tier4VisaRequirement??>
+						<tr>
+							<th>Nationality requires visa</th>
+							<#if profile.tier4VisaRequirement>
+								<td>Yes</td>
+								</tr>
+								<#if profile.casUsed??>
+									<tr>
+										<th>CAS used to obtain visa</th>
+										<#if profile.casUsed>
+											<td>Yes</td>
+										<#else>
+											<td>No</td>
+										</#if>
+									</tr>
+								</#if>
+							<#else>
+								<td>No</td>
+								</tr>
+							</#if>
+						</tr>
+					</#if>
 				</tbody>
 			</table>
 		</div>
@@ -116,6 +139,7 @@
 							<td><@profile_macros.address profile.homeAddress /></td>
 						</tr>
 					</#if>
+
 				</tbody>
 			</table>
 		</div>

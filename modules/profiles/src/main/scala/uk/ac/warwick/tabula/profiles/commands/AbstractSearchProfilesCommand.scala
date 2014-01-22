@@ -35,8 +35,8 @@ abstract class AbstractSearchProfilesCommand(val user: CurrentUser, firstUserTyp
 	var query: String = _
 
 	def validQuery =
-		(query.trim().length > MinimumQueryLength) &&
-		(query.split("""\s+""").find{_.length > MinimumTermLength}.isDefined)
+		(query.trim().length >= MinimumQueryLength) &&
+		(query.split("""\s+""").find{_.length >= MinimumTermLength}.isDefined)
 
 	private def singletonByUserType(option: Option[Member]) = option match {
 		case Some(member) => Seq(member) filter {userTypes contains _.userType}

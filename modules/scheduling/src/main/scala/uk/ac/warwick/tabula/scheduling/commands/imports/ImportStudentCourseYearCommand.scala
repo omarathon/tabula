@@ -67,7 +67,8 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet, importRowTracker: Imp
 
 		moduleRegistrationStatus = ModuleRegistrationStatus.fromCode(moduleRegistrationStatusCode)
 
-		val hasChanged = copyStudentCourseYearProperties(commandBean, studentCourseYearDetailsBean) | markAsSeenInSits(studentCourseYearDetailsBean)
+		val hasChanged = (copyStudentCourseYearProperties(commandBean, studentCourseYearDetailsBean)
+			| markAsSeenInSits(studentCourseYearDetailsBean))
 
 		if (isTransient || hasChanged) {
 			logger.debug("Saving changes for " + studentCourseYearDetails)

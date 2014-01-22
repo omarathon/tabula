@@ -25,6 +25,7 @@ import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportTier4ForStudentCommand
 
 
 // scalastyle:off magic.number
@@ -84,7 +85,8 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 							importRowTracker,
 							new ImportStudentCourseYearCommand(rs, importRowTracker),
 							new ImportSupervisorsForStudentCommand()
-					)
+					),
+					new ImportTier4ForStudentCommand
 				)
 				member.firstName should be (name)
 			}
@@ -114,7 +116,8 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 							importRowTracker,
 							new ImportStudentCourseYearCommand(rs, importRowTracker),
 							new ImportSupervisorsForStudentCommand()
-					)
+					),
+					new ImportTier4ForStudentCommand
 				)
 				member.lastName should be (name)
 			}
