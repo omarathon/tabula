@@ -66,7 +66,8 @@ class StudentViewController extends AttendanceController {
 	) = {
 		Mav("home/student",
 			"student" -> cmd.student,
-			"pointsByTerm" -> cmd.apply().pointsByTerm
+			"pointsByTerm" -> cmd.apply().pointsByTerm,
+			"department" ->  department
 		).crumbs(Breadcrumbs.ViewDepartmentStudents(department))
 	}
 

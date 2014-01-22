@@ -14,7 +14,7 @@ exports.createButtonGroup = function(id){
             return $(this).data('state') == selectedValue;
         }).addClass('active');
     if ($this.attr('title') && $this.attr('title').length > 0) {
-        activeButton.attr('title', '<p>' + activeButton.attr('title') +'</p><p>' + $this.attr('title') + '</p>');
+        activeButton.attr('title', '<p>' + activeButton.attr('title') +'</p>' + $this.attr('title'));
     }
     $this.hide();
 };

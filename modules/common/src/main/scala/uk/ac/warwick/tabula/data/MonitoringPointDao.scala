@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Department, Route, StudentMember}
+import uk.ac.warwick.tabula.data.model.{AttendanceNote, Department, Route, StudentMember}
 import org.hibernate.criterion.{Projections, Order}
 import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.criterion.Restrictions._
@@ -67,6 +67,7 @@ trait MonitoringPointDao {
 	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport]
 	def hasAnyPointSets(department: Department): Boolean
 	def getAttendanceNote(student: StudentMember, monitoringPoint: MonitoringPoint): Option[MonitoringPointAttendanceNote]
+	def findAttendanceNotes(student: StudentMember, points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote]
 }
 
 
@@ -475,6 +476,13 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			.add(is("student", student))
 			.add(is("point", monitoringPoint))
 			.uniqueResult
+	}
+
+	def findAttendanceNotes(student: StudentMember, points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote] = {
+		session.newCriteria[MonitoringPointAttendanceNote]
+			.add(is("student", student))
+			.add(in("point", points.asJava))
+			.seq
 	}
 
 }

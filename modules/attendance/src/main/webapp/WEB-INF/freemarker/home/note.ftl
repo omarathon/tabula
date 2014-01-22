@@ -1,14 +1,22 @@
 <#escape x as x?html>
 <#import "*/modal_macros.ftl" as modal />
 
+	<#assign heading>
+		<#if command.isNew()>
+			<h2>Create attendance note for ${student.fullName}</h2>
+		<#else>
+			<h2>Edit attendance note for ${student.fullName}</h2>
+		</#if>
+	</#assign>
+
 	<#if isModal>
 		<@modal.header>
-			<h2>Edit attendance note</h2>
+			<#noescape>${heading}</#noescape>
 		</@modal.header>
 	<#elseif isIframe>
 		<div id="container">
 	<#else>
-		<h2>Edit attendance note</h2>
+		<#noescape>${heading}</#noescape>
 	</#if>
 
 	<#if isModal>
@@ -25,6 +33,18 @@
 			</form>
 		</@modal.footer>
 	<#else>
+
+		<p>
+			<#if command.checkpoint??>
+				${command.checkpoint.state.description}:
+			<#else>
+				Not recorded:
+			</#if>
+			${command.monitoringPoint.name} (<@fmt.monitoringPointFormat command.monitoringPoint />)
+		</p>
+		<#if command.checkpointDescription?has_content>
+			<p><#noescape>${command.checkpointDescription}</#noescape></p>
+		</#if>
 
 		<@f.form id="attendance-note-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="form-horizontal double-submit-protection">
 

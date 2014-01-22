@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.data.model.{FileAttachment, StudentMember}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointAttendanceNote, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringPointAttendanceNote, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{FileAttachmentServiceComponent, AutowiringFileAttachmentServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, FileAttachmentServiceComponent, AutowiringFileAttachmentServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
 import uk.ac.warwick.tabula.CurrentUser
 import org.joda.time.DateTime
 import org.springframework.validation.BindingResult
@@ -20,26 +20,30 @@ object AttendanceNoteCommand {
 		with AttendanceNoteCommandState
 		with AutowiringMonitoringPointServiceComponent
 		with AutowiringFileAttachmentServiceComponent
+		with AutowiringProfileServiceComponent
 }
 
 class AttendanceNoteCommand(val student: StudentMember, val monitoringPoint: MonitoringPoint, val user: CurrentUser)
-	extends CommandInternal[MonitoringPointAttendanceNote] with PopulateOnForm with BindListener with AttendanceNoteCommandState {
+	extends CommandInternal[MonitoringPointAttendanceNote] with PopulateOnForm with BindListener with AttendanceNoteCommandState with CheckpointUpdatedDescription {
 
-	self: MonitoringPointServiceComponent with FileAttachmentServiceComponent =>
+	self: MonitoringPointServiceComponent with FileAttachmentServiceComponent with ProfileServiceComponent =>
 
 	def populate() = {
-		attendanceNote = monitoringPointService.getAttendanceNote(student, monitoringPoint).getOrElse({
-			val newNote = new MonitoringPointAttendanceNote
-			newNote.student = student
-			newNote.point = monitoringPoint
-			newNote
-		})
 		note = attendanceNote.note
 		attachedFile = attendanceNote.attachment
 	}
 
 	def onBind(result: BindingResult) {
 		file.onBind(result)
+		attendanceNote = monitoringPointService.getAttendanceNote(student, monitoringPoint).getOrElse({
+			isNew = true
+			val newNote = new MonitoringPointAttendanceNote
+			newNote.student = student
+			newNote.point = monitoringPoint
+			newNote
+		})
+		checkpoint = monitoringPointService.getCheckpoint(student, monitoringPoint).getOrElse(null)
+		checkpointDescription = Option(checkpoint).map{ checkpoint => describeCheckpoint(checkpoint)}.getOrElse("")
 	}
 
 	def applyInternal() = {
@@ -100,4 +104,8 @@ trait AttendanceNoteCommandState {
 	var note: String = _
 	var file: UploadedFile = new UploadedFile
 	var attachedFile: FileAttachment = _
+
+	var isNew: Boolean = false
+	var checkpoint: MonitoringCheckpoint = _
+	var checkpointDescription: String = ""
 }

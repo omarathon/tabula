@@ -42,12 +42,26 @@
 								<div class="item-info row-fluid point">
 									<div class="span12">
 										<div class="pull-right">
+											<#local title>
+												<#if features.attendanceMonitoringNote>
+													<#local hasNote = mapGet(command.attendanceNotes, point)?? />
+													<#if hasNote>
+														<#local note = mapGet(command.attendanceNotes, point) />
+														<#noescape>
+															<p>${mapGet(command.checkpointDescriptions, point)?default("")}</p>
+															<p>${note.truncatedNote}</p>
+														</#noescape>
+													<#else>
+														<p>${mapGet(command.checkpointDescriptions, point)?default("")}</p>
+													</#if>
+												</#if>
+											</#local>
 											<select
 												id="checkpointMap-${point.id}"
 												name="checkpointMap[${point.id}]"
-												title="${mapGet(command.checkpointDescriptions, point)?default("")}"
+												title="${title}"
 											>
-												<#assign hasState = mapGet(command.checkpointMap, point)?? />
+												<#local hasState = mapGet(command.checkpointMap, point)?? />
 												<option value="" <#if !hasState >selected</#if>>Not recorded</option>
 												<option value="unauthorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "unauthorised">selected</#if>>Missed (unauthorised)</option>
 												<option value="authorised" <#if hasState && mapGet(command.checkpointMap, point).dbValue == "authorised">selected</#if>>Missed (authorised)</option>
@@ -55,7 +69,12 @@
 											</select>
 
 											<#if features.attendanceMonitoringNote>
-												<a class="btn use-tooltip" title="Edit attendance note" href="<@routes.note student=command.student point=point returnTo=((info.requestedUri!"")?url) />"><i class="icon-edit"></i></a>
+												<#local hasNote = mapGet(command.attendanceNotes, point)?? />
+												<#if hasNote>
+													<a class="btn use-tooltip" title="Edit attendance note" href="<@routes.note student=command.student point=point returnTo=((info.requestedUri!"")?url) />"><i class="icon-edit-sign attendance-note-icon"></i></a>
+												<#else>
+													<a class="btn use-tooltip" title="Add attendance note" href="<@routes.note student=command.student point=point returnTo=((info.requestedUri!"")?url) />"><i class="icon-edit attendance-note-icon"></i></a>
+												</#if>
 											</#if>
 
 											<#if point.pointType?? && point.pointType.dbValue == "meeting">

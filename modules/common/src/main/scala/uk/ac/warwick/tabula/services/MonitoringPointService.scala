@@ -32,6 +32,7 @@ trait MonitoringPointService {
 	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]): Option[MonitoringPointSet]
 	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint]) : Seq[(StudentMember, MonitoringCheckpoint)]
+	def getCheckpoint(student: StudentMember, point: MonitoringPoint) : Option[MonitoringCheckpoint]
 	def listTemplates : Seq[MonitoringPointSetTemplate]
 	def getTemplateById(id: String) : Option[MonitoringPointSetTemplate]
 	def deleteTemplate(template: MonitoringPointSetTemplate)
@@ -81,6 +82,7 @@ trait MonitoringPointService {
 	def studentAlreadyReportedThisTerm(student:StudentMember, point:MonitoringPoint): Boolean
 	def hasAnyPointSets(department: Department): Boolean
 	def getAttendanceNote(student: StudentMember, monitoringPoint: MonitoringPoint): Option[MonitoringPointAttendanceNote]
+	def findAttendanceNotes(student: StudentMember, points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote]
 }
 
 
@@ -103,6 +105,8 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		monitoringPointDao.findMonitoringPointSet(route, academicYear, year)
 	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint]): Seq[(StudentMember, MonitoringCheckpoint)] =
 		monitoringPointDao.getCheckpointsByStudent(monitoringPoints)
+	def getCheckpoint(student: StudentMember, point: MonitoringPoint) : Option[MonitoringCheckpoint] =
+		monitoringPointDao.getCheckpoint(point, student)
 
 	def listTemplates = monitoringPointDao.listTemplates
 
@@ -237,6 +241,10 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 
 	def getAttendanceNote(student: StudentMember, monitoringPoint: MonitoringPoint): Option[MonitoringPointAttendanceNote] = {
 		monitoringPointDao.getAttendanceNote(student, monitoringPoint)
+	}
+
+	def findAttendanceNotes(student: StudentMember, points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote] = {
+		monitoringPointDao.findAttendanceNotes(student, points)
 	}
 
 }
