@@ -189,8 +189,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			new ImportStudentCourseCommand(rs,
 					importRowTracker,
 					new ImportStudentCourseYearCommand(rs, importRowTracker),
-					new ImportSupervisorsForStudentCommand()),
-			new ImportTier4ForStudentCommand
+					new ImportSupervisorsForStudentCommand())
 		)
 	}
 
@@ -423,8 +422,7 @@ object ProfileImporter {
 				new ImportStudentCourseCommand(rs,
 						importRowTracker,
 						new ImportStudentCourseYearCommand(rs, importRowTracker),
-						new ImportSupervisorsForStudentCommand),
-				new ImportTier4ForStudentCommand
+						new ImportSupervisorsForStudentCommand)
 			)
 	}
 

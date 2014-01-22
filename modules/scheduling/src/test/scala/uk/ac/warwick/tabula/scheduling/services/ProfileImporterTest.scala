@@ -85,8 +85,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 							importRowTracker,
 							new ImportStudentCourseYearCommand(rs, importRowTracker),
 							new ImportSupervisorsForStudentCommand()
-					),
-					new ImportTier4ForStudentCommand
+					)
 				)
 				member.firstName should be (name)
 			}
@@ -116,8 +115,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 							importRowTracker,
 							new ImportStudentCourseYearCommand(rs, importRowTracker),
 							new ImportSupervisorsForStudentCommand()
-					),
-					new ImportTier4ForStudentCommand
+					)
 				)
 				member.lastName should be (name)
 			}

@@ -34,10 +34,8 @@ class ImportTier4ForStudentCommandTest extends AppContextTestBase with Mockito w
 			val importer = smartMock[Tier4RequirementImporter]
 			importer.hasTier4Requirement(studentMember.universityId) returns true
 
-			val command = new ImportTier4ForStudentCommand()
+			val command = ImportTier4ForStudentCommand()
 			command.student = studentMember
-			command.requirementImporter = importer
-			command.memberDao = smartMock[MemberDao]
 			command.applyInternal
 
 			studentMember.tier4VisaRequirement.booleanValue() should be (true)

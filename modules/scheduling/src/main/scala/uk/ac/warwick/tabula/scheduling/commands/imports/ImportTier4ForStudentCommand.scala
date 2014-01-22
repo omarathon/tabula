@@ -9,8 +9,8 @@ import uk.ac.warwick.tabula.scheduling.services.{AutowiringTier4ImporterComponen
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
 object ImportTier4ForStudentCommand {
-	def apply(student: StudentMember, year: AcademicYear) =
-		new ImportTier4ForStudentCommandInternal(student, year)
+	def apply() =
+		new ImportTier4ForStudentCommandInternal()
 			with ComposableCommand[Boolean]
 			with ImportTier4ForStudentCommandPermissions
 			with AutowiringTier4ImporterComponent
@@ -18,7 +18,7 @@ object ImportTier4ForStudentCommand {
 			with Unaudited
 }
 
-class ImportTier4ForStudentCommandInternal(student: StudentMember, year: AcademicYear) extends CommandInternal[Boolean] {
+class ImportTier4ForStudentCommandInternal() extends CommandInternal[Boolean] with ImportTier4ForStudentCommandState {
 
 	self: Tier4RequirementImporterComponent with MemberDaoComponent =>
 
@@ -33,8 +33,14 @@ class ImportTier4ForStudentCommandInternal(student: StudentMember, year: Academi
 	}
 }
 
+trait ImportTier4ForStudentCommandState {
+	var student: StudentMember = _
+}
+
 trait ImportTier4ForStudentCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	override def permissionsCheck(p: PermissionsChecking) {
+	self: ImportTier4ForStudentCommandState =>
+
+		override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.ImportSystemData)
 	}
 }

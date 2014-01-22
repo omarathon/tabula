@@ -13,10 +13,11 @@ import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopyin
 import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, ModeOfAttendanceImporter}
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.scheduling.services.SitsAcademicYearAware
 
 
 /*
- * ImportStudentRowCommand takes a number of other commands as argument which perform sub-tasks.
+ * ImportStudentRowCommand takes a number of other commands as arguments which perform sub-tasks.
  * These need to be passed in, rather than newed up within the command, to enable testing
  * without auto-wiring.
  */
@@ -24,11 +25,13 @@ class ImportStudentRowCommand(val member: MembershipInformation,
 		val ssoUser: User,
 		val resultSet: ResultSet,
 		val importRowTracker: ImportRowTracker,
-		var importStudentCourseCommand: ImportStudentCourseCommand,
-		var importTier4ForStudentCommand: ImportTier4ForStudentCommand)
+		var importStudentCourseCommand: ImportStudentCourseCommand)
 	extends ImportMemberCommand(member, ssoUser, Some(resultSet))
 	with Logging with Daoisms
 	with StudentProperties with Unaudited with PropertyCopying {
+
+	var importTier4ForStudentCommand = ImportTier4ForStudentCommand()
+
 
 	import ImportMemberHelpers._
 
