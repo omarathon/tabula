@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.JavaImports._
  */
 @Entity
 @Table(name="UPSTREAMASSIGNMENT")
-class AssessmentComponent extends GeneratedId with PreSaveBehaviour {
+class AssessmentComponent extends GeneratedId with PreSaveBehaviour with Serializable {
 
 	@transient var membershipService = Wire.auto[AssignmentMembershipService]
 
