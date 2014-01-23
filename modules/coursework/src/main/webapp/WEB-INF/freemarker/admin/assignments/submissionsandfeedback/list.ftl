@@ -123,7 +123,7 @@
 				</colgroup>
 
 
-				<thead class="fix-header">
+				<thead>
 					<tr>
 						<th class="check-col student"><div class="check-all checkbox"><input type="checkbox" class="collection-check-all"></div></th>
 						<th class="sortable student">Student</th>
