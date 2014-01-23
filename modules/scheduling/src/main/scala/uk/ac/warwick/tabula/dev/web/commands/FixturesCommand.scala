@@ -12,7 +12,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
 import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.roles.{UserAccessMgrRoleDefinition, DepartmentalAdministratorRoleDefinition}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.{AssessmentType, UpstreamAssessmentGroup, AssessmentComponent, Department, Route}
+import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, AssessmentType, UpstreamAssessmentGroup, AssessmentComponent, Department, Route}
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
 import uk.ac.warwick.tabula.AcademicYear
@@ -89,7 +89,10 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		transactional() {
 			moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code) map { dept =>
 				val routes: Seq[Route] = routeDao.findByDepartment(dept)
-				val scds = scdDao.findByDepartment(dept)
+
+				val deptScds = scdDao.findByDepartment(dept)
+				val looseScds = session.newCriteria[StudentCourseDetails].add(Restrictions.isNull("department")).list
+				val scds = (deptScds ++ looseScds).distinct
 
 				for (scd <- scds) {
 					for (mr <- scd.moduleRegistrations) {
