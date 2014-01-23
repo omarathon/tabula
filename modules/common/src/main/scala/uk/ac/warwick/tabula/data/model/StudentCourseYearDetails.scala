@@ -16,6 +16,9 @@ import reflect.BeanProperty
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.EqualsBuilder
 import org.hibernate.annotations.Type
+import javax.persistence.Column
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.JavaImports._
 
 @Entity
 class StudentCourseYearDetails extends StudentCourseYearProperties
@@ -92,6 +95,10 @@ trait StudentCourseYearProperties {
 	var lastUpdatedDate = DateTime.now
 
 	var missingFromImportSince: DateTime = _
+
+	@Column(name="cas_used")
+	@Restricted(Array("Profiles.Read.CasUsed"))
+	var casUsed: JBoolean = _;
 
 }
 

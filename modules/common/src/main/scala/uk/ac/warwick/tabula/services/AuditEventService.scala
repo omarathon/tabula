@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.tabula.JsonObjectMapperFactory
 import org.jadira.usertype.dateandtime.joda.columnmapper.TimestampColumnDateTimeMapper
 import org.joda.time.DateTimeZone
+import uk.ac.warwick.spring.Wire
 
 trait AuditEventService {
 	def getById(id: Long): Option[AuditEvent]
@@ -193,4 +194,12 @@ class AuditEventServiceImpl extends AuditEventService {
 		case e @ (_: JsonParseException | _: JsonMappingException) => None
 	}
 
+}
+
+trait AuditEventServiceComponent {
+	def auditEventService: AuditEventService
+}
+
+trait AutowiringAuditEventServiceComponent extends AuditEventServiceComponent {
+	var auditEventService = Wire[AuditEventService]
 }

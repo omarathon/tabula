@@ -56,10 +56,8 @@
 					
 					$.get(sUrl, function(pagelet) {
 						$("#activities tbody:last").after(pagelet);
-						
-						if ($("#activities tbody tr").length >= ${activities.total}) {
-							$("#activity-fetcher").remove();
-						}
+
+						$("#activity-fetcher").remove();
 						
 						$(".streaming").fadeIn("normal", function() {
 							var $streaming = $(this);

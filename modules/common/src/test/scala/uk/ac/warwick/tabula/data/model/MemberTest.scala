@@ -312,4 +312,23 @@ class MemberTest extends PersistenceTestBase with Mockito {
 
 		stu1.permanentlyWithdrawn should be (false)
 	}
+
+	@Test def freshOrStaleSCYDTest =  {
+
+		val studentMember = Fixtures.student()
+		val year = studentMember.mostSignificantCourseDetails.get.latestStudentCourseYearDetails.academicYear
+		val studentCourseYearDetails = studentMember.freshOrStaleStudentCourseYearDetails(year).head
+		val latestCourseYearDetails =  studentMember.mostSignificantCourseDetails.get.latestStudentCourseYearDetails
+
+		studentCourseYearDetails should be (latestCourseYearDetails)
+
+	}
+	
+	@Test def casUsedTest =  {
+
+		val studentMember = Fixtures.student()
+		studentMember.casUsed.booleanValue() should be (true)
+
+	}
+
 }

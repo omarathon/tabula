@@ -69,9 +69,20 @@ class AssignmentMembershipServiceImpl
 
 	@Autowired var userLookup: UserLookupService = _
 	@Autowired var dao: AssignmentMembershipDao = _
+	
+	val assignmentManualMembershipHelper = new UserGroupMembershipHelper[Assignment]("members")
 
-	def getEnrolledAssignments(user: User): Seq[Assignment] =
-		dao.getEnrolledAssignments(user)
+	def getEnrolledAssignments(user: User): Seq[Assignment] = {
+		val autoEnrolled = 
+			dao.getSITSEnrolledAssignments(user)
+				 .filterNot { _.members.excludesUser(user) }
+
+		val manuallyEnrolled = 
+			assignmentManualMembershipHelper.findBy(user)
+				.filterNot { assignment => assignment.deleted || assignment.archived }
+		
+		(autoEnrolled ++ manuallyEnrolled).distinct
+	}
 
 	def replaceMembers(template: UpstreamAssessmentGroup, universityIds: Seq[String]) {
 		if (debugEnabled) debugReplace(template, universityIds)

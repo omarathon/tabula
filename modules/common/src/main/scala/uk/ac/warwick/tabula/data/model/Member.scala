@@ -257,10 +257,28 @@ class StudentMember extends Member with StudentProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshOrStaleStudentCourseDetails = studentCourseDetails.asScala
 
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	def freshOrStaleStudentCourseYearDetails(year: AcademicYear) =
+		freshOrStaleStudentCourseDetails.
+			flatMap(_.freshOrStaleStudentCourseYearDetails).
+			filter(_.academicYear == year)
+
 	@OneToOne
 	@JoinColumn(name = "mostSignificantCourse")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var mostSignificantCourse: StudentCourseDetails = _
+
+	@Column(name="tier4_visa_requirement")
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
+	var tier4VisaRequirement: JBoolean = _;
+
+	@Restricted(Array("Profiles.Read.CasUsed"))
+	def casUsed: JBoolean = {
+			mostSignificantCourseDetails match {
+				case Some(scd: StudentCourseDetails) => scd.latestStudentCourseYearDetails.casUsed
+				case _ => null // better not to even display this field if there are no student course details
+			}
+	}
 
 	def this(id: String) = {
 		this()
@@ -328,7 +346,7 @@ class StaffMember extends Member with StaffProperties {
 		this()
 		this.universityId = id
 	}
-	
+
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "assistantsgroup_id")
 	var _assistantsGroup: UserGroup = UserGroup.ofUsercodes

@@ -37,20 +37,24 @@ import uk.ac.warwick.spring.Wire
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import scala.collection.GenTraversableOnce
 import language.implicitConversions
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
-trait CommonQueryMethods[A] { self: AbstractIndexService[A] =>
+trait CommonQueryMethods[A] extends TaskBenchmarking { self: AbstractIndexService[A] =>
 
 	/**
 	 * Get recent items.
 	 */
 	def listRecent(start: Int, count: Int): Seq[A] = {
 		val min = new DateTime().minusYears(2)
-		val docs = search(
-			query = NumericRangeQuery.newLongRange(UpdatedDateField, min.getMillis, null, true, true),
-			sort = reverseDateSort,
-			offset = start,
-			max = count)
-		docs transform { toItem(_) }
+		val docs = benchmarkTask("Search for recent items") {
+			search(
+				query = NumericRangeQuery.newLongRange(UpdatedDateField, min.getMillis, null, true, true),
+				sort = reverseDateSort,
+				offset = start,
+				max = count
+			)
+		}
+		benchmarkTask("Transform documents to items") { docs.transform { toItem(_) } }
 	}
 
 }
