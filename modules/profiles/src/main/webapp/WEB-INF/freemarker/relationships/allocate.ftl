@@ -2,14 +2,16 @@
 <#assign mappingById=allocateStudentsToRelationshipCommand.mappingById />
 
 <#macro student_item profile bindpath="">
+	<#local mostSignificantCourseDetails = profile.mostSignificantCourseDetails />
+	<#local route = mostSignificantCourseDetails.route />
 	<li class="student well well-small"
 	data-f-gender="${(profile.gender.dbValue)!}"
-	data-f-route="${(profile.mostSignificantCourseDetails.route.code)!}"
-	data-f-year="${(profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
+	data-f-route="${(route.code)!}"
+	data-f-year="${(mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
 		<div class="profile clearfix">
 			<div class="name">
 				<h6>${profile.fullName}</h6>
-				${(profile.mostSignificantCourseDetails.route.name)!profile.homeDepartment.name}
+				${(route.name)!profile.homeDepartment.name}
 			</div>
 		</div>
 		<input type="hidden" name="${bindpath}" value="${profile.universityId}" />
@@ -149,7 +151,8 @@
 								<div class="student-list drag-target">
 									<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
 										<@spring.bind path="unallocated">
-											<#list status.actualValue as student>
+											<#assign students = status.actualValue />
+											<#list students as student>
 												<@student_item student "${status.expression}[${student_index}]" />
 											</#list>
 										</@spring.bind>
