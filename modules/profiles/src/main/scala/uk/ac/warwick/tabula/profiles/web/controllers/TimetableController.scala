@@ -50,8 +50,8 @@ class TimetableController extends ProfilesController {
 		val end = new DateTime(to * 1000).toLocalDate
 		command.start = start
 		command.end = end
-		val timetableEvents = command.apply
-		val calendarEvents = timetableEvents map (FullCalendarEvent(_, userLookup))
+		val timetableEvents = command.apply()
+		val calendarEvents = timetableEvents.map (FullCalendarEvent(_, userLookup))
 		Mav(new JSONView(colourEvents(calendarEvents)))
 	}
 
