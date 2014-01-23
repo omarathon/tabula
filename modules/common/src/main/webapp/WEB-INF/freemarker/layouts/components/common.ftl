@@ -9,6 +9,7 @@
 <@script "/static/js/jquery.form.js" />
 <@script "/static/js/jquery-filteredlist.js" />
 <@script "/static/js/jquery-radiocontrolled.js" />
+<@script "/static/js/jquery-scrolltofixed.js" />
 <@script "/static/js/jquery-fixheaderfooter.js" />
 <@script "/static/js/userpicker.js" />
 <@script "/static/js/flexipicker.js" />

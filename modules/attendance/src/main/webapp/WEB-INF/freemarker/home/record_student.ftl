@@ -6,7 +6,7 @@
 <script>
 	(function ($) {
 		$(function() {
-			$('.persist-area').fixHeaderFooter();
+			$('.fix-area').fixHeaderFooter();
 
 			$('.select-all').change(function(e) {
 				$('.attendees').selectDeselectCheckboxes(this);
@@ -21,11 +21,9 @@
 
 	<@attendance_macros.attendanceButtons />
 
-	<div class="persist-area">
-		<div class="persist-header">
-			<h1>Record attendance</h1>
-			<h6><span class="muted">for</span> ${command.student.fullName}, ${command.pointSet.route.name}</h6>
-		</div>
+	<div class="fix-area">
+		<h1>Record attendance</h1>
+		<h6><span class="muted">for</span> ${command.student.fullName}, ${command.pointSet.route.name}</h6>
 
 		<#if command.checkpointMap?keys?size == 0>
 
@@ -73,7 +71,7 @@
              				</#list>
              			</div>
              		<#else>
-             			This student's attendance for this term has already been uploaded to SITS:eVision.
+             			<i class="icon-ban-circle"></i> This student's attendance for this term has already been uploaded to SITS:eVision.
              		</#if>
 				</div>
 			</#macro>
@@ -89,7 +87,7 @@
 					</#if>
 				</#list>
 
-				<div class="persist-footer save-row">
+				<div class="fix-footer save-row">
 					<div class="pull-right">
 						<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
 						<a class="btn" href="${returnTo}">Cancel</a>

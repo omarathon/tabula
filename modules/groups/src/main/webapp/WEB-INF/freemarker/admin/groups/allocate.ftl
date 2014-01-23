@@ -24,7 +24,9 @@
 </#macro>
 
 <#escape x as x?html>
-	<h1>Allocate students to ${set.name}</h1>
+	<h1>Allocate students</h1>
+	<h4><span class="muted">to</span> ${set.name}</h4>
+
 	<#if (allocateStudentsToGroupsCommand.isStudentSignup())>
 		<div class="alert">These groups are currently <strong>${set.openForSignups?string("open","closed")}</strong> for self sign-up</div>
 	</#if>
@@ -68,7 +70,7 @@
 			</@spring.hasBindErrors>
 
 			<#assign submitUrl><@routes.allocateset set /></#assign>
-			<div class="persist-area">
+			<div class="fix-area">
 				<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToGroupsCommand">
 				<div class="tabula-dnd"
 						 data-item-name="student"
@@ -77,18 +79,18 @@
 						 data-selectables=".students .drag-target"
 						 data-scroll="true"
 						 data-remove-tooltip="Remove this student from this group">
-					<div class="persist-header">
+					<div class="fix-header pad-when-fixed">
 						<div class="btn-toolbar">
-							<a class="random btn" data-toggle="randomise" data-disabled-on="empty-list"
+							<a class="random btn btn-mini" data-toggle="randomise" data-disabled-on="empty-list"
 							   href="#" >
 								<i class="icon-random"></i> Randomly allocate
 							</a>
-							<a class="return-items btn" data-toggle="return" data-disabled-on="no-allocation"
+							<a class="return-items btn btn-mini" data-toggle="return" data-disabled-on="no-allocation"
 							   href="#" >
 								<i class="icon-arrow-left"></i> Remove all
 							</a>
 						</div>
-						<div class="row-fluid">
+						<div class="row-fluid hide-smallscreen">
 							<div class="span5">
 								<h3>Students</h3>
 							</div>
@@ -145,11 +147,12 @@
 						</div>
 						<div class="span2">
 							<#-- I, for one, welcome our new jumbo icon overlords -->
-							<div class="direction-icon fix-on-scroll">
+							<div class="direction-icon fix-on-scroll hide-smallscreen">
 								<i class="icon-arrow-right"></i>
 							</div>
 						</div>
 						<div class="span5">
+							<h3 class="smallscreen-only">Groups</h3>
 							<div id="groupslist" class="groups fix-on-scroll">
 								<#list set.groups as group>
 								<#assign existingStudents = mappingById[group.id]![] />
@@ -192,7 +195,7 @@
 
 				</div>
 
-					<div class="submit-buttons persist-footer">
+					<div class="submit-buttons fix-footer">
 						<input type="submit" class="btn btn-primary" value="Save">
 						<a href="<@routes.depthome module />" class="btn">Cancel</a>
 					</div>
@@ -236,15 +239,14 @@
 				return $('#groupslist').outerHeight();
 			});
 
-			var fixHeaderFooter = $('.persist-area').fixHeaderFooter();
+			var fixHeaderFooter = $('.fix-area').fixHeaderFooter();
 
 			$(window).scroll(function() {
 				fixHeaderFooter.fixDirectionIcon();
 				fixHeaderFooter.fixTargetList('#groupslist'); // eg. personal tutors column
 			});
 
-
-			// When the return list has changed, make sure the filter is re-run			
+			// When the return list has changed, make sure the filter is re-run
 			$('.return-list').on('changed.tabula', function(e) {
 				// Make sure it exists before doing it
 				var filter = $('.tabula-filtered-list').data('tabula-filtered-list');

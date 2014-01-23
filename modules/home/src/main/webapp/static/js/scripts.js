@@ -213,7 +213,7 @@
 						$form.find('.submit-buttons .btn').removeClass('disabled');
 						$form.removeData('submitOnceSubmitted');
 					}
-				
+
 					// delete any old errors
 					$(scopeSelector + "span.error").remove();
 					$(scopeSelector + '.error').removeClass('error');
@@ -514,7 +514,7 @@
 		if (typeof($el) === 'undefined') {
 			$el = $('.striped-section.collapsible');
 		}
-		
+
 		$el.filter(':not(.collapsible-init)').each(function() {
 			var $section = $(this).addClass('collapsible-init');
 			var open = function() {
@@ -609,7 +609,7 @@
 				if ($(this).parent().find('.dropdown-menu').is(':visible')) {
 					return;
 				}
-			
+
 				if (open()) {
 					$section.removeClass('expanded');
 					$icon.removeClass().addClass('icon-fixed-width icon-chevron-right');
@@ -622,7 +622,7 @@
 							// Use history.pushState here if supported as it stops the page jumping
 							if (window.history && window.history.pushState && window.location.hash !== ('#' + $section.data('name'))) {
 								window.history.pushState({}, document.title, window.location.pathname + '#' + $section.data('name'));
-							} else {						
+							} else {
 								window.location.hash = $section.data('name');
 							}
 						}
@@ -770,61 +770,63 @@
 			$(window).scroll(function() {
 				var scrollTop = $(this).scrollTop() + gutter;
 
-				$('.fix-on-scroll:visible').each(function() {
-					var $this = $(this);
+				if (!$('body.is-smallscreen').length) {
+                    $('.fix-on-scroll:visible').each(function() {
+                        var $this = $(this);
 
-					var $scrollContainer = $this.closest('.fix-on-scroll-container');
-					if ($scrollContainer.length == 0) $scrollContainer = $('body');
+                        var $scrollContainer = $this.closest('.fix-on-scroll-container');
+                        if ($scrollContainer.length == 0) $scrollContainer = $('body');
 
-					var height = $this.height();
-					var maxHeight = $(window).height() - gutter;
-					var tooHigh = (height > maxHeight);
+                        var height = $this.height();
+                        var maxHeight = $(window).height() - gutter;
+                        var tooHigh = (height > maxHeight);
 
-					var floor = $scrollContainer.offset().top + $scrollContainer.height();
+                        var floor = $scrollContainer.offset().top + $scrollContainer.height();
 
-					var isFixed = $this.data('is-fixed');
-					var pinnedToFloor = $this.data('is-pinned-to-floor');
+                        var isFixed = $this.data('is-fixed');
+                        var pinnedToFloor = $this.data('is-pinned-to-floor');
 
-					var offsetTop = (isFixed) ? $this.data('original-offset') : $this.offset().top;
-					var pinToFloor = (scrollTop + height) > floor;
+                        var offsetTop = (isFixed) ? $this.data('original-offset') : $this.offset().top;
+                        var pinToFloor = (scrollTop + height) > floor;
 
-					if (!tooHigh && scrollTop > offsetTop && !isFixed) {
-						// Fix it
-						$this.data('original-offset', offsetTop);
-						$this.data('original-width', $this.css('width'));
-						$this.data('original-position', $this.css('position'));
-						$this.data('original-top', $this.css('top'));
+                        if (!tooHigh && scrollTop > offsetTop && !isFixed) {
+                            // Fix it
+                            $this.data('original-offset', offsetTop);
+                            $this.data('original-width', $this.css('width'));
+                            $this.data('original-position', $this.css('position'));
+                            $this.data('original-top', $this.css('top'));
 
-						$this.css({
-							width: $this.width(),
-							position: 'fixed',
-							top: gutter
-						});
+                            $this.css({
+                                width: $this.width(),
+                                position: 'fixed',
+                                top: gutter
+                            });
 
-						$this.data('is-fixed', true);
-						$this.trigger('fixed', [true, 'top']);
-					} else if (!tooHigh && isFixed && pinToFloor) {
-						// Pin to the floor
-						var diff = (scrollTop + height) - floor;
+                            $this.data('is-fixed', true);
+                            $this.trigger('fixed', [true, 'top']);
+                        } else if (!tooHigh && isFixed && pinToFloor) {
+                            // Pin to the floor
+                            var diff = (scrollTop + height) - floor;
 
-						$this.css('top', gutter - diff);
-						$this.data('is-pinned-to-floor', true);
-						$this.trigger('fixed', [true, 'bottom']);
-					} else if (!tooHigh && isFixed && !pinToFloor && pinnedToFloor) {
-						// Un-pin from the floor
-						$this.css('top', gutter);
-						$this.data('is-pinned-to-floor', false);
-						$this.trigger('fixed', [true, 'top']);
-					} else if ((tooHigh || scrollTop <= offsetTop) && isFixed) {
-						// Un-fix it
-						$this.css('width', $this.data('original-width'));
-						$this.css('position', $this.data('original-position'));
-						$this.css('top', $this.data('original-top'));
+                            $this.css('top', gutter - diff);
+                            $this.data('is-pinned-to-floor', true);
+                            $this.trigger('fixed', [true, 'bottom']);
+                        } else if (!tooHigh && isFixed && !pinToFloor && pinnedToFloor) {
+                            // Un-pin from the floor
+                            $this.css('top', gutter);
+                            $this.data('is-pinned-to-floor', false);
+                            $this.trigger('fixed', [true, 'top']);
+                        } else if ((tooHigh || scrollTop <= offsetTop) && isFixed) {
+                            // Un-fix it
+                            $this.css('width', $this.data('original-width'));
+                            $this.css('position', $this.data('original-position'));
+                            $this.css('top', $this.data('original-top'));
 
-						$this.data('is-fixed', false);
-						$this.trigger('fixed', [false]);
-					}
-				});
+                            $this.data('is-fixed', false);
+                            $this.trigger('fixed', [false]);
+                        }
+                    });
+                }
 			});
 		}
 

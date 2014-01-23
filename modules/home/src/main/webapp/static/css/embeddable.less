@@ -1,7 +1,7 @@
 // iframes have no green background
 html.iframe {
     background: none;
-    
+
     #container {
     	width: auto;
     }
@@ -23,6 +23,16 @@ html.iframe {
 @import "bootstrap_fixes.inc.less";
 @import "bootstrap/variables.less";
 @import "bootstrap/mixins.less";
+
+body {
+  .smallscreen-only {
+	display: none;
+  }
+
+  &.is-smallscreen .smallscreen-only {
+	display: inherit;
+  }
+}
 
 .mac-cmd {
 	font-size: 140%;
@@ -333,22 +343,25 @@ ul {
 }
 
 
-.feedback-table, .submission-table {
+#main-content .feedback-table,
+#main-content .submission-table {
 	border-collapse: collapse;
 
-		colgroup {
-			&.student    { background-color: #dcdcdd; }
-			&.submission { background-color: #d1d89c; border-left: 2px solid #767575; }
-			&.plagiarism { background-color: #dcdcdd; border-left: 2px solid #767575; }
-			&.feedback   { background-color: #a6d4e5; border-left: 2px solid #767575; }
-		}
+	@studentBackground: #dcdcdd;
+	@submissionBackground: #d1d89c;
+	@plagiarismBackground: #dcdcdd;
+	@feedbackBackground: #a6d4e5;
 
-		thead > tr th {
-			background-color: transparent !important;
-			text-align: center;
-			border-left-color: transparent;
-			border-top-color: transparent;
-		}
+	thead > tr th {
+		&.student    { background-color: @studentBackground; }
+		&.submission { background-color: @submissionBackground; }
+		&.plagiarism { background-color: @plagiarismBackground; }
+		&.feedback   { background-color: @feedbackBackground; }
+	}
+
+	thead > tr th {
+		text-align: center;
+	}
 
     tbody {
     	tr.selected td {
@@ -635,7 +648,7 @@ fieldset.internal {
 	border-top: 1px solid #EEE;
 }
 
-.submit-buttons.persist-footer {
+.submit-buttons.fix-footer {
 	margin-bottom: 0;
 }
 
