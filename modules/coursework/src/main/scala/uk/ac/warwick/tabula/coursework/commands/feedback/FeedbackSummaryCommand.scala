@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
-import uk.ac.warwick.tabula.commands.{Description, Describable, ComposableCommand, CommandInternal}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.data.model.{Assignment, Feedback}
 import uk.ac.warwick.userlookup.User
@@ -14,6 +14,7 @@ object FeedbackSummaryCommand {
 			with FeedbackSummaryCommandPermissions
 			with FeedbackSummaryCommandDescription
 			with AutowiringFeedbackServiceComponent
+			with ReadOnly
 }
 
 class FeedbackSummaryCommandInternal(val assignment: Assignment, val student: User)

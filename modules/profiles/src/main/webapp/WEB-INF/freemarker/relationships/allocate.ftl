@@ -2,14 +2,16 @@
 <#assign mappingById=allocateStudentsToRelationshipCommand.mappingById />
 
 <#macro student_item profile bindpath="">
+	<#local mostSignificantCourseDetails = profile.mostSignificantCourseDetails />
+	<#local route = mostSignificantCourseDetails.route />
 	<li class="student well well-small"
 	data-f-gender="${(profile.gender.dbValue)!}"
-	data-f-route="${(profile.mostSignificantCourseDetails.route.code)!}"
-	data-f-year="${(profile.mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
+	data-f-route="${(route.code)!}"
+	data-f-year="${(mostSignificantCourseDetails.latestStudentCourseYearDetails.yearOfStudy)!}">
 		<div class="profile clearfix">
 			<div class="name">
 				<h6>${profile.fullName}</h6>
-				${(profile.mostSignificantCourseDetails.route.name)!profile.homeDepartment.name}
+				${(route.name)!profile.homeDepartment.name}
 			</div>
 		</div>
 		<input type="hidden" name="${bindpath}" value="${profile.universityId}" />
@@ -17,20 +19,21 @@
 </#macro>
 
 <#escape x as x?html>
-	<h1>Allocate students to ${relationshipType.description}s</h1>
-	
+	<h1>Allocate students</h1>
+	<h4><span class="muted">to</span> ${relationshipType.description}s</h4>
+
 	<noscript>
 		<div class="alert">This page requires Javascript.</div>
 	</noscript>
-	
+
 	<div class="alert">
 		<button type="button" class="close" data-dismiss="alert">&times;</button>
 		<h4>Students with multiple ${relationshipType.agentRole}s</h4>
-		
-		<p>This page expects students to have exactly one ${relationshipType.agentRole}. If you allocate a student to a ${relationshipType.agentRole}, 
+
+		<p>This page expects students to have exactly one ${relationshipType.agentRole}. If you allocate a student to a ${relationshipType.agentRole},
 		it will remove any existing ${relationshipType.agentRole}s that the student has. This makes this page unsuitable for students who
 		are expected to have multiple ${relationshipType.agentRole}s.</p>
-		
+
 		<p>We hope to change this behaviour in the future to make it easier to manage ${relationshipType.agentRole}s for students.</p>
 	</div>
 
@@ -70,16 +73,16 @@
 			</@spring.hasBindErrors>
 
 			<#assign submitUrl><@routes.relationship_allocate department relationshipType /></#assign>
-			<div class="persist-area">
+			<div class="fix-area">
 			<@f.form method="post" action="${submitUrl}" commandName="allocateStudentsToRelationshipCommand" cssClass="form-horizontal">
 			<div class="tabula-dnd"
-					 data-item-name="student" 
+					 data-item-name="student"
 					 data-text-selector=".name h6"
 					 data-use-handle="false"
 					 data-selectables=".students .drag-target"
 					 data-scroll="true"
 					 data-remove-tooltip="Remove this student from this ${relationshipType.agentRole}">
-				<div class="persist-header">
+				<div class="fix-header pad-when-fixed">
 					<div class="btn-toolbar">
 						<a class="random btn" data-toggle="randomise" data-disabled-on="empty-list"
 						   href="#" >
@@ -111,11 +114,11 @@
 
 
 
-				</div><!-- end persist-header -->
+				</div><!-- end fix-header -->
 
 				<div class="row-fluid fix-on-scroll-container">
 					<div class="span5">
-						<div id="studentslist" 
+						<div id="studentslist"
 								 class="students tabula-filtered-list"
 								 data-item-selector=".student-list li">
 							<div class="well ">
@@ -148,7 +151,8 @@
 								<div class="student-list drag-target">
 									<ul class="drag-list return-list unstyled" data-bindpath="unallocated">
 										<@spring.bind path="unallocated">
-											<#list status.actualValue as student>
+											<#assign students = status.actualValue />
+											<#list students as student>
 												<@student_item student "${status.expression}[${student_index}]" />
 											</#list>
 										</@spring.bind>
@@ -189,14 +193,14 @@
 					<div class="span5">
 						<div id="agentslist" class="agents fix-on-scroll clearfix">
 
-							
+
 							<#macro agent_item university_id full_name existing_students=[]>
 								<div class="drag-target well clearfix agent-${university_id}">
 									<div class="agent-header">
 										<a href="#" class="delete pull-right" data-toggle="tooltip" title="Remove ${full_name}">
 											<i class="icon-remove icon-large"></i>
 										</a>
-									
+
 										<#local popoverHeader>${full_name}'s ${relationshipType.studentRole}s</#local>
 
 										<h4 class="name">
@@ -218,20 +222,20 @@
 									</ul>
 								</div>
 							</#macro>
-							
+
 							<#list allocateStudentsToRelationshipCommand.mapping?keys as agent>
 								<#assign existingStudents = mappingById[agent.universityId]![] />
-								
+
 								<@agent_item agent.universityId agent.fullName existingStudents />
 							</#list>
 						</div>
 					</div>
 				</div>
 			</div>
-			
+
 				<#include "_allocate_notifications_modal.ftl" />
 
-					<div class="submit-buttons persist-footer">
+					<div class="submit-buttons fix-footer">
 						<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#notify-modal">Save</button>
 						<a href="<@routes.home />" class="btn">Cancel</a> <#-- TODO better url -->
 					</div>
@@ -239,7 +243,7 @@
 
 
 			</@f.form>
-			</div><!-- end persist-area -->
+			</div><!-- end fix-area -->
 
 			</div><!-- end 1st tab -->
 
@@ -266,7 +270,7 @@
 				return $('#agentslist').outerHeight();
 			});
 
-			var fixHeaderFooter = $('.persist-area').fixHeaderFooter();
+			var fixHeaderFooter = $('.fix-area').fixHeaderFooter();
 			var singleColumnDragTargetHeight =  $('#agentslist .drag-target').outerHeight(true);
 
 			$(window).scroll(function() {
@@ -300,27 +304,27 @@
 				$form.prepend($('<input />').attr({type: 'hidden', name: 'action', value: 'refresh'}));
 				$form.submit();
 			});
-			
+
 			$('#agentslist .agent-header > .delete').on('click', function(e) {
 				e.preventDefault();
 				e.stopPropagation();
-				
+
 				// Get the drag and drop instance
 				var dnd = $('.tabula-dnd').data('tabula-dnd');
 				var $container = $(this).closest('.drag-target')
 				var $dragList = $container.find('.drag-list');
-				
+
 				dnd.batchMove([{
 					target: $('.return-list'),
 					items: $dragList.find('li'),
 					sources: $dragList
 				}]);
-				
+
 				$container.remove();
 				formatAgentsLayout(); // after deleting item from list, re-format the grid layout for the agents
 			});
 
-			// When the return list has changed, make sure the filter is re-run			
+			// When the return list has changed, make sure the filter is re-run
 			$('.return-list').on('changed.tabula', function(e) {
 				// Make sure it exists before doing it
 				var filter = $('.tabula-filtered-list').data('tabula-filtered-list');

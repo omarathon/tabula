@@ -14,8 +14,9 @@
 	<span class="muted" style="display: none;">Please enter at least 3 characters</span>
 </div>
 
+<div class="fix-area">
 <table class="agents table table-bordered table-striped">
-	<thead>
+	<thead class="fix-header pad-when-fixed">
 		<tr>
 			<th>${command.relationshipType.agentRole?capitalize}s</th>
 			<th>${command.relationshipType.studentRole?capitalize}s</th>
@@ -69,9 +70,12 @@
 		</#list>
 	</tbody>
 </table>
+</div>
 
 <script type="text/javascript">
 	jQuery(function($){
+		$('.fix-area').fixHeaderFooter();
+
 		$('table.agents').tablesorter({
 			sortList: [[0,0]],
 			headers: { 4: { sorter: false }},

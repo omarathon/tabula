@@ -1,7 +1,7 @@
 <script>
 (function ($) {
 	$(function() {
-		$('.persist-area').fixHeaderFooter();
+		$('.fix-area').fixHeaderFooter();
 
 		$('.select-all').change(function(e) {
 			$('.attendees').selectDeselectCheckboxes(this);
@@ -28,17 +28,17 @@
 			</button>
 		</div>
 	</div>
-	
-	<div class="persist-area">
-		<div class="persist-header">
-			<h1>Record attendance</h1>
-			<h4><span class="muted">for</span>
-				${command.event.group.groupSet.name},
-				${command.event.group.name}</h4>
-			<h6>
-				${command.event.day.name} <@fmt.time event.startTime /> - <@fmt.time event.endTime />, Week ${command.week}
-			</h6>
-	
+
+	<div class="fix-area">
+		<h1>Record attendance</h1>
+		<h4><span class="muted">for</span>
+			${command.event.group.groupSet.name},
+			${command.event.group.name}</h4>
+		<h6>
+			${command.event.day.name} <@fmt.time event.startTime /> - <@fmt.time event.endTime />, Week ${command.week}
+		</h6>
+
+		<div class="fix-header">
 			<div class="row-fluid record-attendance-form-header">
 					<div class="span12">
 						<span class="studentsLoadingMessage" style="display: none;">
@@ -87,16 +87,16 @@
 							</#if>
 						</div>
 					</div>
-	
 				</div>
 			</div>
-	
+		</div>
+
 		<#if !command.members?has_content>
-	
+
 			<p><em>There are no students allocated to this group.</em></p>
-	
+
 		<#else>
-		
+
 			<#macro studentRow student>
 				<div class="row-fluid item-info">
 					<div class="span12">
@@ -136,10 +136,10 @@
 								</#if>
 							</#if>
 						</div>
-						
+
 						<@fmt.member_photo student "tinythumbnail" true />
 						${student.fullName}
-						
+
 						<@spring.bind path="command.studentsState[${student.universityId}]">
 							<#list status.errorMessages as err>${err}</#list>
 							<div class="text-error"><@f.errors path="studentsState[${student.universityId}]" cssClass="error"/></div>
@@ -150,18 +150,18 @@
 					</script>
 				</div>
 			</#macro>
-	
+
 			<div class="striped-section-contents attendees">
 				<form id="recordAttendance" action="" method="post">
 					<script>
 						AttendanceRecording.bindButtonGroupHandler();
 					</script>
-	
+
 					<#list command.members as student>
 						<@studentRow student />
 					</#list>
-	
-					<div class="persist-footer save-row">
+
+					<div class="fix-footer save-row">
 						<div class="pull-right">
 							<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
 							<a class="btn" href="${returnTo}">Cancel</a>
@@ -169,8 +169,8 @@
 					</div>
 				</form>
 			</div>
-	
+
 		</#if>
-	
+
 	</div>
 </div>

@@ -32,7 +32,7 @@ html .fc,
 ------------------------------------------------------------------------*/
 
 .fc-header td {
-	white-space: nowrap;
+	font-size: 12px;
 	}
 
 .fc-header-left {
@@ -114,7 +114,10 @@ html .fc,
 
 /* Cell Styles
 ------------------------------------------------------------------------*/
-.fc-widget-header { white-space: nowrap; }
+.fc-widget-header { 
+	font-size: 12px;
+	padding: 0 0.5em; 
+}
 
 .fc-widget-header,    /* <th>, usually */
 .fc-widget-content {  /* <td>, usually */

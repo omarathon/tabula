@@ -37,7 +37,7 @@ exports.bindButtonGroupHandler = function() {
 $(function(){
 	// SCRIPTS FOR RECORDING MONITORING POINTS
 
-	$('.recordCheckpointForm').find('.persist-header')
+	$('.recordCheckpointForm').find('.fix-header')
         .find('div.pull-right').show()
         .end().each(function(){
 		$(this).find('.btn-group button').each(function(i){

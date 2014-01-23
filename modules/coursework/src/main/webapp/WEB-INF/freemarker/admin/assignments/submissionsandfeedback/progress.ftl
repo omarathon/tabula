@@ -3,33 +3,33 @@
 
 <#escape x as x?html>
 <div class="fixed-container">
-	<div class="persist-header">
-		<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
+	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
 
-		<#if assignment.openEnded>
-			<p class="dates">
-				<@fmt.interval assignment.openDate />, never closes
-				(open-ended)
-				<#if !assignment.opened>
-					<span class="label label-warning">Not yet open</span>
-				</#if>
-			</p>
-		<#else>
-			<p class="dates">
-				<@fmt.interval assignment.openDate assignment.closeDate />
-				<#if assignment.closed>
-					<span class="label label-warning">Closed</span>
-				</#if>
-				<#if !assignment.opened>
-					<span class="label label-warning">Not yet open</span>
-				</#if>
+	<#if assignment.openEnded>
+		<p class="dates">
+			<@fmt.interval assignment.openDate />, never closes
+			(open-ended)
+			<#if !assignment.opened>
+				<span class="label label-warning">Not yet open</span>
+			</#if>
+		</p>
+	<#else>
+		<p class="dates">
+			<@fmt.interval assignment.openDate assignment.closeDate />
+			<#if assignment.closed>
+				<span class="label label-warning">Closed</span>
+			</#if>
+			<#if !assignment.opened>
+				<span class="label label-warning">Not yet open</span>
+			</#if>
 
-			</p>
-		</#if>
+		</p>
+	</#if>
 
-		<#assign module=assignment.module />
-		<#assign department=module.department />
+	<#assign module=assignment.module />
+	<#assign department=module.department />
 
+	<div class="fix-header pad-when-fixed">
 		<#include "_filter.ftl" />
 
 		<#assign currentView = "summary" />
@@ -40,21 +40,21 @@
 	</div>
 
 	<#macro originalityReport attachment>
-	<#local r=attachment.originalityReport />
+		<#local r = attachment.originalityReport />
 
-				<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
-		  <div id="tip-content-${attachment.id}" class="hide">
-					<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
-					<p class="similarity-subcategories-tooltip">
-						Web: ${r.webOverlap}%<br>
-						Student papers: ${r.studentOverlap}%<br>
-						Publications: ${r.publicationOverlap}%
-					</p>
-					<p>
-						<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
-					</p>
-		  </div>
-		  <script type="text/javascript">
+		<span id="tool-tip-${attachment.id}" class="similarity-${r.similarity} similarity-tooltip">${r.overlap}% similarity</span>
+		<div id="tip-content-${attachment.id}" class="hide">
+			<p>${attachment.name} <img src="<@url resource="/static/images/icons/turnitin-16.png"/>"></p>
+			<p class="similarity-subcategories-tooltip">
+				Web: ${r.webOverlap}%<br>
+				Student papers: ${r.studentOverlap}%<br>
+				Publications: ${r.publicationOverlap}%
+			</p>
+			<p>
+				<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
+			</p>
+		</div>
+		<script type="text/javascript">
 			jQuery(function($){
 			  $("#tool-tip-${attachment.id}").popover({
 				placement: 'right',
@@ -63,12 +63,11 @@
 				title: 'Turnitin report summary'
 			  });
 			});
-		  </script>
-
+		</script>
 	</#macro>
 
 	<table class="coursework-progress-table students table table-bordered table-striped tabula-greenLight sticky-table-headers ">
-		<thead<#if students?size == 0> style="display: none;"</#if> class="persist-header">
+		<thead<#if students?size == 0> style="display: none;"</#if> class="fix-header">
 			<tr>
 				<th class="check-col" style="padding-right: 0px;"><input type="checkbox" class="collection-check-all"></th>
 				<#if department.showStudentName>
@@ -389,7 +388,7 @@
 	<#if students?size gt 0>
 	<script type="text/javascript">
 	(function($) {
-		$('.fixed-container').fixHeaderFooter({minimumWindowHeightFix: 630});
+		$('.fixed-container').fixHeaderFooter();
 
 		var options = {
 			sortList: [<#if department.showStudentName>[3, 0], [2, 0]<#else>[2, 0], [1, 0]</#if>],
@@ -416,8 +415,7 @@
 			}
 		};
 
-		$('.coursework-progress-table:not(.floatingHeadTable)').each(function() { $(this).expandingTable({ tableSorterOptions: options }); });
-  		$(".floatingHeadTable").addClass("tablesorter");
+		$('.coursework-progress-table').each(function() { $(this).expandingTable({ tableSorterOptions: options }); });
 	})(jQuery);
 	</script>
 	<#else>
@@ -438,6 +436,5 @@
 	<#else>
 	</div>
 	</#if>
-
 </div>
 </#escape>
