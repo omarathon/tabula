@@ -28,8 +28,8 @@ abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 		Option(note).map{ note =>
 			val breakIterator: BreakIterator = BreakIterator.getWordInstance
 			breakIterator.setText(note)
-			val length = Math.min(note.length, breakIterator.following(50))
-			if (length == note.length) {
+			val length = Math.min(note.length, breakIterator.following(Math.min(50, note.length)))
+			if (length < 0 || length == note.length) {
 				note
 			} else {
 				note.substring(0, length) + "&hellip;"

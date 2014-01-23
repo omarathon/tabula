@@ -1007,7 +1007,109 @@
 
         $('[data-loading-text]').on('click', function(){
             $(this).button('loading');
-        })
+        });
+
+		// SCRIPTS FOR ATTENDANCE NOTES
+		(function(){
+			var addArgToUrl = function(url, argName, argValue){
+				if(url.indexOf('?') > 0) {
+					return url + '&' + argName + '=' + argValue;
+				} else {
+					return url + '?' + argName + '=' + argValue;
+				}
+			};
+
+			var attendanceNoteIframeLoad = function(iFrame){
+				var $m = $('#attendance-note-modal'), $f = $(iFrame).contents();
+
+				if ($f.find(".attendance-note-success").length > 0) {
+					// Save successful
+					var linkId = $f.find(".attendance-note-success").data('linkid');
+					$(linkId).attr('data-original-title', 'Edit attendance note')
+						.find('i').removeClass('icon-edit').addClass('icon-edit-sign');
+					$m.modal("hide");
+				} else {
+					$m.find('.modal-body').slideDown();
+					var $form = $m.find('form.double-submit-protection');
+					$form.tabulaSubmitOnce();
+					$form.find(".btn").removeClass('disabled');
+					// wipe any existing state information for the submit protection
+					$form.removeData('submitOnceSubmitted');
+					$m.modal("show");
+					$m.on("shown", function() {
+						$f.find("[name='note']").focus();
+					});
+				}
+			};
+
+			var attendanceNoteIframeHandler = function() {
+				attendanceNoteIframeLoad(this);
+				$(this).off('load', attendanceNoteIframeHandler);
+			};
+
+			var attendanceNoteClickHandler = function(href){
+				var $m = $('#attendance-note-modal');
+				if($m.length  === 0) {
+					$m = $('<div />').attr({
+						'id' : 'attendance-note-modal',
+						'class' : 'modal hide fade'
+					}).appendTo($('#column-1-content'));
+				}
+
+				$m.off('submit', 'form').on('submit', 'form', function(e){
+					e.preventDefault();
+					// reattach the load handler and submit the inner form in the iframe
+					$m.find('iframe')
+						.on('load', attendanceNoteIframeHandler)
+						.contents().find('form').submit();
+
+					// hide the iframe, so we don't get a FOUC
+					$m.find('.modal-body').slideUp();
+				});
+
+				$.get(href, function(data){
+					$m.html(data);
+					$m.find('.modal-body').empty();
+					var iframeMarkup = "<iframe frameBorder='0' scrolling='no' style='height:100%;width:100%;' id='modal-content'></iframe>";
+					$(iframeMarkup)
+						.on('load', attendanceNoteIframeHandler)
+						.attr('src', addArgToUrl(href, 'isIframe', 'true'))
+						.appendTo($m.find('.modal-body'));
+				});
+			};
+
+			$('#recordAttendance').on('click', 'a.btn.attendance-note', function(event){
+				event.preventDefault();
+				attendanceNoteClickHandler($(this).attr('href'));
+			});
+
+			// Popovers are created on click so binding directly to A tags won't work
+			$('body').on('click', '.popover a.attendance-note-modal', function(event){
+				var $this = $(this), $m = $('#attendance-note-modal');
+				event.preventDefault();
+				if($m.length  === 0) {
+					$m = $('<div />').attr({
+						'id' : 'attendance-note-modal',
+						'class' : 'modal hide fade'
+					}).appendTo($('#column-1-content'));
+				}
+
+				$.get($this.attr('href'), function(data){
+					$m.html(data).modal('show');
+					$this.closest('.popover').find('button.close').trigger('click');
+					$m.find('.modal-footer .btn-primary').on('click', function(e){
+						e.preventDefault();
+						var link = $(this).attr('href');
+						$m.modal('hide').on('hidden', function(){
+							$m.off('hidden');
+							attendanceNoteClickHandler(link);
+						});
+					});
+				});
+			});
+		})();
+		// END SCRIPTS FOR ATTENDANCE NOTES
+
 	}); // on ready
 
 	// take anything we've attached to "exports" and add it to the global "Profiles"

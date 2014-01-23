@@ -11,9 +11,9 @@ import org.joda.time.DateTime
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.system.BindListener
 
-object AttendanceNoteCommand {
+object EditAttendanceNoteCommand {
 	def apply(student: StudentMember, monitoringPoint: MonitoringPoint, user: CurrentUser) =
-		new AttendanceNoteCommand(student, monitoringPoint, user)
+		new EditAttendanceNoteCommand(student, monitoringPoint, user)
 		with ComposableCommand[MonitoringPointAttendanceNote]
 		with AttendanceNotePermissions
 		with AttendanceNoteDescription
@@ -23,7 +23,7 @@ object AttendanceNoteCommand {
 		with AutowiringProfileServiceComponent
 }
 
-class AttendanceNoteCommand(val student: StudentMember, val monitoringPoint: MonitoringPoint, val user: CurrentUser)
+abstract class EditAttendanceNoteCommand(val student: StudentMember, val monitoringPoint: MonitoringPoint, val user: CurrentUser)
 	extends CommandInternal[MonitoringPointAttendanceNote] with PopulateOnForm with BindListener with AttendanceNoteCommandState with CheckpointUpdatedDescription {
 
 	self: MonitoringPointServiceComponent with FileAttachmentServiceComponent with ProfileServiceComponent =>

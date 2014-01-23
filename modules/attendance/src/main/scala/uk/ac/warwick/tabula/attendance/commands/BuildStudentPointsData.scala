@@ -5,14 +5,13 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.{ProfileServiceComponent, TermServiceComponent, MonitoringPointServiceComponent}
 import uk.ac.warwick.tabula.AcademicYear
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointAttendanceNote, AttendanceState, MonitoringPoint}
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 case class CheckpointData(
 	state: String,
 	recorded: String,
-	hasNote: Boolean,
-	note: String
+	note: MonitoringPointAttendanceNote
 )
 
 case class StudentPointsData(
@@ -58,23 +57,20 @@ trait BuildStudentPointsData extends MonitoringPointServiceComponent with TermSe
 								case (_, checkpoint) => CheckpointData(
 									checkpoint.state.dbValue,
 									describeCheckpoint(checkpoint),
-									attendanceNoteOption.isDefined,
-									attendanceNoteOption.map{_.truncatedNote}.getOrElse("")
+									attendanceNoteOption.getOrElse(null)
 								)
 							}.getOrElse({
 								if (currentAcademicWeek > point.requiredFromWeek)
 									CheckpointData(
 										"late",
 										"",
-										attendanceNoteOption.isDefined,
-										attendanceNoteOption.map{_.truncatedNote}.getOrElse("")
+										attendanceNoteOption.getOrElse(null)
 									)
 								else
 									CheckpointData(
 										"",
 										"",
-										attendanceNoteOption.isDefined,
-										attendanceNoteOption.map{_.truncatedNote}.getOrElse("")
+										attendanceNoteOption.getOrElse(null)
 									)
 							})
 						}

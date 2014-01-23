@@ -39,8 +39,15 @@
 		<#local titles = titles + [checkpointData.recorded] />
 	</#if>
 
-	<#if checkpointData.hasNote>
-		<#local titles = titles + [checkpointData.note] />
+	<#if checkpointData.note??>
+		<#local note>
+			${checkpointData.note.truncatedNote}
+			<#if (checkpointData.note.truncatedNote?length > 0)>
+				<br/>
+			</#if>
+			<a class='attendance-note-modal' href='<@routes.viewNote checkpointData.note.student checkpointData.note.point />'>View attendance note</a>
+		</#local>
+		<#local titles = titles + [note] />
 	</#if>
 
 	<#local renderedTitle>
@@ -52,7 +59,7 @@
 			</#if>
 		</#list>
 	</#local>
-	<i class="use-tooltip icon-fixed-width ${class}" title="${renderedTitle}" data-container="body" data-html="true"></i>
+	<i class="use-popover icon-fixed-width ${class}" data-content="${renderedTitle}" data-html="true"></i>
 </#macro>
 
 <#macro attendanceLabel pointMap point>
@@ -84,8 +91,13 @@
 		<#local titles = titles + [checkpointData.recorded] />
 	</#if>
 
-	<#if checkpointData.hasNote>
-		<#local titles = titles + [checkpointData.note] />
+	<#if checkpointData.note??>
+		<#local note>
+			${checkpointData.note.truncatedNote}
+			<br/>
+			<a class='attendance-note-modal' href='<@routes.viewNote checkpointData.note.student checkpointData.note.point />'>View attendance note</a>
+		</#local>
+		<#local titles = titles + [note] />
 	</#if>
 
 	<#local renderedTitle>
@@ -99,7 +111,7 @@
 	</#local>
 
 	<#if (checkpointData.state?length > 0)>
-		<span class="use-tooltip label ${class}" title="${renderedTitle}" data-container="body" data-html="true">${label}</span>
+		<span class="use-popover label ${class}" data-content="${renderedTitle}" data-html="true" data-placement="left">${label}</span>
 	</#if>
 </#macro>
 

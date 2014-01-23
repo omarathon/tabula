@@ -71,9 +71,9 @@
 											<#if features.attendanceMonitoringNote>
 												<#local hasNote = mapGet(command.attendanceNotes, point)?? />
 												<#if hasNote>
-													<a class="btn use-tooltip" title="Edit attendance note" href="<@routes.note student=command.student point=point returnTo=((info.requestedUri!"")?url) />"><i class="icon-edit-sign attendance-note-icon"></i></a>
+													<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note" title="Edit attendance note" href="<@routes.editNote student=command.student point=point returnTo=((info.requestedUri!"")?url) />"><i class="icon-edit-sign attendance-note-icon"></i></a>
 												<#else>
-													<a class="btn use-tooltip" title="Add attendance note" href="<@routes.note student=command.student point=point returnTo=((info.requestedUri!"")?url) />"><i class="icon-edit attendance-note-icon"></i></a>
+													<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note" title="Add attendance note" href="<@routes.editNote student=command.student point=point returnTo=((info.requestedUri!"")?url) />"><i class="icon-edit attendance-note-icon"></i></a>
 												</#if>
 											</#if>
 

@@ -256,6 +256,11 @@
 				}
 			});
 		});
+		// Enable any freshly loaded popovers
+		jQuery('.use-popover').tabulaPopover({
+			trigger: 'click',
+			container: '#container'
+		});
 	</script>
 
 </#escape>

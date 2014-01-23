@@ -1,6 +1,10 @@
 <#escape x as x?html>
 <#import "*/modal_macros.ftl" as modal />
 
+	<#if success??>
+		<div class="attendance-note-success" data-linkid="#attendanceNote-${student.universityId}-${command.monitoringPoint.id}"></div>
+	</#if>
+
 	<#assign heading>
 		<#if command.isNew()>
 			<h2>Create attendance note for ${student.fullName}</h2>
@@ -65,22 +69,27 @@
 					<@f.hidden path="attachedFile" value="${command.attachedFile.id}" />
 					<i class="icon-remove-sign remove-attachment"></i>
 
-					<script>
-						jQuery(function($){
-							$(".remove-attachment").on("click", function(e){
-								$(this).closest(".control-group").remove();
-								return false;
-							});
-						});
-					</script>
 					<small class="subtle help-block">
 						This is the file attachmented to this administrative note.
 						Click the remove link next to a document to delete it.
 					</small>
+
 				</@form.labelled_row>
+
+				<script>
+					jQuery(function($){
+						$(".remove-attachment").on("click", function(e){
+							$(this).closest('form').find('.attendance-file').show();
+							$(this).closest(".control-group").remove()
+							return false;
+						});
+					});
+				</script>
 			</#if>
 
-			<@form.filewidget basename="file" types=[] multiple=false />
+			<div class="attendance-file" <#if command.attachedFile?has_content>style="display:none;"</#if>>
+				<@form.filewidget basename="file" types=[] multiple=false />
+			</div>
 
 			<#if isIframe>
 				<input type="hidden" name="isModal" value="true" />
