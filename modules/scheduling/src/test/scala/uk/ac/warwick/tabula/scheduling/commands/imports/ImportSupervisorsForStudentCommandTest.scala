@@ -2,16 +2,13 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import org.springframework.transaction.annotation.Transactional
 import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.model.DegreeType.Postgraduate
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
 import uk.ac.warwick.tabula.helpers.Logging
 import org.joda.time.DateTime
+import org.junit.Ignore
 
 
 class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Mockito with Logging {
@@ -24,6 +21,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 
 		val relationshipType = StudentRelationshipType("supervisor", "supervisor", "supervisor", "supervisee")
 		relationshipType.defaultSource = StudentRelationshipSource.SITS
+		relationshipType.defaultRdxType = "SUP"
 		session.saveOrUpdate(relationshipType)
 
 		val department = new Department
@@ -63,10 +61,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			// set up importer to return supervisor
 			val codes = Seq((supervisorUniId, new java.math.BigDecimal("100")))
 			val importer = smartMock[SupervisorImporter]
-			val relType = new StudentRelationshipType
-			relType.defaultRdxType = "SUP"
-			relType.defaultSource = StudentRelationshipSource.SITS
-			importer.getSupervisorUniversityIds(scjCode, relType) returns codes
+			importer.getSupervisorUniversityIds(scjCode, relationshipType) returns codes
 
 			// test command
 			val command = new ImportSupervisorsForStudentCommand()
@@ -91,11 +86,8 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		new Environment {
 			// set up importer to return supervisor
 			val importer = smartMock[SupervisorImporter]
-			val relType = new StudentRelationshipType
-			relType.defaultRdxType = "SUP"
-			relType.defaultSource = StudentRelationshipSource.SITS
 
-			importer.getSupervisorUniversityIds(scjCode, relType) returns Seq()
+			importer.getSupervisorUniversityIds(scjCode, relationshipType) returns Seq()
 
 			// test command
 			val command = new ImportSupervisorsForStudentCommand()
@@ -125,11 +117,8 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			// set up importer to return supervisor
 			val codes = Seq((supervisorUniId, null))
 			val importer = smartMock[SupervisorImporter]
-			val relType = new StudentRelationshipType
-			relType.defaultRdxType = "SUP"
-			relType.defaultSource = StudentRelationshipSource.SITS
+			importer.getSupervisorUniversityIds(scjCode, relationshipType) returns codes
 
-			importer.getSupervisorUniversityIds(scjCode, relType) returns codes
 
 			// test command
 			val command = new ImportSupervisorsForStudentCommand()
