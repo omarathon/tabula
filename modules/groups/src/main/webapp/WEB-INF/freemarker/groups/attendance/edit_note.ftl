@@ -2,7 +2,7 @@
 <#import "*/modal_macros.ftl" as modal />
 
 	<#if success??>
-		<div class="attendance-note-success" data-linkid="#attendanceNote-${student.universityId}-${command.monitoringPoint.id}"></div>
+		<div class="attendance-note-success" data-linkid="#attendanceNote-${student.universityId}-${command.occurrence.id}"></div>
 	</#if>
 
 	<#assign heading>
@@ -39,16 +39,16 @@
 	<#else>
 
 		<p>
-			<#if command.checkpoint??>
-				${command.checkpoint.state.description}:
+			<#if command.attendance??>
+				${command.attendance.state.description}:
 			<#else>
 				Not recorded:
 			</#if>
-			${command.monitoringPoint.name} (<@fmt.monitoringPointFormat command.monitoringPoint />)
+			${command.occurrence.event.group.groupSet.name},
+			${command.occurrence.event.group.name},
+			${command.occurrence.event.day.name} <@fmt.time command.occurrence.event.startTime /> - <@fmt.time command.occurrence.event.endTime />,
+			Week ${command.occurrence.week}
 		</p>
-		<#if command.checkpointDescription?has_content>
-			<p><#noescape>${command.checkpointDescription}</#noescape></p>
-		</#if>
 
 		<@f.form id="attendance-note-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="form-horizontal double-submit-protection">
 
@@ -60,7 +60,7 @@
 				<@form.labelled_row "attachedFile" "Attached file">
 					<i class="icon-file-alt"></i>
 					<@fmt.download_link
-						filePath="/note/${command.student.universityId}/${command.monitoringPoint.id}/attachment/${command.attachedFile.name}"
+						filePath="/note/${command.student.universityId}/${command.occurrence.id}/attachment/${command.attachedFile.name}"
 						mimeType=command.attachedFile.mimeType
 						title="Download file ${command.attachedFile.name}"
 						text="Download ${command.attachedFile.name}"

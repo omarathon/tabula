@@ -26,7 +26,7 @@
 		</#list>
 	</ul>
 	
-	<@components.singleGroupAttendance group instances studentAttendance />
+	<@components.singleGroupAttendance group instances studentAttendance attendanceNotes />
 	
 	<#-- List of students modal -->
 	<div id="students-list-modal" class="modal fade">

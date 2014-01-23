@@ -426,7 +426,7 @@
 	${event.day.shortName} <@fmt.time event.startTime />, <@fmt.singleWeekFormat week academicYear department />
 </#compress></#macro>
 
-<#macro studentAttendanceRow student attendance instances group showStudent=true>
+<#macro studentAttendanceRow student attendance notes instances group showStudent=true>
 	<#local set = group.groupSet />
 	<#local module = set.module />
 	<#local department = module.department />
@@ -437,20 +437,51 @@
 		<#if showStudent><td class="nowrap" data-sortBy="${student.lastName}, ${student.firstName}">${student.fullName}</td></#if>
 		<#list instances as instance>
 			<#local state = mapGet(attendance, instance) />
-		
+			<#local title><@instanceFormat instance academicYear department /></#local>
+
+			<#if state.name == 'Attended'>
+				<#local class = "icon-ok attended" />
+				<#local title = "${student.fullName} attended: " + title />
+			<#elseif state.name == 'MissedAuthorised'>
+				<#local class = "icon-remove-circle authorised" />
+				<#local title = "${student.fullName} did not attend (authorised absence): " + title />
+			<#elseif state.name == 'MissedUnauthorised'>
+				<#local class = "icon-remove unauthorised" />
+				<#local title = "${student.fullName} did not attend (unauthorised): " + title />
+				<#local missedCount = missedCount + 1 />
+			<#elseif state.name == 'Late'>
+				<#local class = "icon-warning-sign late" />
+				<#local title = "No data: " + title />
+			<#else>
+				<#local class = "icon-minus" />
+			</#if>
+
+			<#local titles = [title] />
+
+			<#if mapGet(notes, instance)??>
+				<#local studentNote = mapGet(notes, instance) />
+				<#local note>
+				${studentNote.truncatedNote}
+					<#if (studentNote.truncatedNote?length > 0)>
+						<br/>
+					</#if>
+					<a class='attendance-note-modal' href='<@routes.viewNote studentNote.student studentNote.occurrence />'>View attendance note</a>
+				</#local>
+				<#local titles = titles + [note] />
+			</#if>
+
+			<#local renderedTitle>
+				<#list titles as t>
+					<#if (titles?size > 1)>
+						<p>${t}</p>
+					<#else>
+					${t}
+					</#if>
+				</#list>
+			</#local>
+
 			<td>
-				<#if state.name == 'Attended'>
-					<i class="icon-ok icon-fixed-width attended" title="${student.fullName} attended: <@instanceFormat instance academicYear department />"></i>
-				<#elseif state.name == 'MissedAuthorised'>
-					<i class="icon-remove-circle icon-fixed-width authorised" title="${student.fullName} did not attend (authorised absence): <@instanceFormat instance academicYear department />"></i>
-				<#elseif state.name == 'MissedUnauthorised'>
-					<#local missedCount = missedCount + 1 />
-					<i class="icon-remove icon-fixed-width unauthorised" title="${student.fullName} did not attend (unauthorised): <@instanceFormat instance academicYear department />"></i>
-				<#elseif state.name == 'Late'> <#-- Late -->
-					<i class="icon-warning-sign icon-fixed-width late" title="No data: <@instanceFormat instance academicYear department />"></i>
-				<#else> <#-- Not recorded -->
-					<i class="icon-minus icon-fixed-width" title="<@instanceFormat instance academicYear department />"></i>
-				</#if>
+				<i class="use-popover icon-fixed-width ${class}" data-content="${renderedTitle}" data-html="true"></i>
 			</td>
 		</#list>
 		<td>
@@ -459,7 +490,7 @@
 	</tr>
 </#macro>
 
-<#macro singleGroupAttendance group instances studentAttendance singleStudent={} showRecordButtons=true>
+<#macro singleGroupAttendance group instances studentAttendance attendanceNotes singleStudent={} showRecordButtons=true>
 	<#local set = group.groupSet />
 	<#local module = set.module />
 	<#local department = module.department />
@@ -494,11 +525,12 @@
 		</thead>
 		<tbody>
 			<#if singleStudent?has_content>
-				<@studentAttendanceRow student=singleStudent attendance=studentAttendance instances=instances group=group showStudent=false />
+				<@studentAttendanceRow student=singleStudent attendance=studentAttendance notes=attendanceNotes instances=instances group=group showStudent=false />
 			<#else>
 				<#list studentAttendance?keys as student>
 					<#local attendance = mapGet(studentAttendance, student) />
-					<@studentAttendanceRow student=student attendance=attendance instances=instances group=group showStudent=true />
+					<#local notes = mapGet(attendanceNotes, student) />
+					<@studentAttendanceRow student=student attendance=attendance notes=notes instances=instances group=group showStudent=true />
 				</#list>
 			</#if>
 		</tbody>
@@ -549,7 +581,7 @@
 						<div id="group-attendance-container-${group.id}">
 							<#local attendanceInfo = mapGet(groups, group) />
 			
-							<@singleGroupAttendance group attendanceInfo.instances attendanceInfo.attendance />
+							<@singleGroupAttendance group attendanceInfo.instances attendanceInfo.attendance attendanceInfo.notes />
 			      </div>
 		      </div>
 	      </#list>
@@ -607,7 +639,7 @@
 					<div id="group-attendance-container-${group.id}">
 						<#local attendanceInfo = mapGet(groups, group) />
 		
-						<@singleGroupAttendance group attendanceInfo.instances attendanceInfo.attendance />
+						<@singleGroupAttendance group attendanceInfo.instances attendanceInfo.attendance attendanceInfo.notes />
 		      </div>
 		    </#list>
 	    </div>

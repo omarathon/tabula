@@ -41,6 +41,11 @@
 						pane.find('.title').html(title);
 						$('#attendance-pane').show();
 						window.GlobalScripts.initCollapsible();
+						$('.use-tooltip').tooltip();
+						$('.use-popover').tabulaPopover({
+							trigger: 'click',
+							container: '#container'
+						});
 					}
 				});
 
@@ -51,9 +56,14 @@
 						$('#attendance .small-groups').show();
 						pane.show();
 						window.GlobalScripts.initCollapsible();
+						$('.use-tooltip').tooltip();
+						$('.use-popover').tabulaPopover({
+							trigger: 'click',
+							container: '#container'
+						});
 					}
 				});
-			}
+			};
 			$('#attendance select.academicYear').on('change', monitoringPointsLoader);
 			monitoringPointsLoader();
 		});

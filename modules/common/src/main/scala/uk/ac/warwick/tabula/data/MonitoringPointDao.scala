@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{AttendanceNote, Department, Route, StudentMember}
+import uk.ac.warwick.tabula.data.model.{Department, Route, StudentMember}
 import org.hibernate.criterion.{Projections, Order}
 import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.criterion.Restrictions._
@@ -479,6 +479,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	}
 
 	def findAttendanceNotes(students: Seq[StudentMember], points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote] = {
+		if(students.size == 0 || points.size == 0)
+			return Seq()
+
 		session.newCriteria[MonitoringPointAttendanceNote]
 			.add(in("student", students.asJava))
 			.add(in("point", points.asJava))

@@ -9,9 +9,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, RequiresPermissionsChecking, PermissionsChecking}
 import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
 import org.apache.log4j.Logger
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, SmallGroup, SmallGroupSet, SmallGroupEvent}
 import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.userlookup.User
@@ -312,6 +310,15 @@ abstract class Description {
 	def smallGroupEvent(smallGroupEvent: SmallGroupEvent) = {
 		property("smallGroupEvent" -> smallGroupEvent.id)
 		if (smallGroupEvent.group != null) smallGroup(smallGroupEvent.group)
+		this
+	}
+
+	/**
+	 * Record small group event occurrence, plus its event, group, set, module and department if available.
+	 */
+	def smallGroupEventOccurrence(smallGroupEventOccurrence: SmallGroupEventOccurrence) = {
+		property("smallGroupEventOccurrence" -> smallGroupEventOccurrence.id)
+		if (smallGroupEventOccurrence.event != null) smallGroupEvent(smallGroupEventOccurrence.event)
 		this
 	}
 

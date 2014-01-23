@@ -91,13 +91,4 @@
 </div>
 
 </#if>
-<script>
-	jQuery(function($){
-		$('.use-tooltip').tooltip();
-		$('.use-popover').tabulaPopover({
-			trigger: 'click',
-			container: '#container'
-		});
-	});
-</script>
 </#escape>

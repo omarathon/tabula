@@ -82,7 +82,9 @@
 									<i class="icon-ok icon-fixed-width" title="Set all to 'Attended'"></i>
 								</button>
 							</div>
-							<i class="icon-fixed-width"></i>
+							<#if features.attendanceMonitoringNote>
+								<a style="visibility: hidden" class="btn"><i class="icon-edit"></i></a>
+							</#if>
 						</div>
 					</div>
 	
@@ -109,7 +111,30 @@
 									<option value="${state.dbValue}" <#if hasState && currentState.dbValue == state.dbValue>selected</#if>>${state.description}</option>
 								</#list>
 							</select>
-							<i class="icon-fixed-width"></i>
+							<#if features.attendanceMonitoringNote>
+								<#local hasNote = mapGet(command.attendanceNotes, student)?? />
+								<#if hasNote>
+									<a
+										id="attendanceNote-${student.universityId}-${command.occurrence.id}"
+										class="btn use-tooltip attendance-note"
+										title="Edit attendance note"
+										data-container="body"
+										href="<@routes.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
+									>
+										<i class="icon-edit-sign attendance-note-icon"></i>
+									</a>
+								<#else>
+									<a
+										id="attendanceNote-${student.universityId}-${command.occurrence.id}"
+										class="btn use-tooltip attendance-note"
+										title="Add attendance note"
+										data-container="body"
+										href="<@routes.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
+									>
+										<i class="icon-edit attendance-note-icon"></i>
+									</a>
+								</#if>
+							</#if>
 						</div>
 						
 						<@fmt.member_photo student "tinythumbnail" true />

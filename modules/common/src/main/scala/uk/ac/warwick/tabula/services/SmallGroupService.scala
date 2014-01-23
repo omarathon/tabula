@@ -1,20 +1,14 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConverters._
-import org.hibernate.annotations.{AccessType, Filter, FilterDef}
 import org.springframework.stereotype.Service
-import javax.persistence.{Entity, Table}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.JavaImports.{JArrayList, JList}
 import uk.ac.warwick.tabula.data.{AssignmentMembershipDao, AssignmentMembershipDaoComponent, AutowiringAssignmentMembershipDaoComponent, AutowiringSmallGroupDaoComponent, AutowiringUserGroupDaoComponent, SmallGroupDaoComponent, UserGroupDaoComponent}
-import uk.ac.warwick.tabula.data.model.{ModuleRegistration, UserGroup}
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupSet}
+import uk.ac.warwick.tabula.data.model.{StudentMember, ModuleRegistration, UserGroup, UnspecifiedTypeUserGroup}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroup, SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupSet, SmallGroupEventAttendance}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
-import uk.ac.warwick.tabula.data.model.UnspecifiedTypeUserGroup
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
+import uk.ac.warwick.tabula.commands.{MemberOrUser, Appliable}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import org.joda.time.DateTime
@@ -38,6 +32,7 @@ trait SmallGroupService {
 	def saveOrUpdate(smallGroupSet: SmallGroupSet)
 	def saveOrUpdate(smallGroup: SmallGroup)
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent)
+	def saveOrUpdate(note: SmallGroupEventAttendanceNote)
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent]
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup]
 	def removeFromSmallGroups(moduleRegistration: ModuleRegistration)
@@ -48,6 +43,9 @@ trait SmallGroupService {
 	def saveOrUpdateAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int, state: AttendanceState, user: CurrentUser): SmallGroupEventAttendance
 	def deleteAttendance(studentId: String, event: SmallGroupEvent, weekNumber: Int): Unit
 	def findAttendanceByGroup(smallGroup: SmallGroup): Seq[SmallGroupEventOccurrence]
+	def getAttendanceNote(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendanceNote]
+	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote]
+	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence) : Option[SmallGroupEventAttendance]
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -75,6 +73,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def saveOrUpdate(smallGroupSet: SmallGroupSet) = smallGroupDao.saveOrUpdate(smallGroupSet)
 	def saveOrUpdate(smallGroup: SmallGroup) = smallGroupDao.saveOrUpdate(smallGroup)
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent) = smallGroupDao.saveOrUpdate(smallGroupEvent)
+	def saveOrUpdate(note: SmallGroupEventAttendanceNote) = smallGroupDao.saveOrUpdate(note)
 
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
 	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = groupTutorsHelper.findBy(user)
@@ -126,11 +125,9 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			val userId = modReg.studentCourseDetails.student.userId
 			val user = userLookup.getUserByUserId(userId)
 
-			val groups = smallGroupDao.findByModuleAndYear(modReg.module, modReg.academicYear)
-
 			for {
 			    smallGroup <- smallGroupDao.findByModuleAndYear(modReg.module, modReg.academicYear)
-			    if (smallGroup.students.includesUser(user))
+			    if smallGroup.students.includesUser(user)
 			} {
 				// Wrap this in a sub-command so that we can do auditing
 				userGroupDao.saveOrUpdate(removeFromGroupCommand(user, smallGroup).apply().asInstanceOf[UserGroup])
@@ -141,6 +138,15 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	private def removeFromGroupCommand(user: User, smallGroup: SmallGroup): Appliable[UnspecifiedTypeUserGroup] = {
 		new RemoveUserFromSmallGroupCommand(user, smallGroup)
 	}
+
+	def getAttendanceNote(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendanceNote] =
+		smallGroupDao.getAttendanceNote(studentId, occurrence)
+
+	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote] =
+		smallGroupDao.findAttendanceNotes(studentIds, occurrences)
+
+	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence) : Option[SmallGroupEventAttendance] =
+		smallGroupDao.getAttendance(studentId, occurrence)
 }
 
 trait SmallGroupMembershipHelpers {
