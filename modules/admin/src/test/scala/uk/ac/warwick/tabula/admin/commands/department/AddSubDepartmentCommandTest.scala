@@ -37,7 +37,6 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 		parent.permissionsService = permissionsService
 
 		val command = new AddSubDepartmentCommandInternal(parent) with CommandTestSupport with AddSubDepartmentCommandValidation
-		val x = Seq()
 	}
 
 
