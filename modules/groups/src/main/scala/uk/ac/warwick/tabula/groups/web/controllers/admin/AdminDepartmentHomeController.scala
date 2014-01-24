@@ -43,12 +43,14 @@ class AdminDepartmentHomeController extends GroupsController {
 		)
 
 		val hasModules = !moduleItems.isEmpty
-		val hasGroups = moduleItems.filterNot(i => i.hasOpenableGroupsets && i.hasCloseableGroupsets && i.hasUnreleasedGroupsets).isEmpty
+		val hasGroups = moduleItems.exists { _.module.groupSets.asScala.exists { g => !g.deleted && !g.archived } }
+		val hasGroupAttendance = moduleItems.exists { _.module.groupSets.asScala.exists { g => g.showAttendanceReports } }
 
 		Mav("admin/department",
 			"department" -> department,
 			"data" -> data,
 			"hasModules" -> hasModules,
-			"hasGroups" -> hasGroups)
+			"hasGroups" -> hasGroups,
+			"hasGroupAttendance" -> hasGroupAttendance)
 	}
 }

@@ -88,7 +88,7 @@ If you are doing any work on this, it would be good to do the above first.
 							<i class="icon-envelope-alt icon-fixed-width"></i> Notify
 						</@fmt.permission_button>
 					</li>
-					<li<#if !hasGroups> class="disabled"</#if>>
+					<li<#if !hasGroupAttendance> class="disabled"</#if>>
 						<a href="<@routes.departmentAttendance department />"><i class="icon-group icon-fixed-width"></i> Attendance</a>
 					</li>
 				</ul>

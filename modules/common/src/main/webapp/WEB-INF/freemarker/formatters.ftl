@@ -1,6 +1,22 @@
 <#ftl strip_text=true />
 <#escape x as x?html>
 
+<#--
+deptheader macro creates a one or two line department-based heading for a page,
+automating a dropdown for any related departments (parent and/or subdepartments).
+
+eg. <@deptheader "Do a thing" "in" dept routes "deptHome" /> with CS dept, and no subdepartments gives:
+
+<h1>Do a thing</h1>
+<h4><span class="muted">in</span> Computer Science</h4>
+
+title: Text to use in the <h1> element. Mandatory, unless preposition is empty, in which case, defaults to department name
+preposition: Muted text to relate the title to the department name in the second line, eg. for, with, in. If empty string, header will be one-liner
+department: department (from model)
+routes: routes freemarker object (from prelude.ftl)
+routemacro: a macro string identifier (from within routes) to fetch an appropriate page for related departments
+cssClass (optional): a class to apply to the h1 (typically used for 'with-settings')
+-->
 <#macro deptheader title preposition department routes routemacro cssClass="">
 	<#local use_h4 = preposition?has_content />
 
