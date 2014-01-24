@@ -89,7 +89,7 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 				termService.getAcademicWeekForAcademicYear(term.getEndDate, academicYear)
 			)
 		}.toSeq:_*)
-
+		val occurrences = allInstances.flatMap{case(_, occurenceOption) => occurenceOption}
 		val attendanceNotes = benchmarkTask("Get attendance notes") {
 			smallGroupService.findAttendanceNotes(
 				Seq(user.getWarwickId),
