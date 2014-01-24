@@ -112,7 +112,7 @@ class EditAttendanceNoteController extends GroupsController {
 			form(cmd)
 		} else {
 			cmd.apply()
-			Mav("groups/attendance/edit_note", "success" -> true)
+			Mav("groups/attendance/edit_note", "success" -> true, "isIframe" -> true)
 		}
 	}
 

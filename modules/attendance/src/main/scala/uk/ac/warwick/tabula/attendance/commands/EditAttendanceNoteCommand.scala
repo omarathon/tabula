@@ -47,12 +47,6 @@ abstract class EditAttendanceNoteCommand(val student: StudentMember, val monitor
 	}
 
 	def applyInternal() = {
-		val attendanceNote = monitoringPointService.getAttendanceNote(student, monitoringPoint).getOrElse({
-			val newNote = new MonitoringPointAttendanceNote
-			newNote.student = student
-			newNote.point = monitoringPoint
-			newNote
-		})
 		attendanceNote.note = note
 
 		if (attendanceNote.attachment != null && attachedFile == null) {

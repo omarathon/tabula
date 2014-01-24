@@ -13,7 +13,7 @@
 		</#if>
 	</#assign>
 
-	<#if isModal>
+	<#if isModal?? && isModal>
 		<@modal.header>
 			<#noescape>${heading}</#noescape>
 		</@modal.header>
@@ -23,7 +23,7 @@
 		<#noescape>${heading}</#noescape>
 	</#if>
 
-	<#if isModal>
+	<#if isModal?? && isModal>
 		<@modal.body />
 
 		<@modal.footer>
@@ -91,9 +91,7 @@
 				<@form.filewidget basename="file" types=[] multiple=false />
 			</div>
 
-			<#if isIframe>
-				<input type="hidden" name="isModal" value="true" />
-			<#else>
+			<#if !isIframe>
 
 				<div class="form-actions">
 					<div class="pull-right">

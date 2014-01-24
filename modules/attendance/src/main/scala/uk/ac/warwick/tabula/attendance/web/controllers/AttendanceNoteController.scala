@@ -116,7 +116,7 @@ class EditAttendanceNoteController extends AttendanceController {
 			form(cmd, student)
 		} else {
 			cmd.apply()
-			Mav("home/edit_note", "success" -> true)
+			Mav("home/edit_note", "success" -> true, "isIframe" -> true)
 		}
 	}
 

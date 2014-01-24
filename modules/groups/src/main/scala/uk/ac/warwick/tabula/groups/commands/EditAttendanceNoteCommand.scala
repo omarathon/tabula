@@ -46,12 +46,6 @@ abstract class EditAttendanceNoteCommand(val student: StudentMember, val occurre
 	}
 
 	def applyInternal() = {
-		val attendanceNote = smallGroupService.getAttendanceNote(student.universityId, occurrence).getOrElse({
-			val newNote = new SmallGroupEventAttendanceNote
-			newNote.student = student
-			newNote.occurrence = occurrence
-			newNote
-		})
 		attendanceNote.note = note
 
 		if (attendanceNote.attachment != null && attachedFile == null) {
