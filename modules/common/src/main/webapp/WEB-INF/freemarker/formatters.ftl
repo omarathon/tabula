@@ -1,6 +1,54 @@
 <#ftl strip_text=true />
 <#escape x as x?html>
 
+<#macro deptheader title preposition department routes routemacro cssClass="">
+	<#local use_h4 = preposition?has_content />
+
+	<#if use_h4>
+		<div class="deptheader">
+			<#if cssClass?has_content>
+				<h1 class="${cssClass}">${title}</h1>
+			<#else>
+				<h1>${title}</h1>
+			</#if>
+
+			<#if department.parent?? || department.children?has_content>
+				<h4 class="with-related"><span class="muted">${preposition}</span> ${department.name}</h4>
+			<#else>
+				<h4><span class="muted">for</span> ${department.name}</h4>
+			</#if>
+		<#-- div closed below -->
+	<#else>
+		<div class="deptheader">
+			<#local h1Class = (cssClass + " with-related")?trim />
+			<#if title?has_content>
+				<#local h1Title = title />
+			<#else>
+				<#local h1Title = department.name />
+			</#if>
+
+			<h1 class="${h1Class}">${h1Title}</h1>
+		<#-- div closed below -->
+	</#if>
+
+	<#-- div opened above -->
+		<#if department.parent?? || department.children?has_content>
+			<a class="use-tooltip" data-toggle="dropdown" data-container="body" data-target=".dropdown" title="Related departments"><i class="icon-caret-down<#if !use_h4> icon-large</#if>"></i></a>
+			<div class="dropdown">
+				<ul class="dropdown-menu">
+					<#if department.parent??>
+						<li><a href="<@routes[routemacro] department.parent />">${department.parent.name}</a></li>
+					</#if>
+					<li class="disabled"><a>${department.name}</a></li>
+					<#list department.children as child>
+						<li><a href="<@routes[routemacro] child />">${child.name}</a></li>
+					</#list>
+				</ul>
+			</div>
+		</#if>
+	</div>
+</#macro>
+
 <#macro module_name module withFormatting=true>
 	<#if withFormatting>
 		<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>

@@ -1,30 +1,7 @@
 <#escape x as x?html>
 <#import "../attendance_macros.ftl" as attendance_macros />
 
-<h1>View students</h1>
-<h4><span class="muted">in</span> ${command.department.name}</h4>
-
-<div class="btn-toolbar dept-toolbar">
-	<#if command.department.parent??>
-		<a class="btn btn-medium use-tooltip" href="<@routes.viewDepartmentStudents command.department.parent />" data-container="body" title="${command.department.parent.name}">
-			Parent department
-		</a>
-	</#if>
-
-	<#if command.department.children?has_content>
-		<div class="btn-group">
-			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
-				Subdepartments
-				<span class="caret"></span>
-			</a>
-			<ul class="dropdown-menu pull-right">
-				<#list command.department.children as child>
-					<li><a href="<@routes.viewDepartmentStudents child />">${child.name}</a></li>
-				</#list>
-			</ul>
-		</div>
-	</#if>
-</div>
+<@fmt.deptheader "View students" "in" command.department routes "viewDepartmentStudents" />
 
 <#if updatedStudent??>
 	<div class="alert alert-success">

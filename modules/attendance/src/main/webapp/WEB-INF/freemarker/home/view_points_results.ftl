@@ -5,7 +5,7 @@
 <#assign validationError>
 	<@spring.bind path="command.students">
 		<#if status.error>
-		<div class="alert alert-error"><@f.errors path="command.students" cssClass="error"/></div>
+			<p class="alert alert-error"><@f.errors path="command.students" cssClass="error"/></p>
 		</#if>
 	</@spring.bind>
 </#assign>
@@ -13,11 +13,11 @@
 <#if validationError?has_content>
 	<#noescape>${validationError}</#noescape>
 <#elseif !command.hasBeenFiltered && command.filterTooVague>
-	<div class="alert alert-info">Find points for students using the filter options above.</div>
+	<p class="alert alert-info"><i class="icon-lightbulb"></i> Find points for students using the filter options above.</p>
 <#elseif command.hasBeenFiltered && command.filterTooVague>
-	<div class="alert alert-warn">The filter you have chosen includes too many students.</div>
+	<p class="alert"><i class="icon-warning-sign"></i> The filter you have chosen includes too many students.</p>
 <#elseif pointsMap?keys?size == 0>
-	<p><em>No points exist for the selected options</em></p>
+	<p class="alert"><i class="icon-warning-sign"></i> No points exist for the selected options.</p>
 <#else>
 	<#assign filterQuery = command.serializeFilter />
 	<#assign returnTo><@routes.viewDepartmentPointsWithAcademicYear command.department command.academicYear filterQuery/></#assign>
@@ -45,5 +45,5 @@
 		</#list>
 	</div>
 </#if>
-	
+
 </#escape>

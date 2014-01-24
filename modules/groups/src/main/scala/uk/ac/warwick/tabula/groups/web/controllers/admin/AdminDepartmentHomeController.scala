@@ -42,8 +42,13 @@ class AdminDepartmentHomeController extends GroupsController {
 			canManageDepartment=securityService.can(user, Permissions.Module.ManageSmallGroups, department)
 		)
 
+		val hasModules = !moduleItems.isEmpty
+		val hasGroups = moduleItems.filterNot(i => i.hasOpenableGroupsets && i.hasCloseableGroupsets && i.hasUnreleasedGroupsets).isEmpty
+
 		Mav("admin/department",
 			"department" -> department,
-			"data" -> data )
+			"data" -> data,
+			"hasModules" -> hasModules,
+			"hasGroups" -> hasGroups)
 	}
 }

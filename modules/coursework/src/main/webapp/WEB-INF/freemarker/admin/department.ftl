@@ -16,27 +16,6 @@
 <#assign expand_by_default = (!can_manage_dept && modules?size lte 5) />
 <#if (features.extensions || features.feedbackTemplates)>
 	<div class="btn-toolbar dept-toolbar">
-
-		<#if department.parent??>
-			<a class="btn btn-medium use-tooltip" href="<@routes.departmenthome department.parent />" data-container="body" title="${department.parent.name}">
-				Parent department
-			</a>
-		</#if>
-
-		<#if department.children?has_content>
-		<div class="btn-group">
-			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
-				Subdepartments
-				<span class="caret"></span>
-			</a>
-			<ul class="dropdown-menu pull-right">
-				<#list department.children as child>
-					<li><a href="<@routes.departmenthome child />">${child.name}</a></li>
-				</#list>
-			</ul>
-		</div>
-		</#if>
-
 		<#if !modules?has_content && department.children?has_content>
 			<a class="btn btn-medium dropdown-toggle disabled use-tooltip" title="This department doesn't directly contain any modules. Check subdepartments.">
 				<i class="icon-wrench"></i>
@@ -78,13 +57,13 @@
 				</li>
 				</#if>
 
-				<li id="feedback-report-button">
+				<li<#if !modules?has_content> class="disabled"</#if> id="feedback-report-button">
 					<#assign feedbackrep_url><@routes.feedbackreport department /></#assign>
 					<@fmt.permission_button permission='Department.DownloadFeedbackReport' scope=department action_descr='generate a feedback report' href=feedbackrep_url
 											data_attr='data-container=body data-toggle=modal data-target=#feedback-report-modal'>
 						<i class="icon-book"></i> Feedback report
 					</@fmt.permission_button>
-					
+
 					<#-- Run this script inline to allow us to build the modal and load the URL before the rest of the page has loaded -->
 					<script type="text/javascript">
 						(function($) {
@@ -99,7 +78,7 @@
 					</script>
 				</li>
 
-				<li>
+				<li<#if !modules?has_content> class="disabled"</#if>>
 					<#assign copy_url><@routes.copyDepartmentsAssignments department /></#assign>
 					<@fmt.permission_button
 						permission='Assignment.Create'
@@ -109,7 +88,7 @@
 						<i class="icon-share-alt"></i> Create assignments from previous
 					</@fmt.permission_button>
 				</li>
-				<li>
+				<li<#if !modules?has_content> class="disabled"</#if>>
 					<#assign archive_url><@routes.archiveDepartmentsAssignments department /></#assign>
 					<@fmt.permission_button
 						permission='Assignment.Archive'
@@ -144,10 +123,14 @@
 	</div>
 </#if>
 
-<h1 class="with-settings">${department.name}</h1>
+<@fmt.deptheader "" "" department routes "departmenthome" "with-settings" />
 
-<#if !modules?has_content && department.children?has_content>
-<p>This department doesn't directly contain any modules. Check subdepartments.</p>
+<#if !modules?has_content>
+	<#if department.children?has_content>
+		<p class="alert alert-info"><i class="icon-info-sign"></i> This department doesn't directly contain any modules. Check subdepartments.</p>
+	<#else>
+		<p class="alert alert-info"><i class="icon-info-sign"></i> This department doesn't contain any modules.</p>
+	</#if>
 </#if>
 
 <div id="feedback-report-modal" class="modal fade"></div>
@@ -167,7 +150,7 @@
 
 <#list modules as module>
 	<@components.admin_section module=module expand_by_default=expand_by_default />
-	
+
 	<#if !expand_by_default>
 		<#-- If we're not expanding by default, initialise the collapsible immediate - don't wait for DOMReady -->
 		<script type="text/javascript">

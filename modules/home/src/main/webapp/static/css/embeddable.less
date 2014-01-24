@@ -1235,6 +1235,40 @@ h1.with-settings {
 	margin-right: 0px;
 }
 
+#container .deptheader {
+	margin-bottom: 12px;
+
+	&:after {
+		content: "";
+		display: block;
+		clear: both;
+	}
+
+	h1 + a + .dropdown,
+	h4 + a + .dropdown{
+		top: 40px;
+		left: 50px;
+	}
+	h4 + a + .dropdown { top: -10px; }
+
+	h1.with-related,
+	h4.with-related {
+		float: left;
+		margin-bottom: 0;
+
+		+ a {
+			display: block;
+			float: left;
+			margin-top: 13px;
+			width: 16px;
+			height: 16px;
+
+			i { margin-left: 6px; }
+		}
+	}
+	h4.with-related + a { margin-top: -13px; }
+}
+
 .dept-settings, .user-settings, .dept-show {
 	display: inline-block;
 
