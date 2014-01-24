@@ -13,7 +13,7 @@
 		</#if>
 	</#assign>
 
-	<#if isModal?? && isModal>
+	<#if isModal!false>
 		<@modal.header>
 			<#noescape>${heading}</#noescape>
 		</@modal.header>
@@ -23,7 +23,7 @@
 		<#noescape>${heading}</#noescape>
 	</#if>
 
-	<#if isModal?? && isModal>
+	<#if isModal!false>
 		<@modal.body />
 
 		<@modal.footer>

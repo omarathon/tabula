@@ -25,7 +25,6 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import RecordAttendanceCommand._
 import uk.ac.warwick.tabula.ItemNotFoundException
-import scala.Some
 
 object RecordAttendanceCommand {
 	type UniversityId = String
