@@ -15,9 +15,9 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.scheduling.services.CasUsageImporter
 import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
+import uk.ac.warwick.tabula.TestBase
 
-
-class ImportCasUsageForStudentCommandTest extends AppContextTestBase with Mockito with Logging {
+class ImportCasUsageForStudentCommandTest extends TestBase with Mockito with Logging {
 
 	trait Environment {
 
@@ -33,12 +33,12 @@ class ImportCasUsageForStudentCommandTest extends AppContextTestBase with Mockit
 			val importer = smartMock[CasUsageImporter]
 			importer.isCasUsed(studentMember.universityId) returns false
 
-			val command = new ImportCasUsageForStudentCommand(studentMember, year)
+			val command = ImportCasUsageForStudentCommand(studentMember, year)
 			command.casUsageImporter = importer
-			command.scydDao = smartMock[StudentCourseYearDetailsDao]
+			command.studentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
 			command.applyInternal
 
-			studentMember.casUsed.booleanValue() should be (false)
+			studentMember.casUsed should be (Some(false))
 
 		}
 	}
