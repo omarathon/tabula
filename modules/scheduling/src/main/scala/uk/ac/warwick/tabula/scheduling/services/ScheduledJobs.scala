@@ -40,7 +40,7 @@ class ScheduledJobs {
 	@Scheduled(cron = "0 0 7,14 * * *")
 	def importData: Unit = maintenanceGuard {
 		exceptionResolver.reportExceptions {
-			new ImportModulesCommand().apply()
+			ImportAcademicInformationCommand().apply()
 		}
 	}
 

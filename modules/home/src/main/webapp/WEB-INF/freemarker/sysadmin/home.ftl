@@ -42,7 +42,7 @@
 
 <p>
 <@f.form method="post" action="${url('/sysadmin/import', '/scheduling')}">
-  <input class="btn btn-danger" type="submit" value="Departments & modules" onclick="return confirm('Really? Could take a minute.')">
+  <input class="btn btn-danger" type="submit" value="Departments, modules, routes etc." onclick="return confirm('Really? Could take a minute.')">
 </@f.form>
 </p>
 

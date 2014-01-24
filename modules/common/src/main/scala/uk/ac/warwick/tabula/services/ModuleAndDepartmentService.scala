@@ -155,6 +155,18 @@ class ModuleAndDepartmentService extends Logging {
 	def save(dept: Department) = transactional() {
 		departmentDao.save(dept)
 	}
+	
+	def saveOrUpdate(module: Module) = transactional() {
+		moduleDao.saveOrUpdate(module)
+	}
+	
+	def stampMissingModules(dept: Department, seenCodes: Seq[String]) = transactional() {
+		moduleDao.stampMissingRows(dept, seenCodes)
+	}
+	
+	def stampMissingRoutes(dept: Department, seenCodes: Seq[String]) = transactional() {
+		routeDao.stampMissingRows(dept, seenCodes)
+	}
 
 }
 

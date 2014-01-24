@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, RelationshipService}
 import uk.ac.warwick.tabula.system.permissions.Public
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformationCommand
 import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.roles.{UserAccessMgrRoleDefinition, DepartmentalAdministratorRoleDefinition}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
@@ -23,11 +23,10 @@ import org.hibernate.criterion.Restrictions
   * in essence, to blitz a department and set up some sample data in it.
   */
 class FixturesCommand extends Command[Unit] with Public with Daoisms {
-	import ImportModulesCommand._
+	import ImportAcademicInformationCommand._
 
 	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 	var routeDao = Wire[RouteDao]
-	var departmentDao = Wire[DepartmentDao]
 	var relationshipService = Wire[RelationshipService]
 	var scdDao = Wire[StudentCourseDetailsDao]
 	var memberDao = Wire[MemberDao]
@@ -153,7 +152,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 			descendents.toSet ++ department.children
 		}
 
-		val department = newDepartmentFrom(Fixtures.TestDepartment,departmentDao)
+		val department = newDepartmentFrom(Fixtures.TestDepartment, moduleAndDepartmentService)
 
 		// make sure we can see names, as uni ids are not exposed in the fixtures
 		department.showStudentName = true
@@ -176,11 +175,11 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		// make sure the new parent department is flushed to the DB before we fetch it to create the child
 		session.flush()
 
-		val subDepartment = newDepartmentFrom(Fixtures.TestSubDepartment, departmentDao)
+		val subDepartment = newDepartmentFrom(Fixtures.TestSubDepartment, moduleAndDepartmentService)
 		transactional() {
 			session.save(subDepartment)
 		}
-		val subSubDepartment = newDepartmentFrom(Fixtures.TestSubSubDepartment, departmentDao)
+		val subSubDepartment = newDepartmentFrom(Fixtures.TestSubSubDepartment, moduleAndDepartmentService)
 			transactional() {
 				session.save(subSubDepartment)
 		}

@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
-import uk.ac.warwick.tabula.scheduling.services.{CourseImporter, MembershipInformation, MembershipMember, ModeOfAttendanceImporter, SitsStatusesImporter, Tier4RequirementImporter, Tier4RequirementImporterComponent}
+import uk.ac.warwick.tabula.scheduling.services._
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, MaintenanceModeService, ModuleAndDepartmentService, ProfileService, RelationshipService}
 import uk.ac.warwick.userlookup.AnonymousUser
 
@@ -60,9 +60,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 		modeOfAttendanceImporter.getModeOfAttendanceForCode("P") returns Some(new ModeOfAttendance("P", "PT", "Part Time"))
 
-		val sitsStatusesImporter = smartMock[SitsStatusesImporter]
-		sitsStatusesImporter.getSitsStatusForCode("F") returns  Some(new SitsStatus("F", "F", "Fully Enrolled"))
-		sitsStatusesImporter.getSitsStatusForCode("P") returns  Some(new SitsStatus("P", "P", "Permanently Withdrawn"))
+		val sitsStatusImporter = smartMock[SitsStatusImporter]
+		sitsStatusImporter.getSitsStatusForCode("F") returns  Some(new SitsStatus("F", "F", "Fully Enrolled"))
+		sitsStatusImporter.getSitsStatusForCode("P") returns  Some(new SitsStatus("P", "P", "Permanently Withdrawn"))
 
 
 		val courseImporter = smartMock[CourseImporter]
@@ -125,7 +125,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		val yearCommand = new ImportStudentCourseYearCommand(rs, importRowTracker)
 		yearCommand.modeOfAttendanceImporter = modeOfAttendanceImporter
 		yearCommand.profileService = profileService
-		yearCommand.sitsStatusesImporter = sitsStatusesImporter
+		yearCommand.sitsStatusImporter = sitsStatusImporter
 		yearCommand.maintenanceMode = maintenanceModeService
 		yearCommand.studentCourseYearDetailsDao = studentCourseYearDetailsDao
 
@@ -134,7 +134,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 		val courseCommand = new ImportStudentCourseCommand(rs, importRowTracker, yearCommand, supervisorCommand)
 		courseCommand.studentCourseDetailsDao = studentCourseDetailsDao
-		courseCommand.sitsStatusesImporter = sitsStatusesImporter
+		courseCommand.sitsStatusImporter = sitsStatusImporter
 		courseCommand.courseAndRouteService = courseAndRouteService
 		courseCommand.maintenanceMode = maintenanceModeService
 		courseCommand.moduleAndDepartmentService = modAndDeptService

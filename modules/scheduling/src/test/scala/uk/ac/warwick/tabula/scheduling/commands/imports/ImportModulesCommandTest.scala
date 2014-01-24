@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.scheduling.services._
 import uk.ac.warwick.tabula.services._
 import scala.reflect._
+import uk.ac.warwick.tabula.helpers.Logging
 
 class ImportModulesCommandTest extends TestBase with MockitoSugar {
 
@@ -24,13 +25,11 @@ class ImportModulesCommandTest extends TestBase with MockitoSugar {
         
         // Mocks
 		val mockModuleService = mock[ModuleAndDepartmentService]
-		val mockSession = mock[Session]
 		
 		// The class under test, with mocks wired
-		val command = new ImportModulesCommand {
-			moduleImporter = mock[ModuleImporter]
-			moduleService = mockModuleService
-			override val session = mockSession
+		val command = new ImportModules with Logging with ModuleImporterComponent with ModuleAndDepartmentServiceComponent {
+			val moduleImporter = mock[ModuleImporter]
+			val moduleAndDepartmentService = mockModuleService
 		}
 	}
 
@@ -42,7 +41,7 @@ class ImportModulesCommandTest extends TestBase with MockitoSugar {
 			
 			command.importModules(moduleInfos, department)
 			
-			verify(mockSession, times(2)).saveOrUpdate(isA[Module])
+			verify(mockModuleService, times(2)).saveOrUpdate(isA[Module])
 		}
 	}
 
@@ -59,7 +58,7 @@ class ImportModulesCommandTest extends TestBase with MockitoSugar {
 
 			command.importModules(moduleInfos, department)
 
-			verify(mockSession, times(2)).saveOrUpdate(isA[Module])
+			verify(mockModuleService, times(2)).saveOrUpdate(isA[Module])
 			existingModule.name should be ("Science for Computers")
 		}
 	}

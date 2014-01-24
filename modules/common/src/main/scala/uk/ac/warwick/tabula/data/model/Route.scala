@@ -5,6 +5,7 @@ import javax.persistence._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointSet
+import org.joda.time.DateTime
 
 @Entity
 @NamedQueries(Array(
@@ -39,6 +40,8 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 	@OneToMany(mappedBy="route", fetch = FetchType.LAZY)
 	@BatchSize(size=100)
 	var monitoringPointSets: JList[MonitoringPointSet] = JArrayList()
+	
+	var missingFromImportSince: DateTime = _
 
 }
 

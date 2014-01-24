@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportCourseCommand
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.util.core.StringUtils
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformationCommand
 
 trait CourseImporter extends Logging {
 	var courseDao = Wire[CourseDao]
@@ -41,15 +42,15 @@ trait CourseImporter extends Logging {
 		}
 	}
 
-	def importCourses() {
-		logger.info("Importing courses")
-
-		getImportCommands foreach { _.apply() }
+	def importCourses(): ImportAcademicInformationCommand.ImportResult = {
+		val results = getImportCommands().map { _.apply()._2 }
 
 		updateCourseMap()
+		
+		ImportAcademicInformationCommand.combineResults(results)
 	}
 
-	def getImportCommands: Seq[ImportCourseCommand]
+	def getImportCommands(): Seq[ImportCourseCommand]
 }
 
 @Profile(Array("dev", "test", "production")) @Service
@@ -60,7 +61,7 @@ class SitsCourseImporter extends CourseImporter {
 
 	lazy val coursesQuery = new CoursesQuery(sits)
 
-	def getImportCommands: Seq[ImportCourseCommand] = {
+	def getImportCommands(): Seq[ImportCourseCommand] = {
 		coursesQuery.execute.toSeq
 	}
 }
@@ -92,7 +93,7 @@ case class CourseInfo(code: String, shortName: String, fullName: String, title: 
 @Profile(Array("sandbox")) @Service
 class SandboxCourseImporter extends CourseImporter {
 
-	def getImportCommands: Seq[ImportCourseCommand] =
+	def getImportCommands(): Seq[ImportCourseCommand] =
 		SandboxData.Departments
 			.flatMap { case (departmentCode, department) =>
 				department.routes.map { case (routeCode, route) =>
@@ -108,4 +109,12 @@ class SandboxCourseImporter extends CourseImporter {
 			}
 			.toSeq
 
+}
+
+trait CourseImporterComponent {
+	def courseImporter: CourseImporter
+}
+
+trait AutowiringCourseImporterComponent extends CourseImporterComponent {
+	var courseImporter = Wire[CourseImporter]
 }
