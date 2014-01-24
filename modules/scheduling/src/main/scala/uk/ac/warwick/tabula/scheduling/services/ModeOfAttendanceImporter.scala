@@ -1,21 +1,20 @@
 package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
-import scala.collection.JavaConversions._
+
+import scala.collection.JavaConverters._
+
+import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.stereotype.Service
+
 import javax.sql.DataSource
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.SitsStatusDao
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSitsStatusCommand
-import org.apache.log4j.Logger
-import uk.ac.warwick.tabula.data.model.SitsStatus
+import uk.ac.warwick.tabula.data.ModeOfAttendanceDao
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.data.ModeOfAttendanceDao
+import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModeOfAttendanceCommand
-import org.springframework.context.annotation.Profile
 
 /**
  * Provides access to modeofattendance data in SITS.
@@ -37,7 +36,7 @@ trait ModeOfAttendanceImporter extends Logging {
 	}
 
 	/** Get a list of commands that can be applied to save items to the modeofattendance table. */
-	def getImportCommands: Seq[ImportModeOfAttendanceCommand]
+	def getImportCommands(): Seq[ImportModeOfAttendanceCommand]
 
 	protected def slurpModeOfAttendances(): Map[String, ModeOfAttendance] = {
 		transactional(readOnly = true) {
@@ -59,8 +58,8 @@ class ModeOfAttendanceImporterImpl extends ModeOfAttendanceImporter {
 
 	lazy val modeOfAttendanceQuery = new ModeOfAttendanceQuery(sits)
 
-	def getImportCommands: Seq[ImportModeOfAttendanceCommand] = {
-		val modeOfAttendances = modeOfAttendanceQuery.execute.toSeq
+	def getImportCommands(): Seq[ImportModeOfAttendanceCommand] = {
+		val modeOfAttendances = modeOfAttendanceQuery.execute.asScala.toSeq
 		// this slurp is always one behind, because the above query only selects and it doesn't
 		// get inserted into our table until we return the result for the importer to apply.
 		// but it isn't that important to be dead up to date with this data.
@@ -72,7 +71,7 @@ class ModeOfAttendanceImporterImpl extends ModeOfAttendanceImporter {
 @Profile(Array("sandbox"))
 @Service
 class SandboxModeOfAttendanceImporter extends ModeOfAttendanceImporter {
-	def getImportCommands: Seq[ImportModeOfAttendanceCommand] =
+	def getImportCommands(): Seq[ImportModeOfAttendanceCommand] =
 		Seq(
 			new ImportModeOfAttendanceCommand(ModeOfAttendanceInfo("F", "FULL-TIME", "Full-time according to Funding Council definitions")),
 			new ImportModeOfAttendanceCommand(ModeOfAttendanceInfo("P", "PART-TIME", "Part-time"))
@@ -96,4 +95,12 @@ object ModeOfAttendanceImporter {
 			)
 	}
 
+}
+
+trait ModeOfAttendanceImporterComponent {
+	def modeOfAttendanceImporter: ModeOfAttendanceImporter
+}
+
+trait AutowiringModeOfAttendanceImporterComponent extends ModeOfAttendanceImporterComponent {
+	var modeOfAttendanceImporter = Wire[ModeOfAttendanceImporter]
 }

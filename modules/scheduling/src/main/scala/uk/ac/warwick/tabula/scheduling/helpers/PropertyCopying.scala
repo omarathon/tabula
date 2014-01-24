@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.scheduling.helpers
 import org.apache.log4j.Logger
 import org.springframework.beans.BeanWrapper
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
+import uk.ac.warwick.tabula.scheduling.services.SitsStatusImporter
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Route
@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.SitsStatus
 import org.joda.time.DateTime
 
 trait PropertyCopying extends Logging {
-	var sitsStatusesImporter = Wire.auto[SitsStatusesImporter]
+	var SitsStatusImporter = Wire.auto[SitsStatusImporter]
 	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
 
 	/* Basic properties are those that use primitive types + String + DateTime etc, so can be updated with a simple equality check and setter */
@@ -82,7 +82,7 @@ trait PropertyCopying extends Logging {
 		if (code == null || code == "") {
 			null
 		} else {
-			sitsStatusesImporter.getSitsStatusForCode(code).getOrElse(null)
+			SitsStatusImporter.getSitsStatusForCode(code).getOrElse(null)
 		}
 	}
 

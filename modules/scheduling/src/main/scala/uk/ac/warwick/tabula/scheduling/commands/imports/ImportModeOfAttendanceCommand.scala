@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceInfo
 
-class ImportModeOfAttendanceCommand(info: ModeOfAttendanceInfo) extends Command[ModeOfAttendance] with Logging with Daoisms
+class ImportModeOfAttendanceCommand(info: ModeOfAttendanceInfo) extends Command[(ModeOfAttendance, ImportAcademicInformationCommand.ImportResult)] with Logging with Daoisms
 	with Unaudited with PropertyCopying {
 
 	PermissionCheck(Permissions.ImportSystemData)
@@ -28,7 +28,7 @@ class ImportModeOfAttendanceCommand(info: ModeOfAttendanceInfo) extends Command[
 	var shortName = info.shortName
 	var fullName = info.fullName
 
-	override def applyInternal(): ModeOfAttendance = transactional() ({
+	override def applyInternal() = transactional() ({
 		val modeOfAttendanceExisting = modeOfAttendanceDao.getByCode(code)
 
 		logger.debug("Importing mode of attendance " + code + " into " + modeOfAttendanceExisting)
@@ -52,7 +52,12 @@ class ImportModeOfAttendanceCommand(info: ModeOfAttendanceInfo) extends Command[
 			modeOfAttendanceDao.saveOrUpdate(modeOfAttendance)
 		}
 
-		modeOfAttendance
+		val result = 
+			if (isTransient) ImportAcademicInformationCommand.ImportResult(added = 1)
+			else if (hasChanged) ImportAcademicInformationCommand.ImportResult(deleted = 1)
+			else ImportAcademicInformationCommand.ImportResult()
+
+		(modeOfAttendance, result)
 	})
 
 	private val properties = Set(

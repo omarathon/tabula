@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.scheduling.commands.CleanupUnreferencedFilesCommand
 import uk.ac.warwick.tabula.scheduling.commands.SanityCheckFilesystemCommand
 import uk.ac.warwick.tabula.scheduling.commands.SyncReplicaFilesystemCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAssignmentsCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformationCommand
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportProfilesCommand
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
@@ -118,7 +118,7 @@ class SysadminController extends BaseSysadminController {
 
 	@RequestMapping(method = Array(POST))
 	def importModules = {
-		new ImportModulesCommand().apply()
+		ImportAcademicInformationCommand().apply()
 		"sysadmin/importdone"
 	}
 

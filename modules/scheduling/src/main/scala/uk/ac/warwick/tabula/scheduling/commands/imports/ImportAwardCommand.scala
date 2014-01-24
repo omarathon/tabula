@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import uk.ac.warwick.tabula.scheduling.services.AwardInfo
 
 class ImportAwardCommand(info: AwardInfo)
-	extends Command[Award] with Logging with Daoisms
+	extends Command[(Award, ImportAcademicInformationCommand.ImportResult)] with Logging with Daoisms
 	with Unaudited with PropertyCopying {
 
 	PermissionCheck(Permissions.ImportSystemData)
@@ -25,7 +25,7 @@ class ImportAwardCommand(info: AwardInfo)
 	var shortName = info.shortName
 	var name = info.fullName
 
-	override def applyInternal(): Award = transactional() {
+	override def applyInternal(): (Award, ImportAcademicInformationCommand.ImportResult) = transactional() {
 		val awardExisting = awardDao.getByCode(code)
 
 		logger.debug("Importing award " + code + " into " + awardExisting)
@@ -45,8 +45,13 @@ class ImportAwardCommand(info: AwardInfo)
 			award.lastUpdatedDate = DateTime.now
 			awardDao.saveOrUpdate(award)
 		}
+		
+		val result = 
+			if (isTransient) ImportAcademicInformationCommand.ImportResult(added = 1)
+			else if (hasChanged) ImportAcademicInformationCommand.ImportResult(deleted = 1)
+			else ImportAcademicInformationCommand.ImportResult()
 
-		award
+		(award, result)
 	}
 
 	private val properties = Set(
