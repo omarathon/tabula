@@ -1,31 +1,20 @@
 package uk.ac.warwick.tabula.scheduling.services
-import java.sql.ResultSet
-import java.sql.ResultSetMetaData
+
+import java.sql.{ResultSet, ResultSetMetaData}
 import scala.collection.JavaConversions._
-import org.joda.time.DateTimeConstants
-import org.joda.time.LocalDate
-import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.MemberDao
+import org.joda.time.{DateTimeConstants, LocalDate}
+import uk.ac.warwick.tabula.{PersistenceTestBase, Mockito, _}
+import uk.ac.warwick.tabula.data.{FileDao, MemberDao}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.Gender._
 import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
 import uk.ac.warwick.tabula.events.EventHandling
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentRowCommand
-import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.userlookup.User
-import org.junit.Ignore
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseYearCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSupervisorsForStudentCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStaffMemberCommand
-import uk.ac.warwick.tabula.data.MemberDao
-import uk.ac.warwick.tabula.PersistenceTestBase
-import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.events.EventHandling
+import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportStaffMemberCommand, ImportStudentRowCommand}
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportTier4ForStudentCommand
+import uk.ac.warwick.userlookup.{AnonymousUser, User}
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSupervisorsForStudentCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseYearCommand
 
 
 // scalastyle:off magic.number

@@ -2,16 +2,15 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.{Date, ResultSet, ResultSetMetaData}
 
-import scala.collection.JavaConverters._
-
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.transaction.annotation.Transactional
 
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.data.{FileDao, MemberDao, MemberDaoComponent, ModeOfAttendanceDao, SitsStatusDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
-import uk.ac.warwick.tabula.data.model.{Course, Department, FileAttachment, ModeOfAttendance, Route, SitsStatus, StaffMember, StudentCourseDetails, StudentCourseYearDetails, StudentMember, StudentRelationshipSource, StudentRelationshipType}
-import uk.ac.warwick.tabula.data.model.Gender._
+import uk.ac.warwick.tabula.data.model.{Course, Department, FileAttachment}
+import uk.ac.warwick.tabula.data.model.{ModeOfAttendance, Route, SitsStatus, StaffMember, StudentCourseDetails, StudentCourseYearDetails, StudentMember, StudentRelationshipSource, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.Gender.Male
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.events.EventHandling
@@ -25,15 +24,6 @@ import uk.ac.warwick.userlookup.AnonymousUser
 // scalastyle:off magic.number
 class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	EventHandling.enabled = false
-
-	trait Tier4ForStudentCommandTestSupport extends Tier4RequirementImporterComponent with MemberDaoComponent {
-		val tier4RequirementImporter = smartMock[Tier4RequirementImporter]
-		val memberDao = smartMock[MemberDao]
-
-
-/*		moduleAndDepartmentService.getDepartmentByCode("in-pg") returns (Some(Fixtures.department("in-pg", "IT Services Postgraduate")))
-		moduleAndDepartmentService.getDepartmentByCode(isNotEq("in-pg")) returns (None)*/
-	}
 
 	trait Environment {
 
@@ -157,10 +147,10 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rowCommand.memberDao = memberDao
 		rowCommand.fileDao = fileDao
 		rowCommand.moduleAndDepartmentService = modAndDeptService
-		rowCommand.importTier4ForStudentCommand = new ImportTier4ForStudentCommandInternal with Tier4ForStudentCommandTestSupport with ImportTier4ForStudentCommandState
 
-		//val command = new AddSubDepartmentCommandInternal(parent) with CommandTestSupport with AddSubDepartmentCommandValidation
-
+		val requirementImporter = smartMock[Tier4RequirementImporter]
+		requirementImporter.hasTier4Requirement("0672089") returns (false)
+		rowCommand.tier4RequirementImporter = requirementImporter
 	}
 
 	@Test def testImportStudentCourseYearCommand {
@@ -269,7 +259,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])
-			there was two(memberDao).saveOrUpdate(any[Member])
+			there was one(memberDao).saveOrUpdate(any[Member])
 		}
 	}
 
@@ -293,7 +283,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])
-			there was two(memberDao).saveOrUpdate(any[Member])
+			there was one(memberDao).saveOrUpdate(any[Member])
 		}
 	}
 
