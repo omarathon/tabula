@@ -25,12 +25,14 @@ trait MonitoringPointService {
 	def saveOrUpdate(set: MonitoringPointSet)
 	def saveOrUpdate(template: MonitoringPointSetTemplate)
 	def saveOrUpdate(report : MonitoringPointReport)
+	def saveOrUpdate(note: MonitoringPointAttendanceNote)
 	def getPointById(id : String) : Option[MonitoringPoint]
 	def getSetById(id : String) : Option[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet]
 	def findMonitoringPointSet(route: Route, academicYear: AcademicYear, year: Option[Int]): Option[MonitoringPointSet]
 	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint]) : Seq[(StudentMember, MonitoringCheckpoint)]
+	def getCheckpoint(student: StudentMember, point: MonitoringPoint) : Option[MonitoringCheckpoint]
 	def listTemplates : Seq[MonitoringPointSetTemplate]
 	def getTemplateById(id: String) : Option[MonitoringPointSetTemplate]
 	def deleteTemplate(template: MonitoringPointSetTemplate)
@@ -79,6 +81,8 @@ trait MonitoringPointService {
 	def findReports(students: Seq[StudentMember], year: AcademicYear, period: String): Seq[MonitoringPointReport]
 	def studentAlreadyReportedThisTerm(student:StudentMember, point:MonitoringPoint): Boolean
 	def hasAnyPointSets(department: Department): Boolean
+	def getAttendanceNote(student: StudentMember, monitoringPoint: MonitoringPoint): Option[MonitoringPointAttendanceNote]
+	def findAttendanceNotes(students: Seq[StudentMember], points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote]
 }
 
 
@@ -91,6 +95,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	def saveOrUpdate(set: MonitoringPointSet) = monitoringPointDao.saveOrUpdate(set)
 	def saveOrUpdate(template: MonitoringPointSetTemplate) = monitoringPointDao.saveOrUpdate(template)
 	def saveOrUpdate(report : MonitoringPointReport) = monitoringPointDao.saveOrUpdate(report)
+	def saveOrUpdate(note: MonitoringPointAttendanceNote) = monitoringPointDao.saveOrUpdate(note)
 	def getPointById(id: String): Option[MonitoringPoint] = monitoringPointDao.getPointById(id)
 	def getSetById(id: String): Option[MonitoringPointSet] = monitoringPointDao.getSetById(id)
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet] = monitoringPointDao.findMonitoringPointSets(route)
@@ -100,6 +105,8 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		monitoringPointDao.findMonitoringPointSet(route, academicYear, year)
 	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint]): Seq[(StudentMember, MonitoringCheckpoint)] =
 		monitoringPointDao.getCheckpointsByStudent(monitoringPoints)
+	def getCheckpoint(student: StudentMember, point: MonitoringPoint) : Option[MonitoringCheckpoint] =
+		monitoringPointDao.getCheckpoint(point, student)
 
 	def listTemplates = monitoringPointDao.listTemplates
 
@@ -230,6 +237,14 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 
 	def hasAnyPointSets(department: Department): Boolean = {
 		monitoringPointDao.hasAnyPointSets(department: Department)
+	}
+
+	def getAttendanceNote(student: StudentMember, monitoringPoint: MonitoringPoint): Option[MonitoringPointAttendanceNote] = {
+		monitoringPointDao.getAttendanceNote(student, monitoringPoint)
+	}
+
+	def findAttendanceNotes(students: Seq[StudentMember], points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote] = {
+		monitoringPointDao.findAttendanceNotes(students, points)
 	}
 
 }

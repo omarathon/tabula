@@ -2,16 +2,17 @@ package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPointSet, MonitoringCheckpoint, MonitoringPoint}
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.data.model.{AttendanceNote, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, MonitoringPointServiceComponent, AutowiringMonitoringPointServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
-import org.springframework.validation.Errors
+import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException, CurrentUser}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.system.BindListener
 
 object SetMonitoringCheckpointForStudentCommand {
 	def apply(monitoringPoint: MonitoringPoint, student: StudentMember, user: CurrentUser) =
@@ -28,7 +29,7 @@ object SetMonitoringCheckpointForStudentCommand {
 
 abstract class SetMonitoringCheckpointForStudentCommand(
 	val monitoringPoint: MonitoringPoint, val student: StudentMember, user: CurrentUser
-)	extends CommandInternal[Seq[MonitoringCheckpoint]] with PopulateOnForm with CheckpointUpdatedDescription {
+)	extends CommandInternal[Seq[MonitoringCheckpoint]] with PopulateOnForm with BindListener with CheckpointUpdatedDescription {
 
 	self: SetMonitoringCheckpointForStudentState with ProfileServiceComponent with MonitoringPointServiceComponent =>
 
@@ -45,6 +46,11 @@ abstract class SetMonitoringCheckpointForStudentCommand(
 			}
 			checkpointOption.map{case (_, checkpoint) => checkpoint.state}.getOrElse(null)
 		}).asJava).asJava
+
+	}
+
+	def onBind(result: BindingResult) {
+		val checkpoints = monitoringPointService.getCheckpointsByStudent(Seq(monitoringPoint))
 		checkpointDescriptions = studentsState.asScala.map{
 			case (s, pointMap) => s -> pointMap.asScala.map{
 				case(point, state) => point -> {
@@ -53,6 +59,12 @@ abstract class SetMonitoringCheckpointForStudentCommand(
 					}.map{case (_, checkpoint) => describeCheckpoint(checkpoint)}.getOrElse("")
 				}
 			}.toMap}.toMap
+		attendanceNotes = monitoringPointService.findAttendanceNotes(Seq(student), Seq(monitoringPoint)).groupBy(_.student).map{
+			case (s, pointMap) => s -> pointMap.groupBy(_.point).map{
+				case (point, notes) => point -> notes.head
+			}
+		}.toMap
+
 	}
 
 	def applyInternal(): Seq[MonitoringCheckpoint] = {
@@ -144,6 +156,7 @@ trait SetMonitoringCheckpointForStudentState  extends GroupMonitoringPointsByTer
 	var studentsState: JMap[StudentMember, JMap[MonitoringPoint, AttendanceState]] =
 		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, AttendanceState] }.asJava
 	var checkpointDescriptions: Map[StudentMember, Map[MonitoringPoint, String]] = _
+	var attendanceNotes: Map[StudentMember, Map[MonitoringPoint, AttendanceNote]] = _
 	var set = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
 	def nonReportedTerms = monitoringPointService.findNonReportedTerms(Seq(student), monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
 }

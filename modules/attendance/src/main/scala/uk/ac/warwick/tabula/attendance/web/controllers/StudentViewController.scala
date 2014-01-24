@@ -12,8 +12,8 @@ import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, Autowir
 import org.joda.time.DateTime
 
 object StudentViewCommand {
-	def apply(department: Department, student: StudentMember, academicYearOption: Option[AcademicYear]) =
-		new StudentViewCommand(department, student, academicYearOption)
+	def apply(student: StudentMember, academicYearOption: Option[AcademicYear]) =
+		new StudentViewCommand(student, academicYearOption)
 			with ComposableCommand[StudentPointsData]
 			with StudentViewPermissions
 			with ReadOnly with Unaudited
@@ -23,7 +23,7 @@ object StudentViewCommand {
 			with GroupMonitoringPointsByTerm
 }
 
-abstract class StudentViewCommand(val department: Department, val student: StudentMember, val academicYearOption: Option[AcademicYear])
+abstract class StudentViewCommand(val student: StudentMember, val academicYearOption: Option[AcademicYear])
 	extends CommandInternal[StudentPointsData] with TaskBenchmarking with BuildStudentPointsData with StudentViewCommandState {
 
 	def applyInternal() = {
@@ -41,7 +41,6 @@ trait StudentViewPermissions extends RequiresPermissionsChecking {
 }
 
 trait StudentViewCommandState {
-	def department: Department
 	def student: StudentMember
 	def academicYearOption: Option[AcademicYear]
 	val thisAcademicYear = AcademicYear.guessByDate(DateTime.now())
@@ -54,21 +53,22 @@ class StudentViewController extends AttendanceController {
 
 	@ModelAttribute("command")
 	def command(
-		@PathVariable department: Department,
 		@PathVariable student: StudentMember,
 		@RequestParam(value="academicYear", required = false) academicYear: AcademicYear
 	) = {
-		StudentViewCommand(department, student, Option(academicYear))
+		StudentViewCommand(student, Option(academicYear))
 	}
 
 	@RequestMapping
 	def home(
-		@ModelAttribute("command") cmd: Appliable[StudentPointsData] with StudentViewCommandState
+		@ModelAttribute("command") cmd: Appliable[StudentPointsData] with StudentViewCommandState,
+		@PathVariable department: Department
 	) = {
 		Mav("home/student",
 			"student" -> cmd.student,
-			"pointsByTerm" -> cmd.apply().pointsByTerm
-		).crumbs(Breadcrumbs.ViewDepartmentStudents(cmd.department))
+			"pointsByTerm" -> cmd.apply().pointsByTerm,
+			"department" ->  department
+		).crumbs(Breadcrumbs.ViewDepartmentStudents(department))
 	}
 
 }

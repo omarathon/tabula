@@ -121,7 +121,11 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		val member = Fixtures.member(MemberUserType.Student, user1.getWarwickId, user1.getUserId)
 		
 		val command = new ListStudentGroupAttendanceCommandInternal(member, academicYear) with CommandTestSupport
-		command.smallGroupService.findSmallGroupsByStudent(user1) returns (Seq())
+		command.smallGroupService.findSmallGroupsByStudent(user1) returns Seq()
+		command.smallGroupService.findAttendanceNotes(
+			Seq(user1).map(_.getWarwickId),
+			Seq()
+		) returns Seq()
 		
 		val info = command.applyInternal()
 		info.attendance should be ('empty)
@@ -135,13 +139,17 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		val member = Fixtures.member(MemberUserType.Student, user1.getWarwickId, user1.getUserId)
 		
 		val command = new ListStudentGroupAttendanceCommandInternal(member, academicYear) with CommandTestSupport
-		command.smallGroupService.findSmallGroupsByStudent(user1) returns (Seq(group))
-		command.smallGroupService.findAttendanceByGroup(group) returns (Seq(occurrence1, occurrence2, occurrence3))
+		command.smallGroupService.findSmallGroupsByStudent(user1) returns Seq(group)
+		command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence1, occurrence2, occurrence3)
+		command.smallGroupService.findAttendanceNotes(
+			Seq(user1).map(_.getWarwickId),
+			Seq(occurrence2, occurrence1, occurrence3)
+		) returns Seq()
 		
-		command.termService.getAcademicWeekForAcademicYear(now, academicYear) returns (4)
+		command.termService.getAcademicWeekForAcademicYear(now, academicYear) returns 4
 		command.currentAcademicWeek should be (4)
 		
-		command.termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)) returns (Seq(
+		command.termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)) returns Seq(
 			JInteger(Some(1)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTime.minusSeconds(1)),
 			JInteger(Some(2)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 8).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 14).toDateTime.minusSeconds(1)),
 			JInteger(Some(3)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 15).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 21).toDateTime.minusSeconds(1)),
@@ -152,15 +160,15 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 			JInteger(Some(8)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 19).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 25).toDateTime.minusSeconds(1)),
 			JInteger(Some(9)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 26).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 2).toDateTime.minusSeconds(1)),
 			JInteger(Some(10)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 3).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1))
-		))
+		)
 		
 		val term = mock[Term]
-		term.getStartDate() returns (new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime)
-		term.getEndDate() returns (new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1))
-		command.termService.getTermFromDateIncludingVacations(any[DateTime]) returns (term)
+		term.getStartDate returns new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime
+		term.getEndDate returns new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1)
+		command.termService.getTermFromDateIncludingVacations(any[DateTime]) returns term
 		
-		command.termService.getAcademicWeekForAcademicYear(term.getStartDate(), academicYear) returns (1)
-		command.termService.getAcademicWeekForAcademicYear(term.getEndDate(), academicYear) returns (10)
+		command.termService.getAcademicWeekForAcademicYear(term.getStartDate, academicYear) returns 1
+		command.termService.getAcademicWeekForAcademicYear(term.getEndDate, academicYear) returns 10
 		
 		val info = command.applyInternal()
 		info.missedCount should be (0)
@@ -168,12 +176,12 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		info.termWeeks.toSeq should be (Seq(term -> WeekRange(1, 10)))
 		
 		// Map all the SortedMaps to Seqs to preserve the order they've been set as
-		val attendanceSeqs = info.attendance.toSeq.map { case (term, attendance) =>
-			(term -> attendance.toSeq.map { case (group, attendance) => 
-				(group -> attendance.toSeq.map { case (weekNumber, attendance) => 
-					(weekNumber -> attendance.toSeq)
-				})
-			})
+		val attendanceSeqs = info.attendance.toSeq.map { case (t, attendance) =>
+			t -> attendance.toSeq.map { case (g, att) =>
+				g -> att.toSeq.map { case (w, at) =>
+					w -> at.toSeq
+				}
+			}
 		}
 		
 		attendanceSeqs should be (Seq(
@@ -194,13 +202,17 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		val member = Fixtures.member(MemberUserType.Student, user3.getWarwickId, user3.getUserId)
 		
 		val command = new ListStudentGroupAttendanceCommandInternal(member, academicYear) with CommandTestSupport
-		command.smallGroupService.findSmallGroupsByStudent(user3) returns (Seq(group))
-		command.smallGroupService.findAttendanceByGroup(group) returns (Seq(occurrence1, occurrence2, occurrence3))
+		command.smallGroupService.findSmallGroupsByStudent(user3) returns Seq(group)
+		command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence1, occurrence2, occurrence3)
+		command.smallGroupService.findAttendanceNotes(
+			Seq(user3).map(_.getWarwickId),
+			Seq(occurrence2, occurrence1, occurrence3)
+		) returns Seq()
 		
-		command.termService.getAcademicWeekForAcademicYear(now, academicYear) returns (4)
+		command.termService.getAcademicWeekForAcademicYear(now, academicYear) returns 4
 		command.currentAcademicWeek should be (4)
 		
-		command.termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)) returns (Seq(
+		command.termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)) returns Seq(
 			JInteger(Some(1)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTime.minusSeconds(1)),
 			JInteger(Some(2)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 8).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 14).toDateTime.minusSeconds(1)),
 			JInteger(Some(3)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 15).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 21).toDateTime.minusSeconds(1)),
@@ -211,15 +223,15 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 			JInteger(Some(8)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 19).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 25).toDateTime.minusSeconds(1)),
 			JInteger(Some(9)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 26).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 2).toDateTime.minusSeconds(1)),
 			JInteger(Some(10)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 3).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1))
-		))
+		)
 		
 		val term = mock[Term]
-		term.getStartDate() returns (new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime)
-		term.getEndDate() returns (new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1))
-		command.termService.getTermFromDateIncludingVacations(any[DateTime]) returns (term)
+		term.getStartDate returns new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime
+		term.getEndDate returns new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1)
+		command.termService.getTermFromDateIncludingVacations(any[DateTime]) returns term
 		
-		command.termService.getAcademicWeekForAcademicYear(term.getStartDate(), academicYear) returns (1)
-		command.termService.getAcademicWeekForAcademicYear(term.getEndDate(), academicYear) returns (10)
+		command.termService.getAcademicWeekForAcademicYear(term.getStartDate, academicYear) returns 1
+		command.termService.getAcademicWeekForAcademicYear(term.getEndDate, academicYear) returns 10
 		
 		val info = command.applyInternal()
 		info.missedCount should be (1)
@@ -227,12 +239,12 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		info.termWeeks.toSeq should be (Seq(term -> WeekRange(1, 10)))
 		
 		// Map all the SortedMaps to Seqs to preserve the order they've been set as
-		val attendanceSeqs = info.attendance.toSeq.map { case (term, attendance) =>
-			(term -> attendance.toSeq.map { case (group, attendance) => 
-				(group -> attendance.toSeq.map { case (weekNumber, attendance) => 
-					(weekNumber -> attendance.toSeq)
-				})
-			})
+		val attendanceSeqs = info.attendance.toSeq.map { case (t, attendance) =>
+			t -> attendance.toSeq.map { case (g, att) =>
+				g -> att.toSeq.map { case (weekNumber, at) =>
+					weekNumber -> at.toSeq
+				}
+			}
 		}
 		
 		attendanceSeqs should be (Seq(
@@ -253,13 +265,17 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		val member = Fixtures.member(MemberUserType.Student, user5.getWarwickId, user5.getUserId)
 		
 		val command = new ListStudentGroupAttendanceCommandInternal(member, academicYear) with CommandTestSupport
-		command.smallGroupService.findSmallGroupsByStudent(user5) returns (Seq(group))
-		command.smallGroupService.findAttendanceByGroup(group) returns (Seq(occurrence1, occurrence2, occurrence3))
+		command.smallGroupService.findSmallGroupsByStudent(user5) returns Seq(group)
+		command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence1, occurrence2, occurrence3)
+		command.smallGroupService.findAttendanceNotes(
+			Seq(user5).map(_.getWarwickId),
+			Seq(occurrence2, occurrence1, occurrence3)
+		) returns Seq()
 		
-		command.termService.getAcademicWeekForAcademicYear(now, academicYear) returns (4)
+		command.termService.getAcademicWeekForAcademicYear(now, academicYear) returns 4
 		command.currentAcademicWeek should be (4)
 		
-		command.termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)) returns (Seq(
+		command.termService.getAcademicWeeksForYear(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)) returns Seq(
 			JInteger(Some(1)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 7).toDateTime.minusSeconds(1)),
 			JInteger(Some(2)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 8).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 14).toDateTime.minusSeconds(1)),
 			JInteger(Some(3)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 15).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 21).toDateTime.minusSeconds(1)),
@@ -270,15 +286,15 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 			JInteger(Some(8)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 19).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 25).toDateTime.minusSeconds(1)),
 			JInteger(Some(9)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 26).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 2).toDateTime.minusSeconds(1)),
 			JInteger(Some(10)) -> new Interval(new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 3).toDateTime, new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1))
-		))
+		)
 		
 		val term = mock[Term]
-		term.getStartDate() returns (new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime)
-		term.getEndDate() returns (new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1))
-		command.termService.getTermFromDateIncludingVacations(any[DateTime]) returns (term)
+		term.getStartDate returns new DateMidnight(academicYear.startYear, DateTimeConstants.OCTOBER, 1).toDateTime
+		term.getEndDate returns new DateMidnight(academicYear.startYear, DateTimeConstants.DECEMBER, 9).toDateTime.minusSeconds(1)
+		command.termService.getTermFromDateIncludingVacations(any[DateTime]) returns term
 		
-		command.termService.getAcademicWeekForAcademicYear(term.getStartDate(), academicYear) returns (1)
-		command.termService.getAcademicWeekForAcademicYear(term.getEndDate(), academicYear) returns (10)
+		command.termService.getAcademicWeekForAcademicYear(term.getStartDate, academicYear) returns 1
+		command.termService.getAcademicWeekForAcademicYear(term.getEndDate, academicYear) returns 10
 		
 		val info = command.applyInternal()
 		info.missedCount should be (2)
@@ -286,12 +302,12 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		info.termWeeks.toSeq should be (Seq(term -> WeekRange(1, 10)))
 		
 		// Map all the SortedMaps to Seqs to preserve the order they've been set as
-		val attendanceSeqs = info.attendance.toSeq.map { case (term, attendance) =>
-			(term -> attendance.toSeq.map { case (group, attendance) => 
-				(group -> attendance.toSeq.map { case (weekNumber, attendance) => 
-					(weekNumber -> attendance.toSeq)
-				})
-			})
+		val attendanceSeqs = info.attendance.toSeq.map { case (t, attendance) =>
+			t -> attendance.toSeq.map { case (g, att) =>
+				g -> att.toSeq.map { case (weekNumber, at) =>
+					weekNumber -> at.toSeq
+				}
+			}
 		}
 		
 		attendanceSeqs should be (Seq(

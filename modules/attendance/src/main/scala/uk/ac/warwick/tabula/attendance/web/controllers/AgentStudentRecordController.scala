@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.attendance.web.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{ModelAttribute, PathVariable, RequestParam, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationshipType}
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
+import uk.ac.warwick.tabula.commands.{PopulateOnForm, SelfValidating, Appliable}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringCheckpoint
 import uk.ac.warwick.tabula.attendance.commands.{AgentStudentRecordCommandState, AgentStudentRecordCommand}
@@ -25,7 +25,7 @@ class AgentStudentRecordController extends AttendanceController {
 	) = AgentStudentRecordCommand(currentMember, relationshipType, student, Option(academicYear))
 
 	@RequestMapping(method = Array(GET, HEAD))
-	def list(@ModelAttribute("command") cmd: AgentStudentRecordCommand) = {
+	def list(@ModelAttribute("command") cmd: Appliable[Seq[MonitoringCheckpoint]] with AgentStudentRecordCommandState with PopulateOnForm) = {
 		cmd.populate()
 		form(cmd)
 	}

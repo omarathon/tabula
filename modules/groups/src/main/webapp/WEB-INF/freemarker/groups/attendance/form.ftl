@@ -40,49 +40,52 @@
 
 		<div class="fix-header">
 			<div class="row-fluid record-attendance-form-header">
-				<div class="span12">
-					<span class="studentsLoadingMessage" style="display: none;">
-							<i class="icon-spinner icon-spin"></i><em> Loading&hellip;</em>
-						</span>
-					<script>
-						jQuery('.studentsLoadingMessage').show();
-						jQuery(function($){
-							$('.studentsLoadingMessage').hide();
-						})
-					</script>
-					<div class="pull-right" style="display: none;">
-						<span class="checkAllMessage">
-							Check all
-						<#assign popoverContent>
-							<p><i class="icon-minus icon-fixed-width"></i> Not recorded</p>
-								<p><i class="icon-remove icon-fixed-width unauthorised"></i> Missed (unauthorised)</p>
-								<p><i class="icon-remove-circle icon-fixed-width authorised"></i> Missed (authorised)</p>
-								<p><i class="icon-ok icon-fixed-width attended"></i> Attended</p>
-						</#assign>
-							<a class="use-popover"
-							   data-title="Key"
-							   data-placement="bottom"
-							   data-container="body"
-							   data-content='${popoverContent}'
-							   data-html="true">
-								<i class="icon-question-sign"></i>
-							</a>
-						</span>
-						<div class="btn-group">
-							<button type="button" class="btn">
-								<i class="icon-minus icon-fixed-width" title="Set all to 'Not recorded'"></i>
-							</button>
-							<button type="button" class="btn btn-unauthorised<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>">
-								<i class="icon-remove icon-fixed-width" title="Set all to 'Missed (unauthorised)'"></i>
-							</button>
-							<button type="button" class="btn btn-authorised">
-								<i class="icon-remove-circle icon-fixed-width" title="Set all to 'Missed (authorised)'"></i>
-							</button>
-							<button type="button" class="btn btn-attended<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>">
-								<i class="icon-ok icon-fixed-width" title="Set all to 'Attended'"></i>
-							</button>
+					<div class="span12">
+						<span class="studentsLoadingMessage" style="display: none;">
+								<i class="icon-spinner icon-spin"></i><em> Loading&hellip;</em>
+							</span>
+						<script>
+							jQuery('.studentsLoadingMessage').show();
+							jQuery(function($){
+								$('.studentsLoadingMessage').hide();
+							})
+						</script>
+						<div class="pull-right" style="display: none;">
+							<span class="checkAllMessage">
+								Check all
+							<#assign popoverContent>
+								<p><i class="icon-minus icon-fixed-width"></i> Not recorded</p>
+									<p><i class="icon-remove icon-fixed-width unauthorised"></i> Missed (unauthorised)</p>
+									<p><i class="icon-remove-circle icon-fixed-width authorised"></i> Missed (authorised)</p>
+									<p><i class="icon-ok icon-fixed-width attended"></i> Attended</p>
+							</#assign>
+								<a class="use-popover"
+								   data-title="Key"
+								   data-placement="bottom"
+								   data-container="body"
+								   data-content='${popoverContent}'
+								   data-html="true">
+									<i class="icon-question-sign"></i>
+								</a>
+							</span>
+							<div class="btn-group">
+								<button type="button" class="btn">
+									<i class="icon-minus icon-fixed-width" title="Set all to 'Not recorded'"></i>
+								</button>
+								<button type="button" class="btn btn-unauthorised<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>">
+									<i class="icon-remove icon-fixed-width" title="Set all to 'Missed (unauthorised)'"></i>
+								</button>
+								<button type="button" class="btn btn-authorised">
+									<i class="icon-remove-circle icon-fixed-width" title="Set all to 'Missed (authorised)'"></i>
+								</button>
+								<button type="button" class="btn btn-attended<#if eventInFuture> disabled use-tooltip" data-container="body" title="You can only record authorised absence for future events</#if>">
+									<i class="icon-ok icon-fixed-width" title="Set all to 'Attended'"></i>
+								</button>
+							</div>
+							<#if features.attendanceMonitoringNote>
+								<a style="visibility: hidden" class="btn"><i class="icon-edit"></i></a>
+							</#if>
 						</div>
-						<i class="icon-fixed-width"></i>
 					</div>
 				</div>
 			</div>
@@ -108,7 +111,30 @@
 									<option value="${state.dbValue}" <#if hasState && currentState.dbValue == state.dbValue>selected</#if>>${state.description}</option>
 								</#list>
 							</select>
-							<i class="icon-fixed-width"></i>
+							<#if features.attendanceMonitoringNote>
+								<#local hasNote = mapGet(command.attendanceNotes, student)?? />
+								<#if hasNote>
+									<a
+										id="attendanceNote-${student.universityId}-${command.occurrence.id}"
+										class="btn use-tooltip attendance-note"
+										title="Edit attendance note"
+										data-container="body"
+										href="<@routes.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
+									>
+										<i class="icon-edit-sign attendance-note-icon"></i>
+									</a>
+								<#else>
+									<a
+										id="attendanceNote-${student.universityId}-${command.occurrence.id}"
+										class="btn use-tooltip attendance-note"
+										title="Add attendance note"
+										data-container="body"
+										href="<@routes.editNote student=student occurrence=command.occurrence returnTo=((info.requestedUri!"")?url) />"
+									>
+										<i class="icon-edit attendance-note-icon"></i>
+									</a>
+								</#if>
+							</#if>
 						</div>
 
 						<@fmt.member_photo student "tinythumbnail" true />

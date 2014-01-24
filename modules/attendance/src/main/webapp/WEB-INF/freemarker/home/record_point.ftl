@@ -111,38 +111,65 @@
 							</div>
 							<i class="icon-fixed-width"></i>
 						</div>
+						<#if features.attendanceMonitoringNote>
+							<a style="visibility: hidden" class="btn"><i class="icon-edit"></i></a>
+						</#if>
+						<i class="icon-fixed-width"></i>
 					</div>
 				</div>
 			</div>
 
+		<#macro studentRow student point>
+			<div class="row-fluid item-info">
+				<div class="span12">
+					<div class="pull-right">
+						<#local hasState = mapGet(mapGet(command.studentsState, student), point)?? />
+						<#if hasState>
+							<#local checkpointState = mapGet(mapGet(command.studentsState, student), point) />
+						</#if>
 
-			<#macro studentRow student point>
-				<div class="row-fluid item-info">
-					<div class="span12">
-						<div class="pull-right">
-							<#local hasState = mapGet(mapGet(command.studentsState, student), point)?? />
-							<#if hasState>
-								<#local checkpointState = mapGet(mapGet(command.studentsState, student), point) />
+						<#local title>
+							<#if features.attendanceMonitoringNote>
+								<#local hasNote = mapGet(mapGet(command.attendanceNotes, student), point)?? />
+								<#if hasNote>
+									<#local note = mapGet(mapGet(command.attendanceNotes, student), point) />
+									<p>${mapGet(mapGet(command.checkpointDescriptions, student), point)?default("")}</p>
+									<p>${note.truncatedNote}</p>
+								<#else>
+									<p>${mapGet(mapGet(command.checkpointDescriptions, student), point)?default("")}</p>
+								</#if>
 							</#if>
-							<select
-								id="studentsState-${student.universityId}-${point.id}"
-								name="studentsState[${student.universityId}][${point.id}]"
-								title="${mapGet(mapGet(command.checkpointDescriptions, student), point)?default("")}"
-							>
-								<option value="" <#if !hasState >selected</#if>>Not recorded</option>
-								<#list allCheckpointStates as state>
-									<option value="${state.dbValue}" <#if hasState && checkpointState.dbValue == state.dbValue>selected</#if>>${state.description}</option>
-								</#list>
-							</select>
-							<#if point.pointType?? && point.pointType.dbValue == "meeting">
-								<a class="meetings" title="Meetings with this student" href="<@routes.studentMeetings point student />"><i class="icon-fixed-width icon-info-sign"></i></a>
+						</#local>
+
+						<select
+							id="studentsState-${student.universityId}-${point.id}"
+							name="studentsState[${student.universityId}][${point.id}]"
+							title="${title}"
+						>
+							<option value="" <#if !hasState >selected</#if>>Not recorded</option>
+							<#list allCheckpointStates as state>
+								<option value="${state.dbValue}" <#if hasState && checkpointState.dbValue == state.dbValue>selected</#if>>${state.description}</option>
+							</#list>
+						</select>
+
+						<#if features.attendanceMonitoringNote>
+							<#local hasNote = mapGet(mapGet(command.attendanceNotes, student), point)?? />
+							<#if hasNote>
+								<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note" title="Edit attendance note" href="<@routes.editNote student=student point=point returnTo=((info.requestedUri!"")?url) />"><i class="icon-edit-sign attendance-note-icon"></i></a>
 							<#else>
-								<i class="icon-fixed-width"></i>
+								<a id="attendanceNote-${student.universityId}-${point.id}" class="btn use-tooltip attendance-note" title="Add attendance note" href="<@routes.editNote student=student point=point returnTo=((info.requestedUri!"")?url) />"><i class="icon-edit attendance-note-icon"></i></a>
 							</#if>
-						</div>
+						</#if>
+
+						<#if point.pointType?? && point.pointType.dbValue == "meeting">
+							<a class="meetings" title="Meetings with this student" href="<@routes.studentMeetings point student />"><i class="icon-fixed-width icon-info-sign"></i></a>
+						<#else>
+							<i class="icon-fixed-width"></i>
+						</#if>
 						<#if numberOfStudents <= 50>
 							<@fmt.member_photo student "tinythumbnail" true />
 						</#if>
+						</div>
 						${student.fullName}
 						<@spring.bind path="command.studentsState[${student.universityId}][${point.id}]">
 							<#if status.error>

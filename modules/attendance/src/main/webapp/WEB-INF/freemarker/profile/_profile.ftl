@@ -91,9 +91,4 @@
 </div>
 
 </#if>
-<script>
-	jQuery(function($){
-		$('.use-tooltip').tooltip();
-	});
-</script>
 </#escape>

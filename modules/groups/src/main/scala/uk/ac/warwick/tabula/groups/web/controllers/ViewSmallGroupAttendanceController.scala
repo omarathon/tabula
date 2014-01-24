@@ -29,7 +29,8 @@ class ViewSmallGroupAttendanceController extends GroupsController {
 		
 		Mav("groups/attendance/view_group", 
 			"instances" -> attendanceInfo.instances,
-			"studentAttendance" -> attendanceInfo.attendance
+			"studentAttendance" -> attendanceInfo.attendance,
+			"attendanceNotes" -> attendanceInfo.notes
 		).crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 	}
 

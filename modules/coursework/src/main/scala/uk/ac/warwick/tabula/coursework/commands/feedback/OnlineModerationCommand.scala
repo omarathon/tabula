@@ -40,7 +40,7 @@ abstract class OnlineModerationCommand(module: Module, assignment: Assignment, s
 	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, currentUser)
 	with CommandInternal[MarkerFeedback] with Appliable[MarkerFeedback] with ModerationState with UserAware {
 
-	self: FeedbackServiceComponent with FileAttachmentComponent with ZipServiceComponent with MarkerFeedbackStateCopy
+	self: FeedbackServiceComponent with FileAttachmentServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy
 		with FinaliseFeedbackComponent =>
 
 	val user = currentUser.apparentUser

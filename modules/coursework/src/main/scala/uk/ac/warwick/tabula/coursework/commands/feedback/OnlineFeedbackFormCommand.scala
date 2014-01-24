@@ -33,7 +33,7 @@ abstract class OnlineFeedbackFormCommand(module: Module, assignment: Assignment,
 	extends AbstractOnlineFeedbackFormCommand(module, assignment, student, currentUser)
 	with CommandInternal[Feedback] with Appliable[Feedback] {
 
-	self: FeedbackServiceComponent with SavedFormValueDaoComponent with FileAttachmentComponent with ZipServiceComponent =>
+	self: FeedbackServiceComponent with SavedFormValueDaoComponent with FileAttachmentServiceComponent with ZipServiceComponent =>
 
 	def feedback = assignment.findFullFeedback(student.getWarwickId)
 
