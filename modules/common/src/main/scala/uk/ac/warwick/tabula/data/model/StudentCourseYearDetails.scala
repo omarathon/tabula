@@ -98,7 +98,7 @@ trait StudentCourseYearProperties {
 
 	@Column(name="cas_used")
 	@Restricted(Array("Profiles.Read.CasUsed"))
-	var casUsed: JBoolean = _;
+	var casUsed: JBoolean = _
 
 }
 

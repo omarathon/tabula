@@ -1,23 +1,24 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import java.sql.{Date, ResultSet, ResultSetMetaData}
-import scala.collection.JavaConverters._
+
 import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
 import org.springframework.beans.BeanWrapperImpl
 import org.springframework.transaction.annotation.Transactional
+
 import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.tabula.data.{FileDao, MemberDao, ModeOfAttendanceDao, SitsStatusDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
-import uk.ac.warwick.tabula.data.model.{Course, Department, FileAttachment, ModeOfAttendance, Route, SitsStatus, StaffMember, StudentCourseDetails, StudentCourseYearDetails, StudentMember, StudentRelationshipSource, StudentRelationshipType}
-import uk.ac.warwick.tabula.data.model.Gender._
+import uk.ac.warwick.tabula.data.{FileDao, MemberDao, MemberDaoComponent, ModeOfAttendanceDao, SitsStatusDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
+import uk.ac.warwick.tabula.data.model.{Course, Department, FileAttachment}
+import uk.ac.warwick.tabula.data.model.{ModeOfAttendance, Route, SitsStatus, StaffMember, StudentCourseDetails, StudentCourseYearDetails, StudentMember, StudentRelationshipSource, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.Gender.Male
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
-import uk.ac.warwick.tabula.scheduling.services.{CourseImporter, MembershipInformation, MembershipMember, ModeOfAttendanceImporter, SitsStatusImporter}
+import uk.ac.warwick.tabula.scheduling.services._
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, MaintenanceModeService, ModuleAndDepartmentService, ProfileService, RelationshipService}
 import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.tabula.scheduling.services.Tier4RequirementImporter
 
 
 // scalastyle:off magic.number
@@ -142,14 +143,14 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		courseCommand.courseImporter = courseImporter
 		courseCommand.stuMem = smartMock[StudentMember]
 
-		var tier4ForStudentCommand = new ImportTier4ForStudentCommand
-		tier4ForStudentCommand.requirementImporter = smartMock[Tier4RequirementImporter]
-		tier4ForStudentCommand.memberDao = memberDao
-
-		val rowCommand = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, new ImportRowTracker, courseCommand, tier4ForStudentCommand)
+		val rowCommand = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, new ImportRowTracker, courseCommand)
 		rowCommand.memberDao = memberDao
 		rowCommand.fileDao = fileDao
 		rowCommand.moduleAndDepartmentService = modAndDeptService
+
+		val requirementImporter = smartMock[Tier4RequirementImporter]
+		requirementImporter.hasTier4Requirement("0672089") returns (false)
+		rowCommand.tier4RequirementImporter = requirementImporter
 	}
 
 	@Test def testImportStudentCourseYearCommand {
@@ -258,7 +259,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])
-			there was two(memberDao).saveOrUpdate(any[Member])
+			there was one(memberDao).saveOrUpdate(any[Member])
 		}
 	}
 
@@ -282,7 +283,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])
-			there was two(memberDao).saveOrUpdate(any[Member])
+			there was one(memberDao).saveOrUpdate(any[Member])
 		}
 	}
 
