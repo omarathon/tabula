@@ -13,8 +13,8 @@ import uk.ac.warwick.tabula.data.model.SitsStatus
 import org.joda.time.DateTime
 
 trait PropertyCopying extends Logging {
-	var SitsStatusImporter = Wire.auto[SitsStatusImporter]
-	var moduleAndDepartmentService = Wire.auto[ModuleAndDepartmentService]
+	var sitsStatusImporter = Wire[SitsStatusImporter]
+	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 
 	/* Basic properties are those that use primitive types + String + DateTime etc, so can be updated with a simple equality check and setter */
 	 def copyBasicProperties(properties: Set[String], commandBean: BeanWrapper, destinationBean: BeanWrapper) = {
@@ -82,7 +82,7 @@ trait PropertyCopying extends Logging {
 		if (code == null || code == "") {
 			null
 		} else {
-			SitsStatusImporter.getSitsStatusForCode(code).getOrElse(null)
+			sitsStatusImporter.getSitsStatusForCode(code).getOrElse(null)
 		}
 	}
 

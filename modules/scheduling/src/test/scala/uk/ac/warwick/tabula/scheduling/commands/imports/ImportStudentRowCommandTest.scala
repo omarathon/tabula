@@ -124,7 +124,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		val yearCommand = new ImportStudentCourseYearCommand(rs, importRowTracker)
 		yearCommand.modeOfAttendanceImporter = modeOfAttendanceImporter
 		yearCommand.profileService = profileService
-		yearCommand.SitsStatusImporter = sitsStatusImporter
+		yearCommand.sitsStatusImporter = sitsStatusImporter
 		yearCommand.maintenanceMode = maintenanceModeService
 		yearCommand.studentCourseYearDetailsDao = studentCourseYearDetailsDao
 
@@ -133,7 +133,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 		val courseCommand = new ImportStudentCourseCommand(rs, importRowTracker, yearCommand, supervisorCommand)
 		courseCommand.studentCourseDetailsDao = studentCourseDetailsDao
-		courseCommand.SitsStatusImporter = sitsStatusImporter
+		courseCommand.sitsStatusImporter = sitsStatusImporter
 		courseCommand.courseAndRouteService = courseAndRouteService
 		courseCommand.maintenanceMode = maintenanceModeService
 		courseCommand.moduleAndDepartmentService = modAndDeptService
