@@ -977,9 +977,8 @@
 				var modalNotBodyHeight = modalHeight - modalBodyHeight
 					, viewportMaxHeight = (viewportHeight / 1.1) - modalNotBodyHeight
 				;
-				if (viewportMaxHeight < 400) {
-					$this.find('.modal-body').css('max-height', viewportMaxHeight);
-				}
+
+				$this.find('.modal-body').css('max-height', viewportMaxHeight);
 			}
 		});
 
