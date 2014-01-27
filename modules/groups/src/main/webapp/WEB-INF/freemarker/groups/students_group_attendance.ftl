@@ -54,19 +54,51 @@
 											<td>
 												<#list weekMap?keys as instance>
 													<#local state = mapGet(weekMap, instance) />
-													
+
+													<#local title><@components.instanceFormat instance academicYear department /></#local>
+
 													<#if state.name == 'Attended'>
-														<i class="icon-ok icon-fixed-width attended" title="${student.fullName} attended: <@components.instanceFormat instance academicYear department />"></i>
+														<#local class = "icon-ok attended" />
+														<#local title = "${student.fullName} attended: " + title />
 													<#elseif state.name == 'MissedAuthorised'>
-														<i class="icon-remove-circle icon-fixed-width authorised" title="${student.fullName} did not attend (authorised absence): <@components.instanceFormat instance academicYear department />"></i>
+														<#local class = "icon-remove-circle authorised" />
+														<#local title = "${student.fullName} did not attend (authorised absence): " + title />
 													<#elseif state.name == 'MissedUnauthorised'>
+														<#local class = "icon-remove unauthorised" />
+														<#local title = "${student.fullName} did not attend (unauthorised): " + title />
 														<#local missedCount = missedCount + 1 />
-														<i class="icon-remove icon-fixed-width unauthorised" title="${student.fullName} did not attend (unauthorised): <@components.instanceFormat instance academicYear department />"></i>
-													<#elseif state.name == 'Late'> <#-- Late -->
-														<i class="icon-warning-sign icon-fixed-width late" title="No data: <@components.instanceFormat instance academicYear department />"></i>
-													<#else> <#-- Not recorded -->
-														<i class="icon-minus icon-fixed-width" title="<@components.instanceFormat instance academicYear department />"></i>
+													<#elseif state.name == 'Late'>
+														<#local class = "icon-warning-sign late" />
+														<#local title = "No data: " + title />
+													<#else>
+														<#local class = "icon-minus" />
 													</#if>
+
+													<#local titles = [title] />
+
+													<#if mapGet(attendanceNotes, instance)??>
+														<#local studentNote = mapGet(attendanceNotes, instance) />
+														<#local note>
+														${studentNote.truncatedNote}
+															<#if (studentNote.truncatedNote?length > 0)>
+																<br/>
+															</#if>
+															<a class='attendance-note-modal' href='<@routes.viewNote studentNote.student studentNote.occurrence />'>View attendance note</a>
+														</#local>
+														<#local titles = titles + [note] />
+													</#if>
+
+													<#local renderedTitle>
+														<#list titles as t>
+															<#if (titles?size > 1)>
+																<p>${t}</p>
+															<#else>
+															${t}
+															</#if>
+														</#list>
+													</#local>
+
+													<i class="use-popover icon-fixed-width ${class}" data-content="<#noescape>${renderedTitle}</#noescape>" data-html="true"></i>
 												</#list>
 											</td>
 										<#else>

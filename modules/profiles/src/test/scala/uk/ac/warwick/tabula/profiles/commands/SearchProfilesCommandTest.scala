@@ -19,7 +19,7 @@ class SearchProfilesCommandTest extends TestBase with Mockito {
 		cmd.validQuery should be(false)
 
 		// and the minimum term length is two
-		cmd.query = "xx x"
+		cmd.query = "x x x x"
 		cmd.validQuery should be(false)
 
 		cmd.query = "select foo from bar"

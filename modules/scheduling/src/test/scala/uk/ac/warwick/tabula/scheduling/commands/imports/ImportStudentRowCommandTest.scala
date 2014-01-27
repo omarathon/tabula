@@ -1,54 +1,30 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import scala.collection.JavaConverters._
-import java.sql.Date
-import java.sql.ResultSet
-import java.sql.ResultSetMetaData
-import org.joda.time.DateTimeConstants
-import org.joda.time.LocalDate
+import java.sql.{Date, ResultSet, ResultSetMetaData}
+
+import org.joda.time.{DateTime, DateTimeConstants, LocalDate}
+import org.springframework.beans.BeanWrapperImpl
 import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.data.FileDao
-import uk.ac.warwick.tabula.data.MemberDao
-import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
-import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.data.model.Gender._
+
+import uk.ac.warwick.tabula.{Mockito, TestBase}
+import uk.ac.warwick.tabula.data.{FileDao, MemberDao, MemberDaoComponent, ModeOfAttendanceDao, SitsStatusDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
+import uk.ac.warwick.tabula.data.model.{Course, Department, FileAttachment}
+import uk.ac.warwick.tabula.data.model.{ModeOfAttendance, Route, SitsStatus, StaffMember, StudentCourseDetails, StudentCourseYearDetails, StudentMember, StudentRelationshipSource, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.Gender.Male
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
-import uk.ac.warwick.tabula.data.model.ModeOfAttendance
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.data.model.SitsStatus
-import uk.ac.warwick.tabula.data.model.StaffMember
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import uk.ac.warwick.tabula.data.model.StudentCourseYearDetails
-import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
-import uk.ac.warwick.tabula.scheduling.services.MembershipMember
-import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
-import uk.ac.warwick.tabula.scheduling.services.SitsStatusesImporter
-import uk.ac.warwick.tabula.services.CourseAndRouteService
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.userlookup.AnonymousUser
-import uk.ac.warwick.tabula.data.ModeOfAttendanceDao
-import uk.ac.warwick.tabula.data.SitsStatusDao
-import uk.ac.warwick.tabula.services.MaintenanceModeService
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
-import uk.ac.warwick.tabula.data.model.StudentRelationshipSource
-import uk.ac.warwick.tabula.scheduling.services.CourseImporter
-import uk.ac.warwick.tabula.data.model.Course
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
-import org.springframework.beans.BeanWrapperImpl
-import org.joda.time.DateTime
+import uk.ac.warwick.tabula.scheduling.services._
+import uk.ac.warwick.tabula.services.{CourseAndRouteService, MaintenanceModeService, ModuleAndDepartmentService, ProfileService, RelationshipService}
+import uk.ac.warwick.userlookup.AnonymousUser
 
 
 // scalastyle:off magic.number
 class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
+	EventHandling.enabled = false
+
 	trait Environment {
 
 		val memberDao = smartMock[MemberDao]
@@ -84,9 +60,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 		modeOfAttendanceImporter.getModeOfAttendanceForCode("P") returns Some(new ModeOfAttendance("P", "PT", "Part Time"))
 
-		val sitsStatusesImporter = smartMock[SitsStatusesImporter]
-		sitsStatusesImporter.getSitsStatusForCode("F") returns  Some(new SitsStatus("F", "F", "Fully Enrolled"))
-		sitsStatusesImporter.getSitsStatusForCode("P") returns  Some(new SitsStatus("P", "P", "Permanently Withdrawn"))
+		val sitsStatusImporter = smartMock[SitsStatusImporter]
+		sitsStatusImporter.getSitsStatusForCode("F") returns  Some(new SitsStatus("F", "F", "Fully Enrolled"))
+		sitsStatusImporter.getSitsStatusForCode("P") returns  Some(new SitsStatus("P", "P", "Permanently Withdrawn"))
 
 
 		val courseImporter = smartMock[CourseImporter]
@@ -149,16 +125,16 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		val yearCommand = new ImportStudentCourseYearCommand(rs, importRowTracker)
 		yearCommand.modeOfAttendanceImporter = modeOfAttendanceImporter
 		yearCommand.profileService = profileService
-		yearCommand.sitsStatusesImporter = sitsStatusesImporter
+		yearCommand.sitsStatusImporter = sitsStatusImporter
 		yearCommand.maintenanceMode = maintenanceModeService
 		yearCommand.studentCourseYearDetailsDao = studentCourseYearDetailsDao
 
-		val supervisorCommand = new ImportSupervisorsForStudentCommand()
+		val supervisorCommand = new ImportSupervisorsForStudentCommand
 		supervisorCommand.maintenanceMode = maintenanceModeService
 
 		val courseCommand = new ImportStudentCourseCommand(rs, importRowTracker, yearCommand, supervisorCommand)
 		courseCommand.studentCourseDetailsDao = studentCourseDetailsDao
-		courseCommand.sitsStatusesImporter = sitsStatusesImporter
+		courseCommand.sitsStatusImporter = sitsStatusImporter
 		courseCommand.courseAndRouteService = courseAndRouteService
 		courseCommand.maintenanceMode = maintenanceModeService
 		courseCommand.moduleAndDepartmentService = modAndDeptService
@@ -171,6 +147,10 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rowCommand.memberDao = memberDao
 		rowCommand.fileDao = fileDao
 		rowCommand.moduleAndDepartmentService = modAndDeptService
+
+		val requirementImporter = smartMock[Tier4RequirementImporter]
+		requirementImporter.hasTier4Requirement("0672089") returns (false)
+		rowCommand.tier4RequirementImporter = requirementImporter
 	}
 
 	@Test def testImportStudentCourseYearCommand {

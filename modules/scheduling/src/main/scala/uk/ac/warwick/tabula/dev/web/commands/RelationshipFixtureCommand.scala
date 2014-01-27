@@ -7,18 +7,20 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.{CommandInternal, Unaudited, ComposableCommand}
 import uk.ac.warwick.tabula.services.AutowiringModuleAndDepartmentServiceComponent
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
+import uk.ac.warwick.tabula.services.RelationshipService
 
 class RelationshipFixtureCommand extends CommandInternal[StudentRelationship] {
 	this: TransactionalComponent with SessionComponent=>
 
 	val memberDao = Wire[MemberDao]
+	val relationshipService = Wire[RelationshipService]
 	var agent:String = _
 	var studentUniId:String = _
 	var relationshipType:String = "tutor"
 
 	protected def applyInternal() =
 		transactional() {
-			val relType = memberDao.getStudentRelationshipTypeByUrlPart(relationshipType).get
+			val relType = relationshipService.getStudentRelationshipTypeByUrlPart(relationshipType).get
 			val studentSprCode = memberDao.getByUniversityId(studentUniId).get match {
 				case x: StudentMember => x.mostSignificantCourseDetails.get.sprCode
 				case _ => throw new RuntimeException(s"$studentUniId could not be resolved to a student member")

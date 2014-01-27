@@ -1,40 +1,27 @@
 package uk.ac.warwick.tabula.scheduling.services
 
-import java.sql.ResultSet
-import java.sql.Types
+import java.sql.{ResultSet, Types}
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import org.joda.time.LocalDate
+
+import org.joda.time.{DateTime, LocalDate}
+import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.jdbc.core.SqlParameter
 import org.springframework.stereotype.Service
+
 import javax.sql.DataSource
-import uk.ac.warwick.membership.MembershipInterfaceWrapper
+import uk.ac.warwick.membership.{MembershipInterfaceException, MembershipInterfaceWrapper}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.Gender
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.MemberUserType
-import uk.ac.warwick.tabula.data.model.MemberUserType.Emeritus
-import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
-import uk.ac.warwick.tabula.data.model.MemberUserType.Student
-import uk.ac.warwick.tabula.data.model.MemberUserType.Other
-import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportMemberCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStaffMemberCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentRowCommand
-import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.membership.MembershipInterfaceException
-import org.joda.time.DateTime
-import org.springframework.context.annotation.Profile
-import uk.ac.warwick.tabula.sandbox.SandboxData
-import uk.ac.warwick.tabula.data.model.DegreeType
-import uk.ac.warwick.tabula.sandbox.MapResultSet
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseYearCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSupervisorsForStudentCommand
+import uk.ac.warwick.tabula.data.model.{DegreeType, Department, Gender, Member, MemberUserType}
+import uk.ac.warwick.tabula.data.model.MemberUserType.{Emeritus, Other, Staff, Student}
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.sandbox.{MapResultSet, SandboxData}
+import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportMemberCommand, ImportStaffMemberCommand, ImportStudentCourseCommand, ImportStudentCourseYearCommand, ImportStudentRowCommand, ImportSupervisorsForStudentCommand}
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
+import uk.ac.warwick.userlookup.User
 
 case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
 
@@ -72,14 +59,14 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 		memberInfo.groupBy(_.member.userType).flatMap { case (userType, members) =>
 			userType match {
-				case Staff | Emeritus => members.map { info => 
+				case Staff | Emeritus => members.map { info =>
 					val ssoUser = users(info.member.universityId)
 					new ImportStaffMemberCommand(info, ssoUser)
 				}
-				case Student | Other => members.par.flatMap { info => 
+				case Student | Other => members.par.flatMap { info =>
 					val universityId = info.member.universityId
 					val ssoUser = users(universityId)
-					
+
 					studentInformationQuery(info, ssoUser, importRowTracker).executeByNamedParam(
 						Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
 					).toSeq
@@ -185,7 +172,10 @@ class SandboxProfileImporter extends ProfileImporter {
 			ssoUser,
 			rs,
 			importRowTracker,
-			new ImportStudentCourseCommand(rs, importRowTracker, new ImportStudentCourseYearCommand(rs, importRowTracker), new ImportSupervisorsForStudentCommand())
+			new ImportStudentCourseCommand(rs,
+					importRowTracker,
+					new ImportStudentCourseYearCommand(rs, importRowTracker),
+					new ImportSupervisorsForStudentCommand())
 		)
 	}
 
@@ -408,13 +398,17 @@ object ProfileImporter {
 		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 		declareParameter(new SqlParameter("year", Types.VARCHAR))
 		compile()
+
 		override def mapRow(rs: ResultSet, rowNumber: Int)
 			= new ImportStudentRowCommand(
 				member,
 				ssoUser,
 				rs,
 				importRowTracker,
-				new ImportStudentCourseCommand(rs, importRowTracker, new ImportStudentCourseYearCommand(rs, importRowTracker), new ImportSupervisorsForStudentCommand())
+				new ImportStudentCourseCommand(rs,
+						importRowTracker,
+						new ImportStudentCourseYearCommand(rs, importRowTracker),
+						new ImportSupervisorsForStudentCommand)
 			)
 	}
 

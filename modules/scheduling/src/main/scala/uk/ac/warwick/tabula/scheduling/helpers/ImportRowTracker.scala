@@ -30,4 +30,5 @@ class ImportRowTracker {
 		val allFreshIds = studentCourseYearDetailsDao.getFreshIds.toSet
 		(allFreshIds -- scydIdsSeen).toSeq
 	}
+
 }

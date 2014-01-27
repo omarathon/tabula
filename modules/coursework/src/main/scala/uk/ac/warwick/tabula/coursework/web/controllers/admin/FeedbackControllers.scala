@@ -152,7 +152,7 @@ class FeedbackSummaryController extends CourseworkController {
 	@RequestMapping(method = Array(GET, HEAD))
 	def showForm(@ModelAttribute("command") command: Appliable[Option[Feedback]]): Mav = {
 		val feedback = command.apply()
-		Mav("admin/assignments/feedback/read_only", "feedback" -> feedback).noNavigation()
+		Mav("admin/assignments/feedback/read_only", "feedback" -> feedback).noLayout()
 	}
 
 }

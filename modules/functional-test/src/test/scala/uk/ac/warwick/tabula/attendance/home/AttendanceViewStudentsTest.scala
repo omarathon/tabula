@@ -1,10 +1,12 @@
-package uk.ac.warwick.tabula.attendance
+package uk.ac.warwick.tabula.attendance.home
 
 import org.scalatest.GivenWhenThen
 import uk.ac.warwick.tabula.FunctionalTestAcademicYear
 import org.openqa.selenium.By
+import uk.ac.warwick.tabula.attendance.AttendanceFixture
+import org.scalatest.selenium.WebBrowser.go
 
-class AttendanceViewStudentsPageTest extends AttendanceFixture with GivenWhenThen{
+class AttendanceViewStudentsTest extends AttendanceFixture with GivenWhenThen{
 
 	"A Member of staff" should "see the View Students page" in {
 		Given("I am logged in as Admin1")

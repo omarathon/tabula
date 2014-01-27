@@ -16,18 +16,28 @@ class ShowIntroFunction extends TemplateMethodModelEx {
 
 	@Autowired var userSettings: UserSettingsService = _
 
+	/**
+	 * first argument is a string keying the feature to be hashed.
+	 * second argument (optional) is string referencing the page where it's shown.
+	 *
+	 * Specifying a second common argument across several pages, or in a macro,
+	 * permits a singleton introductory popover across the locations.
+	 *
+	 */
 	override def exec(args: java.util.List[_]): Object = {
 		val arguments = args.asInstanceOf[java.util.List[TemplateModel]]
-		
-		if (arguments == null || args.size() != 1) throw new TemplateModelException("Invalid number of arguments")
-		
+
+		val location = Option(arguments) match {
+			case Some(a) if a.size == 1 => RequestInfo.mappedPage
+			case Some(a) if a.size == 2 => DeepUnwrap.unwrap(a.get(1)).asInstanceOf[String]
+			case _ => throw new TemplateModelException("Invalid number of arguments")
+		}
+
 		val currentUser = RequestInfo.fromThread.get.user
-		val mappedPage = RequestInfo.mappedPage
-		
-		val setting = DeepUnwrap.unwrap(arguments.get(0)).asInstanceOf[String]
-		
-		val shaHash = UserSettings.Settings.hiddenIntroHash(mappedPage, setting)
-			
+		val featureToIntroduce = DeepUnwrap.unwrap(arguments.get(0)).asInstanceOf[String]
+
+		val shaHash = UserSettings.Settings.hiddenIntroHash(location, featureToIntroduce)
+
 		(userSettings.getByUserId(currentUser.apparentId) match {
 			case Some(settings) if settings.hiddenIntros != null => !(settings.hiddenIntros contains(shaHash))
 			case _ => true

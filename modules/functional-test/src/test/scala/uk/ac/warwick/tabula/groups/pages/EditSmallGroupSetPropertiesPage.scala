@@ -10,7 +10,7 @@ class EditSmallGroupSetPropertiesPage (implicit val webDriver:WebDriver) extends
 
 	def isCurrentPage(moduleName:String){
 		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
-		var heading =find(cssSelector("#main-content h1")).get
+		val heading =find(cssSelector("#main-content h1")).get
 		heading.text should startWith ("Edit small groups for")
 
 	}
@@ -23,8 +23,8 @@ class EditSmallGroupSetPropertiesPage (implicit val webDriver:WebDriver) extends
 class AllocateStudentsToGroupsPage(implicit val webDriver:WebDriver)extends WebBrowser with BreadcrumbsMatcher {
 	def isCurrentPage(moduleName:String){
 		breadCrumbsMatch(Seq("Small Group Teaching","Test Services",moduleName.toUpperCase()))
-		var heading =find(cssSelector("#main-content h1")).get
-		heading.text should startWith ("Allocate students to")
+		val heading =find(cssSelector("#main-content h1")).get
+		heading.text should startWith ("Allocate students")
 	}
 
 	def findAllUnallocatedStudents =  {

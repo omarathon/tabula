@@ -10,12 +10,13 @@ class AttendanceFixture extends BrowserTest with FeaturesDriver with FixturesDri
 	val TEST_UNDERGRAD_COURSE_CODE="Ux123"
 
 	before {
-		go to (Path("/scheduling/fixtures/setup"))
+		go to Path("/scheduling/fixtures/setup")
 
 		createRoute(TEST_UG_ROUTE_CODE, TEST_DEPARTMENT_CODE, "UG Route")
 		createCourse(TEST_UNDERGRAD_COURSE_CODE,"Test UG Course")
 		createStudentMember(P.Student1.usercode,routeCode=TEST_UG_ROUTE_CODE, courseCode=TEST_UNDERGRAD_COURSE_CODE,deptCode = TEST_DEPARTMENT_CODE, yearOfStudy = 1)
 		createStaffMember(P.Marker1.usercode, deptCode = TEST_DEPARTMENT_CODE)
+		createMonitoringPointSet(TEST_UG_ROUTE_CODE, 3, "2013", Option(1))
 	}
 
 }

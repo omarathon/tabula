@@ -324,7 +324,7 @@
 							</@fmt.permission_button>
 						</li>
 					<#else>
-						<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" data-container="body" title="No current feedback to publish."><i class="icon-envelope-alt"></i> Publish feedback </a></li>
+						<li class="disabled"><a class="use-tooltip" data-delay="500" data-container="body" title="No current feedback to publish, or the assignment is not yet closed."><i class="icon-envelope-alt"></i> Publish feedback </a></li>
 					</#if>
 
 

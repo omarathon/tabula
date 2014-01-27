@@ -8,7 +8,6 @@ import uk.ac.warwick.tabula.data.Transactions._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.validation.Errors
-import collection.JavaConversions._
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import java.beans.PropertyEditorSupport
@@ -25,6 +24,9 @@ import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.services.SubmissionService
 import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.services.FeedbackService
+import uk.ac.warwick.tabula.helpers.LazyMaps
+import org.apache.commons.collections.map.LazyMap
+import org.apache.commons.collections.Factory
 
 class SubmitAssignmentCommand(
 		val module: Module,
@@ -46,7 +48,7 @@ class SubmitAssignmentCommand(
 	var justSubmitted: Boolean = false
 
 	override def onBind(result:BindingResult) {
-		for ((key, field) <- fields) field.onBind(result)
+		for ((key, field) <- fields.asScala) field.onBind(result)
 	}
 
 	/**
@@ -57,8 +59,14 @@ class SubmitAssignmentCommand(
 	 * and submitting it.
 	 */
 	private def buildEmptyFields: JMap[String, FormValue] = {
-		val pairs = assignment.submissionFields.map { field => field.id -> field.blankFormValue.asInstanceOf[FormValue] }
-		Map(pairs: _*)
+		val fields = JHashMap(assignment.submissionFields.map { field => field.id -> field.blankFormValue.asInstanceOf[FormValue] }.toMap)
+		
+		LazyMap.decorate(fields, new Factory {
+			def create() = new FormValue {
+				val field = null
+				def persist(value: SavedFormValue) {}
+			}
+		}).asInstanceOf[JMap[String, FormValue]]
 	}
 
 	def validate(errors: Errors) {
@@ -78,7 +86,7 @@ class SubmitAssignmentCommand(
 			errors.reject("assignment.submit.closed")
 		}
 		// HFC-164
-		if (assignment.submissions.exists(_.universityId == user.universityId)) {
+		if (assignment.submissions.asScala.exists(_.universityId == user.universityId)) {
 			if (assignment.allowResubmission) {
 				if (assignment.allowLateSubmissions && (assignment.isClosed() && !hasExtension)) {
 					errors.reject("assignment.resubmit.closed")
@@ -105,7 +113,7 @@ class SubmitAssignmentCommand(
 	}
 
 	override def applyInternal() = transactional() {
-		assignment.submissions.find(_.isForUser(user.apparentUser)).map { existingSubmission =>
+		assignment.submissions.asScala.find(_.isForUser(user.apparentUser)).map { existingSubmission =>
 			if (assignment.resubmittable(user.apparentUser)) {
 				service.delete(existingSubmission)
 			} else { // Validation should prevent ever reaching here.
@@ -120,18 +128,18 @@ class SubmitAssignmentCommand(
 		submission.userId = user.apparentUser.getUserId
 		submission.universityId = user.apparentUser.getWarwickId
 
-		submission.values = fields.map {
+		submission.values = fields.asScala.map {
 			case (_, submissionValue) =>
 				val value = new SavedFormValue()
 				value.name = submissionValue.field.name
 				value.submission = submission
 				submissionValue.persist(value)
 				value
-		}.toSet[SavedFormValue]
+		}.toSet[SavedFormValue].asJava
 
 		// TAB-413 assert that we have at least one attachment
 		Assert.isTrue(
-			submission.values.find(value => Option(value.attachments).isDefined && !value.attachments.isEmpty).isDefined,
+			submission.values.asScala.find(value => Option(value.attachments).isDefined && !value.attachments.isEmpty).isDefined,
 			"Submission must have at least one attachment"
 		)
 
@@ -143,7 +151,7 @@ class SubmitAssignmentCommand(
 	override def describe(d: Description) =	{
 		d.assignment(assignment)
 		
-		assignment.submissions.find(_.universityId == user.universityId).map { existingSubmission =>
+		assignment.submissions.asScala.find(_.universityId == user.universityId).map { existingSubmission =>
 			d.properties(
 				"existingSubmission" -> existingSubmission.id,
 				"existingAttachments" -> existingSubmission.allAttachments.map { _.id }

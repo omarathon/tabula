@@ -344,16 +344,20 @@
 
 	// TIMETABLE STUFF
     $(function() {
-		function getEvents(studentId){
-			return function (start, end,callback){
+		function getEvents(studentId, $container){
+			return function (start, end, callback){
+				var complete = false;
+				setTimeout(function() {
+					if (!complete) $container.fadeTo('fast', 0.3);
+				}, 300);
 				$.ajax({url:'/profiles/timetable/api',
-					  // make the from/to params compatible with what FullCalendar sends if you just specify a URL
-					  // as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
-					  data:{'from':start.getTime()/1000,
-							'to':end.getTime()/1000,
-							'whoFor':studentId
-							},
-					  success:function(data){
+				  // make the from/to params compatible with what FullCalendar sends if you just specify a URL
+				  // as an eventSource, rather than a function. i.e. use seconds-since-the-epoch.
+				  data:{'from':start.getTime()/1000,
+						'to':end.getTime()/1000,
+						'whoFor':studentId
+					},
+				  success:function(data){
 						//
 						// TODO
 						//
@@ -362,8 +366,12 @@
 						// https://code.google.com/p/fullcalendar/issues/detail?id=293 has some discussion and patches
 						//
 						callback(data);
-					  }
-					  });
+				  },
+				  complete: function() {
+				  	complete = true;
+				  	$container.fadeTo('fast', 1);
+				  }
+			  });
 			};
 		}
 		function onViewUpdate(view,element){
@@ -389,7 +397,7 @@
 		function createCalendar(container,defaultViewName, studentId){
 			var showWeekends = (defaultViewName == "month");
 			var cal = $(container).fullCalendar({
-									events:getEvents(studentId),
+									events:getEvents(studentId, $(container)),
 									defaultView: defaultViewName,
 									allDaySlot: false,
 									slotMinutes: 60,

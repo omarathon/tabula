@@ -80,7 +80,7 @@ class OnlineModerationCommandTest extends TestBase with Mockito {
 	}
 
 	trait ModerationCommandSupport extends FeedbackServiceComponent with Appliable[MarkerFeedback]
-		with FileAttachmentComponent with ZipServiceComponent with MarkerFeedbackStateCopy with OnlineFeedbackState
+		with FileAttachmentServiceComponent with ZipServiceComponent with MarkerFeedbackStateCopy with OnlineFeedbackState
 		with OnlineFeedbackStudentState with CopyFromFormFields with WriteToFormFields with SavedFormValueDaoComponent
 	{
 		def feedbackService = mock[FeedbackService]

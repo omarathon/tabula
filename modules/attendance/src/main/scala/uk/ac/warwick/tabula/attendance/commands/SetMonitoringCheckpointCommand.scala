@@ -46,9 +46,10 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 		}
 		benchmarkTask("Populate grouped points") {
 			populateGroupedPoints(students, templateMonitoringPoint) match {
-				case (state, descriptions) =>
+				case (state, descriptions, notes) =>
 					studentsState = state
 					checkpointDescriptions = descriptions
+					attendanceNotes = notes
 			}
 		}
 	}
@@ -124,6 +125,7 @@ trait SetMonitoringCheckpointState extends FiltersStudents with PermissionsAware
 	var studentsStateAsScala: Map[StudentMember, Map[MonitoringPoint, AttendanceState]] = _
 
 	var checkpointDescriptions: Map[StudentMember, Map[MonitoringPoint, String]] = _
+	var attendanceNotes: Map[StudentMember, Map[MonitoringPoint, AttendanceNote]] = _
 
 	var courseTypes: JList[CourseType] = JArrayList()
 	var modesOfAttendance: JList[ModeOfAttendance] = JArrayList()

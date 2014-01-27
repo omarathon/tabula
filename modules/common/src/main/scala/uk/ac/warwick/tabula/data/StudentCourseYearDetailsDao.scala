@@ -3,15 +3,14 @@ package uk.ac.warwick.tabula.data
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.HashSet
-
 import org.hibernate.criterion._
 import org.hibernate.criterion.Projections._
 import org.hibernate.transform.Transformers
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
-
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
+import uk.ac.warwick.spring.Wire
 
 trait StudentCourseYearDetailsDao {
 	def saveOrUpdate(studentCourseYearDetails: StudentCourseYearDetails)
@@ -105,4 +104,12 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 						.executeUpdate
 			}
 		}
+}
+
+trait StudentCourseYearDetailsDaoComponent {
+	def studentCourseYearDetailsDao: StudentCourseYearDetailsDao
+}
+
+trait AutowiringStudentCourseYearDetailsDaoComponent extends StudentCourseYearDetailsDaoComponent{
+	var studentCourseYearDetailsDao = Wire[StudentCourseYearDetailsDao]
 }

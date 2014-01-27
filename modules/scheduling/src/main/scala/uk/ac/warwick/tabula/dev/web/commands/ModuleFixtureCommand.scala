@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, CommandInter
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, ModuleAndDepartmentServiceComponent}
 import uk.ac.warwick.tabula.data.{Daoisms, SessionComponent}
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformationCommand
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.Module
 class ModuleFixtureCommand extends CommandInternal[Module] with Logging{
 
 	this: ModuleAndDepartmentServiceComponent with SessionComponent=>
-	import ImportModulesCommand._
+	import ImportAcademicInformationCommand._
 
   var name:String = _
 	var code:String = _

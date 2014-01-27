@@ -147,7 +147,7 @@ class OnlineFeedbackFormCommandTest extends TestBase with Mockito {
 	}
 }
 
-trait OnlineFeedbackFormCommandTestSupport extends FileAttachmentComponent with FeedbackServiceComponent
+trait OnlineFeedbackFormCommandTestSupport extends FileAttachmentServiceComponent with FeedbackServiceComponent
 	with ZipServiceComponent with SavedFormValueDaoComponent with Mockito {
 
 	this : OnlineFeedbackFormCommand =>

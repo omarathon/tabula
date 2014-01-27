@@ -183,19 +183,21 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 				(whoDownloaded.masqueradeUserId, whoDownloaded.eventDate)
 			})
 	}
-
-	def latestOnlineFeedbackViews(assignment: Assignment) = {
+	
+	def latestAssignmentEvent(assignment: Assignment, eventName: String) = {
 		search(all(
 			termQuery("eventType", "ViewOnlineFeedback"),
 			termQuery("assignment", assignment.id)))
 			.transform { toItem(_) }
 			.filterNot { _.hadError }
-			.map( whoViewed => {
-			(whoViewed.masqueradeUserId, whoViewed.eventDate)})
-			.groupBy( _._1)
-			.map(x => (x._2.maxBy(_._2)))
+			.map { user => (user.masqueradeUserId, user.eventDate) }
+			.groupBy { case (userId, _) => userId }
+			.map { case (_, events) => events.maxBy { case (_, eventDate) => eventDate } }
 			.toSeq
 	}
+
+	def latestOnlineFeedbackViews(assignment: Assignment) = latestAssignmentEvent(assignment, "ViewOnlineFeedback")
+	def latestDownloadFeedbackAsPdf(assignment: Assignment) = latestAssignmentEvent(assignment, "DownloadFeedbackAsPdf")
 
 	def latestGenericFeedbackAdded(assignment: Assignment): Option[DateTime] = {
 		search( all(
@@ -429,4 +431,12 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		// sequence-type fields
 		SequenceDataFields.foreach(addSequenceToDoc(_, data, doc))
 	}
+}
+
+trait AuditEventIndexServiceComponent {
+	def auditEventIndexService: AuditEventIndexService
+}
+
+trait AutowiringAuditEventIndexServiceComponent extends AuditEventIndexServiceComponent {
+	var auditEventIndexService = Wire[AuditEventIndexService]
 }

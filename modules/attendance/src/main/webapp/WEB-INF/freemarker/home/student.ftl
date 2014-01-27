@@ -130,7 +130,7 @@
 	</section>
 </article>
 
-<#assign thisPath><@routes.viewStudent command.department student command.academicYear /></#assign>
+<#assign thisPath><@routes.viewStudent department student command.academicYear /></#assign>
 <@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
 
 <#macro pointsInATerm term>
@@ -158,7 +158,7 @@
 	<#if pointsByTerm?keys?size == 0>
 		<p><em>No monitoring points found for this academic year.</em></p>
 	<#else>
-		<a class="btn btn-primary" href="<@routes.recordStudent command.department student command.academicYear thisPath/>">Record attendance</a>
+		<a class="btn btn-primary" href="<@routes.recordStudent department student command.academicYear thisPath/>">Record attendance</a>
 		<#list attendance_variables.monitoringPointTermNames as term>
 			<#if pointsByTerm[term]??>
 				<@pointsInATerm term />

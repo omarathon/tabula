@@ -57,7 +57,7 @@ object Assignment {
 @Filter(name = Assignment.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class Assignment extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with PostLoadBehaviour {
+class Assignment extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with PostLoadBehaviour with Serializable {
 	import Assignment._
 
 	@transient

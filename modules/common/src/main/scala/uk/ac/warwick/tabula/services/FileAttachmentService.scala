@@ -6,11 +6,11 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import org.springframework.beans.factory.annotation.Autowired
 
-trait FileAttachmentComponent {
+trait FileAttachmentServiceComponent {
 	def fileAttachmentService: FileAttachmentService
 }
 
-trait AutowiringFileAttachmentServiceComponent extends FileAttachmentComponent {
+trait AutowiringFileAttachmentServiceComponent extends FileAttachmentServiceComponent {
 	var fileAttachmentService = Wire[FileAttachmentService]
 }
 

@@ -54,60 +54,46 @@ trait AssignmentMembershipDao {
 	def countPublishedFeedback(assignment: Assignment): Int
 	def countFullFeedback(assignment: Assignment): Int
 
-	def getEnrolledAssignments(user: User): Seq[Assignment]
-	def getEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet]
+	/**
+	 * Get SITS enrolled assignments/small group sets *only* - doesn't include any assignments where someone
+	 * has modified the members group. Also doesn't take into account assignments where the
+	 * user has been manually excluded. AssignmentMembershipService.getEnrolledAssignemnts
+	 * takes this into account.
+	 */
+	def getSITSEnrolledAssignments(user: User): Seq[Assignment]
+	def getSITSEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet]
 }
 
 @Repository
 class AssignmentMembershipDaoImpl extends AssignmentMembershipDao with Daoisms {
-
-	def getEnrolledAssignments(user: User): Seq[Assignment] =
+	
+	def getSITSEnrolledAssignments(user: User): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a
-			from Assignment a
-			left join a.assessmentGroups ag
-			join a.members manualMembership
-			where
-				(1 in (
-					select 1 from uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup uag
+			from 
+				Assignment a
+					join a.assessmentGroups ag
+					join ag.assessmentComponent.upstreamAssessmentGroups uag
 					join uag.members autoMembership
 					join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId = :universityId
-					where uag.moduleCode = ag.assessmentComponent.moduleCode
-						and uag.assessmentGroup = ag.assessmentComponent.assessmentGroup
-						and uag.academicYear = a.academicYear
-						and uag.occurrence = ag.occurrence
-					)
-				  or :userId in elements(manualMembership.includeUsers))
-				and :userId not in elements(manualMembership.excludeUsers)
-				and a.deleted = false and a.archived = false""")
+			where 
+					uag.academicYear = a.academicYear and
+					uag.occurrence = ag.occurrence and
+					a.deleted = false and a.archived = false""")
 			.setString("universityId", user.getWarwickId)
-			.setString("userId", user.getUserId)
 			.distinct.seq
 			
-	def getEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet] =
+	def getSITSEnrolledSmallGroupSets(user: User): Seq[SmallGroupSet] =
 		session.newQuery[SmallGroupSet]("""select sgs
 			from SmallGroupSet sgs
-			left join sgs.assessmentGroups ag
-			join sgs._membersGroup manualMembership
-			where
-				(1 in (
-					select 1 from uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup uag
-					join uag.members autoMembership
-					join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId = :universityId
-					where uag.moduleCode = ag.assessmentComponent.moduleCode
-						and uag.assessmentGroup = ag.assessmentComponent.assessmentGroup
-						and uag.academicYear = sgs.academicYear
-						and uag.occurrence = ag.occurrence
-				) or (
-					(manualMembership.universityIds = false and :userId in elements(manualMembership.includeUsers)) or
-					(manualMembership.universityIds = true and :universityId in elements(manualMembership.includeUsers))
-				))
-				and (
-					(manualMembership.universityIds = false and :userId not in elements(manualMembership.excludeUsers)) or
-					(manualMembership.universityIds = true and :universityId not in elements(manualMembership.excludeUsers))
-				)
-				and sgs.deleted = false and sgs.archived = false""")
+				join sgs.assessmentGroups ag
+				join ag.assessmentComponent.upstreamAssessmentGroups uag
+				join uag.members autoMembership
+				join autoMembership.staticIncludeUsers autoUniversityId with autoUniversityId = :universityId
+			where 
+				uag.academicYear = sgs.academicYear and
+				uag.occurrence = ag.occurrence and
+				sgs.deleted = false and sgs.archived = false""")
 			.setString("universityId", user.getWarwickId)
-			.setString("userId", user.getUserId)
 			.distinct.seq
 
 	/**

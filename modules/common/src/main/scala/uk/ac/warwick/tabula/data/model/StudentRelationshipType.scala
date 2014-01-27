@@ -57,6 +57,12 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.StudentRelationshipSourceUserType")
 	var defaultSource: StudentRelationshipSource = StudentRelationshipSource.Local
 
+		/**
+	 * The presence of a value in this field indicates that the relationship type can be read from the RDX
+	 * table in SITS as well as including the corresponding RDX_EXTC value.
+	 */
+	var defaultRdxType: String = _
+
 	var defaultDisplay: JBoolean = true
 
 	@Column(name="expected_ug")
@@ -91,6 +97,8 @@ class StudentRelationshipType extends PermissionsTarget with PermissionsSelector
 	 */
 	def readOnly(department: Department) =
 		(department.getStudentRelationshipSource(this) != StudentRelationshipSource.Local)
+
+
 
 	@transient
 	var relationshipService = Wire[RelationshipService]

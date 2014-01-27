@@ -46,10 +46,10 @@ input.deleted {
 // arrange students into groups
 
 #allocateStudentsToGroupsCommand {
-	
+
 	.filter {
 		select { width: 100%; }
-		
+
 		margin: 0 0 10px;
 	}
 
@@ -58,11 +58,11 @@ input.deleted {
 		margin: -16px;
 		padding: 16px;
 	}
-	
+
 	ul.drag-list li {
 		display: block;
 		float: none;
-	
+
 		background: white;
 		margin: 0 0 10px;
 
@@ -70,23 +70,23 @@ input.deleted {
 
 		&.ui-selecting { background: darken(@wellBackground, 10%) !important; }
 		&.ui-selected { background: darken(@wellBackground, 15%) !important; }
-		
+
 		.profile .photo {
 			float: left;
 			max-width: 50px;
 			padding-right: 10px;
 		}
 	}
-	
+
 	.well.drop-hover {
 		background-color: #dddddd;
 	}
-	
+
 	.group-header {
 		> h4, > div { display: inline-block; }
 		> h4 { margin-right: 10px; }
 	}
-	
+
 	.direction-icon {
 		font-size: 8em;
 		text-align: center;
@@ -123,7 +123,7 @@ input.deleted {
 	}
 }
 
-.record-attendance-form-header {
+.recordCheckpointForm .check-all {
 	background-color: lighten(@tabulaGreenLightTint, 5%);
 }
 
@@ -135,7 +135,7 @@ input.deleted {
 		padding-right: 5px !important;
 		text-align: center;
 	}
-	
+
 	&.tablesorter > thead > tr th.header {
 		/* Position from bottom, CSS3 feature */
 		background-position: bottom 10px right;

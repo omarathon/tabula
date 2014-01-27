@@ -1,4 +1,4 @@
-Your small teaching group allocation for ${groupSet.module.code?upper_case} - "${groupSet.module.name}" has been updated
+Your small teaching group allocation for ${groupSet.module.code?upper_case} - "${groupSet.module.name?trim}" has been updated
 
 ${groupSet.name} ${groupSet.format.description} for ${groupSet.module.code?upper_case} - ${groupSet.module.name}
 

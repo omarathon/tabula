@@ -281,7 +281,7 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		val otherSubDepartment = new Department
 		otherSubDepartment.filterRule = Department.PostgraduateFilterRule
 		val parentDepartment = new Department
-		parentDepartment.children = JArrayList(subDepartment, otherSubDepartment)
+		parentDepartment.children = JHashSet(subDepartment, otherSubDepartment)
 		subDepartment.parent = parentDepartment
 		otherSubDepartment.parent = parentDepartment
 		val ugRoute = Fixtures.route("ug")

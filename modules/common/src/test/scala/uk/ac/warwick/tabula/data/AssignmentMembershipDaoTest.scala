@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
 import uk.ac.warwick.tabula.AcademicYear
 import org.junit.Before
+import uk.ac.warwick.tabula.MockGroupService
 
 class AssignmentMembershipDaoTest extends PersistenceTestBase {
 
@@ -105,6 +106,8 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 
 	@Before def setup() {
 		dao.sessionFactory = sessionFactory
+		assignmentMembershipService.assignmentManualMembershipHelper.sessionFactory = sessionFactory
+		assignmentMembershipService.assignmentManualMembershipHelper.groupService = new MockGroupService
 	}
 
 	@Test def getEnrolledAssignments() {
@@ -122,7 +125,7 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 				val user = new User("cuscav")
 				user.setWarwickId("0672089")
 
-				dao.getEnrolledAssignments(user).toSet should be (Set(assignment1, assignment2, assignment3))
+				assignmentMembershipService.getEnrolledAssignments(user).toSet should be (Set(assignment1, assignment2, assignment3))
 			}
 		}
 	}
@@ -146,7 +149,7 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 				val user = new User("cuscav")
 				user.setWarwickId("0672089")
 
-				dao.getEnrolledAssignments(user).toSet should be (Set(assignment1, assignment2, assignment3))
+				assignmentMembershipService.getEnrolledAssignments(user).toSet should be (Set(assignment1, assignment2, assignment3))
 			}
 		}
 	}

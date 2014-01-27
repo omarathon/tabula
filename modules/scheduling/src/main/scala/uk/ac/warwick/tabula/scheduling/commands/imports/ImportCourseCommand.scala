@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.data.model.Course
 import uk.ac.warwick.tabula.scheduling.services.CourseInfo
 
 class ImportCourseCommand(info: CourseInfo)
-	extends Command[Course] with Logging with Daoisms
+	extends Command[(Course, ImportAcademicInformationCommand.ImportResult)] with Logging with Daoisms
 	with Unaudited with PropertyCopying {
 
 	PermissionCheck(Permissions.ImportSystemData)
@@ -32,7 +32,7 @@ class ImportCourseCommand(info: CourseInfo)
 	var name = info.fullName
 	var title = info.title
 
-	override def applyInternal(): Course = transactional() {
+	override def applyInternal() = transactional() {
 		val courseExisting = courseDao.getByCode(code)
 
 		logger.debug("Importing course " + code + " into " + courseExisting)
@@ -56,7 +56,12 @@ class ImportCourseCommand(info: CourseInfo)
 			courseDao.saveOrUpdate(course)
 		}
 
-		course
+		val result = 
+			if (isTransient) ImportAcademicInformationCommand.ImportResult(added = 1)
+			else if (hasChanged) ImportAcademicInformationCommand.ImportResult(deleted = 1)
+			else ImportAcademicInformationCommand.ImportResult()
+
+		(course, result)
 	}
 
 	private val properties = Set(

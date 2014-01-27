@@ -209,12 +209,18 @@
 							 data-container="body"><i class="icon-download"></i> Download feedback
 						</a>
 					</li>
-					<li>
-						<#assign publishfeedbackurl><@url page='/admin/module/${module.code}/assignments/${assignment.id}/publish'/></#assign>
-						<@fmt.permission_button permission='Feedback.Publish' scope=module type='a' action_descr='release feedback to students' tooltip="Release feedback to students" href=publishfeedbackurl>
-							<i class="icon-share"></i> Publish feedback
-						</@fmt.permission_button>
-					</li>
+					
+					<#if assignment.canPublishFeedback>
+						<li>
+							<#assign publishfeedbackurl><@url page='/admin/module/${module.code}/assignments/${assignment.id}/publish'/></#assign>
+							<@fmt.permission_button permission='Feedback.Publish' scope=assignment type='a' action_descr='release feedback to students' tooltip="Release feedback to students" href=publishfeedbackurl>
+								<i class="icon-share"></i> Publish feedback
+							</@fmt.permission_button>
+						</li>
+					<#else>
+						<li class="disabled"><a class="use-tooltip" data-container="body" title="No current feedback to publish, or the assignment is not yet closed."><i class="icon-share"></i> Publish feedback</a></li>
+					</#if>
+					
 					<li class="must-have-selected">
 						<#assign deletefeedback_url><@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
 						<@fmt.permission_button permission='Feedback.Delete' scope=assignment action_descr='delete feedback' classes="form-post" href=deletefeedback_url tooltip='Delete feedback'>

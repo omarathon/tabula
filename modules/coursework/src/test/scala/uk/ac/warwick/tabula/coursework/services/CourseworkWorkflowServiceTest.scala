@@ -146,7 +146,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 				"AddFeedback" -> StageProgress(AddFeedback, true, "workflow.AddFeedback.uploaded", Good, true, true),
 				"ReleaseFeedback" -> StageProgress(ReleaseFeedback, true, "workflow.ReleaseFeedback.released", Good, true, true),
 				"ViewOnlineFeedback" -> StageProgress(ViewOnlineFeedback, true, "workflow.ViewOnlineFeedback.notViewed", Warning, false, true),
-				"DownloadFeedback" -> StageProgress(DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded", Good, false, false)
+				"DownloadFeedback" -> StageProgress(DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded", Good, false, true)
 			))
 			p.percentage should be (75)
 			p.nextStage should be (Some(ViewOnlineFeedback)) // Complete

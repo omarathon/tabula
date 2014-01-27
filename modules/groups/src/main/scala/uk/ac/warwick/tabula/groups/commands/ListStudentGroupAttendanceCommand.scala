@@ -1,32 +1,28 @@
 package uk.ac.warwick.tabula.groups.commands
 
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
-import uk.ac.warwick.tabula.commands.Unaudited
+import uk.ac.warwick.tabula.commands.{TaskBenchmarking, Unaudited, ComposableCommand, ReadOnly, CommandInternal}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.commands.ComposableCommand
-import uk.ac.warwick.tabula.commands.ReadOnly
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.commands.CommandInternal
 import uk.ac.warwick.tabula.services.SmallGroupServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringSmallGroupServiceComponent
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.services.TermServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEventOccurrence, SmallGroup, DayOfWeek, WeekRange}
 import org.joda.time.DateTime
 import scala.collection.immutable.SortedMap
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.util.termdates.Term
 import org.joda.time.DateMidnight
-import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import org.joda.time.DateTimeConstants
-import uk.ac.warwick.tabula.data.model.groups.WeekRange
+import uk.ac.warwick.tabula.groups.commands.ViewSmallGroupAttendanceCommand._
 
 case class StudentGroupAttendance(
 	termWeeks: SortedMap[Term, WeekRange],
 	attendance: ListStudentGroupAttendanceCommand.PerTermAttendance,
+	notes: Map[EventInstance, SmallGroupEventAttendanceNote],
 	missedCount: Int,
 	missedCountByTerm: Map[Term, Int]
 )
@@ -48,7 +44,7 @@ object ListStudentGroupAttendanceCommand {
 
 class ListStudentGroupAttendanceCommandInternal(val member: Member, val academicYear: AcademicYear)
 	extends CommandInternal[StudentGroupAttendance]
-		with ListStudentGroupAttendanceCommandState {
+		with ListStudentGroupAttendanceCommandState with TaskBenchmarking {
 	self: SmallGroupServiceComponent with TermServiceComponent =>
 
 	import ViewSmallGroupAttendanceCommand._
@@ -71,7 +67,7 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 		val allInstances = groups.flatMap { group => allEventInstances(group, smallGroupService.findAttendanceByGroup(group)) }
 
 		val attendance = groupByTerm(allInstances).mapValues { instances =>
-			val groups = SortedMap((instances.groupBy { case ((event, _), _) => event.group }).toSeq:_*)
+			val groups = SortedMap(instances.groupBy { case ((event, _), _) => event.group }.toSeq:_*)
 			groups.mapValues { instances =>
 				SortedMap(instances.groupBy { case ((_, week), _) => week }.toSeq:_*).mapValues { instances =>
 					attendanceForStudent(instances, isLate)(user)
@@ -81,22 +77,30 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 
 		val missedCountByTerm = attendance.mapValues { groups =>
 			val count = groups.map { case (_, attendanceByInstance) =>
-				attendanceByInstance.values.flatMap(_.values).filter(_ == SmallGroupAttendanceState.MissedUnauthorised).size
+				attendanceByInstance.values.flatMap(_.values).count(_ == SmallGroupAttendanceState.MissedUnauthorised)
 			}
 
 			count.foldLeft(0) { (acc, missedCount) => acc + missedCount }
 		}
 
 		val termWeeks = SortedMap(attendance.keySet.map { term =>
-			(term -> WeekRange(
-				termService.getAcademicWeekForAcademicYear(term.getStartDate(), academicYear),
-				termService.getAcademicWeekForAcademicYear(term.getEndDate(), academicYear)
-			))
+			term -> WeekRange(
+				termService.getAcademicWeekForAcademicYear(term.getStartDate, academicYear),
+				termService.getAcademicWeekForAcademicYear(term.getEndDate, academicYear)
+			)
 		}.toSeq:_*)
+
+		val attendanceNotes = benchmarkTask("Get attendance notes") {
+			smallGroupService.findAttendanceNotes(
+				Seq(user.getWarwickId),
+				allInstances.flatMap{case(_, occurenceOption) => occurenceOption}
+			).groupBy(n => (n.occurrence.event, n.occurrence.week)).mapValues(_.head)
+		}
 
 		StudentGroupAttendance(
 			termWeeks,
 			attendance,
+			attendanceNotes,
 			missedCountByTerm.foldLeft(0) { (acc, missedByTerm) => acc + missedByTerm._2 },
 			missedCountByTerm
 		)
@@ -107,10 +111,10 @@ class ListStudentGroupAttendanceCommandInternal(val member: Member, val academic
 		val day = DayOfWeek.Thursday
 		lazy val weeksForYear = termService.getAcademicWeeksForYear(approxStartDate).toMap
 
-		SortedMap((instances.groupBy { case ((_, week), _) =>
+		SortedMap(instances.groupBy { case ((_, week), _) =>
 			val date = weeksForYear(week).getStart.withDayOfWeek(day.jodaDayOfWeek)
 			termService.getTermFromDateIncludingVacations(date)
-		}).toSeq:_*)
+		}.toSeq:_*)
 	}
 
 	lazy val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now, academicYear)

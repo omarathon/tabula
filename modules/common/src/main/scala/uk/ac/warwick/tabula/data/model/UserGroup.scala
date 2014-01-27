@@ -102,6 +102,10 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 		if (universityIds) includes(user.getWarwickId)
 		else includes(user.getUserId)
 	}
+	def excludesUser(user:User) = {
+		if (universityIds) excludeUsers.contains(user.getWarwickId)
+		else excludeUsers.contains(user.getUserId)
+	}
 	def isEmpty = members.isEmpty
 	def size = members.size
 
@@ -199,6 +203,7 @@ trait UnspecifiedTypeUserGroup {
 	def size:Int
 	def isEmpty:Boolean
   def includesUser(user:User):Boolean
+  def excludesUser(user:User):Boolean
 	/**
 	 * @return true if the other.users() would return the same values as this.users(), else false
 	 */

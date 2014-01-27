@@ -8,11 +8,11 @@ import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, RelationshipService}
 import uk.ac.warwick.tabula.system.permissions.Public
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModulesCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformationCommand
 import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
 import uk.ac.warwick.tabula.roles.{UserAccessMgrRoleDefinition, DepartmentalAdministratorRoleDefinition}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupAllocationMethod, SmallGroupFormat, SmallGroup, SmallGroupSet}
-import uk.ac.warwick.tabula.data.model.{AssessmentType, UpstreamAssessmentGroup, AssessmentComponent, Department, Route}
+import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, AssessmentType, UpstreamAssessmentGroup, AssessmentComponent, Department, Route}
 import uk.ac.warwick.tabula.scheduling.services.ModuleInfo
 import uk.ac.warwick.tabula.scheduling.services.DepartmentInfo
 import uk.ac.warwick.tabula.AcademicYear
@@ -23,11 +23,10 @@ import org.hibernate.criterion.Restrictions
   * in essence, to blitz a department and set up some sample data in it.
   */
 class FixturesCommand extends Command[Unit] with Public with Daoisms {
-	import ImportModulesCommand._
+	import ImportAcademicInformationCommand._
 
 	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
 	var routeDao = Wire[RouteDao]
-	var departmentDao = Wire[DepartmentDao]
 	var relationshipService = Wire[RelationshipService]
 	var scdDao = Wire[StudentCourseDetailsDao]
 	var memberDao = Wire[MemberDao]
@@ -85,17 +84,43 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	}
 
 	private def setupDepartmentAndModules() {
+		// Blitz members
+		transactional() {
+			session.newQuery("delete from StudentCourseYearDetails where studentCourseDetails.scjCode like '3000%'").executeUpdate()
+			session.newQuery("delete from ModuleRegistration where studentCourseDetails.scjCode like '3000%'").executeUpdate()
+			session.newQuery("delete from StudentCourseDetails where scjCode like '3000%'").executeUpdate()
+			session.newQuery("delete from StudentMember where universityId like '3000%'").executeUpdate()
+		}
+		
 		// Blitz the test department
 		transactional() {
 			moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code) map { dept =>
 				val routes: Seq[Route] = routeDao.findByDepartment(dept)
-				val scds = scdDao.findByDepartment(dept)
+
+				val deptScds = scdDao.findByDepartment(dept)
+				val looseScds = 
+					session.newCriteria[StudentCourseDetails]
+						   .add(Restrictions.isNull("department"))
+						   .seq
+				val scds = (deptScds ++ looseScds).distinct
 
 				for (scd <- scds) {
 					for (mr <- scd.moduleRegistrations) {
 						session.delete(mr)
 					}
 					scd.moduleRegistrations.clear()
+				}
+
+				// Checkpoints must be deleted before the associated student
+				for (route <- routes) {
+					val sets = monitoringPointDao.findMonitoringPointSets(route)
+					for (set <- sets) {
+						for (point <- set.points) {
+							for (checkpoint <- point.checkpoints) session.delete(checkpoint)
+							session.delete(point)
+						}
+						session.delete(set)
+					}
 				}
 
 			  for (student <- scds.map{ _.student}.distinct) {
@@ -133,12 +158,12 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				session.delete(dept)
 			}
 		}
-		def recursivelyGetChildren(department:Department): Seq[Department] = {
+		def recursivelyGetChildren(department:Department): Set[Department] = {
 			val descendents = department.children flatMap { recursivelyGetChildren(_) }
-			descendents ++ department.children
+			descendents.toSet ++ department.children
 		}
 
-		val department = newDepartmentFrom(Fixtures.TestDepartment,departmentDao)
+		val department = newDepartmentFrom(Fixtures.TestDepartment, moduleAndDepartmentService)
 
 		// make sure we can see names, as uni ids are not exposed in the fixtures
 		department.showStudentName = true
@@ -161,11 +186,11 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		// make sure the new parent department is flushed to the DB before we fetch it to create the child
 		session.flush()
 
-		val subDepartment = newDepartmentFrom(Fixtures.TestSubDepartment, departmentDao)
+		val subDepartment = newDepartmentFrom(Fixtures.TestSubDepartment, moduleAndDepartmentService)
 		transactional() {
 			session.save(subDepartment)
 		}
-		val subSubDepartment = newDepartmentFrom(Fixtures.TestSubSubDepartment, departmentDao)
+		val subSubDepartment = newDepartmentFrom(Fixtures.TestSubSubDepartment, moduleAndDepartmentService)
 			transactional() {
 				session.save(subSubDepartment)
 		}
