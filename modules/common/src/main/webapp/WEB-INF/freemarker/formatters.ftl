@@ -55,9 +55,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 			<#-- cross-app singleton introductory text -->
 			<#if showIntro("related-depts", "anywhere")>
 				<#assign introText>
-					<p>Click the downward marker to switch between related departments.
-					These might be subdepartments, created in Tabula for division of administrative roles,
-					or a parent department if you're already looking at a subdepartment.</p>
+					<p>To access sub-departments and parent departments, click the down arrow next to the department name.</p>
 				</#assign>
 				<a href="#"
 				   id="related-depts-intro"
