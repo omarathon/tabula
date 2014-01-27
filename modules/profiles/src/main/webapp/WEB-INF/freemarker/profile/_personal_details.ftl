@@ -71,7 +71,7 @@
 								</tr>
 								<#if profile.casUsed??>
 									<tr>
-										<th>CAS used in current year</th>
+										<th>Tier 4 visa</th>
 										<#if profile.casUsed>
 											<td>Yes</td>
 										<#else>
