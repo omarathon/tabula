@@ -15,9 +15,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports.JMap
 
 trait Tier4RequirementImporter {
-	/**
-	 * Returns a sequence of pairs of PRS codes and the percentage load
-	 */
 	def hasTier4Requirement(universityId: String): Boolean
 }
 

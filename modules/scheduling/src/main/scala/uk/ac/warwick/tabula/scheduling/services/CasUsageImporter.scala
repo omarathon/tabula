@@ -15,9 +15,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.JavaImports._
 
 trait CasUsageImporter {
-	/**
-	 * Returns a sequence of pairs of PRS codes and the percentage load
-	 */
 	def isCasUsed(universityId: String): Boolean // cas is a confirmation of acceptance to study - this determines whether such was used to apply for a visa
 }
 
