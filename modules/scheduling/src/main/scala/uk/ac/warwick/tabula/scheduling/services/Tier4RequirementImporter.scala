@@ -32,7 +32,7 @@ class Tier4RequirementImporterImpl extends Tier4RequirementImporter {
 	def hasTier4Requirement(universityId: String): Boolean = {
 		val numNationalitiesNotNeedingVisa =
 			tier4RequirementMappingQuery.executeByNamedParam(Map("universityId" -> universityId)).head
-		(numNationalitiesNotNeedingVisa.intValue() > 0)
+		(numNationalitiesNotNeedingVisa.intValue() == 0)
 	}
 }
 
@@ -44,13 +44,15 @@ class SandboxTier4RequirementImporter extends Tier4RequirementImporter {
 object Tier4RequirementImporter {
 	var sitsSchema: String = Wire.property("${schema.sits}")
 
+	// originally this query also had a condition nat_iuse = 'Y' but we found that
+	// there are current students with nationality codes which are not flagged as in
+	// use
 	val GetTier4RequirementSql = f"""
 			select count(nat_edid) as count from $sitsSchema.srs_nat
 			where nat_code in (
 				(select stu_natc from $sitsSchema.ins_stu where stu_code = :universityId),
 				(select stu_nat1 from $sitsSchema.ins_stu where stu_code = :universityId))
 			and nat_edid = 0
-			and nat_iuse = 'Y'
 		"""
 
 	class Tier4RequirementMappingQuery(ds: DataSource)
