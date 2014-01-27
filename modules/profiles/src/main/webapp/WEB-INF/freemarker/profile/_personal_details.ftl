@@ -69,7 +69,7 @@
 							<#if profile.tier4VisaRequirement>
 								<td>Yes</td>
 								</tr>
-								<#if profile.casUsed??>
+<#--								<#if profile.casUsed??>
 									<tr>
 										<th>CAS used to obtain visa</th>
 										<#if profile.casUsed>
@@ -79,6 +79,7 @@
 										</#if>
 									</tr>
 								</#if>
+-->
 							<#else>
 								<td>No</td>
 								</tr>
