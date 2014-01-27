@@ -1256,17 +1256,19 @@ h1.with-settings {
 		float: left;
 		margin-bottom: 0;
 
-		+ a {
+		+ a,
+		+ a + .use-introductory {
 			display: block;
 			float: left;
 			margin-top: 13px;
 			width: 16px;
 			height: 16px;
 
-			i { margin-left: 6px; }
+			i { margin-left: 8px; }
 		}
 	}
-	h4.with-related + a { margin-top: -13px; }
+	h4.with-related + a,
+	h4.with-related + a + .use-introductory { margin-top: -13px; }
 }
 
 .dept-settings, .user-settings, .dept-show {

@@ -33,7 +33,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 			<#else>
 				<h4><span class="muted">for</span> ${department.name}</h4>
 			</#if>
-		<#-- div closed below -->
+		<#-- <div> closed below -->
 	<#else>
 		<div class="deptheader">
 			<#local h1Class = (cssClass + " with-related")?trim />
@@ -44,12 +44,31 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 			</#if>
 
 			<h1 class="${h1Class}">${h1Title}</h1>
-		<#-- div closed below -->
+		<#-- <div> closed below -->
 	</#if>
 
-	<#-- div opened above -->
+	<#-- <div> opened above -->
 		<#if department.parent?? || department.children?has_content>
-			<a class="use-tooltip" data-toggle="dropdown" data-container="body" data-target=".dropdown" title="Related departments"><i class="icon-caret-down<#if !use_h4> icon-large</#if>"></i></a>
+			<a class="use-tooltip" title="Related departments" data-toggle="dropdown" data-container="body" data-target=".dropdown">
+				<i class="icon-caret-down<#if !use_h4> icon-large</#if>"></i>
+			</a>
+			<#-- cross-app singleton introductory text -->
+			<#if showIntro("related-depts", "anywhere")>
+				<#assign introText>
+					<p>Click the downward marker to switch between related departments.
+					These might be subdepartments, created in Tabula for division of administrative roles,
+					or a parent department if you're already looking at a subdepartment.</p>
+				</#assign>
+				<a href="#"
+				   id="related-depts-intro"
+				   class="use-introductory auto"
+				   data-hash="${introHash("related-depts", "anywhere")}"
+				   data-title="Related departments"
+				   data-placement="bottom"
+				   data-html="true"
+				   data-content="${introText}"><i class="icon-question-sign"></i></a>
+			</#if>
+			<#-- the dropdown itself -->
 			<div class="dropdown">
 				<ul class="dropdown-menu">
 					<#if department.parent??>
