@@ -119,7 +119,7 @@ class SubmissionAndFeedbackCommand(val module: Module, val assignment: Assignmen
 
 					(universityId == feedback.universityId  && 	x._2.isAfter(latestUpdate))})
 
-				new FeedbackListItem(feedback, downloaded, viewed)
+				FeedbackListItem(feedback, downloaded, viewed)
 			}
 			
 			val enhancedExtensionForUniId = usersExtension.headOption map { extension =>
