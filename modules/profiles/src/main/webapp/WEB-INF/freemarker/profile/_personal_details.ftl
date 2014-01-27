@@ -62,6 +62,7 @@
 						</tr>
 					</#if>
 
+
 					<#if profile.tier4VisaRequirement??>
 						<tr>
 							<th>Nationality requires visa</th>
