@@ -34,6 +34,11 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro setAttendance set><@url page="/admin/module/${set.module.code}/groups/${set.id}/attendance" /></#macro>
 <#macro moduleAttendance module><@url page="/admin/module/${module.code}/attendance" /></#macro>
 <#macro departmentAttendance department><@url page="/admin/department/${department.code}/attendance" /></#macro>
+<#macro viewNote student occurrence returnTo=""><@url page="/note/${student.universityId}/${occurrence.id}/?returnTo=${returnTo}" /></#macro>
+<#macro editNote student occurrence returnTo="">
+	<#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>
+	<@url page="/note/${student.universityId}/${occurrence.id}/edit${returnTo}" />
+</#macro>
 
 <#macro signup_to_group set><@url page="/module/${set.module.code}/groups/${set.id}/signup" /></#macro>
 <#macro leave_group set><@url page="/module/${set.module.code}/groups/${set.id}/leave" /></#macro>

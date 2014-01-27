@@ -5,12 +5,13 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.{ProfileServiceComponent, TermServiceComponent, MonitoringPointServiceComponent}
 import uk.ac.warwick.tabula.AcademicYear
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointAttendanceNote, AttendanceState, MonitoringPoint}
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 case class CheckpointData(
 	state: String,
-	recorded: String
+	recorded: String,
+	note: MonitoringPointAttendanceNote
 )
 
 case class StudentPointsData(
@@ -34,6 +35,11 @@ trait BuildStudentPointsData extends MonitoringPointServiceComponent with TermSe
 		val allPoints = pointSetsByStudent.flatMap(_._2.points.asScala).toSeq
 		val checkpoints = benchmarkTask("Get checkpoints for all students") { monitoringPointService.getCheckpointsByStudent(allPoints) }
 		val currentAcademicWeek = benchmarkTask("Get current academic week") { termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear) }
+		val attendanceNotes = benchmarkTask("Get attendance notes") {
+			monitoringPointService.findAttendanceNotes(students, allPoints).groupBy(_.student).map{
+				case (student, notes) => student -> notes.groupBy(_.point)
+			}.toMap
+		}
 
 		students.map{ student => {
 			pointSetsByStudent.get(student).map{ pointSet =>
@@ -44,11 +50,28 @@ trait BuildStudentPointsData extends MonitoringPointServiceComponent with TermSe
 							val checkpointOption = checkpoints.find{
 								case (s, checkpoint) => s == student && checkpoint.point == point
 							}
+							val attendanceNoteOption = attendanceNotes.get(student).flatMap{ pointMap =>
+								pointMap.get(point).flatMap{_.headOption}
+							}
 							checkpointOption.map{
-								case (_, checkpoint) => CheckpointData(checkpoint.state.dbValue, describeCheckpoint(checkpoint))
+								case (_, checkpoint) => CheckpointData(
+									checkpoint.state.dbValue,
+									describeCheckpoint(checkpoint),
+									attendanceNoteOption.getOrElse(null)
+								)
 							}.getOrElse({
-								if (currentAcademicWeek > point.requiredFromWeek)	CheckpointData("late", "")
-								else CheckpointData("", "")
+								if (currentAcademicWeek > point.requiredFromWeek)
+									CheckpointData(
+										"late",
+										"",
+										attendanceNoteOption.getOrElse(null)
+									)
+								else
+									CheckpointData(
+										"",
+										"",
+										attendanceNoteOption.getOrElse(null)
+									)
 							})
 						}
 					}.toMap

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.data.model.{Route, StudentMember, StudentRelationshipType, Member}
+import uk.ac.warwick.tabula.data.model.{AttendanceNote, Route, StudentMember, StudentRelationshipType, Member}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -43,9 +43,10 @@ abstract class AgentPointRecordCommand(
 		}
 		benchmarkTask("Populate grouped points") {
 			populateGroupedPoints(students, templateMonitoringPoint) match {
-				case (state, descriptions) =>
+				case (state, descriptions, notes) =>
 					studentsState = state
 					checkpointDescriptions = descriptions
+					attendanceNotes = notes
 			}
 		}
 	}
@@ -116,5 +117,6 @@ trait AgentPointRecordCommandState extends GroupMonitoringPointsByTerm with Moni
 	var studentsStateAsScala: Map[StudentMember, Map[MonitoringPoint, AttendanceState]] = _
 
 	var checkpointDescriptions: Map[StudentMember, Map[MonitoringPoint, String]] = _
+	var attendanceNotes: Map[StudentMember, Map[MonitoringPoint, AttendanceNote]] = _
 
 }

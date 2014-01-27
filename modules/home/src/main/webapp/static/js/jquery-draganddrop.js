@@ -39,21 +39,21 @@ Example (showing some optional extras as below)
       <ul class="drag-list hide" data-bindpath=command.tutor></ul>
     </div>
   </div>
-  
+
 Options: (all of these options can be set as data- attributes)
- - itemName (default: item): 
+ - itemName (default: item):
  			 The name of the items being drag and dropped, for tooltips and help text
- - textSelector: 
+ - textSelector:
  			 If set, is used as a selector to find the text representation of an item
- - useHandle (default: true): 
+ - useHandle (default: true):
  			 If set to true, adds a handle to each item (see 'handle' option for class name/selector)
- - handle (default: .handle): 
+ - handle (default: .handle):
  			 See useHandle
- - selectables (default: .drag-list): 
+ - selectables (default: .drag-list):
  			 Selector for selectable elements
- - removeTooltip: 
+ - removeTooltip:
  			 Tooltip to be used for removing items
- - scroll (default: false): 
+ - scroll (default: false):
  			 Passed through to created draggables as the 'scroll' option
 
 Optional extras:
@@ -195,34 +195,35 @@ Method calls (after initialising):
 
         // Wire button to trigger returnItems
         $el.find('.return-items, [data-toggle="return"]').click(function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             self.returnItems();
-
-						e.preventDefault();
-						e.stopPropagation();
-						return false;
         });
-        
+
         // Wire button to trigger randomise
         $el.find('.random, [data-toggle="randomise"]').click(function(e) {
+            e.preventDefault();
+            e.stopPropagation();
             self.randomise();
-
-						e.preventDefault();
-						e.stopPropagation();
-						return false;
         });
-        
+
+        // trigger resize event for headerfooter fixing plugin
+        $el.on('changed.tabula', function() {
+            $(window).resize();
+        });
+
         // Automatically disabled/enabled buttons
         $el.find('[data-disabled-on]').each(function(e) {
         	var $button = $(this);
         	var trigger = $button.data('disabledOn');
-        	
+
         	$el.on('changed.tabula', function() {
         		var $sourceList = $returnList;
             var $targets = $el.find(sortables).not('.return-list');
-            
+
             var unallocatedCount = $sourceList.find("li").length;
             var allocatedCount = $targets.find("li").length;
-            
+
             switch (trigger) {
             	case 'empty-list':
             		if (unallocatedCount > 0) $button.removeClass('disabled');
@@ -306,17 +307,17 @@ Method calls (after initialising):
             var $link = $(this);
             // the popover list item
             var $li = $link.closest('li');
-            
+
             // use .attr() rather than .data() to avoid implicit type conversion
-            var id = $li.attr('data-item-id'); 
-            
+            var id = $li.attr('data-item-id');
+
             // the underlying list item
             var $realLi = $li
                 .closest('.drag-target')
                 .find('input')
                 .filter(function(){ return this.value === id; })
                 .closest('li');
-            
+
             returnItem($realLi);
             return false;
         });

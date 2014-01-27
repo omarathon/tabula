@@ -430,3 +430,11 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		SequenceDataFields.foreach(addSequenceToDoc(_, data, doc))
 	}
 }
+
+trait AuditEventIndexServiceComponent {
+	def auditEventIndexService: AuditEventIndexService
+}
+
+trait AutowiringAuditEventIndexServiceComponent extends AuditEventIndexServiceComponent {
+	var auditEventIndexService = Wire[AuditEventIndexService]
+}

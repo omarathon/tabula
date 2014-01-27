@@ -42,6 +42,7 @@ class StudentGroupAttendanceController extends GroupsController {
 			"hasGroups" -> hasGroups,
 			"title" -> title,
 			"terms" -> info.attendance,
+			"attendanceNotes" -> info.notes,
 			"missedCount" -> info.missedCount,
 			"missedCountByTerm" -> info.missedCountByTerm,
 			"termWeeks" -> info.termWeeks,

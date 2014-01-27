@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, SmallGroupEvent, SmallGroup, SmallGroupSet}
-import org.hibernate.criterion.{ Restrictions, Order }
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEventOccurrence, SmallGroupEvent, SmallGroup, SmallGroupSet, SmallGroupEventAttendance}
+import org.hibernate.criterion.Order
+import org.hibernate.criterion.Restrictions._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
+import scala.collection.JavaConverters._
 
 trait SmallGroupDaoComponent {
 	val smallGroupDao: SmallGroupDao
@@ -27,6 +28,7 @@ trait SmallGroupDao {
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent)
 	def saveOrUpdate(occurrence: SmallGroupEventOccurrence)
 	def saveOrUpdate(attendance: SmallGroupEventAttendance)
+	def saveOrUpdate(note: SmallGroupEventAttendanceNote)
 	
 	def findByModuleAndYear(module: Module, year: AcademicYear): Seq[SmallGroup]
 
@@ -35,6 +37,8 @@ trait SmallGroupDao {
 	
 	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendance]
 	def deleteAttendance(attendance: SmallGroupEventAttendance): Unit
+	def getAttendanceNote(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendanceNote]
+	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote]
 }
 
 @Repository
@@ -50,6 +54,7 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 	def saveOrUpdate(smallGroupEvent: SmallGroupEvent) = session.saveOrUpdate(smallGroupEvent)
 	def saveOrUpdate(occurrence: SmallGroupEventOccurrence) = session.saveOrUpdate(occurrence)
 	def saveOrUpdate(attendance: SmallGroupEventAttendance) = session.saveOrUpdate(attendance)
+	def saveOrUpdate(note: SmallGroupEventAttendanceNote) = session.saveOrUpdate(note)
 
 	def getSmallGroupEventOccurrence(event: SmallGroupEvent, week: Int) =
 		session.newCriteria[SmallGroupEventOccurrence]
@@ -79,4 +84,21 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 				.uniqueResult
 				
 	def deleteAttendance(attendance: SmallGroupEventAttendance): Unit = session.delete(attendance)
+
+	def getAttendanceNote(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendanceNote] = {
+		session.newCriteria[SmallGroupEventAttendanceNote]
+			.add(is("student.id", studentId))
+			.add(is("occurrence", occurrence))
+			.uniqueResult
+	}
+
+	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote] = {
+		if(studentIds.size == 0 || occurrences.size == 0)
+			return Seq()
+
+		session.newCriteria[SmallGroupEventAttendanceNote]
+			.add(in("student.id", studentIds.asJava))
+			.add(in("occurrence", occurrences.asJava))
+			.seq
+	}
 }

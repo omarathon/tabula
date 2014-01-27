@@ -14,7 +14,7 @@
 <p><a class="btn" href="<@url page="/sysadmin/relationships" />">Student relationship types</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/pointsettemplates" />">Monitoring point set templates</a></p>
 <p><a class="btn" href="<@url page="/masquerade" context="/admin" />"><i class="icon-eye-open"></i> Masquerade</a></p>
-<p><a class="btn" href="<@url page="/sysadmin/audit/list" />">List audit events</a></p>
+<#--<p><a class="btn" href="<@url page="/sysadmin/audit/list" />">List audit events</a></p>-->
 <p><a class="btn" href="<@url page="/sysadmin/audit/search" />">List audit events (Index version)</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/jobs/list" context="/scheduling" />">Background jobs</a></p>
 <p><a class="btn" href="<@url page="/sysadmin/features" />">Set feature flags</a></p>
@@ -42,7 +42,7 @@
 
 <p>
 <@f.form method="post" action="${url('/sysadmin/import', '/scheduling')}">
-  <input class="btn btn-danger" type="submit" value="Departments & modules" onclick="return confirm('Really? Could take a minute.')">
+  <input class="btn btn-danger" type="submit" value="Departments, modules, routes etc." onclick="return confirm('Really? Could take a minute.')">
 </@f.form>
 </p>
 

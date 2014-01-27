@@ -1,21 +1,15 @@
 package uk.ac.warwick.tabula.groups.commands
 
-import uk.ac.warwick.tabula.commands.Unaudited
-import uk.ac.warwick.tabula.commands.CommandInternal
-import uk.ac.warwick.tabula.commands.ComposableCommand
-import uk.ac.warwick.tabula.commands.ReadOnly
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence
+import uk.ac.warwick.tabula.commands.{MemberOrUser, Unaudited, CommandInternal, ComposableCommand, ReadOnly, TaskBenchmarking}
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroup, SmallGroupEventOccurrence, SmallGroupEvent}
 import uk.ac.warwick.tabula.services.SmallGroupServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringSmallGroupServiceComponent
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.commands.TaskBenchmarking
 import scala.collection.immutable.SortedMap
 import uk.ac.warwick.tabula.services.TermServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
@@ -26,7 +20,7 @@ import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import uk.ac.warwick.tabula.ItemNotFoundException
 
 sealed abstract class SmallGroupAttendanceState {
-	def getName = toString()
+	def getName = toString
 }
 
 object SmallGroupAttendanceState {
@@ -47,10 +41,12 @@ object SmallGroupAttendanceState {
 object ViewSmallGroupAttendanceCommand {
 	type EventInstance = (SmallGroupEvent, SmallGroupEventOccurrence.WeekNumber)
 	type PerUserAttendance = SortedMap[User, SortedMap[EventInstance, SmallGroupAttendanceState]]
+	type PerUserAttendanceNotes = Map[User, Map[EventInstance, SmallGroupEventAttendanceNote]]
 	
 	case class SmallGroupAttendanceInformation(
 		instances: Seq[EventInstance],
-		attendance: PerUserAttendance
+		attendance: PerUserAttendance,
+		notes: PerUserAttendanceNotes
 	)
 	
 	def apply(group: SmallGroup) =
@@ -102,7 +98,7 @@ object ViewSmallGroupAttendanceCommand {
 				if (attendance == SmallGroupAttendanceState.NotRecorded && isLate(event, week)) SmallGroupAttendanceState.Late
 				else attendance
 			
-			(instance -> state)
+			instance -> state
 		} 
 		
 		SortedMap(userAttendance.toSeq:_*)
@@ -125,20 +121,29 @@ class ViewSmallGroupAttendanceCommand(val group: SmallGroup)
 		
 		// Build the list of all users who are in the group, or have attended one or more occurrences of the group
 		val allStudents = benchmarkTask("Get a list of all registered or attended users") {
-			group.students.users ++
-			userLookup.getUsersByWarwickUniIds(occurrences.flatMap { _.attendance.asScala }.map { _.universityId }).values.toSeq
+			(group.students.users ++
+				userLookup.getUsersByWarwickUniIds(occurrences.flatMap { _.attendance.asScala }.map { _.universityId }).values.toSeq)
 			.distinct
 		}
 		
 		val attendance = benchmarkTask("For each student, build an attended list for each instance") { 
-			val attendance = allStudents.map { user => (user -> attendanceForStudent(instances, isLate)(user)) }
+			val attendance = allStudents.map { user => user -> attendanceForStudent(instances, isLate)(user) }
 			
 			SortedMap(attendance.toSeq:_*)
 		}
+
+		val existingAttendanceNotes = benchmarkTask("Get attendance notes") {
+			smallGroupService.findAttendanceNotes(allStudents.map(_.getWarwickId), occurrences).groupBy(_.student).map{
+				case (student, notes) =>
+					MemberOrUser(student).asUser -> notes.groupBy(n => (n.occurrence.event, n.occurrence.week)).mapValues(_.head)
+			}.toMap.withDefaultValue(Map())
+		}
+		val attendanceNotes = allStudents.map{ student => student -> existingAttendanceNotes.get(student).getOrElse(Map())}.toMap
 		
 		SmallGroupAttendanceInformation(
 			instances = instances.map { case ((event, week), occurrence) => (event, week) }.sorted,
-			attendance = attendance
+			attendance = attendance,
+			attendanceNotes
 		)
 	}
 	

@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.SitsStatus
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSitsStatusCommand
 
-trait SitsStatusesImporter extends Logging {
+trait SitsStatusImporter extends Logging {
 	var sitsStatusDao = Wire.auto[SitsStatusDao]
 
 	var sitsStatusMap:Map[String,SitsStatus] = null
@@ -29,7 +29,7 @@ trait SitsStatusesImporter extends Logging {
 	}
 
 
-	def getSitsStatuses: Seq[ImportSitsStatusCommand]
+	def getSitsStatuses(): Seq[ImportSitsStatusCommand]
 
 	def slurpSitsStatuses(): Map[String, SitsStatus] = {
 		transactional(readOnly = true) {
@@ -43,23 +43,23 @@ trait SitsStatusesImporter extends Logging {
 }
 
 @Profile(Array("dev", "test", "production")) @Service
-class SitsStatusesImporterImpl extends SitsStatusesImporter {
-	import SitsStatusesImporter._
+class SitsStatusImporterImpl extends SitsStatusImporter {
+	import SitsStatusImporter._
 
 	var sits = Wire[DataSource]("sitsDataSource")
 
 	lazy val sitsStatusesQuery = new SitsStatusesQuery(sits)
 
-	def getSitsStatuses: Seq[ImportSitsStatusCommand] = {
-		val statuses = sitsStatusesQuery.execute.toSeq
+	def getSitsStatuses(): Seq[ImportSitsStatusCommand] = {
+		val statuses = sitsStatusesQuery.execute.asScala.toSeq
 		sitsStatusMap = slurpSitsStatuses()
 		statuses
 	}
 }
 
 @Profile(Array("sandbox")) @Service
-class SandboxSitsStatusesImporter extends SitsStatusesImporter {
-	def getSitsStatuses: Seq[ImportSitsStatusCommand] =
+class SandboxSitsStatusImporter extends SitsStatusImporter {
+	def getSitsStatuses(): Seq[ImportSitsStatusCommand] =
 		Seq(
 			new ImportSitsStatusCommand(SitsStatusInfo("C", "CURRENT STUDENT", "Current Student")),
 			new ImportSitsStatusCommand(SitsStatusInfo("P", "PERMANENTLY W/D", "Permanently Withdrawn"))
@@ -68,7 +68,7 @@ class SandboxSitsStatusesImporter extends SitsStatusesImporter {
 
 case class SitsStatusInfo(code: String, shortName: String, fullName: String)
 
-object SitsStatusesImporter {
+object SitsStatusImporter {
 	var sitsSchema: String = Wire.property("${schema.sits}")
 
 	val GetSitsStatus = f"""
@@ -83,4 +83,12 @@ object SitsStatusesImporter {
 			)
 	}
 
+}
+
+trait SitsStatusImporterComponent {
+	def sitsStatusImporter: SitsStatusImporter
+}
+
+trait AutowiringSitsStatusImporterComponent extends SitsStatusImporterComponent {
+	var sitsStatusImporter = Wire[SitsStatusImporter]
 }

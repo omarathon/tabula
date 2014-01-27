@@ -292,6 +292,6 @@ object WorkflowStages {
 					StageProgress(DownloadFeedback, true, "workflow.DownloadFeedback.notDownloaded", Warning, false)
 				case _ => StageProgress(DownloadFeedback, false, "workflow.DownloadFeedback.notDownloaded")
 			}
-		override def preconditions = Seq(Seq(ViewOnlineFeedback))
+		override def preconditions = Seq(Seq(ReleaseFeedback, ViewOnlineFeedback), Seq(ReleaseFeedback))
 	}
 }

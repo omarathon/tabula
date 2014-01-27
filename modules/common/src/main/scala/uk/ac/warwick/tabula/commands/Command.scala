@@ -9,9 +9,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.permissions.{PerformsPermissionsChecking, RequiresPermissionsChecking, PermissionsChecking}
 import uk.ac.warwick.tabula.helpers.Stopwatches.StopWatch
 import org.apache.log4j.Logger
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, SmallGroup, SmallGroupSet, SmallGroupEvent}
 import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.userlookup.User
@@ -161,6 +159,11 @@ object Command {
 	}
 }
 
+/** See ApplyWithCallback[A] */
+trait HasCallback[A] {
+	var callback: (A) => Unit = _
+}
+
 /**
  * Defines a function property to be used as a callback, plus a convenience
  * version of `apply` that provides the callback and runs the command
@@ -168,8 +171,7 @@ object Command {
  *
  * It doesn't actually call the callback - you do that in your `apply` implementation.
  */
-trait ApplyWithCallback[A] extends Command[A] {
-	var callback: (A) => Unit = _
+trait ApplyWithCallback[A] extends Command[A] with HasCallback[A] {
 	def apply(fn: (A) => Unit): A = {
 		callback = fn
 		apply()
@@ -308,6 +310,15 @@ abstract class Description {
 	def smallGroupEvent(smallGroupEvent: SmallGroupEvent) = {
 		property("smallGroupEvent" -> smallGroupEvent.id)
 		if (smallGroupEvent.group != null) smallGroup(smallGroupEvent.group)
+		this
+	}
+
+	/**
+	 * Record small group event occurrence, plus its event, group, set, module and department if available.
+	 */
+	def smallGroupEventOccurrence(smallGroupEventOccurrence: SmallGroupEventOccurrence) = {
+		property("smallGroupEventOccurrence" -> smallGroupEventOccurrence.id)
+		if (smallGroupEventOccurrence.event != null) smallGroupEvent(smallGroupEventOccurrence.event)
 		this
 	}
 

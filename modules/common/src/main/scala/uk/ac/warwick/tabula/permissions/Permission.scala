@@ -137,6 +137,7 @@ object Permissions {
 	case object ManageMaintenanceMode extends ScopelessPermission("Manage maintenance mode settings")
 	case object ImportSystemData extends ScopelessPermission("Import data from other systems")
 	case object ReplicaSyncing extends ScopelessPermission("Manually run replica syncing")
+	case object ViewAuditLog extends ScopelessPermission("View and search the audit log")
 
 	object RolesAndPermissions {
 		case object Create extends Permission("Add roles and permissions")

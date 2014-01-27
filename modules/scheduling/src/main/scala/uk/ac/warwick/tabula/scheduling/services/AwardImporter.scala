@@ -1,14 +1,11 @@
 package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.ResultSet
-
 import scala.Option.option2Iterable
 import scala.collection.JavaConversions.asScalaBuffer
-
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQuery
 import org.springframework.stereotype.Service
-
 import javax.sql.DataSource
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.AwardDao
@@ -16,6 +13,7 @@ import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.Award
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAwardCommand
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformationCommand
 
 trait AwardImporter extends Logging {
 	var awardDao = Wire[AwardDao]
@@ -43,15 +41,15 @@ trait AwardImporter extends Logging {
 		}
 	}
 
-	def importAwards() {
-		logger.info("Importing awards")
-
-		getImportCommands foreach { _.apply() }
+	def importAwards(): ImportAcademicInformationCommand.ImportResult = {
+		val results = getImportCommands().map { _.apply()._2 }
 
 		updateAwardMap()
+		
+		ImportAcademicInformationCommand.combineResults(results)
 	}
 
-	def getImportCommands: Seq[ImportAwardCommand]
+	def getImportCommands(): Seq[ImportAwardCommand]
 }
 
 @Profile(Array("dev", "test", "production")) @Service
@@ -91,7 +89,7 @@ case class AwardInfo(code: String, shortName: String, fullName: String)
 @Profile(Array("sandbox")) @Service
 class SandboxAwardImporter extends AwardImporter {
 
-	def getImportCommands: Seq[ImportAwardCommand] =
+	def getImportCommands(): Seq[ImportAwardCommand] =
 		Seq(
 			// the most common awards for current students:
 			new ImportAwardCommand(AwardInfo("BSC", "BSC (HONS)", "Bachelor of Science (with Honours)")),
@@ -103,4 +101,12 @@ class SandboxAwardImporter extends AwardImporter {
 			new ImportAwardCommand(AwardInfo("MA", "MA", "Master of Arts")),
 			new ImportAwardCommand(AwardInfo("PGCERT", "PG Cert", "Postgraduate Certificate"))
 		)
+}
+
+trait AwardImporterComponent {
+	def awardImporter: AwardImporter
+}
+
+trait AutowiringAwardImporterComponent extends AwardImporterComponent {
+	var awardImporter = Wire[AwardImporter]
 }

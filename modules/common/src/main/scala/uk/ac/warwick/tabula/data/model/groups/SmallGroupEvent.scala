@@ -23,6 +23,7 @@ import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.tabula.data.model.groups.WeekRange._
 import org.joda.time.LocalTime
 import javax.validation.constraints.NotNull
+import org.hibernate.annotations.BatchSize
 @Entity
 @AccessType("field")
 class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget with Serializable {
@@ -59,6 +60,10 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	@OneToOne(cascade = Array(ALL))
 	@JoinColumn(name = "tutorsgroup_id")
 	var tutors: UserGroup = UserGroup.ofUsercodes
+	
+	@OneToMany(mappedBy = "event", fetch = FetchType.LAZY, cascade=Array(CascadeType.ALL), orphanRemoval = true)
+	@BatchSize(size=50)
+	var occurrences: JSet[SmallGroupEventOccurrence] = JHashSet()
 	
 	def permissionsParents = Option(group).toStream
 	

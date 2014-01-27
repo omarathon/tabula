@@ -38,7 +38,13 @@ trait PopulateGroupedPoints extends CheckpointUpdatedDescription {
 				}
 			}.toMap}.toMap
 
-		(studentsState, checkpointDescriptions)
+		val attendanceNotes = monitoringPointService.findAttendanceNotes(students, allPoints).groupBy(_.student).map{
+			case (student, pointMap) => student -> pointMap.groupBy(_.point).map{
+				case (point, notes) => point -> notes.head
+			}
+		}.toMap
+
+		(studentsState, checkpointDescriptions, attendanceNotes)
 	}
 
 }

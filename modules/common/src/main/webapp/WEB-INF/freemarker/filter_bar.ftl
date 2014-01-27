@@ -1,5 +1,5 @@
-<div class="persist-area">
-	<div class="temporarily-not-a-persist-header">
+<div class="fix-area">
+	<div class="fix-header pad-when-fixed">
 		<@f.form commandName=filterCommandName action=submitUrl method="GET" cssClass="form-inline">
 			<@f.errors cssClass="error form-errors" />
 			<#if filterCommand.academicYear??>
@@ -132,7 +132,7 @@
 
 <script type="text/javascript">
 	jQuery(function($) {
-		$('.persist-area').fixHeaderFooter();
+		$('.fix-area').fixHeaderFooter();
 
 		var prependClearLink = function($list) {
 			if (!$list.find('input:checked').length) {

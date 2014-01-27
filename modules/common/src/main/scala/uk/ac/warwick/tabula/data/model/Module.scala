@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.roles.ModuleAssistantRoleDefinition
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.system.permissions.Restricted
+import org.joda.time.DateTime
 
 @Entity
 @NamedQueries(Array(
@@ -65,6 +66,8 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	@ForeignKey(name="none")
 	@BatchSize(size=200)
 	var grantedRoles:JList[ModuleGrantedRole] = JArrayList()
+	
+	var missingFromImportSince: DateTime = _
 
 	override def toString = "Module[" + code + "]"
 

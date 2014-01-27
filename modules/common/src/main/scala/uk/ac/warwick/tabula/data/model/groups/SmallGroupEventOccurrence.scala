@@ -22,7 +22,7 @@ class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with 
 	
 	@OneToMany(mappedBy = "occurrence", cascade=Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
-	var attendance: JList[SmallGroupEventAttendance] = JArrayList()
+	var attendance: JSet[SmallGroupEventAttendance] = JHashSet()
 
 	def permissionsParents = Stream(event)
 

@@ -42,8 +42,15 @@ class AdminDepartmentHomeController extends GroupsController {
 			canManageDepartment=securityService.can(user, Permissions.Module.ManageSmallGroups, department)
 		)
 
+		val hasModules = !moduleItems.isEmpty
+		val hasGroups = moduleItems.exists { _.module.groupSets.asScala.exists { g => !g.deleted && !g.archived } }
+		val hasGroupAttendance = moduleItems.exists { _.module.groupSets.asScala.exists { g => g.showAttendanceReports } }
+
 		Mav("admin/department",
 			"department" -> department,
-			"data" -> data )
+			"data" -> data,
+			"hasModules" -> hasModules,
+			"hasGroups" -> hasGroups,
+			"hasGroupAttendance" -> hasGroupAttendance)
 	}
 }

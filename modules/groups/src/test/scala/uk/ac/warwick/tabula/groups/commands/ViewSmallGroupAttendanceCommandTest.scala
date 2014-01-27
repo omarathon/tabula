@@ -60,7 +60,8 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 	def commandApplyNoData() { new Fixture() {
 		val command = new ViewSmallGroupAttendanceCommand(group) with CommandTestSupport
 		
-		command.smallGroupService.findAttendanceByGroup(group) returns (Seq())
+		command.smallGroupService.findAttendanceByGroup(group) returns Seq()
+		command.smallGroupService.findAttendanceNotes(Seq(), Seq()) returns Seq()
 		
 		val info = command.applyInternal()
 		
@@ -124,8 +125,12 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		attendance(occurrence3, user5, AttendanceState.MissedUnauthorised)
 		
 		val command = new ViewSmallGroupAttendanceCommand(group) with CommandTestSupport
-		command.smallGroupService.findAttendanceByGroup(group) returns (Seq(occurrence1, occurrence2, occurrence3))
-		command.termService.getAcademicWeekForAcademicYear(any[DateTime], any[AcademicYear]) returns (4)
+		command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence1, occurrence2, occurrence3)
+		command.smallGroupService.findAttendanceNotes(
+			Seq(user1, user2, user3, user4, user5).map(_.getWarwickId),
+			Seq(occurrence1, occurrence2, occurrence3)
+		) returns Seq()
+		command.termService.getAcademicWeekForAcademicYear(any[DateTime], any[AcademicYear]) returns 4
 		
 		val info = command.applyInternal()
 		
@@ -140,7 +145,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		
 		// Map all the SortedMaps to Seqs to preserve the order they've been set as
 		val userAttendanceSeqs = info.attendance.toSeq.map { case (user, attendance) =>
-			(user -> attendance.toSeq)
+			user -> attendance.toSeq
 		}
 		
 		userAttendanceSeqs should be (Seq(
@@ -233,8 +238,12 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		attendance(occurrence, user3, AttendanceState.Attended)
 		
 		val command = new ViewSmallGroupAttendanceCommand(group) with CommandTestSupport
-		command.smallGroupService.findAttendanceByGroup(group) returns (Seq(occurrence))
-		command.termService.getAcademicWeekForAcademicYear(any[DateTime], any[AcademicYear]) returns (4)
+		command.smallGroupService.findAttendanceByGroup(group) returns Seq(occurrence)
+		command.smallGroupService.findAttendanceNotes(
+			any[Seq[String]],
+			any[Seq[SmallGroupEventOccurrence]]
+		) returns Seq()
+		command.termService.getAcademicWeekForAcademicYear(any[DateTime], any[AcademicYear]) returns 4
 		
 		val info = command.applyInternal()
 		info.attendance.keySet.size should be (3) // If it's 2, we're bad

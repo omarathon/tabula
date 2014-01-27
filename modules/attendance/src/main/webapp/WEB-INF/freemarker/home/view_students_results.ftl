@@ -48,7 +48,7 @@
 		<div class="studentResults" data-sits-url="${sendToSitsUrl}">
 		<#assign returnTo><@routes.viewDepartmentStudentsWithAcademicYear command.department command.academicYear filterQuery/></#assign>
 		<#if (totalResults > 0)>
-			<div class="clearfix">
+			<div class="clearfix fix-header pad-when-fixed">
 				<#if (totalResults > command.studentsPerPage)>
 					<div class="pull-right">
 						<@pagination command.page totalResults command.studentsPerPage "pagination-small" />
@@ -255,6 +255,11 @@
 					$('#command').submit();
 				}
 			});
+		});
+		// Enable any freshly loaded popovers
+		jQuery('.use-popover').tabulaPopover({
+			trigger: 'click',
+			container: '#container'
 		});
 	</script>
 

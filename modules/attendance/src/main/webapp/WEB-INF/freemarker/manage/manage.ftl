@@ -1,31 +1,9 @@
 <#import "../attendance_macros.ftl" as attendance_macros />
 
-<h1 class="with-settings">Manage monitoring points for ${command.dept.name}</h1>
-
-<div class="btn-toolbar dept-toolbar">
-	<#if dept.parent??>
-		<a class="btn btn-medium use-tooltip" href="<@routes.manageDepartment dept.parent />" data-container="body" title="${dept.parent.name}">
-			Parent department
-		</a>
-	</#if>
-	
-	<#if dept.children?has_content>
-		<div class="btn-group">
-			<a class="btn btn-medium dropdown-toggle" data-toggle="dropdown" href="#">
-				Subdepartments
-				<span class="caret"></span>
-			</a>
-			<ul class="dropdown-menu pull-right">
-				<#list dept.children as child>
-					<li><a href="<@routes.manageDepartment child />">${child.name}</a></li>
-				</#list>
-			</ul>
-		</div>
-	</#if>
-</div>
+<@fmt.deptheader "Manage monitoring points" "for" command.dept routes "manageDepartment" "with-settings" />
 
 <#if !dept.routes?has_content && dept.children?has_content>
-<p>This department doesn't directly contain any routes. Check subdepartments.</p>
+	<p class="alert alert-info"><i class="icon-info-sign"></i> This department doesn't directly contain any routes. Check subdepartments.</p>
 <#else>
 <script type="text/javascript">
 	var setsByRouteByAcademicYear = {

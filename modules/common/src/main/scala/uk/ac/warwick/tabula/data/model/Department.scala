@@ -206,15 +206,15 @@ class Department extends GeneratedId
 				case roleDefinition: SelectorBuiltInRoleDefinition[_] => {
 					customRoleDefinition.baseRoleDefinition match {
 						case customRoleDefinition: SelectorBuiltInRoleDefinition[_]
-							if (customRoleDefinition.getClass == roleDefinition.getClass) && 
+							if (customRoleDefinition.getClass == roleDefinition.getClass) &&
 								(roleDefinition <= customRoleDefinition) => true
 						case _ => false
 					}
 				}
 				case _ => roleDefinition == customRoleDefinition.baseRoleDefinition
 			}
-		}		
-		
+		}
+
 		customRoleDefinitions.asScala
 			.filter { _.replacesBaseDefinition }
 			.find { matches }

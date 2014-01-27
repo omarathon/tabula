@@ -8,72 +8,99 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import uk.ac.warwick.userlookup.UserLookupInterface
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
+import uk.ac.warwick.tabula.commands._
+import org.springframework.web.bind.annotation.ModelAttribute
+import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import org.springframework.web.bind.annotation.RequestMapping
+import uk.ac.warwick.tabula.permissions.Permissions
+import AuditLogQueryCommand._
+import uk.ac.warwick.tabula.services.AuditEventIndexServiceComponent
+import uk.ac.warwick.tabula.services.AutowiringAuditEventServiceComponent
+import uk.ac.warwick.tabula.services.AuditEventServiceComponent
+import uk.ac.warwick.tabula.services.AutowiringAuditEventIndexServiceComponent
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
-class AuditLogQuery {
+object AuditLogQueryCommand {
+			
+	type AuditLogQueryCommand = Appliable[AuditLogQueryResults] with AuditLogQueryCommandState
+	
+	val pageSize = 100
+	
+	def apply(): AuditLogQueryCommand =
+		new AuditLogQueryCommandInternal
+			with ComposableCommand[AuditLogQueryResults]
+			with AuditLogQueryCommandPermissions
+			with AutowiringAuditEventServiceComponent
+			with AutowiringAuditEventIndexServiceComponent
+			with Unaudited with ReadOnly
+			
+	case class AuditLogQueryResults(
+		results: Seq[AuditEvent],
+		pageNumber: Int,
+		startIndex: Int,
+		endIndex: Int
+	)
+}
+
+class AuditLogQueryCommandInternal extends CommandInternal[AuditLogQueryResults] with AuditLogQueryCommandState with TaskBenchmarking {
+	self: AuditEventServiceComponent with AuditEventIndexServiceComponent =>
+		
+	def applyInternal() = {
+		val start = (page * pageSize) + 1
+		val max = pageSize
+		val end = start + max - 1
+		val recent = benchmarkTask("Query audit event index") {
+			if (query.hasText) {
+				auditEventIndexService.openQuery(query, page * pageSize, pageSize)
+			} else {
+				auditEventIndexService.listRecent(page * pageSize, pageSize)
+			}
+		}
+		
+		AuditLogQueryResults(
+			results = benchmarkTask("Parse into rich audit items") { recent.map(toRichAuditItem) },
+			pageNumber = page,
+			startIndex = start,
+			endIndex = end
+		)
+	}
+	
+	def toRichAuditItem(item: AuditEvent) = item.copy(parsedData = auditEventService.parseData(item.data))
+}
+
+trait AuditLogQueryCommandPermissions extends RequiresPermissionsChecking {
+	def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.ViewAuditLog)
+	}
+}
+
+trait AuditLogQueryCommandState {
 	var page: Int = 0
 	var query: String = ""
 }
 
-case class UserLookupQuery() {
-	var userLookup = Wire.auto[UserLookupInterface]
-	var userId: String = _
-	var uniId: String = _
-
-	def user = {
-
-	}
-}
-
 @Controller
+@RequestMapping(Array("/sysadmin/audit/search"))
 class AuditLogController extends BaseSysadminController {
+	
+	var auditEventIndexService = Wire[AuditEventIndexService]
+	
+	@ModelAttribute("auditLogQuery") def command: AuditLogQueryCommand = AuditLogQueryCommand()
+	@ModelAttribute("lastIndexTime") def lastIndexTime = auditEventIndexService.lastIndexTime
+	@ModelAttribute("lastIndexDuration") def lastIndexDuration = auditEventIndexService.lastIndexDuration
 
-	var auditEventService = Wire.auto[AuditEventService]
-	var auditEventIndexService = Wire.auto[AuditEventIndexService]
-	var json = Wire.auto[ObjectMapper]
-
-	val pageSize = 100
-
-	@RequestMapping(value = Array("/sysadmin/audit/list"))
-	def listAll(query: AuditLogQuery): Mav = {
-		val page = query.page
-		val start = (page * pageSize) + 1
-		val max = pageSize
-		val end = start + max - 1
-		val recent = auditEventService.listRecent(page * pageSize, pageSize)
+	@RequestMapping
+	def searchAll(@ModelAttribute("auditLogQuery") command: AuditLogQueryCommand): Mav = {
+		val results = command.apply()
+		
 		Mav("sysadmin/audit/list",
-			"items" -> recent,
-			"fromIndex" -> false,
-			"page" -> page,
-			"startIndex" -> start,
-			"endIndex" -> end)
-			.crumbs(Breadcrumbs.Current("Sysadmin audit log"))
-	}
-
-	@RequestMapping(value = Array("/sysadmin/userlookup"))
-	def whois(query: UserLookupQuery) = Mav("sysadmin/userlookup").noLayout()
-
-	@RequestMapping(value = Array("/sysadmin/audit/search"))
-	def searchAll(query: AuditLogQuery): Mav = {
-		val page = query.page
-		val start = (page * pageSize) + 1
-		val max = pageSize
-		val end = start + max - 1
-		val recent = if (query.query.hasText) {
-			auditEventIndexService.openQuery(query.query, page * pageSize, pageSize)
-		} else {
-			auditEventIndexService.listRecent(page * pageSize, pageSize)
-		}
-		Mav("sysadmin/audit/list",
-			"items" -> (recent map toRichAuditItem),
+			"items" -> results.results,
 			"fromIndex" -> true,
-			"lastIndexTime" -> auditEventIndexService.lastIndexTime,
-			"lastIndexDuration" -> auditEventIndexService.lastIndexDuration,
-			"page" -> page,
-			"startIndex" -> start,
-			"endIndex" -> end)
+			"page" -> results.pageNumber,
+			"startIndex" -> results.startIndex,
+			"endIndex" -> results.endIndex)
 			.crumbs(Breadcrumbs.Current("Sysadmin audit log"))
 	}
-
-	def toRichAuditItem(item: AuditEvent) = item.copy(parsedData = auditEventService.parseData(item.data))
 
 }
