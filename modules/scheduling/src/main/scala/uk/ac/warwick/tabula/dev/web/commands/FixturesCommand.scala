@@ -90,7 +90,14 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 				val routes: Seq[Route] = routeDao.findByDepartment(dept)
 
 				val deptScds = scdDao.findByDepartment(dept)
-				val looseScds = session.newCriteria[StudentCourseDetails].add(Restrictions.isNull("department")).list
+				val looseScds = 
+					session.newCriteria[StudentCourseDetails]
+						   .add(
+						  		Restrictions.disjunction()
+						  		.add(Restrictions.isNull("department"))
+						  		.add(Restrictions.not(Restrictions.in("department", moduleAndDepartmentService.allDepartments)))
+						  	)
+						   .seq
 				val scds = (deptScds ++ looseScds).distinct
 
 				for (scd <- scds) {
