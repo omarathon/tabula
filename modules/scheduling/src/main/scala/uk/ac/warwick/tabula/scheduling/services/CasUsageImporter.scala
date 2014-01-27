@@ -18,26 +18,26 @@ trait CasUsageImporter {
 	/**
 	 * Returns a sequence of pairs of PRS codes and the percentage load
 	 */
-	def isCasUsed(universityId: String): Boolean // cas is a confirmation of acceptance to study - this determines whether such was used to apply for a visa
+	def isCasUsedNow(universityId: String): Boolean // cas is a confirmation of acceptance to study - this determines whether such was used to apply for a visa
 }
 
 @Profile(Array("dev", "test", "production")) @Service
-class CasUsageImporterImpl extends CasUsageImporter with SitsAcademicYearAware{
+class CasUsageImporterImpl extends CasUsageImporter {
 	import CasUsageImporter._
 
 	var sits = Wire[DataSource]("sitsDataSource")
 
 	lazy val casUsedMappingQuery = new CasUsedMappingQuery(sits)
 
-	def isCasUsed(universityId: String): Boolean = {
-		val rowCount = casUsedMappingQuery.executeByNamedParam(Map("universityId" -> universityId, "year" -> getCurrentSitsAcademicYearString)).head
+	def isCasUsedNow(universityId: String): Boolean = {
+		val rowCount = casUsedMappingQuery.executeByNamedParam(Map("universityId" -> universityId)).head
 		(rowCount.intValue() > 0)
 	}
 }
 
 @Profile(Array("sandbox")) @Service
 class SandboxCasUsageImporter extends CasUsageImporter {
-	def isCasUsed(universityId: String): Boolean = false
+	def isCasUsedNow(universityId: String): Boolean = false
 }
 
 object CasUsageImporter {
@@ -46,16 +46,16 @@ object CasUsageImporter {
     val CasUsedSql = f"""
  			select count(*) as count from $sitsSchema.srs_vcr
  			where vcr_stuc = :universityId
- 			and vcr_ayrc = :year
  			and vcr_iuse = 'Y'
  			and vcr_ukst = 'USED'
-    	"""
+			and vcr_begd < (select sysdate from dual)
+			and vcr_endd > (select sysdate from dual)
+ 		"""
 
 
 	class CasUsedMappingQuery(ds: DataSource)
 		extends MappingSqlQueryWithParameters[(Number)](ds, CasUsedSql) {
 		this.declareParameter(new SqlParameter("universityId", Types.VARCHAR))
-		this.declareParameter(new SqlParameter("year", Types.VARCHAR))
 		this.compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _])= {
 			(rs.getLong("count"))
