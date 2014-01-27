@@ -26,11 +26,10 @@ class ShowIntroFunction extends TemplateMethodModelEx {
 	 */
 	override def exec(args: java.util.List[_]): Object = {
 		val arguments = args.asInstanceOf[java.util.List[TemplateModel]]
-		var location = RequestInfo.mappedPage
 
-		Option(arguments) match {
-			case Some(a) if a.size == 1 => // do nothing
-			case Some(a) if a.size == 2 => location = DeepUnwrap.unwrap(a.get(1)).asInstanceOf[String]
+		val location = Option(arguments) match {
+			case Some(a) if a.size == 1 => RequestInfo.mappedPage
+			case Some(a) if a.size == 2 => DeepUnwrap.unwrap(a.get(1)).asInstanceOf[String]
 			case _ => throw new TemplateModelException("Invalid number of arguments")
 		}
 
