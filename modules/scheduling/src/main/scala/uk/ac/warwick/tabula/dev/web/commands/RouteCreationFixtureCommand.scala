@@ -16,16 +16,18 @@ class RouteCreationFixtureCommand extends CommandInternal[Route] {
 	var routeName: String = _
   var degreeType:String = "UG"
 
-	protected def applyInternal() =
+	protected def applyInternal() = {
 		transactional() {
 			val existing = routeDao.getByCode(routeCode)
-			for(route<-existing){
+			for(route <- existing){
 				// this may fail, if a department is deleted without deleting the routes associated with it, since
 				// there is no constraint on route.department_id. If that happens, delete the route manually and fix
 				// the code that's deleting the department to also clean up the routes.
 				session.delete(route)
 			}
+		}
 
+		transactional() {
 			val dept = moduleAndDepartmentService.getDepartmentByCode(departmentCode).get
 			val r = new Route
 			r.department = dept
@@ -36,6 +38,7 @@ class RouteCreationFixtureCommand extends CommandInternal[Route] {
 			routeDao.saveOrUpdate(r)
 			r
 		}
+	}
 }
 
 object RouteCreationFixtureCommand{
