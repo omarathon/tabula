@@ -118,15 +118,6 @@ class AssignmentController extends CourseworkController {
 		}
 	}
 
-	@RequestMapping(method = Array(GET), value=Array("/feedback.pdf"))
-	def viewAsPdf(
-		@PathVariable("module") module: Module,
-		@PathVariable("assignment") assignment: Assignment,
-		user: CurrentUser)={
-		val feedback = getFeedback(assignment, user)
-		new PDFView("feedback.pdf", "/WEB-INF/freemarker/admin/assignments/markerfeedback/feedback-download.ftl", Map("feedback" -> feedback, "user"->user)) with FreemarkerXHTMLPDFGeneratorComponent with AutowiredTextRendererComponent
-	}
-
 	@RequestMapping(method = Array(POST))
 	def submit(
 			@PathVariable("module") module: Module,

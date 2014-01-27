@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions._
 
 
-class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, val feedback: Feedback) extends Command[Option[RenderableFile]] with ReadOnly {
+class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, val feedback: Feedback) extends Command[Option[RenderableFile]] with HasCallback[RenderableFile] with ReadOnly {
 	
 	notDeleted(assignment)
 	mustBeLinked(assignment, module)
@@ -26,10 +26,6 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 
 	var filename: String = _
     var students: JList[String] = JArrayList()
-    
-	private var fileFound: Boolean = _
-
-	var callback: (RenderableFile) => Unit = _
 
 	/**
 	 * If filename is unset, it returns a renderable Zip of all files.
@@ -45,7 +41,6 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 				case _ => Some(zipped(feedback))
 			}
 
-		fileFound = result.isDefined
 		if (callback != null) {
 			result.map { callback(_) }
 		}
@@ -59,8 +54,8 @@ class DownloadFeedbackCommand(val module: Module, val assignment: Assignment, va
 		d.property("filename", filename)
 	}
 
-	override def describeResult(d: Description) {
-		d.property("fileFound", fileFound)
+	override def describeResult(d: Description, result: Option[RenderableFile]) {
+		d.property("fileFound", result.isDefined)
 	}
 
 }
