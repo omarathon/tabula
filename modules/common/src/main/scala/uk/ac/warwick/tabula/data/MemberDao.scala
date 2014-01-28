@@ -153,7 +153,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					)
 					.addOrder(asc("universityId"))
 
-			if (eagerLoad)
+			if (eagerLoad) {		
 				criteria
 					.setFetchMode("studentCourseDetails", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
@@ -163,8 +163,14 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment", FetchMode.JOIN)
 					.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment.children", FetchMode.JOIN)
 					.distinct
-
-			criteria.seq
+					.seq.map { m =>
+						// This is the worst hack of all time
+						m.permissionsParents.force
+						m
+					}
+			} else {
+				criteria.seq
+			}
 		} finally {
 			if (disableFilter && filterEnabled)
 				session.enableFilter(Member.StudentsOnlyFilter)
