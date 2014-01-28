@@ -37,14 +37,22 @@
 			</form>
 		</@modal.footer>
 	<#else>
-
 		<p>
-			<#if command.checkpoint??>
+			<#if command.customState??>
+				${command.customState.description}:
+			<#elseif command.checkpoint??>
 				${command.checkpoint.state.description}:
 			<#else>
 				Not recorded:
 			</#if>
+
 			${command.monitoringPoint.name} (<@fmt.monitoringPointFormat command.monitoringPoint />)
+
+			<#if command.customState?? && command.checkpoint?? && command.customState.dbValue != command.checkpoint.state.dbValue>
+				<small class="subtle help-block">
+					This attendance has not yet been saved.
+				</small>
+			</#if>
 		</p>
 		<#if command.checkpointDescription?has_content>
 			<p><#noescape>${command.checkpointDescription}</#noescape></p>
