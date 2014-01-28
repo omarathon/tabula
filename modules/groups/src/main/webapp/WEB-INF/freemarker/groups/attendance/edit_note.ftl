@@ -2,7 +2,11 @@
 <#import "*/modal_macros.ftl" as modal />
 
 	<#if success??>
-		<div class="attendance-note-success" data-linkid="#attendanceNote-${student.universityId}-${command.occurrence.id}"></div>
+		<div
+			class="attendance-note-success"
+			data-linkid="#attendanceNote-${student.universityId}-${command.occurrence.id}"
+			data-state="<#if !command.attendanceNote.note?has_content && !command.attendanceNote.attachment?has_content>Add<#else>Edit</#if>"
+		></div>
 	</#if>
 
 	<#assign heading>

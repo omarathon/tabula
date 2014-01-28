@@ -1025,9 +1025,14 @@
 
 				if ($f.find(".attendance-note-success").length > 0) {
 					// Save successful
-					var linkId = $f.find(".attendance-note-success").data('linkid');
-					$(linkId).attr('data-original-title', 'Edit attendance note')
-						.find('i').removeClass('icon-edit').addClass('icon-edit-sign');
+					var linkId = $f.find(".attendance-note-success").data('linkid')
+						, state = $f.find(".attendance-note-success").data('state');
+					var link = $(linkId).attr('data-original-title', state + ' attendance note');
+					if (state === 'Edit') {
+						link.find('i').removeClass('icon-edit').addClass('icon-edit-sign');
+					} else {
+						link.find('i').removeClass('icon-edit-sign').addClass('icon-edit');
+					}
 					$m.modal("hide");
 				} else {
 					$m.find('.modal-body').slideDown();
