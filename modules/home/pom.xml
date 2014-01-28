@@ -360,6 +360,19 @@
 							<descriptor>src/main/assembly/static-hashes.xml</descriptor>
 						</configuration>
 					</execution>
+					<execution>
+						<id>make-errordocuments</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<appendAssemblyId>false</appendAssemblyId>
+							<finalName>errordocuments</finalName>
+							<descriptor>src/main/assembly/errordocuments.xml</descriptor>
+							<outputDirectory>${tabula.basedir}/dist</outputDirectory>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
