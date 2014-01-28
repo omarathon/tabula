@@ -108,6 +108,9 @@ class Department extends GeneratedId
 		settings += (Settings.StudentRelationshipSource -> newMap)
 	}
 
+	def studentRelationshipSource = getStringMapSetting(Settings.StudentRelationshipSource) getOrElse(Map())
+	def studentRelationshipSource_= (setting: Map[String, String]) = settings += (Settings.StudentRelationshipSource -> setting)
+
 	def studentRelationshipDisplayed = getStringMapSetting(Settings.StudentRelationshipDisplayed) getOrElse(Map())
 	def studentRelationshipDisplayed_= (setting: Map[String, String]) = settings += (Settings.StudentRelationshipDisplayed -> setting)
 

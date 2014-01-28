@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.data.model.{FileAttachment, StudentMember}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringPointAttendanceNote, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPointAttendanceNote, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -10,10 +10,11 @@ import uk.ac.warwick.tabula.CurrentUser
 import org.joda.time.DateTime
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.system.BindListener
+import java.lang.IllegalArgumentException
 
 object EditAttendanceNoteCommand {
-	def apply(student: StudentMember, monitoringPoint: MonitoringPoint, user: CurrentUser) =
-		new EditAttendanceNoteCommand(student, monitoringPoint, user)
+	def apply(student: StudentMember, monitoringPoint: MonitoringPoint, user: CurrentUser, customStateStringOption: Option[String]) =
+		new EditAttendanceNoteCommand(student, monitoringPoint, user, customStateStringOption)
 		with ComposableCommand[MonitoringPointAttendanceNote]
 		with AttendanceNotePermissions
 		with AttendanceNoteDescription
@@ -23,8 +24,13 @@ object EditAttendanceNoteCommand {
 		with AutowiringProfileServiceComponent
 }
 
-abstract class EditAttendanceNoteCommand(val student: StudentMember, val monitoringPoint: MonitoringPoint, val user: CurrentUser)
-	extends CommandInternal[MonitoringPointAttendanceNote] with PopulateOnForm with BindListener with AttendanceNoteCommandState with CheckpointUpdatedDescription {
+abstract class EditAttendanceNoteCommand(
+	val student: StudentMember,
+	val monitoringPoint: MonitoringPoint,
+	val user: CurrentUser,
+	val customStateStringOption: Option[String]
+)	extends CommandInternal[MonitoringPointAttendanceNote] with PopulateOnForm with BindListener
+	with AttendanceNoteCommandState with CheckpointUpdatedDescription {
 
 	self: MonitoringPointServiceComponent with FileAttachmentServiceComponent with ProfileServiceComponent =>
 
@@ -44,6 +50,14 @@ abstract class EditAttendanceNoteCommand(val student: StudentMember, val monitor
 		})
 		checkpoint = monitoringPointService.getCheckpoint(student, monitoringPoint).getOrElse(null)
 		checkpointDescription = Option(checkpoint).map{ checkpoint => describeCheckpoint(checkpoint)}.getOrElse("")
+		customStateStringOption.map(stateString => {
+			try {
+				customState = AttendanceState.fromCode(stateString)
+			} catch {
+				case _: IllegalArgumentException =>
+			}
+		})
+
 	}
 
 	def applyInternal() = {
@@ -102,4 +116,5 @@ trait AttendanceNoteCommandState {
 	var isNew: Boolean = false
 	var checkpoint: MonitoringCheckpoint = _
 	var checkpointDescription: String = ""
+	var customState: AttendanceState = _
 }

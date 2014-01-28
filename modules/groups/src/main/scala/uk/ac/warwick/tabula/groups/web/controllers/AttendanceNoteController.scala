@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.groups.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.commands.{ApplyWithCallback, PopulateOnForm, Appliable}
 import org.springframework.validation.Errors
@@ -66,8 +66,12 @@ class AttendanceNoteAttachmentController extends GroupsController {
 class EditAttendanceNoteController extends GroupsController {
 
 	@ModelAttribute("command")
-	def command(@PathVariable student: StudentMember, @PathVariable occurrence: SmallGroupEventOccurrence) =
-		EditAttendanceNoteCommand(student, occurrence, user)
+	def command(
+		@PathVariable student: StudentMember,
+		@PathVariable occurrence: SmallGroupEventOccurrence,
+		@RequestParam(value="state", required=false) state: String
+	) =
+		EditAttendanceNoteCommand(student, occurrence, user, Option(state))
 
 	@RequestMapping(method=Array(GET, HEAD), params=Array("isIframe"))
 	def getIframe(
