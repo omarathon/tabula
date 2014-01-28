@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.commands.TaskBenchmarking
 
 case class ViewAgentsResult(
 	agent: String,
@@ -31,39 +32,41 @@ object ViewAgentsCommand {
 }
 
 class ViewAgentsCommand(val department: Department, val relationshipType: StudentRelationshipType, val academicYearOption: Option[AcademicYear])
-	extends CommandInternal[Seq[ViewAgentsResult]] with ViewAgentsState {
+	extends CommandInternal[Seq[ViewAgentsResult]] with ViewAgentsState with TaskBenchmarking {
 
 	self: RelationshipServiceComponent with MonitoringPointServiceComponent with TermServiceComponent =>
 
 	def applyInternal() = {
-		val relationships = relationshipService.listStudentRelationshipsByDepartment(relationshipType, department)
+		val relationships = benchmarkTask("Get all relationships in department") { relationshipService.listStudentRelationshipsByDepartment(relationshipType, department) }
 		val students = relationships.flatMap(_.studentMember)
-		val pointSetsByStudent = monitoringPointService.findPointSetsForStudentsByStudent(students, academicYear)
-		val allPoints = pointSetsByStudent.flatMap(_._2.points.asScala).toSeq
-		val checkpoints = monitoringPointService.getCheckpointsByStudent(allPoints)
-		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
+		val pointSetsByStudent = benchmarkTask("Get point sets for students in relationships") { monitoringPointService.findPointSetsForStudentsByStudent(students, academicYear) }
+		val allPoints = benchmarkTask("Collect all points") { pointSetsByStudent.flatMap(_._2.points.asScala).toSeq }
+		val checkpoints = benchmarkTask("Get all checkpoints for all points") { monitoringPointService.getCheckpointsByStudent(allPoints) }
+		val currentAcademicWeek = benchmarkTask("Get current academic week") { termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear) }
 
-		relationships.groupBy(_.agent).map{case(agent, agentRelationships) => {
-			val counts = agentRelationships.flatMap(_.studentMember).map{ student =>
-				pointSetsByStudent.get(student).map{ pointSet =>
-					val studentCheckpoints = pointSet.points.asScala.map{ point => {
-						val checkpointOption = checkpoints.find{
-							case (s, checkpoint) => s == student && checkpoint.point == point
-						}
-						checkpointOption.map{	case (_, checkpoint) => checkpoint.state.dbValue }.getOrElse({
-							if (currentAcademicWeek > point.requiredFromWeek)	"late"
-							else ""
-						})
-					}}
-					val unrecorded = studentCheckpoints.count(_ == "late")
-					val missed = studentCheckpoints.count(_ == AttendanceState.MissedUnauthorised.dbValue)
-					(unrecorded, missed)
-				}.getOrElse((0,0))
-			}
-			val unrecorded = counts.map(_._1).sum
-			val missed = counts.map(_._2).sum
-			ViewAgentsResult(agent, agentRelationships.head.agentMember, agentRelationships.flatMap(_.studentMember), unrecorded, missed)
-		}}.toSeq
+		benchmarkTask("Group points by agent to get results") {
+			relationships.groupBy(_.agent).map{case(agent, agentRelationships) => {
+				val counts = agentRelationships.flatMap(_.studentMember).map{ student =>
+					pointSetsByStudent.get(student).map{ pointSet =>
+						val studentCheckpoints = pointSet.points.asScala.map{ point => {
+							val checkpointOption = checkpoints.find{
+								case (s, checkpoint) => s == student && checkpoint.point == point
+							}
+							checkpointOption.map{	case (_, checkpoint) => checkpoint.state.dbValue }.getOrElse({
+								if (currentAcademicWeek > point.requiredFromWeek)	"late"
+								else ""
+							})
+						}}
+						val unrecorded = studentCheckpoints.count(_ == "late")
+						val missed = studentCheckpoints.count(_ == AttendanceState.MissedUnauthorised.dbValue)
+						(unrecorded, missed)
+					}.getOrElse((0,0))
+				}
+				val unrecorded = counts.map(_._1).sum
+				val missed = counts.map(_._2).sum
+				ViewAgentsResult(agent, agentRelationships.head.agentMember, agentRelationships.flatMap(_.studentMember), unrecorded, missed)
+			}}.toSeq
+		}
 	}
 }
 
