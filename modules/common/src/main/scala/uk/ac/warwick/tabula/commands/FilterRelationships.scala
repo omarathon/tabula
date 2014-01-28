@@ -25,8 +25,8 @@ object FiltersRelationships {
 		"route" -> Seq(
 			"route" -> "route"
 		),
-		"sprStatus" -> Seq(
-			"sprStatus" -> "sprStatus"
+		"statusOnRoute" -> Seq(
+			"statusOnRoute" -> "statusOnRoute"
 		)
 	).toMap
 }
@@ -71,8 +71,8 @@ trait FiltersRelationships extends FiltersStudentsBase with ProfileServiceCompon
 
 			// SPR status
 			inIfNotEmpty(
-				"sprStatus", sprStatuses.asScala,
-				AliasPaths("sprStatus") : _*
+				"statusOnRoute", sprStatuses.asScala,
+				AliasPaths("statusOnRoute") : _*
 			),
 
 			// Registered modules
