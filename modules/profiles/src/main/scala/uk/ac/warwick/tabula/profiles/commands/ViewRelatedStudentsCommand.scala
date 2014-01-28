@@ -11,6 +11,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Order
 import uk.ac.warwick.tabula.data.ScalaRestriction
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import uk.ac.warwick.tabula.system.BindListener
+import org.springframework.validation.BindingResult
 
 
 // Don't need this, unless there is specific state on the command which the controller needs access to.
@@ -55,11 +57,18 @@ trait ViewRelatedStudentsCommandState extends FiltersRelationships {
 }
 
 abstract class ViewRelatedStudentsCommandInternal(val currentMember: Member, val relationshipType: StudentRelationshipType)
-	extends CommandInternal[Seq[StudentMember]] with TaskBenchmarking with ViewRelatedStudentsCommandState {
+	extends CommandInternal[Seq[StudentMember]] with TaskBenchmarking with ViewRelatedStudentsCommandState with BindListener {
 	self: ProfileServiceComponent =>
 
 	def applyInternal(): Seq[StudentMember] =  {
 		profileService.getStudentsByAgentRelationshipAndRestrictions(relationshipType, currentMember, buildRestrictions())
+	}
+
+	def onBind(result: BindingResult) {
+		// Add all non-withdrawn codes to SPR statuses by default
+		if (sprStatuses.isEmpty) {
+			allSprStatuses.filter { status => !status.code.startsWith("P") && !status.code.startsWith("T") }.foreach { sprStatuses.add }
+		}
 	}
 }
 
