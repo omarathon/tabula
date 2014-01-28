@@ -29,6 +29,8 @@ builder: !ruby/object:MavenBuilder
   profiles:
   - skinny
   goal: "-Dscalastyle.skip=true clean install"
+build_artifacts: {
+  "errordocuments.tar.gz"  : "/usr/local/apache/htdocs/errordocuments" }
 scheduler_jboss: !ruby/object:Jboss 
   deployment_state: old
   name: tabula-scheduler
