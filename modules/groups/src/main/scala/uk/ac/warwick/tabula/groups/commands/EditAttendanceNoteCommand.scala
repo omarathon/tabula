@@ -10,10 +10,12 @@ import org.joda.time.DateTime
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEventAttendance, SmallGroupEventOccurrence}
+import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import java.lang.IllegalArgumentException
 
 object EditAttendanceNoteCommand {
-	def apply(student: StudentMember, occurrence: SmallGroupEventOccurrence, user: CurrentUser) =
-		new EditAttendanceNoteCommand(student, occurrence, user)
+	def apply(student: StudentMember, occurrence: SmallGroupEventOccurrence, user: CurrentUser, customStateStringOption: Option[String]) =
+		new EditAttendanceNoteCommand(student, occurrence, user, customStateStringOption)
 		with ComposableCommand[SmallGroupEventAttendanceNote]
 		with AttendanceNotePermissions
 		with AttendanceNoteDescription
@@ -23,8 +25,12 @@ object EditAttendanceNoteCommand {
 		with AutowiringSmallGroupServiceComponent
 }
 
-abstract class EditAttendanceNoteCommand(val student: StudentMember, val occurrence: SmallGroupEventOccurrence, val user: CurrentUser)
-	extends CommandInternal[SmallGroupEventAttendanceNote] with PopulateOnForm with BindListener with AttendanceNoteCommandState {
+abstract class EditAttendanceNoteCommand(
+	val student: StudentMember,
+	val occurrence: SmallGroupEventOccurrence,
+	val user: CurrentUser,
+	val customStateStringOption: Option[String]
+)	extends CommandInternal[SmallGroupEventAttendanceNote] with PopulateOnForm with BindListener with AttendanceNoteCommandState {
 
 	self: SmallGroupServiceComponent with FileAttachmentServiceComponent with ProfileServiceComponent =>
 
@@ -43,6 +49,13 @@ abstract class EditAttendanceNoteCommand(val student: StudentMember, val occurre
 			newNote
 		})
 		attendance = smallGroupService.getAttendance(student.universityId, occurrence).getOrElse(null)
+		customStateStringOption.map(stateString => {
+			try {
+				customState = AttendanceState.fromCode(stateString)
+			} catch {
+				case _: IllegalArgumentException =>
+			}
+		})
 	}
 
 	def applyInternal() = {
@@ -101,4 +114,5 @@ trait AttendanceNoteCommandState {
 	var isNew: Boolean = false
 	var attendance: SmallGroupEventAttendance = _
 	var attendanceDescription: String = ""
+	var customState: AttendanceState = _
 }

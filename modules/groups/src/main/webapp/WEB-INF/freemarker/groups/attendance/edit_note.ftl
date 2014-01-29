@@ -2,7 +2,11 @@
 <#import "*/modal_macros.ftl" as modal />
 
 	<#if success??>
-		<div class="attendance-note-success" data-linkid="#attendanceNote-${student.universityId}-${command.occurrence.id}"></div>
+		<div
+			class="attendance-note-success"
+			data-linkid="#attendanceNote-${student.universityId}-${command.occurrence.id}"
+			data-state="<#if !command.attendanceNote.note?has_content && !command.attendanceNote.attachment?has_content>Add<#else>Edit</#if>"
+		></div>
 	</#if>
 
 	<#assign heading>
@@ -39,7 +43,9 @@
 	<#else>
 
 		<p>
-			<#if command.attendance??>
+			<#if command.customState??>
+				${command.customState.description}:
+			<#elseif command.attendance??>
 				${command.attendance.state.description}:
 			<#else>
 				Not recorded:
@@ -48,6 +54,12 @@
 			${command.occurrence.event.group.name},
 			${command.occurrence.event.day.name} <@fmt.time command.occurrence.event.startTime /> - <@fmt.time command.occurrence.event.endTime />,
 			Week ${command.occurrence.week}
+
+			<#if command.customState?? && command.attendance?? && command.customState.dbValue != command.attendance.state.dbValue>
+				<small class="subtle help-block">
+					This attendance has not yet been saved.
+				</small>
+			</#if>
 		</p>
 
 		<@f.form id="attendance-note-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="form-horizontal double-submit-protection">

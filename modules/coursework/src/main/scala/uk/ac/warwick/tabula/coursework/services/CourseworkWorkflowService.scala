@@ -260,7 +260,7 @@ object WorkflowStages {
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
 				case Some(item) if item.feedback.released =>
 					StageProgress(ReleaseFeedback, true, "workflow.ReleaseFeedback.released", Good, true)
-				case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback =>
+				case Some(item) if item.feedback.hasAttachments || item.feedback.hasOnlineFeedback || item.feedback.hasMarkOrGrade =>
 					StageProgress(ReleaseFeedback, true, "workflow.ReleaseFeedback.notReleased", Warning, false)
 				case _ => StageProgress(ReleaseFeedback, false, "workflow.ReleaseFeedback.notReleased")
 			}
@@ -271,7 +271,7 @@ object WorkflowStages {
 		def actionCode = "workflow.ViewOnlineFeedback.action"
 		def progress(assignment: Assignment)(coursework: WorkflowItems) =
 			coursework.enhancedFeedback.filterNot(_.feedback.isPlaceholder) match {
-				case Some(item) if item.onlineViewed || !(item.feedback.hasGenericFeedback || item.feedback.hasOnlineFeedback) =>
+				case Some(item) if item.feedback.released && item.onlineViewed =>
 					StageProgress(ViewOnlineFeedback, true, "workflow.ViewOnlineFeedback.viewed", Good, true)
 				case Some(item) if item.feedback.released =>
 					StageProgress(ViewOnlineFeedback, true, "workflow.ViewOnlineFeedback.notViewed", Warning, false)
