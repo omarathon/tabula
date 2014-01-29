@@ -126,8 +126,8 @@
 					<#assign placeholder = "All tier 4 statuses" />
 					<#assign currentfilter><@current_filter_value "tier4Statuses" placeholder; tier4Status>${tier4Status?string("Sponsered","Not sponsored")}</@current_filter_value></#assign>
 					<@filter "tier4Statuses" placeholder currentfilter filterCommand.allTier4Statuses; tier4Status>
-						<input type="checkbox" name="${status.expression}" value="${tier4Status?string}" data-short-value="${tier4Status?string("Sponsered","Not sponsored")}" ${filterCommand.allTier4Statuses?seq_contains(tier4Status)?string('checked','')}>
-						${tier4Status?string("Sponsered","Not sponsored")}
+						<input type="checkbox" name="${status.expression}" value="${tier4Status?string}" data-short-value="${tier4Status?string("Sponsored","Not sponsored")}" ${filterCommand.allTier4Statuses?seq_contains(tier4Status)?string('checked','')}>
+						${tier4Status?string("Sponsored","Not sponsored")}
 					</@filter>
 				</#if>
 
