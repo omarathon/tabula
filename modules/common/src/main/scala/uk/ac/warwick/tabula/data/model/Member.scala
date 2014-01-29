@@ -39,8 +39,6 @@ object Member {
 }
 
 /**
- * Represents an assignment within a module, occurring at a certain time.
- *
  * Notes about the notDeleted filter:
  * filters don't run on session.get() but getById will check for you.
  * queries will only include it if it's the entity after "from" and not
@@ -448,6 +446,11 @@ trait StudentProperties {
 	@Restricted(Array("Profiles.Read.NextOfKin"))
 	@BatchSize(size=200)
 	var nextOfKins:JList[NextOfKin] = JArrayList()
+
+	@ManyToOne
+	@JoinColumn(name = "disability")
+	@Restricted(Array("Profiles.Read.Disability"))
+	var disability: Disability = _
 }
 
 trait StaffProperties {

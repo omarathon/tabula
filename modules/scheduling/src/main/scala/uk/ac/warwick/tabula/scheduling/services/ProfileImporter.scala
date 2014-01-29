@@ -323,6 +323,7 @@ object ProfileImporter {
 			stu.stu_endd as date_of_inactivation,
 			stu.stu_haem as alternative_email_address,
 			stu.stu_cat3 as mobile_number,
+			stu.stu_dsbc as disability,
 
 			nat.nat_name as nationality,
 

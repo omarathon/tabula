@@ -41,14 +41,27 @@
 						</tr>
 					</#if>
 
-					<#if profile.student && profile.termtimeAddress??>
-						<tr class="address">
-							<th>Term-time address</th>
-							<td><@profile_macros.address profile.termtimeAddress /></td>
+					<#if profile.disability?has_content>
+						<tr>
+							<th>Disability</th>
+							<td>
+								<a href="#" class="use-popover" id="popover-disability" data-html="true"
+								   data-original-title="Disability"
+								   data-content="<p>This student has self-reported the following disability:</p><ul><li>${profile.disability.definition}</li></ul>">
+									${profile.disability.code}
+								</a>
+							</td>
 						</tr>
 					</#if>
 
-					<#if profile.student && profile.nextOfKins?? && profile.nextOfKins?size gt 0>
+					<#if profile.termtimeAddress??>
+					<tr class="address">
+						<th>Term-time address</th>
+						<td><@profile_macros.address profile.termtimeAddress /></td>
+					</tr>
+					</#if>
+
+					<#if profile.nextOfKins?has_content>
 						<tr>
 							<th>Emergency contacts</th>
 							<td>

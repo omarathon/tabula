@@ -96,7 +96,7 @@ class ImportStudentRowCommand(val member: MembershipInformation,
 	}
 
 	private val basicStudentProperties = Set(
-		"nationality", "mobileNumber"
+		"nationality", "mobileNumber", "disability"
 	)
 
 	private def copyStudentProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =

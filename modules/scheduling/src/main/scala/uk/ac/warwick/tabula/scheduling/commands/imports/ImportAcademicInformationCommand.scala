@@ -4,11 +4,7 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.services.CourseAndRouteService
-import uk.ac.warwick.tabula.data.model.Department.FilterRule
 import uk.ac.warwick.tabula.scheduling.services._
 import uk.ac.warwick.tabula.system.permissions._
 import uk.ac.warwick.tabula.services._
@@ -20,11 +16,12 @@ object ImportAcademicInformationCommand {
 			with ComposableCommand[ImportAcademicInformationResults]
 			with ImportDepartments
 			with ImportModules
-			with ImportRoutes 
+			with ImportRoutes
 			with ImportCourses
 			with ImportSitsStatuses
 			with ImportModesOfAttendance
 			with ImportAwards
+			with ImportDisabilities
 			with AutowiringModuleAndDepartmentServiceComponent
 			with AutowiringModuleImporterComponent
 			with AutowiringCourseAndRouteServiceComponent
@@ -32,12 +29,13 @@ object ImportAcademicInformationCommand {
 			with AutowiringSitsStatusImporterComponent
 			with AutowiringModeOfAttendanceImporterComponent
 			with AutowiringAwardImporterComponent
+			with AutowiringDisabilityImporterComponent
 			with ImportSystemDataPermissions
 			with ImportAcademicInformationDescription
 			with Logging
-			
-	case class ImportResult(added: Int = 0, deleted: Int = 0, changed: Int = 0) 
-			
+
+	case class ImportResult(added: Int = 0, deleted: Int = 0, changed: Int = 0)
+
 	case class ImportAcademicInformationResults(
 		departments: ImportResult,
 		modules: ImportResult,
@@ -45,16 +43,17 @@ object ImportAcademicInformationCommand {
 		courses: ImportResult,
 		sitsStatuses: ImportResult,
 		modesOfAttendance: ImportResult,
-		awards: ImportResult
+		awards: ImportResult,
+		disabilities: ImportResult
 	)
-	
+
 	def combineResults(results: Seq[ImportResult]): ImportResult =
 		results.foldLeft(ImportResult())((acc, result) => ImportResult(
 			added = acc.added + result.added,
 			deleted = acc.deleted + result.deleted,
 			changed = acc.changed + result.changed
 		))
-	
+
 	def newModuleFrom(m: ModuleInfo, dept: Department): Module = {
 		val module = new Module
 		module.code = m.code
@@ -95,8 +94,9 @@ class ImportAcademicInformationCommandInternal extends CommandInternal[ImportAca
 		  ImportCourses with
 		  ImportSitsStatuses with
 		  ImportModesOfAttendance with
-		  ImportAwards =>
-		  	
+		  ImportAwards with
+			ImportDisabilities =>
+
 	def applyInternal() = transactional() {
 		ImportAcademicInformationResults(
 			departments = benchmarkTask("Import departments") { importDepartments() },
@@ -105,44 +105,45 @@ class ImportAcademicInformationCommandInternal extends CommandInternal[ImportAca
 			courses = benchmarkTask("Import courses") { importCourses() },
 			sitsStatuses = benchmarkTask("Import SITS status codes") { importSitsStatuses() },
 			modesOfAttendance = benchmarkTask("Import modes of attendance") { importModesOfAttendance() },
-			awards = benchmarkTask("Import awards") { importAwards() }
+			awards = benchmarkTask("Import awards") { importAwards() },
+			disabilities = benchmarkTask("Import disabilities") { importDisabilities() }
 		)
 	}
 }
 
 trait ImportDepartments {
 	self: ModuleAndDepartmentServiceComponent with ModuleImporterComponent with Logging =>
-	
+
 	def importDepartments(): ImportResult = {
 		logger.info("Importing departments")
 		val results = for (dept <- moduleImporter.getDepartments()) yield {
 			moduleAndDepartmentService.getDepartmentByCode(dept.code) match {
 				case None => {
 					moduleAndDepartmentService.save(newDepartmentFrom(dept, moduleAndDepartmentService))
-					
+
 					ImportResult(added = 1)
 				}
 				case Some(dept) => {
 					debug("Skipping %s as it is already in the database", dept.code)
-					
+
 					ImportResult()
 				}
 			}
 		}
-		
+
 		combineResults(results)
 	}
 }
 
 trait ImportModules {
 	self: ModuleAndDepartmentServiceComponent with ModuleImporterComponent with Logging =>
-	
+
 	def importModules(): ImportResult = {
 		logger.info("Importing modules")
 		val results = for (dept <- moduleAndDepartmentService.allDepartments) yield {
 			importModules(moduleImporter.getModules(dept.code), dept)
 		}
-		
+
 		combineResults(results)
 	}
 
@@ -152,7 +153,7 @@ trait ImportModules {
 				case None => {
 					debug("Mod code %s not found in database, so inserting", mod.code)
 					moduleAndDepartmentService.saveOrUpdate(newModuleFrom(mod, dept))
-					
+
 					ImportResult(added = 1)
 				}
 				case Some(module) => {
@@ -162,34 +163,34 @@ trait ImportModules {
 						module.name = mod.name
 						module.missingFromImportSince = null
 						moduleAndDepartmentService.saveOrUpdate(module)
-						
+
 						ImportResult(changed = 1)
 					} else {
 						module.missingFromImportSince = null
 						moduleAndDepartmentService.saveOrUpdate(module)
-						
+
 						ImportResult()
 					}
 				}
 			}
 		}
-		
+
 		val seenCodes = modules.map { _.code }
 		moduleAndDepartmentService.stampMissingModules(dept, seenCodes)
-		
+
 		combineResults(results)
 	}
 }
 
 trait ImportRoutes {
 	self: ModuleAndDepartmentServiceComponent with CourseAndRouteServiceComponent with ModuleImporterComponent with Logging =>
-	
+
 	def importRoutes(): ImportResult = {
 		logger.info("Importing routes")
 		val results = for (dept <- moduleAndDepartmentService.allDepartments) yield {
 			importRoutes(moduleImporter.getRoutes(dept.code), dept)
 		}
-		
+
 		combineResults(results)
 	}
 
@@ -199,7 +200,7 @@ trait ImportRoutes {
 				case None => {
 					debug("Route code %s not found in database, so inserting", rot.code)
 					courseAndRouteService.save(newRouteFrom(rot, dept))
-					
+
 					ImportResult(added = 1)
 				}
 				case Some(route) => {
@@ -208,22 +209,22 @@ trait ImportRoutes {
 						logger.info("Updating name of %s to %s".format(rot.code, rot.name))
 						route.name = rot.name
 						courseAndRouteService.save(route)
-						
+
 						ImportResult(changed = 1)
 					} else {
-						ImportResult()						
+						ImportResult()
 					}
 				}
 			}
 		}
-		
+
 		combineResults(results)
 	}
 }
 
 trait ImportCourses {
 	self: CourseImporterComponent with Logging =>
-	
+
 	def importCourses(): ImportResult = {
 		logger.info("Importing courses")
 		courseImporter.importCourses()
@@ -232,13 +233,13 @@ trait ImportCourses {
 
 trait ImportSitsStatuses {
 	self: SitsStatusImporterComponent with Logging =>
-	
+
 	def importSitsStatuses(): ImportResult = {
 		logger.info("Importing SITS statuses")
 
 		transactional() {
 			val results = sitsStatusImporter.getSitsStatuses().map { _.apply()._2 }
-			
+
 			combineResults(results)
 		}
 	}
@@ -246,25 +247,34 @@ trait ImportSitsStatuses {
 
 trait ImportModesOfAttendance {
 	self: ModeOfAttendanceImporterComponent with Logging =>
-		
+
 	def importModesOfAttendance(): ImportResult = {
 		logger.info("Importing modes of attendance")
 
 		transactional() {
 			val results = modeOfAttendanceImporter.getImportCommands().map { _.apply()._2 }
-			
+
 			combineResults(results)
 		}
 	}
-	
+
 }
 
 trait ImportAwards {
 	self: AwardImporterComponent with Logging =>
-	
+
 	def importAwards(): ImportResult = {
 		logger.info("Importing awards")
 		awardImporter.importAwards()
+	}
+}
+
+trait ImportDisabilities {
+	self: DisabilityImporterComponent with Logging =>
+
+	def importDisabilities(): ImportResult = {
+		logger.info("Importing disabilities")
+		disabilityImporter.importDisabilities()
 	}
 }
 
@@ -276,7 +286,7 @@ trait ImportSystemDataPermissions extends RequiresPermissionsChecking {
 
 trait ImportAcademicInformationDescription extends Describable[ImportAcademicInformationResults] {
 	override lazy val eventName = "ImportAcademicInformation"
-	
+
 	def describe(d: Description) {}
 	override def describeResult(d: Description, result: ImportAcademicInformationResults) {
 		def importProperties(d: Description, name: String, result: ImportResult): Description = {
@@ -286,7 +296,7 @@ trait ImportAcademicInformationDescription extends Describable[ImportAcademicInf
 				s"${name}Changed" -> result.changed
 			)
 		}
-		
+
 		importProperties(d, "departments", result.departments)
 		importProperties(d, "modules", result.modules)
 		importProperties(d, "routes", result.routes)
@@ -294,5 +304,6 @@ trait ImportAcademicInformationDescription extends Describable[ImportAcademicInf
 		importProperties(d, "sitsStatuses", result.sitsStatuses)
 		importProperties(d, "modesOfAttendance", result.modesOfAttendance)
 		importProperties(d, "awards", result.awards)
+		importProperties(d, "disabilities", result.disabilities)
 	}
 }
