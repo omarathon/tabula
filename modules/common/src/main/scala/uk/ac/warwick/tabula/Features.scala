@@ -75,6 +75,7 @@ abstract class Features {
 	@Value("${features.attendanceMonitoring.report:true}") var attendanceMonitoringReport = defaults.attendanceMonitoringReport
 	@Value("${features.smallGroupTeaching.lectures:true}") var smallGroupTeachingLectures = defaults.smallGroupTeachingLectures
 	@Value("${features.profiles.coursework:true}") var courseworkInStudentProfile = defaults.courseworkInStudentProfile
+	@Value("${features.profiles.visa:true}") var visaInStudentProfile = defaults.visaInStudentProfile
 	@Value("${features.attendanceMonitoring.note:true}") var attendanceMonitoringNote = defaults.attendanceMonitoringNote
 
 	private val bean = new BeanWrapperImpl(this)
@@ -140,6 +141,7 @@ class FeaturesMessage {
 	@BeanProperty var smallGroupTeachingLectures = true
 	@BeanProperty var courseworkInStudentProfile = true
 	@BeanProperty var attendanceMonitoringNote = true
+	@BeanProperty var visaInStudentProfile = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

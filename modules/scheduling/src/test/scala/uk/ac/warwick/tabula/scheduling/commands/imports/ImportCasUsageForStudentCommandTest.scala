@@ -31,7 +31,7 @@ class ImportCasUsageForStudentCommandTest extends TestBase with Mockito with Log
 		new Environment {
 
 			val importer = smartMock[CasUsageImporter]
-			importer.isCasUsed(studentMember.universityId) returns false
+			importer.isCasUsedNow(studentMember.universityId) returns false
 
 			val command = ImportCasUsageForStudentCommand(studentMember, year)
 			command.casUsageImporter = importer

@@ -24,7 +24,7 @@ class ImportCasUsageForStudentCommandInternal(student: StudentMember, year: Acad
 
 	def applyInternal() = {
 		var changed = false
-		val newCasUsed = casUsageImporter.isCasUsed(student.universityId)
+		val newCasUsed = casUsageImporter.isCasUsedNow(student.universityId)
 		student.freshOrStaleStudentCourseYearDetails(year).map {
 			scyd => {
 				if (scyd.casUsed != newCasUsed) {
