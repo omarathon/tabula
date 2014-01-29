@@ -140,6 +140,7 @@ class FeaturesMessage {
 	@BeanProperty var attendanceMonitoringReport = true
 	@BeanProperty var smallGroupTeachingLectures = true
 	@BeanProperty var courseworkInStudentProfile = true
+	@BeanProperty var attendanceMonitoringNote = true
 	@BeanProperty var visaInStudentProfile = true
 }
 
