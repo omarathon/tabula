@@ -1038,7 +1038,10 @@
 					$m.find('.modal-body').slideDown();
 					var $form = $m.find('form.double-submit-protection');
 					$form.tabulaSubmitOnce();
-					$form.find(".btn").removeClass('disabled');
+					var btn = $form.find(".btn").removeClass('disabled');
+					if (btn.data('spinContainer')) {
+						btn.data('spinContainer').spin(false);
+					}
 					// wipe any existing state information for the submit protection
 					$form.removeData('submitOnceSubmitted');
 					$m.modal("show");
@@ -1071,6 +1074,7 @@
 
 					// hide the iframe, so we don't get a FOUC
 					$m.find('.modal-body').slideUp();
+					$m.find('form.double-submit-protection .spinnable').spin('small');
 				});
 
 				$.get(href, function(data){

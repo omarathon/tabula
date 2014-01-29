@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.groups.commands
 
-import uk.ac.warwick.tabula.data.model.{FileAttachment, StudentMember}
+import uk.ac.warwick.tabula.data.model.{AbsenceType, FileAttachment, StudentMember}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.CurrentUser
 import org.joda.time.DateTime
-import org.springframework.validation.BindingResult
+import org.springframework.validation.{Errors, BindingResult}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEventAttendance, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
@@ -19,6 +19,7 @@ object EditAttendanceNoteCommand {
 		with ComposableCommand[SmallGroupEventAttendanceNote]
 		with AttendanceNotePermissions
 		with AttendanceNoteDescription
+		with AttendanceNoteValidation
 		with AttendanceNoteCommandState
 		with AutowiringFileAttachmentServiceComponent
 		with AutowiringProfileServiceComponent
@@ -37,6 +38,7 @@ abstract class EditAttendanceNoteCommand(
 	def populate() = {
 		note = attendanceNote.note
 		attachedFile = attendanceNote.attachment
+		absenceType = attendanceNote.absenceType
 	}
 
 	def onBind(result: BindingResult) {
@@ -71,10 +73,21 @@ abstract class EditAttendanceNoteCommand(
 			attendanceNote.attachment.temporary = false
 		}
 
+		attendanceNote.absenceType = absenceType
 		attendanceNote.updatedBy = user.apparentId
 		attendanceNote.updatedDate = DateTime.now
 		smallGroupService.saveOrUpdate(attendanceNote)
 		attendanceNote
+	}
+}
+
+trait AttendanceNoteValidation extends SelfValidating {
+	self: AttendanceNoteCommandState =>
+
+	override def validate(errors: Errors) = {
+		if (absenceType == null) {
+			errors.rejectValue("absenceType", "attendanceNote.absenceType.empty")
+		}
 	}
 }
 
@@ -110,6 +123,7 @@ trait AttendanceNoteCommandState {
 	var note: String = _
 	var file: UploadedFile = new UploadedFile
 	var attachedFile: FileAttachment = _
+	var absenceType: AbsenceType = _
 
 	var isNew: Boolean = false
 	var attendance: SmallGroupEventAttendance = _

@@ -6,6 +6,7 @@ import org.joda.time.DateTime
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import java.text.BreakIterator
+import org.hibernate.annotations.Type
 
 @Entity
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
@@ -40,5 +41,10 @@ abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 	@OneToOne
 	@JoinColumn(name = "attachment_id")
 	var attachment: FileAttachment = _
+
+	@NotNull
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.AbsenceTypeUserType")
+	@Column(name = "absence_type")
+	var absenceType: AbsenceType = _
 
 }
