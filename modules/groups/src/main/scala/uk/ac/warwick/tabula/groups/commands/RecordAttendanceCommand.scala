@@ -4,7 +4,7 @@ import scala.collection.JavaConverters._
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
+import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupEventAttendance}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
@@ -15,11 +15,9 @@ import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence
 import uk.ac.warwick.tabula.services.SmallGroupServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringSmallGroupServiceComponent
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
 import uk.ac.warwick.tabula.services.TermServiceComponent
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
@@ -69,9 +67,11 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 		}).distinct.sortBy(mou => (mou.lastName, mou.firstName, mou.universityId))
 	}
 
-	lazy val attendanceNotes = benchmarkTask("Get attendance notes") {
+	lazy val attendanceNotes: Map[MemberOrUser, Map[SmallGroupEventOccurrence, SmallGroupEventAttendanceNote]] = benchmarkTask("Get attendance notes") {
 		smallGroupService.findAttendanceNotes(members.map(_.universityId), Seq(occurrence)).groupBy(_.student).map{
-			case (student, notes) => MemberOrUser(student) -> notes.groupBy(_.occurrence)
+			case (student, noteMap) => MemberOrUser(student) -> noteMap.groupBy(_.occurrence).map{
+				case(o, notes) => o -> notes.head
+			}
 		}.toMap
 	}
 	
