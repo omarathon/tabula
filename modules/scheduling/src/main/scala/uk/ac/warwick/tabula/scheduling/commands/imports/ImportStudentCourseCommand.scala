@@ -120,7 +120,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 			endRelationships()
 		}
 		else {
-			captureTutor(studentCourseDetails.department)
+			captureTutor(studentCourseDetails)
 
 			if (scjCode != null && !scjStatusCode.startsWith("P")) {
 				// supervisors are coded against SCJ codes; only import them if the SCJ is not withdrawn
@@ -159,7 +159,8 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 	def toCourse(code: String) = code.maybeText.flatMap { courseImporter.getCourseForCode }.getOrElse(null)
 	def toAward(code: String) = code.maybeText.flatMap { awardImporter.getAwardForCode }.getOrElse(null)
 
-	def captureTutor(dept: Department) = {
+	def captureTutor(studentCourseDetails: StudentCourseDetails) = {
+		val dept = studentCourseDetails.department
 		if (dept == null)
 			logger.warn("Trying to capture tutor for " + sprCode + " but department is null.")
 
@@ -167,8 +168,6 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		// so by default excluding PGRs from the personal tutor import:
 		else if (courseCode != null && courseCode.length() > 0 && CourseType.fromCourseCode(courseCode) != CourseType.PGR) {
 			// is this student in a department that is set to import tutor data from SITS?
-
-
 			relationshipService
 				.getStudentRelationshipTypeByUrlPart("tutor") // TODO this is awful
 				.filter { relType => dept.getStudentRelationshipSource(relType) == StudentRelationshipSource.SITS }
@@ -178,7 +177,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 						case Some(mem: Member) => {
 							logger.info("Got a personal tutor from SITS! SprCode: " + sprCode + ", tutorUniId: " + tutorUniId)
 
-							relationshipService.replaceStudentRelationships(relationshipType, sprCode, Seq(tutorUniId))
+							relationshipService.replaceStudentRelationships(relationshipType, studentCourseDetails, Seq(mem))
 						}
 						case _ => {
 							logger.warn("SPR code: " + sprCode + ": no staff member found for uni ID " + tutorUniId + " - not importing this personal tutor from SITS")
@@ -194,7 +193,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 			val endDateFromSits = endDate.toDateTimeAtCurrentTime()
 			val threeMonthsAgo = DateTime.now().minusMonths(3)
 			if (endDateFromSits.isBefore(threeMonthsAgo)) {
-				relationshipService.getAllCurrentRelationships(sprCode)
+				relationshipService.getAllCurrentRelationships(stuMem)
 					.foreach { relationship =>
 							relationship.endDate = endDateFromSits
 							relationshipService.saveOrUpdate(relationship)

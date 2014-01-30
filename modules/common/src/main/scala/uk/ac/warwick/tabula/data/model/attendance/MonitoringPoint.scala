@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.PostLoadBehaviour
 class MonitoringPoint extends GeneratedId with HasSettings with PostLoadBehaviour {
 	import MonitoringPoint._
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "point_set_id")
 	var pointSet: AbstractMonitoringPointSet = _
 

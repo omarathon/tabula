@@ -10,7 +10,6 @@ import scala.collection.JavaConverters._
 
 class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
-	val profileService = mock[ProfileService]
 	val relationshipService = mock[RelationshipService]
 
 	@Test def getPersonalTutor {
@@ -21,28 +20,19 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 		studentCourseDetails.relationshipService = relationshipService
 
 		student.attachStudentCourseDetails(studentCourseDetails)
-		student.profileService = profileService
-
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-
-		profileService.getStudentBySprCode("0205225/1") returns (Some(student))
-
-		relationshipService.findCurrentRelationships(relationshipType, "0205225/1") returns (Nil)
-		student.freshStudentCourseDetails.head.relationships(relationshipType) should be ('empty)
-
-		val rel = StudentRelationship("0672089", relationshipType, "0205225/1")
-		rel.profileService = profileService
-
-		relationshipService.findCurrentRelationships(relationshipType, "0205225/1") returns (Seq(rel))
-		profileService.getMemberByUniversityId("0672089") returns (None)
-		student.freshStudentCourseDetails.head.relationships(relationshipType) map { _.agentParsed } should be (Seq("0672089"))
-
+		
 		val staff = Fixtures.staff(universityId="0672089")
 		staff.firstName = "Steve"
 		staff.lastName = "Taff"
 
-		profileService.getMemberByUniversityId("0672089") returns (Some(staff))
+		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
+		relationshipService.findCurrentRelationships(relationshipType, student) returns (Nil)
+		student.freshStudentCourseDetails.head.relationships(relationshipType) should be ('empty)
+
+		val rel = StudentRelationship(staff, relationshipType, student)
+
+		relationshipService.findCurrentRelationships(relationshipType, student) returns (Seq(rel))
 		student.freshStudentCourseDetails.head.relationships(relationshipType) map { _.agentParsed } should be (Seq(staff))
 	}
 

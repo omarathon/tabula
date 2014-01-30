@@ -35,7 +35,7 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 		this.group = _group
 	}
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "group_id", insertable = false, updatable = false)
 	var group: SmallGroup = _
 	
@@ -57,7 +57,7 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	def isUnscheduled = day == null || (startTime == null && endTime == null)
 	def isSingleEvent = weekRanges.size == 1 && weekRanges.head.isSingleWeek
 		
-	@OneToOne(cascade = Array(ALL))
+	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "tutorsgroup_id")
 	var tutors: UserGroup = UserGroup.ofUsercodes
 	

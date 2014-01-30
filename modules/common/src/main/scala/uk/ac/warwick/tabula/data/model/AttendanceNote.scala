@@ -11,7 +11,7 @@ import java.text.BreakIterator
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "student_id")
 	var student: StudentMember = _
 
@@ -37,7 +37,7 @@ abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 		}.getOrElse("")
 	}
 
-	@OneToOne
+	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "attachment_id")
 	var attachment: FileAttachment = _
 

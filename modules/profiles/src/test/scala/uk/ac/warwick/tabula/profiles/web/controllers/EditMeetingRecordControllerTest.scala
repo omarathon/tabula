@@ -5,6 +5,8 @@ import uk.ac.warwick.tabula.profiles.web.controllers.relationships.EditMeetingRe
 import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, StudentMember, StudentRelationship, MeetingRecord}
 import uk.ac.warwick.tabula.profiles.commands.EditMeetingRecordCommand
 import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.data.model.MemberStudentRelationship
+import uk.ac.warwick.tabula.Fixtures
 
 class EditMeetingRecordControllerTest extends TestBase with Mockito{
 
@@ -22,10 +24,9 @@ class EditMeetingRecordControllerTest extends TestBase with Mockito{
 		val controller = new EditMeetingRecordController()
 
 		// faffy setup to keep the permissions checking happy
-		val relationship = new StudentRelationship
-		relationship.profileService = mock[ProfileService]
-		relationship.profileService.getStudentBySprCode(any[String]) returns Some(new StudentMember("test"))
+		val relationship = new MemberStudentRelationship
 		relationship.relationshipType = new StudentRelationshipType
+		relationship.studentMember = Fixtures.student()
 		val meeting = new MeetingRecord()
 		meeting.relationship = relationship
 		// end setup

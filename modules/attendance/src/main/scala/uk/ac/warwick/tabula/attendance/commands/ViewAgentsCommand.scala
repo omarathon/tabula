@@ -64,7 +64,7 @@ class ViewAgentsCommand(val department: Department, val relationshipType: Studen
 				}
 				val unrecorded = counts.map(_._1).sum
 				val missed = counts.map(_._2).sum
-				ViewAgentsResult(agent, agentRelationships.head.agentMember, agentRelationships.flatMap(_.studentMember), unrecorded, missed)
+				ViewAgentsResult(agent, agentRelationships.head.agentMember, Nil/*agentRelationships.flatMap(_.studentMember)*/, unrecorded, missed)
 			}}.toSeq
 		}
 	}

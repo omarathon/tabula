@@ -38,7 +38,7 @@ class StudentCourseDetails
 	def id = scjCode
 	def urlSafeId = scjCode.replace("/", "_")
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="universityId", referencedColumnName="universityId")
 	var student: StudentMember = _
 
@@ -83,17 +83,22 @@ class StudentCourseDetails
 		statusOnRoute != null && statusOnRoute.code.startsWith("P")
 	}
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY) // don't cascade, cascaded separately
 	@JoinColumn(name = "latestYearDetails")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var latestStudentCourseYearDetails: StudentCourseYearDetails = _
 
 	def courseType = CourseType.fromCourseCode(course.code)
+	
+	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.PERSIST))
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	@BatchSize(size=200)
+	var relationships: JSet[StudentRelationship[_]] = JHashSet()
 
 	// We can't restrict this because it's not a getter. Restrict in
 	// view code if necessary (or implement for all methods in  ScalaBeansWrapper)
 	def relationships(relationshipType: StudentRelationshipType) =
-		relationshipService.findCurrentRelationships(relationshipType, this.sprCode)
+		relationshipService.findCurrentRelationships(relationshipType, this.student)
 
 	def hasRelationship(relationshipType: StudentRelationshipType) = !relationships(relationshipType).isEmpty
 
@@ -142,12 +147,12 @@ trait StudentCourseProperties {
 	// student's record for their route (SPR = student programme route) - the route code is just edited.  Hence this is not unique.
 	var sprCode: String = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "courseCode", referencedColumnName="code")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var course: Course = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "routeCode", referencedColumnName="code")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var route: Route = _
@@ -155,11 +160,11 @@ trait StudentCourseProperties {
 	// this is the department from the SPR table in SITS (Student Programme Route).  It is likely to be the
 	// same as the department on the Route table, but in some cases, e.g. where routes change ownership in
 	// different years, the SPR code might contain a different department.
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "department_id")
 	var department: Department = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "awardCode", referencedColumnName="code")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var award: Award = _
@@ -179,12 +184,12 @@ trait StudentCourseProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var courseYearLength: String = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="sprStatusCode")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var statusOnRoute: SitsStatus = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="scjStatusCode")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var statusOnCourse: SitsStatus = _

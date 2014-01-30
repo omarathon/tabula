@@ -13,9 +13,9 @@ abstract class MeetingRecordNotification(meeting: MeetingRecord)
 	val FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meeting_record_notification_template.ftl"
 	val target = Some(meeting.relationship)
 	val _object = meeting
-	var message = "Student member for SPR code " + meeting.relationship.targetSprCode + " not found"
+	
 	def url = Routes.profile.view(
-			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(message)), 
+			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(s"Student member for relationship ${meeting.relationship.id} not found")), 
 			meeting)
 
 	def agentRole = meeting.relationship.relationshipType.agentRole

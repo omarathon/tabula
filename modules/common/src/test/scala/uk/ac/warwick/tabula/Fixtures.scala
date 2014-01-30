@@ -200,7 +200,7 @@ object Fixtures extends Mockito {
 
 		val scd = new StudentCourseDetails(member, scjCodeToUse)
 		scd.student = member
-		scd.sprCode = member.universityId + "/1"
+		scd.sprCode = member.universityId + "/2"
 		scd.department = courseDepartment
 		scd.mostSignificant = true
 

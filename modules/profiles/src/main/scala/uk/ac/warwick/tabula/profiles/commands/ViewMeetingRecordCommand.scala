@@ -31,7 +31,7 @@ class ViewMeetingRecordCommandInternal(val  studentCourseDetails: StudentCourseD
 	this: ProfileServiceComponent with RelationshipServiceComponent with MeetingRecordDaoComponent =>
 
 	def applyInternal() = {
-		val rels = relationshipService.getRelationships(relationshipType, studentCourseDetails.sprCode)
+		val rels = relationshipService.getRelationships(relationshipType, studentCourseDetails.student)
 
 		currentMember match {
 			case None => Seq()

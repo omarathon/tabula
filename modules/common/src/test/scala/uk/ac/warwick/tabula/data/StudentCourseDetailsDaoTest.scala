@@ -51,7 +51,7 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 
 		studentCourseDetailsDao.getByScjCode("1000001/1").get.department should be (dept1)
 		studentCourseDetailsDao.getByScjCode("1000001/1").get.student.universityId should be ("1000001")
-		studentCourseDetailsDao.getStudentBySprCode("1000001/1").get.universityId should be ("1000001")
+		studentCourseDetailsDao.getStudentBySprCode("1000001/2").get.universityId should be ("1000001")
 	}
 
 	@Test def getBySprCode = transactional { tx =>
@@ -67,21 +67,21 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 
 		// the student fixture comes with one free studentCourseDetails - add another and override the defaults SPR code:
 		val stu1_scd2 = Fixtures.studentCourseDetails(stu1, dept1, null, "2000001/2")
-		stu1_scd2.sprCode = "2000001/2"
+		stu1_scd2.sprCode = "2000001/3"
 		memberDao.saveOrUpdate(stu1)
 		studentCourseDetailsDao.saveOrUpdate(stu1_scd2)
 		session.flush
 
-		studentCourseDetailsDao.getByScjCode("2000001/1").size should be (1)
-		studentCourseDetailsDao.getBySprCode("2000001/1").size should be (1)
+		studentCourseDetailsDao.getByScjCode("2000001/2").size should be (1)
 		studentCourseDetailsDao.getBySprCode("2000001/2").size should be (1)
+		studentCourseDetailsDao.getBySprCode("2000001/3").size should be (1)
 		session.flush
 
 		val stu1_scd3 = Fixtures.studentCourseDetails(stu1, dept1, null, "2000001/3")
-		stu1_scd3.sprCode = "2000001/2"
+		stu1_scd3.sprCode = "2000001/3"
 		session.flush
 
-		studentCourseDetailsDao.getBySprCode("2000001/2").size should be (2)
+		studentCourseDetailsDao.getBySprCode("2000001/3").size should be (2)
 
 		val stu2 = Fixtures.student(universityId = "2000002", userId="student", department=dept2, courseDepartment=dept2)
 
@@ -90,9 +90,9 @@ class StudentCourseDetailsDaoTest extends PersistenceTestBase with Logging with 
 
 		session.flush()
 
-		studentCourseDetailsDao.getBySprCode("2000001/1").head.department should be (dept1)
-		studentCourseDetailsDao.getBySprCode("2000001/1").head.student.universityId should be ("2000001")
-		studentCourseDetailsDao.getStudentBySprCode("2000001/1").get.universityId should be ("2000001")
+		studentCourseDetailsDao.getBySprCode("2000001/2").head.department should be (dept1)
+		studentCourseDetailsDao.getBySprCode("2000001/2").head.student.universityId should be ("2000001")
+		studentCourseDetailsDao.getStudentBySprCode("2000001/2").get.universityId should be ("2000001")
 	}
 
 

@@ -11,11 +11,11 @@ import java.sql.Types
 
 @Entity
 class MeetingRecordApproval extends GeneratedId  {
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "meetingrecord_id")
 	var meetingRecord: MeetingRecord = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="approver_id")
 	var approver: Member = _
 

@@ -55,8 +55,7 @@ class MeetingRecordApprovalNotificationTest extends TestBase with Mockito {
 			meeting.meetingDate = new DateTime(2013, DateTimeConstants.DECEMBER, 5, 12, 0, 0, 0)
 			
 			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-			meeting.relationship = StudentRelationship(agent.universityId, relationshipType, student.mostSignificantCourseDetails.get.sprCode)
-			meeting.relationship.profileService = profileService
+			meeting.relationship = StudentRelationship(agent, relationshipType, student)
 			
 			val notification = new MeetingRecordApprovalNotification(meeting, "create")
 			notification.freemarker = freeMarkerConfig
