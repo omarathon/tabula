@@ -85,7 +85,14 @@ trait FiltersStudents extends FiltersStudentsBase with ProfileServiceComponent w
 			inIfNotEmpty(
 				"moduleRegistration.module", modules.asScala,
 				AliasPaths("moduleRegistration") : _*
+			),
+
+			// Tier 4 status
+			inIfNotEmpty(
+				"studentCourseYearDetails.casUsed", tier4Statuses.asScala,
+				AliasPaths("studentCourseYearDetails") : _*
 			)
+
 		).flatten
 	}
 
@@ -97,6 +104,6 @@ trait FiltersStudents extends FiltersStudentsBase with ProfileServiceComponent w
 	lazy val allYearsOfStudy: Seq[Int] = 1 to 8
 	lazy val allSprStatuses: Seq[SitsStatus] = profileService.allSprStatuses(mandatory(department).rootDepartment)
 	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = profileService.allModesOfAttendance(mandatory(department))
-
+	lazy val allTier4Statuses: Seq[Boolean] = Seq(true, false)
 
 }
