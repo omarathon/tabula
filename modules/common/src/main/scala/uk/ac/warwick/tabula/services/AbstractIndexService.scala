@@ -104,12 +104,18 @@ abstract class AbstractIndexService[A]
 	// largest batch of items we'll load in at once during scheduled incremental index.
 	val IncrementalBatchSize: Int
 
+	var indexPath: File
+	val analyzer: Analyzer
+	val UpdatedDateField: String
+	val IdField: String
+
 	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
+	@Value("${tabula.yearZero}") var yearZero: Int = _
+
+	final val IndexReopenPeriodInSeconds = 20
 
 	// Are we indexing now?
 	var indexing: Boolean = false
-
-	var indexPath: File
 
 	var lastIndexTime: Option[DateTime] = None
 	var lastIndexDuration: Option[Duration] = None
@@ -117,24 +123,7 @@ abstract class AbstractIndexService[A]
 	// HFC-189 Reopen index every 2 minutes, even if not the indexing instance.
 	val executor: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 
-	/**
-	 * Wrapper around the indexing code so that it is only running once.
-	 * If it's already running, the code is skipped.
-	 * We only try indexing once a minute so thmiere's no need to bother about
-	 * tight race conditions here.
-	 */
-	def ifNotIndexing(work: => Unit) =
-		if (indexing)
-			logger.info("Skipped indexing because the indexer is already/still running.")
-		else
-			try { indexing = true; work }
-			finally indexing = false
-
-	val analyzer: Analyzer
 	lazy val indexAnalyzer = analyzer
-
-	// QueryParser isn't thread safe, hence why this is a def
-	def parser = new QueryParser(LuceneVersion, "", analyzer)
 
 	/**
 	 * When an index run finishes, we note down the date of the newest item,
@@ -142,7 +131,23 @@ abstract class AbstractIndexService[A]
 	 */
 	var mostRecentIndexedItem: Option[DateTime] = None
 
-	final val IndexReopenPeriodInSeconds = 20
+	/**
+		* Wrapper around the indexing code so that it is only running once.
+	 * If it's already running, the code is skipped.
+	 * We only try indexing once a minute so thmiere's no need to bother about
+	 * tight race conditions here.
+	 */
+	def ifNotIndexing(work: => Unit) =
+		if (indexing) {
+			logger.info("Skipped indexing because the indexer is already/still running.")
+		} else {
+			try { indexing = true; work }
+			finally indexing = false
+		}
+
+	// QueryParser isn't thread safe, hence why this is a def
+	def parser = new QueryParser(LuceneVersion, "", analyzer)
+
 
 	override def afterPropertiesSet {
 		if (!indexPath.exists) {
@@ -240,9 +245,6 @@ abstract class AbstractIndexService[A]
 
 	protected def getUpdatedDate(item: A): DateTime
 
-	val UpdatedDateField: String
-
-	@Value("${tabula.yearZero}") var yearZero: Int = _
 
 	/**
 	 * Either get the date of the most recent item we've process in this JVM
@@ -266,8 +268,6 @@ abstract class AbstractIndexService[A]
 	 */
 	def documentValue(doc: Option[Document], key: String): Option[String] = doc.flatMap { _.getValues(key).headOption }
 	def documentValue(doc: Document, key: String): Option[String] = doc.getValues(key).headOption
-
-	val IdField: String
 
 	/**
 	 * If an existing Document is in the index with this term, it
