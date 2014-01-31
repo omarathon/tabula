@@ -1,5 +1,8 @@
 <@attendance_macros.academicYearSwitcher thisPath command.academicYear command.thisAcademicYear />
 
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<div id="profile-modal" class="modal fade profile-subset"></div>
+
 <div class="scrollable-points-table">
 	<div class="row">
 		<div class="left">
@@ -16,7 +19,7 @@
 				<#list students as studentData>
 				<tr class="student">
 					<td class="fname" title="${studentData.student.firstName}">${studentData.student.firstName}</td>
-					<td class="lname" title="${studentData.student.lastName}">${studentData.student.lastName}</td>
+					<td class="lname" title="${studentData.student.lastName}">${studentData.student.lastName}&nbsp;<@pl.profile_link studentData.student /></td>
 					<td class="id"><a class="profile-link" href="<@routes.profile studentData.student />">${studentData.student.universityId}</a></td>
 				</tr>
 				</#list>

@@ -1,6 +1,9 @@
 <#import "*/modal_macros.ftl" as modal />
 <#import "../attendance_macros.ftl" as attendance_macros />
 
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<div id="profile-modal" class="modal fade profile-subset"></div>
+
 <#assign titleHeader>
 <h1>Record attendance</h1>
 <h6><span class="muted">for</span> ${command.templateMonitoringPoint.name}</h6>
@@ -170,7 +173,7 @@
 							<@fmt.member_photo student "tinythumbnail" true />
 						</#if>
 						</div>
-						${student.fullName}
+						${student.fullName}&nbsp;<@pl.profile_link student />
 						<@spring.bind path="command.studentsState[${student.universityId}][${point.id}]">
 							<#if status.error>
 								<div class="text-error"><@f.errors path="command.studentsState[${student.universityId}][${point.id}]" cssClass="error"/></div>

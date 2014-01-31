@@ -3,6 +3,7 @@
 <#escape x as x?html>
 
 <div id="feedback-modal" class="modal fade"></div>
+<div id="profile-modal" class="modal fade profile-subset"></div>
 
 <div class="fixed-container">
 	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>

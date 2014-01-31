@@ -67,6 +67,9 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
+
+<div id="profile-modal" class="modal fade profile-subset"></div>
+
 	<h1>Feedback for ${assignment.name}</h1>
 	<p>You are the <#if isFirstMarker>${firstMarkerRoleName}<#else>${secondMarkerRoleName}</#if> for the following submissions</p>
 	<div class="btn-toolbar">

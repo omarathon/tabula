@@ -6,6 +6,8 @@
 <#assign time_remaining=durationFormatter(assignment.closeDate) />
 <#assign deptName=(module.department.name)!"this deparment" />
 
+<div id="profile-modal" class="modal fade profile-subset"></div>
+
 <div>
     <h1>Grant extensions</h1>
 	<h5><span class="muted">for</span> ${assignment.name}</h5>
