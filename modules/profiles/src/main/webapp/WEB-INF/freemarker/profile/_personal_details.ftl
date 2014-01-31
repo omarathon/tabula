@@ -27,17 +27,17 @@
 						</tr>
 					</#if>
 
-					<#if profile.nationality??>
-						<tr>
-							<th>Nationality</th>
-							<td><@fmt.nationality profile.nationality?default('Unknown') /></td>
-						</tr>
-					</#if>
-
 					<#if profile.dateOfBirth??>
 						<tr>
 							<th>Date of birth</th>
 							<td><@warwick.formatDate value=profile.dateOfBirth.toDateTimeAtStartOfDay() pattern="dd/MM/yyyy" /></td>
+						</tr>
+					</#if>
+
+					<#if profile.nationality??>
+						<tr>
+							<th>Nationality</th>
+							<td><@fmt.nationality profile.nationality?default('Unknown') /></td>
 						</tr>
 					</#if>
 
@@ -62,7 +62,8 @@
 						</tr>
 					</#if>
 
-					<#if profile.tier4VisaRequirement??>
+
+					<#if profile.tier4VisaRequirement?? && features.visaInStudentProfile>
 						<tr>
 							<th>Nationality requires visa</th>
 							<#if profile.tier4VisaRequirement>
@@ -70,7 +71,7 @@
 								</tr>
 								<#if profile.casUsed??>
 									<tr>
-										<th>CAS used to obtain visa</th>
+										<th>Tier 4 visa</th>
 										<#if profile.casUsed>
 											<td>Yes</td>
 										<#else>
@@ -78,6 +79,7 @@
 										</#if>
 									</tr>
 								</#if>
+
 							<#else>
 								<td>No</td>
 								</tr>

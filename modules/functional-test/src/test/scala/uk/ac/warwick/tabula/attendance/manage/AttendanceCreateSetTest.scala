@@ -23,7 +23,8 @@ class AttendanceCreateSetTest extends AttendanceFixture with GivenWhenThen{
 		className("routeAndYearPicker").webElement.findElement(By.className("collapsible-target")).isDisplayed should be (true)
 
 		And("I can choose a year of a route")
-		click on cssSelector(".scroller table td.year_1 input[type=checkbox]")
+				
+		click on cssSelector(".scroller table td.year_2 input[type=checkbox]")
 		className("routes-count").webElement.getText should be ("is 1 route")
 
 		And("I can add a new point")
@@ -39,6 +40,7 @@ class AttendanceCreateSetTest extends AttendanceFixture with GivenWhenThen{
 		pressKeys("Point 1")
 		singleSel("validFromWeek").value = "1"
 		singleSel("requiredFromWeek").value = "2"
+			
 		click on cssSelector(".modal-footer button.btn-primary")
 
 		eventuallyAjax {

@@ -1,36 +1,44 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.data.model.{FileAttachment, StudentMember}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, MonitoringPointAttendanceNote, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.{AbsenceType, FileAttachment, StudentMember}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPointAttendanceNote, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, FileAttachmentServiceComponent, AutowiringFileAttachmentServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.CurrentUser
 import org.joda.time.DateTime
-import org.springframework.validation.BindingResult
+import org.springframework.validation.{Errors, BindingResult}
 import uk.ac.warwick.tabula.system.BindListener
+import java.lang.IllegalArgumentException
 
 object EditAttendanceNoteCommand {
-	def apply(student: StudentMember, monitoringPoint: MonitoringPoint, user: CurrentUser) =
-		new EditAttendanceNoteCommand(student, monitoringPoint, user)
+	def apply(student: StudentMember, monitoringPoint: MonitoringPoint, user: CurrentUser, customStateStringOption: Option[String]) =
+		new EditAttendanceNoteCommand(student, monitoringPoint, user, customStateStringOption)
 		with ComposableCommand[MonitoringPointAttendanceNote]
 		with AttendanceNotePermissions
 		with AttendanceNoteDescription
+		with AttendanceNoteValidation
 		with AttendanceNoteCommandState
 		with AutowiringMonitoringPointServiceComponent
 		with AutowiringFileAttachmentServiceComponent
 		with AutowiringProfileServiceComponent
 }
 
-abstract class EditAttendanceNoteCommand(val student: StudentMember, val monitoringPoint: MonitoringPoint, val user: CurrentUser)
-	extends CommandInternal[MonitoringPointAttendanceNote] with PopulateOnForm with BindListener with AttendanceNoteCommandState with CheckpointUpdatedDescription {
+abstract class EditAttendanceNoteCommand(
+	val student: StudentMember,
+	val monitoringPoint: MonitoringPoint,
+	val user: CurrentUser,
+	val customStateStringOption: Option[String]
+)	extends CommandInternal[MonitoringPointAttendanceNote] with PopulateOnForm with BindListener
+	with AttendanceNoteCommandState with CheckpointUpdatedDescription {
 
 	self: MonitoringPointServiceComponent with FileAttachmentServiceComponent with ProfileServiceComponent =>
 
 	def populate() = {
 		note = attendanceNote.note
 		attachedFile = attendanceNote.attachment
+		absenceType = attendanceNote.absenceType
 	}
 
 	def onBind(result: BindingResult) {
@@ -44,6 +52,14 @@ abstract class EditAttendanceNoteCommand(val student: StudentMember, val monitor
 		})
 		checkpoint = monitoringPointService.getCheckpoint(student, monitoringPoint).getOrElse(null)
 		checkpointDescription = Option(checkpoint).map{ checkpoint => describeCheckpoint(checkpoint)}.getOrElse("")
+		customStateStringOption.map(stateString => {
+			try {
+				customState = AttendanceState.fromCode(stateString)
+			} catch {
+				case _: IllegalArgumentException =>
+			}
+		})
+
 	}
 
 	def applyInternal() = {
@@ -59,10 +75,21 @@ abstract class EditAttendanceNoteCommand(val student: StudentMember, val monitor
 			attendanceNote.attachment.temporary = false
 		}
 
+		attendanceNote.absenceType = absenceType
 		attendanceNote.updatedBy = user.apparentId
 		attendanceNote.updatedDate = DateTime.now
 		monitoringPointService.saveOrUpdate(attendanceNote)
 		attendanceNote
+	}
+}
+
+trait AttendanceNoteValidation extends SelfValidating {
+	self: AttendanceNoteCommandState =>
+
+	override def validate(errors: Errors) = {
+		if (absenceType == null) {
+			errors.rejectValue("absenceType", "attendanceNote.absenceType.empty")
+		}
 	}
 }
 
@@ -98,8 +125,10 @@ trait AttendanceNoteCommandState {
 	var note: String = _
 	var file: UploadedFile = new UploadedFile
 	var attachedFile: FileAttachment = _
+	var absenceType: AbsenceType = _
 
 	var isNew: Boolean = false
 	var checkpoint: MonitoringCheckpoint = _
 	var checkpointDescription: String = ""
+	var customState: AttendanceState = _
 }

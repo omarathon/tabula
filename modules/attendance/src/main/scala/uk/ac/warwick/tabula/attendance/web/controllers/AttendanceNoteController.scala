@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.attendance.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.StudentMember
+import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
+import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointAttendanceNote, MonitoringPoint}
-import uk.ac.warwick.tabula.commands.{ApplyWithCallback, PopulateOnForm, Appliable}
+import uk.ac.warwick.tabula.commands.{SelfValidating, ApplyWithCallback, PopulateOnForm, Appliable}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.commands.{CheckpointUpdatedDescription, AttendanceNoteAttachmentCommand, EditAttendanceNoteCommand}
 import uk.ac.warwick.tabula.attendance.web.Routes
@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.services.fileserver.{FileServer, RenderableFile}
 import org.springframework.beans.factory.annotation.Autowired
 import uk.ac.warwick.tabula.services.{ProfileService, MonitoringPointService}
 import uk.ac.warwick.tabula.helpers.DateBuilder
+import javax.validation.Valid
 
 @Controller
 @RequestMapping(Array("/note/{student}/{monitoringPoint}"))
@@ -66,9 +67,15 @@ class AttendanceNoteAttachmentController extends AttendanceController {
 @RequestMapping(Array("/note/{student}/{monitoringPoint}/edit"))
 class EditAttendanceNoteController extends AttendanceController {
 
+	validatesSelf[SelfValidating]
+
 	@ModelAttribute("command")
-	def command(@PathVariable student: StudentMember, @PathVariable monitoringPoint: MonitoringPoint) =
-		EditAttendanceNoteCommand(student, monitoringPoint, user)
+	def command(
+		@PathVariable student: StudentMember,
+		@PathVariable monitoringPoint: MonitoringPoint,
+		@RequestParam(value="state", required=false) state: String
+	) =
+		EditAttendanceNoteCommand(student, monitoringPoint, user, Option(state))
 
 	@RequestMapping(method=Array(GET, HEAD), params=Array("isIframe"))
 	def getIframe(
@@ -94,6 +101,7 @@ class EditAttendanceNoteController extends AttendanceController {
 		isIframe: Boolean = false
 	) = {
 		val mav = Mav("home/edit_note",
+			"allAbsenceTypes" -> AbsenceType.values,
 			"returnTo" -> getReturnTo(Routes.department.viewStudent(currentMember.homeDepartment, student)),
 			"isModal" -> ajax,
 			"isIframe" -> isIframe
@@ -108,21 +116,21 @@ class EditAttendanceNoteController extends AttendanceController {
 
 	@RequestMapping(method=Array(POST), params=Array("isIframe"))
 	def submitIframe(
-		@ModelAttribute("command") cmd: Appliable[MonitoringPointAttendanceNote] with PopulateOnForm,
+		@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPointAttendanceNote] with PopulateOnForm,
 		errors: Errors,
 		@PathVariable student: StudentMember
 	) = {
 		if (errors.hasErrors) {
-			form(cmd, student)
+			form(cmd, student, true)
 		} else {
 			cmd.apply()
-			Mav("home/edit_note", "success" -> true, "isIframe" -> true)
+			Mav("home/edit_note", "success" -> true, "isIframe" -> true, "allAbsenceTypes" -> AbsenceType.values)
 		}
 	}
 
 	@RequestMapping(method=Array(POST))
 	def submit(
-		@ModelAttribute("command") cmd: Appliable[MonitoringPointAttendanceNote] with PopulateOnForm,
+		@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPointAttendanceNote] with PopulateOnForm,
 		errors: Errors,
 		@PathVariable student: StudentMember
 	) = {
