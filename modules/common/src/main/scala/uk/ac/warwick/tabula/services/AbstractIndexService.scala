@@ -2,42 +2,32 @@ package uk.ac.warwick.tabula.services
 
 import java.io.File
 import java.io.FileNotFoundException
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import org.apache.lucene.analysis._
 import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
-import org.apache.lucene.index.FieldInfo.IndexOptions
 import org.apache.lucene.index._
 import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search._
-import org.apache.lucene.store.FSDirectory
+import org.apache.lucene.store.{Directory, FSDirectory}
 import org.apache.lucene.util.Version
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.Stopwatches._
 import uk.ac.warwick.tabula.helpers._
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-import uk.ac.warwick.userlookup.User
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import org.springframework.beans.factory.DisposableBean
-import org.apache.lucene.analysis.core._
-import org.apache.lucene.analysis.miscellaneous._
-import uk.ac.warwick.spring.Wire
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import scala.collection.GenTraversableOnce
-import language.implicitConversions
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import language.implicitConversions
 
 trait CommonQueryMethods[A] extends TaskBenchmarking { self: AbstractIndexService[A] =>
 
@@ -88,12 +78,20 @@ trait RichSearchResultsCreator {
 
 object RichSearchResultsCreator extends RichSearchResultsCreator
 
+/** Trait for overriding in tests.
+	* @see RAMDirectoryOverride
+	*/
+trait OpensLuceneDirectory {
+	protected def openDirectory(): Directory
+}
+
 abstract class AbstractIndexService[A]
 		extends CommonQueryMethods[A]
 			with QueryHelpers[A]
 			with SearchHelpers[A]
 			with FieldGenerators
 			with RichSearchResultsCreator
+			with OpensLuceneDirectory
 			with InitializingBean
 			with Logging
 			with DisposableBean {
@@ -170,6 +168,8 @@ abstract class AbstractIndexService[A]
 		executor.shutdown()
 	}
 
+	protected override def openDirectory(): Directory = FSDirectory.open(indexPath)
+
 	/**
 	 * Incremental index. Can be run often.
 	 * Has a limit to how many items it will load at once, but subsequent indexes
@@ -217,7 +217,7 @@ abstract class AbstractIndexService[A]
 	private def doIndexItems(items: Seq[A], isIncremental: Boolean) {
 		logger.debug("Writing to the index at " + indexPath + " with analyzer " + indexAnalyzer)
 		val writerConfig = new IndexWriterConfig(LuceneVersion, indexAnalyzer)
-		closeThis(new IndexWriter(FSDirectory.open(indexPath), writerConfig)) { writer =>
+		closeThis(new IndexWriter(openDirectory(), writerConfig)) { writer =>
 			for (item <- items) {
 				if (isIncremental)
 					doUpdateMostRecent(item)
@@ -329,7 +329,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		if (searcherManager == null) {
 			try {
 				logger.debug("Opening a new searcher manager at " + indexPath)
-				searcherManager = new SearcherManager(FSDirectory.open(indexPath), null)
+				searcherManager = new SearcherManager(openDirectory(), null)
 			} catch {
 				case e: IndexNotFoundException => logger.warn("No index found.")
 			}
@@ -380,9 +380,9 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 
 			val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
 			val results =
-				if (sort == null) searcher.search(query, null, searcher.getIndexReader.maxDoc)
+				if (sort == null) searcher.search(query, null, offset+maxResults)
 				else if (searcher.getIndexReader.maxDoc <= 0) new TopDocs(0, Array(), 0f)
-				else searcher.search(query, null, searcher.getIndexReader.maxDoc, sort)
+				else searcher.search(query, null, offset+maxResults, sort)
 			transformResults(searcher, results, offset, maxResults)
 		}
 	}

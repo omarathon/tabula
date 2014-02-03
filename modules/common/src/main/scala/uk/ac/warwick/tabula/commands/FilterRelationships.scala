@@ -92,6 +92,6 @@ trait FiltersRelationships extends FiltersStudentsBase with ProfileServiceCompon
 	lazy val allYearsOfStudy: Seq[Int] = 1 to 8
 	lazy val allSprStatuses: Seq[SitsStatus] = allDepartments.map(dept => profileService.allSprStatuses(dept.rootDepartment)).flatten.distinct
 	lazy val allModesOfAttendance: Seq[ModeOfAttendance] = allDepartments.map(profileService.allModesOfAttendance(_)).flatten.distinct
-
+	lazy val allTier4Statuses: Seq[Boolean] = Seq(true, false)
 
 }
