@@ -41,14 +41,14 @@
 						</tr>
 					</#if>
 
-					<#if profile.disability?has_content>
+					<#if (profile.disability.definition)?trim?has_content>
 						<tr>
 							<th>Disability</th>
 							<td>
-								<a href="#" class="use-popover" id="popover-disability" data-html="true"
+								<a class="use-popover cue-popover" id="popover-disability" data-html="true"
 								   data-original-title="Disability"
-								   data-content="<p>This student has self-reported the following disability:</p><ul><li>${profile.disability.definition}</li></ul>">
-									${profile.disability.code}
+								   data-content="<p>This student has self-reported the following disability code:</p><div class='well'><h6>${profile.disability.code}</h6><small>${profile.disability.sitsDefinition}</small></div>">
+									${profile.disability.definition}
 								</a>
 							</td>
 						</tr>

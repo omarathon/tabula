@@ -39,11 +39,12 @@ trait ProfileService {
 	def findStaffMembersWithAssistant(user: User): Seq[StaffMember]
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def allSprStatuses(department: Department): Seq[SitsStatus]
+	def getDisability(code: String): Option[Disability]
 }
 
 abstract class AbstractProfileService extends ProfileService with Logging {
 
-	self: MemberDaoComponent 
+	self: MemberDaoComponent
 		with StudentCourseDetailsDaoComponent
 		with StaffAssistantsHelpers =>
 
@@ -220,14 +221,20 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 			memberDao.countStudentsByRestrictions(allRestrictions)
 		}
 	}
-	
+
 	def findStaffMembersWithAssistant(user: User) = staffAssistantsHelper.findBy(user)
 
 	def allModesOfAttendance(department: Department): Seq[ModeOfAttendance] = transactional(readOnly = true) {
 		memberDao.getAllModesOfAttendance(department).filter(_ != null)
 	}
+
 	def allSprStatuses(department: Department): Seq[SitsStatus] = transactional(readOnly = true) {
 		memberDao.getAllSprStatuses(department).filter(_ != null)
+	}
+
+	def getDisability(code: String): Option[Disability] = transactional(readOnly=true) {
+		// lookup disability iff a non-null code is passed, otherwise fallback to None - I <3 scala options and flatMap
+		Option(code).flatMap(memberDao.getDisability(_))
 	}
 }
 

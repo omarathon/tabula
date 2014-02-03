@@ -6,7 +6,7 @@ create table disability
 (	code nvarchar2(20) not null enable,
 	shortName nvarchar2(20),
 	sitsDefinition nvarchar2(300),
-	tabulaDefinition nvarchar(100),
+	tabulaDefinition nvarchar2(30),
 	lastUpdatedDate timestamp(6),
   constraint disability_pk primary key (code)
 );
@@ -16,7 +16,7 @@ update disability set tabulaDefinition = 'Learning difficulty' where code = '01'
 update disability set tabulaDefinition = 'Blind/vision impaired' where code = '02';
 update disability set tabulaDefinition = 'Deaf/hearing impaired' where code = '03';
 update disability set tabulaDefinition = 'Mobility issues' where code = '04';
-update disability set tabulaDefinition = 'Personal care support needs' where code = '05';
+update disability set tabulaDefinition = 'Personal care needs' where code = '05';
 update disability set tabulaDefinition = 'Mental health condition' where code = '06';
 update disability set tabulaDefinition = 'Unseen disability' where code = '07';
 update disability set tabulaDefinition = 'Multiple disabilities' where code = '08';
@@ -35,11 +35,11 @@ update disability set tabulaDefinition = 'Unclassified disability' where code = 
 update disability set tabulaDefinition = 'Multiple disabilities' where code = 'J';
 update disability set tabulaDefinition = 'Autistic Spectrum Disorder' where code = 'T';
 
-/* empty strings (deliberately not null) for things we consider to be NOT disabilities */
-update disability set tabulaDefinition = '' where code = '00';
-update disability set tabulaDefinition = '' where code = '97';
-update disability set tabulaDefinition = '' where code = '98';
-update disability set tabulaDefinition = '' where code = '99';
-update disability set tabulaDefinition = '' where code = 'A';
-update disability set tabulaDefinition = '' where code = 'N';
-update disability set tabulaDefinition = '' where code = 'W';
+/* whitespace-only strings (not null/empty string) for things we consider to be NOT disabilities */
+update disability set tabulaDefinition = ' ' where code = '00';
+update disability set tabulaDefinition = ' ' where code = '97';
+update disability set tabulaDefinition = ' ' where code = '98';
+update disability set tabulaDefinition = ' ' where code = '99';
+update disability set tabulaDefinition = ' ' where code = 'A';
+update disability set tabulaDefinition = ' ' where code = 'N';
+update disability set tabulaDefinition = ' ' where code = 'W';

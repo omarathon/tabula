@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.{Member, OtherMember, StudentMember, StudentProperties}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopying}
-import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, ModeOfAttendanceImporter, SitsAcademicYearAware}
+import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, ModeOfAttendanceImporter}
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.scheduling.services.Tier4RequirementImporter
@@ -40,6 +40,9 @@ class ImportStudentRowCommand(val member: MembershipInformation,
 
 	this.nationality = rs.getString("nationality")
 	this.mobileNumber = rs.getString("mobile_number")
+
+	// set appropriate disability object iff a non-null code is retrieved - I <3 scala options
+	profileService.getDisability(rs.getString("disability")).foreach(this.disability = _)
 
 	override def applyInternal(): Member = {
 		transactional() {

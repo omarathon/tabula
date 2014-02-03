@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula.data.model
 
 import org.joda.time.DateTime
-import javax.persistence.{Column, Entity, Id}
+import javax.persistence.{Entity, Id}
 
 @Entity
 class Disability {
-
 	def this(code: String = null, definition: String = null) {
 		this()
 		this.code = code
