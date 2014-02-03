@@ -1,13 +1,14 @@
 package uk.ac.warwick.tabula.data
 
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.{MeetingRecordApproval, MeetingRecord, StudentRelationship, Member}
+import uk.ac.warwick.tabula.data.model.{ScheduledMeetingRecord, MeetingRecordApproval, MeetingRecord, StudentRelationship, Member}
 import org.hibernate.criterion.{Restrictions,Order}
 import scala.collection.JavaConversions._
 import uk.ac.warwick.spring.Wire
 
 trait MeetingRecordDao {
 	def saveOrUpdate(meeting: MeetingRecord)
+	def saveOrUpdate(scheduledMeeting: ScheduledMeetingRecord)
 	def saveOrUpdate(approval: MeetingRecordApproval)
 	def list(rel: Set[StudentRelationship], currentUser: Member): Seq[MeetingRecord]
 	def list(rel: StudentRelationship): Seq[MeetingRecord]
@@ -18,6 +19,8 @@ trait MeetingRecordDao {
 class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 
 	def saveOrUpdate(meeting: MeetingRecord) = session.saveOrUpdate(meeting)
+
+	def saveOrUpdate(scheduledMeeting: ScheduledMeetingRecord) = session.saveOrUpdate(scheduledMeeting)
 
 	def saveOrUpdate(approval: MeetingRecordApproval) = session.saveOrUpdate(approval)
 
