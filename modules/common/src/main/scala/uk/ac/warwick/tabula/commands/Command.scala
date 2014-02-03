@@ -123,7 +123,7 @@ abstract class PromisingCommand[A] extends Command[A] with Promise[A] {
 }
 
 object Command {
-	val MillisToSlowlog = 500
+	val MillisToSlowlog = 5000
 	val slowLogger = Logger.getLogger("uk.ac.warwick.tabula.Command.SLOW_LOG")
 	
 	// TODO this will break if we start doing stuff in parallols
