@@ -165,7 +165,8 @@ class SandboxProfileImporter extends ProfileImporter {
 			"sce_academic_year" -> AcademicYear.guessByDate(DateTime.now).toString,
 			"sce_sequence_number" -> 1,
 			"enrolment_department_code" -> member.departmentCode.toUpperCase,
-			"mod_reg_status" -> "CON"
+			"mod_reg_status" -> "CON",
+			"disability" -> "A"
 		))
 		ImportStudentRowCommand(
 			mac,
