@@ -44,7 +44,7 @@ trait CommonQueryMethods[A] extends TaskBenchmarking { self: AbstractIndexServic
 				max = count
 			)
 		}
-		benchmarkTask("Transform documents to items") { docs.transform { toItem(_) } }
+		benchmarkTask("Transform documents to items") { docs.transformAll { docs => toItems(docs) } }
 	}
 
 }
@@ -68,7 +68,8 @@ trait QueryHelpers[A] { self: AbstractIndexService[A] =>
 
 class RichSearchResults(seq: Seq[Document]) {
 	def first = seq.headOption
-	def transform[A](f: Document => GenTraversableOnce[A]) = seq.flatMap(f)
+	def transform[A](f: Document => Option[A]): Seq[A] = seq.map(f).flatten
+	def transformAll[A](f: Seq[Document] => Seq[A]): Seq[A] = f(seq)
 	def size = seq.size
 }
 
@@ -282,7 +283,7 @@ abstract class AbstractIndexService[A]
 	protected def toDocument(item: A): Document
 
 	protected def toId(doc: Document) = documentValue(doc, IdField)
-	protected def toItem(doc: Document): Option[A]
+	protected def toItems(docs: Seq[Document]): Seq[A]
 
 }
 
