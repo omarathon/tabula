@@ -41,7 +41,7 @@
 						</tr>
 					</#if>
 
-					<#if (profile.disability.definition)?trim?has_content>
+					<#if (profile.disability.reportable)!false>
 						<tr>
 							<th>Disability</th>
 							<td>

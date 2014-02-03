@@ -7,25 +7,30 @@ import org.springframework.beans.BeanWrapperImpl
 import org.springframework.transaction.annotation.Transactional
 
 import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.tabula.data.{FileDao, MemberDao, MemberDaoComponent, ModeOfAttendanceDao, SitsStatusDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
-import uk.ac.warwick.tabula.data.model.{Course, Department, FileAttachment}
-import uk.ac.warwick.tabula.data.model.{ModeOfAttendance, Route, SitsStatus, StaffMember, StudentCourseDetails, StudentCourseYearDetails, StudentMember, StudentRelationshipSource, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.{FileDao, MemberDao, ModeOfAttendanceDao, SitsStatusDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.Gender.Male
-import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 import uk.ac.warwick.tabula.scheduling.services._
-import uk.ac.warwick.tabula.services.{CourseAndRouteService, MaintenanceModeService, ModuleAndDepartmentService, ProfileService, RelationshipService}
+import uk.ac.warwick.tabula.services.{CourseAndRouteService, MaintenanceModeService, ModuleAndDepartmentService, ProfileService, ProfileServiceComponent, RelationshipService}
 import uk.ac.warwick.userlookup.AnonymousUser
-
+import uk.ac.warwick.tabula.scheduling.services.MembershipMember
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 
 // scalastyle:off magic.number
 class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	EventHandling.enabled = false
 
-	trait Environment {
+	trait ComponentMixins extends ProfileServiceComponent with Tier4RequirementImporterComponent	with ModeOfAttendanceImporterComponent {
+		var profileService = smartMock[ProfileService]
+		var tier4RequirementImporter = smartMock[Tier4RequirementImporter]
+		var modeOfAttendanceImporter = smartMock[ModeOfAttendanceImporter]
+	}
+
+	trait Environment extends ComponentMixins {
 
 		val memberDao = smartMock[MemberDao]
 		val moaDao = smartMock[ModeOfAttendanceDao]
@@ -35,6 +40,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		val studentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
 
 		val relationshipService = smartMock[RelationshipService]
+		relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
+
+		val disabilityQ = new Disability("Q", "Test disability")
 
 		val department = new Department
 		department.code = "ph"
@@ -46,13 +54,10 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		var maintenanceModeService = smartMock[MaintenanceModeService]
 		maintenanceModeService.enabled returns false
 
-		val profileService = smartMock[ProfileService]
-
 		val courseAndRouteService = smartMock[CourseAndRouteService]
 		val route = smartMock[Route]
 		courseAndRouteService.getRouteByCode("c100") returns (Some(route))
 
-		val modeOfAttendanceImporter = smartMock[ModeOfAttendanceImporter]
 		modeOfAttendanceImporter.modeOfAttendanceMap returns Map(
 					"F" -> new ModeOfAttendance("F", "FT", "Full Time"),
 					"P" -> new ModeOfAttendance("P", "PT", "Part Time")
@@ -96,8 +101,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rs.getString("mode_of_attendance_code") returns ("P")
 		rs.getString("sce_academic_year") returns ("10/11")
 		rs.getString("most_signif_indicator") returns ("Y")
-		rs.getString("mod_reg_status") returns "CON"
-		rs.getString("course_code") returns "UESA-H612"
+		rs.getString("mod_reg_status") returns ("CON")
+		rs.getString("course_code") returns ("UESA-H612")
+		rs.getString("disability") returns ("Q")
 
 		val mm = MembershipMember(
 			universityId 			= "0672089",
@@ -143,14 +149,21 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		courseCommand.courseImporter = courseImporter
 		courseCommand.stuMem = smartMock[StudentMember]
 
-		val rowCommand = new ImportStudentRowCommand(mac, new AnonymousUser(), rs, new ImportRowTracker, courseCommand)
+		val rowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), rs, new ImportRowTracker, courseCommand)
+			with ComponentMixins
 		rowCommand.memberDao = memberDao
 		rowCommand.fileDao = fileDao
 		rowCommand.moduleAndDepartmentService = modAndDeptService
 
-		val requirementImporter = smartMock[Tier4RequirementImporter]
-		requirementImporter.hasTier4Requirement("0672089") returns (false)
-		rowCommand.tier4RequirementImporter = requirementImporter
+		// only return a known disability for code Q
+		profileService.getDisability(any[String]) returns (None)
+		profileService.getDisability("Q") returns (Some(disabilityQ))
+		rowCommand.profileService = profileService
+
+		tier4RequirementImporter.hasTier4Requirement("0672089") returns (false)
+		rowCommand.tier4RequirementImporter = tier4RequirementImporter
+
+
 	}
 
 	@Test def testImportStudentCourseYearCommand {
@@ -347,6 +360,18 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentMember.mostSignificantCourseDetails should not be (null)
 
 			there was one(relationshipService).replaceStudentRelationships(tutorRelationshipType, "0672089/2", Seq("0070790"))
+		}
+	}
+
+	@Test def testDisabilityHandling {
+		new Environment {
+			var student = rowCommand.applyInternal().asInstanceOf[StudentMember]
+			student.disability should be (disabilityQ)
+
+			// override to test for attempted import of unknown disability
+			rs.getString("disability") returns ("Mystery")
+			student = rowCommand.applyInternal().asInstanceOf[StudentMember]
+			student.disability should be (null)
 		}
 	}
 }

@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.data.model.{DegreeType, Department, Gender, Member, 
 import uk.ac.warwick.tabula.data.model.MemberUserType.{Emeritus, Other, Staff, Student}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.sandbox.{MapResultSet, SandboxData}
-import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportMemberCommand, ImportStaffMemberCommand, ImportStudentCourseCommand, ImportStudentCourseYearCommand, ImportStudentRowCommand, ImportSupervisorsForStudentCommand}
+import uk.ac.warwick.tabula.scheduling.commands.imports._
 import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 import uk.ac.warwick.userlookup.User
 
@@ -167,7 +167,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			"enrolment_department_code" -> member.departmentCode.toUpperCase,
 			"mod_reg_status" -> "CON"
 		))
-		new ImportStudentRowCommand(
+		ImportStudentRowCommand(
 			mac,
 			ssoUser,
 			rs,
@@ -395,13 +395,13 @@ object ProfileImporter {
 		"""
 
 	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User, importRowTracker: ImportRowTracker)
-		extends MappingSqlQuery[ImportStudentRowCommand](ds, GetStudentInformation) {
+		extends MappingSqlQuery[ImportStudentRowCommandInternal](ds, GetStudentInformation) {
 		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 		declareParameter(new SqlParameter("year", Types.VARCHAR))
 		compile()
 
 		override def mapRow(rs: ResultSet, rowNumber: Int)
-			= new ImportStudentRowCommand(
+			= ImportStudentRowCommand(
 				member,
 				ssoUser,
 				rs,

@@ -23,7 +23,7 @@ class ImportDisabilitiesCommand(info: DisabilityInfo)
 
 	var code = info.code
 	var shortName = info.shortName
-	var definition = info.definition
+	var sitsDefinition = info.definition
 
 	override def applyInternal(): (Disability, ImportAcademicInformationCommand.ImportResult) = transactional() {
 		val disabilityExisting = disabilityDao.getByCode(code)
@@ -55,7 +55,7 @@ class ImportDisabilitiesCommand(info: DisabilityInfo)
 	}
 
 	private val properties = Set(
-		"code", "shortName", "definition"
+		"code", "shortName", "sitsDefinition"
 	)
 
 	override def describe(d: Description) = d.property("shortName" -> shortName)

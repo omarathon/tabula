@@ -12,34 +12,34 @@ create table disability
 );
 
 /* set our own consistent text for disabilities on which we want to report */
-update disability set tabulaDefinition = 'Learning difficulty' where code = '01';
-update disability set tabulaDefinition = 'Blind/vision impaired' where code = '02';
-update disability set tabulaDefinition = 'Deaf/hearing impaired' where code = '03';
-update disability set tabulaDefinition = 'Mobility issues' where code = '04';
-update disability set tabulaDefinition = 'Personal care needs' where code = '05';
-update disability set tabulaDefinition = 'Mental health condition' where code = '06';
-update disability set tabulaDefinition = 'Unseen disability' where code = '07';
-update disability set tabulaDefinition = 'Multiple disabilities' where code = '08';
-update disability set tabulaDefinition = 'Unclassified disability' where code = '09';
-update disability set tabulaDefinition = 'Autistic Spectrum Disorder' where code = '10';
-update disability set tabulaDefinition = 'Learning difficulty' where code = '11';
-update disability set tabulaDefinition = 'Unclassified disability' where code = '96';
-update disability set tabulaDefinition = 'Autistic Spectrum Disorder' where code = 'B';
-update disability set tabulaDefinition = 'Blind/vision impaired' where code = 'C';
-update disability set tabulaDefinition = 'Deaf/hearing impaired' where code = 'D';
-update disability set tabulaDefinition = 'Long standing condition' where code = 'E';
-update disability set tabulaDefinition = 'Mental health condition' where code = 'F';
-update disability set tabulaDefinition = 'Learning difficulty' where code = 'G';
-update disability set tabulaDefinition = 'Mobility issues' where code = 'H';
-update disability set tabulaDefinition = 'Unclassified disability' where code = 'I';
-update disability set tabulaDefinition = 'Multiple disabilities' where code = 'J';
-update disability set tabulaDefinition = 'Autistic Spectrum Disorder' where code = 'T';
+insert into disability  (code, tabulaDefinition) values ('01', 'Learning difficulty');
+insert into disability  (code, tabulaDefinition) values ('02', 'Blind/vision impaired');
+insert into disability  (code, tabulaDefinition) values ('03', 'Deaf/hearing impaired');
+insert into disability  (code, tabulaDefinition) values ('04', 'Mobility issues');
+insert into disability  (code, tabulaDefinition) values ('05', 'Personal care needs');
+insert into disability  (code, tabulaDefinition) values ('06', 'Mental health condition');
+insert into disability  (code, tabulaDefinition) values ('07', 'Unseen disability');
+insert into disability  (code, tabulaDefinition) values ('08', 'Multiple disabilities');
+insert into disability  (code, tabulaDefinition) values ('09', 'Unclassified disability');
+insert into disability  (code, tabulaDefinition) values ('10', 'Autistic Spectrum Disorder');
+insert into disability  (code, tabulaDefinition) values ('11', 'Learning difficulty');
+insert into disability  (code, tabulaDefinition) values ('96', 'Unclassified disability');
+insert into disability  (code, tabulaDefinition) values ('B', 'Autistic Spectrum Disorder');
+insert into disability  (code, tabulaDefinition) values ('C', 'Blind/vision impaired');
+insert into disability  (code, tabulaDefinition) values ('D', 'Deaf/hearing impaired');
+insert into disability  (code, tabulaDefinition) values ('E', 'Long standing condition');
+insert into disability  (code, tabulaDefinition) values ('F', 'Mental health condition');
+insert into disability  (code, tabulaDefinition) values ('G', 'Learning difficulty');
+insert into disability  (code, tabulaDefinition) values ('H', 'Mobility issues');
+insert into disability  (code, tabulaDefinition) values ('I', 'Unclassified disability');
+insert into disability  (code, tabulaDefinition) values ('J', 'Multiple disabilities');
+insert into disability  (code, tabulaDefinition) values ('T', 'Autistic Spectrum Disorder');
 
-/* whitespace-only strings (not null/empty string) for things we consider to be NOT disabilities */
-update disability set tabulaDefinition = ' ' where code = '00';
-update disability set tabulaDefinition = ' ' where code = '97';
-update disability set tabulaDefinition = ' ' where code = '98';
-update disability set tabulaDefinition = ' ' where code = '99';
-update disability set tabulaDefinition = ' ' where code = 'A';
-update disability set tabulaDefinition = ' ' where code = 'N';
-update disability set tabulaDefinition = ' ' where code = 'W';
+/* use a ~magic string~ for things we consider to be NOT disabilities */
+insert into disability (code, tabulaDefinition) values ('00', 'NONE');
+insert into disability (code, tabulaDefinition) values ('97', 'NONE');
+insert into disability (code, tabulaDefinition) values ('98', 'NONE');
+insert into disability (code, tabulaDefinition) values ('99', 'NONE');
+insert into disability (code, tabulaDefinition) values ('A', 'NONE');
+insert into disability (code, tabulaDefinition) values ('N', 'NONE');
+insert into disability (code, tabulaDefinition) values ('W', 'NONE');

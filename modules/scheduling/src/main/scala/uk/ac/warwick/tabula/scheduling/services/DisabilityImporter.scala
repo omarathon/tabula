@@ -74,9 +74,9 @@ object SitsDisabilityImporter {
 		override def mapRow(resultSet: ResultSet, rowNumber: Int) =
 			new ImportDisabilitiesCommand(
 				DisabilityInfo(
-					code=resultSet.getString("dsb_code"),
-					shortName=resultSet.getString("dsb_snam"),
-					definition=resultSet.getString("dsb_name")
+					code = resultSet.getString("dsb_code"),
+					shortName = resultSet.getString("dsb_snam"),
+					definition = resultSet.getString("dsb_name")
 				)
 			)
 	}

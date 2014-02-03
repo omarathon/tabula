@@ -66,6 +66,6 @@ trait Tier4RequirementImporterComponent {
 	def tier4RequirementImporter: Tier4RequirementImporter
 }
 
-trait AutowiringTier4ImporterComponent extends Tier4RequirementImporterComponent{
+trait AutowiringTier4RequirementImporterComponent extends Tier4RequirementImporterComponent{
 	var tier4RequirementImporter = Wire[Tier4RequirementImporter]
 }

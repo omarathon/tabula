@@ -22,8 +22,9 @@ class ImportDisabilitiesCommandTest extends AppContextTestBase with Mockito with
 		val (disability, result) = command.applyInternal
 		disability.code should be ("72")
 		disability.shortName should be ("HERON")
-		disability.definition should be ("You spear fish like a demon, but struggle in academic environments")
+		disability.sitsDefinition should be ("You spear fish like a demon, but struggle in academic environments")
 		disability.lastUpdatedDate.dayOfMonth should be ((new DateTime).dayOfMonth)
+		disability.tabulaDefinition should be (null)
 		result should be (ImportAcademicInformationCommand.ImportResult(added = 1))
 	}
 }
