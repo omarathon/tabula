@@ -68,7 +68,7 @@ trait MemberDao {
 	def getAllModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def getAllSprStatuses(department: Department): Seq[SitsStatus]
 	
-	def getFreshUniversityIds: Seq[String]
+	def getFreshUniversityIds(): Seq[String]
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime)
 
 }
@@ -246,33 +246,25 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	}
 
 	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship[_]] = {
-		// order by agent to separate any named (external) from numeric (member) agents
-		// then by student properties
-		session.newQuery[StudentRelationship[_]]("""
-			select
-				distinct sr
-			from
-				StudentRelationship sr,
-				StudentCourseDetails scd
-			where
-				sr.studentCourseDetails = scd
-			and
-				sr.relationshipType = :relationshipType
-			and
-				scd.missingFromImportSince is null
-			and
-				scd.department = :department
-			and
-				scd.mostSignificant = true
-			and
-				scd.statusOnRoute.code not like 'P%'
-			and
-				(sr.endDate is null or sr.endDate >= SYSDATE)
-			order by
-				sr._agentMember, sr.studentCourseDetails
-		""")
-			.setEntity("department", department)
-			.setEntity("relationshipType", relationshipType)
+		// This eagerly fetches a few associations for the view-students-by-tutor page in Attendance Monitoring
+		// (/attendance/view/[dept]/agents/[reltype]) - TAB-1868
+
+		session.newCriteria[StudentRelationship[_]]
+			.createAlias("studentCourseDetails", "studentCourseDetails")
+			.createAlias("studentCourseDetails.student", "student")
+			.add(is("relationshipType", relationshipType))
+			.add(is("studentCourseDetails.department", department))
+			.add(isNull("studentCourseDetails.missingFromImportSince"))
+			.add(is("studentCourseDetails.mostSignificant", true))
+			.add(not(like("studentCourseDetails.statusOnRoute.code", "P%")))
+			.add(or(isNull("endDate"), ge("endDate", DateTime.now)))
+			.addOrder(asc("_agentMember"))
+			.addOrder(asc("studentCourseDetails"))
+			.setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
+			.setFetchMode("studentCourseDetails.route", FetchMode.JOIN)
+			.setFetchMode("studentCourseDetails.latestYearDetails", FetchMode.JOIN)
+			.setFetchMode("studentCourseDetails.latestYearDetails.enrolmentStatus", FetchMode.JOIN)
+			.setFetchMode("_agentMember", FetchMode.JOIN)
 			.seq
 	}
 
@@ -463,7 +455,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		universityIds.grouped(Daoisms.MaxInClauseCount).foreach { ids => or.add(in("universityId", ids)) }
 		c.add(or)
 
-		orders.foreach { c.addOrder(_) }
+		orders.foreach { c.addOrder }
 
 		c.setMaxResults(maxResults).setFirstResult(startResult).distinct.seq
 	}
@@ -535,7 +527,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				session.newQuery(sqlString)
 					.setParameter("importStart", importStart)
 					.setParameterList("newStaleUniversityIds", staleIds)
-					.executeUpdate
+					.executeUpdate()
 			}
 	}
 }

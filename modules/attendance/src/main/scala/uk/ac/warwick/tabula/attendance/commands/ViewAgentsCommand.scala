@@ -45,7 +45,7 @@ class ViewAgentsCommand(val department: Department, val relationshipType: Studen
 		val currentAcademicWeek = benchmarkTask("Get current academic week") { termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear) }
 
 		benchmarkTask("Group points by agent to get results") {
-			relationships.groupBy(_.agent).map{case(agent, agentRelationships) => {
+			relationships.groupBy(_.agent).map { case(agent, agentRelationships) =>
 				val counts = agentRelationships.flatMap(_.studentMember).map{ student =>
 					pointSetsByStudent.get(student).map{ pointSet =>
 						val studentCheckpoints = pointSet.points.asScala.map{ point => {
@@ -64,8 +64,8 @@ class ViewAgentsCommand(val department: Department, val relationshipType: Studen
 				}
 				val unrecorded = counts.map(_._1).sum
 				val missed = counts.map(_._2).sum
-				ViewAgentsResult(agent, agentRelationships.head.agentMember, Nil/*agentRelationships.flatMap(_.studentMember)*/, unrecorded, missed)
-			}}.toSeq
+				ViewAgentsResult(agent, agentRelationships.head.agentMember, agentRelationships.flatMap(_.studentMember), unrecorded, missed)
+			}.toSeq
 		}
 	}
 }
