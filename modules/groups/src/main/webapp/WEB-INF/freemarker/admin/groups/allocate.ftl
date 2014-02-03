@@ -1,9 +1,9 @@
 <#import "../../group_components.ftl" as components />
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
 <#assign set=allocateStudentsToGroupsCommand.set />
 <#assign mappingById=allocateStudentsToGroupsCommand.mappingById />
 <#assign membersById=allocateStudentsToGroupsCommand.membersById />
-
 
 
 <#macro student_item student bindpath="">
@@ -15,7 +15,7 @@
 		<div class="profile clearfix">
 			<@fmt.member_photo profile "tinythumbnail" false />
 			<div class="name">
-				<h6>${profile.fullName!student.fullName}</h6>
+				<h6>${profile.fullName!student.fullName}&nbsp;<@pl.profile_link student /></h6>
 				${(profile.mostSignificantCourseDetails.route.name)!student.shortDepartment!""}
 			</div>
 		</div>
@@ -24,6 +24,7 @@
 </#macro>
 
 <#escape x as x?html>
+	<div id="profile-modal" class="modal fade profile-subset"></div>
 	<h1>Allocate students</h1>
 	<h4><span class="muted">to</span> ${set.name}</h4>
 

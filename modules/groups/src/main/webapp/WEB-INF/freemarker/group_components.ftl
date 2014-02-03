@@ -2,6 +2,8 @@
 
 <#-- Common template parts for use in other small groups templates. -->
 
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+
 <#function module_anchor module>
 	<#return "module-${module.code}" />
 </#function>
@@ -434,7 +436,11 @@
 	<#local missedCount = 0 />
 
 	<tr>
-		<#if showStudent><td class="nowrap" data-sortBy="${student.lastName}, ${student.firstName}">${student.fullName}</td></#if>
+		<#if showStudent>
+			<td class="nowrap" data-sortBy="${student.lastName}, ${student.firstName}">
+				${student.fullName}&nbsp;<@pl.profile_link student />
+			</td>
+		</#if>
 		<#list instances as instance>
 			<#local state = mapGet(attendance, instance) />
 			<#local title><@instanceFormat instance academicYear department /></#local>

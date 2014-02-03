@@ -1,6 +1,7 @@
 <#escape x as x?html>
 	<#import "*/group_components.ftl" as components />
-	
+	<div id="profile-modal" class="modal fade profile-subset"></div>
+
 	<h1>
 		${group.groupSet.name}, ${group.name}
 		<#if can.do("SmallGroups.ReadMembership", group)>
