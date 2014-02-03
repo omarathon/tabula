@@ -179,7 +179,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 			cmd.notifyOldAgent = false
 			cmd.notifyNewAgent = false
 
-			cmd.apply().map { modifiedRelationship => StudentRelationshipChange(cmd.currentAgent, modifiedRelationship) }
+			cmd.apply().map { modifiedRelationship => StudentRelationshipChange(cmd.currentAgent, modifiedRelationship.asInstanceOf[StudentRelationship[Member]]) }
 		}.flatten
 	}
 	
@@ -231,5 +231,5 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 case class StudentRelationshipChange(
 	oldAgent: Option[Member],
-	modifiedRelationship: StudentRelationship[_]
+	modifiedRelationship: StudentRelationship[Member]
 )
