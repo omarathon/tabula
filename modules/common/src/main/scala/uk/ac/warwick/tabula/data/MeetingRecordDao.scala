@@ -9,8 +9,8 @@ import uk.ac.warwick.spring.Wire
 trait MeetingRecordDao {
 	def saveOrUpdate(meeting: MeetingRecord)
 	def saveOrUpdate(approval: MeetingRecordApproval)
-	def list(rel: Set[StudentRelationship], currentUser: Member): Seq[MeetingRecord]
-	def list(rel: StudentRelationship): Seq[MeetingRecord]
+	def list(rel: Set[StudentRelationship[_]], currentUser: Member): Seq[MeetingRecord]
+	def list(rel: StudentRelationship[_]): Seq[MeetingRecord]
 	def get(id: String): Option[MeetingRecord]
 }
 
@@ -21,7 +21,7 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 
 	def saveOrUpdate(approval: MeetingRecordApproval) = session.saveOrUpdate(approval)
 
-	def list(rel: Set[StudentRelationship], currentUser: Member): Seq[MeetingRecord] = {
+	def list(rel: Set[StudentRelationship[_]], currentUser: Member): Seq[MeetingRecord] = {
 		if (rel.isEmpty)
 			Seq()
 		else
@@ -40,7 +40,7 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 
 	}
 
-	def list(rel: StudentRelationship): Seq[MeetingRecord] = {
+	def list(rel: StudentRelationship[_]): Seq[MeetingRecord] = {
 		session.newCriteria[MeetingRecord]
 			.add(Restrictions.eq("relationship", rel))
 			.add(is("deleted", false))

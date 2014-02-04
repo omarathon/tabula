@@ -206,7 +206,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		relationshipService.listStudentRelationshipsWithMember(relationshipType, staff) returns (Seq())
 		staff.isRelationshipAgent(relationshipType) should be (false)
 
-		relationshipService.listStudentRelationshipsWithMember(relationshipType, staff) returns (Seq(StudentRelationship("0672089", relationshipType, "0205225/1")))
+		relationshipService.listStudentRelationshipsWithMember(relationshipType, staff) returns (Seq(StudentRelationship(staff, relationshipType, Fixtures.student())))
 		staff.isRelationshipAgent(relationshipType) should be (true)
 	}
 

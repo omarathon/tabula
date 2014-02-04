@@ -40,7 +40,7 @@ trait MeetingRecordModal  {
 	def allRelationships(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
 						 @PathVariable("relationshipType") relationshipType: StudentRelationshipType) = {
 
-		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode)
+		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.student)
 	}
 
 	@ModelAttribute("viewMeetingRecordCommand")
@@ -155,10 +155,10 @@ trait MeetingRecordModal  {
 	def initRelationshipsEditor(binder: WebDataBinder,
 								@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails, 
 								@PathVariable("relationshipType") relationshipType: StudentRelationshipType) {
-		binder.registerCustomEditor(classOf[StudentRelationship], new AbstractPropertyEditor[StudentRelationship] {
+		binder.registerCustomEditor(classOf[StudentRelationship[_]], new AbstractPropertyEditor[StudentRelationship[_]] {
 			override def fromString(agent: String) = 
 				allRelationships(studentCourseDetails, relationshipType).find(_.agent == agent).orNull
-			override def toString(rel: StudentRelationship) = rel.agent
+			override def toString(rel: StudentRelationship[_]) = rel.agent
 		})
 	}
 }

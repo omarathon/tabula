@@ -1,8 +1,9 @@
 <#import "_submission_details.ftl" as sd />
-<#import "/WEB-INF/freemarker/admin/_profile_link.ftl" as pl />
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#escape x as x?html>
 
 <div id="feedback-modal" class="modal fade"></div>
+<div id="profile-modal" class="modal fade profile-subset"></div>
 
 <div class="fixed-container">
 	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
@@ -186,7 +187,7 @@
 							<td><#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??><@form.selector_check_row "students" student.user.warwickId /></#if></td>
 							<td class="id">
 							<#if module.department.showStudentName>
-								${student.user.fullName} <@pl.profile_link student.user />
+								${student.user.fullName} <@pl.profile_link student.user.warwickId />
 							<#else>
 								${student.user.warwickId}
 							</#if>

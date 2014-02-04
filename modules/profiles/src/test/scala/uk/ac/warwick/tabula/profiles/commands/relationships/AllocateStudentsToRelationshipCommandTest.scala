@@ -32,9 +32,9 @@ class AllocateStudentsToRelationshipCommandTest extends TestBase with Mockito {
 		val staff2 = Fixtures.staff("1000002", "staff2", department)
 		val staff3 = Fixtures.staff("1000003", "staff3", department)
 		
-		val rel1 = StudentRelationship(staff1.universityId, relationshipType, student1.universityId + "/1")
-		val rel2 = StudentRelationship(staff1.universityId, relationshipType, student2.universityId + "/1")
-		val rel3 = StudentRelationship(staff2.universityId, relationshipType, student3.universityId + "/1")
+		val rel1 = StudentRelationship(staff1, relationshipType, student1)
+		val rel2 = StudentRelationship(staff1, relationshipType, student2)
+		val rel3 = StudentRelationship(staff2, relationshipType, student3)
 		
 		Seq(staff1, staff2, staff3).foreach { staff => 
 			profileService.getMemberByUniversityId(staff.universityId) returns (Some(staff))

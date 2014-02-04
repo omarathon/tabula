@@ -51,7 +51,7 @@ class ImportSupervisorsForStudentCommand()
 					m.map { m => (m, percentage) }
 				}
 
-				relationshipService.replaceStudentRelationshipsWithPercentages(relationshipType, studentCourseDetails.sprCode, supervisors.map { case (member, percentage) => (member.universityId, percentage) })
+				relationshipService.replaceStudentRelationshipsWithPercentages(relationshipType, studentCourseDetails, supervisors)
 			}
 	}
 }

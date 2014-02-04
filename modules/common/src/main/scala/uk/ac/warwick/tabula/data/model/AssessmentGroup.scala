@@ -26,15 +26,15 @@ class AssessmentGroup extends GeneratedId {
 	AssessmentComponent to...
 	 */
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "assignment_id")
 	var assignment: Assignment = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "group_set_id")
 	var smallGroupSet: SmallGroupSet = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "upstream_id")
 	var assessmentComponent: AssessmentComponent = _
 

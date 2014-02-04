@@ -49,7 +49,7 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	@NotNull
 	var name: String = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "set_id", insertable = false, updatable = false)
 	var groupSet: SmallGroupSet = _
 	
@@ -65,7 +65,7 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * it to a new UserGroup, you should probably access "students" instead and work with Users rather than guessing what
 	 * the right sort of UserId to use is.
 	 */
-	@OneToOne(cascade = Array(ALL))
+	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "studentsgroup_id")
 	var _studentsGroup: UserGroup = UserGroup.ofUniversityIds
   def students: UnspecifiedTypeUserGroup = _studentsGroup

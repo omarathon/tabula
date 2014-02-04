@@ -41,7 +41,7 @@ class Module extends GeneratedId with PermissionsTarget with Serializable {
 	@transient
 	lazy val assistants = permissionsService.ensureUserGroupFor(this, ModuleAssistantRoleDefinition)
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "department_id")
 	var department: Department = _
 

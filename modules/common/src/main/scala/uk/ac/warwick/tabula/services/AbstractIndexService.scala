@@ -2,42 +2,32 @@ package uk.ac.warwick.tabula.services
 
 import java.io.File
 import java.io.FileNotFoundException
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import org.apache.lucene.analysis._
 import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
-import org.apache.lucene.index.FieldInfo.IndexOptions
 import org.apache.lucene.index._
 import org.apache.lucene.queryparser.classic.QueryParser
 import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search._
-import org.apache.lucene.store.FSDirectory
+import org.apache.lucene.store.{Directory, FSDirectory}
 import org.apache.lucene.util.Version
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.springframework.beans.factory.annotation._
 import org.springframework.beans.factory.InitializingBean
-import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Closeables._
 import uk.ac.warwick.tabula.helpers.Stopwatches._
 import uk.ac.warwick.tabula.helpers._
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-import uk.ac.warwick.userlookup.User
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import org.springframework.beans.factory.DisposableBean
-import org.apache.lucene.analysis.core._
-import org.apache.lucene.analysis.miscellaneous._
-import uk.ac.warwick.spring.Wire
 import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import scala.collection.GenTraversableOnce
-import language.implicitConversions
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import language.implicitConversions
 
 trait CommonQueryMethods[A] extends TaskBenchmarking { self: AbstractIndexService[A] =>
 
@@ -54,7 +44,7 @@ trait CommonQueryMethods[A] extends TaskBenchmarking { self: AbstractIndexServic
 				max = count
 			)
 		}
-		benchmarkTask("Transform documents to items") { docs.transform { toItem(_) } }
+		benchmarkTask("Transform documents to items") { docs.transformAll { docs => toItems(docs) } }
 	}
 
 }
@@ -78,7 +68,8 @@ trait QueryHelpers[A] { self: AbstractIndexService[A] =>
 
 class RichSearchResults(seq: Seq[Document]) {
 	def first = seq.headOption
-	def transform[A](f: Document => GenTraversableOnce[A]) = seq.flatMap(f)
+	def transform[A](f: Document => Option[A]): Seq[A] = seq.map(f).flatten
+	def transformAll[A](f: Seq[Document] => Seq[A]): Seq[A] = f(seq)
 	def size = seq.size
 }
 
@@ -88,12 +79,20 @@ trait RichSearchResultsCreator {
 
 object RichSearchResultsCreator extends RichSearchResultsCreator
 
+/** Trait for overriding in tests.
+	* @see RAMDirectoryOverride
+	*/
+trait OpensLuceneDirectory {
+	protected def openDirectory(): Directory
+}
+
 abstract class AbstractIndexService[A]
 		extends CommonQueryMethods[A]
 			with QueryHelpers[A]
 			with SearchHelpers[A]
 			with FieldGenerators
 			with RichSearchResultsCreator
+			with OpensLuceneDirectory
 			with InitializingBean
 			with Logging
 			with DisposableBean {
@@ -106,12 +105,18 @@ abstract class AbstractIndexService[A]
 	// largest batch of items we'll load in at once during scheduled incremental index.
 	val IncrementalBatchSize: Int
 
+	var indexPath: File
+	val analyzer: Analyzer
+	val UpdatedDateField: String
+	val IdField: String
+
 	@Value("${filesystem.create.missing}") var createMissingDirectories: Boolean = _
+	@Value("${tabula.yearZero}") var yearZero: Int = _
+
+	final val IndexReopenPeriodInSeconds = 20
 
 	// Are we indexing now?
 	var indexing: Boolean = false
-
-	var indexPath: File
 
 	var lastIndexTime: Option[DateTime] = None
 	var lastIndexDuration: Option[Duration] = None
@@ -119,24 +124,7 @@ abstract class AbstractIndexService[A]
 	// HFC-189 Reopen index every 2 minutes, even if not the indexing instance.
 	val executor: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 
-	/**
-	 * Wrapper around the indexing code so that it is only running once.
-	 * If it's already running, the code is skipped.
-	 * We only try indexing once a minute so thmiere's no need to bother about
-	 * tight race conditions here.
-	 */
-	def ifNotIndexing(work: => Unit) =
-		if (indexing)
-			logger.info("Skipped indexing because the indexer is already/still running.")
-		else
-			try { indexing = true; work }
-			finally indexing = false
-
-	val analyzer: Analyzer
 	lazy val indexAnalyzer = analyzer
-
-	// QueryParser isn't thread safe, hence why this is a def
-	def parser = new QueryParser(LuceneVersion, "", analyzer)
 
 	/**
 	 * When an index run finishes, we note down the date of the newest item,
@@ -144,7 +132,23 @@ abstract class AbstractIndexService[A]
 	 */
 	var mostRecentIndexedItem: Option[DateTime] = None
 
-	final val IndexReopenPeriodInSeconds = 20
+	/**
+		* Wrapper around the indexing code so that it is only running once.
+	 * If it's already running, the code is skipped.
+	 * We only try indexing once a minute so thmiere's no need to bother about
+	 * tight race conditions here.
+	 */
+	def ifNotIndexing(work: => Unit) =
+		if (indexing) {
+			logger.info("Skipped indexing because the indexer is already/still running.")
+		} else {
+			try { indexing = true; work }
+			finally indexing = false
+		}
+
+	// QueryParser isn't thread safe, hence why this is a def
+	def parser = new QueryParser(LuceneVersion, "", analyzer)
+
 
 	override def afterPropertiesSet {
 		if (!indexPath.exists) {
@@ -169,6 +173,8 @@ abstract class AbstractIndexService[A]
 	override def destroy {
 		executor.shutdown()
 	}
+
+	protected override def openDirectory(): Directory = FSDirectory.open(indexPath)
 
 	/**
 	 * Incremental index. Can be run often.
@@ -217,7 +223,7 @@ abstract class AbstractIndexService[A]
 	private def doIndexItems(items: Seq[A], isIncremental: Boolean) {
 		logger.debug("Writing to the index at " + indexPath + " with analyzer " + indexAnalyzer)
 		val writerConfig = new IndexWriterConfig(LuceneVersion, indexAnalyzer)
-		closeThis(new IndexWriter(FSDirectory.open(indexPath), writerConfig)) { writer =>
+		closeThis(new IndexWriter(openDirectory(), writerConfig)) { writer =>
 			for (item <- items) {
 				if (isIncremental)
 					doUpdateMostRecent(item)
@@ -240,9 +246,6 @@ abstract class AbstractIndexService[A]
 
 	protected def getUpdatedDate(item: A): DateTime
 
-	val UpdatedDateField: String
-
-	@Value("${tabula.yearZero}") var yearZero: Int = _
 
 	/**
 	 * Either get the date of the most recent item we've process in this JVM
@@ -267,8 +270,6 @@ abstract class AbstractIndexService[A]
 	def documentValue(doc: Option[Document], key: String): Option[String] = doc.flatMap { _.getValues(key).headOption }
 	def documentValue(doc: Document, key: String): Option[String] = doc.getValues(key).headOption
 
-	val IdField: String
-
 	/**
 	 * If an existing Document is in the index with this term, it
 	 * will be replaced.
@@ -282,7 +283,7 @@ abstract class AbstractIndexService[A]
 	protected def toDocument(item: A): Document
 
 	protected def toId(doc: Document) = documentValue(doc, IdField)
-	protected def toItem(doc: Document): Option[A]
+	protected def toItems(docs: Seq[Document]): Seq[A]
 
 }
 
@@ -329,7 +330,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		if (searcherManager == null) {
 			try {
 				logger.debug("Opening a new searcher manager at " + indexPath)
-				searcherManager = new SearcherManager(FSDirectory.open(indexPath), null)
+				searcherManager = new SearcherManager(openDirectory(), null)
 			} catch {
 				case e: IndexNotFoundException => logger.warn("No index found.")
 			}
@@ -380,9 +381,9 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 
 			val maxResults = max.getOrElse(searcher.getIndexReader.maxDoc)
 			val results =
-				if (sort == null) searcher.search(query, null, searcher.getIndexReader.maxDoc)
+				if (sort == null) searcher.search(query, null, offset+maxResults)
 				else if (searcher.getIndexReader.maxDoc <= 0) new TopDocs(0, Array(), 0f)
-				else searcher.search(query, null, searcher.getIndexReader.maxDoc, sort)
+				else searcher.search(query, null, offset+maxResults, sort)
 			transformResults(searcher, results, offset, maxResults)
 		}
 	}

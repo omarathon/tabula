@@ -263,7 +263,7 @@ class StudentMember extends Member with StudentProperties {
 			.flatMap(_.freshOrStaleStudentCourseYearDetails)
 			.filter(_.academicYear == year)
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY) // don't cascade, cascaded separately
 	@JoinColumn(name = "mostSignificantCourse")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var mostSignificantCourse: StudentCourseDetails = _
@@ -347,7 +347,7 @@ class StaffMember extends Member with StaffProperties {
 		this.universityId = id
 	}
 
-	@OneToOne(cascade = Array(ALL))
+	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "assistantsgroup_id")
 	var _assistantsGroup: UserGroup = UserGroup.ofUsercodes
 	def assistants: Option[UnspecifiedTypeUserGroup] = Option(_assistantsGroup)
@@ -414,7 +414,7 @@ trait MemberProperties {
 
 	var groupName: String = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "home_department_id")
 	var homeDepartment: Department = _
 
@@ -434,12 +434,12 @@ trait MemberProperties {
 }
 
 trait StudentProperties {
-	@OneToOne(cascade = Array(ALL))
+	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name="HOME_ADDRESS_ID")
 	@Restricted(Array("Profiles.Read.HomeAddress"))
 	var homeAddress: Address = null
 
-	@OneToOne(cascade = Array(ALL))
+	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name="TERMTIME_ADDRESS_ID")
 	@Restricted(Array("Profiles.Read.TermTimeAddress"))
 	var termtimeAddress: Address = null

@@ -8,23 +8,24 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.codehaus.jackson.JsonParseException
 import org.hibernate.dialect.Dialect
 import org.joda.time.DateTime
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.data.Transactions._
 import org.springframework.util.FileCopyUtils
 import javax.annotation.Resource
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.AuditEvent
-import uk.ac.warwick.tabula.data.{SessionComponent, ExtendedSessionComponent, Daoisms}
+import uk.ac.warwick.tabula.data.{SessionComponent, Daoisms}
 import uk.ac.warwick.tabula.events.Event
 import org.springframework.transaction.annotation.Propagation._
 import uk.ac.warwick.tabula.JsonObjectMapperFactory
 import org.jadira.usertype.dateandtime.joda.columnmapper.TimestampColumnDateTimeMapper
 import org.joda.time.DateTimeZone
 import uk.ac.warwick.spring.Wire
+import scala.collection.JavaConverters._
 
 trait AuditEventService {
 	def getById(id: Long): Option[AuditEvent]
+	def getByIds(ids: Seq[Long]): Seq[AuditEvent]
 	def mapListToObject(array: Array[Object]): AuditEvent
 	def unclob(any: Object): String
 	def save(event: Event, stage: String): Unit
@@ -61,6 +62,7 @@ class AuditEventServiceImpl extends AuditEventService {
 	private val IdIndex = 7
 
 	private val idSql = baseSelect + " where id = :id"
+	private def idsSql = baseSelect + " where id in (:ids)"
 
 	private val eventIdSql = baseSelect + " where eventid = :id"
 
@@ -122,6 +124,15 @@ class AuditEventServiceImpl extends AuditEventService {
 		//		Option(query.uniqueResult.asInstanceOf[Array[Object]]) map mapListToObject map addRelated
 		Option(mapListToObject(query.uniqueResult.asInstanceOf[Array[Object]])).map { addRelated }
 	}
+
+	def getByIds(ids: Seq[Long]): Seq[AuditEvent] =
+		ids.grouped(Daoisms.MaxInClauseCount).flatMap { group =>
+			val query = session.createSQLQuery(idsSql)
+			query.setParameterList("ids", group.asJava)
+			val results = query.list.asScala.toSeq.asInstanceOf[Seq[Array[Object]]]
+			results.map(mapListToObject).map(addRelated)
+		}.toSeq
+
 
 	def addParsedData(event: AuditEvent) = {
 		event.parsedData = parseData(event.data)

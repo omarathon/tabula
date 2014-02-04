@@ -14,7 +14,7 @@ import java.lang.annotation.Annotation
 	new UniqueConstraint(columnNames = Array("event_id", "week"))
 ))
 class SmallGroupEventOccurrence extends GeneratedId with PermissionsTarget with Serializable {
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="event_id")
 	var event: SmallGroupEvent = _
 

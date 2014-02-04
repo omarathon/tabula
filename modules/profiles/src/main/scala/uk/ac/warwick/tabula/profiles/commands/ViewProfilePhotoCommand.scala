@@ -101,7 +101,7 @@ class ViewProfilePhotoCommand(val member: Member)
 
 }
 
-class ViewStudentRelationshipPhotoCommand(val member: Member, val relationship: StudentRelationship)
+class ViewStudentRelationshipPhotoCommand(val member: Member, val relationship: StudentRelationship[_])
 	extends Command[RenderableFile] with ReadOnly with ApplyWithCallback[RenderableFile] with Unaudited  with ResizesPhoto {
 
 	PermissionCheck(Permissions.Profiles.StudentRelationship.Read(relationship.relationshipType), member)
