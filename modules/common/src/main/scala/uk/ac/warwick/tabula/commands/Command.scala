@@ -131,7 +131,7 @@ object Command {
 		override def initialValue = None
 	}
 	
-	def getOrInitStopwatch =
+	def getOrInitStopwatch() =
 		threadLocal.get match {
 			case Some(sw) => sw
 			case None => {
@@ -141,7 +141,7 @@ object Command {
 			}
 		}
 	
-	def endStopwatching { threadLocal.remove }
+	def endStopwatching() { threadLocal.remove() }
 	
 	def timed[A](fn: uk.ac.warwick.util.core.StopWatch => A): A = {
 		val currentStopwatch = threadLocal.get
@@ -151,7 +151,7 @@ object Command {
 				threadLocal.set(Some(sw))
 				fn(sw)
 			} finally {
-				threadLocal.remove
+				threadLocal.remove()
 			}
 		} else {
 			fn(currentStopwatch.get)

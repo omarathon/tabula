@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.AttendanceNote
 @DiscriminatorValue("monitoringPoint")
 class MonitoringPointAttendanceNote extends AttendanceNote {
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "parent_id")
 	var point: MonitoringPoint = _
 

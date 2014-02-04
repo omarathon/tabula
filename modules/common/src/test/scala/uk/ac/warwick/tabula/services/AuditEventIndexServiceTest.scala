@@ -126,9 +126,10 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		}
 
 		val auditEvent = recordAudit(command)
+		println(auditEvent)
 
 		indexer.adminDownloadedSubmissions(assignment) should be ('empty)
-		indexer.incrementalIndex
+		indexer.incrementalIndex()
 		indexer.adminDownloadedSubmissions(assignment) should be (assignment.submissions.toList)
 	}
 

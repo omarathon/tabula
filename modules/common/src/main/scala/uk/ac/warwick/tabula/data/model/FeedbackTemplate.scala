@@ -15,11 +15,11 @@ class FeedbackTemplate extends GeneratedId with PermissionsTarget {
 	var name:String = _
 	var description:String = _
 
-	@OneToOne(orphanRemoval=true, cascade=Array(ALL))
+	@OneToOne(orphanRemoval=true, cascade=Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name="ATTACHMENT_ID")
 	var attachment: FileAttachment = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="DEPARTMENT_ID")
 	var department:Department = _
 

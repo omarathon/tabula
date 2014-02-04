@@ -1,0 +1,60 @@
+package uk.ac.warwick.tabula.data.model
+
+import uk.ac.warwick.tabula.PersistenceTestBase
+import uk.ac.warwick.tabula.Fixtures
+
+class StudentRelationshipPersistenceTest extends PersistenceTestBase {
+	
+	trait Fixture {
+		val student = Fixtures.student(universityId = "1000001")
+		val memberAgent = Fixtures.staff(universityId = "4387483")
+		memberAgent.firstName = "Anne"
+		memberAgent.lastName = "Frank"
+		
+		val externalAgent = "Professor A Frank"
+			
+		val relType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+			
+		session.save(student)
+		session.save(memberAgent)
+		session.save(relType)
+		session.flush
+	}
+	
+	@Test def memberRelationship { transactional { tx => new Fixture { 
+		val rel = StudentRelationship(memberAgent, relType, student)
+		session.save(rel)
+		session.flush
+		session.clear
+		
+		val loadedRel = session.get(classOf[StudentRelationship[_]], rel.id).asInstanceOf[StudentRelationship[_]]
+		loadedRel.isAgentMember should be (true)
+		loadedRel.agent should be ("4387483")
+		loadedRel.agentMember should be (Some(memberAgent))
+		loadedRel.agentParsed should be (memberAgent)
+		loadedRel.studentId should be ("1000001")
+		loadedRel.studentMember should be (Some(student))
+		loadedRel.relationshipType should be (relType)
+		loadedRel.agentName should be ("Anne Frank")
+		loadedRel.agentLastName should be ("Frank")
+	}}}
+	
+	@Test def externalRelationship { transactional { tx => new Fixture {
+		val rel = ExternalStudentRelationship(externalAgent, relType, student)
+		session.save(rel)
+		session.flush
+		session.clear
+		
+		val loadedRel = session.get(classOf[StudentRelationship[_]], rel.id).asInstanceOf[StudentRelationship[_]]
+		loadedRel.isAgentMember should be (false)
+		loadedRel.agent should be (externalAgent)
+		loadedRel.agentMember should be (None)
+		loadedRel.agentParsed should be (externalAgent)
+		loadedRel.studentId should be ("1000001")
+		loadedRel.studentMember should be (Some(student))
+		loadedRel.relationshipType should be (relType)
+		loadedRel.agentName should be (externalAgent)
+		loadedRel.agentLastName should be (externalAgent)
+	}}}
+
+}

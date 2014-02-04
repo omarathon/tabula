@@ -52,11 +52,10 @@ class StudentRelationshipTemplateCommand(val department: Department, val relatio
 		// Transform into a list of (Member, Seq[Member]) pairs
 		val existingAllocations = 
 			existingRelationships
-				.groupBy(_.targetSprCode)
+				.groupBy(_.studentMember)
 				.toSeq
-				.flatMap { case (sprCode, rels) => 
-					val student = profileService.getStudentBySprCode(sprCode)
-					val agents = rels.flatMap { rel => profileService.getMemberByUniversityId(rel.agent) }
+				.flatMap { case (student, rels) => 
+					val agents = rels.flatMap { _.agentMember }
 					
 					(student, agents) match {
 						case (None, _) => None

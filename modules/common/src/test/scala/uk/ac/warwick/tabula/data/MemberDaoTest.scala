@@ -136,6 +136,9 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept1, sprStatus=sprFullyEnrolledStatus)
 		stu2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
 
+		val stu3 = Fixtures.student(universityId = "1000003", userId="student", department=dept2, courseDepartment=dept1, sprStatus=sprFullyEnrolledStatus)
+		stu3.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
+
 		val staff1 = Fixtures.staff(universityId = "1000003", userId="staff1", department=dept1)
 		staff1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 3, 1, 0, 0, 0)
 
@@ -150,21 +153,21 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 
-		val relBetweenStaff1AndStu1 = StudentRelationship("1000003", relationshipType, "1000001/1")
-		val relBetweenStaff1AndStu2 = StudentRelationship("1000003", relationshipType, "1000002/1")
+		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1)
+		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2)
 
 		memberDao.saveOrUpdate(relBetweenStaff1AndStu1)
 		memberDao.saveOrUpdate(relBetweenStaff1AndStu2)
 
-		memberDao.getCurrentRelationships(relationshipType, "1000001/1") should be (Seq(relBetweenStaff1AndStu1))
-		memberDao.getCurrentRelationships(relationshipType, "1000002/1") should be (Seq(relBetweenStaff1AndStu2))
-		memberDao.getCurrentRelationships(relationshipType, "1000003/1") should be (Nil)
-		memberDao.getCurrentRelationships(null, "1000001/1") should be (Nil)
+		memberDao.getCurrentRelationships(relationshipType, stu1) should be (Seq(relBetweenStaff1AndStu1))
+		memberDao.getCurrentRelationships(relationshipType, stu2) should be (Seq(relBetweenStaff1AndStu2))
+		memberDao.getCurrentRelationships(relationshipType, stu3) should be (Nil)
+		memberDao.getCurrentRelationships(null, stu1) should be (Nil)
 
-		memberDao.getRelationshipsByTarget(relationshipType, "1000001/1") should be (Seq(relBetweenStaff1AndStu1))
-		memberDao.getRelationshipsByTarget(relationshipType, "1000002/1") should be (Seq(relBetweenStaff1AndStu2))
-		memberDao.getRelationshipsByTarget(relationshipType, "1000003/1") should be (Seq())
-		memberDao.getRelationshipsByTarget(null, "1000001/1") should be (Seq())
+		memberDao.getRelationshipsByTarget(relationshipType, stu1) should be (Seq(relBetweenStaff1AndStu1))
+		memberDao.getRelationshipsByTarget(relationshipType, stu2) should be (Seq(relBetweenStaff1AndStu2))
+		memberDao.getRelationshipsByTarget(relationshipType, stu3) should be (Seq())
+		memberDao.getRelationshipsByTarget(null, stu1) should be (Seq())
 	}
 
 	@Test
@@ -197,19 +200,13 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 
-		val relBetweenStaff1AndStu1 = StudentRelationship("1000003", relationshipType, "1000001/1")
-		val relBetweenStaff1AndStu2 = StudentRelationship("1000003", relationshipType, "1000002/1")
+		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1)
+		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2)
 
 		memberDao.saveOrUpdate(relBetweenStaff1AndStu1)
 		memberDao.saveOrUpdate(relBetweenStaff1AndStu2)
 
-		// relationship Wires in a ProfileService, awkward.
-		// Fortunately we have a chance to inject a mock in here.
-		val profileService = smartMock[ProfileService]
-		profileService.getStudentBySprCode("1000001/1") returns (Some(stu1))
-
 		val ret = memberDao.getRelationshipsByDepartment(relationshipType, dept1)
-		ret(0).profileService = profileService
 		ret(0).studentMember.get.universityId should be ("1000001")
 		ret(0).studentMember.get.mostSignificantCourseDetails.get.department.code should be ("hm")
 
@@ -235,9 +232,22 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
+		
+		val stu1 = Fixtures.student(universityId = "1000001", userId="student", department=dept1, courseDepartment=dept1, sprStatus=sprFullyEnrolledStatus)
+		stu1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 1, 0, 0, 0)
 
-		val relBetweenStaff1AndStu1 = StudentRelationship("1000003", relationshipType, "1000001/1")
-		val relBetweenStaff1AndStu2 = StudentRelationship("1000003", relationshipType, "1000002/1")
+		val stu2 = Fixtures.student(universityId = "1000002", userId="student", department=dept2, courseDepartment=dept2, sprStatus=sprFullyEnrolledStatus)
+		stu2.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 1, 0, 0, 0)
+
+		val staff1 = Fixtures.staff(universityId = "1000003", userId="staff1", department=dept1)
+		staff1.lastUpdatedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 3, 1, 0, 0, 0)
+
+		memberDao.saveOrUpdate(stu1)
+		memberDao.saveOrUpdate(stu2)
+		memberDao.saveOrUpdate(staff1)
+
+		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1)
+		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2)
 
 		memberDao.saveOrUpdate(relBetweenStaff1AndStu1)
 		memberDao.saveOrUpdate(relBetweenStaff1AndStu2)
@@ -274,17 +284,11 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 
-		val relBetweenStaff1AndStu2 = StudentRelationship("1000004", relationshipType, "1000001/1")
+		val relBetweenStaff1AndStu2 = StudentRelationship(staff2, relationshipType, stu1)
 
 		memberDao.saveOrUpdate(relBetweenStaff1AndStu2)
 
-		// relationship Wires in a ProfileService, awkward.
-		// Fortunately we have a chance to inject a mock in here.
-		val profileService = smartMock[ProfileService]
-		profileService.getStudentBySprCode("1000001/1") returns (Some(stu1))
-
 		val ret = memberDao.getRelationshipsByDepartment(relationshipType, dept1)
-		ret(0).profileService = profileService
 		ret(0).studentMember.get.universityId should be ("1000001")
 		ret(0).studentMember.get.mostSignificantCourseDetails.get.department.code should be ("hm")
 
@@ -330,10 +334,10 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 
-		val relBetweenStaff1AndStu1 = StudentRelationship("1000003", relationshipType, "1000001/1")
-		val relBetweenStaff1AndStu2 = StudentRelationship("1000003", relationshipType, "1000002/1")
+		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1)
+		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2)
 
-		val relBetweenStaff2AndStu1 = StudentRelationship("1000004", relationshipType, "1000001/1")
+		val relBetweenStaff2AndStu1 = StudentRelationship(staff2, relationshipType, stu1)
 
 		memberDao.saveOrUpdate(relBetweenStaff1AndStu1)
 		memberDao.saveOrUpdate(relBetweenStaff1AndStu2)
@@ -382,10 +386,8 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 
-		val relBetweenStaff1AndMultiSCDStudent = StudentRelationship(staff.universityId, relationshipType, "1000001/1")
-		val relBetweenStaff1AndOtherStudent = StudentRelationship(staff.universityId, relationshipType, "1000002/1")
-
-		relBetweenStaff1AndMultiSCDStudent.targetSprCode = sprCode
+		val relBetweenStaff1AndMultiSCDStudent = StudentRelationship(staff, relationshipType, studentWithMultipleScdsSameSpr)
+		val relBetweenStaff1AndOtherStudent = StudentRelationship(staff, relationshipType, anotherStudent)
 
 		memberDao.saveOrUpdate(relBetweenStaff1AndMultiSCDStudent)
 		memberDao.saveOrUpdate(relBetweenStaff1AndOtherStudent)
@@ -425,8 +427,8 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 
-		val relBetweenStaff1AndStu1 = StudentRelationship("1000003", relationshipType, "1000001/1")
-		val relBetweenStaff1AndStu2 = StudentRelationship("1000003", relationshipType, "1000002/1")
+		val relBetweenStaff1AndStu1 = StudentRelationship(staff1, relationshipType, stu1)
+		val relBetweenStaff1AndStu2 = StudentRelationship(staff1, relationshipType, stu2)
 
 		memberDao.saveOrUpdate(relBetweenStaff1AndStu1)
 		memberDao.saveOrUpdate(relBetweenStaff1AndStu2)

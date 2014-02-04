@@ -50,10 +50,10 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.getMemberByUniversityId("0000004") should be (Some(m4))
 		profileService.getMemberByUniversityId("0000005") should be (None)
 
-		profileService.getStudentBySprCode("0000001/1") should be (Some(m1))
-		profileService.getStudentBySprCode("0000002/1") should be (Some(m2))
-		profileService.getStudentBySprCode("0000003/1") should be (None)
-		profileService.getStudentBySprCode("0000001/2") should be (None) // TODO This may not be the right behaviour
+		profileService.getStudentBySprCode("0000001/2") should be (Some(m1))
+		profileService.getStudentBySprCode("0000002/2") should be (Some(m2))
+		profileService.getStudentBySprCode("0000003/2") should be (None)
+		profileService.getStudentBySprCode("0000001/3") should be (None)
 
 		session.enableFilter(Member.StudentsOnlyFilter)
 

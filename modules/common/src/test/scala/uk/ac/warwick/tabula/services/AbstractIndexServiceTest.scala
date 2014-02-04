@@ -73,7 +73,7 @@ class AbstractIndexServiceTest extends TestBase {
 		pages.flatten.toSet should equal (fakeItems.toSet)
 	}
 
-	def toItems(result: RichSearchResults) = result.transform(service.convert)
+	def toItems(result: RichSearchResults) = result.transformAll(service.convert)
 
 	def indexFakeItems() {
 		// Index at random to ensure things don't depend on ordered insertion
@@ -95,7 +95,7 @@ class AbstractIndexServiceTest extends TestBase {
 		protected def getUpdatedDate(item: Item): DateTime = item.date
 		protected def getId(item: Item): String = item.name
 
-		def convert(doc: Document) = toItem(doc)
+		def convert(docs: Seq[Document]) = toItems(docs)
 
 		protected def toDocument(item: Item): Document = {
 			val doc = new Document()
@@ -104,10 +104,12 @@ class AbstractIndexServiceTest extends TestBase {
 			doc
 		}
 
-		protected def toItem(doc: Document): Option[Item] = Some(Item(
-				name = doc.get(IdField),
-				date = new DateTime(doc.get(UpdatedDateField).toLong)
-		))
+		protected def toItems(docs: Seq[Document]): Seq[Item] = docs.map {
+			doc => Item(
+					name = doc.get(IdField),
+					date = new DateTime(doc.get(UpdatedDateField).toLong)
+			)
+		}
 
 	}
 

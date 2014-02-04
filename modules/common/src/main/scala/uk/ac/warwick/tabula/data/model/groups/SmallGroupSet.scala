@@ -97,7 +97,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	  case SmallGroupSetSelfSignUpState.Closed => openForSignups = false
   }
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "module_id")
 	var module: Module = _
 	
@@ -107,7 +107,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	var groups: JList[SmallGroup] = JArrayList()
 
 	// only students manually added or excluded. use allStudents to get all students in the group set
-	@OneToOne(cascade = Array(ALL))
+	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
 	var _membersGroup = UserGroup.ofUniversityIds
 	def members: UnspecifiedTypeUserGroup= _membersGroup
