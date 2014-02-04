@@ -21,7 +21,7 @@ class MemberNote extends GeneratedId with CanBeDeleted with PermissionsTarget wi
 	@transient
 	var userLookup = Wire.auto[UserLookupService]
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="memberid")
 	var member: Member =_
 

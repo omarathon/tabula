@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.notifications
 
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, Notification}
+import uk.ac.warwick.tabula.data.model.{StudentRelationship, MeetingRecord, Notification}
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.spring.Wire
 import freemarker.template.Configuration
@@ -11,11 +11,11 @@ abstract class MeetingRecordNotification(meeting: MeetingRecord)
 	implicit var freemarker = Wire.auto[Configuration]
 
 	val FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meeting_record_notification_template.ftl"
-	val target = Some(meeting.relationship)
+	val target: Option[StudentRelationship[_]] = Some(meeting.relationship)
 	val _object = meeting
-	var message = "Student member for SPR code " + meeting.relationship.targetSprCode + " not found"
+	
 	def url = Routes.profile.view(
-			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(message)), 
+			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(s"Student member for relationship ${meeting.relationship.id} not found")), 
 			meeting)
 
 	def agentRole = meeting.relationship.relationshipType.agentRole

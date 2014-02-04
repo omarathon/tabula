@@ -67,7 +67,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			val command = new ImportSupervisorsForStudentCommand()
 			command.studentCourseDetails = studentCourseDetails
 			command.supervisorImporter = importer
-			command.applyInternal
+			command.applyInternal()
 
 			// check results
 			val supRels = supervisee.freshStudentCourseDetails.head.relationships(relationshipType)
@@ -75,7 +75,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			val rel = supRels.head
 
 			rel.agent should be (supervisorUniId)
-			rel.targetSprCode should be (sprCode)
+			rel.studentMember should be (Some(supervisee))
 			rel.relationshipType should be (relationshipType)
 			(rel.percentage: BigDecimal) should be (100)
 		}
@@ -93,7 +93,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			val command = new ImportSupervisorsForStudentCommand()
 			command.studentCourseDetails = studentCourseDetails
 			command.supervisorImporter = importer
-			command.applyInternal
+			command.applyInternal()
 
 			// check results
 			val supRels = supervisee.freshStudentCourseDetails.head.relationships(relationshipType)
@@ -110,7 +110,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			session.saveOrUpdate(existingSupervisorMember)
 
 			// create and persist existing relationship
-			val existingRelationship = StudentRelationship("1234", relationshipType, sprCode)
+			val existingRelationship = StudentRelationship(existingSupervisorMember, relationshipType, supervisee)
 			existingRelationship.startDate = new DateTime
 			session.saveOrUpdate(existingRelationship)
 
@@ -124,7 +124,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			val command = new ImportSupervisorsForStudentCommand()
 			command.studentCourseDetails = studentCourseDetails
 			command.supervisorImporter = importer
-			command.applyInternal
+			command.applyInternal()
 
 			// check results
 			val supRels = supervisee.freshStudentCourseDetails.head.relationships(relationshipType)
@@ -132,7 +132,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			val rel = supRels.head
 
 			rel.agent should be (supervisorUniId)
-			rel.targetSprCode should be (sprCode)
+			rel.studentMember should be (Some(supervisee))
 			rel.relationshipType should be (relationshipType)
 			rel.percentage should be (null)
 		}

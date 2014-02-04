@@ -29,8 +29,8 @@ import org.springframework.validation.Errors
  * weren't initially requested.
  */
 class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDetails, val relationshipType: StudentRelationshipType, val currentAgent: Option[Member], val currentUser: CurrentUser, val remove: Boolean)
-	extends Command[Seq[StudentRelationship]] 
-	with Notifies[Seq[StudentRelationship], StudentRelationship] 		with SelfValidating {
+	extends Command[Seq[StudentRelationship[_]]] 
+	with Notifies[Seq[StudentRelationship[_]], StudentRelationship[_]] 		with SelfValidating {
 
 	var relationshipService = Wire[RelationshipService]
 
@@ -59,12 +59,12 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 	def applyInternal = {
 		if (!currentAgent.isDefined) {
 			// Brand new agent
-			val newRelationship = relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails.sprCode, Seq(agent.universityId)).head
+			val newRelationship = relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(agent)).head
 
 			Seq(newRelationship)
 		} else if (currentAgent.get != agent) {
 			// Replacing the current agent with a new one
-			val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode)
+			val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.student)
 
 			// Is there an existing relationship for this agent?
 			// Could happen if a student has two agents, and we're trying to replace the second with the first
@@ -78,13 +78,13 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 					endAgentRelationship(currentRelationships)
 
 					// Save the new relationship
-					val newRelationship = relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails.sprCode, Seq(agent.universityId)).head
+					val newRelationship = relationshipService.saveStudentRelationships(relationshipType, studentCourseDetails, Seq(agent)).head
 
 					Seq(newRelationship)
 				}
 			}
 		} else if (currentAgent.get == agent && remove) {		
-			val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode)
+			val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.student)
 			endAgentRelationship(currentRelationships)
 						
 			currentRelationships
@@ -93,7 +93,7 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 		}
 	}
 
-	def endAgentRelationship(currentRelationships: Seq[StudentRelationship]) {
+	def endAgentRelationship(currentRelationships: Seq[StudentRelationship[_]]) {
 		currentRelationships.find(_.agent == currentAgent.get.universityId) foreach { rel =>
 			rel.endDate = DateTime.now
 			relationshipService.saveOrUpdate(rel)
@@ -104,16 +104,16 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 		d.property("student SPR code" -> studentCourseDetails.sprCode)
 		 .property("new agent ID" -> Option(agent).map { _.universityId }.getOrElse(""))
 
-	def emit(modifiedRelationships: Seq[StudentRelationship]): Seq[Notification[StudentRelationship]] = {	
+	def emit(modifiedRelationships: Seq[StudentRelationship[_]]): Seq[Notification[StudentRelationship[_]]] = {	
 		val notifications = modifiedRelationships.flatMap(relationship => {
 
-			val studentNotification: List[Notification[StudentRelationship]] = if (notifyStudent) {
+			val studentNotification: List[Notification[StudentRelationship[_]]] = if (notifyStudent) {
 				val template = StudentRelationshipChangeNotification.StudentTemplate
 				val recepient = relationship.studentMember.get.asSsoUser
 				List(new StudentRelationshipChangeNotification(relationship, currentUser.apparentUser, recepient, currentAgent, template) with FreemarkerTextRenderer)
 			} else Nil
 
-			val oldAgentNotification:List[Notification[StudentRelationship]] = if (notifyOldAgent) {			
+			val oldAgentNotification:List[Notification[StudentRelationship[_]]] = if (notifyOldAgent) {			
 				val notifications = currentAgent.map(oldAgent => {
 					val template = StudentRelationshipChangeNotification.OldAgentTemplate
 					val recepient =  oldAgent.asSsoUser
@@ -122,7 +122,7 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 				List(notifications).flatten
 			} else Nil
 
-			val newAgentNotification:List[Notification[StudentRelationship]] = if (notifyNewAgent) {
+			val newAgentNotification:List[Notification[StudentRelationship[_]]] = if (notifyNewAgent) {
 				val notifications = relationship.agentMember.map(newAgent => {
 					val template = StudentRelationshipChangeNotification.NewAgentTemplate
 					val recepient = newAgent.asSsoUser

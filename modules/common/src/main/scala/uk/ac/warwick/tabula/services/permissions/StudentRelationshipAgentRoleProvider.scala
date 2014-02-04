@@ -22,18 +22,18 @@ class StudentRelationshipAgentRoleProvider extends RoleProvider {
 				.listAllStudentRelationshipsWithUniversityId(user.universityId)
 				.toStream
 				.filter { _.studentId == member.universityId }
-				.map { rel => 
+				.flatMap { rel => rel.studentMember.map { student => (rel.relationshipType, student) } }
+				.distinct
+				.map { case (relationshipType, student) => 
 					/*
 					 * Check the student department for custom roles only, not the agent department,
 					 * as that's what we're performing operations on.
 					 */
 					val studentDepartment = 
-						rel.studentMember
-							 .flatMap { _.mostSignificantCourseDetails }
-							 .flatMap { scd => Option(scd.latestStudentCourseYearDetails.enrolmentDepartment) }
+						student.mostSignificantCourseDetails.flatMap { scd => Option(scd.latestStudentCourseYearDetails.enrolmentDepartment) }
 					
-					customRoleFor(studentDepartment)(StudentRelationshipAgentRoleDefinition(rel.relationshipType), member).getOrElse {
-						StudentRelationshipAgent(member, rel.relationshipType)
+					customRoleFor(studentDepartment)(StudentRelationshipAgentRoleDefinition(relationshipType), member).getOrElse {
+						StudentRelationshipAgent(member, relationshipType)
 					}
 				}
 		}

@@ -25,6 +25,8 @@ import uk.ac.warwick.tabula.commands.UploadedFile
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.data.model.ExternalStudentRelationship
+import uk.ac.warwick.tabula.Fixtures
 
 
 class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
@@ -45,17 +47,13 @@ class DownloadMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		}
 
 		val student = transactional { tx =>
-			val m = new StudentMember("1170836")
-			m.userId = "studentmember"
+			val m = Fixtures.student(universityId="1170836", userId="studentmember")
 			session.save(m)
 			m
 		}
 
 		val relationship = transactional { tx =>
-			val relationship = StudentRelationship("Professor A Tutor", StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"), "0123456/1")
-			relationship.profileService = ps
-			ps.getStudentBySprCode("0123456/1") returns (Some(student))
-
+			val relationship = ExternalStudentRelationship("Professor A Tutor", StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"), student)
 			session.save(relationship)
 			relationship
 		}

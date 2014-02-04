@@ -47,7 +47,7 @@ abstract class FormField extends GeneratedId with Logging {
 	@transient var userLookup = Wire.auto[UserLookupService]
 
 	@BeanProperty
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@(JoinColumn @field)(name = "assignment_id", updatable = false, nullable = false)
 	var assignment: Assignment = _
 

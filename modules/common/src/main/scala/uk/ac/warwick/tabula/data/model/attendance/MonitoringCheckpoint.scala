@@ -2,23 +2,23 @@ package uk.ac.warwick.tabula.data.model.attendance
 
 import javax.persistence.{Column, Entity, JoinColumn, ManyToOne}
 import org.joda.time.DateTime
-
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.data.model.{StudentMember, GeneratedId}
 import org.hibernate.annotations.Type
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.MonitoringPointService
+import javax.persistence.FetchType
 
 @Entity
 class MonitoringCheckpoint extends GeneratedId {
 
 	@transient var monitoringPointService = Wire.auto[MonitoringPointService]
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "point_id")
 	var point: MonitoringPoint = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "student_id")
 	var student: StudentMember = _
 

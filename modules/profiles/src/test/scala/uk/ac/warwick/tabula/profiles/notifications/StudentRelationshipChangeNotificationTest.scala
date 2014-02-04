@@ -12,19 +12,19 @@ class StudentRelationshipChangeNotificationTest extends TestBase with Mockito {
 
 	val TEST_CONTENT = "test"
 
-	def createNewTutorNotification(relationship:StudentRelationship, actor:User, recipient:User, oldTutor: Option[Member]) = {
+	def createNewTutorNotification(relationship:StudentRelationship[_], actor:User, recipient:User, oldTutor: Option[Member]) = {
 		val n = new StudentRelationshipChangeNotification(relationship, actor, recipient, oldTutor, StudentRelationshipChangeNotification.NewAgentTemplate) with MockRenderer
 		when(n.mockRenderer.renderTemplate(any[String],any[Any])).thenReturn(TEST_CONTENT)
 		n
 	}
 
-	def createOldTutorNotification(relationship:StudentRelationship, actor:User, recipient:User, oldTutor: Option[Member]) = {
+	def createOldTutorNotification(relationship:StudentRelationship[_], actor:User, recipient:User, oldTutor: Option[Member]) = {
 		val n = new StudentRelationshipChangeNotification(relationship, actor, recipient, oldTutor, StudentRelationshipChangeNotification.OldAgentTemplate) with MockRenderer
 		when(n.mockRenderer.renderTemplate(any[String],any[Any])).thenReturn(TEST_CONTENT)
 		n
 	}
 
-	def createTuteeNotification(relationship:StudentRelationship, actor:User, recipient:User, oldTutor: Option[Member]) = {
+	def createTuteeNotification(relationship:StudentRelationship[_], actor:User, recipient:User, oldTutor: Option[Member]) = {
 		val n = new StudentRelationshipChangeNotification(relationship, actor, recipient, oldTutor, StudentRelationshipChangeNotification.StudentTemplate) with MockRenderer
 		when(n.mockRenderer.renderTemplate(any[String],any[Any])).thenReturn(TEST_CONTENT)
 		n

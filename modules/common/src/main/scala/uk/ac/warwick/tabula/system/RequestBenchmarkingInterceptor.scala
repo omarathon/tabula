@@ -17,7 +17,8 @@ class RequestBenchmarkingInterceptor extends HandlerInterceptorAdapter with Task
 			if (Logging.benchmarking) {
 				val description = RequestInfo.fromThread.map { info =>
 					val userId = 
-						if (info.user.exists) info.user.realId
+						if (info.user.masquerading) s"${info.user.apparentId} (really ${info.user.realId})"
+						else if (info.user.exists) info.user.realId
 						else "anon"
 							
 					val url = info.requestedUri
