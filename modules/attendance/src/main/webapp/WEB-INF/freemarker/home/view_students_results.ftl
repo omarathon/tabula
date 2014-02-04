@@ -1,6 +1,8 @@
 <#escape x as x?html>
 	<#import "../attendance_variables.ftl" as attendance_variables />
 	<#import "../attendance_macros.ftl" as attendance_macros />
+	<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+	<div id="profile-modal" class="modal fade profile-subset"></div>
 
 	<#function sortClass field>
 		<#list command.sortOrder as order>
@@ -76,7 +78,7 @@
 								<#list students as studentData>
 									<tr class="student">
 										<td class="fname" title="${studentData.student.firstName}">${studentData.student.firstName}</td>
-										<td class="lname" title="${studentData.student.lastName}">${studentData.student.lastName}</td>
+										<td class="lname" title="${studentData.student.lastName}">${studentData.student.lastName}&nbsp;<@pl.profile_link studentData.student.universityId /></td>
 										<td class="id"><a class="profile-link" href="<@routes.profile studentData.student />">${studentData.student.universityId}</a></td>
 									</tr>
 								</#list>
