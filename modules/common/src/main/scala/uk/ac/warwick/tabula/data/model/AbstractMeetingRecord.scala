@@ -10,17 +10,32 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
-import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
-import scala.Some
+import javax.persistence.Column
+
+object Joda {
+	implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isAfter _)
+}
+
+object AbstractMeetingRecord {
+	import Joda._
+	implicit val defaultOrdering = Ordering.by { meeting: AbstractMeetingRecord => (meeting.meetingDate, meeting.lastUpdatedDate) }
+}
 
 @Entity
 @Table(name = "meetingrecord")
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted with FormattedHtml {
+
+	@Column(insertable = false, updatable = false, name = "discriminator")
+	var meetingType: String = _
+
+	def isScheduled: Boolean = this match {
+		case (m: ScheduledMeetingRecord) => true
+		case _ => false
+	}
 
 	@Column(name="creation_date")
 	var creationDate: DateTime = DateTime.now

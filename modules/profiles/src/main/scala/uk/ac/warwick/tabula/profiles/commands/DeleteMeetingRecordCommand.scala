@@ -1,27 +1,34 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.commands.SelfValidating
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.data.model.MeetingRecord
-import uk.ac.warwick.tabula.commands.Description
+import uk.ac.warwick.tabula.commands.{ComposableCommand, Describable, CommandInternal, SelfValidating, Description}
+import uk.ac.warwick.tabula.data.model.{AbstractMeetingRecord, MeetingRecord}
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.data.MeetingRecordDao
-import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
 
-abstract class AbstractDeleteMeetingRecordCommand[A] (val meetingRecord: MeetingRecord, val user: CurrentUser) extends Command[A] with SelfValidating{
+trait RemoveMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: RemoveMeetingRecordState =>
 
-	PermissionCheck(Permissions.Profiles.MeetingRecord.Delete(meetingRecord.relationship.relationshipType), meetingRecord)
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.Profiles.MeetingRecord.Delete(meetingRecord.relationship.relationshipType), meetingRecord)
+	}
+}
 
-	var meetingRecordDao = Wire.auto[MeetingRecordDao]
+trait RemoveMeetingRecordDescription extends Describable[AbstractMeetingRecord] {
+	self: RemoveMeetingRecordState =>
 
-	def contextSpecificValidation(error:Errors)
+	override def describe(d: Description) = d.properties(
+		"meetingRecord" -> meetingRecord.id)
 
-	def validate(errors: Errors) {
-		contextSpecificValidation(errors)
-		if (meetingRecord.isApproved) {
+}
+
+trait RemoveMeetingRecordValidation {
+	self: RemoveMeetingRecordState =>
+
+	def sharedValidation(errors: Errors) {
+		if (!meetingRecord.isScheduled && meetingRecord.asInstanceOf[MeetingRecord].isApproved) {
 			errors.reject("meetingRecord.delete.approved")
 		}
 		else if (user.universityId != meetingRecord.creator.universityId) {
@@ -29,47 +36,97 @@ abstract class AbstractDeleteMeetingRecordCommand[A] (val meetingRecord: Meeting
 		}
 	}
 
-	def describe(d: Description) = d.properties(
-		"meetingRecord" -> meetingRecord.id)
 }
 
-class DeleteMeetingRecordCommand(meetingRecord: MeetingRecord, user: CurrentUser)
-	extends AbstractDeleteMeetingRecordCommand[MeetingRecord](meetingRecord, user) {
+trait RemoveMeetingRecordState {
+	def meetingRecord: AbstractMeetingRecord
+	def user: CurrentUser
+}
 
-	override def contextSpecificValidation(errors: Errors) {
-		if (meetingRecord.deleted) errors.reject("meetingRecord.delete.alreadyDeleted")
-	}
+class DeleteMeetingRecordCommand(val meetingRecord: AbstractMeetingRecord, val user: CurrentUser)
+	extends CommandInternal[AbstractMeetingRecord] {
+
+	self: MeetingRecordServiceComponent =>
 
 	override def applyInternal() = {
 		meetingRecord.deleted = true
-		meetingRecordDao.saveOrUpdate(meetingRecord)
+		meetingRecordService.saveOrUpdate(meetingRecord)
 		meetingRecord
 	}
 }
 
-class RestoreMeetingRecordCommand (meetingRecord: MeetingRecord, user: CurrentUser)
-	extends AbstractDeleteMeetingRecordCommand[MeetingRecord](meetingRecord, user) {
+trait DeleteMeetingRecordCommandValidation extends SelfValidating with RemoveMeetingRecordValidation {
+	self: RemoveMeetingRecordState =>
 
-	override def contextSpecificValidation(errors: Errors) {
-		if (!meetingRecord.deleted) errors.reject("meetingRecord.delete.notDeleted")
+	override def validate(errors: Errors) {
+		if (meetingRecord.deleted) errors.reject("meetingRecord.delete.alreadyDeleted")
+
+		sharedValidation(errors)
 	}
+}
+
+class RestoreMeetingRecordCommand (val meetingRecord: AbstractMeetingRecord, val user: CurrentUser)
+	extends CommandInternal[AbstractMeetingRecord] {
+
+	self: MeetingRecordServiceComponent =>
 
 	override def applyInternal() = {
 		meetingRecord.deleted = false
-		meetingRecordDao.saveOrUpdate(meetingRecord)
+		meetingRecordService.saveOrUpdate(meetingRecord)
 		meetingRecord
 	}
 }
 
-class PurgeMeetingRecordCommand (meetingRecord: MeetingRecord, user: CurrentUser)
-	extends AbstractDeleteMeetingRecordCommand[Unit](meetingRecord, user) with Daoisms {
+trait RestoreMeetingRecordCommandValidation extends SelfValidating with RemoveMeetingRecordValidation {
+	self: RemoveMeetingRecordState =>
 
-	override def contextSpecificValidation(errors: Errors) {
+	override def validate(errors: Errors) {
 		if (!meetingRecord.deleted) errors.reject("meetingRecord.delete.notDeleted")
+
+		sharedValidation(errors)
 	}
+}
+
+class PurgeMeetingRecordCommand (val meetingRecord: AbstractMeetingRecord, val user: CurrentUser)
+	extends CommandInternal[AbstractMeetingRecord] {
+
+	self: MeetingRecordServiceComponent =>
 
 	override def applyInternal() = {
-		session.delete(meetingRecord)
-		session.flush
+		meetingRecordService.purge(meetingRecord)
+		meetingRecord
 	}
+}
+
+object DeleteMeetingRecordCommand {
+	def apply(meetingRecord: AbstractMeetingRecord, user: CurrentUser) =
+		new DeleteMeetingRecordCommand(meetingRecord, user)
+		with ComposableCommand[AbstractMeetingRecord]
+		with AutowiringMeetingRecordServiceComponent
+		with DeleteMeetingRecordCommandValidation
+		with RemoveMeetingRecordPermissions
+		with RemoveMeetingRecordDescription
+		with RemoveMeetingRecordState
+}
+
+object RestoreMeetingRecordCommand {
+	def apply(meetingRecord: AbstractMeetingRecord, user: CurrentUser) =
+		new RestoreMeetingRecordCommand(meetingRecord, user)
+			with ComposableCommand[AbstractMeetingRecord]
+			with AutowiringMeetingRecordServiceComponent
+			with RestoreMeetingRecordCommandValidation
+			with RemoveMeetingRecordPermissions
+			with RemoveMeetingRecordDescription
+			with RemoveMeetingRecordState
+}
+
+object PurgeMeetingRecordCommand {
+	def apply(meetingRecord: AbstractMeetingRecord, user: CurrentUser) =
+		new PurgeMeetingRecordCommand(meetingRecord, user)
+			with ComposableCommand[AbstractMeetingRecord]
+			with AutowiringMeetingRecordServiceComponent
+			with RestoreMeetingRecordCommandValidation
+			with RemoveMeetingRecordPermissions
+			with RemoveMeetingRecordDescription
+			with RemoveMeetingRecordState
 }

@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers.relationships
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.profiles.commands.CreateScheduledMeetingRecordCommand
+import uk.ac.warwick.tabula.profiles.commands.{ViewMeetingRecordCommand, CreateScheduledMeetingRecordCommand}
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.ItemNotFoundException
@@ -11,10 +11,11 @@ import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import javax.validation.Valid
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.services.AutowiringMonitoringPointMeetingRelationshipTermServiceComponent
 
 @Controller
 @RequestMapping(value = Array("/{relationshipType}/meeting/{studentCourseDetails}/schedule/create"))
-class CreateScheduledMeetingRecordController extends ProfilesController {
+class CreateScheduledMeetingRecordController extends ProfilesController with AutowiringMonitoringPointMeetingRelationshipTermServiceComponent {
 
 	validatesSelf[SelfValidating]
 
@@ -23,6 +24,14 @@ class CreateScheduledMeetingRecordController extends ProfilesController {
 											 @PathVariable("relationshipType") relationshipType: StudentRelationshipType) = {
 
 		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode)
+	}
+
+	@ModelAttribute("viewMeetingRecordCommand")
+	def viewMeetingRecordCommand(
+		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
+		@PathVariable("relationshipType") relationshipType: StudentRelationshipType
+	) = {
+		restricted(ViewMeetingRecordCommand(studentCourseDetails, optionalCurrentMember, relationshipType))
 	}
 
 	@ModelAttribute("command")
@@ -41,12 +50,12 @@ class CreateScheduledMeetingRecordController extends ProfilesController {
 		}
 	}
 
-	@RequestMapping(method=Array(GET, HEAD), params=Array("isIframe"))
+	@RequestMapping(method=Array(GET, HEAD), params=Array("iframe"))
 	def getIframe(
 	 @ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecord],
 		@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails
  	) = {
-		form(cmd, studentCourseDetails, isIframe = true)
+		form(cmd, studentCourseDetails, iframe = true)
 	}
 
 	@RequestMapping(method=Array(GET, HEAD))
@@ -60,33 +69,48 @@ class CreateScheduledMeetingRecordController extends ProfilesController {
 	private def form(
 		cmd: Appliable[ScheduledMeetingRecord],
 		studentCourseDetails: StudentCourseDetails,
-		isIframe: Boolean = false
+		iframe: Boolean = false
 	) = {
 		val mav = Mav("related_students/meeting/schedule",
 			"returnTo" -> getReturnTo(Routes.profile.view(studentCourseDetails.student)),
 			"isModal" -> ajax,
-			"isIframe" -> isIframe,
+			"iframe" -> iframe,
 			"formats" -> MeetingFormat.members
 		)
 		if(ajax)
 			mav.noLayout()
-		else if (isIframe)
+		else if (iframe)
 			mav.noNavigation()
 		else
 			mav
 	}
 
-	@RequestMapping(method=Array(POST), params=Array("isIframe"))
+	@RequestMapping(method=Array(POST), params=Array("iframe"))
 	def submitIframe(
 		@Valid @ModelAttribute("command") cmd: Appliable[ScheduledMeetingRecord],
 		errors: Errors,
-		@PathVariable studentCourseDetails: StudentCourseDetails
+		@PathVariable studentCourseDetails: StudentCourseDetails,
+		@PathVariable("relationshipType") relationshipType: StudentRelationshipType,
+		@ModelAttribute("viewMeetingRecordCommand") viewCommand: Option[Appliable[Seq[AbstractMeetingRecord]]]
 	) = {
 		if (errors.hasErrors) {
-			form(cmd, studentCourseDetails, true)
+			form(cmd, studentCourseDetails, iframe = true)
 		} else {
-			cmd.apply()
-			Mav("related_students/meeting/schedule", "success" -> true, "isIframe" -> true)
+			val modifiedMeeting = cmd.apply()
+			val meetingList = viewCommand match {
+				case None => Seq()
+				case Some(command) => command.apply()
+			}
+			Mav("related_students/meeting/list",
+				"studentCourseDetails" -> studentCourseDetails,
+				"role" -> relationshipType,
+				"meetings" -> meetingList,
+				"meetingApprovalWillCreateCheckpoint" -> meetingList.map {
+					case (meeting: MeetingRecord) => meeting.id -> monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
+					case (meeting: ScheduledMeetingRecord) => meeting.id -> false
+				}.toMap,
+				"viewer" -> currentMember,
+				"openMeeting" -> modifiedMeeting).noLayout()
 		}
 	}
 

@@ -13,4 +13,6 @@ class ScheduledMeetingRecord extends AbstractMeetingRecord {
 		this.relationship = relationship
 	}
 
+	def pendingActionBy(member: Member): Boolean = member == creator && meetingDate.isBeforeNow
+
 }

@@ -64,6 +64,37 @@
 
 	};
 
+	// 5-minute resolution
+	jQuery.fn.tabulaDateTimeMinutePicker = function() {
+		var $this = $(this);
+		// if there is no datepicker bound to this input then add one
+		if(!$this.data("datepicker")){
+			$this.datetimepicker({
+				format: "dd-M-yyyy hh:ii:ss",
+				weekStart: 1,
+				autoclose: true
+			}).on('show', function(ev){
+				var d = new Date(ev.date.valueOf()),
+					seconds = d.getUTCSeconds(),
+					millis = d.getUTCMilliseconds();
+
+				if (seconds > 0 || millis > 0) {
+					d.setUTCSeconds(0);
+					d.setUTCMilliseconds(0);
+
+					var DPGlobal = $.fn.datetimepicker.DPGlobal;
+					$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
+
+					$(this).datetimepicker('update');
+				}
+
+			}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
+		}
+
+		$(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
+
+	};
+
 	jQuery.fn.tabulaDatePicker = function() {
 		var $this = $(this)
 		// if there is no datepicker bound to this input then add one
@@ -648,6 +679,7 @@
 		$('input.date-time-picker').tabulaDateTimePicker();
 		$('input.date-picker').tabulaDatePicker();
 		$('input.time-picker').tabulaTimePicker();
+		$('input.date-time-minute-picker').tabulaDateTimeMinutePicker();
 		$('form.double-submit-protection').tabulaSubmitOnce();
         $('select.selectOffset').selectOffset();
 
@@ -660,6 +692,7 @@
 			$m.find('input.date-time-picker').tabulaDateTimePicker();
 			$m.find('input.date-picker').tabulaDatePicker();
 			$m.find('input.time-picker').tabulaTimePicker();
+			$m.find('input.date-time-minute-picker').tabulaDateTimeMinutePicker();
 			$m.find('form.double-submit-protection').tabulaSubmitOnce();
             $('select.selectOffset').selectOffset();
 			$m.tabulaPrepareSpinners();

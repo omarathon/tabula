@@ -12,16 +12,14 @@
 
 			<#if can_create_meetings>
 				<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Create a new record"><i class="icon-edit"></i> New record</a>
-			</#if>
-			<#if can_read_meetings>
-
-				<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
-				<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
+				<a class="btn-like new" href="<@routes.create_scheduled_meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Schedule a meeting"><i class="icon-time"></i> Schedule</a>
 			</#if>
 
 		</div>
 		<#if can_read_meetings>
 			<#if meetings??>
+				<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
+				<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
 				<#list meetings as meeting>
 					<#assign deletedClasses><#if meeting.deleted>deleted muted</#if></#assign>
 					<#assign pendingAction = meeting.pendingActionBy(viewer) />
@@ -40,12 +38,23 @@
 							<span class="date"><@fmt.date date=meeting.meetingDate includeTime=false /></span>
 							<span class="title">${meeting.title!}</span>
 
-							<#if !meeting.approved && viewer.universityId == meeting.creator.universityId>
+							<#if meeting.isScheduled()>
+								<#local editUrl></#local>
+								<#local deleteUrl></#local>
+								<#local restoreUrl></#local>
+								<#local purgeUrl></#local>
+							<#else>
+								<#local editUrl><@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting /></#local>
+								<#local deleteUrl><@routes.delete_meeting_record meeting /></#local>
+								<#local restoreUrl><@routes.restore_meeting_record meeting /></#local>
+								<#local purgeUrl><@routes.purge_meeting_record meeting /></#local>
+							</#if>
+							<#if meeting.isScheduled() || (!meeting.approved && viewer.universityId == meeting.creator.universityId)>
 								<div class="meeting-record-toolbar">
-									<a href="<@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting />" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
-									<a href="<@routes.delete_meeting_record meeting />" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
-									<a href="<@routes.restore_meeting_record meeting />" class="btn-like restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
-									<a href="<@routes.purge_meeting_record meeting />" class="btn-like purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
+									<a href="${editUrl}" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
+									<a href="${deleteUrl}" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
+									<a href="${restoreUrl}" class="btn-like restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
+									<a href="${purgeUrl}" class="btn-like purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
 									<i class="icon-spinner icon-spin"></i>
 								</div>
 							</#if>
@@ -60,7 +69,11 @@
 							<#if meeting.attachments?? && meeting.attachments?size gt 0>
 								<@fmt.download_attachments meeting.attachments "/${relationshipType.urlPart}/meeting/${meeting.id}/" "for this meeting record" "${meeting.title?url}" />
 							</#if>
-							<@state meeting studentCourseDetails/>
+
+							<#if meeting.isScheduled()>
+							<#else>
+								<@meetingState meeting studentCourseDetails/>
+							</#if>
 						</div>
 					</details>
 				</#list>
@@ -69,7 +82,7 @@
 	</section>
 </#macro>
 
-<#macro state meeting studentCourseDetails>
+<#macro meetingState meeting studentCourseDetails>
 	<#if meeting.pendingApproval && !meeting.pendingApprovalBy(viewer)>
 	<small class="muted">Pending approval. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
 	<div class="alert alert-info">

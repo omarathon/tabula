@@ -16,7 +16,7 @@
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 		${heading}
 	</div>
-<#elseif isIframe!false>
+<#elseif iframe!false>
 	<div id="container">
 <#else>
 	${heading}
@@ -73,7 +73,7 @@
 
 		<@form.labelled_row "meetingDate" "Date of meeting">
 			<div class="input-append">
-				<@f.input type="text" path="meetingDate" cssClass="input-medium date-time-picker" placeholder="Pick the date" />
+				<@f.input type="text" path="meetingDate" cssClass="input-medium date-time-minute-picker" placeholder="Pick the date" />
 				<span class="add-on"><i class="icon-calendar"></i></span>
 			</div>
 		</@form.labelled_row>
@@ -120,7 +120,7 @@
 <@f.textarea rows="6" path="description" cssClass="input-xxlarge" />
 </@form.labelled_row>
 
-		<#if !isIframe!false>
+		<#if !iframe!false>
 			<#-- separate page, not modal -->
 			<div class="form-actions">
 				<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
@@ -132,7 +132,7 @@
 	</@f.form>
 </#if>
 
-<#if isIframe!false>
+<#if iframe!false>
 	</div> <#--container -->
 </#if>
 
