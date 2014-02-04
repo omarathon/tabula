@@ -119,7 +119,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 		group.headOption map { head =>
 			val assessmentGroup = head.toUpstreamAssignmentGroup
 			// Convert ModuleRegistrations to simple uni ID strings.
-			val members = group map (mr => SprCode.getUniversityId(mr.sprCode))
+			val members = group.map{ mr => SprCode.getUniversityId(mr.sprCode)}.distinct
 			assignmentMembershipService.replaceMembers(assessmentGroup, members)
 		}
 	}
