@@ -13,7 +13,6 @@ import java.sql.Types
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
-import javax.persistence.Column
 
 object Joda {
 	implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isAfter _)
@@ -28,9 +27,6 @@ object AbstractMeetingRecord {
 @Table(name = "meetingrecord")
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted with FormattedHtml {
-
-	@Column(insertable = false, updatable = false, name = "discriminator")
-	var meetingType: String = _
 
 	def isScheduled: Boolean = this match {
 		case (m: ScheduledMeetingRecord) => true
