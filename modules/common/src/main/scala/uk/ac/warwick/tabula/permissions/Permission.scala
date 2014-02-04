@@ -270,6 +270,8 @@ object Permissions {
 				extends SelectorPermission(relationshipType, "View a member's students")
 		}
 
+		case object NonMemberRead extends ScopelessPermission("Read the core profile information for non-member users")
+
 		object StudentRelationship {
 			case class Create(relationshipType: PermissionsSelector[StudentRelationshipType])
 				extends SelectorPermission(relationshipType, "Add a student relationship")

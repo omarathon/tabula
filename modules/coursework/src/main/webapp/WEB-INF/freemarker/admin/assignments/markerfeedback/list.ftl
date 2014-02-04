@@ -1,11 +1,11 @@
-<#import "/WEB-INF/freemarker/admin/_profile_link.ftl" as pl >
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl >
 <#macro listMarkerFeedback items>
 	<#list items as item>
 		<tr>
 			<#if features.markerFeedback><td><@form.selector_check_row "students" item.student.warwickId /></td></#if>
 			<td>
 				<#if assignment.module.department.showStudentName>
-					${item.student.fullName} <@pl.profile_link item.student />
+					${item.student.fullName} <@pl.profile_link item.student.warwickId />
 				<#else>
 					${item.student.warwickId}
 				</#if>

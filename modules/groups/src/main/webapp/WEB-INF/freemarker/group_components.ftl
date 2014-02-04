@@ -438,7 +438,7 @@
 	<tr>
 		<#if showStudent>
 			<td class="nowrap" data-sortBy="${student.lastName}, ${student.firstName}">
-				${student.fullName}&nbsp;<@pl.profile_link student />
+				${student.fullName}&nbsp;<@pl.profile_link student.warwickId />
 			</td>
 		</#if>
 		<#list instances as instance>

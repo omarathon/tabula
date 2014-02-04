@@ -15,7 +15,7 @@
 		<div class="profile clearfix">
 			<@fmt.member_photo profile "tinythumbnail" false />
 			<div class="name">
-				<h6>${profile.fullName!student.fullName}&nbsp;<@pl.profile_link student /></h6>
+				<h6>${profile.fullName!student.fullName}&nbsp;<@pl.profile_link student.warwickId /></h6>
 				${(profile.mostSignificantCourseDetails.route.name)!student.shortDepartment!""}
 			</div>
 		</div>

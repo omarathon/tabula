@@ -1,5 +1,5 @@
 <#import "_submission_details.ftl" as sd />
-<#import "/WEB-INF/freemarker/admin/_profile_link.ftl" as pl />
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
 <#escape x as x?html>
 
@@ -341,7 +341,7 @@
 							</td>
 							<td class="student-col toggle-cell">
 								<h6 data-profile="${student.user.warwickId}">
-									${student.user.lastName}&nbsp;<@pl.profile_link student.user />
+									${student.user.lastName}&nbsp;<@pl.profile_link student.user.warwickId />
 								</h6>
 							</td>
 						<#else>

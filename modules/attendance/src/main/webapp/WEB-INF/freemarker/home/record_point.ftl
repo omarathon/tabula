@@ -37,7 +37,6 @@
 	</script>
 
 	<div class="recordCheckpointForm">
-		<@attendance_macros.attendanceButtons />
 
 		${titleHeader}
 
@@ -180,7 +179,7 @@
 						<#if numberOfStudents <= 50>
 							<@fmt.member_photo student "tinythumbnail" true />
 						</#if>
-						${student.fullName}&nbsp;<@pl.profile_link student />
+						${student.fullName}&nbsp;<@pl.profile_link student.universityId />
 						<@spring.bind path="command.studentsState[${student.universityId}][${point.id}]">
 							<#if status.error>
 								<div class="text-error"><@f.errors path="command.studentsState[${student.universityId}][${point.id}]" cssClass="error"/></div>

@@ -19,7 +19,7 @@
 				<#list students as studentData>
 				<tr class="student">
 					<td class="fname" title="${studentData.student.firstName}">${studentData.student.firstName}</td>
-					<td class="lname" title="${studentData.student.lastName}">${studentData.student.lastName}&nbsp;<@pl.profile_link studentData.student /></td>
+					<td class="lname" title="${studentData.student.lastName}">${studentData.student.lastName}&nbsp;<@pl.profile_link studentData.student.universityId /></td>
 					<td class="id"><a class="profile-link" href="<@routes.profile studentData.student />">${studentData.student.universityId}</a></td>
 				</tr>
 				</#list>
