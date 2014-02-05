@@ -12,11 +12,13 @@ import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordService
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model.MeetingRecord
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import org.specs.mock.JMocker.{expect => expecting}
 
 class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 	val someTime = dateTime(2013, DateTimeConstants.APRIL)
-	val ps = mock[ProfileService]
+	val mockProfileService = mock[ProfileService]
+	val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
 	val student = mock[StudentMember]
 	var creator: StaffMember = _
 	var relationship: StudentRelationship = _
@@ -39,8 +41,8 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 			session.save(relationshipType)
 			
 			val relationship = StudentRelationship("Professor A Tutor", relationshipType, "0123456/1")
-			relationship.profileService = ps
-			ps.getStudentBySprCode("0123456/1") returns Some(student)
+			relationship.profileService = mockProfileService
+			mockProfileService.getStudentBySprCode("0123456/1") returns Some(student)
 
 			session.save(relationship)
 			relationship
@@ -76,12 +78,13 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		meeting.deleted = true
 
 		val cmd = new RestoreMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
-			val meetingRecordService: MeetingRecordService = mock[MeetingRecordService]
+			val meetingRecordService: MeetingRecordService = mockMeetingRecordService
 		}
 		cmd.applyInternal()
 
 		val deleted: Boolean = meeting.deleted
 		deleted should be (false)
+
 	}
 
 	@Transactional
@@ -94,11 +97,15 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		meetingFromSession.id should be (id)
 
 		val cmd = new PurgeMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
-			val meetingRecordService: MeetingRecordService = mock[MeetingRecordService]
+			val meetingRecordService: MeetingRecordService = mockMeetingRecordService
 		}
+
 		cmd.applyInternal()
 
-		val purgedMeeting = session.get(classOf[MeetingRecord], id)
-		purgedMeeting should be (null)
+		expecting {
+			one(mockMeetingRecordService).purge(meeting)
+		}
+
 	}
+
 }
