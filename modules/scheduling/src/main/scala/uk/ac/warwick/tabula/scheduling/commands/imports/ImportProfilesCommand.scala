@@ -179,8 +179,9 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 		members.map { member => member match {
 				case student: StudentMember => {
-					val importCasUsageForStudentCommand = ImportCasUsageForStudentCommand(student, getCurrentSitsAcademicYear)
-					importCasUsageForStudentCommand.apply()
+					val importTier4ForStudentCommand = ImportTier4ForStudentCommand(student, getCurrentSitsAcademicYear)
+					importTier4ForStudentCommand.apply()
+
 				}
 				case _ =>
 			}

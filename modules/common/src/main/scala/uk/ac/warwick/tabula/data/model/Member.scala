@@ -272,12 +272,20 @@ class StudentMember extends Member with StudentProperties {
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	var tier4VisaRequirement: JBoolean = _
 
-	@Restricted(Array("Profiles.Read.CasUsed"))
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	def casUsed: Option[Boolean] = {
-			mostSignificantCourseDetails match {
-				case Some(scd: StudentCourseDetails) => Some(scd.latestStudentCourseYearDetails.casUsed)
-				case _ => None // better not to even display this field if there are no student course details
-			}
+			mostSignificantCourseDetails.flatMap(scd => scd.latestStudentCourseYearDetails.casUsed match {
+				case null => None
+				case casUsed => Some(casUsed)
+			})
+	}
+
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
+	def hasTier4Visa: Option[Boolean] = {
+		mostSignificantCourseDetails.flatMap(scd => scd.latestStudentCourseYearDetails.tier4Visa match {
+			case null => None
+			case hasTier4Visa => Some(hasTier4Visa)
+		})
 	}
 
 	def this(id: String) = {

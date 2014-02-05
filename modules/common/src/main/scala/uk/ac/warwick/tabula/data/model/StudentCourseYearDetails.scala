@@ -98,8 +98,12 @@ trait StudentCourseYearProperties {
 	var missingFromImportSince: DateTime = _
 
 	@Column(name="cas_used")
-	@Restricted(Array("Profiles.Read.CasUsed"))
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	var casUsed: JBoolean = _
+
+	@Column(name="tier4visa")
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
+	var tier4Visa: JBoolean = _
 
 }
 

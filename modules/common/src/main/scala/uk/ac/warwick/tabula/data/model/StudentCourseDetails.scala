@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.joda.time.DateTime
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.system.permissions.Restricted
 import uk.ac.warwick.spring.Wire
