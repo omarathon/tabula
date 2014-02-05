@@ -1,7 +1,7 @@
 <#assign student = studentCourseDetails.student/>
 <#assign agent_role = relationshipType.agentRole />
 <#assign member_role = relationshipType.studentRole />
-<#assign agent_name><#if !command.considerAlternatives>${command.relationship.agentName}</#if></#assign>
+<#assign agent_name><#if !command.considerAlternatives!false>${command.relationship.agentName}</#if></#assign>
 
 <#assign heading>
 	<h2>Schedule a meeting</h2>
@@ -41,7 +41,7 @@
 			<@f.input type="text" path="title" cssClass="input-xxlarge" maxlength="255" placeholder="Subject of meeting" />
 		</@form.labelled_row>
 
-		<#if allRelationships?size gt 1>
+		<#if allRelationships?? && allRelationships?size gt 1>
 			<#assign isCreatorAgent = creator.id == command.relationship.agent />
 			<#if !isCreatorAgent>
 				<#assign cssClass = "warning" />

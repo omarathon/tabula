@@ -8,7 +8,7 @@ class ScheduledMeetingRecordInviteeNotification(meeting: ScheduledMeetingRecord,
 	override val agent = meeting.creator.asSsoUser
 
 	val FreemarkerTemplate = "/WEB-INF/freemarker/notifications/scheduled_meeting_record_invitee_notification.ftl"
-	def title = "Meeting scheduled"
+	def title = s"Scheduled meeting $verb"
 	def content = renderToString(FreemarkerTemplate, Map(
 		"actor" -> agent,
 		"role" -> agentRole,

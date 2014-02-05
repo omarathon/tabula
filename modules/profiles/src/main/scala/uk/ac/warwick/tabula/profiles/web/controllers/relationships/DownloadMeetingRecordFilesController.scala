@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
 import javax.servlet.http.HttpServletRequest
-import uk.ac.warwick.tabula.data.model.MeetingRecord
+import uk.ac.warwick.tabula.data.model.{AbstractMeetingRecord, MeetingRecord}
 import uk.ac.warwick.tabula.services.fileserver.FileServer
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import org.springframework.web.bind.annotation.RequestMethod
@@ -18,7 +18,7 @@ class DownloadMeetingRecordFilesController extends BaseController {
 
 	@Autowired var fileServer: FileServer = _
 
-	@ModelAttribute def command(@PathVariable("meetingRecord") meetingRecord: MeetingRecord)
+	@ModelAttribute def command(@PathVariable("meetingRecord") meetingRecord: AbstractMeetingRecord)
 		= new DownloadMeetingRecordFilesCommand(meetingRecord)
 
 	// the difference between the RequestMapping paths for these two methods is a bit subtle - the first has

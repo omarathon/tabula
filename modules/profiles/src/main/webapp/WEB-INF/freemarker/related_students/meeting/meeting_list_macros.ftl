@@ -45,7 +45,7 @@
 							<span class="title">${meeting.title!}</span>
 
 							<#if meeting.isScheduled()>
-								<#local editUrl></#local>
+								<#local editUrl><@routes.edit_scheduled_meeting_record meeting studentCourseDetails.urlSafeId relationshipType /></#local>
 							<#else>
 								<#local editUrl><@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting /></#local>
 							</#if>

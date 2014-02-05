@@ -12,23 +12,24 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.{MeetingRecordDaoComponent, AutowiringMeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.profiles.notifications.{ScheduledMeetingRecordInviteeNotification, MeetingRecordApprovalNotification}
+import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
 
 object CreateScheduledMeetingRecordCommand {
 	def apply(creator: Member, relationship: StudentRelationship, considerAlternatives: Boolean) =
 		new CreateScheduledMeetingRecordCommand(creator, relationship, considerAlternatives)
 			with ComposableCommand[ScheduledMeetingRecord]
 			with CreateScheduledMeetingPermissions
-			with CreateScheduledMeetingState
+			with CreateScheduledMeetingRecordState
 			with CreateScheduledMeetingRecordDescription
-			with AutowiringMeetingRecordDaoComponent
+			with AutowiringMeetingRecordServiceComponent
 			with CreateScheduledMeetingRecordCommandValidation
 			with CreateScheduledMeetingRecordNotification
 }
 
 class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship: StudentRelationship, val considerAlternatives: Boolean = false)
-	extends CommandInternal[ScheduledMeetingRecord] with CreateScheduledMeetingState with BindListener {
+	extends CommandInternal[ScheduledMeetingRecord] with CreateScheduledMeetingRecordState with BindListener {
 
-	self: MeetingRecordDaoComponent =>
+	self: MeetingRecordServiceComponent =>
 
 	def applyInternal() = {
 		val scheduledMeeting = new ScheduledMeetingRecord(creator, relationship)
@@ -44,7 +45,7 @@ class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship
 				scheduledMeeting.attachments.add(attachment)
 				attachment.temporary = false
 		})
-		meetingRecordDao.saveOrUpdate(scheduledMeeting)
+		meetingRecordService.saveOrUpdate(scheduledMeeting)
 		scheduledMeeting
 	}
 
@@ -54,31 +55,18 @@ class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship
 
 }
 
-trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating {
-	self: CreateScheduledMeetingState =>
+trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating with ScheduledMeetingRecordValidation {
+	self: CreateScheduledMeetingRecordState with MeetingRecordServiceComponent =>
+
 	override def validate(errors: Errors) {
-		rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
-		if (title.length > MeetingRecord.MaxTitleLength){
-			errors.rejectValue("title", "meetingRecord.title.long", new Array(MeetingRecord.MaxTitleLength), "")
-		}
-
-		rejectIfEmptyOrWhitespace(errors, "relationship", "NotEmpty")
-		rejectIfEmptyOrWhitespace(errors, "format", "NotEmpty")
-
-		meetingDate match {
-			case date:DateTime => {
-				if (meetingDate.isBefore(DateTime.now.toDateTime)) {
-					errors.rejectValue("meetingDate", "meetingRecord.date.past")
-				} else if (meetingDate.isAfter(DateTime.now.plusYears(MeetingRecord.MeetingTooOldThresholdYears).toDateTime)) {
-					errors.rejectValue("meetingDate", "meetingRecord.date.futuristic")
-				}
-			}
-			case _ => errors.rejectValue("meetingDate", "meetingRecord.date.missing")
-		}
+		sharedValidation(errors, title, meetingDate)
+		meetingRecordService.listScheduled(Set(relationship), creator).foreach(
+		 m => if (m.meetingDate == meetingDate) errors.rejectValue("meetingDate", "meetingRecord.date.duplicate")
+		)
 	}
 }
 
-trait CreateScheduledMeetingState {
+trait CreateScheduledMeetingRecordState {
 	def creator: Member
 	def relationship: StudentRelationship
 	def considerAlternatives: Boolean
@@ -95,7 +83,7 @@ trait CreateScheduledMeetingState {
 }
 
 trait CreateScheduledMeetingPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: CreateScheduledMeetingState =>
+	self: CreateScheduledMeetingRecordState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.PermissionCheck(Permissions.Profiles.MeetingRecord.Create(relationship.relationshipType), mandatory(relationship.studentMember))
@@ -103,7 +91,7 @@ trait CreateScheduledMeetingPermissions extends RequiresPermissionsChecking with
 }
 
 trait CreateScheduledMeetingRecordDescription extends Describable[ScheduledMeetingRecord] {
-	self: CreateScheduledMeetingState =>
+	self: CreateScheduledMeetingRecordState =>
 
 	override lazy val eventName = "CreateScheduledMeetingRecord"
 
