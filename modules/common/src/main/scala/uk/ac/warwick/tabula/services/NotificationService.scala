@@ -1,9 +1,8 @@
 package uk.ac.warwick.tabula.services
 
-import org.springframework.stereotype.{Component, Service}
+import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.notifications.EmailNotificationListener
 import uk.ac.warwick.spring.Wire
 
 @Service

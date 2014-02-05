@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.data.model.{FileAttachment, MeetingFormat, MeetingRecord, ScheduledMeetingRecord, StudentRelationship, Member}
-import uk.ac.warwick.tabula.commands.{SelfValidating, UploadedFile, Description, Describable, ComposableCommand, CommandInternal}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.{BindingResult, Errors}
@@ -11,11 +11,18 @@ import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.{MeetingRecordDaoComponent, AutowiringMeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.system.BindListener
+import uk.ac.warwick.tabula.profiles.notifications.{ScheduledMeetingRecordInviteeNotification, MeetingRecordApprovalNotification}
 
 object CreateScheduledMeetingRecordCommand {
 	def apply(creator: Member, relationship: StudentRelationship, considerAlternatives: Boolean) =
-		new CreateScheduledMeetingRecordCommand(creator, relationship, considerAlternatives) with ComposableCommand[ScheduledMeetingRecord] with CreateScheduledMeetingPermissions
-			with CreateScheduledMeetingState with CreateScheduledMeetingRecordDescription with AutowiringMeetingRecordDaoComponent with CreateScheduledMeetingRecordCommandValidation
+		new CreateScheduledMeetingRecordCommand(creator, relationship, considerAlternatives)
+			with ComposableCommand[ScheduledMeetingRecord]
+			with CreateScheduledMeetingPermissions
+			with CreateScheduledMeetingState
+			with CreateScheduledMeetingRecordDescription
+			with AutowiringMeetingRecordDaoComponent
+			with CreateScheduledMeetingRecordCommandValidation
+			with CreateScheduledMeetingRecordNotification
 }
 
 class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship: StudentRelationship, val considerAlternatives: Boolean = false)
@@ -107,4 +114,8 @@ trait CreateScheduledMeetingRecordDescription extends Describable[ScheduledMeeti
 			"relationship" -> relationship.relationshipType.toString()
 		)
 	}
+}
+
+trait CreateScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRecord, ScheduledMeetingRecord] {
+	def emit(meeting: ScheduledMeetingRecord) = Seq(new ScheduledMeetingRecordInviteeNotification(meeting, "created"))
 }

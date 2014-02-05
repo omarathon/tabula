@@ -1,12 +1,13 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.commands.{ComposableCommand, Describable, CommandInternal, SelfValidating, Description}
-import uk.ac.warwick.tabula.data.model.{AbstractMeetingRecord, MeetingRecord}
+import uk.ac.warwick.tabula.commands.{Notifies, ComposableCommand, Describable, CommandInternal, SelfValidating, Description}
+import uk.ac.warwick.tabula.data.model.{ScheduledMeetingRecord, AbstractMeetingRecord, MeetingRecord}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
+import uk.ac.warwick.tabula.profiles.notifications.ScheduledMeetingRecordInviteeNotification
 
 trait RemoveMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: RemoveMeetingRecordState =>
@@ -65,6 +66,15 @@ trait DeleteMeetingRecordCommandValidation extends SelfValidating with RemoveMee
 	}
 }
 
+trait DeleteScheduledMeetingRecordNotification extends Notifies[AbstractMeetingRecord, ScheduledMeetingRecord] {
+	def emit(meeting: AbstractMeetingRecord) = {
+		meeting match {
+			case m: ScheduledMeetingRecord => Seq(new ScheduledMeetingRecordInviteeNotification(m, "deleted"))
+			case _ => Seq()
+		}
+	}
+}
+
 class RestoreMeetingRecordCommand (val meetingRecord: AbstractMeetingRecord, val user: CurrentUser)
 	extends CommandInternal[AbstractMeetingRecord] {
 
@@ -84,6 +94,15 @@ trait RestoreMeetingRecordCommandValidation extends SelfValidating with RemoveMe
 		if (!meetingRecord.deleted) errors.reject("meetingRecord.delete.notDeleted")
 
 		sharedValidation(errors)
+	}
+}
+
+trait RestoreScheduledMeetingRecordNotification extends Notifies[AbstractMeetingRecord, ScheduledMeetingRecord] {
+	def emit(meeting: AbstractMeetingRecord) = {
+		meeting match {
+			case m: ScheduledMeetingRecord => Seq(new ScheduledMeetingRecordInviteeNotification(m, "rescheduled"))
+			case _ => Seq()
+		}
 	}
 }
 
@@ -107,6 +126,7 @@ object DeleteMeetingRecordCommand {
 		with RemoveMeetingRecordPermissions
 		with RemoveMeetingRecordDescription
 		with RemoveMeetingRecordState
+		with DeleteScheduledMeetingRecordNotification
 }
 
 object RestoreMeetingRecordCommand {
@@ -118,6 +138,7 @@ object RestoreMeetingRecordCommand {
 			with RemoveMeetingRecordPermissions
 			with RemoveMeetingRecordDescription
 			with RemoveMeetingRecordState
+			with RestoreScheduledMeetingRecordNotification
 }
 
 object PurgeMeetingRecordCommand {
