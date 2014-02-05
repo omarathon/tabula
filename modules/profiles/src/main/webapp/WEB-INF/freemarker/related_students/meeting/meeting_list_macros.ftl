@@ -33,28 +33,28 @@
 						<#assign openAttribute></#assign>
 					</#if>
 
-					<details class="meeting ${deletedClasses} ${pendingActionClasses} ${openClass!}" ${openAttribute!}>
+					<details class="meeting ${deletedClasses} ${pendingActionClasses} ${openClass!} <#if meeting.isScheduled()>scheduled</#if>" ${openAttribute!}>
 						<summary>
-							<span class="date"><@fmt.date date=meeting.meetingDate includeTime=false /></span>
+							<span class="date">
+								<#if meeting.isScheduled()>
+									<@fmt.date date=meeting.meetingDate includeTime=true />
+								<#else>
+									<@fmt.date date=meeting.meetingDate includeTime=false />
+								</#if>
+							</span>
 							<span class="title">${meeting.title!}</span>
 
 							<#if meeting.isScheduled()>
 								<#local editUrl></#local>
-								<#local deleteUrl></#local>
-								<#local restoreUrl></#local>
-								<#local purgeUrl></#local>
 							<#else>
 								<#local editUrl><@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting /></#local>
-								<#local deleteUrl><@routes.delete_meeting_record meeting /></#local>
-								<#local restoreUrl><@routes.restore_meeting_record meeting /></#local>
-								<#local purgeUrl><@routes.purge_meeting_record meeting /></#local>
 							</#if>
 							<#if meeting.isScheduled() || (!meeting.approved && viewer.universityId == meeting.creator.universityId)>
 								<div class="meeting-record-toolbar">
 									<a href="${editUrl}" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
-									<a href="${deleteUrl}" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
-									<a href="${restoreUrl}" class="btn-like restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
-									<a href="${purgeUrl}" class="btn-like purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
+									<a href="<@routes.delete_meeting_record meeting />" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
+									<a href="<@routes.restore_meeting_record meeting />" class="btn-like restore-meeting-record" title="Restore record"><i class="icon-repeat"></i></a>
+									<a href="<@routes.purge_meeting_record meeting />" class="btn-like purge-meeting-record" title="Purge record"><i class="icon-remove"></i></a>
 									<i class="icon-spinner icon-spin"></i>
 								</div>
 							</#if>
@@ -71,6 +71,7 @@
 							</#if>
 
 							<#if meeting.isScheduled()>
+								<@scheduledMeetingState meeting studentCourseDetails/>
 							<#else>
 								<@meetingState meeting studentCourseDetails/>
 							</#if>
@@ -145,6 +146,10 @@
 	<#else>
 	<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
 	</#if>
+</#macro>
+
+<#macro scheduledMeetingState meeting studentCourseDetails>
+	<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
 </#macro>
 
 </#escape>
