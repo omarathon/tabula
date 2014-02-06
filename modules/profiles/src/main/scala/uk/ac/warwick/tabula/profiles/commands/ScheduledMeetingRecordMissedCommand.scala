@@ -26,7 +26,7 @@ class ScheduledMeetingRecordMissedCommand (val meetingRecord: ScheduledMeetingRe
 
 	def applyInternal() = {
 		meetingRecord.missed = true
-		meetingRecord.missedReason = comments
+		meetingRecord.missedReason = missedReason
 		meetingRecordService.saveOrUpdate(meetingRecord)
 		meetingRecord
 	}
@@ -72,5 +72,5 @@ trait ScheduledMeetingRecordMissedNotification extends Notifies[ScheduledMeeting
 
 trait ScheduledMeetingRecordMissedState {
 	def meetingRecord: ScheduledMeetingRecord
-	var comments: String = _
+	var missedReason: String = _
 }

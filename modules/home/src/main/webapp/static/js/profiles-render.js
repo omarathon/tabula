@@ -216,7 +216,7 @@
 			});
 
 			// make modal links use ajax
-			$('section.meetings').tabulaAjaxSubmit(function() {
+			$('section.meetings .meeting-record-toolbar, section.meetings details.meeting.normal').tabulaAjaxSubmit(function() {
 				document.location.reload(true);
 			});
 
@@ -235,11 +235,7 @@
 				$(this).off('load', iframeHandler);
 			};
 
-			var meetingsSection = $("section.meetings");
-			$(".new, .edit-meeting-record", meetingsSection).on("click", function(e) {
-				var $this = $(this);
-				var targetUrl = $this.attr("href");
-
+			var getModal = function($this, targetUrl) {
 				$.get(targetUrl + "?modal", function(data) {
 					$m.html(data);
 					var $mb = $m.find(".modal-body").empty();
@@ -255,6 +251,13 @@
 						$error.slideDown();
 					}
 				});
+			}
+
+			var meetingsSection = $("section.meetings");
+			$(".new, .edit-meeting-record", meetingsSection).on("click", function(e) {
+				var $this = $(this);
+				getModal($this, $this.attr("href"));
+
 				return false;
 			});
 
@@ -269,7 +272,32 @@
 				$m.find('.modal-body').slideUp();
 			});
 
-		};
+			// Scheduled meetings
+
+			meetingsSection.find('form.scheduled-action').on('submit', function(event){
+				event.preventDefault();
+				var $this = $(this), checkedInput = $this.find('input:checked');
+				$this.find('div.ajaxErrors').hide();
+				switch (checkedInput.val()) {
+					case "confirm": {
+						getModal($this, checkedInput.data('formhref'));
+					} break;
+					case "reschedule": {
+						$this.closest('details').find('.meeting-record-toolbar .edit-meeting-record').trigger('click');
+					} break;
+					case "missed": {
+						$.post(checkedInput.data('formhref'), $this.serialize(), function(data){
+							if(data.status === "successful") {
+								document.location.reload(true);
+							} else {
+								$this.find('div.ajaxErrors').empty().html(data.errors.join('<br />')).show();
+							}
+						});
+					} break;
+				}
+			});
+
+		}
 		// call on page load
 		decorateMeetingRecords();
 

@@ -33,7 +33,7 @@
 						<#assign openAttribute></#assign>
 					</#if>
 
-					<details class="meeting ${deletedClasses} ${pendingActionClasses} ${openClass!} <#if meeting.isScheduled()>scheduled</#if>" ${openAttribute!}>
+					<details class="meeting ${deletedClasses} ${pendingActionClasses} ${openClass!} <#if meeting.isScheduled()>scheduled<#else>normal</#if>" ${openAttribute!}>
 						<summary>
 							<span class="date">
 								<#if meeting.isScheduled()>
@@ -100,7 +100,7 @@
 		</#if>
 	</div>
 	<!-- not a spring form as we don't want the issue of binding multiple sets of data to the same command -->
-	<form method="post" id="meeting-${meeting.id}" action="<@routes.save_meeting_approval meeting />" >
+	<form method="post" class="approval" id="meeting-${meeting.id}" action="<@routes.save_meeting_approval meeting />" >
 		<@form.row>
 			<@form.field>
 				<label class="radio inline">
@@ -150,30 +150,47 @@
 
 <#macro scheduledMeetingState meeting studentCourseDetails>
 	<#if meeting.pendingActionBy(viewer)>
-		<form method="post" id="meeting-${meeting.id}" action="<@routes.save_meeting_approval meeting />" >
+		<small class="muted">Pending confirmation. ${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
+		<div class="alert alert-warning">
+			Please confirm whether this scheduled meeting took place.
+		</div>
+		<form method="post" class="scheduled-action" id="meeting-${meeting.id}" action="<@routes.choose_action_scheduled_meeting_record meeting studentCourseDetails.urlSafeId meeting.relationship.relationshipType />" >
 			<@form.row>
 				<@form.field>
-					<label class="radio inline">
-						<input type="radio" name="approved" value="true">
-						Approve
+					<label class="radio">
+						<input checked type="radio" name="action" value="confirm" data-formhref="<@routes.confirm_scheduled_meeting_record meeting studentCourseDetails.urlSafeId meeting.relationship.relationshipType />">
+						Confirm
 					</label>
-					<label class="radio inline">
-						<input class="reject" type="radio" name="approved" value="false">
-						Reject
+					<label class="radio">
+						<input type="radio" name="action" value="reschedule" />
+						Reschedule
+					</label>
+					<label class="radio">
+						<input type="radio" name="action" value="missed" class="reject" data-formhref="<@routes.missed_scheduled_meeting_record meeting meeting.relationship.relationshipType />">
+						Record that the meeting did not take place
 					</label>
 				</@form.field>
 			</@form.row>
 			<div class="rejection-comment" style="display:none">
 				<@form.row>
 					<@form.field>
-						<textarea class="big-textarea" name="rejectionComments"></textarea>
+						<textarea class="big-textarea" name="missedReason"></textarea>
 					</@form.field>
 				</@form.row>
 			</div>
+			<div class="ajaxErrors alert alert-error" style="display: none;"></div>
 			<button type="submit" class="btn btn-primary">Submit</button>
 		</form>
 	<#elseif meeting.missed>
-		Meeting did not take place. <small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
+		<div class="alert alert-error">
+			<p>Meeting did not take place.</p>
+			<#if meeting.missedReason?has_content>
+				${meeting.missedReason}
+			<#else>
+				<em>No reason given</em>
+			</#if>
+		</div>
+		<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
 	<#else>
 		<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
 	</#if>
