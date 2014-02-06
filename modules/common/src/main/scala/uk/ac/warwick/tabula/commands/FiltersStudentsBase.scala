@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.criterion.Order
 import scala.collection.JavaConverters._
 import uk.ac.warwick.util.web.UriBuilder
-import uk.ac.warwick.tabula.JavaImports
 
 trait FiltersStudentsBase {
 

@@ -37,7 +37,7 @@
 					<#if profile.nationality??>
 						<tr>
 							<th>Nationality</th>
-							<td><@fmt.nationality profile.nationality?default('Unknown') />
+							<td><@fmt.nationality profile.nationality?default('Unknown') /></td>
 						</tr>
 					</#if>
 
@@ -65,20 +65,19 @@
 					 <#if profile.hasTier4Visa?? && profile.casUsed?? && features.visaInStudentProfile>
 						<tr>
 							<th>Tier 4 requirements</th>
-					 	<td>
-						<#if profile.casUsed && profile.hasTier4Visa>Yes
-						<#elseif !profile.casUsed && !profile.hasTier4Visa>No
-						<#elseif !profile.casUsed && profile.hasTier4Visa>
-							Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a> to find out whether tier 4
-							requirements apply to this student (tier 4 visa exists but no Confirmation of Acceptance for Studies)
-						<#elseif profile.casUsed && !profile.hasTier4Visa>
-							Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a> to find out whether tier 4
-							requirements apply to this student (Confirmation of Acceptance for Studies exists but no tier 4 visa)
-						</#if>
-						</td>
-					</tr>
-
-				</#if>
+							<td>
+							<#if profile.casUsed && profile.hasTier4Visa>Yes
+							<#elseif !profile.casUsed && !profile.hasTier4Visa>No
+							<#elseif !profile.casUsed && profile.hasTier4Visa>
+								Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a> to find out whether tier 4
+								requirements apply to this student (tier 4 visa exists but no Confirmation of Acceptance for Studies)
+							<#elseif profile.casUsed && !profile.hasTier4Visa>
+								Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a> to find out whether tier 4
+								requirements apply to this student (Confirmation of Acceptance for Studies exists but no tier 4 visa)
+							</#if>
+							</td>
+						</tr>
+					</#if>
 				</tbody>
 			</table>
 		</div>
