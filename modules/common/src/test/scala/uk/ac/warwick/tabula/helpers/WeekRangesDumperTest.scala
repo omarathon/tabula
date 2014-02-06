@@ -33,7 +33,8 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 	@Test
 	def getsWeekRangesFromTermService() {new Fixture{ withUser("test") {
 			dumper.termService.getAcademicWeeksBetween(any[DateTime],any[DateTime]) returns Nil
-
+			dumper.userSettings.getByUserId(any[String]) returns None
+			dumper.departmentService.getDepartmentByCode(null) returns None
 			dumper.getWeekRangesAsJSON(null) // don't need a formatter as we're not returning any rows
 
 			there was one(dumper.termService).getAcademicWeeksBetween(TEST_TIME.minusYears(2), TEST_TIME.plusYears(2))

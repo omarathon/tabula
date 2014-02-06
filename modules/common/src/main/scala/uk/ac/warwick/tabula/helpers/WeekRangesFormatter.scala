@@ -136,10 +136,10 @@ class WeekRangesFormatter(year: AcademicYear) extends WeekRanges(year: AcademicY
 		case _ => {
 			/*
 			 * The first thing we need to do is split the WeekRanges by term.
-			 * 
+			 *
 			 * If we have a weekRange that is 1-24, we might split that into three week ranges:
 			 *  1-10, 11-15, 16-24
-			 *  
+			 *
 			 * This is because we display it as three separate ranges.
 			 *
 			 * Then we use our PimpedTerm to print the week numbers based on the numbering system.
@@ -299,7 +299,7 @@ trait WeekRangesDumper extends KnowsUserNumberingSystem {
 				val defaultDescription = formatWeekName(year, weekNumber, system)
 
 				// weekRangeFormatter always includes vacations, but we don't want them here, so if the
-				// descripton doesn't look like "Term X Week Y", throw it away and use a standard IntervalFormat;
+				// description doesn't look like "Term X Week Y", throw it away and use a standard IntervalFormat;
 				// TAB-1906 UNLESS we're in academic week number town
 				val description = if (system == WeekRange.NumberingSystem.Academic || defaultDescription.startsWith("Term")) {
 					defaultDescription
