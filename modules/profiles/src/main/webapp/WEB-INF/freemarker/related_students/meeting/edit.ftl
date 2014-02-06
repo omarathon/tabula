@@ -10,17 +10,17 @@
 	</h6>
 </#assign>
 
-<#if modal??>
+<#if modal!false>
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 		${heading}
 	</div>
-<#elseif iframe??>
+<#elseif iframe!false>
 	<div id="container">
 <#else>
 	${heading}
 </#if>
-<#if modal??>
+<#if modal!false>
 	<div class="modal-body" id="meeting-record-modal-body"></div>
 	<div class="modal-footer">
 		<form class="double-submit-protection">
@@ -41,7 +41,7 @@
 			<@f.input type="text" path="title" cssClass="input-xxlarge" maxlength="255" placeholder="Subject of meeting" />
 		</@form.labelled_row>
 
-		<#if allRelationships?size gt 1>
+		<#if allRelationships?? && allRelationships?size gt 1>
 			<#assign isCreatorAgent = creator.id == command.relationship.agent />
 			<#if !isCreatorAgent>
 				<#assign cssClass = "warning" />
@@ -146,7 +146,7 @@
 <@f.textarea rows="6" path="description" cssClass="input-xxlarge" />
 </@form.labelled_row>
 
-		<#if iframe??>
+		<#if iframe!false>
 			<input type="hidden" name="modal" value="true" />
 		<#else>
 			<#-- separate page, not modal -->
@@ -161,7 +161,7 @@
 	</@f.form>
 </#if>
 
-<#if iframe??>
+<#if iframe!false>
 	</div> <#--container -->
 </#if>
 

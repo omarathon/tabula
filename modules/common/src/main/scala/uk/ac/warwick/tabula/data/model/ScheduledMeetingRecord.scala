@@ -13,6 +13,11 @@ class ScheduledMeetingRecord extends AbstractMeetingRecord {
 		this.relationship = relationship
 	}
 
-	def pendingActionBy(member: Member): Boolean = member == creator && meetingDate.isBeforeNow
+	var missed: Boolean = false
+
+	@Column(name="missed_reason")
+	var missedReason: String = _
+
+	def pendingActionBy(member: Member): Boolean = member == creator && meetingDate.isBeforeNow && !missed
 
 }

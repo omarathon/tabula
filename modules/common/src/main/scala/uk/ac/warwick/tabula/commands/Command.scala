@@ -272,6 +272,16 @@ abstract class Description {
 	/**
 	 * Record member note, plus its student.
 	 */
+	def meeting(meeting: AbstractMeetingRecord) = {
+		property("meeting" -> meeting.id)
+		if (meeting.creator != null) member(meeting.creator)
+		if (meeting.relationship != null) property("relationship" -> meeting.relationship.relationshipType.toString())
+		this
+	}
+
+	/**
+	 * Record member note, plus its student.
+	 */
 	def memberNote(memberNote: MemberNote) = {
 		property("membernote" -> memberNote.id)
 		if (memberNote.member != null) member(memberNote.member)

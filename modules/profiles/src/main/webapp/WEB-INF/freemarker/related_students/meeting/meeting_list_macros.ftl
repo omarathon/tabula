@@ -149,7 +149,34 @@
 </#macro>
 
 <#macro scheduledMeetingState meeting studentCourseDetails>
-	<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
+	<#if meeting.pendingActionBy(viewer)>
+		<form method="post" id="meeting-${meeting.id}" action="<@routes.save_meeting_approval meeting />" >
+			<@form.row>
+				<@form.field>
+					<label class="radio inline">
+						<input type="radio" name="approved" value="true">
+						Approve
+					</label>
+					<label class="radio inline">
+						<input class="reject" type="radio" name="approved" value="false">
+						Reject
+					</label>
+				</@form.field>
+			</@form.row>
+			<div class="rejection-comment" style="display:none">
+				<@form.row>
+					<@form.field>
+						<textarea class="big-textarea" name="rejectionComments"></textarea>
+					</@form.field>
+				</@form.row>
+			</div>
+			<button type="submit" class="btn btn-primary">Submit</button>
+		</form>
+	<#elseif meeting.missed>
+		Meeting did not take place. <small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
+	<#else>
+		<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
+	</#if>
 </#macro>
 
 </#escape>
