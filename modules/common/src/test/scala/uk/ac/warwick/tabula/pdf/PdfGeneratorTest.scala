@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.pdf
 
 import uk.ac.warwick.tabula.TestBase
-import java.io.{ByteArrayOutputStream, ByteArrayInputStream, File, FileOutputStream}
+import java.io.{ByteArrayOutputStream, File, FileOutputStream}
 import uk.ac.warwick.tabula.web.views.{TextRenderer, TextRendererComponent}
 
 class PdfGeneratorTest extends TestBase{
 
-	val pdfGenerator = new FreemarkerXHTMLPDFGeneratorComponent with TextRendererComponent{
+	val pdfGenerator = (new FreemarkerXHTMLPDFGeneratorComponent with TextRendererComponent{
 		def textRenderer:TextRenderer = new TextRenderer {
 			def renderTemplate(templateId: String, model: Any): String = {
 				templateId match {
@@ -14,7 +14,7 @@ class PdfGeneratorTest extends TestBase{
 				}
 			}
 		}
-	}.pdfGenerator
+	}).pdfGenerator
 
 	@Test
 	def canRenderXHTML(){
