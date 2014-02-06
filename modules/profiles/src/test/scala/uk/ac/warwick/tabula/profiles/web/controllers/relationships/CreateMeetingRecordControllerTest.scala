@@ -9,10 +9,8 @@ import uk.ac.warwick.tabula.ItemNotFoundException
 
 class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 
-	val student = new StudentMember()
-	val studentCourseDetails = new StudentCourseDetails()
-	studentCourseDetails.sprCode = "sprcode"
-	studentCourseDetails.student = student
+	val student = Fixtures.student()
+	val studentCourseDetails = student.mostSignificantCourseDetails.get
 
 	val controller = new CreateMeetingRecordController
 
@@ -25,12 +23,11 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 
 	when(profileService.getAllMembersWithUserId("tutor", true)).thenReturn(Seq())
 	when(profileService.getAllMembersWithUserId("supervisor", true)).thenReturn(Seq())
-	when(profileService.getStudentBySprCode(studentCourseDetails.sprCode)).thenReturn(Some(student))
 
 	@Test(expected=classOf[ItemNotFoundException])
 	def throwsWithoutRelationships() {
 		withUser("tutor") {
-			when(relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode)).thenReturn(Nil)
+			when(relationshipService.findCurrentRelationships(relationshipType, student)).thenReturn(Nil)
 
 			val tutorCommand = controller.getCommand(relationshipType, studentCourseDetails)
 		}
@@ -41,11 +38,10 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 		withUser("tutor") {
 			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 			
-			val relationship = new StudentRelationship
-			relationship.targetSprCode = studentCourseDetails.sprCode
+			val relationship = new MemberStudentRelationship
+			relationship.studentMember = student
 			relationship.relationshipType = relationshipType
-			relationship.profileService = profileService
-			when(relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode)).thenReturn(Seq(relationship))
+			when(relationshipService.findCurrentRelationships(relationshipType, student)).thenReturn(Seq(relationship))
 
 			val tutorCommand = controller.getCommand(relationshipType, studentCourseDetails)
 			tutorCommand.relationship.relationshipType should be(relationshipType)
@@ -61,19 +57,18 @@ class CreateMeetingRecordControllerTest extends TestBase with Mockito {
 			
 			val firstAgent = "first"
 			// use non-numeric agent in test to avoid unecessary member lookup
-			val rel1 = new StudentRelationship
-			rel1.targetSprCode = studentCourseDetails.sprCode
+			val rel1 = new ExternalStudentRelationship
+			rel1.studentMember = student
 			rel1.relationshipType = relationshipType
 			rel1.agent = firstAgent
-			rel1.profileService = profileService
+
 			val secondAgent = "second"
-			val rel2 = new StudentRelationship
-			rel2.targetSprCode = studentCourseDetails.sprCode
+			val rel2 = new ExternalStudentRelationship
+			rel2.studentMember = student
 			rel2.relationshipType = relationshipType
 			rel2.agent = secondAgent
-			rel2.profileService = profileService
 
-			when(relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode)).thenReturn(Seq(rel1, rel2))
+			when(relationshipService.findCurrentRelationships(relationshipType, student)).thenReturn(Seq(rel1, rel2))
 
 			studentCourseDetails.relationshipService = relationshipService
 			controller.profileService = profileService

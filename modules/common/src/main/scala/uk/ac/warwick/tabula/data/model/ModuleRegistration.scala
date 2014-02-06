@@ -26,7 +26,7 @@ class ModuleRegistration() extends GeneratedId {
 		this.occurrence = occurrence
 	}
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="moduleCode", referencedColumnName="code")
 	var module: Module = null
 	var cats: java.math.BigDecimal = null
@@ -34,7 +34,7 @@ class ModuleRegistration() extends GeneratedId {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
 	var academicYear: AcademicYear = null
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="scjCode", referencedColumnName="scjCode")
 	var studentCourseDetails: StudentCourseDetails = _
 

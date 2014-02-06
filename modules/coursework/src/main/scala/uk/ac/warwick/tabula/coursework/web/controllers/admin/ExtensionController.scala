@@ -200,15 +200,21 @@ class ReviewExtensionRequestController extends ExtensionController {
 		val student = profileService.getMemberByUniversityId(cmd.extension.universityId)
 		val studentRelationships = relationshipService.allStudentRelationshipTypes
 
-		val extraInfo = student.flatMap { _.mostSignificantCourseDetails.map { scd =>
-			val relationships = studentRelationships.map(x => (x.description, relationshipService.findCurrentRelationships(x,scd.sprCode))).toMap
-
-			Map(
-				"relationships" -> relationships.filter({case (relationshipType,relations) => relations.length != 0}),
-				"studentCourseDetails" -> scd,
-				"student" -> student
-			)
-		}}.getOrElse(Map())
+		val extraInfo = student match { 
+			case Some(student: StudentMember) => { 
+				val relationships = studentRelationships.map { relationshipType => 
+					(relationshipType.description, relationshipService.findCurrentRelationships(relationshipType, student))
+				}.toMap
+				
+				Map(
+					"relationships" -> relationships.filter({case (relationshipType,relations) => relations.length != 0}),
+					"student" -> student
+				) ++ student.mostSignificantCourseDetails.map { scd =>
+					Map("studentCourseDetails" -> scd)
+				}.getOrElse(Map())
+			}
+			case _ => Map()
+		}
 
 		val model = Mav("admin/assignments/extensions/review_request", Map(
 			"command" -> cmd,

@@ -11,10 +11,10 @@ trait MeetingRecordDao {
 	def saveOrUpdate(scheduledMeeting: ScheduledMeetingRecord)
 	def saveOrUpdate(meeting: AbstractMeetingRecord)
 	def saveOrUpdate(approval: MeetingRecordApproval)
-	def list(rel: Set[StudentRelationship], currentUser: Member): Seq[MeetingRecord]
-	def listScheduled(rel: Set[StudentRelationship], currentUser: Member): Seq[ScheduledMeetingRecord]
-	def list(rel: StudentRelationship): Seq[MeetingRecord]
-	def get(id: String): Option[AbstractMeetingRecord]
+	def listScheduled(rel: Set[StudentRelationship[_]], currentUser: Member): Seq[ScheduledMeetingRecord]
+	def list(rel: Set[StudentRelationship[_]], currentUser: Member): Seq[MeetingRecord]
+	def list(rel: StudentRelationship[_]): Seq[MeetingRecord]
+	def get(id: String): Option[MeetingRecord]
 	def purge(meeting: AbstractMeetingRecord): Unit
 }
 
@@ -29,7 +29,7 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 
 	def saveOrUpdate(approval: MeetingRecordApproval) = session.saveOrUpdate(approval)
 
-	def list(rel: Set[StudentRelationship], currentUser: Member): Seq[MeetingRecord] = {
+	def list(rel: Set[StudentRelationship[_]], currentUser: Member): Seq[MeetingRecord] = {
 		if (rel.isEmpty)
 			Seq()
 		else
@@ -48,14 +48,14 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 			// and only pick records where deleted = 0 or the current user id is the creator id
 			// - so that no-one can see records created and deleted by someone else
 			.add(Restrictions.disjunction()
-			.add(is("deleted", false))
-			.add(is("creator", currentUser))
+				.add(is("deleted", false))
+				.add(is("creator", currentUser))
 			)
 			.addOrder(Order.desc("meetingDate"))
 			.addOrder(Order.desc("lastUpdatedDate"))
 	}
 
-	def list(rel: StudentRelationship): Seq[MeetingRecord] = {
+	def list(rel: StudentRelationship[_]): Seq[MeetingRecord] = {
 		session.newCriteria[MeetingRecord]
 			.add(Restrictions.eq("relationship", rel))
 			.add(is("deleted", false))

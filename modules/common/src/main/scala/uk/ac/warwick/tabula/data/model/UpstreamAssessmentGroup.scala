@@ -5,6 +5,7 @@ import javax.persistence.{Basic, Column, Entity, JoinColumn, OneToOne}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import javax.persistence.CascadeType
+import javax.persistence.FetchType
 
 
 /**
@@ -30,7 +31,7 @@ class UpstreamAssessmentGroup extends GeneratedId with PreSaveBehaviour {
 	@Column(nullable = false)
 	var academicYear: AcademicYear = _
 
-	@OneToOne(cascade = Array(CascadeType.ALL))
+	@OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
 	var members: UserGroup = UserGroup.ofUniversityIds
 

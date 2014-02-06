@@ -1,7 +1,10 @@
 <#import "_submission_details.ftl" as sd />
-<#import "/WEB-INF/freemarker/admin/_profile_link.ftl" as pl />
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 
 <#escape x as x?html>
+
+<div id="profile-modal" class="modal fade profile-subset"></div>
+
 <div class="fixed-container">
 	<h1>${assignment.name} (${assignment.module.code?upper_case})</h1>
 
@@ -338,7 +341,7 @@
 							</td>
 							<td class="student-col toggle-cell">
 								<h6 data-profile="${student.user.warwickId}">
-									${student.user.lastName}&nbsp;<@pl.profile_link student.user />
+									${student.user.lastName}&nbsp;<@pl.profile_link student.user.warwickId />
 								</h6>
 							</td>
 						<#else>

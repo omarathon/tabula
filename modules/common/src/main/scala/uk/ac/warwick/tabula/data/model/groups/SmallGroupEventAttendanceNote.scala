@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.AttendanceNote
 @DiscriminatorValue("smallGroup")
 class SmallGroupEventAttendanceNote extends AttendanceNote {
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="parent_id")
 	var occurrence: SmallGroupEventOccurrence = _
 

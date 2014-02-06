@@ -22,6 +22,7 @@ var exports = {};
  * eventually.
  */
 jQuery.fn.ajaxModalLink = function(options) {
+
 	this.click(function(e){
 		e.preventDefault();
 		var options = options || {},
@@ -57,6 +58,9 @@ jQuery.fn.ajaxModalLink = function(options) {
 
 		return false;
 	});
+
+	// some ajax links may be hidden to prevent them being clicked before this script is run - show them
+	this.show();
 }
 
 $(function() {

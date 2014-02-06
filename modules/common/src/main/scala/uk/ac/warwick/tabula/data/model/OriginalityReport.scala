@@ -9,7 +9,7 @@ import org.joda.time.DateTime
 class OriginalityReport() extends GeneratedId {
 
 	// Don't cascade as this is the wrong side of the association
-	@OneToOne(optional = false, cascade=Array())
+	@OneToOne(optional = false, cascade=Array(), fetch = FetchType.LAZY)
 	@JoinColumn(name="ATTACHMENT_ID")
     var attachment: FileAttachment = _
 

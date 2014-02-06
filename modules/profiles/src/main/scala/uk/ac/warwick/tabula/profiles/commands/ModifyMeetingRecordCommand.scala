@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.MonitoringPointMeetingRelationshipTermService
 
-abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship, val considerAlternatives: Boolean = false)
+abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship: StudentRelationship[_], val considerAlternatives: Boolean = false)
 	extends Command[MeetingRecord] with Notifies[MeetingRecord, MeetingRecord] with SelfValidating with FormattedHtml
 	with BindListener with Daoisms {
 
