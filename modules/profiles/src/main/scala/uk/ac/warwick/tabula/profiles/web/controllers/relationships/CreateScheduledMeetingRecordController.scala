@@ -23,7 +23,7 @@ class CreateScheduledMeetingRecordController extends ProfilesController with Aut
 	def allRelationships(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
 											 @PathVariable("relationshipType") relationshipType: StudentRelationshipType) = {
 
-		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode)
+		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.student)
 	}
 
 	@ModelAttribute("viewMeetingRecordCommand")
@@ -37,7 +37,7 @@ class CreateScheduledMeetingRecordController extends ProfilesController with Aut
 	@ModelAttribute("command")
 	def getCommand(@PathVariable("relationshipType") relationshipType: StudentRelationshipType,
 				   @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =  {
-		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails).sprCode) match {
+		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails).student) match {
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
 				// Go through the relationships for this SPR code and find one where the current user is the agent.

@@ -107,7 +107,7 @@ trait EditScheduledMeetingRecordState {
 
 	var attachmentTypes = Seq[String]()
 
-	lazy val relationship: StudentRelationship = meetingRecord.relationship
+	lazy val relationship: StudentRelationship[_] = meetingRecord.relationship
 }
 
 trait EditScheduledMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {

@@ -6,9 +6,8 @@ import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.data.model.StaffMember
-import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordServiceComponent, ProfileService}
+import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordServiceComponent}
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model.MeetingRecord
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
@@ -19,7 +18,6 @@ import uk.ac.warwick.tabula.Fixtures
 class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 	val someTime = dateTime(2013, DateTimeConstants.APRIL)
-	val mockProfileService = mock[ProfileService]
 	val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
 	val student = Fixtures.student()
 	var creator: StaffMember = _
@@ -45,8 +43,6 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 			session.save(relationshipType)
 			
 			val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
-			relationship.profileService = mockProfileService
-			mockProfileService.getStudentBySprCode("0123456/1") returns Some(student)
 
 			session.save(relationship)
 			relationship

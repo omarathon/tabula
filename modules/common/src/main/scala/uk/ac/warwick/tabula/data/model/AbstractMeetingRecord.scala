@@ -39,9 +39,9 @@ class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToSt
 	@Column(name="last_updated_date")
 	var lastUpdatedDate: DateTime = creationDate
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "relationship_id")
-	var relationship: StudentRelationship = _
+	var relationship: StudentRelationship[_] = _
 
 	@Column(name="meeting_date")
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
@@ -51,7 +51,7 @@ class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToSt
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.MeetingFormatUserType")
 	var format: MeetingFormat = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="creator_id")
 	var creator: Member = _
 
@@ -70,7 +70,7 @@ class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToSt
 
 	def escapedDescription:String = formattedHtml(description)
 
-	def this(creator: Member, relationship: StudentRelationship) {
+	def this(creator: Member, relationship: StudentRelationship[_]) {
 		this()
 		this.creator = creator
 		this.relationship = relationship

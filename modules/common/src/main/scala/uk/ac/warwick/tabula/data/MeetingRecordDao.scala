@@ -14,7 +14,7 @@ trait MeetingRecordDao {
 	def listScheduled(rel: Set[StudentRelationship[_]], currentUser: Member): Seq[ScheduledMeetingRecord]
 	def list(rel: Set[StudentRelationship[_]], currentUser: Member): Seq[MeetingRecord]
 	def list(rel: StudentRelationship[_]): Seq[MeetingRecord]
-	def get(id: String): Option[MeetingRecord]
+	def get(id: String): Option[AbstractMeetingRecord]
 	def purge(meeting: AbstractMeetingRecord): Unit
 }
 
@@ -36,14 +36,14 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 			addMeetingRecordListRestrictions(session.newCriteria[MeetingRecord], rel, currentUser).seq
 	}
 
-	def listScheduled(rel: Set[StudentRelationship], currentUser: Member): Seq[ScheduledMeetingRecord] = {
+	def listScheduled(rel: Set[StudentRelationship[_]], currentUser: Member): Seq[ScheduledMeetingRecord] = {
 		if (rel.isEmpty)
 			Seq()
 		else
 			addMeetingRecordListRestrictions(session.newCriteria[ScheduledMeetingRecord], rel, currentUser).seq
 	}
 
-	private def addMeetingRecordListRestrictions[A](criteria: ScalaCriteria[A], rel: Set[StudentRelationship], currentUser: Member) = {
+	private def addMeetingRecordListRestrictions[A](criteria: ScalaCriteria[A], rel: Set[StudentRelationship[_]], currentUser: Member) = {
 		criteria.add(Restrictions.in("relationship", rel))
 			// and only pick records where deleted = 0 or the current user id is the creator id
 			// - so that no-one can see records created and deleted by someone else

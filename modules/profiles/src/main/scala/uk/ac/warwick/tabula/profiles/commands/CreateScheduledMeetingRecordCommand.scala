@@ -1,21 +1,19 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.data.model.{FileAttachment, MeetingFormat, MeetingRecord, ScheduledMeetingRecord, StudentRelationship, Member}
+import uk.ac.warwick.tabula.data.model.{FileAttachment, MeetingFormat, ScheduledMeetingRecord, StudentRelationship, Member}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.validation.{BindingResult, Errors}
-import org.springframework.validation.ValidationUtils._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.{MeetingRecordDaoComponent, AutowiringMeetingRecordDaoComponent}
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.profiles.notifications.{ScheduledMeetingRecordInviteeNotification, MeetingRecordApprovalNotification}
+import uk.ac.warwick.tabula.profiles.notifications.ScheduledMeetingRecordInviteeNotification
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
 
 object CreateScheduledMeetingRecordCommand {
-	def apply(creator: Member, relationship: StudentRelationship, considerAlternatives: Boolean) =
+	def apply(creator: Member, relationship: StudentRelationship[_], considerAlternatives: Boolean) =
 		new CreateScheduledMeetingRecordCommand(creator, relationship, considerAlternatives)
 			with ComposableCommand[ScheduledMeetingRecord]
 			with CreateScheduledMeetingPermissions
@@ -26,7 +24,7 @@ object CreateScheduledMeetingRecordCommand {
 			with CreateScheduledMeetingRecordNotification
 }
 
-class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship: StudentRelationship, val considerAlternatives: Boolean = false)
+class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship: StudentRelationship[_], val considerAlternatives: Boolean = false)
 	extends CommandInternal[ScheduledMeetingRecord] with CreateScheduledMeetingRecordState with BindListener {
 
 	self: MeetingRecordServiceComponent =>
@@ -68,7 +66,7 @@ trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating with 
 
 trait CreateScheduledMeetingRecordState {
 	def creator: Member
-	def relationship: StudentRelationship
+	def relationship: StudentRelationship[_]
 	def considerAlternatives: Boolean
 
 	var title: String = _

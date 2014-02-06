@@ -7,7 +7,7 @@ import javax.persistence._
 @DiscriminatorValue("scheduled")
 class ScheduledMeetingRecord extends AbstractMeetingRecord {
 
-	def this(creator: Member, relationship: StudentRelationship) {
+	def this(creator: Member, relationship: StudentRelationship[_]) {
 		this()
 		this.creator = creator
 		this.relationship = relationship

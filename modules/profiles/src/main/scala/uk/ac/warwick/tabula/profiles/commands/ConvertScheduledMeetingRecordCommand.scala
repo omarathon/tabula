@@ -72,7 +72,7 @@ trait ConvertScheduledMeetingRecordState {
 
 	var posted: Boolean = false
 
-	lazy val relationship: StudentRelationship = meetingRecord.relationship
+	lazy val relationship: StudentRelationship[_] = meetingRecord.relationship
 
 	var createCommand: CreateMeetingRecordCommand = _
 }

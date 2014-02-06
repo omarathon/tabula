@@ -19,10 +19,10 @@ trait MeetingRecordService {
 	def saveOrUpdate(scheduledMeeting: ScheduledMeetingRecord)
 	def saveOrUpdate(meeting: AbstractMeetingRecord)
 	def saveOrUpdate(approval: MeetingRecordApproval)
-	def list(rel: Set[StudentRelationship], currentMember: Member): Seq[MeetingRecord]
-	def listScheduled(rel: Set[StudentRelationship], currentMember: Member): Seq[ScheduledMeetingRecord]
-	def listAll(rel: Set[StudentRelationship], currentMember: Member): Seq[AbstractMeetingRecord]
-	def list(rel: StudentRelationship): Seq[MeetingRecord]
+	def list(rel: Set[StudentRelationship[_]], currentMember: Member): Seq[MeetingRecord]
+	def listScheduled(rel: Set[StudentRelationship[_]], currentMember: Member): Seq[ScheduledMeetingRecord]
+	def listAll(rel: Set[StudentRelationship[_]], currentMember: Member): Seq[AbstractMeetingRecord]
+	def list(rel: StudentRelationship[_]): Seq[MeetingRecord]
 	def get(id: String): Option[AbstractMeetingRecord]
 	def purge(meeting: AbstractMeetingRecord): Unit
 
@@ -36,10 +36,10 @@ abstract class AbstractMeetingRecordService extends MeetingRecordService {
 	def saveOrUpdate(scheduledMeeting: ScheduledMeetingRecord) = meetingRecordDao.saveOrUpdate(scheduledMeeting)
 	def saveOrUpdate(meeting: AbstractMeetingRecord) = meetingRecordDao.saveOrUpdate(meeting)
 	def saveOrUpdate(approval: MeetingRecordApproval) = meetingRecordDao.saveOrUpdate(approval)
-	def list(rel: Set[StudentRelationship], currentMember: Member): Seq[MeetingRecord] = meetingRecordDao.list(rel, currentMember)
-	def listScheduled(rel: Set[StudentRelationship], currentMember: Member): Seq[ScheduledMeetingRecord] = meetingRecordDao.listScheduled(rel, currentMember)
-	def list(rel: StudentRelationship): Seq[MeetingRecord] = meetingRecordDao.list(rel)
-	def listAll(rel: Set[StudentRelationship], currentMember: Member): Seq[AbstractMeetingRecord] = {
+	def list(rel: Set[StudentRelationship[_]], currentMember: Member): Seq[MeetingRecord] = meetingRecordDao.list(rel, currentMember)
+	def listScheduled(rel: Set[StudentRelationship[_]], currentMember: Member): Seq[ScheduledMeetingRecord] = meetingRecordDao.listScheduled(rel, currentMember)
+	def list(rel: StudentRelationship[_]): Seq[MeetingRecord] = meetingRecordDao.list(rel)
+	def listAll(rel: Set[StudentRelationship[_]], currentMember: Member): Seq[AbstractMeetingRecord] = {
 		(meetingRecordDao.list(rel, currentMember) ++ meetingRecordDao.listScheduled(rel, currentMember)).sorted
 	}
 	def get(id: String): Option[AbstractMeetingRecord] = meetingRecordDao.get(id)
