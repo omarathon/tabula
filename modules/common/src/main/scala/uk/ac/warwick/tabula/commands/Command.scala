@@ -270,7 +270,7 @@ abstract class Description {
 	}
 
 	/**
-	 * Record member note, plus its student.
+	 * Record meeting, plus its creator and relationship type if available.
 	 */
 	def meeting(meeting: AbstractMeetingRecord) = {
 		property("meeting" -> meeting.id)

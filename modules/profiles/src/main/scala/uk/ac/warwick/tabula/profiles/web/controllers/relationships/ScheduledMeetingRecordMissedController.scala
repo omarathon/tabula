@@ -1,17 +1,14 @@
 package uk.ac.warwick.tabula.profiles.web.controllers.relationships
 
 import org.springframework.web.bind.annotation.PathVariable
-import uk.ac.warwick.tabula.ItemNotFoundException
-import scala.collection.JavaConverters._
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.ModelAttribute
-import uk.ac.warwick.tabula.web.Mav
 import org.springframework.web.bind.annotation.RequestMapping
-import uk.ac.warwick.tabula.data.model.{ScheduledMeetingRecord, MeetingRecordApproval, MeetingRecord}
+import uk.ac.warwick.tabula.data.model.ScheduledMeetingRecord
 import org.springframework.stereotype.Controller
 import javax.validation.Valid
 import uk.ac.warwick.tabula.web.views.JSONErrorView
-import uk.ac.warwick.tabula.profiles.commands.{ScheduledMeetingRecordMissedCommand, ApproveMeetingRecordState, ApproveMeetingRecordCommand}
+import uk.ac.warwick.tabula.profiles.commands.ScheduledMeetingRecordMissedCommand
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
