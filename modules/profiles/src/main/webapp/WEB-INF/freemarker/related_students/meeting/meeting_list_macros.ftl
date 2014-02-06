@@ -12,7 +12,7 @@
 
 			<#if can_create_meetings>
 				<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Create a new record"><i class="icon-edit"></i> New record</a>
-				<a class="btn-like new" href="<@routes.create_scheduled_meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Schedule a meeting"><i class="icon-time"></i> Schedule</a>
+				<#if features.scheduledMeetings><a class="btn-like new" href="<@routes.create_scheduled_meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Schedule a meeting"><i class="icon-time"></i> Schedule</a></#if>
 			</#if>
 
 		</div>
@@ -49,7 +49,7 @@
 							<#else>
 								<#local editUrl><@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting /></#local>
 							</#if>
-							<#if meeting.isScheduled() || (!meeting.approved && viewer.universityId == meeting.creator.universityId)>
+							<#if viewer.universityId == meeting.creator.universityId && (meeting.isScheduled() || !meeting.approved)>
 								<div class="meeting-record-toolbar">
 									<a href="${editUrl}" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
 									<a href="<@routes.delete_meeting_record meeting />" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
