@@ -293,6 +293,11 @@ object Permissions {
       case class Delete(relationshipType: PermissionsSelector[StudentRelationshipType])
       	extends SelectorPermission(relationshipType, "Remove a meeting record")
     }
+
+		object ScheduledMeetingRecord {
+			case object Update extends Permission("Edit a scheduled meeting record")
+			case object Delete extends Permission("Remove a scheduled meeting record")
+		}
 	}
 
 	object SmallGroups {

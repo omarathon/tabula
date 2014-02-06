@@ -13,7 +13,12 @@ trait RemoveMeetingRecordPermissions extends RequiresPermissionsChecking with Pe
 	self: RemoveMeetingRecordState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.MeetingRecord.Delete(meetingRecord.relationship.relationshipType), meetingRecord)
+		meetingRecord match {
+			case (m: MeetingRecord) =>
+				p.PermissionCheck(Permissions.Profiles.MeetingRecord.Delete(meetingRecord.relationship.relationshipType), meetingRecord)
+			case (m: ScheduledMeetingRecord) =>
+				p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Delete, meetingRecord)
+		}
 	}
 }
 
