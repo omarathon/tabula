@@ -24,7 +24,6 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 		val dumper = new WeekRangesDumper with StoppedClockComponent {
 			val stoppedTime = TEST_TIME
 			userSettings = mock[UserSettingsService]
-			when(userSettings.getByUserId("test")).thenReturn(Some(settingsWithNumberingSystem))
 			termService = mock[TermService]
 			departmentService = mock[ModuleAndDepartmentService]
 		}
