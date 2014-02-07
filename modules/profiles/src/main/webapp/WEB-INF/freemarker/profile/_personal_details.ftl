@@ -41,7 +41,7 @@
 						</tr>
 					</#if>
 
-					<#if (profile.disability.reportable)!false>
+					<#if (features.disabilityRenderingInProfiles && profile.disability.reportable)!false>
 						<tr>
 							<th>Disability</th>
 							<td>

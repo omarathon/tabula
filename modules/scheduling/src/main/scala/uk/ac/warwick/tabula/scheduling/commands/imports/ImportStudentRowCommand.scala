@@ -50,7 +50,7 @@ with ImportStudentRowCommandState
 with PropertyCopying
 with Logging {
 
-	self:ProfileServiceComponent with Tier4RequirementImporterComponent with ModeOfAttendanceImporterComponent  =>
+	self: ProfileServiceComponent with Tier4RequirementImporterComponent with ModeOfAttendanceImporterComponent  =>
 
 	// import ImportMemberHelpers._
 
