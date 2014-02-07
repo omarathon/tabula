@@ -59,8 +59,8 @@ object ScalaRestriction {
 		if (!ticked) None
 		else {
 			val criterion = disjunction()
-			criterion.eq(property1, 1)
-			criterion.eq(property2, 1)
+			criterion.add(Daoisms.is(property1, true))
+			criterion.add(Daoisms.is(property2, true))
 
 			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 		}
