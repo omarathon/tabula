@@ -59,8 +59,8 @@ object ScalaRestriction {
 		if (!ticked) None
 		else {
 			val criterion = disjunction()
-			criterion.add(like(property1, true))
-			criterion.add(like(property2, true))
+			criterion.eq(property1, 1)
+			criterion.eq(property2, 1)
 
 			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 		}
