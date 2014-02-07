@@ -56,7 +56,7 @@ abstract class ViewMonitoringPointsCommand(val department: Department, val acade
 			routes = visibleRoutes.toSeq.asJava
 		}
 
-		if (Set(courseTypes.size(), routes.size(), modesOfAttendance.size(), yearsOfStudy.size(), modules.size()).sum == 0) {
+		if (Set(courseTypes.size(), routes.size(), modesOfAttendance.size(), yearsOfStudy.size(), modules.size(), otherCriteria.size).sum == 0) {
 			filterTooVague = true
 			students = Seq()
 		} else {

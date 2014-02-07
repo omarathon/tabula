@@ -16,8 +16,7 @@ trait FiltersStudentsBase {
 	def modules: JList[Module]
 	def defaultOrder: Seq[Order]
 	def sortOrder: JList[Order]
-
-	var tier4Statuses: JList[JBoolean] = JArrayList()
+	var otherCriteria: JList[String] = JArrayList()
 
 	protected def modulesForDepartmentAndSubDepartments(department: Department): Seq[Module] =
 		(department.modules.asScala ++ department.children.asScala.flatMap { modulesForDepartmentAndSubDepartments }).sorted
@@ -33,7 +32,7 @@ trait FiltersStudentsBase {
 		yearsOfStudy.asScala.foreach(p => result.addQueryParameter("yearsOfStudy", p.toString))
 		sprStatuses.asScala.foreach(p => result.addQueryParameter("sprStatuses", p.code))
 		modules.asScala.foreach(p => result.addQueryParameter("modules", p.code))
-		tier4Statuses.asScala.foreach(p => result.addQueryParameter("tier4Statuses", p.toString))
+		otherCriteria.asScala.foreach(p => result.addQueryParameter("otherCriteria", p.toString))
 		if (result.getQuery == null)
 			""
 		else
@@ -48,7 +47,7 @@ trait FiltersStudentsBase {
 			"yearsOfStudy" -> yearsOfStudy.asScala.mkString(","),
 			"sprStatuses" -> sprStatuses.asScala.map{_.code}.mkString(","),
 			"modules" -> modules.asScala.map{_.code}.mkString(","),
-			"tier4Statuses" -> tier4Statuses.asScala.mkString(",")
+			"otherCriteria" -> otherCriteria.asScala.mkString(",")
 		)
 	}
 
