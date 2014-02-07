@@ -42,8 +42,6 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 
 		MonitoringPoints.Report,
 
-		Profiles.Read.Tier4VisaRequirement,
-
 		Profiles.MeetingRecord.ReadDetails(PermissionsSelector.Any[StudentRelationshipType]),
 
 		SmallGroups.Read
