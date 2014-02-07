@@ -69,11 +69,15 @@
 							<#if profile.casUsed && profile.hasTier4Visa>Yes
 							<#elseif !profile.casUsed && !profile.hasTier4Visa>No
 							<#elseif !profile.casUsed && profile.hasTier4Visa>
-								Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a> to find out whether tier 4
-								requirements apply to this student (tier 4 visa exists but no Confirmation of Acceptance for Studies)
+								Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a>
+								<a class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
+								requirements apply to this student. (Tier 4 visa exists but no Confirmation of Acceptance for Studies)"
+								   data-toggle="popover"><i class="icon-question-sign"></i></a>
 							<#elseif profile.casUsed && !profile.hasTier4Visa>
-								Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a> to find out whether tier 4
-								requirements apply to this student (Confirmation of Acceptance for Studies exists but no tier 4 visa)
+								Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a>
+								<a class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
+								requirements apply to this student. (Confirmation of Acceptance for Studies exists but no tier 4 visa)"
+								   data-toggle="popover"><i class="icon-question-sign"></i></a>
 							</#if>
 							</td>
 						</tr>
