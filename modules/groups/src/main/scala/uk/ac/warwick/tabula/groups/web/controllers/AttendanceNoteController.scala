@@ -1,9 +1,9 @@
 package uk.ac.warwick.tabula.groups.web.controllers
 
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
-import uk.ac.warwick.tabula.data.model.StudentMember
-import uk.ac.warwick.tabula.commands.{ApplyWithCallback, PopulateOnForm, Appliable}
+import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
+import uk.ac.warwick.tabula.data.model.{AbsenceType, StudentMember}
+import uk.ac.warwick.tabula.commands.{SelfValidating, ApplyWithCallback, PopulateOnForm, Appliable}
 import org.springframework.validation.Errors
 import scala.Array
 import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
@@ -15,6 +15,7 @@ import uk.ac.warwick.tabula.helpers.DateBuilder
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEventOccurrence}
 import uk.ac.warwick.tabula.groups.commands.{EditAttendanceNoteCommand, AttendanceNoteAttachmentCommand}
 import uk.ac.warwick.tabula.groups.web.Routes
+import javax.validation.Valid
 
 @Controller
 @RequestMapping(Array("/note/{student}/{occurrence}"))
@@ -65,9 +66,15 @@ class AttendanceNoteAttachmentController extends GroupsController {
 @RequestMapping(Array("/note/{student}/{occurrence}/edit"))
 class EditAttendanceNoteController extends GroupsController {
 
+	validatesSelf[SelfValidating]
+
 	@ModelAttribute("command")
-	def command(@PathVariable student: StudentMember, @PathVariable occurrence: SmallGroupEventOccurrence) =
-		EditAttendanceNoteCommand(student, occurrence, user)
+	def command(
+		@PathVariable student: StudentMember,
+		@PathVariable occurrence: SmallGroupEventOccurrence,
+		@RequestParam(value="state", required=false) state: String
+	) =
+		EditAttendanceNoteCommand(student, occurrence, user, Option(state))
 
 	@RequestMapping(method=Array(GET, HEAD), params=Array("isIframe"))
 	def getIframe(
@@ -91,6 +98,7 @@ class EditAttendanceNoteController extends GroupsController {
 		isIframe: Boolean = false
 	) = {
 		val mav = Mav("groups/attendance/edit_note",
+			"allAbsenceTypes" -> AbsenceType.values,
 			"returnTo" -> getReturnTo(Routes.tutor.mygroups(user.apparentUser)),
 			"isModal" -> ajax,
 			"isIframe" -> isIframe
@@ -105,20 +113,20 @@ class EditAttendanceNoteController extends GroupsController {
 
 	@RequestMapping(method=Array(POST), params=Array("isIframe"))
 	def submitIframe(
-		@ModelAttribute("command") cmd: Appliable[SmallGroupEventAttendanceNote] with PopulateOnForm,
+		@Valid @ModelAttribute("command") cmd: Appliable[SmallGroupEventAttendanceNote] with PopulateOnForm,
 		errors: Errors
 	) = {
 		if (errors.hasErrors) {
-			form(cmd)
+			form(cmd, true)
 		} else {
 			cmd.apply()
-			Mav("groups/attendance/edit_note", "success" -> true, "isIframe" -> true)
+			Mav("groups/attendance/edit_note", "success" -> true, "isIframe" -> true, "allAbsenceTypes" -> AbsenceType.values)
 		}
 	}
 
 	@RequestMapping(method=Array(POST))
 	def submit(
-		@ModelAttribute("command") cmd: Appliable[SmallGroupEventAttendanceNote] with PopulateOnForm,
+		@Valid @ModelAttribute("command") cmd: Appliable[SmallGroupEventAttendanceNote] with PopulateOnForm,
 		errors: Errors
 	) = {
 		if (errors.hasErrors) {

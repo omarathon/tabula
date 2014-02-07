@@ -377,9 +377,8 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 	 * which is used to check if approving that meeting would then create a checkpoint.
 	 */
 	private def countRelevantMeetings(student: StudentMember, point: MonitoringPoint, meetingToSkipApproval: Option[MeetingRecord]): Int = {
-		val scd = student.mostSignificantCourseDetails.getOrElse(throw new IllegalArgumentException)
 		point.meetingRelationships.map(relationshipType => {
-			relationshipService.getRelationships(relationshipType, scd.sprCode)
+			relationshipService.getRelationships(relationshipType, student)
 				.flatMap(meetingRecordDao.list(_).filter(meeting =>
 					(meeting.isAttendanceApproved || meetingToSkipApproval.exists(m => m == meeting))
 						&& point.meetingFormats.contains(meeting.format)

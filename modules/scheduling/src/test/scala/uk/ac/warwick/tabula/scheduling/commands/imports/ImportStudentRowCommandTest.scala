@@ -326,7 +326,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			studentMember.freshStudentCourseDetails.size should not be (0)
 
-			there was no(relationshipService).replaceStudentRelationships(tutorRelationshipType, "0672089/2", Seq("0070790"))
+			there was no(relationshipService).replaceStudentRelationships(tutorRelationshipType, studentMember.mostSignificantCourseDetails.get, Seq(existingStaffMember))
 		}
 	}
 
@@ -348,18 +348,19 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
-			relationshipService.findCurrentRelationships(tutorRelationshipType, "0672089/2") returns (Nil)
+			
+			relationshipService.findCurrentRelationships(tutorRelationshipType, existing) returns (Nil)
 
 			val member = rowCommand.applyInternal() match {
 				case stu: StudentMember => Some(stu)
 				case _ => None
 			}
-
+			
 			val studentMember = member.get
 
 			studentMember.mostSignificantCourseDetails should not be (null)
 
-			there was one(relationshipService).replaceStudentRelationships(tutorRelationshipType, "0672089/2", Seq("0070790"))
+			there was one(relationshipService).replaceStudentRelationships(tutorRelationshipType, studentMember.mostSignificantCourseDetails.get, Seq(existingStaffMember))
 		}
 	}
 

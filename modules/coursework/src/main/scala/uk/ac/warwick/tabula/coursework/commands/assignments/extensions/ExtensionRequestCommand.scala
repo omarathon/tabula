@@ -35,7 +35,7 @@ class ExtensionRequestCommand(val module: Module, val assignment:Assignment, val
 
 	val extraInfo = basicInfo ++ (submitter.profile.flatMap { _.mostSignificantCourseDetails.map { scd =>
 
-		val relationships = studentRelationships.map(x => (x.description, relationshipService.findCurrentRelationships(x,scd.sprCode))).toMap
+		val relationships = studentRelationships.map(x => (x.description, relationshipService.findCurrentRelationships(x,scd.student))).toMap
 
 		//Pick only the parts of scd required since passing the whole object fails due to the session not being available to load lazy objects
 		Map(

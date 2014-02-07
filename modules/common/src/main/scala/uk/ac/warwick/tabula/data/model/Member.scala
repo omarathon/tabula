@@ -134,7 +134,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def touchedDepartments = {
 		def moduleDepts = registeredModulesByYear(None).map(_.department).toStream
 
-		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct
+		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct	
 		topLevelDepts flatMap(_.subDepartmentsContaining(this))
 	}
 
@@ -261,7 +261,7 @@ class StudentMember extends Member with StudentProperties {
 			.flatMap(_.freshOrStaleStudentCourseYearDetails)
 			.filter(_.academicYear == year)
 
-	@OneToOne
+	@OneToOne(fetch = FetchType.LAZY) // don't cascade, cascaded separately
 	@JoinColumn(name = "mostSignificantCourse")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var mostSignificantCourse: StudentCourseDetails = _
@@ -270,12 +270,20 @@ class StudentMember extends Member with StudentProperties {
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	var tier4VisaRequirement: JBoolean = _
 
-	@Restricted(Array("Profiles.Read.CasUsed"))
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	def casUsed: Option[Boolean] = {
-			mostSignificantCourseDetails match {
-				case Some(scd: StudentCourseDetails) => Some(scd.latestStudentCourseYearDetails.casUsed)
-				case _ => None // better not to even display this field if there are no student course details
-			}
+			mostSignificantCourseDetails.flatMap(scd => scd.latestStudentCourseYearDetails.casUsed match {
+				case null => None
+				case casUsed => Some(casUsed)
+			})
+	}
+
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
+	def hasTier4Visa: Option[Boolean] = {
+		mostSignificantCourseDetails.flatMap(scd => scd.latestStudentCourseYearDetails.tier4Visa match {
+			case null => None
+			case hasTier4Visa => Some(hasTier4Visa)
+		})
 	}
 
 	def this(id: String) = {
@@ -345,7 +353,7 @@ class StaffMember extends Member with StaffProperties {
 		this.universityId = id
 	}
 
-	@OneToOne(cascade = Array(ALL))
+	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "assistantsgroup_id")
 	var _assistantsGroup: UserGroup = UserGroup.ofUsercodes
 	def assistants: Option[UnspecifiedTypeUserGroup] = Option(_assistantsGroup)
@@ -412,7 +420,7 @@ trait MemberProperties {
 
 	var groupName: String = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "home_department_id")
 	var homeDepartment: Department = _
 
@@ -432,12 +440,12 @@ trait MemberProperties {
 }
 
 trait StudentProperties {
-	@OneToOne(cascade = Array(ALL))
+	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name="HOME_ADDRESS_ID")
 	@Restricted(Array("Profiles.Read.HomeAddress"))
 	var homeAddress: Address = null
 
-	@OneToOne(cascade = Array(ALL))
+	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name="TERMTIME_ADDRESS_ID")
 	@Restricted(Array("Profiles.Read.TermTimeAddress"))
 	var termtimeAddress: Address = null

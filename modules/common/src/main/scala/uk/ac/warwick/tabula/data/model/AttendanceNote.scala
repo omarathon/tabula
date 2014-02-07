@@ -6,12 +6,13 @@ import org.joda.time.DateTime
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import java.text.BreakIterator
+import org.hibernate.annotations.Type
 
 @Entity
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
 abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "student_id")
 	var student: StudentMember = _
 
@@ -37,8 +38,13 @@ abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 		}.getOrElse("")
 	}
 
-	@OneToOne
+	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "attachment_id")
 	var attachment: FileAttachment = _
+
+	@NotNull
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.AbsenceTypeUserType")
+	@Column(name = "absence_type")
+	var absenceType: AbsenceType = _
 
 }

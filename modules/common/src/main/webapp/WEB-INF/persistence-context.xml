@@ -82,6 +82,7 @@
 			<prop key="hibernate.dialect">uk.ac.warwick.tabula.data.oracle.Oracle10gDialect</prop>
 			<prop key="hibernate.jdbc.use_streams_for_binary">true</prop>
 			<prop key="defaultNChar">true</prop>
+			<prop key="hibernate.enable_lazy_load_no_trans">true</prop>
 		</util:properties>
 		
 		<bean id="mainDatabaseDialect" class="uk.ac.warwick.tabula.data.oracle.Oracle10gDialect" />

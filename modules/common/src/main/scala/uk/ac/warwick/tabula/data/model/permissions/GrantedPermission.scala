@@ -29,7 +29,7 @@ import uk.ac.warwick.tabula.data.model.Route
 abstract class GrantedPermission[A <: PermissionsTarget] extends GeneratedId with HibernateVersioned with PostLoadBehaviour {
 	import GrantedPermission.OverrideType
 	
-	@OneToOne(cascade=Array(CascadeType.ALL))
+	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.EAGER)
 	@JoinColumn(name="usergroup_id")
 	var users: UserGroup = UserGroup.ofUsercodes
 	

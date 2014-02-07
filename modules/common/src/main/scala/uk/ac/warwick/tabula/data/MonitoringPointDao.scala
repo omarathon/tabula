@@ -9,6 +9,7 @@ import org.hibernate.criterion.{Projections, Order}
 import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.criterion.Restrictions._
 import uk.ac.warwick.tabula.services.TermService
+import org.hibernate.FetchMode
 
 trait MonitoringPointDaoComponent {
 	val monitoringPointDao: MonitoringPointDao
@@ -90,6 +91,12 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			val or = disjunction()
 			monitoringPoints.grouped(Daoisms.MaxInClauseCount).foreach { mps => or.add(in("point", mps.asJava)) }
 			criteria.add(or)
+
+			if (mostSiginificantOnly) {
+				criteria.setFetchMode("point.student", FetchMode.JOIN)
+				criteria.setFetchMode("point.student.mostSignificantCourseDetails", FetchMode.JOIN)
+				criteria.setFetchMode("point.student.mostSignificantCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
+			}
 	
 			val checkpoints = criteria.seq
 	
@@ -99,12 +106,11 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			if (mostSiginificantOnly)
 				result.filter{ case(student, checkpoint) => student.mostSignificantCourseDetails.exists(scd => {
 					val pointSet = checkpoint.point.pointSet.asInstanceOf[MonitoringPointSet]
-					val scydOption = scd.freshStudentCourseYearDetails.find(scyd =>
+					pointSet.route == scd.route && scd.freshStudentCourseYearDetails.exists(scyd =>
 						scyd.academicYear == pointSet.academicYear && (
 							pointSet.year == null || scyd.yearOfStudy == pointSet.year
 						)
 					)
-					pointSet.route == scd.route && scydOption.isDefined
 				})}
 			else
 				result

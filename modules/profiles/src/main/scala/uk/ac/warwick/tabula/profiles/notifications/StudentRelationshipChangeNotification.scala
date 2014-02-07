@@ -6,12 +6,12 @@ import uk.ac.warwick.tabula.profiles.web.Routes
 import uk.ac.warwick.userlookup.User
 
 class StudentRelationshipChangeNotification (
-	private val relationship:StudentRelationship,
+	private val relationship:StudentRelationship[_],
 	val agent:User,
 	val recipient:User,
 	private val oldAgent: Option[Member],
 	private val templateLocation: String
-) extends Notification[StudentRelationship] with SingleRecipientNotification {
+) extends Notification[StudentRelationship[_]] with SingleRecipientNotification {
 
 	this: TextRenderer =>
 

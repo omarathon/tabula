@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.spring.Wire
 
 @Entity @AccessType("field")
-class StudentRelationshipType extends PermissionsTarget with PermissionsSelector[StudentRelationshipType] {
+class StudentRelationshipType extends PermissionsTarget with PermissionsSelector[StudentRelationshipType] with IdEquality {
 
 	@Id
 	var id: String = _

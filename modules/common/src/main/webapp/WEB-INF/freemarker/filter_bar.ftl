@@ -84,7 +84,7 @@
 				<#assign currentfilter><@current_filter_value "courseTypes" placeholder; courseType>${courseType.code}</@current_filter_value></#assign>
 				<@filter "courseTypes" placeholder currentfilter filterCommand.allCourseTypes; courseType>
 					<input type="checkbox" name="${status.expression}" value="${courseType.code}" data-short-value="${courseType.code}" ${contains_by_code(filterCommand.courseTypes, courseType)?string('checked','')}>
-				${courseType.description}
+					${courseType.description}
 				</@filter>
 
 				<#assign placeholder = "All routes" />
@@ -97,30 +97,57 @@
 				<#assign placeholder = "All attendance" />
 				<#assign currentfilter><@current_filter_value "modesOfAttendance" placeholder; moa>${moa.shortName?capitalize}</@current_filter_value></#assign>
 				<@filter "modesOfAttendance" placeholder currentfilter filterCommand.allModesOfAttendance; moa>
-					<input type="checkbox" name="${status.expression}" value="${moa.code}" data-short-value="${moa.shortName?capitalize}" ${contains_by_code(filterCommand.modesOfAttendance, moa)?string('checked','')}>
-				${moa.fullName}
+					<input type="checkbox" name="${status.expression}" value="${moa.code}" data-short-value="${moa.shortName?capitalize}"
+					${contains_by_code(filterCommand.modesOfAttendance, moa)?string('checked','')}>
+					${moa.fullName}
 				</@filter>
 
 				<#assign placeholder = "All years" />
 				<#assign currentfilter><@current_filter_value "yearsOfStudy" placeholder; year>${year}</@current_filter_value></#assign>
 				<@filter "yearsOfStudy" placeholder currentfilter filterCommand.allYearsOfStudy filterCommand.allYearsOfStudy "Year "; yearOfStudy>
-					<input type="checkbox" name="${status.expression}" value="${yearOfStudy}" data-short-value="${yearOfStudy}" ${filterCommand.yearsOfStudy?seq_contains(yearOfStudy)?string('checked','')}>
-				${yearOfStudy}
+					<input type="checkbox" name="${status.expression}" value="${yearOfStudy}" data-short-value="${yearOfStudy}"
+					${filterCommand.yearsOfStudy?seq_contains(yearOfStudy)?string('checked','')}>
+					${yearOfStudy}
 				</@filter>
 
 				<#assign placeholder = "All statuses" />
 				<#assign currentfilter><@current_filter_value "sprStatuses" placeholder; sprStatus>${sprStatus.shortName?capitalize}</@current_filter_value></#assign>
 				<@filter "sprStatuses" placeholder currentfilter filterCommand.allSprStatuses; sprStatus>
 					<input type="checkbox" name="${status.expression}" value="${sprStatus.code}" data-short-value="${sprStatus.shortName?capitalize}" ${contains_by_code(filterCommand.sprStatuses, sprStatus)?string('checked','')}>
-				${sprStatus.fullName}
+					${sprStatus.fullName}
 				</@filter>
 
 				<#assign placeholder = "All modules" />
 				<#assign currentfilter><@current_filter_value "modules" placeholder; module>${module.code?upper_case}</@current_filter_value></#assign>
 				<@filter "modules" placeholder currentfilter filterCommand.allModules; module>
-					<input type="checkbox" name="${status.expression}" value="${module.code}" data-short-value="${module.code?upper_case}" ${contains_by_code(filterCommand.modules, module)?string('checked','')}>
+					<input type="checkbox" name="${status.expression}"
+						   value="${module.code}"
+						   data-short-value="${module.code?upper_case}"
+							${contains_by_code(filterCommand.modules, module)?string('checked','')}>
 					<@fmt.module_name module false />
 				</@filter>
+
+				<#if features.visaInStudentProfile>
+					<#assign placeholder = "Other" />
+					<#assign currentfilter>
+						<#-- The current_filter_value macro looks to see if a list variable called otherCriteria
+							- coming into the form has a value.  If it does, it lists the elements as "criterion" -->
+						<@current_filter_value "otherCriteria" placeholder; criterion>
+							${criterion}
+						</@current_filter_value>
+					</#assign>
+
+					<@filter "otherCriteria" placeholder currentfilter filterCommand.allOtherCriteria; criterion>
+						<input type="checkbox"
+							name="${status.expression}"
+							value="${criterion}"
+							data-short-value="${criterion}"
+							${filterCommand.otherCriteria?seq_contains(criterion)?string('checked','')}
+						>
+						${criterion}
+					</@filter>
+				</#if>
+
 			</div>
 		</@f.form>
 	</div>

@@ -47,10 +47,12 @@
             $(".related_student").on("mouseover", function(e) {
                 $(this).find("td").addClass("hover");
             }).on("mouseout", function(e) {
-                        $(this).find("td").removeClass("hover");
-                    }).on("click", function(e) {
-                        if (! $(e.target).is("a") && ! $(e.target).is("img")) $(this).find("a.profile-link")[0].click();
-                    });
+				$(this).find("td").removeClass("hover");
+			}).on("click", function(e) {
+				if (!$(e.target).is("a") && !$(e.target).is("img")) {
+					window.location = $(this).find("a.profile-link").attr('href');
+				}
+			});
         });
     })(jQuery);
 </script>

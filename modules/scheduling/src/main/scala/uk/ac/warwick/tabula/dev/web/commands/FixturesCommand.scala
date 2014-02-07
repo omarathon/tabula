@@ -84,13 +84,24 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 	}
 
 	private def setupDepartmentAndModules() {
+		// Blitz members
+		transactional() {
+			session.newQuery("delete from StudentCourseYearDetails where studentCourseDetails.scjCode like '3000%'").executeUpdate()
+			session.newQuery("delete from ModuleRegistration where studentCourseDetails.scjCode like '3000%'").executeUpdate()
+			session.newQuery("delete from StudentCourseDetails where scjCode like '3000%'").executeUpdate()
+			session.newQuery("delete from StudentMember where universityId like '3000%'").executeUpdate()
+		}
+		
 		// Blitz the test department
 		transactional() {
 			moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestDepartment.code) map { dept =>
 				val routes: Seq[Route] = routeDao.findByDepartment(dept)
 
 				val deptScds = scdDao.findByDepartment(dept)
-				val looseScds = session.newCriteria[StudentCourseDetails].add(Restrictions.isNull("department")).list
+				val looseScds = 
+					session.newCriteria[StudentCourseDetails]
+						   .add(Restrictions.isNull("department"))
+						   .seq
 				val scds = (deptScds ++ looseScds).distinct
 
 				for (scd <- scds) {

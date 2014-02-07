@@ -111,7 +111,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	var allowExtensionRequests: JBoolean = _ // by students
 	var genericFeedback: String = ""
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "module_id")
 	var module: Module = _
 
@@ -174,7 +174,7 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	def submissionFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Submission).sortBy(_.position)
 	def feedbackFields: Seq[FormField] = fields.filter(_.context == FormFieldContext.Feedback).sortBy(_.position)
 
-	@OneToOne(cascade = Array(ALL))
+	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
 	var members: UserGroup = UserGroup.ofUsercodes
 

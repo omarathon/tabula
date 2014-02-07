@@ -2,7 +2,11 @@
 <#import "*/modal_macros.ftl" as modal />
 
 	<#if success??>
-		<div class="attendance-note-success" data-linkid="#attendanceNote-${student.universityId}-${command.occurrence.id}"></div>
+		<div
+			class="attendance-note-success"
+			data-linkid="#attendanceNote-${student.universityId}-${command.occurrence.id}"
+			data-state="<#if !command.attendanceNote.note?has_content && !command.attendanceNote.attachment?has_content>Add<#else>Edit</#if>"
+		></div>
 	</#if>
 
 	<#assign heading>
@@ -29,7 +33,7 @@
 		<@modal.footer>
 			<form class="double-submit-protection">
 				<span class="submit-buttons">
-					<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit" data-loading-text="Saving&hellip;">
+					<button class="btn btn-primary spinnable" type="submit" name="submit" data-loading-text="Saving&hellip;">
 						Save
 					</button>
 					<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
@@ -39,7 +43,9 @@
 	<#else>
 
 		<p>
-			<#if command.attendance??>
+			<#if command.customState??>
+				${command.customState.description}:
+			<#elseif command.attendance??>
 				${command.attendance.state.description}:
 			<#else>
 				Not recorded:
@@ -48,9 +54,24 @@
 			${command.occurrence.event.group.name},
 			${command.occurrence.event.day.name} <@fmt.time command.occurrence.event.startTime /> - <@fmt.time command.occurrence.event.endTime />,
 			Week ${command.occurrence.week}
+
+			<#if command.customState?? && command.attendance?? && command.customState.dbValue != command.attendance.state.dbValue>
+				<small class="subtle help-block">
+					This attendance has not yet been saved.
+				</small>
+			</#if>
 		</p>
 
 		<@f.form id="attendance-note-form" method="post" enctype="multipart/form-data" action="" commandName="command" class="form-horizontal double-submit-protection">
+
+			<@form.labelled_row "absenceType" "Absence type">
+				<@f.select path="absenceType">
+					<option value="" style="display: none;">Please select one&hellip;</option>
+					<#list allAbsenceTypes as type>
+						<@f.option value="${type.dbValue}" label="${type.description}" />
+					</#list>
+				</@f.select>
+			</@form.labelled_row>
 
 			<@form.labelled_row "note" "Note">
 				<@f.textarea path="note" cssClass="input-block-level" rows="5" cssStyle="height: 150px;" />

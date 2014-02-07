@@ -19,6 +19,28 @@ exports.createButtonGroup = function(id){
     $this.hide();
 };
 
+var setArgOnUrl = function(url, argName, argValue){
+	if(url.indexOf('?') === 0) {
+		return url + '?' + argName + '=' + argValue;
+	} else {
+		var args = url.substring(url.indexOf('?') + 1, url.length).split('&'),
+			found = false,
+			newArgs = $.map(args, function(pair){
+				var arg = pair.split('=');
+				if (arg[0] === argName) {
+					found = true;
+					return argName + '=' + argValue;
+				} else {
+					return pair;
+				}
+			});
+		if (!found) {
+			newArgs.push(argName + '=' + argValue);
+		}
+		return url.substring(0, url.indexOf('?')) + '?' + newArgs.join('&');
+	}
+};
+
 exports.bindButtonGroupHandler = function() {
     $('#recordAttendance').on('click', 'div.btn-group button', function(e){
         var $this = $(this);
@@ -30,6 +52,8 @@ exports.bindButtonGroupHandler = function() {
 	        $this.closest('div.pull-right').find('option').filter(function(){
 	            return $(this).val() == $this.data('state');
 	        }).prop('selected', true);
+			var noteButton = $this.closest('div.pull-right').find('a.attendance-note');
+			noteButton.attr('href', setArgOnUrl(noteButton.attr('href'), 'state', $this.data('state')));
 	      }
     });
 };

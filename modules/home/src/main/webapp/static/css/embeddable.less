@@ -1021,6 +1021,11 @@ h2 {
 .profile-link {
   color: @tabulaGray;
   font-size: 14px;
+
+	i {
+		color: @tabulaGrayLight;
+	}
+
 }
 
 #app-comment-message {
@@ -1314,6 +1319,10 @@ h1.with-settings {
 
 	.photo.size-tinythumbnail {
 		.tabula-photo(50px, 5px);
+	}
+
+	.photo.size-smallthumbnail {
+		.tabula-photo(130px, 6px);
 	}
 
 	.photo.size-thumbnail {
@@ -1622,6 +1631,25 @@ h1.with-settings {
 
 } // .tabula-page
 
+// profile subset
+.profile-subset {
+
+	margin-left: -25%;
+	width: 50%;
+
+	h1 {
+		margin: 0px;
+	}
+
+ 	.subset-course th {
+		width: 144px;
+		text-align: right;
+	}
+
+	.alert {
+		margin-top: 15px;
+	}
+}
 
 // Mixin. Not for use directly - use the .size-* classes below,
 // which are used by the FTL macro so just use that!
@@ -1811,7 +1839,7 @@ th.nowrap, td.nowrap { white-space: nowrap; }
 
     .filter-short-values {
       display: inline-block;
-      width: 105px;
+      width: 90px;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
@@ -1819,6 +1847,8 @@ th.nowrap, td.nowrap { white-space: nowrap; }
     }
 
     .clear-all-filters {
+	  padding-left: 5px;
+	  padding-right: 5px;
       margin: 0;
       color: @tabulaGray;
 

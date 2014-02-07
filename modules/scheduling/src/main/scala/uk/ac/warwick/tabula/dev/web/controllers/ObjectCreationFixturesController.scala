@@ -157,12 +157,12 @@ class CourseCreationFixturesController {
 class RelationshipCreationFixturesController {
 
 	@ModelAttribute("createRelationship")
-	def getCreateRelationshipCommand(): Appliable[StudentRelationship] = {
+	def getCreateRelationshipCommand(): Appliable[MemberStudentRelationship] = {
 		RelationshipFixtureCommand()
 	}
 
 	@RequestMapping(method = Array(POST))
-	def submit(@ModelAttribute("createRelationship") cmd: Appliable[StudentRelationship]) {
+	def submit(@ModelAttribute("createRelationship") cmd: Appliable[MemberStudentRelationship]) {
 		cmd.apply()
 	}
 }

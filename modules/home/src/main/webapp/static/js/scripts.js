@@ -1025,15 +1025,23 @@
 
 				if ($f.find(".attendance-note-success").length > 0) {
 					// Save successful
-					var linkId = $f.find(".attendance-note-success").data('linkid');
-					$(linkId).attr('data-original-title', 'Edit attendance note')
-						.find('i').removeClass('icon-edit').addClass('icon-edit-sign');
+					var linkId = $f.find(".attendance-note-success").data('linkid')
+						, state = $f.find(".attendance-note-success").data('state');
+					var link = $(linkId).attr('data-original-title', state + ' attendance note');
+					if (state === 'Edit') {
+						link.find('i').removeClass('icon-edit').addClass('icon-edit-sign');
+					} else {
+						link.find('i').removeClass('icon-edit-sign').addClass('icon-edit');
+					}
 					$m.modal("hide");
 				} else {
 					$m.find('.modal-body').slideDown();
 					var $form = $m.find('form.double-submit-protection');
 					$form.tabulaSubmitOnce();
-					$form.find(".btn").removeClass('disabled');
+					var btn = $form.find(".btn").removeClass('disabled');
+					if (btn.data('spinContainer')) {
+						btn.data('spinContainer').spin(false);
+					}
 					// wipe any existing state information for the submit protection
 					$form.removeData('submitOnceSubmitted');
 					$m.modal("show");
@@ -1066,6 +1074,7 @@
 
 					// hide the iframe, so we don't get a FOUC
 					$m.find('.modal-body').slideUp();
+					$m.find('form.double-submit-protection .spinnable').spin('small');
 				});
 
 				$.get(href, function(data){

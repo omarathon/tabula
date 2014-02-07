@@ -40,7 +40,7 @@
 			</@form.label>
 			<@form.label checkbox=true>
 				<@f.radiobutton path="weekNumberingSystem" value="academic" />
-				Use academic week numbers, including vacations (the first week of the Spring term is week 15 or week 16)
+				Use academic week numbers, including vacations (the first week of the Spring term is week 15)
 			</@form.label>
 			<@form.label checkbox=true>
 				<@f.radiobutton path="weekNumberingSystem" value="none" />
