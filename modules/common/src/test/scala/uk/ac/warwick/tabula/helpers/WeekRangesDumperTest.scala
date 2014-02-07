@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.helpers
 
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, Mockito, TestBase}
+import org.mockito.Mockito._
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, UserSettingsService, TermService}
 import org.joda.time.{Interval, DateTime}
 import uk.ac.warwick.tabula.data.model.{Department, UserSettings}
@@ -14,18 +15,19 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 	private trait Fixture {
 		val TEST_TIME = DateTime.now
 
-		val dumper = new WeekRangesDumper with StoppedClockComponent {
-			val stoppedTime = TEST_TIME
-			userSettings = mock[UserSettingsService]
-			termService = mock[TermService]
-			departmentService = mock[ModuleAndDepartmentService]
-		}
-
 		val settingsWithNumberingSystem = new UserSettings()
 		settingsWithNumberingSystem.weekNumberingSystem = WeekRange.NumberingSystem.Term
 
 		val departmentWithNumberingSystem = new Department()
 		departmentWithNumberingSystem.weekNumberingSystem = WeekRange.NumberingSystem.Cumulative
+
+		val dumper = new WeekRangesDumper with StoppedClockComponent {
+			val stoppedTime = TEST_TIME
+			userSettings = mock[UserSettingsService]
+			when(userSettings.getByUserId("test")).thenReturn(Some(settingsWithNumberingSystem))
+			termService = mock[TermService]
+			departmentService = mock[ModuleAndDepartmentService]
+		}
 
 		val singleWeek = Seq((AcademicYear(2012),1,new Interval(TEST_TIME.minusWeeks(1), TEST_TIME)))
 	}
