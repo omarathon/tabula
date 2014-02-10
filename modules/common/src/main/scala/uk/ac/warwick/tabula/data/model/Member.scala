@@ -134,7 +134,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def touchedDepartments = {
 		def moduleDepts = registeredModulesByYear(None).map(_.department).toStream
 
-		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct	
+		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct
 		topLevelDepts flatMap(_.subDepartmentsContaining(this))
 	}
 
@@ -455,7 +455,7 @@ trait StudentProperties {
 	@BatchSize(size=200)
 	var nextOfKins:JList[NextOfKin] = JArrayList()
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "disability")
 	@Restricted(Array("Profiles.Read.Disability"))
 	var disability: Disability = _
