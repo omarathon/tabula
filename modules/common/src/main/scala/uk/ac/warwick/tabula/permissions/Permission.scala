@@ -89,7 +89,7 @@ object CheckablePermission {
 object SelectorPermission {
 	private val ObjectClassPrefix = Permissions.getClass.getName
 
-	def of[A <: PermissionsSelector[A]](name: String, selector: A): SelectorPermission[A] = {
+	def of[A <: PermissionsSelector[A]](name: String, selector: Object): SelectorPermission[A] = {
 		try {
 			// Go through the magical hierarchy
 			val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$'))
