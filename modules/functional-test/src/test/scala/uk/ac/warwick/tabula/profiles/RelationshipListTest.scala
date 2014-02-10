@@ -20,10 +20,11 @@ class RelationshipListTest extends SubDepartmentFixture{
 		createModule("xxx-ug","xug19","Top level module")
 		registerStudentsOnModule(Seq(P.Student2),"xug19")
 
-		Given("Student3 is a postgraduate, registered on a module in xxx")
+		And("Student3 is a postgraduate, registered on a module in xxx")
 		createModule("xxx","xpg12","Postgrad module")
 		registerStudentsOnModule(Seq(P.Student3),"xpg12")
 
+		And("There is a relationship between Student1 and Marker1")
 		createStudentRelationship(P.Student1, P.Marker1)
 	}
 
