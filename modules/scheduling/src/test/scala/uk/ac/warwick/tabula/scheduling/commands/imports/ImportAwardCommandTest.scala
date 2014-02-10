@@ -15,14 +15,14 @@ class ImportAwardCommandTest extends AppContextTestBase with Mockito with Loggin
 
 	@Transactional
 	@Test def testImportAwardCommand() {
-		val info = new AwardInfo("BSC", "BSc", "Batchelor of Science")
+		val info = new AwardInfo("BSC", "BSc", "Bachelor of Science")
 
 		// test command
 		val command = new ImportAwardCommand(info)
 		val (award, result) = command.applyInternal
 		award.code should be ("BSC")
 		award.shortName should be ("BSc")
-		award.name should be ("Batchelor of Science")
+		award.name should be ("Bachelor of Science")
 		award.lastUpdatedDate.dayOfMonth should be ((new DateTime).dayOfMonth)
 		result should be (ImportAcademicInformationCommand.ImportResult(added = 1))
 

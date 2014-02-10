@@ -23,6 +23,8 @@ case object RouteAssistantRoleDefinition extends BuiltInRoleDefinition {
 		Profiles.StudentRelationship.Update(PermissionsSelector.Any[StudentRelationshipType]),
 		Profiles.StudentRelationship.Delete(PermissionsSelector.Any[StudentRelationshipType]),
 
+		Profiles.Read.Tier4VisaRequirement,
+
 		MemberNotes.Create,
 		MemberNotes.Update,
 		MemberNotes.Delete

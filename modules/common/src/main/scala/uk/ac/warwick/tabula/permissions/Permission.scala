@@ -89,7 +89,7 @@ object CheckablePermission {
 object SelectorPermission {
 	private val ObjectClassPrefix = Permissions.getClass.getName
 
-	def of[A <: PermissionsSelector[A]](name: String, selector: A): SelectorPermission[A] = {
+	def of[A <: PermissionsSelector[A]](name: String, selector: Object): SelectorPermission[A] = {
 		try {
 			// Go through the magical hierarchy
 			val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$'))
@@ -260,6 +260,7 @@ object Permissions {
 			case object Timetable extends Permission("View a member's personal timetable")
 			case object Tier4VisaRequirement extends Permission("View a member's tier 4 visa requirement")
 			case object CasUsed extends Permission("View whether a CAS has been used by a student to obtain a visa")
+			case object Disability extends Permission("View a student member's reported disability")
 
 			object StudentCourseDetails {
 				case object Core extends Permission("View a student's basic course, route and department details")

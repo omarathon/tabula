@@ -39,8 +39,6 @@ object Member {
 }
 
 /**
- * Represents an assignment within a module, occurring at a certain time.
- *
  * Notes about the notDeleted filter:
  * filters don't run on session.get() but getById will check for you.
  * queries will only include it if it's the entity after "from" and not
@@ -136,7 +134,7 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def touchedDepartments = {
 		def moduleDepts = registeredModulesByYear(None).map(_.department).toStream
 
-		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct	
+		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct
 		topLevelDepts flatMap(_.subDepartmentsContaining(this))
 	}
 
@@ -272,12 +270,20 @@ class StudentMember extends Member with StudentProperties {
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	var tier4VisaRequirement: JBoolean = _
 
-	@Restricted(Array("Profiles.Read.CasUsed"))
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	def casUsed: Option[Boolean] = {
-			mostSignificantCourseDetails match {
-				case Some(scd: StudentCourseDetails) => Some(scd.latestStudentCourseYearDetails.casUsed)
-				case _ => None // better not to even display this field if there are no student course details
-			}
+			mostSignificantCourseDetails.flatMap(scd => scd.latestStudentCourseYearDetails.casUsed match {
+				case null => None
+				case casUsed => Some(casUsed)
+			})
+	}
+
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
+	def hasTier4Visa: Option[Boolean] = {
+		mostSignificantCourseDetails.flatMap(scd => scd.latestStudentCourseYearDetails.tier4Visa match {
+			case null => None
+			case hasTier4Visa => Some(hasTier4Visa)
+		})
 	}
 
 	def this(id: String) = {
@@ -448,6 +454,11 @@ trait StudentProperties {
 	@Restricted(Array("Profiles.Read.NextOfKin"))
 	@BatchSize(size=200)
 	var nextOfKins:JList[NextOfKin] = JArrayList()
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "disability")
+	@Restricted(Array("Profiles.Read.Disability"))
+	var disability: Disability = _
 }
 
 trait StaffProperties {

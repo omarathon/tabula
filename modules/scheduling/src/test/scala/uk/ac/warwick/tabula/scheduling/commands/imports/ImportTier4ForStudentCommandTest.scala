@@ -9,15 +9,14 @@ import uk.ac.warwick.tabula.data.FileDao
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.model.DegreeType.Postgraduate
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
+import uk.ac.warwick.tabula.scheduling.services.{Tier4VisaImporter, SupervisorImporter, CasUsageImporter}
 import uk.ac.warwick.tabula.helpers.Logging
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.scheduling.services.CasUsageImporter
 import uk.ac.warwick.tabula.data.StudentCourseYearDetailsDao
 import uk.ac.warwick.tabula.TestBase
 
-class ImportCasUsageForStudentCommandTest extends TestBase with Mockito with Logging {
+class ImportTier4ForStudentCommandTest extends TestBase with Mockito with Logging {
 
 	trait Environment {
 
@@ -30,16 +29,20 @@ class ImportCasUsageForStudentCommandTest extends TestBase with Mockito with Log
 	@Test def testCaptureValidSupervisor() {
 		new Environment {
 
-			val importer = smartMock[CasUsageImporter]
-			importer.isCasUsedNow(studentMember.universityId) returns false
+			val casUsageImporter = smartMock[CasUsageImporter]
+			casUsageImporter.isCasUsed(studentMember.universityId) returns false
 
-			val command = ImportCasUsageForStudentCommand(studentMember, year)
-			command.casUsageImporter = importer
+			val tier4VisaImporter = smartMock[Tier4VisaImporter]
+			tier4VisaImporter.hasTier4Visa(studentMember.universityId) returns false
+
+			val command = ImportTier4ForStudentCommand(studentMember, year)
+			command.casUsageImporter = casUsageImporter
+			command.tier4VisaImporter = tier4VisaImporter
 			command.studentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
 			command.applyInternal
 
 			studentMember.casUsed should be (Some(false))
-
+			studentMember.hasTier4Visa should be (Some(false))
 		}
 	}
 }

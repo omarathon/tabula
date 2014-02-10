@@ -13,7 +13,7 @@ import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
 import javax.persistence.{DiscriminatorColumn, DiscriminatorValue, Entity, Inheritance, NamedQueries}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Department, Member, ModeOfAttendance, RuntimeMember, SitsStatus, StaffMember, StudentCourseDetails, StudentMember, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
@@ -70,7 +70,7 @@ trait MemberDao {
 	
 	def getFreshUniversityIds(): Seq[String]
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime)
-
+	def getDisability(code: String): Option[Disability]
 }
 
 @Repository
@@ -529,6 +529,12 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					.setParameterList("newStaleUniversityIds", staleIds)
 					.executeUpdate()
 			}
+	}
+
+	def getDisability(code: String): Option[Disability] = {
+		session.newCriteria[Disability]
+			.add(is("code", code))
+			.uniqueResult
 	}
 }
 
