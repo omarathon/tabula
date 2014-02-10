@@ -68,7 +68,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 
 				val importRowTracker = new ImportRowTracker
 
-				val member = new ImportStudentRowCommand(mac, new AnonymousUser, rs,
+				val member = ImportStudentRowCommand(mac, new AnonymousUser, rs,
 					importRowTracker,
 					new ImportStudentCourseCommand(rs,
 							importRowTracker,
@@ -98,7 +98,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 
 				val importRowTracker = new ImportRowTracker
 
-				val member = new ImportStudentRowCommand(mac, new AnonymousUser, rs,
+				val member = ImportStudentRowCommand(mac, new AnonymousUser, rs,
 					importRowTracker,
 					new ImportStudentCourseCommand(rs,
 							importRowTracker,

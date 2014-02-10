@@ -1,8 +1,7 @@
-package uk.ac.warwick.tabula.scheduling.services;
+package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.{ResultSet, Types}
 import scala.collection.JavaConversions._
-import scala.math.BigDecimal.int2bigDecimal
 import org.springframework.context.annotation.Profile
 import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
 import org.springframework.jdbc.core.SqlParameter
@@ -13,8 +12,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.joda.time.DateTime
 
 trait CasUsageImporter {
-
-	def isCasUsed(universityId: String): Boolean // cas is a confirmation of acceptance to study - this determines whether such was used to apply for a visa
+	// cas is a confirmation of acceptance to study - this determines whether such was used to apply for a visa
+	def isCasUsed(universityId: String): Boolean
 }
 
 @Profile(Array("dev", "test", "production")) @Service
@@ -25,16 +24,16 @@ class CasUsageImporterImpl extends CasUsageImporter {
 
 	lazy val casUsedMappingQuery = new CasUsedMappingQuery(sits)
 
-	def isCasUsed(universityId: String): Boolean = {
-		val earliestEndDate = DateTime.now.minusMonths(4).toDate()
+	def isCasUsed(universityId: String) = {
+		val earliestEndDate = DateTime.now.minusMonths(4).toDate
 		val rowCount = casUsedMappingQuery.executeByNamedParam(Map("universityId" -> universityId, "earliestEndDate" -> earliestEndDate)).head
-		(rowCount.intValue() > 0)
+		rowCount.intValue > 0
 	}
 }
 
 @Profile(Array("sandbox")) @Service
 class SandboxCasUsageImporter extends CasUsageImporter {
-	def isCasUsed(universityId: String): Boolean = false
+	def isCasUsed(universityId: String) = false
 }
 
 object CasUsageImporter {
@@ -55,9 +54,7 @@ object CasUsageImporter {
 		this.declareParameter(new SqlParameter("universityId", Types.VARCHAR))
 		this.declareParameter(new SqlParameter("earliestEndDate", Types.DATE))
 		this.compile()
-		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _])= {
-			(rs.getLong("count"))
-		}
+		override def mapRow(rs: ResultSet, rowNumber: Int, params: Array[java.lang.Object], context: JMap[_, _]) = rs.getLong("count")
 	}
 }
 

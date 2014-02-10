@@ -260,6 +260,7 @@ object Permissions {
 			case object Timetable extends Permission("View a member's personal timetable")
 			case object Tier4VisaRequirement extends Permission("View a member's tier 4 visa requirement")
 			case object CasUsed extends Permission("View whether a CAS has been used by a student to obtain a visa")
+			case object Disability extends Permission("View a student member's reported disability")
 
 			object StudentCourseDetails {
 				case object Core extends Permission("View a student's basic course, route and department details")
