@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.criterion.Restrictions._
 import uk.ac.warwick.tabula.services.TermService
 import org.hibernate.FetchMode
+import org.hibernate.proxy.HibernateProxyHelper
 
 trait MonitoringPointDaoComponent {
 	val monitoringPointDao: MonitoringPointDao
@@ -245,7 +246,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		}.mkString(" or ")	+ ")"
 
 		val query = session.newQuery[Array[java.lang.Object]](queryString)
-			.setParameter("academicYear", point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+			.setParameter("academicYear", HibernateHelpers.initialiseAndUnproxy(point.pointSet).asInstanceOf[MonitoringPointSet].academicYear)
 			.setString("name", point.name.toLowerCase)
 			.setString("validFromWeek", point.validFromWeek.toString)
 			.setString("requiredFromWeek", point.requiredFromWeek.toString)

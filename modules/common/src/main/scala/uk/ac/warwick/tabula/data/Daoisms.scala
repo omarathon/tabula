@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.SessionFactory
+import org.hibernate.{Hibernate, SessionFactory, Session}
 import javax.sql.DataSource
-import org.hibernate.Session
 import uk.ac.warwick.tabula.data.model.CanBeDeleted
 import uk.ac.warwick.spring.Wire
 import language.implicitConversions
 import scala.reflect._
 import uk.ac.warwick.tabula.data.Daoisms.NiceQueryCreator
+import org.hibernate.proxy.HibernateProxy
 
 /** Trait for self-type annotation, declaring availability of a Session. */
 trait SessionComponent{
@@ -44,6 +44,17 @@ trait HelperRestrictions {
 	def isNull(propertyName: String) = org.hibernate.criterion.Restrictions.isNull(propertyName)
 }
 
+trait HibernateHelpers {
+	def initialiseAndUnproxy[A >: Null](entity: A): A =
+		Option(entity).map { proxy =>
+			Hibernate.initialize(proxy)
+			if (proxy.isInstanceOf[HibernateProxy]) proxy.asInstanceOf[HibernateProxy].getHibernateLazyInitializer.getImplementation.asInstanceOf[A]
+			else proxy
+		}.orNull
+}
+
+object HibernateHelpers extends HibernateHelpers
+
 object Daoisms extends HelperRestrictions {
 	/**
 	 * Adds a method to Session which returns a wrapped Criteria or Query that works
@@ -67,7 +78,7 @@ object Daoisms extends HelperRestrictions {
  * session factory. If you want to do JDBC stuff or use a
  * different data source you'll need to look elsewhere.
  */
-trait Daoisms extends ExtendedSessionComponent with HelperRestrictions {
+trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with HibernateHelpers {
 	var dataSource = Wire[DataSource]("dataSource")
 	var sessionFactory = Wire.auto[SessionFactory]
 
