@@ -12,7 +12,6 @@ class ConvertScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 	EventHandling.enabled = false
 
 	trait Fixture {
-
 		val meetingRecordDao = mock[MeetingRecordDao]
 		val notificationService = mock[NotificationService]
 		val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
@@ -37,7 +36,6 @@ class ConvertScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 			val meetingRecordService: MeetingRecordService = mockMeetingRecordService
 		}
 		command.createCommand = createCommand
-
 	}
 
 	@Test
