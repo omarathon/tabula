@@ -4,12 +4,13 @@ import org.springframework.validation.Errors
 import org.springframework.validation.ValidationUtils._
 import uk.ac.warwick.tabula.data.model.MeetingRecord
 import org.joda.time.DateTime
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 trait ScheduledMeetingRecordValidation {
 
 	def sharedValidation(errors: Errors, title: String, meetingDate: DateTime) {
 		rejectIfEmptyOrWhitespace(errors, "title", "NotEmpty")
-		if (title.length > MeetingRecord.MaxTitleLength){
+		if (title.hasText && title.length > MeetingRecord.MaxTitleLength){
 			errors.rejectValue("title", "meetingRecord.title.long", new Array(MeetingRecord.MaxTitleLength), "")
 		}
 
