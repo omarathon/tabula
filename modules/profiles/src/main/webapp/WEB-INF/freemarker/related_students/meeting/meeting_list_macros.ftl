@@ -33,10 +33,10 @@
 						<#assign openAttribute></#assign>
 					</#if>
 
-					<details class="meeting ${deletedClasses} ${pendingActionClasses} ${openClass!} <#if meeting.isScheduled()>scheduled<#else>normal</#if>" ${openAttribute!}>
+					<details class="meeting ${deletedClasses} ${pendingActionClasses} ${openClass!} <#if meeting.scheduled>scheduled<#else>normal</#if>" ${openAttribute!}>
 						<summary>
 							<span class="date">
-								<#if meeting.isScheduled()>
+								<#if meeting.scheduled>
 									<@fmt.date date=meeting.meetingDate includeTime=true />
 								<#else>
 									<@fmt.date date=meeting.meetingDate includeTime=false />
@@ -44,12 +44,12 @@
 							</span>
 							<span class="title">${meeting.title!}</span>
 
-							<#if meeting.isScheduled()>
+							<#if meeting.scheduled>
 								<#local editUrl><@routes.edit_scheduled_meeting_record meeting studentCourseDetails.urlSafeId relationshipType /></#local>
 							<#else>
 								<#local editUrl><@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting /></#local>
 							</#if>
-							<#if viewer.universityId == meeting.creator.universityId && (meeting.isScheduled() || !meeting.approved)>
+							<#if viewer.universityId == meeting.creator.universityId && (meeting.scheduled || !meeting.approved)>
 								<div class="meeting-record-toolbar">
 									<a href="${editUrl}" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
 									<a href="<@routes.delete_meeting_record meeting />" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>
@@ -70,7 +70,7 @@
 								<@fmt.download_attachments meeting.attachments "/${relationshipType.urlPart}/meeting/${meeting.id}/" "for this meeting record" "${meeting.title?url}" />
 							</#if>
 
-							<#if meeting.isScheduled()>
+							<#if meeting.scheduled>
 								<@scheduledMeetingState meeting studentCourseDetails/>
 							<#else>
 								<@meetingState meeting studentCourseDetails/>

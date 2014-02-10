@@ -26,8 +26,7 @@ class ViewMeetingRecordCommandTest extends TestBase with Mockito {
 			command.relationshipService.getRelationships(relationshipType, studentCourseDetails.student) returns Seq(relationship)
 			command.meetingRecordService.listAll(Set(relationship), requestor) returns  Seq(meeting)
 
-			val f = command.applyInternal()
-			f should be (Seq(meeting))
+			command.applyInternal() should be (Seq(meeting))
 		}
 	}
 
