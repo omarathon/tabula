@@ -84,7 +84,7 @@ trait CreateScheduledMeetingPermissions extends RequiresPermissionsChecking with
 	self: CreateScheduledMeetingRecordState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.MeetingRecord.Create(relationship.relationshipType), mandatory(relationship.studentMember))
+		p.PermissionCheck(Permissions.Profiles.ScheduledMeetingRecord.Create(relationship.relationshipType), mandatory(relationship.studentMember))
 	}
 }
 
