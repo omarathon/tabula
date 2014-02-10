@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notifications.{ExtensionRequestModifiedNotification, ExtensionRequestCreatedNotification}
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
-import uk.ac.warwick.tabula.services.{RelationshipServiceComponent, AutowiringRelationshipServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
@@ -27,12 +27,12 @@ object ExtensionRequestCommand {
 	def apply (module: Module, assignment: Assignment, submitter: CurrentUser) = {
 		new ExtensionRequestCommandInternal(module, assignment, submitter) with
 			ComposableCommand[Extension] with
+			AutowiringRelationshipServiceComponent with
 			ExtensionRequestDescription with
 			ExtensionRequestPermission with
 			ExtensionRequestValidation with
 			ExtensionRequestNotification with
-			HibernateExtensionRequestPersistenceComponent with
-			AutowiringRelationshipServiceComponent
+			HibernateExtensionRequestPersistenceComponent
 	}
 }
 
@@ -59,6 +59,7 @@ class ExtensionRequestCommandInternal(val module: Module, val assignment:Assignm
 		extension.requestedExpiryDate = requestedExpiryDate
 		extension.reason = reason
 		extension.requestedOn = DateTime.now
+		extension.disabilityAdjustment = disabilityAdjustment
 
 		if (extension.attachments != null) {
 			// delete attachments that have been removed
@@ -181,6 +182,7 @@ trait ExtensionRequestState {
 		requestedExpiryDate = extension.requestedExpiryDate
 		attachedFiles = extension.attachments
 		modified = true
+		disabilityAdjustment = extension.disabilityAdjustment
 	}
 
 	var reason: String =_
@@ -194,5 +196,5 @@ trait ExtensionRequestState {
 	var readGuidelines: JBoolean =_
 	// true if this command is modifying an existing extension. False otherwise
 	var modified: JBoolean = false
-
+	var disabilityAdjustment: JBoolean = false
 }

@@ -8,13 +8,18 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{Feedback, FileAttachment, Assignment, GeneratedId}
+import uk.ac.warwick.tabula.data.model.{StudentMember, Disability, Feedback, FileAttachment, Assignment, GeneratedId}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.services.ProfileService
 
 @Entity @AccessType("field")
 class Extension extends GeneratedId with PermissionsTarget {
+
+	@transient
+	var profileService = Wire.auto[ProfileService]
 
 	def this(universityId:String=null) {
 		this()
@@ -24,7 +29,7 @@ class Extension extends GeneratedId with PermissionsTarget {
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="assignment_id")
 	var assignment:Assignment = _
-	
+
 	def permissionsParents = Option(assignment).toStream
 
 	@NotNull
@@ -32,7 +37,7 @@ class Extension extends GeneratedId with PermissionsTarget {
 
 	@NotNull
 	var universityId:String =_
-	
+
 	def isForUser(user: User): Boolean = isForUser(user.getWarwickId, user.getUserId)
 	def isForUser(theUniversityId: String, theUsercode: String): Boolean = universityId == theUniversityId || userId == theUsercode
 
@@ -57,6 +62,9 @@ class Extension extends GeneratedId with PermissionsTarget {
 		attachment.extension = this
 		attachments.add(attachment)
 	}
+
+	def memberDisability: Option[Disability] = profileService.getMemberByUniversityId(universityId).map(_.asInstanceOf[StudentMember].disability)
+	var disabilityAdjustment:Boolean = false
 
 	var approved:Boolean = false
 	var rejected:Boolean = false
