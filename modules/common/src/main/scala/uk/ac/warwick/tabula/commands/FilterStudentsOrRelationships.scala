@@ -15,9 +15,6 @@ object FilterStudentsOrRelationships {
 }
 
 trait FilterStudentsOrRelationships extends FiltersStudentsBase with ProfileServiceComponent with PermissionsCheckingMethods {
-	val MaxStudentsPerPage = 100
-	val DefaultStudentsPerPage = 50
-
 	def getAliasPaths(sitsTable: String): Seq[(String, String)]
 
 	protected def buildOrders(): Seq[ScalaOrder] =
