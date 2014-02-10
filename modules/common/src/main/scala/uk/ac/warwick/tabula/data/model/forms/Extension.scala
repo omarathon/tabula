@@ -80,6 +80,7 @@ class Extension extends GeneratedId with PermissionsTarget {
 	// this was not requested by a student. i.e. was manually created by an administrator
 	def isManual = requestedOn == null
 	def isAwaitingApproval = !isManual && !approved && !rejected
+	def isAwaitingReview = approved && !isManual && requestedOn.isAfter(approvedOn)
 
 	@transient
 	lazy val workingDaysHelper = new WorkingDaysHelperImpl
