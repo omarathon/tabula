@@ -4,7 +4,6 @@ import javax.persistence._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.ToString
 import org.joda.time.DateTime
-
 import org.hibernate.annotations.{BatchSize, Type}
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.DateFormats
