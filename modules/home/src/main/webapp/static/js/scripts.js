@@ -358,8 +358,12 @@
 		};
 		var options = $.extend({}, defaults, options);
 
-		// don't popover disabled
+
 		$items.on('click', function(e) {
+			$(this).tooltip('disable');
+			$(this).trigger('mouseout');
+
+			// don't popover disabled
 			if ($(this).hasClass('disabled')) {
 				e.stopImmediatePropagation();
 			}
@@ -373,6 +377,7 @@
 			// if clicking anywhere other than the popover itself
 			if ($(e.target).closest('.popover').length === 0 && $(e.target).closest('.use-popover').length === 0) {
 				$items.popover('hide');
+				$items.tooltip('enable');
 			}
 		});
 
@@ -407,6 +412,7 @@
 			var $creator = $(e.target).parents('.popover').data('creator');
 			if ($creator) {
 				$creator.popover('hide');
+				$creator.tooltip('enable');
 			}
 		});
 
