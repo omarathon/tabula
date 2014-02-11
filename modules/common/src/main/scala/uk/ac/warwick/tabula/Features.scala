@@ -68,7 +68,7 @@ abstract class Features {
 	@Value("${features.personalTutorAssignment:true}") var personalTutorAssignment = defaults.personalTutorAssignment
 	@Value("${features.personalTutorAssignmentFiltering:true}") var personalTutorAssignmentFiltering = defaults.personalTutorAssignmentFiltering
 	@Value("${features.arbitraryRelationships:true}") var arbitraryRelationships = defaults.arbitraryRelationships
-	@Value("${features.personalTimetables:false}") var personalTimetables = defaults.personalTimetables
+	@Value("${features.personalTimetables:true}") var personalTimetables = defaults.personalTimetables
 	@Value("${features.profiles.memberNotes:true}") var profilesMemberNotes = defaults.profilesMemberNotes
 	@Value("${features.smallGroupTeaching.recordAttendance:true}") var smallGroupTeachingRecordAttendance = defaults.smallGroupTeachingRecordAttendance
 	@Value("${features.attendanceMonitoring.meetingPointType:true}") var attendanceMonitoringMeetingPointType = defaults.attendanceMonitoringMeetingPointType
@@ -135,7 +135,7 @@ class FeaturesMessage {
 	@BeanProperty var personalTutorAssignment = true
 	@BeanProperty var personalTutorAssignmentFiltering = true
 	@BeanProperty var arbitraryRelationships = true
-	@BeanProperty var personalTimetables = false
+	@BeanProperty var personalTimetables = true
 	@BeanProperty var profilesMemberNotes = true
 	@BeanProperty var smallGroupTeachingRecordAttendance = true
 	@BeanProperty var attendanceMonitoringMeetingPointType = true
