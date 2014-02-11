@@ -3,6 +3,7 @@
 <#macro list studentCourseDetails meetings relationshipType>
 	<#assign can_read_meetings = can.do_with_selector("Profiles.MeetingRecord.Read", studentCourseDetails, relationshipType) />
 	<#assign can_create_meetings = can.do_with_selector("Profiles.MeetingRecord.Create", studentCourseDetails, relationshipType) />
+	<#assign can_create_scheduled_meetings = can.do_with_selector("Profiles.ScheduledMeetingRecord.Create", studentCourseDetails, relationshipType) />
 
 	<section class="meetings ${relationshipType.id}-meetings" data-target-container="${relationshipType.id}-meetings">
 		<div class="list-controls">
@@ -12,7 +13,9 @@
 
 			<#if can_create_meetings>
 				<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Create a new record"><i class="icon-edit"></i> New record</a>
-				<#if features.scheduledMeetings><a class="btn-like new" href="<@routes.create_scheduled_meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Schedule a meeting"><i class="icon-time"></i> Schedule</a></#if>
+			</#if>
+			<#if can_create_scheduled_meetings && features.scheduledMeetings>
+				<a class="btn-like new" href="<@routes.create_scheduled_meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Schedule a meeting"><i class="icon-time"></i> Schedule</a>
 			</#if>
 
 		</div>
@@ -45,11 +48,12 @@
 							<span class="title">${meeting.title!}</span>
 
 							<#if meeting.scheduled>
+								<#assign can_update_scheduled_meeting = can.do("Profiles.ScheduledMeetingRecord.Update", meeting) />
 								<#local editUrl><@routes.edit_scheduled_meeting_record meeting studentCourseDetails.urlSafeId relationshipType /></#local>
 							<#else>
 								<#local editUrl><@routes.edit_meeting_record studentCourseDetails.urlSafeId meeting /></#local>
 							</#if>
-							<#if viewer.universityId == meeting.creator.universityId && (meeting.scheduled || !meeting.approved)>
+							<#if ((meeting.scheduled && can_update_scheduled_meeting) || (!meeting.scheduled && viewer.universityId == meeting.creator.universityId && !meeting.approved))>
 								<div class="meeting-record-toolbar">
 									<a href="${editUrl}" class="btn-like edit-meeting-record" title="Edit record"><i class="icon-edit" ></i></a>
 									<a href="<@routes.delete_meeting_record meeting />" class="btn-like delete-meeting-record" title="Delete record"><i class="icon-trash"></i></a>

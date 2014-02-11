@@ -4,6 +4,7 @@ import javax.persistence._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.ToString
 import org.joda.time.DateTime
+
 import org.hibernate.annotations.{BatchSize, Type}
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.DateFormats
@@ -14,12 +15,9 @@ import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTar
 import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 
-object Joda {
-	implicit def dateTimeOrdering: Ordering[DateTime] = Ordering.fromLessThan(_ isAfter _)
-}
-
 object AbstractMeetingRecord {
-	import Joda._
+	// do not remove - import needed for sorting DateTimes
+	import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
 	implicit val defaultOrdering = Ordering.by { meeting: AbstractMeetingRecord => (meeting.meetingDate, meeting.lastUpdatedDate) }
 }
 
