@@ -59,13 +59,10 @@ class ExtensionRequestCommandInternal(val module: Module, val assignment:Assignm
 		extension.requestedExpiryDate = requestedExpiryDate
 		extension.reason = reason
 		extension.requestedOn = DateTime.now
-		extension.disabilityAdjustment = disabilityAdjustment
+		extension.disabilityAdjustment = Option(Boolean.unbox(disabilityAdjustment)).getOrElse(false)
 
 		if (extension.attachments != null) {
 			// delete attachments that have been removed
-			if(attachedFiles == null) {
-				attachedFiles = Set[FileAttachment]()
-			}
 			val matchingAttachments: mutable.Set[FileAttachment] = extension.attachments -- attachedFiles
 			matchingAttachments.foreach(delete(_))
 		}
@@ -192,8 +189,8 @@ trait ExtensionRequestState {
 	var requestedExpiryDate: DateTime =_
 
 	var file: UploadedFile = new UploadedFile
-	var attachedFiles: JSet[FileAttachment] =_
-	var readGuidelines: JBoolean =_
+	var attachedFiles: JSet[FileAttachment] = JSet()
+	var readGuidelines: JBoolean = false
 	// true if this command is modifying an existing extension. False otherwise
 	var modified: JBoolean = false
 	var disabilityAdjustment: JBoolean = false
