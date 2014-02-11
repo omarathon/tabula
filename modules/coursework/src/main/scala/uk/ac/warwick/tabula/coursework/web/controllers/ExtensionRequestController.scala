@@ -65,7 +65,7 @@ class ExtensionRequestController extends CourseworkController{
 	}
 
 	@RequestMapping(method=Array(POST))
-	def persistExtensionRequest(@ModelAttribute("command") cmd: Appliable[Extension] with ExtensionRequestState, errors: Errors): Mav = {
+	def persistExtensionRequest(@Valid @ModelAttribute("command") cmd: Appliable[Extension] with ExtensionRequestState, errors: Errors): Mav = {
 		val (assignment, module) = (cmd.assignment, cmd.module)
 
 		if(errors.hasErrors){
