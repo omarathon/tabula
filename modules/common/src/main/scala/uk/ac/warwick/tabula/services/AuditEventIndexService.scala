@@ -169,7 +169,6 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		val individualDownloads = parsedAuditEvents(
 				search(all(assignmentTerm, termQuery("eventType", "AdminGetSingleSubmission"))))
 		val submissions3 = individualDownloads.flatMap(_.submissionId).flatMap(id => assignment.submissions.find((_.id == id)))
-		println("submissionid: " + individualDownloads.map(_.submissionId))
 		(submissions1 ++ submissions2 ++ submissions3).distinct
 	}
 

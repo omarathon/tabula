@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.{AcademicYear, CustomHamcrestMatchers, Mockito}
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
-import uk.ac.warwick.tabula.scheduling.services.ModuleRegistration
+import uk.ac.warwick.tabula.scheduling.services.UpstreamModuleRegistration
 
 @RunWith(classOf[JUnitRunner])
 class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Mockito {
@@ -25,10 +25,10 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 		command.assignmentImporter = importer
 		command.assignmentMembershipService = membershipService
 
-		val registrations: Seq[ModuleRegistration]
+		val registrations: Seq[UpstreamModuleRegistration]
 
-		importer.allMembers(any[ModuleRegistration=>Unit]) answers {
-			case fn: (ModuleRegistration=>Unit) @unchecked => registrations.foreach(fn)
+		importer.allMembers(any[UpstreamModuleRegistration=>Unit]) answers {
+			case fn: (UpstreamModuleRegistration=>Unit) @unchecked => registrations.foreach(fn)
 		}
 	}
 
@@ -38,9 +38,9 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 		new Fixture {
 			importer.getEmptyAssessmentGroups returns (Nil)
 			val registrations = Seq(
-				ModuleRegistration("13/14", "0100001/1", "A", "HI33M-30", "A"),
-				ModuleRegistration("13/14", "0100001/1", "A", "HI100-30", "A"),
-				ModuleRegistration("13/14", "0100002/1", "A", "HI101-30", "A")
+				UpstreamModuleRegistration("13/14", "0100001/1", "A", "HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100001/1", "A", "HI100-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100002/1", "A", "HI101-30", "A")
 			)
 			command.doGroupMembers()
 			there were three(membershipService).replaceMembers(any[UpstreamAssessmentGroup], any[Seq[String]])
@@ -62,10 +62,10 @@ class ImportAssignmentsCommandTest extends FlatSpec with ShouldMatchers with Moc
 			}
 
 			val registrations = Seq(
-				ModuleRegistration("13/14", "0100001/1", "A", "HI33M-30", "A"),
-				ModuleRegistration("13/14", "0100002/1", "A", "HI33M-30", "A"),
-				ModuleRegistration("13/14", "0100003/1", "A", "HI100-30", "A"),
-				ModuleRegistration("13/14", "0100002/1", "A", "HI100-30", "A")
+				UpstreamModuleRegistration("13/14", "0100001/1", "A", "HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100002/1", "A", "HI33M-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100003/1", "A", "HI100-30", "A"),
+				UpstreamModuleRegistration("13/14", "0100002/1", "A", "HI100-30", "A")
 			)
 
 			importer.getEmptyAssessmentGroups returns (Seq(hi900_30))
