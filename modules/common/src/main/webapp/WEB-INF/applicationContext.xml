@@ -106,6 +106,7 @@
 	            <bean class="uk.ac.warwick.tabula.data.convert.DepartmentCodeConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.ModuleCodeConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AssignmentIdConverter"/>
+				<bean class="uk.ac.warwick.tabula.data.convert.AbstractMeetingRecordIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.MeetingRecordIdConverter"/>
 	            <bean class="uk.ac.warwick.tabula.data.convert.AssessmentComponentIdConverter"/>
 				<bean class="uk.ac.warwick.tabula.data.convert.AssessmentGroupIdConverter"/>

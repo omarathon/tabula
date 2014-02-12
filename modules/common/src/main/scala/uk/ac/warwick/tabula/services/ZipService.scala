@@ -163,10 +163,10 @@ class ZipService extends InitializingBean with ZipCreator with Logging {
 		}
 	}
 
-	def getSomeMeetingRecordAttachmentsZip(meetingRecord: MeetingRecord): File =
+	def getSomeMeetingRecordAttachmentsZip(meetingRecord: AbstractMeetingRecord): File =
 		createUnnamedZip(getMeetingRecordZipItems(meetingRecord))
 	
-	private def getMeetingRecordZipItems(meetingRecord: MeetingRecord): Seq[ZipItem] =
+	private def getMeetingRecordZipItems(meetingRecord: AbstractMeetingRecord): Seq[ZipItem] =
 		meetingRecord.attachments.asScala.map { (attachment) =>
 			new ZipFileItem(attachment.name, attachment.dataStream)
 		}

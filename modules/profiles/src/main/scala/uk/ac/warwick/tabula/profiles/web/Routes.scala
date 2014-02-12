@@ -15,12 +15,12 @@ object Routes {
 	def search = "/search"
 		
 	object profile {
-		def view(member: Member) = "/view/%s" format (encoded(member.universityId))
-		def view(member: Member, meeting: MeetingRecord) = "/view/%s?meeting=%s" format (encoded(member.universityId), encoded(meeting.id))
-		def photo(member: Member) = "/view/photo/%s.jpg" format (encoded(member.universityId))
+		def view(member: Member) = "/view/%s" format encoded(member.universityId)
+		def view(member: Member, meeting: AbstractMeetingRecord) = "/view/%s?meeting=%s" format (encoded(member.universityId), encoded(meeting.id))
+		def photo(member: Member) = "/view/photo/%s.jpg" format encoded(member.universityId)
 	}
 	
-	def students(relationshipType: StudentRelationshipType) = "/%s/students" format (encoded(relationshipType.urlPart))		
+	def students(relationshipType: StudentRelationshipType) = "/%s/students" format encoded(relationshipType.urlPart)
 		
 	object relationships {
 		def apply(department: Department, relationshipType: StudentRelationshipType) = "/department/%s/%s" format (encoded(department.code), encoded(relationshipType.urlPart))
@@ -31,6 +31,17 @@ object Routes {
 	
 	object admin {
 		def apply(department: Department) = Routes.home // TODO https://repo.elab.warwick.ac.uk/projects/TAB/repos/tabula/pull-requests/145/overview?commentId=1012
-		def departmentPermissions(department: Department) = "/admin/department/%s/permissions" format (encoded(department.code))
+		def departmentPermissions(department: Department) = "/admin/department/%s/permissions" format encoded(department.code)
+	}
+
+	object scheduledMeeting {
+		def confirm(meetingRecord: ScheduledMeetingRecord, studentCourseDetails: StudentCourseDetails, relationshipType: StudentRelationshipType) =
+			"/%s/meeting/%s/schedule/%s/confirm" format(encoded(relationshipType.urlPart), encoded(studentCourseDetails.urlSafeId), encoded(meetingRecord.id))
+
+		def reschedule(meetingRecord: ScheduledMeetingRecord, studentCourseDetails: StudentCourseDetails, relationshipType: StudentRelationshipType) =
+			"/%s/meeting/%s/schedule/%s/edit" format(encoded(relationshipType.urlPart), encoded(studentCourseDetails.urlSafeId), encoded(meetingRecord.id))
+
+		def missed(meetingRecord: ScheduledMeetingRecord, studentCourseDetails: StudentCourseDetails, relationshipType: StudentRelationshipType) =
+			"/%s/meeting/%s/missed" format(encoded(relationshipType.urlPart), encoded(meetingRecord.id))
 	}
 }

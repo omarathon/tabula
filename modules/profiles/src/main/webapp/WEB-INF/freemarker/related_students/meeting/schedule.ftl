@@ -1,16 +1,17 @@
 <#assign student = studentCourseDetails.student/>
 <#assign agent_role = relationshipType.agentRole />
 <#assign member_role = relationshipType.studentRole />
+<#assign agent_name><#if !command.considerAlternatives!false>${command.relationship.agentName}</#if></#assign>
 
 <#assign heading>
-	<h2>Record a meeting</h2>
+	<h2>Schedule a meeting</h2>
 	<h6>
-		<span class="muted">between ${agent_role}</span> ${agentName!""}
+		<span class="muted">between ${agent_role}</span> ${agent_name!""}
 		<span class="muted">and ${member_role}</span> ${student.fullName}
 	</h6>
 </#assign>
 
-<#if modal!false>
+<#if isModal!false>
 	<div class="modal-header">
 		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
 		${heading}
@@ -20,14 +21,13 @@
 <#else>
 	${heading}
 </#if>
-<#if modal!false>
+<#if isModal!false>
 	<div class="modal-body" id="meeting-record-modal-body"></div>
 	<div class="modal-footer">
 		<form class="double-submit-protection">
 			<span class="submit-buttons">
-				<#assign title>Submit record for approval by <#if isStudent>${agent_role}<#else>${member_role}</#if></#assign>
-				<button title="${title}" class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
-					Submit for approval
+				<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
+					Schedule
 				</button>
 				<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>
 			</span>
@@ -50,7 +50,7 @@
 			<@form.labelled_row "relationship" agent_role?cap_first cssClass!"">
 				<@f.select path="relationship" cssClass="input-large">
 					<@f.option disabled="true" selected="true" label="Please select one..." />
-					<@f.options items=allRelationships itemValue="agent" itemLabel="agentName" />
+					<@f.options items=allRelationships itemValue="agent" itemLabel="agent_name" />
 				</@f.select>
 				<small class="help-block">
 					<#if isCreatorAgent>
@@ -73,7 +73,7 @@
 
 		<@form.labelled_row "meetingDate" "Date of meeting">
 			<div class="input-append">
-				<@f.input type="text" path="meetingDate" cssClass="input-medium date-picker" placeholder="Pick the date" />
+				<@f.input type="text" path="meetingDate" cssClass="input-medium date-time-minute-picker" placeholder="Pick the date" />
 				<span class="add-on"><i class="icon-calendar"></i></span>
 			</div>
 		</@form.labelled_row>
@@ -85,35 +85,9 @@
 			</@f.select>
 		</@form.labelled_row>
 
-		<#if !isStudent>
-			<div id="willCheckpointBeCreatedMessage" class="alert alert-info" style="display: none;">
-				Submitting this record will mark a monitoring point as attended
-			</div>
-			<script>
-				jQuery(function($){
-					$('#meetingDate, #format').on('change', function(){
-						$.get('<@routes.meeting_will_create_checkpoint studentCourseDetails.student />', {
-							'relationshipType' : '${relationshipType.urlPart}',
-							'meetingFormat' : $('#format').val(),
-							'meetingDate' : $('#meetingDate').val()
-						}, function(data){
-							if(data.willCheckpointBeCreated) {
-								$('#willCheckpointBeCreatedMessage').show();
-							} else {
-								$('#willCheckpointBeCreatedMessage').hide();
-							}
-						})
-					})
-				});
-			</script>
-		</#if>
-
 		<#-- file upload (TAB-359) -->
 		<#assign fileTypes=command.attachmentTypes />
 		<@form.filewidget basename="file" types=fileTypes />
-
-		<#-- hidden flag tells command a form was posted - needed when attachedFiles is empty -->
-		<@f.hidden path="posted" value="true" />
 
 		<#if command.attachedFiles?has_content >
 			<@form.labelled_row "attachedFiles" "Previously uploaded files">
@@ -146,14 +120,11 @@
 <@f.textarea rows="6" path="description" cssClass="input-xxlarge" />
 </@form.labelled_row>
 
-		<#if iframe!false>
-			<input type="hidden" name="modal" value="true" />
-		<#else>
+		<#if !iframe!false>
 			<#-- separate page, not modal -->
 			<div class="form-actions">
-				<#assign title>Submit record for approval by <#if isStudent>${relationshipType.agentRole}<#else>${relationshipType.studentRole}</#if></#assign>
-				<button title="${title}" class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
-					Submit for approval
+				<button class="btn btn-primary spinnable spinner-auto" type="submit" name="submit">
+					Schedule
 				</button>
 				<a class="btn" href="<@routes.profile student />">Cancel</a>
 			</div>
