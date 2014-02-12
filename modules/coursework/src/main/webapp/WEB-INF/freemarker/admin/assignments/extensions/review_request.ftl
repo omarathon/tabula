@@ -142,7 +142,7 @@
 
 				<div class="clearfix"></div>
 
-				<#if features.disabilityRenderingInExtensions && extension.disabilityAdjustment && can.do("Profiles.Read.Disability", student)>
+				<#if features.disabilityRenderingInExtensions && extension.disabilityAdjustment && student?? && can.do("Profiles.Read.Disability", student)>
 					<p class="alert alert-warning">Student has requested their ${student.disability.definition} be taken into consideration.</p>
 				</#if>
 			</div>

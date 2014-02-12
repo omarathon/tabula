@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.services.ProfileService
 class Extension extends GeneratedId with PermissionsTarget {
 
 	@transient
-	var profileService = Wire.auto[ProfileService]
+	var profileService = Wire[ProfileService]
 
 	def this(universityId:String=null) {
 		this()
@@ -63,7 +63,6 @@ class Extension extends GeneratedId with PermissionsTarget {
 		attachments.add(attachment)
 	}
 
-	def memberDisability: Option[Disability] = profileService.getMemberByUniversityId(universityId).map(_.asInstanceOf[StudentMember].disability)
 	var disabilityAdjustment:Boolean = false
 
 	var approved:Boolean = false
