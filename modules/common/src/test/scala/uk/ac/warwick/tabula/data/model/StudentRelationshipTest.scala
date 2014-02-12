@@ -23,7 +23,7 @@ class StudentRelationshipTest extends TestBase with Mockito {
 		rel.isAgentMember should be (true)
 
 		rel.agentMember should be (Some(staff))
-		rel.agentParsed should be (staff)
+		rel.agent should be ("0672089")
 		rel.agentName should be ("Steve Taff")
 		rel.agentLastName should be ("Taff")
 

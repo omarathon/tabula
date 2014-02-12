@@ -21,7 +21,7 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 	val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
 	val student = Fixtures.student()
 	var creator: StaffMember = _
-	var relationship: StudentRelationship[_] = _
+	var relationship: StudentRelationship = _
 	var meeting: MeetingRecord = _
 
 	val user = mock[CurrentUser]

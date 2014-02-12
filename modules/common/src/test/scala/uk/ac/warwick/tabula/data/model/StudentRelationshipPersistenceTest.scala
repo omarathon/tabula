@@ -27,11 +27,10 @@ class StudentRelationshipPersistenceTest extends PersistenceTestBase {
 		session.flush
 		session.clear
 		
-		val loadedRel = session.get(classOf[StudentRelationship[_]], rel.id).asInstanceOf[StudentRelationship[_]]
+		val loadedRel = session.get(classOf[StudentRelationship], rel.id).asInstanceOf[StudentRelationship]
 		loadedRel.isAgentMember should be (true)
 		loadedRel.agent should be ("4387483")
 		loadedRel.agentMember should be (Some(memberAgent))
-		loadedRel.agentParsed should be (memberAgent)
 		loadedRel.studentId should be ("1000001")
 		loadedRel.studentMember should be (Some(student))
 		loadedRel.relationshipType should be (relType)
@@ -45,11 +44,10 @@ class StudentRelationshipPersistenceTest extends PersistenceTestBase {
 		session.flush
 		session.clear
 		
-		val loadedRel = session.get(classOf[StudentRelationship[_]], rel.id).asInstanceOf[StudentRelationship[_]]
+		val loadedRel = session.get(classOf[StudentRelationship], rel.id).asInstanceOf[StudentRelationship]
 		loadedRel.isAgentMember should be (false)
 		loadedRel.agent should be (externalAgent)
 		loadedRel.agentMember should be (None)
-		loadedRel.agentParsed should be (externalAgent)
 		loadedRel.studentId should be ("1000001")
 		loadedRel.studentMember should be (Some(student))
 		loadedRel.relationshipType should be (relType)

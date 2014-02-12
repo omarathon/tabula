@@ -30,7 +30,7 @@ trait MeetingRecordTests extends PersistenceTestBase with Mockito {
 
 	var student:StudentMember = _
 	var creator: StaffMember = _
-	var relationship: StudentRelationship[_] = _
+	var relationship: StudentRelationship = _
 	var meeting: MeetingRecord = _
 
 	val user = mock[CurrentUser]

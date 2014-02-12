@@ -14,13 +14,13 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 
 // wrapper class for relationship data - just for less crufty method signature
-case class RelationshipGraph(studentMap: TreeMap[SortableAgentIdentifier, Seq[StudentRelationship[_]]], studentCount: Int, missingCount: Int)
+case class RelationshipGraph(studentMap: TreeMap[SortableAgentIdentifier, Seq[StudentRelationship]], studentCount: Int, missingCount: Int)
 case class SortableAgentIdentifier(agentId:String, lastName:Option[String]){
 	 val sortkey = lastName.getOrElse("") + agentId
 	 override def toString() = sortkey
 }
 object SortableAgentIdentifier{
-	def apply(r:StudentRelationship[_]) = new SortableAgentIdentifier(r.agent, r.agentMember.map(_.lastName))
+	def apply(r:StudentRelationship) = new SortableAgentIdentifier(r.agent, r.agentMember.map(_.lastName))
 
 	val KeyOrdering = Ordering.by { a:SortableAgentIdentifier => a.sortkey }
 }

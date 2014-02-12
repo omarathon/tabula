@@ -33,7 +33,7 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 		val rel = StudentRelationship(staff, relationshipType, student)
 
 		relationshipService.findCurrentRelationships(relationshipType, student) returns (Seq(rel))
-		student.freshStudentCourseDetails.head.relationships(relationshipType) map { _.agentParsed } should be (Seq(staff))
+		student.freshStudentCourseDetails.head.relationships(relationshipType) flatMap { _.agentMember } should be (Seq(staff))
 	}
 
 	@Test def testModuleRegistrations {

@@ -11,7 +11,7 @@ abstract class MeetingRecordNotification(meeting: MeetingRecord)
 	implicit var freemarker = Wire.auto[Configuration]
 
 	val FreemarkerTemplate = "/WEB-INF/freemarker/notifications/meeting_record_notification_template.ftl"
-	val target: Option[StudentRelationship[_]] = Some(meeting.relationship)
+	val target: Option[StudentRelationship] = Some(meeting.relationship)
 	val _object = meeting
 	
 	def url = Routes.profile.view(

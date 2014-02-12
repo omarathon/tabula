@@ -38,7 +38,7 @@ class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToSt
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "relationship_id")
-	var relationship: StudentRelationship[_] = _
+	var relationship: StudentRelationship = _
 
 	@Column(name="meeting_date")
 	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
@@ -67,7 +67,7 @@ class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToSt
 
 	def escapedDescription:String = formattedHtml(description)
 
-	def this(creator: Member, relationship: StudentRelationship[_]) {
+	def this(creator: Member, relationship: StudentRelationship) {
 		this()
 		this.creator = creator
 		this.relationship = relationship

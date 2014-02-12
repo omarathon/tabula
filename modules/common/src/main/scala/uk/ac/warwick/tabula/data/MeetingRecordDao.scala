@@ -11,9 +11,9 @@ trait MeetingRecordDao {
 	def saveOrUpdate(scheduledMeeting: ScheduledMeetingRecord)
 	def saveOrUpdate(meeting: AbstractMeetingRecord)
 	def saveOrUpdate(approval: MeetingRecordApproval)
-	def listScheduled(rel: Set[StudentRelationship[_]], currentUser: Member): Seq[ScheduledMeetingRecord]
-	def list(rel: Set[StudentRelationship[_]], currentUser: Member): Seq[MeetingRecord]
-	def list(rel: StudentRelationship[_]): Seq[MeetingRecord]
+	def listScheduled(rel: Set[StudentRelationship], currentUser: Member): Seq[ScheduledMeetingRecord]
+	def list(rel: Set[StudentRelationship], currentUser: Member): Seq[MeetingRecord]
+	def list(rel: StudentRelationship): Seq[MeetingRecord]
 	def get(id: String): Option[AbstractMeetingRecord]
 	def purge(meeting: AbstractMeetingRecord): Unit
 }
@@ -29,21 +29,21 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 
 	def saveOrUpdate(approval: MeetingRecordApproval) = session.saveOrUpdate(approval)
 
-	def list(rel: Set[StudentRelationship[_]], currentUser: Member): Seq[MeetingRecord] = {
+	def list(rel: Set[StudentRelationship], currentUser: Member): Seq[MeetingRecord] = {
 		if (rel.isEmpty)
 			Seq()
 		else
 			addMeetingRecordListRestrictions(session.newCriteria[MeetingRecord], rel, currentUser).seq
 	}
 
-	def listScheduled(rel: Set[StudentRelationship[_]], currentUser: Member): Seq[ScheduledMeetingRecord] = {
+	def listScheduled(rel: Set[StudentRelationship], currentUser: Member): Seq[ScheduledMeetingRecord] = {
 		if (rel.isEmpty)
 			Seq()
 		else
 			addMeetingRecordListRestrictions(session.newCriteria[ScheduledMeetingRecord], rel, currentUser).seq
 	}
 
-	private def addMeetingRecordListRestrictions[A](criteria: ScalaCriteria[A], rel: Set[StudentRelationship[_]], currentUser: Member) = {
+	private def addMeetingRecordListRestrictions[A](criteria: ScalaCriteria[A], rel: Set[StudentRelationship], currentUser: Member) = {
 		criteria.add(Restrictions.in("relationship", rel))
 			// and only pick records where deleted = 0 or the current user id is the creator id
 			// - so that no-one can see records created and deleted by someone else
@@ -55,7 +55,7 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 			.addOrder(Order.desc("lastUpdatedDate"))
 	}
 
-	def list(rel: StudentRelationship[_]): Seq[MeetingRecord] = {
+	def list(rel: StudentRelationship): Seq[MeetingRecord] = {
 		session.newCriteria[MeetingRecord]
 			.add(Restrictions.eq("relationship", rel))
 			.add(is("deleted", false))

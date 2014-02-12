@@ -9,7 +9,7 @@ import org.joda.time.DateTime
 class CreateScheduledMeetingRecordCommandTest  extends TestBase with Mockito {
 
 	trait Fixture {
-		val relationship: StudentRelationship[_] = mock[StudentRelationship[_]]
+		val relationship: StudentRelationship = mock[StudentRelationship]
 
 		val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
 		mockMeetingRecordService.listScheduled(Set(relationship), creator) returns Seq()

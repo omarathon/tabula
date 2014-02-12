@@ -24,7 +24,7 @@ import org.hibernate.annotations.BatchSize
  * the SPR code of the student - so <some agent> is <some relationship e.g. personal tutor>
  * to <some spr code>
  */
-abstract class StudentRelationship[A] extends GeneratedId with Serializable {
+abstract class StudentRelationship extends GeneratedId with Serializable {
 
 	// "agent" is the the actor in the relationship, e.g. tutor
 	def agent: String
@@ -53,12 +53,6 @@ abstract class StudentRelationship[A] extends GeneratedId with Serializable {
 
 	def agentMember: Option[Member]
 
-	/**
-	 * If the agent matches a University ID, the Member is returned.
-	 * Otherwise the agent string is returned.
-	 */
-	def agentParsed: A
-
 	def agentName: String
 	def agentLastName: String
 
@@ -76,7 +70,7 @@ abstract class StudentRelationship[A] extends GeneratedId with Serializable {
 
 @Entity
 @DiscriminatorValue("member")
-class MemberStudentRelationship extends StudentRelationship[Member] {	
+class MemberStudentRelationship extends StudentRelationship {
 	def isAgentMember = true
 	
 	@ManyToOne(fetch = FetchType.LAZY, optional = true, cascade = Array(CascadeType.PERSIST))
@@ -84,8 +78,6 @@ class MemberStudentRelationship extends StudentRelationship[Member] {
 	var _agentMember: Member = _
 	def agentMember = Option(_agentMember)
 	def agentMember_=(member: Member) { _agentMember = member }
-	
-	def agentParsed = _agentMember
 	
 	def agentName = agentMember.map( _.fullName.getOrElse("[Unknown]") ).getOrElse(agent)
 	def agentLastName = agentMember.map( _.lastName ).getOrElse(agent) // can't reliably extract a last name from agent string
@@ -95,7 +87,7 @@ class MemberStudentRelationship extends StudentRelationship[Member] {
 
 @Entity
 @DiscriminatorValue("external")
-class ExternalStudentRelationship extends StudentRelationship[String] {
+class ExternalStudentRelationship extends StudentRelationship {
 	def isAgentMember = false
 	def agentMember = None
 	
@@ -103,8 +95,6 @@ class ExternalStudentRelationship extends StudentRelationship[String] {
 	var _agentName: String = _
 	def agent = _agentName
 	def agent_=(name: String) { _agentName = name }
-	
-	def agentParsed = agent
 	
 	def agentName = agent
 	def agentLastName = agent

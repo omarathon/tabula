@@ -18,7 +18,7 @@ object MeetingRecord {
 @DiscriminatorValue("standard")
 class MeetingRecord extends AbstractMeetingRecord {
 
-	def this(creator: Member, relationship: StudentRelationship[_]) {
+	def this(creator: Member, relationship: StudentRelationship) {
 		this()
 		this.creator = creator
 		this.relationship = relationship

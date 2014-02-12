@@ -10,7 +10,7 @@ abstract class ScheduledMeetingRecordNotification(meeting: ScheduledMeetingRecor
 	extends Notification[ScheduledMeetingRecord] with FreemarkerRendering {
 	implicit var freemarker = Wire.auto[Configuration]
 
-	val target: Option[StudentRelationship[_]] = Some(meeting.relationship)
+	val target: Option[StudentRelationship] = Some(meeting.relationship)
 	val _object = meeting
 	var studentNotFoundMessage = "Student member for SCJ code " + meeting.relationship.studentCourseDetails.scjCode + " not found"
 	var agentNotFoundMessage = "Agent member for code " + meeting.relationship.agent + " not found"

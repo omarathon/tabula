@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.profiles.notifications.ScheduledMeetingRecordInvitee
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
 
 object CreateScheduledMeetingRecordCommand {
-	def apply(creator: Member, relationship: StudentRelationship[_], considerAlternatives: Boolean) =
+	def apply(creator: Member, relationship: StudentRelationship, considerAlternatives: Boolean) =
 		new CreateScheduledMeetingRecordCommand(creator, relationship, considerAlternatives)
 			with ComposableCommand[ScheduledMeetingRecord]
 			with CreateScheduledMeetingPermissions
@@ -24,7 +24,7 @@ object CreateScheduledMeetingRecordCommand {
 			with CreateScheduledMeetingRecordNotification
 }
 
-class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship: StudentRelationship[_], val considerAlternatives: Boolean = false)
+class CreateScheduledMeetingRecordCommand (val creator: Member, val relationship: StudentRelationship, val considerAlternatives: Boolean = false)
 	extends CommandInternal[ScheduledMeetingRecord] with CreateScheduledMeetingRecordState with BindListener {
 
 	self: MeetingRecordServiceComponent =>
@@ -66,7 +66,7 @@ trait CreateScheduledMeetingRecordCommandValidation extends SelfValidating with 
 
 trait CreateScheduledMeetingRecordState {
 	def creator: Member
-	def relationship: StudentRelationship[_]
+	def relationship: StudentRelationship
 	def considerAlternatives: Boolean
 
 	var title: String = _
