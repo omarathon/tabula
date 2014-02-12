@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 object AbstractMeetingRecord {
 	// do not remove - import needed for sorting DateTimes
 	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
-	implicit val defaultOrdering = Ordering.by { meeting: AbstractMeetingRecord => (meeting.meetingDate, meeting.lastUpdatedDate) }
+	implicit val defaultOrdering = Ordering.by { meeting: AbstractMeetingRecord => (meeting.meetingDate, meeting.lastUpdatedDate) }.reverse
 }
 
 @Entity
