@@ -98,7 +98,6 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 		// it renders the JSON, thus making it invalid. So the WeekRangesDumperTag will continue
 		// to use single quotes, and the test can swap them for doubles to keep s.u.p.j.JSON happy.
 		val jsonString = dumper.getWeekRangesAsJSON(formatter).replaceAll("'","\"")
-		println(jsonString)
 		val results = JSON.parseFull(jsonString)
 		results match {
 			case Some(a:Seq[Map[String,Any]] @unchecked) => {

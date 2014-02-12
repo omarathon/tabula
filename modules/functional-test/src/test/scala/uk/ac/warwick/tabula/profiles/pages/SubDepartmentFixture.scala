@@ -29,6 +29,7 @@ trait SubDepartmentFixture  extends BrowserTest with GivenWhenThen with Fixtures
 		createRoute(TEST_PG_ROUTE_CODE, TEST_DEPARTMENT_CODE, "PG Route","PG")
 		createStudentMember(P.Student3.usercode,routeCode=TEST_PG_ROUTE_CODE, courseCode=TEST_POSTGRAD_COURSE_CODE,deptCode = TEST_DEPARTMENT_CODE)
 
+		createStaffMember(P.Marker1.usercode, deptCode = TEST_DEPARTMENT_CODE)
 	}
 
 }

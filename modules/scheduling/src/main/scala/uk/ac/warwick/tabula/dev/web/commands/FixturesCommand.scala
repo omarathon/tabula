@@ -88,6 +88,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		transactional() {
 			session.newQuery("delete from StudentCourseYearDetails where studentCourseDetails.scjCode like '3000%'").executeUpdate()
 			session.newQuery("delete from ModuleRegistration where studentCourseDetails.scjCode like '3000%'").executeUpdate()
+			session.newQuery("delete from MemberStudentRelationship where studentCourseDetails.scjCode like '3000%'").executeUpdate()
 			session.newQuery("delete from StudentCourseDetails where scjCode like '3000%'").executeUpdate()
 			session.newQuery("delete from StudentMember where universityId like '3000%'").executeUpdate()
 		}

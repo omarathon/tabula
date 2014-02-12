@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.SprCode
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
-import uk.ac.warwick.tabula.scheduling.services.ModuleRegistration
+import uk.ac.warwick.tabula.scheduling.services.UpstreamModuleRegistration
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.{RequiresPermissionsChecking, PermissionsChecking}
 
@@ -79,7 +79,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	def doGroupMembers() {
 		transactional() {
 			benchmark("Import all group members") {
-				var registrations = List[ModuleRegistration]()
+				var registrations = List[UpstreamModuleRegistration]()
 				var count = 0
 				assignmentImporter.allMembers { r =>
 					if (!registrations.isEmpty && r.differentGroup(registrations.head)) {
@@ -115,7 +115,7 @@ trait ImportAssignmentsCommand extends CommandInternal[Unit] with RequiresPermis
 	 * group, so save them (and reconcile it with any existing members we have in the
 	 * database).
 	 */
-	def save(group: Seq[ModuleRegistration]) {
+	def save(group: Seq[UpstreamModuleRegistration]) {
 		group.headOption map { head =>
 			val assessmentGroup = head.toUpstreamAssignmentGroup
 			// Convert ModuleRegistrations to simple uni ID strings.

@@ -68,8 +68,7 @@ class ExtensionRequestController extends CourseworkController{
 	def persistExtensionRequest(@Valid @ModelAttribute("command") cmd: Appliable[Extension] with ExtensionRequestState, errors: Errors): Mav = {
 		val (assignment, module) = (cmd.assignment, cmd.module)
 
-		if(errors.hasErrors){
-			println(errors)
+		if (errors.hasErrors){
 			showForm(cmd)
 		} else {
 			val extension = cmd.apply()

@@ -68,7 +68,7 @@ abstract class Features {
 	@Value("${features.personalTutorAssignment:true}") var personalTutorAssignment = defaults.personalTutorAssignment
 	@Value("${features.personalTutorAssignmentFiltering:true}") var personalTutorAssignmentFiltering = defaults.personalTutorAssignmentFiltering
 	@Value("${features.arbitraryRelationships:true}") var arbitraryRelationships = defaults.arbitraryRelationships
-	@Value("${features.personalTimetables:false}") var personalTimetables = defaults.personalTimetables
+	@Value("${features.personalTimetables:true}") var personalTimetables = defaults.personalTimetables
 	@Value("${features.profiles.memberNotes:true}") var profilesMemberNotes = defaults.profilesMemberNotes
 	@Value("${features.smallGroupTeaching.recordAttendance:true}") var smallGroupTeachingRecordAttendance = defaults.smallGroupTeachingRecordAttendance
 	@Value("${features.attendanceMonitoring.meetingPointType:true}") var attendanceMonitoringMeetingPointType = defaults.attendanceMonitoringMeetingPointType
@@ -77,6 +77,7 @@ abstract class Features {
 	@Value("${features.profiles.coursework:true}") var courseworkInStudentProfile = defaults.courseworkInStudentProfile
 	@Value("${features.profiles.visa:true}") var visaInStudentProfile = defaults.visaInStudentProfile
 	@Value("${features.attendanceMonitoring.note:true}") var attendanceMonitoringNote = defaults.attendanceMonitoringNote
+	@Value("${features.profiles.scheduledMeetings:false}") var scheduledMeetings = defaults.scheduledMeetings
 	@Value("${features.disability.rendering.profiles:false}") var disabilityRenderingInProfiles = defaults.disabilityRenderingInProfiles
 	@Value("${features.disability.rendering.extensions:false}") var disabilityRenderingInExtensions = defaults.disabilityRenderingInExtensions
 
@@ -135,7 +136,7 @@ class FeaturesMessage {
 	@BeanProperty var personalTutorAssignment = true
 	@BeanProperty var personalTutorAssignmentFiltering = true
 	@BeanProperty var arbitraryRelationships = true
-	@BeanProperty var personalTimetables = false
+	@BeanProperty var personalTimetables = true
 	@BeanProperty var profilesMemberNotes = true
 	@BeanProperty var smallGroupTeachingRecordAttendance = true
 	@BeanProperty var attendanceMonitoringMeetingPointType = true
@@ -144,6 +145,7 @@ class FeaturesMessage {
 	@BeanProperty var courseworkInStudentProfile = true
 	@BeanProperty var attendanceMonitoringNote = true
 	@BeanProperty var visaInStudentProfile = true
+	@BeanProperty var scheduledMeetings = false
 	@BeanProperty var disabilityRenderingInProfiles = false
 	@BeanProperty var disabilityRenderingInExtensions = false
 }

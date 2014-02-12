@@ -36,9 +36,9 @@ class BuiltInRoleDefinitionUserType extends AbstractBasicUserType[BuiltInRoleDef
 				SelectorBuiltInRoleDefinition.of(roleName, PermissionsSelector.Any[StudentRelationshipType]) // FIXME hard-wired
 			}
 			case r"([A-Za-z]+)${roleName}\(([^\)]+)${id}\)" => {
-				val selector = relationshipService.get.getStudentRelationshipTypeByUrlPart(id) match { // FIXME hard-wired
+				val selector = relationshipService.get.getStudentRelationshipTypeById(id) match { // FIXME hard-wired
 					case Some(selector) => selector
-					case _ => relationshipService.get.getStudentRelationshipTypeById(id).get // Fall back to ID, just in case
+					case _ => relationshipService.get.getStudentRelationshipTypeByUrlPart(id).get // Fall back to url, just in case
 				}
 				
 				SelectorBuiltInRoleDefinition.of(roleName, selector)

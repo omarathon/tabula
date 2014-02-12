@@ -20,22 +20,25 @@ class RelationshipListTest extends SubDepartmentFixture{
 		createModule("xxx-ug","xug19","Top level module")
 		registerStudentsOnModule(Seq(P.Student2),"xug19")
 
-		Given("Student3 is a postgraduate, registered on a module in xxx")
+		And("Student3 is a postgraduate, registered on a module in xxx")
 		createModule("xxx","xpg12","Postgrad module")
 		registerStudentsOnModule(Seq(P.Student3),"xpg12")
+
+		And("There is a relationship between Student1 and Marker1")
+		createStudentRelationship(P.Student1, P.Marker1)
 	}
 
 	"A departmental administrator" should "be able to see lists of students in his department" in {
 
 		When("The departmental administrator goes to the profiles home page")
-		signIn as(P.Admin1) to(Path("/profiles"))
+		signIn as P.Admin1 to Path("/profiles")
 
 		Then("There is a link to administer department xxx")
 		find(cssSelector("#profile-dept-admin h5")).get.underlying.getText should be("Test Services")
 
 		And("The tutor page shows one student with a tutor")
 		// too lazy to write the code to drive the drop-down "Manage" button on the profiles page.
-		go to(Path("/profiles/department/xxx/tutor"))
+		go to Path("/profiles/department/xxx/tutor")
 		pageSource should include("1 personal tutee")
 
 		And("The tutor page shows two students without a tutor")
@@ -44,13 +47,13 @@ class RelationshipListTest extends SubDepartmentFixture{
 
 	"A sub-departmental administrator" should "be able to see lists of students in his sub-department" in {
 		When("The sub-departmental administrator goes to the profiles home page")
-		signIn as(P.Admin3) to(Path("/profiles"))
+		signIn as P.Admin3 to Path("/profiles")
 
 		Then("There is a link to administer department xxx-ug")
 		find(cssSelector("#profile-dept-admin h5")).get.underlying.getText should be("Test Services - Undergraduates")
 
 		And("The tutor page shows one student with a tutor")
-		go to(Path("/profiles/department/xxx-ug/tutor"))
+		go to Path("/profiles/department/xxx-ug/tutor")
 		pageSource should include("1 personal tutee")
 
 		And("The tutor page shows one student without a tutor")

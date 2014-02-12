@@ -89,7 +89,7 @@ object CheckablePermission {
 object SelectorPermission {
 	private val ObjectClassPrefix = Permissions.getClass.getName
 
-	def of[A <: PermissionsSelector[A]](name: String, selector: A): SelectorPermission[A] = {
+	def of[A <: PermissionsSelector[A]](name: String, selector: Object): SelectorPermission[A] = {
 		try {
 			// Go through the magical hierarchy
 			val clz = Class.forName(ObjectClassPrefix + name.replace('.', '$'))
@@ -294,6 +294,13 @@ object Permissions {
       case class Delete(relationshipType: PermissionsSelector[StudentRelationshipType])
       	extends SelectorPermission(relationshipType, "Remove a meeting record")
     }
+
+		object ScheduledMeetingRecord {
+			case class Create(relationshipType: PermissionsSelector[StudentRelationshipType])
+				extends SelectorPermission(relationshipType, "Create a scheduled meeting record")
+			case object Update extends Permission("Edit a scheduled meeting record")
+			case object Delete extends Permission("Remove a scheduled meeting record")
+		}
 	}
 
 	object SmallGroups {

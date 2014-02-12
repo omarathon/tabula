@@ -32,6 +32,8 @@ trait TimetablingFixture extends BrowserTest with TimetableDriver  with Features
 		createModule(TEST_DEPARTMENT_CODE, TEST_MODULE_CODE, "Timetabling Module")
 		testGroupSetId = createSmallGroupSet(TEST_MODULE_CODE, TEST_GROUPSET_NAME)
 
+		And("marker1 has a membership record")
+		createStaffMember(P.Marker1.usercode, deptCode = TEST_DEPARTMENT_CODE)
 	}
 
 }

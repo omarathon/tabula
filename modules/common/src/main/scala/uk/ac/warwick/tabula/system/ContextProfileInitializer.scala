@@ -33,31 +33,29 @@ class ContextProfileInitializer extends ApplicationContextInitializer[Configurab
 		ctx.getEnvironment().setActiveProfiles(profiles: _*)
 	}
 
-	def resolve() = {
+	def resolve(): Seq[String] = {
 		// get profile listed in spring.profiles.active property
 		val profiles = config.getString(profilesProperty) match {
 			case s: String => s.split(",").toList
 			case _ => Nil
 		}
 		// add any additional profiles based on flags
-		val allProfiles = addExtraProfiles(profiles)
-		allProfiles
+		profiles ++ extraProfiles
 	}
 
-	// chains the individual partial functions together
-	def addExtraProfiles = scheduler andThen web
+	def extraProfiles = scheduler ++ web
 
-	val scheduler = extraProfile("scheduling.enabled", "scheduling", false) _
-	val web = extraProfile("web.enabled", "web", true) _
+	def scheduler = extraProfile("scheduling.enabled", "scheduling", false)
+	def web = extraProfile("web.enabled", "web", true)
 
 	/**
-	 * Function that checks a config property and adds a profile to the profile list
-	 * if found. It returns a new list rather than changing the passed in list.
+	 * Function that checks a config property and returns an Option[String] of
+	 * a profile name if it should be enabled.
 	 */
-	def extraProfile(prop: String, profileName: String, default: Boolean)(profiles: List[String]) =
+	def extraProfile(prop: String, profileName: String, default: Boolean) =
 		config.getBoolean(prop, default) match {
-			case true => profileName :: profiles
-			case false => profiles
+			case true => Some(profileName)
+			case false => None
 		}
 
 	var testConfig: PropertySource[_] = _
