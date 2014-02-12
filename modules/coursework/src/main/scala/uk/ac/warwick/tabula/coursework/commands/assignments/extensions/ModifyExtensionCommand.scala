@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 import uk.ac.warwick.tabula.commands.{Notifies, Description, Command, SelfValidating}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import uk.ac.warwick.tabula.data.model.{StudentMember, Assignment, Module}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.helpers.{LazyLists, Logging}
@@ -26,7 +26,7 @@ import uk.ac.warwick.tabula.validators.WithinYears
 
 class AddExtensionCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
 	extends ModifyExtensionCommand(module, assignment, submitter) with Notifies[Seq[Extension], Option[Extension]] {
-	
+
 	PermissionCheck(Permissions.Extension.Create, assignment)
 
 	def emit(extensions: Seq[Extension]) = extensions.map({extension =>
@@ -37,9 +37,9 @@ class AddExtensionCommand(module: Module, assignment: Assignment, submitter: Cur
 
 class EditExtensionCommand(module: Module, assignment: Assignment, val extension: Extension, submitter: CurrentUser)
 	extends ModifyExtensionCommand(module, assignment, submitter) with Notifies[Seq[Extension], Option[Extension]] {
-	
+
 	PermissionCheck(Permissions.Extension.Update, extension)
-	
+
 	copyExtensions(List(extension))
 
 	def emit(extensions: Seq[Extension]) = extensions.flatMap({extension =>
@@ -68,11 +68,11 @@ class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, exte
 
 abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignment, val submitter: CurrentUser)
 		extends Command[Seq[Extension]] with Daoisms with Logging with SelfValidating {
-	
+
 	mustBeLinked(assignment,module)
 
 	var userLookup = Wire.auto[UserLookupService]
-	
+
 	var extensionItems:JList[ExtensionItem] = LazyLists.create()
 	var extensions:JList[Extension] = LazyLists.create()
 
@@ -92,10 +92,9 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 			})
 			extension.assignment = assignment
 			extension.expiryDate = item.expiryDate
-			extension.approvalComments = item.approvalComments
-			extension.approved = item.approved
-			extension.rejected = item.rejected
-			extension.approvedOn = DateTime.now
+			extension.reviewerComments = item.reviewerComments
+			extension.state = item.state
+			extension.reviewedOn = DateTime.now
 			extension
 		}
 
@@ -111,7 +110,7 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 		val extensionItemsList = for (extension <- extensions) yield {
 			val item = new ExtensionItem
 			item.universityId =  extension.universityId
-			item.approvalComments = extension.approvalComments
+			item.reviewerComments = extension.reviewerComments
 			item.expiryDate = Option(extension.expiryDate).getOrElse(extension.requestedExpiryDate)
 			item
 		}
@@ -144,7 +143,7 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 		}
 
 		if(extension.expiryDate == null){
-			if (!extension.rejected){
+			if (extension.state == ExtensionState.Approved){
 				errors.rejectValue("expiryDate", "extension.requestedExpiryDate.provideExpiry")
 			}
 		} else if(extension.expiryDate.isBefore(assignment.closeDate)){
@@ -165,21 +164,19 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 	}
 }
 
-class ExtensionItem{
+class ExtensionItem {
 
-	var universityId:String =_
-	
+	var universityId: String =_
+
 	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	var expiryDate:DateTime =_
-	var approvalComments:String =_
+	var expiryDate: DateTime =_
+	var reviewerComments: String =_
+	var state: ExtensionState = ExtensionState.Unreviewed
 
-	var approved:Boolean = false
-	var rejected:Boolean = false
-
-	def this(universityId:String, expiryDate:DateTime, reason:String) = {
+	def this(universityId: String, expiryDate: DateTime, reason: String) = {
 		this()
 		this.universityId = universityId
 		this.expiryDate = expiryDate
-		this.approvalComments = approvalComments
+		this.reviewerComments = reviewerComments
 	}
 }

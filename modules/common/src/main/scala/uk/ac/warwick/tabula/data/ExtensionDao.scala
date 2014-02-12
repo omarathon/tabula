@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.Assignment
 import org.hibernate.criterion.Restrictions._
@@ -41,8 +41,7 @@ class ExtensionDaoImpl extends ExtensionDao with Daoisms {
 		.add(
 			and(
 				isNotNull("requestedOn"),
-				is("approved", false),
-				is("rejected", false)
+				is("state", ExtensionState.Unreviewed)
 			)
 		)
 

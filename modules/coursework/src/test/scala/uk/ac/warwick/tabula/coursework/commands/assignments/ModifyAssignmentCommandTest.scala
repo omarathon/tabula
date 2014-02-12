@@ -10,7 +10,7 @@ import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import uk.ac.warwick.tabula.services.{NotificationService, UserLookupService}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{Notification, UserGroup}
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import org.junit.Before
 import uk.ac.warwick.tabula.coursework.web.Routes.admin.assignment.extension
 
@@ -214,8 +214,8 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 		extension2.requestedOn = sometime
 		extension2.requestedExpiryDate = sometime.plusWeeks(8)
 		extension2.assignment = assignment
-		extension2.approved = true
-		extension2.approvedOn = sometime.plusDays(5)
+		extension2.state = ExtensionState.Approved
+		extension2.reviewedOn = sometime.plusDays(5)
 
 		assignment.allowExtensions = true
 		assignment.extensions.add(extension1)

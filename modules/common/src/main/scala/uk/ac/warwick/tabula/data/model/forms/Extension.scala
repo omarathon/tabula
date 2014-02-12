@@ -8,86 +8,134 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{StudentMember, Disability, Feedback, FileAttachment, Assignment, GeneratedId}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.ProfileService
+import org.hibernate.`type`.StandardBasicTypes
+import java.sql.Types
 
 @Entity @AccessType("field")
 class Extension extends GeneratedId with PermissionsTarget {
 
-	@transient
-	var profileService = Wire[ProfileService]
-
-	def this(universityId:String=null) {
+	def this(universityId: String = null) {
 		this()
 		this.universityId = universityId
 	}
 
-	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
-	@JoinColumn(name="assignment_id")
-	var assignment:Assignment = _
+	@transient
+	var profileService = Wire[ProfileService]
 
-	def permissionsParents = Option(assignment).toStream
+	@transient
+	lazy val workingDaysHelper = new WorkingDaysHelperImpl
+
+	@ManyToOne(optional = false, cascade = Array(PERSIST,MERGE), fetch = FetchType.LAZY)
+	@JoinColumn(name = "assignment_id")
+	var assignment: Assignment = _
 
 	@NotNull
-	var userId:String =_
+	var userId: String = _
 
 	@NotNull
-	var universityId:String =_
+	var universityId: String = _
+
+	// TODO should there be a single def that returns the expiry date for approved/manual extensions, and requested expiry date otherwise?
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	var requestedExpiryDate: DateTime = _
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	var expiryDate: DateTime = _
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	var requestedOn: DateTime = _
+	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@JoinColumn(name = "approvedOn")
+	var reviewedOn: DateTime = _
+
+	var reason: String = _
+	@JoinColumn(name = "approvalComments")
+	var reviewerComments: String = _
+	var disabilityAdjustment: Boolean = false
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.forms.ExtensionStateUserType")
+	var state: ExtensionState = ExtensionState.Unreviewed
+
+	@OneToMany(mappedBy = "extension", fetch = LAZY, cascade = Array(ALL))
+	@BatchSize(size = 200)
+	var attachments: JSet[FileAttachment] = JSet()
 
 	def isForUser(user: User): Boolean = isForUser(user.getWarwickId, user.getUserId)
 	def isForUser(theUniversityId: String, theUsercode: String): Boolean = universityId == theUniversityId || userId == theUsercode
 
-	// TODO should there be a single def that returns the expiry date for approved/manual extensions, and requested expiry date otherwise?
-	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	var requestedExpiryDate:DateTime =_
-
-	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	var expiryDate:DateTime =_
-
-	var reason:String =_
-
-	@OneToMany(mappedBy="extension", fetch=LAZY, cascade=Array(ALL))
-	@BatchSize(size=200)
-	var attachments:JSet[FileAttachment] = JSet()
+	def permissionsParents = Option(assignment).toStream
 
 	def nonEmptyAttachments = attachments.toSeq filter(_.hasData)
 
-	def addAttachment(attachment:FileAttachment) {
+	def addAttachment(attachment: FileAttachment) {
 		if (attachment.isAttached) throw new IllegalArgumentException("File already attached to another object")
 		attachment.temporary = false
 		attachment.extension = this
 		attachments.add(attachment)
 	}
 
-	var disabilityAdjustment:Boolean = false
-
-	var approved:Boolean = false
-	var rejected:Boolean = false
-
-	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	var requestedOn:DateTime =_
-
-	@Type(`type`="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	var approvedOn:DateTime =_
-
-	var approvalComments:String =_
-
-	// this was not requested by a student. i.e. was manually created by an administrator
+	// this extension was manually created by an administrator, rather than requested by a student
 	def isManual = requestedOn == null
-	def isAwaitingApproval = !isManual && !approved && !rejected
-	def isAwaitingReview = approved && !isManual && requestedOn.isAfter(approvedOn)
 
-	@transient
-	lazy val workingDaysHelper = new WorkingDaysHelperImpl
+	def approved = state == ExtensionState.Approved
+	def rejected = state == ExtensionState.Rejected
 
-	// feedback deadline taking the extension into account
-	def feedbackDeadline = {
-		val localDate = workingDaysHelper.datePlusWorkingDays(expiryDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)
-		localDate.toDateTime(expiryDate)
+	// keep state encapsulated
+	def approve(comments: String = null) {
+		state = ExtensionState.Approved
+		reviewedOn = DateTime.now
+		reviewerComments = comments
 	}
 
+	// keep state encapsulated
+	def reject(comments: String = null) {
+		state = ExtensionState.Rejected
+		reviewedOn = DateTime.now
+		reviewerComments = comments
+	}
+
+	def awaitingReview = {
+		// wrap nullable dates to be more readable in pattern match
+		val requestDate = Option(requestedOn)
+		val reviewDate = Option(reviewedOn)
+
+		(requestDate, reviewDate) match {
+			case (Some(request), None) => true
+			case (Some(latestRequest), Some(lastReview)) if latestRequest.isAfter(lastReview) => true
+			case _ => false
+		}
+	}
+
+	// feedback deadline taking the extension into account
+	def feedbackDeadline = workingDaysHelper.datePlusWorkingDays(expiryDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays).toDateTime(expiryDate)
+}
+
+
+sealed abstract class ExtensionState(val dbValue: String, val description: String)
+
+object ExtensionState {
+	case object Unreviewed extends ExtensionState("U", "Unreviewed")
+	case object Approved extends ExtensionState("A", "Approved")
+	case object Rejected extends ExtensionState("R", "Rejected")
+
+	def fromCode(code: String) = code match {
+		case Unreviewed.dbValue => Unreviewed
+		case Approved.dbValue => Approved
+		case Rejected.dbValue => Rejected
+		case _ => throw new IllegalArgumentException()
+	}
+}
+
+class ExtensionStateUserType extends AbstractBasicUserType[ExtensionState, String] {
+	val basicType = StandardBasicTypes.STRING
+	override def sqlTypes = Array(Types.VARCHAR)
+
+	val nullValue = null
+	val nullObject = null
+
+	override def convertToObject(string: String) = ExtensionState.fromCode(string)
+	override def convertToValue(es: ExtensionState) = es.dbValue
 }

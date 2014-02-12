@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notificat
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.events.NotificationHandling
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 
 
 class EditAssignmentCommand(module: Module = null, val assignment: Assignment = null, user: CurrentUser)
@@ -44,7 +44,7 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 	override def contextSpecificValidation(errors:Errors){
 
 		// compare ids directly as this.markingWorkflow always comes back with the type MarkingWorkflow which breaks .equals
-		
+
 		val workflowChanged = Option(assignment.markingWorkflow).map(_.id) != Option(markingWorkflow).map(_.id)
 		if (!canUpdateMarkingWorkflow && workflowChanged){
 			errors.rejectValue("markingWorkflow", "markingWorkflow.cannotChange")
@@ -59,7 +59,7 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 			unapprovedExtensions = assignment.getUnapprovedExtensions
 			val admin = user.apparentUser
 			unapprovedExtensions.foreach { e =>
-				e.rejected = true
+				e.reject()
 
 				// let's notify manually for completeness
 				val student = userLookup.getUserByWarwickUniId(e.universityId)

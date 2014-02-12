@@ -7,9 +7,9 @@
 		</div>
 	</div>
 	<div class="control-group">
-		<@form.label path="extensionItems[0].approvalComments">Comments</@form.label>
+		<@form.label path="extensionItems[0].reviewerComments">Comments</@form.label>
 		<div class="controls">
-			<@f.textarea path="extensionItems[0].approvalComments" />
+			<@f.textarea path="extensionItems[0].reviewerComments" />
 		</div>
 	</div>
 </div>

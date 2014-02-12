@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.Feedback
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Module
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import uk.ac.warwick.tabula.services.{SubmissionService, FeedbackService, AssignmentMembershipService, AuditEventQueryMethods}
 import collection.JavaConversions._
@@ -116,7 +116,7 @@ trait ReportWorld extends TestBase with Mockito {
 
 
 	val extension = new Extension(idFormat(3))
-	extension.approved = true
+	extension.state = ExtensionState.Approved
 	extension.expiryDate = assignmentSix.closeDate.plusDays(2)
 	assignmentSix.extensions = Seq(extension)
 

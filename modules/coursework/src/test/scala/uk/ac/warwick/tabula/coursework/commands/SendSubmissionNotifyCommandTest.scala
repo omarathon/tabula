@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model.Submission
 import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.UserGroup
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import collection.JavaConversions._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.coursework.commands.assignments.SendSubmissionNotifyCommand
@@ -91,9 +91,9 @@ class SendSubmissionNotifyCommandTest extends AppContextTestBase with Mockito {
 	    extension.userId = "cuslat"
 	    extension.expiryDate = new DateTime().plusWeeks(1)
 	    extension.reason = "I lost my work down the back of the dog"
-	    extension.approvalComments = "Naughty dog. OK."
-	    extension.approved = true
-	    extension.approvedOn = new DateTime(2012, 7, 22, 14, 42)
+	    extension.reviewerComments = "Naughty dog. OK."
+	    extension.state = ExtensionState.Approved
+	    extension.reviewedOn = new DateTime(2012, 7, 22, 14, 42)
 		extension
 	}
 

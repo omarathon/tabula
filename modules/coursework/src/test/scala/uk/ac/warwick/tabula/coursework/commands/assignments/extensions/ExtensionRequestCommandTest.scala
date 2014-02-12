@@ -7,7 +7,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, RelationshipServiceComponent, RelationshipService}
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.{ExtensionRequestValidation, ExtensionRequestPersistenceComponent, ExtensionRequestCommandInternal}
 import uk.ac.warwick.tabula.data.model.FileAttachment
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import org.joda.time.DateTime
 import org.springframework.util.FileCopyUtils
 import java.io.{FileOutputStream, ByteArrayInputStream}
@@ -42,7 +42,7 @@ class ExtensionRequestCommandTest extends TestBase with Mockito {
 				returnedExtension.requestedOn should be (DateTime.now)
 				returnedExtension.approved should be (false)
 				returnedExtension.rejected should be (false)
-				returnedExtension.approvedOn should be (null)
+				returnedExtension.reviewedOn should be (null)
 				returnedExtension.userId should be (currentUser.userId)
 				returnedExtension.universityId should be (currentUser.universityId)
 				returnedExtension.assignment should be (assignment)
@@ -69,22 +69,22 @@ class ExtensionRequestCommandTest extends TestBase with Mockito {
 				val currentUser = RequestInfo.fromThread.get.user
 				var assignment = newDeepAssignment()
 				val newExtension = new Extension(currentUser.universityId)
-				newExtension.approved = true
-				newExtension.approvedOn = DateTime.now
+				newExtension.state = ExtensionState.Approved
+				newExtension.reviewedOn = DateTime.now
 				assignment.extensions.add(newExtension)
 
 				var command = new ExtensionRequestCommandInternal(assignment.module, assignment, currentUser) with ExtensionRequestCommandTestSupport
 				var returnedExtension = command.applyInternal()
 
 				returnedExtension.approved should be (true)
-				returnedExtension.approvedOn should be (DateTime.now)
+				returnedExtension.reviewedOn should be (DateTime.now)
 
 				assignment = newDeepAssignment()
 				command = new ExtensionRequestCommandInternal(assignment.module, assignment, currentUser) with ExtensionRequestCommandTestSupport
 				returnedExtension = command.applyInternal()
 
 				returnedExtension.approved should be (false)
-				returnedExtension.approvedOn should be (null)
+				returnedExtension.reviewedOn should be (null)
 
 			}
 		}

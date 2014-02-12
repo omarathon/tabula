@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.MarkingMethod
 import uk.ac.warwick.tabula.data.model.MarkingState
 import uk.ac.warwick.tabula.data.model.OriginalityReport
 import uk.ac.warwick.tabula.data.model.Submission
-import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, Extension, MarkerSelectField, WordCountField}
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, SavedFormValue, Extension, MarkerSelectField, WordCountField}
 import uk.ac.warwick.tabula.data.convert.JodaDateTimeConverter
 import org.joda.time.DateTimeConstants
 import org.springframework.validation.BindException
@@ -218,7 +218,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		// TODO is this right?
 
 		val extension = Fixtures.extension("0672089", "cuscav")
-		extension.approved = true
+		extension.state = ExtensionState.Approved
 		extension.expiryDate = DateTime.now.plusDays(1)
 		extension.assignment = assignment
 		assignment.extensions.add(extension)
@@ -260,7 +260,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		// Authorised late isn't allowed here
 
 		val extension = Fixtures.extension("0672089", "cuscav")
-		extension.approved = true
+		extension.state = ExtensionState.Approved
 		extension.expiryDate = DateTime.now.plusDays(1)
 		extension.assignment = assignment
 		assignment.extensions.add(extension)
@@ -337,7 +337,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		// Authorised late fits
 
 		val extension = Fixtures.extension("0672089", "cuscav")
-		extension.approved = true
+		extension.state = ExtensionState.Approved
 		extension.expiryDate = DateTime.now.plusDays(1)
 		extension.assignment = assignment
 		assignment.extensions.add(extension)

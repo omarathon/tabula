@@ -154,9 +154,9 @@
 				</div>
 			</div>
 			<div class="control-group extensionComments">
-				<@form.label path="extensionItems[0].approvalComments"><strong>Comments</strong></@form.label>
+				<@form.label path="extensionItems[0].reviewerComments"><strong>Comments</strong></@form.label>
 				<div class="controls">
-					<@f.textarea path="extensionItems[0].approvalComments"/>
+					<@f.textarea path="extensionItems[0].reviewerComments"/>
 				</div>
 			</div>
 		</div>

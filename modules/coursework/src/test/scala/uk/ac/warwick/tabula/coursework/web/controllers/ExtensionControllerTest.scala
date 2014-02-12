@@ -30,7 +30,7 @@ class ExtensionControllerTest extends TestBase with Mockito {
       val extensions = command.copyExtensionItems()
       val extensionsJson = controller.toJson(extensions)
       val string = json.writeValueAsString(extensionsJson)
-      string should be ("""{"1170836":{"id":"1170836","status":"","expiryDate":"12:00&#8194;Thu 23<sup>rd</sup> August 2012","approvalComments":"Donec a risus purus nullam."}}""")
+      string should be ("""{"1170836":{"id":"1170836","status":"Unreviewed","expiryDate":"12:00&#8194;Thu 23<sup>rd</sup> August 2012","reviewerComments":"Donec a risus purus nullam."}}""")
     }
   }
 
@@ -38,7 +38,7 @@ class ExtensionControllerTest extends TestBase with Mockito {
     val extensionItem = new ExtensionItem
     extensionItem.universityId = "1170836"
     extensionItem.expiryDate = DateTime.parse("2012-08-23T12:00")
-    extensionItem.approvalComments = "Donec a risus purus nullam."
+    extensionItem.reviewerComments = "Donec a risus purus nullam."
     List(extensionItem)
   }
 }
