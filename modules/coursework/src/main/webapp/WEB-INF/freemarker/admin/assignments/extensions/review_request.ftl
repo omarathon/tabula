@@ -139,7 +139,12 @@
 					</details>
 					</#if>
 				</div>
+
 				<div class="clearfix"></div>
+
+				<#if features.disabilityRenderingInExtensions && extension.disabilityAdjustment && student?? && can.do("Profiles.Read.Disability", student)>
+					<p class="alert alert-warning">Student has requested their ${student.disability.definition} be taken into consideration.</p>
+				</#if>
 			</div>
 			<@f.input type="hidden" path="extensionItems[0].universityId" value="${universityId}" />
 			<div class="control-group extensionNewDate">

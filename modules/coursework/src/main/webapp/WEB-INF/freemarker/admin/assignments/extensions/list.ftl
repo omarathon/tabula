@@ -77,7 +77,9 @@
 								</#if>
 							</td>
 							<td class="status">
-								<#if extension.approved>
+								<#if extension.awaitingReview>
+									<span class="requestedExtension">Request updated <@fmt.date date=extension.requestedOn at=true /></span>
+								<#elseif extension.approved>
 									Granted
 								<#elseif extension.rejected>
 									Rejected
