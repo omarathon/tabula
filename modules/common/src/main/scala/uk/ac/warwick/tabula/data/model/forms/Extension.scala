@@ -49,11 +49,11 @@ class Extension extends GeneratedId with PermissionsTarget {
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var requestedOn: DateTime = _
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
-	@JoinColumn(name = "approvedOn")
+	@Column(name = "approvedOn")
 	var reviewedOn: DateTime = _
 
 	var reason: String = _
-	@JoinColumn(name = "approvalComments")
+	@Column(name = "approvalComments")
 	var reviewerComments: String = _
 	var disabilityAdjustment: Boolean = false
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.forms.ExtensionStateUserType")
