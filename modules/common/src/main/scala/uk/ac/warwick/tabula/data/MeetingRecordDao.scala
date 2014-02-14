@@ -68,7 +68,6 @@ class MeetingRecordDaoImpl extends MeetingRecordDao with Daoisms {
 	def get(id: String) = getById[AbstractMeetingRecord](id)
 
 	def purge(meeting: AbstractMeetingRecord): Unit = {
-		meeting.attachments = null
 		session.delete(meeting)
 		session.flush()
 	}
