@@ -48,7 +48,7 @@ class ExtensionRequestApprovedNotification extends ExtensionStudentNotification 
 @Entity
 @DiscriminatorValue("ExtensionRequestRejected")
 class ExtensionRequestRejectedNotification extends ExtensionStudentNotification {
-	val verb = "reject"
+	def verb = "reject"
 	def title = titlePrefix + "Extension request rejected"
-	val template = "/WEB-INF/freemarker/emails/extension_request_rejected.ftl"
+	def template = "/WEB-INF/freemarker/emails/extension_request_rejected.ftl"
 }

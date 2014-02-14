@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.FreemarkerModel
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
-import javax.persistence.DiscriminatorValue
+import javax.persistence.{Entity, DiscriminatorValue}
 
 abstract class ExtensionRequestNotification extends ExtensionNotification {
 
@@ -47,6 +47,7 @@ abstract class ExtensionRequestNotification extends ExtensionNotification {
 	def recipients = assignment.module.department.extensionManagers.users
 }
 
+@Entity
 @DiscriminatorValue("ExtensionRequestCreated")
 class ExtensionRequestCreatedNotification extends ExtensionRequestNotification {
 	def verb = "create"
@@ -54,6 +55,7 @@ class ExtensionRequestCreatedNotification extends ExtensionRequestNotification {
 	def title = titlePrefix + "New extension request made"
 }
 
+@Entity
 @DiscriminatorValue("ExtensionRequestModified")
 class ExtensionRequestModifiedNotification extends ExtensionRequestNotification {
 	def verb = "modify"

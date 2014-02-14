@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
 import uk.ac.warwick.tabula.coursework.web.Routes
-import javax.persistence.DiscriminatorValue
+import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.tabula.data.model.FreemarkerModel
 
 
@@ -24,8 +24,10 @@ abstract class ExtensionRequestRespondedNotification(val verbed: String) extends
 	def recipients = assignment.module.department.extensionManagers.users.filterNot(_ == agent)
 }
 
+@Entity
 @DiscriminatorValue("ExtensionRequestRespondedApprove")
 class ExtensionRequestRespondedApproveNotification extends ExtensionRequestRespondedNotification("approved") {}
 
+@Entity
 @DiscriminatorValue("ExtensionRequestRespondedReject")
 class ExtensionRequestRespondedRejectNotification extends ExtensionRequestRespondedNotification("rejected") {}
