@@ -1,5 +1,15 @@
 <#include "_course_details.ftl" />
 
+<ul class="nav nav-pills">
+	<#list studentCourseDetails.freshStudentCourseYearDetails as scyd>
+		<#if scyd.sceSequenceNumber = studentCourseDetails.latestStudentCourseYearDetails.sceSequenceNumber>
+			<li class="active"><a href="#">${scyd.academicYear.toString}</a></li>
+		<#else>
+			<li><a href="#">${scyd.academicYear.toString}</a></li>
+		</#if>
+	</#list>
+</ul>
+
 <div class="tabbable">
 	<#assign showTimetablePane=features.personalTimetables && can.do("Profiles.Read.Timetable", profile) />
 

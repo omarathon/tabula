@@ -17,7 +17,7 @@ import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
 
-class ImportStudentCourseYearCommand(resultSet: ResultSet, importRowTracker: ImportRowTracker)
+class ImportStudentCourseYearCommand(resultSet: ResultSet, studentCourseDetails: StudentCourseDetails, importRowTracker: ImportRowTracker)
 	extends Command[StudentCourseYearDetails] with Logging with Daoisms
 	with StudentCourseYearProperties with Unaudited with PropertyCopying {
 	import ImportMemberHelpers._
@@ -34,11 +34,6 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet, importRowTracker: Imp
 	var modeOfAttendanceCode: String = _
 	var academicYearString: String = _
 	var moduleRegistrationStatusCode: String = _
-
-	// This needs to be assigned before apply is called.
-	// (can't be in the constructor because it's not yet created then)
-	// TODO - use promises to make sure it gets assigned
-	var studentCourseDetails: StudentCourseDetails = _
 
 	this.yearOfStudy = rs.getInt("year_of_study")
 	//this.fundingSource = rs.getString("funding_source")

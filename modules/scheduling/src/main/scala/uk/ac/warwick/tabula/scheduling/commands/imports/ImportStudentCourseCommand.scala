@@ -11,16 +11,13 @@ import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao}
 import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.{CourseType, Department, Member, StudentCourseDetails, StudentCourseProperties, StudentMember, StudentRelationshipSource}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopying}
+import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory, ImportRowTracker, PropertyCopying}
 import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter}
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, RelationshipService}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.commands.Description
 
-class ImportStudentCourseCommand(resultSet: ResultSet,
-		importRowTracker: ImportRowTracker,
-		importStudentCourseYearCommand: ImportStudentCourseYearCommand,
-		importSupervisorsForStudentCommand: ImportSupervisorsForStudentCommand)
+class ImportStudentCourseCommand(resultSet: ResultSet, stuMem: StudentMember, importCommandFactory: ImportCommandFactory)
 	extends Command[StudentCourseDetails] with Logging with Daoisms
 	with StudentCourseProperties with Unaudited with PropertyCopying {
 
@@ -45,11 +42,6 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 
 	// tutor data also needs some work before it can be persisted, so store it in local variables for now:
 	var tutorUniId = rs.getString("spr_tutor1")
-
-	// This needs to be assigned before apply is called.
-	// (can't be in the constructor because it's not yet created then)
-	// TODO - use promises to make sure it gets assigned
-	var stuMem: StudentMember = _
 
 	// this is the key and is not included in StudentCourseProperties, so just storing it in a var:
 	var scjCode: String = rs.getString("scj_code")
@@ -105,8 +97,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 			}
 		}
 
-		importStudentCourseYearCommand.studentCourseDetails = studentCourseDetails
-		val studentCourseYearDetails = importStudentCourseYearCommand.apply()
+		val studentCourseYearDetails = importCommandFactory.createImportStudentCourseYearCommand(resultSet, studentCourseDetails).apply
 
 		// Apply above will take care of the db.  This brings the in-memory data up to speed:
 		studentCourseDetails.attachStudentCourseYearDetails(studentCourseYearDetails)
@@ -122,14 +113,11 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 		else {
 			captureTutor(studentCourseDetails)
 
-			if (scjCode != null && !scjStatusCode.startsWith("P")) {
-				// supervisors are coded against SCJ codes; only import them if the SCJ is not withdrawn
-				importSupervisorsForStudentCommand.studentCourseDetails = studentCourseDetails
-				importSupervisorsForStudentCommand.apply
-			}
+			if (scjCode != null && !scjStatusCode.startsWith("P"))
+				new ImportSupervisorsForStudentCommand(studentCourseDetails).apply
 		}
 
-		importRowTracker.scjCodesSeen.add(studentCourseDetails.scjCode)
+		importCommandFactory.rowTracker.scjCodesSeen.add(studentCourseDetails.scjCode)
 
 		studentCourseDetails
 	}

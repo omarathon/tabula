@@ -79,6 +79,7 @@ abstract class Features {
 	@Value("${features.attendanceMonitoring.note:true}") var attendanceMonitoringNote = defaults.attendanceMonitoringNote
 	@Value("${features.disability.rendering.profiles:false}") var disabilityRenderingInProfiles = defaults.disabilityRenderingInProfiles
 	@Value("${features.disability.rendering.extensions:false}") var disabilityRenderingInExtensions = defaults.disabilityRenderingInExtensions
+	@Value("${features.includePastYears:true}") var includePastYears = defaults.includePastYears
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -146,6 +147,7 @@ class FeaturesMessage {
 	@BeanProperty var visaInStudentProfile = true
 	@BeanProperty var disabilityRenderingInProfiles = false
 	@BeanProperty var disabilityRenderingInExtensions = false
+	@BeanProperty var includePastYears = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

@@ -20,7 +20,14 @@
 					<#if scd.scjCode != studentCourseDetails.scjCode>
 						<li role="presentation">
 							<a href="/profiles/view/course/${scd.urlSafeId}" role="menuitem">
-								${(scd.course.code)!} <@fmt.course_year_span studentCourseDetails /> ${scd.scjCode}
+								<#if scd.scjCode == profile.mostSignificantCourse.scjCode>
+									<b>
+								</#if>
+								${(scd.course.code)!}
+								<@fmt.course_year_span studentCourseDetails /> ${scd.scjCode}
+								<#if scd.scjCode == profile.mostSignificantCourse.scjCode>
+									</b>
+								</#if>
 							</a>
 						</li>
 					</#if>

@@ -8,12 +8,31 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
 import uk.ac.warwick.tabula.helpers.Logging
 import org.joda.time.DateTime
-import org.junit.Ignore
+import uk.ac.warwick.tabula.scheduling.helpers.ImportCommandFactory
+import uk.ac.warwick.tabula.services.MaintenanceModeService
+import uk.ac.warwick.tabula.data.MemberDao
 
 
 class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Mockito with Logging {
 
-	trait Environment {
+	// I don't know why I need to duplicate these 2 traits here rather than importing them from ImportStudentRowCommandTest
+	trait ImportCommandFactoryForTesting {
+		val importCommandFactory = new ImportCommandFactory
+		importCommandFactory.test = true
+
+		var maintenanceModeService = smartMock[MaintenanceModeService]
+		maintenanceModeService.enabled returns false
+		importCommandFactory.maintenanceModeService = maintenanceModeService
+
+		// needed for importCommandFactor for ImportStudentCourseCommand and also needed for ImportStudentRowCommand
+		val memberDao = smartMock[MemberDao]
+	}
+
+	trait ImportSupervisorsCommandSetup extends ImportCommandFactoryForTesting {
+		importCommandFactory.supervisorImporter = smartMock[SupervisorImporter]
+	}
+
+	trait Environment extends ImportSupervisorsCommandSetup {
 		val scjCode = "1111111/1"
 		val sprCode = "1111111/1"
 		val uniId = "1111111"
@@ -50,9 +69,6 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		session.saveOrUpdate(supervisorMember)
 		val savedSup = session.get(classOf[StaffMember], supervisorUniId)
 		logger.info("saved supervisor is " + savedSup)
-
-
-
 	}
 
 	@Transactional
@@ -60,13 +76,10 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 		new Environment {
 			// set up importer to return supervisor
 			val codes = Seq((supervisorUniId, new java.math.BigDecimal("100")))
-			val importer = smartMock[SupervisorImporter]
-			importer.getSupervisorUniversityIds(scjCode, relationshipType) returns codes
+			importCommandFactory.supervisorImporter.getSupervisorUniversityIds(scjCode, relationshipType) returns codes
 
 			// test command
-			val command = new ImportSupervisorsForStudentCommand()
-			command.studentCourseDetails = studentCourseDetails
-			command.supervisorImporter = importer
+			val command = importCommandFactory.createImportSupervisorsForStudentCommand(studentCourseDetails)
 			command.applyInternal()
 
 			// check results
@@ -85,14 +98,10 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 	@Test def testCaptureInvalidSupervisor() {
 		new Environment {
 			// set up importer to return supervisor
-			val importer = smartMock[SupervisorImporter]
-
-			importer.getSupervisorUniversityIds(scjCode, relationshipType) returns Seq()
+			importCommandFactory.supervisorImporter.getSupervisorUniversityIds(scjCode, relationshipType) returns Seq()
 
 			// test command
-			val command = new ImportSupervisorsForStudentCommand()
-			command.studentCourseDetails = studentCourseDetails
-			command.supervisorImporter = importer
+			val command = importCommandFactory.createImportSupervisorsForStudentCommand(studentCourseDetails)
 			command.applyInternal()
 
 			// check results
@@ -116,14 +125,10 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 
 			// set up importer to return supervisor
 			val codes = Seq((supervisorUniId, null))
-			val importer = smartMock[SupervisorImporter]
-			importer.getSupervisorUniversityIds(scjCode, relationshipType) returns codes
-
+			importCommandFactory.supervisorImporter.getSupervisorUniversityIds(scjCode, relationshipType) returns codes
 
 			// test command
-			val command = new ImportSupervisorsForStudentCommand()
-			command.studentCourseDetails = studentCourseDetails
-			command.supervisorImporter = importer
+			val command = importCommandFactory.createImportSupervisorsForStudentCommand(studentCourseDetails)
 			command.applyInternal()
 
 			// check results

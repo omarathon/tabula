@@ -14,15 +14,13 @@ import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
 import org.joda.time.DateTime
 
-class ImportSupervisorsForStudentCommand()
+class ImportSupervisorsForStudentCommand(var studentCourseDetails: StudentCourseDetails)
 	extends Command[Unit] with Unaudited with Logging {
 	PermissionCheck(Permissions.ImportSystemData)
 
 	var supervisorImporter = Wire.auto[SupervisorImporter]
 	var profileService = Wire.auto[ProfileService]
 	var relationshipService = Wire.auto[RelationshipService]
-
-	var studentCourseDetails: StudentCourseDetails = _
 
 	def applyInternal() {
 		if (studentCourseDetails.route != null && studentCourseDetails.route.degreeType == Postgraduate) {
