@@ -42,7 +42,17 @@ object SmallGroupSet {
 @Filter(name = SmallGroupSet.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings with Serializable with PostLoadBehaviour  {
+class SmallGroupSet
+		extends GeneratedId
+		with CanBeDeleted
+		with ToString
+		with PermissionsTarget
+		with HasSettings
+		with Serializable
+		with PostLoadBehaviour
+		with ToEntityReference {
+	type Entity = SmallGroupSet
+
 	import SmallGroupSet.Settings
 	import SmallGroup._
 
@@ -192,5 +202,7 @@ class SmallGroupSet extends GeneratedId with CanBeDeleted with ToString with Per
 	def postLoad {
 		ensureSettings
 	}
+
+	override def toEntityReference = new SmallGroupSetEntityReference().put(this)
 }
 

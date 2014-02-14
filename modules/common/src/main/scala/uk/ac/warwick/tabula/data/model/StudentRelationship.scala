@@ -24,7 +24,10 @@ import org.hibernate.annotations.BatchSize
  * the SPR code of the student - so <some agent> is <some relationship e.g. personal tutor>
  * to <some spr code>
  */
-abstract class StudentRelationship extends GeneratedId with Serializable {
+abstract class StudentRelationship extends GeneratedId with Serializable with ToEntityReference {
+	type Entity = StudentRelationship
+
+	@transient var profileService = Wire.auto[ProfileService]
 
 	// "agent" is the the actor in the relationship, e.g. tutor
 	def agent: String
@@ -66,6 +69,8 @@ abstract class StudentRelationship extends GeneratedId with Serializable {
 	def studentId = Option(studentCourseDetails).map { scd => SprCode.getUniversityId(scd.sprCode) }.orNull
 
 	override def toString = super.toString + ToString.forProps("agent" -> agent, "relationshipType" -> relationshipType, "student" -> studentId)
+
+	def toEntityReference = new StudentRelationshipEntityReference().put(this)
 }
 
 @Entity
@@ -83,6 +88,8 @@ class MemberStudentRelationship extends StudentRelationship {
 	def agentLastName = agentMember.map( _.lastName ).getOrElse(agent) // can't reliably extract a last name from agent string
 	
 	def agent = agentMember.map { _.universityId }.orNull
+
+	override def toEntityReference = new StudentRelationshipEntityReference().put(this)
 }
 
 @Entity
@@ -90,12 +97,12 @@ class MemberStudentRelationship extends StudentRelationship {
 class ExternalStudentRelationship extends StudentRelationship {
 	def isAgentMember = false
 	def agentMember = None
-	
+
 	@Column(name = "external_agent_name")
 	var _agentName: String = _
 	def agent = _agentName
 	def agent_=(name: String) { _agentName = name }
-	
+
 	def agentName = agent
 	def agentLastName = agent
 }

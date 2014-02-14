@@ -14,8 +14,8 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
-import uk.ac.warwick.tabula.profiles.notifications.StudentRelationshipChangeNotification
 import org.springframework.validation.Errors
+import uk.ac.warwick.tabula.data.model.notifications.{StudentRelationshipChangeToNewAgentNotification, StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToStudentNotification}
 
 /**
  * Command to edit the relationship for the StudentCourseDetails passed in, passing 
@@ -104,32 +104,24 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 		d.property("student SPR code" -> studentCourseDetails.sprCode)
 		 .property("new agent ID" -> Option(agent).map { _.universityId }.getOrElse(""))
 
-	def emit(modifiedRelationships: Seq[StudentRelationship]): Seq[Notification[StudentRelationship]] = {
+	def emit(modifiedRelationships: Seq[StudentRelationship]) = {
 		val notifications = modifiedRelationships.flatMap(relationship => {
 
-			val studentNotification: List[Notification[StudentRelationship]] = if (notifyStudent) {
-				val template = StudentRelationshipChangeNotification.StudentTemplate
-				val recepient = relationship.studentMember.get.asSsoUser
-				List(new StudentRelationshipChangeNotification(relationship, currentUser.apparentUser, recepient, currentAgent, template) with FreemarkerTextRenderer)
-			} else Nil
+			val studentNotification: Option[Notification[StudentRelationship, Unit]] = if (notifyStudent) {
+				Some(Notification.init(new StudentRelationshipChangeToStudentNotification, currentUser.apparentUser, Seq(relationship)))
+			} else None
 
-			val oldAgentNotification:List[Notification[StudentRelationship]] = if (notifyOldAgent) {
-				val notifications = currentAgent.map(oldAgent => {
-					val template = StudentRelationshipChangeNotification.OldAgentTemplate
-					val recepient =  oldAgent.asSsoUser
-					new StudentRelationshipChangeNotification(relationship, currentUser.apparentUser, recepient, currentAgent, template) with FreemarkerTextRenderer
+			val oldAgentNotification = if (notifyOldAgent) {
+				currentAgent.map(oldAgent => {
+					Notification.init(new StudentRelationshipChangeToOldAgentNotification, currentUser.apparentUser, Seq(relationship))
 				})
-				List(notifications).flatten
-			} else Nil
+			} else None
 
-			val newAgentNotification:List[Notification[StudentRelationship]] = if (notifyNewAgent) {
-				val notifications = relationship.agentMember.map(newAgent => {
-					val template = StudentRelationshipChangeNotification.NewAgentTemplate
-					val recepient = newAgent.asSsoUser
-					new StudentRelationshipChangeNotification(relationship, currentUser.apparentUser, recepient, currentAgent, template) with FreemarkerTextRenderer
+			val newAgentNotification = if (notifyNewAgent) {
+				relationship.agentMember.map(newAgent => {
+					Notification.init(new StudentRelationshipChangeToNewAgentNotification, currentUser.apparentUser, Seq(relationship))
 				})
-				List(notifications).flatten
-			} else Nil
+			} else None
 
 			studentNotification ++ oldAgentNotification ++ newAgentNotification
 		})

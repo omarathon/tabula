@@ -14,13 +14,13 @@ import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.BindingResult
-import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notifications.{ExtensionRequestModifiedNotification, ExtensionRequestCreatedNotification}
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.mutable
+import uk.ac.warwick.tabula.data.model.notifications.{ExtensionRequestCreatedNotification, ExtensionRequestModifiedNotification}
 
 
 object ExtensionRequestCommand {
@@ -160,11 +160,14 @@ trait ExtensionRequestNotification extends Notifies[Extension, Option[Extension]
 	}}.getOrElse(Map())
 
 	def emit(extension: Extension) = {
-		if (modified) {
-			Seq(new ExtensionRequestModifiedNotification(extension, submitter.apparentUser, extraInfo) with FreemarkerTextRenderer)
+		val agent = submitter.apparentUser
+		val assignment = extension.assignment
+		val baseNotification = if (modified){
+			new ExtensionRequestModifiedNotification
 		} else {
-			Seq(new ExtensionRequestCreatedNotification(extension, submitter.apparentUser, extraInfo) with FreemarkerTextRenderer)
+			new ExtensionRequestCreatedNotification
 		}
+		Seq(Notification.init(baseNotification, agent, Seq(extension), assignment))
 	}
 }
 

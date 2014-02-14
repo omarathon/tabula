@@ -4,17 +4,17 @@ import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 import org.mockito.Mockito._
 import org.mockito.{ArgumentCaptor, Matchers}
-import uk.ac.warwick.tabula.data.model.{ModeratedMarkingWorkflow, Feedback, Assignment, MarkerFeedback}
-import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.ReleaseToMarkerNotification
+import uk.ac.warwick.tabula.data.model.{Notification, ModeratedMarkingWorkflow, Feedback, Assignment, MarkerFeedback}
 import uk.ac.warwick.tabula.coursework.MockRenderer
+import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
 
 class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
 
 	val TEST_CONTENT = "test"
 
 	def createNotification(agent: User, recipient: User, _object: Seq[MarkerFeedback], assignment: Assignment, isFirstMarker: Boolean) = {
-		val n = new ReleaseToMarkerNotification(agent, recipient, _object, assignment, isFirstMarker) with MockRenderer
-		when(n.mockRenderer.renderTemplate(any[String],any[Any])).thenReturn(TEST_CONTENT)
+		val n = Notification.init(new ReleaseToMarkerNotification, agent, _object, assignment)
+		n.whichMarker.value = if (isFirstMarker) 1 else 2
 		n
 	}
 
@@ -43,27 +43,19 @@ class ReleaseToMarkerNotificationTest  extends TestBase with Mockito {
 	def shouldCallTextRendererWithCorrectTemplate():Unit = new ReleaseNotificationFixture {
 		val n =  createNotification(marker1, marker2, Seq(mf1, mf2), testAssignment, isFirstMarker = true)
 
-		n.content should be (TEST_CONTENT)
-
-		verify(n.mockRenderer, times(1)).renderTemplate(
-			Matchers.eq("/WEB-INF/freemarker/emails/released_to_marker_notification.ftl"),
-			any[Map[String,Any]])
+		val content = n.content
+		content.template should be ("/WEB-INF/freemarker/emails/released_to_marker_notification.ftl")
 	}
 
 	@Test
 	def shouldCallTextRendererWithCorrectModel():Unit = new ReleaseNotificationFixture {
-		val model = ArgumentCaptor.forClass(classOf[Map[String,Any]])
 		val n =  createNotification(marker1, marker2, Seq(mf1, mf2), testAssignment, isFirstMarker = true)
 
-		n.content should be (TEST_CONTENT)
+		val model = n.content.model
 
-		verify(n.mockRenderer, times(1)).renderTemplate(
-			any[String],
-			model.capture())
-
-		model.getValue.get("markingUrl") should be(Some(n.url))
-		model.getValue.get("assignment") should be(Some(testAssignment))
-		model.getValue.get("numReleasedFeedbacks") should be(Some(2))
-		model.getValue.get("verb") should be(Some(Some("mark")))
+		model.get("markingUrl") should be(Some(n.url))
+		model.get("assignment") should be(Some(testAssignment))
+		model.get("numReleasedFeedbacks") should be(Some(2))
+		model.get("verb") should be(Some(Some("mark")))
 	}
 }

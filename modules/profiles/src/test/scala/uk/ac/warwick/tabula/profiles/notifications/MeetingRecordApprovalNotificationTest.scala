@@ -2,12 +2,10 @@ package uk.ac.warwick.tabula.profiles.notifications
 
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.data.model.MeetingRecord
-import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.data.model.{Notification, MeetingRecord, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.web.views.ScalaBeansWrapper
+import uk.ac.warwick.tabula.web.views.{FreemarkerRendering, ScalaBeansWrapper, UrlMethodModel}
 import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.ScopelessPermission
@@ -15,9 +13,10 @@ import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
-import uk.ac.warwick.tabula.web.views.UrlMethodModel
+import java.io.StringWriter
+import uk.ac.warwick.tabula.data.model.notifications.NewMeetingRecordApprovalNotification
 
-class MeetingRecordApprovalNotificationTest extends TestBase with Mockito {
+class MeetingRecordApprovalNotificationTest extends TestBase with Mockito with FreemarkerRendering {
 	
 	val securityService = mock[SecurityService]
 	securityService.can(any[CurrentUser], any[ScopelessPermission]) returns true
@@ -57,10 +56,12 @@ class MeetingRecordApprovalNotificationTest extends TestBase with Mockito {
 			val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 			meeting.relationship = StudentRelationship(agent, relationshipType, student)
 			
-			val notification = new MeetingRecordApprovalNotification(meeting, "create")
-			notification.freemarker = freeMarkerConfig
-			
-			notification.content should be (
+			val notification = new NewMeetingRecordApprovalNotification
+			notification.agent = agent.asSsoUser
+			notification.addItems(Seq(meeting))
+
+			val notificationContent = renderToString(freeMarkerConfig.getTemplate(notification.content.template), notification.content.model)
+			notificationContent should be (
 """This record of your personal tutor meeting has been created by Karen Bradbury:
 
 End of term progress meeting on 5 December 2013

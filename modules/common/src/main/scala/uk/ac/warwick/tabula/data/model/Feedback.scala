@@ -54,7 +54,8 @@ trait FeedbackAttachments {
 }
 
 @Entity @AccessType("field")
-class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget {
+class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarget with ToEntityReference {
+	type Entity = Feedback
 
 	def this(universityId: String) {
 		this()
@@ -184,6 +185,8 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	 * need to check that separately.
 	 */
 	def collectMarks: Boolean = assignment.collectMarks
+
+	override def toEntityReference = new FeedbackEntityReference().put(this)
 }
 
 object Feedback {

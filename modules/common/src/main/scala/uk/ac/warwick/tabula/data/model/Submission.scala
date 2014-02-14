@@ -18,7 +18,9 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.{InvestigationCompleted, SuspectPlagiarised}
 
 @Entity @AccessType("field")
-class Submission extends GeneratedId with PermissionsTarget {
+class Submission extends GeneratedId with PermissionsTarget with ToEntityReference {
+
+	type Entity = Submission
 
 	@transient
 	var userLookup = Wire[UserLookupService]("userLookup")
@@ -97,4 +99,6 @@ class Submission extends GeneratedId with PermissionsTarget {
 
 	def isReleasedForMarking: Boolean = assignment.isReleasedForMarking(this)
 	def isReleasedToSecondMarker: Boolean = assignment.isReleasedToSecondMarker(this)
+
+	def toEntityReference = new SubmissionEntityReference().put(this)
 }

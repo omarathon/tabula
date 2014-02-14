@@ -3,20 +3,17 @@ package uk.ac.warwick.tabula.coursework.notifications
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notifications.{ExtensionRequestRejectedNotification, ExtensionRequestApprovedNotification}
-import uk.ac.warwick.tabula.coursework.{ExtensionFixture, MockRenderer}
-import org.mockito.Mockito._
-import org.mockito.{ArgumentCaptor, Matchers}
+import uk.ac.warwick.tabula.coursework.ExtensionFixture
+import uk.ac.warwick.tabula.data.model.Notification
+import uk.ac.warwick.tabula.data.model.notifications.ExtensionRequestRejectedNotification
 
-class ExtensionRequestRejectedNotificationTest extends TestBase with Mockito {
+class ExtensionRequestRejectedNotificationTest extends TestBase with Mockito with ExtensionNotificationTesting {
 
-	 val TEST_CONTENT = "test"
-
-	 def createNotification(extension: Extension, student: User, actor: User) = {
-		 val n = new ExtensionRequestRejectedNotification(extension, student, actor) with MockRenderer
-		 when(n.mockRenderer.renderTemplate(any[String],any[Any])).thenReturn(TEST_CONTENT)
-		 n
-	 }
+	def createNotification(extension: Extension, student: User, actor: User) = {
+		val n = Notification.init(new ExtensionRequestRejectedNotification, actor, Seq(extension), extension.assignment)
+		wireUserlookup(n, student)
+		n
+	}
 
 	 @Test
 	 def urlIsProfilePage():Unit = new ExtensionFixture {
@@ -40,27 +37,18 @@ class ExtensionRequestRejectedNotificationTest extends TestBase with Mockito {
 	 @Test
 	 def shouldCallTextRendererWithCorrectTemplate():Unit = new ExtensionFixture {
 		 val n = createNotification(extension, student, admin)
-		 n.content should be (TEST_CONTENT)
-		 verify(n.mockRenderer, times(1)).renderTemplate(
-			 Matchers.eq("/WEB-INF/freemarker/emails/extension_request_rejected.ftl"),
-			 any[Map[String,Any]])
+		 n.content.template should be ("/WEB-INF/freemarker/emails/extension_request_rejected.ftl")
 	 }
 
 	 @Test
 	 def shouldCallTextRendererWithCorrectModel():Unit = new ExtensionFixture {
-		 val n = createNotification(extension, student, admin)
-		 n.content should be (TEST_CONTENT)
-		 val model = ArgumentCaptor.forClass(classOf[Map[String,Any]])
-		 verify(n.mockRenderer, times(1)).renderTemplate(
-			 any[String],
-			 model.capture()
-		 )
-		 model.getValue.get("extension").get should be(extension)
-		 model.getValue.get("originalAssignmentDate").get should be("1 August 2013 at 12:00:00")
-		 model.getValue.get("assignment").get should be(assignment)
-		 model.getValue.get("module").get should be(module)
-		 model.getValue.get("user").get should be(student)
-		 model.getValue.get("path").get should be("/module/xxx/123/")
+		val n = createNotification(extension, student, admin)
+		n.content.model.get("extension").get should be(extension)
+		n.content. model.get("originalAssignmentDate").get should be("1 August 2013 at 12:00:00")
+		n.content. model.get("assignment").get should be(assignment)
+		n.content. model.get("module").get should be(module)
+		n.content. model.get("user").get should be(student)
+		n.content.model.get("path").get should be("/module/xxx/123/")
 	 }
 
  }

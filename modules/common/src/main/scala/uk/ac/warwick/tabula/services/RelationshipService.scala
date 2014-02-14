@@ -9,11 +9,14 @@ import uk.ac.warwick.tabula.data.model.{Department, Member, StudentMember, Stude
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 /**
  * Service providing access to members and profiles.
  */
 trait RelationshipService {
+	def getPreviousRelationship(relationship: StudentRelationship): Option[StudentRelationship]
+
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType]
 	def saveOrUpdate(relationshipType: StudentRelationshipType)
 	def delete(relationshipType: StudentRelationshipType)
@@ -215,6 +218,20 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		allStudentRelationshipTypes.filter(_.defaultRdxType != null)
 	}
 
+	def getPreviousRelationship(relationship: StudentRelationship): Option[StudentRelationship] = {
+		relationship.studentMember.flatMap { student =>
+			val rels = getRelationships(relationship.relationshipType, student)
+			val sortedRels = rels.sortBy { _.startDate }
+
+			// Get the element before the current relationship
+			val index = sortedRels.indexOf(relationship)
+			if (index > 0) {
+				Some(sortedRels(index-1))
+			} else {
+				None
+			}
+		}
+	}
 }
 
 trait RelationshipServiceComponent {

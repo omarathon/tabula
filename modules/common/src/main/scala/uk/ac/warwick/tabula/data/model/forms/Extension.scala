@@ -8,18 +8,15 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{StudentMember, Disability, Feedback, FileAttachment, Assignment, GeneratedId}
+import uk.ac.warwick.tabula.data.model.{ExtensionEntityReference, ToEntityReference, Feedback, FileAttachment, Assignment, GeneratedId}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.ProfileService
 
 @Entity @AccessType("field")
-class Extension extends GeneratedId with PermissionsTarget {
+class Extension extends GeneratedId with PermissionsTarget with ToEntityReference {
 
-	@transient
-	var profileService = Wire[ProfileService]
+	type Entity = Extension
 
 	def this(universityId:String=null) {
 		this()
@@ -29,7 +26,7 @@ class Extension extends GeneratedId with PermissionsTarget {
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="assignment_id")
 	var assignment:Assignment = _
-
+	
 	def permissionsParents = Option(assignment).toStream
 
 	@NotNull
@@ -37,7 +34,7 @@ class Extension extends GeneratedId with PermissionsTarget {
 
 	@NotNull
 	var universityId:String =_
-
+	
 	def isForUser(user: User): Boolean = isForUser(user.getWarwickId, user.getUserId)
 	def isForUser(theUniversityId: String, theUsercode: String): Boolean = universityId == theUniversityId || userId == theUsercode
 
@@ -90,4 +87,5 @@ class Extension extends GeneratedId with PermissionsTarget {
 		localDate.toDateTime(expiryDate)
 	}
 
+	def toEntityReference = new ExtensionEntityReference().put(this)
 }

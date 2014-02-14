@@ -6,7 +6,8 @@ import javax.persistence.CascadeType._
 import org.joda.time.DateTime
 
 @Entity
-class OriginalityReport() extends GeneratedId {
+class OriginalityReport extends GeneratedId with ToEntityReference {
+	type Entity = OriginalityReport
 
 	// Don't cascade as this is the wrong side of the association
 	@OneToOne(optional = false, cascade=Array(), fetch = FetchType.LAZY)
@@ -34,4 +35,6 @@ class OriginalityReport() extends GeneratedId {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.OptionIntegerUserType")
 	@Column(name = "PUBLICATION_OVERLAP")
 	var publicationOverlap: Option[Int] = None
+
+	override def toEntityReference = new OriginalityReportEntityReference().put(this)
 }

@@ -20,7 +20,7 @@ class EmailNotificationListener extends NotificationListener with UnicodeEmails 
 	val mailFooter = "\n\nThank you,\nTabula"
 	val replyWarning = "\n\nThis email was sent from an automated system, and replies to it will not reach a real person."
 
-	def listen:(Notification[_] => Unit) = notification => {
+	def listen:(Notification[_,_] => Unit) = notification => {
 		val validRecipients = notification.recipients.filter(_.getEmail.hasText)
 		validRecipients.foreach { recipient =>
 			val message = createMessage(mailSender){ message =>

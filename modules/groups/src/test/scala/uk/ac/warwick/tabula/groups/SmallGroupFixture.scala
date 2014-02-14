@@ -20,9 +20,11 @@ trait SmallGroupFixture extends Mockito {
   // Note that, for mysterious reasons, SmallGroup.students is a group of users by warwick ID number, but
   // SmallGroupEvent.tutors is a group of users by user code.
   val student1 = new User
+	student1.setUserId("student1")
   student1.setWarwickId("student1")
 
   val student2 = new User
+	student2.setUserId("student2")
   student2.setWarwickId("student2")
 
   val tutor1 = new User
@@ -34,6 +36,8 @@ trait SmallGroupFixture extends Mockito {
   val userLookup = mock[UserLookupService]
   when(userLookup.getUserByWarwickUniId(student1.getWarwickId)).thenReturn(student1)
   when(userLookup.getUserByWarwickUniId(student2.getWarwickId)).thenReturn(student2)
+	when(userLookup.getUserByUserId(student1.getUserId)).thenReturn(student1)
+	when(userLookup.getUserByUserId(student2.getUserId)).thenReturn(student2)
   when(userLookup.getUserByUserId(tutor1.getUserId)).thenReturn(tutor1)
   when(userLookup.getUserByUserId(tutor2.getUserId)).thenReturn(tutor2)
   // UserGroup does batched lookups for users when resolving by UserId...
@@ -41,12 +45,15 @@ trait SmallGroupFixture extends Mockito {
   
   val students = Seq(student1, student2)
   userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] =>
-	ids.map(id => (id, students.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
+		ids.map(id => (id, students.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
   }
 
   val actor = new User
   val recipient = new User
   recipient.setWarwickId("recipient")
+	recipient.setUserId("recipient")
+	when(userLookup.getUserByUserId(recipient.getUserId)).thenReturn(recipient)
+
   val department = new Department
 
   val (group1,groupSet1) = createGroupSet("A Groupset 1","small group 1",SmallGroupFormat.Lab, "la101")

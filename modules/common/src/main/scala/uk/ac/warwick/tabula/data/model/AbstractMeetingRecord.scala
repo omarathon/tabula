@@ -23,7 +23,8 @@ object AbstractMeetingRecord {
 @Entity
 @Table(name = "meetingrecord")
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
-class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted with FormattedHtml {
+class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted with FormattedHtml with ToEntityReference {
+	type Entity = AbstractMeetingRecord
 
 	def isScheduled: Boolean = this match {
 		case (m: ScheduledMeetingRecord) => true
@@ -82,6 +83,7 @@ class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToSt
 		"creationDate" -> creationDate,
 		"relationship" -> relationship)
 
+	override def toEntityReference = new MeetingRecordEntityReference().put(this)
 }
 
 sealed abstract class MeetingFormat(val code: String, val description: String) {

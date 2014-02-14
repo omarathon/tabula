@@ -1,29 +1,18 @@
 package uk.ac.warwick.tabula.coursework.commands.markerfeedback
 
-import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{ModeratorRejectedNotification, ReleaseToMarkerNotification}
-import uk.ac.warwick.tabula.coursework.MockRenderer
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.data.model.MarkerFeedback
-import uk.ac.warwick.tabula.data.model.ModeratedMarkingWorkflow
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.TestBase
+
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
-import org.mockito.Mockito._
-import org.mockito.{ArgumentCaptor, Matchers}
-import uk.ac.warwick.tabula.data.model.{ModeratedMarkingWorkflow, Feedback, Assignment, MarkerFeedback}
-import uk.ac.warwick.tabula.coursework.MockRenderer
-import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.notifications.ModeratorRejectedNotification
+import scala.Some
 
-class ModeratorRejectedNotificationTest  extends TestBase with Mockito {
+class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 
-	val TEST_CONTENT = "test"
 	val HERON_PLUG = "Not enough time has been given to explaining the awesome nature of Herons"
 
-	def createNotification(agent: User, recipient: User, _object: MarkerFeedback, firstMarkerFeedback: MarkerFeedback) = {
-		val n = new ModeratorRejectedNotification(agent, recipient, _object, firstMarkerFeedback) with MockRenderer
-		when(n.mockRenderer.renderTemplate(any[String],any[Any])).thenReturn(TEST_CONTENT)
+	def createNotification(agent: User, recipient: User, markerFeedback: MarkerFeedback) = {
+		val n =  Notification.init(new ModeratorRejectedNotification, agent, Seq(markerFeedback))
 		n
 	}
 
@@ -37,45 +26,33 @@ class ModeratorRejectedNotificationTest  extends TestBase with Mockito {
 
 	@Test
 	def titleIncludesModuleAndAssignmentName(){ new ModeratorRejectedNotificationFixture {
-		val n =  createNotification(marker2, marker1, mf1, mf2)
+		val n =  createNotification(marker2, marker1, mf1)
 		n.title should be("Feedback rejected by the moderator for HERON101 - Test assignment")
 	} }
 
 	@Test
 	def urlIsProfilePageForStudents():Unit = new ModeratorRejectedNotificationFixture{
-		val n =  createNotification(marker2, marker1, mf1, mf2)
+		val n =  createNotification(marker2, marker1, mf1)
 		n.url should be("/admin/module/heron101/assignments/1/marker/list")
 	}
 
 
 	@Test
 	def shouldCallTextRendererWithCorrectTemplate():Unit = new ModeratorRejectedNotificationFixture {
-		val n =  createNotification(marker2, marker1, mf1, mf2)
-
-		n.content should be (TEST_CONTENT)
-
-		verify(n.mockRenderer, times(1)).renderTemplate(
-			Matchers.eq("/WEB-INF/freemarker/emails/moderator_rejected_notification.ftl"),
-			any[Map[String,Any]])
+		val n =  createNotification(marker2, marker1, mf1)
+		n.content.template should be("/WEB-INF/freemarker/emails/moderator_rejected_notification.ftl")
 	}
 
 	@Test
 	def shouldCallTextRendererWithCorrectModel():Unit = new ModeratorRejectedNotificationFixture {
-		val model = ArgumentCaptor.forClass(classOf[Map[String,Any]])
-		val n =  createNotification(marker2, marker1, mf1, mf2)
 
-		n.content should be (TEST_CONTENT)
-
-		verify(n.mockRenderer, times(1)).renderTemplate(
-			any[String],
-			model.capture())
-
-		model.getValue.get("markingUrl") should be(Some(n.url))
-		model.getValue.get("assignment") should be(Some(testAssignment))
-		model.getValue.get("studentId") should be(Some("student1"))
-		model.getValue.get("moderatorName") should be(Some("Snorkeldink Wafflesmack"))
-		model.getValue.get("rejectionComments") should be(Some(HERON_PLUG))
-		model.getValue.get("adjustedMark") should be(Some(Some(41)))
-		model.getValue.get("adjustedGrade") should be(Some(Some("3")))
+		val n =  createNotification(marker2, marker1, mf1)
+		n.content.model.get("markingUrl") should be(Some(n.url))
+		n.content.model.get("assignment") should be(Some(testAssignment))
+		n.content.model.get("studentId") should be(Some("student1"))
+		n.content.model.get("moderatorName") should be(Some("Snorkeldink Wafflesmack"))
+		n.content.model.get("rejectionComments") should be(Some(HERON_PLUG))
+		n.content.model.get("adjustedMark") should be(Some(Some(41)))
+		n.content.model.get("adjustedGrade") should be(Some(Some("3")))
 	}
 }

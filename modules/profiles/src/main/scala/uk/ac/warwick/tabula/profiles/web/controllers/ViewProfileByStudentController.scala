@@ -21,6 +21,7 @@ import uk.ac.warwick.tabula.commands.Command
 import scala.Some
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.profiles.web.Routes
 
 @Controller
 class ViewProfileByStudentController extends ViewProfileController {
@@ -39,5 +40,14 @@ class ViewProfileByStudentController extends ViewProfileController {
 		@RequestParam(defaultValue = "", required = false) agentId: String) = {
 		val profiledStudentMember = profileCmd.apply()
 		viewProfileForCourse(profiledStudentMember.mostSignificantCourseDetails, openMeetingId, agentId, profiledStudentMember)
+	}
+
+	@RequestMapping(Array("/view/me"))
+	def viewMe(currentUser: CurrentUser) = {
+		currentUser.profile map { profile =>
+			Redirect(Routes.profile.view(profile))
+		} getOrElse {
+			Redirect(Routes.home)
+		}
 	}
 }

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.data.model.{StudentRelationship, FileAttachment, MeetingFormat, ScheduledMeetingRecord, Member}
+import uk.ac.warwick.tabula.data.model.{Notification, StudentRelationship, FileAttachment, MeetingFormat, ScheduledMeetingRecord, Member}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -10,8 +10,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.services.{MeetingRecordServiceComponent, AutowiringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.profiles.notifications.ScheduledMeetingRecordInviteeNotification
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, FileAttachmentServiceComponent}
+import uk.ac.warwick.tabula.data.model.notifications.ScheduledMeetingRecordInviteeNotification
 
 case class ScheduledMeetingRecordResult(meetingRecord: ScheduledMeetingRecord, isRescheduled: Boolean)
 
@@ -134,7 +134,12 @@ trait EditScheduledMeetingRecordDescription extends Describable[ScheduledMeeting
 
 trait EditScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRecordResult, ScheduledMeetingRecord] {
 	def emit(result: ScheduledMeetingRecordResult) = {
-		if(result.isRescheduled) Seq(new ScheduledMeetingRecordInviteeNotification(result.meetingRecord, "rescheduled"))
-		else Seq(new ScheduledMeetingRecordInviteeNotification(result.meetingRecord, "updated"))
+		val meeting = result.meetingRecord
+		val user = meeting.creator.asSsoUser
+		val verb =
+			if (result.isRescheduled) "rescheduled"
+			else "updated"
+
+		Seq(Notification.init(new ScheduledMeetingRecordInviteeNotification(verb), user, meeting, meeting.relationship))
 	}
 }
