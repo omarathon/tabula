@@ -5,9 +5,9 @@ import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands.Description
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.profiles.notifications.MeetingRecordApprovalNotification
+import uk.ac.warwick.tabula.data.model.notifications.NewMeetingRecordApprovalNotification
 
-class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelationship[_], considerAlternatives: Boolean)
+class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelationship, considerAlternatives: Boolean)
 	extends ModifyMeetingRecordCommand(creator, relationship, considerAlternatives) {
 
 	meetingDate = DateTime.now.toLocalDate
@@ -18,7 +18,9 @@ class CreateMeetingRecordCommand(creator: Member, relationship: StudentRelations
 		file.onBind(result)
 	}
 
-	def emit(meeting: MeetingRecord) = Seq(new MeetingRecordApprovalNotification(meeting, "create"))
+	def emit(meeting: MeetingRecord) = Seq(
+		Notification.init(new NewMeetingRecordApprovalNotification, creator.asSsoUser, Seq(meeting), relationship)
+	)
 }
 
 

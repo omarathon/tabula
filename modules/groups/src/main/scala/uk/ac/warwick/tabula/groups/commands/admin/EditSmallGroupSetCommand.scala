@@ -9,13 +9,13 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.SmallGroupService
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.groups.notifications.SmallGroupSetChangedNotification
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.UnspecifiedTypeUserGroup
+import uk.ac.warwick.tabula.data.model.notifications.SmallGroupSetChangedNotification
 
 class EditSmallGroupSetCommand(val set: SmallGroupSet, val apparentUser:User)
 	extends ModifySmallGroupSetCommand(set.module) with SmallGroupSetCommand  with NotifiesAffectedGroupMembers {

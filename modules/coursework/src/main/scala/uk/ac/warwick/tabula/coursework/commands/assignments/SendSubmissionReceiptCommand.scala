@@ -5,10 +5,9 @@ import uk.ac.warwick.tabula.data.model.{Notification, Submission, Assignment, Mo
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import org.joda.time.format.DateTimeFormat
-import uk.ac.warwick.tabula.web.views.{FreemarkerTextRenderer}
 import uk.ac.warwick.tabula.permissions._
 import language.implicitConversions
-import uk.ac.warwick.tabula.coursework.commands.assignments.notifications.SubmissionRecieptNotification
+import uk.ac.warwick.tabula.data.model.notifications.SubmissionReceiptNotification
 
 /**
  * Send an email confirming the receipt of a submission to the student
@@ -34,9 +33,9 @@ class SendSubmissionReceiptCommand(val module: Module, val assignment: Assignmen
 		d.assignment(assignment)
 	}
 
-	def emit(sendNotification: Boolean): Seq[Notification[Submission]] = {
+	def emit(sendNotification: Boolean) = {
 		if (sendNotification) {
-			Seq(new SubmissionRecieptNotification(submission, user.apparentUser) with FreemarkerTextRenderer)
+			Seq(Notification.init(new SubmissionReceiptNotification, user.apparentUser, Seq(submission), assignment))
 		} else {
 			Nil
 		}

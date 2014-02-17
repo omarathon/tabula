@@ -35,7 +35,7 @@ class MeetingRecordDaoTest extends PersistenceTestBase {
 		memberDao.saveOrUpdate(creator)
 		memberDao.saveOrUpdate(relationship)
 
-		val relSet: Set[StudentRelationship[_]] = Set(relationship)
+		val relSet: Set[StudentRelationship] = Set(relationship)
 
 		val currentMember = new StaffMember
 		currentMember.universityId = "0070790"

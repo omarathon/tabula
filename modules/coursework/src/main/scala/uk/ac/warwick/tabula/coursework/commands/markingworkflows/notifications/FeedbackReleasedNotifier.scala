@@ -6,15 +6,15 @@ import uk.ac.warwick.tabula.services.UserLookupComponent
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JavaImports._
 import collection.JavaConverters._
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
+import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
 
 trait FeedbackReleasedNotifier[A] extends Notifies[A, Seq[MarkerFeedback]] {
 
 	this: ReleasedState with UserAware with UserLookupComponent with Logging =>
 
-	def isFirstMarker: Boolean
+	def blankNotification: ReleaseToMarkerNotification
 
-	def emit(commandResult: A): Seq[Notification[Seq[MarkerFeedback]]] = {
+	def emit(commandResult: A): Seq[Notification[MarkerFeedback, Assignment]] = {
 
 		// emit notifications to each second marker that has new feedback
 		val markerMap : Map[String, Seq[MarkerFeedback]] = newReleasedFeedback.asScala.groupBy(mf => {
@@ -28,8 +28,9 @@ trait FeedbackReleasedNotifier[A] extends Notifies[A, Seq[MarkerFeedback]] {
 		}
 
 		markerMap.filterNot(_._1 == "unassigned").map{ case (usercode, markerFeedbacks) =>
-			val recepient = userLookup.getUserByUserId(usercode)
-			new ReleaseToMarkerNotification(user, recepient, markerFeedbacks, assignment, isFirstMarker) with FreemarkerTextRenderer
+			val notification = Notification.init(blankNotification, user, markerFeedbacks, assignment)
+			notification.recipientUserId = usercode
+			notification
 		}.toSeq
 	}
 }

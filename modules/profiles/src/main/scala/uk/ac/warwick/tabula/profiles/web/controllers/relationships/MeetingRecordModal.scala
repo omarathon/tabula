@@ -87,7 +87,7 @@ trait MeetingRecordModal  {
 	@RequestMapping(method = Array(POST), params = Array("modal"))
 	def saveModalMeetingRecord(@Valid @ModelAttribute("command") command: ModifyMeetingRecordCommand,
 	                           errors: Errors,
-	                           @ModelAttribute("viewMeetingRecordCommand") viewCommand: Option[Appliable[Seq[MeetingRecord]]],
+	                           @ModelAttribute("viewMeetingRecordCommand") viewCommand: Option[Appliable[Seq[AbstractMeetingRecord]]],
 	                           @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
 							   @PathVariable("relationshipType") relationshipType: StudentRelationshipType) =transactional() {
 		if (errors.hasErrors) {
@@ -103,7 +103,10 @@ trait MeetingRecordModal  {
         	"studentCourseDetails" -> studentCourseDetails,
  			    "role" -> relationshipType,
 				  "meetings" -> meetingList,
-					"meetingApprovalWillCreateCheckpoint" -> meetingList.map(m => m.id -> monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(m)).toMap,
+					"meetingApprovalWillCreateCheckpoint" -> meetingList.map {
+						case (meeting: MeetingRecord) => meeting.id -> monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
+						case (meeting: ScheduledMeetingRecord) => meeting.id -> false
+					}.toMap,
 				  "viewer" -> currentMember,
 				  "openMeeting" -> modifiedMeeting).noLayout()
 		}
@@ -155,10 +158,10 @@ trait MeetingRecordModal  {
 	def initRelationshipsEditor(binder: WebDataBinder,
 								@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails, 
 								@PathVariable("relationshipType") relationshipType: StudentRelationshipType) {
-		binder.registerCustomEditor(classOf[StudentRelationship[_]], new AbstractPropertyEditor[StudentRelationship[_]] {
+		binder.registerCustomEditor(classOf[StudentRelationship], new AbstractPropertyEditor[StudentRelationship] {
 			override def fromString(agent: String) = 
 				allRelationships(studentCourseDetails, relationshipType).find(_.agent == agent).orNull
-			override def toString(rel: StudentRelationship[_]) = rel.agent
+			override def toString(rel: StudentRelationship) = rel.agent
 		})
 	}
 }

@@ -19,7 +19,8 @@
 			<table id="agents" class="table table-bordered">
 				<#list agentRelationships?keys as key>
 					<#assign students = mapGet(agentRelationships,key) />
-					<#assign agent = students?first.agentParsed />
+					<#assign agent = students?first.agent /><#-- always a string. -->
+					<#assign agentMember = students?first.agentMember />
 					<#assign studentKey = "rel-" + sanitise(key.sortkey) + "-students" />
 
 					<tbody>
@@ -28,15 +29,15 @@
 								<h4 class="collapse-trigger" id="${studentKey}-trigger" data-toggle="collapse" data-target="#${studentKey}" title="Expand">
 									<span class="agent-detail pull-right"><@fmt.p students?size "${relationshipType.studentRole}" /></span>
 									<i class="icon-chevron-right icon-fixed-width"></i>
-									<#if agent?is_string>
-										${agent}
-										<#if !agent?string?starts_with("Not ")>
-											<span class="agent-detail">External to Warwick</span>
+									<#if agentMember??>
+										${agentMember.fullName}
+										<#if agentMember.homeDepartment.code != department.code>
+											<span class="agent-detail">${agentMember.homeDepartment.name}</span>
 										</#if>
 									<#else>
-										${agent.fullName}
-										<#if agent.homeDepartment.code != department.code>
-											<span class="agent-detail">${agent.homeDepartment.name}</span>
+										${agent}
+										<#if !agent?starts_with("Not ")>
+											<span class="agent-detail">External to Warwick</span>
 										</#if>
 									</#if>
 								</h4>

@@ -15,7 +15,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions._
 
 
-class DownloadMeetingRecordFilesCommand (val meetingRecord: MeetingRecord) extends Command[Option[RenderableFile]] with ReadOnly {
+class DownloadMeetingRecordFilesCommand (val meetingRecord: AbstractMeetingRecord) extends Command[Option[RenderableFile]] with ReadOnly {
 
 	PermissionCheck(Permissions.Profiles.MeetingRecord.ReadDetails(meetingRecord.relationship.relationshipType), meetingRecord)
 
@@ -47,7 +47,7 @@ class DownloadMeetingRecordFilesCommand (val meetingRecord: MeetingRecord) exten
 		result
 	}
 
-	private def zipped(meetingRecord: MeetingRecord) = new RenderableZip(zipService.getSomeMeetingRecordAttachmentsZip(meetingRecord))
+	private def zipped(meetingRecord: AbstractMeetingRecord) = new RenderableZip(zipService.getSomeMeetingRecordAttachmentsZip(meetingRecord))
 
 	override def describe(d: Description) = {
 		d.property("filename", filename)

@@ -16,5 +16,5 @@ Case Subcategory: Class ID
 
 In the detailed description box, advise that:
 
-The class named "${className.value}", with our ID "${classId.value}",
+The class named "${className}", with our ID "${classId}",
 has been incorrectly deleted from the University of Warwick account by a user. Please could it be reinstated.

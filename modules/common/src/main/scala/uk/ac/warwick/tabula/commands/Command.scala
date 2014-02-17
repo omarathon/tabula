@@ -42,7 +42,7 @@ trait KnowsEventName {
  * Takes an A (usually the result of a Command) and generates notifications for Bs. Often, A == B.
  */
 trait Notifies[A, B] {
-	def emit(result: A): Seq[Notification[B]]
+	def emit(result: A): Seq[Notification[_, _]]
 }
 trait Appliable[A]{
   def apply():A
@@ -266,6 +266,16 @@ abstract class Description {
 	def assignment(assignment: Assignment) = {
 		property("assignment" -> assignment.id)
 		if (assignment.module != null) module(assignment.module)
+		this
+	}
+
+	/**
+	 * Record meeting, plus its creator and relationship type if available.
+	 */
+	def meeting(meeting: AbstractMeetingRecord) = {
+		property("meeting" -> meeting.id)
+		if (meeting.creator != null) member(meeting.creator)
+		if (meeting.relationship != null) property("relationship" -> meeting.relationship.relationshipType.toString())
 		this
 	}
 

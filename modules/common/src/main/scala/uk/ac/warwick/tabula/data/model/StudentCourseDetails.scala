@@ -92,7 +92,7 @@ class StudentCourseDetails
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.PERSIST))
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
-	var allRelationships: JSet[StudentRelationship[_]] = JHashSet()
+	var allRelationships: JSet[StudentRelationship] = JHashSet()
 
 	// We can't restrict this because it's not a getter. Restrict in
 	// view code if necessary (or implement for all methods in  ScalaBeansWrapper)

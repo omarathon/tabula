@@ -11,6 +11,7 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{ReleasedState, FeedbackReleasedNotifier}
 import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
 
 object MarkingCompletedCommand {
 	def apply(module: Module, assignment: Assignment, user: User, firstMarker:Boolean) =
@@ -112,5 +113,5 @@ trait MarkingCompletedState {
 
 trait SecondMarkerReleaseNotifier extends FeedbackReleasedNotifier[Unit] {
 	this: MarkingCompletedState with ReleasedState with UserAware with UserLookupComponent with Logging =>
-	def isFirstMarker = false
+	def blankNotification = new ReleaseToMarkerNotification(2)
 }

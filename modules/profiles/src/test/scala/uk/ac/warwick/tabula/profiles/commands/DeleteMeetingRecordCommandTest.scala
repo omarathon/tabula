@@ -6,28 +6,29 @@ import uk.ac.warwick.tabula.AppContextTestBase
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.data.model.StaffMember
-import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.StudentRelationship
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{MeetingRecordService, MeetingRecordServiceComponent}
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model.MeetingRecord
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import org.specs.mock.JMocker.{expect => expecting}
 import uk.ac.warwick.tabula.data.model.ExternalStudentRelationship
 import uk.ac.warwick.tabula.Fixtures
 
 class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 
 	val someTime = dateTime(2013, DateTimeConstants.APRIL)
+	val mockMeetingRecordService: MeetingRecordService = mock[MeetingRecordService]
 	val student = Fixtures.student()
 	var creator: StaffMember = _
-	var relationship: StudentRelationship[_] = _
+	var relationship: StudentRelationship = _
 	var meeting: MeetingRecord = _
 
 	val user = mock[CurrentUser]
-	user.universityId returns("9876543")
+	user.universityId returns "9876543"
 
 	@Before
-	def setUp {
+	def setUp() {
 		transactional { tx => session.save(student) }
 		
 		creator = transactional { tx =>
@@ -42,6 +43,7 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 			session.save(relationshipType)
 			
 			val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
+
 			session.save(relationship)
 			relationship
 		}
@@ -61,8 +63,10 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		var deleted: Boolean = meeting.deleted
 		deleted should be (false)
 
-		val cmd = new DeleteMeetingRecordCommand(meeting, user)
-		cmd.apply();
+		val cmd = new DeleteMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
+			val meetingRecordService: MeetingRecordService = mock[MeetingRecordService]
+		}
+		cmd.applyInternal()
 
 		deleted = meeting.deleted
 		deleted should be (true)
@@ -73,11 +77,14 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 	def testRestore() {
 		meeting.deleted = true
 
-		val cmd = new RestoreMeetingRecordCommand(meeting, user)
-		cmd.apply();
+		val cmd = new RestoreMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
+			val meetingRecordService: MeetingRecordService = mockMeetingRecordService
+		}
+		cmd.applyInternal()
 
 		val deleted: Boolean = meeting.deleted
 		deleted should be (false)
+
 	}
 
 	@Transactional
@@ -89,10 +96,15 @@ class DeleteMeetingRecordCommandTest extends AppContextTestBase with Mockito {
 		val meetingFromSession = session.get(classOf[MeetingRecord], id).asInstanceOf[MeetingRecord]
 		meetingFromSession.id should be (id)
 
-		val cmd = new PurgeMeetingRecordCommand(meeting, user)
-		cmd.apply()
+		val cmd = new PurgeMeetingRecordCommand(meeting, user) with MeetingRecordServiceComponent {
+			val meetingRecordService: MeetingRecordService = mockMeetingRecordService
+		}
 
-		val purgedMeeting = session.get(classOf[MeetingRecord], id)
-		purgedMeeting should be (null)
+		cmd.applyInternal()
+
+		expecting {
+			one(mockMeetingRecordService).purge(meeting)
+		}
+
 	}
 }

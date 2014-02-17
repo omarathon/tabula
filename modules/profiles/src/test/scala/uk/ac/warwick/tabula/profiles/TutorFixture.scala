@@ -47,4 +47,8 @@ trait TutorFixture extends Mockito {
 	val relationship = new MemberStudentRelationship
 	relationship.studentMember = student
 	relationship.agentMember = newTutor
+
+	val relationshipOld = new MemberStudentRelationship
+	relationshipOld.studentMember = student
+	relationshipOld.agentMember = oldTutor
 }

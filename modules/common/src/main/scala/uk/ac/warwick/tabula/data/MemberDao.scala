@@ -36,7 +36,7 @@ trait MemberDao {
 
 	def saveOrUpdate(member: Member)
 	def delete(member: Member)
-	def saveOrUpdate(rel: StudentRelationship[_])
+	def saveOrUpdate(rel: StudentRelationship)
 	def getByUniversityId(universityId: String): Option[Member]
 	def getByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
@@ -48,11 +48,11 @@ trait MemberDao {
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
 	def getStaffByDepartment(department: Department): Seq[StaffMember]
 	
-	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship[_]]
-	def getCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship[_]]
-	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship[_]]
-	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship[_]]
-	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship[_]]
+	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
+	def getCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
+	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
+	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
+	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getAllRelationshipsByAgent(agentId: String): Seq[MemberStudentRelationship]
 	def getAllRelationshipTypesByAgent(agentId: String): Seq[StudentRelationshipType]
 	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[MemberStudentRelationship]
@@ -109,7 +109,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		}
 	}
 
-	def saveOrUpdate(rel: StudentRelationship[_]) = session.saveOrUpdate(rel)
+	def saveOrUpdate(rel: StudentRelationship) = session.saveOrUpdate(rel)
 
 	def getByUniversityId(universityId: String) =
 		session.newCriteria[Member]
@@ -214,8 +214,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setParameter("lastUpdated", startDate)
 			.setMaxResults(max).seq
 
-	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship[_]] = {
-			session.newCriteria[StudentRelationship[_]]
+	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship] = {
+			session.newCriteria[StudentRelationship]
 					.createAlias("studentCourseDetails", "scd")
 					.add(is("scd.student", student))
 					.add( Restrictions.or(
@@ -225,8 +225,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					.seq
 	}
 
-	def getCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship[_]] = {
-			session.newCriteria[StudentRelationship[_]]
+	def getCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = {
+			session.newCriteria[StudentRelationship]
 					.createAlias("studentCourseDetails", "scd")
 					.add(is("scd.student", student))
 					.add(is("relationshipType", relationshipType))
@@ -237,19 +237,19 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					.seq
 	}
 
-	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship[_]] = {
-			session.newCriteria[StudentRelationship[_]]
+	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = {
+			session.newCriteria[StudentRelationship]
 					.createAlias("studentCourseDetails", "scd")
 					.add(is("scd.student", student))
 					.add(is("relationshipType", relationshipType))
 					.seq
 	}
 
-	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship[_]] = {
+	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = {
 		// This eagerly fetches a few associations for the view-students-by-tutor page in Attendance Monitoring
 		// (/attendance/view/[dept]/agents/[reltype]) - TAB-1868
 
-		session.newCriteria[StudentRelationship[_]]
+		session.newCriteria[StudentRelationship]
 			.createAlias("studentCourseDetails", "studentCourseDetails")
 			.createAlias("studentCourseDetails.student", "student")
 			.add(is("relationshipType", relationshipType))
@@ -268,8 +268,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.seq
 	}
 
-	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship[_]] = {
-		session.newQuery[StudentRelationship[_]]("""
+	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = {
+		session.newQuery[StudentRelationship]("""
 			select
 				distinct sr
 			from

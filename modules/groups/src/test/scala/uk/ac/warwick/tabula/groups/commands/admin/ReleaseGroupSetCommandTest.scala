@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.commands.{Description, DescriptionImpl}
 import org.mockito.Mockito._
 import uk.ac.warwick.tabula.groups.SmallGroupFixture
 import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.data.model.notifications.ReleaseSmallGroupSetsNotification
 
 class ReleaseGroupSetCommandTest extends TestBase with Mockito {
 
@@ -91,12 +92,14 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
 
 	@Test
 	def emitShouldCreateNotificationToAllStudents() { new SmallGroupFixture{
-
     val cmd = new ReleaseGroupSetCommandImpl(Seq(groupSet1), requestingUser)
     cmd.notifyStudents = true
     cmd.userLookup = userLookup
     cmd.applyInternal()
 		val notifications = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
+		notifications.foreach {
+			case n : ReleaseSmallGroupSetsNotification => n.userLookup = userLookup
+		}
 		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student1"))  should be (true)
     notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student2"))  should be (true)
 	}}
@@ -107,7 +110,9 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     cmd.notifyStudents = false
     cmd.userLookup = userLookup
     val notifications = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
-
+		notifications.foreach {
+			case n : ReleaseSmallGroupSetsNotification => n.userLookup = userLookup
+		}
     notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student1"))  should be (false)
     notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student2"))  should be (false)
   }}
@@ -119,6 +124,9 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     cmd.userLookup = userLookup
     cmd.applyInternal()
     val notifications = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
+		notifications.foreach {
+			case n : ReleaseSmallGroupSetsNotification => n.userLookup = userLookup
+		}
     notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor1"))  should be (true)
     notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor2"))  should be (true)
   }}
@@ -129,7 +137,9 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     cmd.notifyTutors = false
     cmd.userLookup = userLookup
     val notifications = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
-
+		notifications.foreach {
+			case n : ReleaseSmallGroupSetsNotification => n.userLookup = userLookup
+		}
     notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor1"))  should be (false)
     notifications.exists(n=>n.recipients.exists(u=>u.getUserId == "tutor2"))  should be (false)
   }}
@@ -176,8 +186,10 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     command.userLookup = userLookup
     command.notifyTutors = true
     val updatedSets = command.applyInternal()
-    val notifications = command.emit(Seq(ReleasedSmallGroupSet(groupSet1, false, false), ReleasedSmallGroupSet(groupSet2, command.notifyStudents, true)))
-    val allNotifiedGroupSets = notifications.flatMap(_._object.map(sg=>sg.groupSet))
+    val notifications: Seq[ReleaseSmallGroupSetsNotification] =
+			command.emit(Seq(ReleasedSmallGroupSet(groupSet1, false, false), ReleasedSmallGroupSet(groupSet2, command.notifyStudents, true)))
+		val groups = notifications.flatMap(_.groups)
+    val allNotifiedGroupSets: Seq[SmallGroupSet] = groups.map(_.groupSet)
     allNotifiedGroupSets.exists(_ == groupSet1) should be (false)
   }}
 

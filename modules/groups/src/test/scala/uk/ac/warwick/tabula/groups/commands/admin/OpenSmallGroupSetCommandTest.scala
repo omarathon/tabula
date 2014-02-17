@@ -5,14 +5,13 @@ import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.commands.{Notifies, Appliable, UserAware, Description}
-import uk.ac.warwick.tabula.data.model.{Notification, UserGroup}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 import uk.ac.warwick.tabula.services.UserLookupService
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.notifications.OpenSmallGroupSetsNotification
 
 class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 
@@ -111,17 +110,25 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		// the warwickID is used as the key in UserGroup.members
 		val student1 = new User("student1")
 		student1.setWarwickId("student1")
+		student1.setUserId("student1")
 		val student2 = new User("student2")
 		student2.setWarwickId("student2")
+		student2.setUserId("student2")
 		val student3 = new User("student3")
 		student3.setWarwickId("student3")
+		student3.setUserId("student3")
 		val students = Seq(student1,student2,student3)
 
 		val userLookup = mock[UserLookupService]
+
+		userLookup.getUserByUserId(any[String]) answers{id=>
+			students.find(_.getUserId == id).getOrElse(new AnonymousUser)
+		}
+
 		userLookup.getUserByWarwickUniId(any[String]) answers{id=>
 			students.find(_.getWarwickId == id).getOrElse(new AnonymousUser)
 		}
-		
+
 		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] =>
 			ids.map(id => (id, students.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
 		}
@@ -157,7 +164,10 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 			val user: User = operator
 		}
 
-		val notifications:Seq[Notification[Seq[SmallGroupSet]]]  = notifier.emit(Seq(set1,set2))
+		val notifications = notifier.emit(Seq(set1,set2))
+		notifications.foreach {
+			case n: OpenSmallGroupSetsNotification => n.userLookup = userLookup
+		}
 
 		notifications.size should be(3)
 		notifications.find(_.recipients.head == student1) should be('defined)

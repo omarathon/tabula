@@ -4,11 +4,8 @@ import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles._
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.Submission
-import uk.ac.warwick.tabula.data.model.Feedback
-import uk.ac.warwick.tabula.data.model.Member
+import uk.ac.warwick.tabula.data.model.{ScheduledMeetingRecord, Submission, Feedback, Member, UserSettings}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.data.model.UserSettings
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.roles.FeedbackRecipient
 import uk.ac.warwick.tabula.roles.Submitter
@@ -55,6 +52,12 @@ class OwnDataRoleProvider extends RoleProvider {
 					Stream(customRoleFor(smallGroup.groupSet.module.department)(SmallGroupMemberRoleDefinition, smallGroup).getOrElse(SmallGroupMember(smallGroup)))
 				else Stream.empty
 			}
+
+			// You can change your own scheduled meeting
+			case meeting: ScheduledMeetingRecord =>
+				if (user.apparentId.hasText && meeting.creator.userId == user.apparentId)
+					Stream(customRoleFor(department)(ScheduledMeetingRecordCreatorRoleDefinition, meeting).getOrElse(ScheduledMeetingRecordCreator(meeting)))
+				else Stream.empty
 
 			case _ => Stream.empty
 		}

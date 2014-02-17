@@ -36,7 +36,16 @@ object SmallGroup {
 @Filter(name = SmallGroup.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class SmallGroup extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings with Serializable with PostLoadBehaviour {
+class SmallGroup
+		extends GeneratedId
+		with CanBeDeleted
+		with ToString
+		with PermissionsTarget
+		with HasSettings
+		with Serializable
+		with PostLoadBehaviour
+		with ToEntityReference {
+	type Entity = SmallGroup
 	import SmallGroup._
 	
 	@transient var permissionsService = Wire[PermissionsService]
@@ -110,4 +119,5 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	def hasScheduledEvents = events.asScala.exists(!_.isUnscheduled)
 
+	override def toEntityReference = new SmallGroupEntityReference().put(this)
 }

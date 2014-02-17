@@ -11,7 +11,8 @@ import org.hibernate.annotations.AccessType
 import javax.persistence.Entity
 
 @Entity @AccessType("field")
-class MarkerFeedback extends GeneratedId with FeedbackAttachments {
+class MarkerFeedback extends GeneratedId with FeedbackAttachments with ToEntityReference {
+	type Entity = MarkerFeedback
 
 	def this(parent:Feedback){
 		this()
@@ -77,4 +78,6 @@ class MarkerFeedback extends GeneratedId with FeedbackAttachments {
 	def hasGrade: Boolean = grade.isDefined
 
 	def hasFeedback = attachments != null && attachments.size() > 0
+
+	override def toEntityReference = new MarkerFeedbackEntityReference().put(this)
 }

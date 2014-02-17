@@ -28,8 +28,10 @@ trait Convertible[A >: Null <: AnyRef] {
 abstract class AbstractBasicUserType[A <: Object : ClassTag, B : ClassTag] extends UserType {
 
 	val basicType: AbstractSingleColumnStandardBasicType[B]
-	val nullObject: A // what to use when NULL comes out of the DB
-	val nullValue: B // what to put in the DB when saving null
+	// what to use when NULL comes out of the DB
+	val nullObject: A
+	// what to put in the DB when saving null
+	val nullValue: B
 	def convertToObject(input: B): A
 	def convertToValue(obj: A): B
 

@@ -1,7 +1,8 @@
 <#escape x as x?html>
 <#compress>
 	<#assign time_remaining=durationFormatter(assignment.closeDate) />
-	<h1>Request an extension for <strong>${assignment.name}</strong></h1>
+	<h1>Request an extension</h1>
+	<h4><span class="muted">for</span> ${assignment.name}</h4>
 	<#if isClosed && !isModification>
 		<p>
 			This assignment closed <@fmt.date date=assignment.closeDate /> (${time_remaining}).
@@ -53,7 +54,7 @@
 			<p>
 				This assignment closes <@fmt.date date=assignment.closeDate /> (${time_remaining} remaining).
 				To request an extension for this assignment please read the Extension Guidelines below and submit this form.
-				You will receive a notification when your application has been processed.
+				You will receive a notification when your request has been processed.
 			</p>
 			<#if department.extensionGuidelineSummary??>
 				<#include "/WEB-INF/freemarker/submit/formfields/guideline.ftl" >
@@ -64,7 +65,7 @@
 			</#if>
 		</#if>
 
-		<@f.form method="post" enctype="multipart/form-data" class="form-horizontal double-submit-protection" action="${url('/module/${module.code}/${assignment.id}/extension')}" commandName="extensionRequestCommand">
+		<@f.form method="post" enctype="multipart/form-data" class="form-horizontal double-submit-protection" action="${url('/module/${module.code}/${assignment.id}/extension')}" commandName="command">
 
 			<#if isModification>
 				<@f.hidden path="modified" value="true" />
@@ -77,6 +78,14 @@
 			<@form.labelled_row "reason" "Please give a full statement of your reasons for applying for an extension">
 				<@f.textarea path="reason" cssClass="text big-textarea" maxlength=4000/>
 			</@form.labelled_row>
+
+			<#if features.disabilityRenderingInExtensions && (profile.disability.reportable)!false>
+				<@form.labelled_row "disabilityAdjustment" "Report your disability">
+					<label class="checkbox">
+						<@f.checkbox path="disabilityAdjustment" /> I wish to disclose my ${profile.disability.definition} to the reviewer as part of this request.
+					</label>
+				</@form.labelled_row>
+			</#if>
 
 			<@form.labelled_row "requestedExpiryDate" "Requested extension date">
 				<@f.input path="requestedExpiryDate" cssClass="date-time-picker" />
@@ -127,7 +136,7 @@
 						<@f.errors path="readGuidelines" cssClass="error" />
 				</@form.field>
 			</@form.row>
-			
+
 			<input type="hidden" name="returnTo" value="${returnTo}" />
 
 			<div class="submit-buttons form-actions">

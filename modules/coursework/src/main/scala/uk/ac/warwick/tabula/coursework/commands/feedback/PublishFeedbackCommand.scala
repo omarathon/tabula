@@ -14,16 +14,15 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.FeedbackService
 import language.implicitConversions
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.coursework.commands.assignments.notifications.FeedbackPublishedNotification
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.CurrentUser
+import uk.ac.warwick.tabula.data.model.notifications.FeedbackPublishedNotification
 
 object PublishFeedbackCommand {
 	case class MissingUser(universityId: String)
 	case class BadEmail(user: User, exception: Exception = null)
 	
 	case class PublishFeedbackResults(
-		notifications: Seq[Notification[Feedback]] = Nil,
+		notifications: Seq[Notification[Feedback, Assignment]] = Nil,
 		missingUsers: Seq[MissingUser] = Nil,
 		badEmails: Seq[BadEmail] = Nil
 	)
@@ -84,16 +83,18 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 			val email = user.getEmail
 			if (email.hasText) {
 				PublishFeedbackResults(
-					notifications = Seq(new FeedbackPublishedNotification(feedback, submitter.apparentUser, user) with FreemarkerTextRenderer)
+					notifications = Seq(
+						Notification.init(new FeedbackPublishedNotification, submitter.apparentUser, Seq(feedback), feedback.assignment)
+					)
 				)
 			} else {
 				PublishFeedbackResults(
-					badEmails = Seq(BadEmail(user))
+					badEmails = Seq(PublishFeedbackCommand.BadEmail(user))
 				)
 			}
 		} else {
 			PublishFeedbackResults(
-				missingUsers = Seq(MissingUser(id))
+				missingUsers = Seq(PublishFeedbackCommand.MissingUser(id))
 			)
 		}
 	}

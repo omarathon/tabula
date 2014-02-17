@@ -3,17 +3,17 @@ package uk.ac.warwick.tabula.profiles.commands
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState._
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, MeetingRecordApproval}
+import uk.ac.warwick.tabula.data.model.{Notification, MeetingRecord, MeetingRecordApproval}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.profiles.notifications.{MeetingRecordApprovedNotification, MeetingRecordRejectedNotification}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointMeetingRelationshipTermServiceComponent, MonitoringPointMeetingRelationshipTermServiceComponent}
 import uk.ac.warwick.tabula.{AutowiringFeaturesComponent, FeaturesComponent}
+import uk.ac.warwick.tabula.data.model.notifications.{MeetingRecordRejectedNotification, MeetingRecordApprovedNotification}
 
 object ApproveMeetingRecordCommand {
 	def apply(approval: MeetingRecordApproval) =
@@ -85,9 +85,13 @@ trait ApproveMeetingRecordDescription extends Describable[MeetingRecordApproval]
 trait ApproveMeetingRecordNotification extends Notifies[MeetingRecordApproval, MeetingRecord] {
 	self: ApproveMeetingRecordState =>
 
-	def emit(approval: MeetingRecordApproval) =
-		if (approved) Seq(new MeetingRecordApprovedNotification(approval))
-		else Seq(new MeetingRecordRejectedNotification(approval))
+	def emit(approval: MeetingRecordApproval) = {
+		val agent = approval.approver.asSsoUser
+
+		if (approved) Seq( Notification.init(new MeetingRecordApprovedNotification, agent, Seq(approval) ))
+		else Seq( Notification.init(new MeetingRecordRejectedNotification, agent, Seq(approval) ))
+	}
+
 }
 
 trait ApproveMeetingRecordState {
