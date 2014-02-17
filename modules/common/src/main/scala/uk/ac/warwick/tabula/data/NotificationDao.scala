@@ -10,7 +10,9 @@ trait NotificationDao {
 	def save(notification: Notification[_,_])
 
 	def getById(id: String): Option[Notification[_,_]]
-	def recent(start: Int, count: Int): BatchResults[Notification[_,_]]
+
+
+	def recent(): Scrollable[Notification[_,_]]
 }
 
 @Repository
@@ -18,11 +20,14 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 
 	private def idFunction(notification: Notification[_,_]) = notification.id
 
-	def recent(start: Int, count: Int) = {
+	/** A Scrollable of all notifications, sorted with newest created date first.
+		* This result set has no limit so ensure you set a sensible limit.
+		*/
+	def recent(): Scrollable[Notification[_,_]] = {
 		val scrollable = session.newCriteria[Notification[_,_]]
 			.addOrder(Order.desc("created"))
 			.scroll()
-		new BatchResultsImpl[Notification[_,_]](scrollable, 100, idFunction _, session)
+		new Scrollable(scrollable, session)
 	}
 
 	override def save(notification: Notification[_,_]) {
