@@ -3,6 +3,7 @@
 <#macro list studentCourseDetails meetings relationshipType>
 	<#assign can_read_meetings = can.do_with_selector("Profiles.MeetingRecord.Read", studentCourseDetails, relationshipType) />
 	<#assign can_create_meetings = can.do_with_selector("Profiles.MeetingRecord.Create", studentCourseDetails, relationshipType) />
+	<#assign existingRelationship = ((studentCourseDetails.relationships(relationshipType))![])?size gt 0 />
 	<#assign can_create_scheduled_meetings = can.do_with_selector("Profiles.ScheduledMeetingRecord.Create", studentCourseDetails, relationshipType) />
 
 	<section class="meetings ${relationshipType.id}-meetings" data-target-container="${relationshipType.id}-meetings">
@@ -14,7 +15,7 @@
 			<#if can_create_meetings>
 				<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Create a new record"><i class="icon-edit"></i> New record</a>
 			</#if>
-			<#if can_create_scheduled_meetings && features.scheduledMeetings>
+			<#if existingRelationship && can_create_scheduled_meetings && features.scheduledMeetings>
 				<a class="btn-like new" href="<@routes.create_scheduled_meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Schedule a meeting"><i class="icon-time"></i> Schedule</a>
 				<#if showIntro("scheduled-meetings", "anywhere")>
 					<#assign introText>
@@ -204,12 +205,12 @@
 			<button type="submit" class="btn btn-primary">Submit</button>
 		</form>
 	<#elseif meeting.missed>
-		<div class="alert alert-error">
-			<p>Meeting did not take place.</p>
+		<div class="alert alert-error rejection">
 			<#if meeting.missedReason?has_content>
-				${meeting.missedReason}
+				<p> This meeting did not take place because: </p>
+				<blockquote class="reason">${meeting.missedReason}</blockquote>
 			<#else>
-				<em>No reason given</em>
+				<p> This meeting did not take place (no reason given) </p>
 			</#if>
 		</div>
 		<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
