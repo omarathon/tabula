@@ -201,7 +201,7 @@ abstract class AbstractIndexService[A]
 		}
 	}
 
-	protected def listNewerThan(startDate: DateTime, batchSize: Int): Seq[A]
+	protected def listNewerThan(startDate: DateTime, batchSize: Int): Traversable[A]
 
 	def indexFrom(startDate: DateTime) = transactional(readOnly = true) {
 		ifNotIndexing {
@@ -212,22 +212,25 @@ abstract class AbstractIndexService[A]
 	/**
 	 * Indexes a specific given list of items.
 	 */
-	def indexItems(items: Seq[A]) = transactional(readOnly = true) {
+	def indexItems(items: Traversable[A]) = transactional(readOnly = true) {
 		ifNotIndexing { doIndexItems(items, false) }
 	}
 
-	def indexItemsWithoutNewTransaction(items: Seq[A]) =  {
+	def indexItemsWithoutNewTransaction(items: Traversable[A]) =  {
 		ifNotIndexing { doIndexItems(items, false) }
 	}
 
-	private def doIndexItems(items: Seq[A], isIncremental: Boolean) {
+	private def doIndexItems(items: Traversable[A], isIncremental: Boolean) {
 		logger.debug("Writing to the index at " + indexPath + " with analyzer " + indexAnalyzer)
 		val writerConfig = new IndexWriterConfig(LuceneVersion, indexAnalyzer)
 		closeThis(new IndexWriter(openDirectory(), writerConfig)) { writer =>
 			for (item <- items) {
-				if (isIncremental)
+				if (isIncremental) {
 					doUpdateMostRecent(item)
-				writer.updateDocument(uniqueTerm(item), toDocument(item))
+				}
+				toDocuments(item).foreach { doc =>
+					writer.updateDocument(uniqueTerm(item), doc)
+				}
 			}
 			if (debugEnabled) logger.debug("Indexed " + items.size + " items")
 		}
@@ -280,7 +283,7 @@ abstract class AbstractIndexService[A]
 	/**
 	 * TODO reuse one Document and set of Fields for all items
 	 */
-	protected def toDocument(item: A): Document
+	protected def toDocuments(item: A): Seq[Document]
 
 	protected def toId(doc: Document) = documentValue(doc, IdField)
 	protected def toItems(docs: Seq[Document]): Seq[A]

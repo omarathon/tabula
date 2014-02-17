@@ -385,7 +385,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	/**
 	 * TODO reuse one Document and set of Fields for all items
 	 */
-	protected def toDocument(item: AuditEvent): Document = {
+	protected def toDocuments(item: AuditEvent): Seq[Document] = {
 		val doc = new Document
 
 		if (item.related == null || item.related.isEmpty) {
@@ -411,7 +411,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		}
 
 		doc add dateField(UpdatedDateField, item.eventDate)
-		doc
+		Seq(doc)
 	}
 
 	def openQuery(queryString: String, start: Int, count: Int) = {
