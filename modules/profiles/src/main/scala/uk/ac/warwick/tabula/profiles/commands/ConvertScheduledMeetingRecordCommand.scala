@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.data.model.{MeetingRecord, StudentRelationship, FileAttachment, MeetingFormat, ScheduledMeetingRecord, Member}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -9,6 +9,7 @@ import org.joda.time.LocalDate
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.{MeetingRecordServiceComponent, AutowiringMeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringFileAttachmentServiceComponent, FileAttachmentServiceComponent}
+import scala.collection.JavaConversions._
 
 object ConvertScheduledMeetingRecordCommand {
 	def apply(creator: Member, meetingRecord: ScheduledMeetingRecord) =
@@ -42,9 +43,14 @@ class ConvertScheduledMeetingRecordCommand (val creator: Member, val meetingReco
 
 	def applyInternal() = {
 		val newMeeting = createCommand.apply()
+
+		// cannot update meetingRecord.attachments, or we get a ConcurrentModificationException
+		val attachmentsToPurge = JArrayList[FileAttachment](meetingRecord.attachments)
+		attachmentsToPurge.foreach(meetingRecord.removeAttachment(_))
+
 		meetingRecordService.purge(meetingRecord)
 		newMeeting
-	}
+}
 
 }
 

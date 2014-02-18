@@ -27,5 +27,5 @@ class NotificationService extends Logging {
 }
 
 trait NotificationListener {
-	def listen: Notification[_,_] => Unit
+	def listen(n: Notification[_,_]): Unit
 }

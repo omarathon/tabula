@@ -111,7 +111,7 @@ trait AttendanceNotePermissions extends RequiresPermissionsChecking with Permiss
 	self: AttendanceNoteCommandState =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.SmallGroupEvents.Register, student)
+		p.PermissionCheck(Permissions.SmallGroupEvents.Register, occurrence)
 	}
 }
 

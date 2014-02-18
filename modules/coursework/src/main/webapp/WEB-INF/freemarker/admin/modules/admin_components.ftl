@@ -25,10 +25,9 @@
 			<div class="btn-group module-manage-button section-manage-button">
 			  <a class="btn btn-medium dropdown-toggle" data-toggle="dropdown"><i class="icon-wrench"></i> Manage <span class="caret"></span></a>
 			  <ul class="dropdown-menu pull-right">
-			  	<#if can_manage>
-						<#assign  module_managers_count = ((module.managers.includeUsers)![])?size />
+			  		<#if can_manage>
 						<li><a href="<@routes.moduleperms module />">
-							<i class="icon-user"></i> Edit module permissions <!--<span class="badge">${module_managers_count}</span>-->
+							<i class="icon-user"></i> Edit module permissions
 						</a></li>
 					</#if>
 	
