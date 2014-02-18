@@ -16,7 +16,7 @@
 	</script>
 <#else>
 	<tbody>
-		<#list activities.activities as activity>
+		<#list activities.items as activity>
 			<tr>
 				<td>
 					<#if async??><div class="streaming" style="display:none;"></#if>

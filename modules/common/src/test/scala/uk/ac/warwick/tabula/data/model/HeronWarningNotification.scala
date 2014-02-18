@@ -10,7 +10,7 @@ object HeronWarningNotification {
 
 @Entity
 @DiscriminatorValue(value="heronWarning")
-class HeronWarningNotification extends Notification[SmallGroup, Unit] with SingleItemNotification[SmallGroup]{
+class HeronWarningNotification extends NotificationWithTarget[SmallGroup, SmallGroup] with SingleItemNotification[SmallGroup]{
 
 	import HeronWarningNotification._
 

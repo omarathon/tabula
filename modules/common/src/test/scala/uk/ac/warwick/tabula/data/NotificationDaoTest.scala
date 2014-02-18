@@ -14,11 +14,15 @@ import uk.ac.warwick.userlookup.User
 import scala.reflect.runtime.universe._
 import javax.persistence.DiscriminatorValue
 import org.joda.time.{DateTimeUtils, DateTime}
+import uk.ac.warwick.tabula.data.model.groups.SmallGroup
+import uk.ac.warwick.tabula.data.model.notifications.SubmissionReceivedNotification
 
 @Transactional
 class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 	val notificationDao = new NotificationDaoImpl
+
+	val agent = Fixtures.user()
 
 	@Before
 	def setup() {
@@ -34,15 +38,19 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		DateTimeUtils.setCurrentMillisSystem()
 	}
 
+	def newHeronNotification(agent: User, group: SmallGroup) = {
+		Notification.init(new HeronWarningNotification, agent, group, group)
+	}
+
 	@Test def saveAndFetch() {
-			val agent = Fixtures.user()
+
 			val group = Fixtures.smallGroup("Blissfully unaware group")
-			val notification = Notification.init(new HeronWarningNotification, agent, Seq(group))
-			notification.id = "heronWarningNotificaton"
+			//val notification = Notification.init(new HeronWarningNotification, agent, group)
+			val notification = newHeronNotification(agent, group)
 
 			session.save(group)
 
-			notificationDao.getById(notification.id) should be (None)
+			notificationDao.getById("heronWarningNotification") should be (None)
 			notificationDao.save(notification)
 			notificationDao.getById(notification.id) should be (Option(notification))
 
@@ -53,7 +61,20 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 			retrievedNotification.title should be ("Blissfully unaware group - You all need to know. Herons would love to kill you in your sleep")
 			retrievedNotification.url should be ("/beware/herons")
 			retrievedNotification.item.entity should be(group)
+			retrievedNotification.target should not be(null)
+			retrievedNotification.target.entity should be(group)
 			retrievedNotification.content.template should be ("/WEB-INF/freemarker/notifications/i_really_hate_herons.ftl")
+	}
+
+	@Test
+	def submissionReceived() {
+		val submission = Fixtures.submission()
+		val assignment = Fixtures.assignment("Fun")
+		assignment.addSubmission(submission)
+		val notification = Notification.init(new SubmissionReceivedNotification, agent, submission, assignment)
+
+		notificationDao.save(notification)
+		notification.target.id should not be (null)
 	}
 
 	@Test def recent() {
@@ -64,7 +85,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		val now = DateTime.now
 		DateTimeUtils.setCurrentMillisFixed(now.getMillis)
 		val notifications = for (i <- 1 to 1000) {
-			val notification = Notification.init(new HeronWarningNotification, agent, Seq(group))
+			val notification = newHeronNotification(agent, group)
 			notification.created = now.minusMinutes(i)
 			notificationDao.save(notification)
 			ii += 1

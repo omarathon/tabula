@@ -290,6 +290,27 @@ abstract class AbstractIndexService[A]
 
 }
 
+case class PagingSearchResultItems[A](items: Seq[A], lastscore: Option[ScoreDoc], token: Long, total: Int) {
+	// need this pattern matcher as brain-dead IndexSearcher.searchAfter returns an object containing ScoreDocs,
+	// and expects a ScoreDoc in its method signature, yet in its implementation throws an exception unless you
+	// pass a specific subclass of FieldDoc.
+	def last: Option[FieldDoc] = lastscore match {
+		case None => None
+		case Some(f:FieldDoc) => Some(f)
+		case _ => throw new ClassCastException("Lucene did not return an Option[FieldDoc] as expected")
+	}
+
+	def getTokens: String = last.map { lastscore =>
+		lastscore.doc + "/" + lastscore.fields(0) + "/" + token
+	}.getOrElse("empty")
+}
+
+case class PagingSearchResult(results: RichSearchResults, last: Option[ScoreDoc], token: Long, total: Int) {
+	// Turn results containing documents into results containing actual items.
+	def transformAll[A](fn: (Seq[Document] => Seq[A] )) =
+		PagingSearchResultItems[A](results.transformAll(fn), last, token, total)
+}
+
 trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: AbstractIndexService[A] =>
 
 	/**
@@ -402,8 +423,6 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		hits.toStream.drop(offset).take(max).map { hit => searcher.doc(hit.doc) }.toList
 	}
 
-	case class PagingSearchResult(val results: RichSearchResults, val last: Option[ScoreDoc], val token: Long, val total: Int)
-
 	private def doPagingSearch(query: Query, max: Option[Int], sort: Option[Sort], lastDoc: Option[ScoreDoc], token: Option[Long]): PagingSearchResult = {
 		// guard
 		initialiseSearching
@@ -446,7 +465,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 				newToken = searcherLifetimeManager.record(searcher)
 			}
 			case Some(t) => {
-				searcher = searcherLifetimeManager.acquire(token.get)
+				searcher = searcherLifetimeManager.acquire(t)
 				newToken = t
 			}
 		}

@@ -13,19 +13,36 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.hibernate.ObjectNotFoundException
 import javax.persistence.DiscriminatorValue
+import org.apache.lucene.search.{FieldDoc, SortField, Sort, TermQuery}
+import org.apache.lucene.index.Term
+import uk.ac.warwick.tabula.JavaImports._
 
 class RecipientNotification(val notification: Notification[_,_], val recipient: User) {
-	def id = s"${notification.id}:${recipient.getUserId}}"
+	def id = s"${notification.id}-${recipient.getUserId}"
 }
 
 trait NotificationIndexService {
 	def indexFrom(startDate: DateTime): Unit
 }
 
+trait NotificationQueryMethods { self: NotificationIndexServiceImpl =>
+	def userStream(req: ActivityStreamRequest): PagingSearchResultItems[Notification[_,_]] = {
+		val user = req.user
+		val query = new TermQuery(new Term("recipient", user.getUserId))
+		val sort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true))
+		val fieldDoc = req.pagination.map { p => new FieldDoc(p.lastDoc, Float.NaN, Array(p.lastField:JLong)) }
+		val token = req.pagination.map { _.token }
+		val result = search(query, req.max, sort, fieldDoc, token)
+		result.transformAll[Notification[_,_]] {
+			docs => docs.flatMap(toNotification)
+		}
+	}
+}
+
 /**
  */
-//@Service
-class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotification] with NotificationIndexService {
+@Service
+class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotification] with NotificationIndexService with NotificationQueryMethods {
 	var dao = Wire[NotificationDao]
 	var userLookup = Wire[UserLookupService]
 
@@ -39,13 +56,18 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 
 	private def createAnalyzer = new StandardAnalyzer(LuceneVersion)
 
+	protected def toNotification(doc: Document): Option[Notification[_,_]] =
+		for {
+			id <- documentValue(doc, "notification")
+			notification <- dao.getById(id)
+		}	yield notification
+
 	override protected def toItems(docs: Seq[Document]): Seq[RecipientNotification] =
 		for {
 			doc <- docs
-			id <- documentValue(doc, "notification")
+			notification <- toNotification(doc)
 			userId <- documentValue(doc, "recipient")
 			recipient <- Option(userLookup.getUserByUserId(userId))
-			notification <- dao.getById(id)
 		}	yield new RecipientNotification(notification, recipient)
 
 	override protected def toDocuments(item: RecipientNotification): Seq[Document] = {
@@ -55,6 +77,7 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 
 		val notificationType = notification.getClass.getAnnotation(classOf[DiscriminatorValue]).value()
 
+		doc.add(plainStringField(IdField, item.id))
 		doc.add(plainStringField("notification", notification.id))
 		doc.add(plainStringField("recipient", recipient.getUserId))
 		doc.add(plainStringField("notificationType", notificationType))
