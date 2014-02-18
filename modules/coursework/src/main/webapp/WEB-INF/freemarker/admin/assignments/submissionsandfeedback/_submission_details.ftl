@@ -1,12 +1,16 @@
 <#macro lateness submission=""><#compress>
 	<#if submission?has_content && submission.submittedDate?? && (submission.late || submission.authorisedLate)>
-		${durationFormatter(assignment.closeDate, submission.submittedDate)} after close
+		<#if submission.late>
+			<@fmt.p submission.workingDaysLate "working day" /> late, ${durationFormatter(assignment.closeDate, submission.submittedDate)} after close
+		<#else>
+			${durationFormatter(assignment.closeDate, submission.submittedDate)} after close
+		</#if>
 	</#if>
 </#compress></#macro>
 
 <#macro extensionLateness extension submission><#compress>
 	<#if extension?has_content && extension.expiryDate?? && submission.late>
-	${durationFormatter(extension.expiryDate, submission.submittedDate)} after extended deadline (<@fmt.date date=extension.expiryDate capitalise=false shortMonth=true />)
+		${durationFormatter(extension.expiryDate, submission.submittedDate)} after extended deadline (<@fmt.date date=extension.expiryDate capitalise=false shortMonth=true />)
 	</#if>
 </#compress></#macro>
 
