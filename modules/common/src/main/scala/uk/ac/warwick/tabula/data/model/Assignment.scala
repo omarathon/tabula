@@ -287,6 +287,28 @@ class Assignment
 		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.universityId, submission.userId, submission.submittedDate)
 
 	/**
+	 * Deadline taking into account any approved extension
+	 */
+	def submissionDeadline(submission: Submission) =
+		if (openEnded) null
+		else extensions.find(e => e.isForUser(submission.universityId, submission.userId) && e.approved).map(_.expiryDate).getOrElse(closeDate)
+
+	def workingDaysLate(submission: Submission) =
+		if (isLate(submission)) {
+			val deadline = submissionDeadline(submission)
+
+			val offset =
+				if (deadline.toLocalTime.isAfter(submission.submittedDate.toLocalTime)) -1
+				else 0
+
+			val daysLate = workingDaysHelper.getNumWorkingDays(deadline.toLocalDate, submission.submittedDate.toLocalDate) + offset
+			val lateDay = workingDaysHelper.datePlusWorkingDays(deadline.toLocalDate, daysLate)
+
+			if (lateDay.isBefore(submission.submittedDate.toLocalDate)) daysLate + 1
+			else daysLate
+		} else 0
+
+	/**
 	 * retrospectively checks if a submission was an 'authorised late'
 	 * called by submission.isAuthorisedLate to check against extensions
 	 */

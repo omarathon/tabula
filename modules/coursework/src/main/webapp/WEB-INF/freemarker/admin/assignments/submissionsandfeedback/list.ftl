@@ -177,11 +177,7 @@
 							<#local submission=enhancedSubmission.submission>
 						</#if>
 
-						<#if submission?? && submission.submittedDate?? && (submission.late || submission.authorisedLate)>
-							<#local lateness = "${durationFormatter(assignment.closeDate, submission.submittedDate)} after close" />
-						<#else>
-							<#local lateness = "" />
-						</#if>
+						<#local lateness><@sd.lateness submission /></#local>
 
 						<tr class="itemContainer<#if !enhancedSubmission??> awaiting-submission</#if>" <#if enhancedSubmission?? && submission.suspectPlagiarised> data-plagiarised="true" </#if> >
 							<td><#if student.coursework.enhancedSubmission?? || student.coursework.enhancedFeedback??><@form.selector_check_row "students" student.user.warwickId /></#if></td>
@@ -213,7 +209,7 @@
 							</td>
 							<td class="submitted">
 								<#if submission?? && submission.submittedDate??>
-									<span class="date use-tooltip" title="${lateness!''}">
+									<span class="date use-tooltip" title="${lateness!''}" data-container="body">
 										<@fmt.date date=submission.submittedDate seconds=true capitalise=true shortMonth=true split=true />
 									</span>
 								</#if>
