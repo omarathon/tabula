@@ -376,30 +376,32 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		startResult: Int,
 		query: ScalaQuery[Array[java.lang.Object]]
 	) = {
+		if (universityIds.isEmpty) Nil
+		else {
+			val ordering = if (isAscending) Ordering[Int] else Ordering[Int].reverse
 
-		val ordering = if (isAscending) Ordering[Int] else Ordering[Int].reverse
+			val universityIdCountMap = query.seq.map{objArray =>
+				objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
+			}.toMap
 
-		val universityIdCountMap = query.seq.map{objArray =>
-			objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
-		}.toMap
-
-		val sortedAllUniversityIdCount = universityIds.map{u =>
-			u -> universityIdCountMap.getOrElse(u, 0)
-		}.sortBy(_._2)(ordering)
+			val sortedAllUniversityIdCount = universityIds.map{u =>
+				u -> universityIdCountMap.getOrElse(u, 0)
+			}.sortBy(_._2)(ordering)
 
 
-		val universityIdsToFetch = sortedAllUniversityIdCount.slice(startResult, startResult + maxResults).map(_._1)
+			val universityIdsToFetch = sortedAllUniversityIdCount.slice(startResult, startResult + maxResults).map(_._1)
 
-		val students =
-			session.newCriteria[StudentMember]
-			.add(safeIn("universityId", universityIdsToFetch))
-			.seq
+			val students =
+				session.newCriteria[StudentMember]
+				.add(safeIn("universityId", universityIdsToFetch))
+				.seq
 
-		universityIdsToFetch.flatMap{
-			u => students.find(_.universityId == u)
-		}.map{
-			s => s -> sortedAllUniversityIdCount.toMap.get(s.universityId).getOrElse(0)
-		}.toSeq
+			universityIdsToFetch.flatMap{
+				u => students.find(_.universityId == u)
+			}.map{
+				s => s -> sortedAllUniversityIdCount.toMap.get(s.universityId).getOrElse(0)
+			}.toSeq
+		}
 	}
 
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String] = {
@@ -470,7 +472,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	}
 
 	def findAttendanceNotes(students: Seq[StudentMember], points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote] = {
-		if(students.size == 0 || points.size == 0)
+		if(students.isEmpty || points.isEmpty)
 			return Seq()
 
 		session.newCriteria[MonitoringPointAttendanceNote]

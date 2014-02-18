@@ -144,16 +144,19 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 			.seq
 	
 	def getGrantedRolesForWebgroups[A <: PermissionsTarget: ClassTag](groupNames: Seq[String]) = {
-		val c =
-			session.newCriteria[GrantedRole[A]]
-			.createAlias("users", "users")
-			.add(safeIn("users.baseWebgroup", groupNames))
+		if (groupNames.isEmpty) Nil
+		else {
+			val c =
+				session.newCriteria[GrantedRole[A]]
+				.createAlias("users", "users")
+				.add(safeIn("users.baseWebgroup", groupNames))
 
-		GrantedRole.discriminator[A] foreach { discriminator =>
-			c.add(is("class", discriminator))
+			GrantedRole.discriminator[A] foreach { discriminator =>
+				c.add(is("class", discriminator))
+			}
+
+			c.seq
 		}
-
-		c.seq
 	}
 	
 	def getGrantedPermissionsForUser[A <: PermissionsTarget: ClassTag](user: User) =
@@ -179,15 +182,18 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 	
 	
 	def getGrantedPermissionsForWebgroups[A <: PermissionsTarget: ClassTag](groupNames: Seq[String]) = {
-		val c = session.newCriteria[GrantedPermission[A]]
-			.createAlias("users", "users")
-			.add(safeIn("users.baseWebgroup", groupNames))
+		if (groupNames.isEmpty) Nil
+		else {
+			val c = session.newCriteria[GrantedPermission[A]]
+				.createAlias("users", "users")
+				.add(safeIn("users.baseWebgroup", groupNames))
 
-		GrantedPermission.discriminator[A] map { discriminator =>
-			c.add(is("class", discriminator))
+			GrantedPermission.discriminator[A] map { discriminator =>
+				c.add(is("class", discriminator))
+			}
+
+			c.seq
 		}
-
-		c.seq
 	}
 
 	def getCustomRoleDefinitionsBasedOn(baseDef: BuiltInRoleDefinition): Seq[CustomRoleDefinition] = {
