@@ -3,7 +3,9 @@
 
 <#if has_assignments || has_historical_items || user.student || (!user.staff && user.alumni)>
 	<div class="header-with-tooltip" id="your-assignments">
-		<h2 class="section"><#if isSelf>My<#else>${student.firstName}'s</#if> assignments</h2>
+		<#if ajax><h4><#else><h2 class="section"></#if>
+		<#if isSelf>My<#else>${student.firstName}'s</#if> assignments
+		<#if ajax></h4><#else></h2></#if>
 		<#if isSelf>
 			<span class="use-tooltip" data-toggle="tooltip" data-html="true" data-placement="bottom" data-title="Talk to your module convenor if you think an assignment is missing - maybe it isn't set up yet, or they aren't using Tabula.">Missing an assignment?</span>
 		</#if>
