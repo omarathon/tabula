@@ -100,18 +100,16 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] 
 
 		val webgroupNames: Seq[String] = getWebgroups(user.getUserId)
 
-		val groupsByWebgroup = webgroupNames.grouped(Daoisms.MaxInClauseCount).flatMap { names =>
-			val criteria = session.newCriteria[A]
+		val criteria = session.newCriteria[A]
 
-			joinTable foreach { table =>
-				criteria.createAlias(table, table)
-			}
-
-			criteria
-				.createAlias(prop, "usergroupAlias")
-				.add(in("usergroupAlias.baseWebgroup", names.asJava))
-				.seq
+		joinTable foreach { table =>
+			criteria.createAlias(table, table)
 		}
+
+		val groupsByWebgroup = criteria
+			.createAlias(prop, "usergroupAlias")
+			.add(safeIn("usergroupAlias.baseWebgroup", webgroupNames))
+			.seq
 
 		(groupsByUser ++ groupsByWebgroup).distinct
 	}

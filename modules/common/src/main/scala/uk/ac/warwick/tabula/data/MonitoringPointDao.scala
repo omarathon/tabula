@@ -88,10 +88,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		else {
 			val criteria = session.newCriteria[MonitoringCheckpoint]
 				.createAlias("point", "point")
-	
-			val or = disjunction()
-			monitoringPoints.grouped(Daoisms.MaxInClauseCount).foreach { mps => or.add(in("point", mps.asJava)) }
-			criteria.add(or)
+				.add(safeIn("point", monitoringPoints))
 
 			if (mostSiginificantOnly) {
 				criteria.setFetchMode("point.student", FetchMode.JOIN)
@@ -393,11 +390,10 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 		val universityIdsToFetch = sortedAllUniversityIdCount.slice(startResult, startResult + maxResults).map(_._1)
 
-		val c = session.newCriteria[StudentMember]
-		val or = disjunction()
-		universityIdsToFetch.grouped(Daoisms.MaxInClauseCount).foreach { ids => or.add(in("universityId", ids.asJavaCollection)) }
-		c.add(or)
-		val students = c.seq
+		val students =
+			session.newCriteria[StudentMember]
+			.add(safeIn("universityId", universityIdsToFetch))
+			.seq
 
 		universityIdsToFetch.flatMap{
 			u => students.find(_.universityId == u)
@@ -410,22 +406,19 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		if (students.isEmpty)
 			return Seq()
 
-		val c = session.newCriteria[MonitoringPointReport]
+		val termCounts =
+			session.newCriteria[MonitoringPointReport]
 			.add(is("academicYear", academicYear))
-
-		val or = disjunction()
-		students.map(_.universityId)
-			.grouped(Daoisms.MaxInClauseCount)
-			.foreach { ids => or.add(in("student.universityId", ids.asJavaCollection)) }
-		c.add(or)
-
-		val query = c.project[Array[java.lang.Object]](Projections.projectionList()
-			.add(Projections.groupProperty("monitoringPeriod"))
-			.add(Projections.count("monitoringPeriod"))
-		)
-		val termCounts = query.seq.map{objArray =>
-			objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
-		}
+			.add(safeIn("student.universityId", students.map(_.universityId)))
+			.project[Array[java.lang.Object]](
+				Projections.projectionList()
+					.add(Projections.groupProperty("monitoringPeriod"))
+					.add(Projections.count("monitoringPeriod"))
+			)
+			.seq
+			.map { objArray =>
+				objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
+			}
 
 		TermService.orderedTermNames.diff(termCounts.filter{case(term, count) => count.intValue() == students.size}.map { _._1})
 
@@ -435,17 +428,13 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		if (students.isEmpty)
 			return Seq()
 
-		val c = session.newCriteria[MonitoringPointReport]
+		val reportedStudents =
+			session.newCriteria[MonitoringPointReport]
 			.add(is("academicYear", academicYear))
 			.add(is("monitoringPeriod", period))
-
-		val or = disjunction()
-		students.map(_.universityId)
-			.grouped(Daoisms.MaxInClauseCount)
-			.foreach { ids => or.add(in("student.universityId", ids.asJavaCollection)) }
-		c.add(or)
-
-		val reportedStudents = c.seq.map(_.student)
+			.add(safeIn("student.universityId", students.map(_.universityId)))
+			.seq
+			.map(_.student)
 
 		students.diff(reportedStudents)
 	}
@@ -458,16 +447,11 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		if (students.isEmpty)
 			return Seq()
 
-		val c = session.newCriteria[MonitoringPointReport]
+		session.newCriteria[MonitoringPointReport]
 			.add(is("academicYear", academicYear))
 			.add(is("monitoringPeriod", period))
-
-		val or = disjunction()
-		students.map(_.universityId)
-			.grouped(Daoisms.MaxInClauseCount)
-			.foreach { ids => or.add(in("student.universityId", ids.asJavaCollection)) }
-		c.add(or)
-		c.seq
+			.add(safeIn("student.universityId", students.map(_.universityId)))
+			.seq
 	}
 
 	def hasAnyPointSets(department: Department): Boolean = {
@@ -490,8 +474,8 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 			return Seq()
 
 		session.newCriteria[MonitoringPointAttendanceNote]
-			.add(in("student", students.asJava))
-			.add(in("point", points.asJava))
+			.add(safeIn("student", students))
+			.add(safeIn("point", points))
 			.seq
 	}
 

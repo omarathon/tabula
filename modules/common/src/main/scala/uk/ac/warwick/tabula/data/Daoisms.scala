@@ -6,8 +6,11 @@ import uk.ac.warwick.tabula.data.model.CanBeDeleted
 import uk.ac.warwick.spring.Wire
 import language.implicitConversions
 import scala.reflect._
-import uk.ac.warwick.tabula.data.Daoisms.NiceQueryCreator
 import org.hibernate.proxy.HibernateProxy
+import org.hibernate.criterion.Restrictions._
+import uk.ac.warwick.tabula.data.Daoisms.NiceQueryCreator
+import scala.collection.IterableLike
+import scala.collection.JavaConverters._
 
 /** Trait for self-type annotation, declaring availability of a Session. */
 trait SessionComponent{
@@ -42,6 +45,17 @@ trait ExtendedSessionComponent extends SessionComponent {
 trait HelperRestrictions {
 	def is = org.hibernate.criterion.Restrictions.eqOrIsNull _
 	def isNull(propertyName: String) = org.hibernate.criterion.Restrictions.isNull(propertyName)
+	def safeIn[A](propertyName: String, iterable: Seq[A]) = {
+		if (iterable.length <= Daoisms.MaxInClauseCount) {
+			org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection)
+		} else {
+			val or = disjunction()
+			iterable.grouped(Daoisms.MaxInClauseCount).foreach { subitr =>
+				or.add(org.hibernate.criterion.Restrictions.in(propertyName, subitr.asJavaCollection))
+			}
+			or
+		}
+	}
 }
 
 trait HibernateHelpers {
