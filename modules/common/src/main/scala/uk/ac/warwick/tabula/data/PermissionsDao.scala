@@ -144,8 +144,7 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 			.seq
 	
 	def getGrantedRolesForWebgroups[A <: PermissionsTarget: ClassTag](groupNames: Seq[String]) = {
-		if (groupNames.isEmpty) Nil
-		else {
+		if (!groupNames.isEmpty) {
 			val c =
 				session.newCriteria[GrantedRole[A]]
 				.createAlias("users", "users")
@@ -156,7 +155,7 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 			}
 
 			c.seq
-		}
+		} else Nil
 	}
 	
 	def getGrantedPermissionsForUser[A <: PermissionsTarget: ClassTag](user: User) =
