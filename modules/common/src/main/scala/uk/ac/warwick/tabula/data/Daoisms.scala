@@ -11,6 +11,7 @@ import org.hibernate.criterion.Restrictions._
 import uk.ac.warwick.tabula.data.Daoisms.NiceQueryCreator
 import scala.collection.IterableLike
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.helpers.Logging
 
 /** Trait for self-type annotation, declaring availability of a Session. */
 trait SessionComponent{
@@ -42,11 +43,14 @@ trait ExtendedSessionComponent extends SessionComponent {
 	}
 }
 
-trait HelperRestrictions {
+trait HelperRestrictions extends Logging {
 	def is = org.hibernate.criterion.Restrictions.eqOrIsNull _
 	def isNull(propertyName: String) = org.hibernate.criterion.Restrictions.isNull(propertyName)
 	def safeIn[A](propertyName: String, iterable: Seq[A]) = {
-		if (iterable.length <= Daoisms.MaxInClauseCount) {
+		if (iterable.isEmpty) {
+			logger.warn("Empty iterable passed to safeIn() - query will never return any results, may be unnecessary")
+			org.hibernate.criterion.Restrictions.sqlRestriction("1=0")
+		} else if (iterable.length <= Daoisms.MaxInClauseCount) {
 			org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection)
 		} else {
 			val or = disjunction()
