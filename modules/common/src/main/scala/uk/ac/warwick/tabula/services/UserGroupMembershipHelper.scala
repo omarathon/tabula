@@ -99,17 +99,20 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] 
 			.seq
 
 		val webgroupNames: Seq[String] = getWebgroups(user.getUserId)
+		val groupsByWebgroup =
+			if (webgroupNames.isEmpty) Nil
+			else {
+				val criteria = session.newCriteria[A]
 
-		val criteria = session.newCriteria[A]
+				joinTable.foreach { table =>
+					criteria.createAlias(table, table)
+				}
 
-		joinTable foreach { table =>
-			criteria.createAlias(table, table)
-		}
-
-		val groupsByWebgroup = criteria
-			.createAlias(prop, "usergroupAlias")
-			.add(safeIn("usergroupAlias.baseWebgroup", webgroupNames))
-			.seq
+				criteria
+					.createAlias(prop, "usergroupAlias")
+					.add(safeIn("usergroupAlias.baseWebgroup", webgroupNames))
+					.seq
+			}
 
 		(groupsByUser ++ groupsByWebgroup).distinct
 	}
