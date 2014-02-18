@@ -36,7 +36,7 @@ trait ConvertScheduledMeetingRecordCommandPopulate	extends PopulateOnForm {
 	}
 }
 
-class ConvertScheduledMeetingRecordCommand (val creator: Member, var meetingRecord: ScheduledMeetingRecord)
+class ConvertScheduledMeetingRecordCommand (val creator: Member, val meetingRecord: ScheduledMeetingRecord)
 	extends CommandInternal[MeetingRecord] with ConvertScheduledMeetingRecordState {
 
 	self: MeetingRecordServiceComponent with FileAttachmentServiceComponent =>
