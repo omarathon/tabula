@@ -18,9 +18,11 @@ trait MeetingRecordAttachments {
 	var attachments: JList[FileAttachment]
 
 	def removeAttachment(attachment: FileAttachment) = {
-		attachment.meetingRecord = null
 		attachments.remove(attachment)
 	}
+
+	def removeAllAttachments() = attachments.clear()
+
 }
 
 object AbstractMeetingRecord {

@@ -42,15 +42,14 @@ class ConvertScheduledMeetingRecordCommand (val creator: Member, val meetingReco
 	self: MeetingRecordServiceComponent with FileAttachmentServiceComponent =>
 
 	def applyInternal() = {
+
 		val newMeeting = createCommand.apply()
+		newMeeting.attachments.foreach(_.meetingRecord = newMeeting)
 
-		// cannot update meetingRecord.attachments, or we get a ConcurrentModificationException
-		val attachmentsToPurge = JArrayList[FileAttachment](meetingRecord.attachments)
-		attachmentsToPurge.foreach(meetingRecord.removeAttachment(_))
-
+		meetingRecord.removeAllAttachments()
 		meetingRecordService.purge(meetingRecord)
 		newMeeting
-}
+	}
 
 }
 
