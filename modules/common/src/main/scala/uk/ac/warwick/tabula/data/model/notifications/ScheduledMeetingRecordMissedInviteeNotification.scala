@@ -20,9 +20,10 @@ class ScheduledMeetingRecordMissedInviteeNotification
 		"profileLink" -> url
 	))
 	def recipient = {
-		if (meeting.creator.universityId == meeting.relationship.studentId ) {
+		if (meeting.creator.universityId == meeting.relationship.studentId) {
+			meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage)).asSsoUser
+		} else {
 			meeting.relationship.studentMember.getOrElse(throw new IllegalStateException(studentNotFoundMessage)).asSsoUser
 		}
-		else meeting.relationship.agentMember.getOrElse(throw new IllegalStateException(agentNotFoundMessage)).asSsoUser
 	}
 }
