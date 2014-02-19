@@ -44,5 +44,10 @@ alter table MonitoringPointSet set unused column discriminator;
 alter table MonitoringPointSet set unused column position;
 alter table MonitoringPointSet drop unused columns;
 
+alter table MonitoringPointSet modify (
+  route_id not null,
+  academicyear not null
+);
+
 --- Recreate index on MonitoringPointSet now that TemplateName no longer exists
 create unique index IDX_MPSY_ROUTE_YEAR on MonitoringPointSet (route_id, year, academicyear);
