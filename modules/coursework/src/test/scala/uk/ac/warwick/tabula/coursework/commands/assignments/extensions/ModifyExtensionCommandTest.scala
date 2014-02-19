@@ -1,0 +1,110 @@
+
+import scala.collection.JavaConversions._
+import org.joda.time.DateTime
+import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.{EditExtensionCommand, ExtensionItem, AddExtensionCommand}
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.events.EventHandling
+import uk.ac.warwick.tabula.services.UserLookupService
+import uk.ac.warwick.tabula.{RequestInfo, Mockito, TestBase}
+
+// scalastyle:off magic.number
+class ModifyExtensionCommandTest extends TestBase with Mockito {
+
+	EventHandling.enabled = false
+
+	@Test
+	def addExtension() {
+		withUser("cuslat", "1171795") {
+			withFakeTime(dateTime(2014, 2, 11)) {
+
+				val assignment = createAssignment()
+				val extensions = addAnExtension(assignment: Assignment)
+
+				extensions.head.approved should be (false)
+				extensions.head.rejected should be (false)
+				extensions.head.state should be (ExtensionState.Unreviewed)
+			}
+		}
+	}
+
+	@Test
+	def approveExtension() {
+		withUser("cuslat", "1171795") {
+			withFakeTime(dateTime(2014, 2, 11)) {
+
+				val currentUser = RequestInfo.fromThread.get.user
+				val assignment = createAssignment()
+				var extensions = addAnExtension(assignment)
+
+				extensions.head.approved should be (false)
+				extensions.head.rejected should be (false)
+				extensions.head.state should be (ExtensionState.Unreviewed)
+
+				val editCommand = new EditExtensionCommand(assignment.module, assignment, extensions.head, currentUser, "approve")
+	 			editCommand.userLookup = mock[UserLookupService]
+				editCommand.extensionItems = List(makeExtensionItem())
+				extensions = editCommand.copyExtensionItems()
+
+				extensions.head.approved should be (true)
+				extensions.head.rejected should be (false)
+				extensions.head.state should be (ExtensionState.Approved)
+				extensions.head.reviewedOn should be (DateTime.now)
+			}
+		}
+	}
+
+	@Test
+	def rejectExtension() {
+		withUser("cuslat", "1171795") {
+			withFakeTime(dateTime(2014, 2, 11)) {
+
+				val currentUser = RequestInfo.fromThread.get.user
+				val assignment = createAssignment()
+				var extensions = addAnExtension(assignment)
+
+				extensions.head.approved should be (false)
+				extensions.head.rejected should be (false)
+				extensions.head.state should be (ExtensionState.Unreviewed)
+
+
+				val editCommand = new EditExtensionCommand(assignment.module, assignment, extensions.head, currentUser, "reject")
+				editCommand.userLookup = mock[UserLookupService]
+				editCommand.extensionItems = List(makeExtensionItem())
+				extensions = editCommand.copyExtensionItems()
+
+				extensions.head.approved should be (false)
+				extensions.head.rejected should be (true)
+				extensions.head.state should be (ExtensionState.Rejected)
+				extensions.head.reviewedOn should be (DateTime.now)
+
+			}
+		}
+	}
+
+
+	def createAssignment(): Assignment = {
+		val assignment = newDeepAssignment()
+		assignment.closeDate = DateTime.now.plusMonths(1)
+		assignment.extensions += new Extension(currentUser.universityId)
+		return assignment
+	}
+
+	def addAnExtension(assignment: Assignment) : Seq[Extension] = {
+		val addCommand = new AddExtensionCommand(assignment.module, assignment, currentUser, "")
+		addCommand.userLookup = mock[UserLookupService]
+		addCommand.extensionItems = List(makeExtensionItem())
+
+		return addCommand.copyExtensionItems()
+	}
+
+
+	def makeExtensionItem(): ExtensionItem = {
+		val extensionItem = new ExtensionItem
+		extensionItem.universityId = currentUser.universityId
+		extensionItem.expiryDate = DateTime.now.plusMonths(2)
+		extensionItem.reviewerComments = "Something something cats."
+		return extensionItem
+	}
+
+}

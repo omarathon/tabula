@@ -23,7 +23,7 @@ class ExtensionControllerTest extends TestBase with Mockito {
       assignment.closeDate = DateTime.parse("2012-08-15T12:00")
       assignment.extensions += new Extension("1170836")
 
-      val command = new AddExtensionCommand(assignment.module, assignment, currentUser)
+      val command = new AddExtensionCommand(assignment.module, assignment, currentUser, "")
       command.userLookup = mock[UserLookupService]
       command.extensionItems = mockExtensions
 

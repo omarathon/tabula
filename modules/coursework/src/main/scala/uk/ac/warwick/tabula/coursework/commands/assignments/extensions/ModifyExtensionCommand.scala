@@ -24,8 +24,8 @@ import uk.ac.warwick.tabula.validators.WithinYears
  * Built the command as a bulk operation. Single additions can be achieved by adding only one extension to the list.
  */
 
-class AddExtensionCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
-	extends ModifyExtensionCommand(module, assignment, submitter) with Notifies[Seq[Extension], Option[Extension]] {
+class AddExtensionCommand(module: Module, assignment: Assignment, submitter: CurrentUser, action: String)
+	extends ModifyExtensionCommand(module, assignment, submitter, action) with Notifies[Seq[Extension], Option[Extension]] {
 
 	PermissionCheck(Permissions.Extension.Create, assignment)
 
@@ -35,8 +35,8 @@ class AddExtensionCommand(module: Module, assignment: Assignment, submitter: Cur
 	})
 }
 
-class EditExtensionCommand(module: Module, assignment: Assignment, val extension: Extension, submitter: CurrentUser)
-	extends ModifyExtensionCommand(module, assignment, submitter) with Notifies[Seq[Extension], Option[Extension]] {
+class EditExtensionCommand(module: Module, assignment: Assignment, val extension: Extension, submitter: CurrentUser, action: String)
+	extends ModifyExtensionCommand(module, assignment, submitter, action) with Notifies[Seq[Extension], Option[Extension]] {
 
 	PermissionCheck(Permissions.Extension.Update, extension)
 
@@ -60,13 +60,13 @@ class EditExtensionCommand(module: Module, assignment: Assignment, val extension
 	})
 }
 
-class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, extension: Extension, submitter: CurrentUser)
-	extends EditExtensionCommand(module, assignment, extension, submitter) {
+class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, extension: Extension, submitter: CurrentUser, action: String)
+	extends EditExtensionCommand(module, assignment, extension, submitter, action) {
 
 	PermissionCheck(Permissions.Extension.ReviewRequest, extension)
 }
 
-abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignment, val submitter: CurrentUser)
+abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignment, val submitter: CurrentUser, val action: String)
 		extends Command[Seq[Extension]] with Daoisms with Logging with SelfValidating {
 
 	mustBeLinked(assignment,module)
@@ -99,6 +99,13 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 		}
 
 		val extensionList = extensionItems map (retrieveExtension(_))
+		extensionList.foreach(extension =>
+			action match {
+				case "approve" => extension.approve(extension.reviewerComments)
+				case "reject" => extension.reject(extension.reviewerComments)
+				case _ =>
+			}
+		)
 		extensionList.toList
 	}
 

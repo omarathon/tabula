@@ -160,8 +160,9 @@
 				</div>
 			</div>
 		</div>
-		<@f.hidden class="approveField" path="extensionItems[0].approved" />
-		<@f.hidden class="rejectField" path="extensionItems[0].rejected" />
+
+		<input type="hidden" name="action" class="action" />
+
 		<div class="modal-footer request-controls">
 			<input id="approveButton" type="submit" class="btn btn-success" value="Grant" />
 			<input id="rejectButton" type="submit" class="btn btn-danger" value="Reject" />
