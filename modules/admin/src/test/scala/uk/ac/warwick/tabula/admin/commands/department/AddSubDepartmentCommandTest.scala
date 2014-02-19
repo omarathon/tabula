@@ -8,8 +8,6 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import org.mockito.Mockito._
 import org.hamcrest.Matchers._
 import uk.ac.warwick.tabula.roles.ExtensionManagerRoleDefinition
-import scala.Some
-
 
 class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTesting with Mockito {
 

@@ -12,7 +12,6 @@ import scala.xml.Elem
 import org.joda.time.LocalTime
 import uk.ac.warwick.tabula.data.model.groups._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat._
-import scala.Some
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import scala.annotation.meta.param

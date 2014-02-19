@@ -12,7 +12,6 @@ import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.services.{MonitoringPointMeetingRelationshipTermServiceComponent, RelationshipServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import scala.Some
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.web.controllers.{ControllerViews, ControllerImports, ControllerMethods}
 

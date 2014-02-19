@@ -13,7 +13,6 @@ import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.roles.UniversityMemberRole
 import uk.ac.warwick.tabula.roles.StaffRole
 import uk.ac.warwick.tabula.roles.StudentRole
-import scala.Some
 
 @Component
 class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {

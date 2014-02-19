@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
 import uk.ac.warwick.tabula.data.model._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.notifications.BulkOldAgentRelationshipNotification
-import scala.Some
 
 class BulkRelationshipChangeNotificationTest extends TestBase with Mockito {
 

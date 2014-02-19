@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.commands.{Notifies, Description, UploadedFile}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.Errors
-import scala.Some
 import uk.ac.warwick.tabula.data.model.notifications.FeedbackChangeNotification
 
 class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
