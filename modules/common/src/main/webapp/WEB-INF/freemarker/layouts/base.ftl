@@ -52,9 +52,7 @@
 								<li>
 								<#if user?? && user.loggedIn>
 									Signed in as ${user.fullName}
-									<#if user.staff>
 									| <a href="/settings">Settings</a>
-									</#if>
 									| <a href="http://warwick.ac.uk/tabula/faqs/" target="_blank">FAQs</a>
 									| <a class="sso-link" href="<@sso.logoutlink target="${rootUrl}" />">Sign out</a>
 								<#else>
