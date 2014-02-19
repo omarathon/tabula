@@ -1016,11 +1016,6 @@
 			<version>${scala.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>github.com.ingoem</groupId>
-			<artifactId>scala-react_${scala.major.version}</artifactId>
-			<version>0.9</version>
-		</dependency>
-		<dependency>
 			<groupId>com.jsuereth</groupId>
 			<artifactId>scala-arm_${scala.major.version}</artifactId>
 			<version>1.3</version>
