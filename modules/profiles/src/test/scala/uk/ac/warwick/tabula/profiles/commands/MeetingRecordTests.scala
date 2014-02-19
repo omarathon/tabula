@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{PersistenceTestBase, Mockito, CurrentUser}
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model.MeetingFormat.FaceToFace
-import scala.Some
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import org.hibernate.Session
 import uk.ac.warwick.tabula.events.EventHandling

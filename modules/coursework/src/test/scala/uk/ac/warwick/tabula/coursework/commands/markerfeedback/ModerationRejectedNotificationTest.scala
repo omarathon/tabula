@@ -5,7 +5,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.notifications.ModeratorRejectedNotification
-import scala.Some
 
 class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 

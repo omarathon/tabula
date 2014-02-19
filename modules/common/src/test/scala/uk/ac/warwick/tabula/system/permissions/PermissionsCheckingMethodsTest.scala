@@ -8,9 +8,7 @@ import uk.ac.warwick.tabula.services.SecurityService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.permissions.{PermissionDefinition, RoleService}
 import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
-import scala.Some
 import uk.ac.warwick.tabula.system.CustomDataBinder
-import scala.Some
 import uk.ac.warwick.tabula.services.permissions.PermissionDefinition
 
 class PermissionsCheckingMethodsTest extends TestBase with Mockito with PermissionsChecking {

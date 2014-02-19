@@ -30,7 +30,6 @@ import org.apache.commons.io.FileUtils
 import org.springframework.test.annotation.DirtiesContext
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.AuditEvent
-import scala.Some
 import org.hibernate.dialect.HSQLDialect
 import uk.ac.warwick.tabula.data.SessionComponent
 

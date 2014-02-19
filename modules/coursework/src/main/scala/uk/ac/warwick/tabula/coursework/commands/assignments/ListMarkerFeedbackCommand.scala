@@ -7,8 +7,6 @@ import uk.ac.warwick.tabula.commands.{ReadOnly, Unaudited, Command}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
-import reflect.BeanProperty
-import scala.Some
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.MarkingState.{Rejected, MarkingCompleted}
 

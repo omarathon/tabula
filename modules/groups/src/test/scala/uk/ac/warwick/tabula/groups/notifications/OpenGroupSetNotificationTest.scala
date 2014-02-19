@@ -3,12 +3,7 @@ package uk.ac.warwick.tabula.groups.notifications
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet}
 import uk.ac.warwick.userlookup.User
-import org.mockito.Mockito._
-import scala.Some
 import uk.ac.warwick.tabula.groups.SmallGroupFixture
-import uk.ac.warwick.tabula.groups.web.Routes
-import org.mockito.{ArgumentCaptor, Matchers}
-import uk.ac.warwick.tabula.web.views.TextRenderer
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.data.model.notifications.OpenSmallGroupSetsNotification
 
