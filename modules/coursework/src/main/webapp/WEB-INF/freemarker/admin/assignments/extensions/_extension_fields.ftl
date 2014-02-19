@@ -13,5 +13,4 @@
 		</div>
 	</div>
 </div>
-<@f.hidden path="extensionItems[0].approved" value="true" />
-<@f.hidden path="extensionItems[0].rejected" value="false" />
+<input type="hidden" name="action" class="action" />
