@@ -91,6 +91,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 				.add(safeIn("point", monitoringPoints))
 
 			if (mostSiginificantOnly) {
+				criteria.setFetchMode("point.pointSet", FetchMode.JOIN)
 				criteria.setFetchMode("point.student", FetchMode.JOIN)
 				criteria.setFetchMode("point.student.mostSignificantCourseDetails", FetchMode.JOIN)
 				criteria.setFetchMode("point.student.mostSignificantCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
@@ -103,7 +104,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	
 			if (mostSiginificantOnly)
 				result.filter{ case(student, checkpoint) => student.mostSignificantCourseDetails.exists(scd => {
-					val pointSet = checkpoint.point.pointSet.asInstanceOf[MonitoringPointSet]
+					val pointSet = HibernateHelpers.initialiseAndUnproxy(checkpoint.point.pointSet).asInstanceOf[MonitoringPointSet]
 					pointSet.route == scd.route && scd.freshStudentCourseYearDetails.exists(scyd =>
 						scyd.academicYear == pointSet.academicYear && (
 							pointSet.year == null || scyd.yearOfStudy == pointSet.year
