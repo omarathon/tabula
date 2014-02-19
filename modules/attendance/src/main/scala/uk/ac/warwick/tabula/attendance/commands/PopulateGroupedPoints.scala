@@ -1,10 +1,9 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.services.{ProfileServiceComponent, TermServiceComponent, MonitoringPointServiceComponent}
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.HibernateHelpers
 
 trait PopulateGroupedPoints extends CheckpointUpdatedDescription {
 
@@ -12,7 +11,7 @@ trait PopulateGroupedPoints extends CheckpointUpdatedDescription {
 
 	def populateGroupedPoints(students: Seq[StudentMember], templateMonitoringPoint: MonitoringPoint) = {
 		// Get monitoring points by student for the list of students matching the template point
-		val pointSet = HibernateHelpers.initialiseAndUnproxy(templateMonitoringPoint.pointSet)
+		val pointSet = templateMonitoringPoint.pointSet
 
 		val studentPointMap = monitoringPointService.findSimilarPointsForMembers(templateMonitoringPoint, students)
 		val allPoints = studentPointMap.values.flatten.toSeq

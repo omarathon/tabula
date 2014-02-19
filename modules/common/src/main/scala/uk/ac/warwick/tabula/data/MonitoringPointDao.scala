@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.criterion.Restrictions._
 import uk.ac.warwick.tabula.services.TermService
 import org.hibernate.FetchMode
-import org.hibernate.proxy.HibernateProxyHelper
 
 trait MonitoringPointDaoComponent {
 	val monitoringPointDao: MonitoringPointDao
@@ -110,7 +109,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	
 			if (mostSiginificantOnly)
 				result.filter{ case(student, checkpoint) => student.mostSignificantCourseDetails.exists(scd => {
-					val pointSet = HibernateHelpers.initialiseAndUnproxy(checkpoint.point.pointSet)
+					val pointSet = checkpoint.point.pointSet
 					pointSet.route == scd.route && scd.freshStudentCourseYearDetails.exists(scyd =>
 						scyd.academicYear == pointSet.academicYear && (
 							pointSet.year == null || scyd.yearOfStudy == pointSet.year
@@ -252,7 +251,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		}.mkString(" or ")	+ ")"
 
 		val query = session.newQuery[Array[java.lang.Object]](queryString)
-			.setParameter("academicYear", HibernateHelpers.initialiseAndUnproxy(point.pointSet).academicYear)
+			.setParameter("academicYear", point.pointSet.academicYear)
 			.setString("name", point.name.toLowerCase)
 			.setString("validFromWeek", point.validFromWeek.toString)
 			.setString("requiredFromWeek", point.requiredFromWeek.toString)
