@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.home.commands.sysadmin.pointsettemplates
 
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSetTemplate, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointTemplate, MonitoringPointSetTemplate, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import scala.collection.JavaConverters._
@@ -10,7 +10,7 @@ import org.joda.time.DateTime
 object CreateMonitoringPointCommand {
 	def apply(template: MonitoringPointSetTemplate) =
 		new CreateMonitoringPointCommand(template)
-		with ComposableCommand[MonitoringPoint]
+		with ComposableCommand[MonitoringPointTemplate]
 		with CreateMonitoringPointValidation
 		with CreateMonitoringPointDescription
 		with MonitoringPointSetTemplatesPermissions
@@ -19,10 +19,10 @@ object CreateMonitoringPointCommand {
 /**
  * Create a new monitoring point for the given template.
  */
-abstract class CreateMonitoringPointCommand(val template: MonitoringPointSetTemplate) extends CommandInternal[MonitoringPoint] with CreateMonitoringPointState {
+abstract class CreateMonitoringPointCommand(val template: MonitoringPointSetTemplate) extends CommandInternal[MonitoringPointTemplate] with CreateMonitoringPointState {
 
 	override def applyInternal() = {
-		val point = new MonitoringPoint
+		val point = new MonitoringPointTemplate
 		point.name = name
 		point.validFromWeek = validFromWeek
 		point.requiredFromWeek = requiredFromWeek
@@ -51,7 +51,7 @@ trait CreateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 	}
 }
 
-trait CreateMonitoringPointDescription extends Describable[MonitoringPoint] {
+trait CreateMonitoringPointDescription extends Describable[MonitoringPointTemplate] {
 	self: CreateMonitoringPointState =>
 
 	override lazy val eventName = "CreateMonitoringPoint"

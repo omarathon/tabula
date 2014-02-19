@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.home.commands.sysadmin.pointsettemplates
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSetTemplate, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointTemplate, MonitoringPointSetTemplate, MonitoringPoint}
 import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
 import org.springframework.validation.Errors
 import org.joda.time.DateTime
@@ -29,7 +29,7 @@ abstract class AddMonitoringPointSetTemplateCommand extends CommandInternal[Moni
 		set.templateName = templateName
 		set.createdDate = new DateTime()
 		set.points = monitoringPoints.asScala.map{m =>
-			val point = new MonitoringPoint
+			val point = new MonitoringPointTemplate
 			point.createdDate = new DateTime()
 			point.name = m.name
 			point.pointSet = set

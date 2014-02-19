@@ -10,7 +10,6 @@ import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.criterion.Restrictions._
 import uk.ac.warwick.tabula.services.TermService
 import org.hibernate.FetchMode
-import org.hibernate.proxy.HibernateProxyHelper
 
 trait MonitoringPointDaoComponent {
 	val monitoringPointDao: MonitoringPointDao
@@ -22,10 +21,13 @@ trait AutowiringMonitoringPointDaoComponent extends MonitoringPointDaoComponent 
 
 trait MonitoringPointDao {
 	def getPointById(id: String): Option[MonitoringPoint]
+	def getPointTemplateById(id: String): Option[MonitoringPointTemplate]
 	def getSetById(id: String): Option[MonitoringPointSet]
 	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint], mostSiginificantOnly: Boolean = true): Seq[(StudentMember, MonitoringCheckpoint)]
 	def saveOrUpdate(monitoringPoint: MonitoringPoint)
 	def delete(monitoringPoint: MonitoringPoint)
+	def saveOrUpdate(monitoringPoint: MonitoringPointTemplate)
+	def delete(monitoringPoint: MonitoringPointTemplate)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
 	def saveOrUpdate(template: MonitoringPointSetTemplate)
 	def saveOrUpdate(set: MonitoringPointSet)
@@ -80,6 +82,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def getPointById(id: String) =
 		getById[MonitoringPoint](id)
 
+	def getPointTemplateById(id: String) =
+		getById[MonitoringPointTemplate](id)
+
 	def getSetById(id: String) =
 		getById[MonitoringPointSet](id)
 
@@ -104,7 +109,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	
 			if (mostSiginificantOnly)
 				result.filter{ case(student, checkpoint) => student.mostSignificantCourseDetails.exists(scd => {
-					val pointSet = HibernateHelpers.initialiseAndUnproxy(checkpoint.point.pointSet).asInstanceOf[MonitoringPointSet]
+					val pointSet = checkpoint.point.pointSet
 					pointSet.route == scd.route && scd.freshStudentCourseYearDetails.exists(scyd =>
 						scyd.academicYear == pointSet.academicYear && (
 							pointSet.year == null || scyd.yearOfStudy == pointSet.year
@@ -118,6 +123,8 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 	def saveOrUpdate(monitoringPoint: MonitoringPoint) = session.saveOrUpdate(monitoringPoint)
 	def delete(monitoringPoint: MonitoringPoint) = session.delete(monitoringPoint)
+	def saveOrUpdate(monitoringPoint: MonitoringPointTemplate) = session.saveOrUpdate(monitoringPoint)
+	def delete(monitoringPoint: MonitoringPointTemplate) = session.delete(monitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint) = session.saveOrUpdate(monitoringCheckpoint)
 	def saveOrUpdate(set: MonitoringPointSet) = session.saveOrUpdate(set)
 	def saveOrUpdate(template: MonitoringPointSetTemplate) = session.saveOrUpdate(template)
@@ -244,7 +251,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		}.mkString(" or ")	+ ")"
 
 		val query = session.newQuery[Array[java.lang.Object]](queryString)
-			.setParameter("academicYear", HibernateHelpers.initialiseAndUnproxy(point.pointSet).asInstanceOf[MonitoringPointSet].academicYear)
+			.setParameter("academicYear", point.pointSet.academicYear)
 			.setString("name", point.name.toLowerCase)
 			.setString("validFromWeek", point.validFromWeek.toString)
 			.setString("requiredFromWeek", point.requiredFromWeek.toString)
