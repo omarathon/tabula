@@ -37,6 +37,6 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 		val moduleManagers = submission.assignment.module.managers
 		val userIds = moduleManagers.includeUsers
 		val allAdmins = userIds.asScala.map(id => userLookup.getUserByUserId(id))
-		allAdmins.filter(admin => canEmailUser(admin))
+		allAdmins.filter(canEmailUser)
 	}
 }

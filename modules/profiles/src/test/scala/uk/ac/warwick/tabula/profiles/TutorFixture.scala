@@ -3,9 +3,7 @@ package uk.ac.warwick.tabula.profiles
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.Mockito
-import org.mockito.Mockito.when
 import uk.ac.warwick.tabula.services.ProfileService
-import scala.Some
 
 trait TutorFixture extends Mockito {
 

@@ -47,7 +47,8 @@ class StudentCourseworkController extends CourseworkController {
 			"student" -> MemberOrUser(member),
 			"enrolledAssignments" -> info.enrolledAssignments,
 			"historicAssignments" -> info.historicAssignments,
-			"isSelf" -> (member.universityId == user.universityId)
+			"isSelf" -> (member.universityId == user.universityId),
+			"ajax" -> ajax
 		).noLayoutIf(ajax)
 	}
 

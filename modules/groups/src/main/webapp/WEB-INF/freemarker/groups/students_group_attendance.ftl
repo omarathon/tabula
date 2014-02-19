@@ -24,7 +24,9 @@
 								<#list (weekNumbers.minWeek)..(weekNumbers.maxWeek) as weekNumber>
 									<th class="instance-date-header">
 										<div class="instance-date">
-											<@fmt.singleWeekFormat week=weekNumber academicYear=academicYear dept=member.homeDepartment short=!(defaultExpand!false) />
+											<#if member.homeDepartment?has_content>
+												<@fmt.singleWeekFormat week=weekNumber academicYear=academicYear dept=member.homeDepartment short=!(defaultExpand!false) />
+											</#if>
 										</div>
 									</th>
 								</#list>

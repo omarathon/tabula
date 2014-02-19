@@ -34,6 +34,7 @@ trait AuditEventService {
 	def listRecent(start: Int, count: Int): Seq[AuditEvent]
 	def parseData(data: String): Option[Map[String, Any]]
 	def getByEventId(eventId: String): Seq[AuditEvent]
+	def latest: DateTime
 
 	def addRelated(event: AuditEvent): AuditEvent
 }
@@ -68,6 +69,8 @@ class AuditEventServiceImpl extends AuditEventService {
 
 	// for viewing paginated lists of events
 	private val listSql = baseSelect + """ order by eventdate desc """
+
+	private val latestDateSql = """select max(a.eventdate) from auditevent a"""
 
 	// for getting events newer than a certain date, for indexing
 	private val indexListSql = baseSelect + """ 
@@ -123,6 +126,11 @@ class AuditEventServiceImpl extends AuditEventService {
 		query.setLong("id", id)
 		//		Option(query.uniqueResult.asInstanceOf[Array[Object]]) map mapListToObject map addRelated
 		Option(mapListToObject(query.uniqueResult.asInstanceOf[Array[Object]])).map { addRelated }
+	}
+
+	def latest: DateTime = {
+		val query = session.createSQLQuery(latestDateSql)
+		timestampColumnMapper.fromNonNullValue(query.uniqueResult.asInstanceOf[java.sql.Timestamp])
 	}
 
 	def getByIds(ids: Seq[Long]): Seq[AuditEvent] =

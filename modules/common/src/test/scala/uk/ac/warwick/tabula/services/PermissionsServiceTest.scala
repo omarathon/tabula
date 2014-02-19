@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.permissions.DepartmentGrantedPermission
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.data.{PermissionsDao, PermissionsDaoComponent, PermissionsDaoImpl}
-import scala.Some
 import uk.ac.warwick.util.queue.Queue
 import org.junit.Before
 import uk.ac.warwick.util.queue.QueueListener

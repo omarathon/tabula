@@ -16,7 +16,7 @@ import org.apache.lucene.index.Term
 	* Faster than the disk one, plus data is entirely scoped to the instance of
 	* RAMDirectory so no extra cleanup required.
 	*/
-trait RAMDirectoryOverride[A] { self: OpensLuceneDirectory =>
+trait RAMDirectoryOverride { self: OpensLuceneDirectory =>
 	var indexPath: File = null // unused
 	private val directory = new RAMDirectory()
 	protected override def openDirectory() = directory
@@ -83,7 +83,7 @@ class AbstractIndexServiceTest extends TestBase {
 	/** Simplest implementation of AbstractIndexService to test its core functions.
 		* Indexes a simple case class with a name and a date field.
 		*/
-	class MockIndexService extends AbstractIndexService[Item] with RAMDirectoryOverride[Item] {
+	class MockIndexService extends AbstractIndexService[Item] with RAMDirectoryOverride {
 		val MaxBatchSize: Int = 1000
 		val IncrementalBatchSize: Int = 1000
 
@@ -97,11 +97,11 @@ class AbstractIndexServiceTest extends TestBase {
 
 		def convert(docs: Seq[Document]) = toItems(docs)
 
-		protected def toDocument(item: Item): Document = {
+		protected def toDocuments(item: Item): Seq[Document] = {
 			val doc = new Document()
 			doc.add( plainStringField(IdField, item.name ) )
 			doc.add( dateField(UpdatedDateField, item.date) )
-			doc
+			Seq(doc)
 		}
 
 		protected def toItems(docs: Seq[Document]): Seq[Item] = docs.map {

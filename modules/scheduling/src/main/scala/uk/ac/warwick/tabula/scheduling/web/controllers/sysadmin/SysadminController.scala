@@ -21,9 +21,7 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportAcademicInformatio
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportProfilesCommand
 import uk.ac.warwick.tabula.scheduling.services.AssignmentImporter
 import uk.ac.warwick.tabula.scheduling.services.ProfileImporter
-import uk.ac.warwick.tabula.services.AuditEventIndexService
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.services.ProfileIndexService
+import uk.ac.warwick.tabula.services.{NotificationIndexService, AuditEventIndexService, ModuleAndDepartmentService, ProfileIndexService}
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import uk.ac.warwick.tabula.web.views.UrlMethodModel
 import uk.ac.warwick.userlookup.UserLookupInterface
@@ -68,6 +66,21 @@ class ReindexAuditEventsCommand extends Command[Unit] with ReadOnly {
 	def describe(d: Description) = d.property("from" -> from)
 }
 
+class ReindexNotificationsCommand extends Command[Unit] with ReadOnly {
+	PermissionCheck(Permissions.ImportSystemData)
+
+	var indexer = Wire.auto[NotificationIndexService]
+
+	@WithinYears(maxPast = 20) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
+	var from: DateTime = _
+
+	def applyInternal() = {
+		indexer.indexFrom(from)
+	}
+
+	def describe(d: Description) = d.property("from" -> from)
+}
+
 class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
 	PermissionCheck(Permissions.ImportSystemData)
 
@@ -86,6 +99,18 @@ class ReindexProfilesCommand extends Command[Unit] with ReadOnly {
 	}
 
 	def describe(d: Description) = d.property("from" -> from).property("deptCode" -> deptCode)
+}
+
+@Controller
+@RequestMapping(Array("/sysadmin/index/run-notifications"))
+class SysadminNotificationsAuditController extends BaseSysadminController {
+	@ModelAttribute("reindexForm") def reindexForm = new ReindexNotificationsCommand
+
+	@RequestMapping(method = Array(POST))
+	def reindex(form: ReindexNotificationsCommand) = {
+		form.apply
+		redirectToHome
+	}
 }
 
 @Controller

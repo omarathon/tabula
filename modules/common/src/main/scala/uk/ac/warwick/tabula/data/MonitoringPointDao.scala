@@ -88,12 +88,10 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		else {
 			val criteria = session.newCriteria[MonitoringCheckpoint]
 				.createAlias("point", "point")
-	
-			val or = disjunction()
-			monitoringPoints.grouped(Daoisms.MaxInClauseCount).foreach { mps => or.add(in("point", mps.asJava)) }
-			criteria.add(or)
+				.add(safeIn("point", monitoringPoints))
 
 			if (mostSiginificantOnly) {
+				criteria.setFetchMode("point.pointSet", FetchMode.JOIN)
 				criteria.setFetchMode("point.student", FetchMode.JOIN)
 				criteria.setFetchMode("point.student.mostSignificantCourseDetails", FetchMode.JOIN)
 				criteria.setFetchMode("point.student.mostSignificantCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
@@ -106,7 +104,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	
 			if (mostSiginificantOnly)
 				result.filter{ case(student, checkpoint) => student.mostSignificantCourseDetails.exists(scd => {
-					val pointSet = checkpoint.point.pointSet.asInstanceOf[MonitoringPointSet]
+					val pointSet = HibernateHelpers.initialiseAndUnproxy(checkpoint.point.pointSet).asInstanceOf[MonitoringPointSet]
 					pointSet.route == scd.route && scd.freshStudentCourseYearDetails.exists(scyd =>
 						scyd.academicYear == pointSet.academicYear && (
 							pointSet.year == null || scyd.yearOfStudy == pointSet.year
@@ -379,53 +377,51 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		startResult: Int,
 		query: ScalaQuery[Array[java.lang.Object]]
 	) = {
+		if (universityIds.isEmpty) Nil
+		else {
+			val ordering = if (isAscending) Ordering[Int] else Ordering[Int].reverse
 
-		val ordering = if (isAscending) Ordering[Int] else Ordering[Int].reverse
+			val universityIdCountMap = query.seq.map{objArray =>
+				objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
+			}.toMap
 
-		val universityIdCountMap = query.seq.map{objArray =>
-			objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
-		}.toMap
-
-		val sortedAllUniversityIdCount = universityIds.map{u =>
-			u -> universityIdCountMap.getOrElse(u, 0)
-		}.sortBy(_._2)(ordering)
+			val sortedAllUniversityIdCount = universityIds.map{u =>
+				u -> universityIdCountMap.getOrElse(u, 0)
+			}.sortBy(_._2)(ordering)
 
 
-		val universityIdsToFetch = sortedAllUniversityIdCount.slice(startResult, startResult + maxResults).map(_._1)
+			val universityIdsToFetch = sortedAllUniversityIdCount.slice(startResult, startResult + maxResults).map(_._1)
 
-		val c = session.newCriteria[StudentMember]
-		val or = disjunction()
-		universityIdsToFetch.grouped(Daoisms.MaxInClauseCount).foreach { ids => or.add(in("universityId", ids.asJavaCollection)) }
-		c.add(or)
-		val students = c.seq
+			val students =
+				session.newCriteria[StudentMember]
+				.add(safeIn("universityId", universityIdsToFetch))
+				.seq
 
-		universityIdsToFetch.flatMap{
-			u => students.find(_.universityId == u)
-		}.map{
-			s => s -> sortedAllUniversityIdCount.toMap.get(s.universityId).getOrElse(0)
-		}.toSeq
+			universityIdsToFetch.flatMap{
+				u => students.find(_.universityId == u)
+			}.map{
+				s => s -> sortedAllUniversityIdCount.toMap.get(s.universityId).getOrElse(0)
+			}.toSeq
+		}
 	}
 
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String] = {
 		if (students.isEmpty)
 			return Seq()
 
-		val c = session.newCriteria[MonitoringPointReport]
+		val termCounts =
+			session.newCriteria[MonitoringPointReport]
 			.add(is("academicYear", academicYear))
-
-		val or = disjunction()
-		students.map(_.universityId)
-			.grouped(Daoisms.MaxInClauseCount)
-			.foreach { ids => or.add(in("student.universityId", ids.asJavaCollection)) }
-		c.add(or)
-
-		val query = c.project[Array[java.lang.Object]](Projections.projectionList()
-			.add(Projections.groupProperty("monitoringPeriod"))
-			.add(Projections.count("monitoringPeriod"))
-		)
-		val termCounts = query.seq.map{objArray =>
-			objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
-		}
+			.add(safeIn("student.universityId", students.map(_.universityId)))
+			.project[Array[java.lang.Object]](
+				Projections.projectionList()
+					.add(Projections.groupProperty("monitoringPeriod"))
+					.add(Projections.count("monitoringPeriod"))
+			)
+			.seq
+			.map { objArray =>
+				objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
+			}
 
 		TermService.orderedTermNames.diff(termCounts.filter{case(term, count) => count.intValue() == students.size}.map { _._1})
 
@@ -435,17 +431,13 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		if (students.isEmpty)
 			return Seq()
 
-		val c = session.newCriteria[MonitoringPointReport]
+		val reportedStudents =
+			session.newCriteria[MonitoringPointReport]
 			.add(is("academicYear", academicYear))
 			.add(is("monitoringPeriod", period))
-
-		val or = disjunction()
-		students.map(_.universityId)
-			.grouped(Daoisms.MaxInClauseCount)
-			.foreach { ids => or.add(in("student.universityId", ids.asJavaCollection)) }
-		c.add(or)
-
-		val reportedStudents = c.seq.map(_.student)
+			.add(safeIn("student.universityId", students.map(_.universityId)))
+			.seq
+			.map(_.student)
 
 		students.diff(reportedStudents)
 	}
@@ -458,16 +450,11 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		if (students.isEmpty)
 			return Seq()
 
-		val c = session.newCriteria[MonitoringPointReport]
+		session.newCriteria[MonitoringPointReport]
 			.add(is("academicYear", academicYear))
 			.add(is("monitoringPeriod", period))
-
-		val or = disjunction()
-		students.map(_.universityId)
-			.grouped(Daoisms.MaxInClauseCount)
-			.foreach { ids => or.add(in("student.universityId", ids.asJavaCollection)) }
-		c.add(or)
-		c.seq
+			.add(safeIn("student.universityId", students.map(_.universityId)))
+			.seq
 	}
 
 	def hasAnyPointSets(department: Department): Boolean = {
@@ -486,12 +473,12 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	}
 
 	def findAttendanceNotes(students: Seq[StudentMember], points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote] = {
-		if(students.size == 0 || points.size == 0)
+		if(students.isEmpty || points.isEmpty)
 			return Seq()
 
 		session.newCriteria[MonitoringPointAttendanceNote]
-			.add(in("student", students.asJava))
-			.add(in("point", points.asJava))
+			.add(safeIn("student", students))
+			.add(safeIn("point", points))
 			.seq
 	}
 

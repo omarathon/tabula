@@ -11,7 +11,6 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.AssignmentService
-import scala.Some
 
 
 /**

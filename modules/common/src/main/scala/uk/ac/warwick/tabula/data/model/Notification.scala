@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.services.UserLookupComponent
 import org.springframework.util.Assert
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
+import scala.beans.BeanProperty
 
 object Notification {
 	/**
@@ -114,12 +115,20 @@ abstract class Notification[A >: Null <: ToEntityReference, B] extends Generated
  * and there'd be no valid type for B that could be set to a null EntityReference.
  * So for those types the target parameter is not defined.
  */
+@Entity
 abstract class NotificationWithTarget[A >: Null <: ToEntityReference, B >: Null <: AnyRef] extends Notification[A,B] {
-	@OneToOne
-	final var target: EntityReference[B] = null
+	@Access(value=AccessType.PROPERTY)
+	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[B]])
+	@BeanProperty
+	var target: EntityReference[B] = null
 }
 
-case class FreemarkerModel(template:String, model:Map[String,Any])
+object FreemarkerModel {
+	trait ContentType
+	case object Plain extends ContentType
+	case object Html extends ContentType
+}
+case class FreemarkerModel(template:String, model:Map[String,Any], contentType: FreemarkerModel.ContentType = FreemarkerModel.Plain)
 
 trait SingleItemNotification[A >: Null <: ToEntityReference] {
 	self: Notification[A, _] =>

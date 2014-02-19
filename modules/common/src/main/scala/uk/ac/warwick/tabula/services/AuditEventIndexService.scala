@@ -1,50 +1,26 @@
 package uk.ac.warwick.tabula.services
 
 import java.io.File
-import java.io.FileNotFoundException
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import org.apache.lucene.analysis._
-import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
-import org.apache.lucene.index.FieldInfo.IndexOptions
-import org.apache.lucene.index._
-import org.apache.lucene.queryparser.classic.QueryParser
-import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search._
-import org.apache.lucene.store.FSDirectory
-import org.apache.lucene.util.Version
 import org.joda.time.DateTime
-import org.joda.time.Duration
 import org.springframework.beans.factory.annotation._
-import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.Closeables._
-import uk.ac.warwick.tabula.helpers.Stopwatches._
-import uk.ac.warwick.tabula.helpers._
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.userlookup.User
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import org.springframework.beans.factory.DisposableBean
 import org.apache.lucene.analysis.core._
 import org.apache.lucene.analysis.miscellaneous._
-import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import AuditEventIndexService._
 
-case class PagedAuditEvents(val docs: Seq[AuditEvent], private val lastscore: Option[ScoreDoc], val token: Long, val total: Int) {
-	// need this pattern matcher as brain-dead IndexSearcher.searchAfter returns an object containing ScoreDocs,
-	// and expects a ScoreDoc in its method signature, yet in its implementation throws an exception unless you
-	// pass a specific subclass of FieldDoc.
-	def last: Option[FieldDoc] = lastscore match {
-		case None => None
-		case Some(f:FieldDoc) => Some(f)
-		case _ => throw new ClassCastException("Lucene did not return an Option[FieldDoc] as expected")
-	}
+object AuditEventIndexService {
+	type PagedAuditEvents = PagingSearchResultItems[AuditEvent]
+	val PagedAuditEvents = PagingSearchResultItems[AuditEvent] _
 }
 
 trait AuditEventNoteworthySubmissionsService {
@@ -385,7 +361,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	/**
 	 * TODO reuse one Document and set of Fields for all items
 	 */
-	protected def toDocument(item: AuditEvent): Document = {
+	protected def toDocuments(item: AuditEvent): Seq[Document] = {
 		val doc = new Document
 
 		if (item.related == null || item.related.isEmpty) {
@@ -411,7 +387,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		}
 
 		doc add dateField(UpdatedDateField, item.eventDate)
-		doc
+		Seq(doc)
 	}
 
 	def openQuery(queryString: String, start: Int, count: Int) = {

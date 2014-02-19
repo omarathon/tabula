@@ -1,3 +1,5 @@
+<#import "../admin/assignments/submissionsandfeedback/_submission_details.ftl" as sd />
+
 <#macro admin_href submission>
 	<@url page='/admin/module/${submission.assignment.module.code}/assignments/${submission.assignment.id}/list' />
 </#macro>
@@ -16,7 +18,7 @@
 	</script>
 <#else>
 	<tbody>
-		<#list activities.activities as activity>
+		<#list activities.items as activity>
 			<tr>
 				<td>
 					<#if async??><div class="streaming" style="display:none;"></#if>
@@ -27,9 +29,9 @@
 							<a href="<@admin_href activity.entity />"><b>${activity.title}</b> by ${activity.agent.warwickId}</a>
 		
 							<#if activity.entity.late>
-								<span class="label label-important">Late</span>
+								<span class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span>
 							<#elseif activity.entity.authorisedLate>
-								<span class="label label-info">Within Extension</span>
+								<span class="label label-info use-tooltip" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
 							</#if>
 							<#if activity.entity.suspectPlagiarised>
 								<span class="label label-warning">Suspect Plagiarised</span>

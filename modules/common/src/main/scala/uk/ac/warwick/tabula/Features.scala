@@ -77,7 +77,7 @@ abstract class Features {
 	@Value("${features.profiles.coursework:true}") var courseworkInStudentProfile = defaults.courseworkInStudentProfile
 	@Value("${features.profiles.visa:true}") var visaInStudentProfile = defaults.visaInStudentProfile
 	@Value("${features.attendanceMonitoring.note:true}") var attendanceMonitoringNote = defaults.attendanceMonitoringNote
-	@Value("${features.profiles.scheduledMeetings:false}") var scheduledMeetings = defaults.scheduledMeetings
+	@Value("${features.profiles.scheduledMeetings:true}") var scheduledMeetings = defaults.scheduledMeetings
 	@Value("${features.disability.rendering.profiles:false}") var disabilityRenderingInProfiles = defaults.disabilityRenderingInProfiles
 	@Value("${features.disability.rendering.extensions:false}") var disabilityRenderingInExtensions = defaults.disabilityRenderingInExtensions
 	@Value("${features.includePastYears:true}") var includePastYears = defaults.includePastYears
@@ -146,7 +146,7 @@ class FeaturesMessage {
 	@BeanProperty var courseworkInStudentProfile = true
 	@BeanProperty var attendanceMonitoringNote = true
 	@BeanProperty var visaInStudentProfile = true
-	@BeanProperty var scheduledMeetings = false
+	@BeanProperty var scheduledMeetings = true
 	@BeanProperty var disabilityRenderingInProfiles = false
 	@BeanProperty var disabilityRenderingInExtensions = false
 	@BeanProperty var includePastYears = true

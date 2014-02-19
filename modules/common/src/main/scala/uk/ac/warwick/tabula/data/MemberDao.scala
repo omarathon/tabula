@@ -449,11 +449,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		if (universityIds.isEmpty)
 			return Seq()
 
-		val c = session.newCriteria[StudentMember]
-
-		val or = disjunction()
-		universityIds.grouped(Daoisms.MaxInClauseCount).foreach { ids => or.add(in("universityId", ids)) }
-		c.add(or)
+		val c = session.newCriteria[StudentMember].add(safeIn("universityId", universityIds))
 
 		orders.foreach { c.addOrder }
 

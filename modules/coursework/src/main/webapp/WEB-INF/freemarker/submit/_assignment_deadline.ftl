@@ -1,6 +1,8 @@
 <#--
 	Used in /WEB-INF/freemarker/home/_student.ftl and assignment_submissionform.ftl
 -->
+<#import "../admin/assignments/submissionsandfeedback/_submission_details.ftl" as sd />
+
 <#if !assignment.openEnded>
 	<#macro extensionButtonContents label assignment>
 		<a href="<@routes.extensionRequest assignment=assignment />?returnTo=<@routes.assignment assignment=assignment />" class="btn btn-mini">
@@ -35,10 +37,10 @@
 		<p class="late deadline">
 			<#if showIconsAndButtons><i class="icon-calendar icon-3x pull-left"></i></#if>
 			<#if hasExtension && isExtended>
-				<span class="time-remaining">${extension_time_remaining} <span class="label label-important">Late</span></span>
+				<span class="time-remaining">${extension_time_remaining} <span class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span></span>
 				Extension deadline was <@fmt.date date=extension.expiryDate />
 			<#else>
-				<span class="time-remaining">${time_remaining} <span class="label label-important">Late</span></span>
+				<span class="time-remaining">${time_remaining} <span class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span></span>
 				Deadline was <@fmt.date date=assignment.closeDate />
 			</#if>
 		</p>

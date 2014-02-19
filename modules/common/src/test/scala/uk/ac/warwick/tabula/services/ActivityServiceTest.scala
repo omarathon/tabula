@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.Activity
 import uk.ac.warwick.tabula.data.model.AuditEvent
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.AuditEventIndexService.PagedAuditEvents
 
 //scalastyle:off magic.number
 class ActivityServiceTest extends TestBase with Mockito {
@@ -67,22 +68,22 @@ class ActivityServiceTest extends TestBase with Mockito {
 		auditIndexService.noteworthySubmissionsForModules(Seq(om1, om2, am1, am2), None, None, 8) returns(pae)
 		
 		val activities = service.getNoteworthySubmissions(currentUser)
-		activities.activities.size should be (2)
-		activities.activities(0) should not be (null)
-		activities.activities(0).title should be ("New submission")
-		activities.activities(0).message should be ("")
-		activities.activities(0).date should be (ae1.eventDate)
-		activities.activities(0).agent.getUserId() should be ("cuscav")
-		activities.activities(0).entity should be (submission1)
-		
-		activities.activities(1) should not be (null)
-		activities.activities(1).title should be ("New submission")
-		activities.activities(1).message should be ("")
-		activities.activities(1).date should be (ae2.eventDate)
-		activities.activities(1).agent.getUserId() should be ("cuscav")
-		activities.activities(1).entity should be (submission2)
-		
-		activities.doc should be (Some(fieldDoc))
+		activities.items.size should be (2)
+		activities.items(0) should not be (null)
+		activities.items(0).title should be ("New submission")
+		activities.items(0).message should be ("")
+		activities.items(0).date should be (ae1.eventDate)
+		activities.items(0).agent.getUserId() should be ("cuscav")
+		activities.items(0).entity should be (submission1)
+
+		activities.items(1) should not be (null)
+		activities.items(1).title should be ("New submission")
+		activities.items(1).message should be ("")
+		activities.items(1).date should be (ae2.eventDate)
+		activities.items(1).agent.getUserId() should be ("cuscav")
+		activities.items(1).entity should be (submission2)
+
+		activities.last should be (Some(fieldDoc))
 		activities.token should be (20)
 		activities.total should be (30)
 	}
@@ -124,22 +125,22 @@ class ActivityServiceTest extends TestBase with Mockito {
 		auditIndexService.noteworthySubmissionsForModules(isEq(Seq(om1, om2, am1, am2)), isA[Option[FieldDoc]], isEq(Some(30)), isEq(8)) returns(pae)
 		
 		val activities = service.getNoteworthySubmissions(currentUser, 10, 20, 30)
-		activities.activities.size should be (2)
-		activities.activities(0) should not be (null)
-		activities.activities(0).title should be ("New submission")
-		activities.activities(0).message should be ("")
-		activities.activities(0).date should be (ae1.eventDate)
-		activities.activities(0).agent.getUserId() should be ("cuscav")
-		activities.activities(0).entity should be (submission1)
+		activities.items.size should be (2)
+		activities.items(0) should not be (null)
+		activities.items(0).title should be ("New submission")
+		activities.items(0).message should be ("")
+		activities.items(0).date should be (ae1.eventDate)
+		activities.items(0).agent.getUserId() should be ("cuscav")
+		activities.items(0).entity should be (submission1)
 		
-		activities.activities(1) should not be (null)
-		activities.activities(1).title should be ("New submission")
-		activities.activities(1).message should be ("")
-		activities.activities(1).date should be (ae2.eventDate)
-		activities.activities(1).agent.getUserId() should be ("cuscav")
-		activities.activities(1).entity should be (submission2)
+		activities.items(1) should not be (null)
+		activities.items(1).title should be ("New submission")
+		activities.items(1).message should be ("")
+		activities.items(1).date should be (ae2.eventDate)
+		activities.items(1).agent.getUserId() should be ("cuscav")
+		activities.items(1).entity should be (submission2)
 		
-		activities.doc should be (Some(fieldDoc))
+		activities.last should be (Some(fieldDoc))
 		activities.token should be (20)
 		activities.total should be (30)
 	}
