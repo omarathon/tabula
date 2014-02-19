@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventOccurrence, SmallG
 import uk.ac.warwick.tabula.helpers.Promise
 import uk.ac.warwick.tabula.helpers.Promises
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSetTemplate, MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointTemplate, MonitoringPointSetTemplate, MonitoringPoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.helpers.Logging
 
 /**
@@ -368,6 +368,10 @@ abstract class Description {
 
 	def monitoringPoint(monitoringPoint: MonitoringPoint) = {
 		property("monitoringPoint", monitoringPoint.id)
+	}
+
+	def monitoringPointTemplate(monitoringPoint: MonitoringPointTemplate) = {
+		property("monitoringPointTemplate", monitoringPoint.id)
 	}
 
 	def monitoringCheckpoint(monitoringPoint: MonitoringPoint) = {

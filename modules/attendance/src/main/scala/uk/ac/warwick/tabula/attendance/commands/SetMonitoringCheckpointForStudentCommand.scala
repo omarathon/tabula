@@ -91,7 +91,7 @@ trait SetMonitoringCheckpointForStudentCommandValidation extends SelfValidating 
 
 	def validate(errors: Errors) {
 
-		val academicYear = templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear
+		val academicYear = templateMonitoringPoint.pointSet.academicYear
 		val thisAcademicYear = AcademicYear.guessByDate(DateTime.now)
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
 		studentsState.asScala.foreach{ case(_, pointMap) =>
@@ -103,7 +103,7 @@ trait SetMonitoringCheckpointForStudentCommandValidation extends SelfValidating 
 					errors.rejectValue("", "monitoringPoint.invalidStudent")
 				}	else {
 
-					if (!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear).getTermTypeAsString)){
+					if (!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.academicYear).getTermTypeAsString)){
 						errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 					}
 
@@ -157,6 +157,6 @@ trait SetMonitoringCheckpointForStudentState  extends GroupMonitoringPointsByTer
 		LazyMaps.create{student: StudentMember => JHashMap(): JMap[MonitoringPoint, AttendanceState] }.asJava
 	var checkpointDescriptions: Map[StudentMember, Map[MonitoringPoint, String]] = _
 	var attendanceNotes: Map[StudentMember, Map[MonitoringPoint, AttendanceNote]] = _
-	var set = monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet]
-	def nonReportedTerms = monitoringPointService.findNonReportedTerms(Seq(student), monitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+	var set = monitoringPoint.pointSet
+	def nonReportedTerms = monitoringPointService.findNonReportedTerms(Seq(student), monitoringPoint.pointSet.academicYear)
 }

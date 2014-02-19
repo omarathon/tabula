@@ -35,8 +35,10 @@
 		</div>
 		<#if can_read_meetings>
 			<#if meetings??>
-				<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
-				<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
+				<div class="list-controls">
+					<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
+					<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
+				</div>
 				<#list meetings as meeting>
 					<#assign deletedClasses><#if meeting.deleted>deleted muted</#if></#assign>
 					<#assign pendingAction = meeting.pendingActionBy(viewer) />

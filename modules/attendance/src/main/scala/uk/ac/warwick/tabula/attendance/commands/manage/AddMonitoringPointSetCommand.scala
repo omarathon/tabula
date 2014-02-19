@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, AbstractMonitoringPointSet, MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSetTemplate, MonitoringPointType, MonitoringPoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{Route, Department}
 import org.springframework.validation.Errors
@@ -19,8 +19,8 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.attendance.commands.{AutowiringSecurityServicePermissionsAwareRoutes, PermissionsAwareRoutes, GroupMonitoringPointsByTerm}
 
 object AddMonitoringPointSetCommand {
-	def apply(user: CurrentUser, dept: Department, academicYear: AcademicYear, existingSetOption: Option[AbstractMonitoringPointSet]) =
-		new AddMonitoringPointSetCommand(user, dept, academicYear, existingSetOption)
+	def apply(user: CurrentUser, dept: Department, academicYear: AcademicYear, existingSetOption: Option[MonitoringPointSet], template: Option[MonitoringPointSetTemplate]) =
+		new AddMonitoringPointSetCommand(user, dept, academicYear, existingSetOption, template)
 			with ComposableCommand[Seq[MonitoringPointSet]]
 			with AutowiringSecurityServicePermissionsAwareRoutes
 			with AutowiringCourseAndRouteServiceComponent
@@ -32,7 +32,7 @@ object AddMonitoringPointSetCommand {
 }
 
 
-abstract class AddMonitoringPointSetCommand(val user: CurrentUser, val dept: Department, val academicYear: AcademicYear, val existingSetOption: Option[AbstractMonitoringPointSet])
+abstract class AddMonitoringPointSetCommand(val user: CurrentUser, val dept: Department, val academicYear: AcademicYear, val existingSetOption: Option[MonitoringPointSet], val template: Option[MonitoringPointSetTemplate])
 	extends CommandInternal[Seq[MonitoringPointSet]] with AddMonitoringPointSetState {
 
 	self: MonitoringPointServiceComponent =>
@@ -184,7 +184,8 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with Course
 	def dept: Department
 	def user: CurrentUser
 
-	def existingSetOption: Option[AbstractMonitoringPointSet]
+	def existingSetOption: Option[MonitoringPointSet]
+	def template: Option[MonitoringPointSetTemplate]
 
 	def academicYear: AcademicYear
 
@@ -196,13 +197,12 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with Course
 
 	val pointSetToCopy = null
 
-	val monitoringPoints = existingSetOption match {
-		case Some(set: AbstractMonitoringPointSet) => {
-			val points = new AutoPopulatingList(classOf[MonitoringPoint])
-			set.points.asScala.foreach(p => points.add(p))
-			points
-		}
-		case None => new AutoPopulatingList(classOf[MonitoringPoint])
+	val monitoringPoints = new AutoPopulatingList(classOf[MonitoringPoint])
+	existingSetOption.foreach { set =>
+		set.points.asScala.foreach(p => monitoringPoints.add(p))
+	}
+	template.foreach { template =>
+		template.points.asScala.foreach(p => monitoringPoints.add(p.toPoint()))
 	}
 
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)

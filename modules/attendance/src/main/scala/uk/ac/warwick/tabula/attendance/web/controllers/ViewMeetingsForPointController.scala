@@ -37,7 +37,7 @@ class ViewMeetingsForPointCommand(val student: StudentMember, val point: Monitor
 		}
 
 		allMeetings.map{meeting => meeting -> {
-			val meetingTermWeek = termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+			val meetingTermWeek = termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.pointSet.academicYear)
 			val reasons: mutable.Buffer[String] = mutable.Buffer()
 			if (!point.meetingRelationships.contains(meeting.relationship.relationshipType))
 				reasons += s"Meeting was not with ${point.meetingRelationships.map{_.agentRole}.mkString(" or ")}"
