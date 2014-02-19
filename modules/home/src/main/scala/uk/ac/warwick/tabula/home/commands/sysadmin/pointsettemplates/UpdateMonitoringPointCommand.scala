@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.home.commands.sysadmin.pointsettemplates
 
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSetTemplate, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointTemplate, MonitoringPointSetTemplate}
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import scala.collection.JavaConverters._
@@ -9,9 +9,9 @@ import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent,
 
 
 object UpdateMonitoringPointCommand {
-	def apply(template: MonitoringPointSetTemplate, point: MonitoringPoint) =
+	def apply(template: MonitoringPointSetTemplate, point: MonitoringPointTemplate) =
 		new UpdateMonitoringPointCommand(template, point)
-		with ComposableCommand[MonitoringPoint]
+		with ComposableCommand[MonitoringPointTemplate]
 		with AutowiringMonitoringPointServiceComponent
 		with UpdateMonitoringPointValidation
 		with UpdateMonitoringPointDescription
@@ -21,8 +21,8 @@ object UpdateMonitoringPointCommand {
 /**
  * Update a monitoring point
  */
-abstract class UpdateMonitoringPointCommand(val template: MonitoringPointSetTemplate, val point: MonitoringPoint)
-	extends CommandInternal[MonitoringPoint] with UpdateMonitoringPointState {
+abstract class UpdateMonitoringPointCommand(val template: MonitoringPointSetTemplate, val point: MonitoringPointTemplate)
+	extends CommandInternal[MonitoringPointTemplate] with UpdateMonitoringPointState {
 
 	self: MonitoringPointServiceComponent =>
 
@@ -54,31 +54,31 @@ trait UpdateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 	}
 }
 
-trait UpdateMonitoringPointDescription extends Describable[MonitoringPoint] {
+trait UpdateMonitoringPointDescription extends Describable[MonitoringPointTemplate] {
 	self: UpdateMonitoringPointState =>
 
 	override lazy val eventName = "UpdateMonitoringPoint"
 
 	override def describe(d: Description) {
 		d.monitoringPointSetTemplate(template)
-		d.monitoringPoint(point)
+		d.monitoringPointTemplate(point)
 	}
 }
 
 trait UpdateMonitoringPointState {
 	def template: MonitoringPointSetTemplate
-	def point: MonitoringPoint
+	def point: MonitoringPointTemplate
 	var name: String = _
 	var validFromWeek: Int = 0
 	var requiredFromWeek: Int = 0
 
-	def copyTo(point: MonitoringPoint) {
+	def copyTo(point: MonitoringPointTemplate) {
 		point.name = this.name
 		point.validFromWeek = this.validFromWeek
 		point.requiredFromWeek = this.requiredFromWeek
 	}
 
-	def copyFrom(point: MonitoringPoint) {
+	def copyFrom(point: MonitoringPointTemplate) {
 		this.name = point.name
 		this.validFromWeek = point.validFromWeek
 		this.requiredFromWeek = point.requiredFromWeek

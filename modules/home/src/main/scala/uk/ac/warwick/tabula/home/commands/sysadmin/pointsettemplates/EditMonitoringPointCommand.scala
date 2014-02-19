@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.home.commands.sysadmin.pointsettemplates
 
-import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
+import uk.ac.warwick.tabula.data.model.attendance.MonitoringPointTemplate
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import scala.collection.JavaConverters._
@@ -9,7 +9,7 @@ import org.springframework.util.AutoPopulatingList
 object EditMonitoringPointCommand {
 	def apply(pointIndex: Int) =
 		new EditMonitoringPointCommand(pointIndex)
-		with ComposableCommand[MonitoringPoint]
+		with ComposableCommand[MonitoringPointTemplate]
 		with MonitoringPointSetTemplatesPermissions
 		with EditMonitoringPointValidation
 		with ReadOnly with Unaudited
@@ -20,7 +20,7 @@ object EditMonitoringPointCommand {
  * Does not persist the change (no monitoring point set yet exists)
  */
 abstract class EditMonitoringPointCommand(val pointIndex: Int)
-	extends CommandInternal[MonitoringPoint] with EditMonitoringPointState {
+	extends CommandInternal[MonitoringPointTemplate] with EditMonitoringPointState {
 
 	override def applyInternal() = {
 		copyTo(monitoringPoints.get(pointIndex))
@@ -48,12 +48,12 @@ trait EditMonitoringPointValidation extends SelfValidating with MonitoringPointV
 
 trait EditMonitoringPointState {
 	val pointIndex: Int
-	var monitoringPoints = new AutoPopulatingList(classOf[MonitoringPoint])
+	var monitoringPoints = new AutoPopulatingList(classOf[MonitoringPointTemplate])
 	var name: String = _
 	var validFromWeek: Int = 0
 	var requiredFromWeek: Int = 0
 
-	def copyTo(point: MonitoringPoint) = {
+	def copyTo(point: MonitoringPointTemplate) = {
 		point.name = this.name
 		point.validFromWeek = this.validFromWeek
 		point.requiredFromWeek = this.requiredFromWeek

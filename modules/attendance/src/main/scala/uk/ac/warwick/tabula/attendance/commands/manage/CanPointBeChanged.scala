@@ -21,7 +21,7 @@ trait CanPointBeChanged extends MonitoringPointServiceComponent with TermService
 
 	// TAB-752 have any students already been submitted for this term
 	def anyStudentsReportedForRelatedPointsThisTerm (point: MonitoringPoint): Boolean = {
-		anyStudentsReportedForThisTerm(point.pointSet.asInstanceOf[MonitoringPointSet], point.validFromWeek, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+		anyStudentsReportedForThisTerm(point.pointSet, point.validFromWeek, point.pointSet.academicYear)
 	}
 
 	def anyStudentsReportedForThisTerm (set: MonitoringPointSet, validFromWeek: Int, academicYear: AcademicYear): Boolean = {

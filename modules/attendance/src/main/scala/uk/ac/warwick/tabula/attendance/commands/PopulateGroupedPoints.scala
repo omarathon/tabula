@@ -12,7 +12,7 @@ trait PopulateGroupedPoints extends CheckpointUpdatedDescription {
 
 	def populateGroupedPoints(students: Seq[StudentMember], templateMonitoringPoint: MonitoringPoint) = {
 		// Get monitoring points by student for the list of students matching the template point
-		val pointSet = HibernateHelpers.initialiseAndUnproxy(templateMonitoringPoint.pointSet).asInstanceOf[MonitoringPointSet]
+		val pointSet = HibernateHelpers.initialiseAndUnproxy(templateMonitoringPoint.pointSet)
 
 		val studentPointMap = monitoringPointService.findSimilarPointsForMembers(templateMonitoringPoint, students)
 		val allPoints = studentPointMap.values.flatten.toSeq
