@@ -33,6 +33,7 @@ class Submission extends GeneratedId with PermissionsTarget with ToEntityReferen
 	def isLate = submittedDate != null && assignment.isLate(this)
 	def isAuthorisedLate = submittedDate != null && assignment.isAuthorisedLate(this)
 	def workingDaysLate = assignment.workingDaysLate(this)
+	def deadline = assignment.submissionDeadline(this)
 
 	@ManyToOne(optional = false, cascade = Array(PERSIST, MERGE), fetch = LAZY)
 	@JoinColumn(name = "assignment_id")
