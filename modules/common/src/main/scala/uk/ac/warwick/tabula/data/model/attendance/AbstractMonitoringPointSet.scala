@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import uk.ac.warwick.tabula.data.model.GeneratedId
+import uk.ac.warwick.tabula.data.model.{Route, GeneratedId}
 import javax.persistence._
-import uk.ac.warwick.tabula.JavaImports.JArrayList
-import uk.ac.warwick.tabula.JavaImports.JList
+import uk.ac.warwick.tabula.JavaImports._
 import org.joda.time.DateTime
-import org.hibernate.annotations.BatchSize
+import org.hibernate.annotations.{Type, BatchSize}
+import uk.ac.warwick.tabula.AcademicYear
 
 @Entity
 @Table(name = "monitoringpointset")
@@ -30,4 +30,8 @@ abstract class AbstractMonitoringPointSet extends GeneratedId {
 		points.remove(point)
 		point.pointSet = null
 	}
+
+	def route: Route
+	def year: JInteger
+	def academicYear: AcademicYear
 }
