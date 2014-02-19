@@ -1,9 +1,9 @@
 <#macro lateness submission=""><#compress>
 	<#if submission?has_content && submission.submittedDate?? && (submission.late || submission.authorisedLate)>
 		<#if submission.late>
-			<@fmt.p submission.workingDaysLate "working day" /> late, ${durationFormatter(assignment.closeDate, submission.submittedDate)} after close
+			<@fmt.p submission.workingDaysLate "working day" /> late, ${durationFormatter(submission.deadline, submission.submittedDate)} after deadline
 		<#else>
-			${durationFormatter(assignment.closeDate, submission.submittedDate)} after close
+			${durationFormatter(submission.assignment.closeDate, submission.submittedDate)} after close
 		</#if>
 	</#if>
 </#compress></#macro>

@@ -1,3 +1,5 @@
+<#import "../admin/assignments/submissionsandfeedback/_submission_details.ftl" as sd />
+
 <#assign has_assignments = enrolledAssignments?has_content />
 <#assign has_historical_items = historicAssignments?has_content />
 
@@ -128,9 +130,9 @@
 								<#if hasSubmission>
 									Submitted <@fmt.date date=submission.submittedDate />
 									<#if submission.late>
-										<span class="label label-important">Late</span>
+										<span class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span>
 									<#elseif submission.authorisedLate>
-										<span class="label label-info">Within Extension</span>
+										<span class="label label-info use-tooltip" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
 									</#if>
 								<#elseif isFormative>
 									<span class="label use-tooltip" title="Formative assignments do not contribute to <#if isSelf>your<#else>a student's</#if> module grade or mark. They provide an opportunity to feedback and/or evaluate <#if isSelf>your<#else>a student's</#if> learning.">Formative, no submission</span>
