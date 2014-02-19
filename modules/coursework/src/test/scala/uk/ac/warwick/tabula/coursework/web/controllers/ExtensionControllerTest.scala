@@ -34,6 +34,28 @@ class ExtensionControllerTest extends TestBase with Mockito {
     }
   }
 
+
+	@Test def approve() {
+		withUser("cuslat") {
+			val controller = new AddExtensionController()
+			controller.json = json
+
+			val assignment = newDeepAssignment()
+			assignment.closeDate = DateTime.parse("2012-08-15T12:00")
+			assignment.extensions += new Extension("1170836")
+
+			val command = new AddExtensionCommand(assignment.module, assignment, currentUser, "approve")
+			command.userLookup = mock[UserLookupService]
+			command.extensionItems = mockExtensions
+
+			val extensions = command.copyExtensionItems()
+			val extensionsJson = controller.toJson(extensions)
+			val string = json.writeValueAsString(extensionsJson)
+			string should be ("""{"1170836":{"id":"1170836","status":"Approved","expiryDate":"12:00&#8194;Thu 23<sup>rd</sup> August 2012","reviewerComments":"Donec a risus purus nullam."}}""")
+		}
+	}
+
+
   def mockExtensions = {
     val extensionItem = new ExtensionItem
     extensionItem.universityId = "1170836"
