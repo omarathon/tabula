@@ -54,6 +54,7 @@ trait MemberDao {
 	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getAllRelationshipsByAgent(agentId: String): Seq[MemberStudentRelationship]
+	def getAllRelationshipTypesByStudent(student: StudentMember): Seq[StudentRelationshipType]
 	def getAllRelationshipTypesByAgent(agentId: String): Seq[StudentRelationshipType]
 	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[MemberStudentRelationship]
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
@@ -306,6 +307,17 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				Restrictions.isNull("endDate"),
 				Restrictions.ge("endDate", new DateTime())
 			))
+			.seq
+
+	def getAllRelationshipTypesByStudent(student: StudentMember): Seq[StudentRelationshipType] =
+		session.newCriteria[StudentRelationship]
+			.createAlias("studentCourseDetails", "scd")
+			.add(is("scd.student", student))
+			.add( Restrictions.or(
+			Restrictions.isNull("endDate"),
+			Restrictions.ge("endDate", new DateTime())
+			))
+			.project[StudentRelationshipType](distinct(property("relationshipType")))
 			.seq
 
 
