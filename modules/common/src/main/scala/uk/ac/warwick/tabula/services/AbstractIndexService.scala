@@ -225,11 +225,13 @@ abstract class AbstractIndexService[A]
 		val writerConfig = new IndexWriterConfig(LuceneVersion, indexAnalyzer)
 		closeThis(new IndexWriter(openDirectory(), writerConfig)) { writer =>
 			for (item <- items) {
-				if (isIncremental) {
-					doUpdateMostRecent(item)
-				}
-				toDocuments(item).foreach { doc =>
-					writer.updateDocument(uniqueTerm(item), doc)
+				tryDescribe(s"indexing ${item}") {
+					if (isIncremental) {
+						doUpdateMostRecent(item)
+					}
+					toDocuments(item).foreach { doc =>
+						writer.updateDocument(uniqueTerm(item), doc)
+					}
 				}
 			}
 			if (debugEnabled) logger.debug("Indexed " + items.size + " items")

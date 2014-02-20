@@ -16,6 +16,7 @@ import javax.persistence.DiscriminatorValue
 import org.apache.lucene.search.{FieldDoc, SortField, Sort, TermQuery}
 import org.apache.lucene.index.Term
 import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.helpers.Logging
 
 class RecipientNotification(val notification: Notification[_,_], val recipient: User) {
 	def id = s"${notification.id}-${recipient.getUserId}"
@@ -43,6 +44,8 @@ trait NotificationQueryMethods { self: NotificationIndexServiceImpl =>
  */
 @Service
 class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotification] with NotificationIndexService with NotificationQueryMethods {
+	override val loggerName = classOf[NotificationIndexService].getName
+
 	var dao = Wire[NotificationDao]
 	var userLookup = Wire[UserLookupService]
 
@@ -75,14 +78,18 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 		val notification = item.notification
 		val doc = new Document
 
-		val notificationType = notification.getClass.getAnnotation(classOf[DiscriminatorValue]).value()
-
-		doc.add(plainStringField(IdField, item.id))
-		doc.add(plainStringField("notification", notification.id))
-		doc.add(plainStringField("recipient", recipient.getUserId))
-		doc.add(plainStringField("notificationType", notificationType))
-		doc.add(dateField(UpdatedDateField, notification.created))
-		Seq(doc)
+		if (recipient.isFoundUser && recipient.getUserId != null) {
+			val notificationType = notification.getClass.getAnnotation(classOf[DiscriminatorValue]).value()
+			doc.add(plainStringField(IdField, item.id))
+			doc.add(plainStringField("notification", notification.id))
+			doc.add(plainStringField("recipient", recipient.getUserId))
+			doc.add(plainStringField("notificationType", notificationType))
+			doc.add(dateField(UpdatedDateField, notification.created))
+			Seq(doc)
+		} else {
+			debug("Skipping RecipientNotification because foundUser=%b and userId=%s", recipient.isFoundUser, recipient.getUserId)
+			Nil
+		}
 	}
 
 	override protected def getId(item: RecipientNotification) = item.id
@@ -96,7 +103,9 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 			} catch {
 				// Can happen if reference to an entity has since been deleted, e.g.
 				// a submission is resubmitted and the old submission is removed. Skip this notification.
-				case onf: ObjectNotFoundException => Nil
+				case onf: ObjectNotFoundException =>
+					debug("Skipping notification %s as a referenced object was not found", notification)
+					Nil
 			}
 		}
 
