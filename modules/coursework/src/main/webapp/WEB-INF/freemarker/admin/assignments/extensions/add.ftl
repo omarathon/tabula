@@ -9,7 +9,8 @@
 	<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/extensions/add')}" commandName="modifyExtensionCommand" cssClass="double-submit-protection">
 		<#include "_extension_fields.ftl" />
 		<div class="modal-footer submit-buttons">
-			<input type="submit" class="btn btn-success" value="Grant">
+			<input type="submit" class="btn btn-success" value="Grant" id="approveButton">
+
 			<a href="#" class="close-model btn" data-dismiss="modal">Cancel</a>
 		</div>
 	</@f.form>
