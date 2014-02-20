@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<#macro list studentCourseDetails meetings relationshipType viewerRelationshipTypes>
+<#macro list studentCourseDetails meetings relationshipType viewerRelationshipTypes="">
 	<#assign can_read_meetings = can.do_with_selector("Profiles.MeetingRecord.Read", studentCourseDetails, relationshipType) />
 	<#assign can_create_meetings = can.do_with_selector("Profiles.MeetingRecord.Create", studentCourseDetails, relationshipType) />
 	<#assign existingRelationship = ((studentCourseDetails.relationships(relationshipType))![])?size gt 0 />
