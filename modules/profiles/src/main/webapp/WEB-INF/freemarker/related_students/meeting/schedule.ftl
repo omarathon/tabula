@@ -42,7 +42,7 @@
 		</@form.labelled_row>
 
 		<#if allRelationships?? && allRelationships?size gt 1>
-			<#assign isCreatorAgent = creator.id == command.relationship.agent />
+			<#assign isCreatorAgent = creator?? && creator.id == command.relationship.agent />
 			<#if !isCreatorAgent>
 				<#assign cssClass = "warning" />
 			</#if>
@@ -50,7 +50,7 @@
 			<@form.labelled_row "relationship" agent_role?cap_first cssClass!"">
 				<@f.select path="relationship" cssClass="input-large">
 					<@f.option disabled="true" selected="true" label="Please select one..." />
-					<@f.options items=allRelationships itemValue="agent" itemLabel="agent_name" />
+					<@f.options items=allRelationships itemValue="agent" itemLabel="agentName" />
 				</@f.select>
 				<small class="help-block">
 					<#if isCreatorAgent>
