@@ -82,10 +82,10 @@ class PublishFeedbackCommand(val module: Module, val assignment: Assignment, val
 		if (user.isFoundUser) {
 			val email = user.getEmail
 			if (email.hasText) {
+				val n = Notification.init(new FeedbackPublishedNotification, submitter.apparentUser, Seq(feedback), feedback.assignment)
+				n.recipientUniversityId = user.getWarwickId
 				PublishFeedbackResults(
-					notifications = Seq(
-						Notification.init(new FeedbackPublishedNotification, submitter.apparentUser, Seq(feedback), feedback.assignment)
-					)
+					notifications = Seq(n)
 				)
 			} else {
 				PublishFeedbackResults(
