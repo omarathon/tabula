@@ -172,6 +172,8 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rowCommand.fileDao = smartMock[FileDao]
 		rowCommand.moduleAndDepartmentService = modAndDeptService
 
+		val row = new SitsStudentRow(rs)
+
 		// only return a known disability for code Q
 		val disabilityQ = new Disability("Q", "Test disability")
 		profileService.getDisability(any[String]) returns (None)
@@ -188,7 +190,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseDetails.scjCode = "0672089/2"
 			studentCourseDetails.sprCode = "0672089/2"
 
-			val yearCommand = importCommandFactory.createImportStudentCourseYearCommand(rs, studentCourseDetails)
+			val yearCommand = importCommandFactory.createImportStudentCourseYearCommand(row, studentCourseDetails)
 
 			// now the set up is done, run the apply command and test it:
 			val studentCourseYearDetails = yearCommand.applyInternal()
@@ -212,7 +214,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			studentCourseDetails.scjCode = "0672089/2"
 			studentCourseDetails.sprCode = "0672089/2"
 
-			val courseCommand = importCommandFactory.createImportStudentCourseCommand(rs, smartMock[StudentMember])
+			val courseCommand = importCommandFactory.createImportStudentCourseCommand(row, smartMock[StudentMember])
 
 			importCommandFactory.relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
 
@@ -245,7 +247,7 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			rowCommand.applyInternal() match {
 				case stuMem: StudentMember => {
-					val courseCommand = importCommandFactory.createImportStudentCourseCommand(rs, stuMem)
+					val courseCommand = importCommandFactory.createImportStudentCourseCommand(row, stuMem)
 					courseCommand.markAsSeenInSits(studentCourseDetailsBean) should be (false)
 					studentCourseDetails.missingFromImportSince should be (null)
 					studentCourseDetails.missingFromImportSince = DateTime.now

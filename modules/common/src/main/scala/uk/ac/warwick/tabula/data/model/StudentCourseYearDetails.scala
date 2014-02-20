@@ -60,9 +60,33 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	def isFresh = (missingFromImportSince == null)
 }
 
-trait StudentCourseYearProperties {
-
+trait StudentCourseYearPropertiesFromSits {
 	var sceSequenceNumber: JInteger = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var yearOfStudy: JInteger = _
+
+	@Column(name="cas_used")
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
+	var casUsed: JBoolean = _
+
+	@Column(name="tier4visa")
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
+	var tier4Visa: JBoolean = _
+
+}
+
+trait StudentCourseYearProperties extends StudentCourseYearPropertiesFromSits {
+	var lastUpdatedDate = DateTime.now
+	var missingFromImportSince: DateTime = _
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleRegistrationStatusUserType")
+	var moduleRegistrationStatus: ModuleRegistrationStatus = _ // cam_ssn.ssn_mrgs
+
+	@Basic
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var academicYear: AcademicYear = _
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="enrolmentStatusCode", referencedColumnName="code")
@@ -81,30 +105,6 @@ trait StudentCourseYearProperties {
 	@JoinColumn(name="modeOfAttendanceCode", referencedColumnName="code")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var modeOfAttendance: ModeOfAttendance = _
-
-	@Basic
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var academicYear: AcademicYear = _
-
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var yearOfStudy: JInteger = _
-
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleRegistrationStatusUserType")
-	var moduleRegistrationStatus: ModuleRegistrationStatus = _ // cam_ssn.ssn_mrgs
-
-	var lastUpdatedDate = DateTime.now
-
-	var missingFromImportSince: DateTime = _
-
-	@Column(name="cas_used")
-	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
-	var casUsed: JBoolean = _
-
-	@Column(name="tier4visa")
-	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
-	var tier4Visa: JBoolean = _
-
 }
 
 class StudentCourseYearKey {

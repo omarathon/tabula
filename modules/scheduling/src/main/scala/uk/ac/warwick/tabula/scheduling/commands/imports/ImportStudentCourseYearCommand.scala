@@ -1,15 +1,11 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import java.sql.ResultSet
-import scala.collection.JavaConverters.asScalaBufferConverter
 import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
-import ImportMemberHelpers.toAcademicYear
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.commands.{Command, Description, Unaudited}
 import uk.ac.warwick.tabula.data.{Daoisms, StudentCourseYearDetailsDao}
-import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model.{ModeOfAttendance, ModuleRegistrationStatus, StudentCourseDetails, StudentCourseYearDetails, StudentCourseYearProperties}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopying}
@@ -17,52 +13,34 @@ import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.StudentCourseYearKey
 
-class ImportStudentCourseYearCommand(resultSet: ResultSet, studentCourseDetails: StudentCourseDetails, importRowTracker: ImportRowTracker)
+class ImportStudentCourseYearCommand(row: SitsStudentRow, studentCourseDetails: StudentCourseDetails, importRowTracker: ImportRowTracker)
 	extends Command[StudentCourseYearDetails] with Logging with Daoisms
-	with StudentCourseYearProperties with Unaudited with PropertyCopying {
+	with Unaudited with PropertyCopying {
 	import ImportMemberHelpers._
-
-	implicit val rs = resultSet
 
 	var modeOfAttendanceImporter = Wire.auto[ModeOfAttendanceImporter]
 	var profileService = Wire.auto[ProfileService]
 	var studentCourseYearDetailsDao = Wire.auto[StudentCourseYearDetailsDao]
 
-	// A few intermediate properties that will be transformed later
-	var enrolmentDepartmentCode: String = _
-	var enrolmentStatusCode: String = _
-	var modeOfAttendanceCode: String = _
-	var academicYearString: String = _
-	var moduleRegistrationStatusCode: String = _
-
-	this.yearOfStudy = rs.getInt("year_of_study")
-	//this.fundingSource = rs.getString("funding_source")
-	this.sceSequenceNumber = rs.getInt("sce_sequence_number")
-
-	this.enrolmentDepartmentCode = rs.getString("enrolment_department_code")
-	this.enrolmentStatusCode = rs.getString("enrolment_status_code")
-	this.modeOfAttendanceCode = rs.getString("mode_of_attendance_code")
-	this.academicYearString = rs.getString("sce_academic_year")
-	this.moduleRegistrationStatusCode = rs.getString("mod_reg_status")
+	val sceSequenceNumber = row.sceSequenceNumber
 
 	override def applyInternal(): StudentCourseYearDetails = {
+
 		val studentCourseYearDetailsExisting = studentCourseYearDetailsDao.getBySceKeyStaleOrFresh(
 			studentCourseDetails,
 			sceSequenceNumber)
 
 		logger.debug("Importing student course details for " + studentCourseDetails.scjCode + ", " + sceSequenceNumber)
 
-		val commandBean = new BeanWrapperImpl(this)
+		val rowBean = new BeanWrapperImpl(row)
 
 		val (isTransient, studentCourseYearDetails) = studentCourseYearDetailsExisting match {
 			case Some(studentCourseYearDetails: StudentCourseYearDetails) => (false, studentCourseYearDetails)
-			case _ => (true, new StudentCourseYearDetails(studentCourseDetails, sceSequenceNumber,AcademicYear.parse(academicYearString)))
+			case _ => (true, new StudentCourseYearDetails(studentCourseDetails, sceSequenceNumber,AcademicYear.parse(row.academicYearString)))
 		}
 		val studentCourseYearDetailsBean = new BeanWrapperImpl(studentCourseYearDetails)
 
-		moduleRegistrationStatus = ModuleRegistrationStatus.fromCode(moduleRegistrationStatusCode)
-
-		val hasChanged = (copyStudentCourseYearProperties(commandBean, studentCourseYearDetailsBean)
+		val hasChanged = (copyStudentCourseYearProperties(rowBean, studentCourseYearDetailsBean)
 			| markAsSeenInSits(studentCourseYearDetailsBean))
 
 		if (isTransient || hasChanged) {
@@ -90,11 +68,11 @@ class ImportStudentCourseYearCommand(resultSet: ResultSet, studentCourseDetails:
 
 	private def copyStudentCourseYearProperties(commandBean: BeanWrapper, studentCourseYearBean: BeanWrapper) = {
 		copyBasicProperties(basicStudentCourseYearProperties, commandBean, studentCourseYearBean) |
-		copyObjectProperty("enrolmentDepartment", enrolmentDepartmentCode, studentCourseYearBean, toDepartment(enrolmentDepartmentCode)) |
-		copyObjectProperty("enrolmentStatus", enrolmentStatusCode, studentCourseYearBean, toSitsStatus(enrolmentStatusCode)) |
-		copyModeOfAttendance(modeOfAttendanceCode, studentCourseYearBean) |
-		copyModuleRegistrationStatus(moduleRegistrationStatusCode, studentCourseYearBean)|
-		copyAcademicYear("academicYear", academicYearString, studentCourseYearBean)
+		copyObjectProperty("enrolmentDepartment", row.enrolmentDepartmentCode, studentCourseYearBean, toDepartment(row.enrolmentDepartmentCode)) |
+		copyObjectProperty("enrolmentStatus", row.enrolmentStatusCode, studentCourseYearBean, toSitsStatus(row.enrolmentStatusCode)) |
+		copyModeOfAttendance(row.modeOfAttendanceCode, studentCourseYearBean) |
+		copyModuleRegistrationStatus(row.moduleRegistrationStatusCode, studentCourseYearBean)|
+		copyAcademicYear("academicYear", row.academicYearString, studentCourseYearBean)
 	}
 
 	private def copyModeOfAttendance(code: String, studentCourseYearBean: BeanWrapper) = {
