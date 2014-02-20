@@ -70,10 +70,10 @@ abstract class Job extends Logging {
 trait NotifyingJob[A] { // Doesn't extend Notifies[A] because we don't know which instance to emit for
 	this: Job =>
 
-	var notifications = mutable.Map[JobInstance, mutable.ListBuffer[Notification[A]]]()
+	var notifications = mutable.Map[JobInstance, mutable.ListBuffer[Notification[_,_]]]()
 
-	def pushNotification(instance: JobInstance, n: Notification[A]) {
-		notifications.getOrElseUpdate(instance, new mutable.ListBuffer[Notification[A]]).append(n)
+	def pushNotification(instance: JobInstance, n: Notification[_,_]) {
+		notifications.getOrElseUpdate(instance, new mutable.ListBuffer[Notification[_,_]]).append(n)
 	}
 
 	def popNotifications(instance: JobInstance) = notifications.remove(instance).getOrElse(Nil)

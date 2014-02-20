@@ -1,13 +1,13 @@
 package uk.ac.warwick.tabula.profiles.commands
 
 import uk.ac.warwick.tabula.commands.{Notifies, ComposableCommand, Describable, CommandInternal, SelfValidating, Description}
-import uk.ac.warwick.tabula.data.model.{ScheduledMeetingRecord, AbstractMeetingRecord, MeetingRecord}
+import uk.ac.warwick.tabula.data.model.{Notification, ScheduledMeetingRecord, AbstractMeetingRecord, MeetingRecord}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
-import uk.ac.warwick.tabula.profiles.notifications.ScheduledMeetingRecordInviteeNotification
+import uk.ac.warwick.tabula.data.model.notifications.ScheduledMeetingRecordInviteeNotification
 
 trait RemoveMeetingRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
 	self: RemoveMeetingRecordState =>
@@ -74,8 +74,11 @@ trait DeleteMeetingRecordCommandValidation extends SelfValidating with RemoveMee
 trait DeleteScheduledMeetingRecordNotification extends Notifies[AbstractMeetingRecord, ScheduledMeetingRecord] {
 	def emit(meeting: AbstractMeetingRecord) = {
 		meeting match {
-			case m: ScheduledMeetingRecord => Seq(new ScheduledMeetingRecordInviteeNotification(m, "deleted"))
-			case _ => Seq()
+			case m: ScheduledMeetingRecord => {
+				val user = meeting.creator.asSsoUser
+				Seq(Notification.init(new ScheduledMeetingRecordInviteeNotification("deleted"), user, m, m.relationship))
+			}
+			case _ => Nil
 		}
 	}
 }
@@ -105,7 +108,10 @@ trait RestoreMeetingRecordCommandValidation extends SelfValidating with RemoveMe
 trait RestoreScheduledMeetingRecordNotification extends Notifies[AbstractMeetingRecord, ScheduledMeetingRecord] {
 	def emit(meeting: AbstractMeetingRecord) = {
 		meeting match {
-			case m: ScheduledMeetingRecord => Seq(new ScheduledMeetingRecordInviteeNotification(m, "rescheduled"))
+			case m: ScheduledMeetingRecord => {
+				val user = meeting.creator.asSsoUser
+				Seq(Notification.init(new ScheduledMeetingRecordInviteeNotification("rescheduled"), user, m, m.relationship))
+			}
 			case _ => Seq()
 		}
 	}

@@ -6,9 +6,7 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.MemberUserType
-import uk.ac.warwick.tabula.roles.StudentRole
-import uk.ac.warwick.tabula.roles.StaffRole
-import uk.ac.warwick.tabula.roles.UniversityMemberRole
+import uk.ac.warwick.tabula.roles.{SSOStaffRole, StudentRole, StaffRole, UniversityMemberRole}
 
 class UserTypeAndDepartmentRoleProviderTest extends TestBase with Mockito {
 
@@ -70,7 +68,7 @@ class UserTypeAndDepartmentRoleProviderTest extends TestBase with Mockito {
 		currentUser.realUser.setDepartmentCode("CS")
 		currentUser.realUser.setStaff(true)
 
-		provider.getRolesFor(currentUser) should be (Seq(StaffRole(dept1)))
+		provider.getRolesFor(currentUser) should be (Seq(SSOStaffRole(dept1)))
 	}
 
 	@Test def fallbackToSSOStudent = withUser("cuscav") {

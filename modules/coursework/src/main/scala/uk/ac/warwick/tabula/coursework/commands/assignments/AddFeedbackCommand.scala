@@ -7,9 +7,7 @@ import uk.ac.warwick.tabula.commands.{Notifies, Description, UploadedFile}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.Errors
-import scala.Some
-import uk.ac.warwick.tabula.coursework.commands.assignments.notifications.FeedbackChangeNotification
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
+import uk.ac.warwick.tabula.data.model.notifications.FeedbackChangeNotification
 
 class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
 	extends UploadFeedbackCommand[Seq[Feedback]](module, assignment, submitter) with Notifies[Seq[Feedback], Feedback] {
@@ -96,12 +94,9 @@ class AddFeedbackCommand(module: Module, assignment: Assignment, submitter: Curr
 		 .properties("feedback" -> feedbacks.map { _.id })
 	}
 
-	def emit(updatedFeedback: Seq[Feedback]): Seq[Notification[Feedback]] = {
+	def emit(updatedFeedback: Seq[Feedback]) = {
 		updatedFeedback.filter(_.released).map(feedback => {
-			val student = userLookup.getUserByWarwickUniId(feedback.universityId)
-			new FeedbackChangeNotification(feedback, submitter.apparentUser, student) with FreemarkerTextRenderer
+			Notification.init(new FeedbackChangeNotification, submitter.apparentUser, feedback, assignment)
 		})
 	}
-
-
 }

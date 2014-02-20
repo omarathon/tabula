@@ -183,7 +183,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 	/**
 	 * TODO reuse one Document and set of Fields for all items
 	 */
-	protected def toDocument(item: Member): Document = {
+	protected def toDocuments(item: Member): Seq[Document] = {
 		val doc = new Document
 
 		doc add plainStringField(IdField, item.universityId)
@@ -209,7 +209,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		}
 
 		doc add dateField(UpdatedDateField, item.lastUpdatedDate)
-		doc
+		Seq(doc)
 	}
 
 	private def indexTokenised(doc: Document, fieldName: String, value: Option[String]) = {

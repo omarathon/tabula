@@ -1,4 +1,3 @@
-
 <h1>Web system administrating system screen page</h1>
 
 <#if user.masquerading>
@@ -62,25 +61,20 @@
 
 <h2>Indexing</h2>
 
+<#macro reindex_form name text>
 <p>
-<@f.form method="post" action="${url('/sysadmin/index/run-audit', '/scheduling')}" commandName="blankForm">
-Rebuild audit event index from
-<div class="input-append">
-<@f.input id="index-audit-from" path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
-</div>
+<@f.form method="post" action="${url('/sysadmin/index/run-'+name, '/scheduling')}" commandName="blankForm">
+	Rebuild ${text} from
+	<div class="input-append">
+		<@f.input id="index-${name}-from" path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
+	</div>
 </@f.form>
 </p>
+</#macro>
 
-<p>
-<@f.form method="post" action="${url('/sysadmin/index/run-profiles', '/scheduling')}" commandName="blankForm">
-Rebuild profiles index for
-<br />
-<@f.input id="index-profiles-dept" path="deptCode" cssClass="span6" placeholder="deptCode (optional)" /> from
-<div class="input-append">
-<@f.input id="index-profiles-from" path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
-</div>
-</@f.form>
-</p>
+<@reindex_form 'audit' 'audit event index' />
+<@reindex_form 'profiles' 'profiles index' />
+<@reindex_form 'notifications' 'notification stream index' />
 
 <h2>Scary special stuff</h2>
 

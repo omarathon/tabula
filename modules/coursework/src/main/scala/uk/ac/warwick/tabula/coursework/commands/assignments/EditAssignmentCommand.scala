@@ -2,16 +2,15 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{Notification, Assignment, Module}
 import uk.ac.warwick.tabula.commands.Description
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notifications.{ExtensionRequestRespondedNotification, ExtensionRequestRejectedNotification}
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.events.NotificationHandling
-import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
+import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.notifications.{ExtensionRequestRespondedRejectNotification, ExtensionRequestRejectedNotification}
+
 
 
 class EditAssignmentCommand(module: Module = null, val assignment: Assignment = null, user: CurrentUser)
@@ -27,7 +26,7 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 	def canUpdateMarkingWorkflow = {
 		Option(assignment.markingWorkflow) match {
 			// if students can choose the marker and submissions exist then the markingWorkflow cannot be updated
-			case Some(scheme) if scheme.studentsChooseMarker => (assignment.submissions.size() == 0)
+			case Some(scheme) if scheme.studentsChooseMarker => assignment.submissions.size() == 0
 			case Some(scheme) => true
 			case None => true
 		}
@@ -58,13 +57,17 @@ class EditAssignmentCommand(module: Module = null, val assignment: Assignment = 
 			// reject unapproved extensions (in normal circumstances, this should be unlikely)
 			unapprovedExtensions = assignment.getUnapprovedExtensions
 			val admin = user.apparentUser
-			unapprovedExtensions.foreach { e =>
-				e.reject()
+
+
+			unapprovedExtensions.foreach { extension =>
+				extension.reject()
 
 				// let's notify manually for completeness
-				val student = userLookup.getUserByWarwickUniId(e.universityId)
-				val studentNotification = new ExtensionRequestRejectedNotification(e, student, admin) with FreemarkerTextRenderer
-				val adminNotification = new ExtensionRequestRespondedNotification(e, student, admin) with FreemarkerTextRenderer
+				val studentNotification =
+					Notification.init(new ExtensionRequestRejectedNotification, admin, Seq(extension), assignment)
+				val adminNotification =
+					Notification.init(new ExtensionRequestRespondedRejectNotification, admin, Seq(extension), assignment)
+
 				notify[Option[Extension]](Seq(studentNotification, adminNotification))
 			}
 		}

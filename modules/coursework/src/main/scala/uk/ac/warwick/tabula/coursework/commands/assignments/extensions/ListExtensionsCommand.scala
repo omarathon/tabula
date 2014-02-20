@@ -11,7 +11,6 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.ItemNotFoundException
-import scala.collection.mutable
 
 class ListExtensionsCommand(val module: Module, val assignment: Assignment, val user: CurrentUser)
 	extends Command[ExtensionInformation] with ReadOnly with Unaudited {

@@ -18,14 +18,14 @@ trait GroupedPointValidation {
 		studentsStateAsScala: Map[StudentMember, Map[MonitoringPoint, AttendanceState]],
 		permissionValidation: (StudentMember, Route) => (Boolean)
 	) = {
-		val academicYear = templateMonitoringPoint.pointSet.asInstanceOf[MonitoringPointSet].academicYear
+		val academicYear = templateMonitoringPoint.pointSet.academicYear
 		val thisAcademicYear = AcademicYear.guessByDate(DateTime.now)
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)
 		studentsStateAsScala.foreach{ case(student, pointMap) =>
 			val studentPointSet = monitoringPointService.getPointSetForStudent(student, academicYear)
 			pointMap.foreach{ case(point, state) =>
 				errors.pushNestedPath(s"studentsState[${student.universityId}][${point.id}]")
-				val pointSet = point.pointSet.asInstanceOf[MonitoringPointSet]
+				val pointSet = point.pointSet
 				// Check point is valid for student
 				if (!studentPointSet.exists(s => s.points.asScala.contains(point))) {
 					errors.rejectValue("", "monitoringPoint.invalidStudent")

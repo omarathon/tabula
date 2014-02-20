@@ -243,4 +243,76 @@ class AssignmentTest extends TestBase {
 		f.actualMark = Some(41)
 		f
 	}
+
+	@Test def workingDaysLate {
+		val assignment = new Assignment
+		assignment.openDate = new DateTime(2013, DateTimeConstants.JANUARY, 13, 0, 0, 0, 0)
+		assignment.closeDate = new DateTime(2013, DateTimeConstants.JANUARY, 30, 12, 0, 0, 0) // Wednesday, 12pm
+		assignment.openEnded = false
+
+		val submission = new Submission
+		submission.userId = "cuscav"
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 10, 0, 0, 0, 0)
+		assignment.workingDaysLate(submission) should be (0)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 30, 13, 0, 0, 0) // Wednesday, 1pm
+		assignment.workingDaysLate(submission) should be (1)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0) // Thursday (morning), midnight
+		assignment.workingDaysLate(submission) should be (1)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 31, 14, 0, 0, 0) // Thursday 2pm
+		assignment.workingDaysLate(submission) should be (2)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 11, 0, 0, 0) // Saturday 11am
+		assignment.workingDaysLate(submission) should be (3)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 14, 0, 0, 0) // Saturday 2pm
+		assignment.workingDaysLate(submission) should be (3)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 3, 14, 0, 0, 0) // Sunday 2pm
+		assignment.workingDaysLate(submission) should be (3)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 11, 0, 0, 0) // Monday 11am
+		assignment.workingDaysLate(submission) should be (3)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 23, 0, 0, 0) // Monday 11pm
+		assignment.workingDaysLate(submission) should be (4)
+
+		// Extended until 12pm Friday
+		val extension = new Extension
+		extension.userId = "cuscav"
+		extension.approve()
+		extension.expiryDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 12, 0, 0, 0)
+
+		assignment.extensions.add(extension)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 10, 0, 0, 0, 0)
+		assignment.workingDaysLate(submission) should be (0)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 30, 13, 0, 0, 0) // Wednesday, 1pm
+		assignment.workingDaysLate(submission) should be (0)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 31, 0, 0, 0, 0) // Thursday (morning), midnight
+		assignment.workingDaysLate(submission) should be (0)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.JANUARY, 31, 14, 0, 0, 0) // Thursday 2pm
+		assignment.workingDaysLate(submission) should be (0)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 11, 0, 0, 0) // Saturday 11am
+		assignment.workingDaysLate(submission) should be (1)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 2, 14, 0, 0, 0) // Saturday 2pm
+		assignment.workingDaysLate(submission) should be (1)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 3, 14, 0, 0, 0) // Sunday 2pm
+		assignment.workingDaysLate(submission) should be (1)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 11, 0, 0, 0) // Monday 11am
+		assignment.workingDaysLate(submission) should be (1)
+
+		submission.submittedDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 4, 23, 0, 0, 0) // Monday 11pm
+		assignment.workingDaysLate(submission) should be (2)
+	}
 }

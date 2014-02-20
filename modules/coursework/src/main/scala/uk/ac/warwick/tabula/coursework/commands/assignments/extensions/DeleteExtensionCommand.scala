@@ -4,16 +4,14 @@ import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.commands.{Notifies, Description, Command}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.helpers.{ LazyLists, Logging }
-import uk.ac.warwick.tabula.data.model.Assignment
+import uk.ac.warwick.tabula.data.model.{Notification, Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notifications.{ExtensionRevokedNotification, ExtensionChangedNotification}
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
+import uk.ac.warwick.tabula.data.model.notifications.ExtensionRevokedNotification
 
 
 class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val universityId: String, val submitter: CurrentUser) extends Command[Seq[Extension]]
@@ -58,8 +56,9 @@ class DeleteExtensionCommand(val module: Module, val assignment: Assignment, val
 
 	def emit(extensions: Seq[Extension]) = {
 		extensions.map { extension =>
-			val student = userLookup.getUserByWarwickUniId(extension.universityId)
-			new ExtensionRevokedNotification(assignment, student, submitter.apparentUser) with FreemarkerTextRenderer
+			val notification = Notification.init(new ExtensionRevokedNotification, submitter.apparentUser, Seq(assignment))
+			notification.recipientUniversityId = extension.universityId
+			notification
 		}
 	}
 }

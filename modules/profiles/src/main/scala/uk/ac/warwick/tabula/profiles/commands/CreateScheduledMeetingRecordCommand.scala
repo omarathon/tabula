@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.data.model.{FileAttachment, MeetingFormat, ScheduledMeetingRecord, StudentRelationship, Member}
+import uk.ac.warwick.tabula.data.model.{Notification, FileAttachment, MeetingFormat, ScheduledMeetingRecord, StudentRelationship, Member}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -9,8 +9,8 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.system.BindListener
-import uk.ac.warwick.tabula.profiles.notifications.ScheduledMeetingRecordInviteeNotification
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
+import uk.ac.warwick.tabula.data.model.notifications.ScheduledMeetingRecordInviteeNotification
 
 object CreateScheduledMeetingRecordCommand {
 	def apply(creator: Member, relationship: StudentRelationship, considerAlternatives: Boolean) =
@@ -103,5 +103,8 @@ trait CreateScheduledMeetingRecordDescription extends Describable[ScheduledMeeti
 }
 
 trait CreateScheduledMeetingRecordNotification extends Notifies[ScheduledMeetingRecord, ScheduledMeetingRecord] {
-	def emit(meeting: ScheduledMeetingRecord) = Seq(new ScheduledMeetingRecordInviteeNotification(meeting, "created"))
+	def emit(meeting: ScheduledMeetingRecord) = {
+		val user = meeting.creator.asSsoUser
+		Seq(Notification.init(new ScheduledMeetingRecordInviteeNotification("created"), user, meeting, meeting.relationship))
+	}
 }

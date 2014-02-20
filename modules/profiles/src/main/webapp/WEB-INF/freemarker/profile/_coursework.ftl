@@ -3,9 +3,10 @@
 		jQuery(function($){
 			$('#coursework').load('/coursework/student/${profile.universityId}', {ts: new Date().getTime()}, function() {
 				var pane = $('#coursework-pane');
-				var title = pane.find('h2').html();
+				var title = pane.find('h4').first().html();
 				if (title != '' && title != undefined) {
 					pane.find('.title').html(title);
+					window.GlobalScripts.initCollapsible();
 					$('#coursework-pane').show();
 				}
 			});

@@ -9,8 +9,9 @@ import org.mockito.Mockito._
 import org.mockito.Matchers._
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import org.joda.time.LocalTime
+import uk.ac.warwick.tabula.data.model.notifications.SmallGroupSetChangedNotification
 
-class SmallGroupSetChangedNotificationTemplateTest extends TestBase with FreemarkerTestHelpers with FreemarkerRendering{
+class SmallGroupSetChangedNotificationTemplateTest extends TestBase with FreemarkerTestHelpers with FreemarkerRendering {
 
     private trait NotificationFixture extends SmallGroupFixture {
 
@@ -39,7 +40,7 @@ class SmallGroupSetChangedNotificationTemplateTest extends TestBase with Freemar
     new NotificationFixture {
       val output =
         renderToString(SmallGroupSetChangedNotification.templateLocation,
-          Map("student" -> recipient, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
+          Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
       output should include(group1.name)
     }}
 
@@ -47,7 +48,7 @@ class SmallGroupSetChangedNotificationTemplateTest extends TestBase with Freemar
   def includesTheCountOfStudents{new NotificationFixture {
     val output =
       renderToString(SmallGroupSetChangedNotification.templateLocation,
-        Map("student" -> recipient, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
+				Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
     output should include("2 students")
   }}
 
@@ -55,7 +56,7 @@ class SmallGroupSetChangedNotificationTemplateTest extends TestBase with Freemar
   def rendersProfileUrlOnceOnly{new NotificationFixture {
     val output =
       renderToString(SmallGroupSetChangedNotification.templateLocation,
-        Map("student" -> recipient, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
+				Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
     verify(urlModel.mockDirective, times(1)).execute(anyObject(),anyMap,anyObject(),anyObject())
   }}
 
@@ -64,7 +65,7 @@ class SmallGroupSetChangedNotificationTemplateTest extends TestBase with Freemar
     new NotificationFixture {
       val output =
         renderToString(SmallGroupSetChangedNotification.templateLocation,
-          Map("student" -> recipient, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
+					Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
       verify(weekRangeFormatter.mock, times(2)).exec(anyList())
     }}
 
@@ -73,7 +74,7 @@ class SmallGroupSetChangedNotificationTemplateTest extends TestBase with Freemar
     new NotificationFixture {
       val output =
         renderToString(SmallGroupSetChangedNotification.templateLocation,
-          Map("student" -> recipient,"groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
+					Map("groups" -> groupSet1.groups, "groupSet" -> groupSet1, "profileUrl" -> "profileUrl"))
       verify(timeBuilder.mock, times(2)).exec(anyList())
     }}
 

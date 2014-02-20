@@ -9,11 +9,14 @@ import uk.ac.warwick.tabula.data.model.{Department, Member, StudentMember, Stude
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 /**
  * Service providing access to members and profiles.
  */
 trait RelationshipService {
+	def getPreviousRelationship(relationship: StudentRelationship): Option[StudentRelationship]
+
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType]
 	def saveOrUpdate(relationshipType: StudentRelationshipType)
 	def delete(relationshipType: StudentRelationshipType)
@@ -30,6 +33,7 @@ trait RelationshipService {
 	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def listStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def listAllStudentRelationshipsWithMember(agent: Member): Seq[StudentRelationship]
+	def listAllStudentRelationshipTypesWithStudentMember(student: StudentMember): Seq[StudentRelationshipType]
 	def listAllStudentRelationshipTypesWithMember(agent: Member): Seq[StudentRelationshipType]
 	def listStudentRelationshipsWithMember(relationshipType: StudentRelationshipType, agent: Member): Seq[StudentRelationship]
 	def listAllStudentRelationshipsWithUniversityId(agentId: String): Seq[StudentRelationship]
@@ -174,6 +178,11 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 			.filter(relationshipNotPermanentlyWithdrawn)
 	}
 
+	def listAllStudentRelationshipTypesWithStudentMember(student: StudentMember) = transactional(readOnly = true) {
+		memberDao.getAllRelationshipTypesByStudent(student)
+	}
+
+
 	def listAllStudentRelationshipTypesWithMember(agent: Member) = transactional(readOnly = true) {
 		memberDao.getAllRelationshipTypesByAgent(agent.universityId)
 	}
@@ -215,6 +224,20 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		allStudentRelationshipTypes.filter(_.defaultRdxType != null)
 	}
 
+	def getPreviousRelationship(relationship: StudentRelationship): Option[StudentRelationship] = {
+		relationship.studentMember.flatMap { student =>
+			val rels = getRelationships(relationship.relationshipType, student)
+			val sortedRels = rels.sortBy { _.startDate }
+
+			// Get the element before the current relationship
+			val index = sortedRels.indexOf(relationship)
+			if (index > 0) {
+				Some(sortedRels(index-1))
+			} else {
+				None
+			}
+		}
+	}
 }
 
 trait RelationshipServiceComponent {

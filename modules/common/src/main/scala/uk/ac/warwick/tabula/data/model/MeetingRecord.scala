@@ -51,5 +51,4 @@ class MeetingRecord extends AbstractMeetingRecord {
 	def pendingRevisionBy(member: Member) = isRejected && member == creator
 
 	// End of workflow definitions
-
 }

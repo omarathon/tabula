@@ -231,9 +231,9 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 	}
 
 	class MockNotificationService extends NotificationService {
-		var notifications: ListBuffer[Notification[_]] = new ListBuffer[Notification[_]]()
+		var notifications: ListBuffer[Notification[_,_]] = new ListBuffer[Notification[_,_]]()
 
-		override def push(n: Notification[_]) {
+		override def push(n: Notification[_,_]) {
 			notifications += n
 		}
 	}

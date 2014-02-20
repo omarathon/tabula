@@ -80,6 +80,20 @@ trait Logging {
 		}
 	}
 
+	/** Do some work, and log the description if an exception occurs.
+		* Useful to add context to an exception that occurs within a loop
+		* of things.
+		*/
+	protected def tryDescribe[A](desc: => String)(op: => A): A = {
+		try { op }
+		catch {
+			case e:Exception => {
+				logger.error(s"Exception while ${desc}")
+				throw e
+			}
+		}
+	}
+
 }
 
 object Logging {

@@ -1,8 +1,9 @@
 <#escape x as x?html>
 
-<#macro list studentCourseDetails meetings relationshipType>
+<#macro list studentCourseDetails meetings relationshipType viewerRelationshipTypes>
 	<#assign can_read_meetings = can.do_with_selector("Profiles.MeetingRecord.Read", studentCourseDetails, relationshipType) />
 	<#assign can_create_meetings = can.do_with_selector("Profiles.MeetingRecord.Create", studentCourseDetails, relationshipType) />
+	<#assign existingRelationship = ((studentCourseDetails.relationships(relationshipType))![])?size gt 0 />
 	<#assign can_create_scheduled_meetings = can.do_with_selector("Profiles.ScheduledMeetingRecord.Create", studentCourseDetails, relationshipType) />
 
 	<section class="meetings ${relationshipType.id}-meetings" data-target-container="${relationshipType.id}-meetings">
@@ -14,15 +15,32 @@
 			<#if can_create_meetings>
 				<a class="btn-like new" href="<@routes.meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Create a new record"><i class="icon-edit"></i> New record</a>
 			</#if>
-			<#if can_create_scheduled_meetings && features.scheduledMeetings>
+			<#if existingRelationship && can_create_scheduled_meetings && features.scheduledMeetings>
 				<a class="btn-like new" href="<@routes.create_scheduled_meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Schedule a meeting"><i class="icon-time"></i> Schedule</a>
+				<#if showIntro("scheduled-meetings", "anywhere")>
+					<#assign introText>
+						<p>You can now schedule meetings in advance
+							<#if viewerRelationshipTypes?has_content> with your ${viewerRelationshipTypes}</#if>
+						</p>
+					</#assign>
+					<a href="#"
+					   id="scheduled-meetings-intro"
+					   class="use-introductory auto"
+					   data-hash="${introHash("scheduled-meetings", "anywhere")}"
+					   data-title="Schedule Meetings"
+					   data-placement="bottom"
+					   data-html="true"
+					   data-content="${introText}"><i class="icon-question-sign"></i></a>
+				</#if>
 			</#if>
 
 		</div>
 		<#if can_read_meetings>
 			<#if meetings??>
-				<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
-				<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
+				<div class="list-controls">
+					<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
+					<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
+				</div>
 				<#list meetings as meeting>
 					<#assign deletedClasses><#if meeting.deleted>deleted muted</#if></#assign>
 					<#assign pendingAction = meeting.pendingActionBy(viewer) />
@@ -153,7 +171,12 @@
 </#macro>
 
 <#macro scheduledMeetingState meeting studentCourseDetails>
-	<#if meeting.pendingActionBy(viewer)>
+	<#if meeting.pendingAction && !meeting.pendingActionBy(viewer)>
+	<small class="muted">Pending confirmation. Submitted by ${meeting.creator.fullName}, <@fmt.date meeting.creationDate /></small>
+	<div class="alert alert-info">
+		${meeting.creator.fullName} needs to confirm that this meeting took place.
+	</div>
+	<#elseif meeting.pendingActionBy(viewer)>
 		<small class="muted">Pending confirmation. ${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>
 		<div class="alert alert-warning">
 			Please confirm whether this scheduled meeting took place.
@@ -186,12 +209,12 @@
 			<button type="submit" class="btn btn-primary">Submit</button>
 		</form>
 	<#elseif meeting.missed>
-		<div class="alert alert-error">
-			<p>Meeting did not take place.</p>
+		<div class="alert alert-error rejection">
 			<#if meeting.missedReason?has_content>
-				${meeting.missedReason}
+				<p> This meeting did not take place because: </p>
+				<blockquote class="reason">${meeting.missedReason}</blockquote>
 			<#else>
-				<em>No reason given</em>
+				<p> This meeting did not take place (no reason given) </p>
 			</#if>
 		</div>
 		<small class="muted">${(meeting.format.description)!"Unknown format"} between ${(meeting.relationship.agentName)!meeting.relationship.relationshipType.agentRole} and ${(meeting.relationship.studentMember.fullName)!"student"}. Created by ${meeting.creator.fullName}, <@fmt.date meeting.lastUpdatedDate /></small>

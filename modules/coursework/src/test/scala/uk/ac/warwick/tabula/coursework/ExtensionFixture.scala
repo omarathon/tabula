@@ -45,7 +45,9 @@ trait ExtensionFixture extends Mockito{
 	when(permissionsService.ensureUserGroupFor(department, ExtensionManagerRoleDefinition)) thenReturn extensionManagers
 	department.permissionsService = permissionsService
 
-	val module = new Module
+	val module = new Module {
+		override lazy val managers = new UserGroup()
+	}
 	module.department = department
 	module.code = "xxx"
 	val assignment = new Assignment

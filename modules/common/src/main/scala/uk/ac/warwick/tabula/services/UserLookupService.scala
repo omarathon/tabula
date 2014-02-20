@@ -23,7 +23,7 @@ trait UserLookupComponent {
 }
 
 trait AutowiringUserLookupComponent extends UserLookupComponent {
-	var userLookup = Wire[UserLookupService]
+	@transient var userLookup = Wire[UserLookupService]
 }
 
 trait UserLookupService extends UserLookupInterface {

@@ -20,7 +20,7 @@
 	Please print this report, obtain the signature of your Head of Department,
 	and return it to the Academic Office contact noted on the report screen. For further guidance please consult the guidance notes.</p>
 
-	<p>Once these points are uploaded to SITS you won't be able to change this information via Tabula.  If information does need to be amended later, please contact the Administrative Officer for <a href="http://www2.warwick.ac.uk/studentrecords"> Student Records</a>.</p>
+	<p>Once these points are uploaded to SITS you won't be able to change this information via Tabula.  If information does need to be amended later, please contact the Administrative Officer for <a href="http://warwick.ac.uk/studentrecords">Student Records</a>.</p>
 
 	<p>Are you sure you wish to upload these missed points?</p>
 

@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Value
 import org.joda.time.DateTime
-import scala.react.EventSource
+import uk.ac.warwick.tabula.Reactor
 import uk.ac.warwick.tabula.system.exceptions.HandledException
 import uk.ac.warwick.util.queue.QueueListener
 import org.springframework.beans.factory.InitializingBean
@@ -13,9 +13,10 @@ import org.codehaus.jackson.annotate.JsonAutoDetect
 import uk.ac.warwick.util.queue.conversion.ItemType
 import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.tabula.commands.Describable
-import uk.ac.warwick.tabula.commands.DescriptionImpl
 import uk.ac.warwick.tabula.events.Event
 import uk.ac.warwick.tabula.events.EventDescription
+import org.springframework.beans.BeanWrapperImpl
+import scala.beans.BeanProperty
 
 trait MaintenanceStatus {
 	def enabled: Boolean
@@ -38,7 +39,7 @@ trait MaintenanceModeService extends MaintenanceStatus {
 	 * An EventSource to which you can attach a listener to find
 	 * out when maintenance mode goes on and off.
 	 */
-	val changingState: EventSource[Boolean]
+	val changingState: Reactor.EventSource[Boolean]
 
 	/**
 	 * Returns an Exception object suitable for throwing when trying
@@ -73,7 +74,7 @@ class MaintenanceModeServiceImpl extends MaintenanceModeService with Logging {
 	var message: Option[String] = None
 
 	// for other classes to listen to changes to maintenance mode.
-	val changingState = EventSource[Boolean]
+	val changingState = Reactor.EventSource[Boolean]
 
 	def exception(callee: Describable[_]) = {
 		val m = EventDescription.generateMessage(Event.fromDescribable(callee))
@@ -119,27 +120,30 @@ class MaintenanceModeEnabledException(val until: Option[DateTime], val message: 
 @JsonAutoDetect
 class MaintenanceModeMessage {
 	// Warning: If you make this more complicated, you may break the Jackson auto-JSON stuff for the MaintenanceModeController
-	
+
 	def this(status: MaintenanceStatus) {
 		this()
-		
-		this.enabled = status.enabled
-		this.until = status.until map { _.getMillis } getOrElse(-1)
-		this.message = status.message.orNull
+
+		val bean = new BeanWrapperImpl(this)
+
+		bean.setPropertyValue("enabled", status.enabled)
+		bean.setPropertyValue("until", status.until map { _.getMillis } getOrElse(-1))
+		bean.setPropertyValue("message", status.message.orNull)
+
 	}
-	
-	var enabled: Boolean = _
-	var until: Long = _
-	var message: String = _
+
+	@BeanProperty var enabled: Boolean = _
+	@BeanProperty var until: Long = _
+	@BeanProperty var message: String = _
 }
 
 class MaintenanceModeListener extends QueueListener with InitializingBean with Logging {
-	
+
 		var queue = Wire.named[Queue]("settingsSyncTopic")
 		var service = Wire.auto[MaintenanceModeService]
-		
+
 		override def isListeningToQueue = true
-		override def onReceive(item: Any) {	
+		override def onReceive(item: Any) {
 				item match {
 						case copy: MaintenanceModeMessage => service.update(copy)
 						case _ =>

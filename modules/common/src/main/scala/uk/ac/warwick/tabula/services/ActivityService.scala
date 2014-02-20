@@ -13,18 +13,9 @@ import uk.ac.warwick.tabula.data.model.Module
 import org.apache.lucene.search.FieldDoc
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.ActivityService.PagedActivities
 
 object ActivityService {
-	/** wrapper class to turn ScoreDoc plus searcher id token into a
-	 *  tuple of simple values ready to pass as parameters
-	 */  
-	class PagedActivities(val activities: Seq[Activity[Any]], val doc: Option[FieldDoc], val token: Long, val total: Int) {
-		def getTokens: String = doc match {
-			case None => "empty"
-			case _ => doc.get.doc + "/" + doc.get.fields(0) + "/" + token
-		}
-	}
+	type PagedActivities = PagingSearchResultItems[Activity[_]]
 }
 
 /** At the moment, this uses AuditEvents as a proxy for things of interest,
@@ -35,6 +26,7 @@ object ActivityService {
  * */
 @Service
 class ActivityService {
+	import ActivityService._
 	
 	private val StreamSize = 8
 	
@@ -46,7 +38,7 @@ class ActivityService {
 	def getNoteworthySubmissions(user: CurrentUser): PagedActivities = {
 		val events = auditIndexService.noteworthySubmissionsForModules(getModules(user), None, None, StreamSize)
 		
-		new PagedActivities(events.docs flatMap (event => Activity(event)), events.last, events.token, events.total)
+		new PagedActivities(events.items flatMap (event => Activity(event)), events.last, events.token, events.total)
 	}
 	
 	// following pages
@@ -55,7 +47,7 @@ class ActivityService {
 		val scoreDoc = new FieldDoc(doc, Float.NaN, Array(field:JLong))
 		val events = auditIndexService.noteworthySubmissionsForModules(getModules(user), Option(scoreDoc), Option(token), StreamSize)
 		
-		new PagedActivities(events.docs flatMap (event => Activity(event)), events.last, events.token, events.total)
+		new PagedActivities(events.items flatMap (event => Activity(event)), events.last, events.token, events.total)
 	}
 	
 	private def getModules(user: CurrentUser): Seq[Module] = {

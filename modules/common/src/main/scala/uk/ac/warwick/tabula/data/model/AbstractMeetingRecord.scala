@@ -14,6 +14,17 @@ import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTar
 import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 
+trait MeetingRecordAttachments {
+	var attachments: JList[FileAttachment]
+
+	def removeAttachment(attachment: FileAttachment) = {
+		attachments.remove(attachment)
+	}
+
+	def removeAllAttachments() = attachments.clear()
+
+}
+
 object AbstractMeetingRecord {
 	// do not remove - import needed for sorting DateTimes
 	import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
@@ -23,7 +34,8 @@ object AbstractMeetingRecord {
 @Entity
 @Table(name = "meetingrecord")
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
-class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted with FormattedHtml {
+class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted with FormattedHtml with ToEntityReference with MeetingRecordAttachments {
+	type Entity = AbstractMeetingRecord
 
 	def isScheduled: Boolean = this match {
 		case (m: ScheduledMeetingRecord) => true
@@ -82,6 +94,7 @@ class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToSt
 		"creationDate" -> creationDate,
 		"relationship" -> relationship)
 
+	override def toEntityReference = new MeetingRecordEntityReference().put(this)
 }
 
 sealed abstract class MeetingFormat(val code: String, val description: String) {

@@ -1,12 +1,12 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.data.model.MeetingRecord
+import uk.ac.warwick.tabula.data.model.{Notification, MeetingRecord}
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
 import scala.language.implicitConversions
-import uk.ac.warwick.tabula.profiles.notifications.MeetingRecordApprovalNotification
+import uk.ac.warwick.tabula.data.model.notifications.EditedMeetingRecordApprovalNotification
 
 class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
 	extends ModifyMeetingRecordCommand(meetingRecord.creator, meetingRecord.relationship) with FormattedHtml {
@@ -34,5 +34,7 @@ class EditMeetingRecordCommand(meetingRecord: MeetingRecord)
 		}
 	}
 
-	def emit(meeting: MeetingRecord) = Seq(new MeetingRecordApprovalNotification(meeting, "edit"))
+	def emit(meeting: MeetingRecord) = Seq(
+		Notification.init(new EditedMeetingRecordApprovalNotification, creator.asSsoUser, Seq(meeting), relationship)
+	)
 }

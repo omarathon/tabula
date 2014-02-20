@@ -1,16 +1,65 @@
 package uk.ac.warwick.tabula.data.model
 
-import uk.ac.warwick.tabula.Mockito
-import uk.ac.warwick.tabula.TestBase
+import uk.ac.warwick.tabula.{PersistenceTestBase, Fixtures}
 import org.joda.time.DateTimeConstants
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.Fixtures
+import collection.JavaConversions._
 
 // scalastyle:off magic.number
-class MeetingRecordTest extends TestBase with Mockito {
+class MeetingRecordTest extends PersistenceTestBase {
 	
 	val aprilFool = dateTime(2013, DateTimeConstants.APRIL)
-	
+
+	@Test def deleteFileAttachmentOnDelete = transactional {ts=>
+		val orphanAttachment = flushing(session) {
+			val attachment = new FileAttachment
+			session.save(attachment)
+			attachment
+		}
+
+		val (creator, relationship) = flushing(session){
+			val creator = new StaffMember(id = idFormat(1))
+			creator.userId = idFormat(11)
+			val relationship = new ExternalStudentRelationship
+			session.save(creator)
+			session.save(relationship)
+			(creator, relationship)
+		}
+
+		val (meetingRecord, meetingRecordkAttachment) = flushing(session) {
+			val meetingRecord = new MeetingRecord(creator, relationship)
+			meetingRecord.id = idFormat(2)
+
+			val attachment = new FileAttachment
+			meetingRecord.attachments = List(attachment)
+
+			session.save(meetingRecord)
+			(meetingRecord, attachment)
+		}
+
+		// Ensure everything's been persisted
+		orphanAttachment.id should not be (null)
+		meetingRecord.id should not be (null)
+		meetingRecordkAttachment.id should not be (null)
+
+		// Can fetch everything from db
+		flushing(session) {
+			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
+			session.get(classOf[MeetingRecord], meetingRecord.id) should be (meetingRecord)
+			session.get(classOf[FileAttachment], meetingRecordkAttachment.id) should be (meetingRecordkAttachment)
+		}
+
+		flushing(session) { session.delete(meetingRecord) }
+
+		// Ensure we can't fetch the feedback or attachment, but all the other objects are returned
+		flushing(session) {
+			session.get(classOf[FileAttachment], orphanAttachment.id) should be (orphanAttachment)
+			session.get(classOf[MeetingRecord], meetingRecord.id) should be (null)
+			session.get(classOf[FileAttachment], meetingRecordkAttachment.id) should be (null)
+		}
+	}
+
+
+
 	@Test def defaultConstructor = withFakeTime(aprilFool) {
 		val meeting = new MeetingRecord
 		
@@ -43,4 +92,7 @@ class MeetingRecordTest extends TestBase with Mockito {
 		meeting.format should be (null)
 		meeting should be ('approved)
 	}
+
+	/** Zero-pad integer to a 7 digit string */
+	def idFormat(i:Int) = "%07d" format i
 }

@@ -7,10 +7,10 @@ import uk.ac.warwick.tabula.data.model.Notification
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.groups.notifications.ReleaseSmallGroupSetsNotification
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.data.model.notifications.ReleaseSmallGroupSetsNotification
 
 trait ReleaseSmallGroupSetCommand extends Appliable[Seq[ReleasedSmallGroupSet]] {
 	def describeOutcome:Option[String]
@@ -40,7 +40,7 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
     }
   }
 
-	def emit(releasedSets: Seq[ReleasedSmallGroupSet]): Seq[Notification[Seq[SmallGroup]]] = {		
+	def emit(releasedSets: Seq[ReleasedSmallGroupSet]): Seq[ReleaseSmallGroupSetsNotification] = {
 		val tutorNotifications = 
 			for {
 				releasedSet <- releasedSets
@@ -48,7 +48,13 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
 				group <- releasedSet.set.groups.asScala
 				event <- group.events.asScala
 				tutor <- event.tutors.users
-			} yield new ReleaseSmallGroupSetsNotification(List(group), currentUser, tutor, isStudent = false) with FreemarkerTextRenderer
+			} yield {
+				val n = Notification.init(new ReleaseSmallGroupSetsNotification(), currentUser, List(group))
+					.tap { _.isStudent = false }
+				n.recipientUserId = tutor.getUserId
+				n
+			}
+
 
 		val studentNotifications =
 			for {
@@ -56,7 +62,12 @@ class ReleaseGroupSetCommandImpl(val groupsToPublish:Seq[SmallGroupSet], private
 				if releasedSet.releasedToStudents
 				group <- releasedSet.set.groups.asScala
 				student <- group.students.users
-			} yield new ReleaseSmallGroupSetsNotification(List(group), currentUser, student, isStudent = true) with FreemarkerTextRenderer
+			} yield {
+				val n = Notification.init(new ReleaseSmallGroupSetsNotification(), currentUser, List(group))
+					.tap { _.isStudent = true }
+				n.recipientUserId = student.getUserId
+				n
+			}
 		
 		studentNotifications ++ tutorNotifications
 	}

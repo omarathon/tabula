@@ -12,34 +12,34 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.ProfileService
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
-@Entity @AccessType("field")
-class Extension extends GeneratedId with PermissionsTarget {
 
-	def this(universityId: String = null) {
+@Entity @AccessType("field")
+class Extension extends GeneratedId with PermissionsTarget with ToEntityReference {
+
+	type Entity = Extension
+
+	def this(universityId:String=null) {
 		this()
 		this.universityId = universityId
 	}
 
-	@transient
-	var profileService = Wire[ProfileService]
-
-	@transient
-	lazy val workingDaysHelper = new WorkingDaysHelperImpl
-
-	@ManyToOne(optional = false, cascade = Array(PERSIST,MERGE), fetch = FetchType.LAZY)
-	@JoinColumn(name = "assignment_id")
-	var assignment: Assignment = _
+	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
+	@JoinColumn(name="assignment_id")
+	var assignment:Assignment = _
+	
+	def permissionsParents = Option(assignment).toStream
 
 	@NotNull
 	var userId: String = _
 
 	@NotNull
 	var universityId: String = _
+
+	def isForUser(user: User): Boolean = isForUser(user.getWarwickId, user.getUserId)
+	def isForUser(theUniversityId: String, theUsercode: String): Boolean = universityId == theUniversityId || userId == theUsercode
 
 	// TODO should there be a single def that returns the expiry date for approved/manual extensions, and requested expiry date otherwise?
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
@@ -62,11 +62,6 @@ class Extension extends GeneratedId with PermissionsTarget {
 	@OneToMany(mappedBy = "extension", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)
 	var attachments: JSet[FileAttachment] = JSet()
-
-	def isForUser(user: User): Boolean = isForUser(user.getWarwickId, user.getUserId)
-	def isForUser(theUniversityId: String, theUsercode: String): Boolean = universityId == theUniversityId || userId == theUsercode
-
-	def permissionsParents = Option(assignment).toStream
 
 	def nonEmptyAttachments = attachments.toSeq filter(_.hasData)
 
@@ -109,8 +104,13 @@ class Extension extends GeneratedId with PermissionsTarget {
 		}
 	}
 
+	@transient
+	lazy val workingDaysHelper = new WorkingDaysHelperImpl
+
 	// feedback deadline taking the extension into account
 	def feedbackDeadline = workingDaysHelper.datePlusWorkingDays(expiryDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays).toDateTime(expiryDate)
+
+	def toEntityReference = new ExtensionEntityReference().put(this)
 }
 
 

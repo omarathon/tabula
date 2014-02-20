@@ -8,6 +8,7 @@ import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.R
 import uk.ac.warwick.tabula.commands.UserAware
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.coursework.commands.assignments.{ReleaseForMarkingState, FirstMarkerReleaseNotifier}
+import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
 
 
 class ReleaseForMarkingNotifiesTest extends TestBase with Mockito {
@@ -43,15 +44,19 @@ class ReleaseForMarkingNotifiesTest extends TestBase with Mockito {
 			var userLookup = mockUserLookup
 		}
 
-		val notifications:Seq[Notification[Seq[MarkerFeedback]]]  = notifier.emit(List())
+		val notifications  = notifier.emit(List())
+
+		notifications.foreach {
+			case n: ReleaseToMarkerNotification => n.userLookup = mockUserLookup
+		}
 
 		notifications.size should be(2)
 		notifications(0).recipients should contain(marker2)
-		notifications(0)._object should contain(mf3)
-		notifications(0)._object should contain(mf4)
+		notifications(0).entities should contain(mf3)
+		notifications(0).entities should contain(mf4)
 		notifications(1).recipients should contain(marker1)
-		notifications(1)._object should contain(mf1)
-		notifications(1)._object should contain(mf2)
+		notifications(1).entities should contain(mf1)
+		notifications(1).entities should contain(mf2)
 
 	}}
 

@@ -91,21 +91,16 @@
 				<@f.input path="requestedExpiryDate" cssClass="date-time-picker" />
 			</@form.labelled_row>
 
-			<@form.labelled_row "file.upload" "Upload supporting documentation relevant to your request">
-				<input type="file" name="file.upload" multiple />
-				<div id="multifile-column-description" class="help-block">
-					<#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
-				</div>
-			</@form.labelled_row>
+			<@form.filewidget basename="file" labelText="Upload supporting documentation relevant to your request" types=[] multiple=true />
 
 			<#if command.attachedFiles?has_content >
 				<@form.labelled_row "attachedFiles" "Supporting documents">
 				<ul>
 					<#list command.attachedFiles as attachment>
 						<li id="attachment-${attachment.id}" class="attachment">
-							<a href="<@routes.extensionrequestattachment assignment=assignment filename=attachment.name />">
+							<a href="<@routes.extensionrequestattachment assignment=assignment filename=attachment.name />"><#compress>
 								${attachment.name}
-							</a>&nbsp;
+							</#compress></a>&nbsp;
 							<@f.hidden path="attachedFiles" value="${attachment.id}" />
 							<a class="remove-attachment" href="">Remove</a>
 						</li>

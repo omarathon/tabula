@@ -26,7 +26,7 @@ trait NotificationHandling {
 	 * For edge cases where manual notifications need to be made outside commands.
 	 * Use the command-triggered mixin above where possible for better type safety.
 	 */
-	def notify[A](notifications: Seq[Notification[A]]) {
+	def notify[A](notifications: Seq[Notification[_, _]]) {
 		notifications.foreach { n => notificationService.push(n) }
 	}
 }

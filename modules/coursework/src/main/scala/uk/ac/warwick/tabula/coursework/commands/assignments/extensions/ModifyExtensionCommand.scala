@@ -2,9 +2,8 @@ package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
 import uk.ac.warwick.tabula.commands.{Notifies, Description, Command, SelfValidating}
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
-import uk.ac.warwick.tabula.data.model.{StudentMember, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{Notification, Assignment, Module}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.helpers.{LazyLists, Logging}
 import uk.ac.warwick.tabula.data.Transactions._
@@ -16,9 +15,8 @@ import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.notifications._
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.validators.WithinYears
+import uk.ac.warwick.tabula.data.model.notifications.{ExtensionRequestRespondedApproveNotification, ExtensionRequestRejectedNotification, ExtensionRequestApprovedNotification, ExtensionChangedNotification, ExtensionGrantedNotification}
 
 /*
  * Built the command as a bulk operation. Single additions can be achieved by adding only one extension to the list.
@@ -30,8 +28,7 @@ class AddExtensionCommand(module: Module, assignment: Assignment, submitter: Cur
 	PermissionCheck(Permissions.Extension.Create, assignment)
 
 	def emit(extensions: Seq[Extension]) = extensions.map({extension =>
-		val student = userLookup.getUserByWarwickUniId(extension.universityId)
-		new ExtensionGrantedNotification(extension, student, submitter.apparentUser) with FreemarkerTextRenderer
+		Notification.init(new ExtensionGrantedNotification, submitter.apparentUser, Seq(extension), extension.assignment)
 	})
 }
 
@@ -43,18 +40,23 @@ class EditExtensionCommand(module: Module, assignment: Assignment, val extension
 	copyExtensions(List(extension))
 
 	def emit(extensions: Seq[Extension]) = extensions.flatMap({extension =>
-			val student = userLookup.getUserByWarwickUniId(extension.universityId)
 			val admin = submitter.apparentUser
 
-			val studentNotification = if(extension.isManual){
-				new ExtensionChangedNotification(extension, student, admin) with FreemarkerTextRenderer
+			val baseNotification = if (extension.isManual){
+				new ExtensionChangedNotification
 			} else if (extension.approved) {
-				new ExtensionRequestApprovedNotification(extension, student, admin) with FreemarkerTextRenderer
+				new ExtensionRequestApprovedNotification
 			} else {
-				new ExtensionRequestRejectedNotification(extension, student, admin) with FreemarkerTextRenderer
+				new ExtensionRequestRejectedNotification
 			}
+			val studentNotification = Notification.init(baseNotification, admin, Seq(extension), extension.assignment)
 
-			val adminNotifications = new ExtensionRequestRespondedNotification(extension, student, admin) with FreemarkerTextRenderer
+			val baseAdminNotification = if (extension.approved) {
+				new ExtensionRequestRespondedApproveNotification
+			} else {
+				new ExtensionRequestRespondedApproveNotification
+			}
+			val adminNotifications = Notification.init(baseAdminNotification, admin, Seq(extension), extension.assignment)
 
 		Seq(studentNotification, adminNotifications)
 	})
@@ -102,7 +104,7 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 			extension
 		}
 
-		val extensionList = extensionItems map (retrieveExtension(_))
+		val extensionList = extensionItems map (ex => retrieveExtension(ex))
 		extensionList.toList
 	}
 

@@ -57,8 +57,17 @@ object Assignment {
 @Filter(name = Assignment.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class Assignment extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with PostLoadBehaviour with Serializable {
+class Assignment
+		extends GeneratedId
+		with CanBeDeleted
+		with ToString
+		with PermissionsTarget
+		with PostLoadBehaviour
+		with Serializable
+		with ToEntityReference {
 	import Assignment._
+
+	type Entity = Assignment
 
 	@transient
 	var assignmentService = Wire[AssignmentService]("assignmentService")
@@ -276,6 +285,28 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 	 */
 	def isLate(submission: Submission) =
 		!openEnded && closeDate.isBefore(submission.submittedDate) && !isWithinExtension(submission.universityId, submission.userId, submission.submittedDate)
+
+	/**
+	 * Deadline taking into account any approved extension
+	 */
+	def submissionDeadline(submission: Submission) =
+		if (openEnded) null
+		else extensions.find(e => e.isForUser(submission.universityId, submission.userId) && e.approved).map(_.expiryDate).getOrElse(closeDate)
+
+	def workingDaysLate(submission: Submission) =
+		if (isLate(submission)) {
+			val deadline = submissionDeadline(submission)
+
+			val offset =
+				if (deadline.toLocalTime.isAfter(submission.submittedDate.toLocalTime)) -1
+				else 0
+
+			val daysLate = workingDaysHelper.getNumWorkingDays(deadline.toLocalDate, submission.submittedDate.toLocalDate) + offset
+			val lateDay = workingDaysHelper.datePlusWorkingDays(deadline.toLocalDate, daysLate)
+
+			if (lateDay.isBefore(submission.submittedDate.toLocalDate)) daysLate + 1
+			else daysLate
+		} else 0
 
 	/**
 	 * retrospectively checks if a submission was an 'authorised late'
@@ -501,12 +532,14 @@ class Assignment extends GeneratedId with CanBeDeleted with ToString with Permis
 		"closeDate" -> closeDate,
 		"module" -> module)
 
-    def getUniIdsWithSubmissionOrFeedback = {
-				val submissionIds = submissions.asScala.map { _.universityId }.toSet
-				val feedbackIds = fullFeedback.map { _.universityId }.toSet
-				
-				submissionIds ++ feedbackIds
-    }
+	def getUniIdsWithSubmissionOrFeedback = {
+			val submissionIds = submissions.asScala.map { _.universityId }.toSet
+			val feedbackIds = fullFeedback.map { _.universityId }.toSet
+
+			submissionIds ++ feedbackIds
+	}
+
+	def toEntityReference = new AssignmentEntityReference().put(this)
 
 }
 

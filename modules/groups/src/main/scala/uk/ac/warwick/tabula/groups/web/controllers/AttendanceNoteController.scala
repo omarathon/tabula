@@ -99,7 +99,7 @@ class EditAttendanceNoteController extends GroupsController {
 	) = {
 		val mav = Mav("groups/attendance/edit_note",
 			"allAbsenceTypes" -> AbsenceType.values,
-			"returnTo" -> getReturnTo(Routes.tutor.mygroups(user.apparentUser)),
+			"returnTo" -> getReturnTo(Routes.tutor.mygroups),
 			"isModal" -> ajax,
 			"isIframe" -> isIframe
 		)
@@ -133,7 +133,7 @@ class EditAttendanceNoteController extends GroupsController {
 			form(cmd)
 		} else {
 			cmd.apply()
-			Redirect(Routes.tutor.mygroups(user.apparentUser))
+			Redirect(Routes.tutor.mygroups)
 		}
 	}
 

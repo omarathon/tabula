@@ -201,7 +201,7 @@ abstract class AbstractIndexService[A]
 		}
 	}
 
-	protected def listNewerThan(startDate: DateTime, batchSize: Int): Seq[A]
+	protected def listNewerThan(startDate: DateTime, batchSize: Int): Traversable[A]
 
 	def indexFrom(startDate: DateTime) = transactional(readOnly = true) {
 		ifNotIndexing {
@@ -212,22 +212,27 @@ abstract class AbstractIndexService[A]
 	/**
 	 * Indexes a specific given list of items.
 	 */
-	def indexItems(items: Seq[A]) = transactional(readOnly = true) {
+	def indexItems(items: Traversable[A]) = transactional(readOnly = true) {
 		ifNotIndexing { doIndexItems(items, false) }
 	}
 
-	def indexItemsWithoutNewTransaction(items: Seq[A]) =  {
+	def indexItemsWithoutNewTransaction(items: Traversable[A]) =  {
 		ifNotIndexing { doIndexItems(items, false) }
 	}
 
-	private def doIndexItems(items: Seq[A], isIncremental: Boolean) {
+	private def doIndexItems(items: Traversable[A], isIncremental: Boolean) {
 		logger.debug("Writing to the index at " + indexPath + " with analyzer " + indexAnalyzer)
 		val writerConfig = new IndexWriterConfig(LuceneVersion, indexAnalyzer)
 		closeThis(new IndexWriter(openDirectory(), writerConfig)) { writer =>
 			for (item <- items) {
-				if (isIncremental)
-					doUpdateMostRecent(item)
-				writer.updateDocument(uniqueTerm(item), toDocument(item))
+				tryDescribe(s"indexing ${item}") {
+					if (isIncremental) {
+						doUpdateMostRecent(item)
+					}
+					toDocuments(item).foreach { doc =>
+						writer.updateDocument(uniqueTerm(item), doc)
+					}
+				}
 			}
 			if (debugEnabled) logger.debug("Indexed " + items.size + " items")
 		}
@@ -280,11 +285,32 @@ abstract class AbstractIndexService[A]
 	/**
 	 * TODO reuse one Document and set of Fields for all items
 	 */
-	protected def toDocument(item: A): Document
+	protected def toDocuments(item: A): Seq[Document]
 
 	protected def toId(doc: Document) = documentValue(doc, IdField)
 	protected def toItems(docs: Seq[Document]): Seq[A]
 
+}
+
+case class PagingSearchResultItems[A](items: Seq[A], lastscore: Option[ScoreDoc], token: Long, total: Int) {
+	// need this pattern matcher as brain-dead IndexSearcher.searchAfter returns an object containing ScoreDocs,
+	// and expects a ScoreDoc in its method signature, yet in its implementation throws an exception unless you
+	// pass a specific subclass of FieldDoc.
+	def last: Option[FieldDoc] = lastscore match {
+		case None => None
+		case Some(f:FieldDoc) => Some(f)
+		case _ => throw new ClassCastException("Lucene did not return an Option[FieldDoc] as expected")
+	}
+
+	def getTokens: String = last.map { lastscore =>
+		lastscore.doc + "/" + lastscore.fields(0) + "/" + token
+	}.getOrElse("empty")
+}
+
+case class PagingSearchResult(results: RichSearchResults, last: Option[ScoreDoc], token: Long, total: Int) {
+	// Turn results containing documents into results containing actual items.
+	def transformAll[A](fn: (Seq[Document] => Seq[A] )) =
+		PagingSearchResultItems[A](results.transformAll(fn), last, token, total)
 }
 
 trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: AbstractIndexService[A] =>
@@ -399,8 +425,6 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 		hits.toStream.drop(offset).take(max).map { hit => searcher.doc(hit.doc) }.toList
 	}
 
-	case class PagingSearchResult(val results: RichSearchResults, val last: Option[ScoreDoc], val token: Long, val total: Int)
-
 	private def doPagingSearch(query: Query, max: Option[Int], sort: Option[Sort], lastDoc: Option[ScoreDoc], token: Option[Long]): PagingSearchResult = {
 		// guard
 		initialiseSearching
@@ -443,7 +467,7 @@ trait SearchHelpers[A] extends Logging with RichSearchResultsCreator { self: Abs
 				newToken = searcherLifetimeManager.record(searcher)
 			}
 			case Some(t) => {
-				searcher = searcherLifetimeManager.acquire(token.get)
+				searcher = searcherLifetimeManager.acquire(t)
 				newToken = t
 			}
 		}

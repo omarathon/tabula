@@ -2,11 +2,11 @@ package uk.ac.warwick.tabula.profiles.commands
 
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.ScheduledMeetingRecord
+import uk.ac.warwick.tabula.data.model.{Notification, ScheduledMeetingRecord}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.services.{AutowiringMeetingRecordServiceComponent, MeetingRecordServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
-import uk.ac.warwick.tabula.profiles.notifications.ScheduledMeetingRecordMissedInviteeNotification
+import uk.ac.warwick.tabula.data.model.notifications.ScheduledMeetingRecordMissedInviteeNotification
 
 object ScheduledMeetingRecordMissedCommand {
 	def apply(meetingRecord: ScheduledMeetingRecord) =
@@ -66,8 +66,10 @@ trait ScheduledMeetingRecordMissedDescription extends Describable[ScheduledMeeti
 trait ScheduledMeetingRecordMissedNotification extends Notifies[ScheduledMeetingRecord, ScheduledMeetingRecord] {
 	self: ScheduledMeetingRecordMissedState =>
 
-	def emit(meeting: ScheduledMeetingRecord) =
-		Seq(new ScheduledMeetingRecordMissedInviteeNotification(meeting, "missed"))
+	def emit(meeting: ScheduledMeetingRecord) = {
+		val user = meeting.creator.asSsoUser
+		Seq(Notification.init(new ScheduledMeetingRecordMissedInviteeNotification(), user, meeting, meeting.relationship))
+	}
 }
 
 trait ScheduledMeetingRecordMissedState {
