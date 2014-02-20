@@ -4,7 +4,6 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.commands.CreateMeetingRecordCommand
-import scala.Some
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.ItemNotFoundException
@@ -20,7 +19,7 @@ class CreateMeetingRecordController extends ProfilesController
 	@ModelAttribute("command")
 	def getCommand(@PathVariable("relationshipType") relationshipType: StudentRelationshipType,
 				   @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =  {
-		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails).sprCode) match {
+		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails).student) match {
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
 				// Go through the relationships for this SPR code and find one where the current user is the agent.

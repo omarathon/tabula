@@ -36,7 +36,7 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	@Basic(optional = false)
 	var name: String = null
 
-	@ManyToOne(optional = false)
+	@ManyToOne(optional = false, fetch = FetchType.LAZY)
 	@JoinColumn(name = "department_id")
 	var department: Department = null
 
@@ -45,14 +45,14 @@ abstract class MarkingWorkflow extends GeneratedId with PermissionsTarget {
 	def onlineMarkingUrl(assignment:Assignment, marker: User) : String
 
 	/** The group of first markers. */
-	@OneToOne(cascade = Array(CascadeType.ALL))
+	@OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "firstmarkers_id")
 	var firstMarkers = UserGroup.ofUsercodes
 
 	/** The second group of markers. May be unused if the marking workflow
 	  * only has one marking stage.
 	  */
-	@OneToOne(cascade = Array(CascadeType.ALL))
+	@OneToOne(cascade = Array(CascadeType.ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "secondmarkers_id")
 	var secondMarkers = UserGroup.ofUsercodes
 

@@ -5,6 +5,8 @@ import uk.ac.warwick.tabula.data.model.{StaffMember, StudentRelationship, Studen
 import uk.ac.warwick.tabula.helpers.Tap
 import Tap.tap
 import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService}
+import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.data.model.MemberStudentRelationship
 
 class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
 
@@ -15,26 +17,24 @@ class ViewStudentRelationshipsCommandTest extends TestBase with Mockito {
 		val departmentOfXXX = new Department().tap(_.code = "xxx")
 		val tutorRelType = new StudentRelationshipType().tap(_.description = "tutor")
 
-		val studentRel1 = new StudentRelationship().tap(r => {
-			r.id = "1"
-			r.agent = "111"
-			r.targetSprCode = "1"
-			r.profileService = profileService
-		})
-
-		val studentRel2 = new StudentRelationship().tap(r => {
-			r.id = "2"
-			r.agent = "222"
-			r.targetSprCode = "2"
-			r.profileService = profileService
-		})
-
 		// give them both the same surname, just to prove that we don't accidentally merge users when sorting
 		val staff1 = new StaffMember(id = "111").tap(_.lastName = "Smith")
 		val staff2 = new StaffMember(id = "222").tap(_.lastName = "Smith")
+		
+		val student1 = Fixtures.student(universityId = "1")
+		val student2 = Fixtures.student(universityId = "2")
 
-		profileService.getMemberByUniversityId("111") returns Some(staff1)
-		profileService.getMemberByUniversityId("222") returns Some(staff2)
+		val studentRel1 = new MemberStudentRelationship().tap(r => {
+			r.id = "1"
+			r.agentMember = staff1
+			r.studentMember = student1
+		})
+
+		val studentRel2 = new MemberStudentRelationship().tap(r => {
+			r.id = "2"
+			r.agentMember = staff2
+			r.studentMember = student2
+		})
 	}
 
 	@Test //thisTestHasARidculouslyLongNameButICantThinkOfASensibleWayToShortenItWhichProbablyMeansTheCommandNeedsRefactoring...

@@ -14,6 +14,7 @@ import uk.ac.warwick.tabula.commands.UserAware
 import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.ReleasedState
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
 
 /*
  * Fixed this test by replacing the full appcontext with a minimal functional one as below.
@@ -124,15 +125,18 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			var userLookup = mockUserLookup
 		}
 
-		val notifications:Seq[Notification[Seq[MarkerFeedback]]]  = notifier.emit()
+		val notifications = notifier.emit()
+		notifications.foreach {
+			case n:ReleaseToMarkerNotification => n.userLookup = mockUserLookup
+		}
 
 		notifications.size should be(2)
 		notifications(0).recipients should contain(marker3)
-		notifications(0)._object should contain(mf3)
-		notifications(0)._object should contain(mf4)
+		notifications(0).entities should contain(mf3)
+		notifications(0).entities should contain(mf4)
 		notifications(1).recipients should contain(marker2)
-		notifications(1)._object should contain(mf1)
-		notifications(1)._object should contain(mf2)
+		notifications(1).entities should contain(mf1)
+		notifications(1).entities should contain(mf2)
 
 	}}
 

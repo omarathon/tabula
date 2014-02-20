@@ -1,27 +1,25 @@
 package uk.ac.warwick.tabula.groups.notifications
 
-import org.junit.Test
-import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup}
+
+import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.groups.SmallGroupFixture
-import org.mockito.Mockito._
-
-import uk.ac.warwick.tabula.web.views.TextRenderer
-import org.mockito.{ArgumentCaptor, Matchers}
 import uk.ac.warwick.tabula.groups.web.Routes
+import uk.ac.warwick.tabula.data.model.notifications.ReleaseSmallGroupSetsNotification
+import uk.ac.warwick.tabula.data.model.Notification
 
 class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito{
 
   val TEST_CONTENT = "test"
-  def createNotification(group:SmallGroup, actor:User,recipient:User, isStudent:Boolean = true):ReleaseSmallGroupSetsNotification with MockRenderer = {
-    createMultiGroupNotification(Seq(group), actor, recipient, isStudent)
-  }
+  def createNotification(group:SmallGroup, actor:User,recipient:User, isStudent:Boolean = true) =
+		createMultiGroupNotification(Seq(group), actor, recipient, isStudent)
 
-  def createMultiGroupNotification(groups:Seq[SmallGroup], actor:User,recipient:User, isStudent:Boolean = true) = {
-    val n = new ReleaseSmallGroupSetsNotification(groups, actor, recipient, isStudent) with MockRenderer
-    when(n.mockRenderer.renderTemplate(any[String],any[Any])).thenReturn(TEST_CONTENT)
-    n
+  def createMultiGroupNotification(groups:Seq[SmallGroup], actor:User,recipient:User, isStudent:Boolean = true): ReleaseSmallGroupSetsNotification = {
+    val n = Notification.init(new ReleaseSmallGroupSetsNotification, actor, groups)
+    n.recipientUserId = recipient.getUserId
+		n.isStudent = isStudent
+		n
   }
 
   @Test
@@ -43,51 +41,39 @@ class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito{
   }}
 
   @Test(expected = classOf[IllegalArgumentException])
-  def cantCreateANotificationWithNoGroups(){new SmallGroupFixture{
-    val n = createMultiGroupNotification(Nil,actor, recipient)
+  def cantCreateANotificationWithNoGroups(){ new SmallGroupFixture{
+    val n = createMultiGroupNotification(Nil, actor, recipient)
+		n.preSave(true)
   }}
 
   @Test
   def urlIsProfilePageForStudents():Unit = new SmallGroupFixture{
 
     val n =  createNotification(group1, actor, recipient, isStudent = true)
-    n.url should be("/profiles/view/recipient")
+    n.url should be("/profiles/view/me")
 
   }
 
   @Test
   def urlIsMyGroupsPageForTutors():Unit = new SmallGroupFixture{
-
     val n =  createNotification(group1, actor, recipient, isStudent = false)
-    n.url should be("/groups" + Routes.tutor.mygroups(recipient))
-
+    n.url should be("/groups" + Routes.tutor.mygroups)
   }
 
   @Test
   def shouldCallTextRendererWithCorrectTemplate():Unit = new SmallGroupFixture {
     val n = createNotification(group1, actor, recipient)
-
-    n.content should be (TEST_CONTENT)
-
-    verify(n.mockRenderer, times(1)).renderTemplate(
-      Matchers.eq("/WEB-INF/freemarker/notifications/release_small_group_notification.ftl"),
-      any[Map[String,Any]])
+		n.userLookup = userLookup
+    n.content.template should be ("/WEB-INF/freemarker/notifications/release_small_group_notification.ftl")
   }
 
   @Test
   def shouldCallTextRendererWithCorrectModel():Unit = new SmallGroupFixture {
-    val model = ArgumentCaptor.forClass(classOf[Map[String,Any]])
     val n = createNotification(group1, actor, recipient)
-
-    n.content should be (TEST_CONTENT)
-
-    verify(n.mockRenderer, times(1)).renderTemplate(
-      any[String],
-      model.capture())
-
-    model.getValue.get("user") should be(Some(recipient))
-    model.getValue.get("profileUrl") should be(Some("/profiles/view/recipient"))
-    model.getValue.get("groups") should be(Some(List(group1)))
+		n.userLookup = userLookup
+    n.content.model.get("user") should be(Some(recipient))
+    n.content.model.get("profileUrl") should be(Some("/profiles/view/me"))
+    n.content.model.get("groups") should be(Some(List(group1)))
   }
 }
 

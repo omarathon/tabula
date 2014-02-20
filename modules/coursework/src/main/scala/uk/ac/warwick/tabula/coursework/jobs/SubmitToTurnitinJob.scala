@@ -6,18 +6,18 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.commands.Describable
 import uk.ac.warwick.tabula.coursework.commands.turnitin.TurnitinTrait
-import uk.ac.warwick.tabula.data.model.{Assignment, OriginalityReport}
+import uk.ac.warwick.tabula.data.model.{Notification, Assignment, OriginalityReport}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.services.jobs.JobInstance
 import uk.ac.warwick.tabula.coursework.services.turnitin.Turnitin._
 import uk.ac.warwick.tabula.coursework.services.turnitin._
-import uk.ac.warwick.tabula.web.views.{FreemarkerTextRenderer, FreemarkerRendering}
+import uk.ac.warwick.tabula.web.views.FreemarkerRendering
 import uk.ac.warwick.tabula.jobs._
 import java.util.HashMap
 import uk.ac.warwick.tabula.services.OriginalityReportService
 import language.implicitConversions
-import uk.ac.warwick.tabula.coursework.jobs.notifications.{TurnitinClassDeletedNotification, TurnitinJobSuccessNotification, TurnitinJobErrorNotification}
+import uk.ac.warwick.tabula.data.model.notifications.{TurnitinJobSuccessNotification, TurnitinJobErrorNotification, TurnitinClassDeletedNotification}
 
 object SubmitToTurnitinJob {
 	val identifier = "turnitin-submit"
@@ -88,7 +88,10 @@ class SubmitToTurnitinJob extends Job
 				debug(s"${classId.value} is deleted on Turnitin...")
 				if (sendNotifications) {
 					debug("Sending an email to " + job.user.email)
-					pushNotification(job, new TurnitinClassDeletedNotification(assignment, job.user.apparentUser, className, classId) with FreemarkerTextRenderer)
+					val notification = Notification.init(new TurnitinClassDeletedNotification, job.user.apparentUser, Seq[OriginalityReport](), assignment)
+					notification.className.value = className.value
+					notification.classId.value = classId.value
+					pushNotification(job, notification)
 				}
 				throw new FailedJobException(s"Failed. The class corresponding to the module ${assignment.module.code.toUpperCase} has been deleted by someone on Turnitin.")
 			}
@@ -99,7 +102,8 @@ class SubmitToTurnitinJob extends Job
 			case failure => {
 				if (sendNotifications) {
 					debug("Sending an email to " + job.user.email)
-					pushNotification(job, new TurnitinJobErrorNotification(assignment, job.user.apparentUser) with FreemarkerTextRenderer)
+					val notification = Notification.init(new TurnitinJobErrorNotification, job.user.apparentUser, Seq[OriginalityReport](), assignment)
+					pushNotification(job, notification)
 				}
 				throw new FailedJobException("Failed to get list of existing submissions: " + failure)
 			}
@@ -110,8 +114,8 @@ class SubmitToTurnitinJob extends Job
 			updateProgress(10) // update the progress bar
 
 			removeDefunctSubmissions()
-			val uploadedSubmissions = uploadSubmissions
-			retrieveReport(uploadedSubmissions._1, uploadedSubmissions._2)
+			val (failedUploads, uploadsTotal) = uploadSubmissions()
+			retrieveReport(failedUploads, uploadsTotal)
 		}
 
 		def removeDefunctSubmissions() {
@@ -132,10 +136,10 @@ class SubmitToTurnitinJob extends Job
 			}
 		}
 
-		def uploadSubmissions(): (HashMap[String, String], Int) = {
+		def uploadSubmissions(): (Map[String, String], Int) = {
 			var uploadsDone = 0
 			var uploadsFailed = 0
-			var failedUploads = new HashMap[String, String]
+			var failedUploads = Map[String, String]()
 			val allAttachments = assignment.submissions flatMap { _.allAttachments }
 			val uploadsTotal = allAttachments.size
 
@@ -167,7 +171,7 @@ class SubmitToTurnitinJob extends Job
 							//throw new FailedJobException("Failed to upload '" + attachment.name +"' - " + submitResponse.message)
 							logger.warn("Failed to upload '" + attachment.name + "' - " + submitResponse.message)
 							uploadsFailed += 1
-							failedUploads.put(attachment.name, submitResponse.message)
+							failedUploads += (attachment.name -> submitResponse.message)
 						}
 					}
 					uploadsDone += 1
@@ -182,25 +186,26 @@ class SubmitToTurnitinJob extends Job
 
 
 
-		def retrieveReport(failedUploads: HashMap[String, String], uploadsTotal: Int) {
+		def retrieveReport(failedUploads: Map[String, String], uploadsTotal: Int) {
 			// Uploaded all the submissions probably, now we wait til they're all checked
 			updateStatus("Waiting for documents to be checked...")
 
 			// try WaitingRetries times with a WaitingSleep msec sleep inbetween until we get a full Turnitin report.
 			val reports = runCheck(WaitingRetries) getOrElse Nil
 
-			if (reports.isEmpty && failedUploads.size() != uploadsTotal) {
+			if (reports.isEmpty && failedUploads.size != uploadsTotal) {
 				logger.error("Waited for complete Turnitin report but didn't get one.")
 				updateStatus("Failed to generate a report. The service may be busy - try again later.")
 				if (sendNotifications) {
 					debug("Sending an email to " + job.user.email)
-					pushNotification(job, new TurnitinJobErrorNotification(assignment, job.user.apparentUser) with FreemarkerTextRenderer)
+					val notification = Notification.init(new TurnitinJobErrorNotification, job.user.apparentUser, Seq[OriginalityReport](), assignment)
+					pushNotification(job, notification)
 				}
 			} else {
 
 				val attachments = assignment.submissions.flatMap(_.allAttachments)
 
-				for (report <- reports) {
+				val originalityReports = for (report <- reports) yield {
 
 					val matchingAttachment = attachments.find(attachment => report.matches(attachment))
 
@@ -221,15 +226,20 @@ class SubmitToTurnitinJob extends Job
 							}
 							attachment.originalityReport = r
 							originalityReportService.saveOriginalityReport(attachment)
+							Some(r)
 						}
-						case None => logger.warn("Got plagiarism report for %s but no corresponding Submission item" format (report.universityId))
+						case None => {
+							logger.warn("Got plagiarism report for %s but no corresponding Submission item" format (report.universityId))
+							None
+						}
 					}
-
 				}
 
 				if (sendNotifications) {
 					debug("Sending an email to " + job.user.email)
-					pushNotification(job, new TurnitinJobSuccessNotification(failedUploads, reports, assignment, job.user.apparentUser) with FreemarkerTextRenderer)
+					val notification = Notification.init(new TurnitinJobSuccessNotification, job.user.apparentUser, originalityReports.flatten, assignment)
+					notification.failedUploads.value = failedUploads
+					pushNotification(job, notification)
 				}
 
 				updateStatus("Generated a report.")

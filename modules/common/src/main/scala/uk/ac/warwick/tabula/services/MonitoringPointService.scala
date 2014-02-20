@@ -21,12 +21,15 @@ trait AutowiringMonitoringPointServiceComponent extends MonitoringPointServiceCo
 trait MonitoringPointService {
 	def saveOrUpdate(monitoringPoint : MonitoringPoint)
 	def delete(monitoringPoint : MonitoringPoint)
+	def saveOrUpdate(monitoringPoint : MonitoringPointTemplate)
+	def delete(monitoringPoint : MonitoringPointTemplate)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
 	def saveOrUpdate(set: MonitoringPointSet)
 	def saveOrUpdate(template: MonitoringPointSetTemplate)
 	def saveOrUpdate(report : MonitoringPointReport)
 	def saveOrUpdate(note: MonitoringPointAttendanceNote)
 	def getPointById(id : String) : Option[MonitoringPoint]
+	def getPointTemplateById(id : String) : Option[MonitoringPointTemplate]
 	def getSetById(id : String) : Option[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet]
 	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet]
@@ -91,12 +94,15 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 
 	def saveOrUpdate(monitoringPoint: MonitoringPoint) = monitoringPointDao.saveOrUpdate(monitoringPoint)
 	def delete(monitoringPoint: MonitoringPoint) = monitoringPointDao.delete(monitoringPoint)
+	def saveOrUpdate(monitoringPoint: MonitoringPointTemplate) = monitoringPointDao.saveOrUpdate(monitoringPoint)
+	def delete(monitoringPoint: MonitoringPointTemplate) = monitoringPointDao.delete(monitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint) = monitoringPointDao.saveOrUpdate(monitoringCheckpoint)
 	def saveOrUpdate(set: MonitoringPointSet) = monitoringPointDao.saveOrUpdate(set)
 	def saveOrUpdate(template: MonitoringPointSetTemplate) = monitoringPointDao.saveOrUpdate(template)
 	def saveOrUpdate(report : MonitoringPointReport) = monitoringPointDao.saveOrUpdate(report)
 	def saveOrUpdate(note: MonitoringPointAttendanceNote) = monitoringPointDao.saveOrUpdate(note)
 	def getPointById(id: String): Option[MonitoringPoint] = monitoringPointDao.getPointById(id)
+	def getPointTemplateById(id: String): Option[MonitoringPointTemplate] = monitoringPointDao.getPointTemplateById(id)
 	def getSetById(id: String): Option[MonitoringPointSet] = monitoringPointDao.getSetById(id)
 	def findMonitoringPointSets(route: Route): Seq[MonitoringPointSet] = monitoringPointDao.findMonitoringPointSets(route)
 	def findMonitoringPointSets(route: Route, academicYear: AcademicYear): Seq[MonitoringPointSet] =
@@ -231,8 +237,8 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 	}
 
 	def studentAlreadyReportedThisTerm(student:StudentMember, point:MonitoringPoint): Boolean = {
-		val nonReportedTerms = findNonReportedTerms(Seq(student), point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
-		!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear).getTermTypeAsString)
+		val nonReportedTerms = findNonReportedTerms(Seq(student), point.pointSet.academicYear)
+		!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.academicYear).getTermTypeAsString)
 	}
 
 	def hasAnyPointSets(department: Department): Boolean = {
@@ -362,7 +368,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 	}
 
 	private def isDateValidForPoint(point: MonitoringPoint, date: DateTime) = {
-		val dateWeek = termService.getAcademicWeekForAcademicYear(date, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+		val dateWeek = termService.getAcademicWeekForAcademicYear(date, point.pointSet.academicYear)
 		if (dateWeek == Term.WEEK_NUMBER_BEFORE_START)
 			true
 		else if (dateWeek == Term.WEEK_NUMBER_AFTER_END)
@@ -377,9 +383,8 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 	 * which is used to check if approving that meeting would then create a checkpoint.
 	 */
 	private def countRelevantMeetings(student: StudentMember, point: MonitoringPoint, meetingToSkipApproval: Option[MeetingRecord]): Int = {
-		val scd = student.mostSignificantCourseDetails.getOrElse(throw new IllegalArgumentException)
 		point.meetingRelationships.map(relationshipType => {
-			relationshipService.getRelationships(relationshipType, scd.sprCode)
+			relationshipService.getRelationships(relationshipType, student)
 				.flatMap(meetingRecordDao.list(_).filter(meeting =>
 					(meeting.isAttendanceApproved || meetingToSkipApproval.exists(m => m == meeting))
 						&& point.meetingFormats.contains(meeting.format)

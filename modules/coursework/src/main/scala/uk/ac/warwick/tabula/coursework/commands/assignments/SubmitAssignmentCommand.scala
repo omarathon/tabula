@@ -2,37 +2,29 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.AssignmentService
 import uk.ac.warwick.tabula.data.Transactions._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.validation.Errors
 import collection.JavaConverters._
-import uk.ac.warwick.tabula.JavaImports._
-import java.beans.PropertyEditorSupport
-import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, FormValue}
-import org.springframework.beans.factory.annotation.Configurable
 import uk.ac.warwick.tabula.services.ZipService
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.MarkingState._
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.util.Assert
 import org.springframework.validation.BindingResult
 import uk.ac.warwick.tabula.services.SubmissionService
-import uk.ac.warwick.tabula.data.FeedbackDao
 import uk.ac.warwick.tabula.services.FeedbackService
-import uk.ac.warwick.tabula.helpers.LazyMaps
 import org.apache.commons.collections.map.LazyMap
 import org.apache.commons.collections.Factory
+import uk.ac.warwick.tabula.data.model.notifications.{SubmissionReceivedNotification, SubmissionReceiptNotification}
 
 class SubmitAssignmentCommand(
 		val module: Module,
 		val assignment: Assignment,
 		val user: CurrentUser)
-		extends Command[Submission] with SelfValidating with BindListener {
+		extends Command[Submission] with SelfValidating with BindListener with Notifies[Submission, Submission] {
 
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Create, assignment)
@@ -59,7 +51,7 @@ class SubmitAssignmentCommand(
 	 * and submitting it.
 	 */
 	private def buildEmptyFields: JMap[String, FormValue] = {
-		val fields = JHashMap(assignment.submissionFields.map { field => field.id -> field.blankFormValue.asInstanceOf[FormValue] }.toMap)
+		val fields = JHashMap(assignment.submissionFields.map { field => field.id -> field.blankFormValue }.toMap)
 		
 		LazyMap.decorate(fields, new Factory {
 			def create() = new FormValue {
@@ -139,7 +131,7 @@ class SubmitAssignmentCommand(
 
 		// TAB-413 assert that we have at least one attachment
 		Assert.isTrue(
-			submission.values.asScala.find(value => Option(value.attachments).isDefined && !value.attachments.isEmpty).isDefined,
+			submission.values.asScala.exists(value => Option(value.attachments).isDefined && !value.attachments.isEmpty),
 			"Submission must have at least one attachment"
 		)
 
@@ -165,7 +157,12 @@ class SubmitAssignmentCommand(
 			d.properties("submissionIsNoteworthy" -> true)
 	}
 
-
+	def emit(submission: Submission) = {
+		Seq(
+			Notification.init(new SubmissionReceiptNotification, user.apparentUser, Seq(submission), assignment),
+			Notification.init(new SubmissionReceivedNotification, user.apparentUser, Seq(submission), assignment)
+		)
+	}
 
 }
 

@@ -24,7 +24,7 @@ class Route extends GeneratedId with Serializable with PermissionsTarget {
 
 	var name: String = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "department_id")
 	var department: Department = _
 

@@ -3,13 +3,14 @@ package uk.ac.warwick.tabula.notifications
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.util.mail.WarwickMailSender
 import uk.ac.warwick.tabula.helpers.UnicodeEmails
-import uk.ac.warwick.tabula.data.model.Notification
+import uk.ac.warwick.tabula.data.model.{FreemarkerModel, Notification}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.services.NotificationListener
 import org.springframework.stereotype.Component
+import uk.ac.warwick.tabula.web.views.{AutowiredTextRendererComponent, TextRendererComponent, TextRenderer}
 
 @Component
-class EmailNotificationListener extends NotificationListener with UnicodeEmails {
+class EmailNotificationListener extends NotificationListener with UnicodeEmails with AutowiredTextRendererComponent {
 
 	var mailSender = Wire[WarwickMailSender]("studentMailSender")
 
@@ -20,7 +21,9 @@ class EmailNotificationListener extends NotificationListener with UnicodeEmails 
 	val mailFooter = "\n\nThank you,\nTabula"
 	val replyWarning = "\n\nThis email was sent from an automated system, and replies to it will not reach a real person."
 
-	def listen:(Notification[_] => Unit) = notification => {
+	def render(model: FreemarkerModel) = textRenderer.renderTemplate(model.template, model.model)
+
+	def listen(notification: Notification[_,_]) {
 		val validRecipients = notification.recipients.filter(_.getEmail.hasText)
 		validRecipients.foreach { recipient =>
 			val message = createMessage(mailSender){ message =>
@@ -31,7 +34,7 @@ class EmailNotificationListener extends NotificationListener with UnicodeEmails 
 
 				val body = new StringBuilder("")
 				body.append(mailHeader.format(recipient.getFirstName))
-				body.append(notification.content)
+				body.append(render(notification.content))
 				body.append(mailFooter)
 				body.append(replyWarning)
 				message.setText(body.toString())

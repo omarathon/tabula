@@ -30,7 +30,6 @@ import org.apache.commons.io.FileUtils
 import org.springframework.test.annotation.DirtiesContext
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.AuditEvent
-import scala.Some
 import org.hibernate.dialect.HSQLDialect
 import uk.ac.warwick.tabula.data.SessionComponent
 
@@ -128,7 +127,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		val auditEvent = recordAudit(command)
 
 		indexer.adminDownloadedSubmissions(assignment) should be ('empty)
-		indexer.incrementalIndex
+		indexer.incrementalIndex()
 		indexer.adminDownloadedSubmissions(assignment) should be (assignment.submissions.toList)
 	}
 
@@ -340,15 +339,15 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 
 		// check pager
 		val paged0 = indexer.submissionsForModules(Seq(module), None, None, 100)
-		paged0.docs.length should be (100)
+		paged0.items.length should be (100)
 
 		val paged1 = indexer.submissionsForModules(Seq(module), paged0.last, Some(paged0.token), 100)
 		// asked to batch in 100s, but only 40 left
-		paged1.docs.length should be (40)
+		paged1.items.length should be (40)
 
 		// check pager for noteworthy submissions
 		val paged2 = indexer.noteworthySubmissionsForModules(Seq(module), None, None, 100)
-		paged2.docs.length should be (70)
+		paged2.items.length should be (70)
 
 		// Find by user ID
 		indexer.findByUserId("bob").size should be (140)

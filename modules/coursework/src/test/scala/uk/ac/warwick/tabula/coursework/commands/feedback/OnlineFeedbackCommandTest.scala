@@ -6,7 +6,6 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{Feedback, Submission, Assignment, Module}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.MembershipItem
-import scala.Some
 import uk.ac.warwick.tabula.MockUserLookup
 
 

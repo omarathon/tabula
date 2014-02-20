@@ -5,12 +5,10 @@ import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import org.junit.Before
 import uk.ac.warwick.tabula.{AcademicYear, PersistenceTestBase, Fixtures, Mockito}
-import uk.ac.warwick.tabula.data.model.{DegreeType, Department, SitsStatus, StudentCourseDetails, Route, Member}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.JavaImports._
-import org.mockito.Matchers
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.data.model.StaffMember
 
 // scalastyle:off magic.number
 class ProfileServiceTest extends PersistenceTestBase with Mockito {
@@ -50,10 +48,10 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		profileService.getMemberByUniversityId("0000004") should be (Some(m4))
 		profileService.getMemberByUniversityId("0000005") should be (None)
 
-		profileService.getStudentBySprCode("0000001/1") should be (Some(m1))
-		profileService.getStudentBySprCode("0000002/1") should be (Some(m2))
-		profileService.getStudentBySprCode("0000003/1") should be (None)
-		profileService.getStudentBySprCode("0000001/2") should be (None) // TODO This may not be the right behaviour
+		profileService.getStudentBySprCode("0000001/2") should be (Some(m1))
+		profileService.getStudentBySprCode("0000002/2") should be (Some(m2))
+		profileService.getStudentBySprCode("0000003/2") should be (None)
+		profileService.getStudentBySprCode("0000001/3") should be (None)
 
 		session.enableFilter(Member.StudentsOnlyFilter)
 
@@ -316,6 +314,17 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 
 			val count = profileServiceWithMocks.countStudentsByRestrictions(subDepartment, Seq())
 			count should be (1)
+		}
+	}
+
+	@Test def getDisability {
+		new MockFixture {
+			val disabilityQ = new Disability
+			profileServiceWithMocks.memberDao.getDisability("Q") returns Some(disabilityQ)
+			profileServiceWithMocks.memberDao.getDisability("SITS has no integrity checks") returns None
+
+			profileServiceWithMocks.getDisability("Q") should be (Some(disabilityQ))
+			profileServiceWithMocks.getDisability("SITS has no integrity checks") should be (None)
 		}
 	}
 

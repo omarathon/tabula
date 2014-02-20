@@ -13,33 +13,21 @@ class StudentRelationshipTest extends TestBase with Mockito {
 	@Test def agentMember {
 		val relType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		
-		val rel = StudentRelationship("0672089", relType, "0205225/1")
-		rel.profileService = profileService
-
-		rel.isAgentMember should be (true)
-
-		profileService.getMemberByUniversityId("0672089") returns (None)
-
-		rel.agentMember should be (None)
-		rel.agentParsed should be ("0672089")
-		rel.agentName should be ("0672089")
-		rel.agentLastName should be ("0672089")
-
 		val staff = Fixtures.staff(universityId="0672089")
 		staff.firstName = "Steve"
 		staff.lastName = "Taff"
-
-		profileService.getMemberByUniversityId("0672089") returns (Some(staff))
+			
+		val student = Fixtures.student(universityId="0205225")
+		
+		val rel = StudentRelationship(staff, relType, student)
+		rel.isAgentMember should be (true)
 
 		rel.agentMember should be (Some(staff))
-		rel.agentParsed should be (staff)
+		rel.agent should be ("0672089")
 		rel.agentName should be ("Steve Taff")
 		rel.agentLastName should be ("Taff")
 
 		rel.studentId should be ("0205225")
-
-		val student = Fixtures.student()
-		profileService.getStudentBySprCode("0205225/1") returns (Some(student))
 
 		rel.studentMember.get should be (student)
 	}
@@ -47,9 +35,15 @@ class StudentRelationshipTest extends TestBase with Mockito {
 	@Test def toStringMethod() {
 		val relType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		
-		val rel = StudentRelationship("0672089", relType, "0205225/1")
+		val staff = Fixtures.staff(universityId="0672089")
+		staff.firstName = "Steve"
+		staff.lastName = "Taff"
+			
+		val student = Fixtures.student(universityId="0205225")
+		
+		val rel = StudentRelationship(staff, relType, student)
 		rel.id = "hibernateid"
-		rel.toString should be ("StudentRelationship[hibernateid][agent=0672089,relationshipType=StudentRelationshipType(tutor),student=0205225/1]")
+		rel.toString should be ("MemberStudentRelationship[hibernateid][agent=0672089,relationshipType=StudentRelationshipType(tutor),student=0205225]")
 	}
 
 }

@@ -2,20 +2,17 @@ package uk.ac.warwick.tabula.services.permissions
 
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.roles.Role
+import uk.ac.warwick.tabula.roles._
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.roles.StaffRole
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.data.model.MemberUserType._
-import uk.ac.warwick.tabula.roles.UniversityMemberRole
-import uk.ac.warwick.tabula.roles.StudentRole
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.helpers.Promises._
-import uk.ac.warwick.tabula.roles.StudentRoleDefinition
-import uk.ac.warwick.tabula.roles.StaffRoleDefinition
-import uk.ac.warwick.tabula.roles.UniversityMemberRoleDefinition
+import uk.ac.warwick.tabula.roles.UniversityMemberRole
+import uk.ac.warwick.tabula.roles.StaffRole
+import uk.ac.warwick.tabula.roles.StudentRole
 
 @Component
 class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
@@ -39,12 +36,18 @@ class UserTypeAndDepartmentRoleProvider extends ScopelessRoleProvider {
 			case _ => Stream.empty
 		})
 	}
-	
+
+	/**
+	 * In the case of users not having a member record, we give out definitions based on their SSO
+	 * attributes. This is potentially leaky in terms of PGRs, who would normally get StudentRoleDefinition
+	 * but will in fact get SSOStaffRoleDefinition instead; the reason for SSOStaffRole existing is
+	 * to make sure we don't expose anything truly sensitive in it.
+	 */
 	private def getRolesForSSO(user: CurrentUser) =
 		if (user.departmentCode.hasText) {
 			departmentService.get.getDepartmentByCode(user.departmentCode.toLowerCase) match {
 				case Some(department) =>
-					if (user.isStaff) Stream(customRoleFor(department)(StaffRoleDefinition, department).getOrElse(StaffRole(department)))
+					if (user.isStaff) Stream(customRoleFor(department)(SSOStaffRoleDefinition, department).getOrElse(SSOStaffRole(department)))
 					else if (user.isStudent) Stream(customRoleFor(department)(StudentRoleDefinition, department).getOrElse(StudentRole(department)))
 					else Stream.empty
 				case None => Stream.empty

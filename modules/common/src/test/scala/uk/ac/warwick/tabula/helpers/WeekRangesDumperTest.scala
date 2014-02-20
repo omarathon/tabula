@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.helpers
 
 import uk.ac.warwick.tabula.{CurrentUser, AcademicYear, Mockito, TestBase}
+import org.mockito.Mockito._
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, UserSettingsService, TermService}
 import org.joda.time.{Interval, DateTime}
 import uk.ac.warwick.tabula.data.model.{Department, UserSettings}
@@ -14,6 +15,12 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 	private trait Fixture {
 		val TEST_TIME = DateTime.now
 
+		val settingsWithNumberingSystem = new UserSettings()
+		settingsWithNumberingSystem.weekNumberingSystem = WeekRange.NumberingSystem.Term
+
+		val departmentWithNumberingSystem = new Department()
+		departmentWithNumberingSystem.weekNumberingSystem = WeekRange.NumberingSystem.Cumulative
+
 		val dumper = new WeekRangesDumper with StoppedClockComponent {
 			val stoppedTime = TEST_TIME
 			userSettings = mock[UserSettingsService]
@@ -21,19 +28,14 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 			departmentService = mock[ModuleAndDepartmentService]
 		}
 
-		val settingsWithNumberingSystem = new UserSettings()
-		settingsWithNumberingSystem.weekNumberingSystem = WeekRange.NumberingSystem.Term
-
-		val departmentWithNumberingSystem = new Department()
-		departmentWithNumberingSystem.weekNumberingSystem = WeekRange.NumberingSystem.Cumulative
-
 		val singleWeek = Seq((AcademicYear(2012),1,new Interval(TEST_TIME.minusWeeks(1), TEST_TIME)))
 	}
 
 	@Test
 	def getsWeekRangesFromTermService() {new Fixture{ withUser("test") {
 			dumper.termService.getAcademicWeeksBetween(any[DateTime],any[DateTime]) returns Nil
-
+			dumper.userSettings.getByUserId(any[String]) returns None
+			dumper.departmentService.getDepartmentByCode(null) returns None
 			dumper.getWeekRangesAsJSON(null) // don't need a formatter as we're not returning any rows
 
 			there was one(dumper.termService).getAcademicWeeksBetween(TEST_TIME.minusYears(2), TEST_TIME.plusYears(2))
@@ -96,7 +98,6 @@ class WeekRangesDumperTest extends TestBase with Mockito {
 		// it renders the JSON, thus making it invalid. So the WeekRangesDumperTag will continue
 		// to use single quotes, and the test can swap them for doubles to keep s.u.p.j.JSON happy.
 		val jsonString = dumper.getWeekRangesAsJSON(formatter).replaceAll("'","\"")
-		println(jsonString)
 		val results = JSON.parseFull(jsonString)
 		results match {
 			case Some(a:Seq[Map[String,Any]] @unchecked) => {

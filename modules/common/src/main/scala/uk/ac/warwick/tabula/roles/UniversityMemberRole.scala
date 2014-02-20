@@ -27,10 +27,11 @@ case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefini
 		Profiles.Read.StudentCourseDetails.Status,
 		Profiles.Read.SmallGroups,
 		Profiles.Read.Coursework,
-    Profiles.Read.Timetable,
+		Profiles.Read.Timetable,
+		Profiles.Read.Disability,
 
     Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
-		
+
     Profiles.StudentRelationship.Read(PermissionsSelector.Any[StudentRelationshipType]),
 
     Profiles.MeetingRecord.Read(PermissionsSelector.Any[StudentRelationshipType]),
@@ -39,9 +40,11 @@ case object UniversityMemberRoleDefinition extends UnassignableBuiltInRoleDefini
     Profiles.MeetingRecord.Update(PermissionsSelector.Any[StudentRelationshipType]),
     Profiles.MeetingRecord.Delete(PermissionsSelector.Any[StudentRelationshipType]),
 
+		Profiles.ScheduledMeetingRecord.Create(PermissionsSelector.Any[StudentRelationshipType]),
+
 		MonitoringPoints.View,
 		SmallGroupEvents.ViewRegister,
-		
+
 		// Can read own coursework info
 		Submission.Read,
 		Feedback.Read,

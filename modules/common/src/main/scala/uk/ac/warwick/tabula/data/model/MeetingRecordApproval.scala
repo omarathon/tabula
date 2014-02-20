@@ -10,12 +10,14 @@ import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
 
 @Entity
-class MeetingRecordApproval extends GeneratedId  {
-	@ManyToOne
+class MeetingRecordApproval extends GeneratedId with ToEntityReference {
+	type Entity = MeetingRecordApproval
+
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "meetingrecord_id")
 	var meetingRecord: MeetingRecord = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="approver_id")
 	var approver: Member = _
 
@@ -29,6 +31,8 @@ class MeetingRecordApproval extends GeneratedId  {
 	var lastUpdatedDate: DateTime = creationDate
 
 	var comments: String = _
+
+	override def toEntityReference: EntityReference[MeetingRecordApproval] = new MeetingRecordApprovalEntityReference().put(this)
 }
 
 sealed abstract class MeetingApprovalState(val code: String, val description: String) {

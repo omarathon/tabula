@@ -33,13 +33,11 @@ class ViewMeetingsForPointCommand(val student: StudentMember, val point: Monitor
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 
 		val allMeetings = allRelationshipTypes.flatMap{ relationshipType =>
-			student.mostSignificantCourseDetails.map{ scd =>
-				relationshipService.getRelationships(relationshipType, scd.sprCode).flatMap(meetingRecordDao.list(_))
-			}
-		}.flatten
+			relationshipService.getRelationships(relationshipType, student).flatMap(meetingRecordDao.list(_))
+		}
 
 		allMeetings.map{meeting => meeting -> {
-			val meetingTermWeek = termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+			val meetingTermWeek = termService.getAcademicWeekForAcademicYear(meeting.meetingDate, point.pointSet.academicYear)
 			val reasons: mutable.Buffer[String] = mutable.Buffer()
 			if (!point.meetingRelationships.contains(meeting.relationship.relationshipType))
 				reasons += s"Meeting was not with ${point.meetingRelationships.map{_.agentRole}.mkString(" or ")}"

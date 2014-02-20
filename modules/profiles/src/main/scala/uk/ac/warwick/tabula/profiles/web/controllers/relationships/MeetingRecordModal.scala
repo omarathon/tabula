@@ -12,7 +12,6 @@ import org.springframework.web.bind.WebDataBinder
 import uk.ac.warwick.util.web.bind.AbstractPropertyEditor
 import uk.ac.warwick.tabula.services.{MonitoringPointMeetingRelationshipTermServiceComponent, RelationshipServiceComponent, ProfileServiceComponent}
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import scala.Some
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.web.controllers.{ControllerViews, ControllerImports, ControllerMethods}
 
@@ -40,7 +39,7 @@ trait MeetingRecordModal  {
 	def allRelationships(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
 						 @PathVariable("relationshipType") relationshipType: StudentRelationshipType) = {
 
-		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode)
+		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.student)
 	}
 
 	@ModelAttribute("viewMeetingRecordCommand")
@@ -87,7 +86,7 @@ trait MeetingRecordModal  {
 	@RequestMapping(method = Array(POST), params = Array("modal"))
 	def saveModalMeetingRecord(@Valid @ModelAttribute("command") command: ModifyMeetingRecordCommand,
 	                           errors: Errors,
-	                           @ModelAttribute("viewMeetingRecordCommand") viewCommand: Option[Appliable[Seq[MeetingRecord]]],
+	                           @ModelAttribute("viewMeetingRecordCommand") viewCommand: Option[Appliable[Seq[AbstractMeetingRecord]]],
 	                           @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
 							   @PathVariable("relationshipType") relationshipType: StudentRelationshipType) =transactional() {
 		if (errors.hasErrors) {
@@ -103,7 +102,10 @@ trait MeetingRecordModal  {
         	"studentCourseDetails" -> studentCourseDetails,
  			    "role" -> relationshipType,
 				  "meetings" -> meetingList,
-					"meetingApprovalWillCreateCheckpoint" -> meetingList.map(m => m.id -> monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(m)).toMap,
+					"meetingApprovalWillCreateCheckpoint" -> meetingList.map {
+						case (meeting: MeetingRecord) => meeting.id -> monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
+						case (meeting: ScheduledMeetingRecord) => meeting.id -> false
+					}.toMap,
 				  "viewer" -> currentMember,
 				  "openMeeting" -> modifiedMeeting).noLayout()
 		}

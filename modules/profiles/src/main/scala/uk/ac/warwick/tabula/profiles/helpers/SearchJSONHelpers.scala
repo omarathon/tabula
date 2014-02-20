@@ -5,10 +5,8 @@ import uk.ac.warwick.tabula.profiles.commands.AbstractSearchProfilesCommand
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.JavaConversions._
-import scala.Some
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.web.Mav
-
 
 trait SearchJSONHelpers {
 

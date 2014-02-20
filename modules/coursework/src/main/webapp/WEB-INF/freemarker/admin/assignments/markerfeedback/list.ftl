@@ -1,11 +1,11 @@
-<#import "/WEB-INF/freemarker/admin/_profile_link.ftl" as pl >
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl >
 <#macro listMarkerFeedback items>
 	<#list items as item>
 		<tr>
 			<#if features.markerFeedback><td><@form.selector_check_row "students" item.student.warwickId /></td></#if>
 			<td>
 				<#if assignment.module.department.showStudentName>
-					${item.student.fullName} <@pl.profile_link item.student />
+					${item.student.fullName} <@pl.profile_link item.student.warwickId />
 				<#else>
 					${item.student.warwickId}
 				</#if>
@@ -67,6 +67,9 @@
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
+
+<div id="profile-modal" class="modal fade profile-subset"></div>
+
 	<h1>Feedback for ${assignment.name}</h1>
 	<p>You are the <#if isFirstMarker>${firstMarkerRoleName}<#else>${secondMarkerRoleName}</#if> for the following submissions</p>
 	<div class="btn-toolbar">

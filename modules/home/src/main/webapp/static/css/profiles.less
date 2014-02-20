@@ -106,17 +106,12 @@
 	}
 
 	#container .profile  {
-		.col1 {
+		.col1, .col2 {
 			float: left;
-			width: 354px;
+			width: 340px;
 			margin-right: 16px;
 		}
-
-		.col2 {
-			float: left;
-			width: 354px;
-			margin-right: 0;
-		}
+		.col2 { margin-right: 0; }
 
 		#note-modal .modal-body {
 			max-height: 500px;
@@ -276,6 +271,11 @@
 			section.meetings {
 				margin: 12px 0;
 
+				.list-controls a.toggle-all-details {
+					float: left;
+					margin-left: 0;
+				}
+
 				details.meeting {
 
 					padding-right: 0;
@@ -291,6 +291,14 @@
 						font-weight: bold;
 						border-bottom: dotted 1px lighten(@grayLight, 35%);
 						overflow: auto;
+					}
+
+					&.scheduled {
+						background-color: lighten(@wellBackground, 2%);
+						outline: 1px dashed #c4c4c5;
+						&.well {
+							background-color: @wellBackground;
+						}
 					}
 
 					.meeting-body {
@@ -613,7 +621,7 @@
 			}
 
 	} // .agent-edit
-	
+
 	.muted.percentage {
 		font-size: 80%;
 	}

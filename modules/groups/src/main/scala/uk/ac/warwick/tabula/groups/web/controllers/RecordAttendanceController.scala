@@ -43,7 +43,7 @@ class RecordAttendanceController extends GroupsController {
 			"command" -> command,
 			"allCheckpointStates" -> AttendanceState.values,
 			"eventInFuture" -> command.isFutureEvent,
-			"returnTo" -> getReturnTo(Routes.tutor.mygroups(user.apparentUser)))
+			"returnTo" -> getReturnTo(Routes.tutor.mygroups))
 	}
 
 	@RequestMapping(method = Array(POST))
@@ -52,7 +52,7 @@ class RecordAttendanceController extends GroupsController {
 			form(command)
 		} else {
 			val (occurrence, attendances) = command.apply()
-			Redirect(Routes.tutor.mygroups(user.apparentUser), "updatedOccurrence" -> occurrence.id)
+			Redirect(Routes.tutor.mygroups, "updatedOccurrence" -> occurrence.id)
 		}
 	}
 

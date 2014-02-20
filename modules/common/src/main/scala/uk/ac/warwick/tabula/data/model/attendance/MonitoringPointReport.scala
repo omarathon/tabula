@@ -10,15 +10,15 @@ import javax.validation.constraints.{Min, NotNull}
 @Entity
 class MonitoringPointReport extends GeneratedId {
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="student", referencedColumnName="universityId")
 	var student: StudentMember = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "student_course_details_id")
 	var studentCourseDetails: StudentCourseDetails = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "student_course_year_details_id")
 	var studentCourseYearDetails: StudentCourseYearDetails = _
 

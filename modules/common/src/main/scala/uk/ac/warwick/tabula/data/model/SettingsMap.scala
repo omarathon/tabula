@@ -3,9 +3,31 @@ package uk.ac.warwick.tabula.data.model
 import org.hibernate.annotations.Type
 import uk.ac.warwick.tabula.JavaImports._
 import scala.collection.JavaConverters._
+import javax.persistence.Lob
+import scala.annotation.target.field
+
+object HasSettings {
+	/** Wrapper for get/put operations on a given string setting. */
+	protected case class IntSetting(h: HasSettings)(key: String, default: Int) {
+		def value = h.getIntSetting(key, default)
+		def value_=(v: Int) { h.settings += key -> v }
+	}
+
+	/** Wrapper for get/put operations on a given string setting. */
+	protected case class StringSetting(h: HasSettings)(key: String) {
+		def value = h.getStringSetting(key)
+		def value_=(v: String) { h.settings += key -> v }
+	}
+
+	protected case class StringMapSetting(h: HasSettings)(key: String) {
+		def value = h.getStringMapSetting(key, Map())
+		def value_=(v: Map[String,String]) { h.settings += key -> v }
+	}
+}
 
 trait HasSettings {
 
+	@Lob
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.JsonMapUserType")
 	protected var settings: Map[String, Any] = Map()
 
@@ -36,6 +58,10 @@ trait HasSettings {
 			case _ => None
 		}
 	}
+
+	def StringSetting = HasSettings.StringSetting(this) _
+	def StringMapSetting = HasSettings.StringMapSetting(this) _
+	def IntSetting = HasSettings.IntSetting(this) _
 
 	protected def getStringSetting(key: String, default: => String): String = getStringSetting(key) getOrElse(default)
 	protected def getIntSetting(key: String, default: => Int): Int = getIntSetting(key) getOrElse(default)

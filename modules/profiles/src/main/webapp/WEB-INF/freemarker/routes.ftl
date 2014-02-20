@@ -54,6 +54,12 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro purge_meeting_record meeting_record><@url page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/purge" /></#macro>
 <#macro save_meeting_approval meeting_record><@url page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/approval" /></#macro>
 
+<#macro create_scheduled_meeting_record scjCode relationshipType><@url page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/create" /></#macro>
+<#macro edit_scheduled_meeting_record meetingRecord scjCode relationshipType><@url page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/edit" /></#macro>
+<#macro choose_action_scheduled_meeting_record meetingRecord scjCode relationshipType><@url page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/chooseaction" /></#macro>
+<#macro confirm_scheduled_meeting_record meetingRecord scjCode relationshipType><@url page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/confirm" /></#macro>
+<#macro missed_scheduled_meeting_record meetingRecord relationshipType><@url page="/${relationshipType.urlPart}/meeting/${meetingRecord.id}/missed" /></#macro>
+
 <#macro relationship_search><@url page="/relationships/agents/search" /></#macro>
 <#macro relationship_search_json><@url page="/relationships/agents/search.json" /></#macro>
 

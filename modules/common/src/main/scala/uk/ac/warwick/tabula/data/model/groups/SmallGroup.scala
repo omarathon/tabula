@@ -36,7 +36,16 @@ object SmallGroup {
 @Filter(name = SmallGroup.NotDeletedFilter)
 @Entity
 @AccessType("field")
-class SmallGroup extends GeneratedId with CanBeDeleted with ToString with PermissionsTarget with HasSettings with Serializable with PostLoadBehaviour {
+class SmallGroup
+		extends GeneratedId
+		with CanBeDeleted
+		with ToString
+		with PermissionsTarget
+		with HasSettings
+		with Serializable
+		with PostLoadBehaviour
+		with ToEntityReference {
+	type Entity = SmallGroup
 	import SmallGroup._
 	
 	@transient var permissionsService = Wire[PermissionsService]
@@ -49,7 +58,7 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	@NotNull
 	var name: String = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "set_id", insertable = false, updatable = false)
 	var groupSet: SmallGroupSet = _
 	
@@ -65,7 +74,7 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	 * it to a new UserGroup, you should probably access "students" instead and work with Users rather than guessing what
 	 * the right sort of UserId to use is.
 	 */
-	@OneToOne(cascade = Array(ALL))
+	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "studentsgroup_id")
 	var _studentsGroup: UserGroup = UserGroup.ofUniversityIds
   def students: UnspecifiedTypeUserGroup = _studentsGroup
@@ -110,4 +119,5 @@ class SmallGroup extends GeneratedId with CanBeDeleted with ToString with Permis
 	
 	def hasScheduledEvents = events.asScala.exists(!_.isUnscheduled)
 
+	override def toEntityReference = new SmallGroupEntityReference().put(this)
 }

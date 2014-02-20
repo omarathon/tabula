@@ -9,6 +9,7 @@ import org.hibernate.criterion.{Projections, Order}
 import uk.ac.warwick.tabula.AcademicYear
 import org.hibernate.criterion.Restrictions._
 import uk.ac.warwick.tabula.services.TermService
+import org.hibernate.FetchMode
 
 trait MonitoringPointDaoComponent {
 	val monitoringPointDao: MonitoringPointDao
@@ -20,10 +21,13 @@ trait AutowiringMonitoringPointDaoComponent extends MonitoringPointDaoComponent 
 
 trait MonitoringPointDao {
 	def getPointById(id: String): Option[MonitoringPoint]
+	def getPointTemplateById(id: String): Option[MonitoringPointTemplate]
 	def getSetById(id: String): Option[MonitoringPointSet]
 	def getCheckpointsByStudent(monitoringPoints: Seq[MonitoringPoint], mostSiginificantOnly: Boolean = true): Seq[(StudentMember, MonitoringCheckpoint)]
 	def saveOrUpdate(monitoringPoint: MonitoringPoint)
 	def delete(monitoringPoint: MonitoringPoint)
+	def saveOrUpdate(monitoringPoint: MonitoringPointTemplate)
+	def delete(monitoringPoint: MonitoringPointTemplate)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
 	def saveOrUpdate(template: MonitoringPointSetTemplate)
 	def saveOrUpdate(set: MonitoringPointSet)
@@ -78,6 +82,9 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	def getPointById(id: String) =
 		getById[MonitoringPoint](id)
 
+	def getPointTemplateById(id: String) =
+		getById[MonitoringPointTemplate](id)
+
 	def getSetById(id: String) =
 		getById[MonitoringPointSet](id)
 
@@ -86,10 +93,14 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		else {
 			val criteria = session.newCriteria[MonitoringCheckpoint]
 				.createAlias("point", "point")
-	
-			val or = disjunction()
-			monitoringPoints.grouped(Daoisms.MaxInClauseCount).foreach { mps => or.add(in("point", mps.asJava)) }
-			criteria.add(or)
+				.add(safeIn("point", monitoringPoints))
+
+			if (mostSiginificantOnly) {
+				criteria.setFetchMode("point.pointSet", FetchMode.JOIN)
+				criteria.setFetchMode("point.student", FetchMode.JOIN)
+				criteria.setFetchMode("point.student.mostSignificantCourseDetails", FetchMode.JOIN)
+				criteria.setFetchMode("point.student.mostSignificantCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
+			}
 	
 			val checkpoints = criteria.seq
 	
@@ -98,13 +109,12 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	
 			if (mostSiginificantOnly)
 				result.filter{ case(student, checkpoint) => student.mostSignificantCourseDetails.exists(scd => {
-					val pointSet = checkpoint.point.pointSet.asInstanceOf[MonitoringPointSet]
-					val scydOption = scd.freshStudentCourseYearDetails.find(scyd =>
+					val pointSet = checkpoint.point.pointSet
+					pointSet.route == scd.route && scd.freshStudentCourseYearDetails.exists(scyd =>
 						scyd.academicYear == pointSet.academicYear && (
 							pointSet.year == null || scyd.yearOfStudy == pointSet.year
 						)
 					)
-					pointSet.route == scd.route && scydOption.isDefined
 				})}
 			else
 				result
@@ -113,6 +123,8 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 
 	def saveOrUpdate(monitoringPoint: MonitoringPoint) = session.saveOrUpdate(monitoringPoint)
 	def delete(monitoringPoint: MonitoringPoint) = session.delete(monitoringPoint)
+	def saveOrUpdate(monitoringPoint: MonitoringPointTemplate) = session.saveOrUpdate(monitoringPoint)
+	def delete(monitoringPoint: MonitoringPointTemplate) = session.delete(monitoringPoint)
 	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint) = session.saveOrUpdate(monitoringCheckpoint)
 	def saveOrUpdate(set: MonitoringPointSet) = session.saveOrUpdate(set)
 	def saveOrUpdate(template: MonitoringPointSetTemplate) = session.saveOrUpdate(template)
@@ -239,7 +251,7 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		}.mkString(" or ")	+ ")"
 
 		val query = session.newQuery[Array[java.lang.Object]](queryString)
-			.setParameter("academicYear", point.pointSet.asInstanceOf[MonitoringPointSet].academicYear)
+			.setParameter("academicYear", point.pointSet.academicYear)
 			.setString("name", point.name.toLowerCase)
 			.setString("validFromWeek", point.validFromWeek.toString)
 			.setString("requiredFromWeek", point.requiredFromWeek.toString)
@@ -372,53 +384,51 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		startResult: Int,
 		query: ScalaQuery[Array[java.lang.Object]]
 	) = {
+		if (universityIds.isEmpty) Nil
+		else {
+			val ordering = if (isAscending) Ordering[Int] else Ordering[Int].reverse
 
-		val ordering = if (isAscending) Ordering[Int] else Ordering[Int].reverse
+			val universityIdCountMap = query.seq.map{objArray =>
+				objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
+			}.toMap
 
-		val universityIdCountMap = query.seq.map{objArray =>
-			objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
-		}.toMap
-
-		val sortedAllUniversityIdCount = universityIds.map{u =>
-			u -> universityIdCountMap.getOrElse(u, 0)
-		}.sortBy(_._2)(ordering)
+			val sortedAllUniversityIdCount = universityIds.map{u =>
+				u -> universityIdCountMap.getOrElse(u, 0)
+			}.sortBy(_._2)(ordering)
 
 
-		val universityIdsToFetch = sortedAllUniversityIdCount.slice(startResult, startResult + maxResults).map(_._1)
+			val universityIdsToFetch = sortedAllUniversityIdCount.slice(startResult, startResult + maxResults).map(_._1)
 
-		val c = session.newCriteria[StudentMember]
-		val or = disjunction()
-		universityIdsToFetch.grouped(Daoisms.MaxInClauseCount).foreach { ids => or.add(in("universityId", ids.asJavaCollection)) }
-		c.add(or)
-		val students = c.seq
+			val students =
+				session.newCriteria[StudentMember]
+				.add(safeIn("universityId", universityIdsToFetch))
+				.seq
 
-		universityIdsToFetch.flatMap{
-			u => students.find(_.universityId == u)
-		}.map{
-			s => s -> sortedAllUniversityIdCount.toMap.get(s.universityId).getOrElse(0)
-		}.toSeq
+			universityIdsToFetch.flatMap{
+				u => students.find(_.universityId == u)
+			}.map{
+				s => s -> sortedAllUniversityIdCount.toMap.get(s.universityId).getOrElse(0)
+			}.toSeq
+		}
 	}
 
 	def findNonReportedTerms(students: Seq[StudentMember], academicYear: AcademicYear): Seq[String] = {
 		if (students.isEmpty)
 			return Seq()
 
-		val c = session.newCriteria[MonitoringPointReport]
+		val termCounts =
+			session.newCriteria[MonitoringPointReport]
 			.add(is("academicYear", academicYear))
-
-		val or = disjunction()
-		students.map(_.universityId)
-			.grouped(Daoisms.MaxInClauseCount)
-			.foreach { ids => or.add(in("student.universityId", ids.asJavaCollection)) }
-		c.add(or)
-
-		val query = c.project[Array[java.lang.Object]](Projections.projectionList()
-			.add(Projections.groupProperty("monitoringPeriod"))
-			.add(Projections.count("monitoringPeriod"))
-		)
-		val termCounts = query.seq.map{objArray =>
-			objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
-		}
+			.add(safeIn("student.universityId", students.map(_.universityId)))
+			.project[Array[java.lang.Object]](
+				Projections.projectionList()
+					.add(Projections.groupProperty("monitoringPeriod"))
+					.add(Projections.count("monitoringPeriod"))
+			)
+			.seq
+			.map { objArray =>
+				objArray(0).asInstanceOf[String] -> objArray(1).asInstanceOf[Long].toInt
+			}
 
 		TermService.orderedTermNames.diff(termCounts.filter{case(term, count) => count.intValue() == students.size}.map { _._1})
 
@@ -428,17 +438,13 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		if (students.isEmpty)
 			return Seq()
 
-		val c = session.newCriteria[MonitoringPointReport]
+		val reportedStudents =
+			session.newCriteria[MonitoringPointReport]
 			.add(is("academicYear", academicYear))
 			.add(is("monitoringPeriod", period))
-
-		val or = disjunction()
-		students.map(_.universityId)
-			.grouped(Daoisms.MaxInClauseCount)
-			.foreach { ids => or.add(in("student.universityId", ids.asJavaCollection)) }
-		c.add(or)
-
-		val reportedStudents = c.seq.map(_.student)
+			.add(safeIn("student.universityId", students.map(_.universityId)))
+			.seq
+			.map(_.student)
 
 		students.diff(reportedStudents)
 	}
@@ -451,16 +457,11 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 		if (students.isEmpty)
 			return Seq()
 
-		val c = session.newCriteria[MonitoringPointReport]
+		session.newCriteria[MonitoringPointReport]
 			.add(is("academicYear", academicYear))
 			.add(is("monitoringPeriod", period))
-
-		val or = disjunction()
-		students.map(_.universityId)
-			.grouped(Daoisms.MaxInClauseCount)
-			.foreach { ids => or.add(in("student.universityId", ids.asJavaCollection)) }
-		c.add(or)
-		c.seq
+			.add(safeIn("student.universityId", students.map(_.universityId)))
+			.seq
 	}
 
 	def hasAnyPointSets(department: Department): Boolean = {
@@ -479,12 +480,12 @@ class MonitoringPointDaoImpl extends MonitoringPointDao with Daoisms {
 	}
 
 	def findAttendanceNotes(students: Seq[StudentMember], points: Seq[MonitoringPoint]): Seq[MonitoringPointAttendanceNote] = {
-		if(students.size == 0 || points.size == 0)
+		if(students.isEmpty || points.isEmpty)
 			return Seq()
 
 		session.newCriteria[MonitoringPointAttendanceNote]
-			.add(in("student", students.asJava))
-			.add(in("point", points.asJava))
+			.add(safeIn("student", students))
+			.add(safeIn("point", points))
 			.seq
 	}
 

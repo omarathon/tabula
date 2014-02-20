@@ -7,7 +7,6 @@ import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, FormValue}
 import uk.ac.warwick.tabula.CurrentUser
-import scala.Some
 import uk.ac.warwick.tabula.data.{AutowiringSavedFormValueDaoComponent, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}

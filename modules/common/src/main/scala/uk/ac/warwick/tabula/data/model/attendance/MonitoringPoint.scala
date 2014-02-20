@@ -13,22 +13,28 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 
 @Entity
-class MonitoringPoint extends GeneratedId with HasSettings with PostLoadBehaviour {
-	import MonitoringPoint._
-
-	@ManyToOne
+class MonitoringPoint extends CommonMonitoringPointProperties with MonitoringPointSettings {
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "point_set_id")
-	var pointSet: AbstractMonitoringPointSet = _
+	var pointSet: MonitoringPointSet = _
 
 	@OneToMany(mappedBy = "point", cascade=Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=200)
 	var checkpoints: JList[MonitoringCheckpoint] = JArrayList()
-	
+
+	def isLate(currentAcademicWeek: Int): Boolean = {
+		currentAcademicWeek > requiredFromWeek
+	}
+
+	var sentToAcademicOffice: Boolean = false
+}
+
+trait CommonMonitoringPointProperties extends GeneratedId {
 	@NotNull
 	var name: String = _
-	
+
 	var createdDate: DateTime = _
-	
+
 	var updatedDate: DateTime = _
 
 	@NotNull
@@ -37,15 +43,24 @@ class MonitoringPoint extends GeneratedId with HasSettings with PostLoadBehaviou
 	@NotNull
 	var requiredFromWeek: Int = _
 
-	def isLate(currentAcademicWeek: Int): Boolean = {
-		currentAcademicWeek > requiredFromWeek
-	}
-
-	var sentToAcademicOffice: Boolean = false
-
 	@Column(name="point_type")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.MonitoringPointTypeUserType")
 	var pointType: MonitoringPointType = _
+
+	def toPoint() = {
+		val point = new MonitoringPoint
+		point.createdDate = new DateTime()
+		point.updatedDate = new DateTime()
+		point.name = name
+		point.validFromWeek = validFromWeek
+		point.requiredFromWeek = requiredFromWeek
+		point.pointType = pointType
+		point
+	}
+}
+
+trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
+	import MonitoringPoint._
 
 	@transient
 	var relationshipService = Wire[RelationshipService]

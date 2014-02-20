@@ -16,7 +16,7 @@ import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 ))
 class SmallGroupEventAttendance extends GeneratedId with PermissionsTarget with Serializable {
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="occurrence_id")
 	var occurrence: SmallGroupEventOccurrence = _
 	

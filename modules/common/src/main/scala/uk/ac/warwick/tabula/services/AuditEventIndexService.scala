@@ -1,50 +1,26 @@
 package uk.ac.warwick.tabula.services
 
 import java.io.File
-import java.io.FileNotFoundException
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import org.apache.lucene.analysis._
-import org.apache.lucene.document.Field._
 import org.apache.lucene.document._
-import org.apache.lucene.index.FieldInfo.IndexOptions
-import org.apache.lucene.index._
-import org.apache.lucene.queryparser.classic.QueryParser
-import org.apache.lucene.search.BooleanClause.Occur
 import org.apache.lucene.search._
-import org.apache.lucene.store.FSDirectory
-import org.apache.lucene.util.Version
 import org.joda.time.DateTime
-import org.joda.time.Duration
 import org.springframework.beans.factory.annotation._
-import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Component
-import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.Closeables._
-import uk.ac.warwick.tabula.helpers.Stopwatches._
-import uk.ac.warwick.tabula.helpers._
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.userlookup.User
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
-import org.springframework.beans.factory.DisposableBean
 import org.apache.lucene.analysis.core._
 import org.apache.lucene.analysis.miscellaneous._
-import org.apache.lucene.search.SearcherLifetimeManager.PruneByAge
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import AuditEventIndexService._
 
-case class PagedAuditEvents(val docs: Seq[AuditEvent], private val lastscore: Option[ScoreDoc], val token: Long, val total: Int) {
-	// need this pattern matcher as brain-dead IndexSearcher.searchAfter returns an object containing ScoreDocs,
-	// and expects a ScoreDoc in its method signature, yet in its implementation throws an exception unless you
-	// pass a specific subclass of FieldDoc.
-	def last: Option[FieldDoc] = lastscore match {
-		case None => None
-		case Some(f:FieldDoc) => Some(f)
-		case _ => throw new ClassCastException("Lucene did not return an Option[FieldDoc] as expected")
-	}
+object AuditEventIndexService {
+	type PagedAuditEvents = PagingSearchResultItems[AuditEvent]
+	val PagedAuditEvents = PagingSearchResultItems[AuditEvent] _
 }
 
 trait AuditEventNoteworthySubmissionsService {
@@ -70,7 +46,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		val searchResults = search(all(
 			termQuery("eventType", "PublishFeedback"),
 			termQuery("department", dept.code)))
-			.transform{ toParsedAuditEvent(_) }
+			.transformAll(toParsedAuditEvents)
 			.filterNot { _.hadError }
 
 		searchResults
@@ -96,7 +72,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		query = all(
 			termQuery("eventType", "SubmitAssignment"),
 			termQuery("assignment", assignment.id))
-	).transform{ toParsedAuditEvent(_) }
+	).transformAll(toParsedAuditEvents)
 
 	
 	def publishFeedbackForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = search(
@@ -105,7 +81,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 			termQuery("students", student.getWarwickId()),
 			termQuery("assignment", assignment.id)), 
 			sort = reverseDateSort
-	).transform{ toParsedAuditEvent(_) }
+	).transformAll(toParsedAuditEvents)
 	
 	def submissionForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = search(
 		query = all(
@@ -113,7 +89,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 			termQuery("masqueradeUserId", student.getUserId()),
 			termQuery("assignment", assignment.id)),
 			sort = reverseDateSort
-	).transform{ toParsedAuditEvent(_) }
+	).transformAll(toParsedAuditEvents)
 	
 	
 
@@ -169,7 +145,6 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		val individualDownloads = parsedAuditEvents(
 				search(all(assignmentTerm, termQuery("eventType", "AdminGetSingleSubmission"))))
 		val submissions3 = individualDownloads.flatMap(_.submissionId).flatMap(id => assignment.submissions.find((_.id == id)))
-					
 		(submissions1 ++ submissions2 ++ submissions3).distinct
 	}
 
@@ -177,7 +152,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		search(all(
 			termQuery("eventType", "DownloadFeedback"),
 			termQuery("assignment", assignment.id)))
-			.transform { toItem(_) }
+			.transformAll(toItems)
 			.filterNot { _.hadError }
 			.map( whoDownloaded => {
 				(whoDownloaded.masqueradeUserId, whoDownloaded.eventDate)
@@ -188,7 +163,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		search(all(
 			termQuery("eventType", "ViewOnlineFeedback"),
 			termQuery("assignment", assignment.id)))
-			.transform { toItem(_) }
+			.transformAll(toItems)
 			.filterNot { _.hadError }
 			.map { user => (user.masqueradeUserId, user.eventDate) }
 			.groupBy { case (userId, _) => userId }
@@ -204,7 +179,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 			termQuery("eventType", "GenericFeedback"),
 			termQuery("assignment", assignment.id)),
 			max = 1, sort = reverseDateSort)
-			.transform{ toItem(_) }
+			.transformAll(toItems)
 			.map(latestTime => latestTime.eventDate)
 			.headOption
 	}
@@ -213,7 +188,7 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		search(all(
 			termQuery("eventType", "OnlineFeedback"),
 			termQuery("assignment", assignment.id)))
-			.transform { toParsedAuditEvent(_) }
+			.transformAll(toParsedAuditEvents)
 			.filterNot { _.hadError }
 			.flatMap(auditEvent => auditEvent.students.map( student => (student, auditEvent.eventDate)))
 			.groupBy( _._1)
@@ -224,14 +199,14 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 		search(all(
 			termQuery("eventType", "DownloadFeedback"),
 			termQuery("assignment", assignment.id)))
-			.transform { toItem(_) }
+			.transformAll(toItems)
 			.filterNot { _.hadError }
 			.map { _.masqueradeUserId }
 			.filterNot { _ == null }
 			.distinct
 
 	def mapToAssignments(results: RichSearchResults) = 
-		results.transform(toParsedAuditEvent)
+		results.transformAll(toParsedAuditEvents)
 		.flatMap(_.assignmentId)
 		.flatMap(assignmentService.getAssignmentById)
 
@@ -332,25 +307,47 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 	override def listNewerThan(startDate: DateTime, batchSize: Int) =
 		service.listNewerThan(startDate, batchSize).filter { _.eventStage == "before" }
 
-	protected def toItem(doc: Document) = 
-		documentValue(doc, IdField)
-			.flatMap { id => service.getById(id.toLong) }
-			.orElse {
-				val event = AuditEvent()
-				event.eventStage = "before"
-				event.data = "{}" // We can't restore this if it's not from the db
-				
-				documentValue(doc, IdField).foreach { id => event.id = id.toLong }
-				documentValue(doc, "eventId").foreach { id => event.eventId = id }
-				documentValue(doc, "userId").foreach { id => event.userId = id }
-				documentValue(doc, "masqueradeUserId").foreach { id => event.masqueradeUserId = id }
-				documentValue(doc, "eventType").foreach { typ => event.eventType = typ }
-				documentValue(doc, UpdatedDateField).foreach { ts => event.eventDate = new DateTime(ts.toLong) }
-				
-				Some(event)
-			}
+	/**
+	 * Convert a list of Lucene Documents to a list of AuditEvents.
+	 * Any events not found in the database will be returned as placeholder
+	 * events with whatever data we kept in the Document, just in case
+	 * an event went missing and we'd like to see the data.
+	 */
+	protected def toItems(docs: Seq[Document]): Seq[AuditEvent] = {
+		// Pair Documents up with the contained ID if present
+		val docIds = docs.map { doc =>
+			(doc -> documentValue(doc, IdField).map{ _.toLong })
+		}
+		val ids = docIds.flatMap {
+			case (_, id) => id
+		}
+		// Most events should be in the DB....
+		val eventsMap = service.getByIds(ids)
+			.map { event => (event.id, event) }
+			.toMap
 
-	protected def toParsedAuditEvent(doc: Document): Option[AuditEvent] = toItem(doc).map { event =>
+		// But we will return placeholder items for any IDs that weren't.
+		docIds.map {
+			case (doc, id) =>
+				id.flatMap(eventsMap.get).getOrElse(placeholderEventFromDoc(doc))
+		}
+	}
+
+	/** A placeholder AuditEvent to display if a Document has no matching event in the DB. */
+	private def placeholderEventFromDoc(doc: Document) = {
+		val event = AuditEvent()
+		event.eventStage = "before"
+		event.data = "{}" // We can't restore this if it's not from the db
+		documentValue(doc, IdField).foreach { id => event.id = id.toLong }
+		documentValue(doc, "eventId").foreach { id => event.eventId = id }
+		documentValue(doc, "userId").foreach { id => event.userId = id }
+		documentValue(doc, "masqueradeUserId").foreach { id => event.masqueradeUserId = id }
+		documentValue(doc, "eventType").foreach { typ => event.eventType = typ }
+		documentValue(doc, UpdatedDateField).foreach { ts => event.eventDate = new DateTime(ts.toLong) }
+		event
+	}
+
+	protected def toParsedAuditEvents(doc: Seq[Document]): Seq[AuditEvent] = toItems(doc).map { event =>
 		event.parsedData = service.parseData(event.data)
 		event.related.map { e =>
 			e.parsedData = service.parseData(e.data)
@@ -358,13 +355,13 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		event
 	}
 
-	protected def auditEvents(results: RichSearchResults) = results.transform(toItem(_))
-	protected def parsedAuditEvents(results: RichSearchResults) = results.transform(toParsedAuditEvent(_))
+	protected def auditEvents(results: RichSearchResults) = results.transformAll(toItems)
+	protected def parsedAuditEvents(results: RichSearchResults) = results.transformAll(toParsedAuditEvents)
 
 	/**
 	 * TODO reuse one Document and set of Fields for all items
 	 */
-	protected def toDocument(item: AuditEvent): Document = {
+	protected def toDocuments(item: AuditEvent): Seq[Document] = {
 		val doc = new Document
 
 		if (item.related == null || item.related.isEmpty) {
@@ -390,7 +387,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		}
 
 		doc add dateField(UpdatedDateField, item.eventDate)
-		doc
+		Seq(doc)
 	}
 
 	def openQuery(queryString: String, start: Int, count: Int) = {
@@ -400,7 +397,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 			sort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true)),
 			offset = start,
 			max = count)
-		docs transform toItem
+		docs.transformAll(toItems)
 	}
 	
 	private def addFieldToDoc(field: String, data: Map[String, Any], doc: Document) = data.get(field) match  {

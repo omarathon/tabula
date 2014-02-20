@@ -6,11 +6,11 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{PersistenceTestBase, Mockito, CurrentUser}
 import org.junit.Before
 import uk.ac.warwick.tabula.data.model.MeetingFormat.FaceToFace
-import scala.Some
 import uk.ac.warwick.tabula.data.model.MeetingApprovalState.Pending
 import org.hibernate.Session
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.data.MeetingRecordDao
+import uk.ac.warwick.tabula.Fixtures
 
 trait MeetingRecordTests extends PersistenceTestBase with Mockito {
 
@@ -45,17 +45,13 @@ trait MeetingRecordTests extends PersistenceTestBase with Mockito {
 		}
 
 		student = transactional { tx =>
-			val m = new StudentMember("1170836")
-			m.userId = "studentmember"
+			val m = Fixtures.student(universityId="1170836", userId="studentmember")
 			session.save(m)
 			m
 		}
 
 		relationship = transactional { tx =>
-			val relationship = StudentRelationship("Professor A Tutor", StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"), "1170836/1")
-			relationship.profileService = ps
-			ps.getStudentBySprCode("1170836/1") returns (Some(student))
-
+			val relationship = ExternalStudentRelationship("Professor A Tutor", StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee"), student)
 			session.save(relationship)
 			relationship
 		}

@@ -27,13 +27,6 @@
 						</tr>
 					</#if>
 
-					<#if profile.nationality??>
-						<tr>
-							<th>Nationality</th>
-							<td><@fmt.nationality profile.nationality?default('Unknown') /></td>
-						</tr>
-					</#if>
-
 					<#if profile.dateOfBirth??>
 						<tr>
 							<th>Date of birth</th>
@@ -41,14 +34,34 @@
 						</tr>
 					</#if>
 
-					<#if profile.student && profile.termtimeAddress??>
-						<tr class="address">
-							<th>Term-time address</th>
-							<td><@profile_macros.address profile.termtimeAddress /></td>
+					<#if profile.nationality??>
+						<tr>
+							<th>Nationality</th>
+							<td><@fmt.nationality profile.nationality?default('Unknown') /></td>
 						</tr>
 					</#if>
 
-					<#if profile.student && profile.nextOfKins?? && profile.nextOfKins?size gt 0>
+					<#if features.disabilityRenderingInProfiles && (profile.disability.reportable)!false>
+						<tr>
+							<th>Disability</th>
+							<td>
+								<a class="use-popover cue-popover" id="popover-disability" data-html="true"
+								   data-original-title="Disability"
+								   data-content="<p><#if isSelf>You have<#else>This student has</#if> self-reported the following disability code:</p><div class='well'><h6>${profile.disability.code}</h6><small>${profile.disability.sitsDefinition}</small></div>">
+									${profile.disability.definition}
+								</a>
+							</td>
+						</tr>
+					</#if>
+
+					<#if profile.termtimeAddress??>
+					<tr class="address">
+						<th>Term-time address</th>
+						<td><@profile_macros.address profile.termtimeAddress /></td>
+					</tr>
+					</#if>
+
+					<#if profile.nextOfKins?has_content>
 						<tr>
 							<th>Emergency contacts</th>
 							<td>
@@ -62,28 +75,24 @@
 						</tr>
 					</#if>
 
-
-					<#if profile.tier4VisaRequirement??>
+					 <#if features.visaInStudentProfile && !isSelf && profile.hasTier4Visa?? && profile.casUsed??>
 						<tr>
-							<th>Nationality requires visa</th>
-							<#if profile.tier4VisaRequirement>
-								<td>Yes</td>
-								</tr>
-<#--								<#if profile.casUsed??>
-									<tr>
-										<th>CAS used to obtain visa</th>
-										<#if profile.casUsed>
-											<td>Yes</td>
-										<#else>
-											<td>No</td>
-										</#if>
-									</tr>
+							<th>Tier 4 requirements</th>
+							<td>
+								<#if profile.casUsed && profile.hasTier4Visa>Yes
+								<#elseif !profile.casUsed && !profile.hasTier4Visa>No
+								<#else>
+									<#if !profile.casUsed && profile.hasTier4Visa>
+										<#assign inconsistency = "Tier 4 visa exists but no Confirmation of Acceptance for Studies" />
+									<#else>
+										<#assign inconsistency = "Confirmation of Acceptance for Studies exists but no tier 4 visa" />
+									</#if>
+									Contact the <a href="mailto:immigrationservice@warwick.ac.uk">Immigration Service</a>
+									<a class="use-popover" data-content="Contact the University's Immigration Service to find out whether tier 4
+									requirements apply to this student. (${inconsistency})" data-toggle="popover"><i class="icon-question-sign"></i></a>
 								</#if>
--->
-							<#else>
-								<td>No</td>
-								</tr>
-							</#if>
+							</td>
+						</tr>
 					</#if>
 				</tbody>
 			</table>

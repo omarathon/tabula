@@ -101,7 +101,7 @@ trait ProfileQueryMethods { self: ProfileIndexService =>
 			inUseQuery.add(new WildcardQuery(new Term("inUseFlag", "Inactive - Starts *")), Occur.SHOULD)
 			bq.add(inUseQuery, Occur.MUST)
 
-			search(bq) transform { toItem(_) }
+			search(bq) transformAll { toItems(_) }
 		} catch {
 			case e: ParseException => Seq() // Invalid query string
 		}
@@ -177,12 +177,13 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 
 	override def listNewerThan(startDate: DateTime, batchSize: Int) = dao.listUpdatedSince(startDate, batchSize)
 
-	protected def toItem(doc: Document) = documentValue(doc, IdField).flatMap { id => dao.getByUniversityId(id) }
+	protected def toItems(docs: Seq[Document]) =
+		docs.flatMap { doc => documentValue(doc, IdField).flatMap { id => dao.getByUniversityId(id) } }
 
 	/**
 	 * TODO reuse one Document and set of Fields for all items
 	 */
-	protected def toDocument(item: Member): Document = {
+	protected def toDocuments(item: Member): Seq[Document] = {
 		val doc = new Document
 
 		doc add plainStringField(IdField, item.universityId)
@@ -208,7 +209,7 @@ class ProfileIndexService extends AbstractIndexService[Member] with ProfileQuery
 		}
 
 		doc add dateField(UpdatedDateField, item.lastUpdatedDate)
-		doc
+		Seq(doc)
 	}
 
 	private def indexTokenised(doc: Document, fieldName: String, value: Option[String]) = {

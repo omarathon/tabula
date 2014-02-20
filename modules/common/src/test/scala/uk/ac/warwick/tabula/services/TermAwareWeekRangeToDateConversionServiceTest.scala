@@ -6,7 +6,6 @@ import org.joda.time._
 import uk.ac.warwick.tabula.JavaImports.{JArrayList,JInteger}
 import uk.ac.warwick.util.collections.{Pair=>WPair}
 import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, WeekRange}
-import scala.Some
 
 class TermAwareWeekRangeToDateConversionServiceTest extends TestBase with Mockito{
 

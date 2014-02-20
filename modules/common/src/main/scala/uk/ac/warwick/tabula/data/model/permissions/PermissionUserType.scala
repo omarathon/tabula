@@ -1,15 +1,13 @@
 package uk.ac.warwick.tabula.data.model.permissions
 
 import org.hibernate.`type`.StandardBasicTypes
-import uk.ac.warwick.tabula.data.model.AbstractBasicUserType
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.permissions.Permission
+import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, AbstractBasicUserType}
+import uk.ac.warwick.tabula.permissions.{PermissionsSelector, Permissions, Permission, SelectorPermission}
 import java.sql.Types
 import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.permissions.SelectorPermission
 
 class PermissionUserType extends AbstractBasicUserType[Permission, String] {
 	
@@ -23,10 +21,13 @@ class PermissionUserType extends AbstractBasicUserType[Permission, String] {
 	
 	override def convertToObject(string: String) = {
 		string match {
+			case r"([A-Za-z\.]+)${permissionName}\(\*\)" => {
+				SelectorPermission.of(permissionName, PermissionsSelector.Any[StudentRelationshipType]) // FIXME hard-wired
+			}
 			case r"([A-Za-z\.]+)${permissionName}\(([^\)]+)${id}\)" => {
-				val selector = relationshipService.get.getStudentRelationshipTypeByUrlPart(id) match {
+				val selector = relationshipService.get.getStudentRelationshipTypeById(id) match {
 					case Some(selector) => selector
-					case _ => relationshipService.get.getStudentRelationshipTypeById(id).get // Fall back to ID, just in case
+					case _ => relationshipService.get.getStudentRelationshipTypeByUrlPart(id).get // Fall back to url, just in case
 				}
 				
 				SelectorPermission.of(permissionName, selector) // FIXME hard-wired

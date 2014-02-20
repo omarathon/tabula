@@ -9,9 +9,9 @@ import uk.ac.warwick.tabula.groups.{SmallGroupEventBuilder, SmallGroupFixture, S
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.groups.notifications.SmallGroupSetChangedNotification
 import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.AnonymousUser
+import uk.ac.warwick.tabula.data.model.notifications.SmallGroupSetChangedNotification
 
 
 class NotifiesAffectedGroupMembersTest extends TestBase {
@@ -20,20 +20,27 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
   private trait Fixture extends SmallGroupFixture {
     val user1 = new User("user1")
     user1.setWarwickId("user1")
+		user1.setUserId("user1")
     
     val user2 = new User("user2")
     user2.setWarwickId("user2")
-    
+		user2.setUserId("user2")
+
     val user3 = new User("user3")
     user3.setWarwickId("user3")
-    
+		user3.setUserId("user3")
+
     val user4 = new User("user4")
     user4.setWarwickId("user4")
+		user4.setUserId("user4")
     
     val userDatabase = Seq(user1, user2, user3, user4)
-	userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] =>
-		ids.map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
-	}
+		userLookup.getUsersByWarwickUniIds(any[Seq[String]]) answers { case ids: Seq[String @unchecked] =>
+			ids.map(id => (id, userDatabase.find {_.getWarwickId == id}.getOrElse (new AnonymousUser()))).toMap
+		}
+		userLookup.getUserByUserId(any[String]) answers { case id: String @unchecked =>
+			userDatabase.find {_.getUserId == id}.getOrElse (new AnonymousUser())
+		}
 
     val eventA = new SmallGroupEventBuilder().withTutors(createUserGroup(Seq("tutor1","tutor2"),identifierIsUniNumber = false)).build
     val groupA = new SmallGroupBuilder()
@@ -54,27 +61,6 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
       command.setBeforeUpdates should equal(groupSet1)
       command.setBeforeUpdates.eq(groupSet1) should be(false)
 
-    }
-  }
-
-  @Test
-  def createNotificationCreatesNotificationForCorrectGroup {
-    new Fixture {
-
-      // de-allocate user2 from group A
-      val modifiedGroupA = groupA.withStudents(createUserGroup(Seq("user1"))).build
-      command.set.groups = JArrayList(modifiedGroupA, groupB)
-
-      val user1Notification  = command.createStudentNotification(user1).get
-      user1Notification.asInstanceOf[SmallGroupSetChangedNotification]._object.groups.asScala.head should be(modifiedGroupA)
-      user1Notification.recipients should be(Seq(user1))
-
-      val user3Notification = command.createStudentNotification(user3).get
-      user3Notification.asInstanceOf[SmallGroupSetChangedNotification]._object.groups.asScala.head  should be(groupB)
-      user3Notification.recipients should be(Seq(user3))
-
-      val inNoGroupNotification = command.createStudentNotification(new User("not-in-any-group"))
-      inNoGroupNotification should be(None)
     }
   }
 
@@ -122,6 +108,10 @@ class NotifiesAffectedGroupMembersTest extends TestBase {
 
     val notifications = command.emit(command.set)
     notifications.size should be(2)
+
+		notifications.foreach{
+			case n: SmallGroupSetChangedNotification => n.userLookup = userLookup
+		}
 
     notifications.exists(_.recipients == Seq(user1)) should be(true)
     notifications.exists(_.recipients == Seq(user2)) should be(true)

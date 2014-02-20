@@ -19,6 +19,7 @@ import org.hibernate.annotations.Type
 import javax.persistence.Column
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
+import javax.persistence.FetchType
 
 @Entity
 class StudentCourseYearDetails extends StudentCourseYearProperties
@@ -32,7 +33,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 		this.academicYear = year
 	}
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="scjCode", referencedColumnName="scjCode")
 	var studentCourseDetails: StudentCourseDetails = _
 
@@ -63,7 +64,7 @@ trait StudentCourseYearProperties {
 
 	var sceSequenceNumber: JInteger = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="enrolmentStatusCode", referencedColumnName="code")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var enrolmentStatus: SitsStatus = _
@@ -72,11 +73,11 @@ trait StudentCourseYearProperties {
 	// same as the department on the Route table, and on the StudentCourseDetails, but in some cases, e.g. where routes
 	// change ownership in different years, this might contain a different department. This indicates the
 	// department responsible for administration for the student for this year.
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "enrolment_department_id")
 	var enrolmentDepartment: Department = _
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="modeOfAttendanceCode", referencedColumnName="code")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var modeOfAttendance: ModeOfAttendance = _
@@ -97,8 +98,12 @@ trait StudentCourseYearProperties {
 	var missingFromImportSince: DateTime = _
 
 	@Column(name="cas_used")
-	@Restricted(Array("Profiles.Read.CasUsed"))
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	var casUsed: JBoolean = _
+
+	@Column(name="tier4visa")
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
+	var tier4Visa: JBoolean = _
 
 }
 

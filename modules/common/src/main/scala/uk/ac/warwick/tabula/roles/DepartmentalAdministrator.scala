@@ -28,7 +28,7 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 
 		Assignment.ImportFromExternalSystem,
 
-		FeedbackTemplate.		Create,
+		FeedbackTemplate.Create,
 		FeedbackTemplate.Read,
 		FeedbackTemplate.Update,
 		FeedbackTemplate.Delete,
@@ -42,10 +42,11 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 
 		MonitoringPoints.Report,
 
-		Profiles.Read.Tier4VisaRequirement,
-		Profiles.Read.CasUsed,
-
 		Profiles.MeetingRecord.ReadDetails(PermissionsSelector.Any[StudentRelationshipType]),
+
+		Profiles.ScheduledMeetingRecord.Create(PermissionsSelector.Any[StudentRelationshipType]),
+		Profiles.ScheduledMeetingRecord.Update,
+		Profiles.ScheduledMeetingRecord.Delete,
 
 		SmallGroups.Read
 	)

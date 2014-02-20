@@ -63,7 +63,8 @@ import uk.ac.warwick.tabula.commands.MemberOrUser
 					"ownedDepartments" -> info.ownedDepartments,
 					"ownedModule" -> info.ownedModules,
 					"ownedModuleDepartments" -> info.ownedModules.map { _.department },
-					"activities" -> info.activities)
+					"activities" -> info.activities,
+					"ajax" -> ajax)
 			case _ => Mav("home/view")
 		}
 }

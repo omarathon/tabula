@@ -16,7 +16,6 @@ import org.springframework.jdbc.`object`.MappingSqlQueryWithParameters
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{AssessmentType, UpstreamAssessmentGroup, AssessmentComponent}
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.SprCode
 import org.springframework.context.annotation.Profile
 import uk.ac.warwick.tabula.sandbox.SandboxData
 
@@ -25,7 +24,7 @@ trait AssignmentImporter {
 	 * Iterates through ALL module registration elements,
 	 * passing each ModuleRegistration item to the given callback for it to process.
 	 */
-	def allMembers(callback: ModuleRegistration => Unit): Unit
+	def allMembers(callback: UpstreamModuleRegistration => Unit): Unit
 	
 	def getAllAssessmentGroups: Seq[UpstreamAssessmentGroup]
 
@@ -70,12 +69,12 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 	 * Iterates through ALL module registration elements in ADS (that's many),
 	 * passing each ModuleRegistration item to the given callback for it to process.
 	 */
-	def allMembers(callback: ModuleRegistration => Unit) {
+	def allMembers(callback: UpstreamModuleRegistration => Unit) {
 		val params: JMap[String, Object] = JMap(
 			"academic_year_code" -> yearsToImportArray)
 		jdbc.query(AssignmentImporter.GetAllAssessmentGroupMembers, params, new RowCallbackHandler {
 			override def processRow(rs: ResultSet) {
-				callback(ModuleRegistration(
+				callback(UpstreamModuleRegistration(
 					year = rs.getString("academic_year_code"),
 					sprCode = rs.getString("spr_code"),
 					occurrence = rs.getString("mav_occurrence"),
@@ -100,7 +99,7 @@ class AssignmentImporterImpl extends AssignmentImporter with InitializingBean {
 @Profile(Array("sandbox")) @Service
 class SandboxAssignmentImporter extends AssignmentImporter {
 	
-	def allMembers(callback: ModuleRegistration => Unit) = {
+	def allMembers(callback: UpstreamModuleRegistration => Unit) = {
 		var moduleCodesToIds = Map[String, Seq[Range]]()
 		 
 		for {
@@ -120,7 +119,7 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 			range <- ranges
 			uniId <- range
 		} callback(
-			ModuleRegistration(
+			UpstreamModuleRegistration(
 				year = AcademicYear.guessByDate(DateTime.now).toString,
 				sprCode = "%d/1".format(uniId),
 				occurrence = "A",
@@ -167,10 +166,9 @@ class SandboxAssignmentImporter extends AssignmentImporter {
 
 /**
  * Holds data about an individual student's registration on a single module.
- * FIXME this class name is confusing now there's an unrelated ModuleRegistration entity
  */
-case class ModuleRegistration(year: String, sprCode: String, occurrence: String, moduleCode: String, assessmentGroup: String) {
-	def differentGroup(other: ModuleRegistration) =
+case class UpstreamModuleRegistration(year: String, sprCode: String, occurrence: String, moduleCode: String, assessmentGroup: String) {
+	def differentGroup(other: UpstreamModuleRegistration) =
 		year != other.year ||
 			occurrence != other.occurrence ||
 			moduleCode != other.moduleCode ||
@@ -237,15 +235,22 @@ object AssignmentImporter {
 
 	val GetAllAssessmentGroupMembers = """
 		select 
-			academic_year_code,
-			spr_code, 
-			mav_occurrence,
-			module_code,
-			assessment_group
-		from module_registration  
-		where academic_year_code in (:academic_year_code)
-		order by academic_year_code, module_code, mav_occurrence, assessment_group
-		"""
+			mr.academic_year_code,
+			mr.spr_code,
+			mr.mav_occurrence,
+			mr.module_code,
+			mr.assessment_group
+		from module_registration mr
+    	left outer join student_current_study_details scd
+    		on mr.spr_code = scd.spr_code
+		where
+			mr.academic_year_code in (:academic_year_code) and
+      (
+				scd.student_status is null or
+        scd.student_status not like 'P%'
+      )
+		order by mr.academic_year_code, mr.module_code, mr.mav_occurrence, mr.assessment_group
+																		 """
 
 	/** AssessmentGroups without a cause */
 	val GetEmptyAssessmentGroups = """

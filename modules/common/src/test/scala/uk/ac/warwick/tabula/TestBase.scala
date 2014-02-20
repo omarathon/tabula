@@ -35,7 +35,6 @@ import org.junit.Rule
 import freemarker.template._
 import java.util
 import freemarker.core.Environment
-import scala.Some
 import org.apache.log4j.NDC
 import uk.ac.warwick.tabula.helpers.Logging
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
@@ -57,7 +56,12 @@ abstract class TestBase extends JUnitSuite with ShouldMatchersForJUnit with Test
 
 	Transactions.enabled = false
 
-  NDC.pop
+	// IntelliJ tests via JUnit only half-fill this property, so set it here.
+	if (System.getProperty("TestProcessId") == "F${surefire.forkNumber}") {
+		System.setProperty("TestProcessId", "F1")
+	}
+
+  NDC.pop()
   NDC.push(System.getProperty("TestProcessId"))
   logger.trace("TestBase instantiated for " + this.getClass.getName)
 }

@@ -1,10 +1,12 @@
-<#import "/WEB-INF/freemarker/admin/_profile_link.ftl" as pl />
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
 <#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
 <#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#escape x as x?html>
 
 <#assign time_remaining=durationFormatter(assignment.closeDate) />
 <#assign deptName=(module.department.name)!"this deparment" />
+
+<div id="profile-modal" class="modal fade profile-subset"></div>
 
 <div>
     <h1>Grant extensions</h1>
@@ -59,7 +61,7 @@
 						<tr id="row${extension.universityId}" class="extension-row ${highlightClass}">
 							<#assign student = studentNameLookup[extension.universityId]>
 							<td><h6>${student.firstName}</h6></td>
-							<td><h6>${student.lastName}&nbsp;<@pl.profile_link student /></h6></td>
+							<td><h6>${student.lastName}&nbsp;<@pl.profile_link student.warwickId /></h6></td>
 							<td class="expiryDate">
 								<#if extension.expiryDate??>
 									<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
@@ -75,7 +77,9 @@
 								</#if>
 							</td>
 							<td class="status">
-								<#if extension.approved>
+								<#if extension.awaitingReview>
+									<span class="requestedExtension">Request updated <@fmt.date date=extension.requestedOn at=true /></span>
+								<#elseif extension.approved>
 									Granted
 								<#elseif extension.rejected>
 									Rejected
@@ -110,7 +114,7 @@
 						<tr id="row${extension.universityId}" class="extension-row">
 							<#assign student = studentNameLookup[extension.universityId]>
 							<td><h6>${student.firstName}</h6></td>
-							<td><h6>${student.lastName}&nbsp;<@pl.profile_link student /></h6></td>
+							<td><h6>${student.lastName}&nbsp;<@pl.profile_link student.warwickId /></h6></td>
 							<td class="expiryDate">
 								<#if extension.expiryDate??>
 									<@fmt.date date=extension.expiryDate capitalise=true shortMonth=true />
@@ -164,7 +168,7 @@
 						<tr id="row${universityId}" class="extension-row">
 							<#assign student = studentNameLookup[universityId]>
 							<td><h6>${student.firstName}</h6></td>
-							<td><h6>${student.lastName}&nbsp;<@pl.profile_link student /></h6></td>
+							<td><h6>${student.lastName}&nbsp;<@pl.profile_link student.warwickId /></h6></td>
 							<td class="expiryDate"></td>
 							<td></td>
 							<td class="status"></td>

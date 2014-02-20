@@ -145,6 +145,7 @@
 			trigger: 'click',
 			container: '#container'
 		});
+		AjaxPopup.wireAjaxPopupLinks($module);
 	});
 </script>
 

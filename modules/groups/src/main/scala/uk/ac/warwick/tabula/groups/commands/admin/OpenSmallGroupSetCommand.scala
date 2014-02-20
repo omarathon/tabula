@@ -5,12 +5,12 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.data.model.Notification
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.groups.notifications.OpenSmallGroupSetsNotification
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSetSelfSignUpState._
 import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.notifications.OpenSmallGroupSetsNotification
 
 
 object OpenSmallGroupSetCommand {
@@ -74,7 +74,7 @@ trait OpenSmallGroupSetAudit extends Describable[Seq[SmallGroupSet]] {
 trait OpenSmallGroupSetNotifier extends Notifies[Seq[SmallGroupSet], Seq[SmallGroupSet]] {
 	this: OpenSmallGroupSetState with UserAware =>
 
-	def emit(sets: Seq[SmallGroupSet]): Seq[Notification[Seq[SmallGroupSet]]] = {
+	def emit(sets: Seq[SmallGroupSet]): Seq[Notification[SmallGroupSet, Unit]] = {
 		val allMemberships: Seq[(User,SmallGroupSet)] = 
 			for (set <- sets; member <- set.allStudents) yield (member, set)
 
@@ -82,7 +82,11 @@ trait OpenSmallGroupSetNotifier extends Notifies[Seq[SmallGroupSet], Seq[SmallGr
 		val setsPerUser: Map[User,Seq[SmallGroupSet]] = allMemberships.groupBy(_._1).map { case (k,v) => (k,v.map(_._2))}
 
 		// convert the map into a notification per user
-		setsPerUser.map {case (student, sets) => new OpenSmallGroupSetsNotification(user,student,sets) with FreemarkerTextRenderer}.toSeq
+		setsPerUser.map { case (student, sets) =>
+			val n = Notification.init(new OpenSmallGroupSetsNotification, user, sets)
+			n.recipientUserId = student.getUserId
+			n
+		}.toSeq
 	}
 }
 

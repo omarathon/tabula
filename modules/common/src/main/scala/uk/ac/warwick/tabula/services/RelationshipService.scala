@@ -5,16 +5,18 @@ import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.MemberDao
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.{DegreeType, CourseType, Department, Member, StudentMember, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{Department, Member, StudentMember, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.Logging
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
+import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 
 /**
  * Service providing access to members and profiles.
  */
 trait RelationshipService {
+	def getPreviousRelationship(relationship: StudentRelationship): Option[StudentRelationship]
+
 	def allStudentRelationshipTypes: Seq[StudentRelationshipType]
 	def saveOrUpdate(relationshipType: StudentRelationshipType)
 	def delete(relationshipType: StudentRelationshipType)
@@ -23,11 +25,11 @@ trait RelationshipService {
 	def getStudentRelationshipTypesWithRdxType: Seq[StudentRelationshipType]
 
 	def saveOrUpdate(relationship: StudentRelationship)
-	def findCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
-	def getRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
-	def saveStudentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship]
-	def replaceStudentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship]
-	def replaceStudentRelationshipsWithPercentages(relationshipType: StudentRelationshipType, targetSprCode: String, agentsWithPercentages: Seq[(String, JBigDecimal)]): Seq[StudentRelationship]
+	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
+	def getRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
+	def saveStudentRelationships(relationshipType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails, agents: Seq[Member]): Seq[StudentRelationship]
+	def replaceStudentRelationships(relationshipType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails, agents: Seq[Member]): Seq[StudentRelationship]
+	def replaceStudentRelationshipsWithPercentages(relationshipType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails, agentsWithPercentages: Seq[(Member, JBigDecimal)]): Seq[StudentRelationship]
 	def listStudentRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def listStudentRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def listAllStudentRelationshipsWithMember(agent: Member): Seq[StudentRelationship]
@@ -38,7 +40,7 @@ trait RelationshipService {
 	def listStudentsWithoutRelationship(relationshipType: StudentRelationshipType, department: Department): Seq[Member]
 	def countStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): (Int, Int)
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int
-	def getAllCurrentRelationships(targetSprCode: String): Seq[StudentRelationship]
+	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
 }
 
 @Service(value = "relationshipService")
@@ -59,45 +61,39 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def saveOrUpdate(relationship: StudentRelationship) = memberDao.saveOrUpdate(relationship)
 
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional() {
-		student.freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap {
-			courseDetail => memberDao.getCurrentRelationships(relationshipType, courseDetail.sprCode)
-		}.toSeq
+		memberDao.getCurrentRelationships(relationshipType, student)
 	}
 
-	def findCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship] = transactional() {
-		memberDao.getCurrentRelationships(relationshipType, targetSprCode)
+	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {
+		memberDao.getAllCurrentRelationships(student)
 	}
 
-	def getAllCurrentRelationships(targetSprCode: String): Seq[StudentRelationship] = transactional(readOnly = true) {
-		memberDao.getAllCurrentRelationships(targetSprCode)
+	def getRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {
+		memberDao.getRelationshipsByTarget(relationshipType, student)
 	}
 
-	def getRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship] = transactional(readOnly = true) {
-		memberDao.getRelationshipsByTarget(relationshipType, targetSprCode)
-	}
-
-	def saveStudentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship] = transactional() {
-		val currentRelationships = findCurrentRelationships(relationshipType, targetSprCode)
-		val existingRelationships = currentRelationships.filter { rel => agents.contains(rel.agent) }
-		val agentsToCreate = agents.filterNot { agent => currentRelationships.exists { _.agent == agent } }
+	def saveStudentRelationships(relationshipType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails, agents: Seq[Member]): Seq[StudentRelationship] = transactional() {
+		val currentRelationships = findCurrentRelationships(relationshipType, studentCourseDetails.student)
+		val existingRelationships = currentRelationships.filter { rel => rel.agentMember.exists { agents.contains(_) } }
+		val agentsToCreate = agents.filterNot { agent => currentRelationships.exists { _.agentMember == Some(agent) } }
 
 		agentsToCreate.map { agent =>
 			// create the new one
-			val newRelationship = StudentRelationship(agent, relationshipType, targetSprCode)
+			val newRelationship = StudentRelationship(agent, relationshipType, studentCourseDetails)
 			newRelationship.startDate = new DateTime
 			memberDao.saveOrUpdate(newRelationship)
 			newRelationship
 		} ++ existingRelationships
 	}
 
-	def saveStudentRelationshipsWithPercentages(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[(String, JBigDecimal)]): Seq[StudentRelationship] = transactional() {
-		val currentRelationships = findCurrentRelationships(relationshipType, targetSprCode)
-		val existingRelationships = currentRelationships.filter { rel => agents.map { _._1 }.contains(rel.agent) }
-		val agentsToCreate = agents.filterNot { case (agent, _) => currentRelationships.exists { _.agent == agent } }
+	def saveStudentRelationshipsWithPercentages(relationshipType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails, agents: Seq[(Member, JBigDecimal)]): Seq[StudentRelationship] = transactional() {
+		val currentRelationships = findCurrentRelationships(relationshipType, studentCourseDetails.student)
+		val existingRelationships = currentRelationships.filter { rel => rel.agentMember.exists { agent => agents.map { _._1 }.contains(agent) } }
+		val agentsToCreate = agents.filterNot { case (agent, _) => currentRelationships.exists { _.agentMember == Some(agent) } }
 
 		agentsToCreate.map { case (agent, percentage) =>
 			// create the new one
-			val newRelationship = StudentRelationship(agent, relationshipType, targetSprCode)
+			val newRelationship = StudentRelationship(agent, relationshipType, studentCourseDetails)
 			newRelationship.percentage = percentage
 			newRelationship.startDate = new DateTime
 			memberDao.saveOrUpdate(newRelationship)
@@ -106,11 +102,11 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	}
 
 	// end any existing relationships of the same type for this student, then save the new one
-	def replaceStudentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[String]): Seq[StudentRelationship] = transactional() {
-		val currentRelationships = findCurrentRelationships(relationshipType, targetSprCode)
-		val (existingRelationships, relationshipsToEnd) = currentRelationships.partition { rel => agents.contains(rel.agent) }
+	def replaceStudentRelationships(relationshipType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails, agents: Seq[Member]): Seq[StudentRelationship] = transactional() {
+		val currentRelationships = findCurrentRelationships(relationshipType, studentCourseDetails.student)
+		val (existingRelationships, relationshipsToEnd) = currentRelationships.partition { rel => rel.agentMember.exists { agents.contains(_) } }
 
-		val agentsToAdd = agents.filterNot { agent => existingRelationships.exists { _.agent == agent } }
+		val agentsToAdd = agents.filterNot { agent => existingRelationships.exists { _.agentMember == Some(agent) } }
 
 		// Don't need to do anything with existingRelationships, but need to handle the others
 
@@ -118,18 +114,18 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		relationshipsToEnd.foreach { _.endDate = DateTime.now }
 
 		// Save new relationships for agents that don't already exist
-		saveStudentRelationships(relationshipType, targetSprCode, agentsToAdd)
+		saveStudentRelationships(relationshipType, studentCourseDetails, agentsToAdd)
 	}
 
-	def replaceStudentRelationshipsWithPercentages(relationshipType: StudentRelationshipType, targetSprCode: String, agents: Seq[(String, JBigDecimal)]): Seq[StudentRelationship] = transactional() {
-		val currentRelationships = findCurrentRelationships(relationshipType, targetSprCode)
-		val (existingRelationships, relationshipsToEnd) = currentRelationships.partition { rel => agents.map { _._1 }.contains(rel.agent) }
+	def replaceStudentRelationshipsWithPercentages(relationshipType: StudentRelationshipType, studentCourseDetails: StudentCourseDetails, agents: Seq[(Member, JBigDecimal)]): Seq[StudentRelationship] = transactional() {
+		val currentRelationships = findCurrentRelationships(relationshipType, studentCourseDetails.student)
+		val (existingRelationships, relationshipsToEnd) = currentRelationships.partition { rel => rel.agentMember.exists { agent => agents.map { _._1 }.contains(agent) } }
 
-		val agentsToAdd = agents.filterNot { case (agent, percentage) => existingRelationships.exists { _.agent == agent } }
+		val agentsToAdd = agents.filterNot { case (agent, percentage) => existingRelationships.exists { _.agentMember == Some(agent) } }
 
 		// Find existing relationships with the wrong percentage
 		existingRelationships.foreach { rel =>
-			val (agent, percentage) = agents.find { case (agent, _) => agent == rel.agent }.get
+			val percentage = agents.find { case (agent, _) => rel.agentMember.exists { agent == _ } }.get._2
 			if (rel.percentage != percentage) {
 				rel.percentage = percentage
 				memberDao.saveOrUpdate(rel)
@@ -142,15 +138,14 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		relationshipsToEnd.foreach { _.endDate = DateTime.now }
 
 		// Save new relationships for agents that don't already exist
-		saveStudentRelationshipsWithPercentages(relationshipType, targetSprCode, agentsToAdd)
+		saveStudentRelationshipsWithPercentages(relationshipType, studentCourseDetails, agentsToAdd)
 	}
 
 	def relationshipDepartmentFilterMatches(department: Department)(rel: StudentRelationship) =
 		rel.studentMember.exists(studentDepartmentFilterMatches(department))
 
 	def relationshipNotPermanentlyWithdrawn(rel: StudentRelationship): Boolean = {
-		profileService.getStudentCourseDetailsBySprCode(rel.targetSprCode)
-			.exists(scd => !scd.permanentlyWithdrawn)
+		Option(rel.studentCourseDetails).exists(scd => !scd.permanentlyWithdrawn)
 	}
 
 	def studentDepartmentFilterMatches(department: Department)(member: StudentMember)	= department.filterRule.matches(member)
@@ -159,7 +154,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 
 	def expectedToHaveRelationship(relationshipType: StudentRelationshipType, department: Department)(member: StudentMember) = {
 		member.freshStudentCourseDetails
-		.filter(scd => Option(scd.route).map(_.department == department).getOrElse(false)) // there needs to be an SCD for the right department ...
+		.filter(scd => Option(scd.route).exists(_.department == department)) // there needs to be an SCD for the right department ...
 		.filter(!_.permanentlyWithdrawn) // that's not permanently withdrawn ...
 		.filter(relationshipType.isExpected) // and has a course of the type that is expected to have this kind of relationship
 		.nonEmpty
@@ -223,6 +218,20 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		allStudentRelationshipTypes.filter(_.defaultRdxType != null)
 	}
 
+	def getPreviousRelationship(relationship: StudentRelationship): Option[StudentRelationship] = {
+		relationship.studentMember.flatMap { student =>
+			val rels = getRelationships(relationship.relationshipType, student)
+			val sortedRels = rels.sortBy { _.startDate }
+
+			// Get the element before the current relationship
+			val index = sortedRels.indexOf(relationship)
+			if (index > 0) {
+				Some(sortedRels(index-1))
+			} else {
+				None
+			}
+		}
+	}
 }
 
 trait RelationshipServiceComponent {

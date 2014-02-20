@@ -7,7 +7,6 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.{MarkerFeedback, Feedback, Module, Assignment}
 import uk.ac.warwick.tabula.coursework.commands.feedback._
-import scala.Some
 import uk.ac.warwick.tabula.data.{SavedFormValueDao, SavedFormValueDaoComponent}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.data.model.MarkingState.{ReleasedForMarking, MarkingCompleted, Rejected}

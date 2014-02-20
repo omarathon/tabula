@@ -33,6 +33,7 @@ ajcore*
 .*.swp
 .ctags
 /activemq-data
+/out
 
 # Eclipse IDE
 /.classpath

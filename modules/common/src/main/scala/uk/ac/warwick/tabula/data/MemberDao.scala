@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
-
 import org.hibernate.FetchMode
 import org.hibernate.annotations.{AccessType, FilterDefs, Filters}
 import org.hibernate.criterion.{DetachedCriteria, Order}
@@ -12,13 +11,13 @@ import org.hibernate.criterion.Projections.{countDistinct, distinct, groupProper
 import org.hibernate.criterion.Restrictions.{disjunction, gt, in, like}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
-
 import javax.persistence.{DiscriminatorColumn, DiscriminatorValue, Entity, Inheritance, NamedQueries}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Department, Member, ModeOfAttendance, RuntimeMember, SitsStatus, StaffMember, StudentCourseDetails, StudentMember, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
+import uk.ac.warwick.tabula.data.model.MemberStudentRelationship
 
 trait MemberDaoComponent {
 	val memberDao: MemberDao
@@ -45,28 +44,33 @@ trait MemberDao {
 	def getAllByUserId(userId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, max: Int): Seq[Member]
 	def listUpdatedSince(startDate: DateTime, department: Department, max: Int): Seq[Member]
-	def getAllCurrentRelationships(targetSprCode: String): Seq[StudentRelationship]
-	def getCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
-	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship]
-	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
-	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
-	def getAllRelationshipsByAgent(agentId: String): Seq[StudentRelationship]
-	def getAllRelationshipTypesByAgent(agentId: String): Seq[StudentRelationshipType]
-	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship]
-	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
+	
 	def getStudentsByDepartment(department: Department): Seq[StudentMember]
 	def getStaffByDepartment(department: Department): Seq[StaffMember]
+	
+	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
+	def getCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
+	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
+	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
+	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
+	def getAllRelationshipsByAgent(agentId: String): Seq[MemberStudentRelationship]
+	def getAllRelationshipTypesByAgent(agentId: String): Seq[StudentRelationshipType]
+	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[MemberStudentRelationship]
+	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def getStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
 	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agentId: String, restrictions: Seq[ScalaRestriction]): Seq[StudentMember]
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Number
+	
 	def findUniversityIdsByRestrictions(restrictions: Iterable[ScalaRestriction]): Seq[String]
 	def findStudentsByRestrictions(restrictions: Iterable[ScalaRestriction], orders: Iterable[ScalaOrder], maxResults: Int, startResult: Int): Seq[StudentMember]
 	def countStudentsByRestrictions(restrictions: Iterable[ScalaRestriction]): Int
+	
 	def getAllModesOfAttendance(department: Department): Seq[ModeOfAttendance]
 	def getAllSprStatuses(department: Department): Seq[SitsStatus]
-	def getFreshUniversityIds: Seq[String]
+	
+	def getFreshUniversityIds(): Seq[String]
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime)
-
+	def getDisability(code: String): Option[Disability]
 }
 
 @Repository
@@ -210,9 +214,10 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.setParameter("lastUpdated", startDate)
 			.setMaxResults(max).seq
 
-	def getAllCurrentRelationships(targetSprCode: String): Seq[StudentRelationship] = {
+	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
-					.add(is("targetSprCode", targetSprCode))
+					.createAlias("studentCourseDetails", "scd")
+					.add(is("scd.student", student))
 					.add( Restrictions.or(
 							Restrictions.isNull("endDate"),
 							Restrictions.ge("endDate", new DateTime())
@@ -220,9 +225,10 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					.seq
 	}
 
-	def getCurrentRelationships(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
+	def getCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
-					.add(is("targetSprCode", targetSprCode))
+					.createAlias("studentCourseDetails", "scd")
+					.add(is("scd.student", student))
 					.add(is("relationshipType", relationshipType))
 					.add( Restrictions.or(
 							Restrictions.isNull("endDate"),
@@ -231,41 +237,34 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					.seq
 	}
 
-	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, targetSprCode: String): Seq[StudentRelationship] = {
+	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
-					.add(is("targetSprCode", targetSprCode))
+					.createAlias("studentCourseDetails", "scd")
+					.add(is("scd.student", student))
 					.add(is("relationshipType", relationshipType))
 					.seq
 	}
 
 	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship] = {
-		// order by agent to separate any named (external) from numeric (member) agents
-		// then by student properties
-		session.newQuery[StudentRelationship]("""
-			select
-				distinct sr
-			from
-				StudentRelationship sr,
-				StudentCourseDetails scd
-			where
-				sr.targetSprCode = scd.sprCode
-			and
-				sr.relationshipType = :relationshipType
-			and
-				scd.missingFromImportSince is null
-			and
-				scd.department = :department
-			and
-				scd.mostSignificant = true
-			and
-				scd.statusOnRoute.code not like 'P%'
-			and
-				(sr.endDate is null or sr.endDate >= SYSDATE)
-			order by
-				sr.agent, sr.targetSprCode
-		""")
-			.setEntity("department", department)
-			.setEntity("relationshipType", relationshipType)
+		// This eagerly fetches a few associations for the view-students-by-tutor page in Attendance Monitoring
+		// (/attendance/view/[dept]/agents/[reltype]) - TAB-1868
+
+		session.newCriteria[StudentRelationship]
+			.createAlias("studentCourseDetails", "studentCourseDetails")
+			.createAlias("studentCourseDetails.student", "student")
+			.add(is("relationshipType", relationshipType))
+			.add(is("studentCourseDetails.department", department))
+			.add(isNull("studentCourseDetails.missingFromImportSince"))
+			.add(is("studentCourseDetails.mostSignificant", true))
+			.add(not(like("studentCourseDetails.statusOnRoute.code", "P%")))
+			.add(or(isNull("endDate"), ge("endDate", DateTime.now)))
+			.addOrder(asc("_agentMember"))
+			.addOrder(asc("studentCourseDetails"))
+			.setFetchMode("studentCourseDetails.student", FetchMode.JOIN)
+			.setFetchMode("studentCourseDetails.route", FetchMode.JOIN)
+			.setFetchMode("studentCourseDetails.latestYearDetails", FetchMode.JOIN)
+			.setFetchMode("studentCourseDetails.latestYearDetails.enrolmentStatus", FetchMode.JOIN)
+			.setFetchMode("_agentMember", FetchMode.JOIN)
 			.seq
 	}
 
@@ -278,9 +277,9 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				StudentCourseDetails scd,
 				Member staff
 			where
-				sr.targetSprCode = scd.sprCode
+				sr.studentCourseDetails = scd
       and
-        staff.universityId = sr.agent
+        staff = sr._agentMember
 			and
 				sr.relationshipType = :relationshipType
 			and
@@ -292,7 +291,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				(sr.endDate is null or sr.endDate >= SYSDATE)
 			order by
-				sr.agent, sr.targetSprCode
+				sr._agentMember, sr.studentCourseDetails
 																					""")
 			.setEntity("department", department)
 			.setEntity("relationshipType", relationshipType)
@@ -300,9 +299,9 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	}
 
 
-	def getAllRelationshipsByAgent(agentId: String): Seq[StudentRelationship] =
-		session.newCriteria[StudentRelationship]
-			.add(is("agent", agentId))
+	def getAllRelationshipsByAgent(agentId: String): Seq[MemberStudentRelationship] =
+		session.newCriteria[MemberStudentRelationship]
+			.add(is("_agentMember.universityId", agentId))
 			.add( Restrictions.or(
 				Restrictions.isNull("endDate"),
 				Restrictions.ge("endDate", new DateTime())
@@ -311,8 +310,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 
 	def getAllRelationshipTypesByAgent(agentId: String): Seq[StudentRelationshipType] =
-		session.newCriteria[StudentRelationship]
-			.add(is("agent", agentId))
+		session.newCriteria[MemberStudentRelationship]
+			.add(is("_agentMember.universityId", agentId))
 			.add( Restrictions.or(
 				Restrictions.isNull("endDate"),
 				Restrictions.ge("endDate", new DateTime())
@@ -320,9 +319,9 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			.project[StudentRelationshipType](distinct(property("relationshipType")))
 			.seq
 
-	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[StudentRelationship] =
-		session.newCriteria[StudentRelationship]
-			.add(is("agent", agentId))
+	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[MemberStudentRelationship] =
+		session.newCriteria[MemberStudentRelationship]
+			.add(is("_agentMember.universityId", agentId))
 			.add(is("relationshipType", relationshipType))
 			.add( Restrictions.or(
 				Restrictions.isNull("endDate"),
@@ -347,9 +346,9 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.statusOnRoute.code not like 'P%'
 			and
-				scd.sprCode not in (
+				scd not in (
 					select
-						sr.targetSprCode
+						sr.studentCourseDetails
 					from
 						StudentRelationship sr
 					where
@@ -414,7 +413,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			and
 				scd.statusOnRoute.code not like 'P%'
 			and
-				scd.sprCode in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
+				scd in (select sr.studentCourseDetails from StudentRelationship sr where sr.relationshipType = :relationshipType)
 			""")
 			.setEntity("department", department)
 			.setEntity("relationshipType", relationshipType)
@@ -431,7 +430,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			where
 				scd.missingFromImportSince is null
 			and
-				scd.sprCode in (select sr.targetSprCode from StudentRelationship sr where sr.relationshipType = :relationshipType)
+				scd in (select sr.studentCourseDetails from StudentRelationship sr where sr.relationshipType = :relationshipType)
 			""")
 			.setEntity("relationshipType", relationshipType)
 			.uniqueResult.getOrElse(0)
@@ -450,13 +449,9 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		if (universityIds.isEmpty)
 			return Seq()
 
-		val c = session.newCriteria[StudentMember]
+		val c = session.newCriteria[StudentMember].add(safeIn("universityId", universityIds))
 
-		val or = disjunction()
-		universityIds.grouped(Daoisms.MaxInClauseCount).foreach { ids => or.add(in("universityId", ids)) }
-		c.add(or)
-
-		orders.foreach { c.addOrder(_) }
+		orders.foreach { c.addOrder }
 
 		c.setMaxResults(maxResults).setFirstResult(startResult).distinct.seq
 	}
@@ -465,9 +460,9 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 	def getStudentsByAgentRelationshipAndRestrictions(relationshipType: StudentRelationshipType, agentId: String, restrictions: Seq[ScalaRestriction]): Seq[StudentMember] = {
 		if (relationshipType == null) Nil
 		else {
-			val d = DetachedCriteria.forClass(classOf[StudentRelationship])
-				.setProjection(Property.forName("targetSprCode"))
-				.add(Restrictions.eq("agent", agentId))
+			val d = DetachedCriteria.forClass(classOf[MemberStudentRelationship])
+				.setProjection(Property.forName("studentCourseDetails.scjCode"))
+				.add(Restrictions.eq("_agentMember.universityId", agentId))
 				.add(Restrictions.eq("relationshipType", relationshipType))
 				.add( Restrictions.or(
 								Restrictions.isNull("endDate"),
@@ -476,7 +471,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 
 			val c = session.newCriteria[StudentCourseDetails]
 			restrictions.foreach { _.apply(c) }
-			c.add(Property.forName("sprCode").in(d))
+			c.add(Property.forName("scjCode").in(d))
 			c.project[StudentMember](Projections.groupProperty("student")).seq
 		}
 	}
@@ -528,8 +523,14 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				session.newQuery(sqlString)
 					.setParameter("importStart", importStart)
 					.setParameterList("newStaleUniversityIds", staleIds)
-					.executeUpdate
+					.executeUpdate()
 			}
+	}
+
+	def getDisability(code: String): Option[Disability] = {
+		session.newCriteria[Disability]
+			.add(is("code", code))
+			.uniqueResult
 	}
 }
 

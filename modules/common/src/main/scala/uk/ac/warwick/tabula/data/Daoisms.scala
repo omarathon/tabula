@@ -1,13 +1,17 @@
 package uk.ac.warwick.tabula.data
 
-import org.hibernate.SessionFactory
+import org.hibernate.{Hibernate, SessionFactory, Session}
 import javax.sql.DataSource
-import org.hibernate.Session
 import uk.ac.warwick.tabula.data.model.CanBeDeleted
 import uk.ac.warwick.spring.Wire
 import language.implicitConversions
 import scala.reflect._
+import org.hibernate.proxy.HibernateProxy
+import org.hibernate.criterion.Restrictions._
 import uk.ac.warwick.tabula.data.Daoisms.NiceQueryCreator
+import scala.collection.IterableLike
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.helpers.Logging
 
 /** Trait for self-type annotation, declaring availability of a Session. */
 trait SessionComponent{
@@ -39,10 +43,35 @@ trait ExtendedSessionComponent extends SessionComponent {
 	}
 }
 
-trait HelperRestrictions {
+trait HelperRestrictions extends Logging {
 	def is = org.hibernate.criterion.Restrictions.eqOrIsNull _
 	def isNull(propertyName: String) = org.hibernate.criterion.Restrictions.isNull(propertyName)
+	def safeIn[A](propertyName: String, iterable: Seq[A]) = {
+		if (iterable.isEmpty) {
+			logger.warn("Empty iterable passed to safeIn() - query will never return any results, may be unnecessary")
+			org.hibernate.criterion.Restrictions.sqlRestriction("1=0")
+		} else if (iterable.length <= Daoisms.MaxInClauseCount) {
+			org.hibernate.criterion.Restrictions.in(propertyName, iterable.asJavaCollection)
+		} else {
+			val or = disjunction()
+			iterable.grouped(Daoisms.MaxInClauseCount).foreach { subitr =>
+				or.add(org.hibernate.criterion.Restrictions.in(propertyName, subitr.asJavaCollection))
+			}
+			or
+		}
+	}
 }
+
+trait HibernateHelpers {
+	def initialiseAndUnproxy[A >: Null](entity: A): A =
+		Option(entity).map { proxy =>
+			Hibernate.initialize(proxy)
+			if (proxy.isInstanceOf[HibernateProxy]) proxy.asInstanceOf[HibernateProxy].getHibernateLazyInitializer.getImplementation.asInstanceOf[A]
+			else proxy
+		}.orNull
+}
+
+object HibernateHelpers extends HibernateHelpers
 
 object Daoisms extends HelperRestrictions {
 	/**
@@ -67,7 +96,7 @@ object Daoisms extends HelperRestrictions {
  * session factory. If you want to do JDBC stuff or use a
  * different data source you'll need to look elsewhere.
  */
-trait Daoisms extends ExtendedSessionComponent with HelperRestrictions {
+trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with HibernateHelpers {
 	var dataSource = Wire[DataSource]("dataSource")
 	var sessionFactory = Wire.auto[SessionFactory]
 

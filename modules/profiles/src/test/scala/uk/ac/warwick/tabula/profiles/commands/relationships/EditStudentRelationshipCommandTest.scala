@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.profiles.TutorFixture
 import uk.ac.warwick.tabula.NoCurrentUser
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.data.model.notifications.{StudentRelationshipChangeToStudentNotification, StudentRelationshipChangeToOldAgentNotification, StudentRelationshipChangeToNewAgentNotification}
 
 class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 	
@@ -43,7 +44,6 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 
 		val notifications = command.emit(Seq(relationship))
 		notifications.size should be(1)
-		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "0000002")) should be (true)
 	}}
 
 	@Test
@@ -54,7 +54,6 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 
 		val notifications = command.emit(Seq(relationship))
 		notifications.size should be(1)
-		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "0000001")) should be (true)
 	}}
 
 	@Test
@@ -67,8 +66,6 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 
 		val notifications = command.emit(Seq(relationship))
 		notifications.size should be(2)
-		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "0000001")) should be (true)
-		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student")) should be (true)
 	}}
 
 	@Test
@@ -80,8 +77,8 @@ class EditStudentRelationshipCommandTest extends TestBase with Mockito {
 
 		val notifications = command.emit(Seq(relationship))
 		notifications.size should be(2)
-		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "0000002")) should be (true)
-		notifications.exists(n=>n.recipients.exists(u=>u.getWarwickId == "student")) should be (true)
+		notifications.exists(_.isInstanceOf[StudentRelationshipChangeToOldAgentNotification]) should be (true)
+		notifications.exists(_.isInstanceOf[StudentRelationshipChangeToStudentNotification]) should be (true)
 	}}
 
 }

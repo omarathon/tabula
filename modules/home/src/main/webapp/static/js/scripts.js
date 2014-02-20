@@ -64,6 +64,37 @@
 
 	};
 
+	// 5-minute resolution
+	jQuery.fn.tabulaDateTimeMinutePicker = function() {
+		var $this = $(this);
+		// if there is no datepicker bound to this input then add one
+		if(!$this.data("datepicker")){
+			$this.datetimepicker({
+				format: "dd-M-yyyy hh:ii:ss",
+				weekStart: 1,
+				autoclose: true
+			}).on('show', function(ev){
+				var d = new Date(ev.date.valueOf()),
+					seconds = d.getUTCSeconds(),
+					millis = d.getUTCMilliseconds();
+
+				if (seconds > 0 || millis > 0) {
+					d.setUTCSeconds(0);
+					d.setUTCMilliseconds(0);
+
+					var DPGlobal = $.fn.datetimepicker.DPGlobal;
+					$(this).val(DPGlobal.formatDate(d, DPGlobal.parseFormat("dd-M-yyyy hh:ii:ss", "standard"), "en", "standard"));
+
+					$(this).datetimepicker('update');
+				}
+
+			}).next('.add-on').css({'cursor': 'pointer'}).on('click', function() {$(this).prev("input").focus();});
+		}
+
+		$(this).on('changeDate', function(){ offsetEndDateTime($(this)); });
+
+	};
+
 	jQuery.fn.tabulaDatePicker = function() {
 		var $this = $(this)
 		// if there is no datepicker bound to this input then add one
@@ -358,8 +389,12 @@
 		};
 		var options = $.extend({}, defaults, options);
 
-		// don't popover disabled
+
 		$items.on('click', function(e) {
+			$(this).tooltip('disable');
+			$(this).trigger('mouseout');
+
+			// don't popover disabled
 			if ($(this).hasClass('disabled')) {
 				e.stopImmediatePropagation();
 			}
@@ -373,6 +408,7 @@
 			// if clicking anywhere other than the popover itself
 			if ($(e.target).closest('.popover').length === 0 && $(e.target).closest('.use-popover').length === 0) {
 				$items.popover('hide');
+				$items.tooltip('enable');
 			}
 		});
 
@@ -407,6 +443,7 @@
 			var $creator = $(e.target).parents('.popover').data('creator');
 			if ($creator) {
 				$creator.popover('hide');
+				$creator.tooltip('enable');
 			}
 		});
 
@@ -648,6 +685,7 @@
 		$('input.date-time-picker').tabulaDateTimePicker();
 		$('input.date-picker').tabulaDatePicker();
 		$('input.time-picker').tabulaTimePicker();
+		$('input.date-time-minute-picker').tabulaDateTimeMinutePicker();
 		$('form.double-submit-protection').tabulaSubmitOnce();
         $('select.selectOffset').selectOffset();
 
@@ -660,6 +698,7 @@
 			$m.find('input.date-time-picker').tabulaDateTimePicker();
 			$m.find('input.date-picker').tabulaDatePicker();
 			$m.find('input.time-picker').tabulaTimePicker();
+			$m.find('input.date-time-minute-picker').tabulaDateTimeMinutePicker();
 			$m.find('form.double-submit-protection').tabulaSubmitOnce();
             $('select.selectOffset').selectOffset();
 			$m.tabulaPrepareSpinners();
@@ -884,7 +923,7 @@
 				$t.append($cols);
 				$panes.children('li').each(function(idx) {
 					var $gadget = $(this).addClass('gadget');
-					var title = $(this).find('h4').html();
+					var title = $(this).find('h4').first().html();
 					var link = '#' + $(this).attr('id');
 					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '" title="Click and drag to move"><span class="title">' + title + '</span> <i class="icon-minus-sign-alt" title="Hide ' + title + '"></i></a></li>');
 					var $gadgetHeaderTab = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
@@ -1038,7 +1077,10 @@
 					$m.find('.modal-body').slideDown();
 					var $form = $m.find('form.double-submit-protection');
 					$form.tabulaSubmitOnce();
-					$form.find(".btn").removeClass('disabled');
+					var btn = $form.find(".btn").removeClass('disabled');
+					if (btn.data('spinContainer')) {
+						btn.data('spinContainer').spin(false);
+					}
 					// wipe any existing state information for the submit protection
 					$form.removeData('submitOnceSubmitted');
 					$m.modal("show");
@@ -1071,6 +1113,7 @@
 
 					// hide the iframe, so we don't get a FOUC
 					$m.find('.modal-body').slideUp();
+					$m.find('form.double-submit-protection .spinnable').spin('small');
 				});
 
 				$.get(href, function(data){

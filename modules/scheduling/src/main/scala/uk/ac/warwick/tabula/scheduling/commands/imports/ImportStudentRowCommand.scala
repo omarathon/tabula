@@ -3,17 +3,32 @@ package uk.ac.warwick.tabula.scheduling.commands.imports
 import java.sql.ResultSet
 import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.{Description, Unaudited}
-import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.{Member, OtherMember, StudentMember, StudentProperties}
+import uk.ac.warwick.tabula.data.model.{StudentProperties, Member, OtherMember, StudentMember}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopying}
-import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, ModeOfAttendanceImporter, SitsAcademicYearAware}
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.scheduling.helpers.{PropertyCopying, ImportRowTracker}
+import uk.ac.warwick.tabula.scheduling.services._
+import uk.ac.warwick.tabula.services.{ProfileServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.scheduling.services.Tier4RequirementImporter
+
+
+object ImportStudentRowCommand {
+	def apply(
+		member: MembershipInformation,
+		ssoUser: User,
+		resultSet: ResultSet,
+		importRowTracker: ImportRowTracker,
+		importStudentCourseCommand: ImportStudentCourseCommand
+	) = {
+			new ImportStudentRowCommandInternal(member, ssoUser, resultSet, importRowTracker, importStudentCourseCommand)
+				with Command[Member]
+				with AutowiringProfileServiceComponent
+				with AutowiringTier4RequirementImporterComponent
+				with AutowiringModeOfAttendanceImporterComponent
+				with Unaudited
+			}
+}
 
 
 /*
@@ -21,28 +36,36 @@ import uk.ac.warwick.tabula.scheduling.services.Tier4RequirementImporter
  * These need to be passed in, rather than newed up within the command, to enable testing
  * without auto-wiring.
  */
-class ImportStudentRowCommand(val member: MembershipInformation,
-		val ssoUser: User,
-		val resultSet: ResultSet,
-		val importRowTracker: ImportRowTracker,
-		var importStudentCourseCommand: ImportStudentCourseCommand)
-	extends ImportMemberCommand(member, ssoUser, Some(resultSet))
-	with Logging with Daoisms
-	with StudentProperties with Unaudited with PropertyCopying {
+class ImportStudentRowCommandInternal(
+	val member: MembershipInformation,
+	val ssoUser: User,
+	val resultSet: ResultSet,
+	val importRowTracker: ImportRowTracker,
+	var importStudentCourseCommand: ImportStudentCourseCommand
+)
 
-	import ImportMemberHelpers._
+extends ImportMemberCommand(member, ssoUser, Some(resultSet))
+with Describable[Member]
+with ImportStudentRowCommandState
+with PropertyCopying
+with Logging {
+
+	self: ProfileServiceComponent with Tier4RequirementImporterComponent with ModeOfAttendanceImporterComponent  =>
+
+	// import ImportMemberHelpers._
 
 	implicit val rs = resultSet
 
-	var modeOfAttendanceImporter = Wire[ModeOfAttendanceImporter]
-	var profileService = Wire[ProfileService]
-	var tier4RequirementImporter = Wire[Tier4RequirementImporter]
-
+	// populate *before* apply to avoid concurrency problems
 	this.nationality = rs.getString("nationality")
 	this.mobileNumber = rs.getString("mobile_number")
+	val disabilityCode = rs.getString("disability")
 
 	override def applyInternal(): Member = {
 		transactional() {
+			// set appropriate disability object iff a non-null code is retrieved - I <3 scala options
+			profileService.getDisability(disabilityCode).foreach(this.disability = _)
+
 			val memberExisting = memberDao.getByUniversityIdStaleOrFresh(universityId)
 
 			logger.debug("Importing member " + universityId + " into " + memberExisting)
@@ -73,7 +96,6 @@ class ImportStudentRowCommand(val member: MembershipInformation,
 		}
 	}
 
-
 	private def saveStudentDetails(isTransient: Boolean, member: StudentMember) {
 		// There are multiple rows returned by the SQL per student; only import non-course details if we haven't already
 		val commandBean = new BeanWrapperImpl(this)
@@ -96,7 +118,7 @@ class ImportStudentRowCommand(val member: MembershipInformation,
 	}
 
 	private val basicStudentProperties = Set(
-		"nationality", "mobileNumber"
+		"nationality", "mobileNumber", "disability"
 	)
 
 	private def copyStudentProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
@@ -104,3 +126,5 @@ class ImportStudentRowCommand(val member: MembershipInformation,
 
 	override def describe(d: Description) = d.property("universityId" -> universityId).property("category" -> "student")
 }
+
+trait ImportStudentRowCommandState extends StudentProperties

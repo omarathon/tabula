@@ -26,8 +26,9 @@ class FilterStudentsController extends ProfilesController {
 	@RequestMapping
 	def filter(@Valid @ModelAttribute("filterStudentsCommand") cmd: Appliable[FilterStudentsResults], errors: Errors, @PathVariable department: Department) = {
 		if (errors.hasErrors()) {
-			Mav("profile/filter/filter")
-		} else {
+			Mav("profile/filter/filter").noLayout()
+		}
+		else {
 			val results = cmd.apply()
 			
 			if (ajax) Mav("profile/filter/results", "students" -> results.students, "totalResults" -> results.totalResults).noLayout()

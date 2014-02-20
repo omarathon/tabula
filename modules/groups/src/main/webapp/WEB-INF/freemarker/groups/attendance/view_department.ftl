@@ -1,5 +1,6 @@
 <#escape x as x?html>
 	<#import "*/group_components.ftl" as components />
+	<div id="profile-modal" class="modal fade profile-subset"></div>
 
 	<@fmt.deptheader "Attendance" "for" department routes "departmentAttendance" "with-settings" />
 

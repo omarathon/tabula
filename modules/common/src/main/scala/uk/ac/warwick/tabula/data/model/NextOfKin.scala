@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.ToString
 
 @Entity
 class NextOfKin extends GeneratedId with ToString {	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "member_id")
 	var member: Member = _
 	
@@ -17,7 +17,7 @@ class NextOfKin extends GeneratedId with ToString {
 	
 	var relationship: String = _
 	
-	@OneToOne(cascade = Array(ALL))
+	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name="ADDRESS_ID")
 	var address: Address = _
 	

@@ -8,13 +8,15 @@ import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
 import javax.validation.constraints.NotNull
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.data.model.{Feedback, FileAttachment, Assignment, GeneratedId}
+import uk.ac.warwick.tabula.data.model.{ExtensionEntityReference, ToEntityReference, Feedback, FileAttachment, Assignment, GeneratedId}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import uk.ac.warwick.userlookup.User
 
 @Entity @AccessType("field")
-class Extension extends GeneratedId with PermissionsTarget {
+class Extension extends GeneratedId with PermissionsTarget with ToEntityReference {
+
+	type Entity = Extension
 
 	def this(universityId:String=null) {
 		this()
@@ -58,6 +60,8 @@ class Extension extends GeneratedId with PermissionsTarget {
 		attachments.add(attachment)
 	}
 
+	var disabilityAdjustment:Boolean = false
+
 	var approved:Boolean = false
 	var rejected:Boolean = false
 
@@ -72,6 +76,7 @@ class Extension extends GeneratedId with PermissionsTarget {
 	// this was not requested by a student. i.e. was manually created by an administrator
 	def isManual = requestedOn == null
 	def isAwaitingApproval = !isManual && !approved && !rejected
+	def isAwaitingReview = approved && !isManual && requestedOn.isAfter(approvedOn)
 
 	@transient
 	lazy val workingDaysHelper = new WorkingDaysHelperImpl
@@ -82,4 +87,5 @@ class Extension extends GeneratedId with PermissionsTarget {
 		localDate.toDateTime(expiryDate)
 	}
 
+	def toEntityReference = new ExtensionEntityReference().put(this)
 }

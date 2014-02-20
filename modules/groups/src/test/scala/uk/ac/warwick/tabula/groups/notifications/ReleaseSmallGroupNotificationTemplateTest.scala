@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.JavaImports.{JHashMap}
 import org.mockito.Mockito._
 import org.mockito.Matchers._
 import uk.ac.warwick.tabula.web.views.FreemarkerRendering
+import uk.ac.warwick.tabula.data.model.notifications.ReleaseSmallGroupSetsNotification
 
 
 class ReleaseSmallGroupNotificationTemplateTest extends TestBase with FreemarkerTestHelpers with FreemarkerRendering{

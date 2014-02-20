@@ -8,8 +8,7 @@ import uk.ac.warwick.tabula.coursework.services.docconversion.MarkItem
 import uk.ac.warwick.tabula.permissions.Permissions
 import org.springframework.util.StringUtils
 import uk.ac.warwick.tabula.commands.Notifies
-import uk.ac.warwick.tabula.coursework.commands.assignments.notifications.FeedbackChangeNotification
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
+import uk.ac.warwick.tabula.data.model.notifications.FeedbackChangeNotification
 
 class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: CurrentUser)
 	extends AddMarksCommand[Seq[Feedback]](module, assignment, submitter) with Notifies[Seq[Feedback], Feedback] {
@@ -72,9 +71,8 @@ class AdminAddMarksCommand(module:Module, assignment: Assignment, submitter: Cur
 		markList.toList
 	}
 
-	def emit(updatedFeedback: Seq[Feedback]): Seq[Notification[Feedback]] = updatedReleasedFeedback.map( feedback => {
-		val student = userLookup.getUserByWarwickUniId(feedback.universityId)
-		new FeedbackChangeNotification(feedback, submitter.apparentUser, student) with FreemarkerTextRenderer
+	def emit(updatedFeedback: Seq[Feedback]) = updatedReleasedFeedback.map( feedback => {
+		Notification.init(new FeedbackChangeNotification, submitter.apparentUser, feedback, assignment)
 	})
 
 }

@@ -2,24 +2,17 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{ MeetingRecord, Member, StudentMember }
+import uk.ac.warwick.tabula.data.model.{ScheduledMeetingRecord, AbstractMeetingRecord, MeetingRecord, StudentMember, StudentRelationshipType, StudentCourseDetails}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
-import uk.ac.warwick.tabula.commands.{ Appliable, ViewViewableCommand }
+import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
-import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 import uk.ac.warwick.tabula.commands.Command
-import scala.Some
-import uk.ac.warwick.tabula.data.model.StudentCourseDetails
 import uk.ac.warwick.tabula.web.Mav
 
 class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
@@ -42,7 +35,7 @@ abstract class ViewProfileController extends ProfilesController {
 	def searchProfilesCommand =
 		restricted(new SearchProfilesCommand(currentMember, user)).orNull
 
-	def getViewMeetingRecordCommand(studentCourseDetails: Option[StudentCourseDetails], relationshipType: StudentRelationshipType): Option[Command[Seq[MeetingRecord]]] = {
+	def getViewMeetingRecordCommand(studentCourseDetails: Option[StudentCourseDetails], relationshipType: StudentRelationshipType): Option[Command[Seq[AbstractMeetingRecord]]] = {
 		studentCourseDetails match {
 			case Some(scd: StudentCourseDetails) => restricted(ViewMeetingRecordCommand(scd, optionalCurrentMember, relationshipType))
 			case None => None
@@ -54,7 +47,7 @@ abstract class ViewProfileController extends ProfilesController {
 		openMeetingId: String,
 		agentId: String,
 		profiledStudentMember: StudentMember): Mav = {
-		val isSelf = (profiledStudentMember.universityId == user.universityId)
+		val isSelf = profiledStudentMember.universityId == user.universityId
 
 		val allRelationshipTypes = relationshipService.allStudentRelationshipTypes
 
@@ -88,8 +81,11 @@ abstract class ViewProfileController extends ProfilesController {
 			"profile" -> profiledStudentMember,
 			"viewer" -> currentMember,
 			"isSelf" -> isSelf,
-			"meetingsById" -> relationshipMeetings.map { case (relType, meetings) => (relType.id, meetings) },
-			"meetingApprovalWillCreateCheckpoint" -> meetings.map(m => m.id -> monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(m)).toMap,
+			"meetingsById" -> relationshipMeetings.map { case (relType, m) => (relType.id, m) },
+			"meetingApprovalWillCreateCheckpoint" -> meetings.map {
+				case (meeting: MeetingRecord) => meeting.id -> monitoringPointMeetingRelationshipTermService.willCheckpointBeCreated(meeting)
+				case (meeting: ScheduledMeetingRecord) => meeting.id -> false
+			}.toMap,
 			"openMeeting" -> openMeeting,
 			"numSmallGroups" -> numSmallGroups,
 			"memberNotes" -> memberNotes,

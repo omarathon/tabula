@@ -3,9 +3,7 @@ package uk.ac.warwick.tabula.profiles
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.Mockito
-import org.mockito.Mockito.when
 import uk.ac.warwick.tabula.services.ProfileService
-import scala.Some
 
 trait TutorFixture extends Mockito {
 
@@ -44,8 +42,11 @@ trait TutorFixture extends Mockito {
 	profileService.getMemberByUniversityId("0000001") returns Some(newTutor)
 	profileService.getMemberByUniversityId("0000002") returns Some(oldTutor)
 
-	val relationship = new StudentRelationship
-	relationship.targetSprCode = "student"
-	relationship.agent = "0000001"
-	relationship.profileService = profileService
+	val relationship = new MemberStudentRelationship
+	relationship.studentMember = student
+	relationship.agentMember = newTutor
+
+	val relationshipOld = new MemberStudentRelationship
+	relationshipOld.studentMember = student
+	relationshipOld.agentMember = oldTutor
 }

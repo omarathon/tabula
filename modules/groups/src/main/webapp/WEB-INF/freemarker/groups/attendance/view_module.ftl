@@ -1,7 +1,8 @@
 <#escape x as x?html>
 	<#import "*/group_components.ftl" as components />
-	
-	<h1>Attendance for <@fmt.module_name module /></h1>
+	<div id="profile-modal" class="modal fade profile-subset"></div>
+
+<h1>Attendance for <@fmt.module_name module /></h1>
 	
 	<#if nonempty(sets?keys)>
 		<#list sets?keys as set>

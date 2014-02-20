@@ -102,7 +102,7 @@ abstract class ModifyMeetingRecordCommand(val creator: Member, var relationship:
 		}
 
 		val approver = Seq(relationship.agentMember, relationship.studentMember).flatten.find(_ != creator)
-		approver.map(getMeetingRecord(_))
+		approver.map(getMeetingRecord)
 
 	}
 

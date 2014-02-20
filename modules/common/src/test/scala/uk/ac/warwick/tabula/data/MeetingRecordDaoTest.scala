@@ -7,6 +7,7 @@ import uk.ac.warwick.tabula.data.model.MeetingRecord
 import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.data.model.StudentRelationship
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.data.model.ExternalStudentRelationship
 
 // scalastyle:off magic.number
 class MeetingRecordDaoTest extends PersistenceTestBase {
@@ -25,13 +26,16 @@ class MeetingRecordDaoTest extends PersistenceTestBase {
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		memberDao.saveOrUpdate(relationshipType)
 		
+		val student = Fixtures.student(universityId = "1000001", userId="student")
+		memberDao.saveOrUpdate(student)
+		
 		val creator = Fixtures.staff(universityId = "0000001", userId="staff1")
-		val relationship = StudentRelationship("Professor A Tutor", relationshipType, "0123456/1")
+		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
 
 		memberDao.saveOrUpdate(creator)
 		memberDao.saveOrUpdate(relationship)
 
-		val relSet = Set(relationship)
+		val relSet: Set[StudentRelationship] = Set(relationship)
 
 		val currentMember = new StaffMember
 		currentMember.universityId = "0070790"

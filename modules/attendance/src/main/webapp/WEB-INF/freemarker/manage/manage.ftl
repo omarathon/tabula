@@ -57,12 +57,12 @@
 			<a class="use-popover" id="popover-create-template" data-content="Choose a template monitoring scheme developed for each year of study"><i class="icon-question-sign"></i></a>
 		</label>
 		<span class="existingSetOptions">
-			<select name="existingSet" class="template">
+			<select name="template" class="template">
 				<#list templates as template>
 					<option value="${template.id}">${template.templateName}</option>
 				</#list>
 			</select>
-			<a class="btn monitoring-point-preview-button ajax-modal" data-target="#monitoring-point-preview-modal" href="#" data-hreftemplate="/attendance/monitoringpoints/preview/_TEMPLATE_ID_?department=${command.dept.code}&academicYear=${command.thisAcademicYear.storeValue?c}">
+			<a class="btn monitoring-point-preview-button ajax-modal" data-target="#monitoring-point-preview-modal" href="#" data-hreftemplate="/attendance/monitoringpoints/preview/template/_TEMPLATE_ID_?department=${command.dept.code}&academicYear=${command.thisAcademicYear.storeValue?c}">
 				Preview&hellip; <#-- wired by class in js -->
 			</a>
 		</span>

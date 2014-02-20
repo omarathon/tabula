@@ -36,7 +36,7 @@ import uk.ac.warwick.tabula.helpers.StringUtils._
 class UserGroup private(val universityIds: Boolean) extends GeneratedId with UnspecifiedTypeUserGroup with KnownTypeUserGroup {
 
 	/* For Hibernate xx */
-	private def this() { this(false) }
+	def this() { this(false) }
 
 	@transient var userLookup = Wire.auto[UserLookupService]
 	def groupService = userLookup.getGroupService

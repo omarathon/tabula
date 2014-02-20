@@ -12,9 +12,8 @@ import uk.ac.warwick.tabula.data.model.MarkingState.{MarkingCompleted, Rejected}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.coursework.commands.assignments.FinaliseFeedbackCommand
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.ModeratorRejectedNotification
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.data.model.notifications.ModeratorRejectedNotification
 
 object OnlineModerationCommand {
 	def apply(module: Module, assignment: Assignment, student: User, currentUser: CurrentUser) =
@@ -133,13 +132,10 @@ trait ModerationRejectedNotifier extends Notifies[MarkerFeedback, MarkerFeedback
 
 	this: ModerationState with UserAware with UserLookupComponent with Logging =>
 
-	def emit(rejectedFeedback: MarkerFeedback): Seq[Notification[MarkerFeedback]] = approved match {
-		case false => {
-			val recipient = rejectedFeedback.getMarkerUsercode.map(userLookup.getUserByUserId(_))
-			recipient.map( r =>
-				new ModeratorRejectedNotification(user, r, rejectedFeedback, secondMarkerFeedback) with FreemarkerTextRenderer
-			).toSeq
-		}
+	def emit(rejectedFeedback: MarkerFeedback): Seq[Notification[MarkerFeedback, Unit]] = approved match {
+		case false => Seq (
+			Notification.init(new ModeratorRejectedNotification, user, Seq(secondMarkerFeedback))
+		)
 		case true => Nil
 	}
 }

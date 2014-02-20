@@ -54,6 +54,16 @@ object ScalaRestriction {
 			
 			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
 		}
+
+	def atLeastOneIsTrue(property1: String, property2: String, ticked: Boolean, aliases: (String, String)*) =
+		if (!ticked) None
+		else {
+			val criterion = disjunction()
+			criterion.add(Daoisms.is(property1, true))
+			criterion.add(Daoisms.is(property2, true))
+
+			Some(addAliases(new ScalaRestriction(criterion), aliases: _*))
+		}
 }
 
 trait Aliasable {

@@ -20,6 +20,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.profiles.services.docconversion.RawStudentRelationshipExtractor
 import uk.ac.warwick.tabula.data.model.StudentRelationshipType
+import uk.ac.warwick.tabula.data.model.StudentMember
 
 class AllocateStudentsToRelationshipCommand(val department: Department, val relationshipType: StudentRelationshipType, val viewer: CurrentUser)
 	extends Command[Seq[StudentRelationshipChange]]
@@ -75,8 +76,6 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 	// Only called on initial form view
 	override def populate() {
-		def studentRelationshipToMember(rel: StudentRelationship) = profileService.getStudentBySprCode(rel.targetSprCode)
-
 		// get all relationships by dept
 		service
 			.listStudentRelationshipsByDepartment(relationshipType, department)
@@ -85,7 +84,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 				if (agent.forall(_.isDigit)) {
 					profileService.getMemberByUniversityId(agent) match {
 						case Some(member) =>
-							mapping.put(member, JArrayList(students.flatMap(studentRelationshipToMember).toList))
+							mapping.put(member, JArrayList(students.flatMap(_.studentMember).toList))
 						case _ => // do nothing
 					}
 				}
@@ -137,11 +136,15 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 	final def applyInternal() = transactional() {
 		val addCommands = (for ((agent, students) <- mapping.asScala; student <- students.asScala) yield {
+			val currentAgent = student match {
+				case student: StudentMember => service.findCurrentRelationships(relationshipType, student).headOption.flatMap { _.agentMember }.headOption
+				case _ => None
+			}
 			student.mostSignificantCourseDetails.map { studentCourseDetails =>
 				val cmd = new EditStudentRelationshipCommand(
 					studentCourseDetails,
 					relationshipType,
-					service.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode).headOption.flatMap { _.agentMember }, 
+					currentAgent, 
 					viewer, 
 					false
 				)
@@ -152,7 +155,11 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 		val removeCommands = unallocated.asScala.flatMap { student =>
 			student.mostSignificantCourseDetails.map { studentCourseDetails =>
-				val rels = service.findCurrentRelationships(relationshipType, studentCourseDetails.sprCode)
+				val rels = student match {
+					case student: StudentMember => service.findCurrentRelationships(relationshipType, student)
+					case _ => Nil
+				}
+				
 				val agents = rels.flatMap { _.agentMember }
 
 				agents.map { agent =>
@@ -172,7 +179,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 			cmd.notifyOldAgent = false
 			cmd.notifyNewAgent = false
 
-			cmd.apply().map { modifiedRelationship => StudentRelationshipChange(cmd.currentAgent, modifiedRelationship) }
+			cmd.apply().map { modifiedRelationship => StudentRelationshipChange(cmd.currentAgent, modifiedRelationship.asInstanceOf[StudentRelationship]) }
 		}.flatten
 	}
 	
