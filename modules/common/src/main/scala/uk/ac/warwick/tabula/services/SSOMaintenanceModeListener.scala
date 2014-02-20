@@ -12,7 +12,6 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.util.queue.QueueListener
 import uk.ac.warwick.util.queue.conversion.ItemType
-import scala.react.Observing
 
 /**
  * TAB-106 This bean registers an observer to the maintenance mode service, 
@@ -22,7 +21,7 @@ import scala.react.Observing
  * This listener both listens to the queue and observes, as the queue listener
  * automatically removes messages from the same source, which we don't want.
  */
-class SSOMaintenanceModeListener extends QueueListener with Observing with InitializingBean with Logging with ServletContextAware {
+class SSOMaintenanceModeListener extends QueueListener with InitializingBean with Logging with ServletContextAware {
 	
 	var maintenanceModeService = Wire.auto[MaintenanceModeService]
 	var queue = Wire.named[Queue]("settingsSyncTopic")
@@ -74,7 +73,7 @@ class SSOMaintenanceModeListener extends QueueListener with Observing with Initi
 	override def afterPropertiesSet {
 		queue.addListener(classOf[MaintenanceModeMessage].getAnnotation(classOf[ItemType]).value, this)
 		
-		observe(maintenanceModeService.changingState) { enabled => 
+		maintenanceModeService.changingState.observe { enabled =>
 			if (enabled) switchToOldMode
 			else switchToNewMode
 			true
