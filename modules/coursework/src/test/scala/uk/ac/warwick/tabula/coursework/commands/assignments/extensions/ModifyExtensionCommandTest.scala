@@ -3,7 +3,7 @@ import scala.collection.JavaConversions._
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.{EditExtensionCommand, ExtensionItem, AddExtensionCommand}
 import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.data.model.Assignment
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.{RequestInfo, Mockito, TestBase}
@@ -24,7 +24,7 @@ class ModifyExtensionCommandTest extends TestBase with Mockito {
 				extensions.head.approved should be (false)
 				extensions.head.rejected should be (false)
 				extensions.head.state should be (ExtensionState.Unreviewed)
-				extensions.head.reviewerComments should be ("something something cats")
+				extensions.head.reviewerComments should be (null)
 			}
 		}
 	}
@@ -41,7 +41,7 @@ class ModifyExtensionCommandTest extends TestBase with Mockito {
 				extensions.head.approved should be (false)
 				extensions.head.rejected should be (false)
 				extensions.head.state should be (ExtensionState.Unreviewed)
-				extensions.head.reviewerComments should be ("something something cats")
+				extensions.head.reviewerComments should be (null)
 
 				val reviewerComments = "I've always thought that Tabula should have a photo sharing component"
 
@@ -71,6 +71,7 @@ class ModifyExtensionCommandTest extends TestBase with Mockito {
 				extensions.head.approved should be (false)
 				extensions.head.rejected should be (false)
 				extensions.head.state should be (ExtensionState.Unreviewed)
+				extensions.head.reviewerComments should be (null)
 
 				val reviewerComments = "something something messaging service something something $17 billion cheers thanks"
 

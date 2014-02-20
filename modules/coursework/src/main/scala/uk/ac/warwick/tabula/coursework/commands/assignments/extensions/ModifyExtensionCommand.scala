@@ -92,20 +92,17 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 			})
 			extension.assignment = assignment
 			extension.expiryDate = item.expiryDate
-			extension.reviewerComments = item.reviewerComments
 			extension.state = item.state
 			extension.reviewedOn = DateTime.now
+			action match {
+				case "approve" => extension.approve(item.reviewerComments)
+				case "reject" => extension.reject(item.reviewerComments)
+				case _ =>
+			}
 			extension
 		}
 
 		val extensionList = extensionItems map (retrieveExtension(_))
-		extensionList.foreach(extension =>
-			action match {
-				case "approve" => extension.approve(extension.reviewerComments)
-				case "reject" => extension.reject(extension.reviewerComments)
-				case _ =>
-			}
-		)
 		extensionList.toList
 	}
 
