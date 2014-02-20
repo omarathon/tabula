@@ -24,6 +24,7 @@ class ModifyExtensionCommandTest extends TestBase with Mockito {
 				extensions.head.approved should be (false)
 				extensions.head.rejected should be (false)
 				extensions.head.state should be (ExtensionState.Unreviewed)
+				extensions.head.reviewerComments should be ("something something cats")
 			}
 		}
 	}
@@ -40,16 +41,20 @@ class ModifyExtensionCommandTest extends TestBase with Mockito {
 				extensions.head.approved should be (false)
 				extensions.head.rejected should be (false)
 				extensions.head.state should be (ExtensionState.Unreviewed)
+				extensions.head.reviewerComments should be ("something something cats")
+
+				val reviewerComments = "I've always thought that Tabula should have a photo sharing component"
 
 				val editCommand = new EditExtensionCommand(assignment.module, assignment, extensions.head, currentUser, "approve")
 	 			editCommand.userLookup = mock[UserLookupService]
-				editCommand.extensionItems = List(makeExtensionItem())
+				editCommand.extensionItems = List(makeExtensionItem(reviewerComments))
 				extensions = editCommand.copyExtensionItems()
 
 				extensions.head.approved should be (true)
 				extensions.head.rejected should be (false)
 				extensions.head.state should be (ExtensionState.Approved)
 				extensions.head.reviewedOn should be (DateTime.now)
+				extensions.head.reviewerComments should be (reviewerComments)
 			}
 		}
 	}
@@ -67,17 +72,18 @@ class ModifyExtensionCommandTest extends TestBase with Mockito {
 				extensions.head.rejected should be (false)
 				extensions.head.state should be (ExtensionState.Unreviewed)
 
+				val reviewerComments = "something something messaging service something something $17 billion cheers thanks"
 
 				val editCommand = new EditExtensionCommand(assignment.module, assignment, extensions.head, currentUser, "reject")
 				editCommand.userLookup = mock[UserLookupService]
-				editCommand.extensionItems = List(makeExtensionItem())
+				editCommand.extensionItems = List(makeExtensionItem(reviewerComments))
 				extensions = editCommand.copyExtensionItems()
 
 				extensions.head.approved should be (false)
 				extensions.head.rejected should be (true)
 				extensions.head.state should be (ExtensionState.Rejected)
 				extensions.head.reviewedOn should be (DateTime.now)
-
+				extensions.head.reviewerComments should be (reviewerComments)
 			}
 		}
 	}
@@ -87,24 +93,23 @@ class ModifyExtensionCommandTest extends TestBase with Mockito {
 		val assignment = newDeepAssignment()
 		assignment.closeDate = DateTime.now.plusMonths(1)
 		assignment.extensions += new Extension(currentUser.universityId)
-		return assignment
+		assignment
 	}
 
 	def addAnExtension(assignment: Assignment) : Seq[Extension] = {
 		val addCommand = new AddExtensionCommand(assignment.module, assignment, currentUser, "")
 		addCommand.userLookup = mock[UserLookupService]
 		addCommand.extensionItems = List(makeExtensionItem())
-
-		return addCommand.copyExtensionItems()
+		addCommand.copyExtensionItems()
 	}
 
 
-	def makeExtensionItem(): ExtensionItem = {
+	def makeExtensionItem(reviewerComments: String = "something something cats"): ExtensionItem = {
 		val extensionItem = new ExtensionItem
 		extensionItem.universityId = currentUser.universityId
 		extensionItem.expiryDate = DateTime.now.plusMonths(2)
-		extensionItem.reviewerComments = "Something something cats."
-		return extensionItem
+		extensionItem.reviewerComments = reviewerComments
+		extensionItem
 	}
 
 }
