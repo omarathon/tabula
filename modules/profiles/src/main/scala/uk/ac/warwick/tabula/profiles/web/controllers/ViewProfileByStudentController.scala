@@ -29,6 +29,10 @@ class ViewProfileByStudentController extends ViewProfileController {
 		viewProfileForCourse(profiledStudentMember.mostSignificantCourseDetails, openMeetingId, agentId, profiledStudentMember)
 	}
 
+}
+
+@Controller
+class ViewMyProfileController extends ViewProfileController {
 	@RequestMapping(Array("/view/me"))
 	def viewMe(currentUser: CurrentUser) = {
 		currentUser.profile map { profile =>
