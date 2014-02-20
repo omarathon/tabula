@@ -16,6 +16,7 @@ import javax.persistence.DiscriminatorValue
 import org.joda.time.{DateTimeUtils, DateTime}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.notifications.{ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification, SubmissionReceivedNotification}
+import org.hibernate.ObjectNotFoundException
 
 @Transactional
 class NotificationDaoTest extends PersistenceTestBase with Mockito {
@@ -65,6 +66,25 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 			retrievedNotification.target should not be(null)
 			retrievedNotification.target.entity should be(group)
 			retrievedNotification.content.template should be ("/WEB-INF/freemarker/notifications/i_really_hate_herons.ftl")
+
+			session.clear()
+			session.delete(group)
+			session.flush()
+
+			// If an attached entityreference points to a now non-existent thing, we shouldn't explode
+			// when loading the Notification but only when accessing the lazy entityreference.
+
+			val notificationWithNoItem = try {
+				 notificationDao.getById(notification.id).get.asInstanceOf[HeronWarningNotification]
+			} catch {
+				case e: ObjectNotFoundException =>
+					fail("Shouldn't throw ObjectNotFoundException until entity reference is accessed")
+			}
+
+			// asserts that this type of exception is thrown
+			intercept[ObjectNotFoundException] {
+				notificationWithNoItem.item
+			}
 	}
 
 	@Test
