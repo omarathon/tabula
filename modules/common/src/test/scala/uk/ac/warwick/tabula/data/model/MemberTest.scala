@@ -49,8 +49,8 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		member.mostSignificantCourse = studentCourseDetails
 
 		// add module registrations
-		val mod1 = new Module
-		val mod2 = new Module
+		val mod1 = new Module("cs101")
+		val mod2 = new Module("cs102")
 		mod1.department = extDept
 		mod2.department = homeDept
 		val modReg1 = new ModuleRegistration(studentCourseDetails, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
@@ -91,8 +91,8 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		val scd1 = new StudentCourseDetails(member, "2222222/2")
 		member.attachStudentCourseDetails(scd1)
 
-		val mod1 = new Module
-		val mod2 = new Module
+		val mod1 = new Module("cs101")
+		val mod2 = new Module("cs102")
 		val modReg1 = new ModuleRegistration(scd1, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
 		val modReg2 = new ModuleRegistration(scd1, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
 		scd1.addModuleRegistration(modReg1)
@@ -105,8 +105,8 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		val scd2 = new StudentCourseDetails(member, "2222222/3")
 		member.attachStudentCourseDetails(scd2)
 
-		val mod3 = new Module
-		val mod4 = new Module
+		val mod3 = new Module("cs103")
+		val mod4 = new Module("cs104")
 		val modReg3 = new ModuleRegistration(scd2, mod3, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
 		val modReg4 = new ModuleRegistration(scd2, mod4, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
 		scd2.addModuleRegistration(modReg3)

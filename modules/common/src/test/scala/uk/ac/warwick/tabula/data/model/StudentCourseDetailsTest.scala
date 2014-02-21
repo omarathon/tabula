@@ -44,8 +44,8 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 		val scd1 = new StudentCourseDetails(member, "2222222/2")
 		member.attachStudentCourseDetails(scd1)
 
-		val mod1 = new Module
-		val mod2 = new Module
+		val mod1 = new Module("cs101")
+		val mod2 = new Module("cs102")
 		val modReg1 = new ModuleRegistration(scd1, mod1, new java.math.BigDecimal("12.0"), AcademicYear(2012), "A")
 		val modReg2 = new ModuleRegistration(scd1, mod2, new java.math.BigDecimal("12.0"), AcademicYear(2013), "A")
 
