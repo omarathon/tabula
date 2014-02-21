@@ -76,7 +76,6 @@ class SSOMaintenanceModeListener extends QueueListener with InitializingBean wit
 		maintenanceModeService.changingState.observe { enabled =>
 			if (enabled) switchToOldMode
 			else switchToNewMode
-			true
 		}
 		
 		if (maintenanceModeService.enabled) switchToOldMode

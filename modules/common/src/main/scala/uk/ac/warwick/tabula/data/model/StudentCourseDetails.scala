@@ -53,12 +53,16 @@ class StudentCourseDetails
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
-	var moduleRegistrations: JSet[ModuleRegistration] = JHashSet()
+	private val _moduleRegistrations: JSet[ModuleRegistration] = JHashSet()
+	def moduleRegistrations = _moduleRegistrations.asScala.toSeq.sortBy { reg => (reg.module.code) }
+	def addModuleRegistration(moduleRegistration: ModuleRegistration) = _moduleRegistrations.add(moduleRegistration)
+	def removeModuleRegistration(moduleRegistration: ModuleRegistration) = _moduleRegistrations.remove(moduleRegistration)
+	def clearModuleRegistrations() = _moduleRegistrations.clear()
 
-	def registeredModulesByYear(year: Option[AcademicYear]): Set[Module] = moduleRegistrationsByYear(year).map(_.module)
+	def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] = moduleRegistrationsByYear(year).map(_.module)
 
-	def moduleRegistrationsByYear(year: Option[AcademicYear]): Set[ModuleRegistration] =
-		moduleRegistrations.asScala.toSet[ModuleRegistration].collect {
+	def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =
+		moduleRegistrations.collect {
 			case modReg if year.isEmpty => modReg
 			case modReg if modReg.academicYear == year.getOrElse(null) => modReg
 	}
@@ -115,7 +119,7 @@ class StudentCourseDetails
 	}
 
 	def hasModuleRegistrations = {
-		!moduleRegistrations.isEmpty()
+		!moduleRegistrations.isEmpty
 	}
 
 	def isFresh = (missingFromImportSince == null)
