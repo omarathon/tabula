@@ -214,7 +214,7 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 		extension2.requestedOn = sometime
 		extension2.requestedExpiryDate = sometime.plusWeeks(8)
 		extension2.assignment = assignment
-		extension2.state = ExtensionState.Approved
+		extension2.approve()
 		extension2.reviewedOn = sometime.plusDays(5)
 
 		assignment.allowExtensions = true

@@ -116,7 +116,7 @@ trait ReportWorld extends TestBase with Mockito {
 
 
 	val extension = new Extension(idFormat(3))
-	extension.state = ExtensionState.Approved
+	extension.approve()
 	extension.expiryDate = assignmentSix.closeDate.plusDays(2)
 	assignmentSix.extensions = Seq(extension)
 

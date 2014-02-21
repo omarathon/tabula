@@ -69,7 +69,7 @@ class ExtensionRequestCommandTest extends TestBase with Mockito {
 				val currentUser = RequestInfo.fromThread.get.user
 				var assignment = newDeepAssignment()
 				val newExtension = new Extension(currentUser.universityId)
-				newExtension.state = ExtensionState.Approved
+				newExtension.approve()
 				newExtension.reviewedOn = DateTime.now
 				assignment.extensions.add(newExtension)
 

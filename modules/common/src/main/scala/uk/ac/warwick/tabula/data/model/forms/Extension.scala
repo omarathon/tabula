@@ -56,8 +56,14 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	@Column(name = "approvalComments")
 	var reviewerComments: String = _
 	var disabilityAdjustment: Boolean = false
+
+	@Column(name = "state")
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.forms.ExtensionStateUserType")
-	var state: ExtensionState = ExtensionState.Unreviewed
+	var _state: ExtensionState = ExtensionState.Unreviewed
+	def state = _state
+	/** Don't use rawState_ directly, call approve() or reject() instead **/
+	def rawState_= (state: ExtensionState) { _state = state }
+
 
 	@OneToMany(mappedBy = "extension", fetch = LAZY, cascade = Array(ALL))
 	@BatchSize(size = 200)
@@ -80,14 +86,14 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
 	// keep state encapsulated
 	def approve(comments: String = null) {
-		state = ExtensionState.Approved
+		_state = ExtensionState.Approved
 		reviewedOn = DateTime.now
 		reviewerComments = comments
 	}
 
 	// keep state encapsulated
 	def reject(comments: String = null) {
-		state = ExtensionState.Rejected
+		_state = ExtensionState.Rejected
 		reviewedOn = DateTime.now
 		reviewerComments = comments
 	}

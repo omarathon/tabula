@@ -218,7 +218,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		// TODO is this right?
 
 		val extension = Fixtures.extension("0672089", "cuscav")
-		extension.state = ExtensionState.Approved
+		extension.approve()
 		extension.expiryDate = DateTime.now.plusDays(1)
 		extension.assignment = assignment
 		assignment.extensions.add(extension)
@@ -260,7 +260,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		// Authorised late isn't allowed here
 
 		val extension = Fixtures.extension("0672089", "cuscav")
-		extension.state = ExtensionState.Approved
+		extension.approve()
 		extension.expiryDate = DateTime.now.plusDays(1)
 		extension.assignment = assignment
 		assignment.extensions.add(extension)
@@ -337,7 +337,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		// Authorised late fits
 
 		val extension = Fixtures.extension("0672089", "cuscav")
-		extension.state = ExtensionState.Approved
+		extension.approve()
 		extension.expiryDate = DateTime.now.plusDays(1)
 		extension.assignment = assignment
 		assignment.extensions.add(extension)

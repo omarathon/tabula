@@ -30,7 +30,7 @@ class CreateExtensionFixtureCommand extends CommandInternal[Extension] {
 			e.assignment = assignmentService.getAssignmentById(assignmentId).get
 
 			if (approved) {
-				e.state = ExtensionState.Approved
+				e.approve()
 				e.reviewedOn = now.plusMillis(5) // superquick
 			}
 

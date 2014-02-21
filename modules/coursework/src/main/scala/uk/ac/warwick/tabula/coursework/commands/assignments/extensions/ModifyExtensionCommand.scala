@@ -94,7 +94,7 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 			})
 			extension.assignment = assignment
 			extension.expiryDate = item.expiryDate
-			extension.state = item.state
+			extension.rawState_=(item.state)
 			extension.reviewedOn = DateTime.now
 			action match {
 				case "approve" => extension.approve(item.reviewerComments)
