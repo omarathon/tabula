@@ -41,7 +41,7 @@ class ExtensionDaoImpl extends ExtensionDao with Daoisms {
 		.add(
 			and(
 				isNotNull("requestedOn"),
-				is("state", ExtensionState.Unreviewed)
+				is("_state", ExtensionState.Unreviewed)
 			)
 		)
 
