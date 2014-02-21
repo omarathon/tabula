@@ -52,7 +52,7 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 	def getByScjCodeStaleOrFresh(scjCode: String) =
 		session.newCriteria[StudentCourseDetails]
 				.add(is("scjCode", scjCode.trim))
-				.seq.headOption
+				.uniqueResult
 
 	def getBySprCode(sprCode: String) =
 		session.newCriteria[StudentCourseDetails]
