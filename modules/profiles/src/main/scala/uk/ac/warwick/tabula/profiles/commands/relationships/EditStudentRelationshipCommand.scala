@@ -64,7 +64,7 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 			Seq(newRelationship)
 		} else if (currentAgent.get != agent) {
 			// Replacing the current agent with a new one
-			val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.student)
+			val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
 
 			// Is there an existing relationship for this agent?
 			// Could happen if a student has two agents, and we're trying to replace the second with the first
@@ -84,7 +84,7 @@ class EditStudentRelationshipCommand(val studentCourseDetails: StudentCourseDeta
 				}
 			}
 		} else if (currentAgent.get == agent && remove) {		
-			val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.student)
+			val currentRelationships = relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
 			endAgentRelationship(currentRelationships)
 						
 			currentRelationships

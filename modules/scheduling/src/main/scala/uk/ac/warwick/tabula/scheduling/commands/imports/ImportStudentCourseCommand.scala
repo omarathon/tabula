@@ -77,6 +77,8 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 			case _ => (true, new StudentCourseDetails(stuMem, scjCode))
 		}
 
+		studentCourseDetails.route
+
 		val commandBean = new BeanWrapperImpl(this)
 		val studentCourseDetailsBean = new BeanWrapperImpl(studentCourseDetails)
 

@@ -7,32 +7,33 @@ import uk.ac.warwick.tabula.services.RelationshipService
 import uk.ac.warwick.tabula.services.RelationshipServiceImpl
 import uk.ac.warwick.tabula.AcademicYear
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.StudentRelationship
 
 class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
 	val relationshipService = mock[RelationshipService]
 
+	val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
+
+	val student = new StudentMember
+
+	val studentCourseDetails = new StudentCourseDetails(student, "0205225/1")
+	studentCourseDetails.sprCode = "0205225/1"
+	studentCourseDetails.relationshipService = relationshipService
+
+	student.attachStudentCourseDetails(studentCourseDetails)
+
+	val staff = Fixtures.staff(universityId="0672089")
+	staff.firstName = "Steve"
+	staff.lastName = "Taff"
+
 	@Test def getPersonalTutor {
-		val student = new StudentMember
-
-		val studentCourseDetails = new StudentCourseDetails(student, "0205225/1")
-		studentCourseDetails.sprCode = "0205225/1"
-		studentCourseDetails.relationshipService = relationshipService
-
-		student.attachStudentCourseDetails(studentCourseDetails)
-		
-		val staff = Fixtures.staff(universityId="0672089")
-		staff.firstName = "Steve"
-		staff.lastName = "Taff"
-
-		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-
-		relationshipService.findCurrentRelationships(relationshipType, student) returns (Nil)
+		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns (Nil)
 		student.freshStudentCourseDetails.head.relationships(relationshipType) should be ('empty)
 
 		val rel = StudentRelationship(staff, relationshipType, student)
 
-		relationshipService.findCurrentRelationships(relationshipType, student) returns (Seq(rel))
+		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns (Seq(rel))
 		student.freshStudentCourseDetails.head.relationships(relationshipType) flatMap { _.agentMember } should be (Seq(staff))
 	}
 
@@ -58,6 +59,18 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 		scd1.moduleRegistrations.asScala should be (Set(modReg1, modReg2))
 		scd1.moduleRegistrationsByYear(Some(AcademicYear(2012))) should be (Set(modReg1))
 
+	}
+
+	@Test def relationships {
+		val rel1 = StudentRelationship(staff, relationshipType, student)
+		rel1.id = "1"
+		val rel2 = StudentRelationship(staff, relationshipType, student)
+		rel2.id = "2"
+
+		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns (Seq(rel1))
+
+		rel1.studentCourseDetails = studentCourseDetails
+		studentCourseDetails.relationships(relationshipType) should be (Seq(rel1))
 	}
 
 }

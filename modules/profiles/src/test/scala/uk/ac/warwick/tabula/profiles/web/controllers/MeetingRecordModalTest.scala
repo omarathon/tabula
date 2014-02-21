@@ -26,8 +26,8 @@ class MeetingRecordModalTest extends TestBase with Mockito {
 		var monitoringPointMeetingRelationshipTermService = mock[MonitoringPointMeetingRelationshipTermService]
 	}
 
-	val student = new StudentCourseDetails()
-	student.sprCode = "spr-123"
+	val scd = new StudentCourseDetails()
+	scd.sprCode = "spr-123"
 
 	@Test
 	def viewMeetingRecordCommandUsesRelationshipTypeFromParameter(){
@@ -36,9 +36,9 @@ class MeetingRecordModalTest extends TestBase with Mockito {
 		val relationshipType1 = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		val relationshipType2 = StudentRelationshipType("supervisor", "supervisor", "research supervisor", "research supervisee")
 
-		modals.viewMeetingRecordCommand(student, relationshipType1) should be('defined)
-		modals.viewMeetingRecordCommand(student, relationshipType1).get.relationshipType  should be(relationshipType1)
-		modals.viewMeetingRecordCommand(student, relationshipType2).get.relationshipType  should be(relationshipType2)
+		modals.viewMeetingRecordCommand(scd, relationshipType1) should be('defined)
+		modals.viewMeetingRecordCommand(scd, relationshipType1).get.relationshipType  should be(relationshipType1)
+		modals.viewMeetingRecordCommand(scd, relationshipType2).get.relationshipType  should be(relationshipType2)
 	}
 
 	@Test
@@ -48,9 +48,9 @@ class MeetingRecordModalTest extends TestBase with Mockito {
 		val rels = Seq(new MemberStudentRelationship)
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 		
-		modals.relationshipService.findCurrentRelationships(relationshipType, student.student) returns rels
+		modals.relationshipService.findCurrentRelationships(relationshipType, scd) returns rels
 
-		modals.allRelationships(student, relationshipType) should be(rels)
+		modals.allRelationships(scd, relationshipType) should be(rels)
 	}
 
 }
