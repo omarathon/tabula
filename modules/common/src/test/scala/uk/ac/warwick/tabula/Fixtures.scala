@@ -154,6 +154,8 @@ object Fixtures extends Mockito {
 		val user = new User()
 		user.setUserId(userId)
 		user.setWarwickId(universityId)
+		user.setFoundUser(true)
+		user.setVerified(true)
 		user
 	}
 

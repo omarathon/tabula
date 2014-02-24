@@ -49,11 +49,13 @@ trait MemberDao {
 	def getStaffByDepartment(department: Department): Seq[StaffMember]
 	
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
+	def getCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getRelationshipsByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getRelationshipsByStaffDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentRelationship]
 	def getAllRelationshipsByAgent(agentId: String): Seq[MemberStudentRelationship]
+	def getAllRelationshipTypesByStudent(student: StudentMember): Seq[StudentRelationshipType]
 	def getAllRelationshipTypesByAgent(agentId: String): Seq[StudentRelationshipType]
 	def getRelationshipsByAgent(relationshipType: StudentRelationshipType, agentId: String): Seq[MemberStudentRelationship]
 	def getStudentsWithoutRelationshipByDepartment(relationshipType: StudentRelationshipType, department: Department): Seq[StudentMember]
@@ -237,6 +239,17 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 					.seq
 	}
 
+	def getCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = {
+		session.newCriteria[StudentRelationship]
+			.add(is("studentCourseDetails", scd))
+			.add(is("relationshipType", relationshipType))
+			.add( Restrictions.or(
+			Restrictions.isNull("endDate"),
+			Restrictions.ge("endDate", new DateTime())
+		))
+			.seq
+	}
+
 	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = {
 			session.newCriteria[StudentRelationship]
 					.createAlias("studentCourseDetails", "scd")
@@ -306,6 +319,17 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 				Restrictions.isNull("endDate"),
 				Restrictions.ge("endDate", new DateTime())
 			))
+			.seq
+
+	def getAllRelationshipTypesByStudent(student: StudentMember): Seq[StudentRelationshipType] =
+		session.newCriteria[StudentRelationship]
+			.createAlias("studentCourseDetails", "scd")
+			.add(is("scd.student", student))
+			.add( Restrictions.or(
+			Restrictions.isNull("endDate"),
+			Restrictions.ge("endDate", new DateTime())
+			))
+			.project[StudentRelationshipType](distinct(property("relationshipType")))
 			.seq
 
 

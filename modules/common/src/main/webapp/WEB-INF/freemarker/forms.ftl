@@ -241,13 +241,11 @@ To not bind:
 	basename - bind path to the UploadedFile.
 	multiple - whether it should be possible to upload more than one file.
 -->
-<#macro filewidget types basename multiple=true max=10 >
+<#macro filewidget types basename multiple=true max=10 labelText="File" >
 	<#-- <#local command=.vars[Request[commandVarName]] /> -->
 	<#local elementId="file-upload-${basename?replace('[','')?replace(']','')?replace('.','-')}"/>
 	<@row path=basename>
-	<@label path="${basename}.upload">
-	File
-	</@label>
+	<@label path="${basename}.upload">${labelText}</@label>
 	<@field>
 	<@errors path="${basename}" />
 	<@errors path="${basename}.upload" />

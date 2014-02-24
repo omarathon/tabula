@@ -2,14 +2,15 @@ package uk.ac.warwick.tabula.data.model.attendance
 
 import javax.persistence._
 import javax.validation.constraints.NotNull
-import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.data.model.{GeneratedId, Route}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.AcademicYear
+import org.hibernate.annotations.BatchSize
+import org.joda.time.DateTime
 
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorValue("template")
-class MonitoringPointSetTemplate extends AbstractMonitoringPointSet {
+@Table(name = "monitoringpointsettemplate")
+class MonitoringPointSetTemplate extends GeneratedId {
 
 	@NotNull
 	var templateName: String = _
@@ -17,7 +18,22 @@ class MonitoringPointSetTemplate extends AbstractMonitoringPointSet {
 	@NotNull
 	var position: Int = _
 
-	def route: Route = null
-	def year: JInteger = null
-	def academicYear: AcademicYear = null
+	@OneToMany(mappedBy = "pointSet", cascade=Array(CascadeType.ALL), orphanRemoval = true)
+	@OrderBy("week")
+	@BatchSize(size=100)
+	var points: JList[MonitoringPointTemplate] = JArrayList()
+
+	var createdDate: DateTime = _
+
+	var updatedDate: DateTime = _
+
+	def add(point: MonitoringPointTemplate) {
+		points.add(point)
+		point.pointSet = this
+	}
+
+	def remove(point: MonitoringPointTemplate) {
+		points.remove(point)
+		point.pointSet = null
+	}
 }

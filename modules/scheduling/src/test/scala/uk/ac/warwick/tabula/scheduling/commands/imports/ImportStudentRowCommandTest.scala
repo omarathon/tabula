@@ -93,15 +93,10 @@ trait ImportStudentCourseYearCommandSetup extends ImportCommandFactoryForTesting
 
 }
 
-trait ImportSupervisorsCommandSetup extends ImportCommandFactoryForTesting {
-	importCommandFactory.supervisorImporter = smartMock[SupervisorImporter]
-}
-
 trait ImportCommandFactorySetup
 	extends ComponentMixins
 	with ImportStudentCourseCommandSetup
-	with ImportStudentCourseYearCommandSetup
-	with ImportSupervisorsCommandSetup {}
+	with ImportStudentCourseYearCommandSetup {}
 
 trait MockedResultSet extends Mockito {
 	val rs = smartMock[ResultSet]

@@ -8,21 +8,23 @@ import org.springframework.transaction.annotation.Transactional
 import org.springframework.context.annotation.{ClassPathScanningCandidateComponentProvider, ClassPathBeanDefinitionScanner}
 import org.springframework.core.`type`.filter.AssignableTypeFilter
 import uk.ac.warwick.tabula.{PackageScanner, Mockito, Fixtures, PersistenceTestBase}
-import uk.ac.warwick.tabula.data.model.{ToEntityReference, UserIdRecipientNotification, UniversityIdRecipientNotification, SSOUserType, HeronWarningNotification, Notification}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
 import scala.reflect.runtime.universe._
 import javax.persistence.DiscriminatorValue
 import org.joda.time.{DateTimeUtils, DateTime}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import uk.ac.warwick.tabula.data.model.notifications.SubmissionReceivedNotification
+import uk.ac.warwick.tabula.data.model.notifications.{ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification, SubmissionReceivedNotification}
+import org.hibernate.ObjectNotFoundException
 
 @Transactional
 class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 	val notificationDao = new NotificationDaoImpl
 
-	val agent = Fixtures.user()
+	val agentMember = Fixtures.member(userType=MemberUserType.Staff)
+	val agent = agentMember.asSsoUser
 
 	@Before
 	def setup() {
@@ -64,6 +66,25 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 			retrievedNotification.target should not be(null)
 			retrievedNotification.target.entity should be(group)
 			retrievedNotification.content.template should be ("/WEB-INF/freemarker/notifications/i_really_hate_herons.ftl")
+
+			session.clear()
+			session.delete(group)
+			session.flush()
+
+			// If an attached entityreference points to a now non-existent thing, we shouldn't explode
+			// when loading the Notification but only when accessing the lazy entityreference.
+
+			val notificationWithNoItem = try {
+				 notificationDao.getById(notification.id).get.asInstanceOf[HeronWarningNotification]
+			} catch {
+				case e: ObjectNotFoundException =>
+					fail("Shouldn't throw ObjectNotFoundException until entity reference is accessed")
+			}
+
+			// asserts that this type of exception is thrown
+			intercept[ObjectNotFoundException] {
+				notificationWithNoItem.item
+			}
 	}
 
 	@Test
@@ -75,6 +96,26 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 
 		notificationDao.save(notification)
 		notification.target.id should not be (null)
+	}
+
+	@Test
+	def scheduledMeetings() {
+		val meeting = new ScheduledMeetingRecord
+		val relationship = new MemberStudentRelationship
+
+		session.save(meeting)
+		session.save(relationship)
+
+		val r: StudentRelationship = relationship
+		relationship.agentMember = agentMember
+		val notification = Notification.init(new ScheduledMeetingRecordInviteeNotification, agent, Seq(meeting), r)
+		notificationDao.save(notification)
+
+		session.flush()
+		session.clear()
+
+		val retrieved = notificationDao.getById(notification.id).get.asInstanceOf[ScheduledMeetingRecordNotification]
+		retrieved.meeting
 	}
 
 	@Test def recent() {

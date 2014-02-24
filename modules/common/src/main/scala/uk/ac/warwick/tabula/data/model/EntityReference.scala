@@ -32,81 +32,88 @@ abstract class EntityReference[A >: Null <: AnyRef] extends GeneratedId {
 	type Entity = A
 }
 
+/*
+ A subtype for each type of object.
+
+ The entity property is eager-loaded - some of these types (mainly the abstract
+ ones) may cause errors if lazy loading is turned on, as it will fail casting
+ the proxy abstract class to the specific subtype.
+ */
 
 @Entity @DiscriminatorValue(value="assignment")
 class AssignmentEntityReference extends EntityReference[Assignment] {
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne()
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="submission")
 class SubmissionEntityReference extends EntityReference[Submission] {
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne()
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="feedback")
 class FeedbackEntityReference extends EntityReference[Feedback] {
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne()
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="markerFeedback")
 class MarkerFeedbackEntityReference extends EntityReference[MarkerFeedback] {
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne()
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="module")
 class ModuleEntityReference extends EntityReference[Module] {
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne()
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="extension")
 class ExtensionEntityReference extends EntityReference[Extension] {
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne()
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="studentRelationship")
 class StudentRelationshipEntityReference extends EntityReference[StudentRelationship] {
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne()
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="meetingRecord")
 class MeetingRecordEntityReference extends EntityReference[AbstractMeetingRecord] {
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne()
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="meetingRecordApprovel")
 class MeetingRecordApprovalEntityReference extends EntityReference[MeetingRecordApproval] {
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne()
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="smallGroup")
 class SmallGroupEntityReference extends EntityReference[SmallGroup] {
-	@ManyToOne(fetch = FetchType.LAZY, optional = true)
+	@ManyToOne()
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="smallGroupSet")
 class SmallGroupSetEntityReference extends EntityReference[SmallGroupSet] {
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne()
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="smallGroupEvent")
 class SmallGroupEventEntityReference extends EntityReference[SmallGroupEvent] {
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne()
 	var entity: Entity = null
 }
 
 @Entity @DiscriminatorValue(value="originalityReport")
 class OriginalityReportEntityReference extends EntityReference[OriginalityReport] {
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne()
 	var entity: Entity = null
 }

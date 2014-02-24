@@ -36,20 +36,8 @@ class ImportCommandFactory() {
 	var studentCourseYearDetailsDao: StudentCourseYearDetailsDao = _
 	var modeOfAttendanceImporter: ModeOfAttendanceImporter = _
 
-	// needed for ImportSupervisorCommand:
-	var supervisorImporter: SupervisorImporter = _
-
 	// needed by Command
 	var maintenanceModeService: MaintenanceModeService = _
-
-	def createImportSupervisorsForStudentCommand(studentCourseDetails: StudentCourseDetails): ImportSupervisorsForStudentCommand = {
-		var command = new ImportSupervisorsForStudentCommand(studentCourseDetails)
-		if (test) {
-			command.maintenanceMode = maintenanceModeService
-			command.supervisorImporter = supervisorImporter
-		}
-		command
-	}
 
 	def createImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember) = {
 		val command = new ImportStudentCourseCommand(row, stuMem, this)

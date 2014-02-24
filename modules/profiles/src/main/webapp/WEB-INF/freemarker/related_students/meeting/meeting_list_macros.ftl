@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<#macro list studentCourseDetails meetings relationshipType>
+<#macro list studentCourseDetails meetings relationshipType viewerRelationshipTypes="">
 	<#assign can_read_meetings = can.do_with_selector("Profiles.MeetingRecord.Read", studentCourseDetails, relationshipType) />
 	<#assign can_create_meetings = can.do_with_selector("Profiles.MeetingRecord.Create", studentCourseDetails, relationshipType) />
 	<#assign existingRelationship = ((studentCourseDetails.relationships(relationshipType))![])?size gt 0 />
@@ -19,7 +19,9 @@
 				<a class="btn-like new" href="<@routes.create_scheduled_meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Schedule a meeting"><i class="icon-time"></i> Schedule</a>
 				<#if showIntro("scheduled-meetings", "anywhere")>
 					<#assign introText>
-						<p>You can now schedule meetings in advance.</p>
+						<p>You can now schedule meetings in advance
+							<#if viewerRelationshipTypes?has_content> with your ${viewerRelationshipTypes}</#if>
+						</p>
 					</#assign>
 					<a href="#"
 					   id="scheduled-meetings-intro"
@@ -35,8 +37,10 @@
 		</div>
 		<#if can_read_meetings>
 			<#if meetings??>
-				<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
-				<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
+				<div class="list-controls">
+					<a class="toggle-all-details btn-like open-all-details" title="Expand all meetings"><i class="icon-plus"></i> Expand all</a>
+					<a class="toggle-all-details btn-like close-all-details hide" title="Collapse all meetings"><i class="icon-minus"></i> Collapse all</a>
+				</div>
 				<#list meetings as meeting>
 					<#assign deletedClasses><#if meeting.deleted>deleted muted</#if></#assign>
 					<#assign pendingAction = meeting.pendingActionBy(viewer) />

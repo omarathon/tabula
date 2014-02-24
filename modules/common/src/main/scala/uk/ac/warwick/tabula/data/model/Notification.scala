@@ -25,6 +25,17 @@ object Notification {
 	 * e.g.
 	 *
 	 *    Notification.init(new SubmissionNotification, agent, Seq(submission), assignment)
+	 *
+	 * If the compiler complains about a call to init, it's usually one of these things
+	 *  - the item type doesn't implement ToEntityReference
+	 *  - the target type doesn't implement ToEntityReference
+	 *  - there's a target but the notification doesn't implement NotificationWithTarget
+	 *  - the types do not exactly match (if your notification entity is MeetingRecord,
+	 *    you have to pass it a MeetingRecord var, it will get confused if you pass it a
+	 *    ScheduledMeetingRecord even though it's a subtype. You can still pass it a subtype,
+	 *    just have to cast it or put it in an appropriately typed var)
+	 *
+	 * Some of the above may be solvable things caused by our inability to understand type system.
 	 */
 	def init[A >: Null <: ToEntityReference, B >: Null <: ToEntityReference, C <: NotificationWithTarget[A, B]]
 			(notification: C, agent: User, seq: Seq[A], target: B): C = {
@@ -118,7 +129,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B] extends Generated
 @Entity
 abstract class NotificationWithTarget[A >: Null <: ToEntityReference, B >: Null <: AnyRef] extends Notification[A,B] {
 	@Access(value=AccessType.PROPERTY)
-	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[B]])
+	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[B]], fetch = FetchType.LAZY)
 	@BeanProperty
 	var target: EntityReference[B] = null
 }

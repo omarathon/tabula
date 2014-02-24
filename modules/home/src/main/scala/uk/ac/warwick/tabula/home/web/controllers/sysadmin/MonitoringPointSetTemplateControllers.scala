@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.home.web.controllers.sysadmin
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSetTemplate}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointTemplate, MonitoringPointSetTemplate}
 import uk.ac.warwick.tabula.home.commands.sysadmin.pointsettemplates._
 import scala.Array
 import javax.validation.Valid
@@ -121,12 +121,12 @@ class AddMonitoringPointController extends MonitoringPointSetTemplateController 
 	def createCommand() = AddMonitoringPointCommand()
 
 	@RequestMapping(method=Array(POST), params = Array("form"))
-	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPoint]) = {
+	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPointTemplate]) = {
 		Mav("sysadmin/pointsettemplates/point/add_form").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method=Array(POST))
-	def submitModal(@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPoint], errors: Errors) = {
+	def submitModal(@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPointTemplate], errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
@@ -145,13 +145,13 @@ class EditMonitoringPointController extends MonitoringPointSetTemplateController
 	def createCommand(@PathVariable pointIndex: Int) = EditMonitoringPointCommand(pointIndex)
 
 	@RequestMapping(method=Array(POST), params = Array("form"))
-	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPoint] with EditMonitoringPointState) = {
+	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPointTemplate] with EditMonitoringPointState) = {
 		cmd.copyFrom()
 		Mav("sysadmin/pointsettemplates/point/edit_form").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method=Array(POST))
-	def submitModal(@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPoint] with EditMonitoringPointState, errors: Errors) = {
+	def submitModal(@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPointTemplate] with EditMonitoringPointState, errors: Errors) = {
 		if (errors.hasErrors) {
 			Mav("sysadmin/pointsettemplates/point/edit_form").noLayoutIf(ajax)
 		} else {
@@ -170,12 +170,12 @@ class DeleteMonitoringPointController extends MonitoringPointSetTemplateControll
 	def createCommand(@PathVariable pointIndex: Int) = DeleteMonitoringPointCommand(pointIndex)
 
 	@RequestMapping(method=Array(POST), params = Array("form"))
-	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPoint]) = {
+	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPointTemplate]) = {
 		Mav("sysadmin/pointsettemplates/point/delete_form").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method=Array(POST))
-	def submitModal(@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPoint], errors: Errors) = {
+	def submitModal(@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPointTemplate], errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
@@ -194,12 +194,12 @@ class CreateMonitoringPointController extends MonitoringPointSetTemplateControll
 	def createCommand(@PathVariable template: MonitoringPointSetTemplate) = CreateMonitoringPointCommand(template)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPoint]) = {
+	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPointTemplate]) = {
 		Mav("sysadmin/pointsettemplates/point/create_form").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method=Array(POST))
-	def submitModal(@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPoint], errors: Errors) = {
+	def submitModal(@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPointTemplate], errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
@@ -217,17 +217,17 @@ class UpdateMonitoringPointController extends MonitoringPointSetTemplateControll
 	@ModelAttribute("command")
 	def createCommand(
 		@PathVariable(value = "template") template: MonitoringPointSetTemplate,
-		@PathVariable(value = "point") point: MonitoringPoint
+		@PathVariable(value = "point") point: MonitoringPointTemplate
 	) =
 		UpdateMonitoringPointCommand(template, point)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPoint]) = {
+	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPointTemplate]) = {
 		Mav("sysadmin/pointsettemplates/point/update_form").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method=Array(POST))
-	def submitModal(@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPoint], errors: Errors) = {
+	def submitModal(@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPointTemplate], errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {
@@ -245,17 +245,17 @@ class RemoveMonitoringPointController extends MonitoringPointSetTemplateControll
 	@ModelAttribute("command")
 	def createCommand(
 		@PathVariable(value = "template") template: MonitoringPointSetTemplate,
-		@PathVariable(value = "point") point: MonitoringPoint
+		@PathVariable(value = "point") point: MonitoringPointTemplate
 	) =
 		RemoveMonitoringPointCommand(template, point)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPoint]) = {
+	def form(@ModelAttribute("command") cmd: Appliable[MonitoringPointTemplate]) = {
 		Mav("sysadmin/pointsettemplates/point/remove_form").noLayoutIf(ajax)
 	}
 
 	@RequestMapping(method=Array(POST))
-	def submitModal(@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPoint], errors: Errors) = {
+	def submitModal(@Valid @ModelAttribute("command") cmd: Appliable[MonitoringPointTemplate], errors: Errors) = {
 		if (errors.hasErrors) {
 			form(cmd)
 		} else {

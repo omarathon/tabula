@@ -111,7 +111,7 @@ class ModuleRegistrationDaoTest extends PersistenceTestBase {
 			modReg.selectionStatus = ModuleSelectionStatus.OptionalCore
 			modRegDao.saveOrUpdate(modReg)
 
-			scd.moduleRegistrations.add(modReg)
+			scd.addModuleRegistration(modReg)
 
 			scdDao.saveOrUpdate(scd)
 

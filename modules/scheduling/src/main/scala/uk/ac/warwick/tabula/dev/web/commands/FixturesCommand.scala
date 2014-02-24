@@ -109,7 +109,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 					for (mr <- scd.moduleRegistrations) {
 						session.delete(mr)
 					}
-					scd.moduleRegistrations.clear()
+					scd.clearModuleRegistrations()
 				}
 
 				// Checkpoints must be deleted before the associated student

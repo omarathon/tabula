@@ -11,6 +11,7 @@ import javax.mail.search.StringTerm
 import javax.mail.Message
 import uk.ac.warwick.tabula.data.NotificationDao
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.userlookup.AnonymousUser
 
 
 class NotificationIndexServiceTest extends TestBase with Mockito {
@@ -68,6 +69,13 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 
 		dates.size should be (50)
 		dates.head.toLong should be (recipientNotifications.map{_.notification.created}.max.getMillis)
+	}
+
+	@Test
+	def missingRecipient() {
+		val anonUser = new AnonymousUser()
+		val notification = Notification.init(new HeronWarningNotification, agent, group, group)
+		service.indexItems(Seq(new RecipientNotification(notification, anonUser)))
 	}
 
 	@Test

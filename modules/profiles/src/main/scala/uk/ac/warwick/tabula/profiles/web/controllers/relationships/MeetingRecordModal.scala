@@ -39,7 +39,7 @@ trait MeetingRecordModal  {
 	def allRelationships(@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
 						 @PathVariable("relationshipType") relationshipType: StudentRelationshipType) = {
 
-		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails.student)
+		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails)
 	}
 
 	@ModelAttribute("viewMeetingRecordCommand")

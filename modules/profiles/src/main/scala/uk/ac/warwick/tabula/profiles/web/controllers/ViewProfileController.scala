@@ -7,13 +7,14 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.PermissionDeniedException
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
-import uk.ac.warwick.tabula.data.model.{ScheduledMeetingRecord, AbstractMeetingRecord, MeetingRecord, StudentMember, StudentRelationshipType, StudentCourseDetails}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.profiles.commands.SearchProfilesCommand
 import uk.ac.warwick.tabula.commands.ViewViewableCommand
 import uk.ac.warwick.tabula.profiles.commands.ViewMeetingRecordCommand
 import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.web.Mav
+
 
 class ViewProfileCommand(user: CurrentUser, profile: StudentMember) extends ViewViewableCommand(Permissions.Profiles.Read.Core, profile) with Logging {
 
@@ -60,6 +61,16 @@ abstract class ViewProfileController extends ProfilesController {
 				}
 			}.toMap
 
+		val relationshipTypes: List[String] =
+			if (currentMember.isStaff) relationshipService.listAllStudentRelationshipTypesWithMember(currentMember).map (_.studentRole + "s").distinct.toList
+			else relationshipService.listAllStudentRelationshipTypesWithStudentMember(currentMember.asInstanceOf[StudentMember]).map (_.agentRole).distinct.toList
+
+		def relationshipTypesFormatted = relationshipTypes match {
+			case Nil => ""
+			case singleFormat :: Nil => singleFormat
+			case _ => Seq(relationshipTypes.init.mkString(", "), relationshipTypes.last).mkString(" and ")
+		}
+
 		val meetings = relationshipMeetings.values.flatten
 		val openMeeting = meetings.find(m => m.id == openMeetingId).getOrElse(null)
 
@@ -78,6 +89,7 @@ abstract class ViewProfileController extends ProfilesController {
 			else null
 
 		Mav("profile/view",
+			"viewerRelationshipTypes" -> relationshipTypesFormatted,
 			"profile" -> profiledStudentMember,
 			"viewer" -> currentMember,
 			"isSelf" -> isSelf,
@@ -94,4 +106,5 @@ abstract class ViewProfileController extends ProfilesController {
 			"studentCourseDetails" -> studentCourseDetails)
 			.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}
+
 }

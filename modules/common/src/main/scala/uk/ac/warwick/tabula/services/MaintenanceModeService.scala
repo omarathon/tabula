@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import org.springframework.beans.factory.annotation.Value
 import org.joda.time.DateTime
-import scala.react.{Signal, Observing, Dependent, EventSource}
+import uk.ac.warwick.tabula.Reactor
 import uk.ac.warwick.tabula.system.exceptions.HandledException
 import uk.ac.warwick.util.queue.QueueListener
 import org.springframework.beans.factory.InitializingBean
@@ -17,7 +17,6 @@ import uk.ac.warwick.tabula.events.Event
 import uk.ac.warwick.tabula.events.EventDescription
 import org.springframework.beans.BeanWrapperImpl
 import scala.beans.BeanProperty
-import scala.actors.Reactor
 
 trait MaintenanceStatus {
 	def enabled: Boolean
@@ -40,7 +39,7 @@ trait MaintenanceModeService extends MaintenanceStatus {
 	 * An EventSource to which you can attach a listener to find
 	 * out when maintenance mode goes on and off.
 	 */
-	val changingState: EventSource[Boolean]
+	val changingState: Reactor.EventSource[Boolean]
 
 	/**
 	 * Returns an Exception object suitable for throwing when trying
@@ -75,7 +74,7 @@ class MaintenanceModeServiceImpl extends MaintenanceModeService with Logging {
 	var message: Option[String] = None
 
 	// for other classes to listen to changes to maintenance mode.
-	val changingState = EventSource[Boolean]
+	val changingState = Reactor.EventSource[Boolean]
 
 	def exception(callee: Describable[_]) = {
 		val m = EventDescription.generateMessage(Event.fromDescribable(callee))

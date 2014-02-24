@@ -1,4 +1,4 @@
-This email confirms that you have been granted an extension for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name}.
+This message confirms that you have been granted an extension for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name}.
 Your new submission date for this assignment is ${newExpiryDate}. Any submissions made after this date will be subject to the usual late penalties.
 
 <#if extension.approvalComments?has_content>

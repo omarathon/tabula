@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.services.TermServiceComponent
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointSet, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{CommonMonitoringPointProperties, MonitoringPointSet, MonitoringPoint}
 import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.{DateTimeConstants, DateMidnight}
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
@@ -17,7 +17,7 @@ case class GroupedMonitoringPoint(
 )
 
 trait GroupMonitoringPointsByTerm extends TermServiceComponent {
-	def groupByTerm(monitoringPoints: Seq[MonitoringPoint], academicYear: AcademicYear): Map[String, Seq[MonitoringPoint]] = {
+	def groupByTerm[A <: CommonMonitoringPointProperties](monitoringPoints: Seq[A], academicYear: AcademicYear): Map[String, Seq[A]] = {
 		val approxStartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
 		val day = DayOfWeek.Thursday
 		lazy val weeksForYear = termService.getAcademicWeeksForYear(approxStartDate).toMap
@@ -28,8 +28,8 @@ trait GroupMonitoringPointsByTerm extends TermServiceComponent {
 		} map { case (term, points) => term -> points.sortBy(p => (p.validFromWeek, p.requiredFromWeek)) }
 	}
 
-	def groupSimilarPointsByTerm(
-		monitoringPoints: Seq[MonitoringPoint],
+	def groupSimilarPointsByTerm[A <: CommonMonitoringPointProperties](
+		monitoringPoints: Seq[A],
 		deptRoutes: Seq[Route],
 		academicYear: AcademicYear
 	): Map[String, Seq[GroupedMonitoringPoint]] = {
@@ -42,7 +42,10 @@ trait GroupMonitoringPointsByTerm extends TermServiceComponent {
 						groupedPoints.head.name,
 						point.validFromWeek,
 						point.requiredFromWeek,
-						groupedPoints.map(_.pointSet.asInstanceOf[MonitoringPointSet].route).distinct.sorted(Route.DegreeTypeOrdering).map{
+						groupedPoints.flatMap {
+							case mp: MonitoringPoint => Some(mp.pointSet.route)
+							case _ => None
+						}.distinct.sorted(Route.DegreeTypeOrdering).map{
 							r => (r, deptRoutes.contains(r))
 						},
 						groupedPoints.head.id
