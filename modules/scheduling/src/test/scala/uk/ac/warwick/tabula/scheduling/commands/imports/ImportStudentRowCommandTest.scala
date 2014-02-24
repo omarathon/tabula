@@ -7,13 +7,13 @@ import org.springframework.beans.BeanWrapperImpl
 import org.springframework.transaction.annotation.Transactional
 
 import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.tabula.data.{FileDao, MemberDao, ModeOfAttendanceDao, SitsStatusDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
+import uk.ac.warwick.tabula.data.{FileDao, MemberDao, ModeOfAttendanceDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.Gender.Male
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory, ImportRowTracker}
+import uk.ac.warwick.tabula.scheduling.helpers.{SitsStudentRow, ImportCommandFactory}
 import uk.ac.warwick.tabula.scheduling.services._
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, MaintenanceModeService, ModuleAndDepartmentService, ProfileService, ProfileServiceComponent, RelationshipService}
 import uk.ac.warwick.userlookup.AnonymousUser
@@ -282,8 +282,6 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 				case _ => false should be (true)
 			}
 
-			//there was one(fileDao).savePermanent(any[FileAttachment])
-			//there was no(fileDao).saveTemporary(any[FileAttachment])
 			there was one(memberDao).saveOrUpdate(any[Member])
 		}
 	}
@@ -305,9 +303,6 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 				}
 				case _ => false should be (true)
 			}
-
-			//there was one(fileDao).savePermanent(any[FileAttachment])
-			//there was no(fileDao).saveTemporary(any[FileAttachment])
 			there was one(memberDao).saveOrUpdate(any[Member])
 		}
 	}

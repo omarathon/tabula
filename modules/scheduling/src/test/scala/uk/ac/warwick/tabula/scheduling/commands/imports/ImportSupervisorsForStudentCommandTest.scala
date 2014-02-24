@@ -7,10 +7,6 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
 import uk.ac.warwick.tabula.helpers.Logging
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.scheduling.helpers.ImportCommandFactory
-import uk.ac.warwick.tabula.services.MaintenanceModeService
-import uk.ac.warwick.tabula.data.MemberDao
-
 
 class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Mockito with Logging {
 

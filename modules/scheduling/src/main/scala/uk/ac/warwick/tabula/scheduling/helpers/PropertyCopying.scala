@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.scheduling.helpers
 
-import org.apache.log4j.Logger
 import org.springframework.beans.BeanWrapper
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.services.SitsStatusImporter
@@ -10,7 +9,6 @@ import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.data.model.Course
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.SitsStatus
-import org.joda.time.DateTime
 
 trait PropertyCopying extends Logging {
 	var sitsStatusImporter = Wire[SitsStatusImporter]

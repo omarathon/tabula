@@ -6,9 +6,7 @@ import javax.persistence.Basic
 import javax.persistence.Entity
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
-import javax.persistence.NamedQueries
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports.JInteger
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.system.permissions.Restricted
@@ -17,7 +15,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.EqualsBuilder
 import org.hibernate.annotations.Type
 import javax.persistence.Column
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import javax.persistence.FetchType
 

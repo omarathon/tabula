@@ -1,12 +1,10 @@
 package uk.ac.warwick.tabula.scheduling.helpers
 
-import uk.ac.warwick.tabula.scheduling.commands.imports.{SitsStudentRow, ImportStudentCourseYearCommand, ImportStudentCourseCommand, ImportSupervisorsForStudentCommand}
-import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, Tier4RequirementImporter, CourseImporter, SitsStatusImporter, ModeOfAttendanceImporter, SupervisorImporter}
+import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportStudentCourseYearCommand, ImportStudentCourseCommand, ImportSupervisorsForStudentCommand}
+import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter, SitsStatusImporter, ModeOfAttendanceImporter, SupervisorImporter}
 import uk.ac.warwick.tabula.data.model.{StudentMember, StudentCourseDetails}
 import uk.ac.warwick.tabula.services.{ProfileService, CourseAndRouteService, ModuleAndDepartmentService, RelationshipService, MaintenanceModeService}
-import java.sql.ResultSet
 import uk.ac.warwick.tabula.data.{StudentCourseDetailsDao, StudentCourseYearDetailsDao, ModeOfAttendanceDao, MemberDao}
-import org.springframework.beans.BeanWrapperImpl
 
 /**
  * Created by zoe on 13/02/14.
@@ -16,7 +14,8 @@ class ImportCommandFactory() {
 	val rowTracker = new ImportRowTracker
 	var test = false
 
-	// this lot are all normally auto-wired but need to allow tests to mock them and initialise them in commands
+	// This lot are all normally auto-wired within the import commands.  Declared here in order to allow us to
+	// overwrite them with mock versions for testing.
 
 	// needed for ImportStudentCourseCommand:
 	var memberDao: MemberDao = _

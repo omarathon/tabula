@@ -6,13 +6,11 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.DegreeType.Postgraduate
-import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
-import org.joda.time.DateTime
 
 class ImportSupervisorsForStudentCommand(var studentCourseDetails: StudentCourseDetails)
 	extends Command[Unit] with Unaudited with Logging {

@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.{ResultSet, ResultSetMetaData}
-import scala.collection.JavaConversions._
 import org.joda.time.{DateTimeConstants, LocalDate}
 import uk.ac.warwick.tabula.{PersistenceTestBase, Mockito, _}
 import uk.ac.warwick.tabula.data.{FileDao, MemberDao}
@@ -9,7 +8,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.Gender._
 import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
 import uk.ac.warwick.tabula.events.EventHandling
-import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportCommandFactorySetup, ImportStaffMemberCommand, ImportStudentRowCommand, ImportStudentCourseCommand, ImportSupervisorsForStudentCommand, ImportStudentCourseYearCommand}
+import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportCommandFactorySetup, ImportStaffMemberCommand, ImportStudentRowCommand}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
 
 // scalastyle:off magic.number

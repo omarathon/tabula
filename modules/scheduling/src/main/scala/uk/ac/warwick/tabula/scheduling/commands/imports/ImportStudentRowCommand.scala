@@ -11,8 +11,6 @@ import uk.ac.warwick.tabula.scheduling.helpers.{SitsStudentRow, PropertyCopying,
 import uk.ac.warwick.tabula.scheduling.services._
 import uk.ac.warwick.tabula.services.{ProfileServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.userlookup.User
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportMemberHelpers._
-import scala.Some
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 
 object ImportStudentRowCommand {

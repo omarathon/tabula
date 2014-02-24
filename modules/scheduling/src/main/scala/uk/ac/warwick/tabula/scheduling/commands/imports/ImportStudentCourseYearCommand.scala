@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.commands.{Command, Description, Unaudited}
 import uk.ac.warwick.tabula.data.{Daoisms, StudentCourseYearDetailsDao}
 import uk.ac.warwick.tabula.data.model.{ModeOfAttendance, ModuleRegistrationStatus, StudentCourseDetails, StudentCourseYearDetails, StudentCourseYearProperties}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.helpers.{ImportRowTracker, PropertyCopying}
+import uk.ac.warwick.tabula.scheduling.helpers.{SitsStudentRow, ImportRowTracker, PropertyCopying}
 import uk.ac.warwick.tabula.scheduling.services.ModeOfAttendanceImporter
 import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.data.model.StudentCourseYearKey

@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import java.sql.ResultSet
 import org.joda.time.DateTime
 import org.springframework.beans.BeanWrapper
 import org.springframework.beans.BeanWrapperImpl
@@ -19,8 +18,6 @@ import uk.ac.warwick.tabula.data.model.MemberUserType
 class ImportStaffMemberCommand(member: MembershipInformation, ssoUser: User)
 	extends ImportMemberCommand(member, ssoUser, None)
 	with Logging with Daoisms with StaffProperties with Unaudited {
-
-	import ImportMemberHelpers._
 
 	// TODO reinstate this, one day
 //	this.teachingStaff = rs.getString("teaching_staff") == "Y"

@@ -1,21 +1,19 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
-import java.sql.ResultSet
 import org.hibernate.exception.ConstraintViolationException
 import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
-import ImportMemberHelpers.{opt, toLocalDate}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.{Command, Unaudited}
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao}
-import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.{CourseType, Department, Member, StudentCourseDetails, StudentCourseProperties, StudentMember, StudentRelationshipSource}
+import uk.ac.warwick.tabula.data.model.{CourseType, Member, StudentCourseDetails, StudentMember, StudentRelationshipSource}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory, ImportRowTracker, PropertyCopying}
+import uk.ac.warwick.tabula.scheduling.helpers.{SitsStudentRow, ImportCommandFactory, PropertyCopying}
 import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter}
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, RelationshipService}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.commands.Description
+import ImportMemberHelpers.opt 
 
 class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, importCommandFactory: ImportCommandFactory)
 	extends Command[StudentCourseDetails] with Logging with Daoisms
@@ -111,20 +109,10 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 		copyObjectProperty("statusOnCourse", row.scjStatusCode, studentCourseDetailsBean, toSitsStatus(row.scjStatusCode))
 	}
 
-	def toRoute(routeCode: String) = routeCode match {
-		case (code: String) => code.toLowerCase.maybeText.flatMap { courseAndRouteService.getRouteByCode }.getOrElse(null)
-		case _ => null // catch case where route code is null
-	}
+	def toRoute(code: String) = code.maybeText.flatMap { routeCode => courseAndRouteService.getRouteByCode(routeCode.toLowerCase) }.getOrElse(null)
 
-	def toCourse(courseCode: String) = courseCode match {
-		case (code: String) => code.maybeText.flatMap { courseImporter.getCourseForCode }.getOrElse(null)
-		case _ => null
-	}
-
-	def toAward(awardCode: String) = awardCode match {
-		case (code: String) => code.maybeText.flatMap { awardImporter.getAwardForCode }.getOrElse(null)
-		case _ => null
-	}
+	def toCourse(code: String) = code.maybeText.flatMap { courseImporter.getCourseForCode }.getOrElse(null)
+	def toAward(code: String) = code.maybeText.flatMap { awardImporter.getAwardForCode }.getOrElse(null)
 
 	def captureTutor(studentCourseDetails: StudentCourseDetails) = {
 		val dept = studentCourseDetails.department

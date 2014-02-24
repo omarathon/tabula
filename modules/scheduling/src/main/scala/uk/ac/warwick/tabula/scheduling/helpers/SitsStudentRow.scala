@@ -6,8 +6,10 @@ import uk.ac.warwick.tabula.scheduling.commands.imports.ImportMemberHelpers._
 
 /**
  * Created by zoe on 24/02/14.
+ *
+ * Contains the data from the result set for the SITS query.  (Doesn't include member properties)
  */
-// SitsStudentRow contains the data from the result set for the SITS query.  (It doesn't include member properties)
+
 class SitsStudentRow(resultSet: ResultSet)
 	extends SitsStudentRowCourseDetails
 	with SitsStudentRowYearDetails {

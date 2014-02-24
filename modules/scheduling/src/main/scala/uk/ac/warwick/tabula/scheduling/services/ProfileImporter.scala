@@ -20,7 +20,7 @@ import uk.ac.warwick.tabula.data.model.MemberUserType.{Emeritus, Other, Staff, S
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.sandbox.{MapResultSet, SandboxData}
 import uk.ac.warwick.tabula.scheduling.commands.imports._
-import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory, ImportRowTracker}
+import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.Features
 
@@ -319,14 +319,11 @@ object ProfileImporter extends Logging {
 
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
-	logger.error("before setting sceYearClause")
 	val sceYearClause =
 		if (features.includePastYears) {
-			logger.error("feature is true")
 			""
 		}
 		else {
-			logger.error("feature is not true")
 			"and sce.sce_ayrc in (:year)"
 		}
 
@@ -433,12 +430,12 @@ object ProfileImporter extends Logging {
 		compile()
 
 		override def mapRow(rs: ResultSet, rowNumber: Int)
-			= ImportStudentRowCommand(
-				member,
-				ssoUser,
-				rs,
-				importCommandFactory
-			)
+		= ImportStudentRowCommand(
+			member,
+			ssoUser,
+			rs,
+			importCommandFactory
+		)
 	}
 
 	val GetMembershipByUsercodeInformation = """

@@ -7,7 +7,6 @@ import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import uk.ac.warwick.tabula.data.model.Gender
 import uk.ac.warwick.tabula.data.model.MemberUserType
-import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportCommandFactorySetup
 
 class SandboxProfileImporterTest extends TestBase with ImportCommandFactorySetup {
