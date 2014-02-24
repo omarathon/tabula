@@ -154,14 +154,15 @@
 				</div>
 			</div>
 			<div class="control-group extensionComments">
-				<@form.label path="extensionItems[0].approvalComments"><strong>Comments</strong></@form.label>
+				<@form.label path="extensionItems[0].reviewerComments"><strong>Comments</strong></@form.label>
 				<div class="controls">
-					<@f.textarea path="extensionItems[0].approvalComments"/>
+					<@f.textarea path="extensionItems[0].reviewerComments"/>
 				</div>
 			</div>
 		</div>
-		<@f.hidden class="approveField" path="extensionItems[0].approved" />
-		<@f.hidden class="rejectField" path="extensionItems[0].rejected" />
+
+		<input type="hidden" name="action" class="action" />
+
 		<div class="modal-footer request-controls">
 			<input id="approveButton" type="submit" class="btn btn-success" value="Grant" />
 			<input id="rejectButton" type="submit" class="btn btn-danger" value="Reject" />

@@ -16,20 +16,20 @@ class ExtensionTest extends PersistenceTestBase {
     assignment.closeDate = new DateTime(2012, 7, 12, 12, 0)
 		assignment.openEnded = false
 
-    val extension = new Extension()
-    extension.universityId = "1170836"
-    extension.userId = "cuslaj"
-    extension.expiryDate = new DateTime(2012, 8, 12, 12, 0)
-    extension.reason = "My hands have turned to flippers. Like the ones that dolphins have. It makes writing and typing super hard. Pity me."
-    extension.approvalComments = "That sounds awful. Have an extra month. By then you should be able to write as well as any Cetacea."
-    extension.approved = true
-    extension.approvedOn = new DateTime(2012, 7, 22, 14, 42)
+		withFakeTime(new DateTime(2012, 7, 22, 14, 42)) {
+			val extension = new Extension()
+			extension.universityId = "1170836"
+			extension.userId = "cuslaj"
+			extension.expiryDate = new DateTime(2012, 8, 12, 12, 0)
+			extension.reason = "My hands have turned to flippers. Like the ones that dolphins have. It makes writing and typing super hard. Pity me."
+			extension.approve("That sounds awful. Have an extra month. By then you should be able to write as well as any Cetacea.")
 
-    assignment.extensions add extension
-    
+			assignment.extensions add extension
+		}
+
     val cuslaj = new User("cuslaj")
     cuslaj.setWarwickId("1170836")
-    
+
     val cuscao = new User("cuscao")
     cuscao.setWarwickId("1122334")
 
@@ -117,15 +117,15 @@ class ExtensionTest extends PersistenceTestBase {
 	  val extension = new Extension
 
 	  extension.isManual should be (true)
-	  extension.isAwaitingApproval should be (false)
+	  extension.awaitingReview should be (false)
 
 	  extension.requestedOn = DateTime.now
 
 	  extension.isManual should be (false)
-	  extension.isAwaitingApproval should be (true)
+	  extension.awaitingReview should be (true)
 
-	  extension.approved = true
+	  extension.approve()
 
-	  extension.isAwaitingApproval should be (false)
+	  extension.awaitingReview should be (false)
   }
 }

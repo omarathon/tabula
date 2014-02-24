@@ -19,7 +19,7 @@
 	</div>
 </#macro>
 
-<#macro relationship_section studentCourseDetails relationshipType meetings>
+<#macro relationship_section studentCourseDetails relationshipType meetings viewerRelationshipTypes >
 <section id="relationship-${relationshipType.id}" class="relationship-section clearfix">
 
 	<#if (RequestParameters.relationshipType!) == relationshipType.id>
@@ -120,7 +120,7 @@
 		</#if>
 	</#if>
 
-	<@meeting_macros.list studentCourseDetails meetings relationshipType />
+	<@meeting_macros.list studentCourseDetails meetings relationshipType viewerRelationshipTypes />
 </section>
 </#macro>
 

@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.data.model.notifications.{ExtensionRequestCreatedNot
 
 
 object ExtensionRequestCommand {
-	def apply (module: Module, assignment: Assignment, submitter: CurrentUser) = {
+	def apply (module: Module, assignment: Assignment, submitter: CurrentUser, action: String) = {
 		new ExtensionRequestCommandInternal(module, assignment, submitter) with
 			ComposableCommand[Extension] with
 			AutowiringRelationshipServiceComponent with
@@ -60,6 +60,7 @@ class ExtensionRequestCommandInternal(val module: Module, val assignment:Assignm
 		extension.reason = reason
 		extension.requestedOn = DateTime.now
 		extension.disabilityAdjustment = Option(Boolean.unbox(disabilityAdjustment)).getOrElse(false)
+
 
 		if (extension.attachments != null) {
 			// delete attachments that have been removed

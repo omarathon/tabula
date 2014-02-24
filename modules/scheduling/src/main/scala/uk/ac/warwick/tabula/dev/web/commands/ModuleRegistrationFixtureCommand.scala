@@ -32,7 +32,7 @@ class ModuleRegistrationFixtureCommand extends CommandInternal[Seq[ModuleRegistr
 				} yield {
 					val modReg = new ModuleRegistration(scd, module, cats, AcademicYear(2013), "A")
 					session.save(modReg)
-					scd.moduleRegistrations.add(modReg)
+					scd.addModuleRegistration(modReg)
 					session.save(scd)
 					session.flush
 

@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>61</version>
+	<version>62-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -1014,11 +1014,6 @@
 			<groupId>org.scala-lang</groupId>
 			<artifactId>scala-library</artifactId>
 			<version>${scala.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>github.com.ingoem</groupId>
-			<artifactId>scala-react_${scala.major.version}</artifactId>
-			<version>0.9</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jsuereth</groupId>

@@ -24,7 +24,7 @@ abstract class ExtensionRequestNotification extends ExtensionNotification {
 	def profileInfo = studentMember.flatMap(_.mostSignificantCourseDetails).map(scd => {
 		val relationships = studentRelationships.map(x => (
 			x.description,
-			relationshipService.findCurrentRelationships(x, scd.student)
+			relationshipService.findCurrentRelationships(x, scd)
 		)).filter{ case (relationshipType,relations) => relations.length != 0 }.toMap
 
 		Map(

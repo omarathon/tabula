@@ -1,6 +1,6 @@
-This email confirms that a submission for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name} has been received.
+This message confirms that a submission for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name} has been received.
 
-This email is sent to you as a manager of the module.
+This message is sent to you as a manager of the module.
 
 Submission date: ${submissionDate}
 Submission ID: ${submission.id}
@@ -23,6 +23,6 @@ All submissions for this assignment can be found here:
 
 
 
-To unsubscribe from these emails, go here and select "No alerts".
+To unsubscribe from these messages, go here and select "No alerts".
 
 <@url page='/admin/usersettings#submission-alerts'/>

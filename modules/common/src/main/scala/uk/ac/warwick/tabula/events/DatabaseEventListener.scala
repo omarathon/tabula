@@ -17,9 +17,9 @@ import java.io.FileInputStream
 import java.util.UUID
 import java.io.ObjectOutputStream
 import java.io.FileOutputStream
-import scala.react.Observing
+import uk.ac.warwick.tabula.Reactor
 
-class DatabaseEventListener extends EventListener with InitializingBean with Observing with Logging {
+class DatabaseEventListener extends EventListener with InitializingBean with Logging {
 
 	@Autowired var auditEventService: AuditEventService = _
 	@Autowired var maintenanceModeService: MaintenanceModeService = _
@@ -67,10 +67,9 @@ class DatabaseEventListener extends EventListener with InitializingBean with Obs
 			else throw new IllegalArgumentException("Audit directory " + auditDirectory + " is not a directory")
 		}
 		// listen for maintenance mode changes
-		observe(maintenanceModeService.changingState) { enabled =>
+		maintenanceModeService.changingState.observe { enabled =>
 			if (enabled) startLoggingToFile
 			else stopLoggingToFile
-			true
 		}
 	}
 

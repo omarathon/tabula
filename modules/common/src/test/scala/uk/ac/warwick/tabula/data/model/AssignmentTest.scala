@@ -3,7 +3,7 @@ import uk.ac.warwick.tabula.TestBase
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants._
 import org.joda.time.DateTimeConstants
-import uk.ac.warwick.tabula.data.model.forms.{FormFieldContext, TextField, Extension}
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, FormFieldContext, TextField, Extension}
 
 // scalastyle:off magic.number
 class AssignmentTest extends TestBase {
@@ -215,7 +215,7 @@ class AssignmentTest extends TestBase {
 
 		val extension = new Extension
 		extension.userId = "cuscav"
-		extension.approved = true
+		extension.approve()
 		extension.expiryDate = new DateTime(2013, DateTimeConstants.JANUARY, 31, 12, 0, 0, 0)
 
 		assignment.extensions.add(extension)
@@ -283,7 +283,7 @@ class AssignmentTest extends TestBase {
 		// Extended until 12pm Friday
 		val extension = new Extension
 		extension.userId = "cuscav"
-		extension.approved = true
+		extension.approve()
 		extension.expiryDate = new DateTime(2013, DateTimeConstants.FEBRUARY, 1, 12, 0, 0, 0)
 
 		assignment.extensions.add(extension)

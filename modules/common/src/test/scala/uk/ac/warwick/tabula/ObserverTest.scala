@@ -1,14 +1,15 @@
 package uk.ac.warwick.tabula
 
 import org.junit.Test
-import scala.react.Observing
-import scala.react.EventSource
+
 
 /**
  * This used to be a test for some hand-rolled observer classes,
  * but now it is just testing the scala.react library.
  */
 class ObserverTest extends TestBase {
+
+	import Reactor._
 	
 	class Service {
 		var changedState = EventSource[Boolean]
@@ -17,13 +18,13 @@ class ObserverTest extends TestBase {
 		}
 	}
 	
-	class ServiceObserver(service:Service) extends Observing {
+	class ServiceObserver(service:Service) {
 		var enabled = false
-		
-		val observerHandle = observe(service.changedState) { value =>
+
+		service.changedState.observe { value =>
 			enabled = value
-			true
 		}
+
 	}
 	
 	@Test def listening {
@@ -32,8 +33,10 @@ class ObserverTest extends TestBase {
 		
 		observer.enabled should be (false)
 		service updateState true
+
 		observer.enabled should be (true)
 		service updateState false
+
 		observer.enabled should be (false)
 		
 	}

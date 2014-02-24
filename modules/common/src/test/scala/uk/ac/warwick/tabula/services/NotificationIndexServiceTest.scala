@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.{NotificationPriority, HeronWarningNotification}
+import uk.ac.warwick.tabula.data.model.{Notification, NotificationPriority, HeronWarningNotification}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import org.apache.lucene.store.RAMDirectory
 import org.apache.lucene.index.Term
@@ -10,8 +10,8 @@ import org.apache.lucene.search.{Sort, SortField, TermQuery}
 
 import uk.ac.warwick.tabula.data.NotificationDao
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
+import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
-
 
 class NotificationIndexServiceTest extends TestBase with Mockito {
 
@@ -81,6 +81,13 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 
 		dates.size should be (50)
 		dates.head.toLong should be (recipientNotifications.map{_.notification.created}.max.getMillis)
+	}
+
+	@Test
+	def missingRecipient() {
+		val anonUser = new AnonymousUser()
+		val notification = Notification.init(new HeronWarningNotification, agent, group, group)
+		service.indexItems(Seq(new RecipientNotification(notification, anonUser)))
 	}
 
 	@Test

@@ -59,7 +59,7 @@ trait ExtensionFixture extends Mockito{
 	extension.expiryDate = new DateTime(2013, 8, 23, 12, 0)
 	extension.requestedExpiryDate = new DateTime(2013, 8, 23, 12, 0)
 	extension.reason = "My hands have turned to flippers. Like the ones that dolphins have. It makes writing and typing super hard. Pity me."
-	extension.approvalComments = "That sounds awful. Have an extra month. By then you should be able to write as well as any Cetacea."
+	extension.reviewerComments = "That sounds awful. Have an extra month. By then you should be able to write as well as any Cetacea."
 	extension.assignment = assignment
 	assignment.extensions add extension
 }

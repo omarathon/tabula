@@ -132,7 +132,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B] extends Generated
 @Entity
 abstract class NotificationWithTarget[A >: Null <: ToEntityReference, B >: Null <: AnyRef] extends Notification[A,B] {
 	@Access(value=AccessType.PROPERTY)
-	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[B]])
+	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[B]], fetch = FetchType.LAZY)
 	@BeanProperty
 	var target: EntityReference[B] = null
 }
