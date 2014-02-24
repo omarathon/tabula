@@ -28,7 +28,7 @@ class SmallGroupSetTest extends TestBase with Mockito{
     source.assessmentGroups =  JArrayList()
     source.format = SmallGroupFormat.Lab
     source.groups  = JArrayList(group)
-    source._membersGroup =  UserGroup.ofUniversityIds.tap(_.includeUsers = JArrayList("test user"))
+    source._membersGroup =  UserGroup.ofUniversityIds.tap(_.addUserId("test user"))
 
     source.membershipService = mock[AssignmentMembershipService]
     source.module = new Module

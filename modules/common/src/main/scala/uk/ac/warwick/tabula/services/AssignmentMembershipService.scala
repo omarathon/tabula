@@ -87,9 +87,7 @@ class AssignmentMembershipServiceImpl
 	def replaceMembers(template: UpstreamAssessmentGroup, universityIds: Seq[String]) {
 		if (debugEnabled) debugReplace(template, universityIds)
 		getUpstreamAssessmentGroup(template).map { group =>
-			val collection = group.members.staticIncludeUsers
-			collection.clear()
-			collection.addAll(universityIds.asJava)
+			group.members.knownType.staticUserIds = universityIds
 		} getOrElse {
 			logger.warn("No such assessment group found: " + template.toString)
 		}
@@ -214,11 +212,7 @@ trait AssignmentMembershipMethods extends Logging {
 	}
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean = {
-		if (others map {_.excludes contains user } getOrElse false) false
-		else if (others map { _.users contains user } getOrElse false) true
-		else upstream exists {
-			_.members.staticIncludeUsers contains user.getWarwickId //Yes, definitely Uni ID when checking SITS group
-		}
+		others.map { _.includesUser(user) }.getOrElse(false)
 	}
 
 	private def sameUserIdAs(user: User) = (other: Pair[String, User]) => { user.getUserId == other._2.getUserId }

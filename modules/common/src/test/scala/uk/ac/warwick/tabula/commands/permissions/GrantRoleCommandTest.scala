@@ -48,10 +48,10 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 				
 		val grantedPerm = cmd.applyInternal()
 		grantedPerm.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
-		grantedPerm.users.includeUsers.size() should be (2)
-		grantedPerm.users.includes("cuscav") should be (true)
-		grantedPerm.users.includes("cusebr") should be (true)
-		grantedPerm.users.includes("cuscao") should be (false)
+		grantedPerm.users.size should be (2)
+		grantedPerm.users.knownType.includesUserId("cuscav") should be (true)
+		grantedPerm.users.knownType.includesUserId("cusebr") should be (true)
+		grantedPerm.users.knownType.includesUserId("cuscao") should be (false)
 		grantedPerm.scope should be (dept)
 	}
 	
@@ -64,7 +64,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cusebr")
 		
 		val existing = GrantedRole(dept, DepartmentalAdministratorRoleDefinition)
-		existing.users.addUser("cuscao")
+		existing.users.knownType.addUserId("cuscao")
 		
 		permissionsService.getGrantedRole(dept, DepartmentalAdministratorRoleDefinition) returns (Some(existing))
 				
@@ -72,10 +72,10 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		(grantedPerm.eq(existing)) should be (true)
 		
 		grantedPerm.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
-		grantedPerm.users.includeUsers.size() should be (3)
-		grantedPerm.users.includes("cuscav") should be (true)
-		grantedPerm.users.includes("cusebr") should be (true)
-		grantedPerm.users.includes("cuscao") should be (true)
+		grantedPerm.users.size should be (3)
+		grantedPerm.users.knownType.includesUserId("cuscav") should be (true)
+		grantedPerm.users.knownType.includesUserId("cusebr") should be (true)
+		grantedPerm.users.knownType.includesUserId("cuscao") should be (true)
 		grantedPerm.scope should be (dept)
 	}
 	
@@ -125,7 +125,7 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		cmd.usercodes.add("cuscao")
 		
 		val existing = GrantedRole(dept, singlePermissionsRoleDefinition)
-		existing.users.addUser("cuscao")
+		existing.users.knownType.addUserId("cuscao")
 		
 		permissionsService.getGrantedRole(dept, singlePermissionsRoleDefinition) returns (Some(existing))
 		securityService.canDelegate(currentUser,Permissions.Department.ArrangeModules, dept) returns true

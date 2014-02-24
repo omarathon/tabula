@@ -104,7 +104,7 @@ trait SmallGroupFixture extends Mockito {
   def createUserGroup(userIds:Seq[String], identifierIsUniNumber:Boolean = true) = {
     val ug = if (identifierIsUniNumber) UserGroup.ofUniversityIds else UserGroup.ofUsercodes
     ug.userLookup = userLookup
-    ug.includeUsers = userIds.asJava
+    ug.includedUserIds = userIds
     ug
   }
 }
@@ -169,11 +169,11 @@ class SmallGroupBuilder(val template:SmallGroup = new SmallGroup){
     this
   }
   def withStudents(members:UserGroup):SmallGroupBuilder = {
-    template._studentsGroup = members
+    template.students = members
     this
   }
 	def withUserLookup(userLookup:UserLookupService)={
-		template._studentsGroup.userLookup = userLookup
+		template.students.asInstanceOf[UserGroup].userLookup = userLookup
 		this
 	}
   def withGroupName(s: String) = {

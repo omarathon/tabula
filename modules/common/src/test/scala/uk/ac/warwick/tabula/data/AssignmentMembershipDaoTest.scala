@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.data
 
-import uk.ac.warwick.tabula.PersistenceTestBase
-import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.{MockUserLookup, PersistenceTestBase, Fixtures, AcademicYear, MockGroupService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.AssessmentComponent
 import uk.ac.warwick.tabula.data.model.AssessmentType
@@ -9,9 +8,7 @@ import uk.ac.warwick.tabula.data.model.AssessmentGroup
 import uk.ac.warwick.tabula.services.AssignmentMembershipServiceImpl
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
-import uk.ac.warwick.tabula.AcademicYear
 import org.junit.Before
-import uk.ac.warwick.tabula.MockGroupService
 
 class AssignmentMembershipDaoTest extends PersistenceTestBase {
 
@@ -39,7 +36,7 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 		module2.assignments.add(assignment4)
 
 		// manually enrolled on assignment 1
-		assignment1.members.addUser("cuscav")
+		assignment1.members.knownType.addUserId("cuscav")
 
 		// assessment component enrolment for assignment 2
 		val assignment2AC = new AssessmentComponent
@@ -61,7 +58,7 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 		upstreamGroup2.occurrence = "A"
 		upstreamGroup2.assessmentGroup = "A"
 		upstreamGroup2.academicYear = new AcademicYear(2010)
-		upstreamGroup2.members.staticIncludeUsers.addAll(JList("0672089"))
+		upstreamGroup2.members.knownType.staticUserIds = Seq("0672089")
 
 		assignment2.assessmentGroups.add(assessmentGroup2)
 		assignment2.academicYear = new AcademicYear(2010)
@@ -86,11 +83,11 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 		upstreamGroup3.occurrence = "A"
 		upstreamGroup3.assessmentGroup = "A"
 		upstreamGroup3.academicYear = new AcademicYear(2010)
-		upstreamGroup3.members.staticIncludeUsers.addAll(JList("0672089"))
+		upstreamGroup3.members.knownType.staticUserIds = Seq("0672089")
 
 		assignment3.assessmentGroups.add(assessmentGroup3)
 		assignment3.academicYear = new AcademicYear(2010)
-		assignment3.members.addUser("cuscav")
+		assignment3.members.knownType.addUserId("cuscav")
 
 		// assessment component enrolment for assignment 4 but manually excluded
 		val assessmentGroup4 = new AssessmentGroup
@@ -101,13 +98,22 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 
 		assignment4.assessmentGroups.add(assessmentGroup4)
 		assignment4.academicYear = new AcademicYear(2010)
-		assignment4.members.excludeUser("cuscav")
+		assignment4.members.knownType.excludeUserId("cuscav")
+
+		val user = new User("cuscav")
+		user.setWarwickId("0672089")
+
+		val userLookup = new MockUserLookup
+		userLookup.registerUserObjects(user)
+
+		assignmentMembershipService.assignmentManualMembershipHelper.userlookup = userLookup
 	}
 
 	@Before def setup() {
 		dao.sessionFactory = sessionFactory
 		assignmentMembershipService.assignmentManualMembershipHelper.sessionFactory = sessionFactory
 		assignmentMembershipService.assignmentManualMembershipHelper.groupService = new MockGroupService
+		assignmentMembershipService.assignmentManualMembershipHelper.cache.clear()
 	}
 
 	@Test def getEnrolledAssignments() {
@@ -122,9 +128,6 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 				session.save(dept)
 				session.flush
 
-				val user = new User("cuscav")
-				user.setWarwickId("0672089")
-
 				assignmentMembershipService.getEnrolledAssignments(user).toSet should be (Set(assignment1, assignment2, assignment3))
 			}
 		}
@@ -135,7 +138,7 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 		transactional { tx =>
 			new Fixture {
 				// Add user again
-				upstreamGroup3.members.staticIncludeUsers.addAll(JList("0672089"))
+				upstreamGroup3.members.knownType.staticUserIds = Seq("0672089", "0672089")
 
 				session.save(assignment2AC)
 				session.save(upstreamGroup2)
@@ -145,9 +148,6 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 				session.flush
 				session.save(dept)
 				session.flush
-
-				val user = new User("cuscav")
-				user.setWarwickId("0672089")
 
 				assignmentMembershipService.getEnrolledAssignments(user).toSet should be (Set(assignment1, assignment2, assignment3))
 			}

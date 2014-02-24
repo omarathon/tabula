@@ -141,7 +141,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val dept = new Department
 		
 		val set1 = new SmallGroupSet()
-		set1._membersGroup.includeUsers = Seq(student1.getWarwickId,student2.getWarwickId).asJava
+		set1._membersGroup.includedUserIds = Seq(student1.getWarwickId,student2.getWarwickId)
 		set1._membersGroup.userLookup = userLookup
 		
 		set1.membershipService = membershipService
@@ -150,7 +150,7 @@ class OpenSmallGroupSetCommandTest extends TestBase with Mockito {
 		val s1 = set1.members.users
 
 		val set2 = new SmallGroupSet()
-		set2._membersGroup.includeUsers = Seq(student2.getWarwickId,student3.getWarwickId).asJava
+		set2._membersGroup.includedUserIds = Seq(student2.getWarwickId,student3.getWarwickId)
 		set2._membersGroup.userLookup = userLookup
 		
 		set2.membershipService = membershipService

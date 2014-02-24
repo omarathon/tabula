@@ -29,7 +29,7 @@ class UserGroupMembershipHelperTest extends AppContextTestBase {
 			event.startTime = LocalTime.now()
 			event.endTime = LocalTime.now()
 			event.day = DayOfWeek.Thursday
-			for (tutor <- tutors) event.tutors.addUser(tutor)
+			for (tutor <- tutors) event.tutors.addUserId(tutor)
 			event.group = group
       group.events.add(event)
 			event

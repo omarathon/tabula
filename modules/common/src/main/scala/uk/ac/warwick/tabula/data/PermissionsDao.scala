@@ -128,15 +128,15 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 				from """ + GrantedRole.className[A] + """ r
 				where 
 					(
-						r.users.universityIds = false and 
-						((:userId in elements(r.users.staticIncludeUsers)
-						or :userId in elements(r.users.includeUsers))
-						and :userId not in elements(r.users.excludeUsers))
+						r._users.universityIds = false and
+						((:userId in elements(r._users.staticIncludeUsers)
+						or :userId in elements(r._users.includeUsers))
+						and :userId not in elements(r._users.excludeUsers))
 					) or (
-						r.users.universityIds = true and 
-						((:universityId in elements(r.users.staticIncludeUsers)
-						or :universityId in elements(r.users.includeUsers))
-						and :universityId not in elements(r.users.excludeUsers))
+						r._users.universityIds = true and
+						((:universityId in elements(r._users.staticIncludeUsers)
+						or :universityId in elements(r._users.includeUsers))
+						and :universityId not in elements(r._users.excludeUsers))
 					)
 		""")
 			.setString("universityId", user.getWarwickId())
@@ -164,15 +164,15 @@ class PermissionsDaoImpl extends PermissionsDao with Daoisms {
 				from """ + GrantedPermission.className[A] + """ r
 				where 
 					(
-						r.users.universityIds = false and 
-						((:userId in elements(r.users.staticIncludeUsers)
-						or :userId in elements(r.users.includeUsers))
-						and :userId not in elements(r.users.excludeUsers))
+						r._users.universityIds = false and
+						((:userId in elements(r._users.staticIncludeUsers)
+						or :userId in elements(r._users.includeUsers))
+						and :userId not in elements(r._users.excludeUsers))
 					) or (
-						r.users.universityIds = true and 
-						((:universityId in elements(r.users.staticIncludeUsers)
-						or :universityId in elements(r.users.includeUsers))
-						and :universityId not in elements(r.users.excludeUsers))
+						r._users.universityIds = true and
+						((:universityId in elements(r._users.staticIncludeUsers)
+						or :universityId in elements(r._users.includeUsers))
+						and :universityId not in elements(r._users.excludeUsers))
 					)
 		""")
 			.setString("universityId", user.getWarwickId())

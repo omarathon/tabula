@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 import javax.validation.constraints.NotNull
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, SmallGroupService, SmallGroupMembershipHelpers}
 
 object SmallGroup {
 	final val NotDeletedFilter = "notDeleted"
@@ -50,6 +51,9 @@ class SmallGroup
 	
 	@transient var permissionsService = Wire[PermissionsService]
 
+	// FIXME this isn't really optional, but testing is a pain unless it's made so
+	@transient var smallGroupService = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
+
 	def this(_set: SmallGroupSet) {
 		this()
 		this.groupSet = _set
@@ -76,8 +80,12 @@ class SmallGroup
 	 */
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "studentsgroup_id")
-	var _studentsGroup: UserGroup = UserGroup.ofUniversityIds
-  def students: UnspecifiedTypeUserGroup = _studentsGroup
+	private var _studentsGroup: UserGroup = UserGroup.ofUniversityIds
+  def students: UnspecifiedTypeUserGroup = smallGroupService match {
+		case Some(smallGroupService) => new UserGroupCacheManager(_studentsGroup, smallGroupService.studentGroupHelper)
+		case _ => _studentsGroup
+	}
+	def students_=(group: UserGroup) { _studentsGroup = group }
 
 	def maxGroupSize = getIntSetting(Settings.MaxGroupSize)
 	def maxGroupSize_=(defaultSize:Int) = settings += (Settings.MaxGroupSize -> defaultSize)

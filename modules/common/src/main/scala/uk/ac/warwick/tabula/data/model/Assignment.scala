@@ -454,13 +454,13 @@ class Assignment
 
 	def isFirstMarker(user: User): Boolean = {
 		if (markingWorkflow != null)
-			markingWorkflow.firstMarkers.includes(user.getUserId)
+			markingWorkflow.firstMarkers.includesUser(user)
 		else false
 	}
 
 	def isSecondMarker(user: User): Boolean = {
 		if (markingWorkflow != null)
-			markingWorkflow.secondMarkers.includes(user.getUserId)
+			markingWorkflow.secondMarkers.includesUser(user)
 		else false
 	}
 

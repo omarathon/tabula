@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UserGroup, StaffMember}
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.data.model.permissions.CustomRoleDefinition
@@ -28,7 +28,6 @@ import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.tabula.helpers.RequestLevelCaching
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
 import uk.ac.warwick.tabula.services.UserGroupMembershipHelper
-import uk.ac.warwick.tabula.data.model.StaffMember
 import uk.ac.warwick.util.cache.Cache
 
 trait PermissionsService {
@@ -52,7 +51,7 @@ trait PermissionsService {
 	
 	def getAllPermissionDefinitionsFor[A <: PermissionsTarget: ClassTag](user: CurrentUser, targetPermission: Permission): Set[A]
 	
-	def ensureUserGroupFor[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): UserGroup
+	def ensureUserGroupFor[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): UnspecifiedTypeUserGroup
 
 	def getCustomRoleDefinitionsBasedOn(roleDefinition:BuiltInRoleDefinition):Seq[CustomRoleDefinition]
 }
@@ -138,12 +137,12 @@ abstract class AbstractPermissionsService extends PermissionsService {
 		else Stream.empty
 	
 	def getGrantedRolesFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedRole[_]] = ensureFoundUserSeq(user)(transactional(readOnly = true) {
-		permissionsDao.getGrantedRolesFor(scope) filter { _.users.includes(user.apparentId) }
+		permissionsDao.getGrantedRolesFor(scope) filter { _.users.includesUser(user.apparentUser) }
 	})
 	
 	def getGrantedPermissionsFor(user: CurrentUser, scope: PermissionsTarget): Seq[GrantedPermission[_]] =
 		ensureFoundUserSeq(user)(transactional(readOnly = true) {
-			permissionsDao.getGrantedPermissionsFor(scope).toStream filter { _.users.includes(user.apparentId) }
+			permissionsDao.getGrantedPermissionsFor(scope).toStream filter { _.users.includesUser(user.apparentUser) }
 		}
 	)
 	
@@ -163,7 +162,7 @@ abstract class AbstractPermissionsService extends PermissionsService {
 				++ (GrantedRolesForGroupCache.get((groupNames, classTag[A])).asScala)
 			).toStream
 				// For sanity's sake, filter by the users including the user
-				.filter { _.users.includes(user.apparentId) }
+				.filter { _.users.includesUser(user.apparentUser) }
 		}
 	)
 	
@@ -179,7 +178,7 @@ abstract class AbstractPermissionsService extends PermissionsService {
 				++ (GrantedPermissionsForGroupCache.get((groupNames, classTag[A])).asScala )
 			).toStream
 				// For sanity's sake, filter by the users including the user
-				.filter { _.users.includes(user.apparentId) }
+				.filter { _.users.includesUser(user.apparentUser) }
 		}
 	)
 	
@@ -197,7 +196,7 @@ abstract class AbstractPermissionsService extends PermissionsService {
 		Set() ++ scopesWithGrantedRole ++ scopesWithGrantedPermission
 	}
 	
-	def ensureUserGroupFor[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): UserGroup = transactional() {
+	def ensureUserGroupFor[A <: PermissionsTarget: ClassTag](scope: A, roleDefinition: RoleDefinition): UnspecifiedTypeUserGroup = transactional() {
 		getGrantedRole(scope, roleDefinition) match {
 			case Some(role) => role.users
 			case _ => {

@@ -9,6 +9,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.MockUserLookup
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.UserGroup
 
 class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 	
@@ -68,8 +69,8 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		set.groups.add(group2)
 		group1.groupSet = set
 		group2.groupSet = set
-		group1._studentsGroup.userLookup = userLookup
-		group2._studentsGroup.userLookup = userLookup
+		group1.students.asInstanceOf[UserGroup].userLookup = userLookup
+		group2.students.asInstanceOf[UserGroup].userLookup = userLookup
 		
 		set.members.add(user1)
 		set.members.add(user2)
@@ -103,8 +104,8 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		there was one(service).saveOrUpdate(group1)
 		there was one(service).saveOrUpdate(group2)
 		
-		group1._studentsGroup.includeUsers should be (JArrayList("0200202", "0672088"))
-		group2._studentsGroup.includeUsers should be (JArrayList("8888888", "0672089"))
+		group1.students.asInstanceOf[UserGroup].includedUserIds should be (Seq("0200202", "0672088"))
+		group2.students.asInstanceOf[UserGroup].includedUserIds should be (Seq("8888888", "0672089"))
 	}
 
 }

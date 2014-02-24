@@ -163,7 +163,7 @@ trait SmallGroupMembershipHelpersImpl extends SmallGroupMembershipHelpers {
 	val eventTutorsHelper = new UserGroupMembershipHelper[SmallGroupEvent]("tutors")
 	val groupTutorsHelper = new UserGroupMembershipHelper[SmallGroup]("events.tutors")
 
-	// Don't use this, it's misleading - it won't use linked assessment components
+	// This won't use linked assessment components, only manual membership
 	val groupSetManualMembersHelper = new UserGroupMembershipHelper[SmallGroupSet]("_membersGroup")
 
 	val studentGroupHelper = new UserGroupMembershipHelper[SmallGroup]("_studentsGroup")

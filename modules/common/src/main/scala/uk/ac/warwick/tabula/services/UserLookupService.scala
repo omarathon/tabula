@@ -117,7 +117,11 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 
 	@PreDestroy
 	def shutdownCache() {
-		UserByWarwickIdCache.shutdown()
+		try {
+			UserByWarwickIdCache.shutdown()
+		} catch {
+			case _: Throwable =>
+		}
 	}
 }
 

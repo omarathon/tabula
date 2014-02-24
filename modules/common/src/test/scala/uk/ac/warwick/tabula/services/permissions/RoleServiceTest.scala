@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.roles.DepartmentalAdministrator
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.roles.UniversityMemberRole
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{SmallGroupService, ProfileService}
 import uk.ac.warwick.tabula.roles.DepartmentalAdministrator
 
 class RoleServiceTest extends TestBase with Mockito {
@@ -177,6 +177,10 @@ class RoleServiceTest extends TestBase with Mockito {
 
 		val profileService = mock[ProfileService]
 		member.profileService = profileService
+
+		val smallGroupService = mock[SmallGroupService]
+		smallGroupService.findSmallGroupsByStudent(member.asSsoUser) returns (Nil)
+		member.smallGroupService = smallGroupService
 
 		val provider1 = mock[RoleProvider]
 		val provider2 = mock[RoleProvider]

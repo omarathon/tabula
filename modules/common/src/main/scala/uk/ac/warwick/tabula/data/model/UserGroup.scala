@@ -1,9 +1,6 @@
-package uk.ac.warwick.tabula.data.model;
+package uk.ac.warwick.tabula.data.model
 
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Configurable
 import javax.persistence._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.UserLookupService
@@ -39,7 +36,7 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 	def this() { this(false) }
 
 	@transient var userLookup = Wire.auto[UserLookupService]
-	def groupService = userLookup.getGroupService
+	private def groupService = userLookup.getGroupService
 
 	var baseWebgroup: String = _
 
@@ -48,71 +45,85 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupInclude", joinColumns = Array(
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
-	var includeUsers: JList[String] = JArrayList()
+	private val includeUsers: JList[String] = JArrayList()
 
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupStatic", joinColumns = Array(
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
-	var staticIncludeUsers: JList[String] = JArrayList()
+	private val staticIncludeUsers: JList[String] = JArrayList()
 
 	@ElementCollection @Column(name = "usercode")
 	@JoinTable(name = "UserGroupExclude", joinColumns = Array(
 		new JoinColumn(name = "group_id", referencedColumnName = "id")))
-	var excludeUsers: JList[String] = JArrayList()
+	private val excludeUsers: JList[String] = JArrayList()
+
+	def includedUserIds: Seq[String] = includeUsers.asScala
+	def includedUserIds_=(userIds: Seq[String]) {
+		includeUsers.clear()
+		includeUsers.addAll(userIds.asJava)
+	}
+
+	def staticUserIds: Seq[String] = staticIncludeUsers.asScala
+	def staticUserIds_=(userIds: Seq[String]) {
+		staticIncludeUsers.clear()
+		staticIncludeUsers.addAll(userIds.asJava)
+	}
+
+	def excludedUserIds: Seq[String] = excludeUsers.asScala
+	def excludedUserIds_=(userIds: Seq[String]) {
+		excludeUsers.clear()
+		excludeUsers.addAll(userIds.asJava)
+	}
 
 	def add(user:User) = {
-		addUser(getIdFromUser(user))
+		addUserId(getIdFromUser(user))
 	}
-	def addUser(user: String) = {
+	def addUserId(user: String) {
 		if (!includeUsers.contains(user) && user.hasText) {
 			includeUsers.add(user)
-		} else false
+		}
 	}
-	def removeUser(user: String) = includeUsers.remove(user)
+	def removeUserId(user: String) = includeUsers.remove(user)
 
 	def remove(user:User) = {
-		removeUser(getIdFromUser(user))
+		removeUserId(getIdFromUser(user))
 	}
 
-	def excludeUser(user: String) = {
+	def excludeUserId(user: String) {
 		if (!excludeUsers.contains(user) && user.hasText) {
 			excludeUsers.add(user)
-		} else false
+		}
 	}
 	def exclude(user:User)={
-		excludeUser(getIdFromUser(user))
+		excludeUserId(getIdFromUser(user))
 	}
-	def unexcludeUser(user: String) = excludeUsers.remove(user)
+	def unexcludeUserId(user: String) = excludeUsers.remove(user)
   def unexclude(user:User)={
-		unexcludeUser(getIdFromUser(user))
+		unexcludeUserId(getIdFromUser(user))
 	}
 
 	/*
 	 * Could implement as `members.contains(user)`
 	 * but this is more efficient
 	 */
-	def includes(user: String) =
+	def includesUserId(user: String) =
 		!(excludeUsers contains user) &&
 			(
 				(includeUsers contains user) ||
 				(staticIncludeUsers contains user) ||
 				(baseWebgroup != null && groupService.isUserInGroup(user, baseWebgroup)))
 
-	def includesUser(user:User) = {
-		if (universityIds) includes(user.getWarwickId)
-		else includes(user.getUserId)
-	}
-	def excludesUser(user:User) = {
-		if (universityIds) excludeUsers.contains(user.getWarwickId)
-		else excludeUsers.contains(user.getUserId)
-	}
+	def excludesUserId(user: String) = excludeUsers contains user
+
+	def includesUser(user:User) = includesUserId(getIdFromUser(user))
+	def excludesUser(user:User) = excludesUserId(getIdFromUser(user))
+
 	def isEmpty = members.isEmpty
 	def size = members.size
 
-	def members: Seq[String] =
-		(includeUsers.toList ++ staticIncludeUsers ++ webgroupMembers) filterNot excludeUsers.contains
+	def members: Seq[String] = allIncludedIds diff allExcludedIds
 		
-	def allIncludedIds: Seq[String] = (includeUsers.asScala.toSeq ++ staticIncludeUsers.asScala ++ webgroupMembers)
+	def allIncludedIds: Seq[String] = (includeUsers.asScala.toSeq ++ staticIncludeUsers.asScala ++ webgroupMembers).distinct
 	def allExcludedIds: Seq[String] = excludeUsers.asScala.toSeq
 
 	private def getIdFromUser(user:User):String = {
@@ -129,9 +140,9 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 
 	def users: Seq[User] = getUsersFromIds(members)
 
-	def excludes: Seq[User] = getUsersFromIds(excludeUsers)
+	def excludes: Seq[User] = getUsersFromIds(excludeUsers.asScala)
 
-	def webgroupMembers: List[String] = baseWebgroup match {
+	private def webgroupMembers: List[String] = baseWebgroup match {
 		case webgroup: String => groupService.getUserCodesInGroup(webgroup).asScala.toList
 		case _ => Nil
 	}
@@ -196,7 +207,7 @@ trait UnspecifiedTypeUserGroup {
 	 * @return The explicitly excluded users
 	 */
 	def excludes: Seq[User]
-	def add(User:User)
+	def add(user:User)
 	def remove(user:User)
 	def exclude(user:User)
 	def unexclude(user:User)
@@ -204,10 +215,14 @@ trait UnspecifiedTypeUserGroup {
 	def isEmpty:Boolean
   def includesUser(user:User):Boolean
   def excludesUser(user:User):Boolean
+
 	/**
 	 * @return true if the other.users() would return the same values as this.users(), else false
 	 */
 	def hasSameMembersAs(other:UnspecifiedTypeUserGroup): Boolean
+
+	def copyFrom(otherGroup: UnspecifiedTypeUserGroup): Unit
+	def duplicate(): UnspecifiedTypeUserGroup
 	
 	val universityIds: Boolean
 	def knownType: KnownTypeUserGroup
@@ -216,4 +231,22 @@ trait UnspecifiedTypeUserGroup {
 trait KnownTypeUserGroup extends UnspecifiedTypeUserGroup {
 	def allIncludedIds: Seq[String]
 	def allExcludedIds: Seq[String]
+	def members: Seq[String]
+
+	def addUserId(userId: String)
+	def removeUserId(userId: String)
+	def excludeUserId(userId: String)
+	def unexcludeUserId(userId: String)
+
+	def staticUserIds: Seq[String]
+	def staticUserIds_=(userIds: Seq[String])
+
+	def includedUserIds: Seq[String]
+	def includedUserIds_=(userIds: Seq[String])
+
+	def excludedUserIds: Seq[String]
+	def excludedUserIds_=(userIds: Seq[String])
+
+	def includesUserId(userId: String): Boolean
+	def excludesUserId(userId: String): Boolean
 }

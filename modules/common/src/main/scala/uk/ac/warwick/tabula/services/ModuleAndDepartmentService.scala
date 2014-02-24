@@ -118,37 +118,37 @@ class ModuleAndDepartmentService extends Logging {
 
 	def addOwner(dept: Department, owner: String) = transactional() {
 		val role = getRole(dept, DepartmentalAdministratorRoleDefinition)
-		role.users.addUser(owner)
+		role.users.knownType.addUserId(owner)
 		permissionsService.saveOrUpdate(role)
 	}
 
 	def removeOwner(dept: Department, owner: String) = transactional() {
 		val role = getRole(dept, DepartmentalAdministratorRoleDefinition)
-		role.users.removeUser(owner)
+		role.users.knownType.removeUserId(owner)
 		permissionsService.saveOrUpdate(role)
 	}
 
 	def addModuleManager(module: Module, owner: String) = transactional() {
 		val role = getRole(module, ModuleManagerRoleDefinition)
-		role.users.addUser(owner)
+		role.users.knownType.addUserId(owner)
 		permissionsService.saveOrUpdate(role)
 	}
 
 	def removeModuleManager(module: Module, owner: String) = transactional() {
 		val role = getRole(module, ModuleManagerRoleDefinition)
-		role.users.removeUser(owner)
+		role.users.knownType.removeUserId(owner)
 		permissionsService.saveOrUpdate(role)
 	}
 
 	def addRouteManager(route: Route, owner: String) = transactional() {
 		val role = getRole(route, RouteManagerRoleDefinition)
-		role.users.addUser(owner)
+		role.users.knownType.addUserId(owner)
 		permissionsService.saveOrUpdate(role)
 	}
 
 	def removeRouteManager(route: Route, owner: String) = transactional() {
 		val role = getRole(route, RouteManagerRoleDefinition)
-		role.users.removeUser(owner)
+		role.users.knownType.removeUserId(owner)
 		permissionsService.saveOrUpdate(role)
 	}
 

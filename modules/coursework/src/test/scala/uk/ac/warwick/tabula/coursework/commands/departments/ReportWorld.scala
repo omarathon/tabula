@@ -70,7 +70,7 @@ trait ReportWorld extends TestBase with Mockito {
 	var assignmentMembershipService = mock[AssignmentMembershipService]
 	assignmentMembershipService.determineMembershipUsers(any[Assignment]) answers { assignmentObj =>
 		val assignment = assignmentObj.asInstanceOf[Assignment]
-		val studentIds = assignment.members.includeUsers
+		val studentIds = assignment.members.includedUserIds
 		val users = studentIds.map{userId =>
 			val userOne = new User(userId)
 			userOne.setWarwickId(userId)
@@ -186,7 +186,7 @@ trait ReportWorld extends TestBase with Mockito {
 
 	def makeUserGroup(users: Seq[String]): UserGroup = {
 		val ug = UserGroup.ofUsercodes
-		ug.includeUsers = users
+		ug.includedUserIds = users
 		ug
 	}
 }

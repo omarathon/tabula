@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.{CurrentUser, MockUserLookup, TestBase, Mockito}
 import uk.ac.warwick.tabula.services.{AssignmentMembershipService, ProfileServiceComponent, ProfileService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup}
+import uk.ac.warwick.tabula.data.model.UserGroup
 
 class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 
@@ -59,7 +60,7 @@ class ListGroupUnallocatedStudentsCommandTest extends TestBase with Mockito {
 		  	group.id = "abcdefgh" + index
 				set.groups.add(group)
 				group.groupSet = set
-				group._studentsGroup.userLookup = userLookup
+				group.students.asInstanceOf[UserGroup].userLookup = userLookup
 		}
 
 		val student1 = Fixtures.student(user1.getWarwickId, user1.getUserId, department)

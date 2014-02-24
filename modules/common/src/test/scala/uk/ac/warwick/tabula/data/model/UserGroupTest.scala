@@ -14,9 +14,10 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 			var group = UserGroup.ofUsercodes
 			
 			// users that can't be changed (i.e. as imported from upstream)
-			group.staticIncludeUsers.addAll(Seq( "exoman", "eggdog" ))
+			group.staticUserIds = Seq( "exoman", "eggdog" )
 			// users added manually
-			group.includeUsers.addAll(Seq( "superhat", "menace" ))
+			group.addUserId("superhat")
+			group.addUserId("menace")
 			
 			session.saveOrUpdate(group)
 			session.flush
@@ -24,18 +25,18 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 			
 			group = session.get(classOf[UserGroup], group.id).asInstanceOf[UserGroup]
 			
-			group.staticIncludeUsers.size should be (2)
-			group.staticIncludeUsers should (contain ("exoman") and contain ("eggdog"))
+			group.staticUserIds.size should be (2)
+			group.staticUserIds should (contain ("exoman") and contain ("eggdog"))
 			
-			group.includeUsers.size should be (2)
-			group.includeUsers should (contain ("superhat") and contain ("menace"))
+			group.includedUserIds.size should be (2)
+			group.includedUserIds should (contain ("superhat") and contain ("menace"))
 			
-			group.excludeUser("eggdog") // poor eggdog.
-			group.includes("whoareyou") should be (false)
-			group.includes("exoman") should be (true)
-			group.includes("eggdog") should be (false)
-			group.includes("superhat") should be (true)
-			group.includes("menace") should be (true)
+			group.excludeUserId("eggdog") // poor eggdog.
+			group.includesUserId("whoareyou") should be (false)
+			group.includesUserId("exoman") should be (true)
+			group.includesUserId("eggdog") should be (false)
+			group.includesUserId("superhat") should be (true)
+			group.includesUserId("menace") should be (true)
 			
 			/* check that members works and is consistent.
 			 * At time of writing, staticIncludeUsers would get
@@ -53,10 +54,10 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 		val group = UserGroup.ofUsercodes
 		group.userLookup = userLookup
 		
-		group.addUser("cuscav")
-		group.addUser("curef")
-		group.excludeUser("cusmab") // we don't like Steve
-		group.staticIncludeUsers.add("sb_systemtest")
+		group.addUserId("cuscav")
+		group.addUserId("curef")
+		group.excludeUserId("cusmab") // we don't like Steve
+		group.staticUserIds = Seq("sb_systemtest")
 		group.baseWebgroup = "in-elab"
 			
 		val webgroup = new GroupImpl
@@ -64,15 +65,15 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 		
 		userLookup.groupService.groupMap += ("in-elab" -> webgroup)
 			
-		group.members should be (Seq("cuscav", "curef", "sb_systemtest", "cuscav", "cusebr"))
+		group.members should be (Seq("cuscav", "curef", "sb_systemtest", "cusebr"))
 	}
 	
 	@Test def copy {
 		val group = UserGroup.ofUsercodes
-		group.addUser("cuscav")
-		group.addUser("curef")
-		group.excludeUser("cusmab") // we don't like Steve
-		group.staticIncludeUsers.add("sb_systemtest")
+		group.addUserId("cuscav")
+		group.addUserId("curef")
+		group.excludeUserId("cusmab") // we don't like Steve
+		group.staticUserIds = Seq("sb_systemtest")
 		group.baseWebgroup = "in-elab"
 			
 		val group2 = UserGroup.ofUsercodes
@@ -80,9 +81,9 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 		
 		group.eq(group2) should be (false)
 		
-		group2.includeUsers.asScala.toSeq should be (group.includeUsers.asScala.toSeq)
-		group2.excludeUsers.asScala.toSeq should be (group.excludeUsers.asScala.toSeq)
-		group2.staticIncludeUsers.asScala.toSeq should be (group.staticIncludeUsers.asScala.toSeq)
+		group2.includedUserIds should be (group.includedUserIds)
+		group2.excludedUserIds should be (group.excludedUserIds)
+		group2.staticUserIds should be (group.staticUserIds)
 		group2.baseWebgroup should be (group.baseWebgroup)
 		group2.universityIds should be (group.universityIds)
 	}
@@ -98,7 +99,7 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 	def canGetUsersWhenHoldingUserIds() {
 		val test = new User("test")
 		val group = UserGroup.ofUsercodes
-		group.addUser("test")
+		group.addUserId("test")
 		group.userLookup = mock[UserLookupService]
 		group.userLookup.getUsersByUserIds(JArrayList("test")) returns JHashMap("test" -> test)
 
@@ -110,7 +111,7 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 	def canGetUsersWhenHoldingWarwickIds() {
 		val test = new User("test")
 		val group = UserGroup.ofUniversityIds
-		group.addUser("test")
+		group.addUserId("test")
 		group.userLookup = mock[UserLookupService]
 		group.userLookup.getUsersByWarwickUniIds(Seq("test")) returns Map("test" -> test)
 
@@ -122,7 +123,7 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 	def canGetExcludedUsersWhenHoldingUserIds() {
 		val test = new User("test")
 		val group = UserGroup.ofUsercodes
-		group.excludeUser("test")
+		group.excludeUserId("test")
 		group.userLookup = mock[UserLookupService]
 		group.userLookup.getUsersByUserIds(JArrayList("test")) returns JHashMap("test" -> test)
 
@@ -134,7 +135,7 @@ class UserGroupTest extends PersistenceTestBase  with Mockito{
 	def canGetExcludedUsersWhenHoldingWarwickIds() {
 		val test = new User("test")
 		val group = UserGroup.ofUniversityIds
-		group.excludeUser("test")
+		group.excludeUserId("test")
 		group.userLookup = mock[UserLookupService]
 		group.userLookup.getUsersByWarwickUniIds(Seq("test")) returns Map("test" -> test)
 

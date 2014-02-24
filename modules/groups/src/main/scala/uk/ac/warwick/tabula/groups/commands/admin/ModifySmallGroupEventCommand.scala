@@ -80,7 +80,7 @@ abstract class ModifySmallGroupEventCommand extends PromisingCommand[SmallGroupE
 		startTime = event.startTime
 		endTime = event.endTime
 		
-		if (event.tutors != null) tutors.addAll(event.tutors.includeUsers)
+		if (event.tutors != null) tutors.addAll(event.tutors.allIncludedIds.asJava)
 	}
 	
 	def copyTo(event: SmallGroupEvent) {
@@ -92,7 +92,7 @@ abstract class ModifySmallGroupEventCommand extends PromisingCommand[SmallGroupE
 		event.endTime = endTime
 		
 		if (event.tutors == null) event.tutors = UserGroup.ofUsercodes
-		event.tutors.includeUsers = tutors
+		event.tutors.includedUserIds = tutors.asScala
 	}
 	
 	override def onBind(result: BindingResult) {

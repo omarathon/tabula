@@ -36,7 +36,7 @@ class GrantRoleCommand[A <: PermissionsTarget : ClassTag](val scope: A) extends 
 	def applyInternal() = transactional() {
 		val role = grantedRole getOrElse GrantedRole(scope, roleDefinition)
 
-		for (user <- usercodes) role.users.addUser(user)
+		usercodes.foreach(role.users.knownType.addUserId)
 
 		permissionsService.saveOrUpdate(role)
 
@@ -49,7 +49,7 @@ class GrantRoleCommand[A <: PermissionsTarget : ClassTag](val scope: A) extends 
 		} else {
 			grantedRole.map { _.users }.foreach { users =>
 				val usercodeValidator = new UsercodeListValidator(usercodes, "usercodes") {
-					override def alreadyHasCode = usercodes.exists { users.includes(_) }
+					override def alreadyHasCode = usercodes.exists { users.knownType.includesUserId }
 				}
 				
 				usercodeValidator.validate(errors)
