@@ -24,7 +24,7 @@ class ActivityStreamController extends BaseController {
 			user: CurrentUser,
 			@RequestParam(defaultValue="20") max: Int,
 			@RequestParam types: JList[String],
-			@RequestParam(defaultValue="1.0") minPriority: Double, // minPriority of one means we show all by default
+			@RequestParam(defaultValue="0") minPriority: Double, // minPriority of zero means we show all by default
 			@RequestParam(required=false) lastDoc: JInteger,
 			@RequestParam(required=false) last: JLong,
 			@RequestParam(required=false) token: JLong) = {
