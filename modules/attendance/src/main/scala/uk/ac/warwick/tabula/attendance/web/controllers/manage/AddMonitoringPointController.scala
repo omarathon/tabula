@@ -10,12 +10,22 @@ import uk.ac.warwick.tabula.data.model.attendance.MonitoringPoint
 import uk.ac.warwick.tabula.attendance.commands.manage.AddMonitoringPointCommand
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import scala.Array
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.permissions.Permissions
 
 @Controller
 @RequestMapping(Array("/manage/{dept}/sets/add/points/add"))
 class AddMonitoringPointController extends AttendanceController {
 
 	validatesSelf[SelfValidating]
+
+	@Autowired var moduleAndDepartmentService: ModuleAndDepartmentService = _
+
+	@ModelAttribute("departmentModules")
+	def getDepartmentModules(@PathVariable dept: Department) = {
+		moduleAndDepartmentService.modulesInDepartmentWithPermission(user, Permissions.MonitoringPoints.Manage, dept).toSeq.sorted
+	}
 
 	@ModelAttribute("command")
 	def createCommand(@PathVariable dept: Department) = AddMonitoringPointCommand(dept)

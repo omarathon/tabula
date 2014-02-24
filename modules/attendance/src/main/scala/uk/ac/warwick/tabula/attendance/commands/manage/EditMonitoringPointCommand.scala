@@ -49,6 +49,12 @@ trait EditMonitoringPointValidation extends SelfValidating with MonitoringPointV
 					meetingQuantity, "meetingQuantity",
 					dept
 				)
+			case MonitoringPointType.SmallGroup =>
+				validateTypeSmallGroup(errors,
+					smallGroupEventModules.asScala, "smallGroupEventModules",
+					smallGroupEventQuantity, "smallGroupEventQuantity",
+					dept
+				)
 			case _ =>
 		}
 

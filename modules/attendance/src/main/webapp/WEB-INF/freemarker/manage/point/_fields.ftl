@@ -30,6 +30,11 @@
 		Meeting
 		<@fmt.help_popover id="pointType-meeting" content="This monitoring point will be marked as 'attended' if there is a record in Tabula of a meeting taking place between the start and end dates" />
 	</@form.label>
+	<@form.label clazz="radio" checkbox=true>
+		<@f.radiobutton path="pointType" value="smallGroup" />
+		Small group event
+		<@fmt.help_popover id="pointType-smallGroup" content="This monitoring point will be marked as 'attended' if the student attends the required small group events" />
+	</@form.label>
 </@form.labelled_row>
 
 <#if features.attendanceMonitoringMeetingPointType>
@@ -64,6 +69,35 @@
 				</#list>
 			</@form.labelled_row>
 		</div>
+	</div>
+
+</#if>
+
+<#if features.attendanceMonitoringSmallGroupPointType>
+
+	<div class="pointTypeOption smallGroup row-fluid">
+
+		<@form.labelled_row "smallGroupEventQuantity" "Number of events">
+			<input type="text" class="input-mini" value="<#if (command.smallGroupEventQuantity?? && command.smallGroupEventQuantity > 0)>${command.smallGroupEventQuantity}</#if>" name="smallGroupEventQuantity" />
+		</@form.labelled_row>
+
+		<div class="module-list">
+			<@form.labelled_row "smallGroupEventModules" "Modules">
+				<#list departmentModules as module>
+					<@form.label checkbox=true>
+						<#assign checked = false />
+						<#list command.smallGroupEventModules as selectedModule>
+							<#if selectedModule.id == module.id>
+								<#assign checked = true />
+							</#if>
+						</#list>
+						<input type="checkbox" name="smallGroupEventModules" id="smallGroupEventModules-${module.id}" value="${module.id}" <#if checked>checked</#if>/>
+						<@fmt.module_name module false />
+					</@form.label>
+				</#list>
+			</@form.labelled_row>
+		</div>
+
 	</div>
 
 </#if>
