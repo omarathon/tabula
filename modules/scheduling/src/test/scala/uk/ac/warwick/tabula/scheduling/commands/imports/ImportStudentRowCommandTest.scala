@@ -19,9 +19,10 @@ import uk.ac.warwick.tabula.services.{CourseAndRouteService, MaintenanceModeServ
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import org.scalatest.junit.AssertionsForJUnit
 
 // scalastyle:off magic.number
-class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
+class ImportStudentRowCommandTest extends TestBase with AssertionsForJUnit with Mockito with Logging {
 	EventHandling.enabled = false
 
 	trait ComponentMixins extends ProfileServiceComponent with Tier4RequirementImporterComponent	with ModeOfAttendanceImporterComponent {
@@ -164,6 +165,40 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		rowCommand.tier4RequirementImporter = tier4RequirementImporter
 
 
+	}
+
+	/** When a SPR is (P)ermanently withdrawn, end relationships
+		* FOR THAT ROUTE ONLY
+		*/
+	@Test def endingWithdrawnRouteRelationships() {
+		new Environment {
+			val student = new StudentMember()
+
+			def createRelationship(sprCode: String, scjCode: String) = {
+				val rel = new MemberStudentRelationship()
+				rel.studentMember = student
+				val scd = new StudentCourseDetails()
+				scd.scjCode = scjCode
+				scd.sprCode = sprCode
+				rel.studentCourseDetails = scd
+				rel
+			}
+
+			val rel1 = createRelationship(sprCode="1111111/1", scjCode="1111111/1")
+			val rel2 = createRelationship(sprCode="1111111/2", scjCode="1111111/2")
+			val rel3 = createRelationship(sprCode="1111111/1", scjCode="1111111/3")
+			relationshipService.getAllCurrentRelationships(student) returns (Seq(rel1,rel2,rel3))
+
+			courseCommand.stuMem = student
+			courseCommand.sprCode = "1111111/1"
+			courseCommand.sprStatusCode = "P"
+			courseCommand.endDate = new DateTime().minusMonths(6).toLocalDate
+			courseCommand.applyInternal()
+
+			rel1.endDate.toLocalDate should be (courseCommand.endDate)
+			expectResult(null, "Shouldn't end course that's on a different route")( rel2.endDate )
+			rel3.endDate.toLocalDate should be (courseCommand.endDate)
+		}
 	}
 
 	@Test def testImportStudentCourseYearCommand {

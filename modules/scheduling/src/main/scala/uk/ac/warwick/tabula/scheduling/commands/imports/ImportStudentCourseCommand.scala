@@ -194,6 +194,7 @@ class ImportStudentCourseCommand(resultSet: ResultSet,
 			val threeMonthsAgo = DateTime.now().minusMonths(3)
 			if (endDateFromSits.isBefore(threeMonthsAgo)) {
 				relationshipService.getAllCurrentRelationships(stuMem)
+					.filter { relationship => relationship.studentCourseDetails.sprCode == this.sprCode }
 					.foreach { relationship =>
 							relationship.endDate = endDateFromSits
 							relationshipService.saveOrUpdate(relationship)
