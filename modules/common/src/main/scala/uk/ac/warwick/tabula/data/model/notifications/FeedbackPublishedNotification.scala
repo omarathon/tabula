@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.FreemarkerModel
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 import javax.persistence.{DiscriminatorValue, Entity}
+import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 
 @Entity
 @DiscriminatorValue(value="FeedbackPublished")
@@ -19,6 +20,8 @@ class FeedbackPublishedNotification
 	def assignment = feedback.assignment
 	def module = assignment.module
 	def moduleCode = module.code.toUpperCase
+
+	priority = Warning
 
 	def verb = "publish"
 
