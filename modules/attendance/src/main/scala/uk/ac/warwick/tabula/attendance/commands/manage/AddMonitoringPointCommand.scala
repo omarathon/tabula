@@ -63,6 +63,12 @@ trait AddMonitoringPointValidation extends SelfValidating with MonitoringPointVa
 					meetingQuantity, "meetingQuantity",
 					dept
 				)
+			case MonitoringPointType.SmallGroup =>
+				validateTypeSmallGroup(errors,
+					smallGroupEventModules.asScala, "smallGroupEventModules",
+					smallGroupEventQuantity, "smallGroupEventQuantity",
+					dept
+				)
 			case _ =>
 		}
 

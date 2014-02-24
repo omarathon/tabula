@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
-import uk.ac.warwick.tabula.data.model.{MeetingFormat, StudentRelationshipType, Department}
+import uk.ac.warwick.tabula.data.model.{Module, MeetingFormat, StudentRelationshipType, Department}
 import org.springframework.util.AutoPopulatingList
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringPoint}
 import uk.ac.warwick.tabula.JavaImports._
@@ -15,11 +15,17 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 	var name: String = _
 	var validFromWeek: Int = 0
 	var requiredFromWeek: Int = 0
+
 	var pointType: MonitoringPointType = _
+
 	var meetingRelationships: JSet[StudentRelationshipType] = JHashSet()
 	var meetingFormats: JSet[MeetingFormat] = JHashSet()
 	meetingFormats.addAll(MeetingFormat.members.asJava)
 	var meetingQuantity: Int = 1
+
+	var smallGroupEventQuantity: JInteger = 0
+	var smallGroupEventModules: JSet[Module] = JHashSet()
+
 	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
 	def meetingRelationshipsStrings = meetingRelationships.asScala.map(_.urlPart)
@@ -36,6 +42,10 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 				point.meetingRelationships = meetingRelationships.asScala.toSeq
 				point.meetingFormats = meetingFormats.asScala.toSeq
 				point.meetingQuantity = meetingQuantity
+			}
+			case MonitoringPointType.SmallGroup => {
+				point.smallGroupEventQuantity = smallGroupEventQuantity
+				point.smallGroupEventModules = smallGroupEventModules.asScala.toSeq
 			}
 			case _ =>
 		}
@@ -58,6 +68,11 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 				meetingFormats.clear()
 				meetingFormats.addAll(point.meetingFormats.asJava)
 				meetingQuantity = point.meetingQuantity
+			}
+			case MonitoringPointType.SmallGroup => {
+				smallGroupEventModules.clear()
+				smallGroupEventModules.addAll(point.smallGroupEventModules.asJava)
+				smallGroupEventQuantity = point.smallGroupEventQuantity
 			}
 			case _ =>
 		}

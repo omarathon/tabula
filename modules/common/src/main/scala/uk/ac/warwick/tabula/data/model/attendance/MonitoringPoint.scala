@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import uk.ac.warwick.tabula.data.model.{MeetingFormat, StudentRelationshipType, HasSettings, GeneratedId}
+import uk.ac.warwick.tabula.data.model.{Module, MeetingFormat, StudentRelationshipType, HasSettings, GeneratedId}
 import javax.persistence._
 import javax.validation.constraints.NotNull
 import org.joda.time.DateTime
@@ -8,7 +8,7 @@ import scala.Array
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.annotations.{Type, BatchSize}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, RelationshipService}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 
@@ -65,6 +65,9 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 	@transient
 	var relationshipService = Wire[RelationshipService]
 
+	@transient
+	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+
 	override def postLoad() {
 		ensureSettings
 	}
@@ -78,7 +81,7 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 		meetingRelationships = relationships.asScala.toSeq
 	}
 
-	def meetingFormats = getStringSeqSetting(Settings.MeetingFormats, Seq()).map(MeetingFormat.fromDescription(_))
+	def meetingFormats = getStringSeqSetting(Settings.MeetingFormats, Seq()).map(MeetingFormat.fromDescription)
 	def meetingFormats_= (formats: Seq[MeetingFormat]) =
 		settings += (Settings.MeetingFormats -> formats.map(_.description))
 	// See above
@@ -87,6 +90,24 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 
 	def meetingQuantity = getIntSetting(Settings.MeetingQuantity, 1)
 	def meetingQuantity_= (quantity: Int) = settings += (Settings.MeetingQuantity -> quantity)
+
+	// Setting for MonitoringPointType.SmallGroup
+
+	def smallGroupEventQuantity = getIntSetting(Settings.SmallGroupEventQuantity, 0)
+	def smallGroupEventQuantity_= (quantity: Int): Unit = settings += (Settings.SmallGroupEventQuantity -> quantity)
+	def smallGroupEventQuantity_= (quantity: JInteger): Unit = {
+		smallGroupEventQuantity = quantity match {
+			case q: JInteger => q.intValue
+			case _ => 0
+		}
+	}
+
+	def smallGroupEventModules = getStringSeqSetting(Settings.SmallGroupEventModules, Seq()).map(moduleAndDepartmentService.getModuleById(_).getOrElse(null))
+	def smallGroupEventModules_= (modules: Seq[Module]) =
+		settings += (Settings.SmallGroupEventModules -> modules.map(_.id))
+	// See above
+	def smallGroupEventModulesSpring_= (modules: JSet[Module]) =
+		smallGroupEventModules = modules.asScala.toSeq
 }
 
 object MonitoringPoint {
@@ -95,5 +116,8 @@ object MonitoringPoint {
 		val MeetingRelationships = "meetingRelationships"
 		val MeetingFormats = "meetingFormats"
 		val MeetingQuantity = "meetingQuantity"
+
+		val SmallGroupEventQuantity = "smallGroupEventQuantity"
+		val SmallGroupEventModules = "smallGroupEventModules"
 	}
 }

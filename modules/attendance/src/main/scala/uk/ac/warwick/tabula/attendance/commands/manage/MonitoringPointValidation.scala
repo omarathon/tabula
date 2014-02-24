@@ -3,7 +3,8 @@ package uk.ac.warwick.tabula.attendance.commands.manage
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.mutable
-import uk.ac.warwick.tabula.data.model.{Department, MeetingFormat, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{Module, Department, MeetingFormat, StudentRelationshipType}
+import uk.ac.warwick.tabula.JavaImports._
 
 trait MonitoringPointValidation {
 
@@ -51,5 +52,14 @@ trait MonitoringPointValidation {
 		if (meetingQuantity == 0) {
 			errors.rejectValue(meetingQuantityBindPoint, "monitoringPoint.meetingType.meetingQuantity")
 		}
+	}
+
+	def validateTypeSmallGroup(errors: Errors,
+		smallGroupEventModules: mutable.Set[Module], smallGroupEventModulesBindPoint: String,
+		smallGroupEventQuantity: JInteger, smallGroupEventQuantityBindPoint: String,
+		dept: Department
+	) {
+
+		// nothing at the moment
 	}
 }
