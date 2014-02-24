@@ -36,6 +36,16 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
+        <module name="admin" />
+        <module name="all" />
+        <module name="attendance" />
+        <module name="common" />
+        <module name="courses" />
+        <module name="functional-test" />
+        <module name="groups" />
+        <module name="home" />
+        <module name="profiles" />
+        <module name="scheduling" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
