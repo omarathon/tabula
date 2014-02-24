@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers
 
 import scala.collection.JavaConversions._
 import org.springframework.stereotype.Controller
-import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
+import org.springframework.web.bind.annotation.{RequestParam, PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.data.model.{StudentMember, Member, MeetingRecordApproval, Module, Assignment}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.PermissionDeniedException
@@ -24,8 +24,8 @@ class ExtensionRequestController extends CourseworkController{
 	var profileService = Wire.auto[ProfileService]
 
 	@ModelAttribute("command")
-	def cmd(@PathVariable("module") module: Module, @PathVariable("assignment") assignment:Assignment, user:CurrentUser) =
-		ExtensionRequestCommand(module, assignment, user)
+	def cmd(@PathVariable("module") module: Module, @PathVariable("assignment") assignment:Assignment, @RequestParam(defaultValue = "") action: String, user:CurrentUser) =
+		ExtensionRequestCommand(module, assignment, user, action)
 
 	validatesSelf[SelfValidating]
 
