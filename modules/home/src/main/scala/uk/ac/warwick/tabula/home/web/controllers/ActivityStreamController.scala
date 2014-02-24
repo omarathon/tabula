@@ -24,6 +24,7 @@ class ActivityStreamController extends BaseController {
 			user: CurrentUser,
 			@RequestParam(defaultValue="20") max: Int,
 			@RequestParam types: JList[String],
+			@RequestParam(defaultValue="1.0") minPriority: Double, // minPriority of one means we show all by default
 			@RequestParam(required=false) lastDoc: JInteger,
 			@RequestParam(required=false) last: JLong,
 			@RequestParam(required=false) token: JLong) = {
@@ -33,7 +34,7 @@ class ActivityStreamController extends BaseController {
 		} else {
 			None
 		}
-		val request = ActivityStreamRequest(user.apparentUser, max, typeSet, pagination)
+		val request = ActivityStreamRequest(user.apparentUser, max, minPriority, typeSet, pagination)
 		ActivityStreamCommand(request)
 	}
 
@@ -46,6 +47,7 @@ class ActivityStreamController extends BaseController {
 			val html = item.message
 			Map(
 				"published" -> ActivityStreamDateFormat.print(item.date),
+				"priority" -> item.priority,
 				"title" -> item.title,
 				"url" -> item.url,
 				"content" -> html,

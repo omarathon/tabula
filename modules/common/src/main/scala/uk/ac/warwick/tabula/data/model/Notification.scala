@@ -2,8 +2,6 @@ package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConverters._
 import javax.persistence._
-import org.hibernate.annotations.Type
-
 import org.joda.time.DateTime
 
 import uk.ac.warwick.tabula.JavaImports._
@@ -12,6 +10,7 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.services.UserLookupComponent
 import org.springframework.util.Assert
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
+import org.hibernate.annotations.Type
 import scala.beans.BeanProperty
 
 object Notification {
@@ -101,6 +100,10 @@ abstract class Notification[A >: Null <: ToEntityReference, B] extends Generated
 	def entities = items.asScala.map { _.entity }.toSeq
 
 	var created: DateTime = null
+
+	// the default priority is info. More important notifications should manually set this value to something higher.
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.NotificationPriorityUserType")
+	var priority: NotificationPriority = NotificationPriority.Info
 
 	// HasSettings provides the JSONified settings field... ---> HERE <---
 

@@ -6,16 +6,15 @@ import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.NotificationDao
 import uk.ac.warwick.userlookup.User
-import org.apache.lucene.search.{FieldDoc, ScoreDoc, SortField, Sort, TermQuery}
-import org.apache.lucene.index.Term
+import org.apache.lucene.search.FieldDoc
 import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import org.hibernate.ObjectNotFoundException
 
 case class ActivityStreamRequest(
 		user: User,
 		max: Int = 100,
+		priority: Double = 0,
 		types: Option[Set[String]] = None,
-
 		pagination: Option[SearchPagination]
 )
 
@@ -54,6 +53,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 				Some(new Activity[Any](
 					title = notification.title,
 					date = notification.created,
+					priority = notification.priority.toNumericalValue,
 					agent = notification.agent,
 					verb = notification.verb,
 					url = notification.url,
