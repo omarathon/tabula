@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.profiles.commands.{ViewMeetingRecordCommand, CreateScheduledMeetingRecordCommand}
 import uk.ac.warwick.tabula.profiles.web.controllers.ProfilesController
 import uk.ac.warwick.tabula.data.model.StudentCourseDetails
-import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException}
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import uk.ac.warwick.tabula.profiles.web.Routes
 import javax.validation.Valid
@@ -36,17 +36,20 @@ class CreateScheduledMeetingRecordController extends ProfilesController with Aut
 
 	@ModelAttribute("command")
 	def getCommand(@PathVariable("relationshipType") relationshipType: StudentRelationshipType,
-				   @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails) =  {
+				   @PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails,
+				   @RequestParam(value="relationship", required = false) relationship: StudentRelationship) =  {
 		relationshipService.findCurrentRelationships(mandatory(relationshipType), mandatory(studentCourseDetails)) match {
 			case Nil => throw new ItemNotFoundException
 			case relationships =>
 				// Go through the relationships for this SPR code and find one where the current user is the agent.
 				// If there isn't one but there's only one relationship, pick it. Otherwise default to the first.
-				val defaultRelationship =
-					relationships.find(rel => rel.agentMember.map(_.universityId) == Some(user.universityId))
-						.getOrElse(relationships.head)
+				val chosenRelationship = relationship match {
+					case r: StudentRelationship => r
+					case _ => relationships.find(rel => rel.agentMember.map(_.universityId) == Some(user.universityId))
+										.getOrElse(relationships.head)
+				}
 
-				CreateScheduledMeetingRecordCommand(currentMember, defaultRelationship, relationships.size > 1)
+				CreateScheduledMeetingRecordCommand(currentMember, chosenRelationship, relationships.size > 1)
 		}
 	}
 

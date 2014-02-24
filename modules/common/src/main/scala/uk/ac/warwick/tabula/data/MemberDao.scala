@@ -33,6 +33,7 @@ trait MemberDao {
 	def getStudentRelationshipTypeByUrlPart(urlPart: String): Option[StudentRelationshipType]
 	def saveOrUpdate(relationshipType: StudentRelationshipType)
 	def delete(relationshipType: StudentRelationshipType)
+	def getStudentRelationshipById(id: String): Option[StudentRelationship]
 
 	def saveOrUpdate(member: Member)
 	def delete(member: Member)
@@ -110,6 +111,8 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			session.flush()
 		}
 	}
+
+	def getStudentRelationshipById(id: String) = getById[StudentRelationship](id)
 
 	def saveOrUpdate(rel: StudentRelationship) = session.saveOrUpdate(rel)
 
