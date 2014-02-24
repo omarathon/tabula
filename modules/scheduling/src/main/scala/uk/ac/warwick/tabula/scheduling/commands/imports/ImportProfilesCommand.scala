@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import scala.Option.option2Iterable
-import scala.collection.JavaConversions.{mapAsScalaMap, seqAsJavaList}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
@@ -12,7 +11,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory, ImportRowTracker}
-import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter, MembershipInformation, ModeOfAttendanceImporter, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware, SitsStatusImporter}
+import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware, SitsStatusImporter}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileIndexService, ProfileService, SmallGroupService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.TaskBenchmarking

@@ -111,9 +111,20 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 		copyObjectProperty("statusOnCourse", row.scjStatusCode, studentCourseDetailsBean, toSitsStatus(row.scjStatusCode))
 	}
 
-	def toRoute(code: String) = code.toLowerCase.maybeText.flatMap { courseAndRouteService.getRouteByCode }.getOrElse(null)
-	def toCourse(code: String) = code.maybeText.flatMap { courseImporter.getCourseForCode }.getOrElse(null)
-	def toAward(code: String) = code.maybeText.flatMap { awardImporter.getAwardForCode }.getOrElse(null)
+	def toRoute(routeCode: String) = routeCode match {
+		case (code: String) => code.toLowerCase.maybeText.flatMap { courseAndRouteService.getRouteByCode }.getOrElse(null)
+		case _ => null // catch case where route code is null
+	}
+
+	def toCourse(courseCode: String) = courseCode match {
+		case (code: String) => code.maybeText.flatMap { courseImporter.getCourseForCode }.getOrElse(null)
+		case _ => null
+	}
+
+	def toAward(awardCode: String) = awardCode match {
+		case (code: String) => code.maybeText.flatMap { awardImporter.getAwardForCode }.getOrElse(null)
+		case _ => null
+	}
 
 	def captureTutor(studentCourseDetails: StudentCourseDetails) = {
 		val dept = studentCourseDetails.department

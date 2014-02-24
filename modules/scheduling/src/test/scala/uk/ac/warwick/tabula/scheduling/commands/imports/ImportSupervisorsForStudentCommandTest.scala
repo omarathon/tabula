@@ -14,19 +14,6 @@ import uk.ac.warwick.tabula.data.MemberDao
 
 class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Mockito with Logging {
 
-	// I don't know why I need to duplicate these 2 traits here rather than importing them from ImportStudentRowCommandTest
-	trait ImportCommandFactoryForTesting {
-		val importCommandFactory = new ImportCommandFactory
-		importCommandFactory.test = true
-
-		var maintenanceModeService = smartMock[MaintenanceModeService]
-		maintenanceModeService.enabled returns false
-		importCommandFactory.maintenanceModeService = maintenanceModeService
-
-		// needed for importCommandFactor for ImportStudentCourseCommand and also needed for ImportStudentRowCommand
-		val memberDao = smartMock[MemberDao]
-	}
-
 	trait Environment extends ImportCommandFactoryForTesting {
 		val scjCode = "1111111/1"
 		val sprCode = "1111111/1"

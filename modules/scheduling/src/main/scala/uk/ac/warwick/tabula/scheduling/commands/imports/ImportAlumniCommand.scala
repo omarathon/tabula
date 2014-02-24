@@ -45,7 +45,7 @@ class ImportAlumniCommand(member: MembershipInformation, ssoUser: User, rs: Resu
 	def applyInternal(): Member = transactional() {
 		val memberExisting = memberDao.getByUniversityId(universityId)
 
-		logger.debug("Importing member " + universityId + " into " + memberExisting)
+		logger.debug("Importing alumni member " + universityId + " into " + memberExisting)
 
 		val isTransient = !memberExisting.isDefined
 		val member = memberExisting getOrElse(new OtherMember(universityId))

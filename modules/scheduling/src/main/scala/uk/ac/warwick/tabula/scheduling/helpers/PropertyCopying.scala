@@ -39,15 +39,16 @@ trait PropertyCopying extends Logging {
 		changedProperties.foldLeft(false)(_ || _)
 	}
 
+	// returns true if there is a change, false if no change
 	def copyObjectProperty(property: String, code: String, memberBean: BeanWrapper, obj: Object) = {
 		val oldValue = memberBean.getPropertyValue(property)
 
-		if (oldValue == null && code == null) false
-		else if (oldValue == null) {
+		if (oldValue == null && code == null) false // null before and still null - no change
+		else if (oldValue == null) { // changed to non-null
 			// From no route to having a route
 			memberBean.setPropertyValue(property, obj)
 			true
-		} else if (code == null) {
+		} else if (code == null) { // changed to null
 			// User had a route but now doesn't
 			memberBean.setPropertyValue(property, null)
 			true
@@ -59,9 +60,10 @@ trait PropertyCopying extends Logging {
 				case sitsStatus: SitsStatus => sitsStatus.code
 				case _ => null
 			}
-			if (oldCode == code.toLowerCase) {
+			if (oldCode == code.toLowerCase) { // same non-null value
 				false
-			} else {
+			}
+			else { // different non-null value
 				memberBean.setPropertyValue(property, obj)
 				true
 			}
