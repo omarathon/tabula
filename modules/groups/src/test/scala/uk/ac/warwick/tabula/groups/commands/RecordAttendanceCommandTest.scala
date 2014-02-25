@@ -3,20 +3,14 @@ package uk.ac.warwick.tabula.groups.commands
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.{TestBase, Mockito}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent
-import uk.ac.warwick.tabula.services.{UserLookupComponent, SmallGroupServiceComponent, UserLookupService, SmallGroupService}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventOccurrence
 import uk.ac.warwick.tabula.JavaImports._
-import org.springframework.validation.Errors
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.UserGroup
-import uk.ac.warwick.tabula.services.ProfileService
-import uk.ac.warwick.tabula.services.ProfileServiceComponent
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.services.TermService
-import uk.ac.warwick.tabula.services.TermServiceComponent
-import uk.ac.warwick.tabula.commands.MemberOrUser
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.AcademicYear
@@ -28,11 +22,13 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 	val mockCurrentUser = mock[CurrentUser]
 
 	// Implements the dependencies declared by the command
-	trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent with ProfileServiceComponent with TermServiceComponent {
+	trait CommandTestSupport extends SmallGroupServiceComponent with UserLookupComponent
+	with ProfileServiceComponent with TermServiceComponent with MonitoringPointGroupProfileServiceComponent{
 		val smallGroupService = mock[SmallGroupService]
 		val userLookup = mock[UserLookupService]
 		val profileService = mock[ProfileService]
 		val termService = mock[TermService]
+		val monitoringPointGroupProfileService = mock[MonitoringPointGroupProfileService]
 		
 		def apply(): SmallGroupEventOccurrence = {
 			smallGroupEventOccurrence

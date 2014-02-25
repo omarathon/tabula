@@ -45,7 +45,10 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 			}
 			case MonitoringPointType.SmallGroup => {
 				point.smallGroupEventQuantity = smallGroupEventQuantity
-				point.smallGroupEventModules = smallGroupEventModules.asScala.toSeq
+				point.smallGroupEventModules = smallGroupEventModules match {
+					case modules: JSet[Module] => modules.asScala.toSeq
+					case _ => Seq()
+				}
 			}
 			case _ =>
 		}

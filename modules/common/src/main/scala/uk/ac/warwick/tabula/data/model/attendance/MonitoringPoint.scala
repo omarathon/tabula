@@ -57,6 +57,8 @@ trait CommonMonitoringPointProperties extends GeneratedId {
 		point.pointType = pointType
 		point
 	}
+
+	def includesWeek(week: Int) = (validFromWeek to requiredFromWeek).contains(week)
 }
 
 trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {

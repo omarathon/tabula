@@ -2,13 +2,15 @@ package uk.ac.warwick.tabula.services
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent, AutowiringMonitoringPointDaoComponent, MonitoringPointDaoComponent}
+import uk.ac.warwick.tabula.data.{SmallGroupDaoComponent, AutowiringSmallGroupDaoComponent, AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent, AutowiringMonitoringPointDaoComponent, MonitoringPointDaoComponent}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import org.joda.time.DateTime
 import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
+import uk.ac.warwick.tabula.commands.MemberOrUser
 
 trait MonitoringPointServiceComponent {
 	def monitoringPointService: MonitoringPointService
@@ -263,6 +265,7 @@ class MonitoringPointServiceImpl
 
 
 
+//// MonitoringPointMeetingRelationshipTermService ////
 
 
 trait MonitoringPointMeetingRelationshipTermServiceComponent {
@@ -402,3 +405,103 @@ class MonitoringPointMeetingRelationshipTermServiceImpl
 	with AutowiringMeetingRecordDaoComponent
 	with AutowiringRelationshipServiceComponent
 	with AutowiringTermServiceComponent
+
+
+
+//// MonitoringPointGroupService ////
+
+
+trait MonitoringPointGroupProfileServiceComponent {
+	def monitoringPointGroupProfileService: MonitoringPointGroupProfileService
+}
+
+trait AutowiringMonitoringPointGroupProfileServiceComponent extends MonitoringPointGroupProfileServiceComponent {
+	var monitoringPointGroupProfileService = Wire[MonitoringPointGroupProfileService]
+}
+
+trait MonitoringPointGroupProfileService {
+	def getCheckpointsForAttendance(attendance: Seq[SmallGroupEventAttendance], includeTheseAttendances: Boolean = true): Seq[MonitoringCheckpoint]
+	def updateCheckpointsForAttendance(attendance: Seq[SmallGroupEventAttendance]): Seq[MonitoringCheckpoint]
+}
+
+abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPointGroupProfileService {
+
+	self: MonitoringPointServiceComponent with ProfileServiceComponent with SmallGroupDaoComponent with SmallGroupServiceComponent =>
+
+	def getCheckpointsForAttendance(attendances: Seq[SmallGroupEventAttendance], includeTheseAttendances: Boolean = true): Seq[MonitoringCheckpoint] = {
+		attendances.filter(_.state == AttendanceState.Attended).flatMap(attendance => {
+			profileService.getMemberByUniversityId(attendance.universityId).flatMap{
+				case studentMember: StudentMember =>
+					monitoringPointService.getPointSetForStudent(studentMember, attendance.occurrence.event.group.groupSet.academicYear).flatMap(pointSet => {
+						val relevantPoints = getRelevantPoints(pointSet.points.asScala, attendance, studentMember)
+						val checkpoints = relevantPoints.filter(point => checkQuantity(point, attendance, studentMember)).map(point => {
+							val checkpoint = new MonitoringCheckpoint
+							checkpoint.autoCreated = true
+							checkpoint.point = point
+							checkpoint.student = studentMember
+							checkpoint.updatedBy = attendance.updatedBy
+							checkpoint.updatedDate = DateTime.now
+							checkpoint.state = AttendanceState.Attended
+							checkpoint
+						})
+						Option(checkpoints)
+					})
+				case _ => None
+			}
+		}).flatten
+	}
+
+	def updateCheckpointsForAttendance(attendances: Seq[SmallGroupEventAttendance]): Seq[MonitoringCheckpoint] = {
+		getCheckpointsForAttendance(attendances).map(checkpoint => {
+			monitoringPointService.saveOrUpdate(checkpoint)
+			checkpoint
+		})
+	}
+
+	private def getRelevantPoints(points: Seq[MonitoringPoint], attendance: SmallGroupEventAttendance, studentMember: StudentMember): Seq[MonitoringPoint] = {
+		points.filter(point => 
+			// Is it the correct type
+			point.pointType == MonitoringPointType.SmallGroup
+			// Is the attendance inside the point's weeks
+				&& point.includesWeek(attendance.occurrence.week)
+			// Is the group's module valid
+				&& (point.smallGroupEventModules.isEmpty || point.smallGroupEventModules.contains(attendance.occurrence.event.group.groupSet.module))
+			// Is there no existing checkpoint
+				&& monitoringPointService.getCheckpoint(studentMember, point).isEmpty
+			// The student hasn't been sent to SITS for this point
+				&& !monitoringPointService.studentAlreadyReportedThisTerm(studentMember, point)
+		)
+	}
+	
+	private def checkQuantity(point: MonitoringPoint, attendance: SmallGroupEventAttendance, studentMember: StudentMember): Boolean = {
+		if (point.smallGroupEventQuantity == 1) {
+			true
+		}	else if (point.smallGroupEventQuantity > 1) {
+			val attendances = smallGroupDao
+				.findAttendanceForStudentInModulesInWeeks(studentMember, point.validFromWeek, point.requiredFromWeek, point.smallGroupEventModules)
+				.filterNot(a => a.occurrence == attendance.occurrence && a.universityId == attendance.universityId)
+			point.smallGroupEventQuantity <= attendances.size + 1
+		} else {
+			val groups = smallGroupService.findSmallGroupsByStudent(MemberOrUser(studentMember).asUser)
+			val allOccurrenceWeeks = groups.filter(g => point.smallGroupEventModules.isEmpty || point.smallGroupEventModules.contains(g.groupSet.module))
+				.flatMap(group =>
+					group.events.asScala.flatMap(event =>
+						event.weekRanges.flatMap(_.toWeeks)
+					)
+				)
+			val relevantWeeks = allOccurrenceWeeks.filter(point.includesWeek)
+			val attendances = smallGroupDao
+				.findAttendanceForStudentInModulesInWeeks(studentMember, point.validFromWeek, point.requiredFromWeek, point.smallGroupEventModules)
+				.filterNot(a => a.occurrence == attendance.occurrence && a.universityId == attendance.universityId)
+			relevantWeeks.size <= attendances.size
+		}
+	}
+}
+
+@Service("monitoringPointGroupProfileService")
+class MonitoringPointGroupProfileServiceImpl
+	extends AbstractMonitoringPointGroupProfileService
+	with AutowiringMonitoringPointServiceComponent
+	with AutowiringProfileServiceComponent
+	with AutowiringSmallGroupDaoComponent
+	with AutowiringSmallGroupServiceComponent

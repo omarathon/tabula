@@ -95,6 +95,7 @@
 						<@fmt.module_name module false />
 					</@form.label>
 				</#list>
+				<input name="_smallGroupEventModules" value="false" type="hidden"/>
 			</@form.labelled_row>
 		</div>
 

@@ -7,22 +7,16 @@ import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupEventAttendance}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.AutowiringProfileServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
-import uk.ac.warwick.tabula.services.ProfileServiceComponent
-import uk.ac.warwick.tabula.services.UserLookupComponent
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
-import uk.ac.warwick.tabula.services.SmallGroupServiceComponent
-import uk.ac.warwick.tabula.services.AutowiringSmallGroupServiceComponent
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.services.TermServiceComponent
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
 import RecordAttendanceCommand._
 import uk.ac.warwick.tabula.ItemNotFoundException
+import scala.Some
 
 object RecordAttendanceCommand {
 	type UniversityId = String
@@ -37,7 +31,8 @@ object RecordAttendanceCommand {
 			with AutowiringSmallGroupServiceComponent
 			with AutowiringUserLookupComponent
 			with AutowiringProfileServiceComponent
-			with AutowiringTermServiceComponent {
+			with AutowiringTermServiceComponent
+			with AutowiringMonitoringPointGroupProfileServiceComponent {
 		override lazy val eventName = "RecordAttendance"
 	}
 }
@@ -47,7 +42,8 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 		with RecordAttendanceState 
 		with PopulateOnForm
 		with TaskBenchmarking {
-	self: SmallGroupServiceComponent with UserLookupComponent with ProfileServiceComponent =>
+
+	self: SmallGroupServiceComponent with UserLookupComponent with ProfileServiceComponent with MonitoringPointGroupProfileServiceComponent =>
 		
 	if (!event.group.groupSet.collectAttendance) throw new ItemNotFoundException
 		
@@ -95,7 +91,9 @@ abstract class RecordAttendanceCommand(val event: SmallGroupEvent, val week: Int
 				Some(smallGroupService.saveOrUpdateAttendance(studentId, event, week, state, user))
 			}
 		}.toSeq
-		
+
+		monitoringPointGroupProfileService.updateCheckpointsForAttendance(attendances)
+
 		(occurrence, attendances)
 	}
 }
