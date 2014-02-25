@@ -152,15 +152,4 @@ trait MeetingRecordModal  {
 		}
 	}
 
-
-	@InitBinder
-	def initRelationshipsEditor(binder: WebDataBinder,
-								@PathVariable("studentCourseDetails") studentCourseDetails: StudentCourseDetails, 
-								@PathVariable("relationshipType") relationshipType: StudentRelationshipType) {
-		binder.registerCustomEditor(classOf[StudentRelationship], new AbstractPropertyEditor[StudentRelationship] {
-			override def fromString(agent: String) = 
-				allRelationships(studentCourseDetails, relationshipType).find(_.agent == agent).orNull
-			override def toString(rel: StudentRelationship) = rel.agent
-		})
-	}
 }
