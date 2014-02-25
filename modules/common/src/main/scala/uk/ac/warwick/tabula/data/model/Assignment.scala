@@ -116,6 +116,7 @@ class Assignment
 	var allowResubmission: JBoolean = _
 	var displayPlagiarismNotice: JBoolean = _
 	var summative: JBoolean = _
+	var dissertation: JBoolean = _
 	var allowExtensions: JBoolean = _
 	var allowExtensionRequests: JBoolean = _ // by students
 	var genericFeedback: String = ""
@@ -597,6 +598,7 @@ trait BooleanAssignmentProperties {
 	var allowExtensions: JBoolean = true
 	var allowExtensionRequests: JBoolean = false
 	var summative: JBoolean = true
+	var dissertation: JBoolean = false
 
 	def copyBooleansTo(assignment: Assignment) {
 		assignment.openEnded = openEnded
@@ -609,6 +611,7 @@ trait BooleanAssignmentProperties {
 		assignment.allowExtensions = allowExtensions
 		assignment.allowExtensionRequests = allowExtensionRequests
 		assignment.summative = summative
+		assignment.dissertation = dissertation
 	}
 }
 

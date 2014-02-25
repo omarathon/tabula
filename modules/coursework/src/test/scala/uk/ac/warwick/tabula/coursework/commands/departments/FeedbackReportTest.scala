@@ -12,7 +12,7 @@ import uk.ac.warwick.userlookup.User
 // scalastyle:off
 class FeedbackReportTest extends TestBase with ReportWorld {
 	import FeedbackReport._
-	
+
 	@Test
 	def simpleGetSubmissionTest() {
 		val userOne = new User(idFormat(1))
@@ -39,6 +39,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 		report.getFeedbackCount(assignmentFour) should be (FeedbackCount(7,28, dateTime(2013, 7, 1), dateTime(2013, 7, 1))) // 7 on time - 28 late
 		report.getFeedbackCount(assignmentFive) should be (FeedbackCount(2,98, dateTime(2013, 9, 24), dateTime(2013, 9, 24))) // 2 on time - 98 late
 		report.getFeedbackCount(assignmentSix) should be (FeedbackCount(65,8, dateTime(2013, 7, 16), dateTime(2013, 8, 1))) // 65 on time - 8 late
+		report.getFeedbackCount(assignmentSeven) should be (FeedbackCount(50,0, dateTime(2013, 8, 1), dateTime(2013, 8, 1))) // 50 on time
 	}
 
 	/**
@@ -54,19 +55,19 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 		// 32 days later = deadline day, which should be marked as on-time
 
 		val report = getTestFeedbackReport
-		val assignmentSeven = addAssignment("1007", "test deadline day - 1", dateTime(2013, 3, 28), 10, 0, moduleOne)
-		createPublishEvent(assignmentSeven, 31, studentData(0, 10))	// on-time
-		var feedbackCount = report.getFeedbackCount(assignmentSeven)
+		val assignmentEight = addAssignment("1007", "test deadline day - 1", dateTime(2013, 3, 28), 10, 0, moduleOne)
+		createPublishEvent(assignmentEight, 31, studentData(0, 10))	// on-time
+		var feedbackCount = report.getFeedbackCount(assignmentEight)
 		feedbackCount should be (FeedbackCount(10, 0, dateTime(2013, 4, 28), dateTime(2013, 4, 28))) // 10 on time
 
-		val assignmentEight = addAssignment("1008", "test deadline day", dateTime(2013, 3, 28), 10, 0, moduleOne)
-		createPublishEvent(assignmentEight, 32, studentData(0, 10))	// on time
-		feedbackCount = report.getFeedbackCount(assignmentEight)
+		val assignmentNine = addAssignment("1008", "test deadline day", dateTime(2013, 3, 28), 10, 0, moduleOne)
+		createPublishEvent(assignmentNine, 32, studentData(0, 10))	// on time
+		feedbackCount = report.getFeedbackCount(assignmentNine)
 		feedbackCount should be (FeedbackCount(10, 0, dateTime(2013, 4, 29), dateTime(2013, 4, 29))) // 10 on time
 
-		val assignmentNine = addAssignment("1009", "test deadline day + 1", dateTime(2013, 3, 28), 10, 0, moduleOne)
-		createPublishEvent(assignmentNine, 33, studentData(0, 10))	// late
-		feedbackCount = report.getFeedbackCount(assignmentNine)
+		val assignmentTen = addAssignment("1009", "test deadline day + 1", dateTime(2013, 3, 28), 10, 0, moduleOne)
+		createPublishEvent(assignmentTen, 33, studentData(0, 10))	// late
+		feedbackCount = report.getFeedbackCount(assignmentTen)
 		feedbackCount should be (FeedbackCount(0, 10, dateTime(2013, 4, 30), dateTime(2013, 4, 30))) // 10 late
 
 	}
@@ -74,19 +75,19 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 	@Test
 	def deadlineDayTest2() {
 		val report = getTestFeedbackReport
-		val assignmentTen = addAssignment("1010", "test deadline day - 1", dateTime(2013, 5, 29), 10, 0, moduleOne)
-		createPublishEvent(assignmentTen, 27, studentData(0, 10))	// on time
-		var feedbackCount = report.getFeedbackCount(assignmentTen)
+		val assignmentEleven = addAssignment("1010", "test deadline day - 1", dateTime(2013, 5, 29), 10, 0, moduleOne)
+		createPublishEvent(assignmentEleven, 27, studentData(0, 10))	// on time
+		var feedbackCount = report.getFeedbackCount(assignmentEleven)
 		feedbackCount should be (FeedbackCount(10, 0, dateTime(2013, 6, 25), dateTime(2013, 6, 25))) // 10 on time
 
-		val assignmentEleven = addAssignment("1010", "test deadline day", dateTime(2013, 5, 29), 10, 0, moduleOne)
-		createPublishEvent(assignmentEleven, 28, studentData(0, 10))	// on time
-		feedbackCount = report.getFeedbackCount(assignmentEleven)
+		val assignmentTwelve = addAssignment("1010", "test deadline day", dateTime(2013, 5, 29), 10, 0, moduleOne)
+		createPublishEvent(assignmentTwelve, 28, studentData(0, 10))	// on time
+		feedbackCount = report.getFeedbackCount(assignmentTwelve)
 		feedbackCount should be (FeedbackCount(10, 0, dateTime(2013, 6, 26), dateTime(2013, 6, 26))) // 10 on time
 
-		val assignmentTwelve = addAssignment("1011", "test deadline day + 1", dateTime(2013, 5, 29), 10, 0, moduleOne)
-		createPublishEvent(assignmentTwelve, 29, studentData(0, 10))	// late
-		feedbackCount = report.getFeedbackCount(assignmentTwelve)
+		val assignmentThirteen = addAssignment("1011", "test deadline day + 1", dateTime(2013, 5, 29), 10, 0, moduleOne)
+		createPublishEvent(assignmentThirteen, 29, studentData(0, 10))	// late
+		feedbackCount = report.getFeedbackCount(assignmentThirteen)
 		feedbackCount should be (FeedbackCount(0, 10, dateTime(2013, 6, 27), dateTime(2013, 6, 27))) // 10 late
 	}
 
@@ -124,28 +125,31 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 
 		check("Row 1",
 			assignmentSheet.getRow(1),
-			Seq("test one", "IN101", dateTime(2013, 3, 10), dateTime(2013, 4, 9), "Summative", 10, 10, 0, 2, 0, 10, 10, 1, 0, 0))
+			Seq("test one", "IN101", dateTime(2013, 3, 10), dateTime(2013, 4, 9), "Summative", "", 10, 10, 0, 2, 0, 10, 10, 1, 0, 0))
 
 		check("Row 2",
 			assignmentSheet.getRow(2),
-			Seq("test two", "IN101", dateTime(2013, 4, 10), dateTime(2013, 5, 9), "Summative", 29, 29, 0, 5, 0, 29, 0, 0, 29, 1))
+			Seq("test two", "IN101", dateTime(2013, 4, 10), dateTime(2013, 5, 9), "Summative", "", 29, 29, 0, 5, 0, 29, 0, 0, 29, 1))
 
 		check("Row 3",
 			assignmentSheet.getRow(3),
-			Seq("test three", "IN101", dateTime(2013, 5, 10), dateTime(2013, 6, 10), "Formative", 13, 13, 0, 2, 0, 13, 4, 0.307692307692307692, 9, 0.6923076923076923))
+			Seq("test three", "IN101", dateTime(2013, 5, 10), dateTime(2013, 6, 10), "Formative", "",  13, 13, 0, 2, 0, 13, 4, 0.307692307692307692, 9, 0.6923076923076923))
 
 		check("Row 4",
 			assignmentSheet.getRow(4),
-			Seq("test four","IN102",dateTime(2013, 5, 31),dateTime(2013, 6, 28),"Summative",35,35,0,7,0,35,7,0.2,28,0.8))
+			Seq("test four","IN102",dateTime(2013, 5, 31),dateTime(2013, 6, 28),"Summative", "", 35,35,0,7,0,35,7,0.2,28,0.8))
 
 		check("Row 5",
-			assignmentSheet.getRow(6),
-			Seq("test five","IN102",dateTime(2013, 8, 23),dateTime(2013, 9, 23),"Summative",100,100,0,2,0,100,2,0.02,98,0.98))
+			assignmentSheet.getRow(7),
+			Seq("test five","IN102",dateTime(2013, 8, 23),dateTime(2013, 9, 23),"Summative", "", 100,100,0,2,0,100,2,0.02,98,0.98))
 
 		check("Row 6",
 			assignmentSheet.getRow(5),
-			Seq("test six","IN102",dateTime(2013, 7, 1),dateTime(2013, 7, 29),"Summative",73,73,24,0,0,73,65,0.890410958904109589,8,0.109589041095890410))
+			Seq("test six","IN102",dateTime(2013, 7, 1),dateTime(2013, 7, 29),"Summative", "", 73,73,24,0,0,73,65,0.890410958904109589,8,0.109589041095890410))
 
+		check("Row 7",
+			assignmentSheet.getRow(6),
+			Seq("test seven","IN102", dateTime(2013, 7, 1), dateTime(2013, 7, 29), "Summative", "Dissertation", 100, 100, 0, 2, 50, 50, 50, 1, 0, 0))
 
 		val moduleSheet = report.generateModuleSheet(department)
 		report.populateModuleSheet(moduleSheet)
@@ -156,8 +160,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 
 		check("Module row 2",
 			moduleSheet.getRow(2),
-			Seq("Module Two","IN102",3,208,208,24,9,0,208,74,0.3557692307692307692,134,0.6442307692307692307))
-
+			Seq("Module Two","IN102",4,308,308,24,11,50,258,124,0.4806201550387597,134,0.5193798449612403))
 	}
 
 	def getTestFeedbackReport = {

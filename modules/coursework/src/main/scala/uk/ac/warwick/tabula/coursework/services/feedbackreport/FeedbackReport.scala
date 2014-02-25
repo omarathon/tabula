@@ -36,6 +36,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 		addStringCell("Close date", header, style)
 		addStringCell("Publish deadline", header, style)
 		addStringCell("Credit bearing", header, style)
+		addStringCell("Is dissertation?", header, style)
 		addStringCell("Expected submissions", header, style)
 		addStringCell("Actual submissions", header, style)
 		addStringCell("Late submissions - within extension", header, style)
@@ -63,6 +64,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			val publishDeadline = workingDaysHelper.datePlusWorkingDays(assignment.closeDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays)
 			addDateCell(publishDeadline, row, dateCellStyle(workbook))
 			addStringCell(if (assignment.summative) "Summative" else "Formative", row)
+			addStringCell(if (assignment.dissertation) "Dissertation" else "", row)
 			val numberOfStudents = assignmentMembershipService.determineMembershipUsers(assignment).size
 			addNumericCell(numberOfStudents, row)
 			addNumericCell(assignment.submissions.size, row)
@@ -99,6 +101,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 				assignment.module.name,
 				assignmentMembershipService.determineMembershipUsers(assignment).size,
 				assignment.summative,
+				assignment.dissertation,
 				assignment.submissions.size,
 				assignment.submissions.filter(submission => submission.isAuthorisedLate).size,
 				assignment.submissions.filter(submission => submission.isLate && !submission.isAuthorisedLate).size,
@@ -154,12 +157,14 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 			addNumericCell(submissionsLateWithoutExt, row)
 			val totalPublished = assignmentInfoList.map(_.totalPublished).sum
 			val totalUnPublished = numberOfSubmissions - totalPublished
+			// totalUnPublished vs. outstanding. not necessarily the same thing.
+
 			addNumericCell(totalUnPublished, row)
 			addNumericCell(totalPublished, row)
 			val ontime = assignmentInfoList.map(_.feedbackCount.onTime).sum
 			addNumericCell(ontime, row)
 			addPercentageCell(ontime, totalPublished, row, workbook)
-			val late = assignmentInfoList.map(_.feedbackCount.late).sum
+			val late = assignmentInfoList.map(_.feedbackCount.late).sum // minus any dissertations?
 			addNumericCell(late, row)
 			addPercentageCell(late, totalPublished, row, workbook)
 		}
@@ -187,13 +192,20 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 				if(submissionEventDate.isAfter(assignmentCloseDate)) submissionEventDate
 				else assignmentCloseDate
 
+			// is this assignment exempt from the within 20 working days rule?
+			val isLateExempt = assignment.dissertation
+
 			// was feedback returned within 20 working days?
 			val numOfDays = workingDaysHelper.getNumWorkingDays(submissionCandidateDate.toLocalDate, publishEventDate.toLocalDate)
 
 			// note +1 working day  - getNumWorkingDays is inclusive (starts at 1)
 			// we want n working days after the close date
-			if (numOfDays > (Feedback.PublishDeadlineInWorkingDays + 1)) FeedbackCount(0, 1, publishEventDate, publishEventDate) // was late
-			else FeedbackCount(1, 0, publishEventDate, publishEventDate) // on time
+			if (numOfDays > (Feedback.PublishDeadlineInWorkingDays + 1) && isLateExempt != true)  {
+				FeedbackCount(0, 1, publishEventDate, publishEventDate)
+			} // was late
+			else {
+				FeedbackCount(1, 0, publishEventDate, publishEventDate)
+			} // on time
 		}
 
 		// merge our list of pairs into a single pair of (on time, late)
@@ -233,6 +245,7 @@ object FeedbackReport {
 		val moduleName: String,
 		val membership: Int,
 		val summative: Boolean,
+		var dissertation: Boolean,
 		val numberOfSubmissions: Int,
 		val submissionsLateWithExt: Int,
 		val submissionsLateWithoutExt: Int,

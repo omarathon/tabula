@@ -68,6 +68,7 @@ abstract class CopyAssignmentsCommand(val department: Department, val modules: S
 		newAssignment.allowExtensions = assignment.allowExtensions
 		newAssignment.allowExtensionRequests = assignment.allowExtensionRequests
 		newAssignment.summative = assignment.summative
+		newAssignment.dissertation = assignment.dissertation
 		newAssignment.feedbackTemplate = assignment.feedbackTemplate
 		newAssignment.markingWorkflow = assignment.markingWorkflow
 

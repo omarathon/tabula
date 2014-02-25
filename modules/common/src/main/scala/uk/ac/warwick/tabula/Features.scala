@@ -57,6 +57,7 @@ abstract class Features {
 	@Value("${features.assignmentProgressTable:true}") var assignmentProgressTable = defaults.assignmentProgressTable
 	@Value("${features.assignmentProgressTableByDefault:true}") var assignmentProgressTableByDefault = defaults.assignmentProgressTableByDefault
 	@Value("${features.summativeFilter:true}") var summativeFilter = defaults.summativeFilter
+	@Value("${features.dissertationFilter:true}") var dissertationFilter = defaults.dissertationFilter
 	@Value("${features.meetingRecordApproval:true}") var meetingRecordApproval = defaults.meetingRecordApproval
 	@Value("${features.smallGroupTeaching:true}") var smallGroupTeaching = defaults.smallGroupTeaching
 	@Value("${features.smallGroupTeaching.studentSignUp:true}") var smallGroupTeachingStudentSignUp = defaults.smallGroupTeachingStudentSignUp
@@ -125,6 +126,7 @@ class FeaturesMessage {
 	@BeanProperty var assignmentProgressTable = true
 	@BeanProperty var assignmentProgressTableByDefault = true
 	@BeanProperty var summativeFilter = true
+	@BeanProperty var dissertationFilter = true
 	@BeanProperty var meetingRecordApproval = true
 	@BeanProperty var smallGroupTeaching = true
 	@BeanProperty var smallGroupTeachingStudentSignUp = true
