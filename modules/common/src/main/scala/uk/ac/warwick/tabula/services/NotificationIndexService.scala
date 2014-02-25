@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.hibernate.ObjectNotFoundException
 import javax.persistence.DiscriminatorValue
-import org.apache.lucene.search.{FieldDoc, SortField, Sort, TermQuery}
+import org.apache.lucene.search._
 import org.apache.lucene.index.Term
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.Logging
@@ -29,7 +29,14 @@ trait NotificationIndexService {
 trait NotificationQueryMethods { self: NotificationIndexServiceImpl =>
 	def userStream(req: ActivityStreamRequest): PagingSearchResultItems[Notification[_,_]] = {
 		val user = req.user
-		val query = new TermQuery(new Term("recipient", user.getUserId))
+
+		val recipientQuery = new TermQuery(new Term("recipient", user.getUserId))
+		val priorityLimit = NumericRangeQuery.newDoubleRange("priority", req.priority, 1.0, true, true)
+
+		val query = new BooleanQuery
+		query.add(recipientQuery, BooleanClause.Occur.MUST)
+		query.add(priorityLimit, BooleanClause.Occur.MUST)
+
 		val sort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true))
 		val fieldDoc = req.pagination.map { p => new FieldDoc(p.lastDoc, Float.NaN, Array(p.lastField:JLong)) }
 		val token = req.pagination.map { _.token }
@@ -84,6 +91,7 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 			doc.add(plainStringField("notification", notification.id))
 			doc.add(plainStringField("recipient", recipient.getUserId))
 			doc.add(plainStringField("notificationType", notificationType))
+			doc.add(doubleField("priority", notification.priority.toNumericalValue))
 			doc.add(dateField(UpdatedDateField, notification.created))
 			Seq(doc)
 		} else {

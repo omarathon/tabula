@@ -37,7 +37,7 @@ abstract class AbstractCourseAndRouteService extends CourseAndRouteService {
 	self: RouteDaoComponent with CourseDaoComponent =>
 
 	def save(route: Route) = routeDao.saveOrUpdate(route)
-	def getRouteByCode(code: String): Option[Route] = routeDao.getByCode(code)
+	def getRouteByCode(code: String): Option[Route] = routeDao.getByCode(code.toLowerCase())
 	def getRouteById(id: String): Option[Route] = routeDao.getById(id)
 	def getCourseByCode(code: String): Option[Course] = courseDao.getByCode(code)
 }

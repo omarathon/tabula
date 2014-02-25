@@ -6,14 +6,15 @@ import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.{Command, Unaudited}
 import uk.ac.warwick.tabula.data.{Daoisms, MemberDao, StudentCourseDetailsDao}
-import uk.ac.warwick.tabula.data.model.{CourseType, Member, StudentCourseDetails, StudentMember, StudentRelationshipSource}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.helpers.{SitsStudentRow, ImportCommandFactory, PropertyCopying}
 import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter}
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, RelationshipService}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.commands.Description
-import ImportMemberHelpers.opt 
+import ImportMemberHelpers.opt
+import scala.Some
 
 class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, importCommandFactory: ImportCommandFactory)
 	extends Command[StudentCourseDetails] with Logging with Daoisms
@@ -109,10 +110,9 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 		copyObjectProperty("statusOnCourse", row.scjStatusCode, studentCourseDetailsBean, toSitsStatus(row.scjStatusCode))
 	}
 
-	def toRoute(code: String) = code.maybeText.flatMap { routeCode => courseAndRouteService.getRouteByCode(routeCode.toLowerCase) }.getOrElse(null)
-
-	def toCourse(code: String) = code.maybeText.flatMap { courseImporter.getCourseForCode }.getOrElse(null)
-	def toAward(code: String) = code.maybeText.flatMap { awardImporter.getAwardForCode }.getOrElse(null)
+	def toRoute(code: String): Option[Route] = code.maybeText.flatMap { courseAndRouteService.getRouteByCode }
+	def toCourse(code: String): Option[Course] = code.maybeText.flatMap { courseImporter.getCourseForCode }
+	def toAward(code: String): Option[Award] = code.maybeText.flatMap { awardImporter.getAwardForCode }
 
 	def captureTutor(studentCourseDetails: StudentCourseDetails) = {
 		val dept = studentCourseDetails.department
@@ -149,6 +149,7 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 			val threeMonthsAgo = DateTime.now().minusMonths(3)
 			if (endDateFromSits.isBefore(threeMonthsAgo)) {
 				relationshipService.getAllCurrentRelationships(stuMem)
+					.filter { relationship => relationship.studentCourseDetails.sprCode == row.sprCode }
 					.foreach { relationship =>
 							relationship.endDate = endDateFromSits
 							relationshipService.saveOrUpdate(relationship)

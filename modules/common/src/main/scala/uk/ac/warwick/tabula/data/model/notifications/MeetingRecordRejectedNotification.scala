@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
-import uk.ac.warwick.tabula.data.model.{SingleItemNotification, Notification, FreemarkerModel, MeetingRecordApproval}
+import uk.ac.warwick.tabula.data.model.{NotificationPriority, SingleItemNotification, Notification, FreemarkerModel, MeetingRecordApproval}
 import javax.persistence.{Entity, DiscriminatorValue}
 
 @Entity
@@ -9,6 +9,8 @@ class MeetingRecordRejectedNotification
 	extends Notification[MeetingRecordApproval, Unit]
 	with MeetingRecordNotificationTrait
 	with SingleItemNotification[MeetingRecordApproval] {
+
+	priority = NotificationPriority.Critical
 
 	def approval = item.entity
 	def meeting = approval.meetingRecord

@@ -19,6 +19,7 @@ import uk.ac.warwick.tabula.services.{CourseAndRouteService, MaintenanceModeServ
 import uk.ac.warwick.userlookup.AnonymousUser
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
+import org.scalatest.junit.AssertionsForJUnit
 
 trait ComponentMixins extends Mockito
 		with ProfileServiceComponent
@@ -53,6 +54,7 @@ trait ImportStudentCourseCommandSetup extends ImportCommandFactoryForTesting wit
 	val courseAndRouteService = smartMock[CourseAndRouteService]
 	val route = smartMock[Route]
 	courseAndRouteService.getRouteByCode("c100") returns (Some(route))
+	courseAndRouteService.getRouteByCode("C100") returns (Some(route))
 	importCommandFactory.courseAndRouteService = courseAndRouteService
 
 	val courseImporter = smartMock[CourseImporter]
@@ -74,6 +76,7 @@ trait PropertyCopyingSetup extends ImportCommandFactoryForTesting {
 
 	val modAndDeptService = smartMock[ModuleAndDepartmentService]
 	modAndDeptService.getDepartmentByCode("ph") returns (Some(department))
+	modAndDeptService.getDepartmentByCode("PH") returns (Some(department))
 	importCommandFactory.modAndDeptService = modAndDeptService
 }
 
@@ -177,6 +180,41 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 		tier4RequirementImporter.hasTier4Requirement("0672089") returns (false)
 		rowCommand.tier4RequirementImporter = tier4RequirementImporter
+	}
+
+	/** When a SPR is (P)ermanently withdrawn, end relationships
+		* FOR THAT ROUTE ONLY
+		*/
+	@Test def endingWithdrawnRouteRelationships() {
+		new Environment {
+			val student = new StudentMember()
+
+			def createRelationship(sprCode: String, scjCode: String) = {
+				val rel = new MemberStudentRelationship()
+				rel.studentMember = student
+				val scd = new StudentCourseDetails()
+				scd.scjCode = scjCode
+				scd.sprCode = sprCode
+				rel.studentCourseDetails = scd
+				rel
+			}
+
+			val rel1 = createRelationship(sprCode="1111111/1", scjCode="1111111/1")
+			val rel2 = createRelationship(sprCode="1111111/2", scjCode="1111111/2")
+			val rel3 = createRelationship(sprCode="1111111/1", scjCode="1111111/3")
+			relationshipService.getAllCurrentRelationships(student) returns (Seq(rel1,rel2,rel3))
+
+			row.sprCode = "1111111/1"
+			row.sprStatusCode = "P"
+			row.endDate = new DateTime().minusMonths(6).toLocalDate
+
+			val courseCommand = importCommandFactory.createImportStudentCourseCommand(row, student)
+			courseCommand.applyInternal()
+
+			rel1.endDate.toLocalDate should be (row.endDate)
+			expectResult(null, "Shouldn't end course that's on a different route")( rel2.endDate )
+			rel3.endDate.toLocalDate should be (row.endDate)
+		}
 	}
 
 	@Test def testImportStudentCourseYearCommand {

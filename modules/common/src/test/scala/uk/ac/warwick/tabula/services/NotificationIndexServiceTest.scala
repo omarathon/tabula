@@ -2,17 +2,16 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.{Notification, HeronWarningNotification}
+import uk.ac.warwick.tabula.data.model.{Notification, NotificationPriority, HeronWarningNotification}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import org.apache.lucene.store.RAMDirectory
-import org.apache.lucene.index.{Fields, IndexReaderContext, Term, StoredFieldVisitor, IndexReader}
+import org.apache.lucene.index.Term
 import org.apache.lucene.search.{Sort, SortField, TermQuery}
-import javax.mail.search.StringTerm
-import javax.mail.Message
+
 import uk.ac.warwick.tabula.data.NotificationDao
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 import uk.ac.warwick.userlookup.AnonymousUser
-
+import uk.ac.warwick.tabula.data.model.NotificationPriority.{Critical, Warning}
 
 class NotificationIndexServiceTest extends TestBase with Mockito {
 
@@ -25,7 +24,7 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 	service.dao = dao
 
 	// default behaviour, we add individual expectations later
-	dao.getById(any[String]) returns(None)
+	dao.getById(any[String]) returns None
 
 	val agent = Fixtures.user(userId="abc")
 	val recipient = Fixtures.user(userId="xyz")
@@ -36,10 +35,19 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 
 	// Selection of notifications intended for a couple of different recipients
 	lazy val items = for (i <- 1 to 100) yield {
-		val notification = new HeronWarningNotification/*Notification.init(, agent, group, group)*/
+		val notification = new HeronWarningNotification
 		notification.id = "nid"+i
 		notification.created = now.plusMinutes(i)
-		dao.getById(notification.id) returns(Some(notification))
+		dao.getById(notification.id) returns Some(notification)
+
+		notification.priority = if (i <= 40) {
+			NotificationPriority.Info
+		} else if (i <= 80) {
+			NotificationPriority.Warning
+		} else {
+			NotificationPriority.Critical
+		}
+
 		val theRecipient = if (i % 2 == 0) {
 			recipient
 		} else {
@@ -51,6 +59,10 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 	// The IDs of notifications we expect our recipient to get.
 	lazy val recipientNotifications = items.filter{_.recipient == recipient}
 	lazy val expectedIds = recipientNotifications.map{_.notification.id}
+	lazy val criticalIds = recipientNotifications.filter {_.notification.priority == Critical}.map{_.notification.id}
+	lazy val warningIds =
+		recipientNotifications.filter {i => i.notification.priority == Warning || i.notification.priority == Critical}
+		.map{_.notification.id}
 
 	def indexTestItems() {
 		service.indexItems(items)
@@ -92,6 +104,28 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 		page2.items.size should be (20)
 
 		page2.items.map{_.id} should be (expectedIds.reverse.slice(20, 40))
+	}
+
+	@Test
+	def priorityFilteredUserStream() {
+
+		indexTestItems()
+		// show critical items only - should be 10 items
+		val criticalRequest = ActivityStreamRequest(user=recipient, priority=0.75, max=20, pagination=None)
+		val page = service.userStream(criticalRequest)
+		page.items.size should be (10)
+		page.items.map{_.id} should be (criticalIds.reverse)
+
+		// show >= warning items only - should be 30 items
+		val warningRequest = ActivityStreamRequest(user=recipient, priority=0.5, max=20, pagination=None)
+		val page1 = service.userStream(warningRequest)
+		page1.items.size should be (20)
+		page1.items.map{_.id} should be (warningIds.reverse.slice(0, 20))
+
+		val page2Pagination = new SearchPagination(token=page1.token, last=page1.last.get)
+		val page2 = service.userStream(warningRequest.copy(pagination=Some(page2Pagination)))
+		page2.items.size should be (10)
+		page2.items.map{_.id} should be (warningIds.reverse.slice(20, 30))
 	}
 
 }

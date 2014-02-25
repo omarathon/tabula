@@ -38,32 +38,39 @@ trait PropertyCopying extends Logging {
 	}
 
 	// returns true if there is a change, false if no change
-	def copyObjectProperty(property: String, code: String, memberBean: BeanWrapper, obj: Object) = {
+	def copyObjectProperty(property: String, code: String, memberBean: BeanWrapper, optionObj: Option[Object]) = {
+
 		val oldValue = memberBean.getPropertyValue(property)
 
-		if (oldValue == null && code == null) false // null before and still null - no change
-		else if (oldValue == null) { // changed to non-null
-			// From no route to having a route
-			memberBean.setPropertyValue(property, obj)
-			true
-		} else if (code == null) { // changed to null
-			// User had a route but now doesn't
-			memberBean.setPropertyValue(property, null)
-			true
-		} else {
-			val oldCode = oldValue match {
-				case route: Route => route.code
-				case course: Course => course.code
-				case dept: Department => dept.code
-				case sitsStatus: SitsStatus => sitsStatus.code
-				case _ => null
+		optionObj match {
+			case None => {
+				if (oldValue == null) false // null before and still null - no change
+				else {
+					memberBean.setPropertyValue(property, null)  // change from non-null to null
+					true
+				}
 			}
-			if (oldCode == code.toLowerCase) { // same non-null value
-				false
-			}
-			else { // different non-null value
-				memberBean.setPropertyValue(property, obj)
-				true
+			case Some(obj) => {
+				if (oldValue == null) { // changed from null to non-null
+					memberBean.setPropertyValue(property, obj)
+					true
+				}
+				else {
+					val oldCode = oldValue match {
+						case route: Route => route.code
+						case course: Course => course.code
+						case dept: Department => dept.code
+						case sitsStatus: SitsStatus => sitsStatus.code
+						case _ => null
+					}
+					if (oldCode == code.toLowerCase) { // same non-null value
+						false
+					}
+					else { // different non-null value
+						memberBean.setPropertyValue(property, obj)
+						true
+					}
+				}
 			}
 		}
 	}
@@ -78,19 +85,19 @@ trait PropertyCopying extends Logging {
 		}
 	}
 
-	def toSitsStatus(code: String) = {
+	def toSitsStatus(code: String): Option[SitsStatus] = {
 		if (code == null || code == "") {
-			null
+			None
 		} else {
-			sitsStatusImporter.getSitsStatusForCode(code).getOrElse(null)
+			sitsStatusImporter.getSitsStatusForCode(code)
 		}
 	}
 
-	def toDepartment(departmentCode: String) = {
+	def toDepartment(departmentCode: String): Option[Department] = {
 		if (departmentCode == null || departmentCode == "") {
-			null
+			None
 		} else {
-			moduleAndDepartmentService.getDepartmentByCode(departmentCode.toLowerCase).getOrElse(null)
+			moduleAndDepartmentService.getDepartmentByCode(departmentCode)
 		}
 	}
 }

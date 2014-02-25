@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, CommandInter
 import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, TransactionalComponent}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, AssignmentService}
 
@@ -30,8 +30,8 @@ class CreateExtensionFixtureCommand extends CommandInternal[Extension] {
 			e.assignment = assignmentService.getAssignmentById(assignmentId).get
 
 			if (approved) {
-				e.approved = true
-				e.approvedOn = now.plusMillis(5) // superquick
+				e.approve()
+				e.reviewedOn = now.plusMillis(5) // superquick
 			}
 
 			// make sure to manually create the inverse relationship
