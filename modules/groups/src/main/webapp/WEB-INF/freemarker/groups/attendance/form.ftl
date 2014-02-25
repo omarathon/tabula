@@ -104,7 +104,7 @@
 							<#if hasState>
 								<#local currentState = mapGet(command.studentsState, student.universityId) />
 							</#if>
-							<select id="studentsState-${student.universityId}" name="studentsState[${student.universityId}]">
+							<select id="studentsState-${student.universityId}" name="studentsState[${student.universityId}]" data-universityid="${student.universityId}">
 								<option value="" <#if !hasState>selected</#if>>Not recorded</option>
 								<#list allCheckpointStates as state>
 									<option value="${state.dbValue}" <#if hasState && currentState.dbValue == state.dbValue>selected</#if>>${state.description}</option>
@@ -164,9 +164,9 @@
 			</#macro>
 
 			<div class="striped-section-contents attendees">
-				<form id="recordAttendance" action="" method="post">
+				<form id="recordAttendance" action="" method="post" data-occurrence="${command.occurrence.id}">
 					<script>
-						AttendanceRecording.bindButtonGroupHandler();
+						AttendanceRecording.bindButtonGroupHandler(true);
 					</script>
 
 					<#list command.members as student>
@@ -177,6 +177,11 @@
 						<div class="pull-right">
 							<input type="submit" value="Save" class="btn btn-primary" data-loading-text="Saving&hellip;" autocomplete="off">
 							<a class="btn" href="${returnTo}">Cancel</a>
+						</div>
+						<div class="pull-left checkpoints-message alert alert-info" style="display: none;">
+							Saving this attendance will set monitoring points for
+							<span class="students use-popover" data-placement="top" data-container="body" data-content=" " data-html="true"></span>
+							as attended.
 						</div>
 					</div>
 				</form>
