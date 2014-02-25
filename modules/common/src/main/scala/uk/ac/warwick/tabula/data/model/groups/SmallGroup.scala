@@ -81,9 +81,13 @@ class SmallGroup
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "studentsgroup_id")
 	private var _studentsGroup: UserGroup = UserGroup.ofUniversityIds
-  def students: UnspecifiedTypeUserGroup = smallGroupService match {
-		case Some(smallGroupService) => new UserGroupCacheManager(_studentsGroup, smallGroupService.studentGroupHelper)
-		case _ => _studentsGroup
+  def students: UnspecifiedTypeUserGroup = {
+		smallGroupService match {
+			case Some(smallGroupService) => {
+				new UserGroupCacheManager(_studentsGroup, smallGroupService.studentGroupHelper)
+			}
+			case _ => _studentsGroup
+		}
 	}
 	def students_=(group: UserGroup) { _studentsGroup = group }
 

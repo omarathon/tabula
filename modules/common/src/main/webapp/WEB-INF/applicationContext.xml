@@ -417,6 +417,7 @@
 						<value>uk.ac.warwick.tabula.services.MaintenanceModeMessage</value>
 						<value>uk.ac.warwick.tabula.services.permissions.PermissionsCacheBusterMessage</value>
 						<value>uk.ac.warwick.tabula.services.HibernateStatisticsMessage</value>
+						<value>uk.ac.warwick.tabula.services.UserGroupMembershipHelperCacheBusterMessage</value>
 					</list>
 				</property>
 			</bean>
@@ -426,6 +427,7 @@
 	<bean class="uk.ac.warwick.tabula.FeatureFlagListener" />
 	<bean class="uk.ac.warwick.tabula.services.MaintenanceModeListener" />
 	<bean class="uk.ac.warwick.tabula.services.SSOMaintenanceModeListener" />
+	<bean class="uk.ac.warwick.tabula.services.UserGroupMembershipHelperCacheService" />
 
 	<!-- Expose EhCache properties as system properties -->
 	<bean
@@ -507,6 +509,26 @@
 	</beans>
 
 	<beans profile="dev,sandbox,production">
+		<!-- EhCaches -->
+		<bean id="userGroupCacheBean"
+			  class="uk.ac.warwick.tabula.services.UserGroupMembershipCacheBean"
+			  abstract="true" />
+
+		<bean id="Assignment-_members" parent="userGroupCacheBean"
+			  p:runtimeClass="uk.ac.warwick.tabula.data.model.Assignment"
+			  p:path="_members" />
+		<bean id="SmallGroupSet-_membersGroup" parent="userGroupCacheBean"
+			  p:runtimeClass="uk.ac.warwick.tabula.data.model.groups.SmallGroupSet"
+			  p:path="_membersGroup" />
+		<bean id="SmallGroup-_studentsGroup" parent="userGroupCacheBean"
+			  p:runtimeClass="uk.ac.warwick.tabula.data.model.groups.SmallGroup"
+			  p:path="_studentsGroup" />
+		<bean id="StaffMember-_assistantsGroup" parent="userGroupCacheBean"
+			  p:runtimeClass="uk.ac.warwick.tabula.data.model.StaffMember"
+			  p:path="_assistantsGroup" />
+		<bean id="SmallGroupEvent-_tutors" parent="userGroupCacheBean"
+			  p:runtimeClass="uk.ac.warwick.tabula.data.model.groups.SmallGroupEvent"
+			  p:path="_tutors" />
 
 			<!-- JMX -->
 

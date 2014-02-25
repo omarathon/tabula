@@ -22,7 +22,7 @@ class AllocateStudentsToGroupsCommandTest extends TestBase with Mockito {
 		val set = Fixtures.smallGroupSet("My small groups")
 		set.module = module
 		set.membershipService = membershipService
-		set._membersGroup.userLookup = userLookup
+		set.members.asInstanceOf[UserGroup].userLookup = userLookup
 		
 		val user1 = new User("cuscav")
 		user1.setFoundUser(true)

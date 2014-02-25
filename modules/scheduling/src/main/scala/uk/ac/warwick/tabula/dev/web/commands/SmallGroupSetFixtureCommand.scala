@@ -42,7 +42,7 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 			groupSet.openForSignups = openForSignups
 			groupSet.releasedToStudents = releasedToStudents
 			groupSet.groups = JArrayList()
-			groupSet._membersGroup = UserGroup.ofUsercodes
+			groupSet.members = UserGroup.ofUsercodes
 			if (maxGroupSize > 0){
 				groupSet.defaultMaxGroupSize = maxGroupSize
 				groupSet.defaultMaxGroupSizeEnabled = true

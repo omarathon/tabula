@@ -29,7 +29,7 @@ class UserGroupMembershipHelperTest extends AppContextTestBase {
 			event.startTime = LocalTime.now()
 			event.endTime = LocalTime.now()
 			event.day = DayOfWeek.Thursday
-			for (tutor <- tutors) event.tutors.addUserId(tutor)
+			for (tutor <- tutors) event.tutors.knownType.addUserId(tutor)
 			event.group = group
       group.events.add(event)
 			event
@@ -45,7 +45,7 @@ class UserGroupMembershipHelperTest extends AppContextTestBase {
 		user.setUserId("cusebr")
 		user.setWarwickId("0123456")
 
-		val eventHelper = new UserGroupMembershipHelper[SmallGroupEvent]("tutors") with FakeLookups
+		val eventHelper = new UserGroupMembershipHelper[SmallGroupEvent]("_tutors") with FakeLookups
 		val events = eventHelper.findBy(user)
 		events should have size (2)
 		events should contain (event1)
@@ -53,10 +53,5 @@ class UserGroupMembershipHelperTest extends AppContextTestBase {
 
 		// cached
 		eventHelper.findBy(user)
-
-		val groupHelper = new UserGroupMembershipHelper[SmallGroup]("events.tutors") with FakeLookups
-		groupHelper.findBy(user) should be (Seq(group))
-
-
 	}
 }

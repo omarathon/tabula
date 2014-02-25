@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.{SmallGroupService, TermService, ProfileService, RelationshipService}
+import uk.ac.warwick.tabula.services.{StaffAssistantsHelpers, UserGroupCacheManager, SmallGroupService, TermService, ProfileService, RelationshipService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
 import uk.ac.warwick.tabula.system.permissions.Restricted
@@ -69,7 +69,7 @@ object Member {
 abstract class Member extends MemberProperties with ToString with HibernateVersioned with PermissionsTarget with Logging with Serializable {
 
 	@transient
-	var profileService = Wire[ProfileService]
+	var profileService = Wire[ProfileService with StaffAssistantsHelpers]
 
 	@transient
 	var relationshipService = Wire[RelationshipService]
@@ -367,8 +367,9 @@ class StaffMember extends Member with StaffProperties {
 
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "assistantsgroup_id")
-	var _assistantsGroup: UserGroup = UserGroup.ofUsercodes
-	def assistants: Option[UnspecifiedTypeUserGroup] = Option(_assistantsGroup)
+	private var _assistantsGroup: UserGroup = UserGroup.ofUsercodes
+	def assistants: UnspecifiedTypeUserGroup = new UserGroupCacheManager(_assistantsGroup, profileService.staffAssistantsHelper)
+	def assistants_=(group: UserGroup) { _assistantsGroup = group }
 }
 
 @Entity
@@ -397,7 +398,7 @@ class RuntimeMember(user: CurrentUser) extends Member(user) {
 	override def permissionsParents = Stream.empty
 }
 
-trait MemberProperties {
+trait MemberProperties extends StringId {
 	@Id var universityId: String = _
 	def id = universityId
 

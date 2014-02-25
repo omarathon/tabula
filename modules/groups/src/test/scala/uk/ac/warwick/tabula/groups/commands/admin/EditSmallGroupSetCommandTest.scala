@@ -29,7 +29,7 @@ class EditSmallGroupSetCommandTest extends TestBase with Mockito {
 		module.department = dept
 		
 		val set = new SmallGroupSet()
-		set._membersGroup = UserGroup.ofUsercodes
+		set.members = UserGroup.ofUsercodes
 		set.membershipService = mock[AssignmentMembershipService]
 		set.module = module
 		
@@ -54,7 +54,7 @@ class EditSmallGroupSetCommandTest extends TestBase with Mockito {
 		set.groups.add(group1)
 		set.groups.add(group2)
 		
-		set._membersGroup.userLookup = mockUserLookup
+		set.members.asInstanceOf[UserGroup].userLookup = mockUserLookup
 		group1.students.asInstanceOf[UserGroup].userLookup = mockUserLookup
 		group2.students.asInstanceOf[UserGroup].userLookup = mockUserLookup
 		
@@ -65,7 +65,7 @@ class EditSmallGroupSetCommandTest extends TestBase with Mockito {
 		cmd.groups.asScala.foreach { cmd => cmd.maintenanceMode = new MaintenanceModeServiceImpl() }
 		
 		cmd.membershipService = mock[AssignmentMembershipService] // Intentionally different to the SmallGroupSet's one
-		cmd.membershipService.determineMembershipUsers(Seq(), Some(set._membersGroup)) returns (set._membersGroup.users)
+		cmd.membershipService.determineMembershipUsers(Seq(), Some(set.members)) returns (set.members.users)
 		cmd.membershipService.determineMembershipUsers(Seq(), Some(cmd.members)) returns (cmd.members.users)
 		cmd.applyInternal()
 		
@@ -81,7 +81,7 @@ class EditSmallGroupSetCommandTest extends TestBase with Mockito {
 		cmd.members.add(user5)
 		
 		cmd.membershipService = mock[AssignmentMembershipService] // Intentionally different to the SmallGroupSet's one
-		cmd.membershipService.determineMembershipUsers(Seq(), Some(set._membersGroup)) returns (set._membersGroup.users)
+		cmd.membershipService.determineMembershipUsers(Seq(), Some(set.members)) returns (set.members.users)
 		cmd.membershipService.determineMembershipUsers(Seq(), Some(cmd.members)) returns (cmd.members.users)
 		cmd.applyInternal()
 		

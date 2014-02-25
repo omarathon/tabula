@@ -26,9 +26,16 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 		dept.modules.add(module2)
 
 		val assignment1 = Fixtures.assignment("assignment 1")
+		assignment1.assignmentMembershipService = assignmentMembershipService
+
 		val assignment2 = Fixtures.assignment("assignment 2")
+		assignment2.assignmentMembershipService = assignmentMembershipService
+
 		val assignment3 = Fixtures.assignment("assignment 3")
+		assignment3.assignmentMembershipService = assignmentMembershipService
+
 		val assignment4 = Fixtures.assignment("assignment 4")
+		assignment4.assignmentMembershipService = assignmentMembershipService
 
 		module1.assignments.add(assignment1)
 		module1.assignments.add(assignment2)
@@ -106,14 +113,13 @@ class AssignmentMembershipDaoTest extends PersistenceTestBase {
 		val userLookup = new MockUserLookup
 		userLookup.registerUserObjects(user)
 
-		assignmentMembershipService.assignmentManualMembershipHelper.userlookup = userLookup
+		assignmentMembershipService.assignmentManualMembershipHelper.userLookup = userLookup
 	}
 
 	@Before def setup() {
 		dao.sessionFactory = sessionFactory
 		assignmentMembershipService.assignmentManualMembershipHelper.sessionFactory = sessionFactory
-		assignmentMembershipService.assignmentManualMembershipHelper.groupService = new MockGroupService
-		assignmentMembershipService.assignmentManualMembershipHelper.cache.clear()
+		assignmentMembershipService.assignmentManualMembershipHelper.cache.foreach { _.clear() }
 	}
 
 	@Test def getEnrolledAssignments() {

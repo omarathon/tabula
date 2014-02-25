@@ -76,7 +76,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def saveOrUpdate(note: SmallGroupEventAttendanceNote) = smallGroupDao.saveOrUpdate(note)
 
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
-	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = groupTutorsHelper.findBy(user)
+	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = findSmallGroupEventsByTutor(user).groupBy(_.group).keys.toSeq
 
 	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet] = {
 		val autoEnrolled = 
@@ -151,8 +151,6 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 trait SmallGroupMembershipHelpers {
 	val eventTutorsHelper: UserGroupMembershipHelper[SmallGroupEvent]
-  //TODO can this be removed? findSmallGroupsByTutor could just call findSmallGroupEventsByTutor and then group by group
-	val groupTutorsHelper: UserGroupMembershipHelper[SmallGroup]
 	val studentGroupHelper: UserGroupMembershipHelper[SmallGroup]
 	val groupSetManualMembersHelper: UserGroupMembershipHelper[SmallGroupSet]
 	val membershipDao: AssignmentMembershipDao
@@ -160,8 +158,7 @@ trait SmallGroupMembershipHelpers {
 
 // new up UGMHs which will Wire.auto() their dependencies
 trait SmallGroupMembershipHelpersImpl extends SmallGroupMembershipHelpers {
-	val eventTutorsHelper = new UserGroupMembershipHelper[SmallGroupEvent]("tutors")
-	val groupTutorsHelper = new UserGroupMembershipHelper[SmallGroup]("events.tutors")
+	val eventTutorsHelper = new UserGroupMembershipHelper[SmallGroupEvent]("_tutors")
 
 	// This won't use linked assessment components, only manual membership
 	val groupSetManualMembersHelper = new UserGroupMembershipHelper[SmallGroupSet]("_membersGroup")

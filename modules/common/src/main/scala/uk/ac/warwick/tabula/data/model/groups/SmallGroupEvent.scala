@@ -30,6 +30,9 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 	
 	@transient var permissionsService = Wire[PermissionsService]
 
+	// FIXME this isn't really optional, but testing is a pain unless it's made so
+	@transient var smallGroupService = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
+
 	def this(_group: SmallGroup) {
 		this()
 		this.group = _group
@@ -59,7 +62,16 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
 		
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "tutorsgroup_id")
-	var tutors: UserGroup = UserGroup.ofUsercodes
+	private var _tutors: UserGroup = UserGroup.ofUsercodes
+	def tutors: UnspecifiedTypeUserGroup = {
+		smallGroupService match {
+			case Some(smallGroupService) => {
+				new UserGroupCacheManager(_tutors, smallGroupService.eventTutorsHelper)
+			}
+			case _ => _tutors
+		}
+	}
+	def tutors_=(group: UserGroup) { _tutors = group }
 	
 	@OneToMany(mappedBy = "event", fetch = FetchType.LAZY, cascade=Array(CascadeType.ALL), orphanRemoval = true)
 	@BatchSize(size=50)
@@ -80,7 +92,7 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
     startTime == other.startTime &&
     endTime == other.endTime &&
     location == other.location &&
-    tutors.members == other.tutors.members
+    tutors.hasSameMembersAs(other.tutors)
   }
 
   def duplicateTo(group:SmallGroup):SmallGroupEvent= {
@@ -93,7 +105,7 @@ class SmallGroupEvent extends GeneratedId with ToString with PermissionsTarget w
     newEvent.permissionsService = permissionsService
     newEvent.startTime = startTime
     newEvent.title = title
-    newEvent.tutors = tutors.duplicate()
+    newEvent._tutors = _tutors.duplicate()
     newEvent.weekRanges = weekRanges
 
     newEvent

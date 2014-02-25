@@ -12,6 +12,8 @@ import uk.ac.warwick.spring.Wire
 
 
 trait AssignmentMembershipService {
+	def assignmentManualMembershipHelper: UserGroupMembershipHelperMethods[Assignment]
+
 	def find(assignment: AssessmentComponent): Option[AssessmentComponent]
 	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
 	def find(group: AssessmentGroup): Option[AssessmentGroup]
@@ -70,7 +72,7 @@ class AssignmentMembershipServiceImpl
 	@Autowired var userLookup: UserLookupService = _
 	@Autowired var dao: AssignmentMembershipDao = _
 	
-	val assignmentManualMembershipHelper = new UserGroupMembershipHelper[Assignment]("members")
+	val assignmentManualMembershipHelper = new UserGroupMembershipHelper[Assignment]("_members")
 
 	def getEnrolledAssignments(user: User): Seq[Assignment] = {
 		val autoEnrolled = 

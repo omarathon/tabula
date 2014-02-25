@@ -2,66 +2,105 @@ package uk.ac.warwick.tabula.services
 
 import scala.reflect._
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.Daoisms
-import uk.ac.warwick.userlookup.{User, GroupService}
+import scala.beans.BeanProperty
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.data.{HelperRestrictions, SessionComponent, Daoisms}
+import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.util.cache.{Caches, SingularCacheEntryFactory}
+import uk.ac.warwick.util.cache.{Cache, Caches, SingularCacheEntryFactory}
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.data.model.{KnownTypeUserGroup, UnspecifiedTypeUserGroup}
-import org.joda.time.Days
-import uk.ac.warwick.util.cache.Caches.CacheStrategy
-import org.springframework.stereotype.Service
+import uk.ac.warwick.tabula.data.model.{StringId, KnownTypeUserGroup, UnspecifiedTypeUserGroup}
 import uk.ac.warwick.util.queue.{Queue, QueueListener}
 import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.util.queue.conversion.ItemType
 import org.codehaus.jackson.annotate.JsonAutoDetect
+import org.hibernate.criterion.Projections
+import uk.ac.warwick.tabula.helpers.Logging
+import uk.ac.warwick.tabula.ScalaFactoryBean
+import org.joda.time.Days
+import uk.ac.warwick.util.cache.Caches.CacheStrategy
+import org.springframework.util.Assert
+import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder, ToStringStyle, ToStringBuilder}
 
-trait UserGroupMembershipHelperMethods[A <: Serializable] {
+trait UserGroupMembershipHelperMethods[A <: StringId with Serializable] {
 	def findBy(user: User): Seq[A]
+	def cache: Option[Cache[String, Array[String]]]
 }
 
 /**
  * Class for getting a collection of entities that contain
  * a UserGroup that holds a given user. For example, you could use
- * UserGroupMembershipHelper[SmallGroupEvent]("tutors") to access small group
+ * UserGroupMembershipHelper[SmallGroupEvent]("_tutors") to access small group
  * events for which user X is a tutor.
  *
  * The path can have a second part if the object goes through yet another object,
- * like [SmallGroup]("events.tutors"). We could technically allow longer paths
+ * like [SmallGroup]("events._tutors"). We could technically allow longer paths
  * but it doesn't support that currently and if you want to do this you should
  * maybe think about whether this would be a bit much to ask of the database.
  *
  * This will cache under the default EHcache config unless you define a cache
  * called ClassName-dashed-path,
- * e.g. SmallGroup-events-tutors or SmallGroupEvent-tutors.
+ * e.g. SmallGroup-events-_tutors or SmallGroupEvent-_tutors.
+ *
+ * Requires a cache bean to be specified with the cache name above.
  *
  * TODO PermissionsService ought to use this when it is fully featured
  */
-private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] (
-		path: String,
-		checkUniversityIds:Boolean = true)
-	extends UserGroupMembershipHelperMethods[A] with Daoisms {
+private[services] class UserGroupMembershipHelper[A <: StringId with Serializable : ClassTag] (val path: String, val checkUniversityIds: Boolean = true)
+	extends UserGroupMembershipHelperMethods[A]
+		with UserGroupMembershipHelperLookup
+		with Daoisms
+		with AutowiringUserLookupComponent
+		with Logging {
 
-	var groupService = Wire[GroupService]
-	var userlookup = Wire[UserLookupService]
+	val runtimeClass = classTag[A].runtimeClass
 
-	val simpleEntityName = classTag[A].runtimeClass.getSimpleName
+	lazy val cacheName = simpleEntityName + "-" + path.replace(".","-")
+	lazy val cache: Option[Cache[String, Array[String]]] = Wire.optionNamed[Cache[String, Array[String]]](cacheName)
 
-	val cacheName = simpleEntityName + "-" + path.replace(".","-")
-	val cache = Caches.newCache(cacheName, new UserGroupMembershipCacheFactory(), Days.ONE.toStandardSeconds.getSeconds, CacheStrategy.EhCacheIfAvailable)
+	def findBy(user: User): Seq[A] = {
+		val ids = cache match {
+			case Some(cache) => {
+				cache.get(user.getUserId).toSeq
+			}
+			case None => {
+				logger.warn(s"Couldn't find a cache bean named $cacheName")
+				findByInternal(user)
+			}
+		}
 
-  // A series of confusing variables for building joined queries across paths split by.dots
-	private val pathParts = path.split("\\.").toList.reverse
-	if (pathParts.size > 2) throw new IllegalArgumentException("Only allowed one or two parts to the path")
-  // The actual name of the UserGroup
-	val usergroupName = pathParts.head
-  // A possible table to join through to get to userProp
-  val joinTable: Option[String] = pathParts.tail.headOption
-  // The overall property name, possibly including the joinTable
-  val prop: String = joinTable.fold("")(_ + ".") + usergroupName
-	
-	val groupsByUserSql = {
-    val leftJoin = joinTable.fold("")( table => s"left join r.$table as $table" )
+		if (ids.isEmpty) Nil
+		else session.newCriteria[A].add(safeIn("id", ids)).seq
+	}
+}
+
+trait UserGroupMembershipHelperLookup {
+	self: SessionComponent with HelperRestrictions with UserLookupComponent =>
+
+	def runtimeClass: Class[_]
+	def path: String
+	def checkUniversityIds: Boolean
+
+	lazy val simpleEntityName = runtimeClass.getSimpleName
+
+	// A series of confusing variables for building joined queries across paths split by.dots
+	private lazy val pathParts = {
+		val parts = path.split("\\.").toList.reverse
+
+		if (parts.size > 2) throw new IllegalArgumentException("Only allowed one or two parts to the path")
+
+		parts
+	}
+
+	// The actual name of the UserGroup
+	lazy val usergroupName = pathParts.head
+	// A possible table to join through to get to userProp
+	lazy val joinTable: Option[String] = pathParts.tail.headOption
+	// The overall property name, possibly including the joinTable
+	lazy val prop: String = joinTable.fold("")(_ + ".") + usergroupName
+
+	lazy val groupsByUserSql = {
+		val leftJoin = joinTable.fold("")( table => s"left join r.$table as $table" )
 
 		// skip the university IDs check if we know we only ever use usercodes
 		val universityIdsClause =
@@ -74,7 +113,7 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] 
 			else ""
 
 		s"""
-			select r
+			select r.id
 			from $simpleEntityName r
 			$leftJoin
 			where
@@ -87,26 +126,22 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] 
 		"""
 	}
 
-  // To override in tests
-	protected def getUser(usercode: String) = userlookup.getUserByUserId(usercode)
-	protected def getWebgroups(usercode: String): Seq[String] = usercode.maybeText.map { usercode => groupService.getGroupsNamesForUser(usercode).asScala }.getOrElse(Nil)
+	// To override in tests
+	protected def getUser(usercode: String) = userLookup.getUserByUserId(usercode)
+	protected def getWebgroups(usercode: String): Seq[String] = usercode.maybeText.map { usercode => userLookup.getGroupService.getGroupsNamesForUser(usercode).asScala }.getOrElse(Nil)
 
-	def findBy(user: User): Seq[A] = {
-		cache.get(user.getUserId)
-	}
-
-	protected def findByInternal(user: User): Seq[A] = {
-		val groupsByUser = session.newQuery[A](groupsByUserSql)
+	protected def findByInternal(user: User): Seq[String] = {
+		val groupsByUser = session.createQuery(groupsByUserSql)
 			.setString("universityId", user.getWarwickId)
 			.setString("userId", user.getUserId)
-			.distinct
-			.seq
+			.list.asInstanceOf[JList[String]]
+			.asScala
 
 		val webgroupNames: Seq[String] = getWebgroups(user.getUserId)
 		val groupsByWebgroup =
 			if (webgroupNames.isEmpty) Nil
 			else {
-				val criteria = session.newCriteria[A]
+				val criteria = session.createCriteria(runtimeClass)
 
 				joinTable.foreach { table =>
 					criteria.createAlias(table, table)
@@ -115,42 +150,73 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] 
 				criteria
 					.createAlias(prop, "usergroupAlias")
 					.add(safeIn("usergroupAlias.baseWebgroup", webgroupNames))
-					.seq
+					.setProjection(Projections.id())
+					.list.asInstanceOf[JList[String]]
+					.asScala
 			}
 
 		(groupsByUser ++ groupsByWebgroup).distinct
 	}
+}
 
-	private class UserGroupMembershipCacheFactory extends SingularCacheEntryFactory[String, Array[A]] {
-		def create(usercode: String) = {
-			val user = getUser(usercode)
-			findByInternal(user).toArray[A]
-		}
+class UserGroupMembershipCacheFactory(val runtimeClass: Class[_], val path: String, val checkUniversityIds: Boolean = true)
+	extends SingularCacheEntryFactory[String, Array[String]] with UserGroupMembershipHelperLookup with Daoisms with AutowiringUserLookupComponent {
 
-		def shouldBeCached(value: Array[A]) = true
+	def create(usercode: String) = {
+		val user = getUser(usercode)
+		findByInternal(user).toArray
+	}
+
+	def shouldBeCached(value: Array[String]) = true
+}
+
+class UserGroupMembershipCacheBean extends ScalaFactoryBean[Cache[String, Array[String]]] {
+	@BeanProperty var runtimeClass: Class[_ <: StringId with Serializable] = _
+	@BeanProperty var path: String = _
+	@BeanProperty var checkUniversityIds = true
+
+	def cacheName = runtimeClass.getSimpleName + "-" + path.replace(".","-")
+
+	def createInstance = {
+		Caches.newCache(cacheName, new UserGroupMembershipCacheFactory(runtimeClass, path, checkUniversityIds), Days.ONE.toStandardSeconds.getSeconds, CacheStrategy.EhCacheIfAvailable)
+	}
+
+	override def afterPropertiesSet() {
+		Assert.notNull(runtimeClass, "Must set runtime class")
+		Assert.notNull(path, "Must set path")
+
+		super.afterPropertiesSet()
 	}
 }
 
-@Service(value = "userGroupMembershipHelperCacheService")
-class UserGroupMembershipHelperCacheService extends QueueListener with InitializingBean {
+class UserGroupMembershipHelperCacheService extends QueueListener with InitializingBean with Logging {
 
 	var queue = Wire.named[Queue]("settingsSyncTopic")
+	var context = Wire.property("${module.context}")
 
-	def invalidate(helper: UserGroupMembershipHelper[_], user: User) {
-		helper.cache.remove(user.getUserId)
+	def invalidate(helper: UserGroupMembershipHelperMethods[_], user: User) {
+		helper.cache.foreach { cache =>
+			cache.remove(user.getUserId)
 
-		// Must also inform other Jbosses
-		val msg = new UserGroupMembershipHelperCacheBusterMessage
-		msg.cacheName = helper.cache.getName
-		msg.usercode = user.getUserId
-		queue.send(msg)
+			// Must also inform other Jbosses
+			val msg = new UserGroupMembershipHelperCacheBusterMessage
+			msg.cacheName = cache.getName
+			msg.usercode = user.getUserId
+			queue.send(msg)
+		}
 	}
 
 	override def isListeningToQueue = true
 	override def onReceive(item: Any) {
+		logger.debug(s"Synchronising item $item for $context")
 		item match {
 			case msg: UserGroupMembershipHelperCacheBusterMessage => {
-				Caches.newCache(msg.cacheName, null, Int.MaxValue).remove(msg.usercode)
+				Wire.optionNamed[Cache[String, Array[String]]](msg.cacheName) match {
+					case Some(cache) => {
+						cache.remove(msg.usercode)
+					}
+					case None => logger.warn(s"Couldn't find a cache bean named ${msg.cacheName}")
+				}
 			}
 			case _ =>
 		}
@@ -168,7 +234,7 @@ class UserGroupMembershipHelperCacheBusterMessage {
 	@BeanProperty var usercode: String = _
 }
 
-class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, helper: UserGroupMembershipHelper[_]) extends UnspecifiedTypeUserGroup with KnownTypeUserGroup {
+class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private val helper: UserGroupMembershipHelperMethods[_]) extends UnspecifiedTypeUserGroup with KnownTypeUserGroup {
 
 	// FIXME this isn't really an optional wire, it's just represented as such to make testing easier
 	var cacheService = Wire.option[UserGroupMembershipHelperCacheService]
@@ -231,6 +297,7 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, helper: Us
 	}
 
 	def users = underlying.users
+	def baseWebgroup = underlying.baseWebgroup
 	def excludes = underlying.excludes
 	def size = underlying.size
 	def isEmpty = underlying.isEmpty
@@ -250,4 +317,24 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, helper: Us
 	def includesUserId(userId: String) = underlying.knownType.includesUserId(userId)
 	def excludesUserId(userId: String) = underlying.knownType.excludesUserId(userId)
 
+	override def toString =
+		new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append(underlying)
+				.append(helper)
+				.build()
+
+	override def hashCode() =
+		new HashCodeBuilder()
+				.append(underlying)
+				.append(helper)
+				.build()
+
+	override def equals(other: Any) = other match {
+		case that: UserGroupCacheManager =>
+			new EqualsBuilder()
+				.append(underlying, that.underlying)
+				.append(helper, that.helper)
+				.build()
+		case _ => false
+	}
 }

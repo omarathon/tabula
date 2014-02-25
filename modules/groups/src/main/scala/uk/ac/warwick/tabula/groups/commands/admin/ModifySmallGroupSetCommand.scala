@@ -42,7 +42,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 	// start complicated membership stuff
 
 	lazy val existingGroups: Option[Seq[UpstreamAssessmentGroup]] =  setOption.map(_.upstreamAssessmentGroups)
-	lazy val existingMembers: Option[UserGroup] = setOption.map(_._membersGroup)
+	lazy val existingMembers: Option[UnspecifiedTypeUserGroup] = setOption.map(_.members)
 
 	def copyGroupsFrom(smallGroupSet: SmallGroupSet) {
 		upstreamGroups.addAll(availableUpstreamGroups filter { ug =>
@@ -102,7 +102,7 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 		groups.clear()
 		groups.addAll(set.groups.asScala.map(x => {new EditSmallGroupCommand(x, this)}).asJava)
 		
-		if (set._membersGroup != null) members = set._membersGroup.duplicate()
+		if (set.members != null) members = set.members.duplicate()
 	}
 	
 	def copyTo(set: SmallGroupSet) {
@@ -129,8 +129,8 @@ abstract class ModifySmallGroupSetCommand(val module: Module, val updateStudentM
 		set.groups.clear()
 		set.groups.addAll(groups.asScala.filter(!_.delete).map(_.apply()).asJava)
 		
-		if (set._membersGroup == null) set._membersGroup = UserGroup.ofUniversityIds
-		set._membersGroup.copyFrom(members)
+		if (set.members == null) set.members = UserGroup.ofUniversityIds
+		set.members.copyFrom(members)
 	}
 	
 	override def onBind(result: BindingResult) {

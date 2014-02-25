@@ -149,22 +149,14 @@ class UserGroup private(val universityIds: Boolean) extends GeneratedId with Uns
 
 
 	def copyFrom(otherGroup: UnspecifiedTypeUserGroup) {
-		otherGroup match {
-			case other:UserGroup=>{
-				assert(this.universityIds == other.universityIds, "Can only copy from a group with same type of users")
-				baseWebgroup = other.baseWebgroup
-				includeUsers.clear()
-				excludeUsers.clear()
-				staticIncludeUsers.clear()
-				includeUsers.addAll(other.includeUsers)
-				excludeUsers.addAll(other.excludeUsers)
-				staticIncludeUsers.addAll(other.staticIncludeUsers)
-			}
-			case _ => {
-				assert(false, "Can only copy from one UserGroup to another")
-			}
-		}
+		assert(this.universityIds == otherGroup.universityIds, "Can only copy from a group with same type of users")
 
+		val other = otherGroup.knownType
+
+		baseWebgroup = other.baseWebgroup
+		includedUserIds = other.includedUserIds
+		excludedUserIds = other.excludedUserIds
+		staticUserIds = other.staticUserIds
 	}
 
 	def duplicate(): UserGroup = {
@@ -202,6 +194,8 @@ trait UnspecifiedTypeUserGroup {
 	 * @return All of the included users (includedUsers, staticUsers, and webgroup members), minus the excluded users
 	 */
 	def users: Seq[User]
+
+	def baseWebgroup: String
 
 	/**
 	 * @return The explicitly excluded users

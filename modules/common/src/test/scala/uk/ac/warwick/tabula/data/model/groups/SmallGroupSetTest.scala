@@ -28,7 +28,7 @@ class SmallGroupSetTest extends TestBase with Mockito{
     source.assessmentGroups =  JArrayList()
     source.format = SmallGroupFormat.Lab
     source.groups  = JArrayList(group)
-    source._membersGroup =  UserGroup.ofUniversityIds.tap(_.addUserId("test user"))
+    source.members = UserGroup.ofUniversityIds.tap(_.addUserId("test user"))
 
     source.membershipService = mock[AssignmentMembershipService]
     source.module = new Module
@@ -53,8 +53,8 @@ class SmallGroupSetTest extends TestBase with Mockito{
     clone.format should be (source.format)
     clone.groups.size should be(1)
     clone.groups.asScala.head should be(cloneGroup)
-		clone._membersGroup should not be(source._membersGroup)
-    clone._membersGroup.hasSameMembersAs(source._membersGroup) should be (true)
+		clone.members should not be(source.members)
+    clone.members.hasSameMembersAs(source.members) should be (true)
     clone.module should be (cloneModule)
     clone.name should be(source.name)
     clone.permissionsService should be(source.permissionsService)

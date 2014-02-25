@@ -185,7 +185,11 @@ class Assignment
 
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
-	var members: UserGroup = UserGroup.ofUsercodes
+	private var _members: UserGroup = UserGroup.ofUsercodes
+	def members: UnspecifiedTypeUserGroup = {
+		Option(_members).map { new UserGroupCacheManager(_, assignmentMembershipService.assignmentManualMembershipHelper) }.orNull
+	}
+	def members_=(group: UserGroup) { _members = group }
 
 	// TAB-1446 If hibernate sets members to null, make a new empty usergroup
 	override def postLoad {
@@ -193,8 +197,8 @@ class Assignment
 	}
 
 	def ensureMembersGroup = {
-		if (members == null) members = UserGroup.ofUsercodes
-		members
+		if (_members == null) _members = UserGroup.ofUsercodes
+		_members
 	}
 
 	@ManyToOne(fetch = LAZY)

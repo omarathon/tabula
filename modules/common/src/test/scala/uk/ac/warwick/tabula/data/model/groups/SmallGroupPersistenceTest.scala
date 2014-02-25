@@ -88,8 +88,8 @@ class SmallGroupPersistenceTest extends PersistenceTestBase with FieldAccessByRe
 			
 			session.saveOrUpdate(group1)
 			
-			event1.tutors.addUserId("cusebr")
-			event2.tutors.addUserId("cusfal")
+			event1.tutors.knownType.addUserId("cusebr")
+			event2.tutors.knownType.addUserId("cusfal")
 			
 			session.saveOrUpdate(event1)
 			session.saveOrUpdate(event2)

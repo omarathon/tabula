@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.services.permissions
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
-import uk.ac.warwick.tabula.services.ProfileService
+import uk.ac.warwick.tabula.services.{StaffAssistantsHelpers, ModuleAndDepartmentService, ProfileService}
 import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.roles.{SSOStaffRole, StudentRole, StaffRole, UniversityMemberRole}
 
@@ -12,7 +11,7 @@ class UserTypeAndDepartmentRoleProviderTest extends TestBase with Mockito {
 
 	val provider = new UserTypeAndDepartmentRoleProvider
 
-	val profileService = mock[ProfileService]
+	val profileService = mock[ProfileService with StaffAssistantsHelpers]
 	val departmentService = mock[ModuleAndDepartmentService]
 
 	provider.profileService = profileService

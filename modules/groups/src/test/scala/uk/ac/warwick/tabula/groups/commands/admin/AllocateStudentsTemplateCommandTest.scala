@@ -94,9 +94,9 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		
 		set.membershipService = membershipService
 		set.module = module
-		set._membersGroup.userLookup = userLookup
+		set.members.asInstanceOf[UserGroup].userLookup = userLookup
 		
-		membershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Some(set._membersGroup)) returns (set._membersGroup.users)
+		membershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Some(set.members)) returns (set.members.users)
 	}
 
 

@@ -37,9 +37,8 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		amDao.sessionFactory = sessionFactory
 		assignmentMembershipService.dao = amDao
 		assignmentMembershipService.assignmentManualMembershipHelper.sessionFactory = sessionFactory
-		assignmentMembershipService.assignmentManualMembershipHelper.groupService = new MockGroupService
-		assignmentMembershipService.assignmentManualMembershipHelper.userlookup = userLookup
-		assignmentMembershipService.assignmentManualMembershipHelper.cache.clear()
+		assignmentMembershipService.assignmentManualMembershipHelper.userLookup = userLookup
+		assignmentMembershipService.assignmentManualMembershipHelper.cache.foreach { _.clear() }
 		assignmentMembershipService.userLookup = userLookup
 		val extDao = new ExtensionDaoImpl
 		extDao.sessionFactory = sessionFactory
@@ -543,7 +542,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val assignment1 = newDeepAssignment("ch101")
 		assignment1.academicYear = year
 		assignment1.assignmentMembershipService = assignmentMembershipService
-		assignment1.members.userLookup = userLookup
+		assignment1.members.asInstanceOf[UserGroupCacheManager].underlying.asInstanceOf[UserGroup].userLookup = userLookup
 
 		val department1 = assignment1.module.department
 
@@ -555,7 +554,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignment2.module = assignment1.module
 		assignment2.academicYear = year
 		assignment2.assignmentMembershipService = assignmentMembershipService
-		assignment2.members.userLookup = userLookup
+		assignment2.members.asInstanceOf[UserGroupCacheManager].underlying.asInstanceOf[UserGroup].userLookup = userLookup
 
 		val department2 = assignment2.module.department
 
@@ -622,20 +621,20 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.save(upstreamAg2)
 		assignmentMembershipService.save(upstreamAg3)
 
-		assignment1.members.addUserId("manual1")
-		assignment1.members.addUserId("manual2")
-		assignment1.members.addUserId("manual3")
+		assignment1.members.knownType.addUserId("manual1")
+		assignment1.members.knownType.addUserId("manual2")
+		assignment1.members.knownType.addUserId("manual3")
 
-		assignment2.members.addUserId("manual2")
-		assignment2.members.addUserId("manual3")
-		assignment2.members.addUserId("manual4")
+		assignment2.members.knownType.addUserId("manual2")
+		assignment2.members.knownType.addUserId("manual3")
+		assignment2.members.knownType.addUserId("manual4")
 
-		assignment1.members.excludeUserId("student2")
-		assignment1.members.excludeUserId("student3")
-		assignment1.members.excludeUserId("manual3") // both inc and exc, but exc should take priority
+		assignment1.members.knownType.excludeUserId("student2")
+		assignment1.members.knownType.excludeUserId("student3")
+		assignment1.members.knownType.excludeUserId("manual3") // both inc and exc, but exc should take priority
 
-		assignment2.members.excludeUserId("student4")
-		assignment2.members.excludeUserId("student3")
+		assignment2.members.knownType.excludeUserId("student4")
+		assignment2.members.knownType.excludeUserId("student3")
 
 		val ag1 = new AssessmentGroup
 		ag1.membershipService = assignmentMembershipService
