@@ -57,7 +57,7 @@ trait ScheduledMeetingRecordMissedDescription extends Describable[ScheduledMeeti
 	self: ScheduledMeetingRecordMissedState =>
 
 	override lazy val eventName = "ScheduledMeetingRecordMissed"
-	
+
 	def describe(d: Description) {
 		d.meeting(meetingRecord)
 	}

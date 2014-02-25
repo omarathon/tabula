@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.data.model.notifications
 
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotification}
 import javax.persistence.{DiscriminatorValue, Entity}
+import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 
 @Entity
 @DiscriminatorValue(value="ScheduledMeetingRecordMissedInvitee")
@@ -9,6 +10,7 @@ class ScheduledMeetingRecordMissedInviteeNotification
 	extends ScheduledMeetingRecordNotification with SingleRecipientNotification {
 
 	verbSetting.value = "missed"
+	priority = Warning
 
 	def FreemarkerTemplate = "/WEB-INF/freemarker/notifications/scheduled_meeting_record_missed_invitee_notification.ftl"
 	def title = s"Scheduled meeting missed"

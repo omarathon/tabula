@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model.notifications
 
-import uk.ac.warwick.tabula.data.model.{FreemarkerModel, SingleRecipientNotification}
+import uk.ac.warwick.tabula.data.model.{NotificationPriority, FreemarkerModel, SingleRecipientNotification}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import javax.persistence.{Entity, DiscriminatorValue}
 
@@ -51,4 +51,5 @@ class ExtensionRequestRejectedNotification extends ExtensionStudentNotification 
 	def verb = "reject"
 	def title = titlePrefix + "Extension request rejected"
 	def template = "/WEB-INF/freemarker/emails/extension_request_rejected.ftl"
+	priority = NotificationPriority.Warning
 }

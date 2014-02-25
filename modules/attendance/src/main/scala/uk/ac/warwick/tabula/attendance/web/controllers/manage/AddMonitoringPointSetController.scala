@@ -8,10 +8,8 @@ import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.attendance.commands.manage.AddMonitoringPointSetCommand
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
-import scala.Array
 
 @Controller
 @RequestMapping(value=Array("/manage/{dept}/sets/add/{academicYear}"))
@@ -23,9 +21,15 @@ class AddMonitoringPointSetController extends AttendanceController {
 	def createCommand(
 		@PathVariable dept: Department,
 		@PathVariable academicYear: AcademicYear,
+		@RequestParam createType: String,
 		@RequestParam(value="existingSet",required=false) existingSet: MonitoringPointSet,
-		@RequestParam(value="template",required=false) template: MonitoringPointSetTemplate) =
-		AddMonitoringPointSetCommand(user, dept, academicYear, Option(existingSet), Option(template))
+		@RequestParam(value="template",required=false) template: MonitoringPointSetTemplate
+	) = createType match {
+		case "blank" => AddMonitoringPointSetCommand(user, dept, academicYear, None, None)
+		case "template" => AddMonitoringPointSetCommand(user, dept, academicYear, None, Option(template))
+		case "copy" => AddMonitoringPointSetCommand(user, dept, academicYear, Option(existingSet), None)
+		case _ => throw new IllegalArgumentException
+	}
 
 	@RequestMapping(method=Array(GET,HEAD))
 	def form(@PathVariable dept: Department, @ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointSet]]) = {

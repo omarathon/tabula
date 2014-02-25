@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.data.model.notifications
 import uk.ac.warwick.tabula.coursework.web.Routes
 import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.tabula.data.model.FreemarkerModel
+import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 
 
 abstract class ExtensionRequestRespondedNotification(val verbed: String) extends ExtensionNotification {
@@ -30,4 +31,6 @@ class ExtensionRequestRespondedApproveNotification extends ExtensionRequestRespo
 
 @Entity
 @DiscriminatorValue("ExtensionRequestRespondedReject")
-class ExtensionRequestRespondedRejectNotification extends ExtensionRequestRespondedNotification("rejected") {}
+class ExtensionRequestRespondedRejectNotification extends ExtensionRequestRespondedNotification("rejected") {
+	priority = Warning
+}

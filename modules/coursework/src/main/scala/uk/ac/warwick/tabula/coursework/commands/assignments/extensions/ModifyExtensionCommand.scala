@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments.extensions
 
 import uk.ac.warwick.tabula.commands.{Notifies, Description, Command, SelfValidating}
 import scala.collection.JavaConversions._
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import uk.ac.warwick.tabula.data.model.{Notification, Assignment, Module}
 import uk.ac.warwick.tabula.data.Daoisms
 import uk.ac.warwick.tabula.helpers.{LazyLists, Logging}
@@ -22,9 +22,9 @@ import uk.ac.warwick.tabula.data.model.notifications.{ExtensionRequestRespondedA
  * Built the command as a bulk operation. Single additions can be achieved by adding only one extension to the list.
  */
 
-class AddExtensionCommand(module: Module, assignment: Assignment, submitter: CurrentUser)
-	extends ModifyExtensionCommand(module, assignment, submitter) with Notifies[Seq[Extension], Option[Extension]] {
-	
+class AddExtensionCommand(module: Module, assignment: Assignment, submitter: CurrentUser, action: String)
+	extends ModifyExtensionCommand(module, assignment, submitter, action) with Notifies[Seq[Extension], Option[Extension]] {
+
 	PermissionCheck(Permissions.Extension.Create, assignment)
 
 	def emit(extensions: Seq[Extension]) = extensions.map({extension =>
@@ -32,11 +32,11 @@ class AddExtensionCommand(module: Module, assignment: Assignment, submitter: Cur
 	})
 }
 
-class EditExtensionCommand(module: Module, assignment: Assignment, val extension: Extension, submitter: CurrentUser)
-	extends ModifyExtensionCommand(module, assignment, submitter) with Notifies[Seq[Extension], Option[Extension]] {
-	
+class EditExtensionCommand(module: Module, assignment: Assignment, val extension: Extension, submitter: CurrentUser, action: String)
+	extends ModifyExtensionCommand(module, assignment, submitter, action) with Notifies[Seq[Extension], Option[Extension]] {
+
 	PermissionCheck(Permissions.Extension.Update, extension)
-	
+
 	copyExtensions(List(extension))
 
 	def emit(extensions: Seq[Extension]) = extensions.flatMap({extension =>
@@ -62,19 +62,19 @@ class EditExtensionCommand(module: Module, assignment: Assignment, val extension
 	})
 }
 
-class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, extension: Extension, submitter: CurrentUser)
-	extends EditExtensionCommand(module, assignment, extension, submitter) {
+class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, extension: Extension, submitter: CurrentUser, action: String)
+	extends EditExtensionCommand(module, assignment, extension, submitter, action) {
 
 	PermissionCheck(Permissions.Extension.ReviewRequest, extension)
 }
 
-abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignment, val submitter: CurrentUser)
+abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignment, val submitter: CurrentUser, val action: String)
 		extends Command[Seq[Extension]] with Daoisms with Logging with SelfValidating {
-	
+
 	mustBeLinked(assignment,module)
 
 	var userLookup = Wire.auto[UserLookupService]
-	
+
 	var extensionItems:JList[ExtensionItem] = LazyLists.create()
 	var extensions:JList[Extension] = LazyLists.create()
 
@@ -94,10 +94,13 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 			})
 			extension.assignment = assignment
 			extension.expiryDate = item.expiryDate
-			extension.approvalComments = item.approvalComments
-			extension.approved = item.approved
-			extension.rejected = item.rejected
-			extension.approvedOn = DateTime.now
+			extension.rawState_=(item.state)
+			extension.reviewedOn = DateTime.now
+			action match {
+				case "approve" => extension.approve(item.reviewerComments)
+				case "reject" => extension.reject(item.reviewerComments)
+				case _ =>
+			}
 			extension
 		}
 
@@ -113,7 +116,7 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 		val extensionItemsList = for (extension <- extensions) yield {
 			val item = new ExtensionItem
 			item.universityId =  extension.universityId
-			item.approvalComments = extension.approvalComments
+			item.reviewerComments = extension.reviewerComments
 			item.expiryDate = Option(extension.expiryDate).getOrElse(extension.requestedExpiryDate)
 			item
 		}
@@ -146,7 +149,7 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 		}
 
 		if(extension.expiryDate == null){
-			if (!extension.rejected){
+			if (extension.state == ExtensionState.Approved){
 				errors.rejectValue("expiryDate", "extension.requestedExpiryDate.provideExpiry")
 			}
 		} else if(extension.expiryDate.isBefore(assignment.closeDate)){
@@ -167,21 +170,19 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 	}
 }
 
-class ExtensionItem{
+class ExtensionItem {
 
-	var universityId:String =_
-	
+	var universityId: String =_
+
 	@WithinYears(maxFuture = 3) @DateTimeFormat(pattern = DateFormats.DateTimePicker)
-	var expiryDate:DateTime =_
-	var approvalComments:String =_
+	var expiryDate: DateTime =_
+	var reviewerComments: String =_
+	var state: ExtensionState = ExtensionState.Unreviewed
 
-	var approved:Boolean = false
-	var rejected:Boolean = false
-
-	def this(universityId:String, expiryDate:DateTime, reason:String) = {
+	def this(universityId: String, expiryDate: DateTime, reason: String) = {
 		this()
 		this.universityId = universityId
 		this.expiryDate = expiryDate
-		this.approvalComments = approvalComments
+		this.reviewerComments = reviewerComments
 	}
 }

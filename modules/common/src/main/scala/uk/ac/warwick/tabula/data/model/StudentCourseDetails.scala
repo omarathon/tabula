@@ -101,7 +101,7 @@ class StudentCourseDetails
 	// We can't restrict this because it's not a getter. Restrict in
 	// view code if necessary (or implement for all methods in  ScalaBeansWrapper)
 	def relationships(relationshipType: StudentRelationshipType) =
-		relationshipService.findCurrentRelationships(relationshipType, this.student)
+		relationshipService.findCurrentRelationships(relationshipType, this)
 
 	def hasRelationship(relationshipType: StudentRelationshipType) = !relationships(relationshipType).isEmpty
 
