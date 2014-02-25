@@ -14,7 +14,6 @@ import uk.ac.warwick.tabula.services.{CourseAndRouteService, RelationshipService
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.commands.Description
 import ImportMemberHelpers.opt
-import scala.Some
 
 class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, importCommandFactory: ImportCommandFactory)
 	extends Command[StudentCourseDetails] with Logging with Daoisms
