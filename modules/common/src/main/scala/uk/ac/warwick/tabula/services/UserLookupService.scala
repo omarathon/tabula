@@ -199,9 +199,9 @@ abstract class UserLookupServiceAdapter(var delegate: UserLookupService) extends
 	def getUsersByUserIds(ids: JList[String]) = delegate.getUsersByUserIds(ids)
 	def getUserByWarwickUniId(id: UniversityId) = delegate.getUserByWarwickUniId(id)
 	def getUserByWarwickUniId(id: UniversityId, ignored: Boolean) = delegate.getUserByWarwickUniId(id, ignored)
-	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean) = delegate.getUserByWarwickUniIdUncached(id, false)
+	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean) = delegate.getUserByWarwickUniIdUncached(id, skipMemberLookup)
 	def getUsersByWarwickUniIds(ids: Seq[UniversityId]) = delegate.getUsersByWarwickUniIds(ids)
-	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean) = delegate.getUsersByWarwickUniIdsUncached(ids, false)
+	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean) = delegate.getUsersByWarwickUniIdsUncached(ids, skipMemberLookup)
 	def findUsersWithFilter(map: JMap[String, String]) = delegate.findUsersWithFilter(map)
 	def findUsersWithFilter(map: JMap[String, String], includeInactive: Boolean) = delegate.findUsersWithFilter(map, includeInactive)
 	def getGroupService() = delegate.getGroupService

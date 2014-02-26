@@ -48,7 +48,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 	var membershipInterface = Wire.auto[MembershipInterfaceWrapper]
 
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
-	lazy val membershipByUsercodeQuery = new MembershipByUsercodeQuery(membership)
+	lazy val membershipByUniversityIdQuery = new MembershipByUniversityIdQuery(membership)
 
 	def studentInformationQuery(member: MembershipInformation, ssoUser: User, importCommandFactory: ImportCommandFactory) = {
 
@@ -105,7 +105,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 		}
 
 	def membershipInfoForIndividual(member: Member): Option[MembershipInformation] = {
-		membershipByUsercodeQuery.executeByNamedParam(Map("usercodes" -> member.userId)).asScala.toList match {
+		membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> member.universityId)).asScala.toList match {
 			case Nil => None
 			case mem: List[MembershipMember] => Some (
 					MembershipInformation(
@@ -438,12 +438,12 @@ object ProfileImporter extends Logging {
 		)
 	}
 
-	val GetMembershipByUsercodeInformation = """
-		select * from cmsowner.uow_current_members where its_usercode in (:usercodes)
+	val GetMembershipByUniversityIdInformation = """
+		select * from cmsowner.uow_current_members where university_number in (:universityIds) and its_usercode is not null
 		"""
 
-	class MembershipByUsercodeQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByUsercodeInformation) {
-		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
+	class MembershipByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByUniversityIdInformation) {
+		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs)
 	}
