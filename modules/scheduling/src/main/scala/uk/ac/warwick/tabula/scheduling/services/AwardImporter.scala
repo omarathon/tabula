@@ -20,9 +20,10 @@ trait AwardImporter extends Logging {
 
 	private var awardMap: Map[String, Award] = _
 
-	def getAwardForCode(code: String) = {
+	def getAwardForCode(code: String): Option[Award] = {
 		if (awardMap == null) updateAwardMap()
-		awardMap(code)
+		if (!awardMap.contains(code)) None
+		else Some(awardMap(code))
 	}
 
 	protected def updateAwardMap() {

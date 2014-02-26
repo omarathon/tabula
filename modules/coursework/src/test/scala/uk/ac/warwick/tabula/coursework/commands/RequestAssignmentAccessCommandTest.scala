@@ -46,14 +46,14 @@ trait AssignmentFixture extends Mockito{
 	val userLookup = mock[UserLookupService]
 
 	val ownersGroup = UserGroup.ofUsercodes
-	ownersGroup.includeUsers = List("admin1", "admin2").asJava
+	ownersGroup.includedUserIds = Seq("admin1", "admin2")
 	ownersGroup.userLookup = userLookup
 
 	val student = newTestUser("student")
 	val admin1 = newTestUser("admin1")
 	val admin2 = newTestUser("admin2")
 	
-	userLookup.getUsersByUserIds(ownersGroup.includeUsers) returns JMap("admin1" -> admin1, "admin2" -> admin2)
+	userLookup.getUsersByUserIds(ownersGroup.includedUserIds.asJava) returns JMap("admin1" -> admin1, "admin2" -> admin2)
 	
 	val department = new Department
 	val permissionsService = mock[PermissionsService]

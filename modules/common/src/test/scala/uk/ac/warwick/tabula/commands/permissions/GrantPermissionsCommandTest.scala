@@ -37,10 +37,10 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 				
 		val grantedPerm = cmd.applyInternal()
 		grantedPerm.permission should be (Permissions.Department.ManageExtensionSettings)
-		grantedPerm.users.includeUsers.size() should be (2)
-		grantedPerm.users.includes("cuscav") should be (true)
-		grantedPerm.users.includes("cusebr") should be (true)
-		grantedPerm.users.includes("cuscao") should be (false)
+		grantedPerm.users.size should be (2)
+		grantedPerm.users.knownType.includesUserId("cuscav") should be (true)
+		grantedPerm.users.knownType.includesUserId("cusebr") should be (true)
+		grantedPerm.users.knownType.includesUserId("cuscao") should be (false)
 		grantedPerm.overrideType should be (GrantedPermission.Allow)
 		grantedPerm.scope should be (dept)
 	}
@@ -55,7 +55,7 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 		cmd.overrideType = GrantedPermission.Allow
 		
 		val existing = GrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true)
-		existing.users.addUser("cuscao")
+		existing.users.knownType.addUserId("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
 				
@@ -63,10 +63,10 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 		(grantedPerm.eq(existing)) should be (true)
 		
 		grantedPerm.permission should be (Permissions.Department.ManageExtensionSettings)
-		grantedPerm.users.includeUsers.size() should be (3)
-		grantedPerm.users.includes("cuscav") should be (true)
-		grantedPerm.users.includes("cusebr") should be (true)
-		grantedPerm.users.includes("cuscao") should be (true)
+		grantedPerm.users.size should be (3)
+		grantedPerm.users.knownType.includesUserId("cuscav") should be (true)
+		grantedPerm.users.knownType.includesUserId("cusebr") should be (true)
+		grantedPerm.users.knownType.includesUserId("cuscao") should be (true)
 		grantedPerm.overrideType should be (GrantedPermission.Allow)
 		grantedPerm.scope should be (dept)
 	}
@@ -119,7 +119,7 @@ class GrantPermissionsCommandTest extends TestBase with Mockito {
 		cmd.overrideType = GrantedPermission.Allow
 		
 		val existing = GrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true)
-		existing.users.addUser("cuscao")
+		existing.users.knownType.addUserId("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
 		securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)

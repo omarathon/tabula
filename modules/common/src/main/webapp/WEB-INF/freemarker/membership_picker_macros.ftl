@@ -195,11 +195,11 @@ Generates the bulk of the picker HTML, inside a fieldset element
 					</#list>
 				</tbody>
 
-				<#list command.members.includeUsers as untypedId>
+				<#list command.members.allIncludedIds as untypedId>
 					<input type="hidden" name="includeUsers" value="${untypedId}">
 				</#list>
 
-				<#list command.members.excludeUsers as untypedId>
+				<#list command.members.allExcludedIds as untypedId>
 					<input type="hidden" name="excludeUsers" value="${untypedId}">
 				</#list>
 			</table>

@@ -6,9 +6,7 @@ import javax.persistence.Basic
 import javax.persistence.Entity
 import javax.persistence.JoinColumn
 import javax.persistence.ManyToOne
-import javax.persistence.NamedQueries
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.JavaImports.JInteger
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.system.permissions.Restricted
@@ -17,7 +15,6 @@ import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.EqualsBuilder
 import org.hibernate.annotations.Type
 import javax.persistence.Column
-import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import javax.persistence.FetchType
 
@@ -60,9 +57,33 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	def isFresh = (missingFromImportSince == null)
 }
 
-trait StudentCourseYearProperties {
-
+trait BasicStudentCourseYearProperties {
 	var sceSequenceNumber: JInteger = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var yearOfStudy: JInteger = _
+
+	@Column(name="cas_used")
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
+	var casUsed: JBoolean = _
+
+	@Column(name="tier4visa")
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
+	var tier4Visa: JBoolean = _
+
+}
+
+trait StudentCourseYearProperties extends BasicStudentCourseYearProperties {
+	var lastUpdatedDate = DateTime.now
+	var missingFromImportSince: DateTime = _
+
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleRegistrationStatusUserType")
+	var moduleRegistrationStatus: ModuleRegistrationStatus = _ // cam_ssn.ssn_mrgs
+
+	@Basic
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var academicYear: AcademicYear = _
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="enrolmentStatusCode", referencedColumnName="code")
@@ -81,30 +102,6 @@ trait StudentCourseYearProperties {
 	@JoinColumn(name="modeOfAttendanceCode", referencedColumnName="code")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var modeOfAttendance: ModeOfAttendance = _
-
-	@Basic
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.AcademicYearUserType")
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var academicYear: AcademicYear = _
-
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var yearOfStudy: JInteger = _
-
-	@Type(`type` = "uk.ac.warwick.tabula.data.model.ModuleRegistrationStatusUserType")
-	var moduleRegistrationStatus: ModuleRegistrationStatus = _ // cam_ssn.ssn_mrgs
-
-	var lastUpdatedDate = DateTime.now
-
-	var missingFromImportSince: DateTime = _
-
-	@Column(name="cas_used")
-	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
-	var casUsed: JBoolean = _
-
-	@Column(name="tier4visa")
-	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
-	var tier4Visa: JBoolean = _
-
 }
 
 class StudentCourseYearKey {

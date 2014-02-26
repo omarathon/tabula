@@ -18,7 +18,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import SmallGroupAttendanceState._
 import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.data.model.MemberUserType
+import uk.ac.warwick.tabula.data.model.{UserGroup, MemberUserType}
 import org.joda.time.DateMidnight
 import org.joda.time.DateTimeConstants
 import org.joda.time.Interval
@@ -46,7 +46,7 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		set.releasedToStudents = true
 		
 		val group = new SmallGroup(set)
-		group._studentsGroup.userLookup = userLookup
+		group.students.asInstanceOf[UserGroup].userLookup = userLookup
 		
 		// The group has two events. Event 1 runs at Monday 11am on week 2, 3 and 4; Event 2 runs at Monday 3pm on weeks 1, 3 and 7
 		val event1 = new SmallGroupEvent(group)
@@ -70,10 +70,10 @@ class ListStudentGroupAttendanceCommandTest extends TestBase with Mockito {
 		val user4 = userLookup.getUserByUserId("user4")
 		val user5 = userLookup.getUserByUserId("user5")
 		
-		group._studentsGroup.add(user1)
-		group._studentsGroup.add(user2)
-		group._studentsGroup.add(user3)
-		group._studentsGroup.add(user4)
+		group.students.add(user1)
+		group.students.add(user2)
+		group.students.add(user3)
+		group.students.add(user4)
 		
 		// user5 turned up to the first occurrence and then left
 		

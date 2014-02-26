@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.scheduling.helpers
 
-import org.apache.log4j.Logger
 import org.springframework.beans.BeanWrapper
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.scheduling.services.SitsStatusImporter
@@ -10,7 +9,6 @@ import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.data.model.Course
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.SitsStatus
-import org.joda.time.DateTime
 
 trait PropertyCopying extends Logging {
 	var sitsStatusImporter = Wire[SitsStatusImporter]
@@ -39,31 +37,40 @@ trait PropertyCopying extends Logging {
 		changedProperties.foldLeft(false)(_ || _)
 	}
 
-	def copyObjectProperty(property: String, code: String, memberBean: BeanWrapper, obj: Object) = {
+	// returns true if there is a change, false if no change
+	def copyObjectProperty(property: String, code: String, memberBean: BeanWrapper, optionObj: Option[Object]) = {
+
 		val oldValue = memberBean.getPropertyValue(property)
 
-		if (oldValue == null && code == null) false
-		else if (oldValue == null) {
-			// From no route to having a route
-			memberBean.setPropertyValue(property, obj)
-			true
-		} else if (code == null) {
-			// User had a route but now doesn't
-			memberBean.setPropertyValue(property, null)
-			true
-		} else {
-			val oldCode = oldValue match {
-				case route: Route => route.code
-				case course: Course => course.code
-				case dept: Department => dept.code
-				case sitsStatus: SitsStatus => sitsStatus.code
-				case _ => null
+		optionObj match {
+			case None => {
+				if (oldValue == null) false // null before and still null - no change
+				else {
+					memberBean.setPropertyValue(property, null)  // change from non-null to null
+					true
+				}
 			}
-			if (oldCode == code.toLowerCase) {
-				false
-			} else {
-				memberBean.setPropertyValue(property, obj)
-				true
+			case Some(obj) => {
+				if (oldValue == null) { // changed from null to non-null
+					memberBean.setPropertyValue(property, obj)
+					true
+				}
+				else {
+					val oldCode = oldValue match {
+						case route: Route => route.code
+						case course: Course => course.code
+						case dept: Department => dept.code
+						case sitsStatus: SitsStatus => sitsStatus.code
+						case _ => null
+					}
+					if (oldCode == code.toLowerCase) { // same non-null value
+						false
+					}
+					else { // different non-null value
+						memberBean.setPropertyValue(property, obj)
+						true
+					}
+				}
 			}
 		}
 	}
@@ -78,19 +85,19 @@ trait PropertyCopying extends Logging {
 		}
 	}
 
-	def toSitsStatus(code: String) = {
+	def toSitsStatus(code: String): Option[SitsStatus] = {
 		if (code == null || code == "") {
-			null
+			None
 		} else {
-			sitsStatusImporter.getSitsStatusForCode(code).getOrElse(null)
+			sitsStatusImporter.getSitsStatusForCode(code)
 		}
 	}
 
-	def toDepartment(departmentCode: String) = {
+	def toDepartment(departmentCode: String): Option[Department] = {
 		if (departmentCode == null || departmentCode == "") {
-			null
+			None
 		} else {
-			moduleAndDepartmentService.getDepartmentByCode(departmentCode.toLowerCase).getOrElse(null)
+			moduleAndDepartmentService.getDepartmentByCode(departmentCode)
 		}
 	}
 }

@@ -10,7 +10,7 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.ToString
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.services.{TermService, ProfileService, RelationshipService}
+import uk.ac.warwick.tabula.services.{StaffAssistantsHelpers, UserGroupCacheManager, SmallGroupService, TermService, ProfileService, RelationshipService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.permissions.MemberGrantedRole
 import uk.ac.warwick.tabula.system.permissions.Restricted
@@ -32,6 +32,7 @@ import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Filter
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
+import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -68,10 +69,10 @@ object Member {
 abstract class Member extends MemberProperties with ToString with HibernateVersioned with PermissionsTarget with Logging with Serializable {
 
 	@transient
-	var profileService = Wire.auto[ProfileService]
+	var profileService = Wire[ProfileService with StaffAssistantsHelpers]
 
 	@transient
-	var relationshipService = Wire.auto[RelationshipService]
+	var relationshipService = Wire[RelationshipService]
 
 	def this(user: CurrentUser) = {
 		this()
@@ -126,29 +127,15 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	}
 
 	/**
-	 * Get all departments that this student touches. This includes their home department,
-	 * the department running their course and any departments that they are taking modules in.
-	 *
-	 * For each department, enumerate any sub-departments that the member matches
+	 * Get all departments that this member touches.
+	 * (Overridden by StudentMember).
 	 */
 	def touchedDepartments = {
-		def moduleDepts = registeredModulesByYear(None).map(_.department).toStream
-
-		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct
+		val topLevelDepts = affiliatedDepartments
 		topLevelDepts flatMap(_.subDepartmentsContaining(this))
 	}
 
-	def permissionsParents = touchedDepartments
-
-	/**
-	 * Get all modules this this student is registered on, including historically.
-	 * TODO consider caching based on getLastUpdatedDate
-	 */
-
-	def registeredModulesByYear(year: Option[AcademicYear]) = Set[Module]()
-	def moduleRegistrationsByYear(year: Option[AcademicYear]) = Set[ModuleRegistration]()
-
-	def permanentlyWithdrawn = false
+	def permissionsParents: Stream[PermissionsTarget] = touchedDepartments
 
 	@OneToMany(mappedBy="scope", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL))
 	@ForeignKey(name="none")
@@ -208,17 +195,11 @@ abstract class Member extends MemberProperties with ToString with HibernateVersi
 	def isStaff = (userType == MemberUserType.Staff)
 	def isStudent = (userType == MemberUserType.Student)
 	def isRelationshipAgent(relationshipType: StudentRelationshipType) = {
-		(userType == MemberUserType.Staff &&
-				!relationshipService.listStudentRelationshipsWithMember(
-						relationshipType, this
-			).isEmpty)
+		!relationshipService.listStudentRelationshipsWithMember(relationshipType, this).isEmpty
 	}
 
+	// Overridden in StudentMember
 	def hasRelationship(relationshipType: StudentRelationshipType) = false
-
-	def mostSignificantCourseDetails: Option[StudentCourseDetails] = None
-
-	def hasCurrentEnrolment = false
 
 	def isFresh = (missingFromImportSince == null)
 
@@ -245,7 +226,7 @@ class StudentMember extends Member with StudentProperties {
 	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
-	private var studentCourseDetails: JSet[StudentCourseDetails] = JHashSet()
+	private val studentCourseDetails: JSet[StudentCourseDetails] = JHashSet()
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshStudentCourseDetails = {
@@ -307,12 +288,39 @@ class StudentMember extends Member with StudentProperties {
 		).distinct
 	}
 
+	/**
+	 * Get all departments that this student touches. This includes their home department,
+	 * the department running their course and any departments that they are taking modules in.
+	 *
+	 * For each department, enumerate any sub-departments that the member matches
+	 */
+	override def touchedDepartments = {
+		def moduleDepts = registeredModulesByYear(None).map(_.department).toStream
+
+		val topLevelDepts = (affiliatedDepartments #::: moduleDepts).distinct
+		topLevelDepts flatMap(_.subDepartmentsContaining(this))
+	}
+
+	@transient var smallGroupService = Wire[SmallGroupService]
+
+	/**
+	 * Get all small groups that this student is signed up for
+	 */
+	def registeredSmallGroups: Stream[SmallGroup] = smallGroupService.findSmallGroupsByStudent(asSsoUser).toStream
+
+	override def permissionsParents: Stream[PermissionsTarget] = {
+		val departments: Stream[PermissionsTarget] = touchedDepartments
+		val smallGroups: Stream[PermissionsTarget] = registeredSmallGroups
+
+		departments #::: smallGroups
+	}
+
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	override def mostSignificantCourseDetails: Option[StudentCourseDetails] = Option(mostSignificantCourse).filter(course => course.isFresh)
+	def mostSignificantCourseDetails: Option[StudentCourseDetails] = Option(mostSignificantCourse).filter(course => course.isFresh)
 
-	override def hasCurrentEnrolment: Boolean = freshStudentCourseDetails.exists(_.hasCurrentEnrolment)
+	def hasCurrentEnrolment: Boolean = freshStudentCourseDetails.exists(_.hasCurrentEnrolment)
 
-	override def permanentlyWithdrawn: Boolean = {
+	def permanentlyWithdrawn: Boolean = {
 		freshStudentCourseDetails
 			 .filter(_.statusOnRoute != null)
 			 .map(_.statusOnRoute)
@@ -336,10 +344,14 @@ class StudentMember extends Member with StudentProperties {
 		studentCourseDetails.add(detailsToAdd)
 	}
 
-	override def registeredModulesByYear(year: Option[AcademicYear]): Set[Module] =
+	/**
+	 * Get all modules this this student is registered on, including historically.
+	 * TODO consider caching based on getLastUpdatedDate
+	 */
+	def registeredModulesByYear(year: Option[AcademicYear]): Set[Module] =
 		freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap(_.registeredModulesByYear(year))
 
-	override def moduleRegistrationsByYear(year: Option[AcademicYear]): Set[ModuleRegistration] =
+	def moduleRegistrationsByYear(year: Option[AcademicYear]): Set[ModuleRegistration] =
 		freshStudentCourseDetails.toSet[StudentCourseDetails].flatMap(_.moduleRegistrationsByYear(year))
 }
 
@@ -355,8 +367,9 @@ class StaffMember extends Member with StaffProperties {
 
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "assistantsgroup_id")
-	var _assistantsGroup: UserGroup = UserGroup.ofUsercodes
-	def assistants: Option[UnspecifiedTypeUserGroup] = Option(_assistantsGroup)
+	private var _assistantsGroup: UserGroup = UserGroup.ofUsercodes
+	def assistants: UnspecifiedTypeUserGroup = new UserGroupCacheManager(_assistantsGroup, profileService.staffAssistantsHelper)
+	def assistants_=(group: UserGroup) { _assistantsGroup = group }
 }
 
 @Entity
@@ -385,7 +398,7 @@ class RuntimeMember(user: CurrentUser) extends Member(user) {
 	override def permissionsParents = Stream.empty
 }
 
-trait MemberProperties {
+trait MemberProperties extends StringId {
 	@Id var universityId: String = _
 	def id = universityId
 

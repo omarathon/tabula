@@ -143,12 +143,37 @@ class StudentCourseDetails
 	}
 }
 
-trait StudentCourseProperties {
+// properties for a student on a course which come direct from SITS - those that need to be
+// transformed in some way are in StudentCourseProperties
+trait BasicStudentCourseProperties {
 	// There can be multiple StudentCourseDetails rows for a single SPR code, even though a route is a sub-category of a course;
 	// this is just an artefact of the weird way SITS works.  If a student changes route within a course, they end up with a new
 	// course join (SCJ) row in SITS.  Equally perversely, they keep the same sprcode and SPR row even though this should be the
 	// student's record for their route (SPR = student programme route) - the route code is just edited.  Hence this is not unique.
 	var sprCode: String = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var levelCode: String = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var beginDate: LocalDate = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var endDate: LocalDate = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var expectedEndDate: LocalDate = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var courseYearLength: String = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var mostSignificant: JBoolean = _
+}
+
+trait StudentCourseProperties extends BasicStudentCourseProperties {
+	var lastUpdatedDate = DateTime.now
+	var missingFromImportSince: DateTime = _
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "courseCode", referencedColumnName="code")
@@ -172,21 +197,6 @@ trait StudentCourseProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var award: Award = _
 
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var levelCode: String = _
-
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var beginDate: LocalDate = _
-
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var endDate: LocalDate = _
-
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var expectedEndDate: LocalDate = _
-
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var courseYearLength: String = _
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="sprStatusCode")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
@@ -196,13 +206,6 @@ trait StudentCourseProperties {
 	@JoinColumn(name="scjStatusCode")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var statusOnCourse: SitsStatus = _
-
-	var lastUpdatedDate = DateTime.now
-
-	var missingFromImportSince: DateTime = _
-
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var mostSignificant: JBoolean = _
 }
 
 sealed abstract class CourseType(val code: String, val level: String, val description: String, val courseCodeChar: Char) extends Convertible[String] {

@@ -68,14 +68,14 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			group2010.occurrence = "A"
 			group2010.assessmentGroup = "A"
 			group2010.academicYear = new AcademicYear(2010)
-			group2010.members.staticIncludeUsers.addAll(Seq("rob","kev","bib"))
+			group2010.members.staticUserIds = Seq("rob","kev","bib")
 
 			val group2011 = new UpstreamAssessmentGroup
 			group2011.moduleCode = "la155-10"
 			group2011.occurrence = "A"
 			group2011.assessmentGroup = "A"
 			group2011.academicYear = new AcademicYear(2011)
-			group2011.members.staticIncludeUsers.addAll(Seq("hog","dod","han"))
+			group2011.members.staticUserIds = Seq("hog","dod","han")
 
 			// similar group but doesn't match the occurence of any assignment above, so ignored.
 			val otherGroup = new UpstreamAssessmentGroup
@@ -83,7 +83,7 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 			otherGroup.occurrence = "B"
 			otherGroup.assessmentGroup = "A"
 			otherGroup.academicYear = new AcademicYear(2011)
-			otherGroup.members.staticIncludeUsers.addAll(Seq("hog","dod","han"))
+			otherGroup.members.staticUserIds = Seq("hog","dod","han")
 
 			val member = new StaffMember
 			member.universityId = "0672089"
@@ -106,12 +106,12 @@ class UpstreamEntitiesTest extends PersistenceTestBase {
 
 			law2010.upstreamAssessmentGroups.foreach { group =>
 				group.id should be (group2010.id)
-				group.members.includes("bib") should be (true)
+				group.members.includesUserId("bib") should be (true)
 			}
 
 			law2011.upstreamAssessmentGroups.foreach { group =>
 				group.id should be (group2011.id)
-				group.members.includes("dod") should be (true)
+				group.members.includesUserId("dod") should be (true)
 			}
 
 			law2012.upstreamAssessmentGroups.isEmpty should be (true)

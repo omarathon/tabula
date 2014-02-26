@@ -57,7 +57,7 @@ trait SmallGroupFixture extends Mockito {
   val department = new Department
 
   val (group1,groupSet1) = createGroupSet("A Groupset 1","small group 1",SmallGroupFormat.Lab, "la101")
-  val (group2,groupSet2) = createGroupSet("A Groupset 2","small group 2",SmallGroupFormat.Seminar, "la102")
+	val (group2,groupSet2) = createGroupSet("A Groupset 2","small group 2",SmallGroupFormat.Seminar, "la102")
   val (group3,groupSet3) = createGroupSet("A Groupset 3","small group 3",SmallGroupFormat.Tutorial, "la103")
   val (group4,groupSet4) = createGroupSet("A Groupset 4","small group 4",SmallGroupFormat.Tutorial, "la104")
   val (group5,groupSet5) = createGroupSet("A Groupset 5","small group 5",SmallGroupFormat.Lab, "la105")
@@ -75,7 +75,6 @@ trait SmallGroupFixture extends Mockito {
 
     val students = createUserGroup(Seq(student1.getWarwickId, student2.getWarwickId), identifierIsUniNumber = true)
     val tutors = createUserGroup(Seq(tutor1.getUserId,tutor2.getUserId), identifierIsUniNumber = false)
-
 
     val event = new SmallGroupEventBuilder()
       .withTutors(tutors)
@@ -104,7 +103,7 @@ trait SmallGroupFixture extends Mockito {
   def createUserGroup(userIds:Seq[String], identifierIsUniNumber:Boolean = true) = {
     val ug = if (identifierIsUniNumber) UserGroup.ofUniversityIds else UserGroup.ofUsercodes
     ug.userLookup = userLookup
-    ug.includeUsers = userIds.asJava
+    ug.includedUserIds = userIds
     ug
   }
 }
@@ -126,7 +125,7 @@ class SmallGroupSetBuilder(){
     this
   }
 	def withMembers(members:UserGroup):SmallGroupSetBuilder = {
-		template._membersGroup = members
+		template.members = members
 		this
 	}
   def withReleasedToStudents(b: Boolean): SmallGroupSetBuilder = {
@@ -169,11 +168,11 @@ class SmallGroupBuilder(val template:SmallGroup = new SmallGroup){
     this
   }
   def withStudents(members:UserGroup):SmallGroupBuilder = {
-    template._studentsGroup = members
+    template.students = members
     this
   }
 	def withUserLookup(userLookup:UserLookupService)={
-		template._studentsGroup.userLookup = userLookup
+		template.students.asInstanceOf[UserGroup].userLookup = userLookup
 		this
 	}
   def withGroupName(s: String) = {

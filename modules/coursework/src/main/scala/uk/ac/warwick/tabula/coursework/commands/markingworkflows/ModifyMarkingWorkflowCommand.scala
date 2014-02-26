@@ -38,16 +38,16 @@ abstract class ModifyMarkingWorkflowCommand(val department: Department)
 
 	def copyTo(scheme: MarkingWorkflow) {
 		scheme.name = name
-		scheme.firstMarkers.includeUsers = firstMarkers
-		scheme.secondMarkers.includeUsers = secondMarkers
+		scheme.firstMarkers.includedUserIds = firstMarkers.asScala
+		scheme.secondMarkers.includedUserIds = secondMarkers.asScala
 	}
 
 	def copyFrom(scheme: MarkingWorkflow) {
 		name = scheme.name
 		firstMarkers.clear()
-		firstMarkers.addAll(scheme.firstMarkers.includeUsers)
+		firstMarkers.addAll(scheme.firstMarkers.includedUserIds.asJava)
 		secondMarkers.clear()
-		secondMarkers.addAll(scheme.secondMarkers.includeUsers)
+		secondMarkers.addAll(scheme.secondMarkers.includedUserIds.asJava)
 		markingMethod = scheme.markingMethod
 
 		firstMarkerRoleName = scheme.firstMarkerRoleName

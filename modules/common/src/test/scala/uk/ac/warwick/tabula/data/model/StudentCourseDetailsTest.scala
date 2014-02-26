@@ -2,11 +2,8 @@ package uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.PersistenceTestBase
-import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.services.RelationshipServiceImpl
 import uk.ac.warwick.tabula.AcademicYear
-import scala.collection.JavaConverters._
 
 class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 

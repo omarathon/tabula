@@ -60,13 +60,13 @@ class MockUserLookup(var defaultFoundUser: Boolean)
     		}
 		}
     
-    override def getUserByWarwickUniIdUncached(warwickId: String) = getUserByWarwickUniId(warwickId)
+    override def getUserByWarwickUniIdUncached(warwickId: String, skipMemberLookup: Boolean) = getUserByWarwickUniId(warwickId)
 
     override def getUserByWarwickUniId(warwickId: String, includeDisabledLogins: Boolean) = getUserByWarwickUniId(warwickId)
     
     override def getUsersByWarwickUniIds(warwickIds: Seq[String]) = warwickIds.map { id => id -> getUserByWarwickUniId(id) }.toMap
 	
-		override def getUsersByWarwickUniIdsUncached(warwickIds: Seq[String]): Map[String, User] = 
+		override def getUsersByWarwickUniIdsUncached(warwickIds: Seq[String], skipMemberLookup: Boolean): Map[String, User] =
 			getUsersByWarwickUniIds(warwickIds)
 
     override def findUsersWithFilter(filterValues: JMap[String, String]) = {
@@ -111,7 +111,7 @@ class MockCachingLookupService(var flavour: UserFlavour = Vanilla)
 	with UserByWarwickIdCache
 	with MockUser {
 
-	override def getUserByWarwickUniIdUncached(warwickId: String): User = {
+	override def getUserByWarwickUniIdUncached(warwickId: String, skipMemberLookup: Boolean): User = {
 		flavour match {
 			case Unverified => new UnverifiedUser(new UserLookupException)
 			case Anonymous => new AnonymousUser()
@@ -136,8 +136,8 @@ class MockCachingLookupService(var flavour: UserFlavour = Vanilla)
 	
 	override def getUsersByWarwickUniIds(warwickIds: Seq[String]) = UserByWarwickIdCache.get(warwickIds).asScala.toMap
 	
-	override def getUsersByWarwickUniIdsUncached(warwickIds: Seq[String]): Map[String, User] = 
-		warwickIds.map { id => id -> getUserByWarwickUniIdUncached(id) }.toMap
+	override def getUsersByWarwickUniIdsUncached(warwickIds: Seq[String], skipMemberLookup: Boolean): Map[String, User] =
+		warwickIds.map { id => id -> getUserByWarwickUniIdUncached(id, skipMemberLookup) }.toMap
 }
 
 

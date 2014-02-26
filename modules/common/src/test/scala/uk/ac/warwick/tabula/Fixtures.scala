@@ -110,11 +110,11 @@ object Fixtures extends Mockito {
 		group.assessmentGroup = code
 		group.moduleCode = module
 		group.occurrence = occurrence
-		group.members.staticIncludeUsers.addAll(Seq(
+		group.members.staticUserIds = Seq(
 			"0123456",
 			"0123457",
 			"0123458"
-		))
+		)
 		group
 	}
 

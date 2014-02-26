@@ -60,9 +60,9 @@ trait EditMarkingWorkflowCommandValidation extends MarkingWorkflowCommandValidat
 
 		if (hasExistingSubmissions){
 			if (markingWorkflow.studentsChooseMarker){
-				val existingFirstMarkers = markingWorkflow.firstMarkers.includeUsers.toSet
+				val existingFirstMarkers = markingWorkflow.firstMarkers.includedUserIds.toSet
 				val newFirstMarkers = firstMarkers.toSet
-				val existingSecondMarkers = markingWorkflow.secondMarkers.includeUsers.toSet
+				val existingSecondMarkers = markingWorkflow.secondMarkers.includedUserIds.toSet
 				val newSecondMarkers = secondMarkers.toSet
 				// if newMarkers is not a super set of existingMarker, markers have been removed.
 				if (!(existingFirstMarkers -- newFirstMarkers).isEmpty || !(existingSecondMarkers -- newSecondMarkers).isEmpty) {

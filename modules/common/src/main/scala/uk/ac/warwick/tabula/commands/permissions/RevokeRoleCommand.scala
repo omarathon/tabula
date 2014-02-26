@@ -37,7 +37,7 @@ class RevokeRoleCommand[A <: PermissionsTarget: ClassTag](val scope: A) extends 
 	
 	def applyInternal() = transactional() {
 		grantedRole map { role =>
-			for (user <- usercodes) role.users.removeUser(user)
+			usercodes.foreach(role.users.knownType.removeUserId)
 			
 			permissionsService.saveOrUpdate(role)
 		}
@@ -51,7 +51,7 @@ class RevokeRoleCommand[A <: PermissionsTarget: ClassTag](val scope: A) extends 
 		} else {
 			grantedRole.map { _.users }.foreach { users => 
 				for (code <- usercodes) {
-					if (!users.includes(code)) {
+					if (!users.knownType.includesUserId(code)) {
 						errors.rejectValue("usercodes", "userId.notingroup", Array(code), "")
 					}
 				}

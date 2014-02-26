@@ -12,6 +12,7 @@ import org.hibernate.annotations.FilterDef
 import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.Fixtures
+import uk.ac.warwick.tabula.data.model.UserGroup
 
 class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
 
@@ -21,7 +22,7 @@ class SmallGroupSetMemberRoleProviderTest extends TestBase with Mockito {
 		groupSet.module = Fixtures.module("in101")
 		groupSet.module.department = Fixtures.department("in")
 		
-		groupSet._membersGroup.userLookup = mock[UserLookupService]
+		groupSet.members.asInstanceOf[UserGroup].userLookup = mock[UserLookupService]
 		groupSet.id= "test"
 			
 		val membershipService = mock[AssignmentMembershipService]

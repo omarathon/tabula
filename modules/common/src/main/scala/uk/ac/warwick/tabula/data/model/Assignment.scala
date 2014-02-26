@@ -186,7 +186,11 @@ class Assignment
 
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
-	var members: UserGroup = UserGroup.ofUsercodes
+	private var _members: UserGroup = UserGroup.ofUsercodes
+	def members: UnspecifiedTypeUserGroup = {
+		Option(_members).map { new UserGroupCacheManager(_, assignmentMembershipService.assignmentManualMembershipHelper) }.orNull
+	}
+	def members_=(group: UserGroup) { _members = group }
 
 	// TAB-1446 If hibernate sets members to null, make a new empty usergroup
 	override def postLoad {
@@ -194,8 +198,8 @@ class Assignment
 	}
 
 	def ensureMembersGroup = {
-		if (members == null) members = UserGroup.ofUsercodes
-		members
+		if (_members == null) _members = UserGroup.ofUsercodes
+		_members
 	}
 
 	@ManyToOne(fetch = LAZY)
@@ -455,13 +459,13 @@ class Assignment
 
 	def isFirstMarker(user: User): Boolean = {
 		if (markingWorkflow != null)
-			markingWorkflow.firstMarkers.includes(user.getUserId)
+			markingWorkflow.firstMarkers.includesUser(user)
 		else false
 	}
 
 	def isSecondMarker(user: User): Boolean = {
 		if (markingWorkflow != null)
-			markingWorkflow.secondMarkers.includes(user.getUserId)
+			markingWorkflow.secondMarkers.includesUser(user)
 		else false
 	}
 

@@ -4,13 +4,7 @@ import org.hibernate.annotations.Type
 import javax.persistence._
 import javax.persistence.CascadeType._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.data.model.GeneratedId
-import uk.ac.warwick.tabula.data.model.HibernateVersioned
-import uk.ac.warwick.tabula.data.model.Member
-import uk.ac.warwick.tabula.data.model.Module
-import uk.ac.warwick.tabula.data.model.UserGroup
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.BuiltInRoleDefinition
 import uk.ac.warwick.tabula.roles.RoleBuilder
@@ -19,8 +13,6 @@ import org.hibernate.annotations.ForeignKey
 import scala.reflect._
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroup, SmallGroupEvent}
-import uk.ac.warwick.tabula.data.model.Route
-import uk.ac.warwick.tabula.data.model.StudentMember
 
 @Entity
 @AccessType("field")
@@ -33,7 +25,8 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 
 	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.EAGER)
 	@JoinColumn(name="usergroup_id")
-	var users: UserGroup = UserGroup.ofUsercodes
+	private var _users: UserGroup = UserGroup.ofUsercodes
+	def users: UnspecifiedTypeUserGroup = _users
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "custom_role_id")
@@ -90,7 +83,7 @@ abstract class GrantedRole[A <: PermissionsTarget] extends GeneratedId with Hibe
 	}
 
 	def ensureUsers = {
-		if (users == null) users = UserGroup.ofUsercodes
+		if (users == null) _users = UserGroup.ofUsercodes
 		users
 	}
 
