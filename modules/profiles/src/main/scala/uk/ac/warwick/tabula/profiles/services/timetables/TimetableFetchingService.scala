@@ -183,7 +183,7 @@ object TimetableEvent{
 			endTime = sge.endTime,
 			location = Option(sge.location),
 			moduleCode = sge.group.groupSet.module.code,
-			staffUniversityIds = sge.tutors.members,
+			staffUniversityIds = sge.tutors.knownType.members,
 		 	year = sge.group.groupSet.academicYear)
 	}
 	private def smallGroupFormatToTimetableEventType(sgf: SmallGroupFormat): TimetableEventType = {

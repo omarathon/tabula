@@ -135,12 +135,9 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 	}
 
 	final def applyInternal() = transactional() {
-		val addCommands = (for ((agent, students) <- mapping.asScala; student <- students.asScala) yield {
+		val addCommands = (for ((agent, students) <- mapping.asScala; student <- students.asScala.collect { case student: StudentMember => student }) yield {
 			student.mostSignificantCourseDetails.map { studentCourseDetails =>
-				val currentAgent = student match {
-					case student: StudentMember => service.findCurrentRelationships(relationshipType, student).headOption.flatMap { _.agentMember }.headOption
-					case _ => None
-				}
+				val currentAgent = service.findCurrentRelationships(relationshipType, student).headOption.flatMap { _.agentMember }.headOption
 				val cmd = new EditStudentRelationshipCommand(
 					studentCourseDetails,
 					relationshipType,
@@ -153,13 +150,9 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 			}
 		}).toSeq.flatten
 
-		val removeCommands = unallocated.asScala.flatMap { student =>
+		val removeCommands = unallocated.asScala.collect { case student: StudentMember => student }.flatMap { student =>
 			student.mostSignificantCourseDetails.map { studentCourseDetails =>
-				val rels = student match {
-					case student: StudentMember => service.findCurrentRelationships(relationshipType, student)
-					case _ => Nil
-				}
-				
+				val rels = service.findCurrentRelationships(relationshipType, student)
 				val agents = rels.flatMap { _.agentMember }
 
 				agents.map { agent =>

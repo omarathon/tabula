@@ -75,9 +75,12 @@ class SmallGroupTest extends TestBase with Mockito {
     source.name = "name"
     source.groupSet = sourceSet
     source.permissionsService = mock[PermissionsService]
+
 		// would be nice to use a mock here, but they don't work well with GeneratedId classes
-    source._studentsGroup = UserGroup.ofUniversityIds
-		source._studentsGroup.includeUsers = JArrayList("test user")
+		val studentsGroup = UserGroup.ofUniversityIds
+		studentsGroup.addUserId("test user")
+    source.students = studentsGroup
+
     source.deleted = false
     source.id = "123"
     source.events = JArrayList(event)

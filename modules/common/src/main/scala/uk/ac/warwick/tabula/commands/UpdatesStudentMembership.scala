@@ -21,7 +21,7 @@ trait UpdatesStudentMembership {
 	// needs a module to determine the possible options from SITS
 	val module : Module
 	val existingGroups: Option[Seq[UpstreamAssessmentGroup]]
-	val existingMembers: Option[UserGroup]
+	val existingMembers: Option[UnspecifiedTypeUserGroup]
 
 	/**
 	 * Convert Spring-bound upstream group references to an AssessmentGroup buffer

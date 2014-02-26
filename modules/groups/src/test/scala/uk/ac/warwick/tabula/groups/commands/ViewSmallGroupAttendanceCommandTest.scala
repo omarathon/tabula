@@ -21,6 +21,7 @@ import uk.ac.warwick.tabula.services.UserLookupComponent
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
+import uk.ac.warwick.tabula.data.model.UserGroup
 
 class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 	
@@ -39,7 +40,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		set.academicYear = AcademicYear.guessByDate(DateTime.now)
 		
 		val group = new SmallGroup(set)
-		group._studentsGroup.userLookup = mockUserLookup
+		group.students.asInstanceOf[UserGroup].userLookup = mockUserLookup
 		
 		// The group has two events. Event 1 runs at Monday 11am on week 2, 3 and 4; Event 2 runs at Monday 3pm on weeks 1, 3 and 7
 		val event1 = new SmallGroupEvent(group)
@@ -86,10 +87,10 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		val user4 = mockUserLookup.getUserByUserId("user4")
 		val user5 = mockUserLookup.getUserByUserId("user5")
 		
-		group._studentsGroup.add(user1)
-		group._studentsGroup.add(user2)
-		group._studentsGroup.add(user3)
-		group._studentsGroup.add(user4)
+		group.students.add(user1)
+		group.students.add(user2)
+		group.students.add(user3)
+		group.students.add(user4)
 		
 		// user5 turned up to the first occurrence and then left
 		
@@ -206,7 +207,7 @@ class ViewSmallGroupAttendanceCommandTest extends TestBase with Mockito {
 		set.academicYear = AcademicYear.guessByDate(DateTime.now)
 		
 		val group = new SmallGroup(set)
-		group._studentsGroup.userLookup = mockUserLookup
+		group.students.asInstanceOf[UserGroup].userLookup = mockUserLookup
 		
 		val event = new SmallGroupEvent(group)
 		event.day = DayOfWeek.Monday

@@ -86,8 +86,8 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 		val upstream = newAssessmentGroup(Seq("0000005","0000006"))
 		val others = UserGroup.ofUsercodes
 		others.userLookup = userLookup
-		others.includeUsers.add("aaaaa")
-		others.excludeUsers.add("aaaaf")
+		others.addUserId("aaaaa")
+		others.excludeUserId("aaaaf")
 		val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(others)).items
 
 		membership.size should be (3)
@@ -123,8 +123,8 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 	@Test def redundancy {
 		val upstream = newAssessmentGroup(Seq("0000005", "0000006"))
 		val others = UserGroup.ofUsercodes
-		others.includeUsers.add("aaaaf")
-		others.excludeUsers.add("aaaah")
+		others.addUserId("aaaaf")
+		others.excludeUserId("aaaah")
 		others.userLookup = userLookup
 		val membership = assignmentMembershipService.determineMembership(Seq(upstream), Option(others)).items
 		membership.size should be(3)
@@ -148,7 +148,7 @@ class AssignmentMembershipTest extends TestBase with Mockito {
 
 	def newAssessmentGroup(uniIds:Seq[String]) = {
         val upstream = new UpstreamAssessmentGroup
-        uniIds foreach upstream.members.addUser
+        uniIds foreach upstream.members.knownType.addUserId
         upstream
     }
 }

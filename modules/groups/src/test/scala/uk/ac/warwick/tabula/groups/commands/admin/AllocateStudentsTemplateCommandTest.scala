@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.userlookup.User
 import org.junit.Before
 import org.apache.poi.xssf.usermodel.XSSFSheet
+import uk.ac.warwick.tabula.data.model.UserGroup
 
 class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 
@@ -80,10 +81,10 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		group2.groupSet = set
 		group3.groupSet = set
 		group4.groupSet = set
-		group1._studentsGroup.userLookup = userLookup
-		group2._studentsGroup.userLookup = userLookup
-		group3._studentsGroup.userLookup = userLookup
-		group4._studentsGroup.userLookup = userLookup
+		group1.students.asInstanceOf[UserGroup].userLookup = userLookup
+		group2.students.asInstanceOf[UserGroup].userLookup = userLookup
+		group3.students.asInstanceOf[UserGroup].userLookup = userLookup
+		group4.students.asInstanceOf[UserGroup].userLookup = userLookup
 
 		set.members.add(user1)
 		set.members.add(user2)
@@ -93,9 +94,9 @@ class AllocateStudentsTemplateCommandTest extends TestBase with Mockito {
 		
 		set.membershipService = membershipService
 		set.module = module
-		set._membersGroup.userLookup = userLookup
+		set.members.asInstanceOf[UserGroup].userLookup = userLookup
 		
-		membershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Some(set._membersGroup)) returns (set._membersGroup.users)
+		membershipService.determineMembershipUsers(set.upstreamAssessmentGroups, Some(set.members)) returns (set.members.users)
 	}
 
 

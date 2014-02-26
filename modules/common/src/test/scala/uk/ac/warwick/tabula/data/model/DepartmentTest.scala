@@ -80,20 +80,20 @@ class DepartmentTest extends TestBase with Mockito {
 
 		department.isOwnedBy("cuscav") should be (false)
 
-		department.owners.addUser("cuscav")
-		department.owners.addUser("cusebr")
-		department.owners.addUser("curef")
+		department.owners.knownType.addUserId("cuscav")
+		department.owners.knownType.addUserId("cusebr")
+		department.owners.knownType.addUserId("curef")
 
-		department.owners.removeUser("cusebr")
+		department.owners.knownType.removeUserId("cusebr")
 
 		department.isOwnedBy("cuscav") should be (true)
 		department.isOwnedBy("curef") should be (true)
 		department.isOwnedBy("cusebr") should be (false)
 
-		ownersGroup.includeUsers.asScala.toSeq should be (Seq("cuscav", "curef"))
+		ownersGroup.members should be (Seq("cuscav", "curef"))
 
 		department.isExtensionManager("cuscav") should be (false)
-		extmanGroup.addUser("cuscav")
+		extmanGroup.addUserId("cuscav")
 		department.isExtensionManager("cuscav") should be (true)
 	}
 

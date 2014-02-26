@@ -6,10 +6,10 @@
 		${group.groupSet.name}, ${group.name}
 		<#if can.do("SmallGroups.ReadMembership", group)>
 			<a href="<@routes.studentslist group />" class="ajax-modal" data-target="#students-list-modal">
-				<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
+				<small><@fmt.p (group.students.size)!0 "student" "students" /></small>
 			</a>
 		<#else>
-			<small><@fmt.p (group.students.includeUsers?size)!0 "student" "students" /></small>
+			<small><@fmt.p (group.students.size)!0 "student" "students" /></small>
 		</#if>
 	</h1>
 	

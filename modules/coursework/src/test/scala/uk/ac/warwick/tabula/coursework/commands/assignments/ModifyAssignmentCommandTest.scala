@@ -7,7 +7,7 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, AppContextTestBase, Mockito}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-import uk.ac.warwick.tabula.services.{NotificationService, UserLookupService}
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, NotificationService, UserLookupService}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{Notification, UserGroup}
 import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
@@ -146,8 +146,8 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 			val cmd = new EditAssignmentCommand(f.module, f.assignment, f.currentUser)
 			cmd.userLookup = userLookup
 			cmd.members match {
-				case ug: UserGroup => ug.userLookup = userLookup
-				case _ => fail("Expected to be able to set the userlookup on the usergroup.")
+				case ug: UserGroupCacheManager => ug.underlying.asInstanceOf[UserGroup].userLookup = userLookup
+				case ug => fail(s"Expected to be able to set the userlookup on the usergroup $ug.")
 			}
 
 			// have one user, add a new one and check re-add does nothing

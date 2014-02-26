@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data.model
 
 import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, PersistenceTestBase}
-import uk.ac.warwick.tabula.services.{ProfileService, RelationshipService, RelationshipServiceImpl}
+import uk.ac.warwick.tabula.services.{StaffAssistantsHelpers, ProfileService, RelationshipService, RelationshipServiceImpl}
 import uk.ac.warwick.tabula.data.MemberDaoImpl
 import org.junit.Before
 import uk.ac.warwick.tabula.data.StudentCourseDetailsDao
@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.StudentCourseDetailsDaoImpl
 
 class MemberTest extends PersistenceTestBase with Mockito {
 
-	val profileService = mock[ProfileService]
+	val profileService = mock[ProfileService with StaffAssistantsHelpers]
 	val relationshipService = mock[RelationshipService]
 	val memberDao = new MemberDaoImpl
 	val studentCourseDetailsDao = new StudentCourseDetailsDaoImpl

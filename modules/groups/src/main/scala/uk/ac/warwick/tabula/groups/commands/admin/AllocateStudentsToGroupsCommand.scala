@@ -102,8 +102,8 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	final def applyInternal() = transactional() {
 		for ((group, users) <- mapping.asScala) {
 			val userGroup = UserGroup.ofUniversityIds
-			users.asScala.foreach { user => userGroup.addUser(user.getWarwickId) }
-			group._studentsGroup.copyFrom(userGroup)
+			users.asScala.foreach { user => userGroup.addUserId(user.getWarwickId) }
+			group.students.copyFrom(userGroup)
 			service.saveOrUpdate(group)
 		}
 		set

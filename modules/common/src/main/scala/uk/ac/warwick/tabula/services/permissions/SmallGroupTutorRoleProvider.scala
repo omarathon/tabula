@@ -21,7 +21,7 @@ class SmallGroupTutorRoleProvider extends RoleProvider {
 
 	private def getRoles(user: CurrentUser, events: Seq[SmallGroupEvent]) =
 		events.toStream
-		  .filter { _.tutors.includes(user.apparentId) }
+		  .filter { _.tutors.includesUser(user.apparentUser) }
 		  .map { _.group }
 		  .distinct
 		  .map { group =>

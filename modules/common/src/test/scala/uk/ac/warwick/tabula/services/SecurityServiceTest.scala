@@ -218,6 +218,7 @@ class SecurityServiceTest extends TestBase with Mockito {
 		val currentUser = new CurrentUser(user, user)
 		
 		val department = new Department
+		department.code = "in"
 		
 		val student1 = new StudentMember
 		student1.universityId = "1111111"
@@ -226,6 +227,13 @@ class SecurityServiceTest extends TestBase with Mockito {
 		val student2 = new StudentMember
 		student2.universityId = "2222222"
 		student2.homeDepartment = department
+
+		val smallGroupService = mock[SmallGroupService]
+		smallGroupService.findSmallGroupsByStudent(student1.asSsoUser) returns (Nil)
+		smallGroupService.findSmallGroupsByStudent(student2.asSsoUser) returns (Nil)
+
+		student1.smallGroupService = smallGroupService
+		student2.smallGroupService = smallGroupService
 		
 		val studentCourseDetails = new StudentCourseDetails(student1, "1111111/1")
 		

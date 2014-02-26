@@ -54,7 +54,6 @@ class SmallGroupServiceTest extends TestBase with Mockito {
 			with SmallGroupDaoComponent
 			with Logging {
 				val eventTutorsHelper: UserGroupMembershipHelper[SmallGroupEvent] = null
-				val groupTutorsHelper: UserGroupMembershipHelper[SmallGroup] = null
 				val groupSetManualMembersHelper: UserGroupMembershipHelper[SmallGroupSet] = null
 				val studentGroupHelper: UserGroupMembershipHelper[SmallGroup] = studentGroupMembershipHelper
 

@@ -49,9 +49,9 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		cmd.overrideType = GrantedPermission.Allow
 		
 		val existing = GrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true)
-		existing.users.addUser("cuscav")
-		existing.users.addUser("cusebr")
-		existing.users.addUser("cuscao")
+		existing.users.knownType.addUserId("cuscav")
+		existing.users.knownType.addUserId("cusebr")
+		existing.users.knownType.addUserId("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
 				
@@ -59,10 +59,10 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		(grantedPerm.eq(existing)) should be (true)
 		
 		grantedPerm.permission should be (Permissions.Department.ManageExtensionSettings)
-		grantedPerm.users.includeUsers.size() should be (1)
-		grantedPerm.users.includes("cuscav") should be (false)
-		grantedPerm.users.includes("cusebr") should be (false)
-		grantedPerm.users.includes("cuscao") should be (true)
+		grantedPerm.users.size should be (1)
+		grantedPerm.users.knownType.includesUserId("cuscav") should be (false)
+		grantedPerm.users.knownType.includesUserId("cusebr") should be (false)
+		grantedPerm.users.knownType.includesUserId("cuscao") should be (true)
 		grantedPerm.overrideType should be (GrantedPermission.Allow)
 		grantedPerm.scope should be (dept)
 	}
@@ -77,9 +77,9 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		cmd.overrideType = GrantedPermission.Allow
 		
 		val existing = GrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true)
-		existing.users.addUser("cuscav")
-		existing.users.addUser("cusebr")
-		existing.users.addUser("cuscao")
+		existing.users.knownType.addUserId("cuscav")
+		existing.users.knownType.addUserId("cusebr")
+		existing.users.knownType.addUserId("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
 		securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
@@ -98,9 +98,9 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		cmd.overrideType = GrantedPermission.Allow
 		
 		val existing = GrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true)
-		existing.users.addUser("cuscav")
-		existing.users.addUser("cusebr")
-		existing.users.addUser("cuscao")
+		existing.users.knownType.addUserId("cuscav")
+		existing.users.knownType.addUserId("cusebr")
+		existing.users.knownType.addUserId("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
 		securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
@@ -125,9 +125,9 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		cmd.overrideType = GrantedPermission.Allow
 		
 		val existing = GrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true)
-		existing.users.addUser("cuscav")
-		existing.users.addUser("cusebr")
-		existing.users.addUser("cuscao")
+		existing.users.knownType.addUserId("cuscav")
+		existing.users.knownType.addUserId("cusebr")
+		existing.users.knownType.addUserId("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
 		securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (true)
@@ -170,9 +170,9 @@ class RevokePermissionsCommandTest extends TestBase with Mockito {
 		cmd.overrideType = GrantedPermission.Allow
 		
 		val existing = GrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true)
-		existing.users.addUser("cuscav")
-		existing.users.addUser("cusebr")
-		existing.users.addUser("cuscao")
+		existing.users.knownType.addUserId("cuscav")
+		existing.users.knownType.addUserId("cusebr")
+		existing.users.knownType.addUserId("cuscao")
 		
 		permissionsService.getGrantedPermission(dept, Permissions.Department.ManageExtensionSettings, true) returns (Some(existing))
 		securityService.canDelegate(currentUser, Permissions.Department.ManageExtensionSettings, dept) returns (false)

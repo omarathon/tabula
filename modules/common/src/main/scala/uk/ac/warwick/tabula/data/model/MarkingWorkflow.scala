@@ -91,12 +91,12 @@ trait AssignmentMarkerMap {
 		val student = userLookup.getUserByWarwickUniId(universityId)
 
 		val mapEntry = Option(assignment.markerMap) flatMap { _.find {
-			p:(String,UserGroup) =>
-				p._2.includes(student.getUserId) && markers.includes(p._1)
+			case (markerUserId: String, group: UserGroup) =>
+				group.includesUser(student) && markers.knownType.includesUserId(markerUserId)
 			}
 		}
 
-		mapEntry.map(_._1)
+		mapEntry.map { case (markerUserId, _) => markerUserId }
 	}
 
 	def getStudentsFirstMarker(assignment: Assignment, universityId: UniversityId) =
@@ -122,7 +122,7 @@ trait AssignmentMarkerMap {
 	private def getSubmissionsFromMap(assignment: Assignment, marker: User): Seq[Submission] = {
 		val students = Option(assignment.markerMap.get(marker.getUserId))
 		students.map { ug =>
-			val submissionIds = ug.includeUsers
+			val submissionIds = ug.knownType.allIncludedIds
 			assignment.submissions.filter(s => submissionIds.exists(_ == s.userId))
 		}.getOrElse(Seq())
 	}

@@ -18,6 +18,18 @@ import uk.ac.warwick.userlookup.User
 // reusable environment for marking workflow tests
 trait ReportWorld extends TestBase with Mockito {
 
+	var assignmentMembershipService = mock[AssignmentMembershipService]
+	assignmentMembershipService.determineMembershipUsers(any[Assignment]) answers { assignmentObj =>
+		val assignment = assignmentObj.asInstanceOf[Assignment]
+		val studentIds = assignment.members.knownType.includedUserIds
+		val users = studentIds.map{userId =>
+			val userOne = new User(userId)
+			userOne.setWarwickId(userId)
+			userOne
+		}.toList
+		users
+	}
+
 	val department = new Department
 	department.code = "IN"
 	department.name = "Test Department"
@@ -67,18 +79,6 @@ trait ReportWorld extends TestBase with Mockito {
 		auditEvents.filter(event => {event.students.contains(user.getWarwickId) && event.assignmentId.get == assignment.id})
 	}}
 
-	var assignmentMembershipService = mock[AssignmentMembershipService]
-	assignmentMembershipService.determineMembershipUsers(any[Assignment]) answers { assignmentObj =>
-		val assignment = assignmentObj.asInstanceOf[Assignment]
-		val studentIds = assignment.members.includeUsers
-		val users = studentIds.map{userId =>
-			val userOne = new User(userId)
-			userOne.setWarwickId(userId)
-			userOne
-		}.toList
-		users
-	}
-
 
 	var submissionService = mock[SubmissionService]
 	submissionService.getSubmissionByUniId(any[Assignment], any[String]) answers { argsObj => {
@@ -122,6 +122,8 @@ trait ReportWorld extends TestBase with Mockito {
 
 	def addAssignment(id: String, name: String, closeDate: DateTime, numberOfStudents: Int, lateModNumber: Int, module: Module) = {
 		val assignment = new Assignment(module)
+		assignment.assignmentMembershipService = assignmentMembershipService
+
 		assignment.setDefaultBooleanProperties()
 		assignment.id = id
 		assignment.name = name
@@ -186,7 +188,7 @@ trait ReportWorld extends TestBase with Mockito {
 
 	def makeUserGroup(users: Seq[String]): UserGroup = {
 		val ug = UserGroup.ofUsercodes
-		ug.includeUsers = users
+		ug.includedUserIds = users
 		ug
 	}
 }

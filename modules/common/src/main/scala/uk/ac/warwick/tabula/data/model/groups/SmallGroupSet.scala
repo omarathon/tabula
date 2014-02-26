@@ -59,6 +59,9 @@ class SmallGroupSet
 	@transient var permissionsService = Wire[PermissionsService]
 	@transient var membershipService = Wire[AssignmentMembershipService]
 
+	// FIXME this isn't really optional, but testing is a pain unless it's made so
+	@transient var smallGroupService = Wire.option[SmallGroupService with SmallGroupMembershipHelpers]
+
 	def this(_module: Module) {
 		this()
 		this.module = _module
@@ -119,8 +122,16 @@ class SmallGroupSet
 	// only students manually added or excluded. use allStudents to get all students in the group set
 	@OneToOne(cascade = Array(ALL), fetch = FetchType.LAZY)
 	@JoinColumn(name = "membersgroup_id")
-	var _membersGroup = UserGroup.ofUniversityIds
-	def members: UnspecifiedTypeUserGroup= _membersGroup
+	private var _membersGroup = UserGroup.ofUniversityIds
+	def members: UnspecifiedTypeUserGroup = {
+		smallGroupService match {
+			case Some(smallGroupService) => {
+				new UserGroupCacheManager(_membersGroup, smallGroupService.groupSetManualMembersHelper)
+			}
+			case _ => _membersGroup
+		}
+	}
+	def members_=(group: UserGroup) { _membersGroup = group }
 
 	// Cannot link directly to upstream assessment groups data model in sits is silly ...
 	@OneToMany(mappedBy = "smallGroupSet", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
