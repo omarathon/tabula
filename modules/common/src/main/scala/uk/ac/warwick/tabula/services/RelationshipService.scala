@@ -23,6 +23,7 @@ trait RelationshipService {
 	def getStudentRelationshipTypeById(id: String): Option[StudentRelationshipType]
 	def getStudentRelationshipTypeByUrlPart(urlPart: String): Option[StudentRelationshipType]
 	def getStudentRelationshipTypesWithRdxType: Seq[StudentRelationshipType]
+	def getStudentRelationshipById(id: String): Option[StudentRelationship]
 
 	def saveOrUpdate(relationship: StudentRelationship)
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
@@ -228,6 +229,8 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 	def getStudentRelationshipTypesWithRdxType: Seq[StudentRelationshipType] = {
 		allStudentRelationshipTypes.filter(_.defaultRdxType != null)
 	}
+
+	def getStudentRelationshipById(id: String): Option[StudentRelationship] = memberDao.getStudentRelationshipById(id)
 
 	def getPreviousRelationship(relationship: StudentRelationship): Option[StudentRelationship] = {
 		relationship.studentMember.flatMap { student =>
