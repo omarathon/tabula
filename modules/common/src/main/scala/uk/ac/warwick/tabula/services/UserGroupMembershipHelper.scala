@@ -127,5 +127,3 @@ private[services] class UserGroupMembershipHelper[A <: Serializable : ClassTag] 
 		def shouldBeCached(value: Array[A]) = true
 	}
 }
-
-
