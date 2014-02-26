@@ -15,18 +15,18 @@ case class ModulePickerResult(module: Module, hasSmallGroups: Boolean)
 @RequestMapping(value = Array("/api/modulepicker/query"))
 class ModulePickerController extends BaseController {
 
-@ModelAttribute("command")
-def command = ModulePickerCommand()
+	@ModelAttribute("command")
+	def command = ModulePickerCommand()
 
-@RequestMapping
-def query(@ModelAttribute("command")cmd: Appliable[Seq[ModulePickerResult]]) = {
-	val results = cmd.apply()
-	Mav(
-	new JSONView(
-		results.map(result => Map("code" -> result.module.code, "name" -> result.module.name, "department" -> result.module.department.name, "hasSmallGroups" -> result.hasSmallGroups))
-	)
-	)
-}
+	@RequestMapping
+	def query(@ModelAttribute("command")cmd: Appliable[Seq[ModulePickerResult]]) = {
+		val results = cmd.apply()
+		Mav(
+			new JSONView(
+				results.map(result => Map("code" -> result.module.code, "name" -> result.module.name, "department" -> result.module.department.name, "hasSmallGroups" -> result.hasSmallGroups))
+			)
+		)
+	}
 
 }
 
@@ -37,8 +37,12 @@ class ModulePickerCommand extends CommandInternal[Seq[ModulePickerResult]] {
 	var query: String = _
 
 	def applyInternal() = {
-		val modules: Seq[Module] = moduleAndDepartmentService.findModulesNamedLike(query)
-		modules.map (module => ModulePickerResult(module, smallGroupService.hasSmallGroups(module)))
+		if (query.isEmpty) {
+			Seq()
+		} else {
+			val modules: Seq[Module] = moduleAndDepartmentService.findModulesNamedLike(query)
+			modules.map (module => ModulePickerResult(module, smallGroupService.hasSmallGroups(module)))
+		}
 	}
 
 }
