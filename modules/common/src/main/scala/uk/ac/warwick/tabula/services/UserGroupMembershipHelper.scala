@@ -295,6 +295,15 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
 		for (cacheService <- cacheService; user <- userIds.map(getUserFromUserId))
 			cacheService.invalidate(helper, user)
 	}
+	def copyFrom(otherGroup: UnspecifiedTypeUserGroup) = {
+		val oldIds = underlying.knownType.members
+		val newIds = otherGroup.knownType.members
+
+		underlying.copyFrom(otherGroup)
+
+		for (cacheService <- cacheService; user <- (oldIds ++ newIds).distinct.map(getUserFromUserId))
+			cacheService.invalidate(helper, user)
+	}
 
 	def users = underlying.users
 	def baseWebgroup = underlying.baseWebgroup
@@ -304,7 +313,6 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
 	def includesUser(user: User) = underlying.includesUser(user)
 	def excludesUser(user: User) = underlying.excludesUser(user)
 	def hasSameMembersAs(other: UnspecifiedTypeUserGroup) = underlying.hasSameMembersAs(other)
-	def copyFrom(otherGroup: UnspecifiedTypeUserGroup) = underlying.copyFrom(otherGroup)
 	def duplicate() = new UserGroupCacheManager(underlying.duplicate(), helper) // Should this be wrapped or not?
 	val universityIds = underlying.universityIds
 	def knownType = underlying.knownType
