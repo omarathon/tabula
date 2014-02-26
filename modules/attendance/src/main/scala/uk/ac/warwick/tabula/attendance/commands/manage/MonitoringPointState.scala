@@ -23,7 +23,8 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 	meetingFormats.addAll(MeetingFormat.members.asJava)
 	var meetingQuantity: Int = 1
 
-	var smallGroupEventQuantity: JInteger = 0
+	var smallGroupEventQuantity: JInteger = 1
+	var smallGroupEventQuantityAll: Boolean = false
 	var smallGroupEventModules: JSet[Module] = JHashSet()
 
 	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
@@ -44,7 +45,10 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 				point.meetingQuantity = meetingQuantity
 			}
 			case MonitoringPointType.SmallGroup => {
-				point.smallGroupEventQuantity = smallGroupEventQuantity
+				point.smallGroupEventQuantity = smallGroupEventQuantityAll match {
+					case true => 0
+					case _ => smallGroupEventQuantity.toInt
+				}
 				point.smallGroupEventModules = smallGroupEventModules match {
 					case modules: JSet[Module] => modules.asScala.toSeq
 					case _ => Seq()
@@ -76,6 +80,7 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 				smallGroupEventModules.clear()
 				smallGroupEventModules.addAll(point.smallGroupEventModules.asJava)
 				smallGroupEventQuantity = point.smallGroupEventQuantity
+				smallGroupEventQuantityAll = point.smallGroupEventQuantity == 0
 			}
 			case _ =>
 		}

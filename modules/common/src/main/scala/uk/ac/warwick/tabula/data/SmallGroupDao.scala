@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEventOccurrence, SmallGroupEvent, SmallGroup, SmallGroupSet, SmallGroupEventAttendance}
-import org.hibernate.criterion.Order
+import org.hibernate.criterion.{Projections, Order}
 import org.hibernate.criterion.Restrictions._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.AcademicYear
@@ -41,6 +41,8 @@ trait SmallGroupDao {
 	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote]
 
 	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
+
+	def hasSmallGroups(module: Module): Boolean
 }
 
 @Repository
@@ -125,5 +127,12 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 				.seq
 		}
 
+	}
+
+	def hasSmallGroups(module: Module): Boolean = {
+		session.newCriteria[SmallGroupSet]
+			.add(is("module", module))
+			.project[Number](Projections.rowCount())
+			.uniqueResult.get.intValue() > 0
 	}
 }

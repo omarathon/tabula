@@ -77,8 +77,17 @@
 
 	<div class="pointTypeOption smallGroup row-fluid">
 
-		<@form.labelled_row "smallGroupEventQuantity" "Number of events">
-			<input type="text" class="input-mini" value="<#if (command.smallGroupEventQuantity?? && command.smallGroupEventQuantity > 0)>${command.smallGroupEventQuantity}</#if>" name="smallGroupEventQuantity" />
+		<@form.labelled_row "smallGroupEventQuantityAll" "Number of events">
+			<@form.label>
+				<#-- <input type="radio" class="input-mini" <#if (command.smallGroupEventQuantity?? && command.smallGroupEventQuantity > 0)>checked</#if>" value="false" name="smallGroupEventQuantityAll" > -->
+				<input type="text" <#if (command.smallGroupEventQuantity?? && command.smallGroupEventQuantity > 0)>value="${command.smallGroupEventQuantity}"</#if> name="smallGroupEventQuantity" />
+				<@fmt.help_popover id="smallGroupEventQuantity" content="The student must have attended this many events for any of the specified modules between the start and end dates in order to meet this monitoring point" />
+			</@form.label>
+			<#-- <@form.label clazz="radio" checkbox=true>
+				<input type="radio" class="input-mini" <#if !(command.smallGroupEventQuantity?? && command.smallGroupEventQuantity > 0)>checked</#if>" value="true" name="smallGroupEventQuantityAll" >
+				All
+				<@fmt.help_popover id="smallGroupEventQuantityAll" content="The student must have attended all events set up in Tabula for any of the specified modules between the start and end dates in order to meet this mornitoring point" />
+			</@form.label> -->
 		</@form.labelled_row>
 
 		<div class="module-list">
