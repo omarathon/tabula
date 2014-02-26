@@ -54,9 +54,10 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 	def findModulesNamedLike(query: String): Seq[Module] = {
 		session.newCriteria[Module]
 		.add(disjunction()
-			.add(Restrictions.eq("code", query.toLowerCase).ignoreCase)
-			.add(Restrictions.eq("name", query.toLowerCase).ignoreCase)
-			).seq
+			.add(like("code", s"%${query.toLowerCase}%").ignoreCase)
+			.add(like("name", s"%${query.toLowerCase}%").ignoreCase)
+			)
+			.setMaxResults(20).seq
 	}
 
 }
