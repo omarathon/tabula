@@ -79,7 +79,7 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 		else {
 			captureTutor(studentCourseDetails)
 
-			if (row.scjCode != null && !row.scjStatusCode.startsWith("P"))
+			if (row.scjCode != null && row.scjStatusCode != null && !row.scjStatusCode.startsWith("P"))
 				new ImportSupervisorsForStudentCommand(studentCourseDetails).apply
 		}
 
