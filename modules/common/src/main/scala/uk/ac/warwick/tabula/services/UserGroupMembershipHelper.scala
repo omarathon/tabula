@@ -258,7 +258,7 @@ class UserGroupCacheManager(val underlying: UnspecifiedTypeUserGroup, private va
 	}
 
 	private def getUserFromUserId(userId: String): User =
-		if (universityIds) userLookup.getUserByWarwickUniIdUncached(userId)
+		if (universityIds) userLookup.getUserByWarwickUniId(userId)
 		else userLookup.getUserByUserId(userId)
 
 	def addUserId(userId: String) = {

@@ -71,7 +71,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 							membershipInfos.map { m =>
 								val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
 
-								val user = userLookup.getUserByWarwickUniIdUncached(warwickId) match {
+								val user = userLookup.getUserByWarwickUniIdUncached(warwickId, true) match {
 									case FoundUser(u) => u
 									case _ => userLookup.getUserByUserId(usercode)
 								}
@@ -193,7 +193,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	def refresh(member: Member) {
 		transactional() {
 			val warwickId = member.universityId
-			val user = userLookup.getUserByWarwickUniIdUncached(member.universityId) match {
+			val user = userLookup.getUserByWarwickUniIdUncached(member.universityId, true) match {
 				case FoundUser(u) => u
 				case _ => userLookup.getUserByUserId(member.userId)
 			}
