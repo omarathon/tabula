@@ -4,7 +4,7 @@ import org.springframework.stereotype.Component
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles._
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.{ScheduledMeetingRecord, Submission, Feedback, Member, UserSettings}
+import uk.ac.warwick.tabula.data.model.{Notification, ScheduledMeetingRecord, Submission, Feedback, Member, UserSettings}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.roles.FeedbackRecipient
@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.roles.SettingsOwner
 import uk.ac.warwick.tabula.helpers.Promises._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
+import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
 
 /**
  * A special multi-purpose role provider that provides users access to their own data, generally this isn't an explicit permission.
@@ -44,6 +45,14 @@ class OwnDataRoleProvider extends RoleProvider {
 				if (user.apparentId.hasText && settings.userId == user.apparentId) 
 					Stream(customRoleFor(department)(SettingsOwnerRoleDefinition, settings).getOrElse(SettingsOwner(settings)))
 				else Stream.empty
+
+			// You can modify properties of your own notifications
+			case notification : Notification[_,_] => {
+				if (user.apparentId.hasText && notification.recipients.contains(user.apparentUser))
+					Stream(customRoleFor(department)(NotificationRecepientRoleDefinition, notification)
+						.getOrElse(NotificationRecepient(notification)))
+				else Stream.empty
+			}
 
 			// You can view small groups that you are a member of
 			case smallGroup: SmallGroup => {

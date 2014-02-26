@@ -279,4 +279,9 @@ object Fixtures extends Mockito {
 		approval
 	}
 
+	def notification(agent:User, recipient: User) = {
+		val heron = new Heron(recipient)
+		Notification.init(new HeronWarningNotification, agent, heron, heron)
+	}
+
 }
