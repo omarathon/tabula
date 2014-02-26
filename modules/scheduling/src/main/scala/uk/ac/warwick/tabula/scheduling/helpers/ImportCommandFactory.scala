@@ -1,14 +1,10 @@
 package uk.ac.warwick.tabula.scheduling.helpers
 
-import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportStudentCourseYearCommand, ImportStudentCourseCommand, ImportSupervisorsForStudentCommand}
-import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter, SitsStatusImporter, ModeOfAttendanceImporter, SupervisorImporter}
+import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportStudentCourseYearCommand, ImportStudentCourseCommand}
+import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter, SitsStatusImporter, ModeOfAttendanceImporter}
 import uk.ac.warwick.tabula.data.model.{StudentMember, StudentCourseDetails}
 import uk.ac.warwick.tabula.services.{ProfileService, CourseAndRouteService, ModuleAndDepartmentService, RelationshipService, MaintenanceModeService}
-import uk.ac.warwick.tabula.data.{StudentCourseDetailsDao, StudentCourseYearDetailsDao, ModeOfAttendanceDao, MemberDao}
-
-/**
- * Created by zoe on 13/02/14.
- */
+import uk.ac.warwick.tabula.data.{FileDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao, ModeOfAttendanceDao, MemberDao}
 
 class ImportCommandFactory() {
 	val rowTracker = new ImportRowTracker

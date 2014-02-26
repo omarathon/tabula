@@ -13,7 +13,7 @@ import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter}
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, RelationshipService}
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.commands.Description
-import ImportMemberHelpers.opt
+import ImportMemberHelpers._
 
 class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, importCommandFactory: ImportCommandFactory)
 	extends Command[StudentCourseDetails] with Logging with Daoisms
@@ -80,7 +80,7 @@ class ImportStudentCourseCommand(row: SitsStudentRow, stuMem: StudentMember, imp
 			captureTutor(studentCourseDetails)
 
 			if (row.scjCode != null && row.scjStatusCode != null && !row.scjStatusCode.startsWith("P"))
-				new ImportSupervisorsForStudentCommand(studentCourseDetails).apply
+				new ImportSupervisorsForStudentCommand(studentCourseDetails).apply()
 		}
 
 		importCommandFactory.rowTracker.scjCodesSeen.add(studentCourseDetails.scjCode)

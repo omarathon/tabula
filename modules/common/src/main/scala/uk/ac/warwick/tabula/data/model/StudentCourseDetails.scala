@@ -145,7 +145,7 @@ class StudentCourseDetails
 
 // properties for a student on a course which come direct from SITS - those that need to be
 // transformed in some way are in StudentCourseProperties
-trait StudentCoursePropertiesFromSits {
+trait BasicStudentCourseProperties {
 	// There can be multiple StudentCourseDetails rows for a single SPR code, even though a route is a sub-category of a course;
 	// this is just an artefact of the weird way SITS works.  If a student changes route within a course, they end up with a new
 	// course join (SCJ) row in SITS.  Equally perversely, they keep the same sprcode and SPR row even though this should be the
@@ -171,7 +171,7 @@ trait StudentCoursePropertiesFromSits {
 	var mostSignificant: JBoolean = _
 }
 
-trait StudentCourseProperties extends StudentCoursePropertiesFromSits {
+trait StudentCourseProperties extends BasicStudentCourseProperties {
 	var lastUpdatedDate = DateTime.now
 	var missingFromImportSince: DateTime = _
 

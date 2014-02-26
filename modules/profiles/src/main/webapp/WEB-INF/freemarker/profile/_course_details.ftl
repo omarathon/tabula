@@ -20,7 +20,7 @@
 					<#if scd.scjCode != studentCourseDetails.scjCode>
 						<li role="presentation">
 							<a href="/profiles/view/course/${scd.urlSafeId}" role="menuitem">
-								<!-- when choosing from the "Other courses" drop-down, make the most signicant course
+								<#-- when choosing from the "Other courses" drop-down, make the most signicant course
 								  -- bold to assist with navigating back if you have previously gone into a different course -->
 								<#if scd.scjCode == profile.mostSignificantCourse.scjCode>
 									<b>

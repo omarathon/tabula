@@ -57,7 +57,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	def isFresh = (missingFromImportSince == null)
 }
 
-trait StudentCourseYearPropertiesFromSits {
+trait BasicStudentCourseYearProperties {
 	var sceSequenceNumber: JInteger = _
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
@@ -73,7 +73,7 @@ trait StudentCourseYearPropertiesFromSits {
 
 }
 
-trait StudentCourseYearProperties extends StudentCourseYearPropertiesFromSits {
+trait StudentCourseYearProperties extends BasicStudentCourseYearProperties {
 	var lastUpdatedDate = DateTime.now
 	var missingFromImportSince: DateTime = _
 

@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula.scheduling.helpers
 
 import java.sql.ResultSet
-import uk.ac.warwick.tabula.data.model.{StudentCourseYearPropertiesFromSits, StudentCoursePropertiesFromSits}
+import uk.ac.warwick.tabula.data.model.{BasicStudentCourseYearProperties, BasicStudentCourseProperties}
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportMemberHelpers._
 
 /**
- * Created by zoe on 24/02/14.
  *
  * Contains the data from the result set for the SITS query.  (Doesn't include member properties)
  */
@@ -22,7 +21,7 @@ class SitsStudentRow(resultSet: ResultSet)
 // this trait holds data from the result set which will be used by ImportStudentCourseCommand to create
 // StudentCourseDetails.  The data needs to be extracted in this command while the result set is accessible.
 trait SitsStudentRowCourseDetails
-	extends StudentCoursePropertiesFromSits
+	extends BasicStudentCourseProperties
 {
 	def rs: ResultSet
 
@@ -55,7 +54,7 @@ trait SitsStudentRowCourseDetails
 
 // this trait holds data from the result set which will be used by ImportStudentCourseYearCommand to create
 // StudentCourseYearDetails.  The data needs to be extracted in this command while the result set is accessible.
-trait SitsStudentRowYearDetails extends StudentCourseYearPropertiesFromSits {
+trait SitsStudentRowYearDetails extends BasicStudentCourseYearProperties {
 	def rs: ResultSet
 
 	var enrolmentDepartmentCode: String = rs.getString("enrolment_department_code")
