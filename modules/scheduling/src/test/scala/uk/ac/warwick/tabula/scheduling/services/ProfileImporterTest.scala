@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.scheduling.services
 
 import java.sql.{ResultSet, ResultSetMetaData}
-import scala.collection.JavaConversions._
 import org.joda.time.{DateTimeConstants, LocalDate}
 import uk.ac.warwick.tabula.{PersistenceTestBase, Mockito, _}
 import uk.ac.warwick.tabula.data.{FileDao, MemberDao}
@@ -9,20 +8,15 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.Gender._
 import uk.ac.warwick.tabula.data.model.MemberUserType.Staff
 import uk.ac.warwick.tabula.events.EventHandling
-import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportStaffMemberCommand, ImportStudentRowCommand}
-import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
+import uk.ac.warwick.tabula.scheduling.commands.imports.{ImportCommandFactorySetup, ImportStaffMemberCommand, ImportStudentRowCommand}
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportSupervisorsForStudentCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentCourseYearCommand
-
 
 // scalastyle:off magic.number
 class ProfileImporterTest extends PersistenceTestBase with Mockito {
 
 	EventHandling.enabled = false
 
-	trait Environment {
+	trait Environment extends ImportCommandFactorySetup {
 		val blobBytes = Array[Byte](1,2,3,4,5)
 
 		val rs = mock[ResultSet]
@@ -66,16 +60,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					userType = Staff
 				), () => None)
 
-				val importRowTracker = new ImportRowTracker
-
-				val member = ImportStudentRowCommand(mac, new AnonymousUser, rs,
-					importRowTracker,
-					new ImportStudentCourseCommand(rs,
-							importRowTracker,
-							new ImportStudentCourseYearCommand(rs, importRowTracker),
-							new ImportSupervisorsForStudentCommand()
-					)
-				)
+				val member = ImportStudentRowCommand(mac, new AnonymousUser, rs, importCommandFactory)
 				member.firstName should be (name)
 			}
 		}
@@ -96,16 +81,7 @@ class ProfileImporterTest extends PersistenceTestBase with Mockito {
 					userType = Staff
 				), () => None)
 
-				val importRowTracker = new ImportRowTracker
-
-				val member = ImportStudentRowCommand(mac, new AnonymousUser, rs,
-					importRowTracker,
-					new ImportStudentCourseCommand(rs,
-							importRowTracker,
-							new ImportStudentCourseYearCommand(rs, importRowTracker),
-							new ImportSupervisorsForStudentCommand()
-					)
-				)
+				val member = ImportStudentRowCommand(mac, new AnonymousUser, rs, importCommandFactory)
 				member.lastName should be (name)
 			}
 		}

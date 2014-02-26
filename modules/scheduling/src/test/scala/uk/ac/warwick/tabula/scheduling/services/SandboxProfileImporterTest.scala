@@ -7,9 +7,9 @@ import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import uk.ac.warwick.tabula.data.model.Gender
 import uk.ac.warwick.tabula.data.model.MemberUserType
-import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
+import uk.ac.warwick.tabula.scheduling.commands.imports.ImportCommandFactorySetup
 
-class SandboxProfileImporterTest extends TestBase {
+class SandboxProfileImporterTest extends TestBase with ImportCommandFactorySetup {
 
 	val importer = new SandboxProfileImporter
 
@@ -40,7 +40,7 @@ class SandboxProfileImporterTest extends TestBase {
 		member.alternativeEmailAddress should be (null)
 		member.userType should be (MemberUserType.Student)
 
-		val cmds = importer.getMemberDetails(Seq(mac), Map(), new ImportRowTracker)
+		val cmds = importer.getMemberDetails(Seq(mac), Map(), importCommandFactory)
 		cmds.size should be (1)
 
 		val cmd = cmds(0)
