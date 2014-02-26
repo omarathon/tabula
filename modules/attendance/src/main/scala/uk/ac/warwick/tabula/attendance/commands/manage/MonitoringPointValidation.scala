@@ -49,8 +49,8 @@ trait MonitoringPointValidation {
 			errors.rejectValue(meetingFormatsBindPoint, "monitoringPoint.meetingType.meetingFormats.empty")
 		}
 
-		if (meetingQuantity == 0) {
-			errors.rejectValue(meetingQuantityBindPoint, "monitoringPoint.meetingType.meetingQuantity")
+		if (meetingQuantity < 1) {
+			errors.rejectValue(meetingQuantityBindPoint, "monitoringPoint.pointType.quantity")
 		}
 	}
 
@@ -59,7 +59,6 @@ trait MonitoringPointValidation {
 		smallGroupEventQuantity: JInteger, smallGroupEventQuantityBindPoint: String,
 		dept: Department
 	) {
-
-		// nothing at the moment
+			if (smallGroupEventQuantity < 1) errors.rejectValue(smallGroupEventQuantityBindPoint, "monitoringPoint.pointType.quantity")
 	}
 }
