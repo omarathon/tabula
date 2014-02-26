@@ -200,7 +200,7 @@ class FeedbackReport(department: Department, startDate: DateTime, endDate: DateT
 
 			// note +1 working day  - getNumWorkingDays is inclusive (starts at 1)
 			// we want n working days after the close date
-			if (numOfDays > (Feedback.PublishDeadlineInWorkingDays + 1) && isLateExempt != true)  {
+			if (numOfDays > (Feedback.PublishDeadlineInWorkingDays + 1) && !isLateExempt)  {
 				FeedbackCount(0, 1, publishEventDate, publishEventDate)
 			} // was late
 			else {
