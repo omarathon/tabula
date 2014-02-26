@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{AssignmentMembershipDao, AssignmentMembershipDaoComponent, AutowiringAssignmentMembershipDaoComponent, AutowiringSmallGroupDaoComponent, AutowiringUserGroupDaoComponent, SmallGroupDaoComponent, UserGroupDaoComponent}
-import uk.ac.warwick.tabula.data.model.{StudentMember, ModuleRegistration, UserGroup, UnspecifiedTypeUserGroup}
+import uk.ac.warwick.tabula.data.model.{Module, StudentMember, ModuleRegistration, UserGroup, UnspecifiedTypeUserGroup}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroup, SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupSet, SmallGroupEventAttendance}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
@@ -46,6 +46,8 @@ trait SmallGroupService {
 	def getAttendanceNote(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendanceNote]
 	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote]
 	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence) : Option[SmallGroupEventAttendance]
+
+	def hasSmallGroups(module: Module): Boolean
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -147,6 +149,8 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence) : Option[SmallGroupEventAttendance] =
 		smallGroupDao.getAttendance(studentId, occurrence)
+
+	def hasSmallGroups(module: Module): Boolean = smallGroupDao.hasSmallGroups(module)
 }
 
 trait SmallGroupMembershipHelpers {
