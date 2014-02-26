@@ -74,14 +74,14 @@ so that they can be passed around between requests.
 
 <#if features.dissertationFilter>
 	<@form.row>
-		<@form.label>Dissertation</@form.label>
+
 		<@form.field>
 		<label class="checkbox">
 			<@f.checkbox path="dissertation" id="dissertation" />
 			Is this assignment a dissertation?
 		</label>
 		<div class="help-block">
-			This field only affects feedback reports.
+			Dissertations don't have a 20 day turnaround time for feedback.
 		</div>
 		</@form.field>
 	</@form.row>

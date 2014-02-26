@@ -41,6 +41,7 @@ trait ReportWorld extends TestBase with Mockito {
 	val assignmentFive = addAssignment("1005", "test five", dateTime(2013, 8, 23), 100, 50, moduleTwo)
 	val assignmentSix = addAssignment("1006", "test six", dateTime(2013, 7, 1), 73, 3, moduleTwo)
 	val assignmentSeven = addAssignment("1007", "test seven", dateTime(2013, 7, 1), 100, 50, moduleTwo)
+	val assignmentEight = addAssignment("1008", "test eight", dateTime(2013, 7, 1), 100, 50, moduleTwo)
 
 	assignmentSeven.dissertation = true
 
@@ -54,8 +55,8 @@ trait ReportWorld extends TestBase with Mockito {
 	createPublishEvent(assignmentSix, 15, studentData(1, 23))		// on time
 	createPublishEvent(assignmentSix, 20, studentData(24, 65))	// on time
 	createPublishEvent(assignmentSix, 31, studentData(66, 73))	// late
-	createPublishEvent(assignmentSeven, 31, studentData(1, 50))	// on time, (it would be late but because it's a dissertation it's ok)
-
+	createPublishEvent(assignmentSeven, 31, studentData(1, 50))	// seemingly late because it's a dissertation it's treated as on-time
+	createPublishEvent(assignmentEight, 31, studentData(1, 50))	// late (same details as assignmentSeven, just not a dissertation)
 
 	var auditEventQueryMethods = mock[AuditEventQueryMethods]
 	auditEventQueryMethods.submissionForStudent(any[Assignment], any[User]) answers {argsObj => {

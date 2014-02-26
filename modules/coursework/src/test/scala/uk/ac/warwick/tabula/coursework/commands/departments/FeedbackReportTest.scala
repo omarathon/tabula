@@ -39,7 +39,21 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 		report.getFeedbackCount(assignmentFour) should be (FeedbackCount(7,28, dateTime(2013, 7, 1), dateTime(2013, 7, 1))) // 7 on time - 28 late
 		report.getFeedbackCount(assignmentFive) should be (FeedbackCount(2,98, dateTime(2013, 9, 24), dateTime(2013, 9, 24))) // 2 on time - 98 late
 		report.getFeedbackCount(assignmentSix) should be (FeedbackCount(65,8, dateTime(2013, 7, 16), dateTime(2013, 8, 1))) // 65 on time - 8 late
+	}
+
+
+	/**
+	 * Checks that the dissertation feedback is counted as on time
+	 *
+	 **/
+
+	@Test
+	def feedbackCountsDissertationTest() {
+		val report = getTestFeedbackReport
+
+		// assignmentSeven is a dissertation, assignmentEight isn't
 		report.getFeedbackCount(assignmentSeven) should be (FeedbackCount(50,0, dateTime(2013, 8, 1), dateTime(2013, 8, 1))) // 50 on time
+		report.getFeedbackCount(assignmentEight) should be (FeedbackCount(0,50, dateTime(2013, 8, 1), dateTime(2013, 8, 1))) // is not a dissertation, 50 late
 	}
 
 	/**
@@ -140,7 +154,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 			Seq("test four","IN102",dateTime(2013, 5, 31),dateTime(2013, 6, 28),"Summative", "", 35,35,0,7,0,35,7,0.2,28,0.8))
 
 		check("Row 5",
-			assignmentSheet.getRow(7),
+			assignmentSheet.getRow(8),
 			Seq("test five","IN102",dateTime(2013, 8, 23),dateTime(2013, 9, 23),"Summative", "", 100,100,0,2,0,100,2,0.02,98,0.98))
 
 		check("Row 6",
@@ -151,6 +165,12 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 			assignmentSheet.getRow(6),
 			Seq("test seven","IN102", dateTime(2013, 7, 1), dateTime(2013, 7, 29), "Summative", "Dissertation", 100, 100, 0, 2, 50, 50, 50, 1, 0, 0))
 
+		check("Row 8",
+			assignmentSheet.getRow(7),
+			Seq("test eight","IN102", dateTime(2013, 7, 1), dateTime(2013, 7, 29), "Summative", "", 100, 100, 0, 2, 50, 50, 0, 0, 50, 1)
+		)
+
+
 		val moduleSheet = report.generateModuleSheet(department)
 		report.populateModuleSheet(moduleSheet)
 
@@ -160,7 +180,7 @@ class FeedbackReportTest extends TestBase with ReportWorld {
 
 		check("Module row 2",
 			moduleSheet.getRow(2),
-			Seq("Module Two","IN102",4,308,308,24,11,50,258,124,0.4806201550387597,134,0.5193798449612403))
+			Seq("Module Two","IN102",5,408,408,24,13,100,308,124,0.4025974025974026,184,0.5974025974025974))
 	}
 
 	def getTestFeedbackReport = {
