@@ -53,8 +53,7 @@ trait ImportStudentCourseCommandSetup extends ImportCommandFactoryForTesting wit
 
 	val courseAndRouteService = smartMock[CourseAndRouteService]
 	val route = smartMock[Route]
-	courseAndRouteService.getRouteByCode("c100") returns (Some(route))
-	courseAndRouteService.getRouteByCode("C100") returns (Some(route))
+	courseAndRouteService.getRouteByCode("C100") returns Some(new Route("c100", smartMock[Department]))
 	importCommandFactory.courseAndRouteService = courseAndRouteService
 
 	val courseImporter = smartMock[CourseImporter]
@@ -132,38 +131,6 @@ trait MockedResultSet extends Mockito {
 	rs.getString("disability") returns ("Q")
 }
 
-trait MockedResultSetWithNulls extends Mockito {
-	val rs = smartMock[ResultSet]
-	val rsMetaData = smartMock[ResultSetMetaData]
-	rs.getMetaData() returns(rsMetaData)
-
-	rsMetaData.getColumnCount() returns(4)
-	rsMetaData.getColumnName(1) returns("gender")
-	rsMetaData.getColumnName(2) returns("year_of_study")
-	rsMetaData.getColumnName(3) returns("spr_code")
-	rsMetaData.getColumnName(4) returns("route_code")
-
-	rs.getString("gender") returns("M")
-	rs.getInt("year_of_study") returns(3)
-	rs.getString("spr_code") returns("0672089/2")
-	rs.getString("route_code") returns(null)
-	rs.getString("spr_tutor1") returns (null)
-	rs.getString("homeDepartmentCode") returns (null)
-	rs.getString("department_code") returns (null)
-	rs.getString("scj_code") returns ("0672089/2")
-	rs.getDate("begin_date") returns Date.valueOf("2011-05-12")
-	rs.getDate("end_date") returns Date.valueOf("2014-05-12")
-	rs.getDate("expected_end_date") returns Date.valueOf("2015-05-12")
-	rs.getInt("sce_sequence_number") returns (1)
-	rs.getString("enrolment_status_code") returns ("F")
-	rs.getString("mode_of_attendance_code") returns (null)
-	rs.getString("sce_academic_year") returns ("10/11")
-	rs.getString("most_signif_indicator") returns (null)
-	rs.getString("mod_reg_status") returns ("CON")
-	rs.getString("course_code") returns (null)
-	rs.getString("disability") returns (null)
-}
-
 // scalastyle:off magic.number
 class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	EventHandling.enabled = false
@@ -215,8 +182,6 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	}
 
 	trait Environment extends MockedResultSet with EnvironmentWithoutResultSet
-
-	trait EnvironmentWithNulls extends MockedResultSetWithNulls with EnvironmentWithoutResultSet
 
 	/** When a SPR is (P)ermanently withdrawn, end relationships
 		* FOR THAT ROUTE ONLY
@@ -358,11 +323,11 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 					scd.course.code should be ("UESA-H612")
 					scd.scjCode should be ("0672089/2")
 					scd.department.code should be ("ph")
-					//scd.route.code should be ("c100")
+					scd.route.code should be ("c100")
 					scd.sprCode should be ("0672089/2")
-					//scd.beginDate should be (Date.valueOf("2011-05-12"))
-					//scd.endDate should be (Date.valueOf("2014-05-12"))
-					//scd.expectedEndDate should be (Date.valueOf("2015-05-12"))
+					scd.beginDate.toString should be ("2011-05-12")
+					scd.endDate.toString should be ("2014-05-12")
+					scd.expectedEndDate.toString should be ("2015-05-12")
 
 					val scyd = scd.freshStudentCourseYearDetails.head
 					scyd.yearOfStudy should be (3)
@@ -381,8 +346,42 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 		}
 	}
 
+	trait MockedResultSetWithNulls extends Mockito {
+		val rs = smartMock[ResultSet]
+		val rsMetaData = smartMock[ResultSetMetaData]
+		rs.getMetaData() returns(rsMetaData)
+
+		rsMetaData.getColumnCount() returns(4)
+		rsMetaData.getColumnName(1) returns("gender")
+		rsMetaData.getColumnName(2) returns("year_of_study")
+		rsMetaData.getColumnName(3) returns("spr_code")
+		rsMetaData.getColumnName(4) returns("route_code")
+
+		rs.getString("gender") returns("M")
+		rs.getInt("year_of_study") returns(3)
+		rs.getString("spr_code") returns("0672089/2")
+		rs.getString("route_code") returns(null)
+		rs.getString("spr_tutor1") returns (null)
+		rs.getString("homeDepartmentCode") returns (null)
+		rs.getString("department_code") returns (null)
+		rs.getString("scj_code") returns ("0672089/2")
+		rs.getDate("begin_date") returns (null)
+		rs.getDate("end_date") returns (null)
+		rs.getDate("expected_end_date") returns (null)
+		rs.getInt("sce_sequence_number") returns (1)
+		rs.getString("enrolment_status_code") returns (null)
+		rs.getString("mode_of_attendance_code") returns (null)
+		rs.getString("sce_academic_year") returns ("10/11")
+		rs.getString("most_signif_indicator") returns ("Y")
+		rs.getString("mod_reg_status") returns (null)
+		rs.getString("course_code") returns (null)
+		rs.getString("disability") returns (null)
+	}
+
+	trait EnvironmentWithNulls extends MockedResultSetWithNulls with EnvironmentWithoutResultSet
+
 	@Test
-	def testImportStudentRowCommandWorksWithNewWithNulls {
+	def testImportStudentRowCommandWorksWithNulls {
 		new EnvironmentWithNulls {
 			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
 
@@ -402,13 +401,28 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			member match {
 				case stu: StudentMember => {
+					stu.disability should be (null)
 					stu.freshStudentCourseDetails.size should be (1)
 					stu.freshStudentCourseDetails.head.freshStudentCourseYearDetails.size should be (1)
+					stu.mostSignificantCourse.sprCode should be ("0672089/2")
+					val scd = stu.freshStudentCourseDetails.head
+					scd.course should be (null)
+					scd.department should be (null)
+					scd.route should be (null)
+					scd.beginDate should be (null)
+					scd.endDate should be (null)
+					scd.expectedEndDate should be (null)
 
+					val scyd = scd.freshStudentCourseYearDetails.head
+					scyd.enrolmentStatus should be (null)
+					scyd.modeOfAttendance should be (null)
+					scyd.moduleRegistrationStatus should be (null)
 				}
 				case _ => false should be (true)
 			}
 
+			there was one(rowCommand.fileDao).savePermanent(any[FileAttachment])
+			there was no(rowCommand.fileDao).saveTemporary(any[FileAttachment])
 			there was one(memberDao).saveOrUpdate(any[Member])
 		}
 	}
