@@ -91,7 +91,6 @@ trait ImportStudentCourseYearCommandSetup extends ImportCommandFactoryForTesting
 	importCommandFactory.profileService = smartMock[ProfileService]
 
 	importCommandFactory.studentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
-
 	importCommandFactory.moaDao = smartMock[ModeOfAttendanceDao]
 
 }
@@ -133,6 +132,38 @@ trait MockedResultSet extends Mockito {
 	rs.getString("disability") returns ("Q")
 }
 
+trait MockedResultSetWithNulls extends Mockito {
+	val rs = smartMock[ResultSet]
+	val rsMetaData = smartMock[ResultSetMetaData]
+	rs.getMetaData() returns(rsMetaData)
+
+	rsMetaData.getColumnCount() returns(4)
+	rsMetaData.getColumnName(1) returns("gender")
+	rsMetaData.getColumnName(2) returns("year_of_study")
+	rsMetaData.getColumnName(3) returns("spr_code")
+	rsMetaData.getColumnName(4) returns("route_code")
+
+	rs.getString("gender") returns("M")
+	rs.getInt("year_of_study") returns(3)
+	rs.getString("spr_code") returns("0672089/2")
+	rs.getString("route_code") returns(null)
+	rs.getString("spr_tutor1") returns (null)
+	rs.getString("homeDepartmentCode") returns (null)
+	rs.getString("department_code") returns (null)
+	rs.getString("scj_code") returns ("0672089/2")
+	rs.getDate("begin_date") returns Date.valueOf("2011-05-12")
+	rs.getDate("end_date") returns Date.valueOf("2014-05-12")
+	rs.getDate("expected_end_date") returns Date.valueOf("2015-05-12")
+	rs.getInt("sce_sequence_number") returns (1)
+	rs.getString("enrolment_status_code") returns ("F")
+	rs.getString("mode_of_attendance_code") returns (null)
+	rs.getString("sce_academic_year") returns ("10/11")
+	rs.getString("most_signif_indicator") returns (null)
+	rs.getString("mod_reg_status") returns ("CON")
+	rs.getString("course_code") returns (null)
+	rs.getString("disability") returns (null)
+}
+
 // scalastyle:off magic.number
 class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	EventHandling.enabled = false
@@ -158,29 +189,34 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 			userType				= Student)
 	}
 
-	trait Environment extends ImportCommandFactorySetup
-			with MockedResultSet
-			with MemberSetup {
+	trait EnvironmentWithoutResultSet extends ImportCommandFactorySetup
+	with MemberSetup {
+		val rs: ResultSet
 
 		val blobBytes = Array[Byte](1,2,3,4,5)
 		val mac = MembershipInformation(mm, () => Some(blobBytes))
+
+		// only return a known disability for code Q
+		val disabilityQ = new Disability("Q", "Test disability")
+		profileService.getDisability(any[String]) returns (None)
+		profileService.getDisability(null) returns (None)
+		profileService.getDisability("Q") returns (Some(disabilityQ))
+
+		tier4RequirementImporter.hasTier4Requirement("0672089") returns (false)
 
 		val rowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), rs, importCommandFactory) with ComponentMixins
 		rowCommand.memberDao = memberDao
 		rowCommand.fileDao = smartMock[FileDao]
 		rowCommand.moduleAndDepartmentService = modAndDeptService
+		rowCommand.profileService = profileService
+		rowCommand.tier4RequirementImporter = tier4RequirementImporter
 
 		val row = new SitsStudentRow(rs)
-
-		// only return a known disability for code Q
-		val disabilityQ = new Disability("Q", "Test disability")
-		profileService.getDisability(any[String]) returns (None)
-		profileService.getDisability("Q") returns (Some(disabilityQ))
-		rowCommand.profileService = profileService
-
-		tier4RequirementImporter.hasTier4Requirement("0672089") returns (false)
-		rowCommand.tier4RequirementImporter = tier4RequirementImporter
 	}
+
+	trait Environment extends MockedResultSet with EnvironmentWithoutResultSet
+
+	trait EnvironmentWithNulls extends MockedResultSetWithNulls with EnvironmentWithoutResultSet
 
 	/** When a SPR is (P)ermanently withdrawn, end relationships
 		* FOR THAT ROUTE ONLY
@@ -314,8 +350,61 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 
 			member match {
 				case stu: StudentMember => {
+					stu.disability.code should be ("Q")
 					stu.freshStudentCourseDetails.size should be (1)
 					stu.freshStudentCourseDetails.head.freshStudentCourseYearDetails.size should be (1)
+					stu.mostSignificantCourse.sprCode should be ("0672089/2")
+					val scd = stu.freshStudentCourseDetails.head
+					scd.course.code should be ("UESA-H612")
+					scd.scjCode should be ("0672089/2")
+					scd.department.code should be ("ph")
+					//scd.route.code should be ("c100")
+					scd.sprCode should be ("0672089/2")
+					//scd.beginDate should be (Date.valueOf("2011-05-12"))
+					//scd.endDate should be (Date.valueOf("2014-05-12"))
+					//scd.expectedEndDate should be (Date.valueOf("2015-05-12"))
+
+					val scyd = scd.freshStudentCourseYearDetails.head
+					scyd.yearOfStudy should be (3)
+					scyd.sceSequenceNumber should be (1)
+					scyd.enrolmentStatus.code should be ("F")
+					scyd.modeOfAttendance.code should be ("P")
+					scyd.academicYear.toString should be ("10/11")
+					scyd.moduleRegistrationStatus.dbValue should be ("CON")
+				}
+				case _ => false should be (true)
+			}
+
+			there was one(rowCommand.fileDao).savePermanent(any[FileAttachment])
+			there was no(rowCommand.fileDao).saveTemporary(any[FileAttachment])
+			there was one(memberDao).saveOrUpdate(any[Member])
+		}
+	}
+
+	@Test
+	def testImportStudentRowCommandWorksWithNewWithNulls {
+		new EnvironmentWithNulls {
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
+
+			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
+			val member = rowCommand.applyInternal()
+
+			// test that member contains the expected data:
+			member.title should be ("Mr")
+			member.universityId should be ("0672089")
+			member.userId should be ("cuscav")
+			member.email should be ("M.Mannion@warwick.ac.uk")
+			member.gender should be (Male)
+			member.firstName should be ("Mathew")
+			member.lastName should be ("Mannion")
+			member.photo should not be (null)
+			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
+
+			member match {
+				case stu: StudentMember => {
+					stu.freshStudentCourseDetails.size should be (1)
+					stu.freshStudentCourseDetails.head.freshStudentCourseYearDetails.size should be (1)
+
 				}
 				case _ => false should be (true)
 			}
@@ -341,6 +430,9 @@ class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 				}
 				case _ => false should be (true)
 			}
+
+			there was one(rowCommand.fileDao).savePermanent(any[FileAttachment])
+			there was no(rowCommand.fileDao).saveTemporary(any[FileAttachment])
 			there was one(memberDao).saveOrUpdate(any[Member])
 		}
 	}
