@@ -19,17 +19,15 @@
 				<#list profile.freshStudentCourseDetails as scd>
 					<#if scd.scjCode != studentCourseDetails.scjCode>
 						<li role="presentation">
-							<a href="/profiles/view/course/${scd.urlSafeId}" role="menuitem">
+							<a href="/profiles/view/course/${scd.urlSafeId}" role="menuitem"
+								<#if scd.scjCode == profile.mostSignificantCourse.scjCode>
+									id="most-significant"
+								</#if>
+							>
 								<#-- when choosing from the "Other courses" drop-down, make the most signicant course
 								  -- bold to assist with navigating back if you have previously gone into a different course -->
-								<#if scd.scjCode == profile.mostSignificantCourse.scjCode>
-									<b>
-								</#if>
 								${(scd.course.code)!}
 								<@fmt.course_year_span studentCourseDetails /> ${scd.scjCode}
-								<#if scd.scjCode == profile.mostSignificantCourse.scjCode>
-									</b>
-								</#if>
 							</a>
 						</li>
 					</#if>
