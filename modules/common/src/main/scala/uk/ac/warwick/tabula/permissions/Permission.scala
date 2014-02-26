@@ -352,4 +352,8 @@ object Permissions {
 		case object Update extends Permission("Edit member notes")
 		case object Delete extends Permission("Delete member notes")
 	}
+
+	object Notification {
+		case object Dismiss extends Permission("Dismiss and restore notifications")
+	}
 }

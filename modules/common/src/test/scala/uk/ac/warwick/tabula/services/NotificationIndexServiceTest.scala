@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.data.model.{Notification, NotificationPriority, HeronWarningNotification}
+import uk.ac.warwick.tabula.data.model.{Heron, Notification, NotificationPriority, HeronWarningNotification}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import org.apache.lucene.store.RAMDirectory
 import org.apache.lucene.index.Term
@@ -29,7 +29,8 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 	val agent = Fixtures.user(userId="abc")
 	val recipient = Fixtures.user(userId="xyz")
 	val otherRecipient = Fixtures.user(userId="xyo")
-	val group = new SmallGroup
+	val victim = Fixtures.user("heronVictim")
+	val heron = new Heron(victim)
 
 	val now = DateTime.now
 
@@ -54,6 +55,15 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 			otherRecipient
 		}
 		new RecipientNotification(notification, theRecipient)
+	}
+
+	lazy val dismissedItem = {
+		val notification = new HeronWarningNotification
+		notification.id = "nid101"
+		notification.created = now.plusMinutes(101)
+		dao.getById(notification.id) returns Some(notification)
+		notification.dismiss(recipient)
+		new RecipientNotification(notification, recipient)
 	}
 
 	// The IDs of notifications we expect our recipient to get.
@@ -86,8 +96,21 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 	@Test
 	def missingRecipient() {
 		val anonUser = new AnonymousUser()
-		val notification = Notification.init(new HeronWarningNotification, agent, group, group)
+		val notification = Notification.init(new HeronWarningNotification, agent, heron, heron)
 		service.indexItems(Seq(new RecipientNotification(notification, anonUser)))
+	}
+
+	@Test
+	def ignoreDismissed() {
+
+		indexTestItems()
+		service.indexItems(Seq(dismissedItem))
+
+		val request = ActivityStreamRequest(user=recipient, max=100, pagination=None)
+		service.userStream(request).items.size should be (50)
+
+		val includeDismissed = ActivityStreamRequest(user=recipient, includeDismissed=true, max=100, pagination=None)
+		service.userStream(includeDismissed).items.size should be (51)
 	}
 
 	@Test
