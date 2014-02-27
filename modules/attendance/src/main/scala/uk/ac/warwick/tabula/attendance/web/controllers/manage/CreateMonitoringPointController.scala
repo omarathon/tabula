@@ -16,16 +16,7 @@ import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
 @Controller
 @RequestMapping(Array("/manage/{dept}/sets/{set}/edit/points/add"))
-class CreateMonitoringPointController extends AttendanceController {
-
-	validatesSelf[SelfValidating]
-
-	@Autowired var moduleAndDepartmentService: ModuleAndDepartmentService = _
-
-	@ModelAttribute("departmentModules")
-	def getDepartmentModules(@PathVariable dept: Department) = {
-		moduleAndDepartmentService.modulesInDepartmentWithPermission(user, Permissions.MonitoringPoints.Manage, dept).toSeq.sorted
-	}
+class CreateMonitoringPointController extends AbstractManageMonitoringPointController {
 
 	@ModelAttribute("command")
 	def createCommand(@PathVariable set: MonitoringPointSet) =

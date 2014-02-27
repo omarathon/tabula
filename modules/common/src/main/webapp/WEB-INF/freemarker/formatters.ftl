@@ -82,13 +82,13 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	</div>
 </#macro>
 
-<#macro module_name module withFormatting=true>
+<#macro module_name module withFormatting=true><#compress>
 	<#if withFormatting>
 		<span class="mod-code">${module.code?upper_case}</span> <span class="mod-name">${module.name}</span>
 	<#else>
 		${module.code?upper_case} ${module.name}
 	</#if>
-</#macro>
+</#compress></#macro>
 
 <#macro assignment_name assignment>
 	<@module_name assignment.module /> <span class="ass-name">${assignment.name}</span>

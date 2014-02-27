@@ -23,7 +23,13 @@ class ModulePickerController extends BaseController {
 		val results = cmd.apply()
 		Mav(
 			new JSONView(
-				results.map(result => Map("code" -> result.module.code, "name" -> result.module.name, "department" -> result.module.department.name, "hasSmallGroups" -> result.hasSmallGroups))
+				results.map(result => Map(
+					"id" -> result.module.id,
+					"code" -> result.module.code,
+					"name" -> result.module.name,
+					"department" -> result.module.department.name,
+					"hasSmallGroups" -> result.hasSmallGroups)
+				)
 			)
 		)
 	}
