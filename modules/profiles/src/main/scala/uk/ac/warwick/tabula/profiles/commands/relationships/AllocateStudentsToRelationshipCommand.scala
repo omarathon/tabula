@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.profiles.commands.relationships
 
 import scala.collection.JavaConverters._
 import org.springframework.validation.BindingResult
-import uk.ac.warwick.tabula.commands.{MemberCollectionHelper, SelfValidating, Command, Description, GroupsObjects}
+import uk.ac.warwick.tabula.commands.{GroupsObjectsWithFileUpload, MemberCollectionHelper, SelfValidating, Command, Description}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.ItemNotFoundException
@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.data.model.StudentMember
 
 class AllocateStudentsToRelationshipCommand(val department: Department, val relationshipType: StudentRelationshipType, val viewer: CurrentUser)
 	extends Command[Seq[StudentRelationshipChange]]
-		with GroupsObjects[Member, Member]
+		with GroupsObjectsWithFileUpload[Member, Member]
 		with SelfValidating
 		with BindListener
 		with RelationshipChangingCommand
@@ -100,7 +100,7 @@ class AllocateStudentsToRelationshipCommand(val department: Department, val rela
 
 	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
 	// Do not modify the returned value!
-	override def mappingById = (mapping.asScala.map {
+	def mappingById = (mapping.asScala.map {
 		case (member, users) => (member.universityId, users)
 	}).toMap
 
