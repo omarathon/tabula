@@ -26,12 +26,11 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 	var smallGroupEventQuantity: JInteger = 1
 	var smallGroupEventQuantityAll: Boolean = false
 	var smallGroupEventModules: JSet[Module] = JHashSet()
+	var isAnySmallGroupEventModules: Boolean = false
 
 	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
+
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
-	def meetingRelationshipsStrings = meetingRelationships.asScala.map(_.urlPart)
-	val allMeetingFormats = MeetingFormat.members
-	def meetingFormatsStrings = meetingFormats.asScala.map(_.description)
 
 	def copyTo(point: MonitoringPoint): MonitoringPoint = {
 		point.name = this.name
@@ -39,21 +38,22 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 		point.requiredFromWeek = this.requiredFromWeek
 		point.pointType = pointType
 		pointType match {
-			case MonitoringPointType.Meeting => {
+			case MonitoringPointType.Meeting =>
 				point.meetingRelationships = meetingRelationships.asScala.toSeq
 				point.meetingFormats = meetingFormats.asScala.toSeq
 				point.meetingQuantity = meetingQuantity
-			}
-			case MonitoringPointType.SmallGroup => {
+			case MonitoringPointType.SmallGroup =>
 				point.smallGroupEventQuantity = smallGroupEventQuantityAll match {
 					case true => 0
 					case _ => smallGroupEventQuantity.toInt
 				}
-				point.smallGroupEventModules = smallGroupEventModules match {
-					case modules: JSet[Module] => modules.asScala.toSeq
-					case _ => Seq()
+				point.smallGroupEventModules = isAnySmallGroupEventModules match {
+					case true => Seq()
+					case false => smallGroupEventModules match {
+						case modules: JSet[Module] => modules.asScala.toSeq
+						case _ => Seq()
+					}
 				}
-			}
 			case _ =>
 		}
 		point
@@ -69,19 +69,18 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 		this.requiredFromWeek = point.requiredFromWeek
 		this.pointType = point.pointType
 		this.pointType match {
-			case MonitoringPointType.Meeting => {
+			case MonitoringPointType.Meeting =>
 				meetingRelationships.clear()
 				meetingRelationships.addAll(point.meetingRelationships.asJava)
 				meetingFormats.clear()
 				meetingFormats.addAll(point.meetingFormats.asJava)
 				meetingQuantity = point.meetingQuantity
-			}
-			case MonitoringPointType.SmallGroup => {
+			case MonitoringPointType.SmallGroup =>
 				smallGroupEventModules.clear()
 				smallGroupEventModules.addAll(point.smallGroupEventModules.asJava)
 				smallGroupEventQuantity = point.smallGroupEventQuantity
 				smallGroupEventQuantityAll = point.smallGroupEventQuantity == 0
-			}
+				isAnySmallGroupEventModules = point.smallGroupEventModules.size == 0
 			case _ =>
 		}
 	}

@@ -55,10 +55,19 @@ trait MonitoringPointValidation {
 	}
 
 	def validateTypeSmallGroup(errors: Errors,
-		smallGroupEventModules: mutable.Set[Module], smallGroupEventModulesBindPoint: String,
+		smallGroupEventModules: JSet[Module], smallGroupEventModulesBindPoint: String,
+		isAnySmallGroupEventModules: Boolean,
 		smallGroupEventQuantity: JInteger, smallGroupEventQuantityBindPoint: String,
 		dept: Department
 	) {
-			if (smallGroupEventQuantity < 1) errors.rejectValue(smallGroupEventQuantityBindPoint, "monitoringPoint.pointType.quantity")
+
+		if (smallGroupEventQuantity < 1) {
+			errors.rejectValue(smallGroupEventQuantityBindPoint, "monitoringPoint.pointType.quantity")
+		}
+
+		if (!isAnySmallGroupEventModules && (smallGroupEventModules == null || smallGroupEventModules.size == 0)) {
+			errors.rejectValue(smallGroupEventModulesBindPoint, "monitoringPoint.smallGroupType.smallGroupModules.empty")
+		}
+
 	}
 }
