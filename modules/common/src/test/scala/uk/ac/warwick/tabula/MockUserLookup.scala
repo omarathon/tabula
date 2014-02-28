@@ -70,7 +70,9 @@ class MockUserLookup(var defaultFoundUser: Boolean)
 			getUsersByWarwickUniIds(warwickIds)
 
     override def findUsersWithFilter(filterValues: JMap[String, String]) = {
-        if (findUsersEnabled) {
+				if (filterValues.size() == 1 && filterValues.containsKey("warwickuniid")) {
+					JArrayList(getUserByWarwickUniId(filterValues.get("warwickuniid")))
+				} else if (findUsersEnabled) {
             val list: JList[User] = JArrayList()
             list.addAll(filterUserResult)
             list
@@ -78,6 +80,8 @@ class MockUserLookup(var defaultFoundUser: Boolean)
             throw new UnsupportedOperationException()
         }
     }
+
+		override def findUsersWithFilter(filterValues: JMap[String, String], returnDisabledUsers: Boolean) = findUsersWithFilter(filterValues)
 
     override def getUsersByUserIds(userIds: JList[String]): JMap[String, User] = {
     	val map: Map[String, User] = (userIds.toList map { id => (id -> getUserByUserId(id) )}).toMap
