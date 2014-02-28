@@ -63,7 +63,7 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 	private def getUserByWarwickUniIdFromUserLookup(id: UniversityId) = {
 		/*
 		 * TAB-2004 We go directly to the UserLookup filter method in order to change the behaviour. In particular,
-		 * we want to prefer non-disabled users over ones that are disabled.
+		 * we want to prefer loginDisabled=FALSE over ones whose logins are disabled.
 		 */
 		val filter = Map("warwickuniid" -> id)
 		findUsersWithFilter(filter.asJava, true)
