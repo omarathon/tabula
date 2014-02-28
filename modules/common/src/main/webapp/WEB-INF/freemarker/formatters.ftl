@@ -96,14 +96,14 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 
 <#macro assignment_link assignment>
 	<@module_name assignment.module />
-	<a href="<@url page='/module/${assignment.module.code}/${assignment.id}/' />">
+	<a href="<@url context='/coursework' page='/module/${assignment.module.code}/${assignment.id}/' />">
 		<span class="ass-name">${assignment.name}</span>
 	</a>
 </#macro>
 
 <#macro admin_assignment_link assignment>
 	<@module_name assignment.module />
-	<a href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/list' />">
+	<a href="<@url context='/coursework' page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/list' />">
 		<span class="ass-name">${assignment.name}</span>
 	</a>
 </#macro>
@@ -112,7 +112,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	<#if withFormatting>
 		<span class="route-code">${route.code?upper_case}</span> <span class="route-name">${route.name}</span>
 	<#else>
-		${route.code?upper_case} ${route.name}
+		${route.code?upper_case} ${route.name}k
 	</#if>
 </#macro>
 

@@ -17,8 +17,10 @@ import uk.ac.warwick.tabula.JavaImports._
  *
  */
 class UrlMethodModel extends TemplateDirectiveModel with TemplateMethodModel {
-  
-	@Value("${module.context}") var context: String = _
+
+	// Default behaviour now is to assume provided path is relative to root, i.e. includes the servlet context.
+	// So either pass the whole path as the page, OR explicitly specify context in the macro if you know it.
+	var context: String = "/"
 
 	@Value("${toplevel.url}") var toplevelUrl: String = _
 

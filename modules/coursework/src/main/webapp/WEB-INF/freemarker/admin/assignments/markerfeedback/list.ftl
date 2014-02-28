@@ -22,7 +22,7 @@
 					<#if item.firstMarkerFeedback??>
 						<#assign attachments=item.firstMarkerFeedback.attachments />
 						<#if attachments?size gt 0>
-							<a class="btn long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${item.markerFeedback.id}/feedback-${item.markerFeedback.feedback.universityId}.zip'/>">
+							<a class="btn long-running" href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${item.markerFeedback.id}/feedback-${item.markerFeedback.feedback.universityId}.zip'/>">
 								<i class="icon-download"></i>
 								${attachments?size}
 								<#if attachments?size == 1> file<#else> files</#if>
@@ -38,7 +38,7 @@
 					<td>
 						<#assign attachments=item.markerFeedback.attachments />
 						<#if attachments?size gt 0>
-							<a class="btn long-running" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${item.markerFeedback.id}/feedback-${item.markerFeedback.feedback.universityId}.zip'/>">
+							<a class="btn long-running" href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker/feedback/download/${item.markerFeedback.id}/feedback-${item.markerFeedback.feedback.universityId}.zip'/>">
 								<i class="icon-download"></i>
 								${attachments?size}
 								<#if attachments?size == 1> file<#else> files</#if>
@@ -75,7 +75,7 @@
 	<div class="btn-toolbar">
 		<#assign disabledClass><#if items?size == 0>disabled</#if></#assign>
 		<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
-			<a class="btn use-tooltip" title="Download feedback templates for all students as a ZIP file." href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker-templates.zip'/>"><i class="icon-download"></i>
+			<a class="btn use-tooltip" title="Download feedback templates for all students as a ZIP file." href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/marker-templates.zip'/>"><i class="icon-download"></i>
 				Download feedback templates
 			</a>
 		</#if>

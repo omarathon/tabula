@@ -6,19 +6,21 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 	we're repeating ourselves here. OR expose Routes directly.
 
 --><#compress>
-<#macro home><@url page="/" /></#macro>
-<#macro departmenthome department><@url page="/department/${department.code}/" /></#macro>
-<#macro depthome module><@url page="/department/${module.department.code}/#module-${module.code}" /></#macro>
+<#macro _u page><@url context='/admin' page=page /></#macro>
 
-<#macro deptperms department><@url page="/department/${department.code}/permissions" /></#macro>
-<#macro moduleperms module><@url page="/module/${module.code}/permissions" /></#macro>
-<#macro routeperms route><@url page="/route/${route.code}/permissions" /></#macro>
+<#macro home><@_u page="/" /></#macro>
+<#macro departmenthome department><@_u page="/department/${department.code}/" /></#macro>
+<#macro depthome module><@_u page="/department/${module.department.code}/#module-${module.code}" /></#macro>
 
-<#macro displaysettings department><@url page="/department/${department.code}/settings/display" /></#macro>
+<#macro deptperms department><@_u page="/department/${department.code}/permissions" /></#macro>
+<#macro moduleperms module><@_u page="/module/${module.code}/permissions" /></#macro>
+<#macro routeperms route><@_u page="/route/${route.code}/permissions" /></#macro>
 
-<#macro createsubdepartment department><@url page="/department/${department.code}/subdepartment/new" /></#macro>
-<#macro createmodule department><@url page="/department/${department.code}/module/new" /></#macro>
-<#macro sortmodules department><@url page="/department/${department.code}/sort-modules" /></#macro>
-<#macro sortroutes department><@url page="/department/${department.code}/sort-routes" /></#macro>
+<#macro displaysettings department><@_u page="/department/${department.code}/settings/display" /></#macro>
+
+<#macro createsubdepartment department><@_u page="/department/${department.code}/subdepartment/new" /></#macro>
+<#macro createmodule department><@_u page="/department/${department.code}/module/new" /></#macro>
+<#macro sortmodules department><@_u page="/department/${department.code}/sort-modules" /></#macro>
+<#macro sortroutes department><@_u page="/department/${department.code}/sort-routes" /></#macro>
 
 </#compress>

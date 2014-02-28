@@ -2,7 +2,7 @@ A user (${student.fullName} in ${student.department}) has requested access to th
 
 If you agree that they should have access, you can update the assignment membership here:
 
-<@url page=path context="/coursework" />
+<@url page=path />
 
 
 In any case, you may wish to contact the user at ${student.email}. This message has been sent to all department administrators.

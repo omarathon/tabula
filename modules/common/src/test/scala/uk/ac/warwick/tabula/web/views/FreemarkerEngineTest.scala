@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import org.junit.Ignore
 import org.joda.time.Duration
 import scala.util.Properties
+import uk.ac.warwick.tabula.web.Routes
 
 class FreemarkerEngineTest extends TestBase {
 	var configuration:Configuration = _
@@ -34,13 +35,14 @@ class FreemarkerEngineTest extends TestBase {
 	}
 	
 	/**
-	 * The Scala beans wrapper doesn't handle method invocations yet
+	 * Accessing the Routes object from FTL now works as this test demonstrates,
+	 * but at the time of writing we don't use it. It could replace the routes.ftl
 	 */
-	@Ignore @Test def routes {
+	@Test def routes {
 		val department = new Department
 		department.code = "la"
-		val output = render("renderroutes.ftl", Map("department" -> department))
-		output should be ("GURP")
+		val output = render("renderroutes.ftl", Map("Routes"->Routes, "department" -> department))
+		output should be ("The path to department LA is /coursework/admin/department/la/")
 	}
 	
 	@Test def someAndNon {

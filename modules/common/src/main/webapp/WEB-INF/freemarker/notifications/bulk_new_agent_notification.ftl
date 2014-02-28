@@ -10,4 +10,4 @@ You have now been assigned as ${relationshipType.agentRole} to the following stu
 
 </#list>
 
-You can view all of your ${relationshipType.studentRole}s at <@url page='${path}'/>.
+You can view all of your ${relationshipType.studentRole}s at <@url page=path />.

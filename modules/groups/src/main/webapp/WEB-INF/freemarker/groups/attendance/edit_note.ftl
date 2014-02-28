@@ -81,7 +81,7 @@
 				<@form.labelled_row "attachedFile" "Attached file">
 					<i class="icon-file-alt"></i>
 					<@fmt.download_link
-						filePath="/note/${command.student.universityId}/${command.occurrence.id}/attachment/${command.attachedFile.name}"
+						filePath="/profiles/note/${command.student.universityId}/${command.occurrence.id}/attachment/${command.attachedFile.name}"
 						mimeType=command.attachedFile.mimeType
 						title="Download file ${command.attachedFile.name}"
 						text="Download ${command.attachedFile.name}"

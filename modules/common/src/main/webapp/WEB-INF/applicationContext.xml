@@ -374,7 +374,6 @@
 
 	<bean id="redirectViewResolver" class="uk.ac.warwick.tabula.web.views.RedirectViewResolver"
 		p:toplevelUrl="${toplevel.url}"
-		p:context="${module.context}"
 		p:order="1" />
 	<bean id="viewResolver" class="org.springframework.web.servlet.view.tiles2.TilesViewResolver"
 		p:order="2" />

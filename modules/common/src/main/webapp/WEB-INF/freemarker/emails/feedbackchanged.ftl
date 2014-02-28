@@ -3,7 +3,7 @@ Your feedback has changed for the assignment '${assignment.name}' for ${module.c
 
 To view your new feedback, please visit:
 
-<@url page=path context="/coursework" />
+<@url page=path />
 
 (Only you can retrieve your feedback, so you'll need your IT Services user name and password to confirm that it's really you.)
 

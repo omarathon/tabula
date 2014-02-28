@@ -75,7 +75,7 @@
 
 	<p>Drag students by their <i class="icon-reorder"></i> onto a marker.</p>
 
-		<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/assign-markers')}" commandName="assignMarkersCommand">
+		<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/assign-markers')}" commandName="assignMarkersCommand">
 		<div class="fix-area">
 			<div id="assign-markers">
 				<ul class="nav nav-tabs">

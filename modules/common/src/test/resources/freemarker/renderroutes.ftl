@@ -1,1 +1,1 @@
-The path to department LA is ${Routes.admin.department(department)}
+The path to department LA is ${Routes.coursework.admin.department(department)}

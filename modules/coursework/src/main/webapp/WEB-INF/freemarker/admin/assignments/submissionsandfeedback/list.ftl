@@ -50,7 +50,7 @@
 					Publications: ${r.publicationOverlap}%
 				</p>
 				<p>
-					<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
+					<a target="turnitin-viewer" href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
 				</p>
 			</div>
 			<script type="text/javascript">
@@ -198,7 +198,7 @@
 										<#else>
 											<#local filename = "submission-${submission.universityId}.zip">
 										</#if>
-										<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/${filename}'/>">
+										<a class="long-running" href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/${filename}'/>">
 											${attachments?size}
 											<#if attachments?size == 1> file
 											<#else> files
@@ -277,7 +277,7 @@
 									<#else>
 										<#local attachmentExtension = "zip">
 									</#if>
-									<a class="long-running" href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.coursework.enhancedFeedback.feedback.id}/feedback-${student.coursework.enhancedFeedback.feedback.universityId}.${attachmentExtension}'/>">
+									<a class="long-running" href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedback/download/${student.coursework.enhancedFeedback.feedback.id}/feedback-${student.coursework.enhancedFeedback.feedback.universityId}.${attachmentExtension}'/>">
 										${attachments?size}
 										<#if attachments?size == 1> file
 										<#else> files

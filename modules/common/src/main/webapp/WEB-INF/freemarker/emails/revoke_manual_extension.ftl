@@ -4,4 +4,4 @@ subject to the usual late penalties.
 
 The assignment deadline is displayed at the top of the submission page:
 
-<@url page=path context="/coursework" />
+<@url page=path />

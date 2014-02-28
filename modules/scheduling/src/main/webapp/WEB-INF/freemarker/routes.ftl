@@ -7,4 +7,4 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 	we're repeating ourselves here. OR expose Routes directly.
 
 -->
-<#macro home><@url page="/" /></#macro>
+<#macro home><@url context="/" page="/" /></#macro>

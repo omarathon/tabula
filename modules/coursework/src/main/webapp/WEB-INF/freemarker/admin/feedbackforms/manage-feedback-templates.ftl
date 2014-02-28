@@ -5,7 +5,7 @@
 <@f.form enctype="multipart/form-data"
 		 method="post"
 		 class="form-horizontal"
-		 action="${url('/admin/department/${department.code}/settings/feedback-templates')}"
+		 action="${url('/coursework/admin/department/${department.code}/settings/feedback-templates')}"
 		 commandName="bulkFeedbackTemplateCommand">
 	<@form.labelled_row "file.upload" "Upload feedback forms">
 		<input type="file" name="file.upload" multiple />

@@ -35,7 +35,7 @@
 <h2>Teaching</h2>
 
 <ul class="links">
-<li><a href="<@url page="/tutor" />">My small groups</a></li>
+<li><a href="<@url context='/groups' page="/tutor" />">My small groups</a></li>
 </ul>
 </div>
 </#if>

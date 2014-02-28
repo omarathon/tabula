@@ -11,14 +11,14 @@ Students will be able to access their feedback by visiting this page:
 </p>
 
 <p>
-<#assign feedbackUrl><@url page="/module/${module.code}/${assignment.id}"/></#assign>
+<#assign feedbackUrl><@url page="/coursework/module/${module.code}/${assignment.id}"/></#assign>
 <a href="${feedbackUrl}">
 ${feedbackUrl}
 </a>
 </p>
 
 <p>
-<a href="<@url page="/admin/department/${department.code}/#module-${module.code}" />">
+<a href="<@url page="/coursework/admin/department/${department.code}/#module-${module.code}" />">
 Return to assignment info
 </a>
 </p>

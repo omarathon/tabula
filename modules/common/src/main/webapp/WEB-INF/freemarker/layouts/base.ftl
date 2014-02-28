@@ -19,7 +19,7 @@
 			<#if (user.god)!false>
 				<div id="god-notice" class="sysadmin-only-content">
 					God mode enabled.
-					<@f.form id="godModeForm" method="post" action="${url('/sysadmin/god', '/')}">
+					<@f.form id="godModeForm" method="post" action="${url('/sysadmin/god')}">
 						<input type="hidden" name="returnTo" value="${info.requestedUri!""}" />
 						<input type="hidden" name="action" value="remove" />
 						<button class="btn btn-mini btn-info"><i class="icon-eye-close"></i> Disable God mode</button>
@@ -75,7 +75,7 @@
 								<span id="subsite-character">&raquo;</span>
 							</#if>
 								<span id="current-site-header"><#compress>
-									<#assign homeUrl><@url page="/" /></#assign>
+									<#assign homeUrl><@routes.home /></#assign>
 									<#if (info.requestedUri != homeUrl)!false>
 										<a href="${homeUrl}">${component.siteHeader?default('Tabula')}</a>
 									<#else>
@@ -129,7 +129,7 @@
 										<li class="section rendered-link">
 											<div class="link-content">
 												<div class="title rendered-link-content">
-													<#assign homeUrl><@url page="/" /></#assign>
+													<#assign homeUrl><@routes.home /></#assign>
 													<#if (info.requestedUri != homeUrl)!false>
 														<a href="${homeUrl}">${component.title?default('Tabula')}</a>
 													<#else>

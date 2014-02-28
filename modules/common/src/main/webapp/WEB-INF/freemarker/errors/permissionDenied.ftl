@@ -12,7 +12,7 @@
 
 		<p>This is only shown to Tabula system administrators. Click the &times; button to see the page as a non-administrator sees it.</p>
 
-		<@f.form method="post" action="${url('/sysadmin/permissions-helper', '/')}">
+		<@f.form method="post" action="${url('/sysadmin/permissions-helper')}">
 			<input type="hidden" name="user" value="${originalException.user.userId}" />
 
 			<#if originalException.scope??>
@@ -46,7 +46,7 @@
 
 		<p>Alternatively, harness unlimited power by entering God mode:</p>
 
-		<@f.form method="post" action="${url('/sysadmin/god', '/')}">
+		<@f.form method="post" action="${url('/sysadmin/god')}">
 			<input type="hidden" name="returnTo" value="${info.requestedUri!""}" />
 			<button class="btn btn-large btn-warning"><i class="icon-eye-open"></i> Enable God mode</button>
 		</@f.form>

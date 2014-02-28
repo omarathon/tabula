@@ -10,7 +10,7 @@ ${extension.reviewerComments}
 </#if>
 The assignment deadline is displayed at the top of the submission page:
 
-<@url page=path context="/coursework" />
+<@url page=path />
 
 
 This email was sent from an automated system, and replies to it will not reach a real person.
