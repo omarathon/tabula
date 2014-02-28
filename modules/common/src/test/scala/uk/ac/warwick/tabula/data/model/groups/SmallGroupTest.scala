@@ -80,7 +80,7 @@ class SmallGroupTest extends TestBase with Mockito {
 
     val source = newSmallGroupWithMockedServices
     val clonedEvent = newEventWithMockedServices
-		
+
     // can't use a mockito mock because the final equals method on GeneratedId causes mockito to
     // blow up
     val event:SmallGroupEvent = new SmallGroupEvent{
