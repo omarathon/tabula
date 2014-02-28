@@ -41,7 +41,7 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		val subSubDept = moduleAndDepartmentService.getDepartmentByCode(Fixtures.TestSubSubDepartment.code).get
 
 		// Two department admins, first is a UserAccessManager
-		val cmd = new GrantRoleCommand(department)
+		val cmd = GrantRoleCommand(department)
 
 		cmd.roleDefinition = UserAccessMgrRoleDefinition
 		cmd.usercodes.add(Fixtures.TestAdmin1)
@@ -54,13 +54,13 @@ class FixturesCommand extends Command[Unit] with Public with Daoisms {
 		cmd.apply()
 
 		// admin on the sub-department
-		val subDepartmentAdminCommand = new GrantRoleCommand(subDept)
+		val subDepartmentAdminCommand = GrantRoleCommand(subDept)
 		subDepartmentAdminCommand.roleDefinition = DepartmentalAdministratorRoleDefinition
 		subDepartmentAdminCommand.usercodes.addAll(Seq(Fixtures.TestAdmin3))
 		subDepartmentAdminCommand.apply()
 
 		// admin on the sub-department;
-		val subSubDepartmentAdminCommand = new GrantRoleCommand(subSubDept)
+		val subSubDepartmentAdminCommand = GrantRoleCommand(subSubDept)
 		subSubDepartmentAdminCommand.roleDefinition = DepartmentalAdministratorRoleDefinition
 		subSubDepartmentAdminCommand.usercodes.addAll(Seq(Fixtures.TestAdmin4))
 		subSubDepartmentAdminCommand.apply()

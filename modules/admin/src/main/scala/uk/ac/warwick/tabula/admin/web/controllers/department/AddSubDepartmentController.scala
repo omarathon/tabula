@@ -1,4 +1,4 @@
-package uk.ac.warwick.tabula.admin.web.controllers.modules
+package uk.ac.warwick.tabula.admin.web.controllers.department
 import org.springframework.stereotype.Controller
 import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.RequestMapping

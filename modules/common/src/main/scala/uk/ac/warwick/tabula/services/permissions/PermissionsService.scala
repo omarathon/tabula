@@ -65,6 +65,14 @@ class AutowiringPermissionsServiceImpl
 		with InitializingBean
 		with Logging
 
+trait PermissionsServiceComponent {
+	def permissionsService: PermissionsService
+}
+
+trait AutowiringPermissionsServiceComponent extends PermissionsServiceComponent {
+	var permissionsService = Wire[PermissionsService]
+}
+
 abstract class AbstractPermissionsService extends PermissionsService {
 	self: PermissionsDaoComponent 
 		with PermissionsServiceCaches

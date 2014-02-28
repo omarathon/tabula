@@ -7,19 +7,23 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
-import uk.ac.warwick.tabula.commands.permissions.RevokeRoleCommand
+import uk.ac.warwick.tabula.commands.permissions.{RevokeRoleCommandState, GrantRoleCommandState, GrantRoleCommand, RevokeRoleCommand}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.admin.web.controllers.AdminController
+import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
+import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
 
 trait DepartmentPermissionControllerMethods extends AdminController {
 
-	@ModelAttribute("addCommand") def addCommandModel(@PathVariable("department") department: Department) = new GrantRoleCommand(department)
-	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable("department") department: Department) = new RevokeRoleCommand(department)
+	type GrantRoleCommand = Appliable[GrantedRole[Department]] with GrantRoleCommandState[Department]
+	type RevokeRoleCommand = Appliable[GrantedRole[Department]] with RevokeRoleCommandState[Department]
 
-	var userLookup = Wire.auto[UserLookupService]
+	@ModelAttribute("addCommand") def addCommandModel(@PathVariable("department") department: Department): GrantRoleCommand = GrantRoleCommand(department)
+	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable("department") department: Department): RevokeRoleCommand = RevokeRoleCommand(department)
+
+	var userLookup = Wire[UserLookupService]
 
 	def form(department: Department): Mav = {
 		Mav("admin/department/permissions",
@@ -52,10 +56,10 @@ class DepartmentPermissionController extends AdminController with DepartmentPerm
 @Controller @RequestMapping(value = Array("/department/{department}/permissions"))
 class DepartmentAddPermissionController extends AdminController with DepartmentPermissionControllerMethods {
 
-	validatesSelf[GrantRoleCommand[_]]
+	validatesSelf[SelfValidating]
 
 	@RequestMapping(method = Array(POST), params = Array("_command=add"))
-	def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand[Department], errors: Errors) : Mav =  {
+	def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand, errors: Errors) : Mav =  {
 		val department = command.scope
 		if (errors.hasErrors()) {
 			form(department)
@@ -71,10 +75,10 @@ class DepartmentAddPermissionController extends AdminController with DepartmentP
 @Controller @RequestMapping(value = Array("/department/{department}/permissions"))
 class DepartmentRemovePermissionController extends AdminController with DepartmentPermissionControllerMethods {
 
-	validatesSelf[RevokeRoleCommand[_]]
+	validatesSelf[SelfValidating]
 
 	@RequestMapping(method = Array(POST), params = Array("_command=remove"))
-	def removePermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand[Department],
+	def removePermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand,
 	                     errors: Errors): Mav = {
 		val department = command.scope
 		if (errors.hasErrors()) {

@@ -164,8 +164,8 @@ class SortModulesCommandTest extends TestBase with Mockito {
 
 		val command = new SortModulesCommandPermissions with CommandTestSupport {
 			val department = dept
-			def sort() = ???
-			def populate() = ???
+			def sort() {}
+			def populate() {}
 		}
 
 		val checking = mock[PermissionsChecking]
@@ -180,8 +180,8 @@ class SortModulesCommandTest extends TestBase with Mockito {
 		val command = new SortModulesCommandDescription with CommandTestSupport {
 			val eventName: String = "test"
 			val department = dept
-			def sort() = ???
-			def populate() = ???
+			def sort() {}
+			def populate() {}
 		}
 
 		val d = new DescriptionImpl
