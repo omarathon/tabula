@@ -438,6 +438,7 @@ abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPoin
 							val checkpoint = new MonitoringCheckpoint
 							checkpoint.autoCreated = true
 							checkpoint.point = point
+							checkpoint.monitoringPointService = monitoringPointService
 							checkpoint.student = studentMember
 							checkpoint.updatedBy = attendance.updatedBy
 							checkpoint.updatedDate = DateTime.now
