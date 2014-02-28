@@ -13,6 +13,8 @@ import uk.ac.warwick.userlookup.User
 class SmallGroupTest extends TestBase with Mockito {
 
   val event = new SmallGroupEvent()
+	event.smallGroupService = None
+
   val equivalentEvent = new SmallGroupEvent()
   val notEquivalentEvent = new SmallGroupEvent()
   notEquivalentEvent.day = DayOfWeek.Monday

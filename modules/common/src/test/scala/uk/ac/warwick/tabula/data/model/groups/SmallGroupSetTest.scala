@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.{Mockito, AcademicYear, TestBase}
 import org.junit.Test
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroup, Module, UserGroup}
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, AssignmentMembershipService}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import scala.collection.JavaConverters._
 import org.mockito.Mockito._
@@ -16,6 +16,8 @@ class SmallGroupSetTest extends TestBase with Mockito{
   @Test
   def duplicateCopiesAllFields(){
     val source = new SmallGroupSet
+		source.smallGroupService = None
+
     val cloneGroup = new SmallGroup
     val group:SmallGroup  = new SmallGroup(){
       override def duplicateTo(groupSet:SmallGroupSet) = cloneGroup

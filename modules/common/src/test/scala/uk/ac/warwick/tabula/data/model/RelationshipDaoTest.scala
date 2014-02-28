@@ -7,9 +7,8 @@ import org.junit.{After, Before}
 
 import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
 import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, Member, StudentCourseYearDetails, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, Member, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.ProfileService
 
 // scalastyle:off magic.number
 class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito {
@@ -17,19 +16,14 @@ class RelationshipDaoTest extends PersistenceTestBase with Logging with Mockito 
 	val memberDao = new MemberDaoImpl
 	val relationshipDao = new RelationshipDaoImpl
 	val sitsStatusDao = new SitsStatusDaoImpl
-	val modeOfAttendanceDao = new ModeOfAttendanceDaoImpl
 
 	val sprFullyEnrolledStatus = Fixtures.sitsStatus("F", "Fully Enrolled", "Fully Enrolled for this Session")
 	val sprPermanentlyWithdrawnStatus = Fixtures.sitsStatus("P", "Permanently Withdrawn", "Permanently Withdrawn")
-
-	val moaFT = Fixtures.modeOfAttendance("F", "FT", "Full time")
-	val moaPT = Fixtures.modeOfAttendance("P", "PT", "Part time")
 
 	@Before def setup() {
 		relationshipDao.sessionFactory = sessionFactory
 		memberDao.sessionFactory = sessionFactory
 		sitsStatusDao.sessionFactory = sessionFactory
-		modeOfAttendanceDao.sessionFactory = sessionFactory
 
 		transactional { tx =>
 			session.enableFilter(Member.ActiveOnlyFilter)
