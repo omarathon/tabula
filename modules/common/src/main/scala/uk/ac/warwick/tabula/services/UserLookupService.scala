@@ -124,10 +124,7 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 		try {
 			getUserByWarwickUniIdUncached(warwickId, false)
 		} catch {
-			case e: Exception => {
-				e.printStackTrace()
-				throw new CacheEntryUpdateException(e)
-			}
+			case e: Exception => throw new CacheEntryUpdateException(e)
 		}
 	}
 
