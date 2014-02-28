@@ -19,7 +19,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import javax.persistence.FetchType
 
 object StudentCourseYearDetails {
-	final val FreshOnlyFilter = "freshOnly"
+	final val FreshOnlyFilter = "freshStudentCourseYearDetailsOnly"
 }
 
 @FilterDefs(Array(

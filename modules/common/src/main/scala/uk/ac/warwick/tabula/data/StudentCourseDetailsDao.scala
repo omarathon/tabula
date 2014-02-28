@@ -47,10 +47,9 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 				.uniqueResult
 
 	def getByScjCodeStaleOrFresh(scjCode: String) = {
-		val scd = sessionWithoutFreshFilters.newCriteria[StudentCourseDetails]
+		sessionWithoutFreshFilters.newCriteria[StudentCourseDetails]
 				.add(is("scjCode", scjCode.trim))
 				.uniqueResult
-		scd
 	}
 
 	def getBySprCode(sprCode: String) =

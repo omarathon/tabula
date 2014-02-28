@@ -17,7 +17,7 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
 
 object StudentCourseDetails {
-	final val FreshOnlyFilter = "freshOnly"
+	final val FreshOnlyFilter = "freshStudentCourseDetailsOnly"
 }
 
 @FilterDefs(Array(

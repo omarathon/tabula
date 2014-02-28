@@ -37,7 +37,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
 	final val ActiveOnlyFilter = "activeOnly"
-	final val FreshOnlyFilter = "freshOnly"
+	final val FreshOnlyFilter = "freshMemberOnly"
 }
 
 /**
