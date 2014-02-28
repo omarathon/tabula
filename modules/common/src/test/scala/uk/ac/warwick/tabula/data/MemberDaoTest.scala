@@ -7,9 +7,8 @@ import org.junit.{After, Before}
 
 import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
 import uk.ac.warwick.tabula.JavaImports.JList
-import uk.ac.warwick.tabula.data.model.{StudentCourseDetails, Member, StudentCourseYearDetails, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{Member, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.services.ProfileService
 
 // scalastyle:off magic.number
 class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {

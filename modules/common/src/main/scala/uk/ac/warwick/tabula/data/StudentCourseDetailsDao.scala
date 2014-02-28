@@ -1,10 +1,7 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.mutable.HashSet
-import org.hibernate.annotations.AccessType
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
-import javax.persistence.{DiscriminatorValue, Entity, NamedQueries}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Department, Route, StudentCourseDetails, StudentMember}
 import org.hibernate.criterion.Projections
@@ -50,12 +47,9 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 				.uniqueResult
 
 	def getByScjCodeStaleOrFresh(scjCode: String) = {
-		logger.debug("Getting SCD by scjcode: " + scjCode)
-		session.disableFilter(StudentCourseDetails.FreshOnlyFilter)
-		val scd = session.newCriteria[StudentCourseDetails]
+		val scd = sessionWithoutFreshFilters.newCriteria[StudentCourseDetails]
 				.add(is("scjCode", scjCode.trim))
 				.uniqueResult
-		session.enableFilter(StudentCourseDetails.FreshOnlyFilter)
 		scd
 	}
 

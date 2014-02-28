@@ -2,19 +2,13 @@ package uk.ac.warwick.tabula.data
 
 import scala.collection.JavaConversions.{asScalaBuffer, seqAsJavaList}
 import org.hibernate.FetchMode
-import org.hibernate.annotations.{AccessType, FilterDefs, Filters}
 import org.hibernate.criterion.{DetachedCriteria, Order}
 import org.hibernate.criterion.{Property, Restrictions}
-import org.hibernate.criterion.Order.{asc, desc}
 import org.hibernate.criterion.Projections
-import org.hibernate.criterion.Projections.{countDistinct, distinct, groupProperty, projectionList, property, rowCount}
-import org.hibernate.criterion.Restrictions.{disjunction, gt, in, like}
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
-import javax.persistence.{DiscriminatorColumn, DiscriminatorValue, Entity, Inheritance, NamedQueries}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.helpers.DateTimeOrdering.orderedDateTime
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.helpers.StringUtils.StringToSuperString
 import uk.ac.warwick.tabula.data.model.MemberStudentRelationship
@@ -254,8 +248,7 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 			val c = session.newCriteria[StudentCourseDetails]
 			restrictions.foreach { _.apply(c) }
 			c.add(Property.forName("scjCode").in(d))
-			val students = c.project[StudentMember](Projections.groupProperty("student")).seq
-			students
+			c.project[StudentMember](Projections.groupProperty("student")).seq
 		}
 	}
 

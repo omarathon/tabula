@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
 import uk.ac.warwick.tabula.data._
-import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationship}
 import uk.ac.warwick.spring.Wire
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.{CommandInternal, Unaudited, ComposableCommand}
