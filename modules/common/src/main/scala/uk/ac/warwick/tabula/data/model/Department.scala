@@ -153,16 +153,16 @@ class Department extends GeneratedId
 	@transient
 	lazy val extensionManagers = permissionsService.ensureUserGroupFor(this, ExtensionManagerRoleDefinition)
 
-	def isOwnedBy(userId:String) = owners.includes(userId)
+	def isOwnedBy(userId:String) = owners.knownType.includesUserId(userId)
 
 	@deprecated("Use ModuleAndDepartmentService.addOwner", "35")
-	def addOwner(owner:String) = owners.addUser(owner)
+	def addOwner(owner:String) = owners.knownType.addUserId(owner)
 
 	@deprecated("Use ModuleAndDepartmentService.removeOwner", "35")
-	def removeOwner(owner:String) = owners.removeUser(owner)
+	def removeOwner(owner:String) = owners.knownType.removeUserId(owner)
 
 	def canRequestExtension = allowExtensionRequests
-	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.includes(user)
+	def isExtensionManager(user:String) = extensionManagers!=null && extensionManagers.knownType.includesUserId(user)
 
 	def addFeedbackForm(form:FeedbackTemplate) = feedbackTemplates.add(form)
 
@@ -172,7 +172,7 @@ class Department extends GeneratedId
 	}
 
 	def copyExtensionManagersFrom(other: Department) = {
-		other.extensionManagers.includeUsers.asScala.foreach(extensionManagers.addUser(_))
+		extensionManagers.copyFrom(other.extensionManagers)
 	}
 
 	// If hibernate sets owners to null, make a new empty usergroup

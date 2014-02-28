@@ -57,6 +57,7 @@ abstract class Features {
 	@Value("${features.assignmentProgressTable:true}") var assignmentProgressTable = defaults.assignmentProgressTable
 	@Value("${features.assignmentProgressTableByDefault:true}") var assignmentProgressTableByDefault = defaults.assignmentProgressTableByDefault
 	@Value("${features.summativeFilter:true}") var summativeFilter = defaults.summativeFilter
+	@Value("${features.dissertationFilter:true}") var dissertationFilter = defaults.dissertationFilter
 	@Value("${features.meetingRecordApproval:true}") var meetingRecordApproval = defaults.meetingRecordApproval
 	@Value("${features.smallGroupTeaching:true}") var smallGroupTeaching = defaults.smallGroupTeaching
 	@Value("${features.smallGroupTeaching.studentSignUp:true}") var smallGroupTeachingStudentSignUp = defaults.smallGroupTeachingStudentSignUp
@@ -80,6 +81,7 @@ abstract class Features {
 	@Value("${features.profiles.scheduledMeetings:true}") var scheduledMeetings = defaults.scheduledMeetings
 	@Value("${features.disability.rendering.profiles:false}") var disabilityRenderingInProfiles = defaults.disabilityRenderingInProfiles
 	@Value("${features.disability.rendering.extensions:false}") var disabilityRenderingInExtensions = defaults.disabilityRenderingInExtensions
+	@Value("${features.includePastYears:true}") var includePastYears = defaults.includePastYears
 	@Value("${features.attendanceMonitoring.smallGroupPointType:false}") var attendanceMonitoringSmallGroupPointType = defaults.attendanceMonitoringSmallGroupPointType
 
 	private val bean = new BeanWrapperImpl(this)
@@ -126,6 +128,7 @@ class FeaturesMessage {
 	@BeanProperty var assignmentProgressTable = true
 	@BeanProperty var assignmentProgressTableByDefault = true
 	@BeanProperty var summativeFilter = true
+	@BeanProperty var dissertationFilter = true
 	@BeanProperty var meetingRecordApproval = true
 	@BeanProperty var smallGroupTeaching = true
 	@BeanProperty var smallGroupTeachingStudentSignUp = true
@@ -150,6 +153,7 @@ class FeaturesMessage {
 	@BeanProperty var disabilityRenderingInProfiles = false
 	@BeanProperty var disabilityRenderingInExtensions = false
 	@BeanProperty var attendanceMonitoringSmallGroupPointType = false
+	@BeanProperty var includePastYears = true
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

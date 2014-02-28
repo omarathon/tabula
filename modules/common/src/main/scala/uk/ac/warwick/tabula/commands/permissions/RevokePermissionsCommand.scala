@@ -1,72 +1,104 @@
 package uk.ac.warwick.tabula.commands.permissions
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.commands.{Appliable, ComposableCommand, CommandInternal, Describable}
 import org.springframework.validation.Errors
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.Command
 import uk.ac.warwick.tabula.commands.Description
 import uk.ac.warwick.tabula.commands.SelfValidating
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
-import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.permissions.PermissionsService
-import scala.reflect.ClassTag
+import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent}
+import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
+import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
+import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.RequestInfo
-import uk.ac.warwick.tabula.services.SecurityService
+import scala.reflect.ClassTag
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
-class RevokePermissionsCommand[A <: PermissionsTarget: ClassTag](scope: A) extends Command[GrantedPermission[A]] with SelfValidating {
+object RevokePermissionsCommand {
+	def apply[A <: PermissionsTarget : ClassTag](scope: A): Appliable[GrantedPermission[A]] with RevokePermissionsCommandState[A] =
+		new RevokePermissionsCommandInternal(scope)
+			with ComposableCommand[GrantedPermission[A]]
+			with RevokePermissionsCommandPermissions
+			with RevokePermissionsCommandValidation
+			with RevokePermissionsCommandDescription[A]
+			with AutowiringPermissionsServiceComponent
+			with AutowiringSecurityServiceComponent
+}
 
-	PermissionCheck(Permissions.RolesAndPermissions.Delete, scope)
-	
-	var permissionsService = Wire[PermissionsService]
-	var securityService = Wire[SecurityService]
-	
-	var permission: Permission = _
-	var usercodes: JList[String] = JArrayList()
-	var overrideType: Boolean = _
-	
+class RevokePermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[GrantedPermission[A]] with RevokePermissionsCommandState[A] {
+	self: PermissionsServiceComponent with SecurityServiceComponent =>
+
 	lazy val grantedPermission = permissionsService.getGrantedPermission(scope, permission, overrideType)
-	
+
 	def applyInternal() = transactional() {
-		grantedPermission map { permission =>
-			for (user <- usercodes) permission.users.removeUser(user)
-			
+		grantedPermission.foreach { permission =>
+			usercodes.asScala.foreach(permission.users.knownType.removeUserId)
+
 			permissionsService.saveOrUpdate(permission)
 		}
-		
+
 		grantedPermission.orNull
 	}
-	
+
+}
+
+trait RevokePermissionsCommandValidation extends SelfValidating {
+	self: RevokePermissionsCommandState[_ <: PermissionsTarget] with SecurityServiceComponent =>
+
 	def validate(errors: Errors) {
-		if (usercodes.forall { _.isEmptyOrWhitespace }) {
+		if (usercodes.asScala.forall { _.isEmptyOrWhitespace }) {
 			errors.rejectValue("usercodes", "NotEmpty")
 		} else {
-			grantedPermission.map { _.users }.foreach { users => 
-				for (code <- usercodes) {
-					if (!users.includes(code)) {
+			grantedPermission.map { _.users }.foreach { users =>
+				for (code <- usercodes.asScala) {
+					if (!users.knownType.includesUserId(code)) {
 						errors.rejectValue("usercodes", "userId.notingroup", Array(code), "")
 					}
 				}
 			}
 		}
-		
+
 		// Ensure that the current user can do everything that they're trying to grant permissions for
 		val user = RequestInfo.fromThread.get.user
-		
+
 		if (permission == null) errors.rejectValue("permission", "NotEmpty")
 		else if (!user.sysadmin && !securityService.canDelegate(user, permission, scope)) {
 			errors.rejectValue("permission", "permissions.cantRevokeWhatYouDontHave", Array(permission.description, scope), "")
 		}
 	}
+}
+
+trait RevokePermissionsCommandState[A <: PermissionsTarget] {
+	self: PermissionsServiceComponent =>
+
+	def scope: A
+	var permission: Permission = _
+	var usercodes: JList[String] = JArrayList()
+	var overrideType: Boolean = _
+
+	def grantedPermission: Option[GrantedPermission[A]]
+}
+
+trait RevokePermissionsCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: RevokePermissionsCommandState[_ <: PermissionsTarget] =>
+
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.RolesAndPermissions.Delete, mandatory(scope))
+	}
+}
+
+trait RevokePermissionsCommandDescription[A <: PermissionsTarget] extends Describable[GrantedPermission[A]] {
+	self: RevokePermissionsCommandState[A] =>
 
 	def describe(d: Description) = d.properties(
 		"scope" -> (scope.getClass.getSimpleName + "[" + scope.id + "]"),
-		"usercodes" -> usercodes.mkString(","),
-		"permission" -> permission,
+		"usercodes" -> usercodes.asScala.mkString(","),
+		"permission" -> permission.getName,
 		"overrideType" -> overrideType)
-	
 }
+
+

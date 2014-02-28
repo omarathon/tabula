@@ -154,7 +154,7 @@
 			<@spring.bind path="members">
 				<#assign membersGroup=status.actualValue />
 			</@spring.bind>
-			<#assign hasMembers=(membersGroup?? && (membersGroup.includeUsers?size gt 0 || membersGroup.excludeUsers?size gt 0)) />
+			<#assign hasMembers=(membersGroup?? && (membersGroup.allIncludedIds?size gt 0 || membersGroup.allExcludedIds?size gt 0)) />
 
 			<#-- Members picker is pretty hefty so it is in a separate file -->
 			<#if editSmallGroupSetCommand??>

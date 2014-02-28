@@ -72,7 +72,7 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		val group = new SmallGroup()
 		event.group = group
 		val students = UserGroup.ofUsercodes
-		group._studentsGroup = students
+		group.students = students
 		
 		val set = new SmallGroupSet()
 		group.groupSet = set
@@ -91,7 +91,7 @@ class RecordAttendanceCommandTest extends TestBase with Mockito {
 		students.userLookup = command.userLookup
 		students.userLookup.getUsersByUserIds(JArrayList(validUser.getUserId())) returns JMap(validUser.getUserId() -> validUser)
 		
-		students.addUser(validUser.getUserId())
+		students.addUserId(validUser.getUserId())
 	}
 	
 	@Test

@@ -30,8 +30,8 @@ class PermissionsDaoTest extends PersistenceTestBase {
 		session.flush()
 	
 		val gr1 = new DepartmentGrantedRole(dept1, DepartmentalAdministratorRoleDefinition)
-		gr1.users.addUser("cusbruv")
-		gr1.users.addUser("cusxar")
+		gr1.users.knownType.addUserId("cusbruv")
+		gr1.users.knownType.addUserId("cusxar")
 		dao.saveOrUpdate(gr1)
 		
 		val crd = new CustomRoleDefinition
@@ -48,13 +48,13 @@ class PermissionsDaoTest extends PersistenceTestBase {
 		dao.saveOrUpdate(crd)
 		
 		val gr2 = new DepartmentGrantedRole(dept1, crd)
-		gr2.users.addUser("cusbruv")
-		gr2.users.addUser("cuscao")
+		gr2.users.knownType.addUserId("cusbruv")
+		gr2.users.knownType.addUserId("cuscao")
 		dao.saveOrUpdate(gr2)
 		
 		val gp = new DepartmentGrantedPermission(dept1, Permissions.Module.Create, GrantedPermission.Allow)
-		gp.users.addUser("cusbruv")
-		gp.users.addUser("cuscao")
+		gp.users.knownType.addUserId("cusbruv")
+		gp.users.knownType.addUserId("cuscao")
 		dao.saveOrUpdate(gp)
 		
 		session.flush()

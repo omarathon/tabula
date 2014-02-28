@@ -12,6 +12,8 @@ import uk.ac.warwick.spring.Wire
 
 
 trait AssignmentMembershipService {
+	def assignmentManualMembershipHelper: UserGroupMembershipHelperMethods[Assignment]
+
 	def find(assignment: AssessmentComponent): Option[AssessmentComponent]
 	def find(group: UpstreamAssessmentGroup): Option[UpstreamAssessmentGroup]
 	def find(group: AssessmentGroup): Option[AssessmentGroup]
@@ -70,7 +72,7 @@ class AssignmentMembershipServiceImpl
 	@Autowired var userLookup: UserLookupService = _
 	@Autowired var dao: AssignmentMembershipDao = _
 	
-	val assignmentManualMembershipHelper = new UserGroupMembershipHelper[Assignment]("members")
+	val assignmentManualMembershipHelper = new UserGroupMembershipHelper[Assignment]("_members")
 
 	def getEnrolledAssignments(user: User): Seq[Assignment] = {
 		val autoEnrolled = 
@@ -87,9 +89,7 @@ class AssignmentMembershipServiceImpl
 	def replaceMembers(template: UpstreamAssessmentGroup, universityIds: Seq[String]) {
 		if (debugEnabled) debugReplace(template, universityIds)
 		getUpstreamAssessmentGroup(template).map { group =>
-			val collection = group.members.staticIncludeUsers
-			collection.clear()
-			collection.addAll(universityIds.asJava)
+			group.members.knownType.staticUserIds = universityIds
 		} getOrElse {
 			logger.warn("No such assessment group found: " + template.toString)
 		}
@@ -214,11 +214,7 @@ trait AssignmentMembershipMethods extends Logging {
 	}
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean = {
-		if (others map {_.excludes contains user } getOrElse false) false
-		else if (others map { _.users contains user } getOrElse false) true
-		else upstream exists {
-			_.members.staticIncludeUsers contains user.getWarwickId //Yes, definitely Uni ID when checking SITS group
-		}
+		others.map { _.includesUser(user) }.getOrElse(false)
 	}
 
 	private def sameUserIdAs(user: User) = (other: Pair[String, User]) => { user.getUserId == other._2.getUserId }

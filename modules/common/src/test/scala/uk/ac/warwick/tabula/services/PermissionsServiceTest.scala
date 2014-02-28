@@ -17,6 +17,7 @@ import uk.ac.warwick.util.queue.QueueListener
 import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.MockUserLookup
+import uk.ac.warwick.tabula.data.model.UserGroup
 
 class PermissionsServiceTest extends PersistenceTestBase with Mockito {
 
@@ -44,8 +45,8 @@ class PermissionsServiceTest extends PersistenceTestBase with Mockito {
 		session.flush()
 	
 		val gr1 = new DepartmentGrantedRole(dept1, DepartmentalAdministratorRoleDefinition)
-		gr1.users.addUser("cuscav")
-		gr1.users.addUser("cusebr")
+		gr1.users.knownType.addUserId("cuscav")
+		gr1.users.knownType.addUserId("cusebr")
 		service.saveOrUpdate(gr1)
 		
 		val crd = new CustomRoleDefinition
@@ -62,13 +63,13 @@ class PermissionsServiceTest extends PersistenceTestBase with Mockito {
 		service.saveOrUpdate(crd)
 		
 		val gr2 = new DepartmentGrantedRole(dept1, crd)
-		gr2.users.addUser("cuscav")
-		gr2.users.addUser("cuscao")
+		gr2.users.knownType.addUserId("cuscav")
+		gr2.users.knownType.addUserId("cuscao")
 		service.saveOrUpdate(gr2)
 		
 		val gp = new DepartmentGrantedPermission(dept1, Permissions.Module.Create, GrantedPermission.Allow)
-		gp.users.addUser("cuscav")
-		gp.users.addUser("cuscao")
+		gp.users.knownType.addUserId("cuscav")
+		gp.users.knownType.addUserId("cuscao")
 		service.saveOrUpdate(gp)
 		
 		session.flush()
@@ -109,7 +110,7 @@ class PermissionsServiceTest extends PersistenceTestBase with Mockito {
 		}
 		
 		service.ensureUserGroupFor(dept1, DepartmentalAdministratorRoleDefinition) should be (gr1.users)
-		service.ensureUserGroupFor(dept2, DepartmentalAdministratorRoleDefinition).id should not be (null)
+		service.ensureUserGroupFor(dept2, DepartmentalAdministratorRoleDefinition).asInstanceOf[UserGroup].id should not be (null)
 	}
 	
 	@Test def guards = transactional { t => withUser("cuscav") {

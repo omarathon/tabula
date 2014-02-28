@@ -50,7 +50,7 @@
 			<@form.labelled_row "relationship" agent_role?cap_first cssClass!"">
 				<@f.select path="relationship" cssClass="input-large">
 					<@f.option disabled="true" selected="true" label="Please select one..." />
-					<@f.options items=allRelationships itemValue="agent" itemLabel="agentName" />
+					<@f.options items=allRelationships itemLabel="agentName" />
 				</@f.select>
 				<small class="help-block">
 					<#if isCreatorAgent>

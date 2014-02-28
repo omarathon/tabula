@@ -7,18 +7,22 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import uk.ac.warwick.tabula.data.model.Route
 import uk.ac.warwick.tabula.web.Mav
-import uk.ac.warwick.tabula.commands.permissions.GrantRoleCommand
-import uk.ac.warwick.tabula.commands.permissions.RevokeRoleCommand
+import uk.ac.warwick.tabula.commands.permissions.{RevokeRoleCommandState, RevokeRoleCommand, GrantRoleCommandState, GrantRoleCommand}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.roles.RoleDefinition
 import uk.ac.warwick.tabula.admin.web.controllers.AdminController
+import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
+import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 
 
 trait RoutePermissionControllerMethods extends AdminController {
 
-	@ModelAttribute("addCommand") def addCommandModel(@PathVariable("route") route: Route) = new GrantRoleCommand(route)
-	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable("route") route: Route) = new RevokeRoleCommand(route)
+	type GrantRoleCommand = Appliable[GrantedRole[Route]] with GrantRoleCommandState[Route]
+	type RevokeRoleCommand = Appliable[GrantedRole[Route]] with RevokeRoleCommandState[Route]
+
+	@ModelAttribute("addCommand") def addCommandModel(@PathVariable("route") route: Route): GrantRoleCommand = GrantRoleCommand(route)
+	@ModelAttribute("removeCommand") def removeCommandModel(@PathVariable("route") route: Route): RevokeRoleCommand = RevokeRoleCommand(route)
 
 	var userLookup = Wire.auto[UserLookupService]
 
@@ -50,10 +54,10 @@ class RoutePermissionController extends AdminController with RoutePermissionCont
 @Controller @RequestMapping(value = Array("/route/{route}/permissions"))
 class RouteAddPermissionController extends AdminController with RoutePermissionControllerMethods {
 
-	validatesSelf[GrantRoleCommand[_]]
+	validatesSelf[SelfValidating]
 
 	@RequestMapping(method = Array(POST), params = Array("_command=add"))
-	def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand[Route], errors: Errors) : Mav = {
+	def addPermission(@Valid @ModelAttribute("addCommand") command: GrantRoleCommand, errors: Errors) : Mav = {
 		val route = command.scope
 		if (errors.hasErrors()) {
 			form(route)
@@ -68,10 +72,10 @@ class RouteAddPermissionController extends AdminController with RoutePermissionC
 @Controller @RequestMapping(value = Array("/route/{route}/permissions"))
 class RouteRemovePermissionController extends AdminController with RoutePermissionControllerMethods {
 
-	validatesSelf[RevokeRoleCommand[_]]
+	validatesSelf[SelfValidating]
 
 	@RequestMapping(method = Array(POST), params = Array("_command=remove"))
-	def removePermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand[Route],
+	def removePermission(@Valid @ModelAttribute("removeCommand") command: RevokeRoleCommand,
 	                     errors: Errors): Mav = {
 		val route = command.scope
 		if (errors.hasErrors()) {

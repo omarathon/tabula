@@ -205,15 +205,15 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 <div class="usergroup-summary">
 <#if ug.baseWebgroup??>
 	Webgroup "${ug.baseWebgroup}" (${ug.baseWebgroupSize} members)
-	<#if ug.includeUsers?size gt 0>
-	+${ug.includeUsers?size} extra users
+	<#if ug.allIncludedIds?size gt 0>
+	+${ug.allIncludedIds?size} extra users
 	</#if>
-	<#if ug.excludeUsers?size gt 0>
-	-${ug.excludeUsers?size} excluded users
+	<#if ug.allExcludedIds?size gt 0>
+	-${ug.allExcludedIds?size} excluded users
 	</#if>
 <#else>
-	<#if ug.includeUsers?size gt 0>
-	${ug.includeUsers?size} users
+	<#if ug.allIncludedIds?size gt 0>
+	${ug.allIncludedIds?size} users
 	</#if>
 </#if>
 </div>

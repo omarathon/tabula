@@ -20,9 +20,11 @@ trait GeneratedId extends IdEquality {
 
 }
 
-trait IdEquality {
+trait StringId {
 	def id: String
-	
+}
+
+trait IdEquality extends StringId {
 	override final def hashCode = id match {
 		case null => super.hashCode
 		case str => getClass.hashCode + (41 * str.hashCode)

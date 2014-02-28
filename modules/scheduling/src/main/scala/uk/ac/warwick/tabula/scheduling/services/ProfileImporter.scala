@@ -20,15 +20,18 @@ import uk.ac.warwick.tabula.data.model.MemberUserType.{Emeritus, Other, Staff, S
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.sandbox.{MapResultSet, SandboxData}
 import uk.ac.warwick.tabula.scheduling.commands.imports._
-import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
+import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory}
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.Features
 
 case class MembershipInformation(val member: MembershipMember, val photo: () => Option[Array[Byte]])
 
 trait ProfileImporter {
 	import ProfileImporter._
 
-	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importRowTracker: ImportRowTracker)
+	var features = Wire[Features]
+
+	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importCommandFactory: ImportCommandFactory)
 		: Seq[ImportMemberCommand]
 	def membershipInfoByDepartment(department: Department): Seq[MembershipInformation]
 	def membershipInfoForIndividual(member: Member): Option[MembershipInformation]
@@ -45,13 +48,18 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 	var membershipInterface = Wire.auto[MembershipInterfaceWrapper]
 
 	lazy val membershipByDepartmentQuery = new MembershipByDepartmentQuery(membership)
-	lazy val membershipByUsercodeQuery = new MembershipByUsercodeQuery(membership)
+	lazy val membershipByUniversityIdQuery = new MembershipByUniversityIdQuery(membership)
 
-	def studentInformationQuery(member: MembershipInformation, ssoUser: User, importRowTracker: ImportRowTracker) = {
-		new StudentInformationQuery(sits, member, ssoUser, importRowTracker)
+	def studentInformationQuery(member: MembershipInformation, ssoUser: User, importCommandFactory: ImportCommandFactory) = {
+
+		val sceYearClause =
+			if (features.includePastYears) ""
+			else "and sce.sce_ayrc in (:year)"
+
+		new StudentInformationQuery(sits, member, ssoUser, importCommandFactory, sceYearClause)
 	}
 
-	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importRowTracker: ImportRowTracker)
+	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[UniversityId, User], importCommandFactory: ImportCommandFactory)
 		: Seq[ImportMemberCommand] = {
 		// TODO we could probably chunk this into 20 or 30 users at a time for the query, or even split by category and query all at once
 
@@ -67,8 +75,12 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 					val universityId = info.member.universityId
 					val ssoUser = users(universityId)
 
-					studentInformationQuery(info, ssoUser, importRowTracker).executeByNamedParam(
-						Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
+					studentInformationQuery(info, ssoUser, importCommandFactory).executeByNamedParam(
+						if (features.includePastYears)
+							Map("universityId" -> universityId)
+						else
+							Map("year" -> sitsCurrentAcademicYear, "universityId" -> universityId)
+
 					).toSeq
 				}.seq
 				case _ => Seq()
@@ -93,7 +105,7 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 		}
 
 	def membershipInfoForIndividual(member: Member): Option[MembershipInformation] = {
-		membershipByUsercodeQuery.executeByNamedParam(Map("usercodes" -> member.userId)).asScala.toList match {
+		membershipByUniversityIdQuery.executeByNamedParam(Map("universityIds" -> member.universityId)).asScala.toList match {
 			case Nil => None
 			case mem: List[MembershipMember] => Some (
 					MembershipInformation(
@@ -107,13 +119,13 @@ class ProfileImporterImpl extends ProfileImporter with Logging with SitsAcademic
 
 @Profile(Array("sandbox")) @Service
 class SandboxProfileImporter extends ProfileImporter {
-	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[String, User], importRowTracker: ImportRowTracker): Seq[ImportMemberCommand] =
+	def getMemberDetails(memberInfo: Seq[MembershipInformation], users: Map[String, User], importCommandFactory: ImportCommandFactory): Seq[ImportMemberCommand] =
 		memberInfo map { info => info.member.userType match {
-			case Student => studentMemberDetails(importRowTracker)(info)
+			case Student => studentMemberDetails(importCommandFactory)(info)
 			case _ => staffMemberDetails(info)
 		}}
 
-	def studentMemberDetails(importRowTracker: ImportRowTracker)(mac: MembershipInformation) = {
+	def studentMemberDetails(importCommandFactory: ImportCommandFactory)(mac: MembershipInformation) = {
 		val member = mac.member
 		val ssoUser = new User(member.usercode)
 		ssoUser.setFoundUser(true)
@@ -172,11 +184,7 @@ class SandboxProfileImporter extends ProfileImporter {
 			mac,
 			ssoUser,
 			rs,
-			importRowTracker,
-			new ImportStudentCourseCommand(rs,
-					importRowTracker,
-					new ImportStudentCourseYearCommand(rs, importRowTracker),
-					new ImportSupervisorsForStudentCommand())
+			importCommandFactory
 		)
 	}
 
@@ -304,12 +312,22 @@ class SandboxProfileImporter extends ProfileImporter {
 
 }
 
-object ProfileImporter {
+object ProfileImporter extends Logging {
+	var features = Wire[Features]
+
 	type UniversityId = String
 
 	val sitsSchema: String = Wire.property("${schema.sits}")
 
-	val GetStudentInformation = f"""
+	val sceYearClause =
+		if (features.includePastYears) {
+			""
+		}
+		else {
+			"and sce.sce_ayrc in (:year)"
+		}
+
+	def GetStudentInformation(sceYearClause: String) = f"""
 		select
 			stu.stu_code as university_id,
 			stu.stu_titl as title,
@@ -366,7 +384,7 @@ object ProfileImporter {
 
 			join $sitsSchema.srs_sce sce
 				on scj.scj_code = sce.sce_scjc
-				and sce.sce_ayrc in (:year)
+				$sceYearClause
 				and sce.sce_seq2 =
 					(
 						select max(sce2.sce_seq2)
@@ -395,31 +413,37 @@ object ProfileImporter {
 		order by stu.stu_code
 		"""
 
-	class StudentInformationQuery(ds: DataSource, member: MembershipInformation, ssoUser: User, importRowTracker: ImportRowTracker)
-		extends MappingSqlQuery[ImportStudentRowCommandInternal](ds, GetStudentInformation) {
+	class StudentInformationQuery(ds: DataSource,
+																member: MembershipInformation,
+																ssoUser: User,
+																importCommandFactory: ImportCommandFactory,
+																sceYearClause: String)
+		extends MappingSqlQuery[ImportStudentRowCommandInternal](ds, GetStudentInformation(sceYearClause)) {
+
+		var features = Wire.auto[Features]
+
 		declareParameter(new SqlParameter("universityId", Types.VARCHAR))
-		declareParameter(new SqlParameter("year", Types.VARCHAR))
+
+		if (!features.includePastYears)
+			declareParameter(new SqlParameter("year", Types.VARCHAR))
+
 		compile()
 
 		override def mapRow(rs: ResultSet, rowNumber: Int)
-			= ImportStudentRowCommand(
-				member,
-				ssoUser,
-				rs,
-				importRowTracker,
-				new ImportStudentCourseCommand(rs,
-						importRowTracker,
-						new ImportStudentCourseYearCommand(rs, importRowTracker),
-						new ImportSupervisorsForStudentCommand)
-			)
+		= ImportStudentRowCommand(
+			member,
+			ssoUser,
+			rs,
+			importCommandFactory
+		)
 	}
 
-	val GetMembershipByUsercodeInformation = """
-		select * from cmsowner.uow_current_members where its_usercode in (:usercodes)
+	val GetMembershipByUniversityIdInformation = """
+		select * from cmsowner.uow_current_members where university_number in (:universityIds) and its_usercode is not null
 		"""
 
-	class MembershipByUsercodeQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByUsercodeInformation) {
-		declareParameter(new SqlParameter("usercodes", Types.VARCHAR))
+	class MembershipByUniversityIdQuery(ds: DataSource) extends MappingSqlQuery[MembershipMember](ds, GetMembershipByUniversityIdInformation) {
+		declareParameter(new SqlParameter("universityIds", Types.VARCHAR))
 		compile()
 		override def mapRow(rs: ResultSet, rowNumber: Int) = membershipToMember(rs)
 	}

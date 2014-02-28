@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.groups.commands.admin
 
-import uk.ac.warwick.tabula.commands.{MemberCollectionHelper, SelfValidating, Command, Description, UploadedFile, GroupsObjects}
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{SmallGroupService, ProfileService, SecurityService}
+import uk.ac.warwick.tabula.services.SmallGroupService
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.userlookup.User
@@ -25,7 +25,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroupAllocationMethod.Student
 
 class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet, val viewer: CurrentUser)
 	extends Command[SmallGroupSet]
-		with GroupsObjects[User, SmallGroup]
+		with GroupsObjectsWithFileUpload[User, SmallGroup]
 		with SelfValidating
 		with BindListener
 		with SmallGroupSetCommand
@@ -61,7 +61,7 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 
 	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
 	// Do not modify the returned value!
-	override def mappingById = 
+	def mappingById =
 		(mapping.asScala
 		.filter { case (group, users) => group != null && users != null }
 		.map {
@@ -102,8 +102,8 @@ class AllocateStudentsToGroupsCommand(val module: Module, val set: SmallGroupSet
 	final def applyInternal() = transactional() {
 		for ((group, users) <- mapping.asScala) {
 			val userGroup = UserGroup.ofUniversityIds
-			users.asScala.foreach { user => userGroup.addUser(user.getWarwickId) }
-			group._studentsGroup.copyFrom(userGroup)
+			users.asScala.foreach { user => userGroup.addUserId(user.getWarwickId) }
+			group.students.copyFrom(userGroup)
 			service.saveOrUpdate(group)
 		}
 		set

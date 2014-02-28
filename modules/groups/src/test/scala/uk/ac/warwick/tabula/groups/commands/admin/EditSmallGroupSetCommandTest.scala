@@ -4,13 +4,11 @@ import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupSet
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.userlookup.User
-import org.junit.Test
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.services.MaintenanceModeService
 import uk.ac.warwick.tabula.services.MaintenanceModeServiceImpl
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.services.SmallGroupService
@@ -31,7 +29,7 @@ class EditSmallGroupSetCommandTest extends TestBase with Mockito {
 		module.department = dept
 		
 		val set = new SmallGroupSet()
-		set._membersGroup = UserGroup.ofUsercodes
+		set.members = UserGroup.ofUsercodes
 		set.membershipService = mock[AssignmentMembershipService]
 		set.module = module
 		
@@ -41,13 +39,13 @@ class EditSmallGroupSetCommandTest extends TestBase with Mockito {
 		set.members.add(user4)
 		
 		val group1 = new SmallGroup()
-		group1._studentsGroup = UserGroup.ofUsercodes
+		group1.students = UserGroup.ofUsercodes
 		group1.groupSet = set
 		group1.students.add(user1)
 		group1.students.add(user2)
 		
 		val group2 = new SmallGroup()
-		group2._studentsGroup = UserGroup.ofUsercodes
+		group2.students = UserGroup.ofUsercodes
 		group2.groupSet = set
 		group2.students.add(user3)
 		group2.students.add(user4)
@@ -56,9 +54,9 @@ class EditSmallGroupSetCommandTest extends TestBase with Mockito {
 		set.groups.add(group1)
 		set.groups.add(group2)
 		
-		set._membersGroup.userLookup = mockUserLookup
-		group1._studentsGroup.userLookup = mockUserLookup
-		group2._studentsGroup.userLookup = mockUserLookup
+		set.members.asInstanceOf[UserGroup].userLookup = mockUserLookup
+		group1.students.asInstanceOf[UserGroup].userLookup = mockUserLookup
+		group2.students.asInstanceOf[UserGroup].userLookup = mockUserLookup
 		
 		EventHandling.enabled = false
 		
@@ -67,7 +65,7 @@ class EditSmallGroupSetCommandTest extends TestBase with Mockito {
 		cmd.groups.asScala.foreach { cmd => cmd.maintenanceMode = new MaintenanceModeServiceImpl() }
 		
 		cmd.membershipService = mock[AssignmentMembershipService] // Intentionally different to the SmallGroupSet's one
-		cmd.membershipService.determineMembershipUsers(Seq(), Some(set._membersGroup)) returns (set._membersGroup.users)
+		cmd.membershipService.determineMembershipUsers(Seq(), Some(set.members)) returns (set.members.users)
 		cmd.membershipService.determineMembershipUsers(Seq(), Some(cmd.members)) returns (cmd.members.users)
 		cmd.applyInternal()
 		
@@ -83,7 +81,7 @@ class EditSmallGroupSetCommandTest extends TestBase with Mockito {
 		cmd.members.add(user5)
 		
 		cmd.membershipService = mock[AssignmentMembershipService] // Intentionally different to the SmallGroupSet's one
-		cmd.membershipService.determineMembershipUsers(Seq(), Some(set._membersGroup)) returns (set._membersGroup.users)
+		cmd.membershipService.determineMembershipUsers(Seq(), Some(set.members)) returns (set.members.users)
 		cmd.membershipService.determineMembershipUsers(Seq(), Some(cmd.members)) returns (cmd.members.users)
 		cmd.applyInternal()
 		

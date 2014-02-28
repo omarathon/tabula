@@ -1,4 +1,6 @@
 package uk.ac.warwick.tabula.groups.commands.admin
+
+import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.{Mockito, TestBase}
 import uk.ac.warwick.tabula.data.model.{UserGroup, Notification}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupSet, SmallGroup}
@@ -96,6 +98,7 @@ class ReleaseGroupSetCommandTest extends TestBase with Mockito {
     cmd.notifyStudents = true
     cmd.userLookup = userLookup
     cmd.applyInternal()
+
 		val notifications = cmd.emit(Seq(ReleasedSmallGroupSet(groupSet1, cmd.notifyStudents, cmd.notifyTutors)))
 		notifications.foreach {
 			case n : ReleaseSmallGroupSetsNotification => n.userLookup = userLookup

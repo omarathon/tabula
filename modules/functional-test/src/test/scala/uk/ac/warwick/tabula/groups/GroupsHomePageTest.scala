@@ -49,7 +49,7 @@ class GroupsHomePageTest extends SmallGroupsFixture with GivenWhenThen with Brea
 
 		Then("I should see the released groupset")
 		val groupsPage = new GroupsHomePage
-		groupsPage.isCurrentPage()
+		groupsPage.isCurrentPage() should be (true)
 
 		groupsPage.getGroupsetInfo(TEST_MODULE_CODE, TEST_GROUPSET_NAME) should be ('defined)
 

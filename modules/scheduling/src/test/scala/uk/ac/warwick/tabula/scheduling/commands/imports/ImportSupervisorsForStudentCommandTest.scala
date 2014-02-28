@@ -1,19 +1,16 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.{AppContextTestBase, Mockito}
 import uk.ac.warwick.tabula.data.model.DegreeType.Postgraduate
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
 import uk.ac.warwick.tabula.helpers.Logging
 import org.joda.time.DateTime
-import org.junit.Ignore
-
 
 class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Mockito with Logging {
 
-	trait Environment {
+	trait Environment extends ImportCommandFactoryForTesting {
 		val scjCode = "1111111/1"
 		val sprCode = "1111111/1"
 		val uniId = "1111111"
@@ -93,7 +90,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			importer.getSupervisorUniversityIds(course1.studentCourseDetails.scjCode, relationshipType) returns codes1
 			importer.getSupervisorUniversityIds(course2.studentCourseDetails.scjCode, relationshipType) returns codes2
 
-			val command = new ImportSupervisorsForStudentCommand()
+			val command = new ImportSupervisorsForStudentCommand(course1.studentCourseDetails)
 			command.studentCourseDetails = course1.studentCourseDetails
 			command.supervisorImporter = importer
 			command.applyInternal()
@@ -101,7 +98,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			// check results
 			assertRelationshipIsValid(course1.studentCourseDetails, supervisor)
 
-			val command2 = new ImportSupervisorsForStudentCommand()
+			val command2 = new ImportSupervisorsForStudentCommand(course2.studentCourseDetails)
 			command2.studentCourseDetails = course2.studentCourseDetails
 			command2.supervisorImporter = importer
 			command2.applyInternal()
@@ -117,7 +114,6 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			assertRelationshipIsValid(retrievedScd, supervisor)
 
 		}
-
 	}
 
 	@Transactional
@@ -129,7 +125,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			importer.getSupervisorUniversityIds(scjCode, relationshipType) returns codes
 
 			// test command
-			val command = new ImportSupervisorsForStudentCommand()
+			val command = new ImportSupervisorsForStudentCommand(course1.studentCourseDetails)
 			command.studentCourseDetails = course1.studentCourseDetails
 			command.supervisorImporter = importer
 			command.applyInternal()
@@ -155,7 +151,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			importer.getSupervisorUniversityIds(scjCode, relationshipType) returns Seq()
 
 			// test command
-			val command = new ImportSupervisorsForStudentCommand()
+			val command = new ImportSupervisorsForStudentCommand(course1.studentCourseDetails)
 			command.studentCourseDetails = course1.studentCourseDetails
 			command.supervisorImporter = importer
 			command.applyInternal()
@@ -186,7 +182,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 
 
 			// test command
-			val command = new ImportSupervisorsForStudentCommand()
+			val command = new ImportSupervisorsForStudentCommand(course1.studentCourseDetails)
 			command.studentCourseDetails = course1.studentCourseDetails
 			command.supervisorImporter = importer
 			command.applyInternal()
