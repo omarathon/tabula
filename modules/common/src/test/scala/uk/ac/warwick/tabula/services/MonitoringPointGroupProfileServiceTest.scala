@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.data.{MonitoringPointDaoComponent, SmallGroupDao, SmallGroupDaoComponent, MonitoringPointDao}
+import uk.ac.warwick.tabula.data.{SmallGroupDao, SmallGroupDaoComponent}
 import uk.ac.warwick.tabula.{AcademicYear, TestBase, Fixtures, Mockito}
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPointType, MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, AttendanceState, MonitoringPointType, MonitoringPoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupEventAttendance, SmallGroupSet, SmallGroup}
@@ -11,11 +11,10 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 
 	val mockProfileService = mock[ProfileService]
 	val mockMonitoringPointService = mock[MonitoringPointService]
+	val mockModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 
 	trait ServiceTestSupport extends SmallGroupServiceComponent with SmallGroupDaoComponent
-	with ProfileServiceComponent with  MonitoringPointServiceComponent with MonitoringPointDaoComponent {
-
-		val monitoringPointDao = mock[MonitoringPointDao]
+	with ProfileServiceComponent with  MonitoringPointServiceComponent {
 
 		val monitoringPointService = mockMonitoringPointService
 		val profileService = mockProfileService
@@ -65,6 +64,13 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 
 		mockProfileService.getMemberByUniversityId(student.universityId) returns Option(student)
 
+		val module1 = Fixtures.module("aa101")
+		module1.id = "aa101"
+		val module2 = Fixtures.module("aa202")
+		module2.id = "aa202"
+		mockModuleAndDepartmentService.getModuleById(module1.id) returns Option(module1)
+		mockModuleAndDepartmentService.getModuleById(module2.id) returns Option(module2)
+
 	}
 
 	trait StudentYear2Fixture extends StudentFixture {
@@ -100,7 +106,7 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 		groupThisYearPoint.smallGroupEventModules = Seq()
 		groupThisYearPoint.smallGroupEventQuantity = 1
 		groupThisYearPoint.relationshipService = mock[RelationshipService]
-		groupThisYearPoint.moduleAndDepartmentService = mock[ModuleAndDepartmentService]
+		groupThisYearPoint.moduleAndDepartmentService = mockModuleAndDepartmentService
 
 		mockMonitoringPointService.getCheckpoint(student, groupThisYearPoint ) returns None
 		mockMonitoringPointService.studentAlreadyReportedThisTerm(student, groupThisYearPoint) returns false
@@ -113,14 +119,66 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 
 		service.getCheckpointsForAttendance(Seq(attendance)).size should be (1)
 
-//		service.updateCheckpointsForAttendance(Seq(attendance))
-//		there was one (service.monitoringPointDao).saveOrUpdate(any[MonitoringCheckpoint])
+		service.updateCheckpointsForAttendance(Seq(attendance))
+		there was one (service.monitoringPointService).saveOrUpdate(any[MonitoringCheckpoint])
 	}}
 
 	@Test
-	def wrongWeek() { new ValidYear2PointFixture {
+	def updatesCheckpointQuantityMoreThanOne() { new ValidYear2PointFixture {
 
-		occurrence.week = 2
+		val otherAttendance = new SmallGroupEventAttendance
+		otherAttendance.occurrence = new SmallGroupEventOccurrence
+		otherAttendance.universityId = student.universityId
+
+		service.smallGroupDao.findAttendanceForStudentInModulesInWeeks(
+			student,
+			groupThisYearPoint.validFromWeek,
+			groupThisYearPoint.requiredFromWeek,
+			groupThisYearPoint.smallGroupEventModules
+		) returns Seq(otherAttendance)
+
+		groupThisYearPoint.smallGroupEventQuantity = 2
+
+		service.getCheckpointsForAttendance(Seq(attendance)).size should be (1)
+
+		service.updateCheckpointsForAttendance(Seq(attendance))
+		there was one (service.monitoringPointService).saveOrUpdate(any[MonitoringCheckpoint])
+	}}
+
+	@Test
+	def updatesCheckpointSpecificModule() { new ValidYear2PointFixture {
+
+		groupThisYearPoint.smallGroupEventModules = Seq(module1)
+		groupSet.module = module1
+
+		service.getCheckpointsForAttendance(Seq(attendance)).size should be (1)
+
+		service.updateCheckpointsForAttendance(Seq(attendance))
+		there was one (service.monitoringPointService).saveOrUpdate(any[MonitoringCheckpoint])
+	}}
+
+	@Test
+	def notAttended() { new ValidYear2PointFixture {
+
+		attendance.state = AttendanceState.MissedAuthorised
+		service.getCheckpointsForAttendance(Seq(attendance)).size should be (0)
+
+	}}
+
+	@Test
+	def notAMember() { new ValidYear2PointFixture {
+
+		val nonMember = "notamember"
+		attendance.universityId = nonMember
+		mockProfileService.getMemberByUniversityId(nonMember) returns None
+		service.getCheckpointsForAttendance(Seq(attendance)).size should be (0)
+
+	}}
+
+	@Test
+	def noPointSet() { new ValidYear2PointFixture {
+
+		service.monitoringPointService.getPointSetForStudent(student, academicYear2013) returns None
 		service.getCheckpointsForAttendance(Seq(attendance)).size should be (0)
 
 	}}
@@ -134,9 +192,62 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 	}}
 
 	@Test
+	def wrongWeek() { new ValidYear2PointFixture {
+
+		occurrence.week = 2
+		service.getCheckpointsForAttendance(Seq(attendance)).size should be (0)
+
+	}}
+
+	@Test
+	def wrongModule() { new ValidYear2PointFixture {
+
+		groupThisYearPoint.smallGroupEventModules = Seq(module1)
+		groupSet.module = module2
+		service.getCheckpointsForAttendance(Seq(attendance)).size should be (0)
+
+	}}
+
+	@Test
 	def checkpointAlreadyExists() { new ValidYear2PointFixture {
 
 		mockMonitoringPointService.getCheckpoint(student, groupThisYearPoint ) returns Option(Fixtures.monitoringCheckpoint(groupThisYearPoint, student, AttendanceState.Attended))
+		service.getCheckpointsForAttendance(Seq(attendance)).size should be (0)
+
+	}}
+
+	@Test
+	def reportedToSITS() { new ValidYear2PointFixture {
+
+		mockMonitoringPointService.studentAlreadyReportedThisTerm(student, groupThisYearPoint ) returns true
+		service.getCheckpointsForAttendance(Seq(attendance)).size should be (0)
+
+	}}
+
+	@Test
+	def notEnoughAttendanceCurrentNotPersisted() { new ValidYear2PointFixture {
+
+		groupThisYearPoint.smallGroupEventQuantity = 2
+		service.smallGroupDao.findAttendanceForStudentInModulesInWeeks(
+			student,
+			groupThisYearPoint.validFromWeek,
+			groupThisYearPoint.requiredFromWeek,
+			groupThisYearPoint.smallGroupEventModules
+		) returns Seq()
+		service.getCheckpointsForAttendance(Seq(attendance)).size should be (0)
+
+	}}
+
+	@Test
+	def notEnoughAttendanceCurrentPersisted() { new ValidYear2PointFixture {
+
+		groupThisYearPoint.smallGroupEventQuantity = 2
+		service.smallGroupDao.findAttendanceForStudentInModulesInWeeks(
+			student,
+			groupThisYearPoint.validFromWeek,
+			groupThisYearPoint.requiredFromWeek,
+			groupThisYearPoint.smallGroupEventModules
+		) returns Seq(attendance)
 		service.getCheckpointsForAttendance(Seq(attendance)).size should be (0)
 
 	}}
