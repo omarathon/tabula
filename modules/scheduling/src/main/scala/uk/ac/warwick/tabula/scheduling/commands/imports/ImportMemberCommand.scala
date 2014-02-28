@@ -32,6 +32,7 @@ import scala.util.matching.Regex
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import language.implicitConversions
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
+import uk.ac.warwick.tabula.services.UserLookupService
 
 abstract class ImportMemberCommand extends Command[Member] with Logging with Daoisms
 	with MemberProperties with Unaudited with PropertyCopying {
@@ -39,8 +40,9 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var memberDao = Wire.auto[MemberDao]
-	var fileDao = Wire.auto[FileDao]
+	var memberDao = Wire[MemberDao]
+	var fileDao = Wire[FileDao]
+	var userLookup = Wire[UserLookupService]
 
 	// A couple of intermediate properties that will be transformed later
 	var photoOption: () => Option[Array[Byte]] = _
@@ -57,7 +59,14 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		this.membershipLastUpdated = member.modified
 
 		this.universityId = oneOf(member.universityId, optString("university_id")).get
-		this.userId = oneOf(ssoUser.getUserId.maybeText, member.usercode).get
+
+		val suggestedUserId = oneOf(ssoUser.getUserId.maybeText, member.usercode).get
+
+		this.userId = optString("user_code") match {
+			// TAB-2004
+			case Some(userId) if userId != suggestedUserId && userLookup.getUserByUserId(userId).getWarwickId == this.universityId => userId
+			case _ => suggestedUserId
+		}
 
 		this.userType = member.userType
 

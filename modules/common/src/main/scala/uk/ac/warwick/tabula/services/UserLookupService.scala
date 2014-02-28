@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup._
 import uk.ac.warwick.util.cache._
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
-import org.joda.time.DateTime
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import javax.annotation.PreDestroy
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.services.UserLookupService._
+import uk.ac.warwick.tabula.helpers.Logging
 
 object UserLookupService {
 	type UniversityId = String
@@ -44,7 +45,7 @@ trait UserLookupService extends UserLookupInterface {
 	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean): Map[UniversityId, User]
 }
 
-class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService with UserByWarwickIdCache {
+class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService with UserByWarwickIdCache with Logging {
 	
 	var profileService = Wire[ProfileService]
 
@@ -59,11 +60,30 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 	override def getUsersByWarwickUniIds(ids: Seq[UniversityId]) =
 		UserByWarwickIdCache.get(ids.asJava).asScala.toMap
 
-	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean) =
-		if (skipMemberLookup) super.getUserByWarwickUniId(id)
+	private def getUserByWarwickUniIdFromUserLookup(id: UniversityId) = {
+		/*
+		 * TAB-2004 We go directly to the UserLookup filter method in order to change the behaviour. In particular,
+		 * we want to prefer non-disabled users over ones that are disabled.
+		 */
+		val filter = Map("warwickuniid" -> id)
+		findUsersWithFilter(filter.asJava, true)
+			.asScala
+			.map { user => getUserByUserId(user.getUserId) }
+			.sortBy(user => (user.isLoginDisabled, !user.getEmail.hasText))
+			.filter { user => user.getExtraProperty("urn:websignon:usertype") != "Applicant" }
+			.headOption
+			.getOrElse {
+				logger.debug("No user found that matches Warwick Uni Id:" + id)
+				new AnonymousUser
+			}
+	}
+
+	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean) = {
+		if (skipMemberLookup) getUserByWarwickUniIdFromUserLookup(id)
 		else profileService.getMemberByUniversityIdStaleOrFresh(id)
 			.map { _.asSsoUser }
-			.getOrElse { filterApplicantUsers(super.getUserByWarwickUniId(id)) }
+			.getOrElse { getUserByWarwickUniIdFromUserLookup(id) }
+	}
 	
 	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean) = {
 		val dbUsers =
@@ -71,7 +91,7 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 			else profileService.getAllMembersWithUniversityIdsStaleOrFresh(ids).map { m => m.universityId -> m.asSsoUser }.toMap
 
 		val others = (ids.diff(dbUsers.keys.toSeq)).par.map { id => 
-			id -> filterApplicantUsers(super.getUserByWarwickUniId(id))
+			id -> getUserByWarwickUniIdFromUserLookup(id)
 		}.toMap
 		
 		dbUsers ++ others
@@ -104,7 +124,10 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 		try {
 			getUserByWarwickUniIdUncached(warwickId, false)
 		} catch {
-			case e: Exception => throw new CacheEntryUpdateException(e)
+			case e: Exception => {
+				e.printStackTrace()
+				throw new CacheEntryUpdateException(e)
+			}
 		}
 	}
 
