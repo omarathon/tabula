@@ -38,7 +38,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 	var deptCode: String = _
 
-	val BatchSize = 100
+	val BatchSize = 1
 
 	def applyInternal() {
 		if (features.profiles) {

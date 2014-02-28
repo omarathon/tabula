@@ -48,11 +48,15 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 			.add(is("sceSequenceNumber", seq))
 			.uniqueResult
 
-	def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails] =
-		session.newCriteria[StudentCourseYearDetails]
+	def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails] = {
+		session.disableFilter(StudentCourseYearDetails.FreshOnlyFilter)
+		val scyd = session.newCriteria[StudentCourseYearDetails]
 			.add(is("studentCourseDetails", studentCourseDetails))
 			.add(is("sceSequenceNumber", seq))
 			.uniqueResult
+		session.enableFilter(StudentCourseYearDetails.FreshOnlyFilter)
+		scyd
+	}
 
 	def getFreshKeys: Seq[StudentCourseYearKey] = {
 		session.newCriteria[StudentCourseYearDetails]

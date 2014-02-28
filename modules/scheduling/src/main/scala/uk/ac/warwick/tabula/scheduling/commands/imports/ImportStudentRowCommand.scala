@@ -56,29 +56,29 @@ class ImportStudentRowCommandInternal(
 			// set appropriate disability object iff a non-null code is retrieved - I <3 scala options
 			profileService.getDisability(row.disabilityCode).foreach(this.disability = _)
 
-			val memberExisting = memberDao.getByUniversityIdStaleOrFresh(universityId)
+				val memberExisting = memberDao.getByUniversityIdStaleOrFresh(universityId)
 
-			logger.debug("Importing student member " + universityId + " into " + memberExisting)
+				logger.debug("Importing student member " + universityId + " into " + memberExisting)
 
-			val (isTransient, member) = memberExisting match {
-				case Some(member: StudentMember) => (false, member)
-				case Some(member: OtherMember) => {
-					// TAB-692 delete the existing member, then return a brand new one
-					memberDao.delete(member)
-					(true, new StudentMember(universityId))
+				val (isTransient, member) = memberExisting match {
+					case Some(member: StudentMember) => (false, member)
+					case Some(member: OtherMember) => {
+						// TAB-692 delete the existing member, then return a brand new one
+						memberDao.delete(member)
+						(true, new StudentMember(universityId))
+					}
+					case Some(member) => throw new IllegalStateException("Tried to convert " + member + " into a student!")
+					case _ => (true, new StudentMember(universityId))
 				}
-				case Some(member) => throw new IllegalStateException("Tried to convert " + member + " into a student!")
-				case _ => (true, new StudentMember(universityId))
-			}
 
-			if (!importCommandFactory.rowTracker.universityIdsSeen.contains(member.universityId)) {
-				saveStudentDetails(isTransient, member)
-			}
+				if (!importCommandFactory.rowTracker.universityIdsSeen.contains(member.universityId)) {
+					saveStudentDetails(isTransient, member)
+				}
 
-			val studentCourseDetails = importCommandFactory.createImportStudentCourseCommand(row, member).apply()
-			member.attachStudentCourseDetails(studentCourseDetails)
+				val studentCourseDetails = importCommandFactory.createImportStudentCourseCommand(row, member).apply()
+				member.attachStudentCourseDetails(studentCourseDetails)
 
-			importCommandFactory.rowTracker.universityIdsSeen.add(member.universityId)
+				importCommandFactory.rowTracker.universityIdsSeen.add(member.universityId)
 
 			member
 		}

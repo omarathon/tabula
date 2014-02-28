@@ -13,11 +13,21 @@ import uk.ac.warwick.tabula.system.permissions.Restricted
 import reflect.BeanProperty
 import org.apache.commons.lang3.builder.HashCodeBuilder
 import org.apache.commons.lang3.builder.EqualsBuilder
-import org.hibernate.annotations.Type
+import org.hibernate.annotations.{Filter, Filters, FilterDef, FilterDefs, Type}
 import javax.persistence.Column
 import uk.ac.warwick.tabula.JavaImports._
 import javax.persistence.FetchType
 
+object StudentCourseYearDetails {
+	final val FreshOnlyFilter = "freshOnly"
+}
+
+@FilterDefs(Array(
+	new FilterDef(name = Member.FreshOnlyFilter, defaultCondition = "missingFromImportSince is null")
+))
+@Filters(Array(
+	new Filter(name = Member.FreshOnlyFilter)
+))
 @Entity
 class StudentCourseYearDetails extends StudentCourseYearProperties
 	with GeneratedId with ToString with HibernateVersioned with PermissionsTarget

@@ -16,6 +16,16 @@ import javax.persistence.CascadeType
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
 
+object StudentCourseDetails {
+	final val FreshOnlyFilter = "freshOnly"
+}
+
+@FilterDefs(Array(
+	new FilterDef(name = Member.FreshOnlyFilter, defaultCondition = "missingFromImportSince is null")
+))
+@Filters(Array(
+	new Filter(name = Member.FreshOnlyFilter)
+))
 @Entity
 class StudentCourseDetails
 	extends StudentCourseProperties

@@ -49,10 +49,15 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 				.add(isNull("missingFromImportSince"))
 				.uniqueResult
 
-	def getByScjCodeStaleOrFresh(scjCode: String) =
-		session.newCriteria[StudentCourseDetails]
+	def getByScjCodeStaleOrFresh(scjCode: String) = {
+		logger.debug("Getting SCD by scjcode: " + scjCode)
+		session.disableFilter(StudentCourseDetails.FreshOnlyFilter)
+		val scd = session.newCriteria[StudentCourseDetails]
 				.add(is("scjCode", scjCode.trim))
 				.uniqueResult
+		session.enableFilter(StudentCourseDetails.FreshOnlyFilter)
+		scd
+	}
 
 	def getBySprCode(sprCode: String) =
 		session.newCriteria[StudentCourseDetails]
