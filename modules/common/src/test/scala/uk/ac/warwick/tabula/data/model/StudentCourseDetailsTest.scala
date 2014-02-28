@@ -2,12 +2,8 @@ package uk.ac.warwick.tabula.data.model
 import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.Mockito
 import uk.ac.warwick.tabula.PersistenceTestBase
-import uk.ac.warwick.tabula.services.ProfileService
 import uk.ac.warwick.tabula.services.RelationshipService
-import uk.ac.warwick.tabula.services.RelationshipServiceImpl
 import uk.ac.warwick.tabula.AcademicYear
-import scala.collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.StudentRelationship
 
 class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
@@ -27,17 +23,17 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 	staff.firstName = "Steve"
 	staff.lastName = "Taff"
 
-	@Test def getPersonalTutor {
-		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns (Nil)
+	@Test def personalTutor() {
+		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns Nil
 		student.freshStudentCourseDetails.head.relationships(relationshipType) should be ('empty)
 
 		val rel = StudentRelationship(staff, relationshipType, student)
 
-		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns (Seq(rel))
+		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns Seq(rel)
 		student.freshStudentCourseDetails.head.relationships(relationshipType) flatMap { _.agentMember } should be (Seq(staff))
 	}
 
-	@Test def testModuleRegistrations {
+	@Test def testModuleRegistrations() {
 		val member = new StudentMember
 		member.universityId = "01234567"
 
@@ -61,13 +57,13 @@ class StudentCourseDetailsTest extends PersistenceTestBase with Mockito {
 
 	}
 
-	@Test def relationships {
+	@Test def relationships() {
 		val rel1 = StudentRelationship(staff, relationshipType, student)
 		rel1.id = "1"
 		val rel2 = StudentRelationship(staff, relationshipType, student)
 		rel2.id = "2"
 
-		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns (Seq(rel1))
+		relationshipService.findCurrentRelationships(relationshipType, studentCourseDetails) returns Seq(rel1)
 
 		rel1.studentCourseDetails = studentCourseDetails
 		studentCourseDetails.relationships(relationshipType) should be (Seq(rel1))
