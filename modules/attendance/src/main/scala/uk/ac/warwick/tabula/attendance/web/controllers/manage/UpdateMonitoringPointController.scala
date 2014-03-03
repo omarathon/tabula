@@ -2,19 +2,15 @@ package uk.ac.warwick.tabula.attendance.web.controllers.manage
 
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPoint, MonitoringPointSet}
-import uk.ac.warwick.tabula.commands.{SelfValidating, Appliable}
+import uk.ac.warwick.tabula.commands.Appliable
 import javax.validation.Valid
 import org.springframework.validation.Errors
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.attendance.commands.manage.UpdateMonitoringPointCommand
-import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
-import scala.Array
 
 @Controller
 @RequestMapping(Array("/manage/{dept}/sets/{set}/edit/points/{point}/edit"))
-class UpdateMonitoringPointController extends AttendanceController {
-
-	validatesSelf[SelfValidating]
+class UpdateMonitoringPointController extends AbstractManageMonitoringPointController {
 
 	@ModelAttribute("command")
 	def createCommand(

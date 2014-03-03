@@ -41,7 +41,34 @@ var setArgOnUrl = function(url, argName, argValue){
 	}
 };
 
-exports.bindButtonGroupHandler = function() {
+exports.bindButtonGroupHandler = function(enableCheckForCheckpoints) {
+	var checkForCheckpoints = function(){
+		var attendanceData = {};
+		$('form#recordAttendance').find('select').each(function(){
+			attendanceData[$(this).data('universityid')] = $(this).val();
+		});
+		$.post('/attendance/smallgroupcheckpoints', {
+			'occurrence' : $('form#recordAttendance').data('occurrence'),
+			'attendances' : attendanceData
+		}, function(data){
+			$('form#recordAttendance .checkpoints-message .students').popover('destroy').removeClass('tabulaPopover-init');
+			if (data.length === 0) {
+				$('form#recordAttendance .checkpoints-message').hide();
+			} else {
+				var popoverContent = $('<ul/>');
+				$.each(data, function(i, student){
+					popoverContent.append($('<li/>').html(student.name));
+				});
+				$('form#recordAttendance .checkpoints-message').show()
+					.find('.students').html(data.length + ' student' + ((data.length > 1)?'s':''))
+					.data('content', popoverContent.wrap('<div></div>').parent().html())
+					.tabulaPopover({
+						trigger: 'click'
+					});
+			}
+		});
+	};
+
     $('#recordAttendance').on('click', 'div.btn-group button', function(e){
         var $this = $(this);
         if ($this.is('.disabled')) {
@@ -54,8 +81,24 @@ exports.bindButtonGroupHandler = function() {
 	        }).prop('selected', true);
 			var noteButton = $this.closest('div.pull-right').find('a.attendance-note');
 			noteButton.attr('href', setArgOnUrl(noteButton.attr('href'), 'state', $this.data('state')));
-	      }
+	    }
+
+		if (enableCheckForCheckpoints) {
+			checkForCheckpoints();
+		}
     });
+
+	if (enableCheckForCheckpoints) {
+		$(function(){
+			checkForCheckpoints();
+		});
+	}
+};
+
+exports.enableCheckForCheckpoints = function() {
+	$('#recordAttendance').on('click', 'div.btn-group button', function(e){
+		$('#recordAttendance')
+	});
 };
 
 $(function(){

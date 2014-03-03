@@ -49,6 +49,47 @@ exports.tableSortMatching = function(tableArray) {
     });
 };
 
+exports.bindModulePicker = function(){
+	var $addButton = $('.module-picker').closest('.module-choice').find('button.add-module').attr('disabled', true);
+	$('.module-picker').closest('.module-choice').find('.modules-list').on('click', 'button.btn.btn-danger', function(){
+		$(this).closest('li').remove();
+	});
+	var $input = $('.module-picker').on('change', function(){
+		if ($(this).data('moduleid') && $(this).data('moduleid').length === 0) {
+			$addButton.attr('disabled', true);
+		} else {
+			$addButton.attr('disabled', false);
+		}
+	});
+	$addButton.on('click', function(){
+		$input.closest('.module-choice').find('input.specific[name=isAnySmallGroupEventModules]').attr('checked', true);
+		var icon = $('<i/>').addClass('icon-fixed-width');
+		if (!$input.data('hasgroups')) {
+			icon.addClass('icon-exclamation-sign').attr({
+				'title':'This module has no small groups set up in Tabula'
+			});
+		}
+		$input.closest('.module-choice').find('.modules-list ul').append(
+			$('<li/>').append(
+				$('<input/>').attr({
+					'type':'hidden',
+					'name':'smallGroupEventModules',
+					'value':$input.data('moduleid')
+				})
+			).append(
+				icon
+			).append(
+				$('<span/>').attr('title', $input.val()).html($input.val())
+			).append(
+				$('<button/>').addClass('btn btn-danger').append(
+					$('<i/>').addClass('icon-remove')
+				)
+			)
+		);
+		$input.val('').data('moduleid','');
+	});
+};
+
 $(function(){
 
 	// SCRIPTS FOR MANAGING MONITORING POINTS

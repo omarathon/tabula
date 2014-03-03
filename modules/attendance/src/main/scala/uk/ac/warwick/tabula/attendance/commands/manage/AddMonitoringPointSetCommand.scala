@@ -12,7 +12,6 @@ import org.joda.time.DateTime
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports.JHashMap
 import org.springframework.util.AutoPopulatingList
-import scala.Some
 import scala.collection.mutable
 import uk.ac.warwick.tabula.permissions.CheckablePermission
 import uk.ac.warwick.tabula.CurrentUser
@@ -38,7 +37,7 @@ abstract class AddMonitoringPointSetCommand(val user: CurrentUser, val dept: Dep
 	self: MonitoringPointServiceComponent =>
 
 	override def applyInternal() = {
-		selectedRoutesAndYears.asScala.map{case (route, allYears) => {
+		selectedRoutesAndYears.asScala.map{case (route, allYears) =>
 				allYears.asScala.filter(_._2).keySet.map(year => {
 				val set = new MonitoringPointSet
 				set.academicYear = academicYear
@@ -63,7 +62,7 @@ abstract class AddMonitoringPointSetCommand(val user: CurrentUser, val dept: Dep
 				monitoringPointService.saveOrUpdate(set)
 				set
 			})
-		}}.flatten.toSeq
+		}.flatten.toSeq
 	}
 }
 
@@ -71,7 +70,7 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 	self: AddMonitoringPointSetState =>
 
 	override def validate(errors: Errors) {
-		selectedRoutesAndYears.asScala.map{case (route, allYears) => {
+		selectedRoutesAndYears.asScala.map{case (route, allYears) =>
 			val selectedYears = allYears.asScala.filter(_._2).keySet
 			if (selectedYears.size > 0) {
 				val existingYears = route.monitoringPointSets.asScala.filter(s => s.academicYear == academicYear)
@@ -89,7 +88,7 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 					errors.rejectValue("selectedRoutesAndYears", "monitoringPointSet.mixed", Array(route.code.toUpperCase), null)
 				}
 			}
-		}}
+		}
 		if (selectedRoutesAndYears.asScala.count(_._2.asScala.count(_._2) > 0) == 0) {
 			errors.rejectValue("selectedRoutesAndYears", "monitoringPointSet.noYears")
 		}
@@ -97,7 +96,7 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 			errors.rejectValue("monitoringPoints", "monitoringPointSet.noPoints")
 		}
 
-		monitoringPoints.asScala.zipWithIndex.foreach{case (point, index) => {
+		monitoringPoints.asScala.zipWithIndex.foreach{case (point, index) =>
 			errors.pushNestedPath(s"monitoringPoints[$index]")
 			validateName(errors, point.name, "name")
 			validateWeek(errors, point.validFromWeek, "validFromWeek")
@@ -112,6 +111,13 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 						point.meetingQuantity, "meetingQuantity",
 						dept
 					)
+				case MonitoringPointType.SmallGroup =>
+					validateTypeSmallGroup(errors,
+						point.smallGroupEventModules.toSet.asJava, "smallGroupEventModules",
+						isAnySmallGroupEventModules = false,
+						point.meetingQuantity, "smallGroupEventQuantity",
+						dept
+					)
 				case _ =>
 			}
 
@@ -121,7 +127,7 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 				errors.rejectValue("name", "monitoringPoint.name.exists")
 			}
 			errors.popNestedPath()
-		}}
+		}
 	}
 }
 

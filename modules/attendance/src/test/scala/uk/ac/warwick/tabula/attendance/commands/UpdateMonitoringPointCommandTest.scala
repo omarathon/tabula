@@ -4,8 +4,8 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointReport, MonitoringCheckpoint, MonitoringPointType, MonitoringPointSet, MonitoringPoint}
 import org.springframework.validation.BindException
-import uk.ac.warwick.tabula.data.model.{StudentRelationshipType, Department, Route}
-import uk.ac.warwick.tabula.JavaImports.{JHashSet, JArrayList}
+import uk.ac.warwick.tabula.data.model.{Module, StudentRelationshipType, Department, Route}
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.attendance.commands.manage.{UpdateMonitoringPointState, UpdateMonitoringPointValidation, UpdateMonitoringPointCommand}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.util.termdates.Term
@@ -232,6 +232,68 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 			command.validate(errors)
 			errors.hasFieldErrors should be (right = true)
 			errors.getFieldError("meetingQuantity") should not be null
+		}
+	}
+
+	@Test
+	def validateValidSmallGroupAnyModules() {
+		new Fixture {
+			command.name = "Name"
+			command.validFromWeek = 1
+			command.requiredFromWeek = 1
+			command.pointType = MonitoringPointType.SmallGroup
+			command.smallGroupEventQuantity = 1
+			command.isAnySmallGroupEventModules = true
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = false)
+		}
+	}
+
+	@Test
+	def validateValidSmallGroupSpecificModules() {
+		new Fixture {
+			command.name = "Name"
+			command.validFromWeek = 1
+			command.requiredFromWeek = 1
+			command.pointType = MonitoringPointType.SmallGroup
+			command.smallGroupEventQuantity = 1
+			command.isAnySmallGroupEventModules = false
+			command.smallGroupEventModules = JSet(new Module, new Module)
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = false)
+		}
+	}
+
+	@Test
+	def validateSmallGroupZeroQuantity() {
+		new Fixture {
+			command.name = "Name"
+			command.validFromWeek = 1
+			command.requiredFromWeek = 1
+			command.pointType = MonitoringPointType.SmallGroup
+			command.smallGroupEventQuantity = 0
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = true)
+			errors.getFieldError("smallGroupEventQuantity") should not be null
+		}
+	}
+
+	@Test
+	def validateSmallGroupNoModules() {
+		new Fixture {
+			command.name = "Name"
+			command.validFromWeek = 1
+			command.requiredFromWeek = 1
+			command.pointType = MonitoringPointType.SmallGroup
+			command.smallGroupEventQuantity = 1
+			command.isAnySmallGroupEventModules = false
+			var errors = new BindException(command, "command")
+			command.validate(errors)
+			errors.hasFieldErrors should be (right = true)
+			errors.getFieldError("smallGroupEventModules") should not be null
 		}
 	}
 

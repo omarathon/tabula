@@ -231,8 +231,6 @@ To not bind:
 	<#if multiple></div></#if>
 </#macro>
 
-
-
 <#--
 	Create a file(s) upload widget, binding to an UploadedFile object.
 	For multiple file support, it will use the HTML5 attribute if available,
