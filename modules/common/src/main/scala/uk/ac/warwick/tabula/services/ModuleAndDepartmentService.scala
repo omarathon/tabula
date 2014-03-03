@@ -16,7 +16,6 @@ import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
 import uk.ac.warwick.tabula.roles.RouteManagerRoleDefinition
 import uk.ac.warwick.tabula.roles.RoleDefinition
-import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.RouteDao
@@ -63,8 +62,8 @@ class ModuleAndDepartmentService extends Logging {
 		moduleDao.getByCode(Module.stripCats(sitsModuleCode).toLowerCase())
 	}
 
-	def getModuleById(code: String) = transactional(readOnly = true) {
-		moduleDao.getById(code)
+	def getModuleById(id: String) = transactional(readOnly = true) {
+		moduleDao.getById(id)
 	}
 
 	def getRouteByCode(code: String) = transactional(readOnly = true) {
@@ -167,6 +166,8 @@ class ModuleAndDepartmentService extends Logging {
 	def stampMissingRoutes(dept: Department, seenCodes: Seq[String]) = transactional() {
 		routeDao.stampMissingRows(dept, seenCodes)
 	}
+
+	def findModulesNamedLike(query: String): Seq[Module] = moduleDao.findModulesNamedLike(query)
 
 }
 

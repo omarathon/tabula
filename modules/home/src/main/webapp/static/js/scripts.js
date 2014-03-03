@@ -439,7 +439,7 @@
 			var $po = $(e.target).popover().data('popover').tip();
 			$po.data('creator', $(e.target));
 		});
-		$('#container').on('click', '.popover .close', function(e) {
+		$('body').on('click', '.popover .close', function(e) {
 			var $creator = $(e.target).parents('.popover').data('creator');
 			if ($creator) {
 				$creator.popover('hide');

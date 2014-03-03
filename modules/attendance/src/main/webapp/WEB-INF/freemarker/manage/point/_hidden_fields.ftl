@@ -14,3 +14,7 @@
 	<input type="hidden" name="monitoringPoints[${thisPointIndex}].meetingFormatsSpring" value="${format.description}" />
 </#list>
 <input type="hidden" name="monitoringPoints[${thisPointIndex}].meetingQuantity" value="${point.meetingQuantity}" />
+<#list point.smallGroupEventModules as module>
+<input type="hidden" name="monitoringPoints[${thisPointIndex}].smallGroupEventModulesSpring" value="${module.id}" />
+</#list>
+<input type="hidden" name="monitoringPoints[${thisPointIndex}].smallGroupEventQuantity" value="${point.smallGroupEventQuantity}" />

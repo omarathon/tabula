@@ -9,12 +9,14 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.attendance.commands.manage.CreateMonitoringPointCommand
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
 import scala.Array
+import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.permissions.Permissions
+import org.springframework.beans.factory.annotation.Autowired
+import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 
 @Controller
 @RequestMapping(Array("/manage/{dept}/sets/{set}/edit/points/add"))
-class CreateMonitoringPointController extends AttendanceController {
-
-	validatesSelf[SelfValidating]
+class CreateMonitoringPointController extends AbstractManageMonitoringPointController {
 
 	@ModelAttribute("command")
 	def createCommand(@PathVariable set: MonitoringPointSet) =
