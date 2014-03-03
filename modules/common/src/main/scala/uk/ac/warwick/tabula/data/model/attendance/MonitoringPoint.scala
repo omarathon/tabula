@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import uk.ac.warwick.tabula.data.model.{Module, MeetingFormat, StudentRelationshipType, HasSettings, GeneratedId}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, MeetingFormat, StudentRelationshipType, HasSettings, GeneratedId}
 import javax.persistence._
 import javax.validation.constraints.NotNull
 import org.joda.time.DateTime
@@ -8,7 +8,7 @@ import scala.Array
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.annotations.{Type, BatchSize}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, RelationshipService}
+import uk.ac.warwick.tabula.services.{AssignmentService, ModuleAndDepartmentService, RelationshipService}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 
@@ -47,7 +47,7 @@ trait CommonMonitoringPointProperties extends GeneratedId {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.MonitoringPointTypeUserType")
 	var pointType: MonitoringPointType = _
 
-	def toPoint() = {
+	def toPoint = {
 		val point = new MonitoringPoint
 		point.createdDate = new DateTime()
 		point.updatedDate = new DateTime()
@@ -69,6 +69,9 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 
 	@transient
 	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+
+	@transient
+	var assignmentService = Wire[AssignmentService]
 
 	override def postLoad() {
 		ensureSettings
@@ -110,6 +113,37 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 	// See above
 	def smallGroupEventModulesSpring_= (modules: JSet[Module]) =
 		smallGroupEventModules = modules.asScala.toSeq
+
+	// Setting for MonitoringPointType.AssignmentSubmission
+
+	def assignmentSubmissionIsSpecificAssignments = getBooleanSetting(Settings.AssignmentSubmissionIsSpecificAssignments) getOrElse true
+	def assignmentSubmissionIsSpecificAssignments_= (allow: Boolean) = settings += (Settings.AssignmentSubmissionIsSpecificAssignments -> allow)
+
+	def assignmentSubmissionQuantity = getIntSetting(Settings.AssignmentSubmissionQuantity, 0)
+	def assignmentSubmissionQuantity_= (quantity: Int): Unit = settings += (Settings.AssignmentSubmissionQuantity -> quantity)
+	def assignmentSubmissionQuantity_= (quantity: JInteger): Unit = {
+		assignmentSubmissionQuantity = quantity match {
+			case q: JInteger => q.intValue
+			case _ => 0
+		}
+	}
+
+	def assignmentSubmissionModules = getStringSeqSetting(Settings.AssignmentSubmissionAssignments, Seq()).map(moduleAndDepartmentService.getModuleById(_).getOrElse(null))
+	def assignmentSubmissionModules_= (modules: Seq[Module]) =
+		settings += (Settings.AssignmentSubmissionModules -> modules.map(_.id))
+	// See above
+	def assignmentSubmissionModulesSpring_= (modules: JSet[Module]) =
+		assignmentSubmissionModules = modules.asScala.toSeq
+
+	def assignmentSubmissionAssignments = getStringSeqSetting(Settings.AssignmentSubmissionAssignments, Seq()).map(assignmentService.getAssignmentById(_).getOrElse(null))
+	def assignmentSubmissionAssignments_= (assignments: Seq[Assignment]) =
+		settings += (Settings.AssignmentSubmissionAssignments -> assignments.map(_.id))
+	// See above
+	def assignmentSubmissionAssignmentsSpring_= (assignments: JSet[Assignment]) =
+		assignmentSubmissionAssignments = assignments.asScala.toSeq
+
+	def assignmentSubmissionIsDisjunction = getBooleanSetting(Settings.AssignmentSubmissionIsDisjunction) getOrElse false
+	def assignmentSubmissionIsDisjunction_= (allow: Boolean) = settings += (Settings.AssignmentSubmissionIsDisjunction -> allow)
 }
 
 object MonitoringPoint {
@@ -121,5 +155,11 @@ object MonitoringPoint {
 
 		val SmallGroupEventQuantity = "smallGroupEventQuantity"
 		val SmallGroupEventModules = "smallGroupEventModules"
+
+		val AssignmentSubmissionIsSpecificAssignments = "assignmentSubmissionIsSpecificAssignments"
+		val AssignmentSubmissionQuantity = "assignmentSubmissionQuantity"
+		val AssignmentSubmissionModules = "assignmentSubmissionModules"
+		val AssignmentSubmissionAssignments = "assignmentSubmissionAssignments"
+		val AssignmentSubmissionIsDisjunction = "assignmentSubmissionIsDisjunction"
 	}
 }

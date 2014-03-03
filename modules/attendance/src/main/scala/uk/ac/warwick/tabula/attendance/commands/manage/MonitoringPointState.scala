@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands.manage
 
-import uk.ac.warwick.tabula.data.model.{Module, MeetingFormat, StudentRelationshipType, Department}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, MeetingFormat, StudentRelationshipType, Department}
 import org.springframework.util.AutoPopulatingList
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringPoint}
 import uk.ac.warwick.tabula.JavaImports._
@@ -15,6 +15,7 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 	var name: String = _
 	var validFromWeek: Int = 0
 	var requiredFromWeek: Int = 0
+	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
 
 	var pointType: MonitoringPointType = _
 
@@ -28,7 +29,10 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 	var smallGroupEventModules: JSet[Module] = JHashSet()
 	var isAnySmallGroupEventModules: Boolean = false
 
-	var academicYear: AcademicYear = AcademicYear.guessByDate(new DateTime())
+	var isSpecificAssignments: Boolean = true
+	var assignmentSubmissionQuantity: JInteger = 1
+	var assignmentSubmissionModules: JSet[Module] = JHashSet()
+	var assignmentSubmissionAssignments: JSet[Assignment] = JHashSet()
 
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
 
@@ -53,6 +57,17 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 						case modules: JSet[Module] => modules.asScala.toSeq
 						case _ => Seq()
 					}
+				}
+			case MonitoringPointType.AssignmentSubmission =>
+				point.assignmentSubmissionIsSpecificAssignments = isSpecificAssignments
+				point.assignmentSubmissionQuantity = assignmentSubmissionQuantity.toInt
+				point.assignmentSubmissionModules = assignmentSubmissionModules match {
+					case modules: JSet[Module] => modules.asScala.toSeq
+					case _ => Seq()
+				}
+				point.assignmentSubmissionAssignments = assignmentSubmissionAssignments match {
+					case assignments: JSet[Assignment] => assignments.asScala.toSeq
+					case _ => Seq()
 				}
 			case _ =>
 		}

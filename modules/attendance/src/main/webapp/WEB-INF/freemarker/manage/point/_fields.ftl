@@ -45,13 +45,20 @@
 			<@fmt.help_popover id="pointType-smallGroup" content="This monitoring point will be marked as 'attended' if the student attends a small group teaching event recorded in Tabula between the start and end dates" />
 		</@form.label>
 	</#if>
+	<#if features.attendanceMonitoringAssignmentSubmissionPointType>
+		<@form.label clazz="radio" checkbox=true>
+			<@f.radiobutton path="pointType" value="assignmentSubmission" />
+			Assignment submission
+			<@fmt.help_popover id="pointType-assignmentSubmission" content="" />
+		</@form.label>
+	</#if>
 </@form.labelled_row>
 
 <#if features.attendanceMonitoringMeetingPointType>
 
 	<#assign meetingRelationshipsStrings = extractParam(command.meetingRelationships, 'urlPart') />
 	<#assign meetingFormatsStrings = extractParam(command.meetingFormats, 'description') />
-	<div class="pointTypeOption meeting row-fluid" <#if ((command.pointType.dbValue)!'null') == 'meeting'>style="display:none"</#if>>
+	<div class="pointTypeOption meeting row-fluid" <#if ((command.pointType.dbValue)!'null') != 'meeting'>style="display:none"</#if>>
 		<div class="span5">
 			<@form.labelled_row "meetingRelationships" "Meeting with">
 				<#list command.dept.displayedStudentRelationshipTypes as relationship>
@@ -138,6 +145,95 @@
 		</@form.labelled_row>
 
 	</div>
+
+</#if>
+
+<#if features.attendanceMonitoringAssignmentSubmissionPointType>
+
+<div class="pointTypeOption assignmentSubmission row-fluid" <#if ((command.pointType.dbValue)!'null') != 'assignmentSubmission'>style="display:none"</#if>>
+
+	<@form.labelled_row "specificAssignments" "Modules or specific assignments">
+		<@form.label clazz="radio" checkbox=true>
+			<@f.radiobutton path="specificAssignments" value="false" />
+			Modules
+		</@form.label>
+		<@form.label clazz="radio" checkbox=true>
+			<@f.radiobutton path="specificAssignments" value="true" />
+			Specific assignments
+		</@form.label>
+	</@form.labelled_row>
+
+	<div class="specificAssignments" <#if !command.specificAssignments>style="display:none"</#if>>
+		<div class="assignment-choice">
+			<@form.labelled_row "assignmentSubmissionAssignments" "Assignments">
+				<div class="assignment-search input-append">
+					<input class="assignment-search-query assignment-picker" type="text" value=""/>
+					<span class="add-on"><i class="icon-search"></i></span>
+				</div>
+				<button class="btn add-module"><i class="icon-plus"></i> </button>
+				<div class="assignment-list">
+					<input type="hidden" name="_assignmentSubmissionAssignments" value="false" />
+					<ul>
+						<#list command.assignmentSubmissionAssignments![] as assignment>
+							<li>
+								<input type="hidden" name="assignmentSubmissionModules" value="${assignment.id}" />
+								<i class="icon-fixed-width"></i><span title="<@fmt.assignment_name assignment />"><@fmt.assignment_name assignment /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
+							</li>
+						</#list>
+					</ul>
+				</div>
+			</@form.labelled_row>
+		</div>
+	</div>
+
+	<div class="modules" <#if command.specificAssignments>style="display:none"</#if>>
+		<div class="module-choice">
+			<@form.labelled_row "assignmentSubmissionModules" "Modules">
+				<div class="module-search input-append">
+					<input class="module-search-query module-picker" type="text" value=""/>
+					<span class="add-on"><i class="icon-search"></i></span>
+				</div>
+				<button class="btn add-module"><i class="icon-plus"></i> </button>
+				<div class="modules-list">
+					<input type="hidden" name="_assignmentSubmissionModules" value="false" />
+					<ul>
+						<#list command.assignmentSubmissionModules![] as module>
+							<li>
+								<input type="hidden" name="assignmentSubmissionModules" value="${module.id}" />
+								<i class="icon-fixed-width"></i><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
+							</li>
+						</#list>
+					</ul>
+				</div>
+			</@form.labelled_row>
+		</div>
+
+		<@form.labelled_row "assignmentSubmissionQuantity" "Number of assignments">
+			<input class="input-mini" type="text" <#if (command.assignmentSubmissionQuantity?? && command.assignmentSubmissionQuantity > 0)>value="${command.assignmentSubmissionQuantity}"</#if> name="assignmentSubmissionQuantity" />
+		</@form.labelled_row>
+	</div>
+
+</div>
+
+<script>
+(function($) {
+	// Show relavant extra options when changing assignment type
+	if ($('form input[name=specificAssignments]').length > 0) {
+		var showOptions = function() {
+			var value = $('form input[name=specificAssignments]:checked').val();
+			if (value && value === "true") {
+				$('.pointTypeOption.assignmentSubmission .specificAssignments').show();
+				$('.pointTypeOption.assignmentSubmission .modules').hide();
+			} else {
+				$('.pointTypeOption.assignmentSubmission .specificAssignments').hide();
+				$('.pointTypeOption.assignmentSubmission .modules').show();
+			}
+		};
+		$('form input[name=specificAssignments]').on('click', showOptions);
+		showOptions();
+	}
+})(jQuery);
+</script>
 
 </#if>
 
