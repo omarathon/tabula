@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.data.{SmallGroupDao, SmallGroupDaoComponent}
 import uk.ac.warwick.tabula.{AcademicYear, TestBase, Fixtures, Mockito}
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, AttendanceState, MonitoringPointType, MonitoringPoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.JavaImports.JArrayList
@@ -13,13 +12,12 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 	val mockMonitoringPointService = mock[MonitoringPointService]
 	val mockModuleAndDepartmentService = mock[ModuleAndDepartmentService]
 
-	trait ServiceTestSupport extends SmallGroupServiceComponent with SmallGroupDaoComponent
+	trait ServiceTestSupport extends SmallGroupServiceComponent
 	with ProfileServiceComponent with  MonitoringPointServiceComponent {
 
 		val monitoringPointService = mockMonitoringPointService
 		val profileService = mockProfileService
 		val smallGroupService = mock[SmallGroupService]
-		val smallGroupDao = mock[SmallGroupDao]
 
 
 	}
@@ -130,7 +128,7 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 		otherAttendance.occurrence = new SmallGroupEventOccurrence
 		otherAttendance.universityId = student.universityId
 
-		service.smallGroupDao.findAttendanceForStudentInModulesInWeeks(
+		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(
 			student,
 			groupThisYearPoint.validFromWeek,
 			groupThisYearPoint.requiredFromWeek,
@@ -228,7 +226,7 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 	def notEnoughAttendanceCurrentNotPersisted() { new ValidYear2PointFixture {
 
 		groupThisYearPoint.smallGroupEventQuantity = 2
-		service.smallGroupDao.findAttendanceForStudentInModulesInWeeks(
+		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(
 			student,
 			groupThisYearPoint.validFromWeek,
 			groupThisYearPoint.requiredFromWeek,
@@ -242,7 +240,7 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 	def notEnoughAttendanceCurrentPersisted() { new ValidYear2PointFixture {
 
 		groupThisYearPoint.smallGroupEventQuantity = 2
-		service.smallGroupDao.findAttendanceForStudentInModulesInWeeks(
+		service.smallGroupService.findAttendanceForStudentInModulesInWeeks(
 			student,
 			groupThisYearPoint.validFromWeek,
 			groupThisYearPoint.requiredFromWeek,
