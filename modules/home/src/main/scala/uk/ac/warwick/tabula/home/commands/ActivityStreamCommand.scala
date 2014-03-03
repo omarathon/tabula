@@ -12,8 +12,6 @@ object ActivityStreamCommand {
 	def apply(request: ActivityStreamRequest) =
 		new ActivityStreamCommandInternal(request)
 			with ComposableCommand[PagedActivities]
-			//with ActivityStreamCommandPermissions
-			//with ActivityStreamCommandDescription
 			with Unaudited
 			with PubliclyVisiblePermissions
 			with ActivityStreamCommandValidation
@@ -54,11 +52,3 @@ trait ActivityStreamCommandPermissions extends RequiresPermissionsChecking with 
 
 	}
 }
-/*
-
-trait ActivityStreamCommandDescription extends Describable[PagedActivities] {
-	self: ActivityStreamCommandState =>
-	def describe(d: Description) {
-
-	}
-}*/

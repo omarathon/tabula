@@ -3,7 +3,6 @@ package uk.ac.warwick.tabula.services
 import uk.ac.warwick.tabula.{Mockito, Fixtures, TestBase}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.model.{Heron, Notification, NotificationPriority, HeronWarningNotification}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import org.apache.lucene.store.RAMDirectory
 import org.apache.lucene.index.Term
 import org.apache.lucene.search.{Sort, SortField, TermQuery}

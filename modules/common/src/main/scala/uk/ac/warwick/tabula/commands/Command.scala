@@ -378,6 +378,10 @@ abstract class Description {
 		property("monitoringCheckpoint", monitoringPoint.id)
 	}
 
+	def notifications(notifications: Seq[Notification[_,_]]) = {
+		property("notifications" -> notifications.map(_.id))
+	}
+
 	// delegate equality to the underlying map
 	override def hashCode = map.hashCode
 	override def equals(that: Any) = that match {
@@ -408,7 +412,7 @@ trait PopulateOnForm {
 }
 
 
-trait ComposableCommand[A] extends Command[A] with PerformsPermissionsChecking{
+trait ComposableCommand[A] extends Command[A] with PerformsPermissionsChecking {
 	this:CommandInternal[A] with Describable[A] with RequiresPermissionsChecking=>
 }
 
