@@ -177,7 +177,7 @@
 						<#list command.assignmentSubmissionAssignments![] as assignment>
 							<li>
 								<input type="hidden" name="assignmentSubmissionAssignments" value="${assignment.id}" />
-								<i class="icon-fixed-width"></i><span title="<@fmt.assignment_name assignment />"><@fmt.assignment_name assignment /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
+								<span title="<@fmt.assignment_name assignment false />"><@fmt.assignment_name assignment false /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
 							</li>
 						</#list>
 					</ul>

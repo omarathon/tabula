@@ -70,6 +70,14 @@ trait UpdateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 					smallGroupEventQuantity, "smallGroupEventQuantity",
 					dept
 				)
+			case MonitoringPointType.AssignmentSubmission =>
+				validateTypeAssignmentSubmission(errors,
+					isSpecificAssignments,
+					assignmentSubmissionQuantity, "assignmentSubmissionQuantity",
+					assignmentSubmissionModules, "assignmentSubmissionModules",
+					assignmentSubmissionAssignments, "assignmentSubmissionAssignments",
+					dept
+				)
 			case _ =>
 		}
 
