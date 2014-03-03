@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.attendance.commands.manage
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.mutable
-import uk.ac.warwick.tabula.data.model.{Module, Department, MeetingFormat, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, Department, MeetingFormat, StudentRelationshipType}
 import uk.ac.warwick.tabula.JavaImports._
 
 trait MonitoringPointValidation {
@@ -69,5 +69,28 @@ trait MonitoringPointValidation {
 			errors.rejectValue(smallGroupEventModulesBindPoint, "monitoringPoint.smallGroupType.smallGroupModules.empty")
 		}
 
+	}
+
+	def validateTypeAssignmentSubmission(errors: Errors,
+		isSpecificAssignments: Boolean,
+		assignmentSubmissionQuantity: JInteger, assignmentSubmissionQuantityBindPoint: String,
+		assignmentSubmissionModules: JSet[Module], assignmentSubmissionModulesBindPoint: String,
+		assignmentSubmissionAssignments: JSet[Assignment], assignmentSubmissionAssignmentsBindPoint: String,
+		dept: Department
+	) {
+
+		if (isSpecificAssignments) {
+			if (assignmentSubmissionAssignments == null || assignmentSubmissionAssignments.isEmpty) {
+				errors.rejectValue(assignmentSubmissionAssignmentsBindPoint, "monitoringPoint.assingmentSubmissionType.assignmentSubmissionAssignments.empty")
+			}
+		} else {
+			if (assignmentSubmissionQuantity < 1) {
+				errors.rejectValue(assignmentSubmissionQuantityBindPoint, "monitoringPoint.pointType.quantity")
+			}
+
+			if (assignmentSubmissionModules == null || assignmentSubmissionModules.isEmpty) {
+				errors.rejectValue(assignmentSubmissionModulesBindPoint, "monitoringPoint.assingmentSubmissionType.assignmentSubmissionModules.empty")
+			}
+		}
 	}
 }

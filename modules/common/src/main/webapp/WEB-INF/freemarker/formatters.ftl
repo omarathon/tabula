@@ -90,9 +90,13 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	</#if>
 </#compress></#macro>
 
-<#macro assignment_name assignment>
-	<@module_name assignment.module /> <span class="ass-name">${assignment.name}</span>
-</#macro>
+<#macro assignment_name assignment withFormatting=true><#compress>
+	<#if withFormatting>
+		<@module_name assignment.module /> <span class="ass-name">${assignment.name}</span>
+	<#else>
+		<@module_name assignment.module false /> ${assignment.name}
+	</#if>
+</#compress></#macro>
 
 <#macro assignment_link assignment>
 	<@module_name assignment.module />

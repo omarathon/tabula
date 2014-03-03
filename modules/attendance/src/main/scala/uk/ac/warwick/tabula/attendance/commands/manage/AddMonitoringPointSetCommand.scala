@@ -118,6 +118,14 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 						point.meetingQuantity, "smallGroupEventQuantity",
 						dept
 					)
+				case MonitoringPointType.AssignmentSubmission =>
+					validateTypeAssignmentSubmission(errors,
+						point.assignmentSubmissionIsSpecificAssignments,
+						point.assignmentSubmissionQuantity, "assignmentSubmissionQuantity",
+						point.assignmentSubmissionModules.toSet.asJava, "assignmentSubmissionModules",
+						point.assignmentSubmissionAssignments.toSet.asJava, "assignmentSubmissionAssignments",
+						dept
+					)
 				case _ =>
 			}
 

@@ -95,7 +95,7 @@ exports.bindModulePickers = function(){
 							)
 						)
 				);
-				$this.val('').data('moduleid','');
+				$this.data('moduleid','').val('');
 			});
 	});
 	$('.pointTypeOption.smallGroup .module-search-query').modulePicker({
@@ -128,7 +128,7 @@ exports.bindAssignmentPickers = function(){
 			});
 
 			$addButton.on('click', function(){
-				$this.closest('.assignment-choice').find('.assignment-list ul').append(
+				$this.closest('.assignment-choice').find('.assignments-list ul').append(
 					$('<li/>').append(
 							$('<input/>').attr({
 								'type':'hidden',
@@ -143,7 +143,7 @@ exports.bindAssignmentPickers = function(){
 							)
 						)
 				);
-				$this.val('').data('assignmentid','');
+				$this.data('assignmentid','').val('');
 			});
 		});
 
