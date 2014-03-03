@@ -24,11 +24,11 @@ trait PermissionsChecking extends PermissionsCheckingMethods  {
 	var permissionsAnyChecks: PermissionsCheckMultiMap = newMap()
 	var permissionsAllChecks: PermissionsCheckMultiMap = newMap()
 
-	def PermissionCheckAny(checkablePermissions: => Iterable[CheckablePermission]) {
+	def PermissionCheckAny(checkablePermissions: Iterable[CheckablePermission]) {
 		for (p <- checkablePermissions) checkAny(p.permission, p.scope)
 	}
 
-	def PermissionCheckAll(permission: Permission, scopes: => Iterable[PermissionsTarget]) {
+	def PermissionCheckAll(permission: Permission, scopes: Iterable[PermissionsTarget]) {
 		for (scope <- scopes) checkAll(permission, Some(scope))
 	}
 

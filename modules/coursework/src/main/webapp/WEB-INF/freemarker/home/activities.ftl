@@ -1,7 +1,7 @@
 <#import "../admin/assignments/submissionsandfeedback/_submission_details.ftl" as sd />
 
 <#macro admin_href submission>
-	<@url page='/admin/module/${submission.assignment.module.code}/assignments/${submission.assignment.id}/list' />
+	<@url context='/coursework' page='/admin/module/${submission.assignment.module.code}/assignments/${submission.assignment.id}/list' />
 </#macro>
 
 <#if expired??>
@@ -59,7 +59,7 @@
 	
 	<script type="text/javascript">
 		(function ($) {
-			$("#activities").data("url", "<@url page="/api/activity/pagelet/${activities.tokens}" />");
+			$("#activities").data("url", "<@url context="/coursework" page="/api/activity/pagelet/${activities.tokens}" />");
 		})(jQuery);
 	</script>
 </#if>

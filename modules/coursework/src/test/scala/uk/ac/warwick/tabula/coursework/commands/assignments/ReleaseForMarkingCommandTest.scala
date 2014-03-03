@@ -10,11 +10,11 @@ import uk.ac.warwick.tabula.services.{FeedbackServiceComponent, StateServiceComp
 class ReleaseForMarkingCommandTest extends TestBase  with Mockito {
 
 	val ug1 = UserGroup.ofUniversityIds.tap(g=>{
-		g.includeUsers = Seq("1", "2","4").asJava
+		g.includedUserIds = Seq("1", "2","4")
 		g.userLookup = new MockUserLookup(true)
 	})
 	val ug2 = UserGroup.ofUniversityIds.tap(g=>{
-		g.includeUsers = Seq("1", "2","3").asJava
+		g.includedUserIds = Seq("1", "2","3")
 		g.userLookup = new MockUserLookup(true)
 	})
 

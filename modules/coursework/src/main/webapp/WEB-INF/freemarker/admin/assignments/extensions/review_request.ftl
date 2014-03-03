@@ -5,7 +5,7 @@
 		<button type="button" class="close" data-dismiss="modal">×</button>
 		<h3>Review extension request by ${userFullName}</h3>
 	</div>
-	<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/extensions/review-request/${universityId}')}" commandName="modifyExtensionCommand">
+	<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/extensions/review-request/${universityId}')}" commandName="modifyExtensionCommand">
 		<div class="modal-body reviewExtensionModal">
 			<div class="control-group clearfix alert-info requestDateInfo">
 				<div>

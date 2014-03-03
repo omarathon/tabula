@@ -7,68 +7,70 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 	we're repeating ourselves here. OR expose Routes directly.
 
 -->
-<#macro home><@url page="/" /></#macro>
+<#macro _u page context='/profiles'><@url context=context page=page /></#macro>
 
-<#macro deptperms department><@url page="/department/${department.code}/permissions" context="/admin" /></#macro>
-<#macro displaysettings department><@url page="/department/${department.code}/settings/display" context="/admin" /></#macro>
+<#macro home><@_u page="/" /></#macro>
 
-<#macro search><@url page="/search" /></#macro>
-<#macro profile profile><@url page="/view/${profile.universityId}"/></#macro>
-<#macro profile_by_id student><@url page="/view/${student}"/></#macro>
-<#macro photo profile><#if ((profile.universityId)!)?has_content><@url page="/view/photo/${profile.universityId}.jpg"/><#else><@url resource="/static/images/no-photo.jpg" /></#if></#macro>
-<#macro relationshipPhoto profile relationship><@url page="/view/photo/${relationship.agent}.jpg"/></#macro>
+<#macro deptperms department><@_u page="/department/${department.code}/permissions" context="/admin" /></#macro>
+<#macro displaysettings department><@_u page="/department/${department.code}/settings/display" context="/admin" /></#macro>
 
-<#macro filter_students department><@url page="/department/${department.code}/students" /></#macro>
+<#macro search><@_u page="/search" /></#macro>
+<#macro profile profile><@_u page="/view/${profile.universityId}"/></#macro>
+<#macro profile_by_id student><@_u page="/view/${student}"/></#macro>
+<#macro photo profile><#if ((profile.universityId)!)?has_content><@_u page="/view/photo/${profile.universityId}.jpg"/><#else><@_u resource="/static/images/no-photo.jpg" /></#if></#macro>
+<#macro relationshipPhoto profile relationship><@_u page="/view/photo/${relationship.agent}.jpg"/></#macro>
 
-<#macro relationship_students relationshipType><@url page="/${relationshipType.urlPart}/students" /></#macro>
-<#macro relationship_agents department relationshipType><@url page="/department/${department.code}/${relationshipType.urlPart}" /></#macro>
-<#macro relationship_missing department relationshipType><@url page="/department/${department.code}/${relationshipType.urlPart}/missing" /></#macro>
-<#macro relationship_allocate department relationshipType><@url page="/department/${department.code}/${relationshipType.urlPart}/allocate" /></#macro>
-<#macro relationship_template department relationshipType><@url page="/department/${department.code}/${relationshipType.urlPart}/template" /></#macro>
+<#macro filter_students department><@_u page="/department/${department.code}/students" /></#macro>
+
+<#macro relationship_students relationshipType><@_u page="/${relationshipType.urlPart}/students" /></#macro>
+<#macro relationship_agents department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}" /></#macro>
+<#macro relationship_missing department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/missing" /></#macro>
+<#macro relationship_allocate department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/allocate" /></#macro>
+<#macro relationship_template department relationshipType><@_u page="/department/${department.code}/${relationshipType.urlPart}/template" /></#macro>
 
 <#macro relationship_edit relationshipType scjCode currentAgent>
-	<@url page="/${relationshipType.urlPart}/${scjCode}/edit?currentAgent=${currentAgent.universityId}" />
+	<@_u page="/${relationshipType.urlPart}/${scjCode}/edit?currentAgent=${currentAgent.universityId}" />
 </#macro>
 
 <#macro relationship_edit_set relationshipType scjCode newAgent>
-	<@url page="/${relationshipType.urlPart}/${scjCode}/edit?agent=${newAgent.universityId}" />
+	<@_u page="/${relationshipType.urlPart}/${scjCode}/edit?agent=${newAgent.universityId}" />
 </#macro>
 
 <#macro relationship_edit_replace relationshipType scjCode currentAgent newAgent>
-	<@url page="/${relationshipType.urlPart}/${scjCode}/edit?currentAgent=${currentAgent.universityId}&agent=${newAgent.universityId}" />
+	<@_u page="/${relationshipType.urlPart}/${scjCode}/edit?currentAgent=${currentAgent.universityId}&agent=${newAgent.universityId}" />
 </#macro>
 
 <#macro relationship_edit_no_agent relationshipType scjCode>
-	<@url page="/${relationshipType.urlPart}/${scjCode}/add" />
+	<@_u page="/${relationshipType.urlPart}/${scjCode}/add" />
 </#macro>
 
 <#macro meeting_record scjCode relationshipType>
-	<@url page="/${relationshipType.urlPart}/meeting/${scjCode}/create" />
+	<@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/create" />
 </#macro>
 <#macro edit_meeting_record scjCode meeting_record>
-	<@url page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${scjCode}/edit/${meeting_record.id}" />
+	<@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${scjCode}/edit/${meeting_record.id}" />
 </#macro>
 
-<#macro delete_meeting_record meeting_record><@url page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/delete" /></#macro>
-<#macro restore_meeting_record meeting_record><@url page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/restore" /></#macro>
-<#macro purge_meeting_record meeting_record><@url page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/purge" /></#macro>
-<#macro save_meeting_approval meeting_record><@url page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/approval" /></#macro>
+<#macro delete_meeting_record meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/delete" /></#macro>
+<#macro restore_meeting_record meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/restore" /></#macro>
+<#macro purge_meeting_record meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/purge" /></#macro>
+<#macro save_meeting_approval meeting_record><@_u page="/${meeting_record.relationship.relationshipType.urlPart}/meeting/${meeting_record.id}/approval" /></#macro>
 
-<#macro create_scheduled_meeting_record scjCode relationshipType><@url page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/create" /></#macro>
-<#macro edit_scheduled_meeting_record meetingRecord scjCode relationshipType><@url page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/edit" /></#macro>
-<#macro choose_action_scheduled_meeting_record meetingRecord scjCode relationshipType><@url page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/chooseaction" /></#macro>
-<#macro confirm_scheduled_meeting_record meetingRecord scjCode relationshipType><@url page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/confirm" /></#macro>
-<#macro missed_scheduled_meeting_record meetingRecord relationshipType><@url page="/${relationshipType.urlPart}/meeting/${meetingRecord.id}/missed" /></#macro>
+<#macro create_scheduled_meeting_record scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/create" /></#macro>
+<#macro edit_scheduled_meeting_record meetingRecord scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/edit" /></#macro>
+<#macro choose_action_scheduled_meeting_record meetingRecord scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/chooseaction" /></#macro>
+<#macro confirm_scheduled_meeting_record meetingRecord scjCode relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${scjCode}/schedule/${meetingRecord.id}/confirm" /></#macro>
+<#macro missed_scheduled_meeting_record meetingRecord relationshipType><@_u page="/${relationshipType.urlPart}/meeting/${meetingRecord.id}/missed" /></#macro>
 
-<#macro relationship_search><@url page="/relationships/agents/search" /></#macro>
-<#macro relationship_search_json><@url page="/relationships/agents/search.json" /></#macro>
+<#macro relationship_search><@_u page="/relationships/agents/search" /></#macro>
+<#macro relationship_search_json><@_u page="/relationships/agents/search.json" /></#macro>
 
-<#macro smallgroup group><@url page="/groups/${group.id}/view" /></#macro>
+<#macro smallgroup group><@_u page="/groups/${group.id}/view" /></#macro>
 
-<#macro create_member_note profile><@url page="/${profile.universityId}/note/add" /></#macro>
-<#macro edit_member_note memberNote><@url page="/${memberNote.member.universityId}/note/${memberNote.id}/edit" /></#macro>
-<#macro delete_member_note memberNote ><@url page="/${memberNote.member.universityId}/note/${memberNote.id}/delete" /></#macro>
-<#macro restore_member_note memberNote ><@url page="/${memberNote.member.universityId}/note/${memberNote.id}/restore" /></#macro>
-<#macro purge_member_note memberNote ><@url page="/${memberNote.member.universityId}/note/${memberNote.id}/purge" /></#macro>
+<#macro create_member_note profile><@_u page="/${profile.universityId}/note/add" /></#macro>
+<#macro edit_member_note memberNote><@_u page="/${memberNote.member.universityId}/note/${memberNote.id}/edit" /></#macro>
+<#macro delete_member_note memberNote ><@_u page="/${memberNote.member.universityId}/note/${memberNote.id}/delete" /></#macro>
+<#macro restore_member_note memberNote ><@_u page="/${memberNote.member.universityId}/note/${memberNote.id}/restore" /></#macro>
+<#macro purge_member_note memberNote ><@_u page="/${memberNote.member.universityId}/note/${memberNote.id}/purge" /></#macro>
 
-<#macro meeting_will_create_checkpoint student><@url page="/profile/${student.universityId}/meetingcheckpoint" context="/attendance" /></#macro>
+<#macro meeting_will_create_checkpoint student><@_u page="/profile/${student.universityId}/meetingcheckpoint" context="/attendance" /></#macro>

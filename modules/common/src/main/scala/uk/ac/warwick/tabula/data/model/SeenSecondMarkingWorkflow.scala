@@ -16,7 +16,7 @@ class SeenSecondMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap
 
 	def markingMethod = SeenSecondMarking
 
-	def onlineMarkingUrl(assignment: Assignment, marker: User) = Routes.onlineMarkerFeedback(assignment)
+	def onlineMarkingUrl(assignment: Assignment, marker: User) = Routes.coursework.admin.assignment.onlineMarkerFeedback(assignment)
 
 	override def firstMarkerRoleName: String = "First marker"
 	def hasSecondMarker = true

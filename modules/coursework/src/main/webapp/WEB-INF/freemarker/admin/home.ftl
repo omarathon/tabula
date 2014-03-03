@@ -7,7 +7,7 @@
 </#if>
 <ul>
 <#list ownedDepartments as department>
-<li><a href="<@url page="/admin/department/${department.code}/"/>">Manage ${department.name}</a></li>
+<li><a href="<@url page="/coursework/admin/department/${department.code}/"/>">Manage ${department.name}</a></li>
 </#list>
 </ul>
 <#else>

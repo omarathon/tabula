@@ -28,7 +28,7 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 		parent.autoGroupDeregistration = false
 
 		val ug = UserGroup.ofUsercodes
-		ug.addUser("cuslaj")
+		ug.addUserId("cuslaj")
 
 		val permissionsService = mock[PermissionsService]
 		permissionsService.ensureUserGroupFor(parent, ExtensionManagerRoleDefinition) returns ug
@@ -56,7 +56,7 @@ class AddSubDepartmentCommandTest extends TestBase  with FunctionalContextTestin
 		dept.parent should be (parent)
 		dept.allowExtensionRequests should be (true)
 		dept.autoGroupDeregistration should be (false)
-		dept.extensionManagers.includeUsers should contain("cuslaj")
+		dept.extensionManagers.knownType.includedUserIds should contain("cuslaj")
 
 		there was two(command.moduleAndDepartmentService).save(dept)
 	}}}

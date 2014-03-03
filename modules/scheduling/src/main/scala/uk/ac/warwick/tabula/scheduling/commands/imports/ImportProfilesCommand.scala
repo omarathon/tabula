@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import scala.Option.option2Iterable
-import scala.collection.JavaConversions.{mapAsScalaMap, seqAsJavaList}
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.Features
@@ -11,8 +10,8 @@ import uk.ac.warwick.tabula.data.Transactions.transactional
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.{FoundUser, Logging}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
-import uk.ac.warwick.tabula.scheduling.services.{AwardImporter, CourseImporter, MembershipInformation, ModeOfAttendanceImporter, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware, SitsStatusImporter}
+import uk.ac.warwick.tabula.scheduling.helpers.{ImportCommandFactory, ImportRowTracker}
+import uk.ac.warwick.tabula.scheduling.services.{MembershipInformation, ModuleRegistrationImporter, ProfileImporter, SitsAcademicYearAware}
 import uk.ac.warwick.tabula.services.{ModuleAndDepartmentService, ProfileIndexService, ProfileService, SmallGroupService, UserLookupService}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
@@ -54,7 +53,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 	def doMemberDetails(department : Option[Department]) {
 		logger.info("Importing member details")
-		val importRowTracker = new ImportRowTracker
+		val importCommandFactory = new ImportCommandFactory
 		val importStart = DateTime.now
 
 		val departments = department match {
@@ -72,7 +71,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 							membershipInfos.map { m =>
 								val (usercode, warwickId) = (m.member.usercode, m.member.universityId)
 
-								val user = userLookup.getUserByWarwickUniIdUncached(warwickId) match {
+								val user = userLookup.getUserByWarwickUniIdUncached(warwickId, true) match {
 									case FoundUser(u) => u
 									case _ => userLookup.getUserByUserId(usercode)
 								}
@@ -84,7 +83,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 					logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members from Membership")
 					val studentRowCommands = benchmarkTask("Fetch member details") {
 						transactional() {
-							profileImporter.getMemberDetails(membershipInfos, users, importRowTracker)
+							profileImporter.getMemberDetails(membershipInfos, users, importCommandFactory)
 						}
 					}
 
@@ -114,7 +113,7 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 
 		if (department.isEmpty)
 			benchmarkTask("Stamp missing rows") {
-				stampMissingRows(importRowTracker, importStart)
+				stampMissingRows(importCommandFactory.rowTracker, importStart)
 		}
 	}
 
@@ -194,23 +193,23 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 	def refresh(member: Member) {
 		transactional() {
 			val warwickId = member.universityId
-			val user = userLookup.getUserByWarwickUniIdUncached(member.universityId) match {
+			val user = userLookup.getUserByWarwickUniIdUncached(member.universityId, true) match {
 				case FoundUser(u) => u
 				case _ => userLookup.getUserByUserId(member.userId)
 			}
 
-			val importRowTracker = new ImportRowTracker
+			val importCommandFactory = new ImportCommandFactory
 
 			profileImporter.membershipInfoForIndividual(member) match {
 				case Some(membInfo: MembershipInformation) => {
 
 					// retrieve details for this student from SITS and store the information in Tabula
-					val importMemberCommands = profileImporter.getMemberDetails(List(membInfo), Map(warwickId -> user), importRowTracker)
+					val importMemberCommands = profileImporter.getMemberDetails(List(membInfo), Map(warwickId -> user), importCommandFactory)
 					if (importMemberCommands.isEmpty) logger.warn("Refreshing student " + membInfo.member.universityId + " but found no data to import.")
 					val members = importMemberCommands map { _.apply }
 
 					// update missingFromSitsSince field in this student's member and course records:
-					updateMissingForIndividual(member, importRowTracker)
+					updateMissingForIndividual(member, importCommandFactory.rowTracker)
 
 					session.flush
 

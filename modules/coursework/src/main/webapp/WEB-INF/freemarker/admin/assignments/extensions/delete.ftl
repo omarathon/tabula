@@ -5,7 +5,7 @@
 		<button type="button" class="close" data-dismiss="modal">×</button>
 		<h3>Revoke extension for ${userFullName}</h3>
 	</div>
-	<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/extensions/delete/${universityId}')}" commandName="deleteExtensionCommand">
+	<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/extensions/delete/${universityId}')}" commandName="deleteExtensionCommand">
 		<div class="modal-body">
 			<p>
 				${userFirstName} currently has an extension until <@fmt.date date=extension.expiryDate />

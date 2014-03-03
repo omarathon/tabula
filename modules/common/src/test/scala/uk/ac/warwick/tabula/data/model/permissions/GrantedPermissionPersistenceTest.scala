@@ -18,7 +18,7 @@ class GrantedPermissionPersistenceTest extends PersistenceTestBase with Reflecti
 			session.flush
 			
 			val permission = GrantedPermission(department, Permissions.Department.DownloadFeedbackReport, GrantedPermission.Allow)
-			permission.users.addUser("cuscav")
+			permission.users.knownType.addUserId("cuscav")
 			
 			session.save(permission)
 			session.flush

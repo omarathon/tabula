@@ -48,13 +48,12 @@ abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:A
 	def onBind() {
 		def retrieveMarkers(markerDef:Seq[String]): JList[Marker] = markerDef.map{marker =>
 			val students:JList[Student] = assignment.markerMap.toMap.get(marker) match {
-				case Some(userGroup:UserGroup) => userGroup.includeUsers.map{student =>
-					val user:User = userLookup.getUserByUserId(student)
+				case Some(userGroup:UserGroup) => userGroup.users.map{student =>
 					val displayValue = module.department.showStudentName match {
-						case true => user.getFullName
-						case false => user.getWarwickId
+						case true => student.getFullName
+						case false => student.getWarwickId
 					}
-					new Student(displayValue, student)
+					new Student(displayValue, student.getUserId)
 				}
 				case None => JArrayList()
 			}
@@ -92,7 +91,7 @@ abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:A
 			if(Option(markerMapping).isDefined){
 				markerMapping.foreach{case(marker, studentList) =>
 					val group = UserGroup.ofUsercodes
-					group.includeUsers = studentList
+					group.includedUserIds = studentList.asScala
 					session.saveOrUpdate(group)
 					assignment.markerMap.put(marker, group)
 				}

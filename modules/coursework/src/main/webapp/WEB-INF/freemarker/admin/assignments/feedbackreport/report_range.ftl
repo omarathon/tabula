@@ -7,7 +7,7 @@
 		<h3>Feedback report for ${department.name}</h3>
 	</div>
 	
-	<@f.form method="post" action="${url('/admin/department/${department.code}/reports/feedback/')}" commandName="feedbackReportCommand">
+	<@f.form method="post" action="${url('/coursework/admin/department/${department.code}/reports/feedback/')}" commandName="feedbackReportCommand">
 	<div class="modal-body">
 		<p>Generate report for assignments with closing dates </p>
 

@@ -17,15 +17,15 @@ jQuery(function($){ "use strict";
 
 	$('#feedback-check-recipient-results')
 		.html('<div class="alert"><p>Checking for potential problems with students\' email addresses&hellip;</p></div>')
-		.load('${url('/admin/module/${module.code}/assignments/${assignment.id}/check-recipients')}');
+		.load('${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/check-recipients')}');
 		
 	$('#submissions-report-results')
 		.html('<div class="alert"><p>Comparing feedback list against submission list&hellip;</p></div>')
-		.load('${url('/admin/module/${module.code}/assignments/${assignment.id}/submissions-report')}');
+		.load('${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions-report')}');
 });
 </script>
 
-<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/publish')}" commandName="publishFeedbackCommand">
+<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/publish')}" commandName="publishFeedbackCommand">
 
 <h1>Publish feedback for ${assignment.name}</h1>
 

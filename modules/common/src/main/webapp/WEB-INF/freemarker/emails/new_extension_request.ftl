@@ -8,4 +8,4 @@ ${reasonForRequest}
 
 To review this extension request and any supporting documentation, please click the link below.
 
-<@url page=path context="/coursework" />
+<@url page=path />

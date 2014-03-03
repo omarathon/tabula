@@ -48,8 +48,8 @@
 	<td class="data"><div class="extra-data">${job.data}</div></td>
 	<#if actions>
 		<td class="actions">
-			<a class="btn btn-small btn-info" href="<@url page="/sysadmin/jobs/run" />?id=${job.id}">Run</a>
-			<a class="btn btn-small btn-danger" href="<@url page="/sysadmin/jobs/kill" />?id=${job.id}">Kill</a>
+			<a class="btn btn-small btn-info" href="<@url context='/scheduling' page="/sysadmin/jobs/run" />?id=${job.id}">Run</a>
+			<a class="btn btn-small btn-danger" href="<@url context='/scheduling' page="/sysadmin/jobs/kill" />?id=${job.id}">Kill</a>
 		</td>
 	</#if>
 </tr>

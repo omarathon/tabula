@@ -14,15 +14,15 @@ Uploaded attachments:
 
 You can download all the attachments for this submission here:
 
-<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.universityId}.zip'/>
+<@url context='coursework' page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.universityId}.zip'/>
 
 
 All submissions for this assignment can be found here:
 
-<@url page='/admin/module/${module.code}/assignments/${assignment.id}/list'/>
+<@url context='coursework' page='/admin/module/${module.code}/assignments/${assignment.id}/list'/>
 
 
 
 To unsubscribe from these messages, go here and select "No alerts".
 
-<@url page='/admin/usersettings#submission-alerts'/>
+<@url context='coursework' page='/admin/usersettings#submission-alerts'/>

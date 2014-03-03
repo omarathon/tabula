@@ -32,6 +32,7 @@ import scala.util.matching.Regex
 import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import language.implicitConversions
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
+import uk.ac.warwick.tabula.services.UserLookupService
 
 abstract class ImportMemberCommand extends Command[Member] with Logging with Daoisms
 	with MemberProperties with Unaudited with PropertyCopying {
@@ -39,8 +40,9 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 
 	PermissionCheck(Permissions.ImportSystemData)
 
-	var memberDao = Wire.auto[MemberDao]
-	var fileDao = Wire.auto[FileDao]
+	var memberDao = Wire[MemberDao]
+	var fileDao = Wire[FileDao]
+	var userLookup = Wire[UserLookupService]
 
 	// A couple of intermediate properties that will be transformed later
 	var photoOption: () => Option[Array[Byte]] = _
@@ -57,7 +59,14 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		this.membershipLastUpdated = member.modified
 
 		this.universityId = oneOf(member.universityId, optString("university_id")).get
-		this.userId = oneOf(ssoUser.getUserId.maybeText, member.usercode).get
+
+		val suggestedUserId = oneOf(ssoUser.getUserId.maybeText, member.usercode).get
+
+		this.userId = optString("user_code") match {
+			// TAB-2004
+			case Some(userId) if userId != suggestedUserId && userLookup.getUserByUserId(userId).getWarwickId == this.universityId => userId
+			case _ => suggestedUserId
+		}
 
 		this.userType = member.userType
 
@@ -120,29 +129,6 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		}
 	}
 
-	protected def copyDepartment(property: String, departmentCode: String, bean: BeanWrapper) = {
-		val oldValue = bean.getPropertyValue(property) match {
-			case null => null
-			case value: Department => value
-		}
-
-		if (oldValue == null && departmentCode == null) false
-		else if (oldValue == null) {
-			// From no department to having a department
-			bean.setPropertyValue(property, toDepartment(departmentCode))
-			true
-		} else if (departmentCode == null) {
-			// User had a department but now doesn't
-			bean.setPropertyValue(property, null)
-			true
-		} else if (oldValue.code == departmentCode.toLowerCase) {
-			false
-		}	else {
-			bean.setPropertyValue(property, toDepartment(departmentCode))
-			true
-		}
-	}
-
 	private val basicMemberProperties = Set(
 		// userType is included for new records, but hibernate does not in fact update it for existing records
 		"userId", "firstName", "lastName", "email", "homeEmail", "title", "fullFirstName", "userType", "gender",
@@ -184,7 +170,7 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 	protected def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
 		copyBasicProperties(basicMemberProperties, commandBean, memberBean) |
 		copyPhotoIfModified("photo", photoOption, memberBean) |
-		copyDepartment("homeDepartment", homeDepartmentCode, memberBean)
+		copyObjectProperty("homeDepartment", homeDepartmentCode, memberBean, toDepartment(homeDepartmentCode))
 
 	private def toPhoto(bytes: Array[Byte]) = {
 		val photo = new FileAttachment

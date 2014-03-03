@@ -1,11 +1,10 @@
 package uk.ac.warwick.tabula
 
-import org.junit.Test
+import java.security.InvalidKeyException
 
 
 /**
- * This used to be a test for some hand-rolled observer classes,
- * but now it is just testing the scala.react library.
+ * Test our hand-rolled observer classes in Reactor.
  */
 class ObserverTest extends TestBase {
 
@@ -39,6 +38,16 @@ class ObserverTest extends TestBase {
 
 		observer.enabled should be (false)
 		
+	}
+
+	// Exceptions thrown in observers bubble up to emit().
+	@Test(expected=classOf[InvalidKeyException])
+	def exceptions() {
+		val state = EventSource[Boolean]
+		state.observe { b =>
+			throw new InvalidKeyException()
+		}
+		state.emit(true)
 	}
 
 }

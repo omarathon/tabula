@@ -71,3 +71,18 @@ so that they can be passed around between requests.
 			</@form.field>
 		</@form.row>
 </#if>
+
+<#if features.dissertationFilter>
+	<@form.row>
+
+		<@form.field>
+		<label class="checkbox">
+			<@f.checkbox path="dissertation" id="dissertation" />
+			Is this assignment a dissertation?
+		</label>
+		<div class="help-block">
+			Dissertations don't have a 20 day turnaround time for feedback.
+		</div>
+		</@form.field>
+	</@form.row>
+</#if>

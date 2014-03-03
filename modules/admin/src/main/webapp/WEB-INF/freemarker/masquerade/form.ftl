@@ -12,7 +12,7 @@ actions, both your masquerade identity and your true identity will be stored.</p
 </#if>
 
 <div>
-<@f.form method="post" action="${url('/masquerade')}" command="" cssClass="form-vertical">
+<@f.form method="post" action="${url('/admin/masquerade')}" command="" cssClass="form-vertical">
 	<fieldset>
 	<@form.row>
 		<@form.field>
@@ -28,7 +28,7 @@ actions, both your masquerade identity and your true identity will be stored.</p
 
 <p>Masquerading as ${user.apparentId} (${user.apparentUser.fullName}).</p>
 
-<@f.form method="post" action="${url('/masquerade')}">
+<@f.form method="post" action="${url('/admin/masquerade')}">
 <input type="hidden" name="action" value="remove" />
 <button class="btn"><i class="icon-eye-close"></i> Unmask</button>
 </@f.form>

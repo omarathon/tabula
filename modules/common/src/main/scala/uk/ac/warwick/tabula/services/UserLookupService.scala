@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup._
 import uk.ac.warwick.util.cache._
 import uk.ac.warwick.util.cache.Caches.CacheStrategy
-import org.joda.time.DateTime
+import uk.ac.warwick.tabula.helpers.StringUtils._
 import javax.annotation.PreDestroy
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.spring.Wire
@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.data.model.Member
 import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.data.model.MemberUserType
 import uk.ac.warwick.tabula.services.UserLookupService._
+import uk.ac.warwick.tabula.helpers.Logging
 
 object UserLookupService {
 	type UniversityId = String
@@ -27,7 +28,7 @@ trait AutowiringUserLookupComponent extends UserLookupComponent {
 }
 
 trait UserLookupService extends UserLookupInterface {
-	def getUserByWarwickUniIdUncached(id: UniversityId): User
+	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean): User
 	
 	/**
 	 * Takes a List of universityIds, and returns a Map that maps universityIds to Users. Users found
@@ -41,10 +42,10 @@ trait UserLookupService extends UserLookupInterface {
 	 * @return Map[UniversityId, User]
 	 */
 	def getUsersByWarwickUniIds(ids: Seq[UniversityId]): Map[UniversityId, User]
-	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId]): Map[UniversityId, User]
+	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean): Map[UniversityId, User]
 }
 
-class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService with UserByWarwickIdCache {
+class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d) with UserLookupService with UserByWarwickIdCache with Logging {
 	
 	var profileService = Wire[ProfileService]
 
@@ -59,15 +60,38 @@ class UserLookupServiceImpl(d: UserLookupInterface) extends UserLookupAdapter(d)
 	override def getUsersByWarwickUniIds(ids: Seq[UniversityId]) =
 		UserByWarwickIdCache.get(ids.asJava).asScala.toMap
 
-	def getUserByWarwickUniIdUncached(id: UniversityId) = 
-		profileService.getMemberByUniversityIdStaleOrFresh(id)
+	private def getUserByWarwickUniIdFromUserLookup(id: UniversityId) = {
+		/*
+		 * TAB-2004 We go directly to the UserLookup filter method in order to change the behaviour. In particular,
+		 * we want to prefer loginDisabled=FALSE over ones whose logins are disabled.
+		 */
+		val filter = Map("warwickuniid" -> id)
+		findUsersWithFilter(filter.asJava, true)
+			.asScala
+			.map { user => getUserByUserId(user.getUserId) }
+			.sortBy(user => (user.isLoginDisabled, !user.getEmail.hasText))
+			.filter { user => user.getExtraProperty("urn:websignon:usertype") != "Applicant" }
+			.headOption
+			.getOrElse {
+				logger.debug("No user found that matches Warwick Uni Id:" + id)
+				new AnonymousUser
+			}
+	}
+
+	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean) = {
+		if (skipMemberLookup) getUserByWarwickUniIdFromUserLookup(id)
+		else profileService.getMemberByUniversityIdStaleOrFresh(id)
 			.map { _.asSsoUser }
-			.getOrElse { filterApplicantUsers(super.getUserByWarwickUniId(id)) }
+			.getOrElse { getUserByWarwickUniIdFromUserLookup(id) }
+	}
 	
-	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId]) = {
-		val dbUsers = profileService.getAllMembersWithUniversityIdsStaleOrFresh(ids).map { m => m.universityId -> m.asSsoUser }.toMap
+	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean) = {
+		val dbUsers =
+			if (skipMemberLookup) Map.empty
+			else profileService.getAllMembersWithUniversityIdsStaleOrFresh(ids).map { m => m.universityId -> m.asSsoUser }.toMap
+
 		val others = (ids.diff(dbUsers.keys.toSeq)).par.map { id => 
-			id -> filterApplicantUsers(super.getUserByWarwickUniId(id))
+			id -> getUserByWarwickUniIdFromUserLookup(id)
 		}.toMap
 		
 		dbUsers ++ others
@@ -93,12 +117,12 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 	UserByWarwickIdCache.setAsynchronousUpdateEnabled(true)
 	UserByWarwickIdCache.setMaxSize(UserByWarwickIdCacheMaxSize)
 	
-	def getUserByWarwickUniIdUncached(id: UniversityId): User
-	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId]): Map[UniversityId, User]
+	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean): User
+	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean): Map[UniversityId, User]
 
 	def create(warwickId: UniversityId) = {
 		try {
-			getUserByWarwickUniIdUncached(warwickId)
+			getUserByWarwickUniIdUncached(warwickId, false)
 		} catch {
 			case e: Exception => throw new CacheEntryUpdateException(e)
 		}
@@ -108,7 +132,7 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 
 	def create(warwickIds: JList[UniversityId]): JMap[UniversityId, User] = {
 		try {
-			getUsersByWarwickUniIdsUncached(warwickIds.asScala).asJava
+			getUsersByWarwickUniIdsUncached(warwickIds.asScala, false).asJava
 		} catch {
 			case e: Exception => throw new CacheEntryUpdateException(e)
 		}
@@ -117,7 +141,11 @@ trait UserByWarwickIdCache extends CacheEntryFactory[UniversityId, User] { self:
 
 	@PreDestroy
 	def shutdownCache() {
-		UserByWarwickIdCache.shutdown()
+		try {
+			UserByWarwickIdCache.shutdown()
+		} catch {
+			case _: Throwable =>
+		}
 	}
 }
 
@@ -191,9 +219,9 @@ abstract class UserLookupServiceAdapter(var delegate: UserLookupService) extends
 	def getUsersByUserIds(ids: JList[String]) = delegate.getUsersByUserIds(ids)
 	def getUserByWarwickUniId(id: UniversityId) = delegate.getUserByWarwickUniId(id)
 	def getUserByWarwickUniId(id: UniversityId, ignored: Boolean) = delegate.getUserByWarwickUniId(id, ignored)
-	def getUserByWarwickUniIdUncached(id: UniversityId) = delegate.getUserByWarwickUniIdUncached(id)
+	def getUserByWarwickUniIdUncached(id: UniversityId, skipMemberLookup: Boolean) = delegate.getUserByWarwickUniIdUncached(id, skipMemberLookup)
 	def getUsersByWarwickUniIds(ids: Seq[UniversityId]) = delegate.getUsersByWarwickUniIds(ids)
-	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId]) = delegate.getUsersByWarwickUniIdsUncached(ids)
+	def getUsersByWarwickUniIdsUncached(ids: Seq[UniversityId], skipMemberLookup: Boolean) = delegate.getUsersByWarwickUniIdsUncached(ids, skipMemberLookup)
 	def findUsersWithFilter(map: JMap[String, String]) = delegate.findUsersWithFilter(map)
 	def findUsersWithFilter(map: JMap[String, String], includeInactive: Boolean) = delegate.findUsersWithFilter(map, includeInactive)
 	def getGroupService() = delegate.getGroupService

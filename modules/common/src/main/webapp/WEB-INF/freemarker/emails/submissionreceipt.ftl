@@ -12,4 +12,4 @@ Uploaded attachments:
 
 To review your submission, please visit:
 
-<@url page=path context="/coursework" />
+<@url page=path />

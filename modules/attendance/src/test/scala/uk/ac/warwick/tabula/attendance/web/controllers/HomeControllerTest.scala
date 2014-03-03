@@ -46,7 +46,7 @@ class HomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav = new HomeController().home(command)
-		mav.viewName should be("redirect:/profile")
+		mav.viewName should be("redirect:/attendance/profile")
 
 	}}
 
@@ -61,7 +61,7 @@ class HomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav = new HomeController().home(command)
-		mav.viewName should be(s"redirect:/$departmentCode")
+		mav.viewName should be(s"redirect:/attendance/$departmentCode")
 
 	}}
 
@@ -76,7 +76,7 @@ class HomeControllerTest extends TestBase with Mockito{
 		)
 
 		val mav = new HomeController().home(command)
-		mav.viewName should be(s"redirect:/manage/$departmentCode")
+		mav.viewName should be(s"redirect:/attendance/manage/$departmentCode")
 
 	}}
 

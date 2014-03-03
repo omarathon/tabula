@@ -46,13 +46,13 @@
 					<ul class="dropdown-menu">
 						<li class="must-have-selected">
 							<a class="long-running use-tooltip form-post"
-								 href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>"
+								 href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissions.zip'/>"
 								 title="Download the submission files for the selected students as a ZIP file."
 								 data-container="body"><i class="icon-download"></i> Download submission
 							</a>
 						</li>
 						<li class="must-have-selected">
-							<#assign deletesubmissionurl><@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
+							<#assign deletesubmissionurl><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
 							<@fmt.permission_button permission='Submission.Delete' scope=module action_descr='delete submission' classes="form-post" href=deletesubmissionurl tooltip='Delete submission' >
 								<i class="icon-remove"></i> Delete submission
 							</@fmt.permission_button>
@@ -77,14 +77,14 @@
 					<ul class="dropdown-menu">
 						<#if features.turnitin>
 							<li>
-								<#assign checkplagiarism_url><@url page='/admin/module/${module.code}/assignments/${assignment.id}/turnitin' /></#assign>
+								<#assign checkplagiarism_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/turnitin' /></#assign>
 								<@fmt.permission_button permission='Submission.CheckForPlagiarism' scope=assignment action_descr='check for plagiarism' href=checkplagiarism_url tooltip='Check for plagiarism'>
 									<i class="icon-book"></i> Check for plagiarism
 								</@fmt.permission_button>
 							</li>
 						</#if>
 						<li class="must-have-selected">
-							<#assign markplagiarised_url><@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' /></#assign>
+							<#assign markplagiarised_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/mark-plagiarised' /></#assign>
 							<@fmt.permission_button permission='Submission.ManagePlagiarismStatus' scope=assignment action_descr='mark plagiarised' href=markplagiarised_url id="mark-plagiarised-selected-button" tooltip="Toggle whether the selected student submissions are possibly plagiarised" data_attr='data-container=body'>
 								<i class="icon-exclamation-sign"></i> Mark plagiarised
 							</@fmt.permission_button>
@@ -163,7 +163,7 @@
 					<#if features.feedbackTemplates && assignment.hasFeedbackTemplate>
 						<li>
 							<a class="long-running use-tooltip"
-								 href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>"
+								 href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/feedback-templates.zip'/>"
 								 title="Download feedback templates for all students as a ZIP file."
 								 data-container="body"><i class="icon-download"></i> Download templates
 							</a>
@@ -204,7 +204,7 @@
 					</li>
 					<li class="must-have-selected">
 						<a class="long-running use-tooltip form-post"
-							 href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>"
+							 href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedbacks.zip'/>"
 							 title="Download the feedback files for the selected students as a ZIP file."
 							 data-container="body"><i class="icon-download"></i> Download feedback
 						</a>
@@ -212,7 +212,7 @@
 					
 					<#if assignment.canPublishFeedback>
 						<li>
-							<#assign publishfeedbackurl><@url page='/admin/module/${module.code}/assignments/${assignment.id}/publish'/></#assign>
+							<#assign publishfeedbackurl><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/publish'/></#assign>
 							<@fmt.permission_button permission='Feedback.Publish' scope=assignment type='a' action_descr='release feedback to students' tooltip="Release feedback to students" href=publishfeedbackurl>
 								<i class="icon-share"></i> Publish feedback
 							</@fmt.permission_button>
@@ -222,7 +222,7 @@
 					</#if>
 					
 					<li class="must-have-selected">
-						<#assign deletefeedback_url><@url page='/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
+						<#assign deletefeedback_url><@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/submissionsandfeedback/delete' /></#assign>
 						<@fmt.permission_button permission='Feedback.Delete' scope=assignment action_descr='delete feedback' classes="form-post" href=deletefeedback_url tooltip='Delete feedback'>
 							<i class="icon-remove"></i> Delete feedback
 						</@fmt.permission_button>
@@ -238,13 +238,13 @@
 			</a>
 			<ul class="dropdown-menu">
 				<li>
-					<a class="long-running form-post include-filter" title="Export submissions info as XLSX, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.xlsx'/>">Excel</a>
+					<a class="long-running form-post include-filter" title="Export submissions info as XLSX, for advanced users." href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/export.xlsx'/>">Excel</a>
 				</li>
 				<li>
-					<a class="long-running form-post include-filter" title="Export submissions info as CSV, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.csv'/>">Text (CSV)</a>
+					<a class="long-running form-post include-filter" title="Export submissions info as CSV, for advanced users." href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/export.csv'/>">Text (CSV)</a>
 				</li>
 				<li>
-					<a class="long-running form-post include-filter" title="Export submissions info as XML, for advanced users." href="<@url page='/admin/module/${module.code}/assignments/${assignment.id}/export.xml'/>">Text (XML)</a>
+					<a class="long-running form-post include-filter" title="Export submissions info as XML, for advanced users." href="<@url page='/coursework/admin/module/${module.code}/assignments/${assignment.id}/export.xml'/>">Text (XML)</a>
 				</li>
 			</ul>
 		</div>

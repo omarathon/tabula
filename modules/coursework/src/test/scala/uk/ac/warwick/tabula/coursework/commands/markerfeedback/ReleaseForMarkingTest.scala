@@ -27,7 +27,7 @@ class ReleaseForMarkingTest extends AppContextTestBase with Mockito {
 
 			val assignment = newDeepAssignment()
 			val allStudentsUserGroup = UserGroup.ofUniversityIds
-			allStudentsUserGroup.includeUsers = Seq("0678022","1170836","9170726")
+			allStudentsUserGroup.includedUserIds = Seq("0678022","1170836","9170726")
 			allStudentsUserGroup.userLookup = new MockUserLookup(true)
 			val markerMap = Map("marker-uni-id"->allStudentsUserGroup)
 			assignment.closeDate = DateTime.parse("2012-08-15T12:00")

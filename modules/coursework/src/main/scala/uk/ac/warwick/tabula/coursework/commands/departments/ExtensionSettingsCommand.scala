@@ -1,16 +1,12 @@
 package uk.ac.warwick.tabula.coursework.commands.departments
 
-import uk.ac.warwick.tabula.data.model.{UserGroup, Department}
-import uk.ac.warwick.tabula.data.model.Department.Settings
+import scala.collection.JavaConverters._
+import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.{Description, Command}
-import reflect.BeanProperty
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.Features
 import uk.ac.warwick.tabula.data.Transactions._
-import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.validators.UsercodeListValidator
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.commands.SelfValidating
@@ -25,7 +21,7 @@ class ExtensionSettingsCommand (val department:Department, val features:Features
 	var extensionGuidelineLink:String = department.extensionGuidelineLink
 	var extensionManagers: JList[String] = JArrayList()
 	
-	extensionManagers.addAll(department.extensionManagers.includeUsers)
+	extensionManagers.addAll(department.extensionManagers.knownType.includedUserIds.asJava)
 
 	val validUrl = """^((https?)://|(www2?)\.)[a-z0-9-]+(\.[a-z0-9-]+)+([/?].*)?$"""
 
@@ -49,7 +45,7 @@ class ExtensionSettingsCommand (val department:Department, val features:Features
 				department.extensionGuidelineSummary = extensionGuidelineSummary
 				department.extensionGuidelineLink = extensionGuidelineLink
 
-				department.extensionManagers.includeUsers = extensionManagers
+				department.extensionManagers.knownType.includedUserIds = extensionManagers.asScala
 			}
 		}
 	}

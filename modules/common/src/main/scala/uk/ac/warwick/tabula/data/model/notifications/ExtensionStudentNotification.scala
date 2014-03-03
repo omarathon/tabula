@@ -7,7 +7,7 @@ import javax.persistence.{Entity, DiscriminatorValue}
 abstract class ExtensionStudentNotification extends ExtensionNotification with SingleRecipientNotification {
 
 	def recipient = student
-	def url = Routes.assignment.apply(assignment)
+	def url = Routes.assignment(assignment)
 	def template: String
 
 	def content = FreemarkerModel(template, Map (

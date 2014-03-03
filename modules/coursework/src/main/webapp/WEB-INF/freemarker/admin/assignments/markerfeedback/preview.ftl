@@ -9,7 +9,7 @@
 <#assign hasGlobalErrors=status.errors.globalErrors?size gt 0 />
 </@spring.bind>
 
-<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/marker/feedback')}" commandName=commandName>
+<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/feedback')}" commandName=commandName>
 <input type="hidden" name="batch" value="true">
 
 <h1>Submit feedback for ${assignment.name}</h1>

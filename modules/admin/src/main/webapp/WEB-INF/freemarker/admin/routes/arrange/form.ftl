@@ -32,7 +32,7 @@ drag a box from one route name to another. You can also hold the <kbd class="key
 </#if>
 </@spring.hasBindErrors>
 
-<@f.form commandName="sortRoutesCommand" action="${url('/department/${department.code}/sort-routes')}">
+<@f.form commandName="sortRoutesCommand" action="${url('/admin/department/${department.code}/sort-routes')}">
 <div class="tabula-dnd">	
 	<#macro rots department routes>
 		<div class="drag-target clearfix">

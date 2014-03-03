@@ -63,7 +63,7 @@
 					</#if>
 					<#if attachments >
 						<@fmt.display_deleted_attachments note.attachments note.deleted?string("","hidden") />
-						<div class="deleted-files ${note.deleted?string('hidden','')}"><@fmt.download_attachments note.attachments "/notes/${note.id}/" /></div>
+						<div class="deleted-files ${note.deleted?string('hidden','')}"><@fmt.download_attachments note.attachments "/profiles/notes/${note.id}/" /></div>
 					</#if>
 					<small class="muted clearfix">Student note created by ${note.creator.fullName}, <@fmt.date note.lastUpdatedDate /></small>
 				</div>

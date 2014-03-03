@@ -2,4 +2,4 @@ You recently asked to have the submissions for the assignment ${assignmentTitle}
 
 Please check the list of submissions page, which you can find here:
 
-<@url page=path context="/coursework" />
+<@url page=path />

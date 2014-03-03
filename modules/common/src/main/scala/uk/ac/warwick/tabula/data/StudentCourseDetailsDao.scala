@@ -1,10 +1,7 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.mutable.HashSet
-import org.hibernate.annotations.AccessType
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
-import javax.persistence.{DiscriminatorValue, Entity, NamedQueries}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.{Department, Route, StudentCourseDetails, StudentMember}
 import org.hibernate.criterion.Projections
@@ -49,10 +46,11 @@ class StudentCourseDetailsDaoImpl extends StudentCourseDetailsDao with Daoisms {
 				.add(isNull("missingFromImportSince"))
 				.uniqueResult
 
-	def getByScjCodeStaleOrFresh(scjCode: String) =
-		session.newCriteria[StudentCourseDetails]
+	def getByScjCodeStaleOrFresh(scjCode: String) = {
+		sessionWithoutFreshFilters.newCriteria[StudentCourseDetails]
 				.add(is("scjCode", scjCode.trim))
 				.uniqueResult
+	}
 
 	def getBySprCode(sprCode: String) =
 		session.newCriteria[StudentCourseDetails]

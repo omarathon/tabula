@@ -17,8 +17,8 @@ class ModeratedMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap 
 	def markingMethod = ModeratedMarking
 
 	def onlineMarkingUrl(assignment: Assignment, marker: User) =
-		if (assignment.isFirstMarker(marker)) Routes.onlineMarkerFeedback(assignment)
-		else Routes.onlineModeration(assignment)
+		if (assignment.isFirstMarker(marker)) Routes.coursework.admin.assignment.onlineMarkerFeedback(assignment)
+		else Routes.coursework.admin.assignment.onlineModeration(assignment)
 
 
 

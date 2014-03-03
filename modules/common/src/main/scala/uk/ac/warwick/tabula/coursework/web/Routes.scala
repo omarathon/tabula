@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.coursework.web
 
 import java.net.URLEncoder
 import uk.ac.warwick.tabula.data.model.{Module, MarkingWorkflow, Department, Assignment}
+import uk.ac.warwick.tabula.web.RoutesUtils
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
@@ -10,18 +11,19 @@ import uk.ac.warwick.tabula.data.model.{Module, MarkingWorkflow, Department, Ass
  * For methods called "apply", you can leave out the "apply" and treat the object like a function.
  */
 object Routes {
-	private def encoded(string: String) = URLEncoder.encode(string, "UTF-8")
-	def home = "/"
+	import RoutesUtils._
+	private val context = "/coursework"
+	def home = context + "/"
 
 	object assignment {
-		def apply(assignment: Assignment) = "/module/%s/%s/" format (encoded(assignment.module.code), encoded(assignment.id))
+		def apply(assignment: Assignment) = context + "/module/%s/%s/" format (encoded(assignment.module.code), encoded(assignment.id))
 		def receipt(assignment: Assignment) = apply(assignment)
 	}
 
 	object admin {
-		def department(department: Department) = "/admin/department/%s/" format (encoded(department.code))
-		def feedbackTemplates (department: Department) = "/admin/department/%s/settings/feedback-templates/" format (encoded(department.code))
-		def feedbackReports (department: Department) = "/admin/department/%s/reports/feedback/" format (encoded(department.code))
+		def department(department: Department) = context + "/admin/department/%s/" format (encoded(department.code))
+		def feedbackTemplates (department: Department) = context + "/admin/department/%s/settings/feedback-templates/" format (encoded(department.code))
+		def feedbackReports (department: Department) = context + "/admin/department/%s/reports/feedback/" format (encoded(department.code))
 
 		object markingWorkflow {
 			def list(department: Department) = admin.department(department) + "/markingworkflows"
@@ -46,10 +48,13 @@ object Routes {
 				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online"
 			}
 
+			object onlineModeration {
+				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online/moderation"
+			}
 
-			def create(module: Module) = "/admin/module/%s/assignments/new" format (encoded(module.code))
+			def create(module: Module) = context + "/admin/module/%s/assignments/new" format (encoded(module.code))
 
-			private def assignmentroot(assignment: Assignment) = "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), assignment.id)
+			private def assignmentroot(assignment: Assignment) = context + "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), assignment.id)
 
 			def edit(assignment: Assignment) = assignmentroot(assignment) + "/edit"
 
@@ -73,11 +78,4 @@ object Routes {
 		}
 	}
 
-	object sysadmin {
-		def home = "/sysadmin"
-
-		object events {
-			def query = "/sysadmin/audit/search"
-		}
-	}
 }

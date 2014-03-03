@@ -9,7 +9,7 @@
 	<#assign hasErrors=status.errors.allErrors?size gt 0 />
 	</@spring.bind>
 	
-	<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/marker/marks')}" commandName=commandName>
+	<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/marker/marks')}" commandName=commandName>
 	
 	<#assign isfile=RequestParameters.isfile/>
 	

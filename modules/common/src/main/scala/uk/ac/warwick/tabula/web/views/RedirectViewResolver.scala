@@ -20,17 +20,8 @@ class RedirectViewResolver extends ViewResolver with Ordered {
 	@Required
 	var toplevelUrl: String = _
 
-	@Required
-	var context: String = _
-
 	def resolveViewName(viewName: String, locale: Locale): View = viewName match {
-		case redirectPattern(urlPath) => {
-			val contextNoRoot = context match {
-			  	case "/" => ""
-			  	case context => context
-			}
-			new RedirectView(toplevelUrl + contextNoRoot + urlPath)
-		}
+		case redirectPattern(urlPath) => new RedirectView(toplevelUrl + urlPath)
 		case _ => null
 	}
 

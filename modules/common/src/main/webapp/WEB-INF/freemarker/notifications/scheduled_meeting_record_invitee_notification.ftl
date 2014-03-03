@@ -2,4 +2,4 @@ ${actor.fullName} has <#if verb == 'created'>scheduled a<#else>${verb} a schedul
 
 ${meetingRecord.title} on ${dateTimeFormatter.print(meetingRecord.meetingDate)}
 
-Please visit <@url page=profileLink context="/profiles" /> to view this meeting.
+Please visit <@url page=profileLink /> to view this meeting.
