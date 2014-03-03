@@ -17,14 +17,14 @@ import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
 
 object StudentCourseDetails {
-	final val FreshOnlyFilter = "freshStudentCourseDetailsOnly"
+	final val FreshCourseDetailsOnlyFilter = "freshStudentCourseDetailsOnly"
 }
 
 @FilterDefs(Array(
-	new FilterDef(name = Member.FreshOnlyFilter, defaultCondition = "missingFromImportSince is null")
+	new FilterDef(name = StudentCourseDetails.FreshCourseDetailsOnlyFilter, defaultCondition = "missingFromImportSince is null")
 ))
 @Filters(Array(
-	new Filter(name = Member.FreshOnlyFilter)
+	new Filter(name = StudentCourseDetails.FreshCourseDetailsOnlyFilter)
 ))
 @Entity
 class StudentCourseDetails

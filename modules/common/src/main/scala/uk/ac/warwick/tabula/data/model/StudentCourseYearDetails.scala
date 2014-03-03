@@ -19,14 +19,14 @@ import uk.ac.warwick.tabula.JavaImports._
 import javax.persistence.FetchType
 
 object StudentCourseYearDetails {
-	final val FreshOnlyFilter = "freshStudentCourseYearDetailsOnly"
+	final val FreshCourseYearDetailsOnlyFilter = "freshStudentCourseYearDetailsOnly"
 }
 
 @FilterDefs(Array(
-	new FilterDef(name = Member.FreshOnlyFilter, defaultCondition = "missingFromImportSince is null")
+	new FilterDef(name = StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter, defaultCondition = "missingFromImportSince is null")
 ))
 @Filters(Array(
-	new Filter(name = Member.FreshOnlyFilter)
+	new Filter(name = StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
 ))
 @Entity
 class StudentCourseYearDetails extends StudentCourseYearProperties
