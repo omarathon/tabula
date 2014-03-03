@@ -57,7 +57,8 @@ class NotificationIndexServiceTest extends TestBase with Mockito {
 	}
 
 	lazy val dismissedItem = {
-		val notification = new HeronWarningNotification
+		val heron2 = new Heron(recipient)
+		val notification = Notification.init(new HeronWarningNotification, agent, heron2, heron2)
 		notification.id = "nid101"
 		notification.created = now.plusMinutes(101)
 		dao.getById(notification.id) returns Some(notification)
