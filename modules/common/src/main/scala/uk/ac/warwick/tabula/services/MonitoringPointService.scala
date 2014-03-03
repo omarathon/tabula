@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.services
 
 import scala.collection.JavaConverters._
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.{SmallGroupDaoComponent, AutowiringSmallGroupDaoComponent, AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent, AutowiringMonitoringPointDaoComponent, MonitoringPointDaoComponent}
+import uk.ac.warwick.tabula.data.{AutowiringMeetingRecordDaoComponent, MeetingRecordDaoComponent, AutowiringMonitoringPointDaoComponent, MonitoringPointDaoComponent}
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model.attendance._
 import uk.ac.warwick.tabula.data.model._
@@ -426,7 +426,7 @@ trait MonitoringPointGroupProfileService {
 
 abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPointGroupProfileService {
 
-	self: MonitoringPointServiceComponent with ProfileServiceComponent with SmallGroupDaoComponent with SmallGroupServiceComponent =>
+	self: MonitoringPointServiceComponent with ProfileServiceComponent with SmallGroupServiceComponent =>
 
 	def getCheckpointsForAttendance(attendances: Seq[SmallGroupEventAttendance], includeTheseAttendances: Boolean = true): Seq[MonitoringCheckpoint] = {
 		attendances.filter(_.state == AttendanceState.Attended).flatMap(attendance => {
@@ -478,7 +478,7 @@ abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPoin
 		if (point.smallGroupEventQuantity == 1) {
 			true
 		}	else if (point.smallGroupEventQuantity > 1) {
-			val attendances = smallGroupDao
+			val attendances = smallGroupService
 				.findAttendanceForStudentInModulesInWeeks(studentMember, point.validFromWeek, point.requiredFromWeek, point.smallGroupEventModules)
 				.filterNot(a => a.occurrence == attendance.occurrence && a.universityId == attendance.universityId)
 			point.smallGroupEventQuantity <= attendances.size + 1
@@ -491,7 +491,7 @@ abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPoin
 					)
 				)
 			val relevantWeeks = allOccurrenceWeeks.filter(point.includesWeek)
-			val attendances = smallGroupDao
+			val attendances = smallGroupService
 				.findAttendanceForStudentInModulesInWeeks(studentMember, point.validFromWeek, point.requiredFromWeek, point.smallGroupEventModules)
 				.filterNot(a => a.occurrence == attendance.occurrence && a.universityId == attendance.universityId)
 			relevantWeeks.size <= attendances.size
@@ -504,5 +504,4 @@ class MonitoringPointGroupProfileServiceImpl
 	extends AbstractMonitoringPointGroupProfileService
 	with AutowiringMonitoringPointServiceComponent
 	with AutowiringProfileServiceComponent
-	with AutowiringSmallGroupDaoComponent
 	with AutowiringSmallGroupServiceComponent
