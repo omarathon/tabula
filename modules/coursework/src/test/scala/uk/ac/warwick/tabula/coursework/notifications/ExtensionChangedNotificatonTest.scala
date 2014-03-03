@@ -20,7 +20,7 @@ class ExtensionChangedNotificatonTest extends TestBase with Mockito with Extensi
 	@Test
 	def urlIsProfilePage():Unit = new ExtensionFixture {
 		val n = createNotification(extension, student, admin)
-		n.url should be("/module/xxx/123/")
+		n.url should be("/coursework/module/xxx/123/")
 	}
 
 	@Test
@@ -44,7 +44,7 @@ class ExtensionChangedNotificatonTest extends TestBase with Mockito with Extensi
 		n.content.model.get("assignment").get should be(assignment)
 		n.content.model.get("module").get should be(module)
 		n.content.model.get("user").get should be(student)
-		n.content.model.get("path").get should be("/module/xxx/123/")
+		n.content.model.get("path").get should be("/coursework/module/xxx/123/")
 	}
 
 }
