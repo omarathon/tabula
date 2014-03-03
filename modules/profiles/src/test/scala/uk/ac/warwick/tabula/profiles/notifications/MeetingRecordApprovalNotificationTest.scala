@@ -28,7 +28,7 @@ class MeetingRecordApprovalNotificationTest extends TestBase with Mockito with F
 	freeMarkerConfig.getObjectWrapper.asInstanceOf[ScalaBeansWrapper].securityService = securityService
 	
 	val urlMethodModel = new UrlMethodModel
-	urlMethodModel.context = "/profiles"
+	//urlMethodModel.context = "/profiles"
 	urlMethodModel.toplevelUrl = "https://tabula.warwick.ac.uk"
 	
 	freeMarkerConfig.setSharedVariable("url", urlMethodModel)

@@ -13,6 +13,7 @@ import uk.ac.warwick.tabula.web.RoutesUtils
 object Routes {
 	import RoutesUtils._
 	private val context = "/profiles"
+
 	def home = context + "/"
 	def search = context + "/search"
 		
@@ -20,6 +21,7 @@ object Routes {
 		def view(member: Member) = context + "/view/%s" format encoded(member.universityId)
 		def view(member: Member, meeting: AbstractMeetingRecord) = context + "/view/%s?meeting=%s" format (encoded(member.universityId), encoded(meeting.id))
 		def photo(member: Member) = context + "/view/photo/%s.jpg" format encoded(member.universityId)
+		def mine = context + "/view/me"
 	}
 	
 	def students(relationshipType: StudentRelationshipType) = context + "/%s/students" format encoded(relationshipType.urlPart)

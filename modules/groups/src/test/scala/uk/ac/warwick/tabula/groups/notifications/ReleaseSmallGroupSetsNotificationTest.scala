@@ -57,7 +57,7 @@ class ReleaseSmallGroupSetsNotificationTest extends TestBase with Mockito{
   @Test
   def urlIsMyGroupsPageForTutors():Unit = new SmallGroupFixture{
     val n =  createNotification(group1, actor, recipient, isStudent = false)
-    n.url should be("/groups" + Routes.tutor.mygroups)
+    n.url should be(Routes.tutor.mygroups)
   }
 
   @Test

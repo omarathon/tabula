@@ -33,7 +33,7 @@ class SmallGroupSetChangedNotificationTest extends TestBase with Mockito {
   @Test
   def urlIsGroupsPageForTutor(): Unit = new SmallGroupFixture {
     val n = createTutorNotification(groupSet1, actor, recipient)
-    n.url should be("/groups" + Routes.tutor.mygroups)
+    n.url should be(Routes.tutor.mygroups)
   }
 
   @Test

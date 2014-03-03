@@ -21,12 +21,6 @@ object Routes {
 		def mygroups = context + "/tutor"
 	}
 
-	// These are relative to the /profiles app, not the /groups app.
-	object profile {
-		def view(member: User) = context + "/view/%s" format (encoded(member.getWarwickId))
-		def mine = context + "/view/me"
-	}
-
 	object admin {
 		def apply(department: Department) = context + "/admin/department/%s" format (encoded(department.code))
 

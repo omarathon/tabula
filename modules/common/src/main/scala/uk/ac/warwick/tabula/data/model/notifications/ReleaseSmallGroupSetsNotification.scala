@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.notifications
 import uk.ac.warwick.tabula.data.model.{FreemarkerModel, UserIdRecipientNotification, Notification}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
-import uk.ac.warwick.tabula.groups.web.Routes
+import uk.ac.warwick.tabula.web.Routes
 import javax.persistence.{DiscriminatorValue, Entity}
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
 
@@ -51,9 +51,9 @@ class ReleaseSmallGroupSetsNotification extends Notification[SmallGroup, Unit]
 	
 	def url: String = {
 		if (isStudent) {
-			"/profiles" + Routes.profile.mine
+			Routes.profiles.profile.mine
 		} else {
-			"/groups" + Routes.tutor.mygroups
+			Routes.groups.tutor.mygroups
 		}
 	}
 
