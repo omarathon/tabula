@@ -37,6 +37,7 @@ import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
 	final val ActiveOnlyFilter = "activeOnly"
+	final val FreshOnlyFilter = "freshMemberOnly"
 }
 
 /**
@@ -45,19 +46,16 @@ object Member {
  * queries will only include it if it's the entity after "from" and not
  * some other secondary entity joined on. It's usually possible to flip the
  * query around to make this work.
- *
- * There is no filter returning only fresh records (i.e. those seen in the last SITS import), since that would
- * prevent member.getByUniversityId from returning stale records - which would be an issue since the import
- * uses that to check if a record is there already before re-importing it.  (So having the filter in place would
- * prevent students who had been deleted from SITS from being re-imported.)
  */
 @FilterDefs(Array(
 		new FilterDef(name = Member.StudentsOnlyFilter, defaultCondition = "usertype = 'S'"),
-		new FilterDef(name = Member.ActiveOnlyFilter, defaultCondition = "(inuseflag = 'Active' or inuseflag like 'Inactive - Starts %')")
+		new FilterDef(name = Member.ActiveOnlyFilter, defaultCondition = "(inuseflag = 'Active' or inuseflag like 'Inactive - Starts %')"),
+		new FilterDef(name = Member.FreshOnlyFilter, defaultCondition = "missingFromImportSince is null")
 	))
 	@Filters(Array(
 		new Filter(name = Member.StudentsOnlyFilter),
-		new Filter(name = Member.ActiveOnlyFilter)
+		new Filter(name = Member.ActiveOnlyFilter),
+		new Filter(name = Member.FreshOnlyFilter)
 	))
 @Entity
 @AccessType("field")
