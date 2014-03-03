@@ -107,7 +107,7 @@
 					Specific
 				</@form.label>
 				<div class="module-search input-append">
-					<input class="module-search-query module-picker" type="text" value=""/>
+					<input class="module-search-query" type="text" value=""/>
 					<span class="add-on"><i class="icon-search"></i></span>
 				</div>
 				<button class="btn add-module"><i class="icon-plus"></i> </button>
@@ -154,29 +154,29 @@
 
 	<@form.labelled_row "specificAssignments" "Modules or specific assignments">
 		<@form.label clazz="radio" checkbox=true>
-			<@f.radiobutton path="specificAssignments" value="false" />
+			<input name="isSpecificAssignments" type="radio" value="false" <#if !command.isSpecificAssignments()>checked</#if>>
 			Modules
 		</@form.label>
 		<@form.label clazz="radio" checkbox=true>
-			<@f.radiobutton path="specificAssignments" value="true" />
+			<input name="isSpecificAssignments" type="radio" value="true" <#if command.isSpecificAssignments()>checked</#if>>
 			Specific assignments
 		</@form.label>
 	</@form.labelled_row>
 
-	<div class="specificAssignments" <#if !command.specificAssignments>style="display:none"</#if>>
+	<div class="isSpecificAssignments" <#if !command.isSpecificAssignments()>style="display:none"</#if>>
 		<div class="assignment-choice">
 			<@form.labelled_row "assignmentSubmissionAssignments" "Assignments">
 				<div class="assignment-search input-append">
-					<input class="assignment-search-query assignment-picker" type="text" value=""/>
+					<input class="assignment-search-query" type="text" value=""/>
 					<span class="add-on"><i class="icon-search"></i></span>
 				</div>
-				<button class="btn add-module"><i class="icon-plus"></i> </button>
-				<div class="assignment-list">
+				<button class="btn add-assignment"><i class="icon-plus"></i> </button>
+				<div class="assignments-list">
 					<input type="hidden" name="_assignmentSubmissionAssignments" value="false" />
 					<ul>
 						<#list command.assignmentSubmissionAssignments![] as assignment>
 							<li>
-								<input type="hidden" name="assignmentSubmissionModules" value="${assignment.id}" />
+								<input type="hidden" name="assignmentSubmissionAssignments" value="${assignment.id}" />
 								<i class="icon-fixed-width"></i><span title="<@fmt.assignment_name assignment />"><@fmt.assignment_name assignment /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
 							</li>
 						</#list>
@@ -186,11 +186,11 @@
 		</div>
 	</div>
 
-	<div class="modules" <#if command.specificAssignments>style="display:none"</#if>>
+	<div class="modules" <#if command.isSpecificAssignments()>style="display:none"</#if>>
 		<div class="module-choice">
 			<@form.labelled_row "assignmentSubmissionModules" "Modules">
 				<div class="module-search input-append">
-					<input class="module-search-query module-picker" type="text" value=""/>
+					<input class="module-search-query" type="text" value=""/>
 					<span class="add-on"><i class="icon-search"></i></span>
 				</div>
 				<button class="btn add-module"><i class="icon-plus"></i> </button>
@@ -218,18 +218,18 @@
 <script>
 (function($) {
 	// Show relavant extra options when changing assignment type
-	if ($('form input[name=specificAssignments]').length > 0) {
+	if ($('form input[name=isSpecificAssignments]').length > 0) {
 		var showOptions = function() {
-			var value = $('form input[name=specificAssignments]:checked').val();
+			var value = $('form input[name=isSpecificAssignments]:checked').val();
 			if (value && value === "true") {
-				$('.pointTypeOption.assignmentSubmission .specificAssignments').show();
+				$('.pointTypeOption.assignmentSubmission .isSpecificAssignments').show();
 				$('.pointTypeOption.assignmentSubmission .modules').hide();
 			} else {
-				$('.pointTypeOption.assignmentSubmission .specificAssignments').hide();
+				$('.pointTypeOption.assignmentSubmission .isSpecificAssignments').hide();
 				$('.pointTypeOption.assignmentSubmission .modules').show();
 			}
 		};
-		$('form input[name=specificAssignments]').on('click', showOptions);
+		$('form input[name=isSpecificAssignments]').on('click', showOptions);
 		showOptions();
 	}
 })(jQuery);
@@ -257,9 +257,8 @@
 			trigger: 'click',
 			container: '#container'
 		});
-		$('.module-picker').modulePicker({});
-
-		Attendance.bindModulePicker();
+		Attendance.bindModulePickers();
+		Attendance.bindAssignmentPickers();
 	});
 })(jQuery);
 </script>

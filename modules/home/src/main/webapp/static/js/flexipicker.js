@@ -372,14 +372,16 @@ var ModulePicker = function (options) {
 				url: '/api/modulepicker/query',
 				dataType: 'json',
 				data: {
-					query: query
+					query: query,
+					checkGroups: options.checkGroups,
+					checkAssignments: options.checkAssignments
 				},
 				success: function(data) {
 					process(data)
 				}
 			});
 		},
-		item: '<li class="flexi-picker-result module"><a href="#"><div class="name"></div><div class=department></div><div class="no-groups"><i class="icon-exclamation-sign"></i> This module has no small groups set up in Tabula</div></a></li>'
+		item: '<li class="flexi-picker-result module"><a href="#"><div class="name"></div><div class=department></div><div class="no-groups" style="display:none;"><i class="icon-exclamation-sign"></i> This module has no small groups set up in Tabula</div><div class="no-assignments" style="display:none;"><i class="icon-exclamation-sign"></i> This module has no assignments set up in Tabula</div></a></li>'
 	});
 
 	// Renders each result item with icon and description.
@@ -392,12 +394,23 @@ var ModulePicker = function (options) {
 				i.attr('data-moduleid', item.id);
 				i.find('div.name').html(that.highlighter(item.code.toUpperCase() + ' ' + item.name));
 				i.find('div.department').html(item.department);
-				if (!item.hasSmallGroups) {
-					i.find('div.no-groups').show();
-					i.attr('data-hasgroups', false);
-				} else {
-					i.find('div.no-groups').hide();
-					i.attr('data-hasgroups', true);
+				if (options.checkGroups) {
+					if(!item.hasSmallGroups) {
+						i.find('div.no-groups').show();
+						i.attr('data-hasgroups', false);
+					} else {
+						i.find('div.no-groups').hide();
+						i.attr('data-hasgroups', true);
+					}
+				}
+				if (options.checkAssignments) {
+					if(!item.hasAssignments) {
+						i.find('div.no-assignments').show();
+						i.attr('data-hasassignments', false);
+					} else {
+						i.find('div.no-assignments').hide();
+						i.attr('data-hasassignments', true);
+					}
 				}
 				return i[0];
 			} else {
@@ -431,6 +444,7 @@ var ModulePicker = function (options) {
 	$typeahead.select = function () {
 		this.$element.data('moduleid', this.$menu.find('.active').data('moduleid'));
 		this.$element.data('hasgroups', this.$menu.find('.active').data('hasgroups'));
+		this.$element.data('hasgroups', this.$menu.find('.active').data('hasassignments'));
 		return oldSelect.call($typeahead);
 	};
 
@@ -447,7 +461,9 @@ $.fn.modulePicker = function (options) {
 			throw new Error("FlexiPicker has already been added to this element.");
 		}
 		var allOptions = {
-			input: this
+			input: this,
+			checkGroups: false,
+			checkAssignments: false
 		};
 		$.extend(allOptions, options || {});
 		$this.data('module-picker', new ModulePicker(allOptions));
@@ -463,6 +479,117 @@ jQuery(function($){
 	$('.module-picker').modulePicker({});
 });
 
+
+/**
+ * Like the ModulePicker, but for Assignments
+ */
+var AssignmentPicker = function (options) {
+	var self = this;
+	var $element = $(options.input);
+
+	// Might have manually wired this element up with an existing picker,
+	// but add the class for CSS style purposes.
+	if (!$element.hasClass('assignment-picker')) {
+		$element.addClass('assignment-picker');
+	}
+
+	// Disable browser autocomplete dropdowns, it gets in the way.
+	$element.attr('autocomplete', 'off');
+
+	var $typeahead = new TabulaTypeahead({
+		element: $element,
+		source: function(query, process){
+			// Abort any existing search
+			if (self.currentSearch) {
+				self.currentSearch.abort();
+				self.currentSearch = null;
+			}
+			self.currentSearch = $.ajax({
+				url: '/api/assignmentpicker/query',
+				dataType: 'json',
+				data: {
+					query: query
+				},
+				success: function(data) {
+					process(data)
+				}
+			});
+		},
+		item: '<li class="flexi-picker-result assignment"><a href="#"><div class="name"></div><div class=department></div></a></li>'
+	});
+
+	// Renders each result item with icon and description.
+	$typeahead.render = function (items) {
+		var that = this;
+
+		items = $(items).map(function (i, item) {
+			if (item != undefined) {
+				i = $(that.options.item);
+				i.attr('data-assignmentid', item.id);
+				i.find('div.name').html(that.highlighter(item.code.toUpperCase() + ' ' + item.name));
+				i.find('div.department').html(item.department);
+				return i[0];
+			} else {
+				// no idea what's happened here. Return an empty item.
+				return $(that.options.item)[0];
+			}
+		});
+
+		items.first().addClass('active');
+		this.$menu.html(items);
+		return this;
+	};
+
+	// The Bootstrap Typeahead always appends the drop-down to directly after the input
+	// Replace the show method so that the drop-down is added to the body
+	$typeahead.show = function () {
+		var pos = $.extend({}, this.$element.offset(), {
+			height: this.$element[0].offsetHeight
+		});
+
+		this.$menu.appendTo($('body')).show().css({
+			top: pos.top + pos.height, left: pos.left
+		});
+
+		this.shown = true;
+		return this;
+	};
+
+	// Override select item to store the relevant attributes
+	var oldSelect = $typeahead.select;
+	$typeahead.select = function () {
+		this.$element.data('assignmentid', this.$menu.find('.active').data('assignmentid'));
+		return oldSelect.call($typeahead);
+	};
+
+	$typeahead.updater = function() {
+		return this.$menu.find('.active .name').text();
+	};
+};
+
+// The jQuery plugin
+$.fn.assignmentPicker = function (options) {
+	this.each(function () {
+		var $this = $(this);
+		if ($this.data('assignment-picker')) {
+			throw new Error("FlexiPicker has already been added to this element.");
+		}
+		var allOptions = {
+			input: this
+		};
+		$.extend(allOptions, options || {});
+		$this.data('assignment-picker', new AssignmentPicker(allOptions));
+	});
+	return this;
+};
+
+/**
+ * Any input with the assignment-picker class will have the picker enabled on it,
+ * so you can use the picker without writing any code yourself.
+ */
+jQuery(function($){
+	$('.assignment-picker').assignmentPicker({});
+});
 
 // End of wrapping
 })(jQuery);
