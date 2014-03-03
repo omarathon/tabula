@@ -103,16 +103,16 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 	protected def session = {
 		val session = sessionFactory.getCurrentSession
 		session.enableFilter(Member.FreshOnlyFilter)
-		session.enableFilter(StudentCourseDetails.FreshOnlyFilter)
-		session.enableFilter(StudentCourseYearDetails.FreshOnlyFilter)
+		session.enableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
+		session.enableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
 		session
 	}
 
 	protected def sessionWithoutFreshFilters = {
 		val session = sessionFactory.getCurrentSession
 		session.disableFilter(Member.FreshOnlyFilter)
-		session.disableFilter(StudentCourseDetails.FreshOnlyFilter)
-		session.disableFilter(StudentCourseYearDetails.FreshOnlyFilter)
+		session.disableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
+		session.disableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
 		session
 	}
 
