@@ -112,7 +112,7 @@ cssClass (optional): a class to apply to the h1 (typically used for 'with-settin
 	<#if withFormatting>
 		<span class="route-code">${route.code?upper_case}</span> <span class="route-name">${route.name}</span>
 	<#else>
-		${route.code?upper_case} ${route.name}k
+		${route.code?upper_case} ${route.name}
 	</#if>
 </#macro>
 

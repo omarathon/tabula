@@ -208,7 +208,7 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with Course
 		set.points.asScala.foreach(p => monitoringPoints.add(p))
 	}
 	template.foreach { template =>
-		template.points.asScala.foreach(p => monitoringPoints.add(p.toPoint()))
+		template.points.asScala.foreach(p => monitoringPoints.add(p.toPoint))
 	}
 
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
