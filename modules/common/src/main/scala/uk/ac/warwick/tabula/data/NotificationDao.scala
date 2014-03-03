@@ -3,14 +3,16 @@ package uk.ac.warwick.tabula.data
 import org.springframework.stereotype.Repository
 import org.hibernate.criterion.{Restrictions, Order}
 import uk.ac.warwick.util.hibernate.{BatchResultsImpl, BatchResults}
-import uk.ac.warwick.tabula.data.model.Notification
+import uk.ac.warwick.tabula.data.model.{ToEntityReference, Notification}
 import uk.ac.warwick.tabula.helpers.FunctionConversions.asGoogleFunction
 import org.joda.time.DateTime
 
 trait NotificationDao {
 	def save(notification: Notification[_,_])
 
-	def getById(id: String): Option[Notification[_,_]]
+	def update(notification: Notification[_,_])
+
+	def getById(id: String): Option[Notification[_  >: Null <: ToEntityReference, _]]
 
 	def recent(start: DateTime): Scrollable[Notification[_,_]]
 }
@@ -47,5 +49,9 @@ class NotificationDaoImpl extends NotificationDao with Daoisms {
 		session.save(notification)
 	}
 
-	def getById(id: String) = getById[Notification[_,_]](id)
+	def update(notification: Notification[_,_]) {
+		session.saveOrUpdate(notification)
+	}
+
+	def getById(id: String) = getById[Notification[_ >: Null <: ToEntityReference,_]](id)
 }

@@ -12,6 +12,8 @@ import org.springframework.util.Assert
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
 import org.hibernate.annotations.Type
 import scala.beans.BeanProperty
+import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 object Notification {
 	/**
@@ -85,7 +87,10 @@ object Notification {
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="notification_type")
-abstract class Notification[A >: Null <: ToEntityReference, B] extends GeneratedId with Serializable with HasSettings {
+abstract class Notification[A >: Null <: ToEntityReference, B]
+	extends GeneratedId with Serializable with HasSettings with PermissionsTarget {
+
+	def permissionsParents = Stream.empty
 
 	@transient final val dateOnlyFormatter = DateFormats.NotificationDateOnly
 	@transient final val dateTimeFormatter = DateFormats.NotificationDateTime
@@ -104,6 +109,31 @@ abstract class Notification[A >: Null <: ToEntityReference, B] extends Generated
 	// the default priority is info. More important notifications should manually set this value to something higher.
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.NotificationPriorityUserType")
 	var priority: NotificationPriority = NotificationPriority.Info
+
+	@OneToMany(mappedBy="notification", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
+	var recipientNotificationInfos: JList[RecipientNotificationInfo] = JArrayList()
+
+	// when performing operations on recipientNotificationInfos you should use this to fetch a users info.
+	private def getRecipientNotificationInfo(user: User) = {
+		if (!recipients.contains(user)) throw new IllegalArgumentException("user must be a recipient of this notification")
+		recipientNotificationInfos.asScala.find(_.recipient == user).getOrElse {
+			val newInfo = new RecipientNotificationInfo(this, user)
+			recipientNotificationInfos.add(newInfo)
+			newInfo
+		}
+	}
+
+	def dismiss(user: User) = {
+		val info = getRecipientNotificationInfo(user)
+		info.dismissed = true
+	}
+
+	def unDismiss(user: User) = {
+		val info = getRecipientNotificationInfo(user)
+		info.dismissed = false
+	}
+
+	def isDismissed(user: User) = recipientNotificationInfos.asScala.exists(ni => ni.recipient == user && ni.dismissed)
 
 	// HasSettings provides the JSONified settings field... ---> HERE <---
 

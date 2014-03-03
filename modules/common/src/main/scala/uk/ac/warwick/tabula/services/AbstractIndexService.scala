@@ -494,4 +494,6 @@ trait FieldGenerators {
 	protected def dateField(name: String, value: DateTime) = new LongField(name, value.getMillis, Store.YES)
 
 	protected def doubleField(name: String, value: Double) = new DoubleField(name, value, Store.YES)
+
+	protected def booleanField(name: String, value: Boolean) = new TextField(name, value.toString, Store.YES)
 }

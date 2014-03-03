@@ -16,7 +16,6 @@ import javax.persistence.DiscriminatorValue
 import org.apache.lucene.search._
 import org.apache.lucene.index.Term
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.helpers.Logging
 
 class RecipientNotification(val notification: Notification[_,_], val recipient: User) {
 	def id = s"${notification.id}-${recipient.getUserId}"
@@ -36,6 +35,11 @@ trait NotificationQueryMethods { self: NotificationIndexServiceImpl =>
 		val query = new BooleanQuery
 		query.add(recipientQuery, BooleanClause.Occur.MUST)
 		query.add(priorityLimit, BooleanClause.Occur.MUST)
+
+		if (!req.includeDismissed) {
+			val dismissedQuery = new TermQuery(new Term("dismissed", "false"))
+			query.add(dismissedQuery, BooleanClause.Occur.MUST)
+		}
 
 		val sort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true))
 		val fieldDoc = req.pagination.map { p => new FieldDoc(p.lastDoc, Float.NaN, Array(p.lastField:JLong)) }
@@ -92,6 +96,7 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 			doc.add(plainStringField("recipient", recipient.getUserId))
 			doc.add(plainStringField("notificationType", notificationType))
 			doc.add(doubleField("priority", notification.priority.toNumericalValue))
+			doc.add(booleanField("dismissed", notification.isDismissed(recipient)))
 			doc.add(dateField(UpdatedDateField, notification.created))
 			Seq(doc)
 		} else {
