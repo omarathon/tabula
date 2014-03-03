@@ -33,6 +33,9 @@ trait AssignmentService {
 	def recentAssignment(department: Department): Option[Assignment]
 
 	def getAssignmentsByName(partialName: String, department: Department): Seq[Assignment]
+
+	def findAssignmentsByNameOrModule(query: String): Seq[Assignment]
+
 }
 
 
@@ -105,6 +108,16 @@ class AssignmentServiceImpl
 		""")
 			.setParameter("dept", department)
 			.setString("nameLike", "%" + partialName + "%")
+			.setMaxResults(MaxAssignmentsByName).seq
+	}
+
+	def findAssignmentsByNameOrModule(query: String) = {
+		session.newQuery[Assignment]("""select a from Assignment
+				a where a.name like :nameLike
+				or a.module like :nameLike
+				order by createdDate desc
+		 """)
+			.setString("nameLike", "%" + query + "%")
 			.setMaxResults(MaxAssignmentsByName).seq
 	}
 }
