@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, Sm
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
-import uk.ac.warwick.tabula.commands.{MemberOrUser, Appliable}
+import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import org.joda.time.DateTime
