@@ -344,12 +344,12 @@ $(function(){
 		*/
 		// hide the model
 		jQuery("#extension-model").modal('hide');
-		
+
 		// TAB-1704 change the hash and reload the page
 		$.each(data.result, function() {
 			window.location.hash = 'row' + this.id;
 		});
-		
+
 		window.location.reload(true);
 	});
 
@@ -425,7 +425,7 @@ $(function(){
  */
 $(function() {
 
-	$('#main-content').on('tabula.expandingTable.contentChanged', '.feedback-container', function(e) {
+	$('#online-marking-table').on('tabula.expandingTable.contentChanged', '.content-container', function(e) {
 		var $container = $(this);
 		var $form = $container.find('.onlineFeedback form');
 		var contentId = $container.attr('data-contentid');
@@ -525,7 +525,7 @@ $(function() {
 		});
 	});
 
-	$('#main-content').on('tabula.expandingTable.parentRowCollapsed', '.feedback-container', function(e) {
+	$('#online-marking-table').on('tabula.expandingTable.parentRowCollapsed', '.content-container', function(e) {
 		var $this = $(this);
 		if(hasChanges($this)) {
 			var contentId = $this.attr('data-contentid');

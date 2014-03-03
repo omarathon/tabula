@@ -1,11 +1,11 @@
 (function ($) { "use strict";
 /*
-	Applied to tables. When a table row is clicked then a some hidden content is made visible and placed beneath the
+	Applied to tables. When a table row is clicked then some hidden content is made visible and placed beneath the
 	row. The following rows in the table are moved down to make space for the content. Clicking on the row again hides
 	the content.
 
 
-	A table cell in each row is designated as the content cell. This cell should contain a the follwing markup
+	A table cell in each row is designated as the content cell. This cell should contain the follwing markup
 	Note that the class names given here can be overriden in the options.
 
 	<td class="content-cell">
@@ -155,7 +155,7 @@ jQuery.fn.expandingTable = function(options) {
 						$content.data("loaded", "true");
 						$content.trigger('tabula.expandingTable.contentChanged');
 					});
-					
+
 				} else {
 					showContent($content, $row, $icon);
 				}

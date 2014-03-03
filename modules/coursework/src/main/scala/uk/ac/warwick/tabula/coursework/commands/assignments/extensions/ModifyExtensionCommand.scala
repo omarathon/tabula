@@ -17,6 +17,8 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.data.model.notifications.{ExtensionRequestRespondedApproveNotification, ExtensionRequestRejectedNotification, ExtensionRequestApprovedNotification, ExtensionChangedNotification, ExtensionGrantedNotification}
+import uk.ac.warwick.tabula.coursework.web.Routes.admin.assignment.extension
+import uk.ac.warwick.userlookup.User
 
 /*
  * Built the command as a bulk operation. Single additions can be achieved by adding only one extension to the list.
@@ -32,10 +34,10 @@ class AddExtensionCommand(module: Module, assignment: Assignment, submitter: Cur
 	})
 }
 
-class EditExtensionCommand(module: Module, assignment: Assignment, val extension: Extension, submitter: CurrentUser, action: String)
+class EditExtensionCommand(module: Module, assignment: Assignment, val targetUniversityId: String, val extension: Option[Extension], submitter: CurrentUser, action: String)
 	extends ModifyExtensionCommand(module, assignment, submitter, action) with Notifies[Seq[Extension], Option[Extension]] {
 
-	PermissionCheck(Permissions.Extension.Update, extension)
+	PermissionCheck(Permissions.Extension.Update, extension.getOrElse(null))
 
 	copyExtensions(List(extension))
 
@@ -60,12 +62,6 @@ class EditExtensionCommand(module: Module, assignment: Assignment, val extension
 
 		Seq(studentNotification, adminNotifications)
 	})
-}
-
-class ReviewExtensionRequestCommand(module: Module, assignment: Assignment, extension: Extension, submitter: CurrentUser, action: String)
-	extends EditExtensionCommand(module, assignment, extension, submitter, action) {
-
-	PermissionCheck(Permissions.Extension.ReviewRequest, extension)
 }
 
 abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignment, val submitter: CurrentUser, val action: String)
@@ -111,9 +107,9 @@ abstract class ModifyExtensionCommand(val module:Module, val assignment:Assignme
 	/**
 	 * Copies the specified extensions to the extensionItems array ready for editing
 	 */
-	def copyExtensions(extensions:Seq[Extension]){
+	def copyExtensions(extensions:Seq[Option[Extension]]){
 
-		val extensionItemsList = for (extension <- extensions) yield {
+		val extensionItemsList = for (Some(extension) <- extensions) yield {
 			val item = new ExtensionItem
 			item.universityId =  extension.universityId
 			item.reviewerComments = extension.reviewerComments

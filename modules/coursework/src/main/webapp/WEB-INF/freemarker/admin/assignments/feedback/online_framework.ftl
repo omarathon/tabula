@@ -7,7 +7,7 @@
 		<#return user.userId />
 	<#else>
 		<#return user.warwickId />
-	</#if> 
+	</#if>
 </#function>
 
 <#macro row graph>
@@ -43,7 +43,7 @@
 					</#if>
 				</dt>
 				<dd style="display: none;" class="table-content-container" data-contentid="${markingId(u)}">
-					<div id="content-${markingId(u)}" class="feedback-container content-container" data-contentid="${markingId(u)}">
+					<div id="content-${markingId(u)}" class="content-container" data-contentid="${markingId(u)}">
 						<p>No data is currently available.</p>
 					</div>
 				</dd>

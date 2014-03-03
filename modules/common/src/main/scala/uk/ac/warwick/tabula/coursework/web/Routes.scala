@@ -74,6 +74,10 @@ object Routes {
 
 			object extension {
 				def review(assignment: Assignment, uniId: String) = assignmentroot(assignment) + "/extensions?highlight=" + uniId
+
+				object detail {
+					def apply(assignment: Assignment) = assignmentroot(assignment) + "/extensions/detail"
+				}
 			}
 		}
 	}

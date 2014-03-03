@@ -6,10 +6,10 @@
 		<#return user.userId />
 	<#else>
 		<#return user.warwickId />
-	</#if> 
+	</#if>
 </#function>
 
-<div class="feedback">
+<div class="content">
 	<#if command.submission??>
 		<#assign submission = command.submission />
 		<#include "_submission_summary.ftl">

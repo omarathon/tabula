@@ -13,7 +13,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.ItemNotFoundException
 
 class ListExtensionsCommand(val module: Module, val assignment: Assignment, val user: CurrentUser)
-	extends Command[ExtensionInformation] with ReadOnly with Unaudited {
+	extends Command[Seq[ExtensionGraph]] with ReadOnly with Unaudited {
 
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Extension.Read, assignment)
@@ -47,20 +47,22 @@ class ListExtensionsCommand(val module: Module, val assignment: Assignment, val 
 			assignmentMembership.keySet -- (manualExtensions.map(_.universityId).toSet) --
 				(extensionRequests.map(_.universityId).toSet)
 
-		new ExtensionInformation(
-			students,
-			manualExtensions,
-			extensionRequests,
-			isExtensionManager,
-			potentialExtensions
-		)
-	}
+		(for (student <- students) yield {
+			// deconstruct the map, bleh
+			val universityId = student._1
+			val user = student._2
+			val hasRequestOutstanding = extensionRequests.map(_.universityId).contains(universityId)
+			val hasExtension = assignment.extensions.map(_.universityId).contains(universityId)
+			val extension = assignment.extensions.find(_.universityId == universityId)
 
+			new ExtensionGraph(universityId, user, hasRequestOutstanding, hasExtension, extension)
+		}).toSeq
+	}
 }
 
-case class ExtensionInformation(
-	students: Map[String, User],
-	manualExtensions: Seq[Extension],
-	extensionRequests: Seq[Extension],
-	isExtensionManager: Boolean,
-	potentialExtensions: Set[String])
+case class ExtensionGraph(
+	universityId: String,
+	user: User,
+	hasRequestOutstanding: Boolean,
+	hasExtension: Boolean,
+	extension: Option[Extension])

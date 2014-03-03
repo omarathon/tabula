@@ -7,11 +7,10 @@ import uk.ac.warwick.tabula.JavaImports
 case class ExtensionManager(department: Department) extends BuiltInRole(ExtensionManagerRoleDefinition, department)
 
 case object ExtensionManagerRoleDefinition extends UnassignableBuiltInRoleDefinition {
-	
+
 	override def description = "Extension Manager"
-	
-	GrantsScopedPermission( 
-		Extension.ReviewRequest,
+
+	GrantsScopedPermission(
 		Extension.Update,
 		Extension.Read
 	)

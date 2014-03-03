@@ -30,7 +30,7 @@
 							<i class="icon-user"></i> Edit module permissions
 						</a></li>
 					</#if>
-	
+
 					<li>
 						<#assign create_url><@routes.createAssignment module /></#assign>
 						<@fmt.permission_button
@@ -61,7 +61,7 @@
 							<i class="icon-folder-close"></i> Archive assignments
 						</@fmt.permission_button>
 					</li>
-	
+
 					<#if has_archived_assignments>
 						<li><a class="show-archived-assignments" href="#">
 							<i class="icon-eye-open"></i> Show archived assignments
@@ -70,11 +70,11 @@
 					</#if>
 			  </ul>
 			</div>
-	
+
 			<h2 class="section-title with-button"><@fmt.module_name module /></h2>
 		</div>
-	
-	
+
+
 		<#if has_assignments || has_archived_assignments>
 		<div class="module-info-contents striped-section-contents">
 			<#if has_assignments && expand_by_default>
@@ -82,7 +82,7 @@
 			</#if>
 		</div>
 		</#if>
-	
+
 	</div>
 </#macro>
 
@@ -251,8 +251,8 @@
 					<#if !assignment.openEnded>
 						<#if assignment.allowExtensions || assignment.hasExtensions>
 							<li>
-								<#if can.do('Extension.ReviewRequest', assignment)>
-									<#assign ext_caption='Grant extensions' />
+								<#if can.do('Extension.Update', assignment)>
+									<#assign ext_caption='Manage extensions' />
 								<#else>
 									<#assign ext_caption='View extensions' />
 								</#if>
@@ -268,7 +268,7 @@
 						<#else>
 							<li class="disabled"><a class="use-tooltip" data-delay="500" data-container=".assignment-buttons" title="Extensions are not allowed on this assignment."><i class="icon-calendar"></i> Grant extensions </a></li>
 						</#if>
-	
+
 						<li class="divider"></li>
 					</#if>
 
