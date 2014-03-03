@@ -1,18 +1,14 @@
 package uk.ac.warwick.tabula.data
 
 import org.junit.{After, Before}
-import org.springframework.test.context.transaction.{TransactionConfiguration, BeforeTransaction}
+
 import org.springframework.transaction.annotation.Transactional
-import org.springframework.context.annotation.{ClassPathScanningCandidateComponentProvider, ClassPathBeanDefinitionScanner}
-import org.springframework.core.`type`.filter.AssignableTypeFilter
 import uk.ac.warwick.tabula.{PackageScanner, Mockito, Fixtures, PersistenceTestBase}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.userlookup.User
-import scala.reflect.runtime.universe._
 import javax.persistence.DiscriminatorValue
 import org.joda.time.{DateTimeUtils, DateTime}
-import uk.ac.warwick.tabula.data.model.groups.SmallGroup
 import uk.ac.warwick.tabula.data.model.notifications.{ScheduledMeetingRecordInviteeNotification, ScheduledMeetingRecordNotification, SubmissionReceivedNotification}
 import org.hibernate.ObjectNotFoundException
 
@@ -24,13 +20,14 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 	val agentMember = Fixtures.member(userType=MemberUserType.Staff)
 	val agent = agentMember.asSsoUser
 
-	val victim = Fixtures.user("heronVictim")
+	val victim = Fixtures.user("heronVictim", "heronVictim")
 	val heron = new Heron(victim)
 
 	@Before
 	def setup() {
 		notificationDao.sessionFactory = sessionFactory
 		SSOUserType.userLookup = smartMock[UserLookupService]
+		SSOUserType.userLookup.getUserByUserId("heronVictim") returns victim
 		// hbm2ddl generates a swathe of conflicting foreign key constraints for entity_id, so ignore for this test
 		session.createSQLQuery("SET DATABASE REFERENTIAL INTEGRITY FALSE").executeUpdate()
 	}
@@ -59,7 +56,7 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 			session.clear()
 
 			val retrievedNotification = notificationDao.getById(notification.id).get.asInstanceOf[HeronWarningNotification]
-			retrievedNotification.title should be ("Blissfully unaware group - You all need to know. Herons would love to kill you in your sleep")
+			retrievedNotification.title should be ("You all need to know. Herons would love to kill you in your sleep")
 			retrievedNotification.url should be ("/beware/herons")
 			retrievedNotification.item.entity should be(heron)
 			retrievedNotification.target should not be(null)
@@ -125,12 +122,16 @@ class NotificationDaoTest extends PersistenceTestBase with Mockito {
 		var ii = 0
 		val now = DateTime.now
 		DateTimeUtils.setCurrentMillisFixed(now.getMillis)
+
+		session.save(heron)
+
 		val notifications = for (i <- 1 to 1000) {
 			val notification = newHeronNotification(agent, heron)
 			notification.created = now.minusMinutes(i)
 			notificationDao.save(notification)
 			ii += 1
 		}
+
 		session.flush()
 
 		val everything = notificationDao.recent(now.minusMonths(10)).takeWhile(n => true).toSeq
