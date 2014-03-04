@@ -39,6 +39,10 @@ class ModuleDaoTest extends PersistenceTestBase {
 			dao.findModulesNamedLike("Cs") should be (Seq(cs108, cs240, cs241, cs242, cs333))
 			dao.findModulesNamedLike("s2") should be (Seq(cs240, cs241, cs242))
 			dao.findModulesNamedLike("Hello") should be (Seq())
+
+			dao.hasAssignments(cs108) should be (true)
+			dao.hasAssignments(cs242) should be (false)
+
 		}
 	}}
 	
