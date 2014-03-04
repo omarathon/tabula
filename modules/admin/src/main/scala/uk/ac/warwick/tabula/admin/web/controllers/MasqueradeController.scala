@@ -11,14 +11,17 @@ import uk.ac.warwick.tabula.admin.commands.MasqueradeCommand
 import uk.ac.warwick.tabula.web.Cookies._
 import uk.ac.warwick.tabula.web.{Cookie, Mav}
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.events.EventHandling
 
 @Controller
 @RequestMapping(Array("/masquerade"))
 class MasqueradeController extends AdminController {
 
+	EventHandling.enabled = false
+
 	type MasqueradeCommand = Appliable[Option[Cookie]]
 
-	@ModelAttribute("masqueradeCommand") def command: MasqueradeCommand = MasqueradeCommand()
+	@ModelAttribute("masqueradeCommand") def command(): MasqueradeCommand = MasqueradeCommand()
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def form(@ModelAttribute("masqueradeCommand") cmd: MasqueradeCommand): Mav = Mav("masquerade/form").crumbs(Breadcrumbs.Current("Masquerade"))
