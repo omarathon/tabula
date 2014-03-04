@@ -26,6 +26,21 @@ class HeronWarningNotification extends NotificationWithTarget[Heron, Heron]
 }
 
 @Entity
+@DiscriminatorValue(value="heronDefeat")
+class HeronDefeatedNotification extends NotificationWithTarget[Heron, Heron]
+with SingleItemNotification[Heron] with SingleRecipientNotification {
+
+	import HeronWarningNotification._
+
+	val verb: String = "Heron"
+
+	def title: String = "A heron has been defeated. Rejoice"
+	def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
+	def url: String = "/beware/herons"
+	def recipient = item.entity.victim
+}
+
+@Entity
 class Heron extends GeneratedId with ToEntityReference {
 
 	def this(v: User) = {

@@ -248,6 +248,7 @@
 								<include>libs/spin-js/jquery.spin.js</include>
 								<include>js/modernizr.js</include>
 								<include>js/browser-info.js</include>
+								<include>js/activity-streams.js</include>
 							</includes>
 						</aggregation>
 						<aggregation>

@@ -110,6 +110,9 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.NotificationPriorityUserType")
 	var priority: NotificationPriority = NotificationPriority.Info
 
+	// The priority, or if it is null then the default value of Info.
+	def priorityOrDefault = Option(priority).getOrElse(NotificationPriority.Info)
+
 	@OneToMany(mappedBy="notification", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
 	var recipientNotificationInfos: JList[RecipientNotificationInfo] = JArrayList()
 

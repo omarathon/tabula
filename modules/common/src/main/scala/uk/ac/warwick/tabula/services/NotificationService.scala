@@ -68,7 +68,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 			Some(new Activity[Any](
 				title = notification.title,
 				date = notification.created,
-				priority = notification.priority.toNumericalValue,
+				priority = notification.priorityOrDefault.toNumericalValue,
 				agent = notification.agent,
 				verb = notification.verb,
 				url = notification.url,

@@ -7,9 +7,10 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.ActivityService._
 import uk.ac.warwick.tabula.commands.Appliable
-import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute}
-import uk.ac.warwick.tabula.home.commands.ActivityStreamCommand
+import org.springframework.web.bind.annotation.{RequestHeader, RequestParam, ModelAttribute}
+import uk.ac.warwick.tabula.home.commands.{ActivityStreamCommandState, ActivityStreamCommand}
 import uk.ac.warwick.tabula.services.{SearchPagination, ActivityStreamRequest}
+import uk.ac.warwick.tabula.web.views.JSONView
 
 @Controller
 class ActivityStreamController extends BaseController with ActivityJsonMav {
@@ -18,13 +19,13 @@ class ActivityStreamController extends BaseController with ActivityJsonMav {
 	def command(
 			user: CurrentUser,
 			@RequestParam(defaultValue="20") max: Int,
-			@RequestParam types: JList[String],
+			@RequestParam(required=false) types: JList[String],
 			@RequestParam(defaultValue="0") minPriority: Double, // minPriority of zero means we show all by default
 			@RequestParam(defaultValue="false") includeDismissed: Boolean,
 			@RequestParam(required=false) lastDoc: JInteger,
 			@RequestParam(required=false) last: JLong,
 			@RequestParam(required=false) token: JLong) = {
-		val typeSet = if (types.isEmpty) None else Some(types.asScala.toSet)
+		val typeSet = if (types == null || types.isEmpty) None else Some(types.asScala.toSet)
 		val pagination = if (token != null && lastDoc != null && last != null) {
 			Some(SearchPagination(lastDoc, last, token))
 		} else {
@@ -35,8 +36,25 @@ class ActivityStreamController extends BaseController with ActivityJsonMav {
 	}
 
 	@RequestMapping(value=Array("/activity/@me"))
-	def userStream(@ModelAttribute("command") command: Appliable[PagedActivities]) = {
+	def userStream(@ModelAttribute("command") command: Appliable[PagedActivities] with ActivityStreamCommandState) = {
 		val activities = command.apply()
-		toMav(activities.items)
+		val model = toModel(activities.items)
+
+		val pagination = activities.last.map { last =>
+			Map(
+				"token" -> activities.token,
+				"doc" -> last.doc,
+				"field" -> last.fields(0)
+			)
+		}
+
+		val extraModel = Map(
+			"max" -> command.request.max,
+			"latest" -> command.request.pagination.isEmpty,
+			"total" -> activities.total,
+			"pagination" -> pagination
+		)
+
+		new JSONView(model ++ extraModel)
 	}
 }

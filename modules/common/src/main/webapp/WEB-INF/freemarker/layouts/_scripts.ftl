@@ -16,6 +16,7 @@
 	<@script "/static/libs/spin-js/jquery.spin.js" />
 	<@script "/static/js/modernizr.js" />
 	<@script "/static/js/browser-info.js" />
+	<@script "/static/js/activity-streams.js" />
 <#else>
 	<@script "/static/js/render.js" />
 </#if>

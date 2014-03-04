@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-import uk.ac.warwick.tabula.data.model.Notification
+import uk.ac.warwick.tabula.data.model.{NotificationPriority, Notification}
 import java.io.File
 import org.apache.lucene.analysis.Analyzer
 import org.joda.time.DateTime
@@ -39,6 +39,14 @@ trait NotificationQueryMethods { self: NotificationIndexServiceImpl =>
 		if (!req.includeDismissed) {
 			val dismissedQuery = new TermQuery(new Term("dismissed", "false"))
 			query.add(dismissedQuery, BooleanClause.Occur.MUST)
+		}
+
+		req.types.foreach { types =>
+			val typesQuery = new BooleanQuery()
+			types.foreach { typ =>
+				typesQuery.add(new TermQuery(new Term("notificationType", typ)), BooleanClause.Occur.SHOULD)
+			}
+			query.add(typesQuery, BooleanClause.Occur.MUST)
 		}
 
 		val sort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true))
@@ -91,11 +99,12 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 
 		if (recipient.isFoundUser && recipient.getUserId != null) {
 			val notificationType = notification.getClass.getAnnotation(classOf[DiscriminatorValue]).value()
+			val priority = notification.priorityOrDefault
 			doc.add(plainStringField(IdField, item.id))
 			doc.add(plainStringField("notification", notification.id))
 			doc.add(plainStringField("recipient", recipient.getUserId))
 			doc.add(plainStringField("notificationType", notificationType))
-			doc.add(doubleField("priority", notification.priority.toNumericalValue))
+			doc.add(doubleField("priority", priority.toNumericalValue))
 			doc.add(booleanField("dismissed", notification.isDismissed(recipient)))
 			doc.add(dateField(UpdatedDateField, notification.created))
 			Seq(doc)
