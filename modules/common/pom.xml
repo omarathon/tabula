@@ -43,22 +43,6 @@
 			</testResource>
 		</testResources>
 
-		<plugins>
-			<!-- Collect reflections information -->
-			<plugin>
-				<groupId>org.reflections</groupId>
-				<artifactId>reflections-maven</artifactId>
-				<version>0.9.9-RC1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>reflections</goal>
-						</goals>
-						<phase>process-classes</phase>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
 	</build>
 
 	<dependencies>
