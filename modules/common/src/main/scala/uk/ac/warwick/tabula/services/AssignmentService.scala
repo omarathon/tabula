@@ -1,15 +1,21 @@
 package uk.ac.warwick.tabula.services
 
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms._
-import uk.ac.warwick.tabula.data.Daoisms
+import uk.ac.warwick.tabula.data.{AssignmentDaoComponent, AutowiringAssignmentDaoComponent}
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.userlookup.User
-import org.hibernate.criterion.{Restrictions, Order}
-import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.spring.Wire
+import org.joda.time.DateTime
+
+trait AssignmentServiceComponent {
+	def assignmentService: AssignmentService
+}
+
+trait AutowiringAssignmentServiceComponent extends AssignmentServiceComponent {
+	var assignmentService = Wire[AssignmentService]
+}
 
 /**
  * Service providing access to Assignments and related objects.
@@ -24,6 +30,7 @@ trait AssignmentService {
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment]
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment]
+	def getAssignmentsWithSubmissionBetweenDates(universityId: String, start: DateTime, end: DateTime): Seq[Assignment]
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment]
 
@@ -38,95 +45,36 @@ trait AssignmentService {
 
 }
 
+abstract class AbstractAssignmentService extends AssignmentService {
+	self: AssignmentDaoComponent =>
 
+	def getAssignmentById(id: String): Option[Assignment] = assignmentDao.getAssignmentById(id)
+	def save(assignment: Assignment): Unit = assignmentDao.save(assignment)
+
+	def deleteFormField(field: FormField) : Unit = assignmentDao.deleteFormField(field)
+
+	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment] =
+		assignmentDao.getAssignmentByNameYearModule(name, year, module)
+
+	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] = assignmentDao.getAssignmentsWithFeedback(universityId)
+	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] = assignmentDao.getAssignmentsWithSubmission(universityId)
+	def getAssignmentsWithSubmissionBetweenDates(universityId: String, start: DateTime, end: DateTime): Seq[Assignment] =
+		assignmentDao.getAssignmentsWithSubmissionBetweenDates(universityId, start, end)
+
+	def getAssignmentWhereMarker(user: User): Seq[Assignment] = assignmentDao.getAssignmentWhereMarker(user)
+
+	/**
+	 * Find a recent assignment within this module or possible department.
+	 */
+	def recentAssignment(department: Department): Option[Assignment] = assignmentDao.recentAssignment(department)
+
+	def getAssignmentsByName(partialName: String, department: Department): Seq[Assignment] = assignmentDao.getAssignmentsByName(partialName, department)
+
+	def findAssignmentsByNameOrModule(query: String): Seq[Assignment] = assignmentDao.findAssignmentsByNameOrModule(query)
+}
 
 @Service(value = "assignmentService")
 class AssignmentServiceImpl
-	extends AssignmentService
-		with Daoisms
-		with Logging {
-	import Restrictions._
-
-	@Autowired var auditEventIndexService: AuditEventIndexService = _
-
-	def getAssignmentById(id: String) = getById[Assignment](id)
-	def save(assignment: Assignment) = session.saveOrUpdate(assignment)
-
-	def deleteFormField(field: FormField) {
-		session.delete(field)
-	}
-
-	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] =
-		session.newQuery[Assignment]("""select a from Assignment a
-				join a.feedbacks as f
-				where f.universityId = :universityId
-				and f.released=true""")
-			.setString("universityId", universityId)
-			.distinct.seq
-
-	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] =
-		session.newQuery[Assignment]("""select a from Assignment a
-				join a.submissions as f
-				where f.universityId = :universityId""")
-			.setString("universityId", universityId)
-			.distinct.seq
-
-	def getAssignmentWhereMarker(user: User): Seq[Assignment] =
-		session.newQuery[Assignment]("""select a
-				from Assignment a
-				where (:userId in elements(a.markingWorkflow.firstMarkers.includeUsers)
-					or :userId in elements(a.markingWorkflow.secondMarkers.includeUsers))
-					and a.deleted = false and a.archived = false
-																 """).setString("userId", user.getUserId).distinct.seq
-
-	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module) =
-		session.newQuery[Assignment]("from Assignment where name=:name and academicYear=:year and module=:module and deleted=0")
-			.setString("name", name)
-			.setParameter("year", year)
-			.setEntity("module", module)
-			.seq
-
-	def recentAssignment(department: Department) = {
-		//auditEventIndexService.recentAssignment(department)
-		session.newCriteria[Assignment]
-			.createAlias("module", "m")
-			.add(is("m.department", department))
-			.add(Restrictions.isNotNull("createdDate"))
-			.addOrder(Order.desc("createdDate"))
-			.setMaxResults(1)
-			.uniqueResult
-	}
-
-	val MaxAssignmentsByName = 15
-
-	def getAssignmentsByName(partialName: String, department: Department) = {
-
-		session.newQuery[Assignment]("""select a from Assignment a
-				where a.module.department = :dept
-				and a.name like :nameLike
-				order by createdDate desc
-		""")
-			.setParameter("dept", department)
-			.setString("nameLike", "%" + partialName + "%")
-			.setMaxResults(MaxAssignmentsByName).seq
-	}
-
-	def findAssignmentsByNameOrModule(query: String) = {
-		session.newQuery[Assignment]("""select a from Assignment
-				a where a.name like :nameLike
-				or a.module like :nameLike
-				order by createdDate desc
-		 """)
-			.setString("nameLike", "%" + query + "%")
-			.setMaxResults(MaxAssignmentsByName).seq
-	}
-}
-
-trait AssignmentServiceComponent {
-	def assignmentService: AssignmentService
-}
-
-trait AutowiringAssignmentServiceComponent extends AssignmentServiceComponent{
-	var assignmentService = Wire[AssignmentService]
-}
+	extends AbstractAssignmentService
+	with AutowiringAssignmentDaoComponent
 
