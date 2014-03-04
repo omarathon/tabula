@@ -30,7 +30,7 @@ trait AssignmentService {
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment]
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment]
-	def getAssignmentsWithSubmissionBetweenDates(universityId: String, start: DateTime, end: DateTime): Seq[Assignment]
+	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment]
 
@@ -58,8 +58,8 @@ abstract class AbstractAssignmentService extends AssignmentService {
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment] = assignmentDao.getAssignmentsWithFeedback(universityId)
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment] = assignmentDao.getAssignmentsWithSubmission(universityId)
-	def getAssignmentsWithSubmissionBetweenDates(universityId: String, start: DateTime, end: DateTime): Seq[Assignment] =
-		assignmentDao.getAssignmentsWithSubmissionBetweenDates(universityId, start, end)
+	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
+		assignmentDao.getSubmissionsForAssignmentsBetweenDates(universityId, startInclusive, endExclusive)
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment] = assignmentDao.getAssignmentWhereMarker(user)
 
