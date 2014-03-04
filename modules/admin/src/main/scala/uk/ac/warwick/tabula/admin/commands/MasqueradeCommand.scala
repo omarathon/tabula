@@ -11,7 +11,7 @@ import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupC
 
 object MasqueradeCommand {
 	def apply() =
-		new MasqueradeCommandInternal
+		new MasqueradeCommandInternal()
 				with ComposableCommand[Option[Cookie]]
 				with MasqueradeCommandPermissions
 				with MasqueradeCommandDescription

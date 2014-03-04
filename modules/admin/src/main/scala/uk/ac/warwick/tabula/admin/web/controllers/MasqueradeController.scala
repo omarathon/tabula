@@ -21,7 +21,7 @@ class MasqueradeController extends AdminController {
 
 	type MasqueradeCommand = Appliable[Option[Cookie]]
 
-	@ModelAttribute("masqueradeCommand") def command: MasqueradeCommand = MasqueradeCommand()
+	@ModelAttribute("masqueradeCommand") def command(): MasqueradeCommand = MasqueradeCommand()
 
 	@RequestMapping(method = Array(HEAD, GET))
 	def form(@ModelAttribute("masqueradeCommand") cmd: MasqueradeCommand): Mav = Mav("masquerade/form").crumbs(Breadcrumbs.Current("Masquerade"))
