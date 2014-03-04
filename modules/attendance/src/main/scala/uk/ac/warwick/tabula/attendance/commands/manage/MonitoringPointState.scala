@@ -33,6 +33,7 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 	var assignmentSubmissionQuantity: JInteger = 1
 	var assignmentSubmissionModules: JSet[Module] = JHashSet()
 	var assignmentSubmissionAssignments: JSet[Assignment] = JHashSet()
+	var isAssignmentSubmissionDisjuction: Boolean = false
 
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
 
@@ -69,6 +70,7 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 					case assignments: JSet[Assignment] => assignments.asScala.toSeq
 					case _ => Seq()
 				}
+				point.assignmentSubmissionIsDisjunction = isAssignmentSubmissionDisjuction
 			case _ =>
 		}
 		point
@@ -96,6 +98,14 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 				smallGroupEventQuantity = point.smallGroupEventQuantity
 				smallGroupEventQuantityAll = point.smallGroupEventQuantity == 0
 				isAnySmallGroupEventModules = point.smallGroupEventModules.size == 0
+			case MonitoringPointType.AssignmentSubmission =>
+				isSpecificAssignments = point.assignmentSubmissionIsSpecificAssignments
+				assignmentSubmissionQuantity = point.assignmentSubmissionQuantity
+				assignmentSubmissionModules.clear()
+				assignmentSubmissionModules.addAll(point.assignmentSubmissionModules.asJava)
+				assignmentSubmissionAssignments.clear()
+				assignmentSubmissionAssignments.addAll(point.assignmentSubmissionAssignments.asJava)
+				isAssignmentSubmissionDisjuction = point.assignmentSubmissionIsDisjunction
 			case _ =>
 		}
 	}
