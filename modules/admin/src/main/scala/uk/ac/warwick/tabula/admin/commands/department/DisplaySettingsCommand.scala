@@ -16,10 +16,6 @@ import uk.ac.warwick.tabula.helpers.LazyMaps
 import uk.ac.warwick.tabula.services.RelationshipServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringRelationshipServiceComponent
 
-trait DisplaySettingsCommand extends CommandInternal[Department] with DisplaySettingsCommandState {
-	def init(): Unit
-}
-
 object DisplaySettingsCommand {
 	def apply(department: Department) =
 		new DisplaySettingsCommandInternal(department)
@@ -34,7 +30,7 @@ trait DisplaySettingsCommandState {
 	val department: Department
 }
 
-class DisplaySettingsCommandInternal(val department: Department) extends DisplaySettingsCommand with CommandInternal[Department]
+class DisplaySettingsCommandInternal(val department: Department) extends CommandInternal[Department] with PopulateOnForm
 	with SelfValidating with BindListener with DisplaySettingsCommandState {
 
 	this: ModuleAndDepartmentServiceComponent with RelationshipServiceComponent =>
@@ -55,7 +51,7 @@ class DisplaySettingsCommandInternal(val department: Department) extends Display
 			case (id, bString) => (id -> java.lang.Boolean.valueOf(bString))
 		})
 
-	def init() {
+	def populate() {
 		relationshipService.allStudentRelationshipTypes.foreach { relationshipType =>
 			if (!studentRelationshipDisplayed.containsKey(relationshipType.id))
 				studentRelationshipDisplayed.put(relationshipType.id, relationshipType.defaultDisplay)

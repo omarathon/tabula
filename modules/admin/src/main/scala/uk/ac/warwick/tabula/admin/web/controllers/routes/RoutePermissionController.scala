@@ -32,7 +32,7 @@ trait RoutePermissionControllerMethods extends AdminController {
 	}
 
 	def form(route: Route, usercodes: Seq[String], role: Option[RoleDefinition], action: String): Mav = {
-		val users = userLookup.getUsersByUserIds(usercodes.asJava)
+		val users = userLookup.getUsersByUserIds(usercodes.asJava).asScala
 		Mav("admin/routes/permissions",
 				"route" -> route,
 				"users" -> users,

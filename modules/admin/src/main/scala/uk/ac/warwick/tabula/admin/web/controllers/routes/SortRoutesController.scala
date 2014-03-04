@@ -29,7 +29,7 @@ class SortRoutesController extends AdminController {
 	def command(@PathVariable department: Department): SortRoutesCommand = SortRoutesCommand(department)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def showForm(@ModelAttribute cmd: SortRoutesCommand, errors: Errors):Mav = {
+	def showForm(@ModelAttribute cmd: SortRoutesCommand):Mav = {
 		cmd.populate()
 		cmd.sort()
 		form(cmd)
@@ -46,7 +46,7 @@ class SortRoutesController extends AdminController {
 		}
 	}
 		
-	def form(cmd: SortRoutesCommand): Mav = {
+	private def form(cmd: SortRoutesCommand): Mav = {
 		if (cmd.department.hasParent) {
 			// Sorting is done from the POV of the top department.
 			Redirect(Routes.department.sortRoutes(cmd.department.parent))
