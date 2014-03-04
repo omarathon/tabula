@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.data.model.{Department, Module, Assignment}
+import uk.ac.warwick.tabula.data.model.{Submission, Department, Module, Assignment}
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.data.model.forms.FormField
 import org.joda.time.DateTime
@@ -26,7 +26,7 @@ trait AssignmentDao {
 
 	def getAssignmentsWithFeedback(universityId: String): Seq[Assignment]
 	def getAssignmentsWithSubmission(universityId: String): Seq[Assignment]
-	def getAssignmentsWithSubmissionBetweenDates(universityId: String, start: DateTime, end: DateTime): Seq[Assignment]
+	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission]
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment]
 	def getAssignmentByNameYearModule(name: String, year: AcademicYear, module: Module): Seq[Assignment]
@@ -64,8 +64,13 @@ class AssignmentDaoImpl extends AssignmentDao with Daoisms {
 			.setString("universityId", universityId)
 			.distinct.seq
 
-	def getAssignmentsWithSubmissionBetweenDates(universityId: String, start: DateTime, end: DateTime): Seq[Assignment] =
-		Seq()
+	def getSubmissionsForAssignmentsBetweenDates(universityId: String, startInclusive: DateTime, endExclusive: DateTime): Seq[Submission] =
+		session.newCriteria[Submission]
+			.createAlias("assignment", "assignment")
+			.add(is("universityId", universityId))
+			.add(Restrictions.ge("assignment.closeDate", startInclusive))
+			.add(Restrictions.lt("assignment.closeDate", endExclusive))
+			.seq
 
 	def getAssignmentWhereMarker(user: User): Seq[Assignment] =
 		session.newQuery[Assignment]("""select a

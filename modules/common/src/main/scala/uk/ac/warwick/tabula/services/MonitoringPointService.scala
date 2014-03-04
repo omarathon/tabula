@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import org.joda.time.DateTime
 import uk.ac.warwick.util.termdates.Term
-import uk.ac.warwick.tabula.data.model.groups.SmallGroupEventAttendance
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroupEventAttendance}
 import uk.ac.warwick.tabula.commands.MemberOrUser
 
 trait MonitoringPointServiceComponent {
@@ -420,7 +420,7 @@ trait AutowiringMonitoringPointGroupProfileServiceComponent extends MonitoringPo
 }
 
 trait MonitoringPointGroupProfileService {
-	def getCheckpointsForAttendance(attendance: Seq[SmallGroupEventAttendance], includeTheseAttendances: Boolean = true): Seq[MonitoringCheckpoint]
+	def getCheckpointsForAttendance(attendance: Seq[SmallGroupEventAttendance]): Seq[MonitoringCheckpoint]
 	def updateCheckpointsForAttendance(attendance: Seq[SmallGroupEventAttendance]): Seq[MonitoringCheckpoint]
 }
 
@@ -428,7 +428,7 @@ abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPoin
 
 	self: MonitoringPointServiceComponent with ProfileServiceComponent with SmallGroupServiceComponent =>
 
-	def getCheckpointsForAttendance(attendances: Seq[SmallGroupEventAttendance], includeTheseAttendances: Boolean = true): Seq[MonitoringCheckpoint] = {
+	def getCheckpointsForAttendance(attendances: Seq[SmallGroupEventAttendance]): Seq[MonitoringCheckpoint] = {
 		attendances.filter(_.state == AttendanceState.Attended).flatMap(attendance => {
 			profileService.getMemberByUniversityId(attendance.universityId).flatMap{
 				case studentMember: StudentMember =>
@@ -508,27 +508,27 @@ class MonitoringPointGroupProfileServiceImpl
 
 
 
-/// MonitoringPointSomethingService ///
+/// MonitoringPointProfileTermAssignmentService ///
 
 
-trait MonitoringPointSomethingServiceComponent {
-	def monitoringPointSomethingService: MonitoringPointSomethingService
+trait MonitoringPointProfileTermAssignmentServiceComponent {
+	def monitoringPointProfileTermAssignmentService: MonitoringPointProfileTermAssignmentService
 }
 
-trait AutowiringMonitoringPointSomethingServiceComponent extends MonitoringPointSomethingServiceComponent {
-	var monitoringPointSomethingService = Wire[MonitoringPointSomethingService]
+trait AutowiringMonitoringPointProfileTermAssignmentServiceComponent extends MonitoringPointProfileTermAssignmentServiceComponent {
+	var monitoringPointProfileTermAssignmentService = Wire[MonitoringPointProfileTermAssignmentService]
 }
 
-trait MonitoringPointSomethingService {
-	def getCheckpointsForSubmission(submission: Submission, includeThisSubmission: Boolean = true): Seq[MonitoringCheckpoint]
+trait MonitoringPointProfileTermAssignmentService {
+	def getCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint]
 	def updateCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint]
 }
 
-abstract class AbstractMonitoringPointSomethingService extends MonitoringPointSomethingService {
+abstract class AbstractMonitoringPointProfileTermAssignmentService extends MonitoringPointProfileTermAssignmentService {
 
 	self: MonitoringPointServiceComponent with ProfileServiceComponent with TermServiceComponent with AssignmentServiceComponent =>
 
-	def getCheckpointsForSubmission(submission: Submission, includeThisSubmission: Boolean = true): Seq[MonitoringCheckpoint] = {
+	def getCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint] = {
 		if (submission.isLate) {
 			Seq()
 		} else {
@@ -565,8 +565,8 @@ abstract class AbstractMonitoringPointSomethingService extends MonitoringPointSo
 		points.filter(point =>
 		// Is it the correct type
 			point.pointType == MonitoringPointType.AssignmentSubmission
-				// Is the submission inside the point's weeks
-				&& isDateValidForPoint(point, submission.submittedDate)
+				// Is the assignment's due date inside the point's weeks
+				&& isDateValidForPoint(point, submission.assignment.closeDate)
 				// Is the submission's assignment or module valid
 				&& isAssignmentOrModuleValidForPoint(point, submission.assignment)
 				// Is there no existing checkpoint
@@ -594,25 +594,42 @@ abstract class AbstractMonitoringPointSomethingService extends MonitoringPointSo
 	}
 
 	private def checkQuantity(point: MonitoringPoint, submission: Submission, studentMember: StudentMember): Boolean = {
+		val weeksForYear = termService.getAcademicWeeksForYear(point.pointSet.academicYear.dateInTermOne).toMap
+		def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =
+			weeksForYear(weekNumber).getStart.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
+
 		if (point.assignmentSubmissionIsSpecificAssignments) {
 			if (point.assignmentSubmissionIsDisjunction) {
 				true
 			} else {
-				false
+				val submissions = assignmentService.getSubmissionsForAssignmentsBetweenDates(
+					studentMember.universityId,
+					weekNumberToDate(point.validFromWeek, DayOfWeek.Monday),
+					weekNumberToDate(point.requiredFromWeek + 1, DayOfWeek.Monday)
+				).filterNot(_.isLate).filterNot(s => s.assignment == submission.assignment) ++ Seq(submission)
+
+				point.assignmentSubmissionAssignments.forall(a => submissions.exists(s => s.assignment == a))
 			}
 		} else {
 			if (point.assignmentSubmissionQuantity == 1) {
 				true
 			} else {
-				false
+				val submissions = (assignmentService.getSubmissionsForAssignmentsBetweenDates(
+						studentMember.universityId,
+						weekNumberToDate(point.validFromWeek, DayOfWeek.Monday),
+						weekNumberToDate(point.requiredFromWeek + 1, DayOfWeek.Monday)
+					).filterNot(_.isLate).filterNot(s => s.assignment == submission.assignment) ++ Seq(submission)
+				).filter(s => point.assignmentSubmissionModules.contains(s.assignment.module))
+
+				submissions.size >= point.assignmentSubmissionQuantity
 			}
 		}
 	}
 }
 
-@Service("monitoringPointSomethingService")
-class MonitoringPointSomethingServiceImpl
-	extends AbstractMonitoringPointSomethingService
+@Service("monitoringPointProfileTermAssignmentService")
+class MonitoringPointProfileTermAssignmentServiceImpl
+	extends AbstractMonitoringPointProfileTermAssignmentService
 	with AutowiringMonitoringPointServiceComponent
 	with AutowiringProfileServiceComponent
 	with AutowiringTermServiceComponent
