@@ -55,6 +55,7 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 		val criteria = session.newCriteria[Module]
 
 			if (checkAssignments) criteria.createAlias("assignments", "a")
+			if (checkGroups) criteria.createAlias("groupSets", "g")
 
 			criteria.add(disjunction()
 			.add(like("code", s"%${query.toLowerCase}%").ignoreCase)
