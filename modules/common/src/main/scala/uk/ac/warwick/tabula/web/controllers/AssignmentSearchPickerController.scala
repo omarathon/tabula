@@ -25,8 +25,8 @@ class AssignmentSearchPickerController extends BaseController {
 					"id" -> assignment.id,
 					"name" -> assignment.name,
 					"module" -> assignment.module.code,
-					"department" -> assignment.module.department.name)
-				)
+					"department" -> assignment.module.department.name
+				))
 			)
 		)
 	}

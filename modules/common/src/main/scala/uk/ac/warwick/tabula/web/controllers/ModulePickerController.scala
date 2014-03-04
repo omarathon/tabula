@@ -30,8 +30,7 @@ class ModulePickerController extends BaseController {
 					"department" -> result.module.department.name,
 					"hasSmallGroups" -> result.hasSmallGroups,
 					"hasAssignments" -> result.hasAssignments
-				)
-				)
+				))
 			)
 		)
 	}
@@ -58,7 +57,6 @@ class ModulePickerCommand extends CommandInternal[Seq[ModulePickerResult]] {
 						if (checkAssignments) moduleAndDepartmentService.hasAssignments(module) else false)
 				}
 			}
-
 		}
 	}
 
