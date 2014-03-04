@@ -9,7 +9,7 @@ import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.web.views.JSONView
 
 
-case class ModulePickerResult(module: Module, hasSmallGroups: Boolean)
+case class ModulePickerResult(module: Module, hasSmallGroups: Boolean, hasAssignments: Boolean)
 
 @Controller
 @RequestMapping(value = Array("/api/modulepicker/query"))
@@ -28,7 +28,9 @@ class ModulePickerController extends BaseController {
 					"code" -> result.module.code,
 					"name" -> result.module.name,
 					"department" -> result.module.department.name,
-					"hasSmallGroups" -> result.hasSmallGroups)
+					"hasSmallGroups" -> result.hasSmallGroups,
+					"hasAssignments" -> result.hasAssignments
+				)
 				)
 			)
 		)
@@ -48,8 +50,15 @@ class ModulePickerCommand extends CommandInternal[Seq[ModulePickerResult]] {
 		if (query.isEmpty) {
 			Seq()
 		} else {
-			val modules: Seq[Module] = moduleAndDepartmentService.findModulesNamedLike(query, checkAssignments, checkGroups)
-			modules.map (module => ModulePickerResult(module, smallGroupService.hasSmallGroups(module)))
+			val modules: Seq[Module] = moduleAndDepartmentService.findModulesNamedLike(query)
+			modules.map {
+				case (module) => {
+					ModulePickerResult(module,
+						if (checkGroups) smallGroupService.hasSmallGroups(module) else false,
+						if (checkAssignments) moduleAndDepartmentService.hasAssignments(module) else false)
+				}
+			}
+
 		}
 	}
 

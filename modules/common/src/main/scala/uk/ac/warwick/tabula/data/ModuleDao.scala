@@ -11,7 +11,8 @@ trait ModuleDao {
 	def getByCode(code: String): Option[Module]
 	def getById(id: String): Option[Module]
 	def stampMissingRows(dept: Department, seenCodes: Seq[String]): Int
-	def findModulesNamedLike(query: String, checkAssignments: Boolean, checkGroups: Boolean): Seq[Module]
+	def hasAssignments(module: Module): Boolean
+	def findModulesNamedLike(query: String): Seq[Module]
 
 }
 
@@ -51,18 +52,20 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 			.executeUpdate()
 	}
 
-	def findModulesNamedLike(query: String, checkAssignments: Boolean, checkGroups: Boolean): Seq[Module] = {
-		val criteria = session.newCriteria[Module]
+	def hasAssignments(module: Module): Boolean = {
+		session.newCriteria[Assignment]
+			.add(is("module", module))
+			.project[Number](Projections.rowCount())
+			.uniqueResult.get.intValue() > 0
+	}
 
-			if (checkAssignments) criteria.createAlias("assignments", "a")
-			if (checkGroups) criteria.createAlias("groupSets", "g")
-
-			criteria.add(disjunction()
+	def findModulesNamedLike(query: String): Seq[Module] = {
+		session.newCriteria[Module]
+			.add(disjunction()
 			.add(like("code", s"%${query.toLowerCase}%").ignoreCase)
 			.add(like("name", s"%${query.toLowerCase}%").ignoreCase)
 			)
 			.addOrder(Order.asc("code"))
-			.distinct
 			.setMaxResults(20).seq
 	}
 
