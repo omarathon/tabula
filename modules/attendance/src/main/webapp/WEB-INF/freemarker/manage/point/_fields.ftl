@@ -184,7 +184,7 @@
 				</div>
 			</@form.labelled_row>
 
-			<@form.labelled_row "assignmentSubmissionDisjuction" "">
+			<@form.labelled_row "assignmentSubmissionDisjunction" "">
 				<@form.label clazz="radio" checkbox=true>
 					<input name="isAssignmentSubmissionDisjuction" type="radio" value="true" <#if command.isAssignmentSubmissionDisjuction()>checked</#if>>
 					<em>Any</em> of the assignments must have a submission
