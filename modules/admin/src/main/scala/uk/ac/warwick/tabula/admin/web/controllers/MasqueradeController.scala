@@ -11,10 +11,13 @@ import uk.ac.warwick.tabula.admin.commands.MasqueradeCommand
 import uk.ac.warwick.tabula.web.Cookies._
 import uk.ac.warwick.tabula.web.{Cookie, Mav}
 import uk.ac.warwick.tabula.commands.Appliable
+import uk.ac.warwick.tabula.events.EventHandling
 
 @Controller
 @RequestMapping(Array("/masquerade"))
 class MasqueradeController extends AdminController {
+
+	EventHandling.enabled = false
 
 	type MasqueradeCommand = Appliable[Option[Cookie]]
 
