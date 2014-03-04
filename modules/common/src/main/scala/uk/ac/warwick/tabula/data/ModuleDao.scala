@@ -1,8 +1,7 @@
 package uk.ac.warwick.tabula.data
 import org.springframework.stereotype.Repository
-import model.Module
-import model.Department
-import org.hibernate.criterion.{Restrictions, Order}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, Department}
+import org.hibernate.criterion.{Projections, Order}
 import org.joda.time.DateTime
 import org.hibernate.criterion.Restrictions._
 
@@ -12,7 +11,8 @@ trait ModuleDao {
 	def getByCode(code: String): Option[Module]
 	def getById(id: String): Option[Module]
 	def stampMissingRows(dept: Department, seenCodes: Seq[String]): Int
-	def findModulesNamedLike(query: String): Seq[Module]
+	def findModulesNamedLike(query: String, checkAssignments: Boolean, checkGroups: Boolean): Seq[Module]
+
 }
 
 @Repository
@@ -51,13 +51,17 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 			.executeUpdate()
 	}
 
-	def findModulesNamedLike(query: String): Seq[Module] = {
-		session.newCriteria[Module]
-		.add(disjunction()
+	def findModulesNamedLike(query: String, checkAssignments: Boolean, checkGroups: Boolean): Seq[Module] = {
+		val criteria = session.newCriteria[Module]
+
+			if (checkAssignments) criteria.createAlias("assignments", "a")
+
+			criteria.add(disjunction()
 			.add(like("code", s"%${query.toLowerCase}%").ignoreCase)
 			.add(like("name", s"%${query.toLowerCase}%").ignoreCase)
 			)
 			.addOrder(Order.asc("code"))
+			.distinct
 			.setMaxResults(20).seq
 	}
 

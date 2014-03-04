@@ -11,10 +11,10 @@ import uk.ac.warwick.tabula.web.views.JSONView
 
 @Controller
 @RequestMapping(value = Array("/api/assignmentpicker/query"))
-class AssignmentPickerController extends BaseController {
+class AssignmentSearchPickerController extends BaseController {
 
 	@ModelAttribute("command")
-	def command = AssignmentPickerCommand()
+	def command = AssignmentSearchPickerCommand()
 
 	@RequestMapping
 	def query(@ModelAttribute("command")cmd: Appliable[Seq[Assignment]]) = {
@@ -33,7 +33,7 @@ class AssignmentPickerController extends BaseController {
 
 }
 
-class AssignmentPickerCommand extends CommandInternal[Seq[Assignment]] {
+class AssignmentSearchPickerCommand extends CommandInternal[Seq[Assignment]] {
 
 	self: AssignmentServiceComponent =>
 
@@ -49,7 +49,7 @@ class AssignmentPickerCommand extends CommandInternal[Seq[Assignment]] {
 
 }
 
-object AssignmentPickerCommand {
-	def apply() = new AssignmentPickerCommand with Command[Seq[Assignment]] with AutowiringAssignmentServiceComponent
+object AssignmentSearchPickerCommand {
+	def apply() = new AssignmentSearchPickerCommand with Command[Seq[Assignment]] with AutowiringAssignmentServiceComponent
 	with ReadOnly with Unaudited with Public
 }

@@ -36,9 +36,9 @@ class ModuleDaoTest extends PersistenceTestBase {
 			dao.getById(cs333.id) should be (Some(cs333))
 			dao.getById("wibble") should be (None)
 
-			dao.findModulesNamedLike("Cs") should be (Seq(cs108, cs240, cs241, cs242, cs333))
-			dao.findModulesNamedLike("s2") should be (Seq(cs240, cs241, cs242))
-			dao.findModulesNamedLike("Hello") should be (Seq())
+			dao.findModulesNamedLike("Cs", false, false) should be (Seq(cs108, cs240, cs241, cs242, cs333))
+			dao.findModulesNamedLike("s2", false, false) should be (Seq(cs240, cs241, cs242))
+			dao.findModulesNamedLike("Hello", false, false) should be (Seq())
 		}
 	}}
 	
