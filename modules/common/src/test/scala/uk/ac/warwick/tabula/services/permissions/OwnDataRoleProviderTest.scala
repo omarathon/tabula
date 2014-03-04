@@ -1,10 +1,7 @@
 package uk.ac.warwick.tabula.services.permissions
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Fixtures
-import uk.ac.warwick.tabula.roles.Submitter
-import uk.ac.warwick.tabula.roles.FeedbackRecipient
-import uk.ac.warwick.tabula.roles.SettingsOwner
+import uk.ac.warwick.tabula.{CurrentUser, TestBase, Fixtures}
+import uk.ac.warwick.tabula.roles.{NotificationRecepient, Submitter, FeedbackRecipient, SettingsOwner}
 
 class OwnDataRoleProviderTest extends TestBase {
 	
@@ -13,6 +10,13 @@ class OwnDataRoleProviderTest extends TestBase {
 	val submission = Fixtures.submission("0123456", "cuscav")	
 	val feedback = Fixtures.feedback("0123456")
 	val userSettings = Fixtures.userSettings("cuscav")
+
+	val agent =  Fixtures.user("cuslaj")
+	val user = Fixtures.user("0123456", "cuscav")
+
+	val notification = Fixtures.notification(agent, user)
+	val notification2 = Fixtures.notification(agent, agent)
+
 	
 	@Test def forSubmission = withUser("cuscav", "0123456") {
 		provider.getRolesFor(currentUser, submission) should be (Seq(Submitter(submission)))
@@ -28,6 +32,11 @@ class OwnDataRoleProviderTest extends TestBase {
 		provider.getRolesFor(currentUser, feedback) should be (Seq(FeedbackRecipient(feedback)))
 		
 		provider.getRolesFor(currentUser, Fixtures.feedback()) should be (Seq())
+	}
+
+	@Test def forNotifications = withCurrentUser(new CurrentUser(user,user)) {
+		provider.getRolesFor(currentUser, notification) should be (Seq(NotificationRecepient(notification)))
+		provider.getRolesFor(currentUser, notification2) should be (Seq())
 	}
 	
 	@Test def forSettings = withUser("cuscav", "0123456") {
