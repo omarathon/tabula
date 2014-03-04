@@ -15,7 +15,6 @@ import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarise
 class AssignmentServiceTest extends PersistenceTestBase {
 
 	val thisAssignmentDao = new AssignmentDaoImpl
-	thisAssignmentDao.sessionFactory = sessionFactory
 
 	val assignmentService = new AbstractAssignmentService with AssignmentDaoComponent {
 		val assignmentDao = thisAssignmentDao
@@ -31,6 +30,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
   @Before def setup() {
 		userLookup = new MockUserLookup()
 		userLookup.defaultFoundUser = true
+		thisAssignmentDao.sessionFactory = sessionFactory
 		submissionService.sessionFactory = sessionFactory
 		val deptDao = new DepartmentDaoImpl
 		deptDao.sessionFactory = sessionFactory

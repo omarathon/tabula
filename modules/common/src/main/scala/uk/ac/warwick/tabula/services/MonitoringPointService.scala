@@ -377,7 +377,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 		else if (dateWeek == Term.WEEK_NUMBER_AFTER_END)
 			false
 		else
-			dateWeek >= point.validFromWeek && dateWeek <= point.requiredFromWeek
+			point.includesWeek(dateWeek)
 	}
 
 	/**
@@ -505,3 +505,115 @@ class MonitoringPointGroupProfileServiceImpl
 	with AutowiringMonitoringPointServiceComponent
 	with AutowiringProfileServiceComponent
 	with AutowiringSmallGroupServiceComponent
+
+
+
+/// MonitoringPointSomethingService ///
+
+
+trait MonitoringPointSomethingServiceComponent {
+	def monitoringPointSomethingService: MonitoringPointSomethingService
+}
+
+trait AutowiringMonitoringPointSomethingServiceComponent extends MonitoringPointSomethingServiceComponent {
+	var monitoringPointSomethingService = Wire[MonitoringPointSomethingService]
+}
+
+trait MonitoringPointSomethingService {
+	def getCheckpointsForSubmission(submission: Submission, includeThisSubmission: Boolean = true): Seq[MonitoringCheckpoint]
+	def updateCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint]
+}
+
+abstract class AbstractMonitoringPointSomethingService extends MonitoringPointSomethingService {
+
+	self: MonitoringPointServiceComponent with ProfileServiceComponent with TermServiceComponent with AssignmentServiceComponent =>
+
+	def getCheckpointsForSubmission(submission: Submission, includeThisSubmission: Boolean = true): Seq[MonitoringCheckpoint] = {
+		if (submission.isLate) {
+			Seq()
+		} else {
+			profileService.getMemberByUniversityId(submission.universityId).flatMap{
+				case studentMember: StudentMember =>
+					monitoringPointService.getPointSetForStudent(studentMember, submission.assignment.academicYear).flatMap(pointSet => {
+						val relevantPoints = getRelevantPoints(pointSet.points.asScala, submission, studentMember)
+						val checkpoints = relevantPoints.filter(point => checkQuantity(point, submission, studentMember)).map(point => {
+							val checkpoint = new MonitoringCheckpoint
+							checkpoint.autoCreated = true
+							checkpoint.point = point
+							checkpoint.monitoringPointService = monitoringPointService
+							checkpoint.student = studentMember
+							checkpoint.updatedBy = submission.userId
+							checkpoint.updatedDate = DateTime.now
+							checkpoint.state = AttendanceState.Attended
+							checkpoint
+						})
+						Option(checkpoints)
+					})
+				case _ => None
+			}.getOrElse(Seq())
+		}
+	}
+
+	def updateCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint] = {
+		getCheckpointsForSubmission(submission).map(checkpoint => {
+			monitoringPointService.saveOrUpdate(checkpoint)
+			checkpoint
+		})
+	}
+
+	private def getRelevantPoints(points: Seq[MonitoringPoint], submission: Submission, studentMember: StudentMember): Seq[MonitoringPoint] = {
+		points.filter(point =>
+		// Is it the correct type
+			point.pointType == MonitoringPointType.AssignmentSubmission
+				// Is the submission inside the point's weeks
+				&& isDateValidForPoint(point, submission.submittedDate)
+				// Is the submission's assignment or module valid
+				&& isAssignmentOrModuleValidForPoint(point, submission.assignment)
+				// Is there no existing checkpoint
+				&& monitoringPointService.getCheckpoint(studentMember, point).isEmpty
+				// The student hasn't been sent to SITS for this point
+				&& !monitoringPointService.studentAlreadyReportedThisTerm(studentMember, point)
+		)
+	}
+
+	private def isDateValidForPoint(point: MonitoringPoint, date: DateTime) = {
+		val dateWeek = termService.getAcademicWeekForAcademicYear(date, point.pointSet.academicYear)
+		if (dateWeek == Term.WEEK_NUMBER_BEFORE_START)
+			true
+		else if (dateWeek == Term.WEEK_NUMBER_AFTER_END)
+			false
+		else
+			point.includesWeek(dateWeek)
+	}
+
+	private def isAssignmentOrModuleValidForPoint(point: MonitoringPoint, assignment: Assignment) = {
+		if (point.assignmentSubmissionIsSpecificAssignments)
+			point.assignmentSubmissionAssignments.contains(assignment)
+		else
+			point.assignmentSubmissionModules.contains(assignment.module)
+	}
+
+	private def checkQuantity(point: MonitoringPoint, submission: Submission, studentMember: StudentMember): Boolean = {
+		if (point.assignmentSubmissionIsSpecificAssignments) {
+			if (point.assignmentSubmissionIsDisjunction) {
+				true
+			} else {
+				false
+			}
+		} else {
+			if (point.assignmentSubmissionQuantity == 1) {
+				true
+			} else {
+				false
+			}
+		}
+	}
+}
+
+@Service("monitoringPointSomethingService")
+class MonitoringPointSomethingServiceImpl
+	extends AbstractMonitoringPointSomethingService
+	with AutowiringMonitoringPointServiceComponent
+	with AutowiringProfileServiceComponent
+	with AutowiringTermServiceComponent
+	with AutowiringAssignmentServiceComponent
