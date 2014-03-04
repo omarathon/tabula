@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.data.model.notifications
 import uk.ac.warwick.tabula.data.model.groups.{ SmallGroup, SmallGroupSet }
 import uk.ac.warwick.tabula.data.model.{NotificationWithTarget, UserIdRecipientNotification, FreemarkerModel}
 import javax.persistence.{Entity, DiscriminatorValue}
-import uk.ac.warwick.tabula.groups.web.Routes
+import uk.ac.warwick.tabula.web.Routes
 import uk.ac.warwick.tabula.services.AutowiringUserLookupComponent
 
 object SmallGroupSetChangedNotification {
@@ -28,8 +28,8 @@ abstract class SmallGroupSetChangedNotification(recipientRole: UserRoleOnGroup)
 
 	def url: String = {
 		recipientRole match {
-			case UserRoleOnGroup.Student => "/profiles" + Routes.profile.mine
-			case UserRoleOnGroup.Tutor => "/groups" + Routes.tutor.mygroups
+			case UserRoleOnGroup.Student =>Routes.profiles.profile.mine
+			case UserRoleOnGroup.Tutor => Routes.groups.tutor.mygroups
 		}
 	}
 
