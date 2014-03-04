@@ -13,6 +13,8 @@ class DismissNotificationCommandTest extends TestBase with Mockito {
 	val n2 = Fixtures.notification(recipient, recipient)
 	val notifications = Seq(n1, n2)
 	val ns = smartMock[NotificationService]
+	ns.toActivity(n1) returns None
+	ns.toActivity(n2) returns None
 
 	trait CommandTestSupport extends NotificationServiceComponent {
 		def notificationService = ns
