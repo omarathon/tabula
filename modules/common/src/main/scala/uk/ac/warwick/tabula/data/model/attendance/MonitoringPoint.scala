@@ -128,7 +128,7 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 		}
 	}
 
-	def assignmentSubmissionModules = getStringSeqSetting(Settings.AssignmentSubmissionAssignments, Seq()).map(moduleAndDepartmentService.getModuleById(_).getOrElse(null))
+	def assignmentSubmissionModules = getStringSeqSetting(Settings.AssignmentSubmissionModules, Seq()).map(moduleAndDepartmentService.getModuleById(_).getOrElse(null))
 	def assignmentSubmissionModules_= (modules: Seq[Module]) =
 		settings += (Settings.AssignmentSubmissionModules -> modules.map(_.id))
 	// See above

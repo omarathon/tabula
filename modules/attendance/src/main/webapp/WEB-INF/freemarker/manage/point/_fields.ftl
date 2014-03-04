@@ -183,6 +183,17 @@
 					</ul>
 				</div>
 			</@form.labelled_row>
+
+			<@form.labelled_row "assignmentSubmissionDisjuction" "">
+				<@form.label clazz="radio" checkbox=true>
+					<input name="isAssignmentSubmissionDisjuction" type="radio" value="true" <#if command.isAssignmentSubmissionDisjuction()>checked</#if>>
+					<em>Any</em> of the assignments must have a submission
+				</@form.label>
+				<@form.label clazz="radio" checkbox=true>
+					<input name="isAssignmentSubmissionDisjuction" type="radio" value="false" <#if !command.isAssignmentSubmissionDisjuction()>checked</#if>>
+					<em>All</em> of the assignments must have a submission
+				</@form.label>
+			</@form.labelled_row>
 		</div>
 	</div>
 
