@@ -41,12 +41,14 @@ class ModulePickerCommand extends CommandInternal[Seq[ModulePickerResult]] {
 	self: ModuleAndDepartmentServiceComponent with SmallGroupServiceComponent =>
 
 	var query: String = _
+	var checkAssignments: Boolean = _
+	var checkGroups: Boolean = _
 
 	def applyInternal() = {
 		if (query.isEmpty) {
 			Seq()
 		} else {
-			val modules: Seq[Module] = moduleAndDepartmentService.findModulesNamedLike(query)
+			val modules: Seq[Module] = moduleAndDepartmentService.findModulesNamedLike(query, checkAssignments, checkGroups)
 			modules.map (module => ModulePickerResult(module, smallGroupService.hasSmallGroups(module)))
 		}
 	}
