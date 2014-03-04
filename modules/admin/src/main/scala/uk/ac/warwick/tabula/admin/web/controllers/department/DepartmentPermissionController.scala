@@ -32,7 +32,7 @@ trait DepartmentPermissionControllerMethods extends AdminController {
 	}
 
 	def form(department: Department, usercodes: Seq[String], role: Option[RoleDefinition], action: String): Mav = {
-		val users = userLookup.getUsersByUserIds(usercodes.asJava)
+		val users = userLookup.getUsersByUserIds(usercodes.asJava).asScala
 		Mav("admin/department/permissions",
 				"department" -> department,
 				"users" -> users,
