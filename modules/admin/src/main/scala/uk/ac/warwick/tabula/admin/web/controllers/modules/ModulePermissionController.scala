@@ -32,7 +32,7 @@ trait ModulePermissionControllerMethods extends AdminController {
 	}
 
 	def form(module: Module, usercodes: Seq[String], role: Option[RoleDefinition], action: String): Mav = {
-		val users = userLookup.getUsersByUserIds(usercodes.asJava)
+		val users = userLookup.getUsersByUserIds(usercodes.asJava).asScala
 		Mav("admin/modules/permissions",
 				"module" -> module,
 				"users" -> users,

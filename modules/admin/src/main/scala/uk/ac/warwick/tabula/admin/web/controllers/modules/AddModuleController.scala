@@ -24,7 +24,7 @@ class AddModuleController extends AdminController {
 	def command(@PathVariable("dept") department: Department): AddModuleCommand = AddModuleCommand(mandatory(department))
 	
 	@RequestMapping(method = Array(HEAD, GET))
-	def showForm(cmd: AddModuleCommand, @PathVariable("dept") department: Department) = {
+	def showForm(@PathVariable("dept") department: Department) = {
 		Mav("admin/modules/add/form", 
 			"department" -> department
 		)
@@ -33,7 +33,7 @@ class AddModuleController extends AdminController {
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute cmd: AddModuleCommand, errors: Errors, @PathVariable("dept") department: Department) = {
 		if (errors.hasErrors) {
-			showForm(cmd, department)
+			showForm(department)
 		} else {
 			val module = cmd.apply()
 			Redirect(Routes.module(module))
