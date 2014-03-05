@@ -4,12 +4,8 @@ Submission date: ${submissionDate}
 Submission ID: ${submission.id}
 University ID: ${user.warwickId}
 <#if submission.allAttachments??>
-Uploaded attachments:		
+Uploaded attachments:
 <#list submission.allAttachments as attachment>
-	${attachment.name}
+	* ${attachment.name}
 </#list>  
 </#if>
-
-To review your submission, please visit:
-
-<@url page=path />

@@ -25,9 +25,10 @@ class MeetingRecordRejectedNotification
 		"dateFormatter" -> dateOnlyFormatter,
 		"meetingRecord" -> approval.meetingRecord,
 		"verbed" -> "rejected",
-		"nextActionDescription" -> "edit the record and submit it for approval again",
-		"reason" -> approval.comments,
-		"profileLink" -> url
+		"reason" -> approval.comments
 	))
+
+	def urlTitle = "edit the record and submit it for approval again"
+
 	def recipients = Seq(approval.meetingRecord.creator.asSsoUser)
 }

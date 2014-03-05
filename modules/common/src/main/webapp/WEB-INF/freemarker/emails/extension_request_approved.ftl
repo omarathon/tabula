@@ -7,6 +7,3 @@ The administrator left the following comments:
 ${extension.reviewerComments}
 
 </#if>
-Your new deadline is now displayed at the top of the submission page:
-
-<@url page=path />

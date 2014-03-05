@@ -141,6 +141,14 @@ abstract class Notification[A >: Null <: ToEntityReference, B]
 	@transient def title: String
 	@transient def content: FreemarkerModel
 	@transient def url: String
+
+	/**
+	 * URL title will be used to generate the links in notifications
+	 *
+	 * Activities will use - <a href=${url}>${urlTitle}</a>  (first letter of url title will be converted to upper case)
+	 * Emails will use - Please visit [${url}] to ${urlTitle}
+	 */
+	@transient def urlTitle: String
 	@transient def recipients: Seq[User]
 
 	def addItems(seq: Seq[A]) = {

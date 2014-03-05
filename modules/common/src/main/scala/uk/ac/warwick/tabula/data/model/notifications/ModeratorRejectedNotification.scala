@@ -34,13 +34,13 @@ class ModeratorRejectedNotification extends Notification[MarkerFeedback, Unit]
 			"moderatorName" -> agent.getFullName,
 			"studentId" -> parentFeedback.universityId,
 			"assignment" -> assignment,
-			"markingUrl" -> url,
 			"rejectionComments" -> rejectionFeeback.rejectionComments,
 			"adjustedMark" -> rejectionFeeback.mark,
 			"adjustedGrade" -> rejectionFeeback.grade
 		))
 
 	def url: String = Routes.admin.assignment.markerFeedback(assignment)
+	def urlTitle = "update the feedback and submit it for moderation again"
 
 	// the recepient is the first marker
 	def recipients = markerFeedback.getMarkerUsercode.map(userId => userLookup.getUserByUserId(userId)).toSeq

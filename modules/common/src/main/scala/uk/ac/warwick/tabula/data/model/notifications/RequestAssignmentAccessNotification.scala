@@ -17,11 +17,11 @@ class RequestAssignmentAccessNotification
 
 	def content = FreemarkerModel("/WEB-INF/freemarker/emails/requestassignmentaccess.ftl", Map(
 		"assignment" -> assignment,
-		"student" -> agent,
-		"path" -> url)
+		"student" -> agent)
 	)
 
 	def url = Routes.admin.assignment.edit(assignment)
+	def urlTitle = "update the assignment membership"
 
 	def recipients = assignment.module.department.owners.users
 		.filter(admin => admin.isFoundUser && admin.getEmail.hasText).toSeq

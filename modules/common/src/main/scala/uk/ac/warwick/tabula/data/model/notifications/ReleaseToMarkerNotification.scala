@@ -23,7 +23,7 @@ class ReleaseToMarkerNotification
 		whichMarker.value = markerNumber
 	}
 
-	def templateVerb: Option[String] = whichMarker.value match {
+	def titleVerb: Option[String] = whichMarker.value match {
 		case 1 => Some(assignment.markingWorkflow.firstMarkerVerb)
 		case 2 => assignment.markingWorkflow.secondMarkerVerb
 	}
@@ -36,11 +36,10 @@ class ReleaseToMarkerNotification
 	def title: String = s"Feedback released for ${assignment.module.code.toUpperCase} - ${assignment.name}"
 	def content = FreemarkerModel(ReleaseToMarkerNotification.templateLocation,
 		Map(
-			"markingUrl" -> url,
 			"assignment" -> assignment,
-			"numReleasedFeedbacks" -> items.size,
-			"verb" -> templateVerb
+			"numReleasedFeedbacks" -> items.size
 		))
 	def url: String = Routes.admin.assignment.markerFeedback(assignment)
+	def urlTitle = s"${titleVerb} this feedback"
 }
 
