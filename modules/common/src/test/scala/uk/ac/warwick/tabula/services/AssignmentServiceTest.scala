@@ -814,7 +814,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 	@Transactional
 	@Test def countFullFeedback() {
 		val assignment = assignmentService.getAssignmentById("1").get
-		assignment.id should not be(null)
+		assignment.id should not be null
 
 		def createFeedback(numberOfAttachments:Int=0, mark:Option[Int]=None, grade:Option[String]=None) = {
 			val feedback = new Feedback()
@@ -837,6 +837,51 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		// Multiple attachments shouldn't increase the count, and
 		// feedback with no attachments should be included.
 		feedbackService.countFullFeedback(assignment) should be (3)
+	}
+
+	@Transactional
+	@Test def submissionsForAssignmentsBetweenDates() {
+		val universityId = "1234"
+
+		val startDate = new DateTime(2014, 3, 1, 0, 0, 0)
+		val endDate = new DateTime(2014, 3, 8, 0, 0, 0)
+
+		val assignmentBefore = new Assignment
+		assignmentBefore.closeDate = startDate.minusDays(1)
+		val assignmentInside = new Assignment
+		assignmentInside.closeDate = startDate
+		val assignmentAfter = new Assignment
+		assignmentAfter.closeDate = endDate
+		val assignmentNoSubmission = new Assignment
+		assignmentNoSubmission.closeDate = startDate.plusDays(1)
+
+		val submissionBefore = new Submission
+		submissionBefore.universityId = universityId
+		submissionBefore.userId = universityId
+		submissionBefore.assignment = assignmentBefore
+		assignmentBefore.submissions.add(submissionBefore)
+		val submissionInside = new Submission
+		submissionInside.universityId = universityId
+		submissionInside.userId = universityId
+		submissionInside.assignment = assignmentInside
+		assignmentInside.submissions.add(submissionInside)
+		val submissionAfter = new Submission
+		submissionAfter.universityId = universityId
+		submissionAfter.userId = universityId
+		submissionAfter.assignment = assignmentAfter
+		assignmentAfter.submissions.add(submissionAfter)
+
+		session.save(assignmentBefore)
+		session.save(assignmentInside)
+		session.save(assignmentAfter)
+		session.save(assignmentNoSubmission)
+		session.save(submissionBefore)
+		session.save(submissionInside)
+		session.save(submissionAfter)
+
+		val result = assignmentService.getSubmissionsForAssignmentsBetweenDates(universityId, startDate, endDate)
+		result.size should be (1)
+		result.head should be (submissionInside)
 	}
 
 }
