@@ -108,22 +108,6 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		errors.getFieldError(s"studentsState[${student1.universityId}][${pointSet2Point1.id}]") should not be null
 	}}
 
-	@Test def validateNoRoutePermission() { new Fixture {
-		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
-		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
-		command.studentsState = JHashMap(
-			student1 -> JHashMap(pointSet1Point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
-		)
-		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns false
-		var binder = new WebDataBinder(command, "command")
-		binder.setConversionService(conversionService)
-		command.onBind(null)
-		var errors = binder.getBindingResult
-		command.validate(errors)
-		errors.hasFieldErrors should be (true)
-		errors.getFieldError(s"studentsState[${student1.universityId}][${pointSet1Point1.id}]") should not be null
-	}}
-
 	@Test def validateBeforeValidFromAttended() { new Fixture {
 		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
 		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
