@@ -24,6 +24,9 @@ object Routes {
 	object admin {
 		def apply(department: Department) = context + "/admin/department/%s" format (encoded(department.code))
 
+		def release(department: Department) = apply(department) + "/groups/release"
+		def selfsignup(department: Department, action: String) = apply(department) + "/groups/selfsignup/" + encoded(action)
+
 		object module {
 			def apply(module: Module) = admin(module.department) + "#module-" + encoded(module.code)
 		}

@@ -10,6 +10,7 @@ import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.commands.manage.AddMonitoringPointSetCommand
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
+import uk.ac.warwick.tabula.web.Routes
 
 @Controller
 @RequestMapping(value=Array("/manage/{dept}/sets/add/{academicYear}"))
@@ -47,7 +48,7 @@ class AddMonitoringPointSetController extends AttendanceController {
 			form(dept, cmd, createType)
 		} else {
 			val sets = cmd.apply()
-			Redirect("/manage/" + dept.code, "created" -> sets.map{s => s.route.code}.distinct.size)
+			Redirect(Routes.attendance.department.manage(dept), "created" -> sets.map{s => s.route.code}.distinct.size)
 		}
 	}
 
