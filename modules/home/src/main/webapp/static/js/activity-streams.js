@@ -22,6 +22,11 @@ jQuery(function($) {
 		var options = options || {};
 		$container.html('');
 
+		if ($container.data('activity-stream-init')) {
+			return;
+		}
+		$container.data('activity-stream-init', true);
+
 		var $moreLink = $('<a>', {href:'#', className:'more-link'}).html('More&hellip;');
 
 		function loadPage(pagination) {
@@ -54,9 +59,24 @@ jQuery(function($) {
 		loadPage();
 	}
 
+	function autoInit() {
+		$('.activity-stream').each(function(i, container) {
+			var $container = $(container);
+			var options = {};
+			options.max = $container.data('max');
+			// TODO more options
+			initStream($container, options);
+		});
+	}
+
 	exports.ActivityStreams = {
 		//Activity: Activity,
-		initStream: initStream
+		initStream: initStream,
+		autoInit: autoInit
 	};
+
+	$(function(){
+		autoInit();
+	});
 
 });

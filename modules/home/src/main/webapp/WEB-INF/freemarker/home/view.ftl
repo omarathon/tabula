@@ -63,6 +63,12 @@
 			</li>
 		</#if>
 	</ul>
+
+	<#if features.activityStreams>
+		<#import "*/activity_macros.ftl" as activity />
+		<h3>Activity stream</h3>
+		<@activity.activity_stream max=5 />
+	</#if>
 </#if>
 
 <#if !ajax && (activeSpringProfiles!"") == "sandbox">
