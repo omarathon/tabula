@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula
 
-import scala.collection.JavaConversions._
-
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup

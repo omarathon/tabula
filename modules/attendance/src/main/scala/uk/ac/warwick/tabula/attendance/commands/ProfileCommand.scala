@@ -21,7 +21,7 @@ object ProfileCommand {
 		with ProfileCommandState
 		with AutowiringTermServiceComponent
 		with AutowiringMonitoringPointServiceComponent
-		with AutowiringProfileServiceComponent
+		with AutowiringUserLookupComponent
 		with ReadOnly with Unaudited
 }
 

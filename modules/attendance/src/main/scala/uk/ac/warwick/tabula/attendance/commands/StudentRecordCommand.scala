@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.{CurrentUser, ItemNotFoundException, AcademicYear}
 import uk.ac.warwick.tabula.data.model.attendance._
-import uk.ac.warwick.tabula.services.{ProfileServiceComponent, AutowiringProfileServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent, AutowiringTermServiceComponent}
+import uk.ac.warwick.tabula.services._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.validation.{BindingResult, Errors}
@@ -23,7 +23,7 @@ object StudentRecordCommand {
 			with GroupMonitoringPointsByTerm
 			with AutowiringMonitoringPointServiceComponent
 			with AutowiringTermServiceComponent
-			with AutowiringProfileServiceComponent
+			with AutowiringUserLookupComponent
 }
 
 abstract class StudentRecordCommand(
@@ -32,7 +32,7 @@ abstract class StudentRecordCommand(
 	val user: CurrentUser,
 	val academicYearOption: Option[AcademicYear]
 ) extends CommandInternal[Seq[MonitoringCheckpoint]] with StudentRecordCommandState with PopulateOnForm with BindListener with CheckpointUpdatedDescription {
-	this: MonitoringPointServiceComponent with ProfileServiceComponent =>
+	this: MonitoringPointServiceComponent with UserLookupComponent =>
 
 	def populate() = {
 		val checkpoints = monitoringPointService.getCheckpoints(Seq(student), pointSet)(student)

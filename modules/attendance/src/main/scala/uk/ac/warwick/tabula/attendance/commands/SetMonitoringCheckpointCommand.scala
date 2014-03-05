@@ -18,6 +18,7 @@ import uk.ac.warwick.tabula.system.BindListener
 object SetMonitoringCheckpointCommand {
 	def apply(department: Department, templateMonitoringPoint: MonitoringPoint, user: CurrentUser, routes: JList[Route]) =
 		new SetMonitoringCheckpointCommand(department, templateMonitoringPoint, user, routes)
+			with AutowiringUserLookupComponent
 			with AutowiringProfileServiceComponent
 			with AutowiringSecurityServicePermissionsAwareRoutes
 			with SetMonitoringCheckpointCommandPermissions
@@ -26,7 +27,6 @@ object SetMonitoringCheckpointCommand {
 			with SetMonitoringPointDescription
 			with SetMonitoringCheckpointState
 			with AutowiringMonitoringPointServiceComponent
-			with AutowiringSecurityServiceComponent
 			with AutowiringTermServiceComponent
 }
 
@@ -34,7 +34,7 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 	extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with SetMonitoringCheckpointState
 	with BindListener with PopulateOnForm with PopulateGroupedPoints with TaskBenchmarking {
 
-	self: MonitoringPointServiceComponent with ProfileServiceComponent =>
+	self: MonitoringPointServiceComponent with UserLookupComponent with ProfileServiceComponent =>
 
 	def populate() {
 		val students = benchmarkTask("Get students matching the filter") {
@@ -73,13 +73,10 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 }
 
 trait SetMonitoringCheckpointCommandValidation extends SelfValidating with GroupedPointValidation {
-	self: SetMonitoringCheckpointState with SecurityServiceComponent with TermServiceComponent with MonitoringPointServiceComponent =>
+	self: SetMonitoringCheckpointState with TermServiceComponent with MonitoringPointServiceComponent =>
 
 	def validate(errors: Errors) {
-		def permissionValidation(student: StudentMember, route: Route) = {
-			!securityService.can(user, Permissions.MonitoringPoints.Record, route)
-		}
-		validateGroupedPoint(errors,templateMonitoringPoint, studentsStateAsScala, permissionValidation)
+		validateGroupedPoint(errors,templateMonitoringPoint, studentsStateAsScala)
 	}
 
 }

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, CurrentUser, TestBase, Mockito}
+import uk.ac.warwick.tabula.{MockUserLookup, AcademicYear, Fixtures, CurrentUser, TestBase, Mockito}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.data.model.{Department, Route}
 import uk.ac.warwick.tabula.JavaImports._
@@ -16,12 +16,14 @@ import uk.ac.warwick.util.termdates.Term
 class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 
 	val thisProfileService = mock[ProfileService]
+	val thisUserLookup = new MockUserLookup
 	val thisMonitoringPointService = mock[MonitoringPointService]
 
 	trait CommandTestSupport extends SetMonitoringCheckpointState with SetMonitoringCheckpointCommandValidation
 		with MonitoringPointServiceComponent with ProfileServiceComponent with SecurityServiceComponent with TermServiceComponent {
 		val monitoringPointService = thisMonitoringPointService
 		val profileService = thisProfileService
+		val userLookup = thisUserLookup
 		val securityService = mock[SecurityService]
 		val termService = mock[TermService]
 		def routesForPermission(user: CurrentUser, p: Permission, dept: Department): Set[Route] = {
