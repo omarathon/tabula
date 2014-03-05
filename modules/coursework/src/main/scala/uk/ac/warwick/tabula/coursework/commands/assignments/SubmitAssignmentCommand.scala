@@ -8,14 +8,12 @@ import uk.ac.warwick.tabula.CurrentUser
 import org.springframework.validation.Errors
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, FormValue}
-import uk.ac.warwick.tabula.services.ZipService
+import uk.ac.warwick.tabula.services.{MonitoringPointProfileTermAssignmentService, ZipService, SubmissionService, FeedbackService}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.util.Assert
 import org.springframework.validation.BindingResult
-import uk.ac.warwick.tabula.services.SubmissionService
-import uk.ac.warwick.tabula.services.FeedbackService
 import org.apache.commons.collections.map.LazyMap
 import org.apache.commons.collections.Factory
 import uk.ac.warwick.tabula.data.model.notifications.{SubmissionReceivedNotification, SubmissionReceiptNotification}
@@ -23,14 +21,15 @@ import uk.ac.warwick.tabula.data.model.notifications.{SubmissionReceivedNotifica
 class SubmitAssignmentCommand(
 		val module: Module,
 		val assignment: Assignment,
-		val user: CurrentUser)
-		extends Command[Submission] with SelfValidating with BindListener with Notifies[Submission, Submission] {
+		val user: CurrentUser
+	) extends Command[Submission] with SelfValidating with BindListener with Notifies[Submission, Submission] {
 
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Submission.Create, assignment)
 
 	var service = Wire.auto[SubmissionService]
 	var zipService = Wire.auto[ZipService]
+	var monitoringPointProfileTermAssignmentService = Wire.auto[MonitoringPointProfileTermAssignmentService]
 
 	var fields = buildEmptyFields
 
@@ -137,6 +136,7 @@ class SubmitAssignmentCommand(
 
 		zipService.invalidateSubmissionZip(assignment)
 		service.saveSubmission(submission)
+		monitoringPointProfileTermAssignmentService.updateCheckpointsForSubmission(submission)
 		submission
 	}
 

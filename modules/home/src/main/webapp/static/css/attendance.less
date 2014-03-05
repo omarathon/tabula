@@ -247,14 +247,14 @@
   width: 14px;
 }
 
-#main-content .pointTypeOption.smallGroup {
+#main-content .pointTypeOption {
 
 	label.specific {
 		margin-top: 6px;
 		margin-right: 7px;
 	}
 
-	.modules-list ul {
+	.modules-list ul, .assignments-list ul {
 		padding-left: 0px;
 		list-style-type: none;
 		li span {
@@ -267,4 +267,7 @@
 			vertical-align: middle;
 		}
 	}
+
+	&.assignmentSubmission .modules-list ul li span { width: 224px; }
+	&.assignmentSubmission .assignments-list ul li span { width: 244px; }
 }

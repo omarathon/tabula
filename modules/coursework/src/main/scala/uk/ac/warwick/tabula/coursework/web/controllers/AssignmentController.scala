@@ -7,14 +7,13 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation._
 import javax.validation.Valid
 import uk.ac.warwick.tabula.coursework.commands.assignments.{ViewOnlineFeedbackCommand, SubmitAssignmentCommand}
-import uk.ac.warwick.tabula.data.model.Assignment
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.{Submission, Assignment, Module}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.SubmitPermissionDeniedException
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.SubmissionService
-import uk.ac.warwick.tabula.services.FeedbackService
+import uk.ac.warwick.tabula.services.{MonitoringPointProfileTermAssignmentService, SubmissionService, FeedbackService}
+import org.joda.time.DateTime
 
 /**
  * This is the main student-facing controller for handling esubmission and return of feedback.
@@ -25,6 +24,7 @@ class AssignmentController extends CourseworkController {
 
 	var submissionService = Wire[SubmissionService]
 	var feedbackService = Wire[FeedbackService]
+	var monitoringPointProfileTermAssignmentService = Wire[MonitoringPointProfileTermAssignmentService]
 
 	hideDeletedItems
 
@@ -44,6 +44,14 @@ class AssignmentController extends CourseworkController {
 			feedback.isDefined
 		} (new SubmitAssignmentCommand(mandatory(module), mandatory(assignment), user)).orNull
 
+	}
+
+	@ModelAttribute("willCheckpointBeCreated") def willCheckpointBeCreated(@PathVariable module: Module, @PathVariable assignment: Assignment, user: CurrentUser) = {
+		val submission = new Submission(user.universityId)
+		submission.assignment = assignment
+		submission.submittedDate = DateTime.now
+		submission.userId = user.userId
+		!monitoringPointProfileTermAssignmentService.getCheckpointsForSubmission(submission).isEmpty
 	}
 
 	/**

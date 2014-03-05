@@ -167,7 +167,12 @@ class ModuleAndDepartmentService extends Logging {
 		routeDao.stampMissingRows(dept, seenCodes)
 	}
 
-	def findModulesNamedLike(query: String): Seq[Module] = moduleDao.findModulesNamedLike(query)
+	def hasAssignments(module: Module): Boolean = {
+		moduleDao.hasAssignments(module)
+	}
+
+	def findModulesNamedLike(query: String): Seq[Module] =
+		moduleDao.findModulesNamedLike(query)
 
 }
 

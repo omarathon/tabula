@@ -118,6 +118,14 @@ trait AddMonitoringPointSetValidation extends SelfValidating with MonitoringPoin
 						point.meetingQuantity, "smallGroupEventQuantity",
 						dept
 					)
+				case MonitoringPointType.AssignmentSubmission =>
+					validateTypeAssignmentSubmission(errors,
+						point.assignmentSubmissionIsSpecificAssignments,
+						point.assignmentSubmissionQuantity, "assignmentSubmissionQuantity",
+						point.assignmentSubmissionModules.toSet.asJava, "assignmentSubmissionModules",
+						point.assignmentSubmissionAssignments.toSet.asJava, "assignmentSubmissionAssignments",
+						dept
+					)
 				case _ =>
 			}
 
@@ -208,7 +216,7 @@ trait AddMonitoringPointSetState extends GroupMonitoringPointsByTerm with Course
 		set.points.asScala.foreach(p => monitoringPoints.add(p))
 	}
 	template.foreach { template =>
-		template.points.asScala.foreach(p => monitoringPoints.add(p.toPoint()))
+		template.points.asScala.foreach(p => monitoringPoints.add(p.toPoint))
 	}
 
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
