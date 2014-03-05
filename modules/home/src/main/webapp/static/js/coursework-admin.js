@@ -91,7 +91,7 @@ $(function(){
 	// enable shift-click on multiple checkboxes in tables
 	$('table').find('input[type="checkbox"]').shiftSelectable();
 
-	$('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list, .coursework-progress-table, #online-marking-table').bigList({
+	$('.submission-feedback-list, .submission-list, .feedback-list, .marker-feedback-list, .coursework-progress-table, .expanding-table').bigList({
 		setup : function() {
 			var $container = this;
 			// #delete-selected-button won't work for >1 set of checkboxes on a page.
@@ -145,7 +145,7 @@ $(function(){
 				}
 
 				if ($(this).hasClass('include-filter') && ($('.filter-form').length > 0)) {
-						var $inputs = $(':input', '.filter-form:not(#floatedHeaderContainer *)');
+						var $inputs = $(':input', '.filter-form:not("#floatedHeaderContainer *")');
 						$form.append($inputs.clone());
 
 						doFormSubmit = true;
@@ -287,7 +287,7 @@ $(function(){
 // Ajax specific modal start
 
 // modals use ajax to retrieve their contents
-	$('#feedback-report-button, #extension-list').on('click', 'a[data-toggle=modal]', function(e){
+	$('#feedback-report-button').on('click', 'a[data-toggle=modal]', function(e){
 		e.preventDefault();
 		var $this = $(this);
 		var target = $this.attr('data-target');
@@ -298,7 +298,7 @@ $(function(){
 
 
 // any date fields returned by ajax will have datetime pickers bound to them as required
-	$('#feedback-report-modal, #extension-list').on('focus', 'input.date-time-picker', function(e){
+	$('#feedback-report-modal').on('focus', 'input.date-time-picker', function(e){
 		e.preventDefault();
 		var isPickerHidden = (typeof $('.datetimepicker').filter(':visible')[0] === "undefined") ? true : false;
 
@@ -333,82 +333,6 @@ $(function(){
 		window.location = data.result;
 	});
 
-   // extensions admin
-	$("#extension-list").tabulaAjaxSubmit(function(data) {
-		// TAB-1704 don't do anything clever, just reload the page
-		/*
-			var action = data.action;
-			$.each(data.result, function() {
-				modifyRow(this, action);
-			});
-		*/
-		// hide the model
-		jQuery("#extension-model").modal('hide');
-
-		// TAB-1704 change the hash and reload the page
-		$.each(data.result, function() {
-			window.location.hash = 'row' + this.id;
-		});
-
-		window.location.reload(true);
-	});
-
-	// Ajax specific modal end
-
-	if ($("#extension-list").length > 0) {
-		var highlightId = window.location.hash;
-		if (highlightId != "") {
-			var container = $("#extension-list");
-			var highlightRow = $(highlightId);
-			if(highlightRow.length > 0){
-				container.animate({
-					scrollTop: highlightRow.offset().top - container.offset().top + container.scrollTop()
-				}, 1000);
-			}
-		}
-	}
-
-	// set reject and approved flags
-	$("#extension-model").on('click', '#approveButton', function(){
-		$(".action").val("approve");
-	});
-
-	$("#extension-model").on('click', '#rejectButton', function(){
-		$(".action").val("reject");
-	});
-
-	var modifyRow = function(results, action){
-		var $row =  $("#extension-list").find("#row"+results.id);
-		if(action === "add"){
-			updateRowUI(results, $row);
-			$(".new-extension", $row).hide();
-			$(".modify-extension", $row).show();
-			$(".revoke-extension", $row).show();
-		} else if (action === "edit"){
-			updateRowUI(results, $row);
-		} else if (action === "delete"){
-			$("td.expiryDate", $row).html("");
-			$("td.status", $row).html("");
-			$(".new-extension", $row).show();
-			$(".modify-extension", $row).hide();
-			$(".revoke-extension", $row).hide();
-		}
-	};
-
-	var updateRowUI = function(json, $row){
-		var prop;
-		for(prop in json){
-			$row.find('.'+prop).html(json[prop]);
-		}
-		$('.status').each(function(){
-			if ($(this).html() === "Approved")
-				$(this).html('<span>Granted</span>');
-			else if ($(this).html() === "Rejected")
-				$(this).html('<span>Rejected</span>');
-		});
-	};
-
-
 	// makes dropdown menus dropup rather than down if they're so
 	// close to the end of the screen that they will drop off it
 	var bodyHeight = $('body').height();
@@ -421,13 +345,13 @@ $(function(){
 });
 
 /**
- * Scripts for online marking UI
+ * Scripts for expanding tables, including online marking
  */
 $(function() {
-
-	$('#online-marking-table').on('tabula.expandingTable.contentChanged', '.content-container', function(e) {
+	// this has to descend from #main-content, as the content container is appended there, outside the table
+	$('#main-content').on('tabula.expandingTable.contentChanged', '.content-container', function(e) {
 		var $container = $(this);
-		var $form = $container.find('.onlineFeedback form');
+		var $form = $container.find('form');
 		var contentId = $container.attr('data-contentid');
 		var $row = $('tr.itemContainer[data-contentid='+contentId+']');
 
@@ -438,11 +362,12 @@ $(function() {
 			$(this).data('initialvalue', $(this).val());
 		});
 
+		// only relevant for marker_moderation.ftl:
 		// rejection fields shown when reject is selected
-		$('input.reject', $container).each( function() {
+		$('input.reject', $container).each(function() {
 			var $this = $(this);
 			var $form = $this.closest('form');
-			var $table = $('#online-marking-table');
+			var $table = $('.expanding-table');
 			var $rejectionFields = $form.find('.rejection-fields');
 			$this.slideMoreOptions($rejectionFields, true);
 
@@ -453,10 +378,9 @@ $(function() {
 			$rejectionFields.on('tabula.slideMoreOptions.hidden', function() {
 				$table.trigger('tabula.expandingTable.repositionContent');
 			});
-
 		});
 
-		$('.cancel-feedback', $form).on('click', function(e) {
+		$('.discard-changes', $form).on('click', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			if(hasChanges($container)) {
@@ -481,59 +405,97 @@ $(function() {
 			}
 		});
 
-		$form.ajaxForm({
-			iframe: true,
-			success: function(resp){
-				var $resp = $(resp);
-				if($resp.find('pre#dev').length) {
-					$container.html($resp.find('#column-1-content'));
-					$container.trigger('tabula.expandingTable.contentChanged');
-				} else {
-					// there is an ajax-response class somewhere in the response text
-					var $response = $resp.find('.ajax-response').andSelf().filter('.ajax-response');
-					var rejected = $response.length && $response.data('data') == 'Rejected';
-					var markingCompleted = $response.length && $response.data('data') == 'MarkingCompleted';
-					var success = $response.length && $response.data('status') == 'success';
-
-					if (success) {
-						var $statusContainer = $row.find('.status-col dt');
-						if(rejected) {
-							$statusContainer.append($('<div class="label label-important">Rejected</div>'));
-						}
-						else if(markingCompleted) {
-							$statusContainer.append($('<div class="label label-success">Marking completed</div>'));
-						}
-						else if(!$statusContainer.find('.marked').length) {
-							$statusContainer.append($('<div class="label label-warning marked">Marked</div>'));
-						}
-
-						$statusContainer.find('.unsaved').remove();
-
-						$container.removeData('loaded');
-
-						$row.trigger('tabula.expandingTable.toggle');
-						$row.next('tr').trigger('tabula.expandingTable.toggle');
-
-						$container.html("<p>No data is currently available.</p>");
-					} else {
-						$container.html($resp);
+		/**
+		 * Helper for ajaxified forms in tabula expanding tables
+		 *
+		 * This glues together the ajaxForm and expandingTable plugins. It adds boilerplate for coping with
+		 * signed-out users, and provides a callback for giving UI feedback after the form has been processed.
+		 *
+		 * callback() is passed the raw response text.
+		 * It MUST return an empty string if the form has been successfully handled.
+		 * Otherwise, whatever is returned will be rendered in the container.
+ 		 */
+		var prepareAjaxForm = function($form, callback) {
+			$form.ajaxForm({
+				iframe: true,
+				statusCode: {
+					403: function(jqXHR) {
+						$container.html("<p class='text-error'><i class='icon-warning-sign'></i> Sorry, you don't have permission to see that. Have you signed out of Tabula?</p><p class='text-error'>Refresh the page and try again. If it remains a problem, please let us know using the comments link on the edge of the page.</p>");
 						$container.trigger('tabula.expandingTable.contentChanged');
 					}
+				},
+				success: function(response) {
+					var result;
+
+					if (response.indexOf('id="dev"') >= 0) {
+						// for debugging freemarker...
+						result = $(response).find('#column-1-content');
+					} else {
+						result = callback(response);
+					}
+
+					if (!result || /^\s*$/.test(result)) {
+						// reset if empty
+						$container.html("<p>No data is currently available.</p>");
+						$row.find('.status-col dt .unsaved').remove();
+						$container.removeData('loaded');
+					} else {
+						$container.html(result);
+						$container.trigger('tabula.expandingTable.contentChanged');
+					}
+				},
+				error: function(){alert("There has been an error. Please reload and try again.");}
+			});
+		}
+
+		if ($form.parents('.online-feedback').length) prepareAjaxForm($form, function(resp) {
+			var $resp = $(resp);
+
+			// there should be an ajax-response class somewhere in the response text
+			var $response = $resp.find('.ajax-response').andSelf().filter('.ajax-response');
+			var success = $response.length && $response.data('status') == 'success';
+
+			if (success) {
+				var rejected = $response.length && $response.data('data') == 'Rejected';
+				var markingCompleted = $response.length && $response.data('data') == 'MarkingCompleted';
+				var $statusContainer = $row.find('.status-col dt');
+
+				if(rejected) {
+					$statusContainer.append($('<div class="label label-important">Rejected</div>'));
 				}
-			},
-			error: function(){alert("There has been an error. Please reload and try again.");}
+				else if(markingCompleted) {
+					$statusContainer.append($('<div class="label label-success">Marking completed</div>'));
+				}
+				else if(!$statusContainer.find('.marked').length) {
+					$statusContainer.append($('<div class="label label-warning marked">Marked</div>'));
+				}
+
+				$row.trigger('tabula.expandingTable.toggle');
+				$row.next('tr').trigger('tabula.expandingTable.toggle');
+
+				return "";
+			} else {
+				return resp;
+			}
+		});
+
+		if ($form.parents('.extension-detail').length) prepareAjaxForm($form, function(resp) {
+			// FIXME gotta do some handling...
+			return resp;
 		});
 	});
 
-	$('#online-marking-table').on('tabula.expandingTable.parentRowCollapsed', '.content-container', function(e) {
+	$('#main-content').on('tabula.expandingTable.parentRowCollapsed', '.content-container', function(e) {
 		var $this = $(this);
+		var contentId = $this.attr('data-contentid');
+		var $row = $('tr.itemContainer[data-contentid='+contentId+']');
+		var $statusContainer = $row.find('.status-col dt');
 		if(hasChanges($this)) {
-			var contentId = $this.attr('data-contentid');
-			var $row = $('tr.itemContainer[data-contentid='+contentId+']');
-			var $statusContainer = $row.find('.status-col dt');
 			if(!$statusContainer.find('.unsaved').length){
 				$statusContainer.append($('<div class="label label-important unsaved">Unsaved changes</div>'));
 			}
+		} else {
+			$statusContainer.find('.unsaved').remove();
 		}
 	});
 
@@ -585,13 +547,12 @@ $(function() {
 		return modifiedField;
 	}
 
-	// generic feedback scripts
-
-	$(".edit-generic").on('click', function() {
+	// just for generic feedback
+	$(".edit-generic-feedback").on('click', function() {
 		var $icon = $(this).find('i');
 		$icon.toggleClass('icon-chevron-right')
 			 .toggleClass('icon-chevron-down');
-		var $container = $('.edit-generic-container');
+		var $container = $('.edit-generic-feedback-container');
 		if($container.is(':visible')){
 			$icon.addClass('icon-chevron-right')
 			$icon.removeClass('icon-chevron-down');
@@ -608,11 +569,11 @@ $(function() {
 					$icon.removeClass('icon-spinner icon-spin');
 					$icon.addClass('icon-chevron-down');
 					$(this).show();
-                    $("#online-marking-table").trigger('tabula.expandingTable.repositionContent');
+                    $(".expanding-table").trigger('tabula.expandingTable.repositionContent');
 				});
 			}
 		}
-        $("#online-marking-table").trigger('tabula.expandingTable.repositionContent');
+        $(".expanding-table").trigger('tabula.expandingTable.repositionContent');
 	});
 
 	$(".generic-feedback").on('click', 'input[type=submit]', function(e){
@@ -630,7 +591,6 @@ $(function() {
 			}
 		});
 	});
-
 });
 
 }(jQuery));

@@ -62,7 +62,7 @@
 	</div>
 
 	<#if extensionGraphs?size gt 0>
-		<table id="extensions-table" class="students table table-bordered table-striped tabula-orangeLight sticky-table-headers">
+		<table class="students table table-bordered table-striped tabula-orangeLight sticky-table-headers expanding-table">
 			<thead>
 				<tr>
 					<#if department.showStudentName>
@@ -78,6 +78,8 @@
 
 			<tbody>
 				<#list extensionGraphs as extensionGraph>
+					<#-- FIXME only show row if permitted to do the action
+					 ie. if (!extension && canDo(CREATE)) || (extension && canDo(UPDATE)) -->
 					<@row extensionGraph />
 				</#list>
 			</tbody>
@@ -85,7 +87,7 @@
 
 		<script type="text/javascript">
 		(function($) {
-			$('#extensions-table').expandingTable({
+			$('.expanding-table').expandingTable({
 				contentUrl: '${url(detailUrl!"")}',
 				useIframe: true,
 				tableSorterOptions: { sortList: [<#if department.showStudentName>[2, 0], </#if>[1, 0], [0,0]] }

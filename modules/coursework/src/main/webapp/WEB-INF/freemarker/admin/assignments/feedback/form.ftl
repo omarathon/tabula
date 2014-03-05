@@ -5,7 +5,8 @@
 
 <@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/feedback/new')}" commandName="addFeedbackCommand">
 
-<h1>Submit feedback for ${assignment.name}</h1>
+<h1>Submit feedback</h1>
+<h5><span class="muted">for</span> ${assignment.name}</h5>
 
 <@form.labelled_row "uniNumber" "Student university number">
 <@f.input path="uniNumber" cssClass="text" />

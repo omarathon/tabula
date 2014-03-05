@@ -53,7 +53,8 @@
 </#macro>
 
 <#escape x as x?html>
-	<h1>Online marking for ${assignment.name} (${assignment.module.code?upper_case})</h1>
+	<h1>Online marking</h1>
+	<h5><span class="muted">for</span> ${assignment.name} (${assignment.module.code?upper_case})</h5>
 
 	<#import "../turnitin/_report_macro.ftl" as tin />
 	<#import "../submissionsandfeedback/_submission_details.ftl" as sd />
@@ -74,16 +75,16 @@
 		</div>
 	<#elseif showGenericFeedback>
 		<div class="generic-feedback">
-			<h6 class="toggle-icon edit-generic">
+			<h6 class="toggle-icon edit-generic-feedback">
 				<i class="row-icon icon-chevron-right icon-fixed-width" style="margin-top: 2px;"></i>
 				Generic feedback
 			</h6>
-			<div class="edit-generic-container" style="display: none;"></div>
+			<div class="edit-generic-feedback-container" style="display: none;"></div>
 		</div>
 	</#if>
 
 
-	<table id="online-marking-table" class="students table table-bordered table-striped tabula-greenLight sticky-table-headers">
+	<table id="online-marking" class="students table table-bordered table-striped tabula-greenLight sticky-table-headers expanding-table">
 		<thead<#if feedbackGraphs?size == 0> style="display: none;"</#if>>
 			<tr>
 				<#if showMarkingCompleted>
@@ -124,7 +125,7 @@
 				</#if>
 			};
 
-			$('#online-marking-table').expandingTable({
+			$('.expanding-table').expandingTable({
 				contentUrl: '${url(markingUrl!"")}',
 				useIframe: true,
 				tableSorterOptions: tsOptions

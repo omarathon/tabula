@@ -25,7 +25,7 @@ class ExtensionRequestController extends CourseworkController{
 
 	@ModelAttribute("command")
 	def cmd(@PathVariable("module") module: Module, @PathVariable("assignment") assignment:Assignment, @RequestParam(defaultValue = "") action: String, user:CurrentUser) =
-		ExtensionRequestCommand(module, assignment, user, action)
+		RequestExtensionCommand(module, assignment, user, action)
 
 	validatesSelf[SelfValidating]
 
@@ -34,7 +34,7 @@ class ExtensionRequestController extends CourseworkController{
 		= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 
 	@RequestMapping(method=Array(HEAD,GET))
-	def showForm(@ModelAttribute("command") cmd: Appliable[Extension] with ExtensionRequestState): Mav = {
+	def showForm(@ModelAttribute("command") cmd: Appliable[Extension] with RequestExtensionCommandState): Mav = {
 		val (assignment, module) = (cmd.assignment, cmd.module)
 
 		if (!module.department.canRequestExtension) {
@@ -65,7 +65,7 @@ class ExtensionRequestController extends CourseworkController{
 	}
 
 	@RequestMapping(method=Array(POST))
-	def persistExtensionRequest(@Valid @ModelAttribute("command") cmd: Appliable[Extension] with ExtensionRequestState, errors: Errors): Mav = {
+	def persistExtensionRequest(@Valid @ModelAttribute("command") cmd: Appliable[Extension] with RequestExtensionCommandState, errors: Errors): Mav = {
 		val (assignment, module) = (cmd.assignment, cmd.module)
 
 		if (errors.hasErrors){

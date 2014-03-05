@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.{TestBase, RequestInfo, Mockito}
 import uk.ac.warwick.tabula.events.EventHandling
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.services.{FileAttachmentService, FileAttachmentServiceComponent, RelationshipServiceComponent, RelationshipService}
-import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.{ExtensionRequestValidation, ExtensionRequestPersistenceComponent, ExtensionRequestCommandInternal}
+import uk.ac.warwick.tabula.coursework.commands.assignments.extensions.{RequestExtensionCommandValidation, ExtensionPersistenceComponent, RequestExtensionCommandInternal}
 import uk.ac.warwick.tabula.data.model.FileAttachment
 import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import org.joda.time.DateTime
@@ -13,7 +13,7 @@ import org.springframework.util.FileCopyUtils
 import java.io.{FileOutputStream, ByteArrayInputStream}
 
 // scalastyle:off magic.number
-class ExtensionRequestCommandTest extends TestBase with Mockito {
+class RequestExtensionCommandTest extends TestBase with Mockito {
 
 	EventHandling.enabled = false
 
@@ -25,7 +25,7 @@ class ExtensionRequestCommandTest extends TestBase with Mockito {
 				val currentUser = RequestInfo.fromThread.get.user
 				val assignment = newDeepAssignment()
 
-				val command = new ExtensionRequestCommandInternal(assignment.module, assignment, currentUser) with ExtensionRequestCommandTestSupport
+				val command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
 				command.requestedExpiryDate = DateTime.now.plusMonths(2)
 				command.reason  = "Fun fun fun"
 				command.readGuidelines = true
@@ -73,14 +73,14 @@ class ExtensionRequestCommandTest extends TestBase with Mockito {
 				newExtension.reviewedOn = DateTime.now
 				assignment.extensions.add(newExtension)
 
-				var command = new ExtensionRequestCommandInternal(assignment.module, assignment, currentUser) with ExtensionRequestCommandTestSupport
+				var command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
 				var returnedExtension = command.applyInternal()
 
 				returnedExtension.approved should be (true)
 				returnedExtension.reviewedOn should be (DateTime.now)
 
 				assignment = newDeepAssignment()
-				command = new ExtensionRequestCommandInternal(assignment.module, assignment, currentUser) with ExtensionRequestCommandTestSupport
+				command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
 				returnedExtension = command.applyInternal()
 
 				returnedExtension.approved should be (false)
@@ -100,7 +100,7 @@ class ExtensionRequestCommandTest extends TestBase with Mockito {
 				val assignment = newDeepAssignment()
 				assignment.closeDate = DateTime.now.plusMonths(1)
 
-				val command = new ExtensionRequestCommandInternal(assignment.module, assignment, currentUser) with ExtensionRequestCommandTestSupport
+				val command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
 				var errors = new BindException(command, "command")
 				errors.hasErrors should be (false)
 				command.validate(errors)
@@ -155,7 +155,7 @@ class ExtensionRequestCommandTest extends TestBase with Mockito {
 				newExtension.addAttachment(attachment)
 				assignment.extensions.add(newExtension)
 
-				val command = new ExtensionRequestCommandInternal(assignment.module, assignment, currentUser) with ExtensionRequestCommandTestSupport
+				val command = new RequestExtensionCommandInternal(assignment.module, assignment, currentUser) with RequestExtensionCommandTestSupport
 				// populate command's view of attachments
 				command.presetValues(newExtension)
 
@@ -173,13 +173,13 @@ class ExtensionRequestCommandTest extends TestBase with Mockito {
 
 
 
-	trait ExtensionRequestCommandTestSupport extends FileAttachmentServiceComponent
+	trait RequestExtensionCommandTestSupport extends FileAttachmentServiceComponent
 				with RelationshipServiceComponent
-				with ExtensionRequestPersistenceComponent
-				with ExtensionRequestValidation
+				with ExtensionPersistenceComponent
+				with RequestExtensionCommandValidation
 				with Mockito {
 
-					this : ExtensionRequestCommandInternal =>
+					this : RequestExtensionCommandInternal =>
 
 					val fileAttachmentService = mock[FileAttachmentService]
 
@@ -187,6 +187,7 @@ class ExtensionRequestCommandTest extends TestBase with Mockito {
 
 					var relationshipService = mock[RelationshipService]
 					def delete(attachment: FileAttachment) {}
+					def delete(extension: Extension) {}
 					def save(extension: Extension) {}
 
 	}
