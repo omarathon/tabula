@@ -10,9 +10,10 @@ import uk.ac.warwick.tabula.commands.Appliable
 import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute}
 import uk.ac.warwick.tabula.home.commands.ActivityStreamCommand
 import uk.ac.warwick.tabula.services.{SearchPagination, ActivityStreamRequest}
+import uk.ac.warwick.tabula.web.views.MarkdownRendererImpl
 
 @Controller
-class ActivityStreamController extends BaseController with ActivityJsonMav {
+class ActivityStreamController extends BaseController with ActivityJsonMav with MarkdownRendererImpl {
 
 	@ModelAttribute("command")
 	def command(

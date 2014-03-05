@@ -532,6 +532,12 @@
 			<version>2.3</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.pegdown</groupId>
+			<artifactId>pegdown</artifactId>
+			<version>1.4.2</version>
+		</dependency>
+
 		<!-- Test dependencies -->
 		<dependency>
 			<groupId>org.springframework</groupId>
