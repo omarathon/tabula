@@ -83,6 +83,7 @@ abstract class Features {
 	@Value("${features.disability.rendering.extensions:false}") var disabilityRenderingInExtensions = defaults.disabilityRenderingInExtensions
 	@Value("${features.includePastYears:true}") var includePastYears = defaults.includePastYears
 	@Value("${features.attendanceMonitoring.smallGroupPointType:false}") var attendanceMonitoringSmallGroupPointType = defaults.attendanceMonitoringSmallGroupPointType
+	@Value("${features.activityStreams:false}") var activityStreams = defaults.activityStreams
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -154,6 +155,7 @@ class FeaturesMessage {
 	@BeanProperty var disabilityRenderingInExtensions = false
 	@BeanProperty var attendanceMonitoringSmallGroupPointType = false
 	@BeanProperty var includePastYears = true
+	@BeanProperty var activityStreams = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {
