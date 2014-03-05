@@ -280,7 +280,7 @@ class ReleaseAllSmallGroupSetsController extends GroupsController {
   @RequestMapping(method = Array(POST))
   def submit(@ModelAttribute("moduleList") model: ModuleListViewModel,@PathVariable department:Department) = {
     model.createCommand(user.apparentUser).apply()
-    Redirect("/admin/department/%s/groups/release".format(department.code), "batchReleaseSuccess"->true)
+    Redirect(Routes.admin.release(department), "batchReleaseSuccess"->true)
   }
 
 	class ModuleListViewModel() {
@@ -328,7 +328,7 @@ class OpenAllSmallGroupSetsController extends GroupsController {
 	@RequestMapping(method = Array(POST))
 	def submit(@ModelAttribute("setList") model: GroupsetListViewModel, @PathVariable department:Department) = {
 		model.applyCommand(user.apparentUser)
-		Redirect("/admin/department/%s/groups/selfsignup/%s".format(department.code, model.getName), "batchOpenSuccess" -> true)
+		Redirect(Routes.admin.selfsignup(department, model.getName), "batchOpenSuccess" -> true)
 	}
 
 	class GroupsetListViewModel(val createCommand: (User, Seq[SmallGroupSet]) => Appliable[Seq[SmallGroupSet]], var action: SmallGroupSetSelfSignUpState) {

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.admin.commands.MasqueradeCommand
 import uk.ac.warwick.tabula.web.Cookies._
-import uk.ac.warwick.tabula.web.{Cookie, Mav}
+import uk.ac.warwick.tabula.web.{Routes, Cookie, Mav}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.events.EventHandling
 
@@ -29,7 +29,7 @@ class MasqueradeController extends AdminController {
 	@RequestMapping(method = Array(POST))
 	def submit(@Valid @ModelAttribute("masqueradeCommand") cmd: MasqueradeCommand, response: HttpServletResponse): Mav = {
 		for (cookie <- cmd.apply()) response.addCookie(cookie)
-		Redirect("/masquerade")
+		Redirect(Routes.admin.masquerade)
 	}
 
 }
