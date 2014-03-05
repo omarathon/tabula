@@ -1,21 +1,18 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringCheckpoint
-import uk.ac.warwick.tabula.services.ProfileServiceComponent
-import uk.ac.warwick.tabula.helpers.DateBuilder
+import uk.ac.warwick.tabula.services.UserLookupComponent
+import uk.ac.warwick.tabula.helpers.{FoundUser, DateBuilder}
 
-trait CheckpointUpdatedDescription extends ProfileServiceComponent {
+trait CheckpointUpdatedDescription extends UserLookupComponent {
 
 	def describeCheckpoint(checkpoint: MonitoringCheckpoint) = {
-		val userString = profileService.getAllMembersWithUserId(checkpoint.updatedBy).headOption match {
-			case Some(member) => member.fullName match{
-				case Some(name) => s"by $name,"
-				case _ => ""
-			}
+		val userString = userLookup.getUserByUserId(checkpoint.updatedBy) match {
+			case FoundUser(user) => s"by ${user.getFullName}, "
 			case _ => ""
 		}
 
-		s"Recorded $userString ${DateBuilder.format(checkpoint.updatedDate)}"
+		s"Recorded ${userString}${DateBuilder.format(checkpoint.updatedDate)}"
 	}
 
 }

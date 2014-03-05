@@ -18,7 +18,7 @@ object AgentViewCommand {
 			with AutowiringMonitoringPointServiceComponent
 			with AutowiringTermServiceComponent
 			with AutowiringRelationshipServiceComponent
-			with AutowiringProfileServiceComponent
+			with AutowiringUserLookupComponent
 			with ComposableCommand[(Seq[StudentPointsData], Map[String, Seq[GroupedMonitoringPoint]])]
 			with AgentViewState
 			with ReadOnly with Unaudited

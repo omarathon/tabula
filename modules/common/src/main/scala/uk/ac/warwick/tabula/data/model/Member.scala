@@ -309,8 +309,9 @@ class StudentMember extends Member with StudentProperties {
 	override def permissionsParents: Stream[PermissionsTarget] = {
 		val departments: Stream[PermissionsTarget] = touchedDepartments
 		val smallGroups: Stream[PermissionsTarget] = registeredSmallGroups
+		val currentRoute: Stream[PermissionsTarget] = mostSignificantCourseDetails.map { _.route }.toStream
 
-		departments #::: smallGroups
+		departments #::: smallGroups #::: currentRoute
 	}
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))

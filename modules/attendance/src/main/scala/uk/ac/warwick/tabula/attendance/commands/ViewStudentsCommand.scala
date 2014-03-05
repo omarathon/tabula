@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.system.permissions.RequiresPermissionsChecking
 import uk.ac.warwick.tabula.system.permissions.PermissionsCheckingMethods
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.permissions.{CheckablePermission, Permissions}
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent}
+import uk.ac.warwick.tabula.services._
 import org.hibernate.criterion.Order._
 import uk.ac.warwick.tabula.data.model.Module
 import uk.ac.warwick.tabula.data.model.Route
@@ -30,6 +30,7 @@ object ViewStudentsCommand {
 	def apply(department: Department, academicYearOption: Option[AcademicYear], user: CurrentUser) =
 		new ViewStudentsCommand(department, academicYearOption, user)
 			with ViewStudentsPermissions
+			with AutowiringUserLookupComponent
 			with AutowiringProfileServiceComponent
 			with AutowiringSecurityServicePermissionsAwareRoutes
 			with AutowiringMonitoringPointServiceComponent
@@ -41,7 +42,7 @@ object ViewStudentsCommand {
 
 abstract class ViewStudentsCommand(val department: Department, val academicYearOption: Option[AcademicYear], val user: CurrentUser)
 	extends CommandInternal[ViewStudentsResults] with ViewStudentsState with BindListener with BuildStudentPointsData {
-	self: ProfileServiceComponent with MonitoringPointServiceComponent =>
+	self: UserLookupComponent with ProfileServiceComponent with MonitoringPointServiceComponent =>
 
 	def applyInternal() = {
 		val currentAcademicWeek = termService.getAcademicWeekForAcademicYear(DateTime.now(), academicYear)

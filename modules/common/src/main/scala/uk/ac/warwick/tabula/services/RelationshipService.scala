@@ -249,7 +249,7 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 }
 
 trait RelationshipServiceComponent {
-	var relationshipService: RelationshipService
+	def relationshipService: RelationshipService
 }
 trait AutowiringRelationshipServiceComponent extends RelationshipServiceComponent{
 	var relationshipService = Wire[RelationshipService]
