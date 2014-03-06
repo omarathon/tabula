@@ -319,6 +319,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 object AgentPointRecordCommandTest {
 	class MinimalCommandContext extends FunctionalContext with Mockito {
 		bean() { smartMock[ProfileService] }
+		bean() { smartMock[AssignmentService] }
 		bean() { smartMock[RelationshipService] }
 		bean() { smartMock[UserLookupService] }
 		bean() { smartMock[ModuleAndDepartmentService] }
