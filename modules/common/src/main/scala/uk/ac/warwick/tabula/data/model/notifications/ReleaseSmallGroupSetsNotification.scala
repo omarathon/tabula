@@ -57,4 +57,6 @@ class ReleaseSmallGroupSetsNotification extends Notification[SmallGroup, Unit]
 		}
 	}
 
+	def urlTitle = "view these groups"
+
 }

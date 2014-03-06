@@ -9,5 +9,3 @@ ${group.name} - <@fmt.p number=group.students.members?size singular="student"/>
 </#if></#list>
 
 </#list>
-
-Please visit  <@url page=profileUrl /> to view this group.
