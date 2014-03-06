@@ -1,12 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.{Type, AccessType}
+import org.hibernate.annotations.AccessType
 import javax.persistence._
 import scala.collection.JavaConversions._
 import uk.ac.warwick.userlookup.User
-import scala.{Array, Some}
-import org.hibernate.`type`.StandardBasicTypes
-import java.sql.Types
 import org.springframework.core.convert.converter.Converter
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
@@ -109,7 +106,7 @@ trait AssignmentMarkerMap {
 		val allSubmissions = getSubmissionsFromMap(assignment, marker)
 
 		val isFirstMarker = assignment.isFirstMarker(marker)
-		val isSecondMarker = assignment.isSecondMarker(marker)
+		val isSecondMarker = assignment.markingWorkflow.hasSecondMarker && assignment.isSecondMarker(marker)
 
 		if(isFirstMarker)
 			allSubmissions.filter(_.isReleasedForMarking)
@@ -147,8 +144,14 @@ object MarkingMethod {
 	case object StudentsChooseMarker extends MarkingMethod("StudentsChooseMarker")
 	case object SeenSecondMarking extends MarkingMethod("SeenSecondMarking")
 	case object ModeratedMarking extends MarkingMethod("ModeratedMarking")
+	case object FirstMarkerOnly extends MarkingMethod("FirstMarkerOnly")
 
-	val values: Set[MarkingMethod] = Set(StudentsChooseMarker, SeenSecondMarking, ModeratedMarking)
+	val values: Set[MarkingMethod] = Set(
+		StudentsChooseMarker,
+		SeenSecondMarking,
+		ModeratedMarking,
+		FirstMarkerOnly
+	)
 
 	def fromCode(code: String): MarkingMethod =
 		if (code == null) null

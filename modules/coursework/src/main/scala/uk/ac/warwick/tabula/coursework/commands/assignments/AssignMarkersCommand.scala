@@ -9,11 +9,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
-import scala.beans.BeanProperty
-import org.apache.commons.collections.FactoryUtils
-import org.apache.commons.collections.list.LazyList
 
 class AssignMarkersCommand(module: Module, assignment:Assignment)
 	extends AbstractAssignMarkersCommand(module, assignment)
@@ -67,7 +63,11 @@ abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:A
 		}
 
 		firstMarkers = retrieveMarkers(assignment.markingWorkflow.firstMarkers.members)
-		secondMarkers = retrieveMarkers(assignment.markingWorkflow.secondMarkers.members)
+		secondMarkers = assignment.markingWorkflow.hasSecondMarker match {
+			case true => retrieveMarkers(assignment.markingWorkflow.secondMarkers.members)
+			case false => Seq()
+		}
+
 		val members = assignmentMembershipService.determineMembershipUsers(assignment).map{s =>
 			val displayValue = module.department.showStudentName match {
 				case true => s.getFullName
@@ -80,7 +80,7 @@ abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:A
 		secondMarkerUnassignedStudents = members.toList filterNot secondMarkers.map(_.students).flatten.contains
 
 		markerMapping = new java.util.HashMap[String, JList[String]]()
-		for (marker <- (firstMarkers.toList ++ secondMarkers.toList)){
+		for (marker <- firstMarkers.toList ++ secondMarkers.toList){
 			markerMapping.put(marker.userCode, marker.students.map(_.userCode))
 		}
 	}
