@@ -12,10 +12,12 @@ import uk.ac.warwick.util.termdates.Term
 
 class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends TermServiceComponent with MonitoringPointServiceComponent
-		with UpdateMonitoringPointValidation with UpdateMonitoringPointState {
+	trait CommandTestSupport extends TermServiceComponent with MonitoringPointServiceComponent with SmallGroupServiceComponent
+		with ModuleAndDepartmentServiceComponent with UpdateMonitoringPointValidation with UpdateMonitoringPointState {
 		val monitoringPointService = mock[MonitoringPointService]
 		val termService = mock[TermService]
+		val smallGroupService = mock[SmallGroupService]
+		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 	}
 
 	trait Fixture {

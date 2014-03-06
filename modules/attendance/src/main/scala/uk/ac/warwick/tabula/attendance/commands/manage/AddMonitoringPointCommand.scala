@@ -3,7 +3,7 @@ package uk.ac.warwick.tabula.attendance.commands.manage
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointType, MonitoringPoint}
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent}
 import uk.ac.warwick.tabula.data.model.Department
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -16,6 +16,8 @@ object AddMonitoringPointCommand {
 		new AddMonitoringPointCommand(dept)
 		with ComposableCommand[MonitoringPoint]
 		with AutowiringTermServiceComponent
+		with AutowiringSmallGroupServiceComponent
+		with AutowiringModuleAndDepartmentServiceComponent
 		with AddMonitoringPointValidation
 		with AddMonitoringPointPermissions
 		with ReadOnly with Unaudited

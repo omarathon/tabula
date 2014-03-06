@@ -107,7 +107,7 @@
 					Specific
 				</@form.label>
 				<div class="module-search input-append">
-					<input class="module-search-query" type="text" value=""/>
+					<input class="module-search-query smallGroup" type="text" value=""/>
 					<span class="add-on"><i class="icon-search"></i></span>
 				</div>
 				<button class="btn add-module"><i class="icon-plus"></i> </button>
@@ -118,7 +118,7 @@
 						<#list command.smallGroupEventModules![] as module>
 							<li>
 								<input type="hidden" name="smallGroupEventModules" value="${module.id}" />
-								<i class="icon-fixed-width"></i><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
+								<#if command.moduleHasSmallGroups(module)><i class="icon-fixed-width"></i><#else><i class="icon-fixed-width icon-exclamation-sign" title="This module has no small groups set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
 							</li>
 						</#list>
 
@@ -201,7 +201,7 @@
 		<div class="module-choice">
 			<@form.labelled_row "assignmentSubmissionModules" "Modules">
 				<div class="module-search input-append">
-					<input class="module-search-query" type="text" value=""/>
+					<input class="module-search-query assignment" type="text" value=""/>
 					<span class="add-on"><i class="icon-search"></i></span>
 				</div>
 				<button class="btn add-module"><i class="icon-plus"></i> </button>
@@ -211,7 +211,7 @@
 						<#list command.assignmentSubmissionModules![] as module>
 							<li>
 								<input type="hidden" name="assignmentSubmissionModules" value="${module.id}" />
-								<i class="icon-fixed-width"></i><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
+								<#if command.moduleHasAssignments(module)><i class="icon-fixed-width"></i><#else><i class="icon-fixed-width icon-exclamation-sign" title="This module has no assignments set up in Tabula"></i></#if><span title="<@fmt.module_name module false />"><@fmt.module_name module false /></span><button class="btn btn-danger"><i class="icon-remove"></i></button>
 							</li>
 						</#list>
 					</ul>
