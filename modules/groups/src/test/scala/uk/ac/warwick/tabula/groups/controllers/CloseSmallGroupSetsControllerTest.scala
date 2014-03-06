@@ -99,7 +99,7 @@ class CloseSmallGroupSetsControllerTest extends TestBase with Mockito {
 				
 				val mav = controller.submit(viewModel, department)
 
-				mav.viewName should be("redirect:/admin/department/XYZ/groups/selfsignup/close")
+				mav.viewName should be("redirect:/groups/admin/department/XYZ/groups/selfsignup/close")
 				mav.map("batchOpenSuccess") should be (JBoolean(Some(true)))
 			}
 		}
