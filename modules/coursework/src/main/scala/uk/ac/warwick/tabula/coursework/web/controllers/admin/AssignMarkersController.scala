@@ -25,6 +25,7 @@ class AssignMarkersController extends CourseworkController {
 		val secondMarkerRoleName = assignment.markingWorkflow.secondMarkerRoleName
 
 		Mav("admin/assignments/assignmarkers/form",
+			"hasSecondMarker" -> assignment.markingWorkflow.hasSecondMarker,
 			"firstMarkerRoleName" -> firstMarkerRoleName,
 			"secondMarkerRoleName" -> secondMarkerRoleName
 		).crumbs(Breadcrumbs.Department(cmd.module.department), Breadcrumbs.Module(cmd.module))

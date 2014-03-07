@@ -3,7 +3,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, StudentsChooseMarker, SeenSecondMarking}
+import uk.ac.warwick.tabula.data.model.MarkingMethod.{FirstMarkerOnly, ModeratedMarking, StudentsChooseMarker, SeenSecondMarking}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.AssignmentServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringAssignmentServiceComponent
@@ -33,6 +33,7 @@ class AddMarkingWorkflowCommandInternal(department: Department) extends ModifyMa
 				case SeenSecondMarking => new SeenSecondMarkingWorkflow(department)
 				case StudentsChooseMarker => new StudentsChooseMarkerWorkflow(department)
 				case ModeratedMarking => new ModeratedMarkingWorkflow(department)
+				case FirstMarkerOnly => new FirstMarkerOnlyWorkflow(department)
 				case _ => throw new UnsupportedOperationException(markingMethod + " not specified")
 			}
 			this.copyTo(markingWorkflow)
