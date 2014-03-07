@@ -75,7 +75,7 @@ trait StudentRecordValidation extends SelfValidating {
 				errors.rejectValue("", "monitoringPointSet.invalidPoint")
 			}
 
-			if (!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, pointSet.academicYear).getTermTypeAsString)){
+			if (!nonReportedTerms.contains(termService.getTermFromAcademicWeekIncludingVacations(point.validFromWeek, pointSet.academicYear).getTermTypeAsString)){
 				errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 			}
 

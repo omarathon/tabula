@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.{Fixtures, Mockito, TestBase}
+import uk.ac.warwick.tabula.{AcademicYear, Fixtures, Mockito, TestBase}
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointReport, MonitoringCheckpoint, MonitoringPointType, MonitoringPointSet, MonitoringPoint}
 import org.springframework.validation.BindException
@@ -57,6 +57,8 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 			var errors = new BindException(command, "command")
 			command.validate(errors)
 			errors.hasFieldErrors should be (right = false)
+			// TAB-2025
+			there was no(command.termService).getTermFromAcademicWeek(any[Int], any[AcademicYear], any[Boolean])
 		}
 	}
 
@@ -396,8 +398,8 @@ class UpdateMonitoringPointCommandTest extends TestBase with Mockito {
 
 			val student = Fixtures.student("12345")
 
-			command.termService.getTermFromAcademicWeek(monitoringPoint.validFromWeek, set.academicYear) returns term
-			command.termService.getTermFromAcademicWeek(otherMonitoringPoint.validFromWeek, set.academicYear) returns term
+			command.termService.getTermFromAcademicWeekIncludingVacations(monitoringPoint.validFromWeek, set.academicYear) returns term
+			command.termService.getTermFromAcademicWeekIncludingVacations(otherMonitoringPoint.validFromWeek, set.academicYear) returns term
 			command.monitoringPointService.getCheckpointsByStudent(set.points.asScala) returns Seq((student, mock[MonitoringCheckpoint]))
 			// there is already a report sent for this term, so we cannot edit this Monitoring Point
 			command.monitoringPointService.findReports(Seq(student), set.academicYear, term.getTermTypeAsString ) returns Seq(new MonitoringPointReport)

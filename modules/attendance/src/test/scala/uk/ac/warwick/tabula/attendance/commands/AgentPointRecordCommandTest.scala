@@ -68,7 +68,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 		val command = new AgentPointRecordCommand(agentMember, currentUser, tutorType, template) with CommandTestSupport with AgentPointRecordValidation
 	}
 
-	@Test def init { new Fixture {
+	@Test def init() { new Fixture {
 		command.agent should be (agentMember)
 		command.user should be (currentUser)
 		command.relationshipType should be (tutorType)
@@ -76,14 +76,14 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 	}}
 
 	trait AgentPointRecordWorld extends Fixture {
-		command.relationshipService.listStudentRelationshipsWithMember(tutorType, agentMember) returns (Seq(studentRel1, studentRel2, studentRel3, studentRel4))
+		command.relationshipService.listStudentRelationshipsWithMember(tutorType, agentMember) returns Seq(studentRel1, studentRel2, studentRel3, studentRel4)
 
-		command.monitoringPointService.getPointSetForStudent(student1, AcademicYear.guessByDate(DateTime.now)) returns (Some(pointSet1))
-		command.monitoringPointService.getPointSetForStudent(student2, AcademicYear.guessByDate(DateTime.now)) returns (Some(pointSet1))
-		command.monitoringPointService.getPointSetForStudent(student3, AcademicYear.guessByDate(DateTime.now)) returns (Some(pointSet1))
-		command.monitoringPointService.getPointSetForStudent(student4, AcademicYear.guessByDate(DateTime.now)) returns (Some(pointSet2))
-		command.monitoringPointService.getPointById(point1.id) returns (Some(point1))
-		command.monitoringPointService.getPointById(point2.id) returns (Some(point2))
+		command.monitoringPointService.getPointSetForStudent(student1, AcademicYear.guessByDate(DateTime.now)) returns Some(pointSet1)
+		command.monitoringPointService.getPointSetForStudent(student2, AcademicYear.guessByDate(DateTime.now)) returns Some(pointSet1)
+		command.monitoringPointService.getPointSetForStudent(student3, AcademicYear.guessByDate(DateTime.now)) returns Some(pointSet1)
+		command.monitoringPointService.getPointSetForStudent(student4, AcademicYear.guessByDate(DateTime.now)) returns Some(pointSet2)
+		command.monitoringPointService.getPointById(point1.id) returns Some(point1)
+		command.monitoringPointService.getPointById(point2.id) returns Some(point2)
 
 		// Student3 has already been reported to SITS this term
 		val nonReportedStudents = Seq(student1, student2, student4)
@@ -111,25 +111,26 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 		student3Point.updatedDate = new DateTime(2014, DateTimeConstants.JANUARY, 13, 12, 49, 12, 0)
 
 		val term = smartMock[Term]
-		term.getTermTypeAsString returns ("spring")
+		term.getTermTypeAsString returns "spring"
 
-		command.termService.getTermFromAcademicWeek(argThat(anything), argThat(anything)) returns (term)
-		command.termService.getAcademicWeekForAcademicYear(any[DateTime], any[AcademicYear]) returns (5)
+		command.termService.getTermFromAcademicWeekIncludingVacations(point1.validFromWeek, AcademicYear(2013)) returns term
+		command.termService.getTermFromAcademicWeekIncludingVacations(point2.validFromWeek, AcademicYear(2013)) returns term
+		command.termService.getAcademicWeekForAcademicYear(any[DateTime], any[AcademicYear]) returns 5
 
-		command.monitoringPointService.findNonReported(allStudents, AcademicYear.guessByDate(DateTime.now), "spring") returns (nonReportedStudents)
-		command.monitoringPointService.findNonReportedTerms(Seq(student1), AcademicYear.guessByDate(DateTime.now)) returns (Seq("spring"))
-		command.monitoringPointService.findNonReportedTerms(Seq(student2), AcademicYear.guessByDate(DateTime.now)) returns (Seq("spring"))
-		command.monitoringPointService.findNonReportedTerms(Seq(student3), AcademicYear.guessByDate(DateTime.now)) returns (Nil)
-		command.monitoringPointService.findNonReportedTerms(Seq(student4), AcademicYear.guessByDate(DateTime.now)) returns (Seq("spring"))
+		command.monitoringPointService.findNonReported(allStudents, AcademicYear.guessByDate(DateTime.now), "spring") returns nonReportedStudents
+		command.monitoringPointService.findNonReportedTerms(Seq(student1), AcademicYear.guessByDate(DateTime.now)) returns Seq("spring")
+		command.monitoringPointService.findNonReportedTerms(Seq(student2), AcademicYear.guessByDate(DateTime.now)) returns Seq("spring")
+		command.monitoringPointService.findNonReportedTerms(Seq(student3), AcademicYear.guessByDate(DateTime.now)) returns Nil
+		command.monitoringPointService.findNonReportedTerms(Seq(student4), AcademicYear.guessByDate(DateTime.now)) returns Seq("spring")
 
 		command.monitoringPointService.getCheckpointsByStudent(Seq(point1, point2)) returns Seq((student1, student1Point), (student3, student3Point))
 
 		command.userLookup.registerUsers("cuscav")
 
-		command.monitoringPointService.findAttendanceNotes(allStudents, Seq(point1, point2)) returns (Seq(student1PointNote))
+		command.monitoringPointService.findAttendanceNotes(allStudents, Seq(point1, point2)) returns Seq(student1PointNote)
 	}
 
-	@Test def populate { new AgentPointRecordWorld {
+	@Test def populate() { new AgentPointRecordWorld {
 		command.populate()
 		command.studentsState.asScala.mapValues { _.asScala } should be (Map(
 			student1 -> Map(point1 -> AttendanceState.MissedAuthorised),
@@ -147,7 +148,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 		))
 	}}
 
-	@Test def onBind { new AgentPointRecordWorld {
+	@Test def onBind() { new AgentPointRecordWorld {
 		command.populate()
 		command.onBind(getErrors(command))
 		command.studentsStateAsScala should be (Map(
@@ -157,7 +158,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 		))
 	}}
 
-	@Test def apply { new AgentPointRecordWorld {
+	@Test def apply() { new AgentPointRecordWorld {
 		command.populate()
 
 		// Make it mutable
@@ -172,7 +173,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 		command.onBind(getErrors(command))
 
 		val student4Point = Fixtures.monitoringCheckpoint(point2, student4, AttendanceState.Attended)
-		command.monitoringPointService.saveOrUpdateCheckpoint(student4, point2, AttendanceState.Attended, agentMember) returns (student4Point)
+		command.monitoringPointService.saveOrUpdateCheckpoint(student4, point2, AttendanceState.Attended, agentMember) returns student4Point
 
 		command.applyInternal() should be (Seq(student4Point))
 		there was one (command.monitoringPointService).deleteCheckpoint(student1, point1)
@@ -180,7 +181,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 
 	trait ValidationFixture extends AgentPointRecordWorld
 
-	@Test def validatePasses { new ValidationFixture {
+	@Test def validatePasses() { new ValidationFixture {
 		command.populate()
 
 		val errors = getErrors(command)
@@ -188,9 +189,11 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 		command.validate(errors)
 
 		errors.hasErrors should be (false)
+		// TAB-2025
+		there was no(command.termService).getTermFromAcademicWeek(any[Int], any[AcademicYear], any[Boolean])
 	}}
 
-	@Test def rejectPointNotInSet { new ValidationFixture {
+	@Test def rejectPointNotInSet() { new ValidationFixture {
 		// Make it mutable
 		command.studentsState = JHashMap()
 
@@ -206,7 +209,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 		errors.getFieldError.getCodes should contain ("monitoringPoint.invalidStudent")
 	}}
 
-	@Test def rejectStudentAlreadyReportedThisTerm { new ValidationFixture {
+	@Test def rejectStudentAlreadyReportedThisTerm() { new ValidationFixture {
 		// Make it mutable
 		command.studentsState = JHashMap()
 
@@ -222,13 +225,14 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 		errors.getFieldError.getCodes should contain ("monitoringCheckpoint.student.alreadyReportedThisTerm")
 	}}
 
-	@Test def rejectBeforeValidFromWeek { new ValidationFixture {
+	@Test def rejectBeforeValidFromWeek() { new ValidationFixture {
 		// Make it mutable
 		command.studentsState = JHashMap()
 
 		// We're currently in week 5, make point1 only valid from week 7
 		point1.validFromWeek = 7
 		point1.requiredFromWeek = 8
+		command.termService.getTermFromAcademicWeekIncludingVacations(point1.validFromWeek, AcademicYear(2013)) returns term
 
 		// Try and record for student1
 		command.studentsState.put(student1, JHashMap(point1 -> AttendanceState.Attended))
@@ -255,7 +259,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 	}
 
 	@Test
-	def permissionsRequireReadRelationshipAndViewStudents { new StateSetup {
+	def permissionsRequireReadRelationshipAndViewStudents() { new StateSetup {
 		val command = new AgentPointRecordPermissions with CommandTestSupport {
 			val agent = agentMember
 			val user = currentUser
@@ -263,7 +267,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 			val templateMonitoringPoint = template
 		}
 
-		command.relationshipService.listStudentRelationshipsWithMember(tutorType, agentMember) returns (Seq(studentRel1, studentRel2, studentRel3, studentRel4))
+		command.relationshipService.listStudentRelationshipsWithMember(tutorType, agentMember) returns Seq(studentRel1, studentRel2, studentRel3, studentRel4)
 
 		val checking = mock[PermissionsChecking]
 		command.permissionsCheck(checking)
@@ -272,7 +276,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 	}}
 
 	@Test
-	def describe { new StateSetup {
+	def describe() { new StateSetup {
 		val dept = Fixtures.department("in")
 
 		val command = new AgentPointRecordDescription with CommandTestSupport {
@@ -302,7 +306,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 
 	@Test
 	def glueEverythingTogether() { inContext[MinimalCommandContext] { new StateSetup {
-		Wire[RelationshipService].listStudentRelationshipsWithMember(tutorType, agentMember) returns (Seq(studentRel1, studentRel2, studentRel3, studentRel4))
+		Wire[RelationshipService].listStudentRelationshipsWithMember(tutorType, agentMember) returns Seq(studentRel1, studentRel2, studentRel3, studentRel4)
 
 		val command = AgentPointRecordCommand(agentMember, currentUser, tutorType, template)
 
