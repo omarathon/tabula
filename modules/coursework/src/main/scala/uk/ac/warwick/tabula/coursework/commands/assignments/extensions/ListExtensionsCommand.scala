@@ -7,7 +7,7 @@ import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.services.UserLookupService
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.ItemNotFoundException
@@ -31,9 +31,7 @@ class ListExtensionsCommand(val module: Module, val assignment: Assignment, val 
 				yield (assignmentUser.getWarwickId -> assignmentUser)
 		)
 
-		val manualExtensions = assignment.extensions.filter(_.isManual)
-		val isExtensionManager = module.department.isExtensionManager(user.apparentId)
-		val extensionRequests = assignment.extensions -- manualExtensions
+		val extensionsByState = assignment.extensions.toSeq.groupBy(_.state)
 
 		// all the users that aren't members of this assignment, but have submitted work to it
 		val extensionsFromNonMembers = assignment.extensions.filterNot(x => assignmentMembership.contains(x.universityId))
@@ -42,20 +40,16 @@ class ListExtensionsCommand(val module: Module, val assignment: Assignment, val 
 		// build lookup of names from non members of the assignment that have submitted work plus members
 		val students = nonMembers ++ assignmentMembership
 
-		// users that are members of the assignment but have not yet requested or been granted an extension
-		val potentialExtensions =
-			assignmentMembership.keySet -- (manualExtensions.map(_.universityId).toSet) --
-				(extensionRequests.map(_.universityId).toSet)
-
 		(for (student <- students) yield {
 			// deconstruct the map, bleh
 			val universityId = student._1
 			val user = student._2
-			val hasRequestOutstanding = extensionRequests.map(_.universityId).contains(universityId)
-			val hasExtension = assignment.extensions.map(_.universityId).contains(universityId)
+			val hasOutstandingExtensionRequest = extensionsByState.getOrElse(ExtensionState.Unreviewed, Seq.empty).map(_.universityId).contains(universityId)
+			val hasApprovedExtension = extensionsByState.getOrElse(ExtensionState.Approved, Seq.empty).map(_.universityId).contains(universityId)
+			val hasRejectedExtension = extensionsByState.getOrElse(ExtensionState.Rejected, Seq.empty).map(_.universityId).contains(universityId)
 			val extension = assignment.extensions.find(_.universityId == universityId)
 
-			new ExtensionGraph(universityId, user, hasRequestOutstanding, hasExtension, extension)
+			new ExtensionGraph(universityId, user, hasOutstandingExtensionRequest, hasApprovedExtension, hasRejectedExtension, extension)
 		}).toSeq
 	}
 }
@@ -63,6 +57,7 @@ class ListExtensionsCommand(val module: Module, val assignment: Assignment, val 
 case class ExtensionGraph(
 	universityId: String,
 	user: User,
-	hasRequestOutstanding: Boolean,
-	hasExtension: Boolean,
+	hasOutstandingExtensionRequest: Boolean,
+	hasApprovedExtension: Boolean,
+	hasRejectedExtension: Boolean,
 	extension: Option[Extension])

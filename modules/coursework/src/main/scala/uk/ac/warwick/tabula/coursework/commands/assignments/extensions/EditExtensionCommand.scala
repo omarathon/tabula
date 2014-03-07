@@ -23,10 +23,16 @@ object EditExtensionCommand {
 }
 
 class EditExtensionCommandInternal(mod: Module, ass: Assignment, uniId: String, sub: CurrentUser, action: String)
-		extends ModifyExtensionCommand(mod, ass, uniId, sub, action) with ModifyExtensionCommandState {
+		extends ModifyExtensionCommand(mod, ass, uniId, sub, action) with ModifyExtensionCommandState  {
 	self: ExtensionPersistenceComponent with UserLookupComponent =>
 
-	extension = assignment.findExtension(universityId).getOrElse(new Extension(universityId))
+	val e = assignment.findExtension(universityId)
+	e match {
+		case Some(e) =>
+			copyFrom(e)
+			extension = e
+		case None => extension = new Extension(universityId)
+	}
 
 	def applyInternal() = transactional() {
 		copyTo(extension)

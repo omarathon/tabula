@@ -17,7 +17,7 @@
 				<#if extension.reason??>
 					<div class="extensionReason">
 						<div class="control-group">
-							<label><h4>Reason for extension request</h4></label>
+							<h4>Reason for extension request</h4>
 							<div class="controls">
 							${extension.reason}
 							</div>
@@ -154,10 +154,13 @@
 					<@f.textarea path="reviewerComments" />
 				</div>
 			</div>
-			<input type="hidden" name="action" class="action" />
+
+			<@f.errors path="*" cssClass="error form-errors" />
+
 			<div class="submit-buttons">
-				<input class="btn btn-primary" type="submit" value="Save">
-				<a class="btn discard-changes" href="">Discard</a>
+				<input class="btn btn-primary" type="submit" value="${approvalAction}" name="action">
+				<input class="btn btn-danger" type="submit" value="${rejectionAction}" name="action">
+				<a class="btn discard-changes" href="">Discard changes</a>
 			</div>
 		</@f.form>
 	</div>

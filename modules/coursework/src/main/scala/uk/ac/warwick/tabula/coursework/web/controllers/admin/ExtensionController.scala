@@ -1,6 +1,5 @@
 package uk.ac.warwick.tabula.coursework.web.controllers.admin
 
-import scala.collection.JavaConversions._
 
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
@@ -10,17 +9,16 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
 import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService, RelationshipService}
-import uk.ac.warwick.tabula.CurrentUser
-import com.fasterxml.jackson.databind.ObjectMapper
+import uk.ac.warwick.tabula.{JsonHelper, CurrentUser}
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.helpers.DateBuilder
 import javax.validation.Valid
-import uk.ac.warwick.tabula.web.views.JSONView
 import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
+import com.fasterxml.jackson.databind.ObjectMapper
 
 
 abstract class ExtensionController extends CourseworkController {
@@ -29,23 +27,37 @@ abstract class ExtensionController extends CourseworkController {
 	var relationshipService = Wire[RelationshipService]
 	var profileService = Wire[ProfileService]
 
-	// Add the common breadcrumbs to the model.
-	def crumbed(mav: Mav, module:Module)
+	// Add the common breadcrumbs to the model
+	def crumbed(mav: Mav, module: Module)
 		= mav.crumbs(Breadcrumbs.Department(module.department), Breadcrumbs.Module(module))
 
-	def toJson(extension:Extension) = {
-		val expiryDate =  extension.expiryDate match {
-			case d:DateTime => DateBuilder.format(extension.expiryDate)
-			case _ => ""
-		}
+	class ExtensionMap(extension: Extension) {
+		def asMap: Map[String, String] = {
 
-		Map(
-			"id" -> extension.universityId,
-			"status" -> extension.state.description,
-			"expiryDate" -> expiryDate,
-			"reviewerComments" -> extension.reviewerComments
-		)
+			def convertDateToString(date: DateTime) =
+				Option(date) match {
+					case Some(d: DateTime) => DateBuilder.format(d)
+					case _ => ""
+				}
+
+			def convertDateToMillis(date: DateTime) =
+				Option(date) match {
+					case Some(d: DateTime) => d.getMillis.toString
+					case _ => null
+				}
+
+			Map(
+				"id" -> extension.universityId,
+				"status" -> extension.state.description,
+				"requestedExpiryDate" -> convertDateToString(extension.requestedExpiryDate),
+				"expiryDate" -> convertDateToString(extension.expiryDate),
+				"expiryDateMillis" -> convertDateToMillis(extension.expiryDate),
+				"reviewerComments" -> extension.reviewerComments
+			)
+		}
 	}
+	import scala.language.implicitConversions
+	implicit def asMap(e: Extension) = new ExtensionMap(e)
 }
 
 @Controller
@@ -97,28 +109,23 @@ class EditExtensionController extends ExtensionController {
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,
 			"universityId" -> cmd.universityId,
-			"userFullName" -> userLookup.getUserByWarwickUniId(cmd.universityId).getFullName
+			"userFullName" -> userLookup.getUserByWarwickUniId(cmd.universityId).getFullName,
+			"approvalAction" -> cmd.ApprovalAction,
+			"rejectionAction" -> cmd.RejectionAction
 		).noLayout()
 		model
 	}
 
 	@RequestMapping(method=Array(POST))
 	@ResponseBody
-	def persistExtension(@Valid @ModelAttribute("modifyExtensionCommand") cmd: Appliable[Extension] with ModifyExtensionCommandState, result: BindingResult,
-						 response: HttpServletResponse, errors: Errors): Mav = {
+	def persistExtension(@Valid @ModelAttribute("modifyExtensionCommand") cmd: Appliable[Extension] with ModifyExtensionCommandState, result: BindingResult, errors: Errors): Mav = {
 		if (errors.hasErrors) {
-			val errorList = errors.getFieldErrors
-			val errorMap = Map() ++ (errorList map (error => (error.getField, getMessage(error.getCode))))
-			val errorJson = Map("status" -> "error", "result" -> errorMap)
-			Mav(new JSONView(errorJson))
+			editExtension(cmd, errors)
 		} else {
-			val extensions = cmd.apply()
-			val extensionMap = toJson(extensions)
-			val extensionsJson = Map("status" -> "success", "action" -> "add", "result" -> extensionMap)
-			Mav(new JSONView(extensionsJson))
+			val extensionJson = JsonHelper.toJson(cmd.apply().asMap)
+			Mav("ajax_success", "data" -> extensionJson).noLayout()
 		}
 	}
-
 }
 
 

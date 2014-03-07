@@ -12,7 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.data.Daoisms
 
 
-abstract class ModifyExtensionCommand(val mod: Module, val ass: Assignment, uniId: String, val sub: CurrentUser, val action: String = "")
+abstract class ModifyExtensionCommand(val mod: Module, val ass: Assignment, uniId: String, val sub: CurrentUser, val act: String = "")
 		extends CommandInternal[Extension] with ModifyExtensionCommandState {
 	self: ExtensionPersistenceComponent with UserLookupComponent =>
 
@@ -20,6 +20,7 @@ abstract class ModifyExtensionCommand(val mod: Module, val ass: Assignment, uniI
 	module = mod
 	assignment = ass
 	submitter = sub
+	action = act
 
 	def copyTo(extension: Extension) = {
 		extension.userId = userLookup.getUserByWarwickUniId(universityId).getUserId
@@ -29,24 +30,33 @@ abstract class ModifyExtensionCommand(val mod: Module, val ass: Assignment, uniI
 		extension.reviewedOn = DateTime.now
 
 		action match {
-			case "approve" => extension.approve(reviewerComments)
-			case "reject" => extension.reject(reviewerComments)
+			case ApprovalAction => extension.approve(reviewerComments)
+			case RejectionAction => extension.reject(reviewerComments)
 			case _ =>
 		}
 	}
+
+	def copyFrom(extension: Extension) = {
+		expiryDate = extension.expiryDate
+		state = extension.state
+		reviewerComments = extension.reviewerComments
+	}
+
 }
 
 
 trait ModifyExtensionCommandValidation extends SelfValidating {
 	self: ModifyExtensionCommandState with UserLookupComponent =>
 	def validate(errors: Errors) {
+
 		val userId = userLookup.getUserByWarwickUniId(universityId).getUserId
 		if(userId == null) {
 			errors.rejectValue("universityId", "extension.universityId.noValidUserId")
 		}
 
+		// FIXME can't approve without expiry date - this next bit doesn't work
 		if(expiryDate == null) {
-			if (state == ExtensionState.Approved) {
+			if (action == ApprovalAction) {
 				errors.rejectValue("expiryDate", "extension.requestedExpiryDate.provideExpiry")
 			}
 		} else if(expiryDate.isBefore(assignment.closeDate)) {
@@ -66,8 +76,11 @@ trait ModifyExtensionCommandState {
 	var expiryDate: DateTime =_
 	var reviewerComments: String =_
 	var state: ExtensionState = ExtensionState.Unreviewed
-
+	var action: String =_
 	var extension: Extension =_
+
+	final val ApprovalAction = "Grant"
+	final val RejectionAction = "Reject"
 }
 
 
@@ -96,5 +109,3 @@ trait ExtensionPersistenceComponent {
 	def delete(extension: Extension)
 	def save(extension: Extension)
 }
-
-

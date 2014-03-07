@@ -355,6 +355,7 @@ $(function() {
 		var contentId = $container.attr('data-contentid');
 		var $row = $('tr.itemContainer[data-contentid='+contentId+']');
 
+		$form.find('.date-time-picker').tabulaDateTimePicker();
         $form.tabulaSubmitOnce();
 
 		// record the initial values of the fields
@@ -436,6 +437,7 @@ $(function() {
 
 					if (!result || /^\s*$/.test(result)) {
 						// reset if empty
+						$row.trigger('tabula.expandingTable.toggle');
 						$container.html("<p>No data is currently available.</p>");
 						$row.find('.status-col dt .unsaved').remove();
 						$container.removeData('loaded');
@@ -456,8 +458,8 @@ $(function() {
 			var success = $response.length && $response.data('status') == 'success';
 
 			if (success) {
-				var rejected = $response.length && $response.data('data') == 'Rejected';
-				var markingCompleted = $response.length && $response.data('data') == 'MarkingCompleted';
+				var rejected = $response.data('data') == 'Rejected';
+				var markingCompleted = $response.data('data') == 'MarkingCompleted';
 				var $statusContainer = $row.find('.status-col dt');
 
 				if(rejected) {
@@ -470,7 +472,6 @@ $(function() {
 					$statusContainer.append($('<div class="label label-warning marked">Marked</div>'));
 				}
 
-				$row.trigger('tabula.expandingTable.toggle');
 				$row.next('tr').trigger('tabula.expandingTable.toggle');
 
 				return "";
@@ -481,7 +482,30 @@ $(function() {
 
 		if ($form.parents('.extension-detail').length) prepareAjaxForm($form, function(resp) {
 			// FIXME gotta do some handling...
-			return resp;
+			var $resp = $(resp);
+
+			// there should be an ajax-response class somewhere in the response text
+			var $response = $resp.find('.ajax-response').andSelf().filter('.ajax-response');
+			var success = $response.length && $response.data('status') == 'success';
+
+			if (success) {
+				var rejected = $response.data('data').status == 'Rejected';
+				var approved = $response.data('data').status == 'Approved';
+				var $statusContainer = $row.find('.status-col dt');
+
+				$statusContainer.find(".label").remove();
+
+				if(rejected) {
+					$statusContainer.append($('<div class="label label-important">Rejected</div>'));
+				}
+				else if(approved) {
+					$statusContainer.append($('<div class="label label-info">Approved</div>'));
+				}
+
+				return "";
+			} else {
+				return resp;
+			}
 		});
 	});
 

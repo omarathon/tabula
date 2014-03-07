@@ -15,12 +15,14 @@
 		<td class="status-col toggle-cell content-cell">
 			<dl style="margin: 0; border-bottom: 0;">
 				<dt>
-					<#if !graph.hasExtension>
-						<span class="label">No extension</span>
-					<#elseif graph.hasRequestOutstanding>
+					<#if graph.hasOutstandingExtensionRequest>
 						<span class="label label-warning">Awaiting review</span>
+					<#elseif graph.hasApprovedExtension>
+						<span class="label label-info">Approved</span>
+					<#elseif graph.hasRejectedExtension>
+						<span class="label label-important">Rejected</span>
 					<#else>
-						<span class="label label-info">Has extension</span>
+						<span class="label">No extension</span>
 					</#if>
 				</dt>
 				<dd style="display: none;" class="table-content-container" data-contentid="${graph.universityId}">

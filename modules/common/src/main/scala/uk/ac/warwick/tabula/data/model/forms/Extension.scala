@@ -14,6 +14,7 @@ import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import uk.ac.warwick.userlookup.User
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
+import scala.beans.BeanProperty
 
 
 @Entity @AccessType("field")
