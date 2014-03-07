@@ -63,7 +63,7 @@ exports.bindModulePickers = function(){
 				$addButton = $parent.find('button.add-module'),
 				$hiddenInput = $parent.find('input[type=hidden]:first');
 			$this.on('change', function(){
-				if ($(this).data('moduleid') && $(this).data('moduleid').length === 0) {
+				if ($(this).data('moduleid') != undefined && $(this).data('moduleid').length === 0) {
 					$addButton.attr('disabled', true);
 				} else {
 					$addButton.attr('disabled', false);
@@ -73,9 +73,14 @@ exports.bindModulePickers = function(){
 			$addButton.on('click', function(){
 				$this.closest('.module-choice').find('input.specific[name=isAnySmallGroupEventModules]').attr('checked', true);
 				var icon = $('<i/>').addClass('icon-fixed-width');
-				if (!$this.data('hasgroups')) {
+				if ($this.hasClass('smallGroup') && $this.data('hasgroups') != true) {
 					icon.addClass('icon-exclamation-sign').attr({
 						'title':'This module has no small groups set up in Tabula'
+					});
+				}
+				if ($this.hasClass('assignment') && $this.data('hasassignments') != true) {
+					icon.addClass('icon-exclamation-sign').attr({
+						'title':'This module has no assignments set up in Tabula'
 					});
 				}
 				$this.closest('.module-choice').find('.modules-list ul').append(
@@ -95,7 +100,7 @@ exports.bindModulePickers = function(){
 							)
 						)
 				);
-				$this.data('moduleid','').val('');
+				$this.data('moduleid','').val('').trigger('change');
 			});
 	});
 	$('.pointTypeOption.smallGroup .module-search-query').modulePicker({
@@ -120,7 +125,7 @@ exports.bindAssignmentPickers = function(){
 				$addButton = $parent.find('button.add-assignment'),
 				$hiddenInput = $parent.find('input[type=hidden]:first');
 			$this.on('change', function(){
-				if ($(this).data('assignmentid') && $(this).data('assignmentid').length === 0) {
+				if ($(this).data('assignmentid') != undefined && $(this).data('assignmentid').length === 0) {
 					$addButton.attr('disabled', true);
 				} else {
 					$addButton.attr('disabled', false);
@@ -143,7 +148,7 @@ exports.bindAssignmentPickers = function(){
 							)
 						)
 				);
-				$this.data('assignmentid','').val('');
+				$this.data('assignmentid','').val('').trigger('change');
 			});
 		});
 

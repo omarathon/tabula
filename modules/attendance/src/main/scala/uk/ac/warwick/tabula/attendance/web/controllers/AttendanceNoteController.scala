@@ -13,7 +13,7 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.services.fileserver.{FileServer, RenderableFile}
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.{UserLookupService, ProfileService, MonitoringPointService}
+import uk.ac.warwick.tabula.services.{UserLookupService, MonitoringPointService}
 import uk.ac.warwick.tabula.helpers.DateBuilder
 import javax.validation.Valid
 
@@ -121,7 +121,7 @@ class EditAttendanceNoteController extends AttendanceController {
 		@PathVariable student: StudentMember
 	) = {
 		if (errors.hasErrors) {
-			form(cmd, student, true)
+			form(cmd, student, isIframe = true)
 		} else {
 			cmd.apply()
 			Mav("home/edit_note", "success" -> true, "isIframe" -> true, "allAbsenceTypes" -> AbsenceType.values)

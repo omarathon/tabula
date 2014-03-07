@@ -8,8 +8,9 @@ import uk.ac.warwick.tabula.AcademicYear
 import org.joda.time.DateTime
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.attendance.commands.GroupMonitoringPointsByTerm
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, SmallGroupServiceComponent}
 
-trait MonitoringPointState extends GroupMonitoringPointsByTerm {
+trait MonitoringPointState extends GroupMonitoringPointsByTerm with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent {
 	val dept: Department
 	var monitoringPoints = new AutoPopulatingList(classOf[MonitoringPoint])
 	var name: String = _
@@ -27,7 +28,7 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 	var smallGroupEventQuantity: JInteger = 1
 	var smallGroupEventQuantityAll: Boolean = false
 	var smallGroupEventModules: JSet[Module] = JHashSet()
-	var isAnySmallGroupEventModules: Boolean = false
+	var isAnySmallGroupEventModules: Boolean = true
 
 	var isSpecificAssignments: Boolean = true
 	var assignmentSubmissionQuantity: JInteger = 1
@@ -36,6 +37,9 @@ trait MonitoringPointState extends GroupMonitoringPointsByTerm {
 	var isAssignmentSubmissionDisjunction: Boolean = false
 
 	def monitoringPointsByTerm = groupByTerm(monitoringPoints.asScala, academicYear)
+
+	def moduleHasSmallGroups(module: Module) = smallGroupService.hasSmallGroups(module)
+	def moduleHasAssignments(module: Module) = moduleAndDepartmentService.hasAssignments(module)
 
 	def copyTo(point: MonitoringPoint): MonitoringPoint = {
 		point.name = this.name

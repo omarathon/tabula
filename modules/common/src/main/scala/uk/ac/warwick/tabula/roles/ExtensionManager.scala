@@ -10,8 +10,8 @@ case object ExtensionManagerRoleDefinition extends UnassignableBuiltInRoleDefini
 	override def description = "Extension Manager"
 
 	GeneratesSubRole(ModuleAuditorRoleDefinition)
-
-	GrantsScopedPermission(
+	
+	GrantsScopedPermission( 
 		Extension.Update,
 		Extension.Read
 	)

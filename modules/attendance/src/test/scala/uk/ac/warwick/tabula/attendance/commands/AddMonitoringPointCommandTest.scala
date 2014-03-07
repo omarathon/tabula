@@ -11,9 +11,11 @@ import uk.ac.warwick.tabula.attendance.commands.manage.{MonitoringPointState, Ad
 
 class AddMonitoringPointCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport extends TermServiceComponent
+	trait CommandTestSupport extends TermServiceComponent with SmallGroupServiceComponent with ModuleAndDepartmentServiceComponent
 			with AddMonitoringPointValidation with MonitoringPointState {
 		val termService = mock[TermService]
+		val smallGroupService = mock[SmallGroupService]
+		val moduleAndDepartmentService = mock[ModuleAndDepartmentService]
 	}
 
 	trait Fixture {

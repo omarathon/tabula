@@ -223,7 +223,7 @@
 								</div>
 							</#macro>
 
-							<#list allocateStudentsToRelationshipCommand.mapping?keys as agent>
+							<#list allocateStudentsToRelationshipCommand.mapping?keys?sort_by("lastName") as agent>
 								<#assign existingStudents = mappingById[agent.universityId]![] />
 
 								<@agent_item agent.universityId agent.fullName existingStudents />
