@@ -9,11 +9,37 @@ jQuery(function($) {
 
 	Activity.prototype.render = function() {
 		var item = this.item;
-		var date = new Date(item.published)
-		return $('<div>', {className: 'activity'})
-			.append($('<h5>', {className: 'title'}).html(item.title))
-			.append($('<div>', {className: 'date'}).html(date.toString()))
-			.append($('<div>', {className: 'content'}).html(item.content));
+		var date = new Date(item.published);
+		var priority = 'alert-info';
+		if (item.priority >= 0.5) priority = 'alert-warning';
+		if (item.priority >= 0.75) priority = 'alert-danger';
+
+		var now = moment();
+		var time = moment.utc(item.published);
+		var $timestamp = $('<div>', {'class':'timestamp pull-right'}).html(toTimestamp(now, time));
+
+		return $('<div>', {'class': 'activity alert ' + priority})
+			.append($('<button>', {'class':'close', title: 'Dismiss'}).html('&times;'))
+			//.append($('<a>', {'class': 'url', href:item.url})
+				.append($('<h4>', {'class': 'title'}).html(item.title))
+			//)
+//			.append($('<div>', {'class': 'date'}).html(date.toString()))
+			.append($('<div>', {'class': 'content'}).html(item.content))
+			.append($timestamp)
+			.append($('<p>', {'class': 'url'}).append(
+				$('<a></a>', {'href': item.url}).html('Further info')
+			));
+	}
+
+	// Date stuff
+	function toTimestamp(now, then) {
+		if (now.diff(then) < 60000) { // less than a minute ago
+			return then.from(now);
+		} else if (now.isSame(then, 'day')) {
+			return then.format('H:mma');
+		} else {
+			return then.format('LL H:mma');
+		}
 	}
 
 	// Set up a rendered activity stream in the given container.
@@ -27,9 +53,11 @@ jQuery(function($) {
 		}
 		$container.data('activity-stream-init', true);
 
-		var $moreLink = $('<a>', {href:'#', className:'more-link'}).html('More&hellip;');
+		var $moreLink = $('<div>', {'class':'more-link'}).append(
+				$('<a>', {href:'#'}).html('More&hellip;')
+		);
 
-		function loadPage(pagination) {
+		function loadPage(pagination, first) {
 			var data = jQuery.extend({}, options);
 			var url = '/activity/@me';
 			if (pagination) {
@@ -42,21 +70,30 @@ jQuery(function($) {
 					var activity = new Activity(item);
 					activity.render().appendTo($container);
 				});
-				console.log(data);
+
 				if (data.pagination && data.pagination.token) {
 					$container.append($moreLink);
-					$moreLink.off('click');
-					$moreLink.on('click', function() {
-						loadPage(data.pagination);
-						return false;
-					})
+					if (data.items.length) {
+						$moreLink.off('click');
+						$moreLink.on('click', 'a', function() {
+							loadPage(data.pagination);
+							return false;
+						})
+					} else {
+						// this page was empty but there's another page, so
+						// get that straight away. (can happen if all notifications related
+						// to obsolete objects so aren't returned)
+						loadPage(data.pagination, first);
+					}
 				} else {
+					var noMoreMsg = first ? 'No activity to show.' : 'No more activity to show.';
+					$moreLink.after(noMoreMsg);
 					$moreLink.remove(); // il n'y a pas de items
 				}
 			});
 		}
 
-		loadPage();
+		loadPage(null, true);
 	}
 
 	function autoInit() {
