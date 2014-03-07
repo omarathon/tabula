@@ -33,7 +33,7 @@ abstract class SmallGroupSetChangedNotification(recipientRole: UserRoleOnGroup)
 		}
 	}
 
-	def urlTitle = "view this group"
+	def urlTitle = "view this small group"
 
 }
 
