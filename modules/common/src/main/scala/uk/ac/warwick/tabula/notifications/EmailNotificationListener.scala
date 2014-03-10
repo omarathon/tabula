@@ -23,7 +23,7 @@ class EmailNotificationListener extends NotificationListener with UnicodeEmails 
 	val mailFooter = "\n\nThank you,\nTabula"
 	val replyWarning = "\n\nThis email was sent from an automated system, and replies to it will not reach a real person."
 
-	def link(n: Notification[_,_]) = s"\n\nPlease visit ${topLevelUrl}${n.url} to ${n.urlTitle}"
+	def link(n: Notification[_,_]) = s"\n\nTo ${n.urlTitle}, please visit ${topLevelUrl}${n.url}."
 
 	// add an isEmail property for the model for emails
 	def render(model: FreemarkerModel) = textRenderer.renderTemplate(model.template, model.model + ("isEmail" -> true))
