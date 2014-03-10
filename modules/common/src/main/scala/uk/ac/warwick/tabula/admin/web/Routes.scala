@@ -13,8 +13,7 @@ object Routes {
 	import RoutesUtils._
 	private val context = "/admin"
 	def home = context + "/"
-
-	def masquerade = "/masquerade"
+	def masquerade = context + "/masquerade"
 
 	object department {
 		def apply(department: Department) = context + "/department/%s" format (encoded(department.code))
