@@ -78,18 +78,18 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 	def publishFeedbackForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = search(
 		query = all(
 			termQuery("eventType", "PublishFeedback"),
-			termQuery("students", student.getWarwickId()),
-			termQuery("assignment", assignment.id)), 
-			sort = reverseDateSort
+			termQuery("students", student.getWarwickId),
+			termQuery("assignment", assignment.id))
 	).transformAll(toParsedAuditEvents)
+	.sortBy(_.eventDate).reverse
 	
 	def submissionForStudent(assignment: Assignment, student: User): Seq[AuditEvent] = search(
 		query = all(
 			termQuery("eventType", "SubmitAssignment"),
-			termQuery("masqueradeUserId", student.getUserId()),
-			termQuery("assignment", assignment.id)),
-			sort = reverseDateSort
+			termQuery("masqueradeUserId", student.getUserId),
+			termQuery("assignment", assignment.id))
 	).transformAll(toParsedAuditEvents)
+	.sortBy(_.eventDate).reverse
 	
 	
 
@@ -122,10 +122,9 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 				query = all(
 					assignmentTerm, 
 					termQuery("eventType", "DownloadAllSubmissions")
-				),
-				max = 1, sort = reverseDateSort // we only want the most recent one
+				)
 			)
-		)
+		).sortBy(_.eventDate).reverse
 		
 		// take most recent event and find submissions made before then.
 		val submissions1: Seq[Submission] = allDownloaded.headOption match {
@@ -175,13 +174,14 @@ trait AuditEventQueryMethods extends AuditEventNoteworthySubmissionsService { se
 	def latestDownloadFeedbackAsPdf(assignment: Assignment) = latestAssignmentEvent(assignment, "DownloadFeedbackAsPdf")
 
 	def latestGenericFeedbackAdded(assignment: Assignment): Option[DateTime] = {
-		search( all(
-			termQuery("eventType", "GenericFeedback"),
-			termQuery("assignment", assignment.id)),
-			max = 1, sort = reverseDateSort)
-			.transformAll(toItems)
-			.map(latestTime => latestTime.eventDate)
-			.headOption
+		val allEvents =
+			search( all(
+				termQuery("eventType", "GenericFeedback"),
+				termQuery("assignment", assignment.id))
+			).transformAll(toItems)
+
+		if (allEvents.isEmpty) None
+		else Some(allEvents.maxBy(_.eventDate).eventDate)
 	}
 
 	def latestOnlineFeedbackAdded(assignment: Assignment) =
@@ -394,7 +394,7 @@ class AuditEventIndexService extends AbstractIndexService[AuditEvent] with Audit
 		logger.info("Opening query: " + queryString)
 		val query = parser.parse(queryString)
 		val docs = search(query,
-			sort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true)),
+			sort = reverseDateSort,
 			offset = start,
 			max = count)
 		docs.transformAll(toItems)
