@@ -24,7 +24,7 @@ trait AutowiringMemberDaoComponent extends MemberDaoComponent {
 trait MemberDao {
 	def saveOrUpdate(member: Member)
 	def delete(member: Member)
-	def getByUniversityId(universityId: String): Option[Member]
+	def getByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member]
 	def getByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getAllWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member]
@@ -70,10 +70,38 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		}
 	}
 
-	def getByUniversityId(universityId: String) =
-		session.newCriteria[Member]
-			.add(is("universityId", universityId.safeTrim))
-			.uniqueResult
+	def getByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false) = {
+		val filterEnabled = Option(session.getEnabledFilter(Member.StudentsOnlyFilter)).isDefined
+		try {
+			if (disableFilter)
+				session.disableFilter(Member.StudentsOnlyFilter)
+
+			val criteria =
+				session.newCriteria[Member]
+					.add(is("universityId", universityId.safeTrim))
+
+			if (eagerLoad) {
+				criteria
+					.setFetchMode("studentCourseDetails", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.studentCourseYearDetails", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.moduleRegistrations", FetchMode.JOIN)
+					.setFetchMode("homeDepartment", FetchMode.JOIN)
+					.setFetchMode("homeDepartment.children", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment", FetchMode.JOIN)
+					.setFetchMode("studentCourseDetails.studentCourseYearDetails.enrolmentDepartment.children", FetchMode.JOIN)
+					.uniqueResult.map { m =>
+						// This is the worst hack of all time
+						m.permissionsParents.force
+						m
+					}
+			} else {
+				criteria.uniqueResult
+			}
+		} finally {
+			if (disableFilter && filterEnabled)
+				session.enableFilter(Member.StudentsOnlyFilter)
+		}
+	}
 
 	def getByUniversityIdStaleOrFresh(universityId: String) = {
 		val member = sessionWithoutFreshFilters.newCriteria[Member]

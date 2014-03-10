@@ -10,13 +10,14 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.commands.FiltersStudents
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.helpers.StringUtils._
 
 /**
  * Service providing access to members and profiles.
  */
 trait ProfileService {
 	def save(member: Member)
-	def getMemberByUniversityId(universityId: String): Option[Member]
+	def getMemberByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false): Option[Member]
 	def getMemberByUniversityIdStaleOrFresh(universityId: String): Option[Member]
 	def getAllMembersWithUniversityIds(universityIds: Seq[String]): Seq[Member]
 	def getAllMembersWithUniversityIdsStaleOrFresh(universityIds: Seq[String]): Seq[Member]
@@ -50,8 +51,8 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	var profileIndexService = Wire.auto[ProfileIndexService]
 
-	def getMemberByUniversityId(universityId: String) = transactional(readOnly = true) {
-		memberDao.getByUniversityId(universityId)
+	def getMemberByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false) = transactional(readOnly = true) {
+		memberDao.getByUniversityId(universityId, disableFilter, eagerLoad)
 	}
 
 	def getMemberByUniversityIdStaleOrFresh(universityId: String) = transactional(readOnly = true) {
@@ -72,9 +73,17 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 
 	def getMemberByUser(user: User, disableFilter: Boolean = false, eagerLoad: Boolean = false) = {
 		val allMembers = getAllMembersWithUserId(user.getUserId, disableFilter, eagerLoad)
-		allMembers
-			.filter(_.universityId == user.getWarwickId).headOption // TAB-1716
-			.orElse(allMembers.headOption)
+		val usercodeMatch =
+			allMembers.filter(_.universityId == user.getWarwickId).headOption
+								.orElse(allMembers.headOption) // TAB-1716
+
+		if (usercodeMatch.isDefined || !user.getWarwickId.hasText) {
+			usercodeMatch
+		} else {
+			// TAB-2014 look for a universityId match, but only return it if the email address matches
+			getMemberByUniversityId(user.getWarwickId, disableFilter, eagerLoad)
+				.filter(_.email.safeTrim.safeLowercase == user.getEmail.safeTrim.safeLowercase)
+		}
 	}
 
 	def getStudentBySprCode(sprCode: String) = transactional(readOnly = true) {

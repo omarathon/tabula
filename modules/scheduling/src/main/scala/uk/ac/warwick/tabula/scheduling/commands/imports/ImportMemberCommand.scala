@@ -60,13 +60,8 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 
 		this.universityId = oneOf(member.universityId, optString("university_id")).get
 
-		val suggestedUserId = oneOf(ssoUser.getUserId.maybeText, member.usercode).get
-
-		this.userId = optString("user_code") match {
-			// TAB-2004
-			case Some(userId) if userId != suggestedUserId && userLookup.getUserByUserId(userId).getWarwickId == this.universityId => userId
-			case _ => suggestedUserId
-		}
+		// TAB-2014
+		this.userId = oneOf(member.usercode, ssoUser.getUserId.maybeText, optString("user_code")).get
 
 		this.userType = member.userType
 
