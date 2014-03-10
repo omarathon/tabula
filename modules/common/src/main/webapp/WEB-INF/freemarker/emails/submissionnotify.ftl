@@ -12,9 +12,8 @@ Uploaded attachments:
 </#list>  
 </#if>
 
-<#-- TODO  test to see if this is email. if it isn't block out the additional urls -->
-
-<#if isEmail?? && isEmail>
+<#-- Only show these links if it's an email. -->
+<#if isEmail!false>
 You can download all the attachments for this submission here:
 
 <@url context='coursework' page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.universityId}.zip'/>

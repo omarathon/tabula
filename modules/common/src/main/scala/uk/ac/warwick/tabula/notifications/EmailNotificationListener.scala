@@ -49,6 +49,4 @@ class EmailNotificationListener extends NotificationListener with UnicodeEmails 
 		}
 	}
 
-	def getUrlLink(n: Notification[_,_]) = s"Please visit [${n.url}] to ${n.urlTitle}"
-
 }
