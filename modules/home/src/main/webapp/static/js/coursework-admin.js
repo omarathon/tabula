@@ -499,7 +499,7 @@ $(function() {
 					$statusContainer.append($('<div class="label label-important">Rejected</div>'));
 				}
 				else if(approved) {
-					$statusContainer.append($('<div class="label label-info">Approved</div>'));
+					$statusContainer.append($('<div class="label label-success">Approved</div>'));
 				}
 
 				return "";
@@ -521,6 +521,22 @@ $(function() {
 		} else {
 			$statusContainer.find('.unsaved').remove();
 		}
+	});
+
+	$('#main-content').on("click", ".setExpiryToRequested", function(e) {
+		e.preventDefault();
+		var $form = $(this).closest('form');
+		var $expiryDateField = $form.find('.date-time-picker');
+		if ($expiryDateField.length > 0) {
+			var expiryDatePicker = $expiryDateField.data('datetimepicker');
+			var requestedExpiryDate = new Date($form.find('[name=rawRequestedExpiryDate]').val());
+			if (requestedExpiryDate) {
+				expiryDatePicker.setDate(requestedExpiryDate);
+				expiryDatePicker.setValue();
+			}
+		}
+
+
 	});
 
 	$('#main-content').on("click", ".remove-attachment", function(e) {
@@ -563,7 +579,7 @@ $(function() {
 
 	function inputsHaveChanges($container) {
 		var modifiedField = false;
-		var $inputs = $container.find(':input');
+		var $inputs = $container.find('input,textarea');
 		$inputs.each(function() {
 			modifiedField = $(this).val() != $(this).data("initialvalue");
 			return !modifiedField; // false breaks from loop

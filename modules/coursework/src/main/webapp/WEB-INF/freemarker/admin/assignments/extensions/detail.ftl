@@ -1,157 +1,97 @@
-<#assign spring=JspTaglibs["/WEB-INF/tld/spring.tld"]>
-<#assign f=JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
-<#assign extension=command.extension />
+<#assign spring = JspTaglibs["/WEB-INF/tld/spring.tld"]>
+<#assign f = JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
+<#assign extension = command.extension />
 
 <#escape x as x?html>
 	<div class="content extension-detail">
 		<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/extensions/detail/${universityId}')}" commandName="modifyExtensionCommand" cssClass="form-horizontal double-submit-protection">
 			<@f.input type="hidden" path="universityId" value="${universityId}" />
 
-			<div>
-				<#if extension.requestedExpiryDate??>
-					<@fmt.date date=extension.requestedExpiryDate at=true/>
-				</#if>
-			</div>
-
-			<div class="extension-details">
-				<#if extension.reason??>
-					<div class="extensionReason">
-						<div class="control-group">
-							<h4>Reason for extension request</h4>
-							<div class="controls">
-							${extension.reason}
-							</div>
-						</div>
-					</div>
+			<#if extension.awaitingReview>
+				<input type="hidden" name="rawRequestedExpiryDate" value="${extension.requestedExpiryDate}" />
+				<h5><i class="icon icon-question icon-large"></i> Requested <@fmt.date date=extension.requestedExpiryDate at=true/>&ensp;
+				<span class="muted">${durationFormatter(assignment.closeDate, extension.requestedExpiryDate)} after the set deadline</span></h5>
+				<#if extension.approved>
+					<p><b>This is a revised request from the student.</b>
+					There is already an extension approved until <@fmt.date date=extension.expiryDate at=true/>
+					(${durationFormatter(assignment.closeDate, extension.expiryDate)} after the set deadline).</p>
 				</#if>
 
-				<div class="extensionFurtherDetail">
-					<h4>Further Details</h4>
-					<#if extension.attachments?has_content>
-						<details>
-							<summary><h5>Supporting documents</h5></summary>
-							<div class="controls">
+				<#if features.disabilityRenderingInExtensions && extension.disabilityAdjustment && student?? && student.disability.reportable && can.do("Profiles.Read.Disability", student)>
+					<p><i class="icon icon-stethoscope icon-large"></i> ${student.firstName} has requested their ${(student.disability.definition)!"recorded disability"} be taken into consideration.</p>
+				</#if>
+
+				<#if extension.reason?has_content>
+					<details>
+						<summary><i class="icon-quote-left"></i> Reason for request</summary>
+						<p class="well">${extension.reason}</p>
+					</details>
+				</#if>
+
+				<#if extension.attachments?has_content>
+					<details>
+						<summary><i class="icon-file"></i> Supporting documents</summary>
+						<ul>
+							<#list extension.attachments as attachment>
+								<li>
+									<a href="<@routes.extensionreviewattachment assignment=assignment userid=universityId filename=attachment.name />">
+									${attachment.name}
+									</a>
+								</li>
+							</#list>
+						</ul>
+					</details>
+				</#if>
+
+				<details>
+					<summary><i class="icon-user"></i> About this student</summary>
+					<dl class="unstyled">
+						<#if (studentContext.course)?has_content>
+							<#assign c = studentContext.course />
+							<dt>Course details</dt>
+							<dd>
+								<@fmt.course_description c />
+								<span class="muted">${(c.latestStudentCourseYearDetails.modeOfAttendance.fullNameToDisplay)!}</span>
+							</dd>
+						</#if>
+						<#if (studentContext.relationships)?has_content>
+							<dt>Relationships</dt>
+							<dd>
+								<#assign rels = studentContext.relationships />
 								<ul class="unstyled">
-									<#list extension.attachments as attachment>
-										<li>
-											<a href="<@routes.extensionreviewattachment assignment=assignment userid=universityId filename=attachment.name />">
-											${attachment.name}
-											</a>
-										</li>
-									</#list>
-								</ul>
-							</div>
-						</details>
-					</#if>
-
-					<#if moduleManagers?has_content >
-						<details>
-							<summary><h5>Module Managers</h5></summary>
-							<ul class="unstyled">
-								<#list moduleManagers as manager>
-									<li>
-										<h6>${manager.getFullName()} (${manager.getWarwickId()})</h6>
-									${manager.getEmail()}
-
-									</li>
-								</#list>
-							</ul>
-						</details>
-					</#if>
-
-					<#if student?has_content >
-						<details>
-							<summary><h5>Student Contact Details</h5></summary>
-							<ul class="unstyled">
-								<li>
-									<h6>Mobile Number</h6>
-								${(student.mobileNumber)!"Not available"}
-								</li>
-								<li>
-									<h6>Telephone Number</h6>
-								${(student.phoneNumber)!"Not available"}
-								</li>
-								<li>
-									<h6>Email Address</h6>
-								${(student.email)!"Not available"}
-								</li>
-							</ul>
-
-						</details>
-					<#else>
-						<details>
-							<summary><h5>Contact Details</h5></summary>
-							<ul class="unstyled">
-								<li>
-									<h6>Email Address</h6>
-								${(email)!"Not available"}
-								</li>
-							</ul>
-
-						</details>
-					</#if>
-
-					<#if relationships?has_content >
-						<details>
-							<summary><h5>Student Relationships</h5></summary>
-							<#list relationships?keys as key>
-								<#if relationships[key]?has_content>
-									<h6>${key}<#if (relationships[key]?size > 1)>s</#if></h6>
-									<ul class="unstyled">
-										<#list relationships[key] as agent>
+									<#list rels?keys as key>
+										<#list rels[key] as agent>
 											<li>
-												<strong>${agent.agentMember.fullName} (${agent.agentMember.universityId})</strong>
-											${agent.agentMember.description}
+												${agent.agentMember.fullName}, ${agent.agentMember.description} &ensp;<span class="muted">${key}</span>
 											</li>
 										</#list>
-									</ul>
-								</#if>
-							</#list>
-						</details>
-					</#if>
+									</#list>
+								</ul>
+							</dd>
+						</#if>
+						<#if student.mobileNumber??><dt>Mobile number</dt><dd>${student.mobileNumber}</dd></#if>
+						<#if student.phoneNumber?? && student.phoneNumber != student.mobileNumber!""><dt>Telephone number</dt><dd>${student.phoneNumber}</dd></#if>
+						<#if student.email??><dt>Email address</dt><dd>${student.email}</dd></#if>
+					</dl>
+				</details>
 
-					<#if studentCourseDetails?has_content >
-						<details>
-							<summary><h5>Student Course Details</h5></summary>
-							<ul class="unstyled">
-								<li>
-									<h6>Route</h6>
-								${(studentCourseDetails.route.name)!} (${(studentCourseDetails.route.code?upper_case)!})
-								</li>
-								<li>
-									<h6>Course</h6>
-									<@fmt.course_description studentCourseDetails />
-								</li>
-								<li>
-									<h6>Intended award and type</h6>
-								${(studentCourseDetails.award.name)!} (${(studentCourseDetails.route.degreeType.toString)!})
-								</li>
-								<li>
-									<h6>Attendance</h6>
-								${(studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.fullNameToDisplay)!}
-								</li>
-							</ul>
-						</details>
-					</#if>
-				</div>
-
-				<div class="clearfix"></div>
-
-				<#if features.disabilityRenderingInExtensions && extension.disabilityAdjustment && student?? && can.do("Profiles.Read.Disability", student)>
-					<p class="alert alert-warning">Student has requested their ${student.disability.definition} be taken into consideration.</p>
-				</#if>
-			</div>
+				<hr />
+			</#if>
 
 			<div class="control-group">
-				<@form.label path="expiryDate">New submission deadline</@form.label>
+				<@form.label path="expiryDate">Extended deadline</@form.label>
 				<div class="controls">
-					<@f.input id="picker0" path="expiryDate" class="date-time-picker" />
+					<@f.input id="picker0" path="expiryDate" cssClass="date-time-picker" />
+					<#if !extension.manual && extension.unreviewed>
+						<#-- FIXME write JS to make this button do what it says it will -->
+						<button class="btn setExpiryToRequested">Use requested date</button>
+					</#if>
 				</div>
 			</div>
 			<div class="control-group">
 				<@form.label path="reviewerComments">Comments</@form.label>
 				<div class="controls">
-					<@f.textarea path="reviewerComments" />
+					<@f.textarea path="reviewerComments" cssClass="span7" rows="6" />
 				</div>
 			</div>
 
@@ -159,6 +99,7 @@
 
 			<div class="submit-buttons">
 				<input class="btn btn-primary" type="submit" value="${approvalAction}" name="action">
+				<#-- FIXME I think this should *probably* be changed to revoke for manual extensions. to ponder. -->
 				<input class="btn btn-danger" type="submit" value="${rejectionAction}" name="action">
 				<a class="btn discard-changes" href="">Discard changes</a>
 			</div>

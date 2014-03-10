@@ -14,7 +14,8 @@ import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import uk.ac.warwick.userlookup.User
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
-import scala.beans.BeanProperty
+import uk.ac.warwick.tabula.DateFormats
+import org.springframework.format.annotation.DateTimeFormat
 
 
 @Entity @AccessType("field")
@@ -30,7 +31,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="assignment_id")
 	var assignment:Assignment = _
-	
+
 	def permissionsParents = Option(assignment).toStream
 
 	@NotNull
@@ -44,6 +45,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
 	// TODO should there be a single def that returns the expiry date for approved/manual extensions, and requested expiry date otherwise?
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var requestedExpiryDate: DateTime = _
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var expiryDate: DateTime = _
@@ -84,6 +86,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
 	def approved = state == ExtensionState.Approved
 	def rejected = state == ExtensionState.Rejected
+	def unreviewed = state == ExtensionState.Unreviewed
 
 	// keep state encapsulated
 	def approve(comments: String = null) {
@@ -118,6 +121,11 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	def feedbackDeadline = workingDaysHelper.datePlusWorkingDays(expiryDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays).toDateTime(expiryDate)
 
 	def toEntityReference = new ExtensionEntityReference().put(this)
+}
+
+
+object Extension {
+	val MaxDaysToDisplayAsProgressBar = 8 * 7
 }
 
 

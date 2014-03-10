@@ -4,7 +4,7 @@ package uk.ac.warwick.tabula.coursework.web.controllers.admin
 import uk.ac.warwick.tabula.coursework.web.controllers.CourseworkController
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation._
-import uk.ac.warwick.tabula.data.model.{Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{StudentMember, Assignment, Module}
 import uk.ac.warwick.tabula.coursework.commands.assignments.extensions._
 import uk.ac.warwick.tabula.web.Mav
 import org.springframework.validation.{ BindingResult, Errors }
@@ -19,6 +19,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import com.fasterxml.jackson.databind.ObjectMapper
+import uk.ac.warwick.tabula.coursework.web.Routes.admin.assignment.extension
 
 
 abstract class ExtensionController extends CourseworkController {
@@ -62,7 +63,7 @@ abstract class ExtensionController extends CourseworkController {
 
 @Controller
 @RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions"))
-class ExtensionSummaryController extends ExtensionController {
+class ListExtensionsController extends ExtensionController {
 
 	@ModelAttribute
 	def listCommand(
@@ -78,7 +79,8 @@ class ExtensionSummaryController extends ExtensionController {
 			"detailUrl" -> Routes.admin.assignment.extension.detail(cmd.assignment),
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,
-			"extensionGraphs" -> extensionGraphs
+			"extensionGraphs" -> extensionGraphs,
+			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar
 		)
 
 		crumbed(model, cmd.module)
@@ -92,23 +94,40 @@ class EditExtensionController extends ExtensionController {
 
 	@ModelAttribute("modifyExtensionCommand")
 	def editCommand(
-			@PathVariable("module") module:Module,
-			@PathVariable("assignment") assignment:Assignment,
-			@PathVariable("universityId") universityId:String,
-			user:CurrentUser,
+			@PathVariable("module") module: Module,
+			@PathVariable("assignment") assignment: Assignment,
+			@PathVariable("universityId") universityId: String,
+			user: CurrentUser,
 			@RequestParam(defaultValue = "") action: String) =
 		EditExtensionCommand(module, assignment, universityId, user, action)
 
 	validatesSelf[SelfValidating]
 
-	// add or edit an extension
+	// view an extension (or request)
 	@RequestMapping(method=Array(GET))
 	def editExtension(@ModelAttribute("modifyExtensionCommand") cmd: Appliable[Extension] with ModifyExtensionCommandState, errors: Errors): Mav = {
+		val student = profileService.getMemberByUniversityId(cmd.extension.universityId)
+
+		val studentContext = student match {
+			case Some(student: StudentMember) =>
+				val relationships = relationshipService.allStudentRelationshipTypes.map { relationshipType =>
+					(relationshipType.description, relationshipService.findCurrentRelationships(relationshipType, student))
+				}.toMap.filter({case (relationshipType,relations) => relations.length != 0})
+
+				Map(
+					"relationships" -> relationships,
+					"course" -> student.mostSignificantCourseDetails
+				)
+			case _ => Map.empty
+		}
+
 		val model = Mav("admin/assignments/extensions/detail",
 			"command" -> cmd,
 			"module" -> cmd.module,
 			"assignment" -> cmd.assignment,
 			"universityId" -> cmd.universityId,
+			"student" -> student,
+			"studentContext" -> studentContext,
 			"userFullName" -> userLookup.getUserByWarwickUniId(cmd.universityId).getFullName,
 			"approvalAction" -> cmd.ApprovalAction,
 			"rejectionAction" -> cmd.RejectionAction

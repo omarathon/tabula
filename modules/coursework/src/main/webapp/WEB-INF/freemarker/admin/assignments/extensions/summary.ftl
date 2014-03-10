@@ -5,6 +5,7 @@
 <#import "../submissionsandfeedback/_submission_details.ftl" as sd />
 
 <#macro row graph>
+	<#assign state = (graph.extension.state.description)!"None" />
 	<tr class="itemContainer" data-contentid="${graph.universityId}">
 		<#if department.showStudentName>
 			<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.user.firstName}</h6></td>
@@ -14,15 +15,19 @@
 		</#if>
 		<td class="status-col toggle-cell content-cell">
 			<dl style="margin: 0; border-bottom: 0;">
-				<dt>
-					<#if graph.hasOutstandingExtensionRequest>
+				<dt data-duration="${graph.duration}"
+					data-requested-duration="${graph.requestedDuration}"
+					data-awaiting-review="${graph.awaitingReview?string}"
+					data-approved="${graph.hasApprovedExtension?string}"
+					data-rejected="${graph.hasRejectedExtension?string}">
+					<#if graph.awaitingReview>
 						<span class="label label-warning">Awaiting review</span>
 					<#elseif graph.hasApprovedExtension>
-						<span class="label label-info">Approved</span>
+						<span class="label label-success">Approved</span>
 					<#elseif graph.hasRejectedExtension>
 						<span class="label label-important">Rejected</span>
 					<#else>
-						<span class="label">No extension</span>
+						<span class="label no-extension">No extension</span>
 					</#if>
 				</dt>
 				<dd style="display: none;" class="table-content-container" data-contentid="${graph.universityId}">
@@ -31,6 +36,8 @@
 					</div>
 				</dd>
 			</dl>
+		</td>
+		<td class="duration-col toggle-cell">
 		</td>
 	</tr>
 </#macro>
@@ -64,17 +71,19 @@
 	</div>
 
 	<#if extensionGraphs?size gt 0>
-		<table class="students table table-bordered table-striped tabula-orangeLight sticky-table-headers expanding-table">
+		<table class="students table table-bordered table-striped tabula-orangeLight sticky-table-headers expanding-table" data-max-days="${maxDaysToDisplayAsProgressBar}">
 			<thead>
 				<tr>
 					<#if department.showStudentName>
 						<th class="student-col">First name</th>
 						<th class="student-col">Last name</th>
+						<#-- FIXME Ritchie's profile linky thing -->
 					<#else>
 						<th class="student-col">University ID</th>
 					</#if>
 
 					<th class="status-col">Status</th>
+					<th class="duration-col">Duration</th>
 				</tr>
 			</thead>
 
@@ -96,6 +105,83 @@
 			});
 		})(jQuery);
 		</script>
+
+	<#-- FIXME migrate to coursework_admin.js, courses.less when working -->
+	<style type="text/css">
+		#main-content .students .duration-col {
+			width: 50%;
+		}
+		#main-content .students .progress {
+			margin-bottom: 0;
+			width: 90%;
+		}
+
+		#main-content .students .progress.overTime {
+			width: 100%;
+			position: relative;
+		}
+
+		#main-content .students .progress.overTime:before {
+			content: " ";
+			width: 100%;
+			height: 100%;
+			position: absolute;
+			z-index: 30;
+			top: 0;
+			left: 0;
+			pointer-events: none;
+			/* use 60% of the table stripe colour */
+			background: -moz-linear-gradient(left, rgba(240,240,240,0) 90%, rgba(240,240,240,1) 100%);
+			background: -webkit-gradient(linear, left top, right top, color-stop(90%,rgba(240,240,240,0)), color-stop(100%,rgba(240,240,240,1)));
+			background: -webkit-linear-gradient(left, rgba(240,240,240,0) 90%, rgba(240,240,240,1) 100%);
+			background: -o-linear-gradient(left, rgba(240,240,240,0) 90%, rgba(240,240,240,1) 100%);
+			background: -ms-linear-gradient(left, rgba(240,240,240,0) 90%, rgba(240,240,240,1) 100%);
+			background: linear-gradient(to right, rgba(240,240,240,0) 90%, rgba(240,240,240,1) 100%);
+		}
+	</style>
+	<script type="text/javascript">
+		(function($) {
+			var maxDaysToDisplayAsProgressBar = $('table.students').data('max-days');
+
+			function barWidth(duration) {
+				return 100*Math.min(maxDaysToDisplayAsProgressBar, duration)/maxDaysToDisplayAsProgressBar;
+			}
+
+			$('table.students tbody tr').each(function() {
+				var $row = $(this);
+				var $dt = $row.find('dt');
+				<#-- ignore rows without extension -->
+				if ($row.find('.no-extension').length == 0) {
+
+					var isOverTime = $dt.data('duration') > maxDaysToDisplayAsProgressBar || $dt.data('requestedDuration') > maxDaysToDisplayAsProgressBar;
+					var progressClass = "progress";
+					if (isOverTime) progressClass += " overTime";
+
+					$progress = $('<div class="' + progressClass + '"></div>');
+
+					if ($dt.data('rejected')) {
+						$progress.append($('<div class="bar bar-danger use-tooltip" title="Rejected ' + $dt.data('requestedDuration') + ' days" style="width: ' + barWidth($dt.data('requestedDuration')) + '%"></div>'));
+					} else if ($dt.data('approved')) {
+						$progress.append($('<div class="bar bar-success use-tooltip" title="Approved ' + $dt.data('duration') + ' days" style="width: ' + barWidth($dt.data('duration')) + '%"></div>'));
+					}
+
+					if ($dt.data('awaitingReview')) {
+						var additionalDuration = $dt.data('requestedDuration') - $dt.data('duration');
+						if (additionalDuration > 0) {
+							$progress.append($('<div class="bar bar-warning use-tooltip" title="Requested ' + $dt.data('requestedDuration') + ' days" style="width: ' + barWidth(additionalDuration) + '%"></div>'));
+						}
+					}
+
+					$row.find('.duration-col').empty().append($progress);
+				}
+			});
+
+			$('.bar').tooltip();
+
+		})(jQuery);
+	</script>
+
+
 	<#else>
 		<p class="alert alert-info">There are no students registered for this assignment.</p>
 	</#if>
