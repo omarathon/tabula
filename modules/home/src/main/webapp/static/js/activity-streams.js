@@ -1,6 +1,17 @@
 jQuery(function($) {
 	'use strict';
 
+	// TODO this should be run early on in a more general file,
+	// so that it applies to all use of moment
+	moment.lang('en-gb');
+
+	// Maps from priority classes to icon classes.
+	var icons = {
+		'priority-info' : 'icon-info-sign',
+		'priority-warning' : 'icon-warning-sign',
+		'priority-critical' : 'icon-warning-sign' // same but red.
+	}
+
 	var exports = window;
 
 	function Activity(item) {
@@ -10,35 +21,43 @@ jQuery(function($) {
 	Activity.prototype.render = function() {
 		var item = this.item;
 		var date = new Date(item.published);
-		var priority = 'alert-info';
-		if (item.priority >= 0.5) priority = 'alert-warning';
-		if (item.priority >= 0.75) priority = 'alert-danger';
+		var priority = 'priority-info';
+		if (item.priority >= 0.5) priority = 'priority-warning';
+		if (item.priority >= 0.75) priority = 'priority-critical';
 
 		var now = moment();
 		var time = moment.utc(item.published);
-		var $timestamp = $('<div>', {'class':'timestamp pull-right'}).html(toTimestamp(now, time));
+		var fullDate = time.format('LLLL');
+		var $timestamp = $('<div>', {'class':'timestamp', title: fullDate}).html(toTimestamp(now, time));
 
-		return $('<div>', {'class': 'activity alert ' + priority})
+		return $('<div>', {'class': 'activity ' + priority})
 			.append($('<button>', {'class':'close', title: 'Dismiss'}).html('&times;'))
-			//.append($('<a>', {'class': 'url', href:item.url})
-				.append($('<h4>', {'class': 'title'}).html(item.title))
-			//)
-//			.append($('<div>', {'class': 'date'}).html(date.toString()))
-			.append($('<div>', {'class': 'content'}).html(item.content))
-			.append($timestamp)
-			.append($('<p>', {'class': 'url'}).append(
-				$('<a></a>', {'href': item.url}).html('Further info')
-			));
+			.append($('<div>', {'class': 'headline'})
+				.append($('<i></i>', {'class': icons[priority]}))
+				.append($('<h5>', {'class': 'title'})
+					.append($('<a>', {'class': 'url', href: item.url}).html(item.title))
+				)
+				.append($timestamp)
+			)
+			.append($('<div>', {'class': 'content'})
+				.append(item.content)
+				.append($('<p>', {'class': 'url'}).append(
+					$('<a></a>', {'href': item.url}).html('Further info') // TODO use urlTitle from TAB-1964
+				)))
 	}
 
-	// Date stuff
 	function toTimestamp(now, then) {
+		var yesterday = now.clone().subtract('days', 1)
 		if (now.diff(then) < 60000) { // less than a minute ago
 			return then.from(now);
 		} else if (now.isSame(then, 'day')) {
-			return then.format('H:mma');
+			return then.format('H:mma [Today]');
+		} else if (yesterday.isSame(then, 'day')) {
+			return then.format('H:mma [Yesterday]');
+		} else if (now.isSame(then, 'year')) {
+			return then.format('ddd Do MMM LT');
 		} else {
-			return then.format('LL H:mma');
+			return then.format('ddd Do MMM YYYY LT');
 		}
 	}
 
@@ -56,6 +75,11 @@ jQuery(function($) {
 		var $moreLink = $('<div>', {'class':'more-link'}).append(
 				$('<a>', {href:'#'}).html('More&hellip;')
 		);
+
+		$container.on('click', 'button.close', function() {
+			// dismiss
+			$(this).closest('.activity').remove();
+		});
 
 		function loadPage(pagination, first) {
 			var data = jQuery.extend({}, options);

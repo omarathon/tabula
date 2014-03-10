@@ -66,8 +66,10 @@
 
 	<#if features.activityStreams>
 		<#import "*/activity_macros.ftl" as activity />
+		<div class="home-page-activity">
 		<h3>Activity stream</h3>
 		<@activity.activity_stream max=5 />
+		</div>
 	</#if>
 </#if>
 

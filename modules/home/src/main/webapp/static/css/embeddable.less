@@ -1895,14 +1895,46 @@ ul.nav-pills {
 	margin-top: 30px;
 }
 
+.home-page-activity {
+	margin-top: 2em;
+}
+
 // General activity stream styles.
 .activity-stream {
+	.activity {
+		padding-bottom: @grid-size * 0.75;
+		margin-bottom: @grid-size * 0.75;
+		border-bottom: 1px solid #cccccc;
+	}
+	.headline {
+		i {
+			padding-right: 1em;
+			position: relative;
+			left: 8px;
+			top: -1px;
+		}
+		h5 {
+			display: inline;
+		}
+		a h5 {
+			color: @linkColor;
+		}
+	}
+
+	.priority-info .headline i { color: @tabulaBlue; }
+	.priority-warning .headline i { color: @tabulaOrangeLight; }
+	.priority-critical .headline i { color: @tabulaRed; }
+
 	.timestamp {
 		color: #666;
-		font-size: 85%;
-		margin-left: @grid-size;
+		font-size: @fontSizeSmall;
+		display: inline;
+		padding-left: 1em;
+	}
+	.content {
+		padding-left: @grid-size * 2.5;
 	}
 	.more-link {
-		text-align: center;
+		margin-top: @grid-size;
 	}
 }
