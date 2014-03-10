@@ -8,12 +8,13 @@ Submission ID: ${submission.id}
 <#if submission.allAttachments??>
 Uploaded attachments:		
 <#list submission.allAttachments as attachment>
-	${attachment.name}
+	* ${attachment.name}
 </#list>  
 </#if>
 
 <#-- TODO  test to see if this is email. if it isn't block out the additional urls -->
 
+<#if isEmail?? && isEmail>
 You can download all the attachments for this submission here:
 
 <@url context='coursework' page='/admin/module/${module.code}/assignments/${assignment.id}/submissions/download/${submission.id}/submission-${submission.universityId}.zip'/>
@@ -22,3 +23,4 @@ You can download all the attachments for this submission here:
 To unsubscribe from these messages, go here and select "No alerts".
 
 <@url context='coursework' page='/admin/settings#submission-alerts'/>
+</#if>

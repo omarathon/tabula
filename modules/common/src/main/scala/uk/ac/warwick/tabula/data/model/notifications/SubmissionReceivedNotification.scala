@@ -40,7 +40,7 @@ class SubmissionReceivedNotification extends SubmissionNotification with PreSave
 		}
 	}
 
-	def url = "/coursework" + Routes.admin.assignment.submissionsandfeedback(assignment)
+	def url = Routes.admin.assignment.submissionsandfeedback(assignment)
 	def urlTitle = "view all submissions for this assignment"
 
 	def recipients = {
