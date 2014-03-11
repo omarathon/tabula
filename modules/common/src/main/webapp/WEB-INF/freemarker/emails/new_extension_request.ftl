@@ -5,7 +5,3 @@ They have requested until ${requestedExpiryDate} to complete the assignment. The
 ${reasonForRequest}
 
 <#include "_extension_request_further_details.ftl" />
-
-To review this extension request and any supporting documentation, please click the link below.
-
-<@url page=path />

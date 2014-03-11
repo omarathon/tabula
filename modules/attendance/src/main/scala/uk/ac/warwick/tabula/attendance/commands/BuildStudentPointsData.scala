@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.data.model.StudentMember
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.{ProfileServiceComponent, TermServiceComponent, MonitoringPointServiceComponent}
+import uk.ac.warwick.tabula.services.{UserLookupComponent, ProfileServiceComponent, TermServiceComponent, MonitoringPointServiceComponent}
 import uk.ac.warwick.tabula.AcademicYear
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.attendance.{MonitoringPointAttendanceNote, AttendanceState, MonitoringPoint}
@@ -23,7 +23,7 @@ case class StudentPointsData(
 
 
 trait BuildStudentPointsData extends MonitoringPointServiceComponent with TermServiceComponent
-	with GroupMonitoringPointsByTerm with TaskBenchmarking with CheckpointUpdatedDescription with ProfileServiceComponent {
+	with GroupMonitoringPointsByTerm with TaskBenchmarking with CheckpointUpdatedDescription with UserLookupComponent {
 
 	def buildData(
 		students: Seq[StudentMember],

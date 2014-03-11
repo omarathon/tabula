@@ -22,10 +22,11 @@ class MeetingRecordApprovedNotification
 		"role"->agentRole,
 		"dateFormatter" -> dateOnlyFormatter,
 		"meetingRecord" -> approval.meetingRecord,
-		"verbed" -> "approved",
-		"nextActionDescription" -> "if you wish to view it",
-		"profileLink" -> url
+		"verbed" -> "approved"
 	))
+
+	def urlTitle = "view the meeting record"
+
 	def recipients = Seq(approval.meetingRecord.creator.asSsoUser)
 }
 

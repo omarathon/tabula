@@ -29,6 +29,7 @@ jQuery(function($) {
 		var time = moment.utc(item.published);
 		var fullDate = time.format('LLLL');
 		var $timestamp = $('<div>', {'class':'timestamp', title: fullDate}).html(toTimestamp(now, time));
+		var urlTitle = capitalise(item.urlTitle || 'further info');
 
 		return $('<div>', {'class': 'activity ' + priority})
 			.append($('<button>', {'class':'close', title: 'Dismiss'}).html('&times;'))
@@ -42,8 +43,13 @@ jQuery(function($) {
 			.append($('<div>', {'class': 'content'})
 				.append(item.content)
 				.append($('<p>', {'class': 'url'}).append(
-					$('<a></a>', {'href': item.url}).html('Further info') // TODO use urlTitle from TAB-1964
+					$('<a></a>', {'href': item.url}).html(urlTitle) // TODO use urlTitle from TAB-1964
 				)))
+	}
+
+	function capitalise(text) {
+		if (!text || text.length < 1) return text;
+		return text.charAt(0).toUpperCase() + text.slice(1);
 	}
 
 	function toTimestamp(now, then) {

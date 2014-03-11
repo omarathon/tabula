@@ -7,13 +7,13 @@ import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.services.ActivityService._
 import uk.ac.warwick.tabula.commands.Appliable
-import org.springframework.web.bind.annotation.{RequestHeader, RequestParam, ModelAttribute}
+import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute}
 import uk.ac.warwick.tabula.home.commands.{ActivityStreamCommandState, ActivityStreamCommand}
 import uk.ac.warwick.tabula.services.{SearchPagination, ActivityStreamRequest}
-import uk.ac.warwick.tabula.web.views.JSONView
+import uk.ac.warwick.tabula.web.views.{JSONView, MarkdownRendererImpl}
 
 @Controller
-class ActivityStreamController extends BaseController with ActivityJsonMav {
+class ActivityStreamController extends BaseController with ActivityJsonMav with MarkdownRendererImpl {
 
 	@ModelAttribute("command")
 	def command(

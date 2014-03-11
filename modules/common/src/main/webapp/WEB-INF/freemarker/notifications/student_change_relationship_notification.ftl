@@ -7,5 +7,3 @@ ${oldAgent.officialName} is no longer assigned as your ${relationshipType.agentR
 <#else>
 You have been assigned ${newAgent.officialName} as a ${relationshipType.agentRole}.
 </#if>
-
-You can view this information on your student profile page at <@url page='${path}'/>.

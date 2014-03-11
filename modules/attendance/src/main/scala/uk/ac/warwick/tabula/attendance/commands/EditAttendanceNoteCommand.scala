@@ -22,7 +22,7 @@ object EditAttendanceNoteCommand {
 		with AttendanceNoteCommandState
 		with AutowiringMonitoringPointServiceComponent
 		with AutowiringFileAttachmentServiceComponent
-		with AutowiringProfileServiceComponent
+		with AutowiringUserLookupComponent
 }
 
 abstract class EditAttendanceNoteCommand(
@@ -33,7 +33,7 @@ abstract class EditAttendanceNoteCommand(
 )	extends CommandInternal[MonitoringPointAttendanceNote] with PopulateOnForm with BindListener
 	with AttendanceNoteCommandState with CheckpointUpdatedDescription {
 
-	self: MonitoringPointServiceComponent with FileAttachmentServiceComponent with ProfileServiceComponent =>
+	self: MonitoringPointServiceComponent with FileAttachmentServiceComponent with UserLookupComponent =>
 
 	def populate() = {
 		note = attendanceNote.note

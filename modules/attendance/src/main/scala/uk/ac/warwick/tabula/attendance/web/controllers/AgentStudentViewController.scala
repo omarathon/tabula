@@ -8,7 +8,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.attendance.commands.{StudentPointsData, BuildStudentPointsData, GroupMonitoringPointsByTerm}
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, AutowiringMonitoringPointServiceComponent, AutowiringTermServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, AutowiringProfileServiceComponent, AutowiringMonitoringPointServiceComponent, AutowiringTermServiceComponent}
 import org.joda.time.DateTime
 
 object AgentStudentViewCommand {
@@ -19,7 +19,7 @@ object AgentStudentViewCommand {
 		with ReadOnly with Unaudited
 		with AutowiringTermServiceComponent
 		with AutowiringMonitoringPointServiceComponent
-		with AutowiringProfileServiceComponent
+		with AutowiringUserLookupComponent
 		with GroupMonitoringPointsByTerm
 }
 

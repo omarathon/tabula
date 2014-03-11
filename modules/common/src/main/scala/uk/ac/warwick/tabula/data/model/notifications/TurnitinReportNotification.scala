@@ -11,5 +11,6 @@ abstract class TurnitinReportNotification
 
 	def verb = "request"
 	def url = Routes.admin.assignment.submissionsandfeedback(assignment)
+	def urlTitle = "view the Turnitin results"
 
 }

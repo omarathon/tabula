@@ -42,5 +42,6 @@ class OpenSmallGroupSetsNotification
 	def content = FreemarkerModel(OpenSmallGroupSetsNotification.templateLocation, Map("groupsets" -> entities, "profileUrl" -> url))
 
 	def url: String = "/groups"
+	def urlTitle = "sign up for these groups"
 
 }

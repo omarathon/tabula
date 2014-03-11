@@ -72,6 +72,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 				agent = notification.agent,
 				verb = notification.verb,
 				url = notification.url,
+				urlTitle = notification.urlTitle,
 				message = message,
 				entity = null
 			))

@@ -58,6 +58,8 @@ class BulkStudentRelationshipNotification() extends BulkRelationshipChangeNotifi
 		Routes.profile.view(student)
 	}
 
+	def urlTitle: String = "view this information on your student profile"
+
 	def extraModel = Map(
 		"student" -> modifiedRelationship.studentMember,
 		"oldAgent" -> oldAgent,
@@ -77,6 +79,8 @@ class BulkNewAgentRelationshipNotification extends BulkRelationshipChangeNotific
 
 	def url: String = Routes.students(relationshipType)
 
+	def urlTitle: String = s"view all of your ${relationshipType.studentRole}s"
+
 	def extraModel = Map(
 		"newAgent" -> newAgent
 	)
@@ -93,6 +97,8 @@ class BulkOldAgentRelationshipNotification extends BulkRelationshipChangeNotific
 	def recipients = oldAgent.map { _.asSsoUser }.toSeq
 		
 	def url: String = Routes.students(relationshipType)
+
+	def urlTitle: String = s"view all of your ${relationshipType.studentRole}s"
 
 	def extraModel = Map(
 		"oldAgent" -> oldAgent

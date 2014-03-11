@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, Route, StudentMember, StudentRelationshipType, Member}
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsCheckingMethods, PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
@@ -16,15 +16,14 @@ import uk.ac.warwick.tabula.system.BindListener
 object AgentPointRecordCommand {
 	def apply(agent: Member, user: CurrentUser, relationshipType: StudentRelationshipType, templateMonitoringPoint: MonitoringPoint) =
 		new AgentPointRecordCommand(agent, user, relationshipType, templateMonitoringPoint)
-			with ComposableCommand[Seq[MonitoringCheckpoint]]
-			with AgentPointRecordPermissions
-			with AgentPointRecordDescription
 			with AgentPointRecordValidation
 			with AutowiringMonitoringPointServiceComponent
-			with AutowiringProfileServiceComponent
+			with AutowiringUserLookupComponent
 			with AutowiringTermServiceComponent
-			with AutowiringSecurityServiceComponent
 			with AutowiringRelationshipServiceComponent
+			with AgentPointRecordPermissions
+			with ComposableCommand[Seq[MonitoringCheckpoint]]
+			with AgentPointRecordDescription
 }
 
 abstract class AgentPointRecordCommand(
@@ -32,10 +31,10 @@ abstract class AgentPointRecordCommand(
 	val user: CurrentUser,
 	val relationshipType: StudentRelationshipType,
 	val templateMonitoringPoint: MonitoringPoint
-) extends CommandInternal[Seq[MonitoringCheckpoint]] with Appliable[Seq[MonitoringCheckpoint]] with AgentPointRecordCommandState
+) extends CommandInternal[Seq[MonitoringCheckpoint]] with AgentPointRecordCommandState
 	with BindListener with PopulateOnForm with TaskBenchmarking with PopulateGroupedPoints {
 
-	this: MonitoringPointServiceComponent with RelationshipServiceComponent with ProfileServiceComponent =>
+	this: MonitoringPointServiceComponent with RelationshipServiceComponent with UserLookupComponent =>
 
 	def populate() = {
 		val students = benchmarkTask("Get relationships with current user") {
@@ -71,21 +70,19 @@ abstract class AgentPointRecordCommand(
 }
 
 trait AgentPointRecordValidation extends SelfValidating with GroupedPointValidation {
-	self: AgentPointRecordCommandState with SecurityServiceComponent =>
+	self: AgentPointRecordCommandState =>
 
 	override def validate(errors: Errors) = {
-		def permissionValidation(student: StudentMember, route: Route) = {
-			!securityService.can(user, Permissions.MonitoringPoints.Record, student)
-		}
-		validateGroupedPoint(errors,templateMonitoringPoint, studentsStateAsScala, permissionValidation)
+		validateGroupedPoint(errors,templateMonitoringPoint, studentsStateAsScala)
 	}
 }
 
-trait AgentPointRecordPermissions extends RequiresPermissionsChecking with PermissionsChecking {
-	this: AgentPointRecordCommandState =>
+trait AgentPointRecordPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	this: AgentPointRecordCommandState with RelationshipServiceComponent =>
 
 	def permissionsCheck(p: PermissionsChecking) {
-		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(p.mandatory(relationshipType)), agent)
+		p.PermissionCheck(Permissions.Profiles.StudentRelationship.Read(mandatory(relationshipType)), agent)
+		p.PermissionCheckAll(Permissions.MonitoringPoints.Record, relationshipService.listStudentRelationshipsWithMember(relationshipType, agent).flatMap(_.studentMember))
 	}
 }
 
@@ -96,7 +93,7 @@ trait AgentPointRecordDescription extends Describable[Seq[MonitoringCheckpoint]]
 
 	def describe(d: Description) {
 		d.property("checkpoints", studentsStateAsScala.map{ case (student, pointMap) =>
-			student.universityId -> pointMap.map{ case(point, state) => point -> {
+			student.universityId -> pointMap.map{ case(point, state) => point.id -> {
 				if (state == null)
 					"null"
 				else

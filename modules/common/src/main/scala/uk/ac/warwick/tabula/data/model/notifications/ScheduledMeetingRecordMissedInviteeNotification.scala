@@ -18,8 +18,7 @@ class ScheduledMeetingRecordMissedInviteeNotification
 		"actor" -> agent,
 		"role" -> agentRole,
 		"dateTimeFormatter" -> dateTimeFormatter,
-		"meetingRecord" -> meeting,
-		"profileLink" -> url
+		"meetingRecord" -> meeting
 	))
 	def recipient = {
 		if (meeting.creator.universityId == meeting.relationship.studentId) {

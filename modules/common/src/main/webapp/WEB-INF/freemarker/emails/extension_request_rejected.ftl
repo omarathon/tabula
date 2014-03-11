@@ -8,9 +8,3 @@ The administrator left the following comments:
 ${extension.reviewerComments}
 
 </#if>
-The assignment deadline is displayed at the top of the submission page:
-
-<@url page=path />
-
-
-This email was sent from an automated system, and replies to it will not reach a real person.

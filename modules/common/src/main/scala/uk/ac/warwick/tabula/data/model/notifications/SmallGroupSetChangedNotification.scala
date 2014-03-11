@@ -33,6 +33,8 @@ abstract class SmallGroupSetChangedNotification(recipientRole: UserRoleOnGroup)
 		}
 	}
 
+	def urlTitle = "view this small group"
+
 }
 
 @Entity

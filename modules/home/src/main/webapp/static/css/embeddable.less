@@ -1933,8 +1933,31 @@ ul.nav-pills {
 	}
 	.content {
 		padding-left: @grid-size * 2.5;
+
+		// Compact down some content.
+		// Annoyingly need !important as the ID6 styles are qualified by ID.
+		p { margin: 0 !important; }
+		ul { margin: 0.2em !important; }
+		li { margin: 0 !important; color: @tabulaGray; }
+
 	}
 	.more-link {
 		margin-top: @grid-size;
+	}
+}
+
+.collapsible {
+	@detailsRightArrow = '\25b6';
+	@detailsDownArrow  = '\25bc';
+
+	&::before {
+		content: @detailsRightArrow;
+		position: absolute;
+		margin-left: -16px;
+	}
+	.open {
+		&::before {
+			content: @detailsDownArrow;
+		}
 	}
 }

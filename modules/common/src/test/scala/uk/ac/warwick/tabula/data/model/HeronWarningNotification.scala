@@ -22,6 +22,7 @@ class HeronWarningNotification extends NotificationWithTarget[Heron, Heron]
 	def title: String = "You all need to know. Herons would love to kill you in your sleep"
 	def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
 	def url: String = "/beware/herons"
+	def urlTitle = "see how evil herons really are"
 	def recipient = item.entity.victim
 }
 
@@ -37,6 +38,7 @@ with SingleItemNotification[Heron] with SingleRecipientNotification {
 	def title: String = "A heron has been defeated. Rejoice"
 	def content = FreemarkerModel(templateLocation, Map("group" -> item, "rant" -> heronRant))
 	def url: String = "/beware/herons"
+	def urlTitle = "wallow in glory"
 	def recipient = item.entity.victim
 }
 
