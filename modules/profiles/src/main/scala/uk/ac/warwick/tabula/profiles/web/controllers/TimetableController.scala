@@ -11,15 +11,12 @@ import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 import uk.ac.warwick.tabula.profiles.services.timetables._
 import uk.ac.warwick.tabula.services.{TermAwareWeekToDateConverterComponent, AutowiringProfileServiceComponent, AutowiringTermServiceComponent, UserLookupService, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
-import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.commands.Appliable
 import net.fortuna.ical4j.model.{TimeZoneRegistryFactory, Calendar}
 import net.fortuna.ical4j.model.property.{XProperty, Method, CalScale, Version, ProdId}
 import net.fortuna.ical4j.model.component.VEvent
-import net.fortuna.ical4j.data.CalendarOutputter
-import java.io.StringWriter
-import uk.ac.warwick.tabula.PermissionDeniedException
+import uk.ac.warwick.tabula.ItemNotFoundException
 
 @Controller
 @RequestMapping(value = Array("/timetable"))
@@ -45,13 +42,11 @@ with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponen
 		if (timetableHash.hasText) {
 			profileService.getStudentMemberByTimetableHash(timetableHash).map {
 				member => PublicStudentPersonalTimetableCommand(eventSource, member)
-			}.getOrElse(throw new IllegalArgumentException)
-		}
-		else {
+			}.getOrElse(throw new ItemNotFoundException)
+		} else {
 			whoFor match {
-				case student: StudentMember => {
+				case student: StudentMember =>
 					ViewStudentPersonalTimetableCommand(eventSource, student)
-				}
 				case _ => throw new RuntimeException("Don't know how to render timetables for non-student users")
 			}
 		}

@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.profiles.services.timetables
 
-import uk.ac.warwick.tabula.data.model.groups.{WeekRange}
+import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import org.joda.time._
 import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.services.{ProfileServiceComponent, TermServiceComponent, WeekToDateConverterComponent}
@@ -10,26 +10,22 @@ import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.Property
 import net.fortuna.ical4j.model.parameter.Value
 import net.fortuna.ical4j.model.property.Uid
-import uk.ac.warwick.util.core.StringUtils
-import net.fortuna.ical4j.model.property.Url
 import net.fortuna.ical4j.model.property.Description
 import net.fortuna.ical4j.model.property.Location
 import net.fortuna.ical4j.model.property.Organizer
 import net.fortuna.ical4j.model.parameter.Cn
-import net.fortuna.ical4j.model.PeriodList
-import net.fortuna.ical4j.model.property.RDate
-import uk.ac.warwick.tabula.data.model.Member
 import org.apache.commons.codec.digest.DigestUtils
 
 case class EventOccurrence(
-														name: String,
-														description: String,
-														eventType: TimetableEventType,
-														start: LocalDateTime,
-														end: LocalDateTime,
-														location: Option[String],
-														moduleCode: String,
-														staffUniversityIds: Seq[String])
+	name: String,
+	description: String,
+	eventType: TimetableEventType,
+	start: LocalDateTime,
+	end: LocalDateTime,
+	location: Option[String],
+	moduleCode: String,
+	staffUniversityIds: Seq[String]
+)
 
 object EventOccurrence {
 	def apply(timetableEvent: TimetableEvent, start: LocalDateTime, end: LocalDateTime): EventOccurrence = {
@@ -106,10 +102,11 @@ trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
 			}
 
 			// do not remove; import needed for sorting
+			// should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 			import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 			eventsInIntersectingWeeks
-				.filterNot(_.end.toDateTime().isBefore(dateRange.getStart))
-				.filterNot(_.start.toDateTime().isAfter(dateRange.getEnd))
+				.filterNot(_.end.toDateTime.isBefore(dateRange.getStart))
+				.filterNot(_.start.toDateTime.isAfter(dateRange.getEnd))
 				.sortBy(_.start)
 		}
 

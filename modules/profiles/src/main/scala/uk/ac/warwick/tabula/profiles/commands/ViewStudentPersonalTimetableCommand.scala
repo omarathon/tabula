@@ -63,8 +63,7 @@ object ViewStudentPersonalTimetableCommand {
 	// mmm, cake.
 	// have to pass in the student in the constructor so that we have enough data for the permissions check to work
 
-	def apply(eventSource:StudentTimetableEventSource, student:StudentMember): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState = {
-
+	def apply(eventSource:StudentTimetableEventSource, student:StudentMember): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState =
 		new ViewStudentPersonalTimetableCommandImpl(eventSource, student)
 			with ComposableCommand[Seq[EventOccurrence]]
 			with ViewStudentTimetablePermissions
@@ -73,20 +72,19 @@ object ViewStudentPersonalTimetableCommand {
 			with TermAwareWeekToDateConverterComponent
 			with AutowiringTermServiceComponent
 			with AutowiringProfileServiceComponent
-	}
 }
 
 object PublicStudentPersonalTimetableCommand {
 
 	def apply(eventSource:StudentTimetableEventSource, student:StudentMember) =
 		new ViewStudentPersonalTimetableCommandImpl(eventSource, student)
-		with Command[Seq[EventOccurrence]]
-		with Public
-		with ReadOnly with Unaudited
-		with TermBasedEventOccurrenceComponent
-		with TermAwareWeekToDateConverterComponent
-		with AutowiringTermServiceComponent
-		with AutowiringProfileServiceComponent
+			with Command[Seq[EventOccurrence]]
+			with Public
+			with ReadOnly with Unaudited
+			with TermBasedEventOccurrenceComponent
+			with TermAwareWeekToDateConverterComponent
+			with AutowiringTermServiceComponent
+			with AutowiringProfileServiceComponent
 
 }
 
