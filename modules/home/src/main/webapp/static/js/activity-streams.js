@@ -32,6 +32,7 @@ jQuery(function($) {
 		var urlTitle = capitalise(item.urlTitle || 'further info');
 
 		return $('<div>', {'class': 'activity ' + priority})
+			.data('notification-id', item._id)
 			.append($('<button>', {'class':'close', title: 'Dismiss'}).html('&times;'))
 			.append($('<div>', {'class': 'headline'})
 				.append($('<i></i>', {'class': icons[priority]}))
@@ -71,7 +72,6 @@ jQuery(function($) {
 	// The contents will be cleared.
 	function initStream($container, options) {
 		var options = options || {};
-		$container.html('');
 
 		if ($container.data('activity-stream-init')) {
 			return;
@@ -84,8 +84,30 @@ jQuery(function($) {
 
 		$container.on('click', 'button.close', function() {
 			// dismiss
-			$(this).closest('.activity').remove();
+			var $activity = $(this).closest('.activity');
+			var notificationId = $activity.data('notification-id');
+
+//			console.log('remove', notificationId);
+			$.post('/activity/dismiss/' + notificationId)
+				.then(function(data, textStatus, xhr) {
+					var $undoNotice = $('<div>', {'class':'deleted-notice alert'}).html('Dismissed. ');
+					$undoNotice.append($('<a>', {href:'#'}).html('Undo').on('click', function() {
+						$activity.show();
+						$undoNotice.remove();
+						$.post('/activity/restore/' + notificationId);
+						return false;
+					}));
+					$activity.before($undoNotice);
+					$activity.hide(); // though it's deleted, just hide it for now to make restoring easier.
+				}, function(xhr, textStatus, errorThrown) {
+//					console.error(errorThrown);
+				});
 		});
+
+		// apply JS behaviour to .activity elements.
+		function wire($activities) {
+			$activities.find('.content').collapsible();
+		}
 
 		function loadPage(pagination, first) {
 			var data = jQuery.extend({}, options);
@@ -96,9 +118,13 @@ jQuery(function($) {
 				data.lastDoc = pagination.doc;
 			}
 			jQuery.get(url, data).then(function(data) {
+				if (first) $container.html('');
+
 				$(data.items).each(function(i, item) {
 					var activity = new Activity(item);
-					activity.render().appendTo($container);
+					var $activity = activity.render();
+					wire($activity);
+					$activity.appendTo($container);
 				});
 
 				if (data.pagination && data.pagination.token) {
@@ -120,6 +146,8 @@ jQuery(function($) {
 					$moreLink.after(noMoreMsg);
 					$moreLink.remove(); // il n'y a pas de items
 				}
+			}, function (xhr, data, error) {
+
 			});
 		}
 

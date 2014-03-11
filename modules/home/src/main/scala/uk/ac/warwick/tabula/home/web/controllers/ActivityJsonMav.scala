@@ -16,6 +16,7 @@ trait ActivityJsonMav {
 		val html = renderMarkdown(source)
 
 		Map(
+			"_id" -> item.id,
 			"published" -> DateFormat.print(item.date),
 			"priority" -> item.priority,
 			"title" -> item.title,

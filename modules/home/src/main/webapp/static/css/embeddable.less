@@ -1944,18 +1944,30 @@ ul.nav-pills {
 	.more-link {
 		margin-top: @grid-size;
 	}
+	.deleted-notice {
+		margin-bottom: 0;
+	}
 }
 
 .collapsible {
-	@detailsRightArrow = '\25b6';
-	@detailsDownArrow  = '\25bc';
+	@detailsRightArrow: '\25b8';
+	@detailsDownArrow: '\25be';
+
+	height: 1.6em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	cursor: hand;
+	cursor: pointer;
 
 	&::before {
 		content: @detailsRightArrow;
 		position: absolute;
 		margin-left: -16px;
 	}
-	.open {
+	&.open {
+		height: auto;
+		white-space: inherit;
 		&::before {
 			content: @detailsDownArrow;
 		}

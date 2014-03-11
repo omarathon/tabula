@@ -66,6 +66,7 @@ class NotificationService extends Logging with FreemarkerTextRenderer {
 			val message = renderTemplate(content.template, content.model)
 
 			Some(new Activity[Any](
+				id = notification.id,
 				title = notification.title,
 				date = notification.created,
 				priority = notification.priorityOrDefault.toNumericalValue,
