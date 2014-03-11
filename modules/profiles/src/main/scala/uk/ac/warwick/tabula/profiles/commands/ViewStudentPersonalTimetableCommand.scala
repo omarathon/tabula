@@ -1,14 +1,13 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, Appliable, CommandInternal}
+import uk.ac.warwick.tabula.commands.{Command, Unaudited, ComposableCommand, Appliable, CommandInternal, ReadOnly}
 import uk.ac.warwick.tabula.profiles.services.timetables._
-import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking, PubliclyVisiblePermissions}
+import uk.ac.warwick.tabula.system.permissions.{Public, PermissionsChecking, RequiresPermissionsChecking, PubliclyVisiblePermissions}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.services._
 import org.joda.time.{Interval, LocalDate}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.helpers.DateTimeOrdering
-import uk.ac.warwick.tabula.commands.ReadOnly
 
 trait ViewStudentPersonalTimetableCommandState {
 	val student: StudentMember
@@ -73,7 +72,22 @@ object ViewStudentPersonalTimetableCommand {
 			with TermBasedEventOccurrenceComponent
 			with TermAwareWeekToDateConverterComponent
 			with AutowiringTermServiceComponent
+			with AutowiringProfileServiceComponent
 	}
+}
+
+object PublicStudentPersonalTimetableCommand {
+
+	def apply(eventSource:StudentTimetableEventSource, student:StudentMember) =
+		new ViewStudentPersonalTimetableCommandImpl(eventSource, student)
+		with Command[Seq[EventOccurrence]]
+		with Public
+		with ReadOnly with Unaudited
+		with TermBasedEventOccurrenceComponent
+		with TermAwareWeekToDateConverterComponent
+		with AutowiringTermServiceComponent
+		with AutowiringProfileServiceComponent
+
 }
 
 

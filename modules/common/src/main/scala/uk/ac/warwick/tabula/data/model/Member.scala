@@ -449,6 +449,10 @@ trait MemberProperties extends StringId {
 
 	@Restricted(Array("Profiles.Read.MobileNumber"))
 	var mobileNumber: String = _
+
+	@Column(name = "timetable_hash")
+	var timetableHash: String = _
+
 }
 
 trait StudentProperties {
