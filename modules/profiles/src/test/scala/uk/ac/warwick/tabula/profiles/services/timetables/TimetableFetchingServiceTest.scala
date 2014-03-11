@@ -21,7 +21,7 @@ class TimetableFetchingServiceTest extends TestBase {
 			day=DayOfWeek.Friday,
 			eventType=TimetableEventType.Lecture,
 			location=Some("L5"),
-			moduleCode=Some("CS132"),
+			context=Some("CS132"),
 			staffUniversityIds=Seq("1170047"),
 		  year = AcademicYear(2012)
 		))

@@ -149,7 +149,7 @@ object ScientiaHttpTimetableFetchingService {
 					}
 					case _ => None
 				},
-				moduleCode = Option((activity \\ "module").text),
+				context = Option((activity \\ "module").text),
 				staffUniversityIds = (activity \\ "staffmember") map { _.text },
 				year = year
 			)

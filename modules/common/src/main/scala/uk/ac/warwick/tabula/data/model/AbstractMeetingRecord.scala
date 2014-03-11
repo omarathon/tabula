@@ -89,11 +89,10 @@ abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget 
 	def toEventOccurrence: Option[EventOccurrence] = {
 		/*
 		 * TAB-1928
-		 * TODO At the moment, we're treating any non-scheduled meeting record that has a non-midnight time
-		 * component as being one that has a real time, is this an ok thing to do?
+		 * TODO Somehow include non-scheduled meetings
 		 */
 
-		if (isScheduled || meetingDate.getMillisOfDay > 0) {
+		if (isScheduled) {
 			Some(EventOccurrence(
 				title,
 				description,
