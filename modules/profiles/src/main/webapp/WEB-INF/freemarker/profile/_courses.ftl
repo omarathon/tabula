@@ -1,4 +1,5 @@
 <#include "_course_details.ftl" />
+<#import "*/modal_macros.ftl" as modal />
 
 <div class="tabbable">
 	<#assign showTimetablePane=features.personalTimetables && can.do("Profiles.Read.Timetable", profile) />
@@ -13,11 +14,43 @@
 		<#if showTimetablePane>
 			<li id="timetable-pane">
 				<section id="timetable-details" class="clearfix" >
-					<h4>Timetable</h4>
+					<h4>
+						Timetable
+						<#if studentCourseDetails.student.timetableHash?has_content>
+							<a href="<@routes.timetable_ical studentCourseDetails.student />" title="Subscribe to timetable">
+								<i class="icon-calendar"></i>
+							</a>
+						</#if>
+					</h4>
 					<div class='fullCalendar' data-viewname='agendaWeek' data-studentid='${studentCourseDetails.student.universityId}'>
 					</div>
     			</section>
 			</li>
+
+			<div class="modal hide fade" id="timetable-ical-modal">
+				<@modal.header>
+					<h2>Subscribe to your timetable</h2>
+				</@modal.header>
+				<@modal.body>
+					<#if isSelf>
+						<div class="alert alert-info">
+							<p>Tabula provides your timetable as a calendar feed with a "private address". Private Addresses are designed for your use only. They don't require any further authentication to get information from your timetable, so they're useful for getting your timetable into another calendar or application, or your mobile phone.</p>
+							<p>If you accidentally share the address with others, you can change the address by clicking the button below. All of the existing clients using this private address will break, and you will have to give them the new private address.</p>
+							<form class="form-inline" method="POST" action="<@routes.timetable_ical_regenerate />"><button type="submit" class="btn btn-primary">Generate a new private address</button></form>
+						</div>
+
+						<p>You can <a href="<@routes.timetable_ical studentCourseDetails.student />">click this link</a> to subscribe to your timetable in your default calendar application.</p>
+
+						<p>You can also copy the link and paste it into an external application, e.g. Google Calendar:</p>
+
+						<p><a href="<@routes.timetable_ical studentCourseDetails.student />"><@routes.timetable_ical studentCourseDetails.student /></a></p>
+
+						<p><em>If the above links do not work you can try the one below:</em></p>
+
+						<p><a href="<@routes.timetable_ical student=studentCourseDetails.student webcal=false />"><@routes.timetable_ical student=studentCourseDetails.student webcal=false /></a></p>
+					</#if>
+				</@modal.body>
+			</div>
 		</#if>
 
 		<#list (allRelationshipTypes)![] as relationshipType>

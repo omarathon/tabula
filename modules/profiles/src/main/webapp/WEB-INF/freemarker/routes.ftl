@@ -74,3 +74,13 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 <#macro purge_member_note memberNote ><@_u page="/${memberNote.member.universityId}/note/${memberNote.id}/purge" /></#macro>
 
 <#macro meeting_will_create_checkpoint student><@_u page="/profile/${student.universityId}/meetingcheckpoint" context="/attendance" /></#macro>
+
+<#macro timetable_ical student webcal=true><#compress>
+	<#local https_url><@_u page="/timetable/ical?timetablehash=${student.timetableHash}" /></#local>
+	<#if webcal>
+		${https_url?replace('https','webcals')}
+	<#else>
+		${https_url}
+	</#if>
+</#compress></#macro>
+<#macro timetable_ical_regenerate><@_u page="/timetable/regeneratehash" /></#macro>
