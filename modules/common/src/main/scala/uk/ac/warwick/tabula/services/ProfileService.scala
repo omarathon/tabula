@@ -57,7 +57,6 @@ abstract class AbstractProfileService extends ProfileService with Logging {
 	def regenerateTimetableHash(member: Member) = {
 		member.timetableHash = UUID.randomUUID.toString
 		save(member)
-		
 	}
 
 	def getMemberByUniversityId(universityId: String, disableFilter: Boolean = false, eagerLoad: Boolean = false) = transactional(readOnly = true) {
