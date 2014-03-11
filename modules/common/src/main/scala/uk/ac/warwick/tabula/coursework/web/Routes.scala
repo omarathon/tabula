@@ -74,6 +74,7 @@ object Routes {
 
 			object extension {
 				def detail (assignment: Assignment) = assignmentroot(assignment) + "/extensions/detail"
+				def revoke (assignment: Assignment, universityId: String) = assignmentroot(assignment) + "/extensions/revoke/" + universityId
 			}
 		}
 	}

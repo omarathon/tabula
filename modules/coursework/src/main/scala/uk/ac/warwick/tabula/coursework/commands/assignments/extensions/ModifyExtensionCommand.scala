@@ -54,7 +54,6 @@ trait ModifyExtensionCommandValidation extends SelfValidating {
 			errors.rejectValue("universityId", "extension.universityId.noValidUserId")
 		}
 
-		// FIXME can't approve without expiry date - this next bit doesn't work
 		if(expiryDate == null) {
 			if (action == ApprovalAction) {
 				errors.rejectValue("expiryDate", "extension.requestedExpiryDate.provideExpiry")
@@ -81,6 +80,7 @@ trait ModifyExtensionCommandState {
 
 	final val ApprovalAction = "Grant"
 	final val RejectionAction = "Reject"
+	final val RevocationAction = "Revoke"
 }
 
 

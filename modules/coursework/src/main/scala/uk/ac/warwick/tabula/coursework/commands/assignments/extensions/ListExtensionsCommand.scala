@@ -54,12 +54,13 @@ class ListExtensionsCommand(val module: Module, val assignment: Assignment, val 
 				case Some(e) if e.expiryDate != null => Days.daysBetween(assignment.closeDate, e.expiryDate).getDays
 			case _ => 0
 		}
-			val requestedDuration = extension match {
-				case Some(e) if e.requestedExpiryDate != null => Days.daysBetween(assignment.closeDate, e.requestedExpiryDate).getDays
+			val requestedExtraDuration = extension match {
+				case Some(e) if e.requestedExpiryDate != null && e.expiryDate != null => Days.daysBetween(e.expiryDate, e.requestedExpiryDate).getDays
+				case Some(e) if e.requestedExpiryDate != null && e.expiryDate == null => Days.daysBetween(assignment.closeDate, e.requestedExpiryDate).getDays
 				case _ => 0
 			}
 
-			new ExtensionGraph(universityId, user, isAwaitingReview, hasApprovedExtension, hasRejectedExtension, duration, requestedDuration, extension)
+			new ExtensionGraph(universityId, user, isAwaitingReview, hasApprovedExtension, hasRejectedExtension, duration, requestedExtraDuration, extension)
 		}).toSeq
 	}
 }
@@ -71,5 +72,5 @@ case class ExtensionGraph(
 	hasApprovedExtension: Boolean,
 	hasRejectedExtension: Boolean,
 	duration: Int,
-	requestedDuration: Int,
+	requestedExtraDuration: Int,
 	extension: Option[Extension])

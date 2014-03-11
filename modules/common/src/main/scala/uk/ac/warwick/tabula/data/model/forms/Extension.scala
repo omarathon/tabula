@@ -83,6 +83,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
 	// this extension was manually created by an administrator, rather than requested by a student
 	def isManual = requestedOn == null
+	def isInitiatedByStudent = !isManual
 
 	def approved = state == ExtensionState.Approved
 	def rejected = state == ExtensionState.Rejected

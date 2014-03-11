@@ -481,7 +481,6 @@ $(function() {
 		});
 
 		if ($form.parents('.extension-detail').length) prepareAjaxForm($form, function(resp) {
-			// FIXME gotta do some handling...
 			var $resp = $(resp);
 
 			// there should be an ajax-response class somewhere in the response text
@@ -501,6 +500,8 @@ $(function() {
 				else if(approved) {
 					$statusContainer.append($('<div class="label label-success">Approved</div>'));
 				}
+
+				// FIXME update duration column
 
 				return "";
 			} else {

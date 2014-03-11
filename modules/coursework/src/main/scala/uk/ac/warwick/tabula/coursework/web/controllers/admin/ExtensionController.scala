@@ -94,12 +94,12 @@ class EditExtensionController extends ExtensionController {
 
 	@ModelAttribute("modifyExtensionCommand")
 	def editCommand(
-			@PathVariable("module") module: Module,
-			@PathVariable("assignment") assignment: Assignment,
-			@PathVariable("universityId") universityId: String,
-			user: CurrentUser,
-			@RequestParam(defaultValue = "") action: String) =
-		EditExtensionCommand(module, assignment, universityId, user, action)
+		@PathVariable("module") module: Module,
+		@PathVariable("assignment") assignment: Assignment,
+		@PathVariable("universityId") universityId: String,
+		user: CurrentUser,
+		@RequestParam(defaultValue = "") action: String
+	) = EditExtensionCommand(module, assignment, universityId, user, action)
 
 	validatesSelf[SelfValidating]
 
@@ -130,7 +130,8 @@ class EditExtensionController extends ExtensionController {
 			"studentContext" -> studentContext,
 			"userFullName" -> userLookup.getUserByWarwickUniId(cmd.universityId).getFullName,
 			"approvalAction" -> cmd.ApprovalAction,
-			"rejectionAction" -> cmd.RejectionAction
+			"rejectionAction" -> cmd.RejectionAction,
+			"revocationAction" -> cmd.RevocationAction
 		).noLayout()
 		model
 	}
@@ -149,10 +150,10 @@ class EditExtensionController extends ExtensionController {
 
 
 @Controller
-@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions/delete/{universityId}"))
+@RequestMapping(Array("/admin/module/{module}/assignments/{assignment}/extensions/revoke/{universityId}"))
 class DeleteExtensionController extends ExtensionController {
 
-	@ModelAttribute
+	@ModelAttribute("deleteExtensionCommand")
 	def deleteCommand(
 		@PathVariable("module") module: Module,
 		@PathVariable("assignment") assignment: Assignment,
@@ -162,16 +163,8 @@ class DeleteExtensionController extends ExtensionController {
 
 	// delete a manually created extension item - this revokes the extension
 	@RequestMapping(method=Array(POST))
-	def deleteExtension(@ModelAttribute cmd: Appliable[Extension] with ModifyExtensionCommandState): Mav = {
-		val student = userLookup.getUserByWarwickUniId(cmd.universityId)
-		val model = Mav("admin/assignments/extensions/delete",
-			"module" -> cmd.module,
-			"assignment" -> cmd.assignment,
-			"universityId" -> cmd.universityId,
-			"extension" -> cmd.assignment.findExtension(cmd.universityId).getOrElse(""),
-			"userFullName" -> student.getFullName,
-			"userFirstName" -> student.getFirstName
-		).noLayout()
-		model
+	def deleteExtension(@ModelAttribute("deleteExtensionCommand") cmd: Appliable[Extension] with ModifyExtensionCommandState): Mav = {
+		val extensionJson = JsonHelper.toJson(cmd.apply().asMap)
+		Mav("ajax_success", "data" -> extensionJson).noLayout()
 	}
 }

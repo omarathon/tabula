@@ -3,20 +3,22 @@
 <#assign time_remaining=durationFormatter(assignment.closeDate) />
 
 <#import "../submissionsandfeedback/_submission_details.ftl" as sd />
+<#import "/WEB-INF/freemarker/_profile_link.ftl" as pl />
+<div id="profile-modal" class="modal fade profile-subset"></div>
 
 <#macro row graph>
 	<#assign state = (graph.extension.state.description)!"None" />
 	<tr class="itemContainer" data-contentid="${graph.universityId}">
 		<#if department.showStudentName>
 			<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.user.firstName}</h6></td>
-			<td class="student-col toggle-cell"><h6>${graph.user.lastName}</h6></td>
+			<td class="student-col toggle-cell"><h6>${graph.user.lastName}&nbsp;<@pl.profile_link graph.universityId /></h6></td>
 		<#else>
 			<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.universityId}</h6></td>
 		</#if>
 		<td class="status-col toggle-cell content-cell">
 			<dl style="margin: 0; border-bottom: 0;">
 				<dt data-duration="${graph.duration}"
-					data-requested-duration="${graph.requestedDuration}"
+					data-requested-extra-duration="${graph.requestedExtraDuration}"
 					data-awaiting-review="${graph.awaitingReview?string}"
 					data-approved="${graph.hasApprovedExtension?string}"
 					data-rejected="${graph.hasRejectedExtension?string}">
@@ -77,7 +79,6 @@
 					<#if department.showStudentName>
 						<th class="student-col">First name</th>
 						<th class="student-col">Last name</th>
-						<#-- FIXME Ritchie's profile linky thing -->
 					<#else>
 						<th class="student-col">University ID</th>
 					</#if>
@@ -89,9 +90,10 @@
 
 			<tbody>
 				<#list extensionGraphs as extensionGraph>
-					<#-- FIXME only show row if permitted to do the action
-					 ie. if (!extension && canDo(CREATE)) || (extension && canDo(UPDATE)) -->
-					<@row extensionGraph />
+					<#if (extensionGraph.extension?has_content && can.do("Extension.Update", assignment)) || can.do("Extension.Create", assignment)>
+						<#-- as this is a *management* screen, only show rows we can actually do something with -->
+						<@row extensionGraph />
+					</#if>
 				</#list>
 			</tbody>
 		</table>
@@ -101,7 +103,12 @@
 			$('.expanding-table').expandingTable({
 				contentUrl: '${url(detailUrl!"")}',
 				useIframe: true,
-				tableSorterOptions: { sortList: [<#if department.showStudentName>[2, 0], </#if>[1, 0], [0,0]] }
+				tableSorterOptions: {
+					sortList: [<#if department.showStudentName>[2, 0], </#if>[1, 0], [0, 0]],
+					headers: {
+						3: { sorter: false }
+					}
+				}
 			});
 		})(jQuery);
 		</script>
@@ -113,15 +120,13 @@
 		}
 		#main-content .students .progress {
 			margin-bottom: 0;
-			width: 90%;
 		}
 
 		#main-content .students .progress.overTime {
-			width: 100%;
 			position: relative;
 		}
 
-		#main-content .students .progress.overTime:before {
+		#main-content .students .progress.overTime:after {
 			content: " ";
 			width: 100%;
 			height: 100%;
@@ -142,42 +147,79 @@
 	<script type="text/javascript">
 		(function($) {
 			var maxDaysToDisplayAsProgressBar = $('table.students').data('max-days');
+			var totalDuration;
 
-			function barWidth(duration) {
-				return 100*Math.min(maxDaysToDisplayAsProgressBar, duration)/maxDaysToDisplayAsProgressBar;
+			var barWidth = function(duration) {
+				return 100 * duration / totalDuration;
+			}
+			var tooltip = function(verb, duration) {
+				return verb + ' ' + duration + ' day' + (duration == 1 ? "" : "s");
+			}
+			var appendBar = function(verb, customClass, duration) {
+				if (duration) {
+					$progress.append($('<div class="bar ' + customClass + ' use-tooltip" title="' + tooltip(verb, duration) + '" style="width: ' + barWidth(duration) + '%" data-container="body"></div>'));
+				}
 			}
 
 			$('table.students tbody tr').each(function() {
+				availableWidth = 100;
 				var $row = $(this);
 				var $dt = $row.find('dt');
 				<#-- ignore rows without extension -->
 				if ($row.find('.no-extension').length == 0) {
+					var duration = $dt.data('duration');
+					var requestedExtraDuration = $dt.data('requestedExtraDuration');
+					totalDuration = duration + requestedExtraDuration;
 
-					var isOverTime = $dt.data('duration') > maxDaysToDisplayAsProgressBar || $dt.data('requestedDuration') > maxDaysToDisplayAsProgressBar;
+					var isOverTime = totalDuration > maxDaysToDisplayAsProgressBar;
 					var progressClass = "progress";
-					if (isOverTime) progressClass += " overTime";
-
-					$progress = $('<div class="' + progressClass + '"></div>');
-
-					if ($dt.data('rejected')) {
-						$progress.append($('<div class="bar bar-danger use-tooltip" title="Rejected ' + $dt.data('requestedDuration') + ' days" style="width: ' + barWidth($dt.data('requestedDuration')) + '%"></div>'));
-					} else if ($dt.data('approved')) {
-						$progress.append($('<div class="bar bar-success use-tooltip" title="Approved ' + $dt.data('duration') + ' days" style="width: ' + barWidth($dt.data('duration')) + '%"></div>'));
+					var progressWidth;
+					if (isOverTime) {
+						progressWidth = 100;
+						progressClass += " overTime";
+					} else {
+						progressWidth = 90*totalDuration / maxDaysToDisplayAsProgressBar;
 					}
 
+					$progress = $('<div class="' + progressClass + '" style="width: ' + progressWidth + '%"></div>');
+					if ($dt.data('rejected') && !$dt.data('awaitingReview')) {
+						appendBar('Rejected request for', 'bar-danger', requestedExtraDuration);
+					} else if ($dt.data('approved')) {
+						appendBar('Approved', 'bar-success', duration);
+					}
 					if ($dt.data('awaitingReview')) {
-						var additionalDuration = $dt.data('requestedDuration') - $dt.data('duration');
-						if (additionalDuration > 0) {
-							$progress.append($('<div class="bar bar-warning use-tooltip" title="Requested ' + $dt.data('requestedDuration') + ' days" style="width: ' + barWidth(additionalDuration) + '%"></div>'));
-						}
+						appendBar('Requested further', 'bar-warning', requestedExtraDuration);
 					}
 
 					$row.find('.duration-col').empty().append($progress);
 				}
 			});
-
 			$('.bar').tooltip();
 
+			$('#main-content').on('click', '.btn.revoke', function(e) {
+				e.preventDefault();
+				e.stopPropagation();
+				var message = 'Revoking an extension is irreversible. Are you sure?';
+				var modalHtml = "<div class='modal hide fade' id='confirmModal'>" +
+						"<div class='modal-body'>" +
+						"<h5>"+message+"</h5>" +
+						"</div>" +
+						"<div class='modal-footer'>" +
+						"<a class='confirm btn'>Yes, revoke</a>" +
+						"<a data-dismiss='modal' class='btn btn-primary'>No, go back</a>" +
+						"</div>" +
+						"</div>"
+				var $modal = $(modalHtml);
+				$modal.data('form', $(this).closest('form'));
+				$modal.modal();
+				$('a.confirm', $modal).on('click', function() {
+					$modal.modal('hide');
+					var $form = $modal.data('form');
+					<#-- FIXME I hate literals -->
+					$form.attr('action', $form.attr('action').replace('detail/', 'revoke/'));
+					$form.submit();
+				});
+			});
 		})(jQuery);
 	</script>
 
