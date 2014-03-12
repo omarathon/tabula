@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
 import scala.collection.JavaConverters._
 import org.joda.time.DateTime
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
 
@@ -16,6 +16,8 @@ object UpdateMonitoringPointCommand {
 		with ComposableCommand[MonitoringPoint]
 		with AutowiringMonitoringPointServiceComponent
 		with AutowiringTermServiceComponent
+		with AutowiringSmallGroupServiceComponent
+		with AutowiringModuleAndDepartmentServiceComponent
 		with UpdateMonitoringPointValidation
 		with UpdateMonitoringPointDescription
 		with UpdateMonitoringPointPermission
@@ -61,6 +63,21 @@ trait UpdateMonitoringPointValidation extends SelfValidating with MonitoringPoin
 					meetingRelationships.asScala, "meetingRelationships",
 					meetingFormats.asScala, "meetingFormats",
 					meetingQuantity, "meetingQuantity",
+					dept
+				)
+			case MonitoringPointType.SmallGroup =>
+				validateTypeSmallGroup(errors,
+					smallGroupEventModules, "smallGroupEventModules",
+					isAnySmallGroupEventModules,
+					smallGroupEventQuantity, "smallGroupEventQuantity",
+					dept
+				)
+			case MonitoringPointType.AssignmentSubmission =>
+				validateTypeAssignmentSubmission(errors,
+					isSpecificAssignments,
+					assignmentSubmissionQuantity, "assignmentSubmissionQuantity",
+					assignmentSubmissionModules, "assignmentSubmissionModules",
+					assignmentSubmissionAssignments, "assignmentSubmissionAssignments",
 					dept
 				)
 			case _ =>

@@ -2,8 +2,6 @@ package uk.ac.warwick.tabula.data.model
 
 import scala.collection.JavaConverters._
 import javax.persistence._
-import org.hibernate.annotations.Type
-
 import org.joda.time.DateTime
 
 import uk.ac.warwick.tabula.JavaImports._
@@ -12,7 +10,10 @@ import uk.ac.warwick.tabula.DateFormats
 import uk.ac.warwick.tabula.services.UserLookupComponent
 import org.springframework.util.Assert
 import uk.ac.warwick.tabula.data.PreSaveBehaviour
+import org.hibernate.annotations.Type
 import scala.beans.BeanProperty
+import uk.ac.warwick.tabula.data.model.notifications.RecipientNotificationInfo
+import uk.ac.warwick.tabula.permissions.PermissionsTarget
 
 object Notification {
 	/**
@@ -86,7 +87,10 @@ object Notification {
 @Entity
 @Inheritance(strategy=InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name="notification_type")
-abstract class Notification[A >: Null <: ToEntityReference, B] extends GeneratedId with Serializable with HasSettings {
+abstract class Notification[A >: Null <: ToEntityReference, B]
+	extends GeneratedId with Serializable with HasSettings with PermissionsTarget {
+
+	def permissionsParents = Stream.empty
 
 	@transient final val dateOnlyFormatter = DateFormats.NotificationDateOnly
 	@transient final val dateTimeFormatter = DateFormats.NotificationDateTime
@@ -101,6 +105,35 @@ abstract class Notification[A >: Null <: ToEntityReference, B] extends Generated
 	def entities = items.asScala.map { _.entity }.toSeq
 
 	var created: DateTime = null
+
+	// the default priority is info. More important notifications should manually set this value to something higher.
+	@Type(`type` = "uk.ac.warwick.tabula.data.model.NotificationPriorityUserType")
+	var priority: NotificationPriority = NotificationPriority.Info
+
+	@OneToMany(mappedBy="notification", fetch=FetchType.LAZY, cascade=Array(CascadeType.ALL))
+	var recipientNotificationInfos: JList[RecipientNotificationInfo] = JArrayList()
+
+	// when performing operations on recipientNotificationInfos you should use this to fetch a users info.
+	private def getRecipientNotificationInfo(user: User) = {
+		if (!recipients.contains(user)) throw new IllegalArgumentException("user must be a recipient of this notification")
+		recipientNotificationInfos.asScala.find(_.recipient == user).getOrElse {
+			val newInfo = new RecipientNotificationInfo(this, user)
+			recipientNotificationInfos.add(newInfo)
+			newInfo
+		}
+	}
+
+	def dismiss(user: User) = {
+		val info = getRecipientNotificationInfo(user)
+		info.dismissed = true
+	}
+
+	def unDismiss(user: User) = {
+		val info = getRecipientNotificationInfo(user)
+		info.dismissed = false
+	}
+
+	def isDismissed(user: User) = recipientNotificationInfos.asScala.exists(ni => ni.recipient == user && ni.dismissed)
 
 	// HasSettings provides the JSONified settings field... ---> HERE <---
 
@@ -129,7 +162,7 @@ abstract class Notification[A >: Null <: ToEntityReference, B] extends Generated
 @Entity
 abstract class NotificationWithTarget[A >: Null <: ToEntityReference, B >: Null <: AnyRef] extends Notification[A,B] {
 	@Access(value=AccessType.PROPERTY)
-	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[B]])
+	@OneToOne(cascade = Array(CascadeType.ALL), targetEntity = classOf[EntityReference[B]], fetch = FetchType.LAZY)
 	@BeanProperty
 	var target: EntityReference[B] = null
 }

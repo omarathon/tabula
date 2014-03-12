@@ -1,4 +1,4 @@
-This email confirms that you made a submission for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name}.
+This message confirms that you made a submission for the assignment '${assignment.name}' for ${module.code?upper_case}, ${module.name}.
 
 Submission date: ${submissionDate}
 Submission ID: ${submission.id}
@@ -12,4 +12,4 @@ Uploaded attachments:
 
 To review your submission, please visit:
 
-<@url page=path context="/coursework" />
+<@url page=path />

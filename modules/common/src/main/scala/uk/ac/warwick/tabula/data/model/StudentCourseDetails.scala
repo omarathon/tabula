@@ -16,6 +16,16 @@ import javax.persistence.CascadeType
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
 
+object StudentCourseDetails {
+	final val FreshCourseDetailsOnlyFilter = "freshStudentCourseDetailsOnly"
+}
+
+@FilterDefs(Array(
+	new FilterDef(name = StudentCourseDetails.FreshCourseDetailsOnlyFilter, defaultCondition = "missingFromImportSince is null")
+))
+@Filters(Array(
+	new Filter(name = StudentCourseDetails.FreshCourseDetailsOnlyFilter)
+))
 @Entity
 class StudentCourseDetails
 	extends StudentCourseProperties
@@ -53,12 +63,16 @@ class StudentCourseDetails
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	@BatchSize(size=200)
-	var moduleRegistrations: JSet[ModuleRegistration] = JHashSet()
+	private val _moduleRegistrations: JSet[ModuleRegistration] = JHashSet()
+	def moduleRegistrations = _moduleRegistrations.asScala.toSeq.sortBy { reg => (reg.module.code) }
+	def addModuleRegistration(moduleRegistration: ModuleRegistration) = _moduleRegistrations.add(moduleRegistration)
+	def removeModuleRegistration(moduleRegistration: ModuleRegistration) = _moduleRegistrations.remove(moduleRegistration)
+	def clearModuleRegistrations() = _moduleRegistrations.clear()
 
-	def registeredModulesByYear(year: Option[AcademicYear]): Set[Module] = moduleRegistrationsByYear(year).map(_.module)
+	def registeredModulesByYear(year: Option[AcademicYear]): Seq[Module] = moduleRegistrationsByYear(year).map(_.module)
 
-	def moduleRegistrationsByYear(year: Option[AcademicYear]): Set[ModuleRegistration] =
-		moduleRegistrations.asScala.toSet[ModuleRegistration].collect {
+	def moduleRegistrationsByYear(year: Option[AcademicYear]): Seq[ModuleRegistration] =
+		moduleRegistrations.collect {
 			case modReg if year.isEmpty => modReg
 			case modReg if modReg.academicYear == year.getOrElse(null) => modReg
 	}
@@ -115,7 +129,7 @@ class StudentCourseDetails
 	}
 
 	def hasModuleRegistrations = {
-		!moduleRegistrations.isEmpty()
+		!moduleRegistrations.isEmpty
 	}
 
 	def isFresh = (missingFromImportSince == null)
@@ -139,12 +153,37 @@ class StudentCourseDetails
 	}
 }
 
-trait StudentCourseProperties {
+// properties for a student on a course which come direct from SITS - those that need to be
+// transformed in some way are in StudentCourseProperties
+trait BasicStudentCourseProperties {
 	// There can be multiple StudentCourseDetails rows for a single SPR code, even though a route is a sub-category of a course;
 	// this is just an artefact of the weird way SITS works.  If a student changes route within a course, they end up with a new
 	// course join (SCJ) row in SITS.  Equally perversely, they keep the same sprcode and SPR row even though this should be the
 	// student's record for their route (SPR = student programme route) - the route code is just edited.  Hence this is not unique.
 	var sprCode: String = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var levelCode: String = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var beginDate: LocalDate = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var endDate: LocalDate = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var expectedEndDate: LocalDate = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var courseYearLength: String = _
+
+	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
+	var mostSignificant: JBoolean = _
+}
+
+trait StudentCourseProperties extends BasicStudentCourseProperties {
+	var lastUpdatedDate = DateTime.now
+	var missingFromImportSince: DateTime = _
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "courseCode", referencedColumnName="code")
@@ -168,21 +207,6 @@ trait StudentCourseProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var award: Award = _
 
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var levelCode: String = _
-
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var beginDate: LocalDate = _
-
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var endDate: LocalDate = _
-
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var expectedEndDate: LocalDate = _
-
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var courseYearLength: String = _
-
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name="sprStatusCode")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
@@ -192,13 +216,6 @@ trait StudentCourseProperties {
 	@JoinColumn(name="scjStatusCode")
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Status"))
 	var statusOnCourse: SitsStatus = _
-
-	var lastUpdatedDate = DateTime.now
-
-	var missingFromImportSince: DateTime = _
-
-	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
-	var mostSignificant: JBoolean = _
 }
 
 sealed abstract class CourseType(val code: String, val level: String, val description: String, val courseCodeChar: Char) extends Convertible[String] {

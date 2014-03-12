@@ -48,9 +48,9 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 			"cusfal" -> UserGroup.ofUsercodes
 		).asJava)
 
-		assignment.markerMap.get("cuscav").addUser("student1")
-		assignment.markerMap.get("cuscav").addUser("student2")
-		assignment.markerMap.get("curef").addUser("student4")
+		assignment.markerMap.get("cuscav").addUserId("student1")
+		assignment.markerMap.get("cuscav").addUserId("student2")
+		assignment.markerMap.get("curef").addUserId("student4")
 
 		val s1 = Fixtures.user(universityId="0000001", userId="student1")
 		val s2 = Fixtures.user(universityId="0000002", userId="student2")
@@ -64,11 +64,11 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		def setupWorkflow() {
 			assignment.markingWorkflow = workflow
 
-			workflow.firstMarkers.addUser("cuscav")
-			workflow.firstMarkers.addUser("cusebr")
+			workflow.firstMarkers.addUserId("cuscav")
+			workflow.firstMarkers.addUserId("cusebr")
 
-			workflow.secondMarkers.addUser("curef")
-			workflow.secondMarkers.addUser("cusfal")
+			workflow.secondMarkers.addUserId("curef")
+			workflow.secondMarkers.addUserId("cusfal")
 
 			workflow.userLookup = mock[UserLookupService]
 			when(workflow.userLookup.getUserByWarwickUniId("0000001")).thenReturn(s1)
@@ -125,7 +125,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		assignment.markingWorkflow = workflow
 
 		workflow.markingMethod should be(SeenSecondMarking)
-		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser) should be("/admin/module/heron101/assignments/1/marker/feedback/online")
+		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online")
 
 		workflow.firstMarkerRoleName should be("First marker")
 		workflow.hasSecondMarker should be(true)
@@ -139,7 +139,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		assignment.markingWorkflow = workflow
 
 		workflow.markingMethod should be(ModeratedMarking)
-		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser) should be("/admin/module/heron101/assignments/1/marker/feedback/online/moderation")
+		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online/moderation")
 
 		workflow.firstMarkerRoleName should be("Marker")
 		workflow.hasSecondMarker should be(true)

@@ -4,6 +4,8 @@
 
 <form id="addMonitoringPointSet" action="<@routes.createSet command.dept command.academicYear />" method="POST" class="modify-monitoring-points">
 
+	<input type="hidden" name="createType" value="${createType}" />
+
 	<div class="routeAndYearPicker">
 		<div class="row-fluid">
 			<div class="span2">
@@ -83,10 +85,10 @@
 	<hr />
 
 	<div class="row-fluid">
-		<div class="span3">
+		<div class="span4">
 			<h2>Monitoring points</h2>
 		</div>
-		<div class="span9">
+		<div class="span8">
 			<a href="<@routes.addPoint command.dept />?form=true" class="btn btn-primary new-point"><i class="icon-plus"></i> Create new point</a>
 		</div>
 	</div>

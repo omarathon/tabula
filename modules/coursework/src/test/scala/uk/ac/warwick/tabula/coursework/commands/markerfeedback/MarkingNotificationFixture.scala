@@ -39,7 +39,7 @@ trait MarkingNotificationFixture extends Mockito {
 
 	def userGroup(usercodes: String *) = {
 		val userGroup = UserGroup.ofUsercodes
-		userGroup.includeUsers = usercodes
+		userGroup.includedUserIds = usercodes
 		userGroup
 	}
 

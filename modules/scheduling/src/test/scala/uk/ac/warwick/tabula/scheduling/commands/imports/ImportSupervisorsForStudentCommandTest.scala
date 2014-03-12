@@ -1,19 +1,16 @@
 package uk.ac.warwick.tabula.scheduling.commands.imports
 
 import org.springframework.transaction.annotation.Transactional
-import uk.ac.warwick.tabula.AppContextTestBase
-import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.{AppContextTestBase, Mockito}
 import uk.ac.warwick.tabula.data.model.DegreeType.Postgraduate
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.scheduling.services.SupervisorImporter
 import uk.ac.warwick.tabula.helpers.Logging
 import org.joda.time.DateTime
-import org.junit.Ignore
-
 
 class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Mockito with Logging {
 
-	trait Environment {
+	trait Environment extends ImportCommandFactoryForTesting {
 		val scjCode = "1111111/1"
 		val sprCode = "1111111/1"
 		val uniId = "1111111"
@@ -70,8 +67,18 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			route.degreeType = Postgraduate
 			studentCourseDetails.route = route
 			session.saveOrUpdate(route)
+		}
 
+	}
 
+	@Transactional
+	@Test def testImportConcurrentCourseSupervisors() {
+
+		new Environment {
+			val course2 = new CourseFixture("1111111/2", "1111111/2")
+			session.save(course2.studentCourseDetails)
+
+			val supervisor2 = newSupervisor("1273455","cusmbg")
 		}
 
 	}
@@ -117,7 +124,40 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			assertRelationshipIsValid(retrievedScd, supervisor)
 
 		}
+>>>>>>> master
 
+			val importer = smartMock[SupervisorImporter]
+
+			val codes1 = Seq((supervisor.universityId, new java.math.BigDecimal("100")))
+			val codes2 = Seq((supervisor2.universityId, new java.math.BigDecimal("100")))
+
+			importer.getSupervisorUniversityIds(course1.studentCourseDetails.scjCode, relationshipType) returns codes1
+			importer.getSupervisorUniversityIds(course2.studentCourseDetails.scjCode, relationshipType) returns codes2
+
+			val command = new ImportSupervisorsForStudentCommand(course1.studentCourseDetails)
+			command.studentCourseDetails = course1.studentCourseDetails
+			command.supervisorImporter = importer
+			command.applyInternal()
+
+			// check results
+			assertRelationshipIsValid(course1.studentCourseDetails, supervisor)
+
+			val command2 = new ImportSupervisorsForStudentCommand(course2.studentCourseDetails)
+			command2.studentCourseDetails = course2.studentCourseDetails
+			command2.supervisorImporter = importer
+			command2.applyInternal()
+
+			// check results
+			assertRelationshipIsValid(course2.studentCourseDetails, supervisor2)
+
+			// now check that course1's relationships have not been mangled
+			// clear session so we're definitely getting it out of the DB
+			session.flush()
+			session.clear()
+			val retrievedScd = session.get(classOf[StudentCourseDetails], course1.studentCourseDetails.id).asInstanceOf[StudentCourseDetails]
+			assertRelationshipIsValid(retrievedScd, supervisor)
+
+		}
 	}
 
 	@Transactional
@@ -129,7 +169,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			importer.getSupervisorUniversityIds(scjCode, relationshipType) returns codes
 
 			// test command
-			val command = new ImportSupervisorsForStudentCommand()
+			val command = new ImportSupervisorsForStudentCommand(course1.studentCourseDetails)
 			command.studentCourseDetails = course1.studentCourseDetails
 			command.supervisorImporter = importer
 			command.applyInternal()
@@ -155,7 +195,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 			importer.getSupervisorUniversityIds(scjCode, relationshipType) returns Seq()
 
 			// test command
-			val command = new ImportSupervisorsForStudentCommand()
+			val command = new ImportSupervisorsForStudentCommand(course1.studentCourseDetails)
 			command.studentCourseDetails = course1.studentCourseDetails
 			command.supervisorImporter = importer
 			command.applyInternal()
@@ -186,7 +226,7 @@ class ImportSupervisorsForStudentCommandTest extends AppContextTestBase with Moc
 
 
 			// test command
-			val command = new ImportSupervisorsForStudentCommand()
+			val command = new ImportSupervisorsForStudentCommand(course1.studentCourseDetails)
 			command.studentCourseDetails = course1.studentCourseDetails
 			command.supervisorImporter = importer
 			command.applyInternal()

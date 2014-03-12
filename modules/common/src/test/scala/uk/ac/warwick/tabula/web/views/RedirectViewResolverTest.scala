@@ -9,48 +9,45 @@ import collection.JavaConversions.asJavaMap
 import collection.mutable
 import org.springframework.web.servlet.DispatcherServlet
 import org.springframework.web.servlet.support.SessionFlashMapManager
+import uk.ac.warwick.tabula.web.controllers.ControllerViews
+import uk.ac.warwick.tabula.web.Routes
+import uk.ac.warwick.tabula.data.model.Department
 
 class RedirectViewResolverTest extends TestBase with HttpMocking {
 
-	trait Context {
-		val request = mockRequest
-		request.setAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE, new SessionFlashMapManager);
-		val response = mockResponse
-		val resolver = new RedirectViewResolver
-		resolver.toplevelUrl = "https://tabula.warwick.ac.uk"
-		resolver.context = "/"
+	val request = mockRequest
+	request.setAttribute(DispatcherServlet.FLASH_MAP_MANAGER_ATTRIBUTE, new SessionFlashMapManager);
+	val response = mockResponse
+	val resolver = new RedirectViewResolver
+	resolver.toplevelUrl = "https://tabula.warwick.ac.uk"
 
-		def resolve(viewName: String) = resolver.resolveViewName(viewName, null) match {
-			case redirect:RedirectView => {
-				redirect.render(null, request, response)
-				Some(response.getRedirectedUrl())
-			}
-			case _ => None
+	def resolve(viewName: String) = resolver.resolveViewName(viewName, null) match {
+		case redirect:RedirectView => {
+			redirect.render(null, request, response)
+			Some(response.getRedirectedUrl())
 		}
+		case _ => None
 	}
 
 	@Test def redirectPage {
-		new Context {
-			resolve("redirect:/sysadmin/departments") should be (Some("https://tabula.warwick.ac.uk/sysadmin/departments"))
-			resolve("sysadmin/departments") should be (None)
-		}
+		resolve("redirect:/sysadmin/departments") should be (Some("https://tabula.warwick.ac.uk/sysadmin/departments"))
+		resolve("sysadmin/departments") should be (None)
 	}
 
 	@Test def context {
-		new Context {
-			resolver.context = "/coursework"
-			resolve("redirect:/admin") should be (Some("https://tabula.warwick.ac.uk/coursework/admin"))
+		new ControllerViews {
+			def requestInfo = None
+			val chemistry = new Department {
+				code = "ch"
+			}
+
+			val viewName = Redirect(Routes.coursework.admin.department(chemistry)).viewName
+			resolve(viewName) should be (Some("https://tabula.warwick.ac.uk/coursework/admin/department/ch/"))
 		}
 	}
 
 	@Test def redirectToRoot {
-		new Context {
-			resolve("redirect:/") should be (Some("https://tabula.warwick.ac.uk/"))
-		}
-		new Context {
-			resolver.context = "/coursework"
-			resolve("redirect:/") should be (Some("https://tabula.warwick.ac.uk/coursework/"))
-		}
+		resolve("redirect:/") should be (Some("https://tabula.warwick.ac.uk/"))
 	}
 
 }

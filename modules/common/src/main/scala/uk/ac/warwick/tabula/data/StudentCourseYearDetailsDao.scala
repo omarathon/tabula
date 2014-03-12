@@ -1,14 +1,11 @@
 package uk.ac.warwick.tabula.data
 
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import scala.collection.mutable.HashSet
 import org.hibernate.criterion._
 import org.hibernate.criterion.Projections._
 import org.hibernate.transform.Transformers
 import org.joda.time.DateTime
 import org.springframework.stereotype.Repository
-import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.spring.Wire
 
@@ -48,11 +45,12 @@ class StudentCourseYearDetailsDaoImpl extends StudentCourseYearDetailsDao with D
 			.add(is("sceSequenceNumber", seq))
 			.uniqueResult
 
-	def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails] =
-		session.newCriteria[StudentCourseYearDetails]
+	def getBySceKeyStaleOrFresh(studentCourseDetails: StudentCourseDetails, seq: Integer): Option[StudentCourseYearDetails] = {
+		sessionWithoutFreshFilters.newCriteria[StudentCourseYearDetails]
 			.add(is("studentCourseDetails", studentCourseDetails))
 			.add(is("sceSequenceNumber", seq))
 			.uniqueResult
+	}
 
 	def getFreshKeys: Seq[StudentCourseYearKey] = {
 		session.newCriteria[StudentCourseYearDetails]

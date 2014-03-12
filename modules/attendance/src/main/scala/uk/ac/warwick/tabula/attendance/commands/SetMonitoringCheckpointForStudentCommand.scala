@@ -1,10 +1,10 @@
 package uk.ac.warwick.tabula.attendance.commands
 
 import uk.ac.warwick.tabula.commands._
-import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPointSet, MonitoringCheckpoint, MonitoringPoint}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
 import uk.ac.warwick.tabula.data.model.{AttendanceNote, StudentMember}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.{AutowiringTermServiceComponent, TermServiceComponent, MonitoringPointServiceComponent, AutowiringMonitoringPointServiceComponent, ProfileServiceComponent, AutowiringProfileServiceComponent}
+import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import org.springframework.validation.{BindingResult, Errors}
 import uk.ac.warwick.tabula.{AcademicYear, ItemNotFoundException, CurrentUser}
@@ -22,7 +22,7 @@ object SetMonitoringCheckpointForStudentCommand {
 			with SetMonitoringCheckpointForStudentCommandValidation
 			with SetMonitoringPointForStudentDescription
 			with SetMonitoringCheckpointForStudentState
-			with AutowiringProfileServiceComponent
+			with AutowiringUserLookupComponent
 			with AutowiringMonitoringPointServiceComponent
 			with AutowiringTermServiceComponent
 }
@@ -31,7 +31,7 @@ abstract class SetMonitoringCheckpointForStudentCommand(
 	val monitoringPoint: MonitoringPoint, val student: StudentMember, user: CurrentUser
 )	extends CommandInternal[Seq[MonitoringCheckpoint]] with PopulateOnForm with BindListener with CheckpointUpdatedDescription {
 
-	self: SetMonitoringCheckpointForStudentState with ProfileServiceComponent with MonitoringPointServiceComponent =>
+	self: SetMonitoringCheckpointForStudentState with UserLookupComponent with MonitoringPointServiceComponent =>
 
 	def populate() {
 		if (!monitoringPointService.getPointSetForStudent(student, set.academicYear).exists(
@@ -103,7 +103,7 @@ trait SetMonitoringCheckpointForStudentCommandValidation extends SelfValidating 
 					errors.rejectValue("", "monitoringPoint.invalidStudent")
 				}	else {
 
-					if (!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.academicYear).getTermTypeAsString)){
+					if (!nonReportedTerms.contains(termService.getTermFromAcademicWeekIncludingVacations(point.validFromWeek, point.pointSet.academicYear).getTermTypeAsString)){
 						errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 					}
 

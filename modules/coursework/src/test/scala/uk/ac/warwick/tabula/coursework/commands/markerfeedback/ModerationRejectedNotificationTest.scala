@@ -32,7 +32,7 @@ class ModerationRejectedNotificationTest  extends TestBase with Mockito {
 	@Test
 	def urlIsProfilePageForStudents():Unit = new ModeratorRejectedNotificationFixture{
 		val n =  createNotification(marker2, marker1, mf1)
-		n.url should be("/admin/module/heron101/assignments/1/marker/list")
+		n.url should be("/coursework/admin/module/heron101/assignments/1/marker/list")
 	}
 
 

@@ -5,23 +5,21 @@ import org.joda.time.DateTime
 import org.springframework.beans.{BeanWrapper, BeanWrapperImpl}
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions.transactional
-import uk.ac.warwick.tabula.data.model.{StudentProperties, Member, OtherMember, StudentMember}
+import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.helpers.{PropertyCopying, ImportRowTracker}
+import uk.ac.warwick.tabula.scheduling.helpers.{SitsStudentRow, PropertyCopying, ImportCommandFactory}
 import uk.ac.warwick.tabula.scheduling.services._
 import uk.ac.warwick.tabula.services.{ProfileServiceComponent, AutowiringProfileServiceComponent}
 import uk.ac.warwick.userlookup.User
-
+import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 
 object ImportStudentRowCommand {
 	def apply(
 		member: MembershipInformation,
 		ssoUser: User,
 		resultSet: ResultSet,
-		importRowTracker: ImportRowTracker,
-		importStudentCourseCommand: ImportStudentCourseCommand
-	) = {
-			new ImportStudentRowCommandInternal(member, ssoUser, resultSet, importRowTracker, importStudentCourseCommand)
+		importCommandFactory: ImportCommandFactory) = {
+			new ImportStudentRowCommandInternal(member, ssoUser, resultSet, importCommandFactory)
 				with Command[Member]
 				with AutowiringProfileServiceComponent
 				with AutowiringTier4RequirementImporterComponent
@@ -30,67 +28,57 @@ object ImportStudentRowCommand {
 			}
 }
 
-
 /*
- * ImportStudentRowCommand takes a number of other commands as arguments which perform sub-tasks.
- * These need to be passed in, rather than newed up within the command, to enable testing
- * without auto-wiring.
+ * ImportStudentRowCommand takes an importCommandFactory which enables sub-commands to be created
+  * while enabling testing without auto-wiring.
  */
 class ImportStudentRowCommandInternal(
-	val member: MembershipInformation,
-	val ssoUser: User,
-	val resultSet: ResultSet,
-	val importRowTracker: ImportRowTracker,
-	var importStudentCourseCommand: ImportStudentCourseCommand
-)
-
-extends ImportMemberCommand(member, ssoUser, Some(resultSet))
-with Describable[Member]
-with ImportStudentRowCommandState
-with PropertyCopying
-with Logging {
+			 val member: MembershipInformation,
+			 val ssoUser: User,
+			 val resultSet: ResultSet,
+			 var importCommandFactory: ImportCommandFactory
+		 ) extends ImportMemberCommand(member, ssoUser, Some(resultSet))
+				with Describable[Member]
+				with ImportStudentRowCommandState
+				with PropertyCopying
+				with Logging {
 
 	self: ProfileServiceComponent with Tier4RequirementImporterComponent with ModeOfAttendanceImporterComponent  =>
 
-	// import ImportMemberHelpers._
+	// these properties are from membership but may be overwritten by the SITS data (working theory)
+	this.nationality = resultSet.getString("nationality")
+	this.mobileNumber = resultSet.getString("mobile_number")
 
-	implicit val rs = resultSet
-
-	// populate *before* apply to avoid concurrency problems
-	this.nationality = rs.getString("nationality")
-	this.mobileNumber = rs.getString("mobile_number")
-	val disabilityCode = rs.getString("disability")
+	val row = new SitsStudentRow(resultSet)
 
 	override def applyInternal(): Member = {
 		transactional() {
 			// set appropriate disability object iff a non-null code is retrieved - I <3 scala options
-			profileService.getDisability(disabilityCode).foreach(this.disability = _)
+			profileService.getDisability(row.disabilityCode).foreach(this.disability = _)
 
-			val memberExisting = memberDao.getByUniversityIdStaleOrFresh(universityId)
+				val memberExisting = memberDao.getByUniversityIdStaleOrFresh(universityId)
 
-			logger.debug("Importing member " + universityId + " into " + memberExisting)
+				logger.debug("Importing student member " + universityId + " into " + memberExisting)
 
-			val (isTransient, member) = memberExisting match {
-				case Some(member: StudentMember) => (false, member)
-				case Some(member: OtherMember) => {
-					// TAB-692 delete the existing member, then return a brand new one
-					memberDao.delete(member)
-					(true, new StudentMember(universityId))
+				val (isTransient, member) = memberExisting match {
+					case Some(member: StudentMember) => (false, member)
+					case Some(member: OtherMember) => {
+						// TAB-692 delete the existing member, then return a brand new one
+						memberDao.delete(member)
+						(true, new StudentMember(universityId))
+					}
+					case Some(member) => throw new IllegalStateException("Tried to convert " + member + " into a student!")
+					case _ => (true, new StudentMember(universityId))
 				}
-				case Some(member) => throw new IllegalStateException("Tried to convert " + member + " into a student!")
-				case _ => (true, new StudentMember(universityId))
-			}
 
-			if (!importRowTracker.universityIdsSeen.contains(member.universityId)) {
-				saveStudentDetails(isTransient, member)
-			}
+				if (!importCommandFactory.rowTracker.universityIdsSeen.contains(member.universityId)) {
+					saveStudentDetails(isTransient, member)
+				}
 
-			importStudentCourseCommand.stuMem = member
-			val studentCourseDetails = importStudentCourseCommand.apply()
+				val studentCourseDetails = importCommandFactory.createImportStudentCourseCommand(row, member).apply()
+				member.attachStudentCourseDetails(studentCourseDetails)
 
-			member.attachStudentCourseDetails(studentCourseDetails)
-
-			importRowTracker.universityIdsSeen.add(member.universityId)
+				importCommandFactory.rowTracker.universityIdsSeen.add(member.universityId)
 
 			member
 		}

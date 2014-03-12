@@ -1,6 +1,6 @@
 <#escape x as x?html>
 
-<#macro list studentCourseDetails meetings relationshipType>
+<#macro list studentCourseDetails meetings relationshipType viewerRelationshipTypes="">
 	<#assign can_read_meetings = can.do_with_selector("Profiles.MeetingRecord.Read", studentCourseDetails, relationshipType) />
 	<#assign can_create_meetings = can.do_with_selector("Profiles.MeetingRecord.Create", studentCourseDetails, relationshipType) />
 	<#assign existingRelationship = ((studentCourseDetails.relationships(relationshipType))![])?size gt 0 />
@@ -19,7 +19,9 @@
 				<a class="btn-like new" href="<@routes.create_scheduled_meeting_record studentCourseDetails.urlSafeId relationshipType />" title="Schedule a meeting"><i class="icon-time"></i> Schedule</a>
 				<#if showIntro("scheduled-meetings", "anywhere")>
 					<#assign introText>
-						<p>You can now schedule meetings in advance.</p>
+						<p>You can now schedule meetings in advance
+							<#if viewerRelationshipTypes?has_content> with your ${viewerRelationshipTypes}</#if>
+						</p>
 					</#assign>
 					<a href="#"
 					   id="scheduled-meetings-intro"
@@ -87,7 +89,7 @@
 							</#if>
 
 							<#if meeting.attachments?? && meeting.attachments?size gt 0>
-								<@fmt.download_attachments meeting.attachments "/${relationshipType.urlPart}/meeting/${meeting.id}/" "for this meeting record" "${meeting.title?url}" />
+								<@fmt.download_attachments meeting.attachments "/profiles/${relationshipType.urlPart}/meeting/${meeting.id}/" "for this meeting record" "${meeting.title?url}" />
 							</#if>
 
 							<#if meeting.scheduled>

@@ -6,7 +6,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.{ItemNotFoundException, AcademicYear}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPoint}
-import uk.ac.warwick.tabula.services.{AutowiringProfileServiceComponent, ProfileServiceComponent, AutowiringMonitoringPointServiceComponent, MonitoringPointServiceComponent, AutowiringTermServiceComponent}
+import uk.ac.warwick.tabula.services._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports._
 import org.springframework.validation.{BindingResult, Errors}
@@ -21,7 +21,7 @@ object AgentStudentRecordCommand {
 		with AgentStudentRecordDescription
 		with AgentStudentRecordValidation
 		with AutowiringMonitoringPointServiceComponent
-		with AutowiringProfileServiceComponent
+		with AutowiringUserLookupComponent
 		with AutowiringTermServiceComponent
 		with GroupMonitoringPointsByTerm
 }
@@ -31,7 +31,7 @@ abstract class AgentStudentRecordCommand(val agent: Member, val relationshipType
 ) extends CommandInternal[Seq[MonitoringCheckpoint]] with PopulateOnForm with BindListener
 	with CheckpointUpdatedDescription with AgentStudentRecordCommandState {
 
-	this: MonitoringPointServiceComponent with ProfileServiceComponent =>
+	this: MonitoringPointServiceComponent with UserLookupComponent =>
 
 	def populate() = {
 		val checkpoints = monitoringPointService.getCheckpoints(Seq(student), pointSet)(student)
@@ -73,7 +73,7 @@ trait AgentStudentRecordValidation extends SelfValidating {
 			if (!points.contains(point)) {
 				errors.rejectValue("", "monitoringPointSet.invalidPoint")
 			}
-			if (!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, pointSet.academicYear).getTermTypeAsString)){
+			if (!nonReportedTerms.contains(termService.getTermFromAcademicWeekIncludingVacations(point.validFromWeek, pointSet.academicYear).getTermTypeAsString)){
 				errors.rejectValue("", "monitoringCheckpoint.student.alreadyReportedThisTerm")
 			}
 

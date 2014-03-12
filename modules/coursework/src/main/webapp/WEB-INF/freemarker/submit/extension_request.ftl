@@ -13,8 +13,8 @@
 		<#if isModification>
 			<#if existingRequest.approved>
 				<div class="alert alert-success">
-					<#assign approved_ago=durationFormatter(existingRequest.approvedOn) />
-					Your extension request was approved - <@fmt.date date=existingRequest.approvedOn /> (${approved_ago}).
+					<#assign approved_ago=durationFormatter(existingRequest.reviewedOn) />
+					Your extension request was approved - <@fmt.date date=existingRequest.reviewedOn /> (${approved_ago}).
 				</div>
 			<#elseif existingRequest.rejected>
 				<div class="alert alert-error">
@@ -23,7 +23,7 @@
 			<#else>
 				<div class="alert alert-info">Your extension request is being reviewed.</div>
 			</#if>
-			<#if existingRequest.expiryDate?? || existingRequest.approvalComments??>
+			<#if existingRequest.expiryDate?? || existingRequest.reviewerComments??>
 				<div class="form-horizontal">
 					<#if existingRequest.expiryDate?? && existingRequest.approved>
 						<div class="control-group">
@@ -35,10 +35,10 @@
 							</div>
 						</div>
 					</#if>
-					<#if existingRequest.approvalComments??>
+					<#if existingRequest.reviewerComments??>
 						<div class="control-group">
 							<label class="control-label">Review comments</label>
-							<div class="controls"><p>${existingRequest.approvalComments}</p></div>
+							<div class="controls"><p>${existingRequest.reviewerComments}</p></div>
 						</div>
 					</#if>
 				</div>
@@ -65,7 +65,7 @@
 			</#if>
 		</#if>
 
-		<@f.form method="post" enctype="multipart/form-data" class="form-horizontal double-submit-protection" action="${url('/module/${module.code}/${assignment.id}/extension')}" commandName="command">
+		<@f.form method="post" enctype="multipart/form-data" class="form-horizontal double-submit-protection" action="${url('/coursework/module/${module.code}/${assignment.id}/extension')}" commandName="command">
 
 			<#if isModification>
 				<@f.hidden path="modified" value="true" />
@@ -91,21 +91,16 @@
 				<@f.input path="requestedExpiryDate" cssClass="date-time-picker" />
 			</@form.labelled_row>
 
-			<@form.labelled_row "file.upload" "Upload supporting documentation relevant to your request">
-				<input type="file" name="file.upload" multiple />
-				<div id="multifile-column-description" class="help-block">
-					<#include "/WEB-INF/freemarker/multiple_upload_help.ftl" />
-				</div>
-			</@form.labelled_row>
+			<@form.filewidget basename="file" labelText="Upload supporting documentation relevant to your request" types=[] multiple=true />
 
 			<#if command.attachedFiles?has_content >
 				<@form.labelled_row "attachedFiles" "Supporting documents">
 				<ul>
 					<#list command.attachedFiles as attachment>
 						<li id="attachment-${attachment.id}" class="attachment">
-							<a href="<@routes.extensionrequestattachment assignment=assignment filename=attachment.name />">
+							<a href="<@routes.extensionrequestattachment assignment=assignment filename=attachment.name />"><#compress>
 								${attachment.name}
-							</a>&nbsp;
+							</#compress></a>&nbsp;
 							<@f.hidden path="attachedFiles" value="${attachment.id}" />
 							<a class="remove-attachment" href="">Remove</a>
 						</li>

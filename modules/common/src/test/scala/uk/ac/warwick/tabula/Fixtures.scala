@@ -1,7 +1,5 @@
 package uk.ac.warwick.tabula
 
-import scala.collection.JavaConversions._
-
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.Extension
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
@@ -110,11 +108,11 @@ object Fixtures extends Mockito {
 		group.assessmentGroup = code
 		group.moduleCode = module
 		group.occurrence = occurrence
-		group.members.staticIncludeUsers.addAll(Seq(
+		group.members.staticUserIds = Seq(
 			"0123456",
 			"0123457",
 			"0123458"
-		))
+		)
 		group
 	}
 
@@ -154,6 +152,8 @@ object Fixtures extends Mockito {
 		val user = new User()
 		user.setUserId(userId)
 		user.setWarwickId(universityId)
+		user.setFoundUser(true)
+		user.setVerified(true)
 		user
 	}
 
@@ -275,6 +275,11 @@ object Fixtures extends Mockito {
 		val approval = new MeetingRecordApproval
 		approval.state = state
 		approval
+	}
+
+	def notification(agent:User, recipient: User) = {
+		val heron = new Heron(recipient)
+		Notification.init(new HeronWarningNotification, agent, heron, heron)
 	}
 
 }

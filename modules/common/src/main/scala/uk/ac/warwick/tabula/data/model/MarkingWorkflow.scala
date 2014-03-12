@@ -1,12 +1,9 @@
 package uk.ac.warwick.tabula.data.model
 
-import org.hibernate.annotations.{Type, AccessType}
+import org.hibernate.annotations.AccessType
 import javax.persistence._
 import scala.collection.JavaConversions._
 import uk.ac.warwick.userlookup.User
-import scala.{Array, Some}
-import org.hibernate.`type`.StandardBasicTypes
-import java.sql.Types
 import org.springframework.core.convert.converter.Converter
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserLookupService
@@ -91,12 +88,12 @@ trait AssignmentMarkerMap {
 		val student = userLookup.getUserByWarwickUniId(universityId)
 
 		val mapEntry = Option(assignment.markerMap) flatMap { _.find {
-			p:(String,UserGroup) =>
-				p._2.includes(student.getUserId) && markers.includes(p._1)
+			case (markerUserId: String, group: UserGroup) =>
+				group.includesUser(student) && markers.knownType.includesUserId(markerUserId)
 			}
 		}
 
-		mapEntry.map(_._1)
+		mapEntry.map { case (markerUserId, _) => markerUserId }
 	}
 
 	def getStudentsFirstMarker(assignment: Assignment, universityId: UniversityId) =
@@ -109,7 +106,7 @@ trait AssignmentMarkerMap {
 		val allSubmissions = getSubmissionsFromMap(assignment, marker)
 
 		val isFirstMarker = assignment.isFirstMarker(marker)
-		val isSecondMarker = assignment.isSecondMarker(marker)
+		val isSecondMarker = assignment.markingWorkflow.hasSecondMarker && assignment.isSecondMarker(marker)
 
 		if(isFirstMarker)
 			allSubmissions.filter(_.isReleasedForMarking)
@@ -122,7 +119,7 @@ trait AssignmentMarkerMap {
 	private def getSubmissionsFromMap(assignment: Assignment, marker: User): Seq[Submission] = {
 		val students = Option(assignment.markerMap.get(marker.getUserId))
 		students.map { ug =>
-			val submissionIds = ug.includeUsers
+			val submissionIds = ug.knownType.allIncludedIds
 			assignment.submissions.filter(s => submissionIds.exists(_ == s.userId))
 		}.getOrElse(Seq())
 	}
@@ -147,8 +144,14 @@ object MarkingMethod {
 	case object StudentsChooseMarker extends MarkingMethod("StudentsChooseMarker")
 	case object SeenSecondMarking extends MarkingMethod("SeenSecondMarking")
 	case object ModeratedMarking extends MarkingMethod("ModeratedMarking")
+	case object FirstMarkerOnly extends MarkingMethod("FirstMarkerOnly")
 
-	val values: Set[MarkingMethod] = Set(StudentsChooseMarker, SeenSecondMarking, ModeratedMarking)
+	val values: Set[MarkingMethod] = Set(
+		StudentsChooseMarker,
+		SeenSecondMarking,
+		ModeratedMarking,
+		FirstMarkerOnly
+	)
 
 	def fromCode(code: String): MarkingMethod =
 		if (code == null) null

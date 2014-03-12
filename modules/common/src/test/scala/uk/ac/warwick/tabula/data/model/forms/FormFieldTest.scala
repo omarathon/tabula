@@ -123,8 +123,9 @@ class FormFieldTest extends TestBase with Mockito {
 	@Test def markerSelectField {
 		val assignment = Fixtures.assignment("my assignment")
 		val workflow = Fixtures.seenSecondMarkingWorkflow("my workflow")
-		workflow.firstMarkers.addUser("cuscav")
-		workflow.firstMarkers.addUser("cusebr")
+		workflow.firstMarkers.addUserId("cuscav")
+		workflow.firstMarkers.addUserId("cusebr")
+		workflow.firstMarkers.userLookup = userLookup
 
 		val user1 = new User("cuscav")
 		val user2 = new User("cusebr")

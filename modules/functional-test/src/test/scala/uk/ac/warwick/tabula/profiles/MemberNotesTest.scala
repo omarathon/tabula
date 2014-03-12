@@ -15,7 +15,7 @@ class MemberNotesTest extends BrowserTest with GivenWhenThen with FeaturesDriver
 		When("Student1 views their profile")
 		signIn as(P.Student1) to (Path("/profiles"))
 		val profilePage = new ProfilePage()
-		profilePage should be('currentPage)
+		profilePage.isCurrentPage should be(true)
 
 		val memberNoteSection: Option[Element] = find(cssSelector("#membernote-details"))
 		memberNoteSection should be ('defined)

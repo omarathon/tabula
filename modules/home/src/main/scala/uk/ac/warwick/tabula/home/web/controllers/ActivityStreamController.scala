@@ -10,20 +10,17 @@ import uk.ac.warwick.tabula.commands.Appliable
 import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute}
 import uk.ac.warwick.tabula.home.commands.ActivityStreamCommand
 import uk.ac.warwick.tabula.services.{SearchPagination, ActivityStreamRequest}
-import uk.ac.warwick.tabula.web.views.JSONView
-import org.joda.time.format.{ISODateTimeFormat, DateTimeFormat, DateTimeFormatter}
-
 
 @Controller
-class ActivityStreamController extends BaseController {
-
-	private val ActivityStreamDateFormat = ISODateTimeFormat.dateTimeNoMillis()
+class ActivityStreamController extends BaseController with ActivityJsonMav {
 
 	@ModelAttribute("command")
 	def command(
 			user: CurrentUser,
 			@RequestParam(defaultValue="20") max: Int,
 			@RequestParam types: JList[String],
+			@RequestParam(defaultValue="0") minPriority: Double, // minPriority of zero means we show all by default
+			@RequestParam(defaultValue="false") includeDismissed: Boolean,
 			@RequestParam(required=false) lastDoc: JInteger,
 			@RequestParam(required=false) last: JLong,
 			@RequestParam(required=false) token: JLong) = {
@@ -33,24 +30,13 @@ class ActivityStreamController extends BaseController {
 		} else {
 			None
 		}
-		val request = ActivityStreamRequest(user.apparentUser, max, typeSet, pagination)
+		val request = ActivityStreamRequest(user.apparentUser, max, minPriority, includeDismissed, typeSet, pagination)
 		ActivityStreamCommand(request)
 	}
 
 	@RequestMapping(value=Array("/activity/@me"))
 	def userStream(@ModelAttribute("command") command: Appliable[PagedActivities]) = {
 		val activities = command.apply()
-
-		Mav(new JSONView(Map("items" -> activities.items.map { item =>
-			// TODO this should actually be HTML, at the moment it's plain text.
-			val html = item.message
-			Map(
-				"published" -> ActivityStreamDateFormat.print(item.date),
-				"title" -> item.title,
-				"url" -> item.url,
-				"content" -> html,
-				"verb" -> item.verb
-			)
-		})))
+		toMav(activities.items)
 	}
 }

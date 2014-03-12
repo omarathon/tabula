@@ -24,7 +24,7 @@ import uk.ac.warwick.tabula.data.model.notifications.{ExtensionRequestCreatedNot
 
 
 object ExtensionRequestCommand {
-	def apply (module: Module, assignment: Assignment, submitter: CurrentUser) = {
+	def apply (module: Module, assignment: Assignment, submitter: CurrentUser, action: String) = {
 		new ExtensionRequestCommandInternal(module, assignment, submitter) with
 			ComposableCommand[Extension] with
 			AutowiringRelationshipServiceComponent with
@@ -60,6 +60,7 @@ class ExtensionRequestCommandInternal(val module: Module, val assignment:Assignm
 		extension.reason = reason
 		extension.requestedOn = DateTime.now
 		extension.disabilityAdjustment = Option(Boolean.unbox(disabilityAdjustment)).getOrElse(false)
+
 
 		if (extension.attachments != null) {
 			// delete attachments that have been removed
@@ -147,7 +148,7 @@ trait ExtensionRequestNotification extends Notifies[Extension, Option[Extension]
 
 	val basicInfo = Map("moduleManagers" -> module.managers.users)
 	val studentRelationships = relationshipService.allStudentRelationshipTypes
-	val extraInfo = basicInfo ++ submitter.profile.flatMap { _.mostSignificantCourseDetails.map { scd =>
+	val extraInfo = basicInfo ++ submitter.profile.collect { case student: StudentMember => student }.flatMap { _.mostSignificantCourseDetails.map { scd =>
 		val relationships = studentRelationships.map(x => (x.description, relationshipService.findCurrentRelationships(x,scd.student))).toMap
 
 		//Pick only the parts of scd required since passing the whole object fails due to the session not being available to load lazy objects

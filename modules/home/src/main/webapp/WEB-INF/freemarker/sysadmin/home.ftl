@@ -68,6 +68,10 @@
 	<div class="input-append">
 		<@f.input id="index-${name}-from" path="from" cssClass="date-time-picker" placeholder="Click to pick a date" /><input class="btn btn-danger" type="submit" value="Index" onclick="return confirm('Really? Could take a while.')"/>
 	</div>
+	<#if name = 'profiles'>
+		For department
+		<@f.input id="index-${name}-dept" path="deptCode" cssClass="span6" placeholder="Dept code (optional)" />
+	</#if>
 </@f.form>
 </p>
 </#macro>

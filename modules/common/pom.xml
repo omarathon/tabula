@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>uk.ac.warwick.tabula</groupId>
 		<artifactId>tabula-project</artifactId>
-		<version>61</version>
+		<version>62</version>
 		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
@@ -43,22 +43,6 @@
 			</testResource>
 		</testResources>
 
-		<plugins>
-			<!-- Collect reflections information -->
-			<plugin>
-				<groupId>org.reflections</groupId>
-				<artifactId>reflections-maven</artifactId>
-				<version>0.9.9-RC1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>reflections</goal>
-						</goals>
-						<phase>process-classes</phase>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
 	</build>
 
 	<dependencies>
@@ -525,7 +509,7 @@
 		<dependency>
 			<groupId>org.xhtmlrenderer</groupId>
 			<artifactId>flying-saucer-pdf-itext5</artifactId>
-			<version>9.0.3</version>
+			<version>9.0.4</version>
 		</dependency>
 		
 		<dependency>

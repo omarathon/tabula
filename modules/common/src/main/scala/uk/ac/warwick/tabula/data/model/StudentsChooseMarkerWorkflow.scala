@@ -23,7 +23,7 @@ class StudentsChooseMarkerWorkflow extends MarkingWorkflow with NoSecondMarker {
 
 	override def studentsChooseMarker = true
 
-	def onlineMarkingUrl(assignment: Assignment, marker: User) = Routes.onlineMarkerFeedback(assignment)
+	def onlineMarkingUrl(assignment: Assignment, marker: User) = Routes.coursework.admin.assignment.onlineMarkerFeedback(assignment)
 
 	def getStudentsFirstMarker(assignment: Assignment, universityId: String): Option[String] =
 		assignment.markerSelectField.flatMap { field =>

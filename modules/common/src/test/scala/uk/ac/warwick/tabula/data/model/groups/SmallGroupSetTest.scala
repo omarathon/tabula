@@ -4,7 +4,7 @@ import uk.ac.warwick.tabula.{Mockito, AcademicYear, TestBase}
 import org.junit.Test
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.model.{UpstreamAssessmentGroup, Module, UserGroup}
-import uk.ac.warwick.tabula.services.AssignmentMembershipService
+import uk.ac.warwick.tabula.services.{SmallGroupMembershipHelpers, SmallGroupService, AssignmentMembershipService}
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import scala.collection.JavaConverters._
 import org.mockito.Mockito._
@@ -16,6 +16,8 @@ class SmallGroupSetTest extends TestBase with Mockito{
   @Test
   def duplicateCopiesAllFields(){
     val source = new SmallGroupSet
+		source.smallGroupService = None
+
     val cloneGroup = new SmallGroup
     val group:SmallGroup  = new SmallGroup(){
       override def duplicateTo(groupSet:SmallGroupSet) = cloneGroup
@@ -28,7 +30,7 @@ class SmallGroupSetTest extends TestBase with Mockito{
     source.assessmentGroups =  JArrayList()
     source.format = SmallGroupFormat.Lab
     source.groups  = JArrayList(group)
-    source._membersGroup =  UserGroup.ofUniversityIds.tap(_.includeUsers = JArrayList("test user"))
+    source.members = UserGroup.ofUniversityIds.tap(_.addUserId("test user"))
 
     source.membershipService = mock[AssignmentMembershipService]
     source.module = new Module
@@ -53,8 +55,8 @@ class SmallGroupSetTest extends TestBase with Mockito{
     clone.format should be (source.format)
     clone.groups.size should be(1)
     clone.groups.asScala.head should be(cloneGroup)
-		clone._membersGroup should not be(source._membersGroup)
-    clone._membersGroup.hasSameMembersAs(source._membersGroup) should be (true)
+		clone.members should not be(source.members)
+    clone.members.hasSameMembersAs(source.members) should be (true)
     clone.module should be (cloneModule)
     clone.name should be(source.name)
     clone.permissionsService should be(source.permissionsService)

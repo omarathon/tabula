@@ -11,17 +11,14 @@ import org.springframework.stereotype.Service
 import javax.sql.DataSource
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.ItemNotFoundException
+import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.data.MemberDaoImpl
-import uk.ac.warwick.tabula.data.SitsStatusDao
-import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
-import uk.ac.warwick.tabula.sandbox.MapResultSet
+import uk.ac.warwick.tabula.sandbox.SandboxData
 import uk.ac.warwick.tabula.scheduling.commands.imports.ImportModuleRegistrationsCommand
-import uk.ac.warwick.tabula.scheduling.commands.imports.ImportStudentRowCommand
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.TaskBenchmarking
+import org.joda.time.DateTime
 
 /**
  * Import module registration data from SITS.
@@ -65,20 +62,33 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 
 	def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] =
 		membersAndCategories flatMap { mac =>
-			val usercode = mac.member.usercode
-			val ssoUser = users(mac.member.universityId)
+			val universityId = mac.member.universityId
+			val ssoUser = users(universityId)
 
 			mac.member.userType match {
-				case Student => studentModuleRegistrationDetails(usercode, ssoUser)
+				case Student => studentModuleRegistrationDetails(universityId, ssoUser)
 				case _ => Seq()
 			}
 		}
 
-	def studentModuleRegistrationDetails(usercode: String, ssoUser: User) = {
-		Seq()
+	def studentModuleRegistrationDetails(universityId: String, ssoUser: User) = {
+		for {
+			(code, d) <- SandboxData.Departments
+			route <- d.routes.values.toSeq
+			if (route.studentsStartId to route.studentsEndId).contains(universityId.toInt)
+			moduleCode <- route.moduleCodes
+		} yield {
+			val row = ModuleRegistrationRow(
+				scjCode = "%s/1".format(universityId),
+				sitsModuleCode = "%s-15".format(moduleCode.toUpperCase),
+				cats = new java.math.BigDecimal(15),
+				assessmentGroup = "A",
+				selectionStatusCode = "C",
+				occurrence = "A"
+			)
 
-		//  TODO: see code from sandbox assignment importer
-
+			new ImportModuleRegistrationsCommand(row, AcademicYear.guessByDate(DateTime.now))
+		}
 	}
 }
 

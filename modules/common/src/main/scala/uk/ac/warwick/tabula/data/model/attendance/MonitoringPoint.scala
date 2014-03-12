@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.data.model.attendance
 
-import uk.ac.warwick.tabula.data.model.{MeetingFormat, StudentRelationshipType, HasSettings, GeneratedId}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, MeetingFormat, StudentRelationshipType, HasSettings, GeneratedId}
 import javax.persistence._
 import javax.validation.constraints.NotNull
 import org.joda.time.DateTime
@@ -8,7 +8,7 @@ import scala.Array
 import uk.ac.warwick.tabula.JavaImports._
 import org.hibernate.annotations.{Type, BatchSize}
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.services.RelationshipService
+import uk.ac.warwick.tabula.services.{AssignmentService, ModuleAndDepartmentService, RelationshipService}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.PostLoadBehaviour
 
@@ -47,7 +47,7 @@ trait CommonMonitoringPointProperties extends GeneratedId {
 	@Type(`type` = "uk.ac.warwick.tabula.data.model.attendance.MonitoringPointTypeUserType")
 	var pointType: MonitoringPointType = _
 
-	def toPoint() = {
+	def toPoint = {
 		val point = new MonitoringPoint
 		point.createdDate = new DateTime()
 		point.updatedDate = new DateTime()
@@ -57,6 +57,8 @@ trait CommonMonitoringPointProperties extends GeneratedId {
 		point.pointType = pointType
 		point
 	}
+
+	def includesWeek(week: Int) = (validFromWeek to requiredFromWeek).contains(week)
 }
 
 trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
@@ -64,6 +66,12 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 
 	@transient
 	var relationshipService = Wire[RelationshipService]
+
+	@transient
+	var moduleAndDepartmentService = Wire[ModuleAndDepartmentService]
+
+	@transient
+	var assignmentService = Wire[AssignmentService]
 
 	override def postLoad() {
 		ensureSettings
@@ -78,7 +86,7 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 		meetingRelationships = relationships.asScala.toSeq
 	}
 
-	def meetingFormats = getStringSeqSetting(Settings.MeetingFormats, Seq()).map(MeetingFormat.fromDescription(_))
+	def meetingFormats = getStringSeqSetting(Settings.MeetingFormats, Seq()).map(MeetingFormat.fromDescription)
 	def meetingFormats_= (formats: Seq[MeetingFormat]) =
 		settings += (Settings.MeetingFormats -> formats.map(_.description))
 	// See above
@@ -87,6 +95,55 @@ trait MonitoringPointSettings extends HasSettings with PostLoadBehaviour {
 
 	def meetingQuantity = getIntSetting(Settings.MeetingQuantity, 1)
 	def meetingQuantity_= (quantity: Int) = settings += (Settings.MeetingQuantity -> quantity)
+
+	// Setting for MonitoringPointType.SmallGroup
+
+	def smallGroupEventQuantity = getIntSetting(Settings.SmallGroupEventQuantity, 0)
+	def smallGroupEventQuantity_= (quantity: Int): Unit = settings += (Settings.SmallGroupEventQuantity -> quantity)
+	def smallGroupEventQuantity_= (quantity: JInteger): Unit = {
+		smallGroupEventQuantity = quantity match {
+			case q: JInteger => q.intValue
+			case _ => 0
+		}
+	}
+
+	def smallGroupEventModules = getStringSeqSetting(Settings.SmallGroupEventModules, Seq()).map(moduleAndDepartmentService.getModuleById(_).getOrElse(null))
+	def smallGroupEventModules_= (modules: Seq[Module]) =
+		settings += (Settings.SmallGroupEventModules -> modules.map(_.id))
+	// See above
+	def smallGroupEventModulesSpring_= (modules: JSet[Module]) =
+		smallGroupEventModules = modules.asScala.toSeq
+
+	// Setting for MonitoringPointType.AssignmentSubmission
+
+	def assignmentSubmissionIsSpecificAssignments = getBooleanSetting(Settings.AssignmentSubmissionIsSpecificAssignments) getOrElse true
+	def assignmentSubmissionIsSpecificAssignments_= (allow: Boolean) = settings += (Settings.AssignmentSubmissionIsSpecificAssignments -> allow)
+
+	def assignmentSubmissionQuantity = getIntSetting(Settings.AssignmentSubmissionQuantity, 0)
+	def assignmentSubmissionQuantity_= (quantity: Int): Unit = settings += (Settings.AssignmentSubmissionQuantity -> quantity)
+	def assignmentSubmissionQuantity_= (quantity: JInteger): Unit = {
+		assignmentSubmissionQuantity = quantity match {
+			case q: JInteger => q.intValue
+			case _ => 0
+		}
+	}
+
+	def assignmentSubmissionModules = getStringSeqSetting(Settings.AssignmentSubmissionModules, Seq()).map(moduleAndDepartmentService.getModuleById(_).getOrElse(null))
+	def assignmentSubmissionModules_= (modules: Seq[Module]) =
+		settings += (Settings.AssignmentSubmissionModules -> modules.map(_.id))
+	// See above
+	def assignmentSubmissionModulesSpring_= (modules: JSet[Module]) =
+		assignmentSubmissionModules = modules.asScala.toSeq
+
+	def assignmentSubmissionAssignments = getStringSeqSetting(Settings.AssignmentSubmissionAssignments, Seq()).map(assignmentService.getAssignmentById(_).getOrElse(null))
+	def assignmentSubmissionAssignments_= (assignments: Seq[Assignment]) =
+		settings += (Settings.AssignmentSubmissionAssignments -> assignments.map(_.id))
+	// See above
+	def assignmentSubmissionAssignmentsSpring_= (assignments: JSet[Assignment]) =
+		assignmentSubmissionAssignments = assignments.asScala.toSeq
+
+	def assignmentSubmissionIsDisjunction = getBooleanSetting(Settings.AssignmentSubmissionIsDisjunction) getOrElse false
+	def assignmentSubmissionIsDisjunction_= (allow: Boolean) = settings += (Settings.AssignmentSubmissionIsDisjunction -> allow)
 }
 
 object MonitoringPoint {
@@ -95,5 +152,14 @@ object MonitoringPoint {
 		val MeetingRelationships = "meetingRelationships"
 		val MeetingFormats = "meetingFormats"
 		val MeetingQuantity = "meetingQuantity"
+
+		val SmallGroupEventQuantity = "smallGroupEventQuantity"
+		val SmallGroupEventModules = "smallGroupEventModules"
+
+		val AssignmentSubmissionIsSpecificAssignments = "assignmentSubmissionIsSpecificAssignments"
+		val AssignmentSubmissionQuantity = "assignmentSubmissionQuantity"
+		val AssignmentSubmissionModules = "assignmentSubmissionModules"
+		val AssignmentSubmissionAssignments = "assignmentSubmissionAssignments"
+		val AssignmentSubmissionIsDisjunction = "assignmentSubmissionIsDisjunction"
 	}
 }

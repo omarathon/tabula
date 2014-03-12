@@ -2,11 +2,11 @@ package uk.ac.warwick.tabula.data
 
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroupEventOccurrence, SmallGroupEvent, SmallGroup, SmallGroupSet, SmallGroupEventAttendance}
-import org.hibernate.criterion.Order
+import org.hibernate.criterion.{Projections, Order}
 import org.hibernate.criterion.Restrictions._
 import org.springframework.stereotype.Repository
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.data.model.Module
+import uk.ac.warwick.tabula.data.model.{StudentMember, Module}
 import scala.collection.JavaConverters._
 
 trait SmallGroupDaoComponent {
@@ -39,6 +39,10 @@ trait SmallGroupDao {
 	def deleteAttendance(attendance: SmallGroupEventAttendance): Unit
 	def getAttendanceNote(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendanceNote]
 	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote]
+
+	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
+
+	def hasSmallGroups(module: Module): Boolean
 }
 
 @Repository
@@ -100,5 +104,35 @@ class SmallGroupDaoImpl extends SmallGroupDao with Daoisms {
 			.add(in("student.id", studentIds.asJava))
 			.add(in("occurrence", occurrences.asJava))
 			.seq
+	}
+
+	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance] = {
+		if (modules.isEmpty) {
+			session.newCriteria[SmallGroupEventAttendance]
+				.createAlias("occurrence", "occurrence")
+				.add(is("universityId", student.universityId))
+				.add(ge("occurrence.week", startWeek))
+				.add(le("occurrence.week", endWeek))
+				.seq
+		} else {
+			session.newCriteria[SmallGroupEventAttendance]
+				.createAlias("occurrence", "occurrence")
+				.createAlias("occurrence.event", "event")
+				.createAlias("event.group", "group")
+				.createAlias("group.groupSet", "groupSet")
+				.add(is("universityId", student.universityId))
+				.add(ge("occurrence.week", startWeek))
+				.add(le("occurrence.week", endWeek))
+				.add(safeIn("groupSet.module", modules))
+				.seq
+		}
+
+	}
+
+	def hasSmallGroups(module: Module): Boolean = {
+		session.newCriteria[SmallGroupSet]
+			.add(is("module", module))
+			.project[Number](Projections.rowCount())
+			.uniqueResult.get.intValue() > 0
 	}
 }

@@ -9,7 +9,7 @@
 			Publications: ${r.publicationOverlap}%
 		</p>
 		<p>
-			<a target="turnitin-viewer" href="<@url page='/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
+			<a target="turnitin-viewer" href="<@url page='/coursework/admin/module/${assignment.module.code}/assignments/${assignment.id}/turnitin-report/${attachment.id}'/>">View full report</a>
 		</p>
 	</div>
 	<script type="text/javascript">

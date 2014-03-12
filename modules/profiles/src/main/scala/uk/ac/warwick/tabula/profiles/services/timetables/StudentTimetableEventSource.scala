@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.profiles.services.timetables
 
 import uk.ac.warwick.tabula.data.model.StudentMember
+import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 trait StudentTimetableEventSource {
 	def eventsFor(student: StudentMember):Seq[TimetableEvent]

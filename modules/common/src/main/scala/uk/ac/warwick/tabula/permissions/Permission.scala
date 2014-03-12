@@ -243,6 +243,7 @@ object Permissions {
 
 	object Profiles {
 		case object Search extends ScopelessPermission("Search student profiles")
+		case object ViewSearchResults extends Permission("View profile search results")
 
 		object Read {
 			case object Core extends Permission("View a member's photo, name, Warwick email, job title and University number")
@@ -351,5 +352,9 @@ object Permissions {
 		case object Create extends Permission("Create member notes")
 		case object Update extends Permission("Edit member notes")
 		case object Delete extends Permission("Delete member notes")
+	}
+
+	object Notification {
+		case object Dismiss extends Permission("Dismiss and restore notifications")
 	}
 }

@@ -9,11 +9,14 @@ case class ExtensionManager(department: Department) extends BuiltInRole(Extensio
 case object ExtensionManagerRoleDefinition extends UnassignableBuiltInRoleDefinition {
 	
 	override def description = "Extension Manager"
+
+	GeneratesSubRole(ModuleAuditorRoleDefinition)
 	
-	GrantsScopedPermission( 
+	GrantsScopedPermission(
 		Extension.ReviewRequest,
+		Extension.Create,
 		Extension.Update,
-		Extension.Read
+		Extension.Delete
 	)
 
 }

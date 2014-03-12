@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data
 
 import org.hibernate.{Hibernate, SessionFactory, Session}
 import javax.sql.DataSource
-import uk.ac.warwick.tabula.data.model.CanBeDeleted
+import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, CanBeDeleted, Member, StudentCourseDetails}
 import uk.ac.warwick.spring.Wire
 import language.implicitConversions
 import scala.reflect._
@@ -100,7 +100,21 @@ trait Daoisms extends ExtendedSessionComponent with HelperRestrictions with Hibe
 	var dataSource = Wire[DataSource]("dataSource")
 	var sessionFactory = Wire.auto[SessionFactory]
 
-	protected def session = sessionFactory.getCurrentSession
+	protected def session = {
+		val session = sessionFactory.getCurrentSession
+		session.enableFilter(Member.FreshOnlyFilter)
+		session.enableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
+		session.enableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
+		session
+	}
+
+	protected def sessionWithoutFreshFilters = {
+		val session = sessionFactory.getCurrentSession
+		session.disableFilter(Member.FreshOnlyFilter)
+		session.disableFilter(StudentCourseDetails.FreshCourseDetailsOnlyFilter)
+		session.disableFilter(StudentCourseYearDetails.FreshCourseYearDetailsOnlyFilter)
+		session
+	}
 
 	/**
 	 * Do some work in a new session. Only needed outside of a request,

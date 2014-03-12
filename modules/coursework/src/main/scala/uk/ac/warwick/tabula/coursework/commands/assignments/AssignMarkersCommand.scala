@@ -9,11 +9,7 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.{UserLookupService, AssignmentService}
 import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.services.AssignmentMembershipService
-import scala.beans.BeanProperty
-import org.apache.commons.collections.FactoryUtils
-import org.apache.commons.collections.list.LazyList
 
 class AssignMarkersCommand(module: Module, assignment:Assignment)
 	extends AbstractAssignMarkersCommand(module, assignment)
@@ -48,13 +44,12 @@ abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:A
 	def onBind() {
 		def retrieveMarkers(markerDef:Seq[String]): JList[Marker] = markerDef.map{marker =>
 			val students:JList[Student] = assignment.markerMap.toMap.get(marker) match {
-				case Some(userGroup:UserGroup) => userGroup.includeUsers.map{student =>
-					val user:User = userLookup.getUserByUserId(student)
+				case Some(userGroup:UserGroup) => userGroup.users.map{student =>
 					val displayValue = module.department.showStudentName match {
-						case true => user.getFullName
-						case false => user.getWarwickId
+						case true => student.getFullName
+						case false => student.getWarwickId
 					}
-					new Student(displayValue, student)
+					new Student(displayValue, student.getUserId)
 				}
 				case None => JArrayList()
 			}
@@ -68,7 +63,11 @@ abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:A
 		}
 
 		firstMarkers = retrieveMarkers(assignment.markingWorkflow.firstMarkers.members)
-		secondMarkers = retrieveMarkers(assignment.markingWorkflow.secondMarkers.members)
+		secondMarkers = assignment.markingWorkflow.hasSecondMarker match {
+			case true => retrieveMarkers(assignment.markingWorkflow.secondMarkers.members)
+			case false => Seq()
+		}
+
 		val members = assignmentMembershipService.determineMembershipUsers(assignment).map{s =>
 			val displayValue = module.department.showStudentName match {
 				case true => s.getFullName
@@ -81,7 +80,7 @@ abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:A
 		secondMarkerUnassignedStudents = members.toList filterNot secondMarkers.map(_.students).flatten.contains
 
 		markerMapping = new java.util.HashMap[String, JList[String]]()
-		for (marker <- (firstMarkers.toList ++ secondMarkers.toList)){
+		for (marker <- firstMarkers.toList ++ secondMarkers.toList){
 			markerMapping.put(marker.userCode, marker.students.map(_.userCode))
 		}
 	}
@@ -92,7 +91,7 @@ abstract class AbstractAssignMarkersCommand(val module: Module, val assignment:A
 			if(Option(markerMapping).isDefined){
 				markerMapping.foreach{case(marker, studentList) =>
 					val group = UserGroup.ofUsercodes
-					group.includeUsers = studentList
+					group.includedUserIds = studentList.asScala
 					session.saveOrUpdate(group)
 					assignment.markerMap.put(marker, group)
 				}

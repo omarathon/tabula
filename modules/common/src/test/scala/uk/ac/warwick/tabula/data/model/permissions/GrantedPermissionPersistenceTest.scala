@@ -1,5 +1,5 @@
 package uk.ac.warwick.tabula.data.model.permissions
-import org.reflections.Reflections
+
 import uk.ac.warwick.tabula.PersistenceTestBase
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -18,7 +18,7 @@ class GrantedPermissionPersistenceTest extends PersistenceTestBase with Reflecti
 			session.flush
 			
 			val permission = GrantedPermission(department, Permissions.Department.DownloadFeedbackReport, GrantedPermission.Allow)
-			permission.users.addUser("cuscav")
+			permission.users.knownType.addUserId("cuscav")
 			
 			session.save(permission)
 			session.flush

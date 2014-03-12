@@ -1,51 +1,62 @@
 package uk.ac.warwick.tabula.admin.commands.routes
-import scala.collection.JavaConversions._
+
 import scala.collection.JavaConverters._
 import org.springframework.validation.Errors
-import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.commands.Command
-import uk.ac.warwick.tabula.commands.Description
-import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.JavaImports._
+import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model.Department
-import uk.ac.warwick.tabula.permissions.Permissions
-import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.tabula.data.model.Route
+import uk.ac.warwick.tabula.permissions.Permissions
+import uk.ac.warwick.tabula.services.{ModuleAndDepartmentServiceComponent, AutowiringModuleAndDepartmentServiceComponent}
+import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
+
+object SortRoutesCommand {
+	def apply(department: Department) =
+		new SortRoutesCommandInternal(department)
+			with ComposableCommand[Unit]
+			with SortRoutesCommandGrouping
+			with SortRoutesCommandPermissions
+			with SortRoutesCommandDescription
+			with SortRoutesCommandValidation
+			with AutowiringModuleAndDepartmentServiceComponent
+}
 
 /** Arranges routes between a department and its child departments. */
-class SortRoutesCommand(val department: Department) extends Command[Unit] with SelfValidating {
+class SortRoutesCommandInternal(val department: Department) extends CommandInternal[Unit] with SortRoutesCommandState with SortRoutesCommandGrouping {
+	self: ModuleAndDepartmentServiceComponent =>
 
-	var mads = Wire[ModuleAndDepartmentService]
+	def applyInternal() = transactional() {
+		for ((dept, routes) <- mapping.asScala) {
+			dept.routes.clear()
+			dept.routes.addAll(routes)
+			for (m <- routes.asScala) m.department = dept
+			moduleAndDepartmentService.save(dept)
+		}
+	}
+}
 
-	PermissionCheck(Permissions.Department.ArrangeRoutes, department)
-
-	/** Mapping from departments to an ArrayList containing route IDs. */
-	var mapping = JMap[Department, JList[Route]]()
-	for (dept <- (departments))
-		mapping.put(dept, JArrayList())
-
-	def departments = (department :: department.children.asScala.toList)
+trait SortRoutesCommandGrouping {
+	self: SortRoutesCommandState =>
 
 	// Only called on initial form view
 	def populate() {
 		for (dept <- (departments))
-			mapping.put(dept, dept.routes)
+			mapping.put(dept, JArrayList(dept.routes))
 	}
 
-	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
-	// Do not modify the returned value!
-	def mappingByCode = mapping.asScala.map {
-		case (dept, routes) => (dept.code, routes)
-	}
-
-	final def applyInternal() = transactional() {
+	// Sort all the lists of routes by code.
+	def sort() {
+		// Because sortBy is not an in-place sort, we have to replace the lists entirely.
+		// Alternative is Collections.sort or math.Sorting but these would be more code.
 		for ((dept, routes) <- mapping.asScala) {
-			dept.routes.clear()
-			dept.routes.addAll(routes)
-			for (r <- routes) r.department = dept
-			mads.save(dept)
+			mapping.put(dept, JArrayList(routes.asScala.toList.filter(validRoute).sorted))
 		}
 	}
+}
+
+trait SortRoutesCommandValidation extends SelfValidating {
+	self: SortRoutesCommandState =>
 
 	def validate(errors: Errors) {
 		val mappingMap = mapping.asScala
@@ -66,20 +77,31 @@ class SortRoutesCommand(val department: Department) extends Command[Unit] with S
 			errors.reject("sortRoutes.routes.invalid")
 		}
 	}
+}
 
-	// Sort all the lists of routes by code.
-	def sort() {
-		// Because sortBy is not an in-place sort, we have to replace the lists entirely.
-		// Alternative is Collections.sort or math.Sorting but these would be more code.
-		for ((dept, routes) <- mapping.asScala) {
-			mapping.put(dept, routes.asScala.toList.filter(validRoute).sorted)
-		}
+trait SortRoutesCommandState extends GroupsObjects[Route, Department] {
+	def department: Department
+	def departments = (department :: department.children.asScala.toList)
+
+	protected def validRoute(route: Route) = route.code != null
+
+	// Purely for use by Freemarker as it can't access map values unless the key is a simple value.
+	// Do not modify the returned value!
+	def mappingByCode = mapping.asScala.map {
+		case (dept, routes) => (dept.code, routes)
 	}
+}
 
-	private def validRoute(route: Route) = route.code != null
+trait SortRoutesCommandPermissions extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: SortRoutesCommandState =>
 
-	def describe(d: Description) {
-		d.department(department)
+	override def permissionsCheck(p: PermissionsChecking) {
+		p.PermissionCheck(Permissions.Department.ArrangeRoutes, mandatory(department))
 	}
+}
 
+trait SortRoutesCommandDescription extends Describable[Unit] {
+	self: SortRoutesCommandState =>
+
+	def describe(d: Description) = d.department(department)
 }

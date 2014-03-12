@@ -6,10 +6,17 @@ import uk.ac.warwick.userlookup.User
 import javax.persistence.{Entity, DiscriminatorValue}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.services.UserSettingsService
+import uk.ac.warwick.tabula.data.PreSaveBehaviour
+import uk.ac.warwick.tabula.data.model.NotificationPriority.Warning
 
 @Entity
 @DiscriminatorValue("SubmissionReceived")
-class SubmissionReceivedNotification extends SubmissionNotification {
+class SubmissionReceivedNotification extends SubmissionNotification with PreSaveBehaviour {
+
+	override def preSave(isNew: Boolean) {
+		// if this submission was late then the priority is higher
+		if (submission.isLate) priority = Warning
+	}
 
 	@transient
 	var userSettings = Wire.auto[UserSettingsService]
@@ -35,8 +42,7 @@ class SubmissionReceivedNotification extends SubmissionNotification {
 
 	def recipients = {
 		val moduleManagers = submission.assignment.module.managers
-		val userIds = moduleManagers.includeUsers
-		val allAdmins = userIds.asScala.map(id => userLookup.getUserByUserId(id))
+		val allAdmins = moduleManagers.users
 		allAdmins.filter(canEmailUser)
 	}
 }

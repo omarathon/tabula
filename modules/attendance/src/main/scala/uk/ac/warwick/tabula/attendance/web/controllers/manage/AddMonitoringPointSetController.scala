@@ -8,10 +8,9 @@ import javax.validation.Valid
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.AcademicYear
-import org.joda.time.DateTime
 import uk.ac.warwick.tabula.attendance.commands.manage.AddMonitoringPointSetCommand
 import uk.ac.warwick.tabula.attendance.web.controllers.AttendanceController
-import scala.Array
+import uk.ac.warwick.tabula.web.Routes
 
 @Controller
 @RequestMapping(value=Array("/manage/{dept}/sets/add/{academicYear}"))
@@ -23,22 +22,33 @@ class AddMonitoringPointSetController extends AttendanceController {
 	def createCommand(
 		@PathVariable dept: Department,
 		@PathVariable academicYear: AcademicYear,
+		@RequestParam createType: String,
 		@RequestParam(value="existingSet",required=false) existingSet: MonitoringPointSet,
-		@RequestParam(value="template",required=false) template: MonitoringPointSetTemplate) =
-		AddMonitoringPointSetCommand(user, dept, academicYear, Option(existingSet), Option(template))
+		@RequestParam(value="template",required=false) template: MonitoringPointSetTemplate
+	) = createType match {
+		case "blank" => AddMonitoringPointSetCommand(user, dept, academicYear, None, None)
+		case "template" => AddMonitoringPointSetCommand(user, dept, academicYear, None, Option(template))
+		case "copy" => AddMonitoringPointSetCommand(user, dept, academicYear, Option(existingSet), None)
+		case _ => throw new IllegalArgumentException
+	}
 
 	@RequestMapping(method=Array(GET,HEAD))
-	def form(@PathVariable dept: Department, @ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointSet]]) = {
-		Mav("manage/set/add_form").crumbs(Breadcrumbs.ManagingDepartment(dept))
+	def form(@PathVariable dept: Department, @ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointSet]], @RequestParam createType: String) = {
+		Mav("manage/set/add_form", "createType" -> createType).crumbs(Breadcrumbs.ManagingDepartment(dept))
 	}
 
 	@RequestMapping(method=Array(POST))
-	def submit(@PathVariable dept: Department, @Valid @ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointSet]], errors: Errors) = {
+	def submit(
+		@PathVariable dept: Department,
+		@Valid @ModelAttribute("command") cmd: Appliable[Seq[MonitoringPointSet]],
+		errors: Errors,
+		@RequestParam createType: String
+	) = {
 		if (errors.hasErrors) {
-			form(dept, cmd)
+			form(dept, cmd, createType)
 		} else {
 			val sets = cmd.apply()
-			Redirect("/manage/" + dept.code, "created" -> sets.map{s => s.route.code}.distinct.size)
+			Redirect(Routes.attendance.department.manage(dept), "created" -> sets.map{s => s.route.code}.distinct.size)
 		}
 	}
 

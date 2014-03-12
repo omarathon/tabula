@@ -6,12 +6,13 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import uk.ac.warwick.tabula.admin.web.Routes
-import uk.ac.warwick.tabula.data.model.Department
+import uk.ac.warwick.tabula.data.model.{Route, Department}
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.web.controllers.BaseController
 import javax.validation.Valid
 import uk.ac.warwick.tabula.admin.web.controllers.AdminController
-import uk.ac.warwick.tabula.admin.commands.routes.SortRoutesCommand
+import uk.ac.warwick.tabula.admin.commands.routes.{SortRoutesCommandState, SortRoutesCommand}
+import uk.ac.warwick.tabula.commands.{Appliable, GroupsObjects, SelfValidating}
 
 /**
  * The interface for sorting department routes into
@@ -21,13 +22,14 @@ import uk.ac.warwick.tabula.admin.commands.routes.SortRoutesCommand
 @RequestMapping(value=Array("/department/{department}/sort-routes"))
 class SortRoutesController extends AdminController {
 
-	validatesSelf[SortRoutesCommand]
+	type SortRoutesCommand = Appliable[Unit] with GroupsObjects[Route, Department] with SortRoutesCommandState
+	validatesSelf[SelfValidating]
 	
 	@ModelAttribute
-	def command(@PathVariable department: Department) = new SortRoutesCommand(department)
+	def command(@PathVariable department: Department): SortRoutesCommand = SortRoutesCommand(department)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def showForm(@ModelAttribute cmd: SortRoutesCommand, errors: Errors):Mav = {
+	def showForm(@ModelAttribute cmd: SortRoutesCommand):Mav = {
 		cmd.populate()
 		cmd.sort()
 		form(cmd)
@@ -44,7 +46,7 @@ class SortRoutesController extends AdminController {
 		}
 	}
 		
-	def form(cmd: SortRoutesCommand): Mav = {
+	private def form(cmd: SortRoutesCommand): Mav = {
 		if (cmd.department.hasParent) {
 			// Sorting is done from the POV of the top department.
 			Redirect(Routes.department.sortRoutes(cmd.department.parent))

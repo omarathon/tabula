@@ -370,13 +370,11 @@ $(function(){
 
 	// set reject and approved flags
 	$("#extension-model").on('click', '#approveButton', function(){
-		$(".approveField").val("1");
-		$(".rejectField").val("0");
+		$(".action").val("approve");
 	});
 
 	$("#extension-model").on('click', '#rejectButton', function(){
-		$(".approveField").val("0");
-		$(".rejectField").val("1");
+		$(".action").val("reject");
 	});
 
 	var modifyRow = function(results, action){

@@ -42,7 +42,7 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 			groupSet.openForSignups = openForSignups
 			groupSet.releasedToStudents = releasedToStudents
 			groupSet.groups = JArrayList()
-			groupSet._membersGroup = UserGroup.ofUsercodes
+			groupSet.members = UserGroup.ofUsercodes
 			if (maxGroupSize > 0){
 				groupSet.defaultMaxGroupSize = maxGroupSize
 				groupSet.defaultMaxGroupSizeEnabled = true
@@ -53,8 +53,8 @@ class SmallGroupSetFixtureCommand extends CommandInternal[SmallGroupSet] with Lo
 				if (maxGroupSize > 0){
 					group.maxGroupSize = maxGroupSize
 				}
-				group._studentsGroup = UserGroup.ofUsercodes // have to user userCodes, because you can't look up an ext-user
-				                                             // (e.g. tabula-functest-student1) by uni ID.
+				group.students = UserGroup.ofUsercodes // have to user userCodes, because you can't look up an ext-user
+				                                       // (e.g. tabula-functest-student1) by uni ID.
 				groupSet.groups.add(group)
 
 			}

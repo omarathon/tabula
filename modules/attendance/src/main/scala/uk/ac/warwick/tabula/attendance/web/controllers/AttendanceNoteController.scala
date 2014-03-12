@@ -13,7 +13,7 @@ import javax.servlet.http.{HttpServletResponse, HttpServletRequest}
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.services.fileserver.{FileServer, RenderableFile}
 import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.services.{ProfileService, MonitoringPointService}
+import uk.ac.warwick.tabula.services.{UserLookupService, MonitoringPointService}
 import uk.ac.warwick.tabula.helpers.DateBuilder
 import javax.validation.Valid
 
@@ -22,7 +22,7 @@ import javax.validation.Valid
 class AttendanceNoteController extends AttendanceController with CheckpointUpdatedDescription {
 
 	@Autowired var monitoringPointService: MonitoringPointService = _
-	@Autowired var profileService: ProfileService = _
+	@Autowired var userLookup: UserLookupService = _
 
 	@RequestMapping
 	def home(
@@ -35,7 +35,7 @@ class AttendanceNoteController extends AttendanceController with CheckpointUpdat
 			"attendanceNote" -> attendanceNote,
 			"checkpoint" -> checkpoint,
 			"checkpointDescription" -> Option(checkpoint).map{ checkpoint => describeCheckpoint(checkpoint)}.getOrElse(""),
-			"updatedBy" -> profileService.getAllMembersWithUserId(attendanceNote.updatedBy).headOption.map{_.fullName}.getOrElse(""),
+			"updatedBy" -> userLookup.getUserByUserId(attendanceNote.updatedBy).getFullName,
 			"updatedDate" -> DateBuilder.format(attendanceNote.updatedDate),
 			"isModal" -> ajax
 		).noLayoutIf(ajax)
@@ -121,7 +121,7 @@ class EditAttendanceNoteController extends AttendanceController {
 		@PathVariable student: StudentMember
 	) = {
 		if (errors.hasErrors) {
-			form(cmd, student, true)
+			form(cmd, student, isIframe = true)
 		} else {
 			cmd.apply()
 			Mav("home/edit_note", "success" -> true, "isIframe" -> true, "allAbsenceTypes" -> AbsenceType.values)

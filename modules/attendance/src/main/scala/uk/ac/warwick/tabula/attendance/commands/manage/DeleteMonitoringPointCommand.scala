@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.attendance.commands.manage
 
 import uk.ac.warwick.tabula.commands._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.AutowiringTermServiceComponent
+import uk.ac.warwick.tabula.services.{AutowiringModuleAndDepartmentServiceComponent, AutowiringSmallGroupServiceComponent, AutowiringTermServiceComponent}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.permissions.Permissions
@@ -15,6 +15,8 @@ object DeleteMonitoringPointCommand {
 		new DeleteMonitoringPointCommand(dept, pointIndex)
 		with ComposableCommand[MonitoringPoint]
 		with AutowiringTermServiceComponent
+		with AutowiringSmallGroupServiceComponent
+		with AutowiringModuleAndDepartmentServiceComponent
 		with DeleteMonitoringPointValidation
 		with DeleteMonitoringPointPermissions
 		with ReadOnly with Unaudited

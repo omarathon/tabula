@@ -3,12 +3,12 @@ package uk.ac.warwick.tabula.services
 import org.springframework.stereotype.Service
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.{AssignmentMembershipDao, AssignmentMembershipDaoComponent, AutowiringAssignmentMembershipDaoComponent, AutowiringSmallGroupDaoComponent, AutowiringUserGroupDaoComponent, SmallGroupDaoComponent, UserGroupDaoComponent}
-import uk.ac.warwick.tabula.data.model.{StudentMember, ModuleRegistration, UserGroup, UnspecifiedTypeUserGroup}
+import uk.ac.warwick.tabula.data.model.{Module, StudentMember, ModuleRegistration, UserGroup, UnspecifiedTypeUserGroup}
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEventAttendanceNote, SmallGroup, SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupSet, SmallGroupEventAttendance}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.commands.groups.RemoveUserFromSmallGroupCommand
-import uk.ac.warwick.tabula.commands.{MemberOrUser, Appliable}
+import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.data.model.attendance.AttendanceState
 import org.joda.time.DateTime
@@ -46,6 +46,9 @@ trait SmallGroupService {
 	def getAttendanceNote(studentId: String, occurrence: SmallGroupEventOccurrence): Option[SmallGroupEventAttendanceNote]
 	def findAttendanceNotes(studentIds: Seq[String], occurrences: Seq[SmallGroupEventOccurrence]): Seq[SmallGroupEventAttendanceNote]
 	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence) : Option[SmallGroupEventAttendance]
+
+	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]): Seq[SmallGroupEventAttendance]
+	def hasSmallGroups(module: Module): Boolean
 }
 
 abstract class AbstractSmallGroupService extends SmallGroupService {
@@ -76,7 +79,7 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 	def saveOrUpdate(note: SmallGroupEventAttendanceNote) = smallGroupDao.saveOrUpdate(note)
 
 	def findSmallGroupEventsByTutor(user: User): Seq[SmallGroupEvent] = eventTutorsHelper.findBy(user)
-	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = groupTutorsHelper.findBy(user)
+	def findSmallGroupsByTutor(user: User): Seq[SmallGroup] = findSmallGroupEventsByTutor(user).groupBy(_.group).keys.toSeq
 
 	def findSmallGroupSetsByMember(user:User):Seq[SmallGroupSet] = {
 		val autoEnrolled = 
@@ -147,12 +150,15 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 
 	def getAttendance(studentId: String, occurrence: SmallGroupEventOccurrence) : Option[SmallGroupEventAttendance] =
 		smallGroupDao.getAttendance(studentId, occurrence)
+
+	def findAttendanceForStudentInModulesInWeeks(student: StudentMember, startWeek: Int, endWeek: Int, modules: Seq[Module]) =
+		smallGroupDao.findAttendanceForStudentInModulesInWeeks(student, startWeek, endWeek, modules)
+
+	def hasSmallGroups(module: Module): Boolean = smallGroupDao.hasSmallGroups(module)
 }
 
 trait SmallGroupMembershipHelpers {
 	val eventTutorsHelper: UserGroupMembershipHelper[SmallGroupEvent]
-  //TODO can this be removed? findSmallGroupsByTutor could just call findSmallGroupEventsByTutor and then group by group
-	val groupTutorsHelper: UserGroupMembershipHelper[SmallGroup]
 	val studentGroupHelper: UserGroupMembershipHelper[SmallGroup]
 	val groupSetManualMembersHelper: UserGroupMembershipHelper[SmallGroupSet]
 	val membershipDao: AssignmentMembershipDao
@@ -160,10 +166,9 @@ trait SmallGroupMembershipHelpers {
 
 // new up UGMHs which will Wire.auto() their dependencies
 trait SmallGroupMembershipHelpersImpl extends SmallGroupMembershipHelpers {
-	val eventTutorsHelper = new UserGroupMembershipHelper[SmallGroupEvent]("tutors")
-	val groupTutorsHelper = new UserGroupMembershipHelper[SmallGroup]("events.tutors")
+	val eventTutorsHelper = new UserGroupMembershipHelper[SmallGroupEvent]("_tutors")
 
-	// Don't use this, it's misleading - it won't use linked assessment components
+	// This won't use linked assessment components, only manual membership
 	val groupSetManualMembersHelper = new UserGroupMembershipHelper[SmallGroupSet]("_membersGroup")
 
 	val studentGroupHelper = new UserGroupMembershipHelper[SmallGroup]("_studentsGroup")

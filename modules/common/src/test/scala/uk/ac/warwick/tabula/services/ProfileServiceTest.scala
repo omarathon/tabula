@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.services
 
-
+import uk.ac.warwick.tabula.helpers.Tap._
 import org.joda.time.DateTime
 import org.joda.time.DateTimeConstants
 import org.junit.Before
@@ -327,5 +327,44 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 			profileServiceWithMocks.getDisability("SITS has no integrity checks") should be (None)
 		}
 	}
+
+	@Test def getMemberByUser { transactional { tx =>
+		// TAB-2014
+		val m1 = Fixtures.student(universityId = "1000001", userId="student")
+		m1.email = "student@warwick.ac.uk"
+
+		val m2 = Fixtures.staff(universityId = "1000002", userId="staff")
+		m2.email = "staff@warwick.ac.uk"
+
+		profileService.save(m1)
+		profileService.save(m2)
+
+		profileService.getMemberByUser(m1.asSsoUser) should be (Some(m1))
+		profileService.getMemberByUser(m2.asSsoUser) should be (Some(m2))
+
+		session.enableFilter(Member.StudentsOnlyFilter)
+
+		profileService.getMemberByUser(m1.asSsoUser) should be (Some(m1))
+		profileService.getMemberByUser(m2.asSsoUser) should be (None)
+		profileService.getMemberByUser(m2.asSsoUser, disableFilter = true) should be (Some(m2))
+
+		// Usercode matches, but warwickId doesn't. Still returns correctly
+		profileService.getMemberByUser(m1.asSsoUser.tap(_.setWarwickId("0000001"))) should be (Some(m1))
+		profileService.getMemberByUser(m2.asSsoUser.tap(_.setWarwickId("0000001")), disableFilter = true) should be (Some(m2))
+
+		// Usercode doesn't match, but warwickId matches - but with the wrong email address
+		profileService.getMemberByUser(new User("blabla").tap(_.setWarwickId("1000001"))) should be (None)
+		profileService.getMemberByUser(new User("blabla").tap(_.setWarwickId("1000002")), disableFilter = true) should be (None)
+
+		// Usercode doesn't match, but warwickId matches and so does email address
+		profileService.getMemberByUser(new User("blabla").tap { u =>
+			u.setWarwickId("1000001")
+			u.setEmail("STUDENT@warwick.ac.uk   ")
+		}) should be (Some(m1))
+		profileService.getMemberByUser(new User("blabla").tap { u =>
+			u.setWarwickId("1000002")
+			u.setEmail("STAFF@warwick.ac.uk   ")
+		}, disableFilter = true) should be (Some(m2))
+	}}
 
 }

@@ -5,6 +5,7 @@ import uk.ac.warwick.tabula.services.{UserLookupComponent, SmallGroupServiceComp
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupFormat, SmallGroupEvent}
 import uk.ac.warwick.tabula.data.model.groups.SmallGroupFormat._
+import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 trait SmallGroupEventTimetableEventSourceComponent{
 	val studentGroupEventSource:StudentTimetableEventSource

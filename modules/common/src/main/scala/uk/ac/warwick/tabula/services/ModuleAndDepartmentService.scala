@@ -16,7 +16,6 @@ import uk.ac.warwick.tabula.roles.DepartmentalAdministratorRoleDefinition
 import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
 import uk.ac.warwick.tabula.roles.RouteManagerRoleDefinition
 import uk.ac.warwick.tabula.roles.RoleDefinition
-import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.services.permissions.PermissionsService
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.data.RouteDao
@@ -47,6 +46,7 @@ class ModuleAndDepartmentService extends Logging {
 		routeDao.allRoutes
 	}
 
+
 	def getDepartmentByCode(code: String) = transactional(readOnly = true) {
 		departmentDao.getByCode(code)
 	}
@@ -63,8 +63,8 @@ class ModuleAndDepartmentService extends Logging {
 		moduleDao.getByCode(Module.stripCats(sitsModuleCode).toLowerCase())
 	}
 
-	def getModuleById(code: String) = transactional(readOnly = true) {
-		moduleDao.getById(code)
+	def getModuleById(id: String) = transactional(readOnly = true) {
+		moduleDao.getById(id)
 	}
 
 	def getRouteByCode(code: String) = transactional(readOnly = true) {
@@ -118,37 +118,37 @@ class ModuleAndDepartmentService extends Logging {
 
 	def addOwner(dept: Department, owner: String) = transactional() {
 		val role = getRole(dept, DepartmentalAdministratorRoleDefinition)
-		role.users.addUser(owner)
+		role.users.knownType.addUserId(owner)
 		permissionsService.saveOrUpdate(role)
 	}
 
 	def removeOwner(dept: Department, owner: String) = transactional() {
 		val role = getRole(dept, DepartmentalAdministratorRoleDefinition)
-		role.users.removeUser(owner)
+		role.users.knownType.removeUserId(owner)
 		permissionsService.saveOrUpdate(role)
 	}
 
 	def addModuleManager(module: Module, owner: String) = transactional() {
 		val role = getRole(module, ModuleManagerRoleDefinition)
-		role.users.addUser(owner)
+		role.users.knownType.addUserId(owner)
 		permissionsService.saveOrUpdate(role)
 	}
 
 	def removeModuleManager(module: Module, owner: String) = transactional() {
 		val role = getRole(module, ModuleManagerRoleDefinition)
-		role.users.removeUser(owner)
+		role.users.knownType.removeUserId(owner)
 		permissionsService.saveOrUpdate(role)
 	}
 
 	def addRouteManager(route: Route, owner: String) = transactional() {
 		val role = getRole(route, RouteManagerRoleDefinition)
-		role.users.addUser(owner)
+		role.users.knownType.addUserId(owner)
 		permissionsService.saveOrUpdate(role)
 	}
 
 	def removeRouteManager(route: Route, owner: String) = transactional() {
 		val role = getRole(route, RouteManagerRoleDefinition)
-		role.users.removeUser(owner)
+		role.users.knownType.removeUserId(owner)
 		permissionsService.saveOrUpdate(role)
 	}
 
@@ -167,6 +167,13 @@ class ModuleAndDepartmentService extends Logging {
 	def stampMissingRoutes(dept: Department, seenCodes: Seq[String]) = transactional() {
 		routeDao.stampMissingRows(dept, seenCodes)
 	}
+
+	def hasAssignments(module: Module): Boolean = {
+		moduleDao.hasAssignments(module)
+	}
+
+	def findModulesNamedLike(query: String): Seq[Module] =
+		moduleDao.findModulesNamedLike(query)
 
 }
 

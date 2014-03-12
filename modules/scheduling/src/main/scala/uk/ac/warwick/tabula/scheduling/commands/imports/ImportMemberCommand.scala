@@ -60,13 +60,8 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 
 		this.universityId = oneOf(member.universityId, optString("university_id")).get
 
-		val suggestedUserId = oneOf(ssoUser.getUserId.maybeText, member.usercode).get
-
-		this.userId = optString("user_code") match {
-			// TAB-2004
-			case Some(userId) if userId != suggestedUserId && userLookup.getUserByUserId(userId).getWarwickId == this.universityId => userId
-			case _ => suggestedUserId
-		}
+		// TAB-2014
+		this.userId = oneOf(member.usercode, ssoUser.getUserId.maybeText, optString("user_code")).get
 
 		this.userType = member.userType
 
@@ -129,29 +124,6 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		}
 	}
 
-	protected def copyDepartment(property: String, departmentCode: String, bean: BeanWrapper) = {
-		val oldValue = bean.getPropertyValue(property) match {
-			case null => null
-			case value: Department => value
-		}
-
-		if (oldValue == null && departmentCode == null) false
-		else if (oldValue == null) {
-			// From no department to having a department
-			bean.setPropertyValue(property, toDepartment(departmentCode))
-			true
-		} else if (departmentCode == null) {
-			// User had a department but now doesn't
-			bean.setPropertyValue(property, null)
-			true
-		} else if (oldValue.code == departmentCode.toLowerCase) {
-			false
-		}	else {
-			bean.setPropertyValue(property, toDepartment(departmentCode))
-			true
-		}
-	}
-
 	private val basicMemberProperties = Set(
 		// userType is included for new records, but hibernate does not in fact update it for existing records
 		"userId", "firstName", "lastName", "email", "homeEmail", "title", "fullFirstName", "userType", "gender",
@@ -193,7 +165,7 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 	protected def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
 		copyBasicProperties(basicMemberProperties, commandBean, memberBean) |
 		copyPhotoIfModified("photo", photoOption, memberBean) |
-		copyDepartment("homeDepartment", homeDepartmentCode, memberBean)
+		copyObjectProperty("homeDepartment", homeDepartmentCode, memberBean, toDepartment(homeDepartmentCode))
 
 	private def toPhoto(bytes: Array[Byte]) = {
 		val photo = new FileAttachment

@@ -34,9 +34,10 @@ class OnlineFeedbackCommandTest extends TestBase with Mockito {
 		val assignment = new Assignment
 		val module = new Module
 		val assignmentMembershipService = mock[AssignmentMembershipService]
-		when (assignmentMembershipService.determineMembership(assignment.upstreamAssessmentGroups, Option(assignment.members))) thenReturn(membershipInfo)
-
 		assignment.assignmentMembershipService = assignmentMembershipService
+
+		assignmentMembershipService.determineMembership(assignment.upstreamAssessmentGroups, Option(assignment.members)) returns (membershipInfo)
+
 		assignment.module = module
 
 		val submission1 = new Submission("user1")

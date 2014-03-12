@@ -7,13 +7,13 @@ import org.springframework.beans.BeanWrapperImpl
 import org.springframework.transaction.annotation.Transactional
 
 import uk.ac.warwick.tabula.{Mockito, TestBase}
-import uk.ac.warwick.tabula.data.{FileDao, MemberDao, ModeOfAttendanceDao, SitsStatusDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
+import uk.ac.warwick.tabula.data.{FileDao, MemberDao, ModeOfAttendanceDao, StudentCourseDetailsDao, StudentCourseYearDetailsDao}
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.Gender.Male
 import uk.ac.warwick.tabula.data.model.MemberUserType.Student
 import uk.ac.warwick.tabula.events.EventHandling
 import uk.ac.warwick.tabula.helpers.Logging
-import uk.ac.warwick.tabula.scheduling.helpers.ImportRowTracker
+import uk.ac.warwick.tabula.scheduling.helpers.{SitsStudentRow, ImportCommandFactory}
 import uk.ac.warwick.tabula.scheduling.services._
 import uk.ac.warwick.tabula.services.{CourseAndRouteService, MaintenanceModeService, ModuleAndDepartmentService, ProfileService, ProfileServiceComponent, RelationshipService}
 import uk.ac.warwick.userlookup.AnonymousUser
@@ -21,91 +21,121 @@ import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import org.scalatest.junit.AssertionsForJUnit
 
+trait ComponentMixins extends Mockito
+		with ProfileServiceComponent
+		with Tier4RequirementImporterComponent
+		with ModeOfAttendanceImporterComponent {
+	var profileService = smartMock[ProfileService]
+	var tier4RequirementImporter = smartMock[Tier4RequirementImporter]
+	var modeOfAttendanceImporter = smartMock[ModeOfAttendanceImporter]
+}
+
+trait ImportCommandFactoryForTesting extends ComponentMixins {
+	val importCommandFactory = new ImportCommandFactory
+	importCommandFactory.test = true
+
+	var maintenanceModeService = smartMock[MaintenanceModeService]
+	maintenanceModeService.enabled returns false
+	importCommandFactory.maintenanceModeService = maintenanceModeService
+
+	// needed for importCommandFactor for ImportStudentCourseCommand and also needed for ImportStudentRowCommand
+	val memberDao = smartMock[MemberDao]
+}
+
+trait ImportStudentCourseCommandSetup extends ImportCommandFactoryForTesting with PropertyCopyingSetup {
+	importCommandFactory.memberDao = memberDao
+
+	val relationshipService = smartMock[RelationshipService]
+	relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
+	importCommandFactory.relationshipService = relationshipService
+
+	importCommandFactory.studentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
+
+	val courseAndRouteService = smartMock[CourseAndRouteService]
+	val route = smartMock[Route]
+	courseAndRouteService.getRouteByCode("C100") returns Some(new Route("c100", smartMock[Department]))
+	importCommandFactory.courseAndRouteService = courseAndRouteService
+
+	val courseImporter = smartMock[CourseImporter]
+	courseImporter.getCourseForCode("UESA-H612") returns new Course("UESA-H612", "Computer Systems Engineering MEng")
+	importCommandFactory.courseImporter = courseImporter
+
+	val awardImporter: AwardImporter = smartMock[AwardImporter]
+}
+
+trait PropertyCopyingSetup extends ImportCommandFactoryForTesting {
+	val sitsStatusImporter = smartMock[SitsStatusImporter]
+	sitsStatusImporter.getSitsStatusForCode("F") returns  Some(new SitsStatus("F", "F", "Fully Enrolled"))
+	sitsStatusImporter.getSitsStatusForCode("P") returns  Some(new SitsStatus("P", "P", "Permanently Withdrawn"))
+	importCommandFactory.sitsStatusImporter = sitsStatusImporter
+
+	val department = new Department
+	department.code = "ph"
+	department.name = "Philosophy"
+
+	val modAndDeptService = smartMock[ModuleAndDepartmentService]
+	modAndDeptService.getDepartmentByCode("ph") returns (Some(department))
+	modAndDeptService.getDepartmentByCode("PH") returns (Some(department))
+	importCommandFactory.modAndDeptService = modAndDeptService
+}
+
+trait ImportStudentCourseYearCommandSetup extends ImportCommandFactoryForTesting {
+	modeOfAttendanceImporter.modeOfAttendanceMap returns Map(
+		"F" -> new ModeOfAttendance("F", "FT", "Full Time"),
+		"P" -> new ModeOfAttendance("P", "PT", "Part Time")
+	)
+	modeOfAttendanceImporter.getModeOfAttendanceForCode("P") returns Some(new ModeOfAttendance("P", "PT", "Part Time"))
+	importCommandFactory.modeOfAttendanceImporter = modeOfAttendanceImporter
+
+	importCommandFactory.profileService = smartMock[ProfileService]
+
+	importCommandFactory.studentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
+	importCommandFactory.moaDao = smartMock[ModeOfAttendanceDao]
+
+}
+
+trait ImportCommandFactorySetup
+	extends ComponentMixins
+	with ImportStudentCourseCommandSetup
+	with ImportStudentCourseYearCommandSetup {}
+
+trait MockedResultSet extends Mockito {
+	val rs = smartMock[ResultSet]
+	val rsMetaData = smartMock[ResultSetMetaData]
+	rs.getMetaData() returns(rsMetaData)
+
+	rsMetaData.getColumnCount() returns(4)
+	rsMetaData.getColumnName(1) returns("gender")
+	rsMetaData.getColumnName(2) returns("year_of_study")
+	rsMetaData.getColumnName(3) returns("spr_code")
+	rsMetaData.getColumnName(4) returns("route_code")
+
+	rs.getString("gender") returns("M")
+	rs.getInt("year_of_study") returns(3)
+	rs.getString("spr_code") returns("0672089/2")
+	rs.getString("route_code") returns("C100")
+	rs.getString("spr_tutor1") returns ("0070790")
+	rs.getString("homeDepartmentCode") returns ("PH")
+	rs.getString("department_code") returns ("PH")
+	rs.getString("scj_code") returns ("0672089/2")
+	rs.getDate("begin_date") returns Date.valueOf("2011-05-12")
+	rs.getDate("end_date") returns Date.valueOf("2014-05-12")
+	rs.getDate("expected_end_date") returns Date.valueOf("2015-05-12")
+	rs.getInt("sce_sequence_number") returns (1)
+	rs.getString("enrolment_status_code") returns ("F")
+	rs.getString("mode_of_attendance_code") returns ("P")
+	rs.getString("sce_academic_year") returns ("10/11")
+	rs.getString("most_signif_indicator") returns ("Y")
+	rs.getString("mod_reg_status") returns ("CON")
+	rs.getString("course_code") returns ("UESA-H612")
+	rs.getString("disability") returns ("Q")
+}
+
 // scalastyle:off magic.number
-class ImportStudentRowCommandTest extends TestBase with AssertionsForJUnit with Mockito with Logging {
+class ImportStudentRowCommandTest extends TestBase with Mockito with Logging {
 	EventHandling.enabled = false
 
-	trait ComponentMixins extends ProfileServiceComponent with Tier4RequirementImporterComponent	with ModeOfAttendanceImporterComponent {
-		var profileService = smartMock[ProfileService]
-		var tier4RequirementImporter = smartMock[Tier4RequirementImporter]
-		var modeOfAttendanceImporter = smartMock[ModeOfAttendanceImporter]
-	}
-
-	trait Environment extends ComponentMixins {
-
-		val memberDao = smartMock[MemberDao]
-		val moaDao = smartMock[ModeOfAttendanceDao]
-		val sitsStatusDao = smartMock[SitsStatusDao]
-		val fileDao = smartMock[FileDao]
-		val studentCourseYearDetailsDao = smartMock[StudentCourseYearDetailsDao]
-		val studentCourseDetailsDao = smartMock[StudentCourseDetailsDao]
-
-		val relationshipService = smartMock[RelationshipService]
-		relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
-
-		val disabilityQ = new Disability("Q", "Test disability")
-
-		val department = new Department
-		department.code = "ph"
-		department.name = "Philosophy"
-
-		val modAndDeptService = smartMock[ModuleAndDepartmentService]
-		modAndDeptService.getDepartmentByCode("ph") returns (Some(department))
-
-		var maintenanceModeService = smartMock[MaintenanceModeService]
-		maintenanceModeService.enabled returns false
-
-		val courseAndRouteService = smartMock[CourseAndRouteService]
-		val route = smartMock[Route]
-		courseAndRouteService.getRouteByCode("c100") returns (Some(route))
-
-		modeOfAttendanceImporter.modeOfAttendanceMap returns Map(
-					"F" -> new ModeOfAttendance("F", "FT", "Full Time"),
-					"P" -> new ModeOfAttendance("P", "PT", "Part Time")
-			)
-
-		modeOfAttendanceImporter.getModeOfAttendanceForCode("P") returns Some(new ModeOfAttendance("P", "PT", "Part Time"))
-
-		val sitsStatusImporter = smartMock[SitsStatusImporter]
-		sitsStatusImporter.getSitsStatusForCode("F") returns  Some(new SitsStatus("F", "F", "Fully Enrolled"))
-		sitsStatusImporter.getSitsStatusForCode("P") returns  Some(new SitsStatus("P", "P", "Permanently Withdrawn"))
-
-
-		val courseImporter = smartMock[CourseImporter]
-		courseImporter.getCourseForCode("UESA-H612") returns new Course("UESA-H612", "Computer Systems Engineering MEng")
-
-		//department.personalTutorSource = Department.Settings.PersonalTutorSourceValues.Sits
-
-		val rs = smartMock[ResultSet]
-		val rsMetaData = smartMock[ResultSetMetaData]
-		rs.getMetaData() returns(rsMetaData)
-
-		rsMetaData.getColumnCount() returns(4)
-		rsMetaData.getColumnName(1) returns("gender")
-		rsMetaData.getColumnName(2) returns("year_of_study")
-		rsMetaData.getColumnName(3) returns("spr_code")
-		rsMetaData.getColumnName(4) returns("route_code")
-
-		rs.getString("gender") returns("M")
-		rs.getInt("year_of_study") returns(3)
-		rs.getString("spr_code") returns("0672089/2")
-		rs.getString("route_code") returns("C100")
-		rs.getString("spr_tutor1") returns ("0070790")
-		rs.getString("homeDepartmentCode") returns ("PH")
-		rs.getString("department_code") returns ("PH")
-		rs.getString("scj_code") returns ("0672089/2")
-		rs.getDate("begin_date") returns Date.valueOf("2011-05-12")
-		rs.getDate("end_date") returns Date.valueOf("2014-05-12")
-		rs.getDate("expected_end_date") returns Date.valueOf("2015-05-12")
-		rs.getInt("sce_sequence_number") returns (1)
-		rs.getString("enrolment_status_code") returns ("F")
-		rs.getString("mode_of_attendance_code") returns ("P")
-		rs.getString("sce_academic_year") returns ("10/11")
-		rs.getString("most_signif_indicator") returns ("Y")
-		rs.getString("mod_reg_status") returns ("CON")
-		rs.getString("course_code") returns ("UESA-H612")
-		rs.getString("disability") returns ("Q")
-
+	trait MemberSetup {
 		val mm = MembershipMember(
 			universityId 			= "0672089",
 			departmentCode			= "ph",
@@ -124,47 +154,68 @@ class ImportStudentRowCommandTest extends TestBase with AssertionsForJUnit with 
 			gender					= null,
 			alternativeEmailAddress	= null,
 			userType				= Student)
+	}
+
+	trait EnvironmentWithoutResultSet extends ImportCommandFactorySetup
+	with MemberSetup {
+		val rs: ResultSet
 
 		val blobBytes = Array[Byte](1,2,3,4,5)
 		val mac = MembershipInformation(mm, () => Some(blobBytes))
-		val importRowTracker = new ImportRowTracker
-
-		val yearCommand = new ImportStudentCourseYearCommand(rs, importRowTracker)
-		yearCommand.modeOfAttendanceImporter = modeOfAttendanceImporter
-		yearCommand.profileService = profileService
-		yearCommand.sitsStatusImporter = sitsStatusImporter
-		yearCommand.maintenanceMode = maintenanceModeService
-		yearCommand.studentCourseYearDetailsDao = studentCourseYearDetailsDao
-
-		val supervisorCommand = new ImportSupervisorsForStudentCommand
-		supervisorCommand.maintenanceMode = maintenanceModeService
-
-		val courseCommand = new ImportStudentCourseCommand(rs, importRowTracker, yearCommand, supervisorCommand)
-		courseCommand.studentCourseDetailsDao = studentCourseDetailsDao
-		courseCommand.sitsStatusImporter = sitsStatusImporter
-		courseCommand.courseAndRouteService = courseAndRouteService
-		courseCommand.maintenanceMode = maintenanceModeService
-		courseCommand.moduleAndDepartmentService = modAndDeptService
-		courseCommand.memberDao = memberDao
-		courseCommand.relationshipService = relationshipService
-		courseCommand.courseImporter = courseImporter
-		courseCommand.stuMem = smartMock[StudentMember]
-
-		val rowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), rs, new ImportRowTracker, courseCommand)
-			with ComponentMixins
-		rowCommand.memberDao = memberDao
-		rowCommand.fileDao = fileDao
-		rowCommand.moduleAndDepartmentService = modAndDeptService
 
 		// only return a known disability for code Q
+		val disabilityQ = new Disability("Q", "Test disability")
 		profileService.getDisability(any[String]) returns (None)
+		profileService.getDisability(null) returns (None)
 		profileService.getDisability("Q") returns (Some(disabilityQ))
-		rowCommand.profileService = profileService
 
 		tier4RequirementImporter.hasTier4Requirement("0672089") returns (false)
+
+		val rowCommand = new ImportStudentRowCommandInternal(mac, new AnonymousUser(), rs, importCommandFactory) with ComponentMixins
+		rowCommand.memberDao = memberDao
+		rowCommand.fileDao = smartMock[FileDao]
+		rowCommand.moduleAndDepartmentService = modAndDeptService
+		rowCommand.profileService = profileService
 		rowCommand.tier4RequirementImporter = tier4RequirementImporter
 
+		val row = new SitsStudentRow(rs)
+	}
 
+	trait Environment extends MockedResultSet with EnvironmentWithoutResultSet
+
+	/** When a SPR is (P)ermanently withdrawn, end relationships
+		* FOR THAT ROUTE ONLY
+		*/
+	@Test def endingWithdrawnRouteRelationships() {
+		new Environment {
+			val student = new StudentMember()
+
+			def createRelationship(sprCode: String, scjCode: String) = {
+				val rel = new MemberStudentRelationship()
+				rel.studentMember = student
+				val scd = new StudentCourseDetails()
+				scd.scjCode = scjCode
+				scd.sprCode = sprCode
+				rel.studentCourseDetails = scd
+				rel
+			}
+
+			val rel1 = createRelationship(sprCode="1111111/1", scjCode="1111111/1")
+			val rel2 = createRelationship(sprCode="1111111/2", scjCode="1111111/2")
+			val rel3 = createRelationship(sprCode="1111111/1", scjCode="1111111/3")
+			relationshipService.getAllCurrentRelationships(student) returns (Seq(rel1,rel2,rel3))
+
+			row.sprCode = "1111111/1"
+			row.sprStatusCode = "P"
+			row.endDate = new DateTime().minusMonths(6).toLocalDate
+
+			val courseCommand = importCommandFactory.createImportStudentCourseCommand(row, student)
+			courseCommand.applyInternal()
+
+			rel1.endDate.toLocalDate should be (row.endDate)
+			expectResult(null, "Shouldn't end course that's on a different route")( rel2.endDate )
+			rel3.endDate.toLocalDate should be (row.endDate)
+		}
 	}
 
 	/** When a SPR is (P)ermanently withdrawn, end relationships
@@ -206,7 +257,8 @@ class ImportStudentRowCommandTest extends TestBase with AssertionsForJUnit with 
 			val studentCourseDetails = new StudentCourseDetails
 			studentCourseDetails.scjCode = "0672089/2"
 			studentCourseDetails.sprCode = "0672089/2"
-			yearCommand.studentCourseDetails = studentCourseDetails
+
+			val yearCommand = importCommandFactory.createImportStudentCourseYearCommand(row, studentCourseDetails)
 
 			// now the set up is done, run the apply command and test it:
 			val studentCourseYearDetails = yearCommand.applyInternal()
@@ -219,7 +271,7 @@ class ImportStudentRowCommandTest extends TestBase with AssertionsForJUnit with 
 			studentCourseYearDetails.modeOfAttendance.code should be ("P")
 			studentCourseYearDetails.yearOfStudy should be (3)
 
-			there was one(studentCourseYearDetailsDao).saveOrUpdate(any[StudentCourseYearDetails]);
+			there was one(importCommandFactory.studentCourseYearDetailsDao).saveOrUpdate(any[StudentCourseYearDetails]);
 		}
 	}
 
@@ -229,11 +281,10 @@ class ImportStudentRowCommandTest extends TestBase with AssertionsForJUnit with 
 			var studentCourseDetails = new StudentCourseDetails
 			studentCourseDetails.scjCode = "0672089/2"
 			studentCourseDetails.sprCode = "0672089/2"
-			yearCommand.studentCourseDetails = studentCourseDetails
 
-			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
+			val courseCommand = importCommandFactory.createImportStudentCourseCommand(row, smartMock[StudentMember])
 
-			val studentCourseYearDetails = yearCommand.applyInternal()
+			importCommandFactory.relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
 
 			// now the set up is done, run the apply command and test it:
 			studentCourseDetails = courseCommand.applyInternal()
@@ -246,7 +297,7 @@ class ImportStudentRowCommandTest extends TestBase with AssertionsForJUnit with 
 
 			studentCourseDetails.freshStudentCourseYearDetails.size should be (1)
 
-			there was one(studentCourseDetailsDao).saveOrUpdate(any[StudentCourseDetails]);
+			there was one(importCommandFactory.studentCourseDetailsDao).saveOrUpdate(any[StudentCourseDetails]);
 		}
 	}
 
@@ -262,21 +313,20 @@ class ImportStudentRowCommandTest extends TestBase with AssertionsForJUnit with 
 
 			studentCourseDetails.missingFromImportSince should be (null)
 
-			courseCommand.markAsSeenInSits(studentCourseDetailsBean) should be (false)
-
-			studentCourseDetails.missingFromImportSince should be (null)
-
-			studentCourseDetails.missingFromImportSince = DateTime.now
-
-			studentCourseDetails.missingFromImportSince should not be (null)
-
-			courseCommand.markAsSeenInSits(studentCourseDetailsBean) should be (true)
-
-			studentCourseDetails.missingFromImportSince should be (null)
-
+			rowCommand.applyInternal() match {
+				case stuMem: StudentMember => {
+					val courseCommand = importCommandFactory.createImportStudentCourseCommand(row, stuMem)
+					courseCommand.markAsSeenInSits(studentCourseDetailsBean) should be (false)
+					studentCourseDetails.missingFromImportSince should be (null)
+					studentCourseDetails.missingFromImportSince = DateTime.now
+					studentCourseDetails.missingFromImportSince should not be (null)
+					courseCommand.markAsSeenInSits(studentCourseDetailsBean) should be (true)
+					studentCourseDetails.missingFromImportSince should be (null)
+				}
+				case _ => 1 should be (0)
+			}
 		}
 	}
-
 
 	@Test
 	def testImportStudentRowCommandWorksWithNew {
@@ -299,14 +349,114 @@ class ImportStudentRowCommandTest extends TestBase with AssertionsForJUnit with 
 
 			member match {
 				case stu: StudentMember => {
+					stu.disability.code should be ("Q")
 					stu.freshStudentCourseDetails.size should be (1)
 					stu.freshStudentCourseDetails.head.freshStudentCourseYearDetails.size should be (1)
+					stu.mostSignificantCourse.sprCode should be ("0672089/2")
+					val scd = stu.freshStudentCourseDetails.head
+					scd.course.code should be ("UESA-H612")
+					scd.scjCode should be ("0672089/2")
+					scd.department.code should be ("ph")
+					scd.route.code should be ("c100")
+					scd.sprCode should be ("0672089/2")
+					scd.beginDate.toString should be ("2011-05-12")
+					scd.endDate.toString should be ("2014-05-12")
+					scd.expectedEndDate.toString should be ("2015-05-12")
+
+					val scyd = scd.freshStudentCourseYearDetails.head
+					scyd.yearOfStudy should be (3)
+					scyd.sceSequenceNumber should be (1)
+					scyd.enrolmentStatus.code should be ("F")
+					scyd.modeOfAttendance.code should be ("P")
+					scyd.academicYear.toString should be ("10/11")
+					scyd.moduleRegistrationStatus.dbValue should be ("CON")
 				}
 				case _ => false should be (true)
 			}
 
-			there was one(fileDao).savePermanent(any[FileAttachment])
-			there was no(fileDao).saveTemporary(any[FileAttachment])
+			there was one(rowCommand.fileDao).savePermanent(any[FileAttachment])
+			there was no(rowCommand.fileDao).saveTemporary(any[FileAttachment])
+			there was one(memberDao).saveOrUpdate(any[Member])
+		}
+	}
+
+	trait MockedResultSetWithNulls extends Mockito {
+		val rs = smartMock[ResultSet]
+		val rsMetaData = smartMock[ResultSetMetaData]
+		rs.getMetaData() returns(rsMetaData)
+
+		rsMetaData.getColumnCount() returns(4)
+		rsMetaData.getColumnName(1) returns("gender")
+		rsMetaData.getColumnName(2) returns("year_of_study")
+		rsMetaData.getColumnName(3) returns("spr_code")
+		rsMetaData.getColumnName(4) returns("route_code")
+
+		rs.getString("gender") returns("M")
+		rs.getInt("year_of_study") returns(3)
+		rs.getString("spr_code") returns("0672089/2")
+		rs.getString("route_code") returns(null)
+		rs.getString("spr_tutor1") returns (null)
+		rs.getString("homeDepartmentCode") returns (null)
+		rs.getString("department_code") returns (null)
+		rs.getString("scj_code") returns ("0672089/2")
+		rs.getDate("begin_date") returns (null)
+		rs.getDate("end_date") returns (null)
+		rs.getDate("expected_end_date") returns (null)
+		rs.getInt("sce_sequence_number") returns (1)
+		rs.getString("enrolment_status_code") returns (null)
+		rs.getString("mode_of_attendance_code") returns (null)
+		rs.getString("sce_academic_year") returns ("10/11")
+		rs.getString("most_signif_indicator") returns ("Y")
+		rs.getString("mod_reg_status") returns (null)
+		rs.getString("course_code") returns (null)
+		rs.getString("disability") returns (null)
+	}
+
+	trait EnvironmentWithNulls extends MockedResultSetWithNulls with EnvironmentWithoutResultSet
+
+	@Test
+	def testImportStudentRowCommandWorksWithNulls {
+		new EnvironmentWithNulls {
+			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (None)
+
+			// now the set-up is done, run the apply command for member, which should cascade and run the other apply commands:
+			val member = rowCommand.applyInternal()
+
+			// test that member contains the expected data:
+			member.title should be ("Mr")
+			member.universityId should be ("0672089")
+			member.userId should be ("cuscav")
+			member.email should be ("M.Mannion@warwick.ac.uk")
+			member.gender should be (Male)
+			member.firstName should be ("Mathew")
+			member.lastName should be ("Mannion")
+			member.photo should not be (null)
+			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
+
+			member match {
+				case stu: StudentMember => {
+					stu.disability should be (null)
+					stu.freshStudentCourseDetails.size should be (1)
+					stu.freshStudentCourseDetails.head.freshStudentCourseYearDetails.size should be (1)
+					stu.mostSignificantCourse.sprCode should be ("0672089/2")
+					val scd = stu.freshStudentCourseDetails.head
+					scd.course should be (null)
+					scd.department should be (null)
+					scd.route should be (null)
+					scd.beginDate should be (null)
+					scd.endDate should be (null)
+					scd.expectedEndDate should be (null)
+
+					val scyd = scd.freshStudentCourseYearDetails.head
+					scyd.enrolmentStatus should be (null)
+					scyd.modeOfAttendance should be (null)
+					scyd.moduleRegistrationStatus should be (null)
+				}
+				case _ => false should be (true)
+			}
+
+			there was one(rowCommand.fileDao).savePermanent(any[FileAttachment])
+			there was no(rowCommand.fileDao).saveTemporary(any[FileAttachment])
 			there was one(memberDao).saveOrUpdate(any[Member])
 		}
 	}
@@ -329,8 +479,8 @@ class ImportStudentRowCommandTest extends TestBase with AssertionsForJUnit with 
 				case _ => false should be (true)
 			}
 
-			there was one(fileDao).savePermanent(any[FileAttachment])
-			there was no(fileDao).saveTemporary(any[FileAttachment])
+			there was one(rowCommand.fileDao).savePermanent(any[FileAttachment])
+			there was no(rowCommand.fileDao).saveTemporary(any[FileAttachment])
 			there was one(memberDao).saveOrUpdate(any[Member])
 		}
 	}
@@ -374,9 +524,7 @@ class ImportStudentRowCommandTest extends TestBase with AssertionsForJUnit with 
 
 			val tutorRelationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
 
-			relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (Some(tutorRelationshipType))
-			courseCommand.relationshipService = relationshipService
-			rowCommand.importStudentCourseCommand = courseCommand
+			importCommandFactory.relationshipService.getStudentRelationshipTypeByUrlPart("tutor") returns (Some(tutorRelationshipType))
 
 			// if personalTutorSource is "SITS", there *should* an update
 			department.setStudentRelationshipSource(tutorRelationshipType, StudentRelationshipSource.SITS)
@@ -384,7 +532,7 @@ class ImportStudentRowCommandTest extends TestBase with AssertionsForJUnit with 
 			memberDao.getByUniversityId("0070790") returns(Some(existingStaffMember))
 			memberDao.getByUniversityId("0672089") returns(Some(existing))
 			
-			relationshipService.findCurrentRelationships(tutorRelationshipType, existing) returns (Nil)
+			importCommandFactory.relationshipService.findCurrentRelationships(tutorRelationshipType, existing) returns (Nil)
 
 			val member = rowCommand.applyInternal() match {
 				case stu: StudentMember => Some(stu)

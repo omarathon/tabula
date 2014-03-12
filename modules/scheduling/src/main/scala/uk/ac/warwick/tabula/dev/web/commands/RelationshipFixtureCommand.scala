@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.dev.web.commands
 
 import uk.ac.warwick.tabula.data._
-import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationship, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{StudentMember, StudentRelationship}
 import uk.ac.warwick.spring.Wire
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.commands.{CommandInternal, Unaudited, ComposableCommand}
@@ -14,6 +14,7 @@ class RelationshipFixtureCommand extends CommandInternal[MemberStudentRelationsh
 	this: TransactionalComponent with SessionComponent=>
 
 	val memberDao = Wire[MemberDao]
+	val relationshipDao = Wire[RelationshipDao]
 	val relationshipService = Wire[RelationshipService]
 	var agent:String = _
 	var studentUniId:String = _
@@ -26,7 +27,7 @@ class RelationshipFixtureCommand extends CommandInternal[MemberStudentRelationsh
 				case x: StudentMember => x
 				case _ => throw new RuntimeException(s"$studentUniId could not be resolved to a student member")
 			}
-			val existing = memberDao.getRelationshipsByAgent(relType, agent).find (_.studentId == studentUniId)
+			val existing = relationshipDao.getRelationshipsByAgent(relType, agent).find (_.studentId == studentUniId)
 
 			val modifications = existing match {
 				case Some(existingRel) =>{

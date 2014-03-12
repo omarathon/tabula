@@ -6,4 +6,4 @@ ${meetingRecord.title} on ${dateTimeFormatter.print(meetingRecord.meetingDate)}
 	"${meetingRecord.missedReason}"
 </#if>
 
-Please visit <@url page=profileLink context="/profiles" /> to view this meeting.
+Please visit <@url page=profileLink /> to view this meeting.

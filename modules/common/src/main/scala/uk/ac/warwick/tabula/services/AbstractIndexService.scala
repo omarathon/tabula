@@ -62,6 +62,7 @@ trait QueryHelpers[A] { self: AbstractIndexService[A] =>
 	def termQuery(name: String, value: String) = new TermQuery(new Term(name, value))
 	def term(pair: Pair[String, String]) = new TermQuery(new Term(pair._1, pair._2))
 
+	def dateRange(min: DateTime, max: DateTime) = NumericRangeQuery.newLongRange(UpdatedDateField, min.getMillis, max.getMillis, true, true)
 	def dateSort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, false))
 	def reverseDateSort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true))
 }
@@ -225,11 +226,13 @@ abstract class AbstractIndexService[A]
 		val writerConfig = new IndexWriterConfig(LuceneVersion, indexAnalyzer)
 		closeThis(new IndexWriter(openDirectory(), writerConfig)) { writer =>
 			for (item <- items) {
-				if (isIncremental) {
-					doUpdateMostRecent(item)
-				}
-				toDocuments(item).foreach { doc =>
-					writer.updateDocument(uniqueTerm(item), doc)
+				tryDescribe(s"indexing ${item}") {
+					if (isIncremental) {
+						doUpdateMostRecent(item)
+					}
+					toDocuments(item).foreach { doc =>
+						writer.updateDocument(uniqueTerm(item), doc)
+					}
 				}
 			}
 			if (debugEnabled) logger.debug("Indexed " + items.size + " items")
@@ -490,4 +493,8 @@ trait FieldGenerators {
 	}
 
 	protected def dateField(name: String, value: DateTime) = new LongField(name, value.getMillis, Store.YES)
+
+	protected def doubleField(name: String, value: Double) = new DoubleField(name, value, Store.YES)
+
+	protected def booleanField(name: String, value: Boolean) = new TextField(name, value.toString, Store.YES)
 }

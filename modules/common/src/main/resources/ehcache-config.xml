@@ -83,23 +83,50 @@ under the License.
     memoryStoreEvictionPolicy="LFU"
      />
 
-  <cache name="SmallGroup-events-tutors"
-    maxElementsInMemory="500"
-    maxElementsOnDisk="2000"
-    overflowToDisk="true"
-    diskPersistent="true"
-    diskSpoolBufferSizeMB="20"
-    memoryStoreEvictionPolicy="LFU"
-    />
+  	<cache name="SmallGroupEvent-_tutors"
+		 maxElementsInMemory="5000"
+		 maxElementsOnDisk="20000"
+		 overflowToDisk="true"
+		 diskPersistent="true"
+		 diskSpoolBufferSizeMB="20"
+		 memoryStoreEvictionPolicy="LFU"
+			/>
 
-  <cache name="SmallGroupEvent-tutors"
-    maxElementsInMemory="500"
-    maxElementsOnDisk="2000"
-    overflowToDisk="true"
-    diskPersistent="true"
-    diskSpoolBufferSizeMB="20"
-    memoryStoreEvictionPolicy="LFU"
-    />
+	<cache name="Assignment-_members"
+		   maxElementsInMemory="5000"
+		   maxElementsOnDisk="20000"
+		   overflowToDisk="true"
+		   diskPersistent="true"
+		   diskSpoolBufferSizeMB="20"
+		   memoryStoreEvictionPolicy="LFU"
+			/>
+
+	<cache name="SmallGroupSet-_membersGroup"
+		   maxElementsInMemory="5000"
+		   maxElementsOnDisk="20000"
+		   overflowToDisk="true"
+		   diskPersistent="true"
+		   diskSpoolBufferSizeMB="20"
+		   memoryStoreEvictionPolicy="LFU"
+			/>
+
+	<cache name="SmallGroup-_studentsGroup"
+		   maxElementsInMemory="5000"
+		   maxElementsOnDisk="20000"
+		   overflowToDisk="true"
+		   diskPersistent="true"
+		   diskSpoolBufferSizeMB="20"
+		   memoryStoreEvictionPolicy="LFU"
+			/>
+
+	<cache name="StaffMember-_assistantsGroup"
+		   maxElementsInMemory="5000"
+		   maxElementsOnDisk="20000"
+		   overflowToDisk="true"
+		   diskPersistent="true"
+		   diskSpoolBufferSizeMB="20"
+		   memoryStoreEvictionPolicy="LFU"
+			/>
 
 	<cache name="SyllabusPlusTimetables"
 		   maxElementsInMemory="2000"

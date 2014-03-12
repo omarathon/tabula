@@ -1,11 +1,9 @@
 package uk.ac.warwick.tabula.helpers
 
-import java.io.FileReader
 import java.net.URL
 import java.net.URLConnection
 import java.net.URLStreamHandler
 import java.net.URLStreamHandlerFactory
-import org.reflections.Reflections
 import org.springframework.util.FileCopyUtils
 import uk.ac.warwick.tabula.TestBase
 import uk.ac.warwick.tabula.data.model.Department
@@ -13,8 +11,6 @@ import uk.ac.warwick.tabula.permissions.Permissions
 import java.io.InputStreamReader
 
 class ReflectionHelperTest extends TestBase with ReflectionsSetup {
-
-
 
 	@Test def allPermissionsTargets = {
 		ReflectionHelper.allPermissionTargets.contains(classOf[Department]) should be (true)
@@ -62,10 +58,5 @@ class CatchAllUrlHandler extends URLStreamHandler {
 	}
 }
 
-trait ReflectionsSetup{
-	val maybeRootResource = Option(getClass.getResource("/"))
-	val resourceLocation  = maybeRootResource.map(_.getFile() +  "META-INF/reflections/all-reflections.xml")
-		.getOrElse(getClass.getResource("/META-INF/reflections/all-reflections.xml").getFile())
-
-	new Reflections("uk.ac.warwick.tabula").save(resourceLocation)
-}
+// Not necessary any more, as scanning is done at runtime.
+trait ReflectionsSetup

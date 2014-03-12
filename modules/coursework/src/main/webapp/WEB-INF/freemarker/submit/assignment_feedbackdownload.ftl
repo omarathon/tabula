@@ -33,7 +33,7 @@
 	<#if feedbackcount gt 1>
 		<p>Your feedback consists of ${feedback.attachments?size} files.</p>
 		<p>
-			<a class="btn btn-success" href="<@url page="/module/${module.code}/${assignment.id}/all/feedback.zip"/>"><i class="icon-gift"></i>
+			<a class="btn btn-success" href="<@url context='/coursework' page="/module/${module.code}/${assignment.id}/all/feedback.zip"/>"><i class="icon-gift"></i>
 				Download all as a Zip file
 			</a>
 		</p>
@@ -46,7 +46,7 @@
 		<ul class="file-list">
 		<#list feedback.attachments as attachment>
 			<li>
-			<a class="btn<#if feedbackcount=1> btn-success</#if>" href="<@url page="/module/${module.code}/${assignment.id}/get/${attachment.name?url}"/>"><i class="icon-file"></i>
+			<a class="btn<#if feedbackcount=1> btn-success</#if>" href="<@url context='/coursework' page="/module/${module.code}/${assignment.id}/get/${attachment.name?url}"/>"><i class="icon-file"></i>
 				${attachment.name}
 			</a>
 			</li>

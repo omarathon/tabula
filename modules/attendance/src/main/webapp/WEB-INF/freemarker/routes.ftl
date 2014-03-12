@@ -7,62 +7,65 @@
 		we're repeating ourselves here. OR expose Routes directly.
 
 		-->
-	<#macro home><@url page="/" /></#macro>
-	<#macro viewDepartment department><@url page="/${department.code}/" /></#macro>
-	<#macro viewDepartmentPoints department><@url page="/view/${department.code}/points/" /></#macro>
+
+<#macro _u page context='/attendance'><@url context=context page=page /></#macro>
+
+	<#macro home><@_u page="/" /></#macro>
+	<#macro viewDepartment department><@_u page="/${department.code}/" /></#macro>
+	<#macro viewDepartmentPoints department><@_u page="/view/${department.code}/points/" /></#macro>
 	<#macro viewDepartmentPointsWithAcademicYear department academicYear queryString="">
 		<#if queryString?has_content>
 			<#local queryString = "&" + queryString />
 		</#if>
-		<@url page="/view/${department.code}/points/?academicYear=${academicYear.toString}${queryString}" />
+		<@_u page="/view/${department.code}/points/?academicYear=${academicYear.toString}${queryString}" />
 	</#macro>
-	<#macro viewDepartmentStudents department><@url page="/view/${department.code}/students/" /></#macro>
+	<#macro viewDepartmentStudents department><@_u page="/view/${department.code}/students/" /></#macro>
 	<#macro viewDepartmentStudentsWithAcademicYear department academicYear queryString="">
 		<#if queryString?has_content>
 			<#local queryString = "&" + queryString />
 		</#if>
-		<@url page="/view/${department.code}/students/?academicYear=${academicYear.toString}${queryString}" />
+		<@_u page="/view/${department.code}/students/?academicYear=${academicYear.toString}${queryString}" />
 	</#macro>
-	<#macro viewStudent department student academicYear><@url page="/view/${department.code}/students/${student.universityId}?academicYear=${academicYear.toString}" /></#macro>
-	<#macro viewDepartmentAgents department relationshipType><@url page="/view/${department.code}/agents/${relationshipType.urlPart}" /></#macro>
-	<#macro viewDepartmentAgentsStudents department relationshipType agent><@url page="/view/${department.code}/agents/${relationshipType.urlPart}/${agent.universityId}" /></#macro>
+	<#macro viewStudent department student academicYear><@_u page="/view/${department.code}/students/${student.universityId}?academicYear=${academicYear.toString}" /></#macro>
+	<#macro viewDepartmentAgents department relationshipType><@_u page="/view/${department.code}/agents/${relationshipType.urlPart}" /></#macro>
+	<#macro viewDepartmentAgentsStudents department relationshipType agent><@_u page="/view/${department.code}/agents/${relationshipType.urlPart}/${agent.universityId}" /></#macro>
 
-	<#macro report department academicYear queryString><@url page="/report/${department.code}?academicYear=${academicYear.toString}&${queryString}"/></#macro>
-	<#macro reportConfirm department><@url page="/report/${department.code}/confirm"/></#macro>
+	<#macro report department academicYear queryString><@_u page="/report/${department.code}?academicYear=${academicYear.toString}&${queryString}"/></#macro>
+	<#macro reportConfirm department><@_u page="/report/${department.code}/confirm"/></#macro>
 
-	<#macro manageDepartment department><@url page="/manage/${department.code}/" /></#macro>
+	<#macro manageDepartment department><@_u page="/manage/${department.code}/" /></#macro>
 	
-	<#macro record department pointId queryString returnTo><@url page="/view/${department.code}/${pointId}/record?returnTo=${returnTo?url}&${queryString}"/></#macro>
-	<#macro recordStudent department student academicYear returnTo><@url page="/view/${department.code}/students/${student.universityId}/record?academicYear=${academicYear.toString}&returnTo=${returnTo?url}" /></#macro>
-	<#macro recordStudentPoint point student returnTo><@url page="/${point.pointSet.route.department.code}/${point.id}/record/${student.universityId}?returnTo=${returnTo?url}"/></#macro>
+	<#macro record department pointId queryString returnTo><@_u page="/view/${department.code}/${pointId}/record?returnTo=${returnTo?url}&${queryString}"/></#macro>
+	<#macro recordStudent department student academicYear returnTo><@_u page="/view/${department.code}/students/${student.universityId}/record?academicYear=${academicYear.toString}&returnTo=${returnTo?url}" /></#macro>
+	<#macro recordStudentPoint point student returnTo><@_u page="/${point.pointSet.route.department.code}/${point.id}/record/${student.universityId}?returnTo=${returnTo?url}"/></#macro>
 
-	<#macro viewNote student point returnTo=""><@url page="/note/${student.universityId}/${point.id}/?returnTo=${returnTo}" /></#macro>
+	<#macro viewNote student point returnTo=""><@_u page="/note/${student.universityId}/${point.id}/?returnTo=${returnTo}" /></#macro>
 	<#macro editNote student point returnTo="">
 		<#local returnTo><#if returnTo?has_content>?returnTo=${returnTo}</#if></#local>
-		<@url page="/note/${student.universityId}/${point.id}/edit${returnTo}" />
+		<@_u page="/note/${student.universityId}/${point.id}/edit${returnTo}" />
 	</#macro>
 
-	<#macro studentMeetings point member><@url page="/${point.pointSet.route.department.code}/${point.id}/meetings/${member.universityId}"/></#macro>
+	<#macro studentMeetings point member><@_u page="/${point.pointSet.route.department.code}/${point.id}/meetings/${member.universityId}"/></#macro>
 
-	<#macro agentView relationshipType><@url page="/agent/${relationshipType.urlPart}"/></#macro>
-	<#macro agentStudentView student relationshipType academicYear><@url page="/agent/${relationshipType.urlPart}/${student.universityId}/?academicYear=${academicYear.toString}"/></#macro>
-	<#macro agentStudentRecord student relationshipType academicYear returnTo><@url page="/agent/${relationshipType.urlPart}/${student.universityId}/record?academicYear=${academicYear.toString}&returnTo=${returnTo?url}"/></#macro>
-	<#macro agentPointRecord pointId relationshipType returnTo><@url page="/agent/${relationshipType.urlPart}/point/${pointId}/record?returnTo=${returnTo?url}"/></#macro>
+	<#macro agentView relationshipType><@_u page="/agent/${relationshipType.urlPart}"/></#macro>
+	<#macro agentStudentView student relationshipType academicYear><@_u page="/agent/${relationshipType.urlPart}/${student.universityId}/?academicYear=${academicYear.toString}"/></#macro>
+	<#macro agentStudentRecord student relationshipType academicYear returnTo><@_u page="/agent/${relationshipType.urlPart}/${student.universityId}/record?academicYear=${academicYear.toString}&returnTo=${returnTo?url}"/></#macro>
+	<#macro agentPointRecord pointId relationshipType returnTo><@_u page="/agent/${relationshipType.urlPart}/point/${pointId}/record?returnTo=${returnTo?url}"/></#macro>
 	
-	<#macro createSet department academicYear><@url page="/manage/${department.code}/sets/add/${academicYear.startYear?c}"/></#macro>
-	<#macro editSet pointSet><@url page="/manage/${pointSet.route.department.code}/sets/${pointSet.id}/edit"/></#macro>
+	<#macro createSet department academicYear><@_u page="/manage/${department.code}/sets/add/${academicYear.startYear?c}"/></#macro>
+	<#macro editSet pointSet><@_u page="/manage/${pointSet.route.department.code}/sets/${pointSet.id}/edit"/></#macro>
 	
 	<#-- Non-persistent -->
-	<#macro addPoint department><@url page="/manage/${department.code}/sets/add/points/add" /></#macro>
-	<#macro editPoint department pointIndex><@url page="/manage/${department.code}/sets/add/points/edit/${pointIndex}" /></#macro>
-	<#macro deletePoint department pointIndex><@url page="/manage/${department.code}/sets/add/points/delete/${pointIndex}" /></#macro>
+	<#macro addPoint department><@_u page="/manage/${department.code}/sets/add/points/add" /></#macro>
+	<#macro editPoint department pointIndex><@_u page="/manage/${department.code}/sets/add/points/edit/${pointIndex}" /></#macro>
+	<#macro deletePoint department pointIndex><@_u page="/manage/${department.code}/sets/add/points/delete/${pointIndex}" /></#macro>
 	
 	<#-- Persistent -->
-	<#macro createPoint pointSet><@url page="/manage/${pointSet.route.department.code}/sets/${pointSet.id}/edit/points/add" /></#macro>
-	<#macro updatePoint point><@url page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/edit/points/${point.id}/edit" /></#macro>
-	<#macro removePoint point><@url page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/edit/points/${point.id}/delete" /></#macro>
+	<#macro createPoint pointSet><@_u page="/manage/${pointSet.route.department.code}/sets/${pointSet.id}/edit/points/add" /></#macro>
+	<#macro updatePoint point><@_u page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/edit/points/${point.id}/edit" /></#macro>
+	<#macro removePoint point><@_u page="/manage/${point.pointSet.route.department.code}/sets/${point.pointSet.id}/edit/points/${point.id}/delete" /></#macro>
 	
-	<#macro profile profile><@url page="/view/${profile.universityId}" context="/profiles"/></#macro>
-	<#macro attendanceProfile><@url page="/profile" /></#macro>
-	<#macro photo profile><#if ((profile.universityId)!)?has_content><@url page="/view/photo/${profile.universityId}.jpg" context="/profiles"/><#else><@url resource="/static/images/no-photo.jpg" /></#if></#macro>
-	<#macro relationship_students relationshipType><@url page="/${relationshipType.urlPart}/students" context="/profiles" /></#macro>
+	<#macro profile profile><@_u page="/view/${profile.universityId}" context="/profiles"/></#macro>
+	<#macro attendanceProfile><@_u page="/profile" /></#macro>
+	<#macro photo profile><#if ((profile.universityId)!)?has_content><@_u page="/view/photo/${profile.universityId}.jpg" context="/profiles"/><#else><@_u resource="/static/images/no-photo.jpg" /></#if></#macro>
+	<#macro relationship_students relationshipType><@_u page="/${relationshipType.urlPart}/students" context="/profiles" /></#macro>

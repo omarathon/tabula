@@ -79,7 +79,8 @@ class SubmissionsForMarkerTest  extends TestBase {
 
 	def newMarkingWorkflow(): MarkingWorkflow = {
 		val ug = UserGroup.ofUsercodes
-		ug.includeUsers = List ("cuslaj", "cusebr")
+		ug.addUserId("cuslaj")
+		ug.addUserId("cusebr")
 
 		val ms = new StudentsChooseMarkerWorkflow
 		ms.name = "Test marking workflow"

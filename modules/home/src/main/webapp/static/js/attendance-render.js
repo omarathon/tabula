@@ -49,6 +49,112 @@ exports.tableSortMatching = function(tableArray) {
     });
 };
 
+exports.bindModulePickers = function(){
+	$('.module-search-query')
+		.closest('.module-choice')
+			.find('button.add-module').attr('disabled', true).end()
+			.find('.modules-list').on('click', 'button.btn.btn-danger', function(){
+				$(this).closest('li').remove();
+			}).end()
+		.end()
+		.each(function(){
+			var $this = $(this),
+				$parent = $this.closest('.module-choice'),
+				$addButton = $parent.find('button.add-module'),
+				$hiddenInput = $parent.find('input[type=hidden]:first');
+			$this.on('change', function(){
+				if ($(this).data('moduleid') != undefined && $(this).data('moduleid').length === 0) {
+					$addButton.attr('disabled', true);
+				} else {
+					$addButton.attr('disabled', false);
+				}
+			});
+
+			$addButton.on('click', function(){
+				$this.closest('.module-choice').find('input.specific[name=isAnySmallGroupEventModules]').attr('checked', true);
+				var icon = $('<i/>').addClass('icon-fixed-width');
+				if ($this.hasClass('smallGroup') && $this.data('hasgroups') != true) {
+					icon.addClass('icon-exclamation-sign').attr({
+						'title':'This module has no small groups set up in Tabula'
+					});
+				}
+				if ($this.hasClass('assignment') && $this.data('hasassignments') != true) {
+					icon.addClass('icon-exclamation-sign').attr({
+						'title':'This module has no assignments set up in Tabula'
+					});
+				}
+				$this.closest('.module-choice').find('.modules-list ul').append(
+					$('<li/>').append(
+							$('<input/>').attr({
+								'type':'hidden',
+								'name':$hiddenInput.attr('name').replace('_',''),
+								'value':$this.data('moduleid')
+							})
+						).append(
+							icon
+						).append(
+							$('<span/>').attr('title', $this.val()).html($this.val())
+						).append(
+							$('<button/>').addClass('btn btn-danger').append(
+								$('<i/>').addClass('icon-remove')
+							)
+						)
+				);
+				$this.data('moduleid','').val('').trigger('change');
+			});
+	});
+	$('.pointTypeOption.smallGroup .module-search-query').modulePicker({
+		checkGroups: true
+	});
+	$('.pointTypeOption.assignmentSubmission .module-search-query').modulePicker({
+		checkAssignments: true
+	});
+};
+
+exports.bindAssignmentPickers = function(){
+	$('.assignment-search-query')
+		.closest('.assignment-choice')
+			.find('button.add-assignment').attr('disabled', true).end()
+			.find('.assignments-list').on('click', 'button.btn.btn-danger', function(){
+				$(this).closest('li').remove();
+			}).end()
+		.end()
+		.each(function(){
+			var $this = $(this),
+				$parent = $this.closest('.assignment-choice'),
+				$addButton = $parent.find('button.add-assignment'),
+				$hiddenInput = $parent.find('input[type=hidden]:first');
+			$this.on('change', function(){
+				if ($(this).data('assignmentid') != undefined && $(this).data('assignmentid').length === 0) {
+					$addButton.attr('disabled', true);
+				} else {
+					$addButton.attr('disabled', false);
+				}
+			});
+
+			$addButton.on('click', function(){
+				$this.closest('.assignment-choice').find('.assignments-list ul').append(
+					$('<li/>').append(
+							$('<input/>').attr({
+								'type':'hidden',
+								'name':$hiddenInput.attr('name').replace('_',''),
+								'value':$this.data('assignmentid')
+							})
+						).append(
+							$('<span/>').attr('title', $this.val()).html($this.val())
+						).append(
+							$('<button/>').addClass('btn btn-danger').append(
+								$('<i/>').addClass('icon-remove')
+							)
+						)
+				);
+				$this.data('assignmentid','').val('').trigger('change');
+			});
+		});
+
+	$('.pointTypeOption.assignmentSubmission .assignment-search-query').assignmentPicker({});
+};
+
 $(function(){
 
 	// SCRIPTS FOR MANAGING MONITORING POINTS

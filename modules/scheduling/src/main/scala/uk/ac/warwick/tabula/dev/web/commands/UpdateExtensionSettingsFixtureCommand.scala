@@ -20,13 +20,13 @@ class UpdateExtensionSettingsFixtureCommand extends CommandInternal[Department] 
 				dept.allowExtensionRequests = true
 				dept.extensionGuidelineLink = "http://warwick.ac.uk/"
 				dept.extensionGuidelineSummary = "Don't ask, don't get."
-				dept.extensionManagers.addUser(userId)
+				dept.extensionManagers.knownType.addUserId(userId)
 			} else {
 				dept.allowExtensionRequests = false
 				dept.extensionGuidelineLink = ""
 				dept.extensionGuidelineSummary = ""
 				// can only remove the manager if specified
-				if (!userId.isEmpty) dept.extensionManagers.removeUser(userId)
+				if (!userId.isEmpty) dept.extensionManagers.knownType.removeUserId(userId)
 			}
 			dept
 		}

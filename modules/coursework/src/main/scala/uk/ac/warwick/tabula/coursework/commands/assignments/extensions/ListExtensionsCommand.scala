@@ -17,7 +17,7 @@ class ListExtensionsCommand(val module: Module, val assignment: Assignment, val 
 
 	mustBeLinked(mandatory(assignment), mandatory(module))
 	PermissionCheck(Permissions.Extension.Read, assignment)
-	
+
 	if (assignment.openEnded) throw new ItemNotFoundException
 
 	var assignmentMembershipService = Wire.auto[AssignmentMembershipService]
@@ -31,13 +31,13 @@ class ListExtensionsCommand(val module: Module, val assignment: Assignment, val 
 				yield (assignmentUser.getWarwickId -> assignmentUser)
 		)
 
-		val manualExtensions = assignment.extensions.filter(_.requestedOn == null)
+		val manualExtensions = assignment.extensions.filter(_.isManual)
 		val isExtensionManager = module.department.isExtensionManager(user.apparentId)
-		val extensionRequests = assignment.extensions.filterNot(manualExtensions contains(_))
+		val extensionRequests = assignment.extensions -- manualExtensions
 
 		// all the users that aren't members of this assignment, but have submitted work to it
 		val extensionsFromNonMembers = assignment.extensions.filterNot(x => assignmentMembership.contains(x.universityId))
-		val nonMembers = userLookup.getUsersByWarwickUniIds(extensionsFromNonMembers.map { _.universityId }) 
+		val nonMembers = userLookup.getUsersByWarwickUniIds(extensionsFromNonMembers.map { _.universityId })
 
 		// build lookup of names from non members of the assignment that have submitted work plus members
 		val students = nonMembers ++ assignmentMembership

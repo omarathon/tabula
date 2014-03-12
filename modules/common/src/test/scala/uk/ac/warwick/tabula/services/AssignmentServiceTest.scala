@@ -7,14 +7,18 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula._
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.forms.{CommentField, FormFieldContext, WordCountField, Extension}
-import uk.ac.warwick.tabula.data.{ExtensionDaoComponent, ExtensionDaoImpl, AssignmentMembershipDaoImpl, DepartmentDaoImpl}
+import uk.ac.warwick.tabula.data.{AssignmentDaoComponent, AssignmentDaoImpl, ExtensionDaoComponent, ExtensionDaoImpl, AssignmentMembershipDaoImpl, DepartmentDaoImpl}
 import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.data.model.PlagiarismInvestigation.SuspectPlagiarised
 
 // scalastyle:off magic.number
 class AssignmentServiceTest extends PersistenceTestBase {
 
-	val assignmentService = new AssignmentServiceImpl
+	val thisAssignmentDao = new AssignmentDaoImpl
+
+	val assignmentService = new AbstractAssignmentService with AssignmentDaoComponent {
+		val assignmentDao = thisAssignmentDao
+	}
 	val assignmentMembershipService = new AssignmentMembershipServiceImpl
 	val feedbackService = new FeedbackServiceImpl
 	val submissionService = new SubmissionServiceImpl
@@ -23,10 +27,10 @@ class AssignmentServiceTest extends PersistenceTestBase {
   var userLookup:MockUserLookup = _
 	var extensionService: ExtensionService = _
 
-  @Before def setup {
+  @Before def setup() {
 		userLookup = new MockUserLookup()
 		userLookup.defaultFoundUser = true
-		assignmentService.sessionFactory = sessionFactory
+		thisAssignmentDao.sessionFactory = sessionFactory
 		submissionService.sessionFactory = sessionFactory
 		val deptDao = new DepartmentDaoImpl
 		deptDao.sessionFactory = sessionFactory
@@ -37,7 +41,8 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		amDao.sessionFactory = sessionFactory
 		assignmentMembershipService.dao = amDao
 		assignmentMembershipService.assignmentManualMembershipHelper.sessionFactory = sessionFactory
-		assignmentMembershipService.assignmentManualMembershipHelper.groupService = new MockGroupService
+		assignmentMembershipService.assignmentManualMembershipHelper.userLookup = userLookup
+		assignmentMembershipService.assignmentManualMembershipHelper.cache.foreach { _.clear() }
 		assignmentMembershipService.userLookup = userLookup
 		val extDao = new ExtensionDaoImpl
 		extDao.sessionFactory = sessionFactory
@@ -46,7 +51,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		}
 	}
 
-	@Transactional @Test def recentAssignment {
+	@Transactional @Test def recentAssignment() {
 		val assignment = newDeepAssignment()
 		val department = assignment.module.department
 
@@ -60,7 +65,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 	/**
 	 * The Hibernate filter that adds deleted != 0
 	 */
-	@Transactional @Test def notDeletedFilter {
+	@Transactional @Test def notDeletedFilter() {
 		val module = new Module
 		session.save(module)
 		val assignment = new Assignment
@@ -73,7 +78,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 		assignment.fields.get(1)
 
-		assignmentService.isFilterEnabled("notDeleted") should be (false)
+		assignmentService.assignmentDao.isFilterEnabled("notDeleted") should be (false)
 		assignmentService.getAssignmentById(assignment.id) should be (Some(assignment))
 		session.enableFilter("notDeleted")
 		assignmentService.getAssignmentById(assignment.id) should be (None)
@@ -82,7 +87,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 	}
 
 	/** Checks that assignment field positions don't intefere across FormFieldContexts. */
-	@Transactional @Test def overlappingFieldPositions {
+	@Transactional @Test def overlappingFieldPositions() {
 		val assignment = newDeepAssignment()
 
 		val wordCountField = new WordCountField()
@@ -121,7 +126,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		}
 	}
 
-	@Transactional @Test def findDuplicateAssignmentNames {
+	@Transactional @Test def findDuplicateAssignmentNames() {
 		val module = new Module
 		session.save(module)
 
@@ -139,15 +144,15 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentService.getAssignmentByNameYearModule("Blessay", new AcademicYear(2009), module) should be ('empty)
 	}
 
-	@Transactional @Test def getAssignmentsByNameTest {
+	@Transactional @Test def assignmentsByNameTest() {
 	    val compSciDept = modAndDeptService.getDepartmentByCode("cs")
 	    compSciDept should be ('defined)
 
 	    compSciDept.foreach(dept => {
-	        assignmentService.getAssignmentsByName("Test", dept) should have size(2)
-            assignmentService.getAssignmentsByName("Computing", dept) should have size(1)
-	        assignmentService.getAssignmentsByName("Assignment", dept) should have size(3)
-            assignmentService.getAssignmentsByName("xxxx", dept) should have size(0)
+	        assignmentService.getAssignmentsByName("Test", dept) should have size 2
+            assignmentService.getAssignmentsByName("Computing", dept) should have size 1
+	        assignmentService.getAssignmentsByName("Assignment", dept) should have size 3
+            assignmentService.getAssignmentsByName("xxxx", dept) should have size 0
 	    })
     }
 
@@ -156,7 +161,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 	 *     1. have feedback associated with that assignment which has not been released
 	 *     2. have a submission associated with that assignment which is not suspected plagiarised.
 	 */
-	@Transactional @Test def getUsersForFeedbackTest {
+	@Transactional @Test def usersForFeedbackTest() {
 		val assignment = assignmentService.getAssignmentById("1")
 		assignment should be('defined)
 
@@ -195,7 +200,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 				val user = userPair._2
 
 				studentId should equal ("0070790")
-				user.getWarwickId() should equal ("0070790")
+				user.getWarwickId should equal ("0070790")
 			}
 
 			// suppose the feedback was already released - would expect to get no users back
@@ -216,7 +221,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 	}
 
-	@Transactional @Test def updateAssessmentComponent {
+	@Transactional @Test def updateAssessmentComponent() {
 		val upstream = new AssessmentComponent
 		upstream.departmentCode = "ch"
 		upstream.moduleCode = "ch101"
@@ -238,7 +243,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.save(upstream2)
 	}
 
-	@Transactional @Test def findAssignmentsWithFeedback {
+	@Transactional @Test def findAssignmentsWithFeedback() {
 		val ThisUser = 	"1234567"
 		val OtherUser = "1234568"
 
@@ -260,7 +265,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val assignment1 = new Assignment
 		val assignment2 = new Assignment
 		val assignment3 = new Assignment
-		assignment3.markDeleted
+		assignment3.markDeleted()
 
 		assignment1.addFeedback(myFeedback)
 		assignment1.addFeedback(otherFeedback)
@@ -283,7 +288,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignments(0) should be (assignment1)
 	}
 
-	@Transactional @Test def findAssignmentsWithSubmission {
+	@Transactional @Test def findAssignmentsWithSubmission() {
 		val ThisUser = 	"1234567"
 		val OtherUser = "1234568"
 
@@ -302,7 +307,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val assignment1 = new Assignment
 		val assignment2 = new Assignment
 		val assignment3 = new Assignment
-		assignment3.markDeleted
+		assignment3.markDeleted()
 
 		assignment1.addSubmission(mySubmission)
 		assignment1.addSubmission(otherSubmission)
@@ -323,16 +328,16 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignments(0) should be (assignment1)
 	}
 
-	@Test def upstreamAssessmentGroups = transactional { tx =>
+	@Test def upstreamAssessmentGroups() = transactional { tx =>
 		val group = new UpstreamAssessmentGroup
 		group.moduleCode = "LA155-10"
 		group.occurrence = "A"
 		group.assessmentGroup = "A"
 		group.academicYear = new AcademicYear(2010)
-		group.members.staticIncludeUsers.addAll(Seq("rob","kev","bib").asJava)
+		group.members.staticUserIds = Seq("rob","kev","bib")
 
 		assignmentMembershipService.save(group)
-		session.flush
+		session.flush()
 
 		val ua = new AssessmentComponent
 		ua.departmentCode = "LA"
@@ -348,7 +353,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.getUpstreamAssessmentGroups(ua, new AcademicYear(2011)) should be (Seq())
 		assignmentMembershipService.getUpstreamAssessmentGroups(new AssessmentComponent, new AcademicYear(2010)) should be (Seq())
 
-		session.clear
+		session.clear()
 
 		val foundGroup = assignmentMembershipService.find(group)
 		foundGroup should be ('defined)
@@ -357,14 +362,14 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		foundGroup.get.occurrence = "B"
 
 		assignmentMembershipService.save(foundGroup.get)
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 
 		assignmentMembershipService.find(group) should be ('empty)
 		assignmentMembershipService.find(foundGroup.get) should be ('defined)
 	}
 
-	@Test def upstreamAssignments = transactional { tx =>
+	@Test def upstreamAssignments() = transactional { tx =>
 		val ua1 = new AssessmentComponent
 		ua1.departmentCode = "CH"
 		ua1.moduleCode = "CH101-10"
@@ -402,7 +407,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.save(ua3) should be (ua3)
 		assignmentMembershipService.save(ua4) should be (ua4)
 
-		session.flush
+		session.flush()
 
 		assignmentMembershipService.getAssessmentComponent(ua1.id) should be (Some(ua1))
 		assignmentMembershipService.getAssessmentComponent(ua4.id) should be (Some(ua4))
@@ -417,13 +422,13 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentMembershipService.getAssessmentComponents(Fixtures.department("cs")) should be (Seq())
 	}
 
-	@Test def assessmentGroups = transactional { tx =>
+	@Test def assessmentGroups() = transactional { tx =>
 		val upstreamGroup = new UpstreamAssessmentGroup
 		upstreamGroup.moduleCode = "ch101-10"
 		upstreamGroup.occurrence = "A"
 		upstreamGroup.assessmentGroup = "A"
 		upstreamGroup.academicYear = new AcademicYear(2010)
-		upstreamGroup.members.staticIncludeUsers.addAll(Seq("rob","kev","bib").asJava)
+		upstreamGroup.members.staticUserIds = Seq("rob","kev","bib")
 
 		assignmentMembershipService.save(upstreamGroup)
 
@@ -452,15 +457,15 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
 		session.save(group)
 
-		session.flush
+		session.flush()
 
 		assignmentMembershipService.getAssessmentGroup(group.id) should be (Some(group))
 
-		assignmentMembershipService.getAssessmentGroup(group.id) map { assignmentMembershipService.delete(_) }
+		assignmentMembershipService.getAssessmentGroup(group.id) map { assignmentMembershipService.delete }
 		assignmentMembershipService.getAssessmentGroup(group.id) should be ('empty)
 	}
 
-	@Test def submissions = transactional { tx =>
+	@Test def submissions() = transactional { tx =>
 		val assignment = newDeepAssignment()
 		val department = assignment.module.department
 
@@ -475,8 +480,8 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignment.addSubmission(submission)
 		submissionService.saveSubmission(submission)
 
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 
 		submissionService.getSubmission(submission.id) should be ('defined)
 		submissionService.getSubmission(submission.id).eq(Some(submission)) should be (false)
@@ -484,15 +489,15 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		submissionService.getSubmissionByUniId(assignment, "0070790") should be ('defined)
 		submissionService.getSubmissionByUniId(assignment, "0070790").eq(Some(submission)) should be (false)
 
-		submissionService.getSubmissionByUniId(assignment, "0070790") map { submissionService.delete(_) }
+		submissionService.getSubmissionByUniId(assignment, "0070790") map { submissionService.delete }
 
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 
 		submissionService.getSubmissionByUniId(assignment, "0070790") should be ('empty)
 	}
 
-	@Test def extensions = transactional { tx =>
+	@Test def extensions() = transactional { tx =>
 		val assignment = newDeepAssignment()
 		val department = assignment.module.department
 
@@ -507,16 +512,16 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignment.extensions.add(extension)
 		session.saveOrUpdate(extension)
 
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 
 		extensionService.getExtensionById(extension.id) should be ('defined)
 		extensionService.getExtensionById(extension.id).eq(Some(extension)) should be (false)
 
 		extensionService.getExtensionById(extension.id) map { session.delete(_) }
 
-		session.flush
-		session.clear
+		session.flush()
+		session.clear()
 
 		extensionService.getExtensionById(extension.id) should be ('empty)
 	}
@@ -541,7 +546,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		val assignment1 = newDeepAssignment("ch101")
 		assignment1.academicYear = year
 		assignment1.assignmentMembershipService = assignmentMembershipService
-		assignment1.members.userLookup = userLookup
+		assignment1.members.asInstanceOf[UserGroupCacheManager].underlying.asInstanceOf[UserGroup].userLookup = userLookup
 
 		val department1 = assignment1.module.department
 
@@ -553,7 +558,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignment2.module = assignment1.module
 		assignment2.academicYear = year
 		assignment2.assignmentMembershipService = assignmentMembershipService
-		assignment2.members.userLookup = userLookup
+		assignment2.members.asInstanceOf[UserGroupCacheManager].underlying.asInstanceOf[UserGroup].userLookup = userLookup
 
 		val department2 = assignment2.module.department
 
@@ -590,7 +595,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 
     val upstream3 = assignmentMembershipService.save(up3)
 
-    session.flush
+    session.flush()
 
     val upstreamAg1 = new UpstreamAssessmentGroup
     upstreamAg1.moduleCode = "ch101"
@@ -610,36 +615,30 @@ class AssignmentServiceTest extends PersistenceTestBase {
     upstreamAg3.academicYear = year
     upstreamAg3.occurrence = "C"
 
-    upstreamAg1.members.staticIncludeUsers.add("0000001")
-		upstreamAg1.members.staticIncludeUsers.add("0000002")
+    upstreamAg1.members.staticUserIds = Seq("0000001", "0000002")
 
-		upstreamAg2.members.staticIncludeUsers.add("0000002")
-		upstreamAg2.members.staticIncludeUsers.add("0000003")
+		upstreamAg2.members.staticUserIds = Seq("0000002", "0000003")
 
-		upstreamAg3.members.staticIncludeUsers.add("0000001")
-		upstreamAg3.members.staticIncludeUsers.add("0000002")
-		upstreamAg3.members.staticIncludeUsers.add("0000003")
-		upstreamAg3.members.staticIncludeUsers.add("0000004")
-		upstreamAg3.members.staticIncludeUsers.add("0000005")
+		upstreamAg3.members.staticUserIds = Seq("0000001", "0000002", "0000003", "0000004", "0000005")
 
 		assignmentMembershipService.save(upstreamAg1)
 		assignmentMembershipService.save(upstreamAg2)
 		assignmentMembershipService.save(upstreamAg3)
 
-		assignment1.members.addUser("manual1")
-		assignment1.members.addUser("manual2")
-		assignment1.members.addUser("manual3")
+		assignment1.members.knownType.addUserId("manual1")
+		assignment1.members.knownType.addUserId("manual2")
+		assignment1.members.knownType.addUserId("manual3")
 
-		assignment2.members.addUser("manual2")
-		assignment2.members.addUser("manual3")
-		assignment2.members.addUser("manual4")
+		assignment2.members.knownType.addUserId("manual2")
+		assignment2.members.knownType.addUserId("manual3")
+		assignment2.members.knownType.addUserId("manual4")
 
-		assignment1.members.excludeUser("student2")
-		assignment1.members.excludeUser("student3")
-		assignment1.members.excludeUser("manual3") // both inc and exc, but exc should take priority
+		assignment1.members.knownType.excludeUserId("student2")
+		assignment1.members.knownType.excludeUserId("student3")
+		assignment1.members.knownType.excludeUserId("manual3") // both inc and exc, but exc should take priority
 
-		assignment2.members.excludeUser("student4")
-		assignment2.members.excludeUser("student3")
+		assignment2.members.knownType.excludeUserId("student4")
+		assignment2.members.knownType.excludeUserId("student3")
 
 		val ag1 = new AssessmentGroup
 		ag1.membershipService = assignmentMembershipService
@@ -667,24 +666,24 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		assignmentService.save(assignment1)
 		assignmentService.save(assignment2)
 
-		session.flush
+		session.flush()
 
 		val universityIdGroup = UserGroup.ofUniversityIds
 		universityIdGroup.userLookup = userLookup
-		universityIdGroup.addUser("0000001")
-		universityIdGroup.addUser("0000010")
-		universityIdGroup.addUser("0000015")
-		universityIdGroup.excludeUser("0000009")
+		universityIdGroup.addUserId("0000001")
+		universityIdGroup.addUserId("0000010")
+		universityIdGroup.addUserId("0000015")
+		universityIdGroup.excludeUserId("0000009")
 
 		val userIdGroup = UserGroup.ofUsercodes
 		userIdGroup.userLookup = userLookup
-		userIdGroup.addUser("student1")
-		userIdGroup.addUser("manual5")
-		userIdGroup.addUser("manual10")
-		userIdGroup.excludeUser("manual4")
+		userIdGroup.addUserId("student1")
+		userIdGroup.addUserId("manual5")
+		userIdGroup.addUserId("manual10")
+		userIdGroup.excludeUserId("manual4")
 	}
 
-	@Test def getEnrolledAssignments { transactional { tx =>
+	@Test def enrolledAssignments() { transactional { tx =>
 		new AssignmentMembershipFixture() {
 			val ams = assignmentMembershipService
 
@@ -701,7 +700,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		}
 	}}
 
-	@Test def getAssignmentWhereMarker = transactional { tx =>
+	@Test def assignmentWhereMarker() = transactional { tx =>
 		val department = new Department
 		department.code = "in"
 
@@ -716,19 +715,19 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		workflow2.name = "mw2"
 		workflow2.department = department
 
-		workflow1.firstMarkers.addUser("cuscav")
-		workflow1.firstMarkers.addUser("cusebr")
-		workflow1.firstMarkers.addUser("cuscao")
+		workflow1.firstMarkers.addUserId("cuscav")
+		workflow1.firstMarkers.addUserId("cusebr")
+		workflow1.firstMarkers.addUserId("cuscao")
 
-		workflow2.firstMarkers.addUser("cuscav")
-		workflow2.firstMarkers.addUser("curef")
-		workflow2.secondMarkers.addUser("cusfal")
-		workflow2.secondMarkers.addUser("cusebr")
+		workflow2.firstMarkers.addUserId("cuscav")
+		workflow2.firstMarkers.addUserId("curef")
+		workflow2.secondMarkers.addUserId("cusfal")
+		workflow2.secondMarkers.addUserId("cusebr")
 
 		val assignment1 = new Assignment
 		val assignment2 = new Assignment
 		val assignment3 = new Assignment
-		assignment3.markDeleted
+		assignment3.markDeleted()
 
 		assignment1.markingWorkflow = workflow1
 		assignment2.markingWorkflow = workflow2
@@ -815,7 +814,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 	@Transactional
 	@Test def countFullFeedback() {
 		val assignment = assignmentService.getAssignmentById("1").get
-		assignment.id should not be(null)
+		assignment.id should not be null
 
 		def createFeedback(numberOfAttachments:Int=0, mark:Option[Int]=None, grade:Option[String]=None) = {
 			val feedback = new Feedback()
@@ -838,6 +837,51 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		// Multiple attachments shouldn't increase the count, and
 		// feedback with no attachments should be included.
 		feedbackService.countFullFeedback(assignment) should be (3)
+	}
+
+	@Transactional
+	@Test def submissionsForAssignmentsBetweenDates() {
+		val universityId = "1234"
+
+		val startDate = new DateTime(2014, 3, 1, 0, 0, 0)
+		val endDate = new DateTime(2014, 3, 8, 0, 0, 0)
+
+		val assignmentBefore = new Assignment
+		assignmentBefore.closeDate = startDate.minusDays(1)
+		val assignmentInside = new Assignment
+		assignmentInside.closeDate = startDate
+		val assignmentAfter = new Assignment
+		assignmentAfter.closeDate = endDate
+		val assignmentNoSubmission = new Assignment
+		assignmentNoSubmission.closeDate = startDate.plusDays(1)
+
+		val submissionBefore = new Submission
+		submissionBefore.universityId = universityId
+		submissionBefore.userId = universityId
+		submissionBefore.assignment = assignmentBefore
+		assignmentBefore.submissions.add(submissionBefore)
+		val submissionInside = new Submission
+		submissionInside.universityId = universityId
+		submissionInside.userId = universityId
+		submissionInside.assignment = assignmentInside
+		assignmentInside.submissions.add(submissionInside)
+		val submissionAfter = new Submission
+		submissionAfter.universityId = universityId
+		submissionAfter.userId = universityId
+		submissionAfter.assignment = assignmentAfter
+		assignmentAfter.submissions.add(submissionAfter)
+
+		session.save(assignmentBefore)
+		session.save(assignmentInside)
+		session.save(assignmentAfter)
+		session.save(assignmentNoSubmission)
+		session.save(submissionBefore)
+		session.save(submissionInside)
+		session.save(submissionAfter)
+
+		val result = assignmentService.getSubmissionsForAssignmentsBetweenDates(universityId, startDate, endDate)
+		result.size should be (1)
+		result.head should be (submissionInside)
 	}
 
 }

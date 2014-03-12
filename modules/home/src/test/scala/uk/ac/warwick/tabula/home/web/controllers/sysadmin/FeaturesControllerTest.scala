@@ -4,7 +4,6 @@ import uk.ac.warwick.tabula.{FeaturesMessage, TestBase, Features}
 import org.scalatest.mock.MockitoSugar
 import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.util.queue.conversion.{AnnotationJsonObjectConverter, JsonMessageConverter}
-import uk.ac.warwick.tabula.services.permissions.PermissionsCacheBusterMessage
 import uk.ac.warwick.tabula.services.MaintenanceModeMessage
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 

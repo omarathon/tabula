@@ -13,4 +13,4 @@ ${key} --  ${failedUploads[key]}
 </#if>
 You may see the results on the list of submissions page, which you can find here:
 
-<@url page=path context="/coursework" />
+<@url page=path />

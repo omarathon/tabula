@@ -14,17 +14,19 @@ class MeetingRecordDaoTest extends PersistenceTestBase {
 
 	// This test for memberdao maybe shouldn't be involving meetingrecorddao.
 	val memberDao = new MemberDaoImpl
+	val relationshipDao = new RelationshipDaoImpl
 	val meetingDao = new MeetingRecordDaoImpl
 
 	@Before
 	def setup() {
 		memberDao.sessionFactory = sessionFactory
+		relationshipDao.sessionFactory = sessionFactory
 		meetingDao.sessionFactory = sessionFactory
 	}
 
 	@Test def createAndList = transactional { tx =>
 		val relationshipType = StudentRelationshipType("tutor", "tutor", "personal tutor", "personal tutee")
-		memberDao.saveOrUpdate(relationshipType)
+		relationshipDao.saveOrUpdate(relationshipType)
 		
 		val student = Fixtures.student(universityId = "1000001", userId="student")
 		memberDao.saveOrUpdate(student)
@@ -33,7 +35,7 @@ class MeetingRecordDaoTest extends PersistenceTestBase {
 		val relationship = ExternalStudentRelationship("Professor A Tutor", relationshipType, student)
 
 		memberDao.saveOrUpdate(creator)
-		memberDao.saveOrUpdate(relationship)
+		relationshipDao.saveOrUpdate(relationship)
 
 		val relSet: Set[StudentRelationship] = Set(relationship)
 

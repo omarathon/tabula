@@ -35,7 +35,7 @@ import uk.ac.warwick.tabula.data.model.Gender.{Unspecified, Female, Male}
  */
 
 object FormField {
-	final val FormFieldMaxSize = 4000
+	final val FormFieldMaxSize = 32768
 }
 
 @Entity @Access(AccessType.FIELD)
@@ -212,7 +212,7 @@ class MarkerSelectField extends FormField with SimpleValue[String] {
 
 	def markers:Seq[User] = {
 		if (assignment.markingWorkflow == null) Seq()
-		else assignment.markingWorkflow.firstMarkers.includeUsers.map(userLookup.getUserByUserId(_))
+		else assignment.markingWorkflow.firstMarkers.users
 	}
 
 	override def validate(value: FormValue, errors: Errors) {

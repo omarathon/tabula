@@ -1,15 +1,9 @@
 package uk.ac.warwick.tabula.data
 import org.springframework.stereotype.Repository
-import org.hibernate.SessionFactory
-import model.Module
-import org.hibernate.`type`._
-import org.springframework.beans.factory.annotation.Autowired
-import uk.ac.warwick.tabula.JavaImports._
-import model.Department
-import org.hibernate.criterion.Order
-import uk.ac.warwick.tabula.roles.ModuleManagerRoleDefinition
-import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, Department}
+import org.hibernate.criterion.{Projections, Order}
 import org.joda.time.DateTime
+import org.hibernate.criterion.Restrictions._
 
 trait ModuleDao {
 	def allModules: Seq[Module]
@@ -17,6 +11,9 @@ trait ModuleDao {
 	def getByCode(code: String): Option[Module]
 	def getById(id: String): Option[Module]
 	def stampMissingRows(dept: Department, seenCodes: Seq[String]): Int
+	def hasAssignments(module: Module): Boolean
+	def findModulesNamedLike(query: String): Seq[Module]
+
 }
 
 @Repository
@@ -53,6 +50,23 @@ class ModuleDaoImpl extends ModuleDao with Daoisms {
 			.setParameter("now", DateTime.now)
 			.setEntity("department", dept)
 			.executeUpdate()
+	}
+
+	def hasAssignments(module: Module): Boolean = {
+		session.newCriteria[Assignment]
+			.add(is("module", module))
+			.project[Number](Projections.rowCount())
+			.uniqueResult.get.intValue() > 0
+	}
+
+	def findModulesNamedLike(query: String): Seq[Module] = {
+		session.newCriteria[Module]
+			.add(disjunction()
+			.add(like("code", s"%${query.toLowerCase}%").ignoreCase)
+			.add(like("name", s"%${query.toLowerCase}%").ignoreCase)
+			)
+			.addOrder(Order.asc("code"))
+			.setMaxResults(20).seq
 	}
 
 }

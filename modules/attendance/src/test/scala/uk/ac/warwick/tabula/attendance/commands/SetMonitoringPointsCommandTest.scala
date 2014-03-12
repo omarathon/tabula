@@ -1,6 +1,6 @@
 package uk.ac.warwick.tabula.attendance.commands
 
-import uk.ac.warwick.tabula.{AcademicYear, Fixtures, CurrentUser, TestBase, Mockito}
+import uk.ac.warwick.tabula.{MockUserLookup, AcademicYear, Fixtures, CurrentUser, TestBase, Mockito}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringCheckpoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.data.model.{Department, Route}
 import uk.ac.warwick.tabula.JavaImports._
@@ -16,12 +16,14 @@ import uk.ac.warwick.util.termdates.Term
 class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 
 	val thisProfileService = mock[ProfileService]
+	val thisUserLookup = new MockUserLookup
 	val thisMonitoringPointService = mock[MonitoringPointService]
 
 	trait CommandTestSupport extends SetMonitoringCheckpointState with SetMonitoringCheckpointCommandValidation
 		with MonitoringPointServiceComponent with ProfileServiceComponent with SecurityServiceComponent with TermServiceComponent {
 		val monitoringPointService = thisMonitoringPointService
 		val profileService = thisProfileService
+		val userLookup = thisUserLookup
 		val securityService = mock[SecurityService]
 		val termService = mock[TermService]
 		def routesForPermission(user: CurrentUser, p: Permission, dept: Department): Set[Route] = {
@@ -80,7 +82,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		thisMonitoringPointService.getPointSetForStudent(student1, thisAcademicYear) returns Option(monitoringPointSet1)
 
 		val term = mock[Term]
-		term.getTermTypeAsString() returns ("Autumn")
+		term.getTermTypeAsString returns "Autumn"
 
 	}
 
@@ -89,6 +91,27 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
 		command.onBind(null)
 		command.studentsStateAsScala should not be null
+	}}
+
+	@Test
+	def success() { new Fixture{
+		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
+
+		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
+		command.termService.getTermFromAcademicWeekIncludingVacations(pointSet1Point1.validFromWeek, monitoringPointSet1.academicYear) returns term
+		command.monitoringPointService.findNonReportedTerms(Seq(student1), monitoringPointSet1.academicYear) returns Seq("Autumn")
+
+		command.studentsState = JHashMap(
+			student1 -> JHashMap(pointSet1Point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
+		)
+		var binder = new WebDataBinder(command, "command")
+		binder.setConversionService(conversionService)
+		command.onBind(null)
+		var errors = binder.getBindingResult
+		command.validate(errors)
+		errors.hasFieldErrors should be (false)
+		// TAB-2025
+		there was no(command.termService).getTermFromAcademicWeek(any[Int], any[AcademicYear], any[Boolean])
 	}}
 
 	@Test def validateNoSuchPointForStudent() { new Fixture {
@@ -106,27 +129,11 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		errors.getFieldError(s"studentsState[${student1.universityId}][${pointSet2Point1.id}]") should not be null
 	}}
 
-	@Test def validateNoRoutePermission() { new Fixture {
-		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
-		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
-		command.studentsState = JHashMap(
-			student1 -> JHashMap(pointSet1Point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
-		)
-		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns false
-		var binder = new WebDataBinder(command, "command")
-		binder.setConversionService(conversionService)
-		command.onBind(null)
-		var errors = binder.getBindingResult
-		command.validate(errors)
-		errors.hasFieldErrors should be (true)
-		errors.getFieldError(s"studentsState[${student1.universityId}][${pointSet1Point1.id}]") should not be null
-	}}
-
 	@Test def validateBeforeValidFromAttended() { new Fixture {
 		val command = new SetMonitoringCheckpointCommand(dept, templatePoint, user, JArrayList()) with CommandTestSupport
 		command.termService.getAcademicWeekForAcademicYear(any[DateTime], Matchers.eq(AcademicYear(2013))) returns 5
 
-		command.monitoringPointService.findNonReportedTerms(Seq(student1), monitoringPointSet1.academicYear) returns (Seq("Spring"))
+		command.monitoringPointService.findNonReportedTerms(Seq(student1), monitoringPointSet1.academicYear) returns Seq("Spring")
 
 		command.studentsState = JHashMap(
 			student1 -> JHashMap(pointSet1Point1 -> AttendanceState.Attended.asInstanceOf[AttendanceState])
@@ -134,7 +141,7 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns true
 		pointSet1Point1.validFromWeek = 10
 
-		command.termService.getTermFromAcademicWeek(pointSet1Point1.validFromWeek, monitoringPointSet1.academicYear) returns (term)
+		command.termService.getTermFromAcademicWeekIncludingVacations(pointSet1Point1.validFromWeek, monitoringPointSet1.academicYear) returns term
 
 		var binder = new WebDataBinder(command, "command")
 		binder.setConversionService(conversionService)
@@ -154,8 +161,8 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns true
 		pointSet1Point1.validFromWeek = 10
 
-		command.termService.getTermFromAcademicWeek(pointSet1Point1.validFromWeek, monitoringPointSet1.academicYear) returns (term)
-		command.monitoringPointService.findNonReportedTerms(Seq(student1), monitoringPointSet1.academicYear) returns (Seq("Spring"))
+		command.termService.getTermFromAcademicWeekIncludingVacations(pointSet1Point1.validFromWeek, monitoringPointSet1.academicYear) returns term
+		command.monitoringPointService.findNonReportedTerms(Seq(student1), monitoringPointSet1.academicYear) returns Seq("Spring")
 
 		var binder = new WebDataBinder(command, "command")
 		binder.setConversionService(conversionService)
@@ -175,8 +182,8 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns true
 		pointSet1Point1.validFromWeek = 10
 
-		command.termService.getTermFromAcademicWeek(pointSet1Point1.validFromWeek, monitoringPointSet1.academicYear) returns (term)
-		command.monitoringPointService.findNonReportedTerms(Seq(student1), monitoringPointSet1.academicYear) returns (Seq("Autumn"))
+		command.termService.getTermFromAcademicWeekIncludingVacations(pointSet1Point1.validFromWeek, monitoringPointSet1.academicYear) returns term
+		command.monitoringPointService.findNonReportedTerms(Seq(student1), monitoringPointSet1.academicYear) returns Seq("Autumn")
 
 		var binder = new WebDataBinder(command, "command")
 		binder.setConversionService(conversionService)
@@ -195,8 +202,8 @@ class SetMonitoringPointsCommandTest extends TestBase with Mockito {
 		command.securityService.can(user, Permissions.MonitoringPoints.Record, route) returns true
 		pointSet1Point1.validFromWeek = 10
 
-		command.termService.getTermFromAcademicWeek(pointSet1Point1.validFromWeek, monitoringPointSet1.academicYear) returns (term)
-		command.monitoringPointService.findNonReportedTerms(Seq(student1), monitoringPointSet1.academicYear) returns (Seq("Autumn"))
+		command.termService.getTermFromAcademicWeekIncludingVacations(pointSet1Point1.validFromWeek, monitoringPointSet1.academicYear) returns term
+		command.monitoringPointService.findNonReportedTerms(Seq(student1), monitoringPointSet1.academicYear) returns Seq("Autumn")
 
 		var binder = new WebDataBinder(command, "command")
 		binder.setConversionService(conversionService)

@@ -9,50 +9,68 @@ import org.mockito.Mockito._
 import org.mockito.Matchers._
 import scala.collection.JavaConverters._
 import uk.ac.warwick.userlookup.User
+import uk.ac.warwick.tabula.services.SmallGroupService
 
 class SmallGroupTest extends TestBase with Mockito {
 
-  val event = new SmallGroupEvent()
-  val equivalentEvent = new SmallGroupEvent()
-  val notEquivalentEvent = new SmallGroupEvent()
+  val event = newEventWithMockedServices
+
+  val equivalentEvent = newEventWithMockedServices
+
+  val notEquivalentEvent = newEventWithMockedServices
   notEquivalentEvent.day = DayOfWeek.Monday
+
+	def newSmallGroupWithMockedServices = {
+		val group = new SmallGroup()
+		group.permissionsService = mock[PermissionsService]
+		group.smallGroupService = None
+		group
+	}
+
+	def newEventWithMockedServices = {
+		val event = new SmallGroupEvent()
+		event.smallGroupService = None
+		event.permissionsService = mock[PermissionsService]
+		event
+	}
 
   @Test
   def hasEquivalentEventsToReturnsTrueForSameGroup() {
-    val group = new SmallGroup()
+    val group = newSmallGroupWithMockedServices
+
     group.hasEquivalentEventsTo(group) should be(true)
   }
 
   @Test
   def hasEquivalentEventsToReturnsTrueForGroupsWithNoEvents(){
-    val group = new SmallGroup()
-    group.hasEquivalentEventsTo(new SmallGroup()) should be (true)
+    val group = newSmallGroupWithMockedServices
+    group.hasEquivalentEventsTo(newSmallGroupWithMockedServices) should be (true)
   }
 
   @Test
   def hasEquivalentEventsToReturnsTrueForGroupsWithEquivalentEvents(){
 
-    val group = new SmallGroup()
+    val group = newSmallGroupWithMockedServices
     group.events = JArrayList(event)
-    val group2 = new SmallGroup()
+    val group2 = newSmallGroupWithMockedServices
     group2.events = JArrayList(equivalentEvent)
     group.hasEquivalentEventsTo(group2) should be (true)
   }
 
   @Test
   def hasEquivalentEventsToReturnsFalseForGroupsWithNonEquivalentEvents(){
-    val group = new SmallGroup()
+    val group = newSmallGroupWithMockedServices
     group.events = JArrayList(event)
-    val group2 = new SmallGroup()
+    val group2 = newSmallGroupWithMockedServices
     group2.events = JArrayList(notEquivalentEvent)
     group.hasEquivalentEventsTo(group2) should be (false)
   }
 
   @Test
   def hasEquivalentEventsToReturnsFalseForGroupsWithSubsetOfEvents(){
-    val group = new SmallGroup()
+    val group = newSmallGroupWithMockedServices
     group.events = JArrayList(event)
-    val group2 = new SmallGroup()
+    val group2 = newSmallGroupWithMockedServices
     group2.events = JArrayList(event,notEquivalentEvent)
     group.hasEquivalentEventsTo(group2) should be (false)
   }
@@ -60,8 +78,9 @@ class SmallGroupTest extends TestBase with Mockito {
   @Test
   def duplicateCopiesAllFields(){
 
-    val source = new SmallGroup
-    val clonedEvent = new SmallGroupEvent
+    val source = newSmallGroupWithMockedServices
+    val clonedEvent = newEventWithMockedServices
+
     // can't use a mockito mock because the final equals method on GeneratedId causes mockito to
     // blow up
     val event:SmallGroupEvent = new SmallGroupEvent{
@@ -75,9 +94,12 @@ class SmallGroupTest extends TestBase with Mockito {
     source.name = "name"
     source.groupSet = sourceSet
     source.permissionsService = mock[PermissionsService]
+
 		// would be nice to use a mock here, but they don't work well with GeneratedId classes
-    source._studentsGroup = UserGroup.ofUniversityIds
-		source._studentsGroup.includeUsers = JArrayList("test user")
+		val studentsGroup = UserGroup.ofUniversityIds
+		studentsGroup.addUserId("test user")
+    source.students = studentsGroup
+
     source.deleted = false
     source.id = "123"
     source.events = JArrayList(event)
@@ -108,7 +130,7 @@ class SmallGroupTest extends TestBase with Mockito {
 	def isFullReportsFullnessWhenGroupSizeLimitsEnabled(){
 
 		// set up a group with 1 member, with group size limits enabled
-		val group = new SmallGroup()
+		val group = newSmallGroupWithMockedServices
 		group.groupSet = new SmallGroupSet()
 		group.groupSet.defaultMaxGroupSizeEnabled = true
 		group.students.add(new User("test") {{ setWarwickId("00000001") }})
@@ -129,7 +151,7 @@ class SmallGroupTest extends TestBase with Mockito {
 	def isFullIsFalseWhenGroupSizeLimitsNotEnabled(){
 
 		// set up a group with 1 member, with group size limits enabled
-		val group = new SmallGroup()
+		val group = newSmallGroupWithMockedServices
 		group.groupSet = new SmallGroupSet()
 		group.groupSet.defaultMaxGroupSizeEnabled = false
 		group.students.add(new User("test"))

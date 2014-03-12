@@ -6,4 +6,4 @@ if we end up changing any of them.
 Override this in your module
 
 -->
-<#macro home><@url page="/" /></#macro>
+<#macro home><@url context="/" page="/" /></#macro>

@@ -3,7 +3,8 @@ package uk.ac.warwick.tabula.attendance.commands.manage
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import scala.collection.mutable
-import uk.ac.warwick.tabula.data.model.{Department, MeetingFormat, StudentRelationshipType}
+import uk.ac.warwick.tabula.data.model.{Assignment, Module, Department, MeetingFormat, StudentRelationshipType}
+import uk.ac.warwick.tabula.JavaImports._
 
 trait MonitoringPointValidation {
 
@@ -48,8 +49,48 @@ trait MonitoringPointValidation {
 			errors.rejectValue(meetingFormatsBindPoint, "monitoringPoint.meetingType.meetingFormats.empty")
 		}
 
-		if (meetingQuantity == 0) {
-			errors.rejectValue(meetingQuantityBindPoint, "monitoringPoint.meetingType.meetingQuantity")
+		if (meetingQuantity < 1) {
+			errors.rejectValue(meetingQuantityBindPoint, "monitoringPoint.pointType.quantity")
+		}
+	}
+
+	def validateTypeSmallGroup(errors: Errors,
+		smallGroupEventModules: JSet[Module], smallGroupEventModulesBindPoint: String,
+		isAnySmallGroupEventModules: Boolean,
+		smallGroupEventQuantity: JInteger, smallGroupEventQuantityBindPoint: String,
+		dept: Department
+	) {
+
+		if (smallGroupEventQuantity < 1) {
+			errors.rejectValue(smallGroupEventQuantityBindPoint, "monitoringPoint.pointType.quantity")
+		}
+
+		if (!isAnySmallGroupEventModules && (smallGroupEventModules == null || smallGroupEventModules.size == 0)) {
+			errors.rejectValue(smallGroupEventModulesBindPoint, "monitoringPoint.smallGroupType.smallGroupModules.empty")
+		}
+
+	}
+
+	def validateTypeAssignmentSubmission(errors: Errors,
+		isSpecificAssignments: Boolean,
+		assignmentSubmissionQuantity: JInteger, assignmentSubmissionQuantityBindPoint: String,
+		assignmentSubmissionModules: JSet[Module], assignmentSubmissionModulesBindPoint: String,
+		assignmentSubmissionAssignments: JSet[Assignment], assignmentSubmissionAssignmentsBindPoint: String,
+		dept: Department
+	) {
+
+		if (isSpecificAssignments) {
+			if (assignmentSubmissionAssignments == null || assignmentSubmissionAssignments.isEmpty) {
+				errors.rejectValue(assignmentSubmissionAssignmentsBindPoint, "monitoringPoint.assingmentSubmissionType.assignmentSubmissionAssignments.empty")
+			}
+		} else {
+			if (assignmentSubmissionQuantity < 1) {
+				errors.rejectValue(assignmentSubmissionQuantityBindPoint, "monitoringPoint.pointType.quantity")
+			}
+
+			if (assignmentSubmissionModules == null || assignmentSubmissionModules.isEmpty) {
+				errors.rejectValue(assignmentSubmissionModulesBindPoint, "monitoringPoint.assingmentSubmissionType.assignmentSubmissionModules.empty")
+			}
 		}
 	}
 }

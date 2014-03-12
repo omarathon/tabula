@@ -11,7 +11,7 @@
 
 	<groupId>uk.ac.warwick.tabula</groupId>
 	<artifactId>tabula-project</artifactId>
-	<version>61</version>
+	<version>62</version>
 	<packaging>pom</packaging>
 
 	<name>Tabula</name>
@@ -33,7 +33,7 @@
 		<org.apache.poi.version>3.8</org.apache.poi.version>
 		<org.apache.tiles.version>2.2.2</org.apache.tiles.version>
 
-		<warwickutils.version>20131003</warwickutils.version>
+		<warwickutils.version>20140225</warwickutils.version>
 		<surefire.version>2.14.1</surefire.version>
 		<recompileMode><!-- incremental --></recompileMode>
 
@@ -455,6 +455,16 @@
 		</repository>
 	</repositories>
 
+	<pluginRepositories>
+		<pluginRepository>
+			<id>zact-snaphost</id>
+			<url>http://zact.googlecode.com/svn/maven/snapshot-repository</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</pluginRepository>
+	</pluginRepositories>
+
 	<!-- ====================================================================== -->
 	<!-- R E P O R T I N G -->
 	<!-- ====================================================================== -->
@@ -465,15 +475,28 @@
 				<artifactId>scala-maven-plugin</artifactId>
 				<version>3.1.3</version>
 			</plugin>
+
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>2.5.2</version>
+				<version>2.6</version>
 				<configuration>
 					<aggregate>true</aggregate>
 					<formats>
 						<format>html</format>
 						<format>xml</format>
+					</formats>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>undercover</groupId>
+				<artifactId>undercover-maven-plugin</artifactId>
+				<version>0.8.5-SNAPSHOT</version>
+				<configuration>
+					<formats>
+						<format>html</format>
+						<format>coberturaxml</format>
 					</formats>
 				</configuration>
 			</plugin>
@@ -845,25 +868,6 @@
 								<pluginExecution>
 									<pluginExecutionFilter>
 										<groupId>
-											org.reflections
-										</groupId>
-										<artifactId>
-											reflections-maven
-										</artifactId>
-										<versionRange>
-											[0.9.8,)
-										</versionRange>
-										<goals>
-											<goal>reflections</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
 											org.apache.maven.plugins
 										</groupId>
 										<artifactId>
@@ -1014,11 +1018,6 @@
 			<groupId>org.scala-lang</groupId>
 			<artifactId>scala-library</artifactId>
 			<version>${scala.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>github.com.ingoem</groupId>
-			<artifactId>scala-react_${scala.major.version}</artifactId>
-			<version>0.9</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jsuereth</groupId>

@@ -22,7 +22,7 @@ import uk.ac.warwick.tabula.data.model.StudentRelationshipType
 object ReflectionHelper {
 	
 	Vfs.addDefaultURLTypes(new SillyJbossVfsUrlType)
-	lazy val reflections = Reflections.collect()
+	lazy val reflections = new Reflections("uk.ac.warwick.tabula")
 	
 	private def subtypesOf[A : ClassTag] = reflections
 			.getSubTypesOf(classTag[A].runtimeClass.asInstanceOf[Class[A]])

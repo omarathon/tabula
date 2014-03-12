@@ -26,16 +26,18 @@ abstract class AttendanceNote extends GeneratedId with FormattedHtml {
 	def escapedNote: String = formattedHtml(note)
 
 	def truncatedNote: String = {
-		Option(note).map{ note =>
+		val truncatedNote = Option(note).map{ note =>
 			val breakIterator: BreakIterator = BreakIterator.getWordInstance
 			breakIterator.setText(note)
 			val length = Math.min(note.length, breakIterator.following(Math.min(50, note.length)))
 			if (length < 0 || length == note.length) {
 				note
 			} else {
-				note.substring(0, length) + "&hellip;"
+				note.substring(0, length) + 0x2026.toChar // 0x2026 being unicode horizontal ellipsis (TAB-1891)
 			}
 		}.getOrElse("")
+
+		truncatedNote
 	}
 
 	@OneToOne(cascade=Array(CascadeType.ALL), fetch = FetchType.LAZY)

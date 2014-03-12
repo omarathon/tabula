@@ -36,9 +36,7 @@ trait ExtensionFixture extends Mockito{
 	userLookup.users = Map("admin" -> admin, "admin2" -> admin2, "admin3" -> admin3)
 	val extensionManagers = UserGroup.ofUsercodes
 	extensionManagers.userLookup = userLookup
-	extensionManagers.includeUsers.add("admin")
-	extensionManagers.includeUsers.add("admin2")
-	extensionManagers.includeUsers.add("admin3")
+	extensionManagers.includedUserIds = Seq("admin", "admin2", "admin3")
 
 	val department = new Department
 	val permissionsService = mock[PermissionsService]
@@ -59,7 +57,7 @@ trait ExtensionFixture extends Mockito{
 	extension.expiryDate = new DateTime(2013, 8, 23, 12, 0)
 	extension.requestedExpiryDate = new DateTime(2013, 8, 23, 12, 0)
 	extension.reason = "My hands have turned to flippers. Like the ones that dolphins have. It makes writing and typing super hard. Pity me."
-	extension.approvalComments = "That sounds awful. Have an extra month. By then you should be able to write as well as any Cetacea."
+	extension.reviewerComments = "That sounds awful. Have an extra month. By then you should be able to write as well as any Cetacea."
 	extension.assignment = assignment
 	assignment.extensions add extension
 }

@@ -15,13 +15,16 @@ class TimetableControllerTest extends TestBase{
 			FullCalendarEvent(s"Test event $i", false, 0L,0L,"","","","","","","","","","",s"module$j")
 		}
 
-		val coloured = new TimetableController().colourEvents(events)
+		// Add a Busy event at the end
+		val coloured = new TimetableController().colourEvents(events :+ FullCalendarEvent("Busy", false, 0L,0L,"","","","","","","","","","", ""))
 
 		// every event should have a colour
 		coloured.find(_.backgroundColor=="") should not be('defined)
 
 		// there should be 3 colours in use
-		coloured.map(_.backgroundColor).distinct.size should be(3)
+		coloured.map(_.backgroundColor).distinct.size should be(4)
+
+		coloured.last.backgroundColor should be ("#bbb")
 	}
 
 }

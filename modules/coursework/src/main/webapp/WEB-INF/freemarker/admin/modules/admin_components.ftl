@@ -134,7 +134,7 @@
 
 				<#if assignment.hasReleasedFeedback || features.submissions>
 					<p class="feedback-published">
-						<#assign urlforstudents><@url page="/module/${module.code}/${assignment.id}"/></#assign>
+						<#assign urlforstudents><@routes.assignment assignment /></#assign>
 						<a href="${urlforstudents}" class="linkForStudents">Link for students</a>
 						<a class="use-popover" id="popover-${assignment.id}" data-html="true"
 							data-original-title="<span class='text-info'><strong>Link for students</strong></span>"
@@ -233,7 +233,7 @@
 					</li>
 
 					<li>
-						<#assign archive_url><@url page="/admin/module/${module.code}/assignments/${assignment.id}/archive" /></#assign>
+						<#assign archive_url><@url page="/coursework/admin/module/${module.code}/assignments/${assignment.id}/archive" /></#assign>
 						<#if assignment.archived>
 							<#assign archive_caption>Unarchive assignment</#assign>
 						<#else>
@@ -317,7 +317,7 @@
 
 					<#if assignment.canPublishFeedback>
 						<li>
-							<#assign publishfeedbackurl><@url page="/admin/module/${module.code}/assignments/${assignment.id}/publish" /></#assign>
+							<#assign publishfeedbackurl><@url page="/coursework/admin/module/${module.code}/assignments/${assignment.id}/publish" /></#assign>
 							<@fmt.permission_button permission='Feedback.Publish' scope=module action_descr='release feedback to students' href=publishfeedbackurl data_attr='data-container=body'>
 								<i class="icon-envelope-alt"></i> Publish feedback
 							</@fmt.permission_button>

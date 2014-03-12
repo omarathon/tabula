@@ -7,10 +7,10 @@ import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.{CurrentUser, Fixtures, AppContextTestBase, Mockito}
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.{AnonymousUser, User}
-import uk.ac.warwick.tabula.services.{NotificationService, UserLookupService}
+import uk.ac.warwick.tabula.services.{UserGroupCacheManager, NotificationService, UserLookupService}
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.model.{Notification, UserGroup}
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import org.junit.Before
 import uk.ac.warwick.tabula.coursework.web.Routes.admin.assignment.extension
 
@@ -146,8 +146,8 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 			val cmd = new EditAssignmentCommand(f.module, f.assignment, f.currentUser)
 			cmd.userLookup = userLookup
 			cmd.members match {
-				case ug: UserGroup => ug.userLookup = userLookup
-				case _ => fail("Expected to be able to set the userlookup on the usergroup.")
+				case ug: UserGroupCacheManager => ug.underlying.asInstanceOf[UserGroup].userLookup = userLookup
+				case ug => fail(s"Expected to be able to set the userlookup on the usergroup $ug.")
 			}
 
 			// have one user, add a new one and check re-add does nothing
@@ -214,8 +214,8 @@ class ModifyAssignmentCommandTest extends AppContextTestBase with Mockito {
 		extension2.requestedOn = sometime
 		extension2.requestedExpiryDate = sometime.plusWeeks(8)
 		extension2.assignment = assignment
-		extension2.approved = true
-		extension2.approvedOn = sometime.plusDays(5)
+		extension2.approve()
+		extension2.reviewedOn = sometime.plusDays(5)
 
 		assignment.allowExtensions = true
 		assignment.extensions.add(extension1)

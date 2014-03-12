@@ -6,4 +6,4 @@ ${meetingRecord.title} on ${dateFormatter.print(meetingRecord.meetingDate)}
 Because: "${reason}"
 </#if>
 
-Please visit <@url page=profileLink context="/profiles" /> to ${nextActionDescription}.
+Please visit <@url page=profileLink /> to ${nextActionDescription}.

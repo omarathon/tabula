@@ -115,6 +115,7 @@ trait SharedAssignmentProperties extends BooleanAssignmentProperties with FindAs
 		allowExtensions = assignment.allowExtensions
 		allowExtensionRequests = assignment.allowExtensionRequests
 		summative = assignment.summative
+		dissertation = assignment.dissertation
 		feedbackTemplate = assignment.feedbackTemplate
 		markingWorkflow = assignment.markingWorkflow
 

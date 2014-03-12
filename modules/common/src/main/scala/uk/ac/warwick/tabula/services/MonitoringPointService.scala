@@ -9,6 +9,8 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.{AcademicYear, CurrentUser}
 import org.joda.time.DateTime
 import uk.ac.warwick.util.termdates.Term
+import uk.ac.warwick.tabula.data.model.groups.{DayOfWeek, SmallGroupEventAttendance}
+import uk.ac.warwick.tabula.commands.MemberOrUser
 
 trait MonitoringPointServiceComponent {
 	def monitoringPointService: MonitoringPointService
@@ -238,7 +240,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 
 	def studentAlreadyReportedThisTerm(student:StudentMember, point:MonitoringPoint): Boolean = {
 		val nonReportedTerms = findNonReportedTerms(Seq(student), point.pointSet.academicYear)
-		!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.academicYear).getTermTypeAsString)
+		!nonReportedTerms.contains(termService.getTermFromAcademicWeekIncludingVacations(point.validFromWeek, point.pointSet.academicYear).getTermTypeAsString)
 	}
 
 	def hasAnyPointSets(department: Department): Boolean = {
@@ -263,6 +265,7 @@ class MonitoringPointServiceImpl
 
 
 
+//// MonitoringPointMeetingRelationshipTermService ////
 
 
 trait MonitoringPointMeetingRelationshipTermServiceComponent {
@@ -374,7 +377,7 @@ abstract class AbstractMonitoringPointMeetingRelationshipTermService extends Mon
 		else if (dateWeek == Term.WEEK_NUMBER_AFTER_END)
 			false
 		else
-			dateWeek >= point.validFromWeek && dateWeek <= point.requiredFromWeek
+			point.includesWeek(dateWeek)
 	}
 
 	/**
@@ -402,3 +405,232 @@ class MonitoringPointMeetingRelationshipTermServiceImpl
 	with AutowiringMeetingRecordDaoComponent
 	with AutowiringRelationshipServiceComponent
 	with AutowiringTermServiceComponent
+
+
+
+//// MonitoringPointGroupService ////
+
+
+trait MonitoringPointGroupProfileServiceComponent {
+	def monitoringPointGroupProfileService: MonitoringPointGroupProfileService
+}
+
+trait AutowiringMonitoringPointGroupProfileServiceComponent extends MonitoringPointGroupProfileServiceComponent {
+	var monitoringPointGroupProfileService = Wire[MonitoringPointGroupProfileService]
+}
+
+trait MonitoringPointGroupProfileService {
+	def getCheckpointsForAttendance(attendance: Seq[SmallGroupEventAttendance]): Seq[MonitoringCheckpoint]
+	def updateCheckpointsForAttendance(attendance: Seq[SmallGroupEventAttendance]): Seq[MonitoringCheckpoint]
+}
+
+abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPointGroupProfileService {
+
+	self: MonitoringPointServiceComponent with ProfileServiceComponent with SmallGroupServiceComponent =>
+
+	def getCheckpointsForAttendance(attendances: Seq[SmallGroupEventAttendance]): Seq[MonitoringCheckpoint] = {
+		attendances.filter(_.state == AttendanceState.Attended).flatMap(attendance => {
+			profileService.getMemberByUniversityId(attendance.universityId).flatMap{
+				case studentMember: StudentMember =>
+					monitoringPointService.getPointSetForStudent(studentMember, attendance.occurrence.event.group.groupSet.academicYear).flatMap(pointSet => {
+						val relevantPoints = getRelevantPoints(pointSet.points.asScala, attendance, studentMember)
+						val checkpoints = relevantPoints.filter(point => checkQuantity(point, attendance, studentMember)).map(point => {
+							val checkpoint = new MonitoringCheckpoint
+							checkpoint.autoCreated = true
+							checkpoint.point = point
+							checkpoint.monitoringPointService = monitoringPointService
+							checkpoint.student = studentMember
+							checkpoint.updatedBy = attendance.updatedBy
+							checkpoint.updatedDate = DateTime.now
+							checkpoint.state = AttendanceState.Attended
+							checkpoint
+						})
+						Option(checkpoints)
+					})
+				case _ => None
+			}
+		}).flatten
+	}
+
+	def updateCheckpointsForAttendance(attendances: Seq[SmallGroupEventAttendance]): Seq[MonitoringCheckpoint] = {
+		getCheckpointsForAttendance(attendances).map(checkpoint => {
+			monitoringPointService.saveOrUpdate(checkpoint)
+			checkpoint
+		})
+	}
+
+	private def getRelevantPoints(points: Seq[MonitoringPoint], attendance: SmallGroupEventAttendance, studentMember: StudentMember): Seq[MonitoringPoint] = {
+		points.filter(point => 
+			// Is it the correct type
+			point.pointType == MonitoringPointType.SmallGroup
+			// Is the attendance inside the point's weeks
+				&& point.includesWeek(attendance.occurrence.week)
+			// Is the group's module valid
+				&& (point.smallGroupEventModules.isEmpty || point.smallGroupEventModules.contains(attendance.occurrence.event.group.groupSet.module))
+			// Is there no existing checkpoint
+				&& monitoringPointService.getCheckpoint(studentMember, point).isEmpty
+			// The student hasn't been sent to SITS for this point
+				&& !monitoringPointService.studentAlreadyReportedThisTerm(studentMember, point)
+		)
+	}
+	
+	private def checkQuantity(point: MonitoringPoint, attendance: SmallGroupEventAttendance, studentMember: StudentMember): Boolean = {
+		if (point.smallGroupEventQuantity == 1) {
+			true
+		}	else if (point.smallGroupEventQuantity > 1) {
+			val attendances = smallGroupService
+				.findAttendanceForStudentInModulesInWeeks(studentMember, point.validFromWeek, point.requiredFromWeek, point.smallGroupEventModules)
+				.filterNot(a => a.occurrence == attendance.occurrence && a.universityId == attendance.universityId)
+			point.smallGroupEventQuantity <= attendances.size + 1
+		} else {
+			val groups = smallGroupService.findSmallGroupsByStudent(MemberOrUser(studentMember).asUser)
+			val allOccurrenceWeeks = groups.filter(g => point.smallGroupEventModules.isEmpty || point.smallGroupEventModules.contains(g.groupSet.module))
+				.flatMap(group =>
+					group.events.asScala.flatMap(event =>
+						event.weekRanges.flatMap(_.toWeeks)
+					)
+				)
+			val relevantWeeks = allOccurrenceWeeks.filter(point.includesWeek)
+			val attendances = smallGroupService
+				.findAttendanceForStudentInModulesInWeeks(studentMember, point.validFromWeek, point.requiredFromWeek, point.smallGroupEventModules)
+				.filterNot(a => a.occurrence == attendance.occurrence && a.universityId == attendance.universityId)
+			relevantWeeks.size <= attendances.size
+		}
+	}
+}
+
+@Service("monitoringPointGroupProfileService")
+class MonitoringPointGroupProfileServiceImpl
+	extends AbstractMonitoringPointGroupProfileService
+	with AutowiringMonitoringPointServiceComponent
+	with AutowiringProfileServiceComponent
+	with AutowiringSmallGroupServiceComponent
+
+
+
+/// MonitoringPointProfileTermAssignmentService ///
+
+
+trait MonitoringPointProfileTermAssignmentServiceComponent {
+	def monitoringPointProfileTermAssignmentService: MonitoringPointProfileTermAssignmentService
+}
+
+trait AutowiringMonitoringPointProfileTermAssignmentServiceComponent extends MonitoringPointProfileTermAssignmentServiceComponent {
+	var monitoringPointProfileTermAssignmentService = Wire[MonitoringPointProfileTermAssignmentService]
+}
+
+trait MonitoringPointProfileTermAssignmentService {
+	def getCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint]
+	def updateCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint]
+}
+
+abstract class AbstractMonitoringPointProfileTermAssignmentService extends MonitoringPointProfileTermAssignmentService {
+
+	self: MonitoringPointServiceComponent with ProfileServiceComponent with TermServiceComponent with AssignmentServiceComponent =>
+
+	def getCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint] = {
+		if (submission.isLate) {
+			Seq()
+		} else {
+			profileService.getMemberByUniversityId(submission.universityId).flatMap{
+				case studentMember: StudentMember =>
+					monitoringPointService.getPointSetForStudent(studentMember, submission.assignment.academicYear).flatMap(pointSet => {
+						val relevantPoints = getRelevantPoints(pointSet.points.asScala, submission, studentMember)
+						val checkpoints = relevantPoints.filter(point => checkQuantity(point, submission, studentMember)).map(point => {
+							val checkpoint = new MonitoringCheckpoint
+							checkpoint.autoCreated = true
+							checkpoint.point = point
+							checkpoint.monitoringPointService = monitoringPointService
+							checkpoint.student = studentMember
+							checkpoint.updatedBy = submission.userId
+							checkpoint.updatedDate = DateTime.now
+							checkpoint.state = AttendanceState.Attended
+							checkpoint
+						})
+						Option(checkpoints)
+					})
+				case _ => None
+			}.getOrElse(Seq())
+		}
+	}
+
+	def updateCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint] = {
+		getCheckpointsForSubmission(submission).map(checkpoint => {
+			monitoringPointService.saveOrUpdate(checkpoint)
+			checkpoint
+		})
+	}
+
+	private def getRelevantPoints(points: Seq[MonitoringPoint], submission: Submission, studentMember: StudentMember): Seq[MonitoringPoint] = {
+		points.filter(point =>
+		// Is it the correct type
+			point.pointType == MonitoringPointType.AssignmentSubmission
+				// Is the assignment's due date inside the point's weeks
+				&& isDateValidForPoint(point, submission.assignment.closeDate)
+				// Is the submission's assignment or module valid
+				&& isAssignmentOrModuleValidForPoint(point, submission.assignment)
+				// Is there no existing checkpoint
+				&& monitoringPointService.getCheckpoint(studentMember, point).isEmpty
+				// The student hasn't been sent to SITS for this point
+				&& !monitoringPointService.studentAlreadyReportedThisTerm(studentMember, point)
+		)
+	}
+
+	private def isDateValidForPoint(point: MonitoringPoint, date: DateTime) = {
+		val dateWeek = termService.getAcademicWeekForAcademicYear(date, point.pointSet.academicYear)
+		if (dateWeek == Term.WEEK_NUMBER_BEFORE_START)
+			true
+		else if (dateWeek == Term.WEEK_NUMBER_AFTER_END)
+			false
+		else
+			point.includesWeek(dateWeek)
+	}
+
+	private def isAssignmentOrModuleValidForPoint(point: MonitoringPoint, assignment: Assignment) = {
+		if (point.assignmentSubmissionIsSpecificAssignments)
+			point.assignmentSubmissionAssignments.contains(assignment)
+		else
+			point.assignmentSubmissionModules.contains(assignment.module)
+	}
+
+	private def checkQuantity(point: MonitoringPoint, submission: Submission, studentMember: StudentMember): Boolean = {
+		val weeksForYear = termService.getAcademicWeeksForYear(point.pointSet.academicYear.dateInTermOne).toMap
+		def weekNumberToDate(weekNumber: Int, dayOfWeek: DayOfWeek) =
+			weeksForYear(weekNumber).getStart.withDayOfWeek(dayOfWeek.jodaDayOfWeek)
+
+		if (point.assignmentSubmissionIsSpecificAssignments) {
+			if (point.assignmentSubmissionIsDisjunction) {
+				true
+			} else {
+				val submissions = assignmentService.getSubmissionsForAssignmentsBetweenDates(
+					studentMember.universityId,
+					weekNumberToDate(point.validFromWeek, DayOfWeek.Monday),
+					weekNumberToDate(point.requiredFromWeek + 1, DayOfWeek.Monday)
+				).filterNot(_.isLate).filterNot(s => s.assignment == submission.assignment) ++ Seq(submission)
+
+				point.assignmentSubmissionAssignments.forall(a => submissions.exists(s => s.assignment == a))
+			}
+		} else {
+			if (point.assignmentSubmissionQuantity == 1) {
+				true
+			} else {
+				val submissions = (assignmentService.getSubmissionsForAssignmentsBetweenDates(
+						studentMember.universityId,
+						weekNumberToDate(point.validFromWeek, DayOfWeek.Monday),
+						weekNumberToDate(point.requiredFromWeek + 1, DayOfWeek.Monday)
+					).filterNot(_.isLate).filterNot(s => s.assignment == submission.assignment) ++ Seq(submission)
+				).filter(s => point.assignmentSubmissionModules.contains(s.assignment.module))
+
+				submissions.size >= point.assignmentSubmissionQuantity
+			}
+		}
+	}
+}
+
+@Service("monitoringPointProfileTermAssignmentService")
+class MonitoringPointProfileTermAssignmentServiceImpl
+	extends AbstractMonitoringPointProfileTermAssignmentService
+	with AutowiringMonitoringPointServiceComponent
+	with AutowiringProfileServiceComponent
+	with AutowiringTermServiceComponent
+	with AutowiringAssignmentServiceComponent

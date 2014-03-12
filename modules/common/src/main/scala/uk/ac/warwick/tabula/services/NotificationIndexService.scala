@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.hibernate.ObjectNotFoundException
 import javax.persistence.DiscriminatorValue
-import org.apache.lucene.search.{FieldDoc, SortField, Sort, TermQuery}
+import org.apache.lucene.search._
 import org.apache.lucene.index.Term
 import uk.ac.warwick.tabula.JavaImports._
 
@@ -23,12 +23,25 @@ class RecipientNotification(val notification: Notification[_,_], val recipient: 
 
 trait NotificationIndexService {
 	def indexFrom(startDate: DateTime): Unit
+	def incrementalIndex(): Unit
 }
 
 trait NotificationQueryMethods { self: NotificationIndexServiceImpl =>
 	def userStream(req: ActivityStreamRequest): PagingSearchResultItems[Notification[_,_]] = {
 		val user = req.user
-		val query = new TermQuery(new Term("recipient", user.getUserId))
+
+		val recipientQuery = new TermQuery(new Term("recipient", user.getUserId))
+		val priorityLimit = NumericRangeQuery.newDoubleRange("priority", req.priority, 1.0, true, true)
+
+		val query = new BooleanQuery
+		query.add(recipientQuery, BooleanClause.Occur.MUST)
+		query.add(priorityLimit, BooleanClause.Occur.MUST)
+
+		if (!req.includeDismissed) {
+			val dismissedQuery = new TermQuery(new Term("dismissed", "false"))
+			query.add(dismissedQuery, BooleanClause.Occur.MUST)
+		}
+
 		val sort = new Sort(new SortField(UpdatedDateField, SortField.Type.LONG, true))
 		val fieldDoc = req.pagination.map { p => new FieldDoc(p.lastDoc, Float.NaN, Array(p.lastField:JLong)) }
 		val token = req.pagination.map { _.token }
@@ -43,6 +56,8 @@ trait NotificationQueryMethods { self: NotificationIndexServiceImpl =>
  */
 @Service
 class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotification] with NotificationIndexService with NotificationQueryMethods {
+	override val loggerName = classOf[NotificationIndexService].getName
+
 	var dao = Wire[NotificationDao]
 	var userLookup = Wire[UserLookupService]
 
@@ -75,14 +90,20 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 		val notification = item.notification
 		val doc = new Document
 
-		val notificationType = notification.getClass.getAnnotation(classOf[DiscriminatorValue]).value()
-
-		doc.add(plainStringField(IdField, item.id))
-		doc.add(plainStringField("notification", notification.id))
-		doc.add(plainStringField("recipient", recipient.getUserId))
-		doc.add(plainStringField("notificationType", notificationType))
-		doc.add(dateField(UpdatedDateField, notification.created))
-		Seq(doc)
+		if (recipient.isFoundUser && recipient.getUserId != null) {
+			val notificationType = notification.getClass.getAnnotation(classOf[DiscriminatorValue]).value()
+			doc.add(plainStringField(IdField, item.id))
+			doc.add(plainStringField("notification", notification.id))
+			doc.add(plainStringField("recipient", recipient.getUserId))
+			doc.add(plainStringField("notificationType", notificationType))
+			doc.add(doubleField("priority", notification.priority.toNumericalValue))
+			doc.add(booleanField("dismissed", notification.isDismissed(recipient)))
+			doc.add(dateField(UpdatedDateField, notification.created))
+			Seq(doc)
+		} else {
+			debug("Skipping RecipientNotification because foundUser=%b and userId=%s", recipient.isFoundUser, recipient.getUserId)
+			Nil
+		}
 	}
 
 	override protected def getId(item: RecipientNotification) = item.id
@@ -96,7 +117,9 @@ class NotificationIndexServiceImpl extends AbstractIndexService[RecipientNotific
 			} catch {
 				// Can happen if reference to an entity has since been deleted, e.g.
 				// a submission is resubmitted and the old submission is removed. Skip this notification.
-				case onf: ObjectNotFoundException => Nil
+				case onf: ObjectNotFoundException =>
+					debug("Skipping notification %s as a referenced object was not found", notification)
+					Nil
 			}
 		}
 

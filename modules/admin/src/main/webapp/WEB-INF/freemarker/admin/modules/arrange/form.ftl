@@ -32,7 +32,7 @@ drag a box from one module name to another. You can also hold the <kbd class="ke
 </#if>
 </@spring.hasBindErrors>
 
-<@f.form commandName="sortModulesCommand" action="${url('/department/${department.code}/sort-modules')}">
+<@f.form commandName="sortModulesCommand" action="${url('/admin/department/${department.code}/sort-modules')}">
 <div class="tabula-dnd">	
 	<#macro mods department modules>
 		<div class="drag-target clearfix">

@@ -8,9 +8,13 @@ sealed abstract class MonitoringPointType(val dbValue: String, val description: 
 
 object MonitoringPointType {
 	case object Meeting extends MonitoringPointType("meeting", "Meeting")
+	case object SmallGroup extends MonitoringPointType("smallGroup", "Small Group")
+	case object AssignmentSubmission extends MonitoringPointType("assignmentSubmission", "Assignment Submission")
 
 	def fromCode(code: String) = code match {
 		case Meeting.dbValue => Meeting
+		case SmallGroup.dbValue => SmallGroup
+		case AssignmentSubmission.dbValue => AssignmentSubmission
 		case null => null
 		case _ => throw new IllegalArgumentException()
 	}

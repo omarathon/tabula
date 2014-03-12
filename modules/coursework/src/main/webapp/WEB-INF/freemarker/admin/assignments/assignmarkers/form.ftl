@@ -75,7 +75,7 @@
 
 	<p>Drag students by their <i class="icon-reorder"></i> onto a marker.</p>
 
-		<@f.form method="post" action="${url('/admin/module/${module.code}/assignments/${assignment.id}/assign-markers')}" commandName="assignMarkersCommand">
+		<@f.form method="post" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/assign-markers')}" commandName="assignMarkersCommand">
 		<div class="fix-area">
 			<div id="assign-markers">
 				<ul class="nav nav-tabs">
@@ -84,11 +84,13 @@
 							${firstMarkerRoleName}s
 						</a>
 					</li>
-					<li>
-						<a href="#second-markers">
-							${secondMarkerRoleName}s
-						</a>
-					</li>
+					<#if hasSecondMarker>
+						<li>
+							<a href="#second-markers">
+								${secondMarkerRoleName}s
+							</a>
+						</li>
+					</#if>
 				</ul>
 
 				<div class="tab-content">
@@ -100,14 +102,16 @@
 							firstMarkerRoleName
 						/>
 					</div>
-					<div class="tab-pane" id="second-markers">
-						<@assignStudents
-							assignMarkersCommand.secondMarkerUnassignedStudents
-							assignMarkersCommand.secondMarkers
-							"second-markers"
-							secondMarkerRoleName
-						/>
-					</div>
+					<#if hasSecondMarker>
+						<div class="tab-pane" id="second-markers">
+							<@assignStudents
+								assignMarkersCommand.secondMarkerUnassignedStudents
+								assignMarkersCommand.secondMarkers
+								"second-markers"
+								secondMarkerRoleName
+							/>
+						</div>
+					</#if>
 				</div>
 			</div>
 
