@@ -26,6 +26,7 @@ case object RouteAuditorRoleDefinition extends BuiltInRoleDefinition {
 		Profiles.Read.RelationshipStudents(PermissionsSelector.Any[StudentRelationshipType]),
 
 		Profiles.Search,
+		Profiles.ViewSearchResults,
 		
 		Profiles.MeetingRecord.Read(PermissionsSelector.Any[StudentRelationshipType]),
 		

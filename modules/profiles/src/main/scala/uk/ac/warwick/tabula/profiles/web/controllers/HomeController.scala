@@ -11,6 +11,7 @@ import uk.ac.warwick.tabula.data.model.MemberUserType._
 import uk.ac.warwick.tabula.profiles.commands.ProfilesHomeInformation
 import uk.ac.warwick.tabula.services.ModuleAndDepartmentService
 import uk.ac.warwick.spring.Wire
+import uk.ac.warwick.tabula.permissions.Permissions
 
 @Controller class HomeController extends ProfilesController {
 	
@@ -33,7 +34,7 @@ import uk.ac.warwick.spring.Wire
 				"isPGR" -> user.isPGR,
 				"smallGroups" -> info.smallGroups,
 				"adminDepartments" -> info.adminDepartments,
-				"currentUserDepartment" -> departmentService.getDepartmentByCode(user.departmentCode.toLowerCase)
+				"currentUserDepartment" -> (departmentService.getDepartmentByCode(user.departmentCode) ++ departmentService.departmentsWithPermission(user, Permissions.Profiles.ViewSearchResults)).toSet
 			)
 		} else if (optionalCurrentMember.filter(_.userType == Student).isDefined) {
 			Redirect(Routes.profile.view(currentMember))
