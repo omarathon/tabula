@@ -47,6 +47,7 @@ case object SSOStaffRoleDefinition extends UnassignableBuiltInRoleDefinition {
 
 	GrantsScopedPermission(
 		Profiles.Read.StudentCourseDetails.Status,
+		Profiles.ViewSearchResults,
 
 		// TAB-1619
 		Profiles.Read.Timetable,

@@ -12,10 +12,11 @@ case object ExtensionManagerRoleDefinition extends UnassignableBuiltInRoleDefini
 
 	GeneratesSubRole(ModuleAuditorRoleDefinition)
 	
-	GrantsScopedPermission( 
+	GrantsScopedPermission(
 		Extension.ReviewRequest,
+		Extension.Create,
 		Extension.Update,
-		Extension.Read
+		Extension.Delete
 	)
 
 }

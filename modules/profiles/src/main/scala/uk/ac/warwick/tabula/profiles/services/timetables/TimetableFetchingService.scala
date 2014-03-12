@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.profiles.services.timetables
 
 import org.springframework.beans.factory.DisposableBean
-import org.springframework.stereotype.Service
 import dispatch.classic._
 import dispatch.classic.Request.toRequestVerbs
 import uk.ac.warwick.tabula.helpers.{ClockComponent, Logging}
@@ -16,6 +15,7 @@ import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.AcademicYear
 import scala.annotation.meta.param
 import scala.util.{Success, Try}
+import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 
 trait TimetableFetchingService {
 	def getTimetableForStudent(universityId: String): Seq[TimetableEvent]
@@ -149,76 +149,10 @@ object ScientiaHttpTimetableFetchingService {
 					}
 					case _ => None
 				},
-				moduleCode = (activity \\ "module").text,
+				context = Option((activity \\ "module").text),
 				staffUniversityIds = (activity \\ "staffmember") map { _.text },
 				year = year
 			)
 		}
 	
-}
-
-//TODO extract this into it's own file, and put the EventOccurrence class with it.
-case class TimetableEvent(
-	name: String,
-	description: String,
-	eventType: TimetableEventType,
-	weekRanges: Seq[WeekRange],
-	day: DayOfWeek,
-	startTime: LocalTime,
-	endTime: LocalTime,
-	location: Option[String],
-	moduleCode: String,
-	staffUniversityIds: Seq[String],
-	year:AcademicYear
-)
-
-object TimetableEvent{
-	def apply(sge:SmallGroupEvent):TimetableEvent = {
-		TimetableEvent(name = sge.group.name,
-			description = sge.group.groupSet.name,
-			eventType = smallGroupFormatToTimetableEventType(sge.group.groupSet.format),
-			weekRanges = sge.weekRanges,
-			day = sge.day,
-			startTime = sge.startTime,
-			endTime = sge.endTime,
-			location = Option(sge.location),
-			moduleCode = sge.group.groupSet.module.code,
-			staffUniversityIds = sge.tutors.knownType.members,
-		 	year = sge.group.groupSet.academicYear)
-	}
-	private def smallGroupFormatToTimetableEventType(sgf: SmallGroupFormat): TimetableEventType = {
-		sgf match {
-			case Seminar => TimetableEventType.Seminar
-			case Lab => TimetableEventType.Practical
-			case Tutorial => TimetableEventType.Other("Tutorial")
-			case Project => TimetableEventType.Other("Project")
-			case Example => TimetableEventType.Other("Example")
-			case Lecture => TimetableEventType.Lecture
-		}
-	}
-}
-
-sealed abstract class TimetableEventType(val code: String, val displayName:String)
-object TimetableEventType {
-	case object Lecture extends TimetableEventType("LEC", "Lecture")
-	case object Practical extends TimetableEventType("PRA", "Practical")
-	case object Seminar extends TimetableEventType("SEM","Seminar")
-	case object Induction extends TimetableEventType("IND","Induction")
-	case class Other(c: String) extends TimetableEventType(c,c)
-	
-	// lame manual collection. Keep in sync with the case objects above
-	val members = Seq(Lecture, Practical, Seminar, Induction)
-	
-	def unapply(code: String): Option[TimetableEventType] = code match {
-		case Lecture.code => Some(Lecture)
-		case Practical.code => Some(Practical)
-		case Seminar.code => Some(Seminar)
-		case Induction.code => Some(Induction)
-		case _ => None
-	}
-	
-	def apply(code: String): TimetableEventType = code match {
-		case TimetableEventType(t) => t
-		case _ => Other(code)
-	}
 }

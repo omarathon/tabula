@@ -6,6 +6,7 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.services.{ProfileServiceComponent, TermServiceComponent, WeekToDateConverterComponent}
 import uk.ac.warwick.util.termdates.Term
 import uk.ac.warwick.util.termdates.Term.TermType
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.Property
 import net.fortuna.ical4j.model.parameter.Value
@@ -16,31 +17,6 @@ import net.fortuna.ical4j.model.property.Organizer
 import net.fortuna.ical4j.model.parameter.Cn
 import org.apache.commons.codec.digest.DigestUtils
 
-case class EventOccurrence(
-	name: String,
-	description: String,
-	eventType: TimetableEventType,
-	start: LocalDateTime,
-	end: LocalDateTime,
-	location: Option[String],
-	moduleCode: String,
-	staffUniversityIds: Seq[String]
-)
-
-object EventOccurrence {
-	def apply(timetableEvent: TimetableEvent, start: LocalDateTime, end: LocalDateTime): EventOccurrence = {
-		new EventOccurrence(
-			timetableEvent.name,
-			timetableEvent.description,
-			timetableEvent.eventType,
-			start,
-			end,
-			timetableEvent.location,
-			timetableEvent.moduleCode,
-			timetableEvent.staffUniversityIds
-		)
-	}
-}
 trait EventOccurrenceService{
 	def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence]
 	def toVEvent(eventOccurrence: EventOccurrence): VEvent

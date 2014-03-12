@@ -13,6 +13,7 @@ import java.sql.Types
 import uk.ac.warwick.tabula.permissions.{Permission, Permissions, PermissionsTarget}
 import uk.ac.warwick.tabula.system.permissions.RestrictionProvider
 import uk.ac.warwick.tabula.data.model.forms.FormattedHtml
+import uk.ac.warwick.tabula.timetables.{TimetableEventType, EventOccurrence}
 
 trait MeetingRecordAttachments {
 	var attachments: JList[FileAttachment]
@@ -34,7 +35,7 @@ object AbstractMeetingRecord {
 @Entity
 @Table(name = "meetingrecord")
 @DiscriminatorColumn(name = "discriminator", discriminatorType = DiscriminatorType.STRING)
-class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted with FormattedHtml with ToEntityReference with MeetingRecordAttachments {
+abstract class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToString with CanBeDeleted with FormattedHtml with ToEntityReference with MeetingRecordAttachments {
 	type Entity = AbstractMeetingRecord
 
 	def isScheduled: Boolean = this match {
@@ -85,7 +86,27 @@ class AbstractMeetingRecord extends GeneratedId with PermissionsTarget with ToSt
 		this.relationship = relationship
 	}
 
+	def toEventOccurrence: Option[EventOccurrence] = {
+		/*
+		 * TAB-1928
+		 * TODO Somehow include non-scheduled meetings
+		 */
 
+		if (isScheduled) {
+			Some(EventOccurrence(
+				title,
+				description,
+				TimetableEventType.Meeting,
+				meetingDate.toLocalDateTime,
+				meetingDate.plusHours(1).toLocalDateTime,
+				(if (format == MeetingFormat.FaceToFace) None else Option(format).map { _.description }),
+				Some(relationship.relationshipType.description),
+				relationship.agentMember.map { _.universityId }.toSeq
+			))
+		}	else {
+			None
+		}
+	}
 
 	def permissionsParents = relationship.studentMember.toStream
 

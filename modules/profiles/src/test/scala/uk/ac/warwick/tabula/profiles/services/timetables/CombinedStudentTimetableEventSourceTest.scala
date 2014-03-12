@@ -4,16 +4,17 @@ import uk.ac.warwick.tabula.{AcademicYear, TestBase, Mockito}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.data.model.groups.DayOfWeek
 import org.joda.time.LocalTime
+import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 
 class CombinedStudentTimetableEventSourceTest extends TestBase with Mockito{
 
 	val student = new StudentMember
 	student.universityId = "university ID"
 
-	val ttEvent= TimetableEvent("From Timetable","",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,"",Nil,AcademicYear(2013))
+	val ttEvent= TimetableEvent("From Timetable","",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,None,Nil,AcademicYear(2013))
 	val timetableEvents = Seq(ttEvent)
 
-	val sgEvent= TimetableEvent("From Group","",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,"",Nil,AcademicYear(2013))
+	val sgEvent= TimetableEvent("From Group","",TimetableEventType.Induction,Nil,DayOfWeek.Monday,LocalTime.now, LocalTime.now,None,None,Nil,AcademicYear(2013))
 	val groupEvents = Seq(sgEvent)
 
 	val source = new CombinedStudentTimetableEventSourceComponent

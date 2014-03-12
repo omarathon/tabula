@@ -30,6 +30,7 @@ trait RelationshipDao {
 	def saveOrUpdate(rel: StudentRelationship)
 
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
+	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship]
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship]
 	def getCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
 	def getRelationshipsByTarget(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship]
@@ -78,6 +79,13 @@ class RelationshipDaoImpl extends RelationshipDao with Daoisms with Logging {
 			Restrictions.isNull("endDate"),
 			Restrictions.ge("endDate", new DateTime())
 		))
+			.seq
+	}
+
+	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship] = {
+		session.newCriteria[StudentRelationship]
+			.createAlias("studentCourseDetails", "scd")
+			.add(is("scd.student", student))
 			.seq
 	}
 

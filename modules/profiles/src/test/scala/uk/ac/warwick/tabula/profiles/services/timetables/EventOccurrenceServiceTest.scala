@@ -5,6 +5,7 @@ import org.joda.time._
 import uk.ac.warwick.tabula.services.{ProfileService, ProfileServiceComponent, TermServiceComponent, TermService, WeekToDateConverterComponent, WeekToDateConverter}
 import uk.ac.warwick.util.termdates.{TermImpl,  TermFactory}
 import uk.ac.warwick.util.termdates.Term.TermType
+import uk.ac.warwick.tabula.timetables.{TimetableEventType, TimetableEvent}
 
 class EventOccurrenceServiceTest extends TestBase with Mockito {
 
@@ -28,8 +29,8 @@ class EventOccurrenceServiceTest extends TestBase with Mockito {
 	val intervalIncludingTwoOccurrences = new Interval(week1Start,week2End)
 
 
-	val singleOccurrence = new TimetableEvent("test","test",TimetableEventType.Lecture,singleWeek, DayOfWeek.Monday,tenAm,tenThirty,None,"XX-123",Nil,year)
-	val doubleOccurrenence	= new TimetableEvent("test","test",TimetableEventType.Lecture,twoWeeks, DayOfWeek.Monday,tenAm,tenThirty,None,"XX-123",Nil,year)
+	val singleOccurrence = new TimetableEvent("test","test",TimetableEventType.Lecture,singleWeek, DayOfWeek.Monday,tenAm,tenThirty,None,Some("XX-123"),Nil,year)
+	val doubleOccurrenence	= new TimetableEvent("test","test",TimetableEventType.Lecture,twoWeeks, DayOfWeek.Monday,tenAm,tenThirty,None,Some("XX-123"),Nil,year)
 
 
 
