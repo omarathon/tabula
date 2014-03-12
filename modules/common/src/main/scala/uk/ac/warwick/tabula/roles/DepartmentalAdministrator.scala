@@ -49,8 +49,6 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Profiles.ScheduledMeetingRecord.Delete,
 
 
-		Profiles.ViewSearchResults,
-
 		// TAB-1878
 		Profiles.Read.TelephoneNumber,
 		Profiles.Read.MobileNumber,
