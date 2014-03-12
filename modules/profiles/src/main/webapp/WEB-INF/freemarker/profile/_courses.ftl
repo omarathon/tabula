@@ -39,13 +39,14 @@
 								<p>If you accidentally share the address with others, you can change the address by clicking the button below. All of the existing clients using this private address will break, and you will have to give them the new private address.</p>
 								<form class="form-inline" method="POST" action="<@routes.timetable_ical_regenerate />"><button type="submit" class="btn btn-primary">Generate a new private address</button></form>
 							</div>
-
-							<p>You can <a href="<@routes.timetable_ical studentCourseDetails.student />">click this link</a> to subscribe to your timetable in your default calendar application.</p>
-
-							<p>You can also copy the link and paste it into an external application, e.g. Google Calendar:</p>
-
-							<p><a href="<@routes.timetable_ical studentCourseDetails.student />"><@routes.timetable_ical studentCourseDetails.student /></a></p>
 						</#if>
+
+						<p>You can <a href="<@routes.timetable_ical studentCourseDetails.student />">click this link</a> to subscribe to your timetable in your default calendar application.</p>
+
+						<p>You can also copy the link and paste it into an external application, e.g. Google Calendar:</p>
+
+						<p><a href="<@routes.timetable_ical studentCourseDetails.student />"><@routes.timetable_ical studentCourseDetails.student /></a></p>
+
 					</@modal.body>
 				</div>
 			</#if>
