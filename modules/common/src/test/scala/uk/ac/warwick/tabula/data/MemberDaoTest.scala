@@ -49,7 +49,6 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 			sitsStatusDao.saveOrUpdate(sprFullyEnrolledStatus)
 
 			val m1 = Fixtures.student(universityId = "0000001", userId="student", sprStatus=sprFullyEnrolledStatus)
-
 			val m2 = Fixtures.student(universityId = "0000002", userId="student", sprStatus=sprFullyEnrolledStatus)
 
 			val m3 = Fixtures.staff(universityId = "0000003", userId="staff1")
