@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.userlookup.User
+import org.springframework.transaction.annotation.Transactional
 
 // scalastyle:off magic.number
 class ProfileServiceTest extends PersistenceTestBase with Mockito {
@@ -326,6 +327,25 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 			profileServiceWithMocks.getDisability("Q") should be (Some(disabilityQ))
 			profileServiceWithMocks.getDisability("SITS has no integrity checks") should be (None)
 		}
+	}
+
+	@Transactional
+	@Test def regenerateEmptyTimetableHash {
+		val member = Fixtures.student()
+		member.timetableHash should be (null)
+		profileService.regenerateTimetableHash(member)
+		member.timetableHash should not be (null)
+	}
+
+	@Transactional
+	@Test def regenerateExistingTimetableHash {
+		val member = Fixtures.student()
+		val existingHash = "1234567"
+		member.timetableHash = existingHash
+		member.timetableHash should be (existingHash)
+		profileService.regenerateTimetableHash(member)
+		member.timetableHash should not be (null)
+		member.timetableHash should not be (existingHash)
 	}
 
 	@Test def getMemberByUser { transactional { tx =>
