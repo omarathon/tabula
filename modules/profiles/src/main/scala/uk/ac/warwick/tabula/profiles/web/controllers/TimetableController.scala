@@ -64,6 +64,11 @@ with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponen
 	@RequestMapping(value = Array("/ical"))
 	def getIcalFeed(@ModelAttribute("command") command:Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState): Mav = {
 
+		val start = DateTime.now.minusWeeks(1).toLocalDate
+		val end = DateTime.now.plusWeeks(15).toLocalDate
+		command.start = start
+		command.end = end
+
 		val timetableEvents = command.apply()
 
 		val cal: Calendar = new Calendar
