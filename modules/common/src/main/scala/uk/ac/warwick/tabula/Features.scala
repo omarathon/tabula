@@ -151,8 +151,8 @@ class FeaturesMessage {
 	@BeanProperty var attendanceMonitoringNote = true
 	@BeanProperty var visaInStudentProfile = true
 	@BeanProperty var scheduledMeetings = true
-	@BeanProperty var disabilityRenderingInProfiles = false
-	@BeanProperty var disabilityRenderingInExtensions = false
+	@BeanProperty var disabilityRenderingInProfiles = true
+	@BeanProperty var disabilityRenderingInExtensions = true
 	@BeanProperty var attendanceMonitoringSmallGroupPointType = false
 	@BeanProperty var includePastYears = true
 	@BeanProperty var attendanceMonitoringAssignmentSubmissionPointType = false
