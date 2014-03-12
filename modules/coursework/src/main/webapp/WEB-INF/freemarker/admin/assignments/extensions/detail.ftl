@@ -6,6 +6,7 @@
 	<div class="content extension-detail">
 		<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/extensions/detail/${universityId}')}" commandName="modifyExtensionCommand" cssClass="form-horizontal double-submit-protection">
 			<@f.input type="hidden" path="universityId" value="${universityId}" />
+			<input type="hidden" name="closeDate" class="startDateTime" value="${assignment.closeDate}" />
 
 			<#if extension.awaitingReview>
 				<input type="hidden" name="rawRequestedExpiryDate" value="${extension.requestedExpiryDate}" />
@@ -92,7 +93,6 @@
 			<div class="control-group">
 				<@form.label path="expiryDate">Extended deadline</@form.label>
 				<div class="controls">
-					<#-- FIXME don't allow dates before the closedate in the picker -->
 					<@f.input id="picker0" path="expiryDate" cssClass="date-time-picker" />
 					<#if !extension.manual && extension.unreviewed>
 						<button class="btn setExpiryToRequested">Use requested date</button>

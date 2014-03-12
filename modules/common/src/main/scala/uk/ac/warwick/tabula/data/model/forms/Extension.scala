@@ -88,6 +88,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	def approved = state == ExtensionState.Approved
 	def rejected = state == ExtensionState.Rejected
 	def unreviewed = state == ExtensionState.Unreviewed
+	def revoked = state == ExtensionState.Revoked
 
 	// keep state encapsulated
 	def approve(comments: String = null) {
@@ -136,11 +137,13 @@ object ExtensionState {
 	case object Unreviewed extends ExtensionState("U", "Unreviewed")
 	case object Approved extends ExtensionState("A", "Approved")
 	case object Rejected extends ExtensionState("R", "Rejected")
+	case object Revoked extends ExtensionState("V", "Revoked")
 
 	def fromCode(code: String) = code match {
 		case Unreviewed.dbValue => Unreviewed
 		case Approved.dbValue => Approved
 		case Rejected.dbValue => Rejected
+		case Revoked.dbValue => Revoked
 		case _ => throw new IllegalArgumentException()
 	}
 }

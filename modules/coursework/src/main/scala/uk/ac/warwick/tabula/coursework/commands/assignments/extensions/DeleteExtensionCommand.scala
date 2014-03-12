@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.commands.{Notifies, Description, ComposableCommand}
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.data.model.{Assignment, Module, Notification}
 import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.data.model.forms.Extension
+import uk.ac.warwick.tabula.data.model.forms.{ExtensionState, Extension}
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.notifications.ExtensionRevokedNotification
@@ -16,7 +16,7 @@ object DeleteExtensionCommand {
 		new DeleteExtensionCommandInternal(mod, ass, uniId, sub)
 			with ComposableCommand[Extension]
 			with DeleteExtensionCommandPermissions
-			with DeleteExtensionCommandDescription
+			with ModifyExtensionCommandDescription
 			with DeleteExtensionCommandNotification
 			with AutowiringUserLookupComponent
 			with HibernateExtensionPersistenceComponent
@@ -30,13 +30,13 @@ class DeleteExtensionCommandInternal(mod: Module, ass: Assignment, uniId: String
 	extension = assignment.findExtension(universityId).getOrElse({ throw new IllegalStateException("Cannot delete a missing extension") })
 
 	def applyInternal() = transactional() {
+		extension._state = ExtensionState.Revoked
 		assignment.extensions.remove(extension)
 		extension.attachments.asScala.foreach(delete(_))
 		delete(extension)
 		extension
 	}
 }
-
 
 trait DeleteExtensionCommandNotification extends Notifies[Extension, Option[Extension]] {
 	self: ModifyExtensionCommandState =>
@@ -58,13 +58,3 @@ trait DeleteExtensionCommandPermissions extends RequiresPermissionsChecking with
 	}
 }
 
-trait DeleteExtensionCommandDescription extends ModifyExtensionCommandDescription {
-	self: ModifyExtensionCommandState =>
-
-	override def describeResult(d: Description, extension: Extension) {
-		d.assignment(assignment)
-			.studentIds(Seq(universityId))
-			.property("extension" -> extension)
-			.fileAttachments(extension.attachments.asScala.toSeq)
-	}
-}

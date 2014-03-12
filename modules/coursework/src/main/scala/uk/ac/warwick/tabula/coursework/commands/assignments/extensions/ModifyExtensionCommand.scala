@@ -32,6 +32,7 @@ abstract class ModifyExtensionCommand(val mod: Module, val ass: Assignment, uniI
 		action match {
 			case ApprovalAction => extension.approve(reviewerComments)
 			case RejectionAction => extension.reject(reviewerComments)
+			case RevocationAction => extension.rawState_=(ExtensionState.Revoked)
 			case _ =>
 		}
 	}

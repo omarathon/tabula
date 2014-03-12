@@ -355,7 +355,14 @@ $(function() {
 		var contentId = $container.attr('data-contentid');
 		var $row = $('tr.itemContainer[data-contentid='+contentId+']');
 
-		$form.find('.date-time-picker').tabulaDateTimePicker();
+		var $expiryDateField = $form.find('.date-time-picker');
+		$expiryDateField.tabulaDateTimePicker();
+		var expiryDatePicker = $expiryDateField.data('datetimepicker');
+		var closeDate = new Date($form.find('[name=closeDate]').val());
+		if (closeDate) {
+			expiryDatePicker.setStartDate(closeDate);
+		}
+
         $form.tabulaSubmitOnce();
 
 		// record the initial values of the fields
@@ -490,15 +497,19 @@ $(function() {
 			if (success) {
 				var rejected = $response.data('data').status == 'Rejected';
 				var approved = $response.data('data').status == 'Approved';
+				var revoked = $response.data('data').status == 'Revoked';
 				var $statusContainer = $row.find('.status-col dt');
 
 				$statusContainer.find(".label").remove();
 
 				if(rejected) {
-					$statusContainer.append($('<div class="label label-important">Rejected</div>'));
+					$statusContainer.append($('<span class="label label-important">Rejected</span>'));
 				}
 				else if(approved) {
-					$statusContainer.append($('<div class="label label-success">Approved</div>'));
+					$statusContainer.append($('<span class="label label-success">Approved</span>'));
+				}
+				else if(revoked) {
+					$statusContainer.append($('<span class="label no-extension">No extension</span>'));
 				}
 
 				// FIXME update duration column
