@@ -14,7 +14,7 @@ class PDFView(filename: String, templateName: String, context: Map[String,_]) ex
 	override def render(model: JMap[String, _], request: HttpServletRequest, response: HttpServletResponse) {
 		response.setContentType(getContentType)
 		response.setCharacterEncoding("UTF-8")
-		response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
+		//response.setHeader("Content-Disposition", "attachment;filename=\"" + filename + "\"");
 
 		val mergedModel = JMap((context.toSeq ++ model.asScala.toSeq) :_*)
 		val out = response.getOutputStream

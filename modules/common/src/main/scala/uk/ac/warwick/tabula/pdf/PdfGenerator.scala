@@ -19,13 +19,11 @@ trait FreemarkerXHTMLPDFGeneratorComponent extends PDFGeneratorComponent {
 
 	def pdfGenerator: PdfGenerator = new PdfGeneratorImpl()
 
-	class PdfGeneratorImpl extends PdfGenerator{
-
+	class PdfGeneratorImpl extends PdfGenerator {
 		def renderTemplate(templateId: String, model: Any, out:OutputStream) = {
-
 			val xthml = textRenderer.renderTemplate(templateId, model)
 			val renderer = new ITextRenderer()
-			renderer.setDocumentFromString(xthml)
+			renderer.setDocumentFromString(xthml.replace("&#8194;", " "))
 			renderer.layout()
 			renderer.createPDF(out)
 		}
