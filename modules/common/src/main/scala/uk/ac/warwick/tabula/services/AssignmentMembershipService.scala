@@ -214,7 +214,11 @@ trait AssignmentMembershipMethods extends Logging {
 	}
 
 	def isStudentMember(user: User, upstream: Seq[UpstreamAssessmentGroup], others: Option[UnspecifiedTypeUserGroup]): Boolean = {
-		others.map { _.includesUser(user) }.getOrElse(false)
+		if (others.map { _.excludesUser(user) }.getOrElse(false)) false
+		else if (others.map { _.includesUser(user) }.getOrElse(false)) true
+		else upstream.exists {
+			_.members.staticUserIds.contains(user.getWarwickId) //Yes, definitely Uni ID when checking SITS group
+		}
 	}
 
 	private def sameUserIdAs(user: User) = (other: Pair[String, User]) => { user.getUserId == other._2.getUserId }
