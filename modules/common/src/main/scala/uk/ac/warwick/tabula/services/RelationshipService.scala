@@ -68,6 +68,10 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		relationshipDao.getCurrentRelationships(relationshipType, scd)
 	}
 
+	def findCurrentRelationships(relationshipType: StudentRelationshipType, scd: StudentCourseDetails): Seq[StudentRelationship] = transactional() {
+		memberDao.getCurrentRelationships(relationshipType, scd)
+	}
+
 	def findCurrentRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional() {
 		relationshipDao.getCurrentRelationships(relationshipType, student)
 	}
