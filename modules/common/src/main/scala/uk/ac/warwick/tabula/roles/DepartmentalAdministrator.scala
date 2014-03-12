@@ -48,6 +48,8 @@ case object DepartmentalAdministratorRoleDefinition extends BuiltInRoleDefinitio
 		Profiles.ScheduledMeetingRecord.Update,
 		Profiles.ScheduledMeetingRecord.Delete,
 
+		Profiles.ViewSearchResults,
+
 		SmallGroups.Read
 	)
 	def canDelegateThisRolesPermissions:JBoolean = true
