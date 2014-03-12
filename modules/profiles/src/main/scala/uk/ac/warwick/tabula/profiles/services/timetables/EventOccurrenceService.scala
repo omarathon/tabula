@@ -6,31 +6,8 @@ import uk.ac.warwick.tabula.AcademicYear
 import uk.ac.warwick.tabula.services.{TermServiceComponent, WeekToDateConverterComponent}
 import uk.ac.warwick.util.termdates.Term
 import uk.ac.warwick.util.termdates.Term.TermType
+import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
 
-case class EventOccurrence(
-														name: String,
-														description: String,
-														eventType: TimetableEventType,
-														start: LocalDateTime,
-														end: LocalDateTime,
-														location: Option[String],
-														moduleCode: String,
-														staffUniversityIds: Seq[String])
-
-object EventOccurrence {
-	def apply(timetableEvent: TimetableEvent, start: LocalDateTime, end: LocalDateTime): EventOccurrence = {
-		new EventOccurrence(
-			timetableEvent.name,
-			timetableEvent.description,
-			timetableEvent.eventType,
-			start,
-			end,
-			timetableEvent.location,
-			timetableEvent.moduleCode,
-			timetableEvent.staffUniversityIds
-		)
-	}
-}
 trait EventOccurrenceService{
 	def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence]
 }

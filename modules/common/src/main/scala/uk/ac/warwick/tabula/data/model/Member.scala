@@ -245,10 +245,6 @@ class StudentMember extends Member with StudentProperties {
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	var mostSignificantCourse: StudentCourseDetails = _
 
-	@Column(name="tier4_visa_requirement")
-	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
-	var tier4VisaRequirement: JBoolean = _
-
 	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
 	def casUsed: Option[Boolean] = {
 			mostSignificantCourseDetails.flatMap(scd => scd.latestStudentCourseYearDetails.casUsed match {
@@ -471,6 +467,10 @@ trait StudentProperties {
 	@JoinColumn(name = "disability")
 	@Restricted(Array("Profiles.Read.Disability"))
 	var disability: Disability = _
+
+	@Column(name="tier4_visa_requirement")
+	@Restricted(Array("Profiles.Read.Tier4VisaRequirement"))
+	var tier4VisaRequirement: JBoolean = _
 }
 
 trait StaffProperties {

@@ -5,6 +5,7 @@ import uk.ac.warwick.util.cache.Caches.CacheStrategy
 import java.util
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports.JMap
+import uk.ac.warwick.tabula.timetables.TimetableEvent
 
 
 /**
