@@ -4,15 +4,13 @@ import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.profiles.commands.{PublicStudentPersonalTimetableCommand, ViewStudentPersonalTimetableCommandState, ViewStudentPersonalTimetableCommand}
 import uk.ac.warwick.tabula.data.model.{Member, StudentMember}
 import uk.ac.warwick.tabula.web.Mav
-import org.springframework.web.bind.annotation.{RequestParam, ModelAttribute, RequestMapping}
-import org.joda.time.DateTime
-import uk.ac.warwick.tabula.web.views.{IcalView, JSONView}
+import uk.ac.warwick.tabula.web.views.IcalView
 import org.springframework.web.bind.annotation.{ModelAttribute, RequestParam, RequestMapping}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.tabula.profiles.web.views.FullCalendarEvent
 import uk.ac.warwick.tabula.profiles.services.timetables._
-import uk.ac.warwick.tabula.services.{TermAwareWeekToDateConverterComponent, AutowiringProfileServiceComponent, AutowiringTermServiceComponent, UserLookupService, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
+import uk.ac.warwick.tabula.services.{TermAwareWeekToDateConverterComponent, AutowiringProfileServiceComponent, AutowiringTermServiceComponent}
 import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, AutowiringMeetingRecordServiceComponent, AutowiringRelationshipServiceComponent, UserLookupService, AutowiringUserLookupComponent, AutowiringSmallGroupServiceComponent}
 import uk.ac.warwick.tabula.helpers.SystemClockComponent
 import uk.ac.warwick.spring.Wire
@@ -22,7 +20,6 @@ import net.fortuna.ical4j.model.property.{XProperty, Method, CalScale, Version, 
 import net.fortuna.ical4j.model.component.VEvent
 import uk.ac.warwick.tabula.ItemNotFoundException
 import uk.ac.warwick.tabula.timetables.EventOccurrence
-import uk.ac.warwick.tabula.CurrentUser
 
 @Controller
 @RequestMapping(value = Array("/timetable"))
@@ -54,13 +51,13 @@ with AutowiringProfileServiceComponent with TermAwareWeekToDateConverterComponen
    	) = {
 	  if (timetableHash.hasText) {
 		  profileService.getStudentMemberByTimetableHash(timetableHash).map {
-			  member => PublicStudentPersonalTimetableCommand(eventSource, member)
+			  member => PublicStudentPersonalTimetableCommand(timetableEventSource, scheduledMeetingEventSource, member, user)
 		  }.getOrElse(throw new ItemNotFoundException)
 	  } else {
 		  whoFor match {
-		  case student: StudentMember => ViewStudentPersonalTimetableCommand(timetableEventSource, scheduledMeetingEventSource, student, user)
-		  case _ => throw new RuntimeException("Don't know how to render timetables for non-student users")
-		}
+				case student: StudentMember => ViewStudentPersonalTimetableCommand(timetableEventSource, scheduledMeetingEventSource, student, user)
+				case _ => throw new RuntimeException("Don't know how to render timetables for non-student users")
+			}
 	  }
 	}
 

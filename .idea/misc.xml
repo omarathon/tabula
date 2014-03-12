@@ -5,6 +5,7 @@
   </component>
   <component name="FrameworkDetectionExcludesConfiguration">
     <file url="file://$PROJECT_DIR$/modules/scheduling/overlays" />
+    <file url="file://$PROJECT_DIR$/modules/scheduling/overlays" />
     <file type="javaeeApplication" url="file://$PROJECT_DIR$/modules/all" />
     <file type="web" url="file://$PROJECT_DIR$/modules/admin" />
     <file type="web" url="file://$PROJECT_DIR$/modules/attendance" />

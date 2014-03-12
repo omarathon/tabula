@@ -1,8 +1,8 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.commands.{Command, Unaudited, ComposableCommand, Appliable, CommandInternal, ReadOnly}
+import uk.ac.warwick.tabula.commands.{Command, Unaudited, ComposableCommand, Appliable, CommandInternal}
 import uk.ac.warwick.tabula.profiles.services.timetables._
-import uk.ac.warwick.tabula.system.permissions.{Public, PermissionsChecking, RequiresPermissionsChecking, PubliclyVisiblePermissions}
+import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.services._

@@ -104,7 +104,7 @@ trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
 			}
 
 			val uid = DigestUtils.md5Hex(Seq(eventOccurrence.name, eventOccurrence.start.toString, eventOccurrence.end.toString,
-				eventOccurrence.location.getOrElse(""), eventOccurrence.moduleCode).mkString)
+				eventOccurrence.location.getOrElse(""), eventOccurrence.context.getOrElse("")).mkString)
 
 			event.getProperties.add(new Uid(uid))
 
