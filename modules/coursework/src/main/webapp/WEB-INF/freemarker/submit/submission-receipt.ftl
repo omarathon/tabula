@@ -10,6 +10,10 @@
 	<title>${submission.assignment.module.name} (${submission.assignment.module.code?upper_case} ${submission.assignment.module.name}) - ${submission.assignment.name}</title>
 </head>
 <body>
+	<div id="header">
+		<img src="/static/images/logo-full-black.png" style="float: right;" />
+	</div>
+
 	<h2>${submission.assignment.module.code?upper_case} ${submission.assignment.module.name}</h2>
 	<h2>${submission.assignment.name}</h2>
 	<h3>Submission receipt for ${user.universityId}</h3>
