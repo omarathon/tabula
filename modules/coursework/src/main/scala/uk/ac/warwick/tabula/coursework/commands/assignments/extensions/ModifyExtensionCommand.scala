@@ -16,7 +16,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.validators.WithinYears
-import uk.ac.warwick.tabula.data.model.notifications.{ExtensionRequestRespondedApproveNotification, ExtensionRequestRejectedNotification, ExtensionRequestApprovedNotification, ExtensionChangedNotification, ExtensionGrantedNotification}
+import uk.ac.warwick.tabula.data.model.notifications.{ExtensionRequestRespondedRejectNotification, ExtensionRequestRespondedApproveNotification, ExtensionRequestRejectedNotification, ExtensionRequestApprovedNotification, ExtensionChangedNotification, ExtensionGrantedNotification}
 
 /*
  * Built the command as a bulk operation. Single additions can be achieved by adding only one extension to the list.
@@ -54,7 +54,7 @@ class EditExtensionCommand(module: Module, assignment: Assignment, val extension
 			val baseAdminNotification = if (extension.approved) {
 				new ExtensionRequestRespondedApproveNotification
 			} else {
-				new ExtensionRequestRespondedApproveNotification
+				new ExtensionRequestRespondedRejectNotification
 			}
 			val adminNotifications = Notification.init(baseAdminNotification, admin, Seq(extension), extension.assignment)
 
