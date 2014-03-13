@@ -133,7 +133,10 @@ abstract class AbstractSmallGroupService extends SmallGroupService {
 			    if smallGroup.students.includesUser(user)
 			} {
 				// Wrap this in a sub-command so that we can do auditing
-				userGroupDao.saveOrUpdate(removeFromGroupCommand(user, smallGroup).apply().asInstanceOf[UserGroup])
+				userGroupDao.saveOrUpdate(removeFromGroupCommand(user, smallGroup).apply() match {
+					case group: UserGroupCacheManager => group.underlying.asInstanceOf[UserGroup]
+					case group: UnspecifiedTypeUserGroup => group.asInstanceOf[UserGroup]
+				})
 			}
 		}
 	}
