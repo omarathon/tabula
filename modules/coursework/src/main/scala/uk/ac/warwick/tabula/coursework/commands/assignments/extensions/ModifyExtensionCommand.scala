@@ -30,7 +30,7 @@ abstract class ModifyExtensionCommand(val mod: Module, val ass: Assignment, uniI
 		extension.reviewedOn = DateTime.now
 
 		action match {
-			case ApprovalAction => extension.approve(reviewerComments)
+			case ApprovalAction | UpdateApprovalAction => extension.approve(reviewerComments)
 			case RejectionAction => extension.reject(reviewerComments)
 			case RevocationAction => extension.rawState_=(ExtensionState.Revoked)
 			case _ =>
@@ -82,6 +82,7 @@ trait ModifyExtensionCommandState {
 	final val ApprovalAction = "Grant"
 	final val RejectionAction = "Reject"
 	final val RevocationAction = "Revoke"
+	final val UpdateApprovalAction = "Update"
 }
 
 

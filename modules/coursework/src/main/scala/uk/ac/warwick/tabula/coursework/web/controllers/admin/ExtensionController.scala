@@ -47,19 +47,14 @@ abstract class ExtensionController extends CourseworkController {
 					case _ => null
 				}
 
-			val extensionDuration = (if (extension.expiryDate == null)
-				0
-			else
-				Days.daysBetween(extension.assignment.closeDate, extension.expiryDate).getDays
-			).toString
-
 			Map(
 				"id" -> extension.universityId,
 				"status" -> extension.state.description,
 				"requestedExpiryDate" -> convertDateToString(extension.requestedExpiryDate),
 				"expiryDate" -> convertDateToString(extension.expiryDate),
 				"expiryDateMillis" -> convertDateToMillis(extension.expiryDate),
-				"extensionDuration" -> extensionDuration,
+				"extensionDuration" -> extension.duration.toString,
+				"requestedExtraExtensionDuration" -> extension.requestedExtraDuration.toString,
 				"reviewerComments" -> extension.reviewerComments
 			)
 		}
@@ -136,6 +131,7 @@ class EditExtensionController extends ExtensionController {
 			"student" -> student,
 			"studentContext" -> studentContext,
 			"userFullName" -> userLookup.getUserByWarwickUniId(cmd.universityId).getFullName,
+			"updateAction" -> cmd.UpdateApprovalAction,
 			"approvalAction" -> cmd.ApprovalAction,
 			"rejectionAction" -> cmd.RejectionAction,
 			"revocationAction" -> cmd.RevocationAction

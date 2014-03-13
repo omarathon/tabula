@@ -515,7 +515,7 @@ $(function() {
 
 				// update duration
 				$statusContainer.data('duration', parseInt($response.data('data').extensionDuration));
-				$statusContainer.data('requestedExtraDuration', 0);
+				$statusContainer.data('requestedExtraDuration', parseInt($response.data('data').requestedExtraExtensionDuration));
 				$statusContainer.data('awaitingReview', false);
 				$statusContainer.data('approved', approved);
 				$statusContainer.data('rejected', rejected);

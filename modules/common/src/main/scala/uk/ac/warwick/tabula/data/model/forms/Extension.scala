@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model.forms
 
 import scala.collection.JavaConversions._
 import org.hibernate.annotations.{BatchSize, Type, AccessType}
-import org.joda.time.DateTime
+import org.joda.time.{Days, DateTime}
 import javax.persistence._
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
@@ -85,6 +85,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	def isManual = requestedOn == null
 	def isInitiatedByStudent = !isManual
 
+	// you can't infer from state alone whether there's a request outstanding - use awaitingReview()
 	def approved = state == ExtensionState.Approved
 	def rejected = state == ExtensionState.Rejected
 	def unreviewed = state == ExtensionState.Unreviewed
@@ -123,6 +124,18 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	def feedbackDeadline = workingDaysHelper.datePlusWorkingDays(expiryDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays).toDateTime(expiryDate)
 
 	def toEntityReference = new ExtensionEntityReference().put(this)
+
+	def duration = if (expiryDate != null) Days.daysBetween(assignment.closeDate, expiryDate).getDays else 0
+
+	def requestedExtraDuration = {
+		if (requestedExpiryDate != null && expiryDate != null)
+			Days.daysBetween(expiryDate, requestedExpiryDate).getDays
+
+		else if (requestedExpiryDate != null && expiryDate == null)
+			Days.daysBetween(assignment.closeDate, requestedExpiryDate).getDays
+
+		else 0
+	}
 }
 
 
@@ -134,6 +147,7 @@ object Extension {
 sealed abstract class ExtensionState(val dbValue: String, val description: String)
 
 object ExtensionState {
+	// you can't infer from state alone whether there's a request outstanding - use extension.awaitingReview()
 	case object Unreviewed extends ExtensionState("U", "Unreviewed")
 	case object Approved extends ExtensionState("A", "Approved")
 	case object Rejected extends ExtensionState("R", "Rejected")
