@@ -84,6 +84,40 @@
 	}
 }
 
+@progressFadeLeft: fade(lighten(@tableBackgroundAccent, 2%), 0);
+@progressFadeRight: fade(lighten(@tableBackgroundAccent, 2%), 100);
+
+#main-content .students {
+	.duration-col {
+		width: 50%;
+	}
+
+	.progress {
+		margin-bottom: 0;
+
+		&.overTime {
+			position: relative;
+		}
+
+		&.overTime:after {
+			content: " ";
+			width: 100%;
+			height: 100%;
+			position: absolute;
+			z-index: 30;
+			top: 0;
+			left: 0;
+			pointer-events: none;
+			background: transparent;
+			background: -moz-linear-gradient(left, @progressFadeLeft 90%, @progressFadeRight 100%);
+			background: -webkit-gradient(linear, left top, right top, color-stop(90%,@progressFadeLeft), color-stop(100%,@progressFadeRight));
+			background: -webkit-linear-gradient(left, @progressFadeLeft 90%, @progressFadeRight 100%);
+			background: -o-linear-gradient(left, @progressFadeLeft 90%, @progressFadeRight 100%);
+			background: -ms-linear-gradient(left, @progressFadeLeft 90%, @progressFadeRight 100%);
+			background: linear-gradient(to right, @progressFadeLeft 90%, @progressFadeRight 100%);
+		}
+	}
+}
 
 // department sort-modules (modules/arrange/form.ftl)
 

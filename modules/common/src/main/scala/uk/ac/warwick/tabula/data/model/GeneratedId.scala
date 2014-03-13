@@ -17,7 +17,7 @@ trait GeneratedId extends IdEquality {
 	@GeneratedValue(generator = "system-uuid")
 	@GenericGenerator(name = "system-uuid", strategy = "org.hibernate.id.UUIDGenerator")
 	var id: String = null
-
+	def isNew = id == null
 }
 
 trait StringId {

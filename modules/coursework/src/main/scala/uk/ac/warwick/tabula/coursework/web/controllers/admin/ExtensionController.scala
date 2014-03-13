@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.data.model.forms.Extension
 import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.helpers.DateBuilder
 import javax.validation.Valid
-import org.joda.time.DateTime
+import org.joda.time.{Days, DateTime}
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
@@ -47,12 +47,19 @@ abstract class ExtensionController extends CourseworkController {
 					case _ => null
 				}
 
+			val extensionDuration = (if (extension.expiryDate == null)
+				0
+			else
+				Days.daysBetween(extension.assignment.closeDate, extension.expiryDate).getDays
+			).toString
+
 			Map(
 				"id" -> extension.universityId,
 				"status" -> extension.state.description,
 				"requestedExpiryDate" -> convertDateToString(extension.requestedExpiryDate),
 				"expiryDate" -> convertDateToString(extension.expiryDate),
 				"expiryDateMillis" -> convertDateToMillis(extension.expiryDate),
+				"extensionDuration" -> extensionDuration,
 				"reviewerComments" -> extension.reviewerComments
 			)
 		}

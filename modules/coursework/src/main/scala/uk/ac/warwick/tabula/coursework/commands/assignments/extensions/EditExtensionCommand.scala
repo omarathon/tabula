@@ -48,8 +48,10 @@ trait EditExtensionCommandPermissions extends RequiresPermissionsChecking {
 	def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(assignment, module)
 
-		// FIXME needs to check Create instead for adding new extensions; look at state!
-		p.PermissionCheck(Permissions.Extension.Update, assignment)
+		extension match {
+			case e if e.isNew => p.PermissionCheck(Permissions.Extension.Create, assignment)
+			case _ => p.PermissionCheck(Permissions.Extension.Update, assignment)
+		}
 	}
 }
 
@@ -60,8 +62,7 @@ trait EditExtensionCommandNotification extends Notifies[Extension, Option[Extens
 	def emit(extension: Extension) = {
 		val admin = submitter.apparentUser
 
-		// FIXME null check probably wrong. this should check if this is a new extension by an admin, without student request: look at state?
-		if (extension == null) {
+		if (extension.isManual) {
 			Seq(Notification.init(new ExtensionGrantedNotification, submitter.apparentUser, Seq(extension), assignment))
 		} else {
 			val baseNotification = if (extension.isManual) {

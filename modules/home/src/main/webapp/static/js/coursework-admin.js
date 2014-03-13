@@ -498,8 +498,9 @@ $(function() {
 				var rejected = $response.data('data').status == 'Rejected';
 				var approved = $response.data('data').status == 'Approved';
 				var revoked = $response.data('data').status == 'Revoked';
-				var $statusContainer = $row.find('.status-col dt');
 
+				// update status
+				var $statusContainer = $row.find('.status-col dt');
 				$statusContainer.find(".label").remove();
 
 				if(rejected) {
@@ -512,7 +513,13 @@ $(function() {
 					$statusContainer.append($('<span class="label no-extension">No extension</span>'));
 				}
 
-				// FIXME update duration column
+				// update duration
+				$statusContainer.data('duration', parseInt($response.data('data').extensionDuration));
+				$statusContainer.data('requestedExtraDuration', 0);
+				$statusContainer.data('awaitingReview', false);
+				$statusContainer.data('approved', approved);
+				$statusContainer.data('rejected', rejected);
+				renderDurationProgressBar($row);
 
 				return "";
 			} else {
@@ -520,6 +527,89 @@ $(function() {
 			}
 		});
 	});
+
+	var maxDaysToDisplayAsProgressBar = $('table.students').data('max-days');
+	var totalDuration;
+	var $progress;
+
+	var barWidth = function(duration) {
+		return 100 * duration / totalDuration;
+	}
+	var tooltip = function(verb, duration) {
+		return verb + ' ' + duration + ' day' + (duration == 1 ? "" : "s");
+	}
+	var appendBar = function(verb, customClass, duration) {
+		if (duration) {
+			$progress.append($('<div class="bar ' + customClass + ' use-tooltip" title="' + tooltip(verb, duration) + '" style="width: ' + barWidth(duration) + '%" data-container="body"></div>'));
+		}
+	}
+	var renderDurationProgressBar = function($row) {
+		var $dt = $row.find('dt');
+		var $durationCol = $row.find('.duration-col');
+
+		// ignore rows without extension
+		if ($row.find('.no-extension').length) {
+			$durationCol.empty();
+		} else {
+			var duration = $dt.data('duration');
+			var requestedExtraDuration = $dt.data('requestedExtraDuration');
+			totalDuration = duration + requestedExtraDuration;
+
+			var isOverTime = totalDuration > maxDaysToDisplayAsProgressBar;
+			var progressClass = "progress";
+			var progressWidth;
+			if (isOverTime) {
+				progressWidth = 100;
+				progressClass += " overTime";
+			} else {
+				progressWidth = 90*totalDuration / maxDaysToDisplayAsProgressBar;
+			}
+
+			$progress = $('<div class="' + progressClass + '" style="width: ' + progressWidth + '%"></div>');
+
+			if ($dt.data('rejected') && !$dt.data('awaitingReview')) {
+				appendBar('Rejected request for', 'bar-danger', requestedExtraDuration);
+			} else if ($dt.data('approved')) {
+				appendBar('Approved', 'bar-success', duration);
+			}
+			if ($dt.data('awaitingReview')) {
+				appendBar('Requested further', 'bar-warning', requestedExtraDuration);
+			}
+
+			$durationCol.empty().append($progress);
+		}
+	}
+
+	$('table.students tbody tr').each(function() {
+			renderDurationProgressBar($(this));
+			$(this).find('.bar').tooltip();
+	});
+
+	$('#main-content').on('click', '.btn.revoke', function(e) {
+		e.preventDefault();
+		e.stopPropagation();
+		var message = 'Revoking an extension is irreversible. Are you sure?';
+		var modalHtml = "<div class='modal hide fade' id='confirmModal'>" +
+			"<div class='modal-body'>" +
+			"<h5>"+message+"</h5>" +
+			"</div>" +
+			"<div class='modal-footer'>" +
+			"<a class='confirm btn'>Yes, revoke</a>" +
+			"<a data-dismiss='modal' class='btn btn-primary'>No, go back</a>" +
+			"</div>" +
+			"</div>"
+		var $modal = $(modalHtml);
+		$modal.data('form', $(this).closest('form'));
+		$modal.modal();
+		$('a.confirm', $modal).on('click', function() {
+			$modal.modal('hide');
+			var $form = $modal.data('form');
+			// Dislike literals, but can't see Routes from here
+			$form.attr('action', $form.attr('action').replace('detail/', 'revoke/'));
+			$form.submit();
+		});
+	});
+
 
 	$('#main-content').on('tabula.expandingTable.parentRowCollapsed', '.content-container', function(e) {
 		var $this = $(this);
@@ -547,8 +637,6 @@ $(function() {
 				expiryDatePicker.setValue();
 			}
 		}
-
-
 	});
 
 	$('#main-content').on("click", ".remove-attachment", function(e) {

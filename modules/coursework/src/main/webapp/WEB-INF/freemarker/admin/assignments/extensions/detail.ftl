@@ -108,6 +108,7 @@
 
 			<@f.errors path="*" cssClass="error form-errors" />
 
+			<#-- FIXME disable when appropriate -->
 			<div class="submit-buttons">
 				<input class="btn btn-primary" type="submit" value="${approvalAction}" name="action">
 				<#if !extension.manual>
