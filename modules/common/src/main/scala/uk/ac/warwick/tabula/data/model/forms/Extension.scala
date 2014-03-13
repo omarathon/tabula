@@ -91,6 +91,9 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	def unreviewed = state == ExtensionState.Unreviewed
 	def revoked = state == ExtensionState.Revoked
 
+	def rejectable = awaitingReview || (approved && isInitiatedByStudent)
+	def revocable = approved && !isInitiatedByStudent
+
 	// keep state encapsulated
 	def approve(comments: String = null) {
 		_state = ExtensionState.Approved

@@ -109,16 +109,19 @@
 			<@f.errors path="*" cssClass="error form-errors" />
 
 			<div class="submit-buttons">
+
 				<#if extension.approved && can.do("Extension.Update", assignment)>
 					<input class="btn btn-primary" type="submit" value="${updateAction}" name="action">
 				<#elseif can.do("Extension.Create", assignment)>
 					<input class="btn btn-primary" type="submit" value="${approvalAction}" name="action">
 				</#if>
-				<#if extension.awaitingReview && can.do("Extension.Update", assignment)>
+
+				<#if extension.rejectable && can.do("Extension.Update", assignment)>
 					<input class="btn btn-danger" type="submit" value="${rejectionAction}" name="action">
-				<#elseif extension.approved && can.do("Extension.Delete", assignment)>
+				<#elseif extension.revocable && can.do("Extension.Delete", assignment)>
 					<input class="btn btn-danger revoke" type="submit" value="${revocationAction}" name="action">
 				</#if>
+
 				<a class="btn discard-changes" href="">Discard changes</a>
 			</div>
 		</@f.form>
