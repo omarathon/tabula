@@ -26,6 +26,9 @@
 	</#if>
 	</div>
 	</div>
+
+	<p><a href="<@routes.submissionReceiptPdf assignment=assignment />">Download submission receipt as a PDF file</a></p>
+
 	<#if !feedback??>
 	<p>You should have been sent an email confirming the submission. Check your spam folders if it doesn't show up in your inbox. 
 	If it's been a few minutes and it still hasn't reached you, click the button below to send a fresh copy.</p>
