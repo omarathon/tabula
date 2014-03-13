@@ -912,7 +912,7 @@
 				$t.find('.nav-tabs').sortable({
 					handle: '.icon-move',
 					placeholder: 'tabbable-placeholder'
-				}).show().find('li:first a').tab('show');
+				}).show().find('li:first > a').tab('show');
 				$t.trigger('tabbablechanged', function() { $('.tabbable').tabOverflow(); });
 			});
 
@@ -923,14 +923,14 @@
 				$t.append($cols);
 				$panes.children('li').each(function(idx) {
 					var $gadget = $(this).addClass('gadget');
-					var title = $(this).find('h4').first().html();
+					var title = $(this).find('h4').first().text();
 					var link = '#' + $(this).attr('id');
 					var $tab = $('<li><a href="' + link + '" data-toggle="tab" data-title="' + title + '" title="Click and drag to move"><span class="title">' + title + '</span> <i class="icon-minus-sign-alt" title="Hide ' + title + '"></i></a></li>');
 					var $gadgetHeaderTab = $('<div class="row-fluid tab-container"><ul class="nav nav-tabs"></ul></div>');
 					$(this).find('.agent').removeClass('span4');
 					$gadgetHeaderTab.children().append($tab);
 					$gadget.wrapInner('<div class="tab-content gadget-only" />').children().wrapInner('<div class="gadget-only tab-pane active" />');
-					$gadget.prepend($gadgetHeaderTab).find('.tab-container li a').tab('show');
+					$gadget.prepend($gadgetHeaderTab).find('.tab-container li > a').tab('show');
 
 					// populate columns (dumbly)
 					$(this).appendTo(idx < paneCount/2 ? $cols.children().first() : $cols.children().last());

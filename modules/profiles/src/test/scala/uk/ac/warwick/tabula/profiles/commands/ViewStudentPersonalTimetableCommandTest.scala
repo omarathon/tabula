@@ -20,7 +20,7 @@ class ViewStudentPersonalTimetableCommandTest extends TestBase with Mockito{
 	val occurrence = EventOccurrence("", "", TimetableEventType.Meeting, LocalDateTime.now, LocalDateTime.now, None, None, Nil)
 	val meetingOccurrences = Seq(occurrence)
 
-	val earlierEvent = EventOccurrence("","",TimetableEventType.Induction,LocalDateTime.now, LocalDateTime.now,None, None, Nil )
+	val earlierEvent = EventOccurrence("","",TimetableEventType.Induction,LocalDateTime.now.minusHours(1), LocalDateTime.now,None, None, Nil )
 	val laterEvent = EventOccurrence("","",TimetableEventType.Induction,LocalDateTime.now.plusHours(1), LocalDateTime.now.plusHours(1),None, None, Nil )
 	val eventOccurences = Seq(laterEvent,earlierEvent) // deliberately put them the wrong way round so we can check sorting
 

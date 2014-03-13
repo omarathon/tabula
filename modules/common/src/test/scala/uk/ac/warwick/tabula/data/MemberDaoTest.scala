@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.{Fixtures, Mockito, PersistenceTestBase}
 import uk.ac.warwick.tabula.JavaImports.JList
 import uk.ac.warwick.tabula.data.model.{Member, StudentRelationship, StudentRelationshipType}
 import uk.ac.warwick.tabula.helpers.Logging
+import org.springframework.transaction.annotation.Transactional
 
 // scalastyle:off magic.number
 class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
@@ -81,6 +82,17 @@ class MemberDaoTest extends PersistenceTestBase with Logging with Mockito {
 			memberDao.getAllByUserId("staff1", false) should be (Seq(m3))
 	}
 }
+
+	@Transactional
+	@Test
+	def getStudentByTimetableHash = {
+		val student = Fixtures.student()
+		val timetableHash = "abc"
+		student.timetableHash = timetableHash
+		memberDao.saveOrUpdate(student)
+		memberDao.getStudentMemberByTimetableHash(timetableHash) should be (Some(student))
+		memberDao.getStudentMemberByTimetableHash("anotherhash") should be (None)
+	}
 
 	@Test
   def listUpdatedSince = transactional { tx =>
