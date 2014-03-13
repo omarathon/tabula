@@ -27,5 +27,5 @@ abstract class SubmissionNotification
 		"path" -> url)
 	)
 
-	def url = "/coursework" + Routes.assignment.receipt(assignment)
+	def url = Routes.assignment.receipt(assignment)
 }

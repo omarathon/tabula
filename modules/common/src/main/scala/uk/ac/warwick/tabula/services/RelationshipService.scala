@@ -44,6 +44,7 @@ trait RelationshipService {
 	def countStudentsByRelationshipAndDepartment(relationshipType: StudentRelationshipType, department: Department): (Int, Int)
 	def countStudentsByRelationship(relationshipType: StudentRelationshipType): Int
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship]
+	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship]
 }
 
 @Service(value = "relationshipService")
@@ -73,6 +74,10 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 
 	def getAllCurrentRelationships(student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {
 		relationshipDao.getAllCurrentRelationships(student)
+	}
+
+	def getAllPastAndPresentRelationships(student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {
+		relationshipDao.getAllPastAndPresentRelationships(student)
 	}
 
 	def getRelationships(relationshipType: StudentRelationshipType, student: StudentMember): Seq[StudentRelationship] = transactional(readOnly = true) {

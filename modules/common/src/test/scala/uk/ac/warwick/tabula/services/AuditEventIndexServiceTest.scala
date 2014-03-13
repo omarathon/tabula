@@ -164,6 +164,7 @@ class AuditEventIndexServiceTest extends PersistenceTestBase with Mockito with L
 		indexer.incrementalIndex
 
 		val assignment = new Assignment()
+		assignment.createdDate = null // Set null date otherwise the search will get restricted
 		assignment.id = "12345"
 
 		val maybeDate = indexer.getAssignmentCreatedDate(assignment)

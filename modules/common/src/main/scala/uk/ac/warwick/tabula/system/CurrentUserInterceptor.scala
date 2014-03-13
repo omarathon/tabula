@@ -30,7 +30,7 @@ class CurrentUserInterceptor extends HandlerInterceptorAdapter {
 		val masquerader = roleService.hasRole(new CurrentUser(user, user), Masquerader())
 		val canMasquerade =  sysadmin || masquerader
 		val apparentUser = masqueradeUser(user, canMasquerade)
-		
+
 		new CurrentUser(
 			realUser = user,
 			apparentUser = apparentUser,

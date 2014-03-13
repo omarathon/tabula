@@ -1,11 +1,11 @@
 package uk.ac.warwick.tabula.profiles.web.views
 
 import org.joda.time.{DateTime, LocalDate}
-import uk.ac.warwick.tabula.profiles.services.timetables.EventOccurrence
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
 import uk.ac.warwick.tabula.services.UserLookupService
 import uk.ac.warwick.tabula.helpers.{ConfigurableIntervalFormatter, IntervalFormatter}
 import uk.ac.warwick.tabula.helpers.ConfigurableIntervalFormatter.{IncludeDays, Hour12OptionalMins}
+import uk.ac.warwick.tabula.timetables.EventOccurrence
 
 /**
  * serialises to the JSON which FullCalendar likes.
@@ -28,7 +28,7 @@ case class FullCalendarEvent(title: String,
 														 description: String = "",
 														 shorterTitle: String = "", // used in the pop-up to display event details
 														 tutorNames: String = "",
-                             moduleCode: String="")
+                             context: String="")
 
 object FullCalendarEvent {
 
@@ -36,7 +36,7 @@ object FullCalendarEvent {
 		val intervalFormatter = new ConfigurableIntervalFormatter(Hour12OptionalMins, IncludeDays)
 		val shortTimeFormat = DateTimeFormat.shortTime()
 		FullCalendarEvent(
-			title = source.moduleCode.toUpperCase + " " + source.eventType.displayName + source.location.map(l => s" ($l)").getOrElse(""),
+			title = source.context.map { _ + " " }.getOrElse("") + source.eventType.displayName + source.location.map(l => s" ($l)").getOrElse(""),
 			allDay = false,
 			start = source.start.toDateTime.getMillis / 1000,
 			end = source.end.toDateTime.getMillis / 1000,
@@ -45,9 +45,9 @@ object FullCalendarEvent {
 			formattedInterval = intervalFormatter.format(source.start.toDateTime, source.end.toDateTime),
 			location = source.location.getOrElse(""),
 			description = source.description,
-			shorterTitle = source.moduleCode.toUpperCase + " " + source.eventType.displayName,
+			shorterTitle = source.context.map { _ + " " }.getOrElse("") + source.eventType.displayName,
 			tutorNames = userLookup.getUsersByWarwickUniIds(source.staffUniversityIds).values.map(_.getFullName).mkString(", "),
-		  moduleCode = source.moduleCode
+		  context = source.context.getOrElse("")
 		)
 	}
 }

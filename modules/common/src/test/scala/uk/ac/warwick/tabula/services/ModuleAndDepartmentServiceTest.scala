@@ -84,6 +84,10 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 		service.getDepartmentById(ch.id) should be (Some(ch))
 		service.getDepartmentByCode("wibble") should be (None)
 		service.getDepartmentById("wibble") should be (None)
+
+		service.getDepartmentByCode("CH") should be (Some(ch))
+		service.getDepartmentByCode(null) should be (None)
+
 		
 		service.getModuleByCode("cs108") should be (Some(cs108))
 		service.getModuleById(cs108.id) should be (Some(cs108))

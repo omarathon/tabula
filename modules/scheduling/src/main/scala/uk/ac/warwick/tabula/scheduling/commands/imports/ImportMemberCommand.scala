@@ -20,12 +20,10 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.helpers.Closeables._
 import java.io.InputStream
 import org.apache.commons.codec.digest.DigestUtils
-import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.scheduling.services.MembershipInformation
 import uk.ac.warwick.tabula.commands.Unaudited
 import java.io.ByteArrayInputStream
-import java.sql.ResultSetMetaData
 import uk.ac.warwick.userlookup.User
 import org.apache.commons.lang3.text.WordUtils
 import scala.util.matching.Regex
@@ -33,6 +31,7 @@ import uk.ac.warwick.tabula.scheduling.helpers.PropertyCopying
 import language.implicitConversions
 import uk.ac.warwick.tabula.scheduling.services.MembershipMember
 import uk.ac.warwick.tabula.services.UserLookupService
+import java.util.UUID
 
 abstract class ImportMemberCommand extends Command[Member] with Logging with Daoisms
 	with MemberProperties with Unaudited with PropertyCopying {
@@ -60,13 +59,8 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 
 		this.universityId = oneOf(member.universityId, optString("university_id")).get
 
-		val suggestedUserId = oneOf(ssoUser.getUserId.maybeText, member.usercode).get
-
-		this.userId = optString("user_code") match {
-			// TAB-2004
-			case Some(userId) if userId != suggestedUserId && userLookup.getUserByUserId(userId).getWarwickId == this.universityId => userId
-			case _ => suggestedUserId
-		}
+		// TAB-2014
+		this.userId = oneOf(member.usercode, ssoUser.getUserId.maybeText, optString("user_code")).get
 
 		this.userType = member.userType
 
@@ -166,11 +160,22 @@ abstract class ImportMemberCommand extends Command[Member] with Logging with Dao
 		} else false
 	}
 
+	private def setTimetableHashIfMissing(memberBean: BeanWrapper): Boolean = {
+		val existingHash = memberBean.getPropertyValue("timetableHash").asInstanceOf[String]
+		if (!existingHash.hasText) {
+			memberBean.setPropertyValue("timetableHash", UUID.randomUUID.toString)
+			true
+		} else {
+			false
+		}
+	}
+
 	// We intentionally use a single pipe rather than a double pipe here - we want all statements to be evaluated
 	protected def copyMemberProperties(commandBean: BeanWrapper, memberBean: BeanWrapper) =
 		copyBasicProperties(basicMemberProperties, commandBean, memberBean) |
 		copyPhotoIfModified("photo", photoOption, memberBean) |
-		copyObjectProperty("homeDepartment", homeDepartmentCode, memberBean, toDepartment(homeDepartmentCode))
+		copyObjectProperty("homeDepartment", homeDepartmentCode, memberBean, toDepartment(homeDepartmentCode)) |
+		setTimetableHashIfMissing(memberBean)
 
 	private def toPhoto(bytes: Array[Byte]) = {
 		val photo = new FileAttachment

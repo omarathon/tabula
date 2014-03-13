@@ -20,7 +20,8 @@ trait TermService {
 	def getTermFromDateIncludingVacations(date: BaseDateTime): Term
 	def getTermsBetween(start: BaseDateTime, end: BaseDateTime): Seq[Term]
 	def getAcademicWeekForAcademicYear(date: BaseDateTime, academicYear: AcademicYear): Int
-	def getTermFromAcademicWeek(weekNumber: Int, academicYear: AcademicYear): Term
+	def getTermFromAcademicWeek(weekNumber: Int, academicYear: AcademicYear, includeVacations: Boolean = false): Term
+	def getTermFromAcademicWeekIncludingVacations(weekNumber: Int, academicYear: AcademicYear): Term
 }
 
 object TermService {
@@ -108,12 +109,18 @@ class TermServiceImpl extends TermService {
 			termContainingYearStart.getAcademicWeekNumber(date)
 	}
 
-	def getTermFromAcademicWeek(weekNumber: Int, academicYear: AcademicYear): Term = {
+	def getTermFromAcademicWeek(weekNumber: Int, academicYear: AcademicYear, includeVacations: Boolean = false): Term = {
 		val approxStartDate = new DateMidnight(academicYear.startYear, DateTimeConstants.NOVEMBER, 1)
 		val day = DayOfWeek.Thursday
 		val weeksForYear = getAcademicWeeksForYear(approxStartDate).toMap
-		getTermFromDate(weeksForYear(weekNumber).getStart.withDayOfWeek(day.jodaDayOfWeek))
+		if (includeVacations)
+			getTermFromDateIncludingVacations(weeksForYear(weekNumber).getStart.withDayOfWeek(day.jodaDayOfWeek))
+		else
+			getTermFromDate(weeksForYear(weekNumber).getStart.withDayOfWeek(day.jodaDayOfWeek))
 	}
+
+	def getTermFromAcademicWeekIncludingVacations(weekNumber: Int, academicYear: AcademicYear): Term =
+		getTermFromAcademicWeek(weekNumber, academicYear, includeVacations = true)
 
 }
 

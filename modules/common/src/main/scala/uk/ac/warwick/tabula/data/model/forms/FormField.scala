@@ -35,7 +35,7 @@ import uk.ac.warwick.tabula.data.model.Gender.{Unspecified, Female, Male}
  */
 
 object FormField {
-	final val FormFieldMaxSize = 4000
+	final val FormFieldMaxSize = 32768
 }
 
 @Entity @Access(AccessType.FIELD)

@@ -2,6 +2,7 @@ package uk.ac.warwick.tabula.roles
 
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.permissions.Permissions._
+import uk.ac.warwick.tabula.JavaImports
 
 case class ExtensionManager(department: Department) extends BuiltInRole(ExtensionManagerRoleDefinition, department)
 
@@ -11,7 +12,9 @@ case object ExtensionManagerRoleDefinition extends UnassignableBuiltInRoleDefini
 
 	GeneratesSubRole(ModuleAuditorRoleDefinition)
 	
-	GrantsScopedPermission( 
+	GrantsScopedPermission(
+		Extension.ReviewRequest,
+		Extension.Create,
 		Extension.Update,
 		Extension.Read
 	)

@@ -1,7 +1,11 @@
 <div class="submission-received">
 	<#if justSubmitted!false>
 	<div class="alert alert-success">
-		<a class="close" data-dismiss="alert">&times;</a>Thanks, we've received your submission.
+		<a class="close" data-dismiss="alert">&times;</a>
+		Thanks, we've received your submission. We'll send you an email confirming this shortly;
+		don't worry if the email doesn't arrive straight away - we've already recorded the official
+		time of your submission, and it's <@fmt.date date=submission.submittedDate at=true seconds=false relative=false />,
+		regardless of when the email reaches you.
 	</div>
 	</#if>
 	
@@ -16,12 +20,15 @@
 			<ul>
 				<#list submission.allAttachments as attachment>
 					<li><a href="${url('/coursework/module/${module.code}/${assignment.id}/attachment/${attachment.name?url}')}">${attachment.name}</a></li>
-				</#list>  
+				</#list>
 			</ul>
 		</p>
 	</#if>
 	</div>
 	</div>
+
+	<p><a href="<@routes.submissionReceiptPdf assignment=assignment />">Download submission receipt as a PDF file</a></p>
+
 	<#if !feedback??>
 	<p>You should have been sent an email confirming the submission. Check your spam folders if it doesn't show up in your inbox. 
 	If it's been a few minutes and it still hasn't reached you, click the button below to send a fresh copy.</p>

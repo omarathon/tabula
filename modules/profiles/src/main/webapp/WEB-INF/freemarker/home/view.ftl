@@ -68,7 +68,9 @@
 			</#if>
 			
 			<#if currentUserDepartment??>
-				<h2><a href="<@routes.filter_students currentUserDepartment />">All students in ${currentUserDepartment.name}</a></h2>
+			<#list currentUserDepartment as dept>
+				<h2><a href="<@routes.filter_students dept />">All students in ${dept.name}</a></h2>
+			</#list>
 			</#if>
 		</div>
 		

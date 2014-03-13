@@ -33,6 +33,7 @@ class DownloadFeedbackAsPdfController extends CourseworkController {
 	var feedbackService = Wire[FeedbackService]
 	
 	@ModelAttribute def command(@PathVariable("module") module: Module, @PathVariable("assignment") assignment: Assignment, user: CurrentUser): DownloadFeedbackAsPdfCommand = {
+		// We send a permission denied explicitly (this would normally be a 404 for feedback not found) because PDF handling is silly in Chrome et al
 		if (!user.loggedIn) {
 			throw new PermissionDeniedException(user, Permissions.Feedback.Read, assignment)
 		}

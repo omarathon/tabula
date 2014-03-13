@@ -15,7 +15,7 @@ trait PopulateGroupedPoints extends CheckpointUpdatedDescription {
 
 		val studentPointMap = monitoringPointService.findSimilarPointsForMembers(templateMonitoringPoint, students)
 
-		val period = termService.getTermFromAcademicWeek(templateMonitoringPoint.validFromWeek, pointSet.academicYear).getTermTypeAsString
+		val period = termService.getTermFromAcademicWeekIncludingVacations(templateMonitoringPoint.validFromWeek, pointSet.academicYear).getTermTypeAsString
 		val nonReported = monitoringPointService.findNonReported(students, pointSet.academicYear, period)
 
 		val allPoints = studentPointMap.values.flatten.toSeq.distinct

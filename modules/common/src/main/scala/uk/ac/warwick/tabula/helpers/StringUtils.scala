@@ -18,6 +18,7 @@ trait StringUtils {
 		def orEmpty: String = Option(string).getOrElse("")
 		def maybeText: Option[String] = Option(string).filter(Utils.hasText)
 		def textOrEmpty: String = maybeText.getOrElse("")
+		def safeLowercase = Option(string).map { _.toLowerCase }.getOrElse("")
 	}
 
 	implicit def StringToSuperString(string: String) = new SuperString(string)

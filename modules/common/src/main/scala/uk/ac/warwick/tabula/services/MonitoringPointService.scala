@@ -240,7 +240,7 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 
 	def studentAlreadyReportedThisTerm(student:StudentMember, point:MonitoringPoint): Boolean = {
 		val nonReportedTerms = findNonReportedTerms(Seq(student), point.pointSet.academicYear)
-		!nonReportedTerms.contains(termService.getTermFromAcademicWeek(point.validFromWeek, point.pointSet.academicYear).getTermTypeAsString)
+		!nonReportedTerms.contains(termService.getTermFromAcademicWeekIncludingVacations(point.validFromWeek, point.pointSet.academicYear).getTermTypeAsString)
 	}
 
 	def hasAnyPointSets(department: Department): Boolean = {
