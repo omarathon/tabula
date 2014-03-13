@@ -59,7 +59,7 @@ abstract class HomeCommand(val user: CurrentUser) extends CommandInternal[HomeIn
 		val relationshipTypesMap = allRelationshipTypes.map { t =>
 			(t, downwardRelationships.exists(_.relationshipType == t))
 		}.toMap
-		
+
 		HomeInformation(
 			hasProfile,
 			allViewDepartments,

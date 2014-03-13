@@ -81,24 +81,24 @@ class ImportProfilesCommand extends Command[Unit] with Logging with Daoisms with
 						}
 
 					logger.info(s"Fetching member details for ${membershipInfos.size} ${department.code} members from Membership")
-					val studentRowCommands = benchmarkTask("Fetch member details") {
+					val importMemberCommands = benchmarkTask("Fetch member details") {
 						transactional() {
 							profileImporter.getMemberDetails(membershipInfos, users, importCommandFactory)
 						}
 					}
 
-					logger.info("Updating students")
-					benchmarkTask("Update students") {
+					logger.info("Updating members")
+					benchmarkTask("Update members") {
 					// each apply has its own transaction
 						transactional() {
-							studentRowCommands map { _.apply }
+							importMemberCommands map { _.apply }
 							session.flush()
 						}
 					}
 
 					benchmarkTask("Update casUsed field on StudentCourseYearDetails records") {
 						transactional() {
-							updateCasUsed(studentRowCommands)
+							updateCasUsed(importMemberCommands)
 						}
 					}
 
