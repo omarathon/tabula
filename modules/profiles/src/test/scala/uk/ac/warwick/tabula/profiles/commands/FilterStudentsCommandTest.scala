@@ -124,7 +124,7 @@ class FilterStudentsCommandTest extends TestBase with Mockito {
 
 		val modRestriction = new ScalaRestriction(Restrictions.in("moduleRegistration.module", JArrayList(mod2, mod3)))
 		modRestriction.alias("mostSignificantCourse", "studentCourseDetails")
-		modRestriction.alias("studentCourseDetails.moduleRegistrations", "moduleRegistration")
+		modRestriction.alias("studentCourseDetails._moduleRegistrations", "moduleRegistration")
 
 		val expectedRestrictions = Seq(
 			courseTypeRestriction,
