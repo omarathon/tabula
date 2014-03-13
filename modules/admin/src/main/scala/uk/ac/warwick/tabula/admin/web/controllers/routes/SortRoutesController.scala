@@ -25,18 +25,18 @@ class SortRoutesController extends AdminController {
 	type SortRoutesCommand = Appliable[Unit] with GroupsObjects[Route, Department] with SortRoutesCommandState
 	validatesSelf[SelfValidating]
 	
-	@ModelAttribute
+	@ModelAttribute("sortRoutesCommand")
 	def command(@PathVariable department: Department): SortRoutesCommand = SortRoutesCommand(department)
 
 	@RequestMapping(method=Array(GET, HEAD))
-	def showForm(@ModelAttribute cmd: SortRoutesCommand):Mav = {
+	def showForm(@ModelAttribute("sortRoutesCommand") cmd: SortRoutesCommand):Mav = {
 		cmd.populate()
 		cmd.sort()
 		form(cmd)
 	}
 
 	@RequestMapping(method=Array(POST))
-	def submit(@Valid @ModelAttribute cmd: SortRoutesCommand, errors: Errors): Mav = {
+	def submit(@Valid @ModelAttribute("sortRoutesCommand") cmd: SortRoutesCommand, errors: Errors): Mav = {
 		cmd.sort()
 		if (errors.hasErrors()) {
 			form(cmd)
@@ -46,7 +46,7 @@ class SortRoutesController extends AdminController {
 		}
 	}
 		
-	private def form(cmd: SortRoutesCommand): Mav = {
+	private def form(@ModelAttribute("sortRoutesCommand") cmd: SortRoutesCommand): Mav = {
 		if (cmd.department.hasParent) {
 			// Sorting is done from the POV of the top department.
 			Redirect(Routes.department.sortRoutes(cmd.department.parent))
