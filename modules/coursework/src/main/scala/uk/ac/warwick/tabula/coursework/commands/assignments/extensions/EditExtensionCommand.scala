@@ -49,7 +49,7 @@ trait EditExtensionCommandPermissions extends RequiresPermissionsChecking {
 		p.mustBeLinked(assignment, module)
 
 		extension match {
-			case e if e.isNew => p.PermissionCheck(Permissions.Extension.Create, assignment)
+			case e if e.isTransient => p.PermissionCheck(Permissions.Extension.Create, assignment)
 			case _ => p.PermissionCheck(Permissions.Extension.Update, assignment)
 		}
 	}
