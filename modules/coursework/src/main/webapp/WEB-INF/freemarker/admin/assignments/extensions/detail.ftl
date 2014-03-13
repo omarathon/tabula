@@ -94,7 +94,7 @@
 				<@form.label path="expiryDate">Extended deadline</@form.label>
 				<div class="controls">
 					<@f.input id="picker0" path="expiryDate" cssClass="date-time-picker" />
-					<#if !extension.manual && extension.unreviewed>
+					<#if !extension.manual && extension.awaitingReview>
 						<button class="btn setExpiryToRequested">Use requested date</button>
 					</#if>
 				</div>
@@ -103,6 +103,7 @@
 				<@form.label path="reviewerComments">Comments</@form.label>
 				<div class="controls">
 					<@f.textarea path="reviewerComments" cssClass="span7" rows="6" />
+					<div class="muted">These comments will be saved and sent to the student</div>
 				</div>
 			</div>
 
