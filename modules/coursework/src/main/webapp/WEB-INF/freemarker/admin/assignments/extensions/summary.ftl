@@ -9,12 +9,10 @@
 <#macro row graph>
 	<#assign state = (graph.extension.state.description)!"None" />
 	<tr class="itemContainer" data-contentid="${graph.universityId}">
-		<#if department.showStudentName>
-			<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.user.firstName}</h6></td>
-			<td class="student-col toggle-cell"><h6>${graph.user.lastName}&nbsp;<@pl.profile_link graph.universityId /></h6></td>
-		<#else>
-			<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.universityId}</h6></td>
-		</#if>
+		<#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
+		<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.user.firstName}</h6></td>
+		<td class="student-col toggle-cell"><h6>${graph.user.lastName}&nbsp;<@pl.profile_link graph.universityId /></h6></td>
+
 		<td class="status-col toggle-cell content-cell">
 			<dl style="margin: 0; border-bottom: 0;">
 				<dt data-duration="${graph.duration}"
@@ -76,15 +74,12 @@
 		<table class="students table table-bordered table-striped tabula-orangeLight sticky-table-headers expanding-table" data-max-days="${maxDaysToDisplayAsProgressBar}">
 			<thead>
 				<tr>
-					<#if department.showStudentName>
-						<th class="student-col">First name</th>
-						<th class="student-col">Last name</th>
-					<#else>
-						<th class="student-col">University ID</th>
-					</#if>
+					<#-- TAB-2063 no respect for dept settings, we always want to see a name here -->
+					<th class="student-col">First name</th>
+					<th class="student-col">Last name</th>
 
 					<th class="status-col">Status</th>
-					<th class="duration-col">Duration</th>
+					<th class="duration-col">Length of extension</th>
 				</tr>
 			</thead>
 
