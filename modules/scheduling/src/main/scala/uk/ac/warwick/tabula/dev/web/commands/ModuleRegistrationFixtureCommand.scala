@@ -9,6 +9,7 @@ import uk.ac.warwick.tabula.data.{AutowiringTransactionalComponent, Daoisms, Mem
 import uk.ac.warwick.tabula.data.model.{ModuleRegistration, StudentMember}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.system.permissions.PubliclyVisiblePermissions
+import org.joda.time.DateTime
 
 class ModuleRegistrationFixtureCommand extends CommandInternal[Seq[ModuleRegistration]] with Logging {
 	this: SessionComponent with TransactionalComponent  =>
@@ -30,7 +31,7 @@ class ModuleRegistrationFixtureCommand extends CommandInternal[Seq[ModuleRegistr
 					student <- memberDao.getByUniversityId(uniId).filter { _.isInstanceOf[StudentMember] }.toSeq
 					scd <- student.asInstanceOf[StudentMember].freshStudentCourseDetails
 				} yield {
-					val modReg = new ModuleRegistration(scd, module, cats, AcademicYear(2013), "A")
+					val modReg = new ModuleRegistration(scd, module, cats, AcademicYear.guessByDate(DateTime.now), "A")
 					session.save(modReg)
 					scd.addModuleRegistration(modReg)
 					session.save(scd)
