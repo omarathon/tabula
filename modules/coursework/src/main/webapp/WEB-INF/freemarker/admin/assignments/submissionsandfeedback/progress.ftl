@@ -140,7 +140,7 @@
 						<#local extension=enhancedExtension.extension>
 					</#if>
 
-					<div class="workflow content">
+					<div class="content">
 						<#if student.stages?keys?seq_contains('Submission')>
 							<div class="stage-group clearfix">
 								<h3>Submission</h3>
@@ -361,7 +361,7 @@
 							<dl class="progress progress-${student.progress.t} use-tooltip" title="${progressTooltip}" style="margin: 0; border-bottom: 0;" data-container="body">
 								<dt class="bar" style="width: ${student.progress.percentage}%;"></dt>
 								<dd style="display: none;" class="table-content-container" data-contentid="${student.user.warwickId}">
-									<div id="content-${student.user.warwickId}" class="workflow-container content-container">
+									<div id="content-${student.user.warwickId}" class="content-container">
 										<@workflow student />
 									</div>
 								</dd>

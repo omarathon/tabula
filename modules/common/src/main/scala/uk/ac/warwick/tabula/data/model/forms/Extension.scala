@@ -2,7 +2,7 @@ package uk.ac.warwick.tabula.data.model.forms
 
 import scala.collection.JavaConversions._
 import org.hibernate.annotations.{BatchSize, Type, AccessType}
-import org.joda.time.DateTime
+import org.joda.time.{Days, DateTime}
 import javax.persistence._
 import javax.persistence.CascadeType._
 import javax.persistence.FetchType._
@@ -14,6 +14,8 @@ import uk.ac.warwick.util.workingdays.WorkingDaysHelperImpl
 import uk.ac.warwick.userlookup.User
 import org.hibernate.`type`.StandardBasicTypes
 import java.sql.Types
+import uk.ac.warwick.tabula.DateFormats
+import org.springframework.format.annotation.DateTimeFormat
 
 
 @Entity @AccessType("field")
@@ -29,7 +31,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	@ManyToOne(optional=false, cascade=Array(PERSIST,MERGE), fetch=FetchType.LAZY)
 	@JoinColumn(name="assignment_id")
 	var assignment:Assignment = _
-	
+
 	def permissionsParents = Option(assignment).toStream
 
 	@NotNull
@@ -43,6 +45,7 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
 	// TODO should there be a single def that returns the expiry date for approved/manual extensions, and requested expiry date otherwise?
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+	@DateTimeFormat(pattern = DateFormats.DateTimePicker)
 	var requestedExpiryDate: DateTime = _
 	@Type(`type` = "org.jadira.usertype.dateandtime.joda.PersistentDateTime")
 	var expiryDate: DateTime = _
@@ -80,9 +83,16 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 
 	// this extension was manually created by an administrator, rather than requested by a student
 	def isManual = requestedOn == null
+	def isInitiatedByStudent = !isManual
 
+	// you can't infer from state alone whether there's a request outstanding - use awaitingReview()
 	def approved = state == ExtensionState.Approved
 	def rejected = state == ExtensionState.Rejected
+	def unreviewed = state == ExtensionState.Unreviewed
+	def revoked = state == ExtensionState.Revoked
+
+	def rejectable = awaitingReview || (approved && isInitiatedByStudent)
+	def revocable = approved && !isInitiatedByStudent
 
 	// keep state encapsulated
 	def approve(comments: String = null) {
@@ -117,20 +127,40 @@ class Extension extends GeneratedId with PermissionsTarget with ToEntityReferenc
 	def feedbackDeadline = workingDaysHelper.datePlusWorkingDays(expiryDate.toLocalDate, Feedback.PublishDeadlineInWorkingDays).toDateTime(expiryDate)
 
 	def toEntityReference = new ExtensionEntityReference().put(this)
+
+	def duration = if (expiryDate != null) Days.daysBetween(assignment.closeDate, expiryDate).getDays else 0
+
+	def requestedExtraDuration = {
+		if (requestedExpiryDate != null && expiryDate != null)
+			Days.daysBetween(expiryDate, requestedExpiryDate).getDays
+
+		else if (requestedExpiryDate != null && expiryDate == null)
+			Days.daysBetween(assignment.closeDate, requestedExpiryDate).getDays
+
+		else 0
+	}
+}
+
+
+object Extension {
+	val MaxDaysToDisplayAsProgressBar = 8 * 7
 }
 
 
 sealed abstract class ExtensionState(val dbValue: String, val description: String)
 
 object ExtensionState {
+	// you can't infer from state alone whether there's a request outstanding - use extension.awaitingReview()
 	case object Unreviewed extends ExtensionState("U", "Unreviewed")
 	case object Approved extends ExtensionState("A", "Approved")
 	case object Rejected extends ExtensionState("R", "Rejected")
+	case object Revoked extends ExtensionState("V", "Revoked")
 
 	def fromCode(code: String) = code match {
 		case Unreviewed.dbValue => Unreviewed
 		case Approved.dbValue => Approved
 		case Rejected.dbValue => Rejected
+		case Revoked.dbValue => Revoked
 		case _ => throw new IllegalArgumentException()
 	}
 }
