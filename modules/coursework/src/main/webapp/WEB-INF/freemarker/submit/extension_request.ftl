@@ -65,7 +65,7 @@
 			</#if>
 		</#if>
 
-		<@f.form method="post" enctype="multipart/form-data" class="form-horizontal double-submit-protection" action="${url('/coursework/module/${module.code}/${assignment.id}/extension')}" commandName="command">
+		<@f.form method="post" enctype="multipart/form-data" class="form-horizontal double-submit-protection extension-request" action="${url('/coursework/module/${module.code}/${assignment.id}/extension')}" commandName="command">
 
 			<#if isModification>
 				<@f.hidden path="modified" value="true" />
@@ -87,6 +87,7 @@
 				</@form.labelled_row>
 			</#if>
 
+			<span id="assignmentCloseDate" data-close-date="${assignment.closeDate}" />
 			<@form.labelled_row "requestedExpiryDate" "Requested extension date">
 				<@f.input path="requestedExpiryDate" cssClass="date-time-picker" />
 			</@form.labelled_row>
@@ -139,6 +140,19 @@
 				<a class="btn" href="${returnTo}">Cancel</a>
 			</div>
 		</@f.form>
+
+	<script>
+		(function($) {
+			$form = $(".extension-request");
+			var $expiryDateField = $form.find('.date-time-picker');
+			$expiryDateField.tabulaDateTimePicker();
+			var expiryDatePicker = $expiryDateField.data('datetimepicker');
+			var closeDate = new Date($form.find('#assignmentCloseDate').data("close-date"));
+			if (closeDate) {
+				expiryDatePicker.setStartDate(closeDate);
+			}
+		})(jQuery);
+	</script>
 	</#if>
 </#compress>
 </#escape>

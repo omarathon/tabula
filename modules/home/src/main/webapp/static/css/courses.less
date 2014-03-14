@@ -1,4 +1,5 @@
 @import "bootstrap/variables.less";
+@import "fonts/tabula.less";
 
 @header-colour: @tabulaOrangeLight;
 
@@ -10,6 +11,10 @@
 	.submit-buttons {
 		float: right;
 	}
+}
+
+.extension-metadata {
+	margin-bottom: 20px;
 }
 
 #assign-markers{
@@ -65,37 +70,53 @@
 	color: @tabulaOrangeDark;
 }
 
-#container .reviewExtensionModal {
+#container .extension-detail {
+	h5 {
+		margin: 5px 0;
+		font-size: @h6-font-size;
+	}
 
-  .requestDateInfo {
-    padding: 10px;
-    margin-bottom: 10px;
-    div { float: left; }
-    label { font-size: 1.2em; font-weight: bold; }
-    i { float: left; font-size: 2em; padding: 1% 1em 0 1em  }
-  }
+	details {
+		margin-bottom: 5px;
+		.well { margin: 10px 15px; }
+		summary { font-family: @header-font-stack; }
+		dl { margin: 5px 15px; }
+	}
+}
 
-  .extension-details {
-    border-bottom: 1px dotted silver;
-    margin-bottom: 1em;
-    padding-bottom: 10px;
-    overflow-y: auto;
-    max-height: 178px;
-    ul { padding-left: 5px; }
-    details h5 { display: inline-block; }
+@progressFadeLeft: fade(lighten(@tableBackgroundAccent, 2%), 0);
+@progressFadeRight: fade(lighten(@tableBackgroundAccent, 2%), 100);
 
-    .extensionReason { float: left; width: 65%; }
-    .extensionFurtherDetail { float: right; width: 32%; }
-  }
+#main-content .students {
+	.duration-col {
+		width: 50%;
+	}
 
-  .extensionComments {
-    float: left;
-    width: 60%;
-    .controls textarea { height: 4em; width: 100%; display: block; }
-  }
+	.progress {
+		margin-bottom: 0;
 
-  .extensionNewDate { float: left; width: 36%; }
+		&.overTime {
+			position: relative;
+		}
 
+		&.overTime:after {
+			content: " ";
+			width: 100%;
+			height: 100%;
+			position: absolute;
+			z-index: 30;
+			top: 0;
+			left: 0;
+			pointer-events: none;
+			background: transparent;
+			background: -moz-linear-gradient(left, @progressFadeLeft 90%, @progressFadeRight 100%);
+			background: -webkit-gradient(linear, left top, right top, color-stop(90%,@progressFadeLeft), color-stop(100%,@progressFadeRight));
+			background: -webkit-linear-gradient(left, @progressFadeLeft 90%, @progressFadeRight 100%);
+			background: -o-linear-gradient(left, @progressFadeLeft 90%, @progressFadeRight 100%);
+			background: -ms-linear-gradient(left, @progressFadeLeft 90%, @progressFadeRight 100%);
+			background: linear-gradient(to right, @progressFadeLeft 90%, @progressFadeRight 100%);
+		}
+	}
 }
 
 // department sort-modules (modules/arrange/form.ftl)

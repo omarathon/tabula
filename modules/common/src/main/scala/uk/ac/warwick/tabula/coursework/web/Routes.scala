@@ -73,7 +73,8 @@ object Routes {
 			}
 
 			object extension {
-				def review(assignment: Assignment, uniId: String) = assignmentroot(assignment) + "/extensions?highlight=" + uniId
+				def detail (assignment: Assignment) = assignmentroot(assignment) + "/extensions/detail"
+				def revoke (assignment: Assignment, universityId: String) = assignmentroot(assignment) + "/extensions/revoke/" + universityId
 			}
 		}
 	}

@@ -14,7 +14,7 @@
 		</div>
 		<div class="submit-buttons">
 			<input class="before-save btn btn-primary" type="submit" value="Save">
-			<a class="before-save btn cancel-feedback" href="">Discard</a>
+			<a class="before-save btn discard-changes" href="">Discard</a>
 			<a class="saving btn btn-primary disabled" style="display:none" onclick="return false;" href="">
 				<i class="icon-spinner icon-spin"></i> Saving
 			</a>

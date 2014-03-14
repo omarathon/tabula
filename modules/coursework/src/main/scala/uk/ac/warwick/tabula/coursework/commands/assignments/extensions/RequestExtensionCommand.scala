@@ -9,12 +9,10 @@ import org.joda.time.DateTime
 import uk.ac.warwick.tabula.{CurrentUser, DateFormats}
 import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.helpers.StringUtils._
-import uk.ac.warwick.tabula.data.Daoisms
 import org.springframework.format.annotation.DateTimeFormat
 import uk.ac.warwick.tabula.system.BindListener
 import uk.ac.warwick.tabula.permissions._
 import org.springframework.validation.BindingResult
-import uk.ac.warwick.tabula.web.views.FreemarkerTextRenderer
 import uk.ac.warwick.tabula.services.{AutowiringRelationshipServiceComponent, RelationshipServiceComponent}
 import uk.ac.warwick.tabula.validators.WithinYears
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
@@ -23,26 +21,26 @@ import scala.collection.mutable
 import uk.ac.warwick.tabula.data.model.notifications.{ExtensionRequestCreatedNotification, ExtensionRequestModifiedNotification}
 
 
-object ExtensionRequestCommand {
+object RequestExtensionCommand {
 	def apply (module: Module, assignment: Assignment, submitter: CurrentUser, action: String) = {
-		new ExtensionRequestCommandInternal(module, assignment, submitter) with
+		new RequestExtensionCommandInternal(module, assignment, submitter) with
 			ComposableCommand[Extension] with
 			AutowiringRelationshipServiceComponent with
-			ExtensionRequestDescription with
-			ExtensionRequestPermission with
-			ExtensionRequestValidation with
-			ExtensionRequestNotification with
-			HibernateExtensionRequestPersistenceComponent
+			RequestExtensionCommandDescription with
+			RequestExtensionCommandPermission with
+			RequestExtensionCommandValidation with
+			RequestExtensionCommandNotification with
+			HibernateExtensionPersistenceComponent
 	}
 }
 
 
-class ExtensionRequestCommandInternal(val module: Module, val assignment:Assignment, val submitter: CurrentUser)
+class RequestExtensionCommandInternal(val module: Module, val assignment:Assignment, val submitter: CurrentUser)
 	extends CommandInternal[Extension] with
-	ExtensionRequestState with
+	RequestExtensionCommandState with
 	BindListener {
 
-	self: RelationshipServiceComponent with ExtensionRequestPersistenceComponent =>
+	self: RelationshipServiceComponent with ExtensionPersistenceComponent =>
 
 	override def onBind(result:BindingResult) = transactional() {
 		file.onBind(result)
@@ -80,22 +78,8 @@ class ExtensionRequestCommandInternal(val module: Module, val assignment:Assignm
 }
 
 
-/**
- * This could be a separate service, but it's so noddy it's not (yet) worth it
- */
-trait HibernateExtensionRequestPersistenceComponent extends ExtensionRequestPersistenceComponent with Daoisms {
-	def delete(attachment: FileAttachment) = session.delete(attachment)
-	def save(extension: Extension) = session.saveOrUpdate(extension)
-}
-
-trait ExtensionRequestPersistenceComponent {
-	def delete(attachment: FileAttachment)
-	def save(extension: Extension)
-}
-
-
-trait ExtensionRequestValidation extends SelfValidating {
-	self: ExtensionRequestState =>
+trait RequestExtensionCommandValidation extends SelfValidating {
+	self: RequestExtensionCommandState =>
 
 	def validate(errors: Errors) {
 		if(!submitter.apparentUser.getUserId.hasText){
@@ -117,8 +101,8 @@ trait ExtensionRequestValidation extends SelfValidating {
 }
 
 
-trait ExtensionRequestPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
-	self: ExtensionRequestState =>
+trait RequestExtensionCommandPermission extends RequiresPermissionsChecking with PermissionsCheckingMethods {
+	self: RequestExtensionCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) {
 		p.mustBeLinked(mandatory(assignment), mandatory(module))
@@ -127,8 +111,8 @@ trait ExtensionRequestPermission extends RequiresPermissionsChecking with Permis
 }
 
 
-trait ExtensionRequestDescription extends Describable[Extension] {
-	self: ExtensionRequestState =>
+trait RequestExtensionCommandDescription extends Describable[Extension] {
+	self: RequestExtensionCommandState =>
 
 	def describe(d: Description) {
 		d.assignment(assignment)
@@ -143,8 +127,8 @@ trait ExtensionRequestDescription extends Describable[Extension] {
 }
 
 
-trait ExtensionRequestNotification extends Notifies[Extension, Option[Extension]] {
-	self: ExtensionRequestState with RelationshipServiceComponent =>
+trait RequestExtensionCommandNotification extends Notifies[Extension, Option[Extension]] {
+	self: RequestExtensionCommandState with RelationshipServiceComponent =>
 
 	val basicInfo = Map("moduleManagers" -> module.managers.users)
 	val studentRelationships = relationshipService.allStudentRelationshipTypes
@@ -173,7 +157,7 @@ trait ExtensionRequestNotification extends Notifies[Extension, Option[Extension]
 }
 
 
-trait ExtensionRequestState {
+trait RequestExtensionCommandState {
 	val module: Module
 	val assignment:Assignment
 	val submitter: CurrentUser

@@ -24,7 +24,7 @@ called data. This allows you to perform actions based on the state of the respon
  }
 
 -->
-<div class="ajax-response" data-status="success" data-data="${data!''}">
+<div class="ajax-response" data-status="success" data-data="${data?html!''}">
 <#-- Some text just in case close doesn't work. -->
 Successful. You can close this popup now.
 </div>
