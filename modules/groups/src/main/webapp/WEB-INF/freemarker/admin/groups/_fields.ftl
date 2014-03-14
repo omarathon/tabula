@@ -139,7 +139,7 @@
 	</#if>
 
 </fieldset>
-true
+
 <#import "*/membership_picker_macros.ftl" as membership_picker />
 
 <@form.row "members" "groupEnrolment">
