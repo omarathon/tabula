@@ -3,7 +3,9 @@
 
 <#macro student_item profile bindpath="">
 	<#local mostSignificantCourseDetails = profile.mostSignificantCourseDetails />
-	<#local route = mostSignificantCourseDetails.route />
+	<#if mostSignificantCourseDetails??>
+		<#local route = mostSignificantCourseDetails.route />
+	</#if>
 	<li class="student well well-small"
 	data-f-gender="${(profile.gender.dbValue)!}"
 	data-f-route="${(route.code)!}"
