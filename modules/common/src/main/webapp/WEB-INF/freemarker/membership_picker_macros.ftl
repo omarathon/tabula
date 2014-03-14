@@ -283,8 +283,8 @@ Generates the bulk of the picker HTML, inside a fieldset element
 			</div>
 
 			<div class="modal-footer">
-				<a class="btn btn-success disabled sits-picker-action spinnable spinner-auto" id="link-sits">Link</a>
-				<a class="btn btn-warning disabled sits-picker-action spinnable spinner-auto" id="unlink-sits">Unlink</a>
+				<a class="btn btn-success disabled sits-picker-action spinnable spinner-auto link-sits">Link</a>
+				<a class="btn btn-warning disabled sits-picker-action spinnable spinner-auto unlink-sits">Unlink</a>
 			</div>
 		<#else>
 			<div class="modal-body">
@@ -409,7 +409,7 @@ Generates the bulk of the picker HTML, inside a fieldset element
 				var changes = $m.find('td input:checked').map(function(i, input) { return input.value }).toArray();
 				// always remove even when adding, to dedupe
 				var data = $(current).not(changes).toArray();
-				if (this.id == 'link-sits') {
+				if ($(this).is('.link-sits')) {
 					data = data.concat(changes);
 				}
 

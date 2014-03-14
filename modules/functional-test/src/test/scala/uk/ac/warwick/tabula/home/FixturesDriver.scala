@@ -172,4 +172,33 @@ trait FixturesDriver extends SimpleHttpFetching {
 		http.when(_==200)(req >|)
 	}
 
+	def createAssessmentComponent(departmentCode: String, moduleCode: String, name: String, assessmentGroup: String = "A", sequence: String = "A01") {
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/assessmentComponent"
+		val req = url(uri).POST << Map(
+			"moduleCode" -> moduleCode,
+			"assessmentGroup" -> assessmentGroup,
+			"sequence" -> sequence,
+			"departmentCode" -> departmentCode,
+			"name" -> name
+		)
+		http.when(_==200)(req >|)
+	}
+
+	def createUpstreamAssessmentGroup(moduleCode: String, universityIds: Seq[String], assessmentGroup: String = "A", occurrence: String = "A") {
+		val uri = FunctionalTestProperties.SiteRoot + "/scheduling/fixtures/create/upstreamAssessmentGroup"
+
+		val universityIdArgs: Map[String, String] = universityIds.zipWithIndex.map { case (universityId, index) =>
+			s"universityIds[${index}]" -> universityId
+		}.toMap
+
+		val args = Map(
+			"moduleCode" -> moduleCode,
+			"assessmentGroup" -> assessmentGroup,
+			"occurrence" -> occurrence
+		) ++ universityIdArgs
+
+		val req = url(uri).POST << args
+		http.when(_==200)(req >|)
+	}
+
 }
