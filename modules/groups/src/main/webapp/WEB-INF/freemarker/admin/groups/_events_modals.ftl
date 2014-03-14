@@ -6,6 +6,9 @@
 <#assign academicYear=status.actualValue />
 </@spring.bind>
 
+<#-- Groups section should be open once modal is closed -->
+<input type="hidden" name="openGroupsDetails" id="openGroupsDetails-input" value="true" />
+
 <#macro modal group_index event_index>
 	<div id="group${group_index}-event${event_index}-modal" class="modal hide fade refresh-form" tabindex="-1" role="dialog" aria-labelledby="group${group_index}-event${event_index}-modal-label" aria-hidden="true">
 		<div class="modal-header">
