@@ -45,7 +45,7 @@
 
 						<p>You can also copy the link and paste it into an external application, e.g. Google Calendar:</p>
 
-						<p><a href="<@routes.timetable_ical studentCourseDetails.student />"><@routes.timetable_ical studentCourseDetails.student /></a></p>
+						<p><a href="<@routes.timetable_ical studentCourseDetails.student />"><@routes.timetable_ical studentCourseDetails.student false /></a></p>
 
 					</@modal.body>
 				</div>
