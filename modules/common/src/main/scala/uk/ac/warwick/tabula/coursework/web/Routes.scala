@@ -23,6 +23,7 @@ object Routes {
 	object admin {
 		def department(department: Department) = context + "/admin/department/%s/" format (encoded(department.code))
 		def feedbackTemplates (department: Department) = context + "/admin/department/%s/settings/feedback-templates/" format (encoded(department.code))
+		def extensionSettings (department: Department) = context + "/admin/department/%s/settings/extensions" format (encoded(department.code))
 		def feedbackReports (department: Department) = context + "/admin/department/%s/reports/feedback/" format (encoded(department.code))
 
 		object markingWorkflow {

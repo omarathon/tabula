@@ -12,9 +12,10 @@
 			</label>
 			<@f.errors path="allowExtensionRequests" cssClass="error" />
 			<div class="help-block">
-				Students will be able to request extensions for this department's assignments via the submission page. If you select
-				this option you will need to provide a link to your department's extension guidelines and/or provide a
-				summary of those guidelines.
+				If this is checked, then across the department, students will be able to request extensions
+				on the submission page, if extensions are allowed on a given assignment.
+				If you select this option you will need to provide a link to your department's extension guidelines
+				and/or provide a summary of those guidelines.
 			</div>
 		</@form.field>
 	</@form.row>
