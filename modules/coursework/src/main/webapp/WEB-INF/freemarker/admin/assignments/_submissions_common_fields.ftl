@@ -85,22 +85,22 @@ so that they can be passed around between requests.
 								<@f.checkbox path="allowExtensions" id="allowExtensions" />
 								Allow extensions
 							</label>
+							<div class="help-block">
+								<#if department.allowExtensionRequests>
+									You will be able to grant extensions for an assignment to individual students,
+									and students will be able to request extensions online.
+								<#else>
+									You will be able to grant extensions for an assignment to individual students.
+									Students cannot currently request extensions online for assignments in ${department.name}.
+								</#if>
+								<#if can.do("Department.ManageExtensionSettings", department)>
+									<a class="btn btn-mini use-tooltip" title="Department extension request settings (opens in a new window/tab)" href="<@routes.extensionsettings department />" target="_blank">Review</a>
+								<#else>
+									Departmental administrators control whether extension requests are allowed across a department.
+								</#if>
+							</div>
 						</@form.field>
 					</@form.row>
-					<!--div id="request-extension-row">
-						<@form.row>
-							<@form.label></@form.label>
-							<@form.field>
-								<label class="checkbox">
-									<@f.checkbox path="allowExtensionRequests" />
-									Allow students to request extensions
-								</label>
-								<div class="help-block">
-									Students will be able to request extensions for this assignment via the submission page.
-								</div>
-							</@form.field>
-						</@form.row>
-					</div-->
 
 					<#if (assignment.countUnapprovedExtensions gt 0)!false>
 						<script>
@@ -110,8 +110,8 @@ so that they can be passed around between requests.
 									$('form.edit-assignment').confirmModal(false);
 								} else {
 									$('form.edit-assignment').confirmModal({
-										message: '<@fmt.p assignment.countUnapprovedExtensions "extension request is" "extension requests are" /> pending for this assignment. If you turn off extensions, all pending extension requests will be rejected. Any extensions already granted will remain in place.',
-										confirm: 'Continue, reject pending extension requests'
+										message: '<@fmt.p assignment.countUnapprovedExtensions "extension request is" "extension requests are" /> awaiting review for this assignment. If you turn off extensions, all extension requests awaiting review will be rejected. Any extensions already granted will remain in place.',
+										confirm: 'Continue, reject extension requests awaiting review'
 									});
 								}
 							});
