@@ -286,6 +286,7 @@ trait GrantedRolesForGroupCache { self: PermissionsDaoComponent with CacheStrate
 	final lazy val GrantedRolesForGroupCache = {
 		val cache = Caches.newCache(GrantedRolesForGroupCacheName, new GrantedRolesForGroupCacheFactory, GrantedRolesForGroupCacheMaxAgeSecs, cacheStrategy)
 		cache.setMaxSize(GrantedRolesForGroupCacheMaxSize)
+		cache
 	}
 	
 	class GrantedRolesForGroupCacheFactory extends SingularCacheEntryFactory[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
@@ -304,6 +305,7 @@ trait GrantedPermissionsForUserCache { self: PermissionsDaoComponent with CacheS
 	final lazy val GrantedPermissionsForUserCache = {
 		val cache = Caches.newCache(GrantedPermissionsForUserCacheName, new GrantedPermissionsForUserCacheFactory, GrantedPermissionsForUserCacheMaxAgeSecs, cacheStrategy)
 		cache.setMaxSize(GrantedPermissionsForUserCacheMaxSize)
+		cache
 	}
 	
 	class GrantedPermissionsForUserCacheFactory extends SingularCacheEntryFactory[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
@@ -322,6 +324,7 @@ trait GrantedPermissionsForGroupCache { self: PermissionsDaoComponent with Cache
 	final lazy val GrantedPermissionsForGroupCache = {
 		val cache = Caches.newCache(GrantedPermissionsForGroupCacheName, new GrantedPermissionsForGroupCacheFactory, GrantedPermissionsForGroupCacheMaxAgeSecs, cacheStrategy)
 		cache.setMaxSize(GrantedPermissionsForGroupCacheMaxSize)
+		cache
 	}
 	
 	class GrantedPermissionsForGroupCacheFactory extends SingularCacheEntryFactory[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
