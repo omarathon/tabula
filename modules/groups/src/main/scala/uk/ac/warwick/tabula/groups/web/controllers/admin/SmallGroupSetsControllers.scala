@@ -144,14 +144,14 @@ class EditSmallGroupSetController extends SmallGroupSetsController {
 			cmd.apply()
 		}
 
-		form(cmd, set)
+		form(cmd, set, false)
 	}
 
 	@RequestMapping(method=Array(POST), params=Array("action!=refresh", "action!=update"))
 	def submit(@Valid cmd: EditSmallGroupSetCommand, errors: Errors, @PathVariable("set") set: SmallGroupSet) = {
 		cmd.afterBind()
 
-		if (errors.hasErrors) form(cmd, set)
+		if (errors.hasErrors) form(cmd, set, false)
 		else {
 			cmd.apply()
 			Redirect(Routes.admin.module(cmd.module))
