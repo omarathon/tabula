@@ -23,6 +23,7 @@ object Routes {
 	object admin {
 		def department(department: Department) = context + "/admin/department/%s/" format (encoded(department.code))
 		def feedbackTemplates (department: Department) = context + "/admin/department/%s/settings/feedback-templates/" format (encoded(department.code))
+		def extensionSettings (department: Department) = context + "/admin/department/%s/settings/extensions" format (encoded(department.code))
 		def feedbackReports (department: Department) = context + "/admin/department/%s/reports/feedback/" format (encoded(department.code))
 
 		object markingWorkflow {
@@ -73,7 +74,8 @@ object Routes {
 			}
 
 			object extension {
-				def review(assignment: Assignment, uniId: String) = assignmentroot(assignment) + "/extensions?highlight=" + uniId
+				def detail (assignment: Assignment) = assignmentroot(assignment) + "/extensions/detail"
+				def revoke (assignment: Assignment, universityId: String) = assignmentroot(assignment) + "/extensions/revoke/" + universityId
 			}
 		}
 	}

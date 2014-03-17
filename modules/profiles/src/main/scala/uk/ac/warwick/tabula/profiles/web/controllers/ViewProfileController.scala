@@ -62,8 +62,8 @@ abstract class ViewProfileController extends ProfilesController {
 			}.toMap
 
 		val relationshipTypes: List[String] =
-			if (currentMember.isStaff) relationshipService.listAllStudentRelationshipTypesWithMember(currentMember).map (_.studentRole + "s").distinct.toList
-			else relationshipService.listAllStudentRelationshipTypesWithStudentMember(currentMember.asInstanceOf[StudentMember]).map (_.agentRole).distinct.toList
+			if (currentMember.isStudent) relationshipService.listAllStudentRelationshipTypesWithStudentMember(currentMember.asInstanceOf[StudentMember]).map (_.agentRole).distinct.toList
+			else relationshipService.listAllStudentRelationshipTypesWithMember(currentMember).map (_.studentRole + "s").distinct.toList
 
 		def relationshipTypesFormatted = relationshipTypes match {
 			case Nil => ""

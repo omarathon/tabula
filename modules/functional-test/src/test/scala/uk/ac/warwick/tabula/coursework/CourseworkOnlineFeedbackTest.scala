@@ -24,7 +24,7 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 
 					Then("I see the table of students")
 					pageSource contains (s"Online marking for ${assignmentName}") should be(true)
-					findAll(cssSelector(".feedback-container")).size should be(2)
+					findAll(cssSelector(".content-container")).size should be(2)
 					pageSource contains (P.Student1.usercode) should be(true)
 					pageSource contains (P.Student2.usercode) should be(true)
 				}
@@ -40,7 +40,7 @@ class CourseworkOnlineFeedbackTest extends BrowserTest with CourseworkFixtures w
 
 				Then("I see the table of students")
 				pageSource contains (s"Online marking for ${assignmentName}") should be(true)
-				findAll(cssSelector(".feedback-container")).size should be(1)
+				findAll(cssSelector(".content-container")).size should be(1)
 				pageSource contains (P.Student3.usercode) should be(true)
 			}
 		}

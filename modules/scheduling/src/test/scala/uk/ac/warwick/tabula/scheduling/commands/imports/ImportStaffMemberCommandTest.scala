@@ -67,6 +67,7 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			member.lastName should be ("Mannion")
 			member.photo should not be (null)
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
+			member.timetableHash should not be (null)
 
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])
@@ -78,6 +79,8 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 	@Test def worksWithExisting {
 		new Environment {
 			val existing = new StaffMember("0672089")
+			val existingTimetableHash = "1234"
+			existing.timetableHash = existingTimetableHash
 
 			val fileDao = mock[FileDao]
 
@@ -100,6 +103,7 @@ class ImportStaffMemberCommandTest extends TestBase with Mockito {
 			member.lastName should be ("Mannion")
 			member.photo should not be (null)
 			member.dateOfBirth should be (new LocalDate(1984, DateTimeConstants.AUGUST, 19))
+			member.timetableHash should be (existingTimetableHash)
 
 			there was one(fileDao).savePermanent(any[FileAttachment])
 			there was no(fileDao).saveTemporary(any[FileAttachment])

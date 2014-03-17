@@ -219,7 +219,6 @@ object Permissions {
 
 	object Extension {
 		case object MakeRequest extends Permission("Make an extension request")
-		case object ReviewRequest extends Permission("Review an extension request")
 
 		case object Create extends Permission("Make an extension request")
 		case object Read extends Permission("View an extension request")

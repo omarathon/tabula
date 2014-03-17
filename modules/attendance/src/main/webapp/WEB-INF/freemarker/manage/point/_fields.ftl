@@ -48,8 +48,8 @@
 	<#if features.attendanceMonitoringAssignmentSubmissionPointType>
 		<@form.label clazz="radio" checkbox=true>
 			<@f.radiobutton path="pointType" value="assignmentSubmission" />
-			Assignment submission
-			<@fmt.help_popover id="pointType-assignmentSubmission" content="" />
+			Coursework
+			<@fmt.help_popover id="pointType-assignmentSubmission" content="This monitoring point will be marked as 'attended' if the student submits coursework via Tabula to an assignment with a close date between the start and end dates" />
 		</@form.label>
 	</#if>
 </@form.labelled_row>
@@ -152,22 +152,24 @@
 
 <div class="pointTypeOption assignmentSubmission row-fluid" <#if ((command.pointType.dbValue)!'null') != 'assignmentSubmission'>style="display:none"</#if>>
 
-	<@form.labelled_row "specificAssignments" "Modules or specific assignments">
+	<@form.labelled_row "specificAssignments" "Assignments">
 		<@form.label clazz="radio" checkbox=true>
 			<input name="isSpecificAssignments" type="radio" value="false" <#if !command.isSpecificAssignments()>checked</#if>>
-			Modules
+			By module
+			<@fmt.help_popover id="isSpecificAssignmentsFalse" content="Submission to any assignment for the specified modules with a close date between the start and end dates will count towards this monitoring point" />
 		</@form.label>
 		<@form.label clazz="radio" checkbox=true>
 			<input name="isSpecificAssignments" type="radio" value="true" <#if command.isSpecificAssignments()>checked</#if>>
 			Specific assignments
+			<@fmt.help_popover id="isSpecificAssignmentsTrue" content="Submissions to the specified assignments that have a close date between the start and end dates will count towards this monitoring point" />
 		</@form.label>
 	</@form.labelled_row>
 
 	<div class="isSpecificAssignments" <#if !command.isSpecificAssignments()>style="display:none"</#if>>
 		<div class="assignment-choice">
-			<@form.labelled_row "assignmentSubmissionAssignments" "Assignments">
+			<@form.labelled_row "assignmentSubmissionAssignments" "">
 				<div class="assignment-search input-append">
-					<input class="assignment-search-query" type="text" value=""/>
+					<input class="assignment-search-query" type="text" value="" placeholder="Search for an assignment"/>
 					<span class="add-on"><i class="icon-search"></i></span>
 				</div>
 				<button class="btn add-assignment"><i class="icon-plus"></i> </button>
@@ -187,11 +189,13 @@
 			<@form.labelled_row "assignmentSubmissionDisjunction" "">
 				<@form.label clazz="radio" checkbox=true>
 					<input name="isAssignmentSubmissionDisjunction" type="radio" value="true" <#if command.isAssignmentSubmissionDisjunction()>checked</#if>>
-					<em>Any</em> of the assignments must have a submission
+					Any
+					<@fmt.help_popover id="isAssignmentSubmissionDisjunctionTrue" content="The student must submit coursework to any specified assignment with a close date between the start and end dates in order to meet this monitoring point" />
 				</@form.label>
 				<@form.label clazz="radio" checkbox=true>
 					<input name="isAssignmentSubmissionDisjunction" type="radio" value="false" <#if !command.isAssignmentSubmissionDisjunction()>checked</#if>>
-					<em>All</em> of the assignments must have a submission
+					All
+					<@fmt.help_popover id="isAssignmentSubmissionDisjunctionFalse" content="The student must submit coursework to all of the specified assignments with a close date between the start and end dates in order to meet this monitoring point" />
 				</@form.label>
 			</@form.labelled_row>
 		</div>
@@ -199,9 +203,9 @@
 
 	<div class="modules" <#if command.isSpecificAssignments()>style="display:none"</#if>>
 		<div class="module-choice">
-			<@form.labelled_row "assignmentSubmissionModules" "Modules">
+			<@form.labelled_row "assignmentSubmissionModules" "">
 				<div class="module-search input-append">
-					<input class="module-search-query assignment" type="text" value=""/>
+					<input class="module-search-query assignment" type="text" value="" placeholder="Search for a module"/>
 					<span class="add-on"><i class="icon-search"></i></span>
 				</div>
 				<button class="btn add-module"><i class="icon-plus"></i> </button>
@@ -221,6 +225,7 @@
 
 		<@form.labelled_row "assignmentSubmissionQuantity" "Number of assignments">
 			<input class="input-mini" type="text" <#if (command.assignmentSubmissionQuantity?? && command.assignmentSubmissionQuantity > 0)>value="${command.assignmentSubmissionQuantity}"</#if> name="assignmentSubmissionQuantity" />
+			<@fmt.help_popover id="assignmentSubmissionQuantity" content="The student must submit coursework to this many assignments for any of the specified modules with a close date between the start and end dates in order to meet this monitoring point" />
 		</@form.labelled_row>
 	</div>
 

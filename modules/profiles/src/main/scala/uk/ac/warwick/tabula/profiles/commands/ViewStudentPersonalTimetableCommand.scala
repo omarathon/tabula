@@ -1,7 +1,8 @@
 package uk.ac.warwick.tabula.profiles.commands
 
-import uk.ac.warwick.tabula.commands.{Unaudited, ComposableCommand, Appliable, CommandInternal}
+import uk.ac.warwick.tabula.commands.{Command, Unaudited, ComposableCommand, Appliable, CommandInternal}
 import uk.ac.warwick.tabula.profiles.services.timetables._
+import uk.ac.warwick.tabula.system.permissions.Public
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPermissionsChecking}
 import uk.ac.warwick.tabula.data.model.StudentMember
 import uk.ac.warwick.tabula.services._
@@ -69,8 +70,7 @@ object ViewStudentPersonalTimetableCommand {
 	// mmm, cake.
 	// have to pass in the student in the constructor so that we have enough data for the permissions check to work
 
-	def apply(studentTimetableEventSource:StudentTimetableEventSource, scheduledMeetingEventSource: ScheduledMeetingEventSource, student: StudentMember, currentUser: CurrentUser): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState = {
-
+	def apply(studentTimetableEventSource:StudentTimetableEventSource, scheduledMeetingEventSource: ScheduledMeetingEventSource, student: StudentMember, currentUser: CurrentUser): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState =
 		new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser)
 			with ComposableCommand[Seq[EventOccurrence]]
 			with ViewStudentTimetablePermissions
@@ -78,7 +78,21 @@ object ViewStudentPersonalTimetableCommand {
 			with TermBasedEventOccurrenceComponent
 			with TermAwareWeekToDateConverterComponent
 			with AutowiringTermServiceComponent
-	}
+			with AutowiringProfileServiceComponent
+}
+
+object PublicStudentPersonalTimetableCommand {
+
+	def apply(studentTimetableEventSource:StudentTimetableEventSource, scheduledMeetingEventSource: ScheduledMeetingEventSource, student: StudentMember, currentUser: CurrentUser): Appliable[Seq[EventOccurrence]] with ViewStudentPersonalTimetableCommandState =
+		new ViewStudentPersonalTimetableCommandImpl(studentTimetableEventSource, scheduledMeetingEventSource, student, currentUser)
+			with Command[Seq[EventOccurrence]]
+			with Public
+			with ReadOnly with Unaudited
+			with TermBasedEventOccurrenceComponent
+			with TermAwareWeekToDateConverterComponent
+			with AutowiringTermServiceComponent
+			with AutowiringProfileServiceComponent
+
 }
 
 

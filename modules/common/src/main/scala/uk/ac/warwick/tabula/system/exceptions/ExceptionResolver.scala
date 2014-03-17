@@ -41,7 +41,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	@Required var defaultView: String = _
 
 	@Autowired var exceptionHandler: ExceptionHandler = _
-	
+
 	@Autowired var userInterceptor: CurrentUserInterceptor = _
 	@Autowired var infoInterceptor: RequestInfoInterceptor = _
 
@@ -52,11 +52,11 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 * Doesn't check subclasses, the exception class has to match exactly.
 	 */
 	@Required var viewMappings: JMap[String, String] = Map[String, String]()
-	
-	override def resolveException(request: HttpServletRequest, response: HttpServletResponse, obj: Any, e: Exception): ModelAndView = {	
+
+	override def resolveException(request: HttpServletRequest, response: HttpServletResponse, obj: Any, e: Exception): ModelAndView = {
 		val interceptors = List(userInterceptor, infoInterceptor)
 		for (interceptor <- interceptors) interceptor.preHandle(request, response, obj)
-		
+
 		doResolve(e, Some(request), Some(response)).noLayoutIf(ajax).toModelAndView
 	}
 
@@ -75,20 +75,21 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 	 */
 	def doResolve(e: Throwable, request: Option[HttpServletRequest] = None, response: Option[HttpServletResponse] = None): Mav = {
 		def loggedIn = requestInfo.map { _.user.loggedIn }.getOrElse(false)
+		def isAjaxRequest = request.isDefined && ("XMLHttpRequest" == request.get.getHeader("X-Requested-With"))
 
 		e match {
-			// Handle unresolvable @PathVariables as a page not found (404). HFC-408  
+			// Handle unresolvable @PathVariables as a page not found (404). HFC-408
 			case typeMismatch: TypeMismatchException => handle(new ItemNotFoundException(typeMismatch), request, response)
-			
+
 			// Handle missing servlet param exceptions as 400
 			case missingParam: MissingServletRequestParameterException => handle(new ParameterMissingException(missingParam), request, response)
-						
-			// TAB-411 also redirect to signin for submit permission denied if not logged in
-			case permDenied: PermissionsError if !loggedIn => RedirectToSignin()
-			
+
+			// TAB-411 also redirect to signin for submit permission denied if not logged in (and not ajax request)
+			case permDenied: PermissionsError if (!loggedIn && !isAjaxRequest) => RedirectToSignin()
+
 			// TAB-567 wrap MultipartException in UserError so it doesn't get logged as an error
 			case uploadError: MultipartException => handle(new FileUploadException(uploadError), request, response)
-			
+
 			case exception: Throwable => handle(exception, request, response)
 			case _ => handleNull
 		}
@@ -105,7 +106,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 
 	private def handle(exception: Throwable, request: Option[HttpServletRequest], response: Option[HttpServletResponse]) = {
 		val token = ExceptionTokens.newToken
-		
+
 		val interestingException = ExceptionUtils.getInterestingThrowable(exception, Array(classOf[ServletException]))
 
 		val mav = Mav(defaultView,
@@ -127,7 +128,7 @@ class ExceptionResolver extends HandlerExceptionResolver with Logging with Order
 			case view: String => { mav.viewName = view }
 			case null => //keep defaultView
 		}
-		
+
 		interestingException match {
 			case error: UserError => response map { _.setStatus(error.statusCode) }
 			case _ => response map { _.setStatus(HttpStatus.SC_INTERNAL_SERVER_ERROR) }

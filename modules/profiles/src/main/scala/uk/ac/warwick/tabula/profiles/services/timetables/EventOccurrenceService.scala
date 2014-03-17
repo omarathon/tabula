@@ -1,22 +1,32 @@
 package uk.ac.warwick.tabula.profiles.services.timetables
 
-import uk.ac.warwick.tabula.data.model.groups.{WeekRange}
+import uk.ac.warwick.tabula.data.model.groups.WeekRange
 import org.joda.time._
 import uk.ac.warwick.tabula.AcademicYear
-import uk.ac.warwick.tabula.services.{TermServiceComponent, WeekToDateConverterComponent}
+import uk.ac.warwick.tabula.services.{ProfileServiceComponent, TermServiceComponent, WeekToDateConverterComponent}
 import uk.ac.warwick.util.termdates.Term
 import uk.ac.warwick.util.termdates.Term.TermType
 import uk.ac.warwick.tabula.timetables.{EventOccurrence, TimetableEvent}
+import net.fortuna.ical4j.model.component.VEvent
+import net.fortuna.ical4j.model.Property
+import net.fortuna.ical4j.model.parameter.Value
+import net.fortuna.ical4j.model.property.Uid
+import net.fortuna.ical4j.model.property.Description
+import net.fortuna.ical4j.model.property.Location
+import net.fortuna.ical4j.model.property.Organizer
+import net.fortuna.ical4j.model.parameter.Cn
+import org.apache.commons.codec.digest.DigestUtils
 
 trait EventOccurrenceService{
 	def fromTimetableEvent(event: TimetableEvent, dateRange: Interval): Seq[EventOccurrence]
+	def toVEvent(eventOccurrence: EventOccurrence): VEvent
 }
 trait EventOccurrenceServiceComponent{
 	val eventOccurrenceService:EventOccurrenceService
 
 }
 trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
-	this: WeekToDateConverterComponent with TermServiceComponent =>
+	this: WeekToDateConverterComponent with TermServiceComponent with ProfileServiceComponent =>
 
 	val eventOccurrenceService: EventOccurrenceService = new TermBasedEventOccurrenceService
 
@@ -68,12 +78,57 @@ trait TermBasedEventOccurrenceComponent extends EventOccurrenceServiceComponent{
 			}
 
 			// do not remove; import needed for sorting
+			// should be: import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 			import uk.ac.warwick.tabula.helpers.DateTimeOrdering._
 			eventsInIntersectingWeeks
-				.filterNot(_.end.toDateTime().isBefore(dateRange.getStart))
-				.filterNot(_.start.toDateTime().isAfter(dateRange.getEnd))
+				.filterNot(_.end.toDateTime.isBefore(dateRange.getStart))
+				.filterNot(_.start.toDateTime.isAfter(dateRange.getEnd))
 				.sortBy(_.start)
 		}
+
+		def toVEvent(eventOccurrence: EventOccurrence): VEvent = {
+
+			var end: DateTime = eventOccurrence.end.toDateTime
+			if (eventOccurrence.start.toDateTime.isEqual(end)) {
+				end = end.plusMinutes(1)
+			}
+			val event: VEvent = new VEvent(toDateTime(eventOccurrence.start.toDateTime), toDateTime(end.toDateTime), eventOccurrence.name)
+			event.getProperties.getProperty(Property.DTSTART).getParameters.add(Value.DATE_TIME)
+			event.getProperties.getProperty(Property.DTEND).getParameters.add(Value.DATE_TIME)
+
+			if (!eventOccurrence.description.isEmpty) {
+				event.getProperties.add(new Description(eventOccurrence.description))
+			}
+			if (!eventOccurrence.location.isEmpty) {
+				event.getProperties.add(new Location(eventOccurrence.location.getOrElse("")))
+			}
+
+			val uid = DigestUtils.md5Hex(Seq(eventOccurrence.name, eventOccurrence.start.toString, eventOccurrence.end.toString,
+				eventOccurrence.location.getOrElse(""), eventOccurrence.context.getOrElse("")).mkString)
+
+			event.getProperties.add(new Uid(uid))
+
+			eventOccurrence.staffUniversityIds.headOption.flatMap {
+				universityId =>
+				profileService.getMemberByUniversityId(universityId, disableFilter = true).map {
+					staffMember =>
+						val organiser: Organizer = new Organizer
+						organiser.getParameters.add(new Cn(staffMember.fullName.getOrElse("unknown")))
+						event.getProperties.add(organiser)
+				}
+			}.getOrElse {
+				val organiser: Organizer = new Organizer
+				organiser.getParameters.add(new Cn("unknown"))
+				event.getProperties.add(organiser)
+			}
+
+			event
+		}
+
+		private def toDateTime(dt: DateTime): net.fortuna.ical4j.model.DateTime = {
+			new net.fortuna.ical4j.model.DateTime(dt.getMillis)
+		}
+
 	}
 
 }

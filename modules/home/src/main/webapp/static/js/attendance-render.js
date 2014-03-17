@@ -340,8 +340,10 @@ $(function(){
     					formLoad(data);
     				})
     			});
-    			$m.off('shown').on('shown', function(){
-    				$f.find('input[name="name"]').focus();
+    			$m.off('shown').on('shown', function(e){
+					if ($(e.target).is('#modal')) {
+    					$f.find('input[name="name"]').focus();
+					}
     			}).modal("show");
     		};
     		if ($('form#addMonitoringPointSet').length > 0) {

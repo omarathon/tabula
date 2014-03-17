@@ -1,20 +1,13 @@
 package uk.ac.warwick.tabula.services
 
-import scala.collection.JavaConverters._
-
-import org.junit.Before
-import org.springframework.transaction.annotation.Transactional
-
 import uk.ac.warwick.tabula._
-import uk.ac.warwick.tabula.data.{AssignmentMembershipDaoImpl, DepartmentDaoImpl, ExtensionDaoComponent, ExtensionDaoImpl}
-import uk.ac.warwick.tabula.data.model.UpstreamAssessmentGroup
-import uk.ac.warwick.tabula.data.model.UserGroup
-import uk.ac.warwick.tabula.data.model.forms.{CommentField, WordCountField}
+import uk.ac.warwick.tabula.data.model.{UnspecifiedTypeUserGroup, UpstreamAssessmentGroup, UserGroup}
+import uk.ac.warwick.tabula.helpers.Tap._
 import uk.ac.warwick.userlookup.User
 
-class AssignmentMembershipServiceTest extends TestBase {
+class AssignmentMembershipServiceTest extends TestBase with Mockito {
 
-	@Transactional @Test def testDetermineMembership {
+	@Test def testDetermineMembership {
 		val userLookup = new MockUserLookup
 		userLookup.registerUsers("aaaaa", "bbbbb", "ccccc", "ddddd", "eeeee", "fffff")
 
@@ -57,6 +50,47 @@ class AssignmentMembershipServiceTest extends TestBase {
 		info.items(0).userId should be (Some("aaaaa"))
 		info.items(1).userId should be (Some("bbbbb"))
 		info.items(2).userId should be (Some("ccccc"))
+	}
+
+	@Test def isStudentMember {
+		val service = new AssignmentMembershipServiceImpl
+
+		val user = new User("cuscav").tap { _.setWarwickId("0672089") }
+
+		val excludedGroup = mock[UnspecifiedTypeUserGroup]
+		excludedGroup.excludesUser(user) returns (true)
+
+		service.isStudentMember(user, Nil, Some(excludedGroup)) should be (false)
+		there was no (excludedGroup).includesUser(user) // we quit early
+
+		val includedGroup = mock[UnspecifiedTypeUserGroup]
+		includedGroup.excludesUser(user) returns (false)
+		includedGroup.includesUser(user) returns (true)
+
+		service.isStudentMember(user, Nil, Some(includedGroup)) should be (true)
+
+		val notInGroup = mock[UnspecifiedTypeUserGroup]
+		includedGroup.excludesUser(user) returns (false)
+		includedGroup.includesUser(user) returns (false)
+
+		service.isStudentMember(user, Nil, Some(notInGroup)) should be (false)
+
+		val upstream1 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment("in", 101))
+		val upstream2 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment("in", 101))
+		val upstream3 = Fixtures.assessmentGroup(Fixtures.upstreamAssignment("in", 101))
+		val upstreams = Seq(upstream1, upstream2, upstream3)
+
+		service.isStudentMember(user, upstreams, None) should be (false)
+
+		// Include the user in upstream2
+		upstream2.members.staticUserIds = Seq("0672089")
+
+		service.isStudentMember(user, upstreams, None) should be (true)
+
+		// Doesn't affect results from the usergroup itself
+		service.isStudentMember(user, upstreams, Some(excludedGroup)) should be (false)
+		service.isStudentMember(user, upstreams, Some(includedGroup)) should be (true)
+		service.isStudentMember(user, upstreams, Some(notInGroup)) should be (true)
 	}
 
 }

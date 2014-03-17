@@ -47,6 +47,8 @@ trait MemberDao {
 	def stampMissingFromImport(newStaleUniversityIds: Seq[String], importStart: DateTime)
 	def getDisability(code: String): Option[Disability]
 
+	def getStudentMemberByTimetableHash(timetableHash: String): Option[StudentMember]
+
 }
 
 @Repository
@@ -334,6 +336,12 @@ class MemberDaoImpl extends MemberDao with Daoisms with Logging {
 		session.newCriteria[Disability]
 			.add(is("code", code))
 			.uniqueResult
+	}
+
+	def getStudentMemberByTimetableHash(timetableHash: String): Option[StudentMember] = {
+		session.newCriteria[StudentMember]
+		.add(is("timetableHash", timetableHash))
+		.uniqueResult
 	}
 }
 

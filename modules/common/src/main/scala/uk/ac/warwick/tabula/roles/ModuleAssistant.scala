@@ -8,36 +8,35 @@ import uk.ac.warwick.tabula.JavaImports
 case class ModuleAssistant(module: model.Module) extends BuiltInRole(ModuleAssistantRoleDefinition, module)
 
 case object ModuleAssistantRoleDefinition extends BuiltInRoleDefinition {
-	
+
 	override def description = "Module Assistant"
-	
+
 	GeneratesSubRole(ModuleAuditorRoleDefinition)
 
-	GrantsScopedPermission(		
+	GrantsScopedPermission(
 		RolesAndPermissions.Read,
-		
+
 		Assignment.Create,
 		Assignment.Update,
-		
+
 		Submission.ManagePlagiarismStatus,
 		Submission.CheckForPlagiarism,
 		Submission.ReleaseForMarking,
-		// No Submission.Create() here for obvious reasons!		
+		// No Submission.Create() here for obvious reasons!
 		Submission.Update,
-		
+
 		Marks.Create,
 		Marks.Update,
 		Marks.Delete,
-		
-		Extension.ReviewRequest,
+
 		Extension.Create,
 		Extension.Update,
 		Extension.Delete,
-		
+
 		Feedback.Create,
 		Feedback.Update,
 		Feedback.Delete,
-		
+
 		SmallGroups.Create,
 		SmallGroupEvents.Register,
 		SmallGroups.Update,

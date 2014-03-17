@@ -153,6 +153,36 @@ class CourseCreationFixturesController {
 }
 
 @Controller
+@RequestMapping(Array("/fixtures/create/assessmentComponent"))
+class AssessmentComponentCreationFixturesController {
+
+	@ModelAttribute("createAssessmentComponentCommand")
+	def getAssessmentComponentCommand(): Appliable[AssessmentComponent] = {
+		AssessmentComponentCreationFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createAssessmentComponentCommand") cmd: Appliable[AssessmentComponent]) {
+		cmd.apply()
+	}
+}
+
+@Controller
+@RequestMapping(Array("/fixtures/create/upstreamAssessmentGroup"))
+class UpstreamAssessmentGroupCreationFixturesController {
+
+	@ModelAttribute("createUpstreamAssessmentGroupCommand")
+	def getUpstreamAssessmentGroupCommand(): Appliable[UpstreamAssessmentGroup] = {
+		UpstreamAssessmentGroupCreationFixtureCommand()
+	}
+
+	@RequestMapping(method = Array(POST))
+	def submit(@ModelAttribute("createUpstreamAssessmentGroupCommand") cmd: Appliable[UpstreamAssessmentGroup]) {
+		cmd.apply()
+	}
+}
+
+@Controller
 @RequestMapping(Array("/fixtures/create/relationship"))
 class RelationshipCreationFixturesController {
 

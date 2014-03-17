@@ -472,4 +472,11 @@
     			createCalendar($(this),$(this).data('viewname'),$(this).data('studentid'));
     		});
     	});
+
+		$(function(){
+			$('#timetable-pane h4 a').on('click', function(e){
+				e.preventDefault();
+				$('#timetable-ical-modal').modal('show');
+			});
+		});
 }(jQuery));

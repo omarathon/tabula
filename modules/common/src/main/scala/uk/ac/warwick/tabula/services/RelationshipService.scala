@@ -157,7 +157,8 @@ class RelationshipServiceImpl extends RelationshipService with Logging {
 		rel.studentMember.exists(studentDepartmentFilterMatches(department))
 
 	def relationshipNotPermanentlyWithdrawn(rel: StudentRelationship): Boolean = {
-		Option(rel.studentCourseDetails).exists(scd => !scd.permanentlyWithdrawn)
+		Option(rel.studentCourseDetails).exists(
+			scd => !scd.permanentlyWithdrawn && scd.missingFromImportSince == null)
 	}
 
 	def studentDepartmentFilterMatches(department: Department)(member: StudentMember)	= department.filterRule.matches(member)
