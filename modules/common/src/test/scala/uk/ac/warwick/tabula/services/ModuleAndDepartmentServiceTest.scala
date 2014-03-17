@@ -10,6 +10,7 @@ import uk.ac.warwick.util.queue.QueueListener
 import org.springframework.beans.factory.InitializingBean
 import uk.ac.warwick.tabula.helpers.Logging
 import scala.collection.JavaConverters._
+import uk.ac.warwick.util.cache.Caches.CacheStrategy
 
 class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 	
@@ -35,10 +36,11 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 		val permsDao = new PermissionsDaoImpl
 		permsDao.sessionFactory = sessionFactory
 
-		val permissionsService = new AbstractPermissionsService with PermissionsDaoComponent with PermissionsServiceCaches with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache with QueueListener with InitializingBean with Logging {
+		val permissionsService = new AbstractPermissionsService with PermissionsDaoComponent with PermissionsServiceCaches with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache with CacheStrategyComponent with QueueListener with InitializingBean with Logging {
 			var permissionsDao:PermissionsDao = permsDao
 			val rolesByIdCache:GrantedRoleByIdCache = new GrantedRoleByIdCache(permsDao)
 			val permissionsByIdCache = new GrantedPermissionsByIdCache(permsDao)
+			val cacheStrategy = CacheStrategy.InMemoryOnly
 		}
 		permissionsService.queue = mock[Queue]
 		permissionsService.groupService = userLookupService.getGroupService()
