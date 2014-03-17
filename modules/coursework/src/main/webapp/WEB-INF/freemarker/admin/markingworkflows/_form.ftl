@@ -43,13 +43,24 @@ Common form fields.
 		>
 			Students choose marker
 		</option>
-		<option value="SeenSecondMarking" class="uses-second-markers"
-			<#if ((command.markingMethod.toString)!"") = "SeenSecondMarking">selected="selected"</#if>
-			data-firstrolename="First marker"
-			data-secondrolename="Second marker"
-		>
-			Seen second marking
-		</option>
+		<#if features.newSeenSecondMarkingWorkflows>
+			<option value="SeenSecondMarkingNew" class="uses-second-markers"
+					<#if ((command.markingMethod.toString)!"") = "SeenSecondMarkingNew">selected="selected"</#if>
+					data-firstrolename="First marker"
+					data-secondrolename="Second marker"
+					>
+				Seen second marking (new)
+			</option>
+		<#else>
+			<option value="SeenSecondMarking" class="uses-second-markers"
+					<#if ((command.markingMethod.toString)!"") = "SeenSecondMarking">selected="selected"</#if>
+					data-firstrolename="First marker"
+					data-secondrolename="Second marker"
+					>
+				Seen second marking
+			</option>
+		</#if>
+
 		<option value="ModeratedMarking" class="uses-second-markers"
 			<#if ((command.markingMethod.toString)!"") = "ModeratedMarking">selected="selected"</#if>
 			data-firstrolename="Marker"

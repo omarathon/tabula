@@ -5,7 +5,7 @@ import uk.ac.warwick.tabula.data.model.forms.{SavedFormValue, MarkerSelectField}
 import collection.JavaConverters._
 import uk.ac.warwick.tabula.services.{UserLookupService, SubmissionService}
 import org.mockito.Mockito._
-import uk.ac.warwick.tabula.data.model.MarkingMethod.{ModeratedMarking, SeenSecondMarking}
+import uk.ac.warwick.tabula.data.model.MarkingMethod.{SeenSecondMarkingNew, ModeratedMarking, SeenSecondMarking}
 
 class MarkingWorkflowTest extends TestBase with Mockito {
 
@@ -126,6 +126,20 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 
 		workflow.markingMethod should be(SeenSecondMarking)
 		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online")
+
+		workflow.firstMarkerRoleName should be("First marker")
+		workflow.hasSecondMarker should be(true)
+		workflow.secondMarkerRoleName should be(Some("Second marker"))
+		workflow.secondMarkerVerb should be(Some("mark"))
+
+	}}
+
+	@Test def seenSecondMarkingNew() = withUser("cuscao") { new MarkingWorkflowFixture {
+		val workflow = new SeenSecondMarkingNewWorkflow()
+		assignment.markingWorkflow = workflow
+
+		workflow.markingMethod should be(SeenSecondMarkingNew)
+		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online/moderation")
 
 		workflow.firstMarkerRoleName should be("First marker")
 		workflow.hasSecondMarker should be(true)

@@ -143,12 +143,14 @@ sealed abstract class MarkingMethod(val name: String){
 object MarkingMethod {
 	case object StudentsChooseMarker extends MarkingMethod("StudentsChooseMarker")
 	case object SeenSecondMarking extends MarkingMethod("SeenSecondMarking")
+	case object SeenSecondMarkingNew extends MarkingMethod("SeenSecondMarkingNew")
 	case object ModeratedMarking extends MarkingMethod("ModeratedMarking")
 	case object FirstMarkerOnly extends MarkingMethod("FirstMarkerOnly")
 
 	val values: Set[MarkingMethod] = Set(
 		StudentsChooseMarker,
 		SeenSecondMarking,
+		SeenSecondMarkingNew,
 		ModeratedMarking,
 		FirstMarkerOnly
 	)

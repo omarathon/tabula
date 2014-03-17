@@ -84,6 +84,7 @@ abstract class Features {
 	@Value("${features.includePastYears:true}") var includePastYears = defaults.includePastYears
 	@Value("${features.attendanceMonitoring.smallGroupPointType:true}") var attendanceMonitoringSmallGroupPointType = defaults.attendanceMonitoringSmallGroupPointType
 	@Value("${features.attendanceMonitoring.assignmentSubmissionPointType:true}") var attendanceMonitoringAssignmentSubmissionPointType = defaults.attendanceMonitoringAssignmentSubmissionPointType
+	@Value("${features.newSeenSecondMarkingWorkflows:false}") var newSeenSecondMarkingWorkflows = defaults.newSeenSecondMarkingWorkflows
 
 	private val bean = new BeanWrapperImpl(this)
 	def update(message: FeaturesMessage) = {
@@ -156,6 +157,7 @@ class FeaturesMessage {
 	@BeanProperty var attendanceMonitoringSmallGroupPointType = true
 	@BeanProperty var includePastYears = true
 	@BeanProperty var attendanceMonitoringAssignmentSubmissionPointType = true
+	@BeanProperty var newSeenSecondMarkingWorkflows = false
 }
 
 class FeatureFlagListener extends QueueListener with InitializingBean with Logging {

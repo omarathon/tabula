@@ -53,6 +53,7 @@ class OnlineMarkerFeedbackController extends CourseworkController {
 		val feedbackGraphs = command.apply()
 		val (assignment, module) = (command.assignment, command.assignment.module)
 
+		// will need to take into account Seen Second Marking also
 		val showMarkingCompleted =
 			assignment.markingWorkflow.markingMethod != ModeratedMarking || assignment.isFirstMarker(command.marker)
 
