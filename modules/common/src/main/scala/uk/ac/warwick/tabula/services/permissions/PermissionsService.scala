@@ -332,12 +332,12 @@ trait GrantedPermissionsForGroupCache { self: PermissionsDaoComponent with Cache
 	}
 }
 trait PermissionsServiceCaches {
-	val rolesByIdCache: GrantedRoleByIdCache
-	val permissionsByIdCache: GrantedPermissionsByIdCache
-	val GrantedRolesForUserCache: Cache[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
-	val GrantedRolesForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
-	val GrantedPermissionsForUserCache: Cache[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
-	val GrantedPermissionsForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
+	def rolesByIdCache: GrantedRoleByIdCache
+	def permissionsByIdCache: GrantedPermissionsByIdCache
+	def GrantedRolesForUserCache: Cache[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
+	def GrantedRolesForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
+	def GrantedPermissionsForUserCache: Cache[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
+	def GrantedPermissionsForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
 }
 trait PermissionsServiceCachesImpl extends PermissionsServiceCaches with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache with AutowiringCacheStrategyComponent {
 	this:PermissionsDaoComponent=>
