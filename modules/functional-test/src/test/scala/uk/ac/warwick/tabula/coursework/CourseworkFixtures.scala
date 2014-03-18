@@ -128,6 +128,8 @@ trait CourseworkFixtures extends BrowserTest with FeaturesDriver with FixturesDr
 		}
 
 		// The assignment submission page uses FormFields which don't have readily memorable names, so we need to get fields by their label
+		getInputByLabel("File") should be ('defined)
+
 		click on (getInputByLabel("File").orNull)
 		pressKeys(getClass.getResource(file).getFile)
 
