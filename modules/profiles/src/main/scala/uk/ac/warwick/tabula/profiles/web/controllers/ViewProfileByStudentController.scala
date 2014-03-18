@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestParam
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.ItemNotFoundException
-import uk.ac.warwick.tabula.data.model.{ Member, StudentMember }
+import uk.ac.warwick.tabula.data.model.{StudentCourseYearDetails, StudentCourseDetails, Member, StudentMember}
 import uk.ac.warwick.tabula.commands.Appliable
 import uk.ac.warwick.tabula.profiles.web.Routes
 
@@ -26,7 +26,9 @@ class ViewProfileByStudentController extends ViewProfileController {
 		@RequestParam(value = "meeting", required = false) openMeetingId: String,
 		@RequestParam(defaultValue = "", required = false) agentId: String) = {
 		val profiledStudentMember = profileCmd.apply()
-		viewProfileForCourse(profiledStudentMember.mostSignificantCourseDetails, openMeetingId, agentId, profiledStudentMember)
+		val courseDetails = profiledStudentMember.mostSignificantCourseDetails
+		val courseYearDetails = courseDetails.map(_.latestStudentCourseYearDetails)
+		viewProfileForCourse(courseDetails, courseYearDetails, openMeetingId, agentId, profiledStudentMember)
 	}
 
 }

@@ -54,7 +54,7 @@ class FakeSyllabusPlusController extends Logging {
 		output.write(xml)
 	}
 
-	// note that the "year" variable should be in the same format the Syallabus+ uses
+	// note that the "year" variable should be in the same format Syllabus+ uses
 	// i.e. 1213 for academic year 2012-2013
 	@RequestMapping(method = Array(RequestMethod.POST), value = Array("/stubTimetable/student"))
 	def saveStudent(@RequestParam studentId: String, @RequestParam year:String, @RequestParam content: String) {

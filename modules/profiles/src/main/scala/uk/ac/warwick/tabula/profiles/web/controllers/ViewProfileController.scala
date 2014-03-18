@@ -3,8 +3,7 @@ package uk.ac.warwick.tabula.profiles.web.controllers
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.ModelAttribute
 import uk.ac.warwick.spring.Wire
-import uk.ac.warwick.tabula.CurrentUser
-import uk.ac.warwick.tabula.PermissionDeniedException
+import uk.ac.warwick.tabula.{AcademicYear, CurrentUser, PermissionDeniedException}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.services._
 import uk.ac.warwick.tabula.data.model._
@@ -45,6 +44,7 @@ abstract class ViewProfileController extends ProfilesController {
 
 	def viewProfileForCourse(
 		studentCourseDetails: Option[StudentCourseDetails],
+		studentCourseYearDetails: Option[StudentCourseYearDetails],
 		openMeetingId: String,
 		agentId: String,
 		profiledStudentMember: StudentMember): Mav = {
@@ -103,8 +103,12 @@ abstract class ViewProfileController extends ProfilesController {
 			"memberNotes" -> memberNotes,
 			"agent" -> agent,
 			"allRelationshipTypes" -> allRelationshipTypes,
-			"studentCourseDetails" -> studentCourseDetails)
+			"studentCourseDetails" -> studentCourseDetails,
+			"studentCourseYearDetails" -> studentCourseYearDetails)
 			.crumbs(Breadcrumbs.Profile(profiledStudentMember, isSelf))
 	}
+
+	def studentCourseYearFromYear(studentCourseDetails: StudentCourseDetails, year: AcademicYear) =
+		studentCourseDetails.freshStudentCourseYearDetails.filter(_.academicYear == year).seq.headOption
 
 }

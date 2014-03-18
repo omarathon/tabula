@@ -27,7 +27,7 @@ case class AcademicYear(val startYear: Int) extends Ordered[AcademicYear] with C
 	def getStoreValue = startYear
 	def getLabel = toString
 	def value = startYear
-
+	def startYearAsString = startYear.toString.replace(",","")
 	def previous = new AcademicYear(startYear - 1)
 	def next = new AcademicYear(startYear + 1)
 
