@@ -74,7 +74,7 @@
 	<#if extensionGraphs?size gt 0>
 		<table class="students table table-bordered table-striped tabula-orangeLight sticky-table-headers expanding-table"
 			   data-max-days="${maxDaysToDisplayAsProgressBar}"
-			   data-row-to-open="${extensionToOpen}">
+			   data-row-to-open="${extensionToOpen!""}">
 			<thead>
 				<tr>
 					<#-- TAB-2063 no respect for dept settings, we always want to see a name here -->
