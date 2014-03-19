@@ -20,6 +20,7 @@ import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import com.fasterxml.jackson.databind.ObjectMapper
 import uk.ac.warwick.tabula.coursework.web.Routes.admin.assignment.extension
+import scala.Some
 
 
 abstract class ExtensionController extends CourseworkController {
@@ -74,12 +75,13 @@ class ListExtensionsController extends ExtensionController {
 									 ) = new ListExtensionsCommand(module, assignment, user)
 
 	@RequestMapping(method=Array(HEAD,GET))
-	def listExtensions(cmd: ListExtensionsCommand): Mav = {
+	def listExtensions(cmd: ListExtensionsCommand, @RequestParam(value="universityId", required=false) universityId: String): Mav = {
 		val extensionGraphs = cmd.apply()
 
 		val model = Mav("admin/assignments/extensions/summary",
 			"detailUrl" -> Routes.admin.assignment.extension.detail(cmd.assignment),
 			"module" -> cmd.module,
+			"extensionToOpen" -> universityId,
 			"assignment" -> cmd.assignment,
 			"extensionGraphs" -> extensionGraphs,
 			"maxDaysToDisplayAsProgressBar" -> Extension.MaxDaysToDisplayAsProgressBar
