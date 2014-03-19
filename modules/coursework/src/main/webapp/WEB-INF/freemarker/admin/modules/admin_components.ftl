@@ -180,7 +180,7 @@
 				<#if (features.submissions && assignment.collectSubmissions) || has_feedback>
 					<div class="submission-and-feedback-count">
 						<i class="icon-file"></i>
-						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback">
+						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback" class="use-tooltip">
 							<@fmt.p assignment.submissions?size "submission" /><#--
 							--><#if has_feedback> and ${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> of feedback</#if><#--
 						--></a>
@@ -189,11 +189,13 @@
 						<#if numUnapprovedExtensions gt 0>
 							<span class="has-unapproved-extensions">
 								<i class="icon-info-sign"></i>
-								<#if numUnapprovedExtensions gt 1>
-									${numUnapprovedExtensions} extensions need granting
-								<#else>
-									1 extension needs granting
-								</#if>
+								<a href="<@routes.extensions assignment=assignment />" title="Manage extensions" class="use-tooltip">
+									<#if numUnapprovedExtensions gt 1>
+										${numUnapprovedExtensions} extensions need granting
+									<#else>
+										1 extension needs granting
+									</#if>
+								</a>
 							</span>
 						</#if>
 
