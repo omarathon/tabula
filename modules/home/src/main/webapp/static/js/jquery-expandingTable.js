@@ -214,7 +214,21 @@ jQuery.fn.expandingTable = function(options) {
 		$table.tablesorter(sortOptions);
 	}
 
-}
+	// TAB-2075 open expanded row when fragment identifier present
+	// expects to find a data attribute on the table called row-to-open
+	// which contains the content id for that row
+	var contentIdToOpen = $('.expanding-table').data('row-to-open');
 
+	if(contentIdToOpen) {
+		var $content = $('#content-' + contentIdToOpen);
+		var $row = $("tr[data-contentid='" + contentIdToOpen + "']");
+		var $icon = $(iconSelector, $row).first().find(".row-icon");
+		toggleRow($content, $row, $icon);
+		$content.on('tabula.expandingTable.contentChanged', function() {
+			$content[0].scrollIntoView();
+		});
+	}
+
+}
 
 })(jQuery);

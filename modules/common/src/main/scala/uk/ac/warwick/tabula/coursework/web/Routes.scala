@@ -3,6 +3,7 @@ package uk.ac.warwick.tabula.coursework.web
 import java.net.URLEncoder
 import uk.ac.warwick.tabula.data.model.{Module, MarkingWorkflow, Department, Assignment}
 import uk.ac.warwick.tabula.web.RoutesUtils
+import uk.ac.warwick.tabula.data.model.forms.Extension
 
 /**
  * Generates URLs to various locations, to reduce the number of places where URLs
@@ -74,6 +75,7 @@ object Routes {
 			}
 
 			object extension {
+				def expandrow (assignment: Assignment, universityId: String) = assignmentroot(assignment) + "/extensions?universityId=" + universityId
 				def detail (assignment: Assignment) = assignmentroot(assignment) + "/extensions/detail"
 				def revoke (assignment: Assignment, universityId: String) = assignmentroot(assignment) + "/extensions/revoke/" + universityId
 			}
