@@ -73,6 +73,14 @@ trait AutowiringPermissionsServiceComponent extends PermissionsServiceComponent 
 	var permissionsService = Wire[PermissionsService]
 }
 
+trait CacheStrategyComponent {
+	def cacheStrategy: CacheStrategy
+}
+
+trait AutowiringCacheStrategyComponent extends CacheStrategyComponent {
+	var cacheStrategy = CacheStrategy.valueOf(Wire.property("${tabula.cacheStrategy:InMemoryOnly}"))
+}
+
 abstract class AbstractPermissionsService extends PermissionsService {
 	self: PermissionsDaoComponent 
 		with PermissionsServiceCaches
@@ -246,21 +254,23 @@ class GrantedRoleByIdCache(dao: PermissionsDao) extends RequestLevelCaching[Stri
  * and map to a list of IDs of the granted roles / permissions.
  */ 
 
-trait GrantedRolesForUserCache { self: PermissionsDaoComponent =>
+trait GrantedRolesForUserCache { self: PermissionsDaoComponent with CacheStrategyComponent =>
 	final val GrantedRolesForUserCacheName = "GrantedRolesForUser"
 	final val GrantedRolesForUserCacheMaxAgeSecs = 60 * 60 // 1 hour
 	final val GrantedRolesForUserCacheMaxSize = 1000
-	
-	final val GrantedRolesForUserCache = 
-		Caches.newCache(GrantedRolesForUserCacheName, new GrantedRolesForUserCacheFactory, GrantedRolesForUserCacheMaxAgeSecs, CacheStrategy.EhCacheIfAvailable)
-	GrantedRolesForUserCache.setMaxSize(GrantedRolesForUserCacheMaxSize)
+
+	final lazy val GrantedRolesForUserCache = {
+		val cache = Caches.newCache(GrantedRolesForUserCacheName, new GrantedRolesForUserCacheFactory, GrantedRolesForUserCacheMaxAgeSecs, cacheStrategy)
+		cache.setMaxSize(GrantedRolesForUserCacheMaxSize)
+		cache
+	}
 	
 	class GrantedRolesForUserCacheFactory extends CacheEntryFactory[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
 		def create(cacheKey: (User, ClassTag[_ <: PermissionsTarget])) = cacheKey match {
 			case (user, tag) => JArrayList(permissionsDao.getGrantedRolesForUser(user)(tag).map { role => role.id }.asJava)
 		}
 		def shouldBeCached(ids: JArrayList[String]) = true
-		
+
 		override def isSupportsMultiLookups() = false
 		def create(cacheKeys: JList[(User, ClassTag[_ <: PermissionsTarget])]): JMap[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] = {
 			throw new UnsupportedOperationException("Multi lookups not supported")
@@ -268,15 +278,17 @@ trait GrantedRolesForUserCache { self: PermissionsDaoComponent =>
 	}
 }
 
-trait GrantedRolesForGroupCache { self: PermissionsDaoComponent =>
+trait GrantedRolesForGroupCache { self: PermissionsDaoComponent with CacheStrategyComponent =>
 	final val GrantedRolesForGroupCacheName = "GrantedRolesForGroup"
 	final val GrantedRolesForGroupCacheMaxAgeSecs = 60 * 60 // 1 hour
 	final val GrantedRolesForGroupCacheMaxSize = 1000
-	
-	final val GrantedRolesForGroupCache = 
-		Caches.newCache(GrantedRolesForGroupCacheName, new GrantedRolesForGroupCacheFactory, GrantedRolesForGroupCacheMaxAgeSecs, CacheStrategy.EhCacheIfAvailable)
-	GrantedRolesForGroupCache.setMaxSize(GrantedRolesForGroupCacheMaxSize)
-	
+
+	final lazy val GrantedRolesForGroupCache = {
+		val cache = Caches.newCache(GrantedRolesForGroupCacheName, new GrantedRolesForGroupCacheFactory, GrantedRolesForGroupCacheMaxAgeSecs, cacheStrategy)
+		cache.setMaxSize(GrantedRolesForGroupCacheMaxSize)
+		cache
+	}
+
 	class GrantedRolesForGroupCacheFactory extends SingularCacheEntryFactory[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
 		def create(cacheKey: (Seq[String], ClassTag[_ <: PermissionsTarget])) = cacheKey match {
 			case (groupNames, tag) => JArrayList(permissionsDao.getGrantedRolesForWebgroups(groupNames)(tag).map { role => role.id }.asJava)
@@ -285,15 +297,17 @@ trait GrantedRolesForGroupCache { self: PermissionsDaoComponent =>
 	}
 }
 
-trait GrantedPermissionsForUserCache { self: PermissionsDaoComponent =>
+trait GrantedPermissionsForUserCache { self: PermissionsDaoComponent with CacheStrategyComponent =>
 	final val GrantedPermissionsForUserCacheName = "GrantedPermissionsForUser"
 	final val GrantedPermissionsForUserCacheMaxAgeSecs = 60 * 60 // 1 hour
 	final val GrantedPermissionsForUserCacheMaxSize = 1000
-	
-	final val GrantedPermissionsForUserCache = 
-		Caches.newCache(GrantedPermissionsForUserCacheName, new GrantedPermissionsForUserCacheFactory, GrantedPermissionsForUserCacheMaxAgeSecs, CacheStrategy.EhCacheIfAvailable)
-	GrantedPermissionsForUserCache.setMaxSize(GrantedPermissionsForUserCacheMaxSize)
-	
+
+	final lazy val GrantedPermissionsForUserCache = {
+		val cache = Caches.newCache(GrantedPermissionsForUserCacheName, new GrantedPermissionsForUserCacheFactory, GrantedPermissionsForUserCacheMaxAgeSecs, cacheStrategy)
+		cache.setMaxSize(GrantedPermissionsForUserCacheMaxSize)
+		cache
+	}
+
 	class GrantedPermissionsForUserCacheFactory extends SingularCacheEntryFactory[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
 		def create(cacheKey: (User, ClassTag[_ <: PermissionsTarget])) = cacheKey match {
 			case (user, tag) => JArrayList(permissionsDao.getGrantedPermissionsForUser(user)(tag).map { role => role.id }.asJava)
@@ -302,15 +316,17 @@ trait GrantedPermissionsForUserCache { self: PermissionsDaoComponent =>
 	}
 }
 
-trait GrantedPermissionsForGroupCache { self: PermissionsDaoComponent =>
+trait GrantedPermissionsForGroupCache { self: PermissionsDaoComponent with CacheStrategyComponent =>
 	final val GrantedPermissionsForGroupCacheName = "GrantedPermissionsForGroup"
 	final val GrantedPermissionsForGroupCacheMaxAgeSecs = 60 * 60 // 1 hour
 	final val GrantedPermissionsForGroupCacheMaxSize = 1000
-	
-	final val GrantedPermissionsForGroupCache = 
-		Caches.newCache(GrantedPermissionsForGroupCacheName, new GrantedPermissionsForGroupCacheFactory, GrantedPermissionsForGroupCacheMaxAgeSecs, CacheStrategy.EhCacheIfAvailable)
-	GrantedPermissionsForGroupCache.setMaxSize(GrantedPermissionsForGroupCacheMaxSize)
-	
+
+	final lazy val GrantedPermissionsForGroupCache = {
+		val cache = Caches.newCache(GrantedPermissionsForGroupCacheName, new GrantedPermissionsForGroupCacheFactory, GrantedPermissionsForGroupCacheMaxAgeSecs, cacheStrategy)
+		cache.setMaxSize(GrantedPermissionsForGroupCacheMaxSize)
+		cache
+	}
+
 	class GrantedPermissionsForGroupCacheFactory extends SingularCacheEntryFactory[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]] {
 		def create(cacheKey: (Seq[String], ClassTag[_ <: PermissionsTarget])) = cacheKey match {
 			case (groupNames, tag) => JArrayList(permissionsDao.getGrantedPermissionsForWebgroups(groupNames)(tag).map { role => role.id }.asJava)
@@ -319,14 +335,14 @@ trait GrantedPermissionsForGroupCache { self: PermissionsDaoComponent =>
 	}
 }
 trait PermissionsServiceCaches {
-	val rolesByIdCache: GrantedRoleByIdCache
-	val permissionsByIdCache: GrantedPermissionsByIdCache
-	val GrantedRolesForUserCache: Cache[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
-	val GrantedRolesForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
-	val GrantedPermissionsForUserCache: Cache[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
-	val GrantedPermissionsForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
+	def rolesByIdCache: GrantedRoleByIdCache
+	def permissionsByIdCache: GrantedPermissionsByIdCache
+	def GrantedRolesForUserCache: Cache[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
+	def GrantedRolesForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
+	def GrantedPermissionsForUserCache: Cache[(User, ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
+	def GrantedPermissionsForGroupCache: Cache[(Seq[String], ClassTag[_ <: PermissionsTarget]), JArrayList[String]]
 }
-trait PermissionsServiceCachesImpl extends PermissionsServiceCaches with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache {
+trait PermissionsServiceCachesImpl extends PermissionsServiceCaches with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache with AutowiringCacheStrategyComponent {
 	this:PermissionsDaoComponent=>
 	val rolesByIdCache:GrantedRoleByIdCache = new GrantedRoleByIdCache(permissionsDao)
 	val permissionsByIdCache = new GrantedPermissionsByIdCache(permissionsDao)

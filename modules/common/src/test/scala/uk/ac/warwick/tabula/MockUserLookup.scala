@@ -10,6 +10,8 @@ import uk.ac.warwick.tabula.JavaImports._
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.codec.binary.Base64
 import uk.ac.warwick.tabula.UserFlavour.{Applicant, Anonymous, Unverified, Vanilla}
+import uk.ac.warwick.tabula.services.permissions.CacheStrategyComponent
+import uk.ac.warwick.util.cache.Caches.CacheStrategy
 
 class MockUserLookup(var defaultFoundUser: Boolean)
 	extends UserLookupAdapter(null)
@@ -112,7 +114,10 @@ class MockCachingLookupService(var flavour: UserFlavour = Vanilla)
 	extends UserLookupAdapter(null)
 	with UserLookupService
 	with UserByWarwickIdCache
+	with CacheStrategyComponent
 	with MockUser {
+
+	val cacheStrategy = CacheStrategy.InMemoryOnly
 
 	override def getUserByWarwickUniIdUncached(warwickId: String, skipMemberLookup: Boolean): User = {
 		flavour match {

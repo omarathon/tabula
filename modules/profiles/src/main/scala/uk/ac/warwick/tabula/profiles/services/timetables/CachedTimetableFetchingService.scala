@@ -6,6 +6,7 @@ import java.util
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.JavaImports.JMap
 import uk.ac.warwick.tabula.timetables.TimetableEvent
+import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
 
 
 /**
@@ -13,7 +14,7 @@ import uk.ac.warwick.tabula.timetables.TimetableEvent
  * cache, thus allowing us not to thrash Syllabus+ too badly
  *
  */
-class CachedTimetableFetchingService(delegate:TimetableFetchingService) extends TimetableFetchingService{
+class CachedTimetableFetchingService(delegate:TimetableFetchingService) extends TimetableFetchingService with AutowiringCacheStrategyComponent {
 
 	val CacheExpiryTime = 1000*60*60*6 // 6 hours in ms
 
@@ -61,7 +62,9 @@ class CachedTimetableFetchingService(delegate:TimetableFetchingService) extends 
 		def shouldBeCached(response: EventList): Boolean = true
 	}
 	// rather than using 5 little caches, use one big one with a composite key
-	val timetableCache = Caches.newCache("SyllabusPlusTimetables", cacheEntryFactory, CacheExpiryTime, CacheStrategy.EhCacheIfAvailable)
+	lazy val timetableCache = {
+		Caches.newCache("SyllabusPlusTimetables", cacheEntryFactory, CacheExpiryTime, cacheStrategy)
+	}
 
 	def getTimetableForStudent(universityId: String): Seq[TimetableEvent] = timetableCache.get(StudentKey(universityId))
 	def getTimetableForModule(moduleCode: String): Seq[TimetableEvent] = timetableCache.get(ModuleKey(moduleCode))
