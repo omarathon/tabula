@@ -359,7 +359,7 @@ $(function() {
 		$expiryDateField.tabulaDateTimePicker();
 		var expiryDatePicker = $expiryDateField.data('datetimepicker');
 		var closeDate = new Date($form.find('[name=closeDate]').val());
-		if (closeDate) {
+		if (closeDate && expiryDatePicker) {
 			expiryDatePicker.setStartDate(closeDate);
 		}
 
