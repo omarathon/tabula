@@ -139,7 +139,7 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 		assignment.markingWorkflow = workflow
 
 		workflow.markingMethod should be(SeenSecondMarking)
-		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online/moderation")
+		workflow.onlineMarkingUrl(assignment, currentUser.apparentUser) should be("/coursework/admin/module/heron101/assignments/1/marker/feedback/online")
 
 		workflow.firstMarkerRoleName should be("First marker")
 		workflow.hasSecondMarker should be(true)
@@ -197,14 +197,14 @@ class MarkingWorkflowTest extends TestBase with Mockito {
 	@Test def convertToObject() {
 		val t = new MarkingMethodUserType
 		t.convertToObject("StudentsChooseMarker") should be (MarkingMethod.StudentsChooseMarker)
-		t.convertToObject("SeenSecondMarking") should be (MarkingMethod.SeenSecondMarkingLegacy)
+		t.convertToObject("SeenSecondMarkingLegacy") should be (MarkingMethod.SeenSecondMarkingLegacy)
 		evaluating { t.convertToObject("Q") } should produce [IllegalArgumentException]
 	}
 
 	@Test def convertToValue() {
 		val t = new MarkingMethodUserType
 		t.convertToValue(MarkingMethod.StudentsChooseMarker) should be ("StudentsChooseMarker")
-		t.convertToValue(MarkingMethod.SeenSecondMarkingLegacy) should be ("SeenSecondMarking")
+		t.convertToValue(MarkingMethod.SeenSecondMarkingLegacy) should be ("SeenSecondMarkingLegacy")
 	}
 
 }
