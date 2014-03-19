@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.coursework.commands.feedback
 
 import collection.JavaConverters._
-import uk.ac.warwick.tabula.data.model.{FileAttachment, Feedback, MarkerFeedback, Assignment, Module}
+import uk.ac.warwick.tabula.data.model.{MarkingState, FileAttachment, Feedback, MarkerFeedback, Assignment, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{Appliable, CommandInternal, ComposableCommand}
 import uk.ac.warwick.tabula.services.{ZipServiceComponent, FileAttachmentServiceComponent, FeedbackServiceComponent, AutowiringZipServiceComponent, AutowiringFileAttachmentServiceComponent, AutowiringFeedbackServiceComponent}
@@ -34,6 +34,8 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 
 	self: FeedbackServiceComponent with ZipServiceComponent 	with MarkerFeedbackStateCopy =>
 
+//	if(parentFeedback.retrieveFirstMarkerFeedback.state == MarkingState.SecondMarkingComplete){
+
 	def markerFeedback = assignment.getMarkerFeedback(student.getWarwickId, currentUser.apparentUser)
 
 	copyState(markerFeedback)
@@ -54,7 +56,9 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 
 		// see if marker feedback already exists - if not create one
 		val markerFeedback:MarkerFeedback = firstMarker match {
-			case true => parentFeedback.retrieveFirstMarkerFeedback
+			case true => if(parentFeedback.retrieveFirstMarkerFeedback.state == MarkingState.SecondMarkingComplete){
+				parentFeedback.retrieveFinalMarkerFeedback
+			}	else parentFeedback.retrieveFirstMarkerFeedback
 			case false => parentFeedback.retrieveSecondMarkerFeedback
 		}
 

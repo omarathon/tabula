@@ -2,14 +2,13 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 
 import scala.collection.JavaConversions._
 import uk.ac.warwick.tabula.data.model.MarkingState._
-import uk.ac.warwick.tabula.data.model.{Feedback, Assignment, MarkerFeedback}
+import uk.ac.warwick.tabula.data.model.{MarkingState, Feedback, Assignment, MarkerFeedback, Module}
 import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.commands.{UploadedFile, Description}
 import uk.ac.warwick.tabula.data.Transactions._
 import reflect.BeanProperty
 import uk.ac.warwick.tabula.helpers.LazyLists
 import uk.ac.warwick.tabula.permissions._
-import uk.ac.warwick.tabula.data.model.Module
 import org.springframework.validation.Errors
 
 
@@ -51,22 +50,23 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 			newFeedback
 		})
 
-		// see if marker feedback already exists - if not create one
 		val markerFeedback:MarkerFeedback = firstMarker match {
-			case true => parentFeedback.retrieveFirstMarkerFeedback
+			case true => if(parentFeedback.retrieveFirstMarkerFeedback.state == MarkingState.SecondMarkingComplete){
+											parentFeedback.retrieveFinalMarkerFeedback
+										}	else parentFeedback.retrieveFirstMarkerFeedback
 			case false => parentFeedback.retrieveSecondMarkerFeedback
 		}
 
-		for (attachment <- file.attached){
+				for (attachment <- file.attached){
 			// if an attachment with the same name as this one exists then delete it
 			val duplicateAttachment = markerFeedback.attachments.find(_.name == attachment.name)
 			duplicateAttachment.foreach(markerFeedback.removeAttachment(_))
 			markerFeedback.addAttachment(attachment)
 		}
-
 		session.saveOrUpdate(parentFeedback)
 		session.saveOrUpdate(markerFeedback)
 		//TODO - UPDATE STATE
+
 
 		markerFeedback
 	}

@@ -485,12 +485,20 @@ class Assignment
 		get a MarkerFeedback for the given student ID and user  if one exists. firstMarker = true returns the first markers feedback item.
 		false returns the second markers item
 	 */
+
 	def getMarkerFeedback(uniId:String, user:User) : Option[MarkerFeedback] = {
 		val parentFeedback = feedbacks.find(_.universityId == uniId)
 		parentFeedback match {
 			case Some(f) => {
-				if(this.isFirstMarker(user))
-					Some(f.retrieveFirstMarkerFeedback)
+				if(this.isFirstMarker(user)) {
+					val firstMarkerFeedback = f.retrieveFirstMarkerFeedback
+					if (firstMarkerFeedback.state == MarkingState.SecondMarkingComplete) {
+						Some(f.retrieveFinalMarkerFeedback)
+					}
+					else {
+						Some(f.retrieveFirstMarkerFeedback)
+					}
+				}
 				else if(this.isSecondMarker(user))
 					Some(f.retrieveSecondMarkerFeedback)
 				else
