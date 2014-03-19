@@ -12,6 +12,7 @@ import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, RequiresPer
 import uk.ac.warwick.tabula.coursework.commands.markingworkflows.notifications.{ReleasedState, FeedbackReleasedNotifier}
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.data.model.notifications.ReleaseToMarkerNotification
+import uk.ac.warwick.tabula.data.model.MarkingMethod.SeenSecondMarkingNew
 
 object MarkingCompletedCommand {
 	def apply(module: Module, assignment: Assignment, user: User, firstMarker:Boolean) =
@@ -37,27 +38,40 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 	def applyInternal() {
 		// do not update previously released feedback
 		val feedbackForRelease = markerFeedbacks -- releasedFeedback
-		feedbackForRelease.foreach(stateService.updateState(_, MarkingState.MarkingCompleted))
+
+		feedbackForRelease.foreach { feedback =>
+			if (assignment.markingWorkflow.hasSecondMarker && assignment.markingWorkflow.markingMethod == SeenSecondMarkingNew && !firstMarker) {
+//				stateService.updateState(feedback, MarkingState.SecondMarkingComplete)
+				stateService.updateState(feedback, MarkingState.MarkingCompleted)
+				stateService.updateState(feedback.feedback.retrieveFirstMarkerFeedback, MarkingState.SecondMarkingComplete)
+			} else if (assignment.markingWorkflow.hasSecondMarker && assignment.markingWorkflow.markingMethod == SeenSecondMarkingNew && firstMarker){
+				stateService.updateState(feedback, MarkingState.AwaitingSecondMarking)
+			}
+			else stateService.updateState(feedback, MarkingState.MarkingCompleted)
+		}
 
 		def finaliseFeedback(){
 			val finaliseFeedbackCommand = new FinaliseFeedbackCommand(assignment, feedbackForRelease)
 			finaliseFeedbackCommand.apply()
 		}
 
-		def createSecondMarkerFeedback(){
+		def nextMarkerFeedback(){
 			newReleasedFeedback = feedbackForRelease.map{ mf =>
 				val parentFeedback = mf.feedback
-				val secondMarkerFeedback = parentFeedback.retrieveSecondMarkerFeedback
-				stateService.updateState(secondMarkerFeedback, MarkingState.ReleasedForMarking)
-				secondMarkerFeedback
+				val nextMarkerFeedback = {
+					if (mf.state == MarkingState.AwaitingSecondMarking)	parentFeedback.retrieveSecondMarkerFeedback
+					else parentFeedback.retrieveFinalMarkerFeedback
+				}
+				stateService.updateState(nextMarkerFeedback, MarkingState.ReleasedForMarking)
+				nextMarkerFeedback
 			}
 		}
 
-		if (assignment.markingWorkflow.hasSecondMarker && firstMarker)
-			createSecondMarkerFeedback()
+		if (assignment.markingWorkflow.hasSecondMarker && (firstMarker || !firstMarker && assignment.markingWorkflow.markingMethod == SeenSecondMarkingNew))
+			nextMarkerFeedback()
+			// maybe remove the else block, and always finalise any applicable marking feedbacks
 		else
 			finaliseFeedback()
-
 	}
 
 	def preSubmitValidation() {

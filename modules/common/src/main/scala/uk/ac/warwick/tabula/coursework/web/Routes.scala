@@ -53,6 +53,10 @@ object Routes {
 				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online/moderation"
 			}
 
+			object onlineSecondMarker {
+				def apply(assignment: Assignment) = assignmentroot(assignment) + "/marker/feedback/online/secondmarker"
+			}
+
 			def create(module: Module) = context + "/admin/module/%s/assignments/new" format (encoded(module.code))
 
 			private def assignmentroot(assignment: Assignment) = context + "/admin/module/%s/assignments/%s" format (encoded(assignment.module.code), assignment.id)

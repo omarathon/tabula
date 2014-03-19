@@ -98,9 +98,15 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 	@JoinColumn(name = "second_marker_feedback")
 	var secondMarkerFeedback: MarkerFeedback = _
 
+	@OneToOne(cascade=Array(ALL), fetch = FetchType.LAZY)
+	@JoinColumn(name = "final_marker_feedback")
+	var finalMarkerFeedback: MarkerFeedback = _
+
+
 	def getFeedbackPosition(markerFeedback: MarkerFeedback) : Option[FeedbackPosition] = {
 		if(markerFeedback == firstMarkerFeedback) Some(FirstFeedback)
 		else if (markerFeedback == secondMarkerFeedback) Some(SecondFeedback)
+		else if (markerFeedback == finalMarkerFeedback) Some(FinalFeedback)
 		else None
 	}
 
@@ -130,6 +136,13 @@ class Feedback extends GeneratedId with FeedbackAttachments with PermissionsTarg
 		Option(secondMarkerFeedback).getOrElse({
 			secondMarkerFeedback = new MarkerFeedback(this)
 			secondMarkerFeedback
+		})
+	}
+
+	def retrieveFinalMarkerFeedback:MarkerFeedback = {
+		Option(finalMarkerFeedback).getOrElse({
+			finalMarkerFeedback = new MarkerFeedback(this)
+			finalMarkerFeedback
 		})
 	}
 
@@ -196,3 +209,4 @@ object Feedback {
 sealed trait FeedbackPosition
 case object  FirstFeedback extends FeedbackPosition
 case object  SecondFeedback extends FeedbackPosition
+case object  FinalFeedback extends FeedbackPosition
