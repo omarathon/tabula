@@ -27,7 +27,7 @@
 						<#-- when choosing from the "Other courses" drop-down, make the most signicant course
 						  -- bold to assist with navigating back if you have previously gone into a different course -->
 								${(scd.course.code)!}
-								<@fmt.course_year_span studentCourseDetails /> ${scd.scjCode}
+								<@fmt.course_year_span scd /> ${scd.scjCode}
 						</a>
 					</li>
 				</#if>
@@ -38,7 +38,7 @@
 
 
 	<!-- basic course details across years -->
-	<div class="data clearfix">
+	<div class="data clearfix col1">
 		<div class="col1 basic-course-details">
 			<table class="profile-or-course-info">
 				<tbody>
@@ -73,19 +73,17 @@
 		</div>
 	</div>
 
-	<br />
-
 	<!-- expandable course details -->
 
-	<div class="panel-group expandable-course-details">
+	<div class="panel-group expandable-course-details col2">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h6 class="panel-title">
+				<p class="panel-title">
 					<i class="icon-chevron-right icon-fixed-width"></i>
 					<a data-toggle="collapse" data-parent=".expandable-course-details" href="#more-course-details">
 						More Details
 					</a>
-				</h6>
+				</p>
 			</div>
 			<div id="more-course-details" class="panel-collapse collapse">
 				<div class="panel-body data clearfix col1">
@@ -98,13 +96,6 @@
 									<th>Intended award</th>
 									<td>${(studentCourseDetails.award.name)!}</td>
 								</tr>
-								<#if !isSelf>
-								<tr>
-									<th>Enrolment status</th>
-									<td><@fmt.enrolment_status studentCourseDetails />
-									</td>
-								</tr>
-								</#if>
 								<tr>
 									<th>Length of course</th>
 									<td>
@@ -128,21 +119,19 @@
 								<tr>
 									<th>Start date</th>
 									<td>
-									<#if studentCourseDetails.beginDate??>
-												<@fmt.date date=studentCourseDetails.beginDate includeTime=false />
-											</#if>
+										<#if studentCourseDetails.beginDate??>
+											<@fmt.date date=studentCourseDetails.beginDate includeTime=false />
+										</#if>
 									</td>
 								</tr>
 								<tr>
-									<th>End date</th>
-									<td>
 									<#if studentCourseDetails.endDate??>
-										<@fmt.date date=studentCourseDetails.endDate includeTime=false />
-
-									<#elseif studentCourseDetails.expectedEndDate??>
-										<@fmt.date date=studentCourseDetails.expectedEndDate includeTime=false/> (expected)
+										<th>End date</th>
+										<td><@fmt.date date=studentCourseDetails.endDate includeTime=false /></td>
+									<#else>
+										<th>Expected end date</th>
+										<td><@fmt.date date=studentCourseDetails.expectedEndDate includeTime=false/></td>
 									</#if>
-									</td>
 								</tr>
 								<tr>
 									<th>Programme route code</th>

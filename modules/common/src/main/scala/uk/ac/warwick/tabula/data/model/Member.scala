@@ -33,6 +33,7 @@ import org.hibernate.annotations.Filter
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
+import scala.collection.SortedSet
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -228,7 +229,7 @@ class StudentMember extends Member with StudentProperties {
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshStudentCourseDetails = {
-		studentCourseDetails.asScala.filter(scd => scd.isFresh)
+		studentCourseDetails.asScala.filter(scd => scd.isFresh).to[SortedSet]
 	}
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
@@ -312,6 +313,8 @@ class StudentMember extends Member with StudentProperties {
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def mostSignificantCourseDetails: Option[StudentCourseDetails] = Option(mostSignificantCourse).filter(course => course.isFresh)
+
+	def defaultYearDetails: Option[StudentCourseYearDetails] = mostSignificantCourseDetails.map(_.latestStudentCourseYearDetails)
 
 	def hasCurrentEnrolment: Boolean = freshStudentCourseDetails.exists(_.hasCurrentEnrolment)
 

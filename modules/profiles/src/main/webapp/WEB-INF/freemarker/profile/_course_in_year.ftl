@@ -1,16 +1,20 @@
 <#import "*/modal_macros.ftl" as modal />
 
-<!-- nav pills to choose other years: -->
+<!-- nav to choose other years: -->
 <#if (studentCourseDetails.freshStudentCourseYearDetails)?? && (studentCourseDetails.freshStudentCourseYearDetails?size > 1)>
 
-	<ul class="nav nav-pills">
+	<ul class="nav nav-tabs nav-justified">
 		<#list studentCourseDetails.freshStudentCourseYearDetails as scyd>
 			<#assign year=scyd.academicYear.startYearAsString />
 
 			<#if scyd.academicYear.value != studentCourseYearDetails.academicYear.value>
-					<a href="/profiles/view/course/${studentCourseDetails.urlSafeId}/${year}">
+					<li><a href="/profiles/view/course/${studentCourseDetails.urlSafeId}/${year}">
 						${(scyd.academicYear.toString)!}
-					</a>
+					</a></li>
+			<#else>
+				<li class="active"><a href="/profiles/view/course/${studentCourseDetails.urlSafeId}/${year}">
+					${(scyd.academicYear.toString)!}
+				</a></li>
 			</#if>
 		</#list>
 	</ul>
@@ -18,27 +22,26 @@
 
 <!-- course year details  -->
 <div class="data clearfix">
-	<div>
+	<div id="course-in-year-info">
 		<table class="profile-or-course-info">
 			<tbody>
-			<tr>
-				<th>Attendance</th>
-				<td>${(studentCourseYearDetails.modeOfAttendance.fullNameAliased)!}
-				</td>
-			</tr>
-			<tr>
-				<th>Year of study</th>
-				<td>${(studentCourseYearDetails.yearOfStudy)!}
-				</td>
-			</tr>
-			<tr>
-				<th></th>
-				<#if studentCourseDetails.modeOfAttendance??>
-					<#if studentCourseDetails.latestStudentCourseYearDetails.modeOfAttendance.code != "F">
-					(full-time equivalent)
-					</#if>
+				<#if !isSelf>
+					<tr>
+						<th>Enrolment status</th>
+						<td><@fmt.enrolment_status studentCourseYearDetails />
+						</td>
+					</tr>
 				</#if>
-			</tr>
+				<tr>
+					<th>Attendance</th>
+					<td>${(studentCourseYearDetails.modeOfAttendance.fullNameAliased)!}
+					</td>
+				</tr>
+				<tr>
+					<th>Year of study</th>
+					<td>${(studentCourseYearDetails.yearOfStudy)!}
+					</td>
+				</tr>
 			</tbody>
 		</table>
 	</div>
@@ -47,7 +50,9 @@
 
 <div class="tabbable">
 
-<#assign showTimetablePane=features.personalTimetables && can.do("Profiles.Read.Timetable", profile) />
+<#assign showTimetablePane=features.personalTimetables
+	&& can.do("Profiles.Read.Timetable", profile)
+	&& profile.defaultYearDetails.equals(studentCourseYearDetails) />
 
 <#if showTimetablePane>
 	<script type="text/javascript">

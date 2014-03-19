@@ -70,7 +70,7 @@ class MemberTest extends PersistenceTestBase with Mockito {
 		val route = new Route
 		route.department = routeDept
 		member.mostSignificantCourseDetails.get.route = route
-		member.freshStudentCourseDetails += studentCourseDetails
+		member.attachStudentCourseDetails(studentCourseDetails)
 
 		member.affiliatedDepartments should be (Stream(homeDept, courseDept, routeDept))
 		member.touchedDepartments should be (Stream(homeDept, courseDept, routeDept, extDept))

@@ -15,6 +15,7 @@ import javax.persistence.Entity
 import javax.persistence.CascadeType
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
+import scala.collection.SortedSet
 
 object StudentCourseDetails {
 	final val FreshCourseDetailsOnlyFilter = "freshStudentCourseDetailsOnly"
@@ -57,7 +58,7 @@ class StudentCourseDetails
 	@BatchSize(size=200)
 	private val studentCourseYearDetails: JSet[StudentCourseYearDetails] = JHashSet()
 
-	def freshStudentCourseYearDetails = studentCourseYearDetails.asScala.filter(scyd => scyd.isFresh)
+	def freshStudentCourseYearDetails = studentCourseYearDetails.asScala.filter(scyd => scyd.isFresh).to[SortedSet]
 	def freshOrStaleStudentCourseYearDetails = studentCourseYearDetails.asScala
 
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)

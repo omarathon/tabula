@@ -26,9 +26,12 @@ class ViewProfileByStudentController extends ViewProfileController {
 		@RequestParam(value = "meeting", required = false) openMeetingId: String,
 		@RequestParam(defaultValue = "", required = false) agentId: String) = {
 		val profiledStudentMember = profileCmd.apply()
-		val courseDetails = profiledStudentMember.mostSignificantCourseDetails
-		val courseYearDetails = courseDetails.map(_.latestStudentCourseYearDetails)
-		viewProfileForCourse(courseDetails, courseYearDetails, openMeetingId, agentId, profiledStudentMember)
+
+		viewProfileForCourse(profiledStudentMember.mostSignificantCourseDetails,
+			profiledStudentMember.defaultYearDetails,
+			openMeetingId,
+			agentId,
+			profiledStudentMember)
 	}
 
 }
