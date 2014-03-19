@@ -124,8 +124,8 @@ object Fixtures extends Mockito {
 			occurrence = "A")
 
 
-	def seenSecondMarkingWorkflow(name: String) = {
-		val workflow = new SeenSecondMarkingWorkflow
+	def seenSecondMarkingLegacyWorkflow(name: String) = {
+		val workflow = new SeenSecondMarkingLegacyWorkflow
 		workflow.name = name
 		workflow
 	}

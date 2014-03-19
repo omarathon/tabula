@@ -57,8 +57,8 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 		// see if marker feedback already exists - if not create one
 		val markerFeedback:MarkerFeedback = firstMarker match {
 			case true => if(parentFeedback.retrieveFirstMarkerFeedback.state == MarkingState.SecondMarkingComplete){
-				parentFeedback.retrieveFinalMarkerFeedback
-			}	else parentFeedback.retrieveFirstMarkerFeedback
+					parentFeedback.retrieveFinalMarkerFeedback
+				}	else parentFeedback.retrieveFirstMarkerFeedback
 			case false => parentFeedback.retrieveSecondMarkerFeedback
 		}
 

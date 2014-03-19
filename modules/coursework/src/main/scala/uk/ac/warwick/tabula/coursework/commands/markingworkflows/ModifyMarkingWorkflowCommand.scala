@@ -93,7 +93,7 @@ trait MarkingWorkflowCommandValidation extends SelfValidating {
 		firstMarkersValidator.validate(errors)
 
 		// validate only when second markers are used
-		if(markingMethod == SeenSecondMarking){
+		if(markingMethod == SeenSecondMarkingLegacy){
 			val secondMarkersValidator = new UsercodeListValidator(secondMarkers, "secondMarkers"){
 				override def alreadyHasCode = hasDuplicates(secondMarkers.asScala)
 			}

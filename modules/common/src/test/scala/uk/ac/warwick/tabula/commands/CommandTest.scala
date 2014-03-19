@@ -78,7 +78,7 @@ class CommandTest extends TestBase {
 		feedback.id = "feedbackId"
 		feedback.assignment = assignment
 				
-		val workflow = Fixtures.seenSecondMarkingWorkflow("my workflow")
+		val workflow = Fixtures.seenSecondMarkingLegacyWorkflow("my workflow")
 		workflow.id = "workflowId"
 		workflow.department = department
 		

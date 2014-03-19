@@ -711,7 +711,7 @@ class AssignmentServiceTest extends PersistenceTestBase {
 		workflow1.name = "mw1"
 		workflow1.department = department
 
-		val workflow2 = new SeenSecondMarkingWorkflow
+		val workflow2 = new SeenSecondMarkingLegacyWorkflow
 		workflow2.name = "mw2"
 		workflow2.department = department
 

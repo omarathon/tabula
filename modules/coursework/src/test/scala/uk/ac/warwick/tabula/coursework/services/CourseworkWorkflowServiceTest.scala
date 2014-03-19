@@ -86,7 +86,7 @@ class CourseworkWorkflowServiceTest extends TestBase {
 			AddMarks, AddFeedback, ReleaseFeedback, ViewOnlineFeedback, DownloadFeedback
 		))
 
-		assignment.markingWorkflow = Fixtures.seenSecondMarkingWorkflow("my workflow")
+		assignment.markingWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("my workflow")
 		service.getStagesFor(assignment) should be (Seq(
 			WorkflowStages.Submission, CheckForPlagiarism, DownloadSubmission,
 			ReleaseForMarking, FirstMarking, SecondMarking,

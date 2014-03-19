@@ -14,7 +14,7 @@ import uk.ac.warwick.tabula.coursework.commands.assignments.WorkflowItems
 import uk.ac.warwick.tabula.data.model.MarkingState
 import scala.collection.immutable.ListMap
 import uk.ac.warwick.tabula.data.model.MarkingState.{AwaitingSecondMarking, SecondMarkingComplete, Rejected, MarkingCompleted}
-import uk.ac.warwick.tabula.data.model.MarkingMethod.SeenSecondMarkingNew
+import uk.ac.warwick.tabula.data.model.MarkingMethod.SeenSecondMarking
 
 @Service
 class CourseworkWorkflowService {
@@ -41,7 +41,7 @@ class CourseworkWorkflowService {
 					stages = stages ++ Seq(SecondMarking)
 				}
 
-				if (assignment.markingWorkflow.markingMethod == SeenSecondMarkingNew) {
+				if (assignment.markingWorkflow.markingMethod == SeenSecondMarking) {
 					stages = stages ++ Seq(FinaliseSeenSecondMarking)
 				}
 			}
@@ -250,10 +250,10 @@ object WorkflowStages {
 			val hasSubmission = coursework.enhancedSubmission.exists(_.submission.isReleasedToSecondMarker)
 			coursework.enhancedFeedback match {
 				case Some(item) if hasSubmission &&  item.feedback.retrieveSecondMarkerFeedback.state != Rejected => {
-					if (item.feedback.retrieveFirstMarkerFeedback.state == SecondMarkingComplete)
-						StageProgress(FinaliseSeenSecondMarking, true, "workflow.FinaliseSeenSecondMarking.notFinalised", Warning, false)
-					else
+					if (item.feedback.retrieveFinalMarkerFeedback.state == MarkingCompleted )
 						StageProgress(FinaliseSeenSecondMarking, true, "workflow.FinaliseSeenSecondMarking.finalised", Good, true)
+					else
+						StageProgress(FinaliseSeenSecondMarking, true, "workflow.FinaliseSeenSecondMarking.notFinalised", Warning, false)
 				}
 				case _ => StageProgress(FinaliseSeenSecondMarking, false, "workflow.FinaliseSeenSecondMarking.notFinalised")
 			}

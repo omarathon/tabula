@@ -6,7 +6,7 @@ import uk.ac.warwick.userlookup.User
 import uk.ac.warwick.tabula.web.Routes
 
 @Entity
-@DiscriminatorValue(value="SeenSecondMarking")
+@DiscriminatorValue(value="SeenSecondMarkingNew")
 class SeenSecondMarkingWorkflow extends MarkingWorkflow with AssignmentMarkerMap {
 
 	def this(dept: Department) = {

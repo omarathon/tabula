@@ -5,7 +5,7 @@ import org.hibernate.Session
 import uk.ac.warwick.tabula.Mockito
 
 import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.data.model.{StudentsChooseMarkerWorkflow, SeenSecondMarkingWorkflow, MarkingWorkflow}
+import uk.ac.warwick.tabula.data.model.{StudentsChooseMarkerWorkflow, SeenSecondMarkingLegacyWorkflow, MarkingWorkflow}
 
 class MarkingWorkflowIdConverterTest extends TestBase with Mockito {
 
@@ -19,7 +19,7 @@ class MarkingWorkflowIdConverterTest extends TestBase with Mockito {
 	converter.sessionFactory = sessionFactory
 
 	@Test def validInput {
-		val workflow = new SeenSecondMarkingWorkflow
+		val workflow = new SeenSecondMarkingLegacyWorkflow
 		workflow.id = "steve"
 
 		session.get(classOf[MarkingWorkflow].getName(), "steve") returns (workflow)

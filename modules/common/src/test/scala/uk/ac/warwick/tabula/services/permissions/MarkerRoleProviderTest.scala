@@ -9,10 +9,10 @@ class MarkerRoleProviderTest extends TestBase {
 	
 	val provider = new MarkerRoleProvider
 	
-	val mw1 = Fixtures.seenSecondMarkingWorkflow("workflow is marker")
+	val mw1 = Fixtures.seenSecondMarkingLegacyWorkflow("workflow is marker")
 	mw1.firstMarkers.addUserId("cuscav")
 	
-	val mw2 = Fixtures.seenSecondMarkingWorkflow("workflow not marker")
+	val mw2 = Fixtures.seenSecondMarkingLegacyWorkflow("workflow not marker")
 	mw2.firstMarkers.addUserId("cusebr")
 	
 	val assignmentIsMarker1 = Fixtures.assignment("assignment is marker 1")	

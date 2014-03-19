@@ -3,7 +3,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.data.model._
-import uk.ac.warwick.tabula.data.model.MarkingMethod.{SeenSecondMarkingNew, FirstMarkerOnly, ModeratedMarking, StudentsChooseMarker, SeenSecondMarking}
+import uk.ac.warwick.tabula.data.model.MarkingMethod.{SeenSecondMarking, FirstMarkerOnly, ModeratedMarking, StudentsChooseMarker, SeenSecondMarkingLegacy}
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.services.AssignmentServiceComponent
 import uk.ac.warwick.tabula.services.AutowiringAssignmentServiceComponent
@@ -30,8 +30,8 @@ class AddMarkingWorkflowCommandInternal(department: Department) extends ModifyMa
 	def applyInternal() = {
 		transactional() {
 			val markingWorkflow = markingMethod match {
+				case SeenSecondMarkingLegacy => new SeenSecondMarkingLegacyWorkflow(department)
 				case SeenSecondMarking => new SeenSecondMarkingWorkflow(department)
-				case SeenSecondMarkingNew => new SeenSecondMarkingNewWorkflow(department)
 				case StudentsChooseMarker => new StudentsChooseMarkerWorkflow(department)
 				case ModeratedMarking => new ModeratedMarkingWorkflow(department)
 				case FirstMarkerOnly => new FirstMarkerOnlyWorkflow(department)

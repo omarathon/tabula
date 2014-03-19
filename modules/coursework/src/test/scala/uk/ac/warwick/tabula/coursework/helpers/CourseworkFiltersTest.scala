@@ -493,7 +493,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be (false)
 
-		assignment.markingWorkflow = Fixtures.seenSecondMarkingWorkflow("my marking workflow")
+		assignment.markingWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("my marking workflow")
 
 		assignment.collectSubmissions = false
 		filter.applies(assignment) should be (false)
@@ -583,7 +583,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be (false)
 
-		assignment.markingWorkflow = Fixtures.seenSecondMarkingWorkflow("my marking workflow")
+		assignment.markingWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("my marking workflow")
 
 		assignment.collectSubmissions = false
 		filter.applies(assignment) should be (false)
@@ -625,7 +625,7 @@ class CourseworkFiltersTest extends TestBase with Mockito {
 		assignment.collectSubmissions = true
 		filter.applies(assignment) should be (false)
 
-		assignment.markingWorkflow = Fixtures.seenSecondMarkingWorkflow("my marking workflow")
+		assignment.markingWorkflow = Fixtures.seenSecondMarkingLegacyWorkflow("my marking workflow")
 
 		assignment.collectSubmissions = false
 		filter.applies(assignment) should be (false)
