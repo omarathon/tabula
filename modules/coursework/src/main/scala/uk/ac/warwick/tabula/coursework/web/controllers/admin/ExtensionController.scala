@@ -11,16 +11,14 @@ import org.springframework.validation.{ BindingResult, Errors }
 import uk.ac.warwick.tabula.services.{ProfileService, UserLookupService, RelationshipService}
 import uk.ac.warwick.tabula.{JsonHelper, CurrentUser}
 import uk.ac.warwick.tabula.data.model.forms.Extension
-import javax.servlet.http.HttpServletResponse
 import uk.ac.warwick.tabula.helpers.DateBuilder
 import javax.validation.Valid
-import org.joda.time.{Days, DateTime}
+import org.joda.time.DateTime
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.commands.{Appliable, SelfValidating}
 import com.fasterxml.jackson.databind.ObjectMapper
-import uk.ac.warwick.tabula.coursework.web.Routes.admin.assignment.extension
-import scala.Some
+
 
 
 abstract class ExtensionController extends CourseworkController {
