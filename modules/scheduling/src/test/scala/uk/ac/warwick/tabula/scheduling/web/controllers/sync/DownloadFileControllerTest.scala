@@ -1,7 +1,6 @@
 package uk.ac.warwick.tabula.scheduling.web.controllers.sync
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.{FeaturesImpl, TestBase, Mockito}
 import org.joda.time.DateTime
 import uk.ac.warwick.tabula.data.FileDao
 import org.scalatest.mock.MockitoSugar
@@ -41,6 +40,8 @@ class DownloadFileControllerTest extends TestBase with MockitoSugar {
 		controller.macGenerator = macGenerator
 		controller.fileDao = fileDao
 		controller.fileServer = new FileServer
+		controller.fileServer.features = new FeaturesImpl
+		controller.fileServer.features.xSendfile = false
 		
 		controller.serve("abc", macGenerator.generateMessageAuthenticationCode("abc"))
 		
