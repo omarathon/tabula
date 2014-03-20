@@ -55,8 +55,8 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		grantedRole.scope should be (department)
 
 		there was one (command.permissionsService).saveOrUpdate(any[GrantedRole[Department]])
-		there was one (command.permissionsService).clearCachesForUser(("cuscav", classTag[Department]))
-		there was one (command.permissionsService).clearCachesForUser(("cusebr", classTag[Department]))
+		there was atLeastOne (command.permissionsService).clearCachesForUser(("cuscav", classTag[Department]))
+		there was atLeastOne (command.permissionsService).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
 	
 	@Test def itWorksWithExisting { new Fixture {
@@ -82,8 +82,8 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		grantedRole.scope should be (department)
 
 		there was one (command.permissionsService).saveOrUpdate(existing)
-		there was one (command.permissionsService).clearCachesForUser(("cuscav", classTag[Department]))
-		there was one (command.permissionsService).clearCachesForUser(("cusebr", classTag[Department]))
+		there was atLeastOne (command.permissionsService).clearCachesForUser(("cuscav", classTag[Department]))
+		there was atLeastOne (command.permissionsService).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
 	
 	@Test def validatePasses { withUser("cuscav", "0672089") { new Fixture {
