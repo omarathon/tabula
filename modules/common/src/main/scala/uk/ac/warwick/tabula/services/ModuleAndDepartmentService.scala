@@ -1,6 +1,7 @@
 package uk.ac.warwick.tabula.services
+
 import scala.collection.JavaConverters._
-import scala.reflect.ClassTag
+import scala.reflect._
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import uk.ac.warwick.tabula.CurrentUser
@@ -78,9 +79,14 @@ class ModuleAndDepartmentService extends Logging {
 	// We may have a granted role that's overridden later, so we also need to do a security service check as well
 	// as getting the role itself
 
-	def departmentsWithPermission(user: CurrentUser, permission: Permission): Set[Department] =
+	def departmentsWithPermission(user: CurrentUser, permission: Permission): Set[Department] = {
+		println(permissionsService.getAllPermissionDefinitionsFor[Department](user, permission))
+
 		permissionsService.getAllPermissionDefinitionsFor[Department](user, permission)
-			.filter { department => securityService.can(user, permission, department) }
+			.filter {
+				department => securityService.can(user, permission, department)
+			}
+	}
 
 	def modulesWithPermission(user: CurrentUser, permission: Permission): Set[Module] =
 		permissionsService.getAllPermissionDefinitionsFor[Module](user, permission)
@@ -120,36 +126,42 @@ class ModuleAndDepartmentService extends Logging {
 		val role = getRole(dept, DepartmentalAdministratorRoleDefinition)
 		role.users.knownType.addUserId(owner)
 		permissionsService.saveOrUpdate(role)
+		permissionsService.clearCachesForUser((owner, classTag[Department]))
 	}
 
 	def removeOwner(dept: Department, owner: String) = transactional() {
 		val role = getRole(dept, DepartmentalAdministratorRoleDefinition)
 		role.users.knownType.removeUserId(owner)
 		permissionsService.saveOrUpdate(role)
+		permissionsService.clearCachesForUser((owner, classTag[Department]))
 	}
 
 	def addModuleManager(module: Module, owner: String) = transactional() {
 		val role = getRole(module, ModuleManagerRoleDefinition)
 		role.users.knownType.addUserId(owner)
 		permissionsService.saveOrUpdate(role)
+		permissionsService.clearCachesForUser((owner, classTag[Module]))
 	}
 
 	def removeModuleManager(module: Module, owner: String) = transactional() {
 		val role = getRole(module, ModuleManagerRoleDefinition)
 		role.users.knownType.removeUserId(owner)
 		permissionsService.saveOrUpdate(role)
+		permissionsService.clearCachesForUser((owner, classTag[Module]))
 	}
 
 	def addRouteManager(route: Route, owner: String) = transactional() {
 		val role = getRole(route, RouteManagerRoleDefinition)
 		role.users.knownType.addUserId(owner)
 		permissionsService.saveOrUpdate(role)
+		permissionsService.clearCachesForUser((owner, classTag[Route]))
 	}
 
 	def removeRouteManager(route: Route, owner: String) = transactional() {
 		val role = getRole(route, RouteManagerRoleDefinition)
 		role.users.knownType.removeUserId(owner)
 		permissionsService.saveOrUpdate(role)
+		permissionsService.clearCachesForUser((owner, classTag[Route]))
 	}
 
 	def save(dept: Department) = transactional() {

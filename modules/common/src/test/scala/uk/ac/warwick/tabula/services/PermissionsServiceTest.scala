@@ -24,11 +24,12 @@ class PermissionsServiceTest extends PersistenceTestBase with Mockito {
 
 	val permsDao = new PermissionsDaoImpl
 
-	val service = new AbstractPermissionsService with PermissionsDaoComponent with PermissionsServiceCaches with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache with CacheStrategyComponent with QueueListener with InitializingBean with Logging {
+	val service = new AbstractPermissionsService with PermissionsDaoComponent with PermissionsServiceCaches with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache with CacheStrategyComponent with QueueListener with InitializingBean with Logging with UserLookupComponent {
 		var permissionsDao:PermissionsDao = permsDao
 		val rolesByIdCache:GrantedRoleByIdCache = new GrantedRoleByIdCache(permsDao)
 		val permissionsByIdCache = new GrantedPermissionsByIdCache(permsDao)
 		val cacheStrategy = CacheStrategy.InMemoryOnly
+		val userLookup = new MockUserLookup()
 	}
 	service.queue = mock[Queue]
 

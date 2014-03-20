@@ -1,24 +1,25 @@
 package uk.ac.warwick.tabula.commands.permissions
 
-import uk.ac.warwick.tabula.TestBase
-import uk.ac.warwick.tabula.Mockito
+import uk.ac.warwick.tabula.{MockUserLookup, TestBase, Mockito, Fixtures}
 import uk.ac.warwick.tabula.services.permissions.{PermissionsServiceComponent, PermissionsService}
-import uk.ac.warwick.tabula.Fixtures
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.data.model.permissions.GrantedRole
 import org.springframework.validation.BindException
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
 import uk.ac.warwick.tabula.roles.{BuiltInRoleDefinition, DepartmentalAdministratorRoleDefinition}
 import uk.ac.warwick.tabula.JavaImports._
-import uk.ac.warwick.tabula.services.{SecurityServiceComponent, SecurityService}
+import uk.ac.warwick.tabula.services.{UserLookupComponent, SecurityServiceComponent, SecurityService}
 import uk.ac.warwick.tabula.data.model.Department
 import uk.ac.warwick.tabula.commands.{Describable, SelfValidating, Appliable, DescriptionImpl}
+import scala.reflect._
+import scala.Some
 
 class GrantRoleCommandTest extends TestBase with Mockito {
 
-	trait CommandTestSupport[A <: PermissionsTarget] extends GrantRoleCommandState[A] with PermissionsServiceComponent with SecurityServiceComponent {
+	trait CommandTestSupport[A <: PermissionsTarget] extends GrantRoleCommandState[A] with PermissionsServiceComponent with SecurityServiceComponent with UserLookupComponent {
 		val permissionsService = mock[PermissionsService]
 		val securityService = mock[SecurityService]
+		val userLookup = new MockUserLookup()
 	}
 
 	// a role with a single permission to keep things simple
@@ -41,36 +42,48 @@ class GrantRoleCommandTest extends TestBase with Mockito {
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
 
+		command.userLookup.registerUsers("cuscav", "cusebr")
+
 		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns (None)
 				
-		val grantedPerm = command.applyInternal()
-		grantedPerm.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
-		grantedPerm.users.size should be (2)
-		grantedPerm.users.knownType.includesUserId("cuscav") should be (true)
-		grantedPerm.users.knownType.includesUserId("cusebr") should be (true)
-		grantedPerm.users.knownType.includesUserId("cuscao") should be (false)
-		grantedPerm.scope should be (department)
+		val grantedRole = command.applyInternal()
+		grantedRole.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
+		grantedRole.users.size should be (2)
+		grantedRole.users.knownType.includesUserId("cuscav") should be (true)
+		grantedRole.users.knownType.includesUserId("cusebr") should be (true)
+		grantedRole.users.knownType.includesUserId("cuscao") should be (false)
+		grantedRole.scope should be (department)
+
+		there was one (command.permissionsService).saveOrUpdate(any[GrantedRole[Department]])
+		there was one (command.permissionsService).clearCachesForUser(("cuscav", classTag[Department]))
+		there was one (command.permissionsService).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
 	
 	@Test def itWorksWithExisting { new Fixture {
 		command.roleDefinition = DepartmentalAdministratorRoleDefinition
 		command.usercodes.add("cuscav")
 		command.usercodes.add("cusebr")
+
+		command.userLookup.registerUsers("cuscav", "cusebr")
 		
 		val existing = GrantedRole(department, DepartmentalAdministratorRoleDefinition)
 		existing.users.knownType.addUserId("cuscao")
 
 		command.permissionsService.getGrantedRole(department, DepartmentalAdministratorRoleDefinition) returns (Some(existing))
 				
-		val grantedPerm = command.applyInternal()
-		(grantedPerm.eq(existing)) should be (true)
+		val grantedRole = command.applyInternal()
+		(grantedRole.eq(existing)) should be (true)
 		
-		grantedPerm.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
-		grantedPerm.users.size should be (3)
-		grantedPerm.users.knownType.includesUserId("cuscav") should be (true)
-		grantedPerm.users.knownType.includesUserId("cusebr") should be (true)
-		grantedPerm.users.knownType.includesUserId("cuscao") should be (true)
-		grantedPerm.scope should be (department)
+		grantedRole.roleDefinition should be (DepartmentalAdministratorRoleDefinition)
+		grantedRole.users.size should be (3)
+		grantedRole.users.knownType.includesUserId("cuscav") should be (true)
+		grantedRole.users.knownType.includesUserId("cusebr") should be (true)
+		grantedRole.users.knownType.includesUserId("cuscao") should be (true)
+		grantedRole.scope should be (department)
+
+		there was one (command.permissionsService).saveOrUpdate(existing)
+		there was one (command.permissionsService).clearCachesForUser(("cuscav", classTag[Department]))
+		there was one (command.permissionsService).clearCachesForUser(("cusebr", classTag[Department]))
 	}}
 	
 	@Test def validatePasses { withUser("cuscav", "0672089") { new Fixture {

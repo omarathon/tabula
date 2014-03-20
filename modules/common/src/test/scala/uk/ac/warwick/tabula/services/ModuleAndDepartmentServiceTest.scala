@@ -36,11 +36,12 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 		val permsDao = new PermissionsDaoImpl
 		permsDao.sessionFactory = sessionFactory
 
-		val permissionsService = new AbstractPermissionsService with PermissionsDaoComponent with PermissionsServiceCaches with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache with CacheStrategyComponent with QueueListener with InitializingBean with Logging {
+		val permissionsService = new AbstractPermissionsService with PermissionsDaoComponent with PermissionsServiceCaches with GrantedRolesForUserCache with GrantedRolesForGroupCache with GrantedPermissionsForUserCache with GrantedPermissionsForGroupCache with CacheStrategyComponent with QueueListener with InitializingBean with Logging with UserLookupComponent {
 			var permissionsDao:PermissionsDao = permsDao
 			val rolesByIdCache:GrantedRoleByIdCache = new GrantedRoleByIdCache(permsDao)
 			val permissionsByIdCache = new GrantedPermissionsByIdCache(permsDao)
 			val cacheStrategy = CacheStrategy.InMemoryOnly
+			val userLookup = userLookupService
 		}
 		permissionsService.queue = mock[Queue]
 		permissionsService.groupService = userLookupService.getGroupService()
@@ -101,8 +102,15 @@ class ModuleAndDepartmentServiceTest extends PersistenceTestBase with Mockito {
 		service.getRouteByCode("wibble") should be (None)
 		service.getRouteById("wibble") should be (None)
 		
-		withUser("cusebr") { service.departmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set(cs)) }
-		withUser("cuscav") { 
+		withUser("cusebr") {
+			userLookupService.registerUserObjects(currentUser.apparentUser)
+
+			service.departmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set(cs))
+		}
+
+		withUser("cuscav") {
+			userLookupService.registerUserObjects(currentUser.apparentUser)
+
 			service.departmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set())
 			service.modulesInDepartmentsWithPermission(currentUser, Permissions.Module.ManageAssignments) should be (Set())
 			service.modulesInDepartmentWithPermission(currentUser, Permissions.Module.ManageAssignments, cs) should be (Set())
