@@ -85,10 +85,6 @@ TODO grab values from the Routes object in code, as that's pretty equivalent and
 </#compress></#macro>
 <#macro timetable_ical_regenerate><@_u page="/timetable/regeneratehash" /></#macro>
 
-<#macro mrm studentCourseDetails studentCourseYearDetails>
-	<@url context="https://warwick.ac.uk/mrm" page="/student/student.htm?sprCode=${((studentCourseDetails.sprCode)!)?url}&acYear=${((studentCourseYearDetails.academicYear.toString)!)?url}" />
-</#macro>
-
 <#macro mrm_link studentCourseDetails studentCourseYearDetails>
 	<a href="https://mrm.warwick.ac.uk/mrm/student/student.htm?sprCode=${((studentCourseDetails.sprCode)!)?url}&acYear=${((studentCourseYearDetails.academicYear.toString)!)?url}">
 </#macro>
