@@ -44,7 +44,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	@JoinColumn(name="scjCode", referencedColumnName="scjCode")
 	var studentCourseDetails: StudentCourseDetails = _
 
-	def toStringProps = Seq("studentCourseDetails" -> studentCourseDetails)
+	def toStringProps = Seq("studentCourseDetails" -> studentCourseDetails, "sceSequenceNumber" -> sceSequenceNumber, "academicYear" -> academicYear)
 
 	def permissionsParents = Option(studentCourseDetails).toStream
 
@@ -52,7 +52,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	 * This is used to calculate StudentCourseDetails.latestStudentCourseYearDetails
 	 */
 	def compare(that:StudentCourseYearDetails): Int = {
-		if (this.studentCourseDetails != that.studentCourseDetails) {
+		if (this.studentCourseDetails.scjCode != that.studentCourseDetails.scjCode) {
 			this.studentCourseDetails.compare(that.studentCourseDetails)
 		}
 		else {
@@ -61,7 +61,7 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	}
 
 	def equals(that: StudentCourseYearDetails) = {
-		(this.studentCourseDetails == that.studentCourseDetails) && (this.sceSequenceNumber == that.sceSequenceNumber)
+		(this.studentCourseDetails.scjCode == that.studentCourseDetails.scjCode) && (this.sceSequenceNumber == that.sceSequenceNumber)
 	}
 
 	def isFresh = (missingFromImportSince == null)
