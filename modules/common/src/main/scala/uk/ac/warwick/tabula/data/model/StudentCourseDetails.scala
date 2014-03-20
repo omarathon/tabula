@@ -15,7 +15,6 @@ import javax.persistence.Entity
 import javax.persistence.CascadeType
 import scala.collection.JavaConverters._
 import uk.ac.warwick.tabula.data.convert.ConvertibleConverter
-import scala.collection.SortedSet
 
 object StudentCourseDetails {
 	final val FreshCourseDetailsOnlyFilter = "freshStudentCourseDetailsOnly"
