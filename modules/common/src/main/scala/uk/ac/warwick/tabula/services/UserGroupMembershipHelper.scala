@@ -18,9 +18,9 @@ import org.hibernate.criterion.Projections
 import uk.ac.warwick.tabula.helpers.Logging
 import uk.ac.warwick.tabula.ScalaFactoryBean
 import org.joda.time.Days
-import uk.ac.warwick.util.cache.Caches.CacheStrategy
 import org.springframework.util.Assert
 import org.apache.commons.lang3.builder.{EqualsBuilder, HashCodeBuilder, ToStringStyle, ToStringBuilder}
+import uk.ac.warwick.tabula.services.permissions.AutowiringCacheStrategyComponent
 
 trait UserGroupMembershipHelperMethods[A <: StringId with Serializable] {
 	def findBy(user: User): Seq[A]
@@ -170,7 +170,7 @@ class UserGroupMembershipCacheFactory(val runtimeClass: Class[_], val path: Stri
 	def shouldBeCached(value: Array[String]) = true
 }
 
-class UserGroupMembershipCacheBean extends ScalaFactoryBean[Cache[String, Array[String]]] {
+class UserGroupMembershipCacheBean extends ScalaFactoryBean[Cache[String, Array[String]]] with AutowiringCacheStrategyComponent {
 	@BeanProperty var runtimeClass: Class[_ <: StringId with Serializable] = _
 	@BeanProperty var path: String = _
 	@BeanProperty var checkUniversityIds = true
@@ -178,7 +178,7 @@ class UserGroupMembershipCacheBean extends ScalaFactoryBean[Cache[String, Array[
 	def cacheName = runtimeClass.getSimpleName + "-" + path.replace(".","-")
 
 	def createInstance = {
-		Caches.newCache(cacheName, new UserGroupMembershipCacheFactory(runtimeClass, path, checkUniversityIds), Days.ONE.toStandardSeconds.getSeconds, CacheStrategy.EhCacheIfAvailable)
+		Caches.newCache(cacheName, new UserGroupMembershipCacheFactory(runtimeClass, path, checkUniversityIds), Days.ONE.toStandardSeconds.getSeconds, cacheStrategy)
 	}
 
 	override def afterPropertiesSet() {

@@ -450,6 +450,8 @@
         <!-- The new Properties -->
         <util:properties>
             <prop key="warwick.ehcache.config">/ehcache-config.xml</prop>
+			<prop key="warwick.memcached.config">/memcached.properties</prop>
+			<prop key="ssoclient.cache.strategy">${tabula.cacheStrategy}</prop>
         </util:properties>
     </property>
 	</bean>

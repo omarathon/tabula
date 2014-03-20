@@ -2,6 +2,12 @@
 <#assign f = JspTaglibs["/WEB-INF/tld/spring-form.tld"]>
 <#assign extension = command.extension />
 
+<#assign feedbackNotice>
+	<#if extension.approved>
+		<br>Feedback for this student is currently due <@fmt.date date=extension.feedbackDeadline capitalise=false at=true />.
+	</#if>
+</#assign>
+
 <#escape x as x?html>
 	<div class="content extension-detail">
 		<@f.form method="post" enctype="multipart/form-data" action="${url('/coursework/admin/module/${module.code}/assignments/${assignment.id}/extensions/detail/${universityId}')}" commandName="modifyExtensionCommand" cssClass="form-horizontal double-submit-protection">
@@ -13,11 +19,17 @@
 				<h5><i class="icon icon-question icon-large"></i> Requested <@fmt.date date=extension.requestedExpiryDate capitalise=false at=true/>&ensp;
 				<span class="muted">${durationFormatter(assignment.closeDate, extension.requestedExpiryDate)} after the set deadline</span></h5>
 				<#if extension.approved>
-					<p><b>This is a revised request from the student.</b>
+					<p>
+						<b>This is a revised request from the student.</b>
 						There is already an extension approved until <@fmt.date date=extension.expiryDate capitalise=false at=true/>
-						(${durationFormatter(assignment.closeDate, extension.expiryDate)} after the set deadline).</p>
+						(${durationFormatter(assignment.closeDate, extension.expiryDate)} after the set deadline).
+						<#noescape>${feedbackNotice}</#noescape>
+					</p>
+					<p class="alert alert-info"><i class="icon-lightbulb"></i> To retain the existing extension, choose <i>Update</i> below,
+					leaving a comment for the student if you wish.<br><i>Reject</i> will remove the existing extension as well.</p>
 				<#elseif extension.rejected>
-					<p><b>This is a revised request from the student.</b> An earlier request was rejected <@fmt.date date=extension.reviewedOn capitalise=false includeTime=false />.</p>
+					<p><b>This is a revised request from the student.</b> An earlier request was rejected
+					<@fmt.date date=extension.reviewedOn capitalise=false includeTime=false />.</p>
 				</#if>
 			<#elseif extension.initiatedByStudent>
 				<#if extension.approved>
@@ -26,8 +38,13 @@
 				<#elseif extension.rejected>
 					<h5><i class="icon icon-exclamation icon-large"></i> Rejected <@fmt.date date=extension.reviewedOn capitalise=false includeTime=false /></h5>
 				</#if>
-				The extension was requested for <@fmt.date date=extension.requestedExpiryDate capitalise=false at=true />
-				(${durationFormatter(assignment.closeDate, extension.requestedExpiryDate)} after the set deadline).</p>
+				<p>
+					The extension was requested for <@fmt.date date=extension.requestedExpiryDate capitalise=false at=true />
+					(${durationFormatter(assignment.closeDate, extension.requestedExpiryDate)} after the set deadline).
+					<#noescape>${feedbackNotice}</#noescape>
+				</p>
+			<#elseif extension.approved>
+				<p><#noescape>${feedbackNotice}</#noescape></p>
 			</#if>
 
 			<#if features.disabilityRenderingInExtensions && extension.disabilityAdjustment && student?? && student.disability.reportable && can.do("Profiles.Read.Disability", student)>
@@ -103,7 +120,7 @@
 				<@form.label path="reviewerComments">Comments</@form.label>
 				<div class="controls">
 					<@f.textarea path="reviewerComments" cssClass="span7" rows="6" />
-					<div class="muted">These comments will be saved and sent to the student</div>
+					<div class="muted">Any comments will be saved and sent to the student</div>
 				</div>
 			</div>
 

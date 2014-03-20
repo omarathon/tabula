@@ -84,7 +84,7 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 	}
 
 
-	"Department admin" should "be warned when disallowing extensions with pending requests" in {
+	"Department admin" should "be warned when disallowing extensions with requests awaiting review" in {
 		val assignmentName = "Assignment should warn before disallowing extensions"
 		withAssignment("xxx102", assignmentName) { assignmentId =>
 			Given("I have set up an unapproved extension")
@@ -102,7 +102,7 @@ class CourseworkAssignmentManagementTest extends BrowserTest with CourseworkFixt
 			}
 
 			And("It should show an appropriate warning")
-			modal.get.text should include ("1 extension request is pending for this assignment. If you turn off extensions, all pending extension requests will be rejected.")
+			modal.get.text should include ("1 extension request is awaiting review for this assignment. If you turn off extensions, all extension requests awaiting review will be rejected.")
 
 			And("It should return to the form if cancelled")
 			click on cssSelector(".cancel.confirmModal")
