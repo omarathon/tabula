@@ -84,7 +84,7 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 				assessmentGroup = "A",
 				selectionStatusCode = "C",
 				occurrence = "A",
-				academicYear="13/14"
+				academicYear = AcademicYear.guessByDate(DateTime.now).toString
 			)
 
 			new ImportModuleRegistrationsCommand(row)

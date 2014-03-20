@@ -52,8 +52,8 @@ class StudentCourseYearDetails extends StudentCourseYearProperties
 	 * This is used to calculate StudentCourseDetails.latestStudentCourseYearDetails
 	 */
 	def compare(that:StudentCourseYearDetails): Int = {
-		if (this.academicYear != that.academicYear) {
-			this.academicYear.compare(that.academicYear)
+		if (this.studentCourseDetails != that.studentCourseDetails) {
+			this.studentCourseDetails.compare(that.studentCourseDetails)
 		}
 		else {
 			this.sceSequenceNumber - that.sceSequenceNumber

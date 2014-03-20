@@ -1,8 +1,7 @@
 <section id="module-registrations" class="clearfix">
 	<div class="pull-right">
-		<a href="https://mrm.warwick.ac.uk/mrm/student/student.htm?sprCode=${((studentCourseDetails.sprCode)!)?url}&acYear=${((studentCourseYearDetails.academicYear.toString)!)?url}" target="_blank">
-			View in MRM<img class="targetBlank" alt="" title="Link opens in a new window" src="/static/images/shim.gif">
-		</a>
+		<@routes.mrm_link studentCourseDetails studentCourseYearDetails />
+		View in MRM<img class="targetBlank" alt="" title="Link opens in a new window" src="/static/images/shim.gif"/> </a>
 	</div>
 	
 	<h4>Module Registrations for ${(studentCourseYearDetails.academicYear.toString)!}</h4>

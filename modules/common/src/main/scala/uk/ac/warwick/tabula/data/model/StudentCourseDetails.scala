@@ -58,7 +58,7 @@ class StudentCourseDetails
 	@BatchSize(size=200)
 	private val studentCourseYearDetails: JSet[StudentCourseYearDetails] = JHashSet()
 
-	def freshStudentCourseYearDetails = studentCourseYearDetails.asScala.filter(scyd => scyd.isFresh).to[SortedSet]
+	def freshStudentCourseYearDetails = studentCourseYearDetails.asScala.filter(scyd => scyd.isFresh).toSeq.sorted
 	def freshOrStaleStudentCourseYearDetails = studentCourseYearDetails.asScala
 
 	@OneToMany(mappedBy = "studentCourseDetails", fetch = FetchType.LAZY, cascade = Array(CascadeType.ALL), orphanRemoval = true)

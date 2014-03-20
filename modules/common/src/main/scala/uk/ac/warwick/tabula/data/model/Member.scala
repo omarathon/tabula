@@ -26,14 +26,12 @@ import org.hibernate.annotations.FilterDefs
 import org.hibernate.annotations.Filters
 import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.ForeignKey
-import org.hibernate.annotations.Formula
 import org.hibernate.annotations.Type
 import org.hibernate.annotations.FilterDef
 import org.hibernate.annotations.Filter
 import uk.ac.warwick.tabula.permissions._
 import uk.ac.warwick.tabula.system.permissions.PermissionsChecking
 import uk.ac.warwick.tabula.data.model.groups.SmallGroup
-import scala.collection.SortedSet
 
 object Member {
 	final val StudentsOnlyFilter = "studentsOnly"
@@ -229,7 +227,7 @@ class StudentMember extends Member with StudentProperties {
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
 	def freshStudentCourseDetails = {
-		studentCourseDetails.asScala.filter(scd => scd.isFresh).to[SortedSet]
+		studentCourseDetails.asScala.filter(scd => scd.isFresh).toSeq.sorted
 	}
 
 	@Restricted(Array("Profiles.Read.StudentCourseDetails.Core"))
