@@ -2,11 +2,13 @@ package uk.ac.warwick.tabula.home.web.controllers.sysadmin
 
 import org.springframework.stereotype.Controller
 import uk.ac.warwick.tabula.data.Daoisms
-import org.springframework.web.bind.annotation.{RequestParam, RequestMapping}
+import org.springframework.web.bind.annotation.{ModelAttribute, RequestParam}
 import uk.ac.warwick.tabula.web.views.JSONView
 import uk.ac.warwick.spring.Wire
 import uk.ac.warwick.util.queue.Queue
 import uk.ac.warwick.tabula.services._
+import uk.ac.warwick.util.cache.memcached.MemcachedCacheStore
+import scala.collection.JavaConverters._
 
 /**
  * Control the Hibernate SessionFactory's statistics object to log out various
@@ -37,6 +39,24 @@ class InternalStatisticsController extends BaseSysadminController with Daoisms {
 	@RequestMapping(value=Array("/sysadmin/statistics/hibernate/clearAsync.json"), method=Array(POST))
 	def clearHibernateStatistics() = {
 		queue.send(HibernateStatisticsMessage("clear"))
+		new JSONView(Map("cleared" -> true))
+	}
+
+	@ModelAttribute("memcachedStatistics")
+	def memcachedStats = {
+		MemcachedCacheStore.getDefaultMemcachedClient
+			.getStats
+			.asScala
+			.map { case (_, stats) => stats }
+			.head
+			.asScala
+			.toSeq
+			.sorted
+	}
+
+	@RequestMapping(value=Array("/sysadmin/statistics/memcached/clearAsync.json"), method=Array(POST))
+	def clearMemcached() = {
+		MemcachedCacheStore.getDefaultMemcachedClient.flush().get()
 		new JSONView(Map("cleared" -> true))
 	}
 
