@@ -79,14 +79,11 @@ class ModuleAndDepartmentService extends Logging {
 	// We may have a granted role that's overridden later, so we also need to do a security service check as well
 	// as getting the role itself
 
-	def departmentsWithPermission(user: CurrentUser, permission: Permission): Set[Department] = {
-		println(permissionsService.getAllPermissionDefinitionsFor[Department](user, permission))
-
+	def departmentsWithPermission(user: CurrentUser, permission: Permission): Set[Department] =
 		permissionsService.getAllPermissionDefinitionsFor[Department](user, permission)
 			.filter {
 				department => securityService.can(user, permission, department)
 			}
-	}
 
 	def modulesWithPermission(user: CurrentUser, permission: Permission): Set[Module] =
 		permissionsService.getAllPermissionDefinitionsFor[Module](user, permission)
