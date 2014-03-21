@@ -21,6 +21,7 @@ class FileServer {
 
 		if (request.getMethod.toUpperCase != "HEAD") {
 			if (file.file.isDefined && features.xSendfile) {
+				println(file.file.get.getPath)
 				out.addHeader("X-Sendfile", file.file.get.getAbsolutePath)
 			} else {
 				file.contentLength.foreach { length => out.addHeader("Content-Length", length.toString) }

@@ -395,6 +395,7 @@
 			</bean>
 		</constructor-arg>
 		<constructor-arg value="${filesystem.resizer.dir}" />
+		<constructor-arg value="_" /> <!-- Don't use @ because X-Sendfile on Solaris doesn't work -->
 	</bean>
 
 	<!-- ActiveMQ -->
