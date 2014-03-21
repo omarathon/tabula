@@ -29,13 +29,13 @@ class DownloadFeedbackController extends CourseworkController {
 
 	@Autowired var fileServer: FileServer = _
 
-	@RequestMapping(value = Array("/all/feedback.zip"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	@RequestMapping(value = Array("/all/feedback.zip"))
 	def getAll(command: DownloadFeedbackCommand, user: CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		command.filename = null
 		getOne(command, user)
 	}
 
-	@RequestMapping(value = Array("/get/{filename}"), method = Array(RequestMethod.GET, RequestMethod.HEAD))
+	@RequestMapping(value = Array("/get/{filename}"))
 	def getOne(command: DownloadFeedbackCommand, user: CurrentUser)(implicit request: HttpServletRequest, response: HttpServletResponse): Unit = {
 		// specify callback so that audit logging happens around file serving
 		command.callback = { (renderable) => fileServer.serve(renderable) }
