@@ -180,10 +180,11 @@
 				<#if (features.submissions && assignment.collectSubmissions) || has_feedback>
 					<div class="submission-and-feedback-count">
 						<i class="icon-file"></i>
-						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />" title="View all submissions and feedback" class="use-tooltip">
+						<a href="<@routes.assignmentsubmissionsandfeedback assignment=assignment />">
+							<span class="use-tooltip" title="View all submissions and feedback">
 							<@fmt.p assignment.submissions?size "submission" /><#--
 							--><#if has_feedback> and ${assignment.countFullFeedback} item<#if assignment.countFullFeedback gt 1>s</#if> of feedback</#if><#--
-						--></a>
+						--></span></a>
 
 						<#assign numUnapprovedExtensions = assignment.countUnapprovedExtensions />
 						<#if numUnapprovedExtensions gt 0>
