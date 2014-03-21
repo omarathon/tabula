@@ -26,7 +26,7 @@ Obtain the datasource files for the app and ADS, and place in the deploy directo
 
 You will need to get this configuration added to Web Sign-on for SSO to work.
 
-Set up an Apache vhost referencing the include files in `config/servers/common/vhosts` - 
+Set up an Apache vhost referencing the include files in `config/servers/common/vhosts` -
 use `rewrites.inc` for full Tabula development.
 
 You need an HTTPS vhost for SSO so if you're only going to set up one vhost,
@@ -51,10 +51,12 @@ Some other useful Maven commands:
 - `mvn -DskipTests` - skip tests during deploy (Maven will run tests by default)
 - `mvn -DskipTests -Dmaven.test.skip=true` - also skip test compilation
 - `mvn --projects modules/coursework --also-make` - work on a single module, but make module dependencies like common
-- `mvn -Pdeploy --projects modules/attendance --also-make -DskipTests` - Deploy a single module 
+- `mvn -Pdeploy --projects modules/attendance --also-make -DskipTests` - Deploy a single module
     (Remember JBoss will still deploy old wars unless you delete them!)
 - `mvn test -Dsurefire.useFile=false` - run tests, showing stack trace of failures in the console
 - `mvn test -Dtest=uk.ac.warwick.tabula.coursework.ApplicationTest` - run a specific test
+- `mvn -Pfunctional-test --projects modules/functional-test clean test` - run functional tests (start JBoss instance first)
+- `mvn -Pfunctional-test --projects modules/functional-test clean test -Dtest=CourseworkModuleManagerTest` - run a specific functional test
 - `mvn -Pdev-deploy-views` - syncs the latest Freemarker templates into the deployed app - no need to redeploy
 - `mvn -Pdev-deploy-static` - syncs the latest static content, including compiled assets like LessCSS
 - `mvn scala:cc` - continuously compile sources as they are saved in your IDE
@@ -73,7 +75,7 @@ Directory structure
 - `modules` - Tabula modules
   - `(modulename)`
     - `src`
-      - `main` 
+      - `main`
         - `scala` - Scala source files
         - `java` - Java source files
         - `resources` - non-code files that will be available in the app classpath
@@ -91,8 +93,8 @@ This tells the build to do certain stuff.
 Maven overlays
 ---------
 
-In a module, Maven will overlay resources from other modules when it builds the WAR. In an overlay, 
-files that exist aren't overwritten, so you can define a file with the same name to override behaviour 
+In a module, Maven will overlay resources from other modules when it builds the WAR. In an overlay,
+files that exist aren't overwritten, so you can define a file with the same name to override behaviour
 that would be defined in the overlay.
 
 - `common/.../WEB-INF` -> `WEB-INF` - default `applicationContext.xml` and some includes that can be overridden
@@ -107,27 +109,27 @@ migrate dev first to get it working, and then update test and production _at the
 don't do these at the same time then you run the risk of everything apparently working fine on test
 until you deploy to live, which then explodes.
 
-It is also best to do these before or soon after you've pushed the new code onto the central develop branch, 
+It is also best to do these before or soon after you've pushed the new code onto the central develop branch,
 so that a deploy to tabula-test won't cause explosions.
 
 Code style
 ----------
 
-The code style for the project has developed as we've worked on it and so there are some bits of code that are in a style 
+The code style for the project has developed as we've worked on it and so there are some bits of code that are in a style
 that we later decided was not great. We should decide how to do certain things and fix the old code. It's possible that for
-plain Scala style we can just delegate to http://docs.scala-lang.org/style/ but we also have things in our app that are best 
+plain Scala style we can just delegate to http://docs.scala-lang.org/style/ but we also have things in our app that are best
 used in a certain way, or Spring offers multiple ways of doing something and we want to document the one we've settled on.
 
-- Should always use dots to call methods (e.g. `command.validate(errors)` rather than `command validate errors`) unless it's 
+- Should always use dots to call methods (e.g. `command.validate(errors)` rather than `command validate errors`) unless it's
   a DSL (specific example being the test framework where you can write `assignment.name should be ("Jim")`)
-  
+
 - Methods that have a side-effect should have parentheses. No-paren methods should only be for getters. So `form.onBind()`, not `form.onBind`.
 
 - Preferred method of doing a foreach loop is `for (foo <- fooList)`
 
 - A `map` operation should always use `map` instead of `for (item <- seq) yield item.mappedValue`; for-comprehensions should
-  only be used where there are multiple generators 
-  
+  only be used where there are multiple generators
+
 - Some controllers don't have "Controller" at the end of their name but that turned out to be confusing, so they should all end with Controller.
 
 ### Validation
@@ -140,4 +142,4 @@ used in a certain way, or Spring offers multiple ways of doing something and we 
 
 ### Running code on bind (pre-validation)
 
-- Mixin `BindListener` on your command instead of calling `onBind` from a controller  
+- Mixin `BindListener` on your command instead of calling `onBind` from a controller
