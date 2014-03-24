@@ -57,7 +57,7 @@ abstract class AgentPointRecordCommand(
 					monitoringPointService.deleteCheckpoint(student, point)
 					None
 				} else {
-					Option(monitoringPointService.saveOrUpdateCheckpoint(student, point, state, agent))
+					Option(monitoringPointService.saveOrUpdateCheckpointByMember(student, point, state, agent))
 				}
 			}
 		}.toSeq

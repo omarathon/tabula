@@ -61,7 +61,7 @@ abstract class SetMonitoringCheckpointCommand(val department: Department, val te
 					monitoringPointService.deleteCheckpoint(student, point)
 					None
 				} else {
-					Option(monitoringPointService.saveOrUpdateCheckpoint(student, point, state, user))
+					Option(monitoringPointService.saveOrUpdateCheckpointByUser(student, point, state, user))
 				}
 			}
 		}.toSeq

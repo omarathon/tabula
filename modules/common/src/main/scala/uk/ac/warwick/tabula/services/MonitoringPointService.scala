@@ -25,7 +25,6 @@ trait MonitoringPointService {
 	def delete(monitoringPoint : MonitoringPoint)
 	def saveOrUpdate(monitoringPoint : MonitoringPointTemplate)
 	def delete(monitoringPoint : MonitoringPointTemplate)
-	def saveOrUpdate(monitoringCheckpoint: MonitoringCheckpoint)
 	def saveOrUpdate(set: MonitoringPointSet)
 	def saveOrUpdate(template: MonitoringPointSetTemplate)
 	def saveOrUpdate(report : MonitoringPointReport)
@@ -44,17 +43,26 @@ trait MonitoringPointService {
 	def countCheckpointsForPoint(point: MonitoringPoint): Int
 	def getCheckpoints(members: Seq[StudentMember], set: MonitoringPointSet): Map[StudentMember, Map[MonitoringPoint, Option[MonitoringCheckpoint]]]
 	def deleteCheckpoint(student: StudentMember, point: MonitoringPoint): Unit
-	def saveOrUpdateCheckpoint(
+	def saveOrUpdateCheckpointByUser(
 		student: StudentMember,
 		point: MonitoringPoint,
 		state: AttendanceState,
-		user: CurrentUser
+		user: CurrentUser,
+		autocreated: Boolean = false
 	) : MonitoringCheckpoint
-	def saveOrUpdateCheckpoint(
+	def saveOrUpdateCheckpointByMember(
 		student: StudentMember,
 		point: MonitoringPoint,
 		state: AttendanceState,
-		member: Member
+		member: Member,
+		autocreated: Boolean = false
+	) : MonitoringCheckpoint
+	def saveOrUpdateCheckpointByUsercode(
+		student: StudentMember,
+		point: MonitoringPoint,
+		state: AttendanceState,
+		usercode: String,
+		autocreated: Boolean = false
 	) : MonitoringCheckpoint
 	def getPointSetForStudent(student: StudentMember, academicYear: AcademicYear): Option[MonitoringPointSet]
 	def findPointSetsForStudents(students: Seq[StudentMember], academicYear: AcademicYear): Seq[MonitoringPointSet]
@@ -138,35 +146,49 @@ abstract class AbstractMonitoringPointService extends MonitoringPointService {
 		}
 	}
 
-	def saveOrUpdateCheckpoint(
+	def saveOrUpdateCheckpointByUser(
 		student: StudentMember,
 		point: MonitoringPoint,
 		state: AttendanceState,
-		user: CurrentUser
-	) : MonitoringCheckpoint = saveOrUpdateCheckpointForUser(student, point, state, user.apparentId)
+		user: CurrentUser,
+		autocreated: Boolean = false
+	) : MonitoringCheckpoint = saveOrUpdateCheckpointByUsercode(student, point, state, user.apparentId, autocreated)
 
-	def saveOrUpdateCheckpoint(
+	def saveOrUpdateCheckpointByMember(
 		student: StudentMember,
 		point: MonitoringPoint,
 		state: AttendanceState,
-		member: Member
+		member: Member,
+		autocreated: Boolean = false
 	) : MonitoringCheckpoint =
-		saveOrUpdateCheckpointForUser(student, point, state, member.userId)
+		saveOrUpdateCheckpointByUsercode(student, point, state, member.userId, autocreated)
 
-	private def saveOrUpdateCheckpointForUser(student: StudentMember,
-		point: MonitoringPoint,	state: AttendanceState,	usercode: String
+	def saveOrUpdateCheckpointByUsercode(
+		student: StudentMember,
+		point: MonitoringPoint,
+		state: AttendanceState,
+		usercode: String,
+		autocreated: Boolean
 	) : MonitoringCheckpoint = {
 		val checkpoint = monitoringPointDao.getCheckpoint(point, student).getOrElse({
 			val newCheckpoint = new MonitoringCheckpoint
 			newCheckpoint.point = point
 			newCheckpoint.student = student
+			newCheckpoint.updatedBy = usercode
+			newCheckpoint.updatedDate = DateTime.now
+			newCheckpoint.state = state
+			newCheckpoint.autoCreated = autocreated
+			monitoringPointDao.saveOrUpdate(newCheckpoint)
 			newCheckpoint
 		})
-		checkpoint.state = state
-		checkpoint.updatedBy = usercode
-		checkpoint.updatedDate = DateTime.now
-		checkpoint.autoCreated = false
-		monitoringPointDao.saveOrUpdate(checkpoint)
+		// TAB-2087
+		if (checkpoint.state != state) {
+			checkpoint.updatedBy = usercode
+			checkpoint.updatedDate = DateTime.now
+			checkpoint.state = state
+			monitoringPointDao.saveOrUpdate(checkpoint)
+		}
+
 		checkpoint
 	}
 
@@ -436,12 +458,10 @@ abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPoin
 						val relevantPoints = getRelevantPoints(pointSet.points.asScala, attendance, studentMember)
 						val checkpoints = relevantPoints.filter(point => checkQuantity(point, attendance, studentMember)).map(point => {
 							val checkpoint = new MonitoringCheckpoint
-							checkpoint.autoCreated = true
 							checkpoint.point = point
 							checkpoint.monitoringPointService = monitoringPointService
 							checkpoint.student = studentMember
 							checkpoint.updatedBy = attendance.updatedBy
-							checkpoint.updatedDate = DateTime.now
 							checkpoint.state = AttendanceState.Attended
 							checkpoint
 						})
@@ -454,8 +474,7 @@ abstract class AbstractMonitoringPointGroupProfileService extends MonitoringPoin
 
 	def updateCheckpointsForAttendance(attendances: Seq[SmallGroupEventAttendance]): Seq[MonitoringCheckpoint] = {
 		getCheckpointsForAttendance(attendances).map(checkpoint => {
-			monitoringPointService.saveOrUpdate(checkpoint)
-			checkpoint
+			monitoringPointService.saveOrUpdateCheckpointByUsercode(checkpoint.student, checkpoint.point, checkpoint.state, checkpoint.updatedBy, autocreated = true)
 		})
 	}
 
@@ -556,8 +575,7 @@ abstract class AbstractMonitoringPointProfileTermAssignmentService extends Monit
 
 	def updateCheckpointsForSubmission(submission: Submission): Seq[MonitoringCheckpoint] = {
 		getCheckpointsForSubmission(submission).map(checkpoint => {
-			monitoringPointService.saveOrUpdate(checkpoint)
-			checkpoint
+			monitoringPointService.saveOrUpdateCheckpointByUsercode(checkpoint.student, checkpoint.point, checkpoint.state, checkpoint.updatedBy, autocreated = true)
 		})
 	}
 
