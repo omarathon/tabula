@@ -29,9 +29,9 @@
 							<a href="<@admin_href activity.entity />"><b>${activity.title}</b> by ${activity.agent.warwickId}</a>
 		
 							<#if activity.entity.late>
-								<span class="label label-important" title="<@sd.lateness submission />" data-container="body">Late</span>
+								<span class="label label-important use-tooltip" title="<@sd.lateness submission />" data-container="body">Late</span>
 							<#elseif activity.entity.authorisedLate>
-								<span class="label label-info" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
+								<span class="label label-info use-tooltip" title="<@sd.lateness submission />" data-container="body">Within Extension</span>
 							</#if>
 							<#if activity.entity.suspectPlagiarised>
 								<span class="label label-warning">Suspect Plagiarised</span>
