@@ -57,6 +57,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 	@Test
 	def firstMarkerFinished() {
 		withUser("cuslaj") {
+
 			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
 			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, isFirstMarker)
 			command.stateService = stateService
@@ -73,10 +74,13 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		}
 	}
 
+
+
 	@Test
 	def secondMarkerFinished(){
 		inContext[MarkingCompletedTest.Ctx] {
 		withUser("cuday"){
+
 			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
 			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, isFirstMarker)
 			command.stateService = stateService
@@ -86,14 +90,53 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			command.preSubmitValidation()
 			command.noFeedback.size should be (2)
 			command.noMarks.size should be (2)
+			setFirstMarkerFeedbackState(MarkingState.AwaitingSecondMarking)
 
 			command.applyInternal()
+
 			val secondFeedback = assignment.feedbacks.flatMap(f => Option(f.secondMarkerFeedback))
-			val releasedFeedback = secondFeedback.filter(_.state == MarkingState.MarkingCompleted)
-			releasedFeedback.size should be (2)
+			val completedSecondMarking = secondFeedback.filter(_.state == MarkingState.MarkingCompleted)
+			completedSecondMarking.size should be (2)
+
+			val firstFeedback = assignment.feedbacks.flatMap(f => Option(f.firstMarkerFeedback))
+			val completedFirstMarking = firstFeedback.filter(_.state == MarkingState.SecondMarkingComplete)
+			completedFirstMarking.size should be (2)
+
+			val finalFeedback = assignment.feedbacks.flatMap(f => Option(f.finalMarkerFeedback))
+			finalFeedback.size should be (2)
 		}
 		}
 	}
+
+
+	@Test
+	def finalMarkingComplete() {
+		withUser("cuslaj") {
+
+			val isFirstMarker = assignment.isFirstMarker(currentUser.apparentUser)
+			val command = MarkingCompletedCommand(assignment.module, assignment, currentUser.apparentUser, isFirstMarker)
+
+			assignment.feedbacks.map(addMarkerFeedback(_,FinalFeedback))
+			setFinalMarkerFeedbackState(MarkingState.InProgress)
+			setFirstMarkerFeedbackState(MarkingState.SecondMarkingComplete)
+
+			command.stateService = stateService
+			command.students = List("9876004", "0270954", "9170726")
+			command.onBind()
+
+			command.preSubmitValidation()
+			command.applyInternal()
+			command.noFeedback.size should be (3)
+			command.noMarks.size should be (3)
+
+			command.applyInternal()
+			val releasedFeedback = assignment.feedbacks.map(_.finalMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
+			releasedFeedback.size should be (3)
+		}
+
+
+	}
+
 
 	@Test
 	def notifiesEachAffectedUser() { new MarkingNotificationFixture {
@@ -139,5 +182,7 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 		notifications(1).entities should contain(mf2)
 
 	}}
+
+
 
 }

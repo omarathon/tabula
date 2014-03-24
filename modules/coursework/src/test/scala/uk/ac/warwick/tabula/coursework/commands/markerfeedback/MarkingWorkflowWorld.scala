@@ -18,7 +18,7 @@ trait MarkingWorkflowWorld extends TestFixtures {
 	generateSubmission(assignment, "0672089", "cuscav")
 	addFeedback(assignment)
 
-	val markingWorkflow = new SeenSecondMarkingLegacyWorkflow()
+	var markingWorkflow = new SeenSecondMarkingWorkflow()
 	markingWorkflow.department = assignment.module.department
 	markingWorkflow.firstMarkers = makeUserGroup("cuslaj", "cuscav")
 	markingWorkflow.secondMarkers = makeUserGroup("cuslat", "cuday")
@@ -31,17 +31,33 @@ trait MarkingWorkflowWorld extends TestFixtures {
 	assignment.markerMap.put("cuday", makeUserGroup("cusebr", "cuscav"))
 
 	def addFeedback(assignment:Assignment){
-		val feedback = assignment.submissions.map{s=>
+		val feedback = assignment.submissions.map{ s =>
 			val newFeedback = new Feedback
 			newFeedback.assignment = assignment
 			newFeedback.uploaderId = "cuslaj"
 			newFeedback.universityId = s.universityId
 			newFeedback.released = false
-			val fmFeedback = newFeedback.retrieveFirstMarkerFeedback
-			fmFeedback.state = MarkingState.ReleasedForMarking
+			addMarkerFeedback(newFeedback,FirstFeedback)
 			newFeedback
 		}
 		assignment.feedbacks = feedback
+	}
+
+	def setFirstMarkerFeedbackState(state: MarkingState) =
+		assignment.feedbacks.foreach( mf => mf.firstMarkerFeedback.state = state )
+
+	def setSecondMarkerFeedbackState(state: MarkingState) =
+		assignment.feedbacks.foreach( mf => mf.secondMarkerFeedback.state = state )
+
+	def setFinalMarkerFeedbackState(state: MarkingState) =
+		assignment.feedbacks.foreach( mf => mf.finalMarkerFeedback.state = state )
+
+	def addMarkerFeedback(feedback: Feedback, position: FeedbackPosition) = {
+		val mf = position match {
+			case (FinalFeedback) => feedback.retrieveFinalMarkerFeedback
+			case _ => feedback.retrieveFirstMarkerFeedback
+		}
+		mf.state = MarkingState.ReleasedForMarking
 	}
 
 
