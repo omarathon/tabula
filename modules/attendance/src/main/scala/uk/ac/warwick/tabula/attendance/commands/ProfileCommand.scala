@@ -10,7 +10,8 @@ import uk.ac.warwick.tabula.permissions.Permissions
 
 case class AttendanceProfileInformation(
 	pointsData: StudentPointsData,
-	missedCountByTerm: Map[String, Int]
+	missedCountByTerm: Map[String, Int],
+	nonReportedTerms: Seq[String]
 )
 
 object ProfileCommand {
@@ -40,7 +41,9 @@ abstract class ProfileCommand(val student: StudentMember, val academicYear: Acad
 			case (termName, count) => count > 0
 		}
 
-		AttendanceProfileInformation(pointsData, missedCountByTerm)
+		val nonReportedTerms = monitoringPointService.findNonReportedTerms(Seq(student), academicYear)
+
+		AttendanceProfileInformation(pointsData, missedCountByTerm, nonReportedTerms)
 	}
 }
 
