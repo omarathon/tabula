@@ -75,80 +75,66 @@
 
 	<!-- expandable course details -->
 
-	<div class="panel-group expandable-course-details col2">
-		<div class="panel panel-default">
-			<div class="panel-heading">
-				<p class="panel-title">
-					<i class="icon-chevron-right icon-fixed-width"></i>
-					<a data-toggle="collapse" data-parent=".expandable-course-details" href="#more-course-details">
-						More Details
-					</a>
-				</p>
-			</div>
-			<div id="more-course-details" class="panel-collapse collapse">
-				<div class="panel-body data clearfix col1">
-					<!-- extra course details -->
-					<div class="data clearfix">
-						<div class="col1">
-							<table class="profile-or-course-info">
-								<tbody>
-								<tr>
-									<th>Intended award</th>
-									<td>${(studentCourseDetails.award.name)!}</td>
-								</tr>
-								<tr>
-									<th>Length of course</th>
-									<td>
-									<#if studentCourseDetails.courseYearLength??>
-									${studentCourseDetails.courseYearLength} years
+	<div class="col2">
+		<details>
+			<summary class="collapsible large-chevron">
+				<span>More details</span>
+			</summary>
+			<table class="profile-or-course-info">
+				<tbody>
+				<tr>
+					<th>Intended award</th>
+					<td>${(studentCourseDetails.award.name)!}</td>
+				</tr>
+				<tr>
+					<th>Length of course</th>
+					<td>
+					<#if studentCourseDetails.courseYearLength??>
+					${studentCourseDetails.courseYearLength} years
+					</#if>
+					<#if studentCourseDetails.modeOfAttendance??>
+						<#if studentCourseYearDetails.modeOfAttendance.code != "F">
+							(full-time equivalent)
+						</#if>
+					</#if>
+					</td>
+				</tr>
+				<#if !isSelf>
+				<tr>
+					<th>Status on Course</th>
+					<td><@fmt.status_on_course studentCourseDetails />
+					</td>
+				</tr>
+				</#if>
+				<tr>
+					<th>Start date</th>
+					<td>
+					<#if studentCourseDetails.beginDate??>
+										<@fmt.date date=studentCourseDetails.beginDate includeTime=false />
 									</#if>
-									<#if studentCourseDetails.modeOfAttendance??>
-										<#if studentCourseYearDetails.modeOfAttendance.code != "F">
-											(full-time equivalent)
-										</#if>
-									</#if>
-									</td>
-								</tr>
-								<#if !isSelf>
-								<tr>
-									<th>Status on Course</th>
-									<td><@fmt.status_on_course studentCourseDetails />
-									</td>
-								</tr>
-								</#if>
-								<tr>
-									<th>Start date</th>
-									<td>
-										<#if studentCourseDetails.beginDate??>
-											<@fmt.date date=studentCourseDetails.beginDate includeTime=false />
-										</#if>
-									</td>
-								</tr>
-								<tr>
-									<#if studentCourseDetails.endDate??>
-										<th>End date</th>
-										<td><@fmt.date date=studentCourseDetails.endDate includeTime=false /></td>
-									<#else>
-										<th>Expected end date</th>
-										<td><@fmt.date date=studentCourseDetails.expectedEndDate includeTime=false/></td>
-									</#if>
-								</tr>
-								<tr>
-									<th>Programme route code</th>
-									<td>${studentCourseDetails.sprCode}
-									</td>
-								</tr>
-								<tr>
-									<th>Course join code</th>
-									<td>${studentCourseDetails.scjCode}
-									</td>
-								</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
+					</td>
+				</tr>
+				<tr>
+				<#if studentCourseDetails.endDate??>
+					<th>End date</th>
+					<td><@fmt.date date=studentCourseDetails.endDate includeTime=false /></td>
+				<#elseif studentCourseDetails.expectedEndDate?? >
+					<th>Expected end date</th>
+					<td><@fmt.date date=studentCourseDetails.expectedEndDate includeTime=false/></td>
+				</#if>
+				</tr>
+				<tr>
+					<th>Programme route code</th>
+					<td>${studentCourseDetails.sprCode}
+					</td>
+				</tr>
+				<tr>
+					<th>Course join code</th>
+					<td>${studentCourseDetails.scjCode}
+					</td>
+				</tr>
+				</tbody>
+			</table>
+		</details>
 	</div>
 </section>
