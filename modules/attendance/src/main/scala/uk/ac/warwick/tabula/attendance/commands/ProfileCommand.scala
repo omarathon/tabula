@@ -54,12 +54,6 @@ trait ProfilePermissions extends RequiresPermissionsChecking with PermissionsChe
 	self: ProfileCommandState =>
 
 	override def permissionsCheck(p: PermissionsChecking) = {
-		// TODO there's probably a better place to do this
-		if (academicYear.startYear < yearZero) {
-			logger.info("Not showing attendance monitoring profile for year less than year zero: " + academicYear)
-			throw new ItemNotFoundException
-		}
-
 		p.PermissionCheck(Permissions.MonitoringPoints.View, mandatory(student))
 	}
 
