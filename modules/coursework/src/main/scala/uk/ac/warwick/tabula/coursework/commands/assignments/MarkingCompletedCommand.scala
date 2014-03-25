@@ -4,7 +4,7 @@ package uk.ac.warwick.tabula.coursework.commands.assignments
 import uk.ac.warwick.tabula.commands._
 import uk.ac.warwick.tabula.data.model._
 import org.springframework.validation.Errors
-import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, AutowiringStateServiceComponent, StateServiceComponent}
+import uk.ac.warwick.tabula.services.{FeedbackServiceComponent, AutowiringFeedbackServiceComponent, AutowiringUserLookupComponent, UserLookupComponent, AutowiringStateServiceComponent, StateServiceComponent}
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.userlookup.User
 import scala.collection.JavaConversions._
@@ -23,13 +23,14 @@ object MarkingCompletedCommand {
 			with SecondMarkerReleaseNotifier
 			with AutowiringUserLookupComponent
 			with AutowiringStateServiceComponent
+			with AutowiringFeedbackServiceComponent
 }
 
 abstract class MarkingCompletedCommand(val module: Module, val assignment: Assignment, val user: User, val firstMarker:Boolean)
 	extends CommandInternal[Unit] with Appliable[Unit] with SelfValidating with UserAware with MarkingCompletedState
 	with ReleasedState {
 
-	this: StateServiceComponent =>
+	this: StateServiceComponent with FeedbackServiceComponent =>
 
 	def onBind() {
 		markerFeedbacks = students.flatMap(assignment.getMarkerFeedback(_, user))
@@ -43,7 +44,7 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 			if (assignment.markingWorkflow.markingMethod == SeenSecondMarking && !firstMarker) {
 				stateService.updateState(feedback, MarkingState.MarkingCompleted)
 				stateService.updateState(feedback.feedback.retrieveFirstMarkerFeedback, MarkingState.SecondMarkingComplete)
-			} else if (assignment.markingWorkflow.markingMethod == SeenSecondMarking && firstMarker && feedback.getFeedbackPosition == FirstFeedback){
+			} else if (assignment.markingWorkflow.markingMethod == SeenSecondMarking && firstMarker && feedback.getFeedbackPosition.get == FirstFeedback){
 				stateService.updateState(feedback, MarkingState.AwaitingSecondMarking)
 			}	else stateService.updateState(feedback, MarkingState.MarkingCompleted)
 		}
@@ -70,9 +71,10 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 
 					}
 				}
-				if (nextMarkerFeedback.getFeedbackPosition.get != FinalFeedback && nextMarkerFeedback.state != MarkingState.MarkingCompleted)	{
+					if (mf.getFeedbackPosition.get != FinalFeedback)	{
 					stateService.updateState(nextMarkerFeedback, MarkingState.ReleasedForMarking)
 				}
+				feedbackService.save(nextMarkerFeedback)
 				nextMarkerFeedback
 			}
 		}
