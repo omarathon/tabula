@@ -57,7 +57,7 @@ trait MarkingWorkflowWorld extends TestFixtures {
 			case (FinalFeedback) => feedback.retrieveFinalMarkerFeedback
 			case _ => feedback.retrieveFirstMarkerFeedback
 		}
-		mf.state = MarkingState.ReleasedForMarking
+		mf.state = MarkingState.InProgress
 	}
 
 

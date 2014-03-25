@@ -37,12 +37,14 @@ object MarkingCompletedTest {
 	}
 }
 
-class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mockito with FunctionalContextTesting {
+class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mockito with FunctionalContextTesting with FeedbackServiceComponent {
 
 	val mockSession = mock[Session]
 	var stateService: StateService = new ComposableStateServiceImpl with SessionComponent {
 		def session = mockSession
 	}
+
+	var feedbackService: FeedbackService = mock[FeedbackService]
 
 	@Before
 	def before() {
@@ -68,9 +70,15 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			command.noFeedback.size should be (3)
 			command.noMarks.size should be (3)
 
+			command.feedbackService = feedbackService
+
 			command.applyInternal()
-			val releasedFeedback = assignment.feedbacks.map(_.firstMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
+			val releasedFeedback = assignment.feedbacks.map(_.firstMarkerFeedback).filter(_.state == MarkingState.AwaitingSecondMarking)
 			releasedFeedback.size should be (3)
+
+			val secondMarkerFeedback = assignment.feedbacks.flatMap(f => Option(f.secondMarkerFeedback)).filter(_.state == MarkingState.ReleasedForMarking)
+			secondMarkerFeedback.size should be (3)
+
 		}
 	}
 
@@ -92,6 +100,8 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			command.noMarks.size should be (2)
 			setFirstMarkerFeedbackState(MarkingState.AwaitingSecondMarking)
 
+			command.feedbackService = feedbackService
+
 			command.applyInternal()
 
 			val secondFeedback = assignment.feedbacks.flatMap(f => Option(f.secondMarkerFeedback))
@@ -99,11 +109,13 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 			completedSecondMarking.size should be (2)
 
 			val firstFeedback = assignment.feedbacks.flatMap(f => Option(f.firstMarkerFeedback))
-			val completedFirstMarking = firstFeedback.filter(_.state == MarkingState.SecondMarkingComplete)
+			val completedFirstMarking = firstFeedback.filter(_.state == MarkingState.SecondMarkingCompleted)
 			completedFirstMarking.size should be (2)
 
-			val finalFeedback = assignment.feedbacks.flatMap(f => Option(f.finalMarkerFeedback))
+			val finalFeedback = assignment.feedbacks.flatMap(f => Option(f.finalMarkerFeedback)).filter(_.state == MarkingState.ReleasedForMarking)
 			finalFeedback.size should be (2)
+
+
 		}
 		}
 	}
@@ -118,18 +130,28 @@ class MarkingCompletedTest extends TestBase with MarkingWorkflowWorld with Mocki
 
 			assignment.feedbacks.map(addMarkerFeedback(_,FinalFeedback))
 			setFinalMarkerFeedbackState(MarkingState.InProgress)
-			setFirstMarkerFeedbackState(MarkingState.SecondMarkingComplete)
+			setFirstMarkerFeedbackState(MarkingState.SecondMarkingCompleted)
 
 			command.stateService = stateService
 			command.students = List("9876004", "0270954", "9170726")
 			command.onBind()
 
+			command.feedbackService = feedbackService
+
 			command.preSubmitValidation()
-			command.applyInternal()
 			command.noFeedback.size should be (3)
 			command.noMarks.size should be (3)
 
 			command.applyInternal()
+
+			val secondFeedback = assignment.feedbacks.flatMap(f => Option(f.secondMarkerFeedback))
+			val completedSecondMarking = secondFeedback.filter(_.state == MarkingState.MarkingCompleted)
+			completedSecondMarking.size should be (3)
+
+			val firstFeedback = assignment.feedbacks.flatMap(f => Option(f.firstMarkerFeedback))
+			val completedFirstMarking = firstFeedback.filter(_.state == MarkingState.MarkingCompleted)
+			completedFirstMarking.size should be (3)
+
 			val releasedFeedback = assignment.feedbacks.map(_.finalMarkerFeedback).filter(_.state == MarkingState.MarkingCompleted)
 			releasedFeedback.size should be (3)
 		}

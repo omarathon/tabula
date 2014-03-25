@@ -41,13 +41,21 @@ abstract class MarkingCompletedCommand(val module: Module, val assignment: Assig
 		val feedbackForRelease = markerFeedbacks -- releasedFeedback
 
 		feedbackForRelease.foreach { feedback =>
-			if (assignment.markingWorkflow.markingMethod == SeenSecondMarking && !firstMarker) {
+
+			if (assignment.markingWorkflow.markingMethod != SeenSecondMarking) {
 				stateService.updateState(feedback, MarkingState.MarkingCompleted)
-				stateService.updateState(feedback.feedback.retrieveFirstMarkerFeedback, MarkingState.SecondMarkingComplete)
-			} else if (assignment.markingWorkflow.markingMethod == SeenSecondMarking && firstMarker && feedback.getFeedbackPosition.get == FirstFeedback){
+			}	else if (!firstMarker) {
+				stateService.updateState(feedback, MarkingState.MarkingCompleted)
+				stateService.updateState(feedback.feedback.retrieveFirstMarkerFeedback, MarkingState.SecondMarkingCompleted)
+			} else if (feedback.getFeedbackPosition.get == FirstFeedback){
 				stateService.updateState(feedback, MarkingState.AwaitingSecondMarking)
-			}	else stateService.updateState(feedback, MarkingState.MarkingCompleted)
+			}	else {
+				stateService.updateState(feedback, MarkingState.MarkingCompleted)
+				// Final feedback sets first marker feedback to MarkingCompleted
+				stateService.updateState(feedback.feedback.retrieveFirstMarkerFeedback, MarkingState.MarkingCompleted)
+			}
 		}
+
 
 		val feedbackToFinalise = {
 				if (assignment.markingWorkflow.markingMethod == SeenSecondMarking) feedbackForRelease.filter(_.getFeedbackPosition == FinalFeedback)

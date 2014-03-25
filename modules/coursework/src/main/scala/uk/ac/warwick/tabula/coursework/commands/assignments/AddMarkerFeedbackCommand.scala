@@ -51,7 +51,7 @@ class AddMarkerFeedbackCommand(module: Module, assignment:Assignment, submitter:
 		})
 
 		val markerFeedback:MarkerFeedback = firstMarker match {
-			case true => if(parentFeedback.retrieveFirstMarkerFeedback.state == MarkingState.SecondMarkingComplete){
+			case true => if(parentFeedback.retrieveFirstMarkerFeedback.state == MarkingState.SecondMarkingCompleted){
 											parentFeedback.retrieveFinalMarkerFeedback
 										}	else parentFeedback.retrieveFirstMarkerFeedback
 			case false => parentFeedback.retrieveSecondMarkerFeedback

@@ -492,7 +492,7 @@ class Assignment
 			case Some(f) => {
 				if(this.isFirstMarker(user)) {
 					val firstMarkerFeedback = f.retrieveFirstMarkerFeedback
-					if (firstMarkerFeedback.state == MarkingState.SecondMarkingComplete) {
+					if (firstMarkerFeedback.state == MarkingState.SecondMarkingCompleted) {
 						Some(f.retrieveFinalMarkerFeedback)
 					}
 					else {

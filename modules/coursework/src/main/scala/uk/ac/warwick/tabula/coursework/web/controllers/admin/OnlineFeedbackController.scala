@@ -9,7 +9,7 @@ import org.springframework.validation.Errors
 import uk.ac.warwick.tabula.web.Mav
 import uk.ac.warwick.tabula.CurrentUser
 import javax.validation.Valid
-import uk.ac.warwick.tabula.data.model.MarkingState.{AwaitingSecondMarking, SecondMarkingComplete, Rejected, MarkingCompleted}
+import uk.ac.warwick.tabula.data.model.MarkingState.{AwaitingSecondMarking, SecondMarkingCompleted, Rejected, MarkingCompleted}
 import uk.ac.warwick.tabula.coursework.web.Routes
 import uk.ac.warwick.tabula.data.model.MarkingMethod.ModeratedMarking
 import uk.ac.warwick.userlookup.User
@@ -113,14 +113,13 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 
 		val isCompleted = command.markerFeedback.map(_.state == MarkingCompleted).getOrElse(false)
 
-		//command.markerFeedback.map(_.state == SecondMarkingComplete).getOrElse(false)
 		val parentFeedback = command.markerFeedback.map(_.feedback)
 		val firstMarkerFeedback = parentFeedback.flatMap(feedback => Option(feedback.firstMarkerFeedback))
 		val secondMarkerFeedback =  parentFeedback.flatMap(feedback => Option(feedback.secondMarkerFeedback))
 		val isRejected = secondMarkerFeedback.map(_.state == Rejected).getOrElse(false)
 		val isFirstMarker = command.assignment.isFirstMarker(command.currentUser.apparentUser)
 
-		val secondMarkingComplete = firstMarkerFeedback.map(_.state == SecondMarkingComplete).getOrElse(false)
+		val secondMarkingCompleted = firstMarkerFeedback.map(_.state == SecondMarkingCompleted).getOrElse(false)
 		val awaitingSecondMarking = firstMarkerFeedback.map(_.state == AwaitingSecondMarking).getOrElse(false)
 
 
@@ -132,7 +131,7 @@ class OnlineMarkerFeedbackFormController extends CourseworkController {
 			"isRejected" -> isRejected,
 			"secondMarkerFeedback" -> secondMarkerFeedback,
 			"awaitingSecondMarking" -> awaitingSecondMarking,
-			"secondMarkingComplete" -> secondMarkingComplete
+			"secondMarkingCompleted" -> secondMarkingCompleted
 		).noLayout()
 	}
 

@@ -34,8 +34,6 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 
 	self: FeedbackServiceComponent with ZipServiceComponent 	with MarkerFeedbackStateCopy =>
 
-//	if(parentFeedback.retrieveFirstMarkerFeedback.state == MarkingState.SecondMarkingComplete){
-
 	def markerFeedback = assignment.getMarkerFeedback(student.getWarwickId, currentUser.apparentUser)
 
 	copyState(markerFeedback)
@@ -56,7 +54,7 @@ abstract class OnlineMarkerFeedbackFormCommand(module: Module, assignment: Assig
 
 		// see if marker feedback already exists - if not create one
 		val markerFeedback:MarkerFeedback = firstMarker match {
-			case true => if(parentFeedback.retrieveFirstMarkerFeedback.state == MarkingState.SecondMarkingComplete){
+			case true => if(parentFeedback.retrieveFirstMarkerFeedback.state == MarkingState.SecondMarkingCompleted){
 					parentFeedback.retrieveFinalMarkerFeedback
 				}	else parentFeedback.retrieveFirstMarkerFeedback
 			case false => parentFeedback.retrieveSecondMarkerFeedback

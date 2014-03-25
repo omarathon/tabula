@@ -1,6 +1,6 @@
 <#assign isMarking=false />
-<#if !isCompleted || (isCompleted && secondMarkingComplete)>
-	<#if !isFirstMarker || awaitingSecondMarking || (isFirstMarker && secondMarkingComplete)>
+<#if !isCompleted || (isCompleted && secondMarkingCompleted)>
+	<#if !isFirstMarker || awaitingSecondMarking || (isFirstMarker && secondMarkingCompleted)>
 		<div class="well">
 			<h3>First marker's feedback</h3>
 			<#assign feedback = firstMarkerFeedback />
@@ -8,16 +8,16 @@
 		</div>
 	</#if>
 	<#assign isMarking=true />
-	<#if ((!isFirstMarker && !secondMarkingComplete) || (isFirstMarker && !awaitingSecondMarking && !secondMarkingComplete))>
+	<#if ((!isFirstMarker && !secondMarkingCompleted) || (isFirstMarker && !awaitingSecondMarking && !secondMarkingCompleted))>
 	<#include "online_feedback.ftl">
-	<#elseif secondMarkingComplete>
+	<#elseif secondMarkingCompleted>
 		<div class="well">
 			<h3>Second marker's feedback</h3>
 			<#assign feedback = secondMarkerFeedback />
 			<#include "_feedback_summary.ftl">
 		</div>
 	</#if>
-	<#if isFirstMarker && secondMarkingComplete>
+	<#if isFirstMarker && secondMarkingCompleted>
 		<div class="well">
 			The new form goes in here
 			<#include "online_feedback.ftl">
