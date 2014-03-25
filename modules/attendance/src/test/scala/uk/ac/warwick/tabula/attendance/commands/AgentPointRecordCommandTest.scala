@@ -173,7 +173,7 @@ class AgentPointRecordCommandTest extends TestBase with FunctionalContextTesting
 		command.onBind(getErrors(command))
 
 		val student4Point = Fixtures.monitoringCheckpoint(point2, student4, AttendanceState.Attended)
-		command.monitoringPointService.saveOrUpdateCheckpoint(student4, point2, AttendanceState.Attended, agentMember) returns student4Point
+		command.monitoringPointService.saveOrUpdateCheckpointByMember(student4, point2, AttendanceState.Attended, agentMember) returns student4Point
 
 		command.applyInternal() should be (Seq(student4Point))
 		there was one (command.monitoringPointService).deleteCheckpoint(student1, point1)

@@ -9,6 +9,7 @@
 <#assign is_the_student=currentUser.apparentUser.warwickId==command.student.universityId />
 
 <#macro pointsInATerm term>
+	<#local hasReported = !nonReportedTerms?seq_contains(term) />
 	<table class="table">
 		<tbody>
 			<#local pointMap = pointsByTerm[term] />
@@ -22,14 +23,22 @@
 					</td>
 					<#if can_record>
 						<td>
-							<#local returnTo>
-								<@routes.profile command.student />
-							</#local>
-							<a href="<@routes.recordStudentPoint point command.student returnTo />"
-									class="btn btn-mini btn-primary"
-							>
-								Record
-							</a>
+							<#if hasReported>
+								<a class="btn btn-mini btn-primary disabled use-tooltip"
+								   title="A checkpoint cannot be set as this student's attendance data has already been submitted for this period"
+								>
+									Record
+								</a>
+							<#else>
+								<#local returnTo>
+									<@routes.profile command.student />
+								</#local>
+								<a href="<@routes.recordStudentPoint point command.student returnTo />"
+								   class="btn btn-mini btn-primary"
+										>
+									Record
+								</a>
+							</#if>
 						</td>
 					</#if>
 				</tr>

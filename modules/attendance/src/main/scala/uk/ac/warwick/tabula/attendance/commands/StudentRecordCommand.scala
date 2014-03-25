@@ -56,7 +56,7 @@ abstract class StudentRecordCommand(
 				monitoringPointService.deleteCheckpoint(student, point)
 				None
 			} else {
-				Option(monitoringPointService.saveOrUpdateCheckpoint(student, point, state, user))
+				Option(monitoringPointService.saveOrUpdateCheckpointByUser(student, point, state, user))
 			}
 		}.toSeq
 	}

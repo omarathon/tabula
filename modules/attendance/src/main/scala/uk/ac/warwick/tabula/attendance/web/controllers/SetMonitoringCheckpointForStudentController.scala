@@ -5,28 +5,33 @@ import org.springframework.validation.Errors
 import org.springframework.web.bind.annotation.{PathVariable, ModelAttribute, RequestMapping}
 
 import javax.validation.Valid
-import uk.ac.warwick.tabula.CurrentUser
 import uk.ac.warwick.tabula.attendance.commands.SetMonitoringCheckpointForStudentCommand
 import uk.ac.warwick.tabula.attendance.web.Routes
-import uk.ac.warwick.tabula.commands.Appliable
-import uk.ac.warwick.tabula.commands.PopulateOnForm
-import uk.ac.warwick.tabula.commands.SelfValidating
+import uk.ac.warwick.tabula.commands.{Appliable, PopulateOnForm, SelfValidating}
 import uk.ac.warwick.tabula.data.model.{StudentMember, Department}
 import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPoint}
 import uk.ac.warwick.tabula.data.model.attendance.MonitoringCheckpoint
 import uk.ac.warwick.tabula.web.Mav
+import uk.ac.warwick.tabula.services.{AutowiringMonitoringPointServiceComponent, AutowiringTermServiceComponent, AutowiringRelationshipServiceComponent}
 
 @RequestMapping(Array("/{department}/{monitoringPoint}/record/{student}"))
 @Controller
-class SetMonitoringCheckpointForStudentController extends AttendanceController {
+class SetMonitoringCheckpointForStudentController extends AttendanceController with AutowiringRelationshipServiceComponent
+	with AutowiringTermServiceComponent with AutowiringMonitoringPointServiceComponent {
 
 	validatesSelf[SelfValidating]
 
 	@ModelAttribute("command")
-	def command(@PathVariable monitoringPoint: MonitoringPoint, @PathVariable student: StudentMember, user: CurrentUser)
+	def command(@PathVariable monitoringPoint: MonitoringPoint, @PathVariable student: StudentMember)
 		: Appliable[Seq[MonitoringCheckpoint]] with PopulateOnForm
 			= SetMonitoringCheckpointForStudentCommand(monitoringPoint, mandatory(student), user)
 
+	@ModelAttribute("hasReported")
+	def hasReported(@PathVariable monitoringPoint: MonitoringPoint, @PathVariable student: StudentMember): Boolean = {
+		val period = termService.getTermFromAcademicWeekIncludingVacations(monitoringPoint.validFromWeek, monitoringPoint.pointSet.academicYear).getTermTypeAsString
+		val nonReported = monitoringPointService.findNonReported(Seq(student), monitoringPoint.pointSet.academicYear, period)
+		!nonReported.contains(student)
+	}
 
 	@RequestMapping(method = Array(GET, HEAD))
 	def list(@ModelAttribute("command") command: Appliable[Seq[MonitoringCheckpoint]] with PopulateOnForm, @PathVariable department: Department): Mav = {

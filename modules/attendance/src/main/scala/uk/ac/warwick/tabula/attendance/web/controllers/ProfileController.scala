@@ -40,7 +40,8 @@ class ProfileController extends AttendanceController {
 		val baseMap = Map(
 			"currentUser" -> user,
 			"pointsByTerm" -> info.pointsData.pointsByTerm,
-			"missedCountByTerm" -> info.missedCountByTerm
+			"missedCountByTerm" -> info.missedCountByTerm,
+			"nonReportedTerms" -> info.nonReportedTerms
 		)
 
 		if (ajax)

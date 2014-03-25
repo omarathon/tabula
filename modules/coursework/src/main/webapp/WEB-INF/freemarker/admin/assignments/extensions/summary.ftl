@@ -9,6 +9,7 @@
 <#macro row graph>
 	<#assign state = (graph.extension.state.description)!"None" />
 	<tr class="itemContainer" data-contentid="${graph.universityId}">
+
 		<#-- TAB-2063 - The extension manager will need to know who is doing the asking, so we should always show names -->
 		<td class="student-col toggle-cell"><h6 class="toggle-icon">${graph.user.firstName}</h6></td>
 		<td class="student-col toggle-cell"><h6>${graph.user.lastName}&nbsp;<@pl.profile_link graph.universityId /></h6></td>
@@ -71,7 +72,9 @@
 	</div>
 
 	<#if extensionGraphs?size gt 0>
-		<table class="students table table-bordered table-striped tabula-orangeLight sticky-table-headers expanding-table" data-max-days="${maxDaysToDisplayAsProgressBar}">
+		<table class="students table table-bordered table-striped tabula-orangeLight sticky-table-headers expanding-table"
+			   data-max-days="${maxDaysToDisplayAsProgressBar}"
+			   data-row-to-open="${extensionToOpen!""}">
 			<thead>
 				<tr>
 					<#-- TAB-2063 no respect for dept settings, we always want to see a name here -->

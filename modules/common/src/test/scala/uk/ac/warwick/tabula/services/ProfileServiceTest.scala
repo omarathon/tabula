@@ -118,43 +118,50 @@ class ProfileServiceTest extends PersistenceTestBase with Mockito {
 		val testRoute = new Route
 		testRoute.code = "test"
 
-		val studentInBothYears = new StudentCourseDetails(Fixtures.student(), "studentInBothYears")
-		studentInBothYears.addStudentCourseYearDetails(
-			Fixtures.studentCourseYearDetails(AcademicYear(2012))
+		val studentBothYears = Fixtures.student(universityId = "0000001")
+		val courseDetailsBothYears = new StudentCourseDetails(studentBothYears, "studentInBothYears")
+		courseDetailsBothYears.addStudentCourseYearDetails(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012), studentCourseDetails = courseDetailsBothYears)
 		)
-		studentInBothYears.addStudentCourseYearDetails(
-			Fixtures.studentCourseYearDetails(AcademicYear(2013))
+		courseDetailsBothYears.addStudentCourseYearDetails(
+			Fixtures.studentCourseYearDetails(AcademicYear(2013), studentCourseDetails = courseDetailsBothYears)
 		)
-		studentInBothYears.statusOnRoute = new SitsStatus("C")
-		studentInBothYears.mostSignificant = true
-
-		val studentInFirstYear = new StudentCourseDetails(Fixtures.student(), "studentInFirstYear")
-		studentInFirstYear.addStudentCourseYearDetails(
-			Fixtures.studentCourseYearDetails(AcademicYear(2012))
-		)
-		studentInFirstYear.statusOnRoute = new SitsStatus("C")
-		studentInFirstYear.mostSignificant = true
-
-		val studentInSecondYear = new StudentCourseDetails(Fixtures.student(), "studentInSecondYear")
-		studentInSecondYear.addStudentCourseYearDetails(
-			Fixtures.studentCourseYearDetails(AcademicYear(2013))
-		)
-		studentInSecondYear.statusOnRoute = new SitsStatus("C")
-		studentInSecondYear.mostSignificant = true
+		courseDetailsBothYears.statusOnRoute = new SitsStatus("C")
+		courseDetailsBothYears.mostSignificant = true
+		studentBothYears.attachStudentCourseDetails(courseDetailsBothYears)
 
 
-		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(studentInBothYears, studentInFirstYear, studentInSecondYear)
+		val studentFirstYear = Fixtures.student(universityId = "0000002")
+		val courseDetailsFirstYear = new StudentCourseDetails(studentFirstYear, "studentInFirstYear")
+		courseDetailsFirstYear.addStudentCourseYearDetails(
+			Fixtures.studentCourseYearDetails(AcademicYear(2012), studentCourseDetails = courseDetailsFirstYear)
+		)
+		courseDetailsFirstYear.statusOnRoute = new SitsStatus("C")
+		courseDetailsFirstYear.mostSignificant = true
+		studentFirstYear.attachStudentCourseDetails(courseDetailsFirstYear)
+
+
+		val studentSecondYear = Fixtures.student(universityId = "0000003")
+		val courseDetailsSecondYear = new StudentCourseDetails(studentSecondYear, "studentInSecondYear")
+		courseDetailsSecondYear.addStudentCourseYearDetails(
+			Fixtures.studentCourseYearDetails(AcademicYear(2013), studentCourseDetails = courseDetailsSecondYear)
+		)
+		courseDetailsSecondYear.statusOnRoute = new SitsStatus("C")
+		courseDetailsSecondYear.mostSignificant = true
+		studentSecondYear.attachStudentCourseDetails(courseDetailsSecondYear)
+
+		service.studentCourseDetailsDao.getByRoute(testRoute) returns Seq(courseDetailsBothYears, courseDetailsFirstYear, courseDetailsSecondYear)
 
 		val studentsInFirstYear = service.getStudentsByRoute(testRoute, AcademicYear(2012))
 		studentsInFirstYear.size should be (2)
 		studentsInFirstYear.exists(
-			s => s.freshStudentCourseDetails.head.scjCode.equals(studentInSecondYear.scjCode)
+			s => s.freshStudentCourseDetails.head.scjCode.equals(courseDetailsSecondYear.scjCode)
 		) should be (false)
 
 		val studentsInSecondYear = service.getStudentsByRoute(testRoute, AcademicYear(2013))
 		studentsInSecondYear.size should be (2)
 		studentsInSecondYear.exists(
-			s => s.freshStudentCourseDetails.head.scjCode.equals(studentInFirstYear.scjCode)
+			s => s.freshStudentCourseDetails.head.scjCode.equals(courseDetailsFirstYear.scjCode)
 		) should be (false)
 	}
 

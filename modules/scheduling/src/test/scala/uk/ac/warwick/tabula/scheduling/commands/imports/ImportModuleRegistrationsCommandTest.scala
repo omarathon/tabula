@@ -42,8 +42,8 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 		val madService = smartMock[ModuleAndDepartmentService]
 		madService.getModuleBySitsCode("AX101-30") returns Some(mod)
 
-		val modRegRow1 = ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "C", occurrence)
-		val modRegRow2 = ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "O", occurrence)
+		val modRegRow1 = ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "C", occurrence, "13/14")
+		val modRegRow2 = ModuleRegistrationRow(scd.scjCode, "AX101-30", cats, "A", "O", occurrence, "13/14")
 
 		val scdDao = smartMock[StudentCourseDetailsDao]
 		scdDao.getByScjCode("0000001/1") returns Some(scd)
@@ -57,7 +57,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 		new Environment {
 
 			// apply the command
-			val command = new ImportModuleRegistrationsCommand(modRegRow1, year)
+			val command = new ImportModuleRegistrationsCommand(modRegRow1)
 			command.moduleAndDepartmentService = madService
 			command.studentCourseDetailsDao = scdDao
 			command.moduleRegistrationDao = mrDao
@@ -81,7 +81,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 			session.flush
 
 			// now re-import the same mod reg - the lastupdateddate shouldn't change
-			val command2 = new ImportModuleRegistrationsCommand(modRegRow1, year)
+			val command2 = new ImportModuleRegistrationsCommand(modRegRow1)
 			command2.moduleAndDepartmentService = madService
 			command2.studentCourseDetailsDao = scdDao
 			command2.moduleRegistrationDao = mrDao
@@ -91,7 +91,7 @@ class ImportModuleRegistrationsCommandTest extends PersistenceTestBase with Mock
 			newModReg2.lastUpdatedDate.getDayOfMonth should be (tenDaysAgo.getDayOfMonth)
 
 			// try just changing the selection status:
-			val command3 = new ImportModuleRegistrationsCommand(modRegRow2, year)
+			val command3 = new ImportModuleRegistrationsCommand(modRegRow2)
 			command3.moduleAndDepartmentService = madService
 			command3.studentCourseDetailsDao = scdDao
 			command3.moduleRegistrationDao = mrDao

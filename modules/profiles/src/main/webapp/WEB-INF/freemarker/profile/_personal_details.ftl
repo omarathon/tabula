@@ -47,7 +47,7 @@
 							<td>
 								<a class="use-popover cue-popover" id="popover-disability" data-html="true"
 								   data-original-title="Disability"
-								   data-content="<p><#if isSelf>You have<#else>This student has</#if> self-reported the following disability code:</p><div class='well'><h6>${profile.disability.code}</h6><small>${profile.disability.sitsDefinition}</small></div>">
+								   data-content="<p><#if isSelf>You have<#else>This student has</#if> self-reported the following disability code:</p><div class='well'><h6>${profile.disability.code}</h6><small>${(profile.disability.sitsDefinition)!}</small></div>">
 									${profile.disability.definition}
 								</a>
 							</td>

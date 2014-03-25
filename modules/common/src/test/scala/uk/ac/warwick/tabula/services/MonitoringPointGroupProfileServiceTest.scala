@@ -1,7 +1,7 @@
 package uk.ac.warwick.tabula.services
 
 import uk.ac.warwick.tabula.{AcademicYear, TestBase, Fixtures, Mockito}
-import uk.ac.warwick.tabula.data.model.attendance.{MonitoringCheckpoint, AttendanceState, MonitoringPointType, MonitoringPoint, MonitoringPointSet}
+import uk.ac.warwick.tabula.data.model.attendance.{AttendanceState, MonitoringPointType, MonitoringPoint, MonitoringPointSet}
 import uk.ac.warwick.tabula.JavaImports.JArrayList
 import uk.ac.warwick.tabula.data.model._
 import uk.ac.warwick.tabula.data.model.groups.{SmallGroupEvent, SmallGroupEventOccurrence, SmallGroupEventAttendance, SmallGroupSet, SmallGroup}
@@ -118,7 +118,7 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 		service.getCheckpointsForAttendance(Seq(attendance)).size should be (1)
 
 		service.updateCheckpointsForAttendance(Seq(attendance))
-		there was one (service.monitoringPointService).saveOrUpdate(any[MonitoringCheckpoint])
+		there was one (service.monitoringPointService).saveOrUpdateCheckpointByUsercode(student, groupThisYearPoint, AttendanceState.Attended, attendance.updatedBy, autocreated = true)
 	}}
 
 	@Test
@@ -140,7 +140,7 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 		service.getCheckpointsForAttendance(Seq(attendance)).size should be (1)
 
 		service.updateCheckpointsForAttendance(Seq(attendance))
-		there was one (service.monitoringPointService).saveOrUpdate(any[MonitoringCheckpoint])
+		there was one (service.monitoringPointService).saveOrUpdateCheckpointByUsercode(student, groupThisYearPoint, AttendanceState.Attended, attendance.updatedBy, autocreated = true)
 	}}
 
 	@Test
@@ -152,7 +152,7 @@ class MonitoringPointGroupProfileServiceTest extends TestBase with Mockito {
 		service.getCheckpointsForAttendance(Seq(attendance)).size should be (1)
 
 		service.updateCheckpointsForAttendance(Seq(attendance))
-		there was one (service.monitoringPointService).saveOrUpdate(any[MonitoringCheckpoint])
+		there was one (service.monitoringPointService).saveOrUpdateCheckpointByUsercode(student, groupThisYearPoint, AttendanceState.Attended, attendance.updatedBy, autocreated = true)
 	}}
 
 	@Test

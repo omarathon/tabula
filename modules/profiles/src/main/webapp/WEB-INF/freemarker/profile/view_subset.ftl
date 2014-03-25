@@ -97,24 +97,32 @@
 	<@modal.body>
 		<table class="profile-or-course-info">
 			<tbody>
-			<tr>
-				<th>Email</th>
-				<td>
-					<a href="mailto:${studentUser.email}">${studentUser.email}</a>
-				</td>
-			</tr>
-			<tr>
-				<th>University number</th>
-				<td>${studentUser.warwickId}</td>
-			</tr>
-			<tr>
-				<th>IT code</th>
-				<td>${studentUser.userId}</td>
-			</tr>
-			<tr>
-				<th>Department</th>
-				<td>${studentUser.department}</td>
-			</tr>
+				<#if studentUser.email??>
+					<tr>
+						<th>Email</th>
+						<td>
+							<a href="mailto:${studentUser.email}">${studentUser.email}</a>
+						</td>
+					</tr>
+				</#if>
+				<#if studentUser.warwickId??>
+					<tr>
+						<th>University number</th>
+						<td>${studentUser.warwickId}</td>
+					</tr>
+				</#if>
+				<#if studentUser.userId??>
+					<tr>
+						<th>IT code</th>
+						<td>${studentUser.userId}</td>
+					</tr>
+				</#if>
+				<#if studentUser.department??>
+					<tr>
+						<th>Department</th>
+						<td>${studentUser.department}</td>
+					</tr>
+				</#if>
 			</tbody>
 		</table>
 		<div class="alert alert-info">

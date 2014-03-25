@@ -14,7 +14,7 @@ object FiltersRelationships {
 			"latestStudentCourseYearDetails" -> "studentCourseYearDetails"
 		),
 		"moduleRegistration" -> Seq(
-			"moduleRegistrations" -> "moduleRegistration"
+			"_moduleRegistrations" -> "moduleRegistration"
 		),
 		"course" -> Seq(
 			"course" -> "course"

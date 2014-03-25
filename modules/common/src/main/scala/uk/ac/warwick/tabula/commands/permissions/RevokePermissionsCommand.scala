@@ -9,12 +9,12 @@ import uk.ac.warwick.tabula.data.Transactions._
 import uk.ac.warwick.tabula.helpers.StringUtils._
 import uk.ac.warwick.tabula.permissions.Permissions
 import uk.ac.warwick.tabula.permissions.PermissionsTarget
-import uk.ac.warwick.tabula.services.{AutowiringSecurityServiceComponent, SecurityServiceComponent}
+import uk.ac.warwick.tabula.services.{AutowiringUserLookupComponent, UserLookupComponent, AutowiringSecurityServiceComponent, SecurityServiceComponent}
 import uk.ac.warwick.tabula.services.permissions.{AutowiringPermissionsServiceComponent, PermissionsServiceComponent}
 import uk.ac.warwick.tabula.data.model.permissions.GrantedPermission
 import uk.ac.warwick.tabula.permissions.Permission
 import uk.ac.warwick.tabula.RequestInfo
-import scala.reflect.ClassTag
+import scala.reflect._
 import uk.ac.warwick.tabula.JavaImports._
 import uk.ac.warwick.tabula.system.permissions.{PermissionsChecking, PermissionsCheckingMethods, RequiresPermissionsChecking}
 
@@ -27,10 +27,11 @@ object RevokePermissionsCommand {
 			with RevokePermissionsCommandDescription[A]
 			with AutowiringPermissionsServiceComponent
 			with AutowiringSecurityServiceComponent
+			with AutowiringUserLookupComponent
 }
 
 class RevokePermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val scope: A) extends CommandInternal[GrantedPermission[A]] with RevokePermissionsCommandState[A] {
-	self: PermissionsServiceComponent with SecurityServiceComponent =>
+	self: PermissionsServiceComponent with UserLookupComponent =>
 
 	lazy val grantedPermission = permissionsService.getGrantedPermission(scope, permission, overrideType)
 
@@ -39,6 +40,11 @@ class RevokePermissionsCommandInternal[A <: PermissionsTarget : ClassTag](val sc
 			usercodes.asScala.foreach(permission.users.knownType.removeUserId)
 
 			permissionsService.saveOrUpdate(permission)
+
+			// For each usercode that we've removed, clear the cache
+			usercodes.asScala.foreach { usercode =>
+				permissionsService.clearCachesForUser((usercode, classTag[A]))
+			}
 		}
 
 		grantedPermission.orNull

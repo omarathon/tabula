@@ -12,18 +12,17 @@ class StudentCourseYearDetailsTest extends TestBase with Mockito {
 
 		val scd = new StudentCourseDetails(student, "0205225/1")
 
-		val scyd_2013_1 = new StudentCourseYearDetails(scd, 1,AcademicYear(2013))
-
-		val scyd_2013_2 = new StudentCourseYearDetails(scd, 2,AcademicYear(2013))
-
-		val scyd_2013_3 = new StudentCourseYearDetails(scd, 3,AcademicYear(2013))
-
 		val scyd_2012_1 = new StudentCourseYearDetails(scd, 1, AcademicYear(2012))
 
 		val scyd_2012_2 = new StudentCourseYearDetails(scd, 2,AcademicYear(2012))
 
 		val scyd_2012_3 = new StudentCourseYearDetails(scd, 3,AcademicYear(2012))
 
+		val scyd_2013_1 = new StudentCourseYearDetails(scd, 4,AcademicYear(2013))
+
+		val scyd_2013_2 = new StudentCourseYearDetails(scd, 5,AcademicYear(2013))
+
+		val scyd_2013_3 = new StudentCourseYearDetails(scd, 6,AcademicYear(2013))
 
 		// latest academic year should come back first
 		scd.addStudentCourseYearDetails(scyd_2013_1)

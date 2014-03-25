@@ -31,7 +31,7 @@ trait ModuleRegistrationImporter {
 
 @Profile(Array("dev", "test", "production"))
 @Service
-class ModuleRegistrationImporterImpl extends ModuleRegistrationImporter with SitsAcademicYearAware with TaskBenchmarking {
+class ModuleRegistrationImporterImpl extends ModuleRegistrationImporter with TaskBenchmarking {
 	import ModuleRegistrationImporter._
 
 	var sits = Wire[DataSource]("sitsDataSource")
@@ -43,14 +43,13 @@ class ModuleRegistrationImporterImpl extends ModuleRegistrationImporter with Sit
 	)
 	
 	def getModuleRegistrationDetails(membersAndCategories: Seq[MembershipInformation], users: Map[String, User]): Seq[ImportModuleRegistrationsCommand] = {
-		val sitsCurrentAcademicYear = getCurrentSitsAcademicYear
 
 		benchmarkTask("Fetch module registrations") { 
 			membersAndCategories.filter { _.member.userType == Student }.par.flatMap { mac =>
 				val universityId = mac.member.universityId
-				val params = HashMap(("year", sitsCurrentAcademicYear.toString), ("universityId", universityId))
-				
-				queries.flatMap { query => query.executeByNamedParam(params) }.distinct.map { new ImportModuleRegistrationsCommand(_, sitsCurrentAcademicYear) }
+				val params = HashMap(("universityId", universityId))
+
+				queries.flatMap { query => query.executeByNamedParam(params) }.distinct.map { new ImportModuleRegistrationsCommand(_) }
 			}.seq
 		}
 	}
@@ -84,10 +83,11 @@ class SandboxModuleRegistrationImporter extends ModuleRegistrationImporter {
 				cats = new java.math.BigDecimal(15),
 				assessmentGroup = "A",
 				selectionStatusCode = "C",
-				occurrence = "A"
+				occurrence = "A",
+				academicYear = AcademicYear.guessByDate(DateTime.now).toString
 			)
 
-			new ImportModuleRegistrationsCommand(row, AcademicYear.guessByDate(DateTime.now))
+			new ImportModuleRegistrationsCommand(row)
 		}
 	}
 }
@@ -100,7 +100,7 @@ object ModuleRegistrationImporter {
 	// 2. confirmed module registrations from the SMO table where there is a module registration status of confirmed
 	// 3. confirmed module registrations from the SMO table where no status is recorded, i.e. where MRs have been imported
 	val UnconfirmedModuleRegistrations = f"""
-			select scj_code, sms.mod_code, sms.sms_mcrd, sms.sms_agrp, sms.ses_code, sms.ayr_code, sms_occl as occurrence
+			select scj_code, sms.mod_code, sms.sms_mcrd as credit, sms.sms_agrp as assess_group, sms.ses_code, sms.ayr_code, sms_occl as occurrence
 				from $sitsSchema.ins_stu stu
 					join $sitsSchema.ins_spr spr 
 						on spr.spr_stuc = stu.stu_code
@@ -109,7 +109,7 @@ object ModuleRegistrationImporter {
 						on scj.scj_sprc = spr.spr_code and scj.scj_udfa in ('Y','y')
 					
 					join $sitsSchema.cam_sms sms 
-						on sms.spr_code = spr.spr_code and sms.ayr_code = :year
+						on sms.spr_code = spr.spr_code
 					
 					join $sitsSchema.srs_vco vco 
 						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
@@ -119,7 +119,7 @@ object ModuleRegistrationImporter {
 				where stu.stu_code = :universityId"""
 					
 	val ConfirmedModuleRegistrations = f"""
-			select scj_code, smo.mod_code, smo.smo_mcrd as sms_mcrd, smo.smo_agrp as sms_agrp, smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence
+			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group, smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence
 				from $sitsSchema.ins_stu stu
 					join $sitsSchema.ins_spr spr 
 						on spr.spr_stuc = stu.stu_code
@@ -128,7 +128,7 @@ object ModuleRegistrationImporter {
 						on scj.scj_sprc = spr.spr_code and scj.scj_udfa in ('Y','y')
 					
 					join $sitsSchema.cam_smo smo 
-						on smo.spr_code = spr.spr_code and smo.ayr_code = :year
+						on smo.spr_code = spr.spr_code
 					
 					join $sitsSchema.srs_vco vco 
 						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
@@ -138,7 +138,7 @@ object ModuleRegistrationImporter {
 				where stu.stu_code = :universityId"""
 					
 	val AutoUploadedConfirmedModuleRegistrations = f"""
-			select scj_code, smo.mod_code, smo.smo_mcrd as sms_mcrd, smo.smo_agrp as sms_agrp, smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence
+			select scj_code, smo.mod_code, smo.smo_mcrd as credit, smo.smo_agrp as assess_group, smo.ses_code, smo.ayr_code, smo.mav_occur as occurrence
 				from $sitsSchema.ins_stu stu
 					join $sitsSchema.ins_spr spr 
 						on spr.spr_stuc = stu.stu_code
@@ -147,7 +147,7 @@ object ModuleRegistrationImporter {
 						on scj.scj_sprc = spr.spr_code and scj.scj_udfa in ('Y','y')
 					
 					join $sitsSchema.cam_smo smo 
-						on smo.spr_code = spr.spr_code and smo.ayr_code = :year
+						on smo.spr_code = spr.spr_code
 					
 					join $sitsSchema.srs_vco vco 
 						on vco.vco_crsc = scj.scj_crsc and vco.vco_rouc = spr.rou_code
@@ -162,16 +162,16 @@ object ModuleRegistrationImporter {
 		ModuleRegistrationRow(
 			resultSet.getString("scj_code"),
 			resultSet.getString("mod_code"),
-			resultSet.getBigDecimal("sms_mcrd"),
-			resultSet.getString("sms_agrp"),
+			resultSet.getBigDecimal("credit"),
+			resultSet.getString("assess_group"),
 			resultSet.getString("ses_code"),
-			resultSet.getString("occurrence")
+			resultSet.getString("occurrence"),
+			resultSet.getString("ayr_code")
 		)
 
 	class UnconfirmedModuleRegistrationsQuery(ds: DataSource)
 		extends MappingSqlQuery[ModuleRegistrationRow](ds, UnconfirmedModuleRegistrations) {
 			declareParameter(new SqlParameter("universityId", Types.VARCHAR))
-			declareParameter(new SqlParameter("year", Types.VARCHAR))
 			compile()
 			override def mapRow(resultSet: ResultSet, rowNumber: Int) = mapResultSet(resultSet)
 	}
@@ -179,7 +179,6 @@ object ModuleRegistrationImporter {
 	class ConfirmedModuleRegistrationsQuery(ds: DataSource)
 		extends MappingSqlQuery[ModuleRegistrationRow](ds, ConfirmedModuleRegistrations) {
 			declareParameter(new SqlParameter("universityId", Types.VARCHAR))
-			declareParameter(new SqlParameter("year", Types.VARCHAR))
 			compile()
 			override def mapRow(resultSet: ResultSet, rowNumber: Int) = mapResultSet(resultSet)
 	}
@@ -187,7 +186,6 @@ object ModuleRegistrationImporter {
 	class AutoUploadedConfirmedModuleRegistrationsQuery(ds: DataSource)
 		extends MappingSqlQuery[ModuleRegistrationRow](ds, AutoUploadedConfirmedModuleRegistrations) {
 			declareParameter(new SqlParameter("universityId", Types.VARCHAR))
-			declareParameter(new SqlParameter("year", Types.VARCHAR))
 			compile()
 			override def mapRow(resultSet: ResultSet, rowNumber: Int) = mapResultSet(resultSet)
 	}
@@ -199,4 +197,6 @@ case class ModuleRegistrationRow(
 	val cats: java.math.BigDecimal,
 	val assessmentGroup: String,
 	val selectionStatusCode: String,
-	val occurrence: String)
+	val occurrence: String,
+	val academicYear: String
+)
